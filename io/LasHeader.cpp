@@ -266,51 +266,43 @@ void LasHeader::setSrsFromWkt()
 
 void LasHeader::setSrsFromGeotiff()
 {
-// These are defined in geo_simpletags.h
-// We're not including that file because it includes
-// geotiff.h, which includes a ton of other stuff
-// that might conflict with the messy libgeotiff/GDAL
-// symbol mess
-
-#define STT_SHORT   1
-#define STT_DOUBLE  2
-#define STT_ASCII   3
-
-    GeotiffSupport geotiff;
-    geotiff.resetTags();
-
     LasVLR *vlr;
+    uint8_t *data;
+    size_t dataLen;
 
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
     // We must have a directory entry.
     if (!vlr)
         return;
-    if (!geotiff.setShortKeys(vlr->recordId(), (void *)vlr->data(),
-        (int)vlr->dataLen()))
-    {
-        std::ostringstream oss;
+    data = (uint8_t *)vlr->data();
+    dataLen = vlr->dataLen();
 
-        oss << "Invalid GeoTIFF directory record.  Can't "
-            "interpret spatial reference.";
-        throw pdal_error(oss.str());
-    }
+    std::vector<uint8_t> directoryRec(data, data + dataLen);
 
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
+    data = NULL;
+    dataLen = 0;
     if (vlr && !vlr->isEmpty())
-        geotiff.setDoubleKeys(vlr->recordId(), (void *)vlr->data(),
-            (int)vlr->dataLen());
-    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
-    if (vlr && !vlr->isEmpty())
-        geotiff.setAsciiKeys(vlr->recordId(), (void *)vlr->data(),
-            (int)vlr->dataLen());
+    {
+        data = (uint8_t *)vlr->data();
+        dataLen = vlr->dataLen();
+    }
+    std::vector<uint8_t> doublesRec(data, data + dataLen);
 
-    geotiff.setTags();
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
+    data = NULL;
+    dataLen = 0;
+    if (vlr && !vlr->isEmpty())
+    {
+        data = (uint8_t *)vlr->data();
+        dataLen = vlr->dataLen();
+    }
+    std::vector<uint8_t> asciiRec(data, data + dataLen);
+
+    GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec);
     SpatialReference gtiffSrs = geotiff.srs();
     if (!gtiffSrs.empty())
         m_srs = gtiffSrs;
-
-    m_log->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() <<
-        std::endl;
 }
 
 

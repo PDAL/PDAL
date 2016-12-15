@@ -36,15 +36,9 @@
 
 #include <sstream>
 
-// GDAL
 #include <geo_normalize.h>
 #include <ogr_spatialref.h>
-
-// See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
-#define CPL_SERV_H_INCLUDED
-
 #include <geo_simpletags.h>
-#include <cpl_conv.h>
 
 PDAL_C_START
 
@@ -55,54 +49,44 @@ int CPL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 
 PDAL_C_END
 
-#include <pdal/GDALUtils.hpp>
-
-struct StTiff : public ST_TIFF
-{};
+#include <io/LasVLR.hpp>
 
 namespace pdal
 {
 
-GeotiffSupport::~GeotiffSupport()
+namespace
 {
-    if (m_gtiff != 0)
+
+struct GeotiffCtx
+{
+public:
+    GeotiffCtx() : gtiff(nullptr)
     {
-        GTIFFree(m_gtiff);
-        m_gtiff = 0;
+        tiff = ST_Create();
     }
-    if (m_tiff != 0)
+
+    ~GeotiffCtx()
     {
-        ST_Destroy(m_tiff);
-        m_tiff = 0;
+        if (gtiff)
+            GTIFFree(gtiff);
+        ST_Destroy(tiff);
     }
+
+    ST_TIFF *tiff;
+    GTIF *gtiff;
+};
+
 }
 
-
-void GeotiffSupport::resetTags()
+GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
+    const std::vector<uint8_t>& doublesRec,
+    const std::vector<uint8_t>& asciiRec)
 {
-    // If we already have m_gtiff and m_tiff, that is because we have
-    // already called GetGTIF once before.  VLRs ultimately drive how the
-    // SpatialReference is defined, not the GeoTIFF keys.
-    if (m_tiff != 0)
-    {
-        ST_Destroy(m_tiff);
-        m_tiff = 0;
-    }
+    GeotiffCtx ctx;
 
-    if (m_gtiff != 0)
-    {
-        GTIFFree(m_gtiff);
-        m_gtiff = 0;
-    }
+    if (directoryRec.empty())
+        return;
 
-    m_tiff = (StTiff *)ST_Create();
-
-    return;
-}
-
-
-bool GeotiffSupport::setShortKeys(int tag, void *data, int size)
-{
     // Make sure struct is 16 bytes.
 #pragma pack(push)
 #pragma pack(1)
@@ -115,166 +99,81 @@ bool GeotiffSupport::setShortKeys(int tag, void *data, int size)
     };
 #pragma pack(pop)
 
-    ShortKeyHeader *header = (ShortKeyHeader *)data;
-    int declaredSize = (header->numKeys + 1) * 4;
-    if (size < declaredSize)
-        return false;
-    ST_SetKey(m_tiff, tag, (1 + header->numKeys) * 4, STT_SHORT, data);
-    return true;
-}
+    ShortKeyHeader *header = (ShortKeyHeader *)directoryRec.data();
+    size_t declaredSize = (header->numKeys + 1) * 4;
+    if (directoryRec.size() < declaredSize)
+        return;
+    ST_SetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
+        (1 + header->numKeys) * 4, STT_SHORT, (void *)directoryRec.data());
 
+    if (doublesRec.size())
+        ST_SetKey(ctx.tiff, GEOTIFF_DOUBLES_RECORD_ID,
+            doublesRec.size() / sizeof(double), STT_DOUBLE,
+            (void *)doublesRec.data());
 
-bool GeotiffSupport::setDoubleKeys(int tag, void *data, int size)
-{
-    ST_SetKey(m_tiff, tag, size / sizeof(double), STT_DOUBLE, data);
-    return true;
-}
+    if (asciiRec.size())
+        ST_SetKey(ctx.tiff, GEOTIFF_ASCII_RECORD_ID,
+            asciiRec.size(), STT_ASCII, (void *)asciiRec.data());
 
+    ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
 
-bool GeotiffSupport::setAsciiKeys(int tag, void *data, int size)
-{
-    ST_SetKey(m_tiff, tag, size, STT_ASCII, data);
-    return true;
-}
-
-
-/// Get the geotiff data associated with a tag.
-/// \param tag - geotiff tag.
-/// \param count - Number of items fetched.
-/// \param data_ptr - Pointer to fill with address of filled data.
-/// \return  Size of data referred to by \c data_ptr
-size_t GeotiffSupport::getKey(int tag, int *count, void **data_ptr) const
-{
-    int st_type;
-
-    if (m_tiff == 0)
-        return 0;
-
-    if (!ST_GetKey(m_tiff, tag, count, &st_type, data_ptr))
-        return 0;
-
-    if (st_type == STT_ASCII)
-        return *count;
-    else if (st_type == STT_SHORT)
-        return 2 * *count;
-    else if (st_type == STT_DOUBLE)
-        return 8 * *count;
-    return 8 * *count;
-}
-
-
-void GeotiffSupport::setTags()
-{
-    m_gtiff = GTIFNewSimpleTags(m_tiff);
-    if (!m_gtiff)
-        throw std::runtime_error("The geotiff keys could not be read "
-            "from VLR records");
-}
-
-
-SpatialReference GeotiffSupport::srs() const
-{
     GTIFDefn sGTIFDefn;
-    SpatialReference srs;
-
-    if (m_gtiff && GTIFGetDefn(m_gtiff, &sGTIFDefn))
+    if (GTIFGetDefn(ctx.gtiff, &sGTIFDefn))
     {
-        char *pszWKT = GTIFGetOGISDefn(m_gtiff, &sGTIFDefn);
-        if (pszWKT)
-            srs.set(pszWKT);
+        char *wkt = GTIFGetOGISDefn(ctx.gtiff, &sGTIFDefn);
+        if (wkt)
+            m_srs.set(wkt);
     }
-    return srs;
 }
 
 
-void GeotiffSupport::rebuildGTIF()
+GeotiffTags::GeotiffTags(const SpatialReference& srs)
 {
-    // If we already have m_gtiff and m_tiff, that is because we have
-    // already called GetGTIF once before.  VLRs ultimately drive how the
-    // SpatialReference is defined, not the GeoTIFF keys.
-    if (m_tiff != 0)
-    {
-        ST_Destroy(m_tiff);
-        m_tiff = 0;
-    }
-
-    if (m_gtiff != 0)
-    {
-        GTIFFree(m_gtiff);
-        m_gtiff = 0;
-    }
-
-    m_tiff = (StTiff *)ST_Create();
-
-    // (here it used to read in the VLRs)
-
-    m_gtiff = GTIFNewSimpleTags(m_tiff);
-    if (!m_gtiff)
-        throw std::runtime_error("The geotiff keys could not be read from "
-            "VLR records");
-}
-
-
-void GeotiffSupport::setWkt(const std::string& v)
-{
-    if (!m_gtiff)
-        rebuildGTIF();
-
-    if (v.empty())
+    if (srs.empty())
         return;
 
-    if (!GTIFSetFromOGISDefn(m_gtiff, v.c_str()))
+    GeotiffCtx ctx;
+    ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
+
+    // Set tiff tags from WKT
+    if (!GTIFSetFromOGISDefn(ctx.gtiff, srs.getWKT().c_str()))
         throw pdal_error("Could not set m_gtiff from WKT");
 
-    if (!GTIFWriteKeys(m_gtiff))
-        throw pdal_error("Unable to write SRS as Geotiff keys.");
-}
-
-
-// Utility functor with accompanying to print GeoTIFF directory.
-struct geotiff_dir_printer
-{
-    geotiff_dir_printer() {}
-
-    std::string output() const
+    auto sizeFromType = [](int type, int count) -> size_t
     {
-        return m_oss.str();
-    }
-    std::string::size_type size() const
+        if (type == STT_ASCII)
+            return count;
+        else if (type == STT_SHORT)
+            return 2 * count;
+        else if (type == STT_DOUBLE)
+            return 8 * count;
+        return 8 * count;
+    };
+
+    int count;
+    int st_type;
+    uint8_t *data;
+    if (ST_GetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
+        &count, &st_type, (void **)&data))
     {
-        return m_oss.str().size();
+        size_t size = sizeFromType(st_type, count);
+        m_directoryRec.resize(size);
+        std::copy(data, data + size, m_directoryRec.begin());
     }
-
-    void operator()(char* data, void* /*aux*/)
+    if (ST_GetKey(ctx.tiff, GEOTIFF_DOUBLES_RECORD_ID,
+        &count, &st_type, (void **)&data))
     {
-        if (0 != data)
-        {
-            m_oss << data;
-        }
+        size_t size = sizeFromType(st_type, count);
+        m_doublesRec.resize(size);
+        std::copy(data, data + size, m_doublesRec.begin());
     }
-
-private:
-    std::ostringstream m_oss;
-};
-
-
-static int pdalGeoTIFFPrint(char* data, void* aux)
-{
-    geotiff_dir_printer* printer = reinterpret_cast<geotiff_dir_printer*>(aux);
-    (*printer)(data, 0);
-    return static_cast<int>(printer->size());
-}
-
-
-std::string GeotiffSupport::getText() const
-{
-    if (m_gtiff == NULL)
-        return std::string("");
-
-    geotiff_dir_printer geotiff_printer;
-    GTIFPrint(m_gtiff, pdalGeoTIFFPrint, &geotiff_printer);
-    const std::string s = geotiff_printer.output();
-    return s;
+    if (ST_GetKey(ctx.tiff, GEOTIFF_ASCII_RECORD_ID,
+        &count, &st_type, (void **)&data))
+    {
+        size_t size = sizeFromType(st_type, count);
+        m_asciiRec.resize(size);
+        std::copy(data, data + size, m_asciiRec.begin());
+    }
 }
 
 } // namespace pdal
