@@ -36,6 +36,7 @@
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/Segmentation.hpp>
 #include <pdal/pdal_types.hpp>
 
 #include <vector>
