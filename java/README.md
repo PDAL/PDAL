@@ -45,7 +45,7 @@ PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=<path>
 ## Using with SBT
 
 ```scala
-// pdal is bulished to maven central, but you can use following repos in addition
+// pdal is pubulished to maven central, but you can use following repos in addition
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots") // for snaphots
