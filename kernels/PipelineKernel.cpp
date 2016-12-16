@@ -80,6 +80,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
     args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
+    args.add("stream", "Attempt to run pipeline in streaming mode.", m_stream);
 }
 
 int PipelineKernel::execute()
@@ -100,7 +101,13 @@ int PipelineKernel::execute()
         return 0;
     }
 
-    m_manager.execute();
+    if (m_stream)
+    {
+        FixedPointTable table(10000);
+        m_manager.executeStream(table);
+    }
+    else
+        m_manager.execute();
 
     if (m_pipelineFile.size() > 0)
         PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineFile);

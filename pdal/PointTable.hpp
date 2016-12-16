@@ -78,7 +78,7 @@ public:
     void addSpatialReference(const SpatialReference& srs)
         { m_spatialRefs.insert(srs); }
     bool spatialReferenceUnique() const
-        { return m_spatialRefs.size() == 1; }
+        { return m_spatialRefs.size() <= 1; }
     SpatialReference spatialReference() const
     {
         return spatialReferenceUnique() ? anySpatialReference() :

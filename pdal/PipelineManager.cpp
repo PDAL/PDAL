@@ -205,6 +205,18 @@ point_count_t PipelineManager::execute()
 }
 
 
+void PipelineManager::executeStream(FixedPointTable& table)
+{
+    validateStageOptions();
+    Stage *s = getStage();
+    if (!s)
+        return;
+
+    s->prepare(table);
+    s->execute(table);
+}
+
+
 MetadataNode PipelineManager::getMetadata() const
 {
     MetadataNode output("stages");
