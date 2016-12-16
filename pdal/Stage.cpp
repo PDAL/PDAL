@@ -345,6 +345,7 @@ void Stage::l_done(PointTableRef table)
 
 void Stage::l_addArgs(ProgramArgs& args)
 {
+    args.add("application", "Application-specific JSON", m_applicationJSON);
     args.add("log", "Debug output filename", m_logname);
     readerAddArgs(args);
 }
