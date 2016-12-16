@@ -112,23 +112,23 @@ Release Process
             Summary:
               - Run ./scripts/publish-all.sh and everything is available in a snaphost repository
         - Publishing releases:
-            To publish everything into sonatype snapshot repo (stagin repo) use:
+            To publish everything into sonatype snapshot repo (staging repo) use:
               - ./scripts/publish-all.sh --suffix="" --signed
                `suffix` defines version suffix (for example `--suffix="-RC1"`)
-               `signed` means that jar would be uploaded into a staging sonatype repo with a GPG sign
+               `signed` means that jar would be uploaded into a staging sonatype repo with a PGP sign
             Staging means a special repository in a pre released condition. 
               - Go into staging repos panel: https://oss.sonatype.org/#stagingRepositories (log in using sonatype user / pwd)
               - Filter by package name (pdal in our case) and select staging repo
               - Press Close button on the top of the table with repos. It would run packages 
                 validation and will close staging repo in a succesfull case
               - After succesfull closing press Release button. It would be immediately published into sonatype releases repo, 
-                and sycned with maven central ~ in 10 minutes and ~ in 2 hours it would be index here: 
+                and synced with maven central ~ in 10 minutes and ~ in 2 hours it would be indexed here: 
                 http://search.maven.org/#search%7Cga%7C1%7Cio.pdal
             Full official guide: http://central.sonatype.org/pages/ossrh-guide.html
             Deploying to sonatype using sbt official doc: http://www.scala-sbt.org/release/docs/Using-Sonatype.html
-            Official sonatype guide with pics of (https://oss.sonatype.org/#stagingRepositories) which answers the question what 
-            to do after jars were published into a staging repo (in our case using ./scripts/publish-all.sh --suffix="" --signed) 
+            Official sonatype guide with pics of (https://oss.sonatype.org/#stagingRepositories) and answers the question what 
+            to do after jars were published into a staging repo (in our case after ./scripts/publish-all.sh --suffix="" --signed step) 
             Summary:
               - Run ./scripts/publish-all.sh --suffix="" --signed to publish everything into staging repo
               - Go to sonatype panel https://oss.sonatype.org/#stagingRepositories and release the jar
-              - Await ~10 minutes to have jars published on maven central
+              - Await ~10 minutes to have jars published to maven central
