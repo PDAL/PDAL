@@ -51,8 +51,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <json/json.h>
-
 namespace pdal
 {
 
@@ -311,7 +309,7 @@ private:
     SpatialReference m_spatialReference;
     std::unique_ptr<ProgramArgs> m_args;
 
-    Json::Value m_applicationJSON;
+    std::string m_applicationJSON;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
