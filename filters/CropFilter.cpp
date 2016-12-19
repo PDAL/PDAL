@@ -42,6 +42,7 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/KDIndex.hpp>
+#include "filters/private/crop/Point.hpp"
 
 #include <sstream>
 #include <cstdarg>
