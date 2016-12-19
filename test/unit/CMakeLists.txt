@@ -39,6 +39,7 @@ PDAL_ADD_TEST(pdal_program_arg_test FILES ProgramArgsTest.cpp)
         ${PDAL_JSONCPP_INCLUDE_DIR})
 
 PDAL_ADD_TEST(pdal_polygon_test FILES PolygonTest.cpp)
+PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
