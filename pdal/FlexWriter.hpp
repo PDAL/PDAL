@@ -57,7 +57,7 @@ protected:
             std::ostringstream oss;
             oss << getName() << ": Can't write with template-based "
                 "filename using streaming point table.";
-            throw oss.str();
+            throw pdal_error(oss.str());
         }
     }
 
