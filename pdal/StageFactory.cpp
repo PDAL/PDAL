@@ -53,6 +53,7 @@
 #include <filters/HAGFilter.hpp>
 #include <filters/IQRFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
+#include <filters/LocateMaxFilter.hpp>
 #include <filters/LOFFilter.hpp>
 #include <filters/MADFilter.hpp>
 #include <filters/MergeFilter.hpp>
@@ -251,6 +252,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
+    PluginManager::initializePlugin(LocateMaxFilter_InitPlugin);
     PluginManager::initializePlugin(LOFFilter_InitPlugin);
     PluginManager::initializePlugin(MADFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
