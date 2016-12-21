@@ -48,6 +48,7 @@
 #include <filters/EigenvaluesFilter.hpp>
 #include <filters/EstimateRankFilter.hpp>
 #include <filters/FerryFilter.hpp>
+#include <filters/GroupByFilter.hpp>
 #include <filters/HAGFilter.hpp>
 #include <filters/IQRFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
@@ -244,6 +245,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(EigenvaluesFilter_InitPlugin);
     PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager::initializePlugin(GroupByFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
