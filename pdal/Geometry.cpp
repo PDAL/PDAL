@@ -79,7 +79,8 @@ void Geometry::update(const std::string& wkt_or_json, SpatialReference ref)
     if (!isJson)
     {
         geos::GeometryDeleter geom_del(m_geoserr);
-        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader, wkt_or_json.c_str()), geom_del);
+        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader,
+            wkt_or_json.c_str()), geom_del);
         m_geom.swap(p);
     }
     else
@@ -95,7 +96,8 @@ void Geometry::update(const std::string& wkt_or_json, SpatialReference ref)
         OGRErr err = OGR_G_ExportToWkt(json, &gdal_wkt);
 
         geos::GeometryDeleter geom_del(m_geoserr);
-        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader, gdal_wkt), geom_del);
+        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader,
+            gdal_wkt), geom_del);
         m_geom.swap(p);
 
         OGRFree(gdal_wkt);
@@ -121,13 +123,13 @@ void Geometry::prepare()
 
 Geometry& Geometry::operator=(const Geometry& input)
 {
-
-    if (&input!= this)
+    if (&input != this)
     {
         m_geoserr = input.m_geoserr;
         m_srs = input.m_srs;
         geos::GeometryDeleter geom_del(m_geoserr);
-        GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  input.m_geom.get()), geom_del);
+        GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  input.m_geom.get()),
+            geom_del);
         m_geom.swap(p);
         prepare();
     }
@@ -141,7 +143,8 @@ Geometry::Geometry(const Geometry& input)
 {
     assert(input.m_geom.get() != 0);
     geos::GeometryDeleter geom_del(m_geoserr);
-    GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  input.m_geom.get()), geom_del);
+    GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  input.m_geom.get()),
+        geom_del);
     m_geom.swap(p);
     assert(m_geom.get() != 0);
     m_prepGeom = 0;
@@ -179,13 +182,13 @@ Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
     GEOSWKBReader* reader = GEOSWKBReader_create_r(m_geoserr.ctx());
 
     geos::GeometryDeleter geom_del(m_geoserr);
-    GEOSGeomPtr p(GEOSWKBReader_read_r(m_geoserr.ctx(),  reader, wkb.data(), wkbSize), geom_del);
+    GEOSGeomPtr p(GEOSWKBReader_read_r(m_geoserr.ctx(),  reader, wkb.data(),
+        wkbSize), geom_del);
     m_geom.swap(p);
     prepare();
 
     GEOSWKBReader_destroy_r(m_geoserr.ctx(), reader);
 }
-
 
 
 Geometry Geometry::transform(const SpatialReference& ref) const
@@ -241,7 +244,8 @@ BOX3D Geometry::bounds() const
 
 bool Geometry::equals(const Geometry& p, double tolerance) const
 {
-    return (bool) GEOSEqualsExact_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get(), tolerance);
+    return (bool) GEOSEqualsExact_r(m_geoserr.ctx(), m_geom.get(),
+        p.m_geom.get(), tolerance);
 }
 
 
@@ -281,11 +285,13 @@ std::string Geometry::validReason() const
 std::string Geometry::wkt(double precision, bool bOutputZ) const
 {
     GEOSWKTWriter *writer = GEOSWKTWriter_create_r(m_geoserr.ctx());
-    GEOSWKTWriter_setRoundingPrecision_r(m_geoserr.ctx(), writer, (int)precision);
+    GEOSWKTWriter_setRoundingPrecision_r(m_geoserr.ctx(), writer,
+        (int)precision);
     if (bOutputZ)
         GEOSWKTWriter_setOutputDimension_r(m_geoserr.ctx(), writer, 3);
 
-    char *smoothWkt = GEOSWKTWriter_write_r(m_geoserr.ctx(), writer, m_geom.get());
+    char *smoothWkt = GEOSWKTWriter_write_r(m_geoserr.ctx(), writer,
+        m_geom.get());
     std::string output(smoothWkt);
     GEOSFree_r(m_geoserr.ctx(), smoothWkt);
     GEOSWKTWriter_destroy_r(m_geoserr.ctx(), writer);
@@ -301,13 +307,10 @@ std::string Geometry::json(double precision) const
     papszOptions = CSLSetNameValue(papszOptions, "COORDINATE_PRECISION",
         prec.str().c_str() );
 
-    std::string w(wkt());
-
     gdal::SpatialRef srs(m_srs.getWKT());
-    gdal::Geometry g(w, srs);
+    gdal::Geometry g(wkt(), srs);
 
     char* json = OGR_G_ExportToJsonEx(g.get(), papszOptions);
-
     std::string output(json);
     OGRFree(json);
     return output;
@@ -323,20 +326,16 @@ std::ostream& operator<<(std::ostream& ostr, const Geometry& p)
 
 std::istream& operator>>(std::istream& istr, Geometry& p)
 {
-
     std::ostringstream oss;
     oss << istr.rdbuf();
 
-    std::string wkt = oss.str();
-
     try
     {
-        p.update(wkt);
+        p.update(oss.str());
     }
     catch (pdal_error& err)
     {
         istr.setstate(std::ios::failbit);
-        throw;
     }
     return istr;
 }
