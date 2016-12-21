@@ -4,10 +4,10 @@
 filters.locate
 ===============================================================================
 
-The Locate Max filter searches the specified ``dimension`` for the maximum value
-and returns a single point at this location. If multiple points share the max
-value, the first will be returned. All dimensions of the input ``PointView``
-will be output, subject to any overriding writer options.
+The Locate filter searches the specified ``dimension`` for the minimum or
+maximum value and returns a single point at this location. If multiple points
+share the min/max value, the first will be returned. All dimensions of the input
+``PointView`` will be output, subject to any overriding writer options.
 
 Example
 -------
