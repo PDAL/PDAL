@@ -282,6 +282,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
     std::vector<bool> skips(table.capacity());
     std::list<Stage *> filters;
     SpatialReference srs;
+    std::map<Stage *, SpatialReference> srsMap;
 
     // Separate out the first stage.
     Stage *reader = stages.front();
@@ -325,6 +326,11 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         // processed by subsequent filters.
         for (Stage *s : filters)
         {
+            if (srsMap[s] != srs)
+            {
+                spatialReferenceChanged(srs);
+                srsMap[s] = srs;
+            }
             s->pushLogLeader();
             for (PointId idx = 0; idx < pointLimit; idx++)
             {

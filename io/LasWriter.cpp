@@ -64,7 +64,8 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None)
+LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None),
+    m_srsCnt(0)
 {}
 
 
@@ -130,6 +131,15 @@ void LasWriter::initialize()
 #endif
     m_extraDims = LasUtils::parse(m_extraDimSpec);
     fillForwardList();
+}
+
+
+void LasWriter::spatialReferenceChanged(const SpatialReference&)
+{
+    if (++m_srsCnt > 1)
+        log()->get(LogLevel::Error) << getName() <<
+            ": Attempting to write '" << m_filename << "' with multiple "
+            "point spatial references.";
 }
 
 
