@@ -39,6 +39,7 @@
 #include <filters/ApproximateCoplanarFilter.hpp>
 #include <filters/AttributeFilter.hpp>
 #include <filters/ChipperFilter.hpp>
+#include <filters/ClusterFilter.hpp>
 #include <filters/ColorizationFilter.hpp>
 #include <filters/ColorinterpFilter.hpp>
 #include <filters/ComputeRangeFilter.hpp>
@@ -48,9 +49,11 @@
 #include <filters/EigenvaluesFilter.hpp>
 #include <filters/EstimateRankFilter.hpp>
 #include <filters/FerryFilter.hpp>
+#include <filters/GroupByFilter.hpp>
 #include <filters/HAGFilter.hpp>
 #include <filters/IQRFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
+#include <filters/LocateFilter.hpp>
 #include <filters/LOFFilter.hpp>
 #include <filters/MADFilter.hpp>
 #include <filters/MergeFilter.hpp>
@@ -235,6 +238,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
     PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
+    PluginManager::initializePlugin(ClusterFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(ColorinterpFilter_InitPlugin);
     PluginManager::initializePlugin(ComputeRangeFilter_InitPlugin);
@@ -244,9 +248,11 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(EigenvaluesFilter_InitPlugin);
     PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager::initializePlugin(GroupByFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
+    PluginManager::initializePlugin(LocateFilter_InitPlugin);
     PluginManager::initializePlugin(LOFFilter_InitPlugin);
     PluginManager::initializePlugin(MADFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
