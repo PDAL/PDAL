@@ -56,7 +56,7 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
     , m_srs(ref)
     , m_geoserr(geos::ErrorHandler::get())
 {
-    update(wkt_or_json, ref);
+    update(wkt_or_json);
 }
 
 
@@ -69,7 +69,7 @@ Geometry::~Geometry()
 }
 
 
-void Geometry::update(const std::string& wkt_or_json, SpatialReference ref)
+void Geometry::update(const std::string& wkt_or_json)
 {
     bool isJson = wkt_or_json.find("{") != wkt_or_json.npos ||
                   wkt_or_json.find("}") != wkt_or_json.npos;
