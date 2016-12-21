@@ -131,8 +131,9 @@ PointViewSet CropFilter::run(PointViewPtr view)
 
     for (auto& geom : m_geoms)
     {
-        // If this is the first time through or the SRS has changed,
-        // prepare the crop polygon.
+        // If the geometry or the points have an SRS, transform the SRS
+        // of the geometry to that of the points.  Transform will throw
+        // if either the source or destination SRS is empty.
         if (!srs.empty() || !geom.getSpatialReference().empty())
         {
             try
