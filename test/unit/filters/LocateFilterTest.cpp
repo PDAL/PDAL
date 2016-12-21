@@ -35,14 +35,14 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Options.hpp>
-#include <filters/LocateMaxFilter.hpp>
+#include <filters/LocateFilter.hpp>
 #include <io/LasReader.hpp>
 
 #include "Support.hpp"
 
 using namespace pdal;
 
-TEST(LocateMaxTest, basic)
+TEST(LocateTest, locate_max)
 {
     PointTable table;
 
@@ -53,8 +53,9 @@ TEST(LocateMaxTest, basic)
 
     Options fo;
     fo.add("dimension", "Z");
+    fo.add("minmax", "max");
 
-    LocateMaxFilter f;
+    LocateFilter f;
     f.setInput(r);
     f.setOptions(fo);
     f.prepare(table);
@@ -65,4 +66,30 @@ TEST(LocateMaxTest, basic)
     EXPECT_EQ(1u, view->size());
     
     EXPECT_NEAR(586.38, view->getFieldAs<double>(Dimension::Id::Z, 0), 0.0001);
+}
+
+TEST(LocateTest, locate_min)
+{
+    PointTable table;
+
+    Options ro;
+    ro.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader r;
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("dimension", "Z");
+    fo.add("minmax", "min");
+
+    LocateFilter f;
+    f.setInput(r);
+    f.setOptions(fo);
+    f.prepare(table);
+    PointViewSet viewSet = f.execute(table);
+    EXPECT_EQ(1u, viewSet.size());
+    
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(1u, view->size());
+    
+    EXPECT_NEAR(406.59, view->getFieldAs<double>(Dimension::Id::Z, 0), 0.0001);
 }

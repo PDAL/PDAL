@@ -1,7 +1,7 @@
-.. _filters.locatemax:
+.. _filters.locate:
 
 ===============================================================================
-filters.locatemax
+filters.locate
 ===============================================================================
 
 The Locate Max filter searches the specified ``dimension`` for the maximum value
@@ -20,8 +20,9 @@ This example returns the point at the highest elevation.
       "pipeline":[
         "input.las",
         {
-          "type":"filters.locatemax",
-          "dimension":"Z"
+          "type":"filters.locate",
+          "dimension":"Z",
+          "minmax":"max"
         },
         "output.las"
       ]
@@ -31,4 +32,7 @@ Options
 -------
 
 dimension
-  Name of the dimension in which to search for max value.
+  Name of the dimension in which to search for min/max value.
+
+minmax
+  Whether to return the minimum or maximum value in the dimension.

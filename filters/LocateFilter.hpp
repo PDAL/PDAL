@@ -32,68 +32,44 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "LocateMaxFilter.hpp"
+#pragma once
 
-#include <pdal/pdal_macros.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
+
+#include <map>
+#include <string>
+
+extern "C" int32_t LocateFilter_ExitFunc();
+extern "C" PF_ExitFunc LocateFilter_InitPlugin();
 
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.locatemax",
-               "Return a single point with max value in the named dimension.",
-               "http://pdal.io/stages/filters.locatemax.html");
+class PointView;
+class ProgramArgs;
 
-CREATE_STATIC_PLUGIN(1, 0, LocateMaxFilter, Filter, s_info)
-
-std::string LocateMaxFilter::getName() const
+class PDAL_DLL LocateFilter : public Filter
 {
-    return s_info.name;
-}
+public:
+    LocateFilter() : Filter()
+    {}
 
-void LocateMaxFilter::addArgs(ProgramArgs& args)
-{
-    args.add("dimension", "Dimension in which to locate max", m_dimName);
-}
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-void LocateMaxFilter::prepared(PointTableRef table)
-{
-    PointLayoutPtr layout(table.layout());
-    m_dimId = layout->findDim(m_dimName);
-    if (m_dimId == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-        oss << "Invalid dimension name in filters.locatemax 'dimension' "
-            "option: '" << m_dimName << "'.";
-        throw pdal_error(oss.str());
-    }
-}
+private:
+    std::string m_dimName;
+    Dimension::Id m_dimId;
+    std::string m_minmax;
 
-PointViewSet LocateMaxFilter::run(PointViewPtr inView)
-{
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
+    virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
 
-    PointId maxidx;
-    double maxval = std::numeric_limits<double>::lowest();
+    LocateFilter& operator=(const LocateFilter&); // not implemented
+    LocateFilter(const LocateFilter&); // not implemented
+};
 
-    for (PointId idx = 0; idx < inView->size(); idx++)
-    {
-        double val = inView->getFieldAs<double>(m_dimId, idx);
-        if (val > maxval)
-        {
-            maxval = val;
-            maxidx = idx;
-        }
-    }
-
-    PointViewPtr outView = inView->makeNew();
-    outView->appendPoint(*inView.get(), maxidx);
-
-    viewSet.insert(outView);
-    return viewSet;
-}
-
-} // pdal
+} // namespace pdal
