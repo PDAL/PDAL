@@ -36,45 +36,37 @@
 
 #include <pdal/SpatialReference.hpp>
 
-// GDAL
-#include <geo_normalize.h>
-#include <ogr_spatialref.h>
-
-// See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
-#define CPL_SERV_H_INCLUDED
-
-#include <string>
-#include <stdexcept>
-
-struct StTiff;
-
 namespace pdal
 {
 
-class PDAL_DLL GeotiffSupport
+class GeotiffSrs
 {
 public:
-    GeotiffSupport() : m_gtiff(0), m_tiff(0)
-    {}
-    ~GeotiffSupport();
+    GeotiffSrs(const std::vector<uint8_t>& directoryRec,
+        const std::vector<uint8_t>& doublesRec,
+        const std::vector<uint8_t>& asciiRec);
+    SpatialReference srs() const
+        { return m_srs; }
+private:
+    SpatialReference m_srs;
+};
 
-    void resetTags();
-    bool setShortKeys(int tag, void *data, int size);
-    bool setDoubleKeys(int tag, void *data, int size);
-    bool setAsciiKeys(int tag, void *data, int size);
-    size_t getKey(int tag, int *count, void **data_ptr) const;
-    void setTags();
+class GeotiffTags
+{
+public:
+    GeotiffTags(const SpatialReference& srs);
 
-    SpatialReference srs() const;
-    void setWkt(const std::string&);
-
-    std::string getText() const;
+    std::vector<uint8_t>& directoryData()
+        { return m_directoryRec; }
+    std::vector<uint8_t>& doublesData()
+        { return m_doublesRec; }
+    std::vector<uint8_t>& asciiData()
+        { return m_asciiRec; }
 
 private:
-    void rebuildGTIF();
-
-    GTIF *m_gtiff;
-    StTiff *m_tiff;
+    std::vector<uint8_t> m_directoryRec;
+    std::vector<uint8_t> m_doublesRec;
+    std::vector<uint8_t> m_asciiRec;
 };
 
 } // namespace pdal
