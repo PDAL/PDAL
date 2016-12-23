@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,41 +32,39 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/SpatialReference.hpp>
+#include <io/LasReader.hpp>
+#include <filters/GroupByFilter.hpp>
+#include "Support.hpp"
 
-namespace pdal
+using namespace pdal;
+
+TEST(GroupByTest, basic_test)
 {
+    Options ro;
+    ro.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader r;
+    r.setOptions(ro);
 
-class GeotiffSrs
-{
-public:
-    GeotiffSrs(const std::vector<uint8_t>& directoryRec,
-        const std::vector<uint8_t>& doublesRec,
-        const std::vector<uint8_t>& asciiRec);
-    SpatialReference srs() const
-        { return m_srs; }
-private:
-    SpatialReference m_srs;
-};
+    Options fo;
+    fo.add("dimension", "Classification");
 
-class GeotiffTags
-{
-public:
-    GeotiffTags(const SpatialReference& srs);
+    GroupByFilter s;
+    s.setOptions(fo);
+    s.setInput(r);
 
-    std::vector<uint8_t>& directoryData()
-        { return m_directoryRec; }
-    std::vector<uint8_t>& doublesData()
-        { return m_doublesRec; }
-    std::vector<uint8_t>& asciiData()
-        { return m_asciiRec; }
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    s.prepare(table);
+    PointViewSet viewSet = s.execute(table);
 
-private:
-    std::vector<uint8_t> m_directoryRec;
-    std::vector<uint8_t> m_doublesRec;
-    std::vector<uint8_t> m_asciiRec;
-};
+    EXPECT_EQ(2u, viewSet.size());
 
-} // namespace pdal
+    std::vector<PointViewPtr> views;
+    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
+        views.push_back(*it);
+
+    EXPECT_EQ(789u, views[0]->size());
+    EXPECT_EQ(276u, views[1]->size());
+}

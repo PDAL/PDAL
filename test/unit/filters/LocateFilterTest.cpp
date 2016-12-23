@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,41 +32,64 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/SpatialReference.hpp>
+#include <pdal/Options.hpp>
+#include <filters/LocateFilter.hpp>
+#include <io/LasReader.hpp>
 
-namespace pdal
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(LocateTest, locate_max)
 {
+    PointTable table;
 
-class GeotiffSrs
+    Options ro;
+    ro.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader r;
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("dimension", "Z");
+    fo.add("minmax", "max");
+
+    LocateFilter f;
+    f.setInput(r);
+    f.setOptions(fo);
+    f.prepare(table);
+    PointViewSet viewSet = f.execute(table);
+    EXPECT_EQ(1u, viewSet.size());
+    
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(1u, view->size());
+    
+    EXPECT_NEAR(586.38, view->getFieldAs<double>(Dimension::Id::Z, 0), 0.0001);
+}
+
+TEST(LocateTest, locate_min)
 {
-public:
-    GeotiffSrs(const std::vector<uint8_t>& directoryRec,
-        const std::vector<uint8_t>& doublesRec,
-        const std::vector<uint8_t>& asciiRec);
-    SpatialReference srs() const
-        { return m_srs; }
-private:
-    SpatialReference m_srs;
-};
+    PointTable table;
 
-class GeotiffTags
-{
-public:
-    GeotiffTags(const SpatialReference& srs);
+    Options ro;
+    ro.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader r;
+    r.setOptions(ro);
 
-    std::vector<uint8_t>& directoryData()
-        { return m_directoryRec; }
-    std::vector<uint8_t>& doublesData()
-        { return m_doublesRec; }
-    std::vector<uint8_t>& asciiData()
-        { return m_asciiRec; }
+    Options fo;
+    fo.add("dimension", "Z");
+    fo.add("minmax", "min");
 
-private:
-    std::vector<uint8_t> m_directoryRec;
-    std::vector<uint8_t> m_doublesRec;
-    std::vector<uint8_t> m_asciiRec;
-};
-
-} // namespace pdal
+    LocateFilter f;
+    f.setInput(r);
+    f.setOptions(fo);
+    f.prepare(table);
+    PointViewSet viewSet = f.execute(table);
+    EXPECT_EQ(1u, viewSet.size());
+    
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(1u, view->size());
+    
+    EXPECT_NEAR(406.59, view->getFieldAs<double>(Dimension::Id::Z, 0), 0.0001);
+}

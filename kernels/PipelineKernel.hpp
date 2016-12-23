@@ -66,6 +66,7 @@ private:
     std::string m_progressFile;
     int m_progressFd;
     bool m_usestdin;
+    bool m_stream;
 };
 
 } // pdal

@@ -57,7 +57,7 @@ protected:
             std::ostringstream oss;
             oss << getName() << ": Can't write with template-based "
                 "filename using streaming point table.";
-            throw oss.str();
+            throw pdal_error(oss.str());
         }
     }
 
@@ -90,12 +90,9 @@ private:
         if (m_hashPos == std::string::npos)
         {
             if (!table.spatialReferenceUnique())
-            {
-                std::ostringstream oss;
-                oss << getName() << ": Attempting to write '" << m_filename <<
-                    "' with multiple spatial references.";
-                Utils::printError(oss.str());
-            }
+                log()->get(LogLevel::Error) << getName() <<
+                    ": Attempting to write '" << m_filename <<
+                    "' with multiple point spatial references.";
             readyFile(generateFilename(), table.spatialReference());
         }
     }

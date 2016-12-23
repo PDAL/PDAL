@@ -38,6 +38,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/StageRunner.hpp"
@@ -213,15 +214,17 @@ void Stage::execute(StreamPointTable& table)
 {
     typedef std::list<Stage *> StageList;
 
+    SpatialReference srs;
     std::list<StageList> lists;
     StageList stages;
+    StageList readies;
 
     table.finalize();
 
     // Walk from the current stage backwards.  As we add each input, copy
     // the list of stages and push it on a list.  We then pull a list from the
-    // front of list and keep going.  Placing on the back and pulling from the
-    // front insures that the stages will be executed in the order that they
+    // back of list and keep going.  Pushing on the front and pulling from the
+    // back insures that the stages will be executed in the order that they
     // were added.  If we hit stage with no previous stages, we execute
     // the stage list.
     // All this often amounts to a bunch of list copying for
@@ -236,7 +239,21 @@ void Stage::execute(StreamPointTable& table)
     while (true)
     {
         if (s->m_inputs.empty())
+        {
+            // Ready stages before we execute.
+            for (auto s2 : stages)
+                if (!Utils::contains(readies, s2))
+                {
+                    s2->pushLogLeader();
+                    s2->ready(table);
+                    s2->pushLogLeader();
+                    readies.push_back(s2);
+                    srs = s2->getSpatialReference();
+                    if (!srs.empty())
+                        table.setSpatialReference(srs);
+                }
             execute(table, stages);
+        }
         else
         {
             for (auto s2 : s->m_inputs)
@@ -252,6 +269,13 @@ void Stage::execute(StreamPointTable& table)
         lists.pop_back();
         s = stages.front();
     }
+
+    for (auto s2 : stages)
+    {
+        s2->pushLogLeader();
+        s2->l_done(table);
+        s2->popLogLeader();
+    }
 }
 
 
@@ -260,6 +284,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
     std::vector<bool> skips(table.capacity());
     std::list<Stage *> filters;
     SpatialReference srs;
+    std::map<Stage *, SpatialReference> srsMap;
 
     // Separate out the first stage.
     Stage *reader = stages.front();
@@ -269,14 +294,6 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
     auto begin = stages.begin();
     begin++;
     std::copy(begin, stages.end(), std::back_inserter(filters));
-
-    for (Stage *s : stages)
-    {
-        s->ready(table);
-        srs = s->getSpatialReference();
-        if (!srs.empty())
-            table.setSpatialReference(srs);
-    }
 
     // Loop until we're finished.  We handle the number of points up to
     // the capacity of the StreamPointTable that we've been provided.
@@ -311,6 +328,11 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         // processed by subsequent filters.
         for (Stage *s : filters)
         {
+            if (srsMap[s] != srs)
+            {
+                spatialReferenceChanged(srs);
+                srsMap[s] = srs;
+            }
             s->pushLogLeader();
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
@@ -330,13 +352,6 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         for (size_t i = 0; i < skips.size(); ++i)
             skips[i] = false;
         table.reset();
-    }
-
-    for (Stage *s : stages)
-    {
-        s->pushLogLeader();
-        s->l_done(table);
-        s->popLogLeader();
     }
 }
 
