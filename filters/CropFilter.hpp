@@ -77,7 +77,9 @@ private:
     void crop(const BOX2D& box, PointView& input, PointView& output);
     bool crop(PointRef& point, const Polygon& g);
     void crop(const Polygon& g, PointView& input, PointView& output);
-    void crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output);
+    void crop(const cropfilter::Point& point, double distance,
+        PointView& input, PointView& output);
+    void transform(const SpatialReference& srs);
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented

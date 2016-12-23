@@ -34,8 +34,7 @@
 
 #include "CropFilter.hpp"
 
-#include <iomanip>
-
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Polygon.hpp>
@@ -99,14 +98,11 @@ void CropFilter::initialize()
 
 void CropFilter::ready(PointTableRef table)
 {
+    // If the user didn't provide an SRS, take one from the table.
+    if (m_assignedSrs.empty())
+        m_assignedSrs = table.anySpatialReference();
     for (auto& geom : m_geoms)
-    {
-        // If we already overrode the SRS, use that instead
-        if (m_assignedSrs.empty())
-            geom.setSpatialReference(table.anySpatialReference());
-        else
-            geom.setSpatialReference(m_assignedSrs);
-    }
+        geom.setSpatialReference(m_assignedSrs);
 }
 
 
@@ -124,28 +120,39 @@ bool CropFilter::processOne(PointRef& point)
 }
 
 
+void CropFilter::transform(const SpatialReference& srs)
+{
+    // If we don't have any SRS, do nothing.
+    if (srs.empty() && m_assignedSrs.empty())
+        return;
+    if (srs.empty() || m_assignedSrs.empty())
+        throw pdal_error(getName() + ": Unable to transform crop geometry to "
+            "point coordinate system.");
+
+    for (auto& geom : m_geoms)
+        geom = geom.transform(srs);
+
+    for (auto& box : m_bounds)
+    {
+        BOX3D b3d = box.to3d();
+        gdal::reprojectBounds(b3d, m_assignedSrs.getWKT(), srs.getWKT());
+        box = b3d;
+    }
+    for (auto& point : m_points)
+    {
+        //TODO - Reproject radius centers.
+    }
+    m_assignedSrs = srs;
+}
+
+
 PointViewSet CropFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
-    SpatialReference srs = view->spatialReference();
 
+    transform(view->spatialReference());
     for (auto& geom : m_geoms)
     {
-        // If the geometry or the points have an SRS, transform the SRS
-        // of the geometry to that of the points.  Transform will throw
-        // if either the source or destination SRS is empty.
-        if (!srs.empty() || !geom.getSpatialReference().empty())
-        {
-            try
-            {
-                geom = geom.transform(srs);
-            }
-            catch (pdal_error& err)
-            {
-                throw pdal_error(getName() + ": " + err.what());
-            }
-        }
-
         PointViewPtr outView = view->makeNew();
         crop(geom, *view, *outView);
         viewSet.insert(outView);
@@ -190,12 +197,12 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
     }
 }
 
+
 bool CropFilter::crop(PointRef& point, const Polygon& g)
 {
-    bool covers = g.covers(point);
-    bool keep = (m_cropOutside != covers);
-    return keep;
+    return (m_cropOutside != g.covers(point));
 }
+
 
 void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
 {
@@ -204,11 +211,11 @@ void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
     {
         point.setPointId(idx);
         bool covers = g.covers(point);
-        bool keep = (m_cropOutside != covers);
-        if (keep)
+        if (m_cropOutside != covers)
             output.appendPoint(input, idx);
     }
 }
+
 
 void CropFilter::crop(const cropfilter::Point& point, double distance,
     PointView& input, PointView& output)
@@ -220,7 +227,8 @@ void CropFilter::crop(const cropfilter::Point& point, double distance,
     {
         KD3Index index(input);
         index.build();
-        std::vector<PointId> points = index.radius(point.x, point.y, point.z, m_distance);
+        std::vector<PointId> points =
+            index.radius(point.x, point.y, point.z, m_distance);
         for (PointId idx = 0; idx < points.size(); ++idx)
         {
             if (!m_cropOutside)
@@ -232,16 +240,15 @@ void CropFilter::crop(const cropfilter::Point& point, double distance,
     {
         KD2Index index(input);
         index.build();
-        std::vector<PointId> points = index.radius(point.x, point.y, m_distance);
+        std::vector<PointId> points =
+            index.radius(point.x, point.y, m_distance);
 
         for (PointId idx = 0; idx < points.size(); ++idx)
         {
             if (!m_cropOutside)
                 output.appendPoint(input, idx);
         }
-
     }
 }
-
 
 } // namespace pdal
