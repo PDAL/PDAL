@@ -103,6 +103,7 @@ private:
     LasCompression m_compression;
     std::vector<char> m_pointBuf;
     SpatialReference m_aSrs;
+    int m_srsCnt;
 
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
@@ -134,6 +135,7 @@ private:
         const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
+    void spatialReferenceChanged(const SpatialReference& srs);
     virtual void doneFile();
 
     void fillForwardList();
@@ -160,8 +162,6 @@ private:
         const std::string& description, std::vector<uint8_t>& data);
     void deleteVlr(const std::string& userId, uint16_t recordId);
     void addGeotiffVlrs();
-    void addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
-        const std::string& description);
     bool addWktVlr();
     void finishLasZipOutput();
     void finishLazPerfOutput();

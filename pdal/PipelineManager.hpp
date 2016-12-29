@@ -107,6 +107,7 @@ public:
     QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
+    void executeStream(FixedPointTable& table);
     void validateStageOptions() const;
 
     // Get the resulting point views.

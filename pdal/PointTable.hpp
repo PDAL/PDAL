@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <set>
+#include <list>
 #include <vector>
 
 #include "pdal/SpatialReference.hpp"
@@ -48,6 +48,7 @@ namespace pdal
 
 class PDAL_DLL BasePointTable : public PointContainer
 {
+    FRIEND_TEST(PointTable, srs);
     friend class PointView;
 
 protected:
@@ -75,10 +76,9 @@ public:
     }
     void clearSpatialReferences()
         { m_spatialRefs.clear(); }
-    void addSpatialReference(const SpatialReference& srs)
-        { m_spatialRefs.insert(srs); }
+    void addSpatialReference(const SpatialReference& srs);
     bool spatialReferenceUnique() const
-        { return m_spatialRefs.size() == 1; }
+        { return m_spatialRefs.size() <= 1; }
     SpatialReference spatialReference() const
     {
         return spatialReferenceUnique() ? anySpatialReference() :
@@ -103,7 +103,7 @@ protected:
 
 protected:
     MetadataPtr m_metadata;
-    std::set<SpatialReference> m_spatialRefs;
+    std::list<SpatialReference> m_spatialRefs;
     PointLayout& m_layoutRef;
 };
 typedef BasePointTable& PointTableRef;

@@ -64,7 +64,8 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None)
+LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None),
+    m_srsCnt(0)
 {}
 
 
@@ -130,6 +131,15 @@ void LasWriter::initialize()
 #endif
     m_extraDims = LasUtils::parse(m_extraDimSpec);
     fillForwardList();
+}
+
+
+void LasWriter::spatialReferenceChanged(const SpatialReference&)
+{
+    if (++m_srsCnt > 1)
+        log()->get(LogLevel::Error) << getName() <<
+            ": Attempting to write '" << m_filename << "' with multiple "
+            "point spatial references.";
 }
 
 
@@ -376,42 +386,21 @@ void LasWriter::setVlrsFromSpatialRef()
 
 void LasWriter::addGeotiffVlrs()
 {
-    GeotiffSupport geotiff;
-    geotiff.resetTags();
-
-    geotiff.setWkt(m_srs.getWKT());
-
-    addGeotiffVlr(geotiff, GEOTIFF_DIRECTORY_RECORD_ID,
-        "GeoTiff GeoKeyDirectoryTag");
-    addGeotiffVlr(geotiff, GEOTIFF_DOUBLES_RECORD_ID,
-        "GeoTiff GeoDoubleParamsTag");
-    addGeotiffVlr(geotiff, GEOTIFF_ASCII_RECORD_ID,
-        "GeoTiff GeoAsciiParamsTag");
-}
-
-
-/// Add a geotiff VLR from the information associated with the record ID.
-/// \param  geotiff - Geotiff support structure reference.
-/// \param  recordId - Record ID associated with the VLR/Geotiff ref.
-/// \param  description - Description to use with the VLR
-/// \return  Whether the VLR was added.
-void LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
-    const std::string& description)
-{
-    void *data;
-    int count;
-
-    size_t size = geotiff.getKey(recordId, &count, &data);
-    if (size == 0)
-    {
-        log()->get(LogLevel::Warning) << getName() << ": Invalid spatial "
-            "reference for writing GeoTiff VLR." << std::endl;
+    if (m_srs.empty())
         return;
-    }
 
-    std::vector<uint8_t> buf(size);
-    memcpy(buf.data(), data, size);
-    addVlr(TRANSFORM_USER_ID, recordId, description, buf);
+    GeotiffTags tags(m_srs);
+
+    if (tags.directoryData().empty())
+        throw pdal_error(getName() + ": Invalid spatial reference for "
+            "writing GeoTiff VLR.");
+
+    addVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID,
+        "GeoTiff GeoKeyDirectoryTag", tags.directoryData());
+    addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
+        "GeoTiff GeoDoubleParamsTag", tags.doublesData());
+    addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
+        "GeoTiff GeoAsciiParamsTag", tags.asciiData());
 }
 
 

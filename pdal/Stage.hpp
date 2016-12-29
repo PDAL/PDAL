@@ -411,6 +411,16 @@ private:
     }
 
     /**
+      (Streaming mode)  Notification that the points that will follow in
+      processing are from a spatial reference different than the previous
+      spatial reference.
+
+       \param srs  New spatial reference.
+    */
+    virtual void spatialReferenceChanged(const SpatialReference& srs)
+    {}
+
+    /**
       Process all points in a view.  Implement in subclass.
 
       \param view  PointView to process.
