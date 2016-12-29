@@ -12,10 +12,10 @@ Purpose:
 :ref:`DTM Workshop Materials <unavco:dtm>`
 
 
-writers.p2g
+writers.gdal
 ================================================================================
 
-* :ref:`writers.p2g`
+* :ref:`writers.gdal`
 * Generated using points2grid (OpenTopography)
 * Write TIFF/ASCII raster
 * Control pixel size
@@ -23,7 +23,7 @@ writers.p2g
 DTM (pipeline)
 ================================================================================
 
-.. literalinclude:: ../../exercises/analysis/dtm/p2g.json
+.. literalinclude:: ../../exercises/analysis/dtm/gdal.json
     :linenos:
 
 DTM (execution)
