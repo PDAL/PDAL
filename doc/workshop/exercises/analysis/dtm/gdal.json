@@ -7,7 +7,7 @@
             "output_type":"all",
             "grid_dist_x":"2.0",
             "grid_dist_y":"2.0",
-            "type": "writers.p2g"
+            "type": "writers.gdal"
         }
     ]
 }
