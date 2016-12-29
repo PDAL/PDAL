@@ -309,7 +309,7 @@ private:
     SpatialReference m_spatialReference;
     std::unique_ptr<ProgramArgs> m_args;
 
-    std::string m_applicationJSON;
+    std::string m_userDataJSON;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

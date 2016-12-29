@@ -153,11 +153,11 @@ public:
                vs += *vi;
             }
 
-            // 'application' keys on stages and such are JSON
-            if (!Utils::iequals(k, "application"))
+            // 'userData' keys on stages and such are JSON
+            if (!Utils::iequals(k, "userData"))
                 parent.add(k, vs);
             else
-                parent.addWithType(k, vs, "json", "Application JSON");
+                parent.addWithType(k, vs, "json", "User JSON");
         }
     }
 
