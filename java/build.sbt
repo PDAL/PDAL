@@ -21,12 +21,10 @@ lazy val commonSettings = Seq(
     "-feature"),
   test in assembly := {},
   shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
-  commands += Command.command("publish-javastyle")((state: State) => {
-    val extracted = Project extract state
-    import extracted._
-    val publishState = Command.process("publish", append(Seq(crossPaths := false), state))
-    append(Seq(crossPaths := true), publishState)
-  }),
+  commands ++= Seq(
+    Commands.processJavastyleCommand("publish"),
+    Commands.processJavastyleCommand("publishSigned")
+  ),
   publishArtifact in Test := false,
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
