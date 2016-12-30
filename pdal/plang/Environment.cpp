@@ -266,7 +266,7 @@ std::string readPythonString(PyObject* list, Py_ssize_t index)
         oss << "Unable to get list item number " << index << " for list of length " << PyTuple_Size(list);
         throw pdal_error(oss.str());
     }
-    PyObject* r = PyObject_Repr(o);
+    PyObject* r = PyObject_Str(o);
     if (!r)
         throw pdal::pdal_error("unable to get repr in readPythonString");
 #if PY_MAJOR_VERSION >= 3

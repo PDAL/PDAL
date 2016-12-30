@@ -75,8 +75,8 @@ namespace pdal
 namespace plang
 {
 
-Invocation::Invocation(const Script& script) :
-    m_metaIn(NULL)
+Invocation::Invocation(const Script& script)
+    : m_metaIn(NULL)
     , m_metaOut(NULL)
     , m_script(script)
     , m_bytecode(NULL)
@@ -284,6 +284,70 @@ bool Invocation::execute()
         throw pdal::pdal_error("User function return value not a boolean type.");
 
     return (m_scriptResult == Py_True);
+}
+
+void Invocation::begin(PointView& view, MetadataNode m)
+{
+    PointLayoutPtr layout(view.m_pointTable.layout());
+    Dimension::IdList const& dims = layout->dims();
+
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        Dimension::Id d = *di;
+        const Dimension::Detail *dd = layout->dimDetail(d);
+        void *data = malloc(dd->size() * view.size());
+        m_buffers.push_back(data);  // Hold pointer for deallocation
+        char *p = (char *)data;
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            view.getFieldInternal(d, idx, (void *)p);
+            p += dd->size();
+        }
+        std::string name = layout->dimName(*di);
+        insertArgument(name, (uint8_t *)data, dd->type(), view.size());
+    }
+    Py_XDECREF(m_metaIn);
+    m_metaIn = plang::fromMetadata(m);
+}
+
+
+void Invocation::end(PointView& view, MetadataNode m)
+{
+    // for each entry in the script's outs dictionary,
+    // look up that entry's name in the schema and then
+    // copy the data into the right dimension spot in the
+    // buffer
+
+    std::vector<std::string> names;
+    getOutputNames(names);
+
+    PointLayoutPtr layout(view.m_pointTable.layout());
+    Dimension::IdList const& dims = layout->dims();
+
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        Dimension::Id d = *di;
+        const Dimension::Detail *dd = layout->dimDetail(d);
+        std::string name = layout->dimName(*di);
+        auto found = std::find(names.begin(), names.end(), name);
+        if (found == names.end()) continue; // didn't have this dim in the names
+
+        assert(name == *found);
+        assert(hasOutputVariable(name));
+
+        size_t size = dd->size();
+        void *data = extractResult(name, dd->type());
+        char *p = (char *)data;
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            view.setField(d, dd->type(), idx, (void *)p);
+            p += size;
+        }
+    }
+    for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
+        free(*bi);
+    m_buffers.clear();
+    addMetadata(m_metaOut, m);
 }
 
 } // namespace plang

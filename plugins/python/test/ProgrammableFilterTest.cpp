@@ -231,6 +231,6 @@ TEST_F(ProgrammableFilterTest, metadata)
     m = m.findChild("filters.programmable");
     MetadataNodeList l = m.children();
     EXPECT_EQ(l.size(), 1u);
-//     EXPECT_EQ(l[0].name(), "name");
-//     EXPECT_EQ(l[0].value(), "value");
+    EXPECT_EQ(l[0].name(), "name");
+    EXPECT_EQ(l[0].value(), "value");
 }

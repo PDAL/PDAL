@@ -40,6 +40,7 @@
 #include "Environment.hpp"
 
 #include <pdal/Dimension.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
@@ -81,6 +82,9 @@ public:
     // possible names from the schema)
     void getOutputNames(std::vector<std::string>& names);
 
+    void begin(PointView& view, MetadataNode m);
+    void end(PointView& view, MetadataNode m);
+
 protected:
     PyObject* m_metaIn;
     PyObject* m_metaOut;
@@ -102,6 +106,8 @@ private:
     std::vector<PyObject*> m_pyInputArrays;
 
     Invocation& operator=(Invocation const& rhs); // nope
+
+    std::vector<void *> m_buffers;
 };
 
 } // namespace plang

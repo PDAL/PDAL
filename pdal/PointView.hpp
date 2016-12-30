@@ -56,7 +56,7 @@ namespace pdal
 {
 namespace plang
 {
-    class BufferedInvocation;
+    class Invocation;
 }
 
 struct PointViewLess;
@@ -68,7 +68,7 @@ typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
 class PDAL_DLL PointView : public PointContainer
 {
-    friend class plang::BufferedInvocation;
+    friend class plang::Invocation;
     friend class PointIdxRef;
     friend struct PointViewLess;
 public:
