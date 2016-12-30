@@ -185,7 +185,7 @@ For more on PDAL stages and their options, check the PDAL documentation on
   stage-specific option names and their respective values. Values provided as
   JSON objects or arrays will be stringified and parsed within the stage.
 
-* Applications can place a ``userData`` node on any stage object and it will be
+* Applications can place a ``user_data`` node on any stage object and it will be
   carried through to any serialized pipeline output.
 
 Filename Globbing
