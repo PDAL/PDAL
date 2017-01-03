@@ -76,17 +76,54 @@ void FauxReader::initialize()
             "[0,10].";
         throw pdal_error(oss.str());
     }
-    if (m_count > 1)
+    if (m_mode == Mode::Grid)
     {
-        m_delX = (m_bounds.maxx - m_bounds.minx) / (m_count - 1);
-        m_delY = (m_bounds.maxy - m_bounds.miny) / (m_count - 1);
-        m_delZ = (m_bounds.maxz - m_bounds.minz) / (m_count - 1);
+        m_bounds.minx = ceil(m_bounds.minx);
+        m_bounds.maxx = ceil(m_bounds.maxx);
+        m_bounds.miny = ceil(m_bounds.miny);
+        m_bounds.maxy = ceil(m_bounds.maxy);
+        m_bounds.minz = ceil(m_bounds.minz);
+        m_bounds.maxz = ceil(m_bounds.maxz);
+        // Here delX/Y/Z represent the number of points in each direction.
+        m_count = 1;
+        if (m_bounds.maxx <= m_bounds.minx)
+            m_delX = 0;
+        else
+        {
+            m_delX = m_bounds.maxx - m_bounds.minx;
+            m_count *= m_delX;
+        }
+        if (m_bounds.maxy <= m_bounds.miny)
+            m_delY = 0;
+        else
+        {
+            m_delY = m_bounds.maxy - m_bounds.miny;
+            m_count *= m_delY;
+        }
+        if (m_bounds.maxz <= m_bounds.minz)
+            m_delZ = 0;
+        else
+        {
+            m_delZ = m_bounds.maxz - m_bounds.minz;
+            m_count *= m_delZ;
+        }
+        if (!m_delX && !m_delY && !m_delZ)
+            m_count = 0;
     }
     else
     {
-        m_delX = 0;
-        m_delY = 0;
-        m_delZ = 0;
+        if (m_count > 1)
+        {
+            m_delX = (m_bounds.maxx - m_bounds.minx) / (m_count - 1);
+            m_delY = (m_bounds.maxy - m_bounds.miny) / (m_count - 1);
+            m_delZ = (m_bounds.maxz - m_bounds.minz) / (m_count - 1);
+        }
+        else
+        {
+            m_delX = 0;
+            m_delY = 0;
+            m_delZ = 0;
+        }
     }
 }
 
@@ -137,7 +174,7 @@ bool FauxReader::processOne(PointRef& point)
         break;
     case Mode::Ramp:
         x = m_bounds.minx + m_delX * m_index;
-        y = m_bounds.miny+ m_delY * m_index;
+        y = m_bounds.miny + m_delY * m_index;
         z = m_bounds.minz + m_delZ * m_index;
         break;
     case Mode::Uniform:
@@ -150,6 +187,30 @@ bool FauxReader::processOne(PointRef& point)
         y = Utils::normal(m_mean_y, m_stdev_y, m_seed++);
         z = Utils::normal(m_mean_z, m_stdev_z, m_seed++);
         break;
+    case Mode::Grid:
+    {
+        if (m_delX)
+            x = m_index % (point_count_t)m_delX;
+
+        if (m_delY)
+        {
+            if (m_delX)
+                y = (m_index / (point_count_t)m_delX) % (point_count_t)m_delY;
+            else
+                y = m_index % (point_count_t)m_delY;
+        }
+
+        if (m_delZ)
+        {
+            if (m_delX && m_delY)
+                z = m_index / (point_count_t)(m_delX * m_delY);
+            else if (m_delX)
+                z = m_index / (point_count_t)m_delX;
+            else if (m_delY)
+                z = m_index / (point_count_t)m_delY;
+        }
+        break;
+    }
     }
 
     point.setField(Dimension::Id::X, x);
