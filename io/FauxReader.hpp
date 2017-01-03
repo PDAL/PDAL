@@ -49,7 +49,8 @@ enum class Mode
     Random,
     Ramp,
     Uniform,
-    Normal
+    Normal,
+    Grid
 };
 
 inline std::istream& operator>>(std::istream& in, Mode& m)
@@ -68,6 +69,8 @@ inline std::istream& operator>>(std::istream& in, Mode& m)
         m = Mode::Uniform;
     else if (s == "normal")
         m = Mode::Normal;
+    else if (s == "grid")
+        m = Mode::Grid;
     else
         in.setstate(std::ios::failbit);
     return in;
@@ -84,9 +87,11 @@ inline std::ostream& operator<<(std::ostream& out, const Mode& m)
     case Mode::Ramp:
         out << "Ramp";
     case Mode::Uniform:
-        out << "Uniform";            
+        out << "Uniform";
     case Mode::Normal:
         out << "Normal";
+    case Mode::Grid:
+        out << "Grid";
     }
     return out;
 }
