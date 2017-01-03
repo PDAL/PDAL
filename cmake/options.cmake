@@ -55,8 +55,6 @@ endif(DEFINED ENV{ORACLE_HOME})
 option(BUILD_PLUGIN_OCI
     "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME})
 
-option(BUILD_PLUGIN_P2G "Choose if Points2Grid support should be built" FALSE)
-
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
     "provides PCL-based readers, writers, filters, and kernels")
