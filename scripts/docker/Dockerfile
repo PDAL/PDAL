@@ -22,7 +22,6 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
         -DBUILD_PLUGIN_MRSID=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
-        -DBUILD_PLUGIN_P2G=ON \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_SQLITE=ON \

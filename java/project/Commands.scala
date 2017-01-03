@@ -31,17 +31,16 @@
   * OF SUCH DAMAGE.
   ****************************************************************************/
 
-import sbt.ClasspathDependency
+import sbt._
+import sbt.Keys._
 
-import scala.util.Properties
-
-object Environment {
-  def either(environmentVariable: String, default: String): String =
-    Properties.envOrElse(environmentVariable, default)
-
-  def dependOnNative(native: ClasspathDependency) =
-    if(pdalDependOnNative == "true") Seq(native) else Seq.empty
-
-  lazy val versionSuffix = either("PDAL_VERSION_SUFFIX", "-SNAPSHOT")
-  lazy val pdalDependOnNative = either("PDAL_DEPEND_ON_NATIVE", "true")
+object Commands {
+  def processJavastyleCommand(commandProcess: String) = {
+    Command.command(s"${commandProcess}-javastyle")((state: State) => {
+      val extracted = Project extract state
+      import extracted._
+      val publishState = Command.process(commandProcess, append(Seq(crossPaths := false), state))
+      append(Seq(crossPaths := true), publishState)
+    })
+  }
 }

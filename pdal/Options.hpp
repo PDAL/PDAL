@@ -152,7 +152,12 @@ public:
                    vs += ", ";
                vs += *vi;
             }
-            parent.add(k, vs);
+
+            // 'userData' keys on stages and such are JSON
+            if (!Utils::iequals(k, "user_data"))
+                parent.add(k, vs);
+            else
+                parent.addWithType(k, vs, "json", "User JSON");
         }
     }
 

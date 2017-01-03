@@ -68,8 +68,8 @@ writer from filenames, and able to be specified as a set of sequential steps:
     while only keeping points inside the box :math:`[0 \leq x \leq 100, 0 \leq y \leq 100]`.
 
 A more complex PDAL pipeline, that reprojects the stage tagged ``A1``, merges
-the result with ``B``, and writes the merged output with the :ref:`writers.p2g`
-plugin.:
+the result with ``B``, and writes the merged output with the :ref:`writers.gdal`
+writer:
 
 .. code-block:: json
 
@@ -98,7 +98,7 @@ plugin.:
               ]
           },
           {
-              "type":"writers.p2g",
+              "type":"writers.gdal",
               "filename":"output.tif"
           }
       ]
@@ -185,6 +185,9 @@ For more on PDAL stages and their options, check the PDAL documentation on
   stage-specific option names and their respective values. Values provided as
   JSON objects or arrays will be stringified and parsed within the stage.
 
+* Applications can place a ``user_data`` node on any stage object and it will be
+  carried through to any serialized pipeline output.
+
 Filename Globbing
 ................................................................................
 
@@ -259,7 +262,7 @@ DTM
 A common task is to create a digital terrain model (DTM) from the input point
 cloud. This pipeline infers the reader type, applies an approximate ground
 segmentation filter using :ref:`filters.pmf`, and then creates the DTM using
-the :ref:`writers.p2g` with only the ground returns.
+the :ref:`writers.gdal` with only the ground returns.
 
 .. code-block:: json
 
@@ -278,7 +281,7 @@ the :ref:`writers.p2g` with only the ground returns.
               "classify":false
           },
           {
-              "type":"writers.p2g",
+              "type":"writers.gdal",
               "filename":"autzen-surface.tif",
               "output_type":"min",
               "output_format":"tif",

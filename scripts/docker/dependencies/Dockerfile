@@ -150,18 +150,6 @@ RUN git clone https://github.com/hobu/hexer.git \
     && make install \
     && rm -rf /hexer
 
-RUN git clone https://github.com/CRREL/points2grid.git \
-    && cd points2grid \
-    && mkdir build \
-    && cd build \
-    && CXXFLAGS="-std=c++11" cmake \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_BUILD_TYPE="Release" \
-        .. \
-    && make \
-    && make install \
-    && rm -rf /points2grid
-
 RUN git clone  https://github.com/hobu/laz-perf.git \
     && cd laz-perf \
     && mkdir build \

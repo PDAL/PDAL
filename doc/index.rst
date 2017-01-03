@@ -25,9 +25,15 @@ News
 **12-15-2016**
 ................................................................................
 
+.. image:: ./images/foss4g-2017.png
+    :scale: 40%
+    :align: right
+    :target: http://2017.foss4g.org
+
 PDAL 1.4.0 has been released. Visit :ref:`download` to obtain a copy of the
 source code, or follow the :ref:`quickstart` to get going in a hurry with
 `Docker`_.
+
 
 .. _`Docker`: https://www.docker.com/
 
