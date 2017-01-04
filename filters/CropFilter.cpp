@@ -148,7 +148,8 @@ void CropFilter::transform(const SpatialReference& srs)
     }
     for (auto& point : m_points)
     {
-        //TODO - Reproject radius centers.
+        gdal::reprojectPoint(point.x, point.y, point.z,
+            m_assignedSrs.getWKT(), srs.getWKT());
     }
     m_assignedSrs = srs;
 }
