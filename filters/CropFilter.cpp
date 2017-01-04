@@ -67,8 +67,8 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
     args.add("bounds", "Point box for cropped points", m_bounds);
     args.add("point", "Crop within 'distance' from a 2D or 3D point", m_points).
-        setErrorText("Invalid point specification: must be valid "
-            "well-known text.");
+        setErrorText("Invalid point specification.  Must be valid GeoJSON/WKT. "
+            "Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
         m_distance);
     args.add("polygon", "Bounding polying for cropped points", m_polys).
