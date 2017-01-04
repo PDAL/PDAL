@@ -63,20 +63,10 @@ private:
     bool m_cropOutside;
     std::vector<Polygon> m_polys;
     SpatialReference m_assignedSrs;
-    SpatialReference m_lastSrs;
     double m_distance;
     std::vector<cropfilter::Point> m_points;
 
-    struct GeomPkg
-    {
-        GeomPkg()
-        {}
-
-        Polygon m_geom;
-        Polygon m_geomXform;
-    };
-
-    std::vector<GeomPkg> m_geoms;
+    std::vector<Polygon> m_geoms;
 
     void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -85,8 +75,8 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     bool crop(PointRef& point, const BOX2D& box);
     void crop(const BOX2D& box, PointView& input, PointView& output);
-    bool crop(PointRef& point, const GeomPkg& g);
-    void crop(const GeomPkg& g, PointView& input, PointView& output);
+    bool crop(PointRef& point, const Polygon& g);
+    void crop(const Polygon& g, PointView& input, PointView& output);
     void crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output);
 
     CropFilter& operator=(const CropFilter&); // not implemented

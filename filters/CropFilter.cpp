@@ -71,9 +71,10 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
     args.add("bounds", "Point box for cropped points", m_bounds);
     args.add("point", "Crop within 'distance' from a 2D or 3D point", m_points).
-        setErrorText("Invalid point specification must be in the form \"(1.00, 1.00)\""
-                "or \"(1.00, 1.00, 1.00)\"");
-    args.add("distance", "Crop with this distance from 2D or 3D 'point'", m_distance);
+        setErrorText("Invalid point specification must be in the "
+            "form \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
+    args.add("distance", "Crop with this distance from 2D or 3D 'point'",
+        m_distance);
     args.add("polygon", "Bounding polying for cropped points", m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
@@ -82,24 +83,17 @@ void CropFilter::addArgs(ProgramArgs& args)
 
 void CropFilter::initialize()
 {
-
     // Set geometry from polygons.
     if (m_polys.size())
     {
         m_geoms.clear();
         for (Polygon& poly : m_polys)
         {
-            GeomPkg g;
-
             // Throws if invalid.
             poly.valid();
-            if (!m_assignedSrs.empty())
-                poly.setSpatialReference(m_assignedSrs);
-            g.m_geom = poly;
-            m_geoms.push_back(g);
+            m_geoms.push_back(poly);
         }
     }
-
 }
 
 
@@ -109,7 +103,9 @@ void CropFilter::ready(PointTableRef table)
     {
         // If we already overrode the SRS, use that instead
         if (m_assignedSrs.empty())
-            geom.m_geom.setSpatialReference(table.anySpatialReference());
+            geom.setSpatialReference(table.anySpatialReference());
+        else
+            geom.setSpatialReference(m_assignedSrs);
     }
 }
 
@@ -135,18 +131,25 @@ PointViewSet CropFilter::run(PointViewPtr view)
 
     for (auto& geom : m_geoms)
     {
-        // If this is the first time through or the SRS has changed,
-        // prepare the crop polygon.
-        if (srs != m_lastSrs)
+        // If the geometry or the points have an SRS, transform the SRS
+        // of the geometry to that of the points.  Transform will throw
+        // if either the source or destination SRS is empty.
+        if (!srs.empty() || !geom.getSpatialReference().empty())
         {
-            geom.m_geom = geom.m_geom.transform(srs);
+            try
+            {
+                geom = geom.transform(srs);
+            }
+            catch (pdal_error& err)
+            {
+                throw pdal_error(getName() + ": " + err.what());
+            }
         }
 
         PointViewPtr outView = view->makeNew();
         crop(geom, *view, *outView);
         viewSet.insert(outView);
     }
-    m_lastSrs = srs;
 
     for (auto& box : m_bounds)
     {
@@ -187,27 +190,28 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
     }
 }
 
-bool CropFilter::crop(PointRef& point, const GeomPkg& g)
+bool CropFilter::crop(PointRef& point, const Polygon& g)
 {
-    bool covers = g.m_geom.covers(point);
+    bool covers = g.covers(point);
     bool keep = (m_cropOutside != covers);
     return keep;
 }
 
-void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
+void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
 {
     PointRef point = input.point(0);
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         point.setPointId(idx);
-        bool covers = g.m_geom.covers(point);
+        bool covers = g.covers(point);
         bool keep = (m_cropOutside != covers);
         if (keep)
             output.appendPoint(input, idx);
     }
 }
 
-void CropFilter::crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output)
+void CropFilter::crop(const cropfilter::Point& point, double distance,
+    PointView& input, PointView& output)
 {
 
     bool bIs3D = point.is3d();

@@ -63,10 +63,9 @@ Point::Point(const std::string& wkt_or_json, SpatialReference ref)
 
 }
 
-void Point::update(const std::string& wkt_or_json, SpatialReference ref)
+void Point::update(const std::string& wkt_or_json)
 {
-
-    Geometry::update(wkt_or_json, ref);
+    Geometry::update(wkt_or_json);
 
     int t = GEOSGeomTypeId_r(m_geoserr.ctx(), m_geom.get());
     if (t == -1)

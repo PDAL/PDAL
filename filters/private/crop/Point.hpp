@@ -55,8 +55,7 @@ public:
     void clear();
 
 
-    virtual void update(const std::string& wkt_or_json,
-        SpatialReference ref = SpatialReference());
+    virtual void update(const std::string& wkt_or_json);
 
     double x;
     double y;
