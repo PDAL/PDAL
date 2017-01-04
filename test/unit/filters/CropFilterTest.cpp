@@ -351,41 +351,113 @@ TEST(CropFilterTest, stream)
 }
 
 
-TEST(CropFilterTest, test_sphere)
+TEST(CropFilterTest, circle)
 {
-    BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
-    opts.add("bounds", srcBounds);
-    opts.add("count", 1000);
-    opts.add("mode", "ramp");
+    opts.add("bounds", BOX3D(0.0, 0.0, 0.0, 10.0, 10.0, 0.0));
+    opts.add("mode", "grid");
     FauxReader reader;
     reader.setOptions(opts);
 
-    // crop the window to 1/3rd the size in each dimension
-    BOX2D dstBounds(3.33333, 33.33333, 6.66666, 66.66666);
     Options cropOpts;
-    cropOpts.add("distance", 10.0);
-    cropOpts.add("point", "POINT (4.3 43.0 500)");
+    cropOpts.add("distance", 2.5);
+    cropOpts.add("point", "POINT (5 5)");
 
     CropFilter filter;
     filter.setOptions(cropOpts);
     filter.setInput(reader);
 
-    Options statOpts;
-
-    StatsFilter stats;
-    stats.setOptions(statOpts);
-    stats.setInput(filter);
-
     PointTable table;
-    stats.prepare(table);
-    PointViewSet viewSet = stats.execute(table);
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr buf = *viewSet.begin();
+    EXPECT_EQ(buf->size(), 21u);
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
-    EXPECT_EQ(buf->size(), 14u);
+    struct Point
+    {
+        double x;
+        double y;
+    };
 
+    std::vector<Point> found {
+                {4, 3}, {5, 3}, {6, 3},
+        {3, 4}, {4, 4}, {5, 4}, {6, 4}, {7, 4},
+        {3, 5}, {4, 5}, {5, 5}, {6, 5}, {7, 5},
+        {3, 6}, {4, 6}, {5, 6}, {6, 6}, {7, 6},
+                {4, 7}, {5, 7}, {6, 7}
+    };
+
+    for (PointId idx = 0; idx < buf->size(); ++idx)
+    {
+        EXPECT_EQ(found[idx].x, buf->getFieldAs<double>(Dimension::Id::X, idx));
+        EXPECT_EQ(found[idx].y, buf->getFieldAs<double>(Dimension::Id::Y, idx));
+    }
 }
+
+
+TEST(CropFilterTest, sphere)
+{
+    Options opts;
+    opts.add("bounds", BOX3D(0.0, 0.0, 0.0, 10.0, 10.0, 10.0));
+    opts.add("mode", "grid");
+    FauxReader reader;
+    reader.setOptions(opts);
+
+    Options cropOpts;
+    cropOpts.add("distance", 2.5);
+    cropOpts.add("point", "POINT (5 5 5)");
+
+    CropFilter filter;
+    filter.setOptions(cropOpts);
+    filter.setInput(reader);
+
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr buf = *viewSet.begin();
+    EXPECT_EQ(buf->size(), 81u);
+
+    struct Point
+    {
+        double x;
+        double y;
+        double z;
+    };
+
+    std::vector<Point> found {
+                   {4, 4, 3}, {5, 4, 3}, {6, 4, 3},
+                   {4, 5, 3}, {5, 5, 3}, {6, 5, 3},
+                   {4, 6, 3}, {5, 6, 3}, {6, 6, 3},
+
+                   {4, 3, 4}, {5, 3, 4}, {6, 3, 4},
+        {3, 4, 4}, {4, 4, 4}, {5, 4, 4}, {6, 4, 4}, {7, 4, 4},
+        {3, 5, 4}, {4, 5, 4}, {5, 5, 4}, {6, 5, 4}, {7, 5, 4},
+        {3, 6, 4}, {4, 6, 4}, {5, 6, 4}, {6, 6, 4}, {7, 6, 4},
+                   {4, 7, 4}, {5, 7, 4}, {6, 7, 4},
+
+                   {4, 3, 5}, {5, 3, 5}, {6, 3, 5},
+        {3, 4, 5}, {4, 4, 5}, {5, 4, 5}, {6, 4, 5}, {7, 4, 5},
+        {3, 5, 5}, {4, 5, 5}, {5, 5, 5}, {6, 5, 5}, {7, 5, 5},
+        {3, 6, 5}, {4, 6, 5}, {5, 6, 5}, {6, 6, 5}, {7, 6, 5},
+                   {4, 7, 5}, {5, 7, 5}, {6, 7, 5},
+
+                   {4, 3, 6}, {5, 3, 6}, {6, 3, 6},
+        {3, 4, 6}, {4, 4, 6}, {5, 4, 6}, {6, 4, 6}, {7, 4, 6},
+        {3, 5, 6}, {4, 5, 6}, {5, 5, 6}, {6, 5, 6}, {7, 5, 6},
+        {3, 6, 6}, {4, 6, 6}, {5, 6, 6}, {6, 6, 6}, {7, 6, 6},
+                   {4, 7, 6}, {5, 7, 6}, {6, 7, 6},
+
+                   {4, 4, 7}, {5, 4, 7}, {6, 4, 7},
+                   {4, 5, 7}, {5, 5, 7}, {6, 5, 7},
+                   {4, 6, 7}, {5, 6, 7}, {6, 6, 7}
+    };
+
+    for (PointId idx = 0; idx < buf->size(); ++idx)
+    {
+        EXPECT_EQ(found[idx].x, buf->getFieldAs<double>(Dimension::Id::X, idx));
+        EXPECT_EQ(found[idx].y, buf->getFieldAs<double>(Dimension::Id::Y, idx));
+    }
+}
+
