@@ -394,30 +394,24 @@ public:
     {
         if (m_set)
         {
-            std::ostringstream oss;
-            oss << "Attempted to set value twice for argument '" <<
-                m_longname << "'.";
-            throw arg_val_error(oss.str());
+            throw arg_val_error("Attempted to set value twice for argument '" +
+                m_longname + "'.");
         }
         if (s.empty())
         {
-            std::stringstream oss;
-            oss << "Argument '" << m_longname << "' needs a value and none "
-                "was provided.";
-            throw arg_val_error(oss.str());
+            throw arg_val_error("Argument '" + m_longname +
+                "' needs a value and none was provided.");
         }
+
         m_rawVal = s;
         if (!Utils::fromString(s, m_var))
         {
-            std::ostringstream oss;
-            if (m_error.size())
-                throw arg_val_error(m_error);
-            else
-            {
-                oss << "Invalid value '" << s << "' for argument '" <<
-                    m_longname << "'.";
-                throw arg_val_error(oss.str());
-            }
+            std::string error(m_error);
+
+            if (error.empty())
+                error = "Invalid value '" + s + "' for argument '" +
+                    m_longname;
+            throw arg_val_error(error);
         }
         m_set = true;
     }
@@ -459,13 +453,8 @@ public:
             return;
         }
         if (m_positional == PosType::Required)
-        {
-            std::ostringstream oss;
-
-            oss << "Missing value for positional argument '" <<
-                m_longname << "'.";
-            throw arg_error(oss.str());
-        }
+            throw arg_error("Missing value for positional argument '" +
+                m_longname + "'.");
     }
 
     /**
@@ -557,10 +546,8 @@ public:
     {
         if (s.size() && s[0] == '-')
         {
-            std::stringstream oss;
-            oss << "Argument '" << m_longname << "' needs a value and none "
-                "was provided.";
-            throw arg_val_error(oss.str());
+            throw arg_val_error("Argument '" + m_longname +
+                "' needs a value and none was provided.");
         }
         if (s == "invert")
             m_val = !m_defaultVal;
@@ -593,9 +580,8 @@ public:
     */
     virtual Arg& setPositional()
     {
-        std::ostringstream oss;
-        oss << "Boolean argument '" << m_longname << "' can't be positional.";
-        throw arg_error(oss.str());
+        throw arg_error("Boolean argument '" + m_longname +
+            "' can't be positional.");
         return *this;
     }
 
@@ -607,9 +593,8 @@ public:
     */
     virtual Arg& setOptionalPositional()
     {
-        std::ostringstream oss;
-        oss << "Boolean argument '" << m_longname << "' can't be positional.";
-        throw arg_error(oss.str());
+        throw arg_error("Boolean argument '" + m_longname +
+            "' can't be positional.");
         return *this;
     }
     /**
@@ -689,11 +674,8 @@ public:
         }
         if (cnt == 0 && m_positional == PosType::Required)
         {
-            std::ostringstream oss;
-
-            oss << "Missing value for positional argument '" <<
-                m_longname << "'.";
-            throw arg_error(oss.str());
+            throw arg_error("Missing value for positional argument '" +
+                m_longname + "'.");
         }
     }
 
@@ -769,18 +751,18 @@ public:
     {
         if (s.size() && s[0] == '-')
         {
-            std::stringstream oss;
-            oss << "Argument '" << m_longname << "' needs a value and none "
-                "was provided.";
-            throw arg_val_error(oss.str());
+            throw arg_val_error("Argument '" + m_longname +
+                "' needs a value and none was provided.");
         }
         m_rawVal = s;
         T var;
         if (!Utils::fromString(s, var))
         {
-            std::ostringstream oss;
-            oss << "Invalid value for argument '" << m_longname << "'.";
-            throw arg_val_error(oss.str());
+            std::string error(m_error);
+
+            if (error.empty())
+                error = "Invalid value for argument '" + m_longname + "'.";
+            throw arg_val_error(error);
         }
         if (!m_set)
             m_var.clear();
@@ -886,10 +868,8 @@ public:
 
         if ((s.size() && s[0] == '-') || slist.empty())
         {
-            std::ostringstream oss;
-
-            oss << "Missing value for argument '" << m_longname << "'.";
-            throw arg_val_error(oss.str());
+            throw arg_val_error("Missing value for argument '" + m_longname +
+                "'.");
         }
         m_rawVal = s;
         if (!m_set)
@@ -1369,12 +1349,7 @@ private:
         if (name.empty())
             return;
         if (findLongArg(name))
-        {
-            std::ostringstream oss;
-
-            oss << "Argument --" << name << " already exists.";
-            throw arg_error(oss.str());
-        }
+            throw arg_error("Argument --" + name + " already exists.");
         m_longargs[name] = arg;
     }
 
@@ -1389,12 +1364,7 @@ private:
         if (name.empty())
             return;
         if (findShortArg(name[0]))
-        {
-            std::ostringstream oss;
-
-            oss << "Argument -" << name << " already exists.";
-            throw arg_error(oss.str());
-        }
+            throw arg_error("Argument -" + name + " already exists.");
         m_shortargs[name] = arg;
     }
 
@@ -1483,11 +1453,7 @@ private:
 
         Arg *arg = findLongArg(name);
         if (!arg)
-        {
-            std::ostringstream oss;
-            oss << "Unexpected argument '" << name << "'.";
-            throw arg_error(oss.str());
-        }
+            throw arg_error("Unexpected argument '" + name + "'.");
 
         if (!arg->needsValue())
         {
@@ -1495,10 +1461,9 @@ private:
             {
                 if (value != "true" && value != "false")
                 {
-                    std::ostringstream oss;
-                    oss << "Value '" << value << "' provided for argument '" <<
-                        name << "' when none is expected.";
-                    throw arg_error(oss.str());
+                    throw arg_error("Value '" + value +
+                        "' provided for argument '" + name +
+                        "' when none is expected.");
                 }
             }
             else
@@ -1528,11 +1493,8 @@ private:
 
         Arg *arg = findShortArg(name[1]);
         if (!arg)
-        {
-            std::ostringstream oss;
-            oss << "Unexpected argument '-" << name[1] << "'.";
-            throw arg_error(oss.str());
-        }
+            throw arg_error("Unexpected argument '-" + std::string(1, name[1]) +
+                "'.");
 
         int cnt;
         if (arg->needsValue())
@@ -1541,10 +1503,8 @@ private:
             // rather than a value.
             if (value.empty() || value[0] == '-')
             {
-                std::ostringstream oss;
-                oss << "Short option '" << name << "' expects value "
-                    "but none directly follows.";
-                throw arg_error(oss.str());
+                throw arg_error("Short option '" + name + "' expects value "
+                    "but none directly follows.");
             }
             else
             {
@@ -1573,12 +1533,8 @@ private:
             if (arg->positional() == Arg::PosType::Optional)
                 opt = true;
             if (opt && (arg->positional() == Arg::PosType::Required))
-            {
-                std::ostringstream oss;
-                oss << "Found required positional argument '" <<
-                    arg->longname() << "' after optional positional argument.";
-                throw arg_error(oss.str());
-            }
+                throw arg_error("Found required positional argument '" +
+                    arg->longname() + "' after optional positional argument.");
         }
     }
 

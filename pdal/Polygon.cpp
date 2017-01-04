@@ -62,11 +62,6 @@ Polygon::Polygon(const Polygon& input)
 {
 }
 
-Polygon::Polygon(const Geometry& input)
-    : Geometry(input)
-{
-}
-
 
 Polygon& Polygon::operator=(const Polygon& input)
 {
@@ -185,7 +180,7 @@ Polygon Polygon::transform(const SpatialReference& ref) const
     gdal::SpatialRef toRef(ref.getWKT());
     gdal::Geometry geom(wkt(12, true), fromRef);
     geom.transform(toRef);
-    return Geometry(geom.wkt(), ref);
+    return Polygon(geom.wkt(), ref);
 }
 
 
@@ -250,7 +245,7 @@ Polygon Polygon::simplify(double distance_tolerance,
 
     GEOSGeometry* o = GEOSGeom_createCollection_r(m_geoserr.ctx(), GEOS_MULTIPOLYGON,
         geometries.data(), geometries.size());
-    Geometry p(o, m_srs);
+    Polygon p(o, m_srs);
     GEOSGeom_destroy_r(m_geoserr.ctx(), smoothed);
     GEOSGeom_destroy_r(m_geoserr.ctx(), o);
 
@@ -267,7 +262,7 @@ double Polygon::area() const
 }
 
 
-bool Polygon::covers(PointRef& ref) const
+bool Polygon::covers(const PointRef& ref) const
 {
     GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_geoserr.ctx(), 1, 3);
     if (!coords)

@@ -53,15 +53,13 @@ Point::Point()
     , x(LOWEST)
     , y(LOWEST)
     , z(LOWEST)
-{
+{}
 
-};
 
 Point::Point(const std::string& wkt_or_json, SpatialReference ref)
-    : Geometry(wkt_or_json, ref)
-{
+    : Geometry(wkt_or_json, ref), x(LOWEST), y(LOWEST), z(LOWEST)
+{}
 
-}
 
 void Point::update(const std::string& wkt_or_json)
 {
@@ -96,7 +94,6 @@ void Point::update(const std::string& wkt_or_json)
         if (numInputDims > 2)
             GEOSCoordSeq_getOrdinate_r(m_geoserr.ctx(), coords, i, 2, &z);
     }
-
 }
 
 
@@ -114,7 +111,7 @@ bool Point::empty() const
 
 bool Point::is3d() const
 {
-    return (z != LOWEST );
+    return (z != LOWEST);
 }
 
 } //namespace cropfilter

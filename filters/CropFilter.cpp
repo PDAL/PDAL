@@ -40,7 +40,6 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-#include <pdal/KDIndex.hpp>
 
 #include <sstream>
 #include <cstdarg>
@@ -57,10 +56,8 @@ CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
 
 std::string CropFilter::getName() const { return s_info.name; }
 
-CropFilter::CropFilter() : pdal::Filter()
-{
-    m_cropOutside = false;
-}
+CropFilter::CropFilter() : m_cropOutside(false)
+{}
 
 
 void CropFilter::addArgs(ProgramArgs& args)
@@ -70,8 +67,8 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
     args.add("bounds", "Point box for cropped points", m_bounds);
     args.add("point", "Crop within 'distance' from a 2D or 3D point", m_points).
-        setErrorText("Invalid point specification must be in the "
-            "form \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
+        setErrorText("Invalid point specification.  Must be valid GeoJSON/WKT. "
+            "Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
         m_distance);
     args.add("polygon", "Bounding polying for cropped points", m_polys).
@@ -93,6 +90,7 @@ void CropFilter::initialize()
             m_geoms.push_back(poly);
         }
     }
+    m_distance2 = m_distance * m_distance;
 }
 
 
@@ -116,7 +114,17 @@ bool CropFilter::processOne(PointRef& point)
         if (!crop(point, box.to2d()))
             return false;
 
+    for (auto& center: m_points)
+        if (!crop(point, center))
+            return false;
+
     return true;
+}
+
+
+void CropFilter::spatialReferenceChanged(const SpatialReference& srs)
+{
+    transform(srs);
 }
 
 
@@ -140,7 +148,8 @@ void CropFilter::transform(const SpatialReference& srs)
     }
     for (auto& point : m_points)
     {
-        //TODO - Reproject radius centers.
+        gdal::reprojectPoint(point.x, point.y, point.z,
+            m_assignedSrs.getWKT(), srs.getWKT());
     }
     m_assignedSrs = srs;
 }
@@ -168,7 +177,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
     for (auto& point: m_points)
     {
         PointViewPtr outView = view->makeNew();
-        crop(point, m_distance, *view, *outView);
+        crop(point, *view, *outView);
         viewSet.insert(outView);
     }
 
@@ -176,7 +185,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
 }
 
 
-bool CropFilter::crop(PointRef& point, const BOX2D& box)
+bool CropFilter::crop(const PointRef& point, const BOX2D& box)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -192,13 +201,13 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         point.setPointId(idx);
-        if (crop(point, box))
+        if (m_cropOutside != crop(point, box))
             output.appendPoint(input, idx);
     }
 }
 
 
-bool CropFilter::crop(PointRef& point, const Polygon& g)
+bool CropFilter::crop(const PointRef& point, const Polygon& g)
 {
     return (m_cropOutside != g.covers(point));
 }
@@ -210,44 +219,45 @@ void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         point.setPointId(idx);
-        bool covers = g.covers(point);
-        if (m_cropOutside != covers)
+        if (crop(point, g))
             output.appendPoint(input, idx);
     }
 }
 
 
-void CropFilter::crop(const cropfilter::Point& point, double distance,
-    PointView& input, PointView& output)
+bool CropFilter::crop(const PointRef& point, const cropfilter::Point& center)
 {
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    x -= center.x;
+    y -= center.y;
+    if (x > m_distance || y > m_distance)
+        return (m_cropOutside);
 
-    bool bIs3D = point.is3d();
-
-    if (bIs3D)
+    bool inside;
+    if (center.is3d())
     {
-        KD3Index index(input);
-        index.build();
-        std::vector<PointId> points =
-            index.radius(point.x, point.y, point.z, m_distance);
-        for (PointId idx = 0; idx < points.size(); ++idx)
-        {
-            if (!m_cropOutside)
-                output.appendPoint(input, idx);
-        }
+        double z = point.getFieldAs<double>(Dimension::Id::Z);
+        z -= center.z;
+        if (z > m_distance)
+            return (m_cropOutside);
+        inside = (x * x + y * y + z * z < m_distance2);
     }
-
     else
-    {
-        KD2Index index(input);
-        index.build();
-        std::vector<PointId> points =
-            index.radius(point.x, point.y, m_distance);
+        inside = (x * x + y * y < m_distance2);
+    return (m_cropOutside != inside);
+}
 
-        for (PointId idx = 0; idx < points.size(); ++idx)
-        {
-            if (!m_cropOutside)
-                output.appendPoint(input, idx);
-        }
+
+void CropFilter::crop(const cropfilter::Point& center, PointView& input,
+    PointView& output)
+{
+    PointRef point = input.point(0);
+    for (PointId idx = 0; idx < input.size(); ++idx)
+    {
+        point.setPointId(idx);
+        if (crop(point, center))
+            output.appendPoint(input, idx);
     }
 }
 
