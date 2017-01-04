@@ -68,7 +68,7 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("bounds", "Point box for cropped points", m_bounds);
     args.add("point", "Crop within 'distance' from a 2D or 3D point", m_points).
         setErrorText("Invalid point specification: must be valid "
-            "well-know text.");
+            "well-known text.");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
         m_distance);
     args.add("polygon", "Bounding polying for cropped points", m_polys).
