@@ -38,6 +38,7 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <Eigen/Dense>
 
@@ -202,11 +203,8 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
     BOX2D bounds;
     view->calculateBounds(bounds);
 
-    double extent_x = floor(bounds.maxx) - ceil(bounds.minx);
-    double extent_y = floor(bounds.maxy) - ceil(bounds.miny);
-
-    int cols = static_cast<int>(ceil(extent_x/m_cellSize)) + 1;
-    int rows = static_cast<int>(ceil(extent_y/m_cellSize)) + 1;
+    size_t cols = ((bounds.maxx - bounds.minx)/m_cellSize) + 1;
+    size_t rows = ((bounds.maxy - bounds.miny)/m_cellSize) + 1;
 
     // Compute the series of window sizes and height thresholds
     std::vector<float> htvec;
@@ -263,8 +261,8 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
             double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
             double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
 
-            int r = static_cast<int>(std::floor((y-bounds.miny) / m_cellSize));
-            int c = static_cast<int>(std::floor((x-bounds.minx) / m_cellSize));
+            int c = Utils::clamp(static_cast<int>(floor((x - bounds.minx) / m_cellSize)), 0, static_cast<int>(cols-1));
+            int r = Utils::clamp(static_cast<int>(floor((y - bounds.miny) / m_cellSize)), 0, static_cast<int>(rows-1));
 
             float diff = z - mo(r, c);
             if (diff < htvec[j])
