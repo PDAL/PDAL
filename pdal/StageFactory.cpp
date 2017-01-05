@@ -38,7 +38,6 @@
 
 #include <filters/ApproximateCoplanarFilter.hpp>
 #include <filters/AssignFilter.hpp>
-#include <filters/AttributeFilter.hpp>
 #include <filters/ChipperFilter.hpp>
 #include <filters/ClusterFilter.hpp>
 #include <filters/ColorizationFilter.hpp>
@@ -62,6 +61,7 @@
 #include <filters/MortonOrderFilter.hpp>
 #include <filters/NormalFilter.hpp>
 #include <filters/OutlierFilter.hpp>
+#include <filters/OverlayFilter.hpp>
 #include <filters/PMFFilter.hpp>
 #include <filters/RadialDensityFilter.hpp>
 #include <filters/RangeFilter.hpp>
@@ -238,7 +238,6 @@ StageFactory::StageFactory(bool no_plugins)
     // filters
     PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
     PluginManager::initializePlugin(AssignFilter_InitPlugin);
-    PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ClusterFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
@@ -262,6 +261,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
     PluginManager::initializePlugin(NormalFilter_InitPlugin);
     PluginManager::initializePlugin(OutlierFilter_InitPlugin);
+    PluginManager::initializePlugin(OverlayFilter_InitPlugin);
     PluginManager::initializePlugin(PMFFilter_InitPlugin);
     PluginManager::initializePlugin(RadialDensityFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler <hobu.inc@gmail.com>
+* Copyright (c) 2017, Hobu Inc. <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -41,13 +41,12 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t AttributeFilter_ExitFunc();
-extern "C" PF_ExitFunc AttributeFilter_InitPlugin();
+extern "C" int32_t OverlayFilter_ExitFunc();
+extern "C" PF_ExitFunc OverlayFilter_InitPlugin();
 
 typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
 
 typedef void *OGRLayerH;
-
 
 namespace pdal
 {
@@ -63,15 +62,15 @@ typedef std::shared_ptr<void> OGRGeometryPtr;
 
 class Arg;
 
-class PDAL_DLL AttributeFilter : public Filter
+class PDAL_DLL OverlayFilter : public Filter
 {
 public:
-    AttributeFilter() : m_ds(0), m_lyr(0)
+    OverlayFilter() : m_ds(0), m_lyr(0)
     {}
 
     static void * create();
     static int32_t destroy(void *);
-    std::string getName() const { return "filters.attribute"; }
+    std::string getName() const { return "filters.overlay"; }
 
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -80,28 +79,19 @@ private:
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
 
-    AttributeFilter& operator=(const AttributeFilter&) = delete;
-    AttributeFilter(const AttributeFilter&) = delete;
+    OverlayFilter& operator=(const OverlayFilter&) = delete;
+    OverlayFilter(const OverlayFilter&) = delete;
 
     typedef std::shared_ptr<void> OGRDSPtr;
 
     OGRDSPtr m_ds;
     OGRLayerH m_lyr;
     std::string m_dimName;
-    double m_value;
-    Arg *m_valArg;
-    Arg *m_dsArg;
-    Arg *m_colArg;
-    Arg *m_queryArg;
-    Arg *m_layerArg;
     std::string m_datasource;
     std::string m_column;
     std::string m_query;
     std::string m_layer;
     Dimension::Id m_dim;
-
-    void UpdateGEOSBuffer(PointView& view);
-
 };
 
 } // namespace pdal

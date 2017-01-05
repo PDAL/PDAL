@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2017, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -41,51 +41,7 @@
 
 using namespace pdal;
 
-TEST(AttributeFilterTest, value)
-{
-    Options ro;
-    ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
-
-    StageFactory factory;
-    Stage& r = *(factory.createStage("readers.las"));
-    r.setOptions(ro);
-
-    Options fo;
-    fo.add("dimension", "X");
-    fo.add("value", 27.5);
-
-    Stage& f = *(factory.createStage("filters.attribute"));
-    f.setInput(r);
-    f.setOptions(fo);
-
-    std::string tempfile(Support::temppath("out.las"));
-
-    Options wo;
-    wo.add("filename", tempfile);
-    Stage& w = *(factory.createStage("writers.las"));
-    w.setInput(f);
-    w.setOptions(wo);
-
-    FileUtils::deleteFile(tempfile);
-    PointTable t1;
-    w.prepare(t1);
-    w.execute(t1);
-
-    Options testOptions;
-    testOptions.add("filename", tempfile);
-
-    Stage& test = *(factory.createStage("readers.las"));
-    test.setOptions(testOptions);
-
-    PointTable t2;
-    test.prepare(t2);
-    PointViewSet s = test.execute(t2);
-    PointViewPtr v = *s.begin();
-    for (PointId i = 0; i < v->size(); ++i)
-        EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
-}
-
-TEST(AttributeFilterTest, datasource)
+TEST(OverlayFilterTest, datasource)
 {
     Options ro;
     ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
@@ -99,7 +55,7 @@ TEST(AttributeFilterTest, datasource)
     fo.add("column", "cls");
     fo.add("datasource", Support::datapath("autzen/attributes.shp"));
 
-    Stage& f = *(factory.createStage("filters.attribute"));
+    Stage& f = *(factory.createStage("filters.overlay"));
     f.setInput(r);
     f.setOptions(fo);
 
