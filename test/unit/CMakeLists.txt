@@ -76,6 +76,7 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 #
 # sources for the native filters
 #
+PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_attribute_test FILES filters/AttributeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES

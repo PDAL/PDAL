@@ -37,6 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include <filters/ApproximateCoplanarFilter.hpp>
+#include <filters/AssignFilter.hpp>
 #include <filters/AttributeFilter.hpp>
 #include <filters/ChipperFilter.hpp>
 #include <filters/ClusterFilter.hpp>
@@ -236,6 +237,7 @@ StageFactory::StageFactory(bool no_plugins)
 
     // filters
     PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
+    PluginManager::initializePlugin(AssignFilter_InitPlugin);
     PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ClusterFilter_InitPlugin);
