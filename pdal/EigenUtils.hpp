@@ -322,7 +322,24 @@ PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
   \param r the radius of the padding.
   \return the padded matrix.
 */
-PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
+template <typename Derived>
+PDAL_DLL Derived padMatrix(const Eigen::MatrixBase<Derived>& d, int r)
+{
+    using namespace Eigen;
+
+    Derived out = Derived::Zero(d.rows()+2*r, d.cols()+2*r);
+    out.block(r, r, d.rows(), d.cols()) = d;
+    out.block(r, 0, d.rows(), r) =
+        d.block(0, 0, d.rows(), r).rowwise().reverse();
+    out.block(r, d.cols()+r, d.rows(), r) =
+        d.block(0, d.cols()-r, d.rows(), r).rowwise().reverse();
+    out.block(0, 0, r, out.cols()) =
+        out.block(r, 0, r, out.cols()).colwise().reverse();
+    out.block(d.rows()+r, 0, r, out.cols()) =
+        out.block(out.rows()-r-1, 0, r, out.cols()).colwise().reverse();
+
+    return out;
+}
 
 /**
   Converts a PointView into an Eigen::MatrixXd.
@@ -758,6 +775,118 @@ PDAL_DLL double computeSlopeFD(const Eigen::MatrixBase<Derived>& data,
     double zY = centralDiffY(filled, spacing);
     double p = (zX * zX) + (zY * zY);
     return 100.0 * std::sqrt(p);
+}
+
+/**
+  Perform a morphological dilation of the input matrix.
+
+  Performs a morphological dilation of the input matrix using a circular
+  structuring element of given radius.
+
+  \param data the input matrix.
+  \param radius the radius of the circular structuring element.
+  \return the morphological dilation of the input matrix.
+*/
+template <typename Derived>
+PDAL_DLL Derived dilate(const Eigen::MatrixBase<Derived>& A, int radius)
+{
+    Derived B = Derived::Constant(A.rows(), A.cols(), 0);
+    
+    int length = 2 * radius + 1;
+    bool match_flag;
+    for (int c = 0; c < A.cols(); ++c)
+    {
+        for (int r = 0; r < A.rows(); ++r)
+        {
+            match_flag = false;
+            for (int k = 0; k < length; ++k)
+            {
+                if (match_flag)
+                    break;
+                int cdiff = k-radius;
+                int cpos = c+cdiff;
+                if (cpos < 0 || cpos >= A.cols())
+                    continue;
+                for (int l = 0; l < length; ++l)
+                {
+                    int rdiff = l-radius;
+                    int rpos = r+rdiff;
+                    if (rpos < 0 || rpos >= A.rows())
+                        continue;
+                    if ((cdiff*cdiff+rdiff*rdiff) > radius*radius)
+                        continue;
+                    if (A(rpos, cpos) == 1)
+                    {
+                        match_flag = true;
+                        break;
+                    }
+                }
+            }
+            // Assign value according to match flag
+            B(r, c) = (match_flag) ? 1 : 0;
+        }
+    }
+    
+    return B;
+}
+
+/**
+  Perform a morphological erosion of the input matrix.
+
+  Performs a morphological erosion of the input matrix using a circular
+  structuring element of given radius.
+
+  \param data the input matrix.
+  \param radius the radius of the circular structuring element.
+  \return the morphological erosion of the input matrix.
+*/
+template <typename Derived>
+PDAL_DLL Derived erode(const Eigen::MatrixBase<Derived>& A, int radius)
+{
+    Derived B = Derived::Constant(A.rows(), A.cols(), 1);
+    
+    int length = 2 * radius + 1;
+    bool mismatch_flag;
+    for (int c = 0; c < A.cols(); ++c)
+    {
+        for (int r = 0; r < A.rows(); ++r)
+        {
+            if (A(r, c) == 0)
+            {
+                B(r, c) = 0;
+                continue;
+            }
+            mismatch_flag = false;
+            for (int k = 0; k < length; k++)
+            {
+                if (mismatch_flag)
+                    break;
+                int cdiff = k-radius;
+                int cpos = c+cdiff;
+                if (cpos < 0 || cpos >= A.cols())
+                    continue;
+                for (int l = 0; l < length; l++)
+                {
+                    int rdiff = l-radius;
+                    int rpos = r+rdiff;
+                    if (rpos < 0 || rpos >= A.rows())
+                        continue;
+                    if ((cdiff*cdiff+rdiff*rdiff) > radius*radius)
+                        continue;
+                    if (A(rpos, cpos) == 0)
+                    {
+                        B(r, c) = 0;
+                        mismatch_flag = true;
+                        break;
+                    }
+                }
+            }
+            // Assign value according to mismatch flag
+            B(r, c) = (mismatch_flag) ? 0 : 1;
+        }
+    }
+    
+    return B;
 }
 
 /**
