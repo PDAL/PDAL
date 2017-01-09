@@ -180,24 +180,17 @@ returning only those points with z values in the range 100 to 200.
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "PassThroughExample",
-            "filters":
-            [
-                {
-                    "name": "PassThrough",
-                    "setFilterFieldName": "z",
-                    "setFilterLimits":
-                    {
-                        "min": 410.0,
-                        "max": 440.0
-                    }
-                }
-            ]
+            "name": "PassThrough",
+            "setFilterFieldName": "z",
+            "setFilterLimits":
+            {
+                "min": 410.0,
+                "max": 440.0
+            }
         }
-    }
+    ]
 
 (This example is taken from the unit test
 `PCLBlockFilterTest_example_PassThrough_1`.)
@@ -216,34 +209,24 @@ their public member functions by name.
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "CombinedExample",
-            "help": "Apply passthrough filter followed by statistical outlier removal",
-            "version": 1.0,
-            "author": "Bradley J Chambers",
-            "filters":
-            [
-                {
-                    "name": "PassThrough",
-                    "help": "filter z values to the range [410,440]",
-                    "setFilterFieldName": "z",
-                    "setFilterLimits":
-                    {
-                        "min": 410.0,
-                        "max": 440.0
-                    }
-                },
-                {
-                    "name": "StatisticalOutlierRemoval",
-                    "help": "apply outlier removal",
-                    "setMeanK": 8,
-                    "setStddevMulThresh": 0.2
-                }
-            ]
+            "name": "PassThrough",
+            "help": "filter z values to the range [410,440]",
+            "setFilterFieldName": "z",
+            "setFilterLimits":
+            {
+                "min": 410.0,
+                "max": 440.0
+            }
+        },
+        {
+            "name": "StatisticalOutlierRemoval",
+            "help": "apply outlier removal",
+            "setMeanK": 8,
+            "setStddevMulThresh": 0.2
         }
-    }
+    ]
 
 (This example is taken from the unit test
 `PCLBlockFilterTest_example_PassThrough_2`.)
@@ -265,42 +248,28 @@ To run the PMF with default settings, the PCL Block JSON is simply:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "ProgressiveMorphologicalFilterExample",
-            "filters":
-            [
-                {
-                    "name": "ProgressiveMorphologicalFilter"
-                    "setMaxWindowSize": 200,
-                }
-            ]
+            "name": "ProgressiveMorphologicalFilter"
+            "setMaxWindowSize": 200,
         }
-    }
+    ]
 
 Additional parameters can be set by advanced users:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "ProgressiveMorphologicalFilterAdvancedExample",
-            "filters":
-            [
-                {
-                    "name": "ProgressiveMorphologicalFilter",
-                    "setCellSize": 1.0,
-                    "setMaxWindowSize": 200,
-                    "setSlope": 1.0,
-                    "setInitialDistance": 0.5,
-                    "setMaxDistance": 3.0,
-                    "setExponential": true
-                }
-            ]
+            "name": "ProgressiveMorphologicalFilter",
+            "setCellSize": 1.0,
+            "setMaxWindowSize": 200,
+            "setSlope": 1.0,
+            "setInitialDistance": 0.5,
+            "setMaxDistance": 3.0,
+            "setExponential": true
         }
-    }
+    ]
 
 (These examples are taken from the unit tests
 `PCLBlockFilterTest_example_PMF_1` and `PCLBlockFilterTest_example_PMF_2`.)

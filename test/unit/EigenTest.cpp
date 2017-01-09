@@ -66,9 +66,9 @@ TEST(EigenTest, ComputeValues)
     using namespace Eigen;
 
     Matrix3d A;
-    A << 1.8339, 0.3188, 0.3426,
-    -2.2588, -1.3077, 3.5784,
-    0.8622, -0.4336, 2.7694;
+    A << 1.8339,  0.3188, 0.3426,
+        -2.2588, -1.3077, 3.5784,
+         0.8622, -0.4336, 2.7694;
 
     double spacing(1.4);
 
@@ -132,8 +132,8 @@ TEST(EigenTest, ComputeValues)
     
     Matrix3d gx;
     gx << -1.5151, -0.7457, 0.0238,
-    0.9511, 2.9186, 4.8861,
-    -1.2958, 0.9536, 3.2030;
+           0.9511,  2.9186, 4.8861,
+          -1.2958,  0.9536, 3.2030;
     
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gx(i), out(i), 0.0001);
@@ -141,9 +141,9 @@ TEST(EigenTest, ComputeValues)
     MatrixXd out2 = eigen::gradY(A);
     
     Matrix3d gy;
-    gy << -4.0927, -1.6265, 3.2358,
-    -0.4859, -0.3762, 1.2134,
-    3.1210, 0.8741, -0.8090;
+    gy << -4.0927, -1.6265,  3.2358,
+          -0.4859, -0.3762,  1.2134,
+           3.1210,  0.8741, -0.8090;
     
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gy(i), out2(i), 0.0001);
@@ -200,10 +200,10 @@ TEST(EigenTest, Padding)
 {
     using namespace Eigen;
 
-    Matrix3d A;
-    A << 1.8339, 0.3188, 0.3426,
-    -2.2588, -1.3077, 3.5784,
-    0.8622, -0.4336, 2.7694;
+    MatrixXd A(3, 3);
+    A << 1.8339,  0.3188, 0.3426,
+        -2.2588, -1.3077, 3.5784,
+         0.8622, -0.4336, 2.7694;
 
     MatrixXd B = eigen::padMatrix(A, 1);
 
@@ -214,4 +214,34 @@ TEST(EigenTest, Padding)
     EXPECT_EQ(0.3188, B(0, 2));
     EXPECT_EQ(3.5784, B(2, 4));
     EXPECT_EQ(-0.4336, B(4, 2));
+}
+
+TEST(EigenTest, Dilate)
+{
+    using namespace Eigen;
+    
+    MatrixXd C(5, 5);
+    C << 0, 0, 0, 0, 0,
+         0, 1, 0, 0, 0,
+         0, 1, 1, 0, 0,
+         0, 0, 1, 1, 0,
+         0, 0, 0, 0, 0;
+    
+    MatrixXd D = eigen::dilate(C, 1);
+    
+    EXPECT_EQ(0, D(0, 0));
+    EXPECT_EQ(1, D(1, 0));
+    EXPECT_EQ(1, D(0, 1));
+    
+    MatrixXd E(5, 5);
+    E << 0, 0, 0, 0, 0,
+         0, 1, 1, 1, 0,
+         0, 1, 1, 1, 0,
+         0, 1, 1, 1, 0,
+         0, 0, 0, 0, 0;
+    
+    MatrixXd F = eigen::erode(E, 1);
+    
+    EXPECT_EQ(0, F(1, 3));
+    EXPECT_EQ(1, F(2, 2));
 }

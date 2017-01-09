@@ -39,14 +39,12 @@
 namespace pdal
 {
 
-
 namespace cropfilter
 {
 
 class PDAL_DLL Point : public Geometry
 {
 public:
-
     Point();
     Point(const std::string& wkt_or_json,
            SpatialReference ref);
@@ -54,14 +52,11 @@ public:
     bool empty() const;
     void clear();
 
-
-    virtual void update(const std::string& wkt_or_json,
-        SpatialReference ref = SpatialReference());
+    virtual void update(const std::string& wkt_or_json);
 
     double x;
     double y;
     double z;
-
 };
 } // namespace cropfilter
 } // namespace pdal

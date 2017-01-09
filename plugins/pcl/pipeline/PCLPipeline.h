@@ -4,7 +4,7 @@
  *  Point Cloud Library (PCL) - www.pointclouds.org
  *  Copyright (c) 2009-2012, Willow Garage, Inc.
  *  Copyright (c) 2012-, Open Perception, Inc.
- *  Copyright (c) 2014, RadiantBlue Technologies, Inc.
+ *  Copyright (c) 2014-2016, RadiantBlue Technologies, Inc.
  *
  *  All rights reserved.
  *
@@ -43,10 +43,11 @@
 
 #include <memory>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <pdal/pdal_types.hpp>
 
 #include <pcl/filters/filter_indices.h>
+
+#include <json/json.h>
 
 
 // Pipeline needs to be in the `pcl` namespace in order for the instantiation
@@ -79,8 +80,8 @@ protected:
 
 public:
 
-    typedef boost::shared_ptr< Pipeline<PointT> > Ptr;
-    typedef boost::shared_ptr< const Pipeline<PointT> > ConstPtr;
+    typedef std::shared_ptr< Pipeline<PointT> > Ptr;
+    typedef std::shared_ptr< const Pipeline<PointT> > ConstPtr;
 
 
     /** \brief Constructor.
@@ -99,18 +100,35 @@ public:
     inline void
     setFilename(const std::string &filename)
     {
+        std::ifstream f(filename.c_str());
+
         filename_set_ = true;
-        boost::property_tree::read_json(filename.c_str(), pt_);
+        Json::Reader jsonReader;
+        if (!jsonReader.parse(f, pt_))
+        {
+            std::string err = "PCL pipeline: Unable to parse pipeline file:\n";
+            err += jsonReader.getFormattedErrorMessages();
+            throw pdal::pdal_error(err);
+        }
         json_set_ = true;
     }
 
+    /** \brief Provide the PCL pipeline as a JSON string.
+      * \param[in] methods the PCL JSON pipeline as a string.
+      */
     inline void
-    setJSON(const std::string &json)
+    setMethods(const std::string &methods)
     {
         if (filename_set_)
-            PCL_WARN("Filename and JSON string have both been specified. Using only the string!\n");
-        std::stringstream ss(json);
-        boost::property_tree::read_json(ss, pt_);
+            PCL_WARN("Filename and methods have both been specified. Using only methods!\n");
+        std::stringstream ss(methods);
+        Json::Reader jsonReader;
+        if (!jsonReader.parse(ss, pt_))
+        {
+            std::string err = "PCL pipeline: Unable to parse pipeline methods:\n";
+            err += jsonReader.getFormattedErrorMessages();
+            throw pdal::pdal_error(err);
+        }
         json_set_ = true;
     }
 
@@ -126,8 +144,6 @@ public:
         y_offset_ = y;
         z_offset_ = z;
     }
-
-    void dumper(PointCloud &output);
 
 protected:
     using PCLBase<PointT>::input_;
@@ -147,7 +163,7 @@ protected:
      *  \param[in] value_type The parameters.
      */
     void
-    applyPassThrough(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
+    applyPassThrough(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
     /** \brief Apply statistical outlier removal filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
@@ -155,7 +171,7 @@ protected:
      *  \param[in] value_type The parameters.
      */
     void
-    applyStatisticalOutlierRemoval(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
+    applyStatisticalOutlierRemoval(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
     /** \brief Apply radius outlier removal filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
@@ -163,7 +179,7 @@ protected:
      *  \param[in] value_type The parameters.
      */
     void
-    applyRadiusOutlierRemoval(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
+    applyRadiusOutlierRemoval(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
     /** \brief Apply voxel grid filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
@@ -171,7 +187,7 @@ protected:
      *  \param[in] value_type The parameters.
      */
     void
-    applyVoxelGrid(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
+    applyVoxelGrid(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
     /** \brief Apply grid minimum filter to input cloud, using parameters specified in property tree.
       *  \param[in] cloud The input point cloud.
@@ -179,7 +195,7 @@ protected:
       *  \param[in] value_type The parameters.
       */
     void
-    applyGridMinimum(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
+    applyGridMinimum(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
     /** \brief Apply approximate progressive morphological filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
@@ -187,7 +203,7 @@ protected:
      *  \param[in] value_type The parameters.
      */
     void
-    applyApproximateProgressiveMorphologicalFilter(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
+    applyApproximateProgressiveMorphologicalFilter(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
     /** \brief Apply progressive morphological filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
@@ -195,45 +211,12 @@ protected:
      *  \param[in] value_type The parameters.
      */
     void
-    applyProgressiveMorphologicalFilter(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
-
-    /** \brief Apply normal estimation to input cloud, using parameters specified in property tree.
-     *  \param[in] cloud The input point cloud.
-     *  \param[out] output The resultant point cloud.
-     *  \param[in] value_type The parameters.
-     */
-    //void
-    //applyNormalEstimation(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
-
-    /** \brief Apply conditional removal filter to input cloud, using parameters specified in property tree.
-     *  \param[in] cloud The input point cloud.
-     *  \param[out] output The resultant point cloud.
-     *  \param[in] value_type The parameters.
-     */
-    //void
-    //applyConditionalRemoval(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
-
-    /** \brief Apply moving least squares to input cloud, using parameters specified in property tree.
-     *  \param[in] cloud The input point cloud.
-     *  \param[out] output The resultant point cloud.
-     *  \param[in] value_type The parameters.
-     */
-    void
-    applyMovingLeastSquares(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt);
-
-
-    /** \brief Generate tile indices for input point cloud at the given resolution.
-     *  \param[in] cloud The input point cloud.
-     *  \param[in] resolution The tile size (resolution).
-     *  \param[out] tile_indices Vector of tile indices for each point in the cloud.
-     */
-    void
-    generateTileIndices(PointCloudConstPtr cloud, const float &resolution, std::vector<PointIndices> &tile_indices);
+    applyProgressiveMorphologicalFilter(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
 
 private:
     bool filename_set_, json_set_;
 
-    boost::property_tree::ptree pt_;
+    Json::Value pt_;
 
     /** \brief The offsets to the data in the x, y, and z dimension. */
     double x_offset_, y_offset_, z_offset_;

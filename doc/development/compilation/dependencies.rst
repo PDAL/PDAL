@@ -107,14 +107,6 @@ Point Cloud read/write support.
 .. note::
     MSVC should only require the oci.lib and oci.dll library and dlls.
 
-Points2Grid
-..............................................................................
-
-`Points2Grid`_ is a library with a simple `CMake`-based build system that
-provides simple, out-of-process interpolation of large point sets using
-Boost_. It can be obtained via github.com at https://github.com/CRREL/points2grid
-It is used by :ref:`writers.p2g` to output point cloud interpolation.
-
 Hexer
 ..............................................................................
 

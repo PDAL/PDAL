@@ -52,10 +52,9 @@ public:
     Polygon();
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
+    Polygon(const Polygon&);
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
-    Polygon(const Polygon&);
-    Polygon(const Geometry&);
     Polygon(GEOSGeometry* g, const SpatialReference& srs);
     Polygon(OGRGeometryH g, const SpatialReference& srs);
     Polygon& operator=(const Polygon&);
@@ -68,7 +67,7 @@ public:
     Polygon transform(const SpatialReference& ref) const;
     double area() const;
 
-    bool covers(PointRef& ref) const;
+    bool covers(const PointRef& ref) const;
     bool equal(const Polygon& p) const;
     bool covers(const Polygon& p) const;
     bool overlaps(const Polygon& p) const;

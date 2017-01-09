@@ -65,6 +65,8 @@ PDAL_DLL void registerDrivers();
 PDAL_DLL void unregisterDrivers();
 PDAL_DLL bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
     const std::string& dstSrs);
+PDAL_DLL bool reprojectPoint(double& x, double& y, double& z,
+    const std::string& srcSrs, const std::string& dstSrs);
 PDAL_DLL std::string lastError();
 
 typedef std::shared_ptr<void> RefPtr;

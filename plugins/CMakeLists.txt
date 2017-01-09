@@ -42,10 +42,6 @@ if(BUILD_PLUGIN_OCI)
     add_subdirectory(oci)
 endif()
 
-if(BUILD_PLUGIN_P2G)
-    add_subdirectory(p2g)
-endif()
-
 if(BUILD_PLUGIN_PCL)
     add_subdirectory(pcl)
 endif()

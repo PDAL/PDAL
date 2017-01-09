@@ -114,7 +114,7 @@ void App::outputHelp(const ProgramArgs& args)
 
     for (auto name : loaded_kernels)
         m_out << "   - " << name << std::endl;
-    m_out << "See http://pdal.io/apps.html for more detail" << std::endl;
+    m_out << "See http://pdal.io/apps/ for more detail" << std::endl;
 }
 
 

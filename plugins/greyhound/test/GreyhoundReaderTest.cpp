@@ -164,27 +164,57 @@ TEST_F(GreyhoundReaderTest, filter)
 {
     if (!doTests()) return;
 
-    pdal::GreyhoundReader reader;
-    auto options(greyhoundOptions(&stadiumBounds, 0, 12));
-    options.add("filter", "{ \"Z\": { \"$gte\": 500 } }");
-
-    reader.setOptions(options);
-
-    pdal::PointTable table;
-    reader.prepare(table);
-    PointViewSet viewSet = reader.execute(table);
-    PointViewPtr view = *viewSet.begin();
-    ASSERT_LT(view->size(), 188260u);
-
-    greyhound::Point p;
-    for (std::size_t i(0); i < view->size(); ++i)
     {
-        p.x = view->getFieldAs<double>(Dimension::Id::X, i);
-        p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
-        p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
+        pdal::GreyhoundReader reader;
+        auto options(greyhoundOptions(&stadiumBounds, 0, 12));
+        options.add("filter", "{ \"Z\": { \"$gte\": 500 } }");
 
-        ASSERT_TRUE(stadiumBounds.contains(p));
-        ASSERT_GE(p.z, 500);
+        reader.setOptions(options);
+
+        pdal::PointTable table;
+        reader.prepare(table);
+        PointViewSet viewSet = reader.execute(table);
+        PointViewPtr view = *viewSet.begin();
+        ASSERT_LT(view->size(), 188260u);
+
+        greyhound::Point p;
+        for (std::size_t i(0); i < view->size(); ++i)
+        {
+            p.x = view->getFieldAs<double>(Dimension::Id::X, i);
+            p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
+
+            ASSERT_TRUE(stadiumBounds.contains(p));
+            ASSERT_GE(p.z, 500);
+        }
+    }
+
+    {
+        pdal::GreyhoundReader reader;
+        auto options(greyhoundOptions(&stadiumBounds, 0, 12));
+
+        Json::Value filter;
+        filter["Z"]["$gte"] = 500;
+        options.add("filter", filter);
+
+        reader.setOptions(options);
+
+        pdal::PointTable table;
+        reader.prepare(table);
+        PointViewSet viewSet = reader.execute(table);
+        PointViewPtr view = *viewSet.begin();
+        ASSERT_LT(view->size(), 188260u);
+
+        greyhound::Point p;
+        for (std::size_t i(0); i < view->size(); ++i)
+        {
+            p.x = view->getFieldAs<double>(Dimension::Id::X, i);
+            p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
+
+            ASSERT_TRUE(stadiumBounds.contains(p));
+            ASSERT_GE(p.z, 500);
+        }
     }
 }
 

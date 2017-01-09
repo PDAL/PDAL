@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013-2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,7 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -55,9 +54,9 @@ TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
     pipeline.execute();
 
     PointViewSet viewSet = pipeline.views();
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 795u);
+    EXPECT_EQ(795u, view->size());
 }
 
 static void test_filter(const std::string& jsonFile,
@@ -85,9 +84,9 @@ static void test_filter(const std::string& jsonFile,
     pcl_block->prepare(table);
     PointViewSet viewSet = pcl_block->execute(table);
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), expectedPointCount);
+    EXPECT_EQ(expectedPointCount, view->size());
 }
 
 

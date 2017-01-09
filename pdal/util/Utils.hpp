@@ -75,7 +75,7 @@ namespace Utils
     {
         return ((t < min) ? min : ((t > max) ? max : t));
     }
-      
+
     /**
       Set a seed for random number generation.
 
@@ -948,7 +948,7 @@ namespace Utils
       \return  Converted variable.
     */
     template<typename E>
-    constexpr typename std::underlying_type<E>::type toNative(E e)
+    typename std::underlying_type<E>::type toNative(E e)
     {
         return static_cast<typename std::underlying_type<E>::type>(e);
     }

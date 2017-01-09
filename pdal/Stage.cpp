@@ -172,8 +172,10 @@ PointViewSet Stage::execute(PointTableRef table)
     //   writer wants to check a table's SRS.
     SpatialReference srs;
     table.clearSpatialReferences();
-    for (auto const& it : views)
-        table.addSpatialReference(it->spatialReference());
+    // Iterating backwards will ensure that the SRS for the first view is
+    // first on the list for table.
+    for (auto it = views.rbegin(); it != views.rend(); it++)
+        table.addSpatialReference((*it)->spatialReference());
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
     // Do the ready operation and then start running all the views
@@ -360,6 +362,7 @@ void Stage::l_done(PointTableRef table)
 
 void Stage::l_addArgs(ProgramArgs& args)
 {
+    args.add("user_data", "User JSON", m_userDataJSON);
     args.add("log", "Debug output filename", m_logname);
     readerAddArgs(args);
 }

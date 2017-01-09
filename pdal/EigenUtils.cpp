@@ -428,24 +428,6 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     return maxZ.block(radius, radius, data.rows(), data.cols());
 }
 
-Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r)
-{
-    using namespace Eigen;
-
-    MatrixXd out = MatrixXd::Zero(d.rows()+2*r, d.cols()+2*r);
-    out.block(r, r, d.rows(), d.cols()) = d;
-    out.block(r, 0, d.rows(), r) =
-        d.block(0, 0, d.rows(), r).rowwise().reverse();
-    out.block(r, d.cols()+r, d.rows(), r) =
-        d.block(0, d.cols()-r, d.rows(), r).rowwise().reverse();
-    out.block(0, 0, r, out.cols()) =
-        out.block(r, 0, r, out.cols()).colwise().reverse();
-    out.block(d.rows()+r, 0, r, out.cols()) =
-        out.block(out.rows()-r-1, 0, r, out.cols()).colwise().reverse();
-
-    return out;
-}
-
 Eigen::MatrixXd pointViewToEigen(const PointView& view)
 {
     Eigen::MatrixXd matrix(view.size(), 3);

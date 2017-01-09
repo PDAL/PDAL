@@ -10,22 +10,23 @@ between PDAL and PCL point cloud representations.
 
 This filter is under active development. The current implementation serves as a
 proof of concept for linking PCL into PDAL and converting data. The PCL Block
-filter creates a PCL ``Pipeline`` object and passes it a single argument, the JSON
-file containing the PCL block definition. After filtering, the resulting indices
-can be retrieved and used to create a new PDAL ``PointView`` containing only
-those points that passed the filtering stages.
+filter creates a PCL ``Pipeline`` object and passes it a single argument, the
+JSON file containing the PCL block definition. After filtering, the resulting
+indices can be retrieved and used to create a new PDAL ``PointView`` containing
+only those points that passed the filtering stages.
 
 At this stage in its development, the PCL ``Pipeline`` does not allow complex
-operations that may change the point type (e.g., ``PointXYZ`` to ``PointNormal``) or
-alter points.  We will continue to look into use cases that are of value and
-feasible, but for now are limited primarily to PCL functions that filter or
-segment the point cloud, returning a list of indices of the filtered points
-(e.g., ground or object, noise or signal). The main reason for this design
-decision is that we want to avoid converting all ``PointView`` dimensions to the
-PCL ``PointCloud``. In the case of an LAS reader, we may very well not want to
-operate on fields such as return number, but we do not want to lose this
-information post PCL filtering. The easy solution is to simply retain the index
-between the ``PointView`` and ``PointCloud`` objects and update as necessary.
+operations that may change the point type (e.g., ``PointXYZ`` to
+``PointNormal``) or alter points.  We will continue to look into use cases that
+are of value and feasible, but for now are limited primarily to PCL functions
+that filter or segment the point cloud, returning a list of indices of the
+filtered points (e.g., ground or object, noise or signal). The main reason for
+this design decision is that we want to avoid converting all ``PointView``
+dimensions to the PCL ``PointCloud``. In the case of an LAS reader, we may very
+well not want to operate on fields such as return number, but we do not want to
+lose this information post PCL filtering. The easy solution is to simply retain
+the index between the ``PointView`` and ``PointCloud`` objects and update as
+necessary.
 
 .. seealso::
 
@@ -43,7 +44,10 @@ Options
 -------------------------------------------------------------------------------
 
 filename
-  JSON file to read [Required]
+  Path to external PCL JSON file describing the pipeline
+  
+methods
+  Raw PCL JSON array describing the pipeline
 
 
 
@@ -55,30 +59,21 @@ PCL. Here is an example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "PCL-Block-Name",
-            "help": "This is an example pipeline with two filters.",
-            "author": "mpg",
-            "filters":
-            [
-                {
-                    "name": "FilterOne",
-                    "setFooParameter": "value"
-                },
-                {
-                    "name": "FilterTwo",
-                    "setBarParameter": false,
-                    "setBounds":
-                    {
-                        "upper": 42,
-                        "lower": 17
-                    }
-                }
-            ]
+            "name": "FilterOne",
+            "setFooParameter": "value"
+        },
+        {
+            "name": "FilterTwo",
+            "setBarParameter": false,
+            "setBounds":
+            {
+                "upper": 42,
+                "lower": 17
+            }
         }
-    }
+    ]
 
 
 
@@ -98,14 +93,8 @@ ApproximateProgressiveMorphologicalFilter
     faster (and potentially less accurate) version of the
     **ProgressiveMorphologicalFilter**
 
-ConditionalRemoval
-    filters the data to remove normals outside of a given Z range
-
 GridMinimum
     assembles a local 2D grid over a given PointCloud, then downsamples the data
-
-NormalEstimation
-    computes the surfaces normals of the points in the input
 
 PassThrough
     allows the user to set min/max bounds on one dimension of the data

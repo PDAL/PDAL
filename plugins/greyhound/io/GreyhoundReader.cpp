@@ -126,9 +126,17 @@ namespace
     {
         Json::Value result;
 
-        for (const Dimension::Id& id : layout.dims())
+        std::map<std::size_t, const Dimension::Detail> details;
+
+        for (const Dimension::Id id : layout.dims())
         {
             const auto& d(*layout.dimDetail(id));
+            details.emplace(d.offset(), d);
+        }
+
+        for (const auto& p : details)
+        {
+            const auto& d(p.second);
             Json::Value j;
             j["name"] = Dimension::name(d.id());
             j["type"] = Dimension::toName(base(d.type()));
@@ -268,35 +276,24 @@ void GreyhoundReader::initialize(PointTableRef table)
 
     m_queryBounds = toBounds(m_queryBox).intersection(m_fullBounds);
 
-    if (m_filterArg.size() && !parse(m_filterArg).isNull())
-    {
-        m_filterString = m_filterArg;
-    }
-
     if (m_pathsArg.size())
     {
-        Json::Value json;
-        if (m_filterString.size()) json = parse(m_filterString);
-
         if (m_pathsArg.size() == 1)
         {
-            json["Path"] = m_pathsArg.front();
+            m_filter["Path"] = m_pathsArg.front();
         }
         else
         {
             for (const auto& p : m_pathsArg)
             {
-                json["Path"].append(p);
+                m_filter["Path"].append(p);
             }
         }
-
-        m_filterString = write(json);
     }
 
-    if (m_filterString.size())
+    if (!m_filter.isNull())
     {
-        log()->get(LogLevel::Debug) << "Filter: " << parse(m_filterString) <<
-            std::endl;
+        log()->get(LogLevel::Debug) << "Filter: " << m_filter << std::endl;
     }
 
     m_dims = schemaToDims(m_info["schema"]);
@@ -314,19 +311,34 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
     args.add("depth_begin", "Beginning depth to query", m_depthBeginArg, 0u);
     args.add("depth_end", "Ending depth to query", m_depthEndArg, 0u);
     args.add("tile_path", "Index-optimized tile selection", m_pathsArg);
-    args.add("filter", "Query filter", m_filterArg);
+    args.add("filter", "Query filter", m_filter);
     args.add("threads", "Number of threads for HTTP requests", m_threadsArg, 4);
 }
 
 void GreyhoundReader::prepared(PointTableRef table)
 {
+    auto& layout(*table.layout());
     // Note that we must construct the schema (which drives the formatting of
     // Greyhound's responses) here, rather than just from the 'info' that comes
     // back from Greyhound.  This is because other Reader instances may add
-    // dimensions that don't exist in this resource.  Greyhound will zero-fill
-    // these in the responses, which will compress to pretty much nothing.
-    m_schema = layoutToSchema(*table.layout());
+    // dimensions that don't exist in this resource.  Also, the dimensions may
+    // be re-ordered in the layout from what we obtained in 'info'.  Greyhound
+    // will zero-fill non-existent dimentions in the responses, which will
+    // compress to pretty much nothing.
+    m_schema = layoutToSchema(layout);
     log()->get(LogLevel::Debug) << "Schema: " << m_schema << std::endl;
+
+    m_dims.clear();
+    for (const auto& j : m_schema)
+    {
+        m_dims.push_back(layout.findDimType(j["name"].asString()));
+
+        if (m_dims.back().m_id == Dimension::Id::Unknown)
+        {
+            throw std::runtime_error(
+                    "Could not find dimension " + j["name"].asString());
+        }
+    }
 }
 
 void GreyhoundReader::addDimensions(PointLayoutPtr layout)
@@ -412,13 +424,27 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     {
         pool.add([this, &view, depthBegin, depthSplit]()
         {
-            inc(fetchData(*view, m_queryBounds, depthBegin, depthSplit));
+            try
+            {
+                inc(fetchData(*view, m_queryBounds, depthBegin, depthSplit));
+            }
+            catch (std::exception& e)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_error.reset(new std::string(e.what()));
+            }
+            catch (...)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_error.reset(new std::string("Unknown error during read"));
+            }
         });
     }
 
     launchPooledReads(*view, zoomBounds, depthSplit, pool);
 
     pool.await();
+    if (m_error) throw pdal_error(*m_error);
 
     return m_numPoints;
 }
@@ -613,9 +639,9 @@ point_count_t GreyhoundReader::fetchData(
 #ifdef PDAL_HAVE_LAZPERF
     url << "&compress=true";
 #endif
-    if (m_filterString.size())
+    if (!m_filter.isNull())
     {
-        url << "&filter=" << arbiter::http::sanitize(m_filterString);
+        url << "&filter=" << arbiter::http::sanitize(write(m_filter));
     }
 
     {

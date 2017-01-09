@@ -13,24 +13,24 @@ Download
 Current Release(s)
 ------------------------------------------------------------------------------
 
-* **2016-08-29** `PDAL-1.3.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
+* **2016-12-15** `PDAL-1.4.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.3.0
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.4.0
 
-.. _`PDAL-1.3.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.3.0-src.tar.gz
-.. _`md5`: http://download.osgeo.org/pdal/PDAL-1.3.0-src.tar.gz.md5
+.. _`PDAL-1.4.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.4.0-src.tar.gz
+.. _`md5`: http://download.osgeo.org/pdal/PDAL-1.4.0-src.tar.gz.md5
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 
 
 Past Releases
 ------------------------------------------------------------------------------
 
+* **2016-08-29** `PDAL-1.3.0-src.tar.gz`_ `Release Notes`_
 * **2016-03-31** `PDAL-1.2.0-src.tar.gz`_ `Release Notes`_
-* **2015-11-25** `PDAL-1.1.0-src.tar.gz`_ `Release Notes`_
 
 
+.. _`PDAL-1.3.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.3.0-src.tar.gz
 .. _`PDAL-1.2.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.2.0-src.tar.gz
-.. _`PDAL-1.1.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.1.0-src.tar.gz
 
 
 
@@ -65,7 +65,8 @@ Windows
 ................................................................................
 
 A 1.1.0 release of PDAL is available via `OSGeo4W`_. It is only 64-bit at this
-time.
+time. Use the :ref:`docker` builds if you want to use the PDAL :ref:`apps`, otherwise,
+a call for help with building current Windows PDAL builds is at https://lists.osgeo.org/pipermail/pdal/2016-November/001089.html
 
 RPMs
 ................................................................................

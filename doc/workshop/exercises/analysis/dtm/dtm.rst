@@ -8,7 +8,7 @@ Generating a DTM
 .. index:: elevation model, DTM, DSM
 
 This exercise uses PDAL to generate an elevation model surface using the
-output from the :ref:`ground` exercise, PDAL's :ref:`writers.p2g` operation,
+output from the :ref:`ground` exercise, PDAL's :ref:`writers.gdal` operation,
 and |GDAL| to generate an elevation and hillshade surface from point cloud
 data.
 
@@ -36,7 +36,7 @@ Command
 Invoke the following command, substituting accordingly, in your `Docker
 Quickstart Terminal`:
 
-PDAL capability to generate rasterized output is provided by the :ref:`writers.p2g`
+PDAL capability to generate rasterized output is provided by the :ref:`writers.gdal`
 stage. There is no :ref:`application <apps>` to drive this stage, and we
 must use a pipeline.
 
@@ -44,7 +44,7 @@ Pipeline breakdown
 ................................................................................
 
 
-.. include:: ./p2g.json
+.. include:: ./gdal.json
     :literal:
 
 .. note::
@@ -60,7 +60,7 @@ Pipeline breakdown
 created this output as part of the :ref:`ground` exercise.
 
 
-2. :ref:`writers.p2g`
+2. :ref:`writers.gdal`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `Points2grid`_ writer that bins the point cloud data into an elevation

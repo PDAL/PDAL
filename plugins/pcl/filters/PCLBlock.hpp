@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013-2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,10 +35,14 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/StageFactory.hpp>
+
+#include <string>
 
 namespace pdal
 {
+  
+class PointView;
+class ProgramArgs;
 
 class PDAL_DLL PCLBlock : public Filter
 {
@@ -52,7 +56,7 @@ public:
 
 private:
     std::string m_filename;
-    std::string m_json;
+    std::string m_methods;
 
     virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
@@ -62,4 +66,3 @@ private:
 };
 
 } // namespace pdal
-

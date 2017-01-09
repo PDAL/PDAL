@@ -98,9 +98,7 @@ public:
 
     OGRGeometryH getOGRHandle();
 
-
-    virtual void update(const std::string& wkt_or_json,
-        SpatialReference ref = SpatialReference());
+    virtual void update(const std::string& wkt_or_json);
 
     void setSpatialReference( const SpatialReference& ref)
         { m_srs = ref; }

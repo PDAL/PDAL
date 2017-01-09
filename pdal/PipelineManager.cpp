@@ -50,8 +50,10 @@ PipelineManager::~PipelineManager()
 
 void PipelineManager::readPipeline(std::istream& input)
 {
+    std::istreambuf_iterator<char> eos;
+
     // Read stream into string.
-    std::string s(std::istreambuf_iterator<char>(input), {});
+    std::string s(std::istreambuf_iterator<char>(input), eos);
 
     std::istringstream ss(s);
     if (s.find("?xml") != std::string::npos)

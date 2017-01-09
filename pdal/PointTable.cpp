@@ -47,6 +47,19 @@ MetadataNode BasePointTable::privateMetadata(const std::string& name)
 }
 
 
+void BasePointTable::addSpatialReference(const SpatialReference& spatialRef)
+{
+    auto it = std::find(m_spatialRefs.begin(), m_spatialRefs.end(), spatialRef);
+
+    // If not found, add to the beginning.
+    if (it == m_spatialRefs.end())
+        m_spatialRefs.push_front(spatialRef);
+    // If not the first element, move the found element to the front.
+    else if (it != m_spatialRefs.begin())
+        m_spatialRefs.splice(m_spatialRefs.begin(), m_spatialRefs, it);
+}
+
+
 void SimplePointTable::setFieldInternal(Dimension::Id id, PointId idx,
     const void *value)
 {

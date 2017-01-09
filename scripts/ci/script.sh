@@ -31,7 +31,6 @@ cmake \
     -DBUILD_PLUGIN_MRSID=OFF \
     -DBUILD_PLUGIN_NITF=OFF \
     -DBUILD_PLUGIN_OCI=OFF \
-    -DBUILD_PLUGIN_P2G=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_PCL=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_PGPOINTCLOUD=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PGPOINTCLOUD_TESTS=OFF \
@@ -42,6 +41,7 @@ cmake \
     -DWITH_APPS=ON \
     -DWITH_LAZPERF=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_LASZIP=$OPTIONAL_COMPONENT_SWITCH \
+    -DWITH_PDAL_JNI=$OPTIONAL_COMPONENT_SWITCH \
     -DLASZIP_INCLUDE_DIR:PATH=/usr/include \
     -DLASZIP_LIBRARY:FILEPATH=/usr/lib/liblaszip.so \
     -DWITH_TESTS=ON \
@@ -68,6 +68,9 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     echo "current path: " `pwd`
     export PDAL_TEST_DIR=/pdal/_build/test
     python setup.py test
+
+    # JNI tests
+    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
 
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer

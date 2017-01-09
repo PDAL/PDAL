@@ -5,9 +5,9 @@ Draft PCL JSON Specification
 ============================
 
 :Author: Bradley J. Chambers (RadiantBlue Technologies, Inc.)
-:Revision: 0.1
-:Date: 28 February 2014
-:Copyright: Copyright (c) 2014, RadiantBlue Technologies, Inc. This work is licensed under a Creative Commons Attribution 3.0 United States License.
+:Revision: 0.2
+:Date: 13 December 2016
+:Copyright: Copyright (c) 2014-2016, RadiantBlue Technologies, Inc. This work is licensed under a Creative Commons Attribution 3.0 United States License.
 
 The PCL JSON specification is a point cloud processing pipeline interchange
 format based on JavaScript Object Notation (JSON), drawing inspiration from
@@ -24,14 +24,14 @@ both GeoJSON and TopoJSON.
 Introduction
 ============
 
-A PCL JSON object represents a processing pipeline.
+A PCL JSON array represents a processing pipeline.
 
-A complete PCL JSON data structure is always an object (in JSON terms). In PCL
-JSON, an object consists of a collection of name/value pairs -- also called
-members. For each member, the name is always a string. Member values are either
-a string, number, object, array or one of the literals: "true", "false", and
-"null". An array consists of elements where each element is a value as
-described above.
+A complete PCL JSON data structure is always an array of objects (in JSON
+terms). In PCL JSON, an object consists of a collection of name/value pairs --
+also called members. For each member, the name is always a string. Member values
+are either a string, number, object, array or one of the literals: "true",
+"false", and "null". An array consists of elements where each element is a value
+as described above.
 
 
 
@@ -42,56 +42,62 @@ A very simple PCL JSON pipeline:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "My cool pipeline",
-            "filters":
-            [
-                {
-                    "name": "VoxelGrid",
-                    "setLeafSize":
-                    {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            ]
+            "name": "VoxelGrid",
+            "setLeafSize":
+            {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
         }
-    }
+    ]
 
 A more complex pipeline, containing two filters:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "name": "CombinedExample",
-            "help": "Apply passthrough filter followed by statistical outlier removal",
-            "version": 1.0,
-            "author": "Bradley J Chambers",
-            "filters":
-            [
-                {
-                    "name": "PassThrough",
-                    "help": "filter z values to the range [410,440]",
-                    "setFilterFieldName": "z",
-                    "setFilterLimits":
-                    {
-                        "min": 410.0,
-                        "max": 440.0
-                    }
-                },
-                {
-                    "name": "StatisticalOutlierRemoval",
-                    "help": "apply outlier removal",
-                    "setMeanK": 8,
-                    "setStddevMulThresh": 0.2
-                }
-            ]
+            "name": "PassThrough",
+            "setFilterFieldName": "z",
+            "setFilterLimits":
+            {
+                "min": 410.0,
+                "max": 440.0
+            }
+        },
+        {
+            "name": "StatisticalOutlierRemoval",
+            "setMeanK": 8,
+            "setStddevMulThresh": 0.2
         }
+    ]
+
+A PCL pipeline is embedded within a PDAL pipeline as the "methods" option to :ref:`filters.pclblock` as shown below:
+
+.. code-block:: json
+
+    {
+        "pipeline": [
+            "input.las",
+            {
+                "type": "filters.pclblock",
+                "methods": [
+                    {
+                        "name": "VoxelGrid",
+                        "setLeafSize":
+                        {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                ]
+            },
+            "output.las"
+        ]
     }
 
 
@@ -114,34 +120,20 @@ Definitions
 PCL JSON Objects
 ================
 
-PCL JSON always consists of a single object. This object (referred to as the
-PCL JSON object below) represents a processing pipeline.
+PCL JSON always consists of a single array of PCL JSON objects. This array
+(referred to as the PCL JSON array below) represents a processing pipeline.
 
-* The PCL JSON object may have any number of members (name/value pairs).
+* The PCL JSON array may have any number of PCL JSON objects.
 
-* The PCL JSON object must have a "pipeline" object.
+* A PCL JSON object shall have a "name" member that identifies a supported PCL
+  filter (as documented below).
 
-
-
-Pipeline Objects
-----------------
-
-* A pipeline may have a member with the name "name" whose value is a string.
-
-* A pipeline may have a member with the name "help" whose value is a string.
-
-* A pipeline may have a member with the name "version" whose value is a number.
-
-* A pipeline must have a member with the name "filters" whose value is an array
-  of filters.
+* A PCL JSON object may have any number of members (name/value pairs).
 
 
 
 Filters
 .......
-
-A pipeline must have a "filters" member whose value is an array of zero or more
-filters.
 
 A filter is any of the PCL filters that has been exposed through the PCL
 pipeline class.
@@ -171,25 +163,19 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "ApproximateProgressiveMorphologicalFilter",
-                    "setMaxWindowSize": 65,
-                    "setSlope": 0.7,
-                    "setMaxDistance": 10,
-                    "setInitialDistance": 0.3,
-                    "setCellSize": 1,
-                    "setBase": 2,
-                    "setExponential": false,
-                    "setNegative": false
-                }
-            ]
+            "name": "ApproximateProgressiveMorphologicalFilter",
+            "setMaxWindowSize": 65,
+            "setSlope": 0.7,
+            "setMaxDistance": 10,
+            "setInitialDistance": 0.3,
+            "setCellSize": 1,
+            "setBase": 2,
+            "setExponential": false,
+            "setNegative": false
         }
-    }
+    ]
 
 **Parameters**
 
@@ -225,47 +211,6 @@ setNegative: bool
 
 
 
-ConditionalRemoval
-``````````````````
-
-.. seealso::
-
-    :ref:`filters.range` implements support for this PCL operation as a
-    PDAL filter
-
-This filter removes normals outside of a given Z range.
-
-PCL details: http://docs.pointclouds.org/trunk/classpcl_1_1_conditional_removal.html
-
-Example:
-
-.. code-block:: json
-
-    {
-        "pipeline":
-        {
-            "filters":
-            [
-                {
-                    "name": "ConditionalRemoval",
-                    "normalZ":
-                    {
-                        "min": 0,
-                        "max": 0.95
-                    }
-                }
-            ]
-        }
-    }
-
-**Parameters**
-
-normalZ: object `{"min": float, "max": float}`
-  Set the numerical limits for filtering points based on the z component of
-  their normal. [default: `{"min": 0.0, "max": FLT_MAX}`]
-
-
-
 GridMinimum
 ```````````
 
@@ -278,62 +223,17 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "GridMinimum",
-                    "setResolution": 2.0
-                }
-            ]
+            "name": "GridMinimum",
+            "setResolution": 2.0
         }
-    }
+    ]
 
 **Parameters**
 
 setResolution: float
   Set the grid resolution. [default: 1.0]
-
-
-
-NormalEstimation
-````````````````
-
-
-**Description**
-
-This filter computes the surfaces normals of the points in the input.
-
-PCL details: http://docs.pointclouds.org/1.7.1/classpcl_1_1_normal_estimation.html
-
-Example:
-
-.. code-block:: json
-
-    {
-        "pipeline":
-        {
-            "filters":
-            [
-                {
-                    "name": "NormalEstimation",
-                    "setRadiusSearch": 2
-                }
-            ]
-        }
-    }
-
-**Parameters**
-
-setKSearch: float
-    Set the number of k nearest neighbors to use for the feature estimation.
-    [default: 0.0]
-
-setRadiusSearch: float
-    Set the sphere radius that is to be used for determining the nearest
-    neighbors used for the feature estimation. [default: 1.0]
 
 
 
@@ -350,23 +250,17 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "PassThrough",
-                    "setFilterFieldName": "z",
-                    "setFilterLimits":
-                    {
-                        "min": 3850100,
-                        "max": 3850200
-                    }
-                }
-            ]
+            "name": "PassThrough",
+            "setFilterFieldName": "z",
+            "setFilterLimits":
+            {
+                "min": 3850100,
+                "max": 3850200
+            }
         }
-    }
+    ]
 
 **Parameters**
 
@@ -395,7 +289,7 @@ ProgressiveMorphologicalFilter (PMF)
 
 .. seealso::
 
-    :ref:`filters.ground` implements support for this operation as a
+    :ref:`filters.pmf` implements support for this operation as a
     PDAL filter
 
 **Description**
@@ -408,25 +302,19 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "ProgressiveMorphologicalFilter",
-                    "setMaxWindowSize": 65,
-                    "setSlope": 0.7,
-                    "setMaxDistance": 10,
-                    "setInitialDistance": 0.3,
-                    "setCellSize": 1,
-                    "setBase": 2,
-                    "setExponential": false,
-                    "setNegative": true
-                }
-            ]
+            "name": "ProgressiveMorphologicalFilter",
+            "setMaxWindowSize": 65,
+            "setSlope": 0.7,
+            "setMaxDistance": 10,
+            "setInitialDistance": 0.3,
+            "setCellSize": 1,
+            "setBase": 2,
+            "setExponential": false,
+            "setNegative": true
         }
-    }
+    ]
 
 **Parameters**
 
@@ -467,7 +355,7 @@ RadiusOutlierRemoval
 
 .. seealso::
 
-    :ref:`filters.radiusoutlier` implements support for this operation
+    :ref:`filters.outlier` implements support for this operation
     as a PDAL filter
 
 
@@ -482,19 +370,13 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "RadiusOutlierRemoval",
-                    "setMinNeighborsInRadius": 8,
-                    "setRadiusSearch": 1.0
-                }
-            ]
+            "name": "RadiusOutlierRemoval",
+            "setMinNeighborsInRadius": 8,
+            "setRadiusSearch": 1.0
         }
-    }
+    ]
 
 **Parameters**
 
@@ -513,7 +395,7 @@ StatisticalOutlierRemoval
 
 .. seealso::
 
-    :ref:`filters.statisticaloutlier` implements support for this
+    :ref:`filters.outlier` implements support for this
     operation as a PDAL filter
 
 **Description**
@@ -526,19 +408,13 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "StatisticalOutlierRemoval",
-                    "setMeanK": 8,
-                    "setStddevMulThresh": 1.17
-                }
-            ]
+            "name": "StatisticalOutlierRemoval",
+            "setMeanK": 8,
+            "setStddevMulThresh": 1.17
         }
-    }
+    ]
 
 **Parameters**
 
@@ -570,23 +446,17 @@ Example:
 
 .. code-block:: json
 
-    {
-        "pipeline":
+    [
         {
-            "filters":
-            [
-                {
-                    "name": "VoxelGrid",
-                    "setLeafSize":
-                    {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            ]
+            "name": "VoxelGrid",
+            "setLeafSize":
+            {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
         }
-    }
+    ]
 
 **Parameters**
 

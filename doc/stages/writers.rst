@@ -9,7 +9,7 @@ dimension type, while others only understand fixed dimension names.
 .. note::
 
     PDAL predefined dimension names can be found in the dimension registry:
-    https://github.com/PDAL/PDAL/blob/master/src/Dimension.json
+    :ref:`dimensions`
 
 .. toctree::
    :maxdepth: 1
