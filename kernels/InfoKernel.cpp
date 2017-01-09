@@ -330,7 +330,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
 void InfoKernel::dump(MetadataNode& root)
 {
     if (m_showSchema)
-        root.add(m_manager.pointTable().toMetadata().clone("schema"));
+        root.add(m_manager.pointTable().layout()->toMetadata().clone("schema"));
 
     if (m_PointCloudSchemaOutput.size() > 0)
     {

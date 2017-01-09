@@ -76,9 +76,7 @@ namespace plang
 {
 
 Invocation::Invocation(const Script& script)
-    : m_metaIn(NULL)
-    , m_metaOut(NULL)
-    , m_script(script)
+    : m_script(script)
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
@@ -87,6 +85,9 @@ Invocation::Invocation(const Script& script)
     , m_varsOut(NULL)
     , m_scriptArgs(NULL)
     , m_scriptResult(NULL)
+    , m_metadata_PyObject(NULL)
+    , m_schema_PyObject(NULL)
+    , m_srs_PyObject(NULL)
 {
     plang::Environment::get();
     resetArguments();
@@ -137,8 +138,6 @@ void Invocation::cleanup()
         Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
     Py_XDECREF(m_bytecode);
-    Py_XDECREF(m_metaIn);
-    Py_XDECREF(m_metaOut);
 }
 
 
@@ -147,8 +146,6 @@ void Invocation::resetArguments()
     cleanup();
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
-    m_metaIn = PyList_New(0);
-    m_metaOut = PyList_New(0);
 }
 
 
@@ -268,23 +265,71 @@ bool Invocation::execute()
     Py_INCREF(m_varsOut);
     Py_ssize_t numArgs = argCount(m_function);
     m_scriptArgs = PyTuple_New(numArgs);
+
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
         PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
-    if (numArgs > 2)
-        PyTuple_SetItem(m_scriptArgs, 2, m_metaIn);
-    if (numArgs > 3)
-        PyTuple_SetItem(m_scriptArgs, 3, m_metaOut);
 
-    m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
+
+    int success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
+    if (success)
+        throw pdal::pdal_error("unable to set metadata global");
+
+    success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
+    if (success)
+        throw pdal::pdal_error("unable to set schema global");
+
+    success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
+    if (success)
+        throw pdal::pdal_error("unable to set spatialreference global");
+
+    m_scriptResult = PyObject_Call(m_function, m_scriptArgs, NULL);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
 
-    if (!PyBool_Check(m_scriptResult))
-        throw pdal::pdal_error("User function return value not a boolean type.");
+    PyObject* mod_vars = PyModule_GetDict(m_module);
 
-    return (m_scriptResult == Py_True);
+    PyObject* b =  PyUnicode_FromString("metadata");
+    if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
+        m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
+
+    return true;
 }
+
+PyObject* getPyJSON(MetadataNode node)
+{
+
+    std::ostringstream schema_strm;
+    Utils::toJSON(node, schema_strm);
+
+    PyObject* raw_json =  PyUnicode_FromString(schema_strm.str().c_str());
+    PyObject* json_module = PyImport_ImportModule("json");
+    if (!json_module)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json_mod_dict = PyModule_GetDict(json_module);
+    if (!json_mod_dict)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* loads_func = PyDict_GetItemString(json_mod_dict, "loads");
+    if (!loads_func)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json_args = PyTuple_New(1);
+    if (!json_args)
+        throw pdal::pdal_error(getTraceback());
+
+    int success = PyTuple_SetItem(json_args, 0, raw_json);
+    if (success != 0)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json = PyObject_CallObject(loads_func, json_args);
+    if (!json)
+        throw pdal::pdal_error(getTraceback());
+
+    return json;
+}
+
 
 void Invocation::begin(PointView& view, MetadataNode m)
 {
@@ -306,8 +351,19 @@ void Invocation::begin(PointView& view, MetadataNode m)
         std::string name = layout->dimName(*di);
         insertArgument(name, (uint8_t *)data, dd->type(), view.size());
     }
-    Py_XDECREF(m_metaIn);
-    m_metaIn = plang::fromMetadata(m);
+
+    // Put pipeline 'metadata' variable into module scope
+    Py_XDECREF(m_metadata_PyObject);
+    m_metadata_PyObject= plang::fromMetadata(m);
+
+    // Put 'schema' dict into module scope
+    Py_XDECREF(m_schema_PyObject);
+    MetadataNode s = view.layout()->toMetadata();
+    m_schema_PyObject = getPyJSON(s);
+
+    Py_XDECREF(m_srs_PyObject);
+    MetadataNode srs = view.spatialReference().toMetadata();
+    m_srs_PyObject = getPyJSON(srs);
 }
 
 
@@ -347,7 +403,7 @@ void Invocation::end(PointView& view, MetadataNode m)
     for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
         free(*bi);
     m_buffers.clear();
-    addMetadata(m_metaOut, m);
+    addMetadata(m_metadata_PyObject, m);
 }
 
 } // namespace plang

@@ -85,10 +85,6 @@ public:
     void begin(PointView& view, MetadataNode m);
     void end(PointView& view, MetadataNode m);
 
-protected:
-    PyObject* m_metaIn;
-    PyObject* m_metaOut;
-
 private:
     void cleanup();
 
@@ -108,6 +104,9 @@ private:
     Invocation& operator=(Invocation const& rhs); // nope
 
     std::vector<void *> m_buffers;
+    PyObject* m_metadata_PyObject;
+    PyObject* m_schema_PyObject;
+    PyObject* m_srs_PyObject;
 };
 
 } // namespace plang

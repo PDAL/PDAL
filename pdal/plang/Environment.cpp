@@ -238,34 +238,34 @@ PyObject *fromMetadata(MetadataNode m)
     std::string description = m.description();
 
     MetadataNodeList children = m.children();
-    PyObject *submeta = NULL;
+    PyObject *submeta = PyList_New(0);
     if (children.size())
     {
-        submeta = PyList_New(0);
         for (MetadataNode& child : children)
             PyList_Append(submeta, fromMetadata(child));
     }
-    PyObject *data = PyTuple_New(5);
-    PyTuple_SetItem(data, 0, PyUnicode_FromString(name.data()));
-    PyTuple_SetItem(data, 1, PyUnicode_FromString(value.data()));
-    PyTuple_SetItem(data, 2, PyUnicode_FromString(type.data()));
-    PyTuple_SetItem(data, 3, PyUnicode_FromString(description.data()));
-    PyTuple_SetItem(data, 4, submeta);
+    PyObject *data = PyDict_New();
+    PyDict_SetItemString(data, "name", PyUnicode_FromString(name.data()));
+    PyDict_SetItemString(data, "value", PyUnicode_FromString(value.data()));
+    PyDict_SetItemString(data, "type", PyUnicode_FromString(type.data()));
+    PyDict_SetItemString(data, "description", PyUnicode_FromString(description.data()));
+    PyDict_SetItemString(data, "children", submeta);
 
     return data;
 }
 
-std::string readPythonString(PyObject* list, Py_ssize_t index)
+std::string readPythonString(PyObject* dict, const std::string& key)
 {
     std::stringstream ss;
 
-    PyObject* o = PyTuple_GetItem(list, index);
+    PyObject* o = PyDict_GetItemString(dict, key.c_str());
     if (!o)
     {
         std::stringstream oss;
-        oss << "Unable to get list item number " << index << " for list of length " << PyTuple_Size(list);
+        oss << "Unable to get dictionary item '" << key << "'";
         throw pdal_error(oss.str());
     }
+
     PyObject* r = PyObject_Str(o);
     if (!r)
         throw pdal::pdal_error("unable to get repr in readPythonString");
@@ -279,31 +279,38 @@ std::string readPythonString(PyObject* list, Py_ssize_t index)
 
     return ss.str();
 }
-void addMetadata(PyObject *list, MetadataNode m)
+void addMetadata(PyObject *dict, MetadataNode m)
 {
 
-    if (!PyList_Check(list))
-        return;
-
-    for (Py_ssize_t i = 0; i < PyList_Size(list); ++i)
+    if (! dict)
     {
-        PyObject *tuple = PyList_GetItem(list, i);
-        if (!PyTuple_Check(tuple) || PyTuple_Size(tuple) != 5)
-            continue;
+        return;
+    }
 
-        std::string name = readPythonString(tuple, 0);
-        std::string value = readPythonString(tuple, 1);
+    if (!PyDict_Check(dict) )
+        throw pdal::pdal_error("'metadata' member must be a dictionary!");
 
-        std::string type = readPythonString(tuple, 2);
-        if (type.empty())
-            type = Metadata::inferType(value);
+    std::string name = readPythonString(dict, "name");
+    std::string value = readPythonString(dict, "value");
 
-        std::string description = readPythonString(tuple, 3);
+    std::string type = readPythonString(dict, "type");
+    if (type.empty())
+        type = Metadata::inferType(value);
 
-        PyObject *submeta = PyTuple_GetItem(tuple, 4);
+    std::string description = readPythonString(dict, "description");
+
+    PyObject *submeta = PyDict_GetItemString(dict, "children");
+    if (submeta)
+    {
+        if (!PyList_Check(submeta))
+            throw pdal::pdal_error("'children' metadata member must be a list!");
+
+        for (Py_ssize_t i = 0; i < PyList_Size(submeta); ++i)
+        {
+            PyObject* p = PyList_GetItem(submeta, i);
+            addMetadata(p, m);
+        }
         MetadataNode child =  m.addWithType(name, value, type, description);
-        if (submeta)
-            addMetadata(submeta, child);
     }
 }
 
