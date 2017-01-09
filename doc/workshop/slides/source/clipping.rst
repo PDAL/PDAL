@@ -59,7 +59,7 @@ Pipeline
 ================================================================================
 
 1. :ref:`readers.las`
-2. :ref:`filters.attribute`
+2. :ref:`filters.overlay`
 3. :ref:`filters.range`
 4. :ref:`writers.las`
 
@@ -79,7 +79,7 @@ Range Filter
 Pipeline Strategy
 ================================================================================
 
-1. Assign with `filters.attribute`
+1. Assign with `filters.overlay`
 2. Filter with `filters.range`
 
 

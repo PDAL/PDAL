@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, howard@hobu.co
+* Copyright (c) 2017, Hobu Inc., info@hobu.co
 *
 * All rights reserved.
 *
@@ -32,28 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "AttributeFilter.hpp"
+#include "OverlayFilter.hpp"
 
-#include <memory>
 #include <vector>
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/QuadIndex.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
 static PluginInfo const s_info = PluginInfo(
-    "filters.attribute",
-    "Assign values for a dimension using a specified value, \n" \
-        "an OGR-readable data source, or an OGR SQL query.",
-    "http://pdal.io/stages/filters.attribute.html" );
+    "filters.overlay",
+    "Assign values to a dimension based on the extent of an OGR-readable data "
+    " source or an OGR SQL query.",
+    "http://pdal.io/stages/filters.overlay.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, AttributeFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, OverlayFilter, Filter, s_info)
 
 struct OGRDataSourceDeleter
 {
@@ -76,85 +74,46 @@ struct OGRFeatureDeleter
 };
 
 
-void AttributeFilter::addArgs(ProgramArgs& args)
+void OverlayFilter::addArgs(ProgramArgs& args)
 {
     args.add("dimension", "Dimension on which to filter", m_dimName).
         setPositional();
-    m_valArg = &args.add("value", "Value to set on matching points", m_value,
-        std::numeric_limits<double>::quiet_NaN());
-    m_dsArg = &args.add("datasource", "OGR-readable datasource for Polygon or "
-        "Multipolygon data", m_datasource);
-    m_colArg = &args.add("column", "OGR datasource column from which to "
+    args.add("datasource", "OGR-readable datasource for Polygon or "
+        "Multipolygon data", m_datasource).setPositional();
+    args.add("column", "OGR datasource column from which to "
         "read the attribute.", m_column);
-    m_queryArg = &args.add("query", "OGR SQL query to execute on the "
+    args.add("query", "OGR SQL query to execute on the "
         "datasource to fetch geometry and attributes", m_query);
-    m_layerArg = &args.add("layer", "Datasource layer to use", m_layer);
+    args.add("layer", "Datasource layer to use", m_layer);
 }
 
 
-void AttributeFilter::initialize()
+void OverlayFilter::initialize()
 {
-    if (m_valArg->set() && m_dsArg->set())
-    {
-        std::ostringstream oss;
-        oss << getName() << ": options 'value' and 'datasource' mutually "
-            "exclusive.";
-        throw pdal_error(oss.str());
-    }
-
-    if (!m_valArg->set() && !m_dsArg->set())
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Either option 'value' or 'datasource' must "
-            "be specified.";
-        throw pdal_error(oss.str());
-    }
-
-    Arg *args[] = { m_colArg, m_queryArg, m_layerArg };
-    for (auto& a : args)
-    {
-        if (m_valArg->set() && a->set())
-        {
-            std::ostringstream oss;
-            oss << getName() << ": option '" << a->longname() << "' invalid "
-                "with option 'value'.";
-            throw pdal_error(oss.str());
-        }
-    }
     gdal::registerDrivers();
 }
 
 
-void AttributeFilter::prepared(PointTableRef table)
+void OverlayFilter::prepared(PointTableRef table)
 {
     m_dim = table.layout()->findDim(m_dimName);
     if (m_dim == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Dimension '" << m_dimName << "' not found.";
-        throw pdal_error(oss.str());
-    }
+        throw pdal_error(getName() + ": Dimension '" + m_dimName +
+            "' not found.");
 }
 
 
-void AttributeFilter::ready(PointTableRef table)
+void OverlayFilter::ready(PointTableRef table)
 {
-    if (m_value != m_value)
-    {
-        m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
+    m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
             OGRDataSourceDeleter());
-        if (!m_ds)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Unable to open data source '" <<
-                    m_datasource << "'";
-            throw pdal_error(oss.str());
-        }
-    }
+    if (!m_ds)
+        throw pdal_error(getName() + ": Unable to open data source '" +
+            m_datasource + "'");
 }
 
 
-void AttributeFilter::UpdateGEOSBuffer(PointView& view)
+void OverlayFilter::filter(PointView& view)
 {
     QuadIndex idx(view);
 
@@ -166,11 +125,8 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
         m_lyr = OGR_DS_GetLayer(m_ds.get(), 0);
 
     if (!m_lyr)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Unable to select layer '" << m_layer << "'";
-        throw pdal_error(oss.str());
-    }
+        throw pdal_error(getName() + ": Unable to select layer '" +
+            m_layer + "'");
 
     OGRFeaturePtr feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
         OGRFeatureDeleter());
@@ -180,12 +136,8 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
     {
         field_index = OGR_F_GetFieldIndex(feature.get(), m_column.c_str());
         if (field_index == -1)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": No column name '" << m_column <<
-                "' was found.";
-            throw pdal_error(oss.str());
-        }
+            throw pdal_error(getName() + ": No column name '" + m_column +
+                "' was found.");
     }
 
     while (feature)
@@ -199,9 +151,8 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
             t == wkbPolygon25D ||
             t == wkbMultiPolygon25D))
         {
-            std::ostringstream oss;
-            oss << getName() << ": Geometry is not Polygon or MultiPolygon!";
-            throw pdal::pdal_error(oss.str());
+            throw pdal::pdal_error(getName() +
+                ": Geometry is not Polygon or MultiPolygon!");
         }
 
         pdal::Polygon p(geom, view.spatialReference());
@@ -212,7 +163,6 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
         BOX3D box = p.bounds();
         std::vector<PointId> ids = idx.getPoints(box);
 
-
         for (const auto& i : ids)
         {
             PointRef ref(view, i);
@@ -222,16 +172,6 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
         feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
             OGRFeatureDeleter());
     }
-}
-
-
-void AttributeFilter::filter(PointView& view)
-{
-    if (m_value == m_value)
-        for (PointId i = 0; i < view.size(); ++i)
-            view.setField(m_dim, i, m_value);
-    else
-        UpdateGEOSBuffer(view);
 }
 
 } // namespace pdal

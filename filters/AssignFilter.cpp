@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler <hobu.inc@gmail.com>
+* Copyright (c) 2017, Hobu Inc., info@hobu.co
 *
 * All rights reserved.
 *
@@ -32,76 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "AssignFilter.hpp"
 
-#include <pdal/plugin.hpp>
-#include <pdal/Filter.hpp>
-
-#include <map>
-#include <memory>
-#include <string>
-
-extern "C" int32_t AttributeFilter_ExitFunc();
-extern "C" PF_ExitFunc AttributeFilter_InitPlugin();
-
-typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
-
-typedef void *OGRLayerH;
-
+#include <pdal/pdal_macros.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-namespace gdal
+static PluginInfo const s_info = PluginInfo(
+    "filters.assign",
+    "Assign values for a dimension using a specified value.",
+    "http://pdal.io/stages/filters.assign.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, AssignFilter, Filter, s_info)
+
+void AssignFilter::addArgs(ProgramArgs& args)
 {
-    class ErrorHandler;
+    args.add("dimension", "Dimension on which to filter", m_dimName).
+        setPositional();
+    args.add("value", "Value to set on matching points", m_value).
+        setPositional();
 }
 
-typedef std::shared_ptr<void> OGRDSPtr;
-typedef std::shared_ptr<void> OGRFeaturePtr;
-typedef std::shared_ptr<void> OGRGeometryPtr;
 
-class Arg;
-
-class PDAL_DLL AttributeFilter : public Filter
+void AssignFilter::prepared(PointTableRef table)
 {
-public:
-    AttributeFilter() : m_ds(0), m_lyr(0)
-    {}
+    m_dim = table.layout()->findDim(m_dimName);
+    if (m_dim == Dimension::Id::Unknown)
+        throw pdal_error(getName() + ": Dimension '" + m_dimName +
+            "' not found.");
+}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const { return "filters.attribute"; }
 
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
+bool AssignFilter::processOne(PointRef& point)
+{
+    point.setField(m_dim, m_value);
+    return true;
+}
 
-    AttributeFilter& operator=(const AttributeFilter&) = delete;
-    AttributeFilter(const AttributeFilter&) = delete;
 
-    typedef std::shared_ptr<void> OGRDSPtr;
-
-    OGRDSPtr m_ds;
-    OGRLayerH m_lyr;
-    std::string m_dimName;
-    double m_value;
-    Arg *m_valArg;
-    Arg *m_dsArg;
-    Arg *m_colArg;
-    Arg *m_queryArg;
-    Arg *m_layerArg;
-    std::string m_datasource;
-    std::string m_column;
-    std::string m_query;
-    std::string m_layer;
-    Dimension::Id m_dim;
-
-    void UpdateGEOSBuffer(PointView& view);
-
-};
+void AssignFilter::filter(PointView& view)
+{
+    PointRef point(view, 0);
+    for (PointId id = 0; id < view.size(); ++id)
+    {
+        point.setPointId(id);
+        processOne(point);
+    }
+}
 
 } // namespace pdal
+

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2017, Hobu Inc. <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,29 +34,37 @@
 
 #pragma once
 
-#include <pdal/Geometry.hpp>
+#include <pdal/plugin.hpp>
+#include <pdal/Filter.hpp>
+
+extern "C" int32_t AssignFilter_ExitFunc();
+extern "C" PF_ExitFunc AssignFilter_InitPlugin();
 
 namespace pdal
 {
 
-namespace cropfilter
-{
-
-class PDAL_DLL Point : public Geometry
+class PDAL_DLL AssignFilter : public Filter
 {
 public:
-    Point();
-    Point(const std::string& wkt_or_json,
-           SpatialReference ref);
-    bool is3d() const;
-    bool empty() const;
-    void clear();
+    AssignFilter()
+    {}
 
-    virtual void update(const std::string& wkt_or_json);
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const { return "filters.assign"; }
 
-    double x;
-    double y;
-    double z;
+private:
+    virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
+    virtual bool processOne(PointRef& point);
+    virtual void filter(PointView& view);
+
+    AssignFilter& operator=(const AssignFilter&) = delete;
+    AssignFilter(const AssignFilter&) = delete;
+
+    std::string m_dimName;
+    double m_value;
+    Dimension::Id m_dim;
 };
-} // namespace cropfilter
+
 } // namespace pdal

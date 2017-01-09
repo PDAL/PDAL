@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2017, Hobu Inc. <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,29 +34,64 @@
 
 #pragma once
 
-#include <pdal/Geometry.hpp>
+#include <pdal/plugin.hpp>
+#include <pdal/Filter.hpp>
+
+#include <map>
+#include <memory>
+#include <string>
+
+extern "C" int32_t OverlayFilter_ExitFunc();
+extern "C" PF_ExitFunc OverlayFilter_InitPlugin();
+
+typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
+
+typedef void *OGRLayerH;
 
 namespace pdal
 {
 
-namespace cropfilter
+namespace gdal
 {
+    class ErrorHandler;
+}
 
-class PDAL_DLL Point : public Geometry
+typedef std::shared_ptr<void> OGRDSPtr;
+typedef std::shared_ptr<void> OGRFeaturePtr;
+typedef std::shared_ptr<void> OGRGeometryPtr;
+
+class Arg;
+
+class PDAL_DLL OverlayFilter : public Filter
 {
 public:
-    Point();
-    Point(const std::string& wkt_or_json,
-           SpatialReference ref);
-    bool is3d() const;
-    bool empty() const;
-    void clear();
+    OverlayFilter() : m_ds(0), m_lyr(0)
+    {}
 
-    virtual void update(const std::string& wkt_or_json);
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const { return "filters.overlay"; }
 
-    double x;
-    double y;
-    double z;
+private:
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
+    virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+
+    OverlayFilter& operator=(const OverlayFilter&) = delete;
+    OverlayFilter(const OverlayFilter&) = delete;
+
+    typedef std::shared_ptr<void> OGRDSPtr;
+
+    OGRDSPtr m_ds;
+    OGRLayerH m_lyr;
+    std::string m_dimName;
+    std::string m_datasource;
+    std::string m_column;
+    std::string m_query;
+    std::string m_layer;
+    Dimension::Id m_dim;
 };
-} // namespace cropfilter
+
 } // namespace pdal

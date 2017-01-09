@@ -41,10 +41,10 @@ Stage Operations
 -------------------------------------------------------------------------------
 
 This operation depends on two :ref:`stages <stage_index>` PDAL provides.
-The first is the :ref:`filters.attribute` stage, which allows you to assign
-point values based on polygons read from `OGR`_. The second is the :ref:`filters.range`,
-which allows you to keep or reject points from the set that match given
-criteria.
+The first is the :ref:`filters.overlay` stage, which allows you to assign
+point values based on polygons read from `OGR`_. The second is the
+:ref:`filters.range`, which allows you to keep or reject points from the
+set that match given criteria.
 
 .. seealso::
 
@@ -118,7 +118,7 @@ as they are read, filtered, and written.
     "pipeline":[
       "autzen.laz",
       {
-        "type":"filters.attribute",
+        "type":"filters.overlay",
         "dimension":"Classification",
         "datasource":"attributes.vrt",
         "layer":"OGRGeoJSON",
@@ -134,7 +134,7 @@ as they are read, filtered, and written.
 
 * :ref:`readers.las`: Define a reader that can read `ASPRS LAS`_ or `LASzip`_
   data.
-* :ref:`filters.attribute`: Using the VRT we defined in `Data Preparation`_,
+* :ref:`filters.overlay`: Using the VRT we defined in `Data Preparation`_,
   read attribute polygons out of the data source and assign the values from the
   ``CLS`` column to the ``Classification`` field.
 * :ref:`filters.range`: Given that we have set the ``Classification`` values
@@ -146,7 +146,7 @@ as they are read, filtered, and written.
 .. note::
 
     You don't have to use only ``Classification`` to set the attributes
-    with :ref:`filters.attribute`. Any valid dimension name could work, but
+    with :ref:`filters.overlay`. Any valid dimension name could work, but
     most LiDAR softwares will display categorical coloring for the
     ``Classification`` field, and we can leverage that behavior in this
     scenario.
@@ -173,7 +173,7 @@ Conclusion
 -------------------------------------------------------------------------------
 
 PDAL allows the composition of point cloud operations. This tutorial demonstrated
-how to use the :ref:`filters.attribute` and :ref:`filters.range` stages to clip
+how to use the :ref:`filters.overlay` and :ref:`filters.range` stages to clip
 points with shapefiles.
 
 .. _`CloudCompare`: http://www.danielgm.net/cc/

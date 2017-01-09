@@ -3,8 +3,28 @@
 readers.faux
 ============
 
-The "**faux reader**" is used for testing pipelines. It does not read from a
+The faux reader is used for testing pipelines. It does not read from a
 file or database, but generates synthetic data to feed into the pipeline.
+
+The faux reader requires a mode argume to define the method in which points
+should be generated.  Valid modes are as follows:
+
+constant
+    The values provided as the minimums to the bounds argument are
+    used for the X, Y and Z value, respectively, for every point.
+random
+    Random values are chosen within the provided bounds.
+ramp
+    Value increase uniformly from the minimum values to the maximum values.
+uniform
+    Random values of each dimension are uniformly distributed in the
+    provided ranges.
+normal
+    Random values of each dimension are normally distributed in the
+    provided ranges.
+grid
+    Creates points with integer-valued coordinates in the range provided
+    (excluding the upper bound).
 
 Example
 -------
@@ -46,9 +66,5 @@ stdev_x|y|z
   only) [Default: 1]
 
 mode
-  How to generate synthetic points. One of "constant" (repeat single value),
-  "random" (random values within bounds), "ramp" (steadily increasing values
-  within the bounds), "uniform" (uniformly distributed within bounds), or
-  "normal" (normal distribution with given mean and standard deviation).
-  [Required]
+  "constant", "random", "ramp", "uniform", "normal" or "grid" [Required]
 

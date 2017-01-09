@@ -56,7 +56,7 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
     , m_srs(ref)
     , m_geoserr(geos::ErrorHandler::get())
 {
-    update(wkt_or_json, ref);
+    update(wkt_or_json);
 }
 
 
@@ -69,7 +69,7 @@ Geometry::~Geometry()
 }
 
 
-void Geometry::update(const std::string& wkt_or_json, SpatialReference ref)
+void Geometry::update(const std::string& wkt_or_json)
 {
     bool isJson = wkt_or_json.find("{") != wkt_or_json.npos ||
                   wkt_or_json.find("}") != wkt_or_json.npos;
@@ -194,9 +194,13 @@ Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
 Geometry Geometry::transform(const SpatialReference& ref) const
 {
     if (m_srs.empty())
-        throw pdal_error("Geometry::transform failed due to m_srs being empty");
+        throw pdal_error("Geometry::transform failed.  "
+            "Source missing spatial reference.");
     if (ref.empty())
-        throw pdal_error("Geometry::transform failed due to ref being empty");
+        throw pdal_error("Geometry::transform failed.  "
+            "Invalid destination spatial reference.");
+    if (ref == m_srs)
+        return *this;
 
     gdal::SpatialRef fromRef(m_srs.getWKT());
     gdal::SpatialRef toRef(ref.getWKT());

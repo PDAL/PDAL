@@ -85,11 +85,12 @@ Pipeline breakdown
 
 ``autzen.laz`` is the `LASzip`_ file we will clip.
 
-2. :ref:`filters.attribute`
+2. :ref:`filters.overlay`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ref:`filters.attribute` filter allows you to assign values for coincident
-polygons. Using the VRT we defined in `Data preparation`_, :ref:`filters.attribute` will
+The :ref:`filters.overlay` filter allows you to assign values for coincident
+polygons. Using the VRT we defined in `Data preparation`_,
+:ref:`filters.overlay` will
 assign the values from the ``CLS`` column to the ``Classification`` field.
 
 
@@ -132,7 +133,7 @@ website.
 Notes
 --------------------------------------------------------------------------------
 
-1. :ref:`filters.attribute` does point-in-polygon checks against every point
+1. :ref:`filters.overlay` does point-in-polygon checks against every point
    that is read.
 
 2. Points that are *on* the boundary are included.
