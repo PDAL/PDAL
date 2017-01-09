@@ -36,6 +36,7 @@
 
 #include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/Polygon.hpp>
 
 #include <map>
 #include <memory>
@@ -64,6 +65,12 @@ class Arg;
 
 class PDAL_DLL OverlayFilter : public Filter
 {
+    struct PolyVal
+    {
+        Polygon geom;
+        int32_t val;
+    };
+
 public:
     OverlayFilter() : m_ds(0), m_lyr(0)
     {}
@@ -74,6 +81,8 @@ public:
 
 private:
     virtual void addArgs(ProgramArgs& args);
+    virtual void spatialReferenceChanged(const SpatialReference& srs);
+    virtual bool processOne(PointRef& point);
     virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
@@ -92,6 +101,7 @@ private:
     std::string m_query;
     std::string m_layer;
     Dimension::Id m_dim;
+    std::vector<PolyVal> m_polygons;
 };
 
 } // namespace pdal

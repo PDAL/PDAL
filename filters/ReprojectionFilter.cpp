@@ -64,6 +64,7 @@ ReprojectionFilter::ReprojectionFilter()
     , m_errorHandler(new gdal::ErrorHandler())
 {}
 
+
 ReprojectionFilter::~ReprojectionFilter()
 {
     if (m_transform_ptr)
@@ -86,13 +87,8 @@ void ReprojectionFilter::initialize()
 {
     m_inferInputSRS = m_inSRS.empty();
 
-    m_out_ref_ptr = OSRNewSpatialReference(0);
+    m_out_ref_ptr = OSRNewSpatialReference(m_outSRS.getWKT().c_str());
     if (!m_out_ref_ptr)
-        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference "
-            "in initialize()!");
-
-    int result = OSRSetFromUserInput(m_out_ref_ptr, m_outSRS.getWKT().c_str());
-    if (result != OGRERR_NONE)
     {
         std::ostringstream oss;
         oss << getName() << ": Invalid output spatial reference '" <<
@@ -126,12 +122,8 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
 
     if (m_in_ref_ptr)
         OSRDestroySpatialReference(m_in_ref_ptr);
-    m_in_ref_ptr = OSRNewSpatialReference(0);
+    m_in_ref_ptr = OSRNewSpatialReference(m_inSRS.getWKT().c_str());
     if (!m_in_ref_ptr)
-        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference for input coordinate system in createTransform()!");
-
-    int result = OSRSetFromUserInput(m_in_ref_ptr, m_inSRS.getWKT().c_str());
-    if (result != OGRERR_NONE)
     {
         std::ostringstream oss;
         oss << getName() << ": Invalid input spatial reference '" <<
@@ -152,6 +144,7 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
         throw pdal_error(oss.str());
     }
 }
+
 
 PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {
