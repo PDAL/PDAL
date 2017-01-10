@@ -78,7 +78,6 @@ PointViewSet MADFilter::run(PointViewPtr view)
 {
     using namespace Dimension;
 
-    PointViewSet viewSet;
     PointViewPtr output = view->makeNew();
 
     auto estimate_median = [](std::vector<double> vals)
@@ -92,7 +91,8 @@ PointViewSet MADFilter::run(PointViewPtr view)
         z[j] = view->getFieldAs<double>(m_dimId, j);
 
     double median = estimate_median(z);
-    log()->get(LogLevel::Debug) << getName() << " estimated median value: " << median << std::endl;
+    log()->get(LogLevel::Debug) << getName() <<
+        " estimated median value: " << median << std::endl;
 
     std::transform(z.begin(), z.end(), z.begin(),
        [median](double v) { return std::fabs(v - median); });
@@ -112,9 +112,8 @@ PointViewSet MADFilter::run(PointViewPtr view)
                                 << " in the range (" << low_fence
                                 << "," << hi_fence << ")" << std::endl;
 
-    viewSet.erase(view);
+    PointViewSet viewSet;
     viewSet.insert(output);
-
     return viewSet;
 }
 

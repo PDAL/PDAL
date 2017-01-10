@@ -63,7 +63,8 @@ void HAGFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
     if (!layout->hasDim(Dimension::Id::Classification))
-        throw pdal_error("HAGFilter: missing Classification dimension in input PointView");
+        throw pdal_error(getName() + ": missing Classification dimension "
+            "in input PointView");
 }
 
 void HAGFilter::filter(PointView& view)
@@ -90,13 +91,14 @@ void HAGFilter::filter(PointView& view)
 
     // Bail if there weren't any points classified as ground.
     if (gView->size() == 0)
-        throw pdal_error("HAGFilter: the input PointView does not appear to have any points classified as ground");
+        throw pdal_error(getName() + ": the input PointView does not appear "
+            "to have any points classified as ground");
 
     // Build the 2D KD-tree.
     KD2Index kdi(*gView);
     kdi.build();
 
-    // Second pass: Find Z difference between non-ground points and the nearest 
+    // Second pass: Find Z difference between non-ground points and the nearest
     // neighbor (2D) in the ground view.
     for (PointId i = 0; i < ngView->size(); ++i)
     {

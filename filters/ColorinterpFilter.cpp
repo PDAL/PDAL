@@ -52,7 +52,8 @@
 namespace pdal
 {
 
-static std::vector<std::string> ramps = {"awesome_green", "black_orange", "blue_hue", "blue_red", "heat_map", "pestel_shades", "blue_orange"};
+static std::vector<std::string> ramps = {"awesome_green", "black_orange",
+    "blue_hue", "blue_red", "heat_map", "pestel_shades", "blue_orange"};
 
 static PluginInfo const s_info = PluginInfo(
     "filters.colorinterp",
@@ -77,9 +78,9 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         (void)VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
     }
 //
-std::shared_ptr<pdal::gdal::Raster> openRamp(std::string& rampFilename)
+std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
 {
-    // If the user] selected a default ramp name, it will be opened by
+    // If the user selected a default ramp name, it will be opened by
     // one of these macros if it matches. Otherwise, we just open with the
     // GDALOpen'able the user gave us
 
@@ -94,7 +95,8 @@ std::shared_ptr<pdal::gdal::Raster> openRamp(std::string& rampFilename)
     GETRAMP(heat_map);
     GETRAMP(pestel_shades);
 
-    std::shared_ptr<pdal::gdal::Raster> output (new pdal::gdal::Raster(rampFilename.c_str()));
+    std::shared_ptr<gdal::Raster>
+        output(new gdal::Raster(rampFilename.c_str()));
     return output;
 }
 
@@ -103,16 +105,21 @@ void ColorinterpFilter::addArgs(ProgramArgs& args)
     args.add("dimension", "Dimension to interpolate", m_interpDimString, "Z");
     args.add("minimum", "Minimum value to use for scaling", m_min);
     args.add("maximum", "Maximum value to use for scaling", m_max);
-    args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp, "pestel_shades");
+    args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp,
+        "pestel_shades");
     args.add("invert", "Invert the ramp direction", m_invertRamp, false);
-    args.add("mad", "Use Median Absolute Deviation to compute ramp bounds in combination with 'k' ", m_useMAD, false);
-    args.add("mad_multiplier", "MAD threshold multiplier", m_madMultiplier, 1.4862);
-    args.add("k", "Number of deviations to compute minimum/maximum ", m_stdDevThreshold, 0.0);
+    args.add("mad", "Use Median Absolute Deviation to compute ramp bounds "
+        "in combination with 'k' ", m_useMAD, false);
+    args.add("mad_multiplier", "MAD threshold multiplier",
+        m_madMultiplier, 1.4862);
+    args.add("k", "Number of deviations to compute minimum/maximum ",
+        m_stdDevThreshold, 0.0);
 }
 
 void ColorinterpFilter::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims({Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue});
+    layout->registerDims({Dimension::Id::Red,
+        Dimension::Id::Green, Dimension::Id::Blue});
 }
 
 void ColorinterpFilter::initialize()
@@ -122,13 +129,14 @@ void ColorinterpFilter::initialize()
     m_raster = openRamp(m_colorramp);
     m_raster->open();
 
-    log()->get(LogLevel::Debug) << getName() << " raster connection: "
-                                             << m_raster->filename() << std::endl;
+    log()->get(LogLevel::Debug) << getName() << " raster connection: " <<
+        m_raster->filename() << std::endl;
 
     m_interpDim = Dimension::id(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
-        throw pdal_error("Dimension name is not known!");
+        throw pdal_error(getName() + ": provided dimension name is not known.");
 }
+
 
 void ColorinterpFilter::filter(PointView& view)
 {
@@ -142,7 +150,8 @@ void ColorinterpFilter::filter(PointView& view)
     {
         std::vector<double> values(view.size());
 
-        pdal::stats::Summary summary(pdal::Dimension::name(m_interpDim), pdal::stats::Summary::NoEnum);
+        stats::Summary summary(Dimension::name(m_interpDim),
+            stats::Summary::NoEnum);
         for (PointId idx = 0; idx < view.size(); ++idx)
         {
             double v = view.getFieldAs<double>(m_interpDim, idx);
@@ -152,9 +161,10 @@ void ColorinterpFilter::filter(PointView& view)
 
         auto compute_median = [](std::vector<double> vals)
         {
-            std::nth_element(vals.begin(), vals.begin()+vals.size()/2, vals.end());
+            std::nth_element(vals.begin(), vals.begin() + vals.size() / 2,
+                vals.end());
 
-            return *(vals.begin()+vals.size()/2);
+            return *(vals.begin() + vals.size() / 2);
         };
 
         median = compute_median(values);
@@ -169,10 +179,14 @@ void ColorinterpFilter::filter(PointView& view)
              m_min = median - threshold;
              m_max = median + threshold;
 
-             log()->get(LogLevel::Debug) << getName() << " mad " << mad << std::endl;
-             log()->get(LogLevel::Debug) << getName() << " median " << median << std::endl;
-             log()->get(LogLevel::Debug) << getName() << " minimum " << m_min << std::endl;
-             log()->get(LogLevel::Debug) << getName() << " maximum " << m_max << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " mad " <<
+                mad << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " median " <<
+                median << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " minimum " <<
+                m_min << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " maximum " <<
+                m_max << std::endl;
         }
         else
         {
@@ -180,10 +194,14 @@ void ColorinterpFilter::filter(PointView& view)
              m_min = median - threshold;
              m_max = median + threshold;
 
-             log()->get(LogLevel::Debug) << getName() << " stddev threshold " << threshold << std::endl;
-             log()->get(LogLevel::Debug) << getName() << " median " << median << std::endl;
-             log()->get(LogLevel::Debug) << getName() << " minimum " << m_min << std::endl;
-             log()->get(LogLevel::Debug) << getName() << " maximum " << m_max << std::endl;
+             log()->get(LogLevel::Debug) << getName() <<
+                " stddev threshold " << threshold << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " median " <<
+                median << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " minimum " <<
+                m_min << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " maximum " <<
+                m_max << std::endl;
         }
 
     }
@@ -192,7 +210,8 @@ void ColorinterpFilter::filter(PointView& view)
     // compute them.
     else if ((m_min == 0.0 && m_max == 0.0) )
     {
-        pdal::stats::Summary summary(pdal::Dimension::name(m_interpDim), pdal::stats::Summary::NoEnum);
+        stats::Summary summary(Dimension::name(m_interpDim),
+            stats::Summary::NoEnum);
         for (PointId idx = 0; idx < view.size(); ++idx)
         {
             double v = view.getFieldAs<double>(m_interpDim, idx);
@@ -206,8 +225,6 @@ void ColorinterpFilter::filter(PointView& view)
     m_raster->readBand(m_redBand, 1);
     m_raster->readBand(m_greenBand, 2 );
     m_raster->readBand(m_blueBand, 3);
-
-
 
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
@@ -236,7 +253,6 @@ void ColorinterpFilter::filter(PointView& view)
         view.setField(Dimension::Id::Red, idx, red);
         view.setField(Dimension::Id::Green, idx, green);
         view.setField(Dimension::Id::Blue, idx, blue);
-
     }
 }
 

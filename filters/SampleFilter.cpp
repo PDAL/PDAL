@@ -95,7 +95,7 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
     // neighbors within the user-specified radius, their value is changed to 0.
     std::vector<int> keep(np, 1);
 
-    // We are able to subsample in a single pass over the shufflled indices.
+    // We are able to subsample in a single pass over the shuffled indices.
     for (auto const& i : indices)
     {
         // If a point is masked, it is forever masked, and cannot be part of the

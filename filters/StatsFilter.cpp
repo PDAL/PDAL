@@ -261,8 +261,9 @@ void StatsFilter::extractMetadata(PointTableRef table)
         zs != m_stats.end() &&
         bNoPoints)
     {
-        BOX3D box(xs->second.minimum(), ys->second.minimum(), zs->second.minimum(),
-                  xs->second.maximum(), ys->second.maximum(), zs->second.maximum());
+        BOX3D box(xs->second.minimum(), ys->second.minimum(),
+            zs->second.minimum(), xs->second.maximum(), ys->second.maximum(),
+            zs->second.maximum());
         pdal::Polygon p(box);
 
         MetadataNode mbox = Utils::toMetadata(box);
@@ -273,7 +274,8 @@ void StatsFilter::extractMetadata(PointTableRef table)
         Json::Value json;
         jsonReader.parse(p.json(), json);
 
-        MetadataNode boundary = metadata.addWithType("boundary", json.toStyledString(), "json", "GeoJSON boundary");
+        MetadataNode boundary = metadata.addWithType("boundary",
+            json.toStyledString(), "json", "GeoJSON boundary");
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -292,9 +294,8 @@ void StatsFilter::extractMetadata(PointTableRef table)
             Json::Value json;
             jsonReader.parse(pdd.json(), json);
 
-            MetadataNode ddboundary = dddbox.addWithType("boundary", json.toStyledString(), "json", "GeoJSON boundary");
-
-
+            MetadataNode ddboundary = dddbox.addWithType("boundary",
+                json.toStyledString(), "json", "GeoJSON boundary");
         }
     }
 }
