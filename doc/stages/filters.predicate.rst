@@ -8,6 +8,11 @@ Like the :ref:`filters.programmable` filter, the predicate filter applies a
 the stream by setting true/false values into a special "Mask" dimension in the
 output point array.
 
+.. note::
+
+    See :ref:`filters.programmable` for documentation about how to access
+    the ``metadata``, ``spatialreference``, and ``schema`` variables.
+
 .. code-block:: python
 
   import numpy as np
