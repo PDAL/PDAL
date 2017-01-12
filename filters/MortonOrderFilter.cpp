@@ -45,7 +45,8 @@ namespace pdal
 
 static PluginInfo const s_info = PluginInfo(
     "filters.mortonorder",
-    "Morton or z-order sorting of points. See http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
+    "Morton or z-order sorting of points. See "
+        "http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
     "http://pdal.io/stages/filters.mortonorder.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, MortonOrderFilter, Filter, s_info)

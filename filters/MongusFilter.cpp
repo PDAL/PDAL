@@ -180,7 +180,8 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         if ((mc(i) - cz(i)) >= 1.0)
             cz(i) = mc(i);
     }
-    // cz is still at native resolution, with low points replaced by morphological operators
+    // cz is still at native resolution, with low points replaced by
+    // morphological operators
     writeControl(cx, cy, cz, "grid_mins_adjusted.laz");
 
     // downsample control at max_level
@@ -193,7 +194,8 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
     // Top-level control samples are assumed to be ground points, no filtering
     // is applied.
     downsampleMin(&cx, &cy, &cz, &x_prev, &y_prev, &z_prev, cur_cell_size);
-    // x|y|z_prev are control points downsampled to coarsest resolution for the hierarchy, e.g., for 512x512, this would be 2x2
+    // x|y|z_prev are control points downsampled to coarsest resolution for
+    // the hierarchy, e.g., for 512x512, this would be 2x2
     writeControl(x_prev, y_prev, z_prev, "control_init.laz");
 
     // Point-filtering is performed iteratively at each level of the
@@ -216,7 +218,8 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         downsampleMin(&cx, &cy, &cz, &x_samp, &y_samp, &z_samp, cur_cell_size);
         // 4x4, 8x8, 16x16, 32x32, 64x64, 128x128, 256x256
 
-        MatrixXd surface = eigen::computeSpline(x_prev, y_prev, z_prev, x_samp, y_samp);
+        MatrixXd surface = eigen::computeSpline(x_prev, y_prev, z_prev,
+            x_samp, y_samp);
 
         // if (l == 3)
         // {
@@ -279,7 +282,8 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
             std::cerr << "median troubleshooting\n";
             std::cerr << vals.size() << "\t" << cp.size() << std::endl;
             std::cerr << cp.size() % 2 << std::endl;
-            std::cerr << cp[cp.size()/2-1] << "\t" << cp[cp.size()/2] << std::endl;
+            std::cerr << cp[cp.size()/2-1] << "\t" <<
+                cp[cp.size()/2] << std::endl;
             if (l == 7)
             {
                 for (auto const& v : cp)
@@ -510,7 +514,8 @@ PointViewSet MongusFilter::run(PointViewPtr view)
 
         if (m_classify)
         {
-            log()->get(LogLevel::Debug2) << "Labeled " << idx.size() << " ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Labeled " << idx.size() <<
+                " ground returns!\n";
 
             // set the classification label of ground returns as 2
             // (corresponding to ASPRS LAS specification)
@@ -524,7 +529,8 @@ PointViewSet MongusFilter::run(PointViewPtr view)
 
         if (m_extract)
         {
-            log()->get(LogLevel::Debug2) << "Extracted " << idx.size() << " ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Extracted " << idx.size() <<
+                " ground returns!\n";
 
             // create new PointView containing only ground returns
             PointViewPtr output = view->makeNew();
@@ -540,10 +546,12 @@ PointViewSet MongusFilter::run(PointViewPtr view)
     else
     {
         if (idx.empty())
-            log()->get(LogLevel::Debug2) << "Filtered cloud has no ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Filtered cloud has no "
+                "ground returns!\n";
 
         if (!(m_classify || m_extract))
-            log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";
+            log()->get(LogLevel::Debug2) << "Must choose --classify or "
+                "--extract\n";
 
         // return the view buffer unchanged
         viewSet.insert(view);

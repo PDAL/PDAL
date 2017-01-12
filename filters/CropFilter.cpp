@@ -131,14 +131,23 @@ void CropFilter::spatialReferenceChanged(const SpatialReference& srs)
 void CropFilter::transform(const SpatialReference& srs)
 {
     // If we don't have any SRS, do nothing.
+    for (auto& geom : m_geoms)
+    {
+        try
+        {
+            geom = geom.transform(srs);
+        }
+        catch (pdal_error& err)
+        {
+            throw pdal_error(getName() + ": " + err.what());
+        }
+    }
+
     if (srs.empty() && m_assignedSrs.empty())
         return;
     if (srs.empty() || m_assignedSrs.empty())
         throw pdal_error(getName() + ": Unable to transform crop geometry to "
             "point coordinate system.");
-
-    for (auto& geom : m_geoms)
-        geom = geom.transform(srs);
 
     for (auto& box : m_bounds)
     {

@@ -207,6 +207,7 @@ bool ColorizationFilter::processOne(PointRef& point)
     return false;
 }
 
+
 void ColorizationFilter::filter(PointView& view)
 {
     PointRef point = view.point(0);

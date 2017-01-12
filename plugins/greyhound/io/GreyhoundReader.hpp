@@ -77,8 +77,6 @@ private:
     std::size_t m_sparseDepth;
     Json::Value m_info;
     Json::Value m_schema;
-    std::unique_ptr<greyhound::Point> m_scale;
-    std::unique_ptr<greyhound::Point> m_offset;
 
     mutable std::mutex m_mutex;
     point_count_t m_numPoints = 0;

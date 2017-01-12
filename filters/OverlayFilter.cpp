@@ -37,7 +37,6 @@
 #include <vector>
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/Polygon.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/pdal_macros.hpp>
@@ -110,12 +109,6 @@ void OverlayFilter::ready(PointTableRef table)
     if (!m_ds)
         throw pdal_error(getName() + ": Unable to open data source '" +
             m_datasource + "'");
-}
-
-
-void OverlayFilter::filter(PointView& view)
-{
-    QuadIndex idx(view);
 
     if (m_layer.size())
         m_lyr = OGR_DS_GetLayerByName(m_ds.get(), m_layer.c_str());
@@ -140,7 +133,7 @@ void OverlayFilter::filter(PointView& view)
                 "' was found.");
     }
 
-    while (feature)
+    do
     {
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
         OGRwkbGeometryType t = OGR_G_GetGeometryType(geom);
@@ -151,26 +144,61 @@ void OverlayFilter::filter(PointView& view)
             t == wkbPolygon25D ||
             t == wkbMultiPolygon25D))
         {
-            throw pdal::pdal_error(getName() +
+            throw pdal_error(getName() +
                 ": Geometry is not Polygon or MultiPolygon!");
         }
 
-        pdal::Polygon p(geom, view.spatialReference());
+        // Don't think Polygon meets criteria for implicit move ctor.
+        m_polygons.push_back(
+            { Polygon(geom, table.anySpatialReference()), fieldVal} );
 
-        // Compute a total bounds for the geometry. Query the QuadTree to
-        // find out the points that are inside the bbox. Then test each
-        // point in the bbox against the prepared geometry.
-        BOX3D box = p.bounds();
-        std::vector<PointId> ids = idx.getPoints(box);
-
-        for (const auto& i : ids)
-        {
-            PointRef ref(view, i);
-            if (p.covers(ref))
-                view.setField(m_dim, i, fieldVal);
-        }
         feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
             OGRFeatureDeleter());
+    }
+    while (feature);
+}
+
+
+void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
+{
+    for (auto& poly : m_polygons)
+    {
+        try
+        {
+            poly.geom = poly.geom.transform(srs);
+        }
+        catch (pdal_error& err)
+        {
+            throw pdal_error(getName() + ": " + err.what());
+        }
+    }
+}
+
+
+bool OverlayFilter::processOne(PointRef& point)
+{
+    for (const auto& poly : m_polygons)
+        if (poly.geom.covers(point))
+            point.setField(m_dim, poly.val);
+    return true;
+}
+
+
+void OverlayFilter::filter(PointView& view)
+{
+    QuadIndex idx(view);
+
+    for (const auto& poly : m_polygons)
+    {
+        std::vector<PointId> ids = idx.getPoints(poly.geom.bounds());
+
+        PointRef point(view, 0);
+        for (PointId id : ids)
+        {
+            point.setPointId(id);
+            if (poly.geom.covers(point))
+                point.setField(m_dim, poly.val);
+        }
     }
 }
 

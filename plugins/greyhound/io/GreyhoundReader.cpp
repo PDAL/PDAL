@@ -243,36 +243,7 @@ void GreyhoundReader::initialize(PointTableRef table)
     m_depthBegin = m_depthBeginArg;
     m_depthEnd = m_depthEndArg;
 
-    if (m_info.isMember("scale"))
-    {
-        m_scale.reset(new greyhound::Point(m_info["scale"]));
-    }
-
-    if (m_info.isMember("offset"))
-    {
-        m_offset.reset(new greyhound::Point(m_info["offset"]));
-    }
-
-    if (m_scale && !m_offset) m_offset.reset(new greyhound::Point(0, 0, 0));
-    if (m_offset && !m_scale) m_scale.reset(new greyhound::Point(1, 1, 1));
-
     m_fullBounds = m_info["bounds"];
-
-    if (m_scale)
-    {
-        // Unscale the full bounds.  Since the query bounds will come in as
-        // native coordinates, don't modify those.
-        m_fullBounds = m_fullBounds.unscale(*m_scale, *m_offset);
-
-        // Now inverse our scale/offset.
-        m_scale->x = 1.0 / m_scale->x;
-        m_scale->y = 1.0 / m_scale->y;
-        m_scale->z = 1.0 / m_scale->z;
-
-        m_offset->x = -m_offset->x;
-        m_offset->y = -m_offset->y;
-        m_offset->z = -m_offset->z;
-    }
 
     m_queryBounds = toBounds(m_queryBox).intersection(m_fullBounds);
 
@@ -592,9 +563,6 @@ std::vector<point_count_t> GreyhoundReader::fetchVerticalHierarchy(
     url << "&depthEnd=" << depthEnd;
     url << "&vertical=true";
 
-    if (m_scale) url << "&scale=" << write(m_scale->toJson());
-    if (m_offset) url << "&offset=" << write(m_offset->toJson());
-
     log()->get(LogLevel::Debug) << "Hierarchy: " << url.str() << std::endl;
     const Json::Value json(parse(m_arbiter->get(url.str())));
 
@@ -615,9 +583,6 @@ Json::Value GreyhoundReader::fetchHierarchy(
     url << "&depthBegin=" << depthBegin;
     url << "&depthEnd=" << depthEnd;
 
-    if (m_scale) url << "&scale=" << write(m_scale->toJson());
-    if (m_offset) url << "&offset=" << write(m_offset->toJson());
-
     log()->get(LogLevel::Debug) << "Hierarchy: " << url.str() << std::endl;
     return parse(m_arbiter->get(url.str()));
 }
@@ -633,8 +598,6 @@ point_count_t GreyhoundReader::fetchData(
     url << "/read?bounds=" << arbiter::http::sanitize(stringify(bounds));
     url << "&depthBegin=" << depthBegin;
     url << "&depthEnd=" << depthEnd;
-    if (m_scale) url << "&scale=" << write(m_scale->toJson());
-    if (m_offset) url << "&offset=" << write(m_offset->toJson());
 
 #ifdef PDAL_HAVE_LAZPERF
     url << "&compress=true";

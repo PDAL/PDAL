@@ -52,11 +52,12 @@ std::string ComputeRangeFilter::getName() const
     return s_info.name;
 }
 
+
 void ComputeRangeFilter::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-    m_range = layout->registerOrAssignDim("Range", Type::Double);
+    m_range = layout->registerOrAssignDim("Range", Dimension::Type::Double);
 }
+
 
 void ComputeRangeFilter::prepared(PointTableRef table)
 {
@@ -66,11 +67,13 @@ void ComputeRangeFilter::prepared(PointTableRef table)
 
     m_frameNumber = layout->findDim("Frame Number");
     if (m_frameNumber == Id::Unknown)
-        throw pdal_error("ComputeRangeFilter: missing Frame Number dimension in input PointView");
+        throw pdal_error(getName() + ": missing Frame Number dimension in "
+            "input PointView");
 
     m_pixelNumber = layout->findDim("Pixel Number");
     if (m_pixelNumber == Id::Unknown)
-        throw pdal_error("ComputeRangeFilter: missing Pixel Number dimension in input PointView");
+        throw pdal_error(getName() + ": missing Pixel Number dimension in "
+            "input PointView");
 }
 
 void ComputeRangeFilter::filter(PointView& view)

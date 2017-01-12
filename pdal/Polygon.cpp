@@ -171,6 +171,9 @@ void Polygon::initializeFromBounds(const BOX3D& box)
 
 Polygon Polygon::transform(const SpatialReference& ref) const
 {
+    if (ref.empty() && m_srs.empty())
+        return *this;
+
     if (m_srs.empty())
         throw pdal_error("Polygon::transform failed due to m_srs being empty");
     if (ref.empty())

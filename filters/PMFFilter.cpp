@@ -89,7 +89,8 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
         double x = view->getFieldAs<double>(Dimension::Id::X, i);
         double y = view->getFieldAs<double>(Dimension::Id::Y, i);
 
-        std::vector<PointId> ids = idx.getPoints(x-radius, y-radius, x+radius, y+radius);
+        std::vector<PointId> ids = idx.getPoints(x - radius, y - radius,
+            x + radius, y + radius);
 
         double localMin(std::numeric_limits<double>::max());
         for (auto const& j : ids)
@@ -107,7 +108,8 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
         double x = view->getFieldAs<double>(Dimension::Id::X, i);
         double y = view->getFieldAs<double>(Dimension::Id::Y, i);
 
-        std::vector<PointId> ids = idx.getPoints(x-radius, y-radius, x+radius, y+radius);
+        std::vector<PointId> ids = idx.getPoints(x - radius, y - radius,
+            x + radius, y + radius);
 
         double localMax(std::numeric_limits<double>::lowest());
         for (auto const& j : ids)
@@ -121,6 +123,7 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
 
     return maxZ;
 }
+
 
 std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
 {
@@ -143,7 +146,8 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
         if (iter == 0)
             ht = m_initialDistance;
         else
-            ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize + m_initialDistance;
+            ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize +
+                m_initialDistance;
 
         // Enforce max distance on height threshold
         if (ht > m_maxDistance)
@@ -225,7 +229,8 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
         if (iter == 0)
             ht = m_initialDistance;
         else
-            ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize + m_initialDistance;
+            ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize +
+                m_initialDistance;
 
         // Enforce max distance on height threshold
         if (ht > m_maxDistance)
@@ -261,8 +266,12 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
             double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
             double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
 
-            int c = Utils::clamp(static_cast<int>(floor((x - bounds.minx) / m_cellSize)), 0, static_cast<int>(cols-1));
-            int r = Utils::clamp(static_cast<int>(floor((y - bounds.miny) / m_cellSize)), 0, static_cast<int>(rows-1));
+            int c = Utils::clamp(
+                static_cast<int>(floor((x - bounds.minx) / m_cellSize)), 0,
+                static_cast<int>(cols-1));
+            int r = Utils::clamp(
+                static_cast<int>(floor((y - bounds.miny) / m_cellSize)), 0,
+                static_cast<int>(rows-1));
 
             float diff = z - mo(r, c);
             if (diff < htvec[j])
@@ -330,10 +339,12 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     else
     {
         if (idx.empty())
-            log()->get(LogLevel::Debug2) << "Filtered cloud has no ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Filtered cloud has no "
+                "ground returns!\n";
 
         if (!(m_classify || m_extract))
-            log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";
+            log()->get(LogLevel::Debug2) << "Must choose --classify "
+                "or --extract\n";
 
         // return the input buffer unchanged
         viewSet.insert(input);
