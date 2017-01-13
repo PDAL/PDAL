@@ -90,6 +90,9 @@ TEST(StageFactoryTest, extensionTest)
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.las"), "writers.las");
     EXPECT_EQ(StageFactory::inferWriterDriver("STDOUT"), "writers.text");
     EXPECT_EQ(StageFactory::inferWriterDriver(""), "writers.text");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.tif"), "writers.gdal");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.tiff"), "writers.gdal");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.vrt"), "writers.gdal");
 
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.laz"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
@@ -101,6 +104,8 @@ TEST(StageFactoryTest, extensionTest)
     EXPECT_EQ(StageFactory::extensions("writers.las"), ext);
     ext = { "csv", "json", "txt", "xyz" };
     EXPECT_EQ(StageFactory::extensions("writers.text"), ext);
+    ext = { "tif", "tiff", "vrt" };
+    EXPECT_EQ(StageFactory::extensions("writers.gdal"), ext);
 }
 
 } // namespace pdal
