@@ -39,7 +39,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PointView.hpp>
-#include "PipelineReader.hpp"
 
 #include "RxpReader.hpp"
 #include "Config.hpp"

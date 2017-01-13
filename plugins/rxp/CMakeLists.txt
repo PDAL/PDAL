@@ -12,8 +12,9 @@ PDAL_ADD_PLUGIN(libname reader rxp
         io/RxpReader.cpp
     LINK_WITH
         ${RiVLib_SCANLIB_LIBRARY})
-target_include_directories(${libname} PRIVATE ${RiVLib_INCLUDE_DIRS})
+target_include_directories(${libname} PUBLIC ${RiVLib_INCLUDE_DIRS})
 
+option(BUILD_RIVLIB_TESTS "Build rivlib tests" ON)
 if (BUILD_RIVLIB_TESTS)
     configure_file(
         test/Config.hpp.in
@@ -24,5 +25,6 @@ if (BUILD_RIVLIB_TESTS)
         FILES test/RxpReaderTest.cpp
         LINK_WITH ${libname})
     target_include_directories(${RXP_TEST_NAME} PRIVATE
+        ${PROJECT_BINARY_DIR}/plugins/rxp/test
         ${PROJECT_SOURCE_DIR}/plugins/rxp/io)
 endif()
