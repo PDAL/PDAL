@@ -165,7 +165,7 @@ PointViewSet OutlierFilter::run(PointViewPtr inView)
     else
     {
         log()->get(LogLevel::Warning) << "Requested method is unrecognized. "
-                                      << "Please choose from \"statistical\" " << "or \"radius\".\n";
+            "Please choose from \"statistical\" " << "or \"radius\".\n";
         viewSet.insert(inView);
         return viewSet;
     }
@@ -173,7 +173,7 @@ PointViewSet OutlierFilter::run(PointViewPtr inView)
     if (indices.inliers.empty())
     {
         log()->get(LogLevel::Warning) << "Requested filter would remove all "
-                                      << "points. Try a larger radius/smaller " << "minimum neighbors.\n";
+            "points. Try a larger radius/smaller " << "minimum neighbors.\n";
         viewSet.insert(inView);
         return viewSet;
     }

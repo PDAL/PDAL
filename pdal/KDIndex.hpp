@@ -58,7 +58,7 @@ class PDAL_DLL KDIndex
 protected:
     KDIndex(const PointView& buf) : m_buf(buf)
     {}
-   
+
     ~KDIndex()
     {}
 
@@ -72,8 +72,7 @@ public:
     template <class BBOX> bool kdtree_get_bbox(BBOX& bb) const;
     void build()
     {
-        m_index.reset(new my_kd_tree_t(DIM, *this,
-            nanoflann::KDTreeSingleIndexAdaptorParams(10, DIM)));
+        m_index.reset(new my_kd_tree_t(DIM, *this));
         m_index->buildIndex();
     }
 
@@ -139,7 +138,7 @@ public:
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
- 
+
         return neighbors(x, y, k);
     }
 
@@ -147,7 +146,7 @@ public:
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
- 
+
         return neighbors(x, y, k);
     }
 
@@ -235,7 +234,7 @@ public:
         pt.push_back(x);
         pt.push_back(y);
         pt.push_back(z);
-        m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
+        m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams());
         return output;
     }
 
@@ -256,15 +255,15 @@ public:
 
         return neighbors(x, y, z, k);
     }
-   
+
     void knnSearch(double x, double y, double z, point_count_t k,
         std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
         k = std::min(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
-        
+
         resultSet.init(&indices->front(), &sqr_dists->front());
-        
+
         std::vector<double> pt;
         pt.push_back(x);
         pt.push_back(y);

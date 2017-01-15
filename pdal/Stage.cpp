@@ -172,8 +172,10 @@ PointViewSet Stage::execute(PointTableRef table)
     //   writer wants to check a table's SRS.
     SpatialReference srs;
     table.clearSpatialReferences();
-    for (auto const& it : views)
-        table.addSpatialReference(it->spatialReference());
+    // Iterating backwards will ensure that the SRS for the first view is
+    // first on the list for table.
+    for (auto it = views.rbegin(); it != views.rend(); it++)
+        table.addSpatialReference((*it)->spatialReference());
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
     // Do the ready operation and then start running all the views
@@ -210,12 +212,52 @@ PointViewSet Stage::execute(PointTableRef table)
 // Streamed execution.
 void Stage::execute(StreamPointTable& table)
 {
-    typedef std::list<Stage *> StageList;
+    struct StageList : public std::list<Stage *>
+    {
+        StageList operator - (const StageList& other) const
+        {
+            StageList resultList;
+            auto ti = rbegin();
+            auto oi = other.rbegin();
+
+            while (oi != other.rend() && ti != rend() && *ti == *oi)
+            {
+                oi++;
+                ti++;
+            }
+            while (ti != rend())
+                resultList.push_front(*ti++);
+            return resultList;
+        };
+
+        void ready(PointTableRef& table)
+        {
+            for (auto s : *this)
+            {
+                s->pushLogLeader();
+                s->ready(table);
+                s->pushLogLeader();
+                SpatialReference srs = s->getSpatialReference();
+                if (!srs.empty())
+                    table.setSpatialReference(srs);
+            }
+        }
+
+        void done(PointTableRef& table)
+        {
+            for (auto s : *this)
+            {
+                s->pushLogLeader();
+                s->l_done(table);
+                s->popLogLeader();
+            }
+        }
+    };
 
     SpatialReference srs;
     std::list<StageList> lists;
     StageList stages;
-    StageList readies;
+    StageList lastRunStages;
 
     table.finalize();
 
@@ -238,19 +280,13 @@ void Stage::execute(StreamPointTable& table)
     {
         if (s->m_inputs.empty())
         {
-            // Ready stages before we execute.
-            for (auto s2 : stages)
-                if (!Utils::contains(readies, s2))
-                {
-                    s2->pushLogLeader();
-                    s2->ready(table);
-                    s2->pushLogLeader();
-                    readies.push_back(s2);
-                    srs = s2->getSpatialReference();
-                    if (!srs.empty())
-                        table.setSpatialReference(srs);
-                }
+            // Call done on all the stages we ran last time and aren't
+            // using this time.
+            (lastRunStages - stages).done(table);
+            // Call ready on all the stages we didn't run last time.
+            (stages - lastRunStages).ready(table);
             execute(table, stages);
+            lastRunStages = stages;
         }
         else
         {
@@ -262,17 +298,13 @@ void Stage::execute(StreamPointTable& table)
             }
         }
         if (lists.empty())
+        {
+            lastRunStages.done(table);
             break;
+        }
         stages = lists.back();
         lists.pop_back();
         s = stages.front();
-    }
-
-    for (auto s2 : stages)
-    {
-        s2->pushLogLeader();
-        s2->l_done(table);
-        s2->popLogLeader();
     }
 }
 
@@ -328,7 +360,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         {
             if (srsMap[s] != srs)
             {
-                spatialReferenceChanged(srs);
+                s->spatialReferenceChanged(srs);
                 srsMap[s] = srs;
             }
             s->pushLogLeader();

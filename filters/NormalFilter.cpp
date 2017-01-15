@@ -48,7 +48,7 @@ namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.normal", "Normal Filter", 
+    PluginInfo("filters.normal", "Normal Filter",
                "http://pdal.io/stages/filters.normal.html");
 
 CREATE_STATIC_PLUGIN(1, 0, NormalFilter, Filter, s_info)
@@ -70,7 +70,8 @@ void NormalFilter::addDimensions(PointLayoutPtr layout)
     m_nx = layout->registerOrAssignDim("NormalX", Dimension::Type::Double);
     m_ny = layout->registerOrAssignDim("NormalY", Dimension::Type::Double);
     m_nz = layout->registerOrAssignDim("NormalZ", Dimension::Type::Double);
-    m_curvature = layout->registerOrAssignDim("Curvature", Dimension::Type::Double);
+    m_curvature = layout->registerOrAssignDim("Curvature",
+        Dimension::Type::Double);
 }
 
 void NormalFilter::filter(PointView& view)
@@ -100,10 +101,7 @@ void NormalFilter::filter(PointView& view)
         view.setField(m_nz, i, evec[2]);
 
         double sum = eval[0] + eval[1] + eval[2];
-        if (sum != 0)
-            view.setField(m_curvature, i, std::fabs(eval[0]/sum));
-        else
-            view.setField(m_curvature, i, 0);
+        view.setField(m_curvature, i, sum ? std::fabs(eval[0] / sum) : 0);
     }
 }
 

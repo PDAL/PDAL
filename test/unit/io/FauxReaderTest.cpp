@@ -237,3 +237,73 @@ TEST(FauxReaderTest, one_point)
     EXPECT_EQ(2, view->getFieldAs<int>(Dimension::Id::Y, 0));
     EXPECT_EQ(3, view->getFieldAs<int>(Dimension::Id::Z, 0));
 }
+
+void testGrid(point_count_t xlimit, point_count_t ylimit, point_count_t zlimit)
+{
+    point_count_t size = 1;
+    if (xlimit)
+        size *= xlimit;
+    if (ylimit)
+        size *= ylimit;
+    if (zlimit)
+        size *= zlimit;
+    if (!xlimit && !ylimit && !zlimit)
+        return;
+
+    Options ops;
+
+    ops.add("bounds", BOX3D(0, 0, 0, xlimit, ylimit, zlimit));
+    ops.add("mode", "grid");
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), size);
+
+    PointId index = 0;
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    for (PointId index =  0; index < size; index++)
+    {
+        EXPECT_EQ(x, view->getFieldAs<int>(Dimension::Id::X, index));
+        EXPECT_EQ(y, view->getFieldAs<int>(Dimension::Id::Y, index));
+        EXPECT_EQ(z, view->getFieldAs<int>(Dimension::Id::Z, index));
+        bool incNext = true;
+        if (xlimit)
+        {
+            x++;
+            if (x >= (int)xlimit)
+                x = 0;
+            else
+                incNext = false;
+        }
+
+        if (ylimit && incNext)
+        {
+            y++;
+            if (y >= (int)ylimit)
+                y = 0;
+            else
+                incNext = false;
+        }
+
+        if (zlimit && incNext)
+            z++;
+    }
+}
+
+TEST(FauxReaderTest, grid)
+{
+    testGrid(2, 3, 4);
+    testGrid(0, 3, 4);
+    testGrid(2, 0, 4);
+    testGrid(2, 3, 0);
+    testGrid(2, 0, 0);
+    testGrid(0, 3, 0);
+    testGrid(0, 3, 4);
+}

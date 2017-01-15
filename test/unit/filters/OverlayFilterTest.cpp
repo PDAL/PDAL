@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2017, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -41,66 +41,27 @@
 
 using namespace pdal;
 
-TEST(AttributeFilterTest, value)
+void testOverlay(int numReaders, bool stream)
 {
     Options ro;
     ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
 
     StageFactory factory;
-    Stage& r = *(factory.createStage("readers.las"));
-    r.setOptions(ro);
-
-    Options fo;
-    fo.add("dimension", "X");
-    fo.add("value", 27.5);
-
-    Stage& f = *(factory.createStage("filters.attribute"));
-    f.setInput(r);
-    f.setOptions(fo);
-
-    std::string tempfile(Support::temppath("out.las"));
-
-    Options wo;
-    wo.add("filename", tempfile);
-    Stage& w = *(factory.createStage("writers.las"));
-    w.setInput(f);
-    w.setOptions(wo);
-
-    FileUtils::deleteFile(tempfile);
-    PointTable t1;
-    w.prepare(t1);
-    w.execute(t1);
-
-    Options testOptions;
-    testOptions.add("filename", tempfile);
-
-    Stage& test = *(factory.createStage("readers.las"));
-    test.setOptions(testOptions);
-
-    PointTable t2;
-    test.prepare(t2);
-    PointViewSet s = test.execute(t2);
-    PointViewPtr v = *s.begin();
-    for (PointId i = 0; i < v->size(); ++i)
-        EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
-}
-
-TEST(AttributeFilterTest, datasource)
-{
-    Options ro;
-    ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
-
-    StageFactory factory;
-    Stage& r = *(factory.createStage("readers.las"));
-    r.setOptions(ro);
 
     Options fo;
     fo.add("dimension", "Classification");
     fo.add("column", "cls");
     fo.add("datasource", Support::datapath("autzen/attributes.shp"));
 
-    Stage& f = *(factory.createStage("filters.attribute"));
-    f.setInput(r);
+    LogPtr l(new Log("readers.las", "stderr"));
+    Stage& f = *(factory.createStage("filters.overlay"));
+    for (int i = 0; i < numReaders; ++i)
+    {
+        Stage& r = *(factory.createStage("readers.las"));
+        r.setLog(l);
+        r.setOptions(ro);
+        f.setInput(r);
+    }
     f.setOptions(fo);
 
     std::string tempfile(Support::temppath("out.las"));
@@ -113,10 +74,18 @@ TEST(AttributeFilterTest, datasource)
     w.setOptions(wo);
 
     FileUtils::deleteFile(tempfile);
-    PointTable t;
-    w.prepare(t);
-    w.execute(t);
-
+    if (stream)
+    {
+        FixedPointTable t(100);
+        w.prepare(t);
+        w.execute(t);
+    }
+    else
+    {
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
 //
 //
     Options testOptions;
@@ -182,4 +151,14 @@ TEST(AttributeFilterTest, datasource)
     v = *s.begin();
     for (PointId i = 0; i < v->size(); ++i)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Classification, i), 6);
+}
+
+TEST(OverlayFilterTest, nostream)
+{
+    testOverlay(10, false);
+}
+
+TEST(OverlayFilterTest, stream)
+{
+    testOverlay(10, true);
 }

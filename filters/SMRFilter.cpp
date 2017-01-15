@@ -97,7 +97,7 @@ void SMRFilter::ready(PointTableRef table)
 {
     if (m_outDir.empty())
         return;
-        
+
     if (!FileUtils::directoryExists(m_outDir))
         throw pdal_error("Output directory does not exist");
 }
@@ -203,7 +203,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // their relationship to the interpolated
 
     std::vector<PointId> groundIdx;
-    
+
     BOX2D bounds;
     view->calculateBounds(bounds);
     SpatialReference srs(view->spatialReference());
@@ -264,18 +264,19 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     MatrixXd ZImin = eigen::createMinMatrix(*view.get(), m_numRows, m_numCols,
                                             m_cellSize, bounds);
-    
+
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
     // MatrixXd ZImin_painted = TPS(cx, cy, ZImin);
     MatrixXd ZImin_painted = expandingTPS(cx, cy, ZImin);
-    
+
     if (!m_outDir.empty())
     {
         std::string filename = FileUtils::toAbsolutePath("zimin.tif", m_outDir);
         eigen::writeMatrix(ZImin, filename, "GTiff", m_cellSize, bounds, srs);
-        
+
         filename = FileUtils::toAbsolutePath("zimin_painted.tif", m_outDir);
-        eigen::writeMatrix(ZImin_painted, filename, "GTiff", m_cellSize, bounds, srs);
+        eigen::writeMatrix(ZImin_painted, filename, "GTiff", m_cellSize,
+            bounds, srs);
     }
 
     ZImin = ZImin_painted;
@@ -295,7 +296,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // Sample 1–1 in the ISPRS LIDAR reference dataset (Sithole and Vosselman,
     // 2003), following Zhang et al. (2003).
 
-    // paper has low point happening later, i guess it doesn't matter too much, this is where he does it in matlab code
+    // paper has low point happening later, i guess it doesn't matter
+    // too much, this is where he does it in matlab code
     MatrixXi Low = progressiveFilter(-ZImin, m_cellSize, 5.0, 1.0);
 
     // matlab code has net cutting occurring here
@@ -303,7 +305,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     MatrixXi isNetCell = MatrixXi::Zero(m_numRows, m_numCols);
     if (m_cutNet > 0.0)
     {
-        MatrixXd bigOpen = eigen::matrixOpen(ZImin, 2*std::ceil(m_cutNet / m_cellSize));
+        MatrixXd bigOpen = eigen::matrixOpen(ZImin,
+            2*std::ceil(m_cutNet / m_cellSize));
         for (auto c = 0; c < m_numCols; c += std::ceil(m_cutNet/m_cellSize))
         {
             for (auto r = 0; r < m_numRows; ++r)
@@ -329,7 +332,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     }
 
     // and finally object detection
-    MatrixXi Obj = progressiveFilter(ZInet, m_cellSize, m_percentSlope, m_maxWindow);
+    MatrixXi Obj = progressiveFilter(ZInet, m_cellSize, m_percentSlope,
+        m_maxWindow);
 
     // STEP 3:
 
@@ -340,7 +344,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // according to the same process described previously, producing a
     // provisional DEM (ZIpro).
 
-    // we currently aren't checking for net cells or empty cells (haven't i already marked empty cells as NaNs?)
+    // we currently aren't checking for net cells or empty cells
+    // (haven't I already marked empty cells as NaNs?)
     MatrixXd ZIpro = ZImin;
     for (int i = 0; i < Obj.size(); ++i)
     {
@@ -351,23 +356,26 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // MatrixXd ZIpro_painted = inpaintKnn(cx, cy, ZIpro);
     // MatrixXd ZIpro_painted = TPS(cx, cy, ZIpro);
     MatrixXd ZIpro_painted = expandingTPS(cx, cy, ZIpro);
-    
+
     if (!m_outDir.empty())
     {
         std::string filename = FileUtils::toAbsolutePath("zilow.tif", m_outDir);
-        eigen::writeMatrix(Low.cast<double>(), filename, "GTiff", m_cellSize, bounds, srs);
-        
+        eigen::writeMatrix(Low.cast<double>(), filename, "GTiff",
+            m_cellSize, bounds, srs);
+
         filename = FileUtils::toAbsolutePath("zinet.tif", m_outDir);
         eigen::writeMatrix(ZInet, filename, "GTiff", m_cellSize, bounds, srs);
-        
+
         filename = FileUtils::toAbsolutePath("ziobj.tif", m_outDir);
-        eigen::writeMatrix(Obj.cast<double>(), filename, "GTiff", m_cellSize, bounds, srs);
-        
+        eigen::writeMatrix(Obj.cast<double>(), filename, "GTiff",
+            m_cellSize, bounds, srs);
+
         filename = FileUtils::toAbsolutePath("zipro.tif", m_outDir);
         eigen::writeMatrix(ZIpro, filename, "GTiff", m_cellSize, bounds, srs);
-        
+
         filename = FileUtils::toAbsolutePath("zipro_painted.tif", m_outDir);
-        eigen::writeMatrix(ZIpro_painted, filename, "GTiff", m_cellSize, bounds, srs);
+        eigen::writeMatrix(ZIpro_painted, filename, "GTiff",
+            m_cellSize, bounds, srs);
     }
 
     ZIpro = ZIpro_painted;
@@ -429,7 +437,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // include this portion of the algorithm in the formal testing procedure,
     // though we provide a brief analysis of the effect of using this net filter
     // in the next section.
-    
+
     MatrixXd scaled = ZIpro / m_cellSize;
 
     MatrixXd gx = eigen::gradX(scaled);
@@ -439,29 +447,31 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // MatrixXd gsurfs_painted = inpaintKnn(cx, cy, gsurfs);
     // MatrixXd gsurfs_painted = TPS(cx, cy, gsurfs);
     MatrixXd gsurfs_painted = expandingTPS(cx, cy, gsurfs);
-    
+
     if (!m_outDir.empty())
     {
         std::string filename = FileUtils::toAbsolutePath("gx.tif", m_outDir);
         eigen::writeMatrix(gx, filename, "GTiff", m_cellSize, bounds, srs);
-        
+
         filename = FileUtils::toAbsolutePath("gy.tif", m_outDir);
         eigen::writeMatrix(gy, filename, "GTiff", m_cellSize, bounds, srs);
-        
+
         filename = FileUtils::toAbsolutePath("gsurfs.tif", m_outDir);
         eigen::writeMatrix(gsurfs, filename, "GTiff", m_cellSize, bounds, srs);
-        
+
         filename = FileUtils::toAbsolutePath("gsurfs_painted.tif", m_outDir);
-        eigen::writeMatrix(gsurfs_painted, filename, "GTiff", m_cellSize, bounds, srs);
+        eigen::writeMatrix(gsurfs_painted, filename, "GTiff",
+            m_cellSize, bounds, srs);
     }
 
     gsurfs = gsurfs_painted;
 
     MatrixXd thresh = (m_threshold + m_scalar * gsurfs.array()).matrix();
-    
+
     if (!m_outDir.empty())
     {
-        std::string filename = FileUtils::toAbsolutePath("thresh.tif", m_outDir);
+        std::string filename = FileUtils::toAbsolutePath("thresh.tif",
+            m_outDir);
         eigen::writeMatrix(thresh, filename, "GTiff", m_cellSize, bounds, srs);
     }
 
@@ -472,8 +482,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = Utils::clamp(static_cast<int>(floor(x - bounds.minx) / m_cellSize), 0, m_numCols-1);
-        int r = Utils::clamp(static_cast<int>(floor(y - bounds.miny) / m_cellSize), 0, m_numRows-1);
+        int c = Utils::clamp(
+            static_cast<int>(floor(x - bounds.minx) / m_cellSize), 0,
+            m_numCols-1);
+        int r = Utils::clamp(
+            static_cast<int>(floor(y - bounds.miny) / m_cellSize), 0,
+            m_numRows-1);
 
         // author uses spline interpolation to get value from ZIpro and gsurfs
 
@@ -505,7 +519,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 MatrixXi SMRFilter::progressiveFilter(MatrixXd const& ZImin, double cell_size,
                                       double slope, double max_window)
 {
-    log()->get(LogLevel::Info) << "progressiveFilter: Progressive filtering...\n";
+    log()->get(LogLevel::Info) <<
+        "progressiveFilter: Progressive filtering...\n";
 
     MatrixXi Obj(m_numRows, m_numCols);
     Obj.setZero();
@@ -578,7 +593,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
         if (m_classify)
         {
-            log()->get(LogLevel::Info) << "run: Labeled " << idx.size() << " ground returns!\n";
+            log()->get(LogLevel::Info) << "run: Labeled " << idx.size() <<
+                " ground returns!\n";
 
             // set the classification label of ground returns as 2
             // (corresponding to ASPRS LAS specification)
@@ -592,7 +608,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
         if (m_extract)
         {
-            log()->get(LogLevel::Info) << "run: Extracted " << idx.size() << " ground returns!\n";
+            log()->get(LogLevel::Info) << "run: Extracted " << idx.size() <<
+                " ground returns!\n";
 
             // create new PointView containing only ground returns
             PointViewPtr output = view->makeNew();
@@ -608,10 +625,12 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     else
     {
         if (idx.empty())
-            log()->get(LogLevel::Info) << "run: Filtered cloud has no ground returns!\n";
+            log()->get(LogLevel::Info) << "run: Filtered cloud has no "
+                "ground returns!\n";
 
         if (!(m_classify || m_extract))
-            log()->get(LogLevel::Info) << "run: Must choose --classify or --extract\n";
+            log()->get(LogLevel::Info) << "run: Must choose --classify or "
+                "--extract\n";
 
         // return the view buffer unchanged
         viewSet.insert(view);
@@ -619,6 +638,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     return viewSet;
 }
+
 
 MatrixXd SMRFilter::TPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
 {
@@ -639,7 +659,7 @@ MatrixXd SMRFilter::TPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
             num_nan_detect++;
 
             // Further optimizations are achieved by estimating only the
-            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
+            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
             // neighbourhood is used in our case) of the cell being filtered.
             int radius = 3;
 
@@ -795,7 +815,7 @@ MatrixXd SMRFilter::expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
             num_nan_detect++;
 
             // Further optimizations are achieved by estimating only the
-            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
+            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
             // neighbourhood is used in our case) of the cell being filtered.
             int radius = 3;
             bool solution = false;
@@ -836,7 +856,8 @@ MatrixXd SMRFilter::expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
                             continue;
                         double xk = Xn(id2);
                         double yk = Yn(id2);
-                        double rsqr = (xj - xk) * (xj - xk) + (yj - yk) * (yj - yk);
+                        double rsqr = (xj - xk) * (xj - xk) +
+                            (yj - yk) * (yj - yk);
                         if (rsqr == 0.0)
                             continue;
                         K(id, id2) = rsqr * std::log10(std::sqrt(rsqr));
@@ -866,7 +887,8 @@ MatrixXd SMRFilter::expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
                 {
                     double xj = Xn(j);
                     double yj = Yn(j);
-                    double rsqr = (xj - xi2) * (xj - xi2) + (yj - yi2) * (yj - yi2);
+                    double rsqr = (xj - xi2) * (xj - xi2) +
+                        (yj - yi2) * (yj - yi2);
                     if (rsqr == 0.0)
                         continue;
                     sum += w(j) * rsqr * std::log10(std::sqrt(rsqr));

@@ -66,10 +66,8 @@ void IQRFilter::prepared(PointTableRef table)
     m_dimId = layout->findDim(m_dimName);
     if (m_dimId == Dimension::Id::Unknown)
     {
-        std::ostringstream oss;
-        oss << "Invalid dimension name in filters.iqr 'dimension' "
-            "option: '" << m_dimName << "'.";
-        throw pdal_error(oss.str());
+        throw pdal_error(getName() + ": Dimension '" + m_dimName +
+            "' does not exist.");
     }
 }
 
@@ -77,33 +75,33 @@ PointViewSet IQRFilter::run(PointViewPtr view)
 {
     using namespace Dimension;
 
-    PointViewSet viewSet;
     PointViewPtr output = view->makeNew();
 
     auto quartile = [](std::vector<double> vals, double percent)
     {
-        std::nth_element(vals.begin(), vals.begin()+int(vals.size()*percent), vals.end());
+        std::nth_element(vals.begin(),
+            vals.begin() + int(vals.size() * percent), vals.end());
 
-        return *(vals.begin()+int(vals.size()*percent));
+        return *(vals.begin() + int(vals.size() * percent));
     };
 
     std::vector<double> z(view->size());
     for (PointId j = 0; j < view->size(); ++j)
         z[j] = view->getFieldAs<double>(m_dimId, j);
-    
-    
+
+
     double pc25 = quartile(z, 0.25);
     log()->get(LogLevel::Debug) << "25th percentile: " << pc25 << std::endl;
 
     double pc75 = quartile(z, 0.75);
     log()->get(LogLevel::Debug) << "75th percentile: " << pc75 << std::endl;
-    
+
     double iqr = pc75-pc25;
     log()->get(LogLevel::Debug) << "IQR: " << iqr << std::endl;
-    
+
     double low_fence = pc25 - m_multiplier * iqr;
     double hi_fence = pc75 + m_multiplier * iqr;
-    
+
     for (PointId j = 0; j < view->size(); ++j)
     {
         double val = view->getFieldAs<double>(m_dimId, j);
@@ -114,9 +112,8 @@ PointViewSet IQRFilter::run(PointViewPtr view)
                                 << " in the range (" << low_fence
                                 << "," << hi_fence << ")" << std::endl;
 
-    viewSet.erase(view);
+    PointViewSet viewSet;
     viewSet.insert(output);
-
     return viewSet;
 }
 

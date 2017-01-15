@@ -243,6 +243,9 @@ std::string SpatialReference::getHorizontalUnits() const
 
 bool SpatialReference::equals(const SpatialReference& input) const
 {
+    if (getWKT() == input.getWKT())
+        return true;
+
     OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT().c_str());
     OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT().c_str());
 

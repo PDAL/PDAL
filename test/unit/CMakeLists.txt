@@ -76,7 +76,7 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 #
 # sources for the native filters
 #
-PDAL_ADD_TEST(pdal_filters_attribute_test FILES filters/AttributeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES
     filters/ColorizationFilterTest.cpp)
@@ -91,6 +91,7 @@ PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test FILES
     filters/AdditionalMergeTest.cpp)
+PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)

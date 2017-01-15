@@ -1,16 +1,11 @@
-.. _filters.attribute:
+.. _filters.overlay:
 
-filters.attribute
+filters.overlay
 ===================
 
-The attribute filter allows you to set the values of a
-selected dimension. Two scenarios are supported:
 
-* Set the value of a dimension of all points to single value
-  (use option 'value')
-
-* Set points inside an OGR-readable Polygon or MultiPolygon
-  (use option 'datasource')
+The overlay filter allows you to set the values of a selected dimension
+based on an OGR-readable polygon or multi-polygon.
 
 OGR SQL support
 ----------------
@@ -43,7 +38,7 @@ feature.
       "pipeline":[
         "autzen-dd.las",
         {
-          "type":"filters.attribute",
+          "type":"filters.overlay",
           "dimension":"Classification",
           "datasource":"attributes.shp",
           "layer":"attributes",
@@ -57,33 +52,8 @@ feature.
       ]
     }
 
+
 Example 2
----------
-
-This pipeline sets the PointSourceId of all points from 'autzen-dd.las'
-to the value '26'.
-
-.. code-block:: json
-
-    {
-      "pipeline":[
-        "autzen-dd.las",
-        {
-          "type":"filters.attribute",
-          "dimension":"PointSourceId",
-          "value":26
-        },
-        {
-          "filename":"attributed.las",
-          "scale_x":0.0000001,
-          "scale_y":0.0000001
-        }
-      ]
-    }
-
-
-
-Example 3
 --------------------------------------------------------------------------------
 
 This example sets the Intensity attribute to ``CLS`` values read from the
@@ -97,7 +67,7 @@ This example sets the Intensity attribute to ``CLS`` values read from the
       "pipeline":[
         "autzen-dd.las",
         {
-          "type":"filters.attribute",
+          "type":"filters.overlay",
           "dimension":"Intensity",
           "datasource":"attributes.shp",
           "query":"SELECT CLS FROM attributes where cls!=6",
@@ -113,13 +83,10 @@ Options
 -------
 
 dimension
-  Name of the dimension whose value should be altered.  [Default: none]
-
-value
-  Value to apply to the dimension.  [Default: none]
+  Name of the dimension whose value should be altered.  [Required]
 
 datasource
-  OGR-readable datasource for Polygon or MultiPolygon data.  [Default: none]
+  OGR-readable datasource for Polygon or MultiPolygon data.  [Required]
 
 column
   The OGR datasource column from which to read the attribute.
@@ -127,7 +94,7 @@ column
 
 query
   OGR SQL query to execute on the datasource to fetch geometry and attributes.
-  [Default: none]
+  The entire layer is fetched if no query is provided.  [Default: none]
 
 layer
   The data source's layer to use. [Defalt: first layer]

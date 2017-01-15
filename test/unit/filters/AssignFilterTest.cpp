@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,31 +32,55 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Geometry.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 
-namespace pdal
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(AssignFilterTest, value)
 {
+    Options ro;
+    ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
 
-namespace cropfilter
-{
+    StageFactory factory;
+    Stage& r = *(factory.createStage("readers.las"));
+    r.setOptions(ro);
 
-class PDAL_DLL Point : public Geometry
-{
-public:
-    Point();
-    Point(const std::string& wkt_or_json,
-           SpatialReference ref);
-    bool is3d() const;
-    bool empty() const;
-    void clear();
+    Options fo;
+    fo.add("dimension", "X");
+    fo.add("value", 27.5);
 
-    virtual void update(const std::string& wkt_or_json);
+    Stage& f = *(factory.createStage("filters.assign"));
+    f.setInput(r);
+    f.setOptions(fo);
 
-    double x;
-    double y;
-    double z;
-};
-} // namespace cropfilter
-} // namespace pdal
+    std::string tempfile(Support::temppath("out.las"));
+
+    Options wo;
+    wo.add("filename", tempfile);
+    Stage& w = *(factory.createStage("writers.las"));
+    w.setInput(f);
+    w.setOptions(wo);
+
+    FileUtils::deleteFile(tempfile);
+    PointTable t1;
+    w.prepare(t1);
+    w.execute(t1);
+
+    Options testOptions;
+    testOptions.add("filename", tempfile);
+
+    Stage& test = *(factory.createStage("readers.las"));
+    test.setOptions(testOptions);
+
+    PointTable t2;
+    test.prepare(t2);
+    PointViewSet s = test.execute(t2);
+    PointViewPtr v = *s.begin();
+    for (PointId i = 0; i < v->size(); ++i)
+        EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
+}
