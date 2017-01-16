@@ -262,30 +262,50 @@ bool Invocation::execute()
         throw pdal::pdal_error("No code has been compiled");
 
     Py_INCREF(m_varsIn);
-    Py_INCREF(m_varsOut);
     Py_ssize_t numArgs = argCount(m_function);
     m_scriptArgs = PyTuple_New(numArgs);
 
+    if (numArgs > 2)
+        throw pdal::pdal_error("Only two arguments -- ins and outs numpy arrays -- can be passed!");
+
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
+    {
+        Py_INCREF(m_varsOut);
         PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+    }
 
+    int success(0);
 
-    int success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
-    if (success)
-        throw pdal::pdal_error("unable to set metadata global");
+    if (m_metadata_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set metadata global");
+        Py_INCREF(m_metadata_PyObject);
+    }
 
-    success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
-    if (success)
-        throw pdal::pdal_error("unable to set schema global");
+    if (m_schema_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set schema global");
+        Py_INCREF(m_srs_PyObject);
+    }
 
-    success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
-    if (success)
-        throw pdal::pdal_error("unable to set spatialreference global");
+    if (m_srs_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set spatialreference global");
+        Py_INCREF(m_schema_PyObject);
+    }
 
-    m_scriptResult = PyObject_Call(m_function, m_scriptArgs, NULL);
+    m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
+    if (!PyBool_Check(m_scriptResult))
+        throw pdal::pdal_error("User function return value not a boolean type.");
 
     PyObject* mod_vars = PyModule_GetDict(m_module);
 
@@ -293,7 +313,7 @@ bool Invocation::execute()
     if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
         m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
 
-    return true;
+    return (m_scriptResult == Py_True);
 }
 
 PyObject* getPyJSON(MetadataNode node)
@@ -403,7 +423,8 @@ void Invocation::end(PointView& view, MetadataNode m)
     for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
         free(*bi);
     m_buffers.clear();
-    addMetadata(m_metadata_PyObject, m);
+    if (m_metadata_PyObject)
+        addMetadata(m_metadata_PyObject, m);
 }
 
 } // namespace plang
