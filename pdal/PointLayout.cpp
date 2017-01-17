@@ -318,5 +318,24 @@ Dimension::Type PointLayout::resolveType(Dimension::Type t1,
     }
 }
 
+MetadataNode PointLayout::toMetadata() const
+{
+
+    MetadataNode root;
+
+    for (const auto& id : dims())
+    {
+        MetadataNode dim("dimensions");
+        dim.add("name", dimName(id));
+        Dimension::Type t = dimType(id);
+        dim.add("type", Dimension::toName(Dimension::base(t)));
+        dim.add("size", dimSize(id));
+        root.addList(dim);
+    }
+
+    return root;
+}
+
 } // namespace pdal
+
 

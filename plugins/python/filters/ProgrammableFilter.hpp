@@ -37,7 +37,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
 
-#include <pdal/plang/BufferedInvocation.hpp>
+#include <pdal/plang/Invocation.hpp>
 
 namespace pdal
 {
@@ -56,7 +56,7 @@ public:
 
 private:
     plang::Script* m_script;
-    plang::BufferedInvocation *m_pythonMethod;
+    plang::Invocation *m_pythonMethod;
     std::string m_source;
     std::string m_scriptFile;
     std::string m_module;

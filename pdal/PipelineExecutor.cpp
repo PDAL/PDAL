@@ -76,7 +76,7 @@ std::string PipelineExecutor::getSchema() const
         throw pdal_error("Pipeline has not been executed!");
 
     std::stringstream strm;
-    MetadataNode root = m_manager.pointTable().toMetadata().clone("schema");
+    MetadataNode root = m_manager.pointTable().layout()->toMetadata().clone("schema");
     pdal::Utils::toJSON(root, strm);
     return strm.str();
 }

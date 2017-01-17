@@ -71,7 +71,7 @@ a call for help with building current Windows PDAL builds is at https://lists.os
 RPMs
 ................................................................................
 
-RPMs for PDAL are available at http://pdal.s3-website-us-east-1.amazonaws.com/rpms/
+RPMs for PDAL are available at https://copr.fedorainfracloud.org/coprs/neteler/pdal/
 
 Debian
 ................................................................................

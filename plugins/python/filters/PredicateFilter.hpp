@@ -37,7 +37,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
 
-#include <pdal/plang/BufferedInvocation.hpp>
+#include <pdal/plang/Invocation.hpp>
 
 namespace pdal
 {
@@ -53,7 +53,7 @@ public:
     std::string getName() const;
 
 private:
-    plang::BufferedInvocation* m_pythonMethod;
+    plang::Invocation* m_pythonMethod;
     plang::Script* m_script;
     std::string m_source;
     std::string m_scriptFile;
