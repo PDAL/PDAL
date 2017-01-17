@@ -40,6 +40,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <filters/private/crop/Point.hpp>
 
 #include <sstream>
 #include <cstdarg>
@@ -56,9 +57,12 @@ CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
 
 std::string CropFilter::getName() const { return s_info.name; }
 
-CropFilter::CropFilter() : m_cropOutside(false)
+CropFilter::CropFilter() : m_cropOutside(false),
+    m_centers(new std::vector<cropfilter::Point>)
 {}
 
+CropFilter::~CropFilter()
+{}
 
 void CropFilter::addArgs(ProgramArgs& args)
 {
@@ -66,8 +70,9 @@ void CropFilter::addArgs(ProgramArgs& args)
         "bounding region", m_cropOutside);
     args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
     args.add("bounds", "Point box for cropped points", m_bounds);
-    args.add("point", "Crop within 'distance' from a 2D or 3D point", m_points).
-        setErrorText("Invalid point specification.  Must be valid GeoJSON/WKT. "
+    args.add("point", "Center of circular/spherical crop region.  Use with "
+        "'distance'.", *m_centers).setErrorText("Invalid point specification.  "
+            "Must be valid GeoJSON/WKT. "
             "Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
         m_distance);
@@ -114,7 +119,7 @@ bool CropFilter::processOne(PointRef& point)
         if (!crop(point, box.to2d()))
             return false;
 
-    for (auto& center: m_points)
+    for (auto& center: *m_centers)
         if (!crop(point, center))
             return false;
 
@@ -155,7 +160,7 @@ void CropFilter::transform(const SpatialReference& srs)
         gdal::reprojectBounds(b3d, m_assignedSrs.getWKT(), srs.getWKT());
         box = b3d;
     }
-    for (auto& point : m_points)
+    for (auto& point : *m_centers)
     {
         gdal::reprojectPoint(point.x, point.y, point.z,
             m_assignedSrs.getWKT(), srs.getWKT());
@@ -183,7 +188,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
         viewSet.insert(outView);
     }
 
-    for (auto& point: m_points)
+    for (auto& point: *m_centers)
     {
         PointViewPtr outView = view->makeNew();
         crop(point, *view, *outView);

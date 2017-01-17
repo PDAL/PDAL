@@ -37,13 +37,17 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/plugin.hpp>
-#include "filters/private/crop/Point.hpp"
 
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
 
 namespace pdal
 {
+namespace cropfilter
+{
+    class Point;
+};
+
 
 class ProgramArgs;
 
@@ -53,7 +57,7 @@ class PDAL_DLL CropFilter : public Filter
 {
 public:
     CropFilter();
-
+    ~CropFilter();
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
@@ -65,8 +69,7 @@ private:
     SpatialReference m_assignedSrs;
     double m_distance;
     double m_distance2;
-    std::vector<cropfilter::Point> m_points;
-
+    std::unique_ptr<std::vector<cropfilter::Point>> m_centers;
     std::vector<Polygon> m_geoms;
 
     void addArgs(ProgramArgs& args);
