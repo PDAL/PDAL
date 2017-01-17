@@ -204,9 +204,13 @@ TEST_F(ProgrammableFilterTest, metadata)
     reader.setOptions(ops);
 
     Option source("source", "import numpy\n"
-        "def myfunc(ins,outs,inmeta,outmeta):\n"
-        "  t = ('name', 'value', '', '', [])\n"
-        "  outmeta.append(t)\n"
+        "import sys\n"
+        "import redirector\n"
+        "def myfunc(ins,outs):\n"
+        "  global metadata\n"
+        "  #print('before', globals(),  file=sys.stderr,)\n"
+        "  metadata = {'name': 'root', 'value': 'a string', 'type': 'string', 'description': 'a description', 'children': [{'name': 'filters.programmable', 'value': 52, 'type': 'integer', 'description': 'a filter description', 'children': []}, {'name': 'readers.faux', 'value': 'another string', 'type': 'string', 'description': 'a reader description', 'children': []}]}\n"
+        " # print ('schema', schema, file=sys.stderr,)\n"
         "  return True\n"
     );
     Option module("module", "MyModule");
@@ -230,7 +234,8 @@ TEST_F(ProgrammableFilterTest, metadata)
     MetadataNode m = table.metadata();
     m = m.findChild("filters.programmable");
     MetadataNodeList l = m.children();
-    EXPECT_EQ(l.size(), 1u);
-//     EXPECT_EQ(l[0].name(), "name");
-//     EXPECT_EQ(l[0].value(), "value");
+    EXPECT_EQ(l.size(), 3u);
+    EXPECT_EQ(l[0].name(), "filters.programmable");
+    EXPECT_EQ(l[0].value(), "52");
+    EXPECT_EQ(l[0].description(), "a filter description");
 }

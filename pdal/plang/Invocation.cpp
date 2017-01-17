@@ -75,10 +75,8 @@ namespace pdal
 namespace plang
 {
 
-Invocation::Invocation(const Script& script) :
-    m_metaIn(NULL)
-    , m_metaOut(NULL)
-    , m_script(script)
+Invocation::Invocation(const Script& script)
+    : m_script(script)
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
@@ -87,6 +85,9 @@ Invocation::Invocation(const Script& script) :
     , m_varsOut(NULL)
     , m_scriptArgs(NULL)
     , m_scriptResult(NULL)
+    , m_metadata_PyObject(NULL)
+    , m_schema_PyObject(NULL)
+    , m_srs_PyObject(NULL)
 {
     plang::Environment::get();
     resetArguments();
@@ -137,8 +138,6 @@ void Invocation::cleanup()
         Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
     Py_XDECREF(m_bytecode);
-    Py_XDECREF(m_metaIn);
-    Py_XDECREF(m_metaOut);
 }
 
 
@@ -147,8 +146,6 @@ void Invocation::resetArguments()
     cleanup();
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
-    m_metaIn = PyList_New(0);
-    m_metaOut = PyList_New(0);
 }
 
 
@@ -265,25 +262,169 @@ bool Invocation::execute()
         throw pdal::pdal_error("No code has been compiled");
 
     Py_INCREF(m_varsIn);
-    Py_INCREF(m_varsOut);
     Py_ssize_t numArgs = argCount(m_function);
     m_scriptArgs = PyTuple_New(numArgs);
+
+    if (numArgs > 2)
+        throw pdal::pdal_error("Only two arguments -- ins and outs numpy arrays -- can be passed!");
+
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
+    {
+        Py_INCREF(m_varsOut);
         PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
-    if (numArgs > 2)
-        PyTuple_SetItem(m_scriptArgs, 2, m_metaIn);
-    if (numArgs > 3)
-        PyTuple_SetItem(m_scriptArgs, 3, m_metaOut);
+    }
+
+    int success(0);
+
+    if (m_metadata_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set metadata global");
+        Py_INCREF(m_metadata_PyObject);
+    }
+
+    if (m_schema_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set schema global");
+        Py_INCREF(m_srs_PyObject);
+    }
+
+    if (m_srs_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set spatialreference global");
+        Py_INCREF(m_schema_PyObject);
+    }
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
-
     if (!PyBool_Check(m_scriptResult))
         throw pdal::pdal_error("User function return value not a boolean type.");
 
+    PyObject* mod_vars = PyModule_GetDict(m_module);
+
+    PyObject* b =  PyUnicode_FromString("metadata");
+    if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
+        m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
+
     return (m_scriptResult == Py_True);
+}
+
+PyObject* getPyJSON(MetadataNode node)
+{
+
+    std::ostringstream schema_strm;
+    Utils::toJSON(node, schema_strm);
+
+    PyObject* raw_json =  PyUnicode_FromString(schema_strm.str().c_str());
+    PyObject* json_module = PyImport_ImportModule("json");
+    if (!json_module)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json_mod_dict = PyModule_GetDict(json_module);
+    if (!json_mod_dict)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* loads_func = PyDict_GetItemString(json_mod_dict, "loads");
+    if (!loads_func)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json_args = PyTuple_New(1);
+    if (!json_args)
+        throw pdal::pdal_error(getTraceback());
+
+    int success = PyTuple_SetItem(json_args, 0, raw_json);
+    if (success != 0)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json = PyObject_CallObject(loads_func, json_args);
+    if (!json)
+        throw pdal::pdal_error(getTraceback());
+
+    return json;
+}
+
+
+void Invocation::begin(PointView& view, MetadataNode m)
+{
+    PointLayoutPtr layout(view.m_pointTable.layout());
+    Dimension::IdList const& dims = layout->dims();
+
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        Dimension::Id d = *di;
+        const Dimension::Detail *dd = layout->dimDetail(d);
+        void *data = malloc(dd->size() * view.size());
+        m_buffers.push_back(data);  // Hold pointer for deallocation
+        char *p = (char *)data;
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            view.getFieldInternal(d, idx, (void *)p);
+            p += dd->size();
+        }
+        std::string name = layout->dimName(*di);
+        insertArgument(name, (uint8_t *)data, dd->type(), view.size());
+    }
+
+    // Put pipeline 'metadata' variable into module scope
+    Py_XDECREF(m_metadata_PyObject);
+    m_metadata_PyObject= plang::fromMetadata(m);
+
+    // Put 'schema' dict into module scope
+    Py_XDECREF(m_schema_PyObject);
+    MetadataNode s = view.layout()->toMetadata();
+    m_schema_PyObject = getPyJSON(s);
+
+    Py_XDECREF(m_srs_PyObject);
+    MetadataNode srs = view.spatialReference().toMetadata();
+    m_srs_PyObject = getPyJSON(srs);
+}
+
+
+void Invocation::end(PointView& view, MetadataNode m)
+{
+    // for each entry in the script's outs dictionary,
+    // look up that entry's name in the schema and then
+    // copy the data into the right dimension spot in the
+    // buffer
+
+    std::vector<std::string> names;
+    getOutputNames(names);
+
+    PointLayoutPtr layout(view.m_pointTable.layout());
+    Dimension::IdList const& dims = layout->dims();
+
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        Dimension::Id d = *di;
+        const Dimension::Detail *dd = layout->dimDetail(d);
+        std::string name = layout->dimName(*di);
+        auto found = std::find(names.begin(), names.end(), name);
+        if (found == names.end()) continue; // didn't have this dim in the names
+
+        assert(name == *found);
+        assert(hasOutputVariable(name));
+
+        size_t size = dd->size();
+        void *data = extractResult(name, dd->type());
+        char *p = (char *)data;
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            view.setField(d, dd->type(), idx, (void *)p);
+            p += size;
+        }
+    }
+    for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
+        free(*bi);
+    m_buffers.clear();
+    if (m_metadata_PyObject)
+        addMetadata(m_metadata_PyObject, m);
 }
 
 } // namespace plang

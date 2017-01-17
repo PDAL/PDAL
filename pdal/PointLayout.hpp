@@ -41,6 +41,7 @@
 
 #include <pdal/DimDetail.hpp>
 #include <pdal/DimType.hpp>
+#include <pdal/Metadata.hpp>
 
 namespace pdal
 {
@@ -224,6 +225,9 @@ public:
       \return  A pointer a dimension's detail.
     */
     PDAL_DLL const Dimension::Detail *dimDetail(Dimension::Id id) const;
+
+
+    PDAL_DLL MetadataNode toMetadata() const;
 
 private:
     PDAL_DLL virtual bool update(Dimension::Detail dd, const std::string& name);

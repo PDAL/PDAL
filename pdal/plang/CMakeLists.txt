@@ -1,7 +1,6 @@
 
 set(plang_srcs
     Array.cpp
-    BufferedInvocation.cpp
     Invocation.cpp
     Environment.cpp
     Redirector.cpp
