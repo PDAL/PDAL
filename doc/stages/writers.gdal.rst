@@ -94,7 +94,7 @@ resolution
 
 radius
     Radius about cell center bounding points to use to calculate a cell value.
-    [Required]
+    [Default: ``resolution`` * sqrt(2)]
 
 gdaldriver
     Name of the GDAL driver to use to write the output. [Default: "GTiff"]
