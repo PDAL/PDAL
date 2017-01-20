@@ -32,74 +32,71 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "kernel/Cpd.hpp"
+#include "kernel/CpdKernel.hpp"
 #include <pdal/pdal_macros.hpp>
 
-#include <cpd/rigid.hpp>
 #include <cpd/nonrigid.hpp>
+#include <cpd/rigid.hpp>
 
-#include <pdal/KernelFactory.hpp>
-#include <pdal/StageFactory.hpp>
 #include <filters/CropFilter.hpp>
 #include <io/BufferReader.hpp>
+#include <pdal/KernelFactory.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/EigenUtils.hpp>
 
-namespace pdal
-{
+namespace pdal {
 
 static PluginInfo const s_info = PluginInfo(
-                                     "kernels.cpd",
-                                     "CPD Kernel",
-                                     "http://pdal.io/kernels/kernels.cpd.html" );
+    "kernels.cpd", "CPD Kernel", "http://pdal.io/kernels/kernels.cpd.html");
 
 CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
 
-std::string CpdKernel::getName() const {
-    return s_info.name;
-}
+std::string CpdKernel::getName() const { return s_info.name; }
 
-void CpdKernel::addSwitches(ProgramArgs& args)
-{
-    Arg& method = args.add("method,M", "registration method (rigid, nonrigid)",
-                           m_method);
+void CpdKernel::addSwitches(ProgramArgs& args) {
+    Arg& method =
+        args.add("method,M", "registration method (rigid, nonrigid)", m_method);
     method.setPositional();
-    Arg& filex = args.add("filex,x", "input file containing the source points",
-                          m_filex);
-    filex.setPositional();
-    Arg& filey = args.add("filey,y", "input file containg target points, "
-                          "i.e. the points that will be registered", m_filey);
-    filey.setPositional();
+    Arg& fixed =
+        args.add("fixed,f", "input file containing the fixed points", m_fixed);
+    fixed.setPositional();
+    Arg& moving = args.add("moving,m",
+                          "input file containing the moving points, "
+                          "i.e. the points that will be registered",
+                          m_moving);
+    moving.setPositional();
     Arg& output = args.add("output,o", "output file name", m_output);
     output.setPositional();
-    args.add("tolerance,t", "tolerance criterium", m_tolerance,
-             cpd::Rigid::DEFAULT_TOLERANCE);
-    args.add("max-iterations,m", "maximum number of iterations allowed",
-             m_max_it, cpd::Rigid::DEFAULT_MAX_ITERATIONS);
-    args.add("outliers,O", "the weight of noise and outliers",
-             m_outliers, cpd::Rigid::DEFAULT_OUTLIER_WEIGHT);
-    args.add("no-reflections,r", "Prevent reflections of the data",
-             m_no_reflections, true);
-    args.add("allow-scaling,S", "Allow scaling of the data",
-             m_allow_scaling, false);
-    args.add("beta,b", "std of gaussian filter (Green's function, used "
-             "for nonrigid registrations only)", m_beta, cpd::Nonrigid::DEFAULT_BETA);
-    args.add("lambda,l", "regularization weight (used for nonrigid "
-             "registrations only)", m_lambda, cpd::Nonrigid::DEFAULT_LAMBDA);
     args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
-    args.add("sigma2",
-             "The starting sigma2 value. To improve CPD runs, set to a bit "
-             "more than you expect the average motion to be",
-             m_sigma2, 0.0);
+
+    args.add("max-iterations", "maximum number of iterations allowed",
+             m_max_iterations, cpd::DEFAULT_MAX_ITERATIONS);
+    args.add("normalize", "whether cpd should normalize the points before running",
+             m_normalize, true);
+    args.add("outliers", "a number between zero and one that represents the tolerance for outliers",
+             m_outliers, cpd::DEFAULT_OUTLIERS);
+    args.add("sigma2", "the starting sigma2 value.",
+             m_sigma2, cpd::DEFAULT_SIGMA2);
+    args.add("tolerance", "the amount the error must change to continue iterations",
+             m_tolerance, cpd::DEFAULT_TOLERANCE);
+
+    args.add("reflections", "should rigid registrations allow reflections",
+            m_reflections, false);
+    args.add("scale", "should rigid registrations allow scaling",
+            m_reflections, false);
+
+    args.add("beta", "beta parameter for nonrigid registrations",
+            m_beta, cpd::DEFAULT_BETA);
+    args.add("lambda", "lambda parameter for nonrigid registrations",
+            m_lambda, cpd::DEFAULT_LAMBDA);
 }
 
-
-cpd::Matrix CpdKernel::readFile(const std::string& filename)
-{
+cpd::Matrix CpdKernel::readFile(const std::string& filename) {
     Stage& reader = makeReader(filename, "");
 
     PointTable table;
     PointViewSet viewSet;
-    if (!m_bounds.empty())
-    {
+    if (!m_bounds.empty()) {
         Options boundsOptions;
         boundsOptions.add("bounds", m_bounds);
 
@@ -107,82 +104,42 @@ cpd::Matrix CpdKernel::readFile(const std::string& filename)
         crop.setOptions(boundsOptions);
         crop.prepare(table);
         viewSet = crop.execute(table);
-    }
-    else
-    {
+    } else {
         reader.prepare(table);
         viewSet = reader.execute(table);
     }
 
-    cpd::Matrix matrix(0, 3);
-    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
-    {
-        PointViewPtr view = *it;
-        point_count_t rowidx;
-        if (matrix.rows() == 0)
-        {
-            rowidx = 0;
-            matrix.resize(view->size(), 3);
-        }
-        else
-        {
-            rowidx = matrix.rows();
-            matrix.conservativeResize(matrix.rows() + view->size(), 3);
-        }
-
-        for (point_count_t bufidx = 0; bufidx < view->size(); ++bufidx, ++rowidx)
-        {
-            matrix(rowidx, 0) = view->getFieldAs<double>(Dimension::Id::X, bufidx);
-            matrix(rowidx, 1) = view->getFieldAs<double>(Dimension::Id::Y, bufidx);
-            matrix(rowidx, 2) = view->getFieldAs<double>(Dimension::Id::Z, bufidx);
-        }
-    }
-    return matrix;
+    return eigen::pointViewToEigen(**viewSet.begin());
 }
 
+int CpdKernel::execute() {
+    cpd::Matrix fixed = readFile(m_fixed);
+    cpd::Matrix moving = readFile(m_moving);
 
-int CpdKernel::execute()
-{
-    PointTable tableX;
-    PointTable tableY;
-
-    cpd::Matrix X = readFile(m_filex);
-    cpd::Matrix Y = readFile(m_filey);
-
-    if (X.rows() == 0 || Y.rows() == 0)
-    {
+    if (fixed.rows() == 0 || moving.rows() == 0) {
         throw pdal_error("No points to process.");
     }
 
     cpd::Matrix result;
     if (m_method == "rigid") {
         cpd::Rigid rigid;
-        rigid
-            .set_tolerance(m_tolerance)
-            .set_max_iterations(m_max_it)
-            .set_outlier_weight(m_outliers);
-        rigid
-            .no_reflections(m_no_reflections)
-            .allow_scaling(m_allow_scaling);
-        if (m_sigma2 > 0) {
-            result = rigid.compute(X, Y, m_sigma2).points;
-        } else {
-            result = rigid.compute(X, Y).points;
-        }
+        rigid.max_iterations(m_max_iterations)
+            .normalize(m_normalize)
+            .outliers(m_outliers)
+            .sigma2(m_sigma2)
+            .tolerance(m_tolerance);
+        rigid.reflections(m_reflections)
+            .scale(m_scale);
+        result = rigid.run(fixed, moving).points;
     } else if (m_method == "nonrigid") {
         cpd::Nonrigid nonrigid;
-        nonrigid
-            .set_tolerance(m_tolerance)
-            .set_max_iterations(m_max_it)
-            .set_outlier_weight(m_outliers);
-        nonrigid
-            .set_beta(m_beta)
-            .set_lambda(m_lambda);
-        if (m_sigma2 > 0) {
-            result = nonrigid.compute(X, Y, m_sigma2).points;
-        } else {
-            result = nonrigid.compute(X, Y).points;
-        }
+        nonrigid.max_iterations(m_max_iterations)
+            .normalize(m_normalize)
+            .outliers(m_outliers)
+            .sigma2(m_sigma2)
+            .tolerance(m_tolerance);
+        nonrigid.beta(m_beta).lambda(m_lambda);
+        result = nonrigid.run(fixed, moving).points;
     } else {
         std::stringstream ss;
         ss << "Invalid cpd method: " << m_method << std::endl;
@@ -199,26 +156,24 @@ int CpdKernel::execute()
     outLayout->registerDim(Dimension::Id::ZVelocity);
     PointViewPtr outView(new PointView(outTable));
 
-    size_t M = Y.rows();
-    for (size_t i = 0; i < M; ++i)
-    {
+    size_t rows = moving.rows();
+    for (size_t i = 0; i < rows; ++i) {
         outView->setField<double>(Dimension::Id::X, i, result(i, 0));
         outView->setField<double>(Dimension::Id::Y, i, result(i, 1));
         outView->setField<double>(Dimension::Id::Z, i, result(i, 2));
         outView->setField<double>(Dimension::Id::XVelocity, i,
-                                  Y(i, 0) - result(i, 0));
+                                  moving(i, 0) - result(i, 0));
         outView->setField<double>(Dimension::Id::YVelocity, i,
-                                  Y(i, 1) - result(i, 1));
+                                  moving(i, 1) - result(i, 1));
         outView->setField<double>(Dimension::Id::ZVelocity, i,
-                                  Y(i, 2) - result(i, 2));
+                                  moving(i, 2) - result(i, 2));
     }
 
     BufferReader reader;
     reader.addView(outView);
 
     Options writerOpts;
-    if (StageFactory::inferReaderDriver(m_output) == "writers.text")   
-    {
+    if (StageFactory::inferReaderDriver(m_output) == "writers.text") {
         writerOpts.add("order", "X,Y,Z,XVelocity,YVelocity,ZVelocity");
         writerOpts.add("keep_unspecified", false);
     }
@@ -229,4 +184,4 @@ int CpdKernel::execute()
     return 0;
 }
 
-} // namespace pdal
+}  // namespace pdal
