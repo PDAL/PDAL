@@ -37,6 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/plugin.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include "GDALGrid.hpp"
 
@@ -68,6 +69,7 @@ private:
     std::string m_drivername;
     BOX2D m_bounds;
     double m_edgeLength;
+    Arg *m_radiusArg;
     double m_radius;
     StringList m_options;
     StringList m_outputTypeString;
