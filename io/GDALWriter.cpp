@@ -61,8 +61,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("resolution", "Cell edge size, in units of X/Y",
         m_edgeLength).setPositional();
-    args.add("radius", "Radius from cell center to use to locate influencing "
-        "points", m_radius).setPositional();
+    m_radiusArg = &args.add("radius", "Radius from cell center to use to locate"
+        " influencing points", m_radius);
     args.add("gdaldriver", "GDAL writer driver name", m_drivername, "GTiff");
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
@@ -133,6 +133,9 @@ void GDALWriter::ready(PointTableRef table)
             "references.";
         throw pdal_error(oss.str());
     }
+    
+    if (!m_radiusArg->set())
+        m_radius = m_edgeLength * sqrt(2.0);
 }
 
 
@@ -201,4 +204,3 @@ void GDALWriter::done(PointTableRef table)
 }
 
 } // namespace pdal
-
