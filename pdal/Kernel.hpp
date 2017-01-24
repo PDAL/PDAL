@@ -92,6 +92,7 @@ protected:
         std::string driver);
     Stage& makeWriter(const std::string& outputFile, Stage& parent,
         std::string driver, Options options);
+    virtual bool isStagePrefix(const std::string& stageType);
 
 public:
     virtual void addSwitches(ProgramArgs& args)
@@ -121,9 +122,13 @@ private:
     void doSwitches(const StringList& cmdArgs, ProgramArgs& args);
     int doStartup();
     int doExecution(ProgramArgs& args);
-
-    static bool test_parseOption(std::string o, std::string& stage,
+    bool parseStageOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
+
+    static bool test_parseStageOption(std::string o, std::string& stage,
+        std::string& option, std::string& value);
+    /**
+**/
 
     bool m_showHelp;
     bool m_showOptions;
