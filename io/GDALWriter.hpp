@@ -35,7 +35,7 @@
 #include <algorithm>
 
 #include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/FlexWriter.hpp>
 #include <pdal/plugin.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -47,7 +47,7 @@ extern "C" PF_ExitFunc GDALWriter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL GDALWriter : public Writer
+class PDAL_DLL GDALWriter : public FlexWriter
 {
 public:
     static void * create();
@@ -61,13 +61,20 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs);
+    virtual void writeView(const PointViewPtr view);
+    virtual bool processOne(PointRef& point);
+    virtual void doneFile();
+    void createGrid(BOX2D bounds);
+    void expandGrid(BOX2D bounds);
 
-    std::string m_filename;
+    std::string m_outputFilename;
     std::string m_drivername;
+    SpatialReference m_srs;
     BOX2D m_bounds;
+    BOX2D m_curBounds;
     double m_edgeLength;
     Arg *m_radiusArg;
     double m_radius;
@@ -79,7 +86,6 @@ private:
     double m_noData;
     Dimension::Id m_interpDim;
     std::string m_interpDimString;
-
 };
 
 }

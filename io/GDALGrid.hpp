@@ -53,6 +53,8 @@ public:
     GDALGrid(size_t width, size_t height, double edgeLength, double radius,
         double noData, int outputTypes, size_t windowSize);
 
+    void expand(size_t width, size_t height, size_t xshift, size_t yshift);
+
     // Get the number of bands represented by this grid.
     int numBands() const;
 

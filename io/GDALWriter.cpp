@@ -72,6 +72,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_windowSize);
     args.add("nodata", "No data value", m_noData, -9999.0);
     args.add("dimension", "Dimension to use", m_interpDimString, "Z");
+    args.add("bounds", "Bounds of data.  Required in streaming mode.",
+        m_bounds);
 }
 
 
@@ -120,58 +122,103 @@ void GDALWriter::prepared(PointTableRef table)
             "' does not exist.";
         throw pdal_error(oss.str());
     }
-}
-
-
-void GDALWriter::ready(PointTableRef table)
-{
-    if (!table.spatialReferenceUnique())
-    {
-        std::ostringstream oss;
-
-        oss << getName() << ": Can't write output with multiple spatial "
-            "references.";
-        throw pdal_error(oss.str());
-    }
-    
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
 }
 
 
-void GDALWriter::write(const PointViewPtr view)
+void GDALWriter::readyTable(PointTableRef table)
 {
-    view->calculateBounds(m_bounds);
-    size_t width = ((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
-    size_t height = ((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
-    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius, m_noData,
-        m_outputTypes, m_windowSize));
-
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        double x = view->getFieldAs<double>(Dimension::Id::X, idx) -
-            m_bounds.minx;
-        double y = view->getFieldAs<double>(Dimension::Id::Y, idx) -
-            m_bounds.miny;
-        double z = view->getFieldAs<double>(m_interpDim, idx);
-
-        m_grid->addPoint(x, y, z);
-   }
+    if (m_bounds.empty() && !table.supportsView())
+        throw pdal_error(getName() + ": 'bounds' option required in "
+            "streaming mode.");
 }
 
 
-void GDALWriter::done(PointTableRef table)
+void GDALWriter::readyFile(const std::string& filename,
+    const SpatialReference& srs)
+{
+    m_outputFilename = filename;
+    m_srs = srs;
+    if (m_bounds.valid())
+        createGrid(m_bounds);
+}
+
+
+void GDALWriter::createGrid(BOX2D bounds)
+{
+    m_curBounds = bounds;
+    size_t width = ((m_curBounds.maxx - m_curBounds.minx) / m_edgeLength) + 1;
+    size_t height = ((m_curBounds.maxy - m_curBounds.miny) / m_edgeLength) + 1;
+    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius, m_noData,
+        m_outputTypes, m_windowSize));
+}
+
+
+void GDALWriter::expandGrid(BOX2D bounds)
+{
+    if (bounds == m_curBounds)
+        return;
+
+    bounds.grow(m_curBounds);
+    size_t xshift = ceil((m_curBounds.minx - bounds.minx) / m_edgeLength);
+    bounds.minx = m_curBounds.minx - (xshift * m_edgeLength);
+    size_t yshift = ceil((m_curBounds.miny - bounds.miny) / m_edgeLength);
+    bounds.miny = m_curBounds.miny - (yshift * m_edgeLength);
+
+    size_t width = ((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    size_t height = ((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    m_grid->expand(width, height, xshift, yshift);
+    m_curBounds = bounds;
+}
+
+
+void GDALWriter::writeView(const PointViewPtr view)
+{
+    BOX2D bounds;
+    if (m_bounds.valid())
+        bounds = m_bounds;
+    else
+        view->calculateBounds(bounds);
+
+    if (!m_grid)
+        createGrid(bounds);
+    else
+        expandGrid(bounds);
+
+    PointRef point(*view, 0);
+    for (PointId idx = 0; idx < view->size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
+}
+
+
+bool GDALWriter::processOne(PointRef& point)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X) -
+        m_curBounds.minx;
+    double y = point.getFieldAs<double>(Dimension::Id::Y) -
+        m_curBounds.miny;
+    double z = point.getFieldAs<double>(m_interpDim);
+
+    m_grid->addPoint(x, y, z);
+    return true;
+}
+
+
+void GDALWriter::doneFile()
 {
     std::array<double, 6> pixelToPos;
 
-    pixelToPos[0] = m_bounds.minx;
+    pixelToPos[0] = m_curBounds.minx;
     pixelToPos[1] = m_edgeLength;
     pixelToPos[2] = 0;
-    pixelToPos[3] = m_bounds.miny + (m_edgeLength * m_grid->height());
+    pixelToPos[3] = m_curBounds.miny + (m_edgeLength * m_grid->height());
     pixelToPos[4] = 0;
     pixelToPos[5] = -m_edgeLength;
-    gdal::Raster raster(m_filename, m_drivername, table.spatialReference(),
-        pixelToPos);
+    gdal::Raster raster(m_outputFilename, m_drivername, m_srs, pixelToPos);
 
     m_grid->finalize();
 

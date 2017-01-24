@@ -95,6 +95,70 @@ void runGdalWriter(const Options& wo, const std::string& outfile,
         EXPECT_NEAR(arr[i], *d++, .001);
 }
 
+void runGdalWriter2(const Options& wo, const std::string& outfile,
+    const std::string& values, bool stream)
+{
+    FileUtils::deleteFile(outfile);
+
+    Options ro;
+    ro.add("filename", Support::datapath("gdal/grid.txt"));
+
+    Options ro2;
+    ro2.add("filename", Support::datapath("gdal/grid2.txt"));
+
+    TextReader r;
+    r.setOptions(ro);
+
+    TextReader r2;
+    r2.setOptions(ro2);
+
+    GDALWriter w;
+    w.setOptions(wo);
+    w.setInput(r);
+    w.setInput(r2);
+
+    if (!stream)
+    {
+        PointTable t;
+
+        w.prepare(t);
+        w.execute(t);
+    }
+    else
+    {
+        FixedPointTable t(10);
+
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    using namespace gdal;
+
+    std::istringstream iss(values);
+
+    std::vector<double> arr;
+    while (true)
+    {
+        double d;
+        iss >> d;
+        if (!iss)
+            break;
+        arr.push_back(d);
+    }
+
+    registerDrivers();
+    Raster raster(outfile, "GTiff");
+    if (raster.open() != GDALError::None)
+    {
+        throw pdal_error(raster.errorMsg());
+    }
+    std::vector<uint8_t> data;
+    raster.readBand(data, 1);
+    double *d = reinterpret_cast<double *>(data.data());
+    for (size_t i = 0; i < arr.size(); ++i)
+        EXPECT_NEAR(arr[i], *d++, .001);
+}
+
 }
 
 TEST(GDALWriterTest, min)
@@ -116,6 +180,36 @@ TEST(GDALWriterTest, min)
         "1.000     2.000     3.000     4.000     5.000 ";
 
     runGdalWriter(wo, outfile, output);
+}
+
+TEST(GDALWriterTest, min2)
+{
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "min");
+    wo.add("resolution", 1);
+    wo.add("radius", .7071);
+    wo.add("filename", outfile);
+
+    Options wo2 = wo;
+    wo2.add("bounds", "([-2, 4.7],[-2, 6.5])");
+
+    const std::string output =
+        "-9999.000 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00    -1.00"
+        "-9999.000 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00 "
+        "-9999.000 -9999.00     5.00 -9999.00     7.00     8.00     8.90 "
+        "-9999.000 -9999.00     4.00 -9999.00     6.00     7.00     8.00 "
+        "-9999.000 -9999.00     3.00     4.00     5.00     5.50     6.50 "
+        "-9999.000 -9999.00     2.00     3.00     4.00     4.50     5.50 "
+        "-9999.000 -9999.00     1.00     2.00     3.00     4.00     5.00 "
+        "   -1.000    -1.00 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00 "
+        "   -1.000    -1.00 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00";
+
+    runGdalWriter2(wo, outfile, output, false);
+    runGdalWriter2(wo2, outfile, output, false);
+    runGdalWriter2(wo2, outfile, output, true);
 }
 
 TEST(GDALWriterTest, minWindow)

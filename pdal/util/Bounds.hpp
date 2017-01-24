@@ -72,12 +72,18 @@ public:
     {}
 
     /**
-      Determine whether a bounds box has any bounds set (is in a state
-      as if default-constructed).
+      Determine whether a bounds box has not had any bounds set.
 
       \return  Whether the bounds box is empty.
     */
     bool empty() const;
+
+    /**
+      Determine whether a bounds box has had any bounds set.
+
+      \return  Whether the bounds box is valid.
+    */
+    bool valid() const;
 
     /**
       Clear the bounds box to an empty state.
@@ -317,12 +323,19 @@ public:
     {}
 
     /**
-      Determine whether a bounds box has any bounds set (is in a state
+      Determine whether a bounds box has not had any bounds set (is in a state
       as if default-constructed).
 
       \return  Whether the bounds box is empty.
     */
     bool empty() const;
+
+    /**
+      Determine whether a bounds box has had any bounds set.
+
+      \return  \true if the bounds box is not empty
+    */
+    bool valid() const;
 
     /**
       Expand the bounds of the box if a value is less than the current
@@ -477,7 +490,7 @@ public:
 
     /**
       Convert this box to a well-known text string.
-      
+
       \param precision  Precision for output [default: 8]
       \return  String format of this box.
     */
@@ -545,7 +558,7 @@ public:
 
 /**
   Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
-  to facilitate streaming either a BOX2D or BOX3D 
+  to facilitate streaming either a BOX2D or BOX3D
 */
 class PDAL_DLL Bounds
 {

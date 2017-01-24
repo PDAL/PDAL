@@ -121,57 +121,79 @@ void TextReader::ready(PointTableRef table)
     // Skip header line.
     std::string buf;
     std::getline(*m_istream, buf);
+    m_line = 1;
 }
 
 
 point_count_t TextReader::read(PointViewPtr view, point_count_t numPts)
 {
     PointId idx = view->size();
-
     point_count_t cnt = 0;
-    size_t line = 1;
-    while (m_istream->good() && cnt < numPts)
+    PointRef point(*view, idx);
+    while (cnt < numPts)
     {
+        point.setPointId(idx);
+        if (!processOne(point))
+            break;
+        cnt++;
+        idx++;
+    }
+    return cnt;
+}
+
+
+bool TextReader::processOne(PointRef& point)
+{
+    if (!fillFields())
+        return false;
+
+    double d;
+    for (size_t i = 0; i < m_fields.size(); ++i)
+    {
+        if (!Utils::fromString(m_fields[i], d))
+        {
+            log()->get(LogLevel::Error) << "Can't convert "
+                "field '" << m_fields[i] << "' to numeric value on line " <<
+                m_line << " in '" << m_filename << "'.  Setting to 0." <<
+                std::endl;
+            d = 0;
+        }
+        point.setField(m_dims[i], d);
+    }
+    return true;
+}
+
+
+bool TextReader::fillFields()
+{
+    while (true)
+    {
+        if (!m_istream->good())
+            return false;
+
         std::string buf;
-        StringList fields;
 
         std::getline(*m_istream, buf);
-        line++;
+        m_line++;
         if (buf.empty())
             continue;
         if (m_separator != ' ')
         {
             Utils::remove(buf, ' ');
-            fields = Utils::split(buf, m_separator);
+            m_fields = Utils::split(buf, m_separator);
         }
         else
-            fields = Utils::split2(buf, m_separator);
-        if (fields.size() != m_dims.size())
+            m_fields = Utils::split2(buf, m_separator);
+        if (m_fields.size() != m_dims.size())
         {
-            log()->get(LogLevel::Error) << "Line " << line <<
-               " in '" << m_filename << "' contains " << fields.size() <<
-               " fields when " << m_dims.size() << " were expected.  "
-               "Ignoring." << std::endl;
+            log()->get(LogLevel::Error) << "Line " << m_line <<
+                " in '" << m_filename << "' contains " << m_fields.size() <<
+                " fields when " << m_dims.size() << " were expected.  "
+                "Ignoring." << std::endl;
             continue;
         }
-
-        double d;
-        for (size_t i = 0; i < fields.size(); ++i)
-        {
-            if (!Utils::fromString(fields[i], d))
-            {
-                log()->get(LogLevel::Error) << "Can't convert "
-                    "field '" << fields[i] << "' to numeric value on line " <<
-                    line << " in '" << m_filename << "'.  Setting to 0." <<
-                    std::endl;
-                d = 0;
-            }
-            view->setField(m_dims[i], idx, d);
-        }
-        cnt++;
-        idx++;
+        return true;
     }
-    return cnt;
 }
 
 

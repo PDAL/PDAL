@@ -37,7 +37,9 @@
 #include "Support.hpp"
 
 #include <io/LasReader.hpp>
+#include <io/LasWriter.hpp>
 #include <io/TextReader.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace pdal;
 
@@ -53,7 +55,7 @@ void compareTextLas(const std::string& textFilename,
     Options lo;
     lo.add("filename", lasFilename);
     l.setOptions(lo);
-    
+
     PointTable tt;
     t.prepare(tt);
     PointViewSet ts = t.execute(tt);
@@ -77,6 +79,64 @@ void compareTextLas(const std::string& textFilename,
            lv->getFieldAs<double>(Dimension::Id::Y, i));
        EXPECT_DOUBLE_EQ(tv->getFieldAs<double>(Dimension::Id::Z, i),
            lv->getFieldAs<double>(Dimension::Id::Z, i));
+    }
+}
+
+void compareTextLasStreaming(const std::string& textFilename,
+    const std::string& lasFilename)
+{
+    std::string tempname(Support::temppath("testlas.las"));
+
+    FileUtils::deleteFile(tempname);
+
+    TextReader t;
+    Options to;
+    to.add("filename", textFilename);
+    t.setOptions(to);
+
+    LasWriter w;
+    Options wo;
+    wo.add("filename", tempname);
+    w.setInput(t);
+    w.setOptions(wo);
+
+    FixedPointTable in(1000);
+    w.prepare(in);
+    w.execute(in);
+
+    LasReader l1;
+    Options l1o;
+    l1o.add("filename", lasFilename);
+    l1.setOptions(l1o);
+
+    LasReader l2;
+    Options l2o;
+    l2o.add("filename", tempname);
+    l2.setOptions(l2o);
+
+    PointTable t1;
+    l1.prepare(t1);
+    PointViewSet s1 = l1.execute(t1);
+    EXPECT_EQ(s1.size(), 1U);
+    PointViewPtr v1 = *s1.begin();
+
+    PointTable t2;
+    l2.prepare(t2);
+    PointViewSet s2 = l2.execute(t2);
+    EXPECT_EQ(s2.size(), 1U);
+    PointViewPtr v2 = *s2.begin();
+
+    EXPECT_EQ(v1->size(), v2->size());
+
+    // Validate some point data.
+    for (PointId i = 0; i < v1->size(); ++i)
+    {
+       EXPECT_DOUBLE_EQ(v1->getFieldAs<double>(Dimension::Id::X, i),
+           v2->getFieldAs<double>(Dimension::Id::X, i));
+       EXPECT_DOUBLE_EQ(v1->getFieldAs<double>(Dimension::Id::Y, i),
+           v2->getFieldAs<double>(Dimension::Id::Y, i));
+       EXPECT_DOUBLE_EQ(v1->getFieldAs<double>(Dimension::Id::Z, i),
+           v2->getFieldAs<double>(Dimension::Id::Z, i));
     }
 }
 
@@ -107,4 +167,10 @@ TEST(TextReaderTest, badheader)
 
     PointTable tt;
     EXPECT_THROW(t.prepare(tt), pdal_error);
+}
+
+TEST(TextReaderTest, s1)
+{
+    compareTextLasStreaming(Support::datapath("text/utm17_1.txt"),
+        Support::datapath("las/utm17.las"));
 }
