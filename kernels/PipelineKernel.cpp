@@ -65,6 +65,12 @@ void PipelineKernel::validateSwitches(ProgramArgs& args)
 }
 
 
+bool PipelineKernel::isStagePrefix(const std::string& stage)
+{
+    return Kernel::isStagePrefix(stage) || stage == "stage";
+}
+
+
 void PipelineKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "input file name", m_inputFile).setOptionalPositional();

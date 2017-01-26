@@ -66,7 +66,7 @@ public:
 
     /**
       Read an XML pipeline from a stream into a PipelineManager.
-      
+
       \param input  Stream to read from.
     */
     void readPipeline(std::istream& input);
@@ -92,6 +92,8 @@ private:
 
     PipelineReaderXML& operator=(const PipelineReaderXML&); // not implemented
     PipelineReaderXML(const PipelineReaderXML&); // not implemented
+
+    void baseReadPipeline(std::istream& input);
 };
 
 } // namespace pdal
