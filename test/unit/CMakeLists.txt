@@ -109,7 +109,6 @@ endif()
 PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
 if (BUILD_PIPELINE_TESTS)
-    PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
 endif()
 PDAL_ADD_TEST(hausdorff_test FILES apps/HausdorffTest.cpp)
