@@ -97,6 +97,13 @@ void Options::addConditional(const Option& option)
 }
 
 
+void Options::addConditional(const Options& options)
+{
+    for (auto& o : options.m_options)
+        addConditional(o.second);
+}
+
+
 void Options::remove(const Option& option)
 {
     m_options.erase(option.getName());

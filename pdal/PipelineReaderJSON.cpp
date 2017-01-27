@@ -39,6 +39,7 @@
 #include <pdal/PluginManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <json/json.h>
@@ -244,7 +245,7 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
                         tag + "'.");
             }
             else
-                throw pdal_error("JSON pipeline: 'tag' must be "
+                throw pdal_error("JSON pipeline: tag must be "
                     "specified as a string.");
         }
         node.removeMember("tag");
@@ -252,6 +253,9 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
             throw pdal_error("JSON pipeline: found duplicate 'tag' "
                "entry in stage definition.");
     }
+    if (Utils::contains(tag, '.'))
+        throw pdal_error("JSON pipeline: Stage tag name can't contain "
+            "'.' character.");
     return tag;
 }
 

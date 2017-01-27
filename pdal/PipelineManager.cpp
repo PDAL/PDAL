@@ -410,9 +410,11 @@ Options PipelineManager::stageOptions(Stage& stage)
         if (oi != m_stageOptions.end())
             opts.add(oi->second);
     }
+    // Tag-based options options override stagename-based options, so
+    // we call addConditional.
     auto oi = m_stageOptions.find(stage.getName());
     if (oi != m_stageOptions.end())
-        opts.add(oi->second);
+        opts.addConditional(oi->second);
     return opts;
 }
 
