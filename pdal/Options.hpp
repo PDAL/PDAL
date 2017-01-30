@@ -129,7 +129,9 @@ public:
         { add(opt); }
 
     void add(const Option& option);
+    void add(const Options& options);
     void addConditional(const Option& option);
+    void addConditional(const Options& option);
 
     // if option name not present, just returns
     void remove(const Option& option);

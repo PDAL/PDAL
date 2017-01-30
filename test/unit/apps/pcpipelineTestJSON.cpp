@@ -38,6 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
+#include <io/LasReader.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -257,6 +258,75 @@ TEST(json, issue1417)
     std::string options = "--readers.las.filename=" +
         Support::datapath("las/utm15.las");
     run_pipeline("pipeline/issue1417.json", options);
+}
+
+// Test that stage options passed via --stage.<tagname>.<option> work.
+TEST(json, stagetags)
+{
+    auto checkValue = [](const std::string filename, double value)
+    {
+        Options o;
+        o.add("filename", filename);
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        PointViewSet s = r.execute(t);
+        EXPECT_EQ(s.size(), 1u);
+        PointViewPtr v = *s.begin();
+
+        for (PointId i = 0; i < v->size(); ++i)
+            EXPECT_DOUBLE_EQ(value,
+                v->getFieldAs<double>(Dimension::Id::Z, i));
+
+        FileUtils::deleteFile(filename);
+    };
+
+    std::string outFilename(Support::temppath("assigned.las"));
+    std::string base(appName() + " " +
+        Support::configuredpath("pipeline/options.json"));
+    std::string output;
+    int stat;
+
+    stat = Utils::run_shell_command(base, output);
+    EXPECT_EQ(stat, 0);
+    checkValue(outFilename, 25);
+
+    stat = Utils::run_shell_command(base + " --filters.assign.value=101",
+        output);
+    EXPECT_EQ(stat, 0);
+    checkValue(outFilename, 101);
+
+    stat = Utils::run_shell_command(base + " --stage.assigner.value=1987",
+        output);
+    EXPECT_EQ(stat, 0);
+    checkValue(outFilename, 1987);
+
+    // Make sure that tag options override stage options.
+    stat = Utils::run_shell_command(base + " --filters.assign.value=25 "
+        "--stage.assigner.value=555", output);
+    EXPECT_EQ(stat, 0);
+    checkValue(outFilename, 555);
+    stat = Utils::run_shell_command(base + " --stage.assigner.value=555 "
+        "--filters.assign.value=25 ", output);
+    EXPECT_EQ(stat, 0);
+    checkValue(outFilename, 555);
+
+    // Check that bad tag fails.
+    stat = Utils::run_shell_command(base + " --stage.foobar.value=1987",
+        output);
+    EXPECT_NE(stat, 0);
+
+    // Check that bad option name fails.
+    stat = Utils::run_shell_command(base + " --stage.assigner.blah=1987",
+        output);
+    EXPECT_NE(stat, 0);
+
+    // Check that multiply specified option fails.
+    stat = Utils::run_shell_command(base + " --stage.assigner.value=55 "
+        "--stage.assigner.value=23", output);
+    EXPECT_NE(stat, 0);
 }
 
 } // namespace pdal

@@ -39,6 +39,7 @@
 #include <pdal/PluginManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <json/json.h>
@@ -99,7 +100,8 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
 
             for (const std::string& path : files)
             {
-                s = &m_manager.makeReader(path, type, options);
+                StageCreationOptions ops { path, type, nullptr, options, tag };
+                s = &m_manager.makeReader(ops);
 
                 if (specifiedInputs.size())
                     throw pdal_error("JSON pipeline: Inputs not permitted for "
@@ -109,7 +111,8 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
-            s = &m_manager.makeWriter(filename, type, options);
+            StageCreationOptions ops { filename, type, nullptr, options, tag };
+            s = &m_manager.makeWriter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
@@ -118,7 +121,8 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         {
             if (filename.size())
                 options.add("filename", filename);
-            s = &m_manager.makeFilter(type, options);
+            StageCreationOptions ops { "", type, nullptr, options, tag };
+            s = &m_manager.makeFilter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
@@ -241,7 +245,7 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
                         tag + "'.");
             }
             else
-                throw pdal_error("JSON pipeline: 'tag' must be "
+                throw pdal_error("JSON pipeline: tag must be "
                     "specified as a string.");
         }
         node.removeMember("tag");
@@ -249,6 +253,9 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
             throw pdal_error("JSON pipeline: found duplicate 'tag' "
                "entry in stage definition.");
     }
+    if (Utils::contains(tag, '.'))
+        throw pdal_error("JSON pipeline: Stage tag name can't contain "
+            "'.' character.");
     return tag;
 }
 

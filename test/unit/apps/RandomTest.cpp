@@ -44,20 +44,12 @@
 
 using namespace pdal;
 
-namespace
-{
-std::string appName()
-{
-    return Support::binpath("pdal random");
-}
-}
-
 TEST(Random, extra_ops)
 {
     std::string outfile(Support::temppath("out.las"));
 
-    const std::string cmd = appName() +
-        " --count=100 --writers.las.minor_version=3 " + outfile;
+    const std::string cmd = Support::binpath("pdal") + " random "
+        "--count=100 --writers.las.minor_version=3 " + outfile;
 
     FileUtils::deleteFile(outfile);
     std::string output;

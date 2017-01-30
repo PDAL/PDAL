@@ -1,0 +1,12 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.assign",
+      "dimension":"Z",
+      "value":"25",
+      "tag":"assigner"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/assigned.las"
+  ]
+}

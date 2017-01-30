@@ -58,7 +58,6 @@ void Option::toMetadata(MetadataNode& parent) const
 
 }
 
-//---------------------------------------------------------------------------
 
 bool Option::nameValid(const std::string& name, bool reportError)
 {
@@ -74,10 +73,19 @@ bool Option::nameValid(const std::string& name, bool reportError)
 }
 
 
+//---------------------------------------------------------------------------
+
+
 void Options::add(const Option& option)
 {
     assert(Option::nameValid(option.getName(), true));
     m_options.insert({ option.getName(), option });
+}
+
+
+void Options::add(const Options& o)
+{
+    m_options.insert(o.m_options.begin(), o.m_options.end());
 }
 
 
@@ -86,6 +94,13 @@ void Options::addConditional(const Option& option)
     assert(Option::nameValid(option.getName(), true));
     if (m_options.find(option.getName()) == m_options.end())
         m_options.insert({ option.getName(), option });
+}
+
+
+void Options::addConditional(const Options& options)
+{
+    for (auto& o : options.m_options)
+        addConditional(o.second);
 }
 
 

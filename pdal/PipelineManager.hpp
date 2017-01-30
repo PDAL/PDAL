@@ -45,6 +45,15 @@ namespace pdal
 
 class Options;
 
+struct StageCreationOptions
+{
+    std::string m_filename;
+    std::string m_driver;
+    Stage *m_parent;
+    Options m_options;
+    std::string m_tag;
+};
+
 class PDAL_DLL PipelineManager
 {
     FRIEND_TEST(json, tags);
@@ -76,12 +85,14 @@ public:
     Stage& makeReader(const std::string& inputFile, std::string driver);
     Stage& makeReader(const std::string& inputFile, std::string driver,
         Options options);
+    Stage& makeReader(StageCreationOptions& opts);
 
     Stage& makeFilter(const std::string& driver);
     Stage& makeFilter(const std::string& driver, Options options);
     Stage& makeFilter(const std::string& driver, Stage& parent);
     Stage& makeFilter(const std::string& driver, Stage& parent,
         Options options);
+    Stage& makeFilter(StageCreationOptions& ops);
 
     Stage& makeWriter(const std::string& outputFile, std::string driver);
     Stage& makeWriter(const std::string& outputFile, std::string driver,
@@ -90,6 +101,7 @@ public:
         Stage& parent);
     Stage& makeWriter(const std::string& outputFile, std::string driver,
         Stage& parent, Options options);
+    Stage& makeWriter(StageCreationOptions& ops);
 
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
@@ -123,10 +135,10 @@ public:
         { return m_commonOptions; }
     OptionsMap& stageOptions()
         { return m_stageOptions; }
-    Options& stageOptions(Stage& stage);
 
 private:
     void setOptions(Stage& stage, const Options& addOps);
+    Options stageOptions(Stage& stage);
 
     StageFactory m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
