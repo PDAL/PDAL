@@ -172,5 +172,23 @@ TEST(TextReaderTest, badheader)
 TEST(TextReaderTest, s1)
 {
     compareTextLasStreaming(Support::datapath("text/utm17_1.txt"),
-        Support::datapath("las/utm17.las"));
+                            Support::datapath("las/utm17.las"));
+}
+
+TEST(TextReaderTest, strip_whitespace_from_dimension_names) 
+{
+    TextReader reader;
+    Options options;
+    options.add("filename", Support::datapath("text/intensity.txt"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet pointViewSet = reader.execute(table);
+    PointViewPtr pointViewPtr = *pointViewSet.begin();
+
+    for (PointId i = 0; i < pointViewPtr->size(); ++i) {
+        EXPECT_EQ(
+            i, pointViewPtr->getFieldAs<uint16_t>(Dimension::Id::Intensity, i));
+    }
 }

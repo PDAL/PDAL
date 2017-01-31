@@ -92,6 +92,7 @@ void TextReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto name : m_dimNames)
     {
+        name.erase(name.find_last_not_of(" \n\r\t") + 1);
         Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
         if (Utils::contains(m_dims, id))
