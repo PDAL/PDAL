@@ -159,9 +159,11 @@ extra_dims
   extra dimensions specified by this option.
 
   The special value 'all' can be used in place of a dimension/type list
-  to request
-  that all dimensions that can't be stored in the predefined LAS point
-  record get added as extra data at the end of each point record.
+  to request that all dimensions that can't be stored in the predefined
+  LAS point record get added as extra data at the end of each point record.
+
+  Setting --verbose=Info will provide output on the names, types and order
+  of dimensions being written as part of the LAS extra bytes.
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 

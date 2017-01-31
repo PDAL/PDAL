@@ -37,6 +37,7 @@
 #include <iostream>
 
 #include <pdal/Compression.hpp>
+#include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -139,7 +140,7 @@ void LasWriter::spatialReferenceChanged(const SpatialReference&)
     if (++m_srsCnt > 1)
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
-            "point spatial references.";
+            "point spatial references." << std::endl;
 }
 
 
@@ -148,6 +149,10 @@ void LasWriter::prepared(PointTableRef table)
     FlexWriter::validateFilename(table);
 
     PointLayoutPtr layout = table.layout();
+
+    // Make sure the dataformatID is set so that we can get the proper
+    // dimensions being written as part of the standard LAS record.
+    fillHeader();
 
     // If we've asked for all dimensions, add to extraDims all dimensions
     // in the layout that aren't already destined for LAS output.
@@ -176,6 +181,10 @@ void LasWriter::prepared(PointTableRef table)
             throw pdal_error(oss.str());
         }
         m_extraByteLen += Dimension::size(dim.m_dimType.m_type);
+        log()->get(LogLevel::Info) << getName() << ": Writing dimension " <<
+            dim.m_name <<
+            "(" << Dimension::interpretationName(dim.m_dimType.m_type) <<
+            ") " << " to LAS extra bytes." << std::endl;
     }
 }
 
