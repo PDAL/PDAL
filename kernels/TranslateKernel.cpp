@@ -145,7 +145,10 @@ void TranslateKernel::makeJSONPipeline()
 */
 void TranslateKernel::makeArgPipeline()
 {
-    Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
+    std::string readerType(m_readerType);
+    if (!readerType.empty() && !Utils::startsWith(readerType, "readers."))
+        readerType.insert(0, "readers.");
+    Stage& reader = m_manager.makeReader(m_inputFile, readerType);
     Stage* stage = &reader;
 
     // add each filter provided on the command-line,
@@ -160,7 +163,10 @@ void TranslateKernel::makeArgPipeline()
         Stage& filter = m_manager.makeFilter(filter_name, *stage);
         stage = &filter;
     }
-    m_manager.makeWriter(m_outputFile, m_writerType, *stage);
+    std::string writerType(m_writerType);
+    if (!writerType.empty() && !Utils::startsWith(writerType, "writers."))
+        writerType.insert(0, "writers.");
+    m_manager.makeWriter(m_outputFile, writerType, *stage);
 }
 
 
