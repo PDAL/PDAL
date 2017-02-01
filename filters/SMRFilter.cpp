@@ -99,7 +99,7 @@ void SMRFilter::ready(PointTableRef table)
         return;
 
     if (!FileUtils::directoryExists(m_outDir))
-        throw pdal_error("Output directory does not exist");
+        throwError("Output directory '" + m_outDir + "' does not exist");
 }
 
 MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)

@@ -134,7 +134,7 @@ void ColorinterpFilter::initialize()
 
     m_interpDim = Dimension::id(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
-        throw pdal_error(getName() + ": provided dimension name is not known.");
+        throwError("provided dimension name is not known.");
 }
 
 

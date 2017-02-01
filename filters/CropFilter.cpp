@@ -144,15 +144,15 @@ void CropFilter::transform(const SpatialReference& srs)
         }
         catch (pdal_error& err)
         {
-            throw pdal_error(getName() + ": " + err.what());
+            throwError(err.what());
         }
     }
 
     if (srs.empty() && m_assignedSrs.empty())
         return;
     if (srs.empty() || m_assignedSrs.empty())
-        throw pdal_error(getName() + ": Unable to transform crop geometry to "
-            "point coordinate system.");
+        throwError("Unable to transform crop geometry to point "
+            "coordinate system.");
 
     for (auto& box : m_bounds)
     {

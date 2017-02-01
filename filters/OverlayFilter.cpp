@@ -97,8 +97,7 @@ void OverlayFilter::prepared(PointTableRef table)
 {
     m_dim = table.layout()->findDim(m_dimName);
     if (m_dim == Dimension::Id::Unknown)
-        throw pdal_error(getName() + ": Dimension '" + m_dimName +
-            "' not found.");
+        throwError("Dimension '" + m_dimName + "' not found.");
 }
 
 
@@ -107,8 +106,7 @@ void OverlayFilter::ready(PointTableRef table)
     m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
             OGRDataSourceDeleter());
     if (!m_ds)
-        throw pdal_error(getName() + ": Unable to open data source '" +
-            m_datasource + "'");
+        throwError("Unable to open data source '" + m_datasource + "'");
 
     if (m_layer.size())
         m_lyr = OGR_DS_GetLayerByName(m_ds.get(), m_layer.c_str());
@@ -118,8 +116,7 @@ void OverlayFilter::ready(PointTableRef table)
         m_lyr = OGR_DS_GetLayer(m_ds.get(), 0);
 
     if (!m_lyr)
-        throw pdal_error(getName() + ": Unable to select layer '" +
-            m_layer + "'");
+        throwError("Unable to select layer '" + m_layer + "'");
 
     OGRFeaturePtr feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
         OGRFeatureDeleter());
@@ -129,8 +126,7 @@ void OverlayFilter::ready(PointTableRef table)
     {
         field_index = OGR_F_GetFieldIndex(feature.get(), m_column.c_str());
         if (field_index == -1)
-            throw pdal_error(getName() + ": No column name '" + m_column +
-                "' was found.");
+            throwError("No column name '" + m_column + "' was found.");
     }
 
     do
@@ -144,8 +140,7 @@ void OverlayFilter::ready(PointTableRef table)
             t == wkbPolygon25D ||
             t == wkbMultiPolygon25D))
         {
-            throw pdal_error(getName() +
-                ": Geometry is not Polygon or MultiPolygon!");
+            throwError("Geometry is not Polygon or MultiPolygon!");
         }
 
         // Don't think Polygon meets criteria for implicit move ctor.
@@ -169,7 +164,7 @@ void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
         }
         catch (pdal_error& err)
         {
-            throw pdal_error(getName() + ": " + err.what());
+            throwError(err.what());
         }
     }
 }

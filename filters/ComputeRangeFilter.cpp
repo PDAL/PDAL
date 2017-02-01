@@ -67,13 +67,11 @@ void ComputeRangeFilter::prepared(PointTableRef table)
 
     m_frameNumber = layout->findDim("Frame Number");
     if (m_frameNumber == Id::Unknown)
-        throw pdal_error(getName() + ": missing Frame Number dimension in "
-            "input PointView");
+        throwError("missing Frame Number dimension in input PointView");
 
     m_pixelNumber = layout->findDim("Pixel Number");
     if (m_pixelNumber == Id::Unknown)
-        throw pdal_error(getName() + ": missing Pixel Number dimension in "
-            "input PointView");
+        throwError("missing Pixel Number dimension in input PointView");
 }
 
 void ComputeRangeFilter::filter(PointView& view)

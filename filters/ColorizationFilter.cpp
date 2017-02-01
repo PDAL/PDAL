@@ -68,18 +68,28 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
     uint32_t band = defaultBand;
     double scale = 1.0;
 
-    try
-    {
-        pos = 0;
-        // Skip leading whitespace.
-        count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
-        pos += count;
+    pos = 0;
+    // Skip leading whitespace.
+    count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+    pos += count;
 
-        count = Dimension::extractName(dim, pos);
-        if (count == 0)
-           throw std::string("No dimension name provided.");
-        name = dim.substr(pos, count);
-        pos += count;
+    count = Dimension::extractName(dim, pos);
+    if (count == 0)
+        throw std::string("No dimension name provided.");
+    name = dim.substr(pos, count);
+    pos += count;
+
+    count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    if (pos < dim.size() && dim[pos] == ':')
+    {
+        pos++;
+        start = dim.data() + pos;
+        band = std::strtoul(start, &end, 10);
+        if (start == end)
+            band = defaultBand;
+        pos += (end - start);
 
         count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
         pos += count;
@@ -88,43 +98,22 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         {
             pos++;
             start = dim.data() + pos;
-            band = std::strtoul(start, &end, 10);
+            scale = std::strtod(start, &end);
             if (start == end)
-                band = defaultBand;
+                scale = 1.0;
             pos += (end - start);
-
-            count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
-            pos += count;
-
-            if (pos < dim.size() && dim[pos] == ':')
-            {
-                pos++;
-                start = dim.data() + pos;
-                scale = std::strtod(start, &end);
-                if (start == end)
-                    scale = 1.0;
-                pos += (end - start);
-            }
-        }
-
-        count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
-        pos += count;
-
-        if (pos != dim.size())
-        {
-            std::ostringstream oss;
-
-            oss << "Invalid character '" << dim[pos] <<
-                "' following dimension specification.";
-            throw pdal_error(oss.str());
         }
     }
-    catch (std::string s)
+
+    count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    if (pos != dim.size())
     {
         std::ostringstream oss;
-        oss << "filters.colorization: invalid --dimensions option: '" << dim <<
-            "': " << s;
-        throw pdal_error(oss.str());
+        oss << "Invalid character '" << dim[pos] <<
+            "' following dimension specification.";
+        throw oss.str();
     }
     return ColorizationFilter::BandInfo(name, band, scale);
 }
@@ -146,9 +135,16 @@ void ColorizationFilter::initialize()
     uint32_t defaultBand = 1;
     for (std::string& dim : m_dimSpec)
     {
-        BandInfo bi = parseDim(dim, defaultBand);
-        defaultBand = bi.m_band + 1;
-        m_bands.push_back(bi);
+        try
+        {
+            BandInfo bi = parseDim(dim, defaultBand);
+            defaultBand = bi.m_band + 1;
+            m_bands.push_back(bi);
+        }
+        catch(const std::string& what)
+        {
+            throwError("invalid --dimensions option: '" + dim + "': " + what);
+        }
     }
 
     gdal::registerDrivers();
@@ -180,7 +176,7 @@ void ColorizationFilter::ready(PointTableRef table)
         }
         else
         {
-            throw pdal_error(getName() + ": " + m_raster->errorMsg());
+            throwError(m_raster->errorMsg());
         }
     }
 }

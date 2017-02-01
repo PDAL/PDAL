@@ -48,7 +48,7 @@ namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.approximatecoplanar", "ApproximateCoplanar Filter", 
+    PluginInfo("filters.approximatecoplanar", "ApproximateCoplanar Filter",
                "http://pdal.io/stages/filters.approximatecoplanar.html");
 
 CREATE_STATIC_PLUGIN(1, 0, ApproximateCoplanarFilter, Filter, s_info)
@@ -69,7 +69,8 @@ void ApproximateCoplanarFilter::addArgs(ProgramArgs& args)
 
 void ApproximateCoplanarFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_coplanar = layout->registerOrAssignDim("Coplanar", Dimension::Type::Unsigned8);
+    m_coplanar = layout->registerOrAssignDim("Coplanar",
+        Dimension::Type::Unsigned8);
 }
 
 void ApproximateCoplanarFilter::filter(PointView& view)
@@ -90,9 +91,9 @@ void ApproximateCoplanarFilter::filter(PointView& view)
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3f> solver(B);
         if (solver.info() != Success)
-            throw pdal_error("Cannot perform eigen decomposition.");
+            throwError("Cannot perform eigen decomposition.");
         auto ev = solver.eigenvalues();
-        
+
         // test eigenvalues to label points that are approximately coplanar
         if ((ev[1] > m_thresh1 * ev[0]) && (m_thresh2 * ev[1] > ev[2]))
             view.setField(m_coplanar, i, 1u);

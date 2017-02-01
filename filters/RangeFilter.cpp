@@ -72,72 +72,64 @@ RangeFilter::Range parseRange(const std::string& r)
     std::string name;
     double ub, lb;
 
-    try
+    pos = 0;
+    // Skip leading whitespace.
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
+    if (count == 0)
+        throw std::string("No dimension name.");
+    name = r.substr(pos, count);
+    pos += count;
+
+    if (r[pos] == '!')
     {
-        pos = 0;
-        // Skip leading whitespace.
-        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-        pos += count;
-
-        count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
-        if (count == 0)
-           throw std::string("No dimension name.");
-        name = r.substr(pos, count);
-        pos += count;
-
-        if (r[pos] == '!')
-        {
-            negate = true;
-            pos++;
-        }
-
-        if (r[pos] == '(')
-            ilb = false;
-        else if (r[pos] != '[')
-            throw std::string("Missing '(' or '['.");
+        negate = true;
         pos++;
-
-        // Extract lower bound.
-        start = r.data() + pos;
-        lb = std::strtod(start, &end);
-        if (start == end)
-            lb = std::numeric_limits<double>::min();
-        pos += (end - start);
-
-        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-        pos += count;
-
-        if (r[pos] != ':')
-            throw std::string("Missing ':' limit separator.");
-        pos++;
-
-        start = r.data() + pos;
-        ub = std::strtod(start, &end);
-        if (start == end)
-            ub = std::numeric_limits<double>::max();
-        pos += (end - start);
-
-        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-        pos += count;
-
-        if (r[pos] == ')')
-            iub = false;
-        else if (r[pos] != ']')
-            throw std::string("Missing ')' or ']'.");
-        pos++;
-
-        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-        pos += count;
-
-        if (pos != r.size())
-            throw std::string("Invalid characters following valid range.");
     }
-    catch (std::string s)
-    {
-        std::ostringstream oss;
-        oss << "filters.range: invalid 'limits' option: '" << r << "': " << s;
-        throw pdal_error(oss.str());
-    }
+
+    if (r[pos] == '(')
+        ilb = false;
+    else if (r[pos] != '[')
+        throw std::string("Missing '(' or '['.");
+    pos++;
+
+    // Extract lower bound.
+    start = r.data() + pos;
+    lb = std::strtod(start, &end);
+    if (start == end)
+        lb = std::numeric_limits<double>::min();
+    pos += (end - start);
+
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    if (r[pos] != ':')
+        throw std::string("Missing ':' limit separator.");
+    pos++;
+
+    start = r.data() + pos;
+    ub = std::strtod(start, &end);
+    if (start == end)
+        ub = std::numeric_limits<double>::max();
+    pos += (end - start);
+
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    if (r[pos] == ')')
+        iub = false;
+    else if (r[pos] != ']')
+        throw std::string("Missing ')' or ']'.");
+    pos++;
+
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    if (pos != r.size())
+        throw std::string("Invalid characters following valid range.");
+
     return RangeFilter::Range(name, lb, ub, ilb, iub, negate);
 }
 
@@ -162,7 +154,16 @@ void RangeFilter::initialize()
 {
     // Would be better to have the range know how to read from an input stream.
     for (auto const& r : m_rangeSpec)
-        m_range_list.push_back(parseRange(r));
+    {
+        try
+        {
+            m_range_list.push_back(parseRange(r));
+        }
+        catch (const std::string& what)
+        {
+            throwError("Invalid 'limits' option: '" + r + "': " + what);
+        }
+    }
 }
 
 
@@ -174,12 +175,8 @@ void RangeFilter::prepared(PointTableRef table)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
-        {
-            std::ostringstream oss;
-            oss << "Invalid dimension name in filters.range 'limits' "
-                "option: '" << r.m_name << "'.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Invalid dimension name in 'limits' option: '" +
+                r.m_name + "'.");
     }
     std::sort(m_range_list.begin(), m_range_list.end());
 }
