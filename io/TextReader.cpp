@@ -78,10 +78,7 @@ void TextReader::initialize(PointTableRef table)
         }
 
     if (m_separator != ' ')
-    {
-        Utils::remove(buf, ' ');
         m_dimNames = Utils::split(buf, m_separator);
-    }
     else
         m_dimNames = Utils::split2(buf, m_separator);
     Utils::closeFile(m_istream);
@@ -92,7 +89,7 @@ void TextReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto name : m_dimNames)
     {
-        name.erase(name.find_last_not_of(" \n\r\t") + 1);
+        Utils::trim(name);
         Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
         if (Utils::contains(m_dims, id))
