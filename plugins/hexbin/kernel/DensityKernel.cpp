@@ -54,8 +54,8 @@ std::string DensityKernel::getName() const { return s_info.name; }
 
 void DensityKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "input point cloud file name", m_inputFile);
-    args.add("output,o", "output vector data source", m_outputFile);
+    args.add("input,i", "input point cloud file name", m_inputFile).setPositional();
+    args.add("output,o", "output vector data source", m_outputFile).setPositional();
     args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
     args.add("lyr_name", "OGR layer name to use", m_layerName, "");
