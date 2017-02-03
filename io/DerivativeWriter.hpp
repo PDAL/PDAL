@@ -90,6 +90,7 @@ private:
 
     std::string m_filename;
     std::string m_driver;
+    std::string m_slopeUnit;
     double m_edgeLength;
     double m_illumAltDeg;
     double m_illumAzDeg;

@@ -250,6 +250,9 @@ PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids,
 PDAL_DLL Eigen::MatrixXd createMaxMatrix(PointView& view, int rows, int cols,
         double cell_size, BOX2D bounds);
 
+PDAL_DLL Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
+        double cell_size, BOX2D bounds);
+
 /**
   Create matrix of minimum Z values.
 
@@ -738,12 +741,14 @@ PDAL_DLL double computeSlopeD8(const Eigen::MatrixBase<Derived>& data,
     submatrix.setConstant(data(1, 1));
     submatrix -= data;
     submatrix /= spacing;
-    submatrix(0, 1) /= std::sqrt(2.0);
-    submatrix(1, 0) /= std::sqrt(2.0);
-    submatrix(1, 2) /= std::sqrt(2.0);
-    submatrix(2, 1) /= std::sqrt(2.0);
+    submatrix(0, 0) /= std::sqrt(2.0);
+    submatrix(0, 2) /= std::sqrt(2.0);
+    submatrix(2, 0) /= std::sqrt(2.0);
+    submatrix(2, 2) /= std::sqrt(2.0);
 
-    // find max and convert to degrees
+    // Why not just use Eigen's maxCoeff reduction to find the max? Well, as it
+    // turns out, if there is a chance that we will have NaN's then maxCoeff
+    // has no way to ignore the NaN.
     double maxval = std::numeric_limits<double>::lowest();
     for (int i = 0; i < submatrix.size(); ++i)
     {
@@ -791,7 +796,7 @@ template <typename Derived>
 PDAL_DLL Derived dilate(const Eigen::MatrixBase<Derived>& A, int radius)
 {
     Derived B = Derived::Constant(A.rows(), A.cols(), 0);
-    
+
     int length = 2 * radius + 1;
     bool match_flag;
     for (int c = 0; c < A.cols(); ++c)
@@ -826,7 +831,7 @@ PDAL_DLL Derived dilate(const Eigen::MatrixBase<Derived>& A, int radius)
             B(r, c) = (match_flag) ? 1 : 0;
         }
     }
-    
+
     return B;
 }
 
@@ -844,7 +849,7 @@ template <typename Derived>
 PDAL_DLL Derived erode(const Eigen::MatrixBase<Derived>& A, int radius)
 {
     Derived B = Derived::Constant(A.rows(), A.cols(), 1);
-    
+
     int length = 2 * radius + 1;
     bool mismatch_flag;
     for (int c = 0; c < A.cols(); ++c)
@@ -885,7 +890,7 @@ PDAL_DLL Derived erode(const Eigen::MatrixBase<Derived>& A, int radius)
             B(r, c) = (mismatch_flag) ? 0 : 1;
         }
     }
-    
+
     return B;
 }
 
