@@ -48,7 +48,6 @@ extern "C" PF_ExitFunc TerrasolidReader_InitPlugin();
 namespace pdal
 {
 
-
 enum TERRASOLID_Format_Type
 {
     TERRASOLID_Format_1 = 20010712,
@@ -85,14 +84,6 @@ struct TerraSolidHeader
 };
 
 typedef std::unique_ptr<TerraSolidHeader> TerraSolidHeaderPtr;
-class terrasolid_error : public pdal_error
-{
-public:
-
-    terrasolid_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
 
 class PDAL_DLL TerrasolidReader : public pdal::Reader
 {

@@ -165,6 +165,12 @@ private:
 namespace LasUtils
 {
 
+struct error : public std::runtime_error
+{
+    error(const std::string& err) : std::runtime_error(err)
+    {}
+};
+
 std::vector<ExtraDim> parse(const StringList& dimString);
 
 } // namespace LasUtils

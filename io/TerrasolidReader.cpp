@@ -65,7 +65,7 @@ void TerrasolidReader::initialize()
         m_header->OrgY >> m_header->OrgZ >> m_header->Time >> m_header->Color;
 
     if (m_header->RecogVal != 970401)
-        throw terrasolid_error("Header identifier was not '970401', is this "
+        throwError("Header identifier was not '970401', is this "
             "a TerraSolid .bin file?");
 
     m_haveColor = (m_header->Color != 0);
@@ -73,12 +73,9 @@ void TerrasolidReader::initialize()
     m_format = static_cast<TERRASOLID_Format_Type>(m_header->HdrVersion);
 
     if ((m_format != TERRASOLID_Format_1) && (m_format != TERRASOLID_Format_2))
-    {
-        std::ostringstream oss;
-        oss << "Version was '" << m_format << "', not '" <<
-            TERRASOLID_Format_1 << "' or '" << TERRASOLID_Format_2 << "'";
-        throw terrasolid_error(oss.str());
-    }
+        throwError("Version was '" + Utils::toString(m_format) + "', not '" +
+            Utils::toString(TERRASOLID_Format_1) + "' or '" +
+            Utils::toString(TERRASOLID_Format_2) + "'");
 
     log()->get(LogLevel::Debug) << "TerraSolid Reader::initialize format: " <<
         m_format << std::endl;

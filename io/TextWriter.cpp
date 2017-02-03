@@ -92,12 +92,7 @@ void TextWriter::initialize(PointTableRef table)
     m_stream = FileStreamPtr(Utils::createFile(m_filename, true),
         FileStreamDeleter());
     if (!m_stream)
-    {
-        std::stringstream out;
-        out << "writers.text couldn't open '" << m_filename <<
-            "' for output.";
-        throw pdal_error(out.str());
-    }
+        throwError("Couldn't open '" + m_filename + "' for output.");
     m_outputType = Utils::toupper(m_outputType);
 }
 
@@ -114,12 +109,7 @@ void TextWriter::ready(PointTableRef table)
         Utils::trim(dim);
         Dimension::Id d = table.layout()->findDim(dim);
         if (d == Dimension::Id::Unknown)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Dimension not found with name '" <<
-                dim << "'.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Dimension not found with name '" + dim + "'.");
         m_dims.push_back(d);
     }
 

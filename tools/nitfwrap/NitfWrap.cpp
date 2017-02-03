@@ -120,7 +120,7 @@ void NitfWrap::unwrap()
         throw error(oss.str());
     }
     in->seekg(offset, std::istream::beg);
-    
+
     // Find out if this is a LAS or BPF file and make the output filename.
     bool compressed;
     BOX3D bounds;
@@ -238,7 +238,7 @@ bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed)
     {
         in >> h;
     }
-    catch (pdal_error&)
+    catch (LasHeader::error&)
     {
         return false;
     }

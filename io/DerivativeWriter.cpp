@@ -81,26 +81,16 @@ void DerivativeWriter::initialize()
 
     auto hashPos = handleFilenameTemplate(m_filename);
     if (hashPos == std::string::npos && m_primTypesSpec.size() > 1)
-    {
-        std::ostringstream oss;
-
-        oss << getName() << ": No template placeholder ('#') found in "
-            "filename '" << m_filename << "' when one is required with "
-            "multiple primitive types.";
-        throw pdal_error(oss.str());
-    }
+        throwError("No template placeholder ('#') found in filename '" +
+            m_filename + "' when one is required with multiple primitive "
+            "types.");
 
     for (std::string os : m_primTypesSpec)
     {
         std::string s = Utils::tolower(os);
         auto pi = primtypes.find(s);
         if (pi == primtypes.end())
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Unrecognized primitive type '" << os <<
-                "'.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Unrecognized primitive type '" + os + "'.");
         TypeOutput to;
         to.m_type = pi->second;
         to.m_filename = generateFilename(pi->first, hashPos);

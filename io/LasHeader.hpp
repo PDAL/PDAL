@@ -60,6 +60,12 @@ class Scaling;
 class PDAL_DLL LasHeader
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& s) : std::runtime_error(s)
+        {}
+    };
+
     static const size_t LEGACY_RETURN_COUNT = 5;
     static const size_t RETURN_COUNT = 15;
     static const std::string FILE_SIGNATURE;

@@ -70,12 +70,7 @@ void FauxReader::addArgs(ProgramArgs& args)
 void FauxReader::initialize()
 {
     if (m_numReturns > 10)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Option 'number_of_returns' must be in the range "
-            "[0,10].";
-        throw pdal_error(oss.str());
-    }
+        throwError("Option 'number_of_returns' must be in the range [0,10].");
     if (m_mode == Mode::Grid)
     {
         m_bounds.minx = ceil(m_bounds.minx);

@@ -139,6 +139,12 @@ typedef std::vector<BpfDimension> BpfDimensionList;
 
 struct BpfHeader
 {
+    struct error : std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     BpfHeader() : m_version(0), m_len(176), m_numDim(0),
         m_compression(Utils::toNative(BpfCompression::None)), m_numPts(0),
         m_coordType(Utils::toNative(BpfCoordType::Cartesian)), m_coordId(0),

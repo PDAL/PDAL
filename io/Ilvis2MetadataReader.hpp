@@ -49,6 +49,12 @@ namespace pdal
 class PDAL_DLL Ilvis2MetadataReader
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& s) : std::runtime_error(s)
+        {}
+    };
+
     void readMetadataFile(std::string filename, MetadataNode* m);
 
 protected:
@@ -100,8 +106,6 @@ private:
     void assertElementIs(xmlNodePtr node, std::string expected);
     void assertEndOfElements(xmlNodePtr node);
     int countChildElements(xmlNodePtr node, std::string childName);
-    void errWrongElement(xmlNodePtr node, std::string expected);
-    void errExpectedEnd(xmlNodePtr node);
 };
 
 }

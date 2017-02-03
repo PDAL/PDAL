@@ -95,29 +95,16 @@ void BpfWriter::initialize()
     for (auto file : m_bundledFilesSpec)
     {
         if (!FileUtils::fileExists(file))
-        {
-            std::ostringstream oss;
-
-            oss << getName() << ": bundledfile '" << file << "' doesn't exist.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Bundledfile '" + file + "' doesn't exist.");
 
         size_t size = FileUtils::fileSize(file);
         if (size > (std::numeric_limits<uint32_t>::max)())
-        {
-            std::ostringstream oss;
-            oss << getName() << ": bundledfile '" << file << "' too large.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Bundledfile '" + file + "' too large.");
 
         BpfUlemFile ulemFile(size, FileUtils::getFilename(file), file);
         if (ulemFile.m_filename.length() > 32)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": bundledfile '" << file << "' name "
-                "exceeds maximum length of 32.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Bundledfile '" + file + "' name exceeds "
+                "maximum length of 32.");
         m_bundledFiles.push_back(ulemFile);
     }
 
@@ -152,7 +139,14 @@ void BpfWriter::readyFile(const std::string& filename, const SpatialReference&)
 
     // We will re-write the header and dimensions to account for the point
     // count and dimension min/max.
-    m_header.write(m_stream);
+    try
+    {
+        m_header.write(m_stream);
+    }
+    catch (const BpfHeader::error& err)
+    {
+        throwError(err.what());
+    }
     m_header.writeDimensions(m_stream, m_dims);
     for (auto& file : m_bundledFiles)
         file.write(m_stream);
@@ -176,13 +170,9 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
        {
            Dimension::Id id = layout->findDim(s);
            if (id == Dimension::Id::Unknown)
-           {
-               std::ostringstream oss;
-               oss << "Invalid dimension '" << s << "' specified for "
-                   "'output_dims' option.";
-               throw pdal_error(oss.str());
-            }
-            dims.push_back(id);
+               throwError("Invalid dimension '" + s + "' specified for "
+                   "'output_dims' option.");
+           dims.push_back(id);
        }
     }
     else
@@ -194,8 +184,7 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
     if (dims.size() < 3 || dims[0] != Dimension::Id::X ||
         dims[1] != Dimension::Id::Y || dims[2] != Dimension::Id::Z)
     {
-        throw pdal_error("Missing one of dimensions X, Y or Z.  "
-            "Can't write BPF.");
+        throwError("Missing one of dimensions X, Y or Z.  Can't write BPF.");
     }
 
     for (auto id : dims)
@@ -220,17 +209,24 @@ void BpfWriter::writeView(const PointViewPtr dataShared)
     m_dims[1].m_offset = m_scaling.m_yXform.m_offset.m_val;
     m_dims[2].m_offset = m_scaling.m_zXform.m_offset.m_val;
 
-    switch (m_header.m_pointFormat)
+    try
     {
-    case BpfFormat::PointMajor:
-        writePointMajor(data);
-        break;
-    case BpfFormat::DimMajor:
-        writeDimMajor(data);
-        break;
-    case BpfFormat::ByteMajor:
-        writeByteMajor(data);
-        break;
+        switch (m_header.m_pointFormat)
+        {
+            case BpfFormat::PointMajor:
+                writePointMajor(data);
+                break;
+            case BpfFormat::DimMajor:
+                writeDimMajor(data);
+                break;
+            case BpfFormat::ByteMajor:
+                writeByteMajor(data);
+                break;
+        }
+    }
+    catch (const BpfCompressor::error& err)
+    {
+        throwError(err.what());
     }
     m_header.m_numPts += data->size();
 }
@@ -350,7 +346,14 @@ void BpfWriter::doneFile()
     // Rewrite the header to update the the correct number of points and
     // statistics.
     m_stream.seek(0);
-    m_header.write(m_stream);
+    try
+    {
+        m_header.write(m_stream);
+    }
+    catch (const BpfHeader::error& err)
+    {
+        throwError(err.what());
+    }
     m_header.writeDimensions(m_stream, m_dims);
     m_stream.close();
     getMetadata().addList("filename", m_curFilename);

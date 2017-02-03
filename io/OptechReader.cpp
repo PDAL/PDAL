@@ -105,20 +105,13 @@ void OptechReader::initialize()
 {
     ILeStream stream(Utils::openFile(m_filename));
     if (!stream)
-    {
-        std::stringstream ss;
-        ss << "Unable to open " << m_filename << " for reading.";
-        throw pdal_error(ss.str());
-    }
+        throwError("Unable to open " + m_filename + " for reading.");
 
     stream.get(m_header.signature, 4);
     if (strcmp(m_header.signature, "CSD") != 0)
-    {
-        std::stringstream ss;
-        ss << "Invalid header signature when reading CSD file: '"
-           << m_header.signature << "'";
-        throw optech_error(ss.str());
-    }
+        throwError("Invalid header signature when reading CSD file: '" +
+            std::string(m_header.signature) + "'");
+
     stream.get(m_header.vendorId, 64);
     stream.get(m_header.softwareVersion, 32);
     stream >> m_header.formatVersion >> m_header.headerSize >>
@@ -154,11 +147,7 @@ void OptechReader::ready(PointTableRef)
 {
     m_istream.reset(new IStream(m_filename));
     if (!*m_istream)
-    {
-        std::stringstream ss;
-        ss << "Unable to open " << m_filename << " for reading.";
-        throw pdal_error(ss.str());
-    }
+        throwError("Unable to open " + m_filename + " for reading.");
 
     m_istream->seek(m_header.headerSize);
     m_recordIndex = 0;

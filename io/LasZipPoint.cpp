@@ -54,10 +54,9 @@ LasZipPoint::LasZipPoint(LasVLR *vlr) :
     {
         std::ostringstream oss;
         const char* err = m_zip->get_error();
-        if (err == NULL) 
+        if (err == NULL)
             err = "(unknown error)";
-        oss << "Error unpacking zip VLR data: " << std::string(err);
-        throw pdal_error(oss.str());
+        throw error("Error unpacking zip VLR data: " + std::string(err) + ".");
     }
     ConstructItems();
 }
@@ -73,9 +72,8 @@ LasZipPoint::LasZipPoint(uint8_t format, uint16_t pointLen) :
         const char* err = m_zip->get_error();
         if (err == NULL)
             err = "(unknown error)";
-        oss << "Error setting up LASzip for format " << format << ": " <<
-            err;
-        throw pdal_error(oss.str());
+        throw error("Error setting up LASzip for format " +
+            Utils::toString(format) + ": " + err);
     }
     ConstructItems();
 }

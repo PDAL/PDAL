@@ -52,6 +52,12 @@ class LasVLR;
 class PDAL_DLL LasZipPoint
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     LasZipPoint(LasVLR *lasHeader);
     LasZipPoint(uint8_t format, uint16_t pointLen);
     ~LasZipPoint();
@@ -59,7 +65,7 @@ public:
     std::vector<uint8_t> vlrData() const;
     LASzip* GetZipper() const
         { return m_zip.get(); }
-    
+
 private:
     std::unique_ptr<LASzip> m_zip;
 

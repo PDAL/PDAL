@@ -37,7 +37,8 @@
 namespace pdal
 {
 
-void Ilvis2MetadataReader::readMetadataFile(std::string filename, MetadataNode* m)
+void Ilvis2MetadataReader::readMetadataFile(std::string filename,
+    MetadataNode* m)
 {
     xmlDocPtr doc;
     xmlNodePtr node;
@@ -57,7 +58,8 @@ void Ilvis2MetadataReader::readMetadataFile(std::string filename, MetadataNode* 
 }
 
 
-void Ilvis2MetadataReader::parseGranuleMetaDataFile(xmlNodePtr node, MetadataNode* m)
+void Ilvis2MetadataReader::parseGranuleMetaDataFile(xmlNodePtr node,
+    MetadataNode* m)
 {
     assertElementIs(node, "GranuleMetaDataFile");
 
@@ -77,7 +79,9 @@ void Ilvis2MetadataReader::parseGranuleMetaDataFile(xmlNodePtr node, MetadataNod
     assertEndOfElements(child);
 }
 
-void Ilvis2MetadataReader::parseGranuleURMetaData(xmlNodePtr node, MetadataNode* m)
+
+void Ilvis2MetadataReader::parseGranuleURMetaData(xmlNodePtr node,
+    MetadataNode* m)
 {
     assertElementIs(node, "GranuleURMetaData");
 
@@ -177,7 +181,8 @@ void Ilvis2MetadataReader::parseGranuleURMetaData(xmlNodePtr node, MetadataNode*
 }
 
 
-void Ilvis2MetadataReader::parseCollectionMetaData(xmlNodePtr node, MetadataNode * m)
+void Ilvis2MetadataReader::parseCollectionMetaData(xmlNodePtr node,
+    MetadataNode * m)
 {
     assertElementIs(node, "CollectionMetaData");
 
@@ -212,7 +217,8 @@ void Ilvis2MetadataReader::parseDataFiles(xmlNodePtr node, MetadataNode * m)
 }
 
 
-void Ilvis2MetadataReader::parseDataFileContainer(xmlNodePtr node, MetadataNode * m)
+void Ilvis2MetadataReader::parseDataFileContainer(xmlNodePtr node,
+    MetadataNode * m)
 {
     assertElementIs(node, "DataFileContainer");
 
@@ -247,7 +253,8 @@ void Ilvis2MetadataReader::parseDataFileContainer(xmlNodePtr node, MetadataNode 
 }
 
 
-void Ilvis2MetadataReader::parseECSDataGranule(xmlNodePtr node, MetadataNode * m)
+void Ilvis2MetadataReader::parseECSDataGranule(xmlNodePtr node,
+    MetadataNode * m)
 {
     assertElementIs(node, "ECSDataGranule");
 
@@ -301,7 +308,8 @@ void Ilvis2MetadataReader::parseRangeDateTime(xmlNodePtr node, MetadataNode * m)
 }
 
 
-void Ilvis2MetadataReader::parseSpatialDomainContainer(xmlNodePtr node, MetadataNode * m)
+void Ilvis2MetadataReader::parseSpatialDomainContainer(xmlNodePtr node,
+    MetadataNode * m)
 {
     assertElementIs(node, "SpatialDomainContainer");
 
@@ -339,12 +347,8 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
         // There must be at least 3 points to be valid per the schema.
         int numPoints = countChildElements(child, "Point");
         if (numPoints < 3)
-        {
-            std::ostringstream oss;
-            oss << "Found a polygon boundary with less than 3 points, " <<
-                "invalid for this schema";
-            throw pdal_error(oss.str());
-        }
+            throw error("Found a polygon boundary with less than 3 points, "
+                "invalid for this schema");
 
         GEOSCoordSeq points = GEOSCoordSeq_create(numPoints + 1, 2);
         xmlNodePtr bdChild = getFirstChildElementNode(child);
@@ -476,7 +480,8 @@ void Ilvis2MetadataReader::parseSensor(xmlNodePtr node, MetadataNode * m)
 }
 
 
-void Ilvis2MetadataReader::parseSensorCharacteristic(xmlNodePtr node, MetadataNode * m)
+void Ilvis2MetadataReader::parseSensorCharacteristic(xmlNodePtr node,
+    MetadataNode * m)
 {
     assertElementIs(node, "SensorCharacteristic");
 
@@ -544,7 +549,8 @@ void Ilvis2MetadataReader::parsePSA(xmlNodePtr node, MetadataNode * m)
 
 // Since the Browse, PH, QA, and MP product nodes have the same structure
 // just differing prefixes, they can share this code.
-void Ilvis2MetadataReader::parseXXProduct(std::string type, xmlNodePtr node, MetadataNode * m)
+void Ilvis2MetadataReader::parseXXProduct(std::string type, xmlNodePtr node,
+    MetadataNode * m)
 {
     std::string fullBase = type + "Product";
     std::string fullSub = type + "GranuleId";
@@ -572,15 +578,18 @@ std::string Ilvis2MetadataReader::extractString(xmlNodePtr node)
     return nodeStr;
 }
 
+
 double Ilvis2MetadataReader::extractDouble(xmlNodePtr node)
 {
     return atof((char*)node->children->content);
 }
 
+
 int Ilvis2MetadataReader::extractInt(xmlNodePtr node)
 {
     return atoi((char*)node->children->content);
 }
+
 
 long Ilvis2MetadataReader::extractLong(xmlNodePtr node)
 {
@@ -632,26 +641,28 @@ bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
             reinterpret_cast<const xmlChar*>(expected.c_str())) == 0;
 }
 
+
 // Throws an error if the next element is not what it expects
 void Ilvis2MetadataReader::assertElementIs(xmlNodePtr node, std::string expected)
 {
     if (!node || !nodeElementIs(node, expected))
-    {
-        errWrongElement(node, expected);
-    }
+        throw error("Expected element '" + expected + "', found '" +
+            std::string((const char *)node->name) + "'");
 }
+
 
 // Throws an error if the node is not null
 void Ilvis2MetadataReader::assertEndOfElements(xmlNodePtr node)
 {
     if (node)
-    {
-        errExpectedEnd(node);
-    }
+        throw("Expected to find no more elements, found '" +
+            std::string((const char *)node->name) + "'");
 }
 
+
 // Counts the number of child element nodes with a given name
-int Ilvis2MetadataReader::countChildElements(xmlNodePtr node, std::string childName)
+int Ilvis2MetadataReader::countChildElements(xmlNodePtr node,
+    std::string childName)
 {
     xmlNodePtr child = getFirstChildElementNode(node);
     int ctr = 0;
@@ -666,22 +677,6 @@ int Ilvis2MetadataReader::countChildElements(xmlNodePtr node, std::string childN
     }
 
     return ctr;
-}
-
-
-// Errors used when a file doesn't match the schema.
-void Ilvis2MetadataReader::errWrongElement(xmlNodePtr node, std::string expected)
-{
-    std::ostringstream oss;
-    oss << "Expected element '" << expected << "', found '" << node->name << "'";
-    throw pdal_error(oss.str());
-}
-
-void Ilvis2MetadataReader::errExpectedEnd(xmlNodePtr node)
-{
-    std::ostringstream oss;
-    oss << "Expected to find no more elements, found '" << node->name << "'";
-    throw pdal_error(oss.str());
 }
 
 } // namespace pdal

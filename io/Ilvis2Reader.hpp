@@ -67,6 +67,12 @@ public:
       ALL
     };
 
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     Ilvis2Reader()
     {}
 
@@ -90,7 +96,6 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
-    virtual void done(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
 

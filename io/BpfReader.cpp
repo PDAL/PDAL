@@ -94,7 +94,7 @@ QuickInfo BpfReader::inspect()
 void BpfReader::initialize()
 {
     if (m_filename.empty())
-        throw pdal_error("Can't read BPF file without filename.");
+        throwError("Can't read BPF file without filename.");
 
     // Logfile doesn't get set until options are processed.
     m_header.setLog(log());
@@ -104,13 +104,19 @@ void BpfReader::initialize()
     // Resets the stream position in case it was already open.
     m_stream.seek(0);
     // In order to know the dimensions we must read the file header.
-    if (!m_header.read(m_stream))
-        return;
+    try
+    {
+        if (!m_header.read(m_stream))
+            return;
+        if (!m_header.readDimensions(m_stream, m_dims))
+            return;
+    }
+    catch (const BpfHeader::error& err)
+    {
+        throwError(err.what());
+    }
 
-    if (!m_header.readDimensions(m_stream, m_dims))
-        return;
-
-    std::string code("");
+    std::string code;
     if (m_header.m_coordType == static_cast<int>(BpfCoordType::Cartesian))
        code = std::string("EPSG:4326");
     else if (m_header.m_coordType == static_cast<int>(BpfCoordType::UTM))
@@ -118,17 +124,21 @@ void BpfReader::initialize()
        uint32_t zone(abs(m_header.m_coordId));
 
        if (m_header.m_coordId > 0 && m_header.m_coordId <= 60)
-          code = std::string("EPSG:326") + (zone < 10 ? "0" : "") + Utils::toString(zone);
+          code = std::string("EPSG:326");
        else if (m_header.m_coordId < 0 && m_header.m_coordId >= -60)
-          code = std::string("EPSG:327") + (zone < 10 ? "0" : "") + Utils::toString(zone);
+          code = std::string("EPSG:327");
        else
-          throw pdal_error("BPF file contains an invalid UTM zone");
+          throwError("BPF file contains an invalid UTM zone" +
+            Utils::toString(zone));
+       code += (zone < 10 ? "0" : "") + Utils::toString(zone);
     }
     else
     {
-       //BPF supports something called Terrestrial Centered Rotational (BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
-       //which we can figure out when we run into a file with these coordinate systems.
-       throw pdal_error("BPF file contains unsupported coordinate system");
+       //BPF supports something called Terrestrial Centered Rotational
+       //(BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
+       //which we can figure out when we run into a file with these
+       // coordinate systems.
+       throwError("BPF file contains unsupported coordinate system");
     }
     SpatialReference srs(code);
     setSpatialReference(srs);
@@ -160,12 +170,7 @@ void BpfReader::initialize()
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
     if (pos > m_header.m_len)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": BPF Header length exceeded that reported by "
-            "file.";
-        throw pdal_error(oss.str());
-    }
+        throwError("BPF Header length exceeded that reported by file.");
     m_stream.close();
 }
 

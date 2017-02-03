@@ -195,24 +195,16 @@ std::vector<ExtraDim> parse(const StringList& dimString)
 
         StringList s = Utils::split2(dim, '=');
         if (s.size() != 2)
-        {
-            std::ostringstream oss;
-            oss << "Invalid extra dimension specified: '" << dim <<
+            throw error("Invalid extra dimension specified: '" + dim +
                 "'.  Need <dimension>=<type>.  See documentation "
-                " for details.";
-            throw pdal_error(oss.str());
-        }
+                " for details.");
         Utils::trim(s[0]);
         Utils::trim(s[1]);
         Dimension::Type type = Dimension::type(s[1]);
         if (type == Dimension::Type::None)
-        {
-            std::ostringstream oss;
-            oss << "Invalid extra dimension type specified: '" <<
-                dim << "'.  Need <dimension>=<type>.  See documentations "
-                " for details.";
-            throw pdal_error(oss.str());
-        }
+            throw error("Invalid extra dimension type specified: '" + dim +
+                "'.  Need <dimension>=<type>.  See documentation "
+                " for details.");
         ExtraDim ed(s[0], type);
         extraDims.push_back(ed);
     }
@@ -220,8 +212,8 @@ std::vector<ExtraDim> parse(const StringList& dimString)
     if (all)
     {
         if (extraDims.size())
-            throw (pdal_error("Can't specify specific extra dimensions with "
-                "special 'all' keyword."));
+            throw error("Can't specify specific extra dimensions with "
+                "special 'all' keyword.");
         extraDims.push_back(ExtraDim("all", Dimension::Type::None));
     }
 

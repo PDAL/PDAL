@@ -37,17 +37,6 @@
 namespace pdal
 {
 
-
-class optech_error : public pdal_error
-{
-public:
-    optech_error(const std::string& msg)
-        : pdal_error(msg)
-    {
-    }
-};
-
-
 // Optech csd files contain misalignment angles and IMU offsets.
 // Misalignment angles and IMU offsets combine to form the boresight matrix.
 typedef struct
