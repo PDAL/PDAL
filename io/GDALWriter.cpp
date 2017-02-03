@@ -129,7 +129,7 @@ void GDALWriter::prepared(PointTableRef table)
 
 void GDALWriter::readyTable(PointTableRef table)
 {
-    if (m_bounds.empty() && !table.supportsView())
+    if (m_bounds.to2d().empty() && !table.supportsView())
         throw pdal_error(getName() + ": 'bounds' option required in "
             "streaming mode.");
 }
@@ -140,8 +140,8 @@ void GDALWriter::readyFile(const std::string& filename,
 {
     m_outputFilename = filename;
     m_srs = srs;
-    if (m_bounds.valid())
-        createGrid(m_bounds);
+    if (m_bounds.to2d().valid())
+        createGrid(m_bounds.to2d());
 }
 
 
@@ -176,8 +176,8 @@ void GDALWriter::expandGrid(BOX2D bounds)
 void GDALWriter::writeView(const PointViewPtr view)
 {
     BOX2D bounds;
-    if (m_bounds.valid())
-        bounds = m_bounds;
+    if (m_bounds.to2d().valid())
+        bounds = m_bounds.to2d();
     else
         view->calculateBounds(bounds);
 
