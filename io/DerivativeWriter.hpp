@@ -97,6 +97,13 @@ private:
     StringList m_primTypesSpec;
     std::vector<TypeOutput> m_primitiveTypes;
 
+    const double c_PI = std::acos(-1.0);
+    const double c_rad2deg = 180.0 / c_PI;
+    double percentSlopeToDegrees(double slope)
+    {
+        return std::atan(slope / 100.0) * c_rad2deg;
+    }
+
     DerivativeWriter& operator=(const DerivativeWriter&); // not implemented
     DerivativeWriter(const DerivativeWriter&); // not implemented
 };

@@ -163,13 +163,13 @@ void DerivativeWriter::write(const PointViewPtr data)
                 {
                     out(r-1, c-1) = computeSlopeD8(block, m_edgeLength);
                     if (Utils::iequals(m_slopeUnit, "degrees"))
-                        out(r-1, c-1) = std::atan(out(r-1, c-1) / 100.0) * 180.0 / 3.14159;
+                        out(r-1, c-1) = percentSlopeToDegrees(out(r-1, c-1));
                 }
                 if (to.m_type == SLOPE_FD)
                 {
                     out(r-1, c-1) = computeSlopeFD(block, m_edgeLength);
                     if (Utils::iequals(m_slopeUnit, "degrees"))
-                        out(r-1, c-1) = std::atan(out(r-1, c-1) / 100.0) * 180.0 / 3.14159;
+                        out(r-1, c-1) = percentSlopeToDegrees(out(r-1, c-1));
                 }
                 if (to.m_type == ASPECT_D8)
                     out(r-1, c-1) = computeAspectD8(block, m_edgeLength);
