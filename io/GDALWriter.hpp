@@ -73,7 +73,7 @@ private:
     std::string m_outputFilename;
     std::string m_drivername;
     SpatialReference m_srs;
-    BOX2D m_bounds;
+    Bounds m_bounds;
     BOX2D m_curBounds;
     double m_edgeLength;
     Arg *m_radiusArg;
