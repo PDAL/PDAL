@@ -195,26 +195,21 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
             m_pcid;
         std::string count_str = pg_query_once(m_session, oss.str());
         if (count_str.empty())
-            throw pdal_error("Unable to count pcid's in table "
-                "`pointcloud_formats`");
+            throwError("Unable to count pcid's in table `pointcloud_formats`");
         schema_count = atoi(count_str.c_str());
-        oss.str("");
         if (schema_count == 0)
-        {
-            oss << "requested PCID '" << m_pcid <<
-                "' does not exist in POINTCLOUD_FORMATS";
-            throw pdal_error(oss.str());
-        }
+            throwError("Requested PCID '" + Utils::toString(m_pcid) +
+                "' does not exist in POINTCLOUD_FORMATS");
         return m_pcid;
     }
 
     // Do we have any existing schemas in the POINTCLOUD_FORMATS table?
     uint32_t pcid = 0;
+    oss.clear();
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
     std::string schema_count_str = pg_query_once(m_session, oss.str());
     if (schema_count_str.empty())
-        throw pdal_error("Unable to count pcid's in table "
-            "`pointcloud_formats`");
+        throwError("Unable to count pcid's in table 'pointcloud_formats'.");
     schema_count = atoi(schema_count_str.c_str());
     oss.str("");
 
@@ -269,7 +264,8 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
             std::string pcid_str = pg_query_once(m_session,
                     "SELECT nextval('pointcloud_formats_pcid_sq')");
             if (pcid_str.empty())
-                throw pdal_error("Unable to select nextval from pointcloud_formats_pcid_seq");
+                throwError("Unable to select nextval from "
+                    "'pointcloud_formats_pcid_seq'.");
             pcid = atoi(pcid_str.c_str());
         }
         else
@@ -284,8 +280,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
         std::string pcid_str = pg_query_once(m_session,
                 "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
         if (pcid_str.empty())
-            throw pdal_error("Unable to get the max pcid from "
-                "`pointcloud_formats`");
+            throw("Unable to get the max pcid from 'pointcloud_formats'.");
         pcid = atoi(pcid_str.c_str());
     }
 
@@ -295,7 +290,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1,
             NULL, &paramValues, NULL, NULL, 0);
     if (PQresultStatus(result) != PGRES_COMMAND_OK)
-        throw pdal_error(PQresultErrorMessage(result));
+        throwError(PQresultErrorMessage(result));
     PQclear(result);
     m_pcid = pcid;
     return m_pcid;
@@ -369,7 +364,7 @@ bool PgWriter::CheckTableExists(std::string const& name)
 
     std::string count_str = pg_query_once(m_session, oss.str());
     if (count_str.empty())
-        throw pdal_error("Unable to check for the existence of `pg_table`");
+        throwError("Unable to check for the existence of 'pg_table'.");
     int count = atoi(count_str.c_str());
 
     if (count == 1)

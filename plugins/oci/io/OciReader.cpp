@@ -68,13 +68,19 @@ void OciReader::addArgs(ProgramArgs& args)
 void OciReader::initialize()
 {
     m_compression = false;
-    m_connection = connect(m_connSpec);
+    try
+    {
+        m_connection = connect(m_connSpec);
+    }
+    catch (const connection_failed& err)
+    {
+        throwError(err.what());
+    }
     m_block = BlockPtr(new Block(m_connection));
 
     gdal::registerDrivers();
     if (m_query.empty())
-        throw pdal_error("'query' statement is empty. No data can be read "
-            "from pdal::OciReader");
+        throwError("'query' statement is empty. No data can be read.");
 
     m_stmt = Statement(m_connection->CreateStatement(m_query.c_str()));
     m_stmt->Execute(0);
@@ -86,7 +92,7 @@ void OciReader::initialize()
 
     // Fetch an initial row of data.
     if (!m_stmt->Fetch())
-        throw pdal_error("Unable to fetch a point cloud entry entry!");
+        throwError("Unable to fetch a point cloud entry entry.");
     m_block->setFetched();
 
     // If the spatial reference wasn't provided as an option, fetch it from
@@ -179,12 +185,8 @@ void OciReader::validateQuery()
     }
 
     if (!typeCorrect)
-    {
-        std::ostringstream oss;
-        oss << "Select statement '" << m_query <<
-            "' does not fetch a SDO_PC object.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Select statement '" + m_query + "' does not fetch "
+            "a SDO_PC object.");
 
     // If we found all the fields, the list of required fields will be empty.
     // If not, throw an exception.
@@ -201,7 +203,7 @@ void OciReader::validateQuery()
             if (i != reqFields.end())
                oss << ",";
         }
-        throw pdal_error(oss.str());
+        throwError(oss.str());
     }
 }
 
@@ -330,7 +332,7 @@ point_count_t OciReader::readPointMajor(PointView& view,
             numRead++;
         }
 #else
-        throw pdal_error("Can't decompress without LAZperf.");
+        throwError("Can't decompress without LAZperf.");
 #endif
     }
     else
@@ -403,7 +405,7 @@ void OciReader::readBlob(Statement stmt, BlockPtr block)
 
     if (!stmt->ReadBlob(block->locator, (void*)(block->chunk.data()),
                         block->chunk.size() , &amountRead))
-        throw pdal_error("Did not read all blob data!");
+        throwError("Did not read all blob data.");
 
     block->chunk.resize(amountRead);
 }

@@ -299,7 +299,7 @@ protected:
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void addSpatialReferenceArg(ProgramArgs& args);
-    void throwError(const std::string& s);
+    void throwError(const std::string& s) const;
 
 private:
     bool m_debug;

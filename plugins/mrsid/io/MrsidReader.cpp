@@ -112,7 +112,7 @@ void MrsidReader::addDimensions(PointLayoutPtr layout)
     using namespace Dimension;
 
     if (!m_PS)
-        throw pdal_error("MrSID object not initialized!");
+        throwError("MrSID object not initialized.");
     const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
 
     // add a map for PDAL names that aren't the same as LT ones (GPSTime vs Time)

@@ -76,6 +76,12 @@ namespace pdal
 class PDAL_DLL NitfFileReader
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     NitfFileReader(const std::string& filename);
     NitfFileReader(const NitfFileReader&) = delete;
     NitfFileReader& operator=(const NitfFileReader&) = delete;

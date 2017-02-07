@@ -85,20 +85,22 @@ BOX3D NitfWriter::reprojectBoxToDD(const SpatialReference& reference,
 
     BOX3D output(box);
     if (!gdal::reprojectBounds(output, reference.getWKT(), "EPSG:4326"))
-    {
-        std::ostringstream msg;
-
-        msg << getName() << ": Couldn't reproject corner points to "
-            "geographic: " << gdal::lastError();
-        throw pdal_error(msg.str());
-    }
+        throwError("Couldn't reproject corner points to geographic: " +
+            gdal::lastError());
     return output;
 }
 
 
 NitfWriter::NitfWriter()
 {
-    register_tre_plugins();
+    try
+    {
+        m_nitf.initialize();
+    }
+    catch (const NitfFileWriter::error& err)
+    {
+        throwError(err.what());
+    }
 }
 
 
@@ -147,11 +149,9 @@ void NitfWriter::doneFile()
     {
         m_nitf.write();
     }
-    catch (except::Throwable & t)
+    catch (const NitfFileWriter::error& err)
     {
-        std::ostringstream oss;
-        // std::cout << t.getTrace();
-        throw pdal_error(t.getMessage());
+        throwError(err.what());
     }
 }
 

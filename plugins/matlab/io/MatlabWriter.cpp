@@ -70,12 +70,8 @@ void MatlabWriter::prepared(PointTableRef table)
         {
             DimType dimType = table.layout()->findDimType(s);
             if (dimType.m_id == Dimension::Id::Unknown)
-            {
-                std::ostringstream oss;
-                oss << "Invalid dimension '" << s << "' specified for "
-                    "'output_dims' option.";
-                throw pdal_error(oss.str());
-            }
+                throwError("Invalid dimension '" + s + "' specified for "
+                    "'output_dims' option.");
             m_dimTypes.push_back(dimType);
         }
     }
@@ -86,11 +82,7 @@ void MatlabWriter::ready(PointTableRef table)
 {
     m_matfile = matOpen(m_filename.c_str(), "w");
     if (!m_matfile)
-    {
-        std::stringstream ss;
-        ss << "Could not open file for writing: " << m_filename;
-        throw pdal_error(ss.str());
-    }
+        throwError("Could not open file '" + m_filename + "' for writing.");
 }
 
 
@@ -107,26 +99,15 @@ void MatlabWriter::write(const PointViewPtr view)
     }
     mxArray * dimensionNames = mxCreateString(dimensionsString.str().c_str());
     if (!dimensionNames)
-    {
-        std::stringstream ss;
-        ss << "Could not create string '" << dimensionsString.str() << "'";
-        throw pdal_error(ss.str());
-    }
-    int result = matPutVariable(m_matfile, "Dimensions", dimensionNames);
-    if (result != 0)
-    {
-        std::stringstream ss;
-        ss << "Could not write dimension names to file: " << m_filename;
-        throw pdal_error(ss.str());
-    }
+        throwError("Could not create string '" + dimensionsString.str() + "'");
+    if (matPutVariable(m_matfile, "Dimensions", dimensionNames));
+        throwError("Could not write dimension names to file '" +
+            m_filename + "'.");
 
     mxArray * points = mxCreateDoubleMatrix(nPoints, nDimensions, mxREAL);
-    if (!points) {
-        std::stringstream ss;
-        ss << "Could not create a points array with dimensions " <<
-            nPoints << "x" << nDimensions;
-        throw pdal_error(ss.str());
-    }
+    if (!points)
+        throwError("Could not create a points array with dimensions " +
+            Utils::toString(nPoints) + "x" + Utils::toString(nDimensions));
 
     double * pointsPtr = mxGetPr(points);
     // Matlab is column-major
@@ -140,28 +121,17 @@ void MatlabWriter::write(const PointViewPtr view)
                     sizeof(double));
         }
     }
-    result = matPutVariable(m_matfile, "Points", points);
-    if (result != 0)
-    {
-        std::stringstream ss;
-        ss << "Could not write points to file: " << m_filename;
-        throw pdal_error(ss.str());
-    }
+    if (matPutVariable(m_matfile, "Points", points))
+        throwError("Could not write points to file '" + m_filename + "'.");
     mxDestroyArray(points);
 }
 
 
 void MatlabWriter::done(PointTableRef table)
 {
-    int result = matClose(m_matfile);
-    if (result != 0)
-    {
-        std::stringstream ss;
-        ss << "Unsuccessful write: " << m_filename;
-        throw pdal_error(ss.str());
-    }
+    if (matClose(m_matfile))
+        throwError("Unsuccessful write.");
     getMetadata().addList("filename", m_filename);
 }
-
 
 }

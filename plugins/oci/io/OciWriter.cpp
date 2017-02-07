@@ -375,11 +375,8 @@ bool OciWriter::isGeographic(int32_t srid)
     }
     catch (pdal_error const& e)
     {
-        std::ostringstream oss;
-        oss << getName();
-        oss << ": Failed to fetch geographicness of srid " << srid << std::endl;
-        oss << e.what() << std::endl;
-        throw pdal_error(oss.str());
+        throwError("Failed to fetch geographicness of srid " +
+            Utils::toString(srid) + ": " + e.what());
     }
 
     std::string k = Utils::toupper(kind.get());
@@ -390,11 +387,7 @@ bool OciWriter::isGeographic(int32_t srid)
 std::string OciWriter::loadSQLData(std::string const& filename)
 {
     if (!Utils::fileExists(filename))
-    {
-        std::ostringstream oss;
-        oss << filename << " does not exist";
-        throw pdal_error(oss.str());
-    }
+        throwError("File '" + filename + "' does not exist");
 
     std::istream::pos_type size;
     std::istream* input = Utils::openFile(filename, true);
@@ -588,24 +581,17 @@ void OciWriter::createPCEntry()
         if (!Utils::fileExists(m_baseTableBoundaryWkt))
         {
             if (!isValidWKT(m_baseTableBoundaryWkt))
-            {
-                std::ostringstream oss;
-                oss << "WKT for base_table_boundary_wkt was not valid and '" <<
-                    m_baseTableBoundaryWkt << "' doesn't exist as a file";
-                throw pdal::pdal_error(oss.str());
-            }
+                throwError("WKT for base_table_boundary_wkt was not valid "
+                    "and '" + m_baseTableBoundaryWkt + "' doesn't exist as "
+                    "a file");
             wkt_s << m_baseTableBoundaryWkt;
         }
         else
         {
             std::string wkt = loadSQLData(m_baseTableBoundaryWkt);
             if (!isValidWKT(wkt))
-            {
-                std::ostringstream oss;
-                oss << "WKT for base_table_boundary_wkt was from file '" <<
-                    m_baseTableBoundaryWkt << "' is not valid";
-                throw pdal::pdal_error(oss.str());
-            }
+                throwError("WKT for base_table_boundary_wkt was from file '" +
+                    m_baseTableBoundaryWkt + "' is not valid");
             wkt_s << wkt;
         }
     }
@@ -624,10 +610,8 @@ void OciWriter::createPCEntry()
     }
     catch (std::runtime_error const& e)
     {
-        std::ostringstream oss;
-        oss << "Failed at creating Point Cloud entry into " <<
-            m_baseTableName << " table. Does the table exist? " << e.what();
-        throw pdal_error(oss.str());
+        throwError("Failed at creating Point Cloud entry into " +
+            m_baseTableName + " table: " + e.what() + ".");
     }
 }
 
@@ -722,11 +706,19 @@ void OciWriter::initialize()
         Orientation::PointMajor;
 
     if (m_compression && (m_orientation == Orientation::DimensionMajor))
-        throw pdal_error("LAZperf compression not supported for "
-            "dimension-major point storage.");
+        throwError("LAZperf compression not supported for dimension-major "
+            "point storage.");
 
     gdal::registerDrivers();
-    m_connection = connect(m_connSpec);
+    try
+    {
+        m_connection = connect(m_connSpec);
+    }
+    catch (const connection_failed& err)
+    {
+        throwError(err.what());
+    }
+
     m_gtype = getGType();
 }
 
@@ -867,14 +859,14 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
                 compressor.compress(ptBuf.data(), size);
             }
         }
-        catch (pdal_error)
+        catch (const pdal_error& err)
         {
             compressor.done();
-            throw;
+            throwError(err.what());
         }
         compressor.done();
 #else
-        throw pdal_error("Can't compress without LAZperf.");
+        throwError("Can't compress without LAZperf.");
 #endif
     }
     else
@@ -1021,12 +1013,8 @@ void OciWriter::writeTile(const PointViewPtr view)
     }
     catch (std::runtime_error const& e)
     {
-        std::ostringstream oss;
-        oss << getName();
-        oss << ": Failed to insert block # into '" << m_blockTableName <<
-            "' table. Does the table exist? "  << std::endl;
-        oss << e.what() << std::endl;
-        throw pdal_error(oss.str());
+        throwError("Failed to insert block # into '" + m_blockTableName +
+            "' table: " + e.what());
     }
 
     if (m_streamChunks)
@@ -1128,12 +1116,8 @@ void OciWriter::updatePCExtent()
     }
     catch (std::runtime_error const& e)
     {
-        std::ostringstream oss;
-        oss << getName();
-        oss << ": Failed to update cloud extent in '" << m_baseTableName <<
-            "' table with id " << m_pc_id << ". Does the table exist? " <<
-            std::endl << e.what() << std::endl;
-        throw pdal_error(oss.str());
+        throwError("Failed to update cloud extent in '" + m_baseTableName +
+            "' table with id " + Utils::toString(m_pc_id) + ": " + e.what());
     }
     m_connection->Commit();
 }
