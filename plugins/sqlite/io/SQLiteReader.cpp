@@ -72,7 +72,7 @@ void SQLiteReader::initialize()
     catch (pdal_error const& e)
     {
         throwError("Unable to connect to database with error '" +
-            e.what() + "'");
+            std::string(e.what()));
     }
 
     if (m_spatialRef.empty())
@@ -249,7 +249,7 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
         log()->get(LogLevel::Debug3) << "Compressed byte size: " <<
             m_patch->byte_size() << std::endl;
         if (!m_patch->byte_size())
-            throwError("Compressed patch size was 0.);
+            throwError("Compressed patch size was 0.");
         log()->get(LogLevel::Debug3) << "Uncompressed byte size: " <<
             (m_patch->count * packedPointSize()) << std::endl;
     }

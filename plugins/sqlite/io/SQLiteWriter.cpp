@@ -117,7 +117,7 @@ void SQLiteWriter::initialize()
     catch (pdal_error const& e)
     {
         throwError("Unable to connect to database with error '" +
-            e.what() + ".");
+            std::string(e.what()));
     }
 
     m_patch = PatchPtr(new Patch());
