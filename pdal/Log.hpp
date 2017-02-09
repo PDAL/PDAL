@@ -39,7 +39,7 @@
 #include <stack>
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/util/NullOstream.hpp>
+#include <pdal/util/NullOStream.hpp>
 
 // Adapted from http://drdobbs.com/cpp/201804215
 

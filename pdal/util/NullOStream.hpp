@@ -37,6 +37,9 @@
 #include <iostream>
 #include <streambuf>
 
+namespace pdal
+{
+
 class NullStreambuf : public std::streambuf
 {
     char dummyBuffer[64];
@@ -56,3 +59,5 @@ public:
     NullStreambuf* rdbuf() const
         { return const_cast<NullOStream *>(this); }
 };
+
+} // namespace
