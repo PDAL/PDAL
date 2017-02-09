@@ -112,4 +112,4 @@ cmake_dependent_option(BUILD_RIVLIB_TESTS
     ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_PIPELINE_TESTS
     "Choose if pipeline tests should be built"
-    OFF "WITH_APPS; WITH_TESTS" OFF)
+    OFF "WITH_TESTS" OFF)
