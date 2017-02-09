@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2017, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,58 +32,27 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_test_main.hpp>
-#include <pdal/Log.hpp>
-#include <pdal/util/FileUtils.hpp>
-#include "Support.hpp"
+// Copied from http://stackoverflow.com/questions/8243743/is-there-a-null-stdostream-implementation-in-c-or-libraries
 
-namespace pdal
+#include <iostream>
+#include <streambuf>
+
+class NullStreambuf : public std::streambuf
 {
-
-// Make sure that we properly throw away log stuff that isn't of the right
-// level and that we generally log correctly.
-TEST(Log, t1)
-{
-    std::string filename(Support::temppath("t1"));
-    FileUtils::deleteFile(filename);
-
-    // Scope makes sure file gets closed.
+    char dummyBuffer[64];
+protected:
+    virtual int overflow(int c)
     {
-        Log l("", filename);
-
-        l.setLevel(LogLevel::Debug);
-
-        l.get(LogLevel::Debug) << "debug\n";
-        l.get(LogLevel::Debug5) << "debug5\n";
-        l.get(LogLevel::Info) << "info\n";
+        setp(dummyBuffer, dummyBuffer + sizeof(dummyBuffer));
+        return (c == traits_type::eof()) ? '\0' : c;
     }
+};
 
-    EXPECT_TRUE(Support::compare_text_files(filename,
-        Support::datapath("logs/t1")));
-}
-
-// Make sure that devnull thing works.
-TEST(Log, t2)
+class NullOStream : private NullStreambuf, public std::ostream
 {
-    std::string in(Support::datapath("las/utm15.las"));
-    std::string out(Support::temppath("out.las"));
-
-    FileUtils::deleteFile(out);
-    std::string cmd = Support::binpath(Support::exename("pdal")) +
-        " translate --log devnull -v Debug " + in + " " + out;
-
-    std::string output;
-    int stat = Utils::run_shell_command(cmd, output);
-    EXPECT_EQ(stat, 0);
-    EXPECT_EQ(output.size(), 0u);
-
-    cmd = Support::binpath(Support::exename("pdal")) +
-        " translate -v Debug " + in + " " + out + " 2>&1";
-    stat = Utils::run_shell_command(cmd, output);
-    EXPECT_EQ(stat, 0);
-    EXPECT_NE(output.size(), 0u);
-
-    FileUtils::deleteFile(out);
-}
-
-}
+public:
+    NullOStream() : std::ostream(this)
+        {}
+    NullStreambuf* rdbuf() const
+        { return const_cast<NullOStream *>(this); }
+};
