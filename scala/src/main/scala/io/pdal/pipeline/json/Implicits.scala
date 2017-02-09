@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud.pipeline.json
+package io.pdal.pipeline.json
 
-import geotrellis.pointcloud.pipeline._
+import io.pdal.pipeline._
 
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.extras._
@@ -25,7 +25,7 @@ import io.circe.syntax._
 
 object Implicits extends Implicits
 
-trait Implicits {
+trait Implicits extends Serializable {
   implicit val customConfig: Configuration =
     Configuration.default.withSnakeCaseKeys.withDiscriminator("class_type")
 
@@ -33,7 +33,7 @@ trait Implicits {
   implicit val rawExprEncoder: Encoder[RawExpr] = Encoder.instance { _.json }
   implicit val pipelineConstructorEncoder: Encoder[PipelineConstructor] = Encoder.instance { constructor =>
     Json.obj(
-      "pipeline" -> constructor.list
+      "pipeline" -> constructor
         .map(
           _.asJsonObject
             .remove("class_type") // remove type
@@ -44,6 +44,6 @@ trait Implicits {
 
   implicit val rawExprDecoder: Decoder[RawExpr] = Decoder.instance { _.as[Json].right.map(RawExpr) }
   implicit val pipelineConstructorDecoder: Decoder[PipelineConstructor] = Decoder.instance {
-    _.downField("pipeline").as[List[PipelineExpr]].right.map(PipelineConstructor)
+    _.downField("pipeline").as[PipelineConstructor]
   }
 }

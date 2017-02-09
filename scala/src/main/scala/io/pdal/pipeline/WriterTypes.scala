@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud.pipeline
+package io.pdal.pipeline
 
 sealed trait WriterType extends ExprType { val `type` = "writers" }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud.pipeline
+package io.pdal.pipeline
 
 trait ExprType {
   val `type`: String

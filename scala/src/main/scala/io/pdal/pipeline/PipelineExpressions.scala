@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud.pipeline
+package io.pdal.pipeline
 
 import io.circe.Json
 
 sealed trait PipelineExpr {
-  def ~(other: PipelineExpr): PipelineConstructor =
-    PipelineConstructor(this :: other :: Nil)
+  def ~(other: PipelineExpr): PipelineConstructor = this :: other :: Nil
 
   def ~(other: Option[PipelineExpr]): PipelineConstructor =
-    other.fold(PipelineConstructor(this :: Nil))(o => PipelineConstructor(this :: o :: Nil))
+    other.fold(this :: Nil)(o => this :: o :: Nil)
 }
 
 case class RawExpr(json: Json) extends PipelineExpr
@@ -716,10 +715,3 @@ case class TextWrite(
   delimiter: Option[String] = None,
   `type`: WriterType = WriterTypes.text
 ) extends PipelineExpr
-
-case class PipelineConstructor(list: List[PipelineExpr] = Nil) extends PipelineExpr {
-  override def ~(e: PipelineExpr): PipelineConstructor = PipelineConstructor(list :+ e)
-  override def ~(e: Option[PipelineExpr]): PipelineConstructor = e.fold(this)(el => PipelineConstructor(list :+ el))
-  def map[B](f: PipelineExpr => B): List[B] = list.map(f)
-  def mapExpr(f: PipelineExpr => PipelineExpr): PipelineConstructor = PipelineConstructor(list.map(f))
-}

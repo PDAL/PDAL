@@ -54,6 +54,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic-extras" % Environment.circeVersion,
   "io.circe" %% "circe-literal" % Environment.circeVersion,
   "io.circe" %% "circe-parser" % Environment.circeVersion,  
-  "io.pdal"  %% "pdal" % s"1.4.0",
+  "io.pdal"  %% "pdal" % "1.4.0",
+  "com.vividsolutions" % "jts-core" % "1.14.0",
   "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud.pipeline
+package io.pdal.pipeline
 
-package object json extends Implicits
+package object json extends json.Implicits

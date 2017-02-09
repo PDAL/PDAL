@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud.pipeline
+package io.pdal.pipeline
 
 sealed trait ReaderType extends ExprType { val `type` = "readers" }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package geotrellis.pointcloud
+package io.pdal
 
 import io.circe.Json
 import io.circe.generic.extras.auto._
@@ -25,8 +25,17 @@ import io.circe.syntax._
   * implicit casts in places where PipelineConstructor should be used.
   */
 
-package object pipeline extends json.Implicits {
-  implicit def pipelineExprToConstructor[T <: PipelineExpr](expr: T): PipelineConstructor = PipelineConstructor(expr :: Nil)
+package object pipeline extends json.Implicits with Implicits with Serializable {
+  type PipelineConstructor = List[PipelineExpr]
+
+  implicit class withPipelineConstructor(list: PipelineConstructor) {
+    def ~(e: PipelineExpr): PipelineConstructor = list :+ e
+    def ~(e: Option[PipelineExpr]): PipelineConstructor = e.fold(list)(el => list :+ el)
+    def map[B](f: PipelineExpr => B): List[B] = list.map(f)
+    def toPipeline = Pipeline(list.asJson.noSpaces)
+  }
+
+  implicit def pipelineExprToConstructor[T <: PipelineExpr](expr: T): PipelineConstructor = expr :: Nil
   implicit def pipelineExprToJson(expr: PipelineExpr): Json = expr.asJson
   implicit def pipelineConstructorToJson(expr: PipelineConstructor): Json = expr.asJson
   implicit def pipelineConstructorToString(expr: PipelineConstructor): String = expr.asJson.noSpaces
