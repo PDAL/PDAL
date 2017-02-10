@@ -69,7 +69,7 @@ private:
     SpatialReference m_assignedSrs;
     double m_distance;
     double m_distance2;
-    std::unique_ptr<std::vector<cropfilter::Point>> m_centers;
+    std::vector<cropfilter::Point> m_centers;
     std::vector<Polygon> m_geoms;
 
     void addArgs(ProgramArgs& args);
