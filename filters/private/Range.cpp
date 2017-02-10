@@ -39,17 +39,22 @@
 namespace pdal
 {
 
-Range Range::parse(const std::string& r)
+std::string::size_type Range::subParse(const std::string& r)
 {
+    bool& ilb(m_inclusive_lower_bound);
+    bool& iub(m_inclusive_upper_bound);
+    bool& negate(m_negate);
+    double& ub(m_upper_bound);
+    double& lb(m_lower_bound);
+    std::string& name(m_name);
+
     std::string::size_type pos, count;
-    bool ilb = true;
-    bool iub = true;
-    bool negate = false;
     const char *start;
     char *end;
-    std::string name;
-    double ub, lb;
 
+    ilb = true;
+    iub = true;
+    negate = false;
     pos = 0;
     // Skip leading whitespace.
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
@@ -57,7 +62,7 @@ Range Range::parse(const std::string& r)
 
     count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
     if (count == 0)
-        throw std::string("No dimension name.");
+        throw error("No dimension name.");
     name = r.substr(pos, count);
     pos += count;
 
@@ -70,7 +75,7 @@ Range Range::parse(const std::string& r)
     if (r[pos] == '(')
         ilb = false;
     else if (r[pos] != '[')
-        throw std::string("Missing '(' or '['.");
+        throw error("Missing '(' or '['.");
     pos++;
 
     // Extract lower bound.
@@ -84,7 +89,7 @@ Range Range::parse(const std::string& r)
     pos += count;
 
     if (r[pos] != ':')
-        throw std::string("Missing ':' limit separator.");
+        throw error("Missing ':' limit separator.");
     pos++;
 
     start = r.data() + pos;
@@ -99,16 +104,20 @@ Range Range::parse(const std::string& r)
     if (r[pos] == ')')
         iub = false;
     else if (r[pos] != ']')
-        throw std::string("Missing ')' or ']'.");
+        throw error("Missing ')' or ']'.");
     pos++;
 
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
     pos += count;
+    return pos;
+}
 
+
+void Range::parse(const std::string& r)
+{
+    std::string::size_type pos = subParse(r);
     if (pos != r.size())
-        throw std::string("Invalid characters following valid range.");
-
-    return Range(name, lb, ub, ilb, iub, negate);
+        throw error("Invalid characters following valid range.");
 }
 
 

@@ -82,11 +82,13 @@ void RangeFilter::initialize()
     {
         try
         {
-            m_range_list.push_back(Range::parse(r));
+            Range range;
+            range.parse(r);
+            m_range_list.push_back(range);
         }
-        catch (const std::string& what)
+        catch (const Range::error& err)
         {
-            throwError("Invalid 'limits' option: '" + r + "': " + what);
+            throwError("Invalid 'limits' option: '" + r + "': " + err.what());
         }
     }
 }
