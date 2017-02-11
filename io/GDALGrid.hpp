@@ -50,8 +50,16 @@ public:
     static const int statStdDev = 16;
     static const int statIdw = 32;
 
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     GDALGrid(size_t width, size_t height, double edgeLength, double radius,
         double noData, int outputTypes, size_t windowSize);
+
+    void expand(size_t width, size_t height, size_t xshift, size_t yshift);
 
     // Get the number of bands represented by this grid.
     int numBands() const;

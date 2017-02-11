@@ -35,7 +35,6 @@
 #pragma once
 
 #include <cpd/matrix.hpp>
-
 #include <pdal/Kernel.hpp>
 #include <pdal/pdal_export.hpp>
 
@@ -56,18 +55,25 @@ private:
     cpd::Matrix readFile(const std::string& filename);
 
     std::string m_method;
-    std::string m_filex;
-    std::string m_filey;
+    std::string m_fixed;
+    std::string m_moving;
     std::string m_output;
-    double m_tolerance;
-    size_t m_max_it;
+    BOX3D m_bounds;
+
+    // cpd::Transform
+    size_t m_max_iterations;
+    bool m_normalize;
     double m_outliers;
-    bool m_no_reflections;
-    bool m_allow_scaling;
+    double m_sigma2;
+    double m_tolerance;
+
+    // cpd::Rigid
+    bool m_reflections;
+    bool m_scale;
+
+    // cpd::Nonrigid
     double m_beta;
     double m_lambda;
-    BOX3D m_bounds;
-    double m_sigma2;
 };
 
 } // namespace pdal

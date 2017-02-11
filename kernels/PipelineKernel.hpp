@@ -58,6 +58,7 @@ private:
     PipelineKernel();
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
+    virtual bool isStagePrefix(const std::string& stage);
 
     std::string m_inputFile;
     std::string m_pipelineFile;

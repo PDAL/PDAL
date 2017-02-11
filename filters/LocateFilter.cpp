@@ -65,12 +65,7 @@ void LocateFilter::prepared(PointTableRef table)
     PointLayoutPtr layout(table.layout());
     m_dimId = layout->findDim(m_dimName);
     if (m_dimId == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-        oss << "Invalid dimension name in filters.locate 'dimension' "
-            "option: '" << m_dimName << "'.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Invalid dimension '" + m_dimName + "'.");
 }
 
 PointViewSet LocateFilter::run(PointViewPtr inView)
@@ -99,7 +94,7 @@ PointViewSet LocateFilter::run(PointViewPtr inView)
     }
 
     PointViewPtr outView = inView->makeNew();
-    
+
     if (Utils::iequals("min", m_minmax))
         outView->appendPoint(*inView.get(), minidx);
     if (Utils::iequals("max", m_minmax))

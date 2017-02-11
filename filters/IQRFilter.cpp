@@ -65,10 +65,7 @@ void IQRFilter::prepared(PointTableRef table)
     PointLayoutPtr layout(table.layout());
     m_dimId = layout->findDim(m_dimName);
     if (m_dimId == Dimension::Id::Unknown)
-    {
-        throw pdal_error(getName() + ": Dimension '" + m_dimName +
-            "' does not exist.");
-    }
+        throwError("Dimension '" + m_dimName + "' does not exist.");
 }
 
 PointViewSet IQRFilter::run(PointViewPtr view)

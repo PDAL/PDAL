@@ -58,22 +58,12 @@ TIndexReader::FieldIndexes TIndexReader::getFields()
     indexes.m_filename = OGR_FD_GetFieldIndex(fDefn,
         m_tileIndexColumnName.c_str());
     if (indexes.m_filename < 0)
-    {
-        std::ostringstream out;
-
-        out << "Unable to find field '" << m_tileIndexColumnName <<
-            "' in file '" << m_filename << "'.";
-        throw pdal_error(out.str());
-    }
+        throwError("Unable to find field '" + m_tileIndexColumnName +
+            "' in file '" + m_filename + "'.");
     indexes.m_srs = OGR_FD_GetFieldIndex(fDefn, m_srsColumnName.c_str());
     if (indexes.m_srs < 0)
-    {
-        std::ostringstream out;
-
-        out << "Unable to find field '" << m_srsColumnName << "' in file '" <<
-            m_filename << "'.";
-        throw pdal_error(out.str());
-    }
+        throwError("Unable to find field '" + m_srsColumnName + "' in file '" +
+            m_filename + "'.");
 
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
@@ -161,11 +151,7 @@ void TIndexReader::initialize()
     gdal::registerDrivers();
     m_dataset = OGROpen(m_filename.c_str(), FALSE, NULL);
     if (!m_dataset)
-    {
-        std::stringstream oss;
-        oss << "unable to datasource '" << m_filename << "'";
-        throw pdal::pdal_error(oss.str());
-    }
+        throwError("Unable to datasource '" + m_filename + "'");
 
     OGRGeometryH geometry(0);
     if (m_sql.size())
@@ -178,12 +164,8 @@ void TIndexReader::initialize()
         m_layer = OGR_DS_GetLayerByName(m_dataset, m_layerName.c_str());
     }
     if (!m_layer)
-    {
-        std::stringstream oss;
-        oss << getName() << ": Unable to open layer '" << m_layerName <<
-            "' from OGR datasource '" << m_filename << "'";
-        throw pdal::pdal_error(oss.str());
-    }
+        throwError("Unable to open layer '" + m_layerName +
+            "' from OGR datasource '" + m_filename + "'");
 
     m_out_ref->setFromLayer(m_layer);
 
@@ -222,13 +204,8 @@ void TIndexReader::initialize()
         OGRErr err = OGR_L_SetAttributeFilter(m_layer,
             m_attributeFilter.c_str());
         if (err != OGRERR_NONE)
-        {
-            std::stringstream oss;
-            oss << getName() << ": Unable to set attribute filter '"
-                << m_attributeFilter << "' for OGR datasource '"
-                << m_filename << "'";
-            throw pdal::pdal_error(oss.str());
-        }
+            throwError("Unable to set attribute filter '" + m_attributeFilter +
+                "' for OGR datasource '" + m_filename + "'");
     }
 
     Options cropOptions;
@@ -237,19 +214,14 @@ void TIndexReader::initialize()
 
     for (auto f : getFiles())
     {
-        log()->get(LogLevel::Debug) << "Adding file "
-                                    << f.m_filename
-                                    << " to merge filter" <<std::endl;
+        log()->get(LogLevel::Debug) << "Adding file " << f.m_filename <<
+            " to merge filter" << std::endl;
 
         std::string driver = m_factory.inferReaderDriver(f.m_filename);
         Stage *reader = m_factory.createStage(driver);
         if (!reader)
-        {
-            std::stringstream out;
-            out << "Unable to create reader for file '"
-                << f.m_filename << "'.";
-            throw pdal_error(out.str());
-        }
+            throwError("Unable to create reader for file '" + f.m_filename +
+                "'.");
         Options readerOptions;
         readerOptions.add("filename", f.m_filename);
         reader->setOptions(readerOptions);

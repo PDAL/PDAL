@@ -89,13 +89,9 @@ void ReprojectionFilter::initialize()
 
     m_out_ref_ptr = OSRNewSpatialReference(m_outSRS.getWKT().c_str());
     if (!m_out_ref_ptr)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Invalid output spatial reference '" <<
-            m_outSRS.getWKT() << "'.  This is usually caused by a "
-            "bad value for the 'out_srs' option.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Invalid output spatial reference '" + m_outSRS.getWKT() +
+            "'.  This is usually caused by a bad value for the 'out_srs' "
+            "option.");
 }
 
 
@@ -112,37 +108,24 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     {
         m_inSRS = srsSRS;
         if (m_inSRS.empty())
-        {
-            std::ostringstream oss;
-            oss << getName() << ": source data has no spatial reference and "
-                "none is specified with the 'in_srs' option.";
-            throw pdal_error(oss.str());
-        }
+            throwError("source data has no spatial reference and "
+                "none is specified with the 'in_srs' option.");
     }
 
     if (m_in_ref_ptr)
         OSRDestroySpatialReference(m_in_ref_ptr);
     m_in_ref_ptr = OSRNewSpatialReference(m_inSRS.getWKT().c_str());
     if (!m_in_ref_ptr)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Invalid input spatial reference '" <<
-            m_inSRS.getWKT() << "'.  This is usually caused by "
-            "a bad value for the 'in_srs' option or an invalid "
-            "spatial reference in the source file.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Invalid input spatial reference '" + m_inSRS.getWKT() +
+            "'.  This is usually caused by a bad value for the 'in_srs' "
+            "option or an invalid spatial reference in the source file.");
     if (m_transform_ptr)
         OCTDestroyCoordinateTransformation(m_transform_ptr);
     m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
         m_out_ref_ptr);
     if (!m_transform_ptr)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Could not construct coordinate "
-            "transformation object in createTransform";
-        throw pdal_error(oss.str());
-    }
+        throwError("Could not construct coordinate transformation object "
+            "in createTransform");
 }
 
 

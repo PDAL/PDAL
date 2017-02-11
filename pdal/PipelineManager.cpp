@@ -39,6 +39,10 @@
 
 #include "private/PipelineReaderXML.hpp"
 
+#if defined(PDAL_COMPILER_CLANG) || defined(PDAL_COMPILER_GCC)
+#  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
+
 namespace pdal
 {
 
@@ -93,7 +97,14 @@ void PipelineManager::readPipeline(const std::string& filename)
     {
         Utils::closeFile(m_input);
         m_input = Utils::openFile(filename);
-        readPipeline(*m_input);
+        try
+        {
+            readPipeline(*m_input);
+        }
+        catch (const pdal_error& err)
+        {
+            throw pdal_error(filename + ": " + err.what());
+        }
     }
 }
 
@@ -154,7 +165,8 @@ void PipelineManager::validateStageOptions() const
         const std::string& stageName = si.first;
         auto it = std::find_if(m_stages.begin(), m_stages.end(),
             [stageName](Stage *s)
-            { return (s->getName() == stageName); });
+            { return (s->getName() == stageName ||
+                "stage." + s->tag() == stageName); });
 
         // If the option stage name matches no created stage, then error.
         if (it == m_stages.end())
@@ -230,67 +242,83 @@ MetadataNode PipelineManager::getMetadata() const
     return output;
 }
 
-
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    static Options nullOpts;
+    StageCreationOptions ops { inputFile, driver };
 
-    return makeReader(inputFile, driver, nullOpts);
+    return makeReader(ops);
 }
 
 
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver, Options options)
 {
-    if (driver.empty())
-    {
-        driver = StageFactory::inferReaderDriver(inputFile);
-        if (driver.empty())
-            throw pdal_error("Cannot determine reader for input file: " +
-                inputFile);
-    }
-    if (!inputFile.empty())
-        options.replace("filename", inputFile);
+    StageCreationOptions ops { inputFile, driver, nullptr, options };
 
-    Stage& reader = addReader(driver);
-    setOptions(reader, options);
+    return makeReader(ops);
+}
+
+
+Stage& PipelineManager::makeReader(StageCreationOptions& o)
+{
+    if (o.m_driver.empty())
+    {
+        o.m_driver = StageFactory::inferReaderDriver(o.m_filename);
+        if (o.m_driver.empty())
+            throw pdal_error("Cannot determine reader for input file: " +
+                o.m_filename);
+    }
+    if (!o.m_filename.empty())
+        o.m_options.replace("filename", o.m_filename);
+
+    Stage& reader = addReader(o.m_driver);
+    reader.setTag(o.m_tag);
+    setOptions(reader, o.m_options);
     return reader;
 }
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver)
 {
-    static Options nullOps;
+    StageCreationOptions ops { "", driver };
 
-    Stage& filter = addFilter(driver);
-    setOptions(filter, nullOps);
-    return filter;
+    return makeFilter(ops);
 }
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver, Options options)
 {
-    Stage& filter = addFilter(driver);
-    setOptions(filter, options);
-    return filter;
+    StageCreationOptions ops { "", driver, nullptr, options };
+
+    return makeFilter(ops);
 }
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent)
 {
-    static Options nullOps;
+    StageCreationOptions ops { "", driver, &parent };
 
-    return makeFilter(driver, parent, nullOps);
+    return makeFilter(ops);
 }
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent,
     Options options)
 {
-    Stage& filter = addFilter(driver);
-    setOptions(filter, options);
-    filter.setInput(parent);
+    StageCreationOptions ops { "", driver, &parent, options };
+
+    return makeFilter(ops);
+}
+
+
+Stage& PipelineManager::makeFilter(StageCreationOptions& o)
+{
+    Stage& filter = addFilter(o.m_driver);
+    filter.setTag(o.m_tag);
+    setOptions(filter, o.m_options);
+    if (o.m_parent)
+        filter.setInput(*o.m_parent);
     return filter;
 }
 
@@ -298,44 +326,57 @@ Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent,
 Stage& PipelineManager::makeWriter(const std::string& outputFile,
     std::string driver)
 {
-    static Options nullOps;
+    StageCreationOptions ops { outputFile, driver };
 
-    return makeWriter(outputFile, driver, nullOps);
-}
-
-Stage& PipelineManager::makeWriter(const std::string& outputFile,
-    std::string driver, Options options)
-{
-    if (driver.empty())
-    {
-        driver = StageFactory::inferWriterDriver(outputFile);
-        if (driver.empty())
-            throw pdal_error("Cannot determine writer for output file: " +
-                outputFile);
-    }
-
-    if (!outputFile.empty())
-        options.replace("filename", outputFile);
-
-    auto& writer = addWriter(driver);
-    setOptions(writer, options);
-    return writer;
+    return makeWriter(ops);
 }
 
 
 Stage& PipelineManager::makeWriter(const std::string& outputFile,
     std::string driver, Stage& parent)
 {
-    static Options nullOps;
+    StageCreationOptions ops { outputFile, driver, &parent };
 
-    return makeWriter(outputFile, driver, parent, nullOps);
+    return makeWriter(ops);
 }
+
 
 Stage& PipelineManager::makeWriter(const std::string& outputFile,
     std::string driver, Stage& parent, Options options)
 {
-    Stage& writer = makeWriter(outputFile, driver, options);
-    writer.setInput(parent);
+    StageCreationOptions ops { outputFile, driver, &parent, options };
+
+    return makeWriter(ops);
+}
+
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Options options)
+{
+    StageCreationOptions ops { outputFile, driver, nullptr, options };
+
+    return makeWriter(ops);
+}
+
+
+Stage& PipelineManager::makeWriter(StageCreationOptions& o)
+{
+    if (o.m_driver.empty())
+    {
+        o.m_driver = StageFactory::inferWriterDriver(o.m_filename);
+        if (o.m_driver.empty())
+            throw pdal_error("Cannot determine writer for output file: " +
+                o.m_filename);
+    }
+
+    if (!o.m_filename.empty())
+        o.m_options.replace("filename", o.m_filename);
+
+    auto& writer = addWriter(o.m_driver);
+    writer.setTag(o.m_tag);
+    setOptions(writer, o.m_options);
+    if (o.m_parent)
+        writer.setInput(*o.m_parent);
     return writer;
 }
 
@@ -351,20 +392,30 @@ void PipelineManager::setOptions(Stage& stage, const Options& addOps)
     stage.addOptions(addOps);
 
     // Apply options provided on the command line, overriding others.
-    Options& ops = stageOptions(stage);
+    Options ops = stageOptions(stage);
     stage.removeOptions(ops);
     stage.addOptions(ops);
 }
 
 
-Options& PipelineManager::stageOptions(Stage& stage)
+Options PipelineManager::stageOptions(Stage& stage)
 {
-    static Options nullOpts;
+    Options opts;
 
+    std::string tag = stage.tag();
+    if (tag.size())
+    {
+        tag = "stage." + tag;
+        auto oi = m_stageOptions.find(tag);
+        if (oi != m_stageOptions.end())
+            opts.add(oi->second);
+    }
+    // Tag-based options options override stagename-based options, so
+    // we call addConditional.
     auto oi = m_stageOptions.find(stage.getName());
-    if (oi == m_stageOptions.end())
-        return nullOpts;
-    return oi->second;
+    if (oi != m_stageOptions.end())
+        opts.addConditional(oi->second);
+    return opts;
 }
 
 } // namespace pdal

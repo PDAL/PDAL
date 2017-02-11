@@ -39,6 +39,7 @@
 #include <stack>
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/util/NullOStream.hpp>
 
 // Adapted from http://drdobbs.com/cpp/201804215
 
@@ -133,17 +134,15 @@ public:
 
 protected:
     std::ostream *m_log;
-    std::ostream *m_nullStream;
 
 private:
     Log(const Log&);
     Log& operator =(const Log&);
 
-    void makeNullStream();
-
     LogLevel m_level;
     bool m_deleteStreamOnCleanup;
     std::stack<std::string> m_leaders;
+    NullOStream m_nullStream;
 };
 
 typedef std::shared_ptr<Log> LogPtr;

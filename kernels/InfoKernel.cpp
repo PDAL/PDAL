@@ -227,19 +227,24 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 {
     MetadataNode summary;
     summary.add("num_points", qi.m_pointCount);
-    summary.add("spatial_reference", qi.m_srs.getWKT());
-    MetadataNode srs = qi.m_srs.toMetadata();
-    summary.add(srs);
-    MetadataNode bounds = summary.add("bounds");
-    MetadataNode x = bounds.add("X");
-    x.add("min", qi.m_bounds.minx);
-    x.add("max", qi.m_bounds.maxx);
-    MetadataNode y = bounds.add("Y");
-    y.add("min", qi.m_bounds.miny);
-    y.add("max", qi.m_bounds.maxy);
-    MetadataNode z = bounds.add("Z");
-    z.add("min", qi.m_bounds.minz);
-    z.add("max", qi.m_bounds.maxz);
+    if (qi.m_srs.valid())
+    {
+        MetadataNode srs = qi.m_srs.toMetadata();
+        summary.add(srs);
+    }
+    if (qi.m_bounds.valid())
+    {
+        MetadataNode bounds = summary.add("bounds");
+        MetadataNode x = bounds.add("X");
+        x.add("min", qi.m_bounds.minx);
+        x.add("max", qi.m_bounds.maxx);
+        MetadataNode y = bounds.add("Y");
+        y.add("min", qi.m_bounds.miny);
+        y.add("max", qi.m_bounds.maxy);
+        MetadataNode z = bounds.add("Z");
+        z.add("min", qi.m_bounds.minz);
+        z.add("max", qi.m_bounds.maxz);
+    }
 
     std::string dims;
     auto di = qi.m_dimNames.begin();
@@ -250,7 +255,8 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
         if (di != qi.m_dimNames.end())
            dims += ", ";
     }
-    summary.add("dimensions", dims);
+    if (dims.size())
+        summary.add("dimensions", dims);
     return summary;
 }
 
@@ -311,6 +317,9 @@ MetadataNode InfoKernel::run(const std::string& filename)
     if (m_showSummary)
     {
         QuickInfo qi = m_reader->preview();
+        if (!qi.valid())
+            throw pdal_error("No summary data available for '" +
+                filename + "'.");
         MetadataNode summary = dumpSummary(qi).clone("summary");
         root.add(summary);
     }

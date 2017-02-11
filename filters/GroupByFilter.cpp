@@ -64,12 +64,7 @@ void GroupByFilter::prepared(PointTableRef table)
     PointLayoutPtr layout(table.layout());
     m_dimId = layout->findDim(m_dimName);
     if (m_dimId == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-        oss << "Invalid dimension name in filters.groupby 'dimension' "
-            "option: '" << m_dimName << "'.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Invalid dimension name '" + m_dimName + "'.");
     // also need to check that we have a dimension with discrete values
 }
 

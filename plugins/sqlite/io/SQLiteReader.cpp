@@ -66,17 +66,13 @@ void SQLiteReader::initialize()
         m_session->loadSpatialite(m_modulename);
 
         if (!bHaveSpatialite)
-        {
-            throw pdal_error("no spatialite enabled!");
-        }
+            throwError("Spatialite not enabled.");
 
     }
     catch (pdal_error const& e)
     {
-        std::stringstream oss;
-        oss << getName() << ": Unable to connect to database with error '" <<
-            e.what() << "'";
-        throw pdal_error(oss.str());
+        throwError("Unable to connect to database with error '" +
+            std::string(e.what()));
     }
 
     if (m_spatialRef.empty())
@@ -145,11 +141,7 @@ void SQLiteReader::validateQuery() const
     {
         auto p = m_session->columns().find(*r);
         if (p == m_session->columns().end())
-        {
-            std::ostringstream oss;
-            oss << "Unable to find required column name '" << *r << "'";
-            throw pdal_error(oss.str());
-        }
+            throwError("Unable to find required column name '" + *r + "'");
     }
 }
 
@@ -165,7 +157,7 @@ void SQLiteReader::addDimensions(PointLayoutPtr layout)
     m_session->query(q);
     const row* r = m_session->get(); // First result better have our schema
     if (!r)
-        throw pdal_error("Unable to select schema from query!");
+        throwError("Unable to select schema from query.");
 
     column const& s = r->at(0); // First column is schema
 
@@ -203,7 +195,7 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
 {
     const row* r = m_session->get();
     if (!r)
-        throw pdal_error("readPatch with no data in session!");
+        throwError("readPatch with no data in session.");
     std::map<std::string, int32_t> const& columns = m_session->columns();
 
     // Availability of positions already validated
@@ -251,13 +243,13 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
             count--;
         }
 #else
-        throw pdal_error("Can't decompress without LAZperf.");
+        throwError("Can't decompress without LAZperf.");
 #endif
 
         log()->get(LogLevel::Debug3) << "Compressed byte size: " <<
             m_patch->byte_size() << std::endl;
         if (!m_patch->byte_size())
-            throw pdal_error("Compressed patch size was 0!");
+            throwError("Compressed patch size was 0.");
         log()->get(LogLevel::Debug3) << "Uncompressed byte size: " <<
             (m_patch->count * packedPointSize()) << std::endl;
     }

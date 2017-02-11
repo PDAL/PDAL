@@ -54,11 +54,18 @@ std::string DensityKernel::getName() const { return s_info.name; }
 
 void DensityKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "input point cloud file name", m_inputFile);
-    args.add("output,o", "output vector data source", m_outputFile);
+    args.add("input,i", "input point cloud file name", m_inputFile).setPositional();
+    args.add("output,o", "output vector data source", m_outputFile).setPositional();
     args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
     args.add("lyr_name", "OGR layer name to use", m_layerName, "");
+    args.add("sample_size", "Sample size for auto-edge length calculation",
+        m_sampleSize, 5000U);
+    args.add("threshold", "Required cell density", m_density, 15);
+    args.add("edge_length", "Length of hex edge", m_edgeLength);
+    args.add("hole_cull_area_tolerance", "Tolerance area to "
+            "apply to holes before cull", m_cullArea);
+    args.add("smooth", "Smooth boundary output", m_doSmooth, true);
 }
 
 
@@ -91,8 +98,14 @@ int DensityKernel::execute()
     {
         m_manager.makeReader(m_inputFile, "");
     }
+    Options options;
+    options.add("sample_size", m_sampleSize);
+    options.add("threshold", m_density);
+    options.add("edge_length", m_edgeLength);
+    options.add("hole_cull_area_tolerance", m_cullArea);
+    options.add("smooth", m_doSmooth);
     m_hexbinStage = &(m_manager.makeFilter("filters.hexbin",
-        *m_manager.getStage()));
+        *m_manager.getStage(), options));
     m_manager.execute();
     outputDensity(m_manager.pointTable().anySpatialReference());
     return 0;

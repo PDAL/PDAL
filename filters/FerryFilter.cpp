@@ -63,21 +63,13 @@ void FerryFilter::initialize()
     {
         StringList s = Utils::split2(dim, '=');
         if (s.size() != 2)
-        {
-            std::ostringstream oss;
-            oss << "Invalid dimension specified '" << dim <<
-                "'.  Need <from dimension>=<to dimension>.  See "
-                "documentation for details.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Invalid dimension specified '" + dim + "'.  Need "
+                "<from dimension>=<to dimension>.  See documentation for "
+                "details.");
         Utils::trim(s[0]);
         Utils::trim(s[1]);
         if (s[0] == s[1])
-        {
-            std::ostringstream oss;
-            oss << "Can't ferry dimension '" << s[0] << "' to itself.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Can't ferry dimension '" + s[0] + "' to itself.");
         m_name_map[s[0]] = s[1];
     }
 }
@@ -96,12 +88,8 @@ void FerryFilter::prepared(PointTableRef table)
 {
     for (const auto& dims : m_name_map)
         if (table.layout()->findDim(dims.first) == Dimension::Id::Unknown)
-        {
-            std::ostringstream oss;
-            oss << "Can't ferry dimension '" << dims.first << "'. "
-                "Dimension doesn't exist.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Can't ferry dimension '" + dims.first + "'. "
+                "Dimension doesn't exist.");
 }
 
 void FerryFilter::ready(PointTableRef table)

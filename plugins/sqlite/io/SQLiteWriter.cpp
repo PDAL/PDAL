@@ -116,11 +116,8 @@ void SQLiteWriter::initialize()
     }
     catch (pdal_error const& e)
     {
-        std::stringstream oss;
-        oss << getName();
-        oss << ": Unable to connect to database with error '" <<
-            e.what() << "'";
-        throw pdal_error(oss.str());
+        throwError("Unable to connect to database with error '" +
+            std::string(e.what()));
     }
 
     m_patch = PatchPtr(new Patch());
@@ -343,24 +340,16 @@ SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
     if (!FileUtils::fileExists(filename_or_wkt))
     {
         if (!IsValidGeometryWKT(filename_or_wkt))
-        {
-            std::ostringstream oss;
-            oss << getName() << ": WKT for not valid and '" << filename_or_wkt
-                << "' doesn't exist as a file";
-            throw pdal::pdal_error(oss.str());
-        }
+            throwError("WKT for not valid and '" + filename_or_wkt +
+                "' doesn't exist as a file");
         wkt_s << filename_or_wkt;
     }
     else
     {
         std::string wkt = FileUtils::readFileIntoString(filename_or_wkt);
         if (!IsValidGeometryWKT(wkt))
-        {
-            std::ostringstream oss;
-            oss << getName() << ": WKT for was from file '" << filename_or_wkt
-                << "' is not valid";
-            throw pdal::pdal_error(oss.str());
-        }
+            throwError("WKT for was from file '" + filename_or_wkt +
+                "' is not valid");
         wkt_s << wkt;
     }
     return wkt_s.str();
@@ -493,7 +482,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
         }
         compressor.done();
 #else
-        throw pdal_error("Can't compress without LAZperf.");
+        throwError("Can't compress without LAZperf.");
 #endif
 
         size_t viewSize = view->size() * view->pointSize();

@@ -85,7 +85,8 @@ point_count_t PgReader::getNumPoints() const
 
     std::ostringstream oss;
     oss << "SELECT Sum(PC_NumPoints(" << pg_quote_identifier(m_column_name) << ")) AS numpoints, ";
-    oss << "Max(PC_NumPoints(" << pg_quote_identifier(m_column_name) << ")) AS maxpoints FROM ";
+    oss << "Max(PC_NumPoints(" << pg_quote_identifier(m_column_name) <<
+        ")) AS maxpoints FROM ";
     if (m_schema_name.size())
         oss << pg_quote_identifier(m_schema_name) << ".";
     oss << pg_quote_identifier(m_table_name);
@@ -95,9 +96,7 @@ point_count_t PgReader::getNumPoints() const
     PGresult *result = pg_query_result(m_session, oss.str());
 
     if (PQresultStatus(result) != PGRES_TUPLES_OK)
-    {
-        throw pdal_error("unable to get point count");
-    }
+        throwError("Unable to get point count.");
 
     m_cached_point_count = atoi(PQgetvalue(result, 0, 0));
     m_cached_max_points = atoi(PQgetvalue(result, 0, 1));
@@ -173,7 +172,7 @@ uint32_t PgReader::fetchPcid() const
         if (!m_schema_name.empty())
           oss << "'" << m_schema_name << "'.";
         oss << "'" << m_table_name << "'";
-        throw pdal_error(oss.str());
+        throwError(oss.str());
     }
 
     log()->get(LogLevel::Debug) << "     got pcid = " << pcid << std::endl;
@@ -193,7 +192,7 @@ void PgReader::addDimensions(PointLayoutPtr layout)
 
     std::string xmlStr = pg_query_once(m_session, oss.str());
     if (xmlStr.empty())
-        throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
+        throwError("Unable to fetch schema from 'pointcloud_formats'");
 
     loadSchema(layout, xmlStr);
 }
@@ -211,7 +210,7 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
 
     std::string srid_str = pg_query_once(m_session, oss.str());
     if (srid_str.empty())
-        throw pdal_error("Unable to fetch srid for this table and column");
+        throwError("Unable to fetch srid for this table and column");
 
     int32_t srid = atoi(srid_str.c_str());
     log()->get(LogLevel::Debug) << "     got SRID = " << srid << std::endl;

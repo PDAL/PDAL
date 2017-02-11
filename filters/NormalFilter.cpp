@@ -92,7 +92,7 @@ void NormalFilter::filter(PointView& view)
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3f> solver(B);
         if (solver.info() != Success)
-            throw pdal_error("Cannot perform eigen decomposition.");
+            throwError("Cannot perform eigen decomposition.");
         auto eval = solver.eigenvalues();
         auto evec = solver.eigenvectors().col(0);
 

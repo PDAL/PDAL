@@ -61,8 +61,7 @@ void AssignFilter::prepared(PointTableRef table)
 {
     m_dim = table.layout()->findDim(m_dimName);
     if (m_dim == Dimension::Id::Unknown)
-        throw pdal_error(getName() + ": Dimension '" + m_dimName +
-            "' not found.");
+        throwError("Dimension '" + m_dimName + "' not found.");
 }
 
 

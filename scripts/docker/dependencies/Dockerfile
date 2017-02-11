@@ -258,18 +258,30 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
 #    && wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj \
 #    && rm -rf /vdatum
 
-RUN git clone https://github.com/gadomski/fgt.git \
+RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
     && cd fgt \
-    && git checkout v0.4.4 \
-    && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DEIGEN3_INCLUDE_DIR=/usr/include -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && cmake . \
+        -DWITH_TESTS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        -DEIGEN3_INCLUDE_DIR=/usr/include \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
     && rm -rf /fgt
 
-RUN git clone https://github.com/gadomski/cpd.git \
+RUN git clone --depth 1 --branch v0.5.0 https://github.com/gadomski/cpd.git \
     && cd cpd \
-    && git checkout v0.3.2 \
-    && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && cmake . \
+        -DWITH_TESTS=OFF \
+        -DWITH_JSONCPP=OFF \
+        -DWITH_FGT=ON \
+        -DWITH_STRICT_WARNINGS=OFF \
+        -DWITH_DOCS=OFF \
+        -DEIGEN3_INCLUDE_DIR=/usr/include \
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
     && rm -rf /cpd

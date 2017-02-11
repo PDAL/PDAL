@@ -38,6 +38,7 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
@@ -64,6 +65,66 @@ GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
         m_mean.reset(new DataVec(size));
     if (m_outputTypes & statStdDev)
         m_stdDev.reset(new DataVec(size));
+}
+
+
+/**
+  Expand the grid to a new size.
+
+  /param width
+*/
+void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
+{
+    if (width < m_width)
+        throw error("Expanded grid must have width at least as large "
+            "as existing grid.");
+    if (height < m_height)
+        throw error("Expanded grid must have height at least as large "
+            "as existing grid.");
+    if (m_width + xshift > width || m_height + yshift > height)
+        throw error("Can't shift existing grid outside of new grid "
+            "during expansion.");
+    if (width == m_width && height == m_height)
+        return;
+
+    // Grid (raster) works upside down from standard X/Y.
+    yshift = height - (m_height + yshift);
+    auto moveVec = [=](DataPtr& src, double initializer = 0)
+    {
+        // Compute an index in the destination given source index coords.
+        auto dstIndex = [width, xshift, yshift](size_t i, size_t j)
+        {
+            return ((yshift + j) * width) + i + xshift;
+        };
+
+        size_t size(width * height);
+        DataPtr dst(new DataVec(size, initializer));
+        for (size_t j = 0; j < m_height; ++j)
+        {
+            size_t srcPos = index(0, j);
+            size_t dstPos = dstIndex(0, j);
+            std::copy(src->begin() + srcPos, src->begin() + srcPos + m_width,
+                dst->begin() + dstPos);
+        }
+        src = std::move(dst);
+    };
+
+    moveVec(m_count);
+    if (m_outputTypes & statMin)
+        moveVec(m_min, std::numeric_limits<double>::max());
+    if (m_outputTypes & statMax)
+        moveVec(m_max, std::numeric_limits<double>::lowest());
+    if (m_outputTypes & statIdw)
+    {
+        moveVec(m_idw);
+        moveVec(m_idwDist);
+    }
+    if ((m_outputTypes & statMean) || (m_outputTypes & statStdDev))
+        moveVec(m_mean);
+    if (m_outputTypes & statStdDev)
+        moveVec(m_stdDev);
+    m_width = width;
+    m_height = height;
 }
 
 
@@ -138,7 +199,7 @@ void GDALGrid::addPoint(double x, double y, double z)
     //          ^ | -->
     //        ^ | | --->
     //      ^ | | | ---->
-    //   <------- X ------> 
+    //   <------- X ------>
     //    <------ | | | v
     //     <----- | | v
     //       <--- | v
@@ -234,7 +295,7 @@ void GDALGrid::addPoint(double x, double y, double z)
 void GDALGrid::update(int i, int j, double val, double dist)
 {
     // Once we determine that a point is close enough to a cell to count it,
-    // this function does the actual math.  We use the value of the 
+    // this function does the actual math.  We use the value of the
     // point (val) and its distance from the cell center (dist).  There's
     // a little math that needs to be done once all points are added.  See
     // finalize() for that.
@@ -285,7 +346,7 @@ void GDALGrid::update(int i, int j, double val, double dist)
             if (dist == 0)
             {
                 idw = val;
-                idwDist = std::numeric_limits<double>::quiet_NaN();   
+                idwDist = std::numeric_limits<double>::quiet_NaN();
             }
             else
             {

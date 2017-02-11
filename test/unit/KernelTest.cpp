@@ -41,6 +41,20 @@
 namespace pdal
 {
 
+/**
+class TestKernel : public Kernel
+{
+public:
+    virtual std::string getName()
+        { return "TestKernel"; }
+    int execute()
+        { return 0; }
+    bool test_parseStageOption(std::string o, std::string& stage,
+        std::string& option, std::string& value)
+    { return Kernel::parseStageOption(o, stage, option, value); }
+}
+**/
+
 TEST(KernelTest, parseOption)
 {
     std::string stage;
@@ -48,22 +62,22 @@ TEST(KernelTest, parseOption)
     std::string value;
     bool ok;
 
-    ok = Kernel::test_parseOption("--readers.p2g.foobar=baz",
+    ok = Kernel::test_parseStageOption("--readers.p2g.foobar=baz",
         stage, option, value);
     EXPECT_TRUE(ok);
     EXPECT_EQ(stage, "readers.p2g");
     EXPECT_EQ(option, "foobar");
     EXPECT_EQ(value, "baz");
 
-    ok = Kernel::test_parseOption("--readers.2pg.foobar=baz",
+    ok = Kernel::test_parseStageOption("--readers.2pg.foobar=baz",
         stage, option, value);
     EXPECT_FALSE(ok);
 
-    ok = Kernel::test_parseOption("--read1ers.las.foobar=baz",
+    ok = Kernel::test_parseStageOption("--read1ers.las.foobar=baz",
         stage, option, value);
     EXPECT_FALSE(ok);
 
-    ok = Kernel::test_parseOption("--readers.p2g.foobar",
+    ok = Kernel::test_parseStageOption("--readers.p2g.foobar",
         stage, option, value);
     EXPECT_TRUE(ok);
     EXPECT_EQ(value, "");

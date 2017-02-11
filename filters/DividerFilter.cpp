@@ -51,19 +51,15 @@ std::istream& operator>>(std::istream& in, DividerFilter::Mode& mode)
 {
     std::string s;
     in >> s;
-    
+
     s = Utils::tolower(s);
     if (s == "round_robin")
         mode = DividerFilter::Mode::RoundRobin;
     else if (s == "partition")
         mode = DividerFilter::Mode::Partition;
     else
-    {
-        std::ostringstream oss;
-        oss << "filters.divider: Invalid 'mode' option '" << s << "'. "
-            "Valid options are 'partition' and 'round_robin'";
-        throw pdal_error(oss.str());
-    }
+        throw pdal_error("filters.divider: Invalid 'mode' option '" + s + "'. "
+            "Valid options are 'partition' and 'round_robin'");
     return in;
 }
 
@@ -77,7 +73,7 @@ std::ostream& operator<<(std::ostream& out, const DividerFilter::Mode& mode)
     case DividerFilter::Mode::Partition:
         out << "partition";
     }
-    return out;    
+    return out;
 }
 
 
@@ -96,29 +92,14 @@ void DividerFilter::addArgs(ProgramArgs& args)
 void DividerFilter::initialize()
 {
     if (m_cntArg->set() && m_capArg->set())
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Can't specify both option 'count' and "
-            "option 'capacity.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Can't specify both option 'count' and option 'capacity.");
     if (!m_cntArg->set() && !m_capArg->set())
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Must specify either option 'count' or "
-            "option 'capacity'.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Must specify either option 'count' or option 'capacity'.");
     if (m_cntArg->set())
     {
         m_sizeMode = SizeMode::Count;
         if (m_size < 2 || m_size > 1000)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Option 'count' must be in the range "
-                "[2, 1000].";
-            throw pdal_error(oss.str());
-        }
+            throwError("Option 'count' must be in the range [2, 1000].");
     }
     if (m_capArg->set())
         m_sizeMode = SizeMode::Capacity;

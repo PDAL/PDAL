@@ -62,7 +62,7 @@ void SbetReader::ready(PointTableRef)
     size_t fileSize = FileUtils::fileSize(m_filename);
     size_t pointSize = getDefaultDimensions().size() * sizeof(double);
     if (fileSize % pointSize != 0)
-        throw pdal_error("invalid sbet file size");
+        throwError("Invalid file size.");
     m_numPts = fileSize / pointSize;
     m_index = 0;
     m_stream.reset(new ILeStream(m_filename));

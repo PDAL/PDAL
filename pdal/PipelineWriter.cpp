@@ -44,7 +44,7 @@ namespace pdal
 namespace
 {
 
-void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
+std::string generateTag(Stage *stage, PipelineWriter::TagMap& tags)
 {
     auto tagExists = [tags](const std::string& tag)
     {
@@ -56,16 +56,24 @@ void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
         return false;
     };
 
+    std::string tag = stage->tag();
+    if (tag.empty())
+    {
+        for (size_t i = 1; ; ++i)
+        {
+            tag = stage->getName() + std::to_string(i);
+            if (!tagExists(tag))
+                break;
+        }
+    }
+    return tag;
+}
+
+void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
+{
     for (Stage *s : stage->getInputs())
         generateTags(s, tags);
-    std::string tag;
-    for (size_t i = 1; ; ++i)
-    {
-        tag = stage->tagName() + std::to_string(i);
-        if (!tagExists(tag))
-            break;
-    }
-    tags[stage] = tag;
+    tags[stage] = generateTag(stage, tags);
 }
 
 } // anonymous namespace

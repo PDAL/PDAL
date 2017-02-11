@@ -309,7 +309,7 @@ const Summary& StatsFilter::getStats(Dimension::Id dim) const
         if (d == dim)
             return di->second;
     }
-    throw pdal_error("Dimension not found");
+    throw pdal_error("filters.stats: Dimension not found.");
 }
 
 } // namespace pdal

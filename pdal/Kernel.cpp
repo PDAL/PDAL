@@ -52,11 +52,21 @@
 namespace pdal
 {
 
-namespace
-{
+Kernel::Kernel() :
+    m_showTime(false)
+    , m_hardCoreDebug(false)
+    , m_visualize(false)
+{}
 
-bool parseOption(std::string o, std::string& stage, std::string& option,
-    std::string& value)
+bool Kernel::isStagePrefix(const std::string& stageType)
+{
+   return (stageType == "readers" || stageType == "writers" ||
+        stageType == "filters");
+}
+
+
+bool Kernel::parseStageOption(std::string o, std::string& stage,
+    std::string& option, std::string& value)
 {
     value.clear();
     if (o.size() < 2)
@@ -84,9 +94,8 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     // Get stage_type.
     count = Utils::extract(o, pos, islc);
     pos += count;
-    std::string stage_type = o.substr(0, pos);
-    if (stage_type != "readers" && stage_type != "writers" &&
-        stage_type != "filters")
+    std::string stageType = o.substr(0, pos);
+    if (!isStagePrefix(stageType))
         return false;
     if (pos >= o.length() || o[pos++] != '.')
         return false;
@@ -117,15 +126,6 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     return true;
 }
 
-} // unnamed namespace
-
-
-Kernel::Kernel() :
-    m_showTime(false)
-    , m_hardCoreDebug(false)
-    , m_visualize(false)
-{}
-
 
 std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 {
@@ -148,7 +148,7 @@ void Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
     {
         std::string stageName, opName, value;
 
-        if (parseOption(cmdArgs[i], stageName, opName, value))
+        if (parseStageOption(cmdArgs[i], stageName, opName, value))
         {
             if (value.empty())
             {
@@ -433,10 +433,20 @@ Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
 }
 
 
-bool Kernel::test_parseOption(std::string o, std::string& stage,
+bool Kernel::test_parseStageOption(std::string o, std::string& stage,
     std::string& option, std::string& value)
 {
-    return parseOption(o, stage, option, value);
+    class TestKernel : public Kernel
+    {
+    public:
+        virtual std::string getName() const
+            { return "TestKernel"; }
+        int execute()
+            { return 0; }
+    };
+
+    TestKernel k;
+    return k.parseStageOption(o, stage, option, value);
 }
 
 } // namespace pdal

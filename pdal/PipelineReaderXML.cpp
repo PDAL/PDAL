@@ -438,17 +438,49 @@ void PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
     }
 }
 
+namespace
+{
 
-void PipelineReaderXML::readPipeline(std::istream& input)
+class pipeline_error
+{};
+
+}
+
+void PipelineReaderXML::baseReadPipeline(std::istream& input)
 {
     ptree tree;
 
-    xml_parser::read_xml(input, tree, xml_parser::no_comments);
+    try
+    {
+        xml_parser::read_xml(input, tree, xml_parser::no_comments);
 
-    pdalboost::optional<ptree> opt(tree.get_child_optional("Pipeline"));
-    if (!opt.is_initialized())
-        throw pdal_error("PipelineReaderXML: root element is not Pipeline");
-    parseElement_Pipeline(opt.get());
+        pdalboost::optional<ptree> opt(tree.get_child_optional("Pipeline"));
+        if (!opt.is_initialized())
+            throw pdal_error("PipelineReaderXML: root element is not Pipeline");
+        parseElement_Pipeline(opt.get());
+    }
+    catch (const pdal_error&)
+    {
+        throw;
+    }
+    catch (...)
+    {
+        throw pipeline_error();
+    }
+}
+
+
+void PipelineReaderXML::readPipeline(std::istream& input)
+{
+    try
+    {
+        baseReadPipeline(input);
+    }
+    catch (pipeline_error)
+    {
+        throw pdal_error("Unable to process pipeline from stream. "
+            "XML is invalid.");
+    }
 }
 
 
@@ -456,17 +488,14 @@ void PipelineReaderXML::readPipeline(const std::string& filename)
 {
     m_inputXmlFile = filename;
 
+std::cerr << "Read XML pipeline!\n";
     std::istream* input = Utils::openFile(filename);
 
     try
     {
-        readPipeline(*input);
+        baseReadPipeline(*input);
     }
-    catch (const pdal_error& )
-    {
-        throw;
-    }
-    catch (...)
+    catch (pipeline_error)
     {
         Utils::closeFile(input);
         std::ostringstream oss;

@@ -55,7 +55,8 @@ Connection connect(std::string connSpec)
         if (!input->good())
         {
             Utils::closeFile(input);
-            throw pdal_error("Unable to open connection filename for Oracle!");
+            throw connection_failed("Unable to open connection filename "
+                "for Oracle.");
         }
 
         std::string output;

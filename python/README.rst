@@ -12,6 +12,8 @@ Usage
 Given the following pipeline, which simply reads an `ASPRS LAS`_ file and
 sorts it by the ``X`` dimension:
 
+.. _`ASPRS LAS`: https://www.asprs.org/committee-general/laser-las-file-format-exchange-activities.html
+
 .. code-block:: python
 
 
@@ -27,7 +29,7 @@ sorts it by the ``X`` dimension:
     }"""
 
     import pdal
-    pipeline = pdal.Pipeline(pipeline)
+    pipeline = pdal.Pipeline(json)
     pipeline.validate() # check if our JSON and options were good
     pipeline.loglevel = 9 #really noisy
     count = pipeline.execute()

@@ -253,17 +253,18 @@ public:
     virtual std::string getName() const = 0;
 
     /**
+        Set a specific tag name.
+    */
+    void setTag(const std::string& tag)
+        { m_tag = tag; }
+
+    /**
       Return the tag name of a stage.
 
-      The tag name is used when writing a JSON pipeline.  It is generally
-      the same as the stage name, but a number is appended to maintain
-      uniqueness when stages appear more than once in a pipeline.
-      the same as
-
-      \return  The tag's name.
+      \return  The tag name.
     */
-    virtual std::string tagName() const
-        { return getName(); }
+    virtual std::string tag() const
+        { return m_tag; }
 
     /**
       Return a list of the stage's inputs.
@@ -298,6 +299,7 @@ protected:
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void addSpatialReferenceArg(ProgramArgs& args);
+    void throwError(const std::string& s) const;
 
 private:
     bool m_debug;
@@ -308,7 +310,10 @@ private:
     std::string m_logLeader;
     SpatialReference m_spatialReference;
     std::unique_ptr<ProgramArgs> m_args;
-
+    std::string m_tag;
+    // This is never used after it is set.  It just provides a place to
+    // bind the user_data argument that is essentially a comment in pipeline
+    // files.
     std::string m_userDataJSON;
 
     Stage& operator=(const Stage&); // not implemented

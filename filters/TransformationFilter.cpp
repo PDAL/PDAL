@@ -64,7 +64,7 @@ TransformationMatrix transformationMatrixFromString(const std::string& s)
             std::stringstream msg;
             msg << "Too many entries in transformation matrix, should be "
                 << matrix.size();
-            throw pdal_error(msg.str());
+            throw pdal_error("filters.transformation: " + msg.str());
         }
         matrix[i++] = entry;
     }
@@ -78,7 +78,7 @@ TransformationMatrix transformationMatrixFromString(const std::string& s)
             << matrix.size()
             << ")";
 
-        throw pdal_error(msg.str());
+        throw pdal_error("filters.transformation: " + msg.str());
     }
 
     return matrix;

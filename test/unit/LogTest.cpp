@@ -33,12 +33,57 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
-#include <io/FauxReader.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
-using namespace pdal;
+namespace pdal
+{
 
-//ABELL - Need some tests here, but what we had was crap.
+// Make sure that we properly throw away log stuff that isn't of the right
+// level and that we generally log correctly.
+TEST(Log, t1)
+{
+    std::string filename(Support::temppath("t1"));
+    FileUtils::deleteFile(filename);
+
+    // Scope makes sure file gets closed.
+    {
+        Log l("", filename);
+
+        l.setLevel(LogLevel::Debug);
+
+        l.get(LogLevel::Debug) << "debug\n";
+        l.get(LogLevel::Debug5) << "debug5\n";
+        l.get(LogLevel::Info) << "info\n";
+    }
+
+    EXPECT_TRUE(Support::compare_text_files(filename,
+        Support::datapath("logs/t1")));
+}
+
+// Make sure that devnull thing works.
+TEST(Log, t2)
+{
+    std::string in(Support::datapath("las/utm15.las"));
+    std::string out(Support::temppath("out.las"));
+
+    FileUtils::deleteFile(out);
+    std::string cmd = Support::binpath(Support::exename("pdal")) +
+        " translate --log devnull -v Debug " + in + " " + out;
+
+    std::string output;
+    int stat = Utils::run_shell_command(cmd, output);
+    EXPECT_EQ(stat, 0);
+    EXPECT_EQ(output.size(), 0u);
+
+    cmd = Support::binpath(Support::exename("pdal")) +
+        " translate -v Debug " + in + " " + out + " 2>&1";
+    stat = Utils::run_shell_command(cmd, output);
+    EXPECT_EQ(stat, 0);
+    EXPECT_NE(output.size(), 0u);
+
+    FileUtils::deleteFile(out);
+}
+
+}

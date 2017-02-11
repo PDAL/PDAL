@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2014, Connor Manning, connor@hobu.co
-* 
+*
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ void Hdf5Handler::initialize(
     }
     catch (const H5::FileIException&)
     {
-        throw pdal_error("Could not open HDF5 file.");
+        throw error("Could not open HDF5 file '" + filename + "'.");
     }
 
     try
@@ -74,13 +74,13 @@ void Hdf5Handler::initialize(
                         ColumnData(predType, dataSet, dataSpace)));
 
             // Does not check whether all the columns are the same length.
-            m_numPoints =
-                std::max((uint64_t)getColumnNumEntries(dataSetName), m_numPoints);
+            m_numPoints = std::max((uint64_t)getColumnNumEntries(dataSetName),
+                m_numPoints);
         }
     }
     catch (const H5::Exception&)
     {
-        throw pdal_error("Could not initialize data set information.");
+        throw error("Could not initialize data set information.");
     }
 }
 
@@ -116,16 +116,16 @@ void Hdf5Handler::getColumnEntries(
         columnData.dataSet.read(
                 data,
                 columnData.predType,
-                outSpace, 
+                outSpace,
                 columnData.dataSpace);
     }
     catch (const H5::Exception&)
     {
-        throw pdal_error("Could not read from dataset.");
+        throw error("Could not read from dataset.");
     }
 }
 
-hsize_t 
+hsize_t
 Hdf5Handler::getColumnNumEntries(const std::string& dataSetName) const
 {
     hsize_t entries = 0;
@@ -142,7 +142,7 @@ Hdf5Handler::getColumnData(const std::string& dataSetName) const
 
     if (columnDataIt == m_columnDataMap.end())
     {
-        throw pdal_error("Could not retrieve column data.");
+        throw error("Could not retrieve column data.");
     }
 
     return columnDataIt->second;

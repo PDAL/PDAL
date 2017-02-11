@@ -66,12 +66,7 @@ void MADFilter::prepared(PointTableRef table)
     PointLayoutPtr layout(table.layout());
     m_dimId = layout->findDim(m_dimName);
     if (m_dimId == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-        oss << "Invalid dimension name in filters.mad 'dimension' "
-            "option: '" << m_dimName << "'.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Dimension '" + m_dimName + "' does not exist.");
 }
 
 PointViewSet MADFilter::run(PointViewPtr view)

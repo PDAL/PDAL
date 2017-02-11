@@ -94,11 +94,23 @@ private:
     */
     virtual void done(PointTableRef table);
 
+    /**
+      Read a single point from the input.
+
+      \param point  Reference to point to fill with data.
+      \return  False if no point could be read.
+    */
+    virtual bool processOne(PointRef& point);
+
+    bool fillFields();
+
 private:
     char m_separator;
     std::istream *m_istream;
     StringList m_dimNames;
     Dimension::IdList m_dims;
+    StringList m_fields;
+    size_t m_line;
 };
 
 } // namespace pdal

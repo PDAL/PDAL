@@ -57,24 +57,6 @@ public:
     {}
 };
 
-
-class buffer_too_small : public pdal_error
-{
-public:
-    buffer_too_small(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
-
-class read_error : public pdal_error
-{
-public:
-    read_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
 class Block
 {
 public:

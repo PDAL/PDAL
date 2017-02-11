@@ -37,6 +37,7 @@
 #include <iostream>
 
 #include <pdal/Compression.hpp>
+#include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -126,10 +127,17 @@ void LasWriter::initialize()
         m_lasHeader.setCompressed(true);
 #if !defined(PDAL_HAVE_LASZIP) && !defined(PDAL_HAVE_LAZPERF)
     if (m_compression != LasCompression::None)
-        throw pdal_error("Can't write LAZ output.  "
-            "PDAL not built with LASzip or LAZperf.");
+        throwError("Can't write LAZ output.  PDAL not built with "
+            "LASzip or LAZperf.");
 #endif
-    m_extraDims = LasUtils::parse(m_extraDimSpec);
+    try
+    {
+        m_extraDims = LasUtils::parse(m_extraDimSpec);
+    }
+    catch (const LasUtils::error& err)
+    {
+        throwError(err.what());
+    }
     fillForwardList();
 }
 
@@ -139,7 +147,7 @@ void LasWriter::spatialReferenceChanged(const SpatialReference&)
     if (++m_srsCnt > 1)
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
-            "point spatial references.";
+            "point spatial references." << std::endl;
 }
 
 
@@ -148,6 +156,10 @@ void LasWriter::prepared(PointTableRef table)
     FlexWriter::validateFilename(table);
 
     PointLayoutPtr layout = table.layout();
+
+    // Make sure the dataformatID is set so that we can get the proper
+    // dimensions being written as part of the standard LAS record.
+    fillHeader();
 
     // If we've asked for all dimensions, add to extraDims all dimensions
     // in the layout that aren't already destined for LAS output.
@@ -169,13 +181,13 @@ void LasWriter::prepared(PointTableRef table)
     {
         dim.m_dimType.m_id = table.layout()->findDim(dim.m_name);
         if (dim.m_dimType.m_id == Dimension::Id::Unknown)
-        {
-            std::ostringstream oss;
-            oss << "Dimension '" << dim.m_name << "' specified in "
-                "'extra_dim' option not found.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Dimension '" + dim.m_name + "' specified in "
+                "'extra_dim' option not found.");
         m_extraByteLen += Dimension::size(dim.m_dimType.m_type);
+        log()->get(LogLevel::Info) << getName() << ": Writing dimension " <<
+            dim.m_name <<
+            "(" << Dimension::interpretationName(dim.m_dimType.m_type) <<
+            ") " << " to LAS extra bytes." << std::endl;
     }
 }
 
@@ -221,13 +233,8 @@ void LasWriter::fillForwardList()
         else if (Utils::contains(all, name))
             m_forwards.insert(name);
         else
-        {
-            std::ostringstream oss;
-
-            oss << "Error in 'forward' option.  Unknown field for "
-                "forwarding: '" << name << "'.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Error in 'forward' option.  Unknown field for "
+                "forwarding: '" + name + "'.");
     }
 }
 
@@ -244,13 +251,7 @@ void LasWriter::readyFile(const std::string& filename,
 {
     std::ostream *out = Utils::createFile(filename, true);
     if (!out)
-    {
-        std::stringstream out;
-
-        out << "writers.las couldn't open file '" << filename <<
-            "' for output.";
-        throw pdal_error(out.str());
-    }
+        throwError("Couldn't open file '" + filename + "' for output.");
     m_curFilename = filename;
     m_error.setFilename(filename);
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
@@ -389,18 +390,24 @@ void LasWriter::addGeotiffVlrs()
     if (m_srs.empty())
         return;
 
-    GeotiffTags tags(m_srs);
+    try
+    {
+        GeotiffTags tags(m_srs);
 
-    if (tags.directoryData().empty())
-        throw pdal_error(getName() + ": Invalid spatial reference for "
-            "writing GeoTiff VLR.");
+        if (tags.directoryData().empty())
+            throwError("Invalid spatial reference for writing GeoTiff VLR.");
 
-    addVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID,
-        "GeoTiff GeoKeyDirectoryTag", tags.directoryData());
-    addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
-        "GeoTiff GeoDoubleParamsTag", tags.doublesData());
-    addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
-        "GeoTiff GeoAsciiParamsTag", tags.asciiData());
+        addVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID,
+                "GeoTiff GeoKeyDirectoryTag", tags.directoryData());
+        addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
+                "GeoTiff GeoDoubleParamsTag", tags.doublesData());
+        addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
+                "GeoTiff GeoAsciiParamsTag", tags.asciiData());
+    }
+    catch (GeotiffTags::error& err)
+    {
+        throwError(err.what());
+    }
 }
 
 
@@ -526,7 +533,14 @@ void LasWriter::fillHeader()
 {
     const uint16_t WKT_MASK = (1 << 4);
 
-    m_lasHeader.setScaling(m_scaling);
+    try
+    {
+        m_lasHeader.setScaling(m_scaling);
+    }
+    catch (const LasHeader::error& err)
+    {
+        throwError(err.what());
+    }
     m_lasHeader.setVlrCount(m_vlrs.size());
     m_lasHeader.setEVlrCount(m_eVlrs.size());
 
@@ -547,12 +561,8 @@ void LasWriter::fillHeader()
     m_lasHeader.setGlobalEncoding(globalEncoding);
 
     if (!m_lasHeader.pointFormatSupported())
-    {
-        std::ostringstream oss;
-        oss << "Unsupported LAS output point format: " <<
-            (int)m_lasHeader.pointFormat() << ".";
-        throw pdal_error(oss.str());
-    }
+        throwError("Unsupported LAS output point format: " +
+            Utils::toString((int)m_lasHeader.pointFormat()) + ".");
 }
 
 
@@ -568,8 +578,15 @@ void LasWriter::readyCompression()
 void LasWriter::readyLasZipCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    m_zipPoint.reset(new LasZipPoint(m_lasHeader.pointFormat(),
-        m_lasHeader.pointLen()));
+    try
+    {
+        m_zipPoint.reset(new LasZipPoint(m_lasHeader.pointFormat(),
+            m_lasHeader.pointLen()));
+    }
+    catch (const LasZipPoint::error& err)
+    {
+        throwError(err.what());
+    }
     m_zipper.reset(new LASzipper());
     // Note: this will make the VLR count in the header incorrect, but we
     // rewrite that bit in finishOutput() to fix it up.
@@ -583,7 +600,7 @@ void LasWriter::readyLazPerfCompression()
 {
 #ifdef PDAL_HAVE_LAZPERF
     if (m_lasHeader.versionAtLeast(1, 4))
-        throw pdal_error("Can't write version 1.4 output with LAZperf.");
+        throwError("Can't write version 1.4 output with LAZperf.");
 
     laszip::factory::record_schema schema;
     schema.push(laszip::factory::record_item::POINT10);
@@ -613,8 +630,7 @@ void LasWriter::openCompression()
         const char* err = m_zipper->get_error();
         if (err == NULL)
             err = "(unknown error)";
-        oss << "Error opening LASzipper: " << std::string(err);
-        throw pdal_error(oss.str());
+        throwError("Error opening LASzipper: " + std::string(err) + ".");
     }
 #endif
 }
@@ -683,8 +699,7 @@ void LasWriter::writeLasZipBuf(char *pos, size_t pointLen, point_count_t numPts)
             const char* err = m_zipper->get_error();
             if (err == NULL)
                 err = "(unknown error)";
-            oss << "Error writing point: " << std::string(err);
-            throw pdal_error(oss.str());
+            throwError("Error writing point: " + std::string(err) + ".");
         }
         pos += pointLen;
     }
@@ -746,13 +761,10 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         int32_t i;
 
         if (!Utils::numericCast(d, i))
-        {
-            std::ostringstream oss;
-            oss << "Unable to convert scaled value (" << d << ") to "
-                "int32 for dimension '" << Dimension::name(dim) <<
-                "' when writing LAS/LAZ file " << m_curFilename << ".";
-            throw pdal_error(oss.str());
-        }
+            throwError("Unable to convert scaled value (" +
+                Utils::toString(d) + ") to "
+                "int32 for dimension '" + Dimension::name(dim) +
+                "' when writing LAS/LAZ file " + m_curFilename + ".");
         return i;
     };
 
@@ -884,10 +896,24 @@ void LasWriter::finishOutput()
     }
 
     // Reset the offset/scale since it may have been auto-computed
-    m_lasHeader.setScaling(m_scaling);
+    try
+    {
+        m_lasHeader.setScaling(m_scaling);
+    }
+    catch (const LasHeader::error& err)
+    {
+        throwError(err.what());
+    }
 
     // The summary is calculated as points are written.
-    m_lasHeader.setSummary(*m_summaryData);
+    try
+    {
+        m_lasHeader.setSummary(*m_summaryData);
+    }
+    catch (const LasHeader::error& err)
+    {
+        throwError(err.what());
+    }
 
     out.seek(0);
     out << m_lasHeader;

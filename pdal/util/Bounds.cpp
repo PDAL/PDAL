@@ -92,7 +92,7 @@ const double LOWEST = (std::numeric_limits<double>::lowest)();
 const double HIGHEST = (std::numeric_limits<double>::max)();
 
 }
-    
+
 void BOX2D::clear()
 {
     minx = HIGHEST; miny = HIGHEST;
@@ -112,9 +112,19 @@ bool BOX2D::empty() const
         miny == HIGHEST && maxy == LOWEST;
 }
 
+bool BOX2D::valid() const
+{
+    return  !empty();
+}
+
 bool BOX3D::empty() const
 {
     return  BOX2D::empty() && minz == HIGHEST && maxz == LOWEST;
+}
+
+bool BOX3D::valid() const
+{
+    return !empty();
 }
 
 void BOX2D::grow(double x, double y)
@@ -137,14 +147,14 @@ const BOX2D& BOX2D::getDefaultSpatialExtent()
 {
     static BOX2D v(LOWEST, LOWEST, HIGHEST, HIGHEST);
     return v;
-}    
+}
 
 
 const BOX3D& BOX3D::getDefaultSpatialExtent()
 {
     static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
     return v;
-}    
+}
 
 Bounds::Bounds(const BOX3D& box) : m_box(box)
 {}

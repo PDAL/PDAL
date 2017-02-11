@@ -47,42 +47,13 @@ extern "C" PF_ExitFunc RangeFilter_InitPlugin();
 namespace pdal
 {
 
-class Options;
+struct Range;
 
 class PDAL_DLL RangeFilter : public pdal::Filter
 {
 public:
-
-    struct Range
-    {
-        Range(const std::string name,
-              double lower_bound,
-              double upper_bound,
-              bool inclusive_lower_bound,
-              bool inclusive_upper_bound,
-              bool negate) :
-            m_name(name), m_id(Dimension::Id::Unknown),
-            m_lower_bound(lower_bound), m_upper_bound(upper_bound),
-            m_inclusive_lower_bound(inclusive_lower_bound),
-            m_inclusive_upper_bound(inclusive_upper_bound),
-            m_negate(negate)
-        {}
-
-        Range()
-            {}
-
-        std::string m_name;
-        Dimension::Id m_id;
-        double m_lower_bound;
-        double m_upper_bound;
-        bool m_inclusive_lower_bound;
-        bool m_inclusive_upper_bound;
-        bool m_negate;
-    };
-
-
-    RangeFilter() : Filter()
-    {}
+    RangeFilter();
+    ~RangeFilter();
 
     static void * create();
     static int32_t destroy(void *);

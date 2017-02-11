@@ -63,8 +63,7 @@ void HAGFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
     if (!layout->hasDim(Dimension::Id::Classification))
-        throw pdal_error(getName() + ": missing Classification dimension "
-            "in input PointView");
+        throwError("Missing Classification dimension in input PointView.");
 }
 
 void HAGFilter::filter(PointView& view)
@@ -91,8 +90,8 @@ void HAGFilter::filter(PointView& view)
 
     // Bail if there weren't any points classified as ground.
     if (gView->size() == 0)
-        throw pdal_error(getName() + ": the input PointView does not appear "
-            "to have any points classified as ground");
+        throwError("Input PointView does not have any points classified "
+            "as ground");
 
     // Build the 2D KD-tree.
     KD2Index kdi(*gView);

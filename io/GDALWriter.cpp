@@ -61,8 +61,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("resolution", "Cell edge size, in units of X/Y",
         m_edgeLength).setPositional();
-    args.add("radius", "Radius from cell center to use to locate influencing "
-        "points", m_radius).setPositional();
+    m_radiusArg = &args.add("radius", "Radius from cell center to use to locate"
+        " influencing points", m_radius);
     args.add("gdaldriver", "GDAL writer driver name", m_drivername, "GTiff");
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
@@ -72,6 +72,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_windowSize);
     args.add("nodata", "No data value", m_noData, -9999.0);
     args.add("dimension", "Dimension to use", m_interpDimString, "Z");
+    args.add("bounds", "Bounds of data.  Required in streaming mode.",
+        m_bounds);
 }
 
 
@@ -98,11 +100,7 @@ void GDALWriter::initialize()
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
         else
-        {
-            std::ostringstream oss;
-            oss << "Invalid writers.gdal output type: '" << ts << "'.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Invalid output type: '" + ts + "'.");
     }
 
     gdal::registerDrivers();
@@ -113,69 +111,118 @@ void GDALWriter::prepared(PointTableRef table)
 {
     m_interpDim = table.layout()->findDim(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-
-        oss << getName() << ": specified dimension '" << m_interpDimString <<
-            "' does not exist.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Specified dimension '" + m_interpDimString +
+            "' does not exist.");
+    if (!m_radiusArg->set())
+        m_radius = m_edgeLength * sqrt(2.0);
 }
 
 
-void GDALWriter::ready(PointTableRef table)
+void GDALWriter::readyTable(PointTableRef table)
 {
-    if (!table.spatialReferenceUnique())
-    {
-        std::ostringstream oss;
-
-        oss << getName() << ": Can't write output with multiple spatial "
-            "references.";
-        throw pdal_error(oss.str());
-    }
+    if (m_bounds.to2d().empty() && !table.supportsView())
+        throwError("Option 'bounds' required in streaming mode.");
 }
 
 
-void GDALWriter::write(const PointViewPtr view)
+void GDALWriter::readyFile(const std::string& filename,
+    const SpatialReference& srs)
 {
-    view->calculateBounds(m_bounds);
-    size_t width = ((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
-    size_t height = ((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
+    m_outputFilename = filename;
+    m_srs = srs;
+    if (m_bounds.to2d().valid())
+        createGrid(m_bounds.to2d());
+}
+
+
+void GDALWriter::createGrid(BOX2D bounds)
+{
+    m_curBounds = bounds;
+    size_t width = ((m_curBounds.maxx - m_curBounds.minx) / m_edgeLength) + 1;
+    size_t height = ((m_curBounds.maxy - m_curBounds.miny) / m_edgeLength) + 1;
     m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius, m_noData,
         m_outputTypes, m_windowSize));
-
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        double x = view->getFieldAs<double>(Dimension::Id::X, idx) -
-            m_bounds.minx;
-        double y = view->getFieldAs<double>(Dimension::Id::Y, idx) -
-            m_bounds.miny;
-        double z = view->getFieldAs<double>(m_interpDim, idx);
-
-        m_grid->addPoint(x, y, z);
-   }
 }
 
 
-void GDALWriter::done(PointTableRef table)
+void GDALWriter::expandGrid(BOX2D bounds)
+{
+    if (bounds == m_curBounds)
+        return;
+
+    bounds.grow(m_curBounds);
+    size_t xshift = ceil((m_curBounds.minx - bounds.minx) / m_edgeLength);
+    bounds.minx = m_curBounds.minx - (xshift * m_edgeLength);
+    size_t yshift = ceil((m_curBounds.miny - bounds.miny) / m_edgeLength);
+    bounds.miny = m_curBounds.miny - (yshift * m_edgeLength);
+
+    size_t width = ((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    size_t height = ((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    try
+    {
+        m_grid->expand(width, height, xshift, yshift);
+    }
+    catch (const GDALGrid::error& err)
+    {
+        throwError(err.what()); // Add the stage name onto the error text.
+    }
+    m_curBounds = bounds;
+}
+
+
+void GDALWriter::writeView(const PointViewPtr view)
+{
+    BOX2D bounds;
+    if (m_bounds.to2d().valid())
+        bounds = m_bounds.to2d();
+    else
+        view->calculateBounds(bounds);
+
+    if (!m_grid)
+        createGrid(bounds);
+    else
+        expandGrid(bounds);
+
+    PointRef point(*view, 0);
+    for (PointId idx = 0; idx < view->size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
+}
+
+
+bool GDALWriter::processOne(PointRef& point)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X) -
+        m_curBounds.minx;
+    double y = point.getFieldAs<double>(Dimension::Id::Y) -
+        m_curBounds.miny;
+    double z = point.getFieldAs<double>(m_interpDim);
+
+    m_grid->addPoint(x, y, z);
+    return true;
+}
+
+
+void GDALWriter::doneFile()
 {
     std::array<double, 6> pixelToPos;
 
-    pixelToPos[0] = m_bounds.minx;
+    pixelToPos[0] = m_curBounds.minx;
     pixelToPos[1] = m_edgeLength;
     pixelToPos[2] = 0;
-    pixelToPos[3] = m_bounds.miny + (m_edgeLength * m_grid->height());
+    pixelToPos[3] = m_curBounds.miny + (m_edgeLength * m_grid->height());
     pixelToPos[4] = 0;
     pixelToPos[5] = -m_edgeLength;
-    gdal::Raster raster(m_filename, m_drivername, table.spatialReference(),
-        pixelToPos);
+    gdal::Raster raster(m_outputFilename, m_drivername, m_srs, pixelToPos);
 
     m_grid->finalize();
 
     gdal::GDALError err = raster.open(m_grid->width(), m_grid->height(),
         m_grid->numBands(), Dimension::Type::Double, m_grid->noData());
     if (err != gdal::GDALError::None)
-        throw pdal_error(raster.errorMsg());
+        throwError(raster.errorMsg());
     int bandNum = 1;
     uint8_t *buf;
     buf = m_grid->data("min");
@@ -201,4 +248,3 @@ void GDALWriter::done(PointTableRef table)
 }
 
 } // namespace pdal
-

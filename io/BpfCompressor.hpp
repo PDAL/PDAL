@@ -46,6 +46,12 @@ namespace pdal
 class BpfCompressor
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     BpfCompressor(OLeStream& out, size_t maxSize) :
         m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
         m_compressedSize(0)
@@ -53,7 +59,7 @@ public:
     void startBlock();
     void finish();
     void compress();
-   
+
 private:
     static const int CHUNKSIZE = 1000000;
 

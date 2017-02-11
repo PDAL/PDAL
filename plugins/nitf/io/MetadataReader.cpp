@@ -62,11 +62,11 @@ void MetadataReader::read()
     // dump the file header
     //
     ::nitf::FileHeader header = m_record.getHeader();
-    ::nitf::FileSecurity security = header.getSecurityGroup();        
-    
+    ::nitf::FileSecurity security = header.getSecurityGroup();
+
     doFileHeader("FH", header);
     doSecurity("FH", "F", security);
-    
+
     ::nitf::Extensions ext = header.getExtendedSection();
     doExtensions("FH", ext);
 
@@ -82,19 +82,19 @@ void MetadataReader::read()
     for (i=0; i<num; i++)
     {
         const std::string key = "IM:" + std::to_string(i);
-        
+
         ::nitf::ImageSegment segment = *iter;
         ::nitf::ImageSubheader header = segment.getSubheader();
-        
+
         doImageSubheader(key, header);
-        
+
         ::nitf::Extensions ext = header.getExtendedSection();
         doExtensions(key, ext);
-        
+
         ::nitf::Extensions ext2 = header.getUserDefinedSection();
         doExtensions(key, ext2);
     }
-    
+
     //
     // dump the DE info, for each DE
     //
@@ -103,13 +103,13 @@ void MetadataReader::read()
     for (i=0; i<num; i++)
     {
         const std::string key = "DE:" + std::to_string(i);
-        
+
         ::nitf::DESegment segment = *iter;
         ::nitf::DESubheader header = segment.getSubheader();
         ::nitf::FileSecurity security = header.getSecurityGroup();
-        
+
         doDESubheader(key, header);
-        
+
         ::nitf::Extensions ext = header.getUserDefinedSection();
         doExtensions(key, ext);
     }
@@ -121,7 +121,7 @@ void MetadataReader::writeField(const std::string& parentkey,
                                 ::nitf::Field field)
 {
     std::string v;
-  
+
     if (field.getType() == (::nitf::Field::FieldType)NITF_BCS_A)
     {
         v = field.toString();
@@ -147,16 +147,16 @@ void MetadataReader::writeField(const std::string& parentkey,
     }
     else
     {
-        throw pdal_error("error reading nitf (2)");
-    }    
-   
+        throw error("error reading nitf (2)");
+    }
+
     Utils::trim(v);
-    const bool blank = (v.length() == 0);    
+    const bool blank = (v.length() == 0);
     if (!blank || (blank && m_showEmptyFields))
     {
         m_node.add<std::string>(parentkey + "." + key, v);
     }
-    
+
     return;
 }
 
@@ -164,7 +164,7 @@ void MetadataReader::writeField(const std::string& parentkey,
 void MetadataReader::writeInt(const std::string& parentkey,
                               const std::string& key,
                               int thevalue)
-{   
+{
     m_node.add<std::string>(parentkey + "." + key, std::to_string(thevalue));
 }
 
@@ -172,11 +172,11 @@ void MetadataReader::writeInt(const std::string& parentkey,
 void MetadataReader::writeString(const std::string& parentkey,
                                  const std::string& key,
                                  const std::string& thevalue)
-{   
+{
     m_node.add<std::string>(parentkey + "." + key, thevalue);
 }
-    
-   
+
+
 void MetadataReader::doFileHeader(const std::string& parentkey,
                                   ::nitf::FileHeader& header)
 {
@@ -203,7 +203,7 @@ void MetadataReader::doFileHeader(const std::string& parentkey,
     writeField("FH", "NUMDES", header.getNumDataExtensions());
     writeField("FH", "NUMRES", header.getNumReservedExtensions());
 }
-    
+
 
 void MetadataReader::doSecurity(const std::string& parentkey,
                                 const std::string& prefix,
@@ -226,7 +226,7 @@ void MetadataReader::doSecurity(const std::string& parentkey,
     writeField(parentkey, prefix + "SCTLN", security.getSecurityControlNumber());
 }
 
-    
+
 void MetadataReader::doBands(const std::string& key,
                              ::nitf::ImageSubheader& header)
 {
@@ -238,12 +238,12 @@ void MetadataReader::doBands(const std::string& key,
         doBand(subkey, bandinfo);
     }
 }
-    
+
 
 void MetadataReader::doBand(const std::string& key,
                             ::nitf::BandInfo& band)
 {
-    writeField(key, "IREPBAND", band.getRepresentation());    
+    writeField(key, "IREPBAND", band.getRepresentation());
     writeField(key, "ISUBCAT", band.getSubcategory());
     writeField(key, "IFC", band.getImageFilterCondition());
     writeField(key, "IMFLT", band.getImageFilterCode());
@@ -264,7 +264,7 @@ void MetadataReader::doImageSubheader(const std::string& key,
     writeField(key, "TGTID", subheader.getTargetId());
     writeField(key, "IID2", subheader.getImageTitle());
     writeField(key, "ISCLAS", subheader.getImageSecurityClass());
-    
+
     ::nitf::FileSecurity security = subheader.getSecurityGroup();
     doSecurity(key, "I", security);
 
@@ -283,7 +283,7 @@ void MetadataReader::doImageSubheader(const std::string& key,
 
     ::nitf::List list = subheader.getImageComments();
     doComments(key, list);
-    
+
     writeField(key, "IC", subheader.getImageCompression());
     writeField(key, "COMRAT", subheader.getCompressionRate());
     writeField(key, "NBANDS", subheader.getNumImageBands());
@@ -303,7 +303,7 @@ void MetadataReader::doImageSubheader(const std::string& key,
     writeField(key, "ILOC", subheader.getImageLocation());
     writeField(key, "IMAG", subheader.getImageMagnification());
 }
-    
+
 
 void MetadataReader::doDESubheader(const std::string& key,
                                    ::nitf::DESubheader& subheader)
@@ -333,7 +333,7 @@ void MetadataReader::doTRE(const std::string& key,
     // however: instead, we'll call getField(key) and get the
     // value as represented by a Field object (which will tell us
     // the formatting, etc).
-    
+
     ::nitf::TREFieldIterator iter = tre.begin();
     while (iter != tre.end())
     {
@@ -343,9 +343,9 @@ void MetadataReader::doTRE(const std::string& key,
             // if there's no pair object set (would be nice if
             // there was a is_valid() function or something...)
             ::nitf::Pair pair = *iter;
-            
+
             const char* key = pair.first();
-            
+
             // only put into metadata things that look like legit
             // stringy things
             if (strcmp(key, "raw_data") != 0)
@@ -353,17 +353,17 @@ void MetadataReader::doTRE(const std::string& key,
                 ::nitf::Field field = tre.getField(key);
                 writeField(tag, key, field);
             }
-        }            
+        }
         catch (::except::NullPointerReference&)
         {
             // oh, well - skip this one, go to the next iteration
         }
-        
+
         ++iter;
     }
 }
 
-    
+
 void MetadataReader::doExtensions(const std::string& key,
                                   ::nitf::Extensions& ext)
 {
@@ -377,7 +377,7 @@ void MetadataReader::doExtensions(const std::string& key,
         ++iter;
     }
 }
-    
+
 
 void MetadataReader::doComments(const std::string& key,
                                 ::nitf::List& list)
@@ -389,7 +389,7 @@ void MetadataReader::doComments(const std::string& key,
         ::nitf::Field field = *iter;
 
         const std::string subkey = "ICOM:" + std::to_string(i);
-        
+
         writeField(key, subkey, field);
 
         ++i;
@@ -398,6 +398,6 @@ void MetadataReader::doComments(const std::string& key,
 
     return;
 }
-    
+
 
 } // namespaces

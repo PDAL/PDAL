@@ -89,8 +89,15 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
 void LasHeader::setSummary(const LasSummaryData& summary)
 {
     m_pointCount = summary.getTotalNumPoints();
-    for (size_t num = 0; num < RETURN_COUNT; ++num)
-        m_pointCountByReturn[num] = (int)summary.getReturnCount(num);
+    try
+    {
+        for (size_t num = 0; num < RETURN_COUNT; ++num)
+            m_pointCountByReturn[num] = (int)summary.getReturnCount(num);
+    }
+    catch (const LasSummaryData::error& err)
+    {
+        throw error(err.what());
+    }
     m_bounds = summary.getBounds();
 }
 
@@ -101,13 +108,13 @@ void LasHeader::setScaling(const Scaling& scaling)
     const double& ys = scaling.m_yXform.m_scale.m_val;
     const double& zs = scaling.m_zXform.m_scale.m_val;
     if (xs == 0)
-        throw std::invalid_argument("X scale of 0.0 is invalid!");
+        throw error("X scale of 0.0 is invalid!");
 
     if (ys == 0)
-        throw std::invalid_argument("Y scale of 0.0 is invalid!");
+        throw error("Y scale of 0.0 is invalid!");
 
     if (zs == 0)
-        throw std::invalid_argument("Z scale of 0.0 is invalid!");
+        throw error("Z scale of 0.0 is invalid!");
 
     m_scales[0] = xs;
     m_scales[1] = ys;
@@ -313,11 +320,10 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     uint32_t legacyReturnCount;
 
     in.get(h.m_fileSig, 4);
-    if (!Utils::iequals(h.m_fileSig, "LASF"))
-    {
-        throw pdal::pdal_error("File signature is not 'LASF', "
+    if (!Utils::iequals(h.m_fileSig, LasHeader::FILE_SIGNATURE))
+        throw LasHeader::error("File signature is not 'LASF', "
             "is this an LAS/LAZ file?");
-    }
+
     in >> h.m_sourceId >> h.m_globalEncoding;
     LasHeader::get(in, h.m_projectUuid);
     in >> versionMajor >> h.m_versionMinor;
