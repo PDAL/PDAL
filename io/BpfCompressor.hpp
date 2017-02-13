@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <stdexcept>
 #include <ostream>
 #include <zlib.h>
 
