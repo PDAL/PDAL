@@ -77,7 +77,7 @@ Range Range::parse(const std::string& r)
     start = r.data() + pos;
     lb = std::strtod(start, &end);
     if (start == end)
-        lb = std::numeric_limits<double>::min();
+        lb = std::numeric_limits<double>::lowest();
     pos += (end - start);
 
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
