@@ -266,7 +266,7 @@ Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
     kdi.build();
 
     MatrixXd ZImax(rows, cols);
-    ZImax.setConstant(std::numeric_limits<double>::lowest());
+    ZImax.setConstant(std::numeric_limits<double>::quiet_NaN());
 
     // for each grid center, search PointView for neighbors, and find max of those
     for (int c = 0; c < cols; ++c)
@@ -278,13 +278,16 @@ Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
             double y = bounds.miny + (r + 0.5) * cell_size;
 
             auto neighbors = kdi.radius(x, y, cell_size * std::sqrt(2.0));
-
+            
+            double val(std::numeric_limits<double>::lowest());
             for (auto const& n : neighbors)
             {
-                PointRef point = view.point(n);
-                if (point.getFieldAs<double>(Id::Z) > ZImax(r, c))
-                    ZImax(r, c) = point.getFieldAs<double>(Id::Z);
+                double z(view.getFieldAs<double>(Id::Z, n));
+                if (z > val)
+                    val = z;
             }
+            if (val > std::numeric_limits<double>::lowest())
+                ZImax(r, c) = val;
         }
     }
 
