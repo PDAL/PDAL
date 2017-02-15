@@ -62,6 +62,7 @@ private:
 
     std::string m_inputFile;
     std::string m_pipelineFile;
+    std::string m_metadataFile;
     bool m_validate;
     std::string m_PointCloudSchemaOutput;
     std::string m_progressFile;
