@@ -293,39 +293,46 @@ TEST(json, stagetags)
     EXPECT_EQ(stat, 0);
     checkValue(outFilename, 25);
 
-    stat = Utils::run_shell_command(base + " --filters.assign.value=101",
+    stat = Utils::run_shell_command(base +
+        " --filters.assign.assignment=Z[:]=101",
         output);
     EXPECT_EQ(stat, 0);
     checkValue(outFilename, 101);
 
-    stat = Utils::run_shell_command(base + " --stage.assigner.value=1987",
+    stat = Utils::run_shell_command(base +
+        " --stage.assigner.assignment=Z[:]=1987",
         output);
     EXPECT_EQ(stat, 0);
     checkValue(outFilename, 1987);
 
     // Make sure that tag options override stage options.
-    stat = Utils::run_shell_command(base + " --filters.assign.value=25 "
-        "--stage.assigner.value=555", output);
+    stat = Utils::run_shell_command(base +
+        " --filters.assign.assignment=Z[:]=25 "
+        "--stage.assigner.assignment=Z[:]=555", output);
     EXPECT_EQ(stat, 0);
     checkValue(outFilename, 555);
-    stat = Utils::run_shell_command(base + " --stage.assigner.value=555 "
-        "--filters.assign.value=25 ", output);
+    stat = Utils::run_shell_command(base +
+        " --stage.assigner.assignment=Z[:]=555 "
+        "--filters.assign.assignment=Z[:]=25 ", output);
     EXPECT_EQ(stat, 0);
     checkValue(outFilename, 555);
 
     // Check that bad tag fails.
-    stat = Utils::run_shell_command(base + " --stage.foobar.value=1987",
+    stat = Utils::run_shell_command(base +
+        " --stage.foobar.assignment=Z[:]=1987",
         output);
     EXPECT_NE(stat, 0);
 
     // Check that bad option name fails.
-    stat = Utils::run_shell_command(base + " --stage.assigner.blah=1987",
+    stat = Utils::run_shell_command(base +
+        " --stage.assigner.blah=Z[:]=1987",
         output);
     EXPECT_NE(stat, 0);
 
     // Check that multiply specified option fails.
-    stat = Utils::run_shell_command(base + " --stage.assigner.value=55 "
-        "--stage.assigner.value=23", output);
+    stat = Utils::run_shell_command(base +
+        " --stage.reader.compression=laszip "
+        "--stage.reader.compression=lazperf", output);
     EXPECT_NE(stat, 0);
 }
 

@@ -32,14 +32,14 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Range.hpp"
+#include "DimRange.hpp"
 
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
-std::string::size_type Range::subParse(const std::string& r)
+std::string::size_type DimRange::subParse(const std::string& r)
 {
     bool& ilb(m_inclusive_lower_bound);
     bool& iub(m_inclusive_upper_bound);
@@ -82,7 +82,7 @@ std::string::size_type Range::subParse(const std::string& r)
     start = r.data() + pos;
     lb = std::strtod(start, &end);
     if (start == end)
-        lb = std::numeric_limits<double>::min();
+        lb = std::numeric_limits<double>::lowest();
     pos += (end - start);
 
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
@@ -113,7 +113,20 @@ std::string::size_type Range::subParse(const std::string& r)
 }
 
 
-void Range::parse(const std::string& r)
+bool DimRange::valuePasses(double v) const
+{
+    // Determine if a point passes a range.
+    bool fail = ((m_inclusive_lower_bound && v < m_lower_bound) ||
+        (!m_inclusive_lower_bound && v <= m_lower_bound) ||
+        (m_inclusive_upper_bound && v > m_upper_bound) ||
+        (!m_inclusive_upper_bound && v >= m_upper_bound));
+    if (m_negate)
+        fail = !fail;
+    return !fail;
+}
+
+
+void DimRange::parse(const std::string& r)
 {
     std::string::size_type pos = subParse(r);
     if (pos != r.size())
@@ -121,11 +134,34 @@ void Range::parse(const std::string& r)
 }
 
 
-bool operator < (const Range& r1, const Range& r2)
+bool operator < (const DimRange& r1, const DimRange& r2)
 {
     return (r1.m_name < r2.m_name ? true :
         r1.m_name > r2.m_name ? false :
         &r1 < &r2);
+}
+
+
+std::istream& operator>>(std::istream& in, DimRange& r)
+{
+    std::string s;
+
+    std::getline(in, s);
+    r.parse(s);
+    return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const DimRange& r)
+{
+    out << (r.m_inclusive_lower_bound ? '[' : '(');
+    if (r.m_lower_bound != std::numeric_limits<double>::lowest())
+        out << r.m_lower_bound;
+    out << ':';
+    if (r.m_upper_bound != std::numeric_limits<double>::max())
+        out << r.m_upper_bound;
+    out << (r.m_inclusive_upper_bound ? ']' : ')');
+    return out;
 }
 
 } // namespace pdal

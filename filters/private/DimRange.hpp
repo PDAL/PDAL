@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-struct Range
+struct DimRange
 {
     struct error : public std::runtime_error
     {
@@ -49,7 +49,7 @@ struct Range
         {}
     };
 
-    Range(const std::string name,
+    DimRange(const std::string name,
         double lower_bound,
         double upper_bound,
         bool inclusive_lower_bound,
@@ -62,12 +62,13 @@ struct Range
     m_negate(negate)
     {}
 
-    Range() : m_id(Dimension::Id::Unknown), m_lower_bound(0),
+    DimRange() : m_id(Dimension::Id::Unknown), m_lower_bound(0),
         m_upper_bound(0), m_inclusive_lower_bound(true),
         m_inclusive_upper_bound(true), m_negate(false)
     {}
 
     void parse(const std::string& s);
+    bool valuePasses(double d) const;
 
     std::string m_name;
     Dimension::Id m_id;
@@ -77,10 +78,13 @@ struct Range
     bool m_inclusive_upper_bound;
     bool m_negate;
 
-private:
+protected:
     std::string::size_type subParse(const std::string& r);
 };
 
-bool operator < (const Range& r1, const Range& r2);
+bool operator < (const DimRange& r1, const DimRange& r2);
+std::istream& operator>>(std::istream& in, DimRange& r);
+std::ostream& operator<<(std::ostream& out, const DimRange& r);
+
 
 } // namespace pdal
