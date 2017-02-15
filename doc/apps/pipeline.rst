@@ -23,6 +23,7 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
     --progress                Name of file or FIFO to which stages should write progress
                               information. The file/FIFO must exist. PDAL will not create the progress file.
     --stdin, -s               Read pipeline from standard input
+    --metadata                Name of file to which metadata should be written.
 
 .. note::
 
