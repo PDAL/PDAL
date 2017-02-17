@@ -70,7 +70,7 @@ std::string toString(const greyhound::Bounds& b)
     return ss.str();
 }
 
-const std::string server("http://dev.greyhound.io");
+const std::string server("http://data.greyhound.io");
 const std::string resource("dev/autzen-chipped");
 
 Options greyhoundOptions(
