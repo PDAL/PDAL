@@ -40,6 +40,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/Algorithm.hpp>
 
+#include <arbiter/arbiter.hpp>
+
 #include "Support.hpp"
 #include "../io/GreyhoundReader.hpp"
 #include "../io/bounds.hpp"
@@ -57,7 +59,6 @@ const greyhound::Bounds patchBounds(637000,851550,-1830,637100,851650,2870);
 const greyhound::Bounds originBounds(
         greyhound::Bounds(-92369, 123812, -11170, -22218, 230745, 2226)
         .unscale(.01, greyhound::Point(637300, 851210, 520)));
-
 
 std::string toString(const greyhound::Bounds& b)
 {
@@ -100,7 +101,8 @@ public:
         : m_doTests(false)
     {
         static std::string path(server + "/resource/" + resource + "/info");
-        static bool good(arbiter::Arbiter().tryGetSize(path));
+        static arbiter::Arbiter a;
+        static bool good(a.hasDriver(path) && a.tryGetSize(path));
         m_doTests = good;
     }
 
