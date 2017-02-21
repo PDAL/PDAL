@@ -115,7 +115,7 @@ TEST(EigenTest, ComputeValues)
     EXPECT_NEAR(0.8236099869, slope, 0.0001);
 
     double sd8 = eigen::computeSlopeD8(A, spacing);
-    EXPECT_NEAR(48.0378, sd8, 0.0001);
+    EXPECT_NEAR(67.9357, sd8, 0.0001);
 
     double sfd = eigen::computeSlopeFD(A, spacing);
     EXPECT_NEAR(210.1961, sfd, 0.0001);

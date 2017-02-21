@@ -57,6 +57,8 @@ void DerivativeWriter::addArgs(ProgramArgs& args)
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("edge_length", "Edge length", m_edgeLength, 15.0);
     args.add("primitive_type", "Primitive type", m_primTypesSpec, {"slope_d8"});
+    args.add("slope_units", "Slope units (degrees/percent)", m_slopeUnit,
+             "percent");
     args.add("altitude", "Illumination altitude (degrees)", m_illumAltDeg,
              45.0);
     args.add("azimuth", "Illumination azimuth (degrees)", m_illumAzDeg, 315.0);
@@ -125,19 +127,16 @@ void DerivativeWriter::write(const PointViewPtr data)
     size_t rows = ((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
 
     // Begin by creating a DSM of max elevations per XY cell.
-    MatrixXd DSM = createMaxMatrix(*data.get(), rows, cols, m_edgeLength,
-                                   bounds);
-
-    // Continue by cleaning the DSM.
-    MatrixXd cleanedDSM = cleanDSM(DSM);
+    MatrixXd DSM = createMaxMatrix2(*data.get(), rows, cols, m_edgeLength,
+                                    bounds);
 
     // We will pad the edges by 1 cell, though according to some texts we should
     // simply compute forward- or backward-difference as opposed to centered
     // difference at these points.
-    MatrixXd paddedDSM = padMatrix(cleanedDSM, 1);
+    MatrixXd paddedDSM = padMatrix(DSM, 1);
 
     // Prepare the out matrix.
-    MatrixXd out(cleanedDSM.rows(), cleanedDSM.cols());
+    MatrixXd out(DSM.rows(), DSM.cols());
     out.setConstant(std::numeric_limits<double>::quiet_NaN());
 
     for (TypeOutput& to : m_primitiveTypes)
@@ -151,9 +150,17 @@ void DerivativeWriter::write(const PointViewPtr data)
                     continue;
                 Matrix3d block = paddedDSM.block(r-1, c-1, 3, 3);
                 if (to.m_type == SLOPE_D8)
+                {
                     out(r-1, c-1) = computeSlopeD8(block, m_edgeLength);
+                    if (Utils::iequals(m_slopeUnit, "degrees"))
+                        out(r-1, c-1) = percentSlopeToDegrees(out(r-1, c-1));
+                }
                 if (to.m_type == SLOPE_FD)
+                {
                     out(r-1, c-1) = computeSlopeFD(block, m_edgeLength);
+                    if (Utils::iequals(m_slopeUnit, "degrees"))
+                        out(r-1, c-1) = percentSlopeToDegrees(out(r-1, c-1));
+                }
                 if (to.m_type == ASPECT_D8)
                     out(r-1, c-1) = computeAspectD8(block, m_edgeLength);
                 if (to.m_type == ASPECT_FD)

@@ -34,6 +34,7 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -250,6 +251,44 @@ Eigen::MatrixXd createMaxMatrix(PointView& view, int rows, int cols,
 
         if (z > ZImax(r, c) || std::isnan(ZImax(r, c)))
             ZImax(r, c) = z;
+    }
+
+    return ZImax;
+}
+
+Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
+                                 double cell_size, BOX2D bounds)
+{
+    using namespace Dimension;
+    using namespace Eigen;
+
+    KD2Index kdi(view);
+    kdi.build();
+
+    MatrixXd ZImax(rows, cols);
+    ZImax.setConstant(std::numeric_limits<double>::quiet_NaN());
+
+    // for each grid center, search PointView for neighbors, and find max of those
+    for (int c = 0; c < cols; ++c)
+    {
+        double x = bounds.minx + (c + 0.5) * cell_size;
+
+        for (int r = 0; r < rows; ++r)
+        {
+            double y = bounds.miny + (r + 0.5) * cell_size;
+
+            auto neighbors = kdi.radius(x, y, cell_size * std::sqrt(2.0));
+            
+            double val(std::numeric_limits<double>::lowest());
+            for (auto const& n : neighbors)
+            {
+                double z(view.getFieldAs<double>(Id::Z, n));
+                if (z > val)
+                    val = z;
+            }
+            if (val > std::numeric_limits<double>::lowest())
+                ZImax(r, c) = val;
+        }
     }
 
     return ZImax;

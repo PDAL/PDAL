@@ -73,7 +73,8 @@ bool PipelineKernel::isStagePrefix(const std::string& stage)
 
 void PipelineKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "input file name", m_inputFile).setOptionalPositional();
+    args.add("input,i", "Input filename", m_inputFile).setOptionalPositional();
+
     args.add("pipeline-serialization", "Output file for pipeline serialization",
         m_pipelineFile);
     args.add("validate", "Validate the pipeline (including serialization), "
@@ -87,7 +88,9 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
         m_PointCloudSchemaOutput).setHidden();
     args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
     args.add("stream", "Attempt to run pipeline in streaming mode.", m_stream);
+    args.add("metadata", "Metadata filename", m_metadataFile);
 }
+
 
 int PipelineKernel::execute()
 {
@@ -115,7 +118,16 @@ int PipelineKernel::execute()
     else
         m_manager.execute();
 
-    if (m_pipelineFile.size() > 0)
+    if (m_metadataFile.size())
+    {
+        std::ostream *out = Utils::createFile(m_metadataFile, false);
+        if (!out)
+            throw pdal_error("Can't open file '" + m_metadataFile +
+                "' for metadata output.");
+        Utils::toJSON(m_manager.getMetadata(), *out);
+        Utils::closeFile(out);
+    }
+    if (m_pipelineFile.size())
         PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineFile);
 
     if (m_PointCloudSchemaOutput.size() > 0)

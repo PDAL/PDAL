@@ -8,6 +8,7 @@ if (CURL_FOUND)
     find_package(Threads REQUIRED)
     include_directories(${CURL_INCLUDE_DIR})
     set(PDAL_ARBITER_ENABLED 1)
+    add_definitions("-DARBITER_CURL")
 
     if (WIN32)
         add_definitions("-DWINDOWS")
@@ -15,3 +16,4 @@ if (CURL_FOUND)
         add_definitions("-DUNIX")
     endif()
 endif()
+

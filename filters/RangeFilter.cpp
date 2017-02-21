@@ -159,4 +159,3 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
 }
 
 } // namespace pdal
-

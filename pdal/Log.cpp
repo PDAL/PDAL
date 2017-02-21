@@ -43,7 +43,7 @@ namespace pdal
 
 Log::Log(std::string const& leaderString,
          std::string const& outputName)
-    : m_level(LogLevel::Error)
+    : m_level(LogLevel::Warning)
     , m_deleteStreamOnCleanup(false)
 {
 
