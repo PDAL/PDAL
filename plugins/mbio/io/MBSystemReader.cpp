@@ -90,28 +90,33 @@ void MBSystemReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-void MBSystemReader::initialize()
-{
-
-    if (m_initialized)
-        return;
-
-//     FileIO *file = FileIO::create();
-//     file->init(m_filename.c_str(), "r");
-//     m_PS = MG4PointReader::create();
-//     m_PS->init(file);
-//     file->release();
-//     file = NULL;
-
-//     m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0,
-//         m_PS->getPointInfo(), NULL);
-    m_initialized = true;
-}
-
 void MBSystemReader::ready(PointTableRef table, MetadataNode& m)
 {
     m_index = 0;
+
+    int verbose = 0;
+    int pings = 0;  // Perhaps an argument for this?
+    int lonflip = 0; // Longitude -180 -> 180
+    double bounds[4] { -180, 180, -90, 90 };
+    int btime_i[7];
+    int etime_i[7];
+    double speedmin;
+    double timegap;
+    char *mbio_ptr;
+    double btime_d;
+    double etime_d;
+    int beams_bath;
+    int beams_amp;
+    int pixels_ss;
+    int error;
+
+    // Need to set filename and format from args.
+
+    mb_read_init(verbose, m_filename.data(), m_format, bounds, btime_i,
+        etime_i, speedmin, timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath,
+        &beams_amp, &pixels_ss, &error);
 }
+
 
 QuickInfo MBSystemReader::inspect()
 {
