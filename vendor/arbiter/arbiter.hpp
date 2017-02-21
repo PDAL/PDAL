@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: c670c95662b3b67c642590f7737970d8c745d2ee
+// Git SHA: 25e0972f56f075edd87ed9372075c994f01e4c9e
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3969,7 +3969,7 @@ public:
 
     static std::string extractProfile(const Json::Value& json);
 
-    virtual std::string type() const override { return "s3"; }
+    virtual std::string type() const override;
 
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
@@ -3982,8 +3982,6 @@ public:
             http::Query query) const override;
 
     virtual void copy(std::string src, std::string dst) const override;
-
-    static std::string findRegion();
 
 private:
     /** Inherited from Drivers::Http. */
@@ -4012,7 +4010,12 @@ private:
 class S3::Auth
 {
 public:
-    Auth(std::string access, std::string hidden, std::string token = "");
+    Auth(
+            std::string profile,
+            std::string access,
+            std::string hidden,
+            std::string token = "");
+
     Auth(std::string iamRole);
     Auth(const Auth&);
 
@@ -4032,11 +4035,13 @@ public:
 
     Auth getStatic() const;
 
+    std::string profile() const { return m_profile; }
     std::string access() const;
     std::string hidden() const;
     std::string token() const;
 
 private:
+    mutable std::string m_profile;
     mutable std::string m_access;
     mutable std::string m_hidden;
     mutable std::string m_token;

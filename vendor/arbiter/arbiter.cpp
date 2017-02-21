@@ -102,9 +102,22 @@ Arbiter::Arbiter(const Json::Value& json)
     auto https(Https::create(*m_pool, json["http"]));
     if (https) m_drivers[https->type()] = std::move(https);
 
-    auto s3(S3::create(*m_pool, json["s3"]));
-    if (s3) m_drivers[s3->type()] = std::move(s3);
+    if (json["s3"].isArray())
+    {
+        for (const auto& sub : json["s3"])
+        {
+            auto s3(S3::create(*m_pool, sub));
+            m_drivers[s3->type()] = std::move(s3);
+        }
+    }
+    else
+    {
+        auto s3(S3::create(*m_pool, json["s3"]));
+        if (s3) m_drivers[s3->type()] = std::move(s3);
+    }
 
+    // Credential-based drivers should probably all do something similar to the
+    // S3 driver to support multiple profiles.
     auto dropbox(Dropbox::create(*m_pool, json["dropbox"]));
     if (dropbox) m_drivers[dropbox->type()] = std::move(dropbox);
 #endif
@@ -1646,6 +1659,12 @@ std::string S3::extractProfile(const Json::Value& json)
     }
 }
 
+std::string S3::type() const
+{
+    if (!m_auth || m_auth->profile() == "default") return "s3";
+    else return m_auth->profile() + "@s3";
+}
+
 std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
 {
     std::unique_ptr<std::size_t> size;
@@ -2070,7 +2089,7 @@ std::unique_ptr<S3::Auth> S3::Auth::find(
 
     if (access && hidden)
     {
-        auth.reset(new S3::Auth(*access, *hidden));
+        auth.reset(new S3::Auth(profile, *access, *hidden));
         return auth;
     }
 
@@ -2079,7 +2098,7 @@ std::unique_ptr<S3::Auth> S3::Auth::find(
 
     if (access && hidden)
     {
-        auth.reset(new S3::Auth(*access, *hidden));
+        auth.reset(new S3::Auth(profile, *access, *hidden));
         return auth;
     }
 
@@ -2090,6 +2109,7 @@ std::unique_ptr<S3::Auth> S3::Auth::find(
     {
         auth.reset(
                 new Auth(
+                    profile,
                     json["access"].asString(),
                     json.isMember("secret") ?
                         json["secret"].asString() :
@@ -2139,7 +2159,7 @@ std::unique_ptr<S3::Auth> S3::Auth::find(
                                     hiddenPos + hiddenFind.size(),
                                     hiddenLine.find(';')));
 
-                        auth.reset(new S3::Auth(access, hidden));
+                        auth.reset(new S3::Auth(profile, access, hidden));
                         return auth;
                     }
                 }
@@ -2150,9 +2170,12 @@ std::unique_ptr<S3::Auth> S3::Auth::find(
     }
 
 #ifdef ARBITER_CURL
-    if (const auto iamRole = httpDriver.tryGet(credBase))
+    if (json["allowInstanceProfile"].asBool())
     {
-        auth.reset(new S3::Auth(*iamRole));
+        if (const auto iamRole = httpDriver.tryGet(credBase))
+        {
+            auth.reset(new S3::Auth(*iamRole));
+        }
     }
 #endif
 
@@ -2160,10 +2183,12 @@ std::unique_ptr<S3::Auth> S3::Auth::find(
 }
 
 S3::Auth::Auth(
+        const std::string profile,
         const std::string access,
         const std::string hidden,
         const std::string token)
-    : m_access(access)
+    : m_profile(profile)
+    , m_access(access)
     , m_hidden(hidden)
     , m_token(token)
 { }
@@ -2173,7 +2198,8 @@ S3::Auth::Auth(const std::string iamRole)
 { }
 
 S3::Auth::Auth(const Auth& other)
-    : m_access(other.m_access)
+    : m_profile(other.m_profile)
+    , m_access(other.m_access)
     , m_hidden(other.m_hidden)
     , m_token(other.m_token)
     , m_iamRole(other.m_iamRole)
@@ -2224,7 +2250,7 @@ S3::Auth S3::Auth::getStatic() const
     }
 #endif
 
-    return S3::Auth(m_access, m_hidden, m_token);
+    return S3::Auth(m_profile, m_access, m_hidden, m_token);
 }
 
 } // namespace drivers
@@ -2760,6 +2786,9 @@ void Curl::init(
     // option to make the timeout a sliding window instead of an absolute.
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, m_timeout);
+
+    curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+    curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
 
     // Configuration options.
     if (followRedirect) curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
