@@ -38,6 +38,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include "private/DimRange.hpp"
+
 namespace pdal
 {
 
@@ -48,26 +50,93 @@ static PluginInfo const s_info = PluginInfo(
 
 CREATE_STATIC_PLUGIN(1, 0, AssignFilter, Filter, s_info)
 
+struct AssignRange : public DimRange
+{
+    void parse(const std::string& r);
+    double m_value;
+};
+
+void AssignRange::parse(const std::string& r)
+{
+    std::string::size_type pos, count;
+    const char *start;
+    char *end;
+
+    pos = subParse(r);
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    if (r[pos] != '=')
+        throw error("Missing '=' assignment separator.");
+    pos++;
+
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    pos += count;
+
+    // Extract value
+    start = r.data() + pos;
+    m_value = std::strtod(start, &end);
+    if (start == end)
+        throw error("Missing value to assign following '='.");
+    pos += (end - start);
+
+    if (pos != r.size())
+        throw error("Invalid characters following valid range.");
+}
+
+
+std::istream& operator>>(std::istream& in, AssignRange& r)
+{
+    std::string s;
+
+    std::getline(in, s);
+    r.parse(s);
+    return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const AssignRange& r)
+{
+    out << (const DimRange&)r;
+    out << "=" << r.m_name;
+    return out;
+}
+
+
+AssignFilter::AssignFilter()
+{}
+
+
+AssignFilter::~AssignFilter()
+{}
+
+
 void AssignFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension on which to filter", m_dimName).
-        setPositional();
-    args.add("value", "Value to set on matching points", m_value).
-        setPositional();
+    args.add("assignment", "Values to assign to dimensions based on range.",
+        m_assignments);
 }
 
 
 void AssignFilter::prepared(PointTableRef table)
 {
-    m_dim = table.layout()->findDim(m_dimName);
-    if (m_dim == Dimension::Id::Unknown)
-        throwError("Dimension '" + m_dimName + "' not found.");
+    PointLayoutPtr layout(table.layout());
+
+    for (auto& r : m_assignments)
+    {
+        r.m_id = layout->findDim(r.m_name);
+        if (r.m_id == Dimension::Id::Unknown)
+            throwError("Invalid dimension name in 'values' option: '" +
+                r.m_name + "'.");
+    }
 }
 
 
 bool AssignFilter::processOne(PointRef& point)
 {
-    point.setField(m_dim, m_value);
+    for (AssignRange& r : m_assignments)
+        if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
+            point.setField(r.m_id, r.m_value);
     return true;
 }
 

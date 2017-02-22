@@ -47,7 +47,7 @@ extern "C" PF_ExitFunc RangeFilter_InitPlugin();
 namespace pdal
 {
 
-struct Range;
+struct DimRange;
 
 class PDAL_DLL RangeFilter : public pdal::Filter
 {
@@ -61,14 +61,13 @@ public:
 
 private:
     StringList m_rangeSpec;
-    std::vector<Range> m_range_list;
+    std::vector<DimRange> m_range_list;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
-    bool dimensionPasses(double v, const Range& r) const;
 
     RangeFilter& operator=(const RangeFilter&) = delete;
     RangeFilter(const RangeFilter&) = delete;

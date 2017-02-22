@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 333088e3eac1056ba6e718984a967cc241c4d385
+// Git SHA: 25e0972f56f075edd87ed9372075c994f01e4c9e
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -49,29 +49,14 @@ SOFTWARE.
 #define ARBITER_EXTERNAL_JSON
 
 // //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/util/http.hpp
+// Beginning of content of file: arbiter/util/types.hpp
 // //////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <condition_variable>
 #include <map>
-#include <memory>
-#include <mutex>
 #include <string>
 #include <vector>
-
-#include <curl/curl.h>
-
-#ifndef ARBITER_IS_AMALGAMATION
-#ifndef ARBITER_EXTERNAL_JSON
-#include <arbiter/third/json/json.hpp>
-#endif
-#endif
-
-#ifdef ARBITER_EXTERNAL_JSON
-#include <json/json.h>
-#endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -80,6 +65,14 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
+
+/** @brief Exception class for all internally thrown runtime errors. */
+class ArbiterError : public std::runtime_error
+{
+public:
+    ArbiterError(std::string msg) : std::runtime_error(msg) { }
+};
+
 namespace http
 {
 
@@ -88,17 +81,6 @@ using Headers = std::map<std::string, std::string>;
 
 /** HTTP query parameters. */
 using Query = std::map<std::string, std::string>;
-
-/** Perform URI percent-encoding, without encoding characters included in
- * @p exclusions.
- */
-std::string sanitize(std::string path, std::string exclusions = "/");
-
-/** Build a query string from key-value pairs.  If @p query is empty, the
- * result is an empty string.  Otherwise, the result will start with the
- * '?' character.
- */
-std::string buildQueryString(const http::Query& query);
 
 /** @cond arbiter_internal */
 
@@ -140,6 +122,54 @@ private:
     Headers m_headers;
 };
 
+/** @endcond */
+
+} // namespace http
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/types.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/curl.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <cstddef>
+#include <string>
+
+#ifndef ARBITER_IS_AMALGAMATION
+
+#include <arbiter/util/types.hpp>
+
+#endif
+
+class curl_slist;
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+namespace http
+{
+
+/** @cond arbiter_internal */
+
 class Pool;
 
 class Curl
@@ -174,16 +204,92 @@ private:
 
     void init(std::string path, const Headers& headers, const Query& query);
 
+    // Returns HTTP status code.
+    int perform();
+
     Curl(const Curl&);
     Curl& operator=(const Curl&);
 
-    CURL* m_curl;
+    void* m_curl;
     curl_slist* m_headers;
     const bool m_verbose;
-    const std::size_t m_timeout;
+    const long m_timeout;
 
     std::vector<char> m_data;
 };
+
+/** @endcond */
+
+} // namespace http
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/curl.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/http.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <condition_variable>
+#include <cstddef>
+#include <functional>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <vector>
+
+#ifndef ARBITER_IS_AMALGAMATION
+
+#include <arbiter/util/curl.hpp>
+#include <arbiter/util/types.hpp>
+
+#ifndef ARBITER_EXTERNAL_JSON
+#include <arbiter/third/json/json.hpp>
+#endif
+#endif
+
+#ifdef ARBITER_EXTERNAL_JSON
+#include <json/json.h>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+namespace http
+{
+
+/** Perform URI percent-encoding, without encoding characters included in
+ * @p exclusions.
+ */
+std::string sanitize(std::string path, std::string exclusions = "/");
+
+/** Build a query string from key-value pairs.  If @p query is empty, the
+ * result is an empty string.  Otherwise, the result will start with the
+ * '?' character.
+ */
+std::string buildQueryString(const http::Query& query);
+
+/** @cond arbiter_internal */
+
+class Pool;
 
 class Resource
 {
@@ -230,9 +336,10 @@ class Pool
 
 public:
     Pool(
-            std::size_t concurrent,
-            std::size_t retry,
-            const Json::Value& json);
+            std::size_t concurrent = 4,
+            std::size_t retry = 4,
+            Json::Value json = Json::Value());
+    ~Pool();
 
     Resource acquire();
 
@@ -259,6 +366,59 @@ private:
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/http.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/time.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <cstdint>
+#include <ctime>
+#include <string>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+
+class Time
+{
+public:
+    static const std::string iso8601;
+    static const std::string iso8601NoSeparators;
+    static const std::string dateNoSeparators;
+
+    Time();
+    Time(const std::string& s, const std::string& format = iso8601);
+
+    std::string str(const std::string& format = iso8601) const;
+
+    // Return value is in seconds.
+    int64_t operator-(const Time& other) const;
+
+private:
+    std::time_t m_time;
+};
+
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/time.hpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -629,14 +789,14 @@ public:
     /** Perform an HTTP GET request. */
     std::string get(
             std::string path,
-            http::Headers headers,
-            http::Query query) const;
+            http::Headers headers = http::Headers(),
+            http::Query query = http::Query()) const;
 
     /** Perform an HTTP GET request. */
     std::unique_ptr<std::string> tryGet(
             std::string path,
-            http::Headers headers,
-            http::Query query) const;
+            http::Headers headers = http::Headers(),
+            http::Query query = http::Query()) const;
 
     /** Perform an HTTP GET request. */
     std::vector<char> getBinary(
@@ -3592,6 +3752,7 @@ std::string encodeAsHex(const std::string& data);
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -3761,10 +3922,12 @@ namespace util
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
 #ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/time.hpp>
 #include <arbiter/drivers/http.hpp>
 #endif
 
@@ -3793,9 +3956,9 @@ public:
             bool precheck = false);
 
     /** Try to construct an S3 Driver.  Searches @p json primarily for the keys
-     * `access` and `hidden` to construct an S3::Auth.  If not found, common
-     * filesystem locations and then the environment will be searched (see
-     * S3::Auth::find).
+     * `access` and `hidden`/`secret` to construct an S3::Auth.  If not found,
+     * common filesystem locations and then the environment will be searched
+     * (see S3::Auth::find).
      *
      * Server-side encryption may be enabled by setting key `sse` to `true` in
      * @p json.
@@ -3806,7 +3969,7 @@ public:
 
     static std::string extractProfile(const Json::Value& json);
 
-    virtual std::string type() const override { return "s3"; }
+    virtual std::string type() const override;
 
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
@@ -3820,31 +3983,6 @@ public:
 
     virtual void copy(std::string src, std::string dst) const override;
 
-    /** @brief AWS authentication information. */
-    class Auth
-    {
-    public:
-        Auth(std::string access, std::string hidden);
-
-        /** @brief Search for credentials in some common locations.
-         *
-         * See:
-         * docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-configuring.html
-         *
-         * Uses methods 2 and 3 of "Setting AWS Credentials":
-         *      - Check for them in `~/.aws/credentials`.
-         *      - If not found, try the environment settings.
-         */
-        static std::unique_ptr<Auth> find(std::string profile = "");
-
-        std::string access() const;
-        std::string hidden() const;
-
-    private:
-        std::string m_access;
-        std::string m_hidden;
-    };
-
 private:
     /** Inherited from Drivers::Http. */
     virtual bool get(
@@ -3857,96 +3995,125 @@ private:
             std::string path,
             bool verbose) const override;
 
-    struct Resource
-    {
-        Resource(std::string baseUrl, std::string fullPath);
+    class ApiV4;
+    class Resource;
 
-        std::string url() const;
-        std::string host() const;
-        std::string baseUrl() const { return m_baseUrl; }
-        std::string bucket() const { return m_bucket; }
-        std::string object() const;
-
-    private:
-        std::string m_baseUrl;
-        std::string m_bucket;
-        std::string m_object;
-        bool m_virtualHosted;
-    };
-
-    class FormattedTime
-    {
-    public:
-        FormattedTime();
-
-        const std::string& date() const { return m_date; }
-        const std::string& time() const { return m_time; }
-
-        std::string amazonDate() const
-        {
-            return date() + 'T' + time() + 'Z';
-        }
-
-    private:
-        std::string formatTime(const std::string& format) const;
-
-        const std::string m_date;
-        const std::string m_time;
-    };
-
-    class ApiV4
-    {
-    public:
-        ApiV4(
-                std::string verb,
-                const std::string& region,
-                const Resource& resource,
-                const S3::Auth& auth,
-                const http::Query& query,
-                const http::Headers& headers,
-                const std::vector<char>& data);
-
-        const http::Headers& headers() const { return m_headers; }
-        const http::Query& query() const { return m_query; }
-
-        const std::string& signedHeadersString() const
-        {
-            return m_signedHeadersString;
-        }
-
-    private:
-        std::string buildCanonicalRequest(
-                std::string verb,
-                const Resource& resource,
-                const http::Query& query,
-                const std::vector<char>& data) const;
-
-        std::string buildStringToSign(
-                const std::string& canonicalRequest) const;
-
-        std::string calculateSignature(
-                const std::string& stringToSign) const;
-
-        std::string getAuthHeader(
-                const std::string& signedHeadersString,
-                const std::string& signature) const;
-
-        const S3::Auth& m_auth;
-        const std::string m_region;
-        const FormattedTime m_formattedTime;
-
-        http::Headers m_headers;
-        http::Query m_query;
-        std::string m_canonicalHeadersString;
-        std::string m_signedHeadersString;
-    };
-
-    Auth m_auth;
+    std::unique_ptr<Auth> m_auth;
 
     std::string m_region;
     std::string m_baseUrl;
     http::Headers m_baseHeaders;
     bool m_precheck;
+};
+
+/** @brief AWS authentication information. */
+class S3::Auth
+{
+public:
+    Auth(
+            std::string profile,
+            std::string access,
+            std::string hidden,
+            std::string token = "");
+
+    Auth(std::string iamRole);
+    Auth(const Auth&);
+
+    /** @brief Search for credentials in some common locations.
+     *
+     * Check, in order:
+     *      - Environment settings.
+     *      - Arbiter JSON configuration.
+     *      - Config file `~/.aws/credentials` (searching for @p profile).
+     *      - EC2 instance profile.
+     */
+    static std::unique_ptr<Auth> find(
+            const Json::Value& json,
+            std::string profile = "");
+
+    static std::string region();
+
+    Auth getStatic() const;
+
+    std::string profile() const { return m_profile; }
+    std::string access() const;
+    std::string hidden() const;
+    std::string token() const;
+
+private:
+    mutable std::string m_profile;
+    mutable std::string m_access;
+    mutable std::string m_hidden;
+    mutable std::string m_token;
+
+    std::string m_iamRole;
+    mutable std::unique_ptr<Time> m_expiration;
+    mutable std::mutex m_mutex;
+};
+
+class S3::Resource
+{
+public:
+    Resource(std::string baseUrl, std::string fullPath);
+
+    std::string url() const;
+    std::string host() const;
+    std::string baseUrl() const { return m_baseUrl; }
+    std::string bucket() const { return m_bucket; }
+    std::string object() const;
+
+private:
+    std::string m_baseUrl;
+    std::string m_bucket;
+    std::string m_object;
+    bool m_virtualHosted;
+};
+
+class S3::ApiV4
+{
+public:
+    ApiV4(
+            std::string verb,
+            const std::string& region,
+            const Resource& resource,
+            const S3::Auth& auth,
+            const http::Query& query,
+            const http::Headers& headers,
+            const std::vector<char>& data);
+
+    const http::Headers& headers() const { return m_headers; }
+    const http::Query& query() const { return m_query; }
+
+    const std::string& signedHeadersString() const
+    {
+        return m_signedHeadersString;
+    }
+
+private:
+    std::string buildCanonicalRequest(
+            std::string verb,
+            const Resource& resource,
+            const http::Query& query,
+            const std::vector<char>& data) const;
+
+    std::string buildStringToSign(
+            const std::string& canonicalRequest) const;
+
+    std::string calculateSignature(
+            const std::string& stringToSign) const;
+
+    std::string getAuthHeader(
+            const std::string& signedHeadersString,
+            const std::string& signature) const;
+
+    const S3::Auth m_auth;
+    const std::string m_region;
+    const Time m_time;
+
+    http::Headers m_headers;
+    http::Query m_query;
+    std::string m_canonicalHeadersString;
+    std::string m_signedHeadersString;
 };
 
 } // namespace drivers
@@ -4142,7 +4309,7 @@ private:
 
 #ifndef ARBITER_IS_AMALGAMATION
 
-#include <arbiter/util/http.hpp>
+#include <arbiter/util/types.hpp>
 
 #endif
 
@@ -4155,6 +4322,7 @@ namespace arbiter
 {
 
 namespace drivers { class Http; }
+namespace http { class Pool; }
 
 class Driver;
 
@@ -4342,6 +4510,7 @@ private:
 #include <arbiter/drivers/http.hpp>
 #include <arbiter/drivers/s3.hpp>
 #include <arbiter/drivers/dropbox.hpp>
+#include <arbiter/util/types.hpp>
 
 #ifndef ARBITER_EXTERNAL_JSON
 #include <arbiter/third/json/json.hpp>
@@ -4363,12 +4532,7 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-/** @brief Exception class for all internally thrown runtime errors. */
-class ArbiterError : public std::runtime_error
-{
-public:
-    ArbiterError(std::string msg) : std::runtime_error(msg) { }
-};
+namespace http { class Pool; }
 
 /** @brief The primary interface for storage abstraction.
  *
@@ -4620,14 +4784,14 @@ public:
     /** Fetch the common HTTP pool, which may be useful when dynamically
      * constructing adding a Driver via Arbiter::addDriver.
      */
-    http::Pool& httpPool() { return m_pool; }
+    http::Pool& httpPool() { return *m_pool; }
 
 private:
     const drivers::Http* tryGetHttpDriver(std::string path) const;
     const drivers::Http& getHttpDriver(std::string path) const;
 
     DriverMap m_drivers;
-    http::Pool m_pool;
+    std::unique_ptr<http::Pool> m_pool;
 };
 
 } // namespace arbiter

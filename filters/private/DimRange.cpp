@@ -32,24 +32,29 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Range.hpp"
+#include "DimRange.hpp"
 
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
-Range Range::parse(const std::string& r)
+std::string::size_type DimRange::subParse(const std::string& r)
 {
+    bool& ilb(m_inclusive_lower_bound);
+    bool& iub(m_inclusive_upper_bound);
+    bool& negate(m_negate);
+    double& ub(m_upper_bound);
+    double& lb(m_lower_bound);
+    std::string& name(m_name);
+
     std::string::size_type pos, count;
-    bool ilb = true;
-    bool iub = true;
-    bool negate = false;
     const char *start;
     char *end;
-    std::string name;
-    double ub, lb;
 
+    ilb = true;
+    iub = true;
+    negate = false;
     pos = 0;
     // Skip leading whitespace.
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
@@ -57,7 +62,7 @@ Range Range::parse(const std::string& r)
 
     count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
     if (count == 0)
-        throw std::string("No dimension name.");
+        throw error("No dimension name.");
     name = r.substr(pos, count);
     pos += count;
 
@@ -70,7 +75,7 @@ Range Range::parse(const std::string& r)
     if (r[pos] == '(')
         ilb = false;
     else if (r[pos] != '[')
-        throw std::string("Missing '(' or '['.");
+        throw error("Missing '(' or '['.");
     pos++;
 
     // Extract lower bound.
@@ -84,7 +89,7 @@ Range Range::parse(const std::string& r)
     pos += count;
 
     if (r[pos] != ':')
-        throw std::string("Missing ':' limit separator.");
+        throw error("Missing ':' limit separator.");
     pos++;
 
     start = r.data() + pos;
@@ -99,24 +104,64 @@ Range Range::parse(const std::string& r)
     if (r[pos] == ')')
         iub = false;
     else if (r[pos] != ']')
-        throw std::string("Missing ')' or ']'.");
+        throw error("Missing ')' or ']'.");
     pos++;
 
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
     pos += count;
-
-    if (pos != r.size())
-        throw std::string("Invalid characters following valid range.");
-
-    return Range(name, lb, ub, ilb, iub, negate);
+    return pos;
 }
 
 
-bool operator < (const Range& r1, const Range& r2)
+bool DimRange::valuePasses(double v) const
+{
+    // Determine if a point passes a range.
+    bool fail = ((m_inclusive_lower_bound && v < m_lower_bound) ||
+        (!m_inclusive_lower_bound && v <= m_lower_bound) ||
+        (m_inclusive_upper_bound && v > m_upper_bound) ||
+        (!m_inclusive_upper_bound && v >= m_upper_bound));
+    if (m_negate)
+        fail = !fail;
+    return !fail;
+}
+
+
+void DimRange::parse(const std::string& r)
+{
+    std::string::size_type pos = subParse(r);
+    if (pos != r.size())
+        throw error("Invalid characters following valid range.");
+}
+
+
+bool operator < (const DimRange& r1, const DimRange& r2)
 {
     return (r1.m_name < r2.m_name ? true :
         r1.m_name > r2.m_name ? false :
         &r1 < &r2);
+}
+
+
+std::istream& operator>>(std::istream& in, DimRange& r)
+{
+    std::string s;
+
+    std::getline(in, s);
+    r.parse(s);
+    return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const DimRange& r)
+{
+    out << (r.m_inclusive_lower_bound ? '[' : '(');
+    if (r.m_lower_bound != std::numeric_limits<double>::lowest())
+        out << r.m_lower_bound;
+    out << ':';
+    if (r.m_upper_bound != std::numeric_limits<double>::max())
+        out << r.m_upper_bound;
+    out << (r.m_inclusive_upper_bound ? ']' : ')');
+    return out;
 }
 
 } // namespace pdal

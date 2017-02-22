@@ -40,6 +40,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/Algorithm.hpp>
 
+#include <arbiter/arbiter.hpp>
+
 #include "Support.hpp"
 #include "../io/GreyhoundReader.hpp"
 #include "../io/bounds.hpp"
@@ -58,7 +60,6 @@ const greyhound::Bounds originBounds(
         greyhound::Bounds(-92369, 123812, -11170, -22218, 230745, 2226)
         .unscale(.01, greyhound::Point(637300, 851210, 520)));
 
-
 std::string toString(const greyhound::Bounds& b)
 {
     std::ostringstream ss;
@@ -69,7 +70,7 @@ std::string toString(const greyhound::Bounds& b)
     return ss.str();
 }
 
-const std::string server("http://dev.greyhound.io");
+const std::string server("http://data.greyhound.io");
 const std::string resource("dev/autzen-chipped");
 
 Options greyhoundOptions(
@@ -100,7 +101,8 @@ public:
         : m_doTests(false)
     {
         static std::string path(server + "/resource/" + resource + "/info");
-        static bool good(arbiter::Arbiter().tryGetSize(path));
+        static arbiter::Arbiter a;
+        static bool good(a.hasDriver(path) && a.tryGetSize(path));
         m_doTests = good;
     }
 

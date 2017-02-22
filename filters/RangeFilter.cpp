@@ -38,7 +38,7 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include "private/Range.hpp"
+#include "private/DimRange.hpp"
 
 #include <cctype>
 #include <limits>
@@ -82,11 +82,13 @@ void RangeFilter::initialize()
     {
         try
         {
-            m_range_list.push_back(Range::parse(r));
+            DimRange range;
+            range.parse(r);
+            m_range_list.push_back(range);
         }
-        catch (const std::string& what)
+        catch (const DimRange::error& err)
         {
-            throwError("Invalid 'limits' option: '" + r + "': " + what);
+            throwError("Invalid 'limits' option: '" + r + "': " + err.what());
         }
     }
 }
@@ -106,18 +108,6 @@ void RangeFilter::prepared(PointTableRef table)
     std::sort(m_range_list.begin(), m_range_list.end());
 }
 
-
-// Determine if a point passes a single range.
-bool RangeFilter::dimensionPasses(double v, const Range& r) const
-{
-    bool fail = ((r.m_inclusive_lower_bound && v < r.m_lower_bound) ||
-        (!r.m_inclusive_lower_bound && v <= r.m_lower_bound) ||
-        (r.m_inclusive_upper_bound && v > r.m_upper_bound) ||
-        (!r.m_inclusive_upper_bound && v >= r.m_upper_bound));
-    if (r.m_negate)
-        fail = !fail;
-    return !fail;
-}
 
 // The range list is sorted by dimension, so the logic here should work
 // as ORs between ranges of the same dimension and ANDs between ranges
@@ -143,7 +133,7 @@ bool RangeFilter::processOne(PointRef& point)
         // a new dimension.
         else if (passes)
             continue;
-        passes = dimensionPasses(point.getFieldAs<double>(r.m_id), r);
+        passes = r.valuePasses(point.getFieldAs<double>(r.m_id));
     }
     return passes;
 }
