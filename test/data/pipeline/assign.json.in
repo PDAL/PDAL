@@ -3,8 +3,7 @@
     "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-dd.las",
     {
       "type":"filters.assign",
-      "dimension":"PointSourceId",
-      "value":26
+      "assignment":"PointSourceId[:]=26"
     },
     {
       "filename":"@CMAKE_SOURCE_DIR@/test/temp/attributed.las",

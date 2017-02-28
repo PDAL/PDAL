@@ -93,6 +93,7 @@ NitfWrap::NitfWrap(std::vector<std::string>& args)
         BOX3D bounds;
         verify(bounds);
 
+        m_nitfWriter.initialize();
         m_nitfWriter.setFilename(m_outputFile);
         m_nitfWriter.setBounds(bounds);
         m_nitfWriter.wrapData(m_inputFile);
@@ -120,7 +121,7 @@ void NitfWrap::unwrap()
         throw error(oss.str());
     }
     in->seekg(offset, std::istream::beg);
-    
+
     // Find out if this is a LAS or BPF file and make the output filename.
     bool compressed;
     BOX3D bounds;
@@ -238,7 +239,7 @@ bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed)
     {
         in >> h;
     }
-    catch (pdal_error&)
+    catch (LasHeader::error&)
     {
         return false;
     }

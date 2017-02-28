@@ -141,7 +141,7 @@ bool BpfHeader::readV3(ILeStream& stream)
         m_pointFormat = BpfFormat::ByteMajor;
         break;
     default:
-        throw "Invalid BPF file: unknown interleave type.";
+        throw error("Invalid BPF file: unknown interleave type.");
     }
     return (bool)stream;
 }
@@ -192,7 +192,7 @@ bool BpfHeader::write(OLeStream& stream)
     uint8_t numDim;
 
     if (!Utils::numericCast(m_numDim, numDim))
-        throw pdal_error("Can't write a BPF file of more than 255 dimensions.");
+        throw error("Can't write a BPF file of more than 255 dimensions.");
 
     stream.put("BPF!");
     stream.put("0003");
@@ -246,8 +246,7 @@ bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
             z = true;
     }
     if (!x || !y || !z)
-        throw pdal_error("BPF file missing at least one of X, Y or Z "
-            "dimensions.");
+        throw error("BPF file missing at least one of X, Y or Z dimensions.");
     return true;
 }
 

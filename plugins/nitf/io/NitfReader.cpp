@@ -100,10 +100,17 @@ std::string NitfReader::getName() const { return s_info.name; }
 
 void NitfReader::initialize(PointTableRef table)
 {
-    NitfFileReader nitf(m_filename);
-    nitf.open();
-    nitf.getLasOffset(m_offset, m_length);
-    nitf.extractMetadata(m_metadata);
+    try
+    {
+        NitfFileReader nitf(m_filename);
+        nitf.open();
+        nitf.getLasOffset(m_offset, m_length);
+        nitf.extractMetadata(m_metadata);
+    }
+    catch (const NitfFileReader::error& err)
+    {
+        throwError(err.what());
+    }
     m_metadata.add("DESDATA_OFFSET", m_offset);
     m_metadata.add("DESDATA_LENGTH", m_length);
 

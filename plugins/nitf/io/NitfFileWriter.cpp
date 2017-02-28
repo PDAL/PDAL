@@ -41,9 +41,16 @@
 namespace pdal
 {
 
-NitfFileWriter::NitfFileWriter()
+void NitfFileWriter::initialize()
 {
-    register_tre_plugins();
+    try
+    {
+        register_tre_plugins();
+    }
+    catch (const pdal_error& err)
+    {
+        throw error(err.what());
+    }
 }
 
 
@@ -83,15 +90,10 @@ void NitfFileWriter::write()
     // because this is a flex writer and we don't know the filename
     // until the execute() step.
     if (m_fileTitle.size() > header.getFileTitle().getLength())
-    {
-        std::ostringstream oss;
-
-        oss << "writers.nitf: Can't write file.  " <<
-            "FTITLE field (usually filename) can't be longer than " <<
-            header.getFileTitle().getLength() << ".  Use 'ftitle' option " <<
-            "to set appropriately sized FTITLE.";
-        throw pdal_error(oss.str());
-    }
+        throw error("Can't write file.  FTITLE field (usually filename) "
+            "can't be longer than " +
+            Utils::toString(header.getFileTitle().getLength()) +
+            ".  Use 'ftitle' option to set appropriately sized FTITLE.");
 
     header.getFileHeader().set("NITF");
     header.getComplianceLevel().set(m_cLevel);
@@ -200,12 +202,8 @@ void NitfFileWriter::write()
     {
         StringList v = Utils::split2(s, ':');
         if (v.size() != 2)
-        {
-            std::ostringstream oss;
-            oss << "writers.nitf: Invalid name/value for AIMIDB '" << s <<
-                "'.  Format: <name>:<value>.";
-            throw pdal_error(oss.str());
-        }
+            throw error("Invalid name/value for AIMIDB '" + s +
+                "'.  Format: <name>:<value>.");
         Utils::trim(v[0]);
         Utils::trim(v[1]);
         aimidbTre.setField(v[0], v[1]);
@@ -240,12 +238,8 @@ void NitfFileWriter::write()
     {
         StringList v = Utils::split2(s, ':');
         if (v.size() != 2)
-        {
-            std::ostringstream oss;
-            oss << "writers.nitf: Invalid name/value for ACFTB '" << s <<
-                "'.  Format: <name>:<value>.";
-            throw pdal_error(oss.str());
-        }
+            throw error("Invalid name/value for ACFTB '" + s +
+                "'.  Format: <name>:<value>.");
         Utils::trim(v[0]);
         Utils::trim(v[1]);
         acftbTre.setField(v[0], v[1]);

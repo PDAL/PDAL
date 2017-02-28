@@ -175,11 +175,11 @@ TEST(TextReaderTest, s1)
                             Support::datapath("las/utm17.las"));
 }
 
-TEST(TextReaderTest, strip_whitespace_from_dimension_names) 
+TEST(TextReaderTest, strip_whitespace_from_dimension_names)
 {
     TextReader reader;
     Options options;
-    options.add("filename", Support::datapath("text/intensity.txt"));
+    options.add("filename", Support::datapath("text/crlf_test.txt"));
     reader.setOptions(options);
 
     PointTable table;

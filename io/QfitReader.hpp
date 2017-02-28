@@ -57,15 +57,6 @@ enum QFIT_Format_Type
     QFIT_Format_Unknown = 128
 };
 
-class qfit_error : public pdal_error
-{
-public:
-
-    qfit_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
 class PDAL_DLL QfitReader : public pdal::Reader
 {
 public:

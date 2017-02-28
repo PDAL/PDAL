@@ -55,12 +55,7 @@ void PtsReader::initialize(PointTableRef table)
 {
     m_istream = Utils::openFile(m_filename);
     if (!m_istream)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Unable to open pts file '" <<
-            m_filename << "'.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Unable to open file '" + m_filename + "'.");
 
     std::string buf;
     std::getline(*m_istream, buf);
@@ -95,12 +90,7 @@ void PtsReader::ready(PointTableRef table)
 {
     m_istream = Utils::openFile(m_filename);
     if (!m_istream)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Unable to open text file '" <<
-            m_filename << "'.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Unable to open file '" + m_filename + "'.");
 
     // Skip header line.
     std::string buf;

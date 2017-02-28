@@ -47,6 +47,12 @@ namespace pdal
 class PDAL_DLL LasSummaryData
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     LasSummaryData();
 
     void addPoint(double x, double y, double z, int returnNumber);

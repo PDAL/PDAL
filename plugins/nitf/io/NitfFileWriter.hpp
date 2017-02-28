@@ -71,10 +71,18 @@ namespace pdal
 class PDAL_DLL NitfFileWriter
 {
 public:
-    NitfFileWriter();
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
+    NitfFileWriter()
+    {}
     NitfFileWriter(const NitfFileWriter&) = delete;
     NitfFileWriter& operator=(const NitfFileWriter&) = delete;
 
+    void initialize();
     void setFilename(const std::string& filename)
         { m_filename = filename; }
     void wrapData(const char *buf, size_t size);

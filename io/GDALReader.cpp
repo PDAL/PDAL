@@ -93,7 +93,7 @@ QuickInfo GDALReader::inspect()
 
     m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
     if (m_raster->open() == gdal::GDALError::CantOpen)
-        throw pdal_error("Couldn't open raster file '" + m_filename + "'.");
+        throwError("Couldn't open raster file '" + m_filename + "'.");
 
     qi.m_pointCount = m_raster->width() * m_raster->height();
     // qi.m_bounds = ???;
@@ -121,7 +121,7 @@ void GDALReader::ready(PointTableRef table)
 {
     m_index = 0;
     if (m_raster->open() == gdal::GDALError::CantOpen)
-        throw pdal_error("Couldn't open raster file '" + m_filename + "'.");
+        throwError("Couldn't open raster file '" + m_filename + "'.");
 }
 
 

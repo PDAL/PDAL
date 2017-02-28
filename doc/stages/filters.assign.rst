@@ -4,14 +4,14 @@ filters.assign
 ===================
 
 The assign filter allows you set the value of a dimension for all points
-to a provided value.
+to a provided value that pass a range filter.
 
 
 Example 1
 ---------
 
-This pipeline sets the PointSourceId of all points from 'autzen-dd.las'
-to the value '26'.
+This pipeline resets the Classification of all points with classiciations
+2 or 3 to 0 and all points with classification of 5 to 4.
 
 .. code-block:: json
 
@@ -20,8 +20,8 @@ to the value '26'.
         "autzen-dd.las",
         {
           "type":"filters.assign",
-          "dimension":"PointSourceId",
-          "value":26
+          "assignment" : "Classification[2:3]=0",
+          "assignment" : "Classification[5:5]=4"
         },
         {
           "filename":"attributed.las",
@@ -35,9 +35,7 @@ to the value '26'.
 Options
 -------
 
-dimension
-  Name of the dimension whose value should be altered.  [Required]
-
-value
-  Value to apply to the dimension.  [Required]
-
+assignment
+  A :ref:`range <ranges>` followed by an assignment of a value (see example).
+  Can be specified multiple times.  The assignments are applied sequentially
+  to the dimension value as set when the filter began processing.

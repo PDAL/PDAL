@@ -46,7 +46,7 @@ void BpfCompressor::startBlock()
     m_strm.zfree = Z_NULL;
     m_strm.opaque = Z_NULL;
     if (deflateInit(&m_strm, Z_DEFAULT_COMPRESSION) != Z_OK)
-        throw pdal_error("Could not initialize BPF compressor.");
+        throw error("Could not initialize BPF compressor.");
 
     m_rawSize = 0;
     m_compressedSize = 0;
@@ -115,7 +115,7 @@ void BpfCompressor::finish()
         m_strm.next_out = m_tmpbuf;
     }
     if (ret != Z_STREAM_END)
-        throw pdal_error("Couldn't close BPF compression stream.");
+        throw error("Couldn't close BPF compression stream.");
     deflateEnd(&m_strm);
 
     // Mark our position so that we can get back here.
@@ -128,5 +128,5 @@ void BpfCompressor::finish()
     // Set the position back to the end of the block.
     blockEnd.rewind();
 }
-   
+
 } // namespace pdal

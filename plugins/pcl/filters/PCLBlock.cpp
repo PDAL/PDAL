@@ -67,7 +67,7 @@ void PCLBlock::addArgs(ProgramArgs& args)
 PointViewSet PCLBlock::run(PointViewPtr input)
 {
     using namespace Dimension;
-    
+
     PointViewPtr output = input->makeNew();
     PointViewSet viewSet;
     viewSet.insert(output);
@@ -91,7 +91,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     else if (!m_methods.empty())
         pipeline.setMethods(m_methods);
     else
-        throw pdal_error("No PCL pipeline specified!");
+        throwError("No PCL pipeline specified.");
     // PDALtoPCD subtracts min values in each XYZ dimension to prevent rounding
     // errors in conversion to float. These offsets need to be conveyed to the
     // pipeline to offset any bounds entered as part of a PassThrough filter.

@@ -47,6 +47,13 @@ namespace pdal
 class PDAL_DLL PlyWriter : public Writer
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& e) : std::runtime_error(e)
+        {}
+    };
+
+public:
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
@@ -65,7 +72,6 @@ private:
     PointViewPtr m_pointCollector;
     std::string m_storageModeSpec;
     e_ply_storage_mode m_storageMode;
-
 };
 
 }

@@ -57,6 +57,11 @@ private:
     std::string m_outputFile;
     std::string m_driverName;
     std::string m_layerName;
+    uint32_t m_sampleSize;
+    int32_t m_density;
+    double m_edgeLength;
+    double m_cullArea;
+    bool m_doSmooth;
 
     virtual void addSwitches(ProgramArgs& args);
     void outputDensity(pdal::SpatialReference const& ref);

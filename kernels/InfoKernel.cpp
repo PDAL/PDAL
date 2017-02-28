@@ -204,11 +204,18 @@ MetadataNode InfoKernel::dumpPoints(PointViewPtr inView) const
 
     // Stick points in a inViewfer.
     std::vector<PointId> points = getListOfPoints(m_pointIndexes);
+    bool oorMsg = false;
     for (size_t i = 0; i < points.size(); ++i)
     {
         PointId id = (PointId)points[i];
         if (id < inView->size())
             outView->appendPoint(*inView.get(), id);
+        else if (!oorMsg)
+        {
+            m_log->get(LogLevel::Warning) << "Attempt to display points with "
+                "IDs not available in input dataset." << std::endl;
+            oorMsg = true;
+        }
     }
 
     MetadataNode tree = outView->toMetadata();
@@ -366,7 +373,9 @@ void InfoKernel::dump(MetadataNode& root)
     {
         PointViewSet viewSet = m_manager.views();
         assert(viewSet.size() == 1);
-        root.add(dumpPoints(*viewSet.begin()).clone("points"));
+        MetadataNode points = dumpPoints(*viewSet.begin());
+        if (points.valid())
+            root.add(points.clone("points"));
     }
 
     if (m_queryPoint.size())

@@ -100,11 +100,7 @@ void GDALWriter::initialize()
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
         else
-        {
-            std::ostringstream oss;
-            oss << "Invalid writers.gdal output type: '" << ts << "'.";
-            throw pdal_error(oss.str());
-        }
+            throwError("Invalid output type: '" + ts + "'.");
     }
 
     gdal::registerDrivers();
@@ -115,13 +111,8 @@ void GDALWriter::prepared(PointTableRef table)
 {
     m_interpDim = table.layout()->findDim(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-
-        oss << getName() << ": specified dimension '" << m_interpDimString <<
-            "' does not exist.";
-        throw pdal_error(oss.str());
-    }
+        throwError("Specified dimension '" + m_interpDimString +
+            "' does not exist.");
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
 }
@@ -129,9 +120,8 @@ void GDALWriter::prepared(PointTableRef table)
 
 void GDALWriter::readyTable(PointTableRef table)
 {
-    if (m_bounds.empty() && !table.supportsView())
-        throw pdal_error(getName() + ": 'bounds' option required in "
-            "streaming mode.");
+    if (m_bounds.to2d().empty() && !table.supportsView())
+        throwError("Option 'bounds' required in streaming mode.");
 }
 
 
@@ -140,8 +130,8 @@ void GDALWriter::readyFile(const std::string& filename,
 {
     m_outputFilename = filename;
     m_srs = srs;
-    if (m_bounds.valid())
-        createGrid(m_bounds);
+    if (m_bounds.to2d().valid())
+        createGrid(m_bounds.to2d());
 }
 
 
@@ -168,7 +158,14 @@ void GDALWriter::expandGrid(BOX2D bounds)
 
     size_t width = ((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
     size_t height = ((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
-    m_grid->expand(width, height, xshift, yshift);
+    try
+    {
+        m_grid->expand(width, height, xshift, yshift);
+    }
+    catch (const GDALGrid::error& err)
+    {
+        throwError(err.what()); // Add the stage name onto the error text.
+    }
     m_curBounds = bounds;
 }
 
@@ -176,8 +173,8 @@ void GDALWriter::expandGrid(BOX2D bounds)
 void GDALWriter::writeView(const PointViewPtr view)
 {
     BOX2D bounds;
-    if (m_bounds.valid())
-        bounds = m_bounds;
+    if (m_bounds.to2d().valid())
+        bounds = m_bounds.to2d();
     else
         view->calculateBounds(bounds);
 
@@ -225,7 +222,7 @@ void GDALWriter::doneFile()
     gdal::GDALError err = raster.open(m_grid->width(), m_grid->height(),
         m_grid->numBands(), Dimension::Type::Double, m_grid->noData());
     if (err != gdal::GDALError::None)
-        throw pdal_error(raster.errorMsg());
+        throwError(raster.errorMsg());
     int bandNum = 1;
     uint8_t *buf;
     buf = m_grid->data("min");

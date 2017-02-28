@@ -66,8 +66,7 @@ namespace
                 const std::string jsonError(reader.getFormattedErrorMessages());
                 if (!jsonError.empty())
                 {
-                    throw std::runtime_error(
-                            "Error during parsing: " + jsonError);
+                    throw pdal_error("Error during parsing: " + jsonError);
                 }
             }
         }
@@ -238,7 +237,14 @@ void GreyhoundReader::initialize(PointTableRef table)
     std::string infoUrl = m_url + "/resource/" + m_resource + "/info";
     log()->get(LogLevel::Debug) << "Fetching info URL: " << infoUrl <<
         std::endl;
-    m_info = parse(m_arbiter->get(infoUrl));
+    try
+    {
+        m_info = parse(m_arbiter->get(infoUrl));
+    }
+    catch (const pdal_error& err)
+    {
+        throwError(err.what());
+    }
 
     m_depthBegin = m_depthBeginArg;
     m_depthEnd = m_depthEndArg;
@@ -306,8 +312,7 @@ void GreyhoundReader::prepared(PointTableRef table)
 
         if (m_dims.back().m_id == Dimension::Id::Unknown)
         {
-            throw std::runtime_error(
-                    "Could not find dimension " + j["name"].asString());
+            throwError("Could not find dimension " + j["name"].asString());
         }
     }
 }
@@ -415,7 +420,8 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     launchPooledReads(*view, zoomBounds, depthSplit, pool);
 
     pool.await();
-    if (m_error) throw pdal_error(*m_error);
+    if (m_error)
+        throwError(*m_error);
 
     return m_numPoints;
 }
@@ -480,7 +486,8 @@ void GreyhoundReader::launchPooledReads(
 
         // If any tasks failed, rethrow in the main thread.
         lock.lock();
-        if (m_error) throw pdal_error(*m_error);
+        if (m_error)
+            throwError(*m_error);
     }
 }
 
@@ -564,11 +571,19 @@ std::vector<point_count_t> GreyhoundReader::fetchVerticalHierarchy(
     url << "&vertical=true";
 
     log()->get(LogLevel::Debug) << "Hierarchy: " << url.str() << std::endl;
-    const Json::Value json(parse(m_arbiter->get(url.str())));
 
     std::vector<point_count_t> results;
-    for (const auto& v : json) results.push_back(v.asUInt64());
+    try
+    {
+        const Json::Value json(parse(m_arbiter->get(url.str())));
 
+        for (const auto& v : json)
+            results.push_back(v.asUInt64());
+    }
+    catch (const pdal_error& err)
+    {
+        throwError(err.what());
+    }
     return results;
 }
 
@@ -584,7 +599,17 @@ Json::Value GreyhoundReader::fetchHierarchy(
     url << "&depthEnd=" << depthEnd;
 
     log()->get(LogLevel::Debug) << "Hierarchy: " << url.str() << std::endl;
-    return parse(m_arbiter->get(url.str()));
+
+    Json::Value json;
+    try
+    {
+        json = parse(m_arbiter->get(url.str()));
+    }
+    catch (const pdal_error& err)
+    {
+        throwError(err.what());
+    }
+    return json;
 }
 
 point_count_t GreyhoundReader::fetchData(

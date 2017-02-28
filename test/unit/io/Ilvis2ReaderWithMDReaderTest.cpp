@@ -60,7 +60,8 @@ TEST(Ilvis2ReaderWithMDReaderTest, testInvalidMetadataFile)
     }
     catch (pdal_error const & err)
     {
-        EXPECT_EQ("Invalid metadata file: 'invalidfile'", std::string(err.what()));
+        EXPECT_EQ("readers.ilvis2: Invalid metadata file: 'invalidfile'",
+            std::string(err.what()));
     }
 }
 

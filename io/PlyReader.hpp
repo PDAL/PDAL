@@ -52,6 +52,12 @@ namespace pdal
 class PDAL_DLL PlyReader : public Reader
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& e) : std::runtime_error(e)
+        {}
+    };
+
     static void *create();
     static int32_t destroy(void *);
     std::string getName() const;

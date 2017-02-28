@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
+* Copyright (c) 2017, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,46 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+// Copied from http://stackoverflow.com/questions/8243743/is-there-a-null-stdostream-implementation-in-c-or-libraries
 
-#include <stdexcept>
-#include <ostream>
-#include <zlib.h>
-
-#include <pdal/util/Charbuf.hpp>
-#include <pdal/util/OStream.hpp>
+#include <iostream>
+#include <streambuf>
 
 namespace pdal
 {
 
-class BpfCompressor
+class NullStreambuf : public std::streambuf
 {
-public:
-    struct error : public std::runtime_error
+    char dummyBuffer[64];
+protected:
+    virtual int overflow(int c)
     {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
-    BpfCompressor(OLeStream& out, size_t maxSize) :
-        m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
-        m_compressedSize(0)
-    {}
-    void startBlock();
-    void finish();
-    void compress();
-
-private:
-    static const int CHUNKSIZE = 1000000;
-
-    OLeStream& m_out;
-    Charbuf m_charbuf;
-    std::vector<char> m_inbuf;
-    z_stream m_strm;
-    unsigned char m_tmpbuf[CHUNKSIZE];
-    OStreamMarker m_blockStart;
-    size_t m_rawSize;
-    size_t m_compressedSize;
+        setp(dummyBuffer, dummyBuffer + sizeof(dummyBuffer));
+        return (c == traits_type::eof()) ? '\0' : c;
+    }
 };
 
-} // namespace pdal
+class NullOStream : private NullStreambuf, public std::ostream
+{
+public:
+    NullOStream() : std::ostream(this)
+        {}
+    NullStreambuf* rdbuf() const
+        { return const_cast<NullOStream *>(this); }
+};
+
+} // namespace

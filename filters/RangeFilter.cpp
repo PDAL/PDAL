@@ -38,6 +38,8 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
+#include "private/DimRange.hpp"
+
 #include <cctype>
 #include <limits>
 #include <map>
@@ -58,90 +60,13 @@ std::string RangeFilter::getName() const
     return s_info.name;
 }
 
-namespace
-{
 
-RangeFilter::Range parseRange(const std::string& r)
-{
-    std::string::size_type pos, count;
-    bool ilb = true;
-    bool iub = true;
-    bool negate = false;
-    const char *start;
-    char *end;
-    std::string name;
-    double ub, lb;
-
-    pos = 0;
-    // Skip leading whitespace.
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-    pos += count;
-
-    count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
-    if (count == 0)
-        throw std::string("No dimension name.");
-    name = r.substr(pos, count);
-    pos += count;
-
-    if (r[pos] == '!')
-    {
-        negate = true;
-        pos++;
-    }
-
-    if (r[pos] == '(')
-        ilb = false;
-    else if (r[pos] != '[')
-        throw std::string("Missing '(' or '['.");
-    pos++;
-
-    // Extract lower bound.
-    start = r.data() + pos;
-    lb = std::strtod(start, &end);
-    if (start == end)
-        lb = std::numeric_limits<double>::min();
-    pos += (end - start);
-
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-    pos += count;
-
-    if (r[pos] != ':')
-        throw std::string("Missing ':' limit separator.");
-    pos++;
-
-    start = r.data() + pos;
-    ub = std::strtod(start, &end);
-    if (start == end)
-        ub = std::numeric_limits<double>::max();
-    pos += (end - start);
-
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-    pos += count;
-
-    if (r[pos] == ')')
-        iub = false;
-    else if (r[pos] != ']')
-        throw std::string("Missing ')' or ']'.");
-    pos++;
-
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
-    pos += count;
-
-    if (pos != r.size())
-        throw std::string("Invalid characters following valid range.");
-
-    return RangeFilter::Range(name, lb, ub, ilb, iub, negate);
-}
-
-} // unnamed namespace
+RangeFilter::RangeFilter()
+{}
 
 
-bool operator < (const RangeFilter::Range& r1, const RangeFilter::Range& r2)
-{
-    return (r1.m_name < r2.m_name ? true :
-        r1.m_name > r2.m_name ? false :
-        &r1 < &r2);
-}
+RangeFilter::~RangeFilter()
+{}
 
 
 void RangeFilter::addArgs(ProgramArgs& args)
@@ -157,11 +82,13 @@ void RangeFilter::initialize()
     {
         try
         {
-            m_range_list.push_back(parseRange(r));
+            DimRange range;
+            range.parse(r);
+            m_range_list.push_back(range);
         }
-        catch (const std::string& what)
+        catch (const DimRange::error& err)
         {
-            throwError("Invalid 'limits' option: '" + r + "': " + what);
+            throwError("Invalid 'limits' option: '" + r + "': " + err.what());
         }
     }
 }
@@ -181,18 +108,6 @@ void RangeFilter::prepared(PointTableRef table)
     std::sort(m_range_list.begin(), m_range_list.end());
 }
 
-
-// Determine if a point passes a single range.
-bool RangeFilter::dimensionPasses(double v, const Range& r) const
-{
-    bool fail = ((r.m_inclusive_lower_bound && v < r.m_lower_bound) ||
-        (!r.m_inclusive_lower_bound && v <= r.m_lower_bound) ||
-        (r.m_inclusive_upper_bound && v > r.m_upper_bound) ||
-        (!r.m_inclusive_upper_bound && v >= r.m_upper_bound));
-    if (r.m_negate)
-        fail = !fail;
-    return !fail;
-}
 
 // The range list is sorted by dimension, so the logic here should work
 // as ORs between ranges of the same dimension and ANDs between ranges
@@ -218,7 +133,7 @@ bool RangeFilter::processOne(PointRef& point)
         // a new dimension.
         else if (passes)
             continue;
-        passes = dimensionPasses(point.getFieldAs<double>(r.m_id), r);
+        passes = r.valuePasses(point.getFieldAs<double>(r.m_id));
     }
     return passes;
 }
@@ -244,4 +159,3 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
 }
 
 } // namespace pdal
-

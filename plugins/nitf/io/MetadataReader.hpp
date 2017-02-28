@@ -76,6 +76,12 @@ namespace pdal
 class PDAL_DLL MetadataReader
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     MetadataReader(::nitf::Record&, MetadataNode&, bool showEmptyFields=true);
 
     void read();

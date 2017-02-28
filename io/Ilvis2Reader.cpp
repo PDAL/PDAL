@@ -58,11 +58,11 @@ std::istream& operator >> (std::istream& in, Ilvis2Reader::IlvisMapping& mval)
 
     in >> s;
     s = Utils::toupper(s);
-    
+
     static std::map<std::string, Ilvis2Reader::IlvisMapping> m =
-        { { "INVALID", Ilvis2Reader::IlvisMapping::INVALID }, 
-          { "LOW", Ilvis2Reader::IlvisMapping::LOW }, 
-          { "HIGH", Ilvis2Reader::IlvisMapping::HIGH }, 
+        { { "INVALID", Ilvis2Reader::IlvisMapping::INVALID },
+          { "LOW", Ilvis2Reader::IlvisMapping::LOW },
+          { "HIGH", Ilvis2Reader::IlvisMapping::HIGH },
           { "ALL", Ilvis2Reader::IlvisMapping::ALL } };
 
     mval = m[s];
@@ -131,11 +131,7 @@ Dimension::IdList Ilvis2Reader::getDefaultDimensions()
 void Ilvis2Reader::initialize(PointTableRef)
 {
     if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
-    {
-        std::ostringstream oss;
-        oss << "Invalid metadata file: '" << m_metadataFile << "'";
-        throw pdal_error(oss.str());
-    }
+        throwError("Invalid metadata file: '" + m_metadataFile + "'");
 
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
@@ -150,12 +146,8 @@ T convert(const StringList& s, const std::string& name, size_t fieldno)
 {
     T output;
     if (!Utils::fromString(s[fieldno], output))
-    {
-        std::stringstream oss;
-        oss << "Unable to convert " << name << ", " << s[fieldno] <<
-            ", to double";
-        throw pdal_error(oss.str());
-    }
+        throw Ilvis2Reader::error("Unable to convert " + name +
+            ", " + s[fieldno] + ", to double");
 
     return output;
 }
@@ -210,7 +202,14 @@ void Ilvis2Reader::ready(PointTableRef table)
 {
     if (!m_metadataFile.empty())
     {
-        m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
+        try
+        {
+            m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
+        }
+        catch (const Ilvis2MetadataReader::error& err)
+        {
+            throwError(err.what());
+        }
     }
 
     static const int HeaderSize = 2;
@@ -235,41 +234,45 @@ bool Ilvis2Reader::processOne(PointRef& point)
 // Format:
 // LVIS_LFID SHOTNUMBER TIME LONGITUDE_CENTROID LATITUDE_CENTROID ELEVATION_CENTROID LONGITUDE_LOW LATITUDE_LOW ELEVATION_LOW LONGITUDE_HIGH LATITUDE_HIGH ELEVATION_HIGH
 
-    // This handles the second time through for this data line when we have
-    // an "ALL" mapping and the high and low elevations are different.
-    if (m_resample)
+    try
     {
-        readPoint(point, m_fields, "HIGH");
-        m_resample = false;
-        return true;
-    }
+        // This handles the second time through for this data line when we have
+        // an "ALL" mapping and the high and low elevations are different.
+        if (m_resample)
+        {
+            readPoint(point, m_fields, "HIGH");
+            m_resample = false;
+            return true;
+        }
 
-    if (!std::getline(m_stream, line))
-        return false;
-    m_fields = Utils::split2(line, ' ');
-    if (m_fields.size() != 12)
+        if (!std::getline(m_stream, line))
+            return false;
+        m_fields = Utils::split2(line, ' ');
+        if (m_fields.size() != 12)
+            throwError("Invalid format for line " +
+                Utils::toString(m_lineNum) + ".  Expected 12 fields, got " +
+                Utils::toString(m_fields.size()) + ".");
+
+        double low_elev = convert<double>(m_fields, "ELEVATION_LOW", 8);
+        double high_elev = convert<double>(m_fields, "ELEVATION_HIGH", 11);
+
+        // write LOW point if specified, or for ALL
+        if (m_mapping == IlvisMapping::LOW || m_mapping == IlvisMapping::ALL)
+        {
+            readPoint(point, m_fields, "LOW");
+            // If we have ALL mapping and the high elevation is different
+            // from that of the low elevation, we'll a second point with the
+            // high elevation.
+            if (m_mapping == IlvisMapping::ALL && (low_elev != high_elev))
+                m_resample = true;
+        }
+        else if (m_mapping == IlvisMapping::HIGH)
+            readPoint(point, m_fields, "HIGH");
+    }
+    catch (const error& err)
     {
-        std::stringstream oss;
-        oss << getName() << ": Invalid format for line " << m_lineNum <<
-            ".  Expected 12 fields, got " << m_fields.size() << ".";
-        throw pdal_error(oss.str());
+        throwError(err.what());
     }
-
-    double low_elev = convert<double>(m_fields, "ELEVATION_LOW", 8);
-    double high_elev = convert<double>(m_fields, "ELEVATION_HIGH", 11);
-
-    // write LOW point if specified, or for ALL
-    if (m_mapping == IlvisMapping::LOW || m_mapping == IlvisMapping::ALL)
-    {
-        readPoint(point, m_fields, "LOW");
-        // If we have ALL mapping and the high elevation is different
-        // from that of the low elevation, we'll a second point with the
-        // high elevation.
-        if (m_mapping == IlvisMapping::ALL && (low_elev != high_elev))
-            m_resample = true;
-    }
-    else if (m_mapping == IlvisMapping::HIGH)
-        readPoint(point, m_fields, "HIGH");
     return true;
 }
 
@@ -291,13 +294,6 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
     }
 
     return numRead;
-}
-
-
-void Ilvis2Reader::done(PointTableRef table)
-{
-
-
 }
 
 } // namespace pdal

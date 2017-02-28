@@ -60,14 +60,21 @@ NitfFileReader::NitfFileReader(const std::string& filename) :
     m_validLidarSegments(false),
     m_lidarDataSegment(0)
 {
-    register_tre_plugins();
+    try
+    {
+        register_tre_plugins();
+    }
+    catch (const pdal_error& err)
+    {
+        throw error(err.what());
+    }
 }
 
 
 void NitfFileReader::open()
 {
     if (nitf::Reader::getNITFVersion(m_filename.c_str()) == NITF_VER_UNKNOWN)
-        throw pdal_error("Unable to determine NITF file version");
+        throw error("Unable to determine NITF file version");
 
     // read the major NITF data structures, courtesy Nitro
     try
@@ -76,7 +83,7 @@ void NitfFileReader::open()
     }
     catch (nitf::NITFException& e)
     {
-        throw pdal_error("unable to open NITF file (" + e.getMessage() + ")");
+        throw error("unable to open NITF file (" + e.getMessage() + ")");
     }
     try
     {
@@ -85,7 +92,7 @@ void NitfFileReader::open()
     }
     catch (nitf::NITFException& e)
     {
-        throw pdal_error("unable to read NITF file (" + e.getMessage() + ")");
+        throw error("unable to read NITF file (" + e.getMessage() + ")");
     }
 
     // find the image segment corresponding the the lidar data, if any
@@ -94,7 +101,7 @@ void NitfFileReader::open()
     const bool imageOK = locateLidarImageSegment();
     if (REQUIRE_LIDAR_SEGMENTS && !imageOK)
     {
-        throw pdal_error("Unable to find lidar-compatible image "
+        throw error("Unable to find lidar-compatible image "
             "segment in NITF file");
     }
 
@@ -102,7 +109,7 @@ void NitfFileReader::open()
     const bool dataOK = locateLidarDataSegment();
     if (REQUIRE_LIDAR_SEGMENTS && !dataOK)
     {
-        throw pdal_error("Unable to find LIDARA data extension segment "
+        throw error("Unable to find LIDARA data extension segment "
             "in NITF file");
     }
 
@@ -140,14 +147,21 @@ void NitfFileReader::getLasOffset(uint64_t& offset, uint64_t& length)
             return;
         }
     }
-    throw pdal_error("error reading nitf (1)");
+    throw error("error reading nitf (1)");
 }
 
 
 void NitfFileReader::extractMetadata(MetadataNode& node)
 {
-    MetadataReader mr(m_record, node, SHOW_EMPTY_FIELDS);
-    mr.read();
+    try
+    {
+        MetadataReader mr(m_record, node, SHOW_EMPTY_FIELDS);
+        mr.read();
+    }
+    catch (const MetadataReader::error& err)
+    {
+        throw error(err.what());
+    }
 }
 
 
@@ -169,7 +183,7 @@ bool NitfFileReader::locateLidarImageSegment()
         ::nitf::Field field = subheader.getImageId();
         ::nitf::Field::FieldType fieldType = field.getType();
         if (fieldType != (::nitf::Field::FieldType)NITF_BCS_A)
-            throw pdal_error("error reading nitf (5)");
+            throw error("error reading nitf (5)");
         std::string iid1 = field.toString();
 
         // BUG: shouldn't allow "None" here!
@@ -202,11 +216,11 @@ bool NitfFileReader::locateLidarDataSegment()
 
         ::nitf::Field idField = subheader.getTypeID();
         if (idField.getType() != (::nitf::Field::FieldType)NITF_BCS_A)
-            throw pdal_error("error reading nitf (6)");
+            throw error("error reading nitf (6)");
 
         ::nitf::Field verField = subheader.getVersion();
         if (verField.getType() != (::nitf::Field::FieldType)NITF_BCS_N)
-            throw pdal_error("error reading nitf (7)");
+            throw error("error reading nitf (7)");
 
         const std::string id = idField.toString();
         const int ver = (int)verField;

@@ -103,7 +103,14 @@ void IcebridgeReader::addDimensions(PointLayoutPtr layout)
 
 void IcebridgeReader::ready(PointTableRef table)
 {
-    m_hdf5Handler.initialize(m_filename, hdf5Columns);
+    try
+    {
+        m_hdf5Handler.initialize(m_filename, hdf5Columns);
+    }
+    catch (const Hdf5Handler::error& err)
+    {
+        throwError(err.what());
+    }
     m_index = 0;
     if (!m_metadataFile.empty())
     {
@@ -181,11 +188,9 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
                     view->setField(*di, nextId++, *ival++);
             }
         }
-        catch(...)
+        catch(const Hdf5Handler::error& err)
         {
-            std::ostringstream oss;
-            oss << getName() << ": Error fetching column data.";
-            throw pdal_error(oss.str());
+            throwError(err.what());
         }
     }
     return count;
@@ -200,9 +205,7 @@ void IcebridgeReader::initialize()
 {
     if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
     {
-        std::ostringstream oss;
-        oss << "Invalid metadata file: '" << m_metadataFile << "'";
-        throw pdal_error(oss.str());
+        throwError("Invalid metadata file: '" + m_metadataFile + "'");
     }
 
     // Data are WGS84 (4326) with ITRF2000 datum (6656)

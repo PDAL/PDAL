@@ -77,7 +77,7 @@ BOX3D LasSummaryData::getBounds() const
 point_count_t LasSummaryData::getReturnCount(int returnNumber) const
 {
     if (returnNumber < 0 || (size_t)returnNumber >= m_returnCounts.size())
-        throw pdal_error("getReturnCount: point returnNumber is out of range");
+        throw error("Point return number is out of range");
     return m_returnCounts[returnNumber];
 }
 

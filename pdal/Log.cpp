@@ -43,11 +43,10 @@ namespace pdal
 
 Log::Log(std::string const& leaderString,
          std::string const& outputName)
-    : m_level(LogLevel::Error)
+    : m_level(LogLevel::Warning)
     , m_deleteStreamOnCleanup(false)
 {
 
-    makeNullStream();
     if (Utils::iequals(outputName, "stdlog"))
         m_log = &std::clog;
     else if (Utils::iequals(outputName, "stderr"))
@@ -55,7 +54,7 @@ Log::Log(std::string const& leaderString,
     else if (Utils::iequals(outputName, "stdout"))
         m_log = &std::cout;
     else if (Utils::iequals(outputName, "devnull"))
-        m_log = m_nullStream;
+        m_log = &m_nullStream;
     else
     {
         m_log = Utils::createFile(outputName);
@@ -71,7 +70,6 @@ Log::Log(std::string const& leaderString,
     , m_deleteStreamOnCleanup(false)
 {
     m_log = v;
-    makeNullStream();
     m_leaders.push(leaderString);
 }
 
@@ -84,19 +82,6 @@ Log::~Log()
         m_log->flush();
         delete m_log;
     }
-    delete m_nullStream;
-}
-
-
-void Log::makeNullStream()
-{
-#ifdef _WIN32
-    std::string nullFilename = "nul";
-#else
-    std::string nullFilename = "/dev/null";
-#endif
-
-    m_nullStream = new std::ofstream(nullFilename);
 }
 
 
@@ -121,14 +106,17 @@ std::ostream& Log::get(LogLevel level)
     const auto nativeDebug(Utils::toNative(LogLevel::Debug));
     if (incoming <= stored)
     {
-        *m_log << "(" << leader() << " "<< getLevelString(level) <<": " <<
-            incoming << "): " <<
-            std::string(incoming < nativeDebug ? 0 : incoming - nativeDebug,
-                    '\t');
+        const std::string l = leader();
+
+        *m_log << "(" << l;
+         if (l.size())
+             *m_log << " ";
+         *m_log << getLevelString(level) <<") " <<
+         std::string(incoming < nativeDebug ? 0 : incoming - nativeDebug,
+             '\t');
         return *m_log;
     }
-    return *m_nullStream;
-
+    return m_nullStream;
 }
 
 

@@ -467,7 +467,7 @@ void Stage::setSpatialReference(MetadataNode& m,
 }
 
 
-void Stage::throwError(const std::string& s)
+void Stage::throwError(const std::string& s) const
 {
     throw pdal_error(getName() + ": " + s);
 }

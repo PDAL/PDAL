@@ -76,13 +76,13 @@ GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
 void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
 {
     if (width < m_width)
-        throw pdal_error("Expanded grid must have width at least as large "
+        throw error("Expanded grid must have width at least as large "
             "as existing grid.");
     if (height < m_height)
-        throw pdal_error("Expanded grid must have height at least as large "
+        throw error("Expanded grid must have height at least as large "
             "as existing grid.");
     if (m_width + xshift > width || m_height + yshift > height)
-        throw pdal_error("Can't shift existing grid outside of new grid "
+        throw error("Can't shift existing grid outside of new grid "
             "during expansion.");
     if (width == m_width && height == m_height)
         return;

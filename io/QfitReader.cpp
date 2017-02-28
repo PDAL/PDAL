@@ -205,11 +205,7 @@ void QfitReader::initialize()
 {
     ISwitchableStream str(m_filename);
     if (!str)
-    {
-        std::ostringstream oss;
-        oss << "Unable to open file '" << m_filename << "'";
-        throw qfit_error(oss.str());
-    }
+        throwError("Unable to open file '" + m_filename + "'");
     str.seek(0);
 
     int32_t int4(0);
@@ -248,7 +244,7 @@ void QfitReader::initialize()
         int4 = int32_t(be32toh(uint32_t(int4)));
 
     if (int4 % 4 != 0)
-        throw qfit_error("Base QFIT format is not a multiple of 4, "
+        throwError("Base QFIT format is not a multiple of 4, "
             "unrecognized format!");
 
     m_size = int4;
@@ -277,7 +273,7 @@ void QfitReader::addArgs(ProgramArgs& args)
     args.add("scale_z", "Z scale. Use 0.001 to go from mm to m",
         m_scale_z, 0.001);
 }
-    
+
 
 void QfitReader::addDimensions(PointLayoutPtr layout)
 {
@@ -317,12 +313,8 @@ void QfitReader::ready(PointTableRef)
 {
     m_numPoints = m_point_bytes / m_size;
     if (m_point_bytes % m_size)
-    {
-        std::ostringstream msg;
-        msg << "Error calculating file point count.  File size is "
-            "inconsistent with point size.";
-        throw qfit_error(msg.str());
-    }
+        throwError("Error calculating file point count.  File size is "
+            "inconsistent with point size.");
     m_index = 0;
     m_istream.reset(new IStream(m_filename));
     m_istream->seek(m_offset);
@@ -332,13 +324,9 @@ void QfitReader::ready(PointTableRef)
 point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
 {
     if (!m_istream->good())
-    {
-        throw pdal_error("QFIT file stream is no good!");
-    }
+        throwError("Corrupted file/file read error.");
     if (m_istream->stream()->eof())
-    {
-        throw pdal_error("QFIT file stream is eof!");
-    }
+        throwError("End of file detected.");
 
     count = std::min(m_numPoints - m_index, count);
     std::vector<char> buf(m_size);

@@ -43,11 +43,13 @@ extern "C" PF_ExitFunc AssignFilter_InitPlugin();
 namespace pdal
 {
 
+struct AssignRange;
+
 class PDAL_DLL AssignFilter : public Filter
 {
 public:
-    AssignFilter()
-    {}
+    AssignFilter();
+    ~AssignFilter();
 
     static void * create();
     static int32_t destroy(void *);
@@ -62,9 +64,7 @@ private:
     AssignFilter& operator=(const AssignFilter&) = delete;
     AssignFilter(const AssignFilter&) = delete;
 
-    std::string m_dimName;
-    double m_value;
-    Dimension::Id m_dim;
+    std::vector<AssignRange> m_assignments;
 };
 
 } // namespace pdal

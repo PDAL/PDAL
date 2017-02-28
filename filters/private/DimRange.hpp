@@ -34,43 +34,57 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-#include <memory>
-#include <map>
 #include <string>
 
-extern "C" int32_t RangeFilter_ExitFunc();
-extern "C" PF_ExitFunc RangeFilter_InitPlugin();
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
 
-struct DimRange;
-
-class PDAL_DLL RangeFilter : public pdal::Filter
+struct DimRange
 {
-public:
-    RangeFilter();
-    ~RangeFilter();
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    DimRange(const std::string name,
+        double lower_bound,
+        double upper_bound,
+        bool inclusive_lower_bound,
+        bool inclusive_upper_bound,
+        bool negate) :
+    m_name(name), m_id(Dimension::Id::Unknown),
+    m_lower_bound(lower_bound), m_upper_bound(upper_bound),
+    m_inclusive_lower_bound(inclusive_lower_bound),
+    m_inclusive_upper_bound(inclusive_upper_bound),
+    m_negate(negate)
+    {}
 
-private:
-    StringList m_rangeSpec;
-    std::vector<DimRange> m_range_list;
+    DimRange() : m_id(Dimension::Id::Unknown), m_lower_bound(0),
+        m_upper_bound(0), m_inclusive_lower_bound(true),
+        m_inclusive_upper_bound(true), m_negate(false)
+    {}
 
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual bool processOne(PointRef& point);
-    virtual PointViewSet run(PointViewPtr view);
+    void parse(const std::string& s);
+    bool valuePasses(double d) const;
 
-    RangeFilter& operator=(const RangeFilter&) = delete;
-    RangeFilter(const RangeFilter&) = delete;
+    std::string m_name;
+    Dimension::Id m_id;
+    double m_lower_bound;
+    double m_upper_bound;
+    bool m_inclusive_lower_bound;
+    bool m_inclusive_upper_bound;
+    bool m_negate;
+
+protected:
+    std::string::size_type subParse(const std::string& r);
 };
+
+bool operator < (const DimRange& r1, const DimRange& r2);
+std::istream& operator>>(std::istream& in, DimRange& r);
+std::ostream& operator<<(std::ostream& out, const DimRange& r);
+
 
 } // namespace pdal
