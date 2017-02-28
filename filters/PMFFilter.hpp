@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -37,6 +37,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
 
+#include <Eigen/Dense>
+
 #include <memory>
 
 extern "C" int32_t PMFFilter_ExitFunc();
@@ -72,6 +74,8 @@ private:
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
+    Eigen::MatrixXd fillNearest(PointViewPtr view, Eigen::MatrixXd cz,
+                                double cell_size, BOX2D bounds);
     std::vector<double> morphOpen(PointViewPtr view, float radius);
     std::vector<PointId> processGround(PointViewPtr view);
     std::vector<PointId> processGroundApprox(PointViewPtr view);
