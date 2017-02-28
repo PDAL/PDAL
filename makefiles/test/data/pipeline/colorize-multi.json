@@ -1,0 +1,19 @@
+{
+  "pipeline":[
+    {
+      "filename":"/home/msr/pdal/test/data/autzen/autzen.las",
+      "spatialreference":"EPSG:2993"
+    },
+    {
+      "type":"filters.colorization",
+      "dimensions":"Red1:1:1.0,Green1:2:1.0,Blue1:3:256",
+      "raster":"/home/msr/pdal/test/data/autzen/autzen.jpg"
+    },
+    {
+      "type":"filters.colorization",
+      "dimensions":"Red:1:1.0,Green:2:1.0,Blue:3:256",
+      "raster":"/home/msr/pdal/test/data/autzen/autzen.jpg"
+    },
+    "/home/msr/pdal/test/temp/sometext.txt"
+  ]
+}

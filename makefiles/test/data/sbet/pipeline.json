@@ -1,0 +1,6 @@
+{
+  "pipeline": [
+    "/home/msr/pdal/test/data/sbet/2-points.sbet",
+    "/home/msr/pdal/test/temp/outfile.txt"
+  ]
+}

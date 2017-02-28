@@ -1,0 +1,7 @@
+{
+  "pipeline": [
+    "/home/msr/pdal/test/data/autzen/thin*.las",
+    "/home/msr/pdal/test/temp/globbed.las"
+  ]
+}
+

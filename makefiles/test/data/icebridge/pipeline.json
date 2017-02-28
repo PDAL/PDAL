@@ -1,0 +1,13 @@
+{
+  "pipeline":[
+    {
+        "type":"readers.icebridge",
+        "filename":"/home/msr/pdal/test/data/icebridge/twoPoints.h5"
+    },
+    {
+        "type":"writers.text",
+        "filename":"/home/msr/pdal/test/temp/outfile.txt"
+    }
+  ]
+}
+

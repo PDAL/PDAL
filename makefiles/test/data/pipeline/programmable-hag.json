@@ -1,0 +1,16 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/autzen/autzen.las",
+    {
+      "type":"filters.ferry",
+      "dimensions":"Z=HAG"
+    },
+    {
+      "type":"filters.programmable",
+      "script":"/home/msr/pdal/makefiles/test/data/autzen/hag.py",
+      "function":"filter",
+      "module":"anything"
+    },
+    "/home/msr/pdal/test/temp/autzen-hag.las"
+  ]
+}

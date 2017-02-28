@@ -1,0 +1,14 @@
+{
+  "pipeline":[
+    {
+      "filename":"/home/msr/pdal/test/data/qfit/14-word.qi",
+      "flip_coordinates":true,
+      "scale_z":0.001,
+      "spatialreference":"EPSG:4269+3855",
+      "log":"stdlog"
+    },
+    {
+      "filename":"/home/msr/pdal/test/temp/out2.las"
+    }
+  ]
+}

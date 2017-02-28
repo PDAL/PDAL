@@ -1,0 +1,19 @@
+{
+  "pipeline":[
+    {
+      "filename":"/home/msr/pdal/test/data/las/1.2-with-color.las",
+      "spatialreference":"EPSG:2993"
+    },
+    {
+      "type":"filters.decimation",
+      "step":2,
+      "offset":1
+    },
+    {
+      "type":"writers.text",
+      "filename":"/home/msr/pdal/test/temp/junk.txt",
+      "delimiter":",",
+      "write_header":false
+    }
+  ]
+}

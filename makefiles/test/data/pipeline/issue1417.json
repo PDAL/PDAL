@@ -1,0 +1,9 @@
+{
+  "pipeline":[
+    {
+    "filename" : "badfile.reallybad",
+    "type" : "readers.las"
+    },
+    "/home/msr/pdal/test/temp/out.las"
+  ]
+}

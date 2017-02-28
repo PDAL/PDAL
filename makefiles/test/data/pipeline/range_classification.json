@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.range",
+      "limits":"Classification[2:2]"
+    },
+    "/home/msr/pdal/test/temp/only_class_equals_2.las"
+  ]
+}

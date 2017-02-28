@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/las/interesting.las",
+    {
+      "filename":"/home/msr/pdal/test/temp/metadata-output.las",
+      "forward":"software_id, creation_doy, creation_year",
+      "system_id":"SOMEVALUE"
+    }
+  ]
+}

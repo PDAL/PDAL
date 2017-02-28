@@ -1,0 +1,10 @@
+{
+  "pipeline": [
+    "/home/msr/pdal/test/data/las/1.2-with-color.las",
+    {
+        "type": "filters.sort",
+        "dimension": "X"
+    },
+    "/home/msr/pdal/test/temp/sorted.las"
+  ]
+}

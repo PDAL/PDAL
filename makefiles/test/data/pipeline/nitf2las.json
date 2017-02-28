@@ -1,0 +1,6 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/nitf/autzen-utm10.ntf",
+    "/home/msr/pdal/test/temp/nitf.las"
+  ]
+}

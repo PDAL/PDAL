@@ -1,0 +1,15 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/autzen/autzen-dd.las",
+    {
+      "type":"filters.assign",
+      "dimension":"PointSourceId",
+      "value":26
+    },
+    {
+      "filename":"/home/msr/pdal/test/temp/attributed.las",
+      "scale_x":0.0000001,
+      "scale_y":0.0000001
+    }
+  ]
+}

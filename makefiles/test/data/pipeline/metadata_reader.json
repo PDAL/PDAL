@@ -1,0 +1,5 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/las/interesting.las"
+  ]
+}
