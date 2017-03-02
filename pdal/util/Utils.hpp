@@ -52,6 +52,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <iostream>
+
 #include "pdal_util_export.hpp"
 
 namespace pdal
@@ -867,12 +869,23 @@ namespace Utils
     template<>
     inline bool fromString<char>(const std::string& s, char& to)
     {
-        int i = std::stoi(s);
-        if (i >= std::numeric_limits<char>::lowest() &&
-            i <= std::numeric_limits<char>::max())
+        try
         {
-            to = static_cast<char>(i);
-            return true;
+            int i = std::stoi(s);
+            if (i >= std::numeric_limits<char>::lowest() &&
+                    i <= std::numeric_limits<char>::max())
+            {
+                to = static_cast<char>(i);
+                return true;
+            }
+        }
+        catch (std::invalid_argument) // Character that isn't a number?
+        {
+            if (s.length() == 1)
+            {
+                to = s[0];
+                return true;
+            }
         }
         return false;
     }
@@ -888,13 +901,25 @@ namespace Utils
     inline bool fromString<unsigned char>(const std::string& s,
         unsigned char& to)
     {
-        int i = std::stoi(s);
-        if (i >= std::numeric_limits<unsigned char>::lowest() &&
-            i <= std::numeric_limits<unsigned char>::max())
+        try
         {
-            to = static_cast<unsigned char>(i);
-            return true;
+            int i  = std::stoi(s);
+            if (i >= std::numeric_limits<unsigned char>::lowest() &&
+                i <= std::numeric_limits<unsigned char>::max())
+            {
+                to = static_cast<unsigned char>(i);
+                return true;
+            }
         }
+        catch (std::invalid_argument) // Character that isn't a number?
+        {
+            if (s.length() == 1)
+            {
+                to = s[0];
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -908,12 +933,23 @@ namespace Utils
     template<>
     inline bool fromString<signed char>(const std::string& s, signed char& to)
     {
-        int i = std::stoi(s);
-        if (i >= std::numeric_limits<signed char>::lowest() &&
-            i <= std::numeric_limits<signed char>::max())
+        try
         {
-            to = static_cast<signed char>(i);
-            return true;
+            int i = std::stoi(s);
+            if (i >= std::numeric_limits<signed char>::lowest() &&
+                    i <= std::numeric_limits<signed char>::max())
+            {
+                to = static_cast<signed char>(i);
+                return true;
+            }
+        }
+        catch (std::invalid_argument) // Character that isn't a number?
+        {
+            if (s.length() == 1)
+            {
+                to = s[0];
+                return true;
+            }
         }
         return false;
     }
