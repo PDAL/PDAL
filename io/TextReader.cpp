@@ -64,19 +64,31 @@ void TextReader::initialize(PointTableRef table)
     auto isspecial = [](char c)
         { return (!std::isalnum(c) && c != ' '); };
 
-    // Scan string for some character not a number, space or letter.
-    for (size_t i = 0; i < buf.size(); ++i)
-        if (isspecial(buf[i]))
-        {
-            m_separator = buf[i];
-            break;
-        }
+    // If the separator wasn't provided on the command line extract it
+    // from the header line.
+    if (m_separator == ' ')
+    {
+        // Scan string for some character not a number, space or letter.
+        for (size_t i = 0; i < buf.size(); ++i)
+            if (isspecial(buf[i]))
+            {
+                m_separator = buf[i];
+                break;
+            }
+    }
 
     if (m_separator != ' ')
         m_dimNames = Utils::split(buf, m_separator);
     else
         m_dimNames = Utils::split2(buf, m_separator);
     Utils::closeFile(m_istream);
+}
+
+
+void TextReader::addArgs(ProgramArgs& args)
+{
+    args.add("separator", "Separator character that overrides special "
+        "character in header line", m_separator, ' ');
 }
 
 
