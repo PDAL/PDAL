@@ -194,13 +194,14 @@ void GDALWriter::writeView(const PointViewPtr view)
 
 bool GDALWriter::processOne(PointRef& point)
 {
-    double x = point.getFieldAs<double>(Dimension::Id::X) -
-        m_curBounds.minx;
-    double y = point.getFieldAs<double>(Dimension::Id::Y) -
-        m_curBounds.miny;
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(m_interpDim);
 
-    m_grid->addPoint(x, y, z);
+    auto bounds_2d = m_bounds.to2d();
+    if (bounds_2d.empty() || bounds_2d.contains(x, y)) {
+        m_grid->addPoint(x - m_curBounds.minx, y - m_curBounds.miny, z);
+    }
     return true;
 }
 
