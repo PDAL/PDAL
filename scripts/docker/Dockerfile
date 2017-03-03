@@ -9,9 +9,11 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
     libsqlite3-mod-spatialite \
     && rm -rf /var/lib/apt/lists/*
 
+RUN ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
+
 RUN git clone --depth=1 https://github.com/PDAL/PDAL \
     && cd PDAL \
-    && git checkout master \
+    && git checkout 1.4-maintenance \
     && mkdir build \
     && cd build \
     && cmake \
@@ -22,7 +24,6 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
         -DBUILD_PLUGIN_MRSID=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
-        -DBUILD_PLUGIN_P2G=ON \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_SQLITE=ON \
@@ -115,7 +116,6 @@ RUN apt-get purge -y \
     libcurl4-openssl-dev \
     libspatialite-dev \
     libdap-dev\
-    ninja \
     cython \
     python-pip
 
@@ -157,4 +157,22 @@ RUN apt-get update && apt-get install -y \
     libgdal1i \
     libflann1.8 \
     libpython2.7 \
-    libhdf5-cpp-11
+    libhdf5-cpp-11 \
+    libpcl-common1.7 \
+    libpcl-features1.7 \
+    libpcl-filters1.7 \
+    libpcl-io1.7 \
+    libpcl-kdtree1.7 \
+    libpcl-keypoints1.7 \
+    libpcl-octree1.7 \
+    libpcl-outofcore1.7 \
+    libpcl-people1.7 \
+    libpcl-recognition1.7 \
+    libpcl-registration1.7 \
+    libpcl-sample-consensus1.7 \
+    libpcl-search1.7 \
+    libpcl-segmentation1.7 \
+    libpcl-surface1.7 \
+    libpcl-tracking1.7 \
+    libpcl-visualization1.7
+
