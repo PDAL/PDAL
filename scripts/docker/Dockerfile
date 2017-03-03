@@ -157,4 +157,22 @@ RUN apt-get update && apt-get install -y \
     libgdal1i \
     libflann1.8 \
     libpython2.7 \
-    libhdf5-cpp-11
+    libhdf5-cpp-11 \
+    libpcl-common1.7 \
+    libpcl-features1.7 \
+    libpcl-filters1.7 \
+    libpcl-io1.7 \
+    libpcl-kdtree1.7 \
+    libpcl-keypoints1.7 \
+    libpcl-octree1.7 \
+    libpcl-outofcore1.7 \
+    libpcl-people1.7 \
+    libpcl-recognition1.7 \
+    libpcl-registration1.7 \
+    libpcl-sample-consensus1.7 \
+    libpcl-search1.7 \
+    libpcl-segmentation1.7 \
+    libpcl-surface1.7 \
+    libpcl-tracking1.7 \
+    libpcl-visualization1.7
+
