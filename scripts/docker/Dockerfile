@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
     libsqlite3-mod-spatialite \
     && rm -rf /var/lib/apt/lists/*
 
+RUN ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
+
 RUN git clone --depth=1 https://github.com/PDAL/PDAL \
     && cd PDAL \
     && git checkout master \
@@ -114,7 +116,6 @@ RUN apt-get purge -y \
     libcurl4-openssl-dev \
     libspatialite-dev \
     libdap-dev\
-    ninja \
     cython \
     python-pip
 

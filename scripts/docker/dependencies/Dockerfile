@@ -62,15 +62,32 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libcurl4-openssl-dev \
         libspatialite-dev \
         libdap-dev\
-        ninja \
         cython \
         python-pip \
         libgdal1-dev \
+        gdal-bin \
+        libpcl-dev \
         time \
+        libhpdf-dev \
+        python-setuptools \
+        libgeos++-dev \
+        unzip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
+RUN mkdir /vdatum \
+    && cd /vdatum \
+    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2012.zip && unzip -j -u usa_geoid2012.zip -d /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2009.zip && unzip -j -u usa_geoid2009.zip -d /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2003.zip && unzip -j -u usa_geoid2003.zip -d /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/usa_geoid1999.zip && unzip -j -u usa_geoid1999.zip -d /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconc.gtx && mv vertconc.gtx /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertcone.gtx && mv vertcone.gtx /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconw.gtx && mv vertconw.gtx /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx && mv egm96_15.gtx /usr/share/proj \
+    && wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj \
+    && rm -rf /vdatum
 
 #RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
 #    &&    cd gdal/gdal \
@@ -169,65 +186,65 @@ RUN wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz \
         && rm -rf /3.2.7.tar.gz \
         && rm -rf /eigen-eigen-b30b87236a1b
 
-RUN git clone https://github.com/PointCloudLibrary/pcl.git \
-        && cd pcl \
-        && git checkout pcl-1.8.0 \
-        && mkdir build \
-        && cd build \
-        && CC="clang" CXX="clang++" CXXFLAGS="-std=c++11"  cmake \
-                -DBUILD_2d=ON \
-                -DBUILD_CUDA=OFF \
-                -DBUILD_GPU=OFF \
-                -DBUILD_apps=OFF \
-                -DBUILD_common=ON \
-                -DBUILD_examples=OFF \
-                -DBUILD_features=ON \
-                -DBUILD_filters=ON \
-                -DBUILD_geometry=ON \
-                -DBUILD_global_tests=OFF \
-                -DBUILD_io=ON \
-                -DBUILD_kdtree=ON \
-                -DBUILD_keypoints=ON \
-                -DBUILD_ml=ON \
-                -DBUILD_octree=ON \
-                -DBUILD_outofcore=OFF \
-                -DBUILD_people=OFF \
-                -DBUILD_recognition=OFF \
-                -DBUILD_registration=ON \
-                -DBUILD_sample_concensus=ON \
-                -DBUILD_search=ON \
-                -DBUILD_segmentation=ON \
-                -DBUILD_simulation=OFF \
-                -DBUILD_stereo=OFF \
-                -DBUILD_surface=ON \
-                -DBUILD_surface_on_nurbs=OFF \
-                -DBUILD_tools=OFF \
-                -DBUILD_tracking=OFF \
-                -DBUILD_visualization=OFF \
-                -DWITH_LIBUSB=OFF \
-                -DWITH_OPENNI=OFF \
-                -DWITH_OPENNI2=OFF \
-                -DWITH_FZAPI=OFF \
-                -DWITH_PXCAPI=OFF \
-                -DWITH_PNG=OFF \
-                -DWITH_QHULL=OFF \
-                -DWITH_QT=OFF \
-                -DWITH_VTK=OFF \
-                -DWITH_PCAP=OFF \
-                -DWITH_OPENNI=OFF \
-                -DWITH_OPENNI2=OFF \
-                -DWITH_FZAPI=OFF \
-                -DWITH_ENSENSO=OFF \
-                -DWITH_DAVIDSDK=OFF \
-                -DWITH_DSSDK=OFF \
-                -DWITH_RSSDK=OFF \
-                -DWITH_OPENGL=OFF \
-                -DCMAKE_INSTALL_PREFIX=/usr \
-                -DCMAKE_BUILD_TYPE="Release" \
-                .. \
-        && make -j 4\
-        && make install \
-        && rm -rf /pcl
+#RUN git clone https://github.com/PointCloudLibrary/pcl.git \
+#        && cd pcl \
+#        && git checkout pcl-1.8.0 \
+#        && mkdir build \
+#        && cd build \
+#        && CC="clang" CXX="clang++" CXXFLAGS="-std=c++11"  cmake \
+#                -DBUILD_2d=ON \
+#                -DBUILD_CUDA=OFF \
+#                -DBUILD_GPU=OFF \
+#                -DBUILD_apps=OFF \
+#                -DBUILD_common=ON \
+#                -DBUILD_examples=OFF \
+#                -DBUILD_features=ON \
+#                -DBUILD_filters=ON \
+#                -DBUILD_geometry=ON \
+#                -DBUILD_global_tests=OFF \
+#                -DBUILD_io=ON \
+#                -DBUILD_kdtree=ON \
+#                -DBUILD_keypoints=ON \
+#                -DBUILD_ml=ON \
+#                -DBUILD_octree=ON \
+#                -DBUILD_outofcore=OFF \
+#                -DBUILD_people=OFF \
+#                -DBUILD_recognition=OFF \
+#                -DBUILD_registration=ON \
+#                -DBUILD_sample_concensus=ON \
+#                -DBUILD_search=ON \
+#                -DBUILD_segmentation=ON \
+#                -DBUILD_simulation=OFF \
+#                -DBUILD_stereo=OFF \
+#                -DBUILD_surface=ON \
+#                -DBUILD_surface_on_nurbs=OFF \
+#                -DBUILD_tools=OFF \
+#                -DBUILD_tracking=OFF \
+#                -DBUILD_visualization=OFF \
+#                -DWITH_LIBUSB=OFF \
+#                -DWITH_OPENNI=OFF \
+#                -DWITH_OPENNI2=OFF \
+#                -DWITH_FZAPI=OFF \
+#                -DWITH_PXCAPI=OFF \
+#                -DWITH_PNG=OFF \
+#                -DWITH_QHULL=OFF \
+#                -DWITH_QT=OFF \
+#                -DWITH_VTK=OFF \
+#                -DWITH_PCAP=OFF \
+#                -DWITH_OPENNI=OFF \
+#                -DWITH_OPENNI2=OFF \
+#                -DWITH_FZAPI=OFF \
+#                -DWITH_ENSENSO=OFF \
+#                -DWITH_DAVIDSDK=OFF \
+#                -DWITH_DSSDK=OFF \
+#                -DWITH_RSSDK=OFF \
+#                -DWITH_OPENGL=OFF \
+#                -DCMAKE_INSTALL_PREFIX=/usr \
+#                -DCMAKE_BUILD_TYPE="Release" \
+#                .. \
+#        && make -j 4\
+#        && make install \
+#        && rm -rf /pcl
 
 
 
@@ -239,24 +256,7 @@ RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
     && make install \
     && rm -rf /libgeotiff
 
-RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-        ninja-build \
-        libgeos++-dev \
-        unzip \
-    && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /vdatum \
-    && cd /vdatum \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2012.zip && unzip -j -u usa_geoid2012.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2009.zip && unzip -j -u usa_geoid2009.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2003.zip && unzip -j -u usa_geoid2003.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid1999.zip && unzip -j -u usa_geoid1999.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconc.gtx && mv vertconc.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertcone.gtx && mv vertcone.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconw.gtx && mv vertconw.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx && mv egm96_15.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj \
-    && rm -rf /vdatum
 
 RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
     && cd fgt \
@@ -285,12 +285,6 @@ RUN git clone --depth 1 --branch v0.5.0 https://github.com/gadomski/cpd.git \
     && make \
     && make install \
     && rm -rf /cpd
-
-RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-        libhpdf-dev \
-    python-setuptools \
-    && rm -rf /var/lib/apt/lists/*
-
 
 RUN git clone https://github.com/ninja-build/ninja.git \
     && cd ninja \
