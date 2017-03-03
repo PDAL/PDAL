@@ -301,6 +301,10 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
+# fixup for PCL 1.7
+RUN ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
+
+
 #RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
 
