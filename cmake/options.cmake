@@ -81,6 +81,11 @@ option(BUILD_PLUGIN_PYTHON
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
     "add features that depend on python")
 
+option(BUILD_PLUGIN_MBIO
+    "Choose if MBIO support should be built" FALSE)
+add_feature_info("MBIO plugin" BUILD_PLUGIN_MBIO
+    "add features that depend on MBIO")
+
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 
 option(WITH_TESTS

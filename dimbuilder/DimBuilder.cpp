@@ -437,10 +437,10 @@ void DimBuilder::writeTypes(std::ostream& out)
     }
     out << "    case Id::Unknown:\n";
     out << "        throw pdal_error(\"No type found for undefined "
-        "dimension ID.\");\n";
+        "dimension.\");\n";
     out << "    }\n";
     out << "    throw pdal_error(\"No type found for undefined "
-        "dimension ID.\");\n";
+        "dimension.\");\n";
     out << "}\n";
 }
 

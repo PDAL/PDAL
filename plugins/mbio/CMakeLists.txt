@@ -6,8 +6,9 @@ find_package(MBSYSTEM)
 if (MBSYSTEM_FOUND)
     PDAL_ADD_PLUGIN(reader_libname reader mbio
         FILES
-            io/MBSystemReader.cpp
-            io/mbutil.cpp
+            io/MbReader.cpp
+            io/MbFormat.cpp
+            io/MbError.cpp
         LINK_WITH ${MBSYSTEM_LIBRARY})
     target_include_directories(${reader_libname} PRIVATE
         ${PDAL_IO_DIR}

@@ -187,7 +187,10 @@ inline std::istream& operator>>(std::istream& in, LogLevel& level)
         sval = Utils::tolower(sval);
         for (size_t i = 0; i < logNames.size(); ++i)
             if (logNames[i] == sval)
+            {
                 level = (LogLevel)i;
+                break;
+            }
     }
     if (level == LogLevel::None)
         in.setstate(std::ios_base::failbit);

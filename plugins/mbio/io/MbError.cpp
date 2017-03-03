@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Howard Butler (howard@hobu.co)
+* Copyright (c) 2017, Howard Butler (hobu@hob.co)
 *
 * All rights reserved.
 *
@@ -32,65 +32,76 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/util/Utils.hpp>
 
-#include <pdal/Reader.hpp>
-#include <pdal/util/Bounds.hpp>
-#include <pdal/plugin.hpp>
+#include "MbFormat.hpp"
 
-#include "mbutil.hpp"
-
-
-extern "C" int32_t MBSystemReader_ExitFunc();
-extern "C" PF_ExitFunc MBSystemReader_InitPlugin();
-
+typedef std::pair<int, std::string> MbError;
 
 namespace pdal
 {
 
-
-// The MrSIDReader wraps LT's PointSource abstraction
-//
-class PDAL_DLL MBSystemReader : public pdal::Reader
+namespace MbError
 {
 
-public:
-    virtual ~MBSystemReader(){};
-    MBSystemReader();
-    MBSystemReader& operator=(const MBSystemReader&) = delete;
-    MBSystemReader(const MBSystemReader&) = delete;
+namespace
+{
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-    point_count_t getNumPoints() const
-        {
-            return 0;
-        }
-
-protected:
-    virtual void addDimensions(PointLayoutPtr layout);
-
-private:
-    PointLayoutPtr m_layout;
-
-    point_count_t m_index;
-
-    virtual void initialize();
-    virtual QuickInfo inspect();
-    virtual void addArgs(ProgramArgs& args);
-    virtual void ready(PointTableRef table)
-        { ready(table, m_metadata); }
-    virtual void ready(PointTableRef table, MetadataNode& m);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual void done(PointTableRef table);
-    virtual bool eof()
-        { return m_index >= getNumPoints(); }
-    bool m_initialized;
-
-    struct mb_io_struct* mb_io;
+std::map<int, std::string> errors =
+{
+    { 0, "No error." },
+    { 1, "Memory allocation failure." },
+    { 2, "Can't open file." },
+    { 3, "Bad format." },
+    { 4, "End of file detected." },
+    { 5, "Write failure." },
+    { 6, "No beams in bounds." },
+    { 7, "No beams in time window." },
+    { 8, "Bad descriptor." },
+    { 9, "Bad usage." },
+    { 10, "No pings binned." },
+    { 11, "Bad record type (kind)." },
+    { 12, "Bad parameter." },
+    { 13, "Bad buffer ID." },
+    { 14, "Bad system." },
+    { 15, "Bad data." },
+    { 16, "Missing data." },
+    { -1, "Time gap." },
+    { -2, "Position out of bounds." },
+    { -3, "Time out of bounds." },
+    { -4, "Speed too small." },
+    { -5, "Comment." },
+    { -6, "Sub-bottom." },
+    { -7, "Water column." },
+    { -8, "Other." },
+    { -9, "Unintelligible." },
+    { -10, "Ignore." },
+    { -11, "No data requested." },
+    { -12, "Buffer full." },
+    { -13, "No data loaded." },
+    { -14, "Buffer empty." },
+    { -15, "No data dumped." },
+    { -16, "No more data." },
+    { -17, "Data not inserted." },
+    { -18, "Bad projection." },
+    { -19, "Missing projections." },
+    { -20, "Missing Navattitude." },
+    { -21, "Not enough data." },
+    { -22, "File not found." },
+    { -23, "File locked." },
+    { -24, "Initialization failure." },
 };
 
+} // unnamed namespace
 
-} // namespaces
+std::string text(int errorCode)
+{
+    auto ei = errors.find(errorCode);
+    if (ei != errors.end())
+        return ei->second;
+    return "";
+}
+
+} // namespace MbError
+
+} // namespace pdal
