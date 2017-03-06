@@ -201,7 +201,7 @@ inline std::ostream& operator<<(std::ostream& out, const LogLevel& level)
     if ((size_t)level < logNames.size())
     {
         sval = logNames[(size_t)level];
-        sval[0] = toupper(sval[0]);   // Make "Debug", "Error", etc.
+        sval[0] = (char)toupper(sval[0]);   // Make "Debug", "Error", etc.
     }
     out << sval;
     return out;

@@ -60,6 +60,7 @@ SOFTWARE.
 
 #include <algorithm>
 #include <cstdlib>
+#include <sstream>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -77,9 +78,26 @@ namespace
     const std::size_t concurrentHttpReqs(32);
     const std::size_t httpRetryCount(8);
 #endif
+
+    Json::Value getConfig()
+    {
+        Json::Value config;
+        std::string path("~/.arbiter/config.json");
+
+        if      (auto p = util::env("ARBITER_CONFIG_FILE")) path = *p;
+        else if (auto p = util::env("ARBITER_CONFIG_PATH")) path = *p;
+
+        if (auto data = drivers::Fs().tryGet(path))
+        {
+            std::istringstream ss(*data);
+            ss >> config;
+        }
+
+        return config;
+    }
 }
 
-Arbiter::Arbiter() : Arbiter(Json::Value()) { }
+Arbiter::Arbiter() : Arbiter(getConfig()) { }
 
 Arbiter::Arbiter(const Json::Value& json)
     : m_drivers()
@@ -1385,10 +1403,10 @@ Response Http::internalPost(
 #include <arbiter/arbiter.hpp>
 #include <arbiter/drivers/fs.hpp>
 #include <arbiter/third/xml/xml.hpp>
+#include <arbiter/util/ini.hpp>
 #include <arbiter/util/md5.hpp>
 #include <arbiter/util/sha256.hpp>
 #include <arbiter/util/transforms.hpp>
-#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -1402,10 +1420,7 @@ namespace arbiter
 namespace
 {
 #ifdef ARBITER_CURL
-    http::Pool pool;
-    drivers::Http httpDriver(pool);
-
-    // Re-fetch credentials when there are less then 4 minutes remaining.  New
+    // Re-fetch credentials when there are less than 4 minutes remaining.  New
     // ones are guaranteed by AWS to be available within 5 minutes remaining.
     constexpr int64_t reauthSeconds(60 * 4);
 #endif
@@ -1415,13 +1430,6 @@ namespace
     const std::string credIp("http://169.254.169.254/");
     const std::string credBase(
             credIp + "latest/meta-data/iam/security-credentials/");
-
-    std::string getBaseUrl(const std::string& region)
-    {
-        // https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-        if (region == "us-east-1") return "s3.amazonaws.com/";
-        else return "s3-" + region + ".amazonaws.com/";
-    }
 
     std::string line(const std::string& data) { return data + "\n"; }
     const std::vector<char> empty;
@@ -1467,71 +1475,142 @@ namespace
         if (s.size() && std::isspace(s.back())) s.pop_back();
         return s;
     }
-
-    std::vector<std::string> condense(const std::vector<std::string>& in)
-    {
-        return std::accumulate(
-                in.begin(),
-                in.end(),
-                std::vector<std::string>(),
-                [](const std::vector<std::string>& base, const std::string& in)
-                {
-                    auto out(base);
-
-                    std::string current(in);
-                    current.erase(
-                            std::remove_if(
-                                current.begin(),
-                                current.end(),
-                                [](char c) { return std::isspace(c); }),
-                            current.end());
-
-                    out.push_back(current);
-                    return out;
-                });
-    }
-
-    std::vector<std::string> split(const std::string& in, char delimiter = '\n')
-    {
-        std::size_t index(0);
-        std::size_t pos(0);
-        std::vector<std::string> lines;
-
-        do
-        {
-            index = in.find(delimiter, pos);
-            std::string line(in.substr(pos, index - pos));
-
-            line.erase(
-                    std::remove_if(line.begin(), line.end(), ::isspace),
-                    line.end());
-
-            lines.push_back(line);
-
-            pos = index + 1;
-        }
-        while (index != std::string::npos);
-
-        return lines;
-    }
 }
 
 namespace drivers
 {
 
 using namespace http;
+using namespace util;
 
 S3::S3(
         Pool& pool,
-        const S3::Auth& auth,
+        std::string profile,
+        std::unique_ptr<Auth> auth,
+        std::unique_ptr<Config> config)
+    : Http(pool)
+    , m_profile(profile)
+    , m_auth(std::move(auth))
+    , m_config(std::move(config))
+{ }
+
+std::unique_ptr<S3> S3::create(Pool& pool, const Json::Value& json)
+{
+    const std::string profile(extractProfile(json));
+
+    auto auth(Auth::create(json, profile));
+    if (!auth) return std::unique_ptr<S3>();
+
+    auto config(Config::create(json, profile));
+    if (!config) return std::unique_ptr<S3>();
+
+    return makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
+}
+
+std::string S3::extractProfile(const Json::Value& json)
+{
+    if (auto p = util::env("AWS_PROFILE")) return *p;
+    else if (auto p = util::env("AWS_DEFAULT_PROFILE")) return *p;
+    else if (
+            !json.isNull() &&
+            json.isMember("profile") &&
+            json["profile"].asString().size())
+    {
+        return json["profile"].asString();
+    }
+    else return "default";
+}
+
+std::unique_ptr<S3::Auth> S3::Auth::create(
+        const Json::Value& json,
+        const std::string profile)
+{
+    // Try environment settings first.
+    {
+        auto access(util::env("AWS_ACCESS_KEY_ID"));
+        auto hidden(util::env("AWS_SECRET_ACCESS_KEY"));
+
+        if (access && hidden)
+        {
+            return makeUnique<Auth>(*access, *hidden);
+        }
+
+        access = util::env("AMAZON_ACCESS_KEY_ID");
+        hidden = util::env("AMAZON_SECRET_ACCESS_KEY");
+
+        if (access && hidden)
+        {
+            return makeUnique<Auth>(*access, *hidden);
+        }
+    }
+
+    // Try explicit JSON configuration next.
+    if (
+            !json.isNull() &&
+            json.isMember("access") &&
+            (json.isMember("secret") || json.isMember("hidden")))
+    {
+        return makeUnique<Auth>(
+                json["access"].asString(),
+                json.isMember("secret") ?
+                    json["secret"].asString() :
+                    json["hidden"].asString());
+    }
+
+    const std::string credPath(
+            util::env("AWS_CREDENTIAL_FILE") ?
+                *util::env("AWS_CREDENTIAL_FILE") : "~/.aws/credentials");
+
+    // Finally, try reading credentials file.
+    drivers::Fs fsDriver;
+    if (std::unique_ptr<std::string> c = fsDriver.tryGet(credPath))
+    {
+        const std::string accessKey("aws_access_key_id");
+        const std::string hiddenKey("aws_secret_access_key");
+        const ini::Contents creds(ini::parse(*c));
+        if (creds.count(profile))
+        {
+            const auto section(creds.at(profile));
+            if (section.count(accessKey) && section.count(hiddenKey))
+            {
+                const auto access(section.at(accessKey));
+                const auto hidden(section.at(hiddenKey));
+                return makeUnique<Auth>(access, hidden);
+            }
+        }
+    }
+
+#ifdef ARBITER_CURL
+    // Nothing found in the environment or on the filesystem.  However we may
+    // be running in an EC2 instance with an instance profile set up.
+    //
+    // By default we won't search for this since we don't really want to make
+    // an HTTP request on every Arbiter construction - but if we're allowed,
+    // see if we can request an instance profile configuration.
+    if (
+            json["allowInstanceProfile"].asBool() ||
+            env("AWS_ALLOW_INSTANCE_PROFILE"))
+    {
+        http::Pool pool;
+        drivers::Http httpDriver(pool);
+
+        if (const auto iamRole = httpDriver.tryGet(credBase))
+        {
+            return makeUnique<Auth>(*iamRole);
+        }
+    }
+#endif
+
+    return std::unique_ptr<Auth>();
+}
+
+S3::Config::Config(
         const std::string region,
+        const std::string baseUrl,
         const bool sse,
         const bool precheck)
-    : Http(pool)
-    , m_auth(new Auth(auth))
-    , m_region(region)
-    , m_baseUrl(getBaseUrl(region))
-    , m_baseHeaders()
+    : m_region(region)
+    , m_baseUrl(baseUrl)
     , m_precheck(precheck)
 {
     if (sse)
@@ -1542,139 +1621,156 @@ S3::S3(
     }
 }
 
-std::unique_ptr<S3> S3::create(Pool& pool, const Json::Value& json)
+std::unique_ptr<S3::Config> S3::Config::create(
+        const Json::Value& json,
+        const std::string profile)
 {
-    std::unique_ptr<S3> s3;
-
-    const std::string profile(extractProfile(json));
-    auto auth = S3::Auth::find(json, profile);
-    if (!auth) return s3;
-
+    const auto region(extractRegion(json, profile));
+    const auto baseUrl(extractBaseUrl(json, region));
     const bool sse(json["sse"].asBool());
     const bool precheck(json["precheck"].asBool());
+    return makeUnique<Config>(region, baseUrl, sse, precheck);
+}
 
-    // Try to get the region from the config file, or default to US standard.
-    std::string region("us-east-1");
-    bool regionFound(false);
-
+std::string S3::Config::extractRegion(
+        const Json::Value& json,
+        const std::string profile)
+{
     const std::string configPath(
             util::env("AWS_CONFIG_FILE") ?
                 *util::env("AWS_CONFIG_FILE") : "~/.aws/config");
 
     drivers::Fs fsDriver;
+
     if (auto p = util::env("AWS_REGION"))
     {
-        region = *p;
-        regionFound = true;
+        return *p;
     }
     else if (auto p = util::env("AWS_DEFAULT_REGION"))
     {
-        region = *p;
-        regionFound = true;
+        return *p;
     }
     else if (!json.isNull() && json.isMember("region"))
     {
-        region = json["region"].asString();
-        regionFound = true;
+        return json["region"].asString();
     }
-    else if (std::unique_ptr<std::string> config = fsDriver.tryGet(configPath))
+    else if (std::unique_ptr<std::string> c = fsDriver.tryGet(configPath))
     {
-        const std::vector<std::string> lines(condense(split(*config)));
-
-        if (lines.size() >= 3)
+        const ini::Contents settings(ini::parse(*c));
+        if (settings.count(profile))
         {
-            std::size_t i(0);
+            const auto section(settings.at(profile));
+            if (section.count("region")) return section.at("region");
+        }
+    }
 
-            const std::string profileFind("[" + profile + "]");
-            const std::string outputFind("output=");
-            const std::string regionFind("region=");
+    if (json["verbose"].asBool())
+    {
+        std::cout << "Region not found - defaulting to us-east-1" << std::endl;
+    }
 
-            while (i < lines.size() - 2 && !regionFound)
+    return "us-east-1";
+}
+
+std::string S3::Config::extractBaseUrl(
+        const Json::Value& json,
+        std::string region)
+{
+    if (json.isMember("endpoint") && json["endpoint"].asString().size())
+    {
+        const std::string path(json["endpoint"].asString());
+        return path.back() == '/' ? path : path + '/';
+    }
+
+    std::string endpointsPath("~/.aws/endpoints.json");
+
+    if (const auto e = util::env("AWS_ENDPOINTS_FILE"))
+    {
+        endpointsPath = *e;
+    }
+    else if (json.isMember("endpointsFile"))
+    {
+        endpointsPath = json["endpointsFile"].asString();
+    }
+
+    drivers::Fs fsDriver;
+    if (std::unique_ptr<std::string> e = fsDriver.tryGet(endpointsPath))
+    {
+        Json::Value ep;
+        std::istringstream ss(*e);
+        ss >> ep;
+
+        for (const auto& partition : ep["partitions"])
+        {
+            const auto& endpoints(partition["services"]["s3"]["endpoints"]);
+            const auto regions(endpoints.getMemberNames());
+            for (const auto& r : regions)
             {
-                if (lines[i].find(profileFind) != std::string::npos)
+                if (r == region && endpoints[region].isMember("hostname"))
                 {
-                    auto parse([&](
-                                const std::string& outputLine,
-                                const std::string& regionLine)
-                    {
-                        std::size_t outputPos(outputLine.find(outputFind));
-                        std::size_t regionPos(regionLine.find(regionFind));
-
-                        if (
-                                outputPos != std::string::npos &&
-                                regionPos != std::string::npos)
-                        {
-                            region = regionLine.substr(
-                                    regionPos + regionFind.size(),
-                                    regionLine.find(';'));
-
-                            return true;
-                        }
-
-                        return false;
-                    });
-
-                    const std::string& l1(lines[i + 1]);
-                    const std::string& l2(lines[i + 2]);
-
-                    regionFound = parse(l1, l2) || parse(l2, l1);
+                    return endpoints[region]["hostname"].asString() + '/';
                 }
-
-                ++i;
             }
         }
     }
 
-    if (!regionFound && json["verbose"].asBool())
-    {
-        std::cout <<
-            "Region not found in ~/.aws/config - using us-east-1" << std::endl;
-    }
-
-    s3.reset(new S3(pool, *auth, region, sse, precheck));
-
-    return s3;
+    // https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+    if (region == "us-east-1") return "s3.amazonaws.com/";
+    else return "s3-" + region + ".amazonaws.com/";
 }
 
-std::string S3::extractProfile(const Json::Value& json)
+S3::AuthFields S3::Auth::fields() const
 {
-    if (auto p = util::env("AWS_PROFILE"))
+#ifdef ARBITER_CURL
+    if (m_role)
     {
-        return *p;
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        const Time now;
+        if (!m_expiration || *m_expiration - now < reauthSeconds)
+        {
+            http::Pool pool;
+            drivers::Http httpDriver(pool);
+
+            std::istringstream ss(httpDriver.get(credBase + *m_role));
+            Json::Value creds;
+            ss >> creds;
+            m_access = creds["AccessKeyId"].asString();
+            m_hidden = creds["SecretAccessKey"].asString();
+            m_token = creds["Token"].asString();
+            m_expiration.reset(new Time(creds["Expiration"].asString()));
+
+            if (*m_expiration - now < reauthSeconds)
+            {
+                throw ArbiterError("Got invalid instance profile credentials");
+            }
+        }
+
+        // If we're using an IAM role, make sure to create this before
+        // releasing the lock.
+        return S3::AuthFields(m_access, m_hidden, m_token);
     }
-    else if (auto p = util::env("AWS_DEFAULT_PROFILE"))
-    {
-        return *p;
-    }
-    else if (
-            !json.isNull() &&
-            json.isMember("profile") &&
-            json["profile"].asString().size())
-    {
-        return json["profile"].asString();
-    }
-    else
-    {
-        return "default";
-    }
+#endif
+
+    return S3::AuthFields(m_access, m_hidden, m_token);
 }
 
 std::string S3::type() const
 {
-    if (!m_auth || m_auth->profile() == "default") return "s3";
-    else return m_auth->profile() + "@s3";
+    if (m_profile == "default") return "s3";
+    else return m_profile + "@s3";
 }
 
 std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
 {
     std::unique_ptr<std::size_t> size;
 
-    const Resource resource(m_baseUrl, rawPath);
+    const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
             "HEAD",
-            m_region,
+            m_config->region(),
             resource,
-            *m_auth,
+            m_auth->fields(),
             Query(),
             Headers(),
             empty);
@@ -1697,15 +1793,15 @@ bool S3::get(
         const Query query) const
 {
     std::unique_ptr<std::size_t> size(
-            m_precheck && !headers.count("Range") ?
+            m_config->precheck() && !headers.count("Range") ?
                 tryGetSize(rawPath) : nullptr);
 
-    const Resource resource(m_baseUrl, rawPath);
+    const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
             "GET",
-            m_region,
+            m_config->region(),
             resource,
-            *m_auth,
+            m_auth->fields(),
             query,
             headers,
             empty);
@@ -1736,16 +1832,16 @@ void S3::put(
         const Headers userHeaders,
         const Query query) const
 {
-    const Resource resource(m_baseUrl, rawPath);
+    const Resource resource(m_config->baseUrl(), rawPath);
 
-    Headers headers(m_baseHeaders);
+    Headers headers(m_config->baseHeaders());
     headers.insert(userHeaders.begin(), userHeaders.end());
 
     const ApiV4 apiV4(
             "PUT",
-            m_region,
+            m_config->region(),
             resource,
-            *m_auth,
+            m_auth->fields(),
             query,
             headers,
             data);
@@ -1768,7 +1864,7 @@ void S3::put(
 void S3::copy(const std::string src, const std::string dst) const
 {
     Headers headers;
-    const Resource resource(m_baseUrl, src);
+    const Resource resource(m_config->baseUrl(), src);
     headers["x-amz-copy-source"] = resource.bucket() + '/' + resource.object();
     put(dst, std::vector<char>(), headers, Query());
 }
@@ -1782,7 +1878,7 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     if (recursive) path.pop_back();
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketGET.html
-    const Resource resource(m_baseUrl, path);
+    const Resource resource(m_config->baseUrl(), path);
     const std::string& bucket(resource.bucket());
     const std::string& object(resource.object());
 
@@ -1877,11 +1973,11 @@ S3::ApiV4::ApiV4(
         const std::string verb,
         const std::string& region,
         const Resource& resource,
-        const S3::Auth& auth,
+        const S3::AuthFields authFields,
         const Query& query,
         const Headers& headers,
         const std::vector<char>& data)
-    : m_auth(auth.getStatic())
+    : m_authFields(authFields)
     , m_region(region)
     , m_time()
     , m_headers(headers)
@@ -1890,9 +1986,9 @@ S3::ApiV4::ApiV4(
 {
     m_headers["Host"] = resource.host();
     m_headers["X-Amz-Date"] = m_time.str(Time::iso8601NoSeparators);
-    if (m_auth.token().size())
+    if (m_authFields.token().size())
     {
-        m_headers["X-Amz-Security-Token"] = m_auth.token();
+        m_headers["X-Amz-Security-Token"] = m_authFields.token();
     }
     m_headers["X-Amz-Content-Sha256"] =
             crypto::encodeAsHex(crypto::sha256(data));
@@ -1996,7 +2092,7 @@ std::string S3::ApiV4::calculateSignature(
 {
     const std::string kDate(
             crypto::hmacSha256(
-                "AWS4" + m_auth.hidden(),
+                "AWS4" + m_authFields.hidden(),
                 m_time.str(Time::dateNoSeparators)));
 
     const std::string kRegion(crypto::hmacSha256(kDate, m_region));
@@ -2013,7 +2109,7 @@ std::string S3::ApiV4::getAuthHeader(
 {
     return
         std::string("AWS4-HMAC-SHA256 ") +
-        "Credential=" + m_auth.access() + '/' +
+        "Credential=" + m_authFields.access() + '/' +
             m_time.str(Time::dateNoSeparators) + "/" +
             m_region + "/s3/aws4_request, " +
         "SignedHeaders=" + signedHeadersString + ", " +
@@ -2030,11 +2126,7 @@ S3::Resource::Resource(std::string baseUrl, std::string fullPath)
     const std::size_t split(fullPath.find("/"));
 
     m_bucket = fullPath.substr(0, split);
-
-    if (split != std::string::npos)
-    {
-        m_object = fullPath.substr(split + 1);
-    }
+    if (split != std::string::npos) m_object = fullPath.substr(split + 1);
 
     m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
 }
@@ -2055,14 +2147,8 @@ std::string S3::Resource::url() const
 std::string S3::Resource::object() const
 {
     // We can't use virtual-host style paths if the bucket contains dots.
-    if (m_virtualHosted)
-    {
-        return m_object;
-    }
-    else
-    {
-        return m_bucket + "/" + m_object;
-    }
+    if (m_virtualHosted) return m_object;
+    else return m_bucket + "/" + m_object;
 }
 
 std::string S3::Resource::host() const
@@ -2076,181 +2162,6 @@ std::string S3::Resource::host() const
     {
         return m_baseUrl.substr(0, m_baseUrl.size() - 1);
     }
-}
-
-std::unique_ptr<S3::Auth> S3::Auth::find(
-        const Json::Value& json,
-        const std::string profile)
-{
-    std::unique_ptr<Auth> auth;
-
-    auto access(util::env("AWS_ACCESS_KEY_ID"));
-    auto hidden(util::env("AWS_SECRET_ACCESS_KEY"));
-
-    if (access && hidden)
-    {
-        auth.reset(new S3::Auth(profile, *access, *hidden));
-        return auth;
-    }
-
-    access = util::env("AMAZON_ACCESS_KEY_ID");
-    hidden = util::env("AMAZON_SECRET_ACCESS_KEY");
-
-    if (access && hidden)
-    {
-        auth.reset(new S3::Auth(profile, *access, *hidden));
-        return auth;
-    }
-
-    if (
-            !json.isNull() &&
-            json.isMember("access") &&
-            (json.isMember("secret") || json.isMember("hidden")))
-    {
-        auth.reset(
-                new Auth(
-                    profile,
-                    json["access"].asString(),
-                    json.isMember("secret") ?
-                        json["secret"].asString() :
-                        json["hidden"].asString()));
-        return auth;
-    }
-
-    const std::string credPath(
-            util::env("AWS_CREDENTIAL_FILE") ?
-                *util::env("AWS_CREDENTIAL_FILE") : "~/.aws/credentials");
-
-    // First, try reading credentials file.
-    drivers::Fs fsDriver;
-    if (std::unique_ptr<std::string> cred = fsDriver.tryGet(credPath))
-    {
-        const std::vector<std::string> lines(condense(split(*cred)));
-
-        if (lines.size() >= 3)
-        {
-            std::size_t i(0);
-
-            const std::string profileFind("[" + profile + "]");
-            const std::string accessFind("aws_access_key_id=");
-            const std::string hiddenFind("aws_secret_access_key=");
-
-            while (i < lines.size() - 2 && !auth)
-            {
-                if (lines[i].find(profileFind) != std::string::npos)
-                {
-                    const std::string& accessLine(lines[i + 1]);
-                    const std::string& hiddenLine(lines[i + 2]);
-
-                    std::size_t accessPos(accessLine.find(accessFind));
-                    std::size_t hiddenPos(hiddenLine.find(hiddenFind));
-
-                    if (
-                            accessPos != std::string::npos &&
-                            hiddenPos != std::string::npos)
-                    {
-                        const std::string access(
-                                accessLine.substr(
-                                    accessPos + accessFind.size(),
-                                    accessLine.find(';')));
-
-                        const std::string hidden(
-                                hiddenLine.substr(
-                                    hiddenPos + hiddenFind.size(),
-                                    hiddenLine.find(';')));
-
-                        auth.reset(new S3::Auth(profile, access, hidden));
-                        return auth;
-                    }
-                }
-
-                ++i;
-            }
-        }
-    }
-
-#ifdef ARBITER_CURL
-    if (json["allowInstanceProfile"].asBool())
-    {
-        if (const auto iamRole = httpDriver.tryGet(credBase))
-        {
-            auth.reset(new S3::Auth(*iamRole));
-        }
-    }
-#endif
-
-    return auth;
-}
-
-S3::Auth::Auth(
-        const std::string profile,
-        const std::string access,
-        const std::string hidden,
-        const std::string token)
-    : m_profile(profile)
-    , m_access(access)
-    , m_hidden(hidden)
-    , m_token(token)
-{ }
-
-S3::Auth::Auth(const std::string iamRole)
-    : m_iamRole(iamRole)
-{ }
-
-S3::Auth::Auth(const Auth& other)
-    : m_profile(other.m_profile)
-    , m_access(other.m_access)
-    , m_hidden(other.m_hidden)
-    , m_token(other.m_token)
-    , m_iamRole(other.m_iamRole)
-    , m_expiration(other.m_expiration ? new Time(*other.m_expiration) : nullptr)
-{ }
-
-std::string S3::Auth::access() const
-{
-    if (m_expiration) throw ArbiterError("Must use S3::Auth::getStatic");
-    return m_access;
-}
-
-std::string S3::Auth::hidden() const
-{
-    if (m_expiration) throw ArbiterError("Must use S3::Auth::getStatic");
-    return m_hidden;
-}
-
-std::string S3::Auth::token() const
-{
-    if (m_expiration) throw ArbiterError("Must use S3::Auth::getStatic");
-    return m_token;
-}
-
-S3::Auth S3::Auth::getStatic() const
-{
-#ifdef ARBITER_CURL
-    if (m_iamRole.size())
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
-        const Time now;
-        if (!m_expiration || *m_expiration - now < reauthSeconds)
-        {
-            std::istringstream ss(httpDriver.get(credBase + m_iamRole));
-            Json::Value creds;
-            ss >> creds;
-            m_access = creds["AccessKeyId"].asString();
-            m_hidden = creds["SecretAccessKey"].asString();
-            m_token = creds["Token"].asString();
-            m_expiration.reset(new Time(creds["Expiration"].asString()));
-
-            if (*m_expiration - now < reauthSeconds)
-            {
-                throw ArbiterError("Got invalid instance profile credentials");
-            }
-        }
-    }
-#endif
-
-    return S3::Auth(m_profile, m_access, m_hidden, m_token);
 }
 
 } // namespace drivers
@@ -2644,6 +2555,7 @@ std::vector<std::string> Dropbox::glob(std::string rawPath, bool verbose) const
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
 #include <arbiter/util/http.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CURL
@@ -2735,21 +2647,46 @@ namespace
         return size * num;
     }
 
-    const bool followRedirect(true);
 #else
     const std::string fail("Arbiter was built without curl");
 #endif // ARBITER_CURL
 } // unnamed namespace
 
-Curl::Curl(bool verbose, std::size_t timeout)
-    : m_curl(nullptr)
-    , m_headers(nullptr)
-    , m_verbose(verbose)
-    , m_timeout(timeout)
-    , m_data()
+Curl::Curl(const Json::Value& json)
 {
 #ifdef ARBITER_CURL
+    using namespace util;
+
     m_curl = curl_easy_init();
+
+    if (!json.isNull())
+    {
+        m_verbose = json["verbose"].asBool();
+
+        const auto h(json["http"]);
+
+        if (!h.isNull())
+        {
+            m_timeout = h["timeout"].asUInt64();
+
+            const std::string frKey("followRedirect");
+            m_followRedirect = h.isMember(frKey) && h[frKey].asBool();
+
+            if (auto ca = util::env("CURL_CA_PATH"))
+            {
+                m_caPath = makeUnique<std::string>(*ca);
+            }
+            else if (auto ca = util::env("ARBITER_CA_PATH"))
+            {
+                m_caPath = makeUnique<std::string>(*ca);
+            }
+            else if (h.isMember("caPath"))
+            {
+                m_caPath = makeUnique<std::string>(h["caPath"].asString());
+            }
+        }
+    }
+
 #endif
 }
 
@@ -2791,7 +2728,8 @@ void Curl::init(
     curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
 
     // Configuration options.
-    if (followRedirect) curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+    if (m_followRedirect) curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+    if (m_caPath) curl_easy_setopt(m_curl, CURLOPT_CAPATH, m_caPath->c_str());
 
     // Insert supplied headers.
     for (const auto& h : headers)
@@ -3021,13 +2959,6 @@ namespace arbiter
 namespace http
 {
 
-namespace
-{
-#ifdef ARBITER_CURL
-    const std::size_t defaultHttpTimeout(10);
-#endif
-}
-
 std::string sanitize(const std::string path, const std::string excStr)
 {
     static const std::set<char> unreserved = { '-', '.', '_', '~' };
@@ -3159,20 +3090,10 @@ Pool::Pool(
 #ifdef ARBITER_CURL
     curl_global_init(CURL_GLOBAL_ALL);
 
-    const bool verbose(
-            !json.isNull() && json.isMember("arbiter") ?
-                json["arbiter"]["verbose"].asBool() : false);
-
-    const std::size_t timeout(
-            !json.isNull() &&
-            json.isMember("http") &&
-            json["http"]["timeout"].asUInt64() ?
-                json["http"]["timeout"].asUInt64() : defaultHttpTimeout);
-
     for (std::size_t i(0); i < concurrent; ++i)
     {
         m_available[i] = i;
-        m_curls[i].reset(new Curl(verbose, timeout));
+        m_curls[i].reset(new Curl(json));
     }
 #endif
 }
@@ -3216,6 +3137,81 @@ void Pool::release(const std::size_t id)
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/http.cpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/ini.cpp
+// //////////////////////////////////////////////////////////////////////
+
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/ini.hpp>
+#endif
+
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/util.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+namespace ini
+{
+
+Contents parse(const std::string& s)
+{
+    Contents contents;
+
+    Section section;
+
+    const std::vector<std::string> lines;
+    for (std::string line : util::split(s))
+    {
+        line = util::stripWhitespace(line);
+        const std::size_t semiPos(line.find_first_of(';'));
+        const std::size_t hashPos(line.find_first_of('#'));
+        line = line.substr(0, std::min(semiPos, hashPos));
+
+        if (line.size())
+        {
+            if (line.front() == '[' && line.back() == ']')
+            {
+                section = line.substr(1, line.size() - 2);
+            }
+            else
+            {
+                const std::size_t equals(line.find_first_of('='));
+                if (equals != std::string::npos)
+                {
+                    const Key key(line.substr(0, equals));
+                    const Val val(line.substr(equals + 1));
+                    contents[section][key] = val;
+                }
+            }
+        }
+    }
+
+    return contents;
+}
+
+} // namespace ini
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/ini.cpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -3820,7 +3816,9 @@ std::string encodeAsHex(const std::string& input)
 #include <arbiter/util/time.hpp>
 #endif
 
+#include <ctime>
 #include <iomanip>
+#include <iostream>
 #include <mutex>
 #include <sstream>
 
@@ -3879,22 +3877,41 @@ Time::Time(const std::string& s, const std::string& format)
     static const int64_t utcOffset(utcOffsetSeconds());
 
     auto tm(getTm());
+#ifndef ARBITER_WINDOWS
+    // We'd prefer to use get_time, but it has poor compiler support.
+    if (!strptime(s.c_str(), format.c_str(), &tm))
+    {
+        throw ArbiterError("Failed to parse " + s + " as time: " + format);
+    }
+#else
     std::istringstream ss(s);
     ss >> std::get_time(&tm, format.c_str());
     if (ss.fail())
     {
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
+#endif
     tm.tm_sec -= utcOffset;
     m_time = std::mktime(&tm);
 }
 
 std::string Time::str(const std::string& format) const
 {
-    std::ostringstream ss;
     std::lock_guard<std::mutex> lock(mutex);
+#ifndef ARBITER_WINDOWS
+    // We'd prefer to use put_time, but it has poor compiler support.
+    // We're already locked here for gmtime, so might as well make this static.
+    static std::vector<char> s(256, 0);
+
+    const std::size_t size =
+        strftime(s.data(), s.size(), format.c_str(), std::gmtime(&m_time));
+
+    return std::string(s.data(), s.data() + size);
+#else
+    std::ostringstream ss;
     ss << std::put_time(std::gmtime(&m_time), format.c_str());
     return ss.str();
+#endif
 }
 
 int64_t Time::operator-(const Time& other) const
@@ -3927,6 +3944,8 @@ int64_t Time::operator-(const Time& other) const
 
 #include <arbiter/arbiter.hpp>
 #endif
+
+#include <algorithm>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -4015,6 +4034,42 @@ std::unique_ptr<std::string> env(const std::string& var)
 #endif
 
     return result;
+}
+
+std::vector<std::string> split(const std::string& in, const char delimiter)
+{
+    std::size_t index(0);
+    std::size_t pos(0);
+    std::vector<std::string> lines;
+
+    do
+    {
+        index = in.find(delimiter, pos);
+        std::string line(in.substr(pos, index - pos));
+
+        line.erase(
+                std::remove_if(line.begin(), line.end(), ::isspace),
+                line.end());
+
+        lines.push_back(line);
+
+        pos = index + 1;
+    }
+    while (index != std::string::npos);
+
+    return lines;
+}
+
+std::string stripWhitespace(const std::string& in)
+{
+    std::string out(in);
+    out.erase(
+            std::remove_if(
+                out.begin(),
+                out.end(),
+                [](char c) { return std::isspace(c); }),
+            out.end());
+    return out;
 }
 
 } // namespace util

@@ -52,7 +52,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    TextReader() : m_separator(' '), m_istream(NULL)
+    TextReader() : m_istream(NULL)
     {}
 
 private:
@@ -63,6 +63,12 @@ private:
       \param table  Point table being initialized.
     */
     virtual void initialize(PointTableRef table);
+
+    /**
+      Add arguments to those accepted at the command line.
+      \param args  Argument list to modify.
+    */
+    virtual void addArgs(ProgramArgs& args);
 
     /**
       Add dimensions found in the header line to the layout.

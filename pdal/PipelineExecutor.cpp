@@ -117,6 +117,9 @@ void PipelineExecutor::setLogStream(std::ostream& strm)
 
 void PipelineExecutor::setLogLevel(int level)
 {
+    if (level < 0 || level > 8)
+        throw pdal_error("log level must be between 0 and 8!");
+
     m_logLevel = static_cast<pdal::LogLevel>(level);
     setLogStream(m_logStream);
 }

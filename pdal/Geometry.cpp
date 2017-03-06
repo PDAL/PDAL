@@ -337,7 +337,7 @@ std::istream& operator>>(std::istream& istr, Geometry& p)
     {
         p.update(oss.str());
     }
-    catch (pdal_error& err)
+    catch (pdal_error& )
     {
         istr.setstate(std::ios::failbit);
     }
