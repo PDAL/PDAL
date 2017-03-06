@@ -37,12 +37,23 @@ ENDIF()
 
 
 FIND_PATH(LASZIP_INCLUDE_DIR
-  laszip/laszip.hpp
+  laszip.hpp
   PATHS
-  /usr/include
-  /usr/local/include
-  /tmp/lasjunk/include
-  ${OSGEO4W_ROOT_DIR}/include)
+  /usr/include/laszip
+  /usr/local/include/laszip
+  ${OSGEO4W_ROOT_DIR}/include/laszip)
+
+if (NOT LASZIP_INCLUDE_DIR)
+    FIND_PATH(LASZIP_INCLUDE_DIR
+      laszip/laszip.hpp
+      PATHS
+      /usr/include
+      /usr/local/include
+      ${OSGEO4W_ROOT_DIR}/include)
+    if (LASZIP_INCLUDE_DIR)
+        set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_DIR}/laszip)
+    endif()
+endif()
 
 SET(LASZIP_NAMES ${OSGEO4W_IMPORT_LIBRARY} laszip)
 
@@ -57,7 +68,8 @@ FIND_LIBRARY(LASZIP_LIBRARY
 IF(LASZIP_INCLUDE_DIR)
   SET(LASZIP_VERSION 0)
 
-  SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip/laszip.hpp")
+  message(STATUS "*** ${LASZIP_INCLUDE_DIR} ***")
+  SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip.hpp")
   FILE(READ ${LASZIP_VERSION_H} LASZIP_VERSION_H_CONTENTS)
 
   IF (DEFINED LASZIP_VERSION_H_CONTENTS)
