@@ -65,6 +65,7 @@ std::string generateTag(Stage *stage, PipelineWriter::TagMap& tags)
             if (!tagExists(tag))
                 break;
         }
+        tag = Utils::replaceAll(tag, ".", "_");
     }
     return tag;
 }
