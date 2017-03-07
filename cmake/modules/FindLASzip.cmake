@@ -44,12 +44,12 @@ FIND_PATH(LASZIP_INCLUDE_DIR
   ${OSGEO4W_ROOT_DIR}/include)
 
 if (LASZIP_INCLUDE_DIR)
-    message(STATUS "*** Found laszip in base dir! ***");
+    message(STATUS "*** Found laszip in base dir: ${LASZIP_INCLUDE_DIR}  ***")
 endif()
 
 
 if (NOT LASZIP_INCLUDE_DIR)
-    message(STATUS "*** looking for laszip in subdir! ***");
+    message(STATUS "*** looking for laszip in subdir! ***")
     FIND_PATH(LASZIP_INCLUDE_DIR
       laszip/laszip.hpp
       PATHS
@@ -57,7 +57,7 @@ if (NOT LASZIP_INCLUDE_DIR)
       /usr/local/include
       ${OSGEO4W_ROOT_DIR}/include)
     if (LASZIP_INCLUDE_DIR)
-        message(STATUS "*** Found subdir laszip! ***");
+        message(STATUS "*** Found subdir laszip: ${LASZIP_INCLUDE_DIR} ***")
         set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_DIR}/laszip)
     endif()
 endif()
