@@ -39,9 +39,9 @@ ENDIF()
 FIND_PATH(LASZIP_INCLUDE_DIR
   laszip.hpp
   PATHS
-  /usr/include/laszip
-  /usr/local/include/laszip
-  ${OSGEO4W_ROOT_DIR}/include/laszip)
+  /usr/include
+  /usr/local/include
+  ${OSGEO4W_ROOT_DIR}/include)
 
 if (NOT LASZIP_INCLUDE_DIR)
     FIND_PATH(LASZIP_INCLUDE_DIR
