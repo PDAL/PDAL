@@ -35,7 +35,7 @@ IF(WIN32)
   ENDIF()
 ENDIF()
 
-
+unset(LASZIP_INCLUDE_DIR)
 FIND_PATH(LASZIP_INCLUDE_DIR
   laszip.hpp
   PATHS
@@ -45,6 +45,9 @@ FIND_PATH(LASZIP_INCLUDE_DIR
 
 if (LASZIP_INCLUDE_DIR)
     message(STATUS "*** Found laszip in base dir: ${LASZIP_INCLUDE_DIR}  ***")
+    if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip.hpp)
+        message(STATUS "Found laszip.hpp")
+    endif()
 endif()
 
 
@@ -76,6 +79,11 @@ IF(LASZIP_INCLUDE_DIR)
   SET(LASZIP_VERSION 0)
 
   message(STATUS "*** ${LASZIP_INCLUDE_DIR} ***")
+    if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip.hpp)
+        message(STATUS "Found laszip.hpp")
+    else()
+        message(STATUS "laszip.hpp NOT found")
+    endif()
   SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip.hpp")
   FILE(READ ${LASZIP_VERSION_H} LASZIP_VERSION_H_CONTENTS)
 
