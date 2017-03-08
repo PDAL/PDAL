@@ -4,7 +4,7 @@ filters.crop
 ============
 
 The crop filter removes points that fall outside or inside a cropping bounding
-box (2D), polygon, or point+radius.  If more than one bounding region is
+box (2D), polygon, or point+distance.  If more than one bounding region is
 specified, the filter will pass all input points through each bounding region,
 creating an output point set for each input crop region.
 
@@ -42,7 +42,7 @@ outside
   Invert the cropping logic and only take points **outside** the cropping bounds or polygon. [Default: **false**]
 
 point
-  An array of WKT or GeoJSON 2D or 3D points. Requires ``radius``.
+  An array of WKT or GeoJSON 2D or 3D points. Requires ``distance``.
 
-radius
+distance
   Distance in units of common X, Y, and Z :ref:`dimensions` to crop circle or sphere in combination with ``point``.

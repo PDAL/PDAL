@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 25e0972f56f075edd87ed9372075c994f01e4c9e
+// Git SHA: 353e2ca0d38a7157e3eebce40d4a60ef2a94d6dc
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -148,12 +148,24 @@ private:
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <string>
+#include <vector>
 
 #ifndef ARBITER_IS_AMALGAMATION
 
 #include <arbiter/util/types.hpp>
 
+#ifndef ARBITER_EXTERNAL_JSON
+#include <arbiter/third/json/json.hpp>
+#endif
+
+#endif
+
+
+
+#ifdef ARBITER_EXTERNAL_JSON
+#include <json/json.h>
 #endif
 
 class curl_slist;
@@ -175,6 +187,8 @@ class Pool;
 class Curl
 {
     friend class Pool;
+
+    static constexpr std::size_t defaultHttpTimeout = 5;
 
 public:
     ~Curl();
@@ -200,7 +214,7 @@ public:
             Query query);
 
 private:
-    Curl(bool verbose, std::size_t timeout);
+    Curl(const Json::Value& json = Json::Value());
 
     void init(std::string path, const Headers& headers, const Query& query);
 
@@ -210,10 +224,12 @@ private:
     Curl(const Curl&);
     Curl& operator=(const Curl&);
 
-    void* m_curl;
-    curl_slist* m_headers;
-    const bool m_verbose;
-    const long m_timeout;
+    void* m_curl = nullptr;
+    curl_slist* m_headers = nullptr;
+    bool m_verbose = false;
+    bool m_followRedirect = true;
+    long m_timeout = defaultHttpTimeout;
+    std::unique_ptr<std::string> m_caPath;
 
     std::vector<char> m_data;
 };
@@ -260,7 +276,10 @@ private:
 #ifndef ARBITER_EXTERNAL_JSON
 #include <arbiter/third/json/json.hpp>
 #endif
+
 #endif
+
+
 
 #ifdef ARBITER_EXTERNAL_JSON
 #include <json/json.h>
@@ -366,6 +385,51 @@ private:
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/http.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/ini.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <map>
+#include <string>
+#include <vector>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+namespace ini
+{
+
+using Section = std::string;
+using Key = std::string;
+using Val = std::string;
+using Contents = std::map<Section, std::map<Key, Val>>;
+
+Contents parse(const std::string& s);
+
+} // namespace ini
+
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/ini.hpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -3754,6 +3818,8 @@ std::string encodeAsHex(const std::string& data);
 
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -3897,6 +3963,30 @@ namespace util
      */
     std::unique_ptr<std::string> env(const std::string& var);
 
+    /** @brief Split a string on a token. */
+    std::vector<std::string> split(const std::string& s, char delimiter = '\n');
+
+    /** @brief Remove whitespace. */
+    std::string stripWhitespace(const std::string& s);
+
+    template<typename T, typename... Args>
+    std::unique_ptr<T> makeUnique(Args&&... args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+
+    template<typename T>
+    std::unique_ptr<T> clone(const T& t)
+    {
+        return makeUnique<T>(t);
+    }
+
+    template<typename T>
+    std::unique_ptr<T> maybeClone(const T* t)
+    {
+        if (t) return makeUnique<T>(*t);
+        else return std::unique_ptr<T>();
+    }
 } // namespace util
 
 } // namespace arbiter
@@ -3928,6 +4018,7 @@ namespace util
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/time.hpp>
+#include <arbiter/util/util.hpp>
 #include <arbiter/drivers/http.hpp>
 #endif
 
@@ -3945,30 +4036,30 @@ namespace drivers
 /** @brief Amazon %S3 driver. */
 class S3 : public Http
 {
-public:
     class Auth;
+    class AuthFields;
+    class Config;
 
+public:
     S3(
             http::Pool& pool,
-            const Auth& auth,
-            std::string region = "us-east-1",
-            bool sse = false,
-            bool precheck = false);
+            std::string profile,
+            std::unique_ptr<Auth> auth,
+            std::unique_ptr<Config> config);
 
-    /** Try to construct an S3 Driver.  Searches @p json primarily for the keys
-     * `access` and `hidden`/`secret` to construct an S3::Auth.  If not found,
-     * common filesystem locations and then the environment will be searched
-     * (see S3::Auth::find).
-     *
-     * Server-side encryption may be enabled by setting key `sse` to `true` in
-     * @p json.
+    /** Try to construct an S3 driver.  The configuration/credential discovery
+     * follows, in order:
+     *      - Environment settings.
+     *      - Arbiter JSON configuration.
+     *      - Well-known files or their environment overrides, like
+     *          `~/.aws/credentials` or the file at AWS_CREDENTIAL_FILE.
+     *      - EC2 instance profile.
      */
     static std::unique_ptr<S3> create(
             http::Pool& pool,
             const Json::Value& json);
 
-    static std::string extractProfile(const Json::Value& json);
-
+    // Overrides.
     virtual std::string type() const override;
 
     virtual std::unique_ptr<std::size_t> tryGetSize(
@@ -3984,6 +4075,12 @@ public:
     virtual void copy(std::string src, std::string dst) const override;
 
 private:
+    static std::string extractProfile(const Json::Value& json);
+
+    static std::unique_ptr<Config> extractConfig(
+            const Json::Value& json,
+            std::string profile);
+
     /** Inherited from Drivers::Http. */
     virtual bool get(
             std::string path,
@@ -3998,58 +4095,86 @@ private:
     class ApiV4;
     class Resource;
 
+    std::string m_profile;
     std::unique_ptr<Auth> m_auth;
-
-    std::string m_region;
-    std::string m_baseUrl;
-    http::Headers m_baseHeaders;
-    bool m_precheck;
+    std::unique_ptr<Config> m_config;
 };
 
-/** @brief AWS authentication information. */
+class S3::AuthFields
+{
+public:
+    AuthFields(std::string access, std::string hidden, std::string token = "")
+        : m_access(access), m_hidden(hidden), m_token(token)
+    { }
+
+    const std::string& access() const { return m_access; }
+    const std::string& hidden() const { return m_hidden; }
+    const std::string& token() const { return m_token; }
+
+private:
+    std::string m_access;
+    std::string m_hidden;
+    std::string m_token;
+};
+
 class S3::Auth
 {
 public:
-    Auth(
-            std::string profile,
-            std::string access,
-            std::string hidden,
-            std::string token = "");
+    Auth(std::string access, std::string hidden)
+        : m_access(access)
+        , m_hidden(hidden)
+    { }
 
-    Auth(std::string iamRole);
-    Auth(const Auth&);
+    Auth(std::string iamRole)
+        : m_role(util::makeUnique<std::string>(iamRole))
+    { }
 
-    /** @brief Search for credentials in some common locations.
-     *
-     * Check, in order:
-     *      - Environment settings.
-     *      - Arbiter JSON configuration.
-     *      - Config file `~/.aws/credentials` (searching for @p profile).
-     *      - EC2 instance profile.
-     */
-    static std::unique_ptr<Auth> find(
+    static std::unique_ptr<Auth> create(
             const Json::Value& json,
-            std::string profile = "");
+            std::string profile);
 
-    static std::string region();
-
-    Auth getStatic() const;
-
-    std::string profile() const { return m_profile; }
-    std::string access() const;
-    std::string hidden() const;
-    std::string token() const;
+    AuthFields fields() const;
 
 private:
-    mutable std::string m_profile;
     mutable std::string m_access;
     mutable std::string m_hidden;
     mutable std::string m_token;
 
-    std::string m_iamRole;
+    std::unique_ptr<std::string> m_role;
     mutable std::unique_ptr<Time> m_expiration;
     mutable std::mutex m_mutex;
 };
+
+class S3::Config
+{
+public:
+    Config(std::string region, std::string baseUrl, bool sse, bool precheck);
+
+    static std::unique_ptr<Config> create(
+            const Json::Value& json,
+            std::string profile);
+
+    const std::string& region() const { return m_region; }
+    const std::string& baseUrl() const { return m_baseUrl; }
+    const http::Headers& baseHeaders() const { return m_baseHeaders; }
+    bool precheck() const { return m_precheck; }
+
+private:
+    static std::string extractRegion(
+            const Json::Value& json,
+            std::string profile);
+
+    static std::string extractBaseUrl(
+            const Json::Value& json,
+            std::string region);
+
+    const std::string m_region;
+    const std::string m_baseUrl;
+    http::Headers m_baseHeaders;
+    const bool m_precheck;
+};
+
+
 
 class S3::Resource
 {
@@ -4076,7 +4201,7 @@ public:
             std::string verb,
             const std::string& region,
             const Resource& resource,
-            const S3::Auth& auth,
+            const S3::AuthFields authFields,
             const http::Query& query,
             const http::Headers& headers,
             const std::vector<char>& data);
@@ -4106,7 +4231,7 @@ private:
             const std::string& signedHeadersString,
             const std::string& signature) const;
 
-    const S3::Auth m_auth;
+    const S3::AuthFields m_authFields;
     const std::string m_region;
     const Time m_time;
 

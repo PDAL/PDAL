@@ -75,6 +75,9 @@ bool SpatialReference::empty() const
 bool SpatialReference::valid() const
 {
     OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    if (!current)
+        return false;
+
     OGRErr err = OSRValidate(current);
     OSRDestroySpatialReference(current);
     return err == OGRERR_NONE;
@@ -155,6 +158,11 @@ std::string SpatialReference::getVertical() const
 
     OGRSpatialReference* poSRS =
         (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+
+    // Above can fail if m_wkt is bad.
+    if (!poSRS)
+        return tmp;
+
     char *pszWKT = NULL;
 
     OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
@@ -248,6 +256,8 @@ bool SpatialReference::equals(const SpatialReference& input) const
 
     OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT().c_str());
     OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT().c_str());
+    if (!current || !other)
+        return false;
 
     int output = OSRIsSame(current, other);
     OSRDestroySpatialReference(current);
@@ -279,6 +289,9 @@ const std::string& SpatialReference::getName() const
 bool SpatialReference::isGeographic() const
 {
     OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    if (!current)
+        return false;
+
     bool output = OSRIsGeographic(current);
     OSRDestroySpatialReference(current);
     return output;
@@ -288,6 +301,9 @@ bool SpatialReference::isGeographic() const
 bool SpatialReference::isGeocentric() const
 {
     OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    if (!current)
+        return false;
+
     bool output = OSRIsGeocentric(current);
     OSRDestroySpatialReference(current);
     return output;
@@ -351,14 +367,18 @@ bool SpatialReference::isWKT(const std::string& wkt)
 
 std::string SpatialReference::prettyWkt(const std::string& wkt)
 {
+    std::string outWkt;
+
     OGRSpatialReference *srs =
         (OGRSpatialReference *)OSRNewSpatialReference(wkt.data());
+    if (!srs)
+        return outWkt;
 
     char *buf = nullptr;
     srs->exportToPrettyWkt(&buf, FALSE);
     OSRDestroySpatialReference(srs);
 
-    std::string outWkt(buf);
+    outWkt = buf;
     CPLFree(buf);
     return outWkt;
 }
@@ -371,7 +391,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
         return 0;
 
     OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
-    if (! current)
+    if (!current)
         throw pdal_error("Could not fetch current SRS");
 
     OGRSpatialReferenceH wgs84 = OSRNewSpatialReference(0);

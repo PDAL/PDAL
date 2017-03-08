@@ -44,12 +44,11 @@
 using namespace pdal;
 
 void compareTextLas(const std::string& textFilename,
-    const std::string& lasFilename)
+    Options& textOptions, const std::string& lasFilename)
 {
     TextReader t;
-    Options to;
-    to.add("filename", textFilename);
-    t.setOptions(to);
+    textOptions.add("filename", textFilename);
+    t.setOptions(textOptions);
 
     LasReader l;
     Options lo;
@@ -81,6 +80,16 @@ void compareTextLas(const std::string& textFilename,
            lv->getFieldAs<double>(Dimension::Id::Z, i));
     }
 }
+
+
+void compareTextLas(const std::string& textFilename,
+    const std::string& lasFilename)
+{
+    Options textOptions;
+
+    compareTextLas(textFilename, textOptions, lasFilename);
+}
+
 
 void compareTextLasStreaming(const std::string& textFilename,
     const std::string& lasFilename)
@@ -144,6 +153,16 @@ TEST(TextReaderTest, t1)
 {
     compareTextLas(Support::datapath("text/utm17_1.txt"),
         Support::datapath("las/utm17.las"));
+}
+
+TEST(TextReaderTest, t1a)
+{
+    Options textOptions;
+
+    textOptions.add("separator", ',');
+
+    compareTextLas(Support::datapath("text/utm17_1.txt"),
+        textOptions, Support::datapath("las/utm17.las"));
 }
 
 TEST(TextReaderTest, t2)
