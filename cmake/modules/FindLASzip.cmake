@@ -35,50 +35,15 @@ IF(WIN32)
   ENDIF()
 ENDIF()
 
-unset(LASZIP_INCLUDE_DIR)
 FIND_PATH(LASZIP_INCLUDE_DIR
   laszip.hpp
   PATHS
+  /usr/include/laszip
+  /usr/local/include/laszip
+  ${OSGEO4W_ROOT_DIR}/include/laszip
   /usr/include
   /usr/local/include
   ${OSGEO4W_ROOT_DIR}/include)
-message(STATUS "*** LASZIP_INCLUDE_DIR = ${LASZIP_INCLUDE_DIR} ***")
-if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip.hpp)
-        message(STATUS "Found ${LASZIP_INCLUDE_DIR}/laszip.hpp")
-endif()
-if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip/laszip.hpp)
-        message(STATUS "Found ${LASZIP_INCLUDE_DIR}/laszip/laszip.hpp")
-endif()
-
-FIND_PATH(BLARF
-  some_file_that_doesnt_exist
-  PATHS
-  /usr/include
-  /usr/local/include
-  ${OSGEO4W_ROOT_DIR}/include)
-message(STATUS "*** BLARF = ${BLARF} ***")
-
-if (LASZIP_INCLUDE_DIR)
-    message(STATUS "*** Found laszip in base dir: ${LASZIP_INCLUDE_DIR}  ***")
-    if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip.hpp)
-        message(STATUS "Found laszip.hpp")
-    endif()
-endif()
-
-
-if (NOT LASZIP_INCLUDE_DIR)
-    message(STATUS "*** looking for laszip in subdir! ***")
-    FIND_PATH(LASZIP_INCLUDE_DIR
-      laszip/laszip.hpp
-      PATHS
-      /usr/include
-      /usr/local/include
-      ${OSGEO4W_ROOT_DIR}/include)
-    if (LASZIP_INCLUDE_DIR)
-        message(STATUS "*** Found subdir laszip: ${LASZIP_INCLUDE_DIR} ***")
-        set(LASZIP_INCLUDE_DIR ${LASZIP_INCLUDE_DIR}/laszip)
-    endif()
-endif()
 
 SET(LASZIP_NAMES ${OSGEO4W_IMPORT_LIBRARY} laszip)
 
@@ -93,12 +58,6 @@ FIND_LIBRARY(LASZIP_LIBRARY
 IF(LASZIP_INCLUDE_DIR)
   SET(LASZIP_VERSION 0)
 
-  message(STATUS "*** ${LASZIP_INCLUDE_DIR} ***")
-    if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip.hpp)
-        message(STATUS "Found laszip.hpp")
-    else()
-        message(STATUS "laszip.hpp NOT found")
-    endif()
   SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip.hpp")
   FILE(READ ${LASZIP_VERSION_H} LASZIP_VERSION_H_CONTENTS)
 
