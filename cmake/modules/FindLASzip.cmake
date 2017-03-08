@@ -42,6 +42,15 @@ FIND_PATH(LASZIP_INCLUDE_DIR
   /usr/include
   /usr/local/include
   ${OSGEO4W_ROOT_DIR}/include)
+message(STATUS "*** LASZIP_INCLUDE_DIR = ${LASZIP_INCLUDE_DIR} ***")
+
+FIND_PATH(BLARF
+  some_file_that_doesnt_exist
+  PATHS
+  /usr/include
+  /usr/local/include
+  ${OSGEO4W_ROOT_DIR}/include)
+message(STATUS "*** BLARF = ${BLARF} ***")
 
 if (LASZIP_INCLUDE_DIR)
     message(STATUS "*** Found laszip in base dir: ${LASZIP_INCLUDE_DIR}  ***")
