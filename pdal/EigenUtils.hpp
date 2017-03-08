@@ -268,7 +268,7 @@ PDAL_DLL Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
 */
 PDAL_DLL Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
         double cell_size, BOX2D bounds);
-
+        
 /**
   Find local minimum elevations by extended local minimum.
 
@@ -315,6 +315,21 @@ PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
   \return the morphological opening of the input radius.
 */
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
+
+/**
+  Perform a morphological opening of the input matrix.
+
+  Performs a morphological opening of the input matrix using a diamond
+  structuring element. Larger structuring elements are approximated by applying
+  multiple iterations of the opening operation. Data will be symmetrically
+  padded at its edges.
+
+  \param data the input matrix.
+  \param iterations the number of iterations used to approximate a larger 
+         structuring element.
+  \return the morphological opening of the input radius.
+*/
+PDAL_DLL Eigen::MatrixXd openDiamond(Eigen::MatrixXd data, int iterations);
 
 /**
   Pad input matrix symmetrically.

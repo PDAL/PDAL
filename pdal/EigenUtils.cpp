@@ -43,6 +43,7 @@
 #include <Eigen/Dense>
 
 #include <cfloat>
+#include <numeric>
 #include <vector>
 
 namespace pdal
@@ -465,6 +466,96 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     }
 
     return maxZ.block(radius, radius, data.rows(), data.cols());
+}
+
+Eigen::MatrixXd openDiamond(Eigen::MatrixXd data, int iterations)
+{
+    using namespace Eigen;
+
+    MatrixXd prev(data.rows()+2, data.cols()+2);
+    prev.setConstant(std::numeric_limits<double>::max());
+    prev.block(1, 1, data.rows(), data.cols()) = data;
+    
+    // Construct a list of indices relative to the current pixel to be used in
+    // the diamond kernel.
+    std::list<int> idx {
+      static_cast<int>(-prev.rows()),
+      -1,
+      0,
+      1,
+      static_cast<int>(prev.rows())
+    };
+    
+    // Generate lists of rows, cols, and iterations to be used in subsequent for
+    // loops.
+    std::list<int> rows(data.rows());
+    std::iota(rows.begin(), rows.end(), 1);
+    
+    std::list<int> cols(data.cols());
+    std::iota(cols.begin(), cols.end(), 1);
+    
+    std::list<int> iters(iterations);
+    std::iota(iters.begin(), iters.end(), 0);
+ 
+    // Implementation note. We tried a number of different approaches here,
+    // including using Eigen block extraction and min/maxCoeff, but those always
+    // resulted in a ~2x increase in runtime.
+ 
+    // Begin by initializing the min Z matrix to max double, so that we always
+    // find a value smaller than the initial value.
+    MatrixXd minZ(prev.rows(), prev.cols());
+    minZ.setConstant(std::numeric_limits<double>::max());
+    
+    // To repeat a morphological opening, we actually repeat the erosion step
+    // first, followed by the repeated dilation step.
+    for (auto const& i : iters)
+    {
+        for (auto const& c : cols)
+        {
+            int index_base = c*prev.rows();
+            for (auto const& r : rows)
+            {              
+                int index = index_base + r;
+                for (auto const& j : idx)
+                {
+                    double v = prev(index+j);
+                    if (v < minZ(r, c))
+                        minZ(r, c) = v;
+                }
+            }
+        }
+        
+        prev = minZ;
+    }
+    
+    // Begin by initializing max Z matrix to lowest double, so that we always
+    // find a value larger than the initial value.
+    MatrixXd maxZ(prev.rows(), prev.cols());
+    maxZ.setConstant(std::numeric_limits<double>::lowest());
+    
+    // Complete the repeated opening by repeating the dilation step.
+    for (auto const& i : iters)
+    {
+        for (auto const& c : cols)
+        {
+            int index_base = c*prev.rows();
+            for (auto const& r : rows)
+            {                
+                int index = index_base + r;
+                for (auto const& j : idx)
+                {
+                    double v = prev(index+j);
+                    if (v > maxZ(r, c))
+                        maxZ(r, c) = v;
+                }
+            }
+        }
+        
+        prev = maxZ;
+    }
+
+    // Do not return the padded borders.
+    return prev.block(1, 1, data.rows(), data.cols());
 }
 
 Eigen::MatrixXd pointViewToEigen(const PointView& view)
