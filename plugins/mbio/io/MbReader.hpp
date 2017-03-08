@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2017, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,55 +34,71 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <queue>
+
+#include <pdal/Reader.hpp>
 #include <pdal/plugin.hpp>
 
-#include <Eigen/Dense>
+extern "C"
+{
+#include <mb_define.h>
+}
 
-#include <memory>
+#include "MbFormat.hpp"
 
-extern "C" int32_t PMFFilter_ExitFunc();
-extern "C" PF_ExitFunc PMFFilter_InitPlugin();
+extern "C" int32_t MbReader_ExitFunc();
+extern "C" PF_ExitFunc MbReader_InitPlugin();
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
+struct BathData;
 
-class PDAL_DLL PMFFilter : public Filter
+class PDAL_DLL MbReader : public pdal::Reader
 {
+    struct BathData
+    {
+        double m_bathlon;
+        double m_bathlat;
+        double m_bath;
+        double m_amp;
+
+        BathData(double bathlon, double bathlat, double bath, double amp) :
+            m_bathlon(bathlon), m_bathlat(bathlat), m_bath(bath), m_amp(amp)
+        {}
+    };
+
 public:
-    PMFFilter() : Filter()
-    {}
+    MbReader();
+    virtual ~MbReader();
+    MbReader& operator=(const MbReader&) = delete;
+    MbReader(const MbReader&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
 private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-    bool m_approximate;
-
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual QuickInfo inspect();
     virtual void addArgs(ProgramArgs& args);
-    Eigen::MatrixXd fillNearest(PointViewPtr view, Eigen::MatrixXd cz,
-                                double cell_size, BOX2D bounds);
-    std::vector<double> morphOpen(PointViewPtr view, float radius);
-    std::vector<PointId> processGround(PointViewPtr view);
-    std::vector<PointId> processGroundApprox(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
+    virtual bool processOne(PointRef& point);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
+    bool loadData();
 
-    PMFFilter& operator=(const PMFFilter&); // not implemented
-    PMFFilter(const PMFFilter&); // not implemented
+    void *m_ctx;
+    double *m_bath;
+    double *m_bathlon;
+    double *m_bathlat;
+    double *m_amp;
+    char *m_bathflag;
+    double *m_ss;
+    double *m_sslon;
+    double *m_sslat;
+    std::queue<BathData> m_bathQueue;
+    MbFormat m_format;
 };
 
-} // namespace pdal
+} // namespace PDAL

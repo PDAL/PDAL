@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2017, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,57 +32,38 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 
-#include <Eigen/Dense>
+#include "Support.hpp"
 
-#include <memory>
+using namespace pdal;
 
-extern "C" int32_t PMFFilter_ExitFunc();
-extern "C" PF_ExitFunc PMFFilter_InitPlugin();
-
-namespace pdal
+std::string getFilePath()
 {
+    return Support::datapath("mbio/0000_20140810_071646_EX1404L1_MB.all.mb58");
+}
 
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
-
-class PDAL_DLL PMFFilter : public Filter
+TEST(MBSystemReaderTest, testRead)
 {
-public:
-    PMFFilter() : Filter()
-    {}
+    StageFactory f;
+    Stage* reader(f.createStage("readers.mbio"));
+    EXPECT_TRUE(reader);
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    Option filename("filename", getFilePath());
+    Options options(filename);
+    reader->setOptions(options);
 
-private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-    bool m_approximate;
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2u);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    Eigen::MatrixXd fillNearest(PointViewPtr view, Eigen::MatrixXd cz,
-                                double cell_size, BOX2D bounds);
-    std::vector<double> morphOpen(PointViewPtr view, float radius);
-    std::vector<PointId> processGround(PointViewPtr view);
-    std::vector<PointId> processGroundApprox(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
-
-    PMFFilter& operator=(const PMFFilter&); // not implemented
-    PMFFilter(const PMFFilter&); // not implemented
-};
-
-} // namespace pdal
+}

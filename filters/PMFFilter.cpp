@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015-2017, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,6 +35,7 @@
 #include "PMFFilter.hpp"
 
 #include <pdal/EigenUtils.hpp>
+#include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -75,6 +76,7 @@ void PMFFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
+
 std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
 {
     point_count_t np(view->size());
@@ -90,7 +92,7 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
         double y = view->getFieldAs<double>(Dimension::Id::Y, i);
 
         std::vector<PointId> ids = idx.getPoints(x - radius, y - radius,
-            x + radius, y + radius);
+                                   x + radius, y + radius);
 
         double localMin(std::numeric_limits<double>::max());
         for (auto const& j : ids)
@@ -109,7 +111,7 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
         double y = view->getFieldAs<double>(Dimension::Id::Y, i);
 
         std::vector<PointId> ids = idx.getPoints(x - radius, y - radius,
-            x + radius, y + radius);
+                                   x + radius, y + radius);
 
         double localMax(std::numeric_limits<double>::lowest());
         for (auto const& j : ids)
@@ -147,7 +149,7 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
             ht = m_initialDistance;
         else
             ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize +
-                m_initialDistance;
+                 m_initialDistance;
 
         // Enforce max distance on height threshold
         if (ht > m_maxDistance)
@@ -200,6 +202,59 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
     return groundIdx;
 }
 
+
+Eigen::MatrixXd PMFFilter::fillNearest(PointViewPtr view, Eigen::MatrixXd cz,
+                                       double cell_size, BOX2D bounds)
+{
+    using namespace Dimension;
+    using namespace Eigen;
+
+    // convert cz into PointView
+    PointViewPtr temp = view->makeNew();
+    PointId i(0);
+    for (int c = 0; c < cz.cols(); ++c)
+    {
+        for (int r = 0; r < cz.rows(); ++r)
+        {
+            if (std::isnan(cz(r, c)))
+                continue;
+
+            temp->setField(Id::X, i, bounds.minx + (c+0.5) * cell_size);
+            temp->setField(Id::Y, i, bounds.miny + (r+0.5) * cell_size);
+            temp->setField(Id::Z, i, cz(r, c));
+            i++;
+        }
+    }
+
+    // make a 2D KDIndex
+    KD2Index kdi(*temp);
+    kdi.build();
+
+    MatrixXd out = cz;
+    for (int c = 0; c < cz.cols(); ++c)
+    {
+        for (int r = 0; r < cz.rows(); ++r)
+        {
+            if (!std::isnan(out(r, c)))
+                continue;
+
+            // find k nearest points
+            double x = bounds.minx + (c+0.5) * cell_size;
+            double y = bounds.miny + (r+0.5) * cell_size;
+            int k = 1;
+            std::vector<PointId> neighbors(k);
+            std::vector<double> sqr_dists(k);
+            kdi.knnSearch(x, y, k, &neighbors, &sqr_dists);
+
+            out(r, c) = temp->getFieldAs<double>(Dimension::Id::Z,
+                                                 neighbors[0]);
+        }
+    }
+
+    return out;
+};
+
+
 std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
 {
     using namespace Eigen;
@@ -230,7 +285,7 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
             ht = m_initialDistance;
         else
             ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize +
-                m_initialDistance;
+                 m_initialDistance;
 
         // Enforce max distance on height threshold
         if (ht > m_maxDistance)
@@ -249,6 +304,8 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
     MatrixXd ZImin = eigen::createMinMatrix(*view.get(), rows, cols, m_cellSize,
                                             bounds);
 
+    ZImin = fillNearest(view, ZImin, m_cellSize, bounds);
+
     // Progressively filter ground returns using morphological open
     for (size_t j = 0; j < wsvec.size(); ++j)
     {
@@ -257,7 +314,7 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
                                     << ", window size = " << wsvec[j]
                                     << ")...\n";
 
-        MatrixXd mo = eigen::matrixOpen(ZImin, 0.5*(wsvec[j]-1));
+        MatrixXd mo = eigen::openDiamond(ZImin, 0.5*(wsvec[j]-1));
 
         std::vector<PointId> groundNewIdx;
         for (auto p_idx : groundIdx)
@@ -266,15 +323,10 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
             double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
             double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
 
-            int c = Utils::clamp(
-                static_cast<int>(floor((x - bounds.minx) / m_cellSize)), 0,
-                static_cast<int>(cols-1));
-            int r = Utils::clamp(
-                static_cast<int>(floor((y - bounds.miny) / m_cellSize)), 0,
-                static_cast<int>(rows-1));
+            int c = static_cast<int>(floor((x - bounds.minx) / m_cellSize));
+            int r = static_cast<int>(floor((y - bounds.miny) / m_cellSize));
 
-            float diff = z - mo(r, c);
-            if (diff < htvec[j])
+            if ((z - mo(r, c)) < htvec[j])
                 groundNewIdx.push_back(p_idx);
         }
 
@@ -287,6 +339,7 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
 
     return groundIdx;
 }
+
 
 PointViewSet PMFFilter::run(PointViewPtr input)
 {
@@ -340,11 +393,11 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     {
         if (idx.empty())
             log()->get(LogLevel::Debug2) << "Filtered cloud has no "
-                "ground returns!\n";
+                                         "ground returns!\n";
 
         if (!(m_classify || m_extract))
             log()->get(LogLevel::Debug2) << "Must choose --classify "
-                "or --extract\n";
+                                         "or --extract\n";
 
         // return the input buffer unchanged
         viewSet.insert(input);

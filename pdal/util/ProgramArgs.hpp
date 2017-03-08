@@ -410,7 +410,7 @@ public:
 
             if (error.empty())
                 error = "Invalid value '" + s + "' for argument '" +
-                    m_longname;
+                    m_longname + "'.";
             throw arg_val_error(error);
         }
         m_set = true;

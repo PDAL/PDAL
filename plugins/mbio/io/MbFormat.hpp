@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2017, Howard Butler (hobu@hob.co)
 *
 * All rights reserved.
 *
@@ -34,55 +34,24 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-#include <Eigen/Dense>
-
-#include <memory>
-
-extern "C" int32_t PMFFilter_ExitFunc();
-extern "C" PF_ExitFunc PMFFilter_InitPlugin();
+#include <iostream>
+#include <string>
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
-
-class PDAL_DLL PMFFilter : public Filter
+class MbFormat
 {
-public:
-    PMFFilter() : Filter()
-    {}
-
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
 private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-    bool m_approximate;
+    int m_value;
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    Eigen::MatrixXd fillNearest(PointViewPtr view, Eigen::MatrixXd cz,
-                                double cell_size, BOX2D bounds);
-    std::vector<double> morphOpen(PointViewPtr view, float radius);
-    std::vector<PointId> processGround(PointViewPtr view);
-    std::vector<PointId> processGroundApprox(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
+public:
+    MbFormat();
 
-    PMFFilter& operator=(const PMFFilter&); // not implemented
-    PMFFilter(const PMFFilter&); // not implemented
+    operator int() const;
+
+    friend std::istream& operator>>(std::istream& out, MbFormat& f);
+    friend std::ostream& operator<<(std::ostream& out, const MbFormat& f);
 };
 
 } // namespace pdal
