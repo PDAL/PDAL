@@ -43,6 +43,12 @@ FIND_PATH(LASZIP_INCLUDE_DIR
   /usr/local/include
   ${OSGEO4W_ROOT_DIR}/include)
 message(STATUS "*** LASZIP_INCLUDE_DIR = ${LASZIP_INCLUDE_DIR} ***")
+if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip.hpp)
+        message(STATUS "Found ${LASZIP_INCLUDE_DIR}/laszip.hpp")
+endif()
+if (EXISTS ${LASZIP_INCLUDE_DIR}/laszip/laszip.hpp)
+        message(STATUS "Found ${LASZIP_INCLUDE_DIR}/laszip/laszip.hpp")
+endif()
 
 FIND_PATH(BLARF
   some_file_that_doesnt_exist
