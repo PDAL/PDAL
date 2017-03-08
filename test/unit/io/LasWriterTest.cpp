@@ -716,6 +716,46 @@ TEST(LasWriterTest, fix1063_1064_1065)
     EXPECT_EQ(ref.getWKT(), wkt);
 }
 
+TEST(LasWriterTest, pdal_metadata)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("pdal_metadata", true);
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    EXPECT_EQ(reader2.getMetadata().children("pdal_metadata").size(), 1UL);
+    EXPECT_EQ(reader2.getMetadata().children("pdal_pipeline").size(), 1UL);
+
+}
+
 /**
 namespace
 {

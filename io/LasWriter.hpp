@@ -151,7 +151,7 @@ private:
     void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);
     void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
     void setVlrsFromMetadata(MetadataNode& forward);
-    void setPDALVlrFromMetadata(MetadataNode& m);
+    void setPDALVLRs(MetadataNode& m);
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
     void setExtraBytesVlr();

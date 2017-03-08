@@ -244,6 +244,9 @@ void LasWriter::fillForwardList()
 void LasWriter::readyTable(PointTableRef table)
 {
     m_forwardMetadata = table.privateMetadata("lasforward");
+    MetadataNode m = table.metadata();
+    if(m_writePDALMetadata)
+        setPDALVLRs(m);
     setExtraBytesVlr();
 }
 
@@ -265,9 +268,6 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
 {
 
 
-    MetadataNode m = getMetadata();
-    if(m_writePDALMetadata)
-        setPDALVlrFromMetadata(m);
 
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
@@ -349,18 +349,29 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
     return node.find(pred);
 }
 
-void LasWriter::setPDALVlrFromMetadata(MetadataNode& forward)
+void LasWriter::setPDALVLRs(MetadataNode& forward)
 {
     std::ostringstream ostr;
-    Utils::toJSON(getMetadata(), ostr);
-
+    Utils::toJSON(forward, ostr);
     std::string json = ostr.str();
-    std::vector<uint8_t> data;//(LasVLR::MAX_DATA_SIZE, 0);
-    data.resize(json.size());
-    std::copy(json.begin(), json.end(), data.begin());
+
+    auto store = [this](std::string json, int recordId, std::string description)
+    {
+        std::vector<uint8_t> data;
+        data.resize(json.size());
+        std::copy(json.begin(), json.end(), data.begin());
+        addVlr("PDAL", recordId, description, data);
 
 
-    addVlr("PDAL", 12, "pdal metadata", data);
+    };
+
+    store(ostr.str(), 12, "PDAL metadata");
+    ostr.str("");
+
+    PipelineWriter::writePipeline(this, ostr);
+
+    store(ostr.str(), 13, "PDAL pipeline");
+
 
 }
 /// Set VLRs from metadata for forwarded info.
