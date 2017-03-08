@@ -359,6 +359,15 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     m.add<uint32_t>("count",
         m_header.pointCount(), "This field contains the total "
         "number of point records within the file.");
+
+    LasVLR *vlr = m_header.findVlr("PDAL", 12);
+    if (vlr)
+    {
+        const char *pos = vlr->data();
+        size_t size = vlr->dataLen();
+        m.addWithType("pdal", std::string(pos, size), "json", "PDAL Processing Metadata");
+    }
+
 }
 
 

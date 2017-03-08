@@ -106,6 +106,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         decltype(m_creationDoy)(doy));
     args.add("creation_year", "Creation year", m_creationYear,
         decltype(m_creationYear)(year));
+    args.add("pdal_metadata", "Write PDAL metadata as VLR?", m_writePDALMetadata,
+        decltype(m_writePDALMetadata)(false));
     args.add("scale_x", "X scale factor", m_scaleX, decltype(m_scaleX)(".01"));
     args.add("scale_y", "Y scale factor", m_scaleY, decltype(m_scaleY)(".01"));
     args.add("scale_z", "Z scale factor", m_scaleZ, decltype(m_scaleZ)(".01"));
@@ -261,6 +263,12 @@ void LasWriter::readyFile(const std::string& filename,
 
 void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
 {
+
+
+    MetadataNode m = getMetadata();
+    if(m_writePDALMetadata)
+        setPDALVlrFromMetadata(m);
+
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
 
@@ -273,6 +281,7 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
     setVlrsFromMetadata(m_forwardMetadata);
+
 
     m_summaryData.reset(new LasSummaryData());
     m_ostream = outStream;
@@ -340,7 +349,20 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
     return node.find(pred);
 }
 
+void LasWriter::setPDALVlrFromMetadata(MetadataNode& forward)
+{
+    std::ostringstream ostr;
+    Utils::toJSON(getMetadata(), ostr);
 
+    std::string json = ostr.str();
+    std::vector<uint8_t> data;//(LasVLR::MAX_DATA_SIZE, 0);
+    data.resize(json.size());
+    std::copy(json.begin(), json.end(), data.begin());
+
+
+    addVlr("PDAL", 12, "pdal metadata", data);
+
+}
 /// Set VLRs from metadata for forwarded info.
 void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 {
@@ -878,6 +900,7 @@ void LasWriter::doneFile()
 
 void LasWriter::finishOutput()
 {
+
     if (m_compression == LasCompression::LasZip)
         finishLasZipOutput();
     else if (m_compression == LasCompression::LazPerf)
