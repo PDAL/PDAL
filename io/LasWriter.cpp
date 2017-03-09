@@ -578,6 +578,9 @@ void LasWriter::readyCompression()
 void LasWriter::readyLasZipCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
+    if (m_lasHeader.pointFormat() > 5)
+        throwError("LASzip doesn't currently support compression using LAS "
+            "1.4 point formats (dataformat_id > 5).");
     try
     {
         m_zipPoint.reset(new LasZipPoint(m_lasHeader.pointFormat(),
