@@ -93,8 +93,7 @@ void PgWriter::addArgs(ProgramArgs& args)
     args.add("schema", "Schema name", m_schema_name);
     args.add("compression", "Compression type", m_compressionSpec,
         "dimensional");
-    args.add("overwrite", "Whether data should be overwritten", m_overwrite,
-        true);
+    args.add("overwrite", "Whether data should be overwritten", m_overwrite);
     args.add("srid", "SRID", m_srid, 4326U);
     args.add("pcid", "PCID", m_pcid);
     args.add("pre_sql", "SQL to execute before query", m_pre_sql);
