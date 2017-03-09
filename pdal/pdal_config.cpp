@@ -61,7 +61,7 @@
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip.hpp>
+#include <laszip.hpp>
 #endif
 
 #include <geos_c.h>

@@ -32,8 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <laszip/laszip.hpp>
-#include <laszip/lasunzipper.hpp>
+#include <laszip.hpp>
+#include <lasunzipper.hpp>
 
 #include <pdal/util/IStream.hpp>
 

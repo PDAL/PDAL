@@ -37,9 +37,9 @@
 #include <vector>
 
 #ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip.hpp>
-#include <laszip/lasunzipper.hpp>
-#include <laszip/laszipper.hpp>
+#include <laszip.hpp>
+#include <lasunzipper.hpp>
+#include <laszipper.hpp>
 #endif
 
 namespace pdal
