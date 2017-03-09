@@ -59,7 +59,7 @@ compression
   * **ght** applies a "geohash tree" compression by sorting the points into a prefix tree
 
 overwrite
-  To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **true**]
+  To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **false**]
 
 srid
   Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS) to store with the point cloud schema. [Default: **4326**]
