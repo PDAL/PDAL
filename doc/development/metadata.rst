@@ -63,6 +63,12 @@ A more interesting metadata tree might come from the
 :cpp:class:`pdal::drivers::las::Reader`.  Interesting things to note include
 
 
+.. note::
+
+    ref:`writers.las` can output the metadata as a VLR during processing.
+    This is useful for process tracking, historical record, and remediation
+    activities.
+
 
 .. _`JSON`: http://www.json.org/
 
