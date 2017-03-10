@@ -81,12 +81,13 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
     args.add("filter,f", "Filter type", m_filterType).
         setOptionalPositional();
     args.add("json", "JSON array of filters", m_filterJSON);
-    args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
+    args.add("pipeline,p", "Pipeline output", m_pipelineOutputFile);
     args.add("metadata,m", "Dump metadata output to the specified file",
         m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
 }
+
 
 /*
   Build a pipeline from a JSON filter specification.
@@ -174,24 +175,35 @@ int TranslateKernel::execute()
 {
     std::ostream *metaOut(nullptr);
 
+    if (m_filterJSON.size() && m_filterType.size())
+        throw pdal_error("Cannot set both --filter options and --json options");
+
     if (m_metadataFile.size())
     {
+        if (m_pipelineOutputFile.size())
+            m_log->get(LogLevel::Info) << "Metadata will not be written. "
+                "'pipeline' option prevents execution.";
+        else
+        {
         metaOut = FileUtils::createFile(m_metadataFile);
         if (! metaOut)
             throw pdal_error("Couldn't output metadata output file '" +
                 m_metadataFile + "'.");
+        }
     }
-
-    if (m_filterJSON.size() && m_filterType.size())
-        throw pdal_error("Cannot set both --filter options and --json options");
 
     if (!m_filterJSON.empty())
         makeJSONPipeline();
     else
         makeArgPipeline();
 
-    if (m_pipelineOutput.size() > 0)
-        PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineOutput);
+    // If we write pipeline output, we don't run, and therefore don't write
+    if (m_pipelineOutputFile.size() > 0)
+    {
+        PipelineWriter::writePipeline(m_manager.getStage(),
+            m_pipelineOutputFile);
+        return 0;
+    }
     m_manager.execute();
     if (metaOut)
     {

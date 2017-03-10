@@ -66,7 +66,7 @@ private:
 
     std::string m_inputFile;
     std::string m_outputFile;
-    std::string m_pipelineOutput;
+    std::string m_pipelineOutputFile;
     std::string m_readerType;
     StringList m_filterType;
     std::string m_writerType;
