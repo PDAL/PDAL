@@ -98,3 +98,15 @@ output (including the output from the stats filter) is written to the file
 
     $ pdal translate myfile output.las --metadata=meta.json -r readers.text \
         --json="[ { \"type\":\"filters.stats\" } ]"
+
+Example 4:
+--------------------------------------------------------------------------------
+
+This command reprojects the points in the file "input.las" to another spatial
+reference system and writes the result to the file "output.las".
+
+::
+
+    $ pdal translate input.las output.las -f filters.reprojection \
+      --filters.reprojection.out_srs="EPSG:4326"
+
