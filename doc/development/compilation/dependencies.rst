@@ -37,9 +37,6 @@ and Windows has the `OSGeo4W`_ platform.
     If you are using `OSGeo4W`_ as your provider of GDAL, you must make sure
     to use the GDAL 1.9 package.
 
-Optional Dependencies
-------------------------------------------------------------------------------
-
 GeoTIFF
 ..............................................................................
 
@@ -70,6 +67,9 @@ Proj.4_ is the projection engine that PDAL uses for the
     Proj.4 4.9.0+ is required if you need vertical datum
     transformation support. Otherwise, older versions should be
     sufficient.
+
+Optional Dependencies
+------------------------------------------------------------------------------
 
 libxml2
 ..............................................................................
