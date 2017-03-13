@@ -173,7 +173,8 @@ void GDALWriter::done(PointTableRef table)
     m_grid->finalize();
 
     gdal::GDALError err = raster.open(m_grid->width(), m_grid->height(),
-        m_grid->numBands(), Dimension::Type::Double, m_grid->noData());
+        m_grid->numBands(), Dimension::Type::Double, m_grid->noData(),
+        m_options);
     if (err != gdal::GDALError::None)
         throw pdal_error(raster.errorMsg());
     int bandNum = 1;
