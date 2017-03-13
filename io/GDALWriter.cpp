@@ -220,7 +220,8 @@ void GDALWriter::doneFile()
     m_grid->finalize();
 
     gdal::GDALError err = raster.open(m_grid->width(), m_grid->height(),
-        m_grid->numBands(), Dimension::Type::Double, m_grid->noData());
+        m_grid->numBands(), Dimension::Type::Double, m_grid->noData(),
+        m_options);
     if (err != gdal::GDALError::None)
         throwError(raster.errorMsg());
     int bandNum = 1;
