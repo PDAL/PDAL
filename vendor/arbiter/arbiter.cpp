@@ -1693,6 +1693,8 @@ std::string S3::Config::extractBaseUrl(
         endpointsPath = json["endpointsFile"].asString();
     }
 
+    std::string dnsSuffix("amazonaws.com");
+
     drivers::Fs fsDriver;
     if (std::unique_ptr<std::string> e = fsDriver.tryGet(endpointsPath))
     {
@@ -1702,6 +1704,11 @@ std::string S3::Config::extractBaseUrl(
 
         for (const auto& partition : ep["partitions"])
         {
+            if (partition.isMember("dnsSuffix"))
+            {
+                dnsSuffix = partition["dnsSuffix"].asString();
+            }
+
             const auto& endpoints(partition["services"]["s3"]["endpoints"]);
             const auto regions(endpoints.getMemberNames());
             for (const auto& r : regions)
@@ -1714,9 +1721,11 @@ std::string S3::Config::extractBaseUrl(
         }
     }
 
+    if (dnsSuffix.size() && dnsSuffix.back() != '/') dnsSuffix += '/';
+
     // https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-    if (region == "us-east-1") return "s3.amazonaws.com/";
-    else return "s3-" + region + ".amazonaws.com/";
+    if (region == "us-east-1") return "s3." + dnsSuffix;
+    else return "s3-" + region + "." + dnsSuffix;
 }
 
 S3::AuthFields S3::Auth::fields() const

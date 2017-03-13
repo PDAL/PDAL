@@ -18,16 +18,16 @@ from the command-line.
     --output, -o       Output filename
     --filter, -f       Filter type
     --json             JSON array of filters
-    --pipeline, -p     Pipeline output
+    --pipeline, -p     Write constructed pipeline to file but don't execute.
     --metadata, -m     Dump metadata output to the specified file
     --reader, -r       Reader type
     --writer, -w       Writer type
 
 The ``--input`` and ``--output`` file names are required options.
 
-The ``--pipeline`` file name is optional. If given, the pipeline constructed
-from the command-line arguments will be written to disk for reuse in the
-:ref:`pipeline_command`.
+If provided, the ``--pipeline`` option will write the pipeline constructed
+from the command-line arguments to the specified file.  The translate
+command will not actually run when this argument is given.
 
 The ``--json`` flag can use used to specify a JSON array of filters
 as if they were being specified in a :ref:`pipeline_command`.  If a filename
@@ -98,3 +98,15 @@ output (including the output from the stats filter) is written to the file
 
     $ pdal translate myfile output.las --metadata=meta.json -r readers.text \
         --json="[ { \"type\":\"filters.stats\" } ]"
+
+Example 4:
+--------------------------------------------------------------------------------
+
+This command reprojects the points in the file "input.las" to another spatial
+reference system and writes the result to the file "output.las".
+
+::
+
+    $ pdal translate input.las output.las -f filters.reprojection \
+      --filters.reprojection.out_srs="EPSG:4326"
+
