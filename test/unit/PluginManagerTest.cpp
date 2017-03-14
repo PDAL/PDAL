@@ -49,6 +49,11 @@ struct DummyPlugin : Filter
     static std::string const description;
     static std::string const link;
     // Plugin management
+    static int32_t dummyExitFunc()
+    {
+        return 0;
+    }
+
     static PF_ExitFunc initPlugin() // PF_InitFunc
     {
         PF_RegisterParams rp;
@@ -61,7 +66,9 @@ struct DummyPlugin : Filter
         rp.pluginType = PF_PluginType_Filter;
         if (!PluginManager::registerObject(name, &rp))
             return nullptr;
-        return []()->int32_t { return 0; };
+        return dummyExitFunc;
+//Broken on gcc 4.7.2
+//        return []()->int32_t { return 0; };
     }
     static void* create()
     {
