@@ -271,7 +271,7 @@ public:
 
       \return  A vector pointers to input stages.
     **/
-    const std::vector<Stage*>& getInputs() const
+    std::vector<Stage*>& getInputs()
         { return m_inputs; }
 
     /**
