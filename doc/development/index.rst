@@ -16,6 +16,7 @@ developing new code can be found in this section.
    conventions
    contributors
    docs
+   docker
    errorhandling
    metadata
    goals
