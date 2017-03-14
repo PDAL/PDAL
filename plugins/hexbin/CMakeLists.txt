@@ -11,9 +11,8 @@ if (HEXER_FOUND)
             filters/HexBin.cpp
         LINK_WITH
             ${HEXER_LIBRARY})
-    target_include_directories(${libname} PRIVATE
-        ${PDAL_VENDOR_DIR}/pdalboost
-        ${HEXER_INCLUDE_DIR})
+    target_include_directories(${libname} PRIVATE ${PDAL_VENDOR_DIR}/pdalboost)
+    target_include_directories(${libname} PUBLIC ${HEXER_INCLUDE_DIR})
 
     if (WITH_TESTS)
         PDAL_ADD_TEST(hexbintest
