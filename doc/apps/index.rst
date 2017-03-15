@@ -4,8 +4,8 @@
 Applications
 ******************************************************************************
 
-PDAL contains consists of a single application, called ``pdal``.  Applications
-are run by invoking the ``pdal`` application along with the command name:
+PDAL contains consists of a single application, called ``pdal``.  Operations
+are run by invoking the ``pdal`` application along with a command name:
 
 ::
 
@@ -22,6 +22,15 @@ drivers and their options:
     $ pdal info --help
     $ pdal translate --drivers
     $ pdal pipeline --options writers.las
+
+
+All commands support the following options:
+
+::
+
+    --developer-debug   Enable developer debug (don't trap exceptions).
+    --label             A string to use as a process label.
+    --driver            Name of driver to use to override that inferred from file type.
 
 Additional driver-specific options may be specified by using a
 namespace-prefixed option name. For example, it is possible to set the LAS day

@@ -9,7 +9,8 @@ output of :ref:`filters.hexbin`.
 
 .. note::
 
-    The ``density`` command is only available when PDAL is linked with Hexer.
+    The ``density`` command is only available when PDAL is linked with Hexer
+    (BUILD_PLUGIN_HEXBIN=ON in CMakeCache.txt).
 
 ::
 

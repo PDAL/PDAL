@@ -13,9 +13,6 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
 
 ::
 
-    --developer-debug         Enable developer debug (don't trap exceptions)
-    --label                   A string to label the process with
-    --driver                  Override reader driver
     --input, -i               input file name
     --pipeline-serialization  Output file for pipeline serialization
     --validate                Validate the pipeline (including serialization), but do not write
