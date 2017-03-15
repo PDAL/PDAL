@@ -135,6 +135,9 @@ public:
         { return m_commonOptions; }
     OptionsMap& stageOptions()
         { return m_stageOptions; }
+    std::vector<Stage *> roots() const;
+    std::vector<Stage *> leaves() const;
+    void replace(Stage *sOld, Stage *sNew);
 
 private:
     void setOptions(Stage& stage, const Options& addOps);

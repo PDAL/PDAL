@@ -35,6 +35,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 #include "private/PipelineReaderXML.hpp"
@@ -97,6 +98,9 @@ void PipelineManager::readPipeline(const std::string& filename)
     {
         Utils::closeFile(m_input);
         m_input = Utils::openFile(filename);
+        if (!m_input)
+            throw pdal_error("Can't open file '" + filename + "' as pipeline "
+                "input.");
         try
         {
             readPipeline(*m_input);
@@ -241,6 +245,7 @@ MetadataNode PipelineManager::getMetadata() const
     }
     return output;
 }
+
 
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
@@ -416,6 +421,41 @@ Options PipelineManager::stageOptions(Stage& stage)
     if (oi != m_stageOptions.end())
         opts.addConditional(oi->second);
     return opts;
+}
+
+
+std::vector<Stage *> PipelineManager::roots() const
+{
+    std::vector<Stage *> rlist;
+
+    for (Stage *s : m_stages)
+        if (s->getInputs().empty())
+            rlist.push_back(s);
+    return rlist;
+}
+
+
+std::vector<Stage *> PipelineManager::leaves() const
+{
+    std::vector<Stage *> llist = m_stages;
+    for (Stage *s : m_stages)
+        for (Stage *ss : s->getInputs())
+           Utils::remove(llist, ss);
+    return llist;
+}
+
+
+void PipelineManager::replace(Stage *sOld, Stage *sNew)
+{
+    Utils::remove(m_stages, sNew);
+    for (Stage * & s : m_stages)
+    {
+        if (s == sOld)
+            s = sNew;
+        for (Stage * & ss : s->getInputs())
+            if (ss == sOld)
+                ss = sNew;
+    }
 }
 
 } // namespace pdal

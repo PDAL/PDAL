@@ -71,6 +71,7 @@ TEST(translateTest, t1)
         " --json filters.stats", output), 0);
 }
 
+// Tests for processing JSON input.
 TEST(translateTest, t2)
 {
     std::string output;
@@ -78,29 +79,114 @@ TEST(translateTest, t2)
     std::string in = Support::datapath("las/autzen_trim.las");
     std::string out = Support::temppath("out.las");
 
-    const char *json = " \
-        [ \
+    std::string json = " \
+        { \
+        \\\"pipeline\\\" : [ \
         { \\\"type\\\":\\\"filters.stats\\\" }, \
         { \\\"type\\\":\\\"filters.range\\\", \
           \\\"limits\\\":\\\"Z[0:100]\\\" } \
-        ]";
+        ] \
+        }";
 
-    EXPECT_EQ(runTranslate(in + " " + out +
-        " --json=\"" + json + "\"", output), 0);
-    EXPECT_EQ(runTranslate(in + " " + out + " -r readers.las "
-        " --json=\"" + json + "\"", output), 0);
-    EXPECT_EQ(runTranslate(in + " " + out + " -w writers.las "
-        " --json=\"" + json + "\"", output), 0);
-    EXPECT_EQ(runTranslate(in + " " + out + " -r readers.las -w writers.las "
-        " --json=\"" + json + "\"", output), 0);
+    // Check that we work with just a bunch of filters.
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
 
-    const char *json2 = " \
-        { \\\"type\\\":\\\"filters.stats\\\" }, \
-        { \\\"type\\\":\\\"filters.range\\\", \
-          \\\"limits\\\":\\\"Z[0:100]\\\" }";
+    // Check that we fail with no bad input file.
+    EXPECT_NE(runTranslate("foo.las " + out + " --json=\"" + json + "\"",
+        output), 0);
 
-    EXPECT_NE(runTranslate(in + " " + out +
-        " --json=\"" + json2 + "\"", output), 0);
+    // Check that we file with bad output file.
+    EXPECT_NE(runTranslate(in + " foo.blam " +  " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we work with no stages.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+        ] \
+        }";
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we work with only an input (not specified as such).
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          \\\"badinput.las\\\" \
+        ] \
+        }";
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we work with an input and an output.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          \\\"badinput.las\\\", \
+          \\\"badoutput.las\\\" \
+        ] \
+        }";
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we work with only an output.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"writers.las\\\", \
+          \\\"filename\\\":\\\"badoutput.las\\\" \
+          } \
+        ] \
+        }";
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we work with only an input.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"readers.las\\\", \
+          \\\"filename\\\":\\\"badinput.las\\\" \
+          } \
+        ] \
+        }";
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we fail with unchanined multiple writers.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"writers.las\\\", \
+          \\\"filename\\\":\\\"badoutput.las\\\" \
+          }, \
+          \\\"badoutput2.las\\\" \
+        ] \
+        }";
+    EXPECT_NE(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
+
+    // Check that we can handle chained writers.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"writers.las\\\", \
+          \\\"filename\\\":\\\"badoutput.las\\\", \
+          \\\"tag\\\":\\\"mytag\\\" \
+          }, \
+          { \
+          \\\"filename\\\":\\\"badoutput2.las\\\", \
+          \\\"inputs\\\": \\\"mytag\\\" \
+          } \
+        ] \
+        }";
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+        output), 0);
 }
 
 TEST(translateTest, t3)
