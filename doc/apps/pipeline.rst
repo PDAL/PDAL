@@ -25,44 +25,45 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
     --stdin, -s               Read pipeline from standard input
     --metadata                Name of file to which metadata should be written.
 
-.. note::
+Substitutions
+................................................................................
 
-    The ``pipeline`` command can accept option substitutions, and they replace
-    existing options that are specified in the input JSON pipeline.  If
-    multiple stages of the same name exist in the pipeline, `all` stages would
-    be overridden. For example, to set the output and input LAS files for a
-    pipeline that does a translation, the ``filename`` for the reader and the
-    writer can be overridden:
+The ``pipeline`` command can accept option substitutions, and they replace
+existing options that are specified in the input JSON pipeline.  If
+multiple stages of the same name exist in the pipeline, `all` stages would
+be overridden. For example, to set the output and input LAS files for a
+pipeline that does a translation, the ``filename`` for the reader and the
+writer can be overridden:
 
-    ::
+::
 
-        $ pdal pipeline translate.json --writers.las.filename=output.laz \
-            --readers.las.filename=input.las
+    $ pdal pipeline translate.json --writers.las.filename=output.laz \
+        --readers.las.filename=input.las
 
-    Option substitution can also refer to the tag of an individual stage.
-    This can be done by using the syntax --stage.<tagname>.<option>.  This
-    allows options to be set on individual stages, even if there are multiple
-    stages of the same type.  For example, if a pipeline contained two LAS
-    readers with tags ``las1`` and ``las2`` respectively, the following
-    command would allow assignment of different filenames to each stage:
+Option substitution can also refer to the tag of an individual stage.
+This can be done by using the syntax --stage.<tagname>.<option>.  This
+allows options to be set on individual stages, even if there are multiple
+stages of the same type.  For example, if a pipeline contained two LAS
+readers with tags ``las1`` and ``las2`` respectively, the following
+command would allow assignment of different filenames to each stage:
 
-    ::
+::
 
-        {
-            "pipeline" : [
-                {
-                    "tag" : "las1",
-                    "type" : "readers.las"
-                },
-                {
-                    "tag" : "las2",
-                    "type" : "readers.las"
-                },
-                "placeholder.laz"
-            ]
-        }
+    {
+        "pipeline" : [
+            {
+                "tag" : "las1",
+                "type" : "readers.las"
+            },
+            {
+                "tag" : "las2",
+                "type" : "readers.las"
+            },
+            "placeholder.laz"
+        ]
+    }
 
-        $ pdal pipeline translate.json --writers.las.filename=output.laz \
-            --stage.las1.filename=file1.las --stage.las2.filename=file2.las
+    $ pdal pipeline translate.json --writers.las.filename=output.laz \
+        --stage.las1.filename=file1.las --stage.las2.filename=file2.las
 
-    Options specified by tag names override options specified by stage types.
+Options specified by tag names override options specified by stage types.
