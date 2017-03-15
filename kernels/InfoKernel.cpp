@@ -122,27 +122,27 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
 
 void InfoKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "input file name", m_inputFile).setOptionalPositional();
-    args.add("all", "dump statistics, schema and metadata", m_showAll);
-    args.add("point,p", "point to dump\n--point=\"1-5,10,100-200\"",
+    args.add("input,i", "Input file name", m_inputFile).setOptionalPositional();
+    args.add("all", "Dump statistics, schema and metadata", m_showAll);
+    args.add("point,p", "Point to dump\n--point=\"1-5,10,100-200\" (0 indexed)",
         m_pointIndexes);
     args.add("query",
          "Return points in order of distance from the specified "
          "location (2D or 3D)\n"
          "--query Xcoord,Ycoord[,Zcoord][/count]",
          m_queryPoint);
-    args.add("stats", "dump stats on all points (reads entire dataset)",
+    args.add("stats", "Dump stats on all points (reads entire dataset)",
         m_showStats);
-    args.add("boundary", "compute a hexagonal hull/boundary of dataset",
+    args.add("boundary", "Compute a hexagonal hull/boundary of dataset",
         m_boundary);
-    args.add("dimensions", "dimensions on which to compute statistics",
+    args.add("dimensions", "Dimensions on which to compute statistics",
         m_dimensions);
-    args.add("schema", "dump the schema", m_showSchema);
-    args.add("pipeline-serialization", "Output file for pipeline serialization",
-         m_pipelineFile);
-    args.add("summary", "dump summary of the info", m_showSummary);
-    args.add("metadata", "dump file metadata info", m_showMetadata);
-    args.add("pointcloudschema", "dump PointCloudSchema XML output",
+    args.add("schema", "Dump the schema", m_showSchema);
+    args.add("pipeline-serialization", "Output filename for pipeline "
+        "serialization", m_pipelineFile);
+    args.add("summary", "Dump summary of the info", m_showSummary);
+    args.add("metadata", "Dump file metadata info", m_showMetadata);
+    args.add("pointcloudschema", "Dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
     args.add("stdin,s", "Read a pipeline file from standard input", m_usestdin);
 }

@@ -124,6 +124,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         StringList invalidArgs;
         invalidArgs.push_back("a_srs");
         invalidArgs.push_back("src_srs_name");
+        invalidArgs.push_back("stdin");
+        invalidArgs.push_back("fast_boundary");
         for (auto arg : invalidArgs)
             if (args.set(arg))
             {
@@ -215,6 +217,10 @@ void TIndexKernel::createFile()
         m_files = FileUtils::glob(m_filespec);
     else
         m_files = readSTDIN();
+
+    if (m_absPath)
+        for (auto& s : m_files)
+            s = FileUtils::toAbsolutePath(s);
 
     if (m_files.empty())
     {

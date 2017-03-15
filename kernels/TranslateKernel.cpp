@@ -81,7 +81,8 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
         setPositional();
     args.add("filter,f", "Filter type", m_filterType).
         setOptionalPositional();
-    args.add("json", "JSON array of filters", m_filterJSON);
+    args.add("json", "PDAL pipeline from which to extract filters.",
+        m_filterJSON);
     args.add("pipeline,p", "Pipeline output", m_pipelineOutputFile);
     args.add("metadata,m", "Dump metadata output to the specified file",
         m_metadataFile);

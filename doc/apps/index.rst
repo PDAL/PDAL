@@ -45,8 +45,7 @@ of year at translation time with the following option:
 
 .. note::
 
-    Driver specific options can be identified using the ``pdal info --options``
-    invocation.
+    Driver-specific options can be identified using the ``pdal <command> --help`` invocation.
 
 .. toctree::
    :maxdepth: 2

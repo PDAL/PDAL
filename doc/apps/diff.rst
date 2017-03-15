@@ -13,8 +13,12 @@ between two sources.
 
 ::
 
-    --source arg     Non-positional option for specifying filename of source file.
-    --candidate arg  Non-positional option for specifying filename to test against source.
+  --source       source file name
+  --candidate    candidate file name
+  --output       output file name
+  --2d           only 2D comparisons/indexing
+  --detail       Output deltas per-point
+  --alldims      Compute diffs for all dimensions (not just X,Y,Z)
 
 The command returns 0 and produces no output if the files describe the same
 point data in the same format, otherwise 1 is returned and a JSON-formatted

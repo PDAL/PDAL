@@ -17,10 +17,10 @@ The ``pcl`` command is used to invoke a PCL JSON pipeline. See
 
 ::
 
-    --input [-i] arg   Non-positional argument to specify input file name.
-    --output [-o] arg  Non-positional argument to specify output file name.
-    --pcl [-p] arg     Non-positional argument to specify pcl file name.
-    --compress [-z]    Compress output data (if supported by output format)
-    --metadata [-m]    Forward metadata from previous stages.
+    --input, -i        Input filename
+    --output, -o       Output filename
+    --pcl, -p          PCL filename
+    --compress, -z     Compress output data (if supported by output format)
+    --metadata, -m     Forward metadata (VLRs, header entries, etc) from previous
 
 

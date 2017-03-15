@@ -14,10 +14,13 @@ template) or output directory specification.
 
 ::
 
-    --input [-i] arg   Non-positional option for specifying input file name
-    --output [-o] arg  Non-positional option for specifying output file/directory name
-    --length arg       Edge length for splitter cells.  See :ref:`filters.splitter`.
-    --capacity arg     Point capacity for chipper cells.  See :ref:`filters.chipper`.
+
+    --input, -i     Input filename
+    --output, -o    Output filename
+    --length        Edge length for splitter cells
+    --capacity      Point capacity of chipper cells
+    --origin_x      Origin in X axis for splitter cells
+    --origin_y      Origin in Y axis for splitter cells
 
 If neither the ``--length`` nor ``--capacity`` arguments are specified, an
 implcit argument of capacity with a value of 100000 is added.

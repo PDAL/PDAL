@@ -17,18 +17,14 @@ each of the x, y, and z dimensions.
 
 ::
 
-    --output [-o] arg   Non-positional argument to specify output file name.
-    --compress [-z]     Compress output data (if supported by output format)
-    --count arg         Number of points in created point cloud [0].
-    --bounds arg        Extent (in XYZ to clip output to):
-                        --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
-    --mean arg          List of means (for --distribution normal)
-                        --mean 0.0,0.0,0.0
-                        --mean "0.0 0.0 0.0"
-    --stdev arg         List of standard deviations (for --distribution normal)
-                        --stdev 0.0,0.0,0.0
-                        --stdev "0.0 0.0 0.0"
-    --distribution arg  Distribution type (uniform or normal) [uniform]
-
+  --output, -o       Output file name
+  --compress, -z     Compress output data (if supported by output format)
+  --count            How many points should we write?
+  --bounds           Extent (in XYZ to clip output to)
+  --mean             A comma-separated or quoted, space-separated list of means
+      (normal mode): --mean 0.0,0.0,0.0 --mean "0.0 0.0 0.0"
+  --stdev            A comma-separated or quoted, space-separated list of
+      standard deviations (normal mode): --stdev 0.0,0.0,0.0 --stdev "0.0 0.0 0.0"
+  --distribution     Distribution (uniform / normal)
 
 

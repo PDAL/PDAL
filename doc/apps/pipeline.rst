@@ -13,19 +13,23 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
 
 ::
 
-    --input, -i               input file name
-    --pipeline-serialization  Output file for pipeline serialization
-    --validate                Validate the pipeline (including serialization), but do not write
-                              points
-    --progress                Name of file or FIFO to which stages should write progress
-                              information. The file/FIFO must exist. PDAL will not create the progress file.
-    --stdin, -s               Read pipeline from standard input
-    --metadata                Name of file to which metadata should be written.
+  --input, -i               Input filename
+  --pipeline-serialization  Output file for pipeline serialization
+  --validate                Validate the pipeline (including serialization),
+      but do not write points
+  --progress                Name of file or FIFO to which stages should write
+      progress information. The file/FIFO must exist. PDAL will not create the
+      progress file.
+  --stdin, -s               Read pipeline from standard input
+  --stream                  Attempt to run pipeline in streaming mode.
+  --metadata                Metadata filename
+
 
 Substitutions
 ................................................................................
 
-The ``pipeline`` command can accept option substitutions, and they replace
+The ``pipeline`` command can accept command-line option substitutions and
+they replace
 existing options that are specified in the input JSON pipeline.  If
 multiple stages of the same name exist in the pipeline, `all` stages would
 be overridden. For example, to set the output and input LAS files for a
