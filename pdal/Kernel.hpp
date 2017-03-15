@@ -75,8 +75,6 @@ public:
         StringList names = Utils::split2(getName(), '.');
         return names.size() == 2 ? names[1] : std::string();
     }
-    bool isVisualize() const;
-    void visualize(PointViewPtr view);
 
 protected:
     // this is protected; your derived class ctor will be the public entry point
@@ -117,7 +115,6 @@ private:
     void outputHelp(ProgramArgs& args);
     void outputVersion();
     void addBasicSwitches(ProgramArgs& args);
-    void parseCommonOptions();
 
     void doSwitches(const StringList& cmdArgs, ProgramArgs& args);
     int doStartup();
@@ -127,14 +124,11 @@ private:
 
     static bool test_parseStageOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
-    /**
-**/
 
     bool m_showHelp;
     bool m_showOptions;
     bool m_showTime;
     bool m_hardCoreDebug;
-    bool m_visualize;
     std::string m_label;
 
     Kernel& operator=(const Kernel&); // not implemented

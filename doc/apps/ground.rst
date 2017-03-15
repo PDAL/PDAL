@@ -15,7 +15,6 @@ versus non-ground returns.
 
     --developer-debug   Enable developer debug (don't trap exceptions)
     --label             A string to label the process with
-    --visualize         Visualize result
     --driver            Override reader driver
     --input, -i         Input filename
     --output, -o        Output filename
