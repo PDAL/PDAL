@@ -109,13 +109,7 @@ int GroundKernel::execute()
     Stage& writer(makeWriter(m_outputFile, groundStage, ""));
 
     writer.prepare(table);
-
-    // process the data, grabbing the PointViewSet for visualization of the
-    // resulting PointView
-    PointViewSet viewSetOut = writer.execute(table);
-
-    if (isVisualize())
-        visualize(*viewSetOut.begin());
+    writer.execute(table);
 
     return 0;
 }

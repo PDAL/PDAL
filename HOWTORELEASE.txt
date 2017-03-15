@@ -4,7 +4,7 @@ Steps for Making a PDAL Release
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 09/11/2015
+:Date: 03/14/2017
 
 This document describes the process for releasing a new version of PDAL.
 
@@ -34,6 +34,8 @@ Release Process
   - Increment the doc build branch of .travis.yml:
 
     "$TRAVIS_BRANCH" = "1.2-maintenance"
+
+  - Make DockerHub build entry for new release branch.
 
 
 2) Update README to include any relevant info about the release that
@@ -93,14 +95,14 @@ Release Process
 11) Upload Python extension to PyPI
 
 12) Publish JNI Bindings
-    What you need: 
+    What you need:
         - an account on sonatype (https://issues.sonatype.org/secure/Signup!default.jspa)
-        - ~/.sbt/0.13/sonatype.sbt file with the following content: 
+        - ~/.sbt/0.13/sonatype.sbt file with the following content:
             credentials += Credentials("Sonatype Nexus Repository Manager",
                            "oss.sonatype.org",
                            "<your username>",
                            "<your password>")
-    
+
     The description of the Sonatype publishment process (everything described below is in a java dir: cd PDAL/java):
         - Publishing snaphots:
             Snapshot can be published without PGP sign, it is published to a snapshot repo and allows immediate snaphot updates.
@@ -108,7 +110,7 @@ Release Process
               - ./scripts/publish-local.sh (publishes scala 2.11 version)
               - ./scripts/publish-local-212.sh (publishes scala 2.12 version)
             To publish everything into sonatype snapshot repo use:
-              - ./scripts/publish-all.sh  
+              - ./scripts/publish-all.sh
             Summary:
               - Run ./scripts/publish-all.sh and everything is available in a snaphost repository
         - Publishing releases:
@@ -116,18 +118,18 @@ Release Process
               - ./scripts/publish-all.sh --suffix="" --signed
                `suffix` defines version suffix (for example `--suffix="-RC1"`)
                `signed` means that jar would be uploaded into a staging sonatype repo with a PGP sign
-            Staging means a special repository in a pre released condition. 
+            Staging means a special repository in a pre released condition.
               - Go into staging repos panel: https://oss.sonatype.org/#stagingRepositories (log in using sonatype user / pwd)
               - Filter by package name (pdal in our case) and select staging repo
-              - Press Close button on the top of the table with repos. It would run packages 
+              - Press Close button on the top of the table with repos. It would run packages
                 validation and will close staging repo in a succesfull case
-              - After succesfull closing press Release button. It would be immediately published into sonatype releases repo, 
-                and synced with maven central ~ in 10 minutes and ~ in 2 hours it would be indexed here: 
+              - After succesfull closing press Release button. It would be immediately published into sonatype releases repo,
+                and synced with maven central ~ in 10 minutes and ~ in 2 hours it would be indexed here:
                 http://search.maven.org/#search%7Cga%7C1%7Cio.pdal
             Full official guide: http://central.sonatype.org/pages/ossrh-guide.html
             Deploying to sonatype using sbt official doc: http://www.scala-sbt.org/release/docs/Using-Sonatype.html
-            Official sonatype guide with pics of (https://oss.sonatype.org/#stagingRepositories) and answers the question what 
-            to do after jars were published into a staging repo (in our case after ./scripts/publish-all.sh --suffix="" --signed step) 
+            Official sonatype guide with pics of (https://oss.sonatype.org/#stagingRepositories) and answers the question what
+            to do after jars were published into a staging repo (in our case after ./scripts/publish-all.sh --suffix="" --signed step)
             Summary:
               - Run ./scripts/publish-all.sh --suffix="" --signed to publish everything into staging repo
               - Go to sonatype panel https://oss.sonatype.org/#stagingRepositories and release the jar

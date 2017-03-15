@@ -95,7 +95,6 @@
 #include <io/LasWriter.hpp>
 #include <io/PlyWriter.hpp>
 #include <io/SbetWriter.hpp>
-#include <io/DerivativeWriter.hpp>
 #include <io/TextWriter.hpp>
 #include <io/NullWriter.hpp>
 
@@ -293,7 +292,6 @@ StageFactory::StageFactory(bool no_plugins)
 
     // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
-    PluginManager::initializePlugin(DerivativeWriter_InitPlugin);
     PluginManager::initializePlugin(GDALWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);

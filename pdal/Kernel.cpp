@@ -52,10 +52,7 @@
 namespace pdal
 {
 
-Kernel::Kernel() :
-    m_showTime(false)
-    , m_hardCoreDebug(false)
-    , m_visualize(false)
+Kernel::Kernel() : m_showTime(false), m_hardCoreDebug(false)
 {}
 
 bool Kernel::isStagePrefix(const std::string& stageType)
@@ -273,92 +270,7 @@ int Kernel::innerRun(ProgramArgs& args)
         return -1;
     }
 
-    parseCommonOptions();
     return execute();
-}
-
-
-bool Kernel::isVisualize() const
-{
-    return m_visualize;
-}
-
-
-void Kernel::visualize(PointViewPtr view)
-{
-    PipelineManager manager;
-
-    manager.commonOptions() = m_manager.commonOptions();
-    manager.stageOptions() = m_manager.stageOptions();
-
-    BufferReader& reader =
-        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
-    reader.addView(view);
-
-    Stage& writer = manager.makeWriter("", "writers.pclvisualizer", reader);
-
-    PointTable table;
-    writer.prepare(table);
-    writer.execute(table);
-}
-
-/*
-void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
-{
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-    int viewport = 0;
-
-    // Determine XYZ bounds
-    BOX3D const& input_bounds = input_view->calculateBounds();
-    BOX3D const& output_bounds = output_view->calculateBounds();
-
-    // Convert PointView to a PCL PointCloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(
-        new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(
-        const_cast<PointViewPtr>(*input_view), *input_cloud, input_bounds);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(
-        new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(
-        const_cast<PointViewPtr>(*output_view), *output_cloud, output_bounds);
-
-    // Create PCLVisualizer
-    std::shared_ptr<pcl::visualization::PCLVisualizer> p(
-        new pcl::visualization::PCLVisualizer("3D Viewer"));
-
-    // Set background to black
-    p->setBackgroundColor(0, 0, 0);
-
-    // Use Z dimension to colorize points
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ>
-        input_color(input_cloud, "z");
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ>
-        output_color(output_cloud, "z");
-
-    // Add point cloud to the viewer with the Z dimension color handler
-    p->createViewPort(0, 0, 0.5, 1, viewport);
-    p->addPointCloud<pcl::PointXYZ> (input_cloud, input_color, "cloud");
-    p->createViewPort(0.5, 0, 1, 1, viewport);
-    p->addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "cloud1");
-
-    p->resetCamera();
-
-    while (!p->wasStopped())
-    {
-        p->spinOnce(100);
-        std::this_thread::sleep_for(std::chrono::microseconds(100000));
-    }
-#endif
-}
-*/
-
-
-void Kernel::parseCommonOptions()
-{
-    Options& options = m_manager.commonOptions();
-
-    if (m_visualize)
-        options.add("visualize", m_visualize);
 }
 
 
@@ -382,9 +294,7 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
-
-    args.add("visualize", "Visualize result", m_visualize);
-    args.add("driver", "Override reader driver", m_driverOverride, "");
+    args.add("driver", "Override reader driver", m_driverOverride);
 }
 
 Stage& Kernel::makeReader(const std::string& inputFile, std::string driver)

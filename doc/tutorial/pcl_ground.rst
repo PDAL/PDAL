@@ -13,7 +13,7 @@ Implements the Progressive Morphological Filter for segmentation of ground
 points.
 
 .. note::
-  
+
   ``filters.ground`` required PCL and has since been replaced by
   :ref:`filters.pmf`, which is a native PDAL filter. :ref:`ground_command` has
   been retained, but now calls :ref:`filters.pmf` under the hood as opposed to
@@ -56,14 +56,9 @@ Let's start by running ``pdal ground`` with the default parameters.
 
 ::
 
-    $ pdal ground -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz --visualize
+    $ pdal ground -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz
 
 .. note::
-
-   In this tutorial, we use ``--visualize`` to visualize results, but this is
-   only available if PCL is built with VTK and visualization support. If your
-   install does not support VTK/visualization, simply drop ``--visualize`` and
-   visualize the result with the viewer of your choice.
 
 To get an idea of what's happening during each iteration, you can optionally
 increase the verbosity of the output. We'll try ``-v4``.  Here we see a summary
@@ -72,7 +67,7 @@ remaining ground points.
 
 ::
 
-    $ pdal ground -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz --visualize -v4
+    $ pdal ground -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz -v4
 
     --------------------------------------------------------------------------------
     NAME:    ()
@@ -118,7 +113,7 @@ specified with ``-p``.
 
 ::
 
-    $ pdal pcl -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz -p sor-pmf.json --visualize -v4
+    $ pdal pcl -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz -p sor-pmf.json -v4
 
     --------------------------------------------------------------------------------
     NAME:   Progressive Morphological Filter with Outlier Removal (1.0)
@@ -165,7 +160,7 @@ increasing the cell size, we can do a better job of removing such features.
 
 ::
 
-    $ pdal pcl -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz -p sor-pmf2.json --visualize -v4
+    $ pdal pcl -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz -p sor-pmf2.json -v4
 
     --------------------------------------------------------------------------------
     NAME:   Progressive Morphological Filter with Outlier Removal (1.0)

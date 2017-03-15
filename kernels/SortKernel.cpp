@@ -72,9 +72,6 @@ int SortKernel::execute()
 {
     Stage& readerStage = makeReader(m_inputFile, m_driverOverride);
 
-    // go ahead and prepare/execute on reader stage only to grab input
-    // PointViewSet, this makes the input PointView available to both the
-    // processing pipeline and the visualizer
     PointTable table;
     readerStage.prepare(table);
     PointViewSet viewSetIn = readerStage.execute(table);
@@ -96,12 +93,7 @@ int SortKernel::execute()
     Stage& writer = makeWriter(m_outputFile, sortStage, "", writerOptions);
 
     writer.prepare(table);
-
-    // process the data, grabbing the PointViewSet for visualization of the
-    PointViewSet viewSetOut = writer.execute(table);
-
-    if (isVisualize())
-        visualize(*viewSetOut.begin());
+    writer.execute(table);
 
     return 0;
 }

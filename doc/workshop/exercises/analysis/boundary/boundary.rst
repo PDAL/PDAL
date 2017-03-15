@@ -11,7 +11,7 @@ Finding the boundary
 This exercise uses PDAL to find a tight-fighting boundary of an aerial scan.
 Printing the coordinates of the boundary for the file is quite simple using a
 single ``pdal info`` call, but visualizing the boundary is more complicated. To
-complete this exercise, we are going to use :ref:`qgis` to visualize the
+complete this exercise, we are going to use :ref:`qgis` to view the
 boundary, which means we must first install it on our system.
 
 Exercise

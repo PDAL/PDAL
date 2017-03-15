@@ -68,7 +68,7 @@ int SmoothKernel::execute()
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
-    // processing pipeline and the visualizer
+    // processing pipeline.
     readerStage.prepare(table);
     PointViewSet viewSetIn = readerStage.execute(table);
 
@@ -100,13 +100,7 @@ int SmoothKernel::execute()
     Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage, ""));
 
     writer.prepare(table);
-
-    // process the data, grabbing the PointViewSet for visualization of the
-    // resulting PointView
-    PointViewSet viewSetOut = writer.execute(table);
-
-    if (isVisualize())
-        visualize(*viewSetOut.begin());
+    writer.execute(table);
 
     return 0;
 }
