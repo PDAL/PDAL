@@ -106,6 +106,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         decltype(m_creationDoy)(doy));
     args.add("creation_year", "Creation year", m_creationYear,
         decltype(m_creationYear)(year));
+    args.add("pdal_metadata", "Write PDAL metadata as VLR?", m_writePDALMetadata,
+        decltype(m_writePDALMetadata)(false));
     args.add("scale_x", "X scale factor", m_scaleX, decltype(m_scaleX)(".01"));
     args.add("scale_y", "Y scale factor", m_scaleY, decltype(m_scaleY)(".01"));
     args.add("scale_z", "Z scale factor", m_scaleZ, decltype(m_scaleZ)(".01"));
@@ -242,6 +244,9 @@ void LasWriter::fillForwardList()
 void LasWriter::readyTable(PointTableRef table)
 {
     m_forwardMetadata = table.privateMetadata("lasforward");
+    MetadataNode m = table.metadata();
+    if(m_writePDALMetadata)
+        setPDALVLRs(m);
     setExtraBytesVlr();
 }
 
@@ -261,6 +266,9 @@ void LasWriter::readyFile(const std::string& filename,
 
 void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
 {
+
+
+
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
 
@@ -273,6 +281,7 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
     setVlrsFromMetadata(m_forwardMetadata);
+
 
     m_summaryData.reset(new LasSummaryData());
     m_ostream = outStream;
@@ -340,7 +349,31 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
     return node.find(pred);
 }
 
+void LasWriter::setPDALVLRs(MetadataNode& forward)
+{
+    std::ostringstream ostr;
+    Utils::toJSON(forward, ostr);
+    std::string json = ostr.str();
 
+    auto store = [this](std::string json, int recordId, std::string description)
+    {
+        std::vector<uint8_t> data;
+        data.resize(json.size());
+        std::copy(json.begin(), json.end(), data.begin());
+        addVlr("PDAL", recordId, description, data);
+
+
+    };
+
+    store(ostr.str(), 12, "PDAL metadata");
+    ostr.str("");
+
+    PipelineWriter::writePipeline(this, ostr);
+
+    store(ostr.str(), 13, "PDAL pipeline");
+
+
+}
 /// Set VLRs from metadata for forwarded info.
 void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 {
@@ -881,6 +914,7 @@ void LasWriter::doneFile()
 
 void LasWriter::finishOutput()
 {
+
     if (m_compression == LasCompression::LasZip)
         finishLasZipOutput();
     else if (m_compression == LasCompression::LazPerf)

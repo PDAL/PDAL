@@ -126,6 +126,7 @@ private:
     StringHeaderVal<20> m_offsetY;
     StringHeaderVal<20> m_offsetZ;
     MetadataNode m_forwardMetadata;
+    bool m_writePDALMetadata;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -150,6 +151,7 @@ private:
     void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);
     void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
     void setVlrsFromMetadata(MetadataNode& forward);
+    void setPDALVLRs(MetadataNode& m);
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
     void setExtraBytesVlr();

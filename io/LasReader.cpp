@@ -359,6 +359,25 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     m.add<uint32_t>("count",
         m_header.pointCount(), "This field contains the total "
         "number of point records within the file.");
+
+    // PDAL metadata VLR
+    LasVLR *vlr = m_header.findVlr("PDAL", 12);
+    if (vlr)
+    {
+        const char *pos = vlr->data();
+        size_t size = vlr->dataLen();
+        m.addWithType("pdal_metadata", std::string(pos, size), "json", "PDAL Processing Metadata");
+    }
+    //
+    // PDAL pipeline VLR
+    vlr = m_header.findVlr("PDAL", 13);
+    if (vlr)
+    {
+        const char *pos = vlr->data();
+        size_t size = vlr->dataLen();
+        m.addWithType("pdal_pipeline", std::string(pos, size), "json", "PDAL Processing Pipeline");
+    }
+
 }
 
 
