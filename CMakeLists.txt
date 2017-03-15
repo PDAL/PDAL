@@ -231,6 +231,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
+        ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PUBLIC
