@@ -6,7 +6,7 @@
             "datasource": "/data/exercises/analysis/clipping/attributes.vrt",
             "dimension": "Classification",
             "layer": "OGRGeoJSON",
-            "type": "filters.attribute"
+            "type": "filters.overlay"
         },
         {
             "limits": "Classification[6:6]",

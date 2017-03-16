@@ -21,6 +21,14 @@ It will utilize the PDAL :ref:`command line application <apps>` to inspect the
 file.
 
 
+.. note::
+
+    Docker is not required to use PDAL, and there are packages available on
+    Linux (Debian, RPM) and OSX (Homebrew). If you are a developer looking
+    to leverage PDAL, you will need access to the library in your environment,
+    but this quick start document is for those looking to quickly interact
+    with data using PDAL's :ref:`command line applicationds <apps>`.
+
 .. _docker:
 
 Install Docker
@@ -76,7 +84,7 @@ whatever reason.
 
 ::
 
-    docker pull pdal/pdal:1.4
+    docker pull pdal/pdal:1.5
 
 
 .. image:: ./images/docker-quickstart-pull.png
@@ -84,7 +92,7 @@ whatever reason.
 .. note::
 
     Other PDAL versions are provided at the same `Docker Hub`_ location,
-    with an expected tag name (ie ``pdal/pdal:1.4``, or ``pdal/pdal:1.x``) for
+    with an expected tag name (ie ``pdal/pdal:1.5``, or ``pdal/pdal:1.x``) for
     major PDAL versions. The PDAL Docker hub location at
     https://hub.docker.com/u/pdal/ has images and more information
     on this topic.
@@ -114,7 +122,7 @@ Print the first point
 
 ::
 
-    docker run -v /c/Users/hobu:/data pdal/pdal:1.4 pdal info /data/autzen.laz -p 0
+    docker run -v /c/Users/hobu:/data pdal/pdal:1.5 pdal info /data/autzen.laz -p 0
 
 Here's a summary of what's going on with that command invocation
 
@@ -132,7 +140,7 @@ Here's a summary of what's going on with that command invocation
        The `Docker Volume <https://docs.docker.com/engine/userguide/dockervolumes/>`__
        document describes mounting volumes in more detail.
 
-4. ``pdal/pdal:1.4``: This is the Docker image we are going to run. We fetched it
+4. ``pdal/pdal:1.5``: This is the Docker image we are going to run. We fetched it
    with the command above. If it were not already fetched, Docker would attempt
    to fetch it when we run this command.
 
