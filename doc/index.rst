@@ -88,6 +88,7 @@ Drivers
    stages/writers
    stages/filters
    dimensions
+   python
 
 Tutorials
 --------------------------------------------------------------------------------
