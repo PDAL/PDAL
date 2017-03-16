@@ -22,6 +22,9 @@ Example
         <Option name="dimension">
           X
         </Option>
+        <Option name="order">
+          ASC
+        </Option>
         <Reader type="readers.las">
           <Option name="filename">
             unsorted.las
@@ -37,6 +40,9 @@ Options
 
 dimension
   The dimension on which to sort the points.
+
+order
+  The order in which to sort, ASC or DESC [Default: **ASC**]
 
 Notes
 -----

@@ -60,11 +60,24 @@ private:
     Dimension::Id m_dim;
     // Dimension name.
     std::string m_dimName;
+    
+    enum class Order
+    { 
+        Unknown, ASC, DESC
+    };
+
+    // Sort order.
+    Order m_order;
+    // Sort order name.
+    std::string m_orderName;
+
+    static Order findOrder(const std::string & order);
 
     virtual void addArgs(ProgramArgs& args)
     {
         args.add("dimension", "Dimension on which to sort", m_dimName).
             setPositional();
+        args.add("order", "Sort order ASC(ending) or DESC(ending)", m_orderName, "ASC");
     }
 
     virtual void prepared(PointTableRef table)
@@ -77,12 +90,24 @@ private:
                 "'.";
             throw oss.str();
         }
+
+        m_order = findOrder(m_orderName);
+        if (m_order == Order::Unknown)
+        {
+            std::ostringstream oss;
+            oss << getName() << ": Unrecognized sort order '" << m_orderName <<
+                "'.";
+            throw oss.str();
+        }
     }
 
     virtual void filter(PointView& view)
     {
         auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
-            { return p1.compare(m_dim, p2); };
+            {
+                bool result = p1.compare(m_dim, p2);
+                return (m_order == Order::ASC) ? result : !result;
+            };
 
         std::sort(view.begin(), view.end(), cmp);
     }

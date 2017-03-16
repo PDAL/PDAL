@@ -47,5 +47,15 @@ CREATE_STATIC_PLUGIN(1, 0, SortFilter, Filter, s_info)
 
 std::string SortFilter::getName() const { return s_info.name; }
 
+SortFilter::Order SortFilter::findOrder(const std::string & order)
+{
+    if (order == "ASC")
+        return Order::ASC;
+    else if (order == "DESC")
+        return Order::DESC;
+    else
+        return Order::Unknown;
+}
+
 } // namespace pdal
 
