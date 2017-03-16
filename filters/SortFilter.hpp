@@ -45,6 +45,16 @@ extern "C" PF_ExitFunc SortFilter_InitPlugin();
 namespace pdal
 {
 
+enum class SortOrder
+{
+    ASC, // ascending
+    DESC // descending
+};
+
+std::istream& operator >> (std::istream& in, SortOrder& order);
+std::ostream& operator << (std::ostream& in, const SortOrder& order);
+
+
 class PDAL_DLL SortFilter : public Filter
 {
 public:
@@ -61,17 +71,8 @@ private:
     // Dimension name.
     std::string m_dimName;
     
-    enum class Order
-    { 
-        Unknown, ASC, DESC
-    };
-
     // Sort order.
-    Order m_order;
-    // Sort order name.
-    std::string m_orderName;
-
-    static Order findOrder(const std::string & order);
+    SortOrder m_order;
 
     virtual void addArgs(ProgramArgs& args) override;
     virtual void prepared(PointTableRef table) override;

@@ -97,9 +97,10 @@ TEST(SortFilterTest, simple)
         doSort(count);
 }
 
-TEST(SortFilterTest, simpleDimensionUnknown)
+TEST(SortFilterTest, testUnknownOptions)
 {
-    EXPECT_THROW( doSort(10, "not_a_dimension"), std::string );
+    EXPECT_THROW( doSort(1, "not a dimension"), std::exception );
+    EXPECT_THROW( doSort(1, "X", "not an order"), std::exception );
 }
 
 TEST(SortFilterTest, pipelineJSON)
@@ -156,11 +157,6 @@ TEST(SortFilterTest, issue1382)
         double d2 = v->getFieldAs<double>(Dimension::Id::Z, i);
         EXPECT_TRUE(d1 <= d2);
     }
-}
-
-TEST(SortFilterTest, issue1121_unknownOrder)
-{
-    EXPECT_THROW(doSort(10, "X", "not_an_order"), std::string);
 }
 
 TEST(SortFilterTest, issue1121_simpleSortOrderDesc)

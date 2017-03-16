@@ -51,28 +51,14 @@ void SortFilter::addArgs(ProgramArgs& args)
 {
     args.add("dimension", "Dimension on which to sort", m_dimName).
         setPositional();
-    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_orderName, "ASC");
+    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order, SortOrder::ASC);
 }
 
 void SortFilter::prepared(PointTableRef table)
 {
     m_dim = table.layout()->findDim(m_dimName);
     if (m_dim == Dimension::Id::Unknown)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Invalid sort dimension '" << m_dimName <<
-            "'.";
-        throw oss.str();
-    }
-
-    m_order = findOrder(m_orderName);
-    if (m_order == Order::Unknown)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Unrecognized sort order '" << m_orderName <<
-            "'.";
-        throw oss.str();
-    }
+        throwError("Dimension '" + m_dimName + "' not found.");
 }
 
 void SortFilter::filter(PointView& view)
@@ -80,20 +66,37 @@ void SortFilter::filter(PointView& view)
     auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
     {
         bool result = p1.compare(m_dim, p2);
-        return (m_order == Order::ASC) ? result : !result;
+        return (m_order == SortOrder::ASC) ? result : !result;
     };
 
     std::sort(view.begin(), view.end(), cmp);
 }
 
-SortFilter::Order SortFilter::findOrder(const std::string & order)
+std::istream& operator >> (std::istream& in, SortOrder& order)
 {
-    if (order == "ASC")
-        return Order::ASC;
-    else if (order == "DESC")
-        return Order::DESC;
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "ASC")
+        order = SortOrder::ASC;
+    else if (s == "DESC")
+        order = SortOrder::DESC;
     else
-        return Order::Unknown;
+        in.setstate(std::ios::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const SortOrder& order)
+{
+    switch (order)
+    {
+    case SortOrder::ASC:
+        out << "Point";
+    case SortOrder::DESC:
+        out << "Byte";
+    }
+    return out;
 }
 
 } // namespace pdal
