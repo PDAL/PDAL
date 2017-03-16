@@ -73,44 +73,9 @@ private:
 
     static Order findOrder(const std::string & order);
 
-    virtual void addArgs(ProgramArgs& args)
-    {
-        args.add("dimension", "Dimension on which to sort", m_dimName).
-            setPositional();
-        args.add("order", "Sort order ASC(ending) or DESC(ending)", m_orderName, "ASC");
-    }
-
-    virtual void prepared(PointTableRef table)
-    {
-        m_dim = table.layout()->findDim(m_dimName);
-        if (m_dim == Dimension::Id::Unknown)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Invalid sort dimension '" << m_dimName <<
-                "'.";
-            throw oss.str();
-        }
-
-        m_order = findOrder(m_orderName);
-        if (m_order == Order::Unknown)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Unrecognized sort order '" << m_orderName <<
-                "'.";
-            throw oss.str();
-        }
-    }
-
-    virtual void filter(PointView& view)
-    {
-        auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
-            {
-                bool result = p1.compare(m_dim, p2);
-                return (m_order == Order::ASC) ? result : !result;
-            };
-
-        std::sort(view.begin(), view.end(), cmp);
-    }
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual void filter(PointView& view) override;
 
     SortFilter& operator=(const SortFilter&) = delete;
     SortFilter(const SortFilter&) = delete;

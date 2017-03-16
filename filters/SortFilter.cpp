@@ -47,6 +47,45 @@ CREATE_STATIC_PLUGIN(1, 0, SortFilter, Filter, s_info)
 
 std::string SortFilter::getName() const { return s_info.name; }
 
+void SortFilter::addArgs(ProgramArgs& args)
+{
+    args.add("dimension", "Dimension on which to sort", m_dimName).
+        setPositional();
+    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_orderName, "ASC");
+}
+
+void SortFilter::prepared(PointTableRef table)
+{
+    m_dim = table.layout()->findDim(m_dimName);
+    if (m_dim == Dimension::Id::Unknown)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Invalid sort dimension '" << m_dimName <<
+            "'.";
+        throw oss.str();
+    }
+
+    m_order = findOrder(m_orderName);
+    if (m_order == Order::Unknown)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Unrecognized sort order '" << m_orderName <<
+            "'.";
+        throw oss.str();
+    }
+}
+
+void SortFilter::filter(PointView& view)
+{
+    auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
+    {
+        bool result = p1.compare(m_dim, p2);
+        return (m_order == Order::ASC) ? result : !result;
+    };
+
+    std::sort(view.begin(), view.end(), cmp);
+}
+
 SortFilter::Order SortFilter::findOrder(const std::string & order)
 {
     if (order == "ASC")
