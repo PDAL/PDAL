@@ -113,7 +113,7 @@ public:
     typedef PointIdxRef reference;
     typedef void * pointer;
 
-
+    PointViewIter() {}
     PointViewIter(PointView *buf, PointId id) : m_buf(buf), m_id(id)
     {}
 

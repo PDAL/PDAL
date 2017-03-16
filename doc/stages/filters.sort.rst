@@ -43,10 +43,3 @@ dimension
 
 order
   The order in which to sort, ASC or DESC [Default: **ASC**]
-
-Notes
------
-
-The sorting algorithm used is not stable, meaning that one cannot chain
-multiple Sort filters to sort order point buffer heirarchically (say,
-primarily by the dimension X and secondairly by the dimension Y).
