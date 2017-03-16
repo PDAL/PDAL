@@ -92,9 +92,9 @@ std::ostream& operator<<(std::ostream& out, const SortOrder& order)
     switch (order)
     {
     case SortOrder::ASC:
-        out << "Point";
+        out << "ASC";
     case SortOrder::DESC:
-        out << "Byte";
+        out << "DESC";
     }
     return out;
 }
