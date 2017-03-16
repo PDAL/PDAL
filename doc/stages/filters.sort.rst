@@ -3,9 +3,8 @@
 filters.sort
 ============
 
-The sort filter orders a point view based on the values of a dimension.
-The current filter only supports sorting based on a single dimension in
-increasing order.
+The sort filter orders a point view based on the values of a dimension. The
+sorting can be done in increasing (ascending) or decreasing (descending) order.
 
 Example
 -------
