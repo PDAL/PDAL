@@ -93,7 +93,7 @@ TEST(SortFilterTest, simple)
 {
     // note that this also tests default sort order ASC
     point_count_t inc = 1;
-    for (point_count_t count = 3; count < 1000; count += inc, inc *= 2)
+    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
         doSort(count);
 }
 
@@ -166,7 +166,7 @@ TEST(SortFilterTest, issue1121_unknownOrder)
 TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
 {
     point_count_t inc = 1;
-    for (point_count_t count = 3; count < 1000; count += inc, inc *= 2)
+    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
     {
         doSort(count, "X", "ASC");
         doSort(count, "X", "DESC");
