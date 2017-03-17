@@ -1,7 +1,6 @@
 USR_LOCAL="/usr/local"
 USR="/usr"
 TIFF_HOME=$USR_LOCAL
-LASZIP_HOME=$USR_LOCAL
 LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.4/
 WEBSOCKETPP_HOME=/Users/hobu/dev/git/websocketpp
 HEXER_HOME="/usr/local"
@@ -41,8 +40,6 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
         -DHEXER_LIBRARY=${HEXER_HOME}/lib/libhexer.${SO_EXT} \
-        -DLASZIP_INCLUDE_DIR=${LASZIP_HOME}/include \
-        -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
