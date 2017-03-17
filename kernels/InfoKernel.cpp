@@ -312,7 +312,16 @@ void InfoKernel::setup(const std::string& filename)
         stage = m_statsStage;
     }
     if (m_boundary)
-        m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
+    {
+        try
+        {
+            m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
+        } catch (pdal::pdal_error&)
+        {
+            m_hexbinStage = nullptr;
+
+        }
+    }
 }
 
 
@@ -401,7 +410,32 @@ void InfoKernel::dump(MetadataNode& root)
     {
         PointViewSet viewSet = m_manager.views();
         assert(viewSet.size() == 1);
-        root.add(m_hexbinStage->getMetadata().clone("boundary"));
+        if (m_hexbinStage)
+            root.add(m_hexbinStage->getMetadata().clone("boundary"));
+        else
+        {
+            pdal::BOX2D bounds;
+            for (auto const &v: viewSet)
+            {
+                pdal::BOX2D b;
+                v->calculateBounds(b);
+                bounds.grow(b);
+            }
+            std::stringstream polygon;
+            polygon << "POLYGON ((";
+
+            polygon <<         bounds.minx << " " << bounds.miny;
+            polygon << ", " << bounds.maxx << " " << bounds.miny;
+            polygon << ", " << bounds.maxx << " " << bounds.maxy;
+            polygon << ", " << bounds.minx << " " << bounds.maxy;
+            polygon << ", " << bounds.minx << " " << bounds.miny;
+            polygon << "))";
+
+            MetadataNode m("boundary");
+            m.add("boundary",polygon.str(), "Simple boundary of polygon");
+            root.add(m);
+
+        }
     }
 }
 

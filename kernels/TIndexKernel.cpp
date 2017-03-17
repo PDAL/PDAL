@@ -469,7 +469,10 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     // Need to make sure options get set.
     Stage& reader = manager.makeReader(filename, "");
 
-    if (m_fastBoundary)
+    // If we aren't able to make a hexbin filter, we
+    // will just do a simple fast_boundary.
+    Stage* hexer = &manager.makeFilter("filters.hexbin", reader);
+    if (m_fastBoundary || !hexer)
     {
         QuickInfo qi = reader.preview();
 
@@ -488,11 +491,10 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     }
     else
     {
-        Stage& hexer = manager.makeFilter("filters.hexbin", reader);
 
         PointTable table;
-        hexer.prepare(table);
-        PointViewSet set = hexer.execute(table);
+        hexer->prepare(table);
+        PointViewSet set = hexer->execute(table);
 
         MetadataNode m = table.metadata();
         m = m.findChild("filters.hexbin:boundary");
