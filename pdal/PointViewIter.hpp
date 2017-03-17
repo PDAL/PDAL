@@ -134,7 +134,7 @@ public:
         { return PointViewIter(m_buf, m_id - n); }
     PointViewIter operator-=(const difference_type& n)
         { m_id -= n; return *this; }
-    difference_type operator-(const PointViewIter& i)
+    difference_type operator-(const PointViewIter& i) const
         { return m_id - i.m_id; }
 
     bool operator==(const PointViewIter& i)
