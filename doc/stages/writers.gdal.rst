@@ -19,14 +19,13 @@ potentially contributes to the raster's value.
     If a circle with the provided radius doesn't encompass the entire cell,
     it is possible that some points will not be considered at all, including
     those that may be within the bounds of the raster cell.
-    
+
 .. note::
     If no radius_ is provided, it is set to the product of the resolution_ and
     the square root of two. This is consistent with the original Points2Grid_
-    application from which this algorithm has its roots. 
-    
-.. _Points2Grid:
-http://www.opentopography.org/otsoftware/points2grid
+    application from which this algorithm has its roots.
+
+.. _Points2Grid: http://www.opentopography.org/otsoftware/points2grid
 
 The GDAL writer creates rasters using the data specified in the ``dimension``
 option (defaults to `Z`).The writer will creates up to six rasters based on

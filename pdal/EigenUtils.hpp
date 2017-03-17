@@ -316,6 +316,9 @@ PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
 */
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
 
+Eigen::MatrixXd erodeDiamond(Eigen::MatrixXd data, int iterations);
+Eigen::MatrixXd dilateDiamond(Eigen::MatrixXd data, int iterations);
+
 /**
   Perform a morphological opening of the input matrix.
 

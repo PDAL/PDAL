@@ -17,6 +17,5 @@ Point Cloud Processing and Analysis with PDAL
 
    agenda
    lidar-introduction
-   pdal-introduction
    software
    exercises/index

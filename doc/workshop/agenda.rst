@@ -5,7 +5,7 @@ Introduction
 
 1. :ref:`lidar-introduction`
 
-2. :ref:`pdal-introduction`
+2. :ref:`Introduction to PDAL <about>`
 
 3. :ref:`software`
 

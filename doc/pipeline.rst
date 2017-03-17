@@ -4,10 +4,11 @@
 Pipeline
 ******************************************************************************
 
-Pipelines are the operative construct in PDAL. PDAL constructs a pipeline to
+Pipelines are the operative construct in PDAL, and it is how data are modeled
+from reading, processing, and writing. PDAL internally constructs a pipeline to
 perform data translation operations using :ref:`translate_command`, for
 example. While specific :ref:`applications <apps>` are useful in many contexts,
-a pipeline provides some useful advantages for more complex things:
+a pipeline provides useful advantages for more complex things:
 
 1. You have a record of the operation(s) applied to the data
 2. You can construct a skeleton of an operation and substitute specific
@@ -24,8 +25,8 @@ a pipeline provides some useful advantages for more complex things:
 .. warning::
 
     As of PDAL 1.2, `JSON`_ is now the preferred specification language
-    for PDAL pipelines. XML read support is still available at 1.2, but
-    JSON is preferred. XML support will be dropped in a future release.
+    for PDAL pipelines. XML read support is still available at 1.5, but
+    JSON is preferred, and XML support will be dropped at the 1.6 release.
 
 .. _`JSON`: http://www.json.org/
 
@@ -34,16 +35,11 @@ Introduction
 --------------------------------------------------------------------------------
 
 
-A PDAL JSON object represents a processing pipeline.
+A JSON object represents a PDAL processing pipeline.  The structure is always a
+JSON object, with the primary object called ``pipeline`` being an array of
+inferred or explicit PDAL :ref:`stage_object` representations.
 
-A complete PDAL JSON data structure is always an object (in JSON terms). In PDAL
-JSON, an object consists of a collection of name/value pairs -- also called
-members. For each member, the name is always a string. Member values are either
-a string, number, object, array or one of the literals: "true", "false", and
-"null". An array consists of elements where each element is a value as
-described above.
-
-Examples
+Simple Example
 ................................................................................
 
 A simple PDAL pipeline, inferring the appropriate drivers for the reader and
@@ -67,9 +63,12 @@ writer from filenames, and able to be specified as a set of sequential steps:
     A simple pipeline to convert :ref:`LAS <readers.las>` to :ref:`BPF <readers.bpf>`
     while only keeping points inside the box :math:`[0 \leq x \leq 100, 0 \leq y \leq 100]`.
 
-A more complex PDAL pipeline, that reprojects the stage tagged ``A1``, merges
-the result with ``B``, and writes the merged output with the :ref:`writers.gdal`
-writer:
+Reprojection Example
+................................................................................
+
+A more complex PDAL pipeline reprojects the stage tagged ``A1``, merges
+the result with ``B``, and writes the merged output to a GeoTIFF file
+with the :ref:`writers.gdal` writer:
 
 .. code-block:: json
 
@@ -113,17 +112,6 @@ writer:
 .. _`UTM`: http://spatialreference.org/ref/epsg/nad83-utm-zone-16n/
 .. _`Geographic`: http://spatialreference.org/ref/epsg/4326/
 
-Definitions
-................................................................................
-
-* JavaScript Object Notation (JSON), and the terms object, name, value, array,
-  and number, are defined in IETF RTC 4627, at
-  http://www.ietf.org/rfc/rfc4627.txt.
-
-* The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
-  "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this documention are to
-  be interpreted as described in IETF RFC 2119, at
-  http://www.ietf.org/rfc/rfc2119.txt.
 
 Pipeline Objects
 --------------------------------------------------------------------------------
@@ -230,7 +218,8 @@ reading the input file, the ferry filter is used to copy the Z dimension into a
 new height above ground (HAG) dimension. Next, the :ref:`filters.programmable`
 is used with a Python script to compute height above ground values by comparing
 the Z values to a surface model. These height above ground values are then
-written back into the Z dimension for further analysis.
+written back into the Z dimension for further analysis. See the Python
+code at `hag.py`_.
 
 .. seealso::
 
@@ -255,6 +244,8 @@ written back into the Z dimension for further analysis.
           "autzen-hag.las"
       ]
   }
+
+.. _`hag.py`: https://raw.githubusercontent.com/PDAL/PDAL/master/test/data/autzen/hag.py.in
 
 DTM
 ................................................................................
@@ -470,30 +461,3 @@ PDAL. Readers follow the pattern of :ref:`readers.las` or
     Issuing the command ``pdal info --options`` will list all available
     stages and their options. See :ref:`info_command` for more.
 
-Options
-..............................................................................
-
-Options are the mechanism that PDAL uses to inform :cpp:class:`pdal::Stage`
-entities how to process data. The following example sorts the data using a
-`Morton ordering`_ using :ref:`filters.mortonorder` and writes out a `LASzip`_
-file as the result. We use options to define the ``compression`` function
-for the :ref:`writers.las` :cpp:class:`pdal::Stage`.
-
-.. _`LASzip`: http://www.laszip.org
-.. _`Morton ordering`: http://en.wikipedia.org/wiki/Z-order_curve
-
-.. code-block:: json
-
-    {
-      "pipeline":[
-        "uncompressed.las",
-        {
-          "type":"filters.mortonorder"
-        }
-        {
-          "type":"writers.las",
-          "filename":"compressed.laz",
-          "compression":"true"
-        }
-      ]
-    }

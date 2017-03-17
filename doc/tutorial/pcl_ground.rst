@@ -58,8 +58,6 @@ Let's start by running ``pdal ground`` with the default parameters.
 
     $ pdal ground -i CSite1_orig-utm.laz -o CSite1_orig-utm-ground.laz
 
-.. note::
-
 To get an idea of what's happening during each iteration, you can optionally
 increase the verbosity of the output. We'll try ``-v4``.  Here we see a summary
 of the parameters, along with height threshold, window size, and number of

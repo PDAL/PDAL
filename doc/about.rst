@@ -1,17 +1,19 @@
-.. _pdal-introduction:
+.. _about:
 
-Introduction to PDAL
+About
 ================================================================================
 
-.. include:: ./includes/substitutions.rst
+.. include:: ./workshop/includes/substitutions.rst
 
 What is PDAL?
 --------------------------------------------------------------------------------
 
 |PDAL| is Point Data Abstraction Library, and it is an open source software for
-translating and processing point cloud data. It is not limited to just |LiDAR|
-data, although the focus and impetus for many of the tools have their origins
-in LiDAR.
+translating and processing `point cloud data`_. It is not limited to just
+|LiDAR| data, although the focus and impetus for many of the tools in the
+library have their origins in LiDAR.
+
+.. _`point cloud data`: https://en.wikipedia.org/wiki/Point_cloud
 
 What is its big idea?
 ................................................................................
@@ -38,14 +40,14 @@ have a simple pipeline composed of a :ref:`LAS Reader <readers.las>` stage, a
 specialized program to perform this operation, you can dynamically compose it
 as a sequence of steps or operations.
 
-.. figure:: ./images/intro-pdal-simple-pipeline.png
+.. figure:: ./images/las-crop-bpf-pipeline.png
 
     A simple PDAL pipeline composed of a reader, filter, and writer
     stages.
 
 PDAL can compose intermediate stages, for operations such as filtering,
 clipping, tiling, transforming into a processing pipeline and reuse as
-necessary. It allows you to define these pipelines as `JSON`_ or `XML`_, and it
+necessary. It allows you to define these pipelines as `JSON`_, and it
 provides a command, :ref:`pipeline_command`, to allow you to execute them.
 
 .. note::
@@ -56,7 +58,6 @@ provides a command, :ref:`pipeline_command`, to allow you to execute them.
 
 .. _`Virtual Raster Format`: http://www.gdal.org/gdal_vrttut.html
 .. _`JSON`: https://en.wikipedia.org/wiki/JSON
-.. _`XML`: https://en.wikipedia.org/wiki/XML
 
 
 How is it different than other tools?
@@ -67,9 +68,9 @@ LAStools
 
 .. index:: LAStools
 
-One of the most common open source processing tool suites available is `LAStools`_
-from `Martin Isenburg`_. PDAL is different in philosophy in a number of important
-ways:
+One of the most common open source processing tool suites available for LiDAR
+processing is `LAStools`_ from `Martin Isenburg`_. PDAL is different in
+philosophy in a number of important ways:
 
 1. All components of PDAL are released as open source software under an `OSI`_-approved
    license.
@@ -78,7 +79,7 @@ ways:
    readers, specialized exploitation algorithms, or entire processing pipelines.
 3. PDAL must be able to generically operate on point cloud data of any format --
    not just `ASPRS LAS`_. `LAStools`_ can read and write formats other than LAS, but
-   its view of formats it understands is within the context of the dimension
+   its view of formats it understands is within the context of the :ref:`dimension <dimensions>`
    types provided by the LAS format.
 
 PCL
@@ -89,8 +90,8 @@ PCL
 `PCL`_ is a complementary, rather than substitute, open source software
 processing suite for point cloud data. The developer community of the PCL
 library is focused on algorithm development, robotic and computer vision, and
-real-time laser scanner processing. PDAL links and uses PCL, and PDAL provides a
-convenient pipeline mechanism to orchestrate PCL operations.
+real-time laser scanner processing. PDAL links and uses PCL, and PDAL provides
+a convenient pipeline mechanism to orchestrate PCL operations.
 
 .. note::
 
@@ -102,16 +103,17 @@ Greyhound and Entwine
 
 .. index:: Greyhound, Entwine
 
-`Greyhound`_ is an open source software from Hobu, Inc. that allows clients
+`Greyhound`_ is an open source software from `Hobu, Inc.`_ that allows clients
 over the internet to query and stream progressive point cloud data.  `Entwine`_
 is an open source software from Hobu, Inc. that organizes massive point cloud
 collections into `Greyhound`_-streamable data services. These two software
 projects allow province-scale LiDAR collections to be organized and served
 via HTTP clients over the internet.
 
+.. _`Hobu, Inc.`: https://hobu.co
 
-.. _`Entwine`: http://github.com/connormanning/entwine
-.. _`Greyhound`: http://github.com/hobu/greyhound
+.. _`Entwine`: https://entwine.io
+.. _`Greyhound`: http://greyhound.io
 
 plas.io and Potree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,10 +139,10 @@ Others
 
 .. index:: OrfeoToolbox, libLAS, CloudCompare, Fusion
 
-Other open source point cloud softwares tend to be GUI, rather than library,
-focused.  They include some processing operations, and sometimes they even
-embed tools such as PDAL. We're obviously biased toward PDAL, but you might
-find useful bits of functionality in them. These other tools include:
+Other open source point cloud softwares tend to be Desktop GUI, rather than
+library, focused.  They include some processing operations, and sometimes they
+even embed tools such as PDAL. We're obviously biased toward PDAL, but you
+might find useful bits of functionality in them. These other tools include:
 
 * `libLAS`_
 * `CloudCompare`_
@@ -289,34 +291,11 @@ Python API
 
 PDAL supports both embedding |Python| and extending with |Python|. These
 allow you to dynamically interact with point cloud data in a more
-comfortable and familiar language environment for geospatial practitioners
-
-Embed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. index:: Embed, Python
-
-By embedding Python, PDAL allows you to interact with point cloud data using
-typical `Numpy`_ features. PDAL embeds |Python| scripts in your processing work
-flows with the :ref:`filters.programmable` and :ref:`filters.predicate`
-filters. Your Python scripts can process and interact with point cloud data
-during the execution of a :ref:`PDAL pipeline <pipeline>`, and you are free to
-dynamically do whatever you want in your scripts.
-
-Extension
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. index:: Extension
-
-PDAL also provides a Python extension for software developers who simply
-want to use data as a mechanism to abstract data formats. This approach
-works really well in algorithm work bench scenarios, simple data testing
-and validation challenges, or situations where full C++ applications would be
-too much effort or complexity.
+comfortable and familiar language environment for geospatial practitioners.
 
 .. seealso::
 
-    The :ref:`python_installation` document contains information on how to
+    The :ref:`python` document contains information on how to
     install and use the PDAL Python extension.
 
 .. _`Numpy`: http://www.numpy.org/

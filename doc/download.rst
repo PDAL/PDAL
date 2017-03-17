@@ -43,7 +43,7 @@ The main repository for PDAL is located on github at https://github.com/PDAL/PDA
 
 You can obtain a copy of the active source code by issuing the following command::
 
-    git clone git@github.com:PDAL/PDAL.git pdal
+    git clone https://github.com/PDAL/PDAL.git pdal
 
 
 
@@ -58,15 +58,15 @@ tutorial at :ref:`docker` for more information.
 
 ::
 
-    docker pull pdal/pdal:1.2
+    docker pull pdal/pdal:1.5
 
 
 Windows
 ................................................................................
 
-A 1.1.0 release of PDAL is available via `OSGeo4W`_. It is only 64-bit at this
-time. Use the :ref:`docker` builds if you want to use the PDAL :ref:`apps`, otherwise,
-a call for help with building current Windows PDAL builds is at https://lists.osgeo.org/pipermail/pdal/2016-November/001089.html
+Windows users are asked to use the :ref:`docker` builds for :ref:`apps` access,
+otherwise, a call for help with building current Windows PDAL builds is at
+https://lists.osgeo.org/pipermail/pdal/2016-November/001089.html
 
 RPMs
 ................................................................................

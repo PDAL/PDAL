@@ -43,6 +43,14 @@ source code, or follow the :ref:`quickstart` to get going in a hurry with
 .. _`Point cloud web services with Greyhound, Entwine, and PDAL`: https://2016.foss4g-na.org/session/point-cloud-web-services-greyhound-entwine-and-pdal
 .. _`Filtering point clouds with PDAL and PCL`: https://2016.foss4g-na.org/session/filtering-point-clouds-pdal-and-pcl
 
+About
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   about
+
 
 Download
 --------------------------------------------------------------------------------
@@ -87,7 +95,22 @@ Drivers
    stages/readers
    stages/writers
    stages/filters
+
+Dimensions
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
    dimensions
+
+Python
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   python
 
 Tutorials
 --------------------------------------------------------------------------------

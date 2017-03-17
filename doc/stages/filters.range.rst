@@ -3,6 +3,8 @@
 filters.range
 ======================
 
+.. contents::
+
 The range filter applies rudimentary filtering to the input point cloud
 based on a set of criteria on the given dimensions.
 
@@ -58,3 +60,61 @@ limits
   1, 2, 6 or 7 and have a blue value or 25-75 and have a red value of
   1-50 or 75-255.  In this case, all values are inclusive.
 
+
+.. _ranges:
+
+Ranges
+--------------------------------------------------------------------------------
+
+A range specification is a dimension name, followed by an optional negation
+character ('!'), and a starting and ending value separated by a colon,
+surrounded by parentheses or square brackets.  Either the starting or ending
+values can be omitted.  Parentheses indicate an open endpoint that doesn't
+include the adjacent value.  Square brackets indicate a closed endpoint
+that includes the adjacent value.
+
+Example 1:
+................................................................................
+
+::
+
+  Z[10:]
+
+Selects all points with a Z value greater than or equal to 10.
+
+Example 2:
+................................................................................
+
+::
+
+  Classification[2:2]
+
+Selects all points with a classification of 2.
+
+Example 3:
+................................................................................
+
+::
+
+  Red!(20:40]
+
+Selects all points with red values less than or equal to 20 and those with
+values greater than 40
+
+Example 4:
+................................................................................
+
+::
+
+  Blue[:255)
+
+Selects all points with a blue value less than 255.
+
+Example 5:
+................................................................................
+
+::
+
+  Intensity![25:25]
+
+Selects all points with an intensity not equal to 25.

@@ -117,7 +117,7 @@ Writers (database)
 Filters
 ================================================================================
 
-* :ref:`Geographic attribute assignment<filters.overlay>`
+* :ref:`Geographic attribute assignment <filters.overlay>`
 * :ref:`Polygon clipping <filters.crop>`
 * :ref:`Splitting by volume <filters.chipper>`
 * :ref:`Splitting by geometry <filters.divider>`
