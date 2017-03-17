@@ -61,16 +61,10 @@ public:
     PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr),
             m_progressFd(-1), m_input(nullptr)
         {}
-    PipelineManager(int progressFd) : m_tablePtr(new PointTable()),
-            m_table(*m_tablePtr), m_progressFd(progressFd), m_input(nullptr)
-        {}
-    PipelineManager(PointTableRef table) : m_table(table), m_progressFd(-1),
-            m_input(nullptr)
-        {}
-    PipelineManager(PointTableRef table, int progressFd) : m_table(table),
-            m_progressFd(progressFd), m_input(nullptr)
-        {}
     ~PipelineManager();
+
+    void setProgressFd(int fd)
+        { m_progressFd = fd; }
 
     void readPipeline(std::istream& input);
     void readPipeline(const std::string& filename);

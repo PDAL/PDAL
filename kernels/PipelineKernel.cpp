@@ -97,7 +97,10 @@ int PipelineKernel::execute()
     if (!Utils::fileExists(m_inputFile))
         throw pdal_error("file not found: " + m_inputFile);
     if (m_progressFile.size())
+    {
         m_progressFd = Utils::openProgress(m_progressFile);
+        m_manager.setProgressFd(m_progressFd);
+    }
 
     m_manager.readPipeline(m_inputFile);
 

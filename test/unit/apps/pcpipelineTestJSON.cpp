@@ -107,8 +107,28 @@ TEST(pipelineBaseTest, common_opts)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
+    int stat = Utils::run_shell_command(cmd + " -h", output);
     EXPECT_EQ(stat, 0);
+}
+
+
+TEST(pipelineBaseTest, progress)
+{
+    std::string cmd = appName();
+    std::string progressOut = Support::temppath("progress.out");
+    FileUtils::deleteFile(progressOut);
+    auto handle = FileUtils::createFile(progressOut);
+    FileUtils::closeFile(handle);
+
+    cmd += " --progress " + progressOut + " "  +
+        Support::configuredpath("pipeline/bpf2las.json");
+
+    std::string output;
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+
+    std::string progress = FileUtils::readFileIntoString(progressOut);
+    EXPECT_NE(progress.find("READYFILE"), std::string::npos);
+    EXPECT_NE(progress.find("DONEFILE"), std::string::npos);
 }
 
 class json : public testing::TestWithParam<const char*> {};
