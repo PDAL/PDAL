@@ -16,6 +16,10 @@ run pre-built software in a way that is isolated from your system. Think of
 it like a binary that doesn't depend on your operating system's configuration
 to be able to run.
 
+While Docker is convenient, it is not for everyone. You can also obtain the
+software by installing a Linux package from :ref:`download` or compiling it
+yourself from :ref:`building`.
+
 This exercise will print the first point of an :ref:`ASPRS LAS <readers.las>` file.
 It will utilize the PDAL :ref:`command line application <apps>` to inspect the
 file.
@@ -28,6 +32,8 @@ file.
     to leverage PDAL, you will need access to the library in your environment,
     but this quick start document is for those looking to quickly interact
     with data using PDAL's :ref:`command line applicationds <apps>`.
+
+    If you need to compile
 
 .. _docker:
 

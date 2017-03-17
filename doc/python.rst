@@ -86,10 +86,10 @@ results as `Numpy`_ arrays:
 Installation
 ................................................................................
 
-To install it need to compile and install :ref:`PDAL <building>` and
-then install the PDAL Python extension. The extension lives on `PyPI`_ at
-https://pypi.python.org/pypi/PDAL and you should use that version as
-your canonical Python extension install.
+PDAL Python bindings require a working PDAL install (:ref:`PDAL <building>`)
+and then installation of the Python extension. The extension lives on `PyPI`_
+at https://pypi.python.org/pypi/PDAL and you should use that version as your
+canonical Python extension install.
 
 .. _`PyPI`: https://pypi.python.org/pypi/PDAL
 
