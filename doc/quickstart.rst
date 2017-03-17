@@ -33,7 +33,10 @@ file.
     but this quick start document is for those looking to quickly interact
     with data using PDAL's :ref:`command line applicationds <apps>`.
 
-    If you need to compile
+.. seealso::
+
+    If you need to compile your own copy of PDAL, see :ref:`compilation` for
+    more details.
 
 .. _docker:
 

@@ -43,7 +43,7 @@ The main repository for PDAL is located on github at https://github.com/PDAL/PDA
 
 You can obtain a copy of the active source code by issuing the following command::
 
-    git clone git@github.com:PDAL/PDAL.git pdal
+    git clone https://github.com/PDAL/PDAL.git pdal
 
 
 
