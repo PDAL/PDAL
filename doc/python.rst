@@ -4,6 +4,9 @@
 Python
 ********************************************************************
 
+.. index:: Numpy, Python
+
+
 PDAL provides Python support in two significant ways. First it `embeds`_ Python
 to allow you to write Python programs that interact with data using
 :ref:`filters.programmable` and :ref:`filters.predicate` filters. Second,
@@ -19,7 +22,6 @@ can use to leverage PDAL capabilities in their own applications.
     data is provided to both the filters ands the extension as
     Numpy arrays.
 
-.. _Python: http://python.org/
 .. _NumPy: http://www.numpy.org/
 
 Versions
@@ -31,6 +33,8 @@ for adhoc development and testing.
 
 Embed
 --------------------------------------------------------------------------------
+
+.. index:: Embed, Python
 
 PDAL allows users to embed Python functions inline with other :ref:`pipeline`
 processing operations. The purpose of this capability is to allow users to
@@ -49,6 +53,8 @@ need to get the job done.
 
 Extend
 --------------------------------------------------------------------------------
+
+.. index:: Extension, Python
 
 PDAL provides a Python extension that gives users access to executing
 :ref:`pipeline` instantiations and capturing the results as `Numpy`_ arrays.
@@ -95,6 +101,7 @@ canonical Python extension install.
 
 Install from local
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 In the source code of PDAL there is a ``python`` folder, you have to enter
 there and run ::
 
@@ -104,6 +111,9 @@ there and run ::
 
 Install from repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: Install, Python
+
 The second method to install the PDAL Python extension is to use `pip`_
 or `easy_install`_, you have to run the command as administrator. ::
 

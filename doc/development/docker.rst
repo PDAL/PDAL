@@ -15,6 +15,7 @@ of `Docker`_ containers. PDAL keeps three Docker containers current.
 
 
 
+.. _`Docker`: https://www.docker.com/
 
 .. figure:: ../images/docker-master-branch.png
 
@@ -49,6 +50,8 @@ of the SHA you wish to use to have `DockerHub`_ build.
     `Ubuntu Xenial`_. When the next Ubuntu LTS is released,
     the PDAL project will likely move to it.
 
+.. _`Ubuntu Xenial: http://releases.ubuntu.com/16.04/
+
 Maintenance
 ================================================================================
 
@@ -63,7 +66,6 @@ for testing, bug confirmation, and deployment
     Docker containers on maintenance branch correspond to
     major PDAL releases.
 
-.. `Ubuntu Xenial`: https://launchpad.net/ubuntu/xenial
 
 Latest (or master)
 ================================================================================
