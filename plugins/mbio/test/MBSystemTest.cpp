@@ -46,7 +46,7 @@ using namespace pdal;
 
 std::string getFilePath()
 {
-    return Support::datapath("mbio/0000_20140810_071646_EX1404L1_MB.all.mb58");
+    return Support::datapath("mbio/mbf_em300raw.mb56");
 }
 
 TEST(MBSystemReaderTest, testRead)
@@ -56,7 +56,9 @@ TEST(MBSystemReaderTest, testRead)
     EXPECT_TRUE(reader);
 
     Option filename("filename", getFilePath());
-    Options options(filename);
+    Options options;
+    options.add("filename", getFilePath());
+    options.add("format", "mbf_em300raw");
     reader->setOptions(options);
 
     PointTable table;
@@ -64,6 +66,6 @@ TEST(MBSystemReaderTest, testRead)
     PointViewSet viewSet = reader->execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2u);
+    EXPECT_EQ(view->size(), 112u);
 
 }
