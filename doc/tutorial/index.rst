@@ -14,7 +14,6 @@ Getting Started
    :maxdepth: 1
 
    using
-   overview
 
 Using PDAL
 ----------

@@ -12,6 +12,7 @@ developing new code can be found in this section.
 .. toctree::
    :maxdepth: 2
 
+   overview
    compilation/index
    conventions
    contributors
@@ -22,5 +23,4 @@ developing new code can be found in this section.
    goals
    testing
    integration
-
 

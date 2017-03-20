@@ -8,9 +8,9 @@ About
 What is PDAL?
 --------------------------------------------------------------------------------
 
-|PDAL| is Point Data Abstraction Library, and it is a C/C++ open source library
+|PDAL| is Point Data Abstraction Library.  It is a C/C++ open source library
 and applications for translating and processing `point cloud data`_. It is not
-limited to just |LiDAR| data, although the focus and impetus for many of the
+limited to |LiDAR| data, although the focus and impetus for many of the
 tools in the library have their origins in LiDAR.
 
 .. _`point cloud data`: https://en.wikipedia.org/wiki/Point_cloud
@@ -20,26 +20,26 @@ What is its big idea?
 
 PDAL allows you to compose :ref:`operations <filters>` on point clouds into
 :ref:`pipelines <pipeline>` of :ref:`stages <stage_index>`. These pipelines can
-be written in a declarative JSON syntax in your favorite language.
+be written in a declarative JSON syntax or constructed using the available API.
 
 Why would you want to do that?
 ................................................................................
 
 A task might be to load some `ASPRS LAS`_ (the most common LiDAR binary format)
 data into a database, but you wanted to transform it into a common coordinate
-system along the way. One option would be to write a specialized monolithic
+system along the way.
+
+One option would be to write a specialized monolithic
 program that reads LAS data, reprojects it as necessary, and then handles the
 necessary operations to insert the data in the appropriate format in the
-database.
-
-This approach has a distinct disadvantage. It is a kind of one-off, and it
-could quickly spiral out of control as you look to add new little tweaks and
-features to the operation. It ends up being very specific, and it
+database.  This approach has a distinct disadvantage in that without careful
+planning it could quickly spiral out of control as you add new little tweaks
+and features to the operation. It ends up being very specific, and it
 does not allow you to easily reuse the component that reads the LAS data
 separately from the component that transforms the data.
 
-Little programs that encapsulate specific functionality that can be composed
-together provide a more streamlined approach to the problem. They allow for
+The PDAL approach is to chain together a set of components,
+each of which encapsulates specific functionality.  The components allow for
 reuse, composition, and separation of concerns.  PDAL views point cloud
 processing operations as a pipeline composed as a series of stages.  You might
 have a simple pipeline composed of a :ref:`LAS Reader <readers.las>` stage, a
@@ -79,7 +79,7 @@ and load the data into PostgreSQL might look something like the following:
       ]
     }
 
-PDAL can compose intermediate stages, for operations such as filtering,
+PDAL can compose intermediate stages for operations such as filtering,
 clipping, tiling, transforming into a processing pipeline and reuse as
 necessary. It allows you to define these pipelines as `JSON`_, and it
 provides a command, :ref:`pipeline_command`, to allow you to execute them.
@@ -109,12 +109,13 @@ philosophy in a number of important ways:
 1. All components of PDAL are released as open source software under an
    `OSI`_-approved license.
 2. PDAL allows application developers to provide proprietary extensions that
-   act as stages in processing pipelines. These might be things like custom format
+   act as stages in processing pipelines. These might be things like custom
+   format
    readers, specialized exploitation algorithms, or entire processing pipelines.
-3. PDAL must be able to generically operate on point cloud data of any format
+3. PDAL can operate on point cloud data of any format
    -- not just `ASPRS LAS`_. `LAStools`_ can read and write formats other than
-   LAS, but its view of formats it understands is within the context of the
-   :ref:`dimension <dimensions>` types provided by the LAS format.
+   LAS, but relates all data to its internal handling of LAS data, limiting
+   it to :ref:`dimension <dimensions>` types provided by the LAS format.
 4. PDAL is coordinated by users with its declarative :ref:`JSON <pipeline>`
    syntax. LAStools is coordinated by linking lots of small, specialized
    command line utilities together with intricate arguments.
@@ -145,8 +146,8 @@ Greyhound and Entwine
 .. index:: Greyhound, Entwine
 
 `Greyhound`_ is an open source software from `Hobu, Inc.`_ that allows clients
-over the internet to query and stream progressive point cloud data.  `Entwine`_
-is an open source software from Hobu, Inc. that organizes massive point cloud
+to query and stream progressive point cloud data over the network.  `Entwine`_
+is open source software from Hobu, Inc. that organizes massive point cloud
 collections into `Greyhound`_-streamable data services. These two software
 projects allow province-scale LiDAR collections to be organized and served
 via HTTP clients over the internet. PDAL provides :ref:`readers.greyhound` to

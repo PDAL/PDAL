@@ -35,7 +35,7 @@ writers, all of which are known as stages.  Any merge operation or filter may be
 placed after any reader.  Output filters are distinct from other filters only in
 that they may create more than one set of points to be further filtered or
 written.  The arrangement of readers, filters and writers is called a PDAL
-pipeline.  Pipelines can be specified using XML as detailed later.
+pipeline.  Pipelines can be specified using JSON as detailed later.
 
 Extending PDAL
 ................................................................................
@@ -56,13 +56,8 @@ formats provide this information in a header or preamble.  PDAL calls each of
 the elements that make up a point a dimension.  PDAL predefines the dimensions
 that are in common use by the formats that it currently supports.  Readers may
 register their use of a predefined dimension or may have PDAL create a
-<<<<<<< Updated upstream
-dimension with a name and type as requested.  Dimensions are described by the
-enumeration pdal::Dimension::Id and associated functions in Dimension.hpp.
-=======
 dimension with a name and type as requested.  Dimensions are described in a
 JSON file, Dimension.json.
->>>>>>> Stashed changes
 
 PDAL has a default type (Double, Float, Signed32, etc.) for each of its
 predefined dimensions which is believed to be sufficient to accurately
@@ -87,7 +82,7 @@ requested type is a 16 bit unsigned integer (Unsigned16), PDAL will use a
 Point Layout
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PDAL stores the set of dimension information in a point layout structure
+PDAL stores the dimension information in a point layout structure
 (PointLayout object).  It stores information about the physical layout of
 data of each point in memory and also stores the type and name of each
 dimension.
@@ -99,7 +94,7 @@ PDAL stores points in what is called a point table (PointTable object).  Each
 point table has an associated point layout describing its format.  All
 points in a single point table have the same dimensions and all operations on
 a PDAL pipeline make use of a single point table.  In addition to storing
-points, a point table also stores pipeline metadata that may get created as
+points, a point table also stores pipeline metadata that may be created as
 pipeline stages are executed.  Most functions receive a PointTableRef object,
 which refers to the active point table.  A PointTableRef can be stored
 or copied cheaply.
@@ -147,7 +142,7 @@ Making a Stage (Reader, Filter or Writer):
 All stages (Stage object) share a common interface, though readers, filters and
 writers each have a simplified interface if the generic stage interface is more
 complex than necessary.  One should create a new stage by creating a subclass of
-reader (Reader object), filter (Filter or MultiFilter object) or writer (Writer
+reader (Reader object), filter (Filter object) or writer (Writer
 object).  When a pipeline is made, each stage is created using its default
 constructor.
 
@@ -163,17 +158,12 @@ functions calls, none of which need to be implemented in a stage unless desired.
 Each stage is guaranteed to be prepared after all stages that precede it in the
 pipeline.
 
-1) void processOptions(const Options& options)
+1) void addArgs(ProgramArgs& args)
 
-    PDAL allows users to specify various options at the command line and in
-    pipeline files.  Those options relevant to a stage are passed to the stage
-    during preparation through this method.  This method should extract any
-    necessary data from the options and set data in member variables or perform
-    other configuration as necessary.  It is not recommended that options passed
-    into this function be copied, as they may become non-copyable in a future
-    version of the library.  Handling all option processing at this point also
-    allows an exception to be thrown in the case of an invalid option that can
-    be properly interpreted by the pipeline.
+    Stages can accept various options to control processing.  These options
+    can be declared and bound to variables in this function.  When arguments
+    are added, the stage also provides a description and optionally a default
+    value for the argument.
 
 2) void initialize() OR void initialize(PointTableRef)
 
@@ -185,7 +175,7 @@ pipeline.
     implement the no-argument version.  Whether to place initialization code
     at this step or in prepared() or ready() (see below) is a judgement call,
     but detection of errors earlier in the process allows faster termination of
-    a pipeline.
+    a command..
 
 3) void addDimensions(PointLayoutPtr layout)
 
@@ -193,8 +183,7 @@ pipeline.
     that it would like as part of the record of each point.  Usually, only
     readers add dimensions to a point table, but there is no prohibition on
     filters or writers from adding dimensions if necessary.  Dimensions should
-    not be added to the layout of a pipeline’s point layout except in this
-    method.
+    not be added to the layout outside of this method.
 
 4) void prepared(PointTableRef)
 
@@ -246,9 +235,9 @@ during processing.  There are some situations that may make this undesirable.
 As an alternative, PDAL allows execution of data with a point table that
 contains a fixed number of points (StreamPointTable).  When a StreamPointTable
 is passed to the execute() function, the private run() function detailed above
-isn't called, and instead processOne() is called.  If a StreamPointTable is
-passed to execute() but a pipeline stage doesn't implement processOne(),
-an exception is thrown.
+isn't called, and instead processOne() is called for each point.  If a
+StreamPointTable is passed to execute() but a pipeline stage doesn't
+implement processOne(), an exception is thrown.
 
 bool processOne(PointRef& ref)
 
@@ -258,7 +247,7 @@ bool processOne(PointRef& ref)
     When a filter returns 'false' from this funciton, it indicates
     that the point just processed should be filtered out and not passed
     to subsequent stages for processing.
-    
+
 Implementing a Reader
 ................................................................................
 
@@ -300,15 +289,14 @@ precision floating point.
         for (auto di = header.names.begin(), di != header.names.end(); ++di)
         {
             std::string dimName = *di;
-            Dimension::Id id = layout->registerOrAssignDim(
-                dimName,
+            Dimension::Id id = layout->registerOrAssignDim(dimName,
                 Dimension::Type::Double);
         }
     }
 
 If a reader implements initialize() and opens a source file during the function,
 the file should be closed again before exiting the function to ensure that
-filehandles aren't exhausted when processing a large number of files.
+file handles aren't exhausted when processing a large number of files.
 
 Readers should use the ready() function to reset the input data to a state
 where the first point can be read from the source.  The done() function
@@ -398,7 +386,7 @@ point_count_t read(PointViewPtr view, point_count_t count)
             while (remaining--)
             {
                 PointRef point(view->point(nextId));
-               
+
                 processOne(point);
                 nextId++;
             }
@@ -501,9 +489,12 @@ individual points in write() and close the file in done().
 
 Like a filter, a writer may receive multiple point views during processing
 of a pipeline.  This will result in the write() function being called once
-for each of the input point views.  Some current writers do not produce
-correct output when provided with multiple point views.  Users should
-use a merge filter immediately prior to such writers to avoid errors.
+for each of the input point views.  Writers may produce a separate output
+file for each input point view or may produce a single output file.  The
+documentation should clearly state this behavior.  Placing a merge filter
+in front of a writer in the pipeline will make sure that a single point
+view is passed to the writer.
+
 As new writers are created, developers should try to make sure
 that they behave reasonably if passed multiple point views -- they
 correctly handle write() being called multiple times after a single
