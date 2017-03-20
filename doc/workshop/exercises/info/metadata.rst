@@ -14,7 +14,7 @@ This exercise uses PDAL to print metadata information. Issue the
 following command in your `Docker Quickstart Terminal`.
 
 
-literalinclude:: ./metadata-command.txt
+.. literalinclude:: ./metadata-command.txt
     :linenos:
 
 
@@ -33,10 +33,12 @@ literalinclude:: ./metadata-command.txt
 
     * `Python JSON library`_
     * `jsawk`_ (like ``awk`` but for JSON data)
+    * `jq`_ (command line processor for JSON)
     * `Ruby JSON library`_
 
 .. _`Python JSON library`: https://docs.python.org/2/library/json.html
 .. _`jsawk`: https://github.com/micha/jsawk
+.. _`jq`: https://stedolan.github.io/jq/
 .. _`Ruby JSON library`: http://ruby-doc.org/stdlib-2.0.0/libdoc/json/rdoc/JSON.html
 
 

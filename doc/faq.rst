@@ -17,6 +17,10 @@ FAQ
   declarative pipeline syntax for orchestrating translation operations.
   PDAL can also use PCL through the :ref:`filters.pclblock` mechanism.
 
+  .. seealso::
+
+        :ref:`about_pcl` describes PDAL and PCL's relationship.
+
 * What is PDAL's relationship to libLAS?
 
   The idea behind libLAS was limited to LIDAR data and basic

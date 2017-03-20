@@ -16,10 +16,6 @@ run pre-built software in a way that is isolated from your system. Think of
 it like a binary that doesn't depend on your operating system's configuration
 to be able to run.
 
-While Docker is convenient, it is not for everyone. You can also obtain the
-software by installing a Linux package from :ref:`download` or compiling it
-yourself from :ref:`building`.
-
 This exercise will print the first point of an :ref:`ASPRS LAS <readers.las>` file.
 It will utilize the PDAL :ref:`command line application <apps>` to inspect the
 file.
@@ -27,16 +23,21 @@ file.
 
 .. note::
 
+    While Docker is convenient, it is not for everyone. You can also obtain the
+    software by installing a Linux package from :ref:`download` or compiling it
+    yourself from :ref:`building`.
+
     Docker is not required to use PDAL, and there are packages available on
-    Linux (Debian, RPM) and OSX (Homebrew). If you are a developer looking
-    to leverage PDAL, you will need access to the library in your environment,
-    but this quick start document is for those looking to quickly interact
-    with data using PDAL's :ref:`command line applicationds <apps>`.
+    Linux (Debian, RPM) and OSX (`Homebrew`_). See :ref:`download` to obtain
+    them. If you are a developer looking to leverage PDAL, you will need access
+    to the library in your environment, but this quick start document is for
+    those looking to quickly interact with data using PDAL's :ref:`command line
+    applications <apps>` and :ref:`pipeline`.
 
-.. seealso::
-
-    If you need to compile your own copy of PDAL, see :ref:`compilation` for
+    If you need to compile your own copy of PDAL, see :ref:`building` for
     more details.
+
+.. _`Homebrew`: http://brew.sh
 
 .. _docker:
 
@@ -86,7 +87,8 @@ Obtain PDAL Image
 ................................................................................
 
 A PDAL image based on the latest release, including all recent patches, is
-pushed to `Docker Hub`_ with every code change on the PDAL maintenance branch.
+pushed to `Docker Hub`_ with every code change on the PDAL maintenance branch (find
+out more about that at :ref:`here <development_docker>`).
 We need to pull it locally so we can use it to run PDAL commands. Once it is
 pulled, we don't have to pull it again unless we want to refresh it for
 whatever reason.
@@ -179,6 +181,8 @@ What's next?
 * :ref:`The PDAL workshop <workshop>` contains numerous hands-on examples with screenshots and
   example data of how to use PDAL :ref:`apps` to tackle point cloud data
   processing tasks.
+* :ref:`python` describes how PDAL embeds and extends Python and
+  how you can leverage these capabilities in your own programs.
 
 .. seealso::
 

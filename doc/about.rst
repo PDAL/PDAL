@@ -8,21 +8,29 @@ About
 What is PDAL?
 --------------------------------------------------------------------------------
 
-|PDAL| is Point Data Abstraction Library, and it is an open source software for
-translating and processing `point cloud data`_. It is not limited to just
-|LiDAR| data, although the focus and impetus for many of the tools in the
-library have their origins in LiDAR.
+|PDAL| is Point Data Abstraction Library, and it is a C/C++ open source library
+and applications for translating and processing `point cloud data`_. It is not
+limited to just |LiDAR| data, although the focus and impetus for many of the
+tools in the library have their origins in LiDAR.
 
 .. _`point cloud data`: https://en.wikipedia.org/wiki/Point_cloud
 
 What is its big idea?
+--------------------------------------------------------------------------------
+
+PDAL allows you to compose :ref:`operations <filters>` on point clouds into :ref:`pipelines
+<pipeline>` of :ref:`stages <stage_index>`. These pipelines can be written in a
+declarative JSON syntax in your favorite language.
+
+Why would you want to do that?
 ................................................................................
 
-Say you wanted to load some `ASPRS LAS`_ (the most common LiDAR binary format)
+A task might be to load some `ASPRS LAS`_ (the most common LiDAR binary format)
 data into a database, but you wanted to transform it into a common coordinate
-system along the way. One option would be to write a specialized program that
-reads LAS data, reprojects it as necessary, and then handles the necessary
-operations to insert the data in the appropriate format in the database.
+system along the way. One option would be to write a specialized monolithic
+program that reads LAS data, reprojects it as necessary, and then handles the
+necessary operations to insert the data in the appropriate format in the
+database.
 
 This approach has a distinct disadvantage. It is a kind of one-off, and it
 could quickly spiral out of control as you look to add new little tweaks and
@@ -40,10 +48,36 @@ have a simple pipeline composed of a :ref:`LAS Reader <readers.las>` stage, a
 specialized program to perform this operation, you can dynamically compose it
 as a sequence of steps or operations.
 
-.. figure:: ./images/las-crop-bpf-pipeline.png
+.. figure:: ./images/las-reproject-pgpointcloud.png
 
     A simple PDAL pipeline composed of a reader, filter, and writer
     stages.
+
+A PDAL JSON :ref:`pipeline` that composes this operation to reproject
+and load the data into PostgreSQL might look something like the following:
+
+.. code-block:: json
+    :linenos:
+    :emphasize-lines: 4, 8, 12
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"input.las"
+        },
+        {
+          "type":"filters.reprojection",
+          "out_srs":"EPSG:3857"
+        },
+        {
+          "type":"writers.pgpointcloud",
+          "connection":"host='localhost' dbname='lidar' user='hobu'",
+          "table":"output",
+          "srid":"3857"
+        }
+      ]
+    }
 
 PDAL can compose intermediate stages, for operations such as filtering,
 clipping, tiling, transforming into a processing pipeline and reuse as
@@ -61,10 +95,10 @@ provides a command, :ref:`pipeline_command`, to allow you to execute them.
 
 
 How is it different than other tools?
-................................................................................
+--------------------------------------------------------------------------------
 
 LAStools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+................................................................................
 
 .. index:: LAStools
 
@@ -81,9 +115,14 @@ philosophy in a number of important ways:
    not just `ASPRS LAS`_. `LAStools`_ can read and write formats other than LAS, but
    its view of formats it understands is within the context of the :ref:`dimension <dimensions>`
    types provided by the LAS format.
+4. PDAL is coordinated by users with its declarative :ref:`JSON <pipeline>`
+   syntax. LAStools is coordinated by linking lots of small, specialized
+   command line utilities together with intricate arguments.
+
+.. _about_pcl:
 
 PCL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+................................................................................
 
 .. index:: PCL
 
@@ -99,7 +138,7 @@ a convenient pipeline mechanism to orchestrate PCL operations.
     PCL capabilities within PDAL operations.
 
 Greyhound and Entwine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+................................................................................
 
 .. index:: Greyhound, Entwine
 
@@ -116,13 +155,14 @@ via HTTP clients over the internet.
 .. _`Greyhound`: http://greyhound.io
 
 plas.io and Potree
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+................................................................................
 
 `plas.io`_ is a `WebGL`_ HTML5 point cloud renderer that speaks `ASPRS LAS`_ and
-`LASzip`_ compressed LAS.
+`LASzip`_ compressed LAS. You can find the software for it at plasiojs.io and
+https://github.com/hobu/plasio-ui
 
 `Potree`_ is a `WebGL`_ HTML5 point cloud renderer that speaks `ASPRS LAS`_ and
-`LASzip`_ compressed LAS.
+`LASzip`_ compressed LAS. You can find the software at https://github.com/potree/potree/
 
 .. note::
 
@@ -135,7 +175,7 @@ plas.io and Potree
 .. _`LASzip`: http://laszip.org
 
 Others
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+................................................................................
 
 .. index:: OrfeoToolbox, libLAS, CloudCompare, Fusion
 
@@ -171,7 +211,7 @@ might find useful bits of functionality in them. These other tools include:
 .. _`Martin Isenburg`: https://www.cs.unc.edu/~isenburg/
 
 Where did PDAL come from?
-................................................................................
+--------------------------------------------------------------------------------
 
 PDAL takes its cue from another very popular open source project -- |GDAL|.
 GDAL is Geospatial Data Abstraction Library, and it is used throughout the geospatial
@@ -209,7 +249,8 @@ characteristics demand a library oriented toward these approaches and PDAL
 achieves it.
 
 What tasks are PDAL good at?
-................................................................................
+--------------------------------------------------------------------------------
+
 
 PDAL is great at point cloud data translation work flows. It allows users to
 apply algorithms to data by providing an abstract API to the content -- freeing
@@ -227,12 +268,12 @@ features make it attractive to software developers, data managers, and
 scientists.
 
 What are PDAL's weak points?
-................................................................................
+--------------------------------------------------------------------------------
 
 PDAL doesn't provide a friendly GUI interface, it expects that you have the
-confidence to dig into a command-line interface, and it sometimes forgets that
-you don't always want to read source code to figure out what exactly is
-happening.  PDAL is an open source project in active development, and because
+confidence to dig into the options of :ref:`filters`, :ref:`readers`,
+and :ref:`writers`. We sometimes forget that you don't always want to read source code
+to figure out how things work. PDAL is an open source project in active development, and because
 of that, we're always working to improve it. Please visit :ref:`community` to
 find out how you can participate if you are interested. The project is always
 looking for contribution, and the mailing list is the place to ask for help if
@@ -254,7 +295,9 @@ Core C++ Software Library
 
 PDAL provides a :ref:`C++ API <api>` software developers can use to provide
 point cloud processing capabilities in their own software. PDAL is cross-platform
-C++, and it can compile and run on Linux, OS X, and Windows.
+C++, and it can compile and run on Linux, OS X, and Windows. The best place to
+learn how to use PDAL's C API is the :ref:`test suite <pdal_test>` and
+its `source code <https://github.com/PDAL/PDAL/tree/master/test/unit>`__.
 
 .. seealso::
 

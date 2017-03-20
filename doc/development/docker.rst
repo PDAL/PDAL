@@ -5,7 +5,7 @@ Building Docker Containers for PDAL
 ================================================================================
 
 
-PDAL's :ref:`repository <source>`_ is linked to `DockerHub`_ for automatic building
+PDAL's :ref:`repository <source>` is linked to `DockerHub`_ for automatic building
 of `Docker`_ containers. PDAL keeps three Docker containers current.
 
 * ``pdal/dependencies:latest`` -- PDAL's dependencies
@@ -16,6 +16,7 @@ of `Docker`_ containers. PDAL keeps three Docker containers current.
 
 
 .. _`Docker`: https://www.docker.com/
+.. _`DockerHub`: https://hub.docker.com/r/pdal/pdal/
 
 .. figure:: ../images/docker-master-branch.png
 
@@ -50,7 +51,7 @@ of the SHA you wish to use to have `DockerHub`_ build.
     `Ubuntu Xenial`_. When the next Ubuntu LTS is released,
     the PDAL project will likely move to it.
 
-.. _`Ubuntu Xenial: http://releases.ubuntu.com/16.04/
+.. _`Ubuntu Xenial`: http://releases.ubuntu.com/16.04/
 
 Maintenance
 ================================================================================
