@@ -118,6 +118,8 @@ philosophy in a number of important ways:
 4. PDAL is coordinated by users with its declarative :ref:`JSON <pipeline>`
    syntax. LAStools is coordinated by linking lots of small, specialized
    command line utilities together with intricate arguments.
+5. PDAL is an open source project, with all of its development activites
+   available online at https://github.com/PDAL/PDAL
 
 .. _about_pcl:
 
