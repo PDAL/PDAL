@@ -22,10 +22,18 @@ and types for convenience in file format transformation.
     the :ref:`readers.las` and :ref:`writers.las` :ref:`stages <stage_index>`
     to actually read and write the data.
 
+.. note::
+
+    PDAL uses a fork of the `NITF Nitro`_ library available at
+    https://github.com/hobu/nitro for NITF read and write support.
+
+.. _`NITF Nitro`: http://nitro-nitf.sourceforge.net/wikka.php?wakka=HomePage
+
 Example
 -------
 
 .. code-block:: json
+    :linenos:
 
     {
       "pipeline":[

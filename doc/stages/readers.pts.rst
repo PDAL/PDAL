@@ -3,7 +3,8 @@
 readers.pts
 ============
 
-The **PTS reader** reads data from PTS files.
+The **PTS reader** reads data from Leica Cyclone PTS files. It is
+not very sophisticated.
 
 
 Example Pipeline

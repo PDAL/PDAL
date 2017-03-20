@@ -9,7 +9,7 @@ interchange file format for LIDAR data.
 .. warning::
 
     Scale/offset are not preserved from an input LAS file.  See below for
-    information on the scale/offset options and the 'forward' option.
+    information on the scale/offset options and the `forward` option.
 
 Example
 -------
@@ -35,7 +35,7 @@ Options
 
 filename
   LAS file to read. The writer will accept a filename containing
-  a single placeholder character ('#').  If input to the writer consists
+  a single placeholder character (`#`).  If input to the writer consists
   of multiple PointViews, each will be written to a separate file, where
   the placeholder will be replaced with an incrementing integer.  If no
   placeholder is found, all PointViews provided to the writer are
@@ -107,7 +107,8 @@ system_id
   String identifying the system that created this LAS file. [Default: "PDAL"]
 
 a_srs
-  The spatial reference system of the file to be written. Can be an EPSG string (e.g. "EPSG:268910") or a WKT string. [Default: Not set]
+  The spatial reference system of the file to be written. Can be an EPSG string
+  (e.g. "EPSG:268910") or a WKT string. [Default: Not set]
 
 global_encoding
   Various indicators to describe the data.  See the LAS documentation.  Note
@@ -166,8 +167,8 @@ extra_dims
   of dimensions being written as part of the LAS extra bytes.
 
 pdal_metadata
-  Write two VLRs containing `JSON`_ output with both the :ref:`metadata` and :ref:`pipeline`
-  serialization. [Default: **false**]
+  Write two VLRs containing `JSON`_ output with both the :ref:`metadata` and
+  :ref:`pipeline` serialization. [Default: **false**]
 
 .. _`JSON`: http://www.json.org/
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html

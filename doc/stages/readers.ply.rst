@@ -3,10 +3,14 @@
 readers.ply
 ===========
 
-The **ply reader** reads the `polygon file format`_, a common file format for storing three dimensional models.
-The `rply library`_ is included with the PDAL source, so there are no external dependencies.
+The **ply reader** reads points and vertices from the `polygon file format`_, a
+common file format for storing three dimensional models.  The `rply library`_
+is included with the PDAL source, so there are no external dependencies.
 
-The ply reader can read ASCII and binary ply files.
+
+.. note::
+
+    The ply reader can read ASCII and binary ply files.
 
 
 Example

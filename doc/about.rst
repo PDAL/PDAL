@@ -18,9 +18,9 @@ tools in the library have their origins in LiDAR.
 What is its big idea?
 --------------------------------------------------------------------------------
 
-PDAL allows you to compose :ref:`operations <filters>` on point clouds into :ref:`pipelines
-<pipeline>` of :ref:`stages <stage_index>`. These pipelines can be written in a
-declarative JSON syntax in your favorite language.
+PDAL allows you to compose :ref:`operations <filters>` on point clouds into
+:ref:`pipelines <pipeline>` of :ref:`stages <stage_index>`. These pipelines can
+be written in a declarative JSON syntax in your favorite language.
 
 Why would you want to do that?
 ................................................................................
@@ -106,15 +106,15 @@ One of the most common open source processing tool suites available for LiDAR
 processing is `LAStools`_ from `Martin Isenburg`_. PDAL is different in
 philosophy in a number of important ways:
 
-1. All components of PDAL are released as open source software under an `OSI`_-approved
-   license.
+1. All components of PDAL are released as open source software under an
+   `OSI`_-approved license.
 2. PDAL allows application developers to provide proprietary extensions that
    act as stages in processing pipelines. These might be things like custom format
    readers, specialized exploitation algorithms, or entire processing pipelines.
-3. PDAL must be able to generically operate on point cloud data of any format --
-   not just `ASPRS LAS`_. `LAStools`_ can read and write formats other than LAS, but
-   its view of formats it understands is within the context of the :ref:`dimension <dimensions>`
-   types provided by the LAS format.
+3. PDAL must be able to generically operate on point cloud data of any format
+   -- not just `ASPRS LAS`_. `LAStools`_ can read and write formats other than
+   LAS, but its view of formats it understands is within the context of the
+   :ref:`dimension <dimensions>` types provided by the LAS format.
 4. PDAL is coordinated by users with its declarative :ref:`JSON <pipeline>`
    syntax. LAStools is coordinated by linking lots of small, specialized
    command line utilities together with intricate arguments.
@@ -147,7 +147,8 @@ over the internet to query and stream progressive point cloud data.  `Entwine`_
 is an open source software from Hobu, Inc. that organizes massive point cloud
 collections into `Greyhound`_-streamable data services. These two software
 projects allow province-scale LiDAR collections to be organized and served
-via HTTP clients over the internet.
+via HTTP clients over the internet. PDAL provides :ref:`readers.greyhound` to
+allow users to read data into PDAL processes from that server.
 
 .. _`Hobu, Inc.`: https://hobu.co
 
@@ -162,7 +163,8 @@ plas.io and Potree
 https://github.com/hobu/plasio-ui
 
 `Potree`_ is a `WebGL`_ HTML5 point cloud renderer that speaks `ASPRS LAS`_ and
-`LASzip`_ compressed LAS. You can find the software at https://github.com/potree/potree/
+`LASzip`_ compressed LAS. You can find the software at
+https://github.com/potree/potree/
 
 .. note::
 
@@ -271,13 +273,13 @@ What are PDAL's weak points?
 --------------------------------------------------------------------------------
 
 PDAL doesn't provide a friendly GUI interface, it expects that you have the
-confidence to dig into the options of :ref:`filters`, :ref:`readers`,
-and :ref:`writers`. We sometimes forget that you don't always want to read source code
-to figure out how things work. PDAL is an open source project in active development, and because
-of that, we're always working to improve it. Please visit :ref:`community` to
-find out how you can participate if you are interested. The project is always
-looking for contribution, and the mailing list is the place to ask for help if
-you are stuck.
+confidence to dig into the options of :ref:`filters`, :ref:`readers`, and
+:ref:`writers`. We sometimes forget that you don't always want to read source
+code to figure out how things work. PDAL is an open source project in active
+development, and because of that, we're always working to improve it. Please
+visit :ref:`community` to find out how you can participate if you are
+interested. The project is always looking for contribution, and the mailing
+list is the place to ask for help if you are stuck.
 
 High Level Overview
 --------------------------------------------------------------------------------
@@ -294,10 +296,11 @@ Core C++ Software Library
 ................................................................................
 
 PDAL provides a :ref:`C++ API <api>` software developers can use to provide
-point cloud processing capabilities in their own software. PDAL is cross-platform
-C++, and it can compile and run on Linux, OS X, and Windows. The best place to
-learn how to use PDAL's C API is the :ref:`test suite <pdal_test>` and
-its `source code <https://github.com/PDAL/PDAL/tree/master/test/unit>`__.
+point cloud processing capabilities in their own software. PDAL is
+cross-platform C++, and it can compile and run on Linux, OS X, and Windows. The
+best place to learn how to use PDAL's C API is the :ref:`test suite
+<pdal_test>` and its `source code
+<https://github.com/PDAL/PDAL/tree/master/test/unit>`__.
 
 .. seealso::
 
@@ -316,7 +319,8 @@ coordinate and construct point cloud processing work flows. Some key tasks
 users can achieve with these applications include:
 
 * Print :ref:`info <info_command>` about a data set
-* Data :ref:`translation <translate_command>` from one point cloud format to another
+* Data :ref:`translation <translate_command>` from one point cloud format to
+  another
 * Application of exploitation algorithms
 
   * Generate a DTM
