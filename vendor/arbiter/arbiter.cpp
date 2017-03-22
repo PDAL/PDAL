@@ -2560,6 +2560,8 @@ std::vector<std::string> Dropbox::glob(std::string rawPath, bool verbose) const
 
 #include <algorithm>
 #include <cstring>
+#include <ios>
+#include <iostream>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -2668,34 +2670,98 @@ Curl::Curl(const Json::Value& json)
 
     m_curl = curl_easy_init();
 
+    // Configurable entries are:
+    //      - timeout           (CURLOPT_LOW_SPEED_TIME)
+    //      - followRedirect    (CURLOPT_FOLLOWLOCATION)
+    //      - caBundle          (CURLOPT_CAPATH)
+    //      - caInfo            (CURLOPT_CAINFO)
+    //      - verifyPeer        (CURLOPT_SSL_VERIFYPEER)
+
+    using Keys = std::vector<std::string>;
+    auto find([](const Keys& keys)->std::unique_ptr<std::string>
+    {
+        for (const auto& key : keys)
+        {
+            if (auto e = util::env(key)) return makeUnique<std::string>(*e);
+        }
+        return std::unique_ptr<std::string>();
+    });
+
+    auto mk([](std::string s) { return makeUnique<std::string>(s); });
+
     if (!json.isNull())
     {
         m_verbose = json["verbose"].asBool();
-
-        const auto h(json["http"]);
+        const auto& h(json["http"]);
 
         if (!h.isNull())
         {
-            m_timeout = h["timeout"].asUInt64();
-
-            const std::string frKey("followRedirect");
-            m_followRedirect = h.isMember(frKey) && h[frKey].asBool();
-
-            if (auto ca = util::env("CURL_CA_PATH"))
+            if (h.isMember("timeout"))
             {
-                m_caPath = makeUnique<std::string>(*ca);
+                m_timeout = h["timeout"].asUInt64();
             }
-            else if (auto ca = util::env("ARBITER_CA_PATH"))
+
+            if (h.isMember("followRedirect"))
             {
-                m_caPath = makeUnique<std::string>(*ca);
+                m_followRedirect = h["followRedirect"].asBool();
+            }
+
+            if (h.isMember("caBundle"))
+            {
+                m_caPath = mk(h["caBundle"].asString());
             }
             else if (h.isMember("caPath"))
             {
-                m_caPath = makeUnique<std::string>(h["caPath"].asString());
+                m_caPath = mk(h["caPath"].asString());
+            }
+
+            if (h.isMember("caInfo"))
+            {
+                m_caInfo = mk(h["caInfo"].asString());
+            }
+
+            if (h.isMember("verifyPeer"))
+            {
+                m_verifyPeer = h["verifyPeer"].asBool();
             }
         }
     }
 
+    Keys verboseKeys{ "VERBOSE", "CURL_VERBOSE", "ARBITER_VERBOSE" };
+    Keys timeoutKeys{ "CURL_TIMEOUT", "ARBITER_HTTP_TIMEOUT" };
+    Keys redirKeys{
+        "CURL_FOLLOWLOCATION",
+        "CURL_FOLLOW_LOCATION",
+        "ARBITER_FOLLOW_LOCATION"
+        "ARBITER_FOLLOW_REDIRECT"
+    };
+    Keys verifyKeys{
+        "CURL_SSL_VERIFYPEER",
+        "CURL_VERIFY_PEER",
+        "ARBITER_VERIFY_PEER"
+    };
+    Keys caPathKeys{ "CURL_CA_PATH", "CURL_CA_BUNDLE", "ARBITER_CA_PATH" };
+    Keys caInfoKeys{ "CURL_CAINFO", "CURL_CA_INFO", "ARBITER_CA_INFO" };
+
+    if (auto v = find(verboseKeys)) m_verbose = !!std::stol(*v);
+    if (auto v = find(timeoutKeys)) m_timeout = std::stol(*v);
+    if (auto v = find(redirKeys)) m_followRedirect = !!std::stol(*v);
+    if (auto v = find(verifyKeys)) m_verifyPeer = !!std::stol(*v);
+    if (auto v = find(caPathKeys)) m_caPath = mk(*v);
+    if (auto v = find(caInfoKeys)) m_caInfo = mk(*v);
+
+    static bool logged(false);
+    if (m_verbose && !logged)
+    {
+        logged = true;
+        std::cout << "Curl config:" << std::boolalpha <<
+            "\n\ttimeout: " << m_timeout << "s" <<
+            "\n\tfollowRedirect: " << m_followRedirect <<
+            "\n\tverifyPeer: " << m_verifyPeer <<
+            "\n\tcaBundle: " << (m_caPath ? *m_caPath : "(default)") <<
+            "\n\tcaInfo: " << (m_caInfo ? *m_caInfo : "(default)") <<
+            std::endl;
+    }
 #endif
 }
 
@@ -2736,9 +2802,14 @@ void Curl::init(
     curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
     curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
 
+    auto toLong([](bool b) { return b ? 1L : 0L; });
+
     // Configuration options.
-    if (m_followRedirect) curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(m_curl, CURLOPT_VERBOSE, toLong(m_verbose));
+    curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, toLong(m_followRedirect));
+    curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, toLong(m_verifyPeer));
     if (m_caPath) curl_easy_setopt(m_curl, CURLOPT_CAPATH, m_caPath->c_str());
+    if (m_caInfo) curl_easy_setopt(m_curl, CURLOPT_CAINFO, m_caInfo->c_str());
 
     // Insert supplied headers.
     for (const auto& h : headers)
@@ -2781,7 +2852,6 @@ Response Curl::get(
     if (reserve) data.reserve(reserve);
 
     init(path, headers, query);
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
     // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
@@ -2809,7 +2879,6 @@ Response Curl::head(std::string path, Headers headers, Query query)
     std::vector<char> data;
 
     init(path, headers, query);
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
     // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
@@ -2842,7 +2911,6 @@ Response Curl::put(
 {
 #ifdef ARBITER_CURL
     init(path, headers, query);
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
     std::unique_ptr<PutData> putData(new PutData(data));
 
@@ -2883,7 +2951,6 @@ Response Curl::post(
 {
 #ifdef ARBITER_CURL
     init(path, headers, query);
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
     std::unique_ptr<PutData> putData(new PutData(data));
     std::vector<char> writeData;
