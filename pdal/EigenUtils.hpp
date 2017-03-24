@@ -331,7 +331,9 @@ PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
          structuring element.
   \return the morphological dilation of the input raster.
 */
-std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations);
+PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
+                                           size_t rows, size_t cols,
+                                           int iterations);
 
 /**
   Perform a morphological erosion of the input raster.
@@ -348,7 +350,9 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
          structuring element.
   \return the morphological erosion of the input raster.
 */
-std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations);
+PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
+                                          size_t rows, size_t cols,
+                                          int iterations);
 
 /**
   Pad input matrix symmetrically.
