@@ -341,6 +341,9 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         // When we get false back from a reader, we're done, so set
         // the point limit to the number of points processed in this loop
         // of the table.
+        if (!pointLimit)
+            finished = true;
+
         for (PointId idx = 0; idx < pointLimit; idx++)
         {
             point.setPointId(idx);
