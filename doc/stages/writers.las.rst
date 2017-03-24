@@ -11,6 +11,44 @@ interchange file format for LIDAR data.
     Scale/offset are not preserved from an input LAS file.  See below for
     information on the scale/offset options and the `forward` option.
 
+VLRs
+-------
+
+VLRs can be created by providing a JSON node called `vlrs` with objects
+containing `user_id` and `data` items.
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.las",
+          "vlrs": [{
+                    "description": "A description under 32 bytes",
+                    "record_id": 42,
+                    "user_id": "hobu",
+                    "data": "dGhpcyBpcyBzb21lIHRleHQ="
+                   },
+                   {
+                    "description": "A description under 32 bytes",
+                    "record_id": 43,
+                    "user_id": "hobu",
+                    "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
+                    }
+                  ]
+          "filename":"outputfile.las"
+        }
+      ]
+    }
+
+
+
+
+
 Example
 -------
 

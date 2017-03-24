@@ -45,6 +45,8 @@
 #include "LasSummaryData.hpp"
 #include "LasZipPoint.hpp"
 
+#include <json/json.h>
+
 extern "C" int32_t LasWriter_ExitFunc();
 extern "C" PF_ExitFunc LasWriter_InitPlugin();
 
@@ -127,6 +129,7 @@ private:
     StringHeaderVal<20> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
+    Json::Value m_userVLRs;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -140,6 +143,7 @@ private:
     virtual void doneFile();
 
     void fillForwardList();
+    void collectUserVLRs();
     template <typename T>
     void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);
