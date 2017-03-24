@@ -6,13 +6,12 @@ filters.smrf
 Filter ground returns using the Simple Morphological Filter (SMRF) approach
 outlined in [Pingel2013]_.
 
-.. [Pingel2013] Pingel, T.J., Clarke, K.C., McBride, W.A., 2013. An improved simple morphological filter for the terrain classification of airborne LIDAR data. ISPRS J. Photogramm. Remote Sens. 77, 21–30.
-
-Example
--------
+Example #1
+----------
 
 The sample pipeline below uses ``filters.smrf`` to segment ground and non-ground
-returns, writing only the ground returns to the output file.
+returns, using default options, and writing only the ground returns to the
+output file.
 
 .. code-block:: json
 
@@ -21,6 +20,31 @@ returns, writing only the ground returns to the output file.
         "input.las",
         {
           "type":"filters.smrf"
+        },
+        {
+          "type":"filters.range",
+          "limits":"Classification[2:2]"
+        }
+        "output.laz"
+      ]
+    }
+
+Example #2
+----------
+
+A more complete example, specifying some options. These match the optimized parameters for Sample 1 given in Table 3 of [Pingel2013]_.
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.smrf",
+          "scalar":1.2,
+          "slope":0.2,
+          "threshold":0.45,
+          "window":16.0
         },
         {
           "type":"filters.range",
@@ -39,7 +63,7 @@ cell
 cut
   Cut net size (``cut=0`` skips the net cutting step). [Default: **0.0**]
   
-outdir
+dir
   Optional output directory for debugging intermediate rasters.
   
 scalar

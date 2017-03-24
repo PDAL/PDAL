@@ -29,6 +29,7 @@ Using PDAL
    clipping-with-shapefile
    calculating-normalized-heights
    dart-throwing
+   ground-filters
 
 
 Developing
