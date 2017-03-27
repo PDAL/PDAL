@@ -48,11 +48,13 @@ using namespace pdal;
 namespace
 {
 
-void doSort(point_count_t count)
+void doSort(point_count_t count, const std::string & dim="X", const std::string & order="")
 {
     Options opts;
 
-    opts.add("dimension", "X");
+    opts.add("dimension", dim);
+    if (!order.empty())
+        opts.add("order", order);
 
     SortFilter filter;
     filter.setOptions(opts);
@@ -78,7 +80,10 @@ void doSort(point_count_t count)
     {
         double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
-        EXPECT_TRUE(d1 <= d2);
+        if(order.empty() || order == "ASC")
+            EXPECT_TRUE(d1 <= d2);
+        else // DES(cending)
+            EXPECT_TRUE(d1 >= d2);
     }
 }
 
@@ -86,9 +91,16 @@ void doSort(point_count_t count)
 
 TEST(SortFilterTest, simple)
 {
+    // note that this also tests default sort order ASC
     point_count_t inc = 1;
     for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
         doSort(count);
+}
+
+TEST(SortFilterTest, testUnknownOptions)
+{
+    EXPECT_THROW( doSort(1, "not a dimension"), std::exception );
+    EXPECT_THROW( doSort(1, "X", "not an order"), std::exception );
 }
 
 TEST(SortFilterTest, pipelineJSON)
@@ -146,3 +158,14 @@ TEST(SortFilterTest, issue1382)
         EXPECT_TRUE(d1 <= d2);
     }
 }
+
+TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
+{
+    point_count_t inc = 1;
+    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
+    {
+        doSort(count, "X", "ASC");
+        doSort(count, "X", "DESC");
+    }
+}
+
