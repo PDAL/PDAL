@@ -316,23 +316,43 @@ PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
 */
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
 
-Eigen::MatrixXd erodeDiamond(Eigen::MatrixXd data, int iterations);
-Eigen::MatrixXd dilateDiamond(Eigen::MatrixXd data, int iterations);
-
 /**
-  Perform a morphological opening of the input matrix.
+  Perform a morphological dilation of the input raster.
 
-  Performs a morphological opening of the input matrix using a diamond
+  Performs a morphological dilation of the input raster using a diamond
   structuring element. Larger structuring elements are approximated by applying
-  multiple iterations of the opening operation. Data will be symmetrically
-  padded at its edges.
+  multiple iterations of the opening operation. The input and output rasters are
+  stored in column major order.
 
-  \param data the input matrix.
+  \param data the input raster.
+  \param rows the number of rows.
+  \param cols the number of cols.
   \param iterations the number of iterations used to approximate a larger 
          structuring element.
-  \return the morphological opening of the input radius.
+  \return the morphological dilation of the input raster.
 */
-PDAL_DLL Eigen::MatrixXd openDiamond(Eigen::MatrixXd data, int iterations);
+PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
+                                           size_t rows, size_t cols,
+                                           int iterations);
+
+/**
+  Perform a morphological erosion of the input raster.
+
+  Performs a morphological erosion of the input raster using a diamond
+  structuring element. Larger structuring elements are approximated by applying
+  multiple iterations of the opening operation. The input and output rasters are
+  stored in column major order.
+
+  \param data the input raster.
+  \param rows the number of rows.
+  \param cols the number of cols.
+  \param iterations the number of iterations used to approximate a larger 
+         structuring element.
+  \return the morphological erosion of the input raster.
+*/
+PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
+                                          size_t rows, size_t cols,
+                                          int iterations);
 
 /**
   Pad input matrix symmetrically.
