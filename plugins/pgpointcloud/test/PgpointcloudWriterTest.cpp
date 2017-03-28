@@ -287,3 +287,20 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 
     EXPECT_THROW(writer->execute(table), pdal_error);
 }
+
+TEST_F(PgpointcloudWriterTest, writeDeleteTable)
+{
+    if (shouldSkipTests())
+    {
+        return;
+    }
+
+    executeOnTestDb("CREATE SCHEMA \"4dal-\"\"test\"\"-schema\"");
+    executeOnTestDb("CREATE TABLE \"4dal-\"\"test\"\"-schema\"."
+                    "\"4dal-\"\"test\"\"-table\" (p PCPATCH)");
+    Options ops = getDbOptions();
+    ops.add("overwrite", true);
+    ops.add("schema", "4dal-\"test\"-schema");
+
+    optionsWrite(ops);
+}
