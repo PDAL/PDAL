@@ -37,6 +37,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
 
+#include "private/DimRange.hpp"
+
 #include <memory>
 
 extern "C" int32_t PMFFilter_ExitFunc();
@@ -67,15 +69,16 @@ private:
     double m_maxDistance;
     double m_initialDistance;
     double m_cellSize;
-    bool m_classify;
-    bool m_extract;
     bool m_approximate;
+    DimRange m_ignored;
+    bool m_lastOnly;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
     std::vector<double> fillNearest(PointViewPtr view, size_t rows, size_t cols,
                                     double cell_size, BOX2D bounds);
     std::vector<double> morphOpen(PointViewPtr view, float radius);
+    virtual void prepared(PointTableRef table);
     std::vector<PointId> processGround(PointViewPtr view);
     std::vector<PointId> processGroundApprox(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);

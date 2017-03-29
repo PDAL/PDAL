@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -37,8 +37,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
 
-#include <memory>
 #include <map>
+#include <memory>
 #include <string>
 
 extern "C" int32_t OutlierFilter_ExitFunc();
@@ -59,10 +59,11 @@ class PDAL_DLL OutlierFilter : public pdal::Filter
 {
 public:
     OutlierFilter() : Filter()
-    {}
+    {
+    }
 
-    static void * create();
-    static int32_t destroy(void *);
+    static void* create();
+    static int32_t destroy(void*);
     std::string getName() const;
 
 private:
@@ -71,8 +72,7 @@ private:
     double m_radius;
     int m_meanK;
     double m_multiplier;
-    bool m_classify;
-    bool m_extract;
+    uint8_t m_class;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
@@ -81,7 +81,7 @@ private:
     virtual PointViewSet run(PointViewPtr view);
 
     OutlierFilter& operator=(const OutlierFilter&); // not implemented
-    OutlierFilter(const OutlierFilter&); // not implemented
+    OutlierFilter(const OutlierFilter&);            // not implemented
 };
 
 } // namespace pdal

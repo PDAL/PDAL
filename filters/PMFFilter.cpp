@@ -37,9 +37,12 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/QuadIndex.hpp>
+#include <pdal/Segmentation.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
+
+#include "private/DimRange.hpp"
 
 namespace pdal
 {
@@ -62,14 +65,34 @@ void PMFFilter::addArgs(ProgramArgs& args)
     args.add("max_distance", "Maximum distance", m_maxDistance, 2.5);
     args.add("initial_distance", "Initial distance", m_initialDistance, 0.15);
     args.add("cell_size", "Cell size", m_cellSize, 1.0);
-    args.add("classify", "Apply classification labels?", m_classify, true);
-    args.add("extract", "Extract ground returns?", m_extract);
     args.add("approximate", "Use approximate algorithm?", m_approximate);
+    args.add("ignore", "Ignore values", m_ignored);
+    args.add("last", "Consider last returns only?", m_lastOnly, true);
 }
 
 void PMFFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Classification);
+}
+
+void PMFFilter::prepared(PointTableRef table)
+{
+    const PointLayoutPtr layout(table.layout());
+
+    m_ignored.m_id = layout->findDim(m_ignored.m_name);
+    if (m_ignored.m_id == Dimension::Id::Unknown)
+    {
+        throwError("Invalid dimension name in 'ignore' option: '" +
+                   m_ignored.m_name + "'.");
+    }
+
+    if (m_lastOnly)
+    {
+        if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
+            !layout->hasDim(Dimension::Id::NumberOfReturns))
+            throwError("Cannot filter using last returns only without "
+                       "ReturnNumber and NumberOfReturns.");
+    }
 }
 
 std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
@@ -347,61 +370,57 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
 
 PointViewSet PMFFilter::run(PointViewPtr input)
 {
-    bool logOutput = log()->getLevel() > LogLevel::Debug1;
-    if (logOutput)
-        log()->floatPrecision(8);
-    log()->get(LogLevel::Debug2) << "Process PMFFilter...\n";
+    PointViewSet viewSet;
+    if (!input->size())
+        return viewSet;
+
+    // Segment input view into ignored/kept views.
+    PointViewPtr ignoredView = input->makeNew();
+    PointViewPtr keptView = input->makeNew();
+    Segmentation::ignoreDimRange(m_ignored, input, keptView, ignoredView);
+
+    // Segment kept view into last/other-than-last return views.
+    PointViewPtr lastView = keptView->makeNew();
+    PointViewPtr nonlastView = keptView->makeNew();
+    if (m_lastOnly)
+        Segmentation::segmentLastReturns(keptView, lastView, nonlastView);
+    else
+        lastView->append(*keptView);
+
+    for (PointId i = 0; i < nonlastView->size(); ++i)
+        nonlastView->setField(Dimension::Id::Classification, i, 1);
+
+    for (PointId i = 0; i < lastView->size(); ++i)
+        lastView->setField(Dimension::Id::Classification, i, 1);
 
     std::vector<PointId> idx;
     if (m_approximate)
-        idx = processGroundApprox(input);
+        idx = processGroundApprox(lastView);
     else
-        idx = processGround(input);
+        idx = processGround(lastView);
 
-    PointViewSet viewSet;
-    if (!idx.empty() && (m_classify || m_extract))
+    if (!idx.empty())
     {
 
-        if (m_classify)
+        log()->get(LogLevel::Debug2)
+            << "Labeled " << idx.size() << " ground returns!\n";
+
+        // set the classification label of ground returns as 2
+        // (corresponding to ASPRS LAS specification)
+        for (const auto& i : idx)
         {
-            log()->get(LogLevel::Debug2)
-                << "Labeled " << idx.size() << " ground returns!\n";
-
-            // set the classification label of ground returns as 2
-            // (corresponding to ASPRS LAS specification)
-            for (const auto& i : idx)
-            {
-                input->setField(Dimension::Id::Classification, i, 2);
-            }
-
-            viewSet.insert(input);
+            lastView->setField(Dimension::Id::Classification, i, 2);
         }
 
-        if (m_extract)
-        {
-            log()->get(LogLevel::Debug2)
-                << "Extracted " << idx.size() << " ground returns!\n";
-
-            // create new PointView containing only ground returns
-            PointViewPtr output = input->makeNew();
-            for (const auto& i : idx)
-            {
-                output->appendPoint(*input, i);
-            }
-
-            viewSet.erase(input);
-            viewSet.insert(output);
-        }
+        viewSet.insert(ignoredView);
+        viewSet.insert(nonlastView);
+        viewSet.insert(lastView);
     }
     else
     {
         if (idx.empty())
             log()->get(LogLevel::Debug2) << "Filtered cloud has no "
                                             "ground returns!\n";
-
-        if (!(m_classify || m_extract))
-            log()->get(LogLevel::Debug2) << "Must choose --classify "
-                                            "or --extract\n";
 
         // return the input buffer unchanged
         viewSet.insert(input);
