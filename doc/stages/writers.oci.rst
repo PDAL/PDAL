@@ -128,5 +128,9 @@ output_dims
   If specified, limits the dimensions written for each point.  Dimensions
   are listed by name and separated by commas.
 
+tolerance
+  Oracle geometry tolerance. X, Y, and Z dimensions are all
+  currently specified as a single value [Default: **0.05**]
+
 .. _Oracle point cloud: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 

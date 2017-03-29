@@ -175,7 +175,6 @@ void OciWriter::createSDOEntry()
     else
         s_srid << m_srid;
 
-    double tolerance = 0.05;
     BOX3D e = m_bounds;
     if (isGeographic(m_srid))
     {
@@ -187,21 +186,21 @@ void OciWriter::createSDOEntry()
         e.minz = 0.0;
         e.maxz = 20000.0;
 
-        tolerance = 0.0005;
+        m_tolerance = 0.0005;
     }
 
     oss <<  "INSERT INTO user_sdo_geom_metadata VALUES ('" <<
         m_blockTableName << "','blk_extent', MDSYS.SDO_DIM_ARRAY(";
     oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.minx << "," <<
-        e.maxx <<"," << tolerance << "),"
+        e.maxx <<"," << m_tolerance << "),"
         "MDSYS.SDO_DIM_ELEMENT('Y', " << e.miny << "," <<
-        e.maxy <<"," << tolerance << ")";
+        e.maxy <<"," << m_tolerance << ")";
 
     if (m_3d)
     {
         oss << ",";
         oss <<"MDSYS.SDO_DIM_ELEMENT('Z', "<< e.minz << "," <<
-            e.maxz << "," << tolerance << ")";
+            e.maxz << "," << m_tolerance << ")";
     }
     oss << ")," << s_srid.str() << ")";
 
@@ -588,6 +587,7 @@ void OciWriter::addArgs(ProgramArgs& args)
     args.add("compression", "Set to turn compression on", m_compression);
     args.add("pre_sql", "SQL to run before query", m_preSql);
     args.add("post_block_sql", "SQL to run when stage is done", m_postBlockSql);
+    args.add("tolerance", "Oracle geometry tolerance ", m_tolerance, 0.05);
 }
 
 
