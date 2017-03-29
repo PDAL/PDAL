@@ -11,6 +11,44 @@ interchange file format for LIDAR data.
     Scale/offset are not preserved from an input LAS file.  See below for
     information on the scale/offset options and the `forward` option.
 
+VLRs
+-------
+
+VLRs can be created by providing a JSON node called `vlrs` with objects
+containing `user_id` and `data` items.
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.las",
+          "vlrs": [{
+                    "description": "A description under 32 bytes",
+                    "record_id": 42,
+                    "user_id": "hobu",
+                    "data": "dGhpcyBpcyBzb21lIHRleHQ="
+                   },
+                   {
+                    "description": "A description under 32 bytes",
+                    "record_id": 43,
+                    "user_id": "hobu",
+                    "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
+                    }
+                  ]
+          "filename":"outputfile.las"
+        }
+      ]
+    }
+
+
+
+
+
 Example
 -------
 
@@ -49,24 +87,24 @@ forward
   LAS file.  The
   option can be specified multiple times, which has the same effect as
   listing values separated by a comma.  The following values are valid:
-  'major_version', 'minor_version', 'dataformat_id', 'filesource_id',
-  'global_encoding', 'project_id', 'system_id', 'software_id', 'creation_doy',
-  'creation_year', 'scale_x', 'scale_y', 'scale_z', 'offset_x', 'offset_y',
-  'offset_z'.  In addition, the special value 'header' can be specified,
+  ``major_version``, ``minor_version``, ``dataformat_id``, ``filesource_id``,
+  ``global_encoding``, ``project_id``, ``system_id``, ``software_id``, ``creation_doy``,
+  ``creation_year``, ``scale_x``, ``scale_y``, ``scale_z``, ``offset_x``, ``offset_y``,
+  ``offset_z``.  In addition, the special value ``header`` can be specified,
   which is equivalent to specifying all the values EXCEPT the scale and
   offset values.  Scale and offset values can be forwarded as a group by
-  using the special values 'scale' and 'offset' respectively.  The special
-  value 'all' is equivalent to specifying 'header', 'scale', 'offset' and
-  'vlr' (see below).
+  using the special values ``scale`` and ``offset`` respectively.  The special
+  value ``all`` is equivalent to specifying ``header``, ``scale``, ``offset`` and
+  ``vlr`` (see below).
   If a header option is specified explicitly, it will override any forwarded
   header value.
   If a LAS file is the result of multiple LAS input files, the header values
   to be forwarded must match or they will be ignored and a default will
   be used instead.
 
-  VLRs can be forwarded by using the special value 'vlr'.  VLRs containing
-  the following User IDs are NOT forwarded: 'LASF_Projection', 'LASF_Spec',
-  'liblas', 'laszip encoded'.  These VLRs are known to contain information
+  VLRs can be forwarded by using the special value ``vlr``.  VLRs containing
+  the following User IDs are NOT forwarded: ``LASF_Projection``, ``LASF_Spec``,
+  ``liblas``, ``laszip encoded``.  These VLRs are known to contain information
   regarding the formatting of the data and will be rebuilt properly in the
   output file as necessary.  Unlike header values, VLRs from multiple input
   files are accumulated and each is written to the output file.  Forwarded
@@ -126,7 +164,7 @@ compression
 
 scale_x, scale_y, scale_z
   Scale to be divided from the X, Y and Z nominal values, respectively, after
-  the offset has been applied.  The special value "auto" can be specified,
+  the offset has been applied.  The special value ``auto`` can be specified,
   which causes the writer to select a scale to set the stored values of the
   dimensions to range from [0, 2147483647].  [Default: .01]
 
@@ -134,7 +172,7 @@ scale_x, scale_y, scale_z
 
 offset_x, offset_y, offset_z
    Offset to be subtracted from the X, Y and Z nominal values, respectively,
-   before the value is scaled.  The special value "auto" can be specified,
+   before the value is scaled.  The special value ``auto`` can be specified,
    which causes the writer to set the offset to the minimum value of the
    dimension.  [Default: 0]
 
@@ -154,12 +192,12 @@ extra_dims
   by the LAS point format.  The format of the option is
   <dimension_name>=<type>, ... where type is one of:
   int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double
-  '_t' may be added to any of the type names as well (e.g., uint32_t).  When
+  ``_t`` may be added to any of the type names as well (e.g., uint32_t).  When
   the version of the output file is specified as 1.4 or greater, an extra
   bytes VLR (User ID: LASF_Spec, Record ID: 4), is created that describes the
   extra dimensions specified by this option.
 
-  The special value 'all' can be used in place of a dimension/type list
+  The special value ``all`` can be used in place of a dimension/type list
   to request that all dimensions that can't be stored in the predefined
   LAS point record get added as extra data at the end of each point record.
 

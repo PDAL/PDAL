@@ -306,11 +306,10 @@ void PgWriter::DeleteTable(std::string const& schema_name,
 
     if (schema_name.size())
     {
-        name << schema_name << ".";
+        name << pg_quote_identifier(schema_name) << ".";
     }
-    name << table_name;
-    stmt << pg_quote_identifier(name.str());
-
+    name << pg_quote_identifier(table_name);
+    stmt << name.str();
 
     pg_execute(m_session, stmt.str());
 }

@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2016, Peter J. Gadomski <pete.gadomski@gmail.com>
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2016, Peter J. Gadomski <pete.gadomski@gmail.com>
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
 
@@ -66,9 +66,8 @@ TEST(EigenTest, ComputeValues)
     using namespace Eigen;
 
     Matrix3d A;
-    A << 1.8339,  0.3188, 0.3426,
-        -2.2588, -1.3077, 3.5784,
-         0.8622, -0.4336, 2.7694;
+    A << 1.8339, 0.3188, 0.3426, -2.2588, -1.3077, 3.5784, 0.8622, -0.4336,
+        2.7694;
 
     double spacing(1.4);
 
@@ -127,24 +126,22 @@ TEST(EigenTest, ComputeValues)
     EXPECT_NEAR(269.8718, afd, 0.0001);
 
     double hs = eigen::computeHillshade(A, spacing, 45.0, 315.0);
-    
+
     MatrixXd out = eigen::gradX(A);
-    
+
     Matrix3d gx;
-    gx << -1.5151, -0.7457, 0.0238,
-           0.9511,  2.9186, 4.8861,
-          -1.2958,  0.9536, 3.2030;
-    
+    gx << -1.5151, -0.7457, 0.0238, 0.9511, 2.9186, 4.8861, -1.2958, 0.9536,
+        3.2030;
+
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gx(i), out(i), 0.0001);
-    
+
     MatrixXd out2 = eigen::gradY(A);
-    
+
     Matrix3d gy;
-    gy << -4.0927, -1.6265,  3.2358,
-          -0.4859, -0.3762,  1.2134,
-           3.1210,  0.8741, -0.8090;
-    
+    gy << -4.0927, -1.6265, 3.2358, -0.4859, -0.3762, 1.2134, 3.1210, 0.8741,
+        -0.8090;
+
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gy(i), out2(i), 0.0001);
 
@@ -201,9 +198,8 @@ TEST(EigenTest, Padding)
     using namespace Eigen;
 
     MatrixXd A(3, 3);
-    A << 1.8339,  0.3188, 0.3426,
-        -2.2588, -1.3077, 3.5784,
-         0.8622, -0.4336, 2.7694;
+    A << 1.8339, 0.3188, 0.3426, -2.2588, -1.3077, 3.5784, 0.8622, -0.4336,
+        2.7694;
 
     MatrixXd B = eigen::padMatrix(A, 1);
 
@@ -216,32 +212,41 @@ TEST(EigenTest, Padding)
     EXPECT_EQ(-0.4336, B(4, 2));
 }
 
-TEST(EigenTest, Dilate)
+TEST(EigenTest, Morphological)
 {
     using namespace Eigen;
-    
+
     MatrixXd C(5, 5);
-    C << 0, 0, 0, 0, 0,
-         0, 1, 0, 0, 0,
-         0, 1, 1, 0, 0,
-         0, 0, 1, 1, 0,
-         0, 0, 0, 0, 0;
-    
+    C << 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+        0;
+    std::vector<double> Cv(C.data(), C.data() + C.size());
+
     MatrixXd D = eigen::dilate(C, 1);
-    
+    std::vector<double> Dv = eigen::dilateDiamond(Cv, 5, 5, 1);
+    std::vector<double> Dv2 = eigen::dilateDiamond(Cv, 5, 5, 2);
+
     EXPECT_EQ(0, D(0, 0));
     EXPECT_EQ(1, D(1, 0));
     EXPECT_EQ(1, D(0, 1));
-    
+    EXPECT_EQ(0, Dv[0]);
+    EXPECT_EQ(1, Dv[1]);
+    EXPECT_EQ(1, Dv[5]);
+    EXPECT_EQ(1, Dv2[0]);
+    EXPECT_EQ(1, Dv2[10]);
+    EXPECT_EQ(0, Dv2[15]);
+
     MatrixXd E(5, 5);
-    E << 0, 0, 0, 0, 0,
-         0, 1, 1, 1, 0,
-         0, 1, 1, 1, 0,
-         0, 1, 1, 1, 0,
-         0, 0, 0, 0, 0;
-    
+    E << 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+        0;
+    std::vector<double> Ev(E.data(), E.data() + E.size());
+
     MatrixXd F = eigen::erode(E, 1);
-    
+    std::vector<double> Fv = eigen::erodeDiamond(Ev, 5, 5, 1);
+    std::vector<double> Fv2 = eigen::erodeDiamond(Ev, 5, 5, 2);
+
     EXPECT_EQ(0, F(1, 3));
     EXPECT_EQ(1, F(2, 2));
+    EXPECT_EQ(0, Fv[16]);
+    EXPECT_EQ(1, Fv[12]);
+    EXPECT_EQ(0, Fv2[12]);
 }

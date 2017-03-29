@@ -45,6 +45,16 @@ extern "C" PF_ExitFunc SortFilter_InitPlugin();
 namespace pdal
 {
 
+enum class SortOrder
+{
+    ASC, // ascending
+    DESC // descending
+};
+
+std::istream& operator >> (std::istream& in, SortOrder& order);
+std::ostream& operator << (std::ostream& in, const SortOrder& order);
+
+
 class PDAL_DLL SortFilter : public Filter
 {
 public:
@@ -60,32 +70,13 @@ private:
     Dimension::Id m_dim;
     // Dimension name.
     std::string m_dimName;
+    
+    // Sort order.
+    SortOrder m_order;
 
-    virtual void addArgs(ProgramArgs& args)
-    {
-        args.add("dimension", "Dimension on which to sort", m_dimName).
-            setPositional();
-    }
-
-    virtual void prepared(PointTableRef table)
-    {
-        m_dim = table.layout()->findDim(m_dimName);
-        if (m_dim == Dimension::Id::Unknown)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Invalid sort dimension '" << m_dimName <<
-                "'.";
-            throw oss.str();
-        }
-    }
-
-    virtual void filter(PointView& view)
-    {
-        auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
-            { return p1.compare(m_dim, p2); };
-
-        std::sort(view.begin(), view.end(), cmp);
-    }
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual void filter(PointView& view) override;
 
     SortFilter& operator=(const SortFilter&) = delete;
     SortFilter(const SortFilter&) = delete;

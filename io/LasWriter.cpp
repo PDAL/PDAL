@@ -114,6 +114,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
+    args.add("vlrs", "List of VLRs to set", m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -141,6 +142,7 @@ void LasWriter::initialize()
         throwError(err.what());
     }
     fillForwardList();
+    collectUserVLRs();
 }
 
 
@@ -191,6 +193,39 @@ void LasWriter::prepared(PointTableRef table)
             "(" << Dimension::interpretationName(dim.m_dimType.m_type) <<
             ") " << " to LAS extra bytes." << std::endl;
     }
+}
+
+
+// Capture user-specified VLRs
+void LasWriter::collectUserVLRs()
+{
+
+    for (const auto& v : m_userVLRs)
+    {
+        uint16_t recordId(1);
+        std::string userId("");
+        std::string description("");
+        std::string b64data("");
+        std::string user("");
+        if (! v.isMember("user_id"))
+            throw pdal_error("VLR must contain a 'user_id'!");
+        userId = v["user_id"].asString();
+
+        if (!v.isMember("data"))
+            throw pdal_error("VLR must contain a base64-encoded 'data' member");
+        b64data = v["data"].asString();
+
+        if (v.isMember("record_id"))
+            recordId = v["record_id"].asUInt64();
+
+        if (v.isMember("description"))
+            description = v["description"].asString();
+
+        std::vector<uint8_t> data = Utils::base64_decode(b64data);
+        addVlr(userId, recordId, description, data);
+
+    }
+
 }
 
 

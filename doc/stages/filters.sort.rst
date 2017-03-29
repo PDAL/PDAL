@@ -3,9 +3,8 @@
 filters.sort
 ============
 
-The sort filter orders a point view based on the values of a dimension.
-The current filter only supports sorting based on a single dimension in
-increasing order.
+The sort filter orders a point view based on the values of a dimension. The
+sorting can be done in increasing (ascending) or decreasing (descending) order.
 
 Example
 -------
@@ -21,6 +20,9 @@ Example
       <Filter type="filters.sort">
         <Option name="dimension">
           X
+        </Option>
+        <Option name="order">
+          ASC
         </Option>
         <Reader type="readers.las">
           <Option name="filename">
@@ -38,9 +40,5 @@ Options
 dimension
   The dimension on which to sort the points.
 
-Notes
------
-
-The sorting algorithm used is not stable, meaning that one cannot chain
-multiple Sort filters to sort order point buffer heirarchically (say,
-primarily by the dimension X and secondairly by the dimension Y).
+order
+  The order in which to sort, ASC or DESC [Default: **ASC**]
