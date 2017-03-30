@@ -99,11 +99,6 @@ void SMRFilter::prepared(PointTableRef table)
     const PointLayoutPtr layout(table.layout());
 
     m_ignored.m_id = layout->findDim(m_ignored.m_name);
-    if (m_ignored.m_id == Dimension::Id::Unknown)
-    {
-        throwError("Invalid dimension name in 'ignore' option: '" +
-                   m_ignored.m_name + "'.");
-    }
 
     if (m_lastOnly)
     {
@@ -132,7 +127,10 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = view->makeNew();
     PointViewPtr keptView = view->makeNew();
-    Segmentation::ignoreDimRange(m_ignored, view, keptView, ignoredView);
+    if (m_ignored.m_id == Dimension::Id::Unknown)
+        keptView->append(*view);
+    else
+        Segmentation::ignoreDimRange(m_ignored, view, keptView, ignoredView);
 
     // Segment kept view into last/other-than-last return views.
     PointViewPtr lastView = keptView->makeNew();

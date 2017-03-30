@@ -80,11 +80,6 @@ void PMFFilter::prepared(PointTableRef table)
     const PointLayoutPtr layout(table.layout());
 
     m_ignored.m_id = layout->findDim(m_ignored.m_name);
-    if (m_ignored.m_id == Dimension::Id::Unknown)
-    {
-        throwError("Invalid dimension name in 'ignore' option: '" +
-                   m_ignored.m_name + "'.");
-    }
 
     if (m_lastOnly)
     {
@@ -377,7 +372,10 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = input->makeNew();
     PointViewPtr keptView = input->makeNew();
-    Segmentation::ignoreDimRange(m_ignored, input, keptView, ignoredView);
+    if (m_ignored.m_id == Dimension::Id::Unknown)
+        keptView->append(*input);
+    else
+        Segmentation::ignoreDimRange(m_ignored, input, keptView, ignoredView);
 
     // Segment kept view into last/other-than-last return views.
     PointViewPtr lastView = keptView->makeNew();
