@@ -82,8 +82,14 @@ PointViewSet PredicateFilter::run(PointViewPtr view)
 
     m_pythonMethod->resetArguments();
     m_pythonMethod->begin(*view, n);
+
     if (!m_pdalargs.empty())
-        m_pythonMethod->setKWargs(m_pdalargs.asString());
+    {
+        std::ostringstream args;
+        args << m_pdalargs;
+        m_pythonMethod->setKWargs(args.str());
+    }
+
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))

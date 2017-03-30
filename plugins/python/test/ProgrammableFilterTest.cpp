@@ -257,14 +257,14 @@ TEST_F(ProgrammableFilterTest, pdalargs)
     Option source("source", "import numpy\n"
         "import sys\n"
         "import redirector\n"
-        "def myfunc(ins,outs, args):\n"
-        "  pdalargs['name']"
-        "  print ('pdalargs', pdalargs, file=sys.stderr,)\n"
+        "def myfunc(ins,outs):\n"
+        "  pdalargs['name']\n"
+        "# print ('pdalargs', pdalargs, file=sys.stderr,)\n"
         "  return True\n"
     );
     Option module("module", "MyModule");
     Option function("function", "myfunc");
-    Option args("pdalargs", "{\"name\":\"Howard\",\"something\":42, \"else\": True}");
+    Option args("pdalargs", "{\"name\":\"Howard\",\"something\":42, \"another\": \"True\"}");
     Options opts;
     opts.add(source);
     opts.add(module);
@@ -281,12 +281,5 @@ TEST_F(ProgrammableFilterTest, pdalargs)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
 
-    PointLayoutPtr layout(table.layout());
-    MetadataNode m = table.metadata();
-    m = m.findChild("filters.programmable");
-    MetadataNodeList l = m.children();
-    EXPECT_EQ(l.size(), 3u);
-    EXPECT_EQ(l[0].name(), "filters.programmable");
-    EXPECT_EQ(l[0].value(), "52");
-    EXPECT_EQ(l[0].description(), "a filter description");
+    // Not throwing anything is success for now
 }

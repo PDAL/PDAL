@@ -92,7 +92,11 @@ void ProgrammableFilter::filter(PointView& view)
     m_pythonMethod->begin(view, m_totalMetadata);
 
     if (!m_pdalargs.empty())
-        m_pythonMethod->setKWargs(m_pdalargs.asString());
+    {
+        std::ostringstream args;
+        args << m_pdalargs;
+        m_pythonMethod->setKWargs(args.str());
+    }
     m_pythonMethod->execute();
     m_pythonMethod->end(view, getMetadata());
 }

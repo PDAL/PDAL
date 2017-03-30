@@ -142,8 +142,8 @@ basic Python function while substituting values as necessary.
       ]
     }
 
-With that option set, you can now touch the ``pdalargs`` dictionary in your
-Python script:
+With that option set, you can now fetch the ``pdalargs`` dictionary in your
+Python script and use it:
 
 .. code-block:: python
 
