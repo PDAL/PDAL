@@ -104,8 +104,13 @@ void SMRFilter::prepared(PointTableRef table)
     {
         if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
             !layout->hasDim(Dimension::Id::NumberOfReturns))
-            throwError("Cannot filter using last returns only without "
-                       "ReturnNumber and NumberOfReturns.");
+        {
+            log()->get(LogLevel::Warning) << "Could not find ReturnNumber and "
+                                             "NumberOfReturns. Skipping "
+                                             "segmentation of last returns and "
+                                             "proceeding with all returns.\n";
+            m_lastOnly = false;
+        }
     }
 }
 
