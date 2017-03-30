@@ -397,6 +397,7 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     else
         idx = processGround(lastView);
 
+    PointViewPtr outView = input->makeNew();
     if (!idx.empty())
     {
 
@@ -410,9 +411,9 @@ PointViewSet PMFFilter::run(PointViewPtr input)
             lastView->setField(Dimension::Id::Classification, i, 2);
         }
 
-        viewSet.insert(ignoredView);
-        viewSet.insert(nonlastView);
-        viewSet.insert(lastView);
+        outView->append(*ignoredView);
+        outView->append(*nonlastView);
+        outView->append(*lastView);
     }
     else
     {
@@ -421,8 +422,9 @@ PointViewSet PMFFilter::run(PointViewPtr input)
                                             "ground returns!\n";
 
         // return the input buffer unchanged
-        viewSet.insert(input);
+        outView->append(*input);
     }
+    viewSet.insert(outView);
 
     return viewSet;
 }

@@ -176,9 +176,11 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // DEM.
     classifyGround(lastView, ZIpro);
 
-    viewSet.insert(ignoredView);
-    viewSet.insert(nonlastView);
-    viewSet.insert(lastView);
+    PointViewPtr outView = view->makeNew();
+    outView->append(*ignoredView);
+    outView->append(*nonlastView);
+    outView->append(*lastView);
+    viewSet.insert(outView);
 
     return viewSet;
 }
