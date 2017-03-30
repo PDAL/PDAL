@@ -124,6 +124,7 @@ private:
     std::string m_connSpec;
     std::string m_preSql;
     std::string m_postBlockSql;
+    double m_tolerance;
 
     OciWriter& operator=(const OciWriter&); // not implemented
     OciWriter(const OciWriter&); // not implemented
