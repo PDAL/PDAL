@@ -19,6 +19,7 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         ${NITRO_LIBRARIES})
 target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
+	${PDAL_JSONCPP_INCLUDE_DIR}
     ${ROOT_DIR})
 
 #
@@ -35,6 +36,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${NITRO_LIBRARIES})
 target_include_directories(${writer_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
+	${PDAL_JSONCPP_INCLUDE_DIR}
     ${ROOT_DIR})
 
 if (WITH_TESTS)
@@ -43,12 +45,12 @@ if (WITH_TESTS)
             test/NitfWriterTest.cpp
         LINK_WITH ${writer_libname})
     target_include_directories(pdal_io_nitf_writer_test PRIVATE
-        ${ROOT_DIR})
+        ${ROOT_DIR} ${PDAL_JSONCPP_INCLUDE_DIR})
 
     PDAL_ADD_TEST(pdal_io_nitf_reader_test
         FILES
             test/NitfReaderTest.cpp
         LINK_WITH ${reader_libname})
     target_include_directories(pdal_io_nitf_reader_test PRIVATE
-        ${ROOT_DIR})
+        ${ROOT_DIR} ${PDAL_JSONCPP_INCLUDE_DIR})
 endif()
