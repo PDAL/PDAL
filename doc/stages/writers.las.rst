@@ -39,7 +39,7 @@ containing `user_id` and `data` items.
                     "user_id": "hobu",
                     "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
                     }
-                  ]
+                  ],
           "filename":"outputfile.las"
         }
       ]
