@@ -85,6 +85,8 @@ public:
     void begin(PointView& view, MetadataNode m);
     void end(PointView& view, MetadataNode m);
 
+    void setKWargs(std::string const& s);
+
 private:
     void cleanup();
 
@@ -107,6 +109,7 @@ private:
     PyObject* m_metadata_PyObject;
     PyObject* m_schema_PyObject;
     PyObject* m_srs_PyObject;
+    PyObject* m_pdalargs_PyObject;
 };
 
 } // namespace plang

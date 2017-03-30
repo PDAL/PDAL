@@ -39,6 +39,8 @@
 
 #include <pdal/plang/Invocation.hpp>
 
+#include <json/json.h>
+
 namespace pdal
 {
 
@@ -59,6 +61,7 @@ private:
     std::string m_scriptFile;
     std::string m_module;
     std::string m_function;
+    Json::Value m_pdalargs;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);

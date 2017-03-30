@@ -88,6 +88,7 @@ Invocation::Invocation(const Script& script)
     , m_metadata_PyObject(NULL)
     , m_schema_PyObject(NULL)
     , m_srs_PyObject(NULL)
+    , m_pdalargs_PyObject(NULL)
 {
     plang::Environment::get();
     resetArguments();
@@ -301,6 +302,14 @@ bool Invocation::execute()
         Py_INCREF(m_schema_PyObject);
     }
 
+    if (m_pdalargs_PyObject)
+    {
+        success = PyModule_AddObject(m_module, "pdalargs", m_pdalargs_PyObject);
+        if (success)
+            throw pdal::pdal_error("unable to set pdalargs global");
+        Py_INCREF(m_pdalargs_PyObject);
+    }
+
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
@@ -316,13 +325,10 @@ bool Invocation::execute()
     return (m_scriptResult == Py_True);
 }
 
-PyObject* getPyJSON(MetadataNode node)
+PyObject* getPyJSON(std::string const& str)
 {
 
-    std::ostringstream schema_strm;
-    Utils::toJSON(node, schema_strm);
-
-    PyObject* raw_json =  PyUnicode_FromString(schema_strm.str().c_str());
+    PyObject* raw_json =  PyUnicode_FromString(str.c_str());
     PyObject* json_module = PyImport_ImportModule("json");
     if (!json_module)
         throw pdal::pdal_error(getTraceback());
@@ -350,6 +356,11 @@ PyObject* getPyJSON(MetadataNode node)
     return json;
 }
 
+void Invocation::setKWargs(std::string const& s)
+{
+    Py_XDECREF(m_pdalargs_PyObject);
+    m_pdalargs_PyObject = getPyJSON(s);
+}
 
 void Invocation::begin(PointView& view, MetadataNode m)
 {
@@ -379,11 +390,16 @@ void Invocation::begin(PointView& view, MetadataNode m)
     // Put 'schema' dict into module scope
     Py_XDECREF(m_schema_PyObject);
     MetadataNode s = view.layout()->toMetadata();
-    m_schema_PyObject = getPyJSON(s);
+    std::ostringstream ostrm;
+    Utils::toJSON(s, ostrm);
+    m_schema_PyObject = getPyJSON(ostrm.str());
+    ostrm.str("");
 
     Py_XDECREF(m_srs_PyObject);
     MetadataNode srs = view.spatialReference().toMetadata();
-    m_srs_PyObject = getPyJSON(srs);
+    Utils::toJSON(srs, ostrm);
+    m_srs_PyObject = getPyJSON(ostrm.str());
+    ostrm.str("");
 }
 
 

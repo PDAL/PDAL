@@ -92,6 +92,9 @@ module
 function
   The function to call.
 
+pdalargs
+  A JSON dictionary of items you wish to pass into the modules globals as the
+  ``pdalargs`` object.
 
 
 .. _Python: http://python.org

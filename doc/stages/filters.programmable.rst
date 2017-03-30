@@ -113,6 +113,51 @@ reflected back into the pipeline from that stage forward.
      metadata = {'name': 'root', 'value': 'a string', 'type': 'string', 'description': 'a description', 'children': [{'name': 'filters.programmable', 'value': 52, 'type': 'integer', 'description': 'a filter description', 'children': []}, {'name': 'readers.faux', 'value': 'another string', 'type': 'string', 'description': 'a reader description', 'children': []}]}
      return True
 
+Passing Python objects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As of PDAL 1.5, it is possible to pass an option to :ref:`filters.programmable` and
+:ref:`filters.predicate` of JSON representing a Python dictionary containing objects
+you want to use in your function. This feature is useful in situations where you
+wish to call :ref:`pipeline_command` with substitutions.
+
+If we needed to be able to provide the Z scaling factor of `Example`_ with a
+Python argument, we can place that in a dictionary and pass that to the filter
+as a separate argument. This feature allows us to be able easily reuse the same
+basic Python function while substituting values as necessary.
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.programmable",
+          "module":"anything",
+          "function":"filter",
+          "source":"arguments.py"
+          "pdalargs":"{\"factor\":0.3048,\"an_argument\":42, \"another\": \"a string\"}"
+        },
+        "output.las"
+      ]
+    }
+
+With that option set, you can now touch the ``pdalargs`` dictionary in your
+Python script:
+
+.. code-block:: python
+
+  import numpy as np
+
+  def multiply_z(ins,outs):
+      Z = ins['Z']
+      Z = Z * float(pdalargs['factor'])
+      outs['Z'] = Z
+      return True
+
+
+
+
 Standard output and error
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -140,6 +185,10 @@ source
 
 add_dimension
   The name of a dimension to add to the pipeline that does not already exist.
+
+pdalargs
+  A JSON dictionary of items you wish to pass into the modules globals as the
+  ``pdalargs`` object.
 
 .. _Python: http://python.org/
 .. _NumPy: http://www.numpy.org/

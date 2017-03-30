@@ -6,7 +6,7 @@ PDAL_ADD_PLUGIN(predicate_libname filter predicate
         PredicateFilter.cpp
     LINK_WITH ${PDAL_PLANG_LIB_NAME})
 target_include_directories(${predicate_libname} PRIVATE
-    ${PYTHON_INCLUDE_DIR})
+    ${PYTHON_INCLUDE_DIR} ${PDAL_JSONCPP_INCLUDE_DIR})
 
 #
 # Programmable Filter
@@ -17,7 +17,7 @@ PDAL_ADD_PLUGIN(programmable_libname filter programmable
         ProgrammableFilter.cpp
     LINK_WITH ${PDAL_PLANG_LIB_NAME})
 target_include_directories(${programmable_libname} PRIVATE
-    ${PYTHON_INCLUDE_DIR})
+    ${PYTHON_INCLUDE_DIR} ${PDAL_JSONCPP_INCLUDE_DIR})
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(python_predicate_test

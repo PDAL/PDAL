@@ -39,6 +39,8 @@
 
 #include <pdal/plang/Invocation.hpp>
 
+#include <json/json.h>
+
 namespace pdal
 {
 
@@ -73,6 +75,7 @@ private:
     ProgrammableFilter(const ProgrammableFilter&); // not implemented
 
     MetadataNode m_totalMetadata;
+    Json::Value m_pdalargs;
 };
 
 } // namespace pdal
