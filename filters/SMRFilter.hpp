@@ -37,6 +37,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
 
+#include "private/DimRange.hpp"
+
 #include <string>
 
 extern "C" int32_t SMRFilter_ExitFunc();
@@ -66,11 +68,14 @@ private:
     double m_scalar;
     double m_threshold;
     std::string m_dir;
+    DimRange m_ignored;
+    bool m_lastOnly;
     BOX2D m_bounds;
     SpatialReference m_srs;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 
