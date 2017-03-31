@@ -41,9 +41,12 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
+#include <pdal/Segmentation.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+
+#include "private/DimRange.hpp"
 
 #include <Eigen/Dense>
 
@@ -82,11 +85,33 @@ void SMRFilter::addArgs(ProgramArgs& args)
     args.add("threshold", "Elevation threshold?", m_threshold, 0.5);
     args.add("cut", "Cut net size?", m_cut, 0.0);
     args.add("dir", "Optional output directory for debugging", m_dir);
+    args.add("ignore", "Ignore values", m_ignored);
+    args.add("last", "Consider last returns only?", m_lastOnly, true);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Id::Classification);
+}
+
+void SMRFilter::prepared(PointTableRef table)
+{
+    const PointLayoutPtr layout(table.layout());
+
+    m_ignored.m_id = layout->findDim(m_ignored.m_name);
+
+    if (m_lastOnly)
+    {
+        if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
+            !layout->hasDim(Dimension::Id::NumberOfReturns))
+        {
+            log()->get(LogLevel::Warning) << "Could not find ReturnNumber and "
+                                             "NumberOfReturns. Skipping "
+                                             "segmentation of last returns and "
+                                             "proceeding with all returns.\n";
+            m_lastOnly = false;
+        }
+    }
 }
 
 void SMRFilter::ready(PointTableRef table)
@@ -104,14 +129,33 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     if (!view->size())
         return viewSet;
 
-    m_srs = view->spatialReference();
+    // Segment input view into ignored/kept views.
+    PointViewPtr ignoredView = view->makeNew();
+    PointViewPtr keptView = view->makeNew();
+    if (m_ignored.m_id == Dimension::Id::Unknown)
+        keptView->append(*view);
+    else
+        Segmentation::ignoreDimRange(m_ignored, view, keptView, ignoredView);
 
-    view->calculateBounds(m_bounds);
+    // Segment kept view into last/other-than-last return views.
+    PointViewPtr lastView = keptView->makeNew();
+    PointViewPtr nonlastView = keptView->makeNew();
+    if (m_lastOnly)
+        Segmentation::segmentLastReturns(keptView, lastView, nonlastView);
+    else
+        lastView->append(*keptView);
+
+    for (PointId i = 0; i < nonlastView->size(); ++i)
+        nonlastView->setField(Dimension::Id::Classification, i, 1);
+
+    m_srs = lastView->spatialReference();
+
+    lastView->calculateBounds(m_bounds);
     m_cols = ((m_bounds.maxx - m_bounds.minx) / m_cell) + 1;
     m_rows = ((m_bounds.maxy - m_bounds.miny) / m_cell) + 1;
 
     // Create raster of minimum Z values per element.
-    std::vector<double> ZImin = createZImin(view);
+    std::vector<double> ZImin = createZImin(lastView);
 
     // Create raster mask of pixels containing low outlier points.
     std::vector<int> Low = createLowMask(ZImin);
@@ -130,13 +174,18 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // Create raster representing the provisional DEM. Note that we use the
     // original ZImin (not ZInet), however the net cut mask will still force
     // interpolation at these pixels.
-    std::vector<double> ZIpro = createZIpro(view, ZImin, Low, isNetCell, Obj);
+    std::vector<double> ZIpro =
+        createZIpro(lastView, ZImin, Low, isNetCell, Obj);
 
     // Classify ground returns by comparing elevation values to the provisional
     // DEM.
-    classifyGround(view, ZIpro);
+    classifyGround(lastView, ZIpro);
 
-    viewSet.insert(view);
+    PointViewPtr outView = view->makeNew();
+    outView->append(*ignoredView);
+    outView->append(*nonlastView);
+    outView->append(*lastView);
+    viewSet.insert(outView);
 
     return viewSet;
 }
@@ -217,9 +266,9 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         // vertical distance between each LIDAR point and the provisional
         // DEM, and applying a threshold calculation."
         if (std::fabs(ZIpro[c * m_rows + r] - z) > thresh(r, c))
-            continue;
-
-        view->setField(Id::Classification, i, 2);
+            view->setField(Id::Classification, i, 1);
+        else
+            view->setField(Id::Classification, i, 2);
     }
 }
 
