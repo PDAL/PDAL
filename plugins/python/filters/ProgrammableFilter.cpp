@@ -61,6 +61,7 @@ void ProgrammableFilter::addArgs(ProgramArgs& args)
         m_module);
     args.add("function", "Function to call", m_function);
     args.add("add_dimension", "Dimensions to add", m_addDimensions);
+    args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
 }
 
 
@@ -89,6 +90,13 @@ void ProgrammableFilter::filter(PointView& view)
         " processing " << view.size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
     m_pythonMethod->begin(view, m_totalMetadata);
+
+    if (!m_pdalargs.empty())
+    {
+        std::ostringstream args;
+        args << m_pdalargs;
+        m_pythonMethod->setKWargs(args.str());
+    }
     m_pythonMethod->execute();
     m_pythonMethod->end(view, getMetadata());
 }

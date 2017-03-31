@@ -60,6 +60,7 @@ void PredicateFilter::addArgs(ProgramArgs& args)
     args.add("module", "Python module containing the function to run",
         m_module);
     args.add("function", "Function to call", m_function);
+    args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
 }
 
 
@@ -81,6 +82,14 @@ PointViewSet PredicateFilter::run(PointViewPtr view)
 
     m_pythonMethod->resetArguments();
     m_pythonMethod->begin(*view, n);
+
+    if (!m_pdalargs.empty())
+    {
+        std::ostringstream args;
+        args << m_pdalargs;
+        m_pythonMethod->setKWargs(args.str());
+    }
+
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))

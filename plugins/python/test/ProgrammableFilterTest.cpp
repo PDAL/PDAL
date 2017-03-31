@@ -239,3 +239,47 @@ TEST_F(ProgrammableFilterTest, metadata)
     EXPECT_EQ(l[0].value(), "52");
     EXPECT_EQ(l[0].description(), "a filter description");
 }
+
+TEST_F(ProgrammableFilterTest, pdalargs)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy\n"
+        "import sys\n"
+        "import redirector\n"
+        "def myfunc(ins,outs):\n"
+        "  pdalargs['name']\n"
+        "# print ('pdalargs', pdalargs, file=sys.stderr,)\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Option args("pdalargs", "{\"name\":\"Howard\",\"something\":42, \"another\": \"True\"}");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+    opts.add(args);
+
+    Stage* filter(f.createStage("filters.programmable"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+    filter->prepare(table);
+    PointViewSet viewSet = filter->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    // Not throwing anything is success for now
+}
