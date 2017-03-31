@@ -386,29 +386,25 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
 
 void LasWriter::setPDALVLRs(MetadataNode& forward)
 {
-    std::ostringstream ostr;
-    Utils::toJSON(forward, ostr);
-    std::string json = ostr.str();
-
     auto store = [this](std::string json, int recordId, std::string description)
     {
         std::vector<uint8_t> data;
         data.resize(json.size());
         std::copy(json.begin(), json.end(), data.begin());
         addVlr("PDAL", recordId, description, data);
-
-
     };
 
+    std::ostringstream ostr;
+    Utils::toJSON(forward, ostr);
+    std::string json = ostr.str();
     store(ostr.str(), 12, "PDAL metadata");
+
     ostr.str("");
-
     PipelineWriter::writePipeline(this, ostr);
-
     store(ostr.str(), 13, "PDAL pipeline");
-
-
 }
+
+
 /// Set VLRs from metadata for forwarded info.
 void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 {

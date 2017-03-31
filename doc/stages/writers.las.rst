@@ -103,8 +103,10 @@ forward
   be used instead.
 
   VLRs can be forwarded by using the special value ``vlr``.  VLRs containing
-  the following User IDs are NOT forwarded: ``LASF_Projection``, ``LASF_Spec``,
-  ``liblas``, ``laszip encoded``.  These VLRs are known to contain information
+  the following User IDs are NOT forwarded: ``LASF_Projection``,
+  ``liblas``, ``laszip encoded``.  VLRs with the User ID ``LASF_Spec`` and
+  a record ID other than 0 or 3 are also not forwarded.  These VLRs are known
+  to contain information
   regarding the formatting of the data and will be rebuilt properly in the
   output file as necessary.  Unlike header values, VLRs from multiple input
   files are accumulated and each is written to the output file.  Forwarded

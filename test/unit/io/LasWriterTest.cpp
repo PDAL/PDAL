@@ -756,7 +756,8 @@ TEST(LasWriterTest, pdal_metadata)
 
 }
 
-TEST(LasWriterTest, pdal_set_from_metadata)
+
+TEST(LasWriterTest, pdal_add_vlr)
 {
     PointTable table;
 
@@ -769,11 +770,10 @@ TEST(LasWriterTest, pdal_set_from_metadata)
     Options readerOpts;
     readerOpts.add("filename", infile);
 
-
-    std::string metadata( " [ { \"description\": \"A description under 32 bytes\", \"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIHRleHQ=\" },  { \"description\": \"A description under 32 bytes\", \"record_id\": 43, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIG1vcmUgdGV4dA==\" } ]");
+    std::string vlr( " [ { \"description\": \"A description under 32 bytes\", \"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIHRleHQ=\" },  { \"description\": \"A description under 32 bytes\", \"record_id\": 43, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIG1vcmUgdGV4dA==\" } ]");
 
     Options writerOpts;
-    writerOpts.add("vlrs", metadata);
+    writerOpts.add("vlrs", vlr);
     writerOpts.add("filename", outfile);
 
     LasReader reader;
@@ -800,12 +800,72 @@ TEST(LasWriterTest, pdal_set_from_metadata)
         { return Utils::startsWith(temp.name(), "vlr_"); };
     MetadataNodeList nodes = forward.findChildren(pred);
     EXPECT_EQ(nodes.size(), 2UL);
-
-//     EXPECT_EQ(reader2.getMetadata().children("pdal_metadata").size(), 1UL);
-//     EXPECT_EQ(reader2.getMetadata().children("pdal_pipeline").size(), 1UL);
-
 }
+
+
+// Make sure that we can forward the LAS_Spec/3 VLR
+TEST(LasWriterTest, forward_spec_3)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/spec_3.las"));
+    std::string outfile(Support::temppath("out.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("forward", "all,vlr");
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    auto pred = [](MetadataNode temp)
+    {
+        auto recPred = [](MetadataNode n)
+        {
+            return n.name() == "record_id" &&
+                n.value() == "3";
+        };
+
+        auto userPred = [](MetadataNode n)
+        {
+            return n.name() == "user_id" &&
+                n.value() == "LASF_Spec";
+        };
+
+        return Utils::startsWith(temp.name(), "vlr_") &&
+            !temp.findChild(recPred).empty() &&
+            !temp.findChild(userPred).empty();
+    };
+    MetadataNode root = reader2.getMetadata();
+    MetadataNodeList nodes = root.findChildren(pred);
+    EXPECT_EQ(nodes.size(), 1u);
+}
+
+
 /**
+
 namespace
 {
 

@@ -454,11 +454,14 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
             "Record ID specified by the user.");
         vlrNode.add("description", vlr.description());
 
-        if ((vlr.userId() != TRANSFORM_USER_ID) &&
-            (vlr.userId() != SPEC_USER_ID) &&
-            (vlr.userId() != LASZIP_USER_ID) &&
-            (vlr.userId() != LIBLAS_USER_ID))
-            forward.add(vlrNode);
+        if (vlr.userId() == TRANSFORM_USER_ID||
+            vlr.userId() == LASZIP_USER_ID ||
+            vlr.userId() == LIBLAS_USER_ID)
+            continue;
+        if (vlr.userId() == SPEC_USER_ID &&
+            vlr.recordId() != 0 && vlr.recordId() != 3)
+            continue;
+        forward.add(vlrNode);
     }
 }
 
