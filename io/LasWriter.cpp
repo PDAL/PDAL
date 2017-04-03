@@ -825,7 +825,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t
     {
-        int32_t i;
+        int32_t i(0);
 
         if (!Utils::numericCast(d, i))
             throwError("Unable to convert scaled value (" +
