@@ -59,6 +59,9 @@ public:
         { return &w.m_lasHeader; }
     SpatialReference srs(LasWriter& w)
         { return w.m_srs; }
+    void addVlr(LasWriter& w, const std::string& userId, uint16_t recordId,
+        std::string description, std::vector<uint8_t>& data)
+        { w.addVlr(userId, recordId, description, data); }
 };
 
 } // namespace pdal
@@ -861,6 +864,25 @@ TEST(LasWriterTest, forward_spec_3)
     MetadataNode root = reader2.getMetadata();
     MetadataNodeList nodes = root.findChildren(pred);
     EXPECT_EQ(nodes.size(), 1u);
+}
+
+TEST(LasWriterTest, oversize_vlr)
+{
+    LasWriter w;
+    Options o;
+
+    o.add("filename", "out.las");
+    w.addOptions(o);
+
+    PointTable t;
+
+    w.prepare(t);
+
+    std::vector<uint8_t> data(100000, 32);
+    LasTester tester;
+    EXPECT_THROW(
+        tester.addVlr(w, "USER ID", 555, "This is a description", data),
+        pdal_error);
 }
 
 

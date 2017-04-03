@@ -36,14 +36,15 @@ complexity to the format in terms of capabilities it supports, possible data
 types it stores, and metadata. Users of LAS must balance the features they need
 with the use of the data by downstream applications. While LAS support in some
 form is quite widespread throughout the industry, most applications do not
-support each and every feature of the format. PDAL works to provide many of
-these features, but it doesn't support everything either.
+support every feature of each version.  PDAL works to provide many of
+these features, but it is also incomplete.  Specifically, PDAL doesn't support
+point formats that store waveform data.
 
 Version Example
 ................................................................................
 
-We can use the ``minor_version`` option of :ref:`writers.las` to adjust which
-version PDAL should output. The following example will output a 1.1 version LAS
+We can use the ``minor_version`` option of :ref:`writers.las` to set the
+version PDAL should output. The following example will write a 1.1 version LAS
 file. Depending on the features you need, this may or may not be what you want.
 
 .. code-block:: json
@@ -66,7 +67,8 @@ file. Depending on the features you need, this may or may not be what you want.
 
 .. note::
 
-    PDAL defaults to writing a LAS 1.2 version if no ``minor_version`` is specified
+    PDAL defaults to writing a LAS 1.2 version if no ``minor_version`` is
+    specified
     or the ``forward`` option of :ref:`writers.las` is not used to carry along
     a version from a previously read file.
 
@@ -75,10 +77,11 @@ Spatial Reference System
 --------------------------------------------------------------------------------
 
 LAS 1.0 to 1.3 used |GeoTIFF| keys for storing coordinate system information,
-while LAS 1.4 uses |WellKnownText|. GeoTIFF is well supported by most softwares
+while LAS 1.4 uses |WellKnownText|. GeoTIFF is well-supported by most software
 that read LAS, but it is not possible to express some coordinate system
-specifics with GeoTIFF. WKT is more expressive, but also presents some software
-challenges.
+specifics with GeoTIFF. WKT is more expressive and supports
+more coordinate systems than GeoTIFF, but vendor-specific and later versions
+(WKT 2) may not be handled well.
 
 
 Assignment Example
@@ -112,7 +115,7 @@ The following example sets the ``out_srs`` option of the :ref:`writers.las` to
 
 .. note::
 
-    Remember to set your ``offset_x``, ``offset_y``, ``scale_x``, and
+    Remember to set ``offset_x``, ``offset_y``, ``scale_x``, and
     ``scale_y`` values to something appropriate if your are storing decimal
     degree data in LAS files. The special value ``auto`` can be used for the
     offset values, but you should set an explicit value for the scale values
@@ -123,11 +126,12 @@ The following example sets the ``out_srs`` option of the :ref:`writers.las` to
 Vertical Datum Example
 ................................................................................
 
-Vertical coordinate control is important in |LiDAR|, and PDAL supports assignment
+Vertical coordinate control is important in |LiDAR| and PDAL supports
+assignment
 and reprojection/transform of vertical coordinates using |Proj.4| and |GDAL|.
-The coordinate system description magic happens in GDAL, and you assign a compound
-coordinate system (both vertical and horizontal definitions) using the following
-syntax:
+The coordinate system description magic happens in GDAL, and you assign a
+compound coordinate system (both vertical and horizontal definitions) using
+the following syntax:
 
 ::
 
@@ -193,10 +197,12 @@ coordinate system for a file to `UTM Zone 15N NAD83`_ for horizontal and
 
 .. note::
 
-    Any coordinate system description format supported by GDAL's `SetFromUserInput`_
+    Any coordinate system description format supported by GDAL's
+    `SetFromUserInput`_
     method can be used to assign or set the coordinate system in PDAL.
-    This includes WKT, |Proj.4| definitions, or OGC URNs. It is your responsibility
-    to escape or massage any input data to make it be valid JSON, however.
+    This includes WKT, |Proj.4| definitions, or OGC URNs. It is your
+    responsibility to escape or massage any input data to make it be
+    valid JSON, however.
 
 .. _`SetFromUserInput`: http://www.gdal.org/ogr__srs__api_8h.html#a927749db01cec3af8aa5e577d032956bk
 
@@ -239,30 +245,30 @@ PDAL is :ref:`filters.reprojection`.
 
 .. note ::
 
-    The ``in_srs`` option of :ref:`filters.reprojection` can come from the data
-    itself (in our case it would have been set in the ``input.las`` file) or
-    you can explicitly override it.
-
+    If the input data doesn't specify a projection, you must specify the
+    ``in_srs`` option of :ref:`filters.reprojection`.  ``in_srs`` can also
+    be used to override an existing spatial reference attached to the input
+    point set.
 
 
 Point Formats
 --------------------------------------------------------------------------------
 
-As each revision was released, more point formats were added. A Point Format is
-the fixed set of :ref:`dimensions` that a LAS file must present and store in
-the file. Their definition, size, and composition all change in minor LAS
-versions (ie, 1.2 point formats vs those in 1.4). It is generally true,
-however, that point formats between minor revisions have similar semantic
-meanings, and in many cases their storage size is the same. For example, a 1.0
-file with points of type "Point Format 0" represents essentially the same data
-as a 1.4 file with points of type "Point Format 0".
+As each revision of LAS was released, more point formats were added. A Point
+Format is
+the fixed set of :ref:`dimensions` that a LAS file stores for each point in
+the file.  For any given point format, the size and composition of dimensions is
+consistent across versions, but users should be aware of some minor
+interpretation changes based on LAS file version.  For example, a classification
+value of 11 in version 1.4 indicates "Road Surface", while that value is
+reserved in version 1.1.
 
 Point Format Example
 ................................................................................
 
 Point format or `dataformat_id` is an integer that defines the set of fixed
-:ref:`dimensions` a LAS file must contain. All LAS files have at minimum a fixed
-set of the following dimensions:
+:ref:`dimensions` stored for each point in a LAS file.  All point formats
+specify the following dimensions as part of a point record:
 
 .. csv-table:: Base LAS :ref:`dimensions`
     :widths: auto
@@ -272,14 +278,15 @@ set of the following dimensions:
     "ScanDirectionFlag", "EdgeOfFlightLine", "Classification"
     "ScanAngleRank", "UserData", "PointSourceId"
 
-These fixed formats have known field sizes, and explicit meanings. Because LAS
-data are fluffy, adding 14 bytes per point to add both GPSTime and
-Red/Green/Blue fields can waste a lot of storage if there isn't any actual data
-in them or you would like to disregard it.
+Because LAS files have no built-in compression, it's important to use a
+point format that stores the fewest fields possible that store the desired
+data.  For example, point format 10 uses 45 more bytes per point than point
+format zero.
 
-A simple ``dataformat_id`` option along with the ``forward`` option to carry
-along all of the rest of the fields will be useful in our case to remove
-both the time and color fields (Point format 0):
+If one wanted remove the Red/Green/Blue fields from a LAS file
+(one using point format 2), one could simply set the ``dataformat_id``
+option to 0.  The ``forward`` option can also be set to carry forward
+all possible header values from the source file to the new, smaller file.
 
 .. code-block:: json
     :linenos:
@@ -311,13 +318,13 @@ Extra Dimensions
 A LAS Point Format ID defines the fixed sent of :ref:`dimensions` a file must
 store, but softwares are allowed to store extra data beyond that fixed set.
 This feature of the format was regularized in LAS 1.4 as something called
-"extra bytes" or "extra dims", but formats with versions less than LAS 1.4 can
+"extra bytes" or "extra dims", but previos versions can
 also store these extra per-point attributes.
 
 Extra Dimension Example
 ................................................................................
 
-The following example will write a LAS 1.4 file with all non-LAS dimensions
+The following example will write a LAS 1.4 file with all dimensions
 written into the file along with a description of those dimensions in the
 Extra Bytes VLR in the 1.4 file:
 
@@ -327,18 +334,16 @@ Extra Bytes VLR in the 1.4 file:
 
     {
         "pipeline": [
-            {
-                "type" : "readers.las",
-                "filename" : "input.las"
-            },
+            "some_non_las_file",
             {
                 "type" : "writers.las",
                 "extra_dims": "all",
-                "minor_version" : "1.4",
+                "minor_version" : "4",
                 "filename" : "output.las"
             }
         ]
     }
+
 Required Header Fields
 --------------------------------------------------------------------------------
 
@@ -395,28 +400,39 @@ extent information, and format settings.
         ]
     }
 
+::note
+
+    If multiple input LAS files are being written to an output file, the
+    ``forward`` option can only preserve values when they are the same in
+    all input files.  If the values differ, a default will be used (as it
+    would if the ``forward`` option weren't supplied).  You can specify
+    specific option values for output that will also override any forwarded
+    data.
+
 Coordinate Scaling
 --------------------------------------------------------------------------------
 
 LAS stores coordinates as 32 bit integers. It is the user's responsibility to
 ensure that the coordinate domain required by the data in the file fits within
-the 32 bit integer domain. Users should scale the data in relation to the
-measurement scale of the data, and they should not use the full 32 bit integer
-box of precision available to them to store it.
+the 32 bit integer domain.  Most coordinate values have digits to the right
+of the decimal point that must be preserved for sufficient accuracy.
+Using the scale factor allows for integers to be interprested as floating
+point values when read by software.
 
-It is usual to preserve the coordinate scale of data when translating LAS data,
-but in situations that change the coordinate precision, such as reprojecting
-from UTM to decimal degrees, it is not always possible to do so. Overdriven
-coordinate scale also hurts `Compression`_ with |LASzip| and disrupts
-communication of realistic accuracy.
+When writing data to LAS, choosing an appropriate scale factor should take
+into account not just the maximum precision that can be accommodated by the
+format, but the actual precision of the data.  Using a precision greater than
+the resolution of the data collection can mislead users as to the actual
+measurement precision of the data.  In addition, it can lead to larger files
+when writing `compressed <Compression>`_ data with |LASzip|.
 
 Auto Offset Example
 ................................................................................
 
-Users an allow PDAL select scale and offset values for data with the ``auto``
+Users can allow PDAL select scale and offset values for data with the ``auto``
 option.  This can have some detrimental effects on downstream processing.
-``auto`` for scale values will have the effect of storing the data evenly
-across the 32-bit integer domain. This maximizes the precision available to
+``auto`` for scale values will use the entire 32-bit integer domain.
+This maximizes the precision available to
 store the data, but this will have a detrimental effect on |LASzip| storage
 efficiency.  ``auto`` for offset calculation is just fine, however. When given
 the option, choose to store |ASPRSLAS| data with an explicit scale for the X,
@@ -453,10 +469,9 @@ Compression
 |LASzip| is an open source, lossless compression technique for |ASPRSLAS| data.
 It is supported by two different software libraries, and it can be used in both
 the C/C++ and the JavaScript execution environments.  LAZ support is provided
-by both :ref:`readers.las` and :ref:`writers.las` as an option, the
-``compression`` one, and t is a flag to determine whether or not the data
-should be compressed.  LAZ efficiency is hurt by over-specified coordinate
-precision, and it is not fully compatible with LAS 1.4 as of March 2017. A
+by both :ref:`readers.las` and :ref:`writers.las`.  It can be enabled by
+setting the ``compression`` option to "laszip".  LAZ support is not
+fully compatible with LAS 1.4 as of March 2017. A
 revision with 1.4 support is expected.
 
 Compression Example
@@ -512,18 +527,20 @@ into LAS files. Common VLR data include:
 .. note::
 
     There are VLRs that are defined by the specification, and they
-    always have the VLR ``user_id`` of `LASF_Spec`. The most important
-    ones are used for describing the coordinate system of the data.
+    have the VLR ``user_id``s of `LASF_Spec` or `LASF_Projection`.
+    `LASF_Spec` VLRs provide a description of the data beyond that
+    available in the header.  `LASF_Projection` VLRs store the spatial
+    coordinate system of the data.
 
-VLRs are inserted into the file as a header that stores a length along with a
-binary block of data. For LAS 1.0-1.3, the VLR length could be no larger than
+For LAS 1.0-1.3, the VLR length could be no larger than
 65535 bytes. For EVLRs, stored at the end of the file in LAS 1.4, this limit
 was increased to 4gb.
 
 VLR Example
 ................................................................................
 
-You can add your own VLRs to files to store processing information or whatever you
+You can add your own VLRs to files to store processing information or
+whatever you
 want by providing a JSON block via :ref:`writers.las` ``vlrs`` option that
 defines the ``user_id`` and ``data`` items for the VLR. The ``data`` option
 must be `base64`_-encoded string output. The data will be converted to binary
@@ -563,9 +580,11 @@ PDAL Metadata
 -------------------------------------------------------------------------------
 
 The :ref:`writers.las` driver supports an option, ``pdal_metadata``, that writes
-two `PDAL` VLRs to LAS files. The first is the quivalent of :ref:`info_command`'s
+two `PDAL` VLRs to LAS files. The first is the equivalent of
+:ref:`info_command`'s
 ``--metadata`` output. The second is a dump of the ``--pipeline`` serialization
-to include all stages and their options that wrote the file. These two VLRs may
+option that describes all stages and options of the pipeline that created
+the file.  These two VLRs may
 be useful in tracking down processing history of data, allow you to determine
 which versions of PDAL may have written a file and what filter options were set
 when it was written, and give you the ability to store metadata and other
@@ -574,8 +593,8 @@ information via pipeline ``user_data`` from your own applications.
 Metadata Example
 ................................................................................
 
-The :ref:`pipeline` used to construct the file and all of its :ref:`metadata` can
-be written into VLRs in |ASPRSLAS| files under the `PDAL` `VLR key`_.
+The :ref:`pipeline` used to construct the file and all of its :ref:`metadata`
+can be written into VLRs in |ASPRSLAS| files under the `PDAL` `VLR key`_.
 
 
 .. _`VLR key`: http://www.asprs.org/misc/las-key-list.html
@@ -600,9 +619,8 @@ be written into VLRs in |ASPRSLAS| files under the `PDAL` `VLR key`_.
 
 .. warning::
 
-    VLRs only support storing 64K of information, and it is possible, though
-    improbable that the metadata or pipeline stored in the VLRs will not fit
-    in that space. For LAS 1.4 data, an EVLR would be used, but versions less
-    than 1.4 do not have that option.
+    LAS versions prior to 1.4 only support VLRs of at most 64K of information.
+    It is possible, though improbable, that the metadata or pipeline stored
+    in the VLRs will not fit in that space.
 
 
