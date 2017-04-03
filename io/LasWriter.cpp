@@ -225,7 +225,6 @@ void LasWriter::collectUserVLRs()
         addVlr(userId, recordId, description, data);
 
     }
-
 }
 
 
@@ -525,8 +524,15 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 {
     if (data.size() > LasVLR::MAX_DATA_SIZE)
     {
-        ExtLasVLR evlr(userId, recordId, description, data);
-        m_eVlrs.push_back(std::move(evlr));
+        if (m_lasHeader.versionAtLeast(1, 4))
+        {
+            ExtLasVLR evlr(userId, recordId, description, data);
+            m_eVlrs.push_back(std::move(evlr));
+        }
+        else
+            throwError("Can't write VLR with user ID/record ID = " +
+                userId + "/" + std::to_string(recordId) +
+                ".  The data size exceeds the maximum supported.");
     }
     else
     {
@@ -957,6 +963,7 @@ void LasWriter::finishOutput()
 
     OLeStream out(m_ostream);
 
+    // addVlr prevents any eVlrs from being added before version 1.4.
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;
