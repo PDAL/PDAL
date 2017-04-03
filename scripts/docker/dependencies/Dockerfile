@@ -71,6 +71,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
         python-setuptools \
         libgeos++-dev \
+        libhpdf-dev \
         unzip \
     && rm -rf /var/lib/apt/lists/*
 
@@ -303,6 +304,12 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 # fixup for PCL 1.7
 RUN ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
+
+RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y \
+    && apt-get update \
+    && apt-get install -y mbsystem mbsystem-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 
 
 #RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
