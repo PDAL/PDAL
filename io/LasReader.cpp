@@ -506,7 +506,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
             continue;
         if (dim.m_dimType.m_xform.nonstandard())
             type = Dimension::Type::Double;
-        dim.m_dimType.m_id = layout->assignDim(dim.m_name, type);
+        dim.m_dimType.m_id = layout->registerOrAssignDim(dim.m_name, type);
     }
 }
 
