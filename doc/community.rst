@@ -4,12 +4,13 @@
 Community
 ******************************************************************************
 
-PDAL's community interacts through `Mailing List`_, `GitHub`_, `Gitter`_ and `IRC`_.
-Please feel welcome to ask questions and participate in all of the venues.
-The `Mailing List`_ communication channel is for general questions, development
-discussion, and feedback. The `GitHub`_ communication channel is for development
-activities, bug reports, and testing. The `IRC`_ channel is for real-time
-chat activities such as meetings and interactive debugging sessions.
+PDAL's community interacts through `Mailing List`_, `GitHub`_, `Gitter`_ and
+`IRC`_.  Please feel welcome to ask questions and participate in all of the
+venues.  The `Mailing List`_ communication channel is for general questions,
+development discussion, and feedback. The `GitHub`_ communication channel is
+for development activities, bug reports, and testing. The `IRC`_ and `Gitter`_
+channels are for real-time chat activities such as meetings and interactive
+debugging sessions.
 
 Mailing List
 ..............................................................................
@@ -18,18 +19,13 @@ Developers and users of PDAL participate on the PDAL mailing list. It is OK to
 ask questions about how to use PDAL, how to integrate PDAL into your own software,
 and report issues that you might have.
 
+http://lists.osgeo.org/mailman/listinfo/pdal
+
 .. note::
 
     Please remember that an email to the PDAL list is going to 100s of
     individuals. Do your diligence the best you can on your question before
     asking, but don't be afraid to ask. We won't bite. Promise.
-
-Subscribe
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can find the mailing list management page at
-
-http://lists.osgeo.org/mailman/listinfo/pdal
 
 GitHub
 ..............................................................................

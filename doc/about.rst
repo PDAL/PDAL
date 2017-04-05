@@ -225,7 +225,7 @@ of raster and vector formats. PDAL provides the same capability for point
 cloud data types.
 
 PDAL evolved out of the development of database storage and access capabilities
-for the |USACE| CRREL |GRiD| project. Functionality that was creeping into libLAS
+for the |USACE| `CRREL <http://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476649/remote-sensinggeographic-information-systems-center/>`__ |GRiD| project. Functionality that was creeping into |libLAS|
 was pulled into a new library, and it was designed from the ground up to mimic
 successful extract, transform, and load libraries in the geospatial software
 domain. PDAL has steadily attracted more contributors as other software developers
@@ -252,6 +252,11 @@ different than typical vector GIS work flows, and data organization is extremely
 important to be able to efficiently leverage the available computing. These
 characteristics demand a library oriented toward these approaches and PDAL
 achieves it.
+
+.. note::
+
+    Possible point cloud dimension types provided and supported by PDAL
+    can be found at :ref:`dimensions`.
 
 What tasks are PDAL good at?
 --------------------------------------------------------------------------------
@@ -301,7 +306,7 @@ Core C++ Software Library
 PDAL provides a :ref:`C++ API <api>` software developers can use to provide
 point cloud processing capabilities in their own software. PDAL is
 cross-platform C++, and it can compile and run on Linux, OS X, and Windows. The
-best place to learn how to use PDAL's C API is the :ref:`test suite
+best place to learn how to use PDAL's C++ API is the :ref:`test suite
 <pdal_test>` and its `source code
 <https://github.com/PDAL/PDAL/tree/master/test/unit>`__.
 
@@ -309,8 +314,7 @@ best place to learn how to use PDAL's C API is the :ref:`test suite
 
     PDAL :ref:`software <reading>` :ref:`development <writing>`
     :ref:`tutorials <writing-reader>` have more information on how to
-    use the library from a software developer's perspective. We won't
-    get very deep in the C++ swamp in this workshop.
+    use the library from a software developer's perspective.
 
 Command Line Utilities
 ................................................................................
@@ -333,6 +337,13 @@ users can achieve with these applications include:
 
 * :ref:`Merge <merge_command>` or :ref:`split <split_command>` data
 * :ref:`Catalog <tindex_command>` collections of data
+
+.. note::
+
+    The command line utilities are often simply :ref:`pipeline_command` and
+    :ref:`pipeline` collected into a convenient application. In
+    many cases you can replicate the functionality of an application
+    entirely within a single pipeline.
 
 Python API
 ................................................................................

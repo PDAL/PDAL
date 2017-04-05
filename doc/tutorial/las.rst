@@ -400,7 +400,7 @@ extent information, and format settings.
         ]
     }
 
-::note
+.. note::
 
     If multiple input LAS files are being written to an output file, the
     ``forward`` option can only preserve values when they are the same in
@@ -470,7 +470,7 @@ Compression
 It is supported by two different software libraries, and it can be used in both
 the C/C++ and the JavaScript execution environments.  LAZ support is provided
 by both :ref:`readers.las` and :ref:`writers.las`.  It can be enabled by
-setting the ``compression`` option to "laszip".  LAZ support is not
+setting the ``compression`` option to ``laszip``.  LAZ support is not
 fully compatible with LAS 1.4 as of March 2017. A
 revision with 1.4 support is expected.
 
