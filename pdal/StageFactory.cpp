@@ -47,6 +47,7 @@
 #include <filters/DecimationFilter.hpp>
 #include <filters/DividerFilter.hpp>
 #include <filters/EigenvaluesFilter.hpp>
+#include <filters/ELMFilter.hpp>
 #include <filters/EstimateRankFilter.hpp>
 #include <filters/FerryFilter.hpp>
 #include <filters/GroupByFilter.hpp>
@@ -247,6 +248,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(DecimationFilter_InitPlugin);
     PluginManager::initializePlugin(DividerFilter_InitPlugin);
     PluginManager::initializePlugin(EigenvaluesFilter_InitPlugin);
+    PluginManager::initializePlugin(ELMFilter_InitPlugin);
     PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(GroupByFilter_InitPlugin);
