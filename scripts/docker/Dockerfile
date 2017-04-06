@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
     libsqlite3-mod-spatialite \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth=1 https://github.com/PDAL/PDAL \
+RUN git clone https://github.com/PDAL/PDAL \
     && cd PDAL \
     && git checkout 1.5-maintenance \
     && mkdir build \
