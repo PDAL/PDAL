@@ -273,7 +273,7 @@ TEST(LasReaderTest, extraBytes)
     reader.prepare(table);
 
     DimTypeList dimTypes = layout->dimTypes();
-    EXPECT_EQ(dimTypes.size(), (size_t)25);
+    EXPECT_EQ(dimTypes.size(), (size_t)24);
 
     Dimension::Id color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
@@ -287,10 +287,7 @@ TEST(LasReaderTest, extraBytes)
     Dimension::Id flag1 = layout->findProprietaryDim("Flags1");
     EXPECT_EQ(layout->dimType(flag1), Dimension::Type::Signed8);
 
-    Dimension::Id intense2 = layout->findProprietaryDim("Intensity");
-    EXPECT_EQ(layout->dimType(intense2), Dimension::Type::Unsigned32);
-
-    Dimension::Id time2 = layout->findProprietaryDim("Time");
+    Dimension::Id time2 = layout->findDim("Time");
     EXPECT_EQ(layout->dimType(time2), Dimension::Type::Unsigned64);
 
     PointViewSet viewSet = reader.execute(table);
@@ -309,23 +306,20 @@ TEST(LasReaderTest, extraBytes)
 
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        EXPECT_EQ(view->getFieldAs<uint16_t>(red, idx),
+        ASSERT_EQ(view->getFieldAs<uint16_t>(red, idx),
             view->getFieldAs<uint16_t>(color0, idx));
-        EXPECT_EQ(view->getFieldAs<uint16_t>(green, idx),
+        ASSERT_EQ(view->getFieldAs<uint16_t>(green, idx),
             view->getFieldAs<uint16_t>(color1, idx));
-        EXPECT_EQ(view->getFieldAs<uint16_t>(blue, idx),
+        ASSERT_EQ(view->getFieldAs<uint16_t>(blue, idx),
             view->getFieldAs<uint16_t>(color2, idx));
 
-        EXPECT_EQ(view->getFieldAs<uint16_t>(flag0, idx),
+        ASSERT_EQ(view->getFieldAs<uint16_t>(flag0, idx),
             view->getFieldAs<uint16_t>(returnNum, idx));
-        EXPECT_EQ(view->getFieldAs<uint16_t>(flag1, idx),
+        ASSERT_EQ(view->getFieldAs<uint16_t>(flag1, idx),
             view->getFieldAs<uint16_t>(numReturns, idx));
 
-        EXPECT_EQ(view->getFieldAs<uint16_t>(intensity, idx),
-            view->getFieldAs<uint16_t>(intense2, idx));
-
         // Time was written truncated rather than rounded.
-        EXPECT_NEAR(view->getFieldAs<double>(time, idx),
+        ASSERT_NEAR(view->getFieldAs<double>(time, idx),
             view->getFieldAs<double>(time2, idx), 1.0);
     }
 }
