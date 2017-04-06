@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
 
 RUN git clone --depth=1 https://github.com/PDAL/PDAL \
     && cd PDAL \
-    && git checkout master \
+    && git checkout 1.5-maintenance \
     && mkdir build \
     && cd build \
     && cmake \
