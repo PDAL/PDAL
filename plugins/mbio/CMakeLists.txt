@@ -2,7 +2,7 @@
 # MBIO plugin CMake configuration (MB-System)
 #
 
-find_package(MBSYSTEM)
+find_package(MBSystem)
 if (MBSYSTEM_FOUND)
     PDAL_ADD_PLUGIN(reader_libname reader mbio
         FILES

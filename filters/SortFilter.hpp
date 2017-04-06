@@ -70,13 +70,13 @@ private:
     Dimension::Id m_dim;
     // Dimension name.
     std::string m_dimName;
-    
+
     // Sort order.
     SortOrder m_order;
 
-    virtual void addArgs(ProgramArgs& args) override;
-    virtual void prepared(PointTableRef table) override;
-    virtual void filter(PointView& view) override;
+    virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
+    virtual void filter(PointView& view);
 
     SortFilter& operator=(const SortFilter&) = delete;
     SortFilter(const SortFilter&) = delete;
