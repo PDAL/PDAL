@@ -115,6 +115,22 @@ issuing the following command:
 
     docker run -v /path/to/pdal/root/tree:/data -w /data/doc pdal/docs make html
 
+
+Container refresh
+................................................................................
+
+The ``pdal/docs`` container can be refreshed on DockerHub by tagging a ``docbuild``
+tag and force-pushing it to the main repository:
+
+::
+
+    $ git tag -f docbuild
+    $ git push origin -f refs/tags/docbuild
+
+.. note::
+
+    The ``pdal/docs`` container is constructed from the `Dockerfile <https://github.com/PDAL/PDAL/blob/master/scripts/docker/docbuild/Dockerfile>`__ at whatever revision the ``docbuild`` tag points to.
+
 .. _`GitHub Pages`: https://pages.github.com/
 .. _`GitHub`: http://github.com/PDAL/PDAL
 

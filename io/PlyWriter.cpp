@@ -158,7 +158,7 @@ void PlyWriter::done(PointTableRef table)
     auto dimensions = table.layout()->dims();
     for (auto dim : dimensions) {
         std::string name = table.layout()->dimName(dim);
-        e_ply_type plyType = getPlyType(Dimension::defaultType(dim));
+        e_ply_type plyType = getPlyType(table.layout()->dimType(dim));
         if (!ply_add_scalar_property(m_ply, name.c_str(), plyType))
             throwError("Could not add scalar property '" + name  + "'");
     }

@@ -26,7 +26,11 @@ PDAL is known to compile on Linux 2.6's of various flavors and OSX with XCode.
 .. seealso::
 
     :ref:`docker` contains an automated way to build PDAL and all of
-    its dependencies.
+    its dependencies. The `Dockerfile`_ for PDAL build on Xenial is an
+    excellent script describing how to build PDAL and all of its
+    dependencies.
+
+.. _`Dockerfile`: https://github.com/PDAL/PDAL/blob/master/scripts/docker/Dockerfile
 
 .. note::
 
