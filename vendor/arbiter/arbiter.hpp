@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 1e9cadf66ddc1bc5ea7d4e044136f6072b8b305a
+// Git SHA: 311b81e3dcb5e8c55b2148f7eba46a12cff66914
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -992,6 +992,11 @@ private:
             std::vector<char>& data) const final override
     {
         return get(path, data, http::Headers(), http::Query());
+    }
+
+    std::string typedPath(const std::string& p) const
+    {
+        return type() + "://" + p;
     }
 
     http::Pool& m_pool;
