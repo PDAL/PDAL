@@ -15,6 +15,21 @@
     "description": "Z coordinate"
     },
     {
+    "name": "NormalX",
+    "type": "double",
+    "description": "X component of normal vector"
+    },
+    {
+    "name": "NormalY",
+    "type": "double",
+    "description": "Y component of normal vector"
+    },
+    {
+    "name": "NormalZ",
+    "type": "double",
+    "description": "Z component of normal vector"
+    },
+    {
     "name": "Intensity",
     "type": "uint16",
     "description": "Representation of the pulse return magnitude"
