@@ -77,7 +77,7 @@ TIndexKernel::TIndexKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_fastBoundary(false)
-
+    , m_overrideASrs(false)
 {}
 
 
@@ -145,6 +145,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (args.set("bounds"))
             throw pdal_error("'bounds' option not supported when building "
                 "index.");
+        if (args.set("a_srs"))
+            m_overrideASrs = true;
     }
 }
 
@@ -395,7 +397,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 
     // Set the SRS into the feature.
     // We override if m_assignSrsString is set
-    if (fileInfo.m_srs.empty() || m_assignSrsString.size())
+    if (fileInfo.m_srs.empty() || m_overrideASrs)
         fileInfo.m_srs = m_assignSrsString;
 
     SpatialRef srcSrs(fileInfo.m_srs);
@@ -451,9 +453,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     OGR_G_ExportToWkt(g.get(), &pgeom);
     OGR_F_SetGeometry(hFeature, g.get());
 
-    bool ok = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
-    OGR_F_Destroy(hFeature);
-    return ok;
+    return (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
 }
 
 
