@@ -208,7 +208,7 @@ void GreedyProjection::filter(PointView& view)
       u_ = nc.cross (v_);
 
       // Projecting point onto the surface
-      const Eigen::Vector3d coord(getCoord(R_));
+      Eigen::Vector3d coord(getCoord(R_));
       float dist = nc.dot (coord);
       proj_qp_ = coord - dist * nc;
 
@@ -379,9 +379,9 @@ void GreedyProjection::filter(PointView& view)
 
       Eigen::Vector3d coord(getCoord(R_));
       // Locating FFN and SFN to adapt distance threshold
-      double sqr_source_dist = (coord - getCoord[source_[R_]]).squaredNorm ();
-      double sqr_ffn_dist = (coord - getCoord[ffn_[R_]]).squaredNorm ();
-      double sqr_sfn_dist = (coord - getCoord[sfn_[R_]]).squaredNorm ();
+      double sqr_source_dist = (coord - getCoord(source_[R_])).squaredNorm ();
+      double sqr_ffn_dist = (coord - getCoord(ffn_[R_])).squaredNorm ();
+      double sqr_sfn_dist = (coord - getCoord(sfn_[R_])).squaredNorm ();
       double max_sqr_fn_dist = (std::max)(sqr_ffn_dist, sqr_sfn_dist);
       double sqr_dist_threshold = (std::min)(sqr_max_edge, sqr_mu * sqrDists[1]);
       if (max_sqr_fn_dist > sqrDists[nnn_-1])
@@ -411,10 +411,10 @@ void GreedyProjection::filter(PointView& view)
       v_ = nc.unitOrthogonal ();
       u_ = nc.cross (v_);
 
-      const Eigen::Vector3d coord(getCoord(R_));
+      const Eigen::Vector3d c(getCoord(R_));
       // Projecting point onto the surface
-      float dist = nc.dot (coord);
-      proj_qp_ = coord - dist * nc;
+      float dist = nc.dot (c);
+      proj_qp_ = c - dist * nc;
 
       // Converting coords, calculating angles and saving the projected
       // near boundary edges
@@ -424,7 +424,7 @@ void GreedyProjection::filter(PointView& view)
       //ABELL - Check this.
       for (int i = 1; i < nnn_; i++)
       {
-        tmp_ = coords_[nnIdx[i]] - proj_qp_;
+        tmp_ = getCoord(nnIdx[i]) - proj_qp_;
         uvn_nn[i][0] = tmp_.dot(u_);
         uvn_nn[i][1] = tmp_.dot(v_);
 
@@ -447,7 +447,7 @@ void GreedyProjection::filter(PointView& view)
         if ((ffn_[R_] == nnIdx[i]) || (sfn_[R_] == nnIdx[i]))
           angles_[i].visible = true;
         bool same_side = true;
-        const Eigen::Vector3f neighbor_normal = getNormalCoord(nnIdx[i]);
+        const Eigen::Vector3d neighbor_normal = getNormalCoord(nnIdx[i]);
         double cosine = nc.dot (neighbor_normal);
         if (cosine > 1) cosine = 1;
         if (cosine < -1) cosine = -1;
@@ -467,10 +467,10 @@ void GreedyProjection::filter(PointView& view)
           doubleEdge e;
           e.index = i;
           nr_edge++;
-          tmp_ = getCoord[ffn_[nnIdx[i]]] - proj_qp_;
+          tmp_ = getCoord(ffn_[nnIdx[i]]) - proj_qp_;
           e.first[0] = tmp_.dot(u_);
           e.first[1] = tmp_.dot(v_);
-          tmp_ = getCoord[sfn_[nnIdx[i]]] - proj_qp_;
+          tmp_ = getCoord(sfn_[nnIdx[i]]) - proj_qp_;
           e.second[0] = tmp_.dot(u_);
           e.second[1] = tmp_.dot(v_);
           doubleEdges.push_back(e);
@@ -563,7 +563,6 @@ void GreedyProjection::filter(PointView& view)
         }
 
       // Sorting angles
-      auto comp = [](const nnAngle& a1, const nnAngle
       std::sort(angles_.begin (), angles_.end (),
           [](const nnAngle& a1, const nnAngle& a2)
       {
@@ -588,13 +587,13 @@ void GreedyProjection::filter(PointView& view)
           else
           {
             if (sqr_max_edge <
-                (coords_[ffn_[R_]] - coords_[sfn_[R_]]).squaredNorm ())
+                (getCoord(ffn_[R_]) - getCoord(sfn_[R_])).squaredNorm ())
             {
               state_[R_] = GP3Type::BOUNDARY;
             }
             else
             {
-              tmp_ = coords_[source_[R_]] - proj_qp_;
+              tmp_ = getCoord(source_[R_]) - proj_qp_;
               uvn_s[0] = tmp_.dot(u_);
               uvn_s[1] = tmp_.dot(v_);
               double angleS = atan2(uvn_s[1], uvn_s[0]);
@@ -825,7 +824,7 @@ void GreedyProjection::filter(PointView& view)
           }
           if ((!gaps[j]) &&
               (sqr_max_edge <
-                  (coords_[angles_[j+1].index] - coords_[angles_[j].index]).
+                  (getCoord(angles_[j+1].index) - getCoord(angles_[j].index)).
                   squaredNorm ()))
           {
             gaps[j] = is_boundary = true;
@@ -844,8 +843,8 @@ void GreedyProjection::filter(PointView& view)
           gaps[last_visible] = is_boundary = true;
         }
         if ((!gaps[last_visible]) &&
-            (sqr_max_edge < (coords_[angles_[0].index] -
-                coords_[angles_[last_visible].index]).squaredNorm ()))
+            (sqr_max_edge < (getCoord(angles_[0].index) -
+                getCoord(angles_[last_visible].index)).squaredNorm ()))
         {
           gaps[last_visible] = is_boundary = true;
         }
@@ -863,8 +862,8 @@ void GreedyProjection::filter(PointView& view)
             gaps[j] = is_boundary = true;
           }
           if ((!gaps[j]) &&
-              (sqr_max_edge < (coords_[angles_[j+1].index] -
-                  coords_[angles_[j].index]).squaredNorm ()))
+              (sqr_max_edge < (getCoord(angles_[j+1].index) -
+                  getCoord(angles_[j].index)).squaredNorm ()))
           {
             gaps[j] = is_boundary = true;
           }
@@ -887,8 +886,8 @@ void GreedyProjection::filter(PointView& view)
             gaps[j] = is_boundary = true;
           }
           if ((!gaps[j]) &&
-              (sqr_max_edge < (coords_[angles_[j+1].index] -
-                  coords_[angles_[j].index]).squaredNorm ()))
+              (sqr_max_edge < (getCoord(angles_[j+1].index) -
+                  getCoord(angles_[j].index)).squaredNorm ()))
           {
             gaps[j] = is_boundary = true;
           }
@@ -962,8 +961,8 @@ void GreedyProjection::filter(PointView& view)
             else
             {
               int erased_idx = static_cast<int> (to_erase.size ()) -1;
-              for (auto prev_it = it-1;
-                  (erased_idx != -1) && (it != angleIdx.begin()); it--)
+              auto prev_it = it - 1;
+              for (; (erased_idx != -1) && (it != angleIdx.begin()); it--)
                 if (*it == to_erase[erased_idx])
                   erased_idx--;
                 else
@@ -1175,13 +1174,13 @@ void GreedyProjection::filter(PointView& view)
     }
   }
   log()->get(LogLevel::Debug) << "Number of triangles: " << grid_.size() <<
-      ".\n");
+      ".\n";
   log()->get(LogLevel::Debug) << "Number of unconnected parts: " << nr_parts <<
-      ".\n");
+      ".\n";
   if (increase_nnn4fn > 0)
       log()->get(LogLevel::Warning) << "Number of neighborhood size "
           "increase requests for fringe neighbors: " << increase_nnn4fn <<
-          ".\n");
+          ".\n";
   if (increase_nnn4s > 0)
       log()->get(LogLevel::Warning) << "Number of neighborhood size "
           "increase requests for source: " << increase_nnn4s << ".\n";
@@ -1196,7 +1195,6 @@ void GreedyProjection::filter(PointView& view)
   log()->get(LogLevel::Debug) << "Number of processed points: " <<
       fringe_queue_.size() << " / " << view.size() << "!\n";
   view_ = nullptr;
-  return (true);
 }
 
 GreedyProjection::closeTriangle ()
@@ -1590,10 +1588,10 @@ void GreedyProjection::connectPoint (
               }
               else
               {
-                tmp_ = coords_[ffn_[next_index]] - proj_qp_;
+                tmp_ = getCoord(ffn_[next_index]) - proj_qp_;
                 uvn_next_ffn_[0] = tmp_.dot(u_);
                 uvn_next_ffn_[1] = tmp_.dot(v_);
-                tmp_ = coords_[sfn_[next_index]] - proj_qp_;
+                tmp_ = getCoord(sfn_[next_index]) - proj_qp_;
                 uvn_next_sfn_[0] = tmp_.dot(u_);
                 uvn_next_sfn_[1] = tmp_.dot(v_);
 
@@ -1740,10 +1738,10 @@ void GreedyProjection::connectPoint (
               }
               else
               {
-                tmp_ = coords_[ffn_[next_index]] - proj_qp_;
+                tmp_ = getCoord(ffn_[next_index]) - proj_qp_;
                 uvn_next_ffn_[0] = tmp_.dot(u_);
                 uvn_next_ffn_[1] = tmp_.dot(v_);
-                tmp_ = coords_[sfn_[next_index]] - proj_qp_;
+                tmp_ = getCoord(sfn_[next_index]) - proj_qp_;
                 uvn_next_sfn_[0] = tmp_.dot(u_);
                 uvn_next_sfn_[1] = tmp_.dot(v_);
 
