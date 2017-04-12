@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 5717b5f7b450db996b4a44d4865671f925e2ff50
+// Git SHA: 1e9cadf66ddc1bc5ea7d4e044136f6072b8b305a
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -47,6 +47,43 @@ SOFTWARE.
 #define ARBITER_IS_AMALGAMATION
 #define ARBITER_CUSTOM_NAMESPACE pdal
 #define ARBITER_EXTERNAL_JSON
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/exports.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#if defined(_WIN32) || defined(WIN32) || defined(_MSC_VER)
+#define ARBITER_WINDOWS
+#endif
+
+#ifndef ARBITER_DLL
+#if defined(ARBITER_WINDOWS)
+#if defined(ARBITER_DLL_EXPORT)
+#   define ARBITER_DLL   __declspec(dllexport)
+#elif defined(PDAL_DLL_IMPORT)
+#   define ARBITER_DLL   __declspec(dllimport)
+#else
+#   define ARBITER_DLL
+#endif
+#else
+#  if defined(USE_GCC_VISIBILITY_FLAG)
+#    define ARBITER_DLL     __attribute__ ((visibility("default")))
+#  else
+#    define ARBITER_DLL
+#  endif
+#endif
+#endif
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/exports.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/util/types.hpp
@@ -156,6 +193,8 @@ private:
 #ifndef ARBITER_IS_AMALGAMATION
 
 #include <arbiter/util/types.hpp>
+#include <arbiter/util/exports.hpp>
+
 
 #ifndef ARBITER_EXTERNAL_JSON
 #include <arbiter/third/json/json.hpp>
@@ -169,7 +208,11 @@ private:
 #include <json/json.h>
 #endif
 
-class curl_slist;
+#ifdef ARBITER_CURL
+#include <curl/curl.h>
+#endif
+
+struct curl_slist;
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -185,7 +228,7 @@ namespace http
 
 class Pool;
 
-class Curl
+class ARBITER_DLL Curl
 {
     friend class Pool;
 
@@ -276,6 +319,7 @@ private:
 
 #include <arbiter/util/curl.hpp>
 #include <arbiter/util/types.hpp>
+#include <arbiter/util/exports.hpp>
 
 #ifndef ARBITER_EXTERNAL_JSON
 #include <arbiter/third/json/json.hpp>
@@ -312,9 +356,9 @@ std::string buildQueryString(const http::Query& query);
 
 /** @cond arbiter_internal */
 
-class Pool;
+class ARBITER_DLL Pool;
 
-class Resource
+class ARBITER_DLL Resource
 {
 public:
     Resource(Pool& pool, Curl& curl, std::size_t id, std::size_t retry);
@@ -352,7 +396,7 @@ private:
     http::Response exec(std::function<http::Response()> f);
 };
 
-class Pool
+class ARBITER_DLL Pool
 {
     // Only HttpResource may release.
     friend class Resource;
@@ -451,6 +495,12 @@ Contents parse(const std::string& s);
 #include <ctime>
 #include <string>
 
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/exports.hpp>
+#endif
+
+
+
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
 {
@@ -459,7 +509,7 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-class Time
+class ARBITER_DLL Time
 {
 public:
     static const std::string iso8601;
@@ -467,9 +517,9 @@ public:
     static const std::string dateNoSeparators;
 
     Time();
-    Time(const std::string& s, const std::string& format = iso8601);
+    Time(const std::string& s, const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
 
-    std::string str(const std::string& format = iso8601) const;
+    std::string str(const std::string& format = "%Y-%m-%dT%H:%M:%SZ") const;
 
     // Return value is in seconds.
     int64_t operator-(const Time& other) const;
@@ -654,7 +704,9 @@ typedef std::map<std::string, std::unique_ptr<Driver>> DriverMap;
 #endif
 
 
-
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/exports.hpp>
+#endif
 
 #ifdef ARBITER_EXTERNAL_JSON
 #include <json/json.h>
@@ -679,20 +731,20 @@ class Arbiter;
 namespace fs
 {
     /** @brief Returns true if created, false if already existed. */
-    bool mkdirp(std::string dir);
+    ARBITER_DLL bool mkdirp(std::string dir);
 
     /** @brief Returns true if removed, otherwise false. */
-    bool remove(std::string filename);
+    ARBITER_DLL bool remove(std::string filename);
 
     /** @brief Performs tilde expansion to a fully-qualified path, if possible.
      */
-    std::string expandTilde(std::string path);
+    ARBITER_DLL std::string expandTilde(std::string path);
 
     /** @brief Get temporary path from environment. */
-    std::string getTempPath();
+    ARBITER_DLL std::string getTempPath();
 
     /** @brief Resolve a possible wildcard path. */
-    std::vector<std::string> glob(std::string path);
+    ARBITER_DLL std::vector<std::string> glob(std::string path);
 
     /** @brief A scoped local filehandle for a possibly remote path.
      *
@@ -702,7 +754,7 @@ namespace fs
      *
      * See Arbiter::getLocalHandle for details about construction.
      */
-    class LocalHandle
+    class ARBITER_DLL LocalHandle
     {
         friend class arbiter::Arbiter;
 
@@ -746,9 +798,11 @@ namespace drivers
 {
 
 /** @brief Local filesystem driver. */
-class Fs : public Driver
+class ARBITER_DLL Fs : public Driver
 {
 public:
+    Fs() { }
+
     static std::unique_ptr<Fs> create(const Json::Value& json);
 
     virtual std::string type() const override { return "file"; }
@@ -3824,6 +3878,12 @@ std::string encodeAsHex(const std::string& data);
 #include <string>
 #include <utility>
 #include <vector>
+#include <algorithm>
+
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/exports.hpp>
+#endif
+
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -3839,7 +3899,7 @@ namespace util
     /** Returns @p path, less any trailing glob indicators (one or two
      * asterisks) as well as any possible trailing slash.
      */
-    std::string stripPostfixing(std::string path);
+    ARBITER_DLL std::string stripPostfixing(std::string path);
 
     /** Returns the portion of @p fullPath following the last instance of the
      * character `/`, if any instances exist aside from possibly the delimiter
@@ -3851,20 +3911,20 @@ namespace util
      * logic above, thus the innermost directory in the full path will be
      * returned.
      */
-    std::string getBasename(std::string fullPath);
+    ARBITER_DLL std::string getBasename(std::string fullPath);
 
     /** Returns everything besides the basename, as determined by `getBasename`.
      * For file paths, this corresponds to the directory path above the file.
      * For directory paths, this corresponds to all directories above the
      * innermost directory.
      */
-    std::string getNonBasename(std::string fullPath);
+    ARBITER_DLL std::string getNonBasename(std::string fullPath);
 
     /** @cond arbiter_internal */
-    inline bool isSlash(char c) { return c == '/' || c == '\\'; }
+    ARBITER_DLL inline bool isSlash(char c) { return c == '/' || c == '\\'; }
 
     /** Returns true if the last character is an asterisk. */
-    inline bool isGlob(std::string path)
+    ARBITER_DLL inline bool isGlob(std::string path)
     {
         return path.size() && path.back() == '*';
     }
@@ -4631,7 +4691,7 @@ private:
 #endif
 
 #ifndef ARBITER_IS_AMALGAMATION
-
+#include <arbiter/util/exports.hpp>
 #include <arbiter/driver.hpp>
 #include <arbiter/endpoint.hpp>
 #include <arbiter/drivers/fs.hpp>
@@ -4675,7 +4735,7 @@ namespace http { class Pool; }
  *
  * All Arbiter operations are thread-safe except unless otherwise noted.
  */
-class Arbiter
+class ARBITER_DLL Arbiter
 {
 public:
     /** Construct a basic Arbiter with only drivers the don't require
