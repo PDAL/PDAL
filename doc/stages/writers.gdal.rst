@@ -135,3 +135,12 @@ window_size
 
 dimension
   A dimension name to use for the interpolation. [Default: ``Z``]
+
+.. _bounds:
+
+bounds
+  The bounds of the data to be written.  Points not in bounds are discarded.
+  The format is ([minx, maxx],[miny,maxy]).
+
+.. note::
+  The bounds_ option is required when a pipeline is run in streaming mode.
