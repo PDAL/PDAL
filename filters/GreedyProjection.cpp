@@ -118,10 +118,10 @@ void GreedyProjection::filter(PointView& view)
     int part_index = 0;
 
     // 2D coordinates of points
-    const Eigen::Vector2f uvn_nn_qp_zero = Eigen::Vector2f::Zero();
-    Eigen::Vector2f uvn_current;
-    Eigen::Vector2f uvn_prev;
-    Eigen::Vector2f uvn_next;
+    const Eigen::Vector2d uvn_nn_qp_zero = Eigen::Vector2d::Zero();
+    Eigen::Vector2d uvn_current;
+    Eigen::Vector2d uvn_prev;
+    Eigen::Vector2d uvn_next;
 
     // initializing fields
     already_connected_ = false; // see declaration for comments :P
@@ -132,11 +132,11 @@ void GreedyProjection::filter(PointView& view)
     source_.clear ();
     ffn_.clear ();
     sfn_.clear ();
-    part_.resize(view.size (), -1); // indices of point's part
+    part_.resize(view.size ()); // indices of point's part
     state_.resize(view.size (), GP3Type::FREE);
-    source_.resize(view.size (), -1);
-    ffn_.resize(view.size (), -1);
-    sfn_.resize(view.size (), -1);
+    source_.resize(view.size ());
+    ffn_.resize(view.size());
+    sfn_.resize(view.size());
     fringe_queue_.clear ();
     int fqIdx = 0; // current fringe's index in the queue to be processed
 
@@ -172,8 +172,8 @@ void GreedyProjection::filter(PointView& view)
   int is_free=0, nr_parts=0, increase_nnn4fn=0, increase_nnn4s=0, increase_dist=0, nr_touched = 0;
   bool is_fringe;
   angles_.resize(nnn_);
-  std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f> > uvn_nn (nnn_);
-  Eigen::Vector2f uvn_s;
+  std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d> > uvn_nn (nnn_);
+  Eigen::Vector2d uvn_s;
 
   // iterating through fringe points and finishing them until everything is done
   while (!done)
@@ -214,7 +214,7 @@ void GreedyProjection::filter(PointView& view)
 
       // Converting coords, calculating angles and saving the
       // projected near boundary edges
-      int nr_edge = 0;
+      size_t nr_edge = 0;
       std::vector<doubleEdge> doubleEdges;
       // nearest neighbor with index 0 is the query point R_ itself
       //ABELL - Need to check that the above is true.
@@ -229,13 +229,10 @@ void GreedyProjection::filter(PointView& view)
         angles_[i].angle = atan2(uvn_nn[i][1], uvn_nn[i][0]);
         // initializing angle descriptors
         angles_[i].index = nnIdx[i];
-        if (
-            (state_[nnIdx[i]] == GP3Type::COMPLETED) ||
+        if ((state_[nnIdx[i]] == GP3Type::COMPLETED) ||
             (state_[nnIdx[i]] == GP3Type::BOUNDARY) ||
             (state_[nnIdx[i]] == GP3Type::NONE) ||
-            (nnIdx[i] == -1) /// NOTE: discarding NaN points and those that are not in indices_
-            || (sqrDists[i] > sqr_dist_threshold)
-           )
+            (sqrDists[i] > sqr_dist_threshold))
           angles_[i].visible = false;
         else
           angles_[i].visible = true;
@@ -265,16 +262,16 @@ void GreedyProjection::filter(PointView& view)
             (sfn_[R_] != nnIdx[i]))
         {
           bool visibility = true;
-          for (int j = 0; j < nr_edge; j++)
+          for (size_t j = 0; j < nr_edge; j++)
           {
             if (ffn_[nnIdx[doubleEdges[j].index]] != nnIdx[i])
               visibility = isVisible(uvn_nn[i], uvn_nn[doubleEdges[j].index],
-                doubleEdges[j].first, Eigen::Vector2f::Zero());
+                doubleEdges[j].first, Eigen::Vector2d::Zero());
             if (!visibility)
               break;
             if (sfn_[nnIdx[doubleEdges[j].index]] != nnIdx[i])
               visibility = isVisible(uvn_nn[i], uvn_nn[doubleEdges[j].index],
-                  doubleEdges[j].second, Eigen::Vector2f::Zero());
+                  doubleEdges[j].second, Eigen::Vector2d::Zero());
             if (!visibility == false)
               break;
           }
@@ -286,10 +283,10 @@ void GreedyProjection::filter(PointView& view)
       PointId left = 1;
       do
       {
-        while ((left < nnn_) &&
+        while ((left < (PointId)nnn_) &&
             ((!angles_[left].visible) || stateSet(nnIdx[left])))
             left++;
-        if (left >= nnn_)
+        if (left >= (PointId)nnn_)
           break;
         else
         {
@@ -418,7 +415,7 @@ void GreedyProjection::filter(PointView& view)
 
       // Converting coords, calculating angles and saving the projected
       // near boundary edges
-      int nr_edge = 0;
+      size_t nr_edge = 0;
       std::vector<doubleEdge> doubleEdges;
       // nearest neighbor with index 0 is the query point R_ itself
       //ABELL - Check this.
@@ -434,13 +431,10 @@ void GreedyProjection::filter(PointView& view)
         // initializing angle descriptors
         angles_[i].index = nnIdx[i];
         angles_[i].nnIndex = i;
-        if (
-            (state_[nnIdx[i]] == GP3Type::COMPLETED) ||
+        if ((state_[nnIdx[i]] == GP3Type::COMPLETED) ||
             (state_[nnIdx[i]] == GP3Type::BOUNDARY) ||
             (state_[nnIdx[i]] == GP3Type::NONE) ||
-            (nnIdx[i] == -1) /// NOTE: discarding NaN points and those that are not in indices_
-            || (sqrDists[i] > sqr_dist_threshold)
-           )
+            (sqrDists[i] > sqr_dist_threshold))
           angles_[i].visible = false;
         else
           angles_[i].visible = true;
@@ -540,21 +534,24 @@ void GreedyProjection::filter(PointView& view)
             (ffn_[R_] != nnIdx[i]) && (sfn_[R_] != nnIdx[i]))
         {
           bool visibility = true;
-          for (int j = 0; j < nr_edge; j++)
+          for (size_t j = 0; j < nr_edge; j++)
           {
-            if (doubleEdges[j].index != i)
+            //ABELL - This seems weird.  i is just a count of the nearest
+            // neighbors, not a point index.  Are some indicies the index
+            // of the nearest neighbors?  If so, confusing.
+            if (doubleEdges[j].index != (PointId)i)
             {
-              int f = ffn_[nnIdx[doubleEdges[j].index]];
+              PointId f = ffn_[nnIdx[doubleEdges[j].index]];
               if ((f != nnIdx[i]) && (f != R_))
                 visibility = isVisible(uvn_nn[i], uvn_nn[doubleEdges[j].index],
-                    doubleEdges[j].first, Eigen::Vector2f::Zero());
+                    doubleEdges[j].first, Eigen::Vector2d::Zero());
               if (visibility == false)
                 break;
 
-              int s = sfn_[nnIdx[doubleEdges[j].index]];
+              PointId s = sfn_[nnIdx[doubleEdges[j].index]];
               if ((s != nnIdx[i]) && (s != R_))
                 visibility = isVisible(uvn_nn[i], uvn_nn[doubleEdges[j].index],
-                    doubleEdges[j].second, Eigen::Vector2f::Zero());
+                    doubleEdges[j].second, Eigen::Vector2d::Zero());
               if (visibility == false)
                 break;
             }
@@ -923,9 +920,9 @@ void GreedyProjection::filter(PointView& view)
         double angle_so_far = 0, angle_would_be;
         double max_combined_angle =
             (std::min)(maximum_angle_, M_PI-2*minimum_angle_);
-        Eigen::Vector2f X;
-        Eigen::Vector2f S1;
-        Eigen::Vector2f S2;
+        Eigen::Vector2d X;
+        Eigen::Vector2d S1;
+        Eigen::Vector2d S2;
         std::vector<int> to_erase;
         for (auto it = angleIdx.begin()+1; it != angleIdx.end()-1; it++)
         {
@@ -1197,7 +1194,7 @@ void GreedyProjection::filter(PointView& view)
   view_ = nullptr;
 }
 
-GreedyProjection::closeTriangle ()
+void GreedyProjection::closeTriangle ()
 {
   state_[R_] = GP3Type::COMPLETED;
   addTriangle (angles_[0].index, angles_[1].index, R_);
@@ -1229,7 +1226,7 @@ GreedyProjection::closeTriangle ()
 }
 
 void GreedyProjection::connectPoint (
-    const int prev_index, const int next_index, const int next_next_index,
+    PointId prev_index, PointId next_index, PointId next_next_index,
     const Eigen::Vector2d &uvn_current,
     const Eigen::Vector2d &uvn_prev,
     const Eigen::Vector2d &uvn_next)
@@ -1335,14 +1332,14 @@ void GreedyProjection::connectPoint (
         if (prev_ffn && next_sfn && prev_sfn && next_ffn)
         {
           /* should be never the case */
-          double prev2f = (getCoord[ffn_[current_index_]] -
-              getCoord[prev_index]).squaredNorm ();
-          double next2s = (getCoord[sfn_[current_index_]] -
-              getCoord[next_index]).squaredNorm ();
-          double prev2s = (getCoord[sfn_[current_index_]] -
-              getCoord[prev_index]).squaredNorm ();
-          double next2f = (getCoord[ffn_[current_index_]] -
-              getCoord[next_index]).squaredNorm ();
+          double prev2f = (getCoord(ffn_[current_index_]) -
+              getCoord(prev_index)).squaredNorm ();
+          double next2s = (getCoord(sfn_[current_index_]) -
+              getCoord(next_index)).squaredNorm ();
+          double prev2s = (getCoord(sfn_[current_index_]) -
+              getCoord(prev_index)).squaredNorm ();
+          double next2f = (getCoord(ffn_[current_index_]) -
+              getCoord(next_index)).squaredNorm ();
           if (prev2f < prev2s)
           {
             if (prev2f < next2f)
@@ -1381,10 +1378,10 @@ void GreedyProjection::connectPoint (
         else if (prev_ffn && next_sfn)
         {
           /* a clear case */
-          double prev2f = (getCoord[ffn_[current_index_]] -
-              getCoord[prev_index]).squaredNorm ();
-          double next2s = (getCoord[sfn_[current_index_]] -
-              getCoord[next_index]).squaredNorm ();
+          double prev2f = (getCoord(ffn_[current_index_]) -
+              getCoord(prev_index)).squaredNorm();
+          double next2s = (getCoord(sfn_[current_index_]) -
+              getCoord(next_index)).squaredNorm ();
           if (prev2f < next2s)
             min_dist = 0;
           else
@@ -1393,10 +1390,10 @@ void GreedyProjection::connectPoint (
         else if (prev_sfn && next_ffn)
         {
           /* a clear case */
-          double prev2s = (getCoord[sfn_[current_index_]] -
-              getCoord[prev_index]).squaredNorm ();
-          double next2f = (getCoord[ffn_[current_index_]] -
-              getCoord[next_index]).squaredNorm ();
+          double prev2s = (getCoord(sfn_[current_index_]) -
+              getCoord(prev_index)).squaredNorm ();
+          double next2f = (getCoord(ffn_[current_index_]) -
+              getCoord(next_index)).squaredNorm ();
           if (prev2s < next2f)
             min_dist = 1;
           else
@@ -1414,12 +1411,12 @@ void GreedyProjection::connectPoint (
         /* messed up cases */
         else if (prev_ffn)
         {
-          double prev2f = (getCoord[ffn_[current_index_]] -
-              getCoord[prev_index]).squaredNorm ();
+          double prev2f = (getCoord(ffn_[current_index_]) -
+              getCoord(prev_index)).squaredNorm ();
           if (prev_sfn)
           {
-            double prev2s = (getCoord[sfn_[current_index_]] -
-                getCoord[prev_index]).squaredNorm ();
+            double prev2s = (getCoord(sfn_[current_index_]) -
+                getCoord(prev_index)).squaredNorm ();
             if (prev2s < prev2f)
               min_dist = 1;
             else
@@ -1427,8 +1424,8 @@ void GreedyProjection::connectPoint (
           }
           else if (next_ffn)
           {
-            double next2f = (getCoord[ffn_[current_index_]] -
-                getCoord[next_index]).squaredNorm ();
+            double next2f = (getCoord(ffn_[current_index_]) -
+                getCoord(next_index)).squaredNorm ();
             if (next2f < prev2f)
               min_dist = 2;
             else
@@ -1437,12 +1434,12 @@ void GreedyProjection::connectPoint (
         }
         else if (next_sfn)
         {
-          double next2s = (getCoord[sfn_[current_index_]] -
-              getCoord[next_index]).squaredNorm ();
+          double next2s = (getCoord(sfn_[current_index_]) -
+              getCoord(next_index)).squaredNorm ();
           if (prev_sfn)
           {
-            double prev2s = (getCoord[sfn_[current_index_]] -
-                getCoord[prev_index]).squaredNorm ();
+            double prev2s = (getCoord(sfn_[current_index_]) -
+                getCoord(prev_index)).squaredNorm ();
             if (prev2s < next2s)
               min_dist = 1;
             else
@@ -1450,8 +1447,8 @@ void GreedyProjection::connectPoint (
           }
           else if (next_ffn)
           {
-            double next2f = (getCoord[ffn_[current_index_]] -
-                getCoord[next_index]).squaredNorm ();
+            double next2f = (getCoord(ffn_[current_index_]) -
+                getCoord(next_index)).squaredNorm ();
             if (next2f < next2s)
               min_dist = 2;
             else
@@ -1549,7 +1546,7 @@ void GreedyProjection::connectPoint (
           case 2://next2f:
           {
             addTriangle (current_index_, ffn_[current_index_], next_index);
-            int neighbor_update = next_index;
+            PointId neighbor_update = next_index;
 
             /* updating next_index */
             if (!stateSet(next_index))
@@ -1605,10 +1602,10 @@ void GreedyProjection::connectPoint (
                 int connect2ffn = -1;
                 if (ffn_next_ffn && sfn_next_ffn)
                 {
-                  double fn2f = (getCoord[ffn_[current_index_]] -
-                      getCoord[ffn_[next_index]]).squaredNorm ();
-                  double sn2f = (getCoord[ffn_[current_index_]] -
-                      getCoord[sfn_[next_index]]).squaredNorm ();
+                  double fn2f = (getCoord(ffn_[current_index_]) -
+                      getCoord(ffn_[next_index])).squaredNorm ();
+                  double sn2f = (getCoord(ffn_[current_index_]) -
+                      getCoord(sfn_[next_index])).squaredNorm ();
                   if (fn2f < sn2f)
                       connect2ffn = 0;
                   else
@@ -1699,7 +1696,7 @@ void GreedyProjection::connectPoint (
           case 3://next2s:
           {
             addTriangle (current_index_, sfn_[current_index_], next_index);
-            int neighbor_update = next_index;
+            PointId neighbor_update = next_index;
 
             /* updating next_index */
             if (!stateSet(next_index))
@@ -1755,10 +1752,10 @@ void GreedyProjection::connectPoint (
                 int connect2sfn = -1;
                 if (ffn_next_sfn && sfn_next_sfn)
                 {
-                  double fn2s = (getCoord[sfn_[current_index_]] -
-                      getCoord[ffn_[next_index]]).squaredNorm ();
-                  double sn2s = (getCoord[sfn_[current_index_]] -
-                      getCoord[sfn_[next_index]]).squaredNorm ();
+                  double fn2s = (getCoord(sfn_[current_index_]) -
+                      getCoord(ffn_[next_index])).squaredNorm ();
+                  double sn2s = (getCoord(sfn_[current_index_]) -
+                      getCoord(sfn_[next_index])).squaredNorm ();
                   if (fn2s < sn2s)
                       connect2sfn = 0;
                   else

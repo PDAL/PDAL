@@ -57,7 +57,7 @@ namespace pdal
   inline bool
   isVisible (const Eigen::Vector2d &X, const Eigen::Vector2d &S1,
       const Eigen::Vector2d &S2,
-      const Eigen::Vector2d &R = Eigen::Vector2f::Zero ())
+      const Eigen::Vector2d &R = Eigen::Vector2d::Zero ())
   {
     double a0 = S1[1] - S2[1];
     double b0 = S2[0] - S1[0];
@@ -65,7 +65,7 @@ namespace pdal
     double a1 = -X[1];
     double b1 = X[0];
     double c1 = 0;
-    if (R != Eigen::Vector2f::Zero())
+    if (R != Eigen::Vector2d::Zero())
     {
       a1 += R[1];
       b1 -= R[0];
@@ -76,7 +76,7 @@ namespace pdal
     double y = (a1*c0 - a0*c1) / div;
 
     bool intersection_outside_XR;
-    if (R == Eigen::Vector2f::Zero())
+    if (R == Eigen::Vector2d::Zero())
     {
       if (X[0] > 0)
         intersection_outside_XR = (x <= 0) || (x >= X[0]);
@@ -217,25 +217,6 @@ namespace pdal
       /** \brief Get the state of each point after reconstruction.
         * \note Options are defined as constants: FREE, FRINGE, COMPLETED, BOUNDARY and NONE
         */
-      /**
-      inline std::vector<int>
-      getPointStates () const { return (state_); }
-      **/
-
-      /** \brief Get the ID of each point after reconstruction.
-        * \note parts are numbered from 0, a -1 denotes unconnected points
-        */
-      inline std::vector<int>
-      getPartIDs () const { return (part_); }
-
-
-      /** \brief Get the sfn list. */
-      inline std::vector<int>
-      getSFN () const { return (sfn_); }
-
-      /** \brief Get the ffn list. */
-      inline std::vector<int>
-      getFFN () const { return (ffn_); }
 
     protected:
       /** \brief The nearest neighbor distance multiplier to obtain the
@@ -275,7 +256,7 @@ namespace pdal
       struct nnAngle
       {
         double angle;
-        int index;
+        PointId index;
         int nnIndex;
         bool visible;
       };
@@ -284,13 +265,16 @@ namespace pdal
       struct doubleEdge
       {
         doubleEdge () : index (0), first (), second () {}
-        int index;
-        Eigen::Vector2f first;
-        Eigen::Vector2f second;
+        PointId index;
+        Eigen::Vector2d first;
+        Eigen::Vector2d second;
       };
 
       struct Triangle
       {
+          Triangle(PointId ta, PointId tb, PointId tc) : a(ta), b(tb), c(tc)
+          {}
+
           PointId a;
           PointId b;
           PointId c;
@@ -301,24 +285,24 @@ namespace pdal
       /** \brief A list of angles to neighbors **/
       std::vector<nnAngle> angles_;
       /** \brief Index of the current query point **/
-      int R_;
+      PointId R_;
       /** \brief List of point states **/
       std::vector<GP3Type> state_;
       /** \brief List of sources **/
-      std::vector<int> source_;
+      std::vector<PointId> source_;
       /** \brief List of fringe neighbors in one direction **/
-      std::vector<int> ffn_;
+      std::vector<PointId> ffn_;
       /** \brief List of fringe neighbors in other direction **/
-      std::vector<int> sfn_;
+      std::vector<PointId> sfn_;
       /** \brief Connected component labels for each point **/
-      std::vector<int> part_;
+      std::vector<PointId> part_;
       /** \brief Points on the outer edge from which the mesh is grown **/
-      std::vector<int> fringe_queue_;
+      std::vector<PointId> fringe_queue_;
 
       /** \brief Flag to set if the current point is free **/
       bool is_current_free_;
       /** \brief Current point's index **/
-      int current_index_;
+      PointId current_index_;
       /** \brief Flag set if the previous point is the first fringe neighbor **/
       bool prev_is_ffn_;
       /** \brief Flag to set if the next point is the second fringe neighbor **/
@@ -332,7 +316,7 @@ namespace pdal
       /** \brief Flag to set if the second fringe neighbor was changed **/
       bool changed_2nd_fn_;
       /** \brief New boundary point **/
-      int new2boundary_;
+      PointId new2boundary_;
       /** \brief Flag to set if the next neighbor was already connected in the previous step.
         * To avoid inconsistency it should not be connected again.
         */
@@ -369,12 +353,12 @@ namespace pdal
         * \param[in] uvn_next 2D coordinates of the next point
         */
       void
-      connectPoint (const int prev_index,
-                    const int next_index,
-                    const int next_next_index,
-                    const Eigen::Vector2f &uvn_current,
-                    const Eigen::Vector2f &uvn_prev,
-                    const Eigen::Vector2f &uvn_next);
+      connectPoint (PointId prev_index,
+                    PointId next_index,
+                    PointId next_next_index,
+                    const Eigen::Vector2d &uvn_current,
+                    const Eigen::Vector2d &uvn_prev,
+                    const Eigen::Vector2d &uvn_next);
 
       /** \brief Whenever a query point is part of a boundary loop containing 3 points, that triangle is created
         * (called if angle constraints make it possible)
