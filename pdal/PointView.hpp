@@ -95,6 +95,7 @@ public:
     {
         // We use size() instead of the index end because temp points
         // might have been placed at the end of the buffer.
+        // We're essentially ditching temp points.
         auto thisEnd = m_index.begin() + size();
         auto bufEnd = buf.m_index.begin() + buf.size();
         m_index.insert(thisEnd, buf.m_index.begin(), bufEnd);
@@ -527,32 +528,6 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
         throw pdal_error(oss.str());
     }
 }
-
-/**
-void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
-    const void *value)
-{
-    PointId rawId = 0;
-    if (idx == size())
-    {
-        rawId = m_pointTable.addPoint();
-        m_index.push_back(rawId);
-        m_size++;
-        assert(m_temps.empty());
-    }
-    else if (idx > size())
-    {
-        std::cerr << "Point index must increment.\n";
-        //error - throw?
-        return;
-    }
-    else
-    {
-        rawId = m_index[idx];
-    }
-    m_pointTable.setFieldInternal(dim, rawId, value);
-}
-**/
 
 inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {
