@@ -228,6 +228,23 @@ TEST(ProgramArgsTest, t4)
     HANDLE_EXCEPTION(args.add("", "Foo description", m_foo, "foo"));
 }
 
+TEST(ProgramArgsTest, synonym)
+{
+    ProgramArgs args;
+
+    std::string m_foo;
+
+    args.add("foo,f", "Foo description", m_foo, "foo");
+    args.addSynonym("foo", "bar");
+    StringList s = toStringList("--bar");
+    EXPECT_THROW(args.parse(s), arg_error);
+
+    s = toStringList("--bar=TestFoo");
+    args.reset();
+    args.parse(s);
+    EXPECT_EQ(m_foo, "TestFoo");
+}
+
 TEST(ProgramArgsTest, positional)
 {
     ProgramArgs args;
