@@ -28,7 +28,7 @@ This exercise uses PDAL to remove unwanted noise in an ALS collection.
 Exercise
 --------------------------------------------------------------------------------
 
-PDAL provides a :ref:`filter <filters>` through |PCL| to apply a statistical
+PDAL provides the :ref:`outlier filter<filters.outlier>` to apply a statistical
 filter to data.
 
 Because this operation is somewhat complex, we are going to use a pipeline to
@@ -58,14 +58,14 @@ point cloud file we're going to read.
 2. :ref:`filters.outlier`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ref:`filters.outlier` PDAL filter does most of the work for this operation.
+The PDAL :ref:`outlier filter<filters.outlier>` does most of the work for this
+operation.
 
 ::
 
     {
         "type": "filters.outlier",
         "method": "statistical",
-        "extract": "true",
         "multiplier": 3,
         "mean_k": 8
     },
@@ -75,17 +75,26 @@ The :ref:`filters.outlier` PDAL filter does most of the work for this operation.
 3. :ref:`filters.range`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+At this point, the outliers have been classified per the LAS specification as
+low/noise points with a classification value of 7. The :ref:`range
+filter<filters.range>` can remove these noise points by constructing a
+:ref:`range <ranges>` with the value ``Classification![7:7]``, which passes
+every point with a ``Classification`` value **not** equal to 7.
+
 Even with the :ref:`filters.outlier` operation, there is still a cluster of
 points with extremely negative ``Z`` values. These are some artifact or
-miscomputation of processing, and we don't want these points. We are going to
-use ::ref:`filters.range` to keep only points that are within the range
+miscomputation of processing, and we don't want these points. We can construct
+another :ref:`range <ranges>` to keep only points that are within the range
 ``-100 <= Z <= 3000``.
+
+Both :ref:`ranges <ranges>` are passed as a comma-separated list to the
+:ref:`range filter<filters.range>` via the ``limits`` option.
 
 ::
 
     {
         "type": "filters.range",
-        "limits": "Z[-100:3000]"
+        "limits": "Classification![7:7],Z[-100:3000]"
     },
 
 4. :ref:`writers.las`

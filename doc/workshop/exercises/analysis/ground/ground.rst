@@ -67,24 +67,27 @@ technique we learned about in :ref:`denoising`.
 
 .. literalinclude:: ./ground-run-ground-only.txt
     :linenos:
-    :emphasize-lines: 6
+    :emphasize-lines: 5
 
 .. note::
 
-    The ``filters.pmf.extract=true`` item causes all data except
-    ground-classified points to be removed from the set.
-
-Buildings and other non-ground points are removed with the ``extract`` option
-of :ref:`filters.pmf`
+    The ``--extract=true`` option causes all data except ground-classified
+    points to be removed from the set.
 
 .. image:: ../../../images/ground-ground-only-view.png
 
 
-2. Now we will remove the noise, using the :ref:`translate_command` to stack the
+2. Now we will instead use the :ref:`translate_command` command to stack the
 :ref:`filters.outlier` and :ref:`filters.pmf` stages:
 
 .. literalinclude:: ./translate-run-ground-only.txt
    :linenos:
+   
+In this invocation, we have more control over the process. First the outlier
+filter merely classifies outliers with a ``Classification`` value of 7. These
+outliers are then ignored during PMF processing with the ``ignore`` option.
+Finally, we add a range filter to extract only the ground returns (i.e.,
+``Classification`` value of 2).
    
 The result is a more accurate representation of the ground returns.
 
