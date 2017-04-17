@@ -36,6 +36,7 @@
 
 #include <pdal/DimDetail.hpp>
 #include <pdal/DimType.hpp>
+#include <pdal/Mesh.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
@@ -272,6 +273,9 @@ public:
     }
     MetadataNode toMetadata() const;
 
+    TriangularMesh& mesh()
+    { return m_mesh; }
+
 protected:
     PointTableRef m_pointTable;
     std::deque<PointId> m_index;
@@ -281,6 +285,7 @@ protected:
     int m_id;
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
+    TriangularMesh m_mesh;
 
 private:
     static int m_lastId;

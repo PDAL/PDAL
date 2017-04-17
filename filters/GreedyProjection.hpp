@@ -42,7 +42,11 @@
 #include <fstream>
 #include <iostream>
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 #include <Eigen/Dense>
+
+extern "C" int32_t GreedyProjection_ExitFunc();
+extern "C" PF_ExitFunc GreedyProjection_InitPlugin();
 
 namespace pdal
 {
@@ -177,6 +181,10 @@ namespace pdal
         view_(nullptr)
       {};
 
+      static void * create();
+      static int32_t destroy(void *);
+      std::string getName() const;
+
       /** \brief Don't consider points for triangulation if their normal deviates more than this value from the query point's normal.
         * \param[in] eps_angle maximum surface angle
         * \note As normal estimation methods usually give smooth transitions at sharp edges, this ensures correct triangulation
@@ -270,16 +278,6 @@ namespace pdal
         Eigen::Vector2d second;
       };
 
-      struct Triangle
-      {
-          Triangle(PointId ta, PointId tb, PointId tc) : a(ta), b(tb), c(tc)
-          {}
-
-          PointId a;
-          PointId b;
-          PointId c;
-      };
-
       // Variables made global to decrease the number of parameters to helper functions
 
       /** \brief A list of angles to neighbors **/
@@ -338,8 +336,6 @@ namespace pdal
       Eigen::Vector2d uvn_next_sfn_;
       /** \brief Temporary variable to store 3 coordiantes **/
       Eigen::Vector3d tmp_;
-      /** \brief Output grid **/
-      std::vector<Triangle> grid_;
       /** \brief Pointer to current point view. **/
       PointView *view_;
 

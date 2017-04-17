@@ -38,11 +38,24 @@
 #include <cassert>
 
 #include <pdal/KDIndex.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include "GreedyProjection.hpp"
 
 namespace pdal
 {
+
+static PluginInfo const s_info =
+    PluginInfo("filters.greedygrid", "Greedy Triangulation filter",
+                   "http://pdal.io/stages/filters.greedygrid.html");
+
+CREATE_STATIC_PLUGIN(1, 0, GreedyProjection, Filter, s_info)
+
+std::string GreedyProjection::getName() const
+{
+    return s_info.name;
+}
+
 
 void GreedyProjection::addArgs(ProgramArgs& args)
 {
@@ -96,13 +109,14 @@ Eigen::Vector3d GreedyProjection::getNormalCoord(PointId id)
 
 void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 {
-    grid_.emplace_back(a, b, c);
+    view_->mesh().add(a, b, c);
 }
 
 
 void GreedyProjection::filter(PointView& view)
 {
     KD3Index tree(view);
+    tree.build();
 
     view_ = &view;
     const double sqr_mu = mu_ * mu_;
@@ -1170,8 +1184,8 @@ void GreedyProjection::filter(PointView& view)
       }
     }
   }
-  log()->get(LogLevel::Debug) << "Number of triangles: " << grid_.size() <<
-      ".\n";
+  log()->get(LogLevel::Debug) << "Number of triangles: " <<
+      view_->mesh().size() << ".\n";
   log()->get(LogLevel::Debug) << "Number of unconnected parts: " << nr_parts <<
       ".\n";
   if (increase_nnn4fn > 0)
