@@ -1,6 +1,6 @@
 name := "pdal-scala"
 
-version := s"1.4.0${Environment.versionSuffix}"
+version := s"1.5.0${Environment.versionSuffix}"
 scalaVersion := "2.11.8"
 crossScalaVersions := Seq("2.12.1", "2.11.8")
 organization := "io.pdal"
@@ -19,6 +19,7 @@ scalacOptions ++= Seq(
   "-language:existentials",
   "-feature")
 test in assembly := {}
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
 commands ++= Seq(
   Commands.processJavastyleCommand("publish"),
@@ -54,7 +55,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic-extras" % Environment.circeVersion,
   "io.circe" %% "circe-literal" % Environment.circeVersion,
   "io.circe" %% "circe-parser" % Environment.circeVersion,  
-  "io.pdal"  %% "pdal" % "1.4.0",
+  "io.pdal"  %% "pdal" % s"1.4.0${Environment.versionSuffix}",
   "com.vividsolutions" % "jts-core" % "1.14.0",
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )

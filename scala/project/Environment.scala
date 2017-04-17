@@ -31,15 +31,13 @@
   * OF SUCH DAMAGE.
   ****************************************************************************/
 
-import sbt.ClasspathDependency
-
 import scala.util.Properties
 
 object Environment {
   def either(environmentVariable: String, default: String): String =
     Properties.envOrElse(environmentVariable, default)
 
-  val circeVersion = "0.7.0"
+  val circeVersion = "0.7.1"
   lazy val versionSuffix = either("PDAL_VERSION_SUFFIX", "-SNAPSHOT")  
   lazy val ldLibraryPath = either("LD_LIBRARY_PATH", "/usr/local/lib")
 }
