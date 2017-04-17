@@ -48,3 +48,6 @@ origin_x
 origin_y
   Y Origin of the tiles.  [Default: none (chosen arbitarily)]
 
+buffer
+  Amount of overlap to include in each tile. This buffer is added onto length in both the x and the y direction.
+  [Default: 0.0]

@@ -63,14 +63,32 @@ void SplitterFilter::addArgs(ProgramArgs& args)
         std::numeric_limits<double>::quiet_NaN());
     args.add("origin_y", "Y origin for a cell", m_yOrigin,
         std::numeric_limits<double>::quiet_NaN());
+    args.add("buffer", "Size of buffer (overlap) to include around each tile.",
+        m_buffer, 0.0);
 }
 
+void SplitterFilter::initialize() {
+    if (!(m_buffer < m_length / 2.)) {
+        std::stringstream oss;
+        oss << "Buffer (" << m_buffer << 
+            ") must be less than half of length (" << m_length << ")";
+        throw pdal_error(oss.str());
+    }
+}
 
 PointViewSet SplitterFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
     if (!inView->size())
         return viewSet;
+
+    auto addPoint = [this, &inView](PointId idx, int xpos, int ypos) {
+        Coord loc(xpos, ypos);
+        PointViewPtr& outView = m_viewMap[loc];
+        if (!outView)
+            outView = inView->makeNew();
+        outView->appendPoint(*inView.get(), idx);
+    };
 
     // Use the location of the first point as the origin, unless specified.
     // (!= test == isnan(), which doesn't exist on windows)
@@ -84,22 +102,31 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
         double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
-        x -= m_xOrigin;
-        int xpos = x / m_length;
-        if (x < 0)
+        double dx = x - m_xOrigin;
+        int xpos = dx / m_length;
+        if (dx < 0)
             xpos--;
 
         double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
-        y -= m_yOrigin;
-        int ypos = y / m_length;
-        if (y < 0)
+        double dy = y - m_yOrigin;
+        int ypos = dy / m_length;
+        if (dy < 0)
             ypos--;
 
-        Coord loc(xpos, ypos);
-        PointViewPtr& outView = m_viewMap[loc];
-        if (!outView)
-            outView = inView->makeNew();
-        outView->appendPoint(*inView.get(), idx);
+        addPoint(idx, xpos, ypos);
+
+        if (m_buffer > 0.0) {
+            if (squareContains(xpos - 1, ypos, x, y)) {
+                addPoint(idx, xpos - 1, ypos);
+            } else if (squareContains(xpos + 1, ypos, x, y)) {
+                addPoint(idx, xpos + 1, ypos);
+            }
+            if (squareContains(xpos, ypos - 1, x, y)) {
+                addPoint(idx, xpos, ypos - 1);
+            } else if (squareContains(xpos, ypos + 1, x, y)) {
+                addPoint(idx, xpos, ypos + 1);
+            }
+        }
     }
 
     // Pull the buffers out of the map and stick them in the standard
@@ -107,6 +134,14 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     for (auto bi = m_viewMap.begin(); bi != m_viewMap.end(); ++bi)
         viewSet.insert(bi->second);
     return viewSet;
+}
+
+bool SplitterFilter::squareContains(int xpos, int ypos, double x, double y) const {
+    double minx = m_xOrigin + xpos * m_length - m_buffer; 
+    double maxx = minx + m_length + 2 * m_buffer;
+    double miny = m_yOrigin + ypos * m_length - m_buffer;
+    double maxy = miny + m_length + 2 * m_buffer;
+    return minx < x && x < maxx && miny < y && y < maxy;
 }
 
 } // pdal
