@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
@@ -52,6 +53,12 @@ PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
 	m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
 {
 	m_id = ++m_lastId;
+}
+
+PointView::~PointView()
+{
+    for (auto it = m_meshes.begin(); it != m_meshes.end(); ++it)
+        delete it->second;
 }
 
 PointViewIter PointView::begin()
@@ -152,6 +159,26 @@ MetadataNode PointView::toMetadata() const
         }
     }
     return node;
+}
+
+
+TriangularMesh *PointView::createMesh(const std::string& name)
+{
+    if (Utils::contains(m_meshes, name))
+        return nullptr;
+    auto res = m_meshes.insert(std::make_pair(name, new TriangularMesh));
+    if (res.second)
+        return res.first->second;
+    return nullptr;
+}
+
+
+TriangularMesh *PointView::mesh(const std::string& name)
+{
+    auto it = m_meshes.find(name);
+    if (it != m_meshes.end())
+        return it->second;
+    return nullptr;
 }
 
 

@@ -109,7 +109,7 @@ Eigen::Vector3d GreedyProjection::getNormalCoord(PointId id)
 
 void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 {
-    view_->mesh().add(a, b, c);
+    mesh_->add(a, b, c);
 }
 
 
@@ -119,6 +119,7 @@ void GreedyProjection::filter(PointView& view)
     tree.build();
 
     view_ = &view;
+    mesh_ = view_->createMesh(getName());
     const double sqr_mu = mu_ * mu_;
     const double sqr_max_edge = search_radius_*search_radius_;
 
@@ -1185,7 +1186,7 @@ void GreedyProjection::filter(PointView& view)
     }
   }
   log()->get(LogLevel::Debug) << "Number of triangles: " <<
-      view_->mesh().size() << ".\n";
+      mesh_->size() << ".\n";
   log()->get(LogLevel::Debug) << "Number of unconnected parts: " << nr_parts <<
       ".\n";
   if (increase_nnn4fn > 0)

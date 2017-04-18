@@ -52,9 +52,16 @@ public:
 
 /**
   A mesh is a way to represent a set of points connected by edges.  Point
-  indices are into a
+  indices are into a point view.
 */
-class PDAL_DLL TriangularMesh
+class PDAL_DLL Mesh
+{};
+
+
+/**
+  A mesh where the faces are triangles.
+*/
+class PDAL_DLL TriangularMesh : public Mesh
 {
 public:
     TriangularMesh()

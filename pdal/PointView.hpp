@@ -76,8 +76,7 @@ public:
     PointView(PointTableRef pointTable);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
 
-    virtual ~PointView()
-    {}
+    virtual ~PointView();
 
     PointViewIter begin();
     PointViewIter end();
@@ -273,8 +272,22 @@ public:
     }
     MetadataNode toMetadata() const;
 
-    TriangularMesh& mesh()
-    { return m_mesh; }
+    /**
+      Creates a mesh with the specified name.
+
+      \param name  Name of the mesh.
+      \return  Pointer to the new mesh.  Null is returned if the mesh
+          already exists.
+    */
+    TriangularMesh *createMesh(const std::string& name);
+
+    /**
+      Get a pointer to a mesh.
+
+      \param name  Name of the mesh.
+      \return  New mesh.  Null is returned if the mesh already exists.
+    */
+    TriangularMesh *mesh(const std::string& name);
 
 protected:
     PointTableRef m_pointTable;
@@ -285,7 +298,7 @@ protected:
     int m_id;
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
-    TriangularMesh m_mesh;
+    std::map<std::string, TriangularMesh *> m_meshes;
 
 private:
     static int m_lastId;

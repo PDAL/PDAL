@@ -50,6 +50,8 @@ extern "C" PF_ExitFunc GreedyProjection_InitPlugin();
 
 namespace pdal
 {
+  class TriangularMesh;
+
   /** \brief Returns if a point X is visible from point R (or the origin)
     * when taking into account the segment between the points S1 and S2
     * \param X 2D coordinate of the point
@@ -178,7 +180,8 @@ namespace pdal
         uvn_next_ffn_ (),
         uvn_next_sfn_ (),
         tmp_ (),
-        view_(nullptr)
+        view_(nullptr),
+        mesh_(nullptr)
       {};
 
       static void * create();
@@ -338,6 +341,8 @@ namespace pdal
       Eigen::Vector3d tmp_;
       /** \brief Pointer to current point view. **/
       PointView *view_;
+      /** \brief Pointer to the mesh we're creating. **/
+      TriangularMesh *mesh_;
 
       /** \brief Forms a new triangle by connecting the current neighbor to the query point
         * and the previous neighbor
