@@ -113,3 +113,67 @@ TEST(SplitterTest, test_tile_filter)
         EXPECT_EQ(view->size(), counts[i]);
     }
 }
+
+TEST(SplitterTest, test_buffer)
+{
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(readerOptions);
+
+    Options splitterOptions;
+    splitterOptions.add("length", 1000);
+    splitterOptions.add("buffer", 20);
+
+    SplitterFilter splitter;
+    splitter.setOptions(splitterOptions);
+    splitter.setInput(reader);
+
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    splitter.prepare(table);
+
+    StageWrapper::ready(reader, table);
+    PointViewSet viewSet = StageWrapper::run(reader, view);
+    StageWrapper::done(reader, table);
+    ASSERT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+
+    StageWrapper::ready(splitter, table);
+    viewSet = StageWrapper::run(splitter, view);
+    StageWrapper::done(splitter, table);
+
+    std::vector<PointViewPtr> views;
+    std::map<PointViewPtr, BOX2D> bounds;
+
+    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
+    {
+        BOX2D b;
+        PointViewPtr v = *it;
+        v->calculateBounds(b);
+        EXPECT_TRUE(b.maxx - b.minx <= 1040);    
+        EXPECT_TRUE(b.maxy - b.miny <= 1040);
+        bounds[v] = b;
+        views.push_back(v);
+    }
+
+    auto sorter = [&bounds](PointViewPtr p1, PointViewPtr p2)
+    {
+        BOX2D b1 = bounds[p1];
+        BOX2D b2 = bounds[p2];
+
+        return b1.minx < b2.minx ?  true :
+            b1.minx > b2.minx ? false :
+            b1.miny < b2.miny;
+    };
+    std::sort(views.begin(), views.end(), sorter);
+
+    EXPECT_EQ(views.size(), 24u);
+    size_t counts[] = {26, 26, 3, 28, 27, 13, 65, 80, 47, 80, 89, 12, 94,
+        77, 5, 79, 65, 34, 63, 67, 74, 69, 36, 5};
+    for (size_t i = 0; i < views.size(); ++i)
+    {
+        PointViewPtr view = views[i];
+        EXPECT_EQ(view->size(), counts[i]);
+    }
+}

@@ -56,8 +56,10 @@ PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
 	m_id = ++m_lastId;
 }
 
+
 PointView::~PointView()
 {}
+
 
 PointViewIter PointView::begin()
 {

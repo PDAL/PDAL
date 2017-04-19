@@ -234,7 +234,7 @@ void PlyWriter::done(PointTableRef table)
                     ply_write(m_ply, t.m_b) &&
                     ply_write(m_ply, t.m_c)))
                 throwError("Error writing face number " +
-                    Utils::toString(index) + ".");
+                    Utils::toString(id) + ".");
         }
     }
 
