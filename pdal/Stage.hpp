@@ -292,6 +292,27 @@ public:
     */
     void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
 
+    /**
+      Parse a stage name from a string.  Return the name and update the
+      position in the input string to the end of the stage name.
+
+      \param o     Input string to parse.
+      \param pos   Parsing start/end position.
+      \return  Whether the parsed name is a valid stage name.
+    */
+    static bool parseName(std::string o, std::string::size_type& pos);
+
+    /**
+      Parse a tag name from a string.  Return the name and update the
+      position in the input string to the end of the tag name.
+
+      \param o    Input string to parse.
+      \param pos  Parsing start/end position.
+      \param tag  Parsed tag name.
+      \return  Whether the parsed name is a valid tag name.
+    */
+    static bool parseTagName(std::string o, std::string::size_type& pos);
+
 protected:
     Options m_options;          ///< Stage's options.
     MetadataNode m_metadata;    ///< Stage's metadata.

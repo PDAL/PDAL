@@ -1160,6 +1160,24 @@ public:
     }
 
     /**
+      Add a synonym for an argument.
+
+      \param name  Longname of existing arugment.
+      \param synonym  Synonym for argument.
+    */
+    void addSynonym(const std::string& name, const std::string& synonym)
+    {
+        Arg *arg = findLongArg(name);
+        if (!arg)
+            throw arg_error("Can't set synonym for argument '" + name + "'. "
+                "Argument doesn't exist.");
+        if (synonym.empty())
+            throw arg_error("Invalid (empty) synonym for argument '" +
+                name + "'.");
+        addLongArg(synonym, arg);
+    }
+
+    /**
       Reset the state of all arguments and bound variables as if no parsing
       had occurred.
     */
@@ -1312,6 +1330,7 @@ public:
         }
         out << "]";
     }
+
 private:
     /*
       Split an argument name into longname and shortname.

@@ -4,13 +4,12 @@
         {
             "type": "filters.outlier",
             "method": "statistical",
-            "extract": "true",
             "multiplier": 3,
             "mean_k": 8
         },
         {
             "type": "filters.range",
-            "limits": "Z[-100:3000]"
+            "limits": "Classification![7:7],Z[-100:3000]"
         },
         {
             "type": "writers.las",

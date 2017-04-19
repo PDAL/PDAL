@@ -288,7 +288,9 @@ void GDALGrid::addPoint(double x, double y, double z)
     // This is a questionable case.  If a point is in a cell, shouldn't
     // it just be counted?
     double d = distance(iOrigin, jOrigin, x, y);
-    if (d < m_radius)
+    if (d < m_radius &&
+        iOrigin >= 0 && jOrigin >= 0 &&
+        iOrigin < (int)m_width && jOrigin <= (int)m_height)
         update(iOrigin, jOrigin, z, d);
 }
 
