@@ -43,6 +43,7 @@ extern "C" PF_ExitFunc PlyWriter_InitPlugin();
 
 namespace pdal
 {
+class TriangularMesh;
 
 class PDAL_DLL PlyWriter : public Writer
 {
@@ -63,6 +64,7 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
@@ -72,6 +74,10 @@ private:
     PointViewPtr m_pointCollector;
     std::string m_storageModeSpec;
     e_ply_storage_mode m_storageMode;
+    bool m_faces;
+    StringList m_dimNames;
+    Dimension::IdList m_dims;
+    TriangularMesh *m_mesh;
 };
 
 }

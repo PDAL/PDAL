@@ -39,6 +39,7 @@
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <filters/NormalFilter.hpp>
 
 #include "GreedyProjection.hpp"
 
@@ -46,8 +47,8 @@ namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.greedygrid", "Greedy Triangulation filter",
-                   "http://pdal.io/stages/filters.greedygrid.html");
+    PluginInfo("filters.greedymesh", "Greedy Triangulation filter",
+                   "http://pdal.io/stages/filters.greedymesh.html");
 
 CREATE_STATIC_PLUGIN(1, 0, GreedyProjection, Filter, s_info)
 
@@ -72,6 +73,14 @@ void GreedyProjection::addArgs(ProgramArgs& args)
     args.add("eps_angle", "Max normal difference angle for triangulation "
         "consideration", eps_angle_, M_PI / 4);
 }
+
+
+void GreedyProjection::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDims( { Dimension::Id::NormalX, Dimension::Id::NormalY,
+        Dimension::Id::NormalZ } );
+}
+
 
 void GreedyProjection::initialize()
 {
@@ -115,8 +124,9 @@ void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 
 void GreedyProjection::filter(PointView& view)
 {
-    KD3Index tree(view);
-    tree.build();
+    NormalFilter().doFilter(view);
+
+    KD3Index& tree = view.build3dIndex();
 
     view_ = &view;
     mesh_ = view_->createMesh(getName());
@@ -184,7 +194,7 @@ void GreedyProjection::filter(PointView& view)
   // Initializing
   PointId isFree = 0;
   bool done = false;
-  int is_free=0, nr_parts=0, increase_nnn4fn=0, increase_nnn4s=0, increase_dist=0, nr_touched = 0;
+  int nr_parts=0, increase_nnn4fn=0, increase_nnn4s=0, increase_dist=0, nr_touched = 0;
   bool is_fringe;
   angles_.resize(nnn_);
   std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d> > uvn_nn (nnn_);
@@ -193,7 +203,7 @@ void GreedyProjection::filter(PointView& view)
   // iterating through fringe points and finishing them until everything is done
   while (!done)
   {
-    R_ = is_free;
+    R_ = isFree;
     if (state_[R_] == GP3Type::FREE)
     {
       state_[R_] = GP3Type::NONE;
@@ -202,6 +212,7 @@ void GreedyProjection::filter(PointView& view)
 
       // creating starting triangle
       tree.knnSearch(R_, nnn_, &nnIdx, &sqrDists);
+
       double sqr_dist_threshold =
           (std::min)(sqr_max_edge, sqr_mu * sqrDists[1]);
 
@@ -232,7 +243,6 @@ void GreedyProjection::filter(PointView& view)
       size_t nr_edge = 0;
       std::vector<doubleEdge> doubleEdges;
       // nearest neighbor with index 0 is the query point R_ itself
-      //ABELL - Need to check that the above is true.
       for (int i = 1; i < nnn_; i++)
       {
         // Transforming coordinates
@@ -271,7 +281,6 @@ void GreedyProjection::filter(PointView& view)
 
       // Verify the visibility of each potential new vertex
       // nearest neighbor with index 0 is the query point R_ itself
-      // ABELL - Check the above.
       for (int i = 1; i < nnn_; i++)
         if ((angles_[i].visible) && (ffn_[R_] != nnIdx[i]) &&
             (sfn_[R_] != nnIdx[i]))
@@ -342,7 +351,7 @@ void GreedyProjection::filter(PointView& view)
       while (not_found);
     }
 
-    // Set the index of the first free point in is_free.
+    // Set the index of the first free point in isFree.
     done = true;
     auto it = std::find(state_.begin(), state_.end(), GP3Type::FREE);
     if (it == state_.end())
@@ -350,7 +359,7 @@ void GreedyProjection::filter(PointView& view)
     else
     {
         done = false;
-        is_free = std::distance(state_.begin(), it);
+        isFree = std::distance(state_.begin(), it);
     }
 
     is_fringe = true;
@@ -433,7 +442,6 @@ void GreedyProjection::filter(PointView& view)
       size_t nr_edge = 0;
       std::vector<doubleEdge> doubleEdges;
       // nearest neighbor with index 0 is the query point R_ itself
-      //ABELL - Check this.
       for (int i = 1; i < nnn_; i++)
       {
         tmp_ = getCoord(nnIdx[i]) - proj_qp_;
@@ -543,7 +551,6 @@ void GreedyProjection::filter(PointView& view)
 
       // Verify the visibility of each potential new vertex
       // nearest neighbor with index 0 is the query point R_ itself
-      //ABELL - Check above (AGAIN?!)
       for (int i = 1; i < nnn_; i++)
         if ((angles_[i].visible) &&
             (ffn_[R_] != nnIdx[i]) && (sfn_[R_] != nnIdx[i]))
@@ -714,7 +721,6 @@ void GreedyProjection::filter(PointView& view)
           int nnCB(-1);
 
           // nearest neighbor with index 0 is the query point R_ itself
-          // ABELL - Again.
           for (int i = 1; i < nnn_; i++)
           {
             // NOTE: nnCB is an index in nnIdx

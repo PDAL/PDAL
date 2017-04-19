@@ -30,6 +30,11 @@
     "description": "Z component of normal vector"
     },
     {
+    "name": "Curvature",
+    "type": "double",
+    "description": "Curvature of surface at point"
+    },
+    {
     "name": "Intensity",
     "type": "uint16",
     "description": "Representation of the pulse return magnitude"

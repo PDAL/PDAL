@@ -34,6 +34,7 @@
 
 #include <iomanip>
 
+#include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -56,10 +57,7 @@ PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
 }
 
 PointView::~PointView()
-{
-    for (auto it = m_meshes.begin(); it != m_meshes.end(); ++it)
-        delete it->second;
-}
+{}
 
 PointViewIter PointView::begin()
 {
@@ -166,9 +164,10 @@ TriangularMesh *PointView::createMesh(const std::string& name)
 {
     if (Utils::contains(m_meshes, name))
         return nullptr;
-    auto res = m_meshes.insert(std::make_pair(name, new TriangularMesh));
+    auto res = m_meshes.insert(std::make_pair(name,
+        std::unique_ptr<TriangularMesh>(new TriangularMesh)));
     if (res.second)
-        return res.first->second;
+        return res.first->second.get();
     return nullptr;
 }
 
@@ -177,8 +176,39 @@ TriangularMesh *PointView::mesh(const std::string& name)
 {
     auto it = m_meshes.find(name);
     if (it != m_meshes.end())
-        return it->second;
+        return it->second.get();
+    if (name.empty() && m_meshes.size())
+        return m_meshes.begin()->second.get();
     return nullptr;
+}
+
+
+KD3Index& PointView::build3dIndex()
+{
+    //ABELL
+    // Should we allow a force of point view build - perhaps the index has
+    // changed or the point values have changed.
+    if (!m_index3)
+    {
+        m_index3.reset(new KD3Index(*this));
+        std::cerr << "About to build index!\n";
+        m_index3->build();
+    }
+    return *m_index3.get();
+}
+
+
+KD2Index& PointView::build2dIndex()
+{
+    //ABELL
+    // Should we allow a force of point view build - perhaps the index has
+    // changed or the point values have changed.
+    if (!m_index2)
+    {
+        m_index2.reset(new KD2Index(*this));
+        m_index2->build();
+    }
+    return *m_index2.get();
 }
 
 

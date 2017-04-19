@@ -433,6 +433,7 @@ namespace pdal
       }
 
       void addArgs(ProgramArgs& args);
+      void addDimensions(PointLayoutPtr layout);
       void initialize();
       void filter(PointView& view);
       void addTriangle(PointId a, PointId b, PointId c);

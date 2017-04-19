@@ -63,6 +63,8 @@ namespace plang
 struct PointViewLess;
 class PointView;
 class PointViewIter;
+class KD2Index;
+class KD3Index;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
@@ -73,6 +75,8 @@ class PDAL_DLL PointView : public PointContainer
     friend class PointIdxRef;
     friend struct PointViewLess;
 public:
+    PointView(const PointView&) = delete;
+    PointView& operator=(const PointView&) = delete;
     PointView(PointTableRef pointTable);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
 
@@ -243,7 +247,6 @@ public:
         }
     }
 
-
     /// Provides access to the memory storing the point data.  Though this
     /// function is public, other access methods are safer and preferred.
     char *getPoint(PointId id)
@@ -288,7 +291,10 @@ public:
       \param name  Name of the mesh.
       \return  New mesh.  Null is returned if the mesh already exists.
     */
-    TriangularMesh *mesh(const std::string& name);
+    TriangularMesh *mesh(const std::string& name = "");
+
+    KD3Index& build3dIndex();
+    KD2Index& build2dIndex();
 
 protected:
     PointTableRef m_pointTable;
@@ -299,7 +305,9 @@ protected:
     int m_id;
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
-    std::map<std::string, TriangularMesh *> m_meshes;
+    std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
+    std::unique_ptr<KD3Index> m_index3;
+    std::unique_ptr<KD2Index> m_index2;
 
 private:
     static int m_lastId;

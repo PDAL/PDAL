@@ -71,6 +71,8 @@ public:
         { return m_index.size(); }
     void add(PointId a, PointId b, PointId c)
         { m_index.emplace_back(a, b, c); }
+    const Triangle& operator[](PointId id) const
+        { return m_index[id]; }
 protected:
     std::deque<Triangle> m_index;
 };
