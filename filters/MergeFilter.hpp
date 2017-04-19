@@ -43,7 +43,7 @@ extern "C" PF_ExitFunc MergeFilter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL MergeFilter : public MultiFilter
+class PDAL_DLL MergeFilter : public Filter
 {
 public:
     MergeFilter ()
