@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
+* Copyright (c) 2017, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,52 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <rply/rply.h>
+#pragma once
 
-#include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t PlyWriter_ExitFunc();
-extern "C" PF_ExitFunc PlyWriter_InitPlugin();
+#include <deque>
 
 namespace pdal
 {
-class TriangularMesh;
 
-class PDAL_DLL PlyWriter : public Writer
+class Triangle
 {
 public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& e) : std::runtime_error(e)
-        {}
-    };
+    Triangle(PointId a, PointId b, PointId c) : m_a(a), m_b(b), m_c(c)
+    {}
 
-public:
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-    PlyWriter();
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
-
-    std::string m_filename;
-    p_ply m_ply;
-    PointViewPtr m_pointCollector;
-    std::string m_storageModeSpec;
-    e_ply_storage_mode m_storageMode;
-    bool m_faces;
-    StringList m_dimNames;
-    Dimension::IdList m_dims;
-    TriangularMesh *m_mesh;
+    PointId m_a;
+    PointId m_b;
+    PointId m_c;
 };
 
-}
+/**
+  A mesh is a way to represent a set of points connected by edges.  Point
+  indices are into a point view.
+*/
+class PDAL_DLL Mesh
+{};
+
+
+/**
+  A mesh where the faces are triangles.
+*/
+class PDAL_DLL TriangularMesh : public Mesh
+{
+public:
+    TriangularMesh()
+    {}
+
+    size_t size() const
+        { return m_index.size(); }
+    void add(PointId a, PointId b, PointId c)
+        { m_index.emplace_back(a, b, c); }
+    const Triangle& operator[](PointId id) const
+        { return m_index[id]; }
+protected:
+    std::deque<Triangle> m_index;
+};
+
+} // namespace pdal
