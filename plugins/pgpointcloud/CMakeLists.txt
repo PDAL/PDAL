@@ -54,3 +54,17 @@ if (BUILD_PGPOINTCLOUD_TESTS)
     target_include_directories(pgpointcloudtest PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/include)
 endif()
+
+
+#
+# PgFlatPointCloud Writer
+#
+set(srcs io/PgFlatWriter.cpp)
+set(incs
+    io/PgCommon.hpp
+    io/PgFlatWriter.hpp
+)
+
+PDAL_ADD_PLUGIN(writer_libname writer pgflatpointcloud
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${POSTGRESQL_LIBRARIES})
