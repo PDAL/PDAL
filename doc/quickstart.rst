@@ -107,6 +107,10 @@ whatever reason.
     major PDAL versions. The PDAL Docker hub location at
     https://hub.docker.com/u/pdal/ has images and more information
     on this topic.
+    
+.. note::
+
+    Docker images do not include datum files. If you experience a ``(pdal pipeline filters.reprojection Error: 0): GDAL failure (1) failed to load datum shift file`` error, you will need to build a docker image with the datum files. See `this discussion <https://lists.osgeo.org/pipermail/pdal/2017-February/001143.html>`__ for more information.
 
 .. _`Docker Hub`: http://hub.docker.com
 
