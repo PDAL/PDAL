@@ -78,7 +78,6 @@ RUN apt-get purge -y \
     libtiff5-dev \
     openssh-client \
     python-dev \
-    python-numpy \
     python-software-properties \
     software-properties-common \
     wget \
