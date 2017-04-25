@@ -6,6 +6,8 @@ ENV CXX g++
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
+        python-all-dev \
+        python-numpy \
     libsqlite3-mod-spatialite \
     && rm -rf /var/lib/apt/lists/*
 
@@ -77,7 +79,6 @@ RUN apt-get purge -y \
     liblapack-dev \
     libtiff5-dev \
     openssh-client \
-    python-dev \
     python-software-properties \
     software-properties-common \
     wget \
@@ -114,8 +115,7 @@ RUN apt-get purge -y \
     libcurl4-openssl-dev \
     libspatialite-dev \
     libdap-dev\
-    cython \
-    python-pip
+    cython
 
 RUN apt-get autoremove -y
 
@@ -172,5 +172,7 @@ RUN apt-get update && apt-get install -y \
     libpcl-segmentation1.7 \
     libpcl-surface1.7 \
     libpcl-tracking1.7 \
-    libpcl-visualization1.7
+    libpcl-visualization1.7 \
+    python-all-dev \
+    python-pip
 
