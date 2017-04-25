@@ -94,12 +94,13 @@ void TextReader::addArgs(ProgramArgs& args)
 
 void TextReader::addDimensions(PointLayoutPtr layout)
 {
+    m_dims.clear();
     for (auto name : m_dimNames)
     {
         Utils::trim(name);
         Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
-        if (Utils::contains(m_dims, id))
+        if (Utils::contains(m_dims, id) && id != pdal::Dimension::Id::Unknown)
             throwError("Duplicate dimension '" + name +
                 "' detected in input file '" + m_filename + "'.");
         m_dims.push_back(id);

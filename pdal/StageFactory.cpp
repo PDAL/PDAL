@@ -126,7 +126,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "readers.sqlite", { "sqlite" } },
         { "readers.mrsid", { "sid" } },
         { "readers.tindex", { "tindex" } },
-        { "readers.text", { "txt" } },
+        { "readers.text", { "csv", "txt" } },
         { "readers.icebridge", { "h5" } },
 
         { "writers.bpf", { "bpf" } },
@@ -152,6 +152,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "bin", "readers.terrasolid" },
         { "bpf", "readers.bpf" },
         { "csd", "readers.optech" },
+        { "csv", "readers.text" },
         { "greyhound", "readers.greyhound" },
         { "icebridge", "readers.icebridge" },
         { "las", "readers.las" },
