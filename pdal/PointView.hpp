@@ -36,6 +36,7 @@
 
 #include <pdal/DimDetail.hpp>
 #include <pdal/DimType.hpp>
+#include <pdal/Mesh.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
@@ -72,11 +73,11 @@ class PDAL_DLL PointView : public PointContainer
     friend class PointIdxRef;
     friend struct PointViewLess;
 public:
+    PointView(const PointView&) = delete;
+    PointView& operator=(const PointView&) = delete;
     PointView(PointTableRef pointTable);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
-
-    virtual ~PointView()
-    {}
+    virtual ~PointView();
 
     PointViewIter begin();
     PointViewIter end();
@@ -243,7 +244,6 @@ public:
         }
     }
 
-
     /// Provides access to the memory storing the point data.  Though this
     /// function is public, other access methods are safer and preferred.
     char *getPoint(PointId id)
@@ -273,6 +273,23 @@ public:
     }
     MetadataNode toMetadata() const;
 
+    /**
+      Creates a mesh with the specified name.
+
+      \param name  Name of the mesh.
+      \return  Pointer to the new mesh.  Null is returned if the mesh
+          already exists.
+    */
+    TriangularMesh *createMesh(const std::string& name);
+
+    /**
+      Get a pointer to a mesh.
+
+      \param name  Name of the mesh.
+      \return  New mesh.  Null is returned if the mesh already exists.
+    */
+    TriangularMesh *mesh(const std::string& name = "");
+
 protected:
     PointTableRef m_pointTable;
     std::deque<PointId> m_index;
@@ -282,6 +299,7 @@ protected:
     int m_id;
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
+    std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
 
 private:
     static int m_lastId;

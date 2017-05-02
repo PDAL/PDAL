@@ -35,6 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
 #include <io/PlyWriter.hpp>
 #include "Support.hpp"
@@ -73,5 +75,55 @@ TEST(PlyWriter, Write)
     writer.execute(table);
 }
 
+TEST(PlyWriter, mesh)
+{
+    std::string outfile(Support::temppath("out.ply"));
+    std::string testfile(Support::datapath("ply/mesh.ply"));
+
+    FileUtils::deleteFile(outfile);
+
+    PointTable t;
+
+    t.layout()->registerDim(Dimension::Id::X);
+    t.layout()->registerDim(Dimension::Id::Y);
+    t.layout()->registerDim(Dimension::Id::Z);
+
+    PointViewPtr v(new PointView(t));
+    v->setField(Dimension::Id::X, 0, 1);
+    v->setField(Dimension::Id::Y, 0, 1);
+    v->setField(Dimension::Id::Z, 0, 0);
+
+    v->setField(Dimension::Id::X, 1, 2);
+    v->setField(Dimension::Id::Y, 1, 1);
+    v->setField(Dimension::Id::Z, 1, 0);
+
+    v->setField(Dimension::Id::X, 2, 1);
+    v->setField(Dimension::Id::Y, 2, 2);
+    v->setField(Dimension::Id::Z, 2, 0);
+
+    v->setField(Dimension::Id::X, 3, 2);
+    v->setField(Dimension::Id::Y, 3, 2);
+    v->setField(Dimension::Id::Z, 3, 2);
+
+    TriangularMesh *mesh = v->createMesh("foo");
+    mesh->add(0, 1, 2);
+    mesh->add(1, 2, 3);
+
+    BufferReader r;
+    r.addView(v);
+
+    PlyWriter w;
+    Options wo;
+    wo.add("filename", outfile);
+    wo.add("storage_mode", "ascii");
+    wo.add("faces", true);
+    w.setInput(r);
+    w.setOptions(wo);
+
+    w.prepare(t);
+    w.execute(t);
+
+    EXPECT_TRUE(Support::compare_text_files(outfile, testfile));
+}
 
 }

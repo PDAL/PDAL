@@ -161,58 +161,6 @@ TEST(PointViewTest, getFloat)
 }
 
 
-TEST(PointViewTest, copy)
-{
-    PointTable table;
-    PointViewPtr view = makeTestView(table);
-
-    PointView d2(*view);
-
-    // read the view back out
-    {
-        EXPECT_EQ(
-            d2.getFieldAs<uint8_t>(Dimension::Id::Classification, 0),
-            view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
-        EXPECT_EQ(d2.getFieldAs<int32_t>(Dimension::Id::X, 0),
-            view->getFieldAs<int32_t>(Dimension::Id::X, 0));
-        EXPECT_FLOAT_EQ(d2.getFieldAs<double>(Dimension::Id::Y, 0),
-            view->getFieldAs<double>(Dimension::Id::Y, 0));
-    }
-
-    for (int i = 1; i < 17; i++)
-    {
-        uint8_t x = d2.getFieldAs<uint8_t>(Dimension::Id::Classification, i);
-        int32_t y = d2.getFieldAs<int32_t>(Dimension::Id::X, i);
-        double z = d2.getFieldAs<double>(Dimension::Id::Y, i);
-
-        EXPECT_EQ(x, i + 1u);
-        EXPECT_EQ(y, i * 10);
-        EXPECT_TRUE(Utils::compare_approx(z, i * 100.0,
-            (std::numeric_limits<double>::min)()));
-    }
-    EXPECT_EQ(view->size(), d2.size());
-
-}
-
-TEST(PointViewTest, copyCtor)
-{
-    PointTable table;
-    PointViewPtr view = makeTestView(table);
-
-    PointView d2(*view);
-    verifyTestView(d2);
-}
-
-TEST(PointViewTest, assignment)
-{
-    PointTable table;
-    PointViewPtr view = makeTestView(table);
-
-    PointView d2 = *view;
-    verifyTestView(d2);
-}
-
-
 TEST(PointViewTest, bigfile)
 {
     PointTable table;
@@ -278,68 +226,6 @@ TEST(PointViewTest, bigfile)
             view.getFieldAs<int>(Dimension::Id::Z, id), -(int)idx);
     }
 }
-
-
-//ABELL - Move to KdIndex
-/**
-TEST(PointViewTest, kdindex)
-{
-    LasReader reader(Support::viewpath("1.2-with-color.las"));
-    reader.prepare();
-
-    const Schema& schema = reader.getSchema();
-    uint32_t capacity(1000);
-    PointView view(schema, capacity);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator(view);
-
-    {
-        uint32_t numRead = iter->read(view);
-        EXPECT_EQ(numRead, capacity);
-    }
-
-    EXPECT_EQ(view.getCapacity(), capacity);
-    EXPECT_EQ(view.getSchema(), schema);
-
-
-    IndexedPointView iview(view);
-    EXPECT_EQ(iview.getCapacity(), capacity);
-    EXPECT_EQ(iview.getSchema(), schema);
-
-    iview.build();
-
-    unsigned k = 8;
-
-    // If the query distance is 0, just return the k nearest neighbors
-    std::vector<size_t> ids = idata.neighbors(636199, 849238, 428.05, k);
-    EXPECT_EQ(ids.size(), k);
-    EXPECT_EQ(ids[0], 8u);
-    EXPECT_EQ(ids[1], 7u);
-    EXPECT_EQ(ids[2], 9u);
-    EXPECT_EQ(ids[3], 42u);
-    EXPECT_EQ(ids[4], 40u);
-
-    std::vector<size_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 3);
-
-    EXPECT_EQ(dist_ids.size(), 3u);
-    EXPECT_EQ(dist_ids[0], 8u);
-
-    std::vector<size_t> nids = idata.neighbors(636199, 849238, 428.05, k);
-
-    EXPECT_EQ(nids.size(), k);
-    EXPECT_EQ(nids[0], 8u);
-    EXPECT_EQ(nids[1], 7u);
-    EXPECT_EQ(nids[2], 9u);
-    EXPECT_EQ(nids[3], 42u);
-    EXPECT_EQ(nids[4], 40u);
-
-    std::vector<size_t> rids = iview.radius(637012.24, 849028.31,
-        431.66, 100000);
-    EXPECT_EQ(rids.size(), 11u);
-
-    delete iter;
-}
-**/
 
 
 static void check_bounds(const BOX3D& box,
