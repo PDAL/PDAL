@@ -383,7 +383,7 @@ void PlyReader::readElement(Element& elt, PointRef& point)
 {
     for (auto& prop : elt.m_properties)
         if (!readProperty(prop.get(), point))
-            throwError("Error reading data for point " +
+            throwError("Error reading data for point/element " +
                 std::to_string(point.pointId()) + ".");
 }
 
