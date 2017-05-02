@@ -443,7 +443,7 @@ namespace Utils
 
       \param s  String in which to start counting characters.
       \param p  Position in input string at which to start counting.
-      \param pred  Unary predicte that tests a character.
+      \param pred  Unary predicate that tests a character.
       \return  Then number of characters matching the predicate.
     */
     template<typename PREDICATE>
@@ -451,7 +451,7 @@ namespace Utils
     extract(const std::string& s, std::string::size_type p, PREDICATE pred)
     {
         std::string::size_type count = 0;
-        while (pred(s[p++]))
+        while (p < s.size() && pred(s[p++]))
             count++;
         return count;
     }

@@ -158,6 +158,8 @@ public:
 
     void setPointId(PointId idx)
         { m_idx = idx; }
+    PointId pointId() const
+        { return m_idx; }
     inline void getField(char *val, Dimension::Id d,
         Dimension::Type type) const;
     inline void setField(Dimension::Id dim,

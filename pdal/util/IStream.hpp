@@ -421,6 +421,167 @@ public:
 
 
 /**
+  Stream wrapper for input of binary data that converts from big-endian
+  to host ordering.
+*/
+class IBeStream : public IStream
+{
+public:
+    /**
+      Default constructor.
+    */
+    PDAL_DLL IBeStream()
+    {}
+
+    /**
+      Constructor that opens the file and maps it to a stream.
+
+      \param filename  Filename.
+    */
+    PDAL_DLL IBeStream(const std::string& filename) : IStream(filename)
+    {}
+
+    /**
+      Constructor that maps to a provided stream.
+
+      \param stream  Stream to extract from.
+    */
+    PDAL_DLL IBeStream(std::istream *stream) : IStream(stream)
+    {}
+
+    /**
+      Extract an unsigned byte from the stream.
+
+      \param v  unsigned byte to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (uint8_t& v)
+    {
+        v = (uint8_t)m_stream->get();
+        return *this;
+    }
+
+    /**
+      Extract an unsigned byte from the stream.
+
+      \param v  unsigned byte to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (int8_t& v)
+    {
+        v = (int8_t)m_stream->get();
+        return *this;
+    }
+
+    /**
+      Extract an unsigned short from the stream.
+
+      \param v  unsigned short to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (uint16_t& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        v = be16toh(v);
+        return *this;
+    }
+
+    /**
+      Extract an short from the stream.
+
+      \param v  short to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (int16_t& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        v = (int16_t)be16toh((uint16_t)v);
+        return *this;
+    }
+
+    /**
+      Extract an unsigned int from the stream.
+
+      \param v  unsigned int to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (uint32_t& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        v = be32toh(v);
+        return *this;
+    }
+
+    /**
+      Extract an int from the stream.
+
+      \param v  int to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (int32_t& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        v = (int32_t)be32toh((uint32_t)v);
+        return *this;
+    }
+
+    /**
+      Extract an unsigned long int from the stream.
+
+      \param v  unsigned long int to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (uint64_t& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        v = be64toh(v);
+        return *this;
+    }
+
+    /**
+      Extract a long int from the stream.
+
+      \param v  long int to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (int64_t& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        v = (int64_t)be64toh((uint64_t)v);
+        return *this;
+    }
+
+    /**
+      Extract a float from the stream.
+
+      \param v  float to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (float& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        uint32_t tmp = be32toh(*(uint32_t *)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        return *this;
+    }
+
+    /**
+      Extract a double from the stream.
+
+      \param v  double to populate
+      \return  This stream.
+    */
+    PDAL_DLL IBeStream& operator >> (double& v)
+    {
+        m_stream->read((char *)&v, sizeof(v));
+        uint64_t tmp = be64toh(*(uint64_t *)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        return *this;
+    }
+};
+
+
+/**
   Stream wrapper for input of binary data that converts from either
   little-endian or big-endian to host ordering, depending on object
   settings.
@@ -437,7 +598,7 @@ public:
         : IStream(filename)
         , m_isLittleEndian(DefaultIsLittleEndian)
     {}
-    
+
     PDAL_DLL ISwitchableStream(std::istream* stream)
         : IStream(stream)
         , m_isLittleEndian(DefaultIsLittleEndian)
