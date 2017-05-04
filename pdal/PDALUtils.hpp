@@ -155,8 +155,8 @@ inline Everything extractDim(IN& ext, Dimension::Type type)
 }
 
 
-inline void insertDim(Inserter& ins, Dimension::Type type,
-    const Everything& e)
+template<typename OUT>
+inline void insertDim(OUT& ins, Dimension::Type type, const Everything& e)
 {
     using Type = Dimension::Type;
 

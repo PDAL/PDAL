@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <rply/rply.h>
-
 #include <pdal/PointView.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/plugin.hpp>
@@ -43,18 +41,19 @@ extern "C" PF_ExitFunc PlyWriter_InitPlugin();
 
 namespace pdal
 {
-class TriangularMesh;
+
+class Triangle;
 
 class PDAL_DLL PlyWriter : public Writer
 {
 public:
-    struct error : public std::runtime_error
+    enum class Format
     {
-        error(const std::string& e) : std::runtime_error(e)
-        {}
+        ASCII,
+        BINARY_LE,
+        BINARY_BE
     };
 
-public:
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
@@ -63,21 +62,59 @@ public:
 
 private:
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
 
+    std::string getType(Dimension::Type type) const;
+    void writeHeader(PointLayoutPtr layout) const;
+    void writeValue(PointRef& point, Dimension::Id dim, Dimension::Type type);
+    void writePoint(PointRef& point, PointLayoutPtr layout);
+    void writeTriangle(const Triangle& t, size_t offset);
+
+    std::ostream *m_stream;
     std::string m_filename;
-    p_ply m_ply;
-    PointViewPtr m_pointCollector;
-    std::string m_storageModeSpec;
-    e_ply_storage_mode m_storageMode;
+    Format m_format;
     bool m_faces;
     StringList m_dimNames;
     Dimension::IdList m_dims;
-    TriangularMesh *m_mesh;
+    std::vector<PointViewPtr> m_views;
 };
+
+inline std::istream& operator>>(std::istream& in, PlyWriter::Format& f)
+{
+    std::string s;
+    std::getline(in, s);
+    Utils::trim(s);
+    Utils::tolower(s);
+    if (s == "ascii" || s == "default")
+        f = PlyWriter::Format::ASCII;
+    else if (s == "little endian" || s == "binary_little_endian")
+        f = PlyWriter::Format::BINARY_LE;
+    else if (s == "big endian" || s == "binary_big_endian")
+        f = PlyWriter::Format::BINARY_BE;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+
+inline std::ostream& operator<<(std::ostream& out, const PlyWriter::Format& f)
+{
+    switch (f)
+    {
+    case PlyWriter::Format::ASCII:
+        out << "ascii";
+        break;
+    case PlyWriter::Format::BINARY_LE:
+        out << "binary_little_endian";
+        break;
+    case PlyWriter::Format::BINARY_BE:
+        out << "binary_big_endian";
+        break;
+    }
+    return out;
+}
 
 }
