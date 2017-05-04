@@ -62,7 +62,7 @@ PlyWriter::PlyWriter()
 void PlyWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("storage_mode", "PLY Storage Mode", m_format, Format::ASCII);
+    args.add("storage_mode", "PLY Storage Mode", m_format, Format::Ascii);
     args.add("dims", "Dimension names", m_dimNames);
     args.add("faces", "Write faces", m_faces);
 }
@@ -161,19 +161,19 @@ void PlyWriter::write(const PointViewPtr data)
 void PlyWriter::writeValue(PointRef& point, Dimension::Id dim,
     Dimension::Type type)
 {
-    if (m_format == Format::ASCII)
+    if (m_format == Format::Ascii)
     {
         double d = point.getFieldAs<double>(dim);
         *m_stream << d;
     }
-    else if (m_format == Format::BINARY_LE)
+    else if (m_format == Format::BinaryLe)
     {
         OLeStream out(m_stream);
         Everything e;
         point.getField((char *)&e, dim, type);
         Utils::insertDim(out, type, e);
     }
-    else if (m_format == Format::BINARY_BE)
+    else if (m_format == Format::BinaryBe)
     {
         OBeStream out(m_stream);
         Everything e;
@@ -190,22 +190,22 @@ void PlyWriter::writePoint(PointRef& point, PointLayoutPtr layout)
         Dimension::Id dim = *it;
         writeValue(point, dim, layout->dimType(dim));
         ++it;
-        if (m_format == Format::ASCII && it != m_dims.end())
+        if (m_format == Format::Ascii && it != m_dims.end())
             *m_stream << " ";
     }
-    if (m_format == Format::ASCII)
+    if (m_format == Format::Ascii)
         *m_stream << std::endl;
 }
 
 
 void PlyWriter::writeTriangle(const Triangle& t, size_t offset)
 {
-    if (m_format == Format::ASCII)
+    if (m_format == Format::Ascii)
     {
         *m_stream << "3 " << (t.m_a + offset) << " " <<
             (t.m_b + offset) << " " << (t.m_c + offset) << std::endl;
     }
-    else if (m_format == Format::BINARY_LE)
+    else if (m_format == Format::BinaryLe)
     {
         OLeStream out(m_stream);
         unsigned char count = 3;
@@ -214,7 +214,7 @@ void PlyWriter::writeTriangle(const Triangle& t, size_t offset)
         uint32_t c = (uint32_t)(t.m_c + offset);
         out << count << a << b << c;
     }
-    else if (m_format == Format::BINARY_BE)
+    else if (m_format == Format::BinaryBe)
     {
         OBeStream out(m_stream);
         unsigned char count = 3;

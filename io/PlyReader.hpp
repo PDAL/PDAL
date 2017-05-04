@@ -62,9 +62,9 @@ public:
 private:
     enum class Format
     {
-        ASCII,
-        BINARY_LE,
-        BINARY_BE
+        Ascii,
+        BinaryLe,
+        BinaryBe
     };
 
     struct Property

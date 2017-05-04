@@ -49,9 +49,9 @@ class PDAL_DLL PlyWriter : public Writer
 public:
     enum class Format
     {
-        ASCII,
-        BINARY_LE,
-        BINARY_BE
+        Ascii,
+        BinaryLe,
+        BinaryBe
     };
 
     static void * create();
@@ -89,11 +89,11 @@ inline std::istream& operator>>(std::istream& in, PlyWriter::Format& f)
     Utils::trim(s);
     Utils::tolower(s);
     if (s == "ascii" || s == "default")
-        f = PlyWriter::Format::ASCII;
+        f = PlyWriter::Format::Ascii;
     else if (s == "little endian" || s == "binary_little_endian")
-        f = PlyWriter::Format::BINARY_LE;
+        f = PlyWriter::Format::BinaryLe;
     else if (s == "big endian" || s == "binary_big_endian")
-        f = PlyWriter::Format::BINARY_BE;
+        f = PlyWriter::Format::BinaryBe;
     else
         in.setstate(std::ios_base::failbit);
     return in;
@@ -104,13 +104,13 @@ inline std::ostream& operator<<(std::ostream& out, const PlyWriter::Format& f)
 {
     switch (f)
     {
-    case PlyWriter::Format::ASCII:
+    case PlyWriter::Format::Ascii:
         out << "ascii";
         break;
-    case PlyWriter::Format::BINARY_LE:
+    case PlyWriter::Format::BinaryLe:
         out << "binary_little_endian";
         break;
-    case PlyWriter::Format::BINARY_BE:
+    case PlyWriter::Format::BinaryBe:
         out << "binary_big_endian";
         break;
     }

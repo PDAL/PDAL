@@ -118,11 +118,11 @@ void PlyReader::extractFormat()
 
     word = nextWord();
     if (word == "ascii")
-        m_format = Format::ASCII;
+        m_format = Format::Ascii;
     else if (word == "binary_big_endian")
-        m_format = Format::BINARY_BE;
+        m_format = Format::BinaryBe;
     else if (word == "binary_little_endian")
-        m_format = Format::BINARY_LE;
+        m_format = Format::BinaryLe;
     else
         throwError("Unrecognized PLY format: '" + word + "'.");
 
@@ -325,19 +325,19 @@ bool PlyReader::readProperty(Property *prop, PointRef& point)
 void PlyReader::SimpleProperty::read(std::istream *stream,
     PlyReader::Format format, PointRef& point)
 {
-    if (format == Format::ASCII)
+    if (format == Format::Ascii)
     {
         double d;
         *stream >> d;
         point.setField(m_dim, d);
     }
-    else if (format == Format::BINARY_LE)
+    else if (format == Format::BinaryLe)
     {
         ILeStream in(stream);
         Everything e = Utils::extractDim(in, m_type);
         point.setField(m_dim, m_type, &e);
     }
-    else if (format == Format::BINARY_BE)
+    else if (format == Format::BinaryBe)
     {
         IBeStream in(stream);
         Everything e = Utils::extractDim(in, m_type);
@@ -351,7 +351,7 @@ void PlyReader::SimpleProperty::read(std::istream *stream,
 void PlyReader::ListProperty::read(std::istream *stream,
     PlyReader::Format format, PointRef& point)
 {
-    if (format == Format::ASCII)
+    if (format == Format::Ascii)
     {
         size_t cnt;
         *stream >> cnt;
@@ -360,7 +360,7 @@ void PlyReader::ListProperty::read(std::istream *stream,
         while (cnt--)
             *stream >> d;
     }
-    else if (format == Format::BINARY_LE)
+    else if (format == Format::BinaryLe)
     {
         ILeStream istream(stream);
         Everything e = Utils::extractDim(istream, m_countType);
@@ -368,7 +368,7 @@ void PlyReader::ListProperty::read(std::istream *stream,
         cnt *= Dimension::size(m_listType);
         istream.seek(cnt, std::ios_base::cur);
     }
-    else if (format == Format::BINARY_BE)
+    else if (format == Format::BinaryBe)
     {
         IBeStream istream(stream);
         Everything e = Utils::extractDim(istream, m_countType);
