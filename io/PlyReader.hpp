@@ -127,12 +127,15 @@ private:
     std::istream *m_stream;
     std::istream::streampos m_dataPos;
     std::vector<Element> m_elements;
+    PointId m_index;
+    Element *m_vertexElt;
 
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual void done(PointTableRef table);
+    virtual bool processOne(PointRef& point);
 
     std::string readLine();
     void pushLine();

@@ -52,7 +52,7 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info);
 
 
-PlyReader::PlyReader()
+PlyReader::PlyReader() : m_vertexElt(nullptr)
 {}
 
 
@@ -273,6 +273,12 @@ void PlyReader::extractHeader()
         ;
     extractEnd();
     m_dataPos = m_stream->tellg();
+
+    for (Element& elt : m_elements)
+        if (elt.m_name == "vertex")
+            m_vertexElt = &elt;
+    if (!m_vertexElt)
+        throwError("Can't read PLY file without a 'vertex' element.");
 }
 
 
@@ -395,8 +401,9 @@ void PlyReader::ready(PointTableRef table)
         m_stream->seekg(m_dataPos);
     for (Element& elt : m_elements)
     {
-        if (elt.m_name == "vertex")
+        if (&elt == m_vertexElt)
             break;
+
         // We read an element into point 0.  Since the element's properties
         // weren't registered as dimensions, we'll try to write the data
         // to a NULL dimension, which is a noop.
@@ -408,30 +415,34 @@ void PlyReader::ready(PointTableRef table)
         for (PointId idx = 0; idx < elt.m_count; ++idx)
             readElement(elt, point);
     }
+    m_index = 0;
 }
 
 
+bool PlyReader::processOne(PointRef& point)
+{
+    if (m_index < m_vertexElt->m_count)
+    {
+        readElement(*m_vertexElt, point);
+        m_index++;
+        return true;
+    }
+    return false;
+}
+
+
+// We're just reading the vertex element here.
 point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
 {
     point_count_t cnt;
 
     PointRef point(view->point(0));
-    for (Element& elt : m_elements)
+    cnt = 0;
+    for (PointId idx = 0; idx < m_vertexElt->m_count && idx < num; ++idx)
     {
-        // We've already read all the data that precedes the vertex element
-        // in 'ready'
-        if (elt.m_name != "vertex")
-            continue;
-        cnt = 0;
-        for (PointId idx = 0; idx < elt.m_count && idx < num; ++idx)
-        {
-            point.setPointId(idx);
-            readElement(elt, point);
-            cnt++;
-        }
-        // We currently only read the vertex data.
-        if (elt.m_name == "vertex")
-            break;
+        point.setPointId(idx);
+        processOne(point);
+        cnt++;
     }
     return cnt;
 }
