@@ -44,6 +44,18 @@
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+        "readers.ply",
+        "Read ply files.",
+        "http://pdal.io/stages/reader.ply.html");
+
+CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info);
+
+
+PlyReader::PlyReader()
+{}
+
+
 std::string PlyReader::readLine()
 {
     m_line.clear();
@@ -130,6 +142,7 @@ void PlyReader::extractFormat()
     if (word != "1.0")
         throwError("Unsupported PLY version: '" + word + "'.");
 }
+
 
 Dimension::Type PlyReader::getType(const std::string& name)
 {
@@ -263,23 +276,10 @@ void PlyReader::extractHeader()
 }
 
 
-static PluginInfo const s_info = PluginInfo(
-        "readers.ply",
-        "Read ply files.",
-        "http://pdal.io/stages/reader.ply.html");
-
-
-CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info);
-
-
 std::string PlyReader::getName() const
 {
     return s_info.name;
 }
-
-
-PlyReader::PlyReader()
-{}
 
 
 void PlyReader::initialize()
@@ -393,6 +393,21 @@ void PlyReader::ready(PointTableRef table)
     m_stream = Utils::openFile(m_filename, true);
     if (m_stream)
         m_stream->seekg(m_dataPos);
+    for (Element& elt : m_elements)
+    {
+        if (elt.m_name == "vertex")
+            break;
+        // We read an element into point 0.  Since the element's properties
+        // weren't registered as dimensions, we'll try to write the data
+        // to a NULL dimension, which is a noop.
+        // This essentially just gets us to the vertex element.
+        // In binary mode, this is all silliness, since we should be able
+        // to seek right where we want to go, but in text mode, you've got
+        // to go through the data.
+        PointRef point(table, 0);
+        for (PointId idx = 0; idx < elt.m_count; ++idx)
+            readElement(elt, point);
+    }
 }
 
 
@@ -403,6 +418,10 @@ point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
     PointRef point(view->point(0));
     for (Element& elt : m_elements)
     {
+        // We've already read all the data that precedes the vertex element
+        // in 'ready'
+        if (elt.m_name != "vertex")
+            continue;
         cnt = 0;
         for (PointId idx = 0; idx < elt.m_count && idx < num; ++idx)
         {
@@ -410,7 +429,7 @@ point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
             readElement(elt, point);
             cnt++;
         }
-        // We currently only load the vertex data.
+        // We currently only read the vertex data.
         if (elt.m_name == "vertex")
             break;
     }
