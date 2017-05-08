@@ -301,6 +301,11 @@ void PlyReader::addDimensions(PointLayoutPtr layout)
 {
     SimpleProperty *prop;
 
+    // Override XYZ to doubles.
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+
     for (auto& elt : m_elements)
     {
         if (elt.m_name == "vertex")
