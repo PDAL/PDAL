@@ -110,8 +110,8 @@ inline double toDouble(const Everything& e, Dimension::Type type)
     return d;
 }
 
-template<typename IN>
-inline Everything extractDim(IN& ext, Dimension::Type type)
+template<typename INPUT>
+inline Everything extractDim(INPUT& ext, Dimension::Type type)
 {
     using Type = Dimension::Type;
 
@@ -155,8 +155,8 @@ inline Everything extractDim(IN& ext, Dimension::Type type)
 }
 
 
-template<typename OUT>
-inline void insertDim(OUT& ins, Dimension::Type type, const Everything& e)
+template<typename OUTPUT>
+inline void insertDim(OUTPUT& ins, Dimension::Type type, const Everything& e)
 {
     using Type = Dimension::Type;
 
