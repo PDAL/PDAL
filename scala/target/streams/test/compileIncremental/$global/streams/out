@@ -1,0 +1,42 @@
+[0m[[0mdebug[0m] [0m[naha] [0m
+[0m[[0mdebug[0m] [0m[naha] Initial source changes: [0m
+[0m[[0mdebug[0m] [0m[naha] 	removed:Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	added: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	modified: Set(/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/src/test/scala/io/pdal/pipeline/PipelineExpressionsSpec.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidated products: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] External API changes: API Changes: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Modified binary dependencies: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Initial directly invalidated sources: Set(/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/src/test/scala/io/pdal/pipeline/PipelineExpressionsSpec.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] [0m
+[0m[[0mdebug[0m] [0m[naha] Sources indirectly invalidated by:[0m
+[0m[[0mdebug[0m] [0m[naha] 	product: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	binary dep: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	external source: Set()[0m
+[0m[[0mdebug[0m] [0mAll initially invalidated sources: Set(/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/src/test/scala/io/pdal/pipeline/PipelineExpressionsSpec.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set(/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/src/test/scala/io/pdal/pipeline/PipelineExpressionsSpec.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Recompiling all 1 sources: invalidated sources (1) exceeded 50.0% of all sources[0m
+[0m[[0minfo[0m] [0mCompiling 1 Scala source to /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/target/scala-2.11/test-classes...[0m
+[0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.13:component from component compiler for Scala 2.11.8[0m
+[0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.13:component from component compiler for Scala 2.11.8[0m
+[0m[[0mdebug[0m] [0mRunning cached compiler 45fd4b72, interfacing (CompilerInterface) with Scala compiler version 2.11.8[0m
+[0m[[0mdebug[0m] [0mCalling Scala compiler with arguments  (CompilerInterface):[0m
+[0m[[0mdebug[0m] [0m	-deprecation[0m
+[0m[[0mdebug[0m] [0m	-unchecked[0m
+[0m[[0mdebug[0m] [0m	-language:implicitConversions[0m
+[0m[[0mdebug[0m] [0m	-language:reflectiveCalls[0m
+[0m[[0mdebug[0m] [0m	-language:higherKinds[0m
+[0m[[0mdebug[0m] [0m	-language:postfixOps[0m
+[0m[[0mdebug[0m] [0m	-language:existentials[0m
+[0m[[0mdebug[0m] [0m	-feature[0m
+[0m[[0mdebug[0m] [0m	-Xplugin:/Users/daunnc/.ivy2/cache/org.scalamacros/paradise_2.11.8/jars/paradise_2.11.8-2.1.0.jar[0m
+[0m[[0mdebug[0m] [0m	-bootclasspath[0m
+[0m[[0mdebug[0m] [0m	/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/classes:/Users/daunnc/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar[0m
+[0m[[0mdebug[0m] [0m	-classpath[0m
+[0m[[0mdebug[0m] [0m	/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/target/scala-2.11/test-classes:/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/target/scala-2.11/classes:/Users/daunnc/.ivy2/cache/io.circe/circe-core_2.11/jars/circe-core_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/io.circe/circe-numbers_2.11/jars/circe-numbers_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/org.typelevel/cats-core_2.11/jars/cats-core_2.11-0.9.0.jar:/Users/daunnc/.ivy2/cache/org.typelevel/cats-macros_2.11/jars/cats-macros_2.11-0.9.0.jar:/Users/daunnc/.ivy2/cache/com.github.mpilquist/simulacrum_2.11/jars/simulacrum_2.11-0.10.0.jar:/Users/daunnc/.ivy2/cache/org.typelevel/macro-compat_2.11/jars/macro-compat_2.11-1.1.1.jar:/Users/daunnc/.ivy2/cache/org.typelevel/machinist_2.11/jars/machinist_2.11-0.6.1.jar:/Users/daunnc/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.8.jar:/Users/daunnc/.ivy2/cache/org.typelevel/cats-kernel_2.11/jars/cats-kernel_2.11-0.9.0.jar:/Users/daunnc/.ivy2/cache/io.circe/circe-generic_2.11/jars/circe-generic_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/com.chuusai/shapeless_2.11/bundles/shapeless_2.11-2.3.2.jar:/Users/daunnc/.ivy2/cache/io.circe/circe-generic-extras_2.11/jars/circe-generic-extras_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/io.circe/circe-literal_2.11/jars/circe-literal_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/io.circe/circe-parser_2.11/jars/circe-parser_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/io.circe/circe-jawn_2.11/jars/circe-jawn_2.11-0.7.1.jar:/Users/daunnc/.ivy2/cache/org.spire-math/jawn-parser_2.11/jars/jawn-parser_2.11-0.10.4.jar:/Users/daunnc/.ivy2/cache/io.pdal/pdal_2.11/jars/pdal_2.11-1.4.0.jar:/Users/daunnc/.ivy2/cache/com.vividsolutions/jts-core/jars/jts-core-1.14.0.jar:/Users/daunnc/.ivy2/cache/org.scalatest/scalatest_2.11/bundles/scalatest_2.11-3.0.1.jar:/Users/daunnc/.ivy2/cache/org.scalactic/scalactic_2.11/bundles/scalactic_2.11-3.0.1.jar:/Users/daunnc/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.5.jar:/Users/daunnc/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.4.jar[0m
+[0m[[0mdebug[0m] [0mScala compilation took 0.925679754 s[0m
+[0m[[0mdebug[0m] [0m[naha] New invalidations:[0m
+[0m[[0mdebug[0m] [0m[naha] 	Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Previously invalidated, but (transitively) depend on new invalidations:[0m
+[0m[[0mdebug[0m] [0m[naha] 	Set()[0m
+[0m[[0mdebug[0m] [0m[naha] All newly invalidated sources after taking into account (previously) recompiled sources:Set()[0m

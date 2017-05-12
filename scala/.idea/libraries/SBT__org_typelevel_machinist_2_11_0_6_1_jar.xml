@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: org.typelevel:machinist_2.11:0.6.1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.typelevel/machinist_2.11/jars/machinist_2.11-0.6.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.typelevel/machinist_2.11/srcs/machinist_2.11-0.6.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

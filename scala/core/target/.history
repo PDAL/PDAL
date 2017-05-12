@@ -1,0 +1,12 @@
+compile
+reload
+compile
+project macros
+compile
+show depends
+show dependsOn
+reload
+compile
+compil
+compile
+exit

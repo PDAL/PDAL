@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: org.typelevel:cats-macros_2.11:0.9.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.typelevel/cats-macros_2.11/jars/cats-macros_2.11-0.9.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.typelevel/cats-macros_2.11/srcs/cats-macros_2.11-0.9.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

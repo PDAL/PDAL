@@ -1,0 +1,9 @@
+[0m[[33mwarn[0m] [0mjavaOptions will be ignored, fork is set to false[0m
+[0m[[0mdebug[0m] [0mRunning TaskDef(io.pdal.pipeline.PipelineExpressionsSpec, org.scalatest.tools.Framework$$anon$1@122c2d8, false, [SuiteSelector])[0m
+[0m[[0minfo[0m] [0m[36mRun completed in 1 second, 267 milliseconds.[0m[0m
+[0m[[0minfo[0m] [0m[36mTotal number of tests run: 2[0m[0m
+[0m[[0minfo[0m] [0m[36mSuites: completed 1, aborted 0[0m[0m
+[0m[[0minfo[0m] [0m[36mTests: succeeded 2, failed 0, canceled 0, ignored 0, pending 0[0m[0m
+[0m[[0minfo[0m] [0m[32mAll tests passed.[0m[0m
+[0m[[0mdebug[0m] [0mPassed tests:[0m
+[0m[[0mdebug[0m] [0m	io.pdal.pipeline.PipelineExpressionsSpec[0m
