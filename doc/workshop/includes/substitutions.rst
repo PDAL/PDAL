@@ -8,6 +8,9 @@
 .. |libLAS| replace:: `libLAS <http://liblas.org/>`__
 .. |QGIS| replace:: `QGIS <http://qgis.org>`__
 .. |GDAL| replace:: `GDAL <http://gdal.org/>`__
+.. |JSON| replace:: `JSON <https://en.wikipedia.org/wiki/JSON>`__
+.. |NumPy| replace:: `NumPy <http://www.numpy.org/>`__
+.. |Bash| replace:: `Bash <https://en.wikipedia.org/wiki/Bash_(Unix_shell)>`__
 .. |GEOS| replace:: `GEOS <https://trac.osgeo.org/geos/>`__
 .. |LASzip| replace:: `LASzip <http://laszip.org>`__
 .. |Python| replace:: `Python <http://python.org/>`__
