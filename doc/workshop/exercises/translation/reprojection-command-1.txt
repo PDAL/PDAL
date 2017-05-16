@@ -1,5 +1,4 @@
-docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-    pdal translate /data/exercises/analysis/ground/CSite1_orig-utm.laz \
+pdal translate c:/Users/hobu/PDAL/exercises/analysis/ground/CSite1_orig-utm.laz \
     /data/exercises/translation/csite-dd.laz \
     reprojection \
     --filters.reprojection.out_srs="EPSG:4326"
