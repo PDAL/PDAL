@@ -1,4 +1,3 @@
-docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-       pdal pipeline \
-       /data/exercises/analysis/denoising/denoise.json
+pdal pipeline ^
+   c:/Users/hobu/PDAL/exercises/analysis/denoising/denoise.json
 

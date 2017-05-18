@@ -61,15 +61,23 @@ JSON parsing tool like ``jq`` provide a powerful inspection combination.
 For example, we might only care about the ``system_id`` and ``compressed``
 flag for this particular file. Our simple ``pdal info --metadata`` command
 gives us that, but it also gives us a bunch of other stuff we don't need
-at the moment either. Let's focus on just extracting what we need using the
+at the moment either. Let's focus on extracting what we want using the
 ``jq`` command.
 
 .. literalinclude:: ./metadata-command-jq.txt
     :linenos:
 
-
 .. image:: ../../images/info-interesting-metadata-jq.png
 
+.. note::
+
+    PDAL's JSON output is very powerfully combined with the processing
+    capabilities of other programming languages such as JavaScript or Python.
+    Both of these languages have excellent built-in tools for consuming
+    JSON, along with plenty of other features to allow you to do something
+    with the data inside the data structures. As we will see later
+    in the workshop, this PDAL feature is one that makes construction
+    of custom data processing workflows with PDAL very convenient.
 
 
 

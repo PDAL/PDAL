@@ -20,21 +20,22 @@ Here's a summary of what's going on with that command invocation
 
 1. ``pdal``: The ``pdal`` application :)
 
-6. ``info``: We want to run :ref:`info_command` on the data. All commands
+2. ``info``: We want to run :ref:`info_command` on the data. All commands
    are run by the ``pdal`` application.
 
-7. ``c:/Users/hobu/PDAL/exercises/info/interesting.las``: The file we
+3. ``c:/Users/hobu/PDAL/exercises/info/interesting.las``: The file we
    are running the command on. PDAL will be able to identify this file
    is an |ASPRSLAS| file from the extension, ``.las``, but not every
    file type is easily identified. You can use a :ref:`pipeline <pipeline_command>`
    to override which :ref:`reader <readers>` PDAL will use to
    open the file.
 
-8. ``-p 0``: ``-p`` corresponds to "print a point", and ``0`` means to print
+4. ``-p 0``: ``-p`` corresponds to "print a point", and ``0`` means to print
    the first one (computer people count from 0).
 
 
 .. image:: ../../images/info-interesting-single-point.png
+    :target: ../../../_images/info-interesting-single-point.png
 
 Notes
 --------------------------------------------------------------------------------

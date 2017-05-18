@@ -1,4 +1,4 @@
-.. las_tutorial:
+.. _las_tutorial:
 
 ================================================================================
 LAS Reading and Writing with PDAL

@@ -12,23 +12,27 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
 
 .. _`LASzip`: http://laszip.org
 
-Issue the following command in your `OSGeo4W Shell`.
+1. Issue the following command in your `OSGeo4W Shell`.
 
 
-.. literalinclude:: ./compression-command.txt
+    .. literalinclude:: ./compression-command.txt
 
-LAS is a very fluffy binary format. Because of the way the data are stored,
-there is ample redundant information, and |LASzip| is an open source solution
-for compressing this information
-
-
-1. Verify that the data are in fact compressed:
-
-   .. literalinclude:: ./compression-command-verify.txt
+    LAS is a very fluffy binary format. Because of the way the data are stored,
+    there is ample redundant information, and |LASzip| is an open source solution
+    for compressing this information
 
 
-   .. image:: ../../images/compression-verify.png
+2. Verify that the data are in fact compressed:
 
+    .. literalinclude:: ./compression-command-verify.txt
+
+
+    .. image:: ../../images/compression-verify.png
+        :target: ../../../_images/compression-verify.png
+
+.. seealso::
+    :ref:`las_tutorial` contains many pointers about settings for |ASPRSLAS|
+    data and how to achieve specific data behaviors with PDAL.
 
 Notes
 --------------------------------------------------------------------------------

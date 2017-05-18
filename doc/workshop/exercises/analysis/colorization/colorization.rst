@@ -38,7 +38,7 @@ point cloud file we're going to read.
 
 ::
 
-    "/data/exercises/analysis/colorization/uncompahgre.laz",
+    "c:/Users/hobu/PDAL/exercises/analysis/colorization/uncompahgre.laz",
 
 2. :ref:`filters.colorization`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +51,7 @@ filter will create PDAL dimensions ``Red``, ``Green``, and ``Blue``.
 
     {
         "type": "filters.colorization",
-        "raster": "/data/exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
+        "raster": "c:/Users/hobu/PDAL/exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
     },
 
 
@@ -82,7 +82,7 @@ add a few options to have finer control over what is written. These include:
         "compression": "true",
         "minor_version": "2",
         "dataformat_id": "3",
-        "filename":"/data/exercises/colorization/analysis/uncompahgre-colored.laz"
+        "filename":"c:/Users/hobu/PDAL/exercises/colorization/analysis/uncompahgre-colored.laz"
     }
 
 1. ``compression``: |LASzip| data is ~6x smaller than ASPRS LAS.
