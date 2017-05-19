@@ -527,7 +527,7 @@ into LAS files. Common VLR data include:
 .. note::
 
     There are VLRs that are defined by the specification, and they
-    have the VLR ``user_id``s of `LASF_Spec` or `LASF_Projection`.
+    have the VLR ``user_id`` of `LASF_Spec` or `LASF_Projection`.
     `LASF_Spec` VLRs provide a description of the data beyond that
     available in the header.  `LASF_Projection` VLRs store the spatial
     coordinate system of the data.
