@@ -133,8 +133,9 @@ TEST(NitfReaderTest, optionSrs)
     EXPECT_TRUE(nitfReader);
     nitfReader->setOptions(nitfOpts);
 
+    std::string outfile(Support::temppath("temp.nitf"));
     Options lasOpts;
-    lasOpts.add("filename", "/dev/null");
+    lasOpts.add("filename", outfile);
 
     LasWriter writer;
     writer.setInput(*nitfReader);
