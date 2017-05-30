@@ -40,7 +40,7 @@ namespace pdal
 
 void Reader::readerAddArgs(ProgramArgs& args)
 {
-    m_filenameArg = &args.add("filename", "Name of file to read", m_filename);
+    m_filenameArg = &args.addRequired("filename", "Name of file to read", m_filename);
     m_countArg = &args.add("count", "Maximum number of points read", m_count,
         std::numeric_limits<point_count_t>::max());
 }

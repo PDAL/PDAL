@@ -25,8 +25,10 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <typeinfo>
 
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/TypeName.hpp>
 
 namespace pdal
 {
@@ -152,9 +154,15 @@ protected:
       \param description  Argument description.
     */
     Arg(const std::string& longname, const std::string& shortname,
-        const std::string& description) : m_longname(longname),
+        const std::string& description, const bool required) : m_longname(longname),
         m_shortname(shortname), m_description(description), m_set(false),
-        m_hidden(false), m_positional(PosType::None)
+        m_hidden(false), m_positional(PosType::None), m_required(required), m_valType(TypeName<std::string>::get())
+    {}
+
+    Arg(const std::string& longname, const std::string& shortname,
+        const std::string& description, const bool required, const std::string& valType) : m_longname(longname),
+        m_shortname(shortname), m_description(description), m_set(false),
+        m_hidden(false), m_positional(PosType::None), m_required(required), m_valType(valType)
     {}
 
 public:
@@ -299,6 +307,22 @@ public:
         { return m_longname; }
 
     /**
+      Return whether argument is required.
+
+      \return  By default arguments are not required.
+    */
+    bool isRequired() const
+        { return m_required; }
+
+    /**
+      Return whether argument type in a string.
+
+      \return  By default returns string.
+    */
+    std::string valType() const
+        { return m_valType; }
+
+    /**
       Returns text indicating the longname and shortname of the option
       suitable for displaying in help information.
       \note  Not intended to be called from user code.
@@ -334,6 +358,8 @@ protected:
     bool m_set;
     bool m_hidden;
     PosType m_positional;
+    bool m_required;
+    std::string m_valType;
     std::string m_error;
 };
 
@@ -356,10 +382,11 @@ public:
       \param variable  Variable to which the value of the argument should
         be bound.
       \param def  Default value to be assigned to the bound variable.
+      \param required  Is field required or not.
     */
     TArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, T& variable, T def) :
-        Arg(longname, shortname, description), m_var(variable),
+         const std::string& description, T& variable, T def, const bool required) :
+        Arg(longname, shortname, description, required, TypeName<T>::get()), m_var(variable),
         m_defaultVal(def), m_defaultProvided(true)
     { m_var = m_defaultVal; }
 
@@ -373,10 +400,11 @@ public:
       \param description  Argument description.
       \param variable  Variable to which the value of the argument should
         be bound.
+      \param required  Is field required or not.
     */
     TArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, T& variable) :
-        Arg(longname, shortname, description), m_var(variable),
+         const std::string& description, T& variable, const bool required) :
+        Arg(longname, shortname, description, required, TypeName<T>::get()), m_var(variable),
         m_defaultVal(T()), m_defaultProvided(false)
     { m_var = m_defaultVal; }
 
@@ -426,6 +454,8 @@ public:
     virtual void reset()
     {
         m_var = m_defaultVal;
+        m_valType = TypeName<T>::get();
+        m_required = false;
         m_set = false;
         m_hidden = false;
     }
@@ -499,11 +529,12 @@ public:
       \param variable  bool variable to which the value of the argument should
         be bound.
       \param def  Default value to be assigned to the bound variable.
+      \param required  Is field required or not.
     */
     TArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, bool& variable, bool def) :
-        Arg(longname, shortname, description), m_val(variable),
-        m_defaultVal(def), m_defaultProvided(true)
+         const std::string& description, bool& variable, bool def, const bool required) :
+         Arg(longname, shortname, description, required, TypeName<bool>::get()), m_val(variable),
+         m_defaultVal(def), m_defaultProvided(true)
     { m_val = m_defaultVal; }
 
     /**
@@ -516,11 +547,12 @@ public:
       \param description  Argument description.
       \param variable  bool variable to which the value of the argument should
         be bound.
+      \param required  Is field required or not.
     */
     TArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, bool& variable) :
-        Arg(longname, shortname, description), m_val(variable),
-        m_defaultVal(false), m_defaultProvided(false)
+         const std::string& description, bool& variable, const bool required) :
+         Arg(longname, shortname, description, required, TypeName<bool>::get()), m_val(variable),
+         m_defaultVal(false), m_defaultProvided(false)
     { m_val = m_defaultVal; }
 
     /**
@@ -568,6 +600,8 @@ public:
     virtual void reset()
     {
         m_val = m_defaultVal;
+        m_valType = TypeName<bool>::get();
+        m_required = false;
         m_set = false;
         m_hidden = false;
     }
@@ -637,7 +671,14 @@ public:
       \param description  Argument description.
     */
     BaseVArg(const std::string& longname, const std::string& shortname,
-        const std::string& description) : Arg(longname, shortname, description),
+        const std::string& description, const bool required) :
+        Arg(longname, shortname, description, required),
+        m_defaultProvided(false)
+    {}
+
+    BaseVArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, const bool required, const std::string& valType) :
+        Arg(longname, shortname, description, required, valType),
         m_defaultProvided(false)
     {}
 
@@ -709,11 +750,12 @@ public:
       \param description  Argument description.
       \param variable  Variable to which the argument value(s) should be bound.
       \param def  Default value.
+      \param required  Is field required or not.
     */
     VArg(const std::string& longname, const std::string& shortname,
         const std::string& description, std::vector<T>& variable,
-        std::vector<T> def) :
-        BaseVArg(longname, shortname, description), m_var(variable),
+        std::vector<T> def, const bool required) :
+        BaseVArg(longname, shortname, description, required, TypeName<T>::get()), m_var(variable),
         m_defaultVal(def)
     {
         m_var = def;
@@ -729,10 +771,11 @@ public:
         line with "-" prefix.
       \param description  Argument description.
       \param variable  Variable to which the argument value(s) should be bound.
+      \param required  Is field required or not.
     */
     VArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, std::vector<T>& variable) :
-        BaseVArg(longname, shortname, description), m_var(variable)
+        const std::string& description, std::vector<T>& variable, const bool required) :
+        BaseVArg(longname, shortname, description, required, TypeName<T>::get()), m_var(variable)
     {
         // Clearing the vector resets to "default" value.
         m_var.clear();
@@ -780,6 +823,8 @@ public:
     virtual void reset()
     {
         m_var = m_defaultVal;
+        m_valType = TypeName<T>::get();
+        m_required = false;
         m_set = false;
         m_hidden = false;
     }
@@ -825,11 +870,12 @@ public:
       \param description  Argument description.
       \param variable  Variable to which the argument value(s) should be bound.
       \param def  Default value.
+      \param required  Is field required or not.
     */
     VArg(const std::string& longname, const std::string& shortname,
         const std::string& description, std::vector<std::string>& variable,
-        std::vector<std::string> def) :
-        BaseVArg(longname, shortname, description), m_var(variable),
+        std::vector<std::string> def, const bool required) :
+        BaseVArg(longname, shortname, description, required, TypeName<std::string>::get()), m_var(variable),
         m_defaultVal(def)
     {
         m_var = def;
@@ -845,10 +891,11 @@ public:
         line with "-" prefix.
       \param description  Argument description.
       \param variable  Variable to which the argument value(s) should be bound.
+      \param required  Is field required or not.
     */
     VArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, std::vector<std::string>& variable) :
-        BaseVArg(longname, shortname, description), m_var(variable)
+        const std::string& description, std::vector<std::string>& variable, const bool required) :
+        BaseVArg(longname, shortname, description, required, TypeName<std::string>::get()), m_var(variable)
     {}
 
     /**
@@ -889,6 +936,8 @@ public:
     virtual void reset()
     {
         m_var = m_defaultVal;
+        m_valType = TypeName<std::string>::get();
+        m_required = false;
         m_set = false;
         m_hidden = false;
     }
@@ -945,6 +994,24 @@ public:
     }
 
     /**
+      Add a string argument to the list of arguments.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \param def  Default value of argument.
+      \return  Reference to the new argument.
+      \param required  Is field required or not.
+    */
+    Arg& addRequired(const std::string& name, const std::string description,
+        std::string& var, std::string def)
+    {
+        return addRequired<std::string>(name, description, var, def);
+    }
+
+    /**
       Add a list-based (vector) string argument
 
       \param name  Name of argument.  Argument names are specified as
@@ -958,6 +1025,23 @@ public:
         std::vector<std::string>& var)
     {
         return add<std::string>(name, description, var);
+    }
+
+    /**
+      Add a list-based (vector) string argument
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \return  Reference to the new argument.
+      \param required  Is field required or not.
+    */
+    Arg& addRequired(const std::string& name, const std::string& description,
+        std::vector<std::string>& var)
+    {
+        return addRequired<std::string>(name, description, var);
     }
 
     /**
@@ -989,7 +1073,32 @@ public:
         std::string longname, shortname;
         splitName(name, longname, shortname);
 
-        Arg *arg = new VArg<T>(longname, shortname, description, var);
+        Arg *arg = new VArg<T>(longname, shortname, description, var, false);
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    /**
+      Add a list-based (vector) argument.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \return  Reference to the new argument.
+      \param required  Is field required or not.
+    */
+    template<typename T>
+    Arg& addRequired(const std::string& name, const std::string& description,
+        std::vector<T>& var)
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new VArg<T>(longname, shortname, description, var, true);
         addLongArg(longname, arg);
         addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
@@ -1013,7 +1122,32 @@ public:
         std::string longname, shortname;
         splitName(name, longname, shortname);
 
-        Arg *arg = new VArg<T>(longname, shortname, description, var, def);
+        Arg *arg = new VArg<T>(longname, shortname, description, var, def, false);
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    /**
+      Add a list-based (vector) argument with a default.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \return  Reference to the new argument.
+      \param required  Is field required or not.
+    */
+    template<typename T>
+    Arg& addRequired(const std::string& name, const std::string& description,
+        std::vector<T>& var, std::vector<T> def)
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new VArg<T>(longname, shortname, description, var, def, true);
         addLongArg(longname, arg);
         addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
@@ -1038,7 +1172,33 @@ public:
         std::string longname, shortname;
         splitName(name, longname, shortname);
 
-        Arg *arg = new TArg<T>(longname, shortname, description, var, def);
+        Arg *arg = new TArg<T>(longname, shortname, description, var, def, false);
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    /**
+      Add an argument to the list of arguments with a default.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \param def  Default value of argument.
+      \return  Reference to the new argument.
+      \param required  Is field required or not.
+    */
+    template<typename T>
+    Arg& addRequired(const std::string& name, const std::string description, T& var,
+        T def)
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new TArg<T>(longname, shortname, description, var, def, true);
         addLongArg(longname, arg);
         addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
@@ -1061,7 +1221,31 @@ public:
         std::string longname, shortname;
         splitName(name, longname, shortname);
 
-        Arg *arg = new TArg<T>(longname, shortname, description, var);
+        Arg *arg = new TArg<T>(longname, shortname, description, var, false);
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    /**
+      Add an argument to the list of arguments.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \return  Reference to the new argument.
+      \param required  Is field required or not.
+    */
+    template<typename T>
+    Arg& addRequired(const std::string& name, const std::string description, T& var)
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new TArg<T>(longname, shortname, description, var, true);
         addLongArg(longname, arg);
         addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
@@ -1321,6 +1505,10 @@ public:
 
             if (a->defaultProvided())
                 out << ",\"default\":\"" << a->defaultVal() << "\"";
+
+            out << ",\"required\":\"" << std::boolalpha << a->isRequired() << std::noboolalpha << "\"";
+
+            out << ",\"type\":\"" << a->valType() << "\"";
 
             out << ",\"description\":\"" << a->description() << "\"}";
 
