@@ -65,7 +65,6 @@ public:
 
 private:
     int m_knn;
-    Dimension::Id m_nx, m_ny, m_nz, m_curvature;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
