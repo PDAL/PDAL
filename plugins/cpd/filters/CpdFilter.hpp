@@ -1,7 +1,7 @@
 /******************************************************************************
- * Copyright (c) 2014, Pete Gadomski (pete.gadomski@gmail.com)
+ * Copyright (c) 2017, Peter J. Gadomski <pete@gadom.ski>
  *
- * All rights reserved.
+ * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following
@@ -34,46 +34,44 @@
 
 #pragma once
 
-#include <cpd/matrix.hpp>
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
+
+extern "C" int32_t CpdFilter_ExitFunc();
+extern "C" PF_ExitFunc CpdFilter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL CpdKernel : public Kernel
+class PDAL_DLL CpdFilter : public Filter
 {
-public:
-    static void *create();
-    static int32_t destroy(void *);
+  public:
+    static std::string defaultMethod();
+
+    CpdFilter() : Filter(), m_fixed(nullptr), m_method(""), m_complete(false)
+    {
+    }
+
+    static void* create();
+    static int32_t destroy(void*);
     std::string getName() const;
-    int execute();
 
-private:
-    CpdKernel() : Kernel() {};
-    virtual void addSwitches(ProgramArgs& args);
-    cpd::Matrix readFile(const std::string& filename);
+    virtual PointViewSet run(PointViewPtr view);
 
+  private:
+    virtual void addArgs(ProgramArgs& args);
+    virtual void done(PointTableRef _);
+
+    PointViewPtr change(PointViewPtr fixed, PointViewPtr moving);
+    void cpd_rigid(PointViewPtr fixed, PointViewPtr moving);
+    void cpd_affine(PointViewPtr fixed, PointViewPtr moving);
+    void cpd_nonrigid(PointViewPtr fixed, PointViewPtr moving);
+
+    PointViewPtr m_fixed;
     std::string m_method;
-    std::string m_fixed;
-    std::string m_moving;
-    std::string m_output;
-    BOX3D m_bounds;
+    bool m_complete;
 
-    // cpd::Transform
-    size_t m_max_iterations;
-    bool m_normalize;
-    double m_outliers;
-    double m_sigma2;
-    double m_tolerance;
-
-    // cpd::Rigid
-    bool m_reflections;
-    bool m_scale;
-
-    // cpd::Nonrigid
-    double m_beta;
-    double m_lambda;
+    CpdFilter& operator=(const CpdFilter&); // not implemented
+    CpdFilter(const CpdFilter&);            // not implemented
 };
-
 } // namespace pdal
