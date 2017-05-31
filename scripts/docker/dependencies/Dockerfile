@@ -271,7 +271,7 @@ RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
     && make install \
     && rm -rf /fgt
 
-RUN git clone --depth 1 --branch v0.5.0 https://github.com/gadomski/cpd.git \
+RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
     && cd cpd \
     && cmake . \
         -DWITH_TESTS=OFF \
