@@ -10,27 +10,23 @@ matrix:
   fast_finish: true
 
 environment:
-  OSGEO4W_ROOT: C:\OSGeo4W64
+  OSGEO4W_ROOT: C:\\OSGeo4W64
 
   matrix:
     - PDAL_OPTIONAL_COMPONENTS: OFF
     - PDAL_OPTIONAL_COMPONENTS: ON
+    - OSGEO4W_BUILD: ON
 
 # Should speed up repository cloning
 shallow_clone: true
 clone_depth: 5
 
-# Uncomment if you need to debug AppVeyor session (https://www.appveyor.com/docs/how-to/rdp-to-build-worker)
+#init:
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 # on_finish:
-# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-init:
-  - set PYTHONHOME=C:\Python27-x64
-  - set PYTHONPATH=%PYTHONHOME%\Lib;%OSGEO4W_ROOT%\apps\Python27\lib\site-packages
-  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-  - set PATH=%PYTHONHOME%;%PATH%
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  
 install:
   # make a temp directory for downloading osgeo4w-setup.exe
   # this may not matter as much if part of the install step, as pdal has
@@ -43,8 +39,12 @@ install:
   # get the OSGeo installer
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEO4W_ROOT% > NUL
+  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,msys,nitro,laz-perf,proj,zlib,python3-core,python3-devel,python3-numpy,oci,oci-devel -R %OSGEO4W_ROOT% > NUL
   # call our PDAL install script
+  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
+  - call %OSGEO4W_ROOT%\bin\py3_env.bat
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
   - call .\\scripts\\appveyor\\config.cmd
 
 build:
@@ -53,22 +53,26 @@ build:
   verbosity: minimal
 
 after_build:
-  - 7z a pdal.zip %APPVEYOR_BUILD_FOLDER%\bin\*.*
+  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
+  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+  - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
+  - call .\\scripts\\appveyor\\install.cmd
+
 
 test_script:
   # FIXME: Clear PATH to avoid OSGeo4W loading incompatible DLLs
   - set PATH=
-  - set PATH=%OSGEO4W_ROOT%\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Python27;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
-  - set PYTHONHOME=C:\Python27-x64
-  - set PYTHONPATH=%PYTHONHOME%\Lib;%OSGEO4W_ROOT%\apps\Python27\lib\site-packages
-  - echo %PATH%
-  - set GDAL_DATA=%OSGEO4W_ROOT%\share\epsg_csv
-  - set PROJ_LIB=%OSGEO4W_ROOT%\share\proj
+  - set PATH=%OSGEO4W_ROOT%\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
+  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
+  - call %OSGEO4W_ROOT%\bin\py3_env.bat
+  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+  - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
   - ctest -V --output-on-failure -C Release
 
 artifacts:
-  - path: pdal.zip
-    name: pdalmaster
+  - path: pdal-$(APPVEYOR_REPO_COMMIT).tar.bz2
+    name: pdalosgeo4w
+    type: file
 
 deploy:
     # Amazon S3 deployment provider settings
@@ -79,7 +83,7 @@ deploy:
       secure: cSqZlsaCxFwXgxJw0BLd7npMFvQk3Vbr74ZPLaBQWLKnOz1cKss9qab1SzSygwkh
     bucket: "pdal"
     folder: "osgeo4w/"
-    artifact: pdalmaster
+    artifact: pdalosgeo4w
     set_public: true
 
 notifications:
@@ -91,3 +95,5 @@ notifications:
   - provider: Slack
     incoming_webhook:
       secure: KxbDvaPmsvNmYpsp0TH3m3hJr7PqQL1sxR8xILBzaF2Lbku03M3mJ/h787TvDGQGX3IlyZtfTP0wvSRqMl4nMmdvDQZoAe8+Gyfc7BOkYIg=
+
+ 
