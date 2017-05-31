@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <Eigen/Dense>
 
@@ -948,5 +949,50 @@ PDAL_DLL Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
 
 
 } // namespace eigen
+
+namespace Utils
+{
+
+template <>
+inline bool fromString<Eigen::MatrixXd>(const std::string& s, Eigen::MatrixXd& matrix) {
+    std::stringstream ss(s);
+    std::string line;
+    std::vector<std::vector<double>> rows;
+    while (std::getline(ss, line)) {
+        std::vector<double> row;
+        std::stringstream ss(line);
+        double n;
+        while (ss >> n) {
+            row.push_back(n);
+            if (ss.peek() == ',' || ss.peek() == ' ') {
+                ss.ignore();
+            }
+        }
+        if (!rows.empty() && rows.back().size() != row.size()) {
+            return false;
+        }
+        rows.push_back(row);
+    }
+    if (rows.empty()) {
+        return true;
+    }
+    size_t nrows = rows.size();
+    size_t ncols = rows[0].size();
+    matrix.resize(nrows, ncols);
+    for (size_t i = 0; i < nrows; ++i) {
+        for (size_t j = 0; j < ncols; ++j) {
+            matrix(i, j) = rows[i][j];
+        }
+    }
+    return true;
+}
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const Eigen::MatrixXd& matrix)
+{
+    m_type = "matrix";
+    m_value = Utils::toString(matrix);
+}
 
 } // namespace pdal
