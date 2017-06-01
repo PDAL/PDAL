@@ -58,10 +58,17 @@ private:
     size_t m_stride;
     double m_radius;
     int m_minK;
+    Arg* m_featuresArg;
+    StringList m_features;
+    std::string m_mode;
+    Dimension::Id m_kopt, m_ropt;
+    Arg* m_radiusArg;
+    bool m_optimal;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs &args);
     virtual void filter(PointView &view);
+    virtual void prepared(PointTableRef table);
 
     void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
 };
