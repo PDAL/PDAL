@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <memory>
+
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Metadata.hpp>
@@ -57,6 +59,29 @@
 
 #include <pdal/util/Utils.hpp>
 
+namespace
+{
+
+struct OGRDeleter
+{
+    void operator()(OGRSpatialReference* o)
+    {
+        OSRDestroySpatialReference(o);
+    };
+};
+
+using OGRScopedSpatialReference =
+    std::unique_ptr<OGRSpatialReference, OGRDeleter>;
+
+OGRScopedSpatialReference ogrCreate(std::string s = "")
+{
+    return OGRScopedSpatialReference(
+            static_cast<OGRSpatialReference*>(
+                OSRNewSpatialReference(s.c_str())));
+}
+
+}
+
 namespace pdal
 {
 
@@ -74,12 +99,11 @@ bool SpatialReference::empty() const
 
 bool SpatialReference::valid() const
 {
-    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference current(ogrCreate(m_wkt));
     if (!current)
         return false;
 
-    OGRErr err = OSRValidate(current);
-    OSRDestroySpatialReference(current);
+    OGRErr err = OSRValidate(current.get());
     return err == OGRERR_NONE;
 }
 
@@ -156,8 +180,7 @@ std::string SpatialReference::getVertical() const
 {
     std::string tmp;
 
-    OGRSpatialReference* poSRS =
-        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference poSRS = ogrCreate(m_wkt);
 
     // Above can fail if m_wkt is bad.
     if (!poSRS)
@@ -171,7 +194,6 @@ std::string SpatialReference::getVertical() const
         node->exportToWkt(&pszWKT);
         tmp = pszWKT;
         CPLFree(pszWKT);
-        OSRDestroySpatialReference(poSRS);
     }
 
     return tmp;
@@ -184,8 +206,7 @@ std::string SpatialReference::getVerticalUnits() const
 
     std::string wkt = getVertical();
     const char* poWKT = wkt.c_str();
-    OGRSpatialReference* poSRS =
-        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference poSRS = ogrCreate(m_wkt);
     if (poSRS)
     {
         OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
@@ -210,8 +231,7 @@ std::string SpatialReference::getHorizontal() const
 {
     if (m_horizontalWkt.empty())
     {
-        OGRSpatialReference* poSRS =
-            (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+        OGRScopedSpatialReference poSRS = ogrCreate(m_wkt);
 
         if (poSRS)
         {
@@ -220,7 +240,6 @@ std::string SpatialReference::getHorizontal() const
             poSRS->exportToWkt(&pszWKT);
             m_horizontalWkt = pszWKT;
             CPLFree(pszWKT);
-            OSRDestroySpatialReference(poSRS);
         }
     }
     return m_horizontalWkt;
@@ -231,8 +250,7 @@ std::string SpatialReference::getHorizontalUnits() const
 {
     std::string wkt = getHorizontal();
     const char* poWKT = wkt.c_str();
-    OGRSpatialReference* poSRS =
-        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference poSRS = ogrCreate(m_wkt);
 
     if (!poSRS)
         return std::string();
@@ -254,14 +272,13 @@ bool SpatialReference::equals(const SpatialReference& input) const
     if (getWKT() == input.getWKT())
         return true;
 
-    OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT().c_str());
-    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT().c_str());
+    OGRScopedSpatialReference current = ogrCreate(getWKT());
+    OGRScopedSpatialReference other = ogrCreate(input.getWKT());
+
     if (!current || !other)
         return false;
 
-    int output = OSRIsSame(current, other);
-    OSRDestroySpatialReference(current);
-    OSRDestroySpatialReference(other);
+    int output = OSRIsSame(current.get(), other.get());
 
     return (output == 1);
 }
@@ -288,24 +305,22 @@ const std::string& SpatialReference::getName() const
 
 bool SpatialReference::isGeographic() const
 {
-    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference current = ogrCreate(m_wkt);
     if (!current)
         return false;
 
-    bool output = OSRIsGeographic(current);
-    OSRDestroySpatialReference(current);
+    bool output = OSRIsGeographic(current.get());
     return output;
 }
 
 
 bool SpatialReference::isGeocentric() const
 {
-    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference current = ogrCreate(m_wkt);
     if (!current)
         return false;
 
-    bool output = OSRIsGeocentric(current);
-    OSRDestroySpatialReference(current);
+    bool output = OSRIsGeocentric(current.get());
     return output;
 }
 
@@ -369,14 +384,12 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 {
     std::string outWkt;
 
-    OGRSpatialReference *srs =
-        (OGRSpatialReference *)OSRNewSpatialReference(wkt.data());
+    OGRScopedSpatialReference srs = ogrCreate(wkt);
     if (!srs)
         return outWkt;
 
     char *buf = nullptr;
     srs->exportToPrettyWkt(&buf, FALSE);
-    OSRDestroySpatialReference(srs);
 
     outWkt = buf;
     CPLFree(buf);
@@ -390,27 +403,24 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     if (empty())
         return 0;
 
-    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
+    OGRScopedSpatialReference current = ogrCreate(m_wkt);
     if (!current)
         throw pdal_error("Could not fetch current SRS");
 
-    OGRSpatialReferenceH wgs84 = OSRNewSpatialReference(0);
+    OGRScopedSpatialReference wgs84 = ogrCreate();
 
-    if (OSRSetFromUserInput(wgs84, "EPSG:4326") != OGRERR_NONE)
+    if (OSRSetFromUserInput(wgs84.get(), "EPSG:4326") != OGRERR_NONE)
     {
-        OSRDestroySpatialReference(current);
-        OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
         msg << "Could not import GDAL input spatial reference for WGS84";
         throw pdal_error(msg.str());
     }
 
-    void* transform = OCTNewCoordinateTransformation(current, wgs84);
+    void* transform = OCTNewCoordinateTransformation(current.get(),
+            wgs84.get());
 
-    if (! transform)
+    if (!transform)
     {
-        OSRDestroySpatialReference(current);
-        OSRDestroySpatialReference(wgs84);
         throw pdal_error("Could not compute transform from "
             "coordinate system to WGS84");
     }
@@ -426,8 +436,6 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     if (ret == 0)
     {
         OCTDestroyCoordinateTransformation(transform);
-        OSRDestroySpatialReference(current);
-        OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
         msg << "Could not project minimum point for computeUTMZone::" <<
             CPLGetLastErrorMsg() << ret;
@@ -438,8 +446,6 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     if (ret == 0)
     {
         OCTDestroyCoordinateTransformation(transform);
-        OSRDestroySpatialReference(current);
-        OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
         msg << "Could not project maximum point for computeUTMZone::" <<
             CPLGetLastErrorMsg() << ret;
@@ -454,8 +460,6 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     if (min_zone != max_zone)
     {
         OCTDestroyCoordinateTransformation(transform);
-        OSRDestroySpatialReference(current);
-        OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
         msg << "Minimum zone is " << min_zone <<"' and maximum zone is '" <<
             max_zone << "'. They do not match because they cross a "
@@ -464,8 +468,6 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     }
 
     OCTDestroyCoordinateTransformation(transform);
-    OSRDestroySpatialReference(current);
-    OSRDestroySpatialReference(wgs84);
 
     return min_zone;
 }
