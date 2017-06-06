@@ -138,6 +138,7 @@ TEST(NitfReaderTest, optionSrs)
     lasOpts.add("filename", outfile);
 
     LasWriter writer;
+
     writer.setInput(*nitfReader);
     writer.setOptions(lasOpts);;
 

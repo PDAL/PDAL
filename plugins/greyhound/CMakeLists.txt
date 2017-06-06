@@ -3,6 +3,9 @@
 #
 
 add_definitions(-DHAVE_JSONCPP=1)
+if (WIN32)
+add_definitions("-DARBITER_DLL_IMPORT")
+endif()
 
 PDAL_ADD_PLUGIN(libname reader greyhound
     FILES
@@ -14,6 +17,7 @@ PDAL_ADD_PLUGIN(libname reader greyhound
 target_include_directories(${libname} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}
     ${PDAL_VENDOR_DIR})
+
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(greyhoundreadertest

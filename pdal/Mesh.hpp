@@ -35,6 +35,7 @@
 #pragma once
 
 #include <deque>
+#include <pdal/pdal_defines.h>
 
 namespace pdal
 {
@@ -58,6 +59,8 @@ class PDAL_DLL Mesh
 {};
 
 
+
+
 /**
   A mesh where the faces are triangles.
 */
@@ -74,7 +77,11 @@ public:
     const Triangle& operator[](PointId id) const
         { return m_index[id]; }
 protected:
+#ifdef PDAL_COMPILER_MSVC
+#pragma warning(disable:4251)// [templated class] needs to have dll-interface...
+#endif
     std::deque<Triangle> m_index;
+
 };
 
 } // namespace pdal
