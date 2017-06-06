@@ -96,7 +96,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         decltype(m_dataformatId)(3));
     args.add("format", "Point format", m_dataformatId,
         decltype(m_dataformatId)(3));
-    args.add("global_encoding", "Global encoding byte", m_globalEncoding);
+    args.add("global_encoding", "Global encoding byte", m_globalEncoding,
+        decltype(m_globalEncoding)(0));
     args.add("project_id", "Project ID", m_projectId);
     args.add("system_id", "System ID", m_systemId,
         decltype(m_systemId)(m_lasHeader.getSystemIdentifier()));
