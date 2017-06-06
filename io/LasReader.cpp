@@ -253,6 +253,8 @@ void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
 {
     MetadataNode n = m.add(name, val, description);
 
+    if (name == "global_encoding")
+        std::cerr << "Setting global_encoding = " << val << "!\n";
     // If the entry doesn't already exist, just add it.
     MetadataNode f = forward.findChild(name);
     if (!f.valid())
@@ -264,7 +266,11 @@ void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
     // If the old value and new values aren't the same, set an invalid flag.
     MetadataNode temp = f.addOrUpdate("temp", val);
     if (f.value<std::string>() != temp.value<std::string>())
+    {
+        if (name == "global_encoding")
+            std::cerr << "Setting global encoding to invalid!\n";
         forward.addOrUpdate(name + "INVALID", "");
+    }
 }
 
 

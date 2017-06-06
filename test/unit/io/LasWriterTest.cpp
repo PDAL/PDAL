@@ -346,7 +346,7 @@ TEST(LasWriterTest, forward)
     EXPECT_EQ(n1.findChild("filesource_id").value<uint8_t>(), 0);
     // Global encoding doesn't match because 4_1.las has a bad value, so we
     // get the default.
-    EXPECT_EQ(n1.findChild("global_encoding").value<uint8_t>(), 0);
+    EXPECT_EQ(n1.findChild("global_encoding").value<uint16_t>(), 0);
     EXPECT_EQ(n1.findChild("project_id").value<Uuid>(), Uuid());
     EXPECT_EQ(n1.findChild("system_id").value(), "");
     EXPECT_EQ(n1.findChild("software_id").value(), "TerraScan");
