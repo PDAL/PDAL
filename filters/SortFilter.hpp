@@ -63,7 +63,7 @@ public:
 
     static void * create();
     static int32_t destroy(void *);
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
     // Dimension on which to sort.
