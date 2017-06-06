@@ -54,7 +54,7 @@ lazy val core = (project in file("core")).
   settings(commonSettings: _*).
   settings(name := "pdal").
   settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
-  settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test").
+  settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test").
   dependsOn(Environment.dependOnNative(native % Runtime):_*)
 
 lazy val native = (project in file("native")).

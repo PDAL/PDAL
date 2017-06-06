@@ -1,0 +1,4 @@
+[0m[[0minfo[0m] [0m[32mPipelineExpressionsSpec:[0m[0m
+[0m[[0minfo[0m] [0m[32mPipeline Expressions spec[0m[0m
+[0m[[0minfo[0m] [0m[32m- should print a correct json, using DSL[0m[0m
+[0m[[0minfo[0m] [0m[32m- should print a correct json, using RAW JSON[0m[0m

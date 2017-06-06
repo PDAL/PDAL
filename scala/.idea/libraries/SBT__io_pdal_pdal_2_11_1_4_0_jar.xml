@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: io.pdal:pdal_2.11:1.4.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/io.pdal/pdal_2.11/jars/pdal_2.11-1.4.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/io.pdal/pdal_2.11/srcs/pdal_2.11-1.4.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

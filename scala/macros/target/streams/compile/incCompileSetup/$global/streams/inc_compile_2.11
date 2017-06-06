@@ -1,0 +1,424 @@
+format version: 5
+output mode:
+1 items
+0 -> single
+output directories:
+1 items
+output dir -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes
+compile options:
+9 items
+0 -> -deprecation
+1 -> -unchecked
+2 -> -language:implicitConversions
+3 -> -language:reflectiveCalls
+4 -> -language:higherKinds
+5 -> -language:postfixOps
+6 -> -language:existentials
+7 -> -feature
+8 -> -Xplugin:/Users/daunnc/.ivy2/cache/org.scalamacros/paradise_2.11.8/jars/paradise_2.11.8-2.1.0.jar
+javac options:
+0 items
+compiler version:
+1 items
+0 -> 2.11.8
+compile order:
+1 items
+0 -> Mixed
+name hashing:
+1 items
+0 -> true
+products:
+10 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/extras/ConfiguredJsonEncoder.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/extras/ConfiguredJsonEncoderMacros$$typecreator1$1.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/extras/ConfiguredJsonEncoderMacros.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anon$1.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anonfun$1.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anonfun$2.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anonfun$mkImplicitParams$1$1.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$typecreator1$1.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$typecreator2$1.class
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros.class
+binary dependencies:
+9 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/.ivy2/cache/io.circe/circe-generic-extras_2.11/jars/circe-generic-extras_2.11-0.7.1.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.8.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/.ivy2/cache/org.typelevel/macro-compat_2.11/jars/macro-compat_2.11-1.1.1.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/.ivy2/cache/io.circe/circe-core_2.11/jars/circe-core_2.11-0.7.1.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.8.jar
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> /Users/daunnc/.ivy2/cache/org.typelevel/macro-compat_2.11/jars/macro-compat_2.11-1.1.1.jar
+direct source dependencies:
+0 items
+direct external dependencies:
+0 items
+public inherited source dependencies:
+0 items
+public inherited external dependencies:
+0 items
+member reference internal dependencies:
+1 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala
+member reference external dependencies:
+0 items
+inheritance internal dependencies:
+1 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> /Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala
+inheritance external dependencies:
+0 items
+class names:
+10 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> io.circe.generic.extras.ConfiguredJsonEncoder
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> io.circe.generic.extras.ConfiguredJsonEncoderMacros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> io.circe.generic.extras.ConfiguredJsonEncoderMacros$$typecreator1$1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros$$anon$1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros$$anonfun$1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros$$anonfun$2
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros$$anonfun$mkImplicitParams$1$1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros$$typecreator1$1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io.circe.generic.util.macros.JsonEncoderMacros$$typecreator2$1
+used names:
+291 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> $m
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> $m$untyped
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> $typecreator1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> $u
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> <init>
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> <refinement>
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> <repeated>
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Annotation
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Any
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> ClassSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> ConfiguredJsonEncoder
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> ConfiguredJsonEncoderMacros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Context
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Internal
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> JsonEncoderMacros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Mirror
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> ModuleSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Nothing
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Predef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> ReificationSupportApi
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Seq
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> SingleType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Singleton
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> StaticAnnotation
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> String
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Symbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> T
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> T0
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> ThisType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Tree
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Type
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> TypeCreator
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> TypeSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> TypeTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> U
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> Universe
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> WeakTypeTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> _1.type
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> _root_
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> annotation
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> annottees
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> apply
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> asClass
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> asInstanceOf
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> asModule
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> blackbox
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> bundle
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> c
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> circe
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> constructJsonCodec
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> experimental
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> extras
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> generic
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> internal
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> io
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> jsonCodecAnnotationMacro
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> language
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> macrocompat
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> macros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> materializeWeakTypeTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> module
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> moduleClass
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> package
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> reflect
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> reificationSupport
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> rootMirror
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> scala
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> semiauto
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> staticModule
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> staticPackage
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> symbolOf
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> universe
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> util
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> !=
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> $anon
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> $m
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> $m$untyped
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> $typecreator1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> $typecreator2
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> $u
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> &&
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> +
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ++
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> <init>
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> <repeated>
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ==
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> A
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Any
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> AnyRef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> B
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Boolean
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> CASE
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> CanBuildFrom
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ClassDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ClassDefTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ClassSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ClassTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Coll
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Context
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> DefDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> EmptyTree
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Encoder
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> EncoderClass
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ExistentialType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Flag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> FlagSet
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> FlagValues
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> FlagsRepr
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> FlagsReprExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Function1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> GenTraversableOnce
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Ident
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ImplicitParams
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ImplicitParamsExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Int
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Internal
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> JsonEncoderMacros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Liftable
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> List
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Long
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Mirror
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Modifiers
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ModifiersExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ModuleDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ModuleSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Name
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> NameType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Nil
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> NoMods
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> NoPosition
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> NoPrefix
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> None
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Nothing
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Object
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ObjectEncoder
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ObjectEncoderClass
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Option
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Position
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Predef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Quasiquote
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ReificationSupportApi
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> S
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SEALED
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ScalaDot
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ScalaDotExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Select
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Seq
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Singleton
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Some
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> String
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> StringContext
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Symbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticAppliedType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticBlock
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticBlockExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticDefDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticDefDefExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticObjectDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticObjectDefExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticSelectTerm
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticSelectTermExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticTermIdent
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticTermIdentExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticTypeApplied
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticTypeAppliedExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticTypeIdent
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticTypeIdentExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticValDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> SyntacticValDefExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T0
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T2
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T3
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T4
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> T5
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TermName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TermNameExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TermSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> That
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ThisType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Tree
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TreeTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Tuple5
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Tuple6
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Type
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeBounds
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeCreator
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeNameExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeRef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypeTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Typed
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> TypedExtractor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> U
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> Universe
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ValDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _1
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _2
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _3
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _4
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _5
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _6
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> _root_
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> abort
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> annottees
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> apply
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> asInstanceOf
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> asModule
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> asType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> blackbox
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> bundle
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> c
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> canBuildFrom
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> circe
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> clsDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> codec
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> collection
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> decodedName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> enclosingPosition
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> encodeNme
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> encodeParams
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> fresh$macro$27
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> freshName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> generic
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> get
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> hasFlag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> immutable
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> internal
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> io
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> isCaseClassOrSealed
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> isEmpty
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> isInstanceOf
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> lengthCompare
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> liftName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> macrocompat
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> macros
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> map
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> materializeTypeTag
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> mkEarlyDef
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> mkImplicitParams
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> mkRefTree
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> mods
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> moduleClass
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> name
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ne
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> newNestedSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> noSelfType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> objDefs
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> objEarlyDefs
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> objName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> objParents
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> objSelf
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> package
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> paramName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> paramType
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> q
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> qq$27c24687$macro$4
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> qq$27c24687$macro$5
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> qq$27c24687$macro$6
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> qq$27c24687$macro$7
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> qq$27c24687$macro$8
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> reflect
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> reificationSupport
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> rootMirror
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> scala
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> selectTerm
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> semiautoObj
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> setInfo
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> staticClass
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> staticPackage
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> symdef$_$11
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> symdef$_$21
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> toTermName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> toTypeConstructor
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> tparamName
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> tparamNames
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> tparams
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> tpname
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> tq
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> tree
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> typeOf
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> typeSymbol
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> unapply
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> unapplySeq
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> unary_!
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> universe
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> util
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> ||
+product stamps:
+10 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/extras/ConfiguredJsonEncoder.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/extras/ConfiguredJsonEncoderMacros$$typecreator1$1.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/extras/ConfiguredJsonEncoderMacros.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anon$1.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anonfun$1.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anonfun$2.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$anonfun$mkImplicitParams$1$1.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$typecreator1$1.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros$$typecreator2$1.class -> lastModified(1492439119000)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/target/scala-2.11/classes/io/circe/generic/util/macros/JsonEncoderMacros.class -> lastModified(1492439119000)
+source stamps:
+2 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> hash(5e11ad18648069f85bac9b8f51f753937eb0dd5e)
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> hash(d40a0ea34aa708862d30e8ff72f8c06681346ffb)
+binary stamps:
+6 items
+/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar -> lastModified(1428689516000)
+/Users/daunnc/.ivy2/cache/io.circe/circe-core_2.11/jars/circe-core_2.11-0.7.1.jar -> lastModified(1491275090000)
+/Users/daunnc/.ivy2/cache/io.circe/circe-generic-extras_2.11/jars/circe-generic-extras_2.11-0.7.1.jar -> lastModified(1491275139000)
+/Users/daunnc/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar -> lastModified(1457105192000)
+/Users/daunnc/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.8.jar -> lastModified(1457105200000)
+/Users/daunnc/.ivy2/cache/org.typelevel/macro-compat_2.11/jars/macro-compat_2.11-1.1.1.jar -> lastModified(1455533434000)
+class names:
+6 items
+/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar -> java.lang.Object
+/Users/daunnc/.ivy2/cache/io.circe/circe-core_2.11/jars/circe-core_2.11-0.7.1.jar -> io.circe.ObjectEncoder$
+/Users/daunnc/.ivy2/cache/io.circe/circe-generic-extras_2.11/jars/circe-generic-extras_2.11-0.7.1.jar -> io.circe.generic.extras.semiauto$
+/Users/daunnc/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar -> scala.collection.immutable.List$
+/Users/daunnc/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.8.jar -> scala.reflect.api.TypeCreator
+/Users/daunnc/.ivy2/cache/org.typelevel/macro-compat_2.11/jars/macro-compat_2.11-1.1.1.jar -> macrocompat.bundle
+internal apis:
+2 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> 
+rO0ABXNyABB4c2J0aS5hcGkuU291cmNlSjH5SdlLSkQCAAdJAAdhcGlIYXNoWgAIaGFzTWFjcm9aABBoYXNQYWNrYWdlT2JqZWN0TAAYX2ludGVybmFsT25seV9uYW1lSGFzaGVzdAAkTHhzYnRpL2FwaS9faW50ZXJuYWxPbmx5X05hbWVIYXNoZXM7TAADYXBpdAAVTHhzYnRpL2FwaS9Tb3VyY2VBUEk7TAALY29tcGlsYXRpb250ABdMeHNidGkvYXBpL0NvbXBpbGF0aW9uO1sABGhhc2h0AAJbQnhwIH+HDAEAc3IAInhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoZXNU2r6Z+tTsTAIAAlsAD2ltcGxpY2l0TWVtYmVyc3QAI1tMeHNidGkvYXBpL19pbnRlcm5hbE9ubHlfTmFtZUhhc2g7WwAOcmVndWxhck1lbWJlcnNxAH4AB3hwdXIAI1tMeHNidGkuYXBpLl9pbnRlcm5hbE9ubHlfTmFtZUhhc2g7SVqAtt2Wi/QCAAB4cAAAAAB1cQB+AAkAAAAbc3IAIHhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoWw71InY4V88CAAJJAARoYXNoTAAEbmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO3hwgc+A+HQABm5vdGlmeXNxAH4ADIcOUYZ0AAR3YWl0c3EAfgAMLect+3QADSRhc0luc3RhbmNlT2ZzcQB+AAy4leEudAAGZXF1YWxzc3EAfgAMJ1GhzHQADGFzSW5zdGFuY2VPZnNxAH4ADHaC4k50AAxzeW5jaHJvbml6ZWRzcQB+AAw3R90IdAAObWFjcm9UcmFuc2Zvcm1zcQB+AAyI61/DdAANJGlzSW5zdGFuY2VPZnNxAH4ADB+f9Bx0ABJjb25zdHJ1Y3RKc29uQ29kZWNzcQB+AAyt5MM4dAAJbm90aWZ5QWxsc3EAfgAMrqVnk3QADGlzSW5zdGFuY2VPZnNxAH4ADHjVCFV0AAY8aW5pdD5zcQB+AAx87e6pdAACPT1zcQB+AAy1AsZsdAAFY2xvbmVzcQB+AAylrzM6dAAVQ29uZmlndXJlZEpzb25FbmNvZGVyc3EAfgAMa82Eq3QACHRvU3RyaW5nc3EAfgAMA83yTXQAAiE9c3EAfgAM3yhjQnQAAWNzcQB+AAyuqcOCdAAYanNvbkNvZGVjQW5ub3RhdGlvbk1hY3Jvc3EAfgAMQ6HqWnQAG0NvbmZpZ3VyZWRKc29uRW5jb2Rlck1hY3Jvc3NxAH4ADN1Mtc90AAhnZXRDbGFzc3NxAH4ADHim7od0AAtzZW1pYXV0b09ianNxAH4ADLDh7kJ0AAJuZXNxAH4ADNa7tm10AAJlcXNxAH4ADG44nnN0AAIjI3NxAH4ADKL8PXp0AAhmaW5hbGl6ZXNxAH4ADOxAxK10AAhoYXNoQ29kZXNyABN4c2J0aS5hcGkuU291cmNlQVBJuV6n+SkjOKQCAAJbAAtkZWZpbml0aW9uc3QAF1tMeHNidGkvYXBpL0RlZmluaXRpb247WwAIcGFja2FnZXN0ABRbTHhzYnRpL2FwaS9QYWNrYWdlO3hwdXIAF1tMeHNidGkuYXBpLkRlZmluaXRpb247iMlc57TjXg4CAAB4cAAAAAJzcgATeHNidGkuYXBpLkNsYXNzTGlrZYM0HKHfsJdsAgAETAAOZGVmaW5pdGlvblR5cGV0ABpMeHNidGkvYXBpL0RlZmluaXRpb25UeXBlO1sAEHNhdmVkQW5ub3RhdGlvbnN0ABNbTGphdmEvbGFuZy9TdHJpbmc7TAAIc2VsZlR5cGV0ABBMeHNidGkvYXBpL0xhenk7TAAJc3RydWN0dXJlcQB+AE14cgAheHNidGkuYXBpLlBhcmFtZXRlcml6ZWREZWZpbml0aW9u+RFusdVQPOICAAFbAA50eXBlUGFyYW1ldGVyc3QAGltMeHNidGkvYXBpL1R5cGVQYXJhbWV0ZXI7eHIAFHhzYnRpLmFwaS5EZWZpbml0aW9uhyob6HFC40YCAARMAAZhY2Nlc3N0ABJMeHNidGkvYXBpL0FjY2VzcztbAAthbm5vdGF0aW9uc3QAF1tMeHNidGkvYXBpL0Fubm90YXRpb247TAAJbW9kaWZpZXJzdAAVTHhzYnRpL2FwaS9Nb2RpZmllcnM7TAAEbmFtZXEAfgANeHBzcgAQeHNidGkuYXBpLlB1YmxpY7pYPa5sLWBCAgAAeHIAEHhzYnRpLmFwaS5BY2Nlc3PdYpr4HWMxSAIAAHhwdXIAF1tMeHNidGkuYXBpLkFubm90YXRpb24765frGRD2jUgCAAB4cAAAAAFzcgAUeHNidGkuYXBpLkFubm90YXRpb27eDoGi9lwKsgIAAlsACWFyZ3VtZW50c3QAH1tMeHNidGkvYXBpL0Fubm90YXRpb25Bcmd1bWVudDtMAARiYXNldAAQTHhzYnRpL2FwaS9UeXBlO3hwdXIAH1tMeHNidGkuYXBpLkFubm90YXRpb25Bcmd1bWVudDtRnaaPOCUPeAIAAHhwAAAAAXNyABx4c2J0aS5hcGkuQW5ub3RhdGlvbkFyZ3VtZW501kWx2AMbF3wCAAJMAARuYW1lcQB+AA1MAAV2YWx1ZXEAfgANeHB0AAB0AOooIm1hY3JvIGFubm90YXRpb24gY291bGQgbm90IGJlIGV4cGFuZGVkICh0aGUgbW9zdCBjb21tb24gcmVhc29uIGZvciB0aGF0IGlzIHRoYXQgeW91IG5lZWQgdG8gZW5hYmxlIHRoZSBtYWNybyBwYXJhZGlzZSBwbHVnaW47IGFub3RoZXIgcG9zc2liaWxpdHkgaXMgdGhhdCB5b3UgdHJ5IHRvIHVzZSBtYWNybyBhbm5vdGF0aW9uIGluIHRoZSBzYW1lIGNvbXBpbGF0aW9uIHJ1biB0aGF0IGRlZmluZXMgaXQpIilzcgAUeHNidGkuYXBpLlByb2plY3Rpb27z0o1U6UWkLQIAAkwAAmlkcQB+AA1MAAZwcmVmaXh0ABZMeHNidGkvYXBpL1NpbXBsZVR5cGU7eHIAFHhzYnRpLmFwaS5TaW1wbGVUeXBlcnhiiCEjv0ACAAB4cgAOeHNidGkuYXBpLlR5cGU/atkhFkmqygIAAHhwdAAPY29tcGlsZVRpbWVPbmx5c3IAE3hzYnRpLmFwaS5TaW5nbGV0b278p1/4z1bkRgIAAUwABHBhdGh0ABBMeHNidGkvYXBpL1BhdGg7eHEAfgBmc3IADnhzYnRpLmFwaS5QYXRomz1cCM6lJ4QCAAFbAApjb21wb25lbnRzdAAaW0x4c2J0aS9hcGkvUGF0aENvbXBvbmVudDt4cHVyABpbTHhzYnRpLmFwaS5QYXRoQ29tcG9uZW50O0PaCXQtZxZ0AgAAeHAAAAADc3IADHhzYnRpLmFwaS5JZJgybIs3U8RAAgABTAACaWRxAH4ADXhyABd4c2J0aS5hcGkuUGF0aENvbXBvbmVudF+aIlsuhp+8AgAAeHB0AAVzY2FsYXNxAH4AcnQACmFubm90YXRpb25zcgAOeHNidGkuYXBpLlRoaXPbCe2mzFpAXAIAAHhxAH4Ac3NyABN4c2J0aS5hcGkuTW9kaWZpZXJzl+dh3BMme7MCAAFCAAVmbGFnc3hwQHQALWlvLmNpcmNlLmdlbmVyaWMuZXh0cmFzLkNvbmZpZ3VyZWRKc29uRW5jb2RlcnVyABpbTHhzYnRpLmFwaS5UeXBlUGFyYW1ldGVyO9ltJg8onfK2AgAAeHAAAAAAfnIAGHhzYnRpLmFwaS5EZWZpbml0aW9uVHlwZQAAAAAAAAAAEgAAeHIADmphdmEubGFuZy5FbnVtAAAAAAAAAAASAAB4cHQACENsYXNzRGVmdXIAE1tMamF2YS5sYW5nLlN0cmluZzut0lbn6R17RwIAAHhwAAAAAXQAJ3NjYWxhLnJlZmxlY3QubWFjcm9zLmludGVybmFsLm1hY3JvSW1wbHNyACF4c2J0aS5hcGkuQWJzdHJhY3RMYXp5JFN0cmljdExhenkNZhxrKRYquAIAAUwABXZhbHVldAASTGphdmEvbGFuZy9PYmplY3Q7eHBzcgATeHNidGkuYXBpLkVtcHR5VHlwZbz9nkZJO4kkAgAAeHEAfgBmc3EAfgCGc3IAE3hzYnRpLmFwaS5TdHJ1Y3R1cmWpqvmAk2/YAAIAA0wACGRlY2xhcmVkcQB+AE1MAAlpbmhlcml0ZWRxAH4ATUwAB3BhcmVudHNxAH4ATXhxAH4AZ3NxAH4AhnVxAH4ASAAAAABzcQB+AIZ1cQB+AEgAAAAAc3EAfgCGdXIAEVtMeHNidGkuYXBpLlR5cGU7dP+lWnv56UECAAB4cAAAAARzcQB+AGR0ABBTdGF0aWNBbm5vdGF0aW9uc3EAfgBqc3EAfgBtdXEAfgBwAAAAA3NxAH4AcnEAfgB1c3EAfgBycQB+AHdxAH4AeXNxAH4AZHQACkFubm90YXRpb25xAH4Al3NxAH4AZHQABk9iamVjdHNxAH4AanNxAH4AbXVxAH4AcAAAAANzcQB+AHJ0AARqYXZhc3EAfgBydAAEbGFuZ3EAfgB5c3EAfgBkdAADQW55c3EAfgBqc3EAfgBtdXEAfgBwAAAAAnNxAH4AcnEAfgB1cQB+AHlzcQB+AEpzcgAReHNidGkuYXBpLlByaXZhdGVTqWCBJunVPgIAAHhyABN4c2J0aS5hcGkuUXVhbGlmaWVkqrRd71SxbRgCAAFMAAlxdWFsaWZpZXJ0ABVMeHNidGkvYXBpL1F1YWxpZmllcjt4cQB+AFZzcgAVeHNidGkuYXBpLklkUXVhbGlmaWVyt4cQ9D2ybbUCAAFMAAV2YWx1ZXEAfgANeHIAE3hzYnRpLmFwaS5RdWFsaWZpZXKzeJSp69ZbJwIAAHhwdAAXaW8uY2lyY2UuZ2VuZXJpYy5leHRyYXN1cQB+AFgAAAAAc3EAfgB6AHQAM2lvLmNpcmNlLmdlbmVyaWMuZXh0cmFzLkNvbmZpZ3VyZWRKc29uRW5jb2Rlck1hY3Jvc3VxAH4AfQAAAABxAH4AgXVxAH4AgwAAAABzcQB+AIZxAH4AinNxAH4AhnNxAH4AjHNxAH4AhnVxAH4ASAAAAABzcQB+AIZ1cQB+AEgAAAAAc3EAfgCGdXEAfgCTAAAAA3NxAH4AZHQAEUpzb25FbmNvZGVyTWFjcm9zc3EAfgBqc3EAfgBtdXEAfgBwAAAABnNxAH4AcnQAAmlvc3EAfgBydAAFY2lyY2VzcQB+AHJ0AAdnZW5lcmljc3EAfgBydAAEdXRpbHNxAH4AcnQABm1hY3Jvc3EAfgB5c3EAfgBkcQB+AJ9zcQB+AGpzcQB+AG11cQB+AHAAAAADc3EAfgBycQB+AKRzcQB+AHJxAH4ApnEAfgB5c3EAfgBkcQB+AKhzcQB+AGpzcQB+AG11cQB+AHAAAAACc3EAfgBycQB+AHVxAH4AeXVyABRbTHhzYnRpLmFwaS5QYWNrYWdlO1sTGTdwpyehAgAAeHAAAAAEc3IAEXhzYnRpLmFwaS5QYWNrYWdlflmP9q7OOVgCAAFMAARuYW1lcQB+AA14cHQAAmlvc3EAfgDgdAAIaW8uY2lyY2VzcQB+AOB0ABdpby5jaXJjZS5nZW5lcmljLmV4dHJhc3NxAH4A4HQAEGlvLmNpcmNlLmdlbmVyaWNzcgAVeHNidGkuYXBpLkNvbXBpbGF0aW9u7frgw2rooEICAAJKAAlzdGFydFRpbWVbAAdvdXRwdXRzdAAaW0x4c2J0aS9hcGkvT3V0cHV0U2V0dGluZzt4cAAAAVt8TacudXIAGltMeHNidGkuYXBpLk91dHB1dFNldHRpbmc7f2rC86eHpUICAAB4cAAAAAFzcgAXeHNidGkuYXBpLk91dHB1dFNldHRpbmd62ZpHdPsdewIAAkwAD291dHB1dERpcmVjdG9yeXEAfgANTAAPc291cmNlRGlyZWN0b3J5cQB+AA14cHQAWi9Vc2Vycy9kYXVubmMvc3VidmVyc2lvbnMvZ2l0L2dpdGh1Yi9wb21hZGNoaW4vUERBTC9zY2FsYS9tYWNyb3MvdGFyZ2V0L3NjYWxhLTIuMTEvY2xhc3Nlc3QAAS91cgACW0Ks8xf4BghU4AIAAHhwAAAAFF4RrRhkgGn4W6ybj1H3U5N+sN1e
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> 
+rO0ABXNyABB4c2J0aS5hcGkuU291cmNlSjH5SdlLSkQCAAdJAAdhcGlIYXNoWgAIaGFzTWFjcm9aABBoYXNQYWNrYWdlT2JqZWN0TAAYX2ludGVybmFsT25seV9uYW1lSGFzaGVzdAAkTHhzYnRpL2FwaS9faW50ZXJuYWxPbmx5X05hbWVIYXNoZXM7TAADYXBpdAAVTHhzYnRpL2FwaS9Tb3VyY2VBUEk7TAALY29tcGlsYXRpb250ABdMeHNidGkvYXBpL0NvbXBpbGF0aW9uO1sABGhhc2h0AAJbQnhw/sZqmgAAc3IAInhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoZXNU2r6Z+tTsTAIAAlsAD2ltcGxpY2l0TWVtYmVyc3QAI1tMeHNidGkvYXBpL19pbnRlcm5hbE9ubHlfTmFtZUhhc2g7WwAOcmVndWxhck1lbWJlcnNxAH4AB3hwdXIAI1tMeHNidGkuYXBpLl9pbnRlcm5hbE9ubHlfTmFtZUhhc2g7SVqAtt2Wi/QCAAB4cAAAAAB1cQB+AAkAAAAYc3IAIHhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoWw71InY4V88CAAJJAARoYXNoTAAEbmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO3hwDQy5YnQABm5vdGlmeXNxAH4ADGcnit50AAR3YWl0c3EAfgAMQIy6eXQADSRhc0luc3RhbmNlT2ZzcQB+AAw43IfLdAAGZXF1YWxzc3EAfgAMi42GOHQADGFzSW5zdGFuY2VPZnNxAH4ADIDQBwB0AAxzeW5jaHJvbml6ZWRzcQB+AAyR3iSXdAANJGlzSW5zdGFuY2VPZnNxAH4ADKk/Mn10ABJjb25zdHJ1Y3RKc29uQ29kZWNzcQB+AAxOmTYXdAAJbm90aWZ5QWxsc3EAfgAMoV4w+HQADGlzSW5zdGFuY2VPZnNxAH4ADDjz5wV0AAY8aW5pdD5zcQB+AAzHRqcadAACPT1zcQB+AAxN4Js8dAAFY2xvbmVzcQB+AAzVX7IOdAARSnNvbkVuY29kZXJNYWNyb3NzcQB+AAy5j55tdAAIdG9TdHJpbmdzcQB+AAyCqwyedAACIT1zcQB+AAzyJYhfdAABY3NxAH4ADDXhsQx0AAhnZXRDbGFzc3NxAH4ADCl/Is50AAtzZW1pYXV0b09ianNxAH4ADE6Ocz10AAJuZXNxAH4ADG93Vw50AAJlcXNxAH4ADB6an+p0AAIjI3NxAH4ADKt8Quh0AAhmaW5hbGl6ZXNxAH4ADPx7LTh0AAhoYXNoQ29kZXNyABN4c2J0aS5hcGkuU291cmNlQVBJuV6n+SkjOKQCAAJbAAtkZWZpbml0aW9uc3QAF1tMeHNidGkvYXBpL0RlZmluaXRpb247WwAIcGFja2FnZXN0ABRbTHhzYnRpL2FwaS9QYWNrYWdlO3hwdXIAF1tMeHNidGkuYXBpLkRlZmluaXRpb247iMlc57TjXg4CAAB4cAAAAAFzcgATeHNidGkuYXBpLkNsYXNzTGlrZYM0HKHfsJdsAgAETAAOZGVmaW5pdGlvblR5cGV0ABpMeHNidGkvYXBpL0RlZmluaXRpb25UeXBlO1sAEHNhdmVkQW5ub3RhdGlvbnN0ABNbTGphdmEvbGFuZy9TdHJpbmc7TAAIc2VsZlR5cGV0ABBMeHNidGkvYXBpL0xhenk7TAAJc3RydWN0dXJlcQB+AEd4cgAheHNidGkuYXBpLlBhcmFtZXRlcml6ZWREZWZpbml0aW9u+RFusdVQPOICAAFbAA50eXBlUGFyYW1ldGVyc3QAGltMeHNidGkvYXBpL1R5cGVQYXJhbWV0ZXI7eHIAFHhzYnRpLmFwaS5EZWZpbml0aW9uhyob6HFC40YCAARMAAZhY2Nlc3N0ABJMeHNidGkvYXBpL0FjY2VzcztbAAthbm5vdGF0aW9uc3QAF1tMeHNidGkvYXBpL0Fubm90YXRpb247TAAJbW9kaWZpZXJzdAAVTHhzYnRpL2FwaS9Nb2RpZmllcnM7TAAEbmFtZXEAfgANeHBzcgAQeHNidGkuYXBpLlB1YmxpY7pYPa5sLWBCAgAAeHIAEHhzYnRpLmFwaS5BY2Nlc3PdYpr4HWMxSAIAAHhwdXIAF1tMeHNidGkuYXBpLkFubm90YXRpb24765frGRD2jUgCAAB4cAAAAABzcgATeHNidGkuYXBpLk1vZGlmaWVyc5fnYdwTJnuzAgABQgAFZmxhZ3N4cAF0AC5pby5jaXJjZS5nZW5lcmljLnV0aWwubWFjcm9zLkpzb25FbmNvZGVyTWFjcm9zdXIAGltMeHNidGkuYXBpLlR5cGVQYXJhbWV0ZXI72W0mDyid8rYCAAB4cAAAAAB+cgAYeHNidGkuYXBpLkRlZmluaXRpb25UeXBlAAAAAAAAAAASAAB4cgAOamF2YS5sYW5nLkVudW0AAAAAAAAAABIAAHhwdAAIQ2xhc3NEZWZ1cgATW0xqYXZhLmxhbmcuU3RyaW5nO63SVufpHXtHAgAAeHAAAAAAc3IAIXhzYnRpLmFwaS5BYnN0cmFjdExhenkkU3RyaWN0TGF6eQ1mHGspFiq4AgABTAAFdmFsdWV0ABJMamF2YS9sYW5nL09iamVjdDt4cHNyABN4c2J0aS5hcGkuRW1wdHlUeXBlvP2eRkk7iSQCAAB4cgAUeHNidGkuYXBpLlNpbXBsZVR5cGVyeGKIISO/QAIAAHhyAA54c2J0aS5hcGkuVHlwZT9q2SEWSarKAgAAeHBzcQB+AF9zcgATeHNidGkuYXBpLlN0cnVjdHVyZamq+YCTb9gAAgADTAAIZGVjbGFyZWRxAH4AR0wACWluaGVyaXRlZHEAfgBHTAAHcGFyZW50c3EAfgBHeHEAfgBkc3EAfgBfdXEAfgBCAAAAAHNxAH4AX3VxAH4AQgAAAABzcQB+AF91cgARW0x4c2J0aS5hcGkuVHlwZTt0/6Vae/npQQIAAHhwAAAAAnNyABR4c2J0aS5hcGkuUHJvamVjdGlvbvPSjVTpRaQtAgACTAACaWRxAH4ADUwABnByZWZpeHQAFkx4c2J0aS9hcGkvU2ltcGxlVHlwZTt4cQB+AGN0AAZPYmplY3RzcgATeHNidGkuYXBpLlNpbmdsZXRvbvynX/jPVuRGAgABTAAEcGF0aHQAEEx4c2J0aS9hcGkvUGF0aDt4cQB+AGNzcgAOeHNidGkuYXBpLlBhdGibPVwIzqUnhAIAAVsACmNvbXBvbmVudHN0ABpbTHhzYnRpL2FwaS9QYXRoQ29tcG9uZW50O3hwdXIAGltMeHNidGkuYXBpLlBhdGhDb21wb25lbnQ7Q9oJdC1nFnQCAAB4cAAAAANzcgAMeHNidGkuYXBpLklkmDJsizdTxEACAAFMAAJpZHEAfgANeHIAF3hzYnRpLmFwaS5QYXRoQ29tcG9uZW50X5oiWy6Gn7wCAAB4cHQABGphdmFzcQB+AHx0AARsYW5nc3IADnhzYnRpLmFwaS5UaGlz2wntpsxaQFwCAAB4cQB+AH1zcQB+AHB0AANBbnlzcQB+AHRzcQB+AHd1cQB+AHoAAAACc3EAfgB8dAAFc2NhbGFxAH4Ag3VyABRbTHhzYnRpLmFwaS5QYWNrYWdlO1sTGTdwpyehAgAAeHAAAAAFc3IAEXhzYnRpLmFwaS5QYWNrYWdlflmP9q7OOVgCAAFMAARuYW1lcQB+AA14cHQAFWlvLmNpcmNlLmdlbmVyaWMudXRpbHNxAH4AjXQAAmlvc3EAfgCNdAAcaW8uY2lyY2UuZ2VuZXJpYy51dGlsLm1hY3Jvc3NxAH4AjXQACGlvLmNpcmNlc3EAfgCNdAAQaW8uY2lyY2UuZ2VuZXJpY3NyABV4c2J0aS5hcGkuQ29tcGlsYXRpb27t+uDDauigQgIAAkoACXN0YXJ0VGltZVsAB291dHB1dHN0ABpbTHhzYnRpL2FwaS9PdXRwdXRTZXR0aW5nO3hwAAABW3xNpy51cgAaW0x4c2J0aS5hcGkuT3V0cHV0U2V0dGluZzt/asLzp4elQgIAAHhwAAAAAXNyABd4c2J0aS5hcGkuT3V0cHV0U2V0dGluZ3rZmkd0+x17AgACTAAPb3V0cHV0RGlyZWN0b3J5cQB+AA1MAA9zb3VyY2VEaXJlY3RvcnlxAH4ADXhwdABaL1VzZXJzL2RhdW5uYy9zdWJ2ZXJzaW9ucy9naXQvZ2l0aHViL3BvbWFkY2hpbi9QREFML3NjYWxhL21hY3Jvcy90YXJnZXQvc2NhbGEtMi4xMS9jbGFzc2VzdAABL3VyAAJbQqzzF/gGCFTgAgAAeHAAAAAU1AoOo0qnCIYtMOj/cvjAZoE0b/s=
+external apis:
+0 items
+source infos:
+2 items
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/extras/ConfiguredJsonEncoder.scala -> 
+AAAAAAAAAAA=
+/Users/daunnc/subversions/git/github/pomadchin/PDAL/scala/macros/src/main/scala/io/circe/generic/util/macros/JsonEncoderMacros.scala -> 
+AAAAAAAAAAA=
+compilations:
+1 items
+0 -> rO0ABXNyABV4c2J0aS5hcGkuQ29tcGlsYXRpb27t+uDDauigQgIAAkoACXN0YXJ0VGltZVsAB291dHB1dHN0ABpbTHhzYnRpL2FwaS9PdXRwdXRTZXR0aW5nO3hwAAABW3xNpy51cgAaW0x4c2J0aS5hcGkuT3V0cHV0U2V0dGluZzt/asLzp4elQgIAAHhwAAAAAXNyABd4c2J0aS5hcGkuT3V0cHV0U2V0dGluZ3rZmkd0+x17AgACTAAPb3V0cHV0RGlyZWN0b3J5dAASTGphdmEvbGFuZy9TdHJpbmc7TAAPc291cmNlRGlyZWN0b3J5cQB+AAZ4cHQAWi9Vc2Vycy9kYXVubmMvc3VidmVyc2lvbnMvZ2l0L2dpdGh1Yi9wb21hZGNoaW4vUERBTC9zY2FsYS9tYWNyb3MvdGFyZ2V0L3NjYWxhLTIuMTEvY2xhc3Nlc3QAAS8=

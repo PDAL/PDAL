@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: com.vividsolutions:jts-core:1.14.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.vividsolutions/jts-core/jars/jts-core-1.14.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.vividsolutions/jts-core/srcs/jts-core-1.14.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
