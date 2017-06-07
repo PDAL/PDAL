@@ -1,0 +1,27 @@
+
+set(mlang_srcs
+    Environment.cpp
+    Script.cpp
+)
+
+include(${PDAL_CMAKE_DIR}/matlab.cmake)
+
+PDAL_ADD_LIBRARY(${PDAL_MLANG_LIB_NAME} ${mlang_srcs} )
+set_target_properties(${PDAL_MLANG_LIB_NAME} PROPERTIES
+    VERSION "${PDAL_BUILD_VERSION}"
+    SOVERSION "${PDAL_API_VERSION}"
+    CLEAN_DIRECT_OUTPUT 1)
+target_link_libraries(${PDAL_MLANG_LIB_NAME} PUBLIC
+    ${PDAL_BASE_LIB_NAME}
+    ${PDAL_UTIL_LIB_NAME}
+    ${MATLAB_LIBRARIES} ${MATLAB_ENG_LIBRARY})
+
+target_include_directories(${PDAL_MLANG_LIB_NAME} PRIVATE
+    ${MATLAB_INCLUDE_DIR}
+    ${PROJECT_BINARY_DIR}/include)
+install(TARGETS ${MLANG_LIB_NAME}
+    RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+    LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+
+

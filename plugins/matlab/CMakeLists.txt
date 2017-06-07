@@ -1,6 +1,6 @@
 # Matlab plugin
 
-find_package(Matlab REQUIRED)
+find_package(Matlab QUIET)
 
 PDAL_ADD_PLUGIN(libname writer matlab
     FILES
@@ -25,4 +25,10 @@ if (WITH_TESTS)
         ${PDAL_IO_DIR}
         ${MATLAB_INCLUDE_DIR})
 
+
+    PDAL_ADD_TEST(mlangtest
+        FILES ./test/MLangTest.cpp
+        LINK_WITH ${PDAL_MLANG_LIB_NAME})
+    target_include_directories(mlangtest PRIVATE
+        ${ROOT_DIR} ${MATLAB_INCLUDE_DIR})
 endif()
