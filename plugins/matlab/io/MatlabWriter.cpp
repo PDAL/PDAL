@@ -35,7 +35,7 @@
 #include "MatlabWriter.hpp"
 
 #include <pdal/pdal_macros.hpp>
-#include <pdal/ProgramArgs.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -100,9 +100,12 @@ void MatlabWriter::write(const PointViewPtr view)
     mxArray * dimensionNames = mxCreateString(dimensionsString.str().c_str());
     if (!dimensionNames)
         throwError("Could not create string '" + dimensionsString.str() + "'");
-    if (matPutVariable(m_matfile, "Dimensions", dimensionNames));
+    if (matPutVariable(m_matfile, "Dimensions", dimensionNames))
+    {
+
         throwError("Could not write dimension names to file '" +
             m_filename + "'.");
+    }
 
     mxArray * points = mxCreateDoubleMatrix(nPoints, nDimensions, mxREAL);
     if (!points)
