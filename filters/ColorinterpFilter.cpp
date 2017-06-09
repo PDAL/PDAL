@@ -131,10 +131,15 @@ void ColorinterpFilter::initialize()
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: " <<
         m_raster->filename() << std::endl;
+}
 
-    m_interpDim = Dimension::id(m_interpDimString);
+
+void ColorinterpFilter::prepared(PointTableRef table)
+{
+    PointLayoutPtr layout(table.layout());
+    m_interpDim = layout->findDim(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
-        throwError("provided dimension name is not known.");
+        throwError("Dimension '" + m_interpDimString + "' does not exist.");
 }
 
 

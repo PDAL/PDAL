@@ -80,6 +80,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
     virtual void addDimensions(PointLayoutPtr layout);
 
 
