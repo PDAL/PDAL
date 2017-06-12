@@ -32,76 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef _WIN32
-#include <dlfcn.h>
+#include <pdal/EmbedScript.hpp>
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127) // conditional expression is constant
 #endif
-
-#include <pdal/mlang/Environment.hpp>
-
-#include <sstream>
-#include <mutex>
 
 namespace pdal
 {
-namespace mlang
+namespace embed
 {
 
-
-
-Environment::Environment()
-  : EmbedEnvironment()
-  , m_engine(0)
+EmbedScript::EmbedScript( Json::Value details)
+ : m_detail(details)
 {
-    m_engine = engOpen("");
-    if (!m_engine)
-        throw pdal_error("unable to initialize Matlab!");
 }
 
 
-Environment::~Environment()
+std::ostream& operator << (std::ostream& os, EmbedScript const& script)
 {
-    if (m_engine)
-        engClose (m_engine);
+    os << "details: " << script.details();
+    os << std::endl;
+
+    return os;
 }
 
-
-//
-// int Environment::getPythonDataType(Dimension::Type t)
-// {
-//     using namespace Dimension;
-//
-//     switch (t)
-//     {
-//     case Type::Float:
-//         return NPY_FLOAT;
-//     case Type::Double:
-//         return NPY_DOUBLE;
-//     case Type::Signed8:
-//         return NPY_BYTE;
-//     case Type::Signed16:
-//         return NPY_SHORT;
-//     case Type::Signed32:
-//         return NPY_INT;
-//     case Type::Signed64:
-//         return NPY_LONGLONG;
-//     case Type::Unsigned8:
-//         return NPY_UBYTE;
-//     case Type::Unsigned16:
-//         return NPY_USHORT;
-//     case Type::Unsigned32:
-//         return NPY_UINT;
-//     case Type::Unsigned64:
-//         return NPY_ULONGLONG;
-//     default:
-//         return -1;
-//     }
-//     assert(0);
-//
-//     return -1;
-// }
-//
-
-
-} // namespace mlang
-} // namespace pdal
+} //namespace plang
+} //namespace pdal
 

@@ -44,8 +44,6 @@
 namespace pdal
 {
 
-class ProgrammableFilterSequentialIterator;
-
 class PDAL_DLL ProgrammableFilter : public Filter
 {
 public:

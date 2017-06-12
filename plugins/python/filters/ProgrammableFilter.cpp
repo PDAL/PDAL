@@ -76,7 +76,7 @@ void ProgrammableFilter::ready(PointTableRef table)
 {
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(m_scriptFile);
-    plang::Environment::get()->set_stdout(log()->getLogStream());
+    static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::Invocation(*m_script);
     m_pythonMethod->compile();
@@ -104,7 +104,7 @@ void ProgrammableFilter::filter(PointView& view)
 
 void ProgrammableFilter::done(PointTableRef table)
 {
-    plang::Environment::get()->reset_stdout();
+    static_cast<plang::Environment*>(plang::Environment::get())->reset_stdout();
     delete m_pythonMethod;
     delete m_script;
 }

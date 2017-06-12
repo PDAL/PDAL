@@ -40,6 +40,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
+#include <pdal/EmbedEnvironment.hpp>
 
 
 // Matlab "engine.h"
@@ -51,20 +52,15 @@ namespace pdal
 namespace mlang
 {
 
-class Environment;
-typedef Environment *EnvironmentPtr;
 
-class PDAL_DLL Environment
+class PDAL_DLL Environment : public embed::EmbedEnvironment
 {
 public:
     Environment();
     ~Environment();
 
-//     // these just forward into the Redirector class
-//     void set_stdout(std::ostream* ostr);
-//     void reset_stdout();
-//
-    static EnvironmentPtr get();
+    void execute(embed::EmbedScript& script) {};
+
 
 private:
 

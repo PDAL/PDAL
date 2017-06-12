@@ -79,7 +79,7 @@ namespace plang
 {
 
 static Environment* g_environment=0;
-
+//
 EnvironmentPtr Environment::get()
 {
     static std::once_flag flag;
@@ -88,12 +88,10 @@ EnvironmentPtr Environment::get()
     {
         g_environment = new Environment();
     };
-
     std::call_once(flag, init);
-
     return g_environment;
 }
-
+//
 
 Environment::Environment()
 {

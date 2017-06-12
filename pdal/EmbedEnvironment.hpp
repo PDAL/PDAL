@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,76 +32,47 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef _WIN32
-#include <dlfcn.h>
-#endif
+#pragma once
 
-#include <pdal/mlang/Environment.hpp>
 
-#include <sstream>
-#include <mutex>
+
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/EmbedScript.hpp>
+
+
 
 namespace pdal
 {
-namespace mlang
+namespace embed
 {
 
+class EmbedEnvironment;
+typedef EmbedEnvironment *EmbedEnvironmentPtr;
 
-
-Environment::Environment()
-  : EmbedEnvironment()
-  , m_engine(0)
+class PDAL_DLL EmbedEnvironment
 {
-    m_engine = engOpen("");
-    if (!m_engine)
-        throw pdal_error("unable to initialize Matlab!");
-}
+public:
+    EmbedEnvironment();
+    virtual ~EmbedEnvironment();
 
 
-Environment::~Environment()
-{
-    if (m_engine)
-        engClose (m_engine);
-}
+    // Provide a mechanism for binding stdout for
+    // logging
+    virtual void set_stdout(std::ostream* ostr)=0;
+    virtual void reset_stdout()=0;
 
 
-//
-// int Environment::getPythonDataType(Dimension::Type t)
-// {
-//     using namespace Dimension;
-//
-//     switch (t)
-//     {
-//     case Type::Float:
-//         return NPY_FLOAT;
-//     case Type::Double:
-//         return NPY_DOUBLE;
-//     case Type::Signed8:
-//         return NPY_BYTE;
-//     case Type::Signed16:
-//         return NPY_SHORT;
-//     case Type::Signed32:
-//         return NPY_INT;
-//     case Type::Signed64:
-//         return NPY_LONGLONG;
-//     case Type::Unsigned8:
-//         return NPY_UBYTE;
-//     case Type::Unsigned16:
-//         return NPY_USHORT;
-//     case Type::Unsigned32:
-//         return NPY_UINT;
-//     case Type::Unsigned64:
-//         return NPY_ULONGLONG;
-//     default:
-//         return -1;
-//     }
-//     assert(0);
-//
-//     return -1;
-// }
-//
+    static EmbedEnvironmentPtr get();
 
+    virtual void execute(EmbedScript& script) {};
 
-} // namespace mlang
+private:
+
+};
+
+} // namespace embed
 } // namespace pdal
 
