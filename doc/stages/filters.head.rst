@@ -6,6 +6,11 @@ filters.head
 The HeadFilter returns a specified number of points from the beginning of the
 PointView.
 
+.. note::
+
+    If the requested number of points exceeds the size of the point cloud, all
+    points are passed with a warning.
+
 
 Example #1
 ----------

@@ -6,6 +6,11 @@ filters.tail
 The TailFilter returns a specified number of points from the end of the
 PointView.
 
+.. note::
+
+    If the requested number of points exceeds the size of the point cloud, all
+    points are passed with a warning.
+
 
 Example #1
 ----------
@@ -28,7 +33,7 @@ Sort and extract the 100 lowest intensity points.
         }
       ]
     }
-    
+
 
 .. seealso::
 

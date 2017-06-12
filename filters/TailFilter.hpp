@@ -66,9 +66,14 @@ private:
 
     PointViewSet run(PointViewPtr view)
     {
+        if (m_count > view->size())
+            log()->get(LogLevel::Warning)
+                << "Requested number of points (count=" << m_count
+                << ") exceeds number of available points.\n";
         PointViewSet viewSet;
         PointViewPtr outView = view->makeNew();
-        for (PointId i = view->size() - m_count; i < view->size(); ++i)
+        for (PointId i = view->size() - std::min(m_count, view->size());
+             i < view->size(); ++i)
             outView->appendPoint(*view, i);
         viewSet.insert(outView);
         return viewSet;
