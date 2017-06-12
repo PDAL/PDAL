@@ -74,6 +74,7 @@
 #include <filters/SortFilter.hpp>
 #include <filters/SplitterFilter.hpp>
 #include <filters/StatsFilter.hpp>
+#include <filters/TailFilter.hpp>
 #include <filters/TransformationFilter.hpp>
 
 // readers
@@ -278,6 +279,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(SortFilter_InitPlugin);
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
+    PluginManager::initializePlugin(TailFilter_InitPlugin);
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
 
     // readers
