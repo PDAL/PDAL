@@ -52,6 +52,7 @@
 #include <filters/FerryFilter.hpp>
 #include <filters/GroupByFilter.hpp>
 #include <filters/HAGFilter.hpp>
+#include <filters/HeadFilter.hpp>
 #include <filters/IQRFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
 #include <filters/LocateFilter.hpp>
@@ -255,6 +256,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(GroupByFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
+    PluginManager::initializePlugin(HeadFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
     PluginManager::initializePlugin(LocateFilter_InitPlugin);
