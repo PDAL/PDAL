@@ -37,7 +37,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
 
-#include <pdal/plang/Invocation.hpp>
+#include "../plang/Invocation.hpp"
 
 #include <json/json.h>
 

@@ -33,8 +33,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/plang/Array.hpp>
-#include <pdal/plang/Environment.hpp>
+#include "Array.hpp"
+#include "Environment.hpp"
 
 #include <algorithm>
 

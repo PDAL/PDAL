@@ -1,5 +1,10 @@
 PDAL_ADD_PLUGIN(python_libname filter python
     FILES
+        ../plang/Array.cpp
+        ../plang/Invocation.cpp
+        ../plang/Environment.cpp
+        ../plang/Redirector.cpp
+        ../plang/Script.cpp
         PythonFilter.cpp
     LINK_WITH ${PDAL_PLANG_LIB_NAME})
 target_include_directories(${python_libname} PRIVATE

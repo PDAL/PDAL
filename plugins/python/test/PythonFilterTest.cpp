@@ -39,8 +39,9 @@
 #include <io/FauxReader.hpp>
 #include <filters/StatsFilter.hpp>
 
-#include <pdal/plang/Invocation.hpp>
-#include <pdal/plang/Array.hpp>
+#include "../plang/Invocation.hpp"
+#include "../plang/Array.hpp"
+#include "../plang/Environment.hpp"
 
 #include <pdal/StageWrapper.hpp>
 
@@ -49,7 +50,6 @@
 using namespace pdal;
 using namespace pdal::plang;
 
-#include <pdal/plang/Environment.hpp>
 
 class PythonFilterTest : public ::testing::Test
 {

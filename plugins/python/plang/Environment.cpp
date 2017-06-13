@@ -36,8 +36,8 @@
 #include <dlfcn.h>
 #endif
 
-#include <pdal/plang/Environment.hpp>
-#include <pdal/plang/Redirector.hpp>
+#include "Environment.hpp"
+#include "Redirector.hpp"
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
