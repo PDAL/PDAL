@@ -7,7 +7,7 @@ target_include_directories(${python_libname} PRIVATE
 
 if (WITH_TESTS)
 
-    PDAL_ADD_TEST(python_programmable_test
-        FILES ../test/ProgrammableFilterTest.cpp
+    PDAL_ADD_TEST(pdal_filters_python_test
+        FILES ../test/PythonFilterTest.cpp
         LINK_WITH ${programmable_libname} ${PDAL_PLANG_LIB_NAME})
 endif()
