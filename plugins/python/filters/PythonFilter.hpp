@@ -44,10 +44,10 @@
 namespace pdal
 {
 
-class PDAL_DLL ProgrammableFilter : public Filter
+class PDAL_DLL PythonFilter : public Filter
 {
 public:
-    ProgrammableFilter() : Filter(), m_script(NULL)
+    PythonFilter() : Filter(), m_script(NULL)
         {}
 
     static void *create();
@@ -66,11 +66,11 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
+    virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented
-    ProgrammableFilter(const ProgrammableFilter&); // not implemented
+    PythonFilter& operator=(const PythonFilter&); // not implemented
+    PythonFilter(const PythonFilter&); // not implemented
 
     MetadataNode m_totalMetadata;
     Json::Value m_pdalargs;
