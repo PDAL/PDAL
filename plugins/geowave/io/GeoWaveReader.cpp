@@ -129,6 +129,9 @@ using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloDataSto
 #include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/metadata/AccumuloAdapterStore.h"
 using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::metadata::AccumuloAdapterStore;
 
+namespace pdal
+{
+
 static PluginInfo const s_info = PluginInfo(
     "readers.geowave",
     "\"GeoWave\"  reader support. ",
@@ -138,12 +141,10 @@ CREATE_SHARED_PLUGIN(1, 0, GeoWaveReader, Reader, s_info)
 
 std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
 
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-namespace pdal
-{
+
     void GeoWaveReader::addArgs(ProgramArgs& args)
     {
         args.add("zookeeper_url", "The comma-delimited URLs for all "

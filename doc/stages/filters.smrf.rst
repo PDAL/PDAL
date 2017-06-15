@@ -25,7 +25,7 @@ returns, writing only the ground returns to the output file.
         {
           "type":"filters.range",
           "limits":"Classification[2:2]"
-        }
+        },
         "output.laz"
       ]
     }
@@ -38,18 +38,18 @@ cell
 
 cut
   Cut net size (``cut=0`` skips the net cutting step). [Default: **0.0**]
-  
+
 outdir
   Optional output directory for debugging intermediate rasters.
-  
+
 scalar
   Elevation scalar. [Default: **1.25**]
-  
+
 slope
   Slope (rise over run). [Default: **0.15**]
-  
+
 threshold
   Elevation threshold. [Default: **0.5**]
-  
+
 window
   Max window size. [Default: **18.0**]

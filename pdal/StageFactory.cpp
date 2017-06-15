@@ -66,6 +66,7 @@
 #include <filters/OverlayFilter.hpp>
 #include <filters/PMFFilter.hpp>
 #include <filters/RadialDensityFilter.hpp>
+#include <filters/RandomizeFilter.hpp>
 #include <filters/RangeFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
 #include <filters/SampleFilter.hpp>
@@ -127,7 +128,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "readers.sqlite", { "sqlite" } },
         { "readers.mrsid", { "sid" } },
         { "readers.tindex", { "tindex" } },
-        { "readers.text", { "txt" } },
+        { "readers.text", { "csv", "txt" } },
         { "readers.icebridge", { "h5" } },
 
         { "writers.bpf", { "bpf" } },
@@ -153,6 +154,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "bin", "readers.terrasolid" },
         { "bpf", "readers.bpf" },
         { "csd", "readers.optech" },
+        { "csv", "readers.text" },
         { "greyhound", "readers.greyhound" },
         { "icebridge", "readers.icebridge" },
         { "las", "readers.las" },
@@ -268,6 +270,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(OverlayFilter_InitPlugin);
     PluginManager::initializePlugin(PMFFilter_InitPlugin);
     PluginManager::initializePlugin(RadialDensityFilter_InitPlugin);
+    PluginManager::initializePlugin(RandomizeFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
     PluginManager::initializePlugin(SampleFilter_InitPlugin);

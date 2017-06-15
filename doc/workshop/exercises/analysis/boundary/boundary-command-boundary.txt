@@ -1,5 +1,4 @@
-docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-    pdal info \
-    /data/exercises/analysis/density/uncompahgre.laz \
-    --boundary
+pdal info ^
+c:/Users/hobu/PDAL/exercises/analysis/density/uncompahgre.laz ^
+--boundary
 

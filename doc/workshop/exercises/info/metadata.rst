@@ -11,7 +11,7 @@ Exercise
 --------------------------------------------------------------------------------
 
 This exercise uses PDAL to print metadata information. Issue the
-following command in your `Docker Quickstart Terminal`.
+following command in your `OSGeo4W Shell`.
 
 
 .. literalinclude:: ./metadata-command.txt
@@ -28,7 +28,7 @@ following command in your `Docker Quickstart Terminal`.
 
 .. seealso::
 
-    Use the `JSON`_ processing capabilities of your favorite processing
+    Use the |JSON| processing capabilities of your favorite processing
     software to selectively access and manipulate values.
 
     * `Python JSON library`_
@@ -42,11 +42,50 @@ following command in your `Docker Quickstart Terminal`.
 .. _`Ruby JSON library`: http://ruby-doc.org/stdlib-2.0.0/libdoc/json/rdoc/JSON.html
 
 
+Structured Metadata Output
+................................................................................
+
+Many command-line utilities output their data in a human-readable custom
+format. The downsides to this approach are significant. PDAL was designed to be
+used in the context of other software tools driving it. For example, it is
+quite common for PDAL to be used in data validation scenarios. Other programs
+might need to inspect information in PDAL's output and then act based on the
+values. A human-readable format would mean that downstream program would need
+to write a parser to consume PDAL's special format.
+
+|JSON| provides a nice balance between human- and machine- readable, but
+even then it can be quite hard to find what you're looking for, especially
+if the output is long. ``pdal`` command output used in conjunction with a
+JSON parsing tool like ``jq`` provide a powerful inspection combination.
+
+For example, we might only care about the ``system_id`` and ``compressed``
+flag for this particular file. Our simple ``pdal info --metadata`` command
+gives us that, but it also gives us a bunch of other stuff we don't need
+at the moment either. Let's focus on extracting what we want using the
+``jq`` command.
+
+.. literalinclude:: ./metadata-command-jq.txt
+    :linenos:
+
+.. image:: ../../images/info-interesting-metadata-jq.png
+
+.. note::
+
+    PDAL's JSON output is very powerfully combined with the processing
+    capabilities of other programming languages such as JavaScript or Python.
+    Both of these languages have excellent built-in tools for consuming
+    JSON, along with plenty of other features to allow you to do something
+    with the data inside the data structures. As we will see later
+    in the workshop, this PDAL feature is one that makes construction
+    of custom data processing workflows with PDAL very convenient.
+
+
+
 Notes
 --------------------------------------------------------------------------------
 
-1. PDAL uses `JSON`_ as the exchange format when printing information from :ref:`info_command`.
-   JSON is a structured, human-readable format that is much simpler than its `XML`_ cousin.
+1. PDAL uses |JSON| as the exchange format when printing information from :ref:`info_command`.
+   JSON is a structured, human-readable format that is much simpler than its |XML| cousin.
 
 2. The PDAL :ref:`metadata document <metadata>` contains background and
    information about specific metadata entries and what they mean.
@@ -61,6 +100,3 @@ Notes
    in PDAL.
 
 
-.. _`CSV`: https://en.wikipedia.org/wiki/Comma-separated_values
-.. _`JSON`: https://en.wikipedia.org/wiki/JSON
-.. _`XML`: https://en.wikipedia.org/wiki/XML

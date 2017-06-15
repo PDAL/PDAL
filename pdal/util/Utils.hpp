@@ -45,6 +45,7 @@
 #include <istream>
 #include <limits>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -54,6 +55,7 @@
 
 #include <iostream>
 
+#include "NullOStream.hpp"
 #include "pdal_util_export.hpp"
 
 namespace pdal
@@ -64,8 +66,8 @@ namespace Utils
     /**
      * \brief Clamp value to given bounds.
      *
-     * Clamps the input value t to bounds specified by min and max. Used to ensure
-     * that row and column indices remain within valid bounds.
+     * Clamps the input value t to bounds specified by min and max.
+     * Used to ensure that row and column indices remain within valid bounds.
      *
      * \param t the input value.
      * \param min the lower bound.
@@ -443,7 +445,7 @@ namespace Utils
 
       \param s  String in which to start counting characters.
       \param p  Position in input string at which to start counting.
-      \param pred  Unary predicte that tests a character.
+      \param pred  Unary predicate that tests a character.
       \return  Then number of characters matching the predicate.
     */
     template<typename PREDICATE>
@@ -451,7 +453,7 @@ namespace Utils
     extract(const std::string& s, std::string::size_type p, PREDICATE pred)
     {
         std::string::size_type count = 0;
-        while (pred(s[p++]))
+        while (p < s.size() && pred(s[p++]))
             count++;
         return count;
     }
@@ -566,16 +568,16 @@ namespace Utils
 
     struct RedirectStream
     {
-        RedirectStream() : m_out(NULL), m_out2(NULL), m_buf(NULL)
+        RedirectStream() : m_out(NULL), m_buf(NULL), m_null(new NullOStream)
         {}
 
         std::ofstream *m_out;
-        std::ostream *m_out2;
         std::streambuf *m_buf;
+        std::unique_ptr<NullOStream> m_null;
     };
 
     /**
-      Redirect a stream to some other stream.
+      Redirect a stream to some other stream, by default a null stream.
 
       \param out   Stream to redirect.
       \param dst   Destination stream.
@@ -585,21 +587,34 @@ namespace Utils
     {
         RedirectStream redir;
 
-        redir.m_out2 = &dst;
         redir.m_buf = out.rdbuf();
-        out.rdbuf(redir.m_out2->rdbuf());
+        out.rdbuf(dst.rdbuf());
         return redir;
     }
 
     /**
-      Redirect a stream to some file, by default /dev/null.
+      Redirect a stream to a null stream.
+
+      \param out   Stream to redirect.
+      \return  Context for stream restoration (see \ref restore()).
+    */
+    inline RedirectStream redirect(std::ostream& out)
+    {
+        RedirectStream redir;
+
+        redir.m_buf = out.rdbuf();
+        out.rdbuf(redir.m_null->rdbuf());
+        return redir;
+    }
+
+    /**
+      Redirect a stream to some file.
 
       \param out   Stream to redirect.
       \param file  Name of file where stream should be redirected.
       \return  Context for stream restoration (see \ref restore()).
     */
-    inline RedirectStream redirect(std::ostream& out,
-        const std::string& file = "/dev/null")
+    inline RedirectStream redirect(std::ostream& out, const std::string& file)
     {
         RedirectStream redir;
 
@@ -616,13 +631,12 @@ namespace Utils
       \param redir RedirectStream returned from corresponding
         \ref redirect() call.
     */
-    inline void restore(std::ostream& out, RedirectStream redir)
+    inline void restore(std::ostream& out, RedirectStream& redir)
     {
         out.rdbuf(redir.m_buf);
         if (redir.m_out)
             redir.m_out->close();
         redir.m_out = NULL;
-        redir.m_out2 = NULL;
         redir.m_buf = NULL;
     }
 

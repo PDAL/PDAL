@@ -49,7 +49,8 @@
 namespace pdal
 {
 
-Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0)
+Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0),
+    m_pointCount(0), m_faceCount(0)
 {}
 
 
@@ -178,6 +179,17 @@ PointViewSet Stage::execute(PointTableRef table)
         table.addSpatialReference((*it)->spatialReference());
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
+    // Count the number of views and the number of points and faces so they're
+    // available to stages.
+    m_pointCount = 0;
+    m_faceCount = 0;
+    for (auto const& it : views)
+    {
+        m_pointCount += it->size();
+        auto m = it->mesh();
+        if (m)
+            m_faceCount += m->size();
+    }
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
@@ -205,6 +217,8 @@ PointViewSet Stage::execute(PointTableRef table)
     }
     l_done(table);
     popLogLeader();
+    m_pointCount = 0;
+    m_faceCount = 0;
     return outViews;
 }
 

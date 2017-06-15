@@ -67,8 +67,10 @@ void NormalFilter::addArgs(ProgramArgs& args)
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims( { Dimension::Id::NormalX, Dimension::Id::NormalY,
-        Dimension::Id::NormalZ, Dimension::Id::Curvature } );
+    using namespace Dimension;
+
+    layout->registerDims({Id::NormalX, Id::NormalY, Id::NormalZ,
+        Id::Curvature});
 }
 
 

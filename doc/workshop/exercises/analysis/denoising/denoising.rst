@@ -9,20 +9,6 @@ Removing noise
 
 This exercise uses PDAL to remove unwanted noise in an ALS collection.
 
-.. warning::
-
-    Our default :ref:`docker` machine instance is probably going to run out of
-    memory for this operation (it only has 1gb). We may need to recreate it with
-    the following commands to increase the available memory:
-
-    1. Remove the existing machine instances
-
-        .. literalinclude:: ./denoising-docker-machine-delete.txt
-
-    2. Create a new one with 2gb of memory
-
-        .. literalinclude:: ./denoising-docker-machine-delete.txt
-
 
 
 Exercise
@@ -53,7 +39,7 @@ point cloud file we're going to read.
 
 ::
 
-    "/data/exercises/analysis/denoising/18TWK820985.laz",
+    "c:/Users/hobu/PDAL/exercises/analysis/denoising/18TWK820985.laz",
 
 2. :ref:`filters.outlier`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +71,7 @@ Even with the :ref:`filters.outlier` operation, there is still a cluster of
 points with extremely negative ``Z`` values. These are some artifact or
 miscomputation of processing, and we don't want these points. We can construct
 another :ref:`range <ranges>` to keep only points that are within the range
-``-100 <= Z <= 3000``.
+:math:`-100 <= Z <= 3000`.
 
 Both :ref:`ranges <ranges>` are passed as a comma-separated list to the
 :ref:`range filter<filters.range>` via the ``limits`` option.
@@ -110,7 +96,7 @@ add a few options to have finer control over what is written. These include:
         "compression": "true",
         "minor_version": "2",
         "dataformat_id": "0",
-        "filename":"/data/exercises/analysis/denoising/clean.laz"
+        "filename":"c:/Users/hobu/PDAL/exercises/analysis/denoising/clean.laz"
     }
 
 
@@ -128,12 +114,12 @@ add a few options to have finer control over what is written. These include:
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `Docker
-Quickstart Terminal`:
+Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
 
 .. literalinclude:: ./denoising-run-command.txt
 
 .. image:: ../../../images/denoise-run-command.png
+    :target: ../../../../_images/denoise-run-command.png
 
 Visualization
 ................................................................................
@@ -143,6 +129,7 @@ your ``clean.laz`` output. In the example below, we simply
 opened the file using the `Fugro Viewer`_
 
 .. image:: ../../../images/denoise-fugro.png
+    :target: ../../../../_images/denoise-fugro.png
 
 .. _`Fugro Viewer`: http://www.fugroviewer.com/
 

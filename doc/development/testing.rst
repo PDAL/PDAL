@@ -315,14 +315,14 @@ and to run only select tests (``--gtest_filter``).
 .. note::
 
     If the PostgreSQL PointCloud plugin was enabled on the CMake command line
-    (with ``-DBUILD_PLUGIN_PGPOINTCLOUD=ON``) then `ctest` will attempt to run
-    the ``pgpointcloud`` tests. And you will get PostgreSQL connection errors
+    (with ``-DBUILD_PLUGIN_PGPOINTCLOUD=ON``) then ``ctest`` will attempt to run
+    the ``pgpointcloud`` tests. And you will get PostgreSQL connection errors
     if the `libpq environment variables`_ are not correctly set in your shell.
     This is for example how you can run the ``pgpointcloud`` tests::
 
         $ PGUSER=pdal PGPASSWORD=pdal PGHOST=localhost ctest -R pgpointcloudtest
 
-.. _`libpg environment variables`: https://www.postgresql.org/docs/current/static/libpq-envars.html
+.. _`libpq environment variables`: https://www.postgresql.org/docs/current/static/libpq-envars.html
 
 Test Data
 =========

@@ -321,6 +321,22 @@ protected:
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void addSpatialReferenceArg(ProgramArgs& args);
     void throwError(const std::string& s) const;
+    /**
+      Return the point count of all point views at the start of execution.
+      Only valid during execute().
+
+      \return  Total number of points in all point views being executed.
+    */
+    point_count_t pointCount() const
+        { return m_pointCount; }
+    /**
+      Return the count of faces in all primary meshes for all point views.
+      Only valid during execute().
+
+      \return  Total number of faces in all point views being executed.
+    */
+    point_count_t faceCount() const
+        { return m_faceCount; }
 
 private:
     bool m_debug;
@@ -336,6 +352,8 @@ private:
     // bind the user_data argument that is essentially a comment in pipeline
     // files.
     std::string m_userDataJSON;
+    point_count_t m_pointCount;
+    point_count_t m_faceCount;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

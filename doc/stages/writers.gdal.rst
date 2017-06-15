@@ -4,8 +4,10 @@ writers.gdal
 ================================================================================
 
 The `GDAL`_ writer creates a raster from a point cloud using an interpolation
-algorithm.  Output is produced using GDAL and can therefore use any `driver
-that supports creation of rasters`_.
+algorithm.  Output is produced using GDAL and can theoretically use any `driver
+that supports creation of rasters`_.  Currently, PDAL only supports writing
+double-precision rasters, which limits the number of drivers that can in
+practice be used.
 
 .. _`GDAL`: http://gdal.org
 .. _`driver that supports creation of rasters`: http://www.gdal.org/formats_list.html

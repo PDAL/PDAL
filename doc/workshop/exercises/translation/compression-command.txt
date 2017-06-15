@@ -1,3 +1,2 @@
-docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-    pdal translate /data/exercises/translation/interesting.las \
-    /data/exercises/translation/interesting.laz
+pdal translate c:/Users/hobu/pdal/exercises/translation/interesting.las ^
+c:/Users/hobu/pdal/exercises/translation/interesting.laz
