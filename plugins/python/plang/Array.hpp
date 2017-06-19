@@ -34,16 +34,23 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/PointView.hpp>
 
+#include <algorithm>
 
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127) // conditional expression is constant
 #endif
+
+#include <Python.h>
+#undef toupper
+#undef tolower
+#undef isspace
+
+
+#define PY_ARRAY_UNIQUE_SYMBOL PDALARRAY_ARRAY_API
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
 
 namespace pdal
 {
@@ -54,17 +61,150 @@ namespace plang
 class PDAL_DLL Array
 {
 public:
-    Array();
-    ~Array();
 
-    void update(PointViewPtr view);
+    Array()
+        : m_py_array(0)
+    {
+        auto initNumpy = []()
+        {
+#undef NUMPY_IMPORT_ARRAY_RETVAL
+#define NUMPY_IMPORT_ARRAY_RETVAL
+            import_array();
+        };
+        initNumpy();
+    }
+
+    ~Array()
+    {
+        cleanup();
+    }
+
+
+    inline void update(PointViewPtr view)
+    {
+        typedef std::unique_ptr<std::vector<uint8_t>> DataPtr;
+        cleanup();
+        int nd = 1;
+        Dimension::IdList dims = view->dims();
+        npy_intp mydims = view->size();
+        npy_intp* ndims = &mydims;
+        std::vector<npy_intp> strides(dims.size());
+
+
+        DataPtr pdata( new std::vector<uint8_t>(view->pointSize()* view->size(), 0));
+
+        PyArray_Descr *dtype(0);
+        PyObject * dtype_dict = (PyObject*)buildNumpyDescription(view);
+        if (!dtype_dict)
+            throw pdal_error("Unable to build numpy dtype description dictionary");
+        int did_convert = PyArray_DescrConverter(dtype_dict, &dtype);
+        if (did_convert == NPY_FAIL)
+            throw pdal_error("Unable to build numpy dtype");
+        Py_XDECREF(dtype_dict);
+
+#ifdef NPY_ARRAY_CARRAY
+        int flags = NPY_ARRAY_CARRAY;
+#else
+        int flags = NPY_CARRAY;
+#endif
+        uint8_t* sp = pdata.get()->data();
+        PyObject * pyArray = PyArray_NewFromDescr(&PyArray_Type,
+                                                  dtype,
+                                                  nd,
+                                                  ndims,
+                                                  0,
+                                                  sp,
+                                                  flags,
+                                                  NULL);
+
+        // copy the data
+        uint8_t* p(sp);
+        DimTypeList types = view->dimTypes();
+        for (PointId idx = 0; idx < view->size(); idx++)
+        {
+            p = sp + (view->pointSize() * idx);
+            view->getPackedPoint(types, idx, (char*)p);
+        }
+
+        m_py_array = pyArray;
+        m_data_array = std::move(pdata);
+
+    }
+
 
     inline PyObject* getPythonArray() const { return m_py_array; }
 
 
 private:
-    void cleanup();
-    PyObject* buildNumpyDescription(PointViewPtr view) const;
+
+    inline void cleanup()
+    {
+        PyObject* p = (PyObject*)(m_py_array);
+        Py_XDECREF(p);
+        m_data_array.reset();
+    }
+
+    inline PyObject* buildNumpyDescription(PointViewPtr view) const
+    {
+
+        // Build up a numpy dtype dictionary
+        //
+        // {'formats': ['f8', 'f8', 'f8', 'u2', 'u1', 'u1', 'u1', 'u1', 'u1', 'f4', 'u1', 'u2', 'f8', 'u2', 'u2', 'u2'],
+        // 'names': ['X', 'Y', 'Z', 'Intensity', 'ReturnNumber', 'NumberOfReturns',
+        // 'ScanDirectionFlag', 'EdgeOfFlightLine', 'Classification',
+        // 'ScanAngleRank', 'UserData', 'PointSourceId', 'GpsTime', 'Red', 'Green',
+        // 'Blue']}
+        //
+        std::stringstream oss;
+        Dimension::IdList dims = view->dims();
+
+        PyObject* dict = PyDict_New();
+        PyObject* sizes = PyList_New(dims.size());
+        PyObject* formats = PyList_New(dims.size());
+        PyObject* titles = PyList_New(dims.size());
+
+        for (Dimension::IdList::size_type i=0; i < dims.size(); ++i)
+        {
+            Dimension::Id id = (dims[i]);
+            Dimension::Type t = view->dimType(id);
+            npy_intp stride = view->dimSize(id);
+
+            std::string name = view->dimName(id);
+
+            std::string kind("i");
+            Dimension::BaseType b = Dimension::base(t);
+            if (b == Dimension::BaseType::Unsigned)
+                kind = "u";
+            else if (b == Dimension::BaseType::Floating)
+                kind = "f";
+            else
+            {
+                std::stringstream o;
+                oss << "unable to map kind '" << kind <<"' to PDAL dimension type";
+                throw pdal::pdal_error(o.str());
+            }
+
+            oss << kind << stride;
+            PyObject* pySize = PyLong_FromLong(stride);
+            PyObject* pyTitle = PyUnicode_FromString(name.c_str());
+            PyObject* pyFormat = PyUnicode_FromString(oss.str().c_str());
+
+            PyList_SetItem(sizes, i, pySize);
+            PyList_SetItem(titles, i, pyTitle);
+            PyList_SetItem(formats, i, pyFormat);
+
+            oss.str("");
+        }
+
+        PyDict_SetItemString(dict, "names", titles);
+        PyDict_SetItemString(dict, "formats", formats);
+
+    //     PyObject* obj = PyUnicode_AsASCIIString(PyObject_Str(dict));
+    //     const char* s = PyBytes_AsString(obj);
+    //     std::string output(s);
+    //     std::cout << "array: " << output << std::endl;
+        return dict;
+    }
 
     PyObject* m_py_array;
     std::unique_ptr<std::vector<uint8_t> > m_data_array;

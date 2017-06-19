@@ -1,6 +1,5 @@
 PDAL_ADD_PLUGIN(python_libname filter python
     FILES
-        ../plang/Array.cpp
         ../plang/Invocation.cpp
         ../plang/Environment.cpp
         ../plang/Redirector.cpp
