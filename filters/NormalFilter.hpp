@@ -59,6 +59,8 @@ public:
     NormalFilter& operator=(const NormalFilter&) = delete;
     NormalFilter(const NormalFilter&) = delete;
 
+    void doFilter(PointView& view);
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
@@ -66,8 +68,8 @@ public:
 private:
     int m_knn;
 
-    virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
 
 };

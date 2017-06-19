@@ -63,6 +63,8 @@ namespace plang
 struct PointViewLess;
 class PointView;
 class PointViewIter;
+class KD2Index;
+class KD3Index;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
@@ -290,6 +292,9 @@ public:
     */
     TriangularMesh *mesh(const std::string& name = "");
 
+    KD3Index& build3dIndex();
+    KD2Index& build2dIndex();
+
 protected:
     PointTableRef m_pointTable;
     std::deque<PointId> m_index;
@@ -300,6 +305,8 @@ protected:
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
     std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
+    std::unique_ptr<KD3Index> m_index3;
+    std::unique_ptr<KD2Index> m_index2;
 
 private:
     static int m_lastId;

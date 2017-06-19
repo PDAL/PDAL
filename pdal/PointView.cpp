@@ -185,6 +185,35 @@ TriangularMesh *PointView::mesh(const std::string& name)
 }
 
 
+KD3Index& PointView::build3dIndex()
+{
+    //ABELL
+    // Should we allow a force of point view build - perhaps the index has
+    // changed or the point values have changed.
+    if (!m_index3)
+    {
+        m_index3.reset(new KD3Index(*this));
+        std::cerr << "About to build index!\n";
+        m_index3->build();
+    }
+    return *m_index3.get();
+}
+
+
+KD2Index& PointView::build2dIndex()
+{
+    //ABELL
+    // Should we allow a force of point view build - perhaps the index has
+    // changed or the point values have changed.
+    if (!m_index2)
+    {
+        m_index2.reset(new KD2Index(*this));
+        m_index2->build();
+    }
+    return *m_index2.get();
+}
+
+
 void PointView::dump(std::ostream& ostr) const
 {
     using std::endl;

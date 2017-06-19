@@ -73,12 +73,17 @@ void NormalFilter::addDimensions(PointLayoutPtr layout)
         Id::Curvature});
 }
 
+
+void NormalFilter::doFilter(PointView& view)
+{
+    m_knn = 8;
+    filter(view);
+}
+
+
 void NormalFilter::filter(PointView& view)
 {
-    using namespace Eigen;
-
-    KD3Index kdi(view);
-    kdi.build();
+    KD3Index& kdi = view.build3dIndex();
 
     for (PointId i = 0; i < view.size(); ++i)
     {
@@ -89,8 +94,8 @@ void NormalFilter::filter(PointView& view)
         auto B = eigen::computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3f> solver(B);
-        if (solver.info() != Success)
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(B);
+        if (solver.info() != Eigen::Success)
             throwError("Cannot perform eigen decomposition.");
         auto eval = solver.eigenvalues();
         auto evec = solver.eigenvectors().col(0);
