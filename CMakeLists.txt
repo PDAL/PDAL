@@ -127,6 +127,7 @@ endif()
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
+include(${PDAL_CMAKE_DIR}/python.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
