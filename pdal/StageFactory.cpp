@@ -75,6 +75,8 @@
 #include <filters/SplitterFilter.hpp>
 #include <filters/StatsFilter.hpp>
 #include <filters/TransformationFilter.hpp>
+#include <filters/VoxelCenterNearestNeighborFilter.hpp>
+#include <filters/VoxelCentroidNearestNeighborFilter.hpp>
 
 // readers
 #include <io/BpfReader.hpp>
@@ -279,6 +281,8 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
+    PluginManager::initializePlugin(VoxelCenterNearestNeighborFilter_InitPlugin);
+    PluginManager::initializePlugin(VoxelCentroidNearestNeighborFilter_InitPlugin);
 
     // readers
     PluginManager::initializePlugin(BpfReader_InitPlugin);
