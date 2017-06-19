@@ -488,7 +488,7 @@ public:
 
         std::string v(Utils::escapeJSON(value()));
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
-            m_impl->m_type == "uuid")
+            m_impl->m_type == "uuid" || m_impl->m_type == "matrix")
         {
             std::string val("\"");
             val += escapeQuotes(v) + "\"";
