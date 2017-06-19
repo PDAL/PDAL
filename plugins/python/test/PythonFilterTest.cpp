@@ -918,7 +918,7 @@ TEST(PLangTest, log)
 
         reader.setOptions(reader_opts);
 
-        Stage* xfilter(f.createStage("filters.programmable"));
+        Stage* xfilter(f.createStage("filters.python"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 
