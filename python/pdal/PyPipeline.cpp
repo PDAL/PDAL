@@ -91,7 +91,7 @@ std::vector<PArray> Pipeline::getArrays() const
 
     for (auto i: pvset)
     {
-        PArray array = new pdal::plang::Array;
+        PArray array = new pdal::python::Array;
         array->update(i);
         output.push_back(array);
     }

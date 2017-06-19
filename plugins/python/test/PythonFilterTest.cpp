@@ -40,7 +40,7 @@
 #include <filters/StatsFilter.hpp>
 
 #include "../plang/Invocation.hpp"
-#include "../plang/Array.hpp"
+#include <pdal/PyArray.hpp>
 #include "../plang/Environment.hpp"
 
 #include <pdal/StageWrapper.hpp>
@@ -993,7 +993,7 @@ TEST(PLangTest, PLangTest_array)
     PointTable table;
     PointViewPtr view = makeTestView(table, 40);
 
-    plang::Array array;
+    python::Array array;
     array.update(view);
     verifyTestView(*view.get(), 4);
 

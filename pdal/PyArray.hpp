@@ -47,14 +47,15 @@
 #undef tolower
 #undef isspace
 
-
+#ifndef PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL PDALARRAY_ARRAY_API
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#endif
+
 #include <numpy/arrayobject.h>
 
 namespace pdal
 {
-namespace plang
+namespace python
 {
 
 
@@ -212,6 +213,6 @@ private:
     Array& operator=(Array const& rhs);
 };
 
-} // namespace plang
+} // namespace python
 } // namespace pdal
 

@@ -145,7 +145,6 @@ if pdal_config and "clean" not in sys.argv:
 
 include_dirs.append(numpy.get_include())
 extra_compile_args = ['-std=c++11',]
-libraries.append('pdal_plang')
 
 DEBUG=False
 if DEBUG:
