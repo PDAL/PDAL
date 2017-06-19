@@ -40,7 +40,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
-#include <pdal/EmbedEnvironment.hpp>
+#include "Script.hpp"
 
 
 // Matlab "engine.h"
@@ -53,13 +53,13 @@ namespace mlang
 {
 
 
-class PDAL_DLL Environment : public embed::EmbedEnvironment
+class PDAL_DLL Environment
 {
 public:
     Environment();
     ~Environment();
 
-    void execute(embed::EmbedScript& script) {};
+    void execute(Script& script) {};
 
 
 private:

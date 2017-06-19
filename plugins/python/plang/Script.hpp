@@ -37,14 +37,13 @@
 #include <pdal/pdal_internal.hpp>
 
 #include <pdal/Options.hpp>
-#include <pdal/EmbedScript.hpp>
 
 namespace pdal
 {
 namespace plang
 {
 
-class PDAL_DLL Script : public embed::EmbedScript
+class PDAL_DLL Script
 {
 public:
     Script(const std::string& sourceCode, const std::string& moduleName,

@@ -49,8 +49,7 @@ namespace mlang
 
 
 Environment::Environment()
-  : EmbedEnvironment()
-  , m_engine(0)
+  : m_engine(0)
 {
     m_engine = engOpen("");
     if (!m_engine)

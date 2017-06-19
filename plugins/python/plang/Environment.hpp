@@ -47,9 +47,9 @@ typedef _object PyObject;
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
-#include <pdal/EmbedEnvironment.hpp>
 
 #include "Redirector.hpp"
+#include "Script.hpp"
 
 namespace pdal
 {
@@ -64,7 +64,7 @@ std::string getTraceback();
 class Environment;
 typedef Environment *EnvironmentPtr;
 
-class PDAL_DLL Environment : public embed::EmbedEnvironment
+class PDAL_DLL Environment
 {
 public:
     Environment();
@@ -74,7 +74,7 @@ public:
     void set_stdout(std::ostream* ostr);
     void reset_stdout();
 
-    void execute(embed::EmbedScript& script) {};
+    void execute(Script& script) {};
 
     static EnvironmentPtr get();
 

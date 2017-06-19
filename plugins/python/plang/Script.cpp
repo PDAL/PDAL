@@ -46,15 +46,10 @@ namespace plang
 Script::Script( const std::string& source,
                 const std::string& module,
                 const std::string& function)
-    : embed::EmbedScript(Json::objectValue)
-    , m_source(source)
+    : m_source(source)
     , m_module(module)
     , m_function(function)
 {
-
-    m_detail["source"] = source;
-    m_detail["module"] = module;
-    m_detail["function"] = function;
 }
 
 
