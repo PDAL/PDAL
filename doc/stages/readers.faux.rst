@@ -54,7 +54,7 @@ bounds
   What spatial extent should points be generated within? Text string of the
   form "([xmin,xmax],[ymin,ymax],[zmin,zmax])". [Default: unit cube]
 
-num_points
+count
   How many synthetic points to generate before finishing? [Required]
 
 mean_x|y|z
