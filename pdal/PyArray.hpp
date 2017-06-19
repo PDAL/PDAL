@@ -42,6 +42,9 @@
 #  pragma warning(disable: 4127) // conditional expression is constant
 #endif
 
+
+#ifdef PDAL_HAVE_PYTHON
+
 #include <Python.h>
 #undef toupper
 #undef tolower
@@ -52,6 +55,15 @@
 #endif
 
 #include <numpy/arrayobject.h>
+
+#endif
+
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
 
 namespace pdal
 {
@@ -66,6 +78,7 @@ public:
     Array()
         : m_py_array(0)
     {
+#ifdef PDAL_HAVE_PYTHON
         auto initNumpy = []()
         {
 #undef NUMPY_IMPORT_ARRAY_RETVAL
@@ -73,6 +86,7 @@ public:
             import_array();
         };
         initNumpy();
+#endif
     }
 
     ~Array()
@@ -83,6 +97,7 @@ public:
 
     inline void update(PointViewPtr view)
     {
+#ifdef PDAL_HAVE_PYTHON
         typedef std::unique_ptr<std::vector<uint8_t>> DataPtr;
         cleanup();
         int nd = 1;
@@ -129,7 +144,7 @@ public:
 
         m_py_array = pyArray;
         m_data_array = std::move(pdata);
-
+#endif
     }
 
 
@@ -140,9 +155,11 @@ private:
 
     inline void cleanup()
     {
+#ifdef PDAL_HAVE_PYTHON
         PyObject* p = (PyObject*)(m_py_array);
         Py_XDECREF(p);
         m_data_array.reset();
+#endif
     }
 
     inline PyObject* buildNumpyDescription(PointViewPtr view) const
@@ -156,6 +173,8 @@ private:
         // 'ScanAngleRank', 'UserData', 'PointSourceId', 'GpsTime', 'Red', 'Green',
         // 'Blue']}
         //
+
+#ifdef PDAL_HAVE_PYTHON
         std::stringstream oss;
         Dimension::IdList dims = view->dims();
 
@@ -205,6 +224,7 @@ private:
     //     std::string output(s);
     //     std::cout << "array: " << output << std::endl;
         return dict;
+#endif
     }
 
     PyObject* m_py_array;
