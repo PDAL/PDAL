@@ -11,7 +11,7 @@ target_include_directories(${python_libname} PRIVATE
     ${PYTHON_INCLUDE_DIR} ${PDAL_JSONCPP_INCLUDE_DIR})
 
 target_link_libraries(${python_libname} PUBLIC
-    ${PYTHON_LIBRARY})
+    ${PYTHON_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 if (WITH_TESTS)
 
@@ -19,6 +19,6 @@ if (WITH_TESTS)
         FILES ../test/PythonFilterTest.cpp ${PLANG}
         LINK_WITH ${programmable_libname} )
     target_link_libraries(pdal_filters_python_test PUBLIC
-        ${PYTHON_LIBRARY})
+        ${PYTHON_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 endif()
