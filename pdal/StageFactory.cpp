@@ -53,6 +53,7 @@
 #include <filters/GreedyProjection.hpp>
 #include <filters/GroupByFilter.hpp>
 #include <filters/HAGFilter.hpp>
+#include <filters/HeadFilter.hpp>
 #include <filters/IQRFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
 #include <filters/LocateFilter.hpp>
@@ -74,6 +75,7 @@
 #include <filters/SortFilter.hpp>
 #include <filters/SplitterFilter.hpp>
 #include <filters/StatsFilter.hpp>
+#include <filters/TailFilter.hpp>
 #include <filters/TransformationFilter.hpp>
 #include <filters/VoxelCenterNearestNeighborFilter.hpp>
 #include <filters/VoxelCentroidNearestNeighborFilter.hpp>
@@ -259,6 +261,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(GreedyProjection_InitPlugin);
     PluginManager::initializePlugin(GroupByFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
+    PluginManager::initializePlugin(HeadFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
     PluginManager::initializePlugin(LocateFilter_InitPlugin);
@@ -280,6 +283,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(SortFilter_InitPlugin);
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
+    PluginManager::initializePlugin(TailFilter_InitPlugin);
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
     PluginManager::initializePlugin(VoxelCenterNearestNeighborFilter_InitPlugin);
     PluginManager::initializePlugin(VoxelCentroidNearestNeighborFilter_InitPlugin);
