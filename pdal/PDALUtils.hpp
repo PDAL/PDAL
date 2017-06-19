@@ -110,7 +110,8 @@ inline double toDouble(const Everything& e, Dimension::Type type)
     return d;
 }
 
-inline Everything extractDim(Extractor& ext, Dimension::Type type)
+template<typename INPUT>
+inline Everything extractDim(INPUT& ext, Dimension::Type type)
 {
     using Type = Dimension::Type;
 
@@ -153,8 +154,9 @@ inline Everything extractDim(Extractor& ext, Dimension::Type type)
     return e;
 }
 
-inline void insertDim(Inserter& ins, Dimension::Type type,
-    const Everything& e)
+
+template<typename OUTPUT>
+inline void insertDim(OUTPUT& ins, Dimension::Type type, const Everything& e)
 {
     using Type = Dimension::Type;
 
@@ -194,7 +196,6 @@ inline void insertDim(Inserter& ins, Dimension::Type type,
             break;
     }
 }
-
 
 
 inline MetadataNode toMetadata(const BOX2D& bounds)

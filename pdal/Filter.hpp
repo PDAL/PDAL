@@ -65,12 +65,5 @@ private:
     Filter(const Filter&); // not implemented
 };
 
-class PDAL_DLL MultiFilter : public Filter
-{
-public:
-    MultiFilter() : Filter()
-        {}
-};
-
 }  // namespace pdal
 

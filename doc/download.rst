@@ -64,9 +64,9 @@ The fastest way to get going with PDAL is to use the Docker build. See the
 Windows
 ................................................................................
 
-Windows users are asked to use the :ref:`docker` builds for :ref:`apps` access,
-otherwise, a call for help with building current Windows PDAL builds is at
-https://lists.osgeo.org/pipermail/pdal/2016-November/001089.html
+Windows builds are available via `OSGeo4W`_ (64-bit only). Run the
+``osgeo4w-setup.exe`` and choose the "Advanced Install" option. PDAL is
+available in the Commandline_Utilities or Libs section.
 
 RPMs
 ................................................................................

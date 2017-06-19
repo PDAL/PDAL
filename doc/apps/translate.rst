@@ -80,15 +80,16 @@ Example 2:
 --------------------------------------------------------------------------------
 
 Given these tools, we can now construct a custom pipeline on-the-fly. The
-example below uses a simple LAS reader and writer, but stages a PCL-based
-voxel grid filter, followed by the PMF filter. We can even set
+example below uses a simple LAS reader and writer, but stages a PCL-based voxel
+grid filter, followed by the PMF filter and a range filter. We can even set
 stage-specific parameters as shown.
 
 ::
 
-    $ pdal translate input.las output.las pclblock pmf \
-        --filters.pclblock.json="{\"pipeline\":{\"filters\":[{\"name\":\"VoxelGrid\"}]}}" \
-        --filters.pmf.approximate=true --filters.pmf.extract=true
+    $ pdal translate input.las output.las pclblock pmf range \
+        --filters.pclblock.methods="[{\"name\":\"VoxelGrid\"}]" \
+        --filters.pmf.approximate=true \
+        --filters.range.limits="Classification[2:2]"
 
 Example 3:
 --------------------------------------------------------------------------------
@@ -113,4 +114,3 @@ reference system and writes the result to the file "output.las".
 
     $ pdal translate input.las output.las -f filters.reprojection \
       --filters.reprojection.out_srs="EPSG:4326"
-

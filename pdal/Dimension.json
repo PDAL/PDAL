@@ -337,5 +337,25 @@
     "name": "OriginId",
     "type": "uint32",
     "description": "A file source ID from which the point originated.  This ID is global to a derivative dataset which may be aggregated from multiple files."
+    },
+    {
+    "name": "NormalX",
+    "type": "double",
+    "description": "X component of a vector normal to surface at this point"
+    },
+    {
+    "name": "NormalY",
+    "type": "double",
+    "description": "Y component of a vector normal to surface at this point"
+    },
+    {
+    "name": "NormalZ",
+    "type": "double",
+    "description": "Z component of a vector normal to surface at this point"
+    },
+    {
+    "name": "Curvature",
+    "type": "double",
+    "description": "Curvature of surface at this point"
     }
 ] }

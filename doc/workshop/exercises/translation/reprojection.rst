@@ -10,18 +10,19 @@ Reprojection
 Exercise
 --------------------------------------------------------------------------------
 
-This exercise uses PDAL to reproject `ASPRS LAS`_ data
+This exercise uses PDAL to reproject |ASPRSLAS| data
 
 .. _`LASzip`: http://laszip.org
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 
-Issue the following command in your `Docker Quickstart Terminal`.
+Issue the following command in your `OSGeo4W Shell`.
 
 
 .. literalinclude:: ./reprojection-command-1.txt
     :linenos:
 
 .. image:: ../../images/reprojection-run-command.png
+    :target: ../../../_images/reprojection-run-command.png
 
 
 Unfortunately this doesn't produce the intended results for us. Issue the following
@@ -29,11 +30,22 @@ Unfortunately this doesn't produce the intended results for us. Issue the follow
 
 ::
 
-    docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-        pdal info /data/exercises/translation/csite-dd.laz --all
+        pdal info c:/Users/hobu/PDAL/exercises/translation/csite-dd.laz --all ^
+            | jq .stats.bbox.native.bbox
 
 .. image:: ../../images/reprojection-wrong-scale.png
+    :target: ../../../_images/reprojection-wrong-scale.png
 
+``--all`` dumps all :ref:`info_command` information about the file, and we
+can then use the |jq| command to extract out the "native" (same coordinate
+system as the file itself) bounding box. As we can see, the problem is
+we only have two decimal places of precision on the bounding box. For
+geographic coordinate systems, this isn't enough precision.
+
+Printing the first point confirms this problem:
+
+.. image:: ../../images/reprojection-first-point.png
+    :target: ../../../_images/reprojection-first-point.png
 
 Some formats, like :ref:`writers.las` do not automatically set scaling
 information. PDAL cannot really do this for you because there are a number
@@ -46,6 +58,7 @@ to ``auto`` so you don't have to compute it.
     :linenos:
 
 .. image:: ../../images/reprojection-run-with-scale.png
+    :target: ../../../_images/reprojection-run-with-scale.png
 
 
 Run the `pdal info` command again to verify the ``X``, ``Y``, and ``Z``
@@ -53,6 +66,7 @@ dimensions:
 
 
 .. image:: ../../images/reprojection-proper-scale.png
+    :target: ../../../_images/reprojection-proper-scale.png
 
 Notes
 --------------------------------------------------------------------------------
@@ -63,11 +77,7 @@ Notes
    is not correct, not completely specified, or your system doesn't have
    all of the required supporting coordinate system dictionaries.
 
-2. PDAL uses `proj.4`_ library for reprojection. This library includes
+2. PDAL uses |Proj.4| library for reprojection. This library includes
    the capability to do both vertical and horizontal datum transformations.
 
-.. _`proj.4`: http://proj4.org
 
-.. _`CSV`: https://en.wikipedia.org/wiki/Comma-separated_values
-.. _`JSON`: https://en.wikipedia.org/wiki/JSON
-.. _`XML`: https://en.wikipedia.org/wiki/XML

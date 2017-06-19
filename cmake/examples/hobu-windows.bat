@@ -7,8 +7,8 @@
 
 :: Pick your CMake GENERATOR.  (NMake will pick up architecture (x32, x64) from your environment)
 set GENERATOR="NMake Makefiles"
-rem set GENERATOR="Visual Studio 10 Win64"
-rem set GENERATOR="Visual Studio 10"
+REM set GENERATOR="Ninja"
+REM set GENERATOR="Visual Studio 14 Win64"
 
 :: Pick your build type
 set BUILD_TYPE=Release
@@ -47,23 +47,26 @@ set ORACLE_INCLUDE_DIR=%ORACLE_HOME%\include
 set ORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib
 
 :: LibXML2
-set LIBXML2_ENABLED=ON
 set LIBXML2_INCLUDE_DIR=%OSGEO4W_DIR%\include
 set LIBXML2_LIBRARIES=%OSGEO4W_DIR%\lib\libxml2.lib
 
 :: Python
 set PYTHON_ENABLED=ON
-set PYTHON_EXECUTABLE=%OSGEO4W_DIR\bin\python27.exe
-set PYTHON_INCLUDE_DIR=%OSGEO4W_DIR\apps\python27\include
-set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python27\libs\python27.lib
+set PYTHON_EXECUTABLE=%OSGEO4W_DIR\bin\python36.exe
+set PYTHON_INCLUDE_DIR=%OSGEO4W_DIR\apps\python36\include
+set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python36\libs\python36.lib
 
+
+:: CURL
+set CURL_INCLUDE_DIR=%OSGEO4W_DIR%\include
+set CURL_LIBRARY=%OSGEO4W_DIR%\lib\libcurl.lib
 
 
 if EXIST CMakeCache.txt del CMakeCache.txt
 
-cmake -G "Visual Studio 14 2015 Win64" ^
+cmake -G %GENERATOR% ^
     -DBUILD_PLUGIN_CPD=OFF ^
-    -DBUILD_PLUGIN_GREYHOUND=OFF ^
+    -DBUILD_PLUGIN_GREYHOUND=ON ^
     -DBUILD_PLUGIN_HEXBIN=ON ^
     -DBUILD_PLUGIN_ICEBRIDGE=OFF ^
     -DBUILD_PLUGIN_MRSID=OFF ^
@@ -76,16 +79,20 @@ cmake -G "Visual Studio 14 2015 Win64" ^
     -DBUILD_PLUGIN_PYTHON=ON ^
     -DENABLE_CTEST=OFF ^
     -DWITH_APPS=ON ^
-    -DWITH_LAZPERF=c:\pdalbin\ ^
+    -DWITH_LAZPERF=ON ^
+	-DLazperf_DIR=c:\pdalbin\cmake ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=ON ^
-	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\bin\python.exe ^
-	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\include ^
-	-DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python27\libs\python27.lib ^
-	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
+	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\apps\python36\python.exe ^
+	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python36\include ^
+	-DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python36\libs\python36.lib ^
+	-DPYTHON_DEBUG_LIBRARY=%OSGEO4W_DIR%\apps\python36\libs\python36.lib ^
+	-DCURL_INCLUDE_DIR=%CURL_INCLUDE_DIR% ^
+	-DCURL_LIBRARY=%CURL_LIBRARY% ^
+	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python36\lib\site-packages\numpy\core\include ^
 	-DNUMPY_VERSION=1.11.1 ^
     -Dgtest_force_shared_crt=ON ^
-    -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^
+    -DCMAKE_INSTALL_PREFIX=C:\projects\pdal\install ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     .

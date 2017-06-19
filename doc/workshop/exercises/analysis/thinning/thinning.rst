@@ -38,6 +38,7 @@ should operate similarly for the :ref:`filters.voxelgrid` approach too. See
 :ref:`dart-throwing-tutorial` for description of how to randomly filter.
 
 .. figure:: ../../../images/thinning-overview.png
+    :target: ../../../../_images/thinning-overview.png
 
     Thinning strategies available in PDAL
 
@@ -52,6 +53,7 @@ Quickstart Terminal`:
     :linenos:
 
 .. image:: ../../../images/thinning-command-run.png
+    :target: ../../../../_images/thinning-command-run.png
 
 Visualization
 ................................................................................
@@ -61,14 +63,17 @@ are going to use that ability to view both the ``uncompahgre.laz`` and the
 ``uncompahgre-thin.laz`` file.
 
 .. figure:: ../../../images/thinning-select-data.png
+    :target: ../../../../_images/thinning-select-data.png
 
     Selecting multiple data sets in http://plas.io
 
 .. figure:: ../../../images/thinning-full-res.png
+    :target: ../../../../_images/thinning-select-data.png
 
     Full resolution Uncompahgre data set
 
 .. figure:: ../../../images/thinning-poisson-thin.png
+    :target: ../../../../_images/thinning-poisson-thin.png
 
     Uncompahgre thinned at a radius of 20m
 

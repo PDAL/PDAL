@@ -75,6 +75,7 @@ void SQLiteWriter::addArgs(ProgramArgs& args)
         m_cloud_table).setPositional();
     args.add("connection", "SQL connection string",
         m_connection).setPositional();
+    args.addSynonym("connection", "filename");
     args.add("cloud_column_name", "Cloud column name", m_cloud_column, "id");
     args.add("module", "Module name", m_modulename);
     args.add("srid", "SRID", m_srid, 4326U);

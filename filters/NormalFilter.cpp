@@ -67,19 +67,23 @@ void NormalFilter::addArgs(ProgramArgs& args)
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_nx = layout->registerOrAssignDim("NormalX", Dimension::Type::Double);
-    m_ny = layout->registerOrAssignDim("NormalY", Dimension::Type::Double);
-    m_nz = layout->registerOrAssignDim("NormalZ", Dimension::Type::Double);
-    m_curvature = layout->registerOrAssignDim("Curvature",
-        Dimension::Type::Double);
+    using namespace Dimension;
+
+    layout->registerDims({Id::NormalX, Id::NormalY, Id::NormalZ,
+        Id::Curvature});
 }
+
+
+void NormalFilter::doFilter(PointView& view)
+{
+    m_knn = 8;
+    filter(view);
+}
+
 
 void NormalFilter::filter(PointView& view)
 {
-    using namespace Eigen;
-
-    KD3Index kdi(view);
-    kdi.build();
+    KD3Index& kdi = view.build3dIndex();
 
     for (PointId i = 0; i < view.size(); ++i)
     {
@@ -90,18 +94,19 @@ void NormalFilter::filter(PointView& view)
         auto B = eigen::computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3f> solver(B);
-        if (solver.info() != Success)
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(B);
+        if (solver.info() != Eigen::Success)
             throwError("Cannot perform eigen decomposition.");
         auto eval = solver.eigenvalues();
         auto evec = solver.eigenvectors().col(0);
 
-        view.setField(m_nx, i, evec[0]);
-        view.setField(m_ny, i, evec[1]);
-        view.setField(m_nz, i, evec[2]);
+        view.setField(Dimension::Id::NormalX, i, evec[0]);
+        view.setField(Dimension::Id::NormalY, i, evec[1]);
+        view.setField(Dimension::Id::NormalZ, i, evec[2]);
 
         double sum = eval[0] + eval[1] + eval[2];
-        view.setField(m_curvature, i, sum ? std::fabs(eval[0] / sum) : 0);
+        view.setField(Dimension::Id::Curvature, i,
+            sum ? std::fabs(eval[0] / sum) : 0);
     }
 }
 

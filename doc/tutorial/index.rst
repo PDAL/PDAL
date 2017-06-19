@@ -29,6 +29,7 @@ Using PDAL
    clipping-with-shapefile
    calculating-normalized-heights
    dart-throwing
+   python-filtering
 
 
 Developing

@@ -4,7 +4,7 @@ Steps for Making a PDAL Release
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 03/14/2017
+:Date: 05/31/2017
 
 This document describes the process for releasing a new version of PDAL.
 
@@ -31,9 +31,17 @@ Release Process
 
   - doc/quickstart.rst has a number of current-release references
 
+  - Make and push new release branch
+
+    ::
+
+        git branch 1.6-maintenance
+        git push origin 1.6-maintenance
+
+
   - Increment the doc build branch of .travis.yml:
 
-    "$TRAVIS_BRANCH" = "1.2-maintenance"
+    "$TRAVIS_BRANCH" = "1.6-maintenance"
 
   - Make DockerHub build entry for new release branch.
 
@@ -50,6 +58,7 @@ Release Process
     ::
 
         ctest -V
+
 
 5) Clone a new tree and issue cmake. The package_source CMake target is
    aggressive about scooping up every file in the tree to include in the package.
@@ -94,7 +103,43 @@ Release Process
 
 11) Upload Python extension to PyPI
 
-12) Publish JNI Bindings
+  ::
+
+      cd python; python setup.py sdist upload
+
+12) Upload new OSGeo4W package to download.osgeo.org:/osgeo/download/osgeo4w/x86_64/release/pdal
+
+  - Go to https://ci.appveyor.com/project/hobu/pdal
+  - Choose ``OSGEO4W_BUILD=ON`` build
+  - Scroll to very bottom
+  - Fetch tarball "OSGeo4W64 build will be uploaded to https://s3.amazonaws.com/pdal/osgeo4w/pdal-a4af2420b09725a4a0fff1ef277b1e6370c497d2.tar.bz2"
+
+  - rename to match current release and set OSGeo4W build number to 1
+
+    ::
+
+        mv pdal-a4af2420b09725a4a0fff1ef277b1e6370c497d2.tar.bz2 pdal-1.6.0-1.tar.bz2
+
+  - copy to OSGeo4W server
+
+    ::
+
+        scp pdal-1.6.0-1.tar.bz2 hobu@download.osgeo.org:/osgeo/download/osgeo4w/x86_64/release/pdal
+
+  - refresh OSGeo4W
+
+    ::
+        http://upload.osgeo.org/cgi-bin/osgeo4w-regen.sh
+
+
+  - promote release
+
+    ::
+
+        http://upload.osgeo.org/cgi-bin/osgeo4w-promote.sh
+
+
+13) Publish JNI Bindings
     What you need:
         - an account on sonatype (https://issues.sonatype.org/secure/Signup!default.jspa)
         - ~/.sbt/0.13/sonatype.sbt file with the following content:

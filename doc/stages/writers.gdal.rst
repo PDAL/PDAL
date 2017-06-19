@@ -4,8 +4,10 @@ writers.gdal
 ================================================================================
 
 The `GDAL`_ writer creates a raster from a point cloud using an interpolation
-algorithm.  Output is produced using GDAL and can therefore use any `driver
-that supports creation of rasters`_.
+algorithm.  Output is produced using GDAL and can theoretically use any `driver
+that supports creation of rasters`_.  Currently, PDAL only supports writing
+double-precision rasters, which limits the number of drivers that can in
+practice be used.
 
 .. _`GDAL`: http://gdal.org
 .. _`driver that supports creation of rasters`: http://www.gdal.org/formats_list.html
@@ -135,3 +137,12 @@ window_size
 
 dimension
   A dimension name to use for the interpolation. [Default: ``Z``]
+
+.. _bounds:
+
+bounds
+  The bounds of the data to be written.  Points not in bounds are discarded.
+  The format is ([minx, maxx],[miny,maxy]).
+
+.. note::
+  The bounds_ option is required when a pipeline is run in streaming mode.

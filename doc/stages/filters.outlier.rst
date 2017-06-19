@@ -7,6 +7,18 @@ filters.outlier
 The Outlier filter provides two outlier filtering methods: radius and
 statistical. These two approaches are discussed in further detail below.
 
+It is worth noting that both filtering methods simply apply a classification
+value of 7 to the noise points (per the LAS specification). To remove the noise
+points altogether, users can add a :ref:`range filter<filters.range>` to their
+pipeline, downstream from the outlier filter.
+
+.. code-block:: json
+
+    {
+      "type":"filters.range",
+      "limits":"Classification![7:7]"
+    }
+
 Statistical Method
 -------------------------------------------------------------------------------
 
@@ -38,10 +50,6 @@ We now interate over the pre-computed mean distances :math:`\mu_i` and compare t
       \text{true,} \phantom{false,} \text{if } \mu_i >= t \\
       \text{false,} \phantom{true,} \text{otherwise} \\
   \end{cases}
-
-The ``classify`` and ``extract`` options are used to control whether outlier
-points are labeled as noise, or removed from the output ``PointView``
-completely.
 
 .. figure:: filters.statisticaloutlier.img1.png
     :scale: 70 %
@@ -96,10 +104,6 @@ of neighbors specified by ``min_k``, it is marked as an outlier.
       \text{false,} \phantom{true,} \text{otherwise} \\
   \end{cases}
 
-The ``classify`` and ``extract`` options are used to control whether outlier
-points are labeled as noise, or removed from the output ``PointView``
-completely.
-
 Example
 ...............................................................................
 
@@ -124,6 +128,9 @@ four neighbors within a radius of 1.0.
 Options
 -------------------------------------------------------------------------------
 
+class
+  The classification value to apply to outliers. [Default: **7**]
+
 method
   The outlier removal method. [Default: **statistical**]
 
@@ -138,9 +145,3 @@ mean_k
 
 multiplier
   Standard deviation threshold (statistical method only). [Default: **2.0**]
-
-classify
-  Apply classification value of 18 (LAS high noise)? [Default: **true**]
-
-extract
-  Extract inlier returns only? [Default: **false**]

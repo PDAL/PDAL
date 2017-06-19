@@ -27,18 +27,18 @@ Installing QGIS
 --------------------------------------------------------------------------------
 
 1. Copy the contents of your |Hobu| USB key to a ``PDAL`` directory in your
-   home directory (something like ``C:\Users\Howard\PDAL``). We will refer to
+   home directory (something like ``C:\Users\hobu\PDAL``). We will refer to
    this location for the rest of the workshop materials.
 
 2. After your materials are copied, navigate to the
-   ``c:\Users\Howard\PDAL\software`` directory.
+   ``c:\Users\hobu\PDAL\software`` directory.
 
 .. image:: ./images/qgis-select-qgis.png
 
 .. note::
 
     It is assumed your |Hobu| USB drive has all of its contents
-    copied to the ``C:\Users\Howard\PDAL`` folder. Please adjust your
+    copied to the ``C:\Users\hobu\PDAL`` folder. Please adjust your
     locations when reading these tutorial documents accordingly.
 
 3. Choose the install image, Windows or Mac, and install |QGIS|
@@ -50,7 +50,7 @@ Installing QGIS
 
 
 4. Once installed, verify you can run |QGIS| by opening the application.
-   Navigate to the ``C:\Users\Howard\PDAL\exercises\analysis\colorization``
+   Navigate to the ``C:\Users\hobu\PDAL\exercises\analysis\colorization``
    directory.
 
 .. image:: ./images/qgis-add-raster-layer.png

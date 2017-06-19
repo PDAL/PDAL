@@ -49,7 +49,8 @@
 namespace pdal
 {
 
-Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0)
+Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0),
+    m_pointCount(0), m_faceCount(0)
 {}
 
 
@@ -178,6 +179,17 @@ PointViewSet Stage::execute(PointTableRef table)
         table.addSpatialReference((*it)->spatialReference());
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
+    // Count the number of views and the number of points and faces so they're
+    // available to stages.
+    m_pointCount = 0;
+    m_faceCount = 0;
+    for (auto const& it : views)
+    {
+        m_pointCount += it->size();
+        auto m = it->mesh();
+        if (m)
+            m_faceCount += m->size();
+    }
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
@@ -205,6 +217,8 @@ PointViewSet Stage::execute(PointTableRef table)
     }
     l_done(table);
     popLogLeader();
+    m_pointCount = 0;
+    m_faceCount = 0;
     return outViews;
 }
 
@@ -467,6 +481,34 @@ void Stage::setSpatialReference(MetadataNode& m,
         m.add("comp_spatialreference", spatialRef.getWKT(),
             "SRS of this stage");
     }
+}
+
+
+bool Stage::parseName(std::string o, std::string::size_type& pos)
+{
+    auto isStageChar = [](char c)
+        { return std::islower(c) || std::isdigit(c); };
+
+    std::string::size_type start = pos;
+    if (!std::islower(o[pos]))
+        return false;
+    pos++;
+    pos += Utils::extract(o, pos, isStageChar);
+    return true;
+}
+
+
+bool Stage::parseTagName(std::string o, std::string::size_type& pos)
+{
+    auto isTagChar = [](char c)
+        { return std::isalnum(c) || c == '_'; };
+
+    std::string::size_type start = pos;
+    if (!std::isalpha(o[pos]))
+        return false;
+    pos++;
+    pos += Utils::extract(o, pos, isTagChar);
+    return true;
 }
 
 
