@@ -1,7 +1,7 @@
 #
 # Matlab
 #
-find_package(Matlab QUIET)
+find_package(Matlab COMPONENTS ENG_LIBRARY MX_LIBRARY MEX_LIBRARY REQUIRED)
 set_package_properties(Matlab PROPERTIES TYPE REQUIRED)
 if(MATLAB_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES "${MATLAB_LIBRARIES}")

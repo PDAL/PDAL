@@ -55,9 +55,6 @@ public:
     static int32_t destroy(void*);
     std::string getName() const;
 
-    MatlabWriter()
-    {}
-
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);

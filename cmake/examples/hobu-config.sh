@@ -52,12 +52,11 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost" \
         -DBUILD_PLUGIN_MATLAB=ON \
-        -DMATLAB_ROOT=/Applications/MATLAB_R2017a.app \
-        -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmex.dylib \
-        -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmat.dylib \
-        -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmx.dylib \
-        -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017a.app/extern/include \
-        -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libeng.dylib
+         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmex.dylib \
+         -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmat.dylib \
+         -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmx.dylib \
+         -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017a.app/extern/include \
+         -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libeng.dylib
 
 
 #         -DPYTHON_EXECUTABLE=/usr/local/bin/python \

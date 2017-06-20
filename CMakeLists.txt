@@ -56,7 +56,6 @@ else()
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
-set(PDAL_MLANG_LIB_NAME pdal_mlang)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 #set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
 
@@ -179,9 +178,6 @@ if (NOT PDAL_HAVE_JSONCPP)
 endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
-if (BUILD_PLUGIN_MATLAB)
-    add_subdirectory(pdal/mlang)
-endif()
 add_subdirectory(apps)
 
 #
