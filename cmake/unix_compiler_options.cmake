@@ -1,6 +1,3 @@
-set(PDAL_COMMON_CXX_FLAGS "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wredundant-decls -Wno-long-long -Wno-unknown-pragmas -Wno-deprecated-declarations -isystem /usr/local/include"
-)
-
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.7)
         set(PDAL_CXX_STANDARD "-std=c++0x")
@@ -15,4 +12,20 @@ else()
     message(FATAL_ERROR "Unsupported C++ compiler")
 endif()
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS} ${PDAL_CXX_STANDARD}")
+function(PDAL_TARGET_COMPILE_SETTINGS target)
+    target_compile_options(${target} PUBLIC
+        ${PDAL_CXX_STANDARD}
+        -Wextra
+        -Wall
+        -Wno-unused-parameter
+        -Wno-unused-variable
+        -Wpointer-arith
+        -Wcast-align
+        -Wcast-qual
+        -Wredundant-decls
+        -Wno-long-long
+        -Wno-unknown-pragmas
+        -Wno-deprecated-declarations
+        )
+    target_include_directories(${target} SYSTEM PUBLIC /usr/local/include)
+endfunction()
