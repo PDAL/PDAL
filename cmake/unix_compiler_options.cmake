@@ -3,9 +3,9 @@ set(PDAL_COMMON_CXX_FLAGS "-Wextra -Wall -Wno-unused-parameter -Wno-unused-varia
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.7)
-       set(CXX_STANDARD "-std=c++0x")
+        set(CXX_STANDARD "-std=c++0x")
     else()
-       set(CXX_STANDARD "-std=c++11")
+        set(CXX_STANDARD "-std=c++11")
     endif()
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER 4.6)
         set(PDAL_NO_AS_NEEDED_START "-Wl,--no-as-needed")
