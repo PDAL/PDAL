@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2015, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014-2017, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -71,7 +71,6 @@ private:
     double m_maxDistance;
     double m_initialDistance;
     double m_cellSize;
-    bool m_classify;
     bool m_extract;
     bool m_approximate;
 };
