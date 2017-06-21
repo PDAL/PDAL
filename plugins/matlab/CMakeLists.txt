@@ -2,8 +2,12 @@
 
 include(${PDAL_CMAKE_DIR}/matlab.cmake)
 
+set(MLANG ./filters/Environment.cpp
+          ./filters/Script.cpp)
+
 PDAL_ADD_PLUGIN(libname writer matlab
     FILES
+        ${MLANG}
         io/MatlabWriter.cpp
     LINK_WITH
         ${MATLAB_ENG_LIBRARY} ${MATLAB_MX_LIBRARY} ${MATLAB_MAT_LIBRARY}
@@ -16,8 +20,7 @@ target_include_directories(${libname} PRIVATE ${MATLAB_INCLUDE_DIR})
 
 
 
-set(MLANG ./filters/Environment.cpp
-          ./filters/Script.cpp)
+
 
 PDAL_ADD_PLUGIN(matlab_libname filter matlab
     FILES

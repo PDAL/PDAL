@@ -66,7 +66,7 @@ private:
     StringList m_outputDims; ///< List of dimensions to write
     // Can't use unique_ptr b/c MATFile is an incomplete type.
     MATFile * m_matfile;
-    DimTypeList m_dimTypes;
+    Dimension::IdList m_dims;
 };
 
 
