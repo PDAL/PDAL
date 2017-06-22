@@ -9,7 +9,7 @@ Project Goals
    command line tools are provided.  As `GDAL`_ is to 2D pixels, `OGR`_ is to
    geospatial vector geometry, PDAL is to multidimensional points.
 
-2. From a market perspective, PDAL is "version 2" of libLAS.  The actual
+2. From a market perspective, PDAL is "version 2" of `libLAS`_.  The actual
    code base will be different, however, and the APIs will not be
    compatible.
 
@@ -30,3 +30,4 @@ Project Goals
 
 .. _`GDAL`: http://gdal.org
 .. _`OGR`: http://gdal.org/ogr/
+.. _`libLAS`: https://www.liblas.org
