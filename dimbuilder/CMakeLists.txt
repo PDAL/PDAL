@@ -26,6 +26,7 @@ add_executable(dimbuilder
 target_include_directories(dimbuilder PRIVATE
     ${PDAL_INCLUDE_DIR}
     ${PDAL_JSONCPP_INCLUDE_DIR})
+PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
 if (PDAL_HAVE_JSONCPP)
     target_link_libraries(dimbuilder PRIVATE ${PDAL_JSONCPP_LIB_NAME})
 endif()

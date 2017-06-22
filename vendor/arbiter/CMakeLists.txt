@@ -21,9 +21,7 @@ target_link_libraries(${PDAL_ARBITER_LIB_NAME} )
 if (UNIX)
     target_compile_options(${PDAL_ARBITER_LIB_NAME} PRIVATE "-fPIC")
 else()
-    set_target_properties(${PDAL_ARBITER_LIB_NAME}
-        PROPERTIES
-            COMPILE_DEFINITIONS ARBITER_DLL_EXPORT)
+    target_compile_definitions(${PDAL_ARBITER_LIB_NAME} PUBLIC -DARBITER_DLL_EXPORT)
 endif()
 
 set_target_properties(${PDAL_ARBITER_LIB_NAME} PROPERTIES
