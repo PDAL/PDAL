@@ -52,8 +52,12 @@ public:
     Script() {};
 
     static int getMatlabDataType(Dimension::Type t);
+    static Dimension::Type getPDALDataType(mxClassID t);
 
-    static mxArray* getMatlabStruct(PointViewPtr view, const Dimension::IdList& dims);
+    static mxArray* setMatlabStruct(PointViewPtr view, const Dimension::IdList& dims);
+
+    static void getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& dims);
+
     std::string m_source;
     std::string m_scriptFilename;
     std::string m_module;

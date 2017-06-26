@@ -100,7 +100,7 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     engOutputBuffer(engine, m_MatlabOutputBuffer.get(), logBufferSize);
 
     Dimension::IdList dims;
-    mxArray* matlabData = mlang::Script::getMatlabStruct(view, dims);
+    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims);
     if (engPutVariable(engine, "PDAL", matlabData))
     {
         throwError("Could not push PDAL struct to Matlab");

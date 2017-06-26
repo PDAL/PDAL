@@ -49,8 +49,32 @@ std::ostream& operator << (std::ostream& os, Script const& script)
     return os;
 }
 
+void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& indims)
+{
 
-mxArray* Script::getMatlabStruct(PointViewPtr view, const Dimension::IdList& indims)
+    std::vector<mxArray*> arrays;
+    std::vector<std::string> dimNames;
+
+    mxClassID ml_id = mxGetClassID(array);
+    if (ml_id != mxSTRUCT_CLASS)
+        throw pdal::pdal_error("input array was not a matlab 'PDAL' struct!");
+
+    Dimension::IdList  dims;
+    if (!indims.size())
+        dims = view->dims();
+    else
+        dims = indims;
+
+    for (auto d: dims)
+    {
+        std::string dimName = Dimension::name(d);
+//         int fieldNumber = mxGetFieldNumber(array, dimName.c_str());
+        mxArray* f = mxGetField(array, 0, dimName.c_str());
+    }
+
+}
+
+mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& indims)
 {
 
     std::vector<mxArray*> arrays;
@@ -67,7 +91,6 @@ mxArray* Script::getMatlabStruct(PointViewPtr view, const Dimension::IdList& ind
     mdims[1] = 1;
 
     std::stringstream dimensionsString;
-    bool first(true);
     for (auto d: dims)
     {
         std::string dimName = Dimension::name(d);
@@ -121,6 +144,40 @@ mxArray* Script::getMatlabStruct(PointViewPtr view, const Dimension::IdList& ind
 
 }
 
+Dimension::Type Script::getPDALDataType(mxClassID t)
+{
+    using namespace Dimension;
+
+    switch (t)
+    {
+    case mxSINGLE_CLASS:
+        return Type::Float;
+    case mxDOUBLE_CLASS:
+        return Type::Double;
+    case mxINT8_CLASS:
+        return Type::Signed8;
+    case mxINT16_CLASS:
+        return Type::Signed16;
+    case mxINT32_CLASS:
+        return Type::Signed32;
+    case mxINT64_CLASS:
+        return Type::Signed64;
+    case mxUINT8_CLASS:
+        return Type::Unsigned8;
+    case mxUINT16_CLASS:
+        return Type::Unsigned16;
+    case mxUINT32_CLASS:
+        return Type::Unsigned32;
+    case mxUINT64_CLASS:
+        return Type::Unsigned64;
+    default:
+        return Type::None;
+    }
+    assert(0);
+
+    return Type::None;
+}
+
 int Script::getMatlabDataType(Dimension::Type t)
 {
     using namespace Dimension;
@@ -132,11 +189,11 @@ int Script::getMatlabDataType(Dimension::Type t)
     case Type::Double:
         return mxDOUBLE_CLASS;
     case Type::Signed8:
-        return mxDOUBLE_CLASS;
+        return mxINT8_CLASS;
     case Type::Signed16:
         return mxINT16_CLASS;
     case Type::Signed32:
-        return mxINT64_CLASS;
+        return mxINT32_CLASS;
     case Type::Signed64:
         return mxINT64_CLASS;
     case Type::Unsigned8:
