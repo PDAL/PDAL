@@ -54,6 +54,7 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
+    PDAL_TARGET_COMPILE_SETTINGS(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -73,6 +74,7 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
+    PDAL_TARGET_COMPILE_SETTINGS(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
