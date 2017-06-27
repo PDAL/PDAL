@@ -36,7 +36,7 @@ Example
         {
           "type":"readers.faux",
           "bounds":"([0,1000000],[0,1000000],[0,100])",
-          "num_points":"10000",
+          "count":"10000",
           "mode":"random"
         },
         {
