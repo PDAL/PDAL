@@ -100,7 +100,8 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     engOutputBuffer(engine, m_MatlabOutputBuffer.get(), logBufferSize);
 
     Dimension::IdList dims;
-    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims);
+
+    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, log());
     if (engPutVariable(engine, "PDAL", matlabData))
     {
         throwError("Could not push PDAL struct to Matlab");
@@ -111,27 +112,44 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     std::string noise(m_MatlabOutputBuffer.get(), strlen(m_MatlabOutputBuffer.get()));
     log()->get(LogLevel::Debug) << "filters.matlab " << noise << std::endl;
 
+    matlabData = engGetVariable(engine, "PDAL");
+    if (!matlabData)
+        throwError("No 'PDAL' variable is available in Matlab scope!");
 
     PointViewSet viewSet;
 
-//     if (m_pythonMethod->hasOutputVariable("Mask"))
-//     {
-//         PointViewPtr outview = view->makeNew();
-//
-//         void *pydata =
-//             m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
-//         char *ok = (char *)pydata;
-//         for (PointId idx = 0; idx < view->size(); ++idx)
-//             if (*ok++)
-//                 outview->appendPoint(*view, idx);
-//
-//         viewSet.insert(outview);
-//     }
-//     else
-//     {
-//         m_pythonMethod->end(*view, getMetadata());
+    std::string logicalDimensionName = m_script.getLogicalMask(matlabData, log());
+    if (logicalDimensionName.size())
+    {
+        PointViewPtr outview = view->makeNew();
+
+        mxArray* f = mxGetField(matlabData, 0, logicalDimensionName.c_str());
+        if (!f)
+        {
+            std::ostringstream oss;
+            oss << "Unable to fetch mask dimension '" << logicalDimensionName << "'";
+            throwError(oss.str());
+        }
+
+        mxLogical* logical = mxGetLogicals(f);
+        if (!logical)
+        {
+            std::ostringstream oss;
+            oss << "Unable to fetch logical mask for dimension '" << logicalDimensionName << "'";
+            throwError(oss.str());
+        }
+
+        char *ok = (char *)logical;
+        for (PointId idx = 0; idx < view->size(); ++idx)
+            if (*ok++)
+                outview->appendPoint(*view, idx);
+        viewSet.insert(outview);
+    }
+    else
+    {
+        mlang::Script::getMatlabStruct(matlabData, view, dims, log());
         viewSet.insert(view);
-//     }
+    }
 
     return viewSet;
 

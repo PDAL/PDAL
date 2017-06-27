@@ -49,15 +49,36 @@ std::ostream& operator << (std::ostream& os, Script const& script)
     return os;
 }
 
-void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& indims)
+std::string Script::getLogicalMask(mxArray* array, LogPtr log)
 {
 
+    std::string output("");
+    mxClassID ml_id = mxGetClassID(array);
+    if (ml_id != mxSTRUCT_CLASS)
+        throw pdal::pdal_error("Selected array must be a Matlab struct array!");
+
+    for (int n = 0; n < mxGetNumberOfFields(array); ++n)
+    {
+
+        mxArray* f = mxGetFieldByNumber(array, 0, n);
+
+        if (mxIsLogical(f))
+        {
+            const char* name = mxGetFieldNameByNumber(array, n);
+            output = std::string(name);
+        }
+    }
+    return output;
+}
+
+void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& indims, LogPtr log)
+{
     std::vector<mxArray*> arrays;
     std::vector<std::string> dimNames;
 
     mxClassID ml_id = mxGetClassID(array);
     if (ml_id != mxSTRUCT_CLASS)
-        throw pdal::pdal_error("input array was not a matlab 'PDAL' struct!");
+        throw pdal::pdal_error("Selected array must be a Matlab struct array!");
 
     Dimension::IdList  dims;
     if (!indims.size())
@@ -67,14 +88,46 @@ void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension:
 
     for (auto d: dims)
     {
-        std::string dimName = Dimension::name(d);
-//         int fieldNumber = mxGetFieldNumber(array, dimName.c_str());
-        mxArray* f = mxGetField(array, 0, dimName.c_str());
-    }
+        std::string dimName = view->dimName(d);
 
+        mxArray* f = mxGetField(array, 0, dimName.c_str());
+        if (!f)
+        {
+            std::ostringstream oss;
+            oss << "No dimension named '" << dimName << "' exists on struct array.";
+            throw pdal::pdal_error(oss.str());
+        }
+
+        mwSize numElements = mxGetNumberOfElements(f);
+        if (numElements != view->size())
+        {
+            std::ostringstream oss;
+            oss << "Array shape is not the same as the PDAL PointView. ";
+            oss << "Matlab array is has '" << numElements << "' elements. ";
+            oss << "PointView has '" << view->size() << "' elements.";
+            throw pdal::pdal_error(oss.str());
+        }
+
+        mxClassID mt = mxGetClassID(f);
+        Dimension::Type pt = Script::getPDALDataType(mt);
+
+        char* p = (char*)mxGetData(f);
+        if (!p)
+        {
+            std::ostringstream oss;
+            oss << "Unable to fetch Matlab pointer to array for dimension '" << dimName << "'";
+            throw pdal::pdal_error(oss.str());
+        }
+
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            view->setField(d, pt, i, p);
+            p += view->dimSize(d);
+        }
+    }
 }
 
-mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& indims)
+mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& indims, LogPtr log)
 {
 
     std::vector<mxArray*> arrays;
