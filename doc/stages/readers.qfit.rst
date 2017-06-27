@@ -4,6 +4,8 @@
 readers.qfit
 ******************************************************************************
 
+.. admonition:: This is a built-in reader.
+
 The **QFIT reader** read from files in the `QFIT format`_ originated for the
 Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
 

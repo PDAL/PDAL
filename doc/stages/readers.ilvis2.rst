@@ -3,6 +3,8 @@
 readers.ilvis2
 ===============
 
+.. admonition:: This is a built-in reader.
+
 The **ILVIS2 reader** read from files in the ILVIS2 format. See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html
 for more information
 

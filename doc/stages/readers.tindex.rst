@@ -3,6 +3,7 @@
 readers.tindex
 ================================================================================
 
+.. admonition:: This is a built-in reader.
 
 A `GDAL tile index`_ is an `OGR`_-readable data source of boundary information.
 PDAL provides a similar concept for PDAL-readable point cloud data. You can use

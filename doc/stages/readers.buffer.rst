@@ -3,6 +3,8 @@
 readers.buffer
 ==============
 
+.. admonition:: This is a built-in reader.
+
 The :ref:`readers.buffer` stage is a special stage that allows
 you to read data from your own PointView rather than
 fetching the data from a specific reader. In the :ref:`writing` example,

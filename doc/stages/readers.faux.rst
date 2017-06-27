@@ -3,6 +3,8 @@
 readers.faux
 ============
 
+.. admonition:: This is a built-in reader.
+
 The faux reader is used for testing pipelines. It does not read from a
 file or database, but generates synthetic data to feed into the pipeline.
 

@@ -3,6 +3,8 @@
 readers.las
 ===========
 
+.. admonition:: This is a built-in reader.
+
 The **LAS Reader** supports reading from `LAS format`_ files, the standard
 interchange format for LIDAR data.  The reader does NOT support point formats
 containing waveform data (4, 5, 9 and 10).

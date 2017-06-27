@@ -3,6 +3,8 @@
 readers.pts
 ============
 
+.. admonition:: This is a built-in reader.
+
 The **PTS reader** reads data from Leica Cyclone PTS files. It is
 not very sophisticated.
 

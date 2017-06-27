@@ -3,6 +3,8 @@
 readers.oci
 ===========
 
+.. admonition:: This reader is built as an optional plug-in.
+
 The OCI reader is used to read data from `Oracle point cloud`_ databases.
 
 

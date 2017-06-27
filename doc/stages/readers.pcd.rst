@@ -4,6 +4,7 @@
 readers.pcd
 ******************************************************************************
 
+.. admonition:: This reader is built as an optional plug-in.
 
 The **PCD Reader** supports reading from `Point Cloud Data (PCD)`_ formatted
 files, which are used by the `Point Cloud Library (PCL)`_.

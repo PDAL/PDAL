@@ -3,6 +3,8 @@
 readers.ply
 ===========
 
+.. admonition:: This is a built-in reader.
+
 The **ply reader** reads points and vertices from the `polygon file format`_, a
 common file format for storing three dimensional models.  The `rply library`_
 is included with the PDAL source, so there are no external dependencies.

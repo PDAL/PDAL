@@ -3,6 +3,8 @@
 readers.text
 ============
 
+.. admonition:: This is a built-in reader.
+
 The **text reader** reads data from ASCII text files.  Each point is
 represented in the file as a single line.  Each line is expected to be divided
 into a number of fields by a separator.  Each field represents a value for

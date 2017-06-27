@@ -3,6 +3,8 @@
 readers.greyhound
 =================
 
+.. admonition:: This reader is built as an optional plug-in.
+
 The **Greyhound Reader** allows you to query point data from a `Greyhound`_
 server.
 
