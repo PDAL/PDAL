@@ -32,11 +32,13 @@ endif()
 
 set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
-    PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, and ground, pcl, smooth, and view kernels")
+    PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, ICP filter, and ground, pcl, smooth, and view kernels")
 
 set(INCLUDE_DIRS
     ${ROOT_DIR}
-    ${PCL_INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_LIST_DIR}
+    )
 
 add_definitions(${PCL_DEFINITIONS})
 if (NOT WIN32)
@@ -120,6 +122,13 @@ PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
 target_include_directories(${greedyprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
+PDAL_ADD_PLUGIN(icp_filter_libname filter icp
+    FILES
+        filters/IcpFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+target_include_directories(${icp_filter_libname} PRIVATE
+    ${INCLUDE_DIRS})
+
 #
 # PCL Kernel
 #
@@ -144,10 +153,18 @@ target_include_directories(${smooth_libname} PRIVATE
     ${PDAL_IO_DIR})
 
 if (WITH_TESTS)
-    PDAL_ADD_TEST(pcltest
+    PDAL_ADD_TEST(pdal_filters_pcl_block_test
     FILES
         test/PCLBlockFilterTest.cpp
     LINK_WITH ${pcd_reader_libname} ${pcd_writer_libname} ${pclblock_libname}
         ${pcl_libname} ${smooth_libname}
     )
+
+    PDAL_ADD_TEST(pdal_filters_icp_test
+    FILES
+        test/IcpFilterTest.cpp
+    LINK_WITH
+        ${icp_filter_libname}
+    )
+    target_include_directories(pdal_filters_icp_test PRIVATE ${INCLUDE_DIRS})
 endif()

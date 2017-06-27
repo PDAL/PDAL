@@ -92,7 +92,7 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
         k++;
     }
 
-    return A * A.transpose();
+    return A * A.transpose() / (ids.size()-1);
 }
 
 uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2014, Pete Gadomski (pete.gadomski@gmail.com)
+ * Copyright (c) 2017, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -13,10 +13,9 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software without specific prior
- *       written permission.
+ *     * Neither the name of the Andrew Bell or libLAS nor the names of
+ *       its contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,48 +31,21 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
-
-#include <cpd/matrix.hpp>
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
+#include "HeadFilter.hpp"
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL CpdKernel : public Kernel
+static PluginInfo const s_info = PluginInfo(
+    "filters.head", "Return N points from beginning of the point cloud.",
+    "http://pdal.io/stages/filters.head.html");
+
+CREATE_STATIC_PLUGIN(1, 0, HeadFilter, Filter, s_info)
+
+std::string HeadFilter::getName() const
 {
-public:
-    static void *create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-    int execute();
-
-private:
-    CpdKernel() : Kernel() {};
-    virtual void addSwitches(ProgramArgs& args);
-    cpd::Matrix readFile(const std::string& filename);
-
-    std::string m_method;
-    std::string m_fixed;
-    std::string m_moving;
-    std::string m_output;
-    BOX3D m_bounds;
-
-    // cpd::Transform
-    size_t m_max_iterations;
-    bool m_normalize;
-    double m_outliers;
-    double m_sigma2;
-    double m_tolerance;
-
-    // cpd::Rigid
-    bool m_reflections;
-    bool m_scale;
-
-    // cpd::Nonrigid
-    double m_beta;
-    double m_lambda;
-};
+    return s_info.name;
+}
 
 } // namespace pdal

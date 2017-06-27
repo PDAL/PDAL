@@ -1,14 +1,21 @@
-find_package(Cpd 0.5 REQUIRED)
+set(Cpd_VERSION 0.5)
 
-set_package_properties(Cpd PROPERTIES
-    DESCRIPTION "Coherent Point Drift"
-    URL "https://github.com/gadomski/cpd"
-    TYPE OPTIONAL
-    PURPOSE "Register two point sets using the Coherent Point Drift algorithm"
-    )
+find_package(Cpd ${Cpd_VERSION} REQUIRED)
+option(BUILD_PLUGIN_CPD "Build Coherent Point Drift support" ${Cpd_FOUND})
 
-pdal_add_plugin(cpd_kernel_lib_name kernel cpd
-    FILES kernel/CpdKernel.cpp
+set(files filters/CpdFilter.cpp)
+set(include_dirs "${CMAKE_CURRENT_LIST_DIR}" "${PDAL_VENDOR_DIR}/eigen")
+
+PDAL_ADD_PLUGIN(filter_libname filter cpd
+    FILES filters/CpdFilter.cpp
     LINK_WITH Cpd::Library-C++
     )
-target_include_directories(${cpd_kernel_lib_name} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${filter_libname} PRIVATE "${include_dirs}")
+
+if(${WITH_TESTS})
+    PDAL_ADD_TEST(pdal_filters_cpd_test
+        FILES test/CpdFilterTest.cpp
+        LINK_WITH ${filter_libname}
+        )
+    target_include_directories(pdal_filters_cpd_test PRIVATE "${include_dirs}")
+endif()
