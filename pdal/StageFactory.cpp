@@ -65,6 +65,7 @@
 #include <filters/OutlierFilter.hpp>
 #include <filters/OverlayFilter.hpp>
 #include <filters/PMFFilter.hpp>
+#include <filters/PoissonFilter.hpp>
 #include <filters/RadialDensityFilter.hpp>
 #include <filters/RandomizeFilter.hpp>
 #include <filters/RangeFilter.hpp>
@@ -269,6 +270,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(OutlierFilter_InitPlugin);
     PluginManager::initializePlugin(OverlayFilter_InitPlugin);
     PluginManager::initializePlugin(PMFFilter_InitPlugin);
+    PluginManager::initializePlugin(PoissonFilter_InitPlugin);
     PluginManager::initializePlugin(RadialDensityFilter_InitPlugin);
     PluginManager::initializePlugin(RandomizeFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);

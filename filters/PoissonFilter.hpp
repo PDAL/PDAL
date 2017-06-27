@@ -46,7 +46,7 @@ namespace pdal
 class PDAL_DLL PoissonFilter : public Filter
 {
 public:
-    PoissonFilter() : Filter()
+    PoissonFilter() : Filter(), m_normalsProvided(false)
     {}
     PoissonFilter& operator=(const PoissonFilter&) = delete;
     PoissonFilter(const PoissonFilter&) = delete;
@@ -56,8 +56,14 @@ public:
     std::string getName() const;
 
 private:
-    virtual void filter(PointView& view);
+    bool m_density;
+    int m_depth;
+    bool m_normalsProvided;
+    bool m_doColor;
 
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void addArgs(ProgramArgs& args);
 };
 
 } // namespace pdal

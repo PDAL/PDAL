@@ -340,16 +340,19 @@
     },
     {
     "name": "NormalX",
+    "alt_names": "nx",
     "type": "double",
     "description": "X component of a vector normal to surface at this point"
     },
     {
     "name": "NormalY",
+    "alt_names": "ny",
     "type": "double",
     "description": "Y component of a vector normal to surface at this point"
     },
     {
     "name": "NormalZ",
+    "alt_names": "nz",
     "type": "double",
     "description": "Z component of a vector normal to surface at this point"
     },
@@ -357,5 +360,11 @@
     "name": "Curvature",
     "type": "double",
     "description": "Curvature of surface at this point"
+    },
+    {
+    "name": "Density",
+    "type": "double",
+    "description": "Estimate of point density"
     }
+
 ] }
