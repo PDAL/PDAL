@@ -103,18 +103,25 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     size_t declaredSize = (header->numKeys + 1) * 4;
     if (directoryRec.size() < declaredSize)
         return;
+
+    uint8_t *dirData = const_cast<uint8_t *>(directoryRec.data());
     ST_SetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
-        (1 + header->numKeys) * 4, STT_SHORT,
-        (const void *)directoryRec.data());
+        (1 + header->numKeys) * 4, STT_SHORT, (void *)dirData);
 
     if (doublesRec.size())
+    {
+        uint8_t *doubleData = const_cast<uint8_t *>(doublesRec.data());
         ST_SetKey(ctx.tiff, GEOTIFF_DOUBLES_RECORD_ID,
             doublesRec.size() / sizeof(double), STT_DOUBLE,
-            (const void *)doublesRec.data());
+            (void *)doubleData);
+    }
 
     if (asciiRec.size())
+    {
+        uint8_t *asciiData = const_cast<uint8_t *>(asciiRec.data());
         ST_SetKey(ctx.tiff, GEOTIFF_ASCII_RECORD_ID,
-            asciiRec.size(), STT_ASCII, (const void *)asciiRec.data());
+            asciiRec.size(), STT_ASCII, (void *)asciiData);
+    }
 
     ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
 
