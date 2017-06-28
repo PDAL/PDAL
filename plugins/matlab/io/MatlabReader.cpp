@@ -48,76 +48,79 @@ static PluginInfo const s_info = PluginInfo(
     "Matlab Reader",
     "http://pdal.io/stages/readers.matlab.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, MatlabReader, Reader, s_info)
-
+CREATE_SHARED_PLUGIN(1, 0, MatlabReader, Reader, s_info)
 std::string MatlabReader::getName() const { return s_info.name; }
 
 void MatlabReader::initialize(PointTableRef table)
 {
-//     m_istream = Utils::openFile(m_filename);
-//     if (!m_istream)
-//         throwError("Unable to open text file '" + m_filename + "'.");
-//
-//     std::string buf;
-//     std::getline(*m_istream, buf);
-//
-//     auto isspecial = [](char c)
-//         { return (!std::isalnum(c) && c != ' '); };
-//
-//     // If the separator wasn't provided on the command line extract it
-//     // from the header line.
-//     if (m_separator == ' ')
-//     {
-//         // Scan string for some character not a number, space or letter.
-//         for (size_t i = 0; i < buf.size(); ++i)
-//             if (isspecial(buf[i]))
-//             {
-//                 m_separator = buf[i];
-//                 break;
-//             }
-//     }
-//
-//     if (m_separator != ' ')
-//         m_dimNames = Utils::split(buf, m_separator);
-//     else
-//         m_dimNames = Utils::split2(buf, m_separator);
-//     Utils::closeFile(m_istream);
+    m_matfile = matOpen(m_filename.c_str(), "r");
+    if (!m_matfile)
+        throwError("Could not open file '" + m_filename + "' for reading.");
+
+    m_pointIndex = 0;
+    m_numElements = 0;
+    m_numFields = 0;
 }
 
 
 void MatlabReader::addArgs(ProgramArgs& args)
 {
-//     args.add("separator", "Separator character that overrides special "
-//         "character in header line", m_separator, ' ');
+    args.add("struct", "Name of struct to read from file", m_structName, "PDAL");
 }
 
 
 void MatlabReader::addDimensions(PointLayoutPtr layout)
 {
-    m_dims.clear();
-//     for (auto name : m_dimNames)
-//     {
-//         Utils::trim(name);
-//         Dimension::Id id = layout->registerOrAssignDim(name,
-//             Dimension::Type::Double);
-//         if (Utils::contains(m_dims, id) && id != pdal::Dimension::Id::Unknown)
-//             throwError("Duplicate dimension '" + name +
-//                 "' detected in input file '" + m_filename + "'.");
-//         m_dims.push_back(id);
-//     }
-}
+    log()->get(LogLevel::Debug) << "Opening file" <<
+        " '" << m_filename << "'." << std::endl;
 
+    m_structArray = matGetVariable(m_matfile, m_structName.c_str());
+    if (!m_structArray)
+    {
+        std::ostringstream oss;
+        oss << "Array struct with name '" << m_structName << "' not found ";
+        oss << "in file '" << m_filename << "'";
+        throwError(oss.str());
+    }
 
-void MatlabReader::ready(PointTableRef table)
-{
-//     m_istream = Utils::openFile(m_filename);
-//     if (!m_istream)
-//         throwError("Unable to open text file '" + m_filename + "'.");
-//
-//     // Skip header line.
-//     std::string buf;
-//     std::getline(*m_istream, buf);
-//     m_line = 1;
+    // For now we read all of the fields in the given
+    // array structure
+    m_numFields = mxGetNumberOfFields(m_structArray);
+    if (!m_numFields)
+        throw pdal::pdal_error("Selected struct array must have fields!");
+
+    // Fetch the first array and determine number of elements
+    // it has. We're only going to read that many elements no
+    // matter what
+    mxArray* f = mxGetFieldByNumber(m_structArray, 0, 0);
+    if (!f)
+    {
+        throwError("Unable to fetch first array in array struct to determine number of elements!");
+    }
+    m_numElements = mxGetNumberOfElements(f);
+
+    // Get the dimensions and their types from the array struct
+    PointLayoutPtr matlabLayout = mlang::Script::getStructLayout(m_structArray, log());
+    const Dimension::IdList& dims = matlabLayout->dims();
+
+    int nDimensionNumber(0);
+    for(auto d: dims)
+    {
+        std::string dimName = matlabLayout->dimName(d);
+        const Dimension::Detail* detail = matlabLayout->dimDetail(d);
+        Dimension::Id id = detail->id();
+        Dimension::Type t = detail->type();
+        layout->registerDim(id, t);
+
+        // Keep a map of the Matlab dimension number to
+        // both the PDAL type and PDAL id
+        std::pair<int, int> pd = std::make_pair(nDimensionNumber, (int)id);
+        m_dimensionIdMap.insert(pd);
+        std::pair<int, int> pt = std::make_pair(nDimensionNumber, (int)t);
+        m_dimensionTypeMap.insert(pt);
+        nDimensionNumber++;
+    }
+
 }
 
 
@@ -140,26 +143,44 @@ point_count_t MatlabReader::read(PointViewPtr view, point_count_t numPts)
 
 bool MatlabReader::processOne(PointRef& point)
 {
-    double d;
-//     for (size_t i = 0; i < m_fields.size(); ++i)
-//     {
-//         if (!Utils::fromString(m_fields[i], d))
-//         {
-//             log()->get(LogLevel::Error) << "Can't convert "
-//                 "field '" << m_fields[i] << "' to numeric value on line " <<
-//                 m_line << " in '" << m_filename << "'.  Setting to 0." <<
-//                 std::endl;
-//             d = 0;
-//         }
-//         point.setField(m_dims[i], d);
-//     }
+    // We read them all
+    if (m_pointIndex == m_numElements)
+        return false;
+
+    for (int i=0; i < m_numFields; ++i)
+    {
+        Dimension::Id d = (Dimension::Id) m_dimensionIdMap[i];
+        Dimension::Type t = (Dimension::Type) m_dimensionTypeMap[i];
+
+        mxArray* f = mxGetFieldByNumber(m_structArray, 0, i);
+        if (!f)
+        {
+            std::ostringstream oss;
+            oss << "Unable to fetch array for point " << m_pointIndex;
+            throwError(oss.str());
+        }
+        PointId numElements = (PointId) mxGetNumberOfElements(f);
+        if (numElements >= m_pointIndex )
+        {
+            size_t size = mxGetElementSize(f);
+            char* p = (char*)mxGetData(f) + size;
+            point.setField(d, t, (void*)p);
+        }
+
+
+    }
+
+    m_pointIndex++;
+
     return true;
 }
 
 
-
 void MatlabReader::done(PointTableRef table)
 {
+    matClose(m_matfile);
+    getMetadata().addList("filename", m_filename);
+    getMetadata().add("struct", m_structName);
 }
 
 

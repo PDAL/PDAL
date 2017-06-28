@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
+ * Copyright (c) 2017, Hobu Inc. (info@hobu.co)
  *
  * All rights reserved.
  *
@@ -13,7 +13,7 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *     * Neither the name of Hobu, Inc. nor the
  *       names of its contributors may be used to endorse or promote
  *       products derived from this software without specific prior
  *       written permission.
@@ -32,43 +32,28 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <string>
+#include "Support.hpp"
 
-#include <mat.h>
+#include <io/LasReader.hpp>
+#include "../io/MatlabReader.hpp"
+#include <pdal/util/FileUtils.hpp>
 
-#include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
+using namespace pdal;
 
-extern "C" int32_t MatlabWriter_ExitFunc();
-extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
-
-
-namespace pdal
+TEST(MatlabReaderTest, t1)
 {
+    MatlabReader t;
+    Options mlabOptions;
+    mlabOptions.add("filename", Support::datapath("matlab/autzen.mat"));
+    t.setOptions(mlabOptions);
 
-class PDAL_DLL MatlabWriter : public Writer
-{
-public:
-    static void* create();
-    static int32_t destroy(void*);
-    std::string getName() const;
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
-
-    std::string m_filename;
-    std::string m_structName;
-    StringList m_outputDims; ///< List of dimensions to write
-    // Can't use unique_ptr b/c MATFile is an incomplete type.
-    MATFile * m_matfile;
-    Dimension::IdList m_dims;
-};
-
-
+    PointTable tt;
+    t.prepare(tt);
+    PointViewSet ts = t.execute(tt);
+    EXPECT_EQ(ts.size(), 1U);
+    PointViewPtr tv = *ts.begin();
+    EXPECT_EQ(tv->size(), 1065U);
 }
+

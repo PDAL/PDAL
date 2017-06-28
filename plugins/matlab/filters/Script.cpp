@@ -71,6 +71,36 @@ std::string Script::getLogicalMask(mxArray* array, LogPtr log)
     return output;
 }
 
+PointLayoutPtr Script::getStructLayout(mxArray* array, LogPtr log)
+{
+
+    PointLayoutPtr layout = PointLayoutPtr(new PointLayout());
+    std::vector<mxArray*> arrays;
+
+    mxClassID ml_id = mxGetClassID(array);
+    if (ml_id != mxSTRUCT_CLASS)
+        throw pdal::pdal_error("Selected array must be a Matlab struct array!");
+
+
+    int numFields = mxGetNumberOfFields(array);
+
+    if (!numFields)
+        throw pdal::pdal_error("Selected struct array must have fields!");
+
+    for (int i=0; i < numFields; ++i)
+    {
+        const char* fieldName = mxGetFieldNameByNumber(array, i);
+        mxArray* f = mxGetFieldByNumber(array, 0, i);
+        mxClassID mt = mxGetClassID(f);
+        Dimension::Type pt = Script::getPDALDataType(mt);
+        layout->registerOrAssignDim(fieldName, pt);
+    }
+
+    layout->finalize();
+    return layout;
+}
+
+
 void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& indims, LogPtr log)
 {
     std::vector<mxArray*> arrays;

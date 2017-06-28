@@ -56,6 +56,7 @@ void MatlabWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("output_dims", "Output dimensions", m_outputDims);
+    args.add("struct", "Matlab struct name", m_structName, "PDAL");
 }
 
 
@@ -92,7 +93,7 @@ void MatlabWriter::write(const PointViewPtr view)
 {
 
     mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, log());
-    if (matPutVariable(m_matfile, "PDAL", data))
+    if (matPutVariable(m_matfile, m_structName.c_str(), data))
         throwError("Could not write points to file '" + m_filename + "'.");
 
     mxDestroyArray(data);

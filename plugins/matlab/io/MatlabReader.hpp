@@ -38,6 +38,8 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/plugin.hpp>
+#include "../filters/Script.hpp"
+
 
 #include <mat.h>
 
@@ -81,13 +83,6 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
 
     /**
-      Reopen the file in preparation for reading.
-
-      \param table  Point table to make ready.
-    */
-    virtual void ready(PointTableRef table);
-
-    /**
       Read up to numPts points into the \ref view.
 
       \param view  PointView in which to insert point data.
@@ -111,18 +106,20 @@ private:
     */
     virtual bool processOne(PointRef& point);
 
-    bool fillFields();
-
 private:
 
 
-    std::string m_filename;
+    std::string m_structName;
     MATFile * m_matfile;
 
-    PointLayout m_layout;
+    int m_numFields;
+    size_t m_numElements;
+    mxArray* m_structArray;
 
-    Dimension::IdList m_dims;
-    StringList m_fields;
+    std::map<int, int> m_dimensionIdMap;
+    std::map<int, int> m_dimensionTypeMap;
+    PointId m_pointIndex;
+
 };
 
 } // namespace pdal

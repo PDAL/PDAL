@@ -58,6 +58,7 @@ public:
     static mxArray* setMatlabStruct(PointViewPtr view, const Dimension::IdList& dims, LogPtr log);
 
     static void getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& dims, LogPtr log);
+    static PointLayoutPtr getStructLayout(mxArray* array, LogPtr log);
     static std::string getLogicalMask(mxArray* array, LogPtr log);
 
     std::string m_source;
