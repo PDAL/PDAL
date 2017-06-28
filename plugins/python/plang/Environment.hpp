@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,42 +34,56 @@
 
 #pragma once
 
+
+
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
+
+
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Filter.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Dimension.hpp>
 
-#include <pdal/plang/Invocation.hpp>
-
-#include <json/json.h>
+#include "Redirector.hpp"
+#include "Script.hpp"
 
 namespace pdal
 {
+namespace plang
+{
 
-class PDAL_DLL PredicateFilter : public Filter
+PyObject *fromMetadata(MetadataNode m);
+void addMetadata(PyObject *list, MetadataNode m);
+
+std::string getTraceback();
+
+class Environment;
+typedef Environment *EnvironmentPtr;
+
+class PDAL_DLL Environment
 {
 public:
-    PredicateFilter() : Filter(), m_script(NULL)
-        {}
+    Environment();
+    ~Environment();
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    // these just forward into the Redirector class
+    void set_stdout(std::ostream* ostr);
+    void reset_stdout();
+
+    void execute(Script& script) {};
+
+    static EnvironmentPtr get();
+
+    static int getPythonDataType(Dimension::Type t);
 
 private:
-    plang::Invocation* m_pythonMethod;
-    plang::Script* m_script;
-    std::string m_source;
-    std::string m_scriptFile;
-    std::string m_module;
-    std::string m_function;
-    Json::Value m_pdalargs;
-
-    virtual void addArgs(ProgramArgs& args);
-    virtual void ready(PointTableRef table);
-    virtual PointViewSet run(PointViewPtr view);
-    virtual void done(PointTableRef table);
-
-    PredicateFilter& operator=(const PredicateFilter&); // not implemented
-    PredicateFilter(const PredicateFilter&); // not implemented
+    Redirector m_redirector;
 };
 
+} // namespace plang
 } // namespace pdal
+

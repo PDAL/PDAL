@@ -1,16 +1,23 @@
-.. _filters.programmable:
+.. _filters.python:
 
-filters.programmable
+filters.python
 ====================
 
-The programmable filter allows `Python`_ software to be embedded in a
+The ``filters.python`` filter allows `Python`_ software to be embedded in a
 :ref:`pipeline` that interacts with a `NumPy`_ array of the data and allows
 you to modify those points. Additionally, some global :ref:`metadata` is also
 available that Python functions can interact with.
 
 The function must have two `NumPy`_ arrays as arguments, ``ins`` and ``outs``.
-The ``ins`` array represents the points before the ``filters.programmable``
+The ``ins`` array represents the points before the ``filters.python``
 filter and the ``outs`` array represents the points after filtering.
+
+.. warning::
+    :ref:`filters.python` was called ``filters.programmable`` and
+    ``filters.predicate`` before Python 1.6. The functionality of
+    ``filters.programmable`` and ``filters.predicate`` was rolled into
+    :ref:`filters.python`, and the filter was renamed for clarity.
+
 
 .. warning::
 
@@ -42,10 +49,10 @@ filter and the ``outs`` array represents the points after filtering.
 .. note::
 
     To filter points based on a `Python`_ function, use the
-    :ref:`filters.predicate` filter.
+    :ref:`filters.python` filter.
 
-Example
--------
+Modification Example
+--------------------------------------------------------------------------------
 
 
 .. code-block:: json
@@ -57,7 +64,7 @@ Example
           "type":"filters.ground"
         },
         {
-          "type":"filters.programmable",
+          "type":"filters.python",
           "script":"multiply_z.py",
           "function":"multiply_z",
           "module":"anything"
@@ -82,13 +89,86 @@ which scales up the Z coordinate by a factor of 10.
       outs['Z'] = Z
       return True
 
+Predicates
+--------------------------------------------------------------------------------
+
+Points can be retained/removed from the stream by setting true/false values
+into a special "Mask" dimension in the output point array.
+
+The example above sets the "mask" to true for points that are in
+classifications 1 or 2 and to false otherwise, causing points that are not
+classified 1 or 2 to be dropped from the point stream.
+
+.. code-block:: python
+
+  import numpy as np
+
+  def filter(ins,outs):
+     cls = ins['Classification']
+
+     keep_classes = [1,2]
+
+     # Use the first test for our base array.
+     keep = np.equal(cls, keep_classes[0])
+
+     # For 1:n, test each predicate and join back
+     # to our existing predicate array
+     for k in range(1,len(keep_classes)):
+         t = np.equal(cls, keep_classes[k])
+         keep = keep + t
+
+     outs['Mask'] = keep
+     return True
+
+
+.. note::
+
+    :ref:`filters.range` is a specialized filter that implements the exact
+    functionality described in this Python operation. It is likely to be much
+    faster than Python, but not as flexible. :ref:`filters.python` is the tool
+    you can use for prototyping point stream processing operations.
+
+.. seealso::
+
+    If you want to just read a :ref:`pipeline` of operations into a numpy
+    array, the PDAL Python extension might be what you want. See it at
+    https://pypi.python.org/pypi/PDAL
+
+Example :ref:`pipeline`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "file-input.las",
+        {
+          "type":"filters.ground"
+        },
+        {
+          "type":"filters.python",
+          "script":"filter_pdal.py",
+          "function":"filter",
+          "module":"anything"
+        },
+        {
+          "type":"writers.las",
+          "filename":"file-filtered.las"
+        }
+      ]
+    }
+
+
+
+
+
 Module Globals
 --------------------------------------------------------------------------------
 
 Three global variables are added to the Python module as it is run to allow
 you to get :ref:`dimensions`, :ref:`metadata`, and coordinate system information.
 Additionally, the ``metadata`` object can be set by the function to modify metadata
-for the in-scope :ref:`filters.programmable` :cpp:class:`pdal::Stage`.
+for the in-scope :ref:`filters.python` :cpp:class:`pdal::Stage`.
 
 .. code-block:: python
 
@@ -110,18 +190,18 @@ reflected back into the pipeline from that stage forward.
 
    def myfunc(ins,outs):
      global metadata
-     metadata = {'name': 'root', 'value': 'a string', 'type': 'string', 'description': 'a description', 'children': [{'name': 'filters.programmable', 'value': 52, 'type': 'integer', 'description': 'a filter description', 'children': []}, {'name': 'readers.faux', 'value': 'another string', 'type': 'string', 'description': 'a reader description', 'children': []}]}
+     metadata = {'name': 'root', 'value': 'a string', 'type': 'string', 'description': 'a description', 'children': [{'name': 'filters.python', 'value': 52, 'type': 'integer', 'description': 'a filter description', 'children': []}, {'name': 'readers.faux', 'value': 'another string', 'type': 'string', 'description': 'a reader description', 'children': []}]}
      return True
 
 Passing Python objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As of PDAL 1.5, it is possible to pass an option to :ref:`filters.programmable` and
-:ref:`filters.predicate` of JSON representing a Python dictionary containing objects
+As of PDAL 1.5, it is possible to pass an option to :ref:`filters.python` and
+:ref:`filters.python` of JSON representing a Python dictionary containing objects
 you want to use in your function. This feature is useful in situations where you
 wish to call :ref:`pipeline_command` with substitutions.
 
-If we needed to be able to provide the Z scaling factor of `Example`_ with a
+If we needed to be able to provide the Z scaling factor of `Example Pipeline`_ with a
 Python argument, we can place that in a dictionary and pass that to the filter
 as a separate argument. This feature allows us to be able easily reuse the same
 basic Python function while substituting values as necessary.
@@ -132,7 +212,7 @@ basic Python function while substituting values as necessary.
       "pipeline":[
         "input.las",
         {
-          "type":"filters.programmable",
+          "type":"filters.python",
           "module":"anything",
           "function":"filter",
           "source":"arguments.py",

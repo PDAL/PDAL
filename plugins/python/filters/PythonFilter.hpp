@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,70 +32,48 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "PyPipeline.hpp"
-#ifdef PDAL_HAVE_LIBXML2
-#include <pdal/XMLSchema.hpp>
-#endif
+#pragma once
 
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Filter.hpp>
 
-namespace libpdalpython
+#include "../plang/Invocation.hpp"
+
+#include <json/json.h>
+
+namespace pdal
 {
 
-Pipeline::Pipeline(std::string const& json)
-    : m_executor(json)
+class PDAL_DLL PythonFilter : public Filter
 {
-    auto initNumpy = []()
-    {
-#undef NUMPY_IMPORT_ARRAY_RETVAL
-#define NUMPY_IMPORT_ARRAY_RETVAL
-        import_array();
-    };
+public:
+    PythonFilter() : Filter(), m_script(NULL)
+        {}
 
-    initNumpy();
-}
+    static void *create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-Pipeline::~Pipeline()
-{
-}
+private:
+    plang::Script* m_script;
+    plang::Invocation *m_pythonMethod;
+    std::string m_source;
+    std::string m_scriptFile;
+    std::string m_module;
+    std::string m_function;
+    StringList m_addDimensions;
 
-void Pipeline::setLogLevel(int level)
-{
-    m_executor.setLogLevel(level);
-}
+    virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef table);
 
-int Pipeline::getLogLevel() const
-{
-    return static_cast<int>(m_executor.getLogLevel());
-}
+    PythonFilter& operator=(const PythonFilter&); // not implemented
+    PythonFilter(const PythonFilter&); // not implemented
 
-int64_t Pipeline::execute()
-{
+    MetadataNode m_totalMetadata;
+    Json::Value m_pdalargs;
+};
 
-    int64_t count = m_executor.execute();
-    return count;
-}
-
-bool Pipeline::validate()
-{
-    return m_executor.validate();
-}
-
-std::vector<PArray> Pipeline::getArrays() const
-{
-    std::vector<PArray> output;
-
-    if (!m_executor.executed())
-        throw python_error("call execute() before fetching arrays");
-
-    const pdal::PointViewSet& pvset = m_executor.getManagerConst().views();
-
-    for (auto i: pvset)
-    {
-        PArray array = new pdal::python::Array;
-        array->update(i);
-        output.push_back(array);
-    }
-    return output;
-}
-} //namespace libpdalpython
-
+} // namespace pdal

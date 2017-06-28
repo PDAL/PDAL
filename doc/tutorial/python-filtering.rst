@@ -14,7 +14,7 @@ Filtering Data with Python
    :depth: 2
 
 
-This tutorial will describe using :ref:`filters.programmable` to identify
+This tutorial will describe using :ref:`filters.python` to identify
 outlier points in an LAS file.
 
 Introduction
@@ -33,8 +33,8 @@ be a very quick way to prototype a tool that identified specific points
 we would like to filter.
 
 PDAL has three different ways to manipulate data with Python. The first is
-:ref:`filters.programmable`, which we will be using in this tutorial. The
-second is :ref:`filters.predicate`, which allows you to keep or remove points
+:ref:`filters.python`, which we will be using in this tutorial. The
+second is :ref:`filters.`, which allows you to keep or remove points
 given a Python filtering operation. The third is the Python extension at
 https://pypi.python.org/pypi/PDAL that allows you to utilize PDAL processing
 operations in your own Python programs.
@@ -75,7 +75,7 @@ running.
 Python Filter
 -------------------------------------------------------------------------------
 
-Through the use of the :ref:`filters.programmable` and :ref:`filters.predicate`
+Through the use of the :ref:`filters.python` and :ref:`filters.`
 filters, PDAL allows the use of Python and |NumPy| to process point cloud
 data. This can be very useful in prototyping situations, where PDAL can provide
 convenient data access and the processing logic of software that is still
@@ -112,7 +112,7 @@ can provide.
         # Print our dict to stdout
         print output
 
-        # filters.predicate must return True to tell
+        # filters. must return True to tell
         # PDAL it successfully completed
         return True
 
@@ -134,7 +134,7 @@ This will allow our script to work with any format PDAL can identify.
       "pipeline":[
         "/data/$filename",
         {
-        "type" : "filters.programmable",
+        "type" : "filters.python",
         "function":"mad",
         "module":"anything",
         "source":"$script"
@@ -221,7 +221,7 @@ three standard deviations:
         # Print our dict to stdout
         print output
 
-        # filters.predicate must return True to tell
+        # filters. must return True to tell
         # PDAL it successfully completed
         return True
 
@@ -232,7 +232,7 @@ three standard deviations:
       "pipeline":[
         "/data/$filename",
         {
-        "type" : "filters.programmable",
+        "type" : "filters.python",
         "function":"mad",
         "module":"anything",
         "source":"$script"

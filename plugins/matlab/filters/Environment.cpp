@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2017, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,46 +32,87 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointView.hpp>
-
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
+#ifndef _WIN32
+#include <dlfcn.h>
 #endif
+
+#include "Environment.hpp"
+
+#include <sstream>
+#include <mutex>
 
 namespace pdal
 {
-namespace plang
+namespace mlang
 {
 
-
-class PDAL_DLL Array
+static Environment* g_environment=0;
+//
+EnvironmentPtr Environment::get()
 {
-public:
-    Array();
-    ~Array();
+    static std::once_flag flag;
 
-    void update(PointViewPtr view);
+    auto init = []()
+    {
+        g_environment = new Environment();
+    };
+    std::call_once(flag, init);
+    return g_environment;
+}
 
-    inline PyObject* getPythonArray() const { return m_py_array; }
+Environment::Environment()
+  : m_engine(0)
+{
+    m_engine = engOpen("");
+    if (!m_engine)
+        throw pdal_error("unable to initialize Matlab!");
+}
 
 
-private:
-    void cleanup();
-    PyObject* buildNumpyDescription(PointViewPtr view) const;
+Environment::~Environment()
+{
+    if (m_engine)
+        engClose (m_engine);
+}
 
-    PyObject* m_py_array;
-    std::unique_ptr<std::vector<uint8_t> > m_data_array;
 
-    Array& operator=(Array const& rhs);
-};
+//
+// int Environment::getPythonDataType(Dimension::Type t)
+// {
+//     using namespace Dimension;
+//
+//     switch (t)
+//     {
+//     case Type::Float:
+//         return NPY_FLOAT;
+//     case Type::Double:
+//         return NPY_DOUBLE;
+//     case Type::Signed8:
+//         return NPY_BYTE;
+//     case Type::Signed16:
+//         return NPY_SHORT;
+//     case Type::Signed32:
+//         return NPY_INT;
+//     case Type::Signed64:
+//         return NPY_LONGLONG;
+//     case Type::Unsigned8:
+//         return NPY_UBYTE;
+//     case Type::Unsigned16:
+//         return NPY_USHORT;
+//     case Type::Unsigned32:
+//         return NPY_UINT;
+//     case Type::Unsigned64:
+//         return NPY_ULONGLONG;
+//     default:
+//         return -1;
+//     }
+//     assert(0);
+//
+//     return -1;
+// }
+//
 
-} // namespace plang
+
+} // namespace mlang
 } // namespace pdal
 

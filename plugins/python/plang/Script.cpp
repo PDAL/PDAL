@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/plang/Script.hpp>
+#include "../plang/Script.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
@@ -43,9 +43,12 @@ namespace pdal
 namespace plang
 {
 
-Script::Script(const std::string& source, const std::string& module,
-    const std::string& function) : m_source(source) , m_module(module),
-    m_function(function)
+Script::Script( const std::string& source,
+                const std::string& module,
+                const std::string& function)
+    : m_source(source)
+    , m_module(module)
+    , m_function(function)
 {
 }
 

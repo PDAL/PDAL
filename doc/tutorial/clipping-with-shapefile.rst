@@ -48,10 +48,12 @@ set that match given criteria.
 
 .. seealso::
 
-    :ref:`filters.predicate` allows you to construct sophisticated logic
-    for keeping or rejecting points in a more expressive environment (`Python`_).
+    :ref:`filters.python` or :ref:`filters.matlab` allows you to construct sophisticated logic
+    for keeping or rejecting points in a more expressive environment (`Python`_) or
+    (`Matlab`_)..
 
 .. _`Python`: http://www.python.org
+.. _`Matlab`: http://www.mathworks.com
 
 Data Preparation
 -------------------------------------------------------------------------------

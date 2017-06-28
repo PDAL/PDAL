@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
+ * Copyright (c) 2017, Hobu Inc. (info@hobu.co)
  *
  * All rights reserved.
  *
@@ -13,7 +13,7 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *     * Neither the name of Hobu, Inc. nor the
  *       names of its contributors may be used to endorse or promote
  *       products derived from this software without specific prior
  *       written permission.
@@ -34,74 +34,26 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include "../io/MatlabWriter.hpp"
-
-#include <FauxReader.hpp>
-#include <pdal/StageFactory.hpp>
 #include "Support.hpp"
 
+#include <io/LasReader.hpp>
+#include "../io/MatlabReader.hpp"
+#include <pdal/util/FileUtils.hpp>
 
-namespace pdal
+using namespace pdal;
+
+TEST(MatlabReaderTest, t1)
 {
+    MatlabReader t;
+    Options mlabOptions;
+    mlabOptions.add("filename", Support::datapath("matlab/autzen.mat"));
+    t.setOptions(mlabOptions);
 
-
-class MatlabWriterTest : public ::testing::Test
-{
-protected:
-    virtual void SetUp()
-    {
-        Options options;
-        options.add("mode", "ramp");
-        options.add("count", 100);
-        m_reader.setOptions(options);
-    }
-
-    FauxReader m_reader;
-
-};
-
-
-TEST_F(MatlabWriterTest, constructor)
-{
-    MatlabWriter writer;
+    PointTable tt;
+    t.prepare(tt);
+    PointViewSet ts = t.execute(tt);
+    EXPECT_EQ(ts.size(), 1U);
+    PointViewPtr tv = *ts.begin();
+    EXPECT_EQ(tv->size(), 1065U);
 }
 
-
-TEST_F(MatlabWriterTest, findStage)
-{
-    StageFactory factory;
-    Stage* stage(factory.createStage("writers.matlab"));
-    EXPECT_TRUE(stage);
-}
-
-
-TEST_F(MatlabWriterTest, write)
-{
-    Options options;
-    options.add("filename", Support::temppath("out.mat"));
-    MatlabWriter writer;
-    writer.setOptions(options);
-    writer.setInput(m_reader);
-
-    PointTable table;
-    writer.prepare(table);
-    writer.execute(table);
-}
-
-
-TEST_F(MatlabWriterTest, outputDims)
-{
-    Options options;
-    options.add("filename", Support::temppath("out.mat"));
-    options.add("output_dims", "X,Y");
-    MatlabWriter writer;
-    writer.setOptions(options);
-    writer.setInput(m_reader);
-
-    PointTable table;
-    writer.prepare(table);
-    writer.execute(table);
-}
-
-
-}
