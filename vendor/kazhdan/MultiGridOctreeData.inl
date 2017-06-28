@@ -425,7 +425,7 @@ SparseNodeData< ProjectiveData< Data , Real > > Octree< Real >::setDataField( co
 		const ProjectiveData< Data , Real >& data = sampleData[i];
 		Point3D< Real > p = sample.weight==0 ? sample.data.p : sample.data.p / sample.weight;
 		if( !_InBounds(p) ){ fprintf( stderr , "[WARNING] Point is out of bounds: %f %f %f <- %f %f %f [%f]\n" , p[0] , p[1] , p[2] , sample.data.p[0] , sample.data.p[1] , sample.data.p[2] , sample.weight ) ; continue; }
-		_multiSplatPointData< CreateNodes >( density , (TreeOctNode*)samples[i].node , p , data , dataField , densityKey , dataKey , 2 );
+		_multiSplatPointData< CreateNodes >( density , const_cast<TreeOctNode*>(samples[i].node), p , data , dataField , densityKey , dataKey , 2 );
 	}
 	memoryUsage();
 	return dataField;

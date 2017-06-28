@@ -1087,7 +1087,7 @@ int Octree< Real >::_addIsoPolygons( Kazhdan::Mesh& mesh , std::vector< std::pai
 		if( addBarycenter )
 			for( int i=0 ; i<(int)polygon.size() ; i++ )
 				for( int j=0 ; j<i ; j++ )
-					if( (i+1)%polygon.size()!=j && (j+1)%polygon.size()!=i )
+					if( (i+1)%(int)polygon.size()!=j && (j+1)%(int)polygon.size()!=i )
 					{
 						Vertex v1 = polygon[i].second , v2 = polygon[j].second;
 						for( int k=0 ; k<3 ; k++ ) if( v1.point[k]==v2.point[k] ) isCoplanar = true;

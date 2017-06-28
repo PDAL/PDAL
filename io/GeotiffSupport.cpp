@@ -99,21 +99,22 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     };
 #pragma pack(pop)
 
-    ShortKeyHeader *header = (ShortKeyHeader *)directoryRec.data();
+    const ShortKeyHeader *header = (ShortKeyHeader *)directoryRec.data();
     size_t declaredSize = (header->numKeys + 1) * 4;
     if (directoryRec.size() < declaredSize)
         return;
     ST_SetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
-        (1 + header->numKeys) * 4, STT_SHORT, (void *)directoryRec.data());
+        (1 + header->numKeys) * 4, STT_SHORT,
+        (const void *)directoryRec.data());
 
     if (doublesRec.size())
         ST_SetKey(ctx.tiff, GEOTIFF_DOUBLES_RECORD_ID,
             doublesRec.size() / sizeof(double), STT_DOUBLE,
-            (void *)doublesRec.data());
+            (const void *)doublesRec.data());
 
     if (asciiRec.size())
         ST_SetKey(ctx.tiff, GEOTIFF_ASCII_RECORD_ID,
-            asciiRec.size(), STT_ASCII, (void *)asciiRec.data());
+            asciiRec.size(), STT_ASCII, (const void *)asciiRec.data());
 
     ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
 
