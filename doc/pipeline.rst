@@ -215,7 +215,7 @@ Python HAG
 
 In our next example, the reader and writer types are once again inferred. After
 reading the input file, the ferry filter is used to copy the Z dimension into a
-new height above ground (HAG) dimension. Next, the :ref:`filters.programmable`
+new height above ground (HAG) dimension. Next, the :ref:`filters.python`
 is used with a Python script to compute height above ground values by comparing
 the Z values to a surface model. These height above ground values are then
 written back into the Z dimension for further analysis. See the Python
@@ -236,7 +236,7 @@ code at `hag.py`_.
               "dimensions":"Z=HAG"
           },
           {
-              "type":"programmable",
+              "type":"filters.python",
               "script":"hag.py",
               "function":"filter",
               "module":"anything"
