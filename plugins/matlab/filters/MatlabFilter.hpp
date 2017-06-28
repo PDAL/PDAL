@@ -71,6 +71,7 @@ private:
 
     MetadataNode m_totalMetadata;
     Json::Value m_pdalargs;
+    std::string m_structName;
 
 };
 

@@ -42,3 +42,6 @@ filename
 
 output_dims
   Dimensions to include in the output file [OPTIONAL, defaults to all available dimensions]
+
+struct
+  Array structure name to read [OPTIONAL, defaults ``PDAL``]

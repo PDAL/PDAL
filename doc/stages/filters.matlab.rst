@@ -69,8 +69,7 @@ source
 add_dimension
   The name of a dimension to add to the pipeline that does not already exist.
 
-pdalargs
-  A JSON dictionary of items you wish to pass into the modules globals as the
-  ``pdalargs`` object.
+struct
+  Array structure name to read [OPTIONAL, defaults ``PDAL``]
 
 .. _Matlab: https://www.mathworks.com/products/matlab.html

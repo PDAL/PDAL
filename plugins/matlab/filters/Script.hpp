@@ -63,8 +63,6 @@ public:
 
     std::string m_source;
     std::string m_scriptFilename;
-    std::string m_module;
-    std::string m_function;
 
 private:
 

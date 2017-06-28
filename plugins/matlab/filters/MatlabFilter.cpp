@@ -59,11 +59,8 @@ std::string MatlabFilter::getName() const { return s_info.name; }
 void MatlabFilter::addArgs(ProgramArgs& args)
 {
     args.add("source", "Matlab script to run", m_script.m_source);
-    args.add("script", "File containing script to run", m_script.m_scriptFilename);
-    args.add("module", "Matlab module containing the function to run",
-        m_script.m_module);
-    args.add("function", "Function to call", m_script.m_function);
     args.add("add_dimension", "Dimensions to add", m_addDimensions);
+    args.add("struct", "Matlab struct array to read", m_structName, "PDAL");
     args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
 }
 
@@ -79,11 +76,6 @@ void MatlabFilter::ready(PointTableRef table)
 {
     if (m_script.m_source.empty())
         m_script.m_source = FileUtils::readFileIntoString(m_script.m_scriptFilename);
-//     static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
-//     m_script = new plang::Script(m_source, m_module, m_function);
-//     m_pythonMethod = new plang::Invocation(*m_script);
-//     m_pythonMethod->compile();
-//     m_totalMetadata = table.metadata();
 }
 
 
@@ -102,9 +94,11 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     Dimension::IdList dims;
 
     mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, log());
-    if (engPutVariable(engine, "PDAL", matlabData))
+    if (engPutVariable(engine, m_structName.c_str(), matlabData))
     {
-        throwError("Could not push PDAL struct to Matlab");
+        std::ostringstream oss;
+        oss << "Could not push '" << m_structName << "' struct to Matlab";
+        throwError(oss.str());
     }
 
     engEvalString(engine, m_script.m_source.c_str());
@@ -112,7 +106,7 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     std::string noise(m_MatlabOutputBuffer.get(), strlen(m_MatlabOutputBuffer.get()));
     log()->get(LogLevel::Debug) << "filters.matlab " << noise << std::endl;
 
-    matlabData = engGetVariable(engine, "PDAL");
+    matlabData = engGetVariable(engine, m_structName.c_str());
     if (!matlabData)
         throwError("No 'PDAL' variable is available in Matlab scope!");
 
