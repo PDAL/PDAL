@@ -155,8 +155,6 @@ private:
         ChipRefList& spare, PointId left, PointId right);
     void split(ChipRefList& wide, ChipRefList& narrow,
         ChipRefList& spare, PointId left, PointId right);
-    void finalSplit(ChipRefList& wide, ChipRefList& narrow,
-        PointId pleft, PointId pcenter);
     void emit(ChipRefList& wide, PointId widemin, PointId widemax);
 
     PointId m_threshold;
