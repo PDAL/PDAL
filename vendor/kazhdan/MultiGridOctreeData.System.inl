@@ -1737,7 +1737,6 @@ DenseNodeData< Real > Octree< Real >::solveSystem( const FEMSystemFunctor& F , I
 	BSplineData< FEMDegree , BType > bsData( maxSolveDepth );
 
 	maxSolveDepth = std::min< LocalDepth >( maxSolveDepth , _maxDepth );
-	int iter = 0;
 	const int _iters = std::max< int >( 0 , solverInfo.iters );
 
 	DenseNodeData< Real > solution( _sNodesEnd( _maxDepth ) );
@@ -1749,11 +1748,11 @@ DenseNodeData< Real > Octree< Real >::solveSystem( const FEMSystemFunctor& F , I
 	{
 		int iters = (int)ceil( _iters * pow( solverInfo.lowResIterMultiplier , maxSolveDepth-d ) );
 		_SolverStats sStats;
-		if( !d ) iter = _solveSystemCG( F , bsData , interpolationInfo , d , solution , constraints , metSolution , _sNodesSize(d) , true , sStats , solverInfo.showResidual , 0 );
+		if( !d ) _solveSystemCG( F , bsData , interpolationInfo , d , solution , constraints , metSolution , _sNodesSize(d) , true , sStats , solverInfo.showResidual , 0 );
 		else
 		{
-			if( d>solverInfo.cgDepth ) iter = _solveSystemGS( F , bsData , interpolationInfo , d , solution , constraints , metSolution , iters , true , sStats , solverInfo.showResidual );
-			else                       iter = _solveSystemCG( F , bsData , interpolationInfo , d , solution , constraints , metSolution , iters , true , sStats , solverInfo.showResidual , solverInfo.cgAccuracy );
+			if( d>solverInfo.cgDepth ) _solveSystemGS( F , bsData , interpolationInfo , d , solution , constraints , metSolution , iters , true , sStats , solverInfo.showResidual );
+			else                       _solveSystemCG( F , bsData , interpolationInfo , d , solution , constraints , metSolution , iters , true , sStats , solverInfo.showResidual , solverInfo.cgAccuracy );
 		}
 		int femNodes = 0;
 #pragma omp parallel for reduction( + : femNodes )

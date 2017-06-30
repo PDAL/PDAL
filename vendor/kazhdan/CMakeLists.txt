@@ -8,6 +8,9 @@ PDAL_ADD_FREE_LIBRARY(${PDAL_KAZHDAN_LIB_NAME} STATIC
     Geometry.cpp
     MarchingCubes.cpp
 )
+if (UNIX)
+    target_compile_options(${PDAL_KAZHDAN_LIB_NAME} PRIVATE -fPIC)
+endif()
 target_link_libraries(${PDAL_KAZHDAN_LIB_NAME})
 
 set_property(GLOBAL PROPERTY _PDAL_KAZHDAN_INCLUDED TRUE)
