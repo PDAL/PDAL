@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2017, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -36,20 +36,18 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
-
-#include <pdal/plang/Invocation.hpp>
+#include "Script.hpp"
+#include "Environment.hpp"
 
 #include <json/json.h>
 
 namespace pdal
 {
 
-class ProgrammableFilterSequentialIterator;
-
-class PDAL_DLL ProgrammableFilter : public Filter
+class PDAL_DLL MatlabFilter : public Filter
 {
 public:
-    ProgrammableFilter() : Filter(), m_script(NULL)
+    MatlabFilter() : Filter()
         {}
 
     static void *create();
@@ -57,25 +55,24 @@ public:
     std::string getName() const;
 
 private:
-    plang::Script* m_script;
-    plang::Invocation *m_pythonMethod;
-    std::string m_source;
-    std::string m_scriptFile;
-    std::string m_module;
-    std::string m_function;
+    mlang::Script m_script;
     StringList m_addDimensions;
+
+    std::unique_ptr<char[]> m_MatlabOutputBuffer;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
+    virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented
-    ProgrammableFilter(const ProgrammableFilter&); // not implemented
+    MatlabFilter& operator=(const MatlabFilter&); // not implemented
+    MatlabFilter(const MatlabFilter&); // not implemented
 
     MetadataNode m_totalMetadata;
     Json::Value m_pdalargs;
+    std::string m_structName;
+
 };
 
 } // namespace pdal

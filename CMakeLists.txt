@@ -56,7 +56,6 @@ else()
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
-set(PDAL_PLANG_LIB_NAME pdal_plang)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
 
@@ -126,6 +125,7 @@ endif()
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
+include(${PDAL_CMAKE_DIR}/python.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -179,10 +179,6 @@ if (NOT PDAL_HAVE_JSONCPP)
 endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
-if (BUILD_PLUGIN_PYTHON)
-    set(PYTHON_VERSION_STRING "something" CACHE STRING "Python version" FORCE)
-    add_subdirectory(pdal/plang)
-endif()
 add_subdirectory(apps)
 
 #

@@ -5,7 +5,7 @@
       "type":"filters.stats"
     },
     {
-      "type":"filters.predicate",
+      "type":"filters.python",
       "module":"anything",
       "function":"filter",
       "source":"import numpy as np\n\ndef filter(ins,outs):\n\tret = ins['ReturnNumber']\n\tret_no = ins['NumberOfReturns']\n\n\t# Use the first test for our base array.\n\trets = np.equal(ret, ret_no)\n\n\touts['Mask'] = rets\n\treturn True"

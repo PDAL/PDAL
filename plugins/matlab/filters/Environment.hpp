@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2017, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,70 +32,42 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "PyPipeline.hpp"
-#ifdef PDAL_HAVE_LIBXML2
-#include <pdal/XMLSchema.hpp>
-#endif
+#pragma once
 
 
-namespace libpdalpython
+
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Dimension.hpp>
+#include "Script.hpp"
+
+
+// Matlab "engine.h"
+#include <engine.h>
+
+
+namespace pdal
+{
+namespace mlang
 {
 
-Pipeline::Pipeline(std::string const& json)
-    : m_executor(json)
+class Environment;
+typedef Environment *EnvironmentPtr;
+
+class PDAL_DLL Environment
 {
-    auto initNumpy = []()
-    {
-#undef NUMPY_IMPORT_ARRAY_RETVAL
-#define NUMPY_IMPORT_ARRAY_RETVAL
-        import_array();
-    };
+public:
+    Environment();
+    ~Environment();
 
-    initNumpy();
-}
+    void execute(Script& script) {};
+    static EnvironmentPtr get();
 
-Pipeline::~Pipeline()
-{
-}
 
-void Pipeline::setLogLevel(int level)
-{
-    m_executor.setLogLevel(level);
-}
+    Engine* m_engine;
+};
 
-int Pipeline::getLogLevel() const
-{
-    return static_cast<int>(m_executor.getLogLevel());
-}
-
-int64_t Pipeline::execute()
-{
-
-    int64_t count = m_executor.execute();
-    return count;
-}
-
-bool Pipeline::validate()
-{
-    return m_executor.validate();
-}
-
-std::vector<PArray> Pipeline::getArrays() const
-{
-    std::vector<PArray> output;
-
-    if (!m_executor.executed())
-        throw python_error("call execute() before fetching arrays");
-
-    const pdal::PointViewSet& pvset = m_executor.getManagerConst().views();
-
-    for (auto i: pvset)
-    {
-        PArray array = new pdal::python::Array;
-        array->update(i);
-        output.push_back(array);
-    }
-    return output;
-}
-} //namespace libpdalpython
+} // namespace mlang
+} // namespace pdal
 

@@ -34,54 +34,62 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include "PredicateFilter.hpp"
+#include "PythonFilter.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
 static PluginInfo const s_info = PluginInfo(
-    "filters.predicate",
-    "Filter data using inline Python expressions.",
-    "http://pdal.io/stages/filters.predicate.html" );
+    "filters.python",
+    "Manipulate data using inline Python",
+    "http://pdal.io/stages/filters.python.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PythonFilter, Filter, s_info)
 
-std::string PredicateFilter::getName() const { return s_info.name; }
+std::string PythonFilter::getName() const { return s_info.name; }
 
-void PredicateFilter::addArgs(ProgramArgs& args)
+void PythonFilter::addArgs(ProgramArgs& args)
 {
     args.add("source", "Python script to run", m_source);
     args.add("script", "File containing script to run", m_scriptFile);
     args.add("module", "Python module containing the function to run",
         m_module);
     args.add("function", "Function to call", m_function);
+    args.add("add_dimension", "Dimensions to add", m_addDimensions);
     args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
 }
 
 
-void PredicateFilter::ready(PointTableRef table)
+void PythonFilter::addDimensions(PointLayoutPtr layout)
 {
-    if (m_source.empty())
-        m_source = FileUtils::readFileIntoString(m_scriptFile);
-
-    plang::Environment::get()->set_stdout(log()->getLogStream());
-    m_script = new plang::Script(m_source, m_module, m_function);
-    m_pythonMethod = new plang::Invocation(*m_script);
-    m_pythonMethod->compile();
+    for (const std::string& s : m_addDimensions)
+        layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
 }
 
 
-PointViewSet PredicateFilter::run(PointViewPtr view)
+void PythonFilter::ready(PointTableRef table)
 {
-    MetadataNode n;
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(m_scriptFile);
+    static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
+    m_script = new plang::Script(m_source, m_module, m_function);
+    m_pythonMethod = new plang::Invocation(*m_script);
+    m_pythonMethod->compile();
+    m_totalMetadata = table.metadata();
+}
 
+
+PointViewSet PythonFilter::run(PointViewPtr view)
+{
+    log()->get(LogLevel::Debug5) << "filters.python " << *m_script <<
+        " processing " << view->size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(*view, n);
+    m_pythonMethod->begin(*view, m_totalMetadata);
 
     if (!m_pdalargs.empty())
     {
@@ -89,30 +97,37 @@ PointViewSet PredicateFilter::run(PointViewPtr view)
         args << m_pdalargs;
         m_pythonMethod->setKWargs(args.str());
     }
-
     m_pythonMethod->execute();
 
-    if (!m_pythonMethod->hasOutputVariable("Mask"))
-        throwError("Mask variable not set in filter function.");
-
-    PointViewPtr outview = view->makeNew();
-
-    void *pydata =
-        m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
-    char *ok = (char *)pydata;
-    for (PointId idx = 0; idx < view->size(); ++idx)
-        if (*ok++)
-            outview->appendPoint(*view, idx);
-
     PointViewSet viewSet;
-    viewSet.insert(outview);
+
+    if (m_pythonMethod->hasOutputVariable("Mask"))
+    {
+        PointViewPtr outview = view->makeNew();
+
+        void *pydata =
+            m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
+        char *ok = (char *)pydata;
+        for (PointId idx = 0; idx < view->size(); ++idx)
+            if (*ok++)
+                outview->appendPoint(*view, idx);
+
+        viewSet.insert(outview);
+    }
+    else
+    {
+        m_pythonMethod->end(*view, getMetadata());
+        viewSet.insert(view);
+    }
+
     return viewSet;
+
 }
 
 
-void PredicateFilter::done(PointTableRef table)
+void PythonFilter::done(PointTableRef table)
 {
-    plang::Environment::get()->reset_stdout();
+    static_cast<plang::Environment*>(plang::Environment::get())->reset_stdout();
     delete m_pythonMethod;
     delete m_script;
 }

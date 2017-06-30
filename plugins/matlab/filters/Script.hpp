@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2017, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,52 +34,43 @@
 
 #pragma once
 
-
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-
-
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Metadata.hpp>
-#include <pdal/Dimension.hpp>
 
-#include "Redirector.hpp"
+#include <matrix.h>
+
+#include <pdal/Options.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Log.hpp>
 
 namespace pdal
 {
-namespace plang
+namespace mlang
 {
 
-PyObject *fromMetadata(MetadataNode m);
-void addMetadata(PyObject *list, MetadataNode m);
-
-std::string getTraceback();
-
-class Environment;
-typedef Environment *EnvironmentPtr;
-
-class PDAL_DLL Environment
+class PDAL_DLL Script
 {
 public:
-    Environment();
-    ~Environment();
+    Script() {};
 
-    // these just forward into the Redirector class
-    void set_stdout(std::ostream* ostr);
-    void reset_stdout();
+    static int getMatlabDataType(Dimension::Type t);
+    static Dimension::Type getPDALDataType(mxClassID t);
 
-    static EnvironmentPtr get();
-    static int getPythonDataType(Dimension::Type t);
+    static mxArray* setMatlabStruct(PointViewPtr view, const Dimension::IdList& dims, LogPtr log);
+
+    static void getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& dims, LogPtr log);
+    static PointLayoutPtr getStructLayout(mxArray* array, LogPtr log);
+    static std::string getLogicalMask(mxArray* array, LogPtr log);
+
+    std::string m_source;
+    std::string m_scriptFilename;
 
 private:
-    Redirector m_redirector;
+
+    Script& operator=(Script const& rhs); // nope
 };
 
-} // namespace plang
+PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);
+
+} // namespace mlang
 } // namespace pdal
 

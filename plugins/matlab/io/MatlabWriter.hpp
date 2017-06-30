@@ -55,9 +55,6 @@ public:
     static int32_t destroy(void*);
     std::string getName() const;
 
-    MatlabWriter()
-    {}
-
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
@@ -66,10 +63,11 @@ private:
     virtual void done(PointTableRef table);
 
     std::string m_filename;
+    std::string m_structName;
     StringList m_outputDims; ///< List of dimensions to write
     // Can't use unique_ptr b/c MATFile is an incomplete type.
     MATFile * m_matfile;
-    DimTypeList m_dimTypes;
+    Dimension::IdList m_dims;
 };
 
 

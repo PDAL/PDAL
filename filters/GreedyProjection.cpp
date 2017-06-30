@@ -124,9 +124,9 @@ void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 
 void GreedyProjection::filter(PointView& view)
 {
-    NormalFilter().doFilter(view);
+    pdal::NormalFilter().doFilter(view);
 
-    KD3Index& tree = view.build3dIndex();
+    pdal::KD3Index& tree = view.build3dIndex();
 
     view_ = &view;
     mesh_ = view_->createMesh(getName());

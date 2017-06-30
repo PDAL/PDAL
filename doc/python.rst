@@ -9,9 +9,9 @@ Python
 
 PDAL provides Python support in two significant ways. First it `embeds`_ Python
 to allow you to write Python programs that interact with data using
-:ref:`filters.programmable` and :ref:`filters.predicate` filters. Second,
-it `extends`_ Python by providing an extension that Python programmers
-can use to leverage PDAL capabilities in their own applications.
+:ref:`filters.python` filter. Second, it `extends`_ Python by providing an
+extension that Python programmers can use to leverage PDAL capabilities in
+their own applications.
 
 .. _`embeds`: https://docs.python.org/3/extending/embedding.html
 .. _`extends`: https://docs.python.org/3/extending/extending.html

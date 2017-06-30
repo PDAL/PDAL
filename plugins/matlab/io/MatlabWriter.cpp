@@ -33,9 +33,10 @@
  ****************************************************************************/
 
 #include "MatlabWriter.hpp"
+#include "../filters/Script.hpp"
 
 #include <pdal/pdal_macros.hpp>
-#include <pdal/ProgramArgs.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -55,6 +56,7 @@ void MatlabWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("output_dims", "Output dimensions", m_outputDims);
+    args.add("struct", "Matlab struct name", m_structName, "PDAL");
 }
 
 
@@ -62,17 +64,18 @@ void MatlabWriter::prepared(PointTableRef table)
 {
     if (m_outputDims.empty())
     {
-        m_dimTypes = table.layout()->dimTypes();
+        m_dims = table.layout()->dims();
     }
     else
     {
         for (std::string& s : m_outputDims)
         {
-            DimType dimType = table.layout()->findDimType(s);
-            if (dimType.m_id == Dimension::Id::Unknown)
+//             DimType dimType = table.layout()->findDimType(s);
+            Dimension::Id id = table.layout()->findDim(s);
+            if (id == Dimension::Id::Unknown)
                 throwError("Invalid dimension '" + s + "' specified for "
                     "'output_dims' option.");
-            m_dimTypes.push_back(dimType);
+            m_dims.push_back(id);
         }
     }
 }
@@ -88,42 +91,12 @@ void MatlabWriter::ready(PointTableRef table)
 
 void MatlabWriter::write(const PointViewPtr view)
 {
-    point_count_t nPoints = view->size();
-    auto nDimensions = m_dimTypes.size();
 
-    std::stringstream dimensionsString;
-    for (size_t i = 0; i < nDimensions; ++i)
-    {
-        if (i > 0) dimensionsString << ",";
-        dimensionsString << Dimension::name(m_dimTypes[i].m_id);
-    }
-    mxArray * dimensionNames = mxCreateString(dimensionsString.str().c_str());
-    if (!dimensionNames)
-        throwError("Could not create string '" + dimensionsString.str() + "'");
-    if (matPutVariable(m_matfile, "Dimensions", dimensionNames));
-        throwError("Could not write dimension names to file '" +
-            m_filename + "'.");
-
-    mxArray * points = mxCreateDoubleMatrix(nPoints, nDimensions, mxREAL);
-    if (!points)
-        throwError("Could not create a points array with dimensions " +
-            Utils::toString(nPoints) + "x" + Utils::toString(nDimensions));
-
-    double * pointsPtr = mxGetPr(points);
-    // Matlab is column-major
-    for (size_t j = 0; j < nDimensions; ++j)
-    {
-        for (point_count_t i = 0; i < nPoints; ++i)
-        {
-            double value = view->getFieldAs<double>(m_dimTypes[j].m_id, i);
-            memcpy(static_cast<void*>(pointsPtr++),
-                    static_cast<void*>(&value),
-                    sizeof(double));
-        }
-    }
-    if (matPutVariable(m_matfile, "Points", points))
+    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, log());
+    if (matPutVariable(m_matfile, m_structName.c_str(), data))
         throwError("Could not write points to file '" + m_filename + "'.");
-    mxDestroyArray(points);
+
+    mxDestroyArray(data);
 }
 
 

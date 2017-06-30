@@ -49,7 +49,7 @@ Reflectance values are mapped to intensity values using sensible defaults.
 
 We set the ``discard_high_return_numbers`` option to ``true`` on the :ref:`writers.las`.
 RXP files can contain more returns per shot than is supported by las, and so we need to explicitly tell the las writer to ignore those high return number points.
-You could also use :ref:`filters.predicate` to filter those points earlier in the pipeline, or modify the return values with a :ref:`filters.programmable`.
+You could also use :ref:`filters.python` to filter those points earlier in the pipeline.
 
 
 Options
