@@ -3,6 +3,8 @@
 readers.sqlite
 ====================
 
+.. admonition:: This reader is built as an optional plug-in.
+
 The `SQLite`_ point cloud reader allows you to
 read data stored in a SQLite database using a scheme that
 PDAL wrote using the :ref:`writers.sqlite` writer. Much like

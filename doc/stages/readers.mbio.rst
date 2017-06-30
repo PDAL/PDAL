@@ -3,6 +3,8 @@
 readers.mbio
 ============
 
+.. admonition:: This reader is built as an optional plug-in.
+
 The mbio reader allows sonar bathymetry data to be read into PDAL and
 treated as data collected using LIDAR sources.  PDAL uses the `MB-System`_
 library to read the data and therefore supports `all formats`_ supported by

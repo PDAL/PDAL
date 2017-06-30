@@ -3,6 +3,8 @@
 readers.nitf
 ============
 
+.. admonition:: This reader is built as an optional plug-in.
+
 The `NITF`_ format is used primarily by the US Department of Defense and
 supports many kinds of data inside a generic wrapper. The `NITF 2.1`_ version
 added support for LIDAR point cloud data, and the **NITF file reader** supports

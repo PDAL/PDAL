@@ -3,6 +3,8 @@
 readers.gdal
 ================================================================================
 
+.. admonition:: This is a built-in reader.
+
 The `GDAL`_ reader reads `GDAL readable raster`_ data sources as point clouds.
 
 .. _`GDAL`: http://gdal.org

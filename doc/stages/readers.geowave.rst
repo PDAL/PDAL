@@ -3,6 +3,8 @@
 readers.geowave
 ===============================================================================
 
+.. admonition:: This reader is built as an optional plug-in.
+
 .. index:: GeoWave
 
 The **GeoWave reader** uses `GeoWave`_ to read from Accumulo.  GeoWave entries

@@ -3,6 +3,8 @@
 readers.rxp
 ===========
 
+.. admonition:: This reader is built as an optional plug-in.
+
 The **RXP reader** read from files in the RXP format, the in-house streaming format used by `RIEGL Laser Measurement Systems`_.
 
 .. warning::

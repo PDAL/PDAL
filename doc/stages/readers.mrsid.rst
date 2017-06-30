@@ -3,6 +3,8 @@
 readers.mrsid
 =============
 
+.. admonition:: This reader is built as an optional plug-in.
+
 Implements MrSID 4.0 LiDAR Compressor. It requires the `Lidar_DSDK`_ to be able to
 decompress and read data.
 
