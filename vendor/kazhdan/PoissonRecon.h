@@ -61,26 +61,13 @@ void DumpOutput2( std::vector< char* >& comments , const char* format , ... );
 
 #define XSTR(x) STR(x)
 #define STR(x) #x
+/**
 #if DEFAULT_FULL_DEPTH
 #pragma message ( "[WARNING] Setting default full depth to " XSTR(DEFAULT_FULL_DEPTH) )
 #endif // DEFAULT_FULL_DEPTH
+**/
 
 #include <stdarg.h>
-
-/**
-template< class Real >
-struct ColorInfo
-{
-    static Point3D< Real > ReadASCII( FILE* fp )
-    {
-        Point3D< unsigned char > c;
-        if( fscanf( fp , " %c %c %c " , &c[0] , &c[1] , &c[2] )!=3 ) fprintf( stderr , "[ERROR] Failed to read color\n" ) , exit( 0 );
-        return Point3D< Real >( (Real)c[0] , (Real)c[1] , (Real)c[2] );
-    };
-    static bool ValidPlyProperties( const bool* props ){ return ( props[0] || props[3] ) && ( props[1] || props[4] ) && ( props[2] || props[5] ); }
-    const static PlyProperty PlyProperties[];
-};
-**/
 
 template<typename Real>
 XForm4x4<Real> GetPointXForm(PointSource& source, Real scaleFactor)
@@ -299,33 +286,6 @@ void PoissonRecon<Real>::writeVoxels()
         DeletePointer( values );
     }
 }
-
-/**
-template<typename Real>
-void PoissonRecon<Real>::writePly()
-{
-    if (m_opts.m_density && m_opts.m_hasColor)
-    {
-        CoredFileMeshData<PlyColorAndValueVertex<float>> mesh;
-        writeSurface(mesh);
-    }
-    else if (m_opts.m_density)
-    {
-        CoredFileMeshData<PlyValueVertex<float>> mesh;
-        writeSurface(mesh);
-    }
-    else if (m_opts.m_hasColor)
-    {
-        CoredFileMeshData<PlyColorVertex<float>> mesh;
-        writeSurface(mesh);
-    }
-    else
-    {
-        CoredFileMeshData<PlyVertex<float>> mesh;
-        writeSurface(mesh);
-    }
-}
-**/
 
 template <typename Real>
 void PoissonRecon<Real>::extractMesh(Kazhdan::Mesh& mesh)

@@ -1290,10 +1290,12 @@ int Octree< Real >::_getSliceMatrixAndUpdateConstraints( const FEMSystemFunctor&
 			_updateConstraintsFromCoarser( F , interpolationInfo , neighbors , pNeighbors , node , constraints , metSolution , childIntegrator , stencils[x][y][z] , bsData );
 		}
 	}
+/**
 #if !defined( _WIN32 ) && !defined( _WIN64 )
 #pragma message( "[WARNING] I'm not sure how expensive this system call is on non-Windows system. (You may want to comment this out.)" )
 #endif // !_WIN32 && !_WIN64
 	memoryUsage();
+**/
 	return 1;
 }
 
