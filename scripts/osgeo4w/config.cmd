@@ -44,8 +44,8 @@ cmake -G %GENERATOR% ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=ON ^
 	-DPDAL_PLUGIN_INSTALL_PATH=C:/OSGeo4W64/bin ^
-	-DGDAL_INCLUDE_DIR=%OSGEO4W_DIR%/apps/gdal-dev/include ^
-	-DGDAL_LIBRARY=%OSGEO4W_DIR%/apps/gdal-dev/lib/gdal_i.lib ^
+	-DGDAL_INCLUDE_DIR=%OSGEO4W_DIR%/include ^
+	-DGDAL_LIBRARY=%OSGEO4W_DIR%/lib/gdal_i.lib ^
 	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%/apps/python36/python.exe ^
 	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%/apps/python36/include ^
 	-DPYTHON_LIBRARY=%OSGEO4W_DIR%/apps/python36/libs/python36.lib ^
