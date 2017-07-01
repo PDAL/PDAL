@@ -40,8 +40,8 @@ cmake -G "Visual Studio 14 2015 Win64" ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=%PDAL_BUILD_TESTS% ^
 	-DPDAL_PLUGIN_INSTALL_PATH=%PDAL_PLUGIN_INSTALL_PATH% ^
-	-DGDAL_INCLUDE_DIR=%OSGEO4W_ROOT%/apps/gdal-dev/include ^
-	-DGDAL_LIBRARY=%OSGEO4W_ROOT%/apps/gdal-dev/lib/gdal_i.lib ^
+	-DGDAL_INCLUDE_DIR=%OSGEO4W_ROOT%/include ^
+	-DGDAL_LIBRARY=%OSGEO4W_ROOT%/lib/gdal_i.lib ^
 	-DPYTHON_EXECUTABLE=%OSGEO4W_ROOT%/apps/python36/python.exe ^
 	-DPYTHON_INCLUDE_DIR=%OSGEO4W_ROOT%/apps/python36/include ^
 	-DPYTHON_LIBRARY=%OSGEO4W_ROOT%/apps/python36/libs/python36.lib ^
