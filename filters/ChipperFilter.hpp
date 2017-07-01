@@ -57,14 +57,6 @@ class Stage;
 
 class PDAL_DLL ChipperFilter;
 
-enum Direction
-{
-    DIR_X,
-    DIR_Y,
-    DIR_NONE
-};
-
-
 class PDAL_DLL ChipPtRef
 {
     friend class ChipRefList;
@@ -89,10 +81,7 @@ class PDAL_DLL ChipRefList
 
 private:
     std::vector<ChipPtRef> m_vec;
-    Direction m_dir;
 
-    ChipRefList(Direction dir = DIR_NONE) : m_dir(dir)
-    {}
     std::vector<ChipPtRef>::size_type size() const
     {
         return m_vec.size();
@@ -121,25 +110,13 @@ private:
     {
         return m_vec[pos];
     }
-    std::string Dir()
-    {
-        if (m_dir == DIR_X)
-            return "X";
-        else if (m_dir == DIR_Y)
-            return "Y";
-        else
-            return "NONE";
-    }
 };
 
 
 class PDAL_DLL ChipperFilter : public pdal::Filter
 {
 public:
-    ChipperFilter() : Filter(),
-        m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)
-    {}
-
+    ChipperFilter() {}
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
