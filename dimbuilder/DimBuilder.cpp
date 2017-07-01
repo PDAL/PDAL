@@ -95,19 +95,6 @@ std::string getTypename(Dimension::Type type)
     return "None";
 }
 
-void validateDimension(const std::string& dimName)
-{
-    if (Dimension::extractName(dimName, 0) != dimName.size())
-    {
-        std::ostringstream oss;
-
-        oss << "Invalid dimension name '" << dimName << "'.  Dimension "
-            "names must start with a letter and be followed by letters, "
-            "digits or underscores.";
-        throw dimbuilder_error(oss.str());
-    }
-}
-
 } // unnamed namespace
 
 bool DimBuilder::parseArgs(int argc, char *argv[])
@@ -262,6 +249,30 @@ void DimBuilder::extractDim(Json::Value& dim)
         throw dimbuilder_error(oss.str());
     }
     m_dims.push_back(d);
+}
+
+void DimBuilder::validateDimension(const std::string& dimName)
+{
+    if (Dimension::extractName(dimName, 0) != dimName.size())
+    {
+        std::ostringstream oss;
+
+        oss << "Invalid dimension name '" << dimName << "'.  Dimension "
+            "names must start with a letter and be followed by letters, "
+            "digits or underscores.";
+        throw dimbuilder_error(oss.str());
+    }
+    for (DimSpec& d : m_dims)
+    {
+        if (d.m_name == dimName)
+        {
+            std::ostringstream oss;
+
+            oss << "Duplicate dimension name '" << dimName << "' found. "
+                "Dimension names must be unique.";
+            throw dimbuilder_error(oss.str());
+        }
+    }
 }
 
 void DimBuilder::writeOutput(std::ostream& out)
