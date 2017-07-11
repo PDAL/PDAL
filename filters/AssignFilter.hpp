@@ -36,6 +36,7 @@
 
 #include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/KDIndex.hpp>
 
 extern "C" int32_t AssignFilter_ExitFunc();
 extern "C" PF_ExitFunc AssignFilter_InitPlugin();
@@ -59,12 +60,15 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
     virtual bool processOne(PointRef& point);
+    virtual bool processOneNN(PointRef& point, KD3Index& kdi, PointView &viewNN);
     virtual void filter(PointView& view);
 
+    PointViewPtr loadSet(const std::string &candFileName, PointTable &table);
     AssignFilter& operator=(const AssignFilter&) = delete;
     AssignFilter(const AssignFilter&) = delete;
 
     std::vector<AssignRange> m_assignments;
+    std::string m_candidateFile;
 };
 
 } // namespace pdal

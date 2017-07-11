@@ -35,6 +35,7 @@
 #include "AssignFilter.hpp"
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -115,6 +116,9 @@ void AssignFilter::addArgs(ProgramArgs& args)
 {
     args.add("assignment", "Values to assign to dimensions based on range.",
         m_assignments);
+    Arg& candidate = args.add("candidate", "candidate file name",
+        m_candidateFile);
+    //candidate.setPositional();
 }
 
 
@@ -139,15 +143,64 @@ bool AssignFilter::processOne(PointRef& point)
             point.setField(r.m_id, r.m_value);
     return true;
 }
+// msr
+bool AssignFilter::processOneNN(PointRef& src, KD3Index &kdi, PointView &viewNN)
+{
+    PointId iSrc = kdi.neighbor(src);
+    PointRef nn = viewNN.point(iSrc);
+    // Known issue:  I've observed some point clouds with duplicate XYZ coords and different class codes.
+    // In that case, the KDIndex can not distinguish them and counts may differ from what is expected.
+    for (AssignRange& r : m_assignments)
+    {
+        double vsrc = src.getFieldAs<double>(r.m_id);
+        double vnn = nn.getFieldAs<double>(r.m_id);
+        assert(r.m_id == Dimension::Id::Classification);
+        int classNN = (static_cast<uint8_t>(vnn) & 0x1F);
+        int flagsSrc = (static_cast<uint8_t>(vsrc) & 0xE0);
+        if (r.valuePasses(classNN))
+        {   // Preserve src flags (synthetic, key-point, withheld).
+            src.setField(r.m_id, classNN | flagsSrc);
+        }
+    }
+    return true;
+}
 
+
+PointViewPtr AssignFilter::loadSet(const std::string& filename,
+    PointTable& table)
+{
+    PipelineManager mgr;
+
+    Stage& reader = mgr.makeReader(filename, "readers.las");
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    assert(viewSet.size() == 1);
+    return *viewSet.begin();
+}
 
 void AssignFilter::filter(PointView& view)
 {
-    PointRef point(view, 0);
-    for (PointId id = 0; id < view.size(); ++id)
+    if (m_candidateFile.empty())
     {
-        point.setPointId(id);
-        processOne(point);
+        PointRef point(view, 0);
+        for (PointId id = 0; id < view.size(); ++id)
+        {
+            point.setPointId(id);
+            processOne(point);
+        }
+    }
+    else 
+    {
+        PointTable candTable;
+        PointViewPtr candView = loadSet(m_candidateFile, candTable);
+        KD3Index kdi(*candView);
+        kdi.build();
+        PointRef point(view, 0);
+        for (PointId id = 0; id < view.size(); ++id)
+        {
+            point.setPointId(id);
+            processOneNN(point, kdi, *candView);
+        }
     }
 }
 
