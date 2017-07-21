@@ -3,10 +3,13 @@
 Visualizing acquisition density
 ================================================================================
 
+
+.. include:: ../../includes/substitutions.rst
+
 Purpose:
     * Characterize collection density
 
-:ref:`Density Workshop Materials <unavco:density>`
+:ref:`Density Workshop Materials <pdal:density>`
 
 
 Density (execution)

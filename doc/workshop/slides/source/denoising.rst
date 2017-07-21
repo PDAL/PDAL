@@ -3,11 +3,13 @@
 Removing noise
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
 Purpose:
     * Remove noise with a statistical method
     * Maintain point integrity
 
-:ref:`Denoising Workshop Materials <unavco:colorization>`
+:ref:`Denoising Workshop Materials <pdal:colorization>`
 
 
 Pipeline
@@ -28,7 +30,6 @@ Denoising (pipeline)
 ================================================================================
 
 .. literalinclude:: ../../exercises/analysis/denoising/denoise.json
-    :linenos:
 
 Denoising (command)
 ================================================================================

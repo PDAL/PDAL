@@ -1,2 +1,3 @@
-pdal translate c:/Users/hobu/pdal/exercises/translation/interesting.las ^
-c:/Users/hobu/pdal/exercises/translation/interesting.laz
+pdal translate ^
+    c:/Users/hobu/pdal/exercises/translation/interesting.las ^
+    c:/Users/hobu/pdal/exercises/translation/interesting.laz

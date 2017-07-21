@@ -1,14 +1,13 @@
-.. _denoising:
+.. _workshop-denoising:
 
 Removing noise
 ================================================================================
 
 .. include:: ../../../includes/substitutions.rst
 
-.. index:: Denoising, Filtering
+.. index:: Denoising, outliers
 
-This exercise uses PDAL to remove unwanted noise in an ALS collection.
-
+This exercise uses PDAL to remove unwanted noise in an airborne LiDAR collection.
 
 
 Exercise
@@ -82,6 +81,8 @@ Both :ref:`ranges <ranges>` are passed as a comma-separated list to the
         "type": "filters.range",
         "limits": "Classification![7:7],Z[-100:3000]"
     },
+
+.. index:: range filter, classifications
 
 4. :ref:`writers.las`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
