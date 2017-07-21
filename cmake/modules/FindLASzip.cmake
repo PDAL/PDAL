@@ -36,7 +36,7 @@ IF(WIN32)
 ENDIF()
 
 FIND_PATH(LASZIP_INCLUDE_DIR
-  laszip.hpp
+  laszip_api.h
   PATHS
   /usr/include/laszip
   /usr/local/include/laszip
@@ -53,40 +53,6 @@ FIND_LIBRARY(LASZIP_LIBRARY
   /usr/lib
   /usr/local/lib
   ${OSGEO4W_ROOT_DIR}/lib)
-
-IF(LASZIP_INCLUDE_DIR)
-  SET(LASZIP_VERSION 0)
-
-  SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip.hpp")
-  FILE(READ ${LASZIP_VERSION_H} LASZIP_VERSION_H_CONTENTS)
-
-  IF (DEFINED LASZIP_VERSION_H_CONTENTS)
-    string(REGEX REPLACE ".*#define[ \t]LASZIP_VERSION_MAJOR[ \t]+([0-9]+).*" "\\1" LASZIP_VERSION_MAJOR "${LASZIP_VERSION_H_CONTENTS}")
-    string(REGEX REPLACE ".*#define[ \t]LASZIP_VERSION_MINOR[ \t]+([0-9]+).*" "\\1" LASZIP_VERSION_MINOR "${LASZIP_VERSION_H_CONTENTS}")
-    string(REGEX REPLACE ".*#define[ \t]LASZIP_VERSION_REVISION[ \t]+([0-9]+).*"   "\\1" LASZIP_VERSION_REVISION   "${LASZIP_VERSION_H_CONTENTS}")
-
-    if(NOT ${LASZIP_VERSION_MAJOR} MATCHES "[0-9]+")
-      message(FATAL_ERROR "LASzip version parsing failed for LASZIP_VERSION_MAJOR!")
-    endif()
-    if(NOT ${LASZIP_VERSION_MINOR} MATCHES "[0-9]+")
-      message(FATAL_ERROR "LASzip version parsing failed for LASZIP_VERSION_MINOR!")
-    endif()
-    if(NOT ${LASZIP_VERSION_REVISION} MATCHES "[0-9]+")
-      message(FATAL_ERROR "LASzip version parsing failed for LASZIP_VERSION_REVISION!")
-    endif()
-
-
-    SET(LASZIP_VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_REVISION}"
-      CACHE INTERNAL "The version string for LASzip library")
-
-    IF (LASZIP_VERSION VERSION_LESS LASzip_FIND_VERSION)
-      MESSAGE(FATAL_ERROR "LASzip version check failed. Version ${LASZIP_VERSION} was found, at least version ${LASzip_FIND_VERSION} is required")
-    ENDIF()
-  ELSE()
-    MESSAGE(FATAL_ERROR "Failed to open ${LASZIP_VERSION_H} file")
-  ENDIF()
-
-ENDIF()
 
 # Handle the QUIETLY and REQUIRED arguments and set LASZIP_FOUND to TRUE
 # if all listed variables are TRUE

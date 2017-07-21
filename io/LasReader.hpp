@@ -39,11 +39,17 @@
 #include <pdal/Compression.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip_api.h>
+#else
+using laszip_POINTER = void *;
+using laszip_point_struct = void *;
+struct laszip_point;
+#endif
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
-#include "LasZipPoint.hpp"
 
 extern "C" int32_t LasReader_ExitFunc();
 extern "C" PF_ExitFunc LasReader_InitPlugin();
@@ -112,8 +118,8 @@ protected:
 private:
     LasError m_error;
     LasHeader m_header;
-    std::unique_ptr<LasZipPoint> m_zipPoint;
-    std::unique_ptr<LASunzipper> m_unzipper;
+    laszip_POINTER m_laszip;
+    laszip_point_struct *m_laszipPoint;
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
@@ -138,6 +144,9 @@ private:
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
+    void loadPoint(PointRef& point, laszip_point& p);
+    void loadPointV10(PointRef& point, laszip_point& p);
+    void loadPointV14(PointRef& point, laszip_point& p);
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
     void loadPointV10(PointRef& point, char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);

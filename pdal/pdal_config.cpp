@@ -60,10 +60,6 @@
 #  pragma clang diagnostic pop
 #endif
 
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip.hpp>
-#endif
-
 #include <geos_c.h>
 
 #ifdef PDAL_HAVE_LIBXML2
@@ -165,12 +161,6 @@ std::string getPDALDebugInformation()
 
     os << "GDAL (" << GDALVersionInfo("RELEASE_NAME") << ") - " <<
         "http://www.gdal.org" << std::endl;
-
-#ifdef PDAL_HAVE_LASZIP
-    os << "LASzip (" << LASZIP_VERSION_MAJOR << "." << LASZIP_VERSION_MINOR <<
-        "." << LASZIP_VERSION_REVISION << ") - " <<
-        "http://laszip.org" << std::endl;
-#endif
 
 #ifdef PDAL_HAVE_LIBXML2
     os << "libxml (" << LIBXML_DOTTED_VERSION << ") - " <<

@@ -43,7 +43,12 @@
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
 #include "LasSummaryData.hpp"
-#include "LasZipPoint.hpp"
+
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip_api.h>
+#else
+using laszip_POINTER = void *;
+#endif
 
 #include <json/json.h>
 
@@ -85,8 +90,7 @@ private:
     LasError m_error;
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
-    std::unique_ptr<LASzipper> m_zipper;
-    std::unique_ptr<LasZipPoint> m_zipPoint;
+    laszip_POINTER m_laszip;
     std::unique_ptr<LazPerfVlrCompressor> m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
@@ -152,7 +156,7 @@ private:
     bool fillPointBuf(PointRef& point, LeInserter& ostream);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
-    void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);
+    bool writeLasZipBuf(PointRef& point);
     void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
     void setVlrsFromMetadata(MetadataNode& forward);
     void setPDALVLRs(MetadataNode& m);

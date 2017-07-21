@@ -85,7 +85,8 @@ static bool fileIsOkay(const std::string& name)
 {
     if (!FileUtils::fileExists(name))
         return false;
-    if (FileUtils::fileSize(name) < 1000)
+    // 375 is the size of the LAS header.
+    if (FileUtils::fileSize(name) < 375)
         return false;
     return true;
 }
