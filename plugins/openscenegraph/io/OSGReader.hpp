@@ -59,15 +59,12 @@ namespace pdal
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-
   private:
     point_count_t m_index;
 
     std::vector< osg::Vec3d > _points;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);

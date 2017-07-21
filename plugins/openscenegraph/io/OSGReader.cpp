@@ -122,26 +122,11 @@ CREATE_SHARED_PLUGIN(1, 0, OSGReader, Reader, s_info)
 
 std::string OSGReader::getName() const { return s_info.name; }
 
-void OSGReader::addArgs(ProgramArgs& args)
-{
-}
-
 void OSGReader::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
-}
-
-Dimension::IdList OSGReader::getDefaultDimensions()
-{
-    Dimension::IdList ids;
-
-    ids.push_back(Dimension::Id::X);
-    ids.push_back(Dimension::Id::Y);
-    ids.push_back(Dimension::Id::Z);
-
-    return ids;
 }
 
 void OSGReader::ready(PointTableRef)
@@ -155,7 +140,6 @@ void OSGReader::ready(PointTableRef)
 
 point_count_t OSGReader::read(PointViewPtr view, point_count_t count)
 {
-    PointLayoutPtr layout = view->layout();
     PointId nextId = view->size();
     PointId idx = m_index;
     point_count_t numRead = 0;
@@ -176,7 +160,6 @@ point_count_t OSGReader::read(PointViewPtr view, point_count_t count)
     }
 
     m_index = nextId;
-    numRead = nextId;
     return numRead;
 }
 
