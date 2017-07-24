@@ -66,7 +66,6 @@ public:
 
     OptechReader();
 
-    static Dimension::IdList getDefaultDimensions();
     const CsdHeader& getHeader() const;
 
 private:

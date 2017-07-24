@@ -66,8 +66,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-
 private:
     QFIT_Format_Type m_format;
     std::ios::off_type m_point_bytes;

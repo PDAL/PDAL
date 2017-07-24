@@ -53,14 +53,14 @@ std::string SbetReader::getName() const { return s_info.name; }
 
 void SbetReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(getDefaultDimensions());
+    layout->registerDims(fileDimensions());
 }
 
 
 void SbetReader::ready(PointTableRef)
 {
     size_t fileSize = FileUtils::fileSize(m_filename);
-    size_t pointSize = getDefaultDimensions().size() * sizeof(double);
+    size_t pointSize = fileDimensions().size() * sizeof(double);
     if (fileSize % pointSize != 0)
         throwError("Invalid file size.");
     m_numPts = fileSize / pointSize;
@@ -114,7 +114,7 @@ bool SbetReader::eof()
 
 void SbetReader::seek(PointId idx)
 {
-    m_stream->seek(idx * sizeof(double) * getDefaultDimensions().size());
+    m_stream->seek(idx * sizeof(double) * fileDimensions().size());
 }
 
 } // namespace pdal

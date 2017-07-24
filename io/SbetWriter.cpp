@@ -64,7 +64,7 @@ void SbetWriter::ready(PointTableRef)
 
 void SbetWriter::write(const PointViewPtr view)
 {
-    Dimension::IdList dims = getDefaultDimensions();
+    Dimension::IdList dims = fileDimensions();
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)

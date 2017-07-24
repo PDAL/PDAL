@@ -64,8 +64,6 @@ public:
 
     GDALReader();
 
-    static Dimension::IdList getDefaultDimensions();
-
 private:
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
