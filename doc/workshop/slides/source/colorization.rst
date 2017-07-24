@@ -3,12 +3,14 @@
 Colorizing points with imagery
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
 Purpose:
     * Top-down projection of RGB imagery
     * Improve visualization
     * Assign other GDAL data to points
 
-:ref:`Colorizing Workshop Materials <unavco:colorization>`
+:ref:`Colorizing Workshop Materials <pdal:colorization>`
 
 
 Colorization (setup)

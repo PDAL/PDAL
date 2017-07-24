@@ -1,4 +1,3 @@
 pdal info ^
-c:/Users/hobu/PDAL/exercises/analysis/density/uncompahgre.laz ^
---boundary
-
+    c:/Users/hobu/PDAL/exercises/analysis/density/uncompahgre.laz ^
+    --boundary

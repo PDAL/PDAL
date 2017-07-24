@@ -251,13 +251,8 @@ void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& s
             }
         }
 
-        // Save away the direction so we know which array is X and which is Y
-        // so that when we emit, we can properly label the max/min points.
-        Direction dir = narrow.m_dir;
-        spare.m_dir = dir;
         decideSplit(wide, spare, narrow, pleft, pcenter);
         decideSplit(wide, spare, narrow, pcenter, pright);
-        narrow.m_dir = dir;
     }
 }
 

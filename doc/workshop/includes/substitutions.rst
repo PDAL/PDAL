@@ -24,7 +24,9 @@
 .. |Hobu| replace:: `Hobu <httsp://hobu.co/>`__
 .. |Optech| replace:: `Optech <http://www.teledyneoptech.com/>`__
 .. |Riegl| replace:: `Riegl <http://riegl.com/>`__
+.. |Greyhound| replace:: `Greyhound <http://greyhound.io/>`__
 .. |NCALM| replace:: `NCALM <http://ncalm.cive.uh.edu/>`__
 .. |UTM| replace:: `UTM <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`__
 .. |WGS84| replace:: `WGS84 <https://en.wikipedia.org/wiki/Geodetic_datum>`__
 .. |WellKnownText| replace:: `Well Known Text <https://en.wikipedia.org/wiki/Well-known_text#Coordinate_reference_systems>`__
+.. |Terminal| replace:: `OSGeo4W Shell`

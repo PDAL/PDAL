@@ -3,6 +3,9 @@
 Basic Information
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
+
 * Inspection of file contents
 * Location determination
 * Investigate suitability
@@ -10,46 +13,38 @@ Basic Information
 Exercises
 ================================================================================
 
-1. :ref:`single-point`
-2. :ref:`metadata`
-3. :ref:`near`
+1. :ref:`pdal:workshop-single-point`
+2. :ref:`pdal:workshop-metadata`
+3. :ref:`pdal:near`
 
 Printing a Single Point
 ================================================================================
 
 Purpose:
-    * Learn how to run PDAL via :ref:`docker`
     * Verify PDAL is working correctly
     * Learn about point cloud data types
+    * Familiarize yourself with terminal
 
-:ref:`Workshop Materials <unavco:single-point>`
+:ref:`Workshop Materials <pdal:workshop-single-point>`
+
+Start Terminal (first point)
+================================================================================
+
+1. Start the |Terminal|
+
+.. figure:: ./img/osgeo4w-shell.png
 
 Command (first point)
 ================================================================================
 
-In your `Docker Quickstart Terminal`, issue the following:
+In your |Terminal|, issue the following:
 
 .. literalinclude:: ../../exercises/info/single-point-command.txt
     :linenos:
 
-1. ``docker``: All our commands start with ``docker``
+1. ``pdal``: Inside the ``pdal/pdal`` image, run the `pdal` command
 
-2. ``run``: Tells docker we're going to run an image
-
-3. ``-v /c/Users/Howard/PDAL:/data``: Maps our workshop directory to a directory called
-   ``/data`` inside the container.
-
-Command (first point)
-================================================================================
-
-.. literalinclude:: ../../exercises/info/single-point-command.txt
-    :linenos:
-
-4. ``pdal/pdal``: Run the image with name ``pdal/pdal``
-
-5. ``pdal``: Inside the ``pdal/pdal`` image, run the `pdal` command
-
-6. ``info``: `info` is a "kernel" in PDAL-speak. It is a unit
+2. ``info``: `info` is a "kernel" in PDAL-speak. It is a unit
    of functionality driven by the command line.
 
 Command (first point)
@@ -58,12 +53,12 @@ Command (first point)
 .. literalinclude:: ../../exercises/info/single-point-command.txt
     :linenos:
 
-7. ``/data/exercises/info/interesting.las``: Our directory
-   is now mounted at ``/data``
+3. ``c:/Users/hobu/PDAL/exercises/info/interesting.las``:
+   File to run ``info`` command on
 
-8. ``-p``: ``-p`` corresponds to "print a point".
+4. ``-p``: argument corresponds to "print a point".
 
-9. ``0`` means to print the first
+5. ``0`` means to print the first (starting from 0)
 
 Run (first point)
 ================================================================================
@@ -87,12 +82,12 @@ Purpose:
     * Compute bounding box
     * Retrieve supporting information
 
-:ref:`Metadata Workshop Materials <unavco:metadata>`
+:ref:`Metadata Workshop Materials <pdal:workshop-metadata>`
 
 Command (metadata)
 ================================================================================
 
-In your `Docker Quickstart Terminal`, issue the following:
+In your |Terminal|, issue the following:
 
 .. literalinclude:: ../../exercises/info/metadata-command.txt
     :linenos:
@@ -121,7 +116,7 @@ Purpose:
 Command (near - metadata)
 ================================================================================
 
-In your `Docker Quickstart Terminal`, issue the following:
+In your |Terminal|, issue the following:
 
 .. literalinclude:: ../../exercises/info/near-command-1.txt
     :linenos:
@@ -133,7 +128,7 @@ In your `Docker Quickstart Terminal`, issue the following:
 Command (near - query)
 ================================================================================
 
-In your `Docker Quickstart Terminal`, issue the following:
+In your |Terminal|, issue the following:
 
 .. literalinclude:: ../../exercises/info/near-command-2.txt
     :linenos:

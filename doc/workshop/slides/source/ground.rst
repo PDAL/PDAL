@@ -3,11 +3,13 @@
 Identifying ground
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
+
 Purpose:
     * Filter and classify ground points
 
-
-:ref:`Ground Workshop Materials <unavco:ground>`
+:ref:`Ground Workshop Materials <pdal:ground>`
 
 
 filters.ground

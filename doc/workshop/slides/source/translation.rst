@@ -3,6 +3,9 @@
 Translation
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
+
 * Convert one format to another
 * Do stuff along the way
 
@@ -10,13 +13,12 @@ Compression
 ================================================================================
 
 Purpose:
-    * Output a compressed `LAZ`_
+    * Output a compressed |LASzip|
     * Learn about point cloud metadata
     * Learn about |ASPRSLAS|
 
-:ref:`Compression Workshop Materials <unavco:compression>`
+:ref:`Compression Workshop Materials <pdal:compression>`
 
-.. include:: ../../includes/substitutions.rst
 .. _`LAZ`: http://laszip.org
 
 LASzip
@@ -54,15 +56,14 @@ Purpose:
     * Utilize driver options
     * Scale output data
 
-:ref:`Reprojection Workshop Materials <unavco:reprojection>`
+:ref:`Reprojection Workshop Materials <pdal:reprojection>`
 
 Command (reproject)
 ================================================================================
 
 .. literalinclude:: ../../exercises/translation/reprojection-command-1.txt
-    :linenos:
 
-* We tell ``filters.reprojection`` to output to ``EPSG:4326``
+* We tell :ref:`filters.reprojection` to output to ``EPSG:4326``
 * Add ``reprojection`` filter directly to ``translate`` command
 * Define reprojection filter option via command line
 
@@ -75,7 +76,6 @@ Command (scale)
 ================================================================================
 
 .. literalinclude:: ../../exercises/translation/reprojection-command-2.txt
-    :linenos:
 
 * Scale set to ``1e-7``
 * Offset to ``auto`` (PDAL calculates minimum)

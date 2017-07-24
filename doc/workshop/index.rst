@@ -7,7 +7,7 @@ Point Cloud Processing and Analysis with PDAL
 :Author: Pete Gadomski
 :Author: Dr. Craig Glennie
 :Contact: howard@hobu.co
-:Date: 03/30/2016
+:Date: 07/25/2017
 
 
 .. include:: ./includes/substitutions.rst
@@ -16,6 +16,9 @@ Point Cloud Processing and Analysis with PDAL
    :maxdepth: 3
 
    agenda
+   about
    lidar-introduction
    software
    exercises/index
+   capstone
+   notes
