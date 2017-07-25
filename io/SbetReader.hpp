@@ -57,9 +57,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
-
 private:
     std::unique_ptr<ILeStream> m_stream;
     // Number of points in the file.

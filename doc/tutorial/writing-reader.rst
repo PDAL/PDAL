@@ -33,15 +33,7 @@ These methods are required to fulfill the specs for defining a new plugin.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.hpp
    :language: cpp
-   :lines: 20
-   :linenos:
-
-``getDefaultDimensions`` returns a list of :ref:`dimensions` that the
-reader provides.
-
-.. literalinclude:: ../../examples/writing-reader/MyReader.hpp
-   :language: cpp
-   :lines: 23-25
+   :lines: 21-23
    :linenos:
 
 ``m_stream`` is used to process the input, while ``m_index`` is used to track
@@ -111,16 +103,7 @@ dimension MyData.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 31-40
-   :linenos:
-
-This method returns the list of :ref:`dimensions` that the reader can
-provide.
-
-
-.. literalinclude:: ../../examples/writing-reader/MyReader.cpp
-   :language: cpp
-   :lines: 42-46
+   :lines: 31-35
    :linenos:
 
 This method is called when the Reader is ready for use.  It will only be
@@ -129,7 +112,7 @@ processed.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 49-62
+   :lines: 37-50
    :linenos:
 
 This is a helper function, which will convert a string value into the type
@@ -139,7 +122,7 @@ strings to doubles when reading from the input stream.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 65
+   :lines: 53
    :linenos:
 
 This method is the main processing method for the reader.  It takes a
@@ -152,7 +135,7 @@ PointView object.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 74-76
+   :lines: 62-64
    :linenos:
 
 In preparation for reading the file, we prepare to skip some header lines.  In
@@ -160,7 +143,7 @@ our case, the header is only a single line.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 77-82
+   :lines: 65-70
    :linenos:
 
 Here we begin our main loop.  In our example file, the first line is a header,
@@ -171,7 +154,7 @@ sure we are skipping the header lines here before moving on.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 85-94
+   :lines: 73-82
    :linenos:
 
 Here we take the line we read in the for block header, split it, and make sure
@@ -179,9 +162,8 @@ that we have the proper number of fields.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 96-109
+   :lines: 84-97
    :linenos:
-
 
 Here we take the values we read and put them into the PointView object.  The
 X and Y fields are simply converted from the file and put into the respective
@@ -195,7 +177,7 @@ each iteration of the loop), and the dimension value.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 111-113
+   :lines: 99-101
    :linenos:
 
 Finally, we increment the nextId and make a call into the progress callback

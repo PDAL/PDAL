@@ -80,11 +80,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-    {
-        return getRxpDimensions(DEFAULT_SYNC_TO_PPS, DEFAULT_MINIMAL);
-    }
-
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();

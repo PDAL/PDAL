@@ -191,7 +191,7 @@ std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
 
     void GeoWaveReader::addDimensions(PointLayoutPtr layout)
     {
-        layout->registerDims(getDefaultDimensions());
+        layout->registerDims( { Dimension::Id::X, Dimension::Id::Y } );
 
         BasicAccumuloOperations accumuloOperations;
         try
@@ -227,14 +227,6 @@ std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
             if (name.compare("location") != 0 && name.compare("X") != 0 && name.compare("Y") != 0)
                 layout->registerDim(Dimension::id(name));
         }
-    }
-
-    Dimension::IdList GeoWaveReader::getDefaultDimensions()
-    {
-        Dimension::IdList ids;
-        ids.push_back(Dimension::Id::X);
-        ids.push_back(Dimension::Id::Y);
-        return ids;
     }
 
     void GeoWaveReader::ready(PointTableRef table)

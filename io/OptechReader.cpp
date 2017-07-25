@@ -82,22 +82,6 @@ OptechReader::OptechReader()
 }
 
 
-Dimension::IdList OptechReader::getDefaultDimensions()
-{
-    Dimension::IdList dims;
-    dims.push_back(Dimension::Id::X);
-    dims.push_back(Dimension::Id::Y);
-    dims.push_back(Dimension::Id::Z);
-    dims.push_back(Dimension::Id::GpsTime);
-    dims.push_back(Dimension::Id::ReturnNumber);
-    dims.push_back(Dimension::Id::NumberOfReturns);
-    dims.push_back(Dimension::Id::EchoRange);
-    dims.push_back(Dimension::Id::Intensity);
-    dims.push_back(Dimension::Id::ScanAngleRank);
-    return dims;
-}
-
-
 const CsdHeader& OptechReader::getHeader() const { return m_header; }
 
 
@@ -136,10 +120,11 @@ void OptechReader::initialize()
 
 void OptechReader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto it : getDefaultDimensions())
-    {
-        layout->registerDim(it);
-    }
+    using namespace Dimension;
+
+    layout->registerDims( { Id::X, Id::Y, Id::Z, Id::GpsTime, Id::ReturnNumber,
+        Id::NumberOfReturns, Id::EchoRange, Id::Intensity,
+        Id::ScanAngleRank } );
 }
 
 
