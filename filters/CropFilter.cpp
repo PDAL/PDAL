@@ -107,7 +107,13 @@ void CropFilter::ready(PointTableRef table)
 {
     // If the user didn't provide an SRS, take one from the table.
     if (m_assignedSrs.empty())
+    {
         m_assignedSrs = table.anySpatialReference();
+        if (!table.spatialReferenceUnique())
+            log()->get(LogLevel::Warning) << "Can't determine spatial "
+                "reference for provided bounds.  Consider using 'a_srs' "
+                "option.\n";
+    }
     for (auto& geom : m_geoms)
         geom.setSpatialReference(m_assignedSrs);
 }
