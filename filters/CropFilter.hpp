@@ -71,6 +71,7 @@ private:
     double m_distance2;
     std::vector<cropfilter::Point> m_centers;
     std::vector<Polygon> m_geoms;
+    std::vector<BOX2D> m_boxes;
 
     void addArgs(ProgramArgs& args);
     virtual void initialize();

@@ -566,8 +566,8 @@ public:
     Bounds()
     {}
 
-    Bounds(const BOX3D& box);
-    Bounds(const BOX2D& box);
+    explicit Bounds(const BOX3D& box);
+    explicit Bounds(const BOX2D& box);
 
     BOX3D to3d() const;
     BOX2D to2d() const;
