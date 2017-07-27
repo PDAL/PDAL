@@ -213,8 +213,8 @@ TEST(OldPCLBlockTests, PMF)
     assign->setInput(*r);
 
     Options fo;
-    fo.add("max_window_size", 33);
-    fo.add("cell_size", 1.0);
+    fo.add("max_window_size", 33.0);
+    fo.add("cell_size", 10.0);
     fo.add("slope", 1.0);
     fo.add("initial_distance", 0.15);
     fo.add("max_distance", 2.5);
@@ -239,5 +239,5 @@ TEST(OldPCLBlockTests, PMF)
 
     EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(106u, view->size());
+    EXPECT_EQ(79u, view->size());
 }
