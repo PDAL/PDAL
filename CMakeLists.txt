@@ -57,7 +57,7 @@ else()
 endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
-#set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
+set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -172,6 +172,7 @@ endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
+add_subdirectory(vendor/kazhdan)
 
 if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
@@ -247,6 +248,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
+        ${PDAL_KAZHDAN_LIB_NAME}
     ${JSON_CPP_LINK_TYPE}
         ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
@@ -281,6 +283,11 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     PATTERN "pdal/private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_KERNELS_DIR}
+    DESTINATION include/pdal
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
+)
+install(DIRECTORY ${PDAL_VENDOR_DIR}/nanoflann
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "private" EXCLUDE

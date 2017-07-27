@@ -267,6 +267,7 @@ bool PlyReader::extractElement()
 
 void PlyReader::extractHeader()
 {
+    m_elements.clear();
     extractMagic();
     extractFormat();
     while (extractElement())

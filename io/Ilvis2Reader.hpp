@@ -80,8 +80,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-
 private:
     std::ifstream m_stream;
     IlvisMapping m_mapping;

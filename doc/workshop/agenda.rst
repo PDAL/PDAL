@@ -23,7 +23,7 @@ Materials
 Slides
 ................................................................................
 
-* `Slides <http://www.pdal.io/workshop/slides/>`__
+* `Slides <https://www.pdal.io/workshop/slides/>`__
 
 Workshop Materials
 ................................................................................
@@ -31,8 +31,8 @@ Workshop Materials
 These materials are available at http://pdal.io/workshop/ as both
 a PDF and an HTML website.
 
-* `PDF download <http://pdal.io/PDAL.pdf>`__
-* `Website <http://pdal.io/workshop/>`__
+* `PDF download <https://pdal.io/PDAL.pdf>`__
+* `Website <https://pdal.io/workshop/>`__
 
 USB Example Data Drive
 ................................................................................

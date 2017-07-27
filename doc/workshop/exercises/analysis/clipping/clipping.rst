@@ -124,8 +124,8 @@ Visualization
 ................................................................................
 
 Use one of the point cloud visualization tools you installed to take a look at
-your ``c:\Users\Howard\PDAL\exercises\analysis\clipping\stadium.las`` output.
-In the example below, we simply opened the file using the http://plas.io
+your ``c:/Users/Howard/PDAL/exercises/analysis/clipping/stadium.las`` output.
+In the example below, we opened the file to view it using the http://plas.io
 website.
 
 
@@ -142,7 +142,6 @@ Notes
 2. Points that are *on* the boundary are included.
 
 
-.. _`NASA Airborne Snow Observatory`: http://aso.jpl.nasa.gov/
 .. _`CloudCompare`: http://www.danielgm.net/cc/
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html

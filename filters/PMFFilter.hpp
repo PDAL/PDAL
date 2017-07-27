@@ -39,18 +39,11 @@
 
 #include "private/DimRange.hpp"
 
-#include <memory>
-
 extern "C" int32_t PMFFilter_ExitFunc();
 extern "C" PF_ExitFunc PMFFilter_InitPlugin();
 
 namespace pdal
 {
-
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
 
 class PDAL_DLL PMFFilter : public Filter
 {
@@ -64,24 +57,21 @@ public:
     std::string getName() const;
 
 private:
+    double m_cellSize;
+    bool m_exponential;
+    DimRange m_ignored;
+    double m_initialDistance;
+    bool m_lastOnly;
+    double m_maxDistance;
     double m_maxWindowSize;
     double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_approximate;
-    DimRange m_ignored;
-    bool m_lastOnly;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
-    std::vector<double> fillNearest(PointViewPtr view, size_t rows, size_t cols,
-                                    double cell_size, BOX2D bounds);
-    std::vector<double> morphOpen(PointViewPtr view, float radius);
     virtual void prepared(PointTableRef table);
-    std::vector<PointId> processGround(PointViewPtr view);
-    std::vector<PointId> processGroundApprox(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);
+
+    void processGround(PointViewPtr view);
 
     PMFFilter& operator=(const PMFFilter&); // not implemented
     PMFFilter(const PMFFilter&);            // not implemented

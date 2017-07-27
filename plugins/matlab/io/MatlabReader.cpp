@@ -163,7 +163,7 @@ bool MatlabReader::processOne(PointRef& point)
         if (numElements >= m_pointIndex )
         {
             size_t size = mxGetElementSize(f);
-            char* p = (char*)mxGetData(f) + size;
+            char* p = (char*)mxGetData(f) + (m_pointIndex*size);
             point.setField(d, t, (void*)p);
         }
 

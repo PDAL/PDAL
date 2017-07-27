@@ -52,6 +52,12 @@ Notes
   extra iteration. This parameter can have a strongly negative impact on
   computation performance.
   
+* ``exponential`` is used to control the rate of growth of morphological window
+  sizes toward ``max_window_size``. Linear growth preserves gradually changing
+  topographic features well, but demands considerable compute time. The default
+  behavior is to grow the window sizes exponentially, thus reducing the number
+  of iterations.
+  
 * This filter will mark all returns deemed to be ground returns with a
   classification value of 2 (per the LAS specification). To extract only these
   returns, users can add a :ref:`range filter<filters.range>` to the pipeline.
@@ -71,27 +77,27 @@ Notes
 Options
 -------------------------------------------------------------------------------
 
+cell_size
+  Cell Size. [Default: **1**]
+
+exponential
+  Use exponential growth for window sizes? [Defualt: **true**]
+
+ignore
+  Optional range of values to ignore.
+  
+initial_distance
+  Initial distance. [Default: **0.15**]
+
+last
+  Consider only last returns (when return information is available)? [Default:
+  **true**]
+  
+max_distance
+  Maximum distance. [Default: **2.5**]
+
 max_window_size
   Maximum window size. [Default: **33**]
 
 slope
   Slope. [Default: **1.0**]
-
-max_distance
-  Maximum distance. [Default: **2.5**]
-
-initial_distance
-  Initial distance. [Default: **0.15**]
-
-cell_size
-  Cell Size. [Default: **1**]
-
-approximate
-  Use approximate algorithm? [Default: **false**]
-  
-ignore
-  Optional range of values to ignore.
-
-last
-  Consider only last returns (when return information is available)? [Default:
-  **true**]

@@ -8,6 +8,14 @@ box (2D), polygon, or point+distance.  If more than one bounding region is
 specified, the filter will pass all input points through each bounding region,
 creating an output point set for each input crop region.
 
+The provided bounding regions are assumed to have the same spatial reference
+as the points unless the option `a_srs` provides an explicit spatial reference
+for bounding regions.
+If the point input consists of multiple point views with differing
+spatial references, one is chosen at random and assumed to be the
+spatial reference of the input bounding region.  In this case a warning will
+be logged.
+
 Example
 -------
 
@@ -46,3 +54,8 @@ point
 
 distance
   Distance in units of common X, Y, and Z :ref:`dimensions` to crop circle or sphere in combination with ``point``.
+
+a_srs
+  Indicates the spatial reference of the bounding regions.  If not provided,
+  it is assumed that the spatial reference of the bounding region matches
+  that of the points (if possible).

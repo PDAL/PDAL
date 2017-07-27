@@ -26,6 +26,7 @@ Translation
 
    translation/compression
    translation/reprojection
+   translation/greyhound
 
 
 .. _analysisa:
@@ -44,6 +45,14 @@ Analysis
    analysis/thinning/thinning
    analysis/ground/ground
    analysis/dtm/dtm
+
+Python
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 3
+
+   python/histogram
 
 
 Georeferencing

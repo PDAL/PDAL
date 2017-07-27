@@ -35,7 +35,7 @@ How is LiDAR used?
 Discrete vs. full-waveform
 ============================
 
-- Outgoing puses are *not* instantaneous — they have a finite width and height (approximated by a Gaussian)
+- Outgoing pulses are *not* instantaneous — they have a finite width and height (approximated by a Gaussian)
 - Return energy is not instantaneous either (see picture)
 - The "full waveform" output (see picture) is usually simplified down to single points (discrete-return)
 
@@ -55,7 +55,7 @@ How is LiDAR processed?
 
 * Vendor-specific software (e.g. RiSCAN Pro and RiProcess, from |Riegl|)
 * Other commercial softwares (e.g. TerraStation, QT Modeler)
-* Mixed-source software (e.g. LasTools)
+* Mixed-source software (e.g. LASTools)
 * Open-source software (e.g. CloudCompare, PDAL, laspy)
 
 

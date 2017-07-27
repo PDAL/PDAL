@@ -3,16 +3,18 @@
 Thinning
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
 Purpose:
     * Reduce collection density
 
-:ref:`Thinning Workshop Materials <unavco:thinning>`
+:ref:`Thinning Workshop Materials <pdal:thinning>`
 
 
 PDAL Thinning Techniques
 ================================================================================
 
-* :ref:`filters.dartsample`
+* :ref:`filters.sample`
 * :ref:`filters.voxelgrid`
 * :ref:`filters.randomize` + :ref:`filters.decimation`
 

@@ -147,6 +147,24 @@ bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
 
 
 /**
+  Reproject a bounds box from a source projection to a destination.
+  \param box  2D Bounds box to be reprojected in-place.
+  \param srcSrs  String in WKT or other suitable format of box coordinates.
+  \param dstSrs  String in WKT or other suitable format to which
+    coordinates should be projected.
+  \return  Whether the reprojection was successful or not.
+*/
+bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
+    const std::string& dstSrs)
+{
+    BOX3D b(box);
+    bool res = reprojectBounds(b, srcSrs, dstSrs);
+    box = b.to2d();
+    return res;
+}
+
+
+/**
   Reproject a point from a source projection to a destination.
   \param x  X coordinate of point to be reprojected.
   \param y  Y coordinate of point to be reprojected.

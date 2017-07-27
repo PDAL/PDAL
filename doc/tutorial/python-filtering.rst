@@ -33,9 +33,8 @@ be a very quick way to prototype a tool that identified specific points
 we would like to filter.
 
 PDAL has three different ways to manipulate data with Python. The first is
-:ref:`filters.python`, which we will be using in this tutorial. The
-second is :ref:`filters.`, which allows you to keep or remove points
-given a Python filtering operation. The third is the Python extension at
+:ref:`filters.python`, which we will be using in this tutorial.
+The second is the Python extension at
 https://pypi.python.org/pypi/PDAL that allows you to utilize PDAL processing
 operations in your own Python programs.
 
@@ -75,12 +74,11 @@ running.
 Python Filter
 -------------------------------------------------------------------------------
 
-Through the use of the :ref:`filters.python` and :ref:`filters.`
-filters, PDAL allows the use of Python and |NumPy| to process point cloud
-data. This can be very useful in prototyping situations, where PDAL can provide
-convenient data access and the processing logic of software that is still
-taking shape can be constructed with the rapid prototyping tools that Python
-can provide.
+Through the use of the :ref:`filters.python`, PDAL allows the use of Python and
+|NumPy| to process point cloud data. This can be very useful in prototyping
+situations, where PDAL can provide convenient data access and the processing
+logic of software that is still taking shape can be constructed with the rapid
+prototyping tools that Python can provide.
 
 
 .. code-block:: python
@@ -112,7 +110,7 @@ can provide.
         # Print our dict to stdout
         print output
 
-        # filters. must return True to tell
+        # filters.python must return True to tell
         # PDAL it successfully completed
         return True
 
@@ -221,7 +219,7 @@ three standard deviations:
         # Print our dict to stdout
         print output
 
-        # filters. must return True to tell
+        # filters.python must return True to tell
         # PDAL it successfully completed
         return True
 

@@ -3,6 +3,8 @@
 Introduction to PDAL
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
 * Point Data Abstraction Library
 * "GDAL for point cloud data"
 * Focus (in priority)
@@ -19,11 +21,12 @@ Introduction to PDAL
 Open Source
 ================================================================================
 
-* `BSD`_ license
+* https://pdal.io
 * https://github.com/PDAL/PDAL
 * `Tested with every commit`_
 * 30+ `contributors`_
 * Driven by real world use
+* `BSD`_ license
 
 .. _`Tested with every commit`: http://travis-ci.org/PDAL/PDAL/builds/
 .. _`BSD`: https://opensource.org/licenses/BSD-2-Clause
@@ -70,7 +73,7 @@ Processing Pipeline
 Pipeline Architecture
 ================================================================================
 
-.. image:: ../../images/pdal-reader-writer.png
+.. image:: ../../../images/las-crop-bpf-pipeline.png
 
 Pipeline Architecture
 ================================================================================
@@ -128,11 +131,11 @@ Filters
 Filters (cont)
 ================================================================================
 
-* :ref:`Ground classification<filters.ground>`
-* :ref:`Normalized heights <filters.height>`
+* :ref:`Ground classification<filters.smrf>`
+* :ref:`Normalized heights <filters.hag>`
 * :ref:`Sorting <filters.sort>`
 * :ref:`Spatial curve sorting <filters.mortonorder>`
-* :ref:`Noise filtering <filters.statisticaloutlier>`
+* :ref:`Noise filtering <filters.outlier>`
 * :ref:`Merge<filters.merge>`
 
 Filters (cont)
@@ -180,6 +183,15 @@ Python (cont)
 
        outs['Mask'] = keep
        return True
+
+Matlab
+================================================================================
+
+* :ref:`writers.matlab` and :ref:`readers.matlab` for i/o
+
+* Embed
+
+  * Use Matlab scripts inline with :ref:`pipeline <pipeline>` operations
 
 Next
 ================================================================================
