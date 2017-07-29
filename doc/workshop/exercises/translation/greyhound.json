@@ -1,0 +1,21 @@
+{
+    "pipeline": [
+        {
+            "type": "readers.greyhound",
+            "url":"data.greyhound.io",
+            "depth_begin":0,
+            "depth_end":11,
+            "resource":"dublin",
+            "filter":{
+                "Classification": 2
+            }
+        },
+        {
+            "type": "writers.las",
+            "compression": "true",
+            "minor_version": "2",
+            "dataformat_id": "0",
+            "filename":"just-ground.laz"
+        }
+    ]
+}
