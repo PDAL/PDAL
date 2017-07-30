@@ -15,6 +15,10 @@ transformation — buyer beware.
     — if spatial reference information is desired, it must be specified on
     another filter.
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

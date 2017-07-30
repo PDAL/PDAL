@@ -39,13 +39,14 @@ necessary.
 .. _`PCL`: http://www.pointclouds.org
 
 
+.. plugin::
 
 Options
 -------------------------------------------------------------------------------
 
 filename
   Path to external PCL JSON file describing the pipeline
-  
+
 methods
   Raw PCL JSON array describing the pipeline
 

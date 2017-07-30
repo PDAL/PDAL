@@ -12,6 +12,8 @@ value of 7 to the noise points (per the LAS specification). To remove the noise
 points altogether, users can add a :ref:`range filter<filters.range>` to their
 pipeline, downstream from the outlier filter.
 
+.. embed::
+
 .. code-block:: json
 
     {

@@ -6,6 +6,8 @@ readers.greyhound
 The **Greyhound Reader** allows you to query point data from a `Greyhound`_
 server.
 
+.. plugin::
+
 Example
 -------
 

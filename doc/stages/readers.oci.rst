@@ -5,6 +5,8 @@ readers.oci
 
 The OCI reader is used to read data from `Oracle point cloud`_ databases.
 
+.. plugin::
+
 
 Example
 -------

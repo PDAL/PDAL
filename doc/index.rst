@@ -28,7 +28,7 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**04-6-2016**
+**04-6-2017**
 ................................................................................
 
 PDAL 1.5.0 has been released. Visit :ref:`download` to obtain a copy of the
@@ -150,8 +150,6 @@ Development
    :includehidden:
 
    references
-
-
 
 
 

@@ -11,6 +11,10 @@ for more information
 
     Dimensions provided by the ILVIS2 reader
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

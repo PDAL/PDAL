@@ -7,6 +7,8 @@ filters.cluster
 The Cluster filter first performs Euclidean Cluster Extraction on the input
 ``PointView`` and then labels each point with its associated cluster ID.
 
+.. embed::
+
 Example
 -------
 
@@ -38,4 +40,4 @@ max_points
 tolerance
   Cluster tolerance - maximum Euclidean distance for a point to be added to the
   cluster. [Default: **1.0**]
-  
+

@@ -5,6 +5,9 @@ readers.sbet
 
 The **SBET reader** read from files in the SBET format, used for exchange data from interital measurement units (IMUs).
 
+.. embed::
+
+.. streamable::
 
 Example
 -------

@@ -9,6 +9,7 @@ The **GeoWave writer** uses `GeoWave`_ to write to Accumulo.  GeoWave entries
 are stored using `EPSG:4326 <http://epsg.io/4326/>`__.  Instructions for
 configuring the GeoWave plugin can be found `here`_.
 
+.. plugin::
 
 Example
 --------------------------------------------------------------------------------

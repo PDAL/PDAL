@@ -22,6 +22,11 @@ beyond that number is set to zero.
     explicitly enabled at compile time with the ``BUILD_PLUGIN_MATLAB=ON``
     variable
 
+
+.. plugin::
+
+.. streamable::
+
 Example
 -------
 

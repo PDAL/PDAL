@@ -12,6 +12,8 @@ files, which are used by the `Point Cloud Library (PCL)`_.
 
     The `PCD Reader` requires linkage of the `PCL`_ library.
 
+.. plugin::
+
 
 Example
 -------

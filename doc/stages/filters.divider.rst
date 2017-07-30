@@ -13,6 +13,8 @@ Normally points are divided into subsets to facilitate output by writers
 that support creating multiple output files with a template (LAS and BPF
 are notable examples).
 
+.. embed::
+
 Example
 -------
 

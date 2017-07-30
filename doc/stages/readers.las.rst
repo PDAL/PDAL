@@ -46,6 +46,11 @@ the two supported decompressors, `LASzip`_ or `LAZperf`_.  See the
   but the data associated with a dimension of datatype 0 will be ignored
   (no PDAL dimension will be created).
 
+.. embed::
+
+.. streamable::
+
+
 Example
 -------
 

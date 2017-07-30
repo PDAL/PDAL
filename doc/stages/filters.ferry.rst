@@ -11,6 +11,9 @@ normal case, the X and Y data would be overwritten with the new
 longitude and latitude values as part of the reprojection. The
 ferry filter will allow you to keep this around for later use.
 
+.. embed::
+
+.. streamable::
 
 Example
 -------

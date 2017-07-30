@@ -15,6 +15,8 @@ approximated (i.e., *downsampled*) with their centroid. This approach is a bit
 slower than approximating them with the center of the voxel, but it represents
 the underlying surface more accurately.
 
+.. embed::
+
 Example
 -------
 

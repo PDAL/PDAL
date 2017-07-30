@@ -26,6 +26,8 @@ The interpreter must exit and always set ``ans==true`` upon success. If
     :ref:`filters.matlab` embeds the entire Matlab interpreter, and it
     will require a fully licensed version of Matlab to execute your script.
 
+.. plugin::
+
 Example
 -------
 

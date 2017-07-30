@@ -23,6 +23,8 @@ Eigenvalue estimation is performed using Eigen's ``SelfAdjointEigenSolver``. For
 more information see
 https://eigen.tuxfamily.org/dox/classEigen_1_1SelfAdjointEigenSolver.html.
 
+.. embed::
+
 Example
 -------
 

@@ -8,6 +8,10 @@ box (2D), polygon, or point+distance.  If more than one bounding region is
 specified, the filter will pass all input points through each bounding region,
 creating an output point set for each input crop region.
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

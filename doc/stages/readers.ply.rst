@@ -12,6 +12,9 @@ is included with the PDAL source, so there are no external dependencies.
 
     The ply reader can read ASCII and binary ply files.
 
+.. embed::
+
+.. streamable::
 
 Example
 -------

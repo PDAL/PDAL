@@ -14,6 +14,8 @@ Splitting is usually applied to data read from files (which produce one large
 stream of points) before the points are written to a database (which prefer
 data segmented into smaller blocks).
 
+.. embed::
+
 Example
 -------
 

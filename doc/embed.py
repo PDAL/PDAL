@@ -1,7 +1,8 @@
 import sphinx.locale
-sphinx.locale.admonitionlabels['embed'] = u'Default Embedded Stage'
-sphinx.locale.admonitionlabels['plugin'] = u'Non-default Dynamic Plugin Stage'
-sphinx.locale.admonitionlabels['streamable'] = u'Streamable Stage'
+import docutils.statemachine
+sphinx.locale.admonitionlabels['embed'] = u'' #u'Default Embedded Stage'
+sphinx.locale.admonitionlabels['plugin'] = u''# u'Non-default Dynamic Plugin Stage'
+sphinx.locale.admonitionlabels['streamable'] = u''# u'Streamable Stage'
 
 def setup(app):
     app.add_node(embed,
@@ -38,13 +39,19 @@ def visit_admonition(self, node):
     self.visit_admonition(node)
 
 def visit_embed_node(self, node):
-    self.visit_admonition(node, 'embed')
+    self.body.append(self.starttag(
+            node, 'div', CLASS=('admonition embed')))
+    self.set_first_last(node)
 
 def visit_plugin_node(self, node):
-    self.visit_admonition(node, 'plugin')
+    self.body.append(self.starttag(
+            node, 'div', CLASS=('admonition plugin')))
+    self.set_first_last(node)
 
 def visit_streamable_node(self, node):
-    self.visit_admonition(node, 'streamable')
+    self.body.append(self.starttag(
+            node, 'div', CLASS=('admonition streamable')))
+    self.set_first_last(node)
 
 def depart_node(self, node):
     self.depart_admonition(node)
@@ -67,8 +74,9 @@ class EmbedDirective(Directive):
         targetnode = nodes.target('', '', ids=[targetid])
 
 #        self.content = 'This stage is enabled by default'
+        self.content = docutils.statemachine.StringList(['This stage is enabled by default'])
         embed_node = embed('\n'.join(self.content))
-#        embed_node += nodes.title(_('Embedded'), _('Embedded '))
+        embed_node += nodes.title(_('Default Embedded Stage'), _('Default Embedded Stage '))
         self.state.nested_parse(self.content, self.content_offset, embed_node)
 
         if not hasattr(env, 'embed_all_embeds'):
@@ -94,8 +102,10 @@ class PluginDirective(Directive):
         targetnode = nodes.target('', '', ids=[targetid])
 
 #        self.content = 'This stage requires a dynamic plugin to operate'
+        self.content = docutils.statemachine.StringList(['This stage requires a dynamic plugin to operate'])
+
         plugin_node = plugin('\n'.join(self.content))
-#        plugin_node += nodes.title(_('Dynamic Plugin'), _('Dynamic Plugin'))
+        plugin_node += nodes.title(_('Dynamic Plugin'), _('Dynamic Plugin'))
         self.state.nested_parse(self.content, self.content_offset, plugin_node)
 
         if not hasattr(env, 'plugin_all_plugins'):
@@ -121,7 +131,9 @@ class StreamableDirective(Directive):
         targetnode = nodes.target('', '', ids=[targetid])
 
 #        self.content = 'This stage supports streaming operations'
+        self.content = docutils.statemachine.StringList(['This stage supports streaming operations'])
         streamable_node = streamable('\n'.join(self.content))
+        streamable_node += nodes.title(_('Streamable Stage'), _('Streamable Stage'))
         self.state.nested_parse(self.content, self.content_offset, streamable_node)
 
         if not hasattr(env, 'streamable_all_streamable'):

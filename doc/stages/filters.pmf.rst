@@ -7,6 +7,7 @@ The Progressive Morphological Filter (PMF) is a method of segmenting ground and
 non-ground returns. This filter is an implementation of the method described in
 [Zhang2003]_.
 
+.. embed::
 
 Example
 -------
@@ -51,7 +52,7 @@ Notes
 * Very large ``max_window_size`` values will result in a lot of potentially
   extra iteration. This parameter can have a strongly negative impact on
   computation performance.
-  
+
 * This filter will mark all returns deemed to be ground returns with a
   classification value of 2 (per the LAS specification). To extract only these
   returns, users can add a :ref:`range filter<filters.range>` to the pipeline.
@@ -64,7 +65,7 @@ Notes
     }
 
 .. note::
-  
+
     [Zhang2003]_ describes the consequences and relationships of the parameters
     in more detail and is the canonnical resource on the topic.
 
@@ -88,7 +89,7 @@ cell_size
 
 approximate
   Use approximate algorithm? [Default: **false**]
-  
+
 ignore
   Optional range of values to ignore.
 

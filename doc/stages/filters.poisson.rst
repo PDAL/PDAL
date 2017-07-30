@@ -13,6 +13,9 @@ Poisson is an implementation of the method described in [Kazhdan2006]_.
 
 .. _`PCL`: http://www.pointclouds.org
 
+
+.. embed::
+
 Example
 -------------------------------------------------------------------------------
 

@@ -13,6 +13,8 @@ densities.
 
 .. _`PCL`: http://www.pointclouds.org
 
+.. plugin::
+
 Example
 -------
 

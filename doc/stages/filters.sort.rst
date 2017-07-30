@@ -6,6 +6,8 @@ filters.sort
 The sort filter orders a point view based on the values of a dimension. The
 sorting can be done in increasing (ascending) or decreasing (descending) order.
 
+.. embed::
+
 Example
 -------
 
