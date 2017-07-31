@@ -50,7 +50,15 @@ struct CollectTriangles
     {
         verts = new osg::Vec3Array();
     }
+#ifdef OSG_VERSION_LESS_THAN
+#if OSG_VERSION_LESS_THAN(3,5,6)
     inline void operator () (const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3, bool treatVertexDataAsTemporary)
+#else
+    inline void operator () (const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3)
+#endif
+#else
+    inline void operator () (const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3)
+#endif
     {
         verts->push_back(v1);
         verts->push_back(v2);
