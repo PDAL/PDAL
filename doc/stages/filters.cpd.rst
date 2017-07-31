@@ -3,17 +3,25 @@
 filters.cpd
 ==============
 
-The CPD filter uses the Coherent Point Drift :cite:`Myronenko` algorithm to compute a rigid, nonrigid, or affine transformation between datasets.
-The rigid and affine are what you'd expect; the nonrigid transformation uses Motion Coherence Theory :cite:`Yuille1998` to "bend" the points to find a best alignment.
+The CPD filter uses the Coherent Point Drift :cite:`Myronenko` algorithm to
+compute a rigid, nonrigid, or affine transformation between datasets.  The
+rigid and affine are what you'd expect; the nonrigid transformation uses Motion
+Coherence Theory :cite:`Yuille1998` to "bend" the points to find a best
+alignment.
 
 .. note::
 
-    CPD is computationally intensive and can be slow when working with many points (i.e. > 10 000).
-    Nonrigid is significatly slower than rigid and affine.
+    CPD is computationally intensive and can be slow when working with many
+    points (i.e. :math:`> 10,000`).  Nonrigid is significatly slower than rigid and
+    affine.
 
-The first input to the change filter are considered the "fixed" points, and all subsequent inputs are "moving" points.
-The output from the change filter are the "moving" points after the calculated transformation has been applied, one point view per input.
-Any additional information about the cpd registration, e.g. the rigid transformation matrix, will be placed in the stage's metadata.
+The first input to the change filter are considered the "fixed" points, and all
+subsequent inputs are "moving" points.  The output from the change filter are
+the "moving" points after the calculated transformation has been applied, one
+point view per input.  Any additional information about the cpd registration,
+e.g. the rigid transformation matrix, will be placed in the stage's metadata.
+
+.. plugin::
 
 Examples
 --------

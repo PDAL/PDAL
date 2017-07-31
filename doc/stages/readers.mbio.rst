@@ -14,6 +14,10 @@ longitude and latitude for units and the Z values are in meters (negative,
 being below the surface).  Units for 'Amplitude' is not specified and may
 vary.
 
+.. plugin::
+
+.. streamable::
+
 
 Example
 -------

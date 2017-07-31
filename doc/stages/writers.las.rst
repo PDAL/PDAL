@@ -9,7 +9,11 @@ interchange file format for LIDAR data.
 .. warning::
 
     Scale/offset are not preserved from an input LAS file.  See below for
-    information on the scale/offset options and the `forward` option.
+    information on the scale/offset options and the ``forward`` option.
+
+.. embed::
+
+.. streamable::
 
 VLRs
 -------

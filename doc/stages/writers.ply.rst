@@ -16,6 +16,8 @@ You can choose from:
 - ``big endian``: write a binary ply file with big endian byte ordering.
 
 
+.. embed::
+
 Example
 -------
 

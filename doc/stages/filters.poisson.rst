@@ -25,6 +25,9 @@ This integration of the algorithm with PDAL only supports a limited set of
 the options available to the implementation.  If you need support for further
 options, please let us know.
 
+
+.. embed::
+
 Example
 -------------------------------------------------------------------------------
 

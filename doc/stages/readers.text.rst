@@ -20,6 +20,10 @@ any number of consecutive spaces are treated as single space.
 
 Blank lines after the header line are ignored.
 
+.. embed::
+
+.. streamable::
+
 Example Input File
 ------------------
 

@@ -3,9 +3,15 @@
 readers.pgpointcloud
 ====================
 
-The **PostgreSQL Pointcloud Reader** allows you to read from a PostgreSQL database that the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud extension stores point cloud data in tables that contain rows of patches. Each patch in turn contains a large number of spatially nearby points.
+The **PostgreSQL Pointcloud Reader** allows you to read from a PostgreSQL
+database that the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud
+extension stores point cloud data in tables that contain rows of patches. Each
+patch in turn contains a large number of spatially nearby points.
 
-The reader pulls patches from a table, potentially sub-setting the query on the way with a "where" clause.
+The reader pulls patches from a table, potentially sub-setting the query on the
+way with a "where" clause.
+
+.. plugin::
 
 Example
 -------

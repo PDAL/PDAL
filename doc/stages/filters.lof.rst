@@ -26,11 +26,13 @@ on LOF values, and provide some guidelines on selecting ``minpts`` values, which
 users of ``filters.lof`` should find instructive.
 
 .. note::
-  
+
   To inspect the newly created, non-standard dimensions, be sure to write to an
   output format that can support arbitrary dimensions, such as BPF.
-  
+
 .. [Breunig2000] Breunig, M.M., Kriegel, H.-P., Ng, R.T., Sander, J., 2000. LOF: Identifying Density-Based Local Outliers. Proc. 2000 Acm Sigmod Int. Conf. Manag. Data 1–12.
+
+.. embed::
 
 Example
 -------

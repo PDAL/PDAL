@@ -15,6 +15,8 @@ The produced files has a single variable, `PDAL`, an array struct.
     it must be explicitly enabled at compile time with the ``BUILD_PLUGIN_MATLAB=ON``
     variable
 
+.. plugin::
+
 Example
 -------
 

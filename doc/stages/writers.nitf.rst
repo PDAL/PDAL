@@ -13,6 +13,10 @@ of imagery.  It supports various formats inside a generic wrapper.
     No other content type beyond those two is widely supported as
     of January of 2016.
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

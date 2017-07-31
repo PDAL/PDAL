@@ -17,6 +17,8 @@ is then added to the output point cloud, along with any existing dimensions.
     cloud. The drawback with this approach is that all dimensional data is lost,
     and the sampled cloud now consists of only XYZ coordinates.
 
+.. embed::
+
 Example
 -------
 

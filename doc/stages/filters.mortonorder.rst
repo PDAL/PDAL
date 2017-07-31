@@ -7,6 +7,8 @@ Sorts the XY data using `Morton ordering`_.
 
 .. _`Morton ordering`: http://en.wikipedia.org/wiki/Z-order_curve
 
+.. embed::
+
 Example
 -------
 

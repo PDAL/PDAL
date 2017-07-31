@@ -20,6 +20,7 @@ that are center pixel, and each band is represented by "band-1", "band-2", or
     names. For output to formats such as :ref:`LAS <writers.las>`, this mapping
     is required.
 
+.. embed::
 
 Basic Example
 --------------------------------------------------------------------------------
