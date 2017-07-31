@@ -454,8 +454,6 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 {
     using namespace std;
 
-    Patch outpatch;
-
     if (m_doCompression)
     {
 #ifdef PDAL_HAVE_LAZPERF
@@ -528,6 +526,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     rs.push_back(r);
     m_session->insert(m_block_insert_query.str(), rs);
     m_block_id++;
+    m_patch->clear();
 
 }
 
