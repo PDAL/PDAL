@@ -96,8 +96,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-
     point_count_t getNumPoints() const
         { return m_header->PntCnt; }
 

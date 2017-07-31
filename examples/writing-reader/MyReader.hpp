@@ -17,8 +17,6 @@ namespace pdal
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-
   private:
     std::unique_ptr<ILeStream> m_stream;
     point_count_t m_index;

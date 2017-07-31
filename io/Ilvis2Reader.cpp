@@ -115,19 +115,6 @@ void Ilvis2Reader::addDimensions(PointLayoutPtr layout)
 }
 
 
-Dimension::IdList Ilvis2Reader::getDefaultDimensions()
-{
-    using namespace pdal::Dimension;
-    Dimension::IdList ids;
-
-    ids.push_back(Id::GpsTime);
-    ids.push_back(Id::Y);
-    ids.push_back(Id::X);
-    ids.push_back(Id::Z);
-    return ids;
-}
-
-
 void Ilvis2Reader::initialize(PointTableRef)
 {
     if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))

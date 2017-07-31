@@ -73,31 +73,23 @@ CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
 
 std::string IcebridgeReader::getName() const { return s_info.name; }
 
-Dimension::IdList IcebridgeReader::getDefaultDimensions()
+namespace
 {
-    Dimension::IdList ids;
 
+Dimension::IdList dimensions()
+{
     using namespace Dimension;
 
-    ids.push_back(Id::OffsetTime);
-    ids.push_back(Id::Y);
-    ids.push_back(Id::X);
-    ids.push_back(Id::Z);
-    ids.push_back(Id::StartPulse);
-    ids.push_back(Id::ReflectedPulse);
-    ids.push_back(Id::Azimuth);
-    ids.push_back(Id::Pitch);
-    ids.push_back(Id::Roll);
-    ids.push_back(Id::Pdop);
-    ids.push_back(Id::PulseWidth);
-    ids.push_back(Id::GpsTime);
-    return ids;
+    return IdList { Id::OffsetTime, Id::Y, Id::X, Id::Z, Id::StartPulse,
+        Id::ReflectedPulse, Id::Azimuth, Id::Pitch, Id::Roll, Id::Pdop,
+        Id::PulseWidth, Id::GpsTime };
 }
 
+} // unnamed namespace
 
 void IcebridgeReader::addDimensions(PointLayoutPtr layout)
 {
-    return layout->registerDims(getDefaultDimensions());
+    layout->registerDims(dimensions());
 }
 
 
@@ -134,7 +126,7 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
         rawData(new unsigned char[count * sizeof(float)]);
 
     //Not loving the position-linked data, but fine for now.
-    Dimension::IdList dims = getDefaultDimensions();
+    Dimension::IdList dims = dimensions();
     auto di = dims.begin();
     for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
     {

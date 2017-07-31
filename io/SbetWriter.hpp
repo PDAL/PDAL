@@ -53,9 +53,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
-
 private:
     std::unique_ptr<OLeStream> m_stream;
     std::string m_filename;

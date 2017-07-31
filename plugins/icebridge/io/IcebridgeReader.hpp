@@ -69,8 +69,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-
 private:
     Hdf5Handler m_hdf5Handler;
     point_count_t m_index;

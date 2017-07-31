@@ -129,31 +129,6 @@ void TerrasolidReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-Dimension::IdList TerrasolidReader::getDefaultDimensions()
-{
-    using namespace Dimension;
-
-    IdList dims;
-
-    dims.push_back(Id::Classification);
-    dims.push_back(Id::PointSourceId);
-    dims.push_back(Id::ReturnNumber);
-    dims.push_back(Id::NumberOfReturns);
-    dims.push_back(Id::Flag);
-    dims.push_back(Id::Mark);
-    dims.push_back(Id::Intensity);
-    dims.push_back(Id::X);
-    dims.push_back(Id::Y);
-    dims.push_back(Id::Z);
-    dims.push_back(Id::Red);
-    dims.push_back(Id::Green);
-    dims.push_back(Id::Blue);
-    dims.push_back(Id::Alpha);
-    dims.push_back(Id::OffsetTime);
-    return dims;
-}
-
-
 void TerrasolidReader::ready(PointTableRef)
 {
     m_istream.reset(new IStream(m_filename));
