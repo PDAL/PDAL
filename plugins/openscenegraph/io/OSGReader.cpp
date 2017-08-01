@@ -40,6 +40,7 @@
 #include <osg/NodeVisitor>
 #include <osg/TriangleFunctor>
 #include <osgDB/ReadFile>
+#include <osg/Version>
 
 namespace pdal
 {
