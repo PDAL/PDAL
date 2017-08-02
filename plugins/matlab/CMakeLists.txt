@@ -87,7 +87,7 @@ if (WITH_TESTS)
         INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
         BUILD_WITH_INSTALL_RPATH true
     )
-]]
+
     target_include_directories(pdal_filters_matlab_test PRIVATE
         ${ROOT_DIR}
         ${MATLAB_INCLUDE_DIR}
