@@ -23,6 +23,11 @@ The eigenvalue decomposition is performed using Eigen's
 ``SelfAdjointEigenSolver``. For more information see
 https://eigen.tuxfamily.org/dox/classEigen_1_1SelfAdjointEigenSolver.html.
 
+Normals will be automatically flipped towards the viewpoint to be consistent. By
+default the viewpoint is located at the midpoint of the X and Y extents, and
+1000 units above the max Z value. Users can override any of the XYZ coordinates,
+or set them all to zero to effectively disable the normal flipping.
+
 .. embed::
 
 Example
@@ -54,3 +59,12 @@ Options
 
 knn
   The number of k-nearest neighbors. [Default: **8**]
+
+vx
+  The X coordinate of the viewpoint. Defaults to midpoint of the X extents.
+
+vy
+  The Y coordinate of the viewpoint. Defaults to the midpoint of the Y extents.
+
+vz
+  The Z coordinate of the viewpoint. Defaults to the max value of Z plus 1000.
