@@ -71,9 +71,11 @@ private:
     int m_knn;
     double m_vx, m_vy, m_vz;
     Arg *m_vxArg, *m_vyArg, *m_vzArg;
+    bool m_up;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 };
 

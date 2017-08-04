@@ -64,6 +64,8 @@ void NormalFilter::addArgs(ProgramArgs& args)
     m_vxArg = &args.add("vx", "Viewpoint X coordinate", m_vx);
     m_vyArg = &args.add("vy", "Viewpoint Y coordinate", m_vy);
     m_vzArg = &args.add("vz", "Viewpoint Z coordinate", m_vz);
+    args.add("always_up", "Normals always oriented with positive Z?", m_up,
+             false);
 }
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
@@ -74,24 +76,25 @@ void NormalFilter::addDimensions(PointLayoutPtr layout)
         {Id::NormalX, Id::NormalY, Id::NormalZ, Id::Curvature});
 }
 
+// public method to access filter, used by GreedyProjection and Poisson filters
 void NormalFilter::doFilter(PointView& view)
 {
     m_knn = 8;
     filter(view);
 }
 
+void NormalFilter::prepared(PointTableRef table)
+{
+    if (m_up && (m_vxArg->set() || m_vyArg->set() || m_vzArg->set()))
+        throwError("Use either always_up or vx/vy/vz, but not both.");
+    if ((m_vxArg->set() || m_vyArg->set() || m_vzArg->set()) &&
+        !(m_vxArg->set() && m_vyArg->set() && m_vzArg->set()))
+        throwError("When setting viewpoint, must set vx, vy, and vz.");
+}
+
 void NormalFilter::filter(PointView& view)
 {
     KD3Index& kdi = view.build3dIndex();
-
-    BOX3D bounds;
-    view.calculateBounds(bounds);
-
-    double vx =
-        m_vxArg->set() ? m_vx : bounds.minx + (bounds.maxx - bounds.minx) * 0.5;
-    double vy =
-        m_vyArg->set() ? m_vy : bounds.miny + (bounds.maxy - bounds.miny) * 0.5;
-    double vz = m_vzArg->set() ? m_vz : bounds.maxz + 1000;
 
     for (PointId i = 0; i < view.size(); ++i)
     {
@@ -108,13 +111,21 @@ void NormalFilter::filter(PointView& view)
         auto eval = solver.eigenvalues();
         Eigen::Vector3f normal = solver.eigenvectors().col(0);
 
-        // flip normal towards viewpoint
-        PointRef p = view.point(i);
-        Eigen::Vector3f vp(vx - p.getFieldAs<double>(Dimension::Id::X),
-                           vy - p.getFieldAs<double>(Dimension::Id::Y),
-                           vz - p.getFieldAs<double>(Dimension::Id::Z));
-        if (vp.dot(normal) < 0)
-            normal *= -1.0;
+        if (m_up)
+        {
+            if (normal[2] < 0)
+                normal *= -1.0;
+        }
+        else if (m_vxArg->set() && m_vyArg->set() && m_vzArg->set())
+        {
+            // flip normal towards viewpoint
+            PointRef p = view.point(i);
+            Eigen::Vector3f vp(m_vx - p.getFieldAs<double>(Dimension::Id::X),
+                               m_vy - p.getFieldAs<double>(Dimension::Id::Y),
+                               m_vz - p.getFieldAs<double>(Dimension::Id::Z));
+            if (vp.dot(normal) < 0)
+                normal *= -1.0;
+        }
 
         view.setField(Dimension::Id::NormalX, i, normal[0]);
         view.setField(Dimension::Id::NormalY, i, normal[1]);
