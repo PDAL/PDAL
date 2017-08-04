@@ -39,6 +39,8 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include "private/Point.hpp"
+
 #include <Eigen/Dense>
 
 #include <string>
@@ -61,11 +63,10 @@ std::string NormalFilter::getName() const
 void NormalFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest Neighbors", m_knn, 8);
-    m_vxArg = &args.add("vx", "Viewpoint X coordinate", m_vx);
-    m_vyArg = &args.add("vy", "Viewpoint Y coordinate", m_vy);
-    m_vzArg = &args.add("vz", "Viewpoint Z coordinate", m_vz);
+    m_viewpointArg =
+        &args.add("viewpoint", "Viewpoint as WKT or GeoJSON", m_viewpoint);
     args.add("always_up", "Normals always oriented with positive Z?", m_up,
-             false);
+             true);
 }
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
@@ -85,11 +86,12 @@ void NormalFilter::doFilter(PointView& view)
 
 void NormalFilter::prepared(PointTableRef table)
 {
-    if (m_up && (m_vxArg->set() || m_vyArg->set() || m_vzArg->set()))
-        throwError("Use either always_up or vx/vy/vz, but not both.");
-    if ((m_vxArg->set() || m_vyArg->set() || m_vzArg->set()) &&
-        !(m_vxArg->set() && m_vyArg->set() && m_vzArg->set()))
-        throwError("When setting viewpoint, must set vx, vy, and vz.");
+    if (m_up && m_viewpointArg->set())
+    {
+        log()->get(LogLevel::Warning)
+            << "Viewpoint provided. Ignoring always_up = TRUE." << std::endl;
+        m_up = false;
+    }
 }
 
 void NormalFilter::filter(PointView& view)
@@ -111,19 +113,19 @@ void NormalFilter::filter(PointView& view)
         auto eval = solver.eigenvalues();
         Eigen::Vector3f normal = solver.eigenvectors().col(0);
 
-        if (m_up)
+        if (m_viewpointArg->set())
         {
-            if (normal[2] < 0)
+            PointRef p = view.point(i);
+            Eigen::Vector3f vp(
+                m_viewpoint.x - p.getFieldAs<double>(Dimension::Id::X),
+                m_viewpoint.y - p.getFieldAs<double>(Dimension::Id::Y),
+                m_viewpoint.z - p.getFieldAs<double>(Dimension::Id::Z));
+            if (vp.dot(normal) < 0)
                 normal *= -1.0;
         }
-        else if (m_vxArg->set() && m_vyArg->set() && m_vzArg->set())
+        else if (m_up)
         {
-            // flip normal towards viewpoint
-            PointRef p = view.point(i);
-            Eigen::Vector3f vp(m_vx - p.getFieldAs<double>(Dimension::Id::X),
-                               m_vy - p.getFieldAs<double>(Dimension::Id::Y),
-                               m_vz - p.getFieldAs<double>(Dimension::Id::Z));
-            if (vp.dot(normal) < 0)
+            if (normal[2] < 0)
                 normal *= -1.0;
         }
 

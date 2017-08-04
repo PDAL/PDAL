@@ -45,9 +45,6 @@ const double HIGHEST = (std::numeric_limits<double>::max)();
 
 }
 
-namespace cropfilter
-{
-
 Point::Point()
     : Geometry()
     , x(LOWEST)
@@ -114,7 +111,4 @@ bool Point::is3d() const
     return (z != LOWEST);
 }
 
-} //namespace cropfilter
-
 } //namespace pdal
-

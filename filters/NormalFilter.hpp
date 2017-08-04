@@ -38,6 +38,8 @@
 #include <pdal/plugin.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include "private/Point.hpp"
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -69,8 +71,8 @@ public:
 
 private:
     int m_knn;
-    double m_vx, m_vy, m_vz;
-    Arg *m_vxArg, *m_vyArg, *m_vzArg;
+    Point m_viewpoint;
+    Arg* m_viewpointArg;
     bool m_up;
 
     virtual void addArgs(ProgramArgs& args);
