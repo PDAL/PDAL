@@ -38,7 +38,6 @@
 
 #include <functional>
 #include <map>
-#include <mutex>
 
 #include <ogr_spatialref.h>
 
@@ -258,12 +257,14 @@ void ErrorHandler::set(LogPtr log, bool debug)
 
 void ErrorHandler::setLog(LogPtr log)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_log = log;
 }
 
 
 void ErrorHandler::setDebug(bool debug)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_debug = debug;
 
     if (debug)
@@ -272,15 +273,15 @@ void ErrorHandler::setDebug(bool debug)
         CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
 }
 
-
 int ErrorHandler::errorNum()
 {
-    int errorNum = m_errorNum;
-    return errorNum;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_errorNum;
 }
 
 void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     std::ostringstream oss;
 
     m_errorNum = num;
