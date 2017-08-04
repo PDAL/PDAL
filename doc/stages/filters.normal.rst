@@ -28,6 +28,14 @@ default the viewpoint is located at the midpoint of the X and Y extents, and
 1000 units above the max Z value. Users can override any of the XYZ coordinates,
 or set them all to zero to effectively disable the normal flipping.
 
+.. note::
+
+  By default, the Normal filter will invert normals such that they are always
+  pointed "up" (positive Z). If the user provides a ``viewpoint``, normals will
+  instead be inverted such that they are oriented towards the viewpoint,
+  regardless of the ``always_up`` flag. To disable all normal flipping, do not
+  provide a ``viewpoint`` and set ``always_up=false``.
+
 .. embed::
 
 Example
@@ -60,11 +68,10 @@ Options
 knn
   The number of k-nearest neighbors. [Default: **8**]
 
-vx
-  The X coordinate of the viewpoint. Defaults to midpoint of the X extents.
+viewpoint
+  A single WKT or GeoJSON 3D point. Normals will be inverted such that they are
+  all oriented towards the viewpoint.
 
-vy
-  The Y coordinate of the viewpoint. Defaults to the midpoint of the Y extents.
-
-vz
-  The Z coordinate of the viewpoint. Defaults to the max value of Z plus 1000.
+always_up
+  A flag indicating whether or not normals should be inverted only when the Z
+  component is negative. [Default: **true**]
