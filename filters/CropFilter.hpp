@@ -38,13 +38,14 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/plugin.hpp>
 
+#include "private/Point.hpp"
+
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
 
 namespace pdal
 {
 
-class Point;
 class ProgramArgs;
 
 // removes any points outside of the given range
@@ -65,7 +66,7 @@ private:
     SpatialReference m_assignedSrs;
     double m_distance;
     double m_distance2;
-    std::vector<Point> m_centers;
+    std::vector<filter::Point> m_centers;
     std::vector<Polygon> m_geoms;
     std::vector<BOX2D> m_boxes;
 
@@ -79,8 +80,8 @@ private:
     void crop(const BOX2D& box, PointView& input, PointView& output);
     bool crop(const PointRef& point, const Polygon& g);
     void crop(const Polygon& g, PointView& input, PointView& output);
-    bool crop(const PointRef& point, const Point& center);
-    void crop(const Point& center, PointView& input,
+    bool crop(const PointRef& point, const filter::Point& center);
+    void crop(const filter::Point& center, PointView& input,
         PointView& output);
     void transform(const SpatialReference& srs);
 

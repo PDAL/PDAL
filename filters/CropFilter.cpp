@@ -40,7 +40,8 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-#include <filters/private/Point.hpp>
+
+#include "private/Point.hpp"
 
 #include <sstream>
 #include <cstdarg>
@@ -251,7 +252,7 @@ void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
 }
 
 
-bool CropFilter::crop(const PointRef& point, const Point& center)
+bool CropFilter::crop(const PointRef& point, const filter::Point& center)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -275,7 +276,7 @@ bool CropFilter::crop(const PointRef& point, const Point& center)
 }
 
 
-void CropFilter::crop(const Point& center, PointView& input,
+void CropFilter::crop(const filter::Point& center, PointView& input,
     PointView& output)
 {
     PointRef point = input.point(0);

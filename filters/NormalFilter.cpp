@@ -39,8 +39,6 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "private/Point.hpp"
-
 #include <Eigen/Dense>
 
 #include <string>

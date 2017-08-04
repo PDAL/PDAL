@@ -37,6 +37,9 @@
 namespace pdal
 {
 
+namespace filter
+{
+
 namespace
 {
 
@@ -111,4 +114,6 @@ bool Point::is3d() const
     return (z != LOWEST);
 }
 
-} //namespace pdal
+} // namespace filter
+
+} // namespace pdal

@@ -39,6 +39,9 @@
 namespace pdal
 {
 
+namespace filter
+{
+
 class PDAL_DLL Point : public Geometry
 {
 public:
@@ -55,5 +58,7 @@ public:
     double y;
     double z;
 };
+
+} // namespace filter
 
 } // namespace pdal

@@ -71,7 +71,7 @@ public:
 
 private:
     int m_knn;
-    Point m_viewpoint;
+    filter::Point m_viewpoint;
     Arg* m_viewpointArg;
     bool m_up;
 
