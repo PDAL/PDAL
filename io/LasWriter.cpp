@@ -647,9 +647,13 @@ void LasWriter::readyLasZipCompression()
 #ifdef PDAL_HAVE_LASZIP
     laszip_create(&m_laszip);
 
-    std::vector<laszip_U8> vlrData;
-    laszip_create_laszip_vlr_data(m_laszip, m_lasHeader.pointFormat(),
-        m_lasHeader.pointLen(), vlrData);
+    std::vector<laszip_U8> vlr;
+    laszip_create_laszip_vlr(m_laszip, vlr);
+
+    std::vector<laszip_U8> vlrData(vlr.begin() + 54, vlr.end());
+    std::cerr << "Vlr size = " << vlr.size() << "!\n";
+    std::cerr << "Vlr data size = " << vlrData.size() << "!\n";
+
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrData);
 #endif
 }
@@ -683,8 +687,9 @@ void LasWriter::readyLazPerfCompression()
 void LasWriter::openCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    laszip_open_writer_stream(m_laszip, *m_ostream, true,
-        m_lasHeader.pointFormat(), m_lasHeader.pointLen());
+    laszip_open_writer_stream(m_laszip, *m_ostream, true, true);
+    laszip_set_point_type_and_size(m_laszip, m_lasHeader.pointFormat(),
+        m_lasHeader.pointLen());
 #endif
 }
 
