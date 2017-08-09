@@ -52,6 +52,12 @@ ipch/
 *.sln.docstates
 
 #
+# intellij, clion
+#
+.idea
+*.iml
+
+#
 # doxygen cruft
 #
 doc/doxygen/html
