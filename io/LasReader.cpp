@@ -108,17 +108,8 @@ QuickInfo LasReader::inspect()
 }
 
 
-void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
+void LasReader::handleCompressionOption()
 {
-    try
-    {
-        m_extraDims = LasUtils::parse(m_extraDimSpec);
-    }
-    catch (const LasUtils::error& err)
-    {
-        throwError(err.what());
-    }
-
     std::string compression = Utils::toupper(m_compression);
 #if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
     if (compression == "EITHER")
@@ -144,9 +135,22 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Invalid value for option for compression: '" +
             m_compression + "'.  Value values are 'lazperf' and 'laszip'.");
 #endif
-
     // Set case-corrected value.
     m_compression = compression;
+}
+
+
+void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
+{
+    try
+    {
+        m_extraDims = LasUtils::parse(m_extraDimSpec);
+    }
+    catch (const LasUtils::error& err)
+    {
+        throwError(err.what());
+    }
+
     m_error.setFilename(m_filename);
 
     m_error.setLog(log());
@@ -166,6 +170,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(e.what());
     }
 
+    if (m_header.compressed())
+        handleCompressionOption();
     if (!m_header.pointFormatSupported())
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)m_header.pointFormat()) + ".");
