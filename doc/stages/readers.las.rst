@@ -97,3 +97,8 @@ _`compression`
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS.
   [Default: "laszip"]
+
+_`spatialreference`
+  Sets the spatial reference for the file data.  Overrides any spatial
+  reference information in the file itself.  Most text-based formats of
+  SRS information are accepted, including WKT and proj.4.

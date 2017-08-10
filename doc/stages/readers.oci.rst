@@ -41,7 +41,10 @@ query
   SELECT statement that returns an SDO_PC object as its first and only queried item [Required]
 
 spatialreference
-  Spatial reference system of the data being read. E.g. "EPSG:26910".
+  _`spatialreference`
+    Sets the spatial reference for the point ata.  Overrides any spatial
+    reference information read from the database.  Most text-based formats of
+    SRS information are accepted, including WKT and proj.4.
 
 xml_schema_dump
   Filename to dump the XML schema to.
