@@ -99,7 +99,7 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     };
 #pragma pack(pop)
 
-    ShortKeyHeader *header = (ShortKeyHeader *)directoryRec.data();
+    const ShortKeyHeader *header = (const ShortKeyHeader *)directoryRec.data();
     size_t declaredSize = (header->numKeys + 1) * 4;
     if (directoryRec.size() < declaredSize)
         return;

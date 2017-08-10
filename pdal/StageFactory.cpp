@@ -101,6 +101,7 @@
 #include <io/BpfWriter.hpp>
 #include <io/GDALWriter.hpp>
 #include <io/LasWriter.hpp>
+#include <io/OGRWriter.hpp>
 #include <io/PlyWriter.hpp>
 #include <io/SbetWriter.hpp>
 #include <io/TextWriter.hpp>
@@ -148,6 +149,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "writers.derivative", { "derivative" } },
         { "writers.sqlite", { "sqlite" } },
         { "writers.gdal", { "tif", "tiff", "vrt" } },
+        { "writers.ogr", { "shp", "geojson" } },
     };
 
     return exts[driver];
@@ -227,7 +229,9 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "", "writers.text" },
         { "tif", "writers.gdal" },
         { "tiff", "writers.gdal" },
-        { "vrt", "writers.gdal" }
+        { "vrt", "writers.gdal" },
+        { "shp", "writers.ogr" },
+        { "geojson", "writers.ogr" }
     };
 
     // Strip off '.' and make lowercase.
@@ -311,6 +315,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
     PluginManager::initializePlugin(GDALWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
+    PluginManager::initializePlugin(OGRWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);
