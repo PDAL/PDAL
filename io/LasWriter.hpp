@@ -146,6 +146,7 @@ private:
     void spatialReferenceChanged(const SpatialReference& srs);
     virtual void doneFile();
 
+    void handleLaszip(int result);
     void fillForwardList();
     void collectUserVLRs();
     template <typename T>

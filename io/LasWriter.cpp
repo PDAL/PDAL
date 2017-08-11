@@ -642,17 +642,31 @@ void LasWriter::readyCompression()
 }
 
 
+void LasWriter::handleLaszip(int result)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (result)
+    {
+        char *buf;
+        laszip_get_error(m_laszip, &buf);
+        throwError(buf);
+    }
+#endif
+}
+
+
 void LasWriter::readyLasZipCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    laszip_create(&m_laszip);
+    handleLaszip(laszip_create(&m_laszip));
+    handleLaszip(laszip_set_point_type_and_size(m_laszip,
+        m_lasHeader.pointFormat(), m_lasHeader.pointLen()));
 
     std::vector<laszip_U8> vlr;
-    laszip_create_laszip_vlr(m_laszip, vlr);
+    handleLaszip(laszip_create_laszip_vlr(m_laszip, vlr));
 
+    // A VLR has 54 header bytes that we skip in order to get to the payload.
     std::vector<laszip_U8> vlrData(vlr.begin() + 54, vlr.end());
-    std::cerr << "Vlr size = " << vlr.size() << "!\n";
-    std::cerr << "Vlr data size = " << vlrData.size() << "!\n";
 
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrData);
 #endif
@@ -687,9 +701,7 @@ void LasWriter::readyLazPerfCompression()
 void LasWriter::openCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    laszip_open_writer_stream(m_laszip, *m_ostream, true, true);
-    laszip_set_point_type_and_size(m_laszip, m_lasHeader.pointFormat(),
-        m_lasHeader.pointLen());
+    handleLaszip(laszip_open_writer_stream(m_laszip, *m_ostream, true, true));
 #endif
 }
 
@@ -886,8 +898,8 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
 
     m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
 
-    laszip_set_point(m_laszip, &p);
-    laszip_write_point(m_laszip);
+    handleLaszip(laszip_set_point(m_laszip, &p));
+    handleLaszip(laszip_write_point(m_laszip));
 #endif
     return true;
 }
@@ -1110,8 +1122,8 @@ void LasWriter::finishOutput()
 void LasWriter::finishLasZipOutput()
 {
 #ifdef PDAL_HAVE_LASZIP
-    laszip_close_writer(m_laszip);
-    laszip_destroy(m_laszip);
+    handleLaszip(laszip_close_writer(m_laszip));
+    handleLaszip(laszip_destroy(m_laszip));
 #endif
 }
 

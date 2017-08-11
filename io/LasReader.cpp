@@ -183,6 +183,18 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     m_streamIf.reset();
 }
 
+void LasReader::handleLaszip(int result)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (result)
+    {
+        char *buf;
+        laszip_get_error(m_laszip, &buf);
+        throwError(buf);
+    }
+#endif
+}
+
 
 void LasReader::ready(PointTableRef table)
 {
@@ -197,9 +209,10 @@ void LasReader::ready(PointTableRef table)
         {
             laszip_BOOL compressed;
 
-            laszip_create(&m_laszip);
-            laszip_open_reader_stream(m_laszip, *stream, &compressed);
-            laszip_get_point_pointer(m_laszip, &m_laszipPoint);
+            handleLaszip(laszip_create(&m_laszip));
+            handleLaszip(laszip_open_reader_stream(m_laszip, *stream,
+                &compressed));
+            handleLaszip(laszip_get_point_pointer(m_laszip, &m_laszipPoint));
         }
 #endif
 
@@ -504,15 +517,7 @@ bool LasReader::processOne(PointRef& point)
 #ifdef PDAL_HAVE_LASZIP
         if (m_compression == "LASZIP")
         {
-            if (laszip_read_point(m_laszip))
-            {
-                std::string error = "Error reading compressed point data: ";
-                char *errbuf;
-                laszip_get_error(m_laszip, &errbuf);
-                std::string err = errbuf ? errbuf : "(unknown error)";
-                error += std::string(err) + ".";
-                throwError(error);
-            }
+            handleLaszip(laszip_read_point(m_laszip));
             loadPoint(point, *m_laszipPoint);
         }
 #endif
@@ -908,8 +913,8 @@ void LasReader::done(PointTableRef)
 #ifdef PDAL_HAVE_LASZIP
     if (m_laszip)
     {
-        laszip_close_reader(m_laszip);
-        laszip_destroy(m_laszip);
+        handleLaszip(laszip_close_reader(m_laszip));
+        handleLaszip(laszip_destroy(m_laszip));
     }
 #endif
     m_streamIf.reset();

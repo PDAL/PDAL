@@ -153,6 +153,7 @@ private:
     void loadExtraDims(LeExtractor& istream, PointRef& data);
     point_count_t readFileBlock(std::vector<char>& buf,
         point_count_t maxPoints);
+    void handleLaszip(int result);
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
