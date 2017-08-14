@@ -453,7 +453,7 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
         MetadataNode vlrNode(name.str());
         m.add(vlrNode);
 
-        vlrNode.addEncoded("value",
+        vlrNode.addEncoded("data",
             (const uint8_t *)vlr.data(), vlr.dataLen(), vlr.description());
         vlrNode.add("user_id", vlr.userId(),
             "User ID of the record or pre-defined value from the "
