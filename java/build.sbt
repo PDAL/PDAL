@@ -1,9 +1,9 @@
 name := "pdal-jni"
 
 lazy val commonSettings = Seq(
-  version := "1.4.0" + Environment.versionSuffix,
-  scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.12.1", "2.11.8"),
+  version := "1.4.1" + Environment.versionSuffix,
+  scalaVersion := "2.11.11",
+  crossScalaVersions := Seq("2.12.3", "2.11.11"),
   organization := "io.pdal",
   description := "PDAL JNI bindings",
   licenses := Seq("BSD" -> url("https://github.com/PDAL/PDAL/blob/master/LICENSE.txt")),
@@ -48,14 +48,32 @@ lazy val commonSettings = Seq(
     )
 )
 
-lazy val root = (project in file(".")).aggregate(core, native)
+lazy val root = (project in file(".")).
+  settings(commonSettings: _*).
+  aggregate(`core-scala`, core, native)
+
+lazy val `core-scala` = (project in file("core-scala")).
+  settings(commonSettings: _*).
+  settings(name := "pdal-scala").
+  settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
+  settings(libraryDependencies ++= Seq(
+    Dependencies.circeCore,
+    Dependencies.circeGeneric,
+    Dependencies.circeGenericExtras,
+    Dependencies.circeLiteral,
+    Dependencies.circeParser,
+    Dependencies.jtsCore,
+    Dependencies.scalaTest % Test
+  )).
+  dependsOn(core)
+  dependsOn(Environment.dependOnNative(native % Runtime): _*)
 
 lazy val core = (project in file("core")).
   settings(commonSettings: _*).
   settings(name := "pdal").
   settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
-  settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test").
-  dependsOn(Environment.dependOnNative(native % Runtime):_*)
+  settings(libraryDependencies += Dependencies.scalaTest % Test).
+  dependsOn(Environment.dependOnNative(native % Runtime): _*)
 
 lazy val native = (project in file("native")).
   settings(sourceDirectory in nativeCompile := sourceDirectory.value).
