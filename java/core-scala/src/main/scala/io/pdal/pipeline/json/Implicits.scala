@@ -18,7 +18,7 @@ package io.pdal.pipeline.json
 
 import io.pdal.pipeline._
 
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.generic.extras._
 import io.circe.syntax._
 import cats.syntax.either._
@@ -28,6 +28,8 @@ object Implicits extends Implicits
 trait Implicits extends AutoDerivation with Serializable {
   implicit val customConfig: Configuration =
     Configuration.default.withSnakeCaseKeys.withDiscriminator("class_type")
+
+  val pipelinePrettyPrinter: Printer = Printer.spaces2.copy(dropNullKeys = true)
 
   implicit def exprTypeEncoder[T <: ExprType]: Encoder[T] = Encoder.instance { _.toString.asJson }
   implicit val pipelineConstructorEncoder: Encoder[PipelineConstructor] = Encoder.instance { constructor =>

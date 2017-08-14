@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal" % "1.4.0"
+  "io.pdal" %% "pdal" % "1.4.1"
 )
 ```
 
@@ -26,6 +26,16 @@ It's required to have native JNI binary in `java.library.path`:
 // cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni.1.4.dylib /usr/local/lib/libpdaljni.1.4.dylib
 // place built binary into /usr/local/lib, and pass java.library.path to your JVM
 javaOptions += "-Djava.library.path=/usr/local/lib"
+```
+
+## PDAL-Scala
+
+Scala API to build pipeline expressions instead of writing a raw JSON.
+
+```scala
+libraryDependencies ++= Seq(
+  "io.pdal" %% "pdal-scala" % "1.4.1"
+)
 ```
 
 ## How to compile

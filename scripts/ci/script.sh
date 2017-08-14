@@ -70,6 +70,7 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
 
     # JNI tests
     cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
+    
     # Scala tests
     cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core-scala/test
 
