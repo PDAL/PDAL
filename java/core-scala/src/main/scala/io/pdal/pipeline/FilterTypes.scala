@@ -69,4 +69,7 @@ object FilterTypes {
     pclblock, pmf, poisson, predicate, programmable, radialdensity, randomize, range, reprojection,
     sample, smrf, sort, splitter, stats, transformation, voxelgrid
   )
+
+  def fromName(name: String): FilterType =
+    all.find(_.name == name).getOrElse(throw new Exception(s"FilterType $name is not supported."))
 }

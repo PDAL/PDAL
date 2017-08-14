@@ -18,7 +18,8 @@ lazy val commonSettings = Seq(
     "-language:higherKinds",
     "-language:postfixOps",
     "-language:existentials",
-    "-feature"),
+    "-feature"
+  ),
   test in assembly := {},
   shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
   commands ++= Seq(
@@ -60,7 +61,6 @@ lazy val `core-scala` = (project in file("core-scala")).
     Dependencies.circeCore,
     Dependencies.circeGeneric,
     Dependencies.circeGenericExtras,
-    Dependencies.circeLiteral,
     Dependencies.circeParser,
     Dependencies.jtsCore,
     Dependencies.scalaTest % Test

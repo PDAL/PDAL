@@ -43,4 +43,7 @@ object WriterTypes {
     bpf, derivative, gdal, geowave, las, matlab, nitf, oci, optech,
     pcd, pgpointcloud, pclvisualizer, p2g, ply, rialto, sbet, sqlite, text
   )
+
+  def fromName(name: String): WriterType =
+    all.find(_.name == name).getOrElse(throw new Exception(s"WriterType $name is not supported."))
 }

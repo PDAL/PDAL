@@ -16,6 +16,8 @@
 
 package io.pdal.pipeline
 
+import io.pdal.Pipeline
+
 import io.circe.Json
 
 sealed trait PipelineExpr {
@@ -23,6 +25,8 @@ sealed trait PipelineExpr {
 
   def ~(other: Option[PipelineExpr]): PipelineConstructor =
     other.fold(this :: Nil)(o => this :: o :: Nil)
+
+  def toPipeline: Pipeline = (this :: Nil).toPipeline
 }
 
 case class RawExpr(json: Json) extends PipelineExpr

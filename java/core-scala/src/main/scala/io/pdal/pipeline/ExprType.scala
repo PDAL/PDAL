@@ -16,9 +16,19 @@
 
 package io.pdal.pipeline
 
+import scala.util.Try
+
 trait ExprType {
   val `type`: String
   lazy val name = s"${`type`}.${this.getClass.getName.split("\\$").last}"
 
   override def toString = name
+}
+
+object ExprType {
+  def fromName(name: String): ExprType =
+    Try(FilterTypes.fromName(name))
+      .getOrElse(Try(ReaderTypes.fromName(name))
+        .getOrElse(Try(WriterTypes.fromName(name))
+          .getOrElse(throw new Exception(s"ExprType $name is not supported."))))
 }

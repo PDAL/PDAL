@@ -49,4 +49,7 @@ object ReaderTypes {
     optech, pcd, pgpointcloud, ply, pts, qfit, rxp, sbet, sqlite, text, tindex,
     terrasolid, icebridge
   )
+
+  def fromName(name: String): ReaderType =
+    all.find(_.name == name).getOrElse(throw new Exception(s"ReaderType $name is not supported."))
 }
