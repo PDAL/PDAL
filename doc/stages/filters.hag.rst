@@ -27,7 +27,7 @@ Example
         },
         {
           "type":"filters.ferry",
-          "dimensions":"HeightAboveGround = Z",
+          "dimensions":"HeightAboveGround = Z"
         },
         {
           "type":"writers.las",
