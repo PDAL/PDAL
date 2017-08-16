@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/PDAL/PDAL](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PDAL/PDAL?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Java bindings to use PDAL on JVM.
+Java bindings to use PDAL on JVM (supports PDAL >= 1.4).
 
 ## Using PDAL JNI with SBT
 
@@ -37,6 +37,10 @@ libraryDependencies ++= Seq(
   "io.pdal" %% "pdal-scala" % "1.4.1"
 )
 ```
+
+Scala API covers PDAL 1.5.0 but is compatible with PDAL >= 1.4, to use any custom DSL
+that is not covered by the current Scala API you can use `RawExpr` type to build `Pipeline 
+Expression`.
 
 ## How to compile
 

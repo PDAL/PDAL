@@ -95,6 +95,12 @@ case class Ilvis2Read(
   `type`: ReaderType = ReaderTypes.ilvis2
 ) extends PipelineExpr
 
+case class MbioRead(
+  filename: String,
+  format: String,
+  `type`: ReaderType = ReaderTypes.mbio
+) extends PipelineExpr
+
 case class LasRead(
   filename: String,
   extraDims: Option[String] = None,
@@ -222,26 +228,23 @@ object IceBridgeRead {
 }
 
 case class ApproximateCoplanarFilter(
-  knn: Int, // [default: 8]
-  thresh1: Int, // [default: 25]
-  thresh2: Int, // [default: 6]
+  knn: Option[Int] = None, // [default: 8]
+  thresh1: Option[Int] = None, // [default: 25]
+  thresh2: Option[Int] = None, // [default: 6]
   `type`: FilterType = FilterTypes.approximatecoplanar
-) extends PipelineExpr
-
-case class AttributeFilter(
-  dimension: Option[String] = None, // [default: none]
-  value: Option[Double] = None, // [default: none]
-  datasource: Option[String] = None, // [default: none]
-  column: Option[String] = None, // [default: none]
-  query: Option[String] = None, // [default: first column]
-  layer: Option[String] = None, // [default: first layer]
-  `type`: FilterType = FilterTypes.attribute
 ) extends PipelineExpr
 
 case class ChipperFilter(
   capacity: Option[Int] = None, // [default: 5000]
   `type`: FilterType = FilterTypes.chipper
 ) extends PipelineExpr
+
+case class ClusterFilter(
+  minPoints: Option[Int] = None, // [default: 1]
+  maxPoints: Option[Int] = None, // [default: UINT64_MAX]
+  tolerance: Option[Double] = None, // [default: 1.0]
+  `type`: FilterType = FilterTypes.cluster
+)
 
 case class ColorinterpFilter(
   ramp: Option[String] = None, // [default: pestel_shades]
@@ -312,6 +315,11 @@ case class GridProjectionFilter(
   `type`: FilterType = FilterTypes.gridprojection
 ) extends PipelineExpr
 
+case class GroupByFilter(
+  dimension: String,
+  `type`: FilterType = FilterTypes.groupby
+)
+
 case class HagFilter(
   `type`: FilterType = FilterTypes.hag
 ) extends PipelineExpr
@@ -333,6 +341,12 @@ case class IqrFilter(
 case class KDistanceFilter(
   k: Option[Int] = None,
   `type`: FilterType = FilterTypes.kdistance
+) extends PipelineExpr
+
+case class LocateFilter(
+  dimension: String,
+  minmax: String,
+  `type`: FilterType = FilterTypes.locate
 ) extends PipelineExpr
 
 case class LofFilter(
@@ -380,9 +394,16 @@ case class OutlierFilter(
   radius: Option[Double] = None,
   meanK: Option[Int] = None,
   multiplier: Option[Double] = None,
-  classify: Option[Boolean] = None,
-  extract: Option[Boolean] = None,
   `type`: FilterType = FilterTypes.outlier
+) extends PipelineExpr
+
+case class OverlayFilter(
+  dimension: Option[String] = None, // [default: none]
+  datasource: Option[String] = None, // [default: none]
+  column: Option[String] = None, // [default: none]
+  query: Option[String] = None, // [default: first column]
+  layer: Option[String] = None, // [default: first layer]
+  `type`: FilterType = FilterTypes.overlay
 ) extends PipelineExpr
 
 case class PclBlockFilter(
@@ -397,8 +418,6 @@ case class PmfFilter(
   maxDistance: Option[Double] = None,
   initialDistance: Option[Double] = None,
   cellSize: Option[Int] = None,
-  classify: Option[Boolean] = None,
-  extract: Option[Boolean] = None,
   approximate: Option[Boolean] = None,
   `type`: FilterType = FilterTypes.pmf
 ) extends PipelineExpr
@@ -515,15 +534,6 @@ case class BpfWrite(
   `type`: WriterType = WriterTypes.bpf
 ) extends PipelineExpr
 
-case class DerivativeWrite(
-  filename: String,
-  primitiveType: Option[String] = None,
-  edgeLength: Option[Double] = None,
-  altitude: Option[Double] = None,
-  azimuth: Option[Double] = None,
-  `type`: WriterType = WriterTypes.derivative
-) extends PipelineExpr
-
 case class GdalWrite(
   filename: String,
   resoultion: Int,
@@ -635,18 +645,6 @@ case class OciWrite(
   offsetZ: Option[Double] = None,
   outputDims: Option[String] = None,
   `type`: WriterType = WriterTypes.oci
-) extends PipelineExpr
-
-case class P2gWrite(
-  filename: String,
-  gridDistX: Option[Int] = None,
-  gridDistY: Option[Int] = None,
-  radiuse: Option[Double] = None,
-  outputType: Option[String] = None,
-  outputFormat: Option[String] = None,
-  z: Option[String] = None,
-  bounds: Option[String] = None,
-  `type`: WriterType = WriterTypes.p2g
 ) extends PipelineExpr
 
 case class PcdWrite(

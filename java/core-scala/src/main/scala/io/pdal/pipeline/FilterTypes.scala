@@ -20,8 +20,8 @@ sealed trait FilterType extends ExprType { val `type` = "filters" }
 
 object FilterTypes {
   case object approximatecoplanar extends FilterType
-  case object attribute extends FilterType
   case object chipper extends FilterType
+  case object cluster extends FilterType
   case object colorinterp extends FilterType
   case object colorization extends FilterType
   case object computerange extends FilterType
@@ -33,10 +33,12 @@ object FilterTypes {
   case object ferry extends FilterType
   case object greedyprojection extends FilterType
   case object gridprojection extends FilterType
+  case object groupby extends FilterType
   case object hag extends FilterType
   case object hexbin extends FilterType
   case object iqr extends FilterType
   case object kdistance extends FilterType
+  case object locate extends FilterType
   case object lof extends FilterType
   case object mad extends FilterType
   case object merge extends FilterType
@@ -44,6 +46,7 @@ object FilterTypes {
   case object mortonorder extends FilterType
   case object movingleastsquares extends FilterType
   case object normal extends FilterType
+  case object overlay extends FilterType
   case object outlier extends FilterType
   case object pclblock extends FilterType
   case object pmf extends FilterType
@@ -63,10 +66,10 @@ object FilterTypes {
   case object voxelgrid extends FilterType
 
   lazy val all = List(
-    approximatecoplanar, attribute, chipper, colorinterp, colorization, computerange,
-    crop, decimation, divider, eigenvalues, estimaterank, ferry, greedyprojection, gridprojection,
-    hag, hexbin, iqr, kdistance, lof, mad, merge, mongus, mortonorder, movingleastsquares, normal, outlier,
-    pclblock, pmf, poisson, predicate, programmable, radialdensity, randomize, range, reprojection,
+    approximatecoplanar, chipper, cluster, colorinterp, colorization, computerange,
+    crop, decimation, divider, eigenvalues, estimaterank, ferry, greedyprojection, gridprojection, groupby,
+    hag, hexbin, iqr, kdistance, locate, lof, mad, merge, mongus, mortonorder, movingleastsquares, normal, outlier,
+    overlay, pclblock, pmf, poisson, predicate, programmable, radialdensity, randomize, range, reprojection,
     sample, smrf, sort, splitter, stats, transformation, voxelgrid
   )
 

@@ -20,7 +20,6 @@ sealed trait WriterType extends ExprType { val `type` = "writers" }
 
 object WriterTypes {
   case object bpf extends WriterType
-  case object derivative extends WriterType
   case object gdal extends WriterType
   case object geowave extends WriterType
   case object las extends WriterType
@@ -29,7 +28,6 @@ object WriterTypes {
   case object `null` extends WriterType
   case object oci extends WriterType
   case object optech extends WriterType
-  case object p2g extends WriterType
   case object pcd extends WriterType
   case object pgpointcloud extends WriterType
   case object pclvisualizer extends WriterType
@@ -40,8 +38,8 @@ object WriterTypes {
   case object text extends WriterType
 
   lazy val all = List(
-    bpf, derivative, gdal, geowave, las, matlab, nitf, oci, optech,
-    pcd, pgpointcloud, pclvisualizer, p2g, ply, rialto, sbet, sqlite, text
+    bpf, gdal, geowave, las, matlab, nitf, oci, optech,
+    pcd, pgpointcloud, pclvisualizer, ply, rialto, sbet, sqlite, text
   )
 
   def fromName(name: String): WriterType =

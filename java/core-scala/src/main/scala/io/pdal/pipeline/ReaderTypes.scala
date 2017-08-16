@@ -26,6 +26,7 @@ object ReaderTypes {
   case object geowave extends ReaderType
   case object greyhound extends ReaderType
   case object ilvis2 extends ReaderType
+  case object mbio extends ReaderType
   case object las extends ReaderType
   case object mrsid extends ReaderType
   case object nitf extends ReaderType
@@ -45,9 +46,9 @@ object ReaderTypes {
   case object icebridge extends ReaderType
 
   lazy val all = List(
-    bpf, buffer, faux, gdal, geowave, greyhound, ilvis2, las, mrsid, nitf, oci,
-    optech, pcd, pgpointcloud, ply, pts, qfit, rxp, sbet, sqlite, text, tindex,
-    terrasolid, icebridge
+    bpf, buffer, faux, gdal, geowave, greyhound, ilvis2, mbio, las, mrsid, nitf,
+    oci, optech, pcd, pgpointcloud, ply, pts, qfit, rxp, sbet, sqlite, text,
+    tindex, terrasolid, icebridge
   )
 
   def fromName(name: String): ReaderType =
