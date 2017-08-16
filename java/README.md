@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal" % "1.4.1"
+  "io.pdal" %% "pdal" % "1.5.0"
 )
 ```
 
@@ -34,7 +34,7 @@ Scala API to build pipeline expressions instead of writing a raw JSON.
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal-scala" % "1.4.1"
+  "io.pdal" %% "pdal-scala" % "1.5.0"
 )
 ```
 
