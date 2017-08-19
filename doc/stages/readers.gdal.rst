@@ -63,7 +63,7 @@ RGB values of an `ASPRS LAS`_ file using :ref:`writers.las`.
           "filename":"./pdal/test/data/autzen/autzen.jpg"
         },
         {
-          "type":"filters.ferry"
+          "type":"filters.ferry",
           "dimensions":"band-1=Red, band-2=Green, band-3=Blue",
         },
         {
