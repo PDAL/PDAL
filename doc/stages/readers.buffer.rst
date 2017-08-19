@@ -19,3 +19,5 @@ See :ref:`writing` for an example usage scenario for :ref:`readers.buffer`.
 Options
 -------
 
+count
+    Maximum number of points to read [Optional]

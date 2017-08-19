@@ -83,4 +83,5 @@ filename
 
 .. _`GDALOpen`: http://www.gdal.org/gdal_8h.html#a6836f0f810396c5e45622c8ef94624d4
 
-
+count
+    Maximum number of points to read [Optional]

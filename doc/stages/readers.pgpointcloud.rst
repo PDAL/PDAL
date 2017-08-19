@@ -57,4 +57,7 @@ spatialreference
     reference information read from the database.  Most text-based formats of
     SRS information are accepted, including WKT and proj.4.
 
+count
+  Maximum number of points to read [Optional]
+
 .. _PostgreSQL Pointcloud: https://github.com/pramsey/pointcloud
