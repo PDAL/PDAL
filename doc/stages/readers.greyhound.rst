@@ -94,5 +94,5 @@ _`threads`
 .. _comparison: https://docs.mongodb.com/manual/reference/operator/query-comparison/
 .. _logical: https://docs.mongodb.com/manual/reference/operator/query-logical/
 
--`count`
+_`count`
     Maximum number of points to read [Optional]
