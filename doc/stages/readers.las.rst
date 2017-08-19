@@ -103,5 +103,5 @@ _`spatialreference`
   reference information in the file itself.  Most text-based formats of
   SRS information are accepted, including WKT and proj.4.
 
-- `count`
+_`count`
     Maximum number of points read [Optional]
