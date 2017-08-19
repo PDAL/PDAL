@@ -41,6 +41,3 @@ filename
 .. _NITF 2.1: http://www.gwg.nga.mil/ntb/baseline/docs/2500c/index.html
 
 .. _DES segment: http://jitc.fhu.disa.mil/cgi/nitf/registers/desreg.aspx
-
-count
-  Maximum number of points to read [Optional]
