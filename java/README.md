@@ -42,6 +42,37 @@ Scala API covers PDAL 1.5.0 but is compatible with PDAL >= 1.4, to use any custo
 that is not covered by the current Scala API you can use `RawExpr` type to build `Pipeline 
 Expression`.
 
+### Code examples
+
+```scala
+// To construct the expected json
+val expected =
+  """
+     |{
+     |  "pipeline" : [
+     |    {
+     |      "filename" : "/path/to/las",
+     |      "type" : "readers.las"
+     |    },
+     |    {
+     |      "type" : "filters.crop"
+     |    },
+     |    {
+     |      "filename" : "/path/to/new/las",
+     |      "type" : "writers.las"
+     |    }
+     |  ]
+     |}
+  """.stripMargin
+  
+// The same, but using scala DSL
+val pc: PipelineConstructor = LasRead("/path/to/las") ~ CropFilter() ~ LasWrite("/path/to/new/las")
+
+// The same, but using RawExpr, to support not implemented PDAL Pipeline API features
+// RawExpr accepts a circe.Json type, which can be a json object of any desired complexity
+val pcWithRawExpr = LasRead("/path/to/las") ~ RawExpr(Map("type" -> "filters.crop").asJson) ~ LasWrite("/path/to/new/las") 
+```
+
 ## How to compile
 
 Development purposes (including binaries):

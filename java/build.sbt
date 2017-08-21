@@ -49,32 +49,32 @@ lazy val commonSettings = Seq(
     )
 )
 
-lazy val root = (project in file(".")).
-  settings(commonSettings: _*).
-  aggregate(`core-scala`, core, native)
+lazy val root = (project in file("."))
+  .settings(commonSettings: _*)
+  .aggregate(`core-scala`, core, native)
 
-lazy val `core-scala` = (project in file("core-scala")).
-  settings(commonSettings: _*).
-  settings(name := "pdal-scala").
-  settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
-  settings(libraryDependencies ++= Seq(
+lazy val `core-scala` = project
+  .settings(commonSettings: _*)
+  .settings(name := "pdal-scala")
+  .settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include")
+  .settings(libraryDependencies ++= Seq(
     Dependencies.circeCore,
     Dependencies.circeGeneric,
     Dependencies.circeGenericExtras,
     Dependencies.circeParser,
     Dependencies.jtsCore,
     Dependencies.scalaTest % Test
-  )).
-  dependsOn(core)
-  dependsOn(Environment.dependOnNative(native % Runtime): _*)
+  ))
+  .settings(headerLicense := Some(HeaderLicense.ALv2("2017", "Azavea")))
+  .dependsOn(core)
 
-lazy val core = (project in file("core")).
-  settings(commonSettings: _*).
-  settings(name := "pdal").
-  settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
-  settings(libraryDependencies += Dependencies.scalaTest % Test).
-  dependsOn(Environment.dependOnNative(native % Runtime): _*)
+lazy val core = project
+  .settings(commonSettings: _*)
+  .settings(name := "pdal")
+  .settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include")
+  .settings(libraryDependencies += Dependencies.scalaTest % Test)
+  .dependsOn(Environment.dependOnNative(native % Runtime): _*)
 
-lazy val native = (project in file("native")).
-  settings(sourceDirectory in nativeCompile := sourceDirectory.value).
-  enablePlugins(JniNative)
+lazy val native = project
+  .settings(sourceDirectory in nativeCompile := sourceDirectory.value)
+  .enablePlugins(JniNative)
