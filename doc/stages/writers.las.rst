@@ -152,7 +152,7 @@ system_id
 
 a_srs
   The spatial reference system of the file to be written. Can be an EPSG string
-  (e.g. "EPSG:268910") or a WKT string. [Default: Not set]
+  (e.g. "EPSG:26910") or a WKT string. [Default: Not set]
 
 global_encoding
   Various indicators to describe the data.  See the LAS documentation.  Note
