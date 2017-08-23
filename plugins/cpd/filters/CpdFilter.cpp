@@ -45,7 +45,7 @@ namespace
 {
 void movePoints(PointViewPtr moving, const cpd::Matrix& result)
 {
-    assert(moving->size() == result.rows());
+    assert(moving->size() == (point_count_t)result.rows());
     for (PointId i = 0; i < moving->size(); ++i)
     {
         moving->setField(Dimension::Id::X, i, result(i, 0));
