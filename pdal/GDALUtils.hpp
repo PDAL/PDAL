@@ -43,13 +43,17 @@
 
 #include <array>
 #include <functional>
+#include <mutex>
 #include <sstream>
 #include <vector>
 
+/**
 #include <cpl_port.h>
-#include <gdal_priv.h>
 #include <cpl_vsi.h>
+#include <ogr_srs_api.h>
+**/
 #include <cpl_conv.h>
+#include <gdal_priv.h>
 #include <ogr_api.h>
 #include <ogr_srs_api.h>
 
@@ -202,10 +206,15 @@ private:
 };
 
 
+// This is a little confusing because we have a singleton error handler with
+// a single log pointer, but we set the log pointer/debug state as if we
+// were taking advantage of GDAL's thread-specific error handing.
+//
+// We lock the log/debug so that it doesn't
+// get changed while another thread is using or setting.
 class PDAL_DLL ErrorHandler
 {
 public:
-
     /**
       Get the singleton error handler.
 
@@ -253,17 +262,24 @@ public:
     ErrorHandler();
 
 private:
-
     void handle(::CPLErr level, int num, const char *msg);
 
 private:
+    std::mutex m_mutex;
     bool m_debug;
     pdal::LogPtr m_log;
     int m_errorNum;
     bool m_cplSet;
-
 };
 
+class ErrorHandlerSuspender
+{
+public:
+    ErrorHandlerSuspender()
+        { CPLPushErrorHandler(CPLQuietErrorHandler); }
+    ~ErrorHandlerSuspender()
+        { (void)CPLPopErrorHandler(); }
+};
 
 enum class GDALError
 {

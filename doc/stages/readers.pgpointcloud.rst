@@ -3,9 +3,15 @@
 readers.pgpointcloud
 ====================
 
-The **PostgreSQL Pointcloud Reader** allows you to read from a PostgreSQL database that the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud extension stores point cloud data in tables that contain rows of patches. Each patch in turn contains a large number of spatially nearby points.
+The **PostgreSQL Pointcloud Reader** allows you to read from a PostgreSQL
+database that the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud
+extension stores point cloud data in tables that contain rows of patches. Each
+patch in turn contains a large number of spatially nearby points.
 
-The reader pulls patches from a table, potentially sub-setting the query on the way with a "where" clause.
+The reader pulls patches from a table, potentially sub-setting the query on the
+way with a "where" clause.
+
+.. plugin::
 
 Example
 -------
@@ -46,7 +52,9 @@ column
   Table column to read patches from. [Default: **pa**]
 
 spatialreference
-  The spatial reference to use for the points. Over-rides the value read from the database.
-
+  _`spatialreference`
+    Sets the spatial reference for the point data.  Overrides any spatial
+    reference information read from the database.  Most text-based formats of
+    SRS information are accepted, including WKT and proj.4.
 
 .. _PostgreSQL Pointcloud: https://github.com/pramsey/pointcloud

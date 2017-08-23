@@ -126,6 +126,14 @@ public:
 
     size_t byte_size()
         { return buf.size(); }
+
+    void clear()
+        {
+           buf.clear();
+           count = 0;
+           remaining = 0;
+           idx = 0;
+         }
 };
 typedef std::shared_ptr<Patch> PatchPtr;
 

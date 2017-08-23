@@ -140,6 +140,7 @@ private:
     virtual bool eof()
         { return m_index >= getNumPoints(); }
 
+    void handleCompressionOption();
     void setSrs(MetadataNode& m);
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);

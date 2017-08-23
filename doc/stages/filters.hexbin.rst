@@ -3,7 +3,10 @@
 filters.hexbin
 ==============
 
-A common questions for users of point clouds is what the spatial extent of a point cloud collection is. Files generally provide only rectangular bounds, but often the points inside the files only fill up a small percentage of the area within the bounds.
+A common questions for users of point clouds is what the spatial extent of a
+point cloud collection is. Files generally provide only rectangular bounds, but
+often the points inside the files only fill up a small percentage of the area
+within the bounds.
 
 .. figure:: filters.hexbin.img1.jpg
     :scale: 50 %
@@ -11,7 +14,15 @@ A common questions for users of point clouds is what the spatial extent of a poi
 
     Hexbin output shows boundary of actual points in point buffer, not just rectangular extents.
 
-The hexbin filter reads a point stream and writes out a metadata record that contains a much tighter data bound, expressed as a well-known text polygon. In order to write out the metadata record, the `pdal` pipeline command must be invoked using the `--pipeline-serialization` option:
+The hexbin filter reads a point stream and writes out a metadata record that
+contains a much tighter data bound, expressed as a well-known text polygon. In
+order to write out the metadata record, the `pdal` pipeline command must be
+invoked using the `--pipeline-serialization` option:
+
+.. plugin::
+
+Example
+--------------------------------------------------------------------------------
 
 ::
 

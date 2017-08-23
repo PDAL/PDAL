@@ -29,6 +29,10 @@ potentially contributes to the raster's value.
 
 .. _Points2Grid: http://www.opentopography.org/otsoftware/points2grid
 
+.. embed::
+
+.. streamable::
+
 The GDAL writer creates rasters using the data specified in the ``dimension``
 option (defaults to `Z`).The writer will creates up to six rasters based on
 different statistics in the output dataset.  The order of the layers in the

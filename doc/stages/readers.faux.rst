@@ -26,6 +26,10 @@ grid
     Creates points with integer-valued coordinates in the range provided
     (excluding the upper bound).
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

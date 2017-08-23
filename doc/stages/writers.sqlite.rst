@@ -6,6 +6,8 @@ writers.sqlite
 The `SQLite`_ driver outputs point cloud data into a PDAL-sepecific scheme
 that matches the approach of :ref:`readers.pgpointcloud` and :ref:`readers.oci`.
 
+.. plugin::
+
 Example
 -------
 

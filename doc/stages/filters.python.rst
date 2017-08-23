@@ -25,6 +25,7 @@ filter and the ``outs`` array represents the points after filtering.
     Each array in the ``outs`` list match `NumPy`_ array of the
     same type as provided as ``ins`` for shape and type.
 
+.. plugin::
 
 .. code-block:: python
 

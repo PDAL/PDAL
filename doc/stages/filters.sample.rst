@@ -21,6 +21,7 @@ is kept in tact (the same cannot be said for :ref:`filters.voxelgrid`).
     :ref:`filters.decimation` and :ref:`filters.voxelgrid` also perform
     decimation.
 
+.. embed::
 
 Options
 -------------------------------------------------------------------------------

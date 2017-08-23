@@ -7,6 +7,8 @@ filters.kdistance
 The K-Distance filter creates a new attribute ``KDistance`` that contains the
 Euclidean distance to a point's k-th nearest neighbor.
 
+.. embed::
+
 Example
 -------------------------------------------------------------------------------
 

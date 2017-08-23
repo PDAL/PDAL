@@ -16,6 +16,8 @@ on the parametric fit.
 
 .. _`PCL`: http://www.pointclouds.org
 
+.. plugin::
+
 Example
 -------------------------------------------------------------------------------
 

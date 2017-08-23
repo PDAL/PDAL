@@ -7,6 +7,8 @@ filters.overlay
 The overlay filter allows you to set the values of a selected dimension
 based on an OGR-readable polygon or multi-polygon.
 
+.. embed::
+
 OGR SQL support
 ----------------
 

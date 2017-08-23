@@ -18,6 +18,8 @@ by the volume of the sphere, defined as
 
 The radius :math:`r` can be adjusted by changing the ``radius`` option.
 
+.. embed::
+
 Example
 -------------------------------------------------------------------------------
 

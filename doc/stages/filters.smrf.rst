@@ -8,6 +8,9 @@ outlined in [Pingel2013]_.
 
 .. [Pingel2013] Pingel, T.J., Clarke, K.C., McBride, W.A., 2013. An improved simple morphological filter for the terrain classification of airborne LIDAR data. ISPRS J. Photogramm. Remote Sens. 77, 21–30.
 
+
+.. embed::
+
 Example
 -------
 

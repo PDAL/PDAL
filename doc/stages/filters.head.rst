@@ -11,6 +11,8 @@ PointView.
     If the requested number of points exceeds the size of the point cloud, all
     points are passed with a warning.
 
+.. embed::
+
 
 Example #1
 ----------

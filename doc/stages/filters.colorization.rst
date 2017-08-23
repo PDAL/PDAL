@@ -27,6 +27,13 @@ and the values of the band may be scaled before being written to the dimension.
 If the band range is 0-1, for example, it might make sense to scale by 256 to
 fit into a traditional 1-byte color value range.
 
+.. embed::
+
+.. streamable::
+
+Example
+--------------------------------------------------------------------------------
+
 .. code-block:: json
 
   {

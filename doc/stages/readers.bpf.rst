@@ -16,6 +16,10 @@ made accessible to PDAL; they are essentially ignored.
 Data that follows the standard header but precedes point data is taken to
 be metadata and is UTF-encoded and added to the reader's metadata.
 
+.. embed::
+
+.. streamable::
+
 Example
 ------------------------------------------------------------------------------
 

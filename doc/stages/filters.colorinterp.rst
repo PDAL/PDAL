@@ -24,6 +24,11 @@ creating your own scale factors. See `Default Ramps`_ for more information.
 
     :ref:`filters.colorinterp` will use the entire band to scale the colors.
 
+.. embed::
+
+Example
+--------------------------------------------------------------------------------
+
 .. code-block:: json
 
   {

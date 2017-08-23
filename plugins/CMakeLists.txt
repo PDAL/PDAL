@@ -61,6 +61,10 @@ if(BUILD_PLUGIN_PYTHON)
     add_subdirectory(python)
 endif()
 
+if(BUILD_PLUGIN_OPENSCENEGRAPH)
+    add_subdirectory(openscenegraph)
+endif()
+
 if(BUILD_PLUGIN_RIVLIB)
     add_subdirectory(rxp)
 endif(BUILD_PLUGIN_RIVLIB)

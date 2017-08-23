@@ -16,7 +16,6 @@ Point Cloud Processing and Analysis with PDAL
    :maxdepth: 3
 
    agenda
-   about
    lidar-introduction
    software
    exercises/index

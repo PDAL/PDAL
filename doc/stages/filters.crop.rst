@@ -8,6 +8,10 @@ box (2D), polygon, or point+distance.  If more than one bounding region is
 specified, the filter will pass all input points through each bounding region,
 creating an output point set for each input crop region.
 
+.. embed::
+
+.. streamable::
+
 The provided bounding regions are assumed to have the same spatial reference
 as the points unless the option `a_srs` provides an explicit spatial reference
 for bounding regions.
@@ -15,6 +19,7 @@ If the point input consists of multiple point views with differing
 spatial references, one is chosen at random and assumed to be the
 spatial reference of the input bounding region.  In this case a warning will
 be logged.
+
 
 Example
 -------

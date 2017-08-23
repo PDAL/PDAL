@@ -18,6 +18,9 @@ cloud, along with any existing dimensions.
     all dimensional data is lost, and the sampled cloud now consists of only XYZ
     coordinates.
 
+.. embed::
+
+
 Example
 -------
 
