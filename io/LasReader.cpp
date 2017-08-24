@@ -135,10 +135,6 @@ void LasReader::handleCompressionOption()
             m_compression + "'.  Value values are 'lazperf' and 'laszip'.");
 #endif
 
-#ifdef PDAL_HAVE_LASZIP
-    m_laszip = nullptr;
-#endif
-
     // Set case-corrected value.
     m_compression = compression;
 }
@@ -176,6 +172,10 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     if (m_header.compressed())
         handleCompressionOption();
+#ifdef PDAL_HAVE_LASZIP
+    m_laszip = nullptr;
+#endif
+
     if (!m_header.pointFormatSupported())
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)m_header.pointFormat()) + ".");
