@@ -70,4 +70,7 @@ filename
 separator
   Separator character to override that found in header line.
 
+count
+  Maximum number of points to read [Optional]
+
 .. _formatted: http://en.cppreference.com/w/cpp/string/basic_string/stof
