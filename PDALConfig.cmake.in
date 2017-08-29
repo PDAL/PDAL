@@ -17,6 +17,6 @@ endforeach(_dir)
 
 include("${CMAKE_CURRENT_LIST_DIR}/PDALTargets.cmake")
 
-set(PDAL_LIBRARIES "@PDAL_LIB_NAME@")
+set(PDAL_LIBRARIES "@PDAL_LIB_NAME@" "pdal_util" "pdal_jsoncpp" "pdal_arbiter" "pdal_boost")
 
 check_required_components(PDAL)
