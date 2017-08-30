@@ -606,7 +606,6 @@ double Utils::normalizeLongitude(double longitude)
 std::vector<std::string> Utils::backtrace()
 {
     std::vector<std::string> lines;
-#ifndef WIN32
 #ifdef PDAL_HAVE_EXECINFO_H
     const int MAX_STACK_SIZE(100);
     void* buffer[MAX_STACK_SIZE];
@@ -659,7 +658,6 @@ std::vector<std::string> Utils::backtrace()
             symbol = prefix + symbol;
         }
     }
-#endif
 #endif
     return lines;
 }
