@@ -131,7 +131,7 @@ namespace pdal
     * \author Zoltan Csaba Marton
     * \ingroup surface
     */
-  class GreedyProjection : public Filter
+  class PDAL_DLL GreedyProjection : public Filter
   {
     public:
 

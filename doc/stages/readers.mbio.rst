@@ -55,3 +55,6 @@ format
 .. _MB-System: http://www.ldeo.columbia.edu/res/pi/MB-System/
 
 .. _all formats: https://www.ldeo.columbia.edu/res/pi/MB-System/html/mbio.html#lbAI
+
+count
+  Maximum number of points to read [Optional]
