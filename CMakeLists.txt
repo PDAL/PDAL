@@ -149,6 +149,8 @@ endif()
 
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
+include(CheckIncludeFiles)
+check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 
 #------------------------------------------------------------------------------
