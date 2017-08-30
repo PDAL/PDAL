@@ -92,6 +92,8 @@ void PointLayout::registerDim(Dimension::Id id, Dimension::Type type)
 Dimension::Id PointLayout::assignDim(const std::string& name,
     Dimension::Type type)
 {
+    if (m_nextFree == Dimension::COUNT)
+        throw pdal_error("No dimension IDs remaining for assignment.");
     Dimension::Id id = (Dimension::Id)m_nextFree;
 
     auto di = m_propIds.find(name);

@@ -104,7 +104,7 @@ inline BaseType base(Type t)
 }
 
 static const int COUNT = std::numeric_limits<uint16_t>::max();
-static const int PROPRIETARY = 0xFF00;
+static const int PROPRIETARY = 0xF000;
 
 /// Get a string reresentation of a datatype.
 /// \param[in] dimtype  Dimension type.
