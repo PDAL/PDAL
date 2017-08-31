@@ -35,6 +35,7 @@
 #include "LasWriter.hpp"
 
 #include <iostream>
+#include <climits>
 
 #include <pdal/Compression.hpp>
 #include <pdal/DimUtil.hpp>
@@ -398,7 +399,7 @@ void LasWriter::setPDALVLRs(MetadataNode& forward)
     Utils::toJSON(forward, ostr);
     std::string json = ostr.str();
 
-    if (json.size() > LasVLR::MAX_DATA_SIZE &&
+    if (json.size() > USHRT_MAX &&
         m_minorVersion.val() < 4)
     {
         log()->get(LogLevel::Debug) << "pdal metadata VLR too large "
@@ -412,7 +413,7 @@ void LasWriter::setPDALVLRs(MetadataNode& forward)
     ostr.str("");
     PipelineWriter::writePipeline(this, ostr);
     json = ostr.str();
-    if (json.size() > LasVLR::MAX_DATA_SIZE &&
+    if (json.size() > USHRT_MAX &&
         m_minorVersion.val() < 4)
     {
         log()->get(LogLevel::Debug) << "pdal pipeline VLR too large "

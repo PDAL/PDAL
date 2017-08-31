@@ -243,7 +243,9 @@ TEST(LasReaderTest, test_vlr)
         std::string name("vlr_");
         name += std::to_string(i);
         MetadataNode m = root.findChild(name);
-        EXPECT_TRUE(!m.value().empty()) << "No node " << i;
+        EXPECT_TRUE(!m.empty()) << "No node " << i;
+        m = m.findChild("data");
+        EXPECT_TRUE(!m.empty()) << "No value for node " << i;
     }
 }
 
