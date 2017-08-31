@@ -28,7 +28,7 @@ declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
-declare sbt_saved_stty debugUs
+declare debugUs
 
 declare java_cmd="java"
 declare sbt_launch_dir="$HOME/.sbt/launchers"
@@ -44,19 +44,21 @@ echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 die ()     { echo "Aborting: $@" ; exit 1; }
 
-# restore stty settings (echo in particular)
-onSbtRunnerExit() {
-  [[ -n "$sbt_saved_stty" ]] || return
-  vlog ""
-  vlog "restoring stty: $sbt_saved_stty"
-  stty "$sbt_saved_stty"
-  unset sbt_saved_stty
-}
+setTrapExit () {
+  # save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
+  export SBT_STTY="$(stty -g 2>/dev/null)"
 
-# save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
-trap onSbtRunnerExit EXIT
-sbt_saved_stty="$(stty -g 2>/dev/null)"
-vlog "Saved stty: $sbt_saved_stty"
+  # restore stty settings (echo in particular)
+  onSbtRunnerExit() {
+    [ -t 0 ] || return
+    vlog ""
+    vlog "restoring stty: $SBT_STTY"
+    stty "$SBT_STTY"
+  }
+
+  vlog "saving stty: $SBT_STTY"
+  trap onSbtRunnerExit EXIT
+}
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
@@ -229,8 +231,13 @@ execRunner () {
     vlog ""
   }
 
-  [[ -n "$batch" ]] && exec </dev/null
-  exec "$@"
+  setTrapExit
+
+  if [[ -n "$batch" ]]; then
+    "$@" < /dev/null
+  else
+    "$@"
+  fi
 }
 
 jar_url ()  { make_url "$1"; }

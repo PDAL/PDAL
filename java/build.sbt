@@ -66,6 +66,7 @@ lazy val `core-scala` = project
     Dependencies.scalaTest % Test
   ))
   .settings(headerLicense := Some(HeaderLicense.ALv2("2017", "Azavea")))
+  .settings(licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.html")))
   .dependsOn(core)
 
 lazy val core = project
