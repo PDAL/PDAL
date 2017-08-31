@@ -119,6 +119,7 @@ private:
     std::map<int, int> m_dimensionIdMap;
     std::map<int, int> m_dimensionTypeMap;
     PointId m_pointIndex;
+    MetadataNode m_tableMetadata;
 
 };
 
