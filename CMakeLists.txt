@@ -118,14 +118,11 @@ include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/curl.cmake)
-if (CURL_FOUND)
-    set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
-endif()
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/python.cmake)
+include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -173,7 +170,6 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
-
 if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
 endif()
