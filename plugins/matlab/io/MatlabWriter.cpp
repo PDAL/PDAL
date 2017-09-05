@@ -86,13 +86,15 @@ void MatlabWriter::ready(PointTableRef table)
     m_matfile = matOpen(m_filename.c_str(), "w");
     if (!m_matfile)
         throwError("Could not open file '" + m_filename + "' for writing.");
+
+    m_tableMetadata = table.metadata();
 }
 
 
 void MatlabWriter::write(const PointViewPtr view)
 {
 
-    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, log());
+    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, m_tableMetadata, log());
     if (matPutVariable(m_matfile, m_structName.c_str(), data))
         throwError("Could not write points to file '" + m_filename + "'.");
 
