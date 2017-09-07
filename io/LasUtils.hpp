@@ -173,6 +173,14 @@ struct error : public std::runtime_error
 
 std::vector<ExtraDim> parse(const StringList& dimString);
 
+
+struct IgnoreVLR
+{
+    std::string m_userId;
+    uint16_t m_recordId;
+};
+std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
+
 } // namespace LasUtils
 
 } // namespace pdal

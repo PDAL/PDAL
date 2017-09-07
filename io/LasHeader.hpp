@@ -382,6 +382,8 @@ public:
     bool valid() const;
     Dimension::IdList usedDims() const;
     LasVLR *findVlr(const std::string& userId, uint16_t recordId);
+    void removeVLR(const std::string& userId, uint16_t recordId);
+    void removeVLR(const std::string& userId);
     void setLog(LogPtr log)
         { m_log = log; }
     const VlrList& vlrs() const
