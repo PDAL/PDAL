@@ -72,6 +72,8 @@ private:
     virtual void done(PointTableRef table)
         { m_raster->close(); }
     virtual QuickInfo inspect();
+    template<typename T>
+    void readBandData(int band, PointViewPtr view, point_count_t count);
 
     std::unique_ptr<gdal::Raster> m_raster;
     point_count_t m_index;
