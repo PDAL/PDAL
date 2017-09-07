@@ -110,6 +110,8 @@ protected:
     std::unique_ptr<LasStreamIf> m_streamIf;
 
 private:
+    typedef std::vector<LasUtils::IgnoreVLR> IgnoreVLRList;
+
     LasError m_error;
     LasHeader m_header;
     std::unique_ptr<LasZipPoint> m_zipPoint;
@@ -119,7 +121,9 @@ private:
     point_count_t m_index;
     StringList m_extraDimSpec;
     std::vector<ExtraDim> m_extraDims;
+    IgnoreVLRList m_ignoreVLRs;
     std::string m_compression;
+    StringList m_ignoreVLROption;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
