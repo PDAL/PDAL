@@ -69,7 +69,10 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     python setup.py test
 
     # JNI tests
-#    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
+    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
+    
+    # Scala tests
+    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core-scala/test
 
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer

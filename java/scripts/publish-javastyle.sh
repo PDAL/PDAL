@@ -28,4 +28,4 @@ if ${SIGNED}; then
     COMMAND=publishSigned
 fi
 
-PDAL_DEPEND_ON_NATIVE=false ./sbt "-212" "project core" ${COMMAND}-javastyle
+PDAL_DEPEND_ON_NATIVE=false ./sbt "-212" "project core" ${COMMAND}Javastyle
