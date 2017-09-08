@@ -211,6 +211,14 @@ void GreyhoundReader::initialize(PointTableRef table)
         config["arbiter"]["verbose"] = true;
     m_arbiter.reset(new arbiter::Arbiter(config));
 
+    if (m_filename.size() && m_args.url.empty())
+    {
+        m_args.url = m_filename;
+        const std::string pre("greyhound://");
+        if (m_args.url.find(pre) == 0)
+            m_args.url = m_args.url.substr(pre.size());
+    }
+
     log()->get(LogLevel::Debug) << "Fetching info from " << m_args.base() <<
         std::endl;
 
