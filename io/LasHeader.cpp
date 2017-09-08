@@ -238,15 +238,6 @@ void LasHeader::setSrs()
     }
 }
 
-template<class Container, class F>
-bool erase_where(Container& c, F&& f)
-{
-    return c.erase(std::remove_if(c.begin(),
-                                  c.end(),
-                                  std::forward<F>(f)),
-                   c.end());
-}
-
 
 void LasHeader::removeVLR(const std::string& userId, uint16_t recordId)
 {
@@ -260,7 +251,6 @@ void LasHeader::removeVLR(const std::string& userId, uint16_t recordId)
 }
 
 
-
 void LasHeader::removeVLR(const std::string& userId)
 {
 
@@ -272,6 +262,7 @@ void LasHeader::removeVLR(const std::string& userId)
     Utils::remove_if(m_vlrs, matches);
     Utils::remove_if(m_eVlrs, matches);
 }
+
 
 LasVLR *LasHeader::findVlr(const std::string& userId,
     uint16_t recordId)
