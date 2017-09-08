@@ -285,11 +285,6 @@ install(DIRECTORY ${PDAL_KERNELS_DIR}
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_VENDOR_DIR}/nanoflann
-    DESTINATION include/pdal
-    FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
-)
 install(DIRECTORY ${PDAL_IO_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
