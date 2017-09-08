@@ -34,6 +34,7 @@
 
 #include "LasWriter.hpp"
 
+#include <climits>
 #include <iostream>
 #include <vector>
 
@@ -394,11 +395,30 @@ void LasWriter::setPDALVLRs(MetadataNode& forward)
     std::ostringstream ostr;
     Utils::toJSON(forward, ostr);
     std::string json = ostr.str();
-    store(ostr.str(), 12, "PDAL metadata");
+
+    if (json.size() > USHRT_MAX &&
+        m_minorVersion.val() < 4)
+    {
+        log()->get(LogLevel::Debug) << "pdal metadata VLR too large "
+            "to write in VLR for files < LAS 1.4";
+    } else
+    {
+        store(json, 12, "PDAL metadata");
+    }
+
 
     ostr.str("");
     PipelineWriter::writePipeline(this, ostr);
-    store(ostr.str(), 13, "PDAL pipeline");
+    json = ostr.str();
+    if (json.size() > USHRT_MAX &&
+        m_minorVersion.val() < 4)
+    {
+        log()->get(LogLevel::Debug) << "pdal pipeline VLR too large "
+            "to write in VLR for files < LAS 1.4";
+    } else
+    {
+        store(ostr.str(), 13, "PDAL pipeline");
+    }
 }
 
 

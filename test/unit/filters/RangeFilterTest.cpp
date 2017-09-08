@@ -37,8 +37,11 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <io/FauxReader.hpp>
+#include <io/TextReader.hpp>
 #include <filters/RangeFilter.hpp>
 #include <filters/StreamCallbackFilter.hpp>
+
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -353,6 +356,31 @@ TEST(RangeFilterTest, simple_logic)
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 2), 5);
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 3), 8);
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 4), 9);
+}
+
+// Make sure that dimension names containing digits works
+TEST(RangeFilterTest, case_1659)
+{
+    TextReader reader;
+
+    Options ops;
+    ops.add("filename", Support::datapath("text/numeric_dim.txt"));
+    reader.setOptions(ops);
+
+    Options rangeOps;
+    rangeOps.add("limits", "Eigenvalue0[:35]");
+
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
+
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(3u, view->size());
 }
 
 TEST(RangeFilterTest, stream_logic)

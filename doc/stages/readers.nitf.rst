@@ -60,7 +60,21 @@ Options
 filename
   Filename to read from [Required]
 
+count
+  Maximum number of points to read [Optional]
 
+spatialreference
+  Spatial reference to apply to data
+
+extra_dims
+  Dimensions to assign to extra byte data
+
+compression
+  May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
+  or the LASzip decompressor for LAZ files.  PDAL must have been built with
+  support for the decompressor being requested.  The LazPerf decompressor
+  doesn't support version 1 LAZ files or version 1.4 of LAS.
+  [Default: "laszip"]
 
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
 

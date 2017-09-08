@@ -1,4 +1,4 @@
-.. _readers.mrsid:
+  .. _readers.mrsid:
 
 readers.mrsid
 =============
