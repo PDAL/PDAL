@@ -9,11 +9,13 @@ the method of median absolute deviation from the median (commonly referred to as
 MAD), which is robust to outliers (as opposed to mean and standard deviation).
 
 .. note::
-  
+
   This method can remove real data, especially ridges and valleys in rugged
   terrain, or tall features such as towers and rooftops in flat terrain. While
   the number of deviations can be adjusted to account for such content-specific
   considerations, it must be used with care.
+
+.. embed::
 
 Example
 -------

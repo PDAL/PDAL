@@ -69,7 +69,7 @@ private:
     MatlabFilter& operator=(const MatlabFilter&); // not implemented
     MatlabFilter(const MatlabFilter&); // not implemented
 
-    MetadataNode m_totalMetadata;
+    MetadataNode m_tableMetadata;
     Json::Value m_pdalargs;
     std::string m_structName;
 

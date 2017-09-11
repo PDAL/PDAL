@@ -354,7 +354,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
     PluginManager::setLog(log);
-#ifndef _WIN32
+#ifdef PDAL_HAVE_EXECINFO_H
     if (m_debug)
     {
         signal(SIGSEGV, [](int sig)

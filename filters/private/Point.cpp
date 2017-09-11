@@ -37,6 +37,9 @@
 namespace pdal
 {
 
+namespace filter
+{
+
 namespace
 {
 
@@ -44,9 +47,6 @@ const double LOWEST = (std::numeric_limits<double>::lowest)();
 const double HIGHEST = (std::numeric_limits<double>::max)();
 
 }
-
-namespace cropfilter
-{
 
 Point::Point()
     : Geometry()
@@ -114,7 +114,6 @@ bool Point::is3d() const
     return (z != LOWEST);
 }
 
-} //namespace cropfilter
+} // namespace filter
 
-} //namespace pdal
-
+} // namespace pdal

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,68 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/PointView.hpp>
+#include <pdal/FlexWriter.hpp>
+#include <pdal/plugin.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
-#include <boost/property_tree/ptree.hpp>
+#include <gdal_version.h>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/StageFactory.hpp>
+extern "C" int32_t OGRWriter_ExitFunc();
+extern "C" PF_ExitFunc OGRWriter_InitPlugin();
 
-#include <vector>
-#include <string>
+#if GDAL_VERSION_MAJOR > 2 || \
+    (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR > 0)
+#define PDAL_GDAL2_1
+#endif
 
+#ifdef PDAL_GDAL2_1
+#include <gdal_priv.h>
+#include <ogr_feature.h>
+#else
+#include <ogrsf_frmts.h>
+#endif
 
 namespace pdal
 {
 
-class Options;
-class PipelineManager;
-
-class PDAL_DLL PipelineReaderXML
+class PDAL_DLL OGRWriter : public FlexWriter
 {
-private:
-    class StageParserContext;
-
 public:
-    PipelineReaderXML(PipelineManager&);
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    /**
-      Read an XML pipeline file into a PipelineManager.
-
-      \param filename  Filename to read from.
-    */
-    void readPipeline(const std::string& filename);
-
-    /**
-      Read an XML pipeline from a stream into a PipelineManager.
-
-      \param input  Stream to read from.
-    */
-    void readPipeline(std::istream& input);
+    OGRWriter();
 
 private:
-    typedef std::map<std::string, std::string> map_t;
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
+    virtual void prepared(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs);
+    virtual void writeView(const PointViewPtr view);
+    virtual bool processOne(PointRef& point);
+    virtual void doneFile();
 
-    void parseElement_Pipeline(const pdalboost::property_tree::ptree&);
-    Stage *parseElement_anystage(const std::string& name,
-        const pdalboost::property_tree::ptree& subtree);
-    Stage *parseElement_Reader(const pdalboost::property_tree::ptree& tree);
-    Stage *parseElement_Filter(const pdalboost::property_tree::ptree& tree);
-    Stage *parseElement_Writer(const pdalboost::property_tree::ptree& tree);
-    Option parseElement_Option(const pdalboost::property_tree::ptree& tree);
-    void collect_attributes(map_t& attrs,
-        const pdalboost::property_tree::ptree& tree);
-    void parse_attributes(map_t& attrs,
-        const pdalboost::property_tree::ptree& tree);
-
-private:
-    PipelineManager& m_manager;
-    std::string m_inputXmlFile;
-
-    PipelineReaderXML& operator=(const PipelineReaderXML&); // not implemented
-    PipelineReaderXML(const PipelineReaderXML&); // not implemented
-
-    void baseReadPipeline(std::istream& input);
+    // I don't think this needs to be deleted.
+#ifdef PDAL_GDAL2_1
+    GDALDriver *m_driver;
+    GDALDataset *m_ds;
+#else
+    OGRSFDriver *m_driver;
+    OGRDataSource *m_ds;
+#endif
+    OGRLayer *m_layer;
+    OGRFeature *m_feature;
+    OGRwkbGeometryType m_geomType;
+    OGRMultiPoint m_multiPoint;
+    std::string m_outputFilename;
+    std::string m_driverName;
+    size_t m_multiCount;
+    size_t m_curCount;
+    std::string m_measureDimName;
+    Dimension::Id m_measureDim;
 };
 
-} // namespace pdal
+}

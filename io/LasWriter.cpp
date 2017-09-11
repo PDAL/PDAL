@@ -36,6 +36,7 @@
 
 #include <iostream>
 #include <vector>
+#include <climits>
 
 #include <pdal/Compression.hpp>
 #include <pdal/DimUtil.hpp>
@@ -383,22 +384,31 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
 
 void LasWriter::setPDALVLRs(MetadataNode& forward)
 {
-    auto store = [this](std::string json, int recordId, std::string description)
+    std::string json = Utils::toJSON(forward);
+    if ((json.size() > LasVLR::MAX_DATA_SIZE) &&
+        !m_lasHeader.versionAtLeast(1, 4))
     {
-        std::vector<uint8_t> data;
-        data.resize(json.size());
-        std::copy(json.begin(), json.end(), data.begin());
-        addVlr("PDAL", recordId, description, data);
-    };
+        log()->get(LogLevel::Debug) << "pdal metadata VLR too large "
+            "to write in VLR for files < LAS 1.4";
+    } else
+    {
+        std::vector<uint8_t> data(json.begin(), json.end());
+        addVlr(PDAL_USER_ID, PDAL_METADATA_RECORD_ID, "PDAL metadata", data);
+    }
 
     std::ostringstream ostr;
-    Utils::toJSON(forward, ostr);
-    std::string json = ostr.str();
-    store(ostr.str(), 12, "PDAL metadata");
-
-    ostr.str("");
     PipelineWriter::writePipeline(this, ostr);
-    store(ostr.str(), 13, "PDAL pipeline");
+    json = ostr.str();
+    if (json.size() > LasVLR::MAX_DATA_SIZE &&
+        !m_lasHeader.versionAtLeast(1, 4))
+    {
+        log()->get(LogLevel::Debug) << "pdal pipeline VLR too large "
+            "to write in VLR for files < LAS 1.4";
+    } else
+    {
+        std::vector<uint8_t> data(json.begin(), json.end());
+        addVlr(PDAL_USER_ID, PDAL_PIPELINE_RECORD_ID, "PDAL pipeline", data);
+    }
 }
 
 

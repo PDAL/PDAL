@@ -31,6 +31,7 @@ cmake \
     -DBUILD_PLUGIN_MRSID=OFF \
     -DBUILD_PLUGIN_NITF=OFF \
     -DBUILD_PLUGIN_OCI=OFF \
+    -DBUILD_PLUGIN_OPENSCENEGRAPH=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_PCL=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_PGPOINTCLOUD=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PGPOINTCLOUD_TESTS=OFF \
@@ -68,7 +69,10 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     python setup.py test
 
     # JNI tests
-#    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
+    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
+    
+    # Scala tests
+    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core-scala/test
 
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer

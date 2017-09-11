@@ -11,3 +11,20 @@
 	display: inline;
 }
 
+
+
+.plugin .admonition-title{
+    background: #b92938;
+}
+
+.plugin .admonition-title::before{
+    content: '\f1e6';
+}
+
+.embed .admonition-title::before{
+    content: '\f00c';
+}
+
+.streamable .admonition-title::before{
+    content: '\f141';
+}

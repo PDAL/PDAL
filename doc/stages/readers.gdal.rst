@@ -20,6 +20,7 @@ that are center pixel, and each band is represented by "band-1", "band-2", or
     names. For output to formats such as :ref:`LAS <writers.las>`, this mapping
     is required.
 
+.. embed::
 
 Basic Example
 --------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ RGB values of an `ASPRS LAS`_ file using :ref:`writers.las`.
           "filename":"./pdal/test/data/autzen/autzen.jpg"
         },
         {
-          "type":"filters.ferry"
+          "type":"filters.ferry",
           "dimensions":"band-1=Red, band-2=Green, band-3=Blue",
         },
         {
@@ -82,4 +83,5 @@ filename
 
 .. _`GDALOpen`: http://www.gdal.org/gdal_8h.html#a6836f0f810396c5e45622c8ef94624d4
 
-
+count
+    Maximum number of points to read [Optional]

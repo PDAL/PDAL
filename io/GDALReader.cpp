@@ -149,23 +149,59 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     for (int b = 0; b < m_raster->bandCount(); ++b)
     {
         // Bands count from 1
-        m_raster->readBand(band, b + 1);
-        std::stringstream oss;
-        oss << "band-" << (b + 1);
-        log()->get(LogLevel::Info) << "Read band '" << oss.str() << "'" <<
-            std::endl;
-
-        Dimension::Id d = view->layout()->findDim(oss.str());
-        size_t dimSize = Dimension::size(band_types[b]);
-        uint8_t* p = band.data();
-        for (point_count_t i = 0; i < count; ++i)
+        switch (band_types[b])
         {
-            view->setField(d, band_types[b], i, p);
-            p = p + dimSize;
+        case Dimension::Type::Signed8:
+            readBandData<int8_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Unsigned8:
+            readBandData<uint8_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Signed16:
+            readBandData<int16_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Unsigned16:
+            readBandData<uint16_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Signed32:
+            readBandData<int32_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Unsigned32:
+            readBandData<uint32_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Signed64:
+            readBandData<int64_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Unsigned64:
+            readBandData<uint64_t>(b + 1, view, count);
+            break;
+        case Dimension::Type::Float:
+            readBandData<float>(b + 1, view, count);
+            break;
+        case Dimension::Type::Double:
+            readBandData<double>(b + 1, view, count);
+            break;
+        case Dimension::Type::None:
+            break;
         }
     }
-
     return view->size();
+}
+
+
+template<typename T>
+void GDALReader::readBandData(int band, PointViewPtr view, point_count_t count)
+{
+    std::vector<T> buf;
+
+    m_raster->readBand(buf, band);
+    std::stringstream oss;
+    oss << "band-" << (band);
+    log()->get(LogLevel::Info) << "Read band '" << oss.str() << "'" <<
+       std::endl;
+    Dimension::Id d = view->layout()->findDim(oss.str());
+    for (point_count_t i = 0; i < count; ++i)
+        view->setField(d, i, buf[i]);
 }
 
 } // namespace pdal

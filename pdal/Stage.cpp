@@ -448,6 +448,7 @@ void Stage::l_initialize(PointTableRef table)
 }
 
 
+// This function allows m_spatialReference to remain private.
 void Stage::addSpatialReferenceArg(ProgramArgs& args)
 {
     args.add("spatialreference", "Spatial reference to apply to data",

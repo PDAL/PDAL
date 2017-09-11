@@ -36,11 +36,10 @@ import sbt.Keys._
 
 object Commands {
   def processJavastyleCommand(commandProcess: String) = {
-    Command.command(s"${commandProcess}-javastyle")((state: State) => {
+    Command.command(s"${commandProcess}Javastyle")((state: State) => {
       val extracted = Project extract state
       import extracted._
-      val publishState = Command.process(commandProcess, append(Seq(crossPaths := false), state))
-      append(Seq(crossPaths := true), publishState)
+      commandProcess :: append(Seq(crossPaths := false), state)
     })
   }
 }

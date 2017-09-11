@@ -76,6 +76,8 @@ void MatlabFilter::ready(PointTableRef table)
 {
     if (m_script.m_source.empty())
         m_script.m_source = FileUtils::readFileIntoString(m_script.m_scriptFilename);
+
+    m_tableMetadata = table.metadata();
 }
 
 
@@ -93,7 +95,7 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
 
     Dimension::IdList dims;
 
-    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, log());
+    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, m_tableMetadata, log());
     if (engPutVariable(engine, m_structName.c_str(), matlabData))
     {
         std::ostringstream oss;
@@ -152,9 +154,6 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
 
 void MatlabFilter::done(PointTableRef table)
 {
-//     static_cast<plang::Environment*>(plang::Environment::get())->reset_stdout();
-//     delete m_pythonMethod;
-//     delete m_script;
 }
 
 } // namespace pdal

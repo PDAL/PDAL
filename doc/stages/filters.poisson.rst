@@ -25,6 +25,8 @@ This integration of the algorithm with PDAL only supports a limited set of
 the options available to the implementation.  If you need support for further
 options, please let us know.
 
+.. embed::
+
 Example
 -------------------------------------------------------------------------------
 
@@ -42,6 +44,19 @@ Example
         }
       ]
     }
+
+
+.. note::
+    The algorithm is slow.  On a reasonable desktop machine, the surface
+    reconstruction shown below took about 15 minutes.
+
+.. figure:: ../images/poisson_points.png
+
+  Point cloud (800,000 points)
+
+.. figure:: ../images/poisson_edges.png
+
+  Reconstruction (1.8 million vertices, 3.7 million faces)
 
 
 Options

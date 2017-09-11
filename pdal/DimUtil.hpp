@@ -104,7 +104,7 @@ inline BaseType base(Type t)
 }
 
 static const int COUNT = std::numeric_limits<uint16_t>::max();
-static const int PROPRIETARY = 0xFF00;
+static const int PROPRIETARY = 0xF000;
 
 /// Get a string reresentation of a datatype.
 /// \param[in] dimtype  Dimension type.
@@ -170,7 +170,6 @@ inline Type type(std::string s)
     return Type::None;
 }
 
-
 /// Extract a dimension name of a string.  Dimension names start with an alpha
 /// and continue with numbers or underscores.
 /// \param s  String from which to extract dimension name.
@@ -187,6 +186,24 @@ inline std::size_t extractName(const std::string& s, std::string::size_type p)
     return Utils::extract(s, p, isvalid) + 1;
 }
 
+inline std::istream& operator>>(std::istream& in, Dimension::Type& type)
+{
+    std::string sval;
+
+    in >> sval;
+    type = Dimension::type(sval);
+    if (type == Dimension::Type::None)
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const Dimension::Type& type)
+{
+    out << Dimension::interpretationName(type);
+    return out;
+}
+
 } // namespace Dimension
+
 } // namespace pdal
 

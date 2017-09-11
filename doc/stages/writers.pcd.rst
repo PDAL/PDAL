@@ -10,9 +10,12 @@ By default, compression is not enabled, and the PCD writer will output ASCII
 formatted data. When compression is enabled, the output is PCD's
 binary-compressed format.
 
+.. plugin::
+
 .. note::
 
     The `PCD Writer` requires linkage of the `PCL`_ library.
+
 
 Example
 -------

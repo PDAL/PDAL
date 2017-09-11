@@ -34,11 +34,11 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <functional>
 #include <map>
-#include <mutex>
 
 #include <ogr_spatialref.h>
 
@@ -53,6 +53,32 @@ namespace gdal
 
 namespace
 {
+
+/**
+  Convert a GDAL type string to a PDAL dimension type.
+
+  \param gdalType  String representing the GDAL type.
+  \return  PDAL type associated with \gdalType.
+*/
+Dimension::Type toPdalType(const std::string& gdalType)
+{
+    if (gdalType == "Byte")
+        return Dimension::Type::Unsigned8;
+    else if (gdalType == "UInt16")
+        return Dimension::Type::Unsigned16;
+    else if (gdalType == "Int16")
+        return Dimension::Type::Signed16;
+    else if (gdalType == "UInt32")
+        return Dimension::Type::Unsigned32;
+    else if (gdalType == "Int32")
+        return Dimension::Type::Signed32;
+    else if (gdalType == "Float32")
+        return Dimension::Type::Float;
+    else if (gdalType == "Float64")
+        return Dimension::Type::Double;
+    return Dimension::Type::None;
+}
+
 
 Dimension::Type toPdalType(GDALDataType t)
 {
@@ -258,12 +284,14 @@ void ErrorHandler::set(LogPtr log, bool debug)
 
 void ErrorHandler::setLog(LogPtr log)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_log = log;
 }
 
 
 void ErrorHandler::setDebug(bool debug)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_debug = debug;
 
     if (debug)
@@ -272,15 +300,15 @@ void ErrorHandler::setDebug(bool debug)
         CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
 }
 
-
 int ErrorHandler::errorNum()
 {
-    int errorNum = m_errorNum;
-    return errorNum;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_errorNum;
 }
 
 void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     std::ostringstream oss;
 
     m_errorNum = num;
@@ -298,218 +326,6 @@ void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
     }
 }
 
-
-struct InvalidBand {};
-struct CantReadBlock {};
-struct CantWriteBlock {};
-
-/*
-  Slight abstraction of a GDAL raster band.
-*/
-class Band
-{
-public:
-    /**
-      Create an object for reading a band of a GDAL dataset.
-
-      \param ds  GDAL dataset handle.
-      \param bandNum  Band number (1-indexed).
-    */
-    Band(GDALDataset *ds, int bandNum, const std::string& name = "");
-
-    /**
-      Create an object for writing a band of data to a GDAL dataset.
-
-      \param ds  GDAL dataset handle.
-      \param width  Raster band width.
-      \param height  Raster band height.
-      \param bandNum  Band number in raster (1-indexed).
-      \param name  Band name
-    */
-    /**
-    Band(GDALDataset *ds, int width, int height, int bandNum,
-        const std::string& name = "");
-**/
-
-    /*
-      Read the band into the vector.  Reads a block at a time.  Each
-      block is either fully populated with data or a partial block.
-      Partial blocks appear at the X and Y margins when the total size in
-      the doesn't divide evenly by the block size for both the X and Y
-      dimensions.
-
-      \param  Data Vector into which the data should be read.  The vector is
-        resized as necessary.
-    */
-    void read(std::vector<uint8_t>& ptData);
-
-    /*
-      Write linearized data pointed to by \c data into the band.
-
-      \param data  Pointer to beginning of band
-    */
-    void write(const uint8_t *data);
-private:
-    GDALDataset *m_ds;  /// Dataset handle
-    int m_bandNum;  /// Band number.  Band numbers start at 1.
-    GDALRasterBand *m_band;  /// Band handle
-    int m_xTotalSize, m_yTotalSize;  /// Total size (x and y) of the raster
-    int m_xBlockSize, m_yBlockSize;  /// Size (x and y) of blocks
-    int m_xBlockCnt, m_yBlockCnt;    /// Number of blocks in each direction
-    size_t m_eltSize;                /// Size in bytes of each band element.
-    std::vector<uint8_t> m_buf;      /// Block read buffer.
-    std::string m_name;              /// Band name.
-
-    /*
-      Read a block's worth of data.
-
-      \param x  X coordinate of block to read.
-      \param y  Y coordinate of block to read.
-      \param data  Pointer to vector in which to store data.  Vector must
-        be sufficiently sized to hold all data.
-    */
-    void readBlock(int x, int y, uint8_t *data);
-
-    /**
-      Write a block of a band to a raster.
-
-      \param x  X coordinate of block.
-      \param y  Y coordinate of block.
-      \param data  Pointer to beginning of raster data (not block data).
-    */
-    void writeBlock(int x, int y, const uint8_t *data);
-};
-
-
-Band::Band(GDALDataset *ds, int bandNum, const std::string& name) : m_ds(ds),
-    m_bandNum(bandNum), m_xBlockSize(0), m_yBlockSize(0)
-{
-    m_band = m_ds->GetRasterBand(m_bandNum);
-    if (!m_band)
-        throw InvalidBand();
-
-    if (name.size())
-    {
-        m_band->SetDescription(name.data());
-        // We don't care about offset, but this sets the flag to indicate
-        // that the metadata has changed.
-        m_band->SetOffset(m_band->GetOffset(NULL) + .00001);
-        m_band->SetOffset(m_band->GetOffset(NULL) - .00001);
-    }
-
-    m_xTotalSize = m_band->GetXSize();
-    m_yTotalSize = m_band->GetYSize();
-
-    m_band->GetBlockSize(&m_xBlockSize, &m_yBlockSize);
-    GDALDataType t = m_band->GetRasterDataType();
-    m_eltSize = GDALGetDataTypeSize(t) / CHAR_BIT;
-    m_buf.resize(m_xBlockSize * m_yBlockSize * m_eltSize);
-
-    m_xBlockCnt = ((m_xTotalSize - 1) / m_xBlockSize) + 1;
-    m_yBlockCnt = ((m_yTotalSize - 1) / m_yBlockSize) + 1;
-}
-
-
-void Band::read(std::vector<uint8_t>& ptData)
-{
-    ptData.resize(m_xTotalSize * m_yTotalSize * m_eltSize);
-
-    uint8_t *data = ptData.data();
-    for (int y = 0; y < m_yBlockCnt; ++y)
-        for (int x = 0; x < m_xBlockCnt; ++x)
-            readBlock(x, y, data);
-}
-
-
-/*
-  Read a block's worth of data.
-
-  Read data into a block-sized buffer.  Then copy data from the block buffer
-  into the destination array at the proper location to build a complete
-  raster.
-
-  \param x  X coordinate of the block to read.
-  \param y  Y coordinate of the block to read.
-  \param data  Pointer to the data vector that contains the raster information.
-*/
-void Band::readBlock(int x, int y, uint8_t *data)
-{
-    if (m_band->ReadBlock(x, y, m_buf.data()) != CPLE_None)
-        throw CantReadBlock();
-
-    int xWidth = 0;
-    if (x == m_xBlockCnt - 1)
-        xWidth = m_xTotalSize % m_xBlockSize;
-    if (xWidth == 0)
-        xWidth = m_xBlockSize;
-
-    int yHeight = 0;
-    if (y == m_yBlockCnt - 1)
-        yHeight = m_yTotalSize % m_yBlockSize;
-    if (yHeight == 0)
-        yHeight = m_yBlockSize;
-
-    uint8_t *bp = m_buf.data();
-    // Go through rows copying data.  Increment the buffer pointer by the
-    // width of the row.
-    for (int row = 0; row < yHeight; ++row)
-    {
-        int wholeRows = m_xTotalSize * ((y * m_yBlockSize) + row);
-        int partialRows = m_xBlockSize * x;
-        uint8_t *dp = data + ((wholeRows + partialRows) * m_eltSize);
-        std::copy(bp, bp + (xWidth * m_eltSize), dp);
-
-        // Blocks are always full-sized, even if only some of the data is valid,
-        // so we use m_xBlockSize instead of xWidth.
-        bp += (m_xBlockSize * m_eltSize);
-    }
-}
-
-
-void Band::write(const uint8_t *data)
-{
-    for (int y = 0; y < m_yBlockCnt; ++y)
-        for (int x = 0; x < m_xBlockCnt; ++x)
-            writeBlock(x, y, data);
-}
-
-
-void Band::writeBlock(int x, int y, const uint8_t *data)
-{
-    int xWidth = 0;
-    if (x == m_xBlockCnt - 1)
-        xWidth = m_xTotalSize % m_xBlockSize;
-    if (xWidth == 0)
-        xWidth = m_xBlockSize;
-
-    int yHeight = 0;
-    if (y == m_yBlockCnt - 1)
-        yHeight = m_yTotalSize % m_yBlockSize;
-    if (yHeight == 0)
-        yHeight = m_yBlockSize;
-
-    // Go through rows copying data.
-    uint8_t *dstStart = m_buf.data();
-    // Go through rows copying data.  Increment the buffer pointer by the
-    // width of the row.
-    for (int row = 0; row < yHeight; ++row)
-    {
-        // Find the offset location in the source container.
-        int wholeRowElts = m_xTotalSize * ((y * m_yBlockSize) + row);
-        int partialRowElts = m_xBlockSize * x;
-
-        const uint8_t *srcStart = data +
-            ((wholeRowElts + partialRowElts) * m_eltSize);
-        const uint8_t *srcEnd = srcStart + (m_xBlockSize * m_eltSize);
-        std::copy(srcStart, srcEnd, dstStart);
-
-        // Blocks are always full-sized, even if only some of the data is valid,
-        // so we use m_xBlockSize instead of xWidth.
-        dstStart += (m_xBlockSize * m_eltSize);
-    }
-    if (m_band->WriteBlock(x, y, m_buf.data()) != CPLE_None)
-        throw CantWriteBlock();
-}
 
 Raster::Raster(const std::string& filename, const std::string& drivername)
     : m_filename(filename)
@@ -550,6 +366,8 @@ GDALError Raster::open(int width, int height, int numBands,
     m_width = width;
     m_height = height;
     m_numBands = numBands;
+    m_bandType = type;
+    m_dstNoData = noData;
 
     if (!GDALInvGeoTransform(m_forwardTransform.data(),
         m_inverseTransform.data()))
@@ -578,8 +396,11 @@ GDALError Raster::open(int width, int height, int numBands,
         return GDALError::InvalidDriver;
     }
 
-    std::vector<const char *> opts;
+    GDALError error = validateType(type, driver);
+    if (error != GDALError::None)
+        return error;
 
+    std::vector<const char *> opts;
     for (size_t i = 0; i < options.size(); ++i)
     {
         if (options[i].find("INTERLEAVE") == 0)
@@ -604,10 +425,31 @@ GDALError Raster::open(int width, int height, int numBands,
         m_ds->SetProjection(m_srs.getWKT().data());
 
     m_ds->SetGeoTransform(m_forwardTransform.data());
+    // If the nodata value is NaN, set a default based on type.
+    if (std::isnan(m_dstNoData))
+    {
+        switch (type)
+        {
+        case Dimension::Type::Unsigned8:
+            m_dstNoData = 255;
+            break;
+        case Dimension::Type::Signed8:
+            m_dstNoData = -127;
+            break;
+        case Dimension::Type::Unsigned16:
+        case Dimension::Type::Unsigned32:
+            m_dstNoData = 9999;
+            break;
+        default:
+            m_dstNoData = -9999;
+            break;
+        }
+    }
+
     for (int i = 0; i < m_numBands; ++i)
     {
         GDALRasterBand *band = m_ds->GetRasterBand(i + 1);
-        band->SetNoDataValue(noData);
+        band->SetNoDataValue(m_dstNoData);
     }
 
     return GDALError::None;
@@ -666,44 +508,43 @@ GDALError Raster::open()
 }
 
 
-GDALError Raster::readBand(std::vector<uint8_t>& points, int nBand)
+/**
+  \param type    Reqested type of the raster.
+  \param driver  Pointer to the GDAL driver being used to write the raster.
+  \return  Requested type, or if not supported, the preferred type to use
+      for the raster.
+*/
+GDALError Raster::validateType(Dimension::Type& type,
+    GDALDriver *driver)
 {
-    try
+    // Convert the string of supported GDAL types to a vector of PDAL types,
+    // ignoring types that aren't supported by PDAL (mostly complex values).
+    std::vector<Dimension::Type> types;
+    const char *itemp = driver->GetMetadataItem(GDAL_DMD_CREATIONDATATYPES);
+    if (itemp)
     {
-        Band(m_ds, nBand).read(points);
+        StringList items = Utils::split2(std::string(itemp), ' ');
+        for (auto& i : items)
+        {
+            Dimension::Type t = toPdalType(i);
+            if (t != Dimension::Type::None)
+                types.push_back(t);
+        }
     }
-    catch (InvalidBand)
-    {
-        std::stringstream oss;
-        oss << "Unable to get band " << nBand << " from raster '" <<
-            m_filename << "'.";
-        m_errorMsg = oss.str();
-        return GDALError::InvalidBand;
-    }
-    catch (CantReadBlock)
-    {
-        std::ostringstream oss;
-        oss << "Unable to read block for for raster '" << m_filename << "'.";
-        m_errorMsg = oss.str();
-        return GDALError::CantReadBlock;
-    }
-    return GDALError::None;
-}
 
-
-GDALError Raster::writeBand(const uint8_t *data, int nBand,
-    const std::string& name)
-{
-    try
+    // If requested type is not supported, return an error.
+    if (type != Dimension::Type::None && !Utils::contains(types, type))
     {
-        Band(m_ds, nBand, name).write(data);
+        m_errorMsg = "Requested type '" + Dimension::interpretationName(type) +
+            "' not supported by GDAL driver '" + m_drivername + "'.";
+        return GDALError::InvalidType;
     }
-    catch (CantWriteBlock)
+
+    // If no type is requested, take the "largest" one.
+    if (type == Dimension::Type::None)
     {
-        std::ostringstream oss;
-        oss << "Unable to write block for for raster '" << m_filename << "'.";
-        m_errorMsg = oss.str();
-        return GDALError::CantWriteBlock;
+        std::sort(types.begin(), types.end());
+        type = types.back();
     }
     return GDALError::None;
 }

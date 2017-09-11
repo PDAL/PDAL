@@ -3,10 +3,15 @@
 filters.icp
 ==============
 
-The ICP filter uses the `PCL's Iterative Closest Point (ICP)`_ algorithm to calculate a rigid (rotation and translation) transformation that best aligns two datasets.
-The first input to the ICP filter is considered the "fixed" points, and all subsequent points are "moving" points.
-The output from the change filter are the "moving" points after the calculated transformation has been applied, one point view per input.
-The transformation matrix is inserted into the stage's metadata.
+The ICP filter uses the `PCL's Iterative Closest Point (ICP)`_ algorithm to
+calculate a rigid (rotation and translation) transformation that best aligns
+two datasets.  The first input to the ICP filter is considered the "fixed"
+points, and all subsequent points are "moving" points.  The output from the
+change filter are the "moving" points after the calculated transformation has
+been applied, one point view per input.  The transformation matrix is inserted
+into the stage's metadata.
+
+.. plugin::
 
 Examples
 --------

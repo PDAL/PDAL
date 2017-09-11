@@ -6,6 +6,8 @@ readers.greyhound
 The **Greyhound Reader** allows you to query point data from a `Greyhound`_
 server.
 
+.. plugin::
+
 Example
 -------
 
@@ -92,3 +94,5 @@ _`threads`
 .. _comparison: https://docs.mongodb.com/manual/reference/operator/query-comparison/
 .. _logical: https://docs.mongodb.com/manual/reference/operator/query-logical/
 
+_`count`
+    Maximum number of points to read [Optional]

@@ -69,6 +69,7 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
+    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
 }
 
 
@@ -107,17 +108,8 @@ QuickInfo LasReader::inspect()
 }
 
 
-void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
+void LasReader::handleCompressionOption()
 {
-    try
-    {
-        m_extraDims = LasUtils::parse(m_extraDimSpec);
-    }
-    catch (const LasUtils::error& err)
-    {
-        throwError(err.what());
-    }
-
     std::string compression = Utils::toupper(m_compression);
 #if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
     if (compression == "EITHER")
@@ -150,6 +142,29 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     // Set case-corrected value.
     m_compression = compression;
+}
+
+
+void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
+{
+    try
+    {
+        m_extraDims = LasUtils::parse(m_extraDimSpec);
+    }
+    catch (const LasUtils::error& err)
+    {
+        throwError(err.what());
+    }
+
+    try
+    {
+        m_ignoreVLRs = LasUtils::parseIgnoreVLRs(m_ignoreVLROption);
+    }
+    catch (const LasUtils::error& err)
+    {
+        throwError(err.what());
+    }
+
     m_error.setFilename(m_filename);
 
     m_error.setLog(log());
@@ -169,6 +184,16 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(e.what());
     }
 
+    for (auto i: m_ignoreVLRs)
+    {
+        if (i.m_recordId)
+            m_header.removeVLR(i.m_userId, i.m_recordId);
+        else
+            m_header.removeVLR(i.m_userId);
+    }
+
+    if (m_header.compressed())
+        handleCompressionOption();
     if (!m_header.pointFormatSupported())
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)m_header.pointFormat()) + ".");
@@ -438,9 +463,11 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
 
         std::ostringstream name;
         name << "vlr_" << i++;
-        MetadataNode vlrNode = m.addEncoded(name.str(),
-            (const uint8_t *)vlr.data(), vlr.dataLen(), vlr.description());
+        MetadataNode vlrNode(name.str());
+        m.add(vlrNode);
 
+        vlrNode.addEncoded("data",
+            (const uint8_t *)vlr.data(), vlr.dataLen(), vlr.description());
         vlrNode.add("user_id", vlr.userId(),
             "User ID of the record or pre-defined value from the "
             "specification.");

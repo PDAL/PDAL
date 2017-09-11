@@ -12,6 +12,9 @@ is included with the PDAL source, so there are no external dependencies.
 
     The ply reader can read ASCII and binary ply files.
 
+.. embed::
+
+.. streamable::
 
 Example
 -------
@@ -38,7 +41,8 @@ Options
 filename
   ply file to read [Required]
 
-
+count 
+  Maximum number of points to read [Optional]
 
 .. _polygon file format: http://paulbourke.net/dataformats/ply/
 .. _rply library: http://w3.impa.br/~diego/software/rply/

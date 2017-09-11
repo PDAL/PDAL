@@ -60,7 +60,7 @@ std::string::size_type DimRange::subParse(const std::string& r)
     count = Utils::extract(r, pos, (int(*)(int))std::isspace);
     pos += count;
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
+    count = Dimension::extractName(r, pos);
     if (count == 0)
         throw error("No dimension name.");
     name = r.substr(pos, count);

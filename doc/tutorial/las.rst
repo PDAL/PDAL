@@ -91,7 +91,7 @@ The PDAL :ref:`writers.las` allows you to override or assign the coordinate
 system to an explicit value if you need. Often the coordinate system defined by
 a file might be incorrect or non-existent, and you can set this with PDAL.
 
-The following example sets the ``out_srs`` option of the :ref:`writers.las` to
+The following example sets the ``a_srs`` option of the :ref:`writers.las` to
 ``EPSG:4326``.
 
 
@@ -107,7 +107,7 @@ The following example sets the ``out_srs`` option of the :ref:`writers.las` to
             },
             {
                 "type" : "writers.las",
-                "out_srs": "EPSG:4326",
+                "a_srs": "EPSG:4326",
                 "filename" : "output.las"
             }
         ]
@@ -188,7 +188,7 @@ coordinate system for a file to `UTM Zone 15N NAD83`_ for horizontal and
             },
             {
                 "type" : "writers.las",
-                "out_srs": "EPSG:26915+5703",
+                "a_srs": "EPSG:26915+5703",
                 "filename" : "output.las"
             }
         ]

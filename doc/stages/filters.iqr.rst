@@ -12,11 +12,13 @@ are determined by adding 1.5 times the IQR to the third quartile or subtracting
 1.5, can be adjusted by the user.
 
 .. note::
-  
+
   This method can remove real data, especially ridges and valleys in rugged
   terrain, or tall features such as towers and rooftops in flat terrain. While
   the number of deviations can be adjusted to account for such content-specific
   considerations, it must be used with care.
+
+.. embed::
 
 Example
 -------
@@ -46,6 +48,6 @@ Options
 
 k
   The IQR multiplier used to determine upper/lower bounds. [Default: **1.5**]
-  
+
 dimension
   The name of the dimension to filter.

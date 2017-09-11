@@ -20,6 +20,9 @@ if you want to preserve the old coordinates for future processing, use a
     coordinate values will change, which may change the optimal scale and offset
     for storing the data.
 
+.. embed::
+
+.. streamable::
 
 Example 1
 --------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ fetching the data from a specific reader. In the :ref:`writing` example,
 it is used to take a simple listing of points and turn them into an
 LAS file.
 
+.. embed::
 
 Example
 -------

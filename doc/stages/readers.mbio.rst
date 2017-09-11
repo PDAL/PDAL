@@ -14,6 +14,10 @@ longitude and latitude for units and the Z values are in meters (negative,
 being below the surface).  Units for 'Amplitude' is not specified and may
 vary.
 
+.. plugin::
+
+.. streamable::
+
 
 Example
 -------
@@ -51,3 +55,6 @@ format
 .. _MB-System: http://www.ldeo.columbia.edu/res/pi/MB-System/
 
 .. _all formats: https://www.ldeo.columbia.edu/res/pi/MB-System/html/mbio.html#lbAI
+
+count
+  Maximum number of points to read [Optional]

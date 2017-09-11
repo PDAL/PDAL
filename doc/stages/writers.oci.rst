@@ -5,6 +5,7 @@ writers.oci
 
 The OCI writer is used to write data to `Oracle point cloud`_ databases.
 
+.. plugin::
 
 Example
 -------

@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-namespace cropfilter
+namespace filter
 {
 
 class PDAL_DLL Point : public Geometry
@@ -58,5 +58,7 @@ public:
     double y;
     double z;
 };
-} // namespace cropfilter
+
+} // namespace filter
+
 } // namespace pdal

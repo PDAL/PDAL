@@ -195,8 +195,10 @@ INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
                         testing::Values(
                             "pipeline/bpf2nitf.json",
                             "pipeline/las2nitf.json",
-                            "pipeline/las2nitf-2.json",
                             "pipeline/las2nitf-crop-with-options.json",
+#if defined PDAL_HAVE_LASZIP || defined PDAL_HAVE_LAZPERF
+                            "pipeline/las2nitf-2.json"
+#endif
                             "pipeline/nitf2las.json"
                         ));
 

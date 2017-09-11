@@ -7,6 +7,10 @@ BPF is an NGA specification for point cloud data. The specification can be
 found at https://nsgreg.nga.mil/doc/view?i=4202 The PDAL **BPF Writer**
 only supports writing of version 3 BPF format files.
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

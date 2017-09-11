@@ -11,6 +11,7 @@ The **RXP reader** read from files in the RXP format, the in-house streaming for
    RIEGL is not responsible for damages or other issues that arise from use of this driver.
    This driver has been tested against RiVLib version 1.39 on a Ubuntu 14.04 using gcc43.
 
+.. plugin::
 
 Installation
 ------------

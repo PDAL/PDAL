@@ -55,11 +55,12 @@ public:
     static int getMatlabDataType(Dimension::Type t);
     static Dimension::Type getPDALDataType(mxClassID t);
 
-    static mxArray* setMatlabStruct(PointViewPtr view, const Dimension::IdList& dims, LogPtr log);
+    static mxArray* setMatlabStruct(PointViewPtr view, const Dimension::IdList& dims, MetadataNode node, LogPtr log);
 
     static void getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& dims, LogPtr log);
     static PointLayoutPtr getStructLayout(mxArray* array, LogPtr log);
     static std::string getLogicalMask(mxArray* array, LogPtr log);
+    static std::string getSRSWKT(mxArray* array, LogPtr log);
 
     std::string m_source;
     std::string m_scriptFilename;

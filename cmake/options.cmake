@@ -47,6 +47,11 @@ option(BUILD_PLUGIN_NITF
 add_feature_info("NITF plugin" BUILD_PLUGIN_NITF
     "read/write LAS data wrapped in NITF")
 
+option(BUILD_PLUGIN_OPENSCENEGRAPH
+    "Choose if OpenSceneGraph support should be built" FALSE)
+add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
+    "read/write OpenSceneGraph objects")
+
 if(DEFINED ENV{ORACLE_HOME})
     set(DEFINED_ORACLE_HOME TRUE)
 else(DEFINED ENV{ORACLE_HOME})
