@@ -38,6 +38,7 @@
 #include <pdal/pdal_config.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include "LasSummaryData.hpp"
 
@@ -223,6 +224,31 @@ void LasHeader::setSrs()
     {
         m_log->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
     }
+}
+
+
+void LasHeader::removeVLR(const std::string& userId, uint16_t recordId)
+{
+    auto matches = [&userId, recordId](const LasVLR& vlr)
+    {
+        return vlr.matches(userId, recordId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
+}
+
+
+void LasHeader::removeVLR(const std::string& userId)
+{
+
+    auto matches = [&userId ](const LasVLR& vlr)
+    {
+        return vlr.matches(userId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
 }
 
 

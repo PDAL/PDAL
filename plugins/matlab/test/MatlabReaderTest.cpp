@@ -54,6 +54,9 @@ TEST(MatlabReaderTest, t1)
     PointViewSet ts = t.execute(tt);
     EXPECT_EQ(ts.size(), 1U);
     PointViewPtr tv = *ts.begin();
-    EXPECT_EQ(tv->size(), 1065U);
+    EXPECT_EQ(tv->size(), 106U);
+
+    SpatialReference ref = tv->spatialReference();
+    ASSERT_FALSE(ref.empty());
 }
 

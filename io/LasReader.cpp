@@ -69,6 +69,7 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
+    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
 }
 
 
@@ -151,6 +152,15 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(err.what());
     }
 
+    try
+    {
+        m_ignoreVLRs = LasUtils::parseIgnoreVLRs(m_ignoreVLROption);
+    }
+    catch (const LasUtils::error& err)
+    {
+        throwError(err.what());
+    }
+
     m_error.setFilename(m_filename);
 
     m_error.setLog(log());
@@ -168,6 +178,14 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     catch (const LasHeader::error& e)
     {
         throwError(e.what());
+    }
+
+    for (auto i: m_ignoreVLRs)
+    {
+        if (i.m_recordId)
+            m_header.removeVLR(i.m_userId, i.m_recordId);
+        else
+            m_header.removeVLR(i.m_userId);
     }
 
     if (m_header.compressed())

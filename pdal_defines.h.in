@@ -35,6 +35,11 @@
 #cmakedefine PDAL_ARBITER_ENABLED
 
 /*
+ * availability of execinfo.h
+ */
+#cmakedefine PDAL_HAVE_EXECINFO_H
+
+/*
  * Debug or Release build?
  */
 #define PDAL_BUILD_TYPE "@PDAL_BUILD_TYPE@"
