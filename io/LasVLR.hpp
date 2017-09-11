@@ -51,11 +51,14 @@ static const uint16_t GEOTIFF_DOUBLES_RECORD_ID = 34736;
 static const uint16_t GEOTIFF_ASCII_RECORD_ID = 34737;
 static const uint16_t LASZIP_RECORD_ID = 22204;
 static const uint16_t EXTRA_BYTES_RECORD_ID = 4;
+static const uint16_t PDAL_METADATA_RECORD_ID = 12;
+static const uint16_t PDAL_PIPELINE_RECORD_ID = 13;
 
 static const char TRANSFORM_USER_ID[] = "LASF_Projection";
 static const char SPEC_USER_ID[] = "LASF_Spec";
 static const char LIBLAS_USER_ID[] = "liblas";
 static const char LASZIP_USER_ID[] = "laszip encoded";
+static const char PDAL_USER_ID[] = "PDAL";
 
 class LasVLR;
 typedef std::vector<LasVLR> VlrList;
@@ -79,7 +82,7 @@ public:
         { return m_recordId; }
     std::string description() const
         { return m_description; }
-    
+
     bool matches(const std::string& userId) const
         { return userId == m_userId; }
     bool matches(const std::string& userId, uint16_t recordId) const

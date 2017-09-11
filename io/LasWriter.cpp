@@ -108,8 +108,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         decltype(m_creationDoy)(doy));
     args.add("creation_year", "Creation year", m_creationYear,
         decltype(m_creationYear)(year));
-    args.add("pdal_metadata", "Write PDAL metadata as VLR?", m_writePDALMetadata,
-        decltype(m_writePDALMetadata)(false));
+    args.add("pdal_metadata", "Write PDAL metadata as VLR?",
+        m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
     args.add("scale_x", "X scale factor", m_scaleX, decltype(m_scaleX)(".01"));
     args.add("scale_y", "Y scale factor", m_scaleY, decltype(m_scaleY)(".01"));
     args.add("scale_z", "Z scale factor", m_scaleZ, decltype(m_scaleZ)(".01"));
@@ -387,40 +387,30 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
 
 void LasWriter::setPDALVLRs(MetadataNode& forward)
 {
-    auto store = [this](std::string json, int recordId, std::string description)
-    {
-        std::vector<uint8_t> data;
-        data.resize(json.size());
-        std::copy(json.begin(), json.end(), data.begin());
-        addVlr("PDAL", recordId, description, data);
-    };
-
-    std::ostringstream ostr;
-    Utils::toJSON(forward, ostr);
-    std::string json = ostr.str();
-
-    if (json.size() > USHRT_MAX &&
-        m_minorVersion.val() < 4)
+    std::string json = Utils::toJSON(forward);
+    if ((json.size() > LasVLR::MAX_DATA_SIZE) &&
+        !m_lasHeader.versionAtLeast(1, 4))
     {
         log()->get(LogLevel::Debug) << "pdal metadata VLR too large "
             "to write in VLR for files < LAS 1.4";
     } else
     {
-        store(json, 12, "PDAL metadata");
+        std::vector<uint8_t> data(json.begin(), json.end());
+        addVlr(PDAL_USER_ID, PDAL_METADATA_RECORD_ID, "PDAL metadata", data);
     }
 
-
-    ostr.str("");
+    std::ostringstream ostr;
     PipelineWriter::writePipeline(this, ostr);
     json = ostr.str();
-    if (json.size() > USHRT_MAX &&
-        m_minorVersion.val() < 4)
+    if (json.size() > LasVLR::MAX_DATA_SIZE &&
+        !m_lasHeader.versionAtLeast(1, 4))
     {
         log()->get(LogLevel::Debug) << "pdal pipeline VLR too large "
             "to write in VLR for files < LAS 1.4";
     } else
     {
-        store(ostr.str(), 13, "PDAL pipeline");
+        std::vector<uint8_t> data(json.begin(), json.end());
+        addVlr(PDAL_USER_ID, PDAL_PIPELINE_RECORD_ID, "PDAL pipeline", data);
     }
 }
 
