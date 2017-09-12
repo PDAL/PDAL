@@ -674,7 +674,6 @@ void LasWriter::readyLasZipCompression()
 
     laszip_U8* data;
     size_t size;
-//    std::vector<laszip_U8> vlr;
     handleLaszip(laszip_create_laszip_vlr(m_laszip, data, size));
 
     // A VLR has 54 header bytes that we skip in order to get to the payload.
