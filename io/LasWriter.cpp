@@ -34,9 +34,9 @@
 
 #include "LasWriter.hpp"
 
+#include <climits>
 #include <iostream>
 #include <vector>
-#include <climits>
 
 #include <pdal/Compression.hpp>
 #include <pdal/DimUtil.hpp>
@@ -672,11 +672,13 @@ void LasWriter::readyLasZipCompression()
     handleLaszip(laszip_set_point_type_and_size(m_laszip,
         m_lasHeader.pointFormat(), m_lasHeader.pointLen()));
 
-    std::vector<laszip_U8> vlr;
-    handleLaszip(laszip_create_laszip_vlr(m_laszip, vlr));
+    laszip_U8* data;
+    size_t size;
+//    std::vector<laszip_U8> vlr;
+    handleLaszip(laszip_create_laszip_vlr(m_laszip, data, size));
 
     // A VLR has 54 header bytes that we skip in order to get to the payload.
-    std::vector<laszip_U8> vlrData(vlr.begin() + 54, vlr.end());
+    std::vector<laszip_U8> vlrData(data + 54, data + size);
 
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrData);
 #endif
