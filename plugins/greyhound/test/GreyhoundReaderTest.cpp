@@ -51,45 +51,36 @@ using namespace pdal;
 namespace
 {
 
-const bool fullTest(false);
-
-const greyhound::Bounds fullBounds(634950,848860,-1830,639650,853560,2870);
-const greyhound::Bounds stadiumBounds(637000,851550,-1830,637800,852300,2870);
-const greyhound::Bounds patchBounds(637000,851550,-1830,637100,851650,2870);
-const greyhound::Bounds originBounds(
-        greyhound::Bounds(-92369, 123812, -11170, -22218, 230745, 2226)
-        .unscale(.01, greyhound::Point(637300, 851210, 520)));
-
-std::string toString(const greyhound::Bounds& b)
-{
-    std::ostringstream ss;
-    ss << "([" <<
-        b.min().x << "," << b.max().x << "],[" <<
-        b.min().y << "," << b.max().y << "],[" <<
-        b.min().z << "," << b.max().z << "])";
-    return ss.str();
-}
-
 const std::string server("http://data.greyhound.io");
-const std::string resource("dev/autzen-chipped");
+const std::string resource("dev/ellipsoid-multi-nyc");
+const greyhound::Point center(-8242596.04, 4966606.26);
+const greyhound::Point radius(151, 101, 51);
+const greyhound::Bounds full(center - radius, center + radius);
 
-Options greyhoundOptions(
-        const greyhound::Bounds* b = nullptr,
-        const std::size_t depthBegin = 0,
-        const std::size_t depthEnd = 0)
+Options toOptions(const Json::Value& json)
 {
     Options options;
     options.add("url", server);
     options.add("resource", resource);
-    if (b) options.add("bounds", toString(*b));
-    if (depthBegin) options.add("depth_begin", depthBegin);
-    if (depthEnd) options.add("depth_end", depthEnd);
+
+    for (const auto k : json.getMemberNames())
+    {
+        const auto& v(json[k]);
+        if (v.isBool()) options.add(k, v.asBool());
+        else if (v.isIntegral()) options.add(k, v.asInt());
+        else if (v.isDouble()) options.add(k, v.asDouble());
+        else if (v.isString()) options.add(k, v.asString());
+        else if (v.isObject() || v.isArray()) options.add(k, v);
+    }
+
     return options;
 }
 
-pdal::greyhound::Bounds toBounds(const BOX3D& b)
+std::string dense(const Json::Value& json)
 {
-    return greyhound::Bounds(b.minx, b.miny, b.minz, b.maxx, b.maxy, b.maxz);
+    Json::StreamWriterBuilder builder;
+    builder.settings_["indentation"] = "";
+    return Json::writeString(builder, json);
 }
 
 }
@@ -111,21 +102,20 @@ protected:
     bool m_doTests;
 };
 
-TEST_F(GreyhoundReaderTest, tilePath)
+TEST_F(GreyhoundReaderTest, tileQuery)
 {
     if (!doTests()) return;
 
     pdal::GreyhoundReader reader;
-
-    auto options(greyhoundOptions(nullptr, 14, 15));
-    options.add("tile_path", "c-13.laz");
-    reader.setOptions(options);
+    Json::Value json;
+    json["tile_path"] = "neu.laz";
+    reader.setOptions(toOptions(json));
 
     pdal::PointTable table;
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
-    ASSERT_EQ(view->size(), 2676u);
+    ASSERT_EQ(view->size(), 12593u);
 
     greyhound::Point p;
     for (std::size_t i(0); i < view->size(); ++i)
@@ -134,22 +124,26 @@ TEST_F(GreyhoundReaderTest, tilePath)
         p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
         p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
 
-        ASSERT_TRUE(originBounds.contains(p));
+        ASSERT_TRUE(p >= center) << p;
     }
 }
 
-TEST_F(GreyhoundReaderTest, readPatch)
+TEST_F(GreyhoundReaderTest, boundsQuery)
 {
     if (!doTests()) return;
 
+    const greyhound::Bounds bounds(center - 100, center + 100);
+
     pdal::GreyhoundReader reader;
-    reader.setOptions(greyhoundOptions(&stadiumBounds, 14, 15));
+    Json::Value json;
+    json["bounds"] = bounds.toJson();
+    reader.setOptions(toOptions(json));
 
     pdal::PointTable table;
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
-    ASSERT_EQ(view->size(), 1880u);
+    ASSERT_EQ(view->size(), 66647u);
 
     greyhound::Point p;
     for (std::size_t i(0); i < view->size(); ++i)
@@ -158,7 +152,37 @@ TEST_F(GreyhoundReaderTest, readPatch)
         p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
         p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
 
-        ASSERT_TRUE(stadiumBounds.contains(p));
+        ASSERT_TRUE(bounds.contains(p));
+    }
+}
+
+TEST_F(GreyhoundReaderTest, boundsAndDepthQuery)
+{
+    if (!doTests()) return;
+
+    const greyhound::Bounds bounds(center - 100, center + 100);
+
+    pdal::GreyhoundReader reader;
+    Json::Value json;
+    json["bounds"] = bounds.toJson();
+    json["depth_begin"] = 7;
+    json["depth_end"] = 8;
+    reader.setOptions(toOptions(json));
+
+    pdal::PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+    ASSERT_EQ(view->size(), 13854u);
+
+    greyhound::Point p;
+    for (std::size_t i(0); i < view->size(); ++i)
+    {
+        p.x = view->getFieldAs<double>(Dimension::Id::X, i);
+        p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
+        p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
+
+        ASSERT_TRUE(bounds.contains(p));
     }
 }
 
@@ -166,18 +190,18 @@ TEST_F(GreyhoundReaderTest, filter)
 {
     if (!doTests()) return;
 
+    const greyhound::Bounds bounds(center - 100, center + 100);
+
+    auto run([&bounds](const Json::Value& json)
     {
         pdal::GreyhoundReader reader;
-        auto options(greyhoundOptions(&stadiumBounds, 0, 12));
-        options.add("filter", "{ \"Z\": { \"$gte\": 500 } }");
-
-        reader.setOptions(options);
+        reader.setOptions(toOptions(json));
 
         pdal::PointTable table;
         reader.prepare(table);
         PointViewSet viewSet = reader.execute(table);
         PointViewPtr view = *viewSet.begin();
-        ASSERT_LT(view->size(), 188260u);
+        ASSERT_EQ(view->size(), 33423u);
 
         greyhound::Point p;
         for (std::size_t i(0); i < view->size(); ++i)
@@ -186,78 +210,55 @@ TEST_F(GreyhoundReaderTest, filter)
             p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
             p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
 
-            ASSERT_TRUE(stadiumBounds.contains(p));
-            ASSERT_GE(p.z, 500);
+            ASSERT_TRUE(bounds.contains(p));
+            ASSERT_GE(p.x, center.x);
         }
-    }
+    });
 
-    {
-        pdal::GreyhoundReader reader;
-        auto options(greyhoundOptions(&stadiumBounds, 0, 12));
+    // Filter should work both as a JSON object and a stringified JSON object.
+    Json::Value json;
+    json["bounds"] = bounds.toJson();
+    json["filter"]["X"]["$gte"] = center.x;
+    run(json);
 
-        Json::Value filter;
-        filter["Z"]["$gte"] = 500;
-        options.add("filter", filter);
-
-        reader.setOptions(options);
-
-        pdal::PointTable table;
-        reader.prepare(table);
-        PointViewSet viewSet = reader.execute(table);
-        PointViewPtr view = *viewSet.begin();
-        ASSERT_LT(view->size(), 188260u);
-
-        greyhound::Point p;
-        for (std::size_t i(0); i < view->size(); ++i)
-        {
-            p.x = view->getFieldAs<double>(Dimension::Id::X, i);
-            p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
-            p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
-
-            ASSERT_TRUE(stadiumBounds.contains(p));
-            ASSERT_GE(p.z, 500);
-        }
-    }
+    json["filter"] = json["filter"].toStyledString();
+    run(json);
 }
 
-TEST_F(GreyhoundReaderTest, quickFull)
+TEST_F(GreyhoundReaderTest, singleOption)
 {
     if (!doTests()) return;
 
-    pdal::GreyhoundReader reader;
-    reader.setOptions(greyhoundOptions());
-
-    pdal::QuickInfo qi = reader.preview();
-    EXPECT_EQ(qi.m_pointCount, 10653336u);
-    EXPECT_EQ(toBounds(qi.m_bounds), fullBounds);
-}
-
-TEST_F(GreyhoundReaderTest, quickSplit)
-{
-    if (!doTests()) return;
+    const greyhound::Bounds bounds(center - 100, center + 100);
+    Json::Value filter;
+    filter["X"]["$gte"] = center.x;
 
     pdal::GreyhoundReader reader;
-    reader.setOptions(greyhoundOptions(&patchBounds));
 
-    // The quick-info point count is an upper bound, so it should be at no less
-    // than the actual query result.
-    pdal::QuickInfo qi = reader.preview();
-    EXPECT_GE(qi.m_pointCount, 5141u);
-}
-
-TEST_F(GreyhoundReaderTest, full)
-{
-    if (!doTests() || !fullTest) return;
-
-    pdal::GreyhoundReader reader;
-    auto options(greyhoundOptions());
-    options.add("threads", 10);
+    pdal::Options options;
+    options.add("url", server + "/resource/" + resource + "/read" +
+            "?bounds=" + dense(bounds.toJson()) +
+            "&filter=" + dense(filter) +
+            "&depth=7");
     reader.setOptions(options);
 
     pdal::PointTable table;
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
-    ASSERT_EQ(view->size(), 10653336u);
+    ASSERT_EQ(view->size(), 7008u);
+
+    greyhound::Point p;
+    for (std::size_t i(0); i < view->size(); ++i)
+    {
+        p.x = view->getFieldAs<double>(Dimension::Id::X, i);
+        p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
+        p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
+
+        ASSERT_TRUE(bounds.contains(p));
+        ASSERT_GE(p.x, center.x);
+    }
 }
+
+
 
