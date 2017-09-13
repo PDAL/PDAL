@@ -145,7 +145,7 @@ RUN git clone https://github.com/hobu/nitro \
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
     && cd laszip \
-    && git checkout e7065cbc5bdbbe0c6e50c9d93d1cd346e9be6778 \
+    && git checkout 3.1.0 \
     && mkdir build \
     && cd build \
     && cmake \
