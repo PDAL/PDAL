@@ -5,7 +5,7 @@ option(WITH_LASZIP "Choose if LASzip support should be built" TRUE)
 option(WITH_STATIC_LASZIP "Choose if LASzip should be statically linked" FALSE)
 mark_as_advanced(WITH_STATIC_LASZIP)
 if (WITH_LASZIP)
-    find_package(LASzip QUIET 1.1.0)
+    find_package(LASzip QUIET 3.1.0)
     set_package_properties(LASzip PROPERTIES TYPE RECOMMENDED
         PURPOSE "Provides LASzip compression")
     if(LASZIP_FOUND)
