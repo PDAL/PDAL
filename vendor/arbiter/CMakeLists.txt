@@ -7,6 +7,10 @@ if (NOT PDAL_ARBITER_ENABLED OR EXISTS)
     return()
 endif()
 
+if (CURL_FOUND)
+    add_definitions("-DARBITER_CURL")
+endif()
+
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
 target_include_directories(${PDAL_ARBITER_LIB_NAME} PRIVATE
     ${PDAL_VENDOR_DIR}/jsoncpp/dist)
