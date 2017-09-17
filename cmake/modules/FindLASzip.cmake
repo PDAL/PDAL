@@ -37,10 +37,8 @@ ENDIF()
 
 FIND_PATH(LASZIP_INCLUDE_DIR
   laszip_api.h
+  NAMES laszip
   PATHS
-  /usr/include/laszip
-  /usr/local/include/laszip
-  ${OSGEO4W_ROOT_DIR}/include/laszip
   /usr/include
   /usr/local/include
   ${OSGEO4W_ROOT_DIR}/include)
@@ -55,7 +53,8 @@ FIND_LIBRARY(LASZIP_LIBRARY
   ${OSGEO4W_ROOT_DIR}/lib)
 
 # Comment out laszip.hpp version info
-SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip/laszip_api_version.h")
+SET(LASZIP_VERSION_H "${LASZIP_INCLUDE_DIR}/laszip_api_version.h")
+message(STATUS "iincldfd ${LASZIP_INCLUDE_DIR}")
 IF(LASZIP_INCLUDE_DIR AND EXISTS ${LASZIP_VERSION_H})
   SET(LASZIP_VERSION 0)
 
