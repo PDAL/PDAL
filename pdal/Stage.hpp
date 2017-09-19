@@ -338,6 +338,13 @@ protected:
     point_count_t faceCount() const
         { return m_faceCount; }
 
+    void throwStreamingError() const
+    {
+        std::ostringstream oss;
+        oss << "Point streaming not supported for stage " << getName() << ".";
+        throw pdal_error(oss.str());
+    }
+
 private:
     bool m_debug;
     uint32_t m_verbose;
@@ -449,9 +456,8 @@ private:
     */
     virtual bool processOne(PointRef& /*point*/)
     {
-        std::ostringstream oss;
-        oss << "Point streaming not supported for stage " << getName() << ".";
-        throw pdal_error(oss.str());
+        throwStreamingError();
+        return false;
     }
 
     /**
