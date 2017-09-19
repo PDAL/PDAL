@@ -759,7 +759,7 @@ void LasWriter::writeView(const PointViewPtr view)
         PointRef point(*view, 0);
         for (PointId idx = 0; idx < view->size(); ++idx)
         {
-            point.setPointId(0);
+            point.setPointId(idx);
             processOne(point);
         }
     }
