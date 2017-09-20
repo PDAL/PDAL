@@ -77,7 +77,6 @@ void GroundKernel::addSwitches(ProgramArgs& args)
     args.add("initial_distance", "Initial distance", m_initialDistance, .15);
     args.add("cell_size", "Cell size", m_cellSize, 1.0);
     args.add("extract", "extract ground returns?", m_extract);
-    args.add("approximate", "Use approximate PMF?", m_approximate, true);
 }
 
 int GroundKernel::execute()
@@ -90,7 +89,6 @@ int GroundKernel::execute()
     groundOptions.add("max_distance", m_maxDistance);
     groundOptions.add("initial_distance", m_initialDistance);
     groundOptions.add("cell_size", m_cellSize);
-    groundOptions.add("approximate", m_approximate);
 
     Options rangeOptions;
     rangeOptions.add("limits", "Classification[2:2]");
