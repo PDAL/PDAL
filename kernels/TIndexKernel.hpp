@@ -47,7 +47,7 @@ extern "C" PF_ExitFunc TIndexKernel_InitPlugin();
 namespace pdal
 {
 
-class KernelFactory;
+class StageFactory;
 
 class PDAL_DLL TIndexKernel : public Kernel
 {
@@ -86,7 +86,7 @@ private:
     bool openLayer(const std::string& layerName);
     bool createLayer(const std::string& layerName);
     FieldIndexes getFields();
-    FileInfo getFileInfo(KernelFactory& factory, const std::string& filename);
+    FileInfo getFileInfo(StageFactory& factory, const std::string& filename);
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
     gdal::Geometry prepareGeometry(const std::string& wkt,
@@ -117,4 +117,3 @@ private:
 };
 
 } // namespace pdal
-
