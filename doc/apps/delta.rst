@@ -5,21 +5,16 @@ delta
 ******************************************************************************
 
 The ``delta`` command is used to select a nearest point from a candidate file
-for each point in the source file. If the ``--2d`` option is used, the
-query only happens in XY coordinate space.
+for each point in the source file.
 
 ::
 
-    $ pdal delta <source> <candidate> [output]
-
-Standard out is used if no output file is specified.
+    $ pdal delta <source> <candidate>
 
 ::
 
     --source           source file name
     --candidate        candidate file name
-    --output           output file name
-    --2d               only 2D comparisons/indexing
     --detail           Output deltas per-point
     --alldims          Compute diffs for all dimensions (not just X,Y,Z)
 
