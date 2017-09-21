@@ -42,7 +42,7 @@
 #include <pdal/util/Extractor.hpp>
 
 #ifndef WIN32
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <unistd.h>
 #endif
 

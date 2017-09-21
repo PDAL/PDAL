@@ -86,13 +86,11 @@ private:
 
     std::string m_sourceFile;
     std::string m_candidateFile;
-    std::string m_outputFile;
 
     /**
     std::ostream* m_outputStream;
     **/
 
-    bool m_3d;
     bool m_detail;
     bool m_allDims;
 };
