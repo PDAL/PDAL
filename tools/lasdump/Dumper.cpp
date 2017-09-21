@@ -32,9 +32,6 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <laszip.hpp>
-#include <lasunzipper.hpp>
-
 #include <pdal/util/IStream.hpp>
 
 #include "Dumper.hpp"
@@ -145,35 +142,89 @@ void Dumper::readPoints(ILeStream& in)
 }
 
 
+namespace {
+void handleLaszip(int result)
+{
+#ifdef PDAL_HAVE_LASZIP
+     if (result)
+     {
+         char *buf;
+         laszip_get_error(m_laszip, &buf);
+         std::cerr << buf;
+         exit(-1);
+     }
+#endif
+}
+} // namespace
+
+
 void Dumper::readCompressedPoints(ILeStream& in)
 {
-    LASunzipper unzipper;
-    LASzip zip;
+    laszip_POINTER zip;
+    laszip_BOOL compressed;
+    laszip_point_struct *zipPoint;
 
-    zip.unpack((const unsigned char *)m_zipVlr.data(), m_zipVlr.dataLen());
+    handleLaszip(laszip_create(&zip));
+    handleLaszip(laszip_open_reader_stream(zip, *in.stream(), &compressed));
+    handleLaszip(laszip_get_point_pointer(zip, &zipPoint));
 
-    // compute the point size
-    unsigned pointSize = 0;
-    for (unsigned int i = 0; i < zip.num_items; i++)
-        pointSize += zip.items[i].size;
-
-    // create the point data
-    unsigned char **point = new unsigned char*[zip.num_items];
-    std::vector<uint8_t> pointData(pointSize);
-
-    unsigned offset = 0;
-    for (unsigned i = 0; i < zip.num_items; i++)
-    {
-        point[i] = &(pointData[offset]);
-        offset += zip.items[i].size;
-    }
-
-    unzipper.open(*in.stream(), &zip);
-
+    vector<char> buf(m_header.pointLen());
     for (size_t i = 0; i < m_header.pointCount(); ++i)
     {
-        unzipper.read(point);
-        *m_out << cksum(pointData) << "\n";
+        handleLaszip(laszip_read_point(zip));
+        loadPoint(zipPoint, buf);
+        *m_out << cksum(buf) << "\n";
+    }
+}
+
+
+void Dumper::loadPoint(const laszip_point_struct *zipPoint, vector<char>& buf)
+{
+    const char *in = (const char *)zipPoint;
+    char *out = buf.data();
+    if (m_header.pointFormat() >= 0 && m_header.pointFormat() <= 5)
+    {
+        std::copy(in, in + 20, out);
+        out += 20;
+        in += 20;
+    }
+    else if (m_header.pointFormat() >= 6 & m_header.pointFormat() <= 10)
+    {
+        std::copy(in, in + 30, out);
+        out += 30;
+        in += 30;
+    }
+
+    if (m_header.pointFormat() == 1)
+    {
+        std::copy(in, in + 8, out);  // GPS time
+        in += 8;
+        out += 8;
+    }
+    if (m_header.pointFormat() == 2)
+    {
+        std::copy(in, in + 6, out); // RBG
+        in += 6;
+        out += 6;
+    }
+    if (m_header.pointFormat() == 3)
+    {
+        std::copy(in, in + 14, out); // GPS time, RBG
+        in += 14;
+        out += 14;
+    }
+
+    if (m_header.pointFormat() == 7)
+    {
+        std::copy(in, in + 6, out); // RBG
+        in += 6;
+        out += 6;
+    }
+    if (m_header.pointFormat() == 8)
+    {
+        std::copy(in, in + 8, out); // RBG, NIR
+        in += 8;
+        out += 8;
     }
 }
 
