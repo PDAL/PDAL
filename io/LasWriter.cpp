@@ -805,13 +805,13 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     if (point.hasDim(Id::ReturnNumber))
     {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
+//         if (returnNumber < 1 || returnNumber > maxReturnCount)
+//             m_error.returnNumWarning(returnNumber);
     }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
+//     if (numberOfReturns == 0)
+//         m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -821,8 +821,8 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
+//         else
+//             m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t
@@ -942,13 +942,13 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     if (point.hasDim(Id::ReturnNumber))
     {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
+//         if (returnNumber < 1 || returnNumber > maxReturnCount)
+//             m_error.returnNumWarning(returnNumber);
     }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
+//     if (numberOfReturns == 0)
+//         m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -958,8 +958,8 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
+//         else
+//             m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t
