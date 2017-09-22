@@ -15,6 +15,6 @@ from command-line use to plugin development.
    pcl_block_tutorial
    pcl_ground/index
    clipping-with-shapefile
-   calculating-normalized-heights
+   normalized_heights/index
    dart-throwing
    python-filtering
