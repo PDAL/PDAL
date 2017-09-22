@@ -13,7 +13,7 @@ from command-line use to plugin development.
    reading
    las
    pcl_block_tutorial
-   pcl_ground
+   pcl_ground/index
    clipping-with-shapefile
    calculating-normalized-heights
    dart-throwing
