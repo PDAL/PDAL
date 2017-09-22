@@ -14,7 +14,7 @@ from command-line use to plugin development.
    las
    pcl_block_tutorial
    pcl_ground/index
-   clipping-with-shapefile
+   clipping/index
    normalized_heights/index
    dart-throwing
    python-filtering
