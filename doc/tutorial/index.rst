@@ -16,5 +16,5 @@ from command-line use to plugin development.
    pcl_ground/index
    clipping/index
    normalized_heights/index
-   dart-throwing
+   sampling/index
    python-filtering
