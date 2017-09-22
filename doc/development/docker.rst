@@ -28,7 +28,7 @@ of `Docker`_ containers. PDAL keeps three Docker containers current.
 
 .. _`DockerHub`: https://hub.docker.com/r/pdal/pdal/
 
-Dependences
+Dependencies
 ================================================================================
 
 The PDAL dependencies Docker container is used by both the latest and release
