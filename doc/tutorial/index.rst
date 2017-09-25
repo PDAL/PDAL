@@ -18,6 +18,5 @@ This section provides a collection of tutorials on how to use the PDAL :ref:`app
    pcl_block_tutorial
    pcl_ground/index
    clipping/index
-   normalized_heights/index
    sampling/index
    python-filtering
