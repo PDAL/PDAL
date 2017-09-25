@@ -688,11 +688,11 @@ void LasReader::loadPointV10(PointRef& point, laszip_point& p)
     double y = p.Y * h.scaleY() + h.offsetY();
     double z = p.Z * h.scaleZ() + h.offsetZ();
 
-    if (p.return_number == 0 || p.return_number > 5)
-        m_error.returnNumWarning(p.return_number);
-
-    if (p.number_of_returns == 0 || p.number_of_returns > 5)
-        m_error.numReturnsWarning(p.number_of_returns);
+//     if (p.return_number == 0 || p.return_number > 5)
+//         m_error.returnNumWarning(p.return_number);
+//
+//     if (p.number_of_returns == 0 || p.number_of_returns > 5)
+//         m_error.numReturnsWarning(p.number_of_returns);
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
@@ -753,11 +753,11 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
 
-    if (returnNum == 0 || returnNum > 5)
-        m_error.returnNumWarning(returnNum);
-
-    if (numReturns == 0 || numReturns > 5)
-        m_error.numReturnsWarning(numReturns);
+//     if (returnNum == 0 || returnNum > 5)
+//         m_error.returnNumWarning(returnNum);
+//
+//     if (numReturns == 0 || numReturns > 5)
+//         m_error.numReturnsWarning(numReturns);
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
