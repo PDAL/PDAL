@@ -20,4 +20,3 @@ This section provides a collection of tutorials on how to use the PDAL :ref:`app
    clipping/index
    sampling/index
    python-filtering
-   normalized_heights/index
