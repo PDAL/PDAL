@@ -32,5 +32,4 @@ developing new code can be found in this section.
    writing-kernel
    writing-reader
    writing-writer
-   normalized_heights/index
    using
