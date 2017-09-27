@@ -459,6 +459,17 @@ namespace Utils
     }
 
     /**
+      Count the number of characters spaces in a string at a position.
+
+      \param s  String in which to start counting characters.
+      \param p  Position in input string at which to start counting.
+      \return  Then number of space-y characters matching the predicate.
+    */
+    PDAL_DLL inline std::string::size_type
+    extractSpaces(const std::string& s, std::string::size_type p)
+        { return extract(s, p, (int(*)(int))std::isspace); }
+
+    /**
       Split a string into substrings based on a predicate.  Characters
       matching the predicate are discarded.
 
