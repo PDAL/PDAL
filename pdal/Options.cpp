@@ -34,6 +34,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -149,6 +150,47 @@ StringList Options::toCommandLine() const
         s.push_back(o.toArg());
     }
     return s;
+}
+
+Options Options::fromFile(const std::string& filename)
+{
+    Options options;
+
+    if (!FileUtils::fileExists(filename))
+        throw pdal_error("Can't read options file '" + filename + "'.");
+
+    StringList args = Utils::simpleWordexp(
+        FileUtils::readFileIntoString(filename));
+
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        std::string option = args[i];
+        std::string value;
+        if (i + 1 < args.size())
+            value = args[i + 1];
+
+        if (option.size() < 3)
+            throw pdal_error("Invalid option '" + option + "' in option "
+                "file '" + filename + "'.");
+        if (option[0] != '-' || option[1] != '-')
+            throw pdal_error("Option '" + option + "' missing leading \"--\" "
+                "in option file '" + filename + "'.");
+
+        std::string::size_type pos = 2;
+        std::string::size_type count = Option::parse(option, pos);
+        std::string optionName = option.substr(2, count);
+        pos += count;
+        if (option[pos++] == '=')
+            value = option.substr(pos);
+        else
+            i++;
+        if (value.empty())
+            throw pdal_error("No value found for option '" + option + "' in "
+                "option file '" + filename + "'.");
+        Option o(optionName, value);
+        options.add(o);
+    }
+    return options;
 }
 
 } // namespace pdal

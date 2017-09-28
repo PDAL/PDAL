@@ -224,6 +224,7 @@ public:
 
     std::vector<Option> getOptions(std::string const& name="") const;
     StringList toCommandLine() const;
+    static Options fromFile(const std::string& filename);
 
 private:
     std::multimap<std::string, Option> m_options;

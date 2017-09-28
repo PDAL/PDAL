@@ -98,9 +98,23 @@ void Stage::addAllArgs(ProgramArgs& args)
 void Stage::handleOptions()
 {
     addAllArgs(*m_args);
+
+    StringList files = m_options.getValues("option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file));
+    m_options.remove(Option("option_file", 0));
+
+    StringList cmdline = m_options.toCommandLine();
     try
     {
-        StringList cmdline = m_options.toCommandLine();
+        std::cerr << "Command Line = ";
+        for (size_t i = 0; i < cmdline.size(); ++i)
+        {
+            if (i != 0)
+                std::cerr << " ";
+            std::cerr << cmdline[i];
+        }
+        std::cerr << "\n";
         m_args->parse(cmdline);
     }
     catch (arg_error error)
