@@ -874,6 +874,19 @@ namespace Utils
     inline std::string toString(signed char from)
         { return std::to_string((int)from); }
 
+
+    template<typename T>
+    bool fromString(const std::string& from, T* & to)
+    {
+        void *v;
+        std::istringstream iss(from);
+
+        iss >> v;
+        to = reinterpret_cast<T*>(v);
+        return !iss.fail();
+    }
+
+
     /**
       Convert a string to a value by reading from a string stream.
 
