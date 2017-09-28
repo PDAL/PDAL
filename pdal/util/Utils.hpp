@@ -568,6 +568,20 @@ namespace Utils
     }
 
     /**
+      Perform shell-style word expansion (break a string into arguments).
+      This only does simple handling of quoted values and backslashes
+      and doesn't support fancier shell behavior.  Use the real wordexp()
+      if you need all that.  The behavior of escaped values in a string
+      was surprising to me, so try the shell first if you think you've
+      found a problem.
+
+      \param s  Input string to parse.
+      \return  List of arguments.
+    */
+    PDAL_DLL std::vector<std::string>
+    simpleWordexp(const std::string& s);
+
+    /**
       Return a string representation of a type specified by the template
       argument.
 
