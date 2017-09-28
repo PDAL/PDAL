@@ -107,14 +107,6 @@ void Stage::handleOptions()
     StringList cmdline = m_options.toCommandLine();
     try
     {
-        std::cerr << "Command Line = ";
-        for (size_t i = 0; i < cmdline.size(); ++i)
-        {
-            if (i != 0)
-                std::cerr << " ";
-            std::cerr << cmdline[i];
-        }
-        std::cerr << "\n";
         m_args->parse(cmdline);
     }
     catch (arg_error error)
