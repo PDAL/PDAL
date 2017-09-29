@@ -34,7 +34,6 @@
 
 #include "SortKernel.hpp"
 
-#include <io/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 
@@ -71,19 +70,7 @@ void SortKernel::addSwitches(ProgramArgs& args)
 int SortKernel::execute()
 {
     Stage& readerStage = makeReader(m_inputFile, m_driverOverride);
-
-    PointTable table;
-    readerStage.prepare(table);
-    PointViewSet viewSetIn = readerStage.execute(table);
-
-    // the input PointViewSet will be used to populate a BufferReader that is
-    // consumed by the processing pipeline
-    PointViewPtr inView = *viewSetIn.begin();
-
-    BufferReader bufferReader;
-    bufferReader.addView(inView);
-
-    Stage& sortStage = makeFilter("filters.mortonorder", bufferReader);
+    Stage& sortStage = makeFilter("filters.mortonorder", readerStage);
 
     Options writerOptions;
     if (m_bCompress)
@@ -92,6 +79,7 @@ int SortKernel::execute()
         writerOptions.add("forward_metadata", true);
     Stage& writer = makeWriter(m_outputFile, sortStage, "", writerOptions);
 
+    PointTable table;
     writer.prepare(table);
     writer.execute(table);
 

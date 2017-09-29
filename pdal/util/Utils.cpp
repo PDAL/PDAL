@@ -697,4 +697,57 @@ std::string Utils::hexDump(const char *buf, size_t count)
    return (out);
 }
 
+
+std::vector<std::string> Utils::simpleWordexp(const std::string& cmdline)
+{
+    std::string temp;
+    bool instring = false;
+    bool escape = false;
+    std::vector<std::string> cmdArgs;
+    for (size_t i = 0; i < cmdline.size(); ++i)
+    {
+        if (instring)
+        {
+            if (escape)
+            {
+                if (cmdline[i] != '"' && cmdline[i] != '\\')
+                    temp += '\\';
+                escape = false;
+                temp += cmdline[i];
+            }
+            else if (cmdline[i] == '"')
+                instring = false;
+            else if (cmdline[i] == '\\')
+                escape = true;
+            else
+                temp += cmdline[i];
+        }
+        else
+        {
+            if (escape)
+            {
+                escape = false;
+                temp += cmdline[i];
+            }
+            else if (cmdline[i] == '"')
+                instring = true;
+            else if (cmdline[i] ==  '\\')
+                escape = true;
+            else if (std::isspace(cmdline[i]))
+            {
+                if (temp.size())
+                {
+                    cmdArgs.push_back(temp);
+                    temp.clear();
+                }
+            }
+            else
+                temp += cmdline[i];
+        }
+    }
+    if (!instring && temp.size())
+        cmdArgs.push_back(temp);
+    return cmdArgs;
+}
+
 } // namespace pdal
