@@ -94,6 +94,7 @@ std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
     GETRAMP(blue_red);
     GETRAMP(heat_map);
     GETRAMP(pestel_shades);
+    GETRAMP(blue_orange);
 
     std::shared_ptr<gdal::Raster>
         output(new gdal::Raster(rampFilename.c_str()));
@@ -147,7 +148,9 @@ void ColorinterpFilter::ready(PointTableRef table)
     gdal::registerDrivers();
 
     m_raster = openRamp(m_colorramp);
-    m_raster->open();
+    gdal::GDALError err = m_raster->open();
+    if (err != gdal::GDALError::None && err != gdal::GDALError::NoTransform)
+        throwError(m_raster->errorMsg());
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: " <<
         m_raster->filename() << std::endl;
