@@ -77,7 +77,7 @@ void IcpFilter::done(PointTableRef _)
     if (!this->m_complete)
     {
         throw pdal_error(
-            "filters.change must have two point view inputs, no more, no less");
+            "filters.icp must have two point view inputs, no more, no less");
     }
 }
 

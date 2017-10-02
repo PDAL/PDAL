@@ -81,6 +81,19 @@
 #include <filters/VoxelCenterNearestNeighborFilter.hpp>
 #include <filters/VoxelCentroidNearestNeighborFilter.hpp>
 
+#include <kernels/DeltaKernel.hpp>
+#include <kernels/DiffKernel.hpp>
+#include <kernels/GroundKernel.hpp>
+#include <kernels/HausdorffKernel.hpp>
+#include <kernels/InfoKernel.hpp>
+#include <kernels/MergeKernel.hpp>
+#include <kernels/PipelineKernel.hpp>
+#include <kernels/RandomKernel.hpp>
+#include <kernels/SortKernel.hpp>
+#include <kernels/SplitKernel.hpp>
+#include <kernels/TIndexKernel.hpp>
+#include <kernels/TranslateKernel.hpp>
+
 // readers
 #include <io/BpfReader.hpp>
 #include <io/FauxReader.hpp>
@@ -88,7 +101,6 @@
 #include <io/Ilvis2Reader.hpp>
 #include <io/LasReader.hpp>
 #include <io/OptechReader.hpp>
-#include <io/BufferReader.hpp>
 #include <io/PlyReader.hpp>
 #include <io/PtsReader.hpp>
 #include <io/QfitReader.hpp>
@@ -248,8 +260,8 @@ StageFactory::StageFactory(bool no_plugins)
 {
     if (!no_plugins)
     {
-        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Reader |
-            PF_PluginType_Writer);
+        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Kernel |
+            PF_PluginType_Reader | PF_PluginType_Writer);
     }
 
     // filters
@@ -297,6 +309,20 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
     PluginManager::initializePlugin(VoxelCenterNearestNeighborFilter_InitPlugin);
     PluginManager::initializePlugin(VoxelCentroidNearestNeighborFilter_InitPlugin);
+
+    // kernels
+    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
+    PluginManager::initializePlugin(DiffKernel_InitPlugin);
+    PluginManager::initializePlugin(GroundKernel_InitPlugin);
+    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
+    PluginManager::initializePlugin(InfoKernel_InitPlugin);
+    PluginManager::initializePlugin(MergeKernel_InitPlugin);
+    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
+    PluginManager::initializePlugin(RandomKernel_InitPlugin);
+    PluginManager::initializePlugin(SortKernel_InitPlugin);
+    PluginManager::initializePlugin(SplitKernel_InitPlugin);
+    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
+    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 
     // readers
     PluginManager::initializePlugin(BpfReader_InitPlugin);

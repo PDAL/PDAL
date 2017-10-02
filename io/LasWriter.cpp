@@ -294,7 +294,6 @@ void LasWriter::readyFile(const std::string& filename,
     if (!out)
         throwError("Couldn't open file '" + filename + "' for output.");
     m_curFilename = filename;
-    m_error.setFilename(filename);
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(out, srs);
 }
@@ -346,8 +345,6 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Set the point buffer size here in case we're using the streaming
     // interface.
     m_pointBuf.resize(m_lasHeader.pointLen());
-
-    m_error.setLog(log());
 }
 
 
@@ -802,15 +799,9 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     uint8_t numberOfReturns(1);
 
     if (point.hasDim(Id::ReturnNumber))
-    {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
-    }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -820,8 +811,6 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t
@@ -866,7 +855,7 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     if (has14Format)
     {
         p.extended_point_type = 1;
-        //
+
         p.extended_return_number = returnNumber;
         p.extended_number_of_returns = numberOfReturns;
         p.extended_scanner_channel = scanChannel;
@@ -952,15 +941,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t returnNumber(1);
     uint8_t numberOfReturns(1);
     if (point.hasDim(Id::ReturnNumber))
-    {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
-    }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -970,8 +953,6 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t

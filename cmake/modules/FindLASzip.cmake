@@ -37,10 +37,8 @@ ENDIF()
 
 FIND_PATH(LASZIP_INCLUDE_DIR
   laszip_api.h
+  NAMES laszip
   PATHS
-  /usr/include/laszip
-  /usr/local/include/laszip
-  ${OSGEO4W_ROOT_DIR}/include/laszip
   /usr/include
   /usr/local/include
   ${OSGEO4W_ROOT_DIR}/include)
@@ -73,11 +71,11 @@ IF(LASZIP_INCLUDE_DIR AND EXISTS ${LASZIP_VERSION_H})
       message(FATAL_ERROR "LASzip version parsing failed for \"LASZIP_VERSION_MINOR\"")
     endif()
     if(NOT "${LASZIP_VERSION_PATCH}" MATCHES "^[0-9]+$")
-      message(FATAL_ERROR "LASzip version parsing failed for \"LASZIP_VERSION_REVISION\"")
+      message(FATAL_ERROR "LASzip version parsing failed for \"LASZIP_VERSION_PATCH\"")
     endif()
 
 
-    SET(LASZIP_VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_REVISION}"
+    SET(LASZIP_VERSION "${LASZIP_VERSION_MAJOR}.${LASZIP_VERSION_MINOR}.${LASZIP_VERSION_PATCH}"
       CACHE INTERNAL "The version string for LASzip library")
 
     IF (LASZIP_VERSION VERSION_LESS LASzip_FIND_VERSION)

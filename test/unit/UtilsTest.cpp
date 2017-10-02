@@ -379,3 +379,46 @@ TEST(UtilsTest, wordWrap2)
     EXPECT_EQ(output[1], std::string(10, ' '));
     EXPECT_EQ(output[2], std::string(8, ' '));
 }
+
+TEST(UtilsTest, simpleWordexpTest)
+{
+    std::string s;
+    std::vector<std::string> output;
+
+    s = "fo\"o\\n= \"b\\\"   ar\" \"b";
+    output = Utils::simpleWordexp(s);
+    EXPECT_EQ(output.size(), 2u);
+    EXPECT_EQ(output[0], "foo\\n= b\"");
+    EXPECT_EQ(output[1], "ar b");
+
+    s = "\"\\ \\ \"";
+    output = Utils::simpleWordexp(s);
+    EXPECT_EQ(output.size(), 1u);
+    EXPECT_EQ(output[0], "\\ \\ ");
+
+    s = "\\g";
+    output = Utils::simpleWordexp(s);
+    EXPECT_EQ(output.size(), 1u);
+    EXPECT_EQ(output[0], "g");
+
+    s = "foo= \"b\\\" ar\"";
+    output = Utils::simpleWordexp(s);
+    EXPECT_EQ(output.size(), 2u);
+    EXPECT_EQ(output[0], "foo=");
+    EXPECT_EQ(output[1], "b\" ar");
+
+    s = "fo\"o= \"b\\\"   ar\"\"";
+    output = Utils::simpleWordexp(s);
+    EXPECT_EQ(output.size(), 2u);
+    EXPECT_EQ(output[0], "foo= b\"");
+    EXPECT_EQ(output[1], "ar");
+
+    s = "a b   c   def \"ghi jkl\"";
+    output = Utils::simpleWordexp(s);
+    EXPECT_EQ(output.size(), 5u);
+    EXPECT_EQ(output[0], "a");
+    EXPECT_EQ(output[1], "b");
+    EXPECT_EQ(output[2], "c");
+    EXPECT_EQ(output[3], "def");
+    EXPECT_EQ(output[4], "ghi jkl");
+}

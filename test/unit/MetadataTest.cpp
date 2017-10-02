@@ -293,3 +293,19 @@ TEST(MetadataTest, test_float)
     n2 = n.add("test2", 1.12345678);
     EXPECT_DOUBLE_EQ(n2.value<double>(), 1.12345678);
 }
+
+// Test that pointers traverse metadata.
+TEST(MetadataTest, pointer)
+{
+    class foo
+    {};
+
+    foo f;
+
+    MetadataNode n("top");
+    MetadataNode n2 = n.add("test", &f);
+
+    std::istringstream iss;
+    foo *f2 = n2.value<foo *>();
+    EXPECT_EQ(f2, &f);
+}

@@ -704,6 +704,7 @@ TEST(LasWriterTest, laszip1_4)
     PointViewPtr view2 = *set2.begin();
 
     EXPECT_EQ(view1->size(), view2->size());
+    EXPECT_EQ(view1->size(), (point_count_t)110000);
 
     DimTypeList dims = view1->dimTypes();
     size_t pointSize = view1->pointSize();
