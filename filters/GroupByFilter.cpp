@@ -42,9 +42,9 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.groupby", "Split data categorically by dimension.",
-               "http://pdal.io/stages/filters.groupby.html");
+static PluginInfo const s_info = PluginInfo(
+    "filters.groupby", "Group data categorically by dimension or range.",
+    "http://pdal.io/stages/filters.groupby.html");
 
 CREATE_STATIC_PLUGIN(1, 0, GroupByFilter, Filter, s_info)
 
