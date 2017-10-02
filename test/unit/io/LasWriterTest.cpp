@@ -643,7 +643,7 @@ TEST(LasWriterTest, laszip)
    // Validate some point data.
     std::unique_ptr<char> buf1(new char[pointSize]);
     std::unique_ptr<char> buf2(new char[pointSize]);
-    for (PointId i = 0; i < view1->pointSize(); i += 100)
+    for (PointId i = 0; i < view1->size(); i += 100)
     {
        view1->getPackedPoint(dims, i, buf1.get());
        view2->getPackedPoint(dims, i, buf2.get());
@@ -657,7 +657,8 @@ TEST(LasWriterTest, laszip)
 TEST(LasWriterTest, laszip1_4)
 {
     Options readerOps;
-    readerOps.add("filename", Support::datapath("las/autzen_trim_7.las"));
+    std::string baseFilename = Support::datapath("las/autzen_trim_7.las");
+    readerOps.add("filename", baseFilename);
 
     LasReader lazReader;
     lazReader.setOptions(readerOps);
@@ -692,7 +693,7 @@ TEST(LasWriterTest, laszip1_4)
     PointViewPtr view1 = *set1.begin();
 
     Options ops2;
-    ops2.add("filename", Support::datapath("las/autzen_trim_7.las"));
+    ops2.add("filename", baseFilename);
 
     LasReader r2;
     r2.setOptions(ops2);
@@ -703,7 +704,6 @@ TEST(LasWriterTest, laszip1_4)
     PointViewPtr view2 = *set2.begin();
 
     EXPECT_EQ(view1->size(), view2->size());
-    EXPECT_EQ(view1->size(), (point_count_t)110000);
 
     DimTypeList dims = view1->dimTypes();
     size_t pointSize = view1->pointSize();
@@ -712,10 +712,32 @@ TEST(LasWriterTest, laszip1_4)
    // Validate some point data.
     std::unique_ptr<char> buf1(new char[pointSize]);
     std::unique_ptr<char> buf2(new char[pointSize]);
-    for (PointId i = 0; i < view1->pointSize(); i += 100)
+    for (PointId idx = 0; idx < view1->size(); idx++)
     {
-       view1->getPackedPoint(dims, i, buf1.get());
-       view2->getPackedPoint(dims, i, buf2.get());
+       view1->getPackedPoint(dims, idx, buf1.get());
+       view2->getPackedPoint(dims, idx, buf2.get());
+       char *b1 = buf1.get();
+       char *b2 = buf2.get();
+       // Uncomment this to figure out the exact byte at which things are
+       // broken.
+       /**
+       for (size_t i = 0; i < pointSize; ++i)
+       {
+           if (*b1++ != *b2++)
+           {
+               {
+                   size_t s = 0;
+                   for (auto di = dims.begin(); di != dims.end(); ++di)
+                   {
+                       std::cerr << "Dim " << view1->dimName(di->m_id) <<
+                           " at " << s << "!\n";
+                       s += Dimension::size(di->m_type);
+                   }
+               }
+               throw pdal_error("Mismatch at byte = " + to_string(i) + "!");
+           }
+       }
+       **/
        EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
     }
 }
