@@ -101,7 +101,6 @@
 #include <io/Ilvis2Reader.hpp>
 #include <io/LasReader.hpp>
 #include <io/OptechReader.hpp>
-#include <io/BufferReader.hpp>
 #include <io/PlyReader.hpp>
 #include <io/PtsReader.hpp>
 #include <io/QfitReader.hpp>

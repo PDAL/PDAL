@@ -459,6 +459,17 @@ namespace Utils
     }
 
     /**
+      Count the number of characters spaces in a string at a position.
+
+      \param s  String in which to start counting characters.
+      \param p  Position in input string at which to start counting.
+      \return  Then number of space-y characters matching the predicate.
+    */
+    PDAL_DLL inline std::string::size_type
+    extractSpaces(const std::string& s, std::string::size_type p)
+        { return extract(s, p, (int(*)(int))std::isspace); }
+
+    /**
       Split a string into substrings based on a predicate.  Characters
       matching the predicate are discarded.
 
@@ -555,6 +566,20 @@ namespace Utils
         auto pred = [tChar](char c){ return(c == tChar); };
         return split2(s, pred);
     }
+
+    /**
+      Perform shell-style word expansion (break a string into arguments).
+      This only does simple handling of quoted values and backslashes
+      and doesn't support fancier shell behavior.  Use the real wordexp()
+      if you need all that.  The behavior of escaped values in a string
+      was surprising to me, so try the shell first if you think you've
+      found a problem.
+
+      \param s  Input string to parse.
+      \return  List of arguments.
+    */
+    PDAL_DLL std::vector<std::string>
+    simpleWordexp(const std::string& s);
 
     /**
       Return a string representation of a type specified by the template
@@ -848,6 +873,19 @@ namespace Utils
     */
     inline std::string toString(signed char from)
         { return std::to_string((int)from); }
+
+
+    template<typename T>
+    bool fromString(const std::string& from, T* & to)
+    {
+        void *v;
+        std::istringstream iss(from);
+
+        iss >> v;
+        to = reinterpret_cast<T*>(v);
+        return !iss.fail();
+    }
+
 
     /**
       Convert a string to a value by reading from a string stream.

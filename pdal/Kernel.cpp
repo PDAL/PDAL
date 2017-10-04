@@ -44,8 +44,6 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <io/BufferReader.hpp>
-
 #include <memory>
 #include <vector>
 

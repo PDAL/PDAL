@@ -118,7 +118,6 @@ protected:
 private:
     typedef std::vector<LasUtils::IgnoreVLR> IgnoreVLRList;
 
-    LasError m_error;
     LasHeader m_header;
     laszip_POINTER m_laszip;
     laszip_point_struct *m_laszipPoint;

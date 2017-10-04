@@ -294,7 +294,6 @@ void LasWriter::readyFile(const std::string& filename,
     if (!out)
         throwError("Couldn't open file '" + filename + "' for output.");
     m_curFilename = filename;
-    m_error.setFilename(filename);
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(out, srs);
 }
@@ -314,7 +313,6 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
     setVlrsFromMetadata(m_forwardMetadata);
-
 
     m_summaryData.reset(new LasSummaryData());
     m_ostream = outStream;
@@ -347,8 +345,6 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Set the point buffer size here in case we're using the streaming
     // interface.
     m_pointBuf.resize(m_lasHeader.pointLen());
-
-    m_error.setLog(log());
 }
 
 
@@ -793,8 +789,8 @@ void LasWriter::writeView(const PointViewPtr view)
 bool LasWriter::writeLasZipBuf(PointRef& point)
 {
 #ifdef PDAL_HAVE_LASZIP
-    static const bool has14Format = m_lasHeader.has14Format();
-    static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
+    const bool has14Format = m_lasHeader.has14Format();
+    const size_t maxReturnCount = m_lasHeader.maxReturnCount();
 
     // we always write the base fields
     using namespace Dimension;
@@ -803,15 +799,9 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     uint8_t numberOfReturns(1);
 
     if (point.hasDim(Id::ReturnNumber))
-    {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
-    }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -821,8 +811,6 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t
@@ -844,36 +832,49 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     double y = m_scaling.m_yXform.toScaled(yOrig);
     double z = m_scaling.m_zXform.toScaled(zOrig);
 
-    laszip_point_struct p;
-    p.X = converter(x, Id::X);
-    p.Y = converter(y, Id::Y);
-    p.Z = converter(z, Id::Z);
-    p.intensity = point.getFieldAs<uint16_t>(Id::Intensity);
-
     uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
     uint8_t scanDirectionFlag =
         point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
     uint8_t edgeOfFlightLine =
         point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
+    uint8_t classFlags = 0;
+    if (point.hasDim(Id::ClassFlags))
+        classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+    else
+        classFlags = classification >> 5;
+
+    laszip_point_struct p;
+    p.X = converter(x, Id::X);
+    p.Y = converter(y, Id::Y);
+    p.Z = converter(z, Id::Z);
+    p.intensity = point.getFieldAs<uint16_t>(Id::Intensity);
     p.scan_direction_flag = scanDirectionFlag;
     p.edge_of_flight_line = edgeOfFlightLine;
 
     if (has14Format)
     {
+        p.extended_point_type = 1;
+
         p.extended_return_number = returnNumber;
         p.extended_number_of_returns = numberOfReturns;
-        p.extended_classification_flags =
-            point.getFieldAs<uint8_t>(Id::ClassFlags);
         p.extended_scanner_channel = scanChannel;
         p.extended_scan_angle =
-            point.getFieldAs<float>(Id::ScanAngleRank) / .006;
+            roundf(point.getFieldAs<float>(Id::ScanAngleRank) / .006);
+        p.extended_classification_flags = classFlags;
+        p.extended_classification = classification;
+        p.classification = (classification & 0x1F) | (classFlags << 5);
+//        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
     }
     else
     {
+        p.synthetic_flag = classFlags & 0x1;
+        p.keypoint_flag = (classFlags >> 1) & 0x1;
+        p.withheld_flag = (classFlags >> 2) & 0x1;
         p.return_number = returnNumber;
         p.number_of_returns = numberOfReturns;
-        p.classification = point.getFieldAs<uint8_t>(Id::Classification);
         p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.classification = classification;
     }
     p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
 
@@ -940,15 +941,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t returnNumber(1);
     uint8_t numberOfReturns(1);
     if (point.hasDim(Id::ReturnNumber))
-    {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
-    }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -958,8 +953,6 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t

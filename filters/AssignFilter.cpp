@@ -63,14 +63,14 @@ void AssignRange::parse(const std::string& r)
     char *end;
 
     pos = subParse(r);
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     if (r[pos] != '=')
         throw error("Missing '=' assignment separator.");
     pos++;
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     // Extract value

@@ -87,8 +87,7 @@ void PlyReader::pushLine()
 std::string PlyReader::nextWord()
 {
     std::string s;
-    std::string::size_type cnt =
-        Utils::extract(m_line, m_linePos, (int(*)(int))std::isspace);
+    std::string::size_type cnt = Utils::extractSpaces(m_line, m_linePos);
     m_linePos += cnt;
     if (m_linePos == m_line.size())
         return s;

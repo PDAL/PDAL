@@ -126,6 +126,31 @@ TEST(ColorinterpFilterTest, missingz)
     EXPECT_THROW(c.prepare(t), pdal_error);
 }
 
+TEST(ColorinterpFilterTest, badramp)
+{
+    FauxReader f;
+    Options options;
+
+    options.add("count", 100);
+    options.add("mode", "ramp");
+    options.add("bounds", "([0,99],[0,99],[0,99])");
+
+    f.setOptions(options);
+
+    ColorinterpFilter c;
+    Options coptions;
+
+    coptions.add("minimum", 0);
+    coptions.add("maximum", 100);
+    coptions.add("ramp", "ramp_that_doesnt_exist");
+    c.setOptions(coptions);
+    c.setInput(f);
+
+    PointTable t;
+    c.prepare(t);
+    EXPECT_THROW(c.execute(t), pdal_error);
+}
+
 TEST(ColorinterpFilterTest, cantstream)
 {
     FauxReader f;
