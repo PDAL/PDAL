@@ -228,14 +228,12 @@ public:
     /**
       Push the stage's leader into the log.
     */
-    void pushLogLeader() const
-        { m_log->pushLeader(m_logLeader); }
+    void startLogging() const;
 
     /**
         Pop the stage's leader from the log.
     */
-    void popLogLeader() const
-        { m_log->popLeader(); }
+    void stopLogging() const;
 
     /**
       Determine whether the stage is in debug mode or not.
