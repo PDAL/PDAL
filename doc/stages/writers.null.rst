@@ -6,6 +6,10 @@ writers.null
 The **null writer** discards its input.  No point output is produced when using
 a **null writer**.
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

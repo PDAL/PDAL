@@ -71,10 +71,13 @@ private:
     double m_length;
     double m_xOrigin;
     double m_yOrigin;
+    double m_buffer;
     std::map<Coord, PointViewPtr, CoordCompare> m_viewMap;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);
+    bool squareContains(int xpos, int ypos, double x, double y) const;
 
     SplitterFilter& operator=(const SplitterFilter&); // not implemented
     SplitterFilter(const SplitterFilter&); // not implemented

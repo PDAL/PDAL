@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <Eigen/Dense>
 
@@ -268,7 +269,7 @@ PDAL_DLL Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
 */
 PDAL_DLL Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
         double cell_size, BOX2D bounds);
-
+        
 /**
   Find local minimum elevations by extended local minimum.
 
@@ -315,6 +316,44 @@ PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
   \return the morphological opening of the input radius.
 */
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
+
+/**
+  Perform a morphological dilation of the input raster.
+
+  Performs a morphological dilation of the input raster using a diamond
+  structuring element. Larger structuring elements are approximated by applying
+  multiple iterations of the opening operation. The input and output rasters are
+  stored in column major order.
+
+  \param data the input raster.
+  \param rows the number of rows.
+  \param cols the number of cols.
+  \param iterations the number of iterations used to approximate a larger 
+         structuring element.
+  \return the morphological dilation of the input raster.
+*/
+PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
+                                           size_t rows, size_t cols,
+                                           int iterations);
+
+/**
+  Perform a morphological erosion of the input raster.
+
+  Performs a morphological erosion of the input raster using a diamond
+  structuring element. Larger structuring elements are approximated by applying
+  multiple iterations of the opening operation. The input and output rasters are
+  stored in column major order.
+
+  \param data the input raster.
+  \param rows the number of rows.
+  \param cols the number of cols.
+  \param iterations the number of iterations used to approximate a larger 
+         structuring element.
+  \return the morphological erosion of the input raster.
+*/
+PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
+                                          size_t rows, size_t cols,
+                                          int iterations);
 
 /**
   Pad input matrix symmetrically.
@@ -910,5 +949,50 @@ PDAL_DLL Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
 
 
 } // namespace eigen
+
+namespace Utils
+{
+
+template <>
+inline bool fromString<Eigen::MatrixXd>(const std::string& s, Eigen::MatrixXd& matrix) {
+    std::stringstream ss(s);
+    std::string line;
+    std::vector<std::vector<double>> rows;
+    while (std::getline(ss, line)) {
+        std::vector<double> row;
+        std::stringstream ss(line);
+        double n;
+        while (ss >> n) {
+            row.push_back(n);
+            if (ss.peek() == ',' || ss.peek() == ' ') {
+                ss.ignore();
+            }
+        }
+        if (!rows.empty() && rows.back().size() != row.size()) {
+            return false;
+        }
+        rows.push_back(row);
+    }
+    if (rows.empty()) {
+        return true;
+    }
+    size_t nrows = rows.size();
+    size_t ncols = rows[0].size();
+    matrix.resize(nrows, ncols);
+    for (size_t i = 0; i < nrows; ++i) {
+        for (size_t j = 0; j < ncols; ++j) {
+            matrix(i, j) = rows[i][j];
+        }
+    }
+    return true;
+}
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const Eigen::MatrixXd& matrix)
+{
+    m_type = "matrix";
+    m_value = Utils::toString(matrix);
+}
 
 } // namespace pdal

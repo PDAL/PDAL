@@ -93,8 +93,7 @@ void PgWriter::addArgs(ProgramArgs& args)
     args.add("schema", "Schema name", m_schema_name);
     args.add("compression", "Compression type", m_compressionSpec,
         "dimensional");
-    args.add("overwrite", "Whether data should be overwritten", m_overwrite,
-        true);
+    args.add("overwrite", "Whether data should be overwritten", m_overwrite);
     args.add("srid", "SRID", m_srid, 4326U);
     args.add("pcid", "PCID", m_pcid);
     args.add("pre_sql", "SQL to execute before query", m_pre_sql);
@@ -307,11 +306,10 @@ void PgWriter::DeleteTable(std::string const& schema_name,
 
     if (schema_name.size())
     {
-        name << schema_name << ".";
+        name << pg_quote_identifier(schema_name) << ".";
     }
-    name << table_name;
-    stmt << pg_quote_identifier(name.str());
-
+    name << pg_quote_identifier(table_name);
+    stmt << name.str();
 
     pg_execute(m_session, stmt.str());
 }

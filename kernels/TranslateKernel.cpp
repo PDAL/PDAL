@@ -35,14 +35,14 @@
 
 #include "TranslateKernel.hpp"
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <json/json.h>
 
@@ -80,13 +80,15 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
         setPositional();
     args.add("filter,f", "Filter type", m_filterType).
         setOptionalPositional();
-    args.add("json", "JSON array of filters", m_filterJSON);
-    args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
+    args.add("json", "PDAL pipeline from which to extract filters.",
+        m_filterJSON);
+    args.add("pipeline,p", "Pipeline output", m_pipelineOutputFile);
     args.add("metadata,m", "Dump metadata output to the specified file",
         m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
 }
+
 
 /*
   Build a pipeline from a JSON filter specification.
@@ -100,43 +102,44 @@ void TranslateKernel::makeJSONPipeline()
 
     if (json.empty())
         json = m_filterJSON;
+    std::stringstream in(json);
+    m_manager.readPipeline(in);
 
-    Json::Reader jsonReader;
-    Json::Value filters;
-    jsonReader.parse(json, filters);
-    if (filters.type() != Json::arrayValue || filters.empty())
-        throw pdal_error("JSON must be an array of filter specifications");
+    std::vector<Stage *> roots = m_manager.roots();
+    if (roots.size() > 1)
+        throw pdal_error("Can't process pipeline with more than one root.");
 
-    Json::Value pipeline(Json::arrayValue);
-
-    // Add the input file, the filters (as provided) and the output file.
-    if (m_readerType.size())
+    Stage *r(nullptr);
+    if (roots.size())
+        r = dynamic_cast<Reader *>(roots[0]);
+    if (r)
     {
-        Json::Value node(Json::objectValue);
-        node["filename"] = m_inputFile;
-        node["type"] = m_readerType;
-        pipeline.append(node);
+        StageCreationOptions ops { m_inputFile, m_readerType, nullptr,
+            Options(), r->tag() };
+        m_manager.replace(r, &m_manager.makeReader(ops));
     }
     else
-        pipeline.append(Json::Value(m_inputFile));
-    for (Json::ArrayIndex i = 0; i < filters.size(); ++i)
-        pipeline.append(filters[i]);
-    if (m_writerType.size())
     {
-        Json::Value node(Json::objectValue);
-        node["filename"] = m_outputFile;
-        node["type"] = m_writerType;
-        pipeline.append(node);
+        r = &m_manager.makeReader(m_inputFile, m_readerType);
+        if (roots.size())
+            roots[0]->setInput(*r);
     }
+
+    std::vector<Stage *> leaves = m_manager.leaves();
+    if (leaves.size() != 1)
+        throw pdal_error("Can't process pipeline with more than one "
+            "terminal stage.");
+
+    Stage *w = dynamic_cast<Writer *>(leaves[0]);
+    if (w)
+        m_manager.replace(w, &m_manager.makeWriter(m_outputFile, m_writerType));
     else
-        pipeline.append(Json::Value(m_outputFile));
-
-    Json::Value root;
-    root["pipeline"] = pipeline;
-
-    std::stringstream pipeline_str;
-    pipeline_str << root;
-    m_manager.readPipeline(pipeline_str);
+    {
+        // We know we have a leaf because we added a reader.
+        StageCreationOptions ops { m_outputFile, m_writerType, leaves[0],
+            Options(), "" };  // These last two args just keep compiler quiet.
+        m_manager.makeWriter(ops);
+    }
 }
 
 
@@ -174,24 +177,35 @@ int TranslateKernel::execute()
 {
     std::ostream *metaOut(nullptr);
 
+    if (m_filterJSON.size() && m_filterType.size())
+        throw pdal_error("Cannot set both --filter options and --json options");
+
     if (m_metadataFile.size())
     {
+        if (m_pipelineOutputFile.size())
+            m_log->get(LogLevel::Info) << "Metadata will not be written. "
+                "'pipeline' option prevents execution.";
+        else
+        {
         metaOut = FileUtils::createFile(m_metadataFile);
         if (! metaOut)
             throw pdal_error("Couldn't output metadata output file '" +
                 m_metadataFile + "'.");
+        }
     }
-
-    if (m_filterJSON.size() && m_filterType.size())
-        throw pdal_error("Cannot set both --filter options and --json options");
 
     if (!m_filterJSON.empty())
         makeJSONPipeline();
     else
         makeArgPipeline();
 
-    if (m_pipelineOutput.size() > 0)
-        PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineOutput);
+    // If we write pipeline output, we don't run, and therefore don't write
+    if (m_pipelineOutputFile.size() > 0)
+    {
+        PipelineWriter::writePipeline(m_manager.getStage(),
+            m_pipelineOutputFile);
+        return 0;
+    }
     m_manager.execute();
     if (metaOut)
     {

@@ -30,8 +30,14 @@
 #cmakedefine PDAL_HAVE_LASZIP
 #cmakedefine PDAL_HAVE_LAZPERF
 #cmakedefine PDAL_HAVE_LIBXML2
+#cmakedefine PDAL_HAVE_PYTHON
 
 #cmakedefine PDAL_ARBITER_ENABLED
+
+/*
+ * availability of execinfo.h
+ */
+#cmakedefine PDAL_HAVE_EXECINFO_H
 
 /*
  * Debug or Release build?

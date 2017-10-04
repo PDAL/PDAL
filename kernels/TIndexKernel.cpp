@@ -37,7 +37,6 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
@@ -77,7 +76,7 @@ TIndexKernel::TIndexKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_fastBoundary(false)
-
+    , m_overrideASrs(false)
 {}
 
 
@@ -124,6 +123,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         StringList invalidArgs;
         invalidArgs.push_back("a_srs");
         invalidArgs.push_back("src_srs_name");
+        invalidArgs.push_back("stdin");
+        invalidArgs.push_back("fast_boundary");
         for (auto arg : invalidArgs)
             if (args.set(arg))
             {
@@ -143,6 +144,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (args.set("bounds"))
             throw pdal_error("'bounds' option not supported when building "
                 "index.");
+        if (args.set("a_srs"))
+            m_overrideASrs = true;
     }
 }
 
@@ -216,6 +219,10 @@ void TIndexKernel::createFile()
     else
         m_files = readSTDIN();
 
+    if (m_absPath)
+        for (auto& s : m_files)
+            s = FileUtils::toAbsolutePath(s);
+
     if (m_files.empty())
     {
         std::ostringstream out;
@@ -250,7 +257,7 @@ void TIndexKernel::createFile()
 
     FieldIndexes indexes = getFields();
 
-    KernelFactory factory(false);
+    StageFactory factory(false);
     for (auto f : m_files)
     {
         //ABELL - Not sure why we need to get absolute path here.
@@ -389,7 +396,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 
     // Set the SRS into the feature.
     // We override if m_assignSrsString is set
-    if (fileInfo.m_srs.empty() || m_assignSrsString.size())
+    if (fileInfo.m_srs.empty() || m_overrideASrs)
         fileInfo.m_srs = m_assignSrsString;
 
     SpatialRef srcSrs(fileInfo.m_srs);
@@ -445,13 +452,11 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     OGR_G_ExportToWkt(g.get(), &pgeom);
     OGR_F_SetGeometry(hFeature, g.get());
 
-    bool ok = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
-    OGR_F_Destroy(hFeature);
-    return ok;
+    return (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
 }
 
 
-TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
+TIndexKernel::FileInfo TIndexKernel::getFileInfo(StageFactory& factory,
     const std::string& filename)
 {
     FileInfo fileInfo;
@@ -463,7 +468,10 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     // Need to make sure options get set.
     Stage& reader = manager.makeReader(filename, "");
 
-    if (m_fastBoundary)
+    // If we aren't able to make a hexbin filter, we
+    // will just do a simple fast_boundary.
+    Stage* hexer = &manager.makeFilter("filters.hexbin", reader);
+    if (m_fastBoundary || !hexer)
     {
         QuickInfo qi = reader.preview();
 
@@ -482,11 +490,10 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     }
     else
     {
-        Stage& hexer = manager.makeFilter("filters.hexbin", reader);
 
         PointTable table;
-        hexer.prepare(table);
-        PointViewSet set = hexer.execute(table);
+        hexer->prepare(table);
+        PointViewSet set = hexer->execute(table);
 
         MetadataNode m = table.metadata();
         m = m.findChild("filters.hexbin:boundary");

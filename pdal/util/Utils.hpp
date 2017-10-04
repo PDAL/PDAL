@@ -45,6 +45,7 @@
 #include <istream>
 #include <limits>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -52,6 +53,9 @@
 #include <type_traits>
 #include <vector>
 
+#include <iostream>
+
+#include "NullOStream.hpp"
 #include "pdal_util_export.hpp"
 
 namespace pdal
@@ -62,8 +66,8 @@ namespace Utils
     /**
      * \brief Clamp value to given bounds.
      *
-     * Clamps the input value t to bounds specified by min and max. Used to ensure
-     * that row and column indices remain within valid bounds.
+     * Clamps the input value t to bounds specified by min and max.
+     * Used to ensure that row and column indices remain within valid bounds.
      *
      * \param t the input value.
      * \param min the lower bound.
@@ -441,7 +445,7 @@ namespace Utils
 
       \param s  String in which to start counting characters.
       \param p  Position in input string at which to start counting.
-      \param pred  Unary predicte that tests a character.
+      \param pred  Unary predicate that tests a character.
       \return  Then number of characters matching the predicate.
     */
     template<typename PREDICATE>
@@ -449,10 +453,21 @@ namespace Utils
     extract(const std::string& s, std::string::size_type p, PREDICATE pred)
     {
         std::string::size_type count = 0;
-        while (pred(s[p++]))
+        while (p < s.size() && pred(s[p++]))
             count++;
         return count;
     }
+
+    /**
+      Count the number of characters spaces in a string at a position.
+
+      \param s  String in which to start counting characters.
+      \param p  Position in input string at which to start counting.
+      \return  Then number of space-y characters matching the predicate.
+    */
+    PDAL_DLL inline std::string::size_type
+    extractSpaces(const std::string& s, std::string::size_type p)
+        { return extract(s, p, (int(*)(int))std::isspace); }
 
     /**
       Split a string into substrings based on a predicate.  Characters
@@ -553,6 +568,20 @@ namespace Utils
     }
 
     /**
+      Perform shell-style word expansion (break a string into arguments).
+      This only does simple handling of quoted values and backslashes
+      and doesn't support fancier shell behavior.  Use the real wordexp()
+      if you need all that.  The behavior of escaped values in a string
+      was surprising to me, so try the shell first if you think you've
+      found a problem.
+
+      \param s  Input string to parse.
+      \return  List of arguments.
+    */
+    PDAL_DLL std::vector<std::string>
+    simpleWordexp(const std::string& s);
+
+    /**
       Return a string representation of a type specified by the template
       argument.
 
@@ -564,16 +593,16 @@ namespace Utils
 
     struct RedirectStream
     {
-        RedirectStream() : m_out(NULL), m_out2(NULL), m_buf(NULL)
+        RedirectStream() : m_out(NULL), m_buf(NULL), m_null(new NullOStream)
         {}
 
         std::ofstream *m_out;
-        std::ostream *m_out2;
         std::streambuf *m_buf;
+        std::unique_ptr<NullOStream> m_null;
     };
 
     /**
-      Redirect a stream to some other stream.
+      Redirect a stream to some other stream, by default a null stream.
 
       \param out   Stream to redirect.
       \param dst   Destination stream.
@@ -583,21 +612,34 @@ namespace Utils
     {
         RedirectStream redir;
 
-        redir.m_out2 = &dst;
         redir.m_buf = out.rdbuf();
-        out.rdbuf(redir.m_out2->rdbuf());
+        out.rdbuf(dst.rdbuf());
         return redir;
     }
 
     /**
-      Redirect a stream to some file, by default /dev/null.
+      Redirect a stream to a null stream.
+
+      \param out   Stream to redirect.
+      \return  Context for stream restoration (see \ref restore()).
+    */
+    inline RedirectStream redirect(std::ostream& out)
+    {
+        RedirectStream redir;
+
+        redir.m_buf = out.rdbuf();
+        out.rdbuf(redir.m_null->rdbuf());
+        return redir;
+    }
+
+    /**
+      Redirect a stream to some file.
 
       \param out   Stream to redirect.
       \param file  Name of file where stream should be redirected.
       \return  Context for stream restoration (see \ref restore()).
     */
-    inline RedirectStream redirect(std::ostream& out,
-        const std::string& file = "/dev/null")
+    inline RedirectStream redirect(std::ostream& out, const std::string& file)
     {
         RedirectStream redir;
 
@@ -614,13 +656,12 @@ namespace Utils
       \param redir RedirectStream returned from corresponding
         \ref redirect() call.
     */
-    inline void restore(std::ostream& out, RedirectStream redir)
+    inline void restore(std::ostream& out, RedirectStream& redir)
     {
         out.rdbuf(redir.m_buf);
         if (redir.m_out)
             redir.m_out->close();
         redir.m_out = NULL;
-        redir.m_out2 = NULL;
         redir.m_buf = NULL;
     }
 
@@ -833,6 +874,19 @@ namespace Utils
     inline std::string toString(signed char from)
         { return std::to_string((int)from); }
 
+
+    template<typename T>
+    bool fromString(const std::string& from, T* & to)
+    {
+        void *v;
+        std::istringstream iss(from);
+
+        iss >> v;
+        to = reinterpret_cast<T*>(v);
+        return !iss.fail();
+    }
+
+
     /**
       Convert a string to a value by reading from a string stream.
 
@@ -867,12 +921,23 @@ namespace Utils
     template<>
     inline bool fromString<char>(const std::string& s, char& to)
     {
-        int i = std::stoi(s);
-        if (i >= std::numeric_limits<char>::lowest() &&
-            i <= std::numeric_limits<char>::max())
+        try
         {
-            to = static_cast<char>(i);
-            return true;
+            int i = std::stoi(s);
+            if (i >= std::numeric_limits<char>::lowest() &&
+                    i <= std::numeric_limits<char>::max())
+            {
+                to = static_cast<char>(i);
+                return true;
+            }
+        }
+        catch (std::invalid_argument) // Character that isn't a number?
+        {
+            if (s.length() == 1)
+            {
+                to = s[0];
+                return true;
+            }
         }
         return false;
     }
@@ -888,13 +953,25 @@ namespace Utils
     inline bool fromString<unsigned char>(const std::string& s,
         unsigned char& to)
     {
-        int i = std::stoi(s);
-        if (i >= std::numeric_limits<unsigned char>::lowest() &&
-            i <= std::numeric_limits<unsigned char>::max())
+        try
         {
-            to = static_cast<unsigned char>(i);
-            return true;
+            int i  = std::stoi(s);
+            if (i >= std::numeric_limits<unsigned char>::lowest() &&
+                i <= std::numeric_limits<unsigned char>::max())
+            {
+                to = static_cast<unsigned char>(i);
+                return true;
+            }
         }
+        catch (std::invalid_argument) // Character that isn't a number?
+        {
+            if (s.length() == 1)
+            {
+                to = s[0];
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -908,12 +985,23 @@ namespace Utils
     template<>
     inline bool fromString<signed char>(const std::string& s, signed char& to)
     {
-        int i = std::stoi(s);
-        if (i >= std::numeric_limits<signed char>::lowest() &&
-            i <= std::numeric_limits<signed char>::max())
+        try
         {
-            to = static_cast<signed char>(i);
-            return true;
+            int i = std::stoi(s);
+            if (i >= std::numeric_limits<signed char>::lowest() &&
+                    i <= std::numeric_limits<signed char>::max())
+            {
+                to = static_cast<signed char>(i);
+                return true;
+            }
+        }
+        catch (std::invalid_argument) // Character that isn't a number?
+        {
+            if (s.length() == 1)
+            {
+                to = s[0];
+                return true;
+            }
         }
         return false;
     }

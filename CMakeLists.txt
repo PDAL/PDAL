@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.4.0" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.5.0" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
 set(PDAL_API_VERSION "4")
-set(PDAL_BUILD_VERSION "5.0.0")
+set(PDAL_BUILD_VERSION "5.1.0")
 
 # Name of C++ library
 
@@ -56,15 +56,18 @@ else()
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
-set(PDAL_PLANG_LIB_NAME pdal_plang)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
-#set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
+set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
 set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_INSTALL_DIR}")
 set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_INSTALL_DIR}")
-set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+
+# allow override of PDAL_PLUGIN_INSTALL_PATH path
+if (NOT PDAL_PLUGIN_INSTALL_PATH)
+    set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+endif()
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 
@@ -115,14 +118,11 @@ include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/curl.cmake)
-if (CURL_FOUND)
-    set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
-endif()
-include(${PDAL_CMAKE_DIR}/rply.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
+include(${PDAL_CMAKE_DIR}/python.cmake)
+include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -146,6 +146,8 @@ endif()
 
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
+include(CheckIncludeFiles)
+check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 
 #------------------------------------------------------------------------------
@@ -169,16 +171,12 @@ endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
-
+add_subdirectory(vendor/kazhdan)
 if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
 endif()
 add_subdirectory(pdal/util)
-add_subdirectory(tools)
-if (BUILD_PLUGIN_PYTHON)
-    set(PYTHON_VERSION_STRING "something" CACHE STRING "Python version" FORCE)
-    add_subdirectory(pdal/plang)
-endif()
+#add_subdirectory(tools)
 add_subdirectory(apps)
 
 #
@@ -231,6 +229,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
+        ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PUBLIC
@@ -247,6 +246,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
+        ${PDAL_KAZHDAN_LIB_NAME}
     ${JSON_CPP_LINK_TYPE}
         ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE

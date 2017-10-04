@@ -3,12 +3,16 @@
 Cliping data with polygons
 ================================================================================
 
+.. include:: ../../includes/substitutions.rst
+
+
+
 Purpose:
     * Subset data with a polygon
     * Assign attribute data
     * Use PDAL pipeline
 
-:ref:`Clipping Workshop Materials <unavco:clipping>`
+:ref:`Clipping Workshop Materials <pdal:workshop-clipping>`
 
 Clipping (Autzen)
 ================================================================================
@@ -93,6 +97,17 @@ Clipping (verify)
 ================================================================================
 
 .. image:: ../../images/clipping-stadium-clipped.png
+
+
+Other ways to clip
+================================================================================
+
+* Clip using multiple :ref:`filters.range`
+* :ref:`filters.divider` or :ref:`filters.chipper`
+
+    .. image:: ../../../stages/filters.chipper.img2.png
+
+
 
 Next
 ================================================================================

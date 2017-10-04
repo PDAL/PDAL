@@ -206,6 +206,92 @@ public:
     }
 };
 
+
+/// Stream wrapper for output of binary data that converts from host ordering
+/// to big endian format
+class OBeStream : public OStream
+{
+public:
+    PDAL_DLL OBeStream()
+    {}
+    PDAL_DLL OBeStream(const std::string& filename) : OStream(filename)
+    {}
+    PDAL_DLL OBeStream(std::ostream *stream) : OStream(stream)
+    {}
+
+    PDAL_DLL OBeStream& operator << (uint8_t v)
+    {
+        m_stream->put((char)v);
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (int8_t v)
+    {
+        m_stream->put((char)v);
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (uint16_t v)
+    {
+        v = htobe16(v);
+        m_stream->write((char *)&v, sizeof(v));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (int16_t v)
+    {
+        v = (int16_t)htobe16((uint16_t)v);
+        m_stream->write((char *)&v, sizeof(v));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (uint32_t v)
+    {
+        v = htobe32(v);
+        m_stream->write((char *)&v, sizeof(v));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (int32_t v)
+    {
+        v = (int32_t)htobe32((uint32_t)v);
+        m_stream->write((char *)&v, sizeof(v));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (uint64_t v)
+    {
+        v = htobe64(v);
+        m_stream->write((char *)&v, sizeof(v));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (int64_t v)
+    {
+        v = (int64_t)htobe64((uint64_t)v);
+        m_stream->write((char *)&v, sizeof(v));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (float v)
+    {
+        uint32_t tmp(0);
+        std::memcpy(&tmp, &v, sizeof(v));
+        tmp = htobe32(tmp);
+        m_stream->write((char *)&tmp, sizeof(tmp));
+        return *this;
+    }
+
+    PDAL_DLL OBeStream& operator << (double v)
+    {
+        uint64_t tmp(0);
+        std::memcpy(&tmp, &v, sizeof(v));
+        tmp = htobe64(tmp);
+        m_stream->write((char *)&tmp, sizeof(tmp));
+        return *this;
+    }
+};
+
 /// Stream position marker with rewinding/reset support.
 class OStreamMarker
 {
@@ -226,7 +312,7 @@ public:
 private:
     std::streampos m_pos;
     OStream& m_stream;
-        
+
     OStreamMarker(const OStreamMarker&);  // not implemented
     OStreamMarker& operator=(const OStreamMarker&);  // not implemented
 };

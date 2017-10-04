@@ -14,7 +14,6 @@ Getting Started
    :maxdepth: 1
 
    using
-   overview
 
 Using PDAL
 ----------
@@ -24,11 +23,13 @@ Using PDAL
 
    reading
    writing
+   las
    pcl_block_tutorial
    pcl_ground
    clipping-with-shapefile
    calculating-normalized-heights
    dart-throwing
+   python-filtering
 
 
 Developing

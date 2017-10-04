@@ -34,7 +34,7 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/KernelFactory.hpp>
+#include <pdal/Kernel.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
@@ -110,7 +110,7 @@ void App::outputHelp(const ProgramArgs& args)
 
     m_out << "The following commands are available:" << std::endl;
 
-    KernelFactory f(false);
+    StageFactory f(false);
     StringList loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
     for (auto name : loaded_kernels)
@@ -181,7 +181,7 @@ void App::outputDrivers()
 
 void App::outputCommands()
 {
-    KernelFactory f(false);
+    StageFactory f(false);
     std::vector<std::string> loaded_kernels;
     loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
     for (auto name : loaded_kernels)
@@ -314,7 +314,7 @@ std::string App::findKernel()
         return names.size() == 2 ? names[1] : std::string();
     };
 
-    KernelFactory f(true);
+    StageFactory f(true);
     // Discover available kernels without plugins, and test to see if
     // the positional option 'command' is a valid kernel
     loadedKernels = PluginManager::names(PF_PluginType_Kernel);
@@ -323,7 +323,7 @@ std::string App::findKernel()
             return name;
 
     // Force loading of plugins.
-    KernelFactory f2(false);
+    StageFactory f2(false);
     loadedKernels = PluginManager::names(PF_PluginType_Kernel);
     for (auto& name : loadedKernels)
         if (m_command == kernelSurname(name))
@@ -354,7 +354,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
     PluginManager::setLog(log);
-#ifndef _WIN32
+#ifdef PDAL_HAVE_EXECINFO_H
     if (m_debug)
     {
         signal(SIGSEGV, [](int sig)
@@ -411,4 +411,3 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         outputHelp(args);
     return 0;
 }
-

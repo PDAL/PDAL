@@ -410,7 +410,7 @@ public:
 
             if (error.empty())
                 error = "Invalid value '" + s + "' for argument '" +
-                    m_longname;
+                    m_longname + "'.";
             throw arg_val_error(error);
         }
         m_set = true;
@@ -1070,8 +1070,8 @@ public:
 
     /**
       Parse a command line as specified by its argument vector.  No validation
-      occurs and no exceptions are raised, but assignments are made
-      to bound variables where possible.
+      occurs and only argument value exceptions are raised,
+      but assignments are made to bound variables where possible.
 
       \param s  List of strings that constitute the argument list.
     */
@@ -1131,7 +1131,7 @@ public:
 
       \param s  List of strings that constitute the argument list.
     */
-    void parse(std::vector<std::string>& s)
+    void parse(const std::vector<std::string>& s)
     {
         validate();
         ArgValList vals(s);
@@ -1157,6 +1157,24 @@ public:
             Arg *arg = ai->get();
             arg->assignPositional(vals);
         }
+    }
+
+    /**
+      Add a synonym for an argument.
+
+      \param name  Longname of existing arugment.
+      \param synonym  Synonym for argument.
+    */
+    void addSynonym(const std::string& name, const std::string& synonym)
+    {
+        Arg *arg = findLongArg(name);
+        if (!arg)
+            throw arg_error("Can't set synonym for argument '" + name + "'. "
+                "Argument doesn't exist.");
+        if (synonym.empty())
+            throw arg_error("Invalid (empty) synonym for argument '" +
+                name + "'.");
+        addLongArg(synonym, arg);
     }
 
     /**
@@ -1312,6 +1330,7 @@ public:
         }
         out << "]";
     }
+
 private:
     /*
       Split an argument name into longname and shortname.

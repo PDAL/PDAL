@@ -1,6 +1,6 @@
-docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-       pdal ground \
-       /data/exercises/analysis/ground/CSite1_orig-utm.laz \
-       -o /data/exercises/analysis/ground/ground.laz \
-       --classify=true \
-       --writers.las.compression=true -v 4
+pdal translate ^
+   c:/Users/hobu/PDAL/exercises/analysis/ground/CSite1_orig-utm.laz ^
+   -o c:/Users/hobu/PDAL/exercises/analysis/ground/ground.laz ^
+   smrf ^
+   -v 4
+

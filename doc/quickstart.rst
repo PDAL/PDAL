@@ -21,6 +21,24 @@ It will utilize the PDAL :ref:`command line application <apps>` to inspect the
 file.
 
 
+.. note::
+
+    While Docker is convenient, it is not for everyone. You can also obtain the
+    software by installing a Linux package from :ref:`download` or compiling it
+    yourself from :ref:`building`.
+
+    Docker is not required to use PDAL, and there are packages available on
+    Linux (Debian, RPM) and OSX (`Homebrew`_). See :ref:`download` to obtain
+    them. If you are a developer looking to leverage PDAL, you will need access
+    to the library in your environment, but this quick start document is for
+    those looking to quickly interact with data using PDAL's :ref:`command line
+    applications <apps>` and :ref:`pipeline`.
+
+    If you need to compile your own copy of PDAL, see :ref:`building` for
+    more details.
+
+.. _`Homebrew`: http://brew.sh
+
 .. _docker:
 
 Install Docker
@@ -69,14 +87,15 @@ Obtain PDAL Image
 ................................................................................
 
 A PDAL image based on the latest release, including all recent patches, is
-pushed to `Docker Hub`_ with every code change on the PDAL maintenance branch.
+pushed to `Docker Hub`_ with every code change on the PDAL maintenance branch (find
+out more about that at :ref:`here <development_docker>`).
 We need to pull it locally so we can use it to run PDAL commands. Once it is
 pulled, we don't have to pull it again unless we want to refresh it for
 whatever reason.
 
 ::
 
-    docker pull pdal/pdal:1.4
+    docker pull pdal/pdal:1.5
 
 
 .. image:: ./images/docker-quickstart-pull.png
@@ -84,7 +103,7 @@ whatever reason.
 .. note::
 
     Other PDAL versions are provided at the same `Docker Hub`_ location,
-    with an expected tag name (ie ``pdal/pdal:1.4``, or ``pdal/pdal:1.x``) for
+    with an expected tag name (ie ``pdal/pdal:1.5``, or ``pdal/pdal:1.x``) for
     major PDAL versions. The PDAL Docker hub location at
     https://hub.docker.com/u/pdal/ has images and more information
     on this topic.
@@ -114,7 +133,7 @@ Print the first point
 
 ::
 
-    docker run -v /c/Users/hobu:/data pdal/pdal:1.4 pdal info /data/autzen.laz -p 0
+    docker run -v /c/Users/hobu:/data pdal/pdal:1.5 pdal info /data/autzen.laz -p 0
 
 Here's a summary of what's going on with that command invocation
 
@@ -132,7 +151,7 @@ Here's a summary of what's going on with that command invocation
        The `Docker Volume <https://docs.docker.com/engine/userguide/dockervolumes/>`__
        document describes mounting volumes in more detail.
 
-4. ``pdal/pdal:1.4``: This is the Docker image we are going to run. We fetched it
+4. ``pdal/pdal:1.5``: This is the Docker image we are going to run. We fetched it
    with the command above. If it were not already fetched, Docker would attempt
    to fetch it when we run this command.
 
@@ -162,6 +181,8 @@ What's next?
 * :ref:`The PDAL workshop <workshop>` contains numerous hands-on examples with screenshots and
   example data of how to use PDAL :ref:`apps` to tackle point cloud data
   processing tasks.
+* :ref:`python` describes how PDAL embeds and extends Python and
+  how you can leverage these capabilities in your own programs.
 
 .. seealso::
 

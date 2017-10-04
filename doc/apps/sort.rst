@@ -12,5 +12,9 @@ The ``sort`` command uses :ref:`filters.mortonorder` to sort data by XY values.
 
 ::
 
-    --input [-i] arg   Non-positional argument to specify input file name.
-    --output [-o] arg  Non-positional argument to specify output file name.
+    --input, -i        Input filename
+    --output, -o       Output filename
+    --compress, -z     Compress output data (if supported by output format)
+    --metadata, -m     Forward metadata (VLRs, header entries, etc) from previous stages
+
+

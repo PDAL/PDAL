@@ -3,13 +3,16 @@
 Boundary
 ================================================================================
 
+
+.. include:: ../../includes/substitutions.rst
+
 Purpose:
     * Estimate spatial footprint
     * Do it quickly
     * Balance speed/quality
     * Look with :ref:`qgis`
 
-:ref:`Boundary Workshop Materials <unavco:boundary>`
+:ref:`Boundary Workshop Materials <pdal:boundary>`
 
 Boundary (command)
 ================================================================================

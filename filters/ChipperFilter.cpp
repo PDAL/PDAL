@@ -57,13 +57,9 @@ of the spare array then becomes the active array for the narrow direction.
 This avoids resorting of the arrays, which are already sorted.
 
 This procedure is then recursively applied to the created blocks until
-they contains only one or two partitions.  In the case of one partition,
-we are done, and we simply store away the contents of the block.  If there are
-two partitions in a block, we avoid the recopying the narrow array to the
-spare since the wide array already contains the desired points partitioned
-into two blocks.  We simply need to locate the maximum and minimum values
-from the narrow array so that the approriate extrema of the block can
-be stored.
+they contains only one or two partitions.  In the case of one or two
+partitions we are done, and we simply store away the contents of the
+blocks.
 **/
 
 #include <pdal/pdal_macros.hpp>
@@ -221,10 +217,15 @@ void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& s
 
     if (pright - pleft == 1)
         emit(wide, left, right);
-    else if (pright - pleft == 2)
-        finalSplit(wide, narrow, pleft, pright);
-    else
-    {
+    else if (pright - pleft == 2) {
+        center = m_partitions[pright - 1];
+        emit(wide,
+             left,
+             center - 1);
+        emit(wide,
+             center,
+             right);
+    } else {
         pcenter = (pleft + pright) / 2;
         center = m_partitions[pcenter];
 
@@ -250,79 +251,9 @@ void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& s
             }
         }
 
-        // Save away the direction so we know which array is X and which is Y
-        // so that when we emit, we can properly label the max/min points.
-        Direction dir = narrow.m_dir;
-        spare.m_dir = dir;
         decideSplit(wide, spare, narrow, pleft, pcenter);
         decideSplit(wide, spare, narrow, pcenter, pright);
-        narrow.m_dir = dir;
     }
-}
-
-// In this case the wide array is like we want it.  The narrow array is
-// ordered, but not for our split, so we have to find the max/min entries
-// for each partition in the final split.
-void ChipperFilter::finalSplit(ChipRefList& wide, ChipRefList& narrow,
-    PointId pleft, PointId pright)
-{
-
-    int64_t left1 = -1;
-    int64_t left2 = -1;
-    int64_t right1 = -1;
-    int64_t right2 = -1;
-
-    // It appears we're using int64_t here because we're using -1 as
-    // an indicator.  I'm not 100% sure that i ends up <0, but I don't
-    // think so.  These casts will at least shut up the compiler, but
-    // I think this code should be revisited to use std::vector<uint32_t>::const_iterator
-    // or std::vector<uint32_t>::size_type instead of this int64_t stuff -- hobu 11/15/10
-    int64_t left = m_partitions[pleft];
-    int64_t right = static_cast<int64_t>(m_partitions[pright] - 1);
-    int64_t center = static_cast<int64_t>(m_partitions[pright - 1]);
-
-    // Find left values for the partitions.
-    for (int64_t i = left; i <= right; ++i)
-    {
-        int64_t idx = static_cast<int64_t>(narrow[static_cast<uint32_t>(i)].m_oindex);
-        if (left1 < 0 && (idx < center))
-        {
-            left1 = i;
-            if (left2 >= 0)
-                break;
-        }
-        else if (left2 < 0 && (idx >= center))
-        {
-            left2 = i;
-            if (left1 >= 0)
-                break;
-        }
-    }
-    // Find right values for the partitions.
-    for (int64_t i = right; i >= left; --i)
-    {
-        int64_t idx = static_cast<int64_t>(narrow[static_cast<uint32_t>(i)].m_oindex);
-        if (right1 < 0 && (idx < center))
-        {
-            right1 = i;
-            if (right2 >= 0)
-                break;
-        }
-        else if (right2 < 0 && (idx >= center))
-        {
-            right2 = i;
-            if (right1 >= 0)
-                break;
-        }
-    }
-
-    // Emit results.
-    emit(wide,
-         left,
-         center - 1);
-    emit(wide,
-         center,
-         right);
 }
 
 void ChipperFilter::emit(ChipRefList& wide, PointId widemin, PointId widemax)

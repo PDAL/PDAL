@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/Filter.hpp>
 #include <pdal/pdal_test_main.hpp>
 
 #include <io/PlyReader.hpp>
@@ -126,6 +127,64 @@ TEST(PlyReader, ReadBinary)
     checkPoint(view, 0, -1, 0, 0);
     checkPoint(view, 1, 0, 1, 0);
     checkPoint(view, 2, 1, 0, 0);
+}
+
+
+TEST(PlyReader, ReadBinaryStream)
+{
+    class Checker : public Filter
+    {
+    public:
+        std::string getName() const
+            { return "checker"; }
+    private:
+        bool processOne(PointRef& point)
+        {
+            static int cnt = 0;
+            if (cnt == 0)
+            {
+                EXPECT_DOUBLE_EQ(-1,
+                    point.getFieldAs<double>(Dimension::Id::X));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Y));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Z));
+            }
+            if (cnt == 1)
+            {
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::X));
+                EXPECT_DOUBLE_EQ(1,
+                    point.getFieldAs<double>(Dimension::Id::Y));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Z));
+            }
+            if (cnt == 2)
+            {
+                EXPECT_DOUBLE_EQ(1,
+                    point.getFieldAs<double>(Dimension::Id::X));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Y));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Z));
+            }
+            cnt++;
+            return true;
+        }
+    };
+
+    PlyReader reader;
+    Options options;
+    options.add("filename", Support::datapath("ply/simple_binary.ply"));
+    reader.setOptions(options);
+
+    FixedPointTable table(10);
+
+    Checker c;
+    c.setInput(reader);
+
+    c.prepare(table);
+    c.execute(table);
 }
 
 

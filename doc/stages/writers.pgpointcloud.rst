@@ -3,11 +3,20 @@
 writers.pgpointcloud
 ====================
 
-The **PostgreSQL Pointcloud Writer** allows you to write to PostgreSQL database that have the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud extension stores point cloud data in tables that contain rows of patches. Each patch in turn contains a large number of spatially nearby points.
+The **PostgreSQL Pointcloud Writer** allows you to write to PostgreSQL database
+that have the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud
+extension stores point cloud data in tables that contain rows of patches. Each
+patch in turn contains a large number of spatially nearby points.
 
-While you can theoretically store the contents of a whole file of points in a single patch, it is more practical to store a table full of smaller patches, where the patches are under the PostgreSQL page size (8kb). For most LIDAR data, this practically means a patch size of between 400 and 600 points.
+While you can theoretically store the contents of a whole file of points in a
+single patch, it is more practical to store a table full of smaller patches,
+where the patches are under the PostgreSQL page size (8kb). For most LIDAR
+data, this practically means a patch size of between 400 and 600 points.
 
-In order to create patches of the right size, the Pointcloud writer should be preceded in the pipeline file by :ref:`filters.chipper`.
+In order to create patches of the right size, the Pointcloud writer should be
+preceded in the pipeline file by :ref:`filters.chipper`.
+
+.. plugin::
 
 Example
 -------
@@ -59,7 +68,7 @@ compression
   * **ght** applies a "geohash tree" compression by sorting the points into a prefix tree
 
 overwrite
-  To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **true**]
+  To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **false**]
 
 srid
   Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS) to store with the point cloud schema. [Default: **4326**]

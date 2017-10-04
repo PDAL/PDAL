@@ -5,15 +5,17 @@ writers.matlab
 
 The **Matlab Writer** supports writing Matlab `.mat` files.
 
-The produced files have two variables, `Dimensions` and `Points`.  `Dimensions`
-is a comma-delimited list of dimension names, and `Points` is a double array of
-all dimensions of every points.  This output array can get very large
-very quickly.
+The produced files has a single variable, `PDAL`, an array struct.
 
+.. image:: ./writers.matlab.png
 
 .. note::
 
-    The Matlab writer requires the Mat-File API from MathWorks.
+    The Matlab writer requires the Mat-File API from MathWorks, and
+    it must be explicitly enabled at compile time with the ``BUILD_PLUGIN_MATLAB=ON``
+    variable
+
+.. plugin::
 
 Example
 -------
@@ -42,3 +44,6 @@ filename
 
 output_dims
   Dimensions to include in the output file [OPTIONAL, defaults to all available dimensions]
+
+struct
+  Array structure name to read [OPTIONAL, defaults ``PDAL``]

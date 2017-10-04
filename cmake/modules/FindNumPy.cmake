@@ -20,7 +20,7 @@ FIND_PACKAGE(PythonLibs QUIET REQUIRED)
 EXECUTE_PROCESS(COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy; print (numpy.get_include()); print (numpy.version.version)"
                  OUTPUT_VARIABLE NUMPY_OUTPUT
                  ERROR_VARIABLE NUMPY_ERROR)
-                 
+message(STATUS "Numpy output: ${NUMPY_OUTPUT}")
 IF(NOT NUMPY_ERROR)
   STRING(REPLACE "\n" ";" NUMPY_OUTPUT ${NUMPY_OUTPUT})
   LIST(GET NUMPY_OUTPUT 0 NUMPY_INCLUDE_DIR)

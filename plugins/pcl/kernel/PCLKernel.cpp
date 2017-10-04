@@ -32,7 +32,6 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <io/BufferReader.hpp>
 
@@ -78,7 +77,7 @@ int PCLKernel::execute()
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
-    // processing pipeline and the visualizer
+    // processing pipeline.
     readerStage.prepare(table);
     PointViewSet viewSetIn = readerStage.execute(table);
 
@@ -104,14 +103,7 @@ int PCLKernel::execute()
     Stage& writer(makeWriter(m_outputFile, pclStage, "", writerOptions));
 
     writer.prepare(table);
-
-    // process the data, grabbing the PointViewSet for visualization of the
-    // resulting PointView
-    PointViewSet viewSetOut = writer.execute(table);
-
-    if (isVisualize())
-        visualize(*viewSetOut.begin());
-    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
+    writer.execute(table);
 
     return 0;
 }

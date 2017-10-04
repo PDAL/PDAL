@@ -8,9 +8,9 @@ add_feature_info("Bash completion" WITH_COMPLETION
     "completion for PDAL command line")
 
 option(BUILD_PLUGIN_CPD
-    "Choose if Coherent Point Drift kernel is built" FALSE)
+    "Choose if the cpd filter should be built" FALSE)
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
-    "run Coherent Point Drift on two datasets")
+    "Coherent Point Drift (CPD) computes rigid or nonrigid transformations between point sets")
 
 option(BUILD_PLUGIN_GEOWAVE
     "Choose if GeoWave support should be built" FALSE)
@@ -47,6 +47,11 @@ option(BUILD_PLUGIN_NITF
 add_feature_info("NITF plugin" BUILD_PLUGIN_NITF
     "read/write LAS data wrapped in NITF")
 
+option(BUILD_PLUGIN_OPENSCENEGRAPH
+    "Choose if OpenSceneGraph support should be built" FALSE)
+add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
+    "read/write OpenSceneGraph objects")
+
 if(DEFINED ENV{ORACLE_HOME})
     set(DEFINED_ORACLE_HOME TRUE)
 else(DEFINED ENV{ORACLE_HOME})
@@ -80,6 +85,11 @@ option(BUILD_PLUGIN_PYTHON
     "Choose if Python support should be built" FALSE)
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
     "add features that depend on python")
+
+option(BUILD_PLUGIN_MBIO
+    "Choose if MBIO support should be built" FALSE)
+add_feature_info("MBIO plugin" BUILD_PLUGIN_MBIO
+    "add features that depend on MBIO")
 
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 

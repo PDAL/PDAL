@@ -1,2 +1,2 @@
-docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
-    pdal info /data/exercises/info/interesting.las --all
+pdal info c:/Users/hobu/pdal/exercises/info/interesting.las --all ^
+    | jq .stats.bbox.native.bbox

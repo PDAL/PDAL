@@ -64,8 +64,6 @@ public:
 
     GDALReader();
 
-    static Dimension::IdList getDefaultDimensions();
-
 private:
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
@@ -74,6 +72,8 @@ private:
     virtual void done(PointTableRef table)
         { m_raster->close(); }
     virtual QuickInfo inspect();
+    template<typename T>
+    void readBandData(int band, PointViewPtr view, point_count_t count);
 
     std::unique_ptr<gdal::Raster> m_raster;
     point_count_t m_index;

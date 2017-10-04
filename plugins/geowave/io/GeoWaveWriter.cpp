@@ -34,6 +34,7 @@
 
 #include "GeoWaveWriter.hpp"
 
+#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -135,6 +136,9 @@ using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloDataSto
 #include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/AccumuloIndexWriter.h"
 using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloIndexWriter;
 
+namespace pdal
+{
+  
 static PluginInfo const s_info = PluginInfo(
     "writers.geowave",
     "Write data using GeoWave.",
@@ -144,12 +148,9 @@ CREATE_SHARED_PLUGIN(1, 0, GeoWaveWriter, Writer, s_info)
 
 std::string pdal::GeoWaveWriter::getName() const { return s_info.name; }
 
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-namespace pdal
-{
     void GeoWaveWriter::addArgs(ProgramArgs& args)
     {
         args.add("zookeeper_url", "The comma-delimited URLs for all "
@@ -162,7 +163,7 @@ namespace pdal
             "an Accumulo connector.", m_username).setPositional();
         args.add("password", "The password for the account to establish "
             "an Accumulo connector.", m_password).setPositional();
-        args.add("table_namespace", " "The table name to be used when "
+        args.add("table_namespace", "The table name to be used when "
             "interacting with GeoWave.", m_tableNamespace).setPositional();
         args.add("feature_type_name", "The feature type name to be used "
             "when interacting with GeoWave.", m_featureTypeName, "PDAL_Point");
@@ -193,7 +194,7 @@ namespace pdal
         // get a list of all the dimensions & their types
         Dimension::IdList all = table.layout()->dims();
         for (auto di = all.begin(); di != all.end(); ++di)
-            if (!contains(m_dims, *di))
+            if (!Utils::contains(m_dims, *di))
                 m_dims.push_back(*di);
     }
 

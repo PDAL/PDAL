@@ -43,6 +43,7 @@
 #include <Eigen/Dense>
 
 #include <cfloat>
+#include <numeric>
 #include <vector>
 
 namespace pdal
@@ -91,7 +92,7 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
         k++;
     }
 
-    return A * A.transpose();
+    return A * A.transpose() / (ids.size()-1);
 }
 
 uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
@@ -278,7 +279,7 @@ Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
             double y = bounds.miny + (r + 0.5) * cell_size;
 
             auto neighbors = kdi.radius(x, y, cell_size * std::sqrt(2.0));
-            
+
             double val(std::numeric_limits<double>::lowest());
             for (auto const& n : neighbors)
             {
@@ -467,6 +468,74 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     return maxZ.block(radius, radius, data.rows(), data.cols());
 }
 
+std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
+{
+    std::vector<double> out(data.size(), std::numeric_limits<double>::lowest());
+    std::vector<size_t> idx(5);
+
+    for (int iter = 0; iter < iterations; ++iter)
+    {
+        for (size_t col = 0; col < cols; ++col)
+        {
+            size_t index = col*rows;
+            for (size_t row = 0; row < rows; ++row)
+            {
+                size_t j = 0;
+                idx[j++] = index+row;
+                if (row > 0)
+                    idx[j++] = idx[0]-1;
+                if (row < rows-1)
+                    idx[j++] = idx[0]+1;
+                if (col > 0)
+                    idx[j++] = idx[0]-rows;
+                if (col < cols-1)
+                    idx[j++] = idx[0]+rows;
+                for (size_t i = 0; i < j; ++i)
+                {
+                    if (data[idx[i]] > out[index+row])
+                        out[index+row] = data[idx[i]];
+                }
+            }
+        }
+        data.swap(out);
+    }
+    return data;
+}
+
+std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
+{
+    std::vector<double> out(data.size(), std::numeric_limits<double>::max());
+    std::vector<size_t> idx(5);
+
+    for (int iter = 0; iter < iterations; ++iter)
+    {
+        for (size_t col = 0; col < cols; ++col)
+        {
+            size_t index = col*rows;
+            for (size_t row = 0; row < rows; ++row)
+            {
+                size_t j = 0;
+                idx[j++] = index+row;
+                if (row > 0)
+                    idx[j++] = idx[0]-1;
+                if (row < rows-1)
+                    idx[j++] = idx[0]+1;
+                if (col > 0)
+                    idx[j++] = idx[0]-rows;
+                if (col < cols-1)
+                    idx[j++] = idx[0]+rows;
+                for (size_t i = 0; i < j; ++i)
+                {
+                    if (data[idx[i]] < out[index+row])
+                        out[index+row] = data[idx[i]];
+                }
+            }
+        }
+        data.swap(out);
+    }
+    return data;
+}
+
 Eigen::MatrixXd pointViewToEigen(const PointView& view)
 {
     Eigen::MatrixXd matrix(view.size(), 3);
@@ -509,7 +578,7 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     Eigen::Matrix<float, Dynamic, Dynamic, RowMajor> dataRowMajor;
     dataRowMajor = data.cast<float>();
 
-    raster.writeBand((uint8_t *)dataRowMajor.data(), 1);
+    raster.writeBand((float*)dataRowMajor.data(), -9999.0f, 1);
 }
 
 Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data)

@@ -22,7 +22,7 @@ the two supported decompressors, `LASzip`_ or `LAZperf`_.  See the
   input LAS file to an output LAS file will frequently want to use the same
   scale factors and offsets in the output file as existed in the input
   file in order to
-  maintain the precision of the data.  Use the 'forward' option on the
+  maintain the precision of the data.  Use the `forward` option on the
   :ref:`writers.las` to facilitate transfer of header information from
   source to destination LAS/LAZ files.
 
@@ -40,15 +40,22 @@ the two supported decompressors, `LASzip`_ or `LAZperf`_.  See the
   on the extra bytes VLR in the `LAS Specification`_ for more information
   on the extra bytes VLR and array datatypes.
 
-.. note::
+.. warning::
+
   LAS 1.4 files that use the extra bytes VLR and datatype 0 will be accepted,
   but the data associated with a dimension of datatype 0 will be ignored
   (no PDAL dimension will be created).
+
+.. embed::
+
+.. streamable::
+
 
 Example
 -------
 
 .. code-block:: json
+    :linenos:
 
     {
       "pipeline":[
@@ -73,17 +80,28 @@ _`extra_dims`
   Extra dimensions to be read as part of each point beyond those specified by
   the LAS point format.  The format of the option is
   <dimension_name>=<type>, ... where type is one of:
-  int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double
-  '_t' may be added to any of the type names as well (e.g., uint32_t).  NOTE:
-  the presence of an extra bytes VLR causes when reading a version 1.4 LAS
-  file causes this option to be ignored.
+  int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double.
+  `_t` may be added to any of the type names as well (e.g., uint32_t).
+
+  .. note::
+
+      The presence of an extra bytes VLR causes when reading a version 1.4 LAS file
+      causes this option to be ignored.
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _LAS Specification: http://www.asprs.org/a/society/committees/standards/LAS_1_4_r13.pdf
 
 _`compression`
   May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
-  or the LasZip decompressor for LAZ files.  PDAL must have been build with
+  or the LASzip decompressor for LAZ files.  PDAL must have been built with
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS.
   [Default: "laszip"]
+
+_`spatialreference`
+  Sets the spatial reference for the file data.  Overrides any spatial
+  reference information in the file itself.  Most text-based formats of
+  SRS information are accepted, including WKT and proj.4.
+
+_`count`
+    Maximum number of points read [Optional]

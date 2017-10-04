@@ -10,6 +10,7 @@ the :ref:`writers.oci` and :ref:`writers.pgpointcloud`, the
 SQLite driver stores data in tables that contain rows of
 patches. Each patch contains a number of spatially contiguous points
 
+.. plugin::
 
 Example
 -------
@@ -41,5 +42,7 @@ query
 spatialreference
   The spatial reference to use for the points. Over-rides the value read from the database.
 
+count
+  Maximum number of points to read [Optional]
 
 .. _SQLite: https://sqlite.org/

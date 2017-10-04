@@ -3,9 +3,13 @@
 readers.optech
 ==============
 
-The **Optech reader** reads Corrected Sensor Data (.csd) files.
-These files contain scan angles, ranges, IMU and GNSS information, and boresight calibration values, all of which are combined in the reader into XYZ points using the WGS84 reference frame.
+The **Optech reader** reads Corrected Sensor Data (.csd) files.  These files
+contain scan angles, ranges, IMU and GNSS information, and boresight
+calibration values, all of which are combined in the reader into XYZ points
+using the WGS84 reference frame.
 
+
+.. embed::
 
 Example
 -------
@@ -31,3 +35,6 @@ Options
 
 filename
   csd file to read [Required]
+
+count
+  Maximum number of points read [Optional]

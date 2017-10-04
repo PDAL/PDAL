@@ -40,7 +40,8 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-#include <filters/private/crop/Point.hpp>
+
+#include "private/Point.hpp"
 
 #include <sstream>
 #include <cstdarg>
@@ -94,6 +95,11 @@ void CropFilter::initialize()
             m_geoms.push_back(poly);
         }
     }
+
+    m_boxes.clear();
+    for (auto& bound : m_bounds)
+        m_boxes.push_back(bound.to2d());
+
     m_distance2 = m_distance * m_distance;
 }
 
@@ -102,7 +108,13 @@ void CropFilter::ready(PointTableRef table)
 {
     // If the user didn't provide an SRS, take one from the table.
     if (m_assignedSrs.empty())
+    {
         m_assignedSrs = table.anySpatialReference();
+        if (!table.spatialReferenceUnique())
+            log()->get(LogLevel::Warning) << "Can't determine spatial "
+                "reference for provided bounds.  Consider using 'a_srs' "
+                "option.\n";
+    }
     for (auto& geom : m_geoms)
         geom.setSpatialReference(m_assignedSrs);
 }
@@ -114,8 +126,8 @@ bool CropFilter::processOne(PointRef& point)
         if (!crop(point, geom))
             return false;
 
-    for (auto& box : m_bounds)
-        if (!crop(point, box.to2d()))
+    for (auto& box : m_boxes)
+        if (!crop(point, box))
             return false;
 
     for (auto& center: m_centers)
@@ -153,17 +165,19 @@ void CropFilter::transform(const SpatialReference& srs)
         throwError("Unable to transform crop geometry to point "
             "coordinate system.");
 
-    for (auto& box : m_bounds)
+    for (auto& box : m_boxes)
     {
-        BOX3D b3d = box.to3d();
-        gdal::reprojectBounds(b3d, m_assignedSrs.getWKT(), srs.getWKT());
-        box = b3d;
+        if (!gdal::reprojectBounds(box, m_assignedSrs.getWKT(), srs.getWKT()))
+            throwError("Unable to reproject bounds.");
     }
     for (auto& point : m_centers)
     {
-        gdal::reprojectPoint(point.x, point.y, point.z,
-            m_assignedSrs.getWKT(), srs.getWKT());
+        if (!gdal::reprojectPoint(point.x, point.y, point.z,
+            m_assignedSrs.getWKT(), srs.getWKT()))
+            throwError("Unable to reproject point center.");
     }
+    // Set the assigned SRS for the points/bounds to the one we've
+    // transformed to.
     m_assignedSrs = srs;
 }
 
@@ -180,10 +194,10 @@ PointViewSet CropFilter::run(PointViewPtr view)
         viewSet.insert(outView);
     }
 
-    for (auto& box : m_bounds)
+    for (auto& box : m_boxes)
     {
         PointViewPtr outView = view->makeNew();
-        crop(box.to2d(), *view, *outView);
+        crop(box, *view, *outView);
         viewSet.insert(outView);
     }
 
@@ -238,7 +252,7 @@ void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
 }
 
 
-bool CropFilter::crop(const PointRef& point, const cropfilter::Point& center)
+bool CropFilter::crop(const PointRef& point, const filter::Point& center)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -262,7 +276,7 @@ bool CropFilter::crop(const PointRef& point, const cropfilter::Point& center)
 }
 
 
-void CropFilter::crop(const cropfilter::Point& center, PointView& input,
+void CropFilter::crop(const filter::Point& center, PointView& input,
     PointView& output)
 {
     PointRef point = input.point(0);

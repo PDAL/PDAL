@@ -149,6 +149,29 @@ public:
 
         return neighbors(x, y, k);
     }
+    
+    void knnSearch(double x, double y, point_count_t k,
+        std::vector<PointId> *indices, std::vector<double> *sqr_dists)
+    {
+        k = std::min(m_buf.size(), k);
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
+
+        resultSet.init(&indices->front(), &sqr_dists->front());
+
+        std::vector<double> pt;
+        pt.push_back(x);
+        pt.push_back(y);
+        m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
+    }
+    
+    void knnSearch(PointId idx, point_count_t k, std::vector<PointId> *indices,
+        std::vector<double> *sqr_dists)
+    {
+        double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+
+        knnSearch(x, y, k, indices, sqr_dists);
+    }
 
     std::vector<PointId> radius(double const& x, double const& y,
         double const& r) const

@@ -17,7 +17,7 @@ from the command-line.
     --input, -i        Input filename
     --output, -o       Output filename
     --filter, -f       Filter type
-    --json             JSON array of filters
+    --json             PDAL pipeline from which to extract filters.
     --pipeline, -p     Pipeline output
     --metadata, -m     Dump metadata output to the specified file
     --reader, -r       Reader type
@@ -25,16 +25,19 @@ from the command-line.
 
 The ``--input`` and ``--output`` file names are required options.
 
-The ``--pipeline`` file name is optional. If given, the pipeline constructed
-from the command-line arguments will be written to disk for reuse in the
-:ref:`pipeline_command`.
+If provided, the ``--pipeline`` option will write the pipeline constructed
+from the command-line arguments to the specified file.  The translate
+command will not actually run when this argument is given.
 
-The ``--json`` flag can use used to specify a JSON array of filters
-as if they were being specified in a :ref:`pipeline_command`.  If a filename
-follows the flag, the file is opened and it is assumed that the file
-contains a valid JSON array of filter specifications.  If the flag value
-is not a filename, the value is taken to be a literal JSON string that is
-the array of filters.  The flag
+The ``--json`` flag can use used to specify a PDAL pipeline from which
+filters will be extracted.  If a reader or writer exist in the pipeline,
+they will be removed and replaced with the input and output provided on
+the command lines.  If a reader/writer stage referenced tags in the
+provided pipeline, the overriding files will assume those tags.  If the
+argument to the ``--json`` option references an existing file, it is assumed
+that the file contains the pipeline to be processed.  If the argument value
+is not a filename, it is taken to be a literal JSON string that is
+the pipeline.  The flag
 can't be used if filters are listed on the command line or explicitly
 with the ``--filter`` option.
 
@@ -52,7 +55,8 @@ the correct drivers from the input and output file name extensions respectively.
 Example 1:
 --------------------------------------------------------------------------------
 
-The ``translate`` command can be augmented by specifying full-path options at
+The ``translate`` command can be augmented by specifying fully specified
+options at
 the command-line invocation. For example, the following invocation will
 translate ``1.2-with-color.las`` to ``output.laz`` while doing the following:
 
@@ -76,15 +80,16 @@ Example 2:
 --------------------------------------------------------------------------------
 
 Given these tools, we can now construct a custom pipeline on-the-fly. The
-example below uses a simple LAS reader and writer, but stages a PCL-based
-voxel grid filter, followed by the PMF filter. We can even set
+example below uses a simple LAS reader and writer, but stages a PCL-based voxel
+grid filter, followed by the PMF filter and a range filter. We can even set
 stage-specific parameters as shown.
 
 ::
 
-    $ pdal translate input.las output.las pclblock pmf \
-        --filters.pclblock.json="{\"pipeline\":{\"filters\":[{\"name\":\"VoxelGrid\"}]}}" \
-        --filters.pmf.approximate=true --filters.pmf.extract=true
+    $ pdal translate input.las output.las pclblock pmf range \
+        --filters.pclblock.methods="[{\"name\":\"VoxelGrid\"}]" \
+        --filters.pmf.approximate=true \
+        --filters.range.limits="Classification[2:2]"
 
 Example 3:
 --------------------------------------------------------------------------------
@@ -97,4 +102,15 @@ output (including the output from the stats filter) is written to the file
 ::
 
     $ pdal translate myfile output.las --metadata=meta.json -r readers.text \
-        --json="[ { \"type\":\"filters.stats\" } ]"
+        --json="{ \"pipeline\": [ { \"type\":\"filters.stats\" } ] }"
+
+Example 4:
+--------------------------------------------------------------------------------
+
+This command reprojects the points in the file "input.las" to another spatial
+reference system and writes the result to the file "output.las".
+
+::
+
+    $ pdal translate input.las output.las -f filters.reprojection \
+      --filters.reprojection.out_srs="EPSG:4326"

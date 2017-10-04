@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J. Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016-2017, Bradley J. Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -37,6 +37,8 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
 
+#include "../filters/private/DimRange.hpp"
+
 #include <vector>
 
 namespace pdal
@@ -62,8 +64,15 @@ namespace Segmentation
   \returns a vector of clusters (themselves vectors of PointIds).
 */
 PDAL_DLL std::vector<std::vector<PointId>> extractClusters(PointView& view,
-                                        uint64_t min_points,
-                                        uint64_t max_points, double tolerance);
+                                                           uint64_t min_points,
+                                                           uint64_t max_points,
+                                                           double tolerance);
+
+PDAL_DLL void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
+                             PointViewPtr ignore);
+
+PDAL_DLL void segmentLastReturns(PointViewPtr input, PointViewPtr last,
+                                 PointViewPtr other);
 
 } // namespace Segmentation
 } // namespace pdal

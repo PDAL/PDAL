@@ -1,0 +1,79 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a91cee1..4e38769 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -146,6 +146,8 @@ endif()
+ 
+ set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
+ set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
++include(CheckIncludeFiles)
++check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
+ configure_file(${pdal_defines_h_in} ${pdal_defines_h})
+ 
+ #------------------------------------------------------------------------------
+diff --git a/apps/pdal.cpp b/apps/pdal.cpp
+index 3193196..548ea4f 100644
+--- a/apps/pdal.cpp
++++ b/apps/pdal.cpp
+@@ -355,6 +355,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
+         log->setLevel(LogLevel::Debug);
+     PluginManager::setLog(log);
+ #ifndef _WIN32
++#ifdef PDAL_HAVE_EXECINFO_H
+     if (m_debug)
+     {
+         signal(SIGSEGV, [](int sig)
+@@ -368,6 +369,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
+         });
+     }
+ #endif
++#endif
+ 
+     m_command = Utils::tolower(m_command);
+     if (!m_command.empty())
+diff --git a/pdal/util/Utils.cpp b/pdal/util/Utils.cpp
+index c2a9489..d0675c4 100644
+--- a/pdal/util/Utils.cpp
++++ b/pdal/util/Utils.cpp
+@@ -44,7 +44,9 @@
+ #include <cxxabi.h>
+ #include <sys/ioctl.h>
+ #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
++#ifdef PDAL_HAVE_EXECINFO_H
+ #include <execinfo.h> // backtrace
++#endif
+ #include <dlfcn.h> // dladdr
+ #endif
+ 
+@@ -605,6 +607,7 @@ std::vector<std::string> Utils::backtrace()
+ {
+     std::vector<std::string> lines;
+ #ifndef WIN32
++#ifdef PDAL_HAVE_EXECINFO_H
+     const int MAX_STACK_SIZE(100);
+     void* buffer[MAX_STACK_SIZE];
+     std::vector<std::string> prefixes;
+@@ -657,6 +660,7 @@ std::vector<std::string> Utils::backtrace()
+         }
+     }
+ #endif
++#endif
+     return lines;
+ }
+ 
+diff --git a/pdal_defines.h.in b/pdal_defines.h.in
+index 77dca12..15e3932 100644
+--- a/pdal_defines.h.in
++++ b/pdal_defines.h.in
+@@ -34,6 +34,11 @@
+ #cmakedefine PDAL_ARBITER_ENABLED
+ 
+ /*
++ * availability of execinfo.h
++ */
++#cmakedefine PDAL_HAVE_EXECINFO_H
++
++/*
+  * Debug or Release build?
+  */
+ #define PDAL_BUILD_TYPE "@PDAL_BUILD_TYPE@"

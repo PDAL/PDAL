@@ -36,6 +36,7 @@
 
 #include <pdal/DimDetail.hpp>
 #include <pdal/DimType.hpp>
+#include <pdal/Mesh.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
@@ -62,6 +63,8 @@ namespace plang
 struct PointViewLess;
 class PointView;
 class PointViewIter;
+class KD2Index;
+class KD3Index;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
@@ -72,11 +75,11 @@ class PDAL_DLL PointView : public PointContainer
     friend class PointIdxRef;
     friend struct PointViewLess;
 public:
+    PointView(const PointView&) = delete;
+    PointView& operator=(const PointView&) = delete;
     PointView(PointTableRef pointTable);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
-
-    virtual ~PointView()
-    {}
+    virtual ~PointView();
 
     PointViewIter begin();
     PointViewIter end();
@@ -95,6 +98,7 @@ public:
     {
         // We use size() instead of the index end because temp points
         // might have been placed at the end of the buffer.
+        // We're essentially ditching temp points.
         auto thisEnd = m_index.begin() + size();
         auto bufEnd = buf.m_index.begin() + buf.size();
         m_index.insert(thisEnd, buf.m_index.begin(), bufEnd);
@@ -242,7 +246,6 @@ public:
         }
     }
 
-
     /// Provides access to the memory storing the point data.  Though this
     /// function is public, other access methods are safer and preferred.
     char *getPoint(PointId id)
@@ -272,6 +275,26 @@ public:
     }
     MetadataNode toMetadata() const;
 
+    /**
+      Creates a mesh with the specified name.
+
+      \param name  Name of the mesh.
+      \return  Pointer to the new mesh.  Null is returned if the mesh
+          already exists.
+    */
+    TriangularMesh *createMesh(const std::string& name);
+
+    /**
+      Get a pointer to a mesh.
+
+      \param name  Name of the mesh.
+      \return  New mesh.  Null is returned if the mesh already exists.
+    */
+    TriangularMesh *mesh(const std::string& name = "");
+
+    KD3Index& build3dIndex();
+    KD2Index& build2dIndex();
+
 protected:
     PointTableRef m_pointTable;
     std::deque<PointId> m_index;
@@ -281,6 +304,9 @@ protected:
     int m_id;
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
+    std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
+    std::unique_ptr<KD3Index> m_index3;
+    std::unique_ptr<KD2Index> m_index2;
 
 private:
     static int m_lastId;
@@ -527,32 +553,6 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
         throw pdal_error(oss.str());
     }
 }
-
-/**
-void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
-    const void *value)
-{
-    PointId rawId = 0;
-    if (idx == size())
-    {
-        rawId = m_pointTable.addPoint();
-        m_index.push_back(rawId);
-        m_size++;
-        assert(m_temps.empty());
-    }
-    else if (idx > size())
-    {
-        std::cerr << "Point index must increment.\n";
-        //error - throw?
-        return;
-    }
-    else
-    {
-        rawId = m_index[idx];
-    }
-    m_pointTable.setFieldInternal(dim, rawId, value);
-}
-**/
 
 inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {

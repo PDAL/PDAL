@@ -133,7 +133,7 @@ PCL JSON always consists of a single array of PCL JSON objects. This array
 
 
 Filters
-.......
+--------------------------------------------------------------------------------
 
 A filter is any of the PCL filters that has been exposed through the PCL
 pipeline class.
@@ -146,7 +146,7 @@ Any JSON keys not recognized by the spec are blissfully ignored.
 
 
 ApproximateProgressiveMorphologicalFilter (APMF)
-````````````````````````````````````````````````
+................................................................................
 
 .. seealso:
 
@@ -212,7 +212,7 @@ setNegative: bool
 
 
 GridMinimum
-```````````
+................................................................................
 
 This filter assembles a local 2D grid over a given PointCloud, then downsamples
 the data.
@@ -238,7 +238,7 @@ setResolution: float
 
 
 PassThrough
-```````````
+................................................................................
 
 **Description**
 
@@ -284,7 +284,7 @@ setFilterLimits: object `{"min": float, "max": float}`
 
 
 ProgressiveMorphologicalFilter (PMF)
-````````````````````````````````````
+................................................................................
 
 
 .. seealso::
@@ -351,7 +351,7 @@ setNegative: bool
 
 
 RadiusOutlierRemoval
-````````````````````
+................................................................................
 
 .. seealso::
 
@@ -391,7 +391,7 @@ setRadiusSearch: float
 
 
 StatisticalOutlierRemoval
-`````````````````````````
+................................................................................
 
 .. seealso::
 
@@ -429,7 +429,7 @@ setStddevMulThresh: float
 
 
 VoxelGrid
-`````````
+................................................................................
 
 .. seealso::
 

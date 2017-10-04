@@ -80,6 +80,7 @@ private:
     void writeNameToId(std::ostream& out);
     void writeIdToName(std::ostream& out);
     void writeTypes(std::ostream& out);
+    void validateDimension(const std::string& dimName);
 };
 
 } // namespace pdal

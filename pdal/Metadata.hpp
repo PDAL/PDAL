@@ -150,7 +150,11 @@ private:
     }
 
     template <typename T>
-    inline void setValue(const T& t);
+    inline void setValue(const T& t)
+    {
+        m_type = "unknown";
+        m_value = Utils::toString(t);
+    }
 
     template <std::size_t N>
     inline void setValue(const char(& c)[N]);
@@ -454,7 +458,7 @@ public:
     template<typename T>
     T value() const
     {
-        T t;
+        T t{};
 
         if (m_impl->m_type == "base64Binary")
         {
@@ -465,7 +469,7 @@ public:
         }
         else
         {
-            if (!Utils::fromString<T>(m_impl->m_value, t))
+            if (!Utils::fromString(m_impl->m_value, t))
             {
                 // Static to get default initialization.
                 static T t2;
@@ -488,7 +492,7 @@ public:
 
         std::string v(Utils::escapeJSON(value()));
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
-            m_impl->m_type == "uuid")
+            m_impl->m_type == "uuid" || m_impl->m_type == "matrix")
         {
             std::string val("\"");
             val += escapeQuotes(v) + "\"";

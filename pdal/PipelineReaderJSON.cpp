@@ -252,10 +252,12 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
         if (node.isMember("tag"))
             throw pdal_error("JSON pipeline: found duplicate 'tag' "
                "entry in stage definition.");
+        std::string::size_type pos = 0;
+        if (!Stage::parseTagName(tag, pos) || pos != tag.size())
+            throw pdal_error("JSON pipeline: Invalid tag name '" + tag + "'.  "
+                "Must start with letter.  Remainder can be letters, "
+                "digits or underscores.");
     }
-    if (Utils::contains(tag, '.'))
-        throw pdal_error("JSON pipeline: Stage tag name can't contain "
-            "'.' character.");
     return tag;
 }
 

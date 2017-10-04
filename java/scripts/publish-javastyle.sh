@@ -19,7 +19,7 @@ do
     esac
 done
 
-export PDAL_VERSION_SUFFIX=${PDAL_VERSION_SUFFIX:-"-SNAPSHOT"}
+export PDAL_VERSION_SUFFIX=${PDAL_VERSION_SUFFIX-"-SNAPSHOT"}
 SIGNED=${SIGNED:-false}
 
 COMMAND=publish
@@ -28,4 +28,4 @@ if ${SIGNED}; then
     COMMAND=publishSigned
 fi
 
-PDAL_DEPEND_ON_NATIVE=false ./sbt "-212" "project core" ${COMMAND}-javastyle
+PDAL_DEPEND_ON_NATIVE=false ./sbt "-212" "project core" ${COMMAND}Javastyle

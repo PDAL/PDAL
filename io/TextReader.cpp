@@ -64,13 +64,18 @@ void TextReader::initialize(PointTableRef table)
     auto isspecial = [](char c)
         { return (!std::isalnum(c) && c != ' '); };
 
-    // Scan string for some character not a number, space or letter.
-    for (size_t i = 0; i < buf.size(); ++i)
-        if (isspecial(buf[i]))
-        {
-            m_separator = buf[i];
-            break;
-        }
+    // If the separator wasn't provided on the command line extract it
+    // from the header line.
+    if (m_separator == ' ')
+    {
+        // Scan string for some character not a number, space or letter.
+        for (size_t i = 0; i < buf.size(); ++i)
+            if (isspecial(buf[i]))
+            {
+                m_separator = buf[i];
+                break;
+            }
+    }
 
     if (m_separator != ' ')
         m_dimNames = Utils::split(buf, m_separator);
@@ -80,14 +85,22 @@ void TextReader::initialize(PointTableRef table)
 }
 
 
+void TextReader::addArgs(ProgramArgs& args)
+{
+    args.add("separator", "Separator character that overrides special "
+        "character in header line", m_separator, ' ');
+}
+
+
 void TextReader::addDimensions(PointLayoutPtr layout)
 {
+    m_dims.clear();
     for (auto name : m_dimNames)
     {
         Utils::trim(name);
         Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
-        if (Utils::contains(m_dims, id))
+        if (Utils::contains(m_dims, id) && id != pdal::Dimension::Id::Unknown)
             throwError("Duplicate dimension '" + name +
                 "' detected in input file '" + m_filename + "'.");
         m_dims.push_back(id);

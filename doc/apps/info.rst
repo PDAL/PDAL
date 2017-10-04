@@ -4,7 +4,7 @@
 info
 ********************************************************************************
 
-Dumps information about a point cloud file, such as:
+Displays information about a point cloud file, such as:
 
 * basic properties (extents, number of points, point format)
 * coordinate reference system
@@ -19,26 +19,19 @@ Dumps information about a point cloud file, such as:
 
 ::
 
-    --input arg       Non-positional argument to specify input filename.
-    --point [-p] arg  Display points for particular points.  Points can be specified in
-                      a range or list: 4-10, 15, 255-300.
-    --query arg       Add a listing of points based on the distance from the provided
-                      location.  The number of points returned can be limited by
-                      providing an optional count.
-                      --query "25.34,35.123/3" or --query "11532.23 -10e23 1.234/10"
-    --stats           Display the minimum, maximum, average and count of each
-                      dimension.
-    --boundary        Compute a hexagonal boundary that contains all points.
-    --dimensions arg  Use with --stats to limit the dimensions on which statistics
-                      should be computed.
-                      --dimensions "X, Y,Red"
-    --schema          Dump the schema of the internal point storage.
-    --pipeline-serialization
-                      Create a JSON representation of the pipeline used to generate
-                      the output.
-    --summary         Dump the point count, spatial reference, extrema and dimension
-                      names.
-    --metadata        Dump the metadata associated with the input file.
+  --input, -i               Input file name
+  --all                     Dump statistics, schema and metadata
+  --point, -p               Point to dump --point="1-5,10,100-200" (0 indexed)
+  --query                   Return points in order of distance from the
+      specified location (2D or 3D) --query Xcoord,Ycoord[,Zcoord][/count]
+  --stats                   Dump stats on all points (reads entire dataset)
+  --boundary                Compute a hexagonal hull/boundary of dataset
+  --dimensions              Dimensions on which to compute statistics
+  --schema                  Dump the schema
+  --pipeline-serialization  Output filename for pipeline serialization
+  --summary                 Dump summary of the info
+  --metadata                Dump file metadata info
+  --stdin, -s               Read a pipeline file from standard input
 
 If no options are provided, ``--stats`` is assumed.
 

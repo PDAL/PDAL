@@ -34,7 +34,9 @@
 
 #include "LasWriter.hpp"
 
+#include <climits>
 #include <iostream>
+#include <vector>
 
 #include <pdal/Compression.hpp>
 #include <pdal/DimUtil.hpp>
@@ -49,7 +51,6 @@
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GeotiffSupport.hpp"
-#include "LasZipPoint.hpp"
 
 namespace pdal
 {
@@ -96,7 +97,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         decltype(m_dataformatId)(3));
     args.add("format", "Point format", m_dataformatId,
         decltype(m_dataformatId)(3));
-    args.add("global_encoding", "Global encoding byte", m_globalEncoding);
+    args.add("global_encoding", "Global encoding byte", m_globalEncoding,
+        decltype(m_globalEncoding)(0));
     args.add("project_id", "Project ID", m_projectId);
     args.add("system_id", "System ID", m_systemId,
         decltype(m_systemId)(m_lasHeader.getSystemIdentifier()));
@@ -106,12 +108,15 @@ void LasWriter::addArgs(ProgramArgs& args)
         decltype(m_creationDoy)(doy));
     args.add("creation_year", "Creation year", m_creationYear,
         decltype(m_creationYear)(year));
+    args.add("pdal_metadata", "Write PDAL metadata as VLR?",
+        m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
     args.add("scale_x", "X scale factor", m_scaleX, decltype(m_scaleX)(".01"));
     args.add("scale_y", "Y scale factor", m_scaleY, decltype(m_scaleY)(".01"));
     args.add("scale_z", "Z scale factor", m_scaleZ, decltype(m_scaleZ)(".01"));
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
+    args.add("vlrs", "List of VLRs to set", m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -139,6 +144,7 @@ void LasWriter::initialize()
         throwError(err.what());
     }
     fillForwardList();
+    collectUserVLRs();
 }
 
 
@@ -188,6 +194,38 @@ void LasWriter::prepared(PointTableRef table)
             dim.m_name <<
             "(" << Dimension::interpretationName(dim.m_dimType.m_type) <<
             ") " << " to LAS extra bytes." << std::endl;
+    }
+}
+
+
+// Capture user-specified VLRs
+void LasWriter::collectUserVLRs()
+{
+
+    for (const auto& v : m_userVLRs)
+    {
+        uint16_t recordId(1);
+        std::string userId("");
+        std::string description("");
+        std::string b64data("");
+        std::string user("");
+        if (! v.isMember("user_id"))
+            throw pdal_error("VLR must contain a 'user_id'!");
+        userId = v["user_id"].asString();
+
+        if (!v.isMember("data"))
+            throw pdal_error("VLR must contain a base64-encoded 'data' member");
+        b64data = v["data"].asString();
+
+        if (v.isMember("record_id"))
+            recordId = v["record_id"].asUInt64();
+
+        if (v.isMember("description"))
+            description = v["description"].asString();
+
+        std::vector<uint8_t> data = Utils::base64_decode(b64data);
+        addVlr(userId, recordId, description, data);
+
     }
 }
 
@@ -242,6 +280,9 @@ void LasWriter::fillForwardList()
 void LasWriter::readyTable(PointTableRef table)
 {
     m_forwardMetadata = table.privateMetadata("lasforward");
+    MetadataNode m = table.metadata();
+    if(m_writePDALMetadata)
+        setPDALVLRs(m);
     setExtraBytesVlr();
 }
 
@@ -253,7 +294,6 @@ void LasWriter::readyFile(const std::string& filename,
     if (!out)
         throwError("Couldn't open file '" + filename + "' for output.");
     m_curFilename = filename;
-    m_error.setFilename(filename);
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(out, srs);
 }
@@ -305,8 +345,6 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Set the point buffer size here in case we're using the streaming
     // interface.
     m_pointBuf.resize(m_lasHeader.pointLen());
-
-    m_error.setLog(log());
 }
 
 
@@ -340,6 +378,35 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
     return node.find(pred);
 }
 
+void LasWriter::setPDALVLRs(MetadataNode& forward)
+{
+    std::string json = Utils::toJSON(forward);
+    if ((json.size() > LasVLR::MAX_DATA_SIZE) &&
+        !m_lasHeader.versionAtLeast(1, 4))
+    {
+        log()->get(LogLevel::Debug) << "pdal metadata VLR too large "
+            "to write in VLR for files < LAS 1.4";
+    } else
+    {
+        std::vector<uint8_t> data(json.begin(), json.end());
+        addVlr(PDAL_USER_ID, PDAL_METADATA_RECORD_ID, "PDAL metadata", data);
+    }
+
+    std::ostringstream ostr;
+    PipelineWriter::writePipeline(this, ostr);
+    json = ostr.str();
+    if (json.size() > LasVLR::MAX_DATA_SIZE &&
+        !m_lasHeader.versionAtLeast(1, 4))
+    {
+        log()->get(LogLevel::Debug) << "pdal pipeline VLR too large "
+            "to write in VLR for files < LAS 1.4";
+    } else
+    {
+        std::vector<uint8_t> data(json.begin(), json.end());
+        addVlr(PDAL_USER_ID, PDAL_PIPELINE_RECORD_ID, "PDAL pipeline", data);
+    }
+}
+
 
 /// Set VLRs from metadata for forwarded info.
 void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
@@ -365,7 +432,6 @@ void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
         }
     }
 }
-
 
 /// Set VLRs from the active spatial reference.
 /// \param  srs - Active spatial reference.
@@ -461,8 +527,15 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 {
     if (data.size() > LasVLR::MAX_DATA_SIZE)
     {
-        ExtLasVLR evlr(userId, recordId, description, data);
-        m_eVlrs.push_back(std::move(evlr));
+        if (m_lasHeader.versionAtLeast(1, 4))
+        {
+            ExtLasVLR evlr(userId, recordId, description, data);
+            m_eVlrs.push_back(std::move(evlr));
+        }
+        else
+            throwError("Can't write VLR with user ID/record ID = " +
+                userId + "/" + std::to_string(recordId) +
+                ".  The data size exceeds the maximum supported.");
     }
     else
     {
@@ -575,23 +648,34 @@ void LasWriter::readyCompression()
 }
 
 
+void LasWriter::handleLaszip(int result)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (result)
+    {
+        char *buf;
+        laszip_get_error(m_laszip, &buf);
+        throwError(buf);
+    }
+#endif
+}
+
+
 void LasWriter::readyLasZipCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    try
-    {
-        m_zipPoint.reset(new LasZipPoint(m_lasHeader.pointFormat(),
-            m_lasHeader.pointLen()));
-    }
-    catch (const LasZipPoint::error& err)
-    {
-        throwError(err.what());
-    }
-    m_zipper.reset(new LASzipper());
-    // Note: this will make the VLR count in the header incorrect, but we
-    // rewrite that bit in finishOutput() to fix it up.
-    std::vector<uint8_t> data = m_zipPoint->vlrData();
-    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
+    handleLaszip(laszip_create(&m_laszip));
+    handleLaszip(laszip_set_point_type_and_size(m_laszip,
+        m_lasHeader.pointFormat(), m_lasHeader.pointLen()));
+
+    laszip_U8* data;
+    laszip_U32 size;
+    handleLaszip(laszip_create_laszip_vlr(m_laszip, &data, &size));
+
+    // A VLR has 54 header bytes that we skip in order to get to the payload.
+    std::vector<laszip_U8> vlrData(data + 54, data + size);
+
+    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrData);
 #endif
 }
 
@@ -624,14 +708,7 @@ void LasWriter::readyLazPerfCompression()
 void LasWriter::openCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    if (!m_zipper->open(*m_ostream, m_zipPoint->GetZipper()))
-    {
-        std::ostringstream oss;
-        const char* err = m_zipper->get_error();
-        if (err == NULL)
-            err = "(unknown error)";
-        throwError("Error opening LASzipper: " + std::string(err) + ".");
-    }
+    handleLaszip(laszip_open_writer_stream(m_laszip, *m_ostream, true, true));
 #endif
 }
 
@@ -639,17 +716,26 @@ void LasWriter::openCompression()
 bool LasWriter::processOne(PointRef& point)
 {
     //ABELL - Need to do something about auto offset.
-    LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
-
-    if (!fillPointBuf(point, ostream))
-        return false;
 
     if (m_compression == LasCompression::LasZip)
-        writeLasZipBuf(m_pointBuf.data(), m_lasHeader.pointLen(), 1);
+    {
+        if (!writeLasZipBuf(point))
+            return false;
+    }
     else if (m_compression == LasCompression::LazPerf)
+    {
+        LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
+        if (!fillPointBuf(point, ostream))
+            return false;
         writeLazPerfBuf(m_pointBuf.data(), m_lasHeader.pointLen(), 1);
+    }
     else
+    {
+        LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
+        if (!fillPointBuf(point, ostream))
+            return false;
         m_ostream->write(m_pointBuf.data(), m_lasHeader.pointLen());
+    }
     return true;
 }
 
@@ -662,48 +748,172 @@ void LasWriter::writeView(const PointViewPtr view)
 
     point_count_t pointLen = m_lasHeader.pointLen();
 
-    // Make a buffer of at most a meg.
-    m_pointBuf.resize(std::min((point_count_t)1000000, pointLen * view->size()));
-
-    const PointView& viewRef(*view.get());
-
-    point_count_t remaining = view->size();
-    PointId idx = 0;
-    while (remaining)
+    // Since we use the LASzip API, we can't benefit from building
+    // a buffer of multiple points, so loop.
+    if (m_compression == LasCompression::LasZip)
     {
-        point_count_t filled = fillWriteBuf(viewRef, idx, m_pointBuf);
-        idx += filled;
-        remaining -= filled;
+        PointRef point(*view, 0);
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            point.setPointId(idx);
+            processOne(point);
+        }
+    }
+    else
+    {
+        // Make a buffer of at most a meg.
+        m_pointBuf.resize(std::min((point_count_t)1000000,
+                    pointLen * view->size()));
 
-        if (m_compression == LasCompression::LasZip)
-            writeLasZipBuf(m_pointBuf.data(), pointLen, filled);
-        else if (m_compression == LasCompression::LazPerf)
-            writeLazPerfBuf(m_pointBuf.data(), pointLen, filled);
-        else
-            m_ostream->write(m_pointBuf.data(), filled * pointLen);
+        const PointView& viewRef(*view.get());
+
+        point_count_t remaining = view->size();
+        PointId idx = 0;
+        while (remaining)
+        {
+            point_count_t filled = fillWriteBuf(viewRef, idx, m_pointBuf);
+            idx += filled;
+            remaining -= filled;
+
+            if (m_compression == LasCompression::LazPerf)
+                writeLazPerfBuf(m_pointBuf.data(), pointLen, filled);
+            else
+                m_ostream->write(m_pointBuf.data(), filled * pointLen);
+        }
     }
     Utils::writeProgress(m_progressFd, "DONEVIEW",
         std::to_string(view->size()));
 }
 
 
-void LasWriter::writeLasZipBuf(char *pos, size_t pointLen, point_count_t numPts)
+bool LasWriter::writeLasZipBuf(PointRef& point)
 {
 #ifdef PDAL_HAVE_LASZIP
-    for (point_count_t i = 0; i < numPts; i++)
+    const bool has14Format = m_lasHeader.has14Format();
+    const size_t maxReturnCount = m_lasHeader.maxReturnCount();
+
+    // we always write the base fields
+    using namespace Dimension;
+
+    uint8_t returnNumber(1);
+    uint8_t numberOfReturns(1);
+
+    if (point.hasDim(Id::ReturnNumber))
+        returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
+    if (point.hasDim(Id::NumberOfReturns))
+        numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
+    if (numberOfReturns > maxReturnCount)
     {
-        memcpy(m_zipPoint->m_lz_point_data.data(), pos, pointLen);
-        if (!m_zipper->write(m_zipPoint->m_lz_point))
+        if (m_discardHighReturnNumbers)
         {
-            std::ostringstream oss;
-            const char* err = m_zipper->get_error();
-            if (err == NULL)
-                err = "(unknown error)";
-            throwError("Error writing point: " + std::string(err) + ".");
+            // If this return number is too high, pitch the point.
+            if (returnNumber > maxReturnCount)
+                return false;
+            numberOfReturns = maxReturnCount;
         }
-        pos += pointLen;
     }
+
+    auto converter = [this](double d, Dimension::Id dim) -> int32_t
+    {
+        int32_t i(0);
+
+        if (!Utils::numericCast(d, i))
+            throwError("Unable to convert scaled value (" +
+                Utils::toString(d) + ") to "
+                "int32 for dimension '" + Dimension::name(dim) +
+                "' when writing LAS/LAZ file " + m_curFilename + ".");
+        return i;
+    };
+
+    double xOrig = point.getFieldAs<double>(Id::X);
+    double yOrig = point.getFieldAs<double>(Id::Y);
+    double zOrig = point.getFieldAs<double>(Id::Z);
+    double x = m_scaling.m_xXform.toScaled(xOrig);
+    double y = m_scaling.m_yXform.toScaled(yOrig);
+    double z = m_scaling.m_zXform.toScaled(zOrig);
+
+    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+    uint8_t scanDirectionFlag =
+        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+    uint8_t edgeOfFlightLine =
+        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
+    uint8_t classFlags = 0;
+    if (point.hasDim(Id::ClassFlags))
+        classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+    else
+        classFlags = classification >> 5;
+
+    laszip_point_struct p;
+    p.X = converter(x, Id::X);
+    p.Y = converter(y, Id::Y);
+    p.Z = converter(z, Id::Z);
+    p.intensity = point.getFieldAs<uint16_t>(Id::Intensity);
+    p.scan_direction_flag = scanDirectionFlag;
+    p.edge_of_flight_line = edgeOfFlightLine;
+
+    if (has14Format)
+    {
+        p.extended_point_type = 1;
+
+        p.extended_return_number = returnNumber;
+        p.extended_number_of_returns = numberOfReturns;
+        p.extended_scanner_channel = scanChannel;
+        p.extended_scan_angle =
+            roundf(point.getFieldAs<float>(Id::ScanAngleRank) / .006);
+        p.extended_classification_flags = classFlags;
+        p.extended_classification = classification;
+        p.classification = (classification & 0x1F) | (classFlags << 5);
+//        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+    }
+    else
+    {
+        p.synthetic_flag = classFlags & 0x1;
+        p.keypoint_flag = (classFlags >> 1) & 0x1;
+        p.withheld_flag = (classFlags >> 2) & 0x1;
+        p.return_number = returnNumber;
+        p.number_of_returns = numberOfReturns;
+        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.classification = classification;
+    }
+    p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
+
+    p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
+
+    if (m_lasHeader.hasTime())
+        p.gps_time = point.getFieldAs<double>(Id::GpsTime);
+
+    if (m_lasHeader.hasColor())
+    {
+        p.rgb[0] = point.getFieldAs<uint16_t>(Id::Red);
+        p.rgb[1] = point.getFieldAs<uint16_t>(Id::Green);
+        p.rgb[2] = point.getFieldAs<uint16_t>(Id::Blue);
+    }
+
+    if (m_lasHeader.hasInfrared())
+        p.rgb[3] = point.getFieldAs<uint16_t>(Id::Infrared);
+
+    if (m_extraDims.size())
+    {
+        LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
+        Everything e;
+        for (auto& dim : m_extraDims)
+        {
+            point.getField((char *)&e, dim.m_dimType.m_id,
+                dim.m_dimType.m_type);
+            Utils::insertDim(ostream, dim.m_dimType.m_type, e);
+        }
+        assert(m_extraByteLen == ostream.position());
+    }
+    p.extra_bytes = (laszip_U8 *)m_pointBuf.data();
+    p.num_extra_bytes = m_extraByteLen;
+
+    m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
+
+    handleLaszip(laszip_set_point(m_laszip, &p));
+    handleLaszip(laszip_write_point(m_laszip));
 #endif
+    return true;
 }
 
 
@@ -723,9 +933,6 @@ void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
 bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
 {
     bool has14Format = m_lasHeader.has14Format();
-    bool hasColor = m_lasHeader.hasColor();
-    bool hasTime = m_lasHeader.hasTime();
-    bool hasInfrared = m_lasHeader.hasInfrared();
     static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
 
     // we always write the base fields
@@ -734,15 +941,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t returnNumber(1);
     uint8_t numberOfReturns(1);
     if (point.hasDim(Id::ReturnNumber))
-    {
         returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
-        if (returnNumber < 1 || returnNumber > maxReturnCount)
-            m_error.returnNumWarning(returnNumber);
-    }
     if (point.hasDim(Id::NumberOfReturns))
         numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
-    if (numberOfReturns == 0)
-        m_error.numReturnsWarning(0);
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -752,13 +953,11 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 return false;
             numberOfReturns = maxReturnCount;
         }
-        else
-            m_error.numReturnsWarning(numberOfReturns);
     }
 
     auto converter = [this](double d, Dimension::Id dim) -> int32_t
     {
-        int32_t i;
+        int32_t i(0);
 
         if (!Utils::numericCast(d, i))
             throwError("Unable to convert scaled value (" +
@@ -823,17 +1022,17 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
 
     ostream << point.getFieldAs<uint16_t>(Id::PointSourceId);
 
-    if (hasTime)
+    if (m_lasHeader.hasTime())
         ostream << point.getFieldAs<double>(Id::GpsTime);
 
-    if (hasColor)
+    if (m_lasHeader.hasColor())
     {
         ostream << point.getFieldAs<uint16_t>(Id::Red);
         ostream << point.getFieldAs<uint16_t>(Id::Green);
         ostream << point.getFieldAs<uint16_t>(Id::Blue);
     }
 
-    if (hasInfrared)
+    if (m_lasHeader.hasInfrared())
         ostream << point.getFieldAs<uint16_t>(Id::Infrared);
 
     Everything e;
@@ -889,6 +1088,7 @@ void LasWriter::finishOutput()
 
     OLeStream out(m_ostream);
 
+    // addVlr prevents any eVlrs from being added before version 1.4.
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;
@@ -926,7 +1126,8 @@ void LasWriter::finishOutput()
 void LasWriter::finishLasZipOutput()
 {
 #ifdef PDAL_HAVE_LASZIP
-    m_zipper->close();
+    handleLaszip(laszip_close_writer(m_laszip));
+    handleLaszip(laszip_destroy(m_laszip));
 #endif
 }
 

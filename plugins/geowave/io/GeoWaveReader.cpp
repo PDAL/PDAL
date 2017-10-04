@@ -129,6 +129,9 @@ using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloDataSto
 #include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/metadata/AccumuloAdapterStore.h"
 using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::metadata::AccumuloAdapterStore;
 
+namespace pdal
+{
+
 static PluginInfo const s_info = PluginInfo(
     "readers.geowave",
     "\"GeoWave\"  reader support. ",
@@ -138,12 +141,10 @@ CREATE_SHARED_PLUGIN(1, 0, GeoWaveReader, Reader, s_info)
 
 std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
 
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-namespace pdal
-{
+
     void GeoWaveReader::addArgs(ProgramArgs& args)
     {
         args.add("zookeeper_url", "The comma-delimited URLs for all "
@@ -190,7 +191,7 @@ namespace pdal
 
     void GeoWaveReader::addDimensions(PointLayoutPtr layout)
     {
-        layout->registerDims(getDefaultDimensions());
+        layout->registerDims( { Dimension::Id::X, Dimension::Id::Y } );
 
         BasicAccumuloOperations accumuloOperations;
         try
@@ -226,14 +227,6 @@ namespace pdal
             if (name.compare("location") != 0 && name.compare("X") != 0 && name.compare("Y") != 0)
                 layout->registerDim(Dimension::id(name));
         }
-    }
-
-    Dimension::IdList GeoWaveReader::getDefaultDimensions()
-    {
-        Dimension::IdList ids;
-        ids.push_back(Dimension::Id::X);
-        ids.push_back(Dimension::Id::Y);
-        return ids;
     }
 
     void GeoWaveReader::ready(PointTableRef table)

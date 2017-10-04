@@ -43,7 +43,14 @@
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
 #include "LasSummaryData.hpp"
-#include "LasZipPoint.hpp"
+
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip_api.h>
+#else
+using laszip_POINTER = void *;
+#endif
+
+#include <json/json.h>
 
 extern "C" int32_t LasWriter_ExitFunc();
 extern "C" PF_ExitFunc LasWriter_InitPlugin();
@@ -80,11 +87,9 @@ protected:
     void finishOutput();
 
 private:
-    LasError m_error;
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
-    std::unique_ptr<LASzipper> m_zipper;
-    std::unique_ptr<LasZipPoint> m_zipPoint;
+    laszip_POINTER m_laszip;
     std::unique_ptr<LazPerfVlrCompressor> m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
@@ -126,6 +131,8 @@ private:
     StringHeaderVal<20> m_offsetY;
     StringHeaderVal<20> m_offsetZ;
     MetadataNode m_forwardMetadata;
+    bool m_writePDALMetadata;
+    Json::Value m_userVLRs;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -138,7 +145,9 @@ private:
     void spatialReferenceChanged(const SpatialReference& srs);
     virtual void doneFile();
 
+    void handleLaszip(int result);
     void fillForwardList();
+    void collectUserVLRs();
     template <typename T>
     void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);
@@ -147,9 +156,10 @@ private:
     bool fillPointBuf(PointRef& point, LeInserter& ostream);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
-    void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);
+    bool writeLasZipBuf(PointRef& point);
     void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
     void setVlrsFromMetadata(MetadataNode& forward);
+    void setPDALVLRs(MetadataNode& m);
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
     void setExtraBytesVlr();

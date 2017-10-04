@@ -37,7 +37,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plang/Array.hpp>
+#include <pdal/PyArray.hpp>
 #include <pdal/PipelineExecutor.hpp>
 
 #include <string>
@@ -46,8 +46,9 @@
 #undef tolower
 #undef isspace
 
+#ifndef PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL LIBPDALPYTHON_ARRAY_API
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#endif
 
 #include <numpy/arrayobject.h>
 
@@ -62,7 +63,7 @@ public:
         {}
 };
 
-    typedef pdal::plang::Array* PArray;
+    typedef pdal::python::Array* PArray;
 
 class Pipeline {
 public:

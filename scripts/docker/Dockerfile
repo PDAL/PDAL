@@ -6,16 +6,19 @@ ENV CXX g++
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
+        python-all-dev \
+        python-numpy \
     libsqlite3-mod-spatialite \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth=1 https://github.com/PDAL/PDAL \
+RUN git clone https://github.com/PDAL/PDAL \
     && cd PDAL \
     && git checkout master \
     && mkdir build \
     && cd build \
     && cmake \
-        -DBUILD_PLUGIN_CPD=OFF \
+        -DBUILD_PLUGIN_CPD=ON \
+        -DBUILD_PLUGIN_MBIO=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
@@ -76,8 +79,6 @@ RUN apt-get purge -y \
     liblapack-dev \
     libtiff5-dev \
     openssh-client \
-    python-dev \
-    python-numpy \
     python-software-properties \
     software-properties-common \
     wget \
@@ -114,9 +115,7 @@ RUN apt-get purge -y \
     libcurl4-openssl-dev \
     libspatialite-dev \
     libdap-dev\
-    ninja \
-    cython \
-    python-pip
+    cython
 
 RUN apt-get autoremove -y
 
@@ -156,4 +155,24 @@ RUN apt-get update && apt-get install -y \
     libgdal1i \
     libflann1.8 \
     libpython2.7 \
-    libhdf5-cpp-11
+    libhdf5-cpp-11 \
+    libpcl-common1.7 \
+    libpcl-features1.7 \
+    libpcl-filters1.7 \
+    libpcl-io1.7 \
+    libpcl-kdtree1.7 \
+    libpcl-keypoints1.7 \
+    libpcl-octree1.7 \
+    libpcl-outofcore1.7 \
+    libpcl-people1.7 \
+    libpcl-recognition1.7 \
+    libpcl-registration1.7 \
+    libpcl-sample-consensus1.7 \
+    libpcl-search1.7 \
+    libpcl-segmentation1.7 \
+    libpcl-surface1.7 \
+    libpcl-tracking1.7 \
+    libpcl-visualization1.7 \
+    python-all-dev \
+    python-pip
+

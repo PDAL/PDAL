@@ -26,6 +26,10 @@ grid
     Creates points with integer-valued coordinates in the range provided
     (excluding the upper bound).
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 
@@ -36,7 +40,7 @@ Example
         {
           "type":"readers.faux",
           "bounds":"([0,1000000],[0,1000000],[0,100])",
-          "num_points":"10000",
+          "count":"10000",
           "mode":"random"
         },
         {
@@ -54,7 +58,7 @@ bounds
   What spatial extent should points be generated within? Text string of the
   form "([xmin,xmax],[ymin,ymax],[zmin,zmax])". [Default: unit cube]
 
-num_points
+count
   How many synthetic points to generate before finishing? [Required]
 
 mean_x|y|z

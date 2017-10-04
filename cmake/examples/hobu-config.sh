@@ -1,7 +1,6 @@
 USR_LOCAL="/usr/local"
 USR="/usr"
 TIFF_HOME=$USR_LOCAL
-LASZIP_HOME=$USR_LOCAL
 LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.4/
 WEBSOCKETPP_HOME=/Users/hobu/dev/git/websocketpp
 HEXER_HOME="/usr/local"
@@ -31,17 +30,18 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_MRSID=ON \
+        -DBUILD_PLUGIN_MBIO=ON \
         -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
+        -DBUILD_PLUGIN_MATLAB=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
+        -DBUILD_PLUGIN_OPENSCENEGRAPH=ON \
         -DWITH_LAZPERF=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
         -DHEXER_LIBRARY=${HEXER_HOME}/lib/libhexer.${SO_EXT} \
-        -DLASZIP_INCLUDE_DIR=${LASZIP_HOME}/include \
-        -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
@@ -51,7 +51,13 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/libpython3.6.dylib \
         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/include/python3.6m/ \
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
-        -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
+        -DPGPOINTCLOUD_TEST_DB_HOST="localhost" \
+        -DBUILD_PLUGIN_MATLAB=ON \
+         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmex.dylib \
+         -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmat.dylib \
+         -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmx.dylib \
+         -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017a.app/extern/include \
+         -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libeng.dylib
 
 
 #         -DPYTHON_EXECUTABLE=/usr/local/bin/python \

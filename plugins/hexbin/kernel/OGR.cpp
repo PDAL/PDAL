@@ -160,7 +160,6 @@ void OGR::writeBoundary(hexer::HexGrid *grid)
             << CPLGetLastErrorMsg() << "'";
         throw pdal::pdal_error(oss.str());
     }
-    OGR_F_Destroy( hFeature );
 }
 
 void OGR::collectPath(hexer::Path* path, OGRGeometryH polygon)

@@ -64,14 +64,14 @@ void AssignRange::parse(const std::string& r)
     char *end;
 
     pos = subParse(r);
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     if (r[pos] != '=')
         throw error("Missing '=' assignment separator.");
     pos++;
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     // Extract value
@@ -130,7 +130,7 @@ void AssignFilter::prepared(PointTableRef table)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'values' option: '" +
+            throwError("Invalid dimension name in 'assignment' option: '" +
                 r.m_name + "'.");
     }
 }

@@ -1,22 +1,96 @@
 # Matlab plugin
 
-find_package(Matlab REQUIRED)
+include(${PDAL_CMAKE_DIR}/matlab.cmake)
 
-PDAL_ADD_PLUGIN(libname writer matlab
+#set(CMAKE_SKIP_RPATH true)
+#if (LINUX)
+
+#endif()
+
+PDAL_ADD_PLUGIN(libname_writer writer matlab
     FILES
+        ./filters/Script.cpp
         io/MatlabWriter.cpp
     LINK_WITH
-        ${MATLAB_LIBRARIES}
+        ${Matlab_MX_LIBRARY} ${Matlab_MAT_LIBRARY}
 )
-target_compile_definitions(${libname} PRIVATE -DHAVE_MATLAB=1)
-target_include_directories(${libname} PRIVATE ${MATLAB_INCLUDE_DIR})
+target_include_directories(${libname_writer} PRIVATE
+    ${Matlab_INCLUDE_DIR})
+
+PDAL_ADD_PLUGIN(libname_reader reader matlab
+    FILES
+        ./filters/Script.cpp
+        io/MatlabReader.cpp
+    LINK_WITH
+        ${Matlab_MX_LIBRARY} ${Matlab_MAT_LIBRARY}
+)
+target_include_directories(${libname_reader} PRIVATE
+    ${Matlab_INCLUDE_DIR})
+
+
+PDAL_ADD_PLUGIN(matlab_libname filter matlab
+    FILES
+        ./filters/Environment.cpp
+        ./filters/Script.cpp
+        ./filters/MatlabFilter.cpp
+    LINK_WITH
+        ${Matlab_ENG_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_MAT_LIBRARY}
+    )
+target_include_directories(${matlab_libname} PRIVATE
+    ${Matlab_INCLUDE_DIR}
+    ${PDAL_JSONCPP_INCLUDE_DIR} )
 
 if (WITH_TESTS)
-    PDAL_ADD_TEST(matlabtest
+    PDAL_ADD_TEST(pdal_io_matlab_writer_test
         FILES
             test/MatlabWriterTest.cpp
         LINK_WITH
-            ${libname}
+           ${libname_writer}
+    )
+    target_include_directories(pdal_io_matlab_writer_test PRIVATE
+        ${PDAL_IO_DIR}
+        ${Matlab_INCLUDE_DIR})
+    set_target_properties(pdal_io_matlab_writer_test
+        PROPERTIES
+        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}"
+        BUILD_WITH_INSTALL_RPATH true
     )
 
+
+    PDAL_ADD_TEST(pdal_io_matlab_reader_test
+        FILES
+            test/MatlabReaderTest.cpp
+        LINK_WITH
+           ${libname_reader}
+    )
+    target_include_directories(pdal_io_matlab_reader_test PRIVATE
+        ${PDAL_IO_DIR}
+        ${Matlab_INCLUDE_DIR})
+    set_target_properties(pdal_io_matlab_reader_test
+        PROPERTIES
+        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}"
+        BUILD_WITH_INSTALL_RPATH true
+    )
+
+    PDAL_ADD_TEST(pdal_filters_matlab_test
+        FILES
+            ./filters/Script.cpp
+            ./filters/Environment.cpp
+            ./test/MatlabFilterTest.cpp
+        LINK_WITH
+            ${Matlab_ENG_LIBRARY}
+            ${Matlab_MX_LIBRARY}
+            ${Matlab_MAT_LIBRARY}
+    )
+    set_target_properties(pdal_filters_matlab_test
+        PROPERTIES
+        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+        BUILD_WITH_INSTALL_RPATH true
+    )
+
+    target_include_directories(pdal_filters_matlab_test PRIVATE
+        ${ROOT_DIR}
+        ${Matlab_INCLUDE_DIR}
+        ${PDAL_JSONCPP_INCLUDE_DIR} )
 endif()
+

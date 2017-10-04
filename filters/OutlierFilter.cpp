@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -35,9 +35,9 @@
 #include "OutlierFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <string>
 #include <vector>
@@ -56,25 +56,21 @@ std::string OutlierFilter::getName() const
     return s_info.name;
 }
 
-
 void OutlierFilter::addArgs(ProgramArgs& args)
 {
     args.add("method", "Method [default: statistical]", m_method,
-        "statistical");
+             "statistical");
     args.add("min_k", "Minimum number of neighbors in radius", m_minK, 2);
     args.add("radius", "Radius", m_radius, 1.0);
     args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
     args.add("multiplier", "Standard deviation threshold", m_multiplier, 2.0);
-    args.add("classify", "Apply classification labels?", m_classify, true);
-    args.add("extract", "Extract ground returns?", m_extract);
+    args.add("class", "Class to use for noise points", m_class, uint8_t(7));
 }
-
 
 void OutlierFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Classification);
 }
-
 
 Indices OutlierFilter::processRadius(PointViewPtr inView)
 {
@@ -97,7 +93,6 @@ Indices OutlierFilter::processRadius(PointViewPtr inView)
     return Indices{inliers, outliers};
 }
 
-
 Indices OutlierFilter::processStatistical(PointViewPtr inView)
 {
     KD3Index index(*inView);
@@ -107,7 +102,7 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
     std::vector<PointId> inliers, outliers;
 
-    std::vector<double> distances(np);
+    std::vector<double> distances(np, 0.0);
     for (PointId i = 0; i < np; ++i)
     {
         // we increase the count by one because the query point itself will
@@ -118,21 +113,29 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
         std::vector<double> sqr_dists(count);
         index.knnSearch(i, count, &indices, &sqr_dists);
 
-        double dist_sum = 0.0;
-        for (auto const& d : sqr_dists)
-            dist_sum += sqrt(d);
-        distances[i] = dist_sum / m_meanK;
+        for (size_t j = 1; j < count; ++j)
+        {
+            double delta = std::sqrt(sqr_dists[j]) - distances[i];
+            distances[i] += (delta / j);
+        }
     }
 
-    double sum = 0.0, sq_sum = 0.0;
+    size_t n(0);
+    double M1(0.0);
+    double M2(0.0);
     for (auto const& d : distances)
     {
-        sum += d;
-        sq_sum += d * d;
+        size_t n1(n);
+        n++;
+        double delta = d - M1;
+        double delta_n = delta / n;
+        M1 += delta_n;
+        M2 += delta * delta_n * n1;
     }
-    double mean = sum / np;
-    double variance = (sq_sum - sum * sum / np) / (np - 1);
-    double stdev = sqrt(variance);
+    double mean = M1;
+    double variance = M2 / (n - 1.0);
+    double stdev = std::sqrt(variance);
+
     double threshold = mean + m_multiplier * stdev;
 
     for (PointId i = 0; i < np; ++i)
@@ -145,7 +148,6 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
     return Indices{inliers, outliers};
 }
-
 
 PointViewSet OutlierFilter::run(PointViewPtr inView)
 {
@@ -165,7 +167,8 @@ PointViewSet OutlierFilter::run(PointViewPtr inView)
     else
     {
         log()->get(LogLevel::Warning) << "Requested method is unrecognized. "
-            "Please choose from \"statistical\" " << "or \"radius\".\n";
+                                         "Please choose from \"statistical\" "
+                                         "or \"radius\".\n";
         viewSet.insert(inView);
         return viewSet;
     }
@@ -173,51 +176,28 @@ PointViewSet OutlierFilter::run(PointViewPtr inView)
     if (indices.inliers.empty())
     {
         log()->get(LogLevel::Warning) << "Requested filter would remove all "
-            "points. Try a larger radius/smaller " << "minimum neighbors.\n";
+                                         "points. Try a larger radius/smaller "
+                                         "minimum neighbors.\n";
         viewSet.insert(inView);
         return viewSet;
     }
 
-    if (!indices.outliers.empty() && (m_classify || m_extract))
+    if (!indices.outliers.empty())
     {
-        if (m_classify)
-        {
-            log()->get(LogLevel::Debug2) << "Labeled "
-                                         << indices.outliers.size()
-                                         << " outliers as noise!\n";
+        log()->get(LogLevel::Debug2)
+            << "Labeled " << indices.outliers.size() << " outliers as noise!\n";
 
-            // set the classification label of outlier returns as 18
-            // (corresponding to ASPRS LAS specification for high noise)
-            for (const auto& i : indices.outliers)
-                inView->setField(Dimension::Id::Classification, i, 18);
+        // set the classification label of outlier returns
+        for (const auto& i : indices.outliers)
+            inView->setField(Dimension::Id::Classification, i, m_class);
 
-            viewSet.insert(inView);
-        }
-
-        if (m_extract)
-        {
-            log()->get(LogLevel::Debug2) << "Extracted "
-                                         << indices.inliers.size()
-                                         << " inliers!\n";
-
-            // create new PointView containing only outliers
-            PointViewPtr output = inView->makeNew();
-            for (const auto& i : indices.inliers)
-                output->appendPoint(*inView, i);
-
-            viewSet.erase(inView);
-            viewSet.insert(output);
-        }
+        viewSet.insert(inView);
     }
     else
     {
         if (indices.outliers.empty())
-            log()->get(LogLevel::Warning) << "Filtered cloud has no "
-                                          << "outliers!\n";
-
-        if (!(m_classify || m_extract))
-            log()->get(LogLevel::Warning) << "Must choose --classify or "
-                                          << "--extract\n";
+            log()->get(LogLevel::Warning)
+                << "Filtered cloud has no outliers!\n";
 
         // return the input buffer unchanged
         viewSet.insert(inView);

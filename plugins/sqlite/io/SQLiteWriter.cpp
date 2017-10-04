@@ -75,6 +75,7 @@ void SQLiteWriter::addArgs(ProgramArgs& args)
         m_cloud_table).setPositional();
     args.add("connection", "SQL connection string",
         m_connection).setPositional();
+    args.addSynonym("connection", "filename");
     args.add("cloud_column_name", "Cloud column name", m_cloud_column, "id");
     args.add("module", "Module name", m_modulename);
     args.add("srid", "SRID", m_srid, 4326U);
@@ -209,7 +210,7 @@ void SQLiteWriter::CreateBlockTable()
 
     oss << "CREATE TABLE " << Utils::tolower(m_block_table)
         << "(" << Utils::tolower(m_cloud_column)  <<
-        " INTEGER REFERENCES " << Utils::tolower(m_cloud_column)  <<
+        " INTEGER REFERENCES " << Utils::tolower(m_cloud_table)  <<
         "," << " block_id INTEGER," << " num_points INTEGER," <<
         " points BLOB," << " bbox box3d " << ")";
 
@@ -453,8 +454,6 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 {
     using namespace std;
 
-    Patch outpatch;
-
     if (m_doCompression)
     {
 #ifdef PDAL_HAVE_LAZPERF
@@ -527,6 +526,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     rs.push_back(r);
     m_session->insert(m_block_insert_query.str(), rs);
     m_block_id++;
+    m_patch->clear();
 
 }
 

@@ -99,10 +99,7 @@ int RandomKernel::execute()
 
     PointTable table;
     writer.prepare(table);
-    PointViewSet viewSet = writer.execute(table);
-
-    if (isVisualize())
-        visualize(*viewSet.begin());
+    writer.execute(table);
 
     return 0;
 }

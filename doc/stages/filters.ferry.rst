@@ -3,22 +3,30 @@
 filters.ferry
 ================================================================================
 
-The ferry filter is used to stash intermediate variables as part of
-processing data. For example, a common scenario is to keep both the
-original value and the reprojected X and Y variables in a
-scenario that uses the :ref:`filters.reprojection` filter. In the
-normal case, the X and Y data would be overwritten with the new
-longitude and latitude values as part of the reprojection. The
-ferry filter will allow you to keep this around for later use.
+The ferry filter copies data from one dimension to another, creates new
+dimensions or both.
 
+The filter is guided by a list of 'from' and 'to' dimensions in the format
+<from>=<to>.  Data from the 'from' dimension is copied to the 'to' dimension.
+The 'from' dimension must exist.  The 'to' dimension can be pre-existing or
+will be created by the ferry filter.
 
-Example
--------
+Alternatively, the format =<to> can be used to create a new dimension without
+copying data from any source.  The values of the 'to' dimension are default
+initialized.
 
-In this scenario, we are doing what is described above --
-stashing the pre-projection X and Y values into the
-`StatePlaneX` and `StatePlaneY` dimensions. Future
-processing, can then operate on these data.
+.. embed::
+
+.. streamable::
+
+Example 1
+---------
+
+In this scenario, we are making copies of the X and Y dimensions into the
+dimensions StatePlaneX and StatePlaneY.  Since the reprojection filter will
+modify the dimensions X and Y, this allows us to maintain both the
+pre-reprojection values and the post-reprojection values.
+
 
 .. code-block:: json
 
@@ -47,12 +55,37 @@ processing, can then operate on these data.
       ]
     }
 
+Example 2
+---------
+
+The ferry filter is being used to add a dimension 'Classification' to points
+so that the value can be set to '2' and written as a LAS file.
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+            "type": "readers.gdal",
+            "filename": "somefile.tif"
+        },
+        {
+            "type": "filters.ferry",
+            "dimensions": "=Classification"
+        },
+        {
+            "type": "filters.assign",
+            "assignment": "Classification[:]=2"
+        },
+        "out.las"
+      ]
+    }
+
 Options
 -------
 
 dimensions
-  A list of dimensions whose values should be copied to the specified
-  dimensions.
+  A list of dimensions whose values should be copied.
   The format of the option is <from>=<to>, <from>=<to>,... Spaces are ignored.
-  'from' dimensions must exist and have been created by a reader or filter.
-  'to' dimensions will be created if necessary.
+  'from' can be left empty, in which case the 'to' dimension is created and
+  default-initialized.  'to' dimensions will be created if necessary.

@@ -58,7 +58,7 @@
     "name": "ScanAngleRank",
     "alt_names": "ScanAngle",
     "type": "float",
-    "description": "Angle degree at which the laster point was output from the system, including the roll of the aircraft.  The scan angle is based on being nadir, and -90 the left side of the aircraft in the direction of flight"
+    "description": "Angle degree at which the laser point was output from the system, including the roll of the aircraft.  The scan angle is based on being nadir, and -90 the left side of the aircraft in the direction of flight"
     },
     {
     "name": "UserData",
@@ -337,5 +337,34 @@
     "name": "OriginId",
     "type": "uint32",
     "description": "A file source ID from which the point originated.  This ID is global to a derivative dataset which may be aggregated from multiple files."
+    },
+    {
+    "name": "NormalX",
+    "alt_names": "nx",
+    "type": "double",
+    "description": "X component of a vector normal to surface at this point"
+    },
+    {
+    "name": "NormalY",
+    "alt_names": "ny",
+    "type": "double",
+    "description": "Y component of a vector normal to surface at this point"
+    },
+    {
+    "name": "NormalZ",
+    "alt_names": "nz",
+    "type": "double",
+    "description": "Z component of a vector normal to surface at this point"
+    },
+    {
+    "name": "Curvature",
+    "type": "double",
+    "description": "Curvature of surface at this point"
+    },
+    {
+    "name": "Density",
+    "type": "double",
+    "description": "Estimate of point density"
     }
+
 ] }

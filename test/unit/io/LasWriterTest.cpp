@@ -59,6 +59,9 @@ public:
         { return &w.m_lasHeader; }
     SpatialReference srs(LasWriter& w)
         { return w.m_srs; }
+    void addVlr(LasWriter& w, const std::string& userId, uint16_t recordId,
+        std::string description, std::vector<uint8_t>& data)
+        { w.addVlr(userId, recordId, description, data); }
 };
 
 } // namespace pdal
@@ -343,7 +346,7 @@ TEST(LasWriterTest, forward)
     EXPECT_EQ(n1.findChild("filesource_id").value<uint8_t>(), 0);
     // Global encoding doesn't match because 4_1.las has a bad value, so we
     // get the default.
-    EXPECT_EQ(n1.findChild("global_encoding").value<uint8_t>(), 0);
+    EXPECT_EQ(n1.findChild("global_encoding").value<uint16_t>(), 0);
     EXPECT_EQ(n1.findChild("project_id").value<Uuid>(), Uuid());
     EXPECT_EQ(n1.findChild("system_id").value(), "");
     EXPECT_EQ(n1.findChild("software_id").value(), "TerraScan");
@@ -581,6 +584,166 @@ TEST(LasWriterTest, lazperf)
 }
 #endif
 
+#if defined(PDAL_HAVE_LASZIP)
+// LAZ files are normally written in chunks of 50,000, so a file of size
+// 110,000 ensures we read some whole chunks and a partial.
+TEST(LasWriterTest, laszip)
+{
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/autzen_trim.las"));
+
+    LasReader lazReader;
+    lazReader.setOptions(readerOps);
+
+    std::string testfile(Support::temppath("temp.laz"));
+
+    FileUtils::deleteFile(testfile);
+
+    Options writerOps;
+    writerOps.add("filename", testfile);
+
+    LasWriter lazWriter;
+    lazWriter.setOptions(writerOps);
+    lazWriter.setInput(lazReader);
+
+    PointTable t;
+    lazWriter.prepare(t);
+    lazWriter.execute(t);
+
+    // Now test the points were properly written.  Use laszip.
+    Options ops1;
+    ops1.add("filename", testfile);
+
+    LasReader r1;
+    r1.setOptions(ops1);
+
+    PointTable t1;
+    r1.prepare(t1);
+    PointViewSet set1 = r1.execute(t1);
+    PointViewPtr view1 = *set1.begin();
+
+    Options ops2;
+    ops2.add("filename", Support::datapath("las/autzen_trim.las"));
+
+    LasReader r2;
+    r2.setOptions(ops2);
+
+    PointTable t2;
+    r2.prepare(t2);
+    PointViewSet set2 = r2.execute(t2);
+    PointViewPtr view2 = *set2.begin();
+
+    EXPECT_EQ(view1->size(), view2->size());
+    EXPECT_EQ(view1->size(), (point_count_t)110000);
+
+    DimTypeList dims = view1->dimTypes();
+    size_t pointSize = view1->pointSize();
+    EXPECT_EQ(view1->pointSize(), view2->pointSize());
+
+   // Validate some point data.
+    std::unique_ptr<char> buf1(new char[pointSize]);
+    std::unique_ptr<char> buf2(new char[pointSize]);
+    for (PointId i = 0; i < view1->size(); i += 100)
+    {
+       view1->getPackedPoint(dims, i, buf1.get());
+       view2->getPackedPoint(dims, i, buf2.get());
+       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+    }
+}
+
+// This is the same test as the above, but for a 1.4-specific point format.
+// LAZ files are normally written in chunks of 50,000, so a file of size
+// 110,000 ensures we read some whole chunks and a partial.
+TEST(LasWriterTest, laszip1_4)
+{
+    Options readerOps;
+    std::string baseFilename = Support::datapath("las/autzen_trim_7.las");
+    readerOps.add("filename", baseFilename);
+
+    LasReader lazReader;
+    lazReader.setOptions(readerOps);
+
+    std::string testfile(Support::temppath("temp.laz"));
+
+    FileUtils::deleteFile(testfile);
+
+    Options writerOps;
+    writerOps.add("filename", testfile);
+    writerOps.add("dataformat_id", 7);
+    writerOps.add("minor_version", 4);
+
+    LasWriter lazWriter;
+    lazWriter.setOptions(writerOps);
+    lazWriter.setInput(lazReader);
+
+    PointTable t;
+    lazWriter.prepare(t);
+    lazWriter.execute(t);
+
+    // Now test the points were properly written.  Use laszip.
+    Options ops1;
+    ops1.add("filename", testfile);
+
+    LasReader r1;
+    r1.setOptions(ops1);
+
+    PointTable t1;
+    r1.prepare(t1);
+    PointViewSet set1 = r1.execute(t1);
+    PointViewPtr view1 = *set1.begin();
+
+    Options ops2;
+    ops2.add("filename", baseFilename);
+
+    LasReader r2;
+    r2.setOptions(ops2);
+
+    PointTable t2;
+    r2.prepare(t2);
+    PointViewSet set2 = r2.execute(t2);
+    PointViewPtr view2 = *set2.begin();
+
+    EXPECT_EQ(view1->size(), view2->size());
+    EXPECT_EQ(view1->size(), (point_count_t)110000);
+
+    DimTypeList dims = view1->dimTypes();
+    size_t pointSize = view1->pointSize();
+    EXPECT_EQ(view1->pointSize(), view2->pointSize());
+
+   // Validate some point data.
+    std::unique_ptr<char> buf1(new char[pointSize]);
+    std::unique_ptr<char> buf2(new char[pointSize]);
+    for (PointId idx = 0; idx < view1->size(); idx++)
+    {
+       view1->getPackedPoint(dims, idx, buf1.get());
+       view2->getPackedPoint(dims, idx, buf2.get());
+       char *b1 = buf1.get();
+       char *b2 = buf2.get();
+       // Uncomment this to figure out the exact byte at which things are
+       // broken.
+       /**
+       for (size_t i = 0; i < pointSize; ++i)
+       {
+           if (*b1++ != *b2++)
+           {
+               {
+                   size_t s = 0;
+                   for (auto di = dims.begin(); di != dims.end(); ++di)
+                   {
+                       std::cerr << "Dim " << view1->dimName(di->m_id) <<
+                           " at " << s << "!\n";
+                       s += Dimension::size(di->m_type);
+                   }
+               }
+               throw pdal_error("Mismatch at byte = " + to_string(i) + "!");
+           }
+       }
+       **/
+       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+    }
+}
+#endif // PDAL_HAVE_LASZIP
+
 void compareFiles(const std::string& name1, const std::string& name2,
     size_t increment = 100)
 {
@@ -716,7 +879,175 @@ TEST(LasWriterTest, fix1063_1064_1065)
     EXPECT_EQ(ref.getWKT(), wkt);
 }
 
+TEST(LasWriterTest, pdal_metadata)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("pdal_metadata", true);
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    EXPECT_EQ(reader2.getMetadata().children("pdal_metadata").size(), 1UL);
+    EXPECT_EQ(reader2.getMetadata().children("pdal_pipeline").size(), 1UL);
+
+}
+
+
+TEST(LasWriterTest, pdal_add_vlr)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    std::string vlr( " [ { \"description\": \"A description under 32 bytes\", \"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIHRleHQ=\" },  { \"description\": \"A description under 32 bytes\", \"record_id\": 43, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIG1vcmUgdGV4dA==\" } ]");
+
+    Options writerOpts;
+    writerOpts.add("vlrs", vlr);
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    MetadataNode forward = reader2.getMetadata();
+
+    auto pred = [](MetadataNode temp)
+        { return Utils::startsWith(temp.name(), "vlr_"); };
+    MetadataNodeList nodes = forward.findChildren(pred);
+    EXPECT_EQ(nodes.size(), 2UL);
+}
+
+
+// Make sure that we can forward the LAS_Spec/3 VLR
+TEST(LasWriterTest, forward_spec_3)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/spec_3.las"));
+    std::string outfile(Support::temppath("out.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("forward", "all,vlr");
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    auto pred = [](MetadataNode temp)
+    {
+        auto recPred = [](MetadataNode n)
+        {
+            return n.name() == "record_id" &&
+                n.value() == "3";
+        };
+
+        auto userPred = [](MetadataNode n)
+        {
+            return n.name() == "user_id" &&
+                n.value() == "LASF_Spec";
+        };
+
+        return Utils::startsWith(temp.name(), "vlr_") &&
+            !temp.findChild(recPred).empty() &&
+            !temp.findChild(userPred).empty();
+    };
+    MetadataNode root = reader2.getMetadata();
+    MetadataNodeList nodes = root.findChildren(pred);
+    EXPECT_EQ(nodes.size(), 1u);
+}
+
+TEST(LasWriterTest, oversize_vlr)
+{
+    LasWriter w;
+    Options o;
+
+    o.add("filename", "out.las");
+    w.addOptions(o);
+
+    PointTable t;
+
+    w.prepare(t);
+
+    std::vector<uint8_t> data(100000, 32);
+    LasTester tester;
+    EXPECT_THROW(
+        tester.addVlr(w, "USER ID", 555, "This is a description", data),
+        pdal_error);
+}
+
+
 /**
+
 namespace
 {
 

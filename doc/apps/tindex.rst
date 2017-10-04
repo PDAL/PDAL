@@ -19,6 +19,21 @@ tindex Creation Mode
 
     $ pdal tindex <tindex> <filespec>
 
+::
+
+    --tindex               OGR-readable/writeable tile index output
+    --filespec             Build: Pattern of files to index. Merge: Output filename
+    --fast_boundary        Use extent instead of exact boundary
+    --lyr_name             OGR layer name to write into datasource
+    --tindex_name          Tile index column name
+    --ogrdriver, -f        OGR driver name to use
+    --t_srs                Target SRS of tile index
+    --a_srs                Assign SRS of tile with no SRS to this value
+    --write_absolute_path  Write absolute rather than relative file paths
+    --merge                Whether we're merging the entries in a tindex file.
+    --stdin, -s            Read filespec pattern from standard input
+
+
 This command will index the files referred to by ``filespec`` and place the
 result in ``tindex``.  The ``tindex`` is a vector file or database that
 will be created by ``pdal`` as necessary to store the file index.
@@ -33,22 +48,7 @@ feature in a layer in the index file. The ``filespec`` is a `glob pattern
 <http://man7.org/linux/man-pages/man7/glob.7.html>`_.  and normally needs to be
 quoted to prevent shell expansion of wildcard characters.
 
-::
 
-    --tindex                   Non-positional option for specifying the index file name.
-    --filespec                 Non-positional option for specifying pattern of files to
-                               be indexed.
-    --lyr_name                 Name of layer in which to store the features. Defaults to
-                               the base name of the first file indexed.
-    --tindex_name              Name of the field in the feature in which to store the
-                               indexed file name. ["location"]
-    --ogrdriver                OGR driver name. ["ESRI Shapefile"]
-    --t_srs                    Spatial reference system in which to store index vector
-                               data. ["EPSG:4326"]
-    --a_srs                    Spatial reference assumed to be the reference for the
-                               source data.  If the source data includes spatial reference
-                               information, this value is IGNORED. ["EPSG:4326"]
-    --write_absolute_path arg  Write absolute rather than relative file paths [false]
 
 tindex Merge Mode
 --------------------------------------------------------------------------------
@@ -65,15 +65,15 @@ extension.
 
 ::
 
-    --tindex    Non-positional option for specifying the index filename.
-    --filespec  Non-positional option for specifying the merge output filename.
-    --polygon   Well-known text representation of geometric filter.  Only
-                points inside the object will be written to the output file.
-    --bounds    Bounding box for clipping points.  Only points inside the box
-                will be written to the output file.
-                --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
-    --t_srs     Spatial reference system in which the output data should be
-                represented. ["EPSG:4326"]
+    --tindex         OGR-readable/writeable tile index output
+    --filespec       Build: Pattern of files to index. Merge: Output filename
+    --lyr_name       OGR layer name to write into datasource
+    --tindex_name    Tile index column name
+    --ogrdriver, -f  OGR driver name to use
+    --t_srs          Target SRS of tile index
+    --bounds         Extent (in XYZ) to clip output to
+    --polygon        Well-known text of polygon to clip output
+
 
 Example 1:
 --------------------------------------------------------------------------------

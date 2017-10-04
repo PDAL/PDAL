@@ -20,6 +20,7 @@ print the ``--all`` info for the file and look for the ``bbox`` output:
 .. literalinclude:: ./near-command-1.txt
 
 .. image:: ../../images/info-near-bbox.png
+    :target: ../../../_images/info-near-bbox.png
 
 Find the average the ``X``, ``Y``, and ``Z`` values:
 
@@ -42,6 +43,7 @@ and return the three nearest points to it:
     return data in closest-distance ordering.
 
 .. image:: ../../images/info-near-point.png
+    :target: ../../../_images/info-near-point.png
 
 Notes
 --------------------------------------------------------------------------------

@@ -20,13 +20,17 @@ if you want to preserve the old coordinates for future processing, use a
     coordinate values will change, which may change the optimal scale and offset
     for storing the data.
 
+.. embed::
+
+.. streamable::
 
 Example 1
--------
+--------------------------------------------------------------------------------
+
 This pipeline reprojecs terrain points with Z-values between 0 and 100 by first
 applying a range filter and then specifing both the input and output spatial
 reference as EPSG-codes. The X and Y dimensions are scaled to allow enough
-precision in the output coordinates. 
+precision in the output coordinates.
 
 .. code-block:: json
 
@@ -59,21 +63,22 @@ precision in the output coordinates.
       ]
     }
 
-Examle 2
--------
-In some cases it is not possible to use a EPSG-code as a spatial reference. 
-Instead `Proj.4 <http:/proj4.org>`_ parameters can be used to define a spatial reference. 
-In this example the vertical component of points in a laz file is converted from
-geometric (ellipsoidal) heights to orthometric heights by using the ``geoidgrids``
-parameter from Proj.4.
-Here we change the vertical datum from the GRS80 ellipsoid to DVR90,
-the vertical datum in Denmark. In the writing stage of the pipeline the spatial 
-reference of the file is set to EPSG:7416. The last step is needed since PDAL will
-otherwise reference the vertical datum as "Unnamed Vertical Datum" in the spatial
-reference VLR.
+Example 2
+--------------------------------------------------------------------------------
+
+In some cases it is not possible to use a EPSG-code as a spatial reference.
+Instead `Proj.4 <http:/proj4.org>`_ parameters can be used to define a spatial
+reference.  In this example the vertical component of points in a laz file is
+converted from geometric (ellipsoidal) heights to orthometric heights by using
+the ``geoidgrids`` parameter from Proj.4.  Here we change the vertical datum
+from the GRS80 ellipsoid to DVR90, the vertical datum in Denmark. In the
+writing stage of the pipeline the spatial reference of the file is set to
+EPSG:7416. The last step is needed since PDAL will otherwise reference the
+vertical datum as "Unnamed Vertical Datum" in the spatial reference VLR.
 
 
 .. code-block:: json
+    :linenos:
 
     {
       "pipeline":[

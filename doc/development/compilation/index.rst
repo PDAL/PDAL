@@ -25,5 +25,4 @@ Contents:
    unix
    windows
    dependencies
-   python
 

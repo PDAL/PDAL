@@ -35,7 +35,8 @@ It uses the ``pdal/dependencies`` :ref:`docker` image found at
 https://hub.docker.com/r/pdal/dependencies as a base platform for providing
 prerequisite software and running the test suite. If you want to add new test
 functionality based on a dependency, you will need to update that Docker image
-to do so.
+to do so. See :ref:`development_docker` for more detail on how PDAL builds
+and uses Docker containers for testing.
 
 
 .. _appveyor:
