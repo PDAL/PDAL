@@ -126,7 +126,7 @@ void AssignFilter::prepared(PointTableRef table)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'values' option: '" +
+            throwError("Invalid dimension name in 'assignment' option: '" +
                 r.m_name + "'.");
     }
 }
