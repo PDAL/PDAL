@@ -243,7 +243,7 @@ public:
       \return  The stage's debug state.
     */
     bool isDebug() const
-        { return m_debug; }
+        { return m_log && m_log->getLevel() > LogLevel::Debug; }
 
     /**
       Return the name of a stage.
@@ -346,7 +346,6 @@ protected:
     }
 
 private:
-    bool m_debug;
     uint32_t m_verbose;
     std::string m_logname;
     std::vector<Stage *> m_inputs;
