@@ -256,8 +256,8 @@ bool CropFilter::crop(const PointRef& point, const filter::Point& center)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
-    x -= center.x;
-    y -= center.y;
+    x = std::abs(x - center.x);
+    y = std::abs(y - center.y);
     if (x > m_distance || y > m_distance)
         return (m_cropOutside);
 
@@ -265,7 +265,7 @@ bool CropFilter::crop(const PointRef& point, const filter::Point& center)
     if (center.is3d())
     {
         double z = point.getFieldAs<double>(Dimension::Id::Z);
-        z -= center.z;
+        z = std::abs(z - center.z);
         if (z > m_distance)
             return (m_cropOutside);
         inside = (x * x + y * y + z * z < m_distance2);
