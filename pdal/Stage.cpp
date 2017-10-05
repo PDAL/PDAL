@@ -417,6 +417,11 @@ void Stage::l_addArgs(ProgramArgs& args)
 {
     args.add("user_data", "User JSON", m_userDataJSON);
     args.add("log", "Debug output filename", m_logname);
+    // We never really bind anything to this variable.  We extract the option
+    // before parsing the command line.  This entry allows a line in the
+    // help and options list.
+    args.add("option_file", "File from which to read additional options",
+        m_optionFile);
     readerAddArgs(args);
 }
 

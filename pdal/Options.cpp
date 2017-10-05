@@ -35,6 +35,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <json/json.h>
 
 #include <iostream>
 #include <sstream>
@@ -152,15 +153,73 @@ StringList Options::toCommandLine() const
     return s;
 }
 
-Options Options::fromFile(const std::string& filename)
+Options Options::fromFile(const std::string& filename, bool throwOnOpenError)
+{
+    if (!FileUtils::fileExists(filename))
+    {
+        if (throwOnOpenError)
+            throw pdal_error("Can't read options file '" + filename + "'.");
+        else
+            return Options();
+    }
+
+    std::string s = FileUtils::readFileIntoString(filename);
+
+    size_t cnt = Utils::extractSpaces(s, 0);
+    if (s[cnt] == '{')
+        return fromJsonFile(filename, s);
+    else if (s[cnt] == '-')
+        return fromCmdlineFile(filename, s);
+    else
+        throw pdal_error("Option file '" + filename + "' not valid JSON or "
+            "command-line format.");
+}
+
+
+Options Options::fromJsonFile(const std::string& filename, const std::string& s)
 {
     Options options;
 
-    if (!FileUtils::fileExists(filename))
-        throw pdal_error("Can't read options file '" + filename + "'.");
+    Json::Reader reader;
+    Json::Value node;
 
-    StringList args = Utils::simpleWordexp(
-        FileUtils::readFileIntoString(filename));
+    if (!reader.parse(s, node))
+        throw pdal_error("Unable to parse options file '" + filename +
+            "' as JSON: \n" + reader.getFormattedErrorMessages());
+
+    for (const std::string& name : node.getMemberNames())
+    {
+        if (node[name].isString())
+            options.add(name, node[name].asString());
+        else if (node[name].isInt())
+            options.add(name, node[name].asInt64());
+        else if (node[name].isUInt())
+            options.add(name, node[name].asUInt64());
+        else if (node[name].isDouble())
+            options.add(name, node[name].asDouble());
+        else if (node[name].isBool())
+            options.add(name, node[name].asBool());
+        else if (node[name].isNull())
+            options.add(name, "");
+        else if (node[name].isArray() || node[name].isObject())
+        {
+            Json::FastWriter w;
+            options.add(name, w.write(node[name]));
+        }
+        else
+            throw pdal_error("Value of stage option '" +
+                name + "' in options file '" + filename +
+                "' cannot be converted.");
+    }
+    return options;
+}
+
+
+Options Options::fromCmdlineFile(const std::string& filename,
+    const std::string& s)
+{
+    Options options;
+    StringList args = Utils::simpleWordexp(s);
 
     for (size_t i = 0; i < args.size(); ++i)
     {

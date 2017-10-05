@@ -224,10 +224,16 @@ public:
 
     std::vector<Option> getOptions(std::string const& name="") const;
     StringList toCommandLine() const;
-    static Options fromFile(const std::string& filename);
+    static Options fromFile(const std::string& filename,
+        bool throwOnOpenError = true);
 
 private:
     std::multimap<std::string, Option> m_options;
+
+    static Options fromJsonFile(const std::string& filename,
+        const std::string& s);
+    static Options fromCmdlineFile(const std::string& filename,
+        const std::string& s);
 };
 typedef std::map<std::string, Options> OptionsMap;
 
