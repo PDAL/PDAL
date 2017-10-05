@@ -28,6 +28,8 @@ RUN \
         linux-headers \
         laszip-dev \
         libspatialite-dev \
+        cython-dev \
+        py-packaging \
     ; \
     apk add --no-cache \
         hexer \
@@ -49,6 +51,7 @@ RUN \
         libcurl \
         laszip \
         libspatialite \
+        py-setuptools \
     ;\
     mkdir /vdatum; \
     cd /vdatum; \
@@ -88,6 +91,8 @@ RUN \
     ; \
     make -j2; \
     make install; \
+    cd ../python; \
+    python setup.py install; \
     cd /; \
     rm -rf /PDAL-master; \
     apk del .build-deps
