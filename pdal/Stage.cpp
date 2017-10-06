@@ -104,6 +104,13 @@ void Stage::handleOptions()
         m_options.addConditional(Options::fromFile(file));
     m_options.remove(Option("option_file", 0));
 
+    // Special stuff for GRiD so that no error is thrown when a file
+    // isn't found.
+    files = m_options.getValues("grid_option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file, false));
+    m_options.remove(Option("grid_option_file", 0));
+
     StringList cmdline = m_options.toCommandLine();
     try
     {
