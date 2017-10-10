@@ -87,7 +87,6 @@ protected:
     void finishOutput();
 
 private:
-    LasError m_error;
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;

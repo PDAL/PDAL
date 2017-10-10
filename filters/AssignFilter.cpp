@@ -90,7 +90,14 @@ std::istream& operator>>(std::istream& in, AssignRange& r)
     std::string s;
 
     std::getline(in, s);
-    r.parse(s);
+    try
+    {
+        r.parse(s);
+    }
+    catch (DimRange::error)
+    {
+        in.setstate(std::ios_base::failbit);
+    }
     return in;
 }
 
@@ -126,7 +133,7 @@ void AssignFilter::prepared(PointTableRef table)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'values' option: '" +
+            throwError("Invalid dimension name in 'assignment' option: '" +
                 r.m_name + "'.");
     }
 }
