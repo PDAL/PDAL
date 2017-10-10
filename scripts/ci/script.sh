@@ -1,83 +1,78 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # Builds and tests PDAL
 
-clang --version
+echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+apk update
+apk add \
+    cmake \
+    alpine-sdk \
+    eigen-dev \
+    hexer \
+    hexer-dev \
+    nitro \
+    nitro-dev \
+    gdal \
+    gdal-dev \
+    geos \
+    geos-dev \
+    laz-perf \
+    laz-perf-dev \
+    libgeotiff \
+    libgeotiff-dev \
+    libxml2 \
+    libxml2-dev \
+    python \
+    python-dev \
+    py-numpy \
+    py-numpy-dev \
+    jsoncpp \
+    jsoncpp-dev \
+    hdf5 \
+    hdf5-dev \
+    proj4 \
+    proj4-dev \
+    cpd \
+    cpd-dev \
+    fgt \
+    fgt-dev \
+    sqlite \
+    sqlite-dev \
+    postgresql-dev \
+    libcurl \
+    curl-dev \
+    linux-headers \
+    laszip \
+    laszip-dev \
+    libspatialite \
+    libspatialite-dev
+
 gcc --version
+g++ --version
 
 cd /pdal
-source ./scripts/ci/common.sh
 
 mkdir -p _build || exit 1
 cd _build || exit 1
 
-case "$PDAL_OPTIONAL_COMPONENTS" in
-    all)
-        OPTIONAL_COMPONENT_SWITCH=ON
-        ;;
-    none)
-        OPTIONAL_COMPONENT_SWITCH=OFF
-        ;;
-    *)
-        echo "Unrecognized value for PDAL_OPTIONAL_COMPONENTS=$PDAL_OPTIONAL_COMPONENTS"
-        exit 1
-esac
-
-
-cmake \
-    -DBUILD_PLUGIN_CPD=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_GREYHOUND=OFF \
-    -DBUILD_PLUGIN_HEXBIN=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_ICEBRIDGE=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_MRSID=OFF \
-    -DBUILD_PLUGIN_NITF=OFF \
-    -DBUILD_PLUGIN_OCI=OFF \
-    -DBUILD_PLUGIN_OPENSCENEGRAPH=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_PCL=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_PGPOINTCLOUD=$OPTIONAL_COMPONENT_SWITCH \
+cmake .. \
+    -G "Unix Makefiles" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=gcc \
+    -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_MAKE_PROGRAM=make \
+    -DBUILD_PLUGIN_PYTHON=ON \
+    -DBUILD_PLUGIN_CPD=ON \
+    -DBUILD_PLUGIN_GREYHOUND=ON \
+    -DBUILD_PLUGIN_HEXBIN=ON \
+    -DBUILD_PLUGIN_NITF=ON \
+    -DBUILD_PLUGIN_ICEBRIDGE=ON \
+    -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
     -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-    -DBUILD_PLUGIN_SQLITE=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_RIVLIB=OFF \
-    -DBUILD_PLUGIN_PYTHON=$OPTIONAL_COMPONENT_SWITCH \
-    -DENABLE_CTEST=OFF \
-    -DWITH_APPS=ON \
-    -DWITH_LAZPERF=$OPTIONAL_COMPONENT_SWITCH \
-    -DWITH_LASZIP=$OPTIONAL_COMPONENT_SWITCH \
-    -DWITH_PDAL_JNI=$OPTIONAL_COMPONENT_SWITCH \
-    -DWITH_TESTS=ON \
-    -G "$PDAL_CMAKE_GENERATOR" \
-    ..
+    -DBUILD_PLUGIN_SQLITE=ON \
+    -DWITH_LASZIP=ON \
+    -DWITH_LAZPERF=ON \
+    -DWITH_TESTS=ON
 
-cmake ..
-
-MAKECMD=make
-
-# Don't use ninja's default number of threads becuase it can
-# saturate Travis's available memory.
-NUMTHREADS=2
-${MAKECMD} -j ${NUMTHREADS} && \
-    LD_LIBRARY_PATH=./lib && \
-    PGUSER=postgres ctest -V && \
-    ${MAKECMD} install && \
-    /sbin/ldconfig
-
-if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
-    cd /pdal/python
-    pip install packaging
-    python setup.py build
-    echo "current path: " `pwd`
-    export PDAL_TEST_DIR=/pdal/_build/test
-    python setup.py test
-
-    # JNI tests
-#    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
-
-    # Build all examples
-    for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
-    do
-        cd /pdal/examples/$EXAMPLE
-        mkdir -p _build || exit 1
-        cd _build || exit 1
-        cmake -G "$PDAL_CMAKE_GENERATOR" .. && \
-        ${MAKECMD}
-    done
-fi
+make -j2
+LD_LIBRARY_PATH=./lib
+ctest -V

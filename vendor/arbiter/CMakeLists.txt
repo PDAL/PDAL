@@ -2,26 +2,27 @@
 # Make sure we don't attempt to add a library more than once
 #
 
-if (NOT PDAL_ARBITER_ENABLED)
+get_property(EXISTS GLOBAL PROPERTY _PDALARBITER_INCLUDED)
+if (NOT PDAL_ARBITER_ENABLED OR EXISTS)
     return()
 endif()
 
-get_property(EXISTS GLOBAL PROPERTY _PDALARBITER_INCLUDED)
-if (EXISTS)
-    return()
+if (CURL_FOUND)
+    add_definitions("-DARBITER_CURL")
 endif()
 
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
 target_include_directories(${PDAL_ARBITER_LIB_NAME} PRIVATE
     ${PDAL_VENDOR_DIR}/jsoncpp/dist)
-target_link_libraries(${PDAL_ARBITER_LIB_NAME} )
+target_link_libraries(${PDAL_ARBITER_LIB_NAME})
 #
 # Arbiter is built static but is included in a shared lib.
 #
 if (UNIX)
     target_compile_options(${PDAL_ARBITER_LIB_NAME} PRIVATE "-fPIC")
 else()
-    target_compile_definitions(${PDAL_ARBITER_LIB_NAME} PUBLIC -DARBITER_DLL_EXPORT)
+    target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
+        PUBLIC -DARBITER_DLL_EXPORT -DARBITER_CURL)
 endif()
 
 set_target_properties(${PDAL_ARBITER_LIB_NAME} PROPERTIES

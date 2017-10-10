@@ -45,7 +45,6 @@
 #include <pdal/util/Bounds.hpp>
 
 #include "bounds.hpp"
-#include "pool.hpp"
 
 namespace pdal
 {
@@ -54,88 +53,40 @@ namespace greyhound = entwine;
 
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
-
 public:
-    GreyhoundReader();
-
     static void* create();
     static int32_t destroy(void*);
     std::string getName() const override;
 
 private:
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
-
-    std::string m_url;
-    std::string m_resource;
-    std::string m_sessionId;
-    BOX3D m_queryBox;
-    greyhound::Bounds m_queryBounds;
-    greyhound::Bounds m_fullBounds;
-    std::size_t m_depthBegin;
-    std::size_t m_depthEnd;
-    std::size_t m_baseDepth;
-    std::size_t m_sparseDepth;
-    Json::Value m_info;
-    Json::Value m_schema;
-
-    mutable std::mutex m_mutex;
-    point_count_t m_numPoints = 0;
-    const std::size_t m_hierarchyStep = 6;
-    std::size_t m_taskId = 0;
-    std::queue<std::function<void()>> m_tasks;
-    std::map<std::size_t, std::function<void()>> m_running;
-    std::unique_ptr<std::string> m_error;
-
-    void inc(point_count_t n)
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_numPoints += n;
-    }
-
-    DimTypeList m_dims;
-
-    uint32_t m_depthBeginArg;
-    uint32_t m_depthEndArg;
-    std::vector<std::string> m_pathsArg;
-    Json::Value m_filter;
-    int32_t m_threadsArg;
-
-    virtual void initialize(PointTableRef table) override;
     virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void prepared(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
-    virtual QuickInfo inspect() override;
-    virtual void done(PointTableRef table) override { }
 
-    void launchPooledReads(
-            PointView& view,
-            const greyhound::Bounds& bounds,
-            std::size_t depth,
-            greyhound::Pool& pool);
+    struct Args
+    {
+        std::string url;
+        std::string resource;
+        std::string sbounds;
+        std::size_t depthBegin = 0;
+        std::size_t depthEnd = 0;
+        std::string tilePath;
+        Json::Value filter;
+        Json::Value schema;
 
-    void read(
-            PointView& view,
-            Json::Value& hierarchy,
-            const greyhound::Bounds& bounds,
-            std::size_t startDepth,
-            std::size_t depth);
+        std::string base() const;
+        std::string query() const;
+    };
 
-    std::vector<point_count_t> fetchVerticalHierarchy(
-            const greyhound::Bounds& bounds,
-            std::size_t depthBegin,
-            std::size_t depthEnd) const;
+    Args m_args;
+    std::string m_base;
+    std::string m_query;
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
-    Json::Value fetchHierarchy(
-            const greyhound::Bounds& bounds,
-            std::size_t depthBegin,
-            std::size_t depthEnd) const;
-
-    point_count_t fetchData(
-            PointView& view,
-            const greyhound::Bounds& bounds,
-            std::size_t depthBegin,
-            std::size_t depthEnd);
+    Json::Value m_info;
+    DimTypeList m_dims;
 };
 
 } // namespace pdal

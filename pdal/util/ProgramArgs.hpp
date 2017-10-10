@@ -1070,8 +1070,8 @@ public:
 
     /**
       Parse a command line as specified by its argument vector.  No validation
-      occurs and no exceptions are raised, but assignments are made
-      to bound variables where possible.
+      occurs and only argument value exceptions are raised,
+      but assignments are made to bound variables where possible.
 
       \param s  List of strings that constitute the argument list.
     */
@@ -1131,7 +1131,7 @@ public:
 
       \param s  List of strings that constitute the argument list.
     */
-    void parse(std::vector<std::string>& s)
+    void parse(const std::vector<std::string>& s)
     {
         validate();
         ArgValList vals(s);

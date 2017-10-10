@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <list>
 #include <vector>
 
@@ -206,6 +207,9 @@ public:
             m_buf.resize(pointsToBytes(m_capacity + 1));
         }
     }
+
+    virtual void reset()
+        { std::fill(m_buf.begin(), m_buf.end(), 0); }
 
     point_count_t capacity() const
         { return m_capacity; }

@@ -86,6 +86,7 @@ private:
     double m_noData;
     Dimension::Id m_interpDim;
     std::string m_interpDimString;
+    Dimension::Type m_dataType;
 };
 
 }

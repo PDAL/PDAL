@@ -38,6 +38,7 @@
 #include <pdal/pdal_config.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include "LasSummaryData.hpp"
 
@@ -128,24 +129,12 @@ void LasHeader::setScaling(const Scaling& scaling)
 
 uint16_t LasHeader::basePointLen(uint8_t type)
 {
-    switch (type)
-    {
-    case 0:
-        return 20;
-    case 1:
-        return 28;
-    case 2:
-        return 26;
-    case 3:
-        return 34;
-    case 6:
-        return 30;
-    case 7:
-        return 36;
-    case 8:
-        return 38;
-    }
-    return 0;
+    const uint16_t len[] = { 20, 28, 26, 34, 57, 63, 30, 36, 38, 59, 67 };
+    const size_t numTypes = sizeof(len) / sizeof(len[0]);
+
+    if (type > numTypes)
+        return 0;
+    return len[type];
 }
 
 
@@ -235,6 +224,31 @@ void LasHeader::setSrs()
     {
         m_log->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
     }
+}
+
+
+void LasHeader::removeVLR(const std::string& userId, uint16_t recordId)
+{
+    auto matches = [&userId, recordId](const LasVLR& vlr)
+    {
+        return vlr.matches(userId, recordId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
+}
+
+
+void LasHeader::removeVLR(const std::string& userId)
+{
+
+    auto matches = [&userId ](const LasVLR& vlr)
+    {
+        return vlr.matches(userId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
 }
 
 

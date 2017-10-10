@@ -118,14 +118,11 @@ include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/curl.cmake)
-if (CURL_FOUND)
-    set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
-endif()
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/python.cmake)
+include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -149,6 +146,8 @@ endif()
 
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
+include(CheckIncludeFiles)
+check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 
 #------------------------------------------------------------------------------
@@ -173,12 +172,11 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
-
 if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
 endif()
 add_subdirectory(pdal/util)
-add_subdirectory(tools)
+#add_subdirectory(tools)
 add_subdirectory(apps)
 
 #
@@ -283,11 +281,6 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     PATTERN "pdal/private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_KERNELS_DIR}
-    DESTINATION include/pdal
-    FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
-)
-install(DIRECTORY ${PDAL_VENDOR_DIR}/nanoflann
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "private" EXCLUDE

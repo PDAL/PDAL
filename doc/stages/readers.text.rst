@@ -51,7 +51,7 @@ Example Pipeline
     {
       "pipeline":[
         {
-          "type":"readers.qfit",
+          "type":"readers.text",
           "filename":"inputfile.txt"
         },
         {

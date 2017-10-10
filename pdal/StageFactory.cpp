@@ -81,6 +81,19 @@
 #include <filters/VoxelCenterNearestNeighborFilter.hpp>
 #include <filters/VoxelCentroidNearestNeighborFilter.hpp>
 
+#include <kernels/DeltaKernel.hpp>
+#include <kernels/DiffKernel.hpp>
+#include <kernels/GroundKernel.hpp>
+#include <kernels/HausdorffKernel.hpp>
+#include <kernels/InfoKernel.hpp>
+#include <kernels/MergeKernel.hpp>
+#include <kernels/PipelineKernel.hpp>
+#include <kernels/RandomKernel.hpp>
+#include <kernels/SortKernel.hpp>
+#include <kernels/SplitKernel.hpp>
+#include <kernels/TIndexKernel.hpp>
+#include <kernels/TranslateKernel.hpp>
+
 // readers
 #include <io/BpfReader.hpp>
 #include <io/FauxReader.hpp>
@@ -88,7 +101,6 @@
 #include <io/Ilvis2Reader.hpp>
 #include <io/LasReader.hpp>
 #include <io/OptechReader.hpp>
-#include <io/BufferReader.hpp>
 #include <io/PlyReader.hpp>
 #include <io/PtsReader.hpp>
 #include <io/QfitReader.hpp>
@@ -131,7 +143,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "readers.qfit", { "qi" } },
         { "readers.rxp", { "rxp" } },
         { "readers.sbet", { "sbet" } },
-        { "readers.sqlite", { "sqlite" } },
+        { "readers.sqlite", { "sqlite", "gpkg" } },
         { "readers.matlab", { "mat" } },
         { "readers.mrsid", { "sid" } },
         { "readers.tindex", { "tindex" } },
@@ -147,7 +159,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "writers.ply", { "ply" } },
         { "writers.sbet", { "sbet" } },
         { "writers.derivative", { "derivative" } },
-        { "writers.sqlite", { "sqlite" } },
+        { "writers.sqlite", { "sqlite", "gpkg" } },
         { "writers.gdal", { "tif", "tiff", "vrt" } },
         { "writers.ogr", { "shp", "geojson" } },
     };
@@ -164,6 +176,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "csd", "readers.optech" },
         { "csv", "readers.text" },
         { "greyhound", "readers.greyhound" },
+        { "gpkg", "readers.sqlite" },
         { "icebridge", "readers.icebridge" },
         { "las", "readers.las" },
         { "laz", "readers.las" },
@@ -217,6 +230,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "json", "writers.text" },
         { "las", "writers.las" },
         { "laz", "writers.las" },
+        { "gpkg", "writers.sqlite" },
         { "mat", "writers.matlab" },
         { "ntf", "writers.nitf" },
         { "pcd", "writers.pcd" },
@@ -246,8 +260,8 @@ StageFactory::StageFactory(bool no_plugins)
 {
     if (!no_plugins)
     {
-        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Reader |
-            PF_PluginType_Writer);
+        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Kernel |
+            PF_PluginType_Reader | PF_PluginType_Writer);
     }
 
     // filters
@@ -295,6 +309,20 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
     PluginManager::initializePlugin(VoxelCenterNearestNeighborFilter_InitPlugin);
     PluginManager::initializePlugin(VoxelCentroidNearestNeighborFilter_InitPlugin);
+
+    // kernels
+    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
+    PluginManager::initializePlugin(DiffKernel_InitPlugin);
+    PluginManager::initializePlugin(GroundKernel_InitPlugin);
+    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
+    PluginManager::initializePlugin(InfoKernel_InitPlugin);
+    PluginManager::initializePlugin(MergeKernel_InitPlugin);
+    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
+    PluginManager::initializePlugin(RandomKernel_InitPlugin);
+    PluginManager::initializePlugin(SortKernel_InitPlugin);
+    PluginManager::initializePlugin(SplitKernel_InitPlugin);
+    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
+    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 
     // readers
     PluginManager::initializePlugin(BpfReader_InitPlugin);

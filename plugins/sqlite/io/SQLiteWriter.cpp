@@ -210,7 +210,7 @@ void SQLiteWriter::CreateBlockTable()
 
     oss << "CREATE TABLE " << Utils::tolower(m_block_table)
         << "(" << Utils::tolower(m_cloud_column)  <<
-        " INTEGER REFERENCES " << Utils::tolower(m_cloud_column)  <<
+        " INTEGER REFERENCES " << Utils::tolower(m_cloud_table)  <<
         "," << " block_id INTEGER," << " num_points INTEGER," <<
         " points BLOB," << " bbox box3d " << ")";
 

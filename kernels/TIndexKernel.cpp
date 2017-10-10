@@ -37,7 +37,6 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
@@ -258,7 +257,7 @@ void TIndexKernel::createFile()
 
     FieldIndexes indexes = getFields();
 
-    KernelFactory factory(false);
+    StageFactory factory(false);
     for (auto f : m_files)
     {
         //ABELL - Not sure why we need to get absolute path here.
@@ -457,7 +456,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 }
 
 
-TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
+TIndexKernel::FileInfo TIndexKernel::getFileInfo(StageFactory& factory,
     const std::string& filename)
 {
     FileInfo fileInfo;
