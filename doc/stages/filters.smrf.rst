@@ -42,7 +42,7 @@ cell
 cut
   Cut net size (``cut=0`` skips the net cutting step). [Default: **0.0**]
 
-outdir
+dir
   Optional output directory for debugging intermediate rasters.
 
 scalar
