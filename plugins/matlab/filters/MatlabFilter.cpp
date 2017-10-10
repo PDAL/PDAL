@@ -95,7 +95,7 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
 
     Dimension::IdList dims;
 
-    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, m_tableMetadata, log());
+    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, m_pdalargs, m_tableMetadata, log());
     if (engPutVariable(engine, m_structName.c_str(), matlabData))
     {
         std::ostringstream oss;
@@ -143,10 +143,9 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     }
     else
     {
-        mlang::Script::getMatlabStruct(matlabData, view, dims, log());
+        mlang::Script::getMatlabStruct(matlabData, view, dims, m_pdalargs, m_tableMetadata, log());
         viewSet.insert(view);
     }
-
     return viewSet;
 
 }
