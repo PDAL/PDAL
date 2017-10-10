@@ -12,6 +12,9 @@ SO_EXT=dylib
 ORACLE_HOME=$HOME/oracle
 LAZPERF_HOME=$USR_LOCAL
 export ORACLE_HOME
+MATLAB_HOME=/Applications/MATLAB_R2017b.app
+export GDAL_HOME=/usr/local/opt/gdal2
+
 CONFIG="Unix Makefiles"
 #CONFIG="Ninja" /usr/local/Cellar/hdf5/1.8.16_1/
 
@@ -36,8 +39,9 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_MATLAB=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
-        -DBUILD_PLUGIN_OPENSCENEGRAPH=ON \
+        -DBUILD_PLUGIN_OPENSCENEGRAPH=OFF \
         -DWITH_LAZPERF=ON \
+        -DWITH_LASZIP=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
@@ -47,17 +51,17 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} \
-        -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
-        -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/libpython3.6.dylib \
-        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/include/python3.6m/ \
+        -DPYTHON_EXECUTABLE=/usr/local/bin/python2 \
+        -DPYTHON_LIBRARY=/usr/local/Cellar/python/2.7.14/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
+        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/2.7.14/Frameworks/Python.framework/Versions/2.7/include/python2.7/ \
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost" \
         -DBUILD_PLUGIN_MATLAB=ON \
-         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmex.dylib \
-         -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmat.dylib \
-         -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libmx.dylib \
-         -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017a.app/extern/include \
-         -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017a.app/bin/maci64/libeng.dylib
+         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmex.dylib \
+         -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmat.dylib \
+         -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmx.dylib \
+         -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017b.app/extern/include \
+         -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libeng.dylib
 
 
 #         -DPYTHON_EXECUTABLE=/usr/local/bin/python \
