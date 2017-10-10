@@ -94,7 +94,7 @@ void MatlabWriter::ready(PointTableRef table)
 void MatlabWriter::write(const PointViewPtr view)
 {
 
-    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, m_tableMetadata, log());
+    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, "", m_tableMetadata, log());
     if (matPutVariable(m_matfile, m_structName.c_str(), data))
         throwError("Could not write points to file '" + m_filename + "'.");
 
