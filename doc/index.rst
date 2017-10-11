@@ -28,18 +28,13 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**04-6-2017**
+**10-12-2017**
 ................................................................................
 
-PDAL 1.5.0 has been released. Visit :ref:`download` to obtain a copy of the
+PDAL 1.6.0 has been released. Visit :ref:`download` to obtain a copy of the
 source code, or follow the :ref:`quickstart` to get going in a hurry with
 `Docker`_.
 
-
-.. image:: ./images/foss4g-2017.png
-    :scale: 40%
-    :align: right
-    :target: http://2017.foss4g.org
 
 .. _`Docker`: https://www.docker.com/
 
