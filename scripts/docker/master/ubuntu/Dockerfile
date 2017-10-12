@@ -225,10 +225,11 @@ RUN \
     ; \
     make -j2; \
     make install; \
+    pip install packaging; \
+    cd ../python; \
+    python setup.py install; \
     cd /; \
     rm -rf /PDAL; \
-    pip install packaging; \
-    pip install PDAL; \
     git clone https://github.com/PDAL/PRC.git; \
     cd PRC; \
     git checkout master; \

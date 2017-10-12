@@ -145,7 +145,7 @@ RUN git clone https://github.com/hobu/nitro \
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
     && cd laszip \
-    && git checkout 3.1.0 \
+    && git checkout 3.1.1 \
     && cmake \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE="Release" \

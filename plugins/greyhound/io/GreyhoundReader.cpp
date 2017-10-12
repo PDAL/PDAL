@@ -284,7 +284,7 @@ void GreyhoundReader::prepared(PointTableRef table)
     for (const auto& p : details)
     {
         const Dimension::Detail& d(p.second);
-        const std::string name(Dimension::name(d.id()));
+        const std::string name(layout.dimName(d.id()));
 
         Json::Value j;
         j["name"] = name;

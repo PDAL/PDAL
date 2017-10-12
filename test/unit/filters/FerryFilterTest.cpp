@@ -174,4 +174,12 @@ TEST(FerryFilterTest, test_ferry_invalid)
 
     // Make sure we reject bad option format.
     EXPECT_THROW(f4.prepare(table), pdal_error);
+
+    Options op5;
+    op5.add("dimensions", "=Foobar");
+    FerryFilter f5;
+    f5.setInput(reader);
+    f5.setOptions(op5);
+    f5.prepare(table);
+    EXPECT_TRUE(table.layout()->findDim("Foobar") != Dimension::Id::Unknown);
 }

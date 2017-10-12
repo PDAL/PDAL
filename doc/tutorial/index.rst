@@ -4,42 +4,19 @@
 Tutorials
 ******************************************************************************
 
-This section provides tutorial-level information on various aspects of PDAL,
-from command-line use to plugin development.
+This section provides a collection of tutorials on how to use the PDAL :ref:`apps` and :ref:`Pipelines <pipeline>` to process data.
 
-Getting Started
----------------
+.. note::
 
-.. toctree::
-   :maxdepth: 1
-
-   using
-
-Using PDAL
-----------
+  Users looking for documentation on how to contribute to PDAL should look :ref:`here <development_index>` and users looking to use the PDAL API in their own applications should look :ref:`here <api>`.
 
 .. toctree::
    :maxdepth: 1
 
    reading
-   writing
    las
    pcl_block_tutorial
-   pcl_ground
-   clipping-with-shapefile
-   calculating-normalized-heights
-   dart-throwing
+   pcl_ground/index
+   clipping/index
+   sampling/index
    python-filtering
-
-
-Developing
-----------
-
-.. toctree::
-   :maxdepth: 1
-
-   writing-filter
-   writing-kernel
-   writing-reader
-   writing-writer
-   liblas_to_pdal

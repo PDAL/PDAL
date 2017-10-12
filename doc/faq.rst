@@ -29,7 +29,7 @@ FAQ
   the following paths for plugins: ".", "./lib", "../lib", "./bin", "../bin".
 
   You can also override the default search path by setting the environment
-  variable PDAL_DRIVER_PATH to a list of directories that pdal should search
+  variable ``PDAL_DRIVER_PATH`` to a list of directories that pdal should search
   for plugins.
 
 * What is PDAL's relationship to PCL?
@@ -37,6 +37,8 @@ FAQ
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
   declarative pipeline syntax for orchestrating translation operations.
   PDAL can also use PCL through the :ref:`filters.pclblock` mechanism.
+  PDAL also supports reading and writing PCL PCD files using :ref:`readers.pcd`
+  and :ref:`writers.pcd`.
 
   .. seealso::
 
