@@ -1,7 +1,5 @@
 FROM alpine:3.6
 
-ADD ./10-backtrace-guards.patch /10-backtrace-guards.patch
-
 RUN \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
     apk update; \
@@ -22,12 +20,16 @@ RUN \
         jsoncpp-dev \
         hdf5-dev \
         proj4-dev \
+        cpd-dev \
+        fgt-dev \
         sqlite-dev \
         postgresql-dev \
         curl-dev \
         linux-headers \
         laszip-dev \
         libspatialite-dev \
+        cython-dev \
+        py-packaging \
     ; \
     apk add --no-cache \
         hexer \
@@ -42,11 +44,14 @@ RUN \
         jsoncpp \
         hdf5 \
         proj4 \
+        cpd \
+        fgt \
         sqlite \
         postgresql \
         libcurl \
         laszip \
         libspatialite \
+        py-setuptools \
     ;\
     mkdir /vdatum; \
     cd /vdatum; \
@@ -61,12 +66,10 @@ RUN \
     wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj; \
     cd /; \
     rm -rf /vdatum; \
-    wget https://github.com/PDAL/PDAL/archive/1.4-maintenance.tar.gz; \
-    tar -xf 1.4-maintenance.tar.gz; \
-    rm 1.4-maintenance.tar.gz; \
-    cd /PDAL-1.4-maintenance; \
-    git apply /10-backtrace-guards.patch; \
-    rm /10-backtrace-guards.patch; \
+    wget https://github.com/PDAL/PDAL/archive/1.6-maintenance.tar.gz; \
+    tar -xf 1.6-maintenance.tar.gz; \
+    rm 1.6-maintenance.tar.gz; \
+    cd /PDAL-1.6-maintenance; \
     mkdir -p _build; \
     cd _build; \
     cmake .. \
@@ -76,7 +79,7 @@ RUN \
         -DCMAKE_CXX_COMPILER=g++ \
         -DCMAKE_MAKE_PROGRAM=make \
         -DBUILD_PLUGIN_PYTHON=ON \
-        -DBUILD_PLUGIN_CPD=OFF \
+        -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_NITF=ON \
@@ -88,8 +91,10 @@ RUN \
     ; \
     make -j2; \
     make install; \
+    cd ../python; \
+    python setup.py install; \
     cd /; \
-    rm -rf /PDAL-1.4-maintenance; \
+    rm -rf /PDAL-1.6-maintenance; \
     apk del .build-deps
 
 CMD ["pdal"]
