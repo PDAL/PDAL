@@ -116,6 +116,7 @@ include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/pdaljni.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
+include(${PDAL_CMAKE_DIR}/lzma.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
@@ -240,6 +241,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${LIBLZMA_LIBRARIES}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
     PRIVATE
