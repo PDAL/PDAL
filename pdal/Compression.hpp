@@ -469,7 +469,8 @@ public:
         };
 
         m_strm.avail_in = bufsize;
-        m_strm.next_in = (unsigned char *)buf;
+        m_strm.next_in = reinterpret_cast<unsigned char *>(
+            const_cast<char *>(buf));
         int ret = Z_OK;
         do
         {
@@ -479,7 +480,7 @@ public:
             handleError(ret);
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
-                m_cb((char *)m_tmpbuf, written);
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
         } while (ret == Z_OK);
     }
 
@@ -539,7 +540,8 @@ public:
             }
         };
 
-        m_strm.next_in = (unsigned char *)buf;
+        m_strm.next_in = reinterpret_cast<unsigned char *>(
+            const_cast<char *>(buf));
         m_strm.avail_in = bufsize;
         int ret = Z_OK;
         do
@@ -550,7 +552,7 @@ public:
             handleError(ret);
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
-                m_cb((char *)m_tmpbuf, written);
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
         } while (ret == Z_OK);
     }
 
@@ -577,7 +579,8 @@ protected:
     void run(const char *buf, size_t bufsize)
     {
         m_strm.avail_in = bufsize;
-        m_strm.next_in = (unsigned char *)buf;
+        m_strm.next_in = reinterpret_cast<unsigned char *>(
+            const_cast<char *>(buf));
         int ret = LZMA_OK;
         do
         {
@@ -586,7 +589,7 @@ protected:
             ret = lzma_code(&m_strm, LZMA_RUN);
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
-                m_cb((char *)m_tmpbuf, written);
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
         } while (ret == Z_OK);
         if (ret == Z_STREAM_END)
             return;
