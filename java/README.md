@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal" % "1.5.0"
+  "io.pdal" %% "pdal" % "1.6.0"
 )
 ```
 
@@ -34,11 +34,11 @@ Scala API to build pipeline expressions instead of writing a raw JSON.
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal-scala" % "1.5.0"
+  "io.pdal" %% "pdal-scala" % "1.6.0"
 )
 ```
 
-Scala API covers PDAL 1.5.0 but is compatible with PDAL >= 1.4, to use any custom DSL
+Scala API covers PDAL 1.6.0 but is compatible with PDAL >= 1.4, to use any custom DSL
 that is not covered by the current Scala API you can use `RawExpr` type to build `Pipeline 
 Expression`.
 

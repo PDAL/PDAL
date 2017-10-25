@@ -26,12 +26,14 @@ object ReaderTypes {
   case object geowave extends ReaderType
   case object greyhound extends ReaderType
   case object ilvis2 extends ReaderType
-  case object mbio extends ReaderType
   case object las extends ReaderType
+  case object matlab extends ReaderType
+  case object mbio extends ReaderType
   case object mrsid extends ReaderType
   case object nitf extends ReaderType
   case object oci extends ReaderType
   case object optech extends ReaderType
+  case object osg extends ReaderType
   case object pcd extends ReaderType
   case object pgpointcloud extends ReaderType
   case object ply extends ReaderType
@@ -46,8 +48,8 @@ object ReaderTypes {
   case object icebridge extends ReaderType
 
   lazy val all = List(
-    bpf, buffer, faux, gdal, geowave, greyhound, ilvis2, mbio, las, mrsid, nitf,
-    oci, optech, pcd, pgpointcloud, ply, pts, qfit, rxp, sbet, sqlite, text,
+    bpf, buffer, faux, gdal, geowave, greyhound, ilvis2, las, matlab, mbio, mrsid, nitf,
+    oci, optech, osg, pcd, pgpointcloud, ply, pts, qfit, rxp, sbet, sqlite, text,
     tindex, terrasolid, icebridge
   )
 
