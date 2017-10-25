@@ -132,6 +132,8 @@ public:
     std::vector<Stage *> roots() const;
     std::vector<Stage *> leaves() const;
     void replace(Stage *sOld, Stage *sNew);
+    void setRemoveEmpty(bool removeEmpty)
+        { m_removeEmpty = removeEmpty; }
 
 private:
     void setOptions(Stage& stage, const Options& addOps);
@@ -147,6 +149,7 @@ private:
     int m_progressFd;
     std::istream *m_input;
     LogPtr m_log;
+    bool m_removeEmpty;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented

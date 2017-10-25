@@ -87,6 +87,7 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
         m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
+    args.add("remove-empty", "Remove output file if empty", m_removeEmpty);
 }
 
 
@@ -206,6 +207,7 @@ int TranslateKernel::execute()
             m_pipelineOutputFile);
         return 0;
     }
+    m_manager.setRemoveEmpty(m_removeEmpty);
     m_manager.execute();
     if (metaOut)
     {

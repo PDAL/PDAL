@@ -195,6 +195,9 @@ point_count_t PipelineManager::execute()
         PointViewPtr view = *pi;
         cnt += view->size();
     }
+    if (cnt == 0 && m_removeEmpty && s->canRemove()) {
+        s->remove();
+    }
     return cnt;
 }
 

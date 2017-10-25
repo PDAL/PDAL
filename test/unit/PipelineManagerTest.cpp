@@ -155,3 +155,31 @@ TEST(PipelineManagerTest, InputGlobbing)
     FileUtils::deleteFile(Support::temppath("globbed.las"));
 }
 
+TEST(PipelineManagerTest, RemoveEmpty)
+{
+    const char * outfile = "temp.las";
+    FileUtils::deleteFile(outfile);
+
+    PipelineManager mgr;
+    mgr.setRemoveEmpty(true);
+
+    Options optsR;
+    optsR.add("filename", Support::datapath("las/no-points.las"));
+    Stage& reader = mgr.addReader("readers.las");
+    reader.setOptions(optsR);
+
+    Options optsW;
+    optsW.add("filename", outfile);
+    Stage& writer = mgr.addWriter("writers.las");
+    writer.setInput(reader);
+    writer.setOptions(optsW);
+
+    point_count_t np = mgr.execute();
+    EXPECT_EQ(np, 0u);
+
+    EXPECT_TRUE(std::ifstream(outfile).fail());
+    if (!std::ifstream(outfile).fail()) {
+        FileUtils::deleteFile(outfile);
+    }
+}
+

@@ -205,3 +205,14 @@ TEST(translateTest, t3)
     EXPECT_EQ(std::stoi(output), 1);
 #endif
 }
+
+TEST(translateTest, RemoveEmpty)
+{
+    std::string output;
+
+    std::string in = Support::datapath("las/no-points.las");
+    std::string out = Support::temppath("out.las");
+
+    EXPECT_EQ(runTranslate(in + " " + out + " --remove-empty", output), 0);
+    EXPECT_TRUE(std::ifstream(out).fail());
+}
