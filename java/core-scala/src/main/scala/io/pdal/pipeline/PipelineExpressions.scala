@@ -104,6 +104,13 @@ case class Ilvis2Read(
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
+case class MatlabRead(
+  filename: String,
+  struct: Option[String] = None, // [default: PDAL]
+  `type`: ReaderType = ReaderTypes.mbio
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
 case class MbioRead(
   filename: String,
   format: String,
@@ -144,6 +151,11 @@ case class OciRead(
 object OptechRead {
   def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
     Read(filename, spatialreference, tag, Some(ReaderTypes.optech))
+}
+
+object OsgRead {
+  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
+    Read(filename, spatialreference, tag, Some(ReaderTypes.osg))
 }
 
 object PcdRead {
@@ -291,6 +303,12 @@ case class ComputerangeFilter(
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
+case class CpdFilter(
+  method: Option[String] = None,
+  `type`: FilterType = FilterTypes.cpd
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
 case class CropFilter(
   bounds: Option[String] = None,
   polygon: Option[String] = None,
@@ -357,12 +375,23 @@ case class HagFilter(
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
+case class HeadFilter(
+  count: Option[Int] = None, // [default: 10]
+  `type`: FilterType = FilterTypes.head
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
 case class HexbinFilter(
   edgeSize: Option[Int] = None,
   sampleSize: Option[Int] = None,
   threshold: Option[Int] = None,
   precision: Option[Int] = None,
   `type`: FilterType = FilterTypes.hexbin
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
+case class IcpFilter(
+  `type`: FilterType = FilterTypes.icp
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
@@ -396,6 +425,15 @@ case class MadFilter(
   dimension: String,
   k: Option[Double] = None,
   `type`: FilterType = FilterTypes.mad
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
+case class MatlabFilter(
+  script: String,
+  source: String,
+  addDimenstion: Option[String] = None,
+  struct: Option[String] = None, // [default: PDAL]
+  `type`: FilterType = FilterTypes.matlab
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
@@ -465,7 +503,7 @@ case class PmfFilter(
   maxDistance: Option[Double] = None,
   initialDistance: Option[Double] = None,
   cellSize: Option[Int] = None,
-  approximate: Option[Boolean] = None,
+  exponential: Option[Boolean] = None, // [default: true]
   `type`: FilterType = FilterTypes.pmf
 ) extends PipelineExpr
 
@@ -477,21 +515,14 @@ case class PoissonFilter(
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
-case class PredicateFilter(
-  script: String,
-  module: String,
-  function: String,
-  `type`: FilterType = FilterTypes.predicate
-) extends PipelineExpr
-
-@ConfiguredJsonCodec
-case class ProgrammableFilter(
+case class PythonFilter(
   script: String,
   module: String,
   function: String,
   source: String,
   addDimenstion: Option[String] = None,
-  `type`: FilterType = FilterTypes.programmable
+  pdalargs: Option[String] = None,
+  `type`: FilterType = FilterTypes.python
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
@@ -560,9 +591,27 @@ case class StatsFilter(
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
+case class TailFilter(
+  count: Option[Int] = None, // [default: 10]
+  `type`: FilterType = FilterTypes.tail
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
 case class TransformationFilter(
   matrix: String,
   `type`: FilterType = FilterTypes.transformation
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
+case class VoxelCenterNearestNeighborFilter(
+  cell: Option[Double] = None, // [default: 1.0]
+  `type`: FilterType = FilterTypes.voxelcenternearestneighbor
+) extends PipelineExpr
+
+@ConfiguredJsonCodec
+case class VoxelCentroidNearestNeighbor(
+  cell: Option[Double] = None, // [default: 1.0]
+  `type`: FilterType = FilterTypes.voxelcentroidnearestneighbor
 ) extends PipelineExpr
 
 @ConfiguredJsonCodec
