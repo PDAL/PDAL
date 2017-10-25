@@ -30,7 +30,7 @@ RUN \
         libspatialite-dev \
         cython-dev \
         py-packaging \
-        xz
+        xz-dev
     ; \
     apk add --no-cache \
         hexer \
