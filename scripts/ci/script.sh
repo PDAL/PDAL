@@ -44,7 +44,9 @@ apk add \
     laszip \
     laszip-dev \
     libspatialite \
-    libspatialite-dev
+    libspatialite-dev \
+    xz-dev \
+    xz-libs \
 
 gcc --version
 g++ --version
