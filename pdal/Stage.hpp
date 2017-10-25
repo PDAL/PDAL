@@ -311,6 +311,31 @@ public:
     */
     static bool parseTagName(std::string o, std::string::size_type& pos);
 
+    /**
+      Can the output from this stage be "removed"?
+
+      "Removed" usually means deleting a file from the filesystem, but it
+      doesn't have to.
+
+      \return Whether this stage can be removed.
+    */
+    virtual bool canRemove() const
+    {
+        return false;
+    }
+
+    /**
+      Remove this stage. Throws an exception if removal fails or this stage
+      can't be removed.
+
+      "Remove" usually means deleting a file from the filesystem, but it
+      doesn't have to.
+    */
+    virtual void remove()
+    {
+        this->throwError("This stage is not removable");
+    }
+
 protected:
     Options m_options;          ///< Stage's options.
     MetadataNode m_metadata;    ///< Stage's metadata.

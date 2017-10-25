@@ -36,12 +36,24 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
 class PDAL_DLL FlexWriter : public Writer
 {
+public:
+    virtual bool canRemove() const
+    {
+        return true;
+    }
+
+    virtual void remove()
+    {
+        FileUtils::deleteFile(m_filename);
+    }
+
 protected:
     FlexWriter() : m_filenum(1)
     {}

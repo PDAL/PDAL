@@ -89,6 +89,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
     args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
     args.add("stream", "Attempt to run pipeline in streaming mode.", m_stream);
     args.add("metadata", "Metadata filename", m_metadataFile);
+    args.add("remove-empty", "Remove the output file if it is empty and the output writer supports removal.", m_removeEmpty);
 }
 
 
@@ -119,7 +120,10 @@ int PipelineKernel::execute()
         m_manager.executeStream(table);
     }
     else
+    {
+        m_manager.setRemoveEmpty(m_removeEmpty);
         m_manager.execute();
+    }
 
     if (m_metadataFile.size())
     {
