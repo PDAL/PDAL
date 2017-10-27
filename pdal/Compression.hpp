@@ -153,56 +153,16 @@ typedef TypedLazPerfBuf<unsigned char> LazPerfBuf;
 
 
 #ifdef PDAL_HAVE_LAZPERF
-template<typename OutputStream>
-class LazPerfCompressor
-{
-public:
-    LazPerfCompressor(OutputStream& output, const DimTypeList& dims) :
-        m_encoder(output),
-        m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
-        m_pointSize(0),
-        m_done(false)
-    { m_pointSize = addFields(m_compressor, dims); }
-
-    ~LazPerfCompressor()
-    {
-        if (!m_done)
-            std::cerr << "LazPerfCompressor destroyed without a call "
-               "to done()";
-    }
-
-    size_t pointSize() const
-        { return m_pointSize; }
-    point_count_t compress(const char *inbuf, size_t bufsize)
-    {
-        point_count_t numRead = 0;
-
-        const char *end = inbuf + bufsize;
-        while (inbuf + m_pointSize <= end)
-        {
-            m_compressor->compress(inbuf);
-            inbuf += m_pointSize;
-            numRead++;
-        }
-        return numRead;
-    }
-    void done()
-    {
-        if (!m_done)
-           m_encoder.done();
-        m_done = true;
-    }
-
-private:
-    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
-    Encoder m_encoder;
-    typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
-            Compressor;
-    Compressor m_compressor;
-    size_t m_pointSize;
-    bool m_done;
-};
-
+// This compressor write data in chunks to a stream. At the beginning of the
+// data is an offset to the end of the data, where the chunk table is
+// stored.  The chunk table keeps a list of the offsets to the beginning of
+// each chunk.  Chunks consist of a fixed number of points (last chunk may
+// have fewer points).  Each time a chunk starts, the compressor is reset.
+// This allows decompression of some set of points that's less than the
+// entire set when desired.
+// The compressor uses the schema of the point data in order to compress
+// the point stream.  The schema is also stored in a VLR that isn't
+// handled as part of the compression process itself.
 class LazPerfVlrCompressor
 {
     typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
@@ -420,6 +380,78 @@ public:
     {}
 };
 
+class LazPerfCompressor
+{
+public:
+    LazPerfCompressor(BlockCb cb, const DimTypeList& dims) :
+        m_cb(cb),
+        m_encoder(*this),
+        m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
+        m_pointSize(0),
+        m_avail(CHUNKSIZE)
+    { m_pointSize = addFields(m_compressor, dims); }
+
+    ~LazPerfCompressor()
+    {
+    }
+
+    void putBytes(const uint8_t* buf, size_t bufsize)
+    {
+        while (bufsize)
+        {
+            size_t copyCnt = std::min(m_avail, bufsize);
+            std::copy(buf, buf + copyCnt, m_tmpbuf + (CHUNKSIZE - m_avail));
+            m_avail -= copyCnt;
+            if (m_avail == 0)
+            {
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE);
+                m_avail = CHUNKSIZE;
+            }
+            bufsize -= copyCnt;
+        }
+    }
+
+    void putByte(unsigned char b)
+    {
+        m_tmpbuf[CHUNKSIZE - m_avail] = b;
+        if (--m_avail == 0)
+        {
+            m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE);
+            m_avail = CHUNKSIZE;
+        }
+    }
+
+    void compress(const char *buf, size_t bufsize)
+    {
+        while (bufsize >= m_pointSize)
+        {
+            m_compressor->compress(buf);
+            buf += m_pointSize;
+            bufsize -= m_pointSize;
+        }
+    }
+
+    void done()
+    {
+        m_encoder.done();
+        if (m_avail != CHUNKSIZE)
+            m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE - m_avail);
+        m_avail = CHUNKSIZE;
+    }
+
+private:
+    BlockCb m_cb;
+    typedef laszip::encoders::arithmetic<LazPerfCompressor> Encoder;
+    Encoder m_encoder;
+    typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
+            Compressor;
+    Compressor m_compressor;
+    size_t m_pointSize;
+    unsigned char m_tmpbuf[CHUNKSIZE];
+    size_t m_avail;
+};
+
+
 class DeflateCompressor
 {
 public:
@@ -450,6 +482,17 @@ public:
 
     void compress(const char *buf, size_t bufsize)
     {
+        run(buf, bufsize, Z_NO_FLUSH);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, Z_FINISH);
+    }
+
+private:
+    void run(const char *buf, size_t bufsize, int mode)
+    {
         auto handleError = [](int ret) -> void
         {
             switch (ret)
@@ -464,24 +507,28 @@ public:
             case Z_MEM_ERROR:
                 throw compression_error("Memory allocation failure.");
             default:
+                std::cerr << "Compression error !\n";
                 throw compression_error();
             }
         };
 
-        m_strm.avail_in = bufsize;
-        m_strm.next_in = reinterpret_cast<unsigned char *>(
-            const_cast<char *>(buf));
+        if (buf)
+        {
+            m_strm.avail_in = bufsize;
+            m_strm.next_in = reinterpret_cast<unsigned char *>(
+                    const_cast<char *>(buf));
+        }
         int ret = Z_OK;
         do
         {
             m_strm.avail_out = CHUNKSIZE;
             m_strm.next_out = m_tmpbuf;
-            ret = ::deflate(&m_strm, m_strm.avail_in ? Z_NO_FLUSH : Z_FINISH);
+            ret = ::deflate(&m_strm, mode);
             handleError(ret);
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
                 m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
-        } while (ret == Z_OK);
+        } while (m_strm.avail_out == 0);
     }
 
 private:
@@ -520,7 +567,7 @@ public:
         inflateEnd(&m_strm);
     }
 
-    void decompress(const char *buf, size_t bufsize)
+    void run(const char *buf, size_t bufsize, int mode)
     {
         auto handleError = [](int ret) -> void
         {
@@ -548,12 +595,22 @@ public:
         {
             m_strm.avail_out = CHUNKSIZE;
             m_strm.next_out = m_tmpbuf;
-            ret = inflate(&m_strm, Z_NO_FLUSH);
+            ret = inflate(&m_strm, mode);
             handleError(ret);
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
                 m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
-        } while (ret == Z_OK);
+        } while (m_strm.avail_out == 0);
+    }
+
+    void decompress(const char *buf, size_t bufsize)
+    {
+        run(buf, bufsize, Z_NO_FLUSH);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, Z_FINISH);
     }
 
 private:
@@ -576,7 +633,7 @@ protected:
         lzma_end(&m_strm);
     }
 
-    void run(const char *buf, size_t bufsize)
+    void run(const char *buf, size_t bufsize, lzma_action mode)
     {
         m_strm.avail_in = bufsize;
         m_strm.next_in = reinterpret_cast<unsigned char *>(
@@ -586,7 +643,7 @@ protected:
         {
             m_strm.avail_out = CHUNKSIZE;
             m_strm.next_out = m_tmpbuf;
-            ret = lzma_code(&m_strm, LZMA_RUN);
+            ret = lzma_code(&m_strm, mode);
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
                 m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
@@ -607,6 +664,7 @@ protected:
         }
     }
 
+
 protected:
     lzma_stream m_strm;
 
@@ -626,7 +684,12 @@ public:
 
     void compress(const char *buf, size_t bufsize)
     {
-        run(buf, bufsize);
+        run(buf, bufsize, LZMA_RUN);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, LZMA_FINISH);
     }
 };
 
@@ -643,7 +706,12 @@ public:
 
     void decompress(const char *buf, size_t bufsize)
     {
-        run(buf, bufsize);
+        run(buf, bufsize, LZMA_RUN);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, LZMA_FINISH);
     }
 };
 

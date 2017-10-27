@@ -64,7 +64,7 @@ std::vector<char> getBytes(PointViewPtr view)
 
 
 #ifdef PDAL_HAVE_LAZPERF
-TEST(Compression, Simple)
+TEST(Compression, simple)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
@@ -85,24 +85,29 @@ TEST(Compression, Simple)
     EXPECT_EQ(layout->pointSize(), 52U);
 
     std::vector<unsigned char> rawBuf;
-    LazPerfBuf b(rawBuf);
+    //LazPerfBuf b(rawBuf);
 
     DimTypeList dimTypes = layout->dimTypes();
-    LazPerfCompressor<LazPerfBuf> compressor(b, dimTypes);
+    auto cb = [&rawBuf](char *buf, size_t bufsize)
+    {
+        unsigned char *ubuf = reinterpret_cast<unsigned char *>(buf);
+        rawBuf.insert(rawBuf.end(), ubuf, ubuf + bufsize);
+    };
 
-    std::vector<char> tmpbuf(compressor.pointSize());
+    LazPerfCompressor compressor(cb, dimTypes);
+
+    std::vector<char> tmpbuf(layout->pointSize());
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         view->getPackedPoint(dimTypes, idx, tmpbuf.data());
-        compressor.compress(tmpbuf.data(), compressor.pointSize());
+        compressor.compress(tmpbuf.data(), layout->pointSize());
     }
     compressor.done();
 
-    EXPECT_EQ(view->size() * compressor.pointSize(), (size_t)55380);
+    EXPECT_EQ(view->size() * layout->pointSize(), (size_t)55380);
     EXPECT_EQ(rawBuf.size(), (size_t)30945);
 
     LazPerfBuf b2(rawBuf);
-
     LazPerfDecompressor<LazPerfBuf> decompressor(b2, dimTypes);
 
     size_t outbufSize = decompressor.pointSize() * view->size();
@@ -158,8 +163,13 @@ TEST(Compression, types)
         dimTypes.push_back(DimType(Dimension::Id::Unknown, *ti));
 
     std::vector<unsigned char> rawBuf;
-    LazPerfBuf b(rawBuf);
-    LazPerfCompressor<LazPerfBuf> compressor(b, dimTypes);
+    auto cb = [&rawBuf](char *buf, size_t bufsize)
+    {
+        unsigned char *ubuf = reinterpret_cast<unsigned char *>(buf);
+        rawBuf.insert(rawBuf.begin(), ubuf, ubuf + bufsize);
+    };
+
+    LazPerfCompressor compressor(cb, dimTypes);
     for (size_t i = 0; i < 50; i++)
     {
         compressor.compress(pts[0], 42);
@@ -217,6 +227,7 @@ TEST(Compression, deflate)
     size_t s = orig.size() * sizeof(int);
     char *sp = reinterpret_cast<char *>(orig.data());
     compressor.compress(sp, s);
+    compressor.done();
 
     auto verifier = [&sp](char *buf, size_t bufsize)
     {
@@ -226,6 +237,7 @@ TEST(Compression, deflate)
 
     DeflateDecompressor decompressor(verifier);
     decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
 }
 
 
@@ -257,6 +269,7 @@ TEST(Compression, lzma)
     char *sp = reinterpret_cast<char *>(orig.data());
     LzmaCompressor compressor(cb);
     compressor.compress(sp, s);
+    compressor.done();
 
     auto verifier = [&sp](char *buf, size_t bufsize)
     {
@@ -266,6 +279,7 @@ TEST(Compression, lzma)
 
     LzmaDecompressor decompressor(verifier);
     decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
 }
 
 
