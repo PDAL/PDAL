@@ -462,7 +462,11 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
         for (XMLDim& xmlDim : xmlDims)
             dimTypes.push_back(xmlDim.m_dimType);
 
-        LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
+        auto cb = [this](char *buf, size_t bufsize)
+        {
+            m_patch->putBytes(reinterpret_cast<unsigned char *>(buf), bufsize);
+        };
+        LazPerfCompressor compressor(cb, dimTypes);
 
         try
         {
