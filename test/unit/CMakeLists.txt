@@ -15,6 +15,16 @@ foreach(infileName ${inFiles})
         "${CMAKE_BINARY_DIR}/${outfileName}")
 endforeach()
 
+add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
+target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
+    PRIVATE
+        ${ROOT_DIR}
+        ${PROJECT_BINARY_DIR}/include
+        ${PROJECT_BINARY_DIR}/test/unit
+        ${PDAL_INCLUDE_DIR}
+)
+PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
+
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test FILES EigenTest.cpp)
