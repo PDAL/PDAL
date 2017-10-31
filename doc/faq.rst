@@ -34,6 +34,8 @@ FAQ
   variable ``PDAL_DRIVER_PATH`` to a list of directories that pdal should search
   for plugins.
 
+.. index:: PCL
+
 * What is PDAL's relationship to PCL?
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
