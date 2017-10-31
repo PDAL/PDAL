@@ -176,7 +176,7 @@ if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
 endif()
 add_subdirectory(pdal/util)
-#add_subdirectory(tools)
+add_subdirectory(tools)
 add_subdirectory(apps)
 
 #
