@@ -11,6 +11,8 @@ FAQ
   The proper spelling of the project name is PDAL, in uppercase. It is
   pronounced to rhyme with "GDAL".
 
+  .. it is properly pronounced like the dog though :)
+
 * Why do I get the error "Couldn't create ... stage of type ..."?
 
   In almost all cases this error occurs because you're trying to run a stage
