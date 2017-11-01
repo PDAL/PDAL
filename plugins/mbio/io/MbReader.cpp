@@ -145,11 +145,13 @@ bool MbReader::loadData()
 
     while (true)
     {
+std::cerr << "Context = " << m_ctx << "!\n";
         int status = mb_read(verbose, m_ctx, &kind, &pings, pingTime,
             &pingTimeT, &lon, &lat, &speed, &heading, &distance, &altitude,
             &sonarDepth, &numBath, &numAmp, &numSs, m_bathflag, m_bath,
             m_amp, m_bathlon, m_bathlat, m_ss, m_sslon, m_sslat, comment,
             &error);
+std::cerr << "STatus = " << status << "!\n";
 
         if (status == 0)
         {
