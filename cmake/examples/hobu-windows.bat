@@ -80,7 +80,7 @@ cmake -G %GENERATOR% ^
     -DENABLE_CTEST=OFF ^
     -DWITH_APPS=ON ^
     -DWITH_LAZPERF=ON ^
-	-DLazperf_DIR=c:\pdalbin\cmake ^
+	-DLazperf_DIR=%OSGEO4W_DIR%/cmake ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=ON ^
 	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\apps\python36\python.exe ^
@@ -92,7 +92,7 @@ cmake -G %GENERATOR% ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python36\lib\site-packages\numpy\core\include ^
 	-DNUMPY_VERSION=1.11.1 ^
     -Dgtest_force_shared_crt=ON ^
-    -DCMAKE_INSTALL_PREFIX=C:\projects\pdal\install ^
+    -DCMAKE_INSTALL_PREFIX=c:\OSGeo4W64\ ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     .

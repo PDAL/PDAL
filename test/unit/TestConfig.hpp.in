@@ -36,6 +36,7 @@
 #define UNITTEST_TESTCONFIG_INCLUDED
 
 #define UNITTEST_TESTCONFIG_DATA_PATH "@CMAKE_SOURCE_DIR@/test/data/"
+#define UNITTEST_TESTCONFIG_TEMP_PATH "@CMAKE_SOURCE_DIR@/test/temp/"
 #define UNITTEST_TESTCONFIG_CONFIGURED_PATH "@CMAKE_BINARY_DIR@/test/data/"
 #define UNITTEST_TESTCONFIG_BINARY_PATH "@CMAKE_BINARY_DIR@/bin/"
 #define UNITTEST_TESTCONFIG_OCI_CONNECTION "@OCI_CONNECTION@"
@@ -47,6 +48,9 @@ namespace TestConfig
 
 inline std::string dataPath()
     { return UNITTEST_TESTCONFIG_DATA_PATH; }
+
+inline std::string tempPath()
+    { return UNITTEST_TESTCONFIG_TEMP_PATH; }
 
 inline std::string configuredPath()
     { return UNITTEST_TESTCONFIG_CONFIGURED_PATH; }
