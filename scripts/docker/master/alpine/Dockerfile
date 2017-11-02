@@ -31,7 +31,7 @@ RUN \
         cython-dev \
         py-packaging \
         xz-dev \
-        zstd \
+        zstd-dev \
     ; \
     apk add --no-cache \
         hexer \
