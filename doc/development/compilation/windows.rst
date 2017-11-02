@@ -4,9 +4,11 @@
 Building Under Windows
 ==============================================================================
 
+:Author: Howard Butler
+:Contact: howard at hobu.co
 :Author: Michael Rosen
 :Contact: unknown at lizardtech dot com
-:Date: 3/19/2012
+:Date: 11/02/2017
 
 .. note::
 
@@ -23,205 +25,153 @@ Building Under Windows
 
 .. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
 
-Most Users
+Introduction
 ------------------------------------------------------------------------------
 
-If you just want to build PDAL so you can
+Pre-built binary packages for Windows are available via `OSGeo4W`_ (64-bit version),
+and all of the prerequisites required for compilation of a fully featured build
+are also available via that packaging system. This document assumes you
+will be using OSGeo4W as your base, and anything more advanced is beyond
+the scope of the document.
 
-a. use the utilities or
-b. investigate PDAL integration
-c. test / fix / extend the library and
-
-you are OK with doing all this with a 32 bit compiler, check the
-`Prerequisites`_ and follow the `Basic Build Steps`_ below.
-
-
-Advanced Users
+Required Compiler
 ------------------------------------------------------------------------------
 
-If your needs go beyond this, then check the `Prerequisites`_ and use the
-`Advanced Build Steps`_ below as a guide to configuring the library.
+PDAL is known to compile on `Visual Studio 2015`_, and 2013 *might* work with
+some source tree adjustments. PDAL makes heavy use of C++11, and a compiler
+with good support for those features is required.
 
+.. _`Visual Studio 2015`: https://www.visualstudio.com/vs/older-downloads/
 
-Prerequisites
-------------------------------------------------------------------------------
-
-- Ensure you have git. We used version 1.7.3.1.msysgit.0 from
-  http://code.google.com/p/msysgit
-- Ensure you have a Visual Studio 2010 environment setup. We used VStudio 2010
-  Premium.
-- Ensure you have CMake_. We used version 2.8.4 from http://www.cmake.org
-
-The steps below assume that these tools are available from your command line.
-For Git and CMake, that's just adding them to your %PATH%. For VStudio, you
-need to run `vsvars32.bat` ("Microsoft Visual Studio
-10.0\\Common7\\Tools\\vsvars32.bat")
 
 .. _CMake: http://www.cmake.org
 
-Basic Build Steps
+Prerequiste Libraries
 ------------------------------------------------------------------------------
 
-Most users can use this procedure to build PDAL on Windows. We satisfy all
-dependencies using OSGeo4W.
+PDAL uses the `AppVeyor`_ continuous integration platform for building and
+testing itself on Windows. The configuration that PDAL uses is valuable
+raw materials for configuring your own environment because the PDAL
+team must keep it up to date with both the OSGeo4W environment and
+the Microsoft compiler situation.
 
-0. If you plan to use LAZ support (compressed LAS), get the LASzip source code
-and build it (http://www.laszip.org). Add the directory with laszip.dll to
-your %PATH% (or copy the laszip.* files into the bin directory of PDAL
-itself). Make sure it appears in your PATH before OSGeo4W (as per step 4
-below).
+You can see the current AppVeyor configuration at
+https://github.com/PDAL/PDAL/blob/master/appveyor.yml The most interesting
+bits are the ``install`` section, the ``config.cmd``, and the ``build.cmd``.
 
-While LASzip is included in the OSGeo4W distribution below (see step 1), the
-version there is compiled with Visual Studio 2008 and we have some suspicion
-that it is incompatible with the version of PDAL you are about to build with
-Visual Studio 2010. Building the LASzip library should be no more complicated
-than::
+The AppVeyor configuration installs OSGeo4W and all of PDAL's prerequisites
+via the command line.
 
-    set G="Visual Studio 10"
-    set BUILD_TYPE=Debug
-    cmake -G %G% ^
-        -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
-        -DCMAKE_VERBOSE_MAKEFILE=OFF ^
-        .
+After downloading the `OSGeo4W setup`_, you can invoke it via the command
+line to install PDAL's prerequisite packages.
 
-1. Install OSGeo4W (http://download.osgeo.org/osgeo4w/osgeo4w-setup.exe) using
-the "Advanced Install" option and include the following: gdal-dev, laszip,
-libxml2, iconv.
+::
 
-   .. figure::  media/OSGeo4WInstallAdvanced.png
+   C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 ^
+         -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,^
+            libxml2,msys,nitro,laz-perf,proj,zlib,python3-core,python3-devel,^
+            python3-numpy,oci,oci-devel,laz-perf,jsoncpp -R c:/OSGeo4W64
 
-  Install from Internet
-   .. figure::  media/OSGeo4WInstallFromInternet.png
-  Leave the "Root Directory" for the installation unchanged.
-   .. figure::  media/OSGeo4WInstallRootDirectory.png
-  You can leave the "Select Local Package Directory" and "Internet Connection Type" at the defaults. Under the "libs" tree, select "gdal-dev" for installation. (You should probably use the latest version, e.g. 1.8pre-6.)
-   .. figure::  media/OSGeo4WInstallGDALDev.png
-  Select "laszip" (this is not required currently -- see step 0 above).
-   .. figure::  media/OSGeo4WInstallLASZip.png
-  Select "libxml2".
-   .. figure::  media/OSGeo4WInstallLibXML2.png
-  Select "iconv".
-   .. figure::  media/OSGeo4WInstallIConv.png
-  Select "oci".
-   .. figure::  media/OSGeo4WInstallOCI.png
+.. note::
 
-  There are some other required dependencies (e.g. libtiff, libgeotiff) but
-  they are installed by default.
+    The package list here might change over time. The canonnical location
+    to learn the OSGeo4W prerequisite list for PDAL is the ``appveyor.yml``
+    file in PDAL's source tree.
 
-  Select Next to continue on to install the packages.
+.. seealso::
 
-2.  Get the source code for PDAL:
+    If you don't wish to run via the command line, you can choose the GUI
+    for installation. Visit :ref:`workshop-osgeo4w` for a description, and then
+    choose all of the listed support libraries (minus ``PDAL`` of course)
+    to schedule them for installation.
 
-  ::
+.. warning::
 
-     c:\dev> git clone https://github.com/PDAL/PDAL.git
+    There are a number of package scripts that assume ``c:/OSGeo4W64`` as the
+    installation path, and it is likely that you will run into some
+    trouble attempting to install in other locations. It's possible it will
+    work with some elbow grease, but it might not work out of the box.
 
-3. From the root of your PDAL tree, run "./cmake/examples/mpg-config.bat". This will create the
-   VStudio solution file and .vcxproj files.
-
-  ::
-
-     c:\dev\PDAL> ./cmake/examples/mpg-config.bat
-
-  .. note::
-
-      The config.bat file is set up to build PDAL in the "officially supported"
-      configuration -- that is, with Oracle, and GDAL, and LASzip, and such. If you
-      followed the previous steps, you should be fine to use this default
-      configuration. You may modify this file if you need to (such as to use a local
-      copy of GDAL or to use NMake instead of Visual Studio); see the `Advanced Build Steps`_
-      below for more instructions.
-
-4.  Verify your system environment variables are set properly:
-
-  - PATH should include %OSGeo4W%\bin
-  - GDAL_DATA should be set to %OSGeo4W%\share\epsg_csv
-  - PROJ_LIB should be set to %OSGeo4W%\share\proj
-
-5.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
-
-6. Set pdal_test as the startup project and run it (F5). You should see a
-   console window startup, print something like "Running 158 test cases..."
-   (exact number may vary), and then after a short period print something like
-   "\*\*\* No errors detected". If you do get errors, that means either something is
-   broken on the version of PDAL you checked out OR something is wrong with your
-   installation.
-
-7. PYTHON/PLANG NOTE: If you build WITH_PLANG=ON in Debug mode, the system will
-   try to link against "python27d.lib". You need to change .../Python27/include/pyconfig.h
-   as follows:
-
-    - change the line #pragma comment(lib,"python27d.lib") to refer to python27.lib instead
-	- comment out the line "#define Py_DEBUG"
+.. _`AppVeyor`: https://ci.appveyor.com/project/hobu/pdal/history
+.. _`OSGeo4W setup`: http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe
 
 
-
-Advanced Build Steps
+Fetching the Source
 ------------------------------------------------------------------------------
 
-Advanced users can use this procedure to customize their PDAL build on
-Windows. This enables the use of custom-built external libraries to satisify
-situations (including x64 support) where using OSGeo4W is inadequate.
+Get the source code for PDAL. Presumably you have `GitHub for Windows`_ or
+something like it. Run a "git shell" and clone the repository into the
+directory of your choice.
 
-1. Acquire and stage the required dependent libraries. PDAL depends on the
-   following external libraries. You'll need to get them and build them (or
-   perhaps, download prebuilt binary packages).
+   ::
 
-  - GDAL (get version 1.6 or later from http://gdal.org) [ optional ]
-  - LASZip (get version 1.0.1 or later from http://laszip.org) [ optional ]
-  - libxml2 (http://libxml2.org) [ optional ]
-  - iconv (http://www.gnu.org/software/libiconv/) [ optional (required by libxml2) ]
-  - oci (optional, http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html)
-  - libtiff (optional)
-  - libgeotiff (optional)
+      c:\dev> git clone https://github.com/PDAL/PDAL.git
 
-  One option for all dependencies is OSGeo4W (free, win32
-  installer, no x64 -- see "Basic Build Steps"_ above).
+.. _`GitHub for Windows`: https://desktop.github.com/
+
+Switch to the ``-maintenance`` branch.
+
+   ::
+
+      c:\dev> git checkout 1.6-maintenance
 
 
-2. Having staged the above libs, you need to specify where they are by editing
-   the appropriate lines in the "config.bat" file. Each dependency has a short
-   section of the config.bat file. Check these are specified correctly. For
-   example
+   .. note::
 
-  ::
+        PDAL's active development branch is ``master``, and you are welcome to
+        build it, but is not as stable as the major-versioned release
+        branches are likely to be.
 
-     :: LASZIP
-     set LASZIP_ENABLED=ON
-     set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\laszip.lib
-     set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
-
-3. While you're still in config.bat, configure the "Generator" for CMake.
-
-  ::
-
-     :: Pick your Generator.  NMake will pick up architecture (x32, x64) from your environment
-     rem set GENERATOR="NMake Makefiles"
-     rem set GENERATOR="Visual Studio 10 Win64"
-     set GENERATOR="Visual Studio 10"
-
-     set BUILD_TYPE=Release
-     rem set BUILD_TYPE=Debug
-
-4. Run "config.bat" in the PDAL directory. This will create the VStudio solution file and .vcxproj files.
-
-  ::
-
-     c:\dev\PDAL> config.bat
-
-5. Start Visual Studio and open PDAL.sln (or if you picked "NMake Makefiles", run NMake).
-
-Testing
+Configuration
 ------------------------------------------------------------------------------
 
-Set pdal_test as the default/startup application in Visual Studio
-Run with debug (F5)
+PDAL uses `CMake`_ for its build configuration. You will need to install CMake
+and have it available on your path to configure PDAL.
 
-Troubleshooting
+Invoke your ``cmake`` command to configure the PDAL.
+
+::
+
+    cmake -G "NMake Makefiles" .
+
+A fully-featured build will require more specification of libraries, enabled
+features, and their locations. There are two places in the source tree
+for inspiration on this topic.
+
+1. The AppVeyor build configuration https://github.com/PDAL/PDAL/blob/master/scripts/appveyor/config.cmd#L26
+
+2. Howard Butler's example build configuration https://github.com/PDAL/PDAL/blob/master/cmake/examples/hobu-windows.bat
+
+
+.. note::
+
+    Placing your command in a ``.bat`` file will make for easy reuse.
+
+Building
 ------------------------------------------------------------------------------
 
-* Missing liblas.dll - double check that ``C:\OSGeo4W\bin`` is on your system PATH variable
-* libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
-* "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to ``C:\OSGeo4W\share\gdal``
-* PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
+If you chose ``NMake Makefiles`` as your CMake generator, you can
+invoke the build by calling **nmake**:
 
+::
+
+    nmake /f Makefile
+
+
+If you chose "Visual Studio 14 Win64" as your CMake generator, open ``PDAL.sln``
+and chose your configuration to build.
+
+Running
+------------------------------------------------------------------------------
+
+After you've built the tree, you can run ``pdal.exe`` by issuing it
+
+::
+
+    c:\dev\pdal\bin\pdal.exe
+
+.. note::
+
+    You need to have your OSGeo4W shell active to enable access to
+    PDAL's dependencies. Issue ``c:\osgeo4w64\bin\o4w_env.bat`` in
+    your shell to activiate it.
