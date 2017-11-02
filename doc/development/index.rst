@@ -18,18 +18,11 @@ developing new code can be found in this section.
 
    overview
    compilation/index
-   conventions
-   contributors
-   docs
-   docker
    errorhandling
    metadata
-   goals
-   testing
-   integration
    writing
    writing-filter
    writing-kernel
    writing-reader
    writing-writer
-   using
+   cmake
