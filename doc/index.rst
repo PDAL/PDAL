@@ -137,6 +137,7 @@ Development
    :maxdepth: 2
 
    development/index
+   project/index
    api/index
    faq
    copyright

@@ -72,7 +72,7 @@ std::string Support::configuredpath(const std::string& file)
 
 std::string Support::temppath()
 {
-    return TestConfig::dataPath() + "../temp/";
+    return TestConfig::tempPath();
 }
 
 std::string Support::temppath(const std::string& file)
