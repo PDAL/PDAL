@@ -282,4 +282,45 @@ TEST(Compression, lzma)
     decompressor.done();
 }
 
+TEST(Compression, zstd)
+{
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+
+    // Choosing a size that isn't a multiple of the internal buffer.
+    // Trying to make something that compresses reasonably well.
+    std::vector<int> orig(1000357);
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
+
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
+
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    ZstdCompressor compressor(cb);
+    compressor.compress(sp, s);
+    compressor.done();
+
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
+
+    ZstdDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
+}
+
 
