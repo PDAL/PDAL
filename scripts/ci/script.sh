@@ -47,6 +47,7 @@ apk add \
     libspatialite-dev \
     xz-dev \
     xz-libs \
+    zstd \
 
 gcc --version
 g++ --version
