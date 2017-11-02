@@ -48,6 +48,7 @@ apk add \
     xz-dev \
     xz-libs \
     zstd \
+    zstd-dev \
 
 gcc --version
 g++ --version
