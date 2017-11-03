@@ -4,7 +4,6 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Kernel.hpp>
-#include <pdal/KernelFactory.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/StageFactory.hpp>

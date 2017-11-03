@@ -3,9 +3,6 @@ project(WritingTutorial)
 
 find_package(PDAL 1.6.0 REQUIRED CONFIG)
 
-if (NOT WIN32)
-    set(CMAKE_CXX_FLAGS "-std=c++11")
-endif()
 add_executable(tutorial tutorial.cpp)
 
 target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES})

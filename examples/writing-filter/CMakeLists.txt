@@ -3,10 +3,6 @@ project(FilterTutorial)
 
 find_package(PDAL 1.6.0 REQUIRED CONFIG)
 
-if (NOT WIN32)
-    set(CMAKE_CXX_FLAGS "-std=c++11")
-endif()
-
 add_library(pdal_plugin_filter_myfilter SHARED MyFilter.cpp)
 target_link_libraries(pdal_plugin_filter_myfilter PRIVATE ${PDAL_LIBRARIES})
 target_include_directories(pdal_plugin_filter_myfilter PRIVATE

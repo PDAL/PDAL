@@ -44,7 +44,9 @@ apk add \
     laszip \
     laszip-dev \
     libspatialite \
-    libspatialite-dev
+    libspatialite-dev \
+    zstd \
+    zstd-dev
 
 gcc --version
 g++ --version
@@ -71,6 +73,7 @@ cmake .. \
     -DBUILD_PLUGIN_SQLITE=ON \
     -DWITH_LASZIP=ON \
     -DWITH_LAZPERF=ON \
+    -DWITH_EXAMPLES=ON \
     -DWITH_TESTS=ON
 
 make -j2

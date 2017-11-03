@@ -179,7 +179,6 @@ endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
-
 #
 # On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
 # so that users only need link libpdalcpp.
@@ -261,6 +260,15 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
+
+
+
+if (WITH_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+
+
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file
 # specifies linking in libpdal_base.so and libpdal_util.so.  This allows
