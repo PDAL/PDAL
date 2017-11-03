@@ -6,7 +6,7 @@ Writing a reader
 
 :Authors: Bradley Chambers, Scott Lewis
 :Contact: brad.chambers@gmail.com
-:Date: 10/26/2016
+:Date: 11/02/2017
 
 
 PDAL's command-line application can be extended through the development of

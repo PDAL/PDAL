@@ -29,6 +29,8 @@ RUN \
         laszip-dev \
         libspatialite-dev \
         cython-dev \
+        xz-dev \
+        zstd-dev \
         py-packaging \
         xz-dev \
         zstd-dev \
@@ -47,6 +49,8 @@ RUN \
         hdf5 \
         proj4 \
         cpd \
+        zstd \
+        xz \
         fgt \
         sqlite \
         postgresql \

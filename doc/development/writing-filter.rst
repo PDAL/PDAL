@@ -6,7 +6,7 @@ Writing a filter
 
 :Author: Bradley Chambers
 :Contact: brad.chambers@gmail.com
-:Date: 10/26/2016
+:Date: 11/02/2017
 
 
 PDAL can be extended through the development of filter functions.
@@ -155,3 +155,16 @@ Next, add the following line of code to the ``StageFactory`` constructor.
 .. code-block:: cpp
 
     PluginManager::initializePlugin(MyFilter_InitPlugin);
+
+
+Compilation
+...............................................................................
+
+Set up a ``CMakeLists.txt`` file to compile your filter against PDAL:
+
+.. literalinclude:: ../../examples/writing-filter/CMakeLists.txt
+   :language: cmake
+   :linenos:
+
+
+
