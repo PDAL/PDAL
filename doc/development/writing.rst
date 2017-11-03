@@ -6,7 +6,7 @@ Writing with PDAL
 
 :Author: Bradley Chambers
 :Contact: brad.chambers@gmail.com
-:Date: 01/21/2015
+:Date: 11/02/2017
 
 
 This tutorial will describe a complete example of using PDAL C++ objects to write
