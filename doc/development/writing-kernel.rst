@@ -6,7 +6,7 @@ Writing a kernel
 
 :Author: Bradley Chambers
 :Contact: brad.chambers@gmail.com
-:Date: 10/16/2016
+:Date: 11/02/2017
 
 
 PDAL's command-line application can be extended through the development of
@@ -103,3 +103,16 @@ commands.
 
 To run this kernel, you would use ``pdal mykernel -i <input las file> -o
 <output text file>``.
+
+Compilation
+...............................................................................
+
+Set up a ``CMakeLists.txt`` file to compile your kernel against PDAL:
+
+.. literalinclude:: ../../examples/writing-kernel/CMakeLists.txt
+   :language: cmake
+   :linenos:
+
+
+
+
