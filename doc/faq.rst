@@ -11,6 +11,8 @@ FAQ
   The proper spelling of the project name is PDAL, in uppercase. It is
   pronounced to rhyme with "GDAL".
 
+  .. it is properly pronounced like the dog though :)
+
 * Why do I get the error "Couldn't create ... stage of type ..."?
 
   In almost all cases this error occurs because you're trying to run a stage
@@ -31,6 +33,8 @@ FAQ
   You can also override the default search path by setting the environment
   variable ``PDAL_DRIVER_PATH`` to a list of directories that pdal should search
   for plugins.
+
+.. index:: PCL
 
 * What is PDAL's relationship to PCL?
 
