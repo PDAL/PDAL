@@ -662,7 +662,7 @@ TEST(BPFTest, outputdims)
     BpfWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);
-    
+
     PointTable t;
     writer.prepare(t);
     writer.execute(t);
@@ -677,7 +677,7 @@ TEST(BPFTest, outputdims)
     r.prepare(t2);
 
     StringList dimNames;
-    Dimension::IdList dimList = t2.layout()->dims(); 
+    Dimension::IdList dimList = t2.layout()->dims();
     EXPECT_EQ(dimList.size(), 5u);
     for (auto di : dimList)
         dimNames.push_back(t2.layout()->dimName(di));
@@ -690,7 +690,7 @@ TEST(BPFTest, outputdims)
         "Y",
         "Z"
     };
-   
+
     std::sort(dimNames.begin(), dimNames.end());
     EXPECT_TRUE(CheckEqualCollections(dimNames.begin(),
         dimNames.end(), std::begin(dims)));
@@ -701,10 +701,28 @@ TEST(BPFTest, outputdims)
 
     BpfWriter w3;
     w3.setOptions(o3);
-    
+
     // Missing X dimension.
     PointTable t3;
     EXPECT_THROW(w3.prepare(t3), pdal_error);
-    
+
 }
 
+TEST(BPFTest, autoutm)
+{
+
+    Options readerOps;
+    readerOps.add("autoutm","true");
+    readerOps.add("filename",
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+
+    PointTable table;
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    SpatialReference srs = table.anySpatialReference();
+    EXPECT_EQ(srs.getUTMZone(), 25);
+}
