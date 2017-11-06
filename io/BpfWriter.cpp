@@ -70,7 +70,7 @@ void BpfWriter::addArgs(ProgramArgs& args)
     args.add("format", "Output format", m_header.m_pointFormat,
         BpfFormat::DimMajor);
     args.add("coord_id", "UTM coordinate ID", m_header.m_coordId, -9999);
-    args.add("autoutm", "Attempt to auto-assign UTM (first from SRS, then from bounding box)", m_autoUTM, true);
+    args.add("autoutm", "Attempt to auto-assign UTM (first from SRS, then from bounding box)", m_autoUTM, false);
     args.add("bundledfile", "List of files to bundle in output",
         m_bundledFilesSpec);
     args.add("output_dims", "Output dimensions", m_outputDims);
@@ -141,7 +141,8 @@ void BpfWriter::readyFile(const std::string& filename, const SpatialReference& s
     if (m_autoUTM)
     {
         m_header.m_coordId = 0;
-        m_header.trySetSpatialReference(srs);
+        if (m_header.trySetSpatialReference(srs))
+            m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
     }
 
     // We will re-write the header and dimensions to account for the point

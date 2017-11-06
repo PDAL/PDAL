@@ -710,19 +710,39 @@ TEST(BPFTest, outputdims)
 
 TEST(BPFTest, autoutm)
 {
+    std::string sourcefile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
 
     Options readerOps;
-    readerOps.add("autoutm","true");
-    readerOps.add("filename",
-        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+    readerOps.add("filename",sourcefile);
 
     PointTable table;
 
     BpfReader reader;
     reader.setOptions(readerOps);
 
-    reader.prepare(table);
-    PointViewSet views = reader.execute(table);
-    SpatialReference srs = table.anySpatialReference();
-    EXPECT_EQ(srs.getUTMZone(), 25);
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("autoutm", true);
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options readerOps2;
+    readerOps2.replace("filename",outfile);
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+
+    PointTable table2;
+    reader2.prepare(table2);
+    PointViewSet views = reader2.execute(table2);
+    SpatialReference srs = reader2.getSpatialReference();
+    EXPECT_EQ(srs.getUTMZone(), 10);
 }
