@@ -879,11 +879,15 @@ namespace Utils
     bool fromString(const std::string& from, T* & to)
     {
         void *v;
-        std::istringstream iss(from);
-
-        iss >> v;
+        // Uses sscanf instead of operator>>(istream, void*&) as a workaround
+        // for https://bugs.llvm.org/show_bug.cgi?id=19740, which presents with
+        // clang-800.0.42.1 for x86_64-apple-darwin15.6.0.
+        int result = sscanf(from.c_str(), "%p", &v);
+        if (result != 1) {
+            return false;
+        }
         to = reinterpret_cast<T*>(v);
-        return !iss.fail();
+        return true;
     }
 
 
