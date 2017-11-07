@@ -73,9 +73,19 @@ cmake .. \
     -DBUILD_PLUGIN_SQLITE=ON \
     -DWITH_LASZIP=ON \
     -DWITH_LAZPERF=ON \
-    -DWITH_EXAMPLES=ON \
     -DWITH_TESTS=ON
 
 make -j2
 LD_LIBRARY_PATH=./lib
 ctest -V
+make install
+/sbin/ldconfig
+
+for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+do
+    cd /pdal/examples/$EXAMPLE
+    mkdir -p _build || exit 1
+    cd _build || exit 1
+    cmake -G "Unix Makefiles" .. && \
+    make
+done
