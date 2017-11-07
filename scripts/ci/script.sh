@@ -79,7 +79,6 @@ make -j2
 LD_LIBRARY_PATH=./lib
 ctest -V
 make install
-/sbin/ldconfig
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do
