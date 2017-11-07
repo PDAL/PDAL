@@ -39,6 +39,8 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/DimUtil.hpp>
 
+#include <mb_status.h>
+
 namespace pdal
 {
 
@@ -65,6 +67,9 @@ void MbReader::addArgs(ProgramArgs& args)
 {
     args.add("format", "Name or number of MBIO data format",
         m_format).setPositional();
+    args.add("timegap", "Maximum time between records.", m_timegap, 1.0);
+    args.add("speedmin", "Minimum vehicle speed for data to be valid",
+        m_speedmin);
 }
 
 
@@ -86,8 +91,6 @@ void MbReader::ready(PointTableRef table)
     double bounds[4] { -180, 180, -90, 90 };
     int btime_i[7] { 0, 0, 0, 0, 0, 0, 0 };
     int etime_i[7] { std::numeric_limits<int>::max(), 0, 0, 0, 0, 0 };
-    double speedmin { 0 };
-    double timegap { 0 };
     char *mbio_ptr;
     double btime_d;
     double etime_d;
@@ -98,7 +101,7 @@ void MbReader::ready(PointTableRef table)
 
     mb_read_init(verbose, const_cast<char *>(m_filename.data()),
         (int)m_format, pings, lonflip, bounds, btime_i, etime_i,
-        speedmin, timegap, &m_ctx, &btime_d, &etime_d,
+        m_speedmin, m_timegap, &m_ctx, &btime_d, &etime_d,
         &beams_bath, &beams_amp, &pixels_ss, &error);
     if (error > 0)
         throwError("Can't initialize mb-system reader: " +
@@ -153,7 +156,7 @@ bool MbReader::loadData()
 
         if (status == 0)
         {
-            if (error > 0)
+            if (error > 0 && error != MB_ERROR_EOF)
                 throwError("Error reading data: " + MbError::text(error));
             return false;
         }
