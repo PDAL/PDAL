@@ -104,25 +104,8 @@ public:
         }
     }
 
-    void putByte(const unsigned char b) {
-        buf.push_back(b);
-    }
-
-    unsigned char getByte() {
-        return buf[idx++];
-    }
-
-    void getBytes(unsigned char *b, int len) {
-        for (int i = 0 ; i < len ; i ++) {
-            b[i] = getByte();
-        }
-    }
-
-    void setBytes(const std::vector<uint8_t>& data)
-        { buf = data; }
-
-    const std::vector<uint8_t>& getBytes() const
-        { return buf; }
+    const unsigned char *getBytes() const
+        { return buf.data(); }
 
     size_t byte_size()
         { return buf.size(); }

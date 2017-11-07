@@ -122,37 +122,9 @@ enum class CompressionType
     Unknown = 256
 };
 
-// This is a utility input/output buffer for the compressor/decompressor.
-template <typename CTYPE = unsigned char>
-class TypedLazPerfBuf
-{
-    typedef std::vector<CTYPE> LazPerfRawBuf;
-private:
 
-    LazPerfRawBuf& m_buf;
-    size_t m_idx;
-
-public:
-    TypedLazPerfBuf(LazPerfRawBuf& buf) : m_buf(buf), m_idx(0)
-    {}
-
-    void putBytes(const unsigned char *b, size_t len)
-    {
-        m_buf.insert(m_buf.end(), (const CTYPE *)b, (const CTYPE *)(b + len));
-    }
-    void putByte(const unsigned char b)
-        {   m_buf.push_back((CTYPE)b); }
-    unsigned char getByte()
-        { return (unsigned char)m_buf[m_idx++]; }
-    void getBytes(unsigned char *b, int len)
-    {
-        memcpy(b, m_buf.data() + m_idx, len);
-        m_idx += len;
-    }
-};
-typedef TypedLazPerfBuf<char> SignedLazPerfBuf;
-typedef TypedLazPerfBuf<unsigned char> LazPerfBuf;
-
+using BlockCb = std::function<void(char *buf, size_t bufsize)>;
+const size_t CHUNKSIZE(1000000);
 
 #ifdef PDAL_HAVE_LAZPERF
 // This compressor write data in chunks to a stream. At the beginning of the
@@ -277,40 +249,6 @@ private:
 };
 
 
-template<typename InputStream>
-class LazPerfDecompressor
-{
-public:
-    LazPerfDecompressor(InputStream& input, const DimTypeList& dims) :
-        m_decoder(input),
-        m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder))
-    { m_pointSize = addFields(m_decompressor, dims); }
-
-    size_t pointSize() const
-        { return m_pointSize; }
-    point_count_t decompress(char *outbuf, size_t bufsize)
-    {
-        point_count_t numWritten = 0;
-
-        char *end = outbuf + bufsize;
-        while (outbuf + m_pointSize <= end)
-        {
-            m_decompressor->decompress(outbuf);
-            outbuf += m_pointSize;
-            numWritten++;
-        }
-        return numWritten;
-    }
-
-private:
-    typedef laszip::decoders::arithmetic<InputStream> Decoder;
-    Decoder m_decoder;
-    typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
-        Decompressor;
-    Decompressor m_decompressor;
-    size_t m_pointSize;
-};
-
 class LazPerfVlrDecompressor
 {
 public:
@@ -361,26 +299,6 @@ private:
     uint32_t m_chunkPointsRead;
 };
 
-#else
-
-typedef char LazPerfVlrCompressor;
-typedef char LazPerfVlrDecompressor;
-
-#endif  // PDAL_HAVE_LAZPERF
-
-
-using BlockCb = std::function<void(char *buf, size_t bufsize)>;
-const size_t CHUNKSIZE(1000000);
-class compression_error : public std::runtime_error
-{
-public:
-    compression_error() : std::runtime_error("General compression error")
-    {}
-
-    compression_error(const std::string& s) :
-        std::runtime_error("Compression: " + s)
-    {}
-};
 
 class LazPerfCompressor
 {
@@ -453,6 +371,89 @@ private:
     size_t m_avail;
 };
 
+
+// NOTE - The LazPerfDecompressor is different from others, even though the
+//   interface is the same, in that it always executes the callback after
+//   a point's worth of data is read.
+class LazPerfDecompressor
+{
+public:
+    LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
+        size_t numPoints) :
+        m_decoder(*this),
+        m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder)),
+        m_cb(cb),
+        m_numPoints(numPoints)
+    { m_pointSize = addFields(m_decompressor, dims); }
+
+    unsigned char getByte()
+    {
+        if (m_srcsize)
+        {
+            m_srcsize--;
+            return *m_srcbuf++;
+        }
+        return 0;
+    }
+
+    void getBytes(uint8_t *dst, size_t dstsize)
+    {
+        size_t count = std::min(dstsize, m_srcsize);
+        uint8_t *src = const_cast<uint8_t *>(
+            reinterpret_cast<const uint8_t *>(m_srcbuf));
+        std::copy(src, src + count, dst);
+        m_srcbuf += count;
+        m_srcsize -= count;
+    }
+
+    void decompress(const char *buf, size_t bufsize)
+    {
+        m_srcbuf = buf;
+        m_srcsize = bufsize;
+
+        std::vector<char> outbuf(m_pointSize);
+        while (m_numPoints--)
+        {
+            m_decompressor->decompress(outbuf.data());
+            m_cb(outbuf.data(), m_pointSize);
+        }
+    }
+
+    void done()
+    {}
+
+private:
+    typedef laszip::decoders::arithmetic<LazPerfDecompressor> Decoder;
+    Decoder m_decoder;
+    typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
+        Decompressor;
+    Decompressor m_decompressor;
+    BlockCb m_cb;
+    size_t m_numPoints;
+    const char *m_srcbuf;
+    size_t m_srcsize;
+    size_t m_pointSize;
+};
+
+
+#else
+
+typedef char LazPerfVlrCompressor;
+typedef char LazPerfVlrDecompressor;
+
+#endif  // PDAL_HAVE_LAZPERF
+
+
+class compression_error : public std::runtime_error
+{
+public:
+    compression_error() : std::runtime_error("General compression error")
+    {}
+
+    compression_error(const std::string& s) :
+        std::runtime_error("Compression: " + s)
+    {}
+};
 
 class DeflateCompressor
 {
