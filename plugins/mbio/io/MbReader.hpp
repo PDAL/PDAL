@@ -99,6 +99,8 @@ private:
     double *m_sslat;
     std::queue<BathData> m_bathQueue;
     MbFormat m_format;
+    double m_timegap;
+    double m_speedmin;
 };
 
 } // namespace PDAL

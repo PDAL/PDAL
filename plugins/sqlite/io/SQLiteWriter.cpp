@@ -504,7 +504,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
             m_patch->putBytes((const unsigned char *)storage.data(), size);
         }
         log()->get(LogLevel::Debug3) << "uncompressed size: " <<
-            m_patch->getBytes().size() << std::endl;
+            m_patch->byte_size() << std::endl;
     }
 
     records rs;
@@ -522,8 +522,8 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));
     r.push_back(column(view->size()));
-    r.push_back(blob((const char*)(&m_patch->getBytes()[0]),
-        m_patch->getBytes().size()));
+    r.push_back(blob(reinterpret_cast<const char *>(m_patch->getBytes()),
+        m_patch->byte_size()));
     r.push_back(column(bounds));
     r.push_back(column(m_srid));
     r.push_back(column(box));
