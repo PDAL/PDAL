@@ -55,6 +55,15 @@ namespace pdal
 class PDAL_DLL BpfWriter : public FlexWriter
 {
 public:
+    struct CoordId
+    {
+        CoordId() : m_auto(false), m_val(0)
+        {}
+
+        bool m_auto;
+        int m_val;
+    };
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
@@ -67,7 +76,7 @@ private:
     std::vector<uint8_t> m_extraData;
     std::vector<BpfUlemFile> m_bundledFiles;
     bool m_compression;
-    bool m_autoUTM;
+    CoordId m_coordId;
     std::string m_extraDataSpec;
     StringList m_bundledFilesSpec;
     std::string m_curFilename;

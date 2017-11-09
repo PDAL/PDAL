@@ -714,20 +714,36 @@ TEST(BPFTest, autoutm)
         Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
     std::string outfile(Support::temppath("tmp.bpf"));
 
+    BpfWriter writer;
+
+    // Make sure that we throw on invalid coord_id string.
+    Options o1;
+    o1.add("filename", outfile);
+    o1.add("coord_id", "foobar");
+    writer.setOptions(o1);
+
+    PointTable table;
+
+    EXPECT_THROW(writer.prepare(table), pdal_error);
+
+    // Make sure that we throw on invalid coord_id valid (not a UTM zone).
+    Options o2;
+    o2.add("filename", outfile);
+    o2.add("coord_id", "75");
+    writer.setOptions(o2);
+
+    EXPECT_THROW(writer.prepare(table), pdal_error);
 
     Options readerOps;
     readerOps.add("filename",sourcefile);
-
-    PointTable table;
 
     BpfReader reader;
     reader.setOptions(readerOps);
 
     Options writerOps;
     writerOps.add("filename", outfile);
-    writerOps.add("autoutm", true);
+    writerOps.add("coord_id", "auto");
 
-    BpfWriter writer;
     writer.setOptions(writerOps);
     writer.setInput(reader);
 

@@ -62,6 +62,26 @@ CREATE_STATIC_PLUGIN(1, 0, BpfWriter, Writer, s_info)
 
 std::string BpfWriter::getName() const { return s_info.name; }
 
+std::istream& operator>>(std::istream& in, BpfWriter::CoordId& id)
+{
+    std::string s;
+    in >> s;
+    if (s == "auto")
+        id.m_auto = true;
+    else if (!Utils::fromString(s, id.m_val) || id.m_val < -60 || id.m_val > 60)
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const BpfWriter::CoordId& id)
+{
+    if (id.m_auto)
+        out << "auto";
+    else
+        out << id.m_val;
+    return out;
+}
+
 void BpfWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
@@ -69,8 +89,7 @@ void BpfWriter::addArgs(ProgramArgs& args)
     args.add("header_data", "Base64-encoded header data", m_extraDataSpec);
     args.add("format", "Output format", m_header.m_pointFormat,
         BpfFormat::DimMajor);
-    args.add("coord_id", "UTM coordinate ID", m_header.m_coordId, -9999);
-    args.add("autoutm", "Attempt to auto-assign UTM (first from SRS, then from bounding box)", m_autoUTM, false);
+    args.add("coord_id", "UTM coordinate ID", m_coordId);
     args.add("bundledfile", "List of files to bundle in output",
         m_bundledFilesSpec);
     args.add("output_dims", "Output dimensions", m_outputDims);
@@ -80,18 +99,12 @@ void BpfWriter::addArgs(ProgramArgs& args)
 
 void BpfWriter::initialize()
 {
+    m_header.m_coordId = m_coordId.m_val;
+    m_header.m_coordType = Utils::toNative(m_header.m_coordId ?
+        BpfCoordType::UTM : BpfCoordType::Cartesian);
     m_header.m_compression = Utils::toNative(
             m_compression ? BpfCompression::Zlib : BpfCompression::None);
     m_extraData = Utils::base64_decode(m_extraDataSpec);
-    if (m_header.m_coordId == -9999)
-    {
-        m_header.m_coordId = 0;
-        m_header.m_coordType = Utils::toNative(BpfCoordType::Cartesian);
-    }
-    else
-    {
-        m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
-    }
 
     for (auto file : m_bundledFilesSpec)
     {
@@ -129,7 +142,8 @@ void BpfWriter::prepared(PointTableRef table)
 }
 
 
-void BpfWriter::readyFile(const std::string& filename, const SpatialReference& srs)
+void BpfWriter::readyFile(const std::string& filename,
+    const SpatialReference& srs)
 {
     m_curFilename = filename;
     m_stream.open(filename);
@@ -138,7 +152,7 @@ void BpfWriter::readyFile(const std::string& filename, const SpatialReference& s
     m_header.m_numPts = 0;
     m_header.setLog(log());
 
-    if (m_autoUTM)
+    if (m_coordId.m_auto)
     {
         m_header.m_coordId = 0;
         if (m_header.trySetSpatialReference(srs))
