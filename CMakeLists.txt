@@ -261,14 +261,6 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
 
-
-
-if (WITH_EXAMPLES)
-    add_subdirectory(examples)
-endif()
-
-
-
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file
 # specifies linking in libpdal_base.so and libpdal_util.so.  This allows
