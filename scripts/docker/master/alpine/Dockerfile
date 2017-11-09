@@ -32,6 +32,8 @@ RUN \
         xz-dev \
         zstd-dev \
         py-packaging \
+        xz-dev \
+        zstd-dev \
     ; \
     apk add --no-cache \
         hexer \
@@ -56,6 +58,7 @@ RUN \
         laszip \
         libspatialite \
         py-setuptools \
+        xz-libs \
     ;\
     mkdir /vdatum; \
     cd /vdatum; \

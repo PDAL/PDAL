@@ -45,8 +45,10 @@ apk add \
     laszip-dev \
     libspatialite \
     libspatialite-dev \
+    xz-dev \
+    xz-libs \
     zstd \
-    zstd-dev
+    zstd-dev \
 
 gcc --version
 g++ --version

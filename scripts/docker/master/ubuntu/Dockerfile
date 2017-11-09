@@ -83,6 +83,8 @@ RUN \
         mbsystem \
         mbsystem-dev \
         oracle-java8-installer \
+        liblzma-dev \
+        libzstd-dev \
     ; \
     rm -rf /var/lib/apt/lists/*; \
     rm -rf /var/cache/oracle-jdk8-installer; \
@@ -298,6 +300,8 @@ RUN \
         libdap-dev\
         cython \
         python-pip \
+        liblzma-dev \
+        libzstd-dev \
     ; \
     apt-get autoremove -y; \
     apt-get update; \
@@ -354,5 +358,7 @@ RUN \
         libpcl-segmentation1.7 \
         libpcl-surface1.7 \
         libpcl-tracking1.7 \
-        libpcl-visualization1.7
+        libpcl-visualization1.7 \
+        liblzma5 \
+        libzstd0 \
 

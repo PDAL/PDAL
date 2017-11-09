@@ -74,6 +74,8 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
         unzip \
         libopenscenegraph-dev \
+        libzstd-dev \
+        liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
