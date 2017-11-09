@@ -326,6 +326,7 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
 
     const PointId startId(view->size());
     PointId id(startId);
+    size_t pointNum(0);
 
     for (std::size_t i(0); i < numPoints; ++i)
     {
@@ -339,13 +340,18 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     // pipeline) will be zero-filled.
 
 #ifdef PDAL_HAVE_LAZPERF
+
+    /**
     SignedLazPerfBuf buffer(response);
     LazPerfDecompressor<SignedLazPerfBuf> decompressor(buffer, m_dims);
+    **/
 
-    for (std::size_t i(0); i < numPoints; ++i)
+    auto cb = [&points, &pointNum](char *buf, size_t bufsize)
     {
-        decompressor.decompress(points[i], pointSize);
-    }
+        std::copy(buf, buf + bufsize, points[pointNum++]);
+    };
+    LazPerfDecompressor(cb, m_dims, numPoints).
+        decompress(response.data(), response.size());
 #else
     const char* pos(response.data());
     const char* end(pos + numPoints * pointSize);
