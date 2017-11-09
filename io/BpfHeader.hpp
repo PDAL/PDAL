@@ -40,7 +40,7 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
-#include <pdal/Metadata.hpp>
+#include <pdal/SpatialReference.hpp>
 
 namespace pdal
 {
@@ -173,6 +173,7 @@ struct BpfHeader
     bool write(OLeStream& stream);
     bool readV3(ILeStream& stream);
     bool readV1(ILeStream& stream);
+    bool trySetSpatialReference(const pdal::SpatialReference&);
     PDAL_DLL bool readDimensions(ILeStream& stream,
         std::vector<BpfDimension>& dims);
     void writeDimensions(OLeStream& stream, std::vector<BpfDimension>& dims);

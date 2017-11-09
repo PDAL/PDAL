@@ -67,6 +67,7 @@ private:
     std::vector<uint8_t> m_extraData;
     std::vector<BpfUlemFile> m_bundledFiles;
     bool m_compression;
+    bool m_autoUTM;
     std::string m_extraDataSpec;
     StringList m_bundledFilesSpec;
     std::string m_curFilename;

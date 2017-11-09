@@ -73,6 +73,11 @@ coord_id
     The coordinate ID (UTM zone) of the data.  NOTE: Only the UTM coordinate
     type is currently supported. [Default: 0, with coordinate type set to none]
 
+autoutm
+    Attempt to assign the UTM zone automatically if the active coordinate
+    system is UTM. If the spatial reference is not UTM, no UTM zone will
+    be set for the file.
+
 scale_x, scale_y, scale_z
     Scale to be divided from the X, Y and Z nominal values, respectively, after
     the offset has been applied.  The special value "auto" can be specified,
