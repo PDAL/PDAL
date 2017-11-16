@@ -427,7 +427,13 @@ void PipelineManager::replace(Stage *sOld, Stage *sNew)
     for (Stage * & s : m_stages)
     {
         if (s == sOld)
+        {
             s = sNew;
+            // Copy inputs from the old stage to new one.
+            for (Stage *ss : sOld->getInputs())
+                sNew->setInput(*ss);
+        }
+        // Reset the inputs that refer to the replaced stage.
         for (Stage * & ss : s->getInputs())
             if (ss == sOld)
                 ss = sNew;
