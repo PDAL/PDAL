@@ -128,7 +128,7 @@ void BpfReader::initialize()
        else if (m_header.m_coordId < 0 && m_header.m_coordId >= -60)
           code = std::string("EPSG:327");
        else
-          throwError("BPF file contains an invalid UTM zone" +
+          throwError("BPF file contains an invalid UTM zone " +
             Utils::toString(zone));
        code += (zone < 10 ? "0" : "") + Utils::toString(zone);
     }

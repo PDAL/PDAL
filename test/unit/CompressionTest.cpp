@@ -63,7 +63,8 @@ std::vector<char> getBytes(PointViewPtr view)
 }
 
 
-TEST(Compression, Simple)
+#ifdef PDAL_HAVE_LAZPERF
+TEST(Compression, simple)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
@@ -84,24 +85,29 @@ TEST(Compression, Simple)
     EXPECT_EQ(layout->pointSize(), 52U);
 
     std::vector<unsigned char> rawBuf;
-    LazPerfBuf b(rawBuf);
+    //LazPerfBuf b(rawBuf);
 
     DimTypeList dimTypes = layout->dimTypes();
-    LazPerfCompressor<LazPerfBuf> compressor(b, dimTypes);
+    auto cb = [&rawBuf](char *buf, size_t bufsize)
+    {
+        unsigned char *ubuf = reinterpret_cast<unsigned char *>(buf);
+        rawBuf.insert(rawBuf.end(), ubuf, ubuf + bufsize);
+    };
 
-    std::vector<char> tmpbuf(compressor.pointSize());
+    LazPerfCompressor compressor(cb, dimTypes);
+
+    std::vector<char> tmpbuf(layout->pointSize());
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         view->getPackedPoint(dimTypes, idx, tmpbuf.data());
-        compressor.compress(tmpbuf.data(), compressor.pointSize());
+        compressor.compress(tmpbuf.data(), layout->pointSize());
     }
     compressor.done();
 
-    EXPECT_EQ(view->size() * compressor.pointSize(), (size_t)55380);
+    EXPECT_EQ(view->size() * layout->pointSize(), (size_t)55380);
     EXPECT_EQ(rawBuf.size(), (size_t)30945);
 
     LazPerfBuf b2(rawBuf);
-
     LazPerfDecompressor<LazPerfBuf> decompressor(b2, dimTypes);
 
     size_t outbufSize = decompressor.pointSize() * view->size();
@@ -157,8 +163,13 @@ TEST(Compression, types)
         dimTypes.push_back(DimType(Dimension::Id::Unknown, *ti));
 
     std::vector<unsigned char> rawBuf;
-    LazPerfBuf b(rawBuf);
-    LazPerfCompressor<LazPerfBuf> compressor(b, dimTypes);
+    auto cb = [&rawBuf](char *buf, size_t bufsize)
+    {
+        unsigned char *ubuf = reinterpret_cast<unsigned char *>(buf);
+        rawBuf.insert(rawBuf.begin(), ubuf, ubuf + bufsize);
+    };
+
+    LazPerfCompressor compressor(cb, dimTypes);
     for (size_t i = 0; i < 50; i++)
     {
         compressor.compress(pts[0], 42);
@@ -184,102 +195,132 @@ TEST(Compression, types)
         memset(oPts[2], 0, 42);
     }
 }
+#endif // PDAL_HAVE_LAZPERF
 
-//
-// BOOST_AUTO_TEST_CASE(test_compress_copied_view)
-// {
-//     using namespace pdal;
-//
-//
-//     const std::string file(Support::datapath("las/1.2-with-color.las"));
-//     const pdal::Option opt_filename("filename", file);
-//     pdal::Options opts;
-//     opts.add(opt_filename);
-//     pdal::drivers::las::Reader reader;
-//     reader.setOptions(opts);
-//     PointTable ftable;
-//     reader.prepare(ftable);
-//     PointViewSet viewSet = reader.execute(ftable);
-//     PointViewPtr view = *viewSet.begin();
-//
-//     PointTable table;
-//     table->registerDim(Dimension::Id::X);
-//     table->registerDim(Dimension::Id::Y);
-//     table->registerDim(Dimension::Id::Z);
-//     PointView new_view(table);
-// //
-//     for (PointId i = 0; i < view->size(); ++i)
-//     {
-//         new_view->setField(Dimension::Id::X, i, view->getFieldAs<double>(Dimension::Id::X, i));
-//         new_view->setField(Dimension::Id::Y, i, view->getFieldAs<double>(Dimension::Id::Y, i));
-//         new_view->setField(Dimension::Id::Z, i, view->getFieldAs<double>(Dimension::Id::Z, i));
-//     }
-//     SQLiteTestStream s;
-//     compression::Compress<SQLiteTestStream>(table, new_view, s, compression::CompressionType::Lazperf, 0, 0);
-//     SQLiteTestStream s2;
-//     s2.buf = s.buf;
-//     PointViewPtr b = compression::Decompress<SQLiteTestStream>(table, s2, 11, compression::CompressionType::Lazperf);
-//
-//     int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
-//     BOOST_CHECK_EQUAL(y, 849338);
-//     int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
-//     BOOST_CHECK_EQUAL(x, 636038);
-//     double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
-//     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
-//
-// }
-//
-//
-//
-// BOOST_AUTO_TEST_CASE(test_compress_simple_view)
-// {
-//     using namespace pdal;
-//
-//     PointTable table;
-//     table->registerDim(Dimension::Id::X);
-//     table->registerDim(Dimension::Id::Y);
-//     table->registerDim(Dimension::Id::Z);
-//     table->registerDim(Dimension::Id::GpsTime);
-//     table->registerDim(Dimension::Id::Intensity);
-//     table->registerDim(Dimension::Id::PointSourceId);
-//     table->registerDim(Dimension::Id::ScanAngleRank);
-//     table->registerDim(Dimension::Id::Red);
-//     table->registerDim(Dimension::Id::Green);
-//     table->registerDim(Dimension::Id::Blue);
-//     table->registerDim(Dimension::Id::ReturnNumber);
-//     table->registerDim(Dimension::Id::NumberOfReturns);
-//     table->registerDim(Dimension::Id::ScanDirectionFlag);
-//     table->registerDim(Dimension::Id::EdgeOfFlightLine);
-//     table->registerDim(Dimension::Id::Classification);
-//     table->registerDim(Dimension::Id::UserData);
-//     PointView view(table);
-//     for (PointId i = 0; i < 100; ++i)
-//     {
-//         view->setField(Dimension::Id::X, i, i);
-//         view->setField(Dimension::Id::Y, i, i+100);
-//         view->setField(Dimension::Id::Z, i, i+1000);
-//         view->setField(Dimension::Id::GpsTime, i, i+10000);
-//         view->setField(Dimension::Id::Intensity, i, 600);
-//         view->setField(Dimension::Id::PointSourceId, i, 60);
-//         view->setField(Dimension::Id::ScanAngleRank, i, 1003.23);
-//         view->setField(Dimension::Id::Red, i, 26);
-//         view->setField(Dimension::Id::Green, i, 42);
-//         view->setField(Dimension::Id::Blue, i, 255);
-//         view->setField(Dimension::Id::ReturnNumber, i, 2);
-//         view->setField(Dimension::Id::NumberOfReturns, i, 2);
-//         view->setField(Dimension::Id::ScanDirectionFlag, i, 1);
-//         view->setField(Dimension::Id::EdgeOfFlightLine, i, 1);
-//         view->setField(Dimension::Id::Classification, i, 2);
-//         view->setField(Dimension::Id::UserData, i, 25);
-//     }
-//
-//     SQLiteTestStream s;
-//     compression::Compress<SQLiteTestStream>(table, view, s, compression::CompressionType::Lazperf, 0, 0);
-//     SQLiteTestStream s2;
-//     s2.buf = s.buf;
-//     PointViewPtr b = compression::Decompress<SQLiteTestStream>(table, s2, 11, compression::CompressionType::Lazperf);
-// //     std::cout << *b << std::endl;
-//     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-//     BOOST_CHECK_EQUAL(r, 26u);
-// }
+
+TEST(Compression, deflate)
+{
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+
+    // Choosing a size that isn't a multiple of the internal buffer.
+    std::vector<int> orig(1000357);
+    // Trying to make something that compresses reasonably well.
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
+
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
+
+    DeflateCompressor compressor(cb);
+
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    compressor.compress(sp, s);
+    compressor.done();
+
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
+
+    DeflateDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
+}
+
+
+TEST(Compression, lzma)
+{
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+
+    // Choosing a size that isn't a multiple of the internal buffer.
+    // Trying to make something that compresses reasonably well.
+    std::vector<int> orig(1000357);
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
+
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
+
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    LzmaCompressor compressor(cb);
+    compressor.compress(sp, s);
+    compressor.done();
+
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
+
+    LzmaDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
+}
+
+TEST(Compression, zstd)
+{
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+
+    // Choosing a size that isn't a multiple of the internal buffer.
+    // Trying to make something that compresses reasonably well.
+    std::vector<int> orig(1000357);
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
+
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
+
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    ZstdCompressor compressor(cb);
+    compressor.compress(sp, s);
+    compressor.done();
+
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
+
+    ZstdDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
+}
+
 

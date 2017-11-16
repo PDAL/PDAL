@@ -54,6 +54,10 @@
 #include <map>
 #include <vector>
 
+#include <zlib.h>
+#include <lzma.h>
+#include <zstd.h>
+
 namespace pdal
 {
 
@@ -118,89 +122,21 @@ enum class CompressionType
     Unknown = 256
 };
 
-// This is a utility input/output buffer for the compressor/decompressor.
-template <typename CTYPE = unsigned char>
-class TypedLazPerfBuf
-{
-    typedef std::vector<CTYPE> LazPerfRawBuf;
-private:
 
-    LazPerfRawBuf& m_buf;
-    size_t m_idx;
-
-public:
-    TypedLazPerfBuf(LazPerfRawBuf& buf) : m_buf(buf), m_idx(0)
-    {}
-
-    void putBytes(const unsigned char *b, size_t len)
-    {
-        m_buf.insert(m_buf.end(), (const CTYPE *)b, (const CTYPE *)(b + len));
-    }
-    void putByte(const unsigned char b)
-        {   m_buf.push_back((CTYPE)b); }
-    unsigned char getByte()
-        { return (unsigned char)m_buf[m_idx++]; }
-    void getBytes(unsigned char *b, int len)
-    {
-        memcpy(b, m_buf.data() + m_idx, len);
-        m_idx += len;
-    }
-};
-typedef TypedLazPerfBuf<char> SignedLazPerfBuf;
-typedef TypedLazPerfBuf<unsigned char> LazPerfBuf;
-
+using BlockCb = std::function<void(char *buf, size_t bufsize)>;
+const size_t CHUNKSIZE(1000000);
 
 #ifdef PDAL_HAVE_LAZPERF
-template<typename OutputStream>
-class LazPerfCompressor
-{
-public:
-    LazPerfCompressor(OutputStream& output, const DimTypeList& dims) :
-        m_encoder(output),
-        m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
-        m_pointSize(0),
-        m_done(false)
-    { m_pointSize = addFields(m_compressor, dims); }
-
-    ~LazPerfCompressor()
-    {
-        if (!m_done)
-            std::cerr << "LazPerfCompressor destroyed without a call "
-               "to done()";
-    }
-
-    size_t pointSize() const
-        { return m_pointSize; }
-    point_count_t compress(const char *inbuf, size_t bufsize)
-    {
-        point_count_t numRead = 0;
-
-        const char *end = inbuf + bufsize;
-        while (inbuf + m_pointSize <= end)
-        {
-            m_compressor->compress(inbuf);
-            inbuf += m_pointSize;
-            numRead++;
-        }
-        return numRead;
-    }
-    void done()
-    {
-        if (!m_done)
-           m_encoder.done();
-        m_done = true;
-    }
-
-private:
-    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
-    Encoder m_encoder;
-    typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
-            Compressor;
-    Compressor m_compressor;
-    size_t m_pointSize;
-    bool m_done;
-};
-
+// This compressor write data in chunks to a stream. At the beginning of the
+// data is an offset to the end of the data, where the chunk table is
+// stored.  The chunk table keeps a list of the offsets to the beginning of
+// each chunk.  Chunks consist of a fixed number of points (last chunk may
+// have fewer points).  Each time a chunk starts, the compressor is reset.
+// This allows decompression of some set of points that's less than the
+// entire set when desired.
+// The compressor uses the schema of the point data in order to compress
+// the point stream.  The schema is also stored in a VLR that isn't
+// handled as part of the compression process itself.
 class LazPerfVlrCompressor
 {
     typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
@@ -313,40 +249,6 @@ private:
 };
 
 
-template<typename InputStream>
-class LazPerfDecompressor
-{
-public:
-    LazPerfDecompressor(InputStream& input, const DimTypeList& dims) :
-        m_decoder(input),
-        m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder))
-    { m_pointSize = addFields(m_decompressor, dims); }
-
-    size_t pointSize() const
-        { return m_pointSize; }
-    point_count_t decompress(char *outbuf, size_t bufsize)
-    {
-        point_count_t numWritten = 0;
-
-        char *end = outbuf + bufsize;
-        while (outbuf + m_pointSize <= end)
-        {
-            m_decompressor->decompress(outbuf);
-            outbuf += m_pointSize;
-            numWritten++;
-        }
-        return numWritten;
-    }
-
-private:
-    typedef laszip::decoders::arithmetic<InputStream> Decoder;
-    Decoder m_decoder;
-    typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
-        Decompressor;
-    Decompressor m_decompressor;
-    size_t m_pointSize;
-};
-
 class LazPerfVlrDecompressor
 {
 public:
@@ -397,12 +299,529 @@ private:
     uint32_t m_chunkPointsRead;
 };
 
+
+class LazPerfCompressor
+{
+public:
+    LazPerfCompressor(BlockCb cb, const DimTypeList& dims) :
+        m_cb(cb),
+        m_encoder(*this),
+        m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
+        m_pointSize(0),
+        m_avail(CHUNKSIZE)
+    { m_pointSize = addFields(m_compressor, dims); }
+
+    ~LazPerfCompressor()
+    {
+    }
+
+    void putBytes(const uint8_t* buf, size_t bufsize)
+    {
+        while (bufsize)
+        {
+            size_t copyCnt = std::min(m_avail, bufsize);
+            std::copy(buf, buf + copyCnt, m_tmpbuf + (CHUNKSIZE - m_avail));
+            m_avail -= copyCnt;
+            if (m_avail == 0)
+            {
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE);
+                m_avail = CHUNKSIZE;
+            }
+            bufsize -= copyCnt;
+        }
+    }
+
+    void putByte(unsigned char b)
+    {
+        m_tmpbuf[CHUNKSIZE - m_avail] = b;
+        if (--m_avail == 0)
+        {
+            m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE);
+            m_avail = CHUNKSIZE;
+        }
+    }
+
+    void compress(const char *buf, size_t bufsize)
+    {
+        while (bufsize >= m_pointSize)
+        {
+            m_compressor->compress(buf);
+            buf += m_pointSize;
+            bufsize -= m_pointSize;
+        }
+    }
+
+    void done()
+    {
+        m_encoder.done();
+        if (m_avail != CHUNKSIZE)
+            m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE - m_avail);
+        m_avail = CHUNKSIZE;
+    }
+
+private:
+    BlockCb m_cb;
+    typedef laszip::encoders::arithmetic<LazPerfCompressor> Encoder;
+    Encoder m_encoder;
+    typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
+            Compressor;
+    Compressor m_compressor;
+    size_t m_pointSize;
+    unsigned char m_tmpbuf[CHUNKSIZE];
+    size_t m_avail;
+};
+
+
+// NOTE - The LazPerfDecompressor is different from others, even though the
+//   interface is the same, in that it always executes the callback after
+//   a point's worth of data is read.
+class LazPerfDecompressor
+{
+public:
+    LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
+        size_t numPoints) :
+        m_decoder(*this),
+        m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder)),
+        m_cb(cb),
+        m_numPoints(numPoints)
+    { m_pointSize = addFields(m_decompressor, dims); }
+
+    unsigned char getByte()
+    {
+        if (m_srcsize)
+        {
+            m_srcsize--;
+            return *m_srcbuf++;
+        }
+        return 0;
+    }
+
+    void getBytes(uint8_t *dst, size_t dstsize)
+    {
+        size_t count = std::min(dstsize, m_srcsize);
+        uint8_t *src = const_cast<uint8_t *>(
+            reinterpret_cast<const uint8_t *>(m_srcbuf));
+        std::copy(src, src + count, dst);
+        m_srcbuf += count;
+        m_srcsize -= count;
+    }
+
+    void decompress(const char *buf, size_t bufsize)
+    {
+        m_srcbuf = buf;
+        m_srcsize = bufsize;
+
+        std::vector<char> outbuf(m_pointSize);
+        while (m_numPoints--)
+        {
+            m_decompressor->decompress(outbuf.data());
+            m_cb(outbuf.data(), m_pointSize);
+        }
+    }
+
+    void done()
+    {}
+
+private:
+    typedef laszip::decoders::arithmetic<LazPerfDecompressor> Decoder;
+    Decoder m_decoder;
+    typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
+        Decompressor;
+    Decompressor m_decompressor;
+    BlockCb m_cb;
+    size_t m_numPoints;
+    const char *m_srcbuf;
+    size_t m_srcsize;
+    size_t m_pointSize;
+};
+
+
 #else
 
 typedef char LazPerfVlrCompressor;
 typedef char LazPerfVlrDecompressor;
 
 #endif  // PDAL_HAVE_LAZPERF
+
+
+class compression_error : public std::runtime_error
+{
+public:
+    compression_error() : std::runtime_error("General compression error")
+    {}
+
+    compression_error(const std::string& s) :
+        std::runtime_error("Compression: " + s)
+    {}
+};
+
+class DeflateCompressor
+{
+public:
+    DeflateCompressor(BlockCb cb) : m_cb(cb)
+    {
+        m_strm.zalloc = Z_NULL;
+        m_strm.zfree = Z_NULL;
+        m_strm.opaque = Z_NULL;
+        switch (deflateInit(&m_strm, Z_DEFAULT_COMPRESSION))
+        {
+        case Z_OK:
+            return;
+        case Z_MEM_ERROR:
+            throw compression_error("Memory allocation failure.");
+        case Z_STREAM_ERROR:
+            throw compression_error("Internal error.");
+        case Z_VERSION_ERROR:
+            throw compression_error("Incompatible version.");
+        default:
+            throw compression_error();
+        }
+    }
+
+    ~DeflateCompressor()
+    {
+        deflateEnd(&m_strm);
+    }
+
+    void compress(const char *buf, size_t bufsize)
+    {
+        run(buf, bufsize, Z_NO_FLUSH);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, Z_FINISH);
+    }
+
+private:
+    void run(const char *buf, size_t bufsize, int mode)
+    {
+        auto handleError = [](int ret) -> void
+        {
+            switch (ret)
+            {
+            case Z_OK:
+            case Z_STREAM_END:
+                return;
+            case Z_STREAM_ERROR:
+                throw compression_error("Internal error.");
+            case Z_DATA_ERROR:
+                throw compression_error("Corrupted data.");
+            case Z_MEM_ERROR:
+                throw compression_error("Memory allocation failure.");
+            default:
+                std::cerr << "Compression error !\n";
+                throw compression_error();
+            }
+        };
+
+        if (buf)
+        {
+            m_strm.avail_in = bufsize;
+            m_strm.next_in = reinterpret_cast<unsigned char *>(
+                    const_cast<char *>(buf));
+        }
+        int ret = Z_OK;
+        do
+        {
+            m_strm.avail_out = CHUNKSIZE;
+            m_strm.next_out = m_tmpbuf;
+            ret = ::deflate(&m_strm, mode);
+            handleError(ret);
+            size_t written = CHUNKSIZE - m_strm.avail_out;
+            if (written)
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
+        } while (m_strm.avail_out == 0);
+    }
+
+private:
+    BlockCb m_cb;
+    z_stream m_strm;
+    unsigned char m_tmpbuf[CHUNKSIZE];
+};
+
+class DeflateDecompressor
+{
+public:
+    DeflateDecompressor(BlockCb cb) : m_cb(cb)
+    {
+        m_strm.zalloc = Z_NULL;
+        m_strm.zfree = Z_NULL;
+        m_strm.opaque = Z_NULL;
+        m_strm.avail_in = 0;
+        m_strm.next_in = Z_NULL;
+        switch (inflateInit(&m_strm))
+        {
+        case Z_OK:
+            return;
+        case Z_MEM_ERROR:
+            throw compression_error("Memory allocation failure.");
+        case Z_STREAM_ERROR:
+            throw compression_error("Internal error.");
+        case Z_VERSION_ERROR:
+            throw compression_error("Incompatible version.");
+        default:
+            throw compression_error();
+        }
+    }
+
+    ~DeflateDecompressor()
+    {
+        inflateEnd(&m_strm);
+    }
+
+    void run(const char *buf, size_t bufsize, int mode)
+    {
+        auto handleError = [](int ret) -> void
+        {
+            switch (ret)
+            {
+            case Z_OK:
+            case Z_STREAM_END:
+                return;
+            case Z_STREAM_ERROR:
+                throw compression_error("Internal error.");
+            case Z_DATA_ERROR:
+                throw compression_error("Corrupted data.");
+            case Z_MEM_ERROR:
+                throw compression_error("Memory allocation failure.");
+            default:
+                throw compression_error();
+            }
+        };
+
+        m_strm.next_in = reinterpret_cast<unsigned char *>(
+            const_cast<char *>(buf));
+        m_strm.avail_in = bufsize;
+        int ret = Z_OK;
+        do
+        {
+            m_strm.avail_out = CHUNKSIZE;
+            m_strm.next_out = m_tmpbuf;
+            ret = inflate(&m_strm, mode);
+            handleError(ret);
+            size_t written = CHUNKSIZE - m_strm.avail_out;
+            if (written)
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
+        } while (m_strm.avail_out == 0);
+    }
+
+    void decompress(const char *buf, size_t bufsize)
+    {
+        run(buf, bufsize, Z_NO_FLUSH);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, Z_FINISH);
+    }
+
+private:
+    BlockCb m_cb;
+    z_stream m_strm;
+    unsigned char m_tmpbuf[CHUNKSIZE];
+};
+
+
+class Lzma
+{
+protected:
+    Lzma(BlockCb cb) : m_cb(cb)
+    {
+        m_strm = LZMA_STREAM_INIT;
+    }
+
+    ~Lzma()
+    {
+        lzma_end(&m_strm);
+    }
+
+    void run(const char *buf, size_t bufsize, lzma_action mode)
+    {
+        m_strm.avail_in = bufsize;
+        m_strm.next_in = reinterpret_cast<unsigned char *>(
+            const_cast<char *>(buf));
+        int ret = LZMA_OK;
+        do
+        {
+            m_strm.avail_out = CHUNKSIZE;
+            m_strm.next_out = m_tmpbuf;
+            ret = lzma_code(&m_strm, mode);
+            size_t written = CHUNKSIZE - m_strm.avail_out;
+            if (written)
+                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
+        } while (ret == Z_OK);
+        if (ret == Z_STREAM_END)
+            return;
+
+        switch (ret)
+        {
+        case LZMA_MEM_ERROR:
+            throw compression_error("Memory allocation failure.");
+        case LZMA_DATA_ERROR:
+            throw compression_error("LZMA data error.");
+        case LZMA_OPTIONS_ERROR:
+            throw compression_error("Unsupported option.");
+        case LZMA_UNSUPPORTED_CHECK:
+            throw compression_error("Unsupported integrity check.");
+        }
+    }
+
+
+protected:
+    lzma_stream m_strm;
+
+private:
+    unsigned char m_tmpbuf[CHUNKSIZE];
+    BlockCb m_cb;
+};
+
+class LzmaCompressor : public Lzma
+{
+public:
+    LzmaCompressor(BlockCb cb) : Lzma(cb)
+    {
+        if (lzma_easy_encoder(&m_strm, 2, LZMA_CHECK_CRC64) != LZMA_OK)
+            throw compression_error("Can't create compressor");
+    }
+
+    void compress(const char *buf, size_t bufsize)
+    {
+        run(buf, bufsize, LZMA_RUN);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, LZMA_FINISH);
+    }
+};
+
+
+class LzmaDecompressor : public Lzma
+{
+public:
+    LzmaDecompressor(BlockCb cb) : Lzma(cb)
+    {
+        if (lzma_auto_decoder(&m_strm, std::numeric_limits<uint32_t>::max(),
+            LZMA_TELL_UNSUPPORTED_CHECK))
+            throw compression_error("Can't create decompressor");
+    }
+
+    void decompress(const char *buf, size_t bufsize)
+    {
+        run(buf, bufsize, LZMA_RUN);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, LZMA_FINISH);
+    }
+};
+
+
+class ZstdCompressor
+{
+public:
+    ZstdCompressor(BlockCb cb) : m_cb(cb)
+    {
+        m_strm = ZSTD_createCStream();
+        ZSTD_initCStream(m_strm, 15);
+    }
+
+    ~ZstdCompressor()
+        { ZSTD_freeCStream(m_strm); }
+
+
+    void compress(const char *buf, size_t bufsize)
+    {
+        std::cerr << "Compress!\n";
+        m_inBuf.src = reinterpret_cast<const void *>(buf);
+        m_inBuf.size = bufsize;
+        m_inBuf.pos = 0;
+
+        size_t ret;
+        do
+        {
+            ZSTD_outBuffer outBuf
+                { reinterpret_cast<void *>(m_tmpbuf), CHUNKSIZE, 0 };
+            ret = ZSTD_compressStream(m_strm, &outBuf, &m_inBuf);
+            if (ZSTD_isError(ret))
+                break;
+            if (outBuf.pos)
+                m_cb(m_tmpbuf, outBuf.pos);
+            std::cerr << "In buf pos/size = " << m_inBuf.pos << "/" << m_inBuf.size << "!\n";
+            std::cerr << "Out buf pos/size = " << outBuf.pos << "/" << outBuf.size << "!\n";
+        } while (m_inBuf.pos != m_inBuf.size);
+    }
+
+    void done()
+    {
+        std::cerr << "Done compression!\n";
+        size_t ret;
+        do
+        {
+            ZSTD_outBuffer outBuf
+                { reinterpret_cast<void *>(m_tmpbuf), CHUNKSIZE, 0 };
+            ret = ZSTD_endStream(m_strm, &outBuf);
+            if (ZSTD_isError(ret))
+                break;
+            if (outBuf.pos)
+                m_cb(m_tmpbuf, outBuf.pos);
+        } while (ret);
+    }
+
+private:
+    BlockCb m_cb;
+
+    ZSTD_CStream *m_strm;
+    ZSTD_inBuffer m_inBuf;
+    char m_tmpbuf[CHUNKSIZE];
+};
+
+class ZstdDecompressor
+{
+public:
+    ZstdDecompressor(BlockCb cb) : m_cb(cb)
+    {
+        m_strm = ZSTD_createDStream();
+        ZSTD_initDStream(m_strm);
+    }
+
+    ~ZstdDecompressor()
+    {
+        ZSTD_freeDStream(m_strm);
+    }
+
+    void decompress(const char *buf, size_t bufsize)
+    {
+        std::cerr << "DE-Compress!\n";
+        m_inBuf.src = reinterpret_cast<const void *>(buf);
+        m_inBuf.size = bufsize;
+        m_inBuf.pos = 0;
+
+        size_t ret;
+        do
+        {
+            ZSTD_outBuffer outBuf
+                { reinterpret_cast<void *>(m_tmpbuf), CHUNKSIZE, 0 };
+            ret = ZSTD_decompressStream(m_strm, &outBuf, &m_inBuf);
+            if (ZSTD_isError(ret))
+                break;
+            if (outBuf.pos)
+                m_cb(m_tmpbuf, outBuf.pos);
+        } while (m_inBuf.pos != m_inBuf.size);
+    }
+
+    void done()
+    {}
+
+private:
+    BlockCb m_cb;
+
+    ZSTD_DStream *m_strm;
+    ZSTD_inBuffer m_inBuf;
+    char m_tmpbuf[CHUNKSIZE];
+};
 
 } // namespace pdal
 

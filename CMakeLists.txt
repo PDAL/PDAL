@@ -117,6 +117,8 @@ include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/pdaljni.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
+include(${PDAL_CMAKE_DIR}/lzma.cmake)
+include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
@@ -227,6 +229,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
+        ${ZSTD_INCLUDE_DIR}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
@@ -240,6 +243,8 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${LIBLZMA_LIBRARIES}
+        ${ZSTD_STATIC_LIB}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
     PRIVATE
@@ -260,14 +265,6 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
-
-
-
-if (WITH_EXAMPLES)
-    add_subdirectory(examples)
-endif()
-
-
 
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file

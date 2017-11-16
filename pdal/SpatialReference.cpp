@@ -397,6 +397,18 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 }
 
 
+int SpatialReference::getUTMZone() const
+{
+
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    if (!current)
+        throw pdal_error("Could not fetch current SRS");
+
+    int north(0);
+    int zone = OSRGetUTMZone(current.get(), &north);
+    return north*zone;
+}
+
 int SpatialReference::computeUTMZone(const BOX3D& box) const
 {
     // Nothing we can do if we're an empty SRS
