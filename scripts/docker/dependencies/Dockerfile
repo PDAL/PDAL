@@ -74,6 +74,8 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
         unzip \
         libopenscenegraph-dev \
+        libzstd-dev \
+        liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
@@ -145,7 +147,7 @@ RUN git clone https://github.com/hobu/nitro \
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
     && cd laszip \
-    && git checkout 3.1.0 \
+    && git checkout 3.1.1 \
     && cmake \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE="Release" \

@@ -26,7 +26,7 @@ clone_depth: 5
 
 # on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-  
+
 install:
   # make a temp directory for downloading osgeo4w-setup.exe
   # this may not matter as much if part of the install step, as pdal has
@@ -39,7 +39,7 @@ install:
   # get the OSGeo installer
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,msys,nitro,laz-perf,proj,zlib,python3-core,python3-devel,python3-numpy,oci,oci-devel -R %OSGEO4W_ROOT% > NUL
+  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,msys,nitro,laz-perf,proj,zlib,python3-core,python3-devel,python3-numpy,oci,oci-devel,laz-perf,jsoncpp,xz-devel,zstd -R %OSGEO4W_ROOT% > NUL
   # call our PDAL install script
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
   - call %OSGEO4W_ROOT%\bin\py3_env.bat
@@ -47,14 +47,13 @@ install:
   - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
   - call .\\scripts\\appveyor\\config.cmd
 
-build:
-  parallel: true
-  project: PDAL.sln
-  verbosity: minimal
+build_script:
+  - call .\\scripts\\appveyor\\build.cmd
 
 after_build:
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+  - call %OSGEO4W_ROOT%\bin\py3_env.bat
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
   - call .\\scripts\\appveyor\\install.cmd
 
@@ -96,4 +95,4 @@ notifications:
     incoming_webhook:
       secure: KxbDvaPmsvNmYpsp0TH3m3hJr7PqQL1sxR8xILBzaF2Lbku03M3mJ/h787TvDGQGX3IlyZtfTP0wvSRqMl4nMmdvDQZoAe8+Gyfc7BOkYIg=
 
- 
+

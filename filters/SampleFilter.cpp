@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -35,9 +35,9 @@
 #include "SampleFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <string>
 #include <vector>
@@ -84,19 +84,12 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
     KD3Index index(*inView);
     index.build();
 
-    // The result looks much better if we take some time to shuffle the indices.
-    std::srand(std::time(NULL));
-    std::vector<PointId> indices(np);
-    for (PointId i = 0; i < np; ++i)
-        indices[i] = i;
-    std::random_shuffle(indices.begin(), indices.end());
-
     // All points are marked as kept (1) by default. As they are masked by
     // neighbors within the user-specified radius, their value is changed to 0.
     std::vector<int> keep(np, 1);
 
     // We are able to subsample in a single pass over the shuffled indices.
-    for (auto const& i : indices)
+    for (PointId i = 0; i < np; ++i)
     {
         // If a point is masked, it is forever masked, and cannot be part of the
         // sampled cloud. Otherwise, the current index is appended to the output
@@ -108,16 +101,15 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
         // We now proceed to mask all neighbors within m_radius of the kept
         // point.
         auto ids = index.radius(i, m_radius);
-        for (PointId j = 1; j < ids.size(); ++j)
-            keep[ids[j]] = 0;
+        for (auto const& id : ids)
+            keep[id] = 0;
     }
 
     // Simply calculate the percentage of retained points.
     double frac = (double)outView->size() / (double)inView->size();
-    log()->get(LogLevel::Debug2) << "Retaining "
-                                 << outView->size() << " of "
-                                 << inView->size() << " points ("
-                                 << 100*frac << "%)\n";
+    log()->get(LogLevel::Debug2)
+        << "Retaining " << outView->size() << " of " << inView->size()
+        << " points (" << 100 * frac << "%)\n";
 
     viewSet.insert(outView);
     return viewSet;

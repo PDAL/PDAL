@@ -155,3 +155,44 @@ TEST(PipelineManagerTest, InputGlobbing)
     FileUtils::deleteFile(Support::temppath("globbed.las"));
 }
 
+TEST(PipelineManagerTest, replace)
+{
+    PipelineManager mgr;
+
+    Stage& r = mgr.makeReader("in.las", "readers.las");
+    Stage& f = mgr.makeFilter("filters.crop", r);
+    Stage& w = mgr.makeWriter("out.las", "writers.las", f);
+
+    StageFactory factory;
+    Stage *r2 = factory.createStage("readers.bpf");
+    mgr.replace(&r, r2);
+    EXPECT_EQ(r2->getInputs().size(), 0U);
+
+    EXPECT_EQ(f.getInputs().size(), 1U);
+    EXPECT_EQ(f.getInputs().front(), r2);
+
+    EXPECT_EQ(w.getInputs().size(), 1U);
+    EXPECT_EQ(w.getInputs().front(), &f);
+
+    Stage *f2 = factory.createStage("filters.range");
+
+    mgr.replace(&f, f2);
+    EXPECT_EQ(r2->getInputs().size(), 0U);
+
+    EXPECT_EQ(f2->getInputs().size(), 1U);
+    EXPECT_EQ(f2->getInputs().front(), r2);
+
+    EXPECT_EQ(w.getInputs().size(), 1U);
+    EXPECT_EQ(w.getInputs().front(), f2);
+
+    Stage *w2 = factory.createStage("writers.bpf");
+
+    mgr.replace(&w, w2);
+    EXPECT_EQ(r2->getInputs().size(), 0U);
+
+    EXPECT_EQ(f2->getInputs().size(), 1U);
+    EXPECT_EQ(f2->getInputs().front(), r2);
+
+    EXPECT_EQ(w2->getInputs().size(), 1U);
+    EXPECT_EQ(w2->getInputs().front(), f2);
+}

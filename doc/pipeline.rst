@@ -25,8 +25,7 @@ a pipeline provides useful advantages for more complex things:
 .. warning::
 
     As of PDAL 1.2, `JSON`_ is the preferred specification language
-    for PDAL pipelines. XML read support is still available at 1.5, but
-    XML support will be dropped at the 1.6 release.
+    for PDAL pipelines. XML was dropped at the 1.6 release.
 
 .. _`JSON`: http://www.json.org/
 

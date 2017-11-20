@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.6
 
 ADD ./10-backtrace-guards.patch /10-backtrace-guards.patch
 

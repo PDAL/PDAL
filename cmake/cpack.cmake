@@ -38,5 +38,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/_static/logo/dongle/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/include/pdal/pdal_defines.h")
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".gz2")
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".bz2")
 
 include(CPack)

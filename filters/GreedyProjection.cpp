@@ -47,8 +47,8 @@ namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.greedymesh", "Greedy Triangulation filter",
-                   "http://pdal.io/stages/filters.greedymesh.html");
+    PluginInfo("filters.greedyprojection", "Greedy Triangulation filter",
+                   "http://pdal.io/stages/filters.greedyprojection.html");
 
 CREATE_STATIC_PLUGIN(1, 0, GreedyProjection, Filter, s_info)
 

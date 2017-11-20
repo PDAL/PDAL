@@ -44,7 +44,11 @@ apk add \
     laszip \
     laszip-dev \
     libspatialite \
-    libspatialite-dev
+    libspatialite-dev \
+    xz-dev \
+    xz-libs \
+    zstd \
+    zstd-dev \
 
 gcc --version
 g++ --version
@@ -76,3 +80,13 @@ cmake .. \
 make -j2
 LD_LIBRARY_PATH=./lib
 ctest -V
+make install
+
+for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+do
+    cd /pdal/examples/$EXAMPLE
+    mkdir -p _build || exit 1
+    cd _build || exit 1
+    cmake -G "Unix Makefiles" .. && \
+    make
+done

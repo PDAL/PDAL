@@ -874,6 +874,23 @@ namespace Utils
     inline std::string toString(signed char from)
         { return std::to_string((int)from); }
 
+
+    template<typename T>
+    bool fromString(const std::string& from, T* & to)
+    {
+        void *v;
+        // Uses sscanf instead of operator>>(istream, void*&) as a workaround
+        // for https://bugs.llvm.org/show_bug.cgi?id=19740, which presents with
+        // clang-800.0.42.1 for x86_64-apple-darwin15.6.0.
+        int result = sscanf(from.c_str(), "%p", &v);
+        if (result != 1) {
+            return false;
+        }
+        to = reinterpret_cast<T*>(v);
+        return true;
+    }
+
+
     /**
       Convert a string to a value by reading from a string stream.
 

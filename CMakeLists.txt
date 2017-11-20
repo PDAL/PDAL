@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.5.0" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.6.0" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-set(PDAL_API_VERSION "4")
-set(PDAL_BUILD_VERSION "5.1.0")
+set(PDAL_API_VERSION "5")
+set(PDAL_BUILD_VERSION "6.1.0")
 
 # Name of C++ library
 
@@ -58,6 +58,7 @@ endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
+set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -116,6 +117,8 @@ include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/pdaljni.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
+include(${PDAL_CMAKE_DIR}/lzma.cmake)
+include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
@@ -178,7 +181,6 @@ endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
-
 #
 # On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
 # so that users only need link libpdalcpp.
@@ -227,6 +229,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
+        ${ZSTD_INCLUDE_DIR}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
@@ -240,6 +243,8 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${LIBLZMA_LIBRARIES}
+        ${ZSTD_STATIC_LIB}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
     PRIVATE
@@ -260,6 +265,7 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
+
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file
 # specifies linking in libpdal_base.so and libpdal_util.so.  This allows

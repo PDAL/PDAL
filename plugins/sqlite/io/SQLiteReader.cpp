@@ -206,10 +206,10 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
     m_patch->m_compVersion = m_patch->m_metadata.findChild("version").value();
 
     position = columns.find("NUM_POINTS")->second;
-    int32_t count;
+    size_t count;
     Utils::fromString((*r)[position].data, count);
-    m_patch->remaining = count;
-    m_patch->count = count;
+    m_patch->remaining = (int32_t)count;
+    m_patch->count = (int32_t)count;
 
     log()->get(LogLevel::Debug3) << "patch compression? "
                                  << m_patch->m_isCompressed << std::endl;
@@ -224,31 +224,35 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
     PointId nextId = view->size();
     if (m_patch->m_isCompressed)
     {
+        size_t bufsize = 0;
 #ifdef PDAL_HAVE_LAZPERF
-        LazPerfDecompressor<Patch> decompressor(*m_patch, dbDimTypes());
-
-        // Set the data into the patch.
-        m_patch->setBytes((*r)[position].blobBuf);
-        std::vector<char> tmpBuf(decompressor.pointSize());
-        while (numRead < numPts && count > 0)
+        auto cb = [this, view, &nextId, &numRead, &count]
+            (char *buf, size_t bufsize)
         {
-            decompressor.decompress(tmpBuf.data(), tmpBuf.size());
-            writePoint(*view.get(), nextId, tmpBuf.data());
-
+            writePoint(*view.get(),  nextId, buf);
             if (m_cb)
                 m_cb(*view, nextId);
-
             nextId++;
             numRead++;
             count--;
-        }
+        };
+
+        const char *buf = reinterpret_cast<const char *>(
+            (*r)[position].blobBuf.data());
+        bufsize = (*r)[position].blobBuf.size();
+        count = std::min(count, size_t(numPts));
+        LazPerfDecompressor(cb, dbDimTypes(), count).
+            decompress(buf, bufsize);
+
+        // Set the data into the patch.
+
 #else
         throwError("Can't decompress without LAZperf.");
 #endif
 
         log()->get(LogLevel::Debug3) << "Compressed byte size: " <<
-            m_patch->byte_size() << std::endl;
-        if (!m_patch->byte_size())
+            bufsize << std::endl;
+        if (!bufsize)
             throwError("Compressed patch size was 0.");
         log()->get(LogLevel::Debug3) << "Uncompressed byte size: " <<
             (m_patch->count * packedPointSize()) << std::endl;

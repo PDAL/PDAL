@@ -1,4 +1,1827 @@
+2017-10-12
+	* Howard Butler <howard@hobu.co> require LASzip 3.1.1+ for PDAL 1.6+ (10:39:03)
+
+2017-10-11
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1702 from PDAL/1.6-docs-chambbj (14:45:20)
+	* Howard Butler <howard@hobu.co> point to 1.6-maintenance branch for website publish (14:25:11)
+	* Howard Butler <howard@hobu.co> doc tweaks in preparation for 1.6 (14:24:46)
+
+2017-09-26
+	* Bradley J Chambers <brad.chambers@gmail.com> Move the HAG tutorial to the filters.hag stage docs (14:15:56)
+	* Bradley J Chambers <brad.chambers@gmail.com> Refining the HAG text, but also thinking it could just be part of filters.hag stage documentation (09:55:52)
+	* Bradley J Chambers <brad.chambers@gmail.com> Convert back to tutorials, we'll just remove the coding part of it (09:43:27)
+	* Bradley J Chambers <brad.chambers@gmail.com> remove pcl note (09:42:22)
+	* Mateusz Łoskot <mateusz@loskot.net> Refine ignore patterns for build directory (#1685) (08:23:43)
+
+2017-09-25
+	* Bradley J Chambers <brad.chambers@gmail.com> Normalized heights tutorial (as written anyway) is more of a development topic (15:18:28)
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix typo in OGR writer docs (15:16:45)
+	* Howard Butler <howard@hobu.co> No longer warn for out-of-range ReturnNumber and NumberOfReturns for readers.las and writers.las (#1682) (14:36:37)
+	* chambbj <brad.chambers@gmail.com> Remove BufferReader where it is no longer necessary (#1684) (14:34:28)
+
+2017-09-22
+	* Bradley J Chambers <brad.chambers@gmail.com> Light formatting and eliminate pdal/dependencies from the Travis dicussion, instead citing Alpine (11:35:48)
+	* Bradley J Chambers <brad.chambers@gmail.com> Point users to other types of documentation depending on where they've landed (10:54:22)
+	* Bradley J Chambers <brad.chambers@gmail.com> Clarify what the tutorials section is all about, and redirect other users via Note (10:25:13)
+	* Bradley J Chambers <brad.chambers@gmail.com> Grouping sampling files (and missed ground pipelines) (10:14:50)
+	* Bradley J Chambers <brad.chambers@gmail.com> Group clipping files (10:12:29)
+	* Bradley J Chambers <brad.chambers@gmail.com> Group normalized heights files (10:10:46)
+	* Bradley J Chambers <brad.chambers@gmail.com> Group ground tutorial and all iamges in a folder (10:08:19)
+	* Bradley J Chambers <brad.chambers@gmail.com> libLAS migration guide may be more applicable to API (09:37:35)
+	* Bradley J Chambers <brad.chambers@gmail.com> Move any docs related to writing code from tutorials to development (09:25:38)
+
+2017-10-10
+	* Howard Butler <howard@hobu.co> increment versions in preparation for 1.6.0 release (17:22:48)
+	* Connor Manning <connor@hobu.co> Fix dimension-name lookup in GreyhoundReader to work for proprietary dims. (16:22:36)
+	* Howard Butler <howard@hobu.co> use LASzip 3.1.1 for pdal/dependencies docker image (14:31:30)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (14:30:12)
+	* Howard Butler <howard@hobu.co> Fix #1689 and support PDAL.metadata.pdalargs option as per docs (#1700) (13:44:27)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (08:41:49)
+	* Piero Toffanin <pt@masseranolabs.com> Updated smrf's out directory parameter reference (#1699) (08:28:52)
+
+2017-10-05
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1698 from PDAL/logfix (12:59:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:45:35)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Set failbit on bad DimRange parse. (11:45:03)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1697 from PDAL/build-pdal-python-package-on-master-branch (09:45:42)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1696 from PDAL/sample-filter-masking-issue (09:44:40)
+	* Bradley J Chambers <brad.chambers@gmail.com> Build PDAL Python package for Docker images on master branch (09:27:50)
+
+2017-10-04
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove random shuffle of points (13:24:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Centralize logging changes. (11:31:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Set debug based on log level. (10:16:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:10:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow filters.ferry to create new dimensions with default initialization. Allow filters.ferry to copy data from a single source to multiple destinations. Error if an attempt is made to set a destination dimension more than once. Close #1694 (09:09:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix text of error message. (06:09:45)
+
+2017-10-02
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into laszip (17:58:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fixes to laszip writing. (16:37:36)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (13:52:17)
+	* Grisha <gr.pomadchin@gmail.com> Remove AutoDerivation (#1692) (10:05:42)
+
+2017-09-29
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (14:33:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1690 from spatialhast/patch-1 (10:40:38)
+	* Alexander <spatial.hast@gmail.com> typo fix (10:31:15)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Error if an attempt is made to reference missing color ramp. Load blue_orange color ramp. Close #1688 (09:27:36)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (08:04:41)
+
+2017-09-28
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow metadata to deal with pointers. (18:02:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Provide a simple wordexp() type function. (12:06:19)
+
+2017-09-27
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make an easier way to extract spaces. (14:06:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change string vector to ProgramArgs::parse() to const. (09:44:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1686 from visr/patch-1 (06:21:58)
+	* Martijn Visser <mgvisser@gmail.com> use readers.text in readers.text example pipeline (02:32:49)
+
+2017-09-21
+	* chambbj <brad.chambers@gmail.com> Add Alpine build scripts for Travis and Docker Hub (#1683) (14:09:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix for LAS 1.4 (14:01:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:26:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Have lasdump use new laszip interface. (11:23:27)
+	* Pete Gadomski <pete.gadomski@gmail.com> Change 'filters.change' to 'filters.{cpd|icp}' (#1672) (11:17:07)
+	* chambbj <brad.chambers@gmail.com> Bump Eigen version from 3.2.8 to 3.3.4 (#1681) (11:16:48)
+	* chambbj <brad.chambers@gmail.com> Change fcntl.h include path (#1680) (11:16:31)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (10:20:10)
+
+2017-09-20
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1679 from PDAL/issue/1271-plugin-loading (13:21:03)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1678 from PDAL/issue/1677-no-approximate-in-ground-kernel (13:20:26)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1676 from PDAL/issue/1674-dead-args (13:20:14)
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove KernelFactory and move all kernel plugin loading to StageFactory (10:25:51)
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove approximate option from ground kernel (10:01:08)
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove 2D and output filename options from delta kernel (09:53:13)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (07:37:13)
+
+2017-09-19
+	* Howard Butler <howard@hobu.co> Enable streaming for filters.colorinterp where possible. (#1675) (13:58:25)
+	* Howard Butler <howard@hobu.co> Merge branch 'post1.6' of github.com:PDAL/PDAL (13:48:20)
+	* Howard Butler <howard@hobu.co> metadata and srs support for Matlab stages (#1669) (13:47:28)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Write all the points instead of the same one over and over. (12:57:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:57:15)
+
+2017-09-18
+	* Howard Butler <howard@hobu.co> laszip directory in FindLASzip.cmake (14:38:39)
+
+2017-09-17
+	* Howard Butler <howard@hobu.co> more laszip churn (20:33:05)
+	* Howard Butler <howard@hobu.co> change how we find LASzip (18:39:32)
+
+2017-09-15
+	* Andrew Bell <andrew.bell.ia@gmail.com> Enable streaming for filters.colorinterp where possible. Add tests for filters.colorinterp Close #1609 (10:29:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/post1.6' (09:39:56)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Set FixedPointTable to 0 on reset. (09:38:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:52:35)
+
+2017-09-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow simple callbacks for non-streaming mode. (12:35:35)
+	* Howard Butler <howard@hobu.co> update LASzip build/install (08:50:34)
+
+2017-09-13
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (21:35:19)
+	* Howard Butler <howard@hobu.co> Implement support for LASzip 3.1.0 (#1668) (21:28:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:57:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Initialize HeaderVals to avoid errors. (16:57:02)
+	* Howard Butler <howard@hobu.co> require LASzip 3.1.0 for pdal/dependencies (16:57:01)
+	* Connor Manning <connor@hobu.co> Greyhound reader updates (#1667) (16:40:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update to changed API. (15:28:35)
+
+2017-09-12
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead code. (12:26:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add missing comma . (12:16:04)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/laszip' into laszip (12:08:26)
+
+2017-09-11
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge branch 'master' into laszip (14:29:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into laszip (11:53:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Doc updates. (07:58:38)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (07:29:51)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove unused data. (07:29:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use functions/constants and simplify code. (07:28:33)
+
+2017-09-08
+	* Howard Butler <howard@hobu.co> remove dead code (13:15:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Roll back 23963719ae107176bb076628ca467fdf4c4d3b59 (11:20:06)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:33:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge branch 'master' into laszip (10:32:30)
+	* Grisha <gr.pomadchin@gmail.com> Fix publish scripts to correspond HOWTORELEASE.txt (#1665) (08:44:22)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove XML pipeline support. Close #1666 (07:54:37)
+
+2017-09-07
+	* Grisha <gr.pomadchin@gmail.com> PDAL scala (#1492) (16:39:12)
+	* Howard Butler <howard@hobu.co> SQLite updates to support GPKG (#1654) (16:38:42)
+	* Howard Butler <howard@hobu.co> add ignore_vlr option to readers.las #1651 (#1664) (16:12:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow all datatypes for writers.gdal raster output. Allow specification of the writers.gdal nodata value. (08:59:47)
+
+2017-09-05
+	* Howard Butler <howard@hobu.co> metadata and srs support for Matlab stages (07:36:45)
+
+2017-09-01
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1662 from PDAL/arbiter-cmake (14:27:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update build to make curl/arbiter relationship more clear. (08:38:33)
+
+2017-08-31
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1658 from PDAL/execinfo-guards (14:23:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:50:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't repeat test. (09:50:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use good logic to parse dimension names. Close #1659 (06:48:46)
+
+2017-08-30
+	* Bradley J Chambers <brad.chambers@gmail.com> It is enough to check for PDAL_HAVE_EXECINFO_H (15:15:53)
+	* Bradley J Chambers <brad.chambers@gmail.com> Check for execinfo/backtrace (15:01:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:43:19)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Increase the number of allowable proprietary dimensions to 4095. Throw an error if an attempt is made to assign more than 4095 proprietary dims. Close #1657 (12:41:40)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1656 from jasonbeverage/cmakelibs (12:04:03)
+	* Jason Beverage <jasonbeverage@gmail.com> Changed pdal_util to @PDAL_UTIL_LIB_NAME@ (11:42:15)
+
+2017-08-29
+	* Jason Beverage <jasonbeverage@gmail.com> Changed PDALConfig.cmake.in to only include pdal_util in addition to pdalcpp and not the other libraries. pdal_util is only included on WIN32 (20:48:40)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (16:26:44)
+	* Howard Butler <howard@hobu.co> LasVLR::MAX_DATA_SIZE is never used, use USHRT_MAX for VLR size test (16:26:24)
+	* Jason Beverage <jasonbeverage@gmail.com> Fix for windows linking in PDALTargets.cmake.in (16:19:48)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1655 from jasonbeverage/exportgreedprojection (15:05:48)
+	* Jason Beverage <jasonbeverage@gmail.com> Added PDAL_DLL to GreedyProjection (14:24:17)
+
+2017-08-28
+	* Andrew Bell <andrew.bell.ia@gmail.com> Put encoded LAS VLR in its own node. Close #1648 (09:08:37)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix LASZIP in pipeline test. (08:58:48)
+
+2017-08-25
+	* Howard Butler <howard@hobu.co> don't attempt to write a pdal_metadata VLR if > LasVLR::MAX_DATA_SIZE and minor_version < 4 (13:10:03)
+
+2017-08-24
+	* Adam Steer <adamsteer@users.noreply.github.com> #1591: add --count to html docs (#1649) (20:53:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fixes for laszip API installation/version detection. (10:33:03)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix a typo. (08:43:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add an FAQ about missing plugins. (08:01:44)
+
+2017-08-23
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into laszip (13:28:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't run test that requires LAS compression without it being compiled in. (12:33:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into laszip (11:53:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into laszip (11:53:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix type mismatch in CPD filter. (11:50:22)
+
+2017-08-22
+	* Howard Butler <howard@hobu.co> doc typo (08:02:43)
+
+2017-08-15
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:26:49)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix type in filters.hag doc. (11:26:27)
+
+2017-08-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> More info and pics for poisson doc. (15:56:21)
+
+2017-08-11
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix location of setting point format/size. Add error handling to laszip functions. (14:27:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1645 from jw3/matlab-build (08:34:03)
+
+2017-08-09
+	* John Wass <wassj@ctc.com> update ignores for intellij and clion (16:49:52)
+	* John Wass <wassj@ctc.com> matlab finder changes (16:44:38)
+
+2017-08-02
+	* John Wass <wassj@ctc.com> remove stray brackets (16:42:15)
+
+2017-08-01
+	* Andrew Bell <andrew.bell.ia@gmail.com> "Fixes" for building PDAL with MATLAB. (14:14:34)
+	* Howard Butler <howard@hobu.co> explicitly include osg/Version (10:52:54)
+	* Howard Butler <howard@hobu.co> Revert "explicitly include osg/Version" (10:51:50)
+	* Howard Butler <howard@hobu.co> explicitly include osg/Version (10:51:22)
+	* Howard Butler <howard@hobu.co> make OSGReader happy on PDAL's pdal/dependencies container (10:13:27)
+
+2017-08-10
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update doc for spatialreference option. (16:39:37)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add an OGR writer. (16:12:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Properly handle reading uncompressed files when a compression option is provided. (09:34:58)
+
+2017-08-08
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1639 from PDAL/issue/1638-normal-flip (10:54:49)
+
+2017-08-07
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update for new API. (12:30:39)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge branch 'master' into laszip (09:59:00)
+
+2017-08-04
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make gdal::ErrorHandler thread-safe. Close #1637 (12:00:30)
+	* Bradley J Chambers <brad.chambers@gmail.com> Point still needs to be in a separate namespace (11:44:29)
+	* Bradley J Chambers <brad.chambers@gmail.com> Update the Normal documentation once again (10:34:41)
+	* Bradley J Chambers <brad.chambers@gmail.com> Share private Point class between Normal and Crop filters (10:24:05)
+	* Bradley J Chambers <brad.chambers@gmail.com> Change normal flipping options (08:23:22)
+
+2017-08-03
+	* Bradley J Chambers <brad.chambers@gmail.com> Update the normal docs to discuss normal flipping (12:16:06)
+	* Bradley J Chambers <brad.chambers@gmail.com> Provide for normal flipping (11:33:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix option names in doc. (09:51:51)
+
+2017-07-31
+	* Howard Butler <howard@hobu.co> attempt to compile with different openscenegraph versions (17:01:51)
+	* Howard Butler <howard@hobu.co> implement OpenSceneGraph reader from Jason Beverage (#1622) (14:15:18)
+	* Howard Butler <howard@hobu.co> make sure to clear SQLite insertion patch (#1633) (14:15:05)
+	* Howard Butler <howard@hobu.co> fix #1612 and provide indication for .. embed::, .. streamable::, and .. plugin:: stages. (#1632) (14:14:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Clean up some windows errors. (#1634) (14:13:18)
+
+2017-07-27
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (19:12:42)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Doc for separator option in readers.text. Close #1630 (19:12:02)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/laszip' into laszip (12:16:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into laszip (12:07:10)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove accidentally added files. (12:00:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Test for laszip of 1.4 point format. (11:43:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> This is a merge. (11:27:32)
+
+2017-07-26
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1628 from PDAL/fix-slow-pmf-tests (12:21:45)
+	* Bradley J Chambers <brad.chambers@gmail.com> Changes the expectations slightly for this sparse dataset (12:17:03)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove unused code. (10:39:20)
+
+2017-07-25
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1627 from PDAL/issue-1626 (14:56:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Missing Windows header? (14:45:25)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add documentation for a_srs and a warning if it's not used when necessary. (11:46:18)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1625 from PDAL/no-get-default-dimensions (11:04:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't convert 2D Bounds to invalid 3D bounds. Close #1626 (11:03:15)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1623 from PDAL/approx-pmf-is-only-pmf (09:23:37)
+
+2017-07-24
+	* Andrew Bell <andrew.bell.ia@gmail.com> Poisson surface reconstruction algorithm. (14:24:15)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into no-get-default-dimensions Close #1624 (12:01:52)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove getDefaultDimensions(). (11:52:48)
+
+2017-04-19
+	* Bradley J Chambers <brad.chambers@gmail.com> PMF refactoring (10:04:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into greedy (16:56:02)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Working greedy projection filter. (16:42:35)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (15:29:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Correct index -> id. (15:29:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1569 from gadomski/splitter-buffer (15:05:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Enhance PLY writer. Close #1572 (15:04:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into greedy (13:42:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (13:11:56)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove MultiFilter. (13:11:42)
+
+2017-07-22
+	* Howard Butler <howard@hobu.co> increment to the correct array element when reading matlab data (21:45:49)
+
+2017-07-21
+	* Andrew Bell <andrew.bell.ia@gmail.com> Works against new laszip api. (15:43:28)
+	* Howard Butler <howard@hobu.co> workshop updates (09:34:36)
+
+2017-07-12
+	* Connor Manning <connor@hobu.co> Fix double-initialize in PLY reader. (10:39:00)
+
+2017-07-08
+	* chambbj <brad.chambers@gmail.com> Correct heading in writing a writer tutorial (22:42:27)
+
+2017-07-03
+	* Michael Rosen <michaelr@azimetry.com> add Nanoflann headers to install so KDIndex compiles (17:58:44)
+
+2017-07-02
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1620 from elemoine/chipper-cleanup (13:23:27)
+
+2017-07-01
+	* Éric Lemoine <eric.lemoine@oslandia.com> Remove m_dir in ChipRefList (16:50:42)
+
+2017-06-30
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (21:13:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't allow duplicate dimensions. Close #1605 (21:12:33)
+	* Howard Butler <howard@hobu.co> GDAL 2.x is now default for osgeo4w -- use that (#1619) (18:22:22)
+	* Howard Butler <howard@hobu.co> update dongle content (14:57:03)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1617 from elemoine/simplify-chipper (06:30:42)
+
+2017-06-29
+	* Éric Lemoine <eric.lemoine@oslandia.com> Simply the ChipperFilter code (08:54:58)
+
+2017-06-28
+	* Howard Butler <howard@hobu.co> Embedded language refactoring branch (#1616) (15:59:12)
+
+2017-06-27
+	* Mateusz Loskot <mateusz@loskot.net> [doc] Fix option name in reader.faux example (16:11:29)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1614 from PDAL/sample-cov (08:20:16)
+
+2017-06-26
+	* Bradley J Chambers <brad.chambers@gmail.com> Should be computing sample covariance (13:52:56)
+
+2017-06-22
+	* Pete Gadomski <pete.gadomski@gmail.com> Refactor compiler settings to target-based assignment (#1613) (17:34:11)
+	* Mateusz Loskot <mateusz@loskot.net> Ignore /.vs and /.vscode folders (03:29:57)
+	* Mateusz Loskot <mateusz@loskot.net> Add link to libLAS website (03:27:13)
+
+2017-06-20
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1611 from PDAL/issue/1578-ground-kernel (13:23:13)
+
+2017-04-27
+	* Bradley J Chambers <brad.chambers@gmail.com> Adapt ground kernel to pmf filter changes (12:19:17)
+
+2017-06-19
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1602 from PDAL/add-head-filter (14:26:35)
+	* chambbj <brad.chambers@gmail.com> Add VoxelCenterNearestNeighborFilter and VoxelCentroidNearestNeighborFilter (#1603) (14:24:18)
+	* Howard Butler <howard@hobu.co> Fix #1607 (10:22:21)
+	* Pete Gadomski <pete.gadomski@gmail.com> Add ICP and CPD filters, remove CPD kernel (#1577) (10:38:58)
+
+2017-06-15
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into greedy (15:24:40)
+
+2017-06-12
+	* Bradley J Chambers <brad.chambers@gmail.com> Handle the case that too many points were requested in head and tail filter (13:36:19)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add tail filter that passes only the last n points (specified by count argument) (13:26:53)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add head filter that passes only the first n points (specified by count argument) (09:14:31)
+	* chambbj <brad.chambers@gmail.com> Convert filters.sort and readers.sbet example pipelines from XML to JSON (#1604) (12:39:02)
+
+2017-06-09
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:05:25)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add doc describing raster type limitation for writers.gdal. (14:04:49)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1599 from PDAL/issue/1598-randomize-stagefactory (11:30:06)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add RandomizeFilter to StageFactory (09:30:18)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1594 from PDAL/issue/1593-colorinterp-dims (09:23:10)
+
+2017-06-06
+	* Bradley J Chambers <brad.chambers@gmail.com> ColorInterp can search for the requested dimension instead of relying on only standard dims (09:35:20)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove debug. (11:06:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Initialize global encoding. (09:39:10)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:53:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Test for global encoding issue on Travis. (08:51:07)
+
+2017-06-07
+	* Connor Manning <connor@hobu.co> Merge pull request #1592 from PDAL/scoped-srs (11:32:42)
+	* Connor Manning <connor@hobu.co> Clearer naming for ogr-create-srs utility function. (11:31:44)
+	* Connor Manning <connor@hobu.co> Merge branch 'master' into scoped-srs (10:29:37)
+
+2017-06-05
+	* Connor Manning <connor@hobu.co> Fix GDAL SRS leaks in pdal::SpatialReference.  Add RAII helper. (14:29:05)
+
+2017-06-02
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1588 from PDAL/geowave-minor-edits (14:35:49)
+
+2017-05-31
+	* Pete Gadomski <pete.gadomski@gmail.com> Update CPD docker version to v0.5.1 (15:40:41)
+	* Howard Butler <howard@hobu.co> OSGeo4W64 packaging, windows builds, and windows-specific updates (12:48:36)
+
+2017-05-30
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add memory header. (08:58:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add NormalX/Y/Z and Curvature dimensions. Close #1590 (08:30:22)
+
+2017-05-23
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use null stream instead of /dev/null. Don't use /dev/null in NitfReaderTest. (11:47:24)
+
+2017-05-21
+	* Howard Butler <howard@hobu.co> workshop image (15:29:38)
+
+2017-05-19
+	* Howard Butler <howard@hobu.co> OGR layer owns feature, don't destroy (17:24:13)
+	* Howard Butler <howard@hobu.co> point to osgeo4w for windows download (11:14:20)
+	* Howard Butler <howard@hobu.co> Merge branch 'plugin-install-path-override' into workshop-windows (09:14:21)
+	* Howard Butler <howard@hobu.co> allow PDAL_PLUGIN_INSTALL_PATH override at configure time (09:14:01)
+	* Howard Butler <howard@hobu.co> doc bug (09:12:58)
+
+2017-05-18
+	* Howard Butler <howard@hobu.co> refactor workshop for OSGeo4W (17:05:33)
+
+2017-05-17
+	* Bradley J Chambers <brad.chambers@gmail.com> Fixing some minor issues in the GeoWave plugin (13:43:17)
+
+2017-05-16
+	* Howard Butler <howard@hobu.co> start refactoring workshop for windows (16:19:13)
+
+2017-05-12
+	* Howard Butler <howard@hobu.co> Python filtering tutorial (09:21:59)
+
+2017-05-10
+	* Howard Butler <howard@hobu.co> doc typpo (11:52:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change IN and OUT to INPUT and OUTPUT to make Windows happy. (11:51:08)
+
+2017-05-08
+	* Andrew Bell <andrew.bell.ia@gmail.com> Force X/Y/Z to be registered as doubles in PLY reader. Close #1584 (09:13:31)
+
+2017-05-05
+	* Andrew Bell <andrew.bell.ia@gmail.com> Streaming support for PLY. (14:04:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add streaming support for PLY reader. (08:02:54)
+
+2017-05-04
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove rply. Use came case for ply format. (10:29:28)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove rply from PlyWriter. (10:08:21)
+
+2017-05-02
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change text on PLY error. (12:09:58)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:11:18)
+	* Andrew Bell <andrew.bell.ia@gmail.com> PLY reader without rply. (08:10:55)
+
+2017-04-25
+	* Connor Manning <connor@hobu.co> Map .csv files to the text reader.  Tweak text reader for more flexibility in custom layouts. (15:10:28)
+	* Howard Butler <howard@hobu.co> more python numpy docker fixes (09:54:11)
+
+2017-04-24
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (15:14:28)
+	* Howard Butler <howard@hobu.co> don't purge python-numpy in diet section (15:13:28)
+
+2017-04-21
+	* Howard Butler <howard@hobu.co> we need to count clusters from 1 instead of 0, because all other points will have 0 for their ClusterID (default value) (#1576) (16:28:56)
+	* Éric Lemoine <eric.lemoine@gmail.com> Fix formatting issues in testing.rst (#1574) (07:37:31)
+
+2017-04-20
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add mesh writer test. (12:30:54)
+
+2017-04-18
+	* Andrew Bell <andrew.bell.ia@gmail.com> Hooks for multiple meshes. (11:51:18)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1571 from elemoine/pgpointcloud (07:12:04)
+	* Éric Lemoine <eric.lemoine@oslandia.com> Add note to docs about pgpointcloud tests (03:06:36)
+
+2017-04-17
+	* Pete Gadomski <pete.gadomski@gmail.com> Add a buffer option to the splitter (16:52:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Hook greedy triangulation into filters. (15:24:32)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow tag names to contain underscores and capital letters. Catch bad tag names during parse. Close #1568 (13:32:23)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1567 from PDAL/issue/1566-filter-docs (11:35:24)
+	* Bradley J Chambers <brad.chambers@gmail.com> Resolve some dangling references to deprecated extract and classify options (08:57:15)
+
+2017-04-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make sure cell in which point itself lies is in bounds. Close #1563 (16:17:52)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow longname synonyms in ProgramArgs. Close #1560 (10:52:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove code moved to PointView.cpp. (07:56:50)
+
+2017-04-13
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add bounds option to writers.gdal doc. (14:07:29)
+	* Andrew Bell <andrew.bell.ia@gmail.com> It compiles. (12:39:32)
+
+2017-04-12
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix more errors. (18:01:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Initial check-in for safety. (14:46:34)
+	* Howard Butler <howard@hobu.co> another arbiter refresh (12:56:43)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (12:49:02)
+	* Howard Butler <howard@hobu.co> arbiter refresh (12:48:30)
+
+2017-04-07
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:38:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't set the feature SRS based on a_srs unless it was explicitly set or   no SRS was present. Elminate crash from double-delete of feature. (14:38:06)
+
+2017-04-06
+	* Howard Butler <howard@hobu.co> 1.5.0 RC1 release rollup (#1557) (15:44:02)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Get type from layout -- don't use default type. Close #1556 (12:20:50)
+	* Connor Manning <connormanning@users.noreply.github.com> Preserve well-known, but non-standard to LAS, dimension IDs when written as extra_dims. (#1555) (08:55:01)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1554 from PDAL/add-elm-filter (07:15:13)
+
+2017-04-05
+	* Bradley J Chambers <brad.chambers@gmail.com> Add Extended Local Maximum (ELM) filter (15:22:42)
+
+2017-04-03
+	* Andrew Bell <andrew.bell.ia@gmail.com> Edits to LAS tutorial. Don't allow oversize VLRs when writing LAS 1.0 - 1.3 Close #1551 (16:21:40)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix LASZIP_LASZIP_DEFINES typo (#1550) (14:24:58)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix build failure without LASzip. (#1549) (14:18:59)
+
+2017-03-31
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1545 from PDAL/pmf-smrf-outlier-changes (09:11:26)
+
+2017-03-30
+	* Howard Butler <howard@hobu.co> Implement 'pdalargs' option for filters.predicate and filters.programmable to allow users to pass in a dictionary of arguments to the module #931 (#1546) (23:49:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Forward VLR LASF_Spec/0 and LASF_Spec/3 Close #1547 (21:21:22)
+	* Howard Butler <howard@hobu.co> doc typo (13:59:45)
+	* Bradley J Chambers <brad.chambers@gmail.com> Don't fail when return information is missing. Just use all returns, but warn the user. (13:10:06)
+	* Bradley J Chambers <brad.chambers@gmail.com> Append individual views to a single output view, rather than inserting into the viewSet. Fixup tests. (10:10:28)
+	* Bradley J Chambers <brad.chambers@gmail.com> Don't fail if ignore option is unspecified, just use the input PointView (09:31:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:42:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update metadata doc. (08:42:29)
+
+2017-03-29
+	* Bradley J Chambers <brad.chambers@gmail.com> Updating outlier, PMF, and SMRF filters (14:11:32)
+	* Howard Butler <howard@hobu.co> NITF build config for JSON include dirs (23:02:00)
+	* Howard Butler <howard@hobu.co> update (c) to 2017 (16:37:47)
+	* Howard Butler <howard@hobu.co> Allow setting 'tolerance' for oracle geometry tolerance in writers.oci #810 (#1544) (16:26:50)
+	* Éric Lemoine <eric.lemoine@gmail.com> Add a pgpointcloud test for the overwrite option (#1543) (14:10:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:40:14)
+
+2017-03-27
+	* Howard Butler <howard@hobu.co> doc updates (las tutorial) (14:41:08)
+	* Weston Renoud <wrenoud@gmail.com> Add sort order option, with new descending sort #1121 (#1530) (09:09:41)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1541 from PDAL/faster-morphology (08:54:07)
+
+2017-03-25
+	* Howard Butler <howard@hobu.co> Allow user-settable VLRs in writers.las (#1542) (00:10:10)
+	* Éric Lemoine <eric.lemoine@gmail.com> Fix PgWriter DROP TABLE statement (#1540) (00:10:02)
+
+2017-03-24
+	* Connor Manning <connor@hobu.co> Don't infinite-loop on zero-point StreamPointTable execution. (15:38:30)
+	* Bradley J Chambers <brad.chambers@gmail.com> Export the new erosion and dilation functions (12:08:03)
+	* Bradley J Chambers <brad.chambers@gmail.com> Missing include for back_inserter (11:26:24)
+
+2017-03-23
+	* Bradley J Chambers <brad.chambers@gmail.com> Accelerate morphological operations (11:37:02)
+
+2017-03-22
+	* Connor Manning <connor@hobu.co> Update arbiter bundle for more certificate configuration hooks. (13:35:04)
+	* Howard Butler <howard@hobu.co> doc updates (LAS tutorial, (c) date) (13:11:02)
+
+2017-03-20
+	* Andrew Bell <andrew.bell.ia@gmail.com> Doc updates. (18:03:16)
+	* Howard Butler <howard@hobu.co> doc updates (start on LAS tutorial) (14:20:25)
+	* Howard Butler <howard@hobu.co> doc updates (whitespace, small updates) (11:44:03)
+	* Howard Butler <howard@hobu.co> doc updates (about page, fix links) (10:37:04)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:21:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix mbio test. (09:21:33)
+	* Howard Butler <howard@hobu.co> Attempt to succeed poorly rather than fail ugly when we can't load filters.hexbin for pdal info --boundary and pdal tindex #1532 (#1533) (08:37:20)
+
+2017-03-17
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:01:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Set progress FD in PipelineManager. Close #1534 (16:00:35)
+	* Howard Butler <howard@hobu.co> my config doesn't need to hardcode laszip anymore (15:35:45)
+	* Howard Butler <howard@hobu.co> doc updates (latex output org (14:34:55)
+	* Howard Butler <howard@hobu.co> doc updates (make an About page) (12:13:38)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1531 from PDAL/smrf-refactor (10:50:46)
+	* Howard Butler <howard@hobu.co> doc updates: pull content about Ranges into filters.range document (09:49:49)
+
+2016-11-30
+	* Bradley J Chambers <brad.chambers@gmail.com> Refactor SMRF code (13:09:39)
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix some issues with SMRF (13:09:39)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (15:15:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:18:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Link with dl for dladdr on linux. (12:17:32)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (11:56:19)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1412 from PDAL/eigen-gradients-bug (11:51:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't build dimbuilder with util lib. (11:49:25)
+	* Bradley J Chambers <brad.chambers@gmail.com> Numerical gradient will be computed on matrices larger than 3x3, compute them properly (10:02:24)
+
+2017-03-16
+	* Howard Butler <howard@hobu.co> python docs (16:43:07)
+	* Howard Butler <howard@hobu.co> pipeline doc updates (16:06:55)
+	* Howard Butler <howard@hobu.co> doc updates (10:18:51)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove PCvisualizer references. (07:03:15)
+
+2017-03-15
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (17:06:38)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update options/doc pass for kernels. (17:06:06)
+	* Connor Manning <connor@hobu.co> Expose LASzip's configured include path via interface-include-directories. (16:25:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:07:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move standard kernel option doc. (10:58:33)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1528 from PDAL/remove-derivative-writer (10:00:38)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:27:29)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove visualize option from kernels. Close #1529 (09:25:21)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (08:57:52)
+	* Howard Butler <howard@hobu.co> note about gitter (08:57:37)
+	* Howard Butler <howard@hobu.co> how to release notes (08:53:11)
+	* Howard Butler <howard@hobu.co> discussion about substitution should be more prominent (08:52:54)
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove writers.derivative per #1527 (08:19:22)
+
+2017-03-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1526 from ajokela/master (21:47:20)
+	* Alex Jokela <alex@camulus.com> Add GDALGrid include. (19:47:47)
+	* Howard Butler <howard@hobu.co> Optionally add PDAL metadata and pipeline VLRs to writers.las output in support of processing history activities (#1525) (19:43:11)
+	* Connor Manning <connor@hobu.co> Add arbiter include. (17:34:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Accept full pipelines with --json argument to pdal pipeline. Close #1521 (17:04:47)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:31:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix for GCC 4.7.2 returning lambda. (16:28:18)
+	* Mateusz Łoskot <mateusz@loskot.net> Move GeoTIFF and PROJ.4 to required dependencies. (#1522) (16:23:28)
+	* Pete Gadomski <pete.gadomski@gmail.com> HEXER_INCLUDE_DIR must be included publicly (#1519) (16:23:10)
+	* Howard Butler <howard@hobu.co> add images about docker building (14:29:12)
+	* Howard Butler <howard@hobu.co> add notes about Docker setup (12:34:36)
+
+2017-03-13
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:26:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Pass gdaloptions to raster. Close #1523 (12:25:31)
+	* Howard Butler <howard@hobu.co> don't relink PCL thing in docker container (11:20:13)
+
+2017-03-10
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't run translate command when pipeline option is specified. Close #1518 (11:57:42)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add reprojection example to translate docs. Close #1517 (10:58:31)
+
+2017-03-09
+	* Andrew Bell <andrew.bell.ia@gmail.com> Better diagnostics with LASzip and 1.4 point types. Close #1520 (17:52:53)
+	* Connor Manning <connor@hobu.co> Update arbiter bundle for S3's dnsSuffix configuration. (10:42:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Find laszip.hpp in laszip subdirectory or in base directory. Close #1503 (09:43:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Test travis build. (08:49:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead code. (08:20:56)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change overwrite option on writers.pgpointcloud to false. Close #1516 (08:17:01)
+
+2017-03-08
+	* Andrew Bell <andrew.bell.ia@gmail.com> More testing. (16:53:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More testing. (16:45:03)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More testing (13:25:41)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More testing (13:15:40)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1513 from PDAL/approx-pmf-by-iterative-morphological-ops (12:24:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into mbio (08:26:42)
+
+2017-03-07
+	* Andrew Bell <andrew.bell.ia@gmail.com> Revert laszip changes. (16:23:35)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Testing (16:03:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Revert FindLASzip for now. (15:59:51)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More debug. (14:57:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Test laszip stuff. (14:34:28)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove bogus laszip directory. (13:20:33)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't generate tag names containing '.' character. Close #1515 (13:05:29)
+
+2017-02-28
+	* Bradley J Chambers <brad.chambers@gmail.com> Port PMF to use the new morphological opening (iterative diamond kernel) (16:10:10)
+	* Howard Butler <howard@hobu.co> add vdatum files to pdal/dependencies image (#1505) (22:39:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (17:21:15)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update readers.tindex documentation. (17:20:48)
+	* Connor Manning <connor@hobu.co> Update arbiter bundle for S3 enhancements and better compiler support. (16:14:54)
+
+2017-03-06
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (15:42:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow laszip to be found in laszip subdirectory or not. Close #1503 (15:41:20)
+
+2017-03-05
+	* Howard Butler <howard@hobu.co> warning nit (23:12:14)
+	* Howard Butler <howard@hobu.co> Point to my lazperf windows install (23:12:03)
+
+2017-03-03
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add mbio documentation. (16:24:40)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Working MbReader. (14:48:02)
+	* Howard Butler <howard@hobu.co> PCL 1.7 fixup (14:01:53)
+	* Howard Butler <howard@hobu.co> trap logLevel > 8 and complain (13:10:18)
+	* Howard Butler <howard@hobu.co> add 10 points of autzen pts (09:21:12)
+	* Howard Butler <howard@hobu.co> add back PCL libraries (00:23:42)
+	* Howard Butler <howard@hobu.co> use pcl 1.7 from xenial instead of our own (00:12:36)
+
+2017-03-02
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow delimiter to be specified on the command line. (15:09:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle characters that aren't numeric in string conversion. (14:16:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Correct argument name. (11:57:05)
+
+2017-02-27
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1506 from mloskot/ml/cast-toupper-result (11:15:15)
+	* Mateusz Łoskot <mateusz@loskot.net> Add int to char cast of toupper result (10:41:00)
+
+2017-02-22
+	* Andrew Bell <andrew.bell.ia@gmail.com> Check return code on OSRNewSpatialReference. Close #1501 (13:21:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into mbio (07:41:52)
+
+2017-02-21
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into assign (16:50:00)
+	* Connor Manning <connor@hobu.co> Update arbiter bundle for opt-in instance profiles and multi-S3 configurability. (16:18:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into assign (14:50:21)
+	* Andrew Bell <andrew.bell.ia@gmail.com> First cut. (09:49:27)
+
+2017-02-17
+	* Connor Manning <connor@hobu.co> Update arbiter bundle removing an overzealous throw. (12:43:52)
+	* Connor Manning <connor@hobu.co> Update arbiter bundle for optional Curl and EC2 instance-profile auth. (11:04:27)
+
+2017-02-15
+	* Connor Manning <connor@hobu.co> Add include.  Should fix #1484. (11:10:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add --metadata option to doc. (10:35:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add support for metadata output. Close #1414 (10:33:18)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1494 from PDAL/derivative-work (09:42:02)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Enhance filters.assign with range-based filtering of value assignment. Close #1468 (08:33:17)
+
+2017-02-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Log warning if the user tries to display points that don't exist. Close #1495 (14:22:11)
+	* Bradley J Chambers <brad.chambers@gmail.com> Initialize max matrix to NaN, only update values if we have data (13:25:02)
+
+2017-02-13
+	* Connor Manning <connormanning@users.noreply.github.com> Merge pull request #1489 from pomadchin/fix/stdexcept (15:53:09)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into mbio-reader (14:35:11)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1491 from PDAL/range-filter-lower-bound-fix (11:47:19)
+
+2017-02-11
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into mbio-reader (17:01:26)
+
+2017-02-10
+	* Andrew Bell <andrew.bell.ia@gmail.com> Break apart range parsing. (17:26:04)
+	* Bradley J Chambers <brad.chambers@gmail.com> Range default lower bounds should use lowest, not min (09:39:12)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1488 from PDAL/slope-update (12:12:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Separate Range into its own file and simplify use of private stuff. (11:10:35)
+
+2017-02-09
+	* Andrew Bell <andrew.bell.ia@gmail.com> Correct capitalization. (14:48:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update log output check. (14:32:45)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't open /dev/null for every log. Close #1465 (14:27:21)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Try to fix crlf issue. (10:30:12)
+
+2017-02-08
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix intensity? (16:15:06)
+
+2017-02-07
+	* Grigory Pomadchin <gr.pomadchin@gmail.com> missing include (18:30:23)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix compilation errors. (13:17:33)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More throwError() stuff. (12:55:23)
+
+2017-02-03
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (19:21:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change explicit 'throw pdal_error' to 'throwError' to get automatic stage name added. (16:23:04)
+	* Howard Butler <howard@hobu.co> allow BOX2D or BOX3D for writers.gdal bounds (#1485) (13:45:21)
+	* Bradley J Chambers <brad.chambers@gmail.com> Minor refactoring of the conversion between percent slope and degrees (12:33:32)
+	* Bradley J Chambers <brad.chambers@gmail.com> Improve quality of derivative writer outputs (09:48:58)
+
+2017-02-02
+	* Pete Gadomski <pete.gadomski@gmail.com> Expose hexbin filter options to density kernel (#1487) (09:18:05)
+	* Pete Gadomski <pete.gadomski@gmail.com> Positional input/output args in density kernel (07:41:56)
+
+2017-02-01
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add function for simplified exception from stages. Use new function in filters. (15:25:35)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1486 from gadomski/translate-short-names (10:26:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use trim function instead of explicit char check. (10:13:51)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1483 from gadomski/text-reader-strip-whitespace-dimensions (09:24:40)
+	* Pete Gadomski <pete.gadomski@gmail.com> Reader/writer short names in translate kernel (08:44:56)
+
+2017-01-31
+	* Pete Gadomski <pete.gadomski@gmail.com> Strip whitespace from dimensions in text reader (09:00:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Log dimensions being written to LAS extra bytes. Close #1479 (08:04:49)
+
+2017-01-30
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow staged tags to be referenced as pipeline command options. (11:24:00)
+
+2017-01-27
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't show summary data if it doesn't exist. Close #1012 (15:19:55)
+
+2017-01-26
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove XML pipeline tests. (12:42:54)
+
+2017-01-24
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add TextReader streaming support and test. Add GDALWriter streaming support and test. (16:14:04)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make stage option parsing more flexible. (12:43:14)
+
+2017-01-23
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (10:35:25)
+	* Howard Butler <howard@hobu.co> Fix #1476 -- Python setup.py nits (10:35:22)
+	* chambbj <brad.chambers@gmail.com> Gdal writer radius default (#1475) (07:58:28)
+
+2017-01-20
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1474 from gadomski/cpd-v0.5 (12:45:26)
+	* Pete Gadomski <pete.gadomski@gmail.com> Update docker for new cpd version (09:58:15)
+
+2017-01-18
+	* Pete Gadomski <pete.gadomski@gmail.com> Update cpd plugin for cpd v0.5.0 (07:13:16)
+
+2017-01-19
+	* Howard Butler <howard@hobu.co> catch up Doxygen directories to look for code after the 1.4 reorg (12:13:35)
+	* Howard Butler <howard@hobu.co> readers.mbio scaffolding (11:28:35)
+
+2017-01-17
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (15:57:16)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make cropfilter::Point really private. (15:56:18)
+	* Howard Butler <howard@hobu.co> Add 'metadata', 'schema', and 'spatialreference' variables to filters.programmable and filters.predicate Python filter functions so they can take advantage of this kind of information in their processing chains. (#1471) (08:50:50)
+	* chambbj <brad.chambers@gmail.com> Add tiff and vrt as viable writers.gdal extensions (#1473) (08:45:39)
+
+2017-01-15
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (11:15:54)
+	* Howard Butler <howard@hobu.co> point to Markus' RPM repo for 1.4 PDAL (11:15:35)
+
+2017-01-13
+	* Pete Gadomski <pete.gadomski@gmail.com> Fix up rivlib tests to actually build and run (10:12:58)
+
+2017-01-12
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update decrepit nanoflann code. (09:47:31)
+
+2017-01-11
+	* Connor Manning <connor@hobu.co> Remove scale/offset considerations from the Greyhound reader due to server-side simplifications. (16:56:56)
+
+2017-01-10
+	* Andrew Bell <andrew.bell.ia@gmail.com> Formatting updates. (16:59:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make OverlayFilter streamable. Make sure done() gets called ASAP on streaming. Fix stage on which spatialReferenceChanged() is called. Simplify error handling for CropFilter::transform. Simplify spatial reference creation in reprojection filter. Don't do anything if we try to reproject a polygon with empty SRSes. (15:27:08)
+
+2017-01-09
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1464 from PDAL/eigen-dilate-and-erode (10:45:51)
+
+2017-01-05
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update docs for filters.attribute -> filters.overlay & filters.assign (17:22:07)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:53:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> AttributeFilter -> OverlayFilter (14:53:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Split AssignFilter from AttributeFilter. (11:54:39)
+
+2016-12-05
+	* Bradley J Chambers <brad.chambers@gmail.com> Update EigenUtils (14:47:35)
+
+2017-01-04
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1463 from PDAL/approx-pmf-indexing-issue (14:52:12)
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix indexing issue in approximate PMF (14:07:48)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix circle/sphere cropping. Remove use of KDIndex (slow, slow, slow). Don't allow transformation of any geometry type to polygon. (10:31:15)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into geometry (10:03:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1457 from PDAL/geometry (10:03:00)
+
+2017-01-03
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add grid mode to faux reader. (17:01:06)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into geometry (17:01:47)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add grid mode to faux reader. (17:01:06)
+	* chambbj <brad.chambers@gmail.com> No longer need a CMake option to build P2G (#1461) (09:20:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into geometry (08:03:39)
+
+2016-12-30
+	* Howard Butler <howard@hobu.co> rename userData option to user_data for consistency (09:37:35)
+	* Kristian Evers <kristianevers@gmail.com> How to use of proj strings in filters.reprojection (#1460) (08:49:54)
+
+2016-12-29
+	* Grisha <gr.pomadchin@gmail.com> PDAL JNI Deployment improvements (#1450) (12:57:01)
+	* Howard Butler <howard@hobu.co> Remove writers.p2g and P2G plugin -- use writers.gdal instead (#1459) (12:56:38)
+	* Howard Butler <howard@hobu.co> Allow 'userata' JSON option to be place on any stage and support serialization #1427 (12:56:23)
+	* Howard Butler <howard@hobu.co> add foss4g2017 link to front page (09:51:05)
+
+2016-12-23
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge branch 'master' into geometry (13:24:24)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Provide hook for SRS changes during streaming. Make sure we only call ready() and done() once for each stage in streaming mode. Add streaming support to pipeline kernel. (13:15:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Simplify geotiff conversions. (12:27:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Transform bounding boxes for change in SRS. (12:25:53)
+
+2016-12-21
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:20:25)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Edit comment. (16:19:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove GeomPkg from crop filter. Update SRS transforms in crop filter. (15:37:54)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1453 from PDAL/locatemax (13:26:48)
+	* Bradley J Chambers <brad.chambers@gmail.com> Typo in filters.locate docs (10:42:04)
+	* Bradley J Chambers <brad.chambers@gmail.com> Locate filter can now locate min or max value (10:39:34)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1455 from PDAL/label-clusters (13:23:07)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1454 from PDAL/groupby (13:19:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove code that does nothing. (13:18:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Formatting. (13:01:39)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add options to cluster docs (09:26:01)
+
+2016-12-20
+	* Bradley J Chambers <brad.chambers@gmail.com> Add filter to locate max value in a given dimension (22:00:11)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add a filter to split an incoming PointView by data in a given dimension (21:08:39)
+	* Howard Butler <howard@hobu.co> filters.pmf notes (14:26:59)
+
+2016-05-19
+	* Bradley J Chambers <brad.chambers@gmail.com> Add filter that writes cluster IDs to a new dimension (12:35:49)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1252 from PDAL/native-pdal-filters (09:29:56)
+
+2016-12-19
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:07:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Provide ordered SRSes in PointTable. (10:07:25)
+
+2016-12-16
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1449 from PDAL/extract-clusters (19:12:41)
+	* Howard Butler <howard@hobu.co> include Segmentation.cpp for the PDAL_DLL decoration (14:55:13)
+	* Howard Butler <howard@hobu.co> fix #1446 -- LASZIP_LIBRARY NOTFOUND (11:12:28)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add Euclidean Cluster Extraction (09:40:55)
+	* Howard Butler <howard@hobu.co> update link to dimensions (09:21:16)
+	* Bas Couwenberg <sebastic@xs4all.nl> Add support for GNU/kFreeBSD. (#1447) (08:31:17)
+
+2016-12-15
+	* Bas Couwenberg <sebastic@xs4all.nl> Skip tests for missing test data. (#1445) (16:34:37)
+	* Howard Butler <howard@hobu.co> front page doc update (13:23:14)
+	* Howard Butler <howard@hobu.co> doc updates for website (13:22:45)
+	* Howard Butler <howard@hobu.co> update dead link (11:52:00)
+	* Howard Butler <howard@hobu.co> update doc building branches to 1.4-maintenance and point to impending 1.4.0 release (11:49:28)
+	* Howard Butler <howard@hobu.co> doc updates (11:18:20)
+	* Howard Butler <howard@hobu.co> increment version numbers to 1.4.0 in preparation for release (10:41:33)
+
+2016-12-14
+	* Howard Butler <howard@hobu.co> options test needs PDAL_JSONCPP_INCLUDE_DIR target_include_directories (23:44:33)
+	* Howard Butler <howard@hobu.co> update my test oracle config (23:16:03)
+	* Howard Butler <howard@hobu.co> program_arg test needs PDAL_JSONCPP_INCLUDE_DIR target_include_directories (23:15:51)
+	* Connor Manning <connormanning@users.noreply.github.com> Add tests for native JSON options.  Convert GreyhoundReader to this usage instead of stringification. (#1444) (21:54:06)
+	* Connor Manning <connor@hobu.co> Add error display to the base-chunk read for Greyhound reader.  Verify filter before launching pooled reads. (15:03:08)
+	* Connor Manning <connor@hobu.co> Handle dimension re-ordering properly in the Greyhound reader. (14:33:41)
+	* Howard Butler <howard@hobu.co> MSVC 2013 support (update of #1361) (#1442) (14:05:01)
+	* chambbj <brad.chambers@gmail.com> Update PCL pipeline spec/implementation (#1439) (11:04:15)
+	* Howard Butler <howard@hobu.co> 1.4.0 doc updates (#1441) (11:02:37)
+	* Grisha <gr.pomadchin@gmail.com> Java/JNI Bindings (#1371) (10:36:38)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:06:48)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove duplicate code. Simplify geotiff code by returning SRS instead of WKT. (10:06:04)
+
+2016-12-13
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1435 from PDAL/stringify-arrays-and-objects (14:23:12)
+	* Michael D. Smith <michael.smith.erdc@gmail.com> Add time to pdal dependencies (#1436) (13:48:22)
+	* Howard Butler <howard@hobu.co> Start XML pipeline death by removing XML pipelines from tests (#1437) (13:48:13)
+	* Bradley J Chambers <brad.chambers@gmail.com> Stringify options specified as JSON arrays or objects (09:45:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove remaining optional geotiff references. (11:25:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle more WKT types. Handle filenames as SRSes. (10:52:19)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1432 from PDAL/pcl-shrinkage (08:44:27)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1426 from PDAL/pmf-improvements (08:44:12)
+
+2016-12-12
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1422 from PDAL/bpf-streaming (15:52:08)
+	* Howard Butler <howard@hobu.co> output a 'boundary_json' GeoJSON boundary for filters.hexbin output (#1433) (13:49:15)
+	* Howard Butler <howard@hobu.co> Set 'boundary' objects as JSON, not escaped strings (#1431) (13:48:56)
+	* Howard Butler <howard@hobu.co> more GEOTIFF #define removal related to #1428 (#1429) (08:17:53)
+
+2016-12-06
+	* Bradley J Chambers <brad.chambers@gmail.com> Shrink the PCL plugin (21:54:49)
+	* Pete Gadomski <pete.gadomski@gmail.com> ostream << needs to be const to match src (08:46:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (13:22:32)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't build ilvis if we don't have libxml2 (13:21:45)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1419 from gadomski/libxml2-include-dir (13:20:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:45:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Install pdal app. (12:45:37)
+	* Howard Butler <howard@hobu.co> remove masked m_filename private member (12:31:14)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (12:09:42)
+	* Howard Butler <howard@hobu.co> LasWriter include for new layout for MrSID driver (12:09:40)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make types match. (12:05:57)
+	* Pete Gadomski <pete.gadomski@gmail.com> Blanket include libxml2 include dir (09:05:25)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Reorganize source code. Simplify cmake files. Close #1413 Close #1354 (08:35:58)
+
+2016-12-11
+	* Howard Butler <howard@hobu.co> GeoTIFF no longer optional (20:03:15)
+
+2016-12-09
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove lingering references to PointIdVec and neighborMap (14:42:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't mess with wkt that's passed as SRS. (14:25:23)
+	* Bradley J Chambers <brad.chambers@gmail.com> PMF updates (13:55:39)
+
+2016-12-08
+	* Howard Butler <howard@hobu.co> kill more property_tree (19:00:54)
+	* Howard Butler <howard@hobu.co> docker.com, not org (14:30:16)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1394 from PDAL/tps-as-eigenutil (14:23:01)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1424 from PDAL/basic-smrf-fixes (14:22:08)
+	* Howard Butler <howard@hobu.co> no need for property_tree in oci test (13:25:41)
+	* Howard Butler <howard@hobu.co> remove unused and invalid NITF test file #1025 (12:47:14)
+	* Howard Butler <howard@hobu.co> support point/radius and sphere/radius cropping #1387 (#1388) (10:51:53)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1402 from PDAL/derivative-refactor (09:16:10)
+
+2016-11-16
+	* Bradley J Chambers <brad.chambers@gmail.com> The TPS interpolation in filters.mongus is generic enough to move to EigenUtils (13:45:13)
+	* Bradley J Chambers <brad.chambers@gmail.com> Derivative writer refactor (10:45:17)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add EigenUtils functions (10:45:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Error language fix. (12:52:28)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1391 from kbevers/issue-1389 (10:27:46)
+	* Kristian Evers <kristianevers@gmail.com> Handle filenames in working directory properly. Fixes #1389. (08:27:47)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:26:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add glob test for file in local directory. (08:25:45)
+
+2016-11-23
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix #1146 while we are updating DerivativeWriter anyway (13:32:05)
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix pdal_eigen_test (09:49:43)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1403 from PDAL/kernel-links-add-hausdorff (12:08:42)
+	* Bradley J Chambers <brad.chambers@gmail.com> Documentation updates (11:06:31)
+
+2016-12-07
+	* Connor Manning <connor@hobu.co> Improve BPF streaming performance for dimension-major format. (15:38:07)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Improve argument errors for stages and kernels. (13:31:28)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change !valid() to empty() in ReprojectionFilter SRS test. (13:15:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:24:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Properly build targets dependent on libxml2. (10:23:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:22:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1420 from gadomski/const-qualified-insertion-bounds (10:21:36)
+	* Connor Manning <connor@hobu.co> Formatting. (08:00:24)
+
+2016-12-04
+	* Howard Butler <howard@hobu.co> A few more windows nits (#1418) (18:05:44)
+
+2016-12-03
+	* Howard Butler <howard@hobu.co> build docker container at make -j 2 due to DockerHub instances running out of memory when building (10:48:27)
+
+2016-12-02
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix reader override with invalid file in pipeline. Close #1417 (16:22:43)
+	* Howard Butler <howard@hobu.co> Allow user to control boundary smoothing (on by default) (#1416) (13:51:04)
+
+2016-11-29
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1411 from PDAL/issue/1410-pcd-writer (14:26:45)
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix #1410 (13:52:23)
+
+2016-11-28
+	* Howard Butler <howard@hobu.co> Support --showjson switch for 'pdal' app (#1401) (22:04:05)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (21:47:12)
+	* Grisha <gr.pomadchin@gmail.com> add Java into docker deps (#1405) (21:47:00)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (21:44:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Returning NULL as string results in bad string. (17:58:40)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1408 from PDAL/diffX_diffY_refactor_and_tests (14:58:41)
+	* Bradley J Chambers <brad.chambers@gmail.com> Replace and fix diffX/diffY lambdas (13:53:23)
+
+2016-11-22
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1393 from PDAL/extended-local-minimum (23:02:53)
+	* Howard Butler <howard@hobu.co> don't add filename arg to ProgramArgs for readers.mrsid (22:12:04)
+	* lbartoletti <lbartoletti@users.noreply.github.com> Update PluginManager.cpp (#1400) (22:10:38)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1390 from PDAL/new-compute-range (21:36:02)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1381 from PDAL/hausdorff-kernel (15:54:28)
+	* Howard Butler <howard@hobu.co> remove boost::property_tree from XMLSchema #1350 (#1399) (14:33:18)
+	* Kristian Evers <kristianevers@gmail.com> Experimental python support on windows. Introduces pdal-config for windows and modifies the setup script for the python module. (#1397) (10:51:40)
+
+2016-11-15
+	* Bradley J Chambers <brad.chambers@gmail.com> Add filter to compute ranges from L1 Geiger-mode data (13:32:20)
+	* Connor Manning <connormanning@users.noreply.github.com> Merge pull request #1385 from PDAL/greyhound-reader (16:19:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove debug. (16:01:18)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't use invalid log level. (13:37:39)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Doc-local .gitignore. (11:11:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Missed file. (11:05:52)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:30:47)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle names in addition to numbers as arguments to verbose. Provide better feedback for argument errors in the main app. Close #1299 (10:29:25)
+
+2016-05-24
+	* Bradley J Chambers <brad.chambers@gmail.com> Add kernel to compute Hausdorff distance between two point clouds (14:40:01)
+
+2016-11-19
+	* Howard Butler <howard@hobu.co> include directory update for mrsid driver (23:43:57)
+	* Howard Butler <howard@hobu.co> support writing density data into an existing OGR datasource/layer (#1396) (22:51:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More include directory updates. (08:45:29)
+
+2016-11-17
+	* Andrew Bell <andrew.bell.ia@gmail.com> More include_directories changes. (21:14:24)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change include_directories() to target_include_directories() (20:40:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Clean up dead stuff from derivative writer. (18:42:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (15:01:32)
+	* Kristian Evers <kristianevers@gmail.com> XML->JSON updates to filter documentation (#1392) (09:21:14)
+
+2016-11-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:40:23)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Have greater-than or equal-to actually do great-than or equal-to. Close #1382 (14:39:09)
+	* Connor Manning <connor@hobu.co> Fix a warning and a formatting tweak. (13:44:42)
+	* Connor Manning <connor@hobu.co> Use the correct layout for Greyhound even if other readers have added other dimensions.  Add some comments. (13:38:35)
+	* Connor Manning <connor@hobu.co> Doc syntax fix and an error handling case. (11:56:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle inputs to stages in JSON pipeline as either string or array of strings. Close #1384 (11:13:12)
+	* Connor Manning <connor@hobu.co> Merge branch 'master' into greyhound-reader (11:01:26)
+	* Connor Manning <connor@hobu.co> Add fully-featured Greyhound reader. (11:00:10)
+
+2016-11-13
+	* chambbj <brad.chambers@gmail.com> KDIndex queries are simplified when using the new PointId/PointRef overloads (#1380) (08:26:21)
+	* Howard Butler <howard@hobu.co> Windows 2015 warnings rollup (#1383) (08:24:30)
+
+2016-11-11
+	* Andrew Bell <andrew.bell.ia@gmail.com> Explicitly accept library type in PDAL_ADD_FREE_LIBRARY macro. (11:17:17)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:28:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use proper function to determine dimension existence. Close #1379 (08:27:36)
+
+2016-11-10
+	* chambbj <brad.chambers@gmail.com> Add KDIndex overloads for specifying query point (#1377) (17:20:27)
+	* chambbj <brad.chambers@gmail.com> Add a K-Distance filter (#1374) (17:20:15)
+	* chambbj <brad.chambers@gmail.com> Add a Radial Density filter (#1373) (17:20:02)
+	* Howard Butler <howard@hobu.co> remove string literal because MSVC (14:44:09)
+	* Howard Butler <howard@hobu.co> try pulling in string_literals namespace for MSVC (14:30:05)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (13:53:24)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1370 from PDAL/logFilenames (08:55:39)
+
+2016-11-09
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (21:53:00)
+	* Howard Butler <howard@hobu.co> implement #1365 -- optional MAD and median computation for filters.stats (#1369) (21:27:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Write output filenames to metadata. Remove m_filename from Writer class. (16:26:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update translate command to properly handle -r and -w options with --json     option. Add metadata output to translate command. Add translate tests. Update translate documentation. (14:59:42)
+	* Howard Butler <howard@hobu.co> Python extension improvements (#1367) (14:25:40)
+	* Howard Butler <howard@hobu.co> Merge pull request #1359 from PDAL/issue/1355-fix-approx-pmf (09:59:35)
+	* Howard Butler <howard@hobu.co> Merge pull request #1366 from PDAL/pdal-pipeline-validate (09:59:16)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (09:58:36)
+
+2016-11-08
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1360 from PDAL/istream-get (16:46:44)
+	* Howard Butler <howard@hobu.co> make pdal pipeline --validate do something (15:53:22)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (15:42:51)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1363 from gadomski/cmake-2.8.12 (09:14:36)
+	* Pete Gadomski <pete.gadomski@gmail.com> Use PUBLIC or PRIVATE for all target_link_libraries (08:43:22)
+	* Pete Gadomski <pete.gadomski@gmail.com> Bump minimum cmake version to 2.8.12 (08:40:06)
+
+2016-11-07
+	* Pete Gadomski <pete.gadomski@gmail.com> Only read VLR data if there are data to read (15:10:24)
+	* Pete Gadomski <pete.gadomski@gmail.com> Protect IStream::get from invalid vector address (14:02:34)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1362 from gadomski/glob-test (16:19:25)
+	* Pete Gadomski <pete.gadomski@gmail.com> Close file after creation in glob test (15:04:32)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1358 from gadomski/out-of-bounds-access (13:32:06)
+	* Bradley J Chambers <brad.chambers@gmail.com> Implement the approximate option for PMF filtering (12:53:19)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1357 from PDAL/more-eigen-funcs (13:13:28)
+	* Pete Gadomski <pete.gadomski@gmail.com> Two windoze-specific fixes (12:48:09)
+	* Pete Gadomski <pete.gadomski@gmail.com> Fix out-of-bounds access in program args (11:46:15)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move glob to FileUtils.  Remove tilde expansion until we can do it correctly. (09:07:07)
+	* Bradley J Chambers <brad.chambers@gmail.com> Eigen should take cues from GDAL and GEOS and provide utilies in EigenUtils (08:37:24)
+	* Bradley J Chambers <brad.chambers@gmail.com> Our Eigen utilities should probably be namespaced (08:33:13)
+	* Bradley J Chambers <brad.chambers@gmail.com> Move clamp to Utils and make it a template (08:21:29)
+
+2016-11-04
+	* Bradley J Chambers <brad.chambers@gmail.com> Improve the documentation about our new Eigen functions, apply Astyle, and remove duplicates from SMRF (15:20:28)
+	* Bradley J Chambers <brad.chambers@gmail.com> Move some generic Eigen functions (15:00:32)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1353 from gadomski/gdal-include-dir-interface (10:49:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1352 from gadomski/pointview-to-eigen (10:49:16)
+	* Pete Gadomski <pete.gadomski@gmail.com> Add GDAL_INCLUDE_DIR to interface include dirs (09:43:35)
+	* Pete Gadomski <pete.gadomski@gmail.com> Add pointViewToEigen utility function (08:57:20)
+
+2016-11-02
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (19:27:03)
+
+2016-11-01
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (15:28:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update with better examples. (15:28:05)
+	* Howard Butler <howard@hobu.co> make sure rivlib container users gcc to match sdk (14:52:55)
+	* Pete Gadomski <pete.gadomski@gmail.com> Update colorinterp image (13:25:56)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Better deal with presence of various compressors. Close #1348 (11:44:49)
+	* Howard Butler <howard@hobu.co> --json argument for TranslateKernel (11:38:51)
+	* Howard Butler <howard@hobu.co> make sure to setInput for --json (10:26:18)
+
+2016-10-31
+	* Howard Butler <howard@hobu.co> make sure to set stage for --json inputs (17:12:55)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge branch 'rxp-reflectance' (14:40:20)
+	* Pete Gadomski <pete.gadomski@gmail.com> Add reflectance as intensity option to rxp reader (14:15:19)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (13:00:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix pipeline examples. Close #1345 (13:00:24)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1346 from gadomski/greyhound-cleanup (12:28:57)
+	* Pete Gadomski <pete.gadomski@gmail.com> Include sstream (11:55:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:24:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update location of dimension info. (10:23:12)
+
+2016-10-28
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add TextWriterTest Close #1076 (17:07:29)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:29:23)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove unhandled exceptions. Close #1078 (14:28:48)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1344 from gadomski/build-without-tests (11:00:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1341 from PDAL/glob (10:56:58)
+	* Pete Gadomski <pete.gadomski@gmail.com> Fix build w/ greyhound w/o tests (10:37:25)
+
+2016-10-27
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:30:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Conditionally link libdl to libpdalutil for dladdr. (09:29:33)
+	* Howard Butler <howard@hobu.co> Merge branch 'docwork' (08:09:54)
+	* Howard Butler <howard@hobu.co> update formating of MyReader example (08:08:24)
+
+2016-10-26
+	* Andrew Bell <andrew.bell.ia@gmail.com> On linux you need libdl for dladdr(). (16:01:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Only install SIGSEGV handler when in debug. Make backtrace generator prettier and move to Utils. Close #1343 (15:42:10)
+	* Howard Butler <howard@hobu.co> add a dimensions page. Update the tutorials to match current source code (12:40:45)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead options. (10:32:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:51:49)
+
+2016-10-25
+	* Connor Manning <connor@hobu.co> Fix name collision. (16:57:40)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:34:22)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make sure m_reader gets set when reading pipelines. Close #1340. (16:33:38)
+	* Connor Manning <connor@hobu.co> Allow wildcard input to JSON pipelines. (16:32:09)
+	* Howard Butler <howard@hobu.co> Merge pull request #1339 from PDAL/geojson-polygon-1282 (16:12:59)
+	* Howard Butler <howard@hobu.co> Polygon GeoJSON ingest improvements #1282 (15:49:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:13:18)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove "scales" and "offsets" options from kernels. Close #1317 (14:12:20)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:09:04)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Try to get the app to link on Appveyor. (12:08:26)
+	* Howard Butler <howard@hobu.co> add ninja to pdal/dependencies (08:57:04)
+
+2016-10-24
+	* Howard Butler <howard@hobu.co> Merge pull request #1338 from gadomski/osx-cant-use-system-sqlite3 (23:02:47)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (23:02:09)
+	* Howard Butler <howard@hobu.co> emit gcc and clang versions (17:26:46)
+	* Howard Butler <howard@hobu.co> default to make, not ninja (17:16:21)
+	* Howard Butler <howard@hobu.co> try building travis tests with gcc (17:02:39)
+	* Pete Gadomski <pete.gadomski@gmail.com> Ensure sqlite3 was compiled with load extension (13:20:35)
+	* Howard Butler <howard@hobu.co> Merge pull request #1337 from PDAL/fix-approximatecoplanar-param (12:03:48)
+	* Bradley J Chambers <brad.chambers@gmail.com> Parse thresh1 and thresh2 correctly (11:23:47)
+
+2016-10-21
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add feedback for invalid FTITLE. (16:04:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (13:55:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead code. (13:55:01)
+	* Howard Butler <howard@hobu.co> undo 9a0560e681f13d6afcc5035db0d6909775561216 for dimbuilder (11:31:41)
+	* Howard Butler <howard@hobu.co> cleanups of 3830e9d7705ca4dab020aa033c94a9c5a2dcecb7 (09:37:36)
+	* Howard Butler <howard@hobu.co> Merge pull request #1334 from PDAL/curl-optional (08:30:09)
+
+2016-10-20
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (19:32:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix splitter so that cells below the origin have the correct index. Add tests for the above. ALSO - Store viewMap across point view processing so that cells are merged   from multiple point views. Close #1336 (19:29:15)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (17:12:43)
+	* Howard Butler <howard@hobu.co> Use GCC builds for Docker containers instead of clang (14:51:38)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Get detail for JSON parse error. (14:32:29)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Explicitly ignore return value. (13:51:23)
+
+2016-10-19
+	* Howard Butler <howard@hobu.co> if we can't find curl, don't build and depend on arbiter stuff (15:39:24)
+	* Howard Butler <howard@hobu.co> Merge pull request #1329 from PDAL/stacktrace (15:00:02)
+	* Connor Manning <connor@hobu.co> Link dl. (12:14:42)
+	* Connor Manning <connor@hobu.co> Add include. (11:51:37)
+	* Connor Manning <connor@hobu.co> Merge branch 'master' into stacktrace (11:31:24)
+	* Howard Butler <howard@hobu.co> Merge pull request #1333 from PDAL/1325-gdal-writer-dimension (11:27:07)
+	* Howard Butler <howard@hobu.co> tests should pass, not fail (11:01:22)
+	* Howard Butler <howard@hobu.co> support selection of dimension for writers.gdal #1325 (10:43:05)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (10:15:42)
+	* Howard Butler <howard@hobu.co> rename writers.gdal.edge_length to writers.gdal.resolution. Allow setting of nodata in options (10:15:33)
+
+2016-10-18
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (17:14:23)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead code. Fix comment. (17:13:59)
+
+2016-10-17
+	* Connor Manning <connor@hobu.co> Correct a cmake directive for docker. (13:59:57)
+	* Connor Manning <connor@hobu.co> Add PointId and OriginId dimensions. (12:50:18)
+
+2016-10-16
+	* Howard Butler <howard@hobu.co> return an EMPTY MULTIPOLYGON with an 'error' if we can't compute the boundary #1330 (12:48:00)
+
+2016-10-15
+	* Howard Butler <howard@hobu.co> Merge pull request #1331 from sebastic/specification-typo (22:59:43)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix 'specificiation' typo, replace with 'specification'. (13:11:45)
+
+2016-10-13
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use default arguments for vector arguments. (11:57:47)
+
+2016-10-12
+	* Connor Manning <connor@hobu.co> In demangle, ensure result is valid to avoid hanging.  Use this util for stacktrace logging. (16:57:21)
+	* Connor Manning <connor@hobu.co> Log a stacktrace if at log-level debug on unix if a segfault occurs.  Remove an extraneous debug log. (15:49:02)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:37:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Default values for vector args. (12:36:55)
+
+2016-10-10
+	* Howard Butler <howard@hobu.co> Merge pull request #1328 from lossyrob/docs/contributing (10:14:50)
+
+2016-10-09
+	* lossyrob <rdemanuele@gmail.com> Added gitter channel to contributing.md resources. (23:27:20)
+
+2016-10-08
+	* Howard Butler <howard@hobu.co> Merge pull request #1327 from PDAL/mad-updates (13:03:48)
+
+2016-10-07
+	* Howard Butler <howard@hobu.co> tweaks to filters.mad as a result of implementing in filters.colorinterp (13:53:59)
+	* Howard Butler <howard@hobu.co> git mergefail by hobu (09:49:16)
+	* Howard Butler <howard@hobu.co> Merge pull request #1316 from PDAL/pass-filters-as-json-to-pdal-translate (08:02:24)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into pass-filters-as-json-to-pdal-translate (08:00:59)
+	* Howard Butler <howard@hobu.co> Merge pull request #1322 from PDAL/filters-colorinterpolate (08:00:50)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into pass-filters-as-json-to-pdal-translate (08:00:03)
+
+2016-03-22
+	* Connor Manning <connor@hobu.co> For inspectable Readers, try-catch around SRS init. (10:42:20)
+	* Howard Butler <howard@hobu.co> increment version to 1.2.0 in preparation for release (16:33:52)
+	* Howard Butler <howard@hobu.co> Merge pull request #1192 from PDAL/gdal-error-split (15:50:23)
+	* Howard Butler <howard@hobu.co> further split GDAL error handler binding from GDAl wake up (13:20:00)
+	* Howard Butler <howard@hobu.co> do the GDAL/GEOS error handler binding stuff right away when GlobalEnvironment wakes up. Don't do the heavy GDAL startup stuff until asked. (11:28:36)
+	* Connor Manning <connor@hobu.co> Simplify a constructor. (10:49:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Explicitly set PDAL_PYTHON_LIBRARY in python.cmake Close #1174 (10:02:00)
+	* Howard Butler <howard@hobu.co> Merge pull request #1189 from sebastic/kfreebsd2 (07:59:33)
+
+2016-04-01
+	* Howard Butler <howard@hobu.co> fetch XML metadata for ILVIS2 and IceBridge drivers at ready() instead of done() (11:44:37)
+	* Pete Gadomski <pete.gadomski@gmail.com> Silence BUILD_SHARED_LIBS=ON gtest warnings (18:05:41)
+	* Pete Gadomski <pete.gadomski@gmail.com> On OSX, don't build with install rpath (18:03:36)
+	* Logan Byers <loganbyers@ku.edu> Add writers.pcd.scale_* (14:39:43)
+	* Bradley J Chambers <brad.chambers@gmail.com> PipelineKernel should pass verbose/debug settings to PipelineManager (and on down to pipeline readers) (13:03:15)
+	* Howard Butler <howard@hobu.co> license update for OGR.cpp file #1204 (07:29:38)
+
+2016-10-06
+	* Howard Butler <howard@hobu.co> m_filename from GDAL::Raster is private -- provide an accessor (15:19:02)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into filters-colorinterpolate (15:14:03)
+	* Howard Butler <howard@hobu.co> updates based on Andrew's comments, add MAD support (15:13:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Initial writers.gdal. (12:16:16)
+
+2016-10-05
+	* Howard Butler <howard@hobu.co> updates in response to abell comments (14:07:16)
+	* Howard Butler <howard@hobu.co> filters.colorinterp updates (11:43:31)
+
+2016-10-04
+	* Howard Butler <howard@hobu.co> filters.colorinterp for applying color ramps to data (17:00:08)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into filters-colorinterpolate (09:42:41)
+
+2016-10-03
+	* Andrew Bell <andrew.bell.ia@gmail.com> writers.las doc fixes. (09:37:36)
+
+2016-09-30
+	* Andrew Bell <andrew.bell.ia@gmail.com> Check for duplicate dimensions in readers.text. Close #1320 (17:27:48)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove stray debug code. (15:48:48)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change readers.txt to readers.text. Close #1319 (15:12:40)
+
+2016-09-29
+	* Howard Butler <howard@hobu.co> add filters.colorinterp to interpolate into RGB (16:55:48)
+	* Howard Butler <howard@hobu.co> update Docker container spec for Riegl RivLib 2.3 (15:30:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add sphinx-bibtex to install command. (11:33:52)
+
+2016-09-28
+	* Howard Butler <howard@hobu.co> support passing filters as a JSON string array to pdal translate (12:52:16)
+
+2016-09-22
+	* Howard Butler <howard@hobu.co> Load filters.programmable scripts from files if no source is given (10:17:40)
+
+2016-09-15
+	* Howard Butler <howard@hobu.co> Merge pull request #1312 from kbevers/default-plugin-paths (14:52:47)
+	* Bradley J Chambers <brad.chambers@gmail.com> Do not lock users into using the Z dimension with filters.mad (09:18:06)
+	* Kristian Evers <kristianevers@gmail.com> Add . and ./bin to default plugin search path list (07:26:36)
+
+2016-09-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1311 from kbevers/windex (10:02:00)
+	* Kristian Evers <kristianevers@gmail.com> Globbing for tindex on Windows (09:21:07)
+
+2016-09-12
+	* Howard Butler <howard@hobu.co> Merge pull request #1310 from PDAL/deversion-vendor-packages (13:00:49)
+	* Howard Butler <howard@hobu.co> Merge pull request #1309 from loganbyers/pcdwriter_upgrades (13:00:42)
+	* Howard Butler <howard@hobu.co> deversionize vendor'd code #1294 (11:09:54)
+	* Howard Butler <howard@hobu.co> update docs docker image to xenial (11:09:26)
+	* Logan Byers <loganbyers@ku.edu> Fix PcdWriter compression option (11:00:22)
+	* Howard Butler <howard@hobu.co> Merge pull request #1308 from PDAL/issues/1307-mongus-smrf-docs (09:11:39)
+
+2016-09-09
+	* Bradley J Chambers <brad.chambers@gmail.com> Add initial documentation for Mongus and SMRF (#1307) (13:24:08)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1306 from PDAL/lof (10:02:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1296 from jasonoverland/master (09:48:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle nan as value when reading doubles from strings. Close #1304 (07:24:56)
+
+2016-09-08
+	* Bradley J Chambers <brad.chambers@gmail.com> Initial Local Outlier Factor (LOF) filter implementation (12:55:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> More detailed error information. (18:53:12)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (14:34:53)
+
+2016-09-07
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix max_window_size option name. Close #1303 (21:00:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add filename arg to DerivativeWriter. Close #1302 (20:59:16)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1301 from gadomski/empty-geotiff-vlrs (17:29:08)
+	* Pete Gadomski <pete.gadomski@gmail.com> Protect las reader from empty geotiff VLRs (16:33:08)
+
+2016-09-06
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (16:31:07)
+
+2016-09-02
+	* Jason Overland <joverland@seattle.celartem.local> fix up casting issue (16:59:03)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Push log leader for stages. Remove unused headers from Log.hpp. (12:25:04)
+
+2016-09-01
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1298 from PDAL/mad-and-iqr-outliers (14:20:05)
+	* Bradley J Chambers <brad.chambers@gmail.com> Remove old comment to self (14:19:25)
+	* Bradley J Chambers <brad.chambers@gmail.com> Add MAD and IQR filters with user-selectable dimension and multiplier (12:36:04)
+
+2016-08-31
+	* Howard Butler <howard@hobu.co> update BPF link (10:29:39)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/p2g-incore' (10:27:03)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (09:52:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use InCoreInterp for p2g. (09:50:19)
+
+2016-08-30
+	* Howard Butler <howard@hobu.co> fix #1297 -- Dimension note on website (14:41:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (14:40:04)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix broken link and correct note. Close #1297 (14:39:28)
+	* Jason Overland <joverland@seattle.celartem.local> Handle single-digit UTM zones properly. (12:39:52)
+	* Howard Butler <howard@hobu.co> doc tweaks (12:20:32)
+
+2016-08-29
+	* Howard Butler <howard@hobu.co> front page update (13:38:28)
+	* Howard Butler <howard@hobu.co> update download links to 1.3.0 (11:12:59)
+	* Howard Butler <howard@hobu.co> latex equation formatting (10:31:06)
+	* Howard Butler <howard@hobu.co> update appveyor image link (09:25:09)
+
+2016-08-28
+	* Howard Butler <howard@hobu.co> update quickstart document for use with new Docker for Windows (17:09:58)
+	* Howard Butler <howard@hobu.co> Merge pull request #1293 from sebastic/bash-completion (11:10:01)
+	* Howard Butler <howard@hobu.co> Merge pull request #1292 from sebastic/cmake-3.6-hdf5 (11:08:45)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix bash-completion installation. (09:56:37)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix HDF5 include directory with CMake >= 3.6.0. (08:32:34)
+
+2016-08-27
+	* Howard Butler <howard@hobu.co> latex fixups to allow PDF to build (12:01:46)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (08:51:39)
+	* Howard Butler <howard@hobu.co> typo (08:51:36)
+	* Howard Butler <howard@hobu.co> Merge pull request #1291 from sebastic/spelling-errors (08:51:24)
+	* Howard Butler <howard@hobu.co> a few more missing packages (08:35:40)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix spelling errors. (06:37:17)
+
+2016-08-26
+	* Howard Butler <howard@hobu.co> more release note (23:15:15)
+	* Howard Butler <howard@hobu.co> add fall-through case (22:41:41)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:44:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix path order for plugins. Add error message for plugin load failure. Fix text in kernel usage help output. (16:12:56)
+	* Howard Butler <howard@hobu.co> ignore a generated pdal_defines.h (14:26:22)
+	* Howard Butler <howard@hobu.co> initialization warning cleanup (14:26:00)
+	* Howard Butler <howard@hobu.co> use correct type for m_splitCountThreshold (13:54:07)
+	* Howard Butler <howard@hobu.co> warnings cleanups in mongus (13:46:19)
+	* Howard Butler <howard@hobu.co> bad merge fixup (13:46:07)
+	* Howard Butler <howard@hobu.co> um, 'raise' is a python keyword, not c++ (13:22:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix typo. (13:11:30)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Rename json-forwards.h forwards.h (13:05:42)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:45:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Generalize JSON library handling. Close #1289 (12:44:43)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove /usr/local/bin from PluginManager test. (12:37:28)
+	* Howard Butler <howard@hobu.co> increment version to 1.3.0 in preparation for release (12:19:59)
+	* Howard Butler <howard@hobu.co> more release notes (12:09:38)
+	* Howard Butler <howard@hobu.co> shut off greyhound tests for now (11:55:53)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (11:51:35)
+	* Howard Butler <howard@hobu.co> Somewhat working readers.greyhound (11:45:54)
+	* Howard Butler <howard@hobu.co> Merge pull request #1272 from PDAL/http-read (10:59:36)
+	* Howard Butler <howard@hobu.co> add back missing runtime packages #1290 (09:47:57)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (09:00:47)
+	* Bradley J Chambers <brad.chambers@gmail.com> Get those parentheses in the right place (09:00:18)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (08:36:28)
+	* Howard Butler <howard@hobu.co> need #include <math> for some compilers (08:30:22)
+	* Bradley J Chambers <brad.chambers@gmail.com> Resolve Windows error C2668, ambiguous call to isnan (07:56:30)
+
+2016-08-25
+	* Howard Butler <howard@hobu.co> a few more dockerfile updates to make things happy on xenial (20:11:10)
+	* Howard Butler <howard@hobu.co> Merge pull request #1284 from PDAL/sqlite-fixups (17:20:15)
+	* Howard Butler <howard@hobu.co> Merge pull request #1283 from PDAL/xenial-smaller-docker (17:20:08)
+	* Howard Butler <howard@hobu.co> more docker fixes for xenial (17:07:33)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1288 from PDAL/mongus-redux (12:18:10)
+	* chambbj <brad.chambers@gmail.com> Merge pull request #1287 from PDAL/smrf (12:17:59)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into sqlite-fixups (11:56:40)
+	* Howard Butler <howard@hobu.co> pcl 1.8 (11:55:55)
+	* Howard Butler <howard@hobu.co> Merge pull request #1286 from PDAL/loganbyers-pcdwriter_upgrades (11:55:25)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into loganbyers-pcdwriter_upgrades (11:02:40)
+	* Howard Butler <howard@hobu.co> debugging lint (10:30:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove debug. (10:27:15)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into xenial-smaller-docker (10:18:26)
+	* Howard Butler <howard@hobu.co> don't attempt to load extension for sqlite shared library (09:52:29)
+	* Howard Butler <howard@hobu.co> more docker updates for xenial (09:51:21)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix tests for debug/verbose. (08:54:20)
+	* Andrew Bell <andrew.bell.ia@gmail.com> First cut release notes. (08:50:45)
+
+2016-06-24
+	* Bradley J Chambers <brad.chambers@gmail.com> Initial commit of Mongus-inspired ground return segmentation filter (11:27:12)
+	* Bradley J Chambers <brad.chambers@gmail.com> Initial commit of SMRF-inspired ground return segmentation filter (11:27:12)
+
+2016-08-24
+	* Logan Byers <loganbyers@ku.edu> Add writers.pcd.subtract_minimum (16:17:49)
+	* Logan Byers <loganbyers@ku.edu> Change compression for writers.pcd (15:45:10)
+	* Howard Butler <howard@hobu.co> install PRC in /usr, not /usr/local (14:58:29)
+	* Howard Butler <howard@hobu.co> Attempt to shrink the size of the Docker image by removing development packages once we're done with them. The pdal/dependencies package also no longer installs all of the grid files (350+mb). (14:49:49)
+
+2016-08-23
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix logging. (15:54:20)
+	* Howard Butler <howard@hobu.co> ogrdriver instead of --driver for density kernel (08:21:36)
+
+2016-08-22
+	* Howard Butler <howard@hobu.co> Merge pull request #1280 from visr/ferryflip (16:04:39)
+	* Howard Butler <howard@hobu.co> --driver is PDAL driver. Use --ogrdriver to specify which driver to use for tindex kernel (10:44:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:38:27)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't use invalid log. (10:31:58)
+	* Howard Butler <howard@hobu.co> update PDAL workshop pointers (09:40:49)
+	* Howard Butler <howard@hobu.co> typo (09:16:49)
+
+2016-08-19
+	* Andrew Bell <andrew.bell.ia@gmail.com> Set command-line-based log into stages unless overridden. (17:26:59)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make sure Kernel is destroyed prior to deleteing GDAL drivers -- again. (12:53:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead code. (12:03:32)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make a default log. (11:47:01)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Rearrange main app. Add logging to PluginManager. Close #1118 (09:10:34)
+
+2016-08-16
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move --stdin option to kernels that need it. (11:16:16)
+
+2016-08-15
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change handling of help option in kernels. (17:22:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Change plugin path order. Close #1281 (16:31:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove debug. Fix swallowing of reset options. (08:56:56)
+
+2016-08-12
+	* Andrew Bell <andrew.bell.ia@gmail.com> Set unconsumed args back into command line in parseSimple(). (17:50:02)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Rework handling of positional arguments for flexibility. (13:43:02)
+
+2016-08-11
+	* Andrew Bell <andrew.bell.ia@gmail.com> Have parseSimple handle positional args. Improve localization logic of positional arg handling. (09:27:11)
+
+2016-08-09
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1279 from PDAL/issue-1277 (10:12:13)
+	* Martijn Visser <mgvisser@gmail.com> docs height: flip the ferry direction (04:48:15)
+	* Martijn Visser <mgvisser@gmail.com> doc rename Height -> HeightAboveGround (04:35:08)
+
+2016-08-08
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix test by ignoring count and checking install path. (15:17:57)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' into issue-1277 (14:47:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Pass options when stage is created as part of kernel. (14:46:35)
+
+2016-08-07
+	* Howard Butler <howard@hobu.co> catch up PluginManager PDAL_DRIVER_PATH count for tests (22:50:32)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (08:43:10)
+	* Howard Butler <howard@hobu.co> normalize Reflectance to Intensity for readers.pts (08:43:07)
+
+2016-08-05
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (13:09:24)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Correct text for error message. (13:08:53)
+	* Howard Butler <howard@hobu.co> Merge pull request #1276 from PDAL/pts-reader (09:44:08)
+	* Howard Butler <howard@hobu.co> add readers.pts for reading PTS files directly (09:25:10)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:34:39)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove dead code. (08:34:20)
+	* Howard Butler <howard@hobu.co> Merge pull request #1275 from visr/docfix (07:41:25)
+	* Martijn Visser <mgvisser@gmail.com> docs for ground: update option names (01:06:10)
+	* Martijn Visser <mgvisser@gmail.com> docs for pipeline: add 'writers.' before 'p2g' (00:58:18)
+
+2016-08-04
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:54:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use multiple paths in PDAL_DRIVER_PATH environment variable. Add tests for pluginSearchPaths(). (12:53:53)
+	* Howard Butler <howard@hobu.co> support explicit plugin loading when given by option for JSON pipelines (09:19:25)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (08:23:17)
+
+2016-08-03
+	* Howard Butler <howard@hobu.co> correctly fetch vertical and horizontal units for SpatialReference metadata (18:15:04)
+
+2016-07-31
+	* Howard Butler <howard@hobu.co> Merge pull request #1274 from PDAL/specify-driver (18:08:19)
+
+2016-07-29
+	* Howard Butler <howard@hobu.co> allow override of inferred drivers in kernels (specify with --driver argument) #1273 (10:03:37)
+
+2016-07-28
+	* Andrew Bell <andrew.bell.ia@gmail.com> Ubuntu Xenial docker files. (10:40:09)
+
+2016-07-27
+	* Andrew Bell <andrew.bell.ia@gmail.com> Throw an error if a stage option is provided without a value. (11:58:04)
+
+2016-07-25
+	* Connor Manning <connor@hobu.co> Re-add dockerfile contents to install PDAL/PRC. (11:33:44)
+
+2016-07-23
+	* Connor Manning <connor@hobu.co> Use greyhound:// to signify the greyhound reader, inferring http:// paths from their actual file extension. (12:42:38)
+
+2016-07-22
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use PDALUtils to open LAS files. (08:54:59)
+
+2016-07-20
+	* Andrew Bell <andrew.bell.ia@gmail.com> Ensure extension doesn't get embedded in filename. (11:18:23)
+
+2016-07-19
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (15:46:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Consolidate plugin path handling. Add plugin loading logging. (15:46:15)
+
+2016-07-14
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix output_format for p2g. (16:30:36)
+
+2016-07-11
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't check for file existence in PipelineManager::makeReader(). (15:23:36)
+
+2016-07-07
+	* Howard Butler <howard@hobu.co> Merge pull request #1266 from PDAL/issue-1253-crop-reprojection (16:36:18)
+	* Howard Butler <howard@hobu.co> another arbiter refresh (10:46:27)
+	* Howard Butler <howard@hobu.co> update arbiter to attempt to fix windows appveyor issue (10:44:58)
+
+2016-07-06
+	* Andrew Bell <andrew.bell.ia@gmail.com> Correct documentation. (11:53:50)
+
+2016-07-05
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (16:13:10)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Replace pseudo-scoped-enums with actual scoped enums, getting rid of the need for '::Enum' in type names and disallowing implicit conversion to native. (16:12:38)
+	* Howard Butler <howard@hobu.co> Merge pull request #1260 from gadomski/custom-p2g-bounds (14:43:36)
+	* Howard Butler <howard@hobu.co> correctly reproject crop polygon if a_srs is given #1253 (14:40:55)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' of github.com:PDAL/PDAL (13:54:12)
+	* Howard Butler <howard@hobu.co> description of X dimension was incorrect (13:41:16)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update arbiter.  Simplify some of the utils code that uses it. (13:20:49)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Get names from the layout rather than the default dimension name list. Close #1265 (11:19:09)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove commented code. (10:33:15)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Test file for PLY dimensions. (10:32:37)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Support non-default dimensions in PLY reader. Close #1262 (10:30:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make sure we convert when writing to byte types. Close #1264 (10:29:05)
+
+2016-06-29
+	* Andrew Bell <andrew.bell.ia@gmail.com> 1) Remove arbiter, dl, curl and json dependencies from libutil 2) Make static libraries private cmake dependencies so that downstream   projects don't try to link them in (since we don't install them and   don't need to) 3) Make libutil a private dependency of libpdalcpp so that downstream   cmake project don't try to link it in. 4) Add a library path for as interfere so that rpath dependencies are   satisfied for reexported libutil. 5) Use arbiter-based file access for most calls by replacing   FileUtils::func() with Utils::func() 6) Makes JSONCPP public or private depending on whether we're using   an installed version or our own vendor version. (11:27:10)
+
+2016-06-28
+	* Pete Gadomski <pete.gadomski@gmail.com> Allow setting of bounds on p2g writer (14:22:01)
+
+2016-06-23
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle leading spaces in attached long args. (12:44:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:29:51)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (09:29:35)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1259 from gadomski/argument-starting-with-dash (09:28:40)
+
+2016-06-22
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add support for printing of default option values. (20:07:31)
+	* Pete Gadomski <pete.gadomski@gmail.com> Add test case for transformation starting with - (17:34:50)
+	* Pete Gadomski <pete.gadomski@gmail.com> Remove trailing comma from transformation docs (17:18:28)
+	* Pete Gadomski <pete.gadomski@gmail.com> Merge pull request #1257 from gadomski/rxp-cleanup (13:08:29)
+	* Pete Gadomski <pete.gadomski@gmail.com> rxp plugin cleanup (pointers, mostly) (09:19:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:32:20)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Different handling for explicit and implied boolean arg values. (12:31:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge pull request #1258 from PDAL/outlier-args-typo (11:59:22)
+	* Bradley J Chambers <brad.chambers@gmail.com> Fix typo in outlier args (11:54:56)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Allow access to filename and count args for readers. (10:41:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (10:35:41)
+
+2016-06-21
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove writerAddArgs(). (12:59:58)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:24:10)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Print options from pdal --options. (11:23:33)
+
+2016-06-20
+	* Pete Gadomski <pete.gadomski@gmail.com> Use json extension for pipeline docs (15:56:40)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Have options processed by ProgramArgs. (12:21:49)
+
+2016-06-17
+	* Howard Butler <howard@hobu.co> Merge pull request #1256 from PDAL/no-deploy-key-for-prs (08:46:18)
+
+2016-06-16
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix linking of example to use only pdalcpp. (14:54:39)
+
+2016-06-13
+	* Howard Butler <howard@hobu.co> Merge pull request #1255 from dewall/fix/pgpointcloud/post_sql (14:22:41)
+	* Howard Butler <howard@hobu.co> don't try to add a deploy key if it is empty (PRs from non-PDAL devs won't have one (14:21:10)
+	* dewall <a.dewall@52north.org> Fixed the pipeline post_sql statement, so that the command is read and executed correctly. (08:04:39)
+
+2016-06-03
+	* Andrew Bell <andrew.bell.ia@gmail.com> Reference correct JSON node. (09:37:50)
+
+2016-05-26
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make HIGHEST and LOWEST local. (12:14:38)
+	* Andrew Bell <andrew.bell.ia@gmail.com> PDAL_DLL (09:38:22)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add PDAL_DLL for Bounds. (09:28:43)
+
+2016-05-25
+	* Andrew Bell <andrew.bell.ia@gmail.com> Create Bounds class. (17:54:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Quiet warnings. (17:53:57)
+
+2016-05-21
+	* Connor Manning <connor@hobu.co> Add include. (11:06:41)
+	* Howard Butler <howard@hobu.co> std::prefix isnan and isinf (11:03:41)
+
+2016-05-20
+	* Howard Butler <howard@hobu.co> more marketing materials stickers (14:09:01)
+	* Howard Butler <howard@hobu.co> add dog bone sticker to marketing materials (14:07:56)
+
+2016-05-18
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add handling for comma-separated strings as ProgramArgs. (15:36:08)
+
+2016-05-04
+	* Bradley J Chambers <brad.chambers@gmail.com> New and modified filters (12:24:03)
+
+2016-05-16
+	* Andrew Bell <andrew.bell.ia@gmail.com> Provide a way to go from extension to driver. (16:55:12)
+	* Connor Manning <connor@hobu.co> Update arbiter with some globbing and SSE fixes, and add to pdal namespace.  Fix a #define typo. (11:20:35)
+	* Howard Butler <howard@hobu.co> Merge pull request #1250 from sebastic/hurd (10:54:58)
+	* Howard Butler <howard@hobu.co> Merge pull request #1251 from sebastic/source_date_epoch (10:54:39)
+
+2016-05-15
+	* Bas Couwenberg <sebastic@xs4all.nl> Use SOURCE_DATE_EPOCH instead of current date for reproducible builds. (15:47:07)
+	* Bas Couwenberg <sebastic@xs4all.nl> Add support for GNU/Hurd to portable_endian.hpp. (03:08:50)
+
+2016-05-13
+	* Howard Butler <howard@hobu.co> Merge pull request #1249 from PDAL/remove-nan-inf-json-output (15:18:18)
+	* Howard Butler <howard@hobu.co> Fix #1248 -- remove NaN and Inf from JSON output (15:02:40)
+
+2016-05-12
+	* Howard Butler <howard@hobu.co> Merge pull request #1247 from igrcic/master (08:11:50)
+	* Ivan Grcic <igrcic@gmail.com> Removes backlslashes from connection string (resulting in bad json) (07:22:54)
+	* Ivan Grcic <igrcic@gmail.com> Update interesting.las tutorial url (05:58:34)
+
+2016-05-11
+	* Andrew Bell <andrew.bell.ia@gmail.com> Provide library for linux link. (17:24:01)
+	* Howard Butler <howard@hobu.co> reexport on APPLE needs to use file, not SONAME (15:43:46)
+	* Howard Butler <howard@hobu.co> Merge pull request #1246 from PDAL/python-extension-jsonify (11:39:10)
+	* Howard Butler <howard@hobu.co> Merge pull request #1244 from gadomski/simpler-osx-linking (11:38:59)
+	* Pete Gadomski <pete.gadomski@gmail.com> Fix typo in filters.crop docs (10:31:06)
+	* Howard Butler <howard@hobu.co> Merge pull request #1245 from PDAL/qfit-azimuth (10:08:21)
+	* Howard Butler <howard@hobu.co> change QFIT driver to use Azimuth instead of ScanAngleRank for azimuth dimension (10:05:56)
+	* Howard Butler <howard@hobu.co> add a --python-version switch to pdal-config and use that to detect whether or not the python we are building the extension for is the one we built PDAL against (09:55:32)
+	* Pete Gadomski <pete.gadomski@gmail.com> Remove APPLE-specific BUILD_WITH_INSTALL_RPATH (09:11:01)
+	* Pete Gadomski <pete.gadomski@gmail.com> Remove custom INSTALL_NAME_DIR for APPLE (09:09:20)
+
+2016-05-10
+	* Howard Butler <howard@hobu.co> JSON all the things (python) (17:00:53)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Re-enable VLR test. (15:28:10)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add testing for NITF metadata. Close #394 (13:53:04)
+	* Howard Butler <howard@hobu.co> compile PCL with c++11 and use new lazperf git location (08:31:27)
+
+2016-05-09
+	* Howard Butler <howard@hobu.co> Merge pull request #1242 from PDAL/more-stats (15:26:34)
+	* Howard Butler <howard@hobu.co> Merge pull request #1241 from PDAL/no-points-ogr-error (15:26:24)
+	* Howard Butler <howard@hobu.co> make #1240 more clear (13:38:55)
+	* Howard Butler <howard@hobu.co> Fix #1240, misleading error with no points (11:22:21)
+	* Howard Butler <howard@hobu.co> add skewness, kurtosis, stddev, and variance to filters.stats output (11:13:42)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Uncomment header files. Remove Dimension.hpp dependency. (08:55:38)
+
+2016-05-06
+	* Pete Gadomski <pete.gadomski@gmail.com> Remove an extra semicolon (10:02:55)
+
+2016-05-05
+	* Mateusz Łoskot <mateusz@loskot.net> Fix URL to AppVeyor badge. (04:45:33)
+
+2016-04-30
+	* Howard Butler <howard@hobu.co> Merge pull request #1237 from sebastic/remove-autocleaned-backup-file (14:24:47)
+	* Bas Couwenberg <sebastic@xs4all.nl> Remove autocleaned backup file. (13:59:23)
+	* Howard Butler <howard@hobu.co> Merge pull request #1236 from sebastic/find-websocketpp (11:43:28)
+	* Bas Couwenberg <sebastic@xs4all.nl> Fix websocketpp detection. (11:40:44)
+	* Howard Butler <howard@hobu.co> Merge pull request #1235 from sebastic/dont-require-nitro (11:40:09)
+	* Bas Couwenberg <sebastic@xs4all.nl> Don't require Nitro dependency. (11:38:31)
+
+2016-04-29
+	* Howard Butler <howard@hobu.co> backport front page stuff, update quickstart (15:36:59)
+
+2016-04-28
+	* Andrew Bell <andrew.bell.ia@gmail.com> Add nitfwrap tool to wrap/unwrap BPF LAS files with NITF. (17:19:57)
+	* Howard Butler <howard@hobu.co> Merge pull request #1222 from PDAL/clear-gdal-errors (09:50:23)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into clear-gdal-errors (08:55:28)
+
+2016-04-27
+	* Howard Butler <howard@hobu.co> catch up to arbiter (11:35:06)
+	* Howard Butler <howard@hobu.co> working Arbiter-based remote write (10:20:33)
+
+2016-04-26
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into read-s3 (16:07:17)
+	* Howard Butler <howard@hobu.co> Merge pull request #1231 from PDAL/icebridge-x-normalize (16:07:05)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into read-s3 (16:03:58)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move dimension generation to its own cmake file. (14:55:27)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into read-s3 (13:38:26)
+	* Howard Butler <howard@hobu.co> readers.icebridge was computing normalized X dimensions incorrectly (12:34:08)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Build Dimension.hpp from Dimension.json. (08:16:23)
+
+2016-04-25
+	* Howard Butler <howard@hobu.co> catch up arbiter (14:05:23)
+	* Howard Butler <howard@hobu.co> use 64bit sized integer classes, rethrow exception from jsoncpp instead of swallowing it (14:01:49)
+	* Howard Butler <howard@hobu.co> our own asString method because some older jsoncpp don't quite behave how we want (13:50:26)
+
+2016-04-24
+	* Howard Butler <howard@hobu.co> add a docker-buildable make command for docs (21:26:19)
+
+2016-04-23
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into read-s3 (14:12:24)
+
+2016-04-21
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:10:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Make sure GDAL driver manager is torn down after kernels. (12:10:15)
+
+2016-04-20
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix view kernel compilation. (08:23:55)
+
+2016-04-18
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use the proper PipelineManager in the pipeline kernel. Close #1208 (14:50:07)
+	* Howard Butler <howard@hobu.co> no need to const_cast (14:29:00)
+	* Andrew Bell <andrew.bell.ia@gmail.com> No change. (09:38:50)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move stage creation code to PipelineManager. (08:56:35)
+
+2016-04-15
+	* Andrew Bell <andrew.bell.ia@gmail.com> Correct call to makeReader() in ViewKernel. (10:08:39)
+
+2016-04-14
+	* Howard Butler <howard@hobu.co> arbiter update (11:48:06)
+
+2016-04-13
+	* Howard Butler <howard@hobu.co> make sure JSONCPP is marked optional, and when we don't find it, use our embedded version (15:50:45)
+	* Howard Butler <howard@hobu.co> be more specific about jsoncpp include/linkage (15:19:23)
+	* Howard Butler <howard@hobu.co> bump jsoncpp min version to 1.6.2 (14:44:31)
+	* Howard Butler <howard@hobu.co> update arbiter (14:27:33)
+	* Howard Butler <howard@hobu.co> update arbiter (14:08:11)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move lots of calls from individual kernels to the base kernel code to make sure that they all happen when they're supposed to. (13:46:20)
+	* Howard Butler <howard@hobu.co> more JSON, more pain (12:26:33)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into read-s3 (12:03:13)
+	* Howard Butler <howard@hobu.co> another swing at JSONCPP cmake config (11:59:39)
+	* Howard Butler <howard@hobu.co> jsoncpp needs to be -fPIC (09:57:29)
+	* Howard Butler <howard@hobu.co> need to add FindCurl.cmake (09:56:11)
+	* Howard Butler <howard@hobu.co> arbiter needs to be -fPIC? (09:46:09)
+	* Howard Butler <howard@hobu.co> jsoncpp now compiled as a static lib (09:36:04)
+	* Howard Butler <howard@hobu.co> try to unicode the windows (09:05:17)
+
+2016-04-12
+	* Howard Butler <howard@hobu.co> support reading s3 and http over the network by embedding http://github.com/connormanning/arbiter (15:41:44)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't allow double-setting of non-vector program args. Close #1225 (12:06:55)
+
+2016-04-11
+	* Howard Butler <howard@hobu.co> Documentation improvements (15:28:51)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (11:31:26)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Handle reading pipelines from standard input. Close #1223 (11:30:52)
+
+2016-04-08
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into clear-gdal-errors (13:55:05)
+	* Howard Butler <howard@hobu.co> simplify gdal::ErrorHandler (13:54:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (12:22:08)
+
+2016-04-07
+	* Howard Butler <howard@hobu.co> Merge pull request #1218 from gadomski/docker-update (14:04:03)
+
+2016-04-06
+	* Pete Gadomski <pete.gadomski@gmail.com> [docker] Clean up after each install (19:29:22)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update tindex docs. Make --tindex option in tindex kernel a positional option. Close #1220 (17:18:42)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Use single-quotes with GDAL column value. Close #1219 (14:49:00)
+	* Pete Gadomski <pete.gadomski@gmail.com> Switch rivlib Dockerfile to pdal/pdal (12:16:35)
+	* Pete Gadomski <pete.gadomski@gmail.com> Remove PDAL and PRC dirs from Docker image (13:22:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix dimension name. (10:43:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Rename dimension PlatformHeader to Azimuth. (10:24:37)
+
+2016-04-05
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix bad conversion error message. (17:38:13)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move some stuff from PDALUtils to the classes in which they belong. (17:25:46)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Clean up the main CMakeLists.txt (13:12:18)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into clear-gdal-errors (11:30:57)
+	* Howard Butler <howard@hobu.co> don't every throw GDAL errors (10:50:40)
+	* Howard Butler <howard@hobu.co> always use WGS84 UTM zones for calculateZon computation in filter.hexbin density computation (08:21:01)
+
+2016-04-04
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into clear-gdal-errors (22:16:28)
+	* Howard Butler <howard@hobu.co> don't use negative utm zones for hexbin density computation (22:13:25)
+	* Howard Butler <howard@hobu.co> some experimentation with GDAL error handling (21:51:42)
+	* Howard Butler <howard@hobu.co> remove dead code (15:22:22)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix wordWrap() and add an alternate implementation. (14:29:29)
+	* Howard Butler <howard@hobu.co> TLS stuff can't work here, need to find another way (13:20:08)
+	* Howard Butler <howard@hobu.co> Merge pull request #1215 from PDAL/offset-icebridge-longitude (11:37:55)
+	* Howard Butler <howard@hobu.co> Merge pull request #1209 from PDAL/issue/1208-pipeline-verbose-debug (11:37:22)
+	* Howard Butler <howard@hobu.co> only init m_instance when we're not TLS (apple) (11:16:59)
+	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into clear-gdal-errors (11:09:18)
+	* Howard Butler <howard@hobu.co> Merge pull request #1216 from gadomski/fail-if-no-hexer (11:09:06)
+	* Howard Butler <howard@hobu.co> provide reset() private function to ErrorHandler to CPLErrorReset() and clear the errnum (11:06:45)
+	* Howard Butler <howard@hobu.co> attempt to make GDAL ErrorHandler TLS (10:53:44)
+	* Pete Gadomski <pete.gadomski@gmail.com> Find Hexer w/ REQUIRED flag (10:45:47)
+	* Howard Butler <howard@hobu.co> update icebridge test to account for normalized longitude (10:28:42)
+	* Howard Butler <howard@hobu.co> Merge branch 'master' into offset-icebridge-longitude (10:00:31)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Move normalizeLongitude to Utils. (09:46:30)
+	* Howard Butler <howard@hobu.co> Merge pull request #1210 from gadomski/gtest-shared-libs (09:38:37)
+
+2016-04-03
+	* Howard Butler <howard@hobu.co> offset readers.icebridge longitude #1214 (08:11:59)
+
+2016-04-02
+	* Howard Butler <howard@hobu.co> add python release stuff to release docs (16:50:14)
+	* Howard Butler <howard@hobu.co> Merge pull request #1213 from sebastic/python (16:48:43)
+	* Bas Couwenberg <sebastic@xs4all.nl> Bump Python module version to 1.2.0. (10:01:34)
+
 2016-03-31
+	* Howard Butler <howard@hobu.co> point to 1.2.0 release (23:02:24)
+	* Howard Butler <howard@hobu.co> update ChangeLog (11:46:45)
 	* Howard Butler <howard@hobu.co> tindex kernel needs to registerDrivers (09:33:56)
 
 2016-03-30
@@ -83,19 +1906,11 @@
 	* Andrew Bell <andrew.bell.ia@gmail.com> Doc updates. (07:50:34)
 	* Andrew Bell <andrew.bell.ia@gmail.com> Merge remote-tracking branch 'origin/master' (07:13:33)
 
-2016-03-22
-	* Howard Butler <howard@hobu.co> increment version to 1.2.0 in preparation for release (16:33:52)
-	* Howard Butler <howard@hobu.co> Merge pull request #1192 from PDAL/gdal-error-split (15:50:23)
-	* Howard Butler <howard@hobu.co> further split GDAL error handler binding from GDAl wake up (13:20:00)
-	* Howard Butler <howard@hobu.co> do the GDAL/GEOS error handler binding stuff right away when GlobalEnvironment wakes up. Don't do the heavy GDAL startup stuff until asked. (11:28:36)
-	* Connor Manning <connor@hobu.co> Simplify a constructor. (10:49:08)
-	* Andrew Bell <andrew.bell.ia@gmail.com> Explicitly set PDAL_PYTHON_LIBRARY in python.cmake Close #1174 (10:02:00)
-	* Howard Butler <howard@hobu.co> Merge pull request #1189 from sebastic/kfreebsd2 (07:59:33)
-
 2016-03-21
 	* chambbj <brad.chambers@gmail.com> Merge pull request #1190 from PDAL/doc-cleanup (22:44:13)
 	* Bradley J Chambers <brad.chambers@gmail.com> fix dartsample references (22:43:34)
 	* Bas Couwenberg <sebastic@xs4all.nl> Add support for kFreeBSD to PluginManager & SQLiteCommon. (16:10:51)
+	* Logan Byers <loganbyers@ku.edu> Add pcd.writer.offset_* (12:30:48)
 
 2016-03-20
 	* Howard Butler <howard@hobu.co> Merge pull request #1187 from sebastic/kfreebsd (15:19:02)
@@ -286,7 +2101,11 @@
 	* Bradley J Chambers <brad.chambers@gmail.com> Fix the writer input tests (09:50:37)
 	* Bradley J Chambers <brad.chambers@gmail.com> Add unit test to demonstrate merge issues (09:39:22)
 
+2016-02-20
+	* Logan Byers <loganbyers@ku.edu> Add PointXYZ output to writers.pcd (17:27:13)
+
 2016-02-19
+	* Logan Byers <loganbyers@ku.edu> added binary output to writers.pcd (19:25:07)
 	* Howard Butler <howard@hobu.co> Merge remote-tracking branch 'origin/master' into hobu-docs-rollup (11:26:45)
 	* Howard Butler <howard@hobu.co> a bunch of documentation tweaks related to getting rst2pdf output working -- not quite done yet (11:26:25)
 	* Andrew Bell <andrew.bell.ia@gmail.com> Don't use initializer list for map. (09:16:49)
@@ -7078,8 +8897,8 @@
 	* Howard Butler <hobu.inc@gmail.com> decruft (14:40:34)
 	* Howard Butler <hobu.inc@gmail.com> decruft (14:40:25)
 	* Howard Butler <hobu.inc@gmail.com> used cached byte positions to avoid per-point map lookup of positions for getField queries (14:40:00)
-	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesn't work right now (14:39:03)
-	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesn't work right now (14:38:18)
+	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesnt work right now (14:39:03)
+	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesnt work right now (14:38:18)
 	* Howard Butler <hobu.inc@gmail.com> add getField specialization for fetching based on a pointIndex and Schema::getByteOffset() output (14:36:06)
 	* Howard Butler <hobu.inc@gmail.com> no longer include tuple, not used (14:34:57)
 

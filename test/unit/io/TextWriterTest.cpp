@@ -36,6 +36,7 @@
 
 #include "Support.hpp"
 
+#include <pdal/util/FileUtils.hpp>
 #include <io/TextReader.hpp>
 #include <io/TextWriter.hpp>
 

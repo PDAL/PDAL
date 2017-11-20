@@ -108,20 +108,6 @@ PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
 target_include_directories(${gridprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
-PDAL_ADD_PLUGIN(poisson_filter_libname filter poisson
-    FILES
-        filters/PoissonFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${poisson_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
-    FILES
-        filters/GreedyProjectionFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${greedyprojection_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
 PDAL_ADD_PLUGIN(icp_filter_libname filter icp
     FILES
         filters/IcpFilter.cpp

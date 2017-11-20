@@ -741,8 +741,12 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
         for (XMLDim& xmlDim : xmlDims)
             dimTypes.push_back(xmlDim.m_dimType);
 
-        SignedLazPerfBuf compBuf(outbuf);
-        LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
+        auto cb = [&outbuf](char *buf, size_t bufsize)
+        {
+            outbuf.insert(outbuf.end(), buf, buf + bufsize);
+        };
+
+        LazPerfCompressor compressor(cb, dimTypes);
 
         try
         {

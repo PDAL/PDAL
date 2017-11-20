@@ -1,8 +1,10 @@
 @echo off
 
-REM If OSGEO4W_BUILD is set, we build an OSGeo4W64 tarball package and 
-REM and install it to C:\pdalbin before letting AppVeyor upload it as 
+REM If OSGEO4W_BUILD is set, we build an OSGeo4W64 tarball package and
+REM and install it to C:\pdalbin before letting AppVeyor upload it as
 REM an artifact to S3.
+
+SET PDAL_INSTALL_PREFIX="C:/OSGeo4W64/"
 
 if "%OSGEO4W_BUILD%"=="ON" (
 
@@ -21,7 +23,7 @@ REM needed or else CMake won't find the Oracle library that OSGeo4W installs
 
 SET ORACLE_HOME="C:/OSGEO4W64/"
 
-cmake -G "Visual Studio 14 2015 Win64" ^
+cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_HEXBIN=%PDAL_OPTIONAL_COMPONENTS% ^
@@ -51,11 +53,12 @@ cmake -G "Visual Studio 14 2015 Win64" ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_ROOT%/apps/python36/lib/site-packages/numpy/core/include ^
 	-DNUMPY_VERSION=1.12.0 ^
     -Dgtest_force_shared_crt=ON ^
-    -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^
+    -DCMAKE_INSTALL_PREFIX=%PDAL_INSTALL_PREFIX% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     -DBUILD_PGPOINTCLOUD_TESTS=OFF ^
     -DBUILD_SQLITE_TESTS=OFF ^
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo ^
     -DBUILD_OCI_TESTS=OFF ^
     .
-	
-	
+
+
