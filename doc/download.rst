@@ -15,7 +15,7 @@ Current Release(s)
 
 * **2017-10-12** `PDAL-1.6.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.6.0
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.6
 
 .. _`PDAL-1.6.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.6.0-src.tar.gz
 .. _`md5`: http://download.osgeo.org/pdal/PDAL-1.6.0-src.tar.gz.md5
