@@ -52,12 +52,6 @@ class PointView;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 
-//
-// The application base class gives us these common options:
-//    --help / -h
-//    --verbose / -v
-//    --version
-//
 class PDAL_DLL Kernel
 {
     FRIEND_TEST(KernelTest, parseOption);

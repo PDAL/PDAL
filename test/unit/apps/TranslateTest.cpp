@@ -93,6 +93,7 @@ TEST(translateTest, t2)
         output), 0);
 
     // Check that we fail with no bad input file.
+    FileUtils::deleteFile("foo.las");
     EXPECT_NE(runTranslate("foo.las " + out + " --json=\"" + json + "\"",
         output), 0);
 
