@@ -241,7 +241,7 @@ void LasReader::ready(PointTableRef table)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
-            LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
+            const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
             m_decompressor.reset(new LazPerfVlrDecompressor(*stream,
                 vlr->data(), m_header.pointOffset()));
@@ -375,7 +375,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         "number of point records within the file.");
 
     // PDAL metadata VLR
-    LasVLR *vlr = m_header.findVlr("PDAL", 12);
+    const LasVLR *vlr = m_header.findVlr("PDAL", 12);
     if (vlr)
     {
         const char *pos = vlr->data();
@@ -399,7 +399,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 
 void LasReader::readExtraBytesVlr()
 {
-    LasVLR *vlr = m_header.findVlr(SPEC_USER_ID,
+    const LasVLR *vlr = m_header.findVlr(SPEC_USER_ID,
         EXTRA_BYTES_RECORD_ID);
     if (!vlr)
         return;

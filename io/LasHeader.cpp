@@ -252,12 +252,12 @@ void LasHeader::removeVLR(const std::string& userId)
 }
 
 
-LasVLR *LasHeader::findVlr(const std::string& userId,
-    uint16_t recordId)
+const LasVLR *LasHeader::findVlr(const std::string& userId,
+    uint16_t recordId) const
 {
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
     {
-        LasVLR& vlr = *vi;
+        const LasVLR& vlr = *vi;
         if (vlr.matches(userId, recordId))
             return &vlr;
     }
@@ -267,7 +267,7 @@ LasVLR *LasHeader::findVlr(const std::string& userId,
 
 void LasHeader::setSrsFromWkt()
 {
-    LasVLR *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
+    const LasVLR *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
     if (!vlr)
         vlr = findVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
     if (!vlr || vlr->dataLen() == 0)
@@ -287,16 +287,12 @@ void LasHeader::setSrsFromWkt()
 
 void LasHeader::setSrsFromGeotiff()
 {
-    LasVLR *vlr;
-    uint8_t *data;
-    size_t dataLen;
-
-    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    const LasVLR *vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
     // We must have a directory entry.
     if (!vlr)
         return;
-    data = (uint8_t *)vlr->data();
-    dataLen = vlr->dataLen();
+    uint8_t *data = (uint8_t *)vlr->data();
+    size_t dataLen = vlr->dataLen();
 
     std::vector<uint8_t> directoryRec(data, data + dataLen);
 
