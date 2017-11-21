@@ -98,9 +98,22 @@ void Stage::addAllArgs(ProgramArgs& args)
 void Stage::handleOptions()
 {
     addAllArgs(*m_args);
+
+    StringList files = m_options.getValues("option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file));
+    m_options.remove(Option("option_file", 0));
+
+    // Special stuff for GRiD so that no error is thrown when a file
+    // isn't found.
+    files = m_options.getValues("grid_option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file, false));
+    m_options.remove(Option("grid_option_file", 0));
+
+    StringList cmdline = m_options.toCommandLine();
     try
     {
-        StringList cmdline = m_options.toCommandLine();
         m_args->parse(cmdline);
     }
     catch (arg_error error)
@@ -410,6 +423,11 @@ void Stage::l_addArgs(ProgramArgs& args)
 {
     args.add("user_data", "User JSON", m_userDataJSON);
     args.add("log", "Debug output filename", m_logname);
+    // We never really bind anything to this variable.  We extract the option
+    // before parsing the command line.  This entry allows a line in the
+    // help and options list.
+    args.add("option_file", "File from which to read additional options",
+        m_optionFile);
     readerAddArgs(args);
 }
 

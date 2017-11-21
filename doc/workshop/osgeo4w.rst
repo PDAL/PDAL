@@ -1,4 +1,4 @@
-.. workshop-osgeo4w:
+.. _workshop-osgeo4w:
 
 
 OSGeo4W
