@@ -224,6 +224,7 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
     PointId nextId = view->size();
     if (m_patch->m_isCompressed)
     {
+        size_t bufsize = 0;
 #ifdef PDAL_HAVE_LAZPERF
         auto cb = [this, view, &nextId, &numRead, &count]
             (char *buf, size_t bufsize)
@@ -238,7 +239,7 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
 
         const char *buf = reinterpret_cast<const char *>(
             (*r)[position].blobBuf.data());
-        size_t bufsize = (*r)[position].blobBuf.size();
+        bufsize = (*r)[position].blobBuf.size();
         count = std::min(count, size_t(numPts));
         LazPerfDecompressor(cb, dbDimTypes(), count).
             decompress(buf, bufsize);

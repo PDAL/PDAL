@@ -132,6 +132,10 @@ public:
     std::string getVertical() const;
     std::string getVerticalUnits() const;
 
+    /// Returns UTM zone **if** the coordinate system is actually UTM.
+    /// The method simply forwards down to OSRGetUTMZone
+    int getUTMZone() const;
+
     void dump() const;
     MetadataNode toMetadata() const;
 
