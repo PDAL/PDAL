@@ -212,7 +212,7 @@ public:
          { return layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return layout()->dimTypes(); }
-    PointLayoutPtr layout() const
+    inline PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
     void setSpatialReference(const SpatialReference& spatialRef)
         { m_spatialReference = spatialRef; }

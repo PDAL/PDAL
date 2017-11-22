@@ -224,7 +224,12 @@ public:
       \param id  ID of the dimension.
       \return  A pointer a dimension's detail.
     */
-    PDAL_DLL const Dimension::Detail *dimDetail(Dimension::Id id) const;
+    inline PDAL_DLL const Dimension::Detail* dimDetail(Dimension::Id id) const
+    {
+        return &(m_detail[Utils::toNative(id)]);
+    }
+
+
 
 
     PDAL_DLL MetadataNode toMetadata() const;
