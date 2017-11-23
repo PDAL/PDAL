@@ -16,7 +16,6 @@ import os
 import platform
 import sys
 import numpy
-from Cython.Build import cythonize
 
 USE_CYTHON = True
 try:
