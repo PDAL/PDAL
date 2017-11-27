@@ -78,12 +78,12 @@ cmake -G %GENERATOR% ^
     -DBUILD_PLUGIN_RIVLIB=OFF ^
     -DBUILD_PLUGIN_PYTHON=ON ^
     -DENABLE_CTEST=OFF ^
-    -DWITH_APPS=ON ^
     -DWITH_LAZPERF=ON ^
     -DLazperf_DIR=%OSGEO4W_DIR%/cmake ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=ON ^
     -DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\apps\python36\python.exe ^
+	-DLIBLZMA_LIBRARY=%OSGEO4W_DIR%\lib\liblzma.lib ^
     -DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python36\include ^
     -DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python36\libs\python36.lib ^
     -DPYTHON_DEBUG_LIBRARY=%OSGEO4W_DIR%\apps\python36\libs\python36.lib ^
@@ -94,6 +94,6 @@ cmake -G %GENERATOR% ^
     -Dgtest_force_shared_crt=ON ^
     -DCMAKE_INSTALL_PREFIX=c:\OSGeo4W64\ ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
-    -DCMAKE_VERBOSE_MAKEFILE=OFF ^
+    -DCMAKE_VERBOSE_MAKEFILE=OFF	 ^
     .
 
