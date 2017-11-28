@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,58 +31,34 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
 #pragma once
 
-
-#include <stdexcept>
-#include <ostream>
-#ifdef PDAL_HAVE_ZLIB
-#include <zlib.h>
-#endif // PDAL_HAVE_ZLIB
-
-#include <pdal/util/Charbuf.hpp>
-#include <pdal/util/OStream.hpp>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-class BpfCompressor
+enum class CompressionType
+{
+    None = 0,
+    Ght = 1,
+    Dimensional = 2,
+    Lazperf = 3,
+    Unknown = 256
+};
+
+using BlockCb = std::function<void(char *buf, size_t bufsize)>;
+const size_t CHUNKSIZE(1000000);
+
+class compression_error : public std::runtime_error
 {
 public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
-#ifdef PDAL_HAVE_ZLIB
-    BpfCompressor(OLeStream& out, size_t maxSize) :
-        m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
-        m_compressedSize(0)
+    compression_error() : std::runtime_error("General compression error")
     {}
-#else
-    BpfCompressor(OLeStream&, size_t)
+
+    compression_error(const std::string& s) :
+        std::runtime_error("Compression: " + s)
     {}
-#endif // PDAL_HAVE_ZLIB
-
-    void startBlock();
-    void finish();
-    void compress();
-
-private:
-    static const int CHUNKSIZE = 1000000;
-
-#ifdef PDAL_HAVE_ZLIB
-    OLeStream& m_out;
-    Charbuf m_charbuf;
-    std::vector<char> m_inbuf;
-    z_stream m_strm;
-    unsigned char m_tmpbuf[CHUNKSIZE];
-    OStreamMarker m_blockStart;
-    size_t m_rawSize;
-    size_t m_compressedSize;
-#endif // PDAL_HAVE_ZLIB
 };
 
 } // namespace pdal

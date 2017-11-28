@@ -43,7 +43,10 @@
 #include "Support.hpp"
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Compression.hpp>
+#include <pdal/compression/DeflateCompression.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
+#include <pdal/compression/LzmaCompression.hpp>
+#include <pdal/compression/ZstdCompression.hpp>
 #include <io/LasReader.hpp>
 
 using namespace pdal;
@@ -198,6 +201,7 @@ TEST(Compression, types)
 #endif // PDAL_HAVE_LAZPERF
 
 
+#ifdef PDAL_HAVE_ZILB
 TEST(Compression, deflate)
 {
     std::default_random_engine generator;
@@ -239,8 +243,10 @@ TEST(Compression, deflate)
     decompressor.decompress(compressed.data(), compressed.size());
     decompressor.done();
 }
+#endif // PDAL_HAVE_ZLIB
 
 
+#ifdef PDAL_HAVE_LZMA
 TEST(Compression, lzma)
 {
     std::default_random_engine generator;
@@ -281,7 +287,9 @@ TEST(Compression, lzma)
     decompressor.decompress(compressed.data(), compressed.size());
     decompressor.done();
 }
+#endif // PDAL_HAVE_LZMA
 
+#ifdef PDAL_HAVE_ZSTD
 TEST(Compression, zstd)
 {
     std::default_random_engine generator;
@@ -322,5 +330,5 @@ TEST(Compression, zstd)
     decompressor.decompress(compressed.data(), compressed.size());
     decompressor.done();
 }
-
+#endif // PDAL_HAVE_ZSTD
 

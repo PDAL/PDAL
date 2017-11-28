@@ -38,7 +38,7 @@
 #include <sstream>
 
 #include <pdal/pdal_macros.hpp>
-#include <pdal/Compression.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -340,12 +340,6 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     // pipeline) will be zero-filled.
 
 #ifdef PDAL_HAVE_LAZPERF
-
-    /**
-    SignedLazPerfBuf buffer(response);
-    LazPerfDecompressor<SignedLazPerfBuf> decompressor(buffer, m_dims);
-    **/
-
     auto cb = [&points, &pointNum](char *buf, size_t bufsize)
     {
         std::copy(buf, buf + bufsize, points[pointNum++]);

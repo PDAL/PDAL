@@ -37,7 +37,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/XMLSchema.hpp>
-#include <pdal/Compression.hpp>
 
 #include <sqlite3.h>
 #include <memory>
