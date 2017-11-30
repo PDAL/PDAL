@@ -41,8 +41,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <zlib.h>
-
 #include "BpfCompressor.hpp"
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/Utils.hpp>
@@ -102,6 +100,11 @@ void BpfWriter::initialize()
     m_header.m_coordId = m_coordId.m_val;
     m_header.m_coordType = Utils::toNative(m_header.m_coordId ?
         BpfCoordType::UTM : BpfCoordType::Cartesian);
+#ifndef PDAL_HAVE_ZLIB
+    if (m_compression)
+        throwError("Can't write compressed BPF. PDAL wasn't built with "
+            "Zlib support.");
+#endif
     m_header.m_compression = Utils::toNative(
             m_compression ? BpfCompression::Zlib : BpfCompression::None);
     m_extraData = Utils::base64_decode(m_extraDataSpec);
@@ -290,12 +293,11 @@ void BpfWriter::writePointMajor(const PointView* data)
 
 void BpfWriter::writeDimMajor(const PointView* data)
 {
-    // We're going to pretend for now that we only even have one point buffer.
+    // We're going to pretend for now that we only ever have one point buffer.
     BpfCompressor compressor(m_stream, data->size() * sizeof(float));
 
     for (auto & bpfDim : m_dims)
     {
-
         if (m_header.m_compression)
             compressor.startBlock();
         for (PointId idx = 0; idx < data->size(); ++idx)

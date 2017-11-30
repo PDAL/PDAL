@@ -33,11 +33,14 @@
 ****************************************************************************/
 
 #include "SQLiteWriter.hpp"
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_macros.hpp>
+
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_internal.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <iomanip>

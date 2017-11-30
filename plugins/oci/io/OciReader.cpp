@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Compression.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 

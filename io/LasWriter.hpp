@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <pdal/Compression.hpp>
-#include <pdal/FlexWriter.hpp>
 #include <pdal/plugin.hpp>
+
+#include <pdal/FlexWriter.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"

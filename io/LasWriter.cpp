@@ -38,7 +38,6 @@
 #include <iostream>
 #include <vector>
 
-#include <pdal/Compression.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>

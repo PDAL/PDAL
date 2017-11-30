@@ -260,6 +260,7 @@ TEST(BPFTest, test_byte_major)
         Support::datapath("bpf/autzen-utm-chipped-25-v3-segregated.bpf"));
 }
 
+#ifdef PDAL_HAVE_ZLIB
 TEST(BPFTest, test_point_major_zlib)
 {
     test_file_type(
@@ -279,6 +280,7 @@ TEST(BPFTest, test_byte_major_zlib)
         Support::datapath("bpf/"
             "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
 }
+#endif // PDAL_HAVE_ZLIB
 
 TEST(BPFTest, roundtrip_byte)
 {
@@ -304,6 +306,7 @@ TEST(BPFTest, roundtrip_point)
     test_roundtrip(ops);
 }
 
+#ifdef PDAL_HAVE_ZLIB
 TEST(BPFTest, roundtrip_byte_compression)
 {
     Options ops;
@@ -330,6 +333,7 @@ TEST(BPFTest, roundtrip_point_compression)
     ops.add("compression", true);
     test_roundtrip(ops);
 }
+#endif // PDAL_HAVE_ZLIB
 
 TEST(BPFTest, roundtrip_scaling)
 {
