@@ -2,7 +2,7 @@
 # ZLIB support
 #
 option(WITH_ZLIB
-    "Build support for compression/decompression with zlib/deflate.")
+    "Build support for compression/decompression with zlib/deflate." TRUE)
 if (WITH_ZLIB)
     find_package(ZLIB REQUIRED)
     set_package_properties(ZLIB PROPERTIES TYPE REQUIRED
