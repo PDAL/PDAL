@@ -205,6 +205,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     m_streamIf.reset();
 }
 
+
 void LasReader::handleLaszip(int result)
 {
 #ifdef PDAL_HAVE_LASZIP
@@ -393,7 +394,6 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         m.addWithType("pdal_pipeline", std::string(pos, size), "json",
             "PDAL Processing Pipeline");
     }
-
 }
 
 

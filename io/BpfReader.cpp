@@ -134,9 +134,9 @@ void BpfReader::initialize()
     }
     else
     {
-       //BPF supports something called Terrestrial Centered Rotational
-       //(BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
-       //which we can figure out when we run into a file with these
+       // BPF supports something called Terrestrial Centered Rotational
+       // (BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
+       // which we can figure out when we run into a file with these
        // coordinate systems.
        throwError("BPF file contains unsupported coordinate system");
     }

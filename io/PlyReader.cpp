@@ -439,10 +439,9 @@ bool PlyReader::processOne(PointRef& point)
 // We're just reading the vertex element here.
 point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
 {
-    point_count_t cnt;
+    point_count_t cnt(0);
 
     PointRef point(view->point(0));
-    cnt = 0;
     for (PointId idx = 0; idx < m_vertexElt->m_count && idx < num; ++idx)
     {
         point.setPointId(idx);

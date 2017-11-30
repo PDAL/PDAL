@@ -43,6 +43,7 @@
 #include <ogr_core.h>
 #include <ogrsf_frmts.h>
 
+// Only build this if we are using GDAL pre 2.1.
 #ifndef PDAL_GDAL2_1
 
 namespace pdal
