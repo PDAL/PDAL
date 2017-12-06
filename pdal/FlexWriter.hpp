@@ -105,7 +105,11 @@ private:
     virtual void write(const PointViewPtr view) final
     {
         if (m_hashPos != std::string::npos)
+        {
+            if (view->size() == 0)
+                return;
             readyFile(generateFilename(), view->spatialReference());
+        }
         writeView(view);
         if (m_hashPos != std::string::npos)
             doneFile();
