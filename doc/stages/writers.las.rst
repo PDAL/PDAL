@@ -76,7 +76,7 @@ Options
 -------
 
 filename
-  LAS file to read. The writer will accept a filename containing
+  Output filename. The writer will accept a filename containing
   a single placeholder character (`#`).  If input to the writer consists
   of multiple PointViews, each will be written to a separate file, where
   the placeholder will be replaced with an incrementing integer.  If no
