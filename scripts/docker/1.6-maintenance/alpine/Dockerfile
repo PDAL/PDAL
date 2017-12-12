@@ -29,6 +29,7 @@ RUN \
         laszip-dev \
         libspatialite-dev \
         cython-dev \
+        jsoncpp-dev \
         py-packaging \
     ; \
     apk add --no-cache \
@@ -51,6 +52,7 @@ RUN \
         libcurl \
         laszip \
         libspatialite \
+        jsoncpp \
         py-setuptools \
     ;\
     mkdir /vdatum; \
