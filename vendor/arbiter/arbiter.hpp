@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: c3b439d09d272818e221d3c57c16de14b89a6512
+// Git SHA: 311b81e3dcb5e8c55b2148f7eba46a12cff66914
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -153,10 +153,6 @@ public:
 
     std::vector<char> data() const { return m_data; }
     const Headers& headers() const { return m_headers; }
-    std::string str() const
-    {
-        return std::string(data().data(), data().size());
-    }
 
 private:
     int m_code;
@@ -527,7 +523,6 @@ public:
 
     // Return value is in seconds.
     int64_t operator-(const Time& other) const;
-    int64_t asUnix() const;
 
 private:
     std::time_t m_time;
@@ -808,8 +803,6 @@ class ARBITER_DLL Fs : public Driver
 public:
     Fs() { }
 
-    using Driver::get;
-
     static std::unique_ptr<Fs> create(const Json::Value& json);
 
     virtual std::string type() const override { return "file"; }
@@ -957,14 +950,13 @@ public:
             http::Headers headers,
             http::Query query) const;
 
-    void post(
+protected:
+    /** HTTP-derived Drivers should override this version of GET to allow for
+     * custom headers and query parameters.
+     */
+    virtual bool get(
             std::string path,
-            const std::string& data,
-            http::Headers headers,
-            http::Query query) const;
-    void post(
-            std::string path,
-            const std::vector<char>& data,
+            std::vector<char>& data,
             http::Headers headers,
             http::Query query) const;
 
@@ -994,18 +986,6 @@ public:
             http::Headers headers = http::Headers(),
             http::Query query = http::Query()) const;
 
-protected:
-    /** HTTP-derived Drivers should override this version of GET to allow for
-     * custom headers and query parameters.
-     */
-    virtual bool get(
-            std::string path,
-            std::vector<char>& data,
-            http::Headers headers,
-            http::Query query) const;
-
-    http::Pool& m_pool;
-
 private:
     virtual bool get(
             std::string path,
@@ -1014,7 +994,12 @@ private:
         return get(path, data, http::Headers(), http::Query());
     }
 
-    std::string typedPath(const std::string& p) const;
+    std::string typedPath(const std::string& p) const
+    {
+        return type() + "://" + p;
+    }
+
+    http::Pool& m_pool;
 };
 
 /** @brief HTTPS driver.  Identical to the HTTP driver except for its type
@@ -3865,8 +3850,8 @@ namespace arbiter
 namespace crypto
 {
 
-std::string encodeBase64(const std::vector<char>& data, bool pad = true);
-std::string encodeBase64(const std::string& data, bool pad = true);
+std::string encodeBase64(const std::vector<char>& data);
+std::string encodeBase64(const std::string& data);
 
 std::string encodeAsHex(const std::vector<char>& data);
 std::string encodeAsHex(const std::string& data);
@@ -3902,11 +3887,6 @@ std::string encodeAsHex(const std::string& data);
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/exports.hpp>
-
-#ifndef ARBITER_EXTERNAL_JSON
-#include <arbiter/third/json/json.hpp>
-#endif
-
 #endif
 
 
@@ -4076,26 +4056,6 @@ namespace util
         if (t) return makeUnique<T>(*t);
         else return std::unique_ptr<T>();
     }
-
-    inline Json::Value parse(const std::string& s)
-    {
-        Json::Reader reader;
-        Json::Value json;
-        if (!reader.parse(s, json))
-        {
-            throw std::runtime_error(
-                    "Parse failure: " + reader.getFormattedErrorMessages());
-        }
-        return json;
-    }
-
-    inline std::string toFastString(const Json::Value& json)
-    {
-        std::string s = Json::FastWriter().write(json);
-        s.pop_back();   // Strip trailing newline.
-        return s;
-    }
-
 } // namespace util
 
 } // namespace arbiter
@@ -4164,11 +4124,7 @@ public:
      *          `~/.aws/credentials` or the file at AWS_CREDENTIAL_FILE.
      *      - EC2 instance profile.
      */
-    static std::vector<std::unique_ptr<S3>> create(
-            http::Pool& pool,
-            const Json::Value& json);
-
-    static std::unique_ptr<S3> createOne(
+    static std::unique_ptr<S3> create(
             http::Pool& pool,
             const Json::Value& json);
 
@@ -4233,10 +4189,9 @@ private:
 class S3::Auth
 {
 public:
-    Auth(std::string access, std::string hidden, std::string token = "")
+    Auth(std::string access, std::string hidden)
         : m_access(access)
         , m_hidden(hidden)
-        , m_token(token)
     { }
 
     Auth(std::string iamRole)
@@ -4262,7 +4217,11 @@ private:
 class S3::Config
 {
 public:
-    Config(const Json::Value& json, std::string profile);
+    Config(std::string region, std::string baseUrl, bool sse, bool precheck);
+
+    static std::unique_ptr<Config> create(
+            const Json::Value& json,
+            std::string profile);
 
     const std::string& region() const { return m_region; }
     const std::string& baseUrl() const { return m_baseUrl; }
@@ -4293,8 +4252,8 @@ public:
 
     std::string url() const;
     std::string host() const;
-    std::string baseUrl() const;
-    std::string bucket() const;
+    std::string baseUrl() const { return m_baseUrl; }
+    std::string bucket() const { return m_bucket; }
     std::string object() const;
 
 private:
@@ -4361,103 +4320,6 @@ private:
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/s3.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/drivers/google.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#ifndef ARBITER_IS_AMALGAMATION
-#include <arbiter/drivers/http.hpp>
-#endif
-
-#include <mutex>
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-namespace ARBITER_CUSTOM_NAMESPACE
-{
-#endif
-
-namespace arbiter
-{
-
-namespace drivers
-{
-
-class Google : public Https
-{
-    class Auth;
-public:
-    Google(http::Pool& pool, std::unique_ptr<Auth> auth);
-
-    static std::unique_ptr<Google> create(
-            http::Pool& pool,
-            const Json::Value& json);
-
-    // Overrides.
-    virtual std::string type() const override { return "gs"; }  // Match gsutil.
-
-    virtual std::unique_ptr<std::size_t> tryGetSize(
-            std::string path) const override;
-
-    /** Inherited from Drivers::Http. */
-    virtual void put(
-            std::string path,
-            const std::vector<char>& data,
-            http::Headers headers,
-            http::Query query) const override;
-
-private:
-    /** Inherited from Drivers::Http. */
-    virtual bool get(
-            std::string path,
-            std::vector<char>& data,
-            http::Headers headers,
-            http::Query query) const override;
-
-    virtual std::vector<std::string> glob(
-            std::string path,
-            bool verbose) const override;
-
-    std::unique_ptr<Auth> m_auth;
-};
-
-class Google::Auth
-{
-public:
-    Auth(const Json::Value& creds);
-    static std::unique_ptr<Auth> create(const Json::Value& json);
-
-    http::Headers headers() const;
-
-private:
-    void maybeRefresh() const;
-    std::string sign(std::string data, std::string privateKey) const;
-
-    const Json::Value m_creds;
-    mutable int64_t m_expiration = 0;   // Unix time.
-    mutable http::Headers m_headers;
-
-    mutable std::mutex m_mutex;
-};
-
-} // namespace drivers
-} // namespace arbiter
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-}
-#endif
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/drivers/google.hpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -4790,29 +4652,6 @@ public:
     /** Get a further nested subpath relative to this Endpoint's root. */
     Endpoint getSubEndpoint(std::string subpath) const;
 
-    http::Response httpGet(
-            std::string path,
-            http::Headers headers = http::Headers(),
-            http::Query query = http::Query(),
-            std::size_t reserve = 0) const;
-
-    http::Response httpPut(
-            std::string path,
-            const std::vector<char>& data,
-            http::Headers headers = http::Headers(),
-            http::Query query = http::Query()) const;
-
-    http::Response httpHead(
-            std::string path,
-            http::Headers headers = http::Headers(),
-            http::Query query = http::Query()) const;
-
-    http::Response httpPost(
-            std::string path,
-            const std::vector<char>& data,
-            http::Headers headers = http::Headers(),
-            http::Query query = http::Query()) const;
-
 private:
     Endpoint(const Driver& driver, std::string root);
 
@@ -4857,17 +4696,15 @@ private:
 #endif
 
 #ifndef ARBITER_IS_AMALGAMATION
-#include <arbiter/endpoint.hpp>
+#include <arbiter/util/exports.hpp>
 #include <arbiter/driver.hpp>
-#include <arbiter/drivers/dropbox.hpp>
+#include <arbiter/endpoint.hpp>
 #include <arbiter/drivers/fs.hpp>
-#include <arbiter/drivers/google.hpp>
+#include <arbiter/drivers/test.hpp>
 #include <arbiter/drivers/http.hpp>
 #include <arbiter/drivers/s3.hpp>
-#include <arbiter/drivers/test.hpp>
-#include <arbiter/util/exports.hpp>
+#include <arbiter/drivers/dropbox.hpp>
 #include <arbiter/util/types.hpp>
-#include <arbiter/util/util.hpp>
 
 #ifndef ARBITER_EXTERNAL_JSON
 #include <arbiter/third/json/json.hpp>
@@ -5012,8 +4849,8 @@ public:
 
     /** Copy the single file @p file to the destination @p to.  If @p to ends
      * with a `/` or '\' character, then @p file will be copied into the
-     * directory @p to with the basename of @p file.  If @p to does not end
-     * with a slash character, then @p to will be interpreted as a file path.
+     * directory @p to with the basename of @p file.  If @p does not end with a
+     * slash character, then @p to will be interpreted as a file path.
      *
      * If @p to is a local filesystem path, then `fs::mkdirp` will be called
      * prior to copying.
