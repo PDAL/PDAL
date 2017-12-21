@@ -12,6 +12,7 @@ plugins/pgpointcloud/Pgtest-Support.hpp
 #
 # cmake stuff
 #
+build
 apps/pdal-config
 apps/Makefile
 
