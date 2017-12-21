@@ -12,25 +12,10 @@ plugins/pgpointcloud/Pgtest-Support.hpp
 #
 # cmake stuff
 #
-PDALConfig.cmake
-PDALConfigVersion.cmake
-PDALTargets.cmake
-CMakeCache.txt
-CMakeFiles/
-CPackConfig.cmake
-CPackSourceConfig.cmake
-cmake_install.cmake
-CTestTestfile.cmake
-Testing/
-test/temp/
+build
 apps/pdal-config
-apps/pdal-config.bat
-apps/pdal.pc
-src/CMakeScripts/
-apps/CMakeScripts/
-CMakeScripts/
-_CPack_Packages/
-install_manifest.txt
+apps/Makefile
+
 
 #
 # visual studio cruft
@@ -90,6 +75,8 @@ pdal/gitsha.cpp
 test/unit/TestConfig.hpp
 *.pyc
 
+test/data/autzen/autzen-interpolate.json
+test/data/autzen/hag.py
 test/data/bpf/bpf.xml
 test/data/bpf/bpf2nitf.xml
 test/data/filters/attribute.xml
@@ -113,8 +100,10 @@ test/data/filters/reproject.xml
 test/data/filters/sort.xml
 test/data/filters/splitter.xml
 test/data/filters/stats.xml
+test/data/filters/pcl/passthrough.json
 test/data/hole/crop.xml
 test/data/icebridge/pipeline.xml
+test/data/icebridge/pipeline.json
 test/data/io/p2g-writer.xml
 test/data/io/sqlite-reader.xml
 test/data/io/sqlite-writer.xml
@@ -150,6 +139,8 @@ test/data/qfit/little-endian-conversion.xml
 test/data/qfit/pipeline.xml
 test/data/qfit/reader.xml
 test/data/sbet/pipeline.xml
+test/data/sbet/pipeline.json
+
 
 python/*.egg*
 python/build/*
