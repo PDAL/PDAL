@@ -80,6 +80,8 @@ deploy:
       secure: 6DDLMtbxyT6amL3m5gmMObyL0ucWzIGxylinnYuMJPM=
     secret_access_key:
       secure: cSqZlsaCxFwXgxJw0BLd7npMFvQk3Vbr74ZPLaBQWLKnOz1cKss9qab1SzSygwkh
+    on:
+      branch: 1.6-maintenance
     bucket: "pdal"
     folder: "osgeo4w/"
     artifact: pdalosgeo4w
