@@ -306,6 +306,7 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 	LocalDepth d = _localDepth( node );
 
 	for( int dd=0 ; dd<3 ; dd++ )
+    {
 		if     ( p[dd]==0 ) p[dd] = (Real)(0.+1e-6);
 		else if( p[dd]==1 ) p[dd] = (Real)(1.-1e-6);
 
@@ -359,7 +360,8 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 				}
 			}
 		}
-		return value;
+    }
+	return value;
 }
 template< class Real >
 template< int FEMDegree , BoundaryType BType >
