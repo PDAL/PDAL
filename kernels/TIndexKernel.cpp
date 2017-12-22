@@ -37,10 +37,12 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/FileUtils.hpp>
+
+#include "../io/LasWriter.hpp"
 
 #include <cpl_string.h>
 
@@ -365,11 +367,18 @@ void TIndexKernel::mergeFile()
         merge.setInput(*premerge);
     }
 
-    Options writerOptions;
-    writerOptions.add("offset_x", "auto");
-    writerOptions.add("offset_y", "auto");
-    writerOptions.add("offset_z", "auto");
-    Stage& writer = makeWriter(m_filespec, merge, "", writerOptions);
+    Stage& writer = makeWriter(m_filespec, merge, "");
+    try
+    {
+        (void)dynamic_cast<LasWriter &>(writer);
+        Options options;
+        options.add("offset_x", "auto");
+        options.add("offset_y", "auto");
+        options.add("offset_z", "auto");
+        writer.addOptions(options);
+    }
+    catch (std::bad_cast)
+    {}
 
     PointTable table;
     writer.prepare(table);
