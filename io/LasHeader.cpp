@@ -291,7 +291,7 @@ void LasHeader::setSrsFromGeotiff()
     // We must have a directory entry.
     if (!vlr)
         return;
-    uint8_t *data = (uint8_t *)vlr->data();
+    auto data = reinterpret_cast<const uint8_t *>(vlr->data());
     size_t dataLen = vlr->dataLen();
 
     std::vector<uint8_t> directoryRec(data, data + dataLen);
@@ -301,7 +301,7 @@ void LasHeader::setSrsFromGeotiff()
     dataLen = 0;
     if (vlr && !vlr->isEmpty())
     {
-        data = (uint8_t *)vlr->data();
+        data = reinterpret_cast<const uint8_t *>(vlr->data());
         dataLen = vlr->dataLen();
     }
     std::vector<uint8_t> doublesRec(data, data + dataLen);
@@ -311,7 +311,7 @@ void LasHeader::setSrsFromGeotiff()
     dataLen = 0;
     if (vlr && !vlr->isEmpty())
     {
-        data = (uint8_t *)vlr->data();
+        data = reinterpret_cast<const uint8_t *>(vlr->data());
         dataLen = vlr->dataLen();
     }
     std::vector<uint8_t> asciiRec(data, data + dataLen);
