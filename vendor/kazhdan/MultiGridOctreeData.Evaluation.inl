@@ -59,7 +59,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		{
 			int dir , off;
 			Cube::FactorFaceIndex( f , dir , off );
-			double vv[3] , dv[3];
+			double vv[3] = {0.0, 0.0, 0.0};
+			double dv[3] = {0.0, 0.0, 0.0};
 			switch( dir )
 			{
 			case 0:
@@ -96,7 +97,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		{
 			int orientation , i1 , i2;
 			Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
-			double vv[3] , dv[3];
+			double vv[3] = {0.0, 0.0, 0.0};
+			double dv[3] = {0.0, 0.0, 0.0};
 			switch( orientation )
 			{
 			case 0:
@@ -172,7 +174,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			{
 				int dir , off;
 				Cube::FactorFaceIndex( f , dir , off );
-				double vv[3] , dv[3];
+				double vv[3] = {0.0, 0.0, 0.0};
+				double dv[3] = {0.0, 0.0, 0.0};
 				switch( dir )
 				{
 				case 0:
@@ -209,7 +212,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			{
 				int orientation , i1 , i2;
 				Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
-				double vv[3] , dv[3];
+				double vv[3] = {0.0, 0.0, 0.0};
+				double dv[3] = {0.0, 0.0, 0.0};
 				switch( orientation )
 				{
 				case 0:
