@@ -26,6 +26,7 @@ function(PDAL_TARGET_COMPILE_SETTINGS target)
         -Wno-long-long
         -Wno-unknown-pragmas
         -Wno-deprecated-declarations
+        -Werror
         )
     target_include_directories(${target} SYSTEM PUBLIC /usr/local/include)
 endfunction()
