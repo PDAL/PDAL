@@ -48,7 +48,7 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/writers.gdal.html");
 
 
-CREATE_STATIC_PLUGIN(1, 0, GDALWriter, Writer, s_info);
+CREATE_STATIC_PLUGIN(1, 0, GDALWriter, Writer, s_info)
 
 std::string GDALWriter::getName() const
 {
