@@ -38,9 +38,9 @@
 
 #include <algorithm>
 
-#ifdef PDAL_COMPILER_MSVC
+//#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
-#endif
+//#endif
 
 
 #ifdef PDAL_HAVE_PYTHON
@@ -54,9 +54,10 @@
 #define PY_ARRAY_UNIQUE_SYMBOL PDALARRAY_ARRAY_API
 #endif
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
-#endif
+#endif //PDAL_HAVE_PYTHON
 
 // forward declare PyObject so we don't need the python headers everywhere
 // see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html

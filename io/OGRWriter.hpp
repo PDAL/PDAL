@@ -51,7 +51,10 @@ extern "C" PF_ExitFunc OGRWriter_InitPlugin();
 #include <gdal_priv.h>
 #include <ogr_feature.h>
 #else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #include <ogrsf_frmts.h>
+#pragma GCC diagnostic pop
 #endif
 
 namespace pdal
