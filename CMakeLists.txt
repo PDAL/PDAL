@@ -266,6 +266,9 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
 
+# shut off -Wpedantic unfixable for kazhdan
+set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file
 # specifies linking in libpdal_base.so and libpdal_util.so.  This allows
