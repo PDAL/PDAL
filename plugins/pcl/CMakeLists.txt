@@ -58,6 +58,7 @@ PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_reader_libname} PRIVATE
     ${INCLUDE_DIRS})
+set_source_files_properties(io/PcdReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
 
 #
 # PCD Writer
@@ -69,6 +70,7 @@ PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_writer_libname} PRIVATE
     ${INCLUDE_DIRS})
+set_source_files_properties(io/PcdWriter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
 
 #
 # PCLBlock Filter
@@ -100,6 +102,8 @@ PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${movingleastsquares_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
+set_source_files_properties(filters/MovingLeastSquaresFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+
 
 PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
     FILES
