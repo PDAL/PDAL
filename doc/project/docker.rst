@@ -8,10 +8,10 @@ Building Docker Containers for PDAL
 PDAL's :ref:`repository <source>` is linked to `DockerHub`_ for automatic
 building of `Docker`_ containers. PDAL keeps three Docker containers current.
 
-* ``pdal/dependencies:latest`` -- PDAL's dependencies
-* ``pdal/pdal:latest`` -- PDAL master
-* ``pdal/pdal:1.5`` -- PDAL maintenance branch
-
+* ``pdal/dependencies:latest`` -- PDAL's dependencies for Travis builds
+* ``pdal/pdal:latest`` -- Latest PDAL release branch
+* ``pdal/pdal:1.5`` -- PDAL 1.5 maintenance branch
+* ``pdal/pdal:1.6`` -- PDAL 1.6 maintenance branch
 
 
 
@@ -21,9 +21,10 @@ building of `Docker`_ containers. PDAL keeps three Docker containers current.
 
 .. note::
 
-    Containers are built upon the `Dependences`_ container, but the
-    `Dependences`_ container is not pinned to specific Xenial or PDAL release
-    times. It corresponds to where ever the ``dependencies`` tag of the PDAL
+    PDAL's public use Docker containers are built using `Alpine Linux <https://alpinelinux.org/>`__,
+    but the containers that PDAL's `Travis`_ infrastructure uses
+    are built upon Ubuntu. The `Dependences`_ container
+    corresponds to where ever the ``dependencies`` tag of the PDAL
     source tree at https://github.com/PDAL/PDAL resides
 
 .. _`DockerHub`: https://hub.docker.com/r/pdal/pdal/
@@ -31,8 +32,7 @@ building of `Docker`_ containers. PDAL keeps three Docker containers current.
 Dependencies
 ================================================================================
 
-The PDAL dependencies Docker container is used by both the latest and release
-branch Docker containers. The dependencies container is also used during
+The PDAL dependencies Docker container is used by Travis
 :ref:`integration` testing by Travis. It is built using the Dockerfile at
 https://github.com/PDAL/PDAL/blob/master/scripts/docker/dependencies/Dockerfile
 
@@ -56,8 +56,8 @@ Maintenance
 
 A PDAL container corresponding to the last major release is automatically
 created and maintained with every commit to the active release branch. For
-example, the ``1.4-maintenance`` branch will have a corresponding
-``pdal/pdal:1.4`` container made with every commit on `DockerHub`_. Users are
+example, the ``1.6-maintenance`` branch will have a corresponding
+``pdal/pdal:1.6`` container made with every commit on `DockerHub`_. Users are
 encouraged to use these containers for testing, bug confirmation, and deployment
 
 .. figure:: ../images/docker-maintenance-branch.png
@@ -68,18 +68,17 @@ encouraged to use these containers for testing, bug confirmation, and deployment
 Latest (or master)
 ================================================================================
 
-A PDAL container corresponding to a developer-selected release point is made
-available at ``pdal/pdal:latest`` and corresponds to the manual push of a
-``docker-master`` tag by PDAL developers. This container is typically used for
-testing and verification of fixes, and it is recommended that users looking to
-depend on PDAL's Docker containers always use known release versions off of the
-last stable release branch.
+For convenience, `pdal/pdal:latest` corresponds to the latest
+release-branch, automatically built from the
+`1.x-maintenance` branch as new commits are pushed to it.
+
 
 .. warning::
 
     You should be using the `Maintenance`_ Docker container for any
-    production-oriented operations. Only use the latest one to test or prototype
-    a latest, unreleased feature.
+    production-oriented operations. `latest` may change version as
+    a new PDAL release is made, but specifically versioned Docker containers
+    will continue to be available.
 
 .. figure:: ../images/docker-master-branch.png
 
