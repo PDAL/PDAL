@@ -145,5 +145,5 @@ RUN \
     rm -rf /PRC; \
     apk del .build-deps
 
-#CMD ["pdal"]
+CMD ["pdal"]
 
