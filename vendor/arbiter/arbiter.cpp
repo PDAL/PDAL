@@ -2790,7 +2790,7 @@ Curl::Curl(const Json::Value& json)
 Curl::~Curl()
 {
 #ifdef ARBITER_CURL
-    curl_easy_cleanup(m_curl);
+    curl_easy_cleanup((CURL*)m_curl);
     curl_slist_free_all(m_headers);
     m_headers = nullptr;
 #endif
@@ -2808,30 +2808,30 @@ void Curl::init(
 
     // Set path.
     const std::string path(rawPath + buildQueryString(query));
-    curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_URL, path.c_str());
 
     // Needed for multithreaded Curl usage.
-    curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_NOSIGNAL, 1L);
 
     // Substantially faster DNS lookups without IPv6.
-    curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
     // Don't wait forever.  Use the low-speed options instead of the timeout
     // option to make the timeout a sliding window instead of an absolute.
-    curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
-    curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, m_timeout);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_LOW_SPEED_TIME, m_timeout);
 
-    curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
-    curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
 
     auto toLong([](bool b) { return b ? 1L : 0L; });
 
     // Configuration options.
-    curl_easy_setopt(m_curl, CURLOPT_VERBOSE, toLong(m_verbose));
-    curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, toLong(m_followRedirect));
-    curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, toLong(m_verifyPeer));
-    if (m_caPath) curl_easy_setopt(m_curl, CURLOPT_CAPATH, m_caPath->c_str());
-    if (m_caInfo) curl_easy_setopt(m_curl, CURLOPT_CAINFO, m_caInfo->c_str());
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_VERBOSE, toLong(m_verbose));
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_FOLLOWLOCATION, toLong(m_followRedirect));
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_SSL_VERIFYPEER, toLong(m_verifyPeer));
+    if (m_caPath) curl_easy_setopt((CURL*)m_curl, CURLOPT_CAPATH, m_caPath->c_str());
+    if (m_caInfo) curl_easy_setopt((CURL*)m_curl, CURLOPT_CAINFO, m_caInfo->c_str());
 
     // Insert supplied headers.
     for (const auto& h : headers)
@@ -2850,9 +2850,9 @@ int Curl::perform()
 #ifdef ARBITER_CURL
     long httpCode(0);
 
-    const auto code(curl_easy_perform(m_curl));
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
-    curl_easy_reset(m_curl);
+    const auto code(curl_easy_perform((CURL*)m_curl));
+    curl_easy_getinfo((CURL*)m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
+    curl_easy_reset((CURL*)m_curl);
 
     if (code != CURLE_OK) httpCode = 500;
 
@@ -2876,16 +2876,16 @@ Response Curl::get(
     init(path, headers, query);
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEDATA, &data);
 
     // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
     Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
 
     // Run the command.
     const int httpCode(perform());
@@ -2903,19 +2903,19 @@ Response Curl::head(std::string path, Headers headers, Query query)
     init(path, headers, query);
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEDATA, &data);
 
     // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
     Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
 
     // Specify a HEAD request.
-    curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_NOBODY, 1L);
 
     // Run the command.
     const int httpCode(perform());
@@ -2937,25 +2937,25 @@ Response Curl::put(
     std::unique_ptr<PutData> putData(new PutData(data));
 
     // Register callback function and data pointer to create the request.
-    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
-    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_READFUNCTION, putCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_READDATA, putData.get());
 
     // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Specify that this is a PUT request.
-    curl_easy_setopt(m_curl, CURLOPT_PUT, 1L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_PUT, 1L);
 
     // Must use this for binary data, otherwise curl will use strlen(), which
     // will likely be incorrect.
     curl_easy_setopt(
-            m_curl,
+            (CURL*)m_curl,
             CURLOPT_INFILESIZE_LARGE,
             static_cast<curl_off_t>(data.size()));
 
     // Hide Curl's habit of printing things to console even with verbose set
     // to false.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, eatLogging);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEFUNCTION, eatLogging);
 
     // Run the command.
     const int httpCode(perform());
@@ -2978,28 +2978,28 @@ Response Curl::post(
     std::vector<char> writeData;
 
     // Register callback function and data pointer to create the request.
-    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
-    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_READFUNCTION, putCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_READDATA, putData.get());
 
     // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_WRITEDATA, &writeData);
 
     // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HTTPHEADER, m_headers);
 
     // Set up callback and data pointer for received headers.
     Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
 
     // Specify that this is a POST request.
-    curl_easy_setopt(m_curl, CURLOPT_POST, 1L);
+    curl_easy_setopt((CURL*)m_curl, CURLOPT_POST, 1L);
 
     // Must use this for binary data, otherwise curl will use strlen(), which
     // will likely be incorrect.
     curl_easy_setopt(
-            m_curl,
+            (CURL*)m_curl,
             CURLOPT_INFILESIZE_LARGE,
             static_cast<curl_off_t>(data.size()));
 
