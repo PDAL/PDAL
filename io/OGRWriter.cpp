@@ -58,7 +58,7 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/writers.ogr.html");
 
 
-CREATE_STATIC_PLUGIN(1, 0, OGRWriter, Writer, s_info);
+CREATE_STATIC_PLUGIN(1, 0, OGRWriter, Writer, s_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
     m_feature(nullptr)

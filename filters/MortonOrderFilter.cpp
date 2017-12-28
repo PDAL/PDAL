@@ -60,7 +60,7 @@ namespace
 bool less_msb(const int& x, const int& y)
 {
     return x < y && x < (x ^ y);
-};
+}
 
 class CmpZOrder
 {
