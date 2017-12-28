@@ -16,6 +16,8 @@ function(PDAL_TARGET_COMPILE_SETTINGS target)
     target_compile_options(${target} PUBLIC
         ${PDAL_CXX_STANDARD}
         -Wextra
+        -Wpedantic
+        -Werror
         -Wall
         -Wno-unused-parameter
         -Wno-unused-variable
