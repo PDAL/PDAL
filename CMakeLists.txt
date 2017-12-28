@@ -268,7 +268,6 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
 
 # shut off -Wpedantic selectively
 set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
-set_source_files_properties(io/GDALGrid.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
 
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file
