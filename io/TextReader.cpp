@@ -69,18 +69,18 @@ void TextReader::initialize(PointTableRef table)
     if (m_separator == ' ')
     {
         // Scan string for some character not a number, space or letter.
-        for (size_t i = 0; i < buf.size(); ++i)
-            if (isspecial(buf[i]))
+        for (const auto e : buf) {
+            if (isspecial(e))
             {
-                m_separator = buf[i];
+                m_separator = e;
                 break;
             }
+        }
     }
 
-    if (m_separator != ' ')
-        m_dimNames = Utils::split(buf, m_separator);
-    else
-        m_dimNames = Utils::split2(buf, m_separator);
+    m_dimNames = m_separator != ' '?
+        Utils::split(buf, m_separator) :
+        Utils::split2(buf, m_separator) ;
     Utils::closeFile(m_istream);
 }
 
@@ -123,7 +123,7 @@ void TextReader::ready(PointTableRef table)
 
 point_count_t TextReader::read(PointViewPtr view, point_count_t numPts)
 {
-    PointId idx = view->size();
+    auto idx = view->size();
     point_count_t cnt = 0;
     PointRef point(*view, idx);
     while (cnt < numPts)
@@ -162,15 +162,8 @@ bool TextReader::processOne(PointRef& point)
 
 bool TextReader::fillFields()
 {
-    while (true)
+    for(std::string buf; std::getline(*m_istream, buf) && m_istream->good(); ++m_line)
     {
-        if (!m_istream->good())
-            return false;
-
-        std::string buf;
-
-        std::getline(*m_istream, buf);
-        m_line++;
         if (buf.empty())
             continue;
         if (m_separator != ' ')
@@ -190,6 +183,7 @@ bool TextReader::fillFields()
         }
         return true;
     }
+    return false;
 }
 
 
