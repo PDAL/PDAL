@@ -36,9 +36,10 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/plugin.hpp>
-#include <pdal/Compression.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
+
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip_api.h>
 #else

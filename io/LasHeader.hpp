@@ -381,7 +381,7 @@ public:
     void setSummary(const LasSummaryData& summary);
     bool valid() const;
     Dimension::IdList usedDims() const;
-    LasVLR *findVlr(const std::string& userId, uint16_t recordId);
+    const LasVLR *findVlr(const std::string& userId, uint16_t recordId) const;
     void removeVLR(const std::string& userId, uint16_t recordId);
     void removeVLR(const std::string& userId);
     void setLog(LogPtr log)

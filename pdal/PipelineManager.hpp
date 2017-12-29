@@ -133,6 +133,9 @@ public:
     std::vector<Stage *> leaves() const;
     void replace(Stage *sOld, Stage *sNew);
 
+    const std::vector<Stage *> stages() const
+        { return m_stages; }
+
 private:
     void setOptions(Stage& stage, const Options& addOps);
     Options stageOptions(Stage& stage);

@@ -742,6 +742,77 @@ TEST(LasWriterTest, laszip1_4)
        EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
     }
 }
+
+TEST(LasWriterTest, flex_vlr)
+{
+    std::array<std::string, 3> outname =
+        {{ "test_1.laz", "test_2.laz", "test_3.laz" }};
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/simple.las"));
+
+    PointTable table;
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+        FileUtils::deleteFile(Support::temppath(outname[i]));
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("test_#.laz"));
+    writerOps.add("pdal_metadata", true);
+
+    LasWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    // Make sure that the files have the same three VLRs.
+    for (size_t i = 0; i < outname.size(); ++i)
+    {
+        std::string filename = Support::temppath(outname[i]);
+        EXPECT_TRUE(FileUtils::fileExists(filename));
+
+        Options ops;
+        ops.add("filename", filename);
+
+        LasReader r;
+        r.setOptions(ops);
+
+        PointTable t;
+        r.prepare(t);
+        r.execute(t);
+        const VlrList& vlrs = r.header().vlrs();
+        EXPECT_EQ(vlrs.size(), 3U);
+        EXPECT_NE(r.header().findVlr("laszip encoded", 22204), nullptr);
+        EXPECT_NE(r.header().findVlr("PDAL", 12), nullptr);
+        EXPECT_NE(r.header().findVlr("PDAL", 13), nullptr);
+    }
+}
 #endif // PDAL_HAVE_LASZIP
 
 void compareFiles(const std::string& name1, const std::string& name2,

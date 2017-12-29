@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <pdal/Compression.hpp>
-#include <pdal/FlexWriter.hpp>
 #include <pdal/plugin.hpp>
+
+#include <pdal/FlexWriter.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
@@ -147,7 +148,7 @@ private:
 
     void handleLaszip(int result);
     void fillForwardList();
-    void collectUserVLRs();
+    void addUserVlrs();
     template <typename T>
     void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);
@@ -158,12 +159,13 @@ private:
         std::vector<char>& buf);
     bool writeLasZipBuf(PointRef& point);
     void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
-    void setVlrsFromMetadata(MetadataNode& forward);
-    void setPDALVLRs(MetadataNode& m);
+    void addForwardVlrs();
+    void addMetadataVlr(MetadataNode& forward);
+    void addPipelineVlr();
+    void addExtraBytesVlr();
+    void addSpatialRefVlrs();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
-    void setExtraBytesVlr();
-    void setVlrsFromSpatialRef();
     void readyCompression();
     void readyLasZipCompression();
     void readyLazPerfCompression();

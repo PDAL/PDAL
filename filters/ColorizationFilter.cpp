@@ -58,6 +58,9 @@ std::string ColorizationFilter::getName() const { return s_info.name; }
 namespace
 {
 
+// Parse dimension name:band number:scale factor
+// Unsupplied band numbers start at 1. The default scale factor is 1.0
+//
 ColorizationFilter::BandInfo parseDim(const std::string& dim,
     uint32_t defaultBand)
 {

@@ -82,7 +82,7 @@ cell_size
   Cell Size. [Default: **1**]
 
 exponential
-  Use exponential growth for window sizes? [Defualt: **true**]
+  Use exponential growth for window sizes? [Default: **true**]
 
 ignore
   Optional range of values to ignore.

@@ -1677,7 +1677,7 @@ void Octree< Real >::_updateCumulativeIntegralConstraintsFromFiner( const FEMSys
 			_localDepthAndOffset( node , d , off );
 
 			// Offset the constraints using the solution from finer resolutions.
-			int startX , endX , startY , endY , startZ , endZ;
+			int startX = 0, endX = 0, startY = 0, endY = 0, startZ = 0, endZ = 0;
 			_SetParentOverlapBounds< FEMDegree , FEMDegree >( node , startX , endX , startY  , endY , startZ , endZ );
 
 			Real solution = fineSolution[ node->nodeData.nodeIndex ];

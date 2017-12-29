@@ -67,6 +67,12 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
 // The VSIFILE* that VSIFileFromMemBuffer creates in this
 // macro is never cleaned up. We're opening seven PNGs in the
 // ColorInterpRamps-ramps.hpp header. We always open them so they're available.
+//
+// GDAL forces to keep track of the return value, and its being ignored here,
+// To avoid the warning message:
+// warning: ignoring return value of 'VSILFILE* VSIFileFromMemBuffer(....)'
+//          declared with attribute warn_unused_result [-Wunused-result]
+// Using a tmp variable
 #define GETRAMP(name) \
     if (pdal::Utils::iequals(#name, rampFilename)) \
     { \
@@ -75,7 +81,7 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        (void)VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
+        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE)); \
     }
 //
 std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
