@@ -34,43 +34,81 @@
 
 #pragma once
 
-#include <functional>
-#include <queue>
-#include <vector>
+#include <cstddef>
+#include <string>
 
 #include <json/json.h>
 
-#include <arbiter/arbiter.hpp>
+#include <pdal/pdal_types.hpp>
 
-#include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include "GreyhoundCommon.hpp"
+#include "bounds.hpp"
 
 namespace pdal
 {
 
-class PDAL_DLL GreyhoundReader : public pdal::Reader
+namespace greyhound = entwine;
+
+static inline Json::Value parse(const std::string& data)
+{
+    Json::Value json;
+    Json::Reader reader;
+
+    if (data.size())
+    {
+        if (!reader.parse(data, json, false))
+        {
+            const std::string jsonError(reader.getFormattedErrorMessages());
+            if (!jsonError.empty())
+            {
+                throw pdal_error("Error during parsing: " + jsonError);
+            }
+        }
+    }
+
+    return json;
+}
+
+static inline std::string dense(const Json::Value& json)
+{
+    Json::StreamWriterBuilder builder;
+    builder.settings_["indentation"] = "";
+    return Json::writeString(builder, json);
+}
+
+struct GreyhoundArgs
+{
+    std::string url;
+    std::string resource;
+    std::string sbounds;
+    std::size_t depthBegin = 0;
+    std::size_t depthEnd = 0;
+    std::string tilePath;
+    Json::Value filter;
+    Json::Value schema;
+};
+
+class GreyhoundParams
 {
 public:
-    static void* create();
-    static int32_t destroy(void*);
-    std::string getName() const override;
+    GreyhoundParams() { }
+    GreyhoundParams(const GreyhoundArgs& args);
+    GreyhoundParams(std::string resourceRoot, Json::Value params)
+        : m_url(resourceRoot)
+        , m_params(params)
+    { }
+
+    std::string root() const { return m_url; }
+    std::string qs() const;
+
+    Json::Value& operator[](std::string key) { return m_params[key]; }
+    const Json::Value& toJson() const { return m_params; }
 
 private:
-    virtual void addArgs(ProgramArgs& args) override;
-    virtual void initialize(PointTableRef table) override;
-    virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void prepared(PointTableRef table) override;
-    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    std::string extractUrl(const GreyhoundArgs& args) const;
+    Json::Value extractParams(const GreyhoundArgs& args) const;
 
-    GreyhoundArgs m_args;
-    GreyhoundParams m_params;
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
-
-    Json::Value m_info;
-    PointLayout m_nativeLayout;
-    DimTypeList m_dims;
+    std::string m_url;
+    Json::Value m_params;
 };
 
 } // namespace pdal
