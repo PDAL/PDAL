@@ -13,7 +13,9 @@ if (MRSID_FOUND)
         ${PDAL_IO_DIR}
         ${MRSID_INCLUDE_DIR})
     target_compile_definitions(${reader_libname} PRIVATE -DHAVE_MRSID=1)
-    set_source_files_properties(io/MrsidReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(io/MrsidReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
 
     if (WITH_TESTS)
         PDAL_ADD_TEST(mrsidtest
