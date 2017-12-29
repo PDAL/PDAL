@@ -224,7 +224,7 @@ public:
       \param id  ID of the dimension.
       \return  A pointer a dimension's detail.
     */
-    inline PDAL_DLL const Dimension::Detail* dimDetail(Dimension::Id id) const
+    PDAL_DLL const Dimension::Detail* dimDetail(Dimension::Id id) const
     {
         return &(m_detail[Utils::toNative(id)]);
     }
