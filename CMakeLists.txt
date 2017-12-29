@@ -12,6 +12,15 @@ set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
 #------------------------------------------------------------------------------
+# This prevents cmake to be executed in the source directory
+#------------------------------------------------------------------------------
+if ( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
+    message(FATAL_ERROR "In-source builds not allowed.
+    Please make a new directory (called a build directory) and run CMake from there.
+    You may need to remove CMakeCache.txt." )
+endif()
+
+#------------------------------------------------------------------------------
 # internal cmake settings
 #------------------------------------------------------------------------------
 
