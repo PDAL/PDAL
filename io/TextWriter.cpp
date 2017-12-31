@@ -130,7 +130,7 @@ void TextWriter::ready(PointTableRef table)
 }
 
 
-void TextWriter::writeHeader(PointTableRef table)
+void TextWriter::writeHeader(PointTableRef table) const
 {
     log()->get(LogLevel::Debug) << "Writing header to filename: " <<
         m_filename << std::endl;
@@ -141,7 +141,7 @@ void TextWriter::writeHeader(PointTableRef table)
 }
 
 
-void TextWriter::writeFooter()
+void TextWriter::writeFooter() const
 {
     if (m_outputType == "GEOJSON")
     {
@@ -149,11 +149,10 @@ void TextWriter::writeFooter()
         if (m_callback.size())
             *m_stream  <<")";
     }
-    m_stream.reset();
 }
 
 
-void TextWriter::writeGeoJSONHeader()
+void TextWriter::writeGeoJSONHeader() const
 {
     if (m_callback.size())
         *m_stream << m_callback <<"(";
@@ -161,7 +160,7 @@ void TextWriter::writeGeoJSONHeader()
 }
 
 
-void TextWriter::writeCSVHeader(PointTableRef table)
+void TextWriter::writeCSVHeader(PointTableRef table) const
 {
     const PointLayoutPtr layout(table.layout());
     std::string quote = m_quoteHeader? "\"" : "";
@@ -175,7 +174,7 @@ void TextWriter::writeCSVHeader(PointTableRef table)
     *m_stream << m_newline;
 }
 
-void TextWriter::writeCSVBuffer(const PointViewPtr view)
+void TextWriter::writeCSVBuffer(const PointViewPtr view) const
 {
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
@@ -189,7 +188,7 @@ void TextWriter::writeCSVBuffer(const PointViewPtr view)
     }
 }
 
-void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
+void TextWriter::writeGeoJSONBuffer(const PointViewPtr view) const
 {
     using namespace Dimension;
 
@@ -232,6 +231,7 @@ void TextWriter::write(const PointViewPtr view)
 void TextWriter::done(PointTableRef /*table*/)
 {
     writeFooter();
+    m_stream.reset();
     getMetadata().addList("filename", m_filename);
 }
 
