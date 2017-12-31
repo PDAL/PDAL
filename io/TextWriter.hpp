@@ -85,8 +85,8 @@ private:
     FileStreamPtr m_stream;
     Dimension::IdList m_dims;
 
-    TextWriter& operator=(const TextWriter&); // not implemented
-    TextWriter(const TextWriter&); // not implemented
+    TextWriter& operator=(const TextWriter&) = delete;
+    TextWriter(const TextWriter&) = delete;
 };
 
 } // namespace pdal
