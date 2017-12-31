@@ -205,7 +205,8 @@ void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
         *m_stream << view->getFieldAs<double>(Id::Z, idx) << "]},";
 
         *m_stream << "\"properties\": {";
-        for (const auto &di : m_dims) {
+        for (const auto &di : m_dims)
+        {
             if (di != m_dims.front())
                 *m_stream << ",";
 
