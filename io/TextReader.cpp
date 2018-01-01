@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "TextReader.hpp"
+
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 
-#include "TextReader.hpp"
 
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
