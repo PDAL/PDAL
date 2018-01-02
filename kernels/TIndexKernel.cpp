@@ -259,22 +259,29 @@ void TIndexKernel::createFile()
 
     FieldIndexes indexes = getFields();
 
+    size_t filecount(0);
     StageFactory factory(false);
     for (auto f : m_files)
     {
         //ABELL - Not sure why we need to get absolute path here.
         f = FileUtils::toAbsolutePath(f);
-        FileInfo info = getFileInfo(factory, f);
-        if (!isFileIndexed(indexes, info))
+        FileInfo info;
+        if (getFileInfo(factory, f, info))
         {
-            if (createFeature(indexes, info))
-                m_log->get(LogLevel::Info) << "Indexed file " << f << std::endl;
-            else
-                m_log->get(LogLevel::Error) << "Failed to create feature for "
-                    "file '" << f << "'" << std::endl;
-
+            filecount++;
+            if (!isFileIndexed(indexes, info))
+            {
+                if (createFeature(indexes, info))
+                    m_log->get(LogLevel::Info) << "Indexed file " << f <<
+                    std::endl;
+                else
+                    m_log->get(LogLevel::Error) << "Failed to create feature "
+                        "for file '" << f << "'" << std::endl;
+            }
         }
     }
+    if (!filecount)
+        throw pdal_error("Couldn't index any files.");
     OGR_DS_Destroy(m_dataset);
 }
 
@@ -334,6 +341,8 @@ void TIndexKernel::mergeFile()
 
         OGR_F_Destroy(feature);
     }
+    m_log->get(LogLevel::Info) << "Merge filecount: " <<
+        files.size() << std::endl;
 
     Options cropOptions;
     if (!m_bounds.empty())
@@ -342,6 +351,7 @@ void TIndexKernel::mergeFile()
         cropOptions.add("polygon", m_wkt);
 
     Stage& merge = makeFilter("filters.merge");
+    size_t filecount(0);
     for (auto f : files)
     {
         Stage& reader = makeReader(f.m_filename, m_driverOverride);
@@ -465,11 +475,51 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 }
 
 
-TIndexKernel::FileInfo TIndexKernel::getFileInfo(StageFactory& factory,
-    const std::string& filename)
+bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 {
-    FileInfo fileInfo;
+    QuickInfo qi = reader.preview();
+    if (!qi.valid())
+        return false;
 
+    std::stringstream polygon;
+    polygon << "POLYGON ((";
+
+    polygon <<         qi.m_bounds.minx << " " << qi.m_bounds.miny;
+    polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.miny;
+    polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.maxy;
+    polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.maxy;
+    polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.miny;
+    polygon << "))";
+    fileInfo.m_boundary = polygon.str();
+    if (!qi.m_srs.empty())
+        fileInfo.m_srs = qi.m_srs.getWKT();
+    return true;
+}
+
+
+bool TIndexKernel::slowBoundary(Stage& hexer, FileInfo& fileInfo)
+{
+    PointTable table;
+    hexer.prepare(table);
+    PointViewSet set = hexer.execute(table);
+
+    MetadataNode m = table.metadata();
+    m = m.findChild("filters.hexbin:error");
+    if (m.valid())
+        return false;
+    m = m.findChild("filters.hexbin:boundary");
+    fileInfo.m_boundary = m.value();
+
+    PointViewPtr v = *set.begin();
+    if (!v->spatialReference().empty())
+        fileInfo.m_srs = v->spatialReference().getWKT();
+    return true;
+}
+
+
+bool TIndexKernel::getFileInfo(StageFactory& factory,
+    const std::string& filename, FileInfo& fileInfo)
+{
     PipelineManager manager;
     manager.commonOptions() = m_manager.commonOptions();
     manager.stageOptions() = m_manager.stageOptions();
@@ -479,44 +529,29 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(StageFactory& factory,
 
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
-    Stage* hexer = &manager.makeFilter("filters.hexbin", reader);
-    if (m_fastBoundary || !hexer)
+    bool fast(m_fastBoundary);
+    try
     {
-        QuickInfo qi = reader.preview();
-
-        std::stringstream polygon;
-        polygon << "POLYGON ((";
-
-        polygon <<         qi.m_bounds.minx << " " << qi.m_bounds.miny;
-        polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.miny;
-        polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.maxy;
-        polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.maxy;
-        polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.miny;
-        polygon << "))";
-        fileInfo.m_boundary = polygon.str();
-        if (!qi.m_srs.empty())
-            fileInfo.m_srs = qi.m_srs.getWKT();
+        if (!fast)
+        {
+            Stage& hexer = manager.makeFilter("filters.hexbin", reader);
+            fast = !slowBoundary(hexer, fileInfo);
+        }
     }
-    else
+    catch (pdal_error&)
     {
-
-        PointTable table;
-        hexer->prepare(table);
-        PointViewSet set = hexer->execute(table);
-
-        MetadataNode m = table.metadata();
-        m = m.findChild("filters.hexbin:boundary");
-        fileInfo.m_boundary = m.value();
-
-        PointViewPtr v = *set.begin();
-        if (!v->spatialReference().empty())
-            fileInfo.m_srs = v->spatialReference().getWKT();
+        fast = true;
     }
-
+    if (fast && !fastBoundary(reader, fileInfo))
+    {
+        m_log->get(LogLevel::Error) << "Skipping file '" << filename <<
+            "': can't compute boundary." << std::endl;
+        return false;
+    }
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
     fileInfo.m_filename = filename;
 
-    return fileInfo;
+    return true;
 }
 
 
