@@ -272,7 +272,7 @@ private:
         // I'm setting a minmum number of cells as 1000, because, why not?
         // m_rings isn't necessarily an exact count of edges, but it's close
         // enough for this purpose.
-        size_t m = std::max(1000UL, m_rings.size());
+        size_t m = std::max((size_t)1000, m_rings.size());
 
         // See paper for this calc.
         double scalex = ((m_xMax - m_xMin) * yAvgLen) /
