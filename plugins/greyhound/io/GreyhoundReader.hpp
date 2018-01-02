@@ -69,8 +69,7 @@ private:
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
     Json::Value m_info;
-    PointLayout m_nativeLayout;
-    DimTypeList m_dims;
+    PointLayout m_readLayout;
 };
 
 } // namespace pdal

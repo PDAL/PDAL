@@ -50,24 +50,10 @@ CREATE_SHARED_PLUGIN(1, 0, GreyhoundWriter, Writer, s_info)
 
 std::string GreyhoundWriter::getName() const { return s_info.name; }
 
-namespace
-{
-
-bool existsIn(const Json::Value& schema, const std::string name)
-{
-    for (const auto& d : schema)
-    {
-        if (d["name"].asString() == name)
-            return true;
-    }
-    return false;
-}
-
-} // unnamed namespace
-
 void GreyhoundWriter::addArgs(ProgramArgs& args)
 {
     args.add("name", "Name for the addon dimension set", m_name);
+    args.add("dims", "Dimension names to write", m_writeDims);
 }
 
 void GreyhoundWriter::initialize(PointTableRef table)
@@ -82,41 +68,37 @@ void GreyhoundWriter::prepared(PointTableRef table)
             g.findChild("root").value<std::string>(),
             parse(g.findChild("params").value<std::string>()));
 
-    // TODO Add `dims` parameter for explicit writing.
-    Json::Value nativeSchema(m_info["schema"]);
+    // Don't include the addons here, since addons may be written more than
+    // once.
+    std::map<std::string, const Json::Value*> remote;
+    for (const auto& d : m_info["schema"])
+        remote[d["name"].asString()] = &d;
 
-    // Create our writeLayout, which is the dimensions that do not exist in
-    // the original schema.
     auto& layout(*table.layout());
-    for (const Dimension::Id id : layout.dims())
-    {
-        const Dimension::Detail& d(*layout.dimDetail(id));
-        const std::string name(layout.dimName(id));
 
-        if (!existsIn(nativeSchema, name))
+    // If no dimensions-to-write are explicitly passed in the options, use the
+    // diff between the remote dimensions and the table dimensions.
+    if (m_writeDims.isNull())
+    {
+        for (const Dimension::Id id : layout.dims())
         {
-            m_writeLayout.registerOrAssignDim(name, d.type());
+            const std::string name(layout.dimName(id));
+            if (!remote.count(name))
+            {
+                m_writeDims.append(name);
+            }
         }
     }
 
-    m_writeLayout.finalize();
-
-    // Create our JSON schema to send along with the /write call matching the
-    // formatting of what we'll be writing.
-    Json::Value writeSchema;
-    for (const Dimension::Id id : m_writeLayout.dims())
+    for (const Json::Value& j : m_writeDims)
     {
-        const Dimension::Detail& d(*m_writeLayout.dimDetail(id));
-        const std::string name(layout.dimName(id));
-
-        Json::Value dim;
-        dim["name"] = name;
-        dim["type"] = Dimension::toName(base(d.type()));
-        dim["size"] = static_cast<int>(Dimension::size(d.type()));
-        writeSchema.append(dim);
+        const auto name(j.asString());
+        m_writeLayout.registerOrAssignDim(
+                name,
+                layout.dimType(layout.findDim(name)));
     }
 
-    m_params["schema"] = writeSchema;
+    m_params["schema"] = layoutToSchema(m_writeLayout);
     m_params["name"] = m_name;
 }
 

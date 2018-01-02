@@ -59,11 +59,14 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
     args.add("depth_end", "Ending depth to query", m_args.depthEnd);
     args.add("tile_path", "Index-optimized tile selection", m_args.tilePath);
     args.add("filter", "Query filter", m_args.filter);
-    args.add("schema", "Greyhound schema", m_args.schema);
+    args.add("dims", "Dimension names to read", m_args.dims);
 }
 
 void GreyhoundReader::initialize(PointTableRef table)
 {
+    // Parse the URL and query parameters (although we won't handle the schema
+    // until addDimensions) and fetch the dataset `info`.
+
     Json::Value config;
     if (log()->getLevel() > LogLevel::Debug4)
         config["arbiter"]["verbose"] = true;
@@ -99,19 +102,42 @@ void GreyhoundReader::initialize(PointTableRef table)
 
 void GreyhoundReader::addDimensions(PointLayoutPtr layout)
 {
+    std::map<std::string, const Json::Value*> remote;
+    for (const auto& d : m_info["schema"])
+        remote[d["name"].asString()] = &d;
+    for (const auto& d : m_info["addons"])
+        remote[d["name"].asString()] = &d;
+
+    // The dimensions we will query are determined in the following order, the
+    // first of which is present taking precedence:
+    //  - The `dims` PDAL option on this stage.
+    //  - A `schema` query parameter parsed from the `url` option.
+    //  - Finally, fall back to the full `info.schema`.
+    if (m_args.dims.isNull())
+    {
+        const Json::Value& schema = m_params["schema"].isNull() ?
+            m_info["schema"] : m_params["schema"];
+
+        for (const auto& d : schema)
+        {
+            m_args.dims.append(d["name"].asString());
+        }
+    }
+
     auto isXyz([](const std::string& name)
     {
         return name == "X" || name == "Y" || name == "Z";
     });
 
-    // TODO We should probably take a `dims` parameter rather than a full
-    // schema, similar to the GreyhoundWriter.
-    if (m_params["schema"].isNull())
-        m_params["schema"] = m_info["schema"];
-
-    for (const auto& d : m_params["schema"])
+    // Build the request layout from the specified `dims`.
+    for (const auto& n : m_args.dims)
     {
-        const auto name(d["name"].asString());
+        const auto name(n.asString());
+
+        if (!remote.count(name))
+            throw pdal_error(name + " does not exist in the remote schema");
+
+        const auto& d(*remote.at(name));
 
         const int baseType(
                 Utils::toNative(Dimension::fromName(d["type"].asString())));
@@ -124,34 +150,17 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
                     static_cast<Dimension::Type>(baseType | size));
 
         layout->registerOrAssignDim(name, type);
-        m_nativeLayout.registerOrAssignDim(name, type);
+        m_readLayout.registerOrAssignDim(name, type);
     }
+
+    m_params["schema"] = layoutToSchema(m_readLayout);
+
+    log()->get(LogLevel::Debug) << "Schema: " << m_params["schema"] <<
+        std::endl;
 }
 
 void GreyhoundReader::prepared(PointTableRef table)
 {
-    // Build the Schema for our request from the native schema from `info`.
-    auto& layout(m_nativeLayout);
-    m_args.schema = Json::Value();
-
-    for (const Dimension::Id id : layout.dims())
-    {
-        const Dimension::Detail& d(*layout.dimDetail(id));
-        const std::string name(layout.dimName(id));
-
-        Json::Value j;
-        j["name"] = name;
-        j["type"] = Dimension::toName(base(d.type()));
-        j["size"] = static_cast<int>(Dimension::size(d.type()));
-        m_args.schema.append(j);
-
-        m_dims.push_back(layout.findDimType(name));
-        if (m_dims.back().m_id == Dimension::Id::Unknown)
-            throw pdal_error("Could not find dimension " + name);
-    }
-
-    log()->get(LogLevel::Debug) << "Schema: " << m_args.schema << std::endl;
-
     MetadataNode queryNode(table.privateMetadata("greyhound"));
     queryNode.add("info", dense(m_info));
     queryNode.add("root", m_params.root());
@@ -180,19 +189,20 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     response.resize(response.size() - sizeof(uint32_t));
 
 #ifdef PDAL_HAVE_LAZPERF
-    auto cb = [this, &view, numPoints](char *buf, size_t bufsize)
+    const auto dimTypes(m_readLayout.dimTypes());
+    auto cb = [this, &view, &dimTypes, numPoints](char *buf, size_t bufsize)
     {
-        view->setPackedPoint(m_dims, view->size(), buf);
+        view->setPackedPoint(dimTypes, view->size(), buf);
         if (m_cb)
             m_cb(*view, view->size() - 1);
     };
-    LazPerfDecompressor(cb, m_dims, numPoints).
+    LazPerfDecompressor(cb, dimTypes, numPoints).
         decompress(response.data(), response.size());
 #else
     const char* end(response.data() + response.size());
     for (const char* pos(response.data()); pos < end; pos += pointSize)
     {
-        view->setPackedPoint(m_dims, view->size(); pos);
+        view->setPackedPoint(dimTypes, view->size(); pos);
         if (m_cb)
             m_cb(*view, view->size() - 1);
     }

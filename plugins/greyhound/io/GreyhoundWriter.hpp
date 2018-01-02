@@ -57,6 +57,7 @@ private:
     virtual void write(const PointViewPtr view) override;
 
     std::string m_name;
+    Json::Value m_writeDims;
 
     PointLayout m_writeLayout;
 

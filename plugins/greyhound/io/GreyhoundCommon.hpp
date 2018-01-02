@@ -40,6 +40,7 @@
 #include <json/json.h>
 
 #include <pdal/pdal_types.hpp>
+#include <pdal/PointLayout.hpp>
 
 #include "bounds.hpp"
 
@@ -75,6 +76,26 @@ static inline std::string dense(const Json::Value& json)
     return Json::writeString(builder, json);
 }
 
+static inline Json::Value layoutToSchema(PointLayout& layout)
+{
+    Json::Value schema;
+
+    layout.finalize();
+    for (const Dimension::Id id : layout.dims())
+    {
+        const Dimension::Detail& d(*layout.dimDetail(id));
+        const std::string name(layout.dimName(id));
+
+        Json::Value j;
+        j["name"] = name;
+        j["type"] = Dimension::toName(base(d.type()));
+        j["size"] = static_cast<int>(Dimension::size(d.type()));
+        schema.append(j);
+    }
+
+    return schema;
+}
+
 struct GreyhoundArgs
 {
     std::string url;
@@ -84,6 +105,7 @@ struct GreyhoundArgs
     std::size_t depthEnd = 0;
     std::string tilePath;
     Json::Value filter;
+    Json::Value dims;
     Json::Value schema;
 };
 
