@@ -36,6 +36,7 @@
 #include <pdal/util/Algorithm.hpp>
 
 #include "TextReader.hpp"
+#include "../filters/StatsFilter.hpp"
 
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -51,6 +52,40 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, TextReader, Reader, s_info)
 
 std::string TextReader::getName() const { return s_info.name; }
+
+// NOTE: - Forces reading of the entire file.
+QuickInfo TextReader::inspect()
+{
+    QuickInfo qi;
+    FixedPointTable t(100);
+
+    StatsFilter f;
+    f.setInput(*this);
+
+    f.prepare(t);
+    PointLayoutPtr layout = t.layout();
+    for (Dimension::Id id : layout->dims())
+        qi.m_dimNames.push_back(layout->dimName(id));
+    f.execute(t);
+
+    try
+    {
+        stats::Summary xSummary = f.getStats(Dimension::Id::X);
+        qi.m_pointCount = xSummary.count();
+        qi.m_bounds.minx = xSummary.minimum();
+        qi.m_bounds.maxx = xSummary.maximum();
+        stats::Summary ySummary = f.getStats(Dimension::Id::Y);
+        qi.m_bounds.miny = ySummary.minimum();
+        qi.m_bounds.maxy = ySummary.maximum();
+        stats::Summary zSummary = f.getStats(Dimension::Id::Z);
+        qi.m_bounds.minz = zSummary.minimum();
+        qi.m_bounds.maxz = zSummary.maximum();
+        qi.m_valid = true;
+    }
+    catch (pdal_error&)
+    {}
+    return qi;
+}
 
 void TextReader::initialize(PointTableRef table)
 {
