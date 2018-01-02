@@ -459,7 +459,7 @@ PDAL_DLL Derived gradX(const Eigen::MatrixBase<Derived>& A)
     out.col(out.cols()-1) = A.col(A.cols()-1) - A.col(A.cols()-2);
 
     return out;
-};
+}
 
 /**
   Compute the numerical gradient in the Y direction.
@@ -484,7 +484,7 @@ PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
     out.row(out.rows()-1) = A.row(A.rows()-1) - A.row(A.rows()-2);
 
     return out;
-};
+}
 
 /**
   Compute contour curvature for a single 3x3 matrix.
