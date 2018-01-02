@@ -86,6 +86,8 @@ class PDAL_DLL Geometry
 {
 public:
     Geometry();
+    Geometry(const Geometry&);
+    Geometry(Geometry&&);
     virtual ~Geometry();
     Geometry(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
@@ -93,7 +95,6 @@ public:
     Geometry(GEOSGeometry* g, const SpatialReference& srs);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
 
-    Geometry(const Geometry&);
     Geometry& operator=(const Geometry&);
 
     OGRGeometryH getOGRHandle();
@@ -127,7 +128,6 @@ public:
         { return m_geom != NULL; }
 
 protected:
-
     GEOSGeomPtr m_geom;
     const GEOSPreparedGeometry *m_prepGeom;
 
