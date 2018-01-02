@@ -1157,6 +1157,8 @@ public:
             Arg *arg = ai->get();
             arg->assignPositional(vals);
         }
+        //NOTE - Perhaps we should error here if there are still
+        //  unconsumed arguments.
     }
 
     /**

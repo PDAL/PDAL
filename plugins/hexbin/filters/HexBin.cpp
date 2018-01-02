@@ -104,9 +104,10 @@ void HexBin::done(PointTableRef table)
     }
     catch (hexer::hexer_error& e)
     {
-        m_metadata.add("error", e.what(), "Hexer threw an error and was unable to compute a boundary");
-        m_metadata.add("boundary", "MULTIPOLYGON EMPTY", "Empty polygon -- unable to compute boundary");
-
+        m_metadata.add("error", e.what(),
+            "Hexer threw an error and was unable to compute a boundary");
+        m_metadata.add("boundary", "MULTIPOLYGON EMPTY",
+            "Empty polygon -- unable to compute boundary");
         return;
 
     }
@@ -213,18 +214,21 @@ void HexBin::done(PointTableRef table)
 
     std::string boundary_text = p.wkt(m_precision);
 
-    m_metadata.add("boundary", boundary_text, "Approximated MULTIPOLYGON of domain");
-    m_metadata.addWithType("boundary_json", p.json(), "json", "Approximated MULTIPOLYGON of domain");
+    m_metadata.add("boundary", boundary_text,
+        "Approximated MULTIPOLYGON of domain");
+    m_metadata.addWithType("boundary_json", p.json(), "json",
+        "Approximated MULTIPOLYGON of domain");
     double area = density_p.area();
 
-//    double density = (double) m_grid->densePointCount() / area ;
     double density = (double) m_count/ area ;
     if (std::isinf(density))
     {
         density = -1.0;
         area = -1.0;
     }
-    m_metadata.add("density", density, "Number of points per square unit (total area)");
+
+    m_metadata.add("density", density,
+        "Number of points per square unit (total area)");
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
 
     double moving_avg(0.0);
@@ -243,11 +247,12 @@ void HexBin::done(PointTableRef table)
     }
 
     double avg_density = totalArea /(double) totalCount;
-    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Number of points per square unit (tessellated area within inclusions)");
+    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Number of points "
+        "per square unit (tessellated area within inclusions)");
 
     double avg_spacing = std::sqrt(1/density);
-    m_metadata.add("avg_pt_spacing", avg_spacing, "Avg point spacing (x/y units)");
-
+    m_metadata.add("avg_pt_spacing", avg_spacing,
+        "Avg point spacing (x/y units)");
 }
 
 } // namespace pdal
