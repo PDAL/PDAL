@@ -219,6 +219,11 @@ void HexBin::done(PointTableRef table)
 
 //    double density = (double) m_grid->densePointCount() / area ;
     double density = (double) m_count/ area ;
+    if (std::isinf(density))
+    {
+        density = -1.0;
+        area = -1.0;
+    }
     m_metadata.add("density", density, "Number of points per square unit (total area)");
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
 
