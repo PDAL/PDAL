@@ -170,6 +170,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     ILeStream in(stream);
     try
     {
+        // This also reads the extended VLRs at the end of the data.
         in >> m_header;
     }
     catch (const LasHeader::error& e)
