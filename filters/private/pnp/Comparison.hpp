@@ -238,11 +238,11 @@ class FloatingPoint {
 // macro defined by <windows.h>.
 template <>
 inline float FloatingPoint<float>::Max()
-{ return std::numeric_limits<float>::max(); }
+{ return (std::numeric_limits<float>::max)(); }
 
 template <>
 inline double FloatingPoint<double>::Max()
-{ return std::numeric_limits<double>::max(); }
+{ return (std::numeric_limits<double>::max)(); }
 
 // Typedefs the instances of the FloatingPoint template class that we
 // care to use.

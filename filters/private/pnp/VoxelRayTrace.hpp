@@ -71,18 +71,18 @@ public:
         // direction.
         m_tMaxX = m_xvec ?
             ((xNextCell - m_xstart) / m_xvec) :
-            std::numeric_limits<double>::max();
+            (std::numeric_limits<double>::max)();
         m_tMaxY = m_yvec ?
             ((yNextCell - m_ystart) / m_yvec) :
-            std::numeric_limits<double>::max();
+            (std::numeric_limits<double>::max)();
 
         // Amount t changes to move across a cell.
         m_tDeltaX = m_xvec ?
             std::abs(m_cellWidth / m_xvec) :
-            std::numeric_limits<double>::max();
+            (std::numeric_limits<double>::max)();
         m_tDeltaY = m_yvec ?
             std::abs(m_cellHeight / m_yvec) :
-            std::numeric_limits<double>::max();
+            (std::numeric_limits<double>::max)();
     }
 
     // Return the list of cells crossed when moving from the start point
