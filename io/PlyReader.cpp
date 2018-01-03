@@ -49,7 +49,7 @@ static PluginInfo const s_info = PluginInfo(
         "Read ply files.",
         "http://pdal.io/stages/reader.ply.html");
 
-CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info);
+CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info)
 
 
 PlyReader::PlyReader() : m_vertexElt(nullptr)

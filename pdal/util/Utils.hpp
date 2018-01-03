@@ -767,6 +767,12 @@ namespace Utils
     inline std::string toString(double from)
     {
         std::ostringstream oss;
+        // Standardize nan/inf output to the JAVA property names because
+        // when we convert to a string, we usually convert to JSON.
+        if (std::isnan(from))
+            return "NaN";
+        if (std::isinf(from))
+            return (from < 0 ? "-Infinity" : "Infinity");
         oss << std::setprecision(10) << from;
         return oss.str();
     }

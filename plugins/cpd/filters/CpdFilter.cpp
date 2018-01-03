@@ -66,7 +66,7 @@ void addMetadata(CpdFilter* filter, const cpd::Result& result)
 static PluginInfo const s_info = PluginInfo(
     "filters.cpd", "CPD filter", "http://pdal.io/stages/filters.cpd.html");
 
-CREATE_SHARED_PLUGIN(1, 0, CpdFilter, Filter, s_info);
+CREATE_SHARED_PLUGIN(1, 0, CpdFilter, Filter, s_info)
 
 std::string CpdFilter::getName() const
 {
