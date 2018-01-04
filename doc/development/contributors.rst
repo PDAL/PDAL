@@ -10,7 +10,7 @@ in new drivers and filters that fit into the existing infrastructure.
 
 When contributing, please follow along with existing practice.  If you
 have ideas for improving what we're doing, a discussion prior to a
-PR would be appreciated.  Here are some guidelines that may be helful:
+PR would be appreciated.  Here are some guidelines that may be helpful:
 
 - Don't make changes to existing code that don't need to be made.  If the
   code is working, there is no reason to "improve" it unless it's in the
