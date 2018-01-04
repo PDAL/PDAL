@@ -184,7 +184,7 @@ std::string tempFilename(const std::string& path)
     const std::string basename(arbiter::util::getBasename(path));
 
     return arbiter::util::join(tempdir, basename);
-};
+}
 #endif
 
 // RAII handling of a temp file to make sure file gets deleted.

@@ -121,6 +121,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
+PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 endif()

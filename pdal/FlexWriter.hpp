@@ -81,7 +81,7 @@ private:
     }
 
 #if (__GNUG__ < 4 || (__GNUG__ == 4 && __GNUG_MINOR__ < 7))
-#define final
+#define final final
 #endif
 
     virtual void ready(PointTableRef table) final

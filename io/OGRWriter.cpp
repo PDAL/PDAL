@@ -35,6 +35,8 @@
 
 #include <sstream>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
@@ -42,6 +44,7 @@
 
 #include <ogr_core.h>
 #include <ogrsf_frmts.h>
+#pragma GCC diagnostic pop
 
 // Only build this if we have at least version 2.1
 #ifdef PDAL_GDAL2_1
@@ -55,7 +58,7 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/writers.ogr.html");
 
 
-CREATE_STATIC_PLUGIN(1, 0, OGRWriter, Writer, s_info);
+CREATE_STATIC_PLUGIN(1, 0, OGRWriter, Writer, s_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
     m_feature(nullptr)
