@@ -34,6 +34,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <functional>
 
 namespace pdal
 {
