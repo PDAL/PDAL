@@ -16,6 +16,7 @@ developing new code can be found in this section.
 .. toctree::
    :maxdepth: 2
 
+   contributors
    overview
    compilation/index
    errorhandling

@@ -491,6 +491,9 @@ public:
             return value();
 
         std::string v(Utils::escapeJSON(value()));
+        if (m_impl->m_type == "double")
+            if (v == "NaN" || v == "Infinity" || v == "-Infinity")
+                v = "\"" + v + "\"";
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
             m_impl->m_type == "uuid" || m_impl->m_type == "matrix")
         {

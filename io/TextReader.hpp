@@ -57,6 +57,14 @@ public:
 
 private:
     /**
+      Retrieve summary information for the file. NOTE - entire file must
+      be read to retrieve summary for text files.
+
+      \param table  Point table being initialized.
+    */
+    virtual QuickInfo inspect();
+
+    /**
       Initialize the reader by opening the file and reading the header line.
       Closes the file on completion.
 

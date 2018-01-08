@@ -422,3 +422,13 @@ TEST(UtilsTest, simpleWordexpTest)
     EXPECT_EQ(output[3], "def");
     EXPECT_EQ(output[4], "ghi jkl");
 }
+
+TEST(UtilsTest, naninf)
+{
+    double d = std::numeric_limits<double>::quiet_NaN();
+    EXPECT_EQ(Utils::toString(d), "NaN");
+    d = std::numeric_limits<double>::infinity();
+    EXPECT_EQ(Utils::toString(d), "Infinity");
+    d = -d;
+    EXPECT_EQ(Utils::toString(d), "-Infinity");
+}
