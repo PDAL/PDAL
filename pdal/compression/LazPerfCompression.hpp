@@ -306,6 +306,7 @@ public:
                 m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE);
                 m_avail = CHUNKSIZE;
             }
+            buf += copyCnt;
             bufsize -= copyCnt;
         }
     }
