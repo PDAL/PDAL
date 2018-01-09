@@ -522,7 +522,7 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
     }
 
     return out;
-};
+}
 
 // Iteratively open the estimated surface. progressiveFilter can be used to
 // identify both low points and object (i.e., non-ground) points, depending on

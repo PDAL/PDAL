@@ -170,6 +170,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     ILeStream in(stream);
     try
     {
+        // This also reads the extended VLRs at the end of the data.
         in >> m_header;
     }
     catch (const LasHeader::error& e)
@@ -204,6 +205,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     m_streamIf.reset();
 }
+
 
 void LasReader::handleLaszip(int result)
 {
@@ -393,7 +395,6 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         m.addWithType("pdal_pipeline", std::string(pos, size), "json",
             "PDAL Processing Pipeline");
     }
-
 }
 
 
@@ -693,7 +694,9 @@ void LasReader::loadPointV10(PointRef& point, laszip_point& p)
     point.setField(Dimension::Id::NumberOfReturns, p.number_of_returns);
     point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
     point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
-    point.setField(Dimension::Id::Classification, p.classification);
+    uint8_t classification = p.classification | (p.synthetic_flag << 5) |
+        (p.keypoint_flag << 6) | (p.withheld_flag << 7);
+    point.setField(Dimension::Id::Classification, classification);
     point.setField(Dimension::Id::ScanAngleRank, p.scan_angle_rank);
     point.setField(Dimension::Id::UserData, p.user_data);
     point.setField(Dimension::Id::PointSourceId, p.point_source_ID);
@@ -781,6 +784,7 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 #ifdef PDAL_HAVE_LASZIP
 void LasReader::loadPointV14(PointRef& point, laszip_point& p)
 {
+    std::cerr << "Load point 1.4!\n";
     const LasHeader& h = m_header;
 
     double x = p.X * h.scaleX() + h.offsetX();

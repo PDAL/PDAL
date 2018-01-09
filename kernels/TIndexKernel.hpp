@@ -86,12 +86,15 @@ private:
     bool openLayer(const std::string& layerName);
     bool createLayer(const std::string& layerName);
     FieldIndexes getFields();
-    FileInfo getFileInfo(StageFactory& factory, const std::string& filename);
+    bool getFileInfo(StageFactory& factory, const std::string& filename,
+        FileInfo& info);
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
     gdal::Geometry prepareGeometry(const std::string& wkt,
         const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs);
     void createFields();
+    bool fastBoundary(Stage& reader, FileInfo& fileInfo);
+    bool slowBoundary(Stage& hexer, FileInfo& fileInfo);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 

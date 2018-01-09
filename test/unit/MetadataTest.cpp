@@ -36,6 +36,7 @@
 
 #include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/PDALUtils.hpp>
 
 using namespace pdal;
 
@@ -308,4 +309,21 @@ TEST(MetadataTest, pointer)
     std::istringstream iss;
     foo *f2 = n2.value<foo *>();
     EXPECT_EQ(f2, &f);
+}
+
+// Test the output of infinity/nan
+TEST(MetadataTest, infnan)
+{
+    double d = std::numeric_limits<double>::quiet_NaN();
+    MetadataNode n("top");
+    MetadataNode n2 = n.add("value", d);
+    EXPECT_EQ(n2.jsonValue(), "\"NaN\"");
+
+    d = std::numeric_limits<double>::infinity();
+    n2 = n.add("value2", d);
+    EXPECT_EQ(n2.jsonValue(), "\"Infinity\"");
+
+    d = -d;
+    n2 = n.add("value2", d);
+    EXPECT_EQ(n2.jsonValue(), "\"-Infinity\"");
 }

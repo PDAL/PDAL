@@ -194,6 +194,21 @@ a pipeline, substituting the input and output as it goes.
 
     ls *.las | cut -d. -f1 | xargs -P20 -I{} pdal pipeline -i /path/to/proj.json --readers.las.filename={}.las --writers.las.filename=output/{}.laz
 
+Here is an example doing something similar with Windows PowerShell
+
+::
+
+    $indir="Documents\inlas"
+    $outdir="Documents\outlas"
+    get-childitem $indir |
+    foreach-object {
+        if ($_.extension -ne ".las") {
+            continue
+        }
+        $outname = $outdir + "\" + $_.name
+        pdal pipeline -i \path\to\proj.json $_.fullname $outname
+    }
+
 .. _`JSON`: http://www.json.org/
 .. _`UUID`: http://en.wikipedia.org/wiki/Universally_unique_identifier
 .. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/las/interesting.las?raw=true

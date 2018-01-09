@@ -694,9 +694,11 @@ public:
 				if( normal[0]!=0 || normal[1]!=0 || normal[2]!=0 ) return true;
 			}
 			if( node->children )
-                for( int c=0 ; c<(int)Cube::CORNERS ; c++ )
-                    if( (*this)( node->children + c ) )
-                        return true;
+			{
+				for( int c=0 ; c<(int)Cube::CORNERS ; c++ )
+					if( (*this)( node->children + c ) )
+					return true;
+			}
 			return false;
 		}
 	};

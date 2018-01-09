@@ -97,7 +97,14 @@ Options
 --------------------------------------------------------------------------------
 
 filename
-    Name of output file. [Required]
+    Name of output file. The writer will accept a filename containing
+    a single placeholder character (`#`).  If input to the writer consists
+    of multiple PointViews, each will be written to a separate file, where
+    the placeholder will be replaced with an incrementing integer.  If no
+    placeholder is found, all PointViews provided to the writer are
+    aggregated into a single file for output.  Multiple PointViews are usually
+    the result of using :ref:`filters.splitter`, :ref:`filters.chipper` or
+    :ref:`filters.divider`.[Required]
 
 .. _resolution:
 

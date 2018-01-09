@@ -180,7 +180,7 @@ void Dumper::loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& b
 {
     const char *in = (const char *)zipPoint;
     char *out = buf.data();
-    if (m_header.pointFormat() >= 0 && m_header.pointFormat() <= 5)
+    if (m_header.pointFormat() <= 5)
     {
         std::copy(in, in + 20, out);
         out += 20;
@@ -198,7 +198,7 @@ void Dumper::loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& b
             out += 6;
         }
     }
-    else if (m_header.pointFormat() >= 6 & m_header.pointFormat() <= 10)
+    else if (m_header.pointFormat() >= 6 && m_header.pointFormat() <= 10)
     {
         std::copy(in, in + 14, out);
         out += 14;
