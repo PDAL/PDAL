@@ -62,5 +62,29 @@ public:
     {}
 };
 
+
+class Compressor
+{
+public:
+    virtual ~Compressor()
+    {}
+
+    virtual void compress(const char *buf, size_t bufsize) = 0;
+    virtual void done()
+    {}
+};
+
+
+class Decompressor
+{
+public:
+    virtual ~Decompressor()
+    {}
+
+    virtual void decompress(const char *buf, size_t bufsize) = 0;
+    virtual void done()
+    {}
+};
+
 } // namespace pdal
 

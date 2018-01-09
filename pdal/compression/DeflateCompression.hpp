@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class DeflateCompressor
+class DeflateCompressor : public Compressor
 {
 public:
     DeflateCompressor(BlockCb cb) : m_cb(cb)
@@ -127,7 +127,7 @@ private:
     unsigned char m_tmpbuf[CHUNKSIZE];
 };
 
-class DeflateDecompressor
+class DeflateDecompressor : public Decompressor
 {
 public:
     DeflateDecompressor(BlockCb cb) : m_cb(cb)
@@ -157,6 +157,17 @@ public:
         inflateEnd(&m_strm);
     }
 
+    void decompress(const char *buf, size_t bufsize)
+    {
+        run(buf, bufsize, Z_NO_FLUSH);
+    }
+
+    void done()
+    {
+        run(nullptr, 0, Z_FINISH);
+    }
+
+private:
     void run(const char *buf, size_t bufsize, int mode)
     {
         auto handleError = [](int ret) -> void
@@ -191,16 +202,6 @@ public:
             if (written)
                 m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
         } while (m_strm.avail_out == 0);
-    }
-
-    void decompress(const char *buf, size_t bufsize)
-    {
-        run(buf, bufsize, Z_NO_FLUSH);
-    }
-
-    void done()
-    {
-        run(nullptr, 0, Z_FINISH);
     }
 
 private:

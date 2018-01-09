@@ -86,7 +86,6 @@ protected:
         }
     }
 
-
 protected:
     lzma_stream m_strm;
 
@@ -95,7 +94,8 @@ private:
     BlockCb m_cb;
 };
 
-class LzmaCompressor : public Lzma
+
+class LzmaCompressor : public Compressor, public Lzma
 {
 public:
     LzmaCompressor(BlockCb cb) : Lzma(cb)
@@ -116,7 +116,7 @@ public:
 };
 
 
-class LzmaDecompressor : public Lzma
+class LzmaDecompressor : public Decompressor, public Lzma
 {
 public:
     LzmaDecompressor(BlockCb cb) : Lzma(cb)

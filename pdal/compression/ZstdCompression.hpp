@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class ZstdCompressor
+class ZstdCompressor : public Compressor
 {
 public:
     ZstdCompressor(BlockCb cb) : m_cb(cb)
@@ -97,7 +97,7 @@ private:
     char m_tmpbuf[CHUNKSIZE];
 };
 
-class ZstdDecompressor
+class ZstdDecompressor : public Decompressor
 {
 public:
     ZstdDecompressor(BlockCb cb) : m_cb(cb)
