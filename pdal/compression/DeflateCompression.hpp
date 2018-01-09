@@ -35,7 +35,7 @@
 
 #ifdef PDAL_HAVE_ZLIB
 
-#include <pdal/Compression.hpp>
+#include "Compression.hpp"
 
 #include <zlib.h>
 
