@@ -35,7 +35,7 @@
 
 #ifdef PDAL_HAVE_ZSTD
 
-#include <pdal/Compression.hpp>
+#include "Compression.hpp"
 
 #include <zstd.h>
 
@@ -57,7 +57,6 @@ public:
 
     void compress(const char *buf, size_t bufsize)
     {
-        std::cerr << "Compress!\n";
         m_inBuf.src = reinterpret_cast<const void *>(buf);
         m_inBuf.size = bufsize;
         m_inBuf.pos = 0;
@@ -72,14 +71,11 @@ public:
                 break;
             if (outBuf.pos)
                 m_cb(m_tmpbuf, outBuf.pos);
-            std::cerr << "In buf pos/size = " << m_inBuf.pos << "/" << m_inBuf.size << "!\n";
-            std::cerr << "Out buf pos/size = " << outBuf.pos << "/" << outBuf.size << "!\n";
         } while (m_inBuf.pos != m_inBuf.size);
     }
 
     void done()
     {
-        std::cerr << "Done compression!\n";
         size_t ret;
         do
         {
@@ -117,7 +113,6 @@ public:
 
     void decompress(const char *buf, size_t bufsize)
     {
-        std::cerr << "DE-Compress!\n";
         m_inBuf.src = reinterpret_cast<const void *>(buf);
         m_inBuf.size = bufsize;
         m_inBuf.pos = 0;

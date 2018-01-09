@@ -35,9 +35,12 @@
 
 #ifdef PDAL_HAVE_LZMA
 
-#include <pdal/Compression.hpp>
+#include "Compression.hpp"
 
 #include <lzma.h>
+
+namespace pdal
+{
 
 class Lzma
 {
@@ -66,8 +69,8 @@ protected:
             size_t written = CHUNKSIZE - m_strm.avail_out;
             if (written)
                 m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
-        } while (ret == Z_OK);
-        if (ret == Z_STREAM_END)
+        } while (ret == LZMA_OK);
+        if (ret == LZMA_STREAM_END)
             return;
 
         switch (ret)
