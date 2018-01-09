@@ -88,7 +88,6 @@ TEST(Compression, simple)
     EXPECT_EQ(layout->pointSize(), 52U);
 
     std::vector<unsigned char> rawBuf;
-    //LazPerfBuf b(rawBuf);
 
     DimTypeList dimTypes = layout->dimTypes();
     auto cb = [&rawBuf](char *buf, size_t bufsize)
@@ -110,23 +109,21 @@ TEST(Compression, simple)
     EXPECT_EQ(view->size() * layout->pointSize(), (size_t)55380);
     EXPECT_EQ(rawBuf.size(), (size_t)30945);
 
-    LazPerfBuf b2(rawBuf);
-    LazPerfDecompressor<LazPerfBuf> decompressor(b2, dimTypes);
-
-    size_t outbufSize = decompressor.pointSize() * view->size();
-    std::vector<char> outbuf(outbufSize);
-    decompressor.decompress(outbuf.data(), outbufSize);
-
     PointViewPtr otherView(new PointView(table));
-
-    char *pos = outbuf.data();
-    for (PointId nextId = 0; nextId < 11; nextId++)
+    PointId nextId(0);
+    auto cb2 = [&otherView, &dimTypes, &nextId](char *buf, size_t bufsize)
     {
-        otherView->setPackedPoint(dimTypes, nextId, pos);
-        pos += decompressor.pointSize();
-    }
-    EXPECT_EQ(otherView->size(), 11U);
-    EXPECT_EQ(getBytes(otherView).size(), (size_t)(52 * 11));
+
+        otherView->setPackedPoint(dimTypes, nextId, buf);
+        nextId++;
+    };
+
+    LazPerfDecompressor(cb2, dimTypes, view->size()).
+        decompress(reinterpret_cast<const char *>(rawBuf.data()),
+            rawBuf.size());
+
+    EXPECT_EQ(otherView->size(), 1065U);
+    EXPECT_EQ(getBytes(otherView).size(), (size_t)(52 * 1065));
 
     uint16_t r = otherView->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
     EXPECT_EQ(r, 64U);
@@ -149,8 +146,7 @@ TEST(Compression, types)
     };
     // Size is 42.
 
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+    std::default_random_engine generator;std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
     char pts[3][42];
 
     // Fill three "points" with some random data.
@@ -181,22 +177,25 @@ TEST(Compression, types)
     }
     compressor.done();
 
-    LazPerfBuf b2(rawBuf);
-
-    LazPerfDecompressor<LazPerfBuf> decompressor(b2, dimTypes);
     char oPts[3][42];
-    for (size_t i = 0; i < 50; ++i)
+    PointId id = 0;
+    auto cb2 = [&pts, &oPts, &id](char *buf, size_t bufsize)
     {
-        decompressor.decompress(oPts[0], 42);
-        decompressor.decompress(oPts[1], 42);
-        decompressor.decompress(oPts[2], 42);
-        EXPECT_EQ(memcmp(pts[0], oPts[0], 42), 0);
-        EXPECT_EQ(memcmp(pts[1], oPts[1], 42), 0);
-        EXPECT_EQ(memcmp(pts[2], oPts[2], 42), 0);
-        memset(oPts[0], 0, 42);
-        memset(oPts[1], 0, 42);
-        memset(oPts[2], 0, 42);
-    }
+        memcpy(oPts[id++], buf, bufsize);
+        if (id == 3)
+        {
+            EXPECT_EQ(memcmp(pts[0], oPts[0], 42), 0);
+            EXPECT_EQ(memcmp(pts[0], oPts[0], 42), 0);
+            EXPECT_EQ(memcmp(pts[2], oPts[2], 42), 0);
+            memset(oPts[0], 0, 42);
+            memset(oPts[1], 0, 42);
+            memset(oPts[2], 0, 42);
+            id = 0;
+        }
+    };
+    LazPerfDecompressor(cb2, dimTypes, 50 * 3).
+           decompress(reinterpret_cast<const char *>(rawBuf.data()),
+                       rawBuf.size());
 }
 #endif // PDAL_HAVE_LAZPERF
 
