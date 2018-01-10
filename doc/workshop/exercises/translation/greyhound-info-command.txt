@@ -1,0 +1,2 @@
+pdal info just-ground.las | ^
+    jq .stats.bbox.native

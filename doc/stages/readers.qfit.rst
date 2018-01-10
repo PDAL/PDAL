@@ -7,6 +7,8 @@ readers.qfit
 The **QFIT reader** read from files in the `QFIT format`_ originated for the
 Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
 
+.. embed::
+
 
 Example
 -------
@@ -43,6 +45,8 @@ scale_z
 little_endian
   Are data in little endian format? This should be automatically detected by the driver.
 
+count 
+  Maximum number of points to read [Optional]
 
 .. _QFIT format: http://nsidc.org/data/docs/daac/icebridge/ilatm1b/docs/ReadMe.qfit.txt
 

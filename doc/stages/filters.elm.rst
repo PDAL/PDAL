@@ -14,6 +14,8 @@ noise if needed, and continuing until another neighbor is found to be within the
 threshold. At this point, iteration for the current cell stops, and the next
 cell is considered.
 
+.. embed::
+
 Example #1
 ----------
 
@@ -33,7 +35,7 @@ applying the classification code of 18 to those points determined to be noise.
         "output.las"
       ]
     }
-    
+
 Example #2
 ----------
 

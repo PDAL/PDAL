@@ -33,11 +33,14 @@
 ****************************************************************************/
 
 #include "SQLiteWriter.hpp"
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_macros.hpp>
+
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_internal.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <iomanip>
@@ -210,7 +213,7 @@ void SQLiteWriter::CreateBlockTable()
 
     oss << "CREATE TABLE " << Utils::tolower(m_block_table)
         << "(" << Utils::tolower(m_cloud_column)  <<
-        " INTEGER REFERENCES " << Utils::tolower(m_cloud_column)  <<
+        " INTEGER REFERENCES " << Utils::tolower(m_cloud_table)  <<
         "," << " block_id INTEGER," << " num_points INTEGER," <<
         " points BLOB," << " bbox box3d " << ")";
 
@@ -454,8 +457,6 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 {
     using namespace std;
 
-    Patch outpatch;
-
     if (m_doCompression)
     {
 #ifdef PDAL_HAVE_LAZPERF
@@ -464,7 +465,11 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
         for (XMLDim& xmlDim : xmlDims)
             dimTypes.push_back(xmlDim.m_dimType);
 
-        LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
+        auto cb = [this](char *buf, size_t bufsize)
+        {
+            m_patch->putBytes(reinterpret_cast<unsigned char *>(buf), bufsize);
+        };
+        LazPerfCompressor compressor(cb, dimTypes);
 
         try
         {
@@ -502,7 +507,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
             m_patch->putBytes((const unsigned char *)storage.data(), size);
         }
         log()->get(LogLevel::Debug3) << "uncompressed size: " <<
-            m_patch->getBytes().size() << std::endl;
+            m_patch->byte_size() << std::endl;
     }
 
     records rs;
@@ -520,14 +525,15 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));
     r.push_back(column(view->size()));
-    r.push_back(blob((const char*)(&m_patch->getBytes()[0]),
-        m_patch->getBytes().size()));
+    r.push_back(blob(reinterpret_cast<const char *>(m_patch->getBytes()),
+        m_patch->byte_size()));
     r.push_back(column(bounds));
     r.push_back(column(m_srid));
     r.push_back(column(box));
     rs.push_back(r);
     m_session->insert(m_block_insert_query.str(), rs);
     m_block_id++;
+    m_patch->clear();
 
 }
 

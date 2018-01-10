@@ -45,7 +45,7 @@ process_dimensions()
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -56,7 +56,7 @@ process_dimensions()
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['breathe', 'sphinx.ext.autodoc',
               'sphinx.ext.mathjax', 'sphinx.ext.intersphinx',
-              'sphinxcontrib.bibtex']
+              'sphinxcontrib.bibtex', 'embed']
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -267,7 +267,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
         (master_doc, '%s.tex'% project, u'PDAL: Point cloud Data Abstraction Library',
-         r'Howard Butler\\Brad Chambers\\Michael Gerlek\\PDAL Contributors', 'manual'),
+         r'Andrew Bell\\Brad Chambers\\Howard Butler\\Michael Gerlek\\PDAL Contributors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -309,3 +309,4 @@ breathe_diagram = {
     'no-link' : False
 }
 
+#todo_include_todos=True

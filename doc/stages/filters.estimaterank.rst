@@ -15,6 +15,8 @@ singular value.
 More on JacobiSVD can be found at
 https://eigen.tuxfamily.org/dox/classEigen_1_1JacobiSVD.html.
 
+.. embed::
+
 Example
 -------
 
@@ -45,6 +47,6 @@ Options
 
 knn
   The number of k-nearest neighbors. [Default: **8**]
-  
+
 thresh
   The threshold used to identify nonzero singular values. [Default: **0.01**]

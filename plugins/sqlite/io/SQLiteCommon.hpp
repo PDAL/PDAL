@@ -37,7 +37,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/XMLSchema.hpp>
-#include <pdal/Compression.hpp>
 
 #include <sqlite3.h>
 #include <memory>
@@ -104,28 +103,19 @@ public:
         }
     }
 
-    void putByte(const unsigned char b) {
-        buf.push_back(b);
-    }
-
-    unsigned char getByte() {
-        return buf[idx++];
-    }
-
-    void getBytes(unsigned char *b, int len) {
-        for (int i = 0 ; i < len ; i ++) {
-            b[i] = getByte();
-        }
-    }
-
-    void setBytes(const std::vector<uint8_t>& data)
-        { buf = data; }
-
-    const std::vector<uint8_t>& getBytes() const
-        { return buf; }
+    const unsigned char *getBytes() const
+        { return buf.data(); }
 
     size_t byte_size()
         { return buf.size(); }
+
+    void clear()
+        {
+           buf.clear();
+           count = 0;
+           remaining = 0;
+           idx = 0;
+         }
 };
 typedef std::shared_ptr<Patch> PatchPtr;
 
@@ -203,13 +193,17 @@ public:
         checkSession();
 
         m_log->get(LogLevel::Debug3) << "Executing '" << sql <<"'"<< std::endl;
-
-        int status = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, NULL);
+		char* errmsg;
+        int status = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, &errmsg);
         if (status != SQLITE_OK)
         {
             std::ostringstream oss;
-            oss << "Database operation failed: "
-                << sql;
+			std::string msg = std::string(errmsg);
+			Utils::trimTrailing(msg);
+			oss << "Database operation failed: "
+				<< "'" << sql << "'"
+				<< " with error '" << msg << "'";
+			sqlite3_free(errmsg);
             error(oss.str(), "execute");
         }
     }
@@ -453,12 +447,12 @@ public:
         std::string so_extension;
         std::string lib_extension;
 #ifdef __APPLE__
-        so_extension = "dylib";
+        so_extension = ".dylib";
         lib_extension = "mod_";
 #endif
 
 #if defined(__linux__) || defined(__FreeBSD_kernel__)
-        so_extension = "so";
+        so_extension = ".so";
 #ifdef MOD_SPATIALITE
         lib_extension = "mod_";
 #else
@@ -467,8 +461,8 @@ public:
 #endif
 
 #ifdef _WIN32
-        so_extension = "dll";
-        lib_extension = "mod_";
+        so_extension = ".dll";
+        lib_extension = "pdal";
 #endif
 
 // #if !defined(sqlite3_enable_load_extension)
@@ -480,15 +474,22 @@ public:
             error("spatialite library load failed", "loadSpatialite");
         }
 
-        std::ostringstream oss;
+		std::ostringstream oss;
+
+
 
         oss << "SELECT load_extension('";
         if (module_name.size())
             oss << module_name;
         else
-            oss << lib_extension << "spatialite";
-        oss << "')";
-        execute(oss.str());
+            oss << lib_extension << "spatialite" << so_extension;
+#ifdef _WIN32
+		oss << "', 'sqlite3_modspatialite_init";
+#endif
+		oss << "')";
+
+		std::string sql(oss.str());
+        execute(sql);
         oss.str("");
 
         m_log->get(LogLevel::Debug3) <<  "SpatiaLite version: " << getSpatialiteVersion() << std::endl;

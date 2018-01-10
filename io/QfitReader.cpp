@@ -401,30 +401,6 @@ point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
 }
 
 
-Dimension::IdList QfitReader::getDefaultDimensions()
-{
-    Dimension::IdList ids;
-
-    ids.push_back(Dimension::Id::OffsetTime);
-    ids.push_back(Dimension::Id::Y);
-    ids.push_back(Dimension::Id::X);
-    ids.push_back(Dimension::Id::Z);
-    ids.push_back(Dimension::Id::StartPulse);
-    ids.push_back(Dimension::Id::ReflectedPulse);
-    ids.push_back(Dimension::Id::Azimuth);
-    ids.push_back(Dimension::Id::Pitch);
-    ids.push_back(Dimension::Id::Roll);
-    ids.push_back(Dimension::Id::Pdop);
-    ids.push_back(Dimension::Id::PulseWidth);
-    ids.push_back(Dimension::Id::PassiveSignal);
-    ids.push_back(Dimension::Id::PassiveY);
-    ids.push_back(Dimension::Id::PassiveX);
-    ids.push_back(Dimension::Id::PassiveZ);
-
-    return ids;
-}
-
-
 void QfitReader::done(PointTableRef)
 {
     m_istream.reset();

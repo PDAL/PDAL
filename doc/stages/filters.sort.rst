@@ -6,32 +6,25 @@ filters.sort
 The sort filter orders a point view based on the values of a dimension. The
 sorting can be done in increasing (ascending) or decreasing (descending) order.
 
+.. embed::
+
 Example
 -------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        sorted.las
-      </Option>
-      <Filter type="filters.sort">
-        <Option name="dimension">
-          X
-        </Option>
-        <Option name="order">
-          ASC
-        </Option>
-        <Reader type="readers.las">
-          <Option name="filename">
-            unsorted.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "unsorted.las",
+        {
+          "type":"filters.sort",
+          "dimension":"X",
+          "order":"ASC"
+        },
+        "sorted.las"
+      ]
+    }
 
 
 Options

@@ -44,10 +44,9 @@ namespace pdal
 {
 
 GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
-        double radius, double noData, int outputTypes, size_t windowSize) :
+        double radius, int outputTypes, size_t windowSize) :
     m_width(width), m_height(height), m_windowSize(windowSize),
-    m_edgeLength(edgeLength), m_radius(radius), m_noData(noData),
-    m_outputTypes(outputTypes)
+    m_edgeLength(edgeLength), m_radius(radius), m_outputTypes(outputTypes)
 {
     size_t size(width * height);
 
@@ -89,7 +88,7 @@ void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
 
     // Grid (raster) works upside down from standard X/Y.
     yshift = height - (m_height + yshift);
-    auto moveVec = [=](DataPtr& src, double initializer = 0)
+    auto moveVec = [=](DataPtr& src, double initializer)
     {
         // Compute an index in the destination given source index coords.
         auto dstIndex = [width, xshift, yshift](size_t i, size_t j)
@@ -109,20 +108,20 @@ void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
         src = std::move(dst);
     };
 
-    moveVec(m_count);
+    moveVec(m_count, 0);
     if (m_outputTypes & statMin)
         moveVec(m_min, std::numeric_limits<double>::max());
     if (m_outputTypes & statMax)
         moveVec(m_max, std::numeric_limits<double>::lowest());
     if (m_outputTypes & statIdw)
     {
-        moveVec(m_idw);
-        moveVec(m_idwDist);
+        moveVec(m_idw, 0);
+        moveVec(m_idwDist, 0);
     }
     if ((m_outputTypes & statMean) || (m_outputTypes & statStdDev))
-        moveVec(m_mean);
+        moveVec(m_mean, 0);
     if (m_outputTypes & statStdDev)
-        moveVec(m_stdDev);
+        moveVec(m_stdDev, 0);
     m_width = width;
     m_height = height;
 }
@@ -148,26 +147,20 @@ int GDALGrid::numBands() const
 }
 
 
-uint8_t *GDALGrid::data(const std::string& name)
+double *GDALGrid::data(const std::string& name)
 {
-    if (name == "count")
-        return (m_outputTypes & statCount ?
-            (uint8_t *)m_count->data() : nullptr);
-    if (name == "min")
-        return (m_outputTypes & statMin ?
-            (uint8_t *)m_min->data() : nullptr);
-    if (name == "max")
-        return (m_outputTypes & statMax ?
-            (uint8_t *)m_max->data() : nullptr);
-    if (name == "mean")
-        return (m_outputTypes & statMean ?
-            (uint8_t *)m_mean->data() : nullptr);
-    if (name == "idw")
-        return (m_outputTypes & statIdw ?
-            (uint8_t *)m_idw->data() : nullptr);
-    if (name == "stdev")
-        return (m_outputTypes & statStdDev ?
-            (uint8_t *)m_stdDev->data() : nullptr);
+    if (name == "count" && (m_outputTypes & statCount))
+        return m_count->data();
+    if (name == "min" && (m_outputTypes & statMin))
+        return m_min->data();
+    if (name == "max" && (m_outputTypes & statMax))
+        return m_max->data();
+    if (name == "mean" && (m_outputTypes & statMean))
+        return m_mean->data();
+    if (name == "idw" && (m_outputTypes & statIdw))
+         return m_idw->data();
+    if (name == "stdev" && (m_outputTypes & statStdDev))
+        return m_stdDev->data();
     return nullptr;
 }
 
@@ -391,15 +384,15 @@ void GDALGrid::finalize()
 void GDALGrid::fillNodata(size_t i)
 {
     if (m_min)
-        (*m_min)[i] = m_noData;
+        (*m_min)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_max)
-        (*m_max)[i] = m_noData;
+        (*m_max)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_mean)
-        (*m_mean)[i] = m_noData;
+        (*m_mean)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_idw)
-        (*m_idw)[i] = m_noData;
+        (*m_idw)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_stdDev)
-        (*m_stdDev)[i] = m_noData;
+        (*m_stdDev)[i] = std::numeric_limits<double>::quiet_NaN();
 }
 
 

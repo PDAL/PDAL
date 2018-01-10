@@ -57,10 +57,10 @@ std::string::size_type DimRange::subParse(const std::string& r)
     negate = false;
     pos = 0;
     // Skip leading whitespace.
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
+    count = Dimension::extractName(r, pos);
     if (count == 0)
         throw error("No dimension name.");
     name = r.substr(pos, count);
@@ -85,7 +85,7 @@ std::string::size_type DimRange::subParse(const std::string& r)
         lb = std::numeric_limits<double>::lowest();
     pos += (end - start);
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     if (r[pos] != ':')
@@ -98,7 +98,7 @@ std::string::size_type DimRange::subParse(const std::string& r)
         ub = std::numeric_limits<double>::max();
     pos += (end - start);
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     if (r[pos] == ')')
@@ -107,7 +107,7 @@ std::string::size_type DimRange::subParse(const std::string& r)
         throw error("Missing ')' or ']'.");
     pos++;
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
     return pos;
 }
@@ -116,7 +116,8 @@ std::string::size_type DimRange::subParse(const std::string& r)
 bool DimRange::valuePasses(double v) const
 {
     // Determine if a point passes a range.
-    bool fail = ((m_inclusive_lower_bound && v < m_lower_bound) ||
+    bool fail = std::isnan(v) ||
+        ((m_inclusive_lower_bound && v < m_lower_bound) ||
         (!m_inclusive_lower_bound && v <= m_lower_bound) ||
         (m_inclusive_upper_bound && v > m_upper_bound) ||
         (!m_inclusive_upper_bound && v >= m_upper_bound));

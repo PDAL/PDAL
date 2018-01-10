@@ -34,9 +34,9 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include "MatlabWriter.hpp"
+#include "../io/MatlabWriter.hpp"
 
-#include <faux/FauxReader.hpp>
+#include <FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include "Support.hpp"
 
@@ -52,7 +52,7 @@ protected:
     {
         Options options;
         options.add("mode", "ramp");
-        options.add("num_points", 100);
+        options.add("count", 100);
         m_reader.setOptions(options);
     }
 

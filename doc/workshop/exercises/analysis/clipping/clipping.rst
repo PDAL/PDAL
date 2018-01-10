@@ -21,6 +21,7 @@ use this file to demonstrate clipping points with a geometry. We're going to
 clip out the stadium into a new LAS file.
 
 .. image:: ../../../images/clipping-autzen-view.png
+    :target: ../../../../_images/clipping-autzen-view.png
 
 
 
@@ -59,6 +60,7 @@ capability to reproject the data for us on-the-fly:
     stream.
 
 .. image:: ../../../images/clipping-view-polygons.png
+    :target: ../../../../_images/clipping-view-polygons.png
 
 .. note::
 
@@ -109,25 +111,26 @@ The attributes in the ``attributes.json`` file include polygons with values
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `Docker
-Quickstart Terminal`:
+Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
 
 
 .. literalinclude:: ./clipping-run-command.txt
     :linenos:
 
 .. image:: ../../../images/clipping-run-command.png
+    :target: ../../../../_images/clipping-run-command.png
 
 Visualization
 ................................................................................
 
 Use one of the point cloud visualization tools you installed to take a look at
-your ``c:\Users\Howard\PDAL\exercises\analysis\clipping\stadium.las`` output.
-In the example below, we simply opened the file using the http://plas.io
+your ``c:/Users/Howard/PDAL/exercises/analysis/clipping/stadium.las`` output.
+In the example below, we opened the file to view it using the http://plas.io
 website.
 
 
 .. image:: ../../../images/clipping-stadium-clipped.png
+    :target: ../../../../_images/clipping-stadium-clipped.png
 
 
 Notes
@@ -139,7 +142,6 @@ Notes
 2. Points that are *on* the boundary are included.
 
 
-.. _`NASA Airborne Snow Observatory`: http://aso.jpl.nasa.gov/
 .. _`CloudCompare`: http://www.danielgm.net/cc/
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html

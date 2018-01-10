@@ -38,8 +38,6 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include "private/PipelineReaderXML.hpp"
-
 #if defined(PDAL_COMPILER_CLANG) || defined(PDAL_COMPILER_GCC)
 #  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
@@ -61,35 +59,13 @@ void PipelineManager::readPipeline(std::istream& input)
     std::string s(std::istreambuf_iterator<char>(input), eos);
 
     std::istringstream ss(s);
-    if (s.find("?xml") != std::string::npos)
-        PipelineReaderXML(*this).readPipeline(ss);
-    else if (s.find("\"pipeline\"") != std::string::npos)
-        PipelineReaderJSON(*this).readPipeline(ss);
-    else
-    {
-        try
-        {
-            PipelineReaderXML(*this).readPipeline(ss);
-        }
-        catch (pdal_error)
-        {
-            // Rewind to make sure the stream is properly positioned after
-            // attempting an XML pipeline.
-            ss.seekg(0);
-            PipelineReaderJSON(*this).readPipeline(ss);
-        }
-    }
+    PipelineReaderJSON(*this).readPipeline(ss);
 }
 
 
 void PipelineManager::readPipeline(const std::string& filename)
 {
-    if (FileUtils::extension(filename) == ".xml")
-    {
-        PipelineReaderXML pipeReader(*this);
-        return pipeReader.readPipeline(filename);
-    }
-    else if (FileUtils::extension(filename) == ".json")
+    if (FileUtils::extension(filename) == ".json")
     {
         PipelineReaderJSON pipeReader(*this);
         return pipeReader.readPipeline(filename);
@@ -451,7 +427,13 @@ void PipelineManager::replace(Stage *sOld, Stage *sNew)
     for (Stage * & s : m_stages)
     {
         if (s == sOld)
+        {
             s = sNew;
+            // Copy inputs from the old stage to new one.
+            for (Stage *ss : sOld->getInputs())
+                sNew->setInput(*ss);
+        }
+        // Reset the inputs that refer to the replaced stage.
         for (Stage * & ss : s->getInputs())
             if (ss == sOld)
                 ss = sNew;

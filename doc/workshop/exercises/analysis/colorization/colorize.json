@@ -1,9 +1,9 @@
 {
     "pipeline": [
-        "/data/exercises/analysis/colorization/uncompahgre.laz",
+        "c:/Users/hobu/PDAL/exercises/analysis/colorization/uncompahgre.laz",
         {
             "type": "filters.colorization",
-            "raster": "/data/exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
+            "raster": "c:/Users/hobu/PDAL/exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
         },
         {
             "type": "filters.range",
@@ -14,7 +14,7 @@
             "compression": "true",
             "minor_version": "2",
             "dataformat_id": "3",
-            "filename":"/data/exercises/analysis/colorization/uncompahgre-colored.laz"
+            "filename":"c:/Users/hobu/PDAL/exercises/analysis/colorization/uncompahgre-colored.laz"
         }
     ]
 }

@@ -16,7 +16,6 @@ import os
 import platform
 import sys
 import numpy
-from Cython.Build import cythonize
 
 USE_CYTHON = True
 try:
@@ -145,7 +144,6 @@ if pdal_config and "clean" not in sys.argv:
 
 include_dirs.append(numpy.get_include())
 extra_compile_args = ['-std=c++11',]
-libraries.append('pdal_plang')
 
 DEBUG=False
 if DEBUG:
@@ -191,6 +189,7 @@ setup_args = dict(
         'Topic :: Scientific/Engineering :: GIS',
     ],
     cmdclass           = {},
+    install_requires   = ['numpy', 'packaging'],
 )
 setup(ext_modules=extensions, **setup_args)
 

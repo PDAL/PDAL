@@ -67,6 +67,12 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
 // The VSIFILE* that VSIFileFromMemBuffer creates in this
 // macro is never cleaned up. We're opening seven PNGs in the
 // ColorInterpRamps-ramps.hpp header. We always open them so they're available.
+//
+// GDAL forces to keep track of the return value, and its being ignored here,
+// To avoid the warning message:
+// warning: ignoring return value of 'VSILFILE* VSIFileFromMemBuffer(....)'
+//          declared with attribute warn_unused_result [-Wunused-result]
+// Using a tmp variable
 #define GETRAMP(name) \
     if (pdal::Utils::iequals(#name, rampFilename)) \
     { \
@@ -75,7 +81,7 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        (void)VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
+        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE)); \
     }
 //
 std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
@@ -94,6 +100,7 @@ std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
     GETRAMP(blue_red);
     GETRAMP(heat_map);
     GETRAMP(pestel_shades);
+    GETRAMP(blue_orange);
 
     std::shared_ptr<gdal::Raster>
         output(new gdal::Raster(rampFilename.c_str()));
@@ -103,8 +110,10 @@ std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
 void ColorinterpFilter::addArgs(ProgramArgs& args)
 {
     args.add("dimension", "Dimension to interpolate", m_interpDimString, "Z");
-    args.add("minimum", "Minimum value to use for scaling", m_min);
-    args.add("maximum", "Maximum value to use for scaling", m_max);
+    args.add("minimum", "Minimum value to use for scaling", m_min,
+        std::numeric_limits<double>::quiet_NaN());
+    args.add("maximum", "Maximum value to use for scaling", m_max,
+        std::numeric_limits<double>::quiet_NaN());
     args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp,
         "pestel_shades");
     args.add("invert", "Invert the ramp direction", m_invertRamp, false);
@@ -122,19 +131,39 @@ void ColorinterpFilter::addDimensions(PointLayoutPtr layout)
         Dimension::Id::Green, Dimension::Id::Blue});
 }
 
-void ColorinterpFilter::initialize()
+
+void ColorinterpFilter::prepared(PointTableRef table)
+{
+    PointLayoutPtr layout(table.layout());
+    m_interpDim = layout->findDim(m_interpDimString);
+    if (m_interpDim == Dimension::Id::Unknown)
+        throwError("Dimension '" + m_interpDimString + "' does not exist.");
+    if (!std::isnan(m_min) && !std::isnan(m_max) && m_max <= m_min)
+        throwError("Specified 'minimum' value must be less than "
+            "'maximum' value.");
+}
+
+
+/**
+  Read the band data into local vectors.
+
+  \param table  Point table.
+*/
+void ColorinterpFilter::ready(PointTableRef table)
 {
     gdal::registerDrivers();
 
     m_raster = openRamp(m_colorramp);
-    m_raster->open();
+    gdal::GDALError err = m_raster->open();
+    if (err != gdal::GDALError::None && err != gdal::GDALError::NoTransform)
+        throwError(m_raster->errorMsg());
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: " <<
         m_raster->filename() << std::endl;
 
-    m_interpDim = Dimension::id(m_interpDimString);
-    if (m_interpDim == Dimension::Id::Unknown)
-        throwError("provided dimension name is not known.");
+    m_raster->readBand(m_redBand, 1);
+    m_raster->readBand(m_greenBand, 2);
+    m_raster->readBand(m_blueBand, 3);
 }
 
 
@@ -146,7 +175,7 @@ void ColorinterpFilter::filter(PointView& view)
     // If the user set a 'k' value, we use that
     // defaulting to using a computed stddev if we
     // were not told to use MAD.
-    if ( m_stdDevThreshold != 0.0)
+    if (m_stdDevThreshold != 0.0)
     {
         std::vector<double> values(view.size());
 
@@ -174,8 +203,7 @@ void ColorinterpFilter::filter(PointView& view)
                    [median](double v) { return std::fabs(v - median); });
              mad = compute_median(values);
 
-             mad = mad * m_madMultiplier;
-             double threshold = m_stdDevThreshold * mad;
+             double threshold = mad * m_madMultiplier * m_stdDevThreshold;
              m_min = median - threshold;
              m_max = median + threshold;
 
@@ -203,12 +231,11 @@ void ColorinterpFilter::filter(PointView& view)
              log()->get(LogLevel::Debug) << getName() << " maximum " <<
                 m_max << std::endl;
         }
-
     }
 
     // If the user didn't set min/max values and hadn't set a stddev, we
     // compute them.
-    else if ((m_min == 0.0 && m_max == 0.0) )
+    else if (std::isnan(m_min) || std::isnan(m_max))
     {
         stats::Summary summary(Dimension::name(m_interpDim),
             stats::Summary::NoEnum);
@@ -218,42 +245,45 @@ void ColorinterpFilter::filter(PointView& view)
             summary.insert(v);
         }
 
-        m_min = summary.minimum();
-        m_max = summary.maximum();
+        if (std::isnan(m_min))
+            m_min = summary.minimum();
+        if (std::isnan(m_max))
+            m_max = summary.maximum();
     }
 
-    m_raster->readBand(m_redBand, 1);
-    m_raster->readBand(m_greenBand, 2 );
-    m_raster->readBand(m_blueBand, 3);
-
+    PointRef point(view, 0);
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
-
-        double v = view.getFieldAs<double>(m_interpDim, idx);
-
-        size_t img_width = m_redBand.size();
-        double factor = (v - m_min) / (m_max - m_min);
-
-        if (m_invertRamp)
-            factor = 1 - factor;
-
-        size_t position(std::floor(factor * img_width));
-
-        // Don't color points whose computed position
-        // would fall outside the image
-        if (position > img_width)
-        {
-            continue;
-        }
-
-        double red = m_redBand[position];
-        double blue = m_blueBand[position];
-        double green = m_greenBand[position];
-
-        view.setField(Dimension::Id::Red, idx, red);
-        view.setField(Dimension::Id::Green, idx, green);
-        view.setField(Dimension::Id::Blue, idx, blue);
+        point.setPointId(idx);
+        processOne(point);
     }
+}
+
+
+bool ColorinterpFilter::processOne(PointRef& point)
+{
+    // This will throw if min or max aren't defined.
+    if (std::isnan(m_min) || std::isnan(m_max))
+        throwStreamingError();
+
+    double v = point.getFieldAs<double>(m_interpDim);
+
+    // Don't color points that aren't in the min/max range.
+    if (v < m_min || v >= m_max)
+        return true;
+
+    double factor = (v - m_min) / (m_max - m_min);
+    size_t img_width = m_redBand.size();
+    size_t position = std::floor(factor * img_width);
+
+    if (m_invertRamp)
+        position = (img_width - 1) - position;
+
+    point.setField(Dimension::Id::Red, m_redBand[position]);
+    point.setField(Dimension::Id::Blue, m_blueBand[position]);
+    point.setField(Dimension::Id::Green, m_greenBand[position]);
+
+    return true;
 }
 
 } // namespace pdal

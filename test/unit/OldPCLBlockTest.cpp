@@ -193,7 +193,7 @@ TEST(OldPCLBlockTests, RadiusOutliers2)
     EXPECT_EQ(3u, view->size());
 }
 
-TEST(OldPCLBlockTests, PMF1)
+TEST(OldPCLBlockTests, PMF)
 {
     StageFactory f;
 
@@ -213,102 +213,8 @@ TEST(OldPCLBlockTests, PMF1)
     assign->setInput(*r);
 
     Options fo;
-    fo.add("max_window_size", 200);
-    fo.add("last", false);
-
-    Stage* outlier(f.createStage("filters.pmf"));
-    EXPECT_TRUE(outlier);
-    outlier->setOptions(fo);
-    outlier->setInput(*assign);
-
-    Options rangeOpts;
-    rangeOpts.add("limits", "Classification[2:2]");
-
-    Stage* range(f.createStage("filters.range"));
-    EXPECT_TRUE(range);
-    range->setOptions(rangeOpts);
-    range->setInput(*outlier);
-
-    PointTable table;
-    range->prepare(table);
-    PointViewSet viewSet = range->execute(table);
-
-    EXPECT_EQ(1u, viewSet.size());
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(93u, view->size());
-}
-
-TEST(OldPCLBlockTests, PMF2)
-{
-    StageFactory f;
-
-    Options ro;
-    ro.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-
-    Stage* r(f.createStage("readers.las"));
-    EXPECT_TRUE(r);
-    r->setOptions(ro);
-
-    Options ao;
-    ao.add("assignment", "Classification[:]=0");
-
-    Stage* assign(f.createStage("filters.assign"));
-    EXPECT_TRUE(assign);
-    assign->setOptions(ao);
-    assign->setInput(*r);
-
-    Options fo;
-    fo.add("max_window_size", 200);
-    fo.add("cell_size", 1.0);
-    fo.add("slope", 1.0);
-    fo.add("initial_distance", 0.05);
-    fo.add("max_distance", 3.0);
-    fo.add("last", false);
-
-    Stage* outlier(f.createStage("filters.pmf"));
-    EXPECT_TRUE(outlier);
-    outlier->setOptions(fo);
-    outlier->setInput(*assign);
-
-    Options rangeOpts;
-    rangeOpts.add("limits", "Classification[2:2]");
-
-    Stage* range(f.createStage("filters.range"));
-    EXPECT_TRUE(range);
-    range->setOptions(rangeOpts);
-    range->setInput(*outlier);
-
-    PointTable table;
-    range->prepare(table);
-    PointViewSet viewSet = range->execute(table);
-
-    EXPECT_EQ(1u, viewSet.size());
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(94u, view->size());
-}
-
-TEST(OldPCLBlockTests, PMF3)
-{
-    StageFactory f;
-
-    Options ro;
-    ro.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-
-    Stage* r(f.createStage("readers.las"));
-    EXPECT_TRUE(r);
-    r->setOptions(ro);
-
-    Options ao;
-    ao.add("assignment", "Classification[:]=0");
-
-    Stage* assign(f.createStage("filters.assign"));
-    EXPECT_TRUE(assign);
-    assign->setOptions(ao);
-    assign->setInput(*r);
-
-    Options fo;
-    fo.add("max_window_size", 33);
-    fo.add("cell_size", 1.0);
+    fo.add("max_window_size", 33.0);
+    fo.add("cell_size", 10.0);
     fo.add("slope", 1.0);
     fo.add("initial_distance", 0.15);
     fo.add("max_distance", 2.5);
@@ -333,40 +239,5 @@ TEST(OldPCLBlockTests, PMF3)
 
     EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(106u, view->size());
+    EXPECT_EQ(79u, view->size());
 }
-
-/*
-// Test these with "autzen/autzen-thin.las"
-TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_PMF)
-{
-#if RUN_SLOW_TESTS
-    // explicitly with all defaults
-    test_filter("filters/pcl/filter_PMF_1.json", 9223, true);
-
-    // with CellSize=3
-    test_filter("filters/pcl/filter_PMF_2.json", 8298, true);
-
-    // with WindowSize=50
-    test_filter("filters/pcl/filter_PMF_3.json", 7970, true);
-
-    // with Slope=0.25
-    test_filter("filters/pcl/filter_PMF_4.json", 9206, true);
-
-    // with MaxDistance=5
-    test_filter("filters/pcl/filter_PMF_5.json", 9373, true);
-
-    // with InitialDistance=0.25
-    test_filter("filters/pcl/filter_PMF_6.json", 9229, true);
-
-    // with Base=3
-    test_filter("filters/pcl/filter_PMF_7.json", 8298, true);
-
-    // with Exponential=false
-    test_filter("filters/pcl/filter_PMF_8.json", 9138, true);
-
-    // with Negative=true
-    test_filter("filters/pcl/filter_PMF_9.json", 1430, true);
-#endif
-}
-*/

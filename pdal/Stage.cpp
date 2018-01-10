@@ -49,7 +49,8 @@
 namespace pdal
 {
 
-Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0)
+Stage::Stage() : m_progressFd(-1), m_verbose(0), m_pointCount(0),
+    m_faceCount(0)
 {}
 
 
@@ -97,9 +98,22 @@ void Stage::addAllArgs(ProgramArgs& args)
 void Stage::handleOptions()
 {
     addAllArgs(*m_args);
+
+    StringList files = m_options.getValues("option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file));
+    m_options.remove(Option("option_file", 0));
+
+    // Special stuff for GRiD so that no error is thrown when a file
+    // isn't found.
+    files = m_options.getValues("grid_option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file, false));
+    m_options.remove(Option("grid_option_file", 0));
+
+    StringList cmdline = m_options.toCommandLine();
     try
     {
-        StringList cmdline = m_options.toCommandLine();
         m_args->parse(cmdline);
     }
     catch (arg_error error)
@@ -114,9 +128,9 @@ QuickInfo Stage::preview()
 {
     m_args.reset(new ProgramArgs);
     handleOptions();
-    pushLogLeader();
+    startLogging();
     QuickInfo qi = inspect();
-    popLogLeader();
+    stopLogging();
     return qi;
 }
 
@@ -130,18 +144,18 @@ void Stage::prepare(PointTableRef table)
         prev->prepare(table);
     }
     handleOptions();
-    pushLogLeader();
+    startLogging();
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
     prepared(table);
-    popLogLeader();
+    stopLogging();
 }
 
 
 PointViewSet Stage::execute(PointTableRef table)
 {
-    pushLogLeader();
+    startLogging();
     table.finalize();
 
     PointViewSet views;
@@ -176,8 +190,18 @@ PointViewSet Stage::execute(PointTableRef table)
     // first on the list for table.
     for (auto it = views.rbegin(); it != views.rend(); it++)
         table.addSpatialReference((*it)->spatialReference());
-    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
+    // Count the number of views and the number of points and faces so they're
+    // available to stages.
+    m_pointCount = 0;
+    m_faceCount = 0;
+    for (auto const& it : views)
+    {
+        m_pointCount += it->size();
+        auto m = it->mesh();
+        if (m)
+            m_faceCount += m->size();
+    }
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
@@ -204,7 +228,9 @@ PointViewSet Stage::execute(PointTableRef table)
         outViews.insert(temp.begin(), temp.end());
     }
     l_done(table);
-    popLogLeader();
+    stopLogging();
+    m_pointCount = 0;
+    m_faceCount = 0;
     return outViews;
 }
 
@@ -234,9 +260,9 @@ void Stage::execute(StreamPointTable& table)
         {
             for (auto s : *this)
             {
-                s->pushLogLeader();
+                s->startLogging();
                 s->ready(table);
-                s->pushLogLeader();
+                s->stopLogging();
                 SpatialReference srs = s->getSpatialReference();
                 if (!srs.empty())
                     table.setSpatialReference(srs);
@@ -247,9 +273,9 @@ void Stage::execute(StreamPointTable& table)
         {
             for (auto s : *this)
             {
-                s->pushLogLeader();
+                s->startLogging();
                 s->l_done(table);
-                s->popLogLeader();
+                s->stopLogging();
             }
         }
     };
@@ -337,7 +363,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         PointRef point(table, idx);
         point_count_t pointLimit = table.capacity();
 
-        reader->pushLogLeader();
+        reader->startLogging();
         // When we get false back from a reader, we're done, so set
         // the point limit to the number of points processed in this loop
         // of the table.
@@ -351,7 +377,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
             if (finished)
                 pointLimit = idx;
         }
-        reader->popLogLeader();
+        reader->stopLogging();
         srs = reader->getSpatialReference();
         if (!srs.empty())
             table.setSpatialReference(srs);
@@ -366,7 +392,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
                 s->spatialReferenceChanged(srs);
                 srsMap[s] = srs;
             }
-            s->pushLogLeader();
+            s->startLogging();
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
                 if (skips[idx])
@@ -378,7 +404,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
             srs = s->getSpatialReference();
             if (!srs.empty())
                 table.setSpatialReference(srs);
-            s->popLogLeader();
+            s->stopLogging();
         }
 
         // Yes, vector<bool> is terrible.  Can do something better later.
@@ -397,6 +423,11 @@ void Stage::l_addArgs(ProgramArgs& args)
 {
     args.add("user_data", "User JSON", m_userDataJSON);
     args.add("log", "Debug output filename", m_logname);
+    // We never really bind anything to this variable.  We extract the option
+    // before parsing the command line.  This entry allows a line in the
+    // help and options list.
+    args.add("option_file", "File from which to read additional options",
+        m_optionFile);
     readerAddArgs(args);
 }
 
@@ -422,8 +453,7 @@ void Stage::setupLog()
         m_logLeader += " ";
     m_logLeader += getName();
 
-    bool debug(l > LogLevel::Debug);
-    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, debug);
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, isDebug());
 }
 
 
@@ -434,6 +464,7 @@ void Stage::l_initialize(PointTableRef table)
 }
 
 
+// This function allows m_spatialReference to remain private.
 void Stage::addSpatialReferenceArg(ProgramArgs& args)
 {
     args.add("spatialreference", "Spatial reference to apply to data",
@@ -470,9 +501,50 @@ void Stage::setSpatialReference(MetadataNode& m,
 }
 
 
+bool Stage::parseName(std::string o, std::string::size_type& pos)
+{
+    auto isStageChar = [](char c)
+        { return std::islower(c) || std::isdigit(c); };
+
+    std::string::size_type start = pos;
+    if (!std::islower(o[pos]))
+        return false;
+    pos++;
+    pos += Utils::extract(o, pos, isStageChar);
+    return true;
+}
+
+
+bool Stage::parseTagName(std::string o, std::string::size_type& pos)
+{
+    auto isTagChar = [](char c)
+        { return std::isalnum(c) || c == '_'; };
+
+    std::string::size_type start = pos;
+    if (!std::isalpha(o[pos]))
+        return false;
+    pos++;
+    pos += Utils::extract(o, pos, isTagChar);
+    return true;
+}
+
+
 void Stage::throwError(const std::string& s) const
 {
     throw pdal_error(getName() + ": " + s);
+}
+
+
+void Stage::startLogging() const
+{
+    m_log->pushLeader(m_logLeader);
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, isDebug());
+}
+
+
+void Stage::stopLogging() const
+{
+    m_log->popLeader();
 }
 
 } // namespace pdal

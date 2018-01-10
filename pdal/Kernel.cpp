@@ -44,8 +44,6 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <io/BufferReader.hpp>
-
 #include <memory>
 #include <vector>
 
@@ -55,6 +53,8 @@ namespace pdal
 Kernel::Kernel() : m_showTime(false), m_hardCoreDebug(false)
 {}
 
+
+// Overridden in PipelineKernel to accept "stage" as well.
 bool Kernel::isStagePrefix(const std::string& stageType)
 {
    return (stageType == "readers" || stageType == "writers" ||
@@ -82,8 +82,6 @@ bool Kernel::parseStageOption(std::string o, std::string& stage,
     // a bit better than the cast solution.
     auto islc = [](char c)
         { return std::islower(c); };
-    auto islcOrDigit = [](char c)
-        { return std::islower(c) || std::isdigit(c); };
 
     std::string::size_type pos = 0;
     std::string::size_type count = 0;
@@ -98,10 +96,13 @@ bool Kernel::parseStageOption(std::string o, std::string& stage,
         return false;
 
     // Get stage_name.
-    count = Utils::extract(o, pos, islcOrDigit);
-    if (std::isdigit(o[pos]))
+    bool ok;
+    if (stageType == "stage")
+        ok = Stage::parseTagName(o, pos);
+    else
+        ok = Stage::parseName(o, pos);
+    if (!ok)
         return false;
-    pos += count;
     stage = o.substr(0, pos);
     if (pos >= o.length() || o[pos++] != '.')
         return false;

@@ -4,31 +4,28 @@ writers.gdal
 ================================================================================
 
 The `GDAL`_ writer creates a raster from a point cloud using an interpolation
-algorithm.  Output is produced using GDAL and can therefore use any `driver
-that supports creation of rasters`_.
+algorithm.  Output is produced using GDAL and can use any `driver
+that supports creation of rasters`_.  A data_type_ can be specified for the
+raster (double, float, int32, etc.).  If no data type is specified, the
+data type with the largest range supported by the driver is used.
 
 .. _`GDAL`: http://gdal.org
 .. _`driver that supports creation of rasters`: http://www.gdal.org/formats_list.html
 
 The technique used to create the raster is a simple interpolation where
-each point that falls within a given radius of a raster cell center
-potentially contributes to the raster's value.
-
-.. note::
-
-    If a circle with the provided radius doesn't encompass the entire cell,
-    it is possible that some points will not be considered at all, including
-    those that may be within the bounds of the raster cell.
-
-.. note::
-    If no radius_ is provided, it is set to the product of the resolution_ and
-    the square root of two. This is consistent with the original Points2Grid_
-    application from which this algorithm has its roots.
+each point that falls within a given radius_ of a raster cell center
+potentially contributes to the raster's value.  If no radius is provided,
+it is set to the product of the resolution_ and the square root of two.
+This is consistent with the original Points2Grid_ application from which
+this algorithm has its roots.  If a circle with the provided radius
+doesn't encompass the entire cell, it is possible that some points will
+not be considered at all, including those that may be within the bounds
+of the raster cell.
 
 .. _Points2Grid: http://www.opentopography.org/otsoftware/points2grid
 
-The GDAL writer creates rasters using the data specified in the ``dimension``
-option (defaults to `Z`).The writer will creates up to six rasters based on
+The GDAL writer creates rasters using the data specified in the dimension_
+option (defaults to `Z`). The writer creates up to six rasters based on
 different statistics in the output dataset.  The order of the layers in the
 dataset is as follows:
 
@@ -56,16 +53,22 @@ stdev
 
 If no points fall within the circle about a raster cell, a secondary
 algorithm can be used to attempt to provide a value after the standard
-interpolation is complete.  If the window_size_ option is set to a non-zero
-value, a square of rasters surrounding an empty cell, and the value of each
-non-empty surrounding is averaged using inverse distance weighting to provide
-a value for the subject cell.  The value provided for window_size is the
+interpolation is complete.  If the window_size_ option is non-zero, the
+values of a square of rasters surrounding an empty cell is applied
+using inverse distance weighting of any non-empty cells.
+The value provided for window_size is the
 maximum horizontal or vertical distance that a donor cell may be in order to
 contribute to the subject cell (A window_size of 1 essentially creates a 3x3
 array around the subject cell.  A window_size of 2 creates a 5x5 array, and
 so on.)
 
-Cells that have no value after interpolation are given the empty value of -9999.
+Cells that have no value after interpolation are given a value specified by
+the nodata_ option.
+
+.. embed::
+
+.. streamable::
+
 
 Basic Example
 --------------------------------------------------------------------------------
@@ -94,7 +97,14 @@ Options
 --------------------------------------------------------------------------------
 
 filename
-    Name of output file. [Required]
+    Name of output file. The writer will accept a filename containing
+    a single placeholder character (`#`).  If input to the writer consists
+    of multiple PointViews, each will be written to a separate file, where
+    the placeholder will be replaced with an incrementing integer.  If no
+    placeholder is found, all PointViews provided to the writer are
+    aggregated into a single file for output.  Multiple PointViews are usually
+    the result of using :ref:`filters.splitter`, :ref:`filters.chipper` or
+    :ref:`filters.divider`.[Required]
 
 .. _resolution:
 
@@ -105,7 +115,7 @@ resolution
 
 radius
     Radius about cell center bounding points to use to calculate a cell value.
-    [Default: ``resolution`` * sqrt(2)]
+    [Default: resolution_ * sqrt(2)]
 
 gdaldriver
     Name of the GDAL driver to use to write the output. [Default: "GTiff"]
@@ -118,6 +128,22 @@ gdalopts
     .. note::
         The INTERLEAVE GDAL driver option is not supported.  writers.gdal
         always uses BAND interleaving.
+
+.. _data_type:
+
+data_type
+    The data type to use for the output raster (double, float, int32,
+    uint16, etc.).  Many GDAL drivers only
+    support a limited set of output data types. The default value depends
+    on the driver.
+
+.. _nodata:
+
+nodata
+    The value to use for a raster cell if no data exists in the input data
+    with which to compute an output cell value. [Default: depends on the
+    data_type_.  -9999 for double, float, int and short, 9999 for
+    unsigned int and unsigned short, 255 for unsigned char and -128 for char]
 
 .. _output_type:
 
@@ -133,8 +159,10 @@ window_size
     the fallback interpolation method.  See the stage description for more
     information. [Default: 0]
 
+.. _dimension:
+
 dimension
-  A dimension name to use for the interpolation. [Default: ``Z``]
+  A dimension name to use for the interpolation. [Default: "Z"]
 
 .. _bounds:
 

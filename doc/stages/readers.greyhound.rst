@@ -6,6 +6,8 @@ readers.greyhound
 The **Greyhound Reader** allows you to query point data from a `Greyhound`_
 server.
 
+.. plugin::
+
 Example
 -------
 
@@ -14,32 +16,40 @@ Example
     {
       "pipeline":[
         {
-          "type":"readers.greyhound",
-          "url":"data.greyhound.io",
-          "resource":"autzen"
+          "type": "readers.greyhound",
+          "url": "data.greyhound.io",
+          "resource": "iowa-z",
+          "filter": {"$and": [
+            {"Path": "02004736.laz"},
+            {"Classification": {"$ne": 7}}
+          ]}
         },
-        {
-          "type":"writers.text",
-          "filename":"outputfile.txt"
-        }
+        "output.laz"
       ]
     }
 
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "greyhound://data.greyhound.io/resource/iowa-z/read?filter={\"Path\":\"02004736.laz\"}",
+        "02004736.laz"
+      ]
+    }
 
 Options
 -------
 
 _`url`
-  Greyhound server URL string. [Required]
+  Greyhound server URL, or a full Greyhound `read`_ query URL.  If specified as a full Greyhound query URL, no other options need to be present.
 
 _`resource`
-  Name of the Greyhound resource to access. [Required]
+  Name of the Greyhound resource to access.
 
 _`bounds`
   Spatial bounds to query, expressed as a string, e.g.
   *([xmin, xmax], [ymin, ymax])* or
-  *([xmin, xmax], [ymin, ymax], [zmin, zmax])*.  By default, the entire resource
-  is queried.
+  *([xmin, xmax], [ymin, ymax], [zmin, zmax])* or as a Greyhound `bounds array`_.  By default, the entire resource is queried.
 
 _`depth_begin`
   Beginning octree depth to query, inclusive.  Lower depth values have coarser
@@ -83,12 +93,9 @@ _`filter`
         {"Classification":{"$nin":[2,3]}}
     ]}
 
-_`threads`
-  Because Greyhound resources are accessed by combination of multiple HTTP
-  requests, threaded operation can greatly increase throughput.  This option
-  sets the number of concurrent requests allowed.  [Default: **4**]
-
 .. _Greyhound: https://github.com/hobu/greyhound
+.. _bounds array: https://github.com/hobu/greyhound/blob/master/doc/clientDevelopment.rst#bounds-option
+.. _read: https://github.com/hobu/greyhound/blob/master/doc/clientDevelopment.rst#the-read-query
 .. _comparison: https://docs.mongodb.com/manual/reference/operator/query-comparison/
 .. _logical: https://docs.mongodb.com/manual/reference/operator/query-logical/
 

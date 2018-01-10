@@ -115,6 +115,11 @@ void BpfReader::initialize()
     {
         throwError(err.what());
     }
+#ifndef PDAL_HAVE_ZLIB
+    if (m_header.m_compression)
+        throwError("Can't read compressed BPF. PDAL wasn't built with "
+            "Zlib support.");
+#endif
 
     std::string code;
     if (m_header.m_coordType == static_cast<int>(BpfCoordType::Cartesian))
@@ -128,15 +133,15 @@ void BpfReader::initialize()
        else if (m_header.m_coordId < 0 && m_header.m_coordId >= -60)
           code = std::string("EPSG:327");
        else
-          throwError("BPF file contains an invalid UTM zone" +
+          throwError("BPF file contains an invalid UTM zone " +
             Utils::toString(zone));
        code += (zone < 10 ? "0" : "") + Utils::toString(zone);
     }
     else
     {
-       //BPF supports something called Terrestrial Centered Rotational
-       //(BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
-       //which we can figure out when we run into a file with these
+       // BPF supports something called Terrestrial Centered Rotational
+       // (BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
+       // which we can figure out when we run into a file with these
        // coordinate systems.
        throwError("BPF file contains unsupported coordinate system");
     }
@@ -256,6 +261,7 @@ void BpfReader::ready(PointTableRef)
     m_stream.seek(m_header.m_len);
     m_index = 0;
     m_start = m_stream.position();
+#ifdef PDAL_HAVE_ZLIB
     if (m_header.m_compression)
     {
         m_deflateBuf.resize(numPoints() * m_dims.size() * sizeof(float));
@@ -269,6 +275,7 @@ void BpfReader::ready(PointTableRef)
         m_charbuf.initialize(m_deflateBuf.data(), m_deflateBuf.size(), m_start);
         m_stream.pushStream(new std::istream(&m_charbuf));
     }
+#endif // PDAL_HAVE_ZLIB
 }
 
 
@@ -310,24 +317,6 @@ point_count_t BpfReader::read(PointViewPtr data, point_count_t count)
         return readByteMajor(data, count);
     }
     return 0;
-}
-
-
-size_t BpfReader::readBlock(std::vector<char>& outBuf, size_t index)
-{
-    uint32_t finalBytes;
-    uint32_t compressBytes;
-
-    m_stream >> finalBytes;
-    m_stream >> compressBytes;
-
-    std::vector<char> in(compressBytes);
-
-    // Fill the input bytes from the stream.
-    m_stream.get(in);
-    int ret = inflate(in.data(), compressBytes,
-        outBuf.data() + index, finalBytes);
-    return (ret ? 0 : finalBytes);
 }
 
 
@@ -413,6 +402,7 @@ void BpfReader::readDimMajor(PointRef& point)
             m_streams.emplace_back(new ILeStream());
             m_streams.back()->open(m_filename);
 
+#ifdef PDAL_HAVE_ZLIB
             if (m_header.m_compression)
             {
                 m_charbufs.emplace_back(new Charbuf());
@@ -422,6 +412,7 @@ void BpfReader::readDimMajor(PointRef& point)
                 m_streams.back()->pushStream(
                         new std::istream(m_charbufs.back().get()));
             }
+#endif // PDAL_HAVE_ZLIB
 
             m_streams.back()->seek(m_start + offset);
         }
@@ -622,6 +613,25 @@ void BpfReader::seekByteMajor(size_t dimIdx, size_t byteIdx, PointId ptIdx)
 }
 
 
+#ifdef PDAL_HAVE_ZLIB
+size_t BpfReader::readBlock(std::vector<char>& outBuf, size_t index)
+{
+    uint32_t finalBytes;
+    uint32_t compressBytes;
+
+    m_stream >> finalBytes;
+    m_stream >> compressBytes;
+
+    std::vector<char> in(compressBytes);
+
+    // Fill the input bytes from the stream.
+    m_stream.get(in);
+    int ret = inflate(in.data(), compressBytes,
+        outBuf.data() + index, finalBytes);
+    return (ret ? 0 : finalBytes);
+}
+
+
 int BpfReader::inflate(char *buf, uint32_t insize,
     char *outbuf, uint32_t outsize)
 {
@@ -649,5 +659,6 @@ int BpfReader::inflate(char *buf, uint32_t insize,
     (void)inflateEnd(&strm);
     return ret == Z_STREAM_END ? 0 : -1;
 }
+#endif // PDAL_HAVE_ZLIB
 
 } //namespace pdal

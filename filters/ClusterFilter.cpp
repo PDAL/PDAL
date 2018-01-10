@@ -73,7 +73,7 @@ void ClusterFilter::filter(PointView& view)
     auto clusters = Segmentation::extractClusters(view, m_minPoints,
         m_maxPoints, m_tolerance);
 
-    uint64_t id = 0;
+    uint64_t id = 1;
     for (auto const& c : clusters)
     {
         for (auto const& i : c)

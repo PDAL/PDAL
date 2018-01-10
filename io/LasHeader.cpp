@@ -38,6 +38,7 @@
 #include <pdal/pdal_config.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include "LasSummaryData.hpp"
 
@@ -128,24 +129,12 @@ void LasHeader::setScaling(const Scaling& scaling)
 
 uint16_t LasHeader::basePointLen(uint8_t type)
 {
-    switch (type)
-    {
-    case 0:
-        return 20;
-    case 1:
-        return 28;
-    case 2:
-        return 26;
-    case 3:
-        return 34;
-    case 6:
-        return 30;
-    case 7:
-        return 36;
-    case 8:
-        return 38;
-    }
-    return 0;
+    const uint16_t len[] = { 20, 28, 26, 34, 57, 63, 30, 36, 38, 59, 67 };
+    const size_t numTypes = sizeof(len) / sizeof(len[0]);
+
+    if (type > numTypes)
+        return 0;
+    return len[type];
 }
 
 
@@ -165,10 +154,10 @@ bool LasHeader::valid() const
 
 void LasHeader::get(ILeStream& in, Uuid& uuid)
 {
-    char buf[uuid.size];
+    std::vector<char> buf(uuid.size);
 
-    in.get(buf, uuid.size);
-    uuid.unpack(buf);
+    in.get(buf.data(), uuid.size);
+    uuid.unpack(buf.data());
 }
 
 
@@ -238,12 +227,37 @@ void LasHeader::setSrs()
 }
 
 
-LasVLR *LasHeader::findVlr(const std::string& userId,
-    uint16_t recordId)
+void LasHeader::removeVLR(const std::string& userId, uint16_t recordId)
+{
+    auto matches = [&userId, recordId](const LasVLR& vlr)
+    {
+        return vlr.matches(userId, recordId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
+}
+
+
+void LasHeader::removeVLR(const std::string& userId)
+{
+
+    auto matches = [&userId ](const LasVLR& vlr)
+    {
+        return vlr.matches(userId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
+}
+
+
+const LasVLR *LasHeader::findVlr(const std::string& userId,
+    uint16_t recordId) const
 {
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
     {
-        LasVLR& vlr = *vi;
+        const LasVLR& vlr = *vi;
         if (vlr.matches(userId, recordId))
             return &vlr;
     }
@@ -253,7 +267,7 @@ LasVLR *LasHeader::findVlr(const std::string& userId,
 
 void LasHeader::setSrsFromWkt()
 {
-    LasVLR *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
+    const LasVLR *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
     if (!vlr)
         vlr = findVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
     if (!vlr || vlr->dataLen() == 0)
@@ -273,16 +287,12 @@ void LasHeader::setSrsFromWkt()
 
 void LasHeader::setSrsFromGeotiff()
 {
-    LasVLR *vlr;
-    uint8_t *data;
-    size_t dataLen;
-
-    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    const LasVLR *vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
     // We must have a directory entry.
     if (!vlr)
         return;
-    data = (uint8_t *)vlr->data();
-    dataLen = vlr->dataLen();
+    auto data = reinterpret_cast<const uint8_t *>(vlr->data());
+    size_t dataLen = vlr->dataLen();
 
     std::vector<uint8_t> directoryRec(data, data + dataLen);
 
@@ -291,7 +301,7 @@ void LasHeader::setSrsFromGeotiff()
     dataLen = 0;
     if (vlr && !vlr->isEmpty())
     {
-        data = (uint8_t *)vlr->data();
+        data = reinterpret_cast<const uint8_t *>(vlr->data());
         dataLen = vlr->dataLen();
     }
     std::vector<uint8_t> doublesRec(data, data + dataLen);
@@ -301,7 +311,7 @@ void LasHeader::setSrsFromGeotiff()
     dataLen = 0;
     if (vlr && !vlr->isEmpty())
     {
-        data = (uint8_t *)vlr->data();
+        data = reinterpret_cast<const uint8_t *>(vlr->data());
         dataLen = vlr->dataLen();
     }
     std::vector<uint8_t> asciiRec(data, data + dataLen);

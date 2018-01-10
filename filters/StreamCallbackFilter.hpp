@@ -61,6 +61,16 @@ public:
         { m_callback = cb; }
 
 private:
+    virtual void filter(PointView& view)
+    {
+        PointRef p(view, 0);
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            p.setPointId(idx);
+            processOne(p);
+        }
+    }
+
     virtual bool processOne(PointRef& point)
     {
         if (m_callback)

@@ -58,6 +58,9 @@ std::string ColorizationFilter::getName() const { return s_info.name; }
 namespace
 {
 
+// Parse dimension name:band number:scale factor
+// Unsupplied band numbers start at 1. The default scale factor is 1.0
+//
 ColorizationFilter::BandInfo parseDim(const std::string& dim,
     uint32_t defaultBand)
 {
@@ -70,7 +73,7 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
 
     pos = 0;
     // Skip leading whitespace.
-    count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(dim, pos);
     pos += count;
 
     count = Dimension::extractName(dim, pos);
@@ -79,7 +82,7 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
     name = dim.substr(pos, count);
     pos += count;
 
-    count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(dim, pos);
     pos += count;
 
     if (pos < dim.size() && dim[pos] == ':')
@@ -91,7 +94,7 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
             band = defaultBand;
         pos += (end - start);
 
-        count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+        count = Utils::extractSpaces(dim, pos);
         pos += count;
 
         if (pos < dim.size() && dim[pos] == ':')
@@ -105,7 +108,7 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         }
     }
 
-    count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(dim, pos);
     pos += count;
 
     if (pos != dim.size())

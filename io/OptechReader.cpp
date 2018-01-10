@@ -52,7 +52,7 @@ static PluginInfo const s_info = PluginInfo(
     "Optech reader support.",
     "http://pdal.io/stages/readers.optech.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, OptechReader, Reader, s_info);
+CREATE_STATIC_PLUGIN(1, 0, OptechReader, Reader, s_info)
 
 std::string OptechReader::getName() const
 {
@@ -79,22 +79,6 @@ OptechReader::OptechReader()
     // The Optech docs say that their lat/longs are referenced
     // to the WGS84 reference frame.
     setSpatialReference(SpatialReference("EPSG:4326"));
-}
-
-
-Dimension::IdList OptechReader::getDefaultDimensions()
-{
-    Dimension::IdList dims;
-    dims.push_back(Dimension::Id::X);
-    dims.push_back(Dimension::Id::Y);
-    dims.push_back(Dimension::Id::Z);
-    dims.push_back(Dimension::Id::GpsTime);
-    dims.push_back(Dimension::Id::ReturnNumber);
-    dims.push_back(Dimension::Id::NumberOfReturns);
-    dims.push_back(Dimension::Id::EchoRange);
-    dims.push_back(Dimension::Id::Intensity);
-    dims.push_back(Dimension::Id::ScanAngleRank);
-    return dims;
 }
 
 
@@ -136,10 +120,11 @@ void OptechReader::initialize()
 
 void OptechReader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto it : getDefaultDimensions())
-    {
-        layout->registerDim(it);
-    }
+    using namespace Dimension;
+
+    layout->registerDims( { Id::X, Id::Y, Id::Z, Id::GpsTime, Id::ReturnNumber,
+        Id::NumberOfReturns, Id::EchoRange, Id::Intensity,
+        Id::ScanAngleRank } );
 }
 
 

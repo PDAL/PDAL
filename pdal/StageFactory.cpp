@@ -50,8 +50,10 @@
 #include <filters/ELMFilter.hpp>
 #include <filters/EstimateRankFilter.hpp>
 #include <filters/FerryFilter.hpp>
+#include <filters/GreedyProjection.hpp>
 #include <filters/GroupByFilter.hpp>
 #include <filters/HAGFilter.hpp>
+#include <filters/HeadFilter.hpp>
 #include <filters/IQRFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
 #include <filters/LocateFilter.hpp>
@@ -64,7 +66,9 @@
 #include <filters/OutlierFilter.hpp>
 #include <filters/OverlayFilter.hpp>
 #include <filters/PMFFilter.hpp>
+#include <filters/PoissonFilter.hpp>
 #include <filters/RadialDensityFilter.hpp>
+#include <filters/RandomizeFilter.hpp>
 #include <filters/RangeFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
 #include <filters/SampleFilter.hpp>
@@ -72,7 +76,23 @@
 #include <filters/SortFilter.hpp>
 #include <filters/SplitterFilter.hpp>
 #include <filters/StatsFilter.hpp>
+#include <filters/TailFilter.hpp>
 #include <filters/TransformationFilter.hpp>
+#include <filters/VoxelCenterNearestNeighborFilter.hpp>
+#include <filters/VoxelCentroidNearestNeighborFilter.hpp>
+
+#include <kernels/DeltaKernel.hpp>
+#include <kernels/DiffKernel.hpp>
+#include <kernels/GroundKernel.hpp>
+#include <kernels/HausdorffKernel.hpp>
+#include <kernels/InfoKernel.hpp>
+#include <kernels/MergeKernel.hpp>
+#include <kernels/PipelineKernel.hpp>
+#include <kernels/RandomKernel.hpp>
+#include <kernels/SortKernel.hpp>
+#include <kernels/SplitKernel.hpp>
+#include <kernels/TIndexKernel.hpp>
+#include <kernels/TranslateKernel.hpp>
 
 // readers
 #include <io/BpfReader.hpp>
@@ -81,7 +101,6 @@
 #include <io/Ilvis2Reader.hpp>
 #include <io/LasReader.hpp>
 #include <io/OptechReader.hpp>
-#include <io/BufferReader.hpp>
 #include <io/PlyReader.hpp>
 #include <io/PtsReader.hpp>
 #include <io/QfitReader.hpp>
@@ -94,6 +113,7 @@
 #include <io/BpfWriter.hpp>
 #include <io/GDALWriter.hpp>
 #include <io/LasWriter.hpp>
+#include <io/OGRWriter.hpp>
 #include <io/PlyWriter.hpp>
 #include <io/SbetWriter.hpp>
 #include <io/TextWriter.hpp>
@@ -123,10 +143,11 @@ StringList StageFactory::extensions(const std::string& driver)
         { "readers.qfit", { "qi" } },
         { "readers.rxp", { "rxp" } },
         { "readers.sbet", { "sbet" } },
-        { "readers.sqlite", { "sqlite" } },
+        { "readers.sqlite", { "sqlite", "gpkg" } },
+        { "readers.matlab", { "mat" } },
         { "readers.mrsid", { "sid" } },
         { "readers.tindex", { "tindex" } },
-        { "readers.text", { "txt" } },
+        { "readers.text", { "csv", "txt" } },
         { "readers.icebridge", { "h5" } },
 
         { "writers.bpf", { "bpf" } },
@@ -138,8 +159,9 @@ StringList StageFactory::extensions(const std::string& driver)
         { "writers.ply", { "ply" } },
         { "writers.sbet", { "sbet" } },
         { "writers.derivative", { "derivative" } },
-        { "writers.sqlite", { "sqlite" } },
+        { "writers.sqlite", { "sqlite", "gpkg" } },
         { "writers.gdal", { "tif", "tiff", "vrt" } },
+        { "writers.ogr", { "shp", "geojson" } },
     };
 
     return exts[driver];
@@ -152,10 +174,13 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "bin", "readers.terrasolid" },
         { "bpf", "readers.bpf" },
         { "csd", "readers.optech" },
+        { "csv", "readers.text" },
         { "greyhound", "readers.greyhound" },
+        { "gpkg", "readers.sqlite" },
         { "icebridge", "readers.icebridge" },
         { "las", "readers.las" },
         { "laz", "readers.las" },
+        { "mat", "readers.matlab" },
         { "nitf", "readers.nitf" },
         { "nsf", "readers.nitf" },
         { "ntf", "readers.nitf" },
@@ -205,6 +230,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "json", "writers.text" },
         { "las", "writers.las" },
         { "laz", "writers.las" },
+        { "gpkg", "writers.sqlite" },
         { "mat", "writers.matlab" },
         { "ntf", "writers.nitf" },
         { "pcd", "writers.pcd" },
@@ -217,7 +243,9 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "", "writers.text" },
         { "tif", "writers.gdal" },
         { "tiff", "writers.gdal" },
-        { "vrt", "writers.gdal" }
+        { "vrt", "writers.gdal" },
+        { "shp", "writers.ogr" },
+        { "geojson", "writers.ogr" }
     };
 
     // Strip off '.' and make lowercase.
@@ -232,8 +260,8 @@ StageFactory::StageFactory(bool no_plugins)
 {
     if (!no_plugins)
     {
-        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Reader |
-            PF_PluginType_Writer);
+        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Kernel |
+            PF_PluginType_Reader | PF_PluginType_Writer);
     }
 
     // filters
@@ -251,8 +279,10 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(ELMFilter_InitPlugin);
     PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager::initializePlugin(GreedyProjection_InitPlugin);
     PluginManager::initializePlugin(GroupByFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
+    PluginManager::initializePlugin(HeadFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
     PluginManager::initializePlugin(LocateFilter_InitPlugin);
@@ -265,7 +295,9 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(OutlierFilter_InitPlugin);
     PluginManager::initializePlugin(OverlayFilter_InitPlugin);
     PluginManager::initializePlugin(PMFFilter_InitPlugin);
+    PluginManager::initializePlugin(PoissonFilter_InitPlugin);
     PluginManager::initializePlugin(RadialDensityFilter_InitPlugin);
+    PluginManager::initializePlugin(RandomizeFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
     PluginManager::initializePlugin(SampleFilter_InitPlugin);
@@ -273,7 +305,24 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(SortFilter_InitPlugin);
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
+    PluginManager::initializePlugin(TailFilter_InitPlugin);
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
+    PluginManager::initializePlugin(VoxelCenterNearestNeighborFilter_InitPlugin);
+    PluginManager::initializePlugin(VoxelCentroidNearestNeighborFilter_InitPlugin);
+
+    // kernels
+    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
+    PluginManager::initializePlugin(DiffKernel_InitPlugin);
+    PluginManager::initializePlugin(GroundKernel_InitPlugin);
+    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
+    PluginManager::initializePlugin(InfoKernel_InitPlugin);
+    PluginManager::initializePlugin(MergeKernel_InitPlugin);
+    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
+    PluginManager::initializePlugin(RandomKernel_InitPlugin);
+    PluginManager::initializePlugin(SortKernel_InitPlugin);
+    PluginManager::initializePlugin(SplitKernel_InitPlugin);
+    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
+    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 
     // readers
     PluginManager::initializePlugin(BpfReader_InitPlugin);
@@ -294,6 +343,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
     PluginManager::initializePlugin(GDALWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
+    PluginManager::initializePlugin(OGRWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);

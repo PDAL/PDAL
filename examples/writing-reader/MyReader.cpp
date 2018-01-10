@@ -28,23 +28,11 @@ namespace pdal
     layout->registerOrAssignDim("MyData", Dimension::Type::Unsigned64);
   }
 
-  Dimension::IdList MyReader::getDefaultDimensions()
-  {
-    Dimension::IdList ids;
-
-    ids.push_back(Dimension::Id::X);
-    ids.push_back(Dimension::Id::Y);
-    ids.push_back(Dimension::Id::Z);
-
-    return ids;
-  }
-
   void MyReader::ready(PointTableRef)
   {
     SpatialReference ref("EPSG:4385");
     setSpatialReference(ref);
   }
-
 
   template <typename T>
   T convert(const StringList& s, const std::string& name, size_t fieldno)

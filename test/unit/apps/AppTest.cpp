@@ -64,4 +64,51 @@ TEST(PdalApp, log)
     EXPECT_TRUE(output.find("PDAL Debug") == std::string::npos);
 }
 
+TEST(PdalApp, option_file)
+{
+    std::string output;
+
+    std::string baseCommand = appName() + " translate " +
+        Support::datapath("las/simple.las") + " " +
+        Support::temppath("out.las") + " -f filters.range ";
+    std::string command;
+
+    Utils::run_shell_command(baseCommand + " 2>&1", output);
+    EXPECT_TRUE(output.find("Missing value") != std::string::npos);
+
+    command = baseCommand +
+        "--filters.range.option_file=" + Support::datapath("apps/nofile") +
+        " 2>&1";
+    Utils::run_shell_command(command, output);
+    EXPECT_TRUE(output.find("Can't read") != std::string::npos);
+
+    command = baseCommand +
+        "--filters.range.option_file=" +
+        Support::datapath("apps/good_cmd_opt") +
+        " 2>&1";
+    Utils::run_shell_command(command, output);
+    EXPECT_TRUE(output.empty());
+
+    command = baseCommand +
+        "--filters.range.option_file=" +
+        Support::datapath("apps/good_json_opt") +
+        " 2>&1";
+    Utils::run_shell_command(command, output);
+    EXPECT_TRUE(output.empty());
+
+    command = baseCommand +
+        "--filters.range.option_file=" +
+        Support::datapath("apps/bad_cmd_opt") +
+        " 2>&1";
+    Utils::run_shell_command(command, output);
+    EXPECT_TRUE(output.find("Unexpected argument") != std::string::npos);
+
+    command = baseCommand +
+        "--filters.range.option_file=" +
+        Support::datapath("apps/bad_json_opt") +
+        " 2>&1";
+    Utils::run_shell_command(command, output);
+    EXPECT_TRUE(output.find("Unexpected argument") != std::string::npos);
+}
+
 } // unnamed namespace

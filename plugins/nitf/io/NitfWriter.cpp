@@ -124,7 +124,6 @@ void NitfWriter::readyFile(const std::string& filename,
     const SpatialReference& srs)
 {
     m_nitf.setFilename(filename);
-    m_error.setFilename(filename);
 
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(&m_oss, srs);

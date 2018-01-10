@@ -15,6 +15,17 @@ foreach(infileName ${inFiles})
         "${CMAKE_BINARY_DIR}/${outfileName}")
 endforeach()
 
+add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
+add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
+target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
+    PRIVATE
+        ${ROOT_DIR}
+        ${PROJECT_BINARY_DIR}/include
+        ${PROJECT_BINARY_DIR}/test/unit
+        ${PDAL_INCLUDE_DIR}
+)
+PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
+
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test FILES EigenTest.cpp)
@@ -47,9 +58,7 @@ PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
-if (PDAL_HAVE_LAZPERF)
-    PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)
-endif()
+PDAL_ADD_TEST(pdal_compression_test FILES CompressionTest.cpp)
 
 #
 # sources for the native io
@@ -83,6 +92,8 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 target_include_directories(pdal_filters_chipper_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
+PDAL_ADD_TEST(pdal_filters_colorinterp_test FILES
+    filters/ColorinterpFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES
     filters/ColorizationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_computerange_test FILES filters/ComputeRangeFilterTest.cpp)
@@ -110,6 +121,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
+PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 endif()

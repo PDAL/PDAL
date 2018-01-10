@@ -72,7 +72,7 @@ public:
     template <class BBOX> bool kdtree_get_bbox(BBOX& bb) const;
     void build()
     {
-        m_index.reset(new my_kd_tree_t(DIM, *this));
+        m_index.reset(new my_kd_tree_t(DIM, *this, nanoflann::KDTreeSingleIndexAdaptorParams(100)));
         m_index->buildIndex();
     }
 
@@ -149,7 +149,7 @@ public:
 
         return neighbors(x, y, k);
     }
-    
+
     void knnSearch(double x, double y, point_count_t k,
         std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
@@ -163,7 +163,7 @@ public:
         pt.push_back(y);
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
     }
-    
+
     void knnSearch(PointId idx, point_count_t k, std::vector<PointId> *indices,
         std::vector<double> *sqr_dists)
     {

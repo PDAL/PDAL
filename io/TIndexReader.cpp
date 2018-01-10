@@ -133,12 +133,6 @@ void TIndexReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-pdal::Dimension::IdList TIndexReader::getDefaultDimensions()
-{
-    return Dimension::IdList();
-}
-
-
 void TIndexReader::initialize()
 {
     if (!m_bounds.empty())

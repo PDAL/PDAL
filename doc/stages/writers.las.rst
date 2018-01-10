@@ -9,7 +9,11 @@ interchange file format for LIDAR data.
 .. warning::
 
     Scale/offset are not preserved from an input LAS file.  See below for
-    information on the scale/offset options and the `forward` option.
+    information on the scale/offset options and the ``forward`` option.
+
+.. embed::
+
+.. streamable::
 
 VLRs
 -------
@@ -72,7 +76,7 @@ Options
 -------
 
 filename
-  LAS file to read. The writer will accept a filename containing
+  Output filename. The writer will accept a filename containing
   a single placeholder character (`#`).  If input to the writer consists
   of multiple PointViews, each will be written to a separate file, where
   the placeholder will be replaced with an incrementing integer.  If no
@@ -148,7 +152,7 @@ system_id
 
 a_srs
   The spatial reference system of the file to be written. Can be an EPSG string
-  (e.g. "EPSG:268910") or a WKT string. [Default: Not set]
+  (e.g. "EPSG:26910") or a WKT string. [Default: Not set]
 
 global_encoding
   Various indicators to describe the data.  See the LAS documentation.  Note

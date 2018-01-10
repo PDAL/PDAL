@@ -228,14 +228,12 @@ public:
     /**
       Push the stage's leader into the log.
     */
-    void pushLogLeader() const
-        { m_log->pushLeader(m_logLeader); }
+    void startLogging() const;
 
     /**
         Pop the stage's leader from the log.
     */
-    void popLogLeader() const
-        { m_log->popLeader(); }
+    void stopLogging() const;
 
     /**
       Determine whether the stage is in debug mode or not.
@@ -243,7 +241,7 @@ public:
       \return  The stage's debug state.
     */
     bool isDebug() const
-        { return m_debug; }
+        { return m_log && m_log->getLevel() > LogLevel::Debug; }
 
     /**
       Return the name of a stage.
@@ -292,6 +290,27 @@ public:
     */
     void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
 
+    /**
+      Parse a stage name from a string.  Return the name and update the
+      position in the input string to the end of the stage name.
+
+      \param o     Input string to parse.
+      \param pos   Parsing start/end position.
+      \return  Whether the parsed name is a valid stage name.
+    */
+    static bool parseName(std::string o, std::string::size_type& pos);
+
+    /**
+      Parse a tag name from a string.  Return the name and update the
+      position in the input string to the end of the tag name.
+
+      \param o    Input string to parse.
+      \param pos  Parsing start/end position.
+      \param tag  Parsed tag name.
+      \return  Whether the parsed name is a valid tag name.
+    */
+    static bool parseTagName(std::string o, std::string::size_type& pos);
+
 protected:
     Options m_options;          ///< Stage's options.
     MetadataNode m_metadata;    ///< Stage's metadata.
@@ -300,9 +319,31 @@ protected:
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void addSpatialReferenceArg(ProgramArgs& args);
     void throwError(const std::string& s) const;
+    /**
+      Return the point count of all point views at the start of execution.
+      Only valid during execute().
+
+      \return  Total number of points in all point views being executed.
+    */
+    point_count_t pointCount() const
+        { return m_pointCount; }
+    /**
+      Return the count of faces in all primary meshes for all point views.
+      Only valid during execute().
+
+      \return  Total number of faces in all point views being executed.
+    */
+    point_count_t faceCount() const
+        { return m_faceCount; }
+
+    void throwStreamingError() const
+    {
+        std::ostringstream oss;
+        oss << "Point streaming not supported for stage " << getName() << ".";
+        throw pdal_error(oss.str());
+    }
 
 private:
-    bool m_debug;
     uint32_t m_verbose;
     std::string m_logname;
     std::vector<Stage *> m_inputs;
@@ -315,6 +356,11 @@ private:
     // bind the user_data argument that is essentially a comment in pipeline
     // files.
     std::string m_userDataJSON;
+    point_count_t m_pointCount;
+    point_count_t m_faceCount;
+    // This is never used, but we want something to bind to the argument
+    // we stick in ProgramArgs so that it shows up in help and an options list.
+    std::string m_optionFile;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
@@ -410,9 +456,8 @@ private:
     */
     virtual bool processOne(PointRef& /*point*/)
     {
-        std::ostringstream oss;
-        oss << "Point streaming not supported for stage " << getName() << ".";
-        throw pdal_error(oss.str());
+        throwStreamingError();
+        return false;
     }
 
     /**

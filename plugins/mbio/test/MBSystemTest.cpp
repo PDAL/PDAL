@@ -55,7 +55,6 @@ TEST(MBSystemReaderTest, testRead)
     Stage* reader(f.createStage("readers.mbio"));
     EXPECT_TRUE(reader);
 
-    Option filename("filename", getFilePath());
     Options options;
     options.add("filename", getFilePath());
     options.add("format", "mbf_em300raw");
@@ -66,6 +65,5 @@ TEST(MBSystemReaderTest, testRead)
     PointViewSet viewSet = reader->execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 112u);
-
+    EXPECT_EQ(view->size(), 3767u);
 }

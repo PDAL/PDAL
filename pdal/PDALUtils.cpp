@@ -177,17 +177,15 @@ void toJSON(const MetadataNode& m, std::ostream& o)
 namespace
 {
 
+#ifdef PDAL_ARBITER_ENABLED
 std::string tempFilename(const std::string& path)
 {
-#ifdef PDAL_ARBITER_ENABLED
     const std::string tempdir(arbiter::fs::getTempPath());
     const std::string basename(arbiter::util::getBasename(path));
 
     return arbiter::util::join(tempdir, basename);
-#else
-    throw pdal_error("Arbiter is not enabled for this configuration (tempFilename)!");
+}
 #endif
-};
 
 // RAII handling of a temp file to make sure file gets deleted.
 class TempFile
@@ -362,16 +360,16 @@ bool fileExists(const std::string& path)
 double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 {
     using namespace Dimension;
-        
+
     KD3Index srcIndex(*srcView);
     srcIndex.build();
-    
+
     KD3Index candIndex(*candView);
     candIndex.build();
-    
+
     double maxDistSrcToCand = std::numeric_limits<double>::lowest();
     double maxDistCandToSrc = std::numeric_limits<double>::lowest();
-    
+
     for (PointId i = 0; i < srcView->size(); ++i)
     {
         std::vector<PointId> indices(1);
@@ -396,7 +394,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     maxDistSrcToCand = std::sqrt(maxDistSrcToCand);
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
-    
+
     return std::max(maxDistSrcToCand, maxDistCandToSrc);
 }
 

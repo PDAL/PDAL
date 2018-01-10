@@ -52,11 +52,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-    {
-        return fileDimensions();
-    };
-
 private:
     point_count_t m_numPts;
 

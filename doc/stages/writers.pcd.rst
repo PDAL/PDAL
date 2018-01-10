@@ -10,9 +10,12 @@ By default, compression is not enabled, and the PCD writer will output ASCII
 formatted data. When compression is enabled, the output is PCD's
 binary-compressed format.
 
+.. plugin::
+
 .. note::
 
     The `PCD Writer` requires linkage of the `PCL`_ library.
+
 
 Example
 -------
@@ -39,8 +42,19 @@ filename
   PCD file to write [Required]
 
 compression
-  Apply compression to the PCD file? [Default: false]
+  Level of PCD compression to use (ascii, binary, compressed) [Default: **ascii**]
 
+xyz
+  Write only XYZ dimension? [Default: **false**]
+
+subtract_minimum
+  Set origin to minimum of XYZ dimension? [Default: **true**]
+
+offset_x, offset_y, offset_z
+  Offset to be subtracted from XYZ position [Default: **0.0**]
+
+scale_x, scale_y, scale_z
+  Scale to divide from XYZ dimension [Default: **1.0**]
 
 
 .. _Point Cloud Data (PCD): http://pointclouds.org/documentation/tutorials/pcd_file_format.php

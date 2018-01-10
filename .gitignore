@@ -35,6 +35,7 @@ install_manifest.txt
 #
 # visual studio cruft
 #
+/.vs*
 Debug/
 Release/
 RelWithDebInfo/
@@ -49,6 +50,12 @@ ipch/
 *.suo
 *.opensdf
 *.sln.docstates
+
+#
+# intellij, clion
+#
+.idea
+*.iml
 
 #
 # doxygen cruft
@@ -69,8 +76,10 @@ test/data/local
 #
 .DS_Store
 
-_build
-build
+/_build*
+/build*
+/*local*.bat
+/*local*.sh
 Makefile
 doc/build
 bin/
@@ -144,8 +153,9 @@ test/data/sbet/pipeline.xml
 
 python/*.egg*
 python/build/*
-python/pdal/libpdalpython.so
-python/pdal/libpdalpython.cpp
+python/dist/*
+python/pdal/libpdalpython*
+python/pdal/libpdalpython*
 test/data/*.json
 test/data/pipeline/*.json
 test/data/filters/*.json

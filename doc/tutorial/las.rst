@@ -1,4 +1,4 @@
-.. las_tutorial:
+.. _las_tutorial:
 
 ================================================================================
 LAS Reading and Writing with PDAL
@@ -91,7 +91,7 @@ The PDAL :ref:`writers.las` allows you to override or assign the coordinate
 system to an explicit value if you need. Often the coordinate system defined by
 a file might be incorrect or non-existent, and you can set this with PDAL.
 
-The following example sets the ``out_srs`` option of the :ref:`writers.las` to
+The following example sets the ``a_srs`` option of the :ref:`writers.las` to
 ``EPSG:4326``.
 
 
@@ -107,7 +107,7 @@ The following example sets the ``out_srs`` option of the :ref:`writers.las` to
             },
             {
                 "type" : "writers.las",
-                "out_srs": "EPSG:4326",
+                "a_srs": "EPSG:4326",
                 "filename" : "output.las"
             }
         ]
@@ -188,7 +188,7 @@ coordinate system for a file to `UTM Zone 15N NAD83`_ for horizontal and
             },
             {
                 "type" : "writers.las",
-                "out_srs": "EPSG:26915+5703",
+                "a_srs": "EPSG:26915+5703",
                 "filename" : "output.las"
             }
         ]
@@ -527,7 +527,7 @@ into LAS files. Common VLR data include:
 .. note::
 
     There are VLRs that are defined by the specification, and they
-    have the VLR ``user_id``s of `LASF_Spec` or `LASF_Projection`.
+    have the VLR ``user_id`` of `LASF_Spec` or `LASF_Projection`.
     `LASF_Spec` VLRs provide a description of the data beyond that
     available in the header.  `LASF_Projection` VLRs store the spatial
     coordinate system of the data.

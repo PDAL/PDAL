@@ -5,6 +5,10 @@ filters.decimation
 
 The decimation filter retains every Nth point from an input point view.
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

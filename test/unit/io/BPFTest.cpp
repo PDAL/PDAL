@@ -260,6 +260,7 @@ TEST(BPFTest, test_byte_major)
         Support::datapath("bpf/autzen-utm-chipped-25-v3-segregated.bpf"));
 }
 
+#ifdef PDAL_HAVE_ZLIB
 TEST(BPFTest, test_point_major_zlib)
 {
     test_file_type(
@@ -279,6 +280,7 @@ TEST(BPFTest, test_byte_major_zlib)
         Support::datapath("bpf/"
             "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
 }
+#endif // PDAL_HAVE_ZLIB
 
 TEST(BPFTest, roundtrip_byte)
 {
@@ -304,6 +306,7 @@ TEST(BPFTest, roundtrip_point)
     test_roundtrip(ops);
 }
 
+#ifdef PDAL_HAVE_ZLIB
 TEST(BPFTest, roundtrip_byte_compression)
 {
     Options ops;
@@ -330,6 +333,7 @@ TEST(BPFTest, roundtrip_point_compression)
     ops.add("compression", true);
     test_roundtrip(ops);
 }
+#endif // PDAL_HAVE_ZLIB
 
 TEST(BPFTest, roundtrip_scaling)
 {
@@ -662,7 +666,7 @@ TEST(BPFTest, outputdims)
     BpfWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);
-    
+
     PointTable t;
     writer.prepare(t);
     writer.execute(t);
@@ -677,7 +681,7 @@ TEST(BPFTest, outputdims)
     r.prepare(t2);
 
     StringList dimNames;
-    Dimension::IdList dimList = t2.layout()->dims(); 
+    Dimension::IdList dimList = t2.layout()->dims();
     EXPECT_EQ(dimList.size(), 5u);
     for (auto di : dimList)
         dimNames.push_back(t2.layout()->dimName(di));
@@ -690,7 +694,7 @@ TEST(BPFTest, outputdims)
         "Y",
         "Z"
     };
-   
+
     std::sort(dimNames.begin(), dimNames.end());
     EXPECT_TRUE(CheckEqualCollections(dimNames.begin(),
         dimNames.end(), std::begin(dims)));
@@ -701,10 +705,64 @@ TEST(BPFTest, outputdims)
 
     BpfWriter w3;
     w3.setOptions(o3);
-    
+
     // Missing X dimension.
     PointTable t3;
     EXPECT_THROW(w3.prepare(t3), pdal_error);
-    
+
 }
 
+TEST(BPFTest, autoutm)
+{
+    std::string sourcefile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+    BpfWriter writer;
+
+    // Make sure that we throw on invalid coord_id string.
+    Options o1;
+    o1.add("filename", outfile);
+    o1.add("coord_id", "foobar");
+    writer.setOptions(o1);
+
+    PointTable table;
+
+    EXPECT_THROW(writer.prepare(table), pdal_error);
+
+    // Make sure that we throw on invalid coord_id valid (not a UTM zone).
+    Options o2;
+    o2.add("filename", outfile);
+    o2.add("coord_id", "75");
+    writer.setOptions(o2);
+
+    EXPECT_THROW(writer.prepare(table), pdal_error);
+
+    Options readerOps;
+    readerOps.add("filename",sourcefile);
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("coord_id", "auto");
+
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options readerOps2;
+    readerOps2.replace("filename",outfile);
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+
+    PointTable table2;
+    reader2.prepare(table2);
+    PointViewSet views = reader2.execute(table2);
+    SpatialReference srs = reader2.getSpatialReference();
+    EXPECT_EQ(srs.getUTMZone(), 10);
+}

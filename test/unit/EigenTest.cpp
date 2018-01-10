@@ -250,3 +250,12 @@ TEST(EigenTest, Morphological)
     EXPECT_EQ(1, Fv[12]);
     EXPECT_EQ(0, Fv2[12]);
 }
+
+TEST(EigenTest, RoundtripString)
+{
+    Eigen::MatrixXd identity = Eigen::MatrixXd::Identity(4, 4);
+    Eigen::MatrixXd target;
+    Utils::fromString(Utils::toString(identity), target);
+    ASSERT_EQ(identity.size(), target.size());
+    EXPECT_EQ(identity, target);
+}

@@ -3,12 +3,13 @@
     {
       "filename" :"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
       "compression" : "laszip",
-      "tag": "reader"
+      "tag": "my_reader"
     },
     {
       "type":"filters.assign",
       "assignment":"Z[:]=25",
-      "tag":"assigner"
+      "tag":"assigner",
+      "inputs":"my_reader"
     },
     "@CMAKE_SOURCE_DIR@/test/temp/assigned.las"
   ]

@@ -46,6 +46,11 @@ the two supported decompressors, `LASzip`_ or `LAZperf`_.  See the
   but the data associated with a dimension of datatype 0 will be ignored
   (no PDAL dimension will be created).
 
+.. embed::
+
+.. streamable::
+
+
 Example
 -------
 
@@ -88,7 +93,15 @@ _`extra_dims`
 
 _`compression`
   May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
-  or the LasZip decompressor for LAZ files.  PDAL must have been build with
+  or the LASzip decompressor for LAZ files.  PDAL must have been built with
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS.
   [Default: "laszip"]
+
+_`spatialreference`
+  Sets the spatial reference for the file data.  Overrides any spatial
+  reference information in the file itself.  Most text-based formats of
+  SRS information are accepted, including WKT and proj.4.
+
+_`count`
+    Maximum number of points read [Optional]

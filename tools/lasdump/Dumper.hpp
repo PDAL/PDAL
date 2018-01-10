@@ -39,6 +39,8 @@
 #include "Header.hpp"
 #include "Vlr.hpp"
 
+#include <laszip/laszip_api.h>
+
 namespace pdal
 {
 
@@ -68,6 +70,7 @@ private:
     int processArgs(std::deque<std::string> args);
     void readPoints(ILeStream& in);
     void readCompressedPoints(ILeStream& in);
+    void loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& buf);
 };
 
 } // namespace lasdump

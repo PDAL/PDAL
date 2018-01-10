@@ -46,7 +46,7 @@ protected:
     T m_defVal;
     bool m_valSet;
 
-    BaseHeaderVal() : m_valSet(false)
+    BaseHeaderVal() : m_val(T()), m_valSet(false)
     {}
 
     BaseHeaderVal(const T& t) : m_defVal(t), m_valSet(false)

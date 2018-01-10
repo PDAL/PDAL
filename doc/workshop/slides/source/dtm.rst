@@ -3,20 +3,26 @@
 Generating a DTM
 ================================================================================
 
+
+.. include:: ../../includes/substitutions.rst
+
+
+
 Purpose:
     * Generate a DTM from ground-filtered data
     * Data was created in :ref:`ground`
     * Visualize DTM using :ref:`qgis`
 
 
-:ref:`DTM Workshop Materials <unavco:dtm>`
+:ref:`DTM Workshop Materials <pdal:dtm>`
 
 
 writers.gdal
 ================================================================================
 
 * :ref:`writers.gdal`
-* Generated using points2grid (OpenTopography)
+* Ported points2grid (OpenTopography)
+* IDW available for fill-in
 * Write TIFF/ASCII raster
 * Control pixel size
 
@@ -24,7 +30,6 @@ DTM (pipeline)
 ================================================================================
 
 .. literalinclude:: ../../exercises/analysis/dtm/gdal.json
-    :linenos:
 
 DTM (execution)
 ================================================================================

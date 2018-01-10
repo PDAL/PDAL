@@ -1,9 +1,9 @@
 name := "pdal-jni"
 
 lazy val commonSettings = Seq(
-  version := "1.4.0" + Environment.versionSuffix,
-  scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.12.1", "2.11.8"),
+  version := "1.7.0" + Environment.versionSuffix,
+  scalaVersion := "2.11.11",
+  crossScalaVersions := Seq("2.12.4", "2.11.11"),
   organization := "io.pdal",
   description := "PDAL JNI bindings",
   licenses := Seq("BSD" -> url("https://github.com/PDAL/PDAL/blob/master/LICENSE.txt")),
@@ -18,7 +18,8 @@ lazy val commonSettings = Seq(
     "-language:higherKinds",
     "-language:postfixOps",
     "-language:existentials",
-    "-feature"),
+    "-feature"
+  ),
   test in assembly := {},
   shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
   commands ++= Seq(
@@ -48,15 +49,33 @@ lazy val commonSettings = Seq(
     )
 )
 
-lazy val root = (project in file(".")).aggregate(core, native)
+lazy val root = (project in file("."))
+  .settings(commonSettings: _*)
+  .aggregate(`core-scala`, core, native)
 
-lazy val core = (project in file("core")).
-  settings(commonSettings: _*).
-  settings(name := "pdal").
-  settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
-  settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test").
-  dependsOn(Environment.dependOnNative(native % Runtime):_*)
+lazy val `core-scala` = project
+  .settings(commonSettings: _*)
+  .settings(name := "pdal-scala")
+  .settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include")
+  .settings(libraryDependencies ++= Seq(
+    Dependencies.circeCore,
+    Dependencies.circeGeneric,
+    Dependencies.circeGenericExtras,
+    Dependencies.circeParser,
+    Dependencies.jtsCore,
+    Dependencies.scalaTest % Test
+  ))
+  .settings(headerLicense := Some(HeaderLicense.ALv2("2017", "Azavea")))
+  .settings(licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.html")))
+  .dependsOn(core)
 
-lazy val native = (project in file("native")).
-  settings(sourceDirectory in nativeCompile := sourceDirectory.value).
-  enablePlugins(JniNative)
+lazy val core = project
+  .settings(commonSettings: _*)
+  .settings(name := "pdal")
+  .settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include")
+  .settings(libraryDependencies += Dependencies.scalaTest % Test)
+  .dependsOn(Environment.dependOnNative(native % Runtime): _*)
+
+lazy val native = project
+  .settings(sourceDirectory in nativeCompile := sourceDirectory.value)
+  .enablePlugins(JniNative)

@@ -54,6 +54,7 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
+    PDAL_TARGET_COMPILE_SETTINGS(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -73,6 +74,7 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
+    PDAL_TARGET_COMPILE_SETTINGS(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -160,14 +162,12 @@ macro(PDAL_ADD_TEST _name)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    set(common_srcs
-        ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-    )
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
         add_definitions("-DPDAL_DLL_EXPORT=1")
     endif()
-    add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
+    add_executable(${_name} ${PDAL_ADD_TEST_FILES}
+        $<TARGET_OBJECTS:${PDAL_TEST_SUPPORT_OBJS}>)
     target_include_directories(${_name} PRIVATE
         ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}

@@ -11,6 +11,10 @@ for more information
 
     Dimensions provided by the ILVIS2 reader
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 
@@ -42,3 +46,6 @@ mapping
 
 metadata
   XML metadata file to coincidentally read [Optional]
+
+count
+  Maximum number of points to read [Optional]

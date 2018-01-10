@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Compression.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -309,28 +310,24 @@ point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
 point_count_t OciReader::readPointMajor(PointView& view,
     BlockPtr block, point_count_t numPts)
 {
-    size_t numRemaining = block->numRemaining();
     PointId nextId = view.size();
     point_count_t numRead = 0;
 
     if (m_compression)
     {
 #ifdef PDAL_HAVE_LAZPERF
-        LazPerfBuf buf(block->chunk);
-        LazPerfDecompressor<LazPerfBuf> decompressor(buf, dbDimTypes());
-
-        std::vector<char> ptBuf(decompressor.pointSize());
-        while (numRead < numPts && numRemaining > 0)
+        auto cb = [this, &view, &nextId, &numRead](char *buf, size_t bufsize)
         {
-            point_count_t numWritten =
-                decompressor.decompress(ptBuf.data(), ptBuf.size());
-            writePoint(view, nextId, ptBuf.data());
+            writePoint(view, nextId, buf);
             if (m_cb)
                 m_cb(view, nextId);
-            numRemaining--;
             nextId++;
             numRead++;
-        }
+        };
+        const char *src = reinterpret_cast<const char *>(block->chunk.data());
+        size_t srcsize = block->chunk.size();
+        LazPerfDecompressor(cb, dbDimTypes(), block->numRemaining()).
+            decompress(src, srcsize);
 #else
         throwError("Can't decompress without LAZperf.");
 #endif
@@ -338,7 +335,9 @@ point_count_t OciReader::readPointMajor(PointView& view,
     else
     {
         char *pos = seekPointMajor(block);
-        while (numRead < numPts && numRemaining > 0)
+
+        size_t cnt = block->numRemaining();
+        while (numRead < numPts && cnt--)
         {
             writePoint(view, nextId, pos);
 
@@ -346,12 +345,11 @@ point_count_t OciReader::readPointMajor(PointView& view,
                 m_cb(view, nextId);
 
             pos += packedPointSize();
-            numRemaining--;
             nextId++;
             numRead++;
         }
     }
-    block->setNumRemaining(numRemaining);
+    block->setNumRemaining(block->numRemaining() - numRead);
     return numRead;
 }
 

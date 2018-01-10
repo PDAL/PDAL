@@ -15,6 +15,8 @@ from various sources being merged have similar dimensions or are generally
 compatible.  Notably, dimensions are not initialized when points merged
 from various sources do not have dimensions in common.
 
+.. embed::
+
 Example 1
 ---------
 

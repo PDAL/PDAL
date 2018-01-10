@@ -32,12 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_macros.hpp>
 
-#include <pdal/Compression.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "OciWriter.hpp"
@@ -741,8 +741,12 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
         for (XMLDim& xmlDim : xmlDims)
             dimTypes.push_back(xmlDim.m_dimType);
 
-        SignedLazPerfBuf compBuf(outbuf);
-        LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
+        auto cb = [&outbuf](char *buf, size_t bufsize)
+        {
+            outbuf.insert(outbuf.end(), buf, buf + bufsize);
+        };
+
+        LazPerfCompressor compressor(cb, dimTypes);
 
         try
         {

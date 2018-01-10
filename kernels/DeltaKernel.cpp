@@ -47,7 +47,7 @@ CREATE_STATIC_PLUGIN(1, 0, DeltaKernel, Kernel, s_info)
 
 std::string DeltaKernel::getName() const { return s_info.name; }
 
-DeltaKernel::DeltaKernel() : m_3d(true), m_detail(false), m_allDims(false)
+DeltaKernel::DeltaKernel() : m_detail(false), m_allDims(false)
 {}
 
 
@@ -58,9 +58,6 @@ void DeltaKernel::addSwitches(ProgramArgs& args)
     Arg& candidate = args.add("candidate", "candidate file name",
         m_candidateFile);
     candidate.setPositional();
-    Arg& output = args.add("output", "output file name", m_outputFile);
-    output.setPositional();
-    args.add("2d", "only 2D comparisons/indexing", m_3d, true);
     args.add("detail", "Output deltas per-point", m_detail);
     args.add("alldims", "Compute diffs for all dimensions (not just X,Y,Z)",
         m_allDims);

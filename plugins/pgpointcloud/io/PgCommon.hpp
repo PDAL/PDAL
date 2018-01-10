@@ -38,7 +38,7 @@
 #include "libpq-fe.h"
 
 #include <pdal/Options.hpp>
-#include <pdal/Compression.hpp>
+#include <pdal/compression/Compression.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal

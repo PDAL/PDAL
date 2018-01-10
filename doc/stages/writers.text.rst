@@ -8,6 +8,10 @@ getting smaller files into an easily parseable format.  The text writer
 supports both `GeoJSON`_ and `CSV`_ output.
 
 
+.. embed::
+
+.. streamable::
+
 Example
 -------
 

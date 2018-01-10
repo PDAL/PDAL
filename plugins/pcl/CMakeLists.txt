@@ -32,11 +32,13 @@ endif()
 
 set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
-    PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, and ground, pcl, smooth, and view kernels")
+    PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, ICP filter, and ground, pcl, smooth, and view kernels")
 
 set(INCLUDE_DIRS
     ${ROOT_DIR}
-    ${PCL_INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_LIST_DIR}
+    )
 
 add_definitions(${PCL_DEFINITIONS})
 if (NOT WIN32)
@@ -56,6 +58,9 @@ PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_reader_libname} PRIVATE
     ${INCLUDE_DIRS})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(io/PcdReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
 
 #
 # PCD Writer
@@ -67,6 +72,9 @@ PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_writer_libname} PRIVATE
     ${INCLUDE_DIRS})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(io/PcdWriter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
 
 #
 # PCLBlock Filter
@@ -98,6 +106,10 @@ PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${movingleastsquares_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(filters/MovingLeastSquaresFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
+
 
 PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
     FILES
@@ -106,18 +118,11 @@ PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
 target_include_directories(${gridprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
-PDAL_ADD_PLUGIN(poisson_filter_libname filter poisson
+PDAL_ADD_PLUGIN(icp_filter_libname filter icp
     FILES
-        filters/PoissonFilter.cpp
+        filters/IcpFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${poisson_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
-    FILES
-        filters/GreedyProjectionFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${greedyprojection_filter_libname} PRIVATE
+target_include_directories(${icp_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 #
@@ -144,10 +149,18 @@ target_include_directories(${smooth_libname} PRIVATE
     ${PDAL_IO_DIR})
 
 if (WITH_TESTS)
-    PDAL_ADD_TEST(pcltest
+    PDAL_ADD_TEST(pdal_filters_pcl_block_test
     FILES
         test/PCLBlockFilterTest.cpp
     LINK_WITH ${pcd_reader_libname} ${pcd_writer_libname} ${pclblock_libname}
         ${pcl_libname} ${smooth_libname}
     )
+
+    PDAL_ADD_TEST(pdal_filters_icp_test
+    FILES
+        test/IcpFilterTest.cpp
+    LINK_WITH
+        ${icp_filter_libname}
+    )
+    target_include_directories(pdal_filters_icp_test PRIVATE ${INCLUDE_DIRS})
 endif()

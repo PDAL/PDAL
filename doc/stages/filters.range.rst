@@ -8,6 +8,10 @@ filters.range
 The range filter applies rudimentary filtering to the input point cloud
 based on a set of criteria on the given dimensions.
 
+.. embed::
+
+.. streamable::
+
 Pipeline Example
 ----------------
 

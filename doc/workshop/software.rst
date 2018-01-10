@@ -8,9 +8,4 @@ Software Installation
 .. toctree::
    :maxdepth: 2
 
-   docker
-   qgis
-
-
-
-
+   osgeo4w

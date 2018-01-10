@@ -11,13 +11,18 @@ C++ language double-precision values.
 
 The text reader expects a header line to 1) indicate the separator character
 for the fields and 2) name the dimension for each field in the points.  Any
-single non-alphanumeric character can be used as a separator.
+single non-alphanumeric character can be used as a separator.  The header line
+separator can be overridden by the 'separator' option (see below).
 Each line in the file must contain the same number of fields as indicated by
 dimension names in the header.  Spaces are generally ignored in the input
 unless used as a separator.  When a space character is used as a separator,
 any number of consecutive spaces are treated as single space.
 
 Blank lines after the header line are ignored.
+
+.. embed::
+
+.. streamable::
 
 Example Input File
 ------------------
@@ -46,7 +51,7 @@ Example Pipeline
     {
       "pipeline":[
         {
-          "type":"readers.qfit",
+          "type":"readers.text",
           "filename":"inputfile.txt"
         },
         {
@@ -61,5 +66,11 @@ Options
 
 filename
   text file to read [Required]
+
+separator
+  Separator character to override that found in header line.
+
+count
+  Maximum number of points to read [Optional]
 
 .. _formatted: http://en.cppreference.com/w/cpp/string/basic_string/stof

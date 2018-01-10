@@ -92,7 +92,7 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
         k++;
     }
 
-    return A * A.transpose();
+    return A * A.transpose() / (ids.size()-1);
 }
 
 uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
@@ -279,7 +279,7 @@ Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
             double y = bounds.miny + (r + 0.5) * cell_size;
 
             auto neighbors = kdi.radius(x, y, cell_size * std::sqrt(2.0));
-            
+
             double val(std::numeric_limits<double>::lowest());
             for (auto const& n : neighbors)
             {
@@ -472,7 +472,7 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
 {
     std::vector<double> out(data.size(), std::numeric_limits<double>::lowest());
     std::vector<size_t> idx(5);
-    
+
     for (int iter = 0; iter < iterations; ++iter)
     {
         for (size_t col = 0; col < cols; ++col)
@@ -506,7 +506,7 @@ std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t c
 {
     std::vector<double> out(data.size(), std::numeric_limits<double>::max());
     std::vector<size_t> idx(5);
-    
+
     for (int iter = 0; iter < iterations; ++iter)
     {
         for (size_t col = 0; col < cols; ++col)
@@ -578,7 +578,7 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     Eigen::Matrix<float, Dynamic, Dynamic, RowMajor> dataRowMajor;
     dataRowMajor = data.cast<float>();
 
-    raster.writeBand((uint8_t *)dataRowMajor.data(), 1);
+    raster.writeBand((float*)dataRowMajor.data(), -9999.0f, 1);
 }
 
 Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data)

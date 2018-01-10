@@ -3,11 +3,10 @@
 Order of business
 ================================================================================
 
-* Materials https://hobu.co/workshops/unavco/
-* Follow along https://hobu.co/workshops/unavco/slides/
-* PDF https://hobu.co/workshops/unavco/PDAL-UNAVCO-ShortCourse.pdf
+* Materials https://s3.amazonaws.com/pdal/workshop/PDAL.zip
+* Follow along https://pdal.io/workshop/slides/
+* PDF http://pdal.io/PDAL.pdf
 * Links everywhere
-* First time guinea pigs
 
 Guinea Pigs
 ================================================================================
@@ -28,8 +27,9 @@ Who are we
 ================================================================================
 
 * Howard Butler
-* Pete Gadomski
-* Dr. Craig Glennie
+* Connor Manning
+* Rick Brown
+
 
 Howard Butler
 ================================================================================
@@ -41,20 +41,20 @@ Howard Butler
 
 .. _`Hobu, Inc.`: http://hobu.co
 
-Pete Gadomski
+Connor Manning
 ================================================================================
 
-* Physical Scientist at CRREL
-* Graduate student in Geosensing Systems Engineering and Sciences at UH
-* Writes code, collects data
-* https://github.com/gadomski
+* Works @ `Hobu, Inc.`_
+* Develops Entwine https://entwine.io
+* Develops Greyhound http://greyhound.io
+* Tweets @ http://twitter.com/csmannin
 
-Dr. Craig Glennie
+Rick Brown
 ================================================================================
 
-* Co-PI National Center for Airborne Laser Mapping (NCALM)
-* University of Houston
-* Formerly VP Engineering, Terrapoint
+* Works here!
+* LiDAR data processing and management
+* Entwine with Connor Manning
 
 Next
 ================================================================================

@@ -17,6 +17,7 @@ data described by the tiles.
 
 
 
+.. embed::
 
 
 Basic Example
@@ -103,6 +104,9 @@ where
 dialect
   `OGR SQL`_ dialect to use when querying tile index layer
   [Default: OGRSQL]
+
+count
+  Maximum number of points to read [Optional]
 
 .. _`OGR SQL`: http://www.gdal.org/ogr_sql.html
 

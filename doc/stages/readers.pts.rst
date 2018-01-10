@@ -6,6 +6,10 @@ readers.pts
 The **PTS reader** reads data from Leica Cyclone PTS files. It is
 not very sophisticated.
 
+.. embed::
+
+
+
 
 Example Pipeline
 ----------------
@@ -31,3 +35,5 @@ Options
 filename
   text file to read [Required]
 
+count 
+  Maximum number of points to read [Optional]

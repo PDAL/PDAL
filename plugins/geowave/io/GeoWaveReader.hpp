@@ -65,8 +65,6 @@ namespace pdal
         virtual void ready(PointTableRef table);
         virtual point_count_t read(PointViewPtr view, point_count_t count);
         virtual void done(PointTableRef table);
-
-	Dimension::IdList getDefaultDimensions();
         int createJvm();
 
         std::string m_zookeeperUrl;

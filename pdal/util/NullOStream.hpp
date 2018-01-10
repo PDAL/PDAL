@@ -34,6 +34,8 @@
 
 // Copied from http://stackoverflow.com/questions/8243743/is-there-a-null-stdostream-implementation-in-c-or-libraries
 
+#pragma once
+
 #include <iostream>
 #include <streambuf>
 
