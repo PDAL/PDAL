@@ -162,6 +162,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "writers.sqlite", { "sqlite", "gpkg" } },
         { "writers.gdal", { "tif", "tiff", "vrt" } },
         { "writers.ogr", { "shp", "geojson" } },
+        { "writers.fbx", { "fbx" } }
     };
 
     return exts[driver];
@@ -245,7 +246,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "tiff", "writers.gdal" },
         { "vrt", "writers.gdal" },
         { "shp", "writers.ogr" },
-        { "geojson", "writers.ogr" }
+        { "geojson", "writers.ogr" },
+        { "fbx", "writers.fbx" }
     };
 
     // Strip off '.' and make lowercase.

@@ -91,6 +91,11 @@ option(BUILD_PLUGIN_MBIO
 add_feature_info("MBIO plugin" BUILD_PLUGIN_MBIO
     "add features that depend on MBIO")
 
+option(BUILD_PLUGIN_FBX
+    "Choose if FBX support should be built" FALSE)
+add_feature_info("FBX plugin" BUILD_PLUGIN_FBX
+    "add features that depend on FBX")
+
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 
 option(WITH_TESTS

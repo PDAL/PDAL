@@ -32,8 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-/**
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#pragma GCC diagnostic ignored "-Wextra-semi"
+#pragma GCC diagnostic ignored "-Wnull-dereference"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#include <fbxsdk.h>
+#pragma GCC diagnostic pop
+
 #include "FbxWriter.hpp"
+
+#include <pdal/pdal_macros.hpp>
+
+using namespace fbxsdk;
 
 namespace pdal
 {
@@ -44,46 +56,17 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/writers.fbx.html"
         );
 
-CREATE_STATIC_PLUGIN(1, 0, FbxWriter, Writer, s_info)
+CREATE_SHARED_PLUGIN(1, 0, FbxWriter, Writer, s_info)
 
 std::string FbxWriter::getName() const { return s_info.name; }
+
+FbxWriter::FbxWriter()
+{}
+
 
 void FbxWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("faces", "Write faces", m_faces);
-}
-
-
-void FbxWriter::prepared(PointTableRef table)
-{
-}
-
-
-std::string PlyWriter::getType(Dimension::Type type) const
-{
-   static std::map<Dimension::Type, std::string> types =
-    {
-        { Dimension::Type::Signed8, "int8" },
-        { Dimension::Type::Unsigned8, "uint8" },
-        { Dimension::Type::Signed16, "int16" },
-        { Dimension::Type::Unsigned16, "uint16" },
-        { Dimension::Type::Signed32, "int32" },
-        { Dimension::Type::Unsigned32, "uint32" },
-        { Dimension::Type::Float, "float32" },
-        { Dimension::Type::Double, "float64" }
-    };
-
-    try
-    {
-        return types.at(type);
-    }
-    catch (std::out_of_range)
-    {
-        throwError("Can't write dimension of type '" +
-                Dimension::interpretationName(type) + "'.");
-    }
-    return "";
 }
 
 
@@ -92,12 +75,11 @@ void FbxWriter::ready(PointTableRef table)
     m_manager = FbxManager::Create();
     FbxIOSettings *ios = FbxIOSettings::Create(m_manager, IOSROOT);
     m_manager->SetIOSettings(ios);
-
     m_scene = FbxScene::Create(m_manager, "Scene");
 }
 
 
-void FbxWriter::write(const PointViewPtr data)
+void FbxWriter::write(const PointViewPtr v)
 {
     TriangularMesh *mesh = v->mesh();
     if (!mesh)
@@ -105,13 +87,13 @@ void FbxWriter::write(const PointViewPtr data)
 
     FbxMesh *fbxMesh = FbxMesh::Create(m_scene, "mesh");
 
-    fbxMesh->InitControlPoints(data->size());
+    fbxMesh->InitControlPoints(v->size());
     FbxVector4 *points = fbxMesh->GetControlPoints();
-    for (size_t i = 0; i < data->size(); ++i)
+    for (size_t i = 0; i < v->size(); ++i)
     {
-        double x = data->getFieldAs<double>(Dimension::Id::X, i);
-        double y = data->getFieldAs<double>(Dimension::Id::Y, i);
-        double z = data->getFieldAs<double>(Dimension::Id::Z, i);
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = v->getFieldAs<double>(Dimension::Id::Z, i);
         points[i] = FbxVector4(x, y, z);
     }
 
@@ -124,25 +106,39 @@ void FbxWriter::write(const PointViewPtr data)
         fbxMesh->AddPolygon(t.m_c);
         fbxMesh->EndPolygon();
     }
-    FbxNode *node = FbxNode::Create(m_scene, mesh);
-    node->SetNodeAttirbute(mesh);
+    FbxNode *node = FbxNode::Create(m_scene, "scene");
+    node->SetNodeAttribute(fbxMesh);
     m_scene->GetRootNode()->AddChild(node);
 }
 
 
-void PlyWriter::done(PointTableRef table)
+void FbxWriter::done(PointTableRef table)
 {
-    FbxExpoerter *exporter = FbxExporter::Create(m_manager, "");
-    exporter->Initialize(m_filename.data(), -1, m_manager->GetIOSettings());
-    status = exporter->Export(m_scene);
+    FbxExporter *exporter = FbxExporter::Create(m_manager, "");
+    FbxIOSettings *settings = m_manager->GetIOSettings();
+    FbxIOPluginRegistry *registry = m_manager->GetIOPluginRegistry();
 
-    m_exporter->Destroy();
+    // "FBX binary (*.fbx)"
+    // "FBX ascii (*.fbx)"
+    // "FBX encrypted (*.fbx)"
+    // ...
+    int writer = registry->FindWriterIDByDescription("FBX ascii (*.fbx)");
+    /**
+    int numWriters = registry->GetWriterFormatCount();
+    for (int i = 0; i < numWriters; ++i)
+        std::cerr << registry->GetWriterFormatDescription(i) << "\n";
+    **/
+    // -1 is default
+    // 0 is FBX binary
+    // 1 is FBX ascii
+    exporter->Initialize(m_filename.data(), writer, settings);
+    exporter->Export(m_scene);
+
+    exporter->Destroy();
     m_manager->Destroy();
     m_manager = nullptr;
-    m_exporter = nullptr;
     m_scene = nullptr;
 }
 
 } // namespace pdal
 
-**/

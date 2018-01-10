@@ -39,6 +39,12 @@
 extern "C" int32_t FbxWriter_ExitFunc();
 extern "C" PF_ExitFunc FbxWriter_InitPlugin();
 
+namespace fbxsdk
+{
+class FbxManager;
+class FbxScene;
+}
+
 namespace pdal
 {
 
@@ -55,59 +61,13 @@ public:
 
 private:
     virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
 
-    std::string getType(Dimension::Type type) const;
-    void writeHeader(PointLayoutPtr layout) const;
-    void writeValue(PointRef& point, Dimension::Id dim, Dimension::Type type);
-    void writePoint(PointRef& point, PointLayoutPtr layout);
-    void writeTriangle(const Triangle& t, size_t offset);
-
-    std::ostream *m_stream;
     std::string m_filename;
-    Format m_format;
-    bool m_faces;
-    StringList m_dimNames;
-    Dimension::IdList m_dims;
-    std::vector<PointViewPtr> m_views;
+    fbxsdk::FbxManager *m_manager;
+    fbxsdk::FbxScene *m_scene;
 };
 
-inline std::istream& operator>>(std::istream& in, PlyWriter::Format& f)
-{
-    std::string s;
-    std::getline(in, s);
-    Utils::trim(s);
-    Utils::tolower(s);
-    if (s == "ascii" || s == "default")
-        f = PlyWriter::Format::Ascii;
-    else if (s == "little endian" || s == "binary_little_endian")
-        f = PlyWriter::Format::BinaryLe;
-    else if (s == "big endian" || s == "binary_big_endian")
-        f = PlyWriter::Format::BinaryBe;
-    else
-        in.setstate(std::ios_base::failbit);
-    return in;
-}
-
-
-inline std::ostream& operator<<(std::ostream& out, const PlyWriter::Format& f)
-{
-    switch (f)
-    {
-    case PlyWriter::Format::Ascii:
-        out << "ascii";
-        break;
-    case PlyWriter::Format::BinaryLe:
-        out << "binary_little_endian";
-        break;
-    case PlyWriter::Format::BinaryBe:
-        out << "binary_big_endian";
-        break;
-    }
-    return out;
-}
-
-}
+} // namespace pdal
