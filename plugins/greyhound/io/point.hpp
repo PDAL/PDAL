@@ -13,11 +13,11 @@
 #include <cmath>
 #include <iomanip>
 #include <limits>
-#include <ostream>
+#include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include <json/json.h>
-#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
@@ -26,7 +26,7 @@ namespace entwine
 
 using Transformation = std::vector<double>;
 
-class PDAL_DLL Point
+class Point
 {
 public:
     Point() noexcept
@@ -98,17 +98,20 @@ public:
         return sqDist2d(other) + zDelta * zDelta;
     }
 
-    static bool exists(Point p)
+    bool exists() const
     {
         return
-            p.x != Point::emptyCoord() ||
-            p.y != Point::emptyCoord() ||
-            p.z != Point::emptyCoord();
+            x != Point::emptyCoord() ||
+            y != Point::emptyCoord() ||
+            z != Point::emptyCoord();
     }
 
     static bool exists(double x, double y, double z)
     {
-        return exists(Point(x, y, z));
+        return
+            x != Point::emptyCoord() ||
+            y != Point::emptyCoord() ||
+            z != Point::emptyCoord();
     }
 
     static double emptyCoord()
@@ -189,6 +192,15 @@ public:
         return (d - origin) / scale + origin - offset;
     }
 
+    static double scaleInversed(
+            double d,
+            double origin,
+            double scaleInversed,
+            double offset)
+    {
+        return (d - origin) * scaleInversed + origin - offset;
+    }
+
     static Point unscale(
             const Point& p,
             const Point& scale,
@@ -220,6 +232,11 @@ public:
     static double unscale(double d, double origin, double scale, double offset)
     {
         return (d - origin + offset) * scale + origin;
+    }
+
+    template<typename Op> Point apply(Op op) const
+    {
+        return Point(op(x), op(y), op(z));
     }
 
     template<typename Op> static Point apply(Op op, const Point& p)
@@ -350,6 +367,11 @@ inline Point operator*(const Point& a, const Point& b)
     return Point(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
+inline Point operator/(const Point& a, double s)
+{
+    return Point(a.x / s, a.y / s, a.z / s);
+}
+
 inline Point operator/(const Point& a, const Point& b)
 {
     return Point(a.x / b.x, a.y / b.y, a.z / b.z);
@@ -362,8 +384,30 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point)
 
     auto printCoord([&os](double d)
     {
-        if (std::trunc(d) == d) os << static_cast<long>(d);
-        else os << d;
+        if (d == std::numeric_limits<double>::max()) os << "max";
+        else if (d == std::numeric_limits<double>::lowest()) os << "min";
+        else if (std::trunc(d) == d) os << static_cast<long>(d);
+        else
+        {
+            std::ostringstream oss;
+            oss << std::setprecision(8) << d;
+            std::string s(oss.str());
+
+            // Don't strip out trailing zeroes after exponential notation.
+            if (s.find_first_of("Ee") == std::string::npos)
+            {
+                while (
+                        s.find('.') != std::string::npos &&
+                        s.size() > 2 &&
+                        s.back() == '0' &&
+                        s[s.size() - 2] != '.')
+                {
+                    s.pop_back();
+                }
+            }
+
+            os << s;
+        }
     });
 
     os << std::setprecision(5) << std::fixed;
@@ -372,14 +416,8 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point)
     printCoord(point.x);
     os << ", ";
     printCoord(point.y);
-
-    if (
-            point.z != std::numeric_limits<double>::max() &&
-            point.z != std::numeric_limits<double>::lowest())
-    {
-        os << ", ";
-        printCoord(point.z);
-    }
+    os << ", ";
+    printCoord(point.z);
     os << ")";
 
     os << std::setprecision(precision);

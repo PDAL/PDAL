@@ -16,13 +16,13 @@
 
 #include <json/json.h>
 
-#include <entwine/types/dir.hpp>
-#include <entwine/types/point.hpp>
+#include "dir.hpp"
+#include "point.hpp"
 
+namespace pdal
+{
 namespace entwine
 {
-
-class Delta;
 
 class Bounds
 {
@@ -254,16 +254,6 @@ public:
         return width() == depth() && (!is3d() || width() == height());
     }
 
-    // Bloat all coordinates necessary to form a cube and also to the nearest
-    // integer.
-    Bounds cubeify(const Delta* delta = nullptr) const;
-    Bounds cubeify(const Delta& delta) const;
-
-    Bounds deltify(const Delta* delta) const;
-    Bounds deltify(const Delta& delta) const;
-    Bounds undeltify(const Delta* delta) const;
-    Bounds undeltify(const Delta& delta) const;
-
     Bounds growBy(double ratio) const;
 
     std::vector<Bounds> explode() const;
@@ -366,4 +356,5 @@ inline Bounds operator+(const Bounds& b, const Point& p)
 }
 
 } // namespace entwine
+} // namespace pdal
 
