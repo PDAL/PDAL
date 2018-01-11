@@ -107,6 +107,7 @@ struct GreyhoundArgs
     Json::Value filter;
     Json::Value dims;
     Json::Value schema;
+    double buffer = 0;
 };
 
 class GreyhoundParams
@@ -117,17 +118,33 @@ public:
     GreyhoundParams(std::string resourceRoot, Json::Value params)
         : m_url(resourceRoot)
         , m_params(params)
-    { }
+    {
+        if (m_params.isMember("obounds"))
+        {
+            m_obounds = m_params["obounds"];
+            m_params.removeMember("obounds");
+        }
+    }
 
     std::string root() const { return m_url; }
     std::string qs() const;
 
     Json::Value& operator[](std::string key) { return m_params[key]; }
-    const Json::Value& toJson() const { return m_params; }
+    Json::Value toJson() const
+    {
+        Json::Value json(m_params);
+        if (!m_obounds.isNull())
+            json["obounds"] = m_obounds;
+        return json;
+    }
+
+    Json::Value obounds() const { return m_obounds; }
 
 private:
     std::string extractUrl(const GreyhoundArgs& args) const;
-    Json::Value extractParams(const GreyhoundArgs& args) const;
+    Json::Value extractParams(const GreyhoundArgs& args);
+
+    Json::Value m_obounds;
 
     std::string m_url;
     Json::Value m_params;

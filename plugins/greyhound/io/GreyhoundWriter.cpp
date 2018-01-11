@@ -35,6 +35,7 @@
 #include "GreyhoundWriter.hpp"
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 
 #include <arbiter/arbiter.hpp>
 
@@ -98,17 +99,20 @@ void GreyhoundWriter::prepared(PointTableRef table)
                 layout.dimType(layout.findDim(name)));
     }
 
+    if (!m_params.obounds().isNull())
+    {
+        m_writeLayout.registerDim(Dimension::Id::Omit);
+    }
+
     m_params["schema"] = layoutToSchema(m_writeLayout);
     m_params["name"] = m_name;
 }
 
 void GreyhoundWriter::write(const PointViewPtr view)
 {
-    /*
-    std::cout << "Writing" << std::endl;
-    std::cout << m_params.root() << std::endl;
-    std::cout << m_params.qs() << std::endl;
-    */
+    log()->get(LogLevel::Debug) <<
+        "Writing: " << m_params.root() << "\n" << m_params.qs() << "\n" <<
+        m_params.toJson() << "O: " << m_params.obounds() << std::endl;
 
     const std::size_t pointSize(m_writeLayout.pointSize());
     std::vector<char> data(view->size() * pointSize, 0);
@@ -120,10 +124,35 @@ void GreyhoundWriter::write(const PointViewPtr view)
         pos += pointSize;
     }
 
+#ifdef PDAL_HAVE_LAZPERF
+    m_params["compress"] = true;
+
+    std::vector<char> comp;
+    comp.reserve(static_cast<float>(data.size()) * 0.2);
+
+    auto cb([&comp](char* p, std::size_t s)
+    {
+        comp.insert(comp.end(), p, p + s);
+    });
+
+    LazPerfCompressor compressor(cb, m_writeLayout.dimTypes());
+    compressor.compress(data.data(), data.size());
+    compressor.done();
+
+    data = std::move(comp);
+
+#else
+    m_params.removeMember("compress");
+#endif
+
+    const arbiter::http::Headers h {
+        { "NumPoints", std::to_string(view->size()) }
+    };
+
     arbiter::Arbiter a;
     const std::string url(m_params.root() + "write" + m_params.qs());
     log()->get(LogLevel::Debug) << "Writing: " << url << std::endl;
-    a.put(url, data);
+    a.put(url, data, h);
 }
 
 } // namespace pdal

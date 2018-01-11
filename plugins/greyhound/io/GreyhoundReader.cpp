@@ -60,6 +60,9 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
     args.add("tile_path", "Index-optimized tile selection", m_args.tilePath);
     args.add("filter", "Query filter", m_args.filter);
     args.add("dims", "Dimension names to read", m_args.dims);
+    args.add("buffer", "Ratio by which to bloat the requested bounds.  The "
+            "buffered portion, if writers.greyhound is later used, will not be "
+            "written - this allows edge effect mitigation.", m_args.buffer);
 }
 
 void GreyhoundReader::initialize(PointTableRef table)
@@ -105,8 +108,6 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
     std::map<std::string, const Json::Value*> remote;
     for (const auto& d : m_info["schema"])
         remote[d["name"].asString()] = &d;
-    for (const auto& d : m_info["addons"])
-        remote[d["name"].asString()] = &d;
 
     // The dimensions we will query are determined in the following order, the
     // first of which is present taking precedence:
@@ -115,10 +116,18 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
     //  - Finally, fall back to the full `info.schema`.
     if (m_args.dims.isNull())
     {
-        const Json::Value& schema = m_params["schema"].isNull() ?
-            m_info["schema"] : m_params["schema"];
+        // If no dimensions are explicitly listed, only include the indexed
+        // schema - omitting any appended dimensions.  Those must be explicitly
+        // specified if desired.
+        Json::Value nativeSchema;
+        for (const Json::Value d : m_info["schema"])
+            if (!d["addon"].asBool())
+                nativeSchema.append(d);
 
-        for (const auto& d : schema)
+        const Json::Value& readSchema = m_params["schema"].isNull() ?
+            nativeSchema : m_params["schema"];
+
+        for (const auto& d : readSchema)
         {
             m_args.dims.append(d["name"].asString());
         }
@@ -151,6 +160,11 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
 
         layout->registerOrAssignDim(name, type);
         m_readLayout.registerOrAssignDim(name, type);
+    }
+
+    if (!m_params.obounds().isNull())
+    {
+        layout->registerDim(Dimension::Id::Omit);
     }
 
     m_params["schema"] = layoutToSchema(m_readLayout);
@@ -207,6 +221,21 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
             m_cb(*view, view->size() - 1);
     }
 #endif
+    if (!m_params.obounds().isNull())
+    {
+        greyhound::Bounds obounds(m_params.obounds());
+        greyhound::Point p;
+
+        for (std::size_t i(0); i < view->size(); ++i)
+        {
+            p.x = view->getFieldAs<double>(Dimension::Id::X, i);
+            p.y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
+
+            if (!obounds.contains(p))
+                view->setField(Dimension::Id::Omit, i, true);
+        }
+    }
 
     return numPoints;
 }

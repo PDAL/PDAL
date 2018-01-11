@@ -101,7 +101,7 @@ std::string GreyhoundParams::extractUrl(const GreyhoundArgs& args) const
     return s;
 }
 
-Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args) const
+Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args)
 {
     Json::Value json;
 
@@ -170,6 +170,16 @@ Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args) const
         }
 
         json["bounds"] = gbounds.toJson();
+    }
+
+    if (args.buffer)
+    {
+        if (json["bounds"].isNull())
+            throw pdal_error("Cannot specify `buffer` without `bounds`");
+        m_obounds = json["bounds"];
+
+        json["bounds"] = greyhound::Bounds(json["bounds"])
+            .growBy(args.buffer).toJson();
     }
 
     if (args.depthBegin)
