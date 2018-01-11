@@ -67,6 +67,7 @@ FbxWriter::FbxWriter()
 void FbxWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("ascii", "Write FBX as ASCII", m_ascii);
 }
 
 
@@ -85,8 +86,11 @@ void FbxWriter::write(const PointViewPtr v)
     if (!mesh)
         throwError("Can't write FBX file without generated mesh.");
 
-    FbxMesh *fbxMesh = FbxMesh::Create(m_scene, "mesh");
+    if (v->size() == 0)
+        log()->get(LogLevel::Error) << "Writing FBX file with no vertices." <<
+            std::endl;
 
+    FbxMesh *fbxMesh = FbxMesh::Create(m_scene, "mesh");
     fbxMesh->InitControlPoints(v->size());
     FbxVector4 *points = fbxMesh->GetControlPoints();
     for (size_t i = 0; i < v->size(); ++i)
@@ -106,9 +110,6 @@ void FbxWriter::write(const PointViewPtr v)
         fbxMesh->AddPolygon(t.m_c);
         fbxMesh->EndPolygon();
     }
-    FbxNode *node = FbxNode::Create(m_scene, "scene");
-    node->SetNodeAttribute(fbxMesh);
-    m_scene->GetRootNode()->AddChild(node);
 }
 
 
@@ -122,15 +123,13 @@ void FbxWriter::done(PointTableRef table)
     // "FBX ascii (*.fbx)"
     // "FBX encrypted (*.fbx)"
     // ...
-    int writer = registry->FindWriterIDByDescription("FBX ascii (*.fbx)");
+    const char *format = m_ascii ? "FBX ascii (*.fbx)" : "FBX binary (*.fbx)";
+    int writer = registry->FindWriterIDByDescription(format);
     /**
     int numWriters = registry->GetWriterFormatCount();
     for (int i = 0; i < numWriters; ++i)
         std::cerr << registry->GetWriterFormatDescription(i) << "\n";
     **/
-    // -1 is default
-    // 0 is FBX binary
-    // 1 is FBX ascii
     exporter->Initialize(m_filename.data(), writer, settings);
     exporter->Export(m_scene);
 

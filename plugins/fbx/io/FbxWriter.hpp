@@ -66,6 +66,7 @@ private:
     virtual void done(PointTableRef table);
 
     std::string m_filename;
+    bool m_ascii;
     fbxsdk::FbxManager *m_manager;
     fbxsdk::FbxScene *m_scene;
 };
