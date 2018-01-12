@@ -30,13 +30,13 @@ if (FBX_FOUND)
         ${FBX_INCLUDE_DIR})
 #    target_compile_definitions(${reader_libname} PRIVATE -DHAVE_MBSYSTEM=1)
 
-#    if (WITH_TESTS)
-#        PDAL_ADD_TEST(mbsystemtest
-#            FILES test/MBSystemTest.cpp
-#            LINK_WITH ${reader_libname})
-#        target_include_directories(mbsystemtest PRIVATE
-#            ${PDAL_IO_DIR})
-#    endif()
+    if (WITH_TESTS)
+        PDAL_ADD_TEST(fbxtest
+            FILES test/FbxWriterTest.cpp
+            LINK_WITH ${writer_libname})
+        target_include_directories(fbxtest PRIVATE
+            ${PDAL_IO_DIR})
+    endif()
 else()
     message(STATUS "Building without FBX support")
 endif()
