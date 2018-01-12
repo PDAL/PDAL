@@ -84,7 +84,7 @@ void GreyhoundWriter::prepared(PointTableRef table)
         for (const Dimension::Id id : layout.dims())
         {
             const std::string name(layout.dimName(id));
-            if (!remote.count(name))
+            if (!remote.count(name) && id != Dimension::Id::PointId)
             {
                 m_writeDims.append(name);
             }
@@ -110,18 +110,25 @@ void GreyhoundWriter::prepared(PointTableRef table)
 
 void GreyhoundWriter::write(const PointViewPtr view)
 {
-    log()->get(LogLevel::Debug) <<
-        "Writing: " << m_params.root() << "\n" << m_params.qs() << "\n" <<
-        m_params.toJson() << "O: " << m_params.obounds() << std::endl;
-
     const std::size_t pointSize(m_writeLayout.pointSize());
     std::vector<char> data(view->size() * pointSize, 0);
-    char* pos(data.data());
+
+    char* pos(nullptr);
+    std::size_t pointId(0);
+    bool zeroFound(false);
 
     for (std::size_t i(0); i < view->size(); ++i)
     {
+        pointId = view->getFieldAs<std::size_t>(Dimension::Id::PointId, i);
+        if (!pointId)
+        {
+            if (zeroFound)
+                throw pdal_error("Invalid data for GreyhoundWriter");
+            zeroFound = true;
+        }
+        pos = data.data() + pointId * pointSize;
+
         view->getPackedPoint(m_writeLayout.dimTypes(), i, pos);
-        pos += pointSize;
     }
 
 #ifdef PDAL_HAVE_LAZPERF
@@ -140,7 +147,6 @@ void GreyhoundWriter::write(const PointViewPtr view)
     compressor.done();
 
     data = std::move(comp);
-
 #else
     m_params.removeMember("compress");
 #endif
@@ -148,6 +154,10 @@ void GreyhoundWriter::write(const PointViewPtr view)
     const arbiter::http::Headers h {
         { "NumPoints", std::to_string(view->size()) }
     };
+
+    log()->get(LogLevel::Debug) <<
+        "Writing: " << m_params.root() << "\n" << m_params.qs() << "\n" <<
+        m_params.toJson() << "\nOBounds: " << m_params.obounds() << std::endl;
 
     arbiter::Arbiter a;
     const std::string url(m_params.root() + "write" + m_params.qs());

@@ -139,6 +139,7 @@ public:
     }
 
     Json::Value obounds() const { return m_obounds; }
+    void removeMember(std::string key) { m_params.removeMember(key); }
 
 private:
     std::string extractUrl(const GreyhoundArgs& args) const;

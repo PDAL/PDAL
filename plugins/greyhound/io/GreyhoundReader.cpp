@@ -167,6 +167,11 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
         layout->registerDim(Dimension::Id::Omit);
     }
 
+    // We'll keep track of the point ordering here in case any intermediate
+    // filters reorder them.  We need to write them with a 1:1 mapping to the
+    // original query.
+    layout->registerDim(Dimension::Id::PointId);
+
     m_params["schema"] = layoutToSchema(m_readLayout);
 
     log()->get(LogLevel::Debug) << "Schema: " << m_params["schema"] <<
@@ -235,6 +240,11 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
             if (!obounds.contains(p))
                 view->setField(Dimension::Id::Omit, i, true);
         }
+    }
+
+    for (std::size_t i(0); i < view->size(); ++i)
+    {
+        view->setField(Dimension::Id::PointId, i, i);
     }
 
     return numPoints;
