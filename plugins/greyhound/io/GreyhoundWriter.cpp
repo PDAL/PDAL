@@ -104,6 +104,8 @@ void GreyhoundWriter::prepared(PointTableRef table)
         m_writeLayout.registerDim(Dimension::Id::Omit);
     }
 
+    m_writeLayout.finalize();
+
     m_params["schema"] = layoutToSchema(m_writeLayout);
     m_params["name"] = m_name;
 }
