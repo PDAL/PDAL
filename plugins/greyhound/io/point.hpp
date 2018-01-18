@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include <json/json.h>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
@@ -26,7 +27,7 @@ namespace entwine
 
 using Transformation = std::vector<double>;
 
-class Point
+class PDAL_DLL Point
 {
 public:
     Point() noexcept

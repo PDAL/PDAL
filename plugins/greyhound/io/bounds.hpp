@@ -24,7 +24,7 @@ namespace pdal
 namespace entwine
 {
 
-class Bounds
+class PDAL_DLL Bounds
 {
 public:
     Bounds() = default;
@@ -325,11 +325,11 @@ private:
     }
 };
 
-std::ostream& operator<<(std::ostream& os, const Bounds& bounds);
+PDAL_DLL std::ostream& operator<<(std::ostream& os, const Bounds& bounds);
 
 // Orders Bounds by their midpoint.  This is really only useful if the bounds
 // are arranged in a grid and are of equal size (like during a MetaQuery).
-inline bool operator<(const Bounds& lhs, const Bounds& rhs)
+PDAL_DLL inline bool operator<(const Bounds& lhs, const Bounds& rhs)
 {
     const auto& lhsMid(lhs.mid());
     const auto& rhsMid(rhs.mid());
@@ -340,17 +340,17 @@ inline bool operator<(const Bounds& lhs, const Bounds& rhs)
         (lhsMid.x == rhsMid.x && lhsMid.y == rhsMid.y && lhsMid.z < rhsMid.z);
 }
 
-inline bool operator==(const Bounds& lhs, const Bounds& rhs)
+PDAL_DLL inline bool operator==(const Bounds& lhs, const Bounds& rhs)
 {
     return lhs.min() == rhs.min() && lhs.max() == rhs.max();
 }
 
-inline bool operator!=(const Bounds& lhs, const Bounds& rhs)
+PDAL_DLL inline bool operator!=(const Bounds& lhs, const Bounds& rhs)
 {
     return !(lhs == rhs);
 }
 
-inline Bounds operator+(const Bounds& b, const Point& p)
+PDAL_DLL inline Bounds operator+(const Bounds& b, const Point& p)
 {
     return Bounds(b.min() + p, b.max() + p);
 }
