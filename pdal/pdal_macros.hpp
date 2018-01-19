@@ -36,7 +36,6 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/plugin.hpp>
-#include <pdal/PluginManager.hpp>
 
 namespace pdal
 {
@@ -53,57 +52,37 @@ struct PluginInfo
 
 }
 
+extern "C"
+{
+typedef void PF_ExitFunc;
+typedef void (*PF_InitFunc)();
+}
+
+#include <pdal/PluginManager.hpp>
+
+namespace pdal
+{
+class Kernel;
+class Stage;
+}
+
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
-    extern "C" PDAL_DLL int32_t ExitFunc() \
-    { return 0; } \
-    extern "C" PDAL_DLL PF_ExitFunc PF_initPlugin() \
+    extern "C" PDAL_DLL void PF_initPlugin() \
     { \
-        int res = 0; \
-        PF_RegisterParams rp; \
-        rp.version.major = version_major; \
-        rp.version.minor = version_minor; \
-        rp.createFunc = pdal::T::create; \
-        rp.destroyFunc = pdal::T::destroy; \
-        rp.description = info.description; \
-        rp.link = info.link; \
-        rp.pluginType = PF_PluginType_ ## type; \
-        if (!pdal::PluginManager::registerObject(info.name, &rp)) \
-            return NULL; \
-        return ExitFunc; \
-    } \
-    void * pdal::T::create() { return new pdal::T(); } \
-    int32_t pdal::T::destroy(void *p) \
-    { \
-        if (!p) \
-            return -1; \
-        delete (pdal::T *)p; \
-        return 0; \
+        bool stage = std::is_convertible<T*, Stage *>::value; \
+        if (stage) \
+            pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); \
+        else \
+            pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
 
 #define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
-    extern "C" PDAL_DLL int32_t T ## _ExitFunc() \
-    { return 0; } \
-    extern "C" PDAL_DLL PF_ExitFunc T ## _InitPlugin() \
+    extern "C" PDAL_DLL void T ## _InitPlugin() \
     { \
-        int res = 0; \
-        PF_RegisterParams rp; \
-        rp.version.major = version_major; \
-        rp.version.minor = version_minor; \
-        rp.createFunc = pdal::T::create; \
-        rp.destroyFunc = pdal::T::destroy; \
-        rp.description = info.description; \
-        rp.link = info.link; \
-        rp.pluginType = PF_PluginType_ ## type; \
-        if (!pdal::PluginManager::registerObject(info.name, &rp)) \
-            return NULL; \
-        return T ## _ExitFunc; \
-    } \
-    void * pdal::T::create() { return new pdal::T(); } \
-    int32_t pdal::T::destroy(void *p) \
-    { \
-        if (!p) \
-            return -1; \
-        delete (pdal::T *)p; \
-        return 0; \
+        bool stage = std::is_convertible<T*, Stage *>::value; \
+        if (stage) \
+            pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); \
+        else \
+            pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
 

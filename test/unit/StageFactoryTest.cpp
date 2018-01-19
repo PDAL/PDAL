@@ -43,6 +43,7 @@
 namespace pdal
 {
 
+/**
 TEST(StageFactoryTest, Load)
 {
     StageFactory f(false);
@@ -53,7 +54,9 @@ TEST(StageFactoryTest, Load)
     ASSERT_TRUE(Utils::contains(ns, "readers.las"));
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
+**/
 
+/**
 TEST(StageFactoryTest, Load2)
 {
     StageFactory f(false);
@@ -63,7 +66,9 @@ TEST(StageFactoryTest, Load2)
     ASSERT_FALSE(Utils::contains(ns, "readers.las"));
     ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
 }
+**/
 
+/**
 TEST(StageFactoryTest, Load3)
 {
     StageFactory f(false);
@@ -73,7 +78,9 @@ TEST(StageFactoryTest, Load3)
     ASSERT_TRUE(Utils::contains(ns, "readers.las"));
     ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
 }
+**/
 
+/**
 TEST(StageFactoryTest, Load4)
 {
     StageFactory f(false);
@@ -83,6 +90,7 @@ TEST(StageFactoryTest, Load4)
     ASSERT_FALSE(Utils::contains(ns, "readers.las"));
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
+**/
 
 TEST(StageFactoryTest, extensionTest)
 {

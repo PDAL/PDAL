@@ -51,7 +51,6 @@ public:
     int execute();
 
 private:
-    SmoothKernel() {};
     virtual void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

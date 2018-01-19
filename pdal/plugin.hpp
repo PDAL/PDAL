@@ -45,10 +45,9 @@
 
 #include <cstdint>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <pdal/pdal_macros.hpp>
 
+/**
 const int PF_PluginType_Kernel = 1;
 const int PF_PluginType_Reader = 2;
 const int PF_PluginType_Filter = 4;
@@ -61,37 +60,17 @@ typedef struct PF_PluginAPI_Version
     int32_t minor;
 } PF_PluginAPI_Version;
 
-typedef void * (*PF_CreateFunc)();
-typedef int32_t (*PF_DestroyFunc)(void *);
+using PF_ExitFunc = int32_t (*)();
+using PF_InitFunc = PF_ExitFunc (*)();
 
-typedef struct PF_RegisterParams
+struct PF_RegisterParams
 {
-    PF_PluginAPI_Version version;
-    PF_CreateFunc createFunc;
-    PF_DestroyFunc destroyFunc;
+//    PF_PluginAPI_Version version;
     std::string description;
     std::string link;
-    PF_PluginType pluginType;
-} PF_RegisterParams;
+//    PF_PluginType pluginType;
+};
 
-typedef int32_t (*PF_ExitFunc)();
-typedef PF_ExitFunc (*PF_InitFunc)();
-
-#ifndef PDAL_DLL
-  #ifdef _WIN32
-    #define PDAL_DLL __declspec(dllimport)
-  #else
-    #define PDAL_DLL
-  #endif
-#endif
-
-extern
-#ifdef __cplusplus
-"C"
-#endif
 PDAL_DLL PF_ExitFunc PF_initPlugin();
-
-#ifdef __cplusplus
-}
-#endif
+**/
 

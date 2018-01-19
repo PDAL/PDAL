@@ -53,9 +53,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    PipelineKernel();
 
 private:
-    PipelineKernel();
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
     virtual bool isStagePrefix(const std::string& stage);

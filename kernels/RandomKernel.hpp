@@ -50,11 +50,11 @@ public:
     static void *create();
     static int32_t destroy(void *);
 
+    RandomKernel();
     std::string getName() const;
     int execute();
 
 private:
-    RandomKernel();
     void addSwitches(ProgramArgs& arg);
 
     std::string m_outputFile;
