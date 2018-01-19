@@ -34,23 +34,16 @@
 
 #pragma once
 
-#include <functional>
-#include <queue>
-#include <vector>
-
 #include <json/json.h>
 
-#include <arbiter/arbiter.hpp>
-
-#include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
+#include <pdal/Writer.hpp>
 
 #include "GreyhoundCommon.hpp"
 
 namespace pdal
 {
 
-class PDAL_DLL GreyhoundReader : public pdal::Reader
+class PDAL_DLL GreyhoundWriter : public Writer
 {
 public:
     static void* create();
@@ -60,16 +53,16 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
-    virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void prepared(PointTableRef table) override;
-    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    virtual void write(const PointViewPtr view) override;
 
-    GreyhoundArgs m_args;
-    GreyhoundParams m_params;
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    std::string m_name;
+    Json::Value m_writeDims;
+
+    PointLayout m_writeLayout;
 
     Json::Value m_info;
-    PointLayout m_readLayout;
+    GreyhoundParams m_params;
 };
 
 } // namespace pdal
