@@ -18,7 +18,6 @@ RUN \
         python-dev \
         py-numpy-dev \
         hdf5-dev \
-        proj4-dev \
         cpd-dev \
         fgt-dev \
         sqlite-dev \
@@ -45,6 +44,7 @@ RUN \
         python \
         py-numpy \
         hdf5 \
+        proj4-dev \
         proj4 \
         cpd \
         fgt \
