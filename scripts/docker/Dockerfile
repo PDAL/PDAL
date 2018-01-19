@@ -17,7 +17,6 @@ RUN \
         libxml2-dev \
         python-dev \
         py-numpy-dev \
-        jsoncpp-dev \
         hdf5-dev \
         proj4-dev \
         cpd-dev \
@@ -26,7 +25,6 @@ RUN \
         postgresql-dev \
         curl-dev \
         linux-headers \
-        laszip-dev \
         libspatialite-dev \
         cython-dev \
         py-packaging \
@@ -35,7 +33,6 @@ RUN \
         poppler-dev \
         boost-dev \
         zlib-dev \
-        laszip-dev \
     ; \
     apk add --no-cache \
         hexer \
@@ -54,14 +51,11 @@ RUN \
         sqlite \
         postgresql \
         libcurl \
-        laszip \
         libspatialite \
-        jsoncpp \
         py-setuptools \
         libharu \
         poppler \
         boost \
-        laszip \
     ;\
     mkdir /vdatum; \
     cd /vdatum; \
@@ -84,7 +78,7 @@ RUN \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_SHARED_LIBS=ON \
         -DBUILD_STATIC_LIBS=OFF \
-        -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+        -DCMAKE_INSTALL_LIBDIR=lib \
     ; \
     make -j2; \
     make install; \
@@ -96,6 +90,7 @@ RUN \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_SHARED_LIBS=ON \
         -DBUILD_STATIC_LIBS=OFF \
+        -DCMAKE_INSTALL_LIBDIR=lib \
     ; \
     make -j2; \
     make install; \
@@ -103,7 +98,7 @@ RUN \
     rm -rf /laszip; \
     git clone https://github.com/PDAL/PDAL.git /pdal; \
     cd /pdal; \
-    git checkout master; \
+    git checkout greyhound-writer; \
     mkdir -p _build; \
     cd _build; \
     cmake .. \
@@ -122,6 +117,8 @@ RUN \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DWITH_LASZIP=ON \
         -DWITH_LAZPERF=ON \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
     ; \
     make -j2; \
     make install; \
