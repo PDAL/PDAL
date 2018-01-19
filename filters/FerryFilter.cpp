@@ -84,8 +84,12 @@ void FerryFilter::initialize()
 void FerryFilter::addDimensions(PointLayoutPtr layout)
 {
     for (auto& info : m_dims)
-        info.m_toId = layout->registerOrAssignDim(info.m_toName,
-            Dimension::Type::Double);
+    {
+        const Dimension::Id fromId = layout->findDim(info.m_fromName);
+        const Dimension::Type fromType = layout->dimType(fromId);
+
+        info.m_toId = layout->registerOrAssignDim(info.m_toName, fromType);
+    }
 }
 
 
