@@ -57,6 +57,7 @@ namespace pdal
 class ProgramArgs;
 class StageRunner;
 class StageWrapper;
+class Streamable;
 
 /**
   A stage performs the actual processing in PDAL.  Stages may read data,
@@ -72,6 +73,7 @@ class PDAL_DLL Stage
     FRIEND_TEST(OptionsTest, conditional);
     friend class StageWrapper;
     friend class StageRunner;
+    friend class Streamable;
 public:
     Stage();
     virtual ~Stage()
@@ -137,6 +139,14 @@ public:
 
     */
     void execute(StreamPointTable& table);
+
+    /**
+      Determine if a pipeline with this stage as a sink is streamable.
+
+      \return Whether the pipeline is streamable.
+    */
+    virtual bool pipelineStreamable() const
+    { return false; }
 
     /**
       Set the spatial reference of a stage.

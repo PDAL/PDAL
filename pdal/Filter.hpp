@@ -43,7 +43,7 @@ class Filter;
 
 class FilterWrapper;
 
-class PDAL_DLL Filter : public Stage
+class PDAL_DLL Filter : public virtual Stage
 {
     friend class FilterWrapper;
 public:
