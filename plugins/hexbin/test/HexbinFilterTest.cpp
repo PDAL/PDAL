@@ -69,7 +69,6 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
     EXPECT_TRUE(reader);
     reader->setOptions(options);
 
-std::cerr << "Making hexbin!\n";
     Stage* hexbin(f.createStage("filters.hexbin"));
 
     Options hexOptions;

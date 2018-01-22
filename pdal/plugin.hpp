@@ -32,45 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-// plugin.h was modeled very closely after the work of Gigi Sayfan in the Dr.
-// Dobbs article:
-// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
-// The original work was released under the Apache License v2.
+// This file is dead, but some may try to include it.
 
 #pragma once
-
-#include <string>
-
-#include <pdal/pdal_export.hpp>
-
-#include <cstdint>
-
 #include <pdal/pdal_macros.hpp>
-
-/**
-const int PF_PluginType_Kernel = 1;
-const int PF_PluginType_Reader = 2;
-const int PF_PluginType_Filter = 4;
-const int PF_PluginType_Writer = 8;
-typedef int PF_PluginType;
-
-typedef struct PF_PluginAPI_Version
-{
-    int32_t major;
-    int32_t minor;
-} PF_PluginAPI_Version;
-
-using PF_ExitFunc = int32_t (*)();
-using PF_InitFunc = PF_ExitFunc (*)();
-
-struct PF_RegisterParams
-{
-//    PF_PluginAPI_Version version;
-    std::string description;
-    std::string link;
-//    PF_PluginType pluginType;
-};
-
-PDAL_DLL PF_ExitFunc PF_initPlugin();
-**/
-

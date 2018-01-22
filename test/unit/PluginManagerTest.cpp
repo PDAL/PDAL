@@ -63,22 +63,17 @@ struct DummyPlugin : Filter
     void filter(PointView& /*view*/) final {}
 };
 
-/**
 TEST(PluginManagerTest, NoPluginsNoNames)
 {
-    auto ns = PluginManager::names(PF_PluginType_Filter
-        | PF_PluginType_Reader | PF_PluginType_Writer);
+    auto ns = PluginManager<Stage>::names();
+    EXPECT_TRUE(ns.empty());
+    ns = PluginManager<Kernel>::names();
     EXPECT_TRUE(ns.empty());
 }
-**/
 
 TEST(PluginManagerTest, InitPlugin)
 {
     EXPECT_TRUE(PluginManager<Stage>::initializePlugin(DummyPlugin::initPlugin));
-//    EXPECT_TRUE(!PluginManager::names(PF_PluginType_Filter).empty());
-
-    // Try to re-register the plugin
-    EXPECT_FALSE(PluginManager<Stage>::initializePlugin(DummyPlugin::initPlugin));
 }
 
 TEST(PluginManagerTest, MissingPlugin)

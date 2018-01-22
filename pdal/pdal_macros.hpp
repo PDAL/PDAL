@@ -34,8 +34,9 @@
 
 #pragma once
 
+#include <string>
+
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 namespace pdal
 {
@@ -59,12 +60,6 @@ typedef void (*PF_InitFunc)();
 }
 
 #include <pdal/PluginManager.hpp>
-
-namespace pdal
-{
-class Kernel;
-class Stage;
-}
 
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL void PF_initPlugin() \
