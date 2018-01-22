@@ -69,8 +69,6 @@ static PluginManager<Kernel> s_kernelInstance({"kernel"});
     const std::string dynamicLibraryExtension(".dll");
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
 StringList pluginSearchPaths()
 {
     StringList searchPaths;
@@ -93,7 +91,6 @@ StringList pluginSearchPaths()
     }
     return searchPaths;
 }
-#pragma GCC diagnostic pop
 } // unnamed namespace;
 
 PluginManager<Stage> s_stageInstance({"reader", "writer", "filter"});
@@ -108,30 +105,6 @@ bool PluginManager<T>::pluginNameValid(const std::string& pathname)
             return true;
     return false;
 }
-
-
-/**
-template <typename T>
-template <typename C>
-void PluginManager<T>::registerPlugin(const PluginInfo& info)
-{
-    return m_instance->l_registerPlugin<C>(info);
-}
-
-
-template <typename T>
-template <typename C>
-void PluginManager<T>::l_registerPlugin(const PluginInfo& pi)
-{
-    auto f = []()
-    {
-        return dynamic_cast<T *>(new C);
-    };
-    Info info {pi.name, pi.link, pi.description, f};
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_plugins.insert(std::make_pair(pi.name, info));
-}
-**/
 
 
 template <typename T>
@@ -281,10 +254,6 @@ PluginManager<T>::PluginManager(const StringList& suffixes) :
     m_suffixes(suffixes), m_log(new Log("PDAL", &std::clog))
 {
     m_instance = this;
-    /**
-    m_version.major = 1;
-    m_version.minor = 0;
-    **/
 }
 
 
