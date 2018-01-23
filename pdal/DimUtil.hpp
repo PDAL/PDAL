@@ -181,7 +181,7 @@ inline std::size_t extractName(const std::string& s, std::string::size_type p)
         return 0;
     auto isvalid = [](int c)
     {
-        return std::isalpha(c) || std::isdigit(c) || c == '_';
+        return std::isalpha(c) || std::isdigit(c) || c == '_' || c == '/';
     };
     return Utils::extract(s, p, isvalid) + 1;
 }
