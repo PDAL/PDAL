@@ -73,7 +73,10 @@ void GreyhoundWriter::prepared(PointTableRef table)
     // once.
     std::map<std::string, const Json::Value*> remote;
     for (const auto& d : m_info["schema"])
-        remote[d["name"].asString()] = &d;
+    {
+        if (!d["addon"].asBool())
+            remote[d["name"].asString()] = &d;
+    }
 
     auto& layout(*table.layout());
 
