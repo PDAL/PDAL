@@ -34,6 +34,7 @@
 
 #include "GreyhoundReader.hpp"
 
+#include <pdal/pdal_defines.h>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -207,8 +208,8 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
 
     response.resize(response.size() - sizeof(uint32_t));
 
-#ifdef PDAL_HAVE_LAZPERF
     const auto dimTypes(m_readLayout.dimTypes());
+#ifdef PDAL_HAVE_LAZPERF
     auto cb = [this, &view, &dimTypes, numPoints](char *buf, size_t bufsize)
     {
         view->setPackedPoint(dimTypes, view->size(), buf);
@@ -221,7 +222,7 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     const char* end(response.data() + response.size());
     for (const char* pos(response.data()); pos < end; pos += pointSize)
     {
-        view->setPackedPoint(dimTypes, view->size(); pos);
+        view->setPackedPoint(dimTypes, view->size(), pos);
         if (m_cb)
             m_cb(*view, view->size() - 1);
     }
