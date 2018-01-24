@@ -34,7 +34,7 @@
 
 #include "SQLiteWriter.hpp"
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_features.h>
 #include <pdal/pdal_macros.hpp>
 
 #include <pdal/PointView.hpp>
