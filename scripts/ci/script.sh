@@ -25,6 +25,8 @@ apk add \
     python-dev \
     py-numpy \
     py-numpy-dev \
+    cython \
+    cython-dev \
     py-pip \
     jsoncpp \
     jsoncpp-dev \
