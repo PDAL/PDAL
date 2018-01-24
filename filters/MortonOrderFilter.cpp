@@ -53,6 +53,11 @@ CREATE_STATIC_PLUGIN(1, 0, MortonOrderFilter, Filter, s_info)
 
 std::string MortonOrderFilter::getName() const { return s_info.name; }
 
+void MortonOrderFilter::addArgs(ProgramArgs& args)
+{
+    args.add("revert", "Revert Morton", m_revert, false);
+}
+
 //This used to be a lambda, but the VS compiler exploded, I guess.
 typedef std::pair<double, double> Coord;
 namespace
@@ -87,7 +92,91 @@ public:
 };
 }
 
-PointViewSet MortonOrderFilter::run(PointViewPtr inView)
+class RevertZOrder
+{
+public:
+    static uint32_t encode_morton(uint32_t x, uint32_t y)
+    {
+        return (part1_by1(y) << 1) + part1_by1(x);
+    }
+
+    static uint32_t revert_morton(uint32_t index)
+    {
+        index = ((index >> 1) & 0x55555555u) | ((index & 0x55555555u) << 1);
+        index = ((index >> 2) & 0x33333333u) | ((index & 0x33333333u) << 2);
+        index = ((index >> 4) & 0x0f0f0f0fu) | ((index & 0x0f0f0f0fu) << 4);
+        index = ((index >> 8) & 0x00ff00ffu) | ((index & 0x00ff00ffu) << 8);
+        index = ((index >> 16) & 0xffffu) | ((index & 0xffffu) << 16);
+        return index;
+    }
+
+private:
+    static uint32_t part1_by1(uint32_t x)
+    {
+        x &= 0x0000ffff;
+        x = (x ^ (x <<  8)) & 0x00ff00ff;
+        x = (x ^ (x <<  4)) & 0x0f0f0f0f;
+        x = (x ^ (x <<  2)) & 0x33333333;
+        x = (x ^ (x <<  1)) & 0x55555555;
+        return x;
+    }
+
+    static uint32_t part1_by2(uint32_t x)
+    {
+        x &= 0x000003ff;
+        x = (x ^ (x << 16)) & 0xff0000ff;
+        x = (x ^ (x <<  8)) & 0x0300f00f;
+        x = (x ^ (x <<  4)) & 0x030c30c3;
+        x = (x ^ (x <<  2)) & 0x09249249;
+        return x;
+    }
+};
+
+PointViewSet MortonOrderFilter::revertMorton(PointViewPtr inView)
+{
+    int32_t cell = sqrt(inView->size());
+
+    // compute range
+    BOX2D buffer_bounds;
+    inView->calculateBounds(buffer_bounds);
+    const double xrange = buffer_bounds.maxx - buffer_bounds.minx;
+    const double yrange = buffer_bounds.maxy - buffer_bounds.miny;
+
+    const double cell_width = xrange / cell;
+    const double cell_height = yrange / cell;
+
+    // compute revert morton code for each point
+    std::multimap<uint32_t, PointId> codes;
+    for (PointId idx = 0; idx < inView->size(); idx++)
+    {
+        const double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
+        const int32_t xpos = floor((x - buffer_bounds.minx) / cell_width);
+
+        const double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
+        const int32_t ypos = floor((y - buffer_bounds.miny) / cell_height);
+
+        const uint32_t code = RevertZOrder::encode_morton(xpos, ypos);
+        const uint32_t revert = RevertZOrder::revert_morton( code );
+
+        codes.insert( std::pair<uint32_t, PointId>(revert, idx) );
+    }
+
+    // a map is yet order by key so its naturally ordered by lod
+    std::multimap<uint32_t, PointId>::iterator it;
+    PointViewPtr outView = inView->makeNew();
+    for (it = codes.begin(); it != codes.end(); ++it)
+    {
+        outView->appendPoint(*inView, it->second);
+    }
+
+    // build output view
+    PointViewSet viewSet;
+    viewSet.insert(outView);
+
+    return viewSet;
+}
+
+PointViewSet MortonOrderFilter::morton(PointViewPtr inView)
 {
     PointViewSet viewSet;
     if (!inView->size())
@@ -119,6 +208,18 @@ PointViewSet MortonOrderFilter::run(PointViewPtr inView)
     viewSet.insert(outView);
 
     return viewSet;
+}
+
+PointViewSet MortonOrderFilter::run(PointViewPtr inView)
+{
+    if ( m_revert )
+    {
+        return revertMorton( inView );
+    }
+    else
+    {
+        return morton( inView );
+    }
 }
 
 } // pdal
