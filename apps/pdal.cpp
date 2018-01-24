@@ -93,7 +93,7 @@ private:
 void App::outputVersion()
 {
     m_out << headline << std::endl;
-    m_out << "pdal " << GetFullVersionString() << std::endl;
+    m_out << "pdal " << Config::fullVersionString() << std::endl;
     m_out << headline << std::endl;
     m_out << std::endl;
 }

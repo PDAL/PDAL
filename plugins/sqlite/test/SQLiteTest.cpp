@@ -36,9 +36,8 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
-
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_defines.h>
+#include <pdal/pdal_config.hpp>
 #include <io/LasReader.hpp>
 
 #include "../io/SQLiteCommon.hpp"
@@ -143,24 +142,22 @@ TEST(SQLiteTest, readWrite)
     testReadWrite(false, false);
 }
 
-#ifdef PDAL_HAVE_LAZPERF
 TEST(SQLiteTest, readWriteCompress)
 {
-    testReadWrite(true, false);
+    if (Config::featureEnabled(Config::Feature::LAZPERF))
+        testReadWrite(true, false);
 }
-#endif
 
 TEST(SQLiteTest, readWriteScale)
 {
     testReadWrite(false, true);
 }
 
-#ifdef PDAL_HAVE_LAZPERF
 TEST(SQLiteTest, readWriteCompressScale)
 {
-    testReadWrite(true, true);
+    if (Config::featureEnabled(Config::Feature::LAZPERF))
+        testReadWrite(true, true);
 }
-#endif
 
 TEST(SQLiteTest, Issue895)
 {

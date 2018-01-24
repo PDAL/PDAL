@@ -37,13 +37,11 @@
 #include <pdal/pdal_config.hpp>
 
 using namespace pdal;
+using namespace pdal::Config;
 
 TEST(ConfigTest, test_3rdparty_libs)
 {
-    bool geotiff = IsLibGeoTIFFEnabled();
-    bool laszip = IsLasZipEnabled();
-
-    EXPECT_TRUE(geotiff);
+    bool laszip = featureEnabled(Feature::LASZIP);
 
 #ifdef PDAL_HAVE_LASZIP
     EXPECT_TRUE(laszip);
@@ -56,18 +54,18 @@ TEST(ConfigTest, test_version)
 {
     // just verify these functions can be called, don't worry about the values
 
-    std::string version = GetVersionString();
+    std::string version = versionString();
     EXPECT_TRUE(!version.empty());
-    std::string fullVersion = GetFullVersionString();
+    std::string fullVersion = fullVersionString();
     EXPECT_TRUE(!fullVersion.empty());
 
-    int major = GetVersionMajor();
+    int major = versionMajor();
     EXPECT_TRUE(major >= 0);
-    int minor = GetVersionMinor();
+    int minor = versionMinor();
     EXPECT_TRUE(minor >= 0);
-    int patch = GetVersionPatch();
+    int patch = versionPatch();
     EXPECT_TRUE(patch >= 0);
 
-    int bignum = GetVersionInteger();
+    int bignum = versionInteger();
     EXPECT_TRUE(bignum > 0);
 }

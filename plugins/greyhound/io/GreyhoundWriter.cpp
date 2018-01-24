@@ -34,6 +34,7 @@
 
 #include "GreyhoundWriter.hpp"
 
+#include <pdal/pdal_features.h>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 

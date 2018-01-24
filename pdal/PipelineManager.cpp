@@ -38,9 +38,7 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#if defined(PDAL_COMPILER_CLANG) || defined(PDAL_COMPILER_GCC)
-#  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#endif
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
 namespace pdal
 {

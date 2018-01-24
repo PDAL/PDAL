@@ -128,7 +128,7 @@ include(${PDAL_CMAKE_DIR}/python.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
-# generate the pdal_defines.h header
+# generate the pdal_features.h header
 #------------------------------------------------------------------------------
 
 # from http://stackoverflow.com/questions/1435953/how-can-i-pass-git-sha1-to-compiler-as-definition-using-cmake
@@ -139,7 +139,7 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
   "${PROJECT_SOURCE_DIR}/pdal/gitsha.cpp")
 
-# needs to come before configuration of pdal_defines
+# needs to come before configuration of pdal_features
 if(APPLE)
     option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
     if (PDAL_BUNDLE)
@@ -147,11 +147,11 @@ if(APPLE)
     endif()
 endif()
 
-set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
-set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
+set(pdal_features_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_features.h.in")
+set(pdal_features_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_features.h")
 include(CheckIncludeFiles)
 check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
-configure_file(${pdal_defines_h_in} ${pdal_defines_h})
+configure_file(${pdal_features_h_in} ${pdal_features_h})
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -307,7 +307,7 @@ install(DIRECTORY ${PDAL_FILTERS_DIR}
     PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_defines_h}
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_h}
   DESTINATION include/pdal
 )
 

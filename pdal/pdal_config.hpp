@@ -1,14 +1,7 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS version related functions.
- * Author:   Mateusz Loskot, mateusz@loskot.net
- *           Frank Warmerdam, warmerdam@pobox.com
- *
- ******************************************************************************
  * Copyright (c) 2008, Mateusz Loskot
  * Copyright (c) 2010, Frank Warmerdam
+ * Copyright (c) 2018, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -49,20 +42,34 @@
 
 namespace pdal
 {
+namespace Config
+{
 
-PDAL_DLL bool IsLibLASEnabled();
-PDAL_DLL bool IsGDALEnabled();
-PDAL_DLL bool IsLibGeoTIFFEnabled();
-PDAL_DLL bool IsLasZipEnabled();
+enum class Feature
+{
+    LASZIP,
+    LAZPERF,
+    ZSTD,
+    ZLIB,
+    LZMA,
+    LIBXML2,
+    PYTHON,
+    ARBITER
+};
 
-PDAL_DLL std::string GetFullVersionString();
-PDAL_DLL std::string GetVersionString();
-PDAL_DLL int GetVersionInteger();
-PDAL_DLL std::string GetSHA1();
-PDAL_DLL int GetVersionMajor();
-PDAL_DLL int GetVersionMinor();
-PDAL_DLL int GetVersionPatch();
-PDAL_DLL std::string getPDALDebugInformation();
+PDAL_DLL bool featureEnabled(Feature f);
+PDAL_DLL bool lazPerfEnabled();
+PDAL_DLL std::string fullVersionString();
+PDAL_DLL std::string versionString();
+PDAL_DLL int versionInteger();
+PDAL_DLL std::string sha1();
+PDAL_DLL int versionMajor();
+PDAL_DLL int versionMinor();
+PDAL_DLL int versionPatch();
+PDAL_DLL std::string debugInformation();
+PDAL_DLL std::string pluginInstallPath();
+PDAL_DLL std::string pluginInstallPath();
 
+} // namespace Config
 } // namespace pdal
 

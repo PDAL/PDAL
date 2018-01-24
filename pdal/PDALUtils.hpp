@@ -36,17 +36,14 @@
 
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
-#include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <fcntl.h>
 #include <unistd.h>
-#endif
-
-#ifdef PDAL_COMPILER_MSVC
+#else
 //#  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
