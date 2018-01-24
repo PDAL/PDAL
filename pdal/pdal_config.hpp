@@ -68,7 +68,6 @@ PDAL_DLL int versionMinor();
 PDAL_DLL int versionPatch();
 PDAL_DLL std::string debugInformation();
 PDAL_DLL std::string pluginInstallPath();
-PDAL_DLL std::string pluginInstallPath();
 
 } // namespace Config
 } // namespace pdal
