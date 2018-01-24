@@ -25,6 +25,7 @@ apk add \
     python-dev \
     py-numpy \
     py-numpy-dev \
+    py-pip \
     jsoncpp \
     jsoncpp-dev \
     hdf5 \
