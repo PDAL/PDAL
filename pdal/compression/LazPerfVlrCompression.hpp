@@ -58,7 +58,7 @@ namespace pdal
 // The compressor uses the schema of the point data in order to compress
 // the point stream.  The schema is also stored in a VLR that isn't
 // handled as part of the compression process itself.
-class LazPerfVlrCompressor
+class PDAL_DLL LazPerfVlrCompressor
 {
     typedef laszip::factory::record_schema Schema;
 
@@ -77,7 +77,7 @@ private:
 
 class LazPerfVlrDecompressorImpl;
 
-class LazPerfVlrDecompressor
+class PDAL_DLL LazPerfVlrDecompressor
 {
 public:
     LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,

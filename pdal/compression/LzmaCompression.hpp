@@ -39,7 +39,7 @@ namespace pdal
 {
 
 class LzmaCompressorImpl;
-class LzmaCompressor : public Compressor
+class PDAL_DLL LzmaCompressor : public Compressor
 {
 public:
     LzmaCompressor(BlockCb cb);
@@ -55,7 +55,7 @@ private:
 
 class LzmaDecompressorImpl;
 
-class LzmaDecompressor : public Decompressor
+class PDAL_DLL LzmaDecompressor : public Decompressor
 {
 public:
     LzmaDecompressor(BlockCb cb);

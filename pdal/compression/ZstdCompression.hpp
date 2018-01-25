@@ -40,7 +40,7 @@ namespace pdal
 
 class ZstdCompressorImpl;
 
-class ZstdCompressor : public Compressor
+class PDAL_DLL ZstdCompressor : public Compressor
 {
 public:
     ZstdCompressor(BlockCb cb);
@@ -55,7 +55,7 @@ private:
 
 class ZstdDecompressorImpl;
 
-class ZstdDecompressor : public Decompressor
+class PDAL_DLL ZstdDecompressor : public Decompressor
 {
 public:
     ZstdDecompressor(BlockCb cb);

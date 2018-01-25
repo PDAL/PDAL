@@ -40,7 +40,7 @@ namespace pdal
 
 class DeflateCompressorImpl;
 
-class DeflateCompressor : public Compressor
+class PDAL_DLL DeflateCompressor : public Compressor
 {
 public:
     DeflateCompressor(BlockCb cb);
@@ -56,7 +56,7 @@ private:
 
 class DeflateDecompressorImpl;
 
-class DeflateDecompressor : public Decompressor
+class PDAL_DLL DeflateDecompressor : public Decompressor
 {
 public:
     DeflateDecompressor(BlockCb cb);

@@ -42,7 +42,7 @@ namespace pdal
 
 class LazPerfCompressorImpl;
 
-class LazPerfCompressor : public Compressor
+class PDAL_DLL LazPerfCompressor : public Compressor
 {
 public:
     LazPerfCompressor(BlockCb cb, const DimTypeList& dims);
@@ -61,7 +61,7 @@ class LazPerfDecompressorImpl;
 // NOTE - The LazPerfDecompressor is different from others, even though the
 //   interface is the same, in that it always executes the callback after
 //   a point's worth of data is read.
-class LazPerfDecompressor : public Decompressor
+class PDAL_DLL LazPerfDecompressor : public Decompressor
 {
 public:
     LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
