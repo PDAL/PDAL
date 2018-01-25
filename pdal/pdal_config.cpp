@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #include <pdal/pdal_config.hpp>
-#include <pdal/pdal_features.h>
+#include <pdal/pdal_features.hpp>
 
 #include <sstream>
 #include <iomanip>

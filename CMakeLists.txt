@@ -128,7 +128,7 @@ include(${PDAL_CMAKE_DIR}/python.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
-# generate the pdal_features.h header
+# generate the pdal_features.hpp header
 #------------------------------------------------------------------------------
 
 # from http://stackoverflow.com/questions/1435953/how-can-i-pass-git-sha1-to-compiler-as-definition-using-cmake
@@ -147,11 +147,10 @@ if(APPLE)
     endif()
 endif()
 
-set(pdal_features_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_features.h.in")
-set(pdal_features_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_features.h")
-include(CheckIncludeFiles)
-check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
-configure_file(${pdal_features_h_in} ${pdal_features_h})
+set(pdal_features_hpp_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_features.hpp.in")
+set(pdal_features_hpp
+    "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_features.hpp")
+configure_file(${pdal_features_hpp_in} ${pdal_features_hpp})
 
 #------------------------------------------------------------------------------
 # subdirectory controls

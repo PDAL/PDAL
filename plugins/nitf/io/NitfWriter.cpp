@@ -41,10 +41,8 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PointView.hpp>
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wunused-private-field"
-#endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
 
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
@@ -52,12 +50,7 @@
 #include <nitro/c++/import/nitf.hpp>
 #include "tre_plugins.hpp"
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
+#pragma GCC diagnostic pop
 
 // NOTES
 //

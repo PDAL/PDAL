@@ -39,28 +39,15 @@
 
 #include <vector>
 
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wextra"
-#  pragma GCC diagnostic ignored "-Wcast-qual"
-   // The following pragma doesn't actually work:
-   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
-   //#  pragma GCC diagnostic ignored "-Wliteral-suffix"
-#endif
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wunused-private-field"
-#endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Wextra"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
 
 #include <nitro/c++/import/nitf.hpp>
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
+#pragma GCC diagnostic pop
 
 namespace pdal
 {
