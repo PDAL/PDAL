@@ -144,7 +144,7 @@ TEST(SQLiteTest, readWrite)
 
 TEST(SQLiteTest, readWriteCompress)
 {
-    if (Config::featureEnabled(Config::Feature::LAZPERF))
+    if (Config::hasFeature(Config::Feature::LAZPERF))
         testReadWrite(true, false);
 }
 
@@ -155,7 +155,7 @@ TEST(SQLiteTest, readWriteScale)
 
 TEST(SQLiteTest, readWriteCompressScale)
 {
-    if (Config::featureEnabled(Config::Feature::LAZPERF))
+    if (Config::hasFeature(Config::Feature::LAZPERF))
         testReadWrite(true, true);
 }
 

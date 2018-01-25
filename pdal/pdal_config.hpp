@@ -57,7 +57,7 @@ enum class Feature
     ARBITER
 };
 
-PDAL_DLL bool featureEnabled(Feature f);
+PDAL_DLL bool hasFeature(Feature f);
 PDAL_DLL bool lazPerfEnabled();
 PDAL_DLL std::string fullVersionString();
 PDAL_DLL std::string versionString();

@@ -31,41 +31,54 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
-#include "Compression.hpp"
+#include <pdal/pdal_test_main.hpp>
 
-namespace pdal
+#include <random>
+
+#include <pdal/compression/DeflateCompression.hpp>
+
+using namespace pdal;
+
+TEST(Compression, deflate)
 {
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
 
-class LzmaCompressorImpl;
-class LzmaCompressor : public Compressor
-{
-public:
-    LzmaCompressor(BlockCb cb);
-    ~LzmaCompressor();
+    // Choosing a size that isn't a multiple of the internal buffer.
+    std::vector<int> orig(1000357);
+    // Trying to make something that compresses reasonably well.
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
 
-    void compress(const char *buf, size_t bufsize);
-    void done();
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
 
-private:
-    std::unique_ptr<LzmaCompressorImpl> m_impl;
-};
+    DeflateCompressor compressor(cb);
 
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    compressor.compress(sp, s);
+    compressor.done();
 
-class LzmaDecompressorImpl;
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
 
-class LzmaDecompressor : public Decompressor
-{
-public:
-    LzmaDecompressor(BlockCb cb);
-    ~LzmaDecompressor();
+    DeflateDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
+}
 
-    void decompress(const char *buf, size_t bufsize);
-    void done();
-
-private:
-    std::unique_ptr<LzmaDecompressorImpl> m_impl;
-};
-
-} // namespace pdal

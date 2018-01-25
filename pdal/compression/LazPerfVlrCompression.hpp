@@ -33,39 +33,62 @@
 ****************************************************************************/
 #pragma once
 
-#include "Compression.hpp"
+#include <pdal/util/OStream.hpp>
+
+namespace laszip
+{
+namespace factory
+{
+    class record_schema;
+}
+}
 
 namespace pdal
 {
+    class LazPerfVlrCompressorImpl;
 
-class LzmaCompressorImpl;
-class LzmaCompressor : public Compressor
+// This compressor write data in chunks to a stream. At the beginning of the
+// data is an offset to the end of the data, where the chunk table is
+// stored.  The chunk table keeps a list of the offsets to the beginning of
+// each chunk.  Chunks consist of a fixed number of points (last chunk may
+// have fewer points).  Each time a chunk starts, the compressor is reset.
+// This allows decompression of some set of points that's less than the
+// entire set when desired.
+// The compressor uses the schema of the point data in order to compress
+// the point stream.  The schema is also stored in a VLR that isn't
+// handled as part of the compression process itself.
+class LazPerfVlrCompressor
 {
-public:
-    LzmaCompressor(BlockCb cb);
-    ~LzmaCompressor();
+    typedef laszip::factory::record_schema Schema;
 
-    void compress(const char *buf, size_t bufsize);
+public:
+    LazPerfVlrCompressor(std::ostream& stream, const Schema& schema,
+        uint32_t chunksize);
+    ~LazPerfVlrCompressor();
+
+    void compress(const char *inbuf);
     void done();
 
 private:
-    std::unique_ptr<LzmaCompressorImpl> m_impl;
+    std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
 };
 
 
-class LzmaDecompressorImpl;
+class LazPerfVlrDecompressorImpl;
 
-class LzmaDecompressor : public Decompressor
+class LazPerfVlrDecompressor
 {
 public:
-    LzmaDecompressor(BlockCb cb);
-    ~LzmaDecompressor();
+    LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
+        std::streamoff pointOffset);
+    ~LazPerfVlrDecompressor();
 
-    void decompress(const char *buf, size_t bufsize);
-    void done();
+    size_t pointSize() const;
+    void decompress(char *outbuf);
 
 private:
-    std::unique_ptr<LzmaDecompressorImpl> m_impl;
+    std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;
 };
 
 } // namespace pdal
+

@@ -41,7 +41,7 @@ using namespace pdal::Config;
 
 TEST(ConfigTest, test_3rdparty_libs)
 {
-    bool laszip = featureEnabled(Feature::LASZIP);
+    bool laszip = hasFeature(Feature::LASZIP);
 
 #ifdef PDAL_HAVE_LASZIP
     EXPECT_TRUE(laszip);

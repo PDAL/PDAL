@@ -198,21 +198,47 @@ file(GLOB BASE_SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/*.cpp)
+    ${PDAL_SRC_DIR}/*.cpp
+    ${PDAL_SRC_DIR}/compression/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
     ${PDAL_KERNELS_DIR}/private/*.cpp
     ${PDAL_SRC_DIR}/private/*.cpp)
 list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
+
+#
+# Remove stuff we don't want to build.
+#
 if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
-        pdal/DbWriter.cpp
-        pdal/DbReader.cpp
-        pdal/XMLSchema.cpp)
+        ${PDAL_SRC_DIR}/DbWriter.cpp
+        ${PDAL_SRC_DIR}/DbReader.cpp
+        ${PDAL_SRC_DIR}/XMLSchema.cpp)
     list(REMOVE_ITEM SRCS ${XML_SRCS})
+endif()
+if (NOT PDAL_HAVE_ZSTD)
+    file(GLOB ZSTD_SRCS
+        ${PDAL_SRC_DIR}/compression/ZstdCompression.cpp)
+    list(REMOVE_ITEM SRCS ${ZSTD_SRCS})
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    file(GLOB ZLIB_SRCS
+        ${PDAL_SRC_DIR}/compression/DeflateCompression.cpp)
+    list(REMOVE_ITEM SRCS ${ZLIB_SRCS})
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    file(GLOB LZMA_SRCS
+        ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
+    list(REMOVE_ITEM SRCS ${LZMA_SRCS})
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    file(GLOB LAZPERF_SRCS
+        ${PDAL_SRC_DIR}/compression/LazPerfCompression.cpp
+        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
+    list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 

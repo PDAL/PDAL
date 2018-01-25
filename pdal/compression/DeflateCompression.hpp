@@ -33,184 +33,40 @@
 ****************************************************************************/
 #pragma once
 
-#ifdef PDAL_HAVE_ZLIB
-
 #include "Compression.hpp"
-
-#include <zlib.h>
 
 namespace pdal
 {
 
+class DeflateCompressorImpl;
+
 class DeflateCompressor : public Compressor
 {
 public:
-    DeflateCompressor(BlockCb cb) : m_cb(cb)
-    {
-        m_strm.zalloc = Z_NULL;
-        m_strm.zfree = Z_NULL;
-        m_strm.opaque = Z_NULL;
-        switch (deflateInit(&m_strm, Z_DEFAULT_COMPRESSION))
-        {
-        case Z_OK:
-            return;
-        case Z_MEM_ERROR:
-            throw compression_error("Memory allocation failure.");
-        case Z_STREAM_ERROR:
-            throw compression_error("Internal error.");
-        case Z_VERSION_ERROR:
-            throw compression_error("Incompatible version.");
-        default:
-            throw compression_error();
-        }
-    }
+    DeflateCompressor(BlockCb cb);
+    ~DeflateCompressor();
 
-    ~DeflateCompressor()
-    {
-        deflateEnd(&m_strm);
-    }
-
-    void compress(const char *buf, size_t bufsize)
-    {
-        run(buf, bufsize, Z_NO_FLUSH);
-    }
-
-    void done()
-    {
-        run(nullptr, 0, Z_FINISH);
-    }
+    void compress(const char *buf, size_t bufsize);
+    void done();
 
 private:
-    void run(const char *buf, size_t bufsize, int mode)
-    {
-        auto handleError = [](int ret) -> void
-        {
-            switch (ret)
-            {
-            case Z_OK:
-            case Z_STREAM_END:
-                return;
-            case Z_STREAM_ERROR:
-                throw compression_error("Internal error.");
-            case Z_DATA_ERROR:
-                throw compression_error("Corrupted data.");
-            case Z_MEM_ERROR:
-                throw compression_error("Memory allocation failure.");
-            default:
-                std::cerr << "Compression error !\n";
-                throw compression_error();
-            }
-        };
-
-        if (buf)
-        {
-            m_strm.avail_in = bufsize;
-            m_strm.next_in = reinterpret_cast<unsigned char *>(
-                    const_cast<char *>(buf));
-        }
-        int ret = Z_OK;
-        do
-        {
-            m_strm.avail_out = CHUNKSIZE;
-            m_strm.next_out = m_tmpbuf;
-            ret = ::deflate(&m_strm, mode);
-            handleError(ret);
-            size_t written = CHUNKSIZE - m_strm.avail_out;
-            if (written)
-                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
-        } while (m_strm.avail_out == 0);
-    }
-
-private:
-    BlockCb m_cb;
-    z_stream m_strm;
-    unsigned char m_tmpbuf[CHUNKSIZE];
+    std::unique_ptr<DeflateCompressorImpl> m_impl;
 };
+
+
+class DeflateDecompressorImpl;
 
 class DeflateDecompressor : public Decompressor
 {
 public:
-    DeflateDecompressor(BlockCb cb) : m_cb(cb)
-    {
-        m_strm.zalloc = Z_NULL;
-        m_strm.zfree = Z_NULL;
-        m_strm.opaque = Z_NULL;
-        m_strm.avail_in = 0;
-        m_strm.next_in = Z_NULL;
-        switch (inflateInit(&m_strm))
-        {
-        case Z_OK:
-            return;
-        case Z_MEM_ERROR:
-            throw compression_error("Memory allocation failure.");
-        case Z_STREAM_ERROR:
-            throw compression_error("Internal error.");
-        case Z_VERSION_ERROR:
-            throw compression_error("Incompatible version.");
-        default:
-            throw compression_error();
-        }
-    }
+    DeflateDecompressor(BlockCb cb);
+    ~DeflateDecompressor();
 
-    ~DeflateDecompressor()
-    {
-        inflateEnd(&m_strm);
-    }
-
-    void decompress(const char *buf, size_t bufsize)
-    {
-        run(buf, bufsize, Z_NO_FLUSH);
-    }
-
-    void done()
-    {
-        run(nullptr, 0, Z_FINISH);
-    }
+    void decompress(const char *buf, size_t bufsize);
+    void done();
 
 private:
-    void run(const char *buf, size_t bufsize, int mode)
-    {
-        auto handleError = [](int ret) -> void
-        {
-            switch (ret)
-            {
-            case Z_OK:
-            case Z_STREAM_END:
-                return;
-            case Z_STREAM_ERROR:
-                throw compression_error("Internal error.");
-            case Z_DATA_ERROR:
-                throw compression_error("Corrupted data.");
-            case Z_MEM_ERROR:
-                throw compression_error("Memory allocation failure.");
-            default:
-                throw compression_error();
-            }
-        };
-
-        m_strm.next_in = reinterpret_cast<unsigned char *>(
-            const_cast<char *>(buf));
-        m_strm.avail_in = bufsize;
-        int ret = Z_OK;
-        do
-        {
-            m_strm.avail_out = CHUNKSIZE;
-            m_strm.next_out = m_tmpbuf;
-            ret = inflate(&m_strm, mode);
-            handleError(ret);
-            size_t written = CHUNKSIZE - m_strm.avail_out;
-            if (written)
-                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
-        } while (m_strm.avail_out == 0);
-    }
-
-private:
-    BlockCb m_cb;
-    z_stream m_strm;
-    unsigned char m_tmpbuf[CHUNKSIZE];
+    std::unique_ptr<DeflateDecompressorImpl> m_impl;
 };
 
-
 } // namespace pdal
-
-#endif // PDAL_HAVE_ZLIB

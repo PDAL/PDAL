@@ -62,7 +62,7 @@ namespace pdal
 namespace Config
 {
 
-bool featureEnabled(Feature f)
+bool hasFeature(Feature f)
 {
     bool enabled = false;
     switch (f)
