@@ -92,7 +92,7 @@ public:
 };
 }
 
-class RevertZOrder
+class ReverseZOrder
 {
 public:
     static uint32_t encode_morton(uint32_t x, uint32_t y)
@@ -134,7 +134,7 @@ private:
 
 PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
 {
-    int32_t cell = sqrt(inView->size());
+    const int32_t cell = sqrt(inView->size());
 
     // compute range
     BOX2D buffer_bounds;
@@ -155,8 +155,8 @@ PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
         const double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
         const int32_t ypos = floor((y - buffer_bounds.miny) / cell_height);
 
-        const uint32_t code = RevertZOrder::encode_morton(xpos, ypos);
-        const uint32_t reverse = RevertZOrder::reverse_morton( code );
+        const uint32_t code = ReverseZOrder::encode_morton(xpos, ypos);
+        const uint32_t reverse = ReverseZOrder::reverse_morton( code );
 
         codes.insert( std::pair<uint32_t, PointId>(reverse, idx) );
     }
