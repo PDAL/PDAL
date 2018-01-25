@@ -41,16 +41,11 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PointView.hpp>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-private-field"
-
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
 #endif
 #include <nitro/c++/import/nitf.hpp>
 #include "tre_plugins.hpp"
-
-#pragma GCC diagnostic pop
 
 // NOTES
 //
