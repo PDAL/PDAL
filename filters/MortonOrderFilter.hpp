@@ -56,7 +56,13 @@ public:
     std::string getName() const;
 
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
+
+    PointViewSet reverseMorton(PointViewPtr view);
+    PointViewSet morton(PointViewPtr view);
+
+    bool m_reverse = false;
 };
 
 } // namespace pdal

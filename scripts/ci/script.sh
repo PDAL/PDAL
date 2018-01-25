@@ -25,6 +25,9 @@ apk add \
     python-dev \
     py-numpy \
     py-numpy-dev \
+    cython \
+    cython-dev \
+    py-pip \
     jsoncpp \
     jsoncpp-dev \
     hdf5 \
@@ -81,6 +84,14 @@ make -j2
 LD_LIBRARY_PATH=./lib
 ctest -V
 make install
+
+# Python extension testing
+cd /pdal/python
+pip install packaging
+python setup.py build
+echo "current path: " `pwd`
+export PDAL_TEST_DIR=/pdal/_build/test
+python setup.py test
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do
