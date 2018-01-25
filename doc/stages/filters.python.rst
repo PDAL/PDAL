@@ -62,7 +62,7 @@ Modification Example
       "pipeline":[
         "file-input.las",
         {
-          "type":"filters.ground"
+          "type":"filters.smrf"
         },
         {
           "type":"filters.python",
@@ -144,7 +144,7 @@ Example :ref:`pipeline`
       "pipeline":[
         "file-input.las",
         {
-          "type":"filters.ground"
+          "type":"filters.smrf
         },
         {
           "type":"filters.python",
