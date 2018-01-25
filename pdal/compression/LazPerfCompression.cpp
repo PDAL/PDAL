@@ -32,7 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/DimType.hpp>
 #include <pdal/util/OStream.hpp>
 
 #include <laz-perf/common/common.hpp>
@@ -45,7 +44,7 @@
 #include <laz-perf/io.hpp>
 #include <laz-perf/las.hpp>
 
-#include "Compression.hpp"
+#include "LazPerfCompression.hpp"
 
 namespace pdal
 {
@@ -160,7 +159,7 @@ public:
 
 private:
     BlockCb m_cb;
-    typedef laszip::encoders::arithmetic<LazPerfCompressor> Encoder;
+    typedef laszip::encoders::arithmetic<LazPerfCompressorImpl> Encoder;
     Encoder m_encoder;
     typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
             Compressor;
@@ -171,7 +170,7 @@ private:
 };
 
 
-LazPerfCompressor::LazPerfCompressor(BlockCb cb, const DimTypesList& dims) :
+LazPerfCompressor::LazPerfCompressor(BlockCb cb, const DimTypeList& dims) :
     m_impl(new LazPerfCompressorImpl(cb, dims))
 {}
 
@@ -180,13 +179,13 @@ LazPerfCompressor::~LazPerfCompressor()
 {}
 
 
-LazPerfCompressor::compress(const char *buf, size_t bufsize)
+void LazPerfCompressor::compress(const char *buf, size_t bufsize)
 {
     m_impl->compress(buf, bufsize);
 }
 
 
-LazPerfCompressor::done()
+void LazPerfCompressor::done()
 {
     m_impl->done();
 }
@@ -237,7 +236,7 @@ public:
     }
 
 private:
-    typedef laszip::decoders::arithmetic<LazPerfDecompressor> Decoder;
+    typedef laszip::decoders::arithmetic<LazPerfDecompressorImpl> Decoder;
     Decoder m_decoder;
     typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
         Decompressor;

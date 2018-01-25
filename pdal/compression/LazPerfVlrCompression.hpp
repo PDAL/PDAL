@@ -40,7 +40,7 @@ namespace laszip
 {
 namespace factory
 {
-    class record_schema;
+    struct record_schema;
 }
 }
 

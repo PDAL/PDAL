@@ -31,9 +31,6 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
-
-#include <pdal/util/OStream.hpp>
 
 #include <laz-perf/common/common.hpp>
 #include <laz-perf/compressor.hpp>
@@ -44,6 +41,8 @@
 #include <laz-perf/formats.hpp>
 #include <laz-perf/io.hpp>
 #include <laz-perf/las.hpp>
+
+#include "LazPerfVlrCompression.hpp"
 
 namespace pdal
 {
@@ -170,13 +169,13 @@ private:
 };
 
 
-LazPerfVlrCompressor::LazPerfCompressor(std::ostream& stream, Schema& schema,
-        uint32_t chunksize) :
-   m_impl(new LazPerfVlrCompressorImpl(stream, schema, chunksize)
+LazPerfVlrCompressor::LazPerfVlrCompressor(std::ostream& stream,
+        const Schema& schema, uint32_t chunksize) :
+    m_impl(new LazPerfVlrCompressorImpl(stream, schema, chunksize))
 {}
 
 
-LazPerfVlrCompressor::~LazPerfCompressor()
+LazPerfVlrCompressor::~LazPerfVlrCompressor()
 {}
 
 
