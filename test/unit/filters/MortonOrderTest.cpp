@@ -34,9 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-//#include <pdal/PointView.hpp>
-//#include <pdal/StageFactory.hpp>
-
 #include <io/BufferReader.hpp>
 #include <filters/MortonOrderFilter.hpp>
 
@@ -68,7 +65,7 @@ TEST(MortonOrderTest, test_code)
 
     MortonOrderFilter filter;
     Options o;
-    o.add("revert", "true");
+    o.add("reverse", "true");
     filter.setInput(r);
     filter.setOptions(o);
 

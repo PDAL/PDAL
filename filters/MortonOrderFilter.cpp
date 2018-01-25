@@ -55,7 +55,7 @@ std::string MortonOrderFilter::getName() const { return s_info.name; }
 
 void MortonOrderFilter::addArgs(ProgramArgs& args)
 {
-    args.add("revert", "Revert Morton", m_revert, false);
+    args.add("reverse", "Reverse Morton", m_reverse, false);
 }
 
 //This used to be a lambda, but the VS compiler exploded, I guess.
@@ -100,7 +100,7 @@ public:
         return (part1_by1(y) << 1) + part1_by1(x);
     }
 
-    static uint32_t revert_morton(uint32_t index)
+    static uint32_t reverse_morton(uint32_t index)
     {
         index = ((index >> 1) & 0x55555555u) | ((index & 0x55555555u) << 1);
         index = ((index >> 2) & 0x33333333u) | ((index & 0x33333333u) << 2);
@@ -132,7 +132,7 @@ private:
     }
 };
 
-PointViewSet MortonOrderFilter::revertMorton(PointViewPtr inView)
+PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
 {
     int32_t cell = sqrt(inView->size());
 
@@ -145,7 +145,7 @@ PointViewSet MortonOrderFilter::revertMorton(PointViewPtr inView)
     const double cell_width = xrange / cell;
     const double cell_height = yrange / cell;
 
-    // compute revert morton code for each point
+    // compute reverse morton code for each point
     std::multimap<uint32_t, PointId> codes;
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
@@ -156,9 +156,9 @@ PointViewSet MortonOrderFilter::revertMorton(PointViewPtr inView)
         const int32_t ypos = floor((y - buffer_bounds.miny) / cell_height);
 
         const uint32_t code = RevertZOrder::encode_morton(xpos, ypos);
-        const uint32_t revert = RevertZOrder::revert_morton( code );
+        const uint32_t reverse = RevertZOrder::reverse_morton( code );
 
-        codes.insert( std::pair<uint32_t, PointId>(revert, idx) );
+        codes.insert( std::pair<uint32_t, PointId>(reverse, idx) );
     }
 
     // a map is yet order by key so its naturally ordered by lod
@@ -212,9 +212,9 @@ PointViewSet MortonOrderFilter::morton(PointViewPtr inView)
 
 PointViewSet MortonOrderFilter::run(PointViewPtr inView)
 {
-    if ( m_revert )
+    if ( m_reverse )
     {
-        return revertMorton( inView );
+        return reverseMorton( inView );
     }
     else
     {
