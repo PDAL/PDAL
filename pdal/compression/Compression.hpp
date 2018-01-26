@@ -75,7 +75,7 @@ public:
 };
 
 
-class Decompressor
+class PDAL_DLL Decompressor
 {
 public:
     virtual ~Decompressor()

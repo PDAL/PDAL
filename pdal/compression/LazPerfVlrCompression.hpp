@@ -58,17 +58,17 @@ namespace pdal
 // The compressor uses the schema of the point data in order to compress
 // the point stream.  The schema is also stored in a VLR that isn't
 // handled as part of the compression process itself.
-class PDAL_DLL LazPerfVlrCompressor
+class LazPerfVlrCompressor
 {
     typedef laszip::factory::record_schema Schema;
 
 public:
-    LazPerfVlrCompressor(std::ostream& stream, const Schema& schema,
+    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, const Schema& schema,
         uint32_t chunksize);
-    ~LazPerfVlrCompressor();
+    PDAL_DLL ~LazPerfVlrCompressor();
 
-    void compress(const char *inbuf);
-    void done();
+    PDAL_DLL void compress(const char *inbuf);
+    PDAL_DLL void done();
 
 private:
     std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
@@ -80,12 +80,12 @@ class LazPerfVlrDecompressorImpl;
 class PDAL_DLL LazPerfVlrDecompressor
 {
 public:
-    LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
+    PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
         std::streamoff pointOffset);
-    ~LazPerfVlrDecompressor();
+    PDAL_DLL ~LazPerfVlrDecompressor();
 
-    size_t pointSize() const;
-    void decompress(char *outbuf);
+    PDAL_DLL size_t pointSize() const;
+    PDAL_DLL void decompress(char *outbuf);
 
 private:
     std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;

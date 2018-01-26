@@ -40,14 +40,14 @@ namespace pdal
 
 class ZstdCompressorImpl;
 
-class PDAL_DLL ZstdCompressor : public Compressor
+class ZstdCompressor : public Compressor
 {
 public:
-    ZstdCompressor(BlockCb cb);
-    ~ZstdCompressor();
+    PDAL_DLL ZstdCompressor(BlockCb cb);
+    PDAL_DLL ~ZstdCompressor();
 
-    void compress(const char *buf, size_t bufsize);
-    void done();
+    PDAL_DLL void compress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
     std::unique_ptr<ZstdCompressorImpl> m_impl;
@@ -58,11 +58,11 @@ class ZstdDecompressorImpl;
 class PDAL_DLL ZstdDecompressor : public Decompressor
 {
 public:
-    ZstdDecompressor(BlockCb cb);
-    ~ZstdDecompressor();
+    PDAL_DLL ZstdDecompressor(BlockCb cb);
+    PDAL_DLL ~ZstdDecompressor();
 
-    void decompress(const char *buf, size_t bufsize);
-    void done()
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
+    PDAL_DLL void done()
     {}
 
 private:

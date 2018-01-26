@@ -40,14 +40,14 @@ namespace pdal
 
 class DeflateCompressorImpl;
 
-class PDAL_DLL DeflateCompressor : public Compressor
+class DeflateCompressor : public Compressor
 {
 public:
-    DeflateCompressor(BlockCb cb);
-    ~DeflateCompressor();
+    PDAL_DLL DeflateCompressor(BlockCb cb);
+    PDAL_DLL ~DeflateCompressor();
 
-    void compress(const char *buf, size_t bufsize);
-    void done();
+    PDAL_DLL void compress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
     std::unique_ptr<DeflateCompressorImpl> m_impl;
@@ -59,11 +59,11 @@ class DeflateDecompressorImpl;
 class PDAL_DLL DeflateDecompressor : public Decompressor
 {
 public:
-    DeflateDecompressor(BlockCb cb);
-    ~DeflateDecompressor();
+    PDAL_DLL DeflateDecompressor(BlockCb cb);
+    PDAL_DLL ~DeflateDecompressor();
 
-    void decompress(const char *buf, size_t bufsize);
-    void done();
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
     std::unique_ptr<DeflateDecompressorImpl> m_impl;

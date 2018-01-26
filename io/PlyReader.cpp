@@ -301,8 +301,6 @@ void PlyReader::initialize()
 
 void PlyReader::addDimensions(PointLayoutPtr layout)
 {
-    SimpleProperty *prop;
-
     // Override XYZ to doubles.
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);

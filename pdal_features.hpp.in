@@ -1,7 +1,7 @@
 /*
  * pdal_features.hpp.in is used by cmake to generate pdal_features.hpp
  *
- * Do not edit pdal_defines.h!
+ * Do not edit pdal_features.hpp
  *
  */
 #pragma once

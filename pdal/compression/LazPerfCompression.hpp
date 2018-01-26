@@ -42,14 +42,14 @@ namespace pdal
 
 class LazPerfCompressorImpl;
 
-class PDAL_DLL LazPerfCompressor : public Compressor
+class LazPerfCompressor : public Compressor
 {
 public:
-    LazPerfCompressor(BlockCb cb, const DimTypeList& dims);
-    ~LazPerfCompressor();
+    PDAL_DLL LazPerfCompressor(BlockCb cb, const DimTypeList& dims);
+    PDAL_DLL ~LazPerfCompressor();
 
-    void compress(const char *buf, size_t bufsize);
-    void done();
+    PDAL_DLL void compress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
     std::unique_ptr<LazPerfCompressorImpl> m_impl;
@@ -61,14 +61,14 @@ class LazPerfDecompressorImpl;
 // NOTE - The LazPerfDecompressor is different from others, even though the
 //   interface is the same, in that it always executes the callback after
 //   a point's worth of data is read.
-class PDAL_DLL LazPerfDecompressor : public Decompressor
+class LazPerfDecompressor : public Decompressor
 {
 public:
-    LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
+    PDAL_DLL LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
         size_t numPoints);
-    ~LazPerfDecompressor();
+    PDAL_DLL ~LazPerfDecompressor();
 
-    void decompress(const char *buf, size_t bufsize);
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
 
 private:
     std::unique_ptr<LazPerfDecompressorImpl> m_impl;
