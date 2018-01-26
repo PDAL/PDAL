@@ -77,7 +77,7 @@ private:
 
 class LazPerfVlrDecompressorImpl;
 
-class PDAL_DLL LazPerfVlrDecompressor
+class LazPerfVlrDecompressor
 {
 public:
     PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
