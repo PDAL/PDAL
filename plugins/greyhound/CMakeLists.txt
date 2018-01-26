@@ -13,8 +13,7 @@ PDAL_ADD_PLUGIN(reader_libname reader greyhound
         io/GreyhoundReader.cpp
         io/GreyhoundCommon.cpp
         io/bounds.cpp
-    LINK_WITH ${PDAL_JSONCPP_LIB_NAME}
-        ${PDAL_ARBITER_LIB_NAME})
+    LINK_WITH ${PDAL_JSONCPP_LIB_NAME})
 
 PDAL_ADD_PLUGIN(writer_libname writer greyhound
     FILES
@@ -22,8 +21,7 @@ PDAL_ADD_PLUGIN(writer_libname writer greyhound
         io/GreyhoundWriter.cpp
         io/GreyhoundCommon.cpp
         io/bounds.cpp
-    LINK_WITH ${PDAL_JSONCPP_LIB_NAME}
-        ${PDAL_ARBITER_LIB_NAME})
+    LINK_WITH ${PDAL_JSONCPP_LIB_NAME})
 
 target_include_directories(${reader_libname} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}
