@@ -56,7 +56,7 @@ private:
 
 class DeflateDecompressorImpl;
 
-class PDAL_DLL DeflateDecompressor : public Decompressor
+class DeflateDecompressor : public Decompressor
 {
 public:
     PDAL_DLL DeflateDecompressor(BlockCb cb);

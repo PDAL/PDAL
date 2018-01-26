@@ -55,7 +55,7 @@ private:
 
 class ZstdDecompressorImpl;
 
-class PDAL_DLL ZstdDecompressor : public Decompressor
+class ZstdDecompressor : public Decompressor
 {
 public:
     PDAL_DLL ZstdDecompressor(BlockCb cb);

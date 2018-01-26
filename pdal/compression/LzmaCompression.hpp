@@ -55,7 +55,7 @@ private:
 
 class LzmaDecompressorImpl;
 
-class PDAL_DLL LzmaDecompressor : public Decompressor
+class LzmaDecompressor : public Decompressor
 {
 public:
     PDAL_DLL LzmaDecompressor(BlockCb cb);
