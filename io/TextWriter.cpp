@@ -103,11 +103,11 @@ void TextWriter::ready(PointTableRef table)
     *m_stream << std::fixed;
 
     // Find the dimensions listed and put them on the id list.
-    StringList dimNames = Utils::split2(m_dimOrder, ',');
+    auto dimNames = Utils::split2(m_dimOrder, ',');
     for (std::string dim : dimNames)
     {
         Utils::trim(dim);
-        Dimension::Id d = table.layout()->findDim(dim);
+        auto d = table.layout()->findDim(dim);
         if (d == Dimension::Id::Unknown)
             throwError("Dimension not found with name '" + dim + "'.");
         m_dims.push_back(d);
@@ -117,10 +117,10 @@ void TextWriter::ready(PointTableRef table)
     // Yes, this isn't efficient when, but it's simple.
     if (m_dimOrder.empty() || m_writeAllDims)
     {
-        Dimension::IdList all = table.layout()->dims();
-        for (auto di = all.begin(); di != all.end(); ++di)
-            if (!Utils::contains(m_dims, *di))
-                m_dims.push_back(*di);
+        for (const auto d : table.layout()->dims()) {
+            if (!Utils::contains(m_dims, d))
+                m_dims.push_back(d);
+        }
     }
 
     if (!m_writeHeader)
@@ -130,7 +130,7 @@ void TextWriter::ready(PointTableRef table)
 }
 
 
-void TextWriter::writeHeader(PointTableRef table)
+void TextWriter::writeHeader(PointTableRef table) const
 {
     log()->get(LogLevel::Debug) << "Writing header to filename: " <<
         m_filename << std::endl;
@@ -141,7 +141,7 @@ void TextWriter::writeHeader(PointTableRef table)
 }
 
 
-void TextWriter::writeFooter()
+void TextWriter::writeFooter() const
 {
     if (m_outputType == "GEOJSON")
     {
@@ -149,11 +149,10 @@ void TextWriter::writeFooter()
         if (m_callback.size())
             *m_stream  <<")";
     }
-    m_stream.reset();
 }
 
 
-void TextWriter::writeGeoJSONHeader()
+void TextWriter::writeGeoJSONHeader() const
 {
     if (m_callback.size())
         *m_stream << m_callback <<"(";
@@ -161,37 +160,35 @@ void TextWriter::writeGeoJSONHeader()
 }
 
 
-void TextWriter::writeCSVHeader(PointTableRef table)
+void TextWriter::writeCSVHeader(PointTableRef table) const
 {
     const PointLayoutPtr layout(table.layout());
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        if (di != m_dims.begin())
+    std::string quote = m_quoteHeader? "\"" : "";
+    for (const auto &di : m_dims) {
+        if (di != m_dims.front())
             *m_stream << m_delimiter;
 
-        if (m_quoteHeader)
-            *m_stream << "\"" << layout->dimName(*di) << "\"";
-        else
-            *m_stream << layout->dimName(*di);
+        *m_stream << quote << layout->dimName(di) << quote;
     }
+
     *m_stream << m_newline;
 }
 
-void TextWriter::writeCSVBuffer(const PointViewPtr view)
+void TextWriter::writeCSVBuffer(const PointViewPtr view) const
 {
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        for (const auto &di : m_dims)
         {
-            if (di != m_dims.begin())
+            if (di != m_dims.front())
                 *m_stream << m_delimiter;
-            *m_stream << view->getFieldAs<double>(*di, idx);
+            *m_stream << view->getFieldAs<double>(di, idx);
         }
         *m_stream << m_newline;
     }
 }
 
-void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
+void TextWriter::writeGeoJSONBuffer(const PointViewPtr view) const
 {
     using namespace Dimension;
 
@@ -207,15 +204,14 @@ void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
         *m_stream << view->getFieldAs<double>(Id::Z, idx) << "]},";
 
         *m_stream << "\"properties\": {";
-
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        for (const auto &di : m_dims)
         {
-            if (di != m_dims.begin())
+            if (di != m_dims.front())
                 *m_stream << ",";
 
-            *m_stream << "\"" << view->dimName(*di) << "\":";
+            *m_stream << "\"" << view->dimName(di) << "\":";
             *m_stream << "\"";
-            *m_stream << view->getFieldAs<double>(*di, idx);
+            *m_stream << view->getFieldAs<double>(di, idx);
             *m_stream <<"\"";
         }
         *m_stream << "}"; // end properties
@@ -235,6 +231,7 @@ void TextWriter::write(const PointViewPtr view)
 void TextWriter::done(PointTableRef /*table*/)
 {
     writeFooter();
+    m_stream.reset();
     getMetadata().addList("filename", m_filename);
 }
 

@@ -62,13 +62,13 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    void writeHeader(PointTableRef table);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointTableRef table);
+    void writeHeader(PointTableRef table) const;
+    void writeFooter() const;
+    void writeGeoJSONHeader() const;
+    void writeCSVHeader(PointTableRef table) const;
 
-    void writeGeoJSONBuffer(const PointViewPtr view);
-    void writeCSVBuffer(const PointViewPtr view);
+    void writeGeoJSONBuffer(const PointViewPtr view) const;
+    void writeCSVBuffer(const PointViewPtr view) const;
 
     std::string m_filename;
     std::string m_outputType;
@@ -85,8 +85,8 @@ private:
     FileStreamPtr m_stream;
     Dimension::IdList m_dims;
 
-    TextWriter& operator=(const TextWriter&); // not implemented
-    TextWriter(const TextWriter&); // not implemented
+    TextWriter& operator=(const TextWriter&) = delete;
+    TextWriter(const TextWriter&) = delete;
 };
 
 } // namespace pdal
