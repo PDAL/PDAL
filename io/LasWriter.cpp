@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/compression/LazPerfVlrCompression.hpp>
+
 #include "LasWriter.hpp"
 
 #include <climits>
@@ -65,9 +67,17 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None),
-    m_srsCnt(0)
+LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
+    m_compression(LasCompression::None), m_srsCnt(0)
 {}
+
+
+LasWriter::~LasWriter()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_compressor;
+#endif
+}
 
 
 void LasWriter::addArgs(ProgramArgs& args)
@@ -704,8 +714,9 @@ void LasWriter::readyLazPerfCompression()
     zipvlr.extract((char *)data.data());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
 
-    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema,
-        zipvlr.chunk_size));
+    delete m_compressor;
+    m_compressor = new LazPerfVlrCompressor(*m_ostream, schema,
+        zipvlr.chunk_size);
 #endif
 }
 

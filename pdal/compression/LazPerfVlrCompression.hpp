@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler (howard@hobu.co)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,77 +31,65 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+#pragma once
 
-#include <pdal/pdal_features.hpp> // For PDAL_HAVE_LIBXML2
-#include <pdal/PointView.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
-#include <map>
+#include <memory>
+#include <pdal/util/OStream.hpp>
 
-#ifndef PDAL_HAVE_LIBXML2
-namespace pdal
+namespace laszip
 {
-  class Ilvis2MetadataReader
-  {
-  public:
-      inline void readMetadataFile(std::string filename, pdal::MetadataNode* m) {};
-  };
+namespace factory
+{
+    struct record_schema;
 }
-#else
-    #include "Ilvis2MetadataReader.hpp"
-#endif
-
-extern "C" int32_t Ilvis2Reader_ExitFunc();
-extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
+}
 
 namespace pdal
 {
-class PDAL_DLL Ilvis2Reader : public pdal::Reader
+    class LazPerfVlrCompressorImpl;
+
+// This compressor write data in chunks to a stream. At the beginning of the
+// data is an offset to the end of the data, where the chunk table is
+// stored.  The chunk table keeps a list of the offsets to the beginning of
+// each chunk.  Chunks consist of a fixed number of points (last chunk may
+// have fewer points).  Each time a chunk starts, the compressor is reset.
+// This allows decompression of some set of points that's less than the
+// entire set when desired.
+// The compressor uses the schema of the point data in order to compress
+// the point stream.  The schema is also stored in a VLR that isn't
+// handled as part of the compression process itself.
+class LazPerfVlrCompressor
 {
+    typedef laszip::factory::record_schema Schema;
+
 public:
-    enum class IlvisMapping
-    {
-      INVALID,
-      LOW,
-      HIGH,
-      ALL
-    };
+    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, const Schema& schema,
+        uint32_t chunksize);
+    PDAL_DLL ~LazPerfVlrCompressor();
 
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
-    Ilvis2Reader()
-    {}
-
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    PDAL_DLL void compress(const char *inbuf);
+    PDAL_DLL void done();
 
 private:
-    std::ifstream m_stream;
-    IlvisMapping m_mapping;
-    StringList m_fields;
-    size_t m_lineNum;
-    bool m_resample;
-    PointLayoutPtr m_layout;
-    std::string m_metadataFile;
-    Ilvis2MetadataReader m_mdReader;
-
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual bool processOne(PointRef& point);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-
-    virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
+    std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
 };
 
-std::ostream& operator<<(std::ostream& out,
-    const Ilvis2Reader::IlvisMapping& mval);
+
+class LazPerfVlrDecompressorImpl;
+
+class LazPerfVlrDecompressor
+{
+public:
+    PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
+        std::streamoff pointOffset);
+    PDAL_DLL ~LazPerfVlrDecompressor();
+
+    PDAL_DLL size_t pointSize() const;
+    PDAL_DLL void decompress(char *outbuf);
+
+private:
+    std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;
+};
 
 } // namespace pdal
+

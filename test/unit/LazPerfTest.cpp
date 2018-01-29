@@ -34,8 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <iterator>
-#include <sstream>
 #include <iostream>
 #include <string>
 #include <random>
@@ -43,10 +41,7 @@
 #include "Support.hpp"
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/compression/DeflateCompression.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
-#include <pdal/compression/LzmaCompression.hpp>
-#include <pdal/compression/ZstdCompression.hpp>
 #include <io/LasReader.hpp>
 
 using namespace pdal;
@@ -66,7 +61,6 @@ std::vector<char> getBytes(PointViewPtr view)
 }
 
 
-#ifdef PDAL_HAVE_LAZPERF
 TEST(Compression, simple)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
@@ -197,137 +191,4 @@ TEST(Compression, types)
            decompress(reinterpret_cast<const char *>(rawBuf.data()),
                        rawBuf.size());
 }
-#endif // PDAL_HAVE_LAZPERF
-
-
-#ifdef PDAL_HAVE_ZILB
-TEST(Compression, deflate)
-{
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
-
-    // Choosing a size that isn't a multiple of the internal buffer.
-    std::vector<int> orig(1000357);
-    // Trying to make something that compresses reasonably well.
-    int val = dist(generator);
-    for (size_t i = 0; i < orig.size(); ++i)
-    {
-        orig[i] = val++;
-        if (i % 100 == 0)
-            val = dist(generator);
-    }
-
-    std::vector<char> compressed;
-    auto cb = [&compressed](char *buf, size_t bufsize)
-    {
-        static size_t total = 0;
-        compressed.insert(compressed.end(), buf, buf + bufsize);
-        total += bufsize;
-    };
-
-    DeflateCompressor compressor(cb);
-
-    size_t s = orig.size() * sizeof(int);
-    char *sp = reinterpret_cast<char *>(orig.data());
-    compressor.compress(sp, s);
-    compressor.done();
-
-    auto verifier = [&sp](char *buf, size_t bufsize)
-    {
-        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
-        sp += bufsize;
-    };
-
-    DeflateDecompressor decompressor(verifier);
-    decompressor.decompress(compressed.data(), compressed.size());
-    decompressor.done();
-}
-#endif // PDAL_HAVE_ZLIB
-
-
-#ifdef PDAL_HAVE_LZMA
-TEST(Compression, lzma)
-{
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
-
-    // Choosing a size that isn't a multiple of the internal buffer.
-    // Trying to make something that compresses reasonably well.
-    std::vector<int> orig(1000357);
-    int val = dist(generator);
-    for (size_t i = 0; i < orig.size(); ++i)
-    {
-        orig[i] = val++;
-        if (i % 100 == 0)
-            val = dist(generator);
-    }
-
-    std::vector<char> compressed;
-    auto cb = [&compressed](char *buf, size_t bufsize)
-    {
-        static size_t total = 0;
-        compressed.insert(compressed.end(), buf, buf + bufsize);
-        total += bufsize;
-    };
-
-    size_t s = orig.size() * sizeof(int);
-    char *sp = reinterpret_cast<char *>(orig.data());
-    LzmaCompressor compressor(cb);
-    compressor.compress(sp, s);
-    compressor.done();
-
-    auto verifier = [&sp](char *buf, size_t bufsize)
-    {
-        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
-        sp += bufsize;
-    };
-
-    LzmaDecompressor decompressor(verifier);
-    decompressor.decompress(compressed.data(), compressed.size());
-    decompressor.done();
-}
-#endif // PDAL_HAVE_LZMA
-
-#ifdef PDAL_HAVE_ZSTD
-TEST(Compression, zstd)
-{
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
-
-    // Choosing a size that isn't a multiple of the internal buffer.
-    // Trying to make something that compresses reasonably well.
-    std::vector<int> orig(1000357);
-    int val = dist(generator);
-    for (size_t i = 0; i < orig.size(); ++i)
-    {
-        orig[i] = val++;
-        if (i % 100 == 0)
-            val = dist(generator);
-    }
-
-    std::vector<char> compressed;
-    auto cb = [&compressed](char *buf, size_t bufsize)
-    {
-        static size_t total = 0;
-        compressed.insert(compressed.end(), buf, buf + bufsize);
-        total += bufsize;
-    };
-
-    size_t s = orig.size() * sizeof(int);
-    char *sp = reinterpret_cast<char *>(orig.data());
-    ZstdCompressor compressor(cb);
-    compressor.compress(sp, s);
-    compressor.done();
-
-    auto verifier = [&sp](char *buf, size_t bufsize)
-    {
-        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
-        sp += bufsize;
-    };
-
-    ZstdDecompressor decompressor(verifier);
-    decompressor.decompress(compressed.data(), compressed.size());
-    decompressor.done();
-}
-#endif // PDAL_HAVE_ZSTD
 

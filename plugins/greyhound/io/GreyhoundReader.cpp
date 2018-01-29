@@ -34,7 +34,7 @@
 
 #include "GreyhoundReader.hpp"
 
-#include <pdal/pdal_defines.h>
+#include <pdal/pdal_features.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -239,7 +239,7 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
             p.z = view->getFieldAs<double>(Dimension::Id::Z, i);
 
             if (!obounds.contains(p))
-                view->setField(Dimension::Id::Omit, i, true);
+                view->setField(Dimension::Id::Omit, i, 1);
         }
     }
 

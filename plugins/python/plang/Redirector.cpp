@@ -8,10 +8,8 @@
 
 #include "Redirector.hpp"
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#  pragma warning(disable: 4068)  // gcc pragma warnings
-#endif
+#pragma warning(disable: 4127)  // conditional expression is constant
+#pragma warning(disable: 4068)  // gcc pragma warnings
 
 #include <ostream>
 #include <string>
