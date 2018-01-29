@@ -50,7 +50,7 @@ static std::string appName()
 }
 
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef _WIN32
 TEST(pc2pcTest, pc2pcTest_test_no_input)
 {
     std::string cmd = appName();

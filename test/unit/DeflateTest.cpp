@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler (howard@hobu.co)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,76 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_features.hpp> // For PDAL_HAVE_LIBXML2
-#include <pdal/PointView.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
-#include <map>
+#include <pdal/pdal_test_main.hpp>
 
-#ifndef PDAL_HAVE_LIBXML2
-namespace pdal
+#include <random>
+
+#include <pdal/compression/DeflateCompression.hpp>
+
+using namespace pdal;
+
+TEST(Compression, deflate)
 {
-  class Ilvis2MetadataReader
-  {
-  public:
-      inline void readMetadataFile(std::string filename, pdal::MetadataNode* m) {};
-  };
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+
+    // Choosing a size that isn't a multiple of the internal buffer.
+    std::vector<int> orig(1000357);
+    // Trying to make something that compresses reasonably well.
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
+
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
+
+    DeflateCompressor compressor(cb);
+
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    compressor.compress(sp, s);
+    compressor.done();
+
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
+
+    DeflateDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
 }
-#else
-    #include "Ilvis2MetadataReader.hpp"
-#endif
 
-extern "C" int32_t Ilvis2Reader_ExitFunc();
-extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
-
-namespace pdal
-{
-class PDAL_DLL Ilvis2Reader : public pdal::Reader
-{
-public:
-    enum class IlvisMapping
-    {
-      INVALID,
-      LOW,
-      HIGH,
-      ALL
-    };
-
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
-    Ilvis2Reader()
-    {}
-
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-private:
-    std::ifstream m_stream;
-    IlvisMapping m_mapping;
-    StringList m_fields;
-    size_t m_lineNum;
-    bool m_resample;
-    PointLayoutPtr m_layout;
-    std::string m_metadataFile;
-    Ilvis2MetadataReader m_mdReader;
-
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual bool processOne(PointRef& point);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-
-    virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
-};
-
-std::ostream& operator<<(std::ostream& out,
-    const Ilvis2Reader::IlvisMapping& mval);
-
-} // namespace pdal

@@ -269,7 +269,7 @@ public:
 
     static Point round(const Point& p)
     {
-        return Point(std::llround(p.x), std::llround(p.y), std::llround(p.z));
+        return Point(std::round(p.x), std::round(p.y), std::round(p.z));
     }
 
     double x;

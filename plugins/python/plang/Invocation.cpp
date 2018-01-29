@@ -35,8 +35,8 @@
 #include "Invocation.hpp"
 #include "Environment.hpp"
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127) // conditional expression is constant
+#pragma warning(disable: 4127) // conditional expression is constant
+#ifdef _WIN32
 #define HAVE_ROUND // inconsistent dll linkage otherwise
 #endif
 

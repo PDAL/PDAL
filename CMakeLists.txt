@@ -128,7 +128,7 @@ include(${PDAL_CMAKE_DIR}/python.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
-# generate the pdal_defines.h header
+# generate the pdal_features.hpp header
 #------------------------------------------------------------------------------
 
 # from http://stackoverflow.com/questions/1435953/how-can-i-pass-git-sha1-to-compiler-as-definition-using-cmake
@@ -139,7 +139,7 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
   "${PROJECT_SOURCE_DIR}/pdal/gitsha.cpp")
 
-# needs to come before configuration of pdal_defines
+# needs to come before configuration of pdal_features
 if(APPLE)
     option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
     if (PDAL_BUNDLE)
@@ -147,11 +147,10 @@ if(APPLE)
     endif()
 endif()
 
-set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
-set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
-include(CheckIncludeFiles)
-check_include_files(execinfo.h PDAL_HAVE_EXECINFO_H)
-configure_file(${pdal_defines_h_in} ${pdal_defines_h})
+set(pdal_features_hpp_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_features.hpp.in")
+set(pdal_features_hpp
+    "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_features.hpp")
+configure_file(${pdal_features_hpp_in} ${pdal_features_hpp})
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -198,21 +197,47 @@ file(GLOB BASE_SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/*.cpp)
+    ${PDAL_SRC_DIR}/*.cpp
+    ${PDAL_SRC_DIR}/compression/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
     ${PDAL_KERNELS_DIR}/private/*.cpp
     ${PDAL_SRC_DIR}/private/*.cpp)
 list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
+
+#
+# Remove stuff we don't want to build.
+#
 if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
-        pdal/DbWriter.cpp
-        pdal/DbReader.cpp
-        pdal/XMLSchema.cpp)
+        ${PDAL_SRC_DIR}/DbWriter.cpp
+        ${PDAL_SRC_DIR}/DbReader.cpp
+        ${PDAL_SRC_DIR}/XMLSchema.cpp)
     list(REMOVE_ITEM SRCS ${XML_SRCS})
+endif()
+if (NOT PDAL_HAVE_ZSTD)
+    file(GLOB ZSTD_SRCS
+        ${PDAL_SRC_DIR}/compression/ZstdCompression.cpp)
+    list(REMOVE_ITEM SRCS ${ZSTD_SRCS})
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    file(GLOB ZLIB_SRCS
+        ${PDAL_SRC_DIR}/compression/DeflateCompression.cpp)
+    list(REMOVE_ITEM SRCS ${ZLIB_SRCS})
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    file(GLOB LZMA_SRCS
+        ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
+    list(REMOVE_ITEM SRCS ${LZMA_SRCS})
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    file(GLOB LAZPERF_SRCS
+        ${PDAL_SRC_DIR}/compression/LazPerfCompression.cpp
+        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
+    list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 
@@ -307,7 +332,7 @@ install(DIRECTORY ${PDAL_FILTERS_DIR}
     PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_defines_h}
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_h}
   DESTINATION include/pdal
 )
 

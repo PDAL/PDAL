@@ -1,12 +1,10 @@
 /*
- * pdal_defines.h.in is used by cmake to generate pdal_defines.h
+ * pdal_features.hpp.in is used by cmake to generate pdal_features.hpp
  *
- * Do not edit pdal_defines.h!
+ * Do not edit pdal_features.hpp
  *
- * Note this is a C-style header.  Do not use C++ syntax.
  */
-#ifndef PDAL_DEFINES_H
-#define PDAL_DEFINES_H
+#pragma once
 
 /*
  * version settings
@@ -16,8 +14,6 @@
 #define PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@
 
 #define PDAL_VERSION_STRING "@PDAL_VERSION_STRING@"
-
-#define PDAL_PLUGIN_VERSION 1
 
 /* (note this will look yucky until we get to major>=1) */
 #define PDAL_VERSION_INTEGER ((PDAL_VERSION_MAJOR*100*100)+(PDAL_VERSION_MINOR*100)+PDAL_VERSION_PATCH)
@@ -34,13 +30,7 @@
 #cmakedefine PDAL_HAVE_LZMA
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_PYTHON
-
 #cmakedefine PDAL_ARBITER_ENABLED
-
-/*
- * availability of execinfo.h
- */
-#cmakedefine PDAL_HAVE_EXECINFO_H
 
 /*
  * Debug or Release build?
@@ -48,27 +38,7 @@
 #define PDAL_BUILD_TYPE "@PDAL_BUILD_TYPE@"
 
 /*
- * platform OS
- */
-#cmakedefine PDAL_PLATFORM_WIN32
-#cmakedefine PDAL_PLATFORM_OSX
-#cmakedefine PDAL_PLATFORM_LINUX
-
-/*
- * platform compiler
- */
-#cmakedefine PDAL_COMPILER_MSVC
-#cmakedefine PDAL_COMPILER_VC12
-#cmakedefine PDAL_COMPILER_VC11
-#cmakedefine PDAL_COMPILER_VC10
-#cmakedefine PDAL_COMPILER_VC9
-#cmakedefine PDAL_COMPILER_VC8
-#cmakedefine PDAL_COMPILER_GCC
-#cmakedefine PDAL_COMPILER_CLANG
-
-/*
  * built pdal app as application bundle on OSX?
  */
 #cmakedefine PDAL_APP_BUNDLE
 
-#endif
