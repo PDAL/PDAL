@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class Triangle
+class PDAL_DLL Triangle
 {
 public:
     Triangle(PointId a, PointId b, PointId c) : m_a(a), m_b(b), m_c(c)
@@ -54,7 +54,7 @@ public:
   A mesh is a way to represent a set of points connected by edges.  Point
   indices are into a point view.
 */
-class PDAL_DLL Mesh
+class Mesh
 {};
 
 
@@ -63,22 +63,19 @@ class PDAL_DLL Mesh
 /**
   A mesh where the faces are triangles.
 */
-class PDAL_DLL TriangularMesh : public Mesh
+class TriangularMesh : public Mesh
 {
 public:
-    TriangularMesh()
+    PDAL_DLL TriangularMesh()
     {}
 
-    size_t size() const
+    size_t PDAL_DLL size() const
         { return m_index.size(); }
-    void add(PointId a, PointId b, PointId c)
+    void PDAL_DLL add(PointId a, PointId b, PointId c)
         { m_index.emplace_back(a, b, c); }
-    const Triangle& operator[](PointId id) const
+    const PDAL_DLL Triangle& operator[](PointId id) const
         { return m_index[id]; }
 protected:
-#ifdef _WIN32
-#pragma warning(disable:4251)// [templated class] needs to have dll-interface...
-#endif
     std::deque<Triangle> m_index;
 
 };

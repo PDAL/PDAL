@@ -43,8 +43,6 @@
 #ifndef _WIN32
 #include <fcntl.h>
 #include <unistd.h>
-#else
-//#  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
 
