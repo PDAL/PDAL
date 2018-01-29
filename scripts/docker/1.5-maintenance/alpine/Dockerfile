@@ -21,7 +21,6 @@ RUN \
         py-numpy-dev \
         jsoncpp-dev \
         hdf5-dev \
-        proj4-dev \
         cpd-dev \
         fgt-dev \
         sqlite-dev \
@@ -44,6 +43,7 @@ RUN \
         jsoncpp \
         hdf5 \
         proj4 \
+        proj4-dev \
         cpd \
         fgt \
         sqlite \
