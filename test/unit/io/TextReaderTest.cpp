@@ -211,3 +211,58 @@ TEST(TextReaderTest, strip_whitespace_from_dimension_names)
             i, pointViewPtr->getFieldAs<uint16_t>(Dimension::Id::Intensity, i));
     }
 }
+
+TEST(TextReaderTest, warnMissingHeader)
+{
+    std::string infile = Support::datapath("text/missingheader.txt");
+    std::string outfile = Support::temppath("out.txt");
+
+    std::string cmd = "pdal translate " + infile + " " + outfile + " 2>&1";
+    std::string output;
+
+    Utils::run_shell_command(Support::binpath(cmd), output);
+    EXPECT_NE(output.find("doesn't appear to contain a header"),
+        std::string::npos);
+}
+
+TEST(TextReaderTest, overrideHeader)
+{
+    TextReader reader;
+    Options options;
+    options.add("header_override", "A,B,C,G");
+    options.add("filename", Support::datapath("text/crlf_test.txt"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet pointViewSet = reader.execute(table);
+    PointViewPtr pointViewPtr = *pointViewSet.begin();
+
+    EXPECT_EQ(pointViewPtr->size(), 10U);
+    PointLayoutPtr layout = table.layout();
+    EXPECT_TRUE(layout->findDim("A") != Dimension::Id::Unknown);
+    EXPECT_TRUE(layout->findDim("B") != Dimension::Id::Unknown);
+    EXPECT_TRUE(layout->findDim("C") != Dimension::Id::Unknown);
+    EXPECT_TRUE(layout->findDim("G") != Dimension::Id::Unknown);
+}
+
+TEST(TextReaderTest, insertHeader)
+{
+    TextReader reader;
+    Options options;
+    options.add("header_insert", "A,B,C,G");
+    options.add("filename", Support::datapath("text/crlf_test.txt"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet pointViewSet = reader.execute(table);
+    PointViewPtr pointViewPtr = *pointViewSet.begin();
+
+    EXPECT_EQ(pointViewPtr->size(), 11U);
+    PointLayoutPtr layout = table.layout();
+    EXPECT_TRUE(layout->findDim("A") != Dimension::Id::Unknown);
+    EXPECT_TRUE(layout->findDim("B") != Dimension::Id::Unknown);
+    EXPECT_TRUE(layout->findDim("C") != Dimension::Id::Unknown);
+    EXPECT_TRUE(layout->findDim("G") != Dimension::Id::Unknown);
+}
