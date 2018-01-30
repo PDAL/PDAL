@@ -38,6 +38,7 @@
 #include <set>
 #include <sstream>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/util/Bounds.hpp>
 
 namespace pdal

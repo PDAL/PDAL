@@ -39,6 +39,7 @@
 #include <sstream>
 #include <string.h>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>

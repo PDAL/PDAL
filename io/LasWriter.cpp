@@ -32,7 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_features.hpp>
+
 #include <pdal/compression/LazPerfVlrCompression.hpp>
+#ifdef PDAL_HAVE_LAZPERF
+#include <laz-perf/factory.hpp>
+#include <laz-perf/io.hpp>
+#endif
 
 #include "LasWriter.hpp"
 
@@ -40,6 +46,7 @@
 #include <iostream>
 #include <vector>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>

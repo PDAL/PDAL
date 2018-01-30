@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/plugin.hpp>
 
 #include <pdal/FlexWriter.hpp>

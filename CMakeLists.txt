@@ -332,7 +332,7 @@ install(DIRECTORY ${PDAL_FILTERS_DIR}
     PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_features_h}
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
   DESTINATION include/pdal
 )
 
