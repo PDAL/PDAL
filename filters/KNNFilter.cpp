@@ -64,12 +64,32 @@ KNNFilter::~KNNFilter()
 void KNNFilter::addArgs(ProgramArgs& args)
 {
     args.add("domain", "Selects which points will be subject to KNN-based update",
-        m_domain);
+        m_domainSpec);
     args.add("k", "Number of nearest neighbors to consult",
         m_k).setPositional();
     args.add("dimension", "Dimension on to be updated", m_dimName).setPositional();
+    Arg& candidate = args.add("candidate", "candidate file name",
+        m_candidateFile);
 }
 
+void KNNFilter::initialize()
+{
+    for (auto const& r : m_domainSpec)
+    {
+        try
+        {
+            DimRange range;
+            range.parse(r);
+            m_domain.push_back(range);
+        }
+        catch (const DimRange::error& err)
+        {
+            throwError("Invalid 'domain' option: '" + r + "': " + err.what());
+        }
+    }
+    if (m_k < 1)
+        throwError("Invalid 'k' option: " + std::to_string(m_k) +  ", must be > 0");
+}
 void KNNFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
@@ -81,8 +101,9 @@ void KNNFilter::prepared(PointTableRef table)
             throwError("Invalid dimension name in 'assignment' option: '" +
                 r.m_name + "'.");
     }
-
+    std::sort(m_domain.begin(), m_domain.end());
     m_dim = layout->findDim(m_dimName);
+
     if (m_dim == Dimension::Id::Unknown)
         throwError("Dimension '" + m_dimName + "' not found.");
 }
@@ -94,28 +115,47 @@ std::ostream& operator<<(std::ostream& out, const Dimension::Id& r)
     return out;
 }
 
-bool KNNFilter::processOne(PointRef& point, PointRef &temp, KD3Index &kdi)
+void KNNFilter::processOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)
 {
-    for (DimRange& r : m_domain)
+    std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
+    double thresh = iSrc.size()/2.0;
+    //std::cout << "iSrc.size() " << iSrc.size() << " thresh " << thresh << std::endl;
+
+    // vote NNs
+    std::map<double, unsigned int> counts;
+    for (PointId id : iSrc)
     {
+        temp.setPointId(id);
+        double votefor = temp.getFieldAs<double>(m_dim);
+        counts[votefor]++;
+    }
+
+    // pick winner of the vote
+    auto pr = *std::max_element(counts.begin(), counts.end(),
+        [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) {
+        return p1.second < p2.second; });
+
+    // update point
+    auto oldclass = point.getFieldAs<double>(m_dim);
+    auto newclass = pr.first;
+    //std::cout << oldclass << " --> " << newclass << " count " << pr.second << std::endl;
+    if (pr.second > thresh && oldclass != newclass)
+    {    
+        point.setField(m_dim, newclass); 
+    }
+}
+
+bool KNNFilter::processOne(PointRef& point, PointRef &temp, KD3Index &kdi)
+{   // update point.  kdi and temp both reference the NN point cloud
+
+    if (m_domain.empty())  // No domain, process all points
+        processOneNoDomain(point, temp, kdi);
+        
+    for (DimRange& r : m_domain)
+    {   // process only points that satisfy a domain condition
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
         {
-            std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
-            double thresh = iSrc.size()/2.0;
-            std::map<double, unsigned int> counts;
-            for (PointId id : iSrc)
-            {
-                temp.setPointId(id);
-                double votefor = temp.getFieldAs<double>(m_dim);
-                counts[votefor]++;
-            }
-            auto pr = *std::max_element(counts.begin(), counts.end());
-            auto oldclass = point.getFieldAs<double>(m_dim);
-            auto newclass = pr.first;
-            if (pr.second > thresh && oldclass != newclass)
-            {    
-                point.setField(m_dim, newclass); 
-            }
+            processOneNoDomain(point, temp, kdi);
             break;
         }
     }
@@ -127,7 +167,7 @@ PointViewPtr KNNFilter::loadSet(const std::string& filename,
 {
     PipelineManager mgr;
 
-    Stage& reader = mgr.makeReader(filename, "readers.las");
+    Stage& reader = mgr.makeReader(filename, "");
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
     assert(viewSet.size() == 1);
@@ -136,14 +176,30 @@ PointViewPtr KNNFilter::loadSet(const std::string& filename,
 
 void KNNFilter::filter(PointView& view)
 {
-    KD3Index kdi(view);
-    kdi.build();
-    PointRef point(view, 0);
-    PointRef temp(view, 0);
-    for (PointId id = 0; id < view.size(); ++id)
-    {
-        point.setPointId(id);
-        processOne(point, temp, kdi);
+    PointRef point_src(view, 0);
+    if (m_candidateFile.empty())
+    {   // No candidate file so NN comes from src file
+        KD3Index kdiSrc(view);
+        kdiSrc.build();
+        PointRef point_nn(view, 0);
+        for (PointId id = 0; id < view.size(); ++id)
+        {
+            point_src.setPointId(id);
+            processOne(point_src, point_nn, kdiSrc);
+        }
+    }
+    else
+    {   // NN comes from candidate file
+        PointTable candTable;
+        PointViewPtr candView = loadSet(m_candidateFile, candTable);
+        KD3Index kdiCand(*candView);
+        kdiCand.build();
+        PointRef point_nn(*candView, 0);
+        for (PointId id = 0; id < view.size(); ++id)
+        {
+            point_src.setPointId(id);
+            processOne(point_src, point_nn, kdiCand);
+        }
     }
 }
 
