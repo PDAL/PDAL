@@ -52,7 +52,7 @@ capabilities to the PDAL project, including :ref:`Poisson sampling
 Funding Contributors
 --------------------------------------------------------------------------------
 
-.. image:: ./rsgis_logo.png
+.. image:: ../development/rsgis_logo.png
     :target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
 
 The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at
@@ -61,10 +61,10 @@ management systems. `CRREL`_'s `GRiD`_ project manages LiDAR and point cloud
 data for a multitude of U.S. Army Corps missions. Find out more about GRiD in
 this `LiDAR Magazine article`_.
 
-.. image:: ./nsf1.png
+.. image:: ../development/nsf1.png
     :target: http://www.nsf.gov
 
-.. image:: ./uoh.png
+.. image:: ../development/uoh.png
     :target: http://www.uh.edu
 
 `NSF <http://www.nsf.gov>`_, in collaboration with `Dr. Craig Glennie
