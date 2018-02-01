@@ -22,6 +22,8 @@
 /*
  * availability of 3rd-party libraries
  */
+#cmakedefine PDAL_HAVE_LASZIP
+#cmakedefine PDAL_HAVE_LAZPERF
 #cmakedefine PDAL_HAVE_HDF5
 #cmakedefine PDAL_HAVE_ZSTD
 #cmakedefine PDAL_HAVE_ZLIB

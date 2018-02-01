@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/plugin.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>

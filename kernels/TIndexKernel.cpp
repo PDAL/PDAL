@@ -87,7 +87,7 @@ void TIndexKernel::addSwitches(ProgramArgs& args)
     args.add("tindex", "OGR-readable/writeable tile index output",
         m_idxFilename).setPositional();
     args.add("filespec", "Build: Pattern of files to index. "
-        "Merge: Output filename", m_filespec).setPositional();
+        "Merge: Output filename", m_filespec).setOptionalPositional();
     args.add("fast_boundary", "Use extent instead of exact boundary",
         m_fastBoundary);
     args.add("lyr_name", "OGR layer name to write into datasource",
@@ -140,6 +140,9 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
     {
         if (m_filespec.empty() && !m_usestdin)
             throw pdal_error("No input pattern specified");
+        if (m_filespec.size() && m_usestdin)
+            throw pdal_error("Can't specify both --filespec and --stdin "
+                "options.");
         if (args.set("polygon"))
             throw pdal_error("'polygon' option not supported when building "
                 "index.");

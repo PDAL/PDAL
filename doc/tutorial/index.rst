@@ -19,25 +19,8 @@ This section provides a collection of tutorials on how to use the PDAL
    reading
    las
    pcl_block_tutorial
-   pcl_ground
-   clipping-with-shapefile
-   calculating-normalized-heights
-   dart-throwing
+   pcl_ground/index
+   clipping/index
    ground-filters
 
 
-Developing
-----------
-
-.. toctree::
-   :maxdepth: 1
-
-   writing-filter
-   writing-kernel
-   writing-reader
-   writing-writer
-   liblas_to_pdal
-   pcl_ground/index
-   clipping/index
-   sampling/index
-   python-filtering
