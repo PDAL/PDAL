@@ -55,12 +55,10 @@ const size_t LasHeader::RETURN_COUNT;
 
 std::string GetDefaultSoftwareId()
 {
-    std::string ver(PDAL_VERSION_STRING);
+    std::string ver(Config::versionString());
     std::stringstream oss;
     std::ostringstream revs;
-    revs << GetSHA1();
-
-
+    revs << Config::sha1();
     oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";
     return oss.str();
 }

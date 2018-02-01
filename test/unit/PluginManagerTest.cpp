@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PluginManager.hpp>
+#include <pdal/pdal_config.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/util/Algorithm.hpp>
 
@@ -98,7 +99,7 @@ TEST(PluginManagerTest, SearchPaths)
     EXPECT_TRUE(Utils::contains(paths, "./lib"));
     EXPECT_TRUE(Utils::contains(paths, "../lib"));
     EXPECT_TRUE(Utils::contains(paths, "../bin"));
-    EXPECT_TRUE(Utils::contains(paths, PDAL_PLUGIN_INSTALL_PATH));
+    EXPECT_TRUE(Utils::contains(paths, Config::pluginInstallPath()));
 
     Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
     paths = PluginManager<Stage>::test_pluginSearchPaths();

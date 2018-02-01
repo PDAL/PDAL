@@ -93,7 +93,7 @@ private:
 void App::outputVersion()
 {
     m_out << headline << std::endl;
-    m_out << "pdal " << GetFullVersionString() << std::endl;
+    m_out << "pdal " << Config::fullVersionString() << std::endl;
     m_out << headline << std::endl;
     m_out << std::endl;
 }
@@ -353,7 +353,8 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         log->setLevel(LogLevel::Debug);
     PluginManager<Stage>::setLog(log);
     PluginManager<Kernel>::setLog(log);
-#ifdef PDAL_HAVE_EXECINFO_H
+#ifndef _WIN32
+#if __has_include(<execinfo.h>)
     if (m_debug)
     {
         signal(SIGSEGV, [](int sig)
@@ -366,6 +367,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             exit(1);
         });
     }
+#endif
 #endif
 
     m_command = Utils::tolower(m_command);

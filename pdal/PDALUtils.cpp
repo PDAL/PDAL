@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_features.hpp>
 
 #ifdef PDAL_ARBITER_ENABLED
     #include <arbiter/arbiter.hpp>
@@ -219,8 +220,6 @@ public:
         close();
         arbiter::Arbiter a;
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
-#else
-        throw pdal_error("Arbiter is not enabled for this configuration!");
 #endif
     }
 

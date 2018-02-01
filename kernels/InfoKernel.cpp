@@ -347,7 +347,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_manager.prepare();
         dump(root);
     }
-    root.add("pdal_version", pdal::GetFullVersionString());
+    root.add("pdal_version", Config::fullVersionString());
     return root;
 }
 

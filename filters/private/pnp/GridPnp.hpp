@@ -278,8 +278,8 @@ private:
         double scalex = ((m_xMax - m_xMin) * yAvgLen) /
             ((m_yMax - m_yMin) * xAvgLen);
         double scaley = 1 / scalex;
-        double mx = std::sqrt(m * scalex);
-        double my = std::sqrt(m * scaley);
+        size_t mx = (size_t)std::sqrt(m * scalex);
+        size_t my = (size_t)std::sqrt(m * scaley);
 
         // We always round up, because why not.
         return XYIndex(mx + 1, my + 1);

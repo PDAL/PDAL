@@ -62,10 +62,8 @@
 #include "Inserter.hpp"
 #include "Extractor.hpp"
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4267 4244)  // ignore conversion warnings
-#endif
+#pragma warning(push)
+#pragma warning(disable: 4267 4244)  // ignore conversion warnings
 
 
 namespace pdal
@@ -234,7 +232,5 @@ inline std::istream& operator >> (std::istream& in, Uuid& u)
 
 } // namespace pdal
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
-#endif
+#pragma warning(pop)
 

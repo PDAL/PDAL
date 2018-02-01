@@ -39,7 +39,7 @@
 
 #include <pdal/PluginManager.hpp>
 
-#include <pdal/pdal_defines.h>
+#include <pdal/pdal_config.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
@@ -84,10 +84,10 @@ StringList pluginSearchPaths()
         for (std::string& s : standardPaths)
         {
             if (FileUtils::toAbsolutePath(s) !=
-                FileUtils::toAbsolutePath(PDAL_PLUGIN_INSTALL_PATH))
+                FileUtils::toAbsolutePath(Config::pluginInstallPath()))
                 searchPaths.push_back(s);
         }
-        searchPaths.push_back(PDAL_PLUGIN_INSTALL_PATH);
+        searchPaths.push_back(Config::pluginInstallPath());
     }
     return searchPaths;
 }
