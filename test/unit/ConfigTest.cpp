@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/pdal_config.hpp>
 
 using namespace pdal;
