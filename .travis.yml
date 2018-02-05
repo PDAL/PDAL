@@ -6,10 +6,10 @@ sudo: required
 services: docker
 
 before_install:
-  - docker pull alpine:3.6
+  - docker pull alpine:3.7
 
 script:
-  - docker run -v $TRAVIS_BUILD_DIR:/pdal -t alpine:3.6 /bin/sh -c "/pdal/scripts/ci/script.sh"
+  - docker run -v $TRAVIS_BUILD_DIR:/pdal -t alpine:3.7 /bin/sh -c "/pdal/scripts/ci/script.sh"
 
 after_success:
   - echo "secure travis:" "$TRAVIS_SECURE_ENV_VARS"
