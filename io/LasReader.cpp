@@ -32,11 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/compression/LazPerfVlrCompression.hpp>
+
 #include "LasReader.hpp"
 
 #include <sstream>
 #include <string.h>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
@@ -62,6 +65,18 @@ struct invalid_stream : public std::runtime_error
 };
 
 } // unnamed namespace
+
+LasReader::LasReader() : m_decompressor(nullptr), m_index(0)
+{}
+
+
+LasReader::~LasReader()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_decompressor;
+#endif
+}
+
 
 void LasReader::addArgs(ProgramArgs& args)
 {
@@ -170,6 +185,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     ILeStream in(stream);
     try
     {
+        // This also reads the extended VLRs at the end of the data.
         in >> m_header;
     }
     catch (const LasHeader::error& e)
@@ -204,6 +220,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     m_streamIf.reset();
 }
+
 
 void LasReader::handleLaszip(int result)
 {
@@ -241,10 +258,11 @@ void LasReader::ready(PointTableRef table)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
-            LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
+            const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
-            m_decompressor.reset(new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_header.pointOffset()));
+            delete m_decompressor;
+            m_decompressor = new LazPerfVlrDecompressor(*stream,
+                vlr->data(), m_header.pointOffset());
             m_decompressorBuf.resize(m_decompressor->pointSize());
         }
 #endif
@@ -375,7 +393,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         "number of point records within the file.");
 
     // PDAL metadata VLR
-    LasVLR *vlr = m_header.findVlr("PDAL", 12);
+    const LasVLR *vlr = m_header.findVlr("PDAL", 12);
     if (vlr)
     {
         const char *pos = vlr->data();
@@ -393,13 +411,12 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         m.addWithType("pdal_pipeline", std::string(pos, size), "json",
             "PDAL Processing Pipeline");
     }
-
 }
 
 
 void LasReader::readExtraBytesVlr()
 {
-    LasVLR *vlr = m_header.findVlr(SPEC_USER_ID,
+    const LasVLR *vlr = m_header.findVlr(SPEC_USER_ID,
         EXTRA_BYTES_RECORD_ID);
     if (!vlr)
         return;
@@ -693,7 +710,9 @@ void LasReader::loadPointV10(PointRef& point, laszip_point& p)
     point.setField(Dimension::Id::NumberOfReturns, p.number_of_returns);
     point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
     point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
-    point.setField(Dimension::Id::Classification, p.classification);
+    uint8_t classification = p.classification | (p.synthetic_flag << 5) |
+        (p.keypoint_flag << 6) | (p.withheld_flag << 7);
+    point.setField(Dimension::Id::Classification, classification);
     point.setField(Dimension::Id::ScanAngleRank, p.scan_angle_rank);
     point.setField(Dimension::Id::UserData, p.user_data);
     point.setField(Dimension::Id::PointSourceId, p.point_source_ID);
@@ -781,6 +800,7 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 #ifdef PDAL_HAVE_LASZIP
 void LasReader::loadPointV14(PointRef& point, laszip_point& p)
 {
+    std::cerr << "Load point 1.4!\n";
     const LasHeader& h = m_header;
 
     double x = p.X * h.scaleX() + h.offsetX();

@@ -70,8 +70,10 @@ header_data
     standard BPF header.
 
 coord_id
-    The coordinate ID (UTM zone) of the data.  NOTE: Only the UTM coordinate
-    type is currently supported. [Default: 0, with coordinate type set to none]
+    The coordinate ID (UTM zone) of the data.  Southern zones take negative
+    values.  A value of 0 indicates cartesian instead of UTM coordinates.  A
+    value of 'auto' will attempt to set the UTM zone from a suitable spatial
+    reference, or set to 0 if no such SRS is set.  [Default: 0]
 
 scale_x, scale_y, scale_z
     Scale to be divided from the X, Y and Z nominal values, respectively, after

@@ -58,6 +58,9 @@ PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_reader_libname} PRIVATE
     ${INCLUDE_DIRS})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(io/PcdReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
 
 #
 # PCD Writer
@@ -69,6 +72,9 @@ PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_writer_libname} PRIVATE
     ${INCLUDE_DIRS})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(io/PcdWriter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
 
 #
 # PCLBlock Filter
@@ -100,26 +106,16 @@ PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${movingleastsquares_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+        set_source_files_properties(filters/MovingLeastSquaresFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    endif()
+
 
 PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
     FILES
         filters/GridProjectionFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${gridprojection_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(poisson_filter_libname filter poisson
-    FILES
-        filters/PoissonFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${poisson_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
-    FILES
-        filters/GreedyProjectionFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${greedyprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(icp_filter_libname filter icp

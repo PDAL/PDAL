@@ -85,7 +85,7 @@ std::string Script::getSRSWKT(mxArray* array, LogPtr log)
             size_t len = mxGetN(s);
             std::string data;
             data.resize(len+1);
-            int ret = mxGetString(s, (char*)data.data(), len+1);
+            int ret = mxGetString(s, const_cast<char*>(data.data()), len+1);
             output = std::string(data);
         }
     }
@@ -140,7 +140,7 @@ PointLayoutPtr Script::getStructLayout(mxArray* array, LogPtr log)
 }
 
 
-void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& indims, LogPtr log)
+void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension::IdList& indims, std::string& pdalargs, MetadataNode pdalmetadata, LogPtr log)
 {
     std::vector<mxArray*> arrays;
     std::vector<std::string> dimNames;
@@ -149,6 +149,25 @@ void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension:
     if (ml_id != mxSTRUCT_CLASS)
         throw pdal::pdal_error("Selected array must be a Matlab struct array!");
 
+    mxArray* metadata = mxGetField(array, 0, "metadata");
+    if (metadata)
+    {
+
+        mxArray* args = mxGetField(metadata, 0, "pdalargs");
+        if (args)
+        {
+            mxClassID mt = mxGetClassID(args);
+            if (mt == mxCHAR_CLASS)
+            {
+                size_t len = mxGetN(args);
+                std::string data;
+                data.resize(len+1);
+                int ret = mxGetString(args, const_cast<char*>(data.data()),
+                    len+1);
+                pdalargs = std::string(data);
+            }
+        }
+    }
     Dimension::IdList  dims;
     if (!indims.size())
         dims = view->dims();
@@ -194,9 +213,11 @@ void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension:
             p += view->dimSize(d);
         }
     }
+
+    // TODO: add back metadata
 }
 
-mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& indims, MetadataNode mdataNode, LogPtr log)
+mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& indims, const std::string& pdalargs, MetadataNode mdataNode,  LogPtr log)
 {
 
     std::vector<mxArray*> arrays;
@@ -261,6 +282,8 @@ mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& ind
     metadataDimNames.push_back("wkt");
     metadataDimNames.push_back("horizontal");
     metadataDimNames.push_back("vertical");
+    metadataDimNames.push_back("pdalargs");
+
 
     std::transform(metadataDimNames.begin(), metadataDimNames.end(), std::back_inserter(fieldNames), convert);
     mxArray* metadata = mxCreateStructArray(2, mdims, metadataDimNames.size(), fieldNames.data());
@@ -286,6 +309,9 @@ mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& ind
     mxArray* vertical = mxCreateString(vertical_s.c_str());
     mxSetField(metadata, 0, "vertical", vertical);
 
+    mxArray* pargs = mxCreateString(pdalargs.c_str());
+    mxSetField(metadata, 0, "pdalargs", pargs);
+
     fieldNames.clear();
     std::transform(dimNames.begin(), dimNames.end(), std::back_inserter(fieldNames), convert);
     mxArray* s = mxCreateStructArray(2, mdims, dimNames.size(), fieldNames.data());
@@ -297,6 +323,7 @@ mxArray* Script::setMatlabStruct(PointViewPtr view, const Dimension::IdList& ind
     }
 
     mxSetField(s, 0, "metadata", metadata);
+
 
 
     return s;

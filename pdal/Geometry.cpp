@@ -60,6 +60,27 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
 }
 
 
+Geometry::Geometry(const Geometry& input)
+    : m_srs(input.m_srs)
+    , m_geoserr(input.m_geoserr)
+{
+    assert(input.m_geom.get() != 0);
+    geos::GeometryDeleter geom_del(m_geoserr);
+    GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  input.m_geom.get()),
+        geom_del);
+    m_geom.swap(p);
+    assert(m_geom.get() != 0);
+    m_prepGeom = 0;
+    prepare();
+}
+
+
+Geometry::Geometry(Geometry&& input) :
+    m_geom(std::move(input.m_geom)), m_prepGeom(input.m_prepGeom),
+    m_srs(input.m_srs), m_geoserr(input.m_geoserr)
+{}
+
+
 Geometry::~Geometry()
 {
     m_geom.reset();
@@ -134,21 +155,6 @@ Geometry& Geometry::operator=(const Geometry& input)
         prepare();
     }
     return *this;
-}
-
-
-Geometry::Geometry(const Geometry& input)
-    : m_srs(input.m_srs)
-    , m_geoserr(input.m_geoserr)
-{
-    assert(input.m_geom.get() != 0);
-    geos::GeometryDeleter geom_del(m_geoserr);
-    GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  input.m_geom.get()),
-        geom_del);
-    m_geom.swap(p);
-    assert(m_geom.get() != 0);
-    m_prepGeom = 0;
-    prepare();
 }
 
 

@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.6
 
 ADD ./10-backtrace-guards.patch /10-backtrace-guards.patch
 
@@ -21,7 +21,6 @@ RUN \
         py-numpy-dev \
         jsoncpp-dev \
         hdf5-dev \
-        proj4-dev \
         sqlite-dev \
         postgresql-dev \
         curl-dev \
@@ -42,6 +41,7 @@ RUN \
         jsoncpp \
         hdf5 \
         proj4 \
+        proj4-dev \
         sqlite \
         postgresql \
         libcurl \

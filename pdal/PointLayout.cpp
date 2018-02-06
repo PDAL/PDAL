@@ -212,12 +212,6 @@ size_t PointLayout::pointSize() const
 }
 
 
-const Dimension::Detail* PointLayout::dimDetail(Dimension::Id id) const
-{
-    return &(m_detail[Utils::toNative(id)]);
-}
-
-
 // Update the point layout given dimension detail and the dimension's name.
 bool PointLayout::update(Dimension::Detail dd, const std::string& name)
 {

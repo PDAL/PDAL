@@ -15,6 +15,17 @@ foreach(infileName ${inFiles})
         "${CMAKE_BINARY_DIR}/${outfileName}")
 endforeach()
 
+add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
+add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
+target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
+    PRIVATE
+        ${ROOT_DIR}
+        ${PROJECT_BINARY_DIR}/include
+        ${PROJECT_BINARY_DIR}/test/unit
+        ${PDAL_INCLUDE_DIR}
+)
+PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
+
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test FILES EigenTest.cpp)
@@ -47,8 +58,17 @@ PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
-if (PDAL_HAVE_LAZPERF)
-    PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)
+if (PDAL_HAVE_LAZ_PERF)
+PDAL_ADD_TEST(pdal_lazperf_test FILES LazPerfTest.cpp)
+endif()
+if (PDAL_HAVE_ZLIB)
+PDAL_ADD_TEST(pdal_deflate_test FILES DeflateTest.cpp)
+endif()
+if (PDAL_HAVE_LZMA)
+PDAL_ADD_TEST(pdal_lzma_test FILES LzmaTest.cpp)
+endif()
+if (PDAL_HAVE_ZSTD)
+PDAL_ADD_TEST(pdal_zstd_test FILES ZstdTest.cpp)
 endif()
 
 #
@@ -97,6 +117,7 @@ PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_knn_test FILES filters/KNNFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
+PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test FILES
     filters/AdditionalMergeTest.cpp)
 target_include_directories(pdal_filters_additional_merge_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
@@ -113,6 +134,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
+PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 endif()

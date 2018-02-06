@@ -76,9 +76,13 @@ void NormalFilter::addDimensions(PointLayoutPtr layout)
 }
 
 // public method to access filter, used by GreedyProjection and Poisson filters
-void NormalFilter::doFilter(PointView& view)
+void NormalFilter::doFilter(PointView& view, int knn)
 {
-    m_knn = 8;
+    m_knn = knn;
+    ProgramArgs args;
+    addArgs(args);
+    // We're never parsing anything, so we'll just end up with default vals.
+    // This makes sure that the arg pointer (m_viewpointArg) is valid.
     filter(view);
 }
 

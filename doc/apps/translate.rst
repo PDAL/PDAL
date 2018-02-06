@@ -32,7 +32,7 @@ command will not actually run when this argument is given.
 The ``--json`` flag can use used to specify a PDAL pipeline from which
 filters will be extracted.  If a reader or writer exist in the pipeline,
 they will be removed and replaced with the input and output provided on
-the command lines.  If a reader/writer stage referenced tags in the
+the command line.  If a reader/writer stage references tags in the
 provided pipeline, the overriding files will assume those tags.  If the
 argument to the ``--json`` option references an existing file, it is assumed
 that the file contains the pipeline to be processed.  If the argument value

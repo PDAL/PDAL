@@ -32,13 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_features.hpp>
+
+#include <pdal/compression/LazPerfVlrCompression.hpp>
+#ifdef PDAL_HAVE_LAZPERF
+#include <laz-perf/factory.hpp>
+#include <laz-perf/io.hpp>
+#endif
+
 #include "LasWriter.hpp"
 
 #include <climits>
 #include <iostream>
 #include <vector>
 
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
@@ -66,9 +74,17 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None),
-    m_srsCnt(0)
+LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
+    m_compression(LasCompression::None), m_srsCnt(0)
 {}
+
+
+LasWriter::~LasWriter()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_compressor;
+#endif
+}
 
 
 void LasWriter::addArgs(ProgramArgs& args)
@@ -144,7 +160,6 @@ void LasWriter::initialize()
         throwError(err.what());
     }
     fillForwardList();
-    collectUserVLRs();
 }
 
 
@@ -199,7 +214,7 @@ void LasWriter::prepared(PointTableRef table)
 
 
 // Capture user-specified VLRs
-void LasWriter::collectUserVLRs()
+void LasWriter::addUserVlrs()
 {
 
     for (const auto& v : m_userVLRs)
@@ -225,7 +240,6 @@ void LasWriter::collectUserVLRs()
 
         std::vector<uint8_t> data = Utils::base64_decode(b64data);
         addVlr(userId, recordId, description, data);
-
     }
 }
 
@@ -280,10 +294,15 @@ void LasWriter::fillForwardList()
 void LasWriter::readyTable(PointTableRef table)
 {
     m_forwardMetadata = table.privateMetadata("lasforward");
-    MetadataNode m = table.metadata();
     if(m_writePDALMetadata)
-        setPDALVLRs(m);
-    setExtraBytesVlr();
+    {
+        MetadataNode m = table.metadata();
+        addMetadataVlr(m);
+        addPipelineVlr();
+    }
+    addExtraBytesVlr();
+    addUserVlrs();
+    addForwardVlrs();
 }
 
 
@@ -311,8 +330,7 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     fillHeader();
 
     // Spatial reference can potentially change for multiple output files.
-    setVlrsFromSpatialRef();
-    setVlrsFromMetadata(m_forwardMetadata);
+    addSpatialRefVlrs();
 
     m_summaryData.reset(new LasSummaryData());
     m_ostream = outStream;
@@ -378,7 +396,8 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
     return node.find(pred);
 }
 
-void LasWriter::setPDALVLRs(MetadataNode& forward)
+
+void LasWriter::addMetadataVlr(MetadataNode& forward)
 {
     std::string json = Utils::toJSON(forward);
     if ((json.size() > LasVLR::MAX_DATA_SIZE) &&
@@ -391,10 +410,14 @@ void LasWriter::setPDALVLRs(MetadataNode& forward)
         std::vector<uint8_t> data(json.begin(), json.end());
         addVlr(PDAL_USER_ID, PDAL_METADATA_RECORD_ID, "PDAL metadata", data);
     }
+}
 
+void LasWriter::addPipelineVlr()
+{
+    // Write a VLR with the PDAL pipeline.
     std::ostringstream ostr;
     PipelineWriter::writePipeline(this, ostr);
-    json = ostr.str();
+    std::string json = ostr.str();
     if (json.size() > LasVLR::MAX_DATA_SIZE &&
         !m_lasHeader.versionAtLeast(1, 4))
     {
@@ -408,8 +431,8 @@ void LasWriter::setPDALVLRs(MetadataNode& forward)
 }
 
 
-/// Set VLRs from metadata for forwarded info.
-void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
+/// Add VLRs forwarded from the input.
+void LasWriter::addForwardVlrs()
 {
     std::vector<uint8_t> data;
 
@@ -419,7 +442,7 @@ void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
     auto pred = [](MetadataNode n)
         { return Utils::startsWith(n.name(), "vlr_"); };
 
-    MetadataNodeList nodes = forward.findChildren(pred);
+    MetadataNodeList nodes = m_forwardMetadata.findChildren(pred);
     for (auto& n : nodes)
     {
         const MetadataNode& userIdNode = n.findChild("user_id");
@@ -435,7 +458,7 @@ void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 
 /// Set VLRs from the active spatial reference.
 /// \param  srs - Active spatial reference.
-void LasWriter::setVlrsFromSpatialRef()
+void LasWriter::addSpatialRefVlrs()
 {
     // Delete any existing spatial ref VLRs.  This can be an issue if we're
     // using the reader to write multiple output files via a filename template.
@@ -500,7 +523,7 @@ bool LasWriter::addWktVlr()
 }
 
 
-void LasWriter::setExtraBytesVlr()
+void LasWriter::addExtraBytesVlr()
 {
     if (m_extraDims.empty())
         return;
@@ -641,6 +664,7 @@ void LasWriter::fillHeader()
 
 void LasWriter::readyCompression()
 {
+    deleteVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
     if (m_compression == LasCompression::LasZip)
         readyLasZipCompression();
     else if (m_compression == LasCompression::LazPerf)
@@ -697,8 +721,9 @@ void LasWriter::readyLazPerfCompression()
     zipvlr.extract((char *)data.data());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
 
-    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema,
-        zipvlr.chunk_size));
+    delete m_compressor;
+    m_compressor = new LazPerfVlrCompressor(*m_ostream, schema,
+        zipvlr.chunk_size);
 #endif
 }
 

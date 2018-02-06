@@ -34,11 +34,10 @@
 
 #include "BpfCompressor.hpp"
 
-#include <pdal/pdal_internal.hpp>
-
 namespace pdal
 {
 
+#ifdef PDAL_HAVE_ZLIB
 void BpfCompressor::startBlock()
 {
     // Initialize the stream.
@@ -129,4 +128,16 @@ void BpfCompressor::finish()
     blockEnd.rewind();
 }
 
+#else
+
+void BpfCompressor::startBlock()
+{}
+void BpfCompressor::compress()
+{}
+void BpfCompressor::finish()
+{}
+
+#endif // PDAL_HAVE_ZLIB
+
 } // namespace pdal
+

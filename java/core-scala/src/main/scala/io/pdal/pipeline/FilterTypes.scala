@@ -25,6 +25,7 @@ object FilterTypes {
   case object colorinterp extends FilterType
   case object colorization extends FilterType
   case object computerange extends FilterType
+  case object cpd extends FilterType
   case object crop extends FilterType
   case object decimation extends FilterType
   case object divider extends FilterType
@@ -35,12 +36,15 @@ object FilterTypes {
   case object gridprojection extends FilterType
   case object groupby extends FilterType
   case object hag extends FilterType
+  case object head extends FilterType
   case object hexbin extends FilterType
+  case object icp extends FilterType
   case object iqr extends FilterType
   case object kdistance extends FilterType
   case object locate extends FilterType
   case object lof extends FilterType
   case object mad extends FilterType
+  case object matlab extends FilterType
   case object merge extends FilterType
   case object mongus extends FilterType
   case object mortonorder extends FilterType
@@ -51,8 +55,7 @@ object FilterTypes {
   case object pclblock extends FilterType
   case object pmf extends FilterType
   case object poisson extends FilterType
-  case object predicate extends FilterType
-  case object programmable extends FilterType
+  case object python extends FilterType
   case object radialdensity extends FilterType
   case object range extends FilterType
   case object randomize extends FilterType
@@ -62,15 +65,19 @@ object FilterTypes {
   case object sort extends FilterType
   case object splitter extends FilterType
   case object stats extends FilterType
+  case object tail extends FilterType
   case object transformation extends FilterType
+  case object voxelcenternearestneighbor extends FilterType
+  case object voxelcentroidnearestneighbor extends FilterType
   case object voxelgrid extends FilterType
 
   lazy val all = List(
-    approximatecoplanar, chipper, cluster, colorinterp, colorization, computerange,
-    crop, decimation, divider, eigenvalues, estimaterank, ferry, greedyprojection, gridprojection, groupby,
-    hag, hexbin, iqr, kdistance, locate, lof, mad, merge, mongus, mortonorder, movingleastsquares, normal, outlier,
-    overlay, pclblock, pmf, poisson, predicate, programmable, radialdensity, randomize, range, reprojection,
-    sample, smrf, sort, splitter, stats, transformation, voxelgrid
+    approximatecoplanar, chipper, cluster, colorinterp, colorization, computerange, crop,
+    cpd, decimation, divider, eigenvalues, estimaterank, ferry, greedyprojection, gridprojection, groupby,
+    hag, head, hexbin, icp, iqr, kdistance, locate, lof, mad, matlab, merge, mongus, mortonorder, movingleastsquares,
+    normal, outlier, overlay, pclblock, pmf, poisson, python, radialdensity, randomize, range, reprojection,
+    sample, smrf, sort, splitter, stats, transformation, voxelcenternearestneighbor, voxelcentroidnearestneighbor,
+    voxelgrid
   )
 
   def fromName(name: String): FilterType =

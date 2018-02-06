@@ -76,13 +76,6 @@ Options toOptions(const Json::Value& json)
     return options;
 }
 
-std::string dense(const Json::Value& json)
-{
-    Json::StreamWriterBuilder builder;
-    builder.settings_["indentation"] = "";
-    return Json::writeString(builder, json);
-}
-
 }
 
 class GreyhoundReaderTest : public testing::Test

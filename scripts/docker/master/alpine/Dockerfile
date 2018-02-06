@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.6
 
 RUN \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
@@ -19,7 +19,6 @@ RUN \
         py-numpy-dev \
         jsoncpp-dev \
         hdf5-dev \
-        proj4-dev \
         cpd-dev \
         fgt-dev \
         sqlite-dev \
@@ -28,6 +27,12 @@ RUN \
         linux-headers \
         laszip-dev \
         libspatialite-dev \
+        cython-dev \
+        xz-dev \
+        zstd-dev \
+        py-packaging \
+        xz-dev \
+        zstd-dev \
     ; \
     apk add --no-cache \
         hexer \
@@ -42,13 +47,18 @@ RUN \
         jsoncpp \
         hdf5 \
         proj4 \
+        proj4-dev \
         cpd \
+        zstd \
+        xz \
         fgt \
         sqlite \
         postgresql \
         libcurl \
         laszip \
         libspatialite \
+        py-setuptools \
+        xz-libs \
     ;\
     mkdir /vdatum; \
     cd /vdatum; \
@@ -88,6 +98,8 @@ RUN \
     ; \
     make -j2; \
     make install; \
+    cd ../python; \
+    python setup.py install; \
     cd /; \
     rm -rf /PDAL-master; \
     apk del .build-deps

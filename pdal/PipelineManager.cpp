@@ -38,9 +38,7 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#if defined(PDAL_COMPILER_CLANG) || defined(PDAL_COMPILER_GCC)
-#  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#endif
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
 namespace pdal
 {
@@ -427,7 +425,13 @@ void PipelineManager::replace(Stage *sOld, Stage *sNew)
     for (Stage * & s : m_stages)
     {
         if (s == sOld)
+        {
             s = sNew;
+            // Copy inputs from the old stage to new one.
+            for (Stage *ss : sOld->getInputs())
+                sNew->setInput(*ss);
+        }
+        // Reset the inputs that refer to the replaced stage.
         for (Stage * & ss : s->getInputs())
             if (ss == sOld)
                 ss = sNew;

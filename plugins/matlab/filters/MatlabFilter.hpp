@@ -70,7 +70,7 @@ private:
     MatlabFilter(const MatlabFilter&); // not implemented
 
     MetadataNode m_tableMetadata;
-    Json::Value m_pdalargs;
+    std::string m_pdalargs;
     std::string m_structName;
 
 };

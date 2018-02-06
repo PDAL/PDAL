@@ -146,6 +146,18 @@ bool BpfHeader::readV3(ILeStream& stream)
     return (bool)stream;
 }
 
+bool BpfHeader::trySetSpatialReference(const SpatialReference& srs)
+{
+    m_log->get(LogLevel::Debug) << "Attempting to set coordinate system UTM zone \n";
+
+    int zone = srs.getUTMZone();
+    if (zone)
+    {
+        m_coordId = zone;
+        return true;
+    }
+    return false;
+}
 
 bool BpfHeader::readV1(ILeStream& stream)
 {

@@ -91,7 +91,14 @@ std::istream& operator>>(std::istream& in, AssignRange& r)
     std::string s;
 
     std::getline(in, s);
-    r.parse(s);
+    try
+    {
+        r.parse(s);
+    }
+    catch (DimRange::error)
+    {
+        in.setstate(std::ios_base::failbit);
+    }
     return in;
 }
 

@@ -767,6 +767,12 @@ namespace Utils
     inline std::string toString(double from)
     {
         std::ostringstream oss;
+        // Standardize nan/inf output to the JAVA property names because
+        // when we convert to a string, we usually convert to JSON.
+        if (std::isnan(from))
+            return "NaN";
+        if (std::isinf(from))
+            return (from < 0 ? "-Infinity" : "Infinity");
         oss << std::setprecision(10) << from;
         return oss.str();
     }
@@ -879,11 +885,15 @@ namespace Utils
     bool fromString(const std::string& from, T* & to)
     {
         void *v;
-        std::istringstream iss(from);
-
-        iss >> v;
+        // Uses sscanf instead of operator>>(istream, void*&) as a workaround
+        // for https://bugs.llvm.org/show_bug.cgi?id=19740, which presents with
+        // clang-800.0.42.1 for x86_64-apple-darwin15.6.0.
+        int result = sscanf(from.c_str(), "%p", &v);
+        if (result != 1) {
+            return false;
+        }
         to = reinterpret_cast<T*>(v);
-        return !iss.fail();
+        return true;
     }
 
 

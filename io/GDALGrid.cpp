@@ -88,7 +88,7 @@ void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
 
     // Grid (raster) works upside down from standard X/Y.
     yshift = height - (m_height + yshift);
-    auto moveVec = [=](DataPtr& src, double initializer = 0)
+    auto moveVec = [=](DataPtr& src, double initializer)
     {
         // Compute an index in the destination given source index coords.
         auto dstIndex = [width, xshift, yshift](size_t i, size_t j)
@@ -108,20 +108,20 @@ void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
         src = std::move(dst);
     };
 
-    moveVec(m_count);
+    moveVec(m_count, 0);
     if (m_outputTypes & statMin)
         moveVec(m_min, std::numeric_limits<double>::max());
     if (m_outputTypes & statMax)
         moveVec(m_max, std::numeric_limits<double>::lowest());
     if (m_outputTypes & statIdw)
     {
-        moveVec(m_idw);
-        moveVec(m_idwDist);
+        moveVec(m_idw, 0);
+        moveVec(m_idwDist, 0);
     }
     if ((m_outputTypes & statMean) || (m_outputTypes & statStdDev))
-        moveVec(m_mean);
+        moveVec(m_mean, 0);
     if (m_outputTypes & statStdDev)
-        moveVec(m_stdDev);
+        moveVec(m_stdDev, 0);
     m_width = width;
     m_height = height;
 }
@@ -421,7 +421,7 @@ void GDALGrid::windowFill(size_t dstI, size_t dstJ)
                 continue;
             // The ternaries just avoid underflow UB.  We're just trying to
             // find the distance from j to dstJ or i to dstI.
-            double distance = std::max(j > dstJ ? j - dstJ : dstJ - j,
+            double distance = (double)std::max(j > dstJ ? j - dstJ : dstJ - j,
                 i > dstI ? i - dstI : dstI - i);
             windowFillCell(srcIdx, dstIdx, distance);
             distSum += (1 / distance);

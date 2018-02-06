@@ -228,14 +228,12 @@ public:
     /**
       Push the stage's leader into the log.
     */
-    void pushLogLeader() const
-        { m_log->pushLeader(m_logLeader); }
+    void startLogging() const;
 
     /**
         Pop the stage's leader from the log.
     */
-    void popLogLeader() const
-        { m_log->popLeader(); }
+    void stopLogging() const;
 
     /**
       Determine whether the stage is in debug mode or not.
@@ -243,7 +241,7 @@ public:
       \return  The stage's debug state.
     */
     bool isDebug() const
-        { return m_debug; }
+        { return m_log && m_log->getLevel() > LogLevel::Debug; }
 
     /**
       Return the name of a stage.
@@ -346,7 +344,6 @@ protected:
     }
 
 private:
-    bool m_debug;
     uint32_t m_verbose;
     std::string m_logname;
     std::vector<Stage *> m_inputs;
@@ -361,6 +358,9 @@ private:
     std::string m_userDataJSON;
     point_count_t m_pointCount;
     point_count_t m_faceCount;
+    // This is never used, but we want something to bind to the argument
+    // we stick in ProgramArgs so that it shows up in help and an options list.
+    std::string m_optionFile;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

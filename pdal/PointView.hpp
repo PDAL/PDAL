@@ -49,9 +49,7 @@
 #include <vector>
 #include <deque>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
-#endif
+#pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
 
 namespace pdal
 {
@@ -212,7 +210,7 @@ public:
          { return layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return layout()->dimTypes(); }
-    PointLayoutPtr layout() const
+    inline PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
     void setSpatialReference(const SpatialReference& spatialRef)
         { m_spatialReference = spatialRef; }

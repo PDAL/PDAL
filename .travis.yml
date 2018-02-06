@@ -6,14 +6,14 @@ sudo: required
 services: docker
 
 before_install:
-  - docker pull alpine:edge
+  - docker pull alpine:3.7
 
 script:
-  - docker run -v $TRAVIS_BUILD_DIR:/pdal -t alpine:edge /bin/sh -c "/pdal/scripts/ci/script.sh"
+  - docker run -v $TRAVIS_BUILD_DIR:/pdal -t alpine:3.7 /bin/sh -c "/pdal/scripts/ci/script.sh"
 
 after_success:
   - echo "secure travis:" "$TRAVIS_SECURE_ENV_VARS"
-  - sh -c 'if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "1.5-maintenance"; then echo "publish website"; ./scripts/ci/build_docs.sh; ./scripts/ci/add_deploy_key.sh; ./scripts/ci/deploy_website.sh $TRAVIS_BUILD_DIR/doc/build /tmp; fi'
+  - sh -c 'if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "1.6-maintenance"; then echo "publish website"; ./scripts/ci/build_docs.sh; ./scripts/ci/add_deploy_key.sh; ./scripts/ci/deploy_website.sh $TRAVIS_BUILD_DIR/doc/build /tmp; fi'
 
 notifications:
   on_success: always

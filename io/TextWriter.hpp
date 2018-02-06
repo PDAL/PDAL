@@ -34,15 +34,8 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/plugin.hpp>
-
-#include <memory>
-#include <vector>
-#include <string>
 
 extern "C" int32_t TextWriter_ExitFunc();
 extern "C" PF_ExitFunc TextWriter_InitPlugin();

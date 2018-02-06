@@ -163,6 +163,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "writers.sqlite", { "sqlite", "gpkg" } },
         { "writers.gdal", { "tif", "tiff", "vrt" } },
         { "writers.ogr", { "shp", "geojson" } },
+        { "writers.greyhound", { "greyhound" } },
     };
 
     return exts[driver];
@@ -219,8 +220,12 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
     std::string ext;
 
+    static const std::string ghPrefix("greyhound://");
+
     if (filename == "STDOUT")
         ext = ".txt";
+    else if (Utils::iequals(filename.substr(0, ghPrefix.size()), ghPrefix))
+        ext = ".greyhound";      // Make it look like an extension.
     else
         ext = Utils::tolower(FileUtils::extension(filename));
 
@@ -232,6 +237,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "las", "writers.las" },
         { "laz", "writers.las" },
         { "gpkg", "writers.sqlite" },
+        { "greyhound", "writers.greyhound" },
         { "mat", "writers.matlab" },
         { "ntf", "writers.nitf" },
         { "pcd", "writers.pcd" },

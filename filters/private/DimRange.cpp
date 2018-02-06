@@ -116,7 +116,8 @@ std::string::size_type DimRange::subParse(const std::string& r)
 bool DimRange::valuePasses(double v) const
 {
     // Determine if a point passes a range.
-    bool fail = ((m_inclusive_lower_bound && v < m_lower_bound) ||
+    bool fail = std::isnan(v) ||
+        ((m_inclusive_lower_bound && v < m_lower_bound) ||
         (!m_inclusive_lower_bound && v <= m_lower_bound) ||
         (m_inclusive_upper_bound && v > m_upper_bound) ||
         (!m_inclusive_upper_bound && v >= m_upper_bound));

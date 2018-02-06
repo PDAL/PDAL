@@ -49,7 +49,7 @@ static PluginInfo const s_info = PluginInfo(
         "Read ply files.",
         "http://pdal.io/stages/reader.ply.html");
 
-CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info);
+CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info)
 
 
 PlyReader::PlyReader() : m_vertexElt(nullptr)
@@ -291,6 +291,8 @@ std::string PlyReader::getName() const
 void PlyReader::initialize()
 {
     m_stream = Utils::openFile(m_filename, true);
+    if (!m_stream)
+        throwError("Couldn't open '" + m_filename + "'.");
     extractHeader();
     Utils::closeFile(m_stream);
     m_stream = nullptr;
@@ -299,8 +301,6 @@ void PlyReader::initialize()
 
 void PlyReader::addDimensions(PointLayoutPtr layout)
 {
-    SimpleProperty *prop;
-
     // Override XYZ to doubles.
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
@@ -439,10 +439,9 @@ bool PlyReader::processOne(PointRef& point)
 // We're just reading the vertex element here.
 point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
 {
-    point_count_t cnt;
+    point_count_t cnt(0);
 
     PointRef point(view->point(0));
-    cnt = 0;
     for (PointId idx = 0; idx < m_vertexElt->m_count && idx < num; ++idx)
     {
         point.setPointId(idx);

@@ -55,12 +55,10 @@ const size_t LasHeader::RETURN_COUNT;
 
 std::string GetDefaultSoftwareId()
 {
-    std::string ver(PDAL_VERSION_STRING);
+    std::string ver(Config::versionString());
     std::stringstream oss;
     std::ostringstream revs;
-    revs << GetSHA1();
-
-
+    revs << Config::sha1();
     oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";
     return oss.str();
 }
@@ -154,10 +152,10 @@ bool LasHeader::valid() const
 
 void LasHeader::get(ILeStream& in, Uuid& uuid)
 {
-    char buf[uuid.size];
+    std::vector<char> buf(uuid.size);
 
-    in.get(buf, uuid.size);
-    uuid.unpack(buf);
+    in.get(buf.data(), uuid.size);
+    uuid.unpack(buf.data());
 }
 
 
@@ -252,12 +250,12 @@ void LasHeader::removeVLR(const std::string& userId)
 }
 
 
-LasVLR *LasHeader::findVlr(const std::string& userId,
-    uint16_t recordId)
+const LasVLR *LasHeader::findVlr(const std::string& userId,
+    uint16_t recordId) const
 {
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
     {
-        LasVLR& vlr = *vi;
+        const LasVLR& vlr = *vi;
         if (vlr.matches(userId, recordId))
             return &vlr;
     }
@@ -267,7 +265,7 @@ LasVLR *LasHeader::findVlr(const std::string& userId,
 
 void LasHeader::setSrsFromWkt()
 {
-    LasVLR *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
+    const LasVLR *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
     if (!vlr)
         vlr = findVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
     if (!vlr || vlr->dataLen() == 0)
@@ -287,16 +285,12 @@ void LasHeader::setSrsFromWkt()
 
 void LasHeader::setSrsFromGeotiff()
 {
-    LasVLR *vlr;
-    uint8_t *data;
-    size_t dataLen;
-
-    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    const LasVLR *vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
     // We must have a directory entry.
     if (!vlr)
         return;
-    data = (uint8_t *)vlr->data();
-    dataLen = vlr->dataLen();
+    auto data = reinterpret_cast<const uint8_t *>(vlr->data());
+    size_t dataLen = vlr->dataLen();
 
     std::vector<uint8_t> directoryRec(data, data + dataLen);
 
@@ -305,7 +299,7 @@ void LasHeader::setSrsFromGeotiff()
     dataLen = 0;
     if (vlr && !vlr->isEmpty())
     {
-        data = (uint8_t *)vlr->data();
+        data = reinterpret_cast<const uint8_t *>(vlr->data());
         dataLen = vlr->dataLen();
     }
     std::vector<uint8_t> doublesRec(data, data + dataLen);
@@ -315,7 +309,7 @@ void LasHeader::setSrsFromGeotiff()
     dataLen = 0;
     if (vlr && !vlr->isEmpty())
     {
-        data = (uint8_t *)vlr->data();
+        data = reinterpret_cast<const uint8_t *>(vlr->data());
         dataLen = vlr->dataLen();
     }
     std::vector<uint8_t> asciiRec(data, data + dataLen);

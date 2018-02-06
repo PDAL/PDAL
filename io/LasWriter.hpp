@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <pdal/Compression.hpp>
-#include <pdal/FlexWriter.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/plugin.hpp>
+
+#include <pdal/FlexWriter.hpp>
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
@@ -61,6 +62,7 @@ class LeInserter;
 class LasTester;
 class NitfWriter;
 class GeotiffSupport;
+class LazPerfVlrCompressor;
 
 struct VlrOptionInfo
 {
@@ -81,6 +83,7 @@ public:
     std::string getName() const;
 
     LasWriter();
+    ~LasWriter();
 
 protected:
     void prepOutput(std::ostream *out, const SpatialReference& srs);
@@ -90,7 +93,7 @@ private:
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
-    std::unique_ptr<LazPerfVlrCompressor> m_compressor;
+    LazPerfVlrCompressor *m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;
@@ -147,7 +150,7 @@ private:
 
     void handleLaszip(int result);
     void fillForwardList();
-    void collectUserVLRs();
+    void addUserVlrs();
     template <typename T>
     void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);
@@ -158,12 +161,13 @@ private:
         std::vector<char>& buf);
     bool writeLasZipBuf(PointRef& point);
     void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
-    void setVlrsFromMetadata(MetadataNode& forward);
-    void setPDALVLRs(MetadataNode& m);
+    void addForwardVlrs();
+    void addMetadataVlr(MetadataNode& forward);
+    void addPipelineVlr();
+    void addExtraBytesVlr();
+    void addSpatialRefVlrs();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
-    void setExtraBytesVlr();
-    void setVlrsFromSpatialRef();
     void readyCompression();
     void readyLasZipCompression();
     void readyLazPerfCompression();
