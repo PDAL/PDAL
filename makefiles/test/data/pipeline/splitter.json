@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.splitter",
+      "length":100
+    },
+    "/home/msr/pdal/test/temp/tiled.las"
+  ]
+}

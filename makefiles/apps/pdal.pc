@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=/usr/local/bin
+libdir=/usr/local/
+includedir=/usr/local/include
+
+Name: PDAL
+Description: Point Data Abstraction Library
+Requires:   gdal libxml-2.0 geos
+Version: 1.4.0
+Libs: -L${libdir} -lpdalcpp
+Cflags: -I${includedir}/pdal  
+

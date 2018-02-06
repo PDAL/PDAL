@@ -1,0 +1,9 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.stats"
+    },
+    "/home/msr/pdal/test/temp/pdal-stats.las"
+  ]
+}

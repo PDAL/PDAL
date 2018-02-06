@@ -63,14 +63,14 @@ void AssignRange::parse(const std::string& r)
     char *end;
 
     pos = subParse(r);
-    count = Utils::extractSpaces(r, pos);
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
     pos += count;
 
     if (r[pos] != '=')
         throw error("Missing '=' assignment separator.");
     pos++;
 
-    count = Utils::extractSpaces(r, pos);
+    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
     pos += count;
 
     // Extract value
@@ -90,14 +90,7 @@ std::istream& operator>>(std::istream& in, AssignRange& r)
     std::string s;
 
     std::getline(in, s);
-    try
-    {
-        r.parse(s);
-    }
-    catch (DimRange::error)
-    {
-        in.setstate(std::ios_base::failbit);
-    }
+    r.parse(s);
     return in;
 }
 
@@ -133,7 +126,7 @@ void AssignFilter::prepared(PointTableRef table)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'assignment' option: '" +
+            throwError("Invalid dimension name in 'values' option: '" +
                 r.m_name + "'.");
     }
 }

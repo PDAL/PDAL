@@ -1,0 +1,12 @@
+{
+  "pipeline": [
+    {
+      "filename": "/home/msr/pdal/test/data/nitf/autzen-utm10.ntf",
+      "spatialreference": "EPSG:32610"
+    },
+    {
+      "type": "filters.chipper",
+      "capacity": 15
+    }
+  ]
+}

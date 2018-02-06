@@ -1,0 +1,15 @@
+{
+  "pipeline": [
+    {
+        "filename": "/home/msr/pdal/test/data/las/1.2-with-color.las",
+        "spatialreference": "EPSG:2027"
+    },
+    {
+        "filename": "/home/msr/pdal/test/data/las/1.2-with-color.las",
+        "spatialreference": "EPSG:2028"
+    },
+    {
+      "type": "filters.merge"
+    }
+  ]
+}

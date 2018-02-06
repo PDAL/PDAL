@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "/home/msr/pdal/test/data/autzen/autzen.las",
+    {
+      "type":"filters.colorization",
+      "dimensions":"Red, Green, Blue::256",
+      "raster":"/home/msr/pdal/test/data/autzen/autzen.jpg"
+    },
+    "/home/msr/pdal/test/temp/colorized.las"
+  ]
+}
