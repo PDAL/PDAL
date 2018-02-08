@@ -55,6 +55,7 @@
 #include <filters/HAGFilter.hpp>
 #include <filters/HeadFilter.hpp>
 #include <filters/IQRFilter.hpp>
+#include <filters/KNNAssignFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
 #include <filters/LocateFilter.hpp>
 #include <filters/LOFFilter.hpp>
@@ -291,6 +292,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(HeadFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
     PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
+    PluginManager::initializePlugin(KNNAssignFilter_InitPlugin);
     PluginManager::initializePlugin(LocateFilter_InitPlugin);
     PluginManager::initializePlugin(LOFFilter_InitPlugin);
     PluginManager::initializePlugin(MADFilter_InitPlugin);

@@ -79,8 +79,9 @@ TEST(KNNAssignFilterTest, singleRange)
 
         Stage& f = *(factory.createStage("filters.knnassign"));
         f.setInput(r);
+
         f.setOptions(fo);
- 
+
         PointTable table;
         f.prepare(table);
         PointViewSet viewSet = f.execute(table);
@@ -132,7 +133,7 @@ TEST(KNNAssignFilterTest, multipleRange)
         Stage& f = *(factory.createStage("filters.knnassign"));
         f.setInput(r);
         f.setOptions(fo);
- 
+
         PointTable table;
         f.prepare(table);
         PointViewSet viewSet = f.execute(table);
@@ -172,7 +173,7 @@ TEST(KNNAssignFilterTest, candidate)
     Stage& rC = *(factory.createStage("readers.las"));
     rC.setOptions(rClassifications);
     stats::Summary::EnumMap OrigClassifications = GetClassifications(rC, &count);
-    
+
     Options ro;
     ro.add("filename", Support::datapath("las/sample_nc.las"));
 
@@ -190,7 +191,7 @@ TEST(KNNAssignFilterTest, candidate)
         Stage& f = *(factory.createStage("filters.knnassign"));
         f.setInput(r);
         f.setOptions(fo);
- 
+
         PointTable table;
         f.prepare(table);
         PointViewSet viewSet = f.execute(table);
@@ -208,7 +209,7 @@ TEST(KNNAssignFilterTest, candidate)
             {
                 EXPECT_TRUE(NewClassifications[p.first] == 12441 && OrigClassifications[p.first] == 12525);
             }
-            //std::cout << "  OrigClassifications["<< p.first << "] = " << OrigClassifications[p.first] << 
+            //std::cout << "  OrigClassifications["<< p.first << "] = " << OrigClassifications[p.first] <<
             //" --> " << "NewClassifications[" << p.first << "] = " << NewClassifications[p.first] << std::endl;
         }
     }
