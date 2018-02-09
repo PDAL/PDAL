@@ -16,6 +16,7 @@ import os
 import platform
 import sys
 import numpy
+from Cython.Build import cythonize
 
 USE_CYTHON = True
 try:
@@ -189,7 +190,6 @@ setup_args = dict(
         'Topic :: Scientific/Engineering :: GIS',
     ],
     cmdclass           = {},
-    install_requires   = ['numpy', 'packaging'],
 )
 setup(ext_modules=extensions, **setup_args)
 
