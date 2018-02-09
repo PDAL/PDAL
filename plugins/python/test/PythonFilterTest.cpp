@@ -40,7 +40,6 @@
 #include <filters/StatsFilter.hpp>
 
 #include "../plang/Invocation.hpp"
-#include <pdal/PyArray.hpp>
 #include "../plang/Environment.hpp"
 
 #include <pdal/StageWrapper.hpp>
@@ -986,17 +985,6 @@ void verifyTestView(const PointView& view, point_count_t cnt = 17)
         EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
             (std::numeric_limits<double>::min)()));
     }
-}
-
-TEST(PLangTest, PLangTest_array)
-{
-    PointTable table;
-    PointViewPtr view = makeTestView(table, 40);
-
-    python::Array array;
-    array.update(view);
-    verifyTestView(*view.get(), 4);
-
 }
 
 
