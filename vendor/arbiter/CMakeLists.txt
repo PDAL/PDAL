@@ -13,7 +13,7 @@ endif()
 
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
 target_include_directories(${PDAL_ARBITER_LIB_NAME} PRIVATE
-    ${PDAL_VENDOR_DIR}/jsoncpp/dist)
+    ${PDAL_JSONCPP_INCLUDE_DIR})
 target_link_libraries(${PDAL_ARBITER_LIB_NAME})
 #
 # Arbiter is built static but is included in a shared lib.
