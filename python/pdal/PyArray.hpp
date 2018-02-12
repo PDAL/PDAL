@@ -46,6 +46,7 @@
 #undef tolower
 #undef isspace
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
 // forward declare PyObject so we don't need the python headers everywhere
