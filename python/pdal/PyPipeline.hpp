@@ -45,7 +45,7 @@
 #undef tolower
 #undef isspace
 
-namespeace pdal
+namespace pdal
 {
 namespace python
 {

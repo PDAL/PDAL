@@ -41,6 +41,7 @@
 #include <dlfcn.h>
 #endif
 
+#include <Python.h>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
@@ -95,7 +96,7 @@ bool Pipeline::validate()
 
 std::vector<Array *> Pipeline::getArrays() const
 {
-    std::vector<PArray> output;
+    std::vector<Array *> output;
 
     if (!m_executor.executed())
         throw python_error("call execute() before fetching arrays");
