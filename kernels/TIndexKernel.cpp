@@ -506,11 +506,14 @@ bool TIndexKernel::slowBoundary(Stage& hexer, FileInfo& fileInfo)
     hexer.prepare(table);
     PointViewSet set = hexer.execute(table);
 
-    MetadataNode m = table.metadata();
-    m = m.findChild("filters.hexbin:error");
-    if (m.valid())
+    MetadataNode root = table.metadata();
+
+    // If we had an error set, bail out
+    MetadataNode e = root.findChild("filters.hexbin:error");
+    if (e.valid())
         return false;
-    m = m.findChild("filters.hexbin:boundary");
+
+    MetadataNode m = root.findChild("filters.hexbin:boundary");
     fileInfo.m_boundary = m.value();
 
     PointViewPtr v = *set.begin();
@@ -695,6 +698,12 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
         throw pdal_error("Unable to import target SRS.");
 
     Geometry g;
+    if (fileInfo.m_boundary.empty())
+    {
+        oss << "Empty boundary for file " <<
+            fileInfo.m_filename ;
+        throw pdal_error(oss.str());
+    }
     try
     {
        g = prepareGeometry(fileInfo.m_boundary, srcSrs, tgtSrs);
