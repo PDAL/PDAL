@@ -59,10 +59,10 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
-    virtual bool processOne(PointRef& point, PointRef& temp, KD3Index &kdi);
+    bool doOne(PointRef& point, PointRef& temp, KD3Index &kdi);
     virtual void filter(PointView& view);
     virtual void initialize();
-    void processOneNoDomain(PointRef &point, PointRef& temp, KD3Index &kdi);
+    void doOneNoDomain(PointRef &point, PointRef& temp, KD3Index &kdi);
     PointViewPtr loadSet(const std::string &candFileName, PointTable &table);
     KNNAssignFilter& operator=(const KNNAssignFilter&) = delete;
     KNNAssignFilter(const KNNAssignFilter&) = delete;

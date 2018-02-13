@@ -115,7 +115,7 @@ std::ostream& operator<<(std::ostream& out, const Dimension::Id& r)
     return out;
 }
 
-void KNNAssignFilter::processOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)
+void KNNAssignFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)
 {
     std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
     double thresh = iSrc.size()/2.0;
@@ -145,17 +145,17 @@ void KNNAssignFilter::processOneNoDomain(PointRef &point, PointRef &temp, KD3Ind
     }
 }
 
-bool KNNAssignFilter::processOne(PointRef& point, PointRef &temp, KD3Index &kdi)
+bool KNNAssignFilter::doOne(PointRef& point, PointRef &temp, KD3Index &kdi)
 {   // update point.  kdi and temp both reference the NN point cloud
 
     if (m_domain.empty())  // No domain, process all points
-        processOneNoDomain(point, temp, kdi);
+        doOneNoDomain(point, temp, kdi);
         
     for (DimRange& r : m_domain)
     {   // process only points that satisfy a domain condition
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
         {
-            processOneNoDomain(point, temp, kdi);
+            doOneNoDomain(point, temp, kdi);
             break;
         }
     }
@@ -185,7 +185,7 @@ void KNNAssignFilter::filter(PointView& view)
         for (PointId id = 0; id < view.size(); ++id)
         {
             point_src.setPointId(id);
-            processOne(point_src, point_nn, kdiSrc);
+            doOne(point_src, point_nn, kdiSrc);
         }
     }
     else
@@ -198,7 +198,7 @@ void KNNAssignFilter::filter(PointView& view)
         for (PointId id = 0; id < view.size(); ++id)
         {
             point_src.setPointId(id);
-            processOne(point_src, point_nn, kdiCand);
+            doOne(point_src, point_nn, kdiCand);
         }
     }
 }
