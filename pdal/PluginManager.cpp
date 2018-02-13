@@ -56,11 +56,6 @@ namespace pdal
 namespace
 {
 
-/**
-static PluginManager<Stage> s_stageInstance({"reader", "writer", "filter"});
-static PluginManager<Kernel> s_kernelInstance({"kernel"});
-**/
-
 #if defined(__APPLE__) && defined(__MACH__)
     const std::string dynamicLibraryExtension(".dylib");
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
@@ -434,6 +429,7 @@ T *PluginManager<T>::l_createObject(const std::string& objectType)
     }
     return nullptr;
 }
+
 
 template <typename T>
 DynamicLibrary *PluginManager<T>::loadLibrary(const std::string& path,

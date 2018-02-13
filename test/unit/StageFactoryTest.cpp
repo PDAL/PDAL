@@ -43,54 +43,16 @@
 namespace pdal
 {
 
-/**
 TEST(StageFactoryTest, Load)
 {
     StageFactory f(false);
 
-    StringList ns = PluginManager::names(PF_PluginType_Filter |
-        PF_PluginType_Reader | PF_PluginType_Writer);
+    StringList ns = PluginManager<Stage>::names();
     ASSERT_TRUE(Utils::contains(ns, "filters.crop"));
     ASSERT_TRUE(Utils::contains(ns, "readers.las"));
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
-**/
 
-/**
-TEST(StageFactoryTest, Load2)
-{
-    StageFactory f(false);
-
-    StringList ns = PluginManager::names(PF_PluginType_Filter);
-    ASSERT_TRUE(Utils::contains(ns, "filters.crop"));
-    ASSERT_FALSE(Utils::contains(ns, "readers.las"));
-    ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
-}
-**/
-
-/**
-TEST(StageFactoryTest, Load3)
-{
-    StageFactory f(false);
-
-    StringList ns = PluginManager::names(PF_PluginType_Reader);
-    ASSERT_FALSE(Utils::contains(ns, "filters.crop"));
-    ASSERT_TRUE(Utils::contains(ns, "readers.las"));
-    ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
-}
-**/
-
-/**
-TEST(StageFactoryTest, Load4)
-{
-    StageFactory f(false);
-
-    StringList ns = PluginManager::names(PF_PluginType_Writer);
-    ASSERT_FALSE(Utils::contains(ns, "filters.crop"));
-    ASSERT_FALSE(Utils::contains(ns, "readers.las"));
-    ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
-}
-**/
 
 TEST(StageFactoryTest, extensionTest)
 {

@@ -55,6 +55,8 @@ struct PluginInfo
 
 extern "C"
 {
+// This is a placeholder so as not to break existing plugins even though the
+// internal interface has changed.
 typedef void PF_ExitFunc;
 typedef void (*PF_InitFunc)();
 }

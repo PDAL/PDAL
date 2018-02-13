@@ -128,7 +128,6 @@ private:
 
     static PluginManager<T> *m_instance;
     StringList m_suffixes;
-//    PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;
     RegistrationInfoMap m_plugins;
     std::mutex m_mutex;
@@ -137,7 +136,6 @@ private:
 
 template<typename T>
 PluginManager<T> *PluginManager<T>::m_instance;
-
 
 } // namespace pdal
 

@@ -97,8 +97,8 @@ class TestPipeline(unittest.TestCase):
         r = pdal.Pipeline(json)
         r.loglevel = 8
         count = r.execute()
-        """self.assertEqual(count, 789)"""
-        """self.assertEqual(r.log.split()[0], '(pypipeline')"""
+        self.assertEqual(count, 789)
+        self.assertEqual(r.log.split()[0], '(pypipeline')
 
     @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/sort.json')),
                          "missing test data")
