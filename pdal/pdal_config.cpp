@@ -1,14 +1,7 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS version related functions.
- * Author:   Mateusz Loskot, mateusz@loskot.net
- *           Frank Warmerdam, warmerdam@pobox.com
- *
- ******************************************************************************
  * Copyright (c) 2008, Mateusz Loskot
  * Copyright (c) 2010, Frank Warmerdam
+ * Copyright (c) 2018, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -42,23 +35,19 @@
  ****************************************************************************/
 
 #include <pdal/pdal_config.hpp>
+#include <pdal/pdal_features.hpp>
 
 #include <sstream>
 #include <iomanip>
 
-#include <pdal/pdal_defines.h>
 #include <pdal/gitsha.h>
 
 #include <geotiff.h>
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
+#pragma clang diagnostic pop
 
 #include <geos_c.h>
 
@@ -70,60 +59,101 @@
 
 namespace pdal
 {
-
-/// Check if GeoTIFF support has been built in to PDAL
-bool IsLibGeoTIFFEnabled()
+namespace Config
 {
-    return true;
-}
 
-/// Check if LasZip compression support has been built in to PDAL
-bool IsLasZipEnabled()
+bool hasFeature(Feature f)
 {
+    bool enabled = false;
+    switch (f)
+    {
+    case Feature::LASZIP:
 #ifdef PDAL_HAVE_LASZIP
-    return true;
-#else
-    return false;
+        enabled = true;
 #endif
+        break;
+    case Feature::LAZPERF:
+#ifdef PDAL_HAVE_LAZPERF
+        enabled = true;
+#endif
+        break;
+    case Feature::ZSTD:
+#ifdef PDAL_HAVE_ZSTD
+        enabled = true;
+#endif
+        break;
+    case Feature::ZLIB:
+#ifdef PDAL_HAVE_ZLIB
+        enabled = true;
+#endif
+        break;
+    case Feature::LZMA:
+#ifdef PDAL_HAVE_LZMA
+        enabled = true;
+#endif
+        break;
+    case Feature::LIBXML2:
+#ifdef PDAL_HAVE_LIBXML2
+        enabled = true;
+#endif
+        break;
+    case Feature::PYTHON:
+#ifdef PDAL_HAVE_PYTHON
+        enabled = true;
+#endif
+        break;
+    case Feature::ARBITER:
+#ifdef PDAL_HAVE_ARBITER
+        enabled = true;
+#endif
+        break;
+    default:
+        break;
+    }
+    return enabled;
 }
 
-int GetVersionMajor()
+
+int versionMajor()
 {
     return PDAL_VERSION_MAJOR;
 }
 
-int GetVersionMinor()
+
+int versionMinor()
 {
     return PDAL_VERSION_MINOR;
 }
 
-int GetVersionPatch()
+
+int versionPatch()
 {
     return PDAL_VERSION_PATCH;
 }
 
-std::string GetVersionString()
+
+std::string versionString()
 {
     return std::string(PDAL_VERSION_STRING);
 }
 
-int GetVersionInteger()
+int versionInteger()
 {
     return PDAL_VERSION_INTEGER;
 }
 
-std::string GetSHA1()
+std::string sha1()
 {
 	return g_GIT_SHA1;
 }
 
 
 /// Tell the user a bit about PDAL's compilation
-std::string GetFullVersionString()
+std::string fullVersionString()
 {
     std::ostringstream os;
 
-    std::string sha = GetSHA1();
+    std::string sha = sha1();
     if (!Utils::iequals(sha, "Release"))
         sha = sha.substr(0,6);
 
@@ -133,7 +163,7 @@ std::string GetFullVersionString()
 }
 
 
-std::string getPDALDebugInformation()
+std::string debugInformation()
 {
     Utils::screenWidth();
     std::string headline(Utils::screenWidth(), '-');
@@ -146,7 +176,7 @@ std::string getPDALDebugInformation()
 
     os << "Version information" << std::endl;
     os << headline << std::endl;
-    os << "(" << pdal::GetFullVersionString() << ")" << std::endl;
+    os << "(" << fullVersionString() << ")" << std::endl;
     os << std::endl;
 
     os << "Debug build status" << std::endl;
@@ -173,4 +203,10 @@ std::string getPDALDebugInformation()
     return os.str();
 }
 
+std::string pluginInstallPath()
+{
+    return PDAL_PLUGIN_INSTALL_PATH;
+}
+
+} // namespace Config
 } // namespace pdal

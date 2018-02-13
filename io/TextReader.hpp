@@ -118,6 +118,22 @@ private:
 
     bool fillFields();
 
+    /**
+      Parse a header line into a list of dimension names.
+
+      \param header  Header line to parse.
+      \return  List of dimension names.
+    */
+    void parseHeader(const std::string& header);
+
+    /**
+      Check a header line to see if it appears header-like.  Display a
+      warning if it doesn't look like a header.
+
+      \param header  Header string to test.
+    */
+    void checkHeader(const std::string& header);
+
 private:
     char m_separator;
     std::istream *m_istream;
@@ -125,6 +141,8 @@ private:
     Dimension::IdList m_dims;
     StringList m_fields;
     size_t m_line;
+    std::string m_headerOverride;
+    std::string m_headerInsert;
 };
 
 } // namespace pdal

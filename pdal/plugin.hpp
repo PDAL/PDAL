@@ -32,66 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-// plugin.h was modeled very closely after the work of Gigi Sayfan in the Dr.
-// Dobbs article:
-// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
-// The original work was released under the Apache License v2.
+// This file is dead, but some may try to include it.
 
 #pragma once
-
-#include <string>
-
-#include <pdal/pdal_export.hpp>
-
-#include <cstdint>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-const int PF_PluginType_Kernel = 1;
-const int PF_PluginType_Reader = 2;
-const int PF_PluginType_Filter = 4;
-const int PF_PluginType_Writer = 8;
-typedef int PF_PluginType;
-
-typedef struct PF_PluginAPI_Version
-{
-    int32_t major;
-    int32_t minor;
-} PF_PluginAPI_Version;
-
-typedef void * (*PF_CreateFunc)();
-typedef int32_t (*PF_DestroyFunc)(void *);
-
-typedef struct PF_RegisterParams
-{
-    PF_PluginAPI_Version version;
-    PF_CreateFunc createFunc;
-    PF_DestroyFunc destroyFunc;
-    std::string description;
-    std::string link;
-    PF_PluginType pluginType;
-} PF_RegisterParams;
-
-typedef int32_t (*PF_ExitFunc)();
-typedef PF_ExitFunc (*PF_InitFunc)();
-
-#ifndef PDAL_DLL
-  #ifdef _WIN32
-    #define PDAL_DLL __declspec(dllimport)
-  #else
-    #define PDAL_DLL
-  #endif
-#endif
-
-extern
-#ifdef __cplusplus
-"C"
-#endif
-PDAL_DLL PF_ExitFunc PF_initPlugin();
-
-#ifdef __cplusplus
-}
-#endif
-
+#include <pdal/pdal_macros.hpp>

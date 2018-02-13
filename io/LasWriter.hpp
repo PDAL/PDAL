@@ -34,10 +34,10 @@
 
 #pragma once
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/plugin.hpp>
 
 #include <pdal/FlexWriter.hpp>
-#include <pdal/compression/LazPerfCompression.hpp>
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
@@ -62,6 +62,7 @@ class LeInserter;
 class LasTester;
 class NitfWriter;
 class GeotiffSupport;
+class LazPerfVlrCompressor;
 
 struct VlrOptionInfo
 {
@@ -82,6 +83,7 @@ public:
     std::string getName() const;
 
     LasWriter();
+    ~LasWriter();
 
 protected:
     void prepOutput(std::ostream *out, const SpatialReference& srs);
@@ -91,7 +93,7 @@ private:
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
-    std::unique_ptr<LazPerfVlrCompressor> m_compressor;
+    LazPerfVlrCompressor *m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;

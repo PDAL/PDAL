@@ -73,9 +73,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    DeltaKernel();
 
 private:
-    DeltaKernel();
     void addSwitches(ProgramArgs& args);
     PointViewPtr loadSet(const std::string& filename, PointTable& table);
     MetadataNode dump(PointViewPtr& srcView, PointViewPtr& candView,

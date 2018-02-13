@@ -16,6 +16,7 @@ import os
 import platform
 import sys
 import numpy
+from Cython.Build import cythonize
 
 USE_CYTHON = True
 try:
@@ -143,7 +144,7 @@ if pdal_config and "clean" not in sys.argv:
             libraries.append(item[2:])
 
 include_dirs.append(numpy.get_include())
-extra_compile_args = ['-std=c++11',]
+extra_compile_args = ['-std=c++11','-Wno-unknown-pragmas']
 
 DEBUG=False
 if DEBUG:

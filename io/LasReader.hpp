@@ -35,10 +35,10 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/plugin.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/compression/LazPerfCompression.hpp>
 
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip_api.h>
@@ -62,6 +62,7 @@ class NitfReader;
 class LasHeader;
 class LeExtractor;
 class PointDimensions;
+class LazPerfVlrDecompressor;
 
 class PDAL_DLL LasReader : public pdal::Reader
 {
@@ -87,8 +88,8 @@ protected:
 
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0)
-        {}
+    LasReader();
+    ~LasReader();
 
     static void * create();
     static int32_t destroy(void *);
@@ -122,7 +123,8 @@ private:
     LasHeader m_header;
     laszip_POINTER m_laszip;
     laszip_point_struct *m_laszipPoint;
-    std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
+
+    LazPerfVlrDecompressor *m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
     StringList m_extraDimSpec;

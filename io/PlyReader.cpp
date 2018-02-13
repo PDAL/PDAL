@@ -291,6 +291,8 @@ std::string PlyReader::getName() const
 void PlyReader::initialize()
 {
     m_stream = Utils::openFile(m_filename, true);
+    if (!m_stream)
+        throwError("Couldn't open '" + m_filename + "'.");
     extractHeader();
     Utils::closeFile(m_stream);
     m_stream = nullptr;
@@ -299,8 +301,6 @@ void PlyReader::initialize()
 
 void PlyReader::addDimensions(PointLayoutPtr layout)
 {
-    SimpleProperty *prop;
-
     // Override XYZ to doubles.
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);

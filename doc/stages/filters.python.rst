@@ -14,7 +14,7 @@ filter and the ``outs`` array represents the points after filtering.
 
 .. warning::
     :ref:`filters.python` was called ``filters.programmable`` and
-    ``filters.predicate`` before Python 1.6. The functionality of
+    ``filters.predicate`` before PDAL 1.6. The functionality of
     ``filters.programmable`` and ``filters.predicate`` was rolled into
     :ref:`filters.python`, and the filter was renamed for clarity.
 
@@ -62,7 +62,7 @@ Modification Example
       "pipeline":[
         "file-input.las",
         {
-          "type":"filters.ground"
+          "type":"filters.smrf"
         },
         {
           "type":"filters.python",
@@ -144,7 +144,7 @@ Example :ref:`pipeline`
       "pipeline":[
         "file-input.las",
         {
-          "type":"filters.ground"
+          "type":"filters.smrf
         },
         {
           "type":"filters.python",

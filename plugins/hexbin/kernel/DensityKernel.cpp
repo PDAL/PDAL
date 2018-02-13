@@ -71,7 +71,7 @@ void DensityKernel::addSwitches(ProgramArgs& args)
 
 void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 {
-    HexBin* hexbin = static_cast<pdal::HexBin*>(m_hexbinStage);
+    HexBin* hexbin = dynamic_cast<HexBin*>(m_hexbinStage);
     if (!hexbin)
         throw pdal::pdal_error("unable to fetch filters.hexbin stage!");
 

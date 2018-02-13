@@ -33,110 +33,39 @@
 ****************************************************************************/
 #pragma once
 
-#ifdef PDAL_HAVE_LZMA
-
 #include "Compression.hpp"
-
-#include <lzma.h>
 
 namespace pdal
 {
 
-class Lzma
+class LzmaCompressorImpl;
+class LzmaCompressor : public Compressor
 {
-protected:
-    Lzma(BlockCb cb) : m_cb(cb)
-    {
-        m_strm = LZMA_STREAM_INIT;
-    }
+public:
+    PDAL_DLL LzmaCompressor(BlockCb cb);
+    PDAL_DLL ~LzmaCompressor();
 
-    ~Lzma()
-    {
-        lzma_end(&m_strm);
-    }
-
-    void run(const char *buf, size_t bufsize, lzma_action mode)
-    {
-        m_strm.avail_in = bufsize;
-        m_strm.next_in = reinterpret_cast<unsigned char *>(
-            const_cast<char *>(buf));
-        int ret = LZMA_OK;
-        do
-        {
-            m_strm.avail_out = CHUNKSIZE;
-            m_strm.next_out = m_tmpbuf;
-            ret = lzma_code(&m_strm, mode);
-            size_t written = CHUNKSIZE - m_strm.avail_out;
-            if (written)
-                m_cb(reinterpret_cast<char *>(m_tmpbuf), written);
-        } while (ret == LZMA_OK);
-        if (ret == LZMA_STREAM_END)
-            return;
-
-        switch (ret)
-        {
-        case LZMA_MEM_ERROR:
-            throw compression_error("Memory allocation failure.");
-        case LZMA_DATA_ERROR:
-            throw compression_error("LZMA data error.");
-        case LZMA_OPTIONS_ERROR:
-            throw compression_error("Unsupported option.");
-        case LZMA_UNSUPPORTED_CHECK:
-            throw compression_error("Unsupported integrity check.");
-        }
-    }
-
-protected:
-    lzma_stream m_strm;
+    PDAL_DLL void compress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
-    unsigned char m_tmpbuf[CHUNKSIZE];
-    BlockCb m_cb;
+    std::unique_ptr<LzmaCompressorImpl> m_impl;
 };
 
 
-class LzmaCompressor : public Compressor, public Lzma
+class LzmaDecompressorImpl;
+
+class LzmaDecompressor : public Decompressor
 {
 public:
-    LzmaCompressor(BlockCb cb) : Lzma(cb)
-    {
-        if (lzma_easy_encoder(&m_strm, 2, LZMA_CHECK_CRC64) != LZMA_OK)
-            throw compression_error("Can't create compressor");
-    }
+    PDAL_DLL LzmaDecompressor(BlockCb cb);
+    PDAL_DLL ~LzmaDecompressor();
 
-    void compress(const char *buf, size_t bufsize)
-    {
-        run(buf, bufsize, LZMA_RUN);
-    }
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
-    void done()
-    {
-        run(nullptr, 0, LZMA_FINISH);
-    }
-};
-
-
-class LzmaDecompressor : public Decompressor, public Lzma
-{
-public:
-    LzmaDecompressor(BlockCb cb) : Lzma(cb)
-    {
-        if (lzma_auto_decoder(&m_strm, std::numeric_limits<uint32_t>::max(),
-            LZMA_TELL_UNSUPPORTED_CHECK))
-            throw compression_error("Can't create decompressor");
-    }
-
-    void decompress(const char *buf, size_t bufsize)
-    {
-        run(buf, bufsize, LZMA_RUN);
-    }
-
-    void done()
-    {
-        run(nullptr, 0, LZMA_FINISH);
-    }
+private:
+    std::unique_ptr<LzmaDecompressorImpl> m_impl;
 };
 
 } // namespace pdal
-
-#endif // PDAL_HAVE_LZMA

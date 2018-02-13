@@ -21,8 +21,8 @@ building of `Docker`_ containers. PDAL keeps three Docker containers current.
 
 .. note::
 
-    Containers are built upon the `Dependences`_ container, but the
-    `Dependences`_ container is not pinned to specific Xenial or PDAL release
+    Containers are built upon the `Dependencies`_ container, but the
+    `Dependencies`_ container is not pinned to specific Xenial or PDAL release
     times. It corresponds to where ever the ``dependencies`` tag of the PDAL
     source tree at https://github.com/PDAL/PDAL resides
 

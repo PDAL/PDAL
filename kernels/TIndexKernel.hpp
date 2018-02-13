@@ -73,9 +73,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
+    TIndexKernel();
 
 private:
-    TIndexKernel();
     virtual void addSwitches(ProgramArgs& args);
     virtual void validateSwitches(ProgramArgs& args);
 
