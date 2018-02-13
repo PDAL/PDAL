@@ -37,7 +37,6 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PyArray.hpp>
 #include <pdal/PipelineExecutor.hpp>
 
 #include <string>
@@ -46,12 +45,13 @@
 #undef tolower
 #undef isspace
 
-#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL LIBPDALPYTHON_ARRAY_API
-#endif
-
-#include <numpy/arrayobject.h>
-
+namespace pdal
+{
+namespace python
+{
+    class Array;
+}
+}
 
 namespace libpdalpython
 {
@@ -62,8 +62,6 @@ public:
     inline python_error(std::string const& msg) : std::runtime_error(msg)
         {}
 };
-
-    typedef pdal::python::Array* PArray;
 
 class Pipeline {
 public:
@@ -88,16 +86,13 @@ public:
     {
         return m_executor.getLog();
     }
-    std::vector<PArray> getArrays() const;
-
+    std::vector<pdal::python::Array *> getArrays() const;
 
     void setLogLevel(int level);
     int getLogLevel() const;
 
 private:
-
     pdal::PipelineExecutor m_executor;
-
 };
 
 }

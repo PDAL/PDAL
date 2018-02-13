@@ -46,10 +46,6 @@
 #undef tolower
 #undef isspace
 
-#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL PDALARRAY_ARRAY_API
-#endif
-
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
@@ -70,17 +66,8 @@ class PDAL_DLL Array
 {
 public:
 
-    Array()
-        : m_py_array(0)
-    {
-        auto initNumpy = []()
-        {
-#undef NUMPY_IMPORT_ARRAY_RETVAL
-#define NUMPY_IMPORT_ARRAY_RETVAL
-            import_array();
-        };
-        initNumpy();
-    }
+    Array() : m_py_array(0)
+    {}
 
     ~Array()
     {
