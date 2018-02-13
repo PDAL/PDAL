@@ -12,7 +12,7 @@ from cpython cimport PyObject, Py_INCREF
 from cython.operator cimport dereference as deref, preincrement as inc
 
 
-cdef extern from "pdal/PyArray.hpp" namespace "pdal::python":
+cdef extern from "PyArray.hpp" namespace "pdal::python":
     cdef cppclass Array:
         void* getPythonArray() except+
 

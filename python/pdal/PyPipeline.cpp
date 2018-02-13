@@ -37,21 +37,35 @@
 #include <pdal/XMLSchema.hpp>
 #endif
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
+#include <Python.h>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
+
+#include "PyArray.hpp"
 
 namespace libpdalpython
 {
 
+using namespace pdal::python;
+
 Pipeline::Pipeline(std::string const& json)
     : m_executor(json)
 {
-    auto initNumpy = []()
-    {
-#undef NUMPY_IMPORT_ARRAY_RETVAL
-#define NUMPY_IMPORT_ARRAY_RETVAL
-        import_array();
-    };
+    // Make the symbols in pdal_base global so that they're accessible
+    // to PDAL plugins.  Python dlopen's this extension with RTLD_LOCAL,
+    // which means that without this, symbols in libpdal_base aren't available
+    // for resolution of symbols on future runtime linking.  This is an issue
+    // on Apline and other Linux variants that doesn't use UNIQUE symbols
+    // for C++ template statics. only
+#ifndef _WIN32
+    ::dlopen("libpdal_base.so", RTLD_NOLOAD | RTLD_GLOBAL);
+#endif
 
-    initNumpy();
+    import_array();
 }
 
 Pipeline::~Pipeline()
@@ -80,9 +94,9 @@ bool Pipeline::validate()
     return m_executor.validate();
 }
 
-std::vector<PArray> Pipeline::getArrays() const
+std::vector<Array *> Pipeline::getArrays() const
 {
-    std::vector<PArray> output;
+    std::vector<Array *> output;
 
     if (!m_executor.executed())
         throw python_error("call execute() before fetching arrays");
@@ -91,7 +105,8 @@ std::vector<PArray> Pipeline::getArrays() const
 
     for (auto i: pvset)
     {
-        PArray array = new pdal::python::Array;
+        //ABELL - Leak?
+        Array *array = new pdal::python::Array;
         array->update(i);
         output.push_back(array);
     }
