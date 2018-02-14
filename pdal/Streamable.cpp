@@ -32,14 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Streamable.hpp>
-
 #include <iterator>
-/**
-#include "private/StageRunner.hpp"
 
-#include <memory>
-**/
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
@@ -169,7 +164,7 @@ void Streamable::execute(StreamPointTable& table,
     std::map<Streamable *, SpatialReference> srsMap;
 
     // Separate out the first stage.
-    Stage *reader = stages.front();
+    Streamable *reader = stages.front();
 
     // Build a list of all stages except the first.  We may have a writer in
     // this list in addition to filters, but we treat them in the same way.
