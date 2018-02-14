@@ -13,13 +13,12 @@ namespace pdal
 class PDAL_DLL MyKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
+    MyKernel();
+
     std::string getName() const;
     int execute(); // override
 
 private:
-    MyKernel();
     void addSwitches(ProgramArgs& args);
 
     std::string m_input_file;

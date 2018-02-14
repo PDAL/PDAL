@@ -59,7 +59,7 @@ public:
     std::string getName() const;
     int execute(); // overrride
 
-
+    InfoKernel();
     void setup(const std::string& filename);
     MetadataNode run(const std::string& filename);
 
@@ -69,7 +69,6 @@ public:
     inline void doComputeBoundary(bool value) { m_boundary = value; }
 
 private:
-    InfoKernel();
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
 

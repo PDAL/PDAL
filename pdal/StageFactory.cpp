@@ -266,101 +266,103 @@ StageFactory::StageFactory(bool no_plugins)
 {
     if (!no_plugins)
     {
-        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Kernel |
-            PF_PluginType_Reader | PF_PluginType_Writer);
+        PluginManager<Stage>::loadAll();
+        PluginManager<Kernel>::loadAll();
     }
 
     // filters
-    PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
-    PluginManager::initializePlugin(AssignFilter_InitPlugin);
-    PluginManager::initializePlugin(ChipperFilter_InitPlugin);
-    PluginManager::initializePlugin(ClusterFilter_InitPlugin);
-    PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
-    PluginManager::initializePlugin(ColorinterpFilter_InitPlugin);
-    PluginManager::initializePlugin(ComputeRangeFilter_InitPlugin);
-    PluginManager::initializePlugin(CropFilter_InitPlugin);
-    PluginManager::initializePlugin(DecimationFilter_InitPlugin);
-    PluginManager::initializePlugin(DividerFilter_InitPlugin);
-    PluginManager::initializePlugin(EigenvaluesFilter_InitPlugin);
-    PluginManager::initializePlugin(ELMFilter_InitPlugin);
-    PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
-    PluginManager::initializePlugin(FerryFilter_InitPlugin);
-    PluginManager::initializePlugin(GreedyProjection_InitPlugin);
-    PluginManager::initializePlugin(GroupByFilter_InitPlugin);
-    PluginManager::initializePlugin(HAGFilter_InitPlugin);
-    PluginManager::initializePlugin(HeadFilter_InitPlugin);
-    PluginManager::initializePlugin(IQRFilter_InitPlugin);
-    PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
-    PluginManager::initializePlugin(LocateFilter_InitPlugin);
-    PluginManager::initializePlugin(LOFFilter_InitPlugin);
-    PluginManager::initializePlugin(MADFilter_InitPlugin);
-    PluginManager::initializePlugin(MergeFilter_InitPlugin);
-    PluginManager::initializePlugin(MongusFilter_InitPlugin);
-    PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
-    PluginManager::initializePlugin(NormalFilter_InitPlugin);
-    PluginManager::initializePlugin(OutlierFilter_InitPlugin);
-    PluginManager::initializePlugin(OverlayFilter_InitPlugin);
-    PluginManager::initializePlugin(PMFFilter_InitPlugin);
-    PluginManager::initializePlugin(PoissonFilter_InitPlugin);
-    PluginManager::initializePlugin(RadialDensityFilter_InitPlugin);
-    PluginManager::initializePlugin(RandomizeFilter_InitPlugin);
-    PluginManager::initializePlugin(RangeFilter_InitPlugin);
-    PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
-    PluginManager::initializePlugin(SampleFilter_InitPlugin);
-    PluginManager::initializePlugin(SMRFilter_InitPlugin);
-    PluginManager::initializePlugin(SortFilter_InitPlugin);
-    PluginManager::initializePlugin(SplitterFilter_InitPlugin);
-    PluginManager::initializePlugin(StatsFilter_InitPlugin);
-    PluginManager::initializePlugin(TailFilter_InitPlugin);
-    PluginManager::initializePlugin(TransformationFilter_InitPlugin);
-    PluginManager::initializePlugin(VoxelCenterNearestNeighborFilter_InitPlugin);
-    PluginManager::initializePlugin(VoxelCentroidNearestNeighborFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(AssignFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ChipperFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ClusterFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ColorizationFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ColorinterpFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ComputeRangeFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(CropFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(DecimationFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(DividerFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(EigenvaluesFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ELMFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(EstimateRankFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(GreedyProjection_InitPlugin);
+    PluginManager<Stage>::initializePlugin(GroupByFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(HAGFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(HeadFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(IQRFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(KDistanceFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(LocateFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(LOFFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(MADFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(MergeFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(MongusFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(MortonOrderFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(NormalFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(OutlierFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(OverlayFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(PMFFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(PoissonFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(RadialDensityFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(RandomizeFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(RangeFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(ReprojectionFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(SampleFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(SMRFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(SortFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(SplitterFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(StatsFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(TailFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(TransformationFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(
+        VoxelCenterNearestNeighborFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(
+        VoxelCentroidNearestNeighborFilter_InitPlugin);
 
     // kernels
-    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
-    PluginManager::initializePlugin(DiffKernel_InitPlugin);
-    PluginManager::initializePlugin(GroundKernel_InitPlugin);
-    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
-    PluginManager::initializePlugin(InfoKernel_InitPlugin);
-    PluginManager::initializePlugin(MergeKernel_InitPlugin);
-    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
-    PluginManager::initializePlugin(RandomKernel_InitPlugin);
-    PluginManager::initializePlugin(SortKernel_InitPlugin);
-    PluginManager::initializePlugin(SplitKernel_InitPlugin);
-    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
-    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(DeltaKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(DiffKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(GroundKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(HausdorffKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(InfoKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(MergeKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(PipelineKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(RandomKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(SortKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(SplitKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(TIndexKernel_InitPlugin);
+    PluginManager<Kernel>::initializePlugin(TranslateKernel_InitPlugin);
 
     // readers
-    PluginManager::initializePlugin(BpfReader_InitPlugin);
-    PluginManager::initializePlugin(FauxReader_InitPlugin);
-    PluginManager::initializePlugin(GDALReader_InitPlugin);
-    PluginManager::initializePlugin(Ilvis2Reader_InitPlugin);
-    PluginManager::initializePlugin(LasReader_InitPlugin);
-    PluginManager::initializePlugin(OptechReader_InitPlugin);
-    PluginManager::initializePlugin(PlyReader_InitPlugin);
-    PluginManager::initializePlugin(PtsReader_InitPlugin);
-    PluginManager::initializePlugin(QfitReader_InitPlugin);
-    PluginManager::initializePlugin(SbetReader_InitPlugin);
-    PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
-    PluginManager::initializePlugin(TextReader_InitPlugin);
-    PluginManager::initializePlugin(TIndexReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(BpfReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(FauxReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(GDALReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(Ilvis2Reader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(LasReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(OptechReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(PlyReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(PtsReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(QfitReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(SbetReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(TerrasolidReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(TextReader_InitPlugin);
+    PluginManager<Stage>::initializePlugin(TIndexReader_InitPlugin);
 
     // writers
-    PluginManager::initializePlugin(BpfWriter_InitPlugin);
-    PluginManager::initializePlugin(GDALWriter_InitPlugin);
-    PluginManager::initializePlugin(LasWriter_InitPlugin);
-    PluginManager::initializePlugin(OGRWriter_InitPlugin);
-    PluginManager::initializePlugin(PlyWriter_InitPlugin);
-    PluginManager::initializePlugin(SbetWriter_InitPlugin);
-    PluginManager::initializePlugin(TextWriter_InitPlugin);
-    PluginManager::initializePlugin(NullWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(BpfWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(GDALWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(LasWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(OGRWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(PlyWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(SbetWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(TextWriter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(NullWriter_InitPlugin);
 }
 
 
 Stage *StageFactory::createStage(std::string const& stage_name)
 {
     static_assert(0 < sizeof(Stage), "");
-    Stage *s = static_cast<Stage*>(PluginManager::createObject(stage_name));
+    Stage *s = PluginManager<Stage>::createObject(stage_name);
     if (s)
     {
         std::lock_guard<std::mutex> lock(m_mutex);

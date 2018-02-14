@@ -315,7 +315,7 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
     {
         if (name == "plugin")
         {
-            PluginManager::loadPlugin(node[name].asString());
+            PluginManager<Stage>::loadPlugin(node[name].asString());
 
             // Don't actually put a "plugin" option on
             // any stage
