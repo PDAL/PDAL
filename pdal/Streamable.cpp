@@ -34,10 +34,10 @@
 
 #include <pdal/Streamable.hpp>
 
+#include <iterator>
 /**
 #include "private/StageRunner.hpp"
 
-#include <iterator>
 #include <memory>
 **/
 
