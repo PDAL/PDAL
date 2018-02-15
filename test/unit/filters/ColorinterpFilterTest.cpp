@@ -174,7 +174,7 @@ TEST(ColorinterpFilterTest, cantstream)
 
     FixedPointTable t(10);
     c.prepare(t);
-    EXPECT_THROW(c.execute(t), pdal_error);
+    EXPECT_FALSE(c.pipelineStreamable());
 }
 
 namespace

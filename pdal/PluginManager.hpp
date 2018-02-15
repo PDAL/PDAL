@@ -40,8 +40,6 @@
 #pragma once
 
 #include <pdal/Log.hpp>
-#include <pdal/pdal_internal.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Kernel.hpp>
 

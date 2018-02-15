@@ -40,7 +40,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <memory>
 #include <string>

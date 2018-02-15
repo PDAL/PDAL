@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include "MergeFilter.hpp"
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

@@ -38,9 +38,6 @@
 #include "TextReader.hpp"
 #include "../filters/StatsFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-#include <pdal/util/Algorithm.hpp>
-
 namespace pdal
 {
 

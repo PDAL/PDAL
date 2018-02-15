@@ -32,7 +32,6 @@
  ****************************************************************************/
 
 #include "HeadFilter.hpp"
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

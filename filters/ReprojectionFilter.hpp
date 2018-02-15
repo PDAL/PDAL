@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <memory>
 
@@ -50,7 +50,7 @@ namespace gdal
     class ErrorHandler;
 }
 
-class PDAL_DLL ReprojectionFilter : public Filter
+class PDAL_DLL ReprojectionFilter : public Filter, public Streamable
 {
 public:
     ReprojectionFilter();

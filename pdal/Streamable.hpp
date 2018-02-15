@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-
 #include <pdal/Stage.hpp>
 
 namespace pdal
@@ -63,6 +62,7 @@ public:
 
     */
     void execute(StreamPointTable& table);
+    using Stage::execute;
 
     /**
       Determine if a pipeline is streamable.
@@ -94,9 +94,8 @@ protected:
     **/
 
     /**
-      (Streaming mode)  Notification that the points that will follow in
-      processing are from a spatial reference different than the previous
-      spatial reference.
+      Notification that the points that will follow in processing are from
+      a spatial reference different than the previous spatial reference.
 
        \param srs  New spatial reference.
     */

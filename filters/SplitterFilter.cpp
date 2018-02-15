@@ -38,7 +38,6 @@
 #include <iostream>
 #include <limits>
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -70,7 +69,7 @@ void SplitterFilter::addArgs(ProgramArgs& args)
 void SplitterFilter::initialize() {
     if (!(m_buffer < m_length / 2.)) {
         std::stringstream oss;
-        oss << "Buffer (" << m_buffer << 
+        oss << "Buffer (" << m_buffer <<
             ") must be less than half of length (" << m_length << ")";
         throw pdal_error(oss.str());
     }
@@ -137,7 +136,7 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
 }
 
 bool SplitterFilter::squareContains(int xpos, int ypos, double x, double y) const {
-    double minx = m_xOrigin + xpos * m_length - m_buffer; 
+    double minx = m_xOrigin + xpos * m_length - m_buffer;
     double maxx = minx + m_length + 2 * m_buffer;
     double miny = m_yOrigin + ypos * m_length - m_buffer;
     double maxy = miny + m_length + 2 * m_buffer;

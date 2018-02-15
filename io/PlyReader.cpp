@@ -38,7 +38,6 @@
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/IStream.hpp>
 
 namespace pdal

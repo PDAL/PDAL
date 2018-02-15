@@ -236,6 +236,7 @@ PointViewSet Stage::execute(PointTableRef table)
 
 
 // Streamed execution.
+/**
 void Stage::execute(StreamPointTable& table)
 {
     struct StageList : public std::list<Stage *>
@@ -413,6 +414,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         table.reset();
     }
 }
+**/
 
 void Stage::l_done(PointTableRef table)
 {

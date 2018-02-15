@@ -37,7 +37,6 @@
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pdal/EigenUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

@@ -39,7 +39,6 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

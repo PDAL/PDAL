@@ -36,7 +36,6 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t TailFilter_ExitFunc();
 extern "C" PF_ExitFunc TailFilter_InitPlugin();

@@ -34,7 +34,6 @@
 
 
 #include "OSGReader.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <osg/NodeVisitor>

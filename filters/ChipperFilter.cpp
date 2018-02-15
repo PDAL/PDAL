@@ -62,7 +62,6 @@ partitions we are done, and we simply store away the contents of the
 blocks.
 **/
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

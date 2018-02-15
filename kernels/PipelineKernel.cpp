@@ -39,7 +39,6 @@
 #endif
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

@@ -41,8 +41,8 @@
 
 #include <fstream>
 #include <iostream>
+
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 #include <Eigen/Dense>
 
 extern "C" int32_t GreedyProjection_ExitFunc();

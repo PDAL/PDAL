@@ -46,7 +46,7 @@ Streamable::Streamable()
 bool Streamable::pipelineStreamable() const
 {
     for (const Stage *s : m_inputs)
-        if (!dynamic_cast<const Streamable *>(s) || !s->pipelineStreamable())
+        if (!s->pipelineStreamable())
             return false;
     return true;
 }
@@ -55,11 +55,11 @@ bool Streamable::pipelineStreamable() const
 // Streamed execution.
 void Streamable::execute(StreamPointTable& table)
 {
-    struct StageList : public std::list<Streamable *>
+    struct StreamableList : public std::list<Streamable *>
     {
-        StageList operator - (const StageList& other) const
+        StreamableList operator - (const StreamableList& other) const
         {
-            StageList resultList;
+            StreamableList resultList;
             auto ti = rbegin();
             auto oi = other.rbegin();
 
@@ -101,9 +101,9 @@ void Streamable::execute(StreamPointTable& table)
         return;
 
     SpatialReference srs;
-    std::list<StageList> lists;
-    StageList stages;
-    StageList lastRunStages;
+    std::list<StreamableList> lists;
+    StreamableList stages;
+    StreamableList lastRunStages;
 
     table.finalize();
 
@@ -138,7 +138,7 @@ void Streamable::execute(StreamPointTable& table)
         {
             for (auto s2 : s->m_inputs)
             {
-                StageList newStages(stages);
+                StreamableList newStages(stages);
                 newStages.push_front(dynamic_cast<Streamable *>(s2));
                 lists.push_front(newStages);
             }

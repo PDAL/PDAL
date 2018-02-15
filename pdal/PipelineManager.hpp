@@ -34,8 +34,10 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/StageFactory.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Log.hpp>
 
 #include <vector>
 #include <string>
@@ -43,7 +45,9 @@
 namespace pdal
 {
 
-class Options;
+struct QuickInfo;
+class Stage;
+class StageFactory;
 
 struct StageCreationOptions
 {
@@ -58,9 +62,7 @@ class PDAL_DLL PipelineManager
 {
     FRIEND_TEST(json, tags);
 public:
-    PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr),
-            m_progressFd(-1), m_input(nullptr)
-        {}
+    PipelineManager();
     ~PipelineManager();
 
     void setProgressFd(int fd)
@@ -140,7 +142,7 @@ private:
     void setOptions(Stage& stage, const Options& addOps);
     Options stageOptions(Stage& stage);
 
-    StageFactory m_factory;
+    std::unique_ptr<StageFactory> m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
     PointTableRef m_table;
     Options m_commonOptions;

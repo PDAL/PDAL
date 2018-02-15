@@ -38,7 +38,6 @@
 #include <cassert>
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <filters/NormalFilter.hpp>
 
 #include "GreedyProjection.hpp"
