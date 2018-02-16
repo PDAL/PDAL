@@ -53,7 +53,7 @@ static PluginInfo const s_info = PluginInfo(
 
 CREATE_STATIC_PLUGIN(1, 0, KNNAssignFilter, Filter, s_info)
 
-KNNAssignFilter::KNNAssignFilter()
+KNNAssignFilter::KNNAssignFilter() : m_dim(Dimension::Id::Classification)
 {}
 
 
@@ -67,7 +67,7 @@ void KNNAssignFilter::addArgs(ProgramArgs& args)
         m_domainSpec);
     args.add("k", "Number of nearest neighbors to consult",
         m_k).setPositional();
-    args.add("dimension", "Dimension on to be updated", m_dimName).setPositional();
+    //args.add("dimension", "Dimension on to be updated", m_dimName).setPositional();
     Arg& candidate = args.add("candidate", "candidate file name",
         m_candidateFile);
 }
@@ -102,17 +102,10 @@ void KNNAssignFilter::prepared(PointTableRef table)
                 r.m_name + "'.");
     }
     std::sort(m_domain.begin(), m_domain.end());
-    m_dim = layout->findDim(m_dimName);
+    //m_dim = layout->findDim(m_dimName);
 
-    if (m_dim == Dimension::Id::Unknown)
-        throwError("Dimension '" + m_dimName + "' not found.");
-}
-
-std::ostream& operator<<(std::ostream& out, const Dimension::Id& r)
-{
-    out << (const Dimension::Id&)r;
-    out << "=" << (int)r;
-    return out;
+    //if (m_dim == Dimension::Id::Unknown)
+    //    throwError("Dimension '" + m_dimName + "' not found.");
 }
 
 void KNNAssignFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)

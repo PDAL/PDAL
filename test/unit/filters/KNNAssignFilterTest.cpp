@@ -74,7 +74,7 @@ TEST(KNNAssignFilterTest, singleRange)
 
         Options fo;
         fo.add("domain", "Classification[14:14]");
-        fo.add("dimension", "Classification");
+        //fo.add("dimension", "Classification");
         fo.add("k", k);
 
         Stage& f = *(factory.createStage("filters.knnassign"));
@@ -127,7 +127,7 @@ TEST(KNNAssignFilterTest, multipleRange)
 
         Options fo;
         fo.add("domain", "Classification[14:14], Classification[11:11]");
-        fo.add("dimension", "Classification");
+        //fo.add("dimension", "Classification");
         fo.add("k", k);
 
         Stage& f = *(factory.createStage("filters.knnassign"));
@@ -184,7 +184,7 @@ TEST(KNNAssignFilterTest, candidate)
     for (auto &k : kvals) {
 
         Options fo;
-        fo.add("dimension", "Classification");
+        //fo.add("dimension", "Classification");
         fo.add("candidate", Support::datapath("las/sample_c_thin.las"));
         fo.add("k", k);
 
