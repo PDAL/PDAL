@@ -1,0 +1,13 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.hexbin",
+      "edge_size":0.0,
+      "threshold":10,
+      "sample_size":5000
+      "precision":4
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/hexbin.las"
+  ]
+}
