@@ -165,6 +165,17 @@ void PipelineManager::validateStageOptions() const
 }
 
 
+bool PipelineManager::pipelineStreamable() const
+{
+    bool streamable = false;
+
+    Stage *s = getStage();
+    if (s)
+        streamable = s->pipelineStreamable();
+    return streamable;
+}
+
+
 QuickInfo PipelineManager::preview() const
 {
     QuickInfo qi;

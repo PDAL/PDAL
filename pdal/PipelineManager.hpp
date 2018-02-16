@@ -117,6 +117,7 @@ public:
     point_count_t execute();
     void executeStream(FixedPointTable& table);
     void validateStageOptions() const;
+    bool pipelineStreamable() const;
 
     // Get the resulting point views.
     const PointViewSet& views() const

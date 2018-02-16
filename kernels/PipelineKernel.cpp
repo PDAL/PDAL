@@ -39,6 +39,7 @@
 #endif
 
 #include <pdal/PDALUtils.hpp>
+#include <json/json.h>
 
 namespace pdal
 {
@@ -101,17 +102,32 @@ int PipelineKernel::execute()
         m_manager.setProgressFd(m_progressFd);
     }
 
-    m_manager.readPipeline(m_inputFile);
-
     if (m_validate)
     {
+        Json::Value root;
         // Validate the options of the pipeline we were
         // given, and once we succeed, we're done
-        m_manager.prepare();
+        try
+        {
+            m_manager.readPipeline(m_inputFile);
+            m_manager.prepare();
+            root["valid"] = true;
+            root["error_detail"] = "";
+            root["streamable"] = m_manager.pipelineStreamable();
+        }
+        catch (pdal::pdal_error const& e)
+        {
+            root["valid"] = false;
+            root["error_detail"] = e.what();
+            root["streamable"] = false;
+        }
         Utils::closeProgress(m_progressFd);
+        Json::StyledWriter writer;
+        std::cout << writer.write(root);
         return 0;
     }
 
+    m_manager.readPipeline(m_inputFile);
     if (m_stream)
     {
         FixedPointTable table(10000);
