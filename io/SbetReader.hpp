@@ -36,8 +36,8 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
 
 #include "SbetCommon.hpp"
 
@@ -47,7 +47,7 @@ extern "C" PF_ExitFunc SbetReader_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL SbetReader : public pdal::Reader
+class PDAL_DLL SbetReader : public Reader, public Streamable
 {
 public:
     SbetReader() : Reader()

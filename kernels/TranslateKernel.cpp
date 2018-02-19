@@ -35,7 +35,6 @@
 
 #include "TranslateKernel.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>

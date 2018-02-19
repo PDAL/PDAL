@@ -421,7 +421,7 @@ void GDALGrid::windowFill(size_t dstI, size_t dstJ)
                 continue;
             // The ternaries just avoid underflow UB.  We're just trying to
             // find the distance from j to dstJ or i to dstI.
-            double distance = std::max(j > dstJ ? j - dstJ : dstJ - j,
+            double distance = (double)std::max(j > dstJ ? j - dstJ : dstJ - j,
                 i > dstI ? i - dstI : dstI - i);
             windowFillCell(srcIdx, dstIdx, distance);
             distSum += (1 / distance);

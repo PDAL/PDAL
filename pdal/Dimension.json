@@ -365,6 +365,11 @@
     "name": "Density",
     "type": "double",
     "description": "Estimate of point density"
+    },
+    {
+    "name": "Omit",
+    "type": "uint8_t",
+    "description": "Used to shallowly mark a point as being omitted without removing it"
     }
 
 ] }

@@ -44,7 +44,6 @@
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -347,7 +346,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_manager.prepare();
         dump(root);
     }
-    root.add("pdal_version", pdal::GetFullVersionString());
+    root.add("pdal_version", Config::fullVersionString());
     return root;
 }
 

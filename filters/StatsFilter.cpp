@@ -37,11 +37,9 @@
 #include <cmath>
 #include <unordered_map>
 
-#include <pdal/pdal_export.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <json/json.h>

@@ -38,7 +38,6 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.hpp>
 
 
 extern "C" int32_t TIndexKernel_ExitFunc();
@@ -73,9 +72,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
+    TIndexKernel();
 
 private:
-    TIndexKernel();
     virtual void addSwitches(ProgramArgs& args);
     virtual void validateSwitches(ProgramArgs& args);
 

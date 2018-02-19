@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -52,7 +52,7 @@ namespace pdal
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
-class PDAL_DLL ColorizationFilter : public Filter
+class PDAL_DLL ColorizationFilter : public Filter, public Streamable
 {
 public:
     struct BandInfo

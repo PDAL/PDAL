@@ -37,7 +37,6 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
-        -DBUILD_PLUGIN_MATLAB=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_OPENSCENEGRAPH=OFF \
         -DWITH_LAZPERF=ON \
@@ -56,13 +55,13 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python/2.7.14/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/2.7.14/Frameworks/Python.framework/Versions/2.7/include/python2.7/ \
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
-        -DPGPOINTCLOUD_TEST_DB_HOST="localhost" \
-        -DBUILD_PLUGIN_MATLAB=ON \
-         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmex.dylib \
-         -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmat.dylib \
-         -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmx.dylib \
-         -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017b.app/extern/include \
-         -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libeng.dylib
+        -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
+#        -DBUILD_PLUGIN_MATLAB=ON \
+#         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmex.dylib \
+#         -DMATLAB_MAT_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmat.dylib \
+#         -DMATLAB_MX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmx.dylib \
+#         -DMATLAB_INCLUDE_DIR=/Applications/MATLAB_R2017b.app/extern/include \
+#         -DMATLAB_ENG_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libeng.dylib
 
 
 #         -DPYTHON_EXECUTABLE=/usr/local/bin/python \

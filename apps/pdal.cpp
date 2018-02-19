@@ -93,7 +93,7 @@ private:
 void App::outputVersion()
 {
     m_out << headline << std::endl;
-    m_out << "pdal " << GetFullVersionString() << std::endl;
+    m_out << "pdal " << Config::fullVersionString() << std::endl;
     m_out << headline << std::endl;
     m_out << std::endl;
 }
@@ -111,7 +111,7 @@ void App::outputHelp(const ProgramArgs& args)
     m_out << "The following commands are available:" << std::endl;
 
     StageFactory f(false);
-    StringList loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
+    StringList loaded_kernels = PluginManager<Kernel>::names();
 
     for (auto name : loaded_kernels)
         m_out << "   - " << name << std::endl;
@@ -124,8 +124,7 @@ void App::outputDrivers()
     // Force plugin loading.
     StageFactory f(false);
 
-    StringList stages = PluginManager::names(PF_PluginType_Filter |
-        PF_PluginType_Reader | PF_PluginType_Writer);
+    StringList stages = PluginManager<Stage>::names();
 
     if (!m_showJSON)
     {
@@ -146,7 +145,7 @@ void App::outputDrivers()
 
         for (auto name : stages)
         {
-            std::string descrip = PluginManager::description(name);
+            std::string descrip = PluginManager<Stage>::description(name);
             StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
             for (size_t i = 0; i < lines.size(); ++i)
             {
@@ -164,8 +163,8 @@ void App::outputDrivers()
         Json::Value array(Json::arrayValue);
         for (auto name : stages)
         {
-            std::string description = PluginManager::description(name);
-            std::string link = PluginManager::link(name);
+            std::string description = PluginManager<Stage>::description(name);
+            std::string link = PluginManager<Stage>::link(name);
             Json::Value node(Json::objectValue);
             node["name"] = name;
             node["description"] = description;
@@ -183,7 +182,7 @@ void App::outputCommands()
 {
     StageFactory f(false);
     std::vector<std::string> loaded_kernels;
-    loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
+    loaded_kernels = PluginManager<Kernel>::names();
     for (auto name : loaded_kernels)
         m_out << name << std::endl;
 }
@@ -207,7 +206,7 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
 
     if (!m_showJSON)
     {
-        strm  << stageName << " -- " << PluginManager::link(stageName) <<
+        strm  << stageName << " -- " << PluginManager<Stage>::link(stageName) <<
             std::endl;
         strm  << headline << std::endl;
 
@@ -237,8 +236,7 @@ void App::outputOptions()
     // Force plugin loading.
     StageFactory f(false);
 
-    StringList nv = PluginManager::names(PF_PluginType_Filter |
-        PF_PluginType_Reader | PF_PluginType_Writer);
+    StringList nv = PluginManager<Stage>::names();
 
     if (!m_showJSON)
     {
@@ -317,14 +315,14 @@ std::string App::findKernel()
     StageFactory f(true);
     // Discover available kernels without plugins, and test to see if
     // the positional option 'command' is a valid kernel
-    loadedKernels = PluginManager::names(PF_PluginType_Kernel);
+    loadedKernels = PluginManager<Kernel>::names();
     for (auto& name : loadedKernels)
         if (m_command == kernelSurname(name))
             return name;
 
     // Force loading of plugins.
     StageFactory f2(false);
-    loadedKernels = PluginManager::names(PF_PluginType_Kernel);
+    loadedKernels = PluginManager<Kernel>::names();
     for (auto& name : loadedKernels)
         if (m_command == kernelSurname(name))
             return name;
@@ -353,8 +351,10 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         log->setLevel(m_logLevel);
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
-    PluginManager::setLog(log);
-#ifdef PDAL_HAVE_EXECINFO_H
+    PluginManager<Stage>::setLog(log);
+    PluginManager<Kernel>::setLog(log);
+#ifndef _WIN32
+#if __has_include(<execinfo.h>)
     if (m_debug)
     {
         signal(SIGSEGV, [](int sig)
@@ -368,6 +368,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         });
     }
 #endif
+#endif
 
     m_command = Utils::tolower(m_command);
     if (!m_command.empty())
@@ -378,8 +379,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         {
             if (m_help)
                 cmdArgs.push_back("--help");
-            void *obj = PluginManager::createObject(name);
-            Kernel *kernel(static_cast<Kernel *>(obj));
+            Kernel *kernel = PluginManager<Kernel>::createObject(name);
             // This shouldn't throw.  If it does, it's something awful, so
             // not cleaning up seems inconsequential.
             log->setLeader("pdal " + m_command);

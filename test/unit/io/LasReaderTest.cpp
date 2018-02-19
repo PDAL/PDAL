@@ -34,9 +34,11 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/Streamable.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
@@ -408,7 +410,7 @@ void streamTest(const std::string src, const std::string compression)
     PointViewSet s = lasReader.execute(t);
     PointViewPtr p = *s.begin();
 
-    class Checker : public Filter
+    class Checker : public Filter, public Streamable
     {
     public:
         std::string getName() const

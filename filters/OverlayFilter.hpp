@@ -34,9 +34,9 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <map>
 #include <memory>
@@ -63,7 +63,7 @@ typedef std::shared_ptr<void> OGRGeometryPtr;
 
 class Arg;
 
-class PDAL_DLL OverlayFilter : public Filter
+class PDAL_DLL OverlayFilter : public Filter, public Streamable
 {
     struct PolyVal
     {

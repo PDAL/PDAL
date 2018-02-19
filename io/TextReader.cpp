@@ -38,9 +38,6 @@
 #include "TextReader.hpp"
 #include "../filters/StatsFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-#include <pdal/util/Algorithm.hpp>
-
 namespace pdal
 {
 
@@ -87,15 +84,20 @@ QuickInfo TextReader::inspect()
     return qi;
 }
 
-void TextReader::initialize(PointTableRef table)
+
+void TextReader::checkHeader(const std::string& header)
 {
-    m_istream = Utils::openFile(m_filename);
-    if (!m_istream)
-        throwError("Unable to open text file '" + m_filename + "'.");
+    auto it = std::find_if(header.begin(), header.end(),
+        [](char c){ return std::isalpha(c); });
+    if (it == header.end())
+        log()->get(LogLevel::Warning) << getName() <<
+            ": file '" << m_filename <<
+            "' doesn't appear to contain a header line." << std::endl;
+}
 
-    std::string buf;
-    std::getline(*m_istream, buf);
 
+void TextReader::parseHeader(const std::string& header)
+{
     auto isspecial = [](char c)
         { return (!std::isalnum(c) && c != ' '); };
 
@@ -104,18 +106,43 @@ void TextReader::initialize(PointTableRef table)
     if (m_separator == ' ')
     {
         // Scan string for some character not a number, space or letter.
-        for (size_t i = 0; i < buf.size(); ++i)
-            if (isspecial(buf[i]))
+        for (size_t i = 0; i < header.size(); ++i)
+            if (isspecial(header[i]))
             {
-                m_separator = buf[i];
+                m_separator = header[i];
                 break;
             }
     }
 
     if (m_separator != ' ')
-        m_dimNames = Utils::split(buf, m_separator);
+        m_dimNames = Utils::split(header, m_separator);
     else
-        m_dimNames = Utils::split2(buf, m_separator);
+        m_dimNames = Utils::split2(header, m_separator);
+}
+
+
+void TextReader::initialize(PointTableRef table)
+{
+    if (m_headerInsert.size() && m_headerOverride.size())
+        throwError("Can't specify both 'header_insert' and 'header_override' "
+            "options.");
+
+    m_istream = Utils::openFile(m_filename);
+    if (!m_istream)
+        throwError("Unable to open text file '" + m_filename + "'.");
+
+    std::string header;
+    if (m_headerInsert.size())
+        header = m_headerInsert;
+    else if (m_headerOverride.size())
+        header = m_headerOverride;
+    else
+    {
+        std::getline(*m_istream, header);
+        checkHeader(header);
+    }
+
+    parseHeader(header);
     Utils::closeFile(m_istream);
 }
 
@@ -123,7 +150,11 @@ void TextReader::initialize(PointTableRef table)
 void TextReader::addArgs(ProgramArgs& args)
 {
     args.add("separator", "Separator character that overrides special "
-        "character in header line", m_separator, ' ');
+        "character found in header line", m_separator, ' ');
+    args.add("header_override", "Use this string as the header line.  Ignore "
+        "the first line in the file.", m_headerOverride);
+    args.add("header_insert", "Use this string as the header line. All "
+        "lines of the file are treated as data.", m_headerInsert);
 }
 
 
@@ -149,10 +180,15 @@ void TextReader::ready(PointTableRef table)
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
-    // Skip header line.
-    std::string buf;
-    std::getline(*m_istream, buf);
-    m_line = 1;
+    // Skip header line unless we're inserting one from the command line..
+    if (m_headerInsert.size())
+        m_line = 0;
+    else
+    {
+        std::string buf;
+        std::getline(*m_istream, buf);
+        m_line = 1;
+    }
 }
 
 

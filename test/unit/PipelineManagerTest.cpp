@@ -36,6 +36,8 @@
 
 #include "Support.hpp"
 
+#include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 

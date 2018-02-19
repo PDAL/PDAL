@@ -38,7 +38,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include "private/Point.hpp"
 
@@ -53,7 +53,7 @@ class GridPnp;
 
 // removes any points outside of the given range
 // updates the header accordingly
-class PDAL_DLL CropFilter : public Filter
+class PDAL_DLL CropFilter : public Filter, public Streamable
 {
 public:
     CropFilter();

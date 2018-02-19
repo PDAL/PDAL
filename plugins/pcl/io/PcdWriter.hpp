@@ -37,7 +37,6 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/StageFactory.hpp>
 
 #include "../PCLConversions.hpp"
 

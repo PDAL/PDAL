@@ -37,7 +37,7 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t TextReader_ExitFunc();
 extern "C" PF_ExitFunc TextReader_InitPlugin();
@@ -45,7 +45,7 @@ extern "C" PF_ExitFunc TextReader_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL TextReader : public Reader
+class PDAL_DLL TextReader : public Reader, public Streamable
 {
 public:
     static void * create();
@@ -118,6 +118,22 @@ private:
 
     bool fillFields();
 
+    /**
+      Parse a header line into a list of dimension names.
+
+      \param header  Header line to parse.
+      \return  List of dimension names.
+    */
+    void parseHeader(const std::string& header);
+
+    /**
+      Check a header line to see if it appears header-like.  Display a
+      warning if it doesn't look like a header.
+
+      \param header  Header string to test.
+    */
+    void checkHeader(const std::string& header);
+
 private:
     char m_separator;
     std::istream *m_istream;
@@ -125,6 +141,8 @@ private:
     Dimension::IdList m_dims;
     StringList m_fields;
     size_t m_line;
+    std::string m_headerOverride;
+    std::string m_headerInsert;
 };
 
 } // namespace pdal

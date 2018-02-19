@@ -193,7 +193,6 @@ KD3Index& PointView::build3dIndex()
     if (!m_index3)
     {
         m_index3.reset(new KD3Index(*this));
-        std::cerr << "About to build index!\n";
         m_index3->build();
     }
     return *m_index3.get();

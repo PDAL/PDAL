@@ -35,7 +35,6 @@
 #include "VoxelCenterNearestNeighborFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <set>
 #include <string>

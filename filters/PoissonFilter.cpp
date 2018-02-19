@@ -35,8 +35,6 @@
 #include "PoissonFilter.hpp"
 #include "NormalFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <kazhdan/PoissonRecon.h>
 #include <kazhdan/point_source/PointSource.h>
 
@@ -131,6 +129,19 @@ public:
         m_view.setField(Dimension::Id::Y, cnt, position[1]);
         m_view.setField(Dimension::Id::Z, cnt, position[2]);
         m_view.setField(Dimension::Id::Density, cnt, density);
+        return cnt;
+    }
+
+    virtual int newPoint(const std::array<double, 3>& position,
+        const std::array<uint8_t, 3>& color)
+    {
+        PointId cnt = m_view.size();
+        m_view.setField(Dimension::Id::X, cnt, position[0]);
+        m_view.setField(Dimension::Id::Y, cnt, position[1]);
+        m_view.setField(Dimension::Id::Z, cnt, position[2]);
+        m_view.setField(Dimension::Id::Red, cnt, color[0]);
+        m_view.setField(Dimension::Id::Green, cnt, color[1]);
+        m_view.setField(Dimension::Id::Blue, cnt, color[2]);
         return cnt;
     }
 

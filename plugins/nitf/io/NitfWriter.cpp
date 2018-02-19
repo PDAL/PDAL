@@ -38,26 +38,13 @@
 #include "NitfWriter.hpp"
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointView.hpp>
-
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wunused-private-field"
-#endif
 
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
 #endif
 #include <nitro/c++/import/nitf.hpp>
 #include "tre_plugins.hpp"
-
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
 
 // NOTES
 //

@@ -167,7 +167,6 @@ Word #       Content
 #include "QfitReader.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/portable_endian.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -175,10 +174,7 @@ Word #       Content
 #include <algorithm>
 #include <map>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-
+#pragma warning(disable: 4127)  // conditional expression is constant
 
 namespace pdal
 {

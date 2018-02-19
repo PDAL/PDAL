@@ -39,7 +39,6 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t DeltaKernel_ExitFunc();
 extern "C" PF_ExitFunc DeltaKernel_InitPlugin();
@@ -73,9 +72,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    DeltaKernel();
 
 private:
-    DeltaKernel();
     void addSwitches(ProgramArgs& args);
     PointViewPtr loadSet(const std::string& filename, PointTable& table);
     MetadataNode dump(PointViewPtr& srcView, PointViewPtr& candView,

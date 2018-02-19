@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,66 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-// plugin.h was modeled very closely after the work of Gigi Sayfan in the Dr.
-// Dobbs article:
-// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
-// The original work was released under the Apache License v2.
+#include <pdal/pdal_test_main.hpp>
 
-#pragma once
+#include <random>
 
-#include <string>
+#include <pdal/compression/DeflateCompression.hpp>
 
-#include <pdal/pdal_export.hpp>
+using namespace pdal;
 
-#include <cstdint>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-const int PF_PluginType_Kernel = 1;
-const int PF_PluginType_Reader = 2;
-const int PF_PluginType_Filter = 4;
-const int PF_PluginType_Writer = 8;
-typedef int PF_PluginType;
-
-typedef struct PF_PluginAPI_Version
+TEST(Compression, deflate)
 {
-    int32_t major;
-    int32_t minor;
-} PF_PluginAPI_Version;
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
 
-typedef void * (*PF_CreateFunc)();
-typedef int32_t (*PF_DestroyFunc)(void *);
+    // Choosing a size that isn't a multiple of the internal buffer.
+    std::vector<int> orig(1000357);
+    // Trying to make something that compresses reasonably well.
+    int val = dist(generator);
+    for (size_t i = 0; i < orig.size(); ++i)
+    {
+        orig[i] = val++;
+        if (i % 100 == 0)
+            val = dist(generator);
+    }
 
-typedef struct PF_RegisterParams
-{
-    PF_PluginAPI_Version version;
-    PF_CreateFunc createFunc;
-    PF_DestroyFunc destroyFunc;
-    std::string description;
-    std::string link;
-    PF_PluginType pluginType;
-} PF_RegisterParams;
+    std::vector<char> compressed;
+    auto cb = [&compressed](char *buf, size_t bufsize)
+    {
+        static size_t total = 0;
+        compressed.insert(compressed.end(), buf, buf + bufsize);
+        total += bufsize;
+    };
 
-typedef int32_t (*PF_ExitFunc)();
-typedef PF_ExitFunc (*PF_InitFunc)();
+    DeflateCompressor compressor(cb);
 
-#ifndef PDAL_DLL
-  #ifdef _WIN32
-    #define PDAL_DLL __declspec(dllimport)
-  #else
-    #define PDAL_DLL
-  #endif
-#endif
+    size_t s = orig.size() * sizeof(int);
+    char *sp = reinterpret_cast<char *>(orig.data());
+    compressor.compress(sp, s);
+    compressor.done();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif
-PDAL_DLL PF_ExitFunc PF_initPlugin();
+    auto verifier = [&sp](char *buf, size_t bufsize)
+    {
+        EXPECT_EQ(memcmp(buf, sp, bufsize), 0);
+        sp += bufsize;
+    };
 
-#ifdef __cplusplus
+    DeflateDecompressor decompressor(verifier);
+    decompressor.decompress(compressed.data(), compressed.size());
+    decompressor.done();
 }
-#endif
 

@@ -39,8 +39,6 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_config.hpp>
-#include <pdal/pdal_macros.hpp>
-
 
 namespace pdal
 {
@@ -90,7 +88,7 @@ int HausdorffKernel::execute()
     root.add("filenames", m_sourceFile);
     root.add("filenames", m_candidateFile);
     root.add("hausdorff", hausdorff);
-    root.add("pdal_version", pdal::GetFullVersionString());
+    root.add("pdal_version", Config::fullVersionString());
     Utils::toJSON(root, std::cout);
 
     return 0;

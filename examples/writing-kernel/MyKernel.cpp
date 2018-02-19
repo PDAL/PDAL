@@ -5,8 +5,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/PointTable.hpp>
 
 #include <memory>
@@ -36,7 +34,6 @@ namespace pdal {
   int MyKernel::execute()
   {
     PointTable table;
-    StageFactory f;
 
     Stage& reader = makeReader(m_input_file, "readers.las");
 

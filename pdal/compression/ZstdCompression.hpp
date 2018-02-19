@@ -33,119 +33,41 @@
 ****************************************************************************/
 #pragma once
 
-#ifdef PDAL_HAVE_ZSTD
-
-#include <pdal/Compression.hpp>
-
-#include <zstd.h>
+#include "Compression.hpp"
 
 namespace pdal
 {
 
-class ZstdCompressor
+class ZstdCompressorImpl;
+
+class ZstdCompressor : public Compressor
 {
 public:
-    ZstdCompressor(BlockCb cb) : m_cb(cb)
-    {
-        m_strm = ZSTD_createCStream();
-        ZSTD_initCStream(m_strm, 15);
-    }
+    PDAL_DLL ZstdCompressor(BlockCb cb);
+    PDAL_DLL ~ZstdCompressor();
 
-    ~ZstdCompressor()
-        { ZSTD_freeCStream(m_strm); }
-
-
-    void compress(const char *buf, size_t bufsize)
-    {
-        std::cerr << "Compress!\n";
-        m_inBuf.src = reinterpret_cast<const void *>(buf);
-        m_inBuf.size = bufsize;
-        m_inBuf.pos = 0;
-
-        size_t ret;
-        do
-        {
-            ZSTD_outBuffer outBuf
-                { reinterpret_cast<void *>(m_tmpbuf), CHUNKSIZE, 0 };
-            ret = ZSTD_compressStream(m_strm, &outBuf, &m_inBuf);
-            if (ZSTD_isError(ret))
-                break;
-            if (outBuf.pos)
-                m_cb(m_tmpbuf, outBuf.pos);
-            std::cerr << "In buf pos/size = " << m_inBuf.pos << "/" << m_inBuf.size << "!\n";
-            std::cerr << "Out buf pos/size = " << outBuf.pos << "/" << outBuf.size << "!\n";
-        } while (m_inBuf.pos != m_inBuf.size);
-    }
-
-    void done()
-    {
-        std::cerr << "Done compression!\n";
-        size_t ret;
-        do
-        {
-            ZSTD_outBuffer outBuf
-                { reinterpret_cast<void *>(m_tmpbuf), CHUNKSIZE, 0 };
-            ret = ZSTD_endStream(m_strm, &outBuf);
-            if (ZSTD_isError(ret))
-                break;
-            if (outBuf.pos)
-                m_cb(m_tmpbuf, outBuf.pos);
-        } while (ret);
-    }
+    PDAL_DLL void compress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
-    BlockCb m_cb;
-
-    ZSTD_CStream *m_strm;
-    ZSTD_inBuffer m_inBuf;
-    char m_tmpbuf[CHUNKSIZE];
+    std::unique_ptr<ZstdCompressorImpl> m_impl;
 };
 
-class ZstdDecompressor
+class ZstdDecompressorImpl;
+
+class ZstdDecompressor : public Decompressor
 {
 public:
-    ZstdDecompressor(BlockCb cb) : m_cb(cb)
-    {
-        m_strm = ZSTD_createDStream();
-        ZSTD_initDStream(m_strm);
-    }
+    PDAL_DLL ZstdDecompressor(BlockCb cb);
+    PDAL_DLL ~ZstdDecompressor();
 
-    ~ZstdDecompressor()
-    {
-        ZSTD_freeDStream(m_strm);
-    }
-
-    void decompress(const char *buf, size_t bufsize)
-    {
-        std::cerr << "DE-Compress!\n";
-        m_inBuf.src = reinterpret_cast<const void *>(buf);
-        m_inBuf.size = bufsize;
-        m_inBuf.pos = 0;
-
-        size_t ret;
-        do
-        {
-            ZSTD_outBuffer outBuf
-                { reinterpret_cast<void *>(m_tmpbuf), CHUNKSIZE, 0 };
-            ret = ZSTD_decompressStream(m_strm, &outBuf, &m_inBuf);
-            if (ZSTD_isError(ret))
-                break;
-            if (outBuf.pos)
-                m_cb(m_tmpbuf, outBuf.pos);
-        } while (m_inBuf.pos != m_inBuf.size);
-    }
-
-    void done()
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
+    PDAL_DLL void done()
     {}
 
 private:
-    BlockCb m_cb;
-
-    ZSTD_DStream *m_strm;
-    ZSTD_inBuffer m_inBuf;
-    char m_tmpbuf[CHUNKSIZE];
+    std::unique_ptr<ZstdDecompressorImpl> m_impl;
 };
 
 } // namespace pdal
 
-#endif // PDAL_HAVE_ZSTD

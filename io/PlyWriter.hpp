@@ -34,7 +34,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t PlyWriter_ExitFunc();
 extern "C" PF_ExitFunc PlyWriter_InitPlugin();

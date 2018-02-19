@@ -35,7 +35,6 @@
 #include "RadialDensityFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <string>
 #include <vector>
@@ -68,12 +67,12 @@ void RadialDensityFilter::addDimensions(PointLayoutPtr layout)
 void RadialDensityFilter::filter(PointView& view)
 {
     using namespace Dimension;
-    
+
     // Build the 3D KD-tree.
     log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
     KD3Index index(view);
     index.build();
- 
+
     // Search for neighboring points within the specified radius. The number of
     // neighbors (which includes the query point) is normalized by the volume
     // of the search sphere and recorded as the density.
@@ -83,7 +82,7 @@ void RadialDensityFilter::filter(PointView& view)
     {
         std::vector<PointId> pts = index.radius(i, m_rad);
         view.setField(m_rdens, i, pts.size() * factor);
-    } 
+    }
 }
 
 } // namespace pdal

@@ -37,7 +37,7 @@
 #include <queue>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C"
 {
@@ -54,7 +54,7 @@ namespace pdal
 
 struct BathData;
 
-class PDAL_DLL MbReader : public pdal::Reader
+class PDAL_DLL MbReader : public Reader, public Streamable
 {
     struct BathData
     {

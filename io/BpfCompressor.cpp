@@ -34,9 +34,6 @@
 
 #include "BpfCompressor.hpp"
 
-
-#include <pdal/pdal_internal.hpp>
-
 namespace pdal
 {
 

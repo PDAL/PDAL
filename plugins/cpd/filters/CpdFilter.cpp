@@ -37,7 +37,6 @@
 #include <cpd/rigid.hpp>
 #include <filters/CpdFilter.hpp>
 #include <pdal/EigenUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

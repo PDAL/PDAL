@@ -38,26 +38,16 @@
 
 #include <algorithm>
 
-//#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127) // conditional expression is constant
-//#endif
+#pragma warning(disable: 4127) // conditional expression is constant
 
-
-#ifdef PDAL_HAVE_PYTHON
 
 #include <Python.h>
 #undef toupper
 #undef tolower
 #undef isspace
 
-#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL PDALARRAY_ARRAY_API
-#endif
-
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
-
-#endif //PDAL_HAVE_PYTHON
 
 // forward declare PyObject so we don't need the python headers everywhere
 // see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
@@ -76,19 +66,8 @@ class PDAL_DLL Array
 {
 public:
 
-    Array()
-        : m_py_array(0)
-    {
-#ifdef PDAL_HAVE_PYTHON
-        auto initNumpy = []()
-        {
-#undef NUMPY_IMPORT_ARRAY_RETVAL
-#define NUMPY_IMPORT_ARRAY_RETVAL
-            import_array();
-        };
-        initNumpy();
-#endif
-    }
+    Array() : m_py_array(0)
+    {}
 
     ~Array()
     {
@@ -98,7 +77,6 @@ public:
 
     inline void update(PointViewPtr view)
     {
-#ifdef PDAL_HAVE_PYTHON
         typedef std::unique_ptr<std::vector<uint8_t>> DataPtr;
         cleanup();
         int nd = 1;
@@ -145,7 +123,6 @@ public:
 
         m_py_array = pyArray;
         m_data_array = std::move(pdata);
-#endif
     }
 
 
@@ -156,11 +133,9 @@ private:
 
     inline void cleanup()
     {
-#ifdef PDAL_HAVE_PYTHON
         PyObject* p = (PyObject*)(m_py_array);
         Py_XDECREF(p);
         m_data_array.reset();
-#endif
     }
 
     inline PyObject* buildNumpyDescription(PointViewPtr view) const
@@ -175,7 +150,6 @@ private:
         // 'Blue']}
         //
 
-#ifdef PDAL_HAVE_PYTHON
         std::stringstream oss;
         Dimension::IdList dims = view->dims();
 
@@ -225,7 +199,6 @@ private:
     //     std::string output(s);
     //     std::cout << "array: " << output << std::endl;
         return dict;
-#endif
     }
 
     PyObject* m_py_array;

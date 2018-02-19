@@ -35,7 +35,6 @@
 #include "MbReader.hpp"
 #include "MbError.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/DimUtil.hpp>
 

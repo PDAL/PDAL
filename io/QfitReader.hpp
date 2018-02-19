@@ -40,7 +40,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
 
 
 extern "C" int32_t QfitReader_ExitFunc();

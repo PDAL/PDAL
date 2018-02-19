@@ -34,15 +34,16 @@
 
 #pragma once
 
-
 #include <stdexcept>
 #include <ostream>
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/util/Charbuf.hpp>
+#include <pdal/util/OStream.hpp>
+
 #ifdef PDAL_HAVE_ZLIB
 #include <zlib.h>
 #endif // PDAL_HAVE_ZLIB
-
-#include <pdal/util/Charbuf.hpp>
-#include <pdal/util/OStream.hpp>
 
 namespace pdal
 {

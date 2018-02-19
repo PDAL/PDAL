@@ -32,17 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/compression/LazPerfVlrCompression.hpp>
+
 #include "LasReader.hpp"
 
 #include <sstream>
 #include <string.h>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GeotiffSupport.hpp"
@@ -62,6 +64,18 @@ struct invalid_stream : public std::runtime_error
 };
 
 } // unnamed namespace
+
+LasReader::LasReader() : m_decompressor(nullptr), m_index(0)
+{}
+
+
+LasReader::~LasReader()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_decompressor;
+#endif
+}
+
 
 void LasReader::addArgs(ProgramArgs& args)
 {
@@ -245,8 +259,9 @@ void LasReader::ready(PointTableRef table)
         {
             const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
-            m_decompressor.reset(new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_header.pointOffset()));
+            delete m_decompressor;
+            m_decompressor = new LazPerfVlrDecompressor(*stream,
+                vlr->data(), m_header.pointOffset());
             m_decompressorBuf.resize(m_decompressor->pointSize());
         }
 #endif

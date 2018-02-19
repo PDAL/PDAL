@@ -36,7 +36,6 @@
 
 #include <pdal/Kernel.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t RandomKernel_ExitFunc();
 extern "C" PF_ExitFunc RandomKernel_InitPlugin();
@@ -50,11 +49,11 @@ public:
     static void *create();
     static int32_t destroy(void *);
 
+    RandomKernel();
     std::string getName() const;
     int execute();
 
 private:
-    RandomKernel();
     void addSwitches(ProgramArgs& arg);
 
     std::string m_outputFile;

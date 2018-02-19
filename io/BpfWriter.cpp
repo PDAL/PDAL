@@ -37,12 +37,10 @@
 #include <climits>
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_export.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "BpfCompressor.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 

@@ -35,7 +35,6 @@
 
 #include "SmoothKernel.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <io/BufferReader.hpp>
 
 #include "../filters/PCLBlock.hpp"
@@ -80,7 +79,7 @@ int SmoothKernel::execute()
     manager.stageOptions() = m_manager.stageOptions();
 
     BufferReader& bufferReader =
-        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+        dynamic_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
     bufferReader.addView(input_view);
 
     std::ostringstream ss;

@@ -34,6 +34,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <functional>
 
 namespace pdal
 {
@@ -58,6 +59,30 @@ public:
 
     compression_error(const std::string& s) :
         std::runtime_error("Compression: " + s)
+    {}
+};
+
+
+class PDAL_DLL Compressor
+{
+public:
+    virtual ~Compressor()
+    {}
+
+    virtual void compress(const char *buf, size_t bufsize) = 0;
+    virtual void done()
+    {}
+};
+
+
+class PDAL_DLL Decompressor
+{
+public:
+    virtual ~Decompressor()
+    {}
+
+    virtual void decompress(const char *buf, size_t bufsize) = 0;
+    virtual void done()
     {}
 };
 

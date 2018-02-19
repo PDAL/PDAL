@@ -32,7 +32,6 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/pdal_macros.hpp>
 #include <io/BufferReader.hpp>
 
 #include "PCLKernel.hpp"

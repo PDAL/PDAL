@@ -40,7 +40,7 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t PlyReader_ExitFunc();
 extern "C" PF_ExitFunc PlyReader_InitPlugin();
@@ -48,7 +48,7 @@ extern "C" PF_ExitFunc PlyReader_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL PlyReader : public Reader
+class PDAL_DLL PlyReader : public Reader, public Streamable
 {
 public:
     static void *create();

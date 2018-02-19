@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Connor Manning (connor@hobu.co)
+* Copyright (c) 2017, Connor Manning (connor@hobu.co)
 *
 * All rights reserved.
 *
@@ -38,18 +38,17 @@
 #include <queue>
 #include <vector>
 
+#include <json/json.h>
+
 #include <arbiter/arbiter.hpp>
 
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/util/Bounds.hpp>
 
-#include "bounds.hpp"
+#include "GreyhoundCommon.hpp"
 
 namespace pdal
 {
-
-namespace greyhound = entwine;
 
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
@@ -65,28 +64,12 @@ private:
     virtual void prepared(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
 
-    struct Args
-    {
-        std::string url;
-        std::string resource;
-        std::string sbounds;
-        std::size_t depthBegin = 0;
-        std::size_t depthEnd = 0;
-        std::string tilePath;
-        Json::Value filter;
-        Json::Value schema;
-
-        std::string base() const;
-        std::string query() const;
-    };
-
-    Args m_args;
-    std::string m_base;
-    std::string m_query;
+    GreyhoundArgs m_args;
+    GreyhoundParams m_params;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
     Json::Value m_info;
-    DimTypeList m_dims;
+    PointLayout m_readLayout;
 };
 
 } // namespace pdal

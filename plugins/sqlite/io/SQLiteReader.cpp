@@ -35,7 +35,7 @@
 #include "SQLiteReader.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>

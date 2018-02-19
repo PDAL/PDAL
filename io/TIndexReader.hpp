@@ -38,7 +38,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/plugin.hpp>
 #include <filters/MergeFilter.hpp>
 
 extern "C" int32_t TIndexReader_ExitFunc();
@@ -46,7 +45,7 @@ extern "C" PF_ExitFunc TIndexReader_InitPlugin();
 
 namespace pdal
 {
-class PDAL_DLL TIndexReader : public pdal::Reader
+class PDAL_DLL TIndexReader : public Reader
 {
     struct FileInfo
     {
@@ -77,6 +76,7 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 

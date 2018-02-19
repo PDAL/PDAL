@@ -34,7 +34,6 @@
 
 #include "GeoWaveWriter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -138,7 +137,7 @@ using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloIndexWr
 
 namespace pdal
 {
-  
+
 static PluginInfo const s_info = PluginInfo(
     "writers.geowave",
     "Write data using GeoWave.",
@@ -206,7 +205,7 @@ std::string pdal::GeoWaveWriter::getName() const { return s_info.name; }
         std::ostringstream os;
 
         BasicAccumuloOperations accumuloOperations;
-        try 
+        try
         {
             accumuloOperations = java_new<BasicAccumuloOperations>(
                 java_new<String>(m_zookeeperUrl),

@@ -35,7 +35,6 @@
 #include "DecimationFilter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
