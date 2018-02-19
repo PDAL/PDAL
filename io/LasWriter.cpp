@@ -55,7 +55,6 @@
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/Utils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GeotiffSupport.hpp"

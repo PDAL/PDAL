@@ -34,7 +34,6 @@
 
 #include "TIndexReader.hpp"
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

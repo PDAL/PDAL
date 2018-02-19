@@ -40,8 +40,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/surface/grid_projection.h>
 
-#include <pdal/pdal_macros.hpp>
-
 #include "../PCLConversions.hpp"
 
 namespace pdal

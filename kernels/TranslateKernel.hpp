@@ -37,8 +37,6 @@
 
 #include <pdal/Kernel.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <string>

@@ -36,9 +36,9 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_features.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip_api.h>
@@ -64,7 +64,7 @@ class LeExtractor;
 class PointDimensions;
 class LazPerfVlrDecompressor;
 
-class PDAL_DLL LasReader : public pdal::Reader
+class PDAL_DLL LasReader : public Reader, public Streamable
 {
 protected:
     class LasStreamIf

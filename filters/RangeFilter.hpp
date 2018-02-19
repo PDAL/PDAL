@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <memory>
 #include <map>
@@ -49,7 +49,7 @@ namespace pdal
 
 struct DimRange;
 
-class PDAL_DLL RangeFilter : public pdal::Filter
+class PDAL_DLL RangeFilter : public Filter,  public Streamable
 {
 public:
     RangeFilter();

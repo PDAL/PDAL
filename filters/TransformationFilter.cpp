@@ -34,9 +34,6 @@
 
 #include "TransformationFilter.hpp"
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_macros.hpp>
-
 #include <sstream>
 
 namespace pdal

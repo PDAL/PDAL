@@ -36,7 +36,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
@@ -260,12 +259,16 @@ void ColorinterpFilter::filter(PointView& view)
 }
 
 
+bool ColorinterpFilter::pipelineStreamable() const
+{
+    if (std::isnan(m_min) || std::isnan(m_max))
+        return false;
+    return Streamable::pipelineStreamable();
+}
+
+
 bool ColorinterpFilter::processOne(PointRef& point)
 {
-    // This will throw if min or max aren't defined.
-    if (std::isnan(m_min) || std::isnan(m_max))
-        throwStreamingError();
-
     double v = point.getFieldAs<double>(m_interpDim);
 
     // Don't color points that aren't in the min/max range.

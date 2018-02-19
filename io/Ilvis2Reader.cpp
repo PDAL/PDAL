@@ -35,7 +35,6 @@
 #include "Ilvis2Reader.hpp"
 #include "Ilvis2MetadataReader.hpp"
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <algorithm>

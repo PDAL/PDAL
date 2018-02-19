@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/Point.hpp"

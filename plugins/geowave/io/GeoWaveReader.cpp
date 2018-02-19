@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "GeoWaveReader.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <jace/Jace.h>

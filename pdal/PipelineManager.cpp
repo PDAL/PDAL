@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -42,6 +43,12 @@
 
 namespace pdal
 {
+
+PipelineManager::PipelineManager() : m_factory(new StageFactory),
+    m_tablePtr(new PointTable()), m_table(*m_tablePtr),
+    m_progressFd(-1), m_input(nullptr)
+{}
+
 
 PipelineManager::~PipelineManager()
 {
@@ -89,7 +96,7 @@ void PipelineManager::readPipeline(const std::string& filename)
 
 Stage& PipelineManager::addReader(const std::string& type)
 {
-    Stage *reader = m_factory.createStage(type);
+    Stage *reader = m_factory->createStage(type);
     if (!reader)
     {
         std::ostringstream ss;
@@ -105,7 +112,7 @@ Stage& PipelineManager::addReader(const std::string& type)
 
 Stage& PipelineManager::addFilter(const std::string& type)
 {
-    Stage *filter = m_factory.createStage(type);
+    Stage *filter = m_factory->createStage(type);
     if (!filter)
     {
         std::ostringstream ss;
@@ -121,7 +128,7 @@ Stage& PipelineManager::addFilter(const std::string& type)
 
 Stage& PipelineManager::addWriter(const std::string& type)
 {
-    Stage *writer = m_factory.createStage(type);
+    Stage *writer = m_factory->createStage(type);
     if (!writer)
     {
         std::ostringstream ss;
@@ -155,6 +162,17 @@ void PipelineManager::validateStageOptions() const
             throw pdal_error(oss.str());
         }
     }
+}
+
+
+bool PipelineManager::pipelineStreamable() const
+{
+    bool streamable = false;
+
+    Stage *s = getStage();
+    if (s)
+        streamable = s->pipelineStreamable();
+    return streamable;
 }
 
 

@@ -15,8 +15,8 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
 
   --input, -i               Input filename
   --pipeline-serialization  Output file for pipeline serialization
-  --validate                Validate the pipeline (including serialization),
-      but do not write points
+  --validate                Validate but do not process the pipeline.
+      Also reports whether a pipeline can be streamed.
   --progress                Name of file or FIFO to which stages should write
       progress information. The file/FIFO must exist. PDAL will not create the
       progress file.

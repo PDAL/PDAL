@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t PoissonFilter_ExitFunc();
 extern "C" PF_ExitFunc PoissonFilter_InitPlugin();

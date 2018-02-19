@@ -40,10 +40,10 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 #include "BpfHeader.hpp"
 
@@ -55,7 +55,7 @@ extern "C" PF_ExitFunc BpfReader_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL BpfReader : public Reader
+class PDAL_DLL BpfReader : public Reader, public Streamable
 {
 public:
     static void * create();

@@ -37,7 +37,6 @@
 
 #include "MatlabReader.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal

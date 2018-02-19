@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t StatsFilter_ExitFunc();
 extern "C" PF_ExitFunc StatsFilter_InitPlugin();
@@ -155,10 +155,10 @@ private:
 
 // This is just a pass-through filter, which collects some stats about
 // the points that are fed through it
-class PDAL_DLL StatsFilter : public Filter
+class PDAL_DLL StatsFilter : public Filter, public Streamable
 {
 public:
-    StatsFilter() : Filter()
+    StatsFilter()
         {}
 
     static void * create();

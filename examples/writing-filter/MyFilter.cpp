@@ -3,10 +3,8 @@
 #include "MyFilter.hpp"
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

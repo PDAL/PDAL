@@ -37,7 +37,6 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t PtsReader_ExitFunc();
 extern "C" PF_ExitFunc PtsReader_InitPlugin();

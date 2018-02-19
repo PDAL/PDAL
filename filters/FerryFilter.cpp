@@ -34,8 +34,6 @@
 
 #include "FerryFilter.hpp"
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 

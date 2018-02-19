@@ -41,8 +41,6 @@
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Georeference.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 #include "OptechCommon.hpp"
 

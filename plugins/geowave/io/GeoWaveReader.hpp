@@ -35,9 +35,7 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/plugin.hpp>
 
 #include <geos_c.h>
 

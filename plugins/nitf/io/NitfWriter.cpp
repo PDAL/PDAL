@@ -38,7 +38,6 @@
 #include "NitfWriter.hpp"
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointView.hpp>
 
 #ifndef IMPORT_NITRO_API

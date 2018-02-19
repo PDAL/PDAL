@@ -39,8 +39,6 @@
 #include <zlib.h>
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
