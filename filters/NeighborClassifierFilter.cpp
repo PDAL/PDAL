@@ -32,9 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "KNNAssignFilter.hpp"
+#include "NeighborClassifierFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -47,9 +46,9 @@ namespace pdal
 {
 
 static PluginInfo const s_info = PluginInfo(
-    "filters.knnassign",
+    "filters.neighborclassifier",
     "Re-assign some point attributes based KNN voting",
-    "http://pdal.io/stages/filters.knnassign.html" );
+    "http://pdal.io/stages/filters.neighborclassifier.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, KNNAssignFilter, Filter, s_info)
 

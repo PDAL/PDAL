@@ -1,13 +1,12 @@
-.. _filters.knnassign:
+.. _filters.neighborclassifier:
 
-filters.knnassign
+filters.neighborclassifier
 ===================
 
-The knnassign filter allows you update the value of a dimension for specific points
-to a value determined by a K-nearest neighbors vote. For each point, the k 
-nearest neighbors are queried and if more than half of them have the same 
-value for the specified dimension, the filter updates the selected point 
-accordingly
+The neighborclassifier filter allows you update the value of the classification
+for specific points to a value determined by a K-nearest neighbors vote. 
+For each point, the k nearest neighbors are queried and if more than half of
+them have the same value, the filter updates the selected point accordingly
 
 For example, if an automated classification procedure put/left erroneous 
 vegetation points near the edges of buildings which were largely classified 
@@ -30,9 +29,8 @@ This pipeline updates the Classification of all points with classification
       "pipeline":[
         "autzen_class.las",
         {
-          "type" : "filters.knnassign",
+          "type" : "filters.neighborclassifier",
           "domain" : "Classification[1:1]",
-          "dimension" : "Classification",
           "k" : 10
         },
         {
@@ -53,8 +51,7 @@ assigned based on the closest point in pred.txt.
       "pipeline":[
         "src.las",
         {
-          "type" : "filters.knnassign",
-          "dimension" : "Classification",
+          "type" : "filters.neighborclassifier",
           "k" : 1,
           "candidate" : "pred.txt"
         },
@@ -75,9 +72,6 @@ domain
   A :ref:`range <ranges>` which selects points to be processed by the filter.
   Can be specified multiple times.  Points satisfying any range will be
   processed
-
-dimension
-  A :ref:`dimension` which specifies which dimension to be updated by the filter.
 
 k
   An integer which specifies the number of neighbors which vote on each

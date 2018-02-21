@@ -58,7 +58,7 @@ const stats::Summary::EnumMap GetClassifications(Stage &s, unsigned int *count =
         *count = statsClassification.count();
     return statsClassification.values();
 }
-TEST(KNNAssignFilterTest, singleRange)
+TEST(NeighborClassifierFilterTest, singleRange)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/sample_c.las"));
@@ -77,7 +77,7 @@ TEST(KNNAssignFilterTest, singleRange)
         //fo.add("dimension", "Classification");
         fo.add("k", k);
 
-        Stage& f = *(factory.createStage("filters.knnassign"));
+        Stage& f = *(factory.createStage("filters.neighborclassifier"));
         f.setInput(r);
 
         f.setOptions(fo);
@@ -111,7 +111,7 @@ TEST(KNNAssignFilterTest, singleRange)
     }
 }
 
-TEST(KNNAssignFilterTest, multipleRange)
+TEST(NeighborClassifierFilterTest, multipleRange)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/sample_c.las"));
@@ -130,7 +130,7 @@ TEST(KNNAssignFilterTest, multipleRange)
         //fo.add("dimension", "Classification");
         fo.add("k", k);
 
-        Stage& f = *(factory.createStage("filters.knnassign"));
+        Stage& f = *(factory.createStage("filters.neighborclassifier"));
         f.setInput(r);
         f.setOptions(fo);
 
@@ -163,7 +163,7 @@ TEST(KNNAssignFilterTest, multipleRange)
     }
 }
 
-TEST(KNNAssignFilterTest, candidate)
+TEST(NeighborClassifierFilterTest, candidate)
 {
     StageFactory factory;
 
@@ -188,7 +188,7 @@ TEST(KNNAssignFilterTest, candidate)
         fo.add("candidate", Support::datapath("las/sample_c_thin.las"));
         fo.add("k", k);
 
-        Stage& f = *(factory.createStage("filters.knnassign"));
+        Stage& f = *(factory.createStage("filters.neighborclassifier"));
         f.setInput(r);
         f.setOptions(fo);
 

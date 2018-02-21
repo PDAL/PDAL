@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/KDIndex.hpp>
 
@@ -54,7 +53,7 @@ public:
 
     static void * create();
     static int32_t destroy(void *);
-    std::string getName() const { return "filters.knnassign"; }
+    std::string getName() const { return "filters.neighborclassifier"; }
 
 private:
     virtual void addArgs(ProgramArgs& args);

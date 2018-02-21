@@ -55,7 +55,7 @@
 #include <filters/HAGFilter.hpp>
 #include <filters/HeadFilter.hpp>
 #include <filters/IQRFilter.hpp>
-#include <filters/KNNAssignFilter.hpp>
+#include <filters/NeighborClassifierFilter.hpp>
 #include <filters/KDistanceFilter.hpp>
 #include <filters/LocateFilter.hpp>
 #include <filters/LOFFilter.hpp>
