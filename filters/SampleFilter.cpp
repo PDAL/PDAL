@@ -35,7 +35,6 @@
 #include "SampleFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 

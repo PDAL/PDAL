@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t MergeFilter_ExitFunc();
 extern "C" PF_ExitFunc MergeFilter_InitPlugin();
@@ -43,7 +43,7 @@ extern "C" PF_ExitFunc MergeFilter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL MergeFilter : public Filter
+class PDAL_DLL MergeFilter : public Filter, public Streamable
 {
 public:
     MergeFilter ()

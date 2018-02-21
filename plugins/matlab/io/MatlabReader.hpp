@@ -37,12 +37,10 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 #include "../filters/Script.hpp"
 
-
 #include <mat.h>
-
 
 extern "C" int32_t MatlabReader_ExitFunc();
 extern "C" PF_ExitFunc MatlabReader_InitPlugin();
@@ -50,7 +48,7 @@ extern "C" PF_ExitFunc MatlabReader_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL MatlabReader : public Reader
+class PDAL_DLL MatlabReader : public Reader, public Streamable
 {
 public:
     static void * create();

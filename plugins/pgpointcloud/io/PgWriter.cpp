@@ -36,9 +36,7 @@
 #include "PgWriter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/portable_endian.hpp>
 #include <pdal/util/ProgramArgs.hpp>

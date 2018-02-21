@@ -37,7 +37,6 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

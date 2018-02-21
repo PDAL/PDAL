@@ -34,8 +34,6 @@
 
 #include "IQRFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <string>
 #include <vector>
 

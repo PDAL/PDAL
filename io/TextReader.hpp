@@ -37,7 +37,7 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t TextReader_ExitFunc();
 extern "C" PF_ExitFunc TextReader_InitPlugin();
@@ -45,7 +45,7 @@ extern "C" PF_ExitFunc TextReader_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL TextReader : public Reader
+class PDAL_DLL TextReader : public Reader, public Streamable
 {
 public:
     static void * create();

@@ -36,12 +36,10 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/plugin.hpp>
 
 #include <lidar/PointSource.h>
 #include <lidar/PointData.h>
 #include <lidar/MG4PointReader.h>
-
 
 extern "C" int32_t MrsidReader_ExitFunc();
 extern "C" PF_ExitFunc MrsidReader_InitPlugin();

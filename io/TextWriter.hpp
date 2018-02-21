@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t TextWriter_ExitFunc();
 extern "C" PF_ExitFunc TextWriter_InitPlugin();

@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <vector>
 #include <string>
@@ -46,7 +46,7 @@ extern "C" PF_ExitFunc FerryFilter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL FerryFilter : public Filter
+class PDAL_DLL FerryFilter : public Filter, public Streamable
 {
     struct Info
     {

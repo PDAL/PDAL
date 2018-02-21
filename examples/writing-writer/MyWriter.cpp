@@ -1,7 +1,6 @@
 // MyWriter.cpp
 
 #include "MyWriter.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -33,7 +32,7 @@ namespace pdal
   void MyWriter::addArgs(ProgramArgs& args)
   {
     // setPositional() Makes the argument required.
-    args.add("filename", "Output filename", m_filename).setPositional();  
+    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("newline", "Line terminator", m_newline, "\n");
     args.add("datafield", "Data field", m_datafield, "UserData");
     args.add("precision", "Precision", m_precision, 3);

@@ -44,6 +44,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PipelineWriter.hpp>
+#include <pdal/PluginHelper.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/PointView.hpp>
@@ -57,6 +58,7 @@ namespace pdal
 class ProgramArgs;
 class StageRunner;
 class StageWrapper;
+class Streamable;
 
 /**
   A stage performs the actual processing in PDAL.  Stages may read data,
@@ -72,6 +74,7 @@ class PDAL_DLL Stage
     FRIEND_TEST(OptionsTest, conditional);
     friend class StageWrapper;
     friend class StageRunner;
+    friend class Streamable;
 public:
     Stage();
     virtual ~Stage()
@@ -121,22 +124,12 @@ public:
     PointViewSet execute(PointTableRef table);
 
     /**
-      Execute a prepared pipeline (linked set of stages) in streaming mode.
+      Determine if a pipeline with this stage as a sink is streamable.
 
-      This performs the action associated with the stage by executing the
-      \ref processOne function of each stage in depth first order.  Points
-      are processed up to the capacity of the provided StreamPointTable.
-      Not all stages support streaming mode and an exception will be thrown
-      when attempting to \ref execute an unsupported stage.
-
-      Streaming points can reduce memory consumption, but may limit access
-      to algorithms that need to operate on full point sets.
-
-      \param table  Streming point table used for stage pipeline.  This must be
-        the same \ref table used in the \ref prepare function.
-
+      \return Whether the pipeline is streamable.
     */
-    void execute(StreamPointTable& table);
+    virtual bool pipelineStreamable() const
+    { return false; }
 
     /**
       Set the spatial reference of a stage.
@@ -336,13 +329,6 @@ protected:
     point_count_t faceCount() const
         { return m_faceCount; }
 
-    void throwStreamingError() const
-    {
-        std::ostringstream oss;
-        oss << "Point streaming not supported for stage " << getName() << ".";
-        throw pdal_error(oss.str());
-    }
-
 private:
     uint32_t m_verbose;
     std::string m_logname;
@@ -447,30 +433,6 @@ private:
         {}
 
     /**
-      Process a single point (streaming mode).  Implement in sublcass.
-
-      \param point  Point to process.
-      \return  Readers return false when no more points are to be read.
-        Filters return false if a point is to be filtered-out (not passed
-        to subsequent stages).
-    */
-    virtual bool processOne(PointRef& /*point*/)
-    {
-        throwStreamingError();
-        return false;
-    }
-
-    /**
-      (Streaming mode)  Notification that the points that will follow in
-      processing are from a spatial reference different than the previous
-      spatial reference.
-
-       \param srs  New spatial reference.
-    */
-    virtual void spatialReferenceChanged(const SpatialReference& srs)
-    {}
-
-    /**
       Process all points in a view.  Implement in subclass.
 
       \param view  PointView to process.
@@ -488,8 +450,6 @@ private:
     */
     virtual void done(PointTableRef /*table*/)
         {}
-
-    void execute(StreamPointTable& table, std::list<Stage *>& stages);
 
     /*
       Test hook.

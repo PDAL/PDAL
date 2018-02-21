@@ -36,7 +36,6 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <map>
 #include <string>

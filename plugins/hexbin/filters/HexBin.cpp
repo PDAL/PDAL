@@ -37,7 +37,6 @@
 #include <hexer/HexIter.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 
 using namespace hexer;
 

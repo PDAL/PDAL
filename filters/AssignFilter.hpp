@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t AssignFilter_ExitFunc();
 extern "C" PF_ExitFunc AssignFilter_InitPlugin();
@@ -45,7 +45,7 @@ namespace pdal
 
 struct AssignRange;
 
-class PDAL_DLL AssignFilter : public Filter
+class PDAL_DLL AssignFilter : public Filter, public Streamable
 {
 public:
     AssignFilter();

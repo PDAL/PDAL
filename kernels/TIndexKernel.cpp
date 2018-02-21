@@ -39,7 +39,6 @@
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 #include "../io/LasWriter.hpp"

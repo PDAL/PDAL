@@ -34,7 +34,6 @@
 
 #include "MongusFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/EigenUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/SpatialReference.hpp>

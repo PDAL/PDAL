@@ -36,7 +36,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/util/Extractor.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <map>
 

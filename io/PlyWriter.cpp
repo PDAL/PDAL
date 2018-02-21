@@ -37,7 +37,6 @@
 #include <limits>
 #include <sstream>
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 

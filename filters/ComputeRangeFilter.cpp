@@ -34,8 +34,6 @@
 
 #include "ComputeRangeFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <string>
 
 namespace pdal

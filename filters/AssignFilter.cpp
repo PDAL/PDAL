@@ -34,7 +34,6 @@
 
 #include "AssignFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 

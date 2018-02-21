@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PointRef.hpp>
-
 #include "SbetReader.hpp"
 
-#include <pdal/pdal_macros.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal

@@ -36,7 +36,6 @@
 
 #include <lidar/MG4PointReader.h>
 #include <lidar/FileIO.h>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/DimUtil.hpp>
 

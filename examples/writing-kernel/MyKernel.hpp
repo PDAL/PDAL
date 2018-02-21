@@ -3,7 +3,6 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.hpp>
 
 #include <string>
 

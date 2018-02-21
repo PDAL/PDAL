@@ -57,7 +57,7 @@ std::string appName()
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
 void run_pipeline(std::string const& pipelineFile,
-    const std::string options = std::string())
+    const std::string options = std::string(), const std::string lookFor = "")
 {
     const std::string cmd = appName();
 
@@ -68,6 +68,10 @@ void run_pipeline(std::string const& pipelineFile,
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
+    if (lookFor.size())
+    {
+        EXPECT_NE(output.find(lookFor), std::string::npos);
+    }
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
@@ -133,15 +137,10 @@ TEST(pipelineBaseTest, progress)
 
 class json : public testing::TestWithParam<const char*> {};
 
+// TEST_P is run for each of the values in INSTANTIATE_TEST_CASE below.
 TEST_P(json, pipeline)
 {
     run_pipeline(GetParam());
-}
-
-TEST(json, pipeline_stdin)
-{
-    run_pipeline_stdin("pipeline/las2csv.json");
-    run_pipeline_stdin("pipeline/bpf2las.json");
 }
 
 INSTANTIATE_TEST_CASE_P(base, json,
@@ -176,6 +175,25 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/stats.json",
                             "pipeline/transformation.json"
                         ));
+
+TEST(json, pipeline_stdin)
+{
+    run_pipeline_stdin("pipeline/las2csv.json");
+    run_pipeline_stdin("pipeline/bpf2las.json");
+}
+
+TEST(json, pipeline_verify)
+{
+    run_pipeline("pipeline/streamable.json", "--validate",
+        "\"streamable\" : true");
+    run_pipeline("pipeline/nonstreamable.json", "--validate",
+        "\"streamable\" : false");
+    run_pipeline("pipeline/invalid1.json", "--validate",
+        "Unable to parse");
+    run_pipeline("pipeline/invalid2.json", "--validate",
+        "Unexpected argument");
+}
+
 
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
 

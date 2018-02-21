@@ -37,7 +37,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <vector>

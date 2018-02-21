@@ -1,7 +1,6 @@
 // MyReader.cpp
 
 #include "MyReader.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

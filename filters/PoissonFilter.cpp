@@ -35,8 +35,6 @@
 #include "PoissonFilter.hpp"
 #include "NormalFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <kazhdan/PoissonRecon.h>
 #include <kazhdan/point_source/PointSource.h>
 
