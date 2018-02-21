@@ -50,9 +50,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    SortKernel();
 
 private:
-    SortKernel();
     void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

@@ -80,7 +80,7 @@ int SmoothKernel::execute()
     manager.stageOptions() = m_manager.stageOptions();
 
     BufferReader& bufferReader =
-        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+        dynamic_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
     bufferReader.addView(input_view);
 
     std::ostringstream ss;

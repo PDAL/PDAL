@@ -265,10 +265,13 @@ void TIndexReader::initialize()
     m_dataset = 0;
 }
 
+void TIndexReader::prepared(PointTableRef table)
+{
+    m_merge.prepare(table);
+}
 
 void TIndexReader::ready(PointTableRef table)
 {
-    m_merge.prepare(table);
     m_pvSet = m_merge.execute(table);
 }
 

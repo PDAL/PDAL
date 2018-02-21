@@ -59,9 +59,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    GroundKernel();
 
 private:
-    GroundKernel();
     virtual void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

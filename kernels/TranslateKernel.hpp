@@ -57,9 +57,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    TranslateKernel();
 
 private:
-    TranslateKernel();
     virtual void addSwitches(ProgramArgs& args);
     void makeJSONPipeline();
     void makeArgPipeline();
