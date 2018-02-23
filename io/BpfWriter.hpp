@@ -42,7 +42,6 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/FlexWriter.hpp>
 #include <pdal/util/OStream.hpp>
-#include <pdal/plugin.hpp>
 
 #include <vector>
 

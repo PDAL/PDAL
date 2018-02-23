@@ -35,9 +35,9 @@
 #pragma once
 
 #include <pdal/pdal_features.hpp>
-#include <pdal/plugin.hpp>
 
 #include <pdal/FlexWriter.hpp>
+#include <pdal/Streamable.hpp>
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
@@ -73,7 +73,7 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL LasWriter : public FlexWriter
+class PDAL_DLL LasWriter : public FlexWriter, public Streamable
 {
     friend class LasTester;
     friend class NitfWriter;

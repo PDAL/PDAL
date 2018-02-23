@@ -38,7 +38,6 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/pdal_export.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <string>
@@ -59,9 +58,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    GroundKernel();
 
 private:
-    GroundKernel();
     virtual void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

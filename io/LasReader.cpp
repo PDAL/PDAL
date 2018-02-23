@@ -45,7 +45,6 @@
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GeotiffSupport.hpp"

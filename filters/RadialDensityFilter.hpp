@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 
@@ -62,7 +61,7 @@ public:
 private:
     Dimension::Id m_rdens;
     double m_rad;
-    
+
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);

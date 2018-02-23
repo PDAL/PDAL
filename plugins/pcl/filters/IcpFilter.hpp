@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t IcpFilter_ExitFunc();
 extern "C" PF_ExitFunc IcpFilter_InitPlugin();

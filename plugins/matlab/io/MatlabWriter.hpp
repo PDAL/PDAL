@@ -39,7 +39,6 @@
 #include <mat.h>
 
 #include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
 
 extern "C" int32_t MatlabWriter_ExitFunc();
 extern "C" PF_ExitFunc MatlabWriter_InitPlugin();

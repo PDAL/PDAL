@@ -32,12 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-
 #include "MatlabFilter.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
 

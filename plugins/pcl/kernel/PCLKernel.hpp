@@ -47,9 +47,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    PCLKernel();
 
 private:
-    PCLKernel();
     virtual void addSwitches(ProgramArgs& args);
 
     std::unique_ptr<PipelineManager> m_manager;

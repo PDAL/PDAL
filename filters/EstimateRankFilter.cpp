@@ -36,7 +36,6 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <string>
@@ -46,7 +45,7 @@ namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.estimaterank", "EstimateRank Filter", 
+    PluginInfo("filters.estimaterank", "EstimateRank Filter",
                "http://pdal.io/stages/filters.estimaterank.html");
 
 CREATE_STATIC_PLUGIN(1, 0, EstimateRankFilter, Filter, s_info)

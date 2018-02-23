@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <functional>
 
@@ -45,7 +45,7 @@ extern "C" PF_ExitFunc StreamCallbackFilter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL StreamCallbackFilter : public Filter
+class PDAL_DLL StreamCallbackFilter : public Filter, public Streamable
 {
 public:
     static void * create();

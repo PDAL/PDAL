@@ -34,7 +34,6 @@
 
 #include "ClusterFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/Segmentation.hpp>
 
 #include <string>

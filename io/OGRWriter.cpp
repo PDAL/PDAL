@@ -39,7 +39,6 @@
 #pragma GCC diagnostic ignored "-Wredundant-decls"
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 #include <ogr_core.h>

@@ -42,7 +42,6 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/Segmentation.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 

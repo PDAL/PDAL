@@ -34,8 +34,6 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/Writer.hpp>
 
 extern "C" int32_t NullWriter_ExitFunc();

@@ -167,7 +167,6 @@ Word #       Content
 #include "QfitReader.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/portable_endian.hpp>
 #include <pdal/util/ProgramArgs.hpp>

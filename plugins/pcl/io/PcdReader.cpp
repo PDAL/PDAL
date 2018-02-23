@@ -43,8 +43,6 @@
 #include <pdal/PointView.hpp>
 #include "../PCLConversions.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 namespace pdal
 {
 

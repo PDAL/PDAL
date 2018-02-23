@@ -37,8 +37,6 @@
 
 #include <pdal/Kernel.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <string>
@@ -57,9 +55,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    TranslateKernel();
 
 private:
-    TranslateKernel();
     virtual void addSwitches(ProgramArgs& args);
     void makeJSONPipeline();
     void makeArgPipeline();

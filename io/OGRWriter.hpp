@@ -34,7 +34,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/FlexWriter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal_version.h>
@@ -60,7 +60,7 @@ extern "C" PF_ExitFunc OGRWriter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL OGRWriter : public FlexWriter
+class PDAL_DLL OGRWriter : public FlexWriter, public Streamable
 {
 public:
     static void * create();

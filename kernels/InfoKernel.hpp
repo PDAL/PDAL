@@ -39,7 +39,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.hpp>
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
@@ -59,7 +58,7 @@ public:
     std::string getName() const;
     int execute(); // overrride
 
-
+    InfoKernel();
     void setup(const std::string& filename);
     MetadataNode run(const std::string& filename);
 
@@ -69,7 +68,6 @@ public:
     inline void doComputeBoundary(bool value) { m_boundary = value; }
 
 private:
-    InfoKernel();
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
 

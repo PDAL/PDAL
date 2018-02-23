@@ -35,12 +35,10 @@
 #include "MatlabWriter.hpp"
 #include "../filters/Script.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
-
 
 static PluginInfo const s_info = PluginInfo(
     "writers.matlab",

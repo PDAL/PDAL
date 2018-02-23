@@ -34,9 +34,9 @@
 
 #include <algorithm>
 
-#include <pdal/PointView.hpp>
 #include <pdal/FlexWriter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GDALGrid.hpp"
@@ -47,7 +47,7 @@ extern "C" PF_ExitFunc GDALWriter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL GDALWriter : public FlexWriter
+class PDAL_DLL GDALWriter : public FlexWriter, public Streamable
 {
 public:
     static void * create();

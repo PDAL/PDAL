@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C" int32_t DecimationFilter_ExitFunc();
 extern "C" PF_ExitFunc DecimationFilter_InitPlugin();
@@ -44,7 +44,7 @@ namespace pdal
 {
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL DecimationFilter : public Filter
+class PDAL_DLL DecimationFilter : public Filter, public Streamable
 {
 public:
     DecimationFilter()
