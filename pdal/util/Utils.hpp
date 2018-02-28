@@ -764,7 +764,7 @@ namespace Utils
       \param from  Value to convert.
       \return  String representation of numeric value.
     */
-    inline std::string toString(double from)
+    inline std::string toString(double from, size_t precision = 10)
     {
         std::ostringstream oss;
         // Standardize nan/inf output to the JAVA property names because
@@ -773,7 +773,7 @@ namespace Utils
             return "NaN";
         if (std::isinf(from))
             return (from < 0 ? "-Infinity" : "Infinity");
-        oss << std::setprecision(10) << from;
+        oss << std::setprecision(precision) << from;
         return oss.str();
     }
 
