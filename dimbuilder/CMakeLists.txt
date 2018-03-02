@@ -1,6 +1,6 @@
 #
 # The seemingly strange arrangement of this cmake file allows you to build
-# lasdump as a standalone.
+# this application as a standalone.
 #
 cmake_minimum_required(VERSION 2.8.6)
 

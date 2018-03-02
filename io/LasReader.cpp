@@ -276,11 +276,36 @@ void LasReader::ready(PointTableRef table)
 }
 
 
+namespace
+{
+
+void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, double val, const std::string description,
+    size_t precision)
+{
+    MetadataNode n = m.add(name, val, description, precision);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(n);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+}
+
 // Store data in the normal metadata place.  Also store it in the private
 // lasforward metadata node.
 template <typename T>
 void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
-    const std::string& name, T val, const std::string description = "")
+    const std::string& name, T val, const std::string description)
 {
     MetadataNode n = m.add(name, val, description);
 
@@ -332,7 +357,8 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 
     addForwardMetadata(forward, m, "project_id", m_header.projectId(),
         "Project ID.");
-    addForwardMetadata(forward, m, "system_id", m_header.systemId());
+    addForwardMetadata(forward, m, "system_id", m_header.systemId(),
+        "Generating system ID.");
     addForwardMetadata(forward, m, "software_id", m_header.softwareId(),
         "Generating software description.");
     addForwardMetadata(forward, m, "creation_doy", m_header.creationDOY(),
@@ -343,17 +369,17 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         "The year, expressed as a four digit number, in which the file was "
         "created.");
     addForwardMetadata(forward, m, "scale_x", m_header.scaleX(),
-        "The scale factor for X values.");
+        "The scale factor for X values.", 20);
     addForwardMetadata(forward, m, "scale_y", m_header.scaleY(),
-        "The scale factor for Y values.");
+        "The scale factor for Y values.", 20);
     addForwardMetadata(forward, m, "scale_z", m_header.scaleZ(),
-        "The scale factor for Z values.");
+        "The scale factor for Z values.", 20);
     addForwardMetadata(forward, m, "offset_x", m_header.offsetX(),
-        "The offset for X values.");
+        "The offset for X values.", 20);
     addForwardMetadata(forward, m, "offset_y", m_header.offsetY(),
-        "The offset for Y values.");
+        "The offset for Y values.", 20);
     addForwardMetadata(forward, m, "offset_z", m_header.offsetZ(),
-        "The offset for Z values.");
+        "The offset for Z values.", 20);
 
     m.add("header_size", m_header.vlrOffset(),
         "The size, in bytes, of the header block, including any extension "

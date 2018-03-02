@@ -127,12 +127,12 @@ private:
     // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
     // them as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_creationYear;
-    StringHeaderVal<20> m_scaleX;
-    StringHeaderVal<20> m_scaleY;
-    StringHeaderVal<20> m_scaleZ;
-    StringHeaderVal<20> m_offsetX;
-    StringHeaderVal<20> m_offsetY;
-    StringHeaderVal<20> m_offsetZ;
+    StringHeaderVal<0> m_scaleX;
+    StringHeaderVal<0> m_scaleY;
+    StringHeaderVal<0> m_scaleZ;
+    StringHeaderVal<0> m_offsetX;
+    StringHeaderVal<0> m_offsetY;
+    StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
     Json::Value m_userVLRs;
