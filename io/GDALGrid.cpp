@@ -294,7 +294,7 @@ void GDALGrid::addPoint(double x, double y, double z)
     double d = distance(iOrigin, jOrigin, x, y);
     if (d < m_radius &&
         iOrigin >= 0 && jOrigin >= 0 &&
-        iOrigin < (int)m_width && jOrigin <= (int)m_height)
+        iOrigin < (int)m_width && jOrigin < (int)m_height)
         update(iOrigin, jOrigin, z, d);
 }
 
