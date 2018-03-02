@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <filters/RangeFilter.hpp>
 #include <io/GDALWriter.hpp>
 #include <io/LasReader.hpp>
 #include <io/TextReader.hpp>
@@ -544,5 +545,33 @@ TEST(GDALWriterTest, btint)
     raster.readBand(data, 1);
     for (size_t i = 0; i < arr.size(); ++i)
         EXPECT_NEAR(arr[i], data[i], .001);
+}
+
+TEST(GDALWriterTest, no_points)
+{
+    std::string outfile(Support::temppath("out.tif"));
+    FileUtils::deleteFile(outfile);
+
+    LasReader r;
+    Options ro;
+    ro.add("filename", Support::datapath("las/no-points.las"));
+    r.setOptions(ro);
+
+    RangeFilter f;
+    f.setInput(r);
+    Options fo;
+    fo.add("limits", "Classification[2:2]");
+    f.setOptions(fo);
+
+    GDALWriter w;
+    w.setInput(f);
+    Options wo;
+    wo.add("resolution", 2);
+    wo.add("filename", outfile);
+    w.setOptions(wo);
+
+    PointTable t;
+    w.prepare(t);
+    EXPECT_THROW(w.execute(t), pdal_error);
 }
 
