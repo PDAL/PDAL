@@ -199,9 +199,11 @@ void GDALGrid::addPoint(double x, double y, double z)
     //         <- v
 
 
+    int i, j;
+    int iStart, jStart;
     // First quadrant;
-    int i = iOrigin + 1;
-    int j = jOrigin;
+    i = iStart = std::max(0, iOrigin + 1);
+    j = jStart = std::min(jOrigin, int(m_height - 1));
     while (i < (int)m_width && j >= 0)
     {
         double d = distance(i, j, x, y);
@@ -212,16 +214,16 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (i == iOrigin + 1)
+            if (i == iStart)
                 break;
-            i = iOrigin + 1;
+            i = iStart;
             j--;
         }
     }
 
     // Second quadrant;
-    i = iOrigin;
-    j = jOrigin - 1;
+    i = iStart = std::min(iOrigin, int(m_width - 1));
+    j = jStart = std::min(jOrigin - 1, int(m_height - 1));
     while (i >= 0 && j >= 0)
     {
         double d = distance(i, j, x, y);
@@ -232,16 +234,16 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (j == jOrigin - 1)
+            if (j == jStart)
                 break;
-            j = jOrigin - 1;
+            j = jStart;
             i--;
         }
     }
 
     // Third quadrant;
-    i = iOrigin - 1;
-    j = jOrigin;
+    i = iStart = std::min(iOrigin - 1, int(m_width - 1));
+    j = jStart = std::max(jOrigin, 0);
     while (i >= 0 && j < (int)m_height)
     {
         double d = distance(i, j, x, y);
@@ -252,15 +254,15 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (i == iOrigin - 1)
+            if (i == iStart)
                 break;
-            i = iOrigin - 1;
+            i = iStart;
             j++;
         }
     }
     // Fourth quadrant;
-    i = iOrigin;
-    j = jOrigin + 1;
+    i = iStart = std::max(iOrigin, 0);
+    j = jStart = std::max(jOrigin + 1, 0);
     while (i < (int)m_width && j < (int)m_height)
     {
         double d = distance(i, j, x, y);
@@ -271,9 +273,9 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (j == jOrigin + 1)
+            if (j == jStart)
                 break;
-            j = jOrigin + 1;
+            j = jStart;
             i++;
         }
     }
@@ -287,7 +289,7 @@ void GDALGrid::addPoint(double x, double y, double z)
         update(iOrigin, jOrigin, z, d);
 }
 
-void GDALGrid::update(int i, int j, double val, double dist)
+void GDALGrid::update(size_t i, size_t j, double val, double dist)
 {
     // Once we determine that a point is close enough to a cell to count it,
     // this function does the actual math.  We use the value of the
