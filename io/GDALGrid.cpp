@@ -48,6 +48,15 @@ GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
     m_width(width), m_height(height), m_windowSize(windowSize),
     m_edgeLength(edgeLength), m_radius(radius), m_outputTypes(outputTypes)
 {
+    if (width > std::numeric_limits<int>::max() ||
+        height > std::numeric_limits<int>::max())
+    {
+        std::ostringstream oss;
+        oss << "Grid width or height is too large. Width and height are "
+            "limited to " << std::numeric_limits<int>::max() << " cells."
+            "Try setting bounds or increasing resolution.";
+        throw error(oss.str());
+    }
     size_t size(width * height);
 
     m_count.reset(new DataVec(size));
