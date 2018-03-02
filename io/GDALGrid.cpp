@@ -203,7 +203,7 @@ void GDALGrid::addPoint(double x, double y, double z)
     int iStart, jStart;
     // First quadrant;
     i = iStart = std::max(0, iOrigin + 1);
-    j = jStart = std::min(jOrigin, int(m_height - 1));
+    j = std::min(jOrigin, int(m_height - 1));
     while (i < (int)m_width && j >= 0)
     {
         double d = distance(i, j, x, y);
@@ -222,7 +222,7 @@ void GDALGrid::addPoint(double x, double y, double z)
     }
 
     // Second quadrant;
-    i = iStart = std::min(iOrigin, int(m_width - 1));
+    i = std::min(iOrigin, int(m_width - 1));
     j = jStart = std::min(jOrigin - 1, int(m_height - 1));
     while (i >= 0 && j >= 0)
     {
@@ -243,7 +243,7 @@ void GDALGrid::addPoint(double x, double y, double z)
 
     // Third quadrant;
     i = iStart = std::min(iOrigin - 1, int(m_width - 1));
-    j = jStart = std::max(jOrigin, 0);
+    j = std::max(jOrigin, 0);
     while (i >= 0 && j < (int)m_height)
     {
         double d = distance(i, j, x, y);
@@ -261,7 +261,7 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
     }
     // Fourth quadrant;
-    i = iStart = std::max(iOrigin, 0);
+    i = std::max(iOrigin, 0);
     j = jStart = std::max(jOrigin + 1, 0);
     while (i < (int)m_width && j < (int)m_height)
     {
