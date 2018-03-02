@@ -61,10 +61,9 @@ public:
     /**
       Create a stage factory.
 
-      \param no_plugins  Don't load plugins or allowed them to be created
-        with this factory.
+      \param ignored  Ignored argument.
     */
-    StageFactory(bool no_plugins = true);
+    StageFactory(bool ignored = true);
 
     /**
       Return the file extensions associated with a driver.

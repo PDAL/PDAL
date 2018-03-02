@@ -34,6 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/PluginDirectory.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/Filter.hpp>
@@ -72,11 +74,6 @@ TEST(PluginManagerTest, NoPluginsNoNames)
     EXPECT_TRUE(ns.empty());
 }
 
-TEST(PluginManagerTest, InitPlugin)
-{
-    EXPECT_TRUE(PluginManager<Stage>::initializePlugin(DummyPlugin::initPlugin));
-}
-
 TEST(PluginManagerTest, MissingPlugin)
 {
     std::unique_ptr<Stage> p(PluginManager<Stage>::createObject("filters.nonexistentplugin"));
@@ -85,6 +82,7 @@ TEST(PluginManagerTest, MissingPlugin)
 
 TEST(PluginManagerTest, CreateObject)
 {
+    DummyPlugin::initPlugin();
     std::unique_ptr<Stage> p(PluginManager<Stage>::createObject("filters.dummytest"));
     EXPECT_NE(p.get(), nullptr);
 }
@@ -95,19 +93,19 @@ TEST(PluginManagerTest, SearchPaths)
     int set = Utils::getenv("PDAL_DRIVER_PATH", curPath);
     Utils::unsetenv("PDAL_DRIVER_PATH");
 
-    StringList paths = PluginManager<Stage>::test_pluginSearchPaths();
+    StringList paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_TRUE(Utils::contains(paths, "./lib"));
     EXPECT_TRUE(Utils::contains(paths, "../lib"));
     EXPECT_TRUE(Utils::contains(paths, "../bin"));
     EXPECT_TRUE(Utils::contains(paths, Config::pluginInstallPath()));
 
     Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
-    paths = PluginManager<Stage>::test_pluginSearchPaths();
+    paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_EQ(paths.size(), 2U);
     EXPECT_TRUE(Utils::contains(paths, "/foo/bar"));
     EXPECT_TRUE(Utils::contains(paths, "//baz"));
     Utils::setenv("PDAL_DRIVER_PATH", "/this/is/a/path");
-    paths = PluginManager<Stage>::test_pluginSearchPaths();
+    paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_EQ(paths.size(), 1U);
     EXPECT_TRUE(Utils::contains(paths, "/this/is/a/path"));
 
