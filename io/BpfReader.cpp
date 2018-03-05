@@ -141,7 +141,11 @@ void BpfReader::initialize()
        // (BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
        // which we can figure out when we run into a file with these
        // coordinate systems.
-       throwError("BPF file contains unsupported coordinate system");
+        std::ostringstream oss;
+        oss << "BPF file contains unsupported coordinate system with "
+            << "coordinate type: '" << m_header.m_coordType
+            << "' and coordinate id: '" << m_header.m_coordId << "'";
+       throwError(oss.str());
     }
     SpatialReference srs(code);
     setSpatialReference(srs);
