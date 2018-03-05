@@ -65,7 +65,7 @@ TEST(FerryFilterTest, stream)
     r.setOptions(ro);
 
     Options fo;
-    fo.add("dimensions", "X=FooX,Y=BarY");
+    fo.add("dimensions", "X=FooX,Y=>BarY");
 
     FerryFilter f;
     f.setOptions(fo);
@@ -167,7 +167,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
 
     Options op4;
 
-    op4.add("dimensions", "X = Y, X = NewZ = NewQ");
+    op4.add("dimensions", "X = Y, X => NewZ = NewQ");
     FerryFilter f4;
     f4.setInput(reader);
     f4.setOptions(op4);
