@@ -14,14 +14,18 @@ function(PDAL_TARGET_COMPILE_SETTINGS target)
                 )
             target_compile_options(${target} PUBLIC
                 # Nitro makes use of Exception Specifications, which results in
-                # numerous warnings when compiling in MSVC. We will ignore them for
-                # now.
+                # numerous warnings when compiling in MSVC. We will ignore
+                # them for now.
                 /wd4290
                 /wd4800
-                # Windows warns about integer narrowing like crazy and it's annoying.
-                # In most cases the programmer knows what they're doing.  A good
-                # static analysis tool would be better than turning this warning off.
+                # Windows warns about integer narrowing like crazy and it's
+                # annoying.  In most cases the programmer knows what they're
+                # doing.  A good static analysis tool would be better than
+                # turning this warning off.
                 /wd4267
+                # Annoying warning about function hiding with virtual
+                # inheritance.
+                /wd4250
                 )
         endif()
 
