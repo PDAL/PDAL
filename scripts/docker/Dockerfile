@@ -2,12 +2,13 @@ FROM alpine:3.7
 
 RUN \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
+    echo "@edgecommunity http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
     apk update; \
     apk add --no-cache --virtual .build-deps \
         alpine-sdk \
         unzip \
         cmake \
-        eigen-dev \
+        eigen-dev@edgecommunity \
         hexer-dev \
         nitro-dev \
         gdal-dev \

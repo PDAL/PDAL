@@ -217,6 +217,10 @@ bool GDALWriter::processOne(PointRef& point)
 
 void GDALWriter::doneFile()
 {
+    if (!m_grid) {
+        throw pdal_error("Unable to write GDAL data, grid is uninitialized. You "
+                "might have provided the GDALWriter zero points.");
+    }
     std::array<double, 6> pixelToPos;
 
     pixelToPos[0] = m_curBounds.minx;
