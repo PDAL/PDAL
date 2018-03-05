@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Howard Butler, howard@hobu.co
+* Copyright (c) 2018, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,43 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_features.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Streamable.hpp>
-#include "../plang/Invocation.hpp"
+#include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
+#include <filters/StatsFilter.hpp>
+
+#include "../io/NumpyReader.hpp"
+
+#include <pdal/StageWrapper.hpp>
+
+#include "Support.hpp"
+
+using namespace pdal;
 
 
-namespace pdal
-{
-
-class PDAL_DLL NumpyReader : public Reader, public Streamable
+class NumpyReaderTest : public ::testing::Test
 {
 public:
-    NumpyReader()
-    {}
+    virtual void SetUp()
+    {
+        pdal::plang::Environment::get();
+    }
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-
-private:
-
-    virtual void initialize();
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual bool processOne(PointRef& point);
-    virtual void done(PointTableRef table);
-
-    PyObject* m_array;
-
-    NumpyReader& operator=(const NumpyReader&); // not implemented
-    NumpyReader(const NumpyReader&); // not implemented
 };
 
-} // namespace pdal
+TEST_F(NumpyReaderTest, NumpyReaderTest_read)
+{
+    StageFactory f;
+
+    Options ops;
+//         Support::temppath("mylog_three.txt"),
+    ops.add("filename", Support::datapath("plang/1.2-with-color.npy"));
+
+    NumpyReader reader;
+    reader.setOptions(ops);
+
+    PointTable table;
+
+    reader.prepare(table);
+    reader.log()->setLevel(LogLevel::Debug1);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1065u);
+    PointViewPtr view = *viewSet.begin();
+
+}
+

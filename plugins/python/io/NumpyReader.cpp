@@ -39,8 +39,17 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-#include "../plang/Invocation.hpp"
 
+#include <Python.h>
+#undef toupper
+#undef tolower
+#undef isspace
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
+#include <numpy/arrayobject.h>
 
 namespace pdal
 {
@@ -54,29 +63,11 @@ CREATE_SHARED_PLUGIN(1, 0, NumpyReader, Reader, s_info)
 
 std::string NumpyReader::getName() const { return s_info.name; }
 
-void NumpyReader::initialize()
-{
-
-}
-
-
-
-void NumpyReader::addArgs(ProgramArgs& args)
-{
-}
-
-
-
-void NumpyReader::addDimensions(PointLayoutPtr layout)
-{
-    log()->get(LogLevel::Debug) << "Adding dimensions in readers.numpy" << std::endl;
-}
-
 
 PyObject* load_npy(std::string const& filename)
 {
 
-    PyObject* py_filename =  PyUnicode_FromString(filename.c_str());
+    PyObject* py_filename =  PyString_FromString(filename.c_str());
     PyObject* numpy_module = PyImport_ImportModule("numpy");
     if (!numpy_module)
         throw pdal::pdal_error(plang::getTraceback());
@@ -85,7 +76,7 @@ PyObject* load_npy(std::string const& filename)
     if (!numpy_mod_dict)
         throw pdal::pdal_error(plang::getTraceback());
 
-    PyObject* loads_func = PyDict_GetItemString(numpy_mod_dict, "loads");
+    PyObject* loads_func = PyDict_GetItemString(numpy_mod_dict, "load");
     if (!loads_func)
         throw pdal::pdal_error(plang::getTraceback());
 
@@ -104,13 +95,77 @@ PyObject* load_npy(std::string const& filename)
     return array;
 }
 
+
+void NumpyReader::initialize()
+{
+    plang::Environment::get();
+    m_array = load_npy(m_filename);
+    if (!PyArray_Check(m_array))
+        throw pdal::pdal_error("Object in file  '" + m_filename +
+            "' is not a numpy array");
+}
+
+
+
+void NumpyReader::addArgs(ProgramArgs& args)
+{
+}
+
+
+
+void NumpyReader::addDimensions(PointLayoutPtr layout)
+{
+    using namespace Dimension;
+
+    // TODO pivot whether we are a 1d, 2d, or named arrays
+
+    PyArrayObject* arr = (PyArrayObject*)m_array;
+    PyArray_Descr *dtype = PyArray_DTYPE(arr);
+    if (!dtype)
+        throw pdal::pdal_error(plang::getTraceback());
+
+    // Get length of fields
+    Py_ssize_t count = PyDict_Size(dtype->fields);
+    log()->get(LogLevel::Debug) << "Adding " << count <<" dimensions" << std::endl;
+    std::cerr<< "Adding " << count <<" dimensions" << std::endl;
+
+
+//     PyObject* dtype = PyObject_GetAttrString(m_array, "dtype");
+//     if (!dtype)
+//         throw pdal::pdal_error(plang::getTraceback());
+//     PyObject* names = PyObject_GetAttrString(dtype, "names");
+//     if (!names)
+//         throw pdal::pdal_error(plang::getTraceback());
+//
+//     // Get length of names list
+//     Py_ssize_t count = PySequence_Size(names);
+//     log()->get(LogLevel::Debug) << "Adding " << count <<" dimensions" << std::endl;
+//     std::cerr<< "Adding " << count <<" dimensions" << std::endl;
+//
+//     for (int i=0; i < (int) count; i++)
+//     {
+//         char* name = PyString_AsString(PySequence_GetItem(names, i));
+//         Id id = Dimension::id(name);
+//         if (id != Id::Unknown)
+//         {
+//
+//         }
+//         log()->get(LogLevel::Debug) << "Adding dimension '" << name <<"'" << std::endl;
+//
+//     }
+//     layout->registerDim(Id::X, Type::Double);
+
+
+}
+
+
 void NumpyReader::ready(PointTableRef table)
 {
     // wake up python
+
+
     static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
-
-    // open .npy file
-
+    log()->get(LogLevel::Debug) << "Initializing Numpy array '" << m_filename <<"'" << std::endl;
 }
 
 

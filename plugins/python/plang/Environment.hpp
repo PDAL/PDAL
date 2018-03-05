@@ -79,6 +79,7 @@ public:
     static EnvironmentPtr get();
 
     static int getPythonDataType(Dimension::Type t);
+    static pdal::Dimension::Type getPDALDataType(int t);
 
 private:
     Redirector m_redirector;
