@@ -281,9 +281,7 @@ void GDALGrid::addPoint(double x, double y, double z)
     // This is a questionable case.  If a point is in a cell, shouldn't
     // it just be counted?
     double d = distance(iOrigin, jOrigin, x, y);
-    if (d < m_radius &&
-        iOrigin >= 0 && jOrigin >= 0 &&
-        iOrigin < (int)m_width && jOrigin <= (int)m_height)
+    if (d < m_radius)
         update(iOrigin, jOrigin, z, d);
 }
 
@@ -298,6 +296,10 @@ void GDALGrid::update(int i, int j, double val, double dist)
     // See
     // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
     // https://en.wikipedia.org/wiki/Inverse_distance_weighting
+
+    // Perform a bounds check before indexing into the various data arrays.
+    if(!validIndex(i, j))
+        return;
 
     size_t offset = index(i, j);
 

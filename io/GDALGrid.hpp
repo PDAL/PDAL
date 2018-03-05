@@ -103,6 +103,10 @@ private:
     size_t index(size_t i, size_t j)
         { return (j * m_width) + i; }
 
+    // Determine if a cell i, j is within the bounds of the grid.
+    bool validIndex(int i, int j)
+        { return i >= 0 && j >= 0 && i < (int)width() && j < (int)height(); }
+
     // Determine if a cell i, j has no associated points.
     bool empty(size_t i, size_t j)
         { return empty(index(i, j)); }
