@@ -57,7 +57,7 @@ public:
     std::map<std::string, std::string> m_drivers;
 
 private:
-    static StringList test_pluginSearchPaths();
+    PDAL_DLL static StringList test_pluginSearchPaths();
 };
 
 } // namespace pdal
