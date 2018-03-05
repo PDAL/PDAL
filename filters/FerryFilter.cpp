@@ -64,8 +64,12 @@ void FerryFilter::initialize()
         StringList s = Utils::split(dim, '=');
         if (s.size() != 2)
             throwError("Invalid dimension specified '" + dim + "'.  Need "
-                "<from dimension>=<to dimension>.  See documentation for "
+                "<from dimension>=><to dimension>.  See documentation for "
                 "details.");
+        // Allow new '=>' syntax
+        if (s[1][0] == '>')
+            s[1].erase(s[1].begin());
+
         Utils::trim(s[0]);
         Utils::trim(s[1]);
         if (s[0] == s[1])
