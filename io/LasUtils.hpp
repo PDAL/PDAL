@@ -171,7 +171,7 @@ struct error : public std::runtime_error
     {}
 };
 
-std::vector<ExtraDim> parse(const StringList& dimString);
+std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
 
 
 struct IgnoreVLR

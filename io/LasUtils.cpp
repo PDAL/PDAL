@@ -212,7 +212,7 @@ std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
     return ignoredVLRs;
 
 }
-std::vector<ExtraDim> parse(const StringList& dimString)
+std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
     bool all = false;
@@ -221,6 +221,11 @@ std::vector<ExtraDim> parse(const StringList& dimString)
     {
         if (dim == "all")
         {
+            // We only accept all for LasWriter.
+            if (!allOk)
+                throw error("Invalid extra dimension specified: '" + dim +
+                    "'.  Need <dimension>=<type>.  See documentation "
+                    " for details.");
             all = true;
             continue;
         }
