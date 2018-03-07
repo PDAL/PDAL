@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: e3fead2f855dc2d3193cd3bb784f7d90b5d5daff
+// Git SHA: 76c801ff63cfae132d8477c6933feb8445bdecf5
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -563,6 +563,12 @@ private:
 #include <string>
 #include <vector>
 
+#ifndef ARBITER_IS_AMALGAMATION
+
+#include <arbiter/util/exports.hpp>
+
+#endif
+
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
 {
@@ -588,7 +594,7 @@ class HttpPool;
  * HTTP-derived classes should override the PUT and GET versions that accept
  * http::Headers and http::Query parameters instead.
  */
-class Driver
+class ARBITER_DLL Driver
 {
 public:
     virtual ~Driver() { }
@@ -4643,6 +4649,7 @@ private:
 
 #ifndef ARBITER_IS_AMALGAMATION
 
+#include <arbiter/util/exports.hpp>
 #include <arbiter/util/types.hpp>
 
 #endif
@@ -4669,7 +4676,7 @@ class Driver;
  *
  * An Endpoint may be created using Arbiter::getEndpoint.
  */
-class Endpoint
+class ARBITER_DLL Endpoint
 {
     // Only Arbiter may construct.
     friend class Arbiter;

@@ -139,7 +139,7 @@ private:
     }
 
     // Update cell at i, j with value at a distance.
-    void update(int i, int j, double val, double dist);
+    void update(size_t i, size_t j, double val, double dist);
 
     // Fill cell at index \c i with the nondata value.
     void fillNodata(size_t i);

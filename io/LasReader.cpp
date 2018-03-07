@@ -159,7 +159,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     try
     {
-        m_extraDims = LasUtils::parse(m_extraDimSpec);
+        m_extraDims = LasUtils::parse(m_extraDimSpec, false);
     }
     catch (const LasUtils::error& err)
     {

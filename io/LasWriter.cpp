@@ -152,7 +152,7 @@ void LasWriter::initialize()
 #endif
     try
     {
-        m_extraDims = LasUtils::parse(m_extraDimSpec);
+        m_extraDims = LasUtils::parse(m_extraDimSpec, true);
     }
     catch (const LasUtils::error& err)
     {
