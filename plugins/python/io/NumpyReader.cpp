@@ -124,10 +124,34 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
     if (!dtype)
         throw pdal::pdal_error(plang::getTraceback());
 
+
+    int ndims = PyArray_NDIM(arr);
+    npy_intp* shape = PyArray_SHAPE(arr);
+    if (!dtype)
+        throw pdal::pdal_error(plang::getTraceback());
+
     // Get length of fields
     Py_ssize_t count = PyDict_Size(dtype->fields);
     log()->get(LogLevel::Debug) << "Adding " << count <<" dimensions" << std::endl;
     std::cerr<< "Adding " << count <<" dimensions" << std::endl;
+    std::cerr<< "ndims " << ndims <<" dimensions" << std::endl;
+    std::cerr<< "shape " << shape[0] <<" "  << std::endl;
+
+    // if there's only 1 ndims, but more than 1 count of them,
+    // the data are arranged as named columns all of the same length
+    // which is shape[0]
+
+
+    for (int i = 0; i < count; ++i)
+    {
+        // Get the dimension name
+
+        // Check that it doesn't already match a PDAL dimension name
+
+        // Check its size in relation to PDAL's defaultsize for the dimension
+
+
+    }
 
 
 //     PyObject* dtype = PyObject_GetAttrString(m_array, "dtype");
