@@ -135,13 +135,31 @@ void BpfReader::initialize()
             Utils::toString(zone));
        code += (zone < 10 ? "0" : "") + Utils::toString(zone);
     }
+    else if (m_header.m_coordType == static_cast<int>(BpfCoordType::TCR))
+    {
+        // TCR is ECEF meters, or EPSG:4978
+        // According to the 1.0 spec, the m_coordId must be 1 to be
+        // valid.
+        if (m_header.m_coordId == 1)
+            code = std::string("EPSG:4978");
+        else
+        {
+            std::ostringstream oss;
+            oss << "BPF has ECEF/TCR coordinate type defined, but the ID of '"
+                <<  m_header.m_coordId << "' is invalid";
+            throwError(oss.str());
+        }
+    }
     else
     {
-       // BPF supports something called Terrestrial Centered Rotational
-       // (BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
+       // BPF also supports something East North Up (BpfCoordType::ENU)
        // which we can figure out when we run into a file with these
        // coordinate systems.
-       throwError("BPF file contains unsupported coordinate system");
+        std::ostringstream oss;
+        oss << "BPF file contains unsupported coordinate system with "
+            << "coordinate type: '" << m_header.m_coordType
+            << "' and coordinate id: '" << m_header.m_coordId << "'";
+       throwError(oss.str());
     }
     SpatialReference srs(code);
     setSpatialReference(srs);
