@@ -34,16 +34,14 @@ set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
     PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, ICP filter, and ground, pcl, smooth, and view kernels")
 
-set(INCLUDE_DIRS
-    ${ROOT_DIR}
-    ${PCL_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_LIST_DIR}
-    )
-
 add_definitions(${PCL_DEFINITIONS})
-if (NOT WIN32)
-    add_definitions("-fvisibility-inlines-hidden")
-endif()
+#
+# This can cause problems if you inline some code that instantiates a static.
+# I'm not sure why it was here, but I'm keeping it for now in case someone
+# goes looking for it. - ABELL 3/18
+#if (NOT WIN32)
+#    add_definitions("-fvisibility-inlines-hidden")
+#endif()
 
 # PCL's configuration clobbers Boost find_package - do it again
 find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
@@ -57,7 +55,7 @@ PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
         io/PcdReader.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_reader_libname} PRIVATE
-    ${INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS})
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
         set_source_files_properties(io/PcdReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
     endif()
@@ -71,7 +69,7 @@ PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
         io/PcdWriter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_writer_libname} PRIVATE
-    ${INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS})
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
         set_source_files_properties(io/PcdWriter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
     endif()
@@ -89,7 +87,7 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
 )
 target_include_directories(${pclblock_libname}
     PRIVATE
-      ${INCLUDE_DIRS}
+      ${PCL_INCLUDE_DIRS}
       ${PDAL_JSONCPP_INCLUDE_DIR}
 )
 
@@ -97,15 +95,17 @@ PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
     FILES
         filters/VoxelGridFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${voxelgrid_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
+target_include_directories(${voxelgrid_filter_libname}
+    PRIVATE
+      ${PCL_INCLUDE_DIRS}
+)
 
 PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
     FILES
         filters/MovingLeastSquaresFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${movingleastsquares_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS})
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
         set_source_files_properties(filters/MovingLeastSquaresFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
     endif()
@@ -116,14 +116,14 @@ PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
         filters/GridProjectionFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${gridprojection_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(icp_filter_libname filter icp
     FILES
         filters/IcpFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${icp_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS})
 
 #
 # PCL Kernel
@@ -134,7 +134,7 @@ PDAL_ADD_PLUGIN(pcl_libname kernel pcl
     LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 target_include_directories(${pcl_libname} PRIVATE
     ${PDAL_IO_DIR}
-    ${INCLUDE_DIRS})
+    ${PCL_INCLUDE_DIRS})
 
 #
 # Smooth Kernel
@@ -145,7 +145,7 @@ PDAL_ADD_PLUGIN(smooth_libname kernel smooth
         kernel/SmoothKernel.cpp
     LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 target_include_directories(${smooth_libname} PRIVATE
-    ${INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
     ${PDAL_IO_DIR})
 
 if (WITH_TESTS)
@@ -162,5 +162,6 @@ if (WITH_TESTS)
     LINK_WITH
         ${icp_filter_libname}
     )
-    target_include_directories(pdal_filters_icp_test PRIVATE ${INCLUDE_DIRS})
+    target_include_directories(pdal_filters_icp_test PRIVATE
+        ${PCL_INCLUDE_DIRS})
 endif()
