@@ -42,12 +42,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.terrasolid",
     "TerraSolid Reader",
-    "http://pdal.io/stages/readers.terrasolid.html" );
+    "http://pdal.io/stages/readers.terrasolid.html",
+    { "bin" },
+    { "bin" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TerrasolidReader, Reader, s_info)
+CREATE_STATIC_STAGE(TerrasolidReader, s_info)
 
 std::string TerrasolidReader::getName() const { return s_info.name; }
 

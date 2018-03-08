@@ -42,11 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.hag", "HAG Filter",
-               "http://pdal.io/stages/filters.hag.html");
+static StaticPluginInfo const s_info
+{
+    "filters.hag",
+    "HAG Filter",
+    "http://pdal.io/stages/filters.hag.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, HAGFilter, Filter, s_info)
+CREATE_STATIC_STAGE(HAGFilter, s_info)
 
 std::string HAGFilter::getName() const
 {

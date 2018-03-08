@@ -62,14 +62,18 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "writers.las",
     "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
         "available if enabled at compile-time. Note that LAZ \n" \
         "does not provide LAS 1.4 support at this time.",
-    "http://pdal.io/stages/writers.las.html" );
+    "http://pdal.io/stages/writers.las.html",
+    { "las", "laz" },
+    { "las", "laz" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
+CREATE_STATIC_STAGE(LasWriter, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 

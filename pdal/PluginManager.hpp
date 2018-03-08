@@ -82,26 +82,39 @@ public:
     static std::string description(const std::string& name);
     static std::string link(const std::string& name);
     template <typename C>
-    static void registerPlugin(const PluginInfo& info)
-        { return m_instance->l_registerPlugin<C>(info); }
+    static bool registerPlugin(const PluginInfo& info)
+        { return get().template l_registerPlugin<C>(info); }
+    template <typename C>
+    static bool registerPlugin(const StaticPluginInfo& info)
+        { return get().template l_registerPlugin<C>(info); }
     static bool loadPlugin(const std::string& pluginFilename);
     static T *createObject(const std::string& objectType);
     static StringList names();
     static void setLog(LogPtr& log);
     static void loadAll();
+    static bool loadDynamic(const std::string& driverName);
+    static PluginManager<T>& get()
+    {
+        static PluginManager<T> instance;
+
+        return instance;
+    }
+    std::map<std::string, std::string> inferredReaders();
+    std::map<std::string, std::string> inferredWriters();
+    std::map<std::string, StringList> extensions();
 
 private:
     std::string getPath(const std::string& driver);
     void shutdown();
     bool loadByPath(const std::string & path);
-    bool loadDynamic(const std::string& driverName);
+    bool l_loadDynamic(const std::string& driverName);
     DynamicLibrary *libraryLoaded(const std::string& path);
     DynamicLibrary *loadLibrary(const std::string& path);
     T *l_createObject(const std::string& objectType);
     template <class C>
-    void l_registerPlugin(const PluginInfo& pi)
+    bool l_registerPlugin(const PluginInfo& pi)
     {
-        auto f = []()
+        auto f = [&]()
         {
             T *t = dynamic_cast<T *>(new C);
             return t;
@@ -109,23 +122,33 @@ private:
         Info info {pi.name, pi.link, pi.description, f};
         std::lock_guard<std::mutex> lock(m_pluginMutex);
         m_plugins.insert(std::make_pair(pi.name, info));
+        return true;
     }
+    template <class C>
+    bool l_registerPlugin(const StaticPluginInfo& pi)
+    {
+        l_registerPlugin<C>((const PluginInfo&)pi);
+        addExtensions(pi.name, pi.extensions, pi.defaultExtensions);
+        return true;
+    }
+
     bool l_loadPlugin(const std::string& pluginFilename);
     StringList l_names();
     std::string l_description(const std::string& name);
     std::string l_link(const std::string& name);
     void l_loadAll();
+    void addExtensions(const std::string& name, const StringList& extensions,
+        const StringList& defaultExtensions);
 
-    static PluginManager<T> *m_instance;
     DynamicLibraryMap m_dynamicLibraryMap;
     RegistrationInfoMap m_plugins;
     std::mutex m_pluginMutex;
     std::mutex m_libMutex;
     LogPtr m_log;
+    std::map<std::string, StringList> m_extensions;
+    std::map<std::string, std::string> m_inferredReaders;
+    std::map<std::string, std::string> m_inferredWriters;
 };
-
-template<typename T>
-PluginManager<T> *PluginManager<T>::m_instance;
 
 } // namespace pdal
 

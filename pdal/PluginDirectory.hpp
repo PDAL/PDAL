@@ -50,13 +50,24 @@ namespace pdal
 class PluginDirectory
 {
     FRIEND_TEST(PluginManagerTest, SearchPaths);
-public:
+
+private:
     PluginDirectory();
+
+public:
+    // This is actually thread-safe in C++11. How nice :)
+    static PluginDirectory& get()
+    {
+        static PluginDirectory instance;
+
+        return instance;
+    }
 
     std::map<std::string, std::string> m_kernels;
     std::map<std::string, std::string> m_drivers;
 
 private:
+    static PluginDirectory *m_instance;
     PDAL_DLL static StringList test_pluginSearchPaths();
 };
 

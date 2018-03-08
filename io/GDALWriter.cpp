@@ -41,13 +41,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-        "writers.gdal",
-        "Write a point cloud as a GDAL raster.",
-        "http://pdal.io/stages/writers.gdal.html");
+static StaticPluginInfo const s_info
+{
+    "writers.gdal",
+    "Write a point cloud as a GDAL raster.",
+    "http://pdal.io/stages/writers.gdal.html",
+    { "tif", "tiff", "vrt" },
+    { "tif", "tiff", "vrt" }
+};
 
-
-CREATE_STATIC_PLUGIN(1, 0, GDALWriter, Writer, s_info)
+CREATE_STATIC_STAGE(GDALWriter, s_info)
 
 std::string GDALWriter::getName() const
 {

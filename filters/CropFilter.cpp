@@ -49,12 +49,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.crop",
     "Filter points inside or outside a bounding box or a polygon",
-    "http://pdal.io/stages/filters.crop.html" );
+    "http://pdal.io/stages/filters.crop.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
+CREATE_STATIC_STAGE(CropFilter, s_info)
 
 CropFilter::ViewGeom::ViewGeom(const Polygon& poly) : m_poly(poly)
 {}

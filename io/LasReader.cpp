@@ -87,14 +87,17 @@ void LasReader::addArgs(ProgramArgs& args)
 }
 
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info {
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
         "enabled through this driver if LASzip was found during \n" \
         "compilation.",
-    "http://pdal.io/stages/readers.las.html" );
+    "http://pdal.io/stages/readers.las.html",
+    { "las", "laz" },
+    { "las", "laz" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
+CREATE_STATIC_STAGE(LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 

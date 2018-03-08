@@ -37,12 +37,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.merge",
     "Merge data from two different readers into a single stream.",
-    "http://pdal.io/stages/filters.merge.html" );
+    "http://pdal.io/stages/filters.merge.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, MergeFilter, Filter, s_info)
+CREATE_STATIC_STAGE(MergeFilter, s_info)
 
 std::string MergeFilter::getName() const { return s_info.name; }
 

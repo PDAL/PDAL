@@ -40,12 +40,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "writers.sbet",
     "SBET Writer",
-    "http://pdal.io/stages/writers.sbet.html" );
+    "http://pdal.io/stages/writers.sbet.html",
+    { "sbet" },
+    { "sbet" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SbetWriter, Writer, s_info)
+CREATE_STATIC_STAGE(SbetWriter, s_info)
 
 std::string SbetWriter::getName() const { return s_info.name; }
 

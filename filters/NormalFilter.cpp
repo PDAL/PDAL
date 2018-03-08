@@ -46,11 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.normal", "Normal Filter",
-               "http://pdal.io/stages/filters.normal.html");
+static StaticPluginInfo const s_info
+{
+    "filters.normal",
+    "Normal Filter",
+    "http://pdal.io/stages/filters.normal.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, NormalFilter, Filter, s_info)
+CREATE_STATIC_STAGE(NormalFilter, s_info)
 
 std::string NormalFilter::getName() const
 {

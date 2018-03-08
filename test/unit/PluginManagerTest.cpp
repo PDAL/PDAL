@@ -66,6 +66,8 @@ struct DummyPlugin : Filter
     void filter(PointView& /*view*/) final {}
 };
 
+/**
+ABELL - Now load at startup.
 TEST(PluginManagerTest, NoPluginsNoNames)
 {
     auto ns = PluginManager<Stage>::names();
@@ -73,6 +75,7 @@ TEST(PluginManagerTest, NoPluginsNoNames)
     ns = PluginManager<Kernel>::names();
     EXPECT_TRUE(ns.empty());
 }
+**/
 
 TEST(PluginManagerTest, MissingPlugin)
 {

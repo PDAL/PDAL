@@ -41,12 +41,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.text",
     "Text Reader",
-    "http://pdal.io/stages/readers.text.html" );
+    "http://pdal.io/stages/readers.text.html",
+    { "txt", "csv" },
+    { "txt", "csv" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TextReader, Reader, s_info)
+CREATE_STATIC_STAGE(TextReader, s_info)
 
 std::string TextReader::getName() const { return s_info.name; }
 

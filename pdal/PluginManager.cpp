@@ -54,23 +54,17 @@
 namespace pdal
 {
 
-// The directory must be created first.
-PluginDirectory s_directory;
-
-PluginManager<Stage> s_stageInstance;
-PluginManager<Kernel> s_kernelInstance;
-
 template <typename T>
 StringList PluginManager<T>::names()
 {
-    return m_instance->l_names();
+    return get().l_names();
 }
 
 
 template <typename T>
 void PluginManager<T>::setLog(LogPtr& log)
 {
-    m_instance->m_log = log;
+    get().m_log = log;
 }
 
 
@@ -92,10 +86,11 @@ StringList PluginManager<T>::l_names()
 template <typename T>
 void PluginManager<T>::loadAll()
 {
-    m_instance->l_loadAll();
+    get().l_loadAll();
 }
 
 
+//Base template.
 template <typename T>
 void PluginManager<T>::l_loadAll()
 {}
@@ -104,16 +99,18 @@ void PluginManager<T>::l_loadAll()
 template<>
 void PluginManager<Stage>::l_loadAll()
 {
-    for (auto& di: s_directory.m_drivers)
-        loadDynamic(di.first);
+    PluginDirectory& dir = PluginDirectory::get();
+    for (auto& di: dir.m_drivers)
+        l_loadDynamic(di.first);
 }
 
 
 template<>
 void PluginManager<Kernel>::l_loadAll()
 {
-    for (auto& di: s_directory.m_kernels)
-        loadDynamic(di.first);
+    PluginDirectory& dir = PluginDirectory::get();
+    for (auto& di: dir.m_kernels)
+        l_loadDynamic(di.first);
 }
 
 
@@ -126,7 +123,7 @@ void PluginManager<Kernel>::l_loadAll()
 template <typename T>
 std::string PluginManager<T>::link(const std::string& name)
 {
-    return m_instance->l_link(name);
+    return get().l_link(name);
 }
 
 
@@ -152,7 +149,7 @@ std::string PluginManager<T>::l_link(const std::string& name)
 template <typename T>
 std::string PluginManager<T>::description(const std::string& name)
 {
-    return m_instance->l_description(name);
+    return get().l_description(name);
 }
 
 
@@ -171,9 +168,7 @@ std::string PluginManager<T>::l_description(const std::string& name)
 
 template <typename T>
 PluginManager<T>::PluginManager() : m_log(new Log("PDAL", &std::clog))
-{
-    m_instance = this;
-}
+{}
 
 
 template <typename T>
@@ -212,7 +207,7 @@ void PluginManager<T>::shutdown()
 template <typename T>
 bool PluginManager<T>::loadPlugin(const std::string& driverFileName)
 {
-    return m_instance->l_loadPlugin(driverFileName);
+    return get().l_loadPlugin(driverFileName);
 }
 
 
@@ -232,8 +227,9 @@ std::string PluginManager<T>::getPath(const std::string& driver)
 template<>
 std::string PluginManager<Stage>::getPath(const std::string& driver)
 {
-    auto it = s_directory.m_drivers.find(driver);
-    if (it == s_directory.m_drivers.end())
+    PluginDirectory& dir = PluginDirectory::get();
+    auto it = dir.m_drivers.find(driver);
+    if (it == dir.m_drivers.end())
         return std::string();
     return it->second;
 }
@@ -242,15 +238,22 @@ std::string PluginManager<Stage>::getPath(const std::string& driver)
 template<>
 std::string PluginManager<Kernel>::getPath(const std::string& driver)
 {
-    auto it = s_directory.m_kernels.find(driver);
-    if (it == s_directory.m_kernels.end())
+    PluginDirectory& dir = PluginDirectory::get();
+
+    auto it = dir.m_kernels.find(driver);
+    if (it == dir.m_kernels.end())
         return std::string();
     return it->second;
 }
 
-
 template <typename T>
 bool PluginManager<T>::loadDynamic(const std::string& driverName)
+{
+    return get().l_loadDynamic(driverName);
+}
+
+template <typename T>
+bool PluginManager<T>::l_loadDynamic(const std::string& driverName)
 {
     // If the library pointer is already in the map, we've already loaded
     // the library.
@@ -303,7 +306,7 @@ bool PluginManager<T>::loadByPath(const std::string& path)
 template <typename T>
 T *PluginManager<T>::createObject(const std::string& objectType)
 {
-    return m_instance->l_createObject(objectType);
+    return get().l_createObject(objectType);
 }
 
 
@@ -317,7 +320,7 @@ T *PluginManager<T>::l_createObject(const std::string& objectType)
         return m_plugins.count(objectType);
     });
 
-    if (find() || (loadDynamic(objectType) && find()))
+    if (find() || (l_loadDynamic(objectType) && find()))
     {
         // Kernels contain a PipelineManager, which may load other plugins,
         // so the lock must be released prior to invoking the ctor to
@@ -366,6 +369,60 @@ DynamicLibrary *PluginManager<T>::loadLibrary(const std::string& path)
             ": " << errorString;
 
     return d;
+}
+
+template<typename T>
+void PluginManager<T>::addExtensions(const std::string& name,
+    const StringList& extensions, const StringList& defaultExtensions)
+{
+    auto addInferred = [&name, this](
+        std::map<std::string, std::string>& inferred,
+        const std::string& extension)
+    {
+        auto ii = inferred.insert(std::make_pair(extension, name));
+        if (!ii.second)
+            m_log->get(LogLevel::Error) << "Can't set driver '" <<
+                name << "' to be inferred from extension '" <<
+                extension << ". Extension already set for '" <<
+                ii.first->second << "'." << std::endl;
+    };
+
+    //NOTE - This should be called under lock.
+    m_extensions[name] = extensions;
+    for (const std::string& ext : defaultExtensions)
+    {
+        if (Utils::startsWith(name, "readers."))
+            addInferred(m_inferredReaders, ext);
+        else if (Utils::startsWith(name, "writers."))
+            addInferred(m_inferredWriters, ext);
+        else
+            m_log->get(LogLevel::Error) << "Can't set a default "
+                "extension for stage '" << name << "'." << std::endl;
+    }
+}
+
+
+template<typename T>
+std::map<std::string, StringList> PluginManager<T>::extensions()
+{
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
+    return m_extensions;
+}
+
+
+template<typename T>
+std::map<std::string, std::string> PluginManager<T>::inferredReaders()
+{
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
+    return m_inferredReaders;
+}
+
+
+template<typename T>
+std::map<std::string, std::string> PluginManager<T>::inferredWriters()
+{
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
+    return m_inferredWriters;
 }
 
 class Stage;

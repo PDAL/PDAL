@@ -51,6 +51,25 @@ struct PluginInfo
     {}
 };
 
+struct StaticPluginInfo : public PluginInfo
+{
+    StringList extensions;
+    StringList defaultExtensions;
+
+    StaticPluginInfo(const std::string& n, const std::string& d,
+        const std::string& l) : PluginInfo(n, d, l)
+    {}
+
+    StaticPluginInfo(const std::string& n, const std::string& d,
+            const std::string& l, const StringList& e) :
+        PluginInfo(n, d, l), extensions(e)
+    {}
+    StaticPluginInfo(const std::string& n, const std::string& d,
+            const std::string& l, const StringList& e, const StringList& de) :
+        PluginInfo(n, d, l), extensions(e), defaultExtensions(de)
+    {}
+};
+
 }
 
 extern "C"
@@ -82,4 +101,9 @@ typedef void (*PF_InitFunc)();
         else \
             pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
+
+#define CREATE_STATIC_STAGE(T, info) \
+    static bool T ## _b =  \
+        pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info);
+
 

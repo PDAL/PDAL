@@ -64,11 +64,14 @@ using namespace Dimension;
 using namespace Eigen;
 using namespace eigen;
 
-static PluginInfo const s_info = PluginInfo(
-    "filters.smrf", "Simple Morphological Filter (Pingel et al., 2013)",
-    "http://pdal.io/stages/filters.smrf.html");
+static StaticPluginInfo const s_info
+{
+    "filters.smrf",
+    "Simple Morphological Filter (Pingel et al., 2013)",
+    "http://pdal.io/stages/filters.smrf.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SMRFilter, Filter, s_info)
+CREATE_STATIC_STAGE(SMRFilter, s_info)
 
 std::string SMRFilter::getName() const
 {

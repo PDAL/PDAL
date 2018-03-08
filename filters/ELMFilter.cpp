@@ -45,11 +45,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.elm", "Extended Local Minimum Filter",
-               "http://pdal.io/stages/filters.elm.html");
+static StaticPluginInfo const s_info
+{
+    "filters.elm",
+    "Extended Local Minimum Filter",
+    "http://pdal.io/stages/filters.elm.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ELMFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ELMFilter, s_info)
 
 std::string ELMFilter::getName() const
 {
