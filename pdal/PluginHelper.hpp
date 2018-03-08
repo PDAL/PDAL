@@ -92,6 +92,7 @@ typedef void (*PF_InitFunc)();
             pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
 
+/**
 #define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL void T ## _InitPlugin() \
     { \
@@ -101,6 +102,11 @@ typedef void (*PF_InitFunc)();
         else \
             pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
+**/
+
+#define CREATE_STATIC_KERNEL(T, info) \
+    static bool T ## _b = \
+        pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info);
 
 #define CREATE_STATIC_STAGE(T, info) \
     static bool T ## _b =  \

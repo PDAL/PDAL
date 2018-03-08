@@ -39,10 +39,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.delta", "Delta Kernel",
-    "http://www.pdal.io/apps/delta.html");
+static StaticPluginInfo const s_info
+{
+    "kernels.delta",
+    "Delta Kernel",
+    "http://www.pdal.io/apps/delta.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, DeltaKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(DeltaKernel, s_info)
 
 std::string DeltaKernel::getName() const { return s_info.name; }
 

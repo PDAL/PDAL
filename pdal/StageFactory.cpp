@@ -36,22 +36,8 @@
 #include <pdal/PluginManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <kernels/DeltaKernel.hpp>
-#include <kernels/DiffKernel.hpp>
-#include <kernels/GroundKernel.hpp>
-#include <kernels/HausdorffKernel.hpp>
-#include <kernels/InfoKernel.hpp>
-#include <kernels/MergeKernel.hpp>
-#include <kernels/PipelineKernel.hpp>
-#include <kernels/RandomKernel.hpp>
-#include <kernels/SortKernel.hpp>
-#include <kernels/SplitKernel.hpp>
-#include <kernels/TIndexKernel.hpp>
-#include <kernels/TranslateKernel.hpp>
-
 #include <sstream>
 #include <string>
-//#include <stdio.h> // for funcptr
 
 namespace pdal
 {
@@ -147,20 +133,6 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 StageFactory::StageFactory(bool ignored)
 {
     (void)ignored;
-
-    // kernels
-    DeltaKernel_InitPlugin();
-    DiffKernel_InitPlugin();
-    GroundKernel_InitPlugin();
-    HausdorffKernel_InitPlugin();
-    InfoKernel_InitPlugin();
-    MergeKernel_InitPlugin();
-    PipelineKernel_InitPlugin();
-    RandomKernel_InitPlugin();
-    SortKernel_InitPlugin();
-    SplitKernel_InitPlugin();
-    TIndexKernel_InitPlugin();
-    TranslateKernel_InitPlugin();
 }
 
 

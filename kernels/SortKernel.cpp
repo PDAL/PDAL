@@ -37,10 +37,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.sort", "Sort Kernel",
-    "http://pdal.io/apps/sort.html" );
+static StaticPluginInfo const s_info
+{
+    "kernels.sort",
+    "Sort Kernel",
+    "http://pdal.io/apps/sort.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SortKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(SortKernel, s_info)
 
 std::string SortKernel::getName() const
 {
