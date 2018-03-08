@@ -34,12 +34,12 @@
 
 #include "Support.hpp"
 #include <Eigen/Dense>
-#include <filters/IcpFilter.hpp>
 #include <filters/TransformationFilter.hpp>
 #include <io/LasReader.hpp>
 #include <memory>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/EigenUtils.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
@@ -55,9 +55,11 @@ std::unique_ptr<LasReader> newReader()
     return reader;
 }
 
-std::unique_ptr<IcpFilter> newFilter()
+Stage* newFilter()
 {
-    return std::unique_ptr<IcpFilter>(new IcpFilter());
+    static StageFactory f;
+
+    return f.createStage("filters.icp");
 }
 
 void checkPointsEqualReader(const PointViewSet& pointViewSet, double tolerance)

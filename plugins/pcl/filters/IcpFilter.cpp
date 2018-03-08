@@ -32,8 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "PCLConversions.hpp"
-#include <filters/IcpFilter.hpp>
+#include "../PCLConversions.hpp"
+#include "IcpFilter.hpp"
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pdal/EigenUtils.hpp>
