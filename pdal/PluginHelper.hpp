@@ -92,18 +92,6 @@ typedef void (*PF_InitFunc)();
             pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
 
-/**
-#define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
-    extern "C" PDAL_DLL void T ## _InitPlugin() \
-    { \
-        bool stage = std::is_convertible<T*, Stage *>::value; \
-        if (stage) \
-            pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); \
-        else \
-            pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
-    }
-**/
-
 #define CREATE_STATIC_KERNEL(T, info) \
     static bool T ## _b = \
         pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info);
@@ -111,5 +99,4 @@ typedef void (*PF_InitFunc)();
 #define CREATE_STATIC_STAGE(T, info) \
     static bool T ## _b =  \
         pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info);
-
 
