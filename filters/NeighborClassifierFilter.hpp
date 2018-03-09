@@ -37,19 +37,19 @@
 #include <pdal/Filter.hpp>
 #include <pdal/KDIndex.hpp>
 
-extern "C" int32_t KNNAssignFilter_ExitFunc();
-extern "C" PF_ExitFunc KNNAssignFilter_InitPlugin();
+extern "C" int32_t NeighborClassifierFilter_ExitFunc();
+extern "C" PF_ExitFunc NeighborClassifierFilter_InitPlugin();
 
 namespace pdal
 {
 
 struct DimRange;
 
-class PDAL_DLL KNNAssignFilter : public Filter
+class PDAL_DLL NeighborClassifierFilter : public Filter
 {
 public:
-    KNNAssignFilter();
-    ~KNNAssignFilter();
+    NeighborClassifierFilter();
+    ~NeighborClassifierFilter();
 
     static void * create();
     static int32_t destroy(void *);
@@ -63,8 +63,8 @@ private:
     virtual void initialize();
     void doOneNoDomain(PointRef &point, PointRef& temp, KD3Index &kdi);
     PointViewPtr loadSet(const std::string &candFileName, PointTable &table);
-    KNNAssignFilter& operator=(const KNNAssignFilter&) = delete;
-    KNNAssignFilter(const KNNAssignFilter&) = delete;
+    NeighborClassifierFilter& operator=(const NeighborClassifierFilter&) = delete;
+    NeighborClassifierFilter(const NeighborClassifierFilter&) = delete;
     StringList m_domainSpec;
     std::vector<DimRange> m_domain;
     int m_k;

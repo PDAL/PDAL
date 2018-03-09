@@ -292,7 +292,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager<Stage>::initializePlugin(HeadFilter_InitPlugin);
     PluginManager<Stage>::initializePlugin(IQRFilter_InitPlugin);
     PluginManager<Stage>::initializePlugin(KDistanceFilter_InitPlugin);
-    PluginManager<Stage>::initializePlugin(KNNAssignFilter_InitPlugin);
+    PluginManager<Stage>::initializePlugin(NeighborClassifierFilter_InitPlugin);
     PluginManager<Stage>::initializePlugin(LocateFilter_InitPlugin);
     PluginManager<Stage>::initializePlugin(LOFFilter_InitPlugin);
     PluginManager<Stage>::initializePlugin(MADFilter_InitPlugin);

@@ -50,17 +50,17 @@ static PluginInfo const s_info = PluginInfo(
     "Re-assign some point attributes based KNN voting",
     "http://pdal.io/stages/filters.neighborclassifier.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, KNNAssignFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, NeighborClassifierFilter, Filter, s_info)
 
-KNNAssignFilter::KNNAssignFilter() : m_dim(Dimension::Id::Classification)
+NeighborClassifierFilter::NeighborClassifierFilter() : m_dim(Dimension::Id::Classification)
 {}
 
 
-KNNAssignFilter::~KNNAssignFilter()
+NeighborClassifierFilter::~NeighborClassifierFilter()
 {}
 
 
-void KNNAssignFilter::addArgs(ProgramArgs& args)
+void NeighborClassifierFilter::addArgs(ProgramArgs& args)
 {
     args.add("domain", "Selects which points will be subject to KNN-based assignmenassignment",
         m_domainSpec);
@@ -71,7 +71,7 @@ void KNNAssignFilter::addArgs(ProgramArgs& args)
         m_candidateFile);
 }
 
-void KNNAssignFilter::initialize()
+void NeighborClassifierFilter::initialize()
 {
     for (auto const& r : m_domainSpec)
     {
@@ -89,7 +89,7 @@ void KNNAssignFilter::initialize()
     if (m_k < 1)
         throwError("Invalid 'k' option: " + std::to_string(m_k) +  ", must be > 0");
 }
-void KNNAssignFilter::prepared(PointTableRef table)
+void NeighborClassifierFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
 
@@ -107,7 +107,7 @@ void KNNAssignFilter::prepared(PointTableRef table)
     //    throwError("Dimension '" + m_dimName + "' not found.");
 }
 
-void KNNAssignFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)
+void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)
 {
     std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
     double thresh = iSrc.size()/2.0;
@@ -137,7 +137,7 @@ void KNNAssignFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD3Index &k
     }
 }
 
-bool KNNAssignFilter::doOne(PointRef& point, PointRef &temp, KD3Index &kdi)
+bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp, KD3Index &kdi)
 {   // update point.  kdi and temp both reference the NN point cloud
 
     if (m_domain.empty())  // No domain, process all points
@@ -154,7 +154,7 @@ bool KNNAssignFilter::doOne(PointRef& point, PointRef &temp, KD3Index &kdi)
     return true;
 }
 
-PointViewPtr KNNAssignFilter::loadSet(const std::string& filename,
+PointViewPtr NeighborClassifierFilter::loadSet(const std::string& filename,
     PointTable& table)
 {
     PipelineManager mgr;
@@ -166,7 +166,7 @@ PointViewPtr KNNAssignFilter::loadSet(const std::string& filename,
     return *viewSet.begin();
 }
 
-void KNNAssignFilter::filter(PointView& view)
+void NeighborClassifierFilter::filter(PointView& view)
 {
     PointRef point_src(view, 0);
     if (m_candidateFile.empty())
