@@ -143,8 +143,15 @@ void GDALWriter::createGrid(BOX2D bounds)
     m_curBounds = bounds;
     size_t width = ((m_curBounds.maxx - m_curBounds.minx) / m_edgeLength) + 1;
     size_t height = ((m_curBounds.maxy - m_curBounds.miny) / m_edgeLength) + 1;
-    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
-        m_outputTypes, m_windowSize));
+    try
+    {
+        m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
+                    m_outputTypes, m_windowSize));
+    }
+    catch (GDALGrid::error& err)
+    {
+        throwError(err.what());
+    }
 }
 
 
