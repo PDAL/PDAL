@@ -189,6 +189,8 @@ void TextReader::ready(PointTableRef table)
     // Skip header line unless we're inserting one from the command line..
     if (m_headerInsert.size())
         m_line = 0;
+    else if (m_headerSkip)
+        m_line = m_headerSkip;
     else
     {
         std::string buf;
