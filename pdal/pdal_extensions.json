@@ -1,62 +1,13 @@
-[
-    "writers.pcd" :
-    {
-        "extensions" : "pcd",
-        "default_extensions" : "pcd"
-    },
-    "readers.greyhound" :
-    {
-        "extensions" : "greyhound",
-        "default_extensions" : "greyhound"
-    },
-    "readers.icebridge" :
-    {
-        "extensions" : "icebridge h5",
-        "default_extensions" : "icebridge h5"
-    },
-    "readers.matlab" :
-    {
-        "extensions" : "mat",
-        "default_extensions" : "mat"
-    },
-    "writers.matlab" :
-    {
-        "extensions" : "mat",
-        "default_extensions" : "mat"
-    },
-    "readers.nitf" :
-    {
-        "extensions" : "nitf, nsf, ntf",
-        "default_extensions" : "nitf, nsf, ntf"
-    },
-    "readers.pcd" :
-    {
-        "extensions" : "pcd",
-        "default_extensions" : "pcd"
-    },
-    "writers.pcd" :
-    {
-        "extensions" : "pcd",
-        "default_extensions" : "pcd"
-    },
-    "readers.sqlite" :
-    {
-        "extensions" : "sqlite, gpkg",
-        "default_extensions" : "sqlite, gpkg"
-    },
-    "writers.sqlite" :
-    {
-        "extensions" : "sqlite, gpkg",
-        "default_extensions" : "sqlite, gpkg"
-    },
-    "readers.mrsid" :
-    {
-        "extensions" : "sid",
-        "default_extensions" : "sid"
-    },
-    "readers.rxp" :
-    {
-        "extensions" : "rxp",
-        "default_extensions" : "rxp"
-    }
-]
+{
+    "readers.greyhound" : "greyhound",
+    "readers.icebridge" : "icebridge h5",
+    "readers.matlab" : "mat",
+    "writers.matlab" : "mat",
+    "readers.nitf" : "nitf, nsf, ntf",
+    "readers.pcd" : "pcd",
+    "writers.pcd" : "pcd",
+    "readers.sqlite" : "sqlite, gpkg",
+    "writers.sqlite" : "sqlite, gpkg",
+    "readers.mrsid" : "sid",
+    "readers.rxp" : "rxp"
+}

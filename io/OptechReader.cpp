@@ -51,7 +51,6 @@ static StaticPluginInfo const s_info
     "readers.optech",
     "Optech reader support.",
     "http://pdal.io/stages/readers.optech.html",
-    { "csd" },
     { "csd" }
 };
 

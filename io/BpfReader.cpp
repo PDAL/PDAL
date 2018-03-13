@@ -50,7 +50,6 @@ static StaticPluginInfo const s_info
         "DoD and research format that is used by some sensor and \n" \
         "processing chains.",
     "http://pdal.io/stages/readers.bpf.html",
-    { "bpf" },
     { "bpf" }
 };
 

@@ -52,7 +52,6 @@ struct PluginInfo
 struct StaticPluginInfo : public PluginInfo
 {
     StringList extensions;
-    StringList defaultExtensions;
 
     StaticPluginInfo(const std::string& n, const std::string& d,
         const std::string& l) : PluginInfo(n, d, l)
@@ -61,10 +60,6 @@ struct StaticPluginInfo : public PluginInfo
     StaticPluginInfo(const std::string& n, const std::string& d,
             const std::string& l, const StringList& e) :
         PluginInfo(n, d, l), extensions(e)
-    {}
-    StaticPluginInfo(const std::string& n, const std::string& d,
-            const std::string& l, const StringList& e, const StringList& de) :
-        PluginInfo(n, d, l), extensions(e), defaultExtensions(de)
     {}
 };
 

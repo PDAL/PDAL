@@ -184,7 +184,6 @@ static StaticPluginInfo const s_info
     "readers.qfit",
     "QFIT Reader",
     "http://pdal.io/stages/readers.qfit.html",
-    { "qi" },
     { "qi" }
 };
 

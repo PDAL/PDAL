@@ -42,9 +42,6 @@
 
 #include "private/Point.hpp"
 
-extern "C" int32_t CropFilter_ExitFunc();
-extern "C" PF_ExitFunc CropFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -58,8 +55,6 @@ class PDAL_DLL CropFilter : public Filter, public Streamable
 public:
     CropFilter();
     ~CropFilter();
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

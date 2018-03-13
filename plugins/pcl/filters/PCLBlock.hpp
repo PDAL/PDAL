@@ -40,7 +40,7 @@
 
 namespace pdal
 {
-  
+
 class PointView;
 class ProgramArgs;
 
@@ -49,9 +49,6 @@ class PDAL_DLL PCLBlock : public Filter
 public:
     PCLBlock() : Filter()
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -34,6 +34,8 @@
 
 #include "RandomKernel.hpp"
 
+#include <pdal/Stage.hpp>
+
 namespace pdal
 {
 

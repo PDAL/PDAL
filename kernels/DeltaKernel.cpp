@@ -34,6 +34,7 @@
 
 #include "DeltaKernel.hpp"
 
+#include <pdal/Stage.hpp>
 #include <pdal/PDALUtils.hpp>
 
 namespace pdal

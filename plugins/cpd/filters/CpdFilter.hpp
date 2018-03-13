@@ -36,9 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-extern "C" int32_t CpdFilter_ExitFunc();
-extern "C" PF_ExitFunc CpdFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -50,9 +47,6 @@ class PDAL_DLL CpdFilter : public Filter
     CpdFilter() : Filter(), m_fixed(nullptr), m_method(""), m_complete(false)
     {
     }
-
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
     virtual PointViewSet run(PointViewPtr view);

@@ -45,9 +45,6 @@
 
 #include <vector>
 
-extern "C" int32_t BpfWriter_ExitFunc();
-extern "C" PF_ExitFunc BpfWriter_InitPlugin();
-
 namespace pdal
 {
 
@@ -63,8 +60,6 @@ public:
         int m_val;
     };
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

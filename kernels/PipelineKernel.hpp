@@ -39,17 +39,12 @@
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-extern "C" int32_t PipelineKernel_ExitFunc();
-extern "C" PF_ExitFunc PipelineKernel_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL PipelineKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
     PipelineKernel();

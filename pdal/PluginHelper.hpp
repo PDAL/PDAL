@@ -38,49 +38,9 @@
 
 #include <pdal/pdal_export.hpp>
 
-namespace pdal
-{
-
-struct PluginInfo
-{
-    std::string name;
-    std::string description;
-    std::string link;
-    PluginInfo(const std::string& n, const std::string& d, const std::string& l)
-      : name(n), description(d), link(l)
-    {}
-};
-
-struct StaticPluginInfo : public PluginInfo
-{
-    StringList extensions;
-    StringList defaultExtensions;
-
-    StaticPluginInfo(const std::string& n, const std::string& d,
-        const std::string& l) : PluginInfo(n, d, l)
-    {}
-
-    StaticPluginInfo(const std::string& n, const std::string& d,
-            const std::string& l, const StringList& e) :
-        PluginInfo(n, d, l), extensions(e)
-    {}
-    StaticPluginInfo(const std::string& n, const std::string& d,
-            const std::string& l, const StringList& e, const StringList& de) :
-        PluginInfo(n, d, l), extensions(e), defaultExtensions(de)
-    {}
-};
-
-}
-
-extern "C"
-{
-// This is a placeholder so as not to break existing plugins even though the
-// internal interface has changed.
-typedef void PF_ExitFunc;
-typedef void (*PF_InitFunc)();
-}
-
 #include <pdal/PluginManager.hpp>
+#include <pdal/PluginInfo.hpp>
+#include <pdal/Kernel.hpp>
 
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL void PF_initPlugin() \

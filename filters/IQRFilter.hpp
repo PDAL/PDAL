@@ -38,9 +38,6 @@
 
 #include <string>
 
-extern "C" int32_t IQRFilter_ExitFunc();
-extern "C" PF_ExitFunc IQRFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -54,8 +51,6 @@ public:
     IQRFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

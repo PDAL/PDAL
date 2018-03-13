@@ -66,13 +66,6 @@ public:
     StageFactory(bool ignored = true);
 
     /**
-      Return the file extensions associated with a driver.
-
-      \param driver  Name of the driver whose extensions should be returned.
-    */
-    static StringList extensions(const std::string& driver);
-
-    /**
       Infer the reader to use based on a filename.
 
       \param filename  Filename that should be analyzed to determine a driver.

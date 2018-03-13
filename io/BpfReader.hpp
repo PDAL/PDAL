@@ -49,17 +49,12 @@
 
 #include <vector>
 
-extern "C" int32_t BpfReader_ExitFunc();
-extern "C" PF_ExitFunc BpfReader_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL BpfReader : public Reader, public Streamable
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     virtual point_count_t numPoints() const

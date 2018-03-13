@@ -46,9 +46,6 @@ class PDAL_DLL SQLiteWriter : public DbWriter
 {
 public:
     SQLiteWriter();
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

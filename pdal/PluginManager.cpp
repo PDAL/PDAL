@@ -54,6 +54,15 @@
 namespace pdal
 {
 
+// This is thread-safe in C++ 11.
+template <typename T>
+PluginManager<T>& PluginManager<T>::get()
+{
+    static PluginManager<T> instance;
+
+    return instance;
+}
+
 template <typename T>
 StringList PluginManager<T>::names()
 {
@@ -167,7 +176,8 @@ std::string PluginManager<T>::l_description(const std::string& name)
 
 
 template <typename T>
-PluginManager<T>::PluginManager() : m_log(new Log("PDAL", &std::clog))
+PluginManager<T>::PluginManager() : m_log(new Log("PDAL", &std::clog)),
+    m_extensions(m_log)
 {}
 
 
@@ -369,60 +379,6 @@ DynamicLibrary *PluginManager<T>::loadLibrary(const std::string& path)
             ": " << errorString;
 
     return d;
-}
-
-template<typename T>
-void PluginManager<T>::addExtensions(const std::string& name,
-    const StringList& extensions, const StringList& defaultExtensions)
-{
-    auto addInferred = [&name, this](
-        std::map<std::string, std::string>& inferred,
-        const std::string& extension)
-    {
-        auto ii = inferred.insert(std::make_pair(extension, name));
-        if (!ii.second)
-            m_log->get(LogLevel::Error) << "Can't set driver '" <<
-                name << "' to be inferred from extension '" <<
-                extension << ". Extension already set for '" <<
-                ii.first->second << "'." << std::endl;
-    };
-
-    //NOTE - This should be called under lock.
-    m_extensions[name] = extensions;
-    for (const std::string& ext : defaultExtensions)
-    {
-        if (Utils::startsWith(name, "readers."))
-            addInferred(m_inferredReaders, ext);
-        else if (Utils::startsWith(name, "writers."))
-            addInferred(m_inferredWriters, ext);
-        else
-            m_log->get(LogLevel::Error) << "Can't set a default "
-                "extension for stage '" << name << "'." << std::endl;
-    }
-}
-
-
-template<typename T>
-std::map<std::string, StringList> PluginManager<T>::extensions()
-{
-    std::lock_guard<std::mutex> lock(m_pluginMutex);
-    return m_extensions;
-}
-
-
-template<typename T>
-std::map<std::string, std::string> PluginManager<T>::inferredReaders()
-{
-    std::lock_guard<std::mutex> lock(m_pluginMutex);
-    return m_inferredReaders;
-}
-
-
-template<typename T>
-std::map<std::string, std::string> PluginManager<T>::inferredWriters()
-{
-    std::lock_guard<std::mutex> lock(m_pluginMutex);
-    return m_inferredWriters;
 }
 
 class Stage;

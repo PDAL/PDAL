@@ -51,8 +51,6 @@ public:
     SQLiteReader()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     SpatialReference fetchSpatialReference(std::string const& query) const;

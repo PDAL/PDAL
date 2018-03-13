@@ -45,7 +45,6 @@ static StaticPluginInfo const s_info
     "writers.sbet",
     "SBET Writer",
     "http://pdal.io/stages/writers.sbet.html",
-    { "sbet" },
     { "sbet" }
 };
 

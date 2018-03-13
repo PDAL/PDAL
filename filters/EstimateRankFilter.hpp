@@ -40,9 +40,6 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t EstimateRankFilter_ExitFunc();
-extern "C" PF_ExitFunc EstimateRankFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -58,8 +55,6 @@ public:
     EstimateRankFilter& operator=(const EstimateRankFilter&) = delete;
     EstimateRankFilter(const EstimateRankFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

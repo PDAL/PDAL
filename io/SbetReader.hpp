@@ -41,9 +41,6 @@
 
 #include "SbetCommon.hpp"
 
-extern "C" int32_t SbetReader_ExitFunc();
-extern "C" PF_ExitFunc SbetReader_InitPlugin();
-
 namespace pdal
 {
 
@@ -53,8 +50,6 @@ public:
     SbetReader() : Reader()
         {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

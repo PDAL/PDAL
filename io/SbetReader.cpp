@@ -45,7 +45,6 @@ static StaticPluginInfo const s_info
     "readers.sbet",
     "SBET Reader",
     "http://pdal.io/stages/readers.sbet.html",
-    { "sbet" },
     { "sbet" }
 };
 

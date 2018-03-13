@@ -42,46 +42,14 @@
 namespace pdal
 {
 
-StringList StageFactory::extensions(const std::string& driver)
-{
-    std::map<std::string, StringList> exts =
-        PluginManager<Stage>::get().extensions();
+/**
+  Find the default reader for a file.
 
-    exts["readers.pcd"] = {"pcd"};
-    exts["writers.pcd"] = {"pcd"};
-    exts["readers.greyhound"] = {"greyhound"};
-    exts["writers.greyhound"] = {"greyhound"};
-    exts["readers.matlab"] = {"mat"};
-    exts["writers.matlab"] = {"mat"};
-    exts["readers.icebridge"] = {"h5", "icebridge"};
-    exts["readers.nitf"] = {"nitf", "nsf", "ntf"};
-    exts["writers.nitf"] = {"nitf", "nsf", "ntf"};
-    exts["readers.sqlite"] = {"sqlite", "gpkg"};
-    exts["writers.sqlite"] = {"sqlite", "gpkg"};
-    exts["readers.mrsid"] = {"sid"};
-    exts["readers.rxp"] = {"rxp"};
-
-    return exts[driver];
-}
-
+  \param filename  Filename for which to infer a reader.
+  \return  Name of the reader driver associated with the file.
+*/
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
-    std::map<std::string, std::string> drivers =
-        PluginManager<Stage>::get().inferredReaders();
-
-    drivers["pcd"] = "readers.pcd";
-    drivers["greyhound"] = "readers.greyhound";
-    drivers["mat"] = "readers.matlab";
-    drivers["h5"] = "readers.icebridge";
-    drivers["icebridge"] = "readers.icebridge";
-    drivers["nitf"] = "readers.nitf";
-    drivers["ntf"] = "readers.nitf";
-    drivers["nsf"] = "readers.nitf";
-    drivers["sqlite"] = "readers.sqlite";
-    drivers["gpkg"] = "readers.sqlite";
-    drivers["sid"] = "readers.mrsid";
-    drivers["rxp"] = "readers.rxp";
-
     static const std::string ghPrefix("greyhound://");
 
     std::string ext;
@@ -93,12 +61,19 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     // Strip off '.' and make lowercase.
     if (ext.length())
-        ext = Utils::tolower(ext.substr(1, ext.length() - 1));
+        ext = Utils::tolower(ext.substr(1));
 
-    return drivers[ext]; // will be "" if not found
+    PluginManager<Stage>& mgr = PluginManager<Stage>::get();
+    return mgr.extensions().defaultReader(ext);
 }
 
 
+/**
+  Find the default writer for a file.
+
+  \param filename  Filename for which to infer a writer.
+  \return  Name of the writer driver associated with the file.
+*/
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
     std::string ext;
@@ -113,20 +88,10 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         ext = Utils::tolower(FileUtils::extension(filename));
     // Strip off '.' and make lowercase.
     if (ext.length())
-        ext = Utils::tolower(ext.substr(1, ext.length() - 1));
+        ext = Utils::tolower(ext.substr(1));
 
-    std::map<std::string, std::string> drivers =
-        PluginManager<Stage>::get().inferredWriters();
-    drivers["pcd"] = "writers.pcd";
-    drivers["greyhound"] = "writers.greyhound";
-    drivers["mat"] = "writers.matlab";
-    drivers["nitf"] = "writers.nitf";
-    drivers["ntf"] = "writers.nitf";
-    drivers["nsf"] = "writers.nitf";
-    drivers["sqlite"] = "writers.sqlite";
-    drivers["gpkg"] = "writers.sqlite";
-
-    return drivers[ext];
+    PluginManager<Stage>& mgr = PluginManager<Stage>::get();
+    return mgr.extensions().defaultWriter(ext);
 }
 
 

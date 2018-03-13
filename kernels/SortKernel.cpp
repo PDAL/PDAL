@@ -34,6 +34,8 @@
 
 #include "SortKernel.hpp"
 
+#include <pdal/Stage.hpp>
+
 namespace pdal
 {
 

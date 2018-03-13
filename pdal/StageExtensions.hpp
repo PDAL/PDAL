@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, James W. O'Meara (james.w.omeara@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,45 +32,29 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <mutex>
 
-#include <pdal/Reader.hpp>
-#include <pdal/util/Bounds.hpp>
-
-#include <geos_c.h>
-
-#include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
-using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
+#include <pdal/Log.hpp>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
 
-    class PDAL_DLL GeoWaveReader : public Reader
-    {
-    public:
-        std::string getName() const;
+class StageExtensions
+{
+public:
+    StageExtensions(LogPtr log);
 
-    private:
-        virtual void initialize();
-        virtual void addArgs(ProgramArgs& args);
-        virtual void addDimensions(PointLayoutPtr layout);
-        virtual void ready(PointTableRef table);
-        virtual point_count_t read(PointViewPtr view, point_count_t count);
-        virtual void done(PointTableRef table);
-        int createJvm();
+    void set(const std::string& stage, const StringList& exts);
+    std::string defaultReader(const std::string& filename);
+    std::string defaultWriter(const std::string& filename);
+private:
+    void load();
 
-        std::string m_zookeeperUrl;
-        std::string m_instanceName;
-        std::string m_username;
-        std::string m_password;
-        std::string m_tableNamespace;
-        std::string m_featureTypeName;
-        std::string m_dataAdapter;
-        bool m_useFeatCollDataAdapter;
-        uint32_t m_pointsPerEntry;
-        BOX3D m_bounds;
+    LogPtr m_log;
+    std::mutex m_mutex;
+    std::map<std::string, std::string> m_readers;
+    std::map<std::string, std::string> m_writers;
+};
 
-        CloseableIterator m_iterator;
-    };
-
-} // namespace pdal
+}

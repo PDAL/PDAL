@@ -93,7 +93,6 @@ static StaticPluginInfo const s_info {
         "enabled through this driver if LASzip was found during \n" \
         "compilation.",
     "http://pdal.io/stages/readers.las.html",
-    { "las", "laz" },
     { "las", "laz" }
 };
 

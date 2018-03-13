@@ -69,7 +69,6 @@ static StaticPluginInfo const s_info
         "available if enabled at compile-time. Note that LAZ \n" \
         "does not provide LAS 1.4 support at this time.",
     "http://pdal.io/stages/writers.las.html",
-    { "las", "laz" },
     { "las", "laz" }
 };
 

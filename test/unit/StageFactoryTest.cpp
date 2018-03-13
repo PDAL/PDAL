@@ -68,16 +68,11 @@ TEST(StageFactoryTest, extensionTest)
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.laz"), "readers.las");
 
-    PluginManager<Stage>::loadDynamic("readers.greyhound");
     EXPECT_EQ(StageFactory::inferReaderDriver("greyhound://foo.bar.baz"),
         "readers.greyhound");
 
-    StringList ext = { "las", "laz" };
-    EXPECT_EQ(StageFactory::extensions("writers.las"), ext);
-    ext = { "csv", "txt", "json", "xyz" };
-    EXPECT_EQ(StageFactory::extensions("writers.text"), ext);
-    ext = { "tif", "tiff", "vrt" };
-    EXPECT_EQ(StageFactory::extensions("writers.gdal"), ext);
+    EXPECT_EQ(StageFactory::inferReaderDriver("foo.ntf"), "readers.nitf");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.ntf"), "writers.nitf");
 }
 
 } // namespace pdal

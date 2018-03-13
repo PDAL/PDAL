@@ -45,9 +45,6 @@
 #include <pdal/PointView.hpp>
 #include <vector>
 
-extern "C" int32_t ChipperFilter_ExitFunc();
-extern "C" PF_ExitFunc ChipperFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -116,8 +113,6 @@ class PDAL_DLL ChipperFilter : public pdal::Filter
 {
 public:
     ChipperFilter() {}
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

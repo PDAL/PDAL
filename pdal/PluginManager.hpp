@@ -40,8 +40,8 @@
 #pragma once
 
 #include <pdal/Log.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/Kernel.hpp>
+#include <pdal/PluginInfo.hpp>
+#include <pdal/StageExtensions.hpp>
 
 #include <map>
 #include <memory>
@@ -76,7 +76,6 @@ class PDAL_DLL PluginManager
 public:
     PluginManager(const PluginManager&) = delete;
     PluginManager& operator=(const PluginManager&) = delete;
-    PluginManager();
     ~PluginManager();
 
     static std::string description(const std::string& name);
@@ -93,17 +92,13 @@ public:
     static void setLog(LogPtr& log);
     static void loadAll();
     static bool loadDynamic(const std::string& driverName);
-    static PluginManager<T>& get()
-    {
-        static PluginManager<T> instance;
-
-        return instance;
-    }
-    std::map<std::string, std::string> inferredReaders();
-    std::map<std::string, std::string> inferredWriters();
-    std::map<std::string, StringList> extensions();
+    static PluginManager<T>& get();
+    StageExtensions& extensions()
+        { return m_extensions; }
 
 private:
+    PluginManager();
+
     std::string getPath(const std::string& driver);
     void shutdown();
     bool loadByPath(const std::string & path);
@@ -128,7 +123,7 @@ private:
     bool l_registerPlugin(const StaticPluginInfo& pi)
     {
         l_registerPlugin<C>((const PluginInfo&)pi);
-        addExtensions(pi.name, pi.extensions, pi.defaultExtensions);
+        m_extensions.set(pi.name, pi.extensions);
         return true;
     }
 
@@ -137,17 +132,13 @@ private:
     std::string l_description(const std::string& name);
     std::string l_link(const std::string& name);
     void l_loadAll();
-    void addExtensions(const std::string& name, const StringList& extensions,
-        const StringList& defaultExtensions);
 
     DynamicLibraryMap m_dynamicLibraryMap;
     RegistrationInfoMap m_plugins;
     std::mutex m_pluginMutex;
     std::mutex m_libMutex;
     LogPtr m_log;
-    std::map<std::string, StringList> m_extensions;
-    std::map<std::string, std::string> m_inferredReaders;
-    std::map<std::string, std::string> m_inferredWriters;
+    StageExtensions m_extensions;
 };
 
 } // namespace pdal
