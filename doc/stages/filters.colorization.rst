@@ -110,7 +110,8 @@ raster
 
 dimensions
   A comma separated list of dimensions to populate with values from the raster
-  file. The format of each dimension is <name>:<band_number>:<scale_factor>.
+  file. Dimensions will be created if they don't already exist.  The format
+  of each dimension is <name>:<band_number>:<scale_factor>.
   Either or both of band number and scale factor may be omitted as may ':'
   separators if the data is not ambiguous.  If not supplied, band numbers
   begin at 1 and increment from the band number of the previous dimension.
