@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -36,6 +36,8 @@
 
 #include <pdal/Filter.hpp>
 
+#include "private/DimRange.hpp"
+
 #include <map>
 #include <string>
 
@@ -53,21 +55,26 @@ class PDAL_DLL GroupByFilter : public Filter
 public:
     GroupByFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
+    static void* create();
+    static int32_t destroy(void*);
     std::string getName() const;
 
 private:
     std::map<uint64_t, PointViewPtr> m_viewMap;
     std::string m_dimName;
     Dimension::Id m_dimId;
+    StringList m_rangeSpec;
+    std::vector<DimRange> m_range_list;
+    Arg* m_dimArg;
+    Arg* m_rngArg;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 
     GroupByFilter& operator=(const GroupByFilter&); // not implemented
-    GroupByFilter(const GroupByFilter&); // not implemented
+    GroupByFilter(const GroupByFilter&);            // not implemented
 };
 
 } // namespace pdal
