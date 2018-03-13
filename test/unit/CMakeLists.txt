@@ -114,6 +114,7 @@ PDAL_ADD_TEST(pdal_filters_decimation_test FILES
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)

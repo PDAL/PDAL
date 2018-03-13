@@ -138,6 +138,7 @@ public:
 
     const std::vector<Stage *> stages() const
         { return m_stages; }
+    void destroyStage(Stage *s = nullptr);
 
 private:
     void setOptions(Stage& stage, const Options& addOps);

@@ -456,4 +456,14 @@ void PipelineManager::replace(Stage *sOld, Stage *sNew)
     }
 }
 
+
+void PipelineManager::destroyStage(Stage *s)
+{
+    if (s)
+        m_factory->destroyStage(s);
+    else
+        m_factory.reset(new StageFactory());
+}
+
+
 } // namespace pdal
