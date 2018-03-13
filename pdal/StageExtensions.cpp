@@ -59,6 +59,9 @@ StringList parse(const std::string& val)
 // runtime.  The advantage of that is that it allows people who make
 // their own plugins to add to the list.  For now we decided that managing
 // a configuration file like this wasn't worth it.
+
+// NOTE: Only extensions for dynamic stages go here.  Static stage extensions
+//  are defined in the stage files themselves.
 const std::string extension_json (
 R"PDALEXTENSIONS(
 
