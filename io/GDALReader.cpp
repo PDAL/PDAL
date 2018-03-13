@@ -78,6 +78,7 @@ void GDALReader::initialize()
     }
 
     m_count = m_raster->width() * m_raster->height();
+    m_bandTypes = m_raster->getPDALDimensionTypes();
     m_raster->close();
 }
 
@@ -111,7 +112,7 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
     {
         std::ostringstream oss;
         oss << "band-" << (i + 1);
-        layout->registerOrAssignDim(oss.str(), Dimension::Type::Double);
+        layout->registerOrAssignDim(oss.str(), m_bandTypes[i]);
     }
 }
 
@@ -142,13 +143,11 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     }
 
     std::vector<uint8_t> band;
-    std::vector<Dimension::Type> band_types =
-        m_raster->getPDALDimensionTypes();
 
     for (int b = 0; b < m_raster->bandCount(); ++b)
     {
         // Bands count from 1
-        switch (band_types[b])
+        switch (m_bandTypes[b])
         {
         case Dimension::Type::Signed8:
             readBandData<int8_t>(b + 1, view, count);

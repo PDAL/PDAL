@@ -131,6 +131,12 @@ void ColorizationFilter::addArgs(ProgramArgs& args)
 
 void ColorizationFilter::initialize()
 {
+    gdal::registerDrivers();
+
+    m_raster.reset(new gdal::Raster(m_rasterFilename));
+    auto bandTypes = m_raster->getPDALDimensionTypes();
+    m_raster->close();
+
     if (m_dimSpec.empty())
         m_dimSpec = { "Red", "Green", "Blue" };
 
@@ -141,6 +147,8 @@ void ColorizationFilter::initialize()
         {
             BandInfo bi = parseDim(dim, defaultBand);
             defaultBand = bi.m_band + 1;
+            if (bi.m_band < bandTypes.size())
+                bi.m_type = bandTypes[bi.m_band];
             m_bands.push_back(bi);
         }
         catch(const std::string& what)
@@ -149,15 +157,13 @@ void ColorizationFilter::initialize()
         }
     }
 
-    gdal::registerDrivers();
 }
 
 
 void ColorizationFilter::addDimensions(PointLayoutPtr layout)
 {
     for (auto& band : m_bands)
-        band.m_dim = layout->registerOrAssignDim(band.m_name,
-            Dimension::defaultType(Dimension::Id::Red));
+        band.m_dim = layout->registerOrAssignDim(band.m_name, band.m_type);
 }
 
 

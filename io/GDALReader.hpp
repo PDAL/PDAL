@@ -72,6 +72,7 @@ private:
     void readBandData(int band, PointViewPtr view, point_count_t count);
 
     std::unique_ptr<gdal::Raster> m_raster;
+    std::vector<Dimension::Type> m_bandTypes;
     point_count_t m_index;
 
 };
