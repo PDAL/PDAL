@@ -91,6 +91,8 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         band = std::strtoul(start, &end, 10);
         if (start == end)
             band = defaultBand;
+        if (band == 0)
+            throw std::string("Invalid band number 0. Bands start at 1.");
         pos += (end - start);
 
         count = Utils::extractSpaces(dim, pos);
@@ -147,8 +149,9 @@ void ColorizationFilter::initialize()
         {
             BandInfo bi = parseDim(dim, defaultBand);
             defaultBand = bi.m_band + 1;
-            if (bi.m_band < bandTypes.size())
-                bi.m_type = bandTypes[bi.m_band];
+            // Band types are 0 offset but band numbers are 1 offset.
+            if (bi.m_band <= bandTypes.size())
+                bi.m_type = bandTypes[bi.m_band - 1];
             m_bands.push_back(bi);
         }
         catch(const std::string& what)
