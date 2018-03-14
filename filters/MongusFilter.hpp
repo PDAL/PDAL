@@ -41,9 +41,6 @@
 #include <memory>
 #include <unordered_map>
 
-extern "C" int32_t MongusFilter_ExitFunc();
-extern "C" PF_ExitFunc MongusFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -58,8 +55,6 @@ public:
     MongusFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

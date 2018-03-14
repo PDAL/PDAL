@@ -61,17 +61,9 @@ public:
     /**
       Create a stage factory.
 
-      \param no_plugins  Don't load plugins or allowed them to be created
-        with this factory.
+      \param ignored  Ignored argument.
     */
-    StageFactory(bool no_plugins = true);
-
-    /**
-      Return the file extensions associated with a driver.
-
-      \param driver  Name of the driver whose extensions should be returned.
-    */
-    static StringList extensions(const std::string& driver);
+    StageFactory(bool ignored = true);
 
     /**
       Infer the reader to use based on a filename.

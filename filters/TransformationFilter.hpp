@@ -41,9 +41,6 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-extern "C" int32_t TransformationFilter_ExitFunc();
-extern "C" PF_ExitFunc TransformationFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -61,8 +58,6 @@ public:
     TransformationFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

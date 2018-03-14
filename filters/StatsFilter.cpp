@@ -47,12 +47,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.stats",
     "Compute statistics about each dimension (mean, min, max, etc.)",
-    "http://pdal.io/stages/filters.stats.html" );
+    "http://pdal.io/stages/filters.stats.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, StatsFilter, Filter, s_info)
+CREATE_STATIC_STAGE(StatsFilter, s_info)
 
 std::string StatsFilter::getName() const { return s_info.name; }
 

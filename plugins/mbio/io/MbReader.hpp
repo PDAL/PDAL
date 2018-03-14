@@ -46,9 +46,6 @@ extern "C"
 
 #include "MbFormat.hpp"
 
-extern "C" int32_t MbReader_ExitFunc();
-extern "C" PF_ExitFunc MbReader_InitPlugin();
-
 namespace pdal
 {
 
@@ -73,9 +70,6 @@ public:
     virtual ~MbReader();
     MbReader& operator=(const MbReader&) = delete;
     MbReader(const MbReader&) = delete;
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

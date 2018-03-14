@@ -42,9 +42,6 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t OverlayFilter_ExitFunc();
-extern "C" PF_ExitFunc OverlayFilter_InitPlugin();
-
 typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
 
 typedef void *OGRLayerH;
@@ -75,8 +72,6 @@ public:
     OverlayFilter() : m_ds(0), m_lyr(0)
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const { return "filters.overlay"; }
 
 private:

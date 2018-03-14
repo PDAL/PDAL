@@ -44,7 +44,7 @@
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
-#if __has_include(<execinfo.h>)
+#ifndef _WIN32
 #include <execinfo.h> // backtrace
 #endif
 #include <dlfcn.h> // dladdr
@@ -605,7 +605,6 @@ std::vector<std::string> Utils::backtrace()
 {
     std::vector<std::string> lines;
 #ifndef _WIN32
-#if __has_include(<execinfo.h>)
     const int MAX_STACK_SIZE(100);
     void* buffer[MAX_STACK_SIZE];
     std::vector<std::string> prefixes;
@@ -657,7 +656,6 @@ std::vector<std::string> Utils::backtrace()
             symbol = prefix + symbol;
         }
     }
-#endif
 #endif
     return lines;
 }

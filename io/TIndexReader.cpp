@@ -39,12 +39,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.tindex",
     "TileIndex Reader",
-    "http://pdal.io/stages/readers.tindex.html" );
+    "http://pdal.io/stages/readers.tindex.html",
+    { "tindex" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TIndexReader, Reader, s_info)
+CREATE_STATIC_STAGE(TIndexReader, s_info)
 
 std::string TIndexReader::getName() const { return s_info.name; }
 

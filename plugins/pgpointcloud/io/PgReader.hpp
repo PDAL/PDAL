@@ -85,8 +85,6 @@ public:
     PgReader();
     ~PgReader();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     virtual point_count_t getNumPoints() const;

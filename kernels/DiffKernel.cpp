@@ -43,10 +43,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.diff", "Diff Kernel",
-    "http://www.pdal.io/apps/diff.html" );
+static StaticPluginInfo const s_info
+{
+    "kernels.diff",
+    "Diff Kernel",
+    "http://www.pdal.io/apps/diff.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(DiffKernel, s_info)
 
 std::string DiffKernel::getName() const { return s_info.name; }
 

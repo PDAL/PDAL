@@ -36,9 +36,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-extern "C" int32_t DividerFilter_ExitFunc();
-extern "C" PF_ExitFunc DividerFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -50,8 +47,6 @@ public:
     DividerFilter()
         {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

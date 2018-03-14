@@ -42,13 +42,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.mortonorder",
     "Morton or z-order sorting of points. See "
         "http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
-    "http://pdal.io/stages/filters.mortonorder.html" );
+    "http://pdal.io/stages/filters.mortonorder.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, MortonOrderFilter, Filter, s_info)
+CREATE_STATIC_STAGE(MortonOrderFilter, s_info)
 
 std::string MortonOrderFilter::getName() const { return s_info.name; }
 

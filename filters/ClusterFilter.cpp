@@ -41,11 +41,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.cluster", "Label clusters",
-               "http://pdal.io/stages/filters.cluster.html");
+static StaticPluginInfo const s_info
+{
+    "filters.cluster",
+    "Label clusters",
+    "http://pdal.io/stages/filters.cluster.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ClusterFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ClusterFilter, s_info)
 
 std::string ClusterFilter::getName() const
 {

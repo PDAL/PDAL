@@ -43,12 +43,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.ilvis2",
     "ILVIS2 Reader",
-    "http://pdal.io/stages/readers.ilvis2.html" );
+    "http://pdal.io/stages/readers.ilvis2.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, Ilvis2Reader, Reader, s_info)
+CREATE_STATIC_STAGE(Ilvis2Reader, s_info)
 
 std::string Ilvis2Reader::getName() const { return s_info.name; }
 

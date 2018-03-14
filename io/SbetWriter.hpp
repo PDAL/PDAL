@@ -39,17 +39,12 @@
 
 #include "SbetCommon.hpp"
 
-extern "C" int32_t SbetWriter_ExitFunc();
-extern "C" PF_ExitFunc SbetWriter_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL SbetWriter : public Writer
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

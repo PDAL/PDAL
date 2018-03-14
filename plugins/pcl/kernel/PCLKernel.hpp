@@ -43,8 +43,6 @@ namespace pdal
 class PDAL_DLL PCLKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
     PCLKernel();

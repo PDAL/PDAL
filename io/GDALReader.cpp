@@ -42,13 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-        "readers.gdal",
-        "Read GDAL rasters as point clouds.",
-        "http://pdal.io/stages/reader.gdal.html");
+static StaticPluginInfo const s_info
+{
+    "readers.gdal",
+    "Read GDAL rasters as point clouds.",
+    "http://pdal.io/stages/reader.gdal.html"
+};
 
-
-CREATE_STATIC_PLUGIN(1, 0, GDALReader, Reader, s_info)
+CREATE_STATIC_STAGE(GDALReader, s_info)
 
 
 std::string GDALReader::getName() const

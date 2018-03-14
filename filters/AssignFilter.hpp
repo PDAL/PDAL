@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-extern "C" int32_t AssignFilter_ExitFunc();
-extern "C" PF_ExitFunc AssignFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -51,8 +48,6 @@ public:
     AssignFilter();
     ~AssignFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const { return "filters.assign"; }
 
 private:

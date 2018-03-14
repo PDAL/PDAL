@@ -44,9 +44,6 @@ class PDAL_DLL GridProjectionFilter : public Filter
 public:
     GridProjectionFilter() : Filter()
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

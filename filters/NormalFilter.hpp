@@ -43,9 +43,6 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t NormalFilter_ExitFunc();
-extern "C" PF_ExitFunc NormalFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -63,8 +60,6 @@ public:
 
     void doFilter(PointView& view, int knn = 8);
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

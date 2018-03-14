@@ -62,7 +62,6 @@ const float DEFAULT_MAX_REFLECTANCE = 5.0;
 std::string extractRivlibURI(const Options& options);
 Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
 
-
 class PDAL_DLL RxpReader : public pdal::Reader
 {
 public:
@@ -76,8 +75,6 @@ public:
         , m_pointcloud()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

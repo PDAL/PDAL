@@ -40,9 +40,6 @@
 #include <vector>
 #include <string>
 
-extern "C" int32_t FerryFilter_ExitFunc();
-extern "C" PF_ExitFunc FerryFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -65,8 +62,6 @@ public:
     FerryFilter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

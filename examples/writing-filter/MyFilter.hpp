@@ -19,9 +19,6 @@ class PDAL_DLL MyFilter : public Filter
 public:
     MyFilter() : Filter()
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -39,11 +39,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.computerange", "Compute Range Filter",
-               "http://pdal.io/stages/filters.computerange.html");
+static StaticPluginInfo const s_info
+{
+    "filters.computerange",
+    "Compute Range Filter",
+    "http://pdal.io/stages/filters.computerange.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ComputeRangeFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ComputeRangeFilter, s_info)
 
 std::string ComputeRangeFilter::getName() const
 {

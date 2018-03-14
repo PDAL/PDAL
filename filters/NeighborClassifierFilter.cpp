@@ -50,9 +50,10 @@ static PluginInfo const s_info = PluginInfo(
     "Re-assign some point attributes based KNN voting",
     "http://pdal.io/stages/filters.neighborclassifier.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, NeighborClassifierFilter, Filter, s_info)
+CREATE_STATIC_STAGE(NeighborClassifierFilter, s_info)
 
-NeighborClassifierFilter::NeighborClassifierFilter() : m_dim(Dimension::Id::Classification)
+NeighborClassifierFilter::NeighborClassifierFilter() :
+    m_dim(Dimension::Id::Classification)
 {}
 
 
@@ -62,13 +63,11 @@ NeighborClassifierFilter::~NeighborClassifierFilter()
 
 void NeighborClassifierFilter::addArgs(ProgramArgs& args)
 {
-    args.add("domain", "Selects which points will be subject to KNN-based assignmenassignment",
-        m_domainSpec);
+    args.add("domain", "Selects which points will be subject to "
+        "KNN-based assignmenassignment", m_domainSpec);
     args.add("k", "Number of nearest neighbors to consult",
         m_k).setPositional();
-    //args.add("dimension", "Dimension on to be updated", m_dimName).setPositional();
-    Arg& candidate = args.add("candidate", "candidate file name",
-        m_candidateFile);
+    args.add("candidate", "candidate file name", m_candidateFile);
 }
 
 void NeighborClassifierFilter::initialize()
@@ -87,8 +86,11 @@ void NeighborClassifierFilter::initialize()
         }
     }
     if (m_k < 1)
-        throwError("Invalid 'k' option: " + std::to_string(m_k) +  ", must be > 0");
+        throwError("Invalid 'k' option: " + std::to_string(m_k) +
+            ", must be > 0");
 }
+
+
 void NeighborClassifierFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
@@ -101,17 +103,13 @@ void NeighborClassifierFilter::prepared(PointTableRef table)
                 r.m_name + "'.");
     }
     std::sort(m_domain.begin(), m_domain.end());
-    //m_dim = layout->findDim(m_dimName);
-
-    //if (m_dim == Dimension::Id::Unknown)
-    //    throwError("Dimension '" + m_dimName + "' not found.");
 }
 
-void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD3Index &kdi)
+void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
+    KD3Index &kdi)
 {
     std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
     double thresh = iSrc.size()/2.0;
-    //std::cout << "iSrc.size() " << iSrc.size() << " thresh " << thresh << std::endl;
 
     // vote NNs
     std::map<double, unsigned int> counts;
@@ -130,19 +128,19 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp, KD
     // update point
     auto oldclass = point.getFieldAs<double>(m_dim);
     auto newclass = pr.first;
-    //std::cout << oldclass << " --> " << newclass << " count " << pr.second << std::endl;
     if (pr.second > thresh && oldclass != newclass)
-    {    
-        point.setField(m_dim, newclass); 
+    {
+        point.setField(m_dim, newclass);
     }
 }
 
-bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp, KD3Index &kdi)
-{   // update point.  kdi and temp both reference the NN point cloud
-
+// update point.  kdi and temp both reference the NN point cloud
+bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp,
+    KD3Index &kdi)
+{
     if (m_domain.empty())  // No domain, process all points
         doOneNoDomain(point, temp, kdi);
-        
+
     for (DimRange& r : m_domain)
     {   // process only points that satisfy a domain condition
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
@@ -153,6 +151,7 @@ bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp, KD3Index &
     }
     return true;
 }
+
 
 PointViewPtr NeighborClassifierFilter::loadSet(const std::string& filename,
     PointTable& table)

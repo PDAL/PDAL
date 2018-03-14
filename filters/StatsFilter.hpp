@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-extern "C" int32_t StatsFilter_ExitFunc();
-extern "C" PF_ExitFunc StatsFilter_InitPlugin();
-
 namespace pdal
 {
 namespace stats
@@ -161,8 +158,6 @@ public:
     StatsFilter()
         {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     const stats::Summary& getStats(Dimension::Id d) const;

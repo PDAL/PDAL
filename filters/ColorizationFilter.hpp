@@ -43,9 +43,6 @@
 
 #include <map>
 
-extern "C" int32_t ColorizationFilter_ExitFunc();
-extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -77,8 +74,6 @@ public:
     ColorizationFilter& operator=(const ColorizationFilter&) = delete;
     ColorizationFilter(const ColorizationFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

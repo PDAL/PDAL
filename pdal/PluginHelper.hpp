@@ -38,30 +38,9 @@
 
 #include <pdal/pdal_export.hpp>
 
-namespace pdal
-{
-
-struct PluginInfo
-{
-    std::string name;
-    std::string description;
-    std::string link;
-    PluginInfo(const std::string& n, const std::string& d, const std::string& l)
-      : name(n), description(d), link(l)
-    {}
-};
-
-}
-
-extern "C"
-{
-// This is a placeholder so as not to break existing plugins even though the
-// internal interface has changed.
-typedef void PF_ExitFunc;
-typedef void (*PF_InitFunc)();
-}
-
 #include <pdal/PluginManager.hpp>
+#include <pdal/PluginInfo.hpp>
+#include <pdal/Kernel.hpp>
 
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL void PF_initPlugin() \
@@ -73,13 +52,11 @@ typedef void (*PF_InitFunc)();
             pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
 
-#define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
-    extern "C" PDAL_DLL void T ## _InitPlugin() \
-    { \
-        bool stage = std::is_convertible<T*, Stage *>::value; \
-        if (stage) \
-            pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); \
-        else \
-            pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
-    }
+#define CREATE_STATIC_KERNEL(T, info) \
+    static bool T ## _b = \
+        pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info);
+
+#define CREATE_STATIC_STAGE(T, info) \
+    static bool T ## _b =  \
+        pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info);
 

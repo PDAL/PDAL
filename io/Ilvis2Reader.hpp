@@ -52,9 +52,6 @@ namespace pdal
     #include "Ilvis2MetadataReader.hpp"
 #endif
 
-extern "C" int32_t Ilvis2Reader_ExitFunc();
-extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
-
 namespace pdal
 {
 class PDAL_DLL Ilvis2Reader : public Reader, public Streamable
@@ -77,8 +74,6 @@ public:
     Ilvis2Reader()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

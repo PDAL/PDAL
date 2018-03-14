@@ -40,18 +40,12 @@
 
 #include <pdal/Writer.hpp>
 
-extern "C" int32_t MatlabWriter_ExitFunc();
-extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
-
-
 namespace pdal
 {
 
 class PDAL_DLL MatlabWriter : public Writer
 {
 public:
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

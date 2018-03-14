@@ -42,21 +42,15 @@
 
 #include <mat.h>
 
-extern "C" int32_t MatlabReader_ExitFunc();
-extern "C" PF_ExitFunc MatlabReader_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL MatlabReader : public Reader, public Streamable
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
     MatlabReader()
     {}
+    std::string getName() const;
 
 private:
     /**
