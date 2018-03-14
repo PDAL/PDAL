@@ -298,7 +298,12 @@ bool PluginManager<T>::loadByPath(const std::string& path)
 
     m_log->get(LogLevel::Debug) << "Loaded plugin '" << path <<
         "'." << std::endl;
-    PF_InitFunc initFunc = (PF_InitFunc)(d->getSymbol("PF_initPlugin"));
+    PF_InitFunc initFunc;
+
+    // This awfulness is to work around a warning that some compilers
+    // generate when casting a void * to a function *.  See the example
+    // in the dlsym manpage.
+    *(void **)(&initFunc) = d->getSymbol("PF_initPlugin");
     if (!initFunc)
     {
         m_log->get(LogLevel::Debug) << "No symbol 'PF_initPlugin' found "

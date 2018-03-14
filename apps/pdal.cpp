@@ -353,7 +353,6 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     PluginManager<Stage>::setLog(log);
     PluginManager<Kernel>::setLog(log);
 #ifndef _WIN32
-#if __has_include(<execinfo.h>)
     if (m_debug)
     {
         signal(SIGSEGV, [](int sig)
@@ -366,7 +365,6 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             exit(1);
         });
     }
-#endif
 #endif
 
     m_command = Utils::tolower(m_command);
