@@ -51,9 +51,6 @@ public:
     {}
     OciReader& operator=(const OciReader&) = delete;
     OciReader(const OciReader&) = delete;
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -40,9 +40,6 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t ApproximateCoplanarFilter_ExitFunc();
-extern "C" PF_ExitFunc ApproximateCoplanarFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -59,8 +56,6 @@ public:
         const ApproximateCoplanarFilter&) = delete;
     ApproximateCoplanarFilter(const ApproximateCoplanarFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

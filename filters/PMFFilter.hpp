@@ -38,9 +38,6 @@
 
 #include "private/DimRange.hpp"
 
-extern "C" int32_t PMFFilter_ExitFunc();
-extern "C" PF_ExitFunc PMFFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -51,8 +48,6 @@ public:
     {
     }
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

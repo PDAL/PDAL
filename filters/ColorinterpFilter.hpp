@@ -44,9 +44,6 @@
 
 #include <map>
 
-extern "C" int32_t ColorinterpFilter_ExitFunc();
-extern "C" PF_ExitFunc ColorinterpFilter_InitPlugin();
-
 namespace pdal
 {
 

@@ -36,9 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-extern "C" int32_t MortonOrderFilter_ExitFunc();
-extern "C" PF_ExitFunc MortonOrderFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -50,8 +47,6 @@ public:
     MortonOrderFilter& operator=(const MortonOrderFilter&) = delete;
     MortonOrderFilter(const MortonOrderFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

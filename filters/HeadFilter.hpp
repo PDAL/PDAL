@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
 
-extern "C" int32_t HeadFilter_ExitFunc();
-extern "C" PF_ExitFunc HeadFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -50,8 +47,6 @@ public:
     {
     }
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

@@ -42,9 +42,6 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t GroundKernel_ExitFunc();
-extern "C" PF_ExitFunc GroundKernel_InitPlugin();
-
 namespace pdal
 {
 
@@ -54,8 +51,6 @@ class Stage;
 class PDAL_DLL GroundKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
     GroundKernel();

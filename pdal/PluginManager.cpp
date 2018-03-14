@@ -37,6 +37,7 @@
 // http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
 // The original work was released under the Apache License v2.
 
+#include <pdal/PluginDirectory.hpp>
 #include <pdal/PluginManager.hpp>
 
 #include <pdal/pdal_config.hpp>
@@ -53,88 +54,26 @@
 namespace pdal
 {
 
-namespace
-{
-
-#if defined(__APPLE__) && defined(__MACH__)
-    const std::string dynamicLibraryExtension(".dylib");
-#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
-    const std::string dynamicLibraryExtension(".so");
-#elif defined _WIN32
-    const std::string dynamicLibraryExtension(".dll");
-#endif
-
-StringList pluginSearchPaths()
-{
-    StringList searchPaths;
-    std::string envOverride;
-
-    Utils::getenv("PDAL_DRIVER_PATH", envOverride);
-
-    if (!envOverride.empty())
-        searchPaths = Utils::split2(envOverride, ':');
-    else
-    {
-        StringList standardPaths { ".", "./lib", "../lib", "./bin", "../bin" };
-        for (std::string& s : standardPaths)
-        {
-            if (FileUtils::toAbsolutePath(s) !=
-                FileUtils::toAbsolutePath(Config::pluginInstallPath()))
-                searchPaths.push_back(s);
-        }
-        searchPaths.push_back(Config::pluginInstallPath());
-    }
-    return searchPaths;
-}
-} // unnamed namespace;
-
-PluginManager<Stage> s_stageInstance({"reader", "writer", "filter"});
-PluginManager<Kernel> s_kernelInstance({"kernel"});
-
+// This is thread-safe in C++ 11.
 template <typename T>
-bool PluginManager<T>::pluginNameValid(const std::string& pathname)
+PluginManager<T>& PluginManager<T>::get()
 {
-    std::string base("libpdal_plugin_");
-    for (std::string& suffix : m_suffixes)
-        if (Utils::startsWith(pathname, base + suffix))
-            return true;
-    return false;
+    static PluginManager<T> instance;
+
+    return instance;
 }
-
-
-template <typename T>
-void PluginManager<T>::loadAll()
-{
-    m_instance->l_loadAll();
-}
-
-
-template <typename T>
-void PluginManager<T>::l_loadAll()
-{
-    for (const auto& pluginPath : pluginSearchPaths())
-        loadAll(pluginPath);
-}
-
-
-template <typename T>
-StringList PluginManager<T>::test_pluginSearchPaths()
-{
-    return pluginSearchPaths();
-}
-
 
 template <typename T>
 StringList PluginManager<T>::names()
 {
-    return m_instance->l_names();
+    return get().l_names();
 }
 
 
 template <typename T>
 void PluginManager<T>::setLog(LogPtr& log)
 {
-    m_instance->m_log = log;
+    get().m_log = log;
 }
 
 
@@ -143,10 +82,44 @@ StringList PluginManager<T>::l_names()
 {
     StringList l;
 
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
     for (auto p : m_plugins)
         l.push_back(p.first);
     return l;
+}
+
+
+/**
+  Load all plugins.
+*/
+template <typename T>
+void PluginManager<T>::loadAll()
+{
+    get().l_loadAll();
+}
+
+
+//Base template.
+template <typename T>
+void PluginManager<T>::l_loadAll()
+{}
+
+
+template<>
+void PluginManager<Stage>::l_loadAll()
+{
+    PluginDirectory& dir = PluginDirectory::get();
+    for (auto& di: dir.m_drivers)
+        l_loadDynamic(di.first);
+}
+
+
+template<>
+void PluginManager<Kernel>::l_loadAll()
+{
+    PluginDirectory& dir = PluginDirectory::get();
+    for (auto& di: dir.m_kernels)
+        l_loadDynamic(di.first);
 }
 
 
@@ -159,7 +132,7 @@ StringList PluginManager<T>::l_names()
 template <typename T>
 std::string PluginManager<T>::link(const std::string& name)
 {
-    return m_instance->l_link(name);
+    return get().l_link(name);
 }
 
 
@@ -168,7 +141,7 @@ std::string PluginManager<T>::l_link(const std::string& name)
 {
     std::string link;
 
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
     auto ei = m_plugins.find(name);
     if (ei != m_plugins.end())
         link = ei->second.link;
@@ -185,7 +158,7 @@ std::string PluginManager<T>::l_link(const std::string& name)
 template <typename T>
 std::string PluginManager<T>::description(const std::string& name)
 {
-    return m_instance->l_description(name);
+    return get().l_description(name);
 }
 
 
@@ -194,7 +167,7 @@ std::string PluginManager<T>::l_description(const std::string& name)
 {
     std::string descrip;
 
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
     auto ei = m_plugins.find(name);
     if (ei != m_plugins.end())
         descrip = ei->second.description;
@@ -202,69 +175,23 @@ std::string PluginManager<T>::l_description(const std::string& name)
 }
 
 
-/**
-  Load all plugins in a directory.
-
-  \param pluginDirectory  Name of plugin directory.
-*/
 template <typename T>
-void PluginManager<T>::loadAll(const std::string& pluginDirectory)
-{
-    const bool pluginDirectoryValid = pluginDirectory.size() &&
-        (FileUtils::fileExists(pluginDirectory) ||
-            FileUtils::isDirectory(pluginDirectory));
-
-    if (pluginDirectoryValid)
-    {
-        m_log->get(LogLevel::Debug) << "Loading plugins from directory " <<
-            pluginDirectory << std::endl;
-        StringList files = FileUtils::directoryList(pluginDirectory);
-        for (auto file : files)
-        {
-            if ((FileUtils::extension(file) == dynamicLibraryExtension) &&
-                !FileUtils::isDirectory(file))
-                loadByPath(file);
-        }
-    }
-}
-
-
-template <typename T>
-bool PluginManager<T>::initializePlugin(PF_InitFunc initFunc)
-{
-    return m_instance->l_initializePlugin(initFunc);
-}
-
-
-template <typename T>
-bool PluginManager<T>::l_initializePlugin(PF_InitFunc initFunc)
-{
-    initFunc();
-    return true;
-}
-
-
-template <typename T>
-PluginManager<T>::PluginManager(const StringList& suffixes) :
-    m_suffixes(suffixes), m_log(new Log("PDAL", &std::clog))
-{
-    m_instance = this;
-}
+PluginManager<T>::PluginManager() : m_log(new Log("PDAL", &std::clog)),
+    m_extensions(m_log)
+{}
 
 
 template <typename T>
 PluginManager<T>::~PluginManager()
 {
-    if (!shutdown())
-        m_log->get(LogLevel::Error) <<
-            "Error destroying PluginManager" << std::endl;
+    shutdown();
 }
 
 
 template <typename T>
-bool PluginManager<T>::shutdown()
+void PluginManager<T>::shutdown()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_pluginMutex);
 
     // This clears the handles on the dynamic libraries so that they won't
     // be closed with dlclose().  Depending on the order of dll unloading,
@@ -279,8 +206,6 @@ bool PluginManager<T>::shutdown()
 
     m_dynamicLibraryMap.clear();
     m_plugins.clear();
-
-    return true;
 }
 
 
@@ -292,53 +217,64 @@ bool PluginManager<T>::shutdown()
 template <typename T>
 bool PluginManager<T>::loadPlugin(const std::string& driverFileName)
 {
-    return m_instance->l_loadPlugin(driverFileName);
+    return get().l_loadPlugin(driverFileName);
 }
 
 
 template <typename T>
 bool PluginManager<T>::l_loadPlugin(const std::string& driverFileName)
 {
-    if ((FileUtils::extension(driverFileName) != dynamicLibraryExtension) ||
-            FileUtils::isDirectory(driverFileName))
-        return false;
-
     return loadByPath(driverFileName);
 }
 
+template<typename T>
+std::string PluginManager<T>::getPath(const std::string& driver)
+{
+    return std::string();
+}
+
+
+template<>
+std::string PluginManager<Stage>::getPath(const std::string& driver)
+{
+    PluginDirectory& dir = PluginDirectory::get();
+    auto it = dir.m_drivers.find(driver);
+    if (it == dir.m_drivers.end())
+        return std::string();
+    return it->second;
+}
+
+
+template<>
+std::string PluginManager<Kernel>::getPath(const std::string& driver)
+{
+    PluginDirectory& dir = PluginDirectory::get();
+
+    auto it = dir.m_kernels.find(driver);
+    if (it == dir.m_kernels.end())
+        return std::string();
+    return it->second;
+}
 
 template <typename T>
-bool PluginManager<T>::guessLoadByPath(const std::string& driverName)
+bool PluginManager<T>::loadDynamic(const std::string& driverName)
 {
-    // parse the driver name into an expected pluginName, e.g.,
-    // writers.las => libpdal_plugin_writer_las
+    return get().l_loadDynamic(driverName);
+}
 
-    StringList driverNameVec = Utils::split2(driverName, '.');
-    if (driverNameVec.size() != 2)
+template <typename T>
+bool PluginManager<T>::l_loadDynamic(const std::string& driverName)
+{
+    // If the library pointer is already in the map, we've already loaded
+    // the library.
+    std::string path = getPath(driverName);
+    if (path.empty())
     {
-        m_log->get(LogLevel::Error) <<
-           "Invalid PDAL driver name '" << driverName << "'." << std::endl;
+        m_log->get(LogLevel::Debug) << "No plugin file found for driver '" <<
+            driverName << "." << std::endl;
         return false;
     }
-    // The substr() removes the 's' from the end of the type.
-    std::string pluginName = "libpdal_plugin_" +
-        driverNameVec[0].substr(0, driverNameVec[0].size() - 1) + "_" +
-        driverNameVec[1] + dynamicLibraryExtension;
-
-    for (const auto& pluginPath : pluginSearchPaths())
-    {
-#ifdef _WIN32
-        char pathsep('\\');
-#else
-        char pathsep('/');
-#endif
-        std::string file = pluginPath + pathsep + pluginName;
-        if (FileUtils::fileExists(file) &&
-            !FileUtils::isDirectory(file))
-            return loadByPath(file);
-    }
-
-    return false;
+    return loadByPath(path);
 }
 
 
@@ -349,72 +285,52 @@ bool PluginManager<T>::guessLoadByPath(const std::string& driverName)
   \return  \c true on success, \c false on error
 */
 template <typename T>
-bool PluginManager<T>::loadByPath(const std::string& pluginPath)
+bool PluginManager<T>::loadByPath(const std::string& path)
 {
-    // Only filenames that start with libpdal_plugin are candidates to be loaded
-    // at runtime.  PDAL plugins are to be named in a specified form:
+    if (libraryLoaded(path))
+        return true;
 
-    // libpdal_plugin_{stagetype}_{name}
+    m_log->get(LogLevel::Debug) << "Attempting to load plugin '" <<
+        path << "'." << std::endl;
+    DynamicLibrary *d = loadLibrary(path);
+    if (!d)
+        return false;
 
-    // For example, libpdal_plugin_writer_text or libpdal_plugin_filter_color
-
-    bool loaded(false);
-
-    std::string filename = Utils::tolower(FileUtils::getFilename(pluginPath));
-
-    // If we are a valid type, and we're not yet already
-    // loaded in the LibraryMap, load it.
-
-    if (pluginNameValid(filename) && !libraryLoaded(pluginPath))
+    m_log->get(LogLevel::Debug) << "Loaded plugin '" << path <<
+        "'." << std::endl;
+    PF_InitFunc initFunc = (PF_InitFunc)(d->getSymbol("PF_initPlugin"));
+    if (!initFunc)
     {
-        std::string errorString;
-        auto completePath(FileUtils::toAbsolutePath(pluginPath));
-
-        m_log->get(LogLevel::Debug) << "Attempting to load plugin '" <<
-            completePath << "'." << std::endl;
-
-        if (DynamicLibrary *d = loadLibrary(completePath, errorString))
-        {
-            m_log->get(LogLevel::Debug) << "Loaded plugin '" << completePath <<
-                "'." << std::endl;
-            if (PF_InitFunc initFunc =
-                    (PF_InitFunc)(d->getSymbol("PF_initPlugin")))
-            {
-                loaded = initializePlugin(initFunc);
-                m_log->get(LogLevel::Debug) << "Initialized plugin '" <<
-                    completePath << "'." << std::endl;
-            }
-            else
-                m_log->get(LogLevel::Error) <<
-                    "Failed to initialize plugin function for plugin '" <<
-                    completePath << "'." << std::endl;
-        }
-        else
-            m_log->get(LogLevel::Error) << "Plugin '" << completePath <<
-                "' found but failed to load: " << errorString << std::endl;
+        m_log->get(LogLevel::Debug) << "No symbol 'PF_initPlugin' found "
+            "in plugin '" << path << "'." << std::endl;
+        return false;
     }
+    initFunc();
+    m_log->get(LogLevel::Debug) << "Initialized plugin '" <<
+        path << "'." << std::endl;
 
-    return loaded;
+    return true;
 }
 
 
 template <typename T>
 T *PluginManager<T>::createObject(const std::string& objectType)
 {
-    return m_instance->l_createObject(objectType);
+    return get().l_createObject(objectType);
 }
 
 
 template <typename T>
 T *PluginManager<T>::l_createObject(const std::string& objectType)
 {
+    // Static plugins already here.
     auto find([this, &objectType]()->bool
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(m_pluginMutex);
         return m_plugins.count(objectType);
     });
 
-    if (find() || (guessLoadByPath(objectType) && find()))
+    if (find() || (l_loadDynamic(objectType) && find()))
     {
         // Kernels contain a PipelineManager, which may load other plugins,
         // so the lock must be released prior to invoking the ctor to
@@ -422,7 +338,7 @@ T *PluginManager<T>::l_createObject(const std::string& objectType)
         std::function<T *()> f;
         {
             // Lock must be released before the creation function is invoked.
-            std::lock_guard<std::mutex> lock(m_mutex);
+            std::lock_guard<std::mutex> lock(m_pluginMutex);
             f = m_plugins[objectType].create;
         }
         return f();
@@ -432,33 +348,37 @@ T *PluginManager<T>::l_createObject(const std::string& objectType)
 
 
 template <typename T>
-DynamicLibrary *PluginManager<T>::loadLibrary(const std::string& path,
-    std::string& errorString)
+DynamicLibrary *PluginManager<T>::libraryLoaded(const std::string& path)
 {
-    DynamicLibrary *d = DynamicLibrary::load(path, errorString);
-
-    if (d)
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_dynamicLibraryMap[FileUtils::toAbsolutePath(path)] = DynLibPtr(d);
-    }
-    else
-    {
-        m_log->get(LogLevel::Error) << "Can't load library " << path <<
-            ": " << errorString;
-    }
-
-    return d;
+    std::lock_guard<std::mutex> lock(m_libMutex);
+    auto it = m_dynamicLibraryMap.find(path);
+    if (it == m_dynamicLibraryMap.end())
+        return nullptr;
+    return it->second.get();
 }
 
 
 template <typename T>
-bool PluginManager<T>::libraryLoaded(const std::string& path)
+DynamicLibrary *PluginManager<T>::loadLibrary(const std::string& path)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::string errorString;
+    DynamicLibrary *d;
 
-    std::string p = FileUtils::toAbsolutePath(path);
-    return Utils::contains(m_dynamicLibraryMap, p);
+    d = libraryLoaded(path);
+    if (d)
+        return d;
+
+    d = DynamicLibrary::load(path, errorString);
+    if (d)
+    {
+        std::lock_guard<std::mutex> lock(m_libMutex);
+        m_dynamicLibraryMap[FileUtils::toAbsolutePath(path)] = DynLibPtr(d);
+    }
+    else
+        m_log->get(LogLevel::Error) << "Can't load library " << path <<
+            ": " << errorString;
+
+    return d;
 }
 
 class Stage;

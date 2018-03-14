@@ -43,12 +43,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
         "readers.ply",
         "Read ply files.",
-        "http://pdal.io/stages/reader.ply.html");
+        "http://pdal.io/stages/reader.ply.html",
+        { "ply" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info)
+CREATE_STATIC_STAGE(PlyReader, s_info)
 
 
 PlyReader::PlyReader() : m_vertexElt(nullptr)

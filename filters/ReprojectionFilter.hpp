@@ -39,9 +39,6 @@
 
 #include <memory>
 
-extern "C" int32_t ReprojectionFilter_ExitFunc();
-extern "C" PF_ExitFunc ReprojectionFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -56,8 +53,6 @@ public:
     ReprojectionFilter();
     ~ReprojectionFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

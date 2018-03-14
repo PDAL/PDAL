@@ -12,9 +12,6 @@ namespace pdal
   {
   public:
     MyReader() : Reader() {};
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
   private:

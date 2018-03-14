@@ -42,17 +42,12 @@
 #include <string>
 #include <vector>
 
-extern "C" int32_t TranslateKernel_ExitFunc();
-extern "C" PF_ExitFunc TranslateKernel_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
     TranslateKernel();

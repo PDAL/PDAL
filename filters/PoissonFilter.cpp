@@ -218,11 +218,14 @@ private:
     bool m_doColor;
 };
 
-static PluginInfo const s_info =
-    PluginInfo("filters.poisson", "Poisson Surface Reconstruction Filter",
-               "http://pdal.io/stages/filters.poisson.html");
+static StaticPluginInfo const s_info
+{
+    "filters.poisson",
+    "Poisson Surface Reconstruction Filter",
+    "http://pdal.io/stages/filters.poisson.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PoissonFilter, Filter, s_info)
+CREATE_STATIC_STAGE(PoissonFilter, s_info)
 
 std::string PoissonFilter::getName() const { return s_info.name; }
 

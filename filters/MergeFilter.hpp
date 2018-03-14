@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-extern "C" int32_t MergeFilter_ExitFunc();
-extern "C" PF_ExitFunc MergeFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -49,8 +46,6 @@ public:
     MergeFilter ()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

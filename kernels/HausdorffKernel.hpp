@@ -38,9 +38,6 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-extern "C" int32_t HausdorffKernel_ExitFunc();
-extern "C" PF_ExitFunc HausdorffKernel_InitPlugin();
-
 namespace pdal
 {
 
@@ -49,11 +46,8 @@ class PointView;
 class PDAL_DLL HausdorffKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
-
 
 private:
     virtual void addSwitches(ProgramArgs& args);

@@ -40,9 +40,6 @@
 #include <memory>
 #include <string>
 
-extern "C" int32_t HAGFilter_ExitFunc();
-extern "C" PF_ExitFunc HAGFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -56,8 +53,6 @@ public:
     HAGFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

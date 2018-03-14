@@ -43,10 +43,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.hausdorff",
-    "Hausdorff Kernel", "http://pdal.io/apps/hausdorff.html");
+static StaticPluginInfo const s_info
+{
+    "kernels.hausdorff",
+    "Hausdorff Kernel",
+    "http://pdal.io/apps/hausdorff.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, HausdorffKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(HausdorffKernel, s_info)
 
 std::string HausdorffKernel::getName() const
 {

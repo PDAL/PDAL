@@ -41,10 +41,6 @@
 #include <lidar/PointData.h>
 #include <lidar/MG4PointReader.h>
 
-extern "C" int32_t MrsidReader_ExitFunc();
-extern "C" PF_ExitFunc MrsidReader_InitPlugin();
-
-
 namespace pdal
 {
 
@@ -59,9 +55,6 @@ public:
     MrsidReader();
     MrsidReader& operator=(const MrsidReader&) = delete;
     MrsidReader(const MrsidReader&) = delete;
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     point_count_t getNumPoints() const

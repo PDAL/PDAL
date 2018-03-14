@@ -39,9 +39,6 @@
 #include <map>
 #include <string>
 
-extern "C" int32_t GroupByFilter_ExitFunc();
-extern "C" PF_ExitFunc GroupByFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -53,8 +50,6 @@ class PDAL_DLL GroupByFilter : public Filter
 public:
     GroupByFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

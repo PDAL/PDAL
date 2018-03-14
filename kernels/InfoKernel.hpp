@@ -44,17 +44,12 @@
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
 #endif
 
-extern "C" int32_t InfoKernel_ExitFunc();
-extern "C" PF_ExitFunc InfoKernel_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL InfoKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
 

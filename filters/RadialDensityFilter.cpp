@@ -42,11 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.radialdensity", "RadialDensity Filter",
-               "http://pdal.io/stages/filters.radialdensity.html");
+static StaticPluginInfo const s_info
+{
+    "filters.radialdensity",
+    "RadialDensity Filter",
+    "http://pdal.io/stages/filters.radialdensity.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, RadialDensityFilter, Filter, s_info)
+CREATE_STATIC_STAGE(RadialDensityFilter, s_info)
 
 std::string RadialDensityFilter::getName() const
 {

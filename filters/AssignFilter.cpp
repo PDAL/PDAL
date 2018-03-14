@@ -42,12 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.assign",
     "Assign values for a dimension using a specified value.",
-    "http://pdal.io/stages/filters.assign.html" );
+    "http://pdal.io/stages/filters.assign.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, AssignFilter, Filter, s_info)
+CREATE_STATIC_STAGE(AssignFilter, s_info)
 
 struct AssignRange : public DimRange
 {

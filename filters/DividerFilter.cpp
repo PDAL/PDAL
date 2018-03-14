@@ -36,13 +36,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "filters.divider",
     "Divide points into approximately equal sized groups based on a simple "
       "scheme",
-    "http://pdal.io/stages/filters.divider.html" );
+    "http://pdal.io/stages/filters.divider.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, DividerFilter, Filter, s_info)
+CREATE_STATIC_STAGE(DividerFilter, s_info)
 
 std::string DividerFilter::getName() const { return s_info.name; }
 

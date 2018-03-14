@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
 
-extern "C" int32_t RandomizeFilter_ExitFunc();
-extern "C" PF_ExitFunc RandomizeFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -49,8 +46,6 @@ public:
     RandomizeFilter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

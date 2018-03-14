@@ -54,9 +54,6 @@ class PDAL_DLL PcdWriter : public Writer
 public:
     PcdWriter()
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

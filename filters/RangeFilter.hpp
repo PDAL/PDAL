@@ -41,9 +41,6 @@
 #include <map>
 #include <string>
 
-extern "C" int32_t RangeFilter_ExitFunc();
-extern "C" PF_ExitFunc RangeFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -55,8 +52,6 @@ public:
     RangeFilter();
     ~RangeFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

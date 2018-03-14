@@ -46,11 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.eigenvalues", "Eigenvalues Filter",
-               "http://pdal.io/stages/filters.eigenvalues.html");
+static StaticPluginInfo const s_info
+{
+    "filters.eigenvalues",
+    "Eigenvalues Filter",
+    "http://pdal.io/stages/filters.eigenvalues.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, EigenvaluesFilter, Filter, s_info)
+CREATE_STATIC_STAGE(EigenvaluesFilter, s_info)
 
 std::string EigenvaluesFilter::getName() const
 {

@@ -39,10 +39,6 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-
-extern "C" int32_t TIndexKernel_ExitFunc();
-extern "C" PF_ExitFunc TIndexKernel_InitPlugin();
-
 namespace pdal
 {
 
@@ -68,8 +64,6 @@ class PDAL_DLL TIndexKernel : public Kernel
     };
 
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
     TIndexKernel();

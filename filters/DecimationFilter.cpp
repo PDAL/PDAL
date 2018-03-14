@@ -40,12 +40,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.decimation",
     "Rank decimation filter. Keep every Nth point",
-    "http://pdal.io/stages/filters.decimation.html" );
+    "http://pdal.io/stages/filters.decimation.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, DecimationFilter, Filter,  s_info)
+CREATE_STATIC_STAGE(DecimationFilter, s_info)
 
 std::string DecimationFilter::getName() const { return s_info.name; }
 
