@@ -87,7 +87,7 @@ ctest -V
 make install
 
 # Python extension testing
-pip install PDAL
+pip install packaging PDAL
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do
