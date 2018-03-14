@@ -18,6 +18,8 @@ apk add \
     geos-dev \
     laz-perf \
     laz-perf-dev \
+    libexecinfo \
+    libexecinfo-dev \
     libgeotiff \
     libgeotiff-dev \
     libxml2 \

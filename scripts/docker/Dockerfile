@@ -14,6 +14,7 @@ RUN \
         gdal-dev \
         geos-dev \
         laz-perf-dev \
+        libexecinfo-dev \
         libgeotiff-dev \
         libxml2-dev \
         python-dev \
@@ -40,6 +41,7 @@ RUN \
         gdal \
         geos \
         laz-perf \
+        libexecinfo \
         libgeotiff \
         libxml2 \
         python \
