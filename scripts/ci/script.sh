@@ -87,12 +87,7 @@ ctest -V
 make install
 
 # Python extension testing
-cd /pdal/python
-pip install packaging
-python setup.py build
-echo "current path: " `pwd`
-export PDAL_TEST_DIR=/pdal/_build/test
-python setup.py test
+pip install PDAL
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do
