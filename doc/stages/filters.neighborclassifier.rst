@@ -4,12 +4,12 @@ filters.neighborclassifier
 ===================
 
 The neighborclassifier filter allows you update the value of the classification
-for specific points to a value determined by a K-nearest neighbors vote. 
+for specific points to a value determined by a K-nearest neighbors vote.
 For each point, the k nearest neighbors are queried and if more than half of
 them have the same value, the filter updates the selected point accordingly
 
-For example, if an automated classification procedure put/left erroneous 
-vegetation points near the edges of buildings which were largely classified 
+For example, if an automated classification procedure put/left erroneous
+vegetation points near the edges of buildings which were largely classified
 correctly, you could try using this filter to fix that problem.
 
 Similiarly, some automated classification processes result in prediction for
@@ -33,11 +33,9 @@ This pipeline updates the Classification of all points with classification
           "domain" : "Classification[1:1]",
           "k" : 10
         },
-        {
-          "filename":"autzen_class_refined.las"
-        }
+        "autzen_class_refined.las"
       ]
-    } 
+    }
 
 Example 2
 ---------
@@ -55,11 +53,9 @@ assigned based on the closest point in pred.txt.
           "k" : 1,
           "candidate" : "pred.txt"
         },
-        {
-          "filename":"dest.las"
-        }
+        "dest.las"
       ]
-    } 
+    }
 
 Options
 -------
@@ -75,4 +71,4 @@ domain
 
 k
   An integer which specifies the number of neighbors which vote on each
-  selected point.  
+  selected point.
