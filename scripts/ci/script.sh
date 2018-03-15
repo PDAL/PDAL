@@ -89,8 +89,9 @@ ctest -V
 make install
 
 # Python extension testing
-cd /pdal/python
 pip install packaging
+git clone https://github.com/PDAL/python.git pdal-python
+cd pdal-python
 python setup.py build
 echo "current path: " `pwd`
 export PDAL_TEST_DIR=/pdal/_build/test

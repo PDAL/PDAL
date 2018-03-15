@@ -56,7 +56,7 @@ public:
     {
         BandInfo(const std::string& name, uint32_t band, double scale) :
             m_name(name), m_band(band), m_scale(scale),
-            m_dim(Dimension::Id::Unknown)
+            m_dim(Dimension::Id::Unknown), m_type(Dimension::Type::Double)
         {}
 
         BandInfo() : m_band(0), m_scale(1.0), m_dim(Dimension::Id::Unknown)
@@ -66,6 +66,7 @@ public:
         uint32_t m_band;
         double m_scale;
         Dimension::Id m_dim;
+        Dimension::Type m_type;
     };
 
 
