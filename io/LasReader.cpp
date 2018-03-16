@@ -83,6 +83,8 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
+    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
+        m_useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
 }
 
@@ -212,7 +214,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)m_header.pointFormat()) + ".");
 
-    if (m_header.versionAtLeast(1, 4))
+    if (m_header.versionAtLeast(1, 4) || m_useEbVlr)
         readExtraBytesVlr();
     setSrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
