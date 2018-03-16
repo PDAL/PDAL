@@ -38,12 +38,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.nitf",
     "NITF Reader",
-    "http://pdal.io/stages/readers.nitf.html" );
+    "http://pdal.io/stages/readers.nitf.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, NitfReader, Reader, s_info)
+CREATE_SHARED_STAGE(NitfReader, s_info)
 
 std::string NitfReader::getName() const { return s_info.name; }
 

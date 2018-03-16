@@ -42,6 +42,7 @@
 #include <pdal/PluginInfo.hpp>
 #include <pdal/Kernel.hpp>
 
+//DEPRECATED
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL void PF_initPlugin() \
     { \
@@ -51,6 +52,14 @@
         else \
             pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); \
     }
+
+#define CREATE_SHARED_KERNEL(T, info) \
+    extern "C" PDAL_DLL void PF_initPlugin() \
+    { pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); }
+
+#define CREATE_SHARED_STAGE(T, info) \
+    extern "C" PDAL_DLL void PF_initPlugin() \
+    { pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); }
 
 #define CREATE_STATIC_KERNEL(T, info) \
     static bool T ## _b = \

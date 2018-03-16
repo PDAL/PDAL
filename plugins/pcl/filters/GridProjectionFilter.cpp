@@ -45,11 +45,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.gridprojection", "Grid Projection filter",
-               "http://pdal.io/stages/filters.gridprojection.html");
+static PluginInfo const s_info
+{
+    "filters.gridprojection",
+    "Grid Projection filter",
+    "http://pdal.io/stages/filters.gridprojection.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, GridProjectionFilter, Filter, s_info)
+CREATE_SHARED_STAGE(GridProjectionFilter, s_info)
 
 std::string GridProjectionFilter::getName() const
 {

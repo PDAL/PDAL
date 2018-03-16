@@ -40,10 +40,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.pcl", "PCL Kernel",
-    "http://pdal.io/apps/pcl.html" );
+static PluginInfo const s_info
+{
+    "kernels.pcl",
+    "PCL Kernel",
+    "http://pdal.io/apps/pcl.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, PCLKernel, Kernel, s_info)
+CREATE_SHARED_KERNEL(PCLKernel, s_info)
 
 std::string PCLKernel::getName() const { return s_info.name; }
 
