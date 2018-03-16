@@ -127,6 +127,7 @@ private:
     IgnoreVLRList m_ignoreVLRs;
     std::string m_compression;
     StringList m_ignoreVLROption;
+    bool m_useEbVlr;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
