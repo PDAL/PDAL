@@ -45,7 +45,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.icp", "Iterative Closest Point (ICP) filter",
                "http://pdal.io/stages/filters.icp.html");
 
-CREATE_SHARED_PLUGIN(1, 0, IcpFilter, Filter, s_info);
+CREATE_SHARED_PLUGIN(1, 0, IcpFilter, Filter, s_info)
 
 std::string IcpFilter::getName() const
 {
