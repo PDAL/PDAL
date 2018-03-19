@@ -829,7 +829,6 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 #ifdef PDAL_HAVE_LASZIP
 void LasReader::loadPointV14(PointRef& point, laszip_point& p)
 {
-    std::cerr << "Load point 1.4!\n";
     const LasHeader& h = m_header;
 
     double x = p.X * h.scaleX() + h.offsetX();

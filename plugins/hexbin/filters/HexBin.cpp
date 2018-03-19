@@ -48,7 +48,7 @@ static PluginInfo const s_info = PluginInfo(
     "Tessellate the point's X/Y domain and determine point density and/or point boundary.",
     "http://pdal.io/stages/filters.hexbin.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, HexBin, Filter, s_info)
+CREATE_SHARED_STAGE(HexBin, s_info)
 
 void HexBin::addArgs(ProgramArgs& args)
 {

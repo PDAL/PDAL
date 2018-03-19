@@ -42,12 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.greyhound",
     "Greyhound Writer",
-    "http://pdal.io/stages/writers.greyhound.html");
+    "http://pdal.io/stages/writers.greyhound.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, GreyhoundWriter, Writer, s_info)
+CREATE_SHARED_STAGE(GreyhoundWriter, s_info)
 
 std::string GreyhoundWriter::getName() const { return s_info.name; }
 

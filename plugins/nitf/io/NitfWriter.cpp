@@ -55,12 +55,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.nitf",
     "NITF Writer",
-    "http://pdal.io/stages/writers.nitf.html" );
+    "http://pdal.io/stages/writers.nitf.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
+CREATE_SHARED_STAGE(NitfWriter, s_info)
 
 std::string NitfWriter::getName() const { return s_info.name; }
 

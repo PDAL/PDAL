@@ -44,11 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.movingleastsquares", "Moving Least Squares filter",
-               "http://pdal.io/stages/filters.movingleastsquares.html");
+static PluginInfo const s_info
+{
+    "filters.movingleastsquares",
+    "Moving Least Squares filter",
+    "http://pdal.io/stages/filters.movingleastsquares.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MovingLeastSquaresFilter, Filter, s_info)
+CREATE_SHARED_STAGE(MovingLeastSquaresFilter, s_info)
 
 std::string MovingLeastSquaresFilter::getName() const
 {

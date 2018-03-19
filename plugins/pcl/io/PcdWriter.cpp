@@ -51,12 +51,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.pcd",
     "Write data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/writers.pcd.html" );
+    "http://pdal.io/stages/writers.pcd.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
+CREATE_SHARED_STAGE(PcdWriter, s_info)
 
 std::string PcdWriter::getName() const { return s_info.name; }
 
