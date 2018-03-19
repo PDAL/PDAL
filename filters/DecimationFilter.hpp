@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-extern "C" int32_t DecimationFilter_ExitFunc();
-extern "C" PF_ExitFunc DecimationFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -50,8 +47,6 @@ public:
     DecimationFilter()
         {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

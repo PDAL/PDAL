@@ -35,9 +35,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Writer.hpp>
 
-extern "C" int32_t PlyWriter_ExitFunc();
-extern "C" PF_ExitFunc PlyWriter_InitPlugin();
-
 namespace pdal
 {
 
@@ -53,8 +50,6 @@ public:
         BinaryBe
     };
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     PlyWriter();

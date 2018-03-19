@@ -42,12 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.mrsid",
     "MrSID Reader",
-    "http://www.pdal.io/stages/readers.mrsid.html" );
+    "http://www.pdal.io/stages/readers.mrsid.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MrsidReader, Reader, s_info)
+CREATE_SHARED_STAGE(MrsidReader, s_info)
 
 std::string MrsidReader::getName() const { return s_info.name; }
 

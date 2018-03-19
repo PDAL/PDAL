@@ -42,11 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.lof", "LOF Filter",
-               "http://pdal.io/stages/filters.lof.html");
+static StaticPluginInfo const s_info
+{
+    "filters.lof",
+    "LOF Filter",
+    "http://pdal.io/stages/filters.lof.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LOFFilter, Filter, s_info)
+CREATE_STATIC_STAGE(LOFFilter, s_info)
 
 std::string LOFFilter::getName() const
 {

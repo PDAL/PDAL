@@ -44,12 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.pgpointcloud",
     "Write points to PostgreSQL pgpointcloud output",
-    "http://pdal.io/stages/writers.pgpointcloud.html" );
+    "http://pdal.io/stages/writers.pgpointcloud.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, PgWriter, Writer, s_info)
+CREATE_SHARED_STAGE(PgWriter, s_info)
 
 std::string PgWriter::getName() const { return s_info.name; }
 

@@ -42,18 +42,12 @@
 #include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
 using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
 
-extern "C" int32_t GeoWaveReader_ExitFunc();
-extern "C" PF_ExitFunc GeoWaveReader_InitPlugin();
-
-
 namespace pdal
 {
 
     class PDAL_DLL GeoWaveReader : public Reader
     {
     public:
-        static void * create();
-        static int32_t destroy(void *);
         std::string getName() const;
 
     private:

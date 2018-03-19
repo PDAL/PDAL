@@ -6,6 +6,8 @@ if(EXISTS)
     return()
 endif()
 
+include(${PDAL_CMAKE_DIR}/execinfo.cmake)
+
 set(PDAL_UTIL_SOURCES
     "${PDAL_UTIL_DIR}/Bounds.cpp"
     "${PDAL_UTIL_DIR}/Charbuf.cpp"
@@ -17,6 +19,7 @@ set(PDAL_UTIL_SOURCES
 PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
     PRIVATE
+        ${EXECINFO_LIBRARY}
         ${PDAL_BOOST_LIB_NAME}
 )
 target_include_directories(${PDAL_UTIL_LIB_NAME} PRIVATE

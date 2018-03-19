@@ -38,9 +38,6 @@
 
 #include <memory>
 
-extern "C" int32_t KDistanceFilter_ExitFunc();
-extern "C" PF_ExitFunc KDistanceFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -54,8 +51,6 @@ public:
     KDistanceFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

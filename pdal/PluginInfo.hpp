@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2018, Hobu Inc. (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,65 +34,42 @@
 
 #pragma once
 
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineWriter.hpp>
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/PipelineExecutor.hpp>
-
 #include <string>
-#include <sstream>
-#undef toupper
-#undef tolower
-#undef isspace
 
 namespace pdal
 {
-namespace python
-{
-    class Array;
-}
-}
 
-namespace libpdalpython
+struct PluginInfo
 {
-
-class python_error : public std::runtime_error
-{
-public:
-    inline python_error(std::string const& msg) : std::runtime_error(msg)
-        {}
+    std::string name;
+    std::string description;
+    std::string link;
+    PluginInfo(const std::string& n, const std::string& d, const std::string& l)
+      : name(n), description(d), link(l)
+    {}
 };
 
-class Pipeline {
-public:
-    Pipeline(std::string const& xml);
-    ~Pipeline();
+struct StaticPluginInfo : public PluginInfo
+{
+    StringList extensions;
 
-    int64_t execute();
-    bool validate();
-    inline std::string getPipeline() const
-    {
-        return m_executor.getPipeline();
-    }
-    inline std::string getMetadata() const
-    {
-        return m_executor.getMetadata();
-    }
-    inline std::string getSchema() const
-    {
-        return m_executor.getSchema();
-    }
-    inline std::string getLog() const
-    {
-        return m_executor.getLog();
-    }
-    std::vector<pdal::python::Array *> getArrays() const;
+    StaticPluginInfo(const std::string& n, const std::string& d,
+        const std::string& l) : PluginInfo(n, d, l)
+    {}
 
-    void setLogLevel(int level);
-    int getLogLevel() const;
-
-private:
-    pdal::PipelineExecutor m_executor;
+    StaticPluginInfo(const std::string& n, const std::string& d,
+            const std::string& l, const StringList& e) :
+        PluginInfo(n, d, l), extensions(e)
+    {}
 };
 
 }
+
+extern "C"
+{
+// This is a placeholder so as not to break existing plugins even though the
+// internal interface has changed.
+typedef void PF_ExitFunc;
+typedef void (*PF_InitFunc)();
+}
+

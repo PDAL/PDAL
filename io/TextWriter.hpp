@@ -36,9 +36,6 @@
 
 #include <pdal/Writer.hpp>
 
-extern "C" int32_t TextWriter_ExitFunc();
-extern "C" PF_ExitFunc TextWriter_InitPlugin();
-
 namespace pdal
 {
 
@@ -50,8 +47,6 @@ public:
     TextWriter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

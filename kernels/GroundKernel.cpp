@@ -48,10 +48,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.ground", "Ground Kernel",
-                                            "http://pdal.io/apps/ground.html");
+static StaticPluginInfo const s_info
+{
+    "kernels.ground",
+    "Ground Kernel",
+    "http://pdal.io/apps/ground.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(GroundKernel, s_info)
 
 std::string GroundKernel::getName() const
 {

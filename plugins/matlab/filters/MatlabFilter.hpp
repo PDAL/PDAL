@@ -49,9 +49,6 @@ class PDAL_DLL MatlabFilter : public Filter
 public:
     MatlabFilter() : Filter()
         {}
-
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

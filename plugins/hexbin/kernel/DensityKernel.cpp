@@ -42,13 +42,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.density", "Density Kernel",
-    "http://www.pdal.io/apps/density.html" );
+static PluginInfo const s_info
+{
+    "kernels.density",
+    "Density Kernel",
+    "http://www.pdal.io/apps/density.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, DensityKernel, Kernel, s_info)
+CREATE_SHARED_KERNEL(DensityKernel, s_info)
 
 std::string DensityKernel::getName() const { return s_info.name; }
-
 
 void DensityKernel::addSwitches(ProgramArgs& args)
 {

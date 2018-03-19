@@ -54,12 +54,14 @@ namespace pdal
 static std::vector<std::string> ramps = {"awesome_green", "black_orange",
     "blue_hue", "blue_red", "heat_map", "pestel_shades", "blue_orange"};
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.colorinterp",
     "Assigns RGB colors based on a dimension and a ramp",
-    "http://pdal.io/stages/filters.colorinterp.html" );
+    "http://pdal.io/stages/filters.colorinterp.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ColorinterpFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ColorinterpFilter, s_info)
 
 std::string ColorinterpFilter::getName() const { return s_info.name; }
 

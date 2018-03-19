@@ -46,9 +46,6 @@ public:
     {}
     VoxelGridFilter& operator=(const VoxelGridFilter&) = delete;
     VoxelGridFilter(const VoxelGridFilter&) = delete;
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -44,11 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.estimaterank", "EstimateRank Filter",
-               "http://pdal.io/stages/filters.estimaterank.html");
+static StaticPluginInfo const s_info
+{
+    "filters.estimaterank",
+    "EstimateRank Filter",
+    "http://pdal.io/stages/filters.estimaterank.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, EstimateRankFilter, Filter, s_info)
+CREATE_STATIC_STAGE(EstimateRankFilter, s_info)
 
 std::string EstimateRankFilter::getName() const
 {

@@ -53,8 +53,6 @@ namespace pdal
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
 public:
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const override;
 
 private:

@@ -40,10 +40,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.split", "Split Kernel",
-    "http://pdal.io/apps/split.html" );
+static StaticPluginInfo const s_info
+{
+    "kernels.split",
+    "Split Kernel",
+    "http://pdal.io/apps/split.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SplitKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(SplitKernel, s_info)
 
 std::string SplitKernel::getName() const
 {

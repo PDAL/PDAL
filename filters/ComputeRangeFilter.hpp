@@ -38,9 +38,6 @@
 
 #include <string>
 
-extern "C" int32_t ComputeRangeFilter_ExitFunc();
-extern "C" PF_ExitFunc ComputeRangeFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -53,8 +50,6 @@ public:
     ComputeRangeFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

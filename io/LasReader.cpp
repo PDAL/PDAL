@@ -83,18 +83,22 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
+    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
+        m_useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
 }
 
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info {
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
         "enabled through this driver if LASzip was found during \n" \
         "compilation.",
-    "http://pdal.io/stages/readers.las.html" );
+    "http://pdal.io/stages/readers.las.html",
+    { "las", "laz" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
+CREATE_STATIC_STAGE(LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 
@@ -210,7 +214,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)m_header.pointFormat()) + ".");
 
-    if (m_header.versionAtLeast(1, 4))
+    if (m_header.versionAtLeast(1, 4) || m_useEbVlr)
         readExtraBytesVlr();
     setSrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
@@ -825,7 +829,6 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 #ifdef PDAL_HAVE_LASZIP
 void LasReader::loadPointV14(PointRef& point, laszip_point& p)
 {
-    std::cerr << "Load point 1.4!\n";
     const LasHeader& h = m_header;
 
     double x = p.X * h.scaleX() + h.offsetX();

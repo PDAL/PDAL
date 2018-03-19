@@ -39,11 +39,13 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.groupby", "Split data categorically by dimension.",
-               "http://pdal.io/stages/filters.groupby.html");
-
-CREATE_STATIC_PLUGIN(1, 0, GroupByFilter, Filter, s_info)
+static StaticPluginInfo const s_info
+{
+    "filters.groupby",
+    "Split data categorically by dimension.",
+    "http://pdal.io/stages/filters.groupby.html"
+};
+CREATE_STATIC_STAGE(GroupByFilter, s_info)
 
 GroupByFilter::GroupByFilter() : m_viewMap()
 {}

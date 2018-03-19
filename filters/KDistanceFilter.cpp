@@ -42,11 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.kdistance", "K-Distance Filter",
-               "http://pdal.io/stages/filters.kdistance.html");
+static PluginInfo const s_info
+{
+    "filters.kdistance",
+    "K-Distance Filter",
+    "http://pdal.io/stages/filters.kdistance.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, KDistanceFilter, Filter, s_info)
+CREATE_STATIC_STAGE(KDistanceFilter, s_info)
 
 std::string KDistanceFilter::getName() const
 {

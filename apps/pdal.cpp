@@ -69,7 +69,7 @@ private:
     void outputVersion();
     void outputHelp(const ProgramArgs& args);
     void outputDrivers();
-    void outputCommands();
+    void outputCommands(const std::string& leader);
     void outputOptions();
     void outputOptions(const std::string& stageName,std::ostream& strm);
     void addArgs(ProgramArgs& args);
@@ -110,11 +110,11 @@ void App::outputHelp(const ProgramArgs& args)
 
     m_out << "The following commands are available:" << std::endl;
 
-    StageFactory f(false);
-    StringList loaded_kernels = PluginManager<Kernel>::names();
-
-    for (auto name : loaded_kernels)
-        m_out << "   - " << name << std::endl;
+    // Load all kernels so that we can report the names.
+    StageFactory f;
+    PluginManager<Kernel>::loadAll();
+    outputCommands("  -");
+    m_out << std::endl;
     m_out << "See http://pdal.io/apps/ for more detail" << std::endl;
 }
 
@@ -122,8 +122,8 @@ void App::outputHelp(const ProgramArgs& args)
 void App::outputDrivers()
 {
     // Force plugin loading.
-    StageFactory f(false);
-
+    StageFactory f;
+    PluginManager<Stage>::loadAll();
     StringList stages = PluginManager<Stage>::names();
 
     if (!m_showJSON)
@@ -178,13 +178,12 @@ void App::outputDrivers()
 }
 
 
-void App::outputCommands()
+void App::outputCommands(const std::string& leader)
 {
-    StageFactory f(false);
-    std::vector<std::string> loaded_kernels;
-    loaded_kernels = PluginManager<Kernel>::names();
-    for (auto name : loaded_kernels)
-        m_out << name << std::endl;
+    StageFactory f;
+    PluginManager<Kernel>::loadAll();
+    for (auto name : PluginManager<Kernel>::names())
+        m_out << leader << name << std::endl;
 }
 
 
@@ -354,7 +353,6 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     PluginManager<Stage>::setLog(log);
     PluginManager<Kernel>::setLog(log);
 #ifndef _WIN32
-#if __has_include(<execinfo.h>)
     if (m_debug)
     {
         signal(SIGSEGV, [](int sig)
@@ -367,7 +365,6 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             exit(1);
         });
     }
-#endif
 #endif
 
     m_command = Utils::tolower(m_command);

@@ -44,9 +44,6 @@ class PDAL_DLL MovingLeastSquaresFilter : public Filter
 public:
     MovingLeastSquaresFilter() : Filter()
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

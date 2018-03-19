@@ -40,9 +40,6 @@
 #include <pdal/GDALUtils.hpp>
 #include <filters/MergeFilter.hpp>
 
-extern "C" int32_t TIndexReader_ExitFunc();
-extern "C" PF_ExitFunc TIndexReader_InitPlugin();
-
 namespace pdal
 {
 class PDAL_DLL TIndexReader : public Reader
@@ -68,8 +65,6 @@ public:
     TIndexReader() : m_dataset(NULL) , m_layer(NULL)
         {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

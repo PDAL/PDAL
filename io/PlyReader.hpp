@@ -42,17 +42,12 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 
-extern "C" int32_t PlyReader_ExitFunc();
-extern "C" PF_ExitFunc PlyReader_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL PlyReader : public Reader, public Streamable
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     typedef std::map<std::string, Dimension::Id> DimensionMap;

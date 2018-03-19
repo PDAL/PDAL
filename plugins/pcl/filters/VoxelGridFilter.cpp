@@ -45,11 +45,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.voxelgrid", "Voxel grid filter",
-               "http://pdal.io/stages/filters.voxelgrid.html");
+static PluginInfo const s_info
+{
+    "filters.voxelgrid",
+    "Voxel grid filter",
+    "http://pdal.io/stages/filters.voxelgrid.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, VoxelGridFilter, Filter, s_info)
+CREATE_SHARED_STAGE(VoxelGridFilter, s_info)
 
 std::string VoxelGridFilter::getName() const
 {

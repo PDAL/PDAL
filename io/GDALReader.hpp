@@ -42,10 +42,6 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>
 
-extern "C" int32_t GDALReader_ExitFunc();
-extern "C" PF_ExitFunc GDALReader_InitPlugin();
-
-
 namespace pdal
 {
 
@@ -54,8 +50,6 @@ typedef std::map<std::string, Dimension::Id> DimensionMap;
 class PDAL_DLL GDALReader : public Reader
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     GDALReader();
@@ -72,6 +66,7 @@ private:
     void readBandData(int band, PointViewPtr view, point_count_t count);
 
     std::unique_ptr<gdal::Raster> m_raster;
+    std::vector<Dimension::Type> m_bandTypes;
     point_count_t m_index;
 
 };

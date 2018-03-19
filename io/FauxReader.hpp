@@ -37,9 +37,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-extern "C" int32_t FauxReader_ExitFunc();
-extern "C" PF_ExitFunc FauxReader_InitPlugin();
-
 namespace pdal
 {
 
@@ -130,8 +127,6 @@ public:
     FauxReader()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

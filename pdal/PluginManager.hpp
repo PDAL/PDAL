@@ -40,8 +40,8 @@
 #pragma once
 
 #include <pdal/Log.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/Kernel.hpp>
+#include <pdal/PluginInfo.hpp>
+#include <pdal/StageExtensions.hpp>
 
 #include <map>
 #include <memory>
@@ -69,8 +69,6 @@ class PDAL_DLL PluginManager
         std::string description;
         std::function<T *()> create;
     };
-    FRIEND_TEST(PluginManagerTest, SearchPaths);
-
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
     typedef std::map<std::string, DynLibPtr> DynamicLibraryMap;
     typedef std::map<std::string, Info> RegistrationInfoMap;
@@ -78,62 +76,70 @@ class PDAL_DLL PluginManager
 public:
     PluginManager(const PluginManager&) = delete;
     PluginManager& operator=(const PluginManager&) = delete;
-    PluginManager(const StringList& suffixes);
     ~PluginManager();
 
     static std::string description(const std::string& name);
     static std::string link(const std::string& name);
     template <typename C>
-    static void registerPlugin(const PluginInfo& info)
-        { return m_instance->l_registerPlugin<C>(info); }
-    static bool initializePlugin(PF_InitFunc initFunc);
+    static bool registerPlugin(const PluginInfo& info)
+        { return get().template l_registerPlugin<C>(info); }
+    template <typename C>
+    static bool registerPlugin(const StaticPluginInfo& info)
+        { return get().template l_registerPlugin<C>(info); }
     static bool loadPlugin(const std::string& pluginFilename);
-    static void loadAll();
     static T *createObject(const std::string& objectType);
     static StringList names();
     static void setLog(LogPtr& log);
+    static void loadAll();
+    static bool loadDynamic(const std::string& driverName);
+    static PluginManager<T>& get();
+    StageExtensions& extensions()
+        { return m_extensions; }
 
 private:
-    bool pluginNameValid(const std::string& pathname);
-    bool shutdown();
-    bool guessLoadByPath(const std::string & driverName);
+    PluginManager();
+
+    std::string getPath(const std::string& driver);
+    void shutdown();
     bool loadByPath(const std::string & path);
-    bool libraryLoaded(const std::string& path);
-    void loadAll(const std::string& pluginDirectory);
-    bool l_initializePlugin(PF_InitFunc initFunc);
+    bool l_loadDynamic(const std::string& driverName);
+    DynamicLibrary *libraryLoaded(const std::string& path);
+    DynamicLibrary *loadLibrary(const std::string& path);
     T *l_createObject(const std::string& objectType);
     template <class C>
-    void l_registerPlugin(const PluginInfo& pi)
+    bool l_registerPlugin(const PluginInfo& pi)
     {
-        auto f = []()
+        auto f = [&]()
         {
             T *t = dynamic_cast<T *>(new C);
             return t;
         };
         Info info {pi.name, pi.link, pi.description, f};
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(m_pluginMutex);
         m_plugins.insert(std::make_pair(pi.name, info));
+        return true;
     }
+    template <class C>
+    bool l_registerPlugin(const StaticPluginInfo& pi)
+    {
+        l_registerPlugin<C>((const PluginInfo&)pi);
+        m_extensions.set(pi.name, pi.extensions);
+        return true;
+    }
+
     bool l_loadPlugin(const std::string& pluginFilename);
-    void l_loadAll();
     StringList l_names();
     std::string l_description(const std::string& name);
     std::string l_link(const std::string& name);
-    DynamicLibrary *loadLibrary(const std::string& path,
-        std::string& errorString);
+    void l_loadAll();
 
-    static StringList test_pluginSearchPaths();
-
-    static PluginManager<T> *m_instance;
-    StringList m_suffixes;
     DynamicLibraryMap m_dynamicLibraryMap;
     RegistrationInfoMap m_plugins;
-    std::mutex m_mutex;
+    std::mutex m_pluginMutex;
+    std::mutex m_libMutex;
     LogPtr m_log;
+    StageExtensions m_extensions;
 };
-
-template<typename T>
-PluginManager<T> *PluginManager<T>::m_instance;
 
 } // namespace pdal
 

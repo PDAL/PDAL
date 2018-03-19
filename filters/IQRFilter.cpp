@@ -40,11 +40,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.iqr", "Interquartile Range Filter",
-               "http://pdal.io/stages/filters.iqr.html");
+static StaticPluginInfo const s_info
+{
+    "filters.iqr",
+    "Interquartile Range Filter",
+    "http://pdal.io/stages/filters.iqr.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, IQRFilter, Filter, s_info)
+CREATE_STATIC_STAGE(IQRFilter, s_info)
 
 std::string IQRFilter::getName() const
 {

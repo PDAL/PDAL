@@ -53,9 +53,6 @@ using laszip_POINTER = void *;
 
 #include <json/json.h>
 
-extern "C" int32_t LasWriter_ExitFunc();
-extern "C" PF_ExitFunc LasWriter_InitPlugin();
-
 namespace pdal
 {
 class LeInserter;
@@ -78,8 +75,6 @@ class PDAL_DLL LasWriter : public FlexWriter, public Streamable
     friend class LasTester;
     friend class NitfWriter;
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     LasWriter();

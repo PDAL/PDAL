@@ -36,17 +36,12 @@
 
 #include <pdal/Kernel.hpp>
 
-extern "C" int32_t MergeKernel_ExitFunc();
-extern "C" PF_ExitFunc MergeKernel_InitPlugin();
-
 namespace pdal
 {
 
 class PDAL_DLL MergeKernel : public Kernel
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
 

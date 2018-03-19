@@ -52,9 +52,6 @@ struct laszip_point;
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
 
-extern "C" int32_t LasReader_ExitFunc();
-extern "C" PF_ExitFunc LasReader_InitPlugin();
-
 namespace pdal
 {
 
@@ -91,8 +88,6 @@ public:
     LasReader();
     ~LasReader();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     const LasHeader& header() const
@@ -132,6 +127,7 @@ private:
     IgnoreVLRList m_ignoreVLRs;
     std::string m_compression;
     StringList m_ignoreVLROption;
+    bool m_useEbVlr;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
