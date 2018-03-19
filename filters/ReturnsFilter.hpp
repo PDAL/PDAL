@@ -36,7 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-#include <map>
 #include <string>
 
 namespace pdal
@@ -58,7 +57,6 @@ public:
     std::string getName() const;
 
 private:
-    std::map<uint64_t, PointViewPtr> m_viewMap;
     StringList m_returnsString;
     int m_outputTypes;
 
