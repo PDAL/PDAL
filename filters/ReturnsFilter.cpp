@@ -112,14 +112,42 @@ PointViewSet ReturnsFilter::run(PointViewPtr inView)
             onlyView->appendPoint(*inView.get(), idx);
     }
 
-    if (firstView->size())
-        viewSet.insert(firstView);
-    if (intermediateView->size())
-        viewSet.insert(intermediateView);
-    if (lastView->size())
-        viewSet.insert(lastView);
-    if (onlyView->size())
-        viewSet.insert(onlyView);
+    if (m_outputTypes & returnFirst)
+    {
+        if (firstView->size())
+            viewSet.insert(firstView);
+        else
+            log()->get(LogLevel::Warning)
+                << "Requested first returns set it empty\n";
+    }
+
+    if (m_outputTypes & returnIntermediate)
+    {
+        if (intermediateView->size())
+            viewSet.insert(intermediateView);
+        else
+            log()->get(LogLevel::Warning)
+                << "Requested intermediate returns set is empty\n";
+    }
+
+    if (m_outputTypes & returnLast)
+    {
+        if (lastView->size())
+            viewSet.insert(lastView);
+        else
+            log()->get(LogLevel::Warning)
+                << "Requested last returns set is empty\n";
+    }
+
+    if (m_outputTypes & returnOnly)
+    {
+        if (onlyView->size())
+            viewSet.insert(onlyView);
+        else
+            log()->get(LogLevel::Warning)
+                << "Requested only returns set is empty\n";
+    }
+
     return viewSet;
 }
 

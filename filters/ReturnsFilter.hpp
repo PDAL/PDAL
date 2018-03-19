@@ -39,9 +39,6 @@
 #include <map>
 #include <string>
 
-extern "C" int32_t ReturnsFilter_ExitFunc();
-extern "C" PF_ExitFunc ReturnsFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -58,8 +55,6 @@ public:
     static const int returnLast = 4;
     static const int returnOnly = 8;
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:
@@ -71,8 +66,8 @@ private:
     virtual void prepared(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 
-    ReturnsFilter& operator=(const ReturnsFilter&); // not implemented
-    ReturnsFilter(const ReturnsFilter&);            // not implemented
+    ReturnsFilter& operator=(const ReturnsFilter&) = delete; // not implemented
+    ReturnsFilter(const ReturnsFilter&) = delete;            // not implemented
 };
 
 } // namespace pdal
