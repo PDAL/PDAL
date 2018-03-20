@@ -138,12 +138,14 @@ using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloIndexWr
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.geowave",
     "Write data using GeoWave.",
-    "http://pdal.io/stages/drivers.geowave.writer.html" );
+    "http://pdal.io/stages/drivers.geowave.writer.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, GeoWaveWriter, Writer, s_info)
+CREATE_SHARED_STAGE(GeoWaveWriter, s_info)
 
 std::string pdal::GeoWaveWriter::getName() const { return s_info.name; }
 

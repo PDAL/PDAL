@@ -46,11 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.pclblock", "PCL Block implementation",
-               "http://pdal.io/stages/filters.pclblock.html");
+static PluginInfo const s_info
+{
+    "filters.pclblock",
+    "PCL Block implementation",
+    "http://pdal.io/stages/filters.pclblock.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, PCLBlock, Filter, s_info)
+CREATE_SHARED_STAGE(PCLBlock, s_info)
 
 std::string PCLBlock::getName() const
 {

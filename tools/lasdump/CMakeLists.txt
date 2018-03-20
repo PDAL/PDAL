@@ -9,6 +9,7 @@ set(MAKE_COLOR_MAKEFILE ON)
 if(NOT ROOT_DIR)
     project(LASDUMP)
     set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
+    include(FeatureSummary)
 endif()
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
@@ -16,7 +17,6 @@ include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 # Add necessary modules.
 #
 include(${PDAL_CMAKE_DIR}/laszip.cmake)
-find_package(LASzip QUIET)
 
 #
 # Right now we don't bother if we don't have LASzip.

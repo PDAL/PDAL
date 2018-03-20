@@ -44,12 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "filters.matlab",
     "Manipulate data using inline Matlab",
-    "http://pdal.io/stages/filters.matlab.html" );
+    "http://pdal.io/stages/filters.matlab.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MatlabFilter, Filter, s_info)
+CREATE_SHARED_STAGE(MatlabFilter, Filter)
 
 std::string MatlabFilter::getName() const { return s_info.name; }
 
