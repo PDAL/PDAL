@@ -37,6 +37,7 @@ primitive objects, and first :ref:`stage <stage_index>` implementations.
 
 
 .. image:: ./Radiant-Solutions-Logo-Color-1920.png
+    :width: 300px
     :target: http://radiantsolutions.com
 
 `Bradley Chambers`_ from `RadiantSolutions`_ has contributed numerous features
