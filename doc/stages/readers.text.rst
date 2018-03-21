@@ -71,13 +71,12 @@ filename
 separator
   Separator character to override that found in header line.
 
-header_override
-  String to override the first line in the file that would normally be used
-  as the header.
-
-header_insert
+header
   String to use as the file header.  All lines in the file as assumed to be
-  records containing point data.
+  records containing point data unless skipped with the 'skip' option.
+
+skip
+  Number of lines to ignore at the beginning of the file.
 
 count
   Maximum number of points to read [Optional]

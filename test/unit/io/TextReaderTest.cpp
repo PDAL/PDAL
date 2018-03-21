@@ -225,11 +225,13 @@ TEST(TextReaderTest, warnMissingHeader)
         std::string::npos);
 }
 
+// Skip the file's header and use another in it's place.
 TEST(TextReaderTest, overrideHeader)
 {
     TextReader reader;
     Options options;
-    options.add("header_override", "A,B,C,G");
+    options.add("skip", 1);
+    options.add("header", "A,B,C,G");
     options.add("filename", Support::datapath("text/crlf_test.txt"));
     reader.setOptions(options);
 
@@ -250,7 +252,7 @@ TEST(TextReaderTest, insertHeader)
 {
     TextReader reader;
     Options options;
-    options.add("header_insert", "A,B,C,G");
+    options.add("header", "A,B,C,G");
     options.add("filename", Support::datapath("text/crlf_test.txt"));
     reader.setOptions(options);
 
