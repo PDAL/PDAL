@@ -185,6 +185,14 @@ TriangularMesh *PointView::mesh(const std::string& name)
 }
 
 
+void PointView::invalidateProducts()
+{
+    m_index2.reset();
+    m_index3.reset();
+    // Should all meshes also be invalidated?
+}
+
+
 KD3Index& PointView::build3dIndex()
 {
     //ABELL
