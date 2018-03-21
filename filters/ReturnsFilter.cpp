@@ -118,7 +118,7 @@ PointViewSet ReturnsFilter::run(PointViewPtr inView)
             viewSet.insert(firstView);
         else
             log()->get(LogLevel::Warning)
-                << "Requested first returns set it empty\n";
+                << "Requested returns group 'first' is empty\n";
     }
 
     if (m_outputTypes & returnIntermediate)
@@ -127,7 +127,7 @@ PointViewSet ReturnsFilter::run(PointViewPtr inView)
             viewSet.insert(intermediateView);
         else
             log()->get(LogLevel::Warning)
-                << "Requested intermediate returns set is empty\n";
+                << "Requested returns group 'intermediate' is empty\n";
     }
 
     if (m_outputTypes & returnLast)
@@ -136,7 +136,7 @@ PointViewSet ReturnsFilter::run(PointViewPtr inView)
             viewSet.insert(lastView);
         else
             log()->get(LogLevel::Warning)
-                << "Requested last returns set is empty\n";
+                << "Requested returns group 'last' is empty\n";
     }
 
     if (m_outputTypes & returnOnly)
@@ -145,7 +145,7 @@ PointViewSet ReturnsFilter::run(PointViewPtr inView)
             viewSet.insert(onlyView);
         else
             log()->get(LogLevel::Warning)
-                << "Requested only returns set is empty\n";
+                << "Requested returns group 'only' is empty\n";
     }
 
     return viewSet;
