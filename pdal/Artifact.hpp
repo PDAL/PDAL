@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Howard Butler (hobu@hob.co)
+* Copyright (c) 2018, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -34,15 +34,18 @@
 
 #pragma once
 
-#include <string>
+#include <memory>
 
 namespace pdal
 {
 
-namespace MbError
+class Artifact
 {
+public:
+    virtual ~Artifact()  // Need to make sure we have a virt. func. tbl.
+    {}
+};
 
-std::string text(int errorCode);
-}
+using ArtifactPtr = std::shared_ptr<Artifact>;
 
 } // namespace pdal

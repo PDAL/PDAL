@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Howard Butler (hobu@hob.co)
+* Copyright (c) 2016, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -32,17 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <string>
+#include <pdal/Artifact.hpp>
+#include <pdal/ArtifactManager.hpp>
+#include <pdal/PointTable.hpp>
+
+#include <pdal/Options.hpp>
+
+#include "Support.hpp"
+
 
 namespace pdal
 {
 
-namespace MbError
+class TestArtifact : public Artifact
 {
+public:
+    TestArtifact(const std::string& s) : m_val(s)
+    {}
 
-std::string text(int errorCode);
+    std::string m_val;
+};
+
+class Foo
+{
+};
+
+class TestArtifact2 : public Artifact
+{
+};
+
+TEST(ArtifactTest, simple)
+{
+    using TAPtr = std::shared_ptr<TestArtifact>;
+    TAPtr ta(new TestArtifact("MyTest"));
+
+    PointTable t;
+    t.artifactManager().put("MyTest", ta);
+    EXPECT_EQ(t.artifactManager().get<TestArtifact>("foo"), nullptr);
+    EXPECT_NE(t.artifactManager().get<TestArtifact>("MyTest"), nullptr);
+    EXPECT_EQ(t.artifactManager().get<TestArtifact>("MyTest")->m_val, "MyTest");
+    EXPECT_EQ(t.artifactManager().get<Foo>("MyTest"), nullptr);
+    EXPECT_EQ(t.artifactManager().get<TestArtifact2>("MyTest"), nullptr);
 }
 
 } // namespace pdal

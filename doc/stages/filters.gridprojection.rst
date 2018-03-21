@@ -28,8 +28,9 @@ Example
           "type":"filters.gridprojection"
         },
         {
-          "type":"writers.las",
-          "filename":"output.las"
+          "type":"writers.ply",
+          "faces":true,
+          "filename":"output.ply"
         }
       ]
     }

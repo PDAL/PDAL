@@ -37,7 +37,6 @@
 #include <sstream>
 
 #include <geo_normalize.h>
-#include <ogr_spatialref.h>
 #include <geo_simpletags.h>
 
 PDAL_C_START

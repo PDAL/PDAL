@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Howard Butler (hobu@hob.co)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,15 +34,37 @@
 
 #pragma once
 
+#include <map>
+#include <memory>
 #include <string>
+
+#include <pdal/Artifact.hpp>
 
 namespace pdal
 {
 
-namespace MbError
+class ArtifactManager
 {
+public:
+    bool put(const std::string& name, ArtifactPtr artifact)
+    {
+        return m_storage.insert(std::make_pair(name, artifact)).second;
+    }
 
-std::string text(int errorCode);
-}
+    template <typename T>
+    std::shared_ptr<T> get(const std::string& name)
+    {
+        std::shared_ptr<T> art;
+        try
+        {
+            art = std::dynamic_pointer_cast<T>(m_storage.at(name));
+        }
+        catch (...)
+        {}
+        return art;
+    }
+private:
+    std::map<std::string, ArtifactPtr> m_storage;
+};
 
 } // namespace pdal

@@ -29,8 +29,9 @@ Example
           "radius": 10
         },
         {
-          "type":"writers.las",
-          "filename":"output.las"
+          "type":"writers.ply",
+          "faces":true,
+          "filename":"output.ply"
         }
       ]
     }
