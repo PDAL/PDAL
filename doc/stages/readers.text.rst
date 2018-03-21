@@ -79,6 +79,9 @@ header_insert
   String to use as the file header.  All lines in the file as assumed to be
   records containing point data.
 
+header_skip
+  Number of lines to skip before reading header
+
 count
   Maximum number of points to read [Optional]
 

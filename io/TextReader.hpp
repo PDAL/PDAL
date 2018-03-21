@@ -138,6 +138,7 @@ private:
     size_t m_line;
     std::string m_headerOverride;
     std::string m_headerInsert;
+    uint32_t m_headerSkip;
 };
 
 } // namespace pdal

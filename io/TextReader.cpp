@@ -134,7 +134,12 @@ void TextReader::initialize(PointTableRef table)
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
+
     std::string header;
+
+    // Skip any lines requested
+    for (uint32_t i = 0; i < m_headerSkip; ++i)
+        std::getline(*m_istream, header);
     if (m_headerInsert.size())
         header = m_headerInsert;
     else if (m_headerOverride.size())
@@ -158,6 +163,7 @@ void TextReader::addArgs(ProgramArgs& args)
         "the first line in the file.", m_headerOverride);
     args.add("header_insert", "Use this string as the header line. All "
         "lines of the file are treated as data.", m_headerInsert);
+    args.add("header_skip", "Use number to skip lines before starting reading. " , m_headerSkip, 0u);
 }
 
 
@@ -186,6 +192,8 @@ void TextReader::ready(PointTableRef table)
     // Skip header line unless we're inserting one from the command line..
     if (m_headerInsert.size())
         m_line = 0;
+    else if (m_headerSkip)
+        m_line = m_headerSkip;
     else
     {
         std::string buf;
