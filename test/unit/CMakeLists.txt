@@ -48,6 +48,7 @@ PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 PDAL_ADD_TEST(pdal_program_arg_test FILES ProgramArgsTest.cpp)
     target_include_directories(pdal_program_arg_test PRIVATE
         ${PDAL_JSONCPP_INCLUDE_DIR})
+PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
 PDAL_ADD_TEST(pdal_polygon_test FILES PolygonTest.cpp)
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
