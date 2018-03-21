@@ -72,7 +72,8 @@ public:
     template <class BBOX> bool kdtree_get_bbox(BBOX& bb) const;
     void build()
     {
-        m_index.reset(new my_kd_tree_t(DIM, *this, nanoflann::KDTreeSingleIndexAdaptorParams(100)));
+        m_index.reset(new my_kd_tree_t(DIM, *this,
+            nanoflann::KDTreeSingleIndexAdaptorParams(100)));
         m_index->buildIndex();
     }
 
@@ -304,8 +305,8 @@ public:
         knnSearch(x, y, z, k, indices, sqr_dists);
     }
 
-    void knnSearch(PointRef &point, point_count_t k, std::vector<PointId> *indices,
-        std::vector<double> *sqr_dists)
+    void knnSearch(PointRef &point, point_count_t k,
+        std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);

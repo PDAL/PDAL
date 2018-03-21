@@ -273,6 +273,8 @@ public:
     }
     MetadataNode toMetadata() const;
 
+    void invalidateProducts();
+
     /**
       Creates a mesh with the specified name.
 
