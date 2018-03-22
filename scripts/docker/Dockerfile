@@ -75,8 +75,6 @@ RUN \
     rm -rf /vdatum; \
     git clone https://github.com/hobu/jsoncpp.git /jsoncpp; \
     cd /jsoncpp; \
-    export CXX=/usr/bin/clang++; \
-    export CC=/usr/bin/clang; \
     cmake -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_SHARED_LIBS=ON \
@@ -106,8 +104,6 @@ RUN \
     cmake .. \
         -G "Unix Makefiles" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_C_COMPILER=gcc \
-        -DCMAKE_CXX_COMPILER=g++ \
         -DCMAKE_MAKE_PROGRAM=make \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_CPD=ON \
