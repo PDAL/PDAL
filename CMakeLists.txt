@@ -124,7 +124,6 @@ include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
-include(${PDAL_CMAKE_DIR}/python.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
