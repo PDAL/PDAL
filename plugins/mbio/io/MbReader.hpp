@@ -65,6 +65,23 @@ class PDAL_DLL MbReader : public Reader, public Streamable
         {}
     };
 
+    struct SidescanData
+    {
+        double m_sslon;
+        double m_sslat;
+        double m_ss;
+
+        SidescanData(double sslon, double sslat, double ss) :
+            m_sslon(sslon), m_sslat(sslat), m_ss(ss)
+        {}
+    };
+
+    enum class DataType
+    {
+        Multibeam,
+        Sidescan
+    };
+
 public:
     MbReader();
     virtual ~MbReader();
@@ -81,6 +98,13 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
     bool loadData();
+    bool extractMultibeam(int numBath, int numAmp);
+    bool extractSidescan(int numSs);
+
+    friend std::istream& operator>>(std::istream& in,
+        MbReader::DataType& mode);
+    friend std::ostream& operator<<(std::ostream& in,
+        const MbReader::DataType& mode);
 
     void *m_ctx;
     double *m_bath;
@@ -92,9 +116,11 @@ private:
     double *m_sslon;
     double *m_sslat;
     std::queue<BathData> m_bathQueue;
+    std::queue<SidescanData> m_ssQueue;
     MbFormat m_format;
     double m_timegap;
     double m_speedmin;
+    DataType m_dataType;
 };
 
 } // namespace PDAL

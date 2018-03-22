@@ -71,6 +71,8 @@ void MbReader::addArgs(ProgramArgs& args)
     args.add("timegap", "Maximum time between records.", m_timegap, 1.0);
     args.add("speedmin", "Minimum vehicle speed for data to be valid",
         m_speedmin);
+    args.add("datatype", "Multibeam (default) or sidescan.", m_dataType,
+        DataType::Multibeam);
 }
 
 
@@ -81,6 +83,7 @@ void MbReader::addDimensions(PointLayoutPtr layout)
     std::vector<Dimension::Id> dims { Id::X, Id::Y, Id::Z, Id::Amplitude };
 
     layout->registerDims(dims);
+    layout->registerDim(Id::Intensity, Type::Double);
 }
 
 
@@ -164,18 +167,12 @@ bool MbReader::loadData()
 
         if (kind == 1)
         {
-            for (size_t i = 0; i < (size_t)numBath; ++i)
-            {
-                if (m_bathflag[i] & 1)
-                    continue;
-                m_bathQueue.emplace(m_bathlon[i], m_bathlat[i], -m_bath[i],
-                    m_amp[i]);
-            }
-            if (numBath != numAmp)
-                log()->get(LogLevel::Warning) << getName() << ": Number of "
-                    "bathymetry values doesn't match number of amplitude "
-                    "values." << std::endl;
-            if (m_bathQueue.size())
+            bool ok(false);
+            if (m_dataType == DataType::Multibeam)
+                ok = extractMultibeam(numBath, numAmp);
+            else
+                ok = extractSidescan(numSs);
+            if (ok)
                 break;
         }
     }
@@ -183,19 +180,62 @@ bool MbReader::loadData()
 }
 
 
+bool MbReader::extractMultibeam(int numBath, int numAmp)
+{
+    for (size_t i = 0; i < (size_t)numBath; ++i)
+    {
+        if (m_bathflag[i] & 1)
+            continue;
+        m_bathQueue.emplace(m_bathlon[i], m_bathlat[i], -m_bath[i],
+                m_amp[i]);
+    }
+    if (numBath != numAmp)
+        log()->get(LogLevel::Warning) << getName() << ": Number of "
+            "bathymetry values doesn't match number of amplitude "
+            "values." << std::endl;
+    return m_bathQueue.size();
+}
+
+
+bool MbReader::extractSidescan(int numSs)
+{
+    for (size_t i = 0; i < (size_t)numSs; ++i)
+        m_ssQueue.emplace(m_sslon[i], m_sslat[i], m_ss[i]);
+    return m_ssQueue.size();
+}
+
+
 bool MbReader::processOne(PointRef& point)
 {
-    if (m_bathQueue.empty())
-        if (!loadData())
-            return false;
+    if (m_dataType == DataType::Multibeam)
+    {
+        if (m_bathQueue.empty())
+            if (!loadData())
+            {
+                return false;
+            }
 
-    BathData& bd = m_bathQueue.front();
+        BathData& bd = m_bathQueue.front();
 
-    point.setField(Dimension::Id::X, bd.m_bathlon);
-    point.setField(Dimension::Id::Y, bd.m_bathlat);
-    point.setField(Dimension::Id::Z, bd.m_bath);
-    point.setField(Dimension::Id::Amplitude, bd.m_amp);
-    m_bathQueue.pop();
+        point.setField(Dimension::Id::X, bd.m_bathlon);
+        point.setField(Dimension::Id::Y, bd.m_bathlat);
+        point.setField(Dimension::Id::Z, bd.m_bath);
+        point.setField(Dimension::Id::Amplitude, bd.m_amp);
+        m_bathQueue.pop();
+    }
+    else // Sidescan
+    {
+        if (m_ssQueue.empty())
+            if (!loadData())
+                return false;
+
+        SidescanData& ss = m_ssQueue.front();
+
+        point.setField(Dimension::Id::X, ss.m_sslon);
+        point.setField(Dimension::Id::Y, ss.m_sslat);
+        point.setField(Dimension::Id::Intensity, ss.m_ss);
+        m_ssQueue.pop();
+    }
     return true;
 }
 
@@ -237,6 +277,29 @@ void MbReader::done(PointTableRef table)
 
     mb_close(0, &m_ctx, &error);
     getMetadata().addList("filename", m_filename);
+}
+
+inline std::istream& operator>>(std::istream& in, MbReader::DataType& dt)
+{
+    std::string s;
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "MULTIBEAM")
+        dt = MbReader::DataType::Multibeam;
+    else if (s == "SIDESCAN")
+        dt = MbReader::DataType::Sidescan;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const MbReader::DataType& dt)
+{
+    if (dt == MbReader::DataType::Multibeam)
+        out << "Multibeam";
+    else if (dt == MbReader::DataType::Sidescan)
+        out << "Sidescan";
+    return out;
 }
 
 } // namespace pdal
