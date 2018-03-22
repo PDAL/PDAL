@@ -19,19 +19,17 @@ std::string DelaunayFilter::getName() const
     return s_info.name;
 }
 
-PointViewSet DelaunayFilter::run(PointViewPtr input)
+PointViewSet DelaunayFilter::run(PointViewPtr pointView)
 {
-    PointViewPtr output = input->makeNew();
-    PointViewSet viewSet;
-    viewSet.insert(input);
-    viewSet.insert(output);
-    
     // TODO Check for null (= already exists)
-    TriangularMesh *mesh = output->createMesh("delaunay");
+    TriangularMesh *mesh = pointView->createMesh("delaunay");
     
     //Testing...
     mesh->add(0, 1, 2);
     mesh->add(1, 2, 3);
+    
+    PointViewSet viewSet;
+    viewSet.insert(pointView);
     
     return viewSet;
 }
