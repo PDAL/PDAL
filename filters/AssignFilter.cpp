@@ -45,7 +45,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.assign",
-    "Assign values for a dimension using a specified value.",
+    "Assign values for a dimension range to a specified value.",
     "http://pdal.io/stages/filters.assign.html"
 };
 
@@ -160,4 +160,3 @@ void AssignFilter::filter(PointView& view)
 }
 
 } // namespace pdal
-
