@@ -39,6 +39,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include <Python.h>
 #undef toupper
@@ -142,42 +143,53 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
     // which is shape[0]
 
 
+    PyObject* names_dict = dtype->fields;
+    PyObject* keys = PyDict_Keys(names_dict);
+    if (!keys)
+        throw pdal::pdal_error(plang::getTraceback());
     for (int i = 0; i < count; ++i)
     {
         // Get the dimension name
+        PyObject* item = PyList_GetItem(keys, i);
+        if (!item)
+            throw pdal::pdal_error(plang::getTraceback());
+        const char* cname = PyString_AsString(item);
+        std::string name(cname);
 
-        // Check that it doesn't already match a PDAL dimension name
 
-        // Check its size in relation to PDAL's defaultsize for the dimension
+        // Try sanitizing names to remove characters that would
+        // make them valid PDAL dimension names otherwise
+        std::string dash_s(name);
+        std::string space_s(name);
+        std::string under_s(name);
+        pdal::Utils::remove(dash_s,'-');
+        pdal::Utils::remove(space_s,' ');
+        pdal::Utils::remove(under_s,'_');
 
+        pdal::Dimension::Id dash = pdal::Dimension::id(dash_s);
+        pdal::Dimension::Id space = pdal::Dimension::id(space_s);
+        pdal::Dimension::Id under = pdal::Dimension::id(under_s);
+
+        pdal::Dimension::Id id = pdal::Dimension::id(name);
+        if (dash != pdal::Dimension::Id::Unknown)
+            id = dash;
+        else if (space != pdal::Dimension::Id::Unknown)
+            id = space;
+        else if (under != pdal::Dimension::Id::Unknown)
+            id = under;
+        else if (id == pdal::Dimension::Id::Unknown)
+            id = pdal::Dimension::Id::Unknown;
+
+        pdal::Dimension::Type p_type = plang::Environment::getPDALDataType(dtype->type_num);
+        if (id == pdal::Dimension::Id::Unknown)
+            layout->registerOrAssignDim(name, p_type);
+        else
+            layout->registerOrAssignDim(pdal::Dimension::name(id), p_type);
+
+        std::cerr << "found known dimension" << "'" << pdal::Dimension::name(id) <<"' for given name '"<<name <<"'"<< std::endl;
+        std::cerr << "name: " << name << std::endl;
 
     }
-
-
-//     PyObject* dtype = PyObject_GetAttrString(m_array, "dtype");
-//     if (!dtype)
-//         throw pdal::pdal_error(plang::getTraceback());
-//     PyObject* names = PyObject_GetAttrString(dtype, "names");
-//     if (!names)
-//         throw pdal::pdal_error(plang::getTraceback());
-//
-//     // Get length of names list
-//     Py_ssize_t count = PySequence_Size(names);
-//     log()->get(LogLevel::Debug) << "Adding " << count <<" dimensions" << std::endl;
-//     std::cerr<< "Adding " << count <<" dimensions" << std::endl;
-//
-//     for (int i=0; i < (int) count; i++)
-//     {
-//         char* name = PyString_AsString(PySequence_GetItem(names, i));
-//         Id id = Dimension::id(name);
-//         if (id != Id::Unknown)
-//         {
-//
-//         }
-//         log()->get(LogLevel::Debug) << "Adding dimension '" << name <<"'" << std::endl;
-//
-//     }
-//     layout->registerDim(Id::X, Type::Double);
 
 
 }
@@ -186,10 +198,8 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
 void NumpyReader::ready(PointTableRef table)
 {
     // wake up python
-
-
     static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
-    log()->get(LogLevel::Debug) << "Initializing Numpy array '" << m_filename <<"'" << std::endl;
+    log()->get(LogLevel::Debug) << "Initializing Numpy array for file '" << m_filename <<"'" << std::endl;
 }
 
 
