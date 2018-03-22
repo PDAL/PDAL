@@ -7,4 +7,5 @@
 PDAL_ADD_PLUGIN(filter_libname filter delaunay
     FILES
         filters/DelaunayFilter.cpp
+	filters/Delaunay_psm.cpp
 )
