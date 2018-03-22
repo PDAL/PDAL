@@ -39,7 +39,15 @@
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
 #endif
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+
 #include <nitro/c++/import/nitf.hpp>
+
+#pragma GCC diagnostic pop
+
 #include <nitro/c++/except/Trace.h>
 
 namespace pdal
