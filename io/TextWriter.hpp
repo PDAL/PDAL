@@ -43,6 +43,12 @@ typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
 class PDAL_DLL TextWriter : public Writer
 {
+    struct DimSpec
+    {
+        Dimension::Id id;
+        size_t precision;
+    };
+
 public:
     TextWriter()
     {}
@@ -63,6 +69,8 @@ private:
 
     void writeGeoJSONBuffer(const PointViewPtr view);
     void writeCSVBuffer(const PointViewPtr view);
+    DimSpec extractDim(std::string dim, PointTableRef table);
+    bool findDim(Dimension::Id id, DimSpec& ds);
 
     std::string m_filename;
     std::string m_outputType;
@@ -77,7 +85,7 @@ private:
     int m_precision;
 
     FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
+    std::vector<DimSpec> m_dims;
 
     TextWriter& operator=(const TextWriter&); // not implemented
     TextWriter(const TextWriter&); // not implemented
