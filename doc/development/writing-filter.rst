@@ -73,16 +73,14 @@ PDAL requires that filter names always begin with ``filters.``, and end with a
 string that uniquely identifies the filter. The description will be displayed
 to users of the PDAL CLI (``pdal --drivers``).
 
-Next, we pass the following to the ``CREATE_STATIC_PLUGIN`` macro, in order:
-PDAL plugin ABI major version, PDAL plugin ABI minor version, filter class
-name, stage type (``Filter``), and our ``PluginInfo`` struct.
+Next, we pass the following to the ``CREATE_STATIC_STAGE`` macro, passin in the name of the stage and the ``PluginInfo`` struct.
 
 .. literalinclude:: ../../examples/writing-filter/MyFilter.cpp
    :language: cpp
    :lines: 19
 
-To create a shared plugin, we simply change ``CREATE_STATIC_PLUGIN`` to
-``CREATE_SHARED_PLUGIN``.
+To create a shared stage, we simply change ``CREATE_STATIC_STAGE`` to
+``CREATE_SHARED_STAGE``.
 
 Finally, we implement a method to get the plugin name, which is primarily used
 by the PDAL CLI when using the ``--drivers`` or ``--options`` arguments.
@@ -129,32 +127,6 @@ points.
 
 We suggest you take a closer look at our existing filters to get an idea of the
 power of the ``Filter`` stage and inspiration for your own filters!
-
-StageFactory
-...............................................................................
-
-As of this writing, users must also make a couple of changes to
-``StageFactory.cpp`` to properly register static plugins only (this is not
-required for shared plugins). It is our goal to eventually remove this
-requirement to further streamline development of add-on plugins.
-
-.. note::
-
-    Modification of StageFactory is required for STATIC plugins only.
-    Dynamic plugins are registered at runtime.
-
-First, add the following line to the beginning of ``StageFactory.cpp``
-(adjusting the path and filename as necessary).
-
-.. code-block:: cpp
-
-    #include <MyFilter.hpp>
-
-Next, add the following line of code to the ``StageFactory`` constructor.
-
-.. code-block:: cpp
-
-    PluginManager::initializePlugin(MyFilter_InitPlugin);
 
 
 Compilation
