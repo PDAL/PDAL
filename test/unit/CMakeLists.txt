@@ -108,7 +108,6 @@ PDAL_ADD_TEST(pdal_filters_colorinterp_test FILES
     filters/ColorinterpFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES
     filters/ColorizationFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_computerange_test FILES filters/ComputeRangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)

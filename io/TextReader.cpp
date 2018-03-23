@@ -90,6 +90,7 @@ QuickInfo TextReader::inspect()
 
 void TextReader::checkHeader(const std::string& header)
 {
+    std::cerr << "Header = " << header << "!\n";
     auto it = std::find_if(header.begin(), header.end(),
         [](char c){ return std::isalpha(c); });
     if (it == header.end())
@@ -130,6 +131,7 @@ void TextReader::initialize(PointTableRef table)
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
+    m_line = 0;
     // Skip lines requested.
     std::string dummy;
     for (size_t i = 0; i < m_skip; ++i)
