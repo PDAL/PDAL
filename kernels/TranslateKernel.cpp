@@ -207,7 +207,13 @@ int TranslateKernel::execute()
             m_pipelineOutputFile);
         return 0;
     }
-    m_manager.execute();
+    if (m_manager.pipelineStreamable())
+    {
+        FixedPointTable t(10000);
+        m_manager.executeStream(t);
+    }
+    else
+        m_manager.execute();
     if (metaOut)
     {
         MetadataNode m = m_manager.getMetadata();
