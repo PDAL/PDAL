@@ -41,6 +41,17 @@
 #include "../plang/Invocation.hpp"
 
 
+#include <Python.h>
+#undef toupper
+#undef tolower
+#undef isspace
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
+#include <numpy/arrayobject.h>
+
 namespace pdal
 {
 
@@ -54,6 +65,8 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
+    point_count_t getNumPoints() const;
+
 
 private:
 
@@ -65,7 +78,20 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
+    void loadPoint(PointRef& point, point_count_t position );
+
     PyObject* m_array;
+
+    NpyIter* m_iter;
+    NpyIter_IterNextFunc* m_iternext;
+    char** m_dataptr;
+    npy_intp m_nonzero_count;
+    npy_intp* m_strideptr, *m_innersizeptr;
+
+
+    std::map<pdal::Dimension::Id, int> m_ids;
+    std::map<pdal::Dimension::Id, pdal::Dimension::Type> m_types;
+    point_count_t m_index;
 
     NumpyReader& operator=(const NumpyReader&); // not implemented
     NumpyReader(const NumpyReader&); // not implemented

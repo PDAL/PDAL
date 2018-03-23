@@ -16,7 +16,7 @@ MATLAB_HOME=/Applications/MATLAB_R2017b.app
 export GDAL_HOME=/usr/local/opt/gdal2
 
 CONFIG="Unix Makefiles"
-#CONFIG="Ninja" /usr/local/Cellar/hdf5/1.8.16_1/
+CONFIG="Ninja"
 
 if ! [ -z "$1" ]; then
     CONFIG="$1"

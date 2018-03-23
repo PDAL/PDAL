@@ -41,16 +41,6 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Algorithm.hpp>
 
-#include <Python.h>
-#undef toupper
-#undef tolower
-#undef isspace
-
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
-#include <numpy/arrayobject.h>
 
 namespace pdal
 {
@@ -100,6 +90,7 @@ PyObject* load_npy(std::string const& filename)
 void NumpyReader::initialize()
 {
     plang::Environment::get();
+    m_index = 0;
     m_array = load_npy(m_filename);
     if (!PyArray_Check(m_array))
         throw pdal::pdal_error("Object in file  '" + m_filename +
@@ -121,6 +112,19 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
     // TODO pivot whether we are a 1d, 2d, or named arrays
 
     PyArrayObject* arr = (PyArrayObject*)m_array;
+    if (PyArray_SIZE(arr) == 0)
+        throw pdal::pdal_error("Array cannot be 0!");
+
+    m_iter = NpyIter_New(arr, NPY_ITER_READONLY|
+                             NPY_ITER_EXTERNAL_LOOP|
+                             NPY_ITER_REFS_OK,
+                         NPY_KEEPORDER, NPY_NO_CASTING,
+                         NULL);
+    if (m_iter == NULL)
+    {
+        throw pdal::pdal_error("Unable to create iterator from array in '" + m_filename +"'");
+    }
+
     PyArray_Descr *dtype = PyArray_DTYPE(arr);
     if (!dtype)
         throw pdal::pdal_error(plang::getTraceback());
@@ -177,20 +181,24 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
             id = space;
         else if (under != pdal::Dimension::Id::Unknown)
             id = under;
-        else if (id == pdal::Dimension::Id::Unknown)
-            id = pdal::Dimension::Id::Unknown;
 
         pdal::Dimension::Type p_type = plang::Environment::getPDALDataType(dtype->type_num);
+        m_types[id] = p_type;
+        m_ids[id] = i;
         if (id == pdal::Dimension::Id::Unknown)
             layout->registerOrAssignDim(name, p_type);
         else
             layout->registerOrAssignDim(pdal::Dimension::name(id), p_type);
 
-        std::cerr << "found known dimension" << "'" << pdal::Dimension::name(id) <<"' for given name '"<<name <<"'"<< std::endl;
-        std::cerr << "name: " << name << std::endl;
+        std::cerr << "found known dimension "
+                  << " '" << pdal::Dimension::name(id)
+                  <<" 'for given name '"
+                  <<" 'ptype: '" << dtype->type_num
+                  <<" 'elsize: '" << dtype->elsize<< "' name '"
+                  << name <<"'"
+                  << "for type '" << pdal::Dimension::interpretationName(p_type) << "'"<< std::endl;
 
     }
-
 
 }
 
@@ -202,20 +210,67 @@ void NumpyReader::ready(PointTableRef table)
     log()->get(LogLevel::Debug) << "Initializing Numpy array for file '" << m_filename <<"'" << std::endl;
 }
 
+void NumpyReader::loadPoint(PointRef& point, point_count_t position )
+{
+    // for each dimension in m_ids_map, get the value from
+    // the m_array Numpy array and set it on the point
+    PyArrayObject* arr = (PyArrayObject*)m_array;
+
+    npy_intp pos(position);
+    void* data = PyArray_GetPtr(arr, &pos);
+
+    for (auto& i: m_ids)
+    {
+
+        pdal::Dimension::Id id = i.first;
+        npy_intp idx = i.second;
+//         log()->get(LogLevel::Debug) << "fetching position '" << position <<"' and name '" << pdal::Dimension::name(id) <<"'" << std::endl;
+
+        char* c = (char*) data;
+        void* p =  c+idx;
+        point.setField(id, m_types[id], (void *)p);
+    }
+
+
+
+}
+
 
 bool NumpyReader::processOne(PointRef& point)
 {
-//     if (m_index >= getNumPoints())
-//         return false;
-//
-//     size_t pointLen = m_header.pointLen();
+    if (m_index >= getNumPoints())
+        return false;
+
+    loadPoint(point, m_index);
+    m_index+=1;
 
     return true;
 
 }
 
+point_count_t NumpyReader::getNumPoints() const
+{
+    if (m_array)
+        return (point_count_t) PyArray_Size(m_array);
+    else
+        throw pdal::pdal_error("Numpy array not initialized!");
+}
+
 point_count_t NumpyReader::read(PointViewPtr view, point_count_t count)
 {
+    count = std::min(count, getNumPoints() - m_index);
+
+    PointId i = 0;
+    for (i = 0; i < count; i++)
+    {
+        PointRef point = view->point(i);
+        PointId id = view->size();
+        processOne(point);
+        if (m_cb)
+            m_cb(*view, id);
+    }
+
+
 //     if (eof())
 //         return 0;
 
