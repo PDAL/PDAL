@@ -79,14 +79,19 @@ private:
     virtual void done(PointTableRef table);
 
     void loadPoint(PointRef& point, point_count_t position );
+    void wakeUpNumpyArray();
 
-    PyObject* m_array;
+
+    PyArrayObject* m_array;
 
     NpyIter* m_iter;
     NpyIter_IterNextFunc* m_iternext;
+    PyArray_Descr* m_dtype;
     char** m_dataptr;
     npy_intp m_nonzero_count;
     npy_intp* m_strideptr, *m_innersizeptr;
+    point_count_t m_numPoints;
+    int m_numDimensions;
 
 
     std::map<pdal::Dimension::Id, int> m_ids;

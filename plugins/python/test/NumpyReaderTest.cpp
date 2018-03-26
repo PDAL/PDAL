@@ -73,8 +73,9 @@ TEST_F(NumpyReaderTest, NumpyReaderTest_read)
     reader.prepare(table);
     reader.log()->setLevel(LogLevel::Debug1);
     PointViewSet viewSet = reader.execute(table);
-    EXPECT_EQ(viewSet.size(), 1065u);
+    EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065u);
 
 }
 
