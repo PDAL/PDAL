@@ -13,6 +13,8 @@ Displays information about a point cloud file, such as:
 * the plain text format should be reStructured text if possible to allow a user
   to retransform the output into whatever they want with ease
 
+Processing is performed with stream mode if possible.
+
 ::
 
     $ pdal info <input>
