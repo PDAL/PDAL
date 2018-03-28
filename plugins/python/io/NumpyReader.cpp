@@ -271,11 +271,6 @@ void NumpyReader::ready(PointTableRef table)
     static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
     log()->get(LogLevel::Debug) << "Initializing Numpy array for file '" << m_filename <<"'" << std::endl;
 
-    // for each dimension in m_ids_map, get the value from
-    // the m_array Numpy array and set it on the point
-
-//     npy_intp* strideptr,* innersizeptr;
-
     // Set our iterators
     // The location of the data pointer which the iterator may update
     m_dataptr = NpyIter_GetDataPtrArray(m_iter);
@@ -297,24 +292,23 @@ bool NumpyReader::loadPoint(PointRef& point, point_count_t position )
 
     for (size_t dim = 0; dim < m_ids.size(); ++dim)
     {
-        pdal::Dimension::Id id = m_ids[dim];
-        pdal::Dimension::Type t = m_types[dim];
-        int offset = m_offsets[dim];
-
-        point.setField(id, t, (void*) (p_data + offset));
+        point.setField( m_ids[dim],
+                        m_types[dim],
+                        (void*) (p_data + m_offsets[dim]));
     }
 
 //     log()->get(LogLevel::Debug) << "x: " << point.getFieldAs<double>(pdal::Dimension::Id::X) << " id: " << point.pointId() << " m_chunkCount: " << m_chunkCount << std::endl;
     p_data += stride;
     m_chunkCount--;
 
-     bool more = m_chunkCount != 0;
-     if (!more)
-     {
-         more = (bool)m_iternext(m_iter);
-         m_chunkCount = *m_innersizeptr;
-     }
-    return more; //(bool) m_iternext(m_iter);
+    bool more = m_chunkCount != 0;
+    if (!more)
+    {
+        more = (bool)m_iternext(m_iter);
+        m_chunkCount = *m_innersizeptr;
+        p_data = *m_dataptr;
+    }
+    return more;
 
 }
 
@@ -345,12 +339,12 @@ point_count_t NumpyReader::read(PointViewPtr view, point_count_t numToRead)
     point_count_t numRead(0);
 
 
+    PointRef point(*view, idx);
     numToRead = 3;
     while (numRead < numToRead)
     {
-        PointRef point(*view, idx);
 
-        point.setPointId(idx);
+        PointRef point(*view, idx);
 //         log()->get(LogLevel::Debug) <<"idx:" << idx<<std::endl;
     log()->get(LogLevel::Debug) <<"inner:" << Utils::toJSON(view->toMetadata()) <<std::endl;
         if (!processOne(point))
