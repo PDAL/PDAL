@@ -82,11 +82,12 @@ private:
     void wakeUpNumpyArray();
 
 
+    // Py_XDECREF these on the way out
     PyArrayObject* m_array;
-
     NpyIter* m_iter;
     NpyIter_IterNextFunc* m_iternext;
     PyArray_Descr* m_dtype;
+
     char** m_dataptr;
     char* p_data;
     npy_intp m_nonzero_count;

@@ -96,11 +96,22 @@ void NumpyReader::initialize()
     m_numDimensions = 0;
     m_chunkCount = 0;
 
+    m_iter = NULL;
+    m_iternext = NULL;
+    m_array = NULL;
+
+    p_data = NULL;
+    m_dataptr = NULL;
+    m_iternext = NULL;
+    m_strideptr = NULL;
+    m_innersizeptr = NULL;
+
     m_array = load_npy(m_filename);
     if (!PyArray_Check(m_array))
         throw pdal::pdal_error("Object in file  '" + m_filename +
             "' is not a numpy array");
 }
+
 
 void NumpyReader::wakeUpNumpyArray()
 {
@@ -157,17 +168,12 @@ void NumpyReader::wakeUpNumpyArray()
         m_numDimensions = count;
     }
 
-    log()->get(LogLevel::Debug) << "Adding " << count <<" dimensions" << std::endl;
-    std::cerr<< "Adding " << count <<" dimensions" << std::endl;
-    std::cerr<< "ndims " << ndims <<" dimensions" << std::endl;
-    std::cerr<< "shape " << shape[0] <<" "  << std::endl;
-
 }
+
 
 void NumpyReader::addArgs(ProgramArgs& args)
 {
 }
-
 
 
 void NumpyReader::addDimensions(PointLayoutPtr layout)
@@ -249,17 +255,6 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
 
         m_ids.push_back(id);
 
-//        std::cerr << Utils::toJSON(layout->toMetadata()) <<std::endl;
-
-        std::cerr << "found known dimension "
-                  << "position " << i
-                  << " '" << pdal::Dimension::name(id)
-                  <<" 'for given name ' "
-                  <<" 'ptype: '" << dtype->type_num
-                  <<" 'elsize: '" << dtype->elsize<< "' name ' "
-                  << name <<"'"
-                  << "for type '" << pdal::Dimension::interpretationName(p_type) << "'"<< std::endl;
-
     }
 
 }
@@ -269,6 +264,7 @@ void NumpyReader::ready(PointTableRef table)
 {
     // wake up python
     static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
+
     log()->get(LogLevel::Debug) << "Initializing Numpy array for file '" << m_filename <<"'" << std::endl;
 
     // Set our iterators
@@ -285,9 +281,9 @@ void NumpyReader::ready(PointTableRef table)
     m_chunkCount = *m_innersizeptr;
 }
 
+
 bool NumpyReader::loadPoint(PointRef& point, point_count_t position )
 {
-
     npy_intp stride = *m_strideptr;
 
     for (size_t dim = 0; dim < m_ids.size(); ++dim)
@@ -297,7 +293,6 @@ bool NumpyReader::loadPoint(PointRef& point, point_count_t position )
                         (void*) (p_data + m_offsets[dim]));
     }
 
-//     log()->get(LogLevel::Debug) << "x: " << point.getFieldAs<double>(pdal::Dimension::Id::X) << " id: " << point.pointId() << " m_chunkCount: " << m_chunkCount << std::endl;
     p_data += stride;
     m_chunkCount--;
 
@@ -332,21 +327,16 @@ point_count_t NumpyReader::getNumPoints() const
         throw pdal::pdal_error("Numpy array not initialized!");
 }
 
+
 point_count_t NumpyReader::read(PointViewPtr view, point_count_t numToRead)
 {
-
     PointId idx = view->size();
     point_count_t numRead(0);
 
-
-    PointRef point(*view, idx);
     numToRead = 3;
     while (numRead < numToRead)
     {
-
         PointRef point(*view, idx);
-//         log()->get(LogLevel::Debug) <<"idx:" << idx<<std::endl;
-    log()->get(LogLevel::Debug) <<"inner:" << Utils::toJSON(view->toMetadata()) <<std::endl;
         if (!processOne(point))
             break;
         numRead++;
@@ -355,14 +345,20 @@ point_count_t NumpyReader::read(PointViewPtr view, point_count_t numToRead)
     return numRead;
 }
 
+
 void NumpyReader::done(PointTableRef)
 {
-
-    // Dereference everything else we're using
+    // Dereference everything we're using
 
     if (m_iter)
         NpyIter_Deallocate(m_iter);
+
+    Py_XDECREF(m_dtype);
+    Py_XDECREF(m_iter);
+    Py_XDECREF(m_array);
 }
 
 
 } // namespace pdal
+
+
