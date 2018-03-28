@@ -29,6 +29,7 @@ Processing is performed with stream mode if possible.
   --stats                   Dump stats on all points (reads entire dataset)
   --boundary                Compute a hexagonal hull/boundary of dataset
   --dimensions              Dimensions on which to compute statistics
+  --enumerate               Dimensions whose values should be enumerated
   --schema                  Dump the schema
   --pipeline-serialization  Output filename for pipeline serialization
   --summary                 Dump summary of the info
