@@ -78,7 +78,7 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
-    void loadPoint(PointRef& point, point_count_t position );
+    bool loadPoint(PointRef& point, point_count_t position );
     void wakeUpNumpyArray();
 
 
@@ -88,14 +88,18 @@ private:
     NpyIter_IterNextFunc* m_iternext;
     PyArray_Descr* m_dtype;
     char** m_dataptr;
+    char* p_data;
     npy_intp m_nonzero_count;
     npy_intp* m_strideptr, *m_innersizeptr;
+    npy_intp m_chunkCount;
     point_count_t m_numPoints;
     int m_numDimensions;
 
 
-    std::map<pdal::Dimension::Id, int> m_ids;
-    std::map<pdal::Dimension::Id, pdal::Dimension::Type> m_types;
+    std::vector<pdal::Dimension::Id> m_ids;
+    std::vector<pdal::Dimension::Type> m_types;
+    std::vector<int> m_sizes;
+    std::vector<int> m_offsets;
     point_count_t m_index;
 
     NumpyReader& operator=(const NumpyReader&); // not implemented
