@@ -82,6 +82,7 @@ private:
     bool m_boundary;
     std::string m_pointIndexes;
     std::string m_dimensions;
+    std::string m_enumerate;
     std::string m_queryPoint;
     std::string m_pipelineFile;
     bool m_showSummary;

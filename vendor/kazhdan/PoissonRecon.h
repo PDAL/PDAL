@@ -497,7 +497,6 @@ void PoissonRecon<Real>::execute()
 	OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
     readData();
 
-	Real pointWeightSum;
     calcDensity();
     calcNormalData();
     trim();
