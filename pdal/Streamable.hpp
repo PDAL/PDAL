@@ -61,7 +61,7 @@ public:
         the same \ref table used in the \ref prepare function.
 
     */
-    void execute(StreamPointTable& table);
+    virtual void execute(StreamPointTable& table);
     using Stage::execute;
 
     /**
