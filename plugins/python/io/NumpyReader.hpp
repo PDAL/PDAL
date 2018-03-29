@@ -80,6 +80,8 @@ private:
 
     bool loadPoint(PointRef& point, point_count_t position );
     void wakeUpNumpyArray();
+    void prepareFieldsArray(PointLayoutPtr layout);
+    void prepareRasterArray(PointLayoutPtr layout);
 
 
     // Py_XDECREF these on the way out
@@ -92,10 +94,13 @@ private:
     char* p_data;
     npy_intp m_nonzero_count;
     npy_intp* m_strideptr, *m_innersizeptr;
+    npy_intp* m_shape;
     npy_intp m_chunkCount;
     point_count_t m_numPoints;
-    int m_numDimensions;
+    int m_numFields;
 
+    int m_ndims;
+    std::string m_defaultDimension;
 
     std::vector<pdal::Dimension::Id> m_ids;
     std::vector<pdal::Dimension::Type> m_types;

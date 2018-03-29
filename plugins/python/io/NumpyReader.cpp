@@ -93,8 +93,9 @@ void NumpyReader::initialize()
     plang::Environment::get();
     m_index = 0;
     m_numPoints = 0;
-    m_numDimensions = 0;
+    m_numFields = 0;
     m_chunkCount = 0;
+    m_ndims = 0;
 
     m_iter = NULL;
     m_iternext = NULL;
@@ -150,22 +151,54 @@ void NumpyReader::wakeUpNumpyArray()
         throw pdal::pdal_error(plang::getTraceback());
 
 
-    int ndims = PyArray_NDIM(m_array);
-    npy_intp* shape = PyArray_SHAPE(m_array);
-    if (!shape)
+    m_ndims = PyArray_NDIM(m_array);
+    m_shape = PyArray_SHAPE(m_array);
+    if (!m_shape)
         throw pdal::pdal_error(plang::getTraceback());
 
-    // Get length of fields
-    Py_ssize_t count = PyDict_Size(m_dtype->fields);
 
     // if there's only 1 ndims, but more than 1 count of them,
     // the data are arranged as named columns all of the same length
     // which is shape[0]
-    if (ndims == 1)
+    if (m_ndims == 1)
     {
         // Named arrays, one at a time
-        m_numPoints = shape[0];
-        m_numDimensions = count;
+        npy_intp* shape = PyArray_SHAPE(m_array);
+        if (!shape)
+            throw pdal::pdal_error(plang::getTraceback());
+
+        m_numPoints = m_shape[0];
+
+        // Get length of fields
+        Py_ssize_t count = PyDict_Size(m_dtype->fields);
+        std::cerr << "count: " << count << std::endl;
+        m_numFields = count;
+    }
+    else if (m_ndims == 2)
+    {
+
+        npy_intp* shape = PyArray_SHAPE(m_array);
+        if (!shape)
+            throw pdal::pdal_error(plang::getTraceback());
+
+        m_numPoints = m_shape[0] * m_shape[1];
+
+        pdal::Dimension::Type p_type = plang::Environment::getPDALDataType(m_dtype->type_num);
+
+        if (p_type == pdal::Dimension::Type::None)
+        {
+            std::ostringstream oss;
+            oss << "Unable to map raster dimension "
+                << "because its type '" << m_dtype->type_num <<"' is not mappable to PDAL";
+            throw pdal::pdal_error(oss.str());
+        }
+
+        m_types.push_back(p_type);
+
+//         std::ostringstream oss;
+//         oss << "no support for arrays with "
+//             << m_ndims << " dimensions";
+//         throw pdal::pdal_error(oss.str());
     }
 
 }
@@ -173,22 +206,21 @@ void NumpyReader::wakeUpNumpyArray()
 
 void NumpyReader::addArgs(ProgramArgs& args)
 {
+    args.add("dimension",
+             "Dimension name to map raster dimension values to ",
+             m_defaultDimension,
+             "Intensity");
 }
 
-
-void NumpyReader::addDimensions(PointLayoutPtr layout)
+void NumpyReader::prepareFieldsArray(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-
-    wakeUpNumpyArray();
-
     PyObject* names_dict = m_dtype->fields;
     PyObject* names = PyDict_Keys(names_dict);
     PyObject* values = PyDict_Values(names_dict);
     if (!names || !values)
         throw pdal::pdal_error(plang::getTraceback());
 
-    for (int i = 0; i < m_numDimensions; ++i)
+    for (int i = 0; i < m_numFields; ++i)
     {
         // Get the dimension name and dtype
         PyObject* pname = PyList_GetItem(names, i);
@@ -257,6 +289,36 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
 
     }
 
+
+}
+
+void NumpyReader::prepareRasterArray(PointLayoutPtr layout)
+{
+    layout->registerDim(pdal::Dimension::Id::X, pdal::Dimension::Type::Signed32);
+    layout->registerDim(pdal::Dimension::Id::Y, pdal::Dimension::Type::Signed32);
+    pdal::Dimension::Id id = layout->registerOrAssignDim(m_defaultDimension, m_types[0]);
+
+    m_ids.push_back(id);
+    m_sizes.push_back(layout->dimSize(id));
+}
+
+void NumpyReader::addDimensions(PointLayoutPtr layout)
+{
+    using namespace Dimension;
+
+    wakeUpNumpyArray();
+
+    if (m_ndims == 1)
+    {
+        prepareFieldsArray(layout);
+    } else if (m_ndims == 2)
+    {
+        // X is dimension 1
+        // Y is dimension 2
+        prepareRasterArray(layout);
+
+    }
+
 }
 
 
@@ -273,12 +335,20 @@ void NumpyReader::ready(PointTableRef table)
 
     // The location of the stride which the iterator may update
     m_strideptr = NpyIter_GetInnerStrideArray(m_iter);
+    log()->get(LogLevel::Debug) << "numpy inner stride '" << *m_strideptr <<"'" << std::endl;
 
     // The location of the inner loop size which the iterator may update
     m_innersizeptr = NpyIter_GetInnerLoopSizePtr(m_iter);
+    log()->get(LogLevel::Debug) << "numpy inner stride size '" << *m_innersizeptr <<"'" << std::endl;
 
     p_data = *m_dataptr;
     m_chunkCount = *m_innersizeptr;
+
+    log()->get(LogLevel::Debug) << "numpy number of points '" << m_numPoints <<"'" << std::endl;
+    log()->get(LogLevel::Debug) << "numpy number of dimensions '" << m_ndims <<"'" << std::endl;
+
+    for (npy_intp i = 0; i < m_ndims; ++i)
+        log()->get(LogLevel::Debug) << "numpy number shape dimension number '" << i <<"' is '" << m_shape[i] <<"'" << std::endl;
 }
 
 
@@ -286,17 +356,33 @@ bool NumpyReader::loadPoint(PointRef& point, point_count_t position )
 {
     npy_intp stride = *m_strideptr;
 
-    for (size_t dim = 0; dim < m_ids.size(); ++dim)
+    if (m_ndims == 1)
     {
-        point.setField( m_ids[dim],
-                        m_types[dim],
-                        (void*) (p_data + m_offsets[dim]));
+        for (size_t dim = 0; dim < m_ids.size(); ++dim)
+        {
+            point.setField( m_ids[dim],
+                            m_types[dim],
+                            (void*) (p_data + m_offsets[dim]));
+        }
+    } else if (m_ndims == 2)
+    {
+        // Figure out X, Y position based on how we are iterating
+        double i = position;
+        double x = std::fmod(position, (m_shape[0] +1));
+        position = position / (m_shape[1] + 1);
+        double y = std::fmod(i, (m_shape[1] + 1));
+
+        point.setField(pdal::Dimension::Id::X, x);
+        point.setField(pdal::Dimension::Id::Y, y);
+        point.setField( m_ids[0],
+                        m_types[0],
+                        (void*) (p_data));
     }
 
     p_data += stride;
     m_chunkCount--;
 
-    bool more = m_chunkCount != 0;
+    bool more = m_chunkCount >= 0;
     if (!more)
     {
         more = (bool)m_iternext(m_iter);
@@ -333,7 +419,6 @@ point_count_t NumpyReader::read(PointViewPtr view, point_count_t numToRead)
     PointId idx = view->size();
     point_count_t numRead(0);
 
-    numToRead = 3;
     while (numRead < numToRead)
     {
         PointRef point(*view, idx);
