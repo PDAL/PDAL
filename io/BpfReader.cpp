@@ -308,6 +308,9 @@ void BpfReader::done(PointTableRef)
 
 bool BpfReader::processOne(PointRef& point)
 {
+    if (eof() || m_index >= m_count)
+        return false;
+
     switch (m_header.m_pointFormat)
     {
     case BpfFormat::PointMajor:
@@ -320,7 +323,7 @@ bool BpfReader::processOne(PointRef& point)
         readByteMajor(point);
         break;
     }
-    return !eof() && (m_index < m_count);
+    return true;
 }
 
 
