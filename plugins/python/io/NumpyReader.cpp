@@ -438,8 +438,6 @@ void NumpyReader::done(PointTableRef)
     if (m_iter)
         NpyIter_Deallocate(m_iter);
 
-    Py_XDECREF(m_dtype);
-    Py_XDECREF(m_iter);
     Py_XDECREF(m_array);
 }
 
