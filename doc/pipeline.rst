@@ -126,8 +126,7 @@ For operations that don't require access to all points, PDAL provides stream
 mode.  Stream mode processes points through a pipeline in chunks, which
 reduces memory requirements.
 
-When using :ref:`pdal info<info_command>`,
-:ref:`pdal translate<translate_command>` or
+When using :ref:`pdal translate<translate_command>` or
 :ref:`pdal pipeline<pipeline_command>`
 PDAL uses stream mode if possible.  If stream mode can't use used
 the applications fall back to standard mode processing.
