@@ -98,7 +98,8 @@ void Streamable::execute(StreamPointTable& table)
     };
 
     if (!pipelineStreamable())
-        return;
+        throwError("Attempting to use stream mode with a stage that doesn't "
+            "support streaming.");
 
     SpatialReference srs;
     std::list<StreamableList> lists;
