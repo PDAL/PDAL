@@ -48,7 +48,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.elm",
-    "Extended Local Minimum Filter",
+    "Marks low points as noise.",
     "http://pdal.io/stages/filters.elm.html"
 };
 
