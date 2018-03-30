@@ -46,29 +46,18 @@ install:
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
   - mkdir build
-  - cd build
+  - pushd build
   - call ..\\scripts\\appveyor\\config.cmd
+  - popd
 
 build_script:
   - call ..\\scripts\\appveyor\\build.cmd
 
-after_build:
-  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-  - call %OSGEO4W_ROOT%\bin\py3_env.bat
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
-  - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
-  - call ..\\scripts\\appveyor\\install.cmd
-
-
 test_script:
-  # FIXME: Clear PATH to avoid OSGeo4W loading incompatible DLLs
-  - set PATH=
-  - set PATH=%OSGEO4W_ROOT%\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
-  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-  - call %OSGEO4W_ROOT%\bin\py3_env.bat
-  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-  - set PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
-  - ctest -V --output-on-failure
+  - call ..\\scripts\\appveyor\\test.cmd
+
+deploy_script:
+  - call ..\\scripts\\appveyor\\install.cmd
 
 artifacts:
   - path: pdal-$(APPVEYOR_REPO_COMMIT).tar.bz2
