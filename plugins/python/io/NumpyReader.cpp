@@ -171,7 +171,6 @@ void NumpyReader::wakeUpNumpyArray()
 
         // Get length of fields
         Py_ssize_t count = PyDict_Size(m_dtype->fields);
-        std::cerr << "count: " << count << std::endl;
         m_numFields = count;
     }
     else if (m_ndims == 2)
