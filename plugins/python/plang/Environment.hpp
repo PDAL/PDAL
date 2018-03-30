@@ -56,10 +56,10 @@ namespace pdal
 namespace plang
 {
 
-PyObject *fromMetadata(MetadataNode m);
-void addMetadata(PyObject *list, MetadataNode m);
+PDAL_DLL PyObject *fromMetadata(MetadataNode m);
+PDAL_DLL void addMetadata(PyObject *list, MetadataNode m);
 
-std::string getTraceback();
+PDAL_DLL std::string getTraceback();
 
 class Environment;
 typedef Environment *EnvironmentPtr;
