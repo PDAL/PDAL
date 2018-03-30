@@ -102,6 +102,11 @@ private:
     int m_ndims;
     std::string m_defaultDimension;
 
+    size_t m_xDimNum;
+    size_t m_yDimNum;
+    size_t m_zDimNum;
+    double m_assignZ;
+
     std::vector<pdal::Dimension::Id> m_ids;
     std::vector<pdal::Dimension::Type> m_types;
     std::vector<int> m_sizes;

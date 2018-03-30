@@ -210,6 +210,23 @@ void NumpyReader::addArgs(ProgramArgs& args)
              "Dimension name to map raster dimension values to ",
              m_defaultDimension,
              "Intensity");
+    args.add<size_t>("x",
+                     "Dimension number to map to X",
+                     m_xDimNum,
+                     0);
+    args.add<size_t>("y",
+                     "Dimension number to map to Y",
+                     m_yDimNum,
+                     1);
+    args.add<size_t>("z",
+                     "Dimension number to map to Z",
+                     m_zDimNum,
+                     2);
+    args.add<double>("assign_z",
+                     "Assign Z dimension to a single given value",
+                     m_assignZ,
+                     0.0);
+
 }
 
 void NumpyReader::prepareFieldsArray(PointLayoutPtr layout)
@@ -296,6 +313,9 @@ void NumpyReader::prepareRasterArray(PointLayoutPtr layout)
 {
     layout->registerDim(pdal::Dimension::Id::X, pdal::Dimension::Type::Signed32);
     layout->registerDim(pdal::Dimension::Id::Y, pdal::Dimension::Type::Signed32);
+
+    if (m_assignZ != 0.0f)
+        layout->registerDim(pdal::Dimension::Id::Z, pdal::Dimension::Type::Signed32);
     pdal::Dimension::Id id = layout->registerOrAssignDim(m_defaultDimension, m_types[0]);
 
     m_ids.push_back(id);
@@ -367,10 +387,14 @@ bool NumpyReader::loadPoint(PointRef& point, point_count_t position )
     } else if (m_ndims == 2)
     {
         // Figure out X, Y position based on how we are iterating
-        double i = position;
-        double x = std::fmod(position, (m_shape[0] +1));
-        position = position / (m_shape[1] + 1);
-        double y = std::fmod(i, (m_shape[1] + 1));
+        // stolen from https://stackoverflow.com/a/10904309
+        double i = (double) position;
+        double x = std::fmod(i, ((double)m_shape[m_xDimNum] + 1));
+        i = i / ((double) m_shape[0] );
+        double y = std::fmod(i, ((double)m_shape[m_yDimNum] + 1));
+        if (m_assignZ != 0.0f)
+            point.setField(pdal::Dimension::Id::Z, m_assignZ);
+
 
         point.setField(pdal::Dimension::Id::X, x);
         point.setField(pdal::Dimension::Id::Y, y);
