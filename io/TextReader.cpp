@@ -90,7 +90,6 @@ QuickInfo TextReader::inspect()
 
 void TextReader::checkHeader(const std::string& header)
 {
-    std::cerr << "Header = " << header << "!\n";
     auto it = std::find_if(header.begin(), header.end(),
         [](char c){ return std::isalpha(c); });
     if (it == header.end())
