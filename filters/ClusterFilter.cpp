@@ -44,7 +44,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.cluster",
-    "Label clusters",
+    "Extract and label clusters using Euclidean distance.",
     "http://pdal.io/stages/filters.cluster.html"
 };
 

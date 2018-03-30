@@ -49,7 +49,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.eigenvalues",
-    "Eigenvalues Filter",
+    "Returns the eigenvalues for a given point, based on its k-nearest neighbors.",
     "http://pdal.io/stages/filters.eigenvalues.html"
 };
 
