@@ -23,6 +23,9 @@ REM needed or else CMake won't find the Oracle library that OSGeo4W installs
 
 SET ORACLE_HOME="C:/OSGEO4W64/"
 
+mkdir build
+pushd build
+
 cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=%PDAL_OPTIONAL_COMPONENTS% ^
@@ -62,4 +65,6 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_OCI_TESTS=OFF ^
     ..
 
+popd
 
+echo "Exiting config"
