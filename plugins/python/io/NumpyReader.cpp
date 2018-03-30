@@ -58,7 +58,7 @@ std::string NumpyReader::getName() const { return s_info.name; }
 PyArrayObject* load_npy(std::string const& filename)
 {
 
-    PyObject* py_filename =  PyString_FromString(filename.c_str());
+    PyObject* py_filename =  PyUnicode_FromString(filename.c_str());
     PyObject* numpy_module = PyImport_ImportModule("numpy");
     if (!numpy_module)
         throw pdal::pdal_error(plang::getTraceback());
