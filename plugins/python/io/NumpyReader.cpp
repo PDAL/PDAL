@@ -242,7 +242,13 @@ void NumpyReader::prepareFieldsArray(PointLayoutPtr layout)
         PyObject* pname = PyList_GetItem(names, i);
         if (!pname)
             throw pdal::pdal_error(plang::getTraceback());
-        const char* cname = PyString_AsString(pname);
+
+        const char* cname(0);
+#if PY_MAJOR_VERSION >= 3
+        cname = PyBytes_AsString(PyUnicode_AsUTF8String(pname));
+#else
+        cname = PyString_AsString(pname);
+#endif
         std::string name(cname);
 
         PyObject* tup = PyList_GetItem(values, i);
@@ -257,7 +263,7 @@ void NumpyReader::prepareFieldsArray(PointLayoutPtr layout)
         if (!offset_o)
             throw pdal::pdal_error(plang::getTraceback());
 
-        long offset = PyInt_AsLong(offset_o);
+        long offset = PyLong_AsLong(offset_o);
 
         PyArray_Descr* dtype = (PyArray_Descr*)dt;
 
