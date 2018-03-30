@@ -57,12 +57,11 @@ public:
 
 };
 
-TEST_F(NumpyReaderTest, NumpyReaderTest_read)
+TEST_F(NumpyReaderTest, NumpyReaderTest_read_fields)
 {
     StageFactory f;
 
     Options ops;
-//         Support::temppath("mylog_three.txt"),
     ops.add("filename", Support::datapath("plang/1.2-with-color.npy"));
 
     NumpyReader reader;
@@ -71,11 +70,40 @@ TEST_F(NumpyReaderTest, NumpyReaderTest_read)
     PointTable table;
 
     reader.prepare(table);
-    reader.log()->setLevel(LogLevel::Debug1);
     PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065u);
+    EXPECT_EQ(view->layout()->pointSize(), 34u);
+
+    EXPECT_EQ(view->getFieldAs<int16_t>(pdal::Dimension::Id::Intensity,800), 49);
+    EXPECT_EQ(view->getFieldAs<int32_t>(pdal::Dimension::Id::X,400), 63679039);
+
+}
+
+
+TEST_F(NumpyReaderTest, NumpyReaderTest_read_array)
+{
+    StageFactory f;
+
+    Options ops;
+    ops.add("filename", Support::datapath("plang/perlin.npy"));
+
+    NumpyReader reader;
+    reader.setOptions(ops);
+
+    PointTable table;
+
+    reader.prepare(table);
+
+//     reader.log()->setLevel(LogLevel::Debug1);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 10000u);
+    EXPECT_EQ(view->layout()->pointSize(), 16u);
+
+    EXPECT_EQ(view->getFieldAs<double>(pdal::Dimension::Id::Intensity,5000), 0.5);
+    EXPECT_EQ(view->getFieldAs<uint32_t>(pdal::Dimension::Id::X,5000), 51u);
 
 }
 
