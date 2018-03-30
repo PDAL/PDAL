@@ -60,6 +60,6 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_SQLITE_TESTS=OFF ^
     -DCMAKE_BUILD_TYPE=RelWithDebInfo ^
     -DBUILD_OCI_TESTS=OFF ^
-    .
+    ..
 
 
