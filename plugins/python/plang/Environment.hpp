@@ -48,8 +48,13 @@ typedef _object PyObject;
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
+
+
 #include "Redirector.hpp"
 #include "Script.hpp"
+
 
 namespace pdal
 {
