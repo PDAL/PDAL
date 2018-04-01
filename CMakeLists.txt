@@ -85,7 +85,6 @@ if(WIN32)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
   # ---[ Windows requires DLLs (shared libraries) to be installed in
   # ---[ the same directory as executables
-  message("*** CONFIG RUNTIME OUTPUT = ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE}} ***")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
 endif(WIN32)
 
