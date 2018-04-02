@@ -12,6 +12,15 @@ target_include_directories(${numpy_reader} PRIVATE
 target_link_libraries(${numpy_reader} PUBLIC
     ${PYTHON_LIBRARY})
 
+# Install headers so Python extension
+# can use them later
+
+install(DIRECTORY .
+    DESTINATION  include/pdal/io
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "CMakeFiles" EXCLUDE
+)
+
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_numpy_test
         FILES
