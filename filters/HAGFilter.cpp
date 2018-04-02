@@ -45,7 +45,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.hag",
-    "HAG Filter",
+    "Computes height above ground using ground-classified returns.",
     "http://pdal.io/stages/filters.hag.html"
 };
 

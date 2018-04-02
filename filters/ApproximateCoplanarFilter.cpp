@@ -49,7 +49,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.approximatecoplanar",
-    "ApproximateCoplanar Filter",
+    "Estimates the planarity of a neighborhood of points using eigenvalues.",
     "http://pdal.io/stages/filters.approximatecoplanar.html"
 };
 
