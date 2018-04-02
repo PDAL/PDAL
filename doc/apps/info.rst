@@ -13,6 +13,8 @@ Displays information about a point cloud file, such as:
 * the plain text format should be reStructured text if possible to allow a user
   to retransform the output into whatever they want with ease
 
+Processing is performed with stream mode if possible.
+
 ::
 
     $ pdal info <input>
@@ -27,6 +29,7 @@ Displays information about a point cloud file, such as:
   --stats                   Dump stats on all points (reads entire dataset)
   --boundary                Compute a hexagonal hull/boundary of dataset
   --dimensions              Dimensions on which to compute statistics
+  --enumerate               Dimensions whose values should be enumerated
   --schema                  Dump the schema
   --pipeline-serialization  Output filename for pipeline serialization
   --summary                 Dump summary of the info

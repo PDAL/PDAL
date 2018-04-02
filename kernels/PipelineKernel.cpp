@@ -91,7 +91,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
     args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
-    args.add("stream", "Attempt to run pipeline in streaming mode.", m_stream);
+    args.add("stream", "This option is obsolete.", m_stream);
     args.add("metadata", "Metadata filename", m_metadataFile);
 }
 
@@ -132,7 +132,7 @@ int PipelineKernel::execute()
     }
 
     m_manager.readPipeline(m_inputFile);
-    if (m_stream)
+    if (m_manager.pipelineStreamable())
     {
         FixedPointTable table(10000);
         m_manager.executeStream(table);
