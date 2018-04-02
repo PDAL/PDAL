@@ -345,6 +345,39 @@ int Environment::getPythonDataType(Dimension::Type t)
 }
 
 
+Dimension::Type Environment::getPDALDataType(int t)
+{
+    using namespace Dimension;
+
+    switch (t)
+    {
+    case NPY_FLOAT:
+        return Type::Float;
+    case NPY_DOUBLE:
+        return Type::Double;
+    case NPY_BYTE:
+        return Type::Signed8;
+    case NPY_SHORT:
+        return Type::Signed16;
+    case NPY_INT:
+        return Type::Signed32;
+    case NPY_LONGLONG:
+        return Type::Signed64;
+    case NPY_UBYTE:
+        return Type::Unsigned8;
+    case NPY_USHORT:
+        return Type::Unsigned16;
+    case NPY_UINT:
+        return Type::Unsigned32;
+    case NPY_ULONGLONG:
+        return Type::Unsigned64;
+    default:
+        return Type::None;
+    }
+    assert(0);
+
+    return Type::None;
+}
 
 } // namespace plang
 } // namespace pdal
