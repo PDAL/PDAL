@@ -6,7 +6,7 @@ translate
 
 The ``translate`` command can be used for simple conversion of files based on
 their file extensions. It can also be used for constructing pipelines directly
-from the command-line.
+from the command-line.  Processing is done with stream mode if possible.
 
 ::
 

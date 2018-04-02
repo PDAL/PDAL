@@ -23,8 +23,6 @@ Some warts about the current implementation:
 * We require specification of a max level, whereas the original paper
   automatically determined an appropriate max level.
 
-.. [Mongus2012] Mongus, D., Zalik, B., 2012. Parameter-free ground filtering of LiDAR data for automatic DTM generation. ISPRS J. Photogramm. Remote Sens. 67, 1–12.
-
 .. embed::
 
 Example
