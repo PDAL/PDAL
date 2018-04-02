@@ -1,26 +1,24 @@
 
-PDAL_ADD_PLUGIN(python_libname reader numpy
+PDAL_ADD_PLUGIN(numpy_reader reader numpy
     FILES
         NumpyReader.cpp
         ../plang/Environment.cpp
         ../plang/Redirector.cpp
     )
 
-target_include_directories(${python_libname} PRIVATE
+target_include_directories(${numpy_reader} PRIVATE
     ${PYTHON_INCLUDE_DIR})
 
-target_link_libraries(${python_libname} PUBLIC
+target_link_libraries(${numpy_reader} PUBLIC
     ${PYTHON_LIBRARY})
 
 if (WITH_TESTS)
-
     PDAL_ADD_TEST(pdal_io_numpy_test
         FILES
             ../test/NumpyReaderTest.cpp
             ../plang/Environment.cpp
             ../plang/Redirector.cpp
-        LINK_WITH ${python_libname} )
+        LINK_WITH ${numpy_reader} )
     target_link_libraries(pdal_io_numpy_test PUBLIC
         ${PYTHON_LIBRARY})
-
 endif()

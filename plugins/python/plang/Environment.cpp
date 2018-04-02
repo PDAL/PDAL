@@ -351,25 +351,25 @@ Dimension::Type Environment::getPDALDataType(int t)
 
     switch (t)
     {
-    case NPY_FLOAT:
+    case NPY_FLOAT32:
         return Type::Float;
-    case NPY_DOUBLE:
+    case NPY_FLOAT64:
         return Type::Double;
-    case NPY_BYTE:
+    case NPY_INT8:
         return Type::Signed8;
-    case NPY_SHORT:
+    case NPY_INT16:
         return Type::Signed16;
-    case NPY_INT:
+    case NPY_INT32:
         return Type::Signed32;
-    case NPY_LONGLONG:
+    case NPY_INT64:
         return Type::Signed64;
-    case NPY_UBYTE:
+    case NPY_UINT8:
         return Type::Unsigned8;
-    case NPY_USHORT:
+    case NPY_UINT16:
         return Type::Unsigned16;
-    case NPY_UINT:
+    case NPY_UINT32:
         return Type::Unsigned32;
-    case NPY_ULONGLONG:
+    case NPY_UINT64:
         return Type::Unsigned64;
     default:
         return Type::None;
