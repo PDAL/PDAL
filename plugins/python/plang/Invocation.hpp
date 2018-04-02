@@ -42,7 +42,6 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/PointView.hpp>
 
-
 namespace pdal
 {
 namespace plang
