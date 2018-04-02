@@ -34,16 +34,6 @@
 
 #pragma once
 
-
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-/**
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-**/
 #include <Python.h>
 #undef toupper
 #undef tolower
