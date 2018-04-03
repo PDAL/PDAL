@@ -39,6 +39,6 @@
 namespace pdal
 {
 
-PDAL_DLL Dimension::IdList fileDimensions();
+PDAL_DLL Dimension::IdList pcdDimensions();
 
 } // namespace pdal
