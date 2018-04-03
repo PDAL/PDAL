@@ -37,7 +37,7 @@
 namespace pdal
 {
 
-Dimension::IdList fileDimensions()
+Dimension::IdList pcdDimensions()
 {
     Dimension::IdList ids;
 
