@@ -70,6 +70,7 @@ R"PDALEXTENSIONS(
     "readers.icebridge" : "icebridge h5",
     "readers.matlab" : "mat",
     "writers.matlab" : "mat",
+    "readers.numpy" : "npy",
     "readers.nitf" : "nitf, nsf, ntf",
     "writers.nitf" : "nitf, nsf, ntf",
     "readers.pcd" : "pcd",
