@@ -28,6 +28,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.mbio
    readers.mrsid
    readers.nitf
+   readers.numpy
    readers.oci
    readers.optech
    readers.pcd
@@ -84,6 +85,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.nitf`
     Read point cloud data (LAS or LAZ) wrapped in NITF 2.1 files.
+
+:ref:`readers.numpy`
+    Read point cloud data from Numpy ``.npy`` files.
 
 :ref:`readers.oci`
     Read data from Oracle point cloud databases.
