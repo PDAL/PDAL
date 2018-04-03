@@ -350,6 +350,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         log->setLevel(m_logLevel);
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
+    log->get(LogLevel::Debug) << "Debugging..." << std::endl;
     PluginManager<Stage>::setLog(log);
     PluginManager<Kernel>::setLog(log);
 #ifndef _WIN32

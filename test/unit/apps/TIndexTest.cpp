@@ -106,6 +106,8 @@ TEST(TIndex, test2)
 // Indentical to test1, but filespec input comes from find command.
 TEST(TIndex, test3)
 {
+// No find on Windows.
+#ifndef WIN32
     std::string outSpec(Support::temppath("tindex.out"));
     std::string outPoints(Support::temppath("points.txt"));
 
@@ -142,5 +144,6 @@ TEST(TIndex, test3)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Merge filecount: 1");
     EXPECT_NE(pos, std::string::npos);
+#endif
 }
 
