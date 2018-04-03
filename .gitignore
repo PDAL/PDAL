@@ -50,6 +50,13 @@ ipch/
 *.suo
 *.opensdf
 *.sln.docstates
+*.ilk
+*.exe
+*.lib
+*.pdb
+*.exp
+*.dll
+*.manifest
 
 #
 # intellij, clion

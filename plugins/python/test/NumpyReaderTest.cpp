@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,54 +32,67 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <Python.h>
-#undef toupper
-#undef tolower
-#undef isspace
+#include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
+#include <filters/StatsFilter.hpp>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Metadata.hpp>
-#include <pdal/Dimension.hpp>
+#include "../io/NumpyReader.hpp"
 
-#include "Redirector.hpp"
-#include "Script.hpp"
+#include <pdal/StageWrapper.hpp>
 
-namespace pdal
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(NumpyReaderTest, NumpyReaderTest_read_fields)
 {
-namespace plang
+    StageFactory f;
+
+    Options ops;
+    ops.add("filename", Support::datapath("plang/1.2-with-color.npy"));
+
+    NumpyReader reader;
+    reader.setOptions(ops);
+
+    PointTable table;
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065u);
+    EXPECT_EQ(view->layout()->pointSize(), 34u);
+
+    EXPECT_EQ(view->getFieldAs<int16_t>(pdal::Dimension::Id::Intensity,800),
+        49);
+    EXPECT_EQ(view->getFieldAs<int32_t>(pdal::Dimension::Id::X,400), 63679039);
+
+}
+
+
+TEST(NumpyReaderTest, NumpyReaderTest_read_array)
 {
+    StageFactory f;
 
-PDAL_DLL PyObject *fromMetadata(MetadataNode m);
-PDAL_DLL void addMetadata(PyObject *list, MetadataNode m);
+    Options ops;
+    ops.add("filename", Support::datapath("plang/perlin.npy"));
 
-PDAL_DLL std::string getTraceback();
+    NumpyReader reader;
+    reader.setOptions(ops);
 
-class Environment;
-typedef Environment *EnvironmentPtr;
+    PointTable table;
 
-class PDAL_DLL Environment
-{
-public:
-    Environment();
-    ~Environment();
+    reader.prepare(table);
 
-    // these just forward into the Redirector class
-    void set_stdout(std::ostream* ostr);
-    void reset_stdout();
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 10000u);
+    EXPECT_EQ(view->layout()->pointSize(), 16u);
 
-    void execute(Script& script) {};
-
-    static EnvironmentPtr get();
-
-    static int getPythonDataType(Dimension::Type t);
-    static pdal::Dimension::Type getPDALDataType(int t);
-
-private:
-    Redirector m_redirector;
-};
-
-} // namespace plang
-} // namespace pdal
+    EXPECT_EQ(view->getFieldAs<double>(pdal::Dimension::Id::Intensity,5000),
+        0.5);
+    EXPECT_EQ(view->getFieldAs<uint32_t>(pdal::Dimension::Id::X,5000), 51u);
+}
 
