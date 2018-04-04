@@ -63,6 +63,7 @@ private:
     int m_progressFd;
     bool m_usestdin;
     bool m_stream;
+    bool m_noStream;
 };
 
 } // pdal
