@@ -102,11 +102,21 @@ TEST(PluginManagerTest, SearchPaths)
     EXPECT_TRUE(Utils::contains(paths, "../bin"));
     EXPECT_TRUE(Utils::contains(paths, Config::pluginInstallPath()));
 
+#ifdef _WIN32
+    Utils::setenv("PDAL_DRIVER_PATH", "C:\foo\bar;D:\baz");
+#else
     Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
+#endif
     paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_EQ(paths.size(), 2U);
+
+#ifdef _WIN32
+    EXPECT_TRUE(Utils::contains(paths, "C:\foo\bar"));
+    EXPECT_TRUE(Utils::contains(paths, "D:\baz"));
+#else
     EXPECT_TRUE(Utils::contains(paths, "/foo/bar"));
     EXPECT_TRUE(Utils::contains(paths, "//baz"));
+#endif
     Utils::setenv("PDAL_DRIVER_PATH", "/this/is/a/path");
     paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_EQ(paths.size(), 1U);
