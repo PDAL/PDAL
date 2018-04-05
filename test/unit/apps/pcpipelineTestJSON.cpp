@@ -63,8 +63,8 @@ void run_pipeline(std::string const& pipelineFile,
 
     std::string output;
     std::string file(Support::configuredpath(pipelineFile));
-    int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " + options,
-        output);
+    int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " +
+        options + " 2>&1", output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
@@ -192,6 +192,10 @@ TEST(json, pipeline_verify)
         "Unable to parse");
     run_pipeline("pipeline/invalid2.json", "--validate",
         "Unexpected argument");
+    run_pipeline("pipeline/streamable.json", "-v Debug",
+        "stream mode");
+    run_pipeline("pipeline/streamable.json", "-v Debug --nostream",
+        "standard mode");
 }
 
 
