@@ -88,6 +88,8 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
         m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
+    args.add("nostream", "Don't run in stream mode, even if technically "
+        "possible.", m_noStream);
 }
 
 
@@ -207,13 +209,17 @@ int TranslateKernel::execute()
             m_pipelineOutputFile);
         return 0;
     }
-    if (m_manager.pipelineStreamable())
+
+    if (m_noStream || !m_manager.pipelineStreamable())
+    {
+        m_manager.execute();
+    }
+    else
     {
         FixedPointTable t(10000);
         m_manager.executeStream(t);
     }
-    else
-        m_manager.execute();
+
     if (metaOut)
     {
         MetadataNode m = m_manager.getMetadata();

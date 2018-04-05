@@ -163,6 +163,8 @@ PointViewSet Stage::execute(PointTableRef table)
     // If the inputs are empty, we're a reader.
     if (m_inputs.empty())
     {
+        m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
+            std::endl;
         views.insert(PointViewPtr(new PointView(table)));
     }
     else
