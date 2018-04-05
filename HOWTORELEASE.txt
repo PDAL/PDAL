@@ -28,6 +28,8 @@ Release Process
 
   - doc/quickstart.rst has a number of current-release references
 
+  - doc/download.rst point to new release
+
   - Make and push new release branch
 
     ::
