@@ -87,6 +87,7 @@ private:
     std::string m_showOptions;
     bool m_showJSON;
     std::string m_log;
+    bool m_logtiming;
 };
 
 
@@ -280,6 +281,7 @@ void App::addArgs(ProgramArgs& args)
         m_showOptions);
     args.add("log", "Log filename (accepts stderr, stdout, stdlog, devnull"
         " as special cases)", m_log, "stderr");
+    args.add("logtiming", "Turn on timing for log messages", m_logtiming);
     Arg& json = args.add("showjson", "List options or drivers as JSON output",
         m_showJSON);
     json.setHidden();
@@ -345,11 +347,12 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         return -1;
     }
 
-    log.reset(new Log("PDAL", m_log));
+    log.reset(new Log("PDAL", m_log, m_logtiming));
     if (m_logLevel != LogLevel::None)
         log->setLevel(m_logLevel);
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
+    log->get(LogLevel::Debug) << "Debugging..." << std::endl;
     PluginManager<Stage>::setLog(log);
     PluginManager<Kernel>::setLog(log);
 #ifndef _WIN32

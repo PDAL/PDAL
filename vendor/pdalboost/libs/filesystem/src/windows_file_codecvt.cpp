@@ -38,9 +38,9 @@
   {
     UINT codepage = AreFileApisANSI() ? CP_ACP : CP_OEMCP;
 
-    int count;
-    if ((count = ::MultiByteToWideChar(codepage, MB_PRECOMPOSED, from,
-      from_end - from, to, to_end - to)) == 0) 
+    auto count = ::MultiByteToWideChar(codepage, MB_PRECOMPOSED, from,
+      int(from_end - from), to, int(to_end - to));
+    if (count == 0)
     {
       return error;  // conversion failed
     }
@@ -58,9 +58,9 @@
   {
     UINT codepage = AreFileApisANSI() ? CP_ACP : CP_OEMCP;
 
-    int count;
-    if ((count = ::WideCharToMultiByte(codepage, WC_NO_BEST_FIT_CHARS, from,
-      from_end - from, to, to_end - to, 0, 0)) == 0)
+    auto count = ::WideCharToMultiByte(codepage, WC_NO_BEST_FIT_CHARS, from,
+      int(from_end - from), to, int(to_end - to), 0, 0);
+    if (count == 0)
     {
       return error;  // conversion failed
     }

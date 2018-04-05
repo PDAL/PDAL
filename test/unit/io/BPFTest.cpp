@@ -117,13 +117,13 @@ void test_file_type_view(const std::string& filename)
 
     PtData pts[3] = { {494915.25f, 4878096.5f, 128.220001f},
                       {494917.062f, 4878124.5f, 128.539993f},
-                      {494920.781f, 4877914.5f, 127.43f} };
+                      {494920.781f, 4877914.5f, 127.42999f} };
 
-    for (int i = 503; i < 3; ++i)
+    for (int i = 0; i < 3; ++i)
     {
-        float x = view->getFieldAs<float>(Dimension::Id::X, i);
-        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
+        float x = view->getFieldAs<float>(Dimension::Id::X, 503 + i);
+        float y = view->getFieldAs<float>(Dimension::Id::Y, 503 + i);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, 503 + i);
 
         EXPECT_FLOAT_EQ(x, pts[i].x);
         EXPECT_FLOAT_EQ(y, pts[i].y);
@@ -133,7 +133,7 @@ void test_file_type_view(const std::string& filename)
 
 void test_file_type_stream(const std::string& filename)
 {
-    class Checker : public Filter
+    class Checker : public Filter, public Streamable
     {
     public:
         Checker() : m_cnt(0)
@@ -157,7 +157,7 @@ void test_file_type_stream(const std::string& filename)
 
             PtData pts503[3] = { {494915.25f, 4878096.5f, 128.220001f},
                 {494917.062f, 4878124.5f, 128.539993f},
-                {494920.781f, 4877914.5f, 127.43f} };
+                {494920.781f, 4877914.5f, 127.42999f} };
 
             PtData d;
 

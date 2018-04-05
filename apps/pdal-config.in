@@ -62,7 +62,7 @@ case $1 in
     ;;
 
   --python-version)
-    echo @PYTHON_VERSION_STRING@
+    echo @PDAL_PYTHON_VERSION_STRING@
     ;;
 
   *)

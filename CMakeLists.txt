@@ -67,7 +67,11 @@ set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_INSTALL_DIR}")
 
 # allow override of PDAL_PLUGIN_INSTALL_PATH path
 if (NOT PDAL_PLUGIN_INSTALL_PATH)
-    set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+    if (WIN32)
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}")
+    else()
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+    endif()
 endif()
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
@@ -81,19 +85,20 @@ set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
 
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
-  foreach(config ${CMAKE_CONFIGURATION_TYPES})
-    string(TOUPPER ${config} CONFIG)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_LIB_DIR}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
-    # ---[ Windows requires DLLs (shared libraries) to be installed in
-    # ---[ the same directory as executables
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
-  endforeach(config)
-else(WIN32)
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_LIB_DIR}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
+  # ---[ Windows requires DLLs (shared libraries) to be installed in
+  # ---[ the same directory as executables
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
 endif(WIN32)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+if(WIN32)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+else()
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+endif()
 
 # Choose package components
 
@@ -114,7 +119,6 @@ include(${PDAL_CMAKE_DIR}/geos.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/pdaljni.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/lzma.cmake)
