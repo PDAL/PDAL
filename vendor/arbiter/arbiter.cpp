@@ -4479,7 +4479,7 @@ Time::Time(const std::string& s, const std::string& format)
 {
     static const int64_t utcOffset(utcOffsetSeconds());
 
-    std::tm tm {};
+    std::tm tm;
 #ifndef ARBITER_WINDOWS
     // We'd prefer to use get_time, but it has poor compiler support.
     if (!strptime(s.c_str(), format.c_str(), &tm))
