@@ -57,7 +57,7 @@ public:
       Streaming points can reduce memory consumption, but may limit access
       to algorithms that need to operate on full point sets.
 
-      \param table  Streming point table used for stage pipeline.  This must be
+      \param table  Streaming point table used for stage pipeline.  This must be
         the same \ref table used in the \ref prepare function.
 
     */
