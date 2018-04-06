@@ -51,7 +51,7 @@ build_script:
 test_script:
   - call scripts\\appveyor\\test.cmd
 
-after_build:
+deploy_script:
   - call scripts\\appveyor\\install.cmd
 
 artifacts:
