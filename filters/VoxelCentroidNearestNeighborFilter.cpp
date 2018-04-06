@@ -83,9 +83,9 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
         double y = view->getFieldAs<double>(Dimension::Id::Y, id);
         double x = view->getFieldAs<double>(Dimension::Id::X, id);
         double z = view->getFieldAs<double>(Dimension::Id::Z, id);
-        size_t r = static_cast<size_t>(floor(y - bounds.miny) / m_cell);
-        size_t c = static_cast<size_t>(floor(x - bounds.minx) / m_cell);
-        size_t d = static_cast<size_t>(floor(z - bounds.minz) / m_cell);
+        size_t r = static_cast<size_t>((y - bounds.miny) / m_cell);
+        size_t c = static_cast<size_t>((x - bounds.minx) / m_cell);
+        size_t d = static_cast<size_t>((z - bounds.minz) / m_cell);
         populated_voxel_ids[std::make_tuple(r, c, d)].push_back(id);
     }
 
