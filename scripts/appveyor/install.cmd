@@ -1,11 +1,10 @@
 @echo off
 
-if NOT "%OSGEO4W_BUILD%" == "ON"
-(
+
+if NOT "%OSGEO4W_BUILD%"=="ON"(
     REM only bother with this for OSGEO4W_BUILD situation
     exit /b 0
 )
-
 
 
 call %OSGEO4W_ROOT%\bin\o4w_env.bat
