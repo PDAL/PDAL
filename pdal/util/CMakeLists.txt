@@ -27,7 +27,7 @@ target_include_directories(${PDAL_UTIL_LIB_NAME} PRIVATE
 
 if (UNIX AND NOT APPLE)
     target_link_libraries(${PDAL_UTIL_LIB_NAME}
-        PRIVATE
+        PUBLIC
             dl
     )
 endif()
