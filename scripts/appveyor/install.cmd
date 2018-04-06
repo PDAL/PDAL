@@ -1,8 +1,9 @@
 @echo off
 
 
-if NOT "%OSGEO4W_BUILD%"=="ON"(
+if "%OSGEO4W_BUILD%" NEQ "ON" (
     REM only bother with this for OSGEO4W_BUILD situation
+    echo "Not building OSGeo4W package"
     exit /b 0
 )
 
