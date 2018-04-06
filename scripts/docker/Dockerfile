@@ -99,6 +99,7 @@ RUN \
     rm -rf /laszip; \
     git clone https://github.com/PDAL/PDAL.git /pdal; \
     cd /pdal; \
+    git checkout 1.7-maintenance; \
     mkdir -p _build; \
     cd _build; \
     cmake .. \
