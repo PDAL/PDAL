@@ -51,7 +51,10 @@ build_script:
 test_script:
   - call scripts\\appveyor\\test.cmd
 
-before_deploy:
+# We need to install so the artifacts are ready
+# for deployment for the OSGeo4W build for all
+# other build types, no artifact is made
+after_test:
   - call scripts\\appveyor\\install.cmd
 
 artifacts:
