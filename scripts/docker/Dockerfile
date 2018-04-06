@@ -8,7 +8,6 @@ RUN \
         alpine-sdk \
         unzip \
         cmake \
-        eigen-dev@edgecommunity \
         hexer-dev \
         nitro-dev \
         gdal-dev \
@@ -36,6 +35,7 @@ RUN \
         zlib-dev \
     ; \
     apk add --no-cache \
+        eigen-dev@edgecommunity \
         hexer \
         nitro \
         gdal \
