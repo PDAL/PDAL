@@ -4,6 +4,9 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
         NumpyReader.cpp
         ../plang/Environment.cpp
         ../plang/Redirector.cpp
+    LINK_WITH
+        ${PYTHON_LIBRARY}
+        ${CMAKE_DL_LIBS}
     )
 
 target_include_directories(${numpy_reader} PRIVATE
@@ -25,9 +28,6 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_numpy_test
         FILES
             ../test/NumpyReaderTest.cpp
-            ../plang/Environment.cpp
-            ../plang/Redirector.cpp
-        LINK_WITH ${numpy_reader} )
-    target_link_libraries(pdal_io_numpy_test PUBLIC
-        ${PYTHON_LIBRARY})
+        LINK_WITH
+            ${numpy_reader})
 endif()
