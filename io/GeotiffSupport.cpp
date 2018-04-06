@@ -123,6 +123,9 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     }
 
     ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
+    if (!ctx.gtiff)
+        throw Geotiff::error("Couldn't create Geotiff tags from "
+            "Geotiff definition.");
 
     GTIFDefn sGTIFDefn;
     if (GTIFGetDefn(ctx.gtiff, &sGTIFDefn))
@@ -144,7 +147,7 @@ GeotiffTags::GeotiffTags(const SpatialReference& srs)
 
     // Set tiff tags from WKT
     if (!GTIFSetFromOGISDefn(ctx.gtiff, srs.getWKT().c_str()))
-        throw error("Could not set m_gtiff from WKT");
+        throw Geotiff::error("Could not set m_gtiff from WKT");
     GTIFWriteKeys(ctx.gtiff);
 
     auto sizeFromType = [](int type, int count) -> size_t

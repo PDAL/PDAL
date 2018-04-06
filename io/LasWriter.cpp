@@ -495,7 +495,7 @@ void LasWriter::addGeotiffVlrs()
         addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
                 "GeoTiff GeoAsciiParamsTag", tags.asciiData());
     }
-    catch (GeotiffTags::error& err)
+    catch (Geotiff::error& err)
     {
         throwError(err.what());
     }
