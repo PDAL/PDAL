@@ -1,5 +1,13 @@
 @echo off
 
+if NOT "%OSGEO4W_BUILD%" == "ON"
+(
+    REM only bother with this for OSGEO4W_BUILD situation
+    exit /b 0
+)
+
+
+
 call %OSGEO4W_ROOT%\bin\o4w_env.bat
 call %OSGEO4W_ROOT%\bin\py3_env.bat
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
