@@ -80,10 +80,13 @@ void MbReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
 
-    std::vector<Dimension::Id> dims { Id::X, Id::Y, Id::Z, Id::Amplitude };
+    std::vector<Dimension::Id> dims { Id::X, Id::Y, Id::Z };
 
     layout->registerDims(dims);
-    layout->registerDim(Id::Intensity, Type::Double);
+    if (m_dataType == DataType::Multibeam)
+        layout->registerDim(Id::Amplitude);
+    else
+        layout->registerDim(Id::Intensity, Type::Double);
 }
 
 
