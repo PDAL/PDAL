@@ -129,7 +129,8 @@ reduces memory requirements.
 When using :ref:`pdal translate<translate_command>` or
 :ref:`pdal pipeline<pipeline_command>`
 PDAL uses stream mode if possible.  If stream mode can't use used
-the applications fall back to standard mode processing.
+the applications fall back to standard mode processing.  Users can explicitly
+choose to use standard mode by using the ``--nostream`` option.
 
 Users of the PDAL API can explicitly control the selection of the PDAL
 processing mode.
