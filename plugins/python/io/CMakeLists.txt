@@ -12,9 +12,6 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
 target_include_directories(${numpy_reader} PRIVATE
     ${PYTHON_INCLUDE_DIR})
 
-target_link_libraries(${numpy_reader} PUBLIC
-    ${PYTHON_LIBRARY})
-
 # Install headers so Python extension
 # can use them later
 
