@@ -55,10 +55,8 @@ std::string DelaunayFilter::getName() const
 
 PointViewSet DelaunayFilter::run(PointViewPtr pointView)
 {
-    std::cout << "Point view size is " << pointView->size() << "." << std::endl;
-    
     // Returns NULL if the mesh already exists
-    TriangularMesh *mesh = pointView->createMesh("delaunay");
+    TriangularMesh *mesh = pointView->createMesh("delaunay2d");
     
     if (mesh != NULL)
     {
@@ -76,13 +74,15 @@ PointViewSet DelaunayFilter::run(PointViewPtr pointView)
         GEO::initialize();
         
         GEO::index_t numDimensions = 2;
+        
+        // Pick the 2D Delaunay algorithm
         GEO::Delaunay_var triangulation = GEO::Delaunay::create(GEO::coord_index_t(numDimensions), "BDEL2d");
         GEO::index_t numPoints = delaunayPoints.size() / numDimensions;
+        
+        // Actually perform the triangulation
         triangulation->set_vertices(numPoints, delaunayPoints.data());
         
         
-        std::cout << triangulation->nb_vertices() << " vertices in triangulation." << std::endl;
-        std::cout << triangulation->nb_cells() << " cells in triangulation." << std::endl;
         for (GEO::index_t i = 0; i < triangulation->nb_cells(); i++)
         {
             GEO::index_t v_0 = triangulation->cell_vertex(i, 0);
