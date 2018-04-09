@@ -53,15 +53,21 @@ TEST(PdalApp, log)
     std::string output;
 
     Utils::run_shell_command(appName() + " -v Debug 2>&1", output);
-    EXPECT_TRUE(output.find("PDAL Debug") != std::string::npos);
+    EXPECT_TRUE(output.find("PDAL Debug)") != std::string::npos);
 
     output.clear();
     Utils::run_shell_command(appName() + " --verbose=3 2>&1", output);
-    EXPECT_TRUE(output.find("PDAL Debug") != std::string::npos);
+    EXPECT_TRUE(output.find("PDAL Debug)") != std::string::npos);
 
     output.clear();
     Utils::run_shell_command(appName() + " 2>&1", output);
-    EXPECT_TRUE(output.find("PDAL Debug") == std::string::npos);
+    EXPECT_TRUE(output.find("PDAL Debug)") == std::string::npos);
+
+    output.clear();
+    // With logtiming there should be a time after "Debug" and before the
+    // closing paren.
+    Utils::run_shell_command(appName() + " --logtiming 2>&1", output);
+    EXPECT_TRUE(output.find("PDAL Debug)") == std::string::npos);
 }
 
 TEST(PdalApp, option_file)

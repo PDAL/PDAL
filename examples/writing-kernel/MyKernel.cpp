@@ -13,13 +13,14 @@
 
 namespace pdal {
 
-  static PluginInfo const s_info {
+  static PluginInfo const s_info
+  {
     "kernels.mykernel",
     "MyKernel",
     "http://link/to/documentation"
   };
 
-  CREATE_SHARED_PLUGIN(1, 0, MyKernel, Kernel, s_info);
+  CREATE_SHARED_KERNEL(MyKernel, s_info);
   std::string MyKernel::getName() const { return s_info.name; }
 
   MyKernel::MyKernel() : Kernel()

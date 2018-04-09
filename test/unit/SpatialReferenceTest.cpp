@@ -48,18 +48,6 @@
 
 using namespace pdal;
 
-TEST(SpatialReferenceTest, test_env_vars)
-{
-
-#ifdef _MSC_VER
-    const char* gdal_data = getenv("GDAL_DATA");
-    const char* proj_lib = getenv("PROJ_LIB");
-
-    EXPECT_TRUE(FileUtils::fileExists(gdal_data));
-    EXPECT_TRUE(FileUtils::fileExists(proj_lib));
-#endif
-}
-
 TEST(SpatialReferenceTest, test_ctor)
 {
     SpatialReference srs;

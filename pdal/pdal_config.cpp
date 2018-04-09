@@ -42,8 +42,6 @@
 
 #include <pdal/gitsha.h>
 
-#include <geotiff.h>
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
@@ -196,9 +194,6 @@ std::string debugInformation()
     os << "libxml (" << LIBXML_DOTTED_VERSION << ") - " <<
               "http://www.xmlsoft.org/" << std::endl;
 #endif
-
-    os << "libgeotiff (" << LIBGEOTIFF_VERSION << ") - " <<
-        "http://trac.osgeo.org/geotiff" << std::endl;
 
     return os.str();
 }

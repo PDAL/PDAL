@@ -21,19 +21,9 @@ First, we provide a full listing of the reader header.
    :language: cpp
    :linenos:
 
-In your MyReader class, you will declare the necessary methods and variables
-needed to make the reader work and meet the plugin specifications.
-
 .. literalinclude:: ../../examples/writing-reader/MyReader.hpp
    :language: cpp
-   :lines: 16-18
-   :linenos:
-
-These methods are required to fulfill the specs for defining a new plugin.
-
-.. literalinclude:: ../../examples/writing-reader/MyReader.hpp
-   :language: cpp
-   :lines: 21-23
+   :lines:18-20
    :linenos:
 
 ``m_stream`` is used to process the input, while ``m_index`` is used to track
@@ -42,7 +32,7 @@ be described later.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.hpp
    :language: cpp
-   :lines: 27-31
+   :lines: 22-26
    :linenos:
 
 Various other override methods for the stage.  There are a few others that
@@ -62,26 +52,17 @@ Again, we start with a full listing of the reader source.
    :language: cpp
    :linenos:
 
-In your reader implementation, you will use a macro defined in pdal_macros.
+In your reader implementation, you will use a macro to create the plugin.
+This macro registers the plugin with the PDAL PluginManager.  In this case,
+we are declaring this as a SHARED stage, meaning that it will be loaded at
+runtime instead of being linked
+to the main PDAL installation.  The macro is supplied with the class name
+of the plugin and a PluginInfo object.  The PluginInfo objection includes
+the name of the plugin, a description, and a link to documentation.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 9-12
-   :linenos:
-
-This macro registers the plugin with the PDAL code.  In this case, we are
-declaring this as a SHARED plugin, meaning that it will be located external
-to the main PDAL installation.  The macro is supplied with a version number
-(major and minor), the class of the plugin, the parent class (in this case,
-to identify it as a reader), and an object with information.  This information
-includes the name of the plugin, a description, and a link to documentation.
-
-Creating STATIC plugins requires a few more steps which will not be covered
-in this tutorial.
-
-.. literalinclude:: ../../examples/writing-reader/MyReader.cpp
-   :language: cpp
-   :lines: 18-21
+   :lines: 8-15
    :linenos:
 
 This method will process a options for the reader.  In this
@@ -94,7 +75,7 @@ stage.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 23-29
+   :lines: 19-22
    :linenos:
 
 This method registers the various dimensions the reader will use.  In our case,
@@ -103,7 +84,7 @@ dimension MyData.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 31-35
+   :lines: 24-30
    :linenos:
 
 This method is called when the Reader is ready for use.  It will only be
@@ -112,21 +93,20 @@ processed.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 37-50
+   :lines: 32-36
    :linenos:
 
 This is a helper function, which will convert a string value into the type
 specified when it's called.  In our example, it will be used to convert
 strings to doubles when reading from the input stream.
 
-
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 53
+   :lines: 38-52
    :linenos:
 
 This method is the main processing method for the reader.  It takes a
-pointer to a Point View which we will build as we read from the file.  We
+pointer to a PointView which we will build as we read from the file.  We
 initialize some variables as well, and then reset the input stream with
 the filename used for the reader.  Note that in other readers, the contents
 of this method could be very different depending on the format of the file
@@ -135,7 +115,7 @@ PointView object.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 62-64
+   :lines: 57-62
    :linenos:
 
 In preparation for reading the file, we prepare to skip some header lines.  In
@@ -143,7 +123,7 @@ our case, the header is only a single line.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 65-70
+   :lines: 64-66
    :linenos:
 
 Here we begin our main loop.  In our example file, the first line is a header,
@@ -151,10 +131,9 @@ and each line thereafter is a single point.  If the file had a different format
 the method of looping and reading would have to change as appropriate.  We make
 sure we are skipping the header lines here before moving on.
 
-
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 73-82
+   :lines: 67-72
    :linenos:
 
 Here we take the line we read in the for block header, split it, and make sure
@@ -162,7 +141,7 @@ that we have the proper number of fields.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 84-97
+   :lines: 75-84
    :linenos:
 
 Here we take the values we read and put them into the PointView object.  The
@@ -177,7 +156,7 @@ each iteration of the loop), and the dimension value.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
-   :lines: 99-101
+   :lines: 86-99
    :linenos:
 
 Finally, we increment the nextId and make a call into the progress callback
@@ -186,8 +165,18 @@ and number read, and return that value as the number of points read.
 This could differ in cases where we read multiple streams, but that won't
 be covered here.
 
+.. literalinclude:: ../../examples/writing-reader/MyReader.cpp
+   :language: cpp
+   :lines: 101-108
+   :linenos:
+
 When the read method is finished, the done method is called for any cleanup.
 In this case, we simply make sure the stream is reset.
+
+.. literalinclude:: ../../examples/writing-reader/MyReader.cpp
+   :language: cpp
+   :lines: 111-114
+   :linenos:
 
 
 Compiling and Usage

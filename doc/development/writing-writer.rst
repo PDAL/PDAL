@@ -34,21 +34,20 @@ later on.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
-   :lines: 19-21
+   :lines: 19
 
-These three methods are required to fulfill the specs for defining a new plugin.
-
+Every stage must return a unique name.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
-   :lines: 24-28
+   :lines: 22-26
 
 These methods are used during various phases of the pipeline.  There are also
 more methods, which will not be covered in this tutorial.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
-   :lines: 30-36
+   :lines: 28-34
 
 These are variables our Writer will use, such as the file to write to, the
 newline character to use, the name of the data field to use to write the MyData
@@ -72,21 +71,17 @@ which is included in the include chain we are using.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 10-15
+   :lines: 9-16
 
 Here we define a struct with information regarding the writer, such as the
 name, a description, and a path to documentation.  We then use the macro
-to create a SHARED plugin, which means it will be external to the main PDAL
-installation.  When using the macro, we specify the version (major and minor),
-the class of the plugin, the class of the parent (Writer, in this case), and
-the struct we defined earlier.
-
-Creating STATIC plugins, which would be part of the main PDAL installation, is
-also possible, but requires some extra steps and will not be covered here.
+to create a SHARED stage, which means it will be external to the main PDAL
+installation.  When using the macro, we specify the name of the Stage and
+the PluginInfo struct we defined earlier.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 19-30
+   :lines: 20-31
    :linenos:
 
 This struct is used for helping with the FileStreamPtr for cleanup.
@@ -101,14 +96,13 @@ private variables.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 47-63
+   :lines: 42-53
 
 This method initializes our file stream in preparation for writing.
 
-
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 55-70
+   :lines: 56-72
    :linenos:
 
 The ready method is used to prepare the writer for any number of PointViews that
@@ -118,7 +112,7 @@ and writing the header of the output file.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 74-90
+   :lines: 75-91
    :linenos:
 
 This method is the main method for writing.  In our case, we are writing a very
@@ -138,7 +132,7 @@ to the output stream.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 93-96
+   :lines: 94-97
    :linenos:
 
 This method is called when the writing is done.  In this case, it simply cleans

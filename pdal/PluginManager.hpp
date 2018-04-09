@@ -48,6 +48,8 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <functional>
+
 
 namespace pdal
 {

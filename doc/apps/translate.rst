@@ -6,7 +6,7 @@ translate
 
 The ``translate`` command can be used for simple conversion of files based on
 their file extensions. It can also be used for constructing pipelines directly
-from the command-line.
+from the command-line.  Processing is done with stream mode if possible.
 
 ::
 
@@ -22,6 +22,7 @@ from the command-line.
     --metadata, -m     Dump metadata output to the specified file
     --reader, -r       Reader type
     --writer, -w       Writer type
+    --nostream         Don't run in stream mode, even if technically possible.
 
 The ``--input`` and ``--output`` file names are required options.
 

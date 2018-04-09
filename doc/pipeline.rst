@@ -111,6 +111,29 @@ with the :ref:`writers.gdal` writer:
 .. _`UTM`: http://spatialreference.org/ref/epsg/nad83-utm-zone-16n/
 .. _`Geographic`: http://spatialreference.org/ref/epsg/4326/
 
+.. _processing_modes:
+
+Processing Modes
+--------------------------------------------------------------------------------
+
+PDAL process data in one of two ways: standard mode or stream mode.  With
+standard mode, all input is read into memory before it is processed.  Many
+algorithms require standard mode processing because they need access to
+all points. Operations that do sorting or require neighbors of points, for
+example, require access to all points.
+
+For operations that don't require access to all points, PDAL provides stream
+mode.  Stream mode processes points through a pipeline in chunks, which
+reduces memory requirements.
+
+When using :ref:`pdal translate<translate_command>` or
+:ref:`pdal pipeline<pipeline_command>`
+PDAL uses stream mode if possible.  If stream mode can't use used
+the applications fall back to standard mode processing.  Users can explicitly
+choose to use standard mode by using the ``--nostream`` option.
+
+Users of the PDAL API can explicitly control the selection of the PDAL
+processing mode.
 
 Pipeline Objects
 --------------------------------------------------------------------------------

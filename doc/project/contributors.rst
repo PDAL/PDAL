@@ -30,23 +30,23 @@ new feature development of PDAL over the past couple of years.
 .. _`Hobu`: http://hobu.co
 
 
-.. image:: http://radiantblue.com/wp-content/uploads/2015/12/logo1.png
-    :target: http://radiantblue.com
-
-`Michael Gerlek`_ from `DigitalGlobe`_ helped bootstrap PDAL by providing its
-first design, basic primitive objects, and first :ref:`stage <stage_index>`
-implementations.
+`Michael Gerlek`_ helped bootstrap PDAL by providing its first design, basic
+primitive objects, and first :ref:`stage <stage_index>` implementations.
 
 .. _`Michael Gerlek`: http://github.com/mpgerlek
 
 
-`Bradley Chambers`_ from `DigitalGlobe`_ has contributed numerous features and
-capabilities to the PDAL project, including :ref:`Poisson sampling
-<dart-throwing-tutorial>` and :ref:`Progressive Morphological Filters <pcl_ground>`. He is also a prolific
-:ref:`tutorial` writer.
+.. image:: ./Radiant-Solutions-Logo-Color-1920.png
+    :width: 300px
+    :target: http://radiantsolutions.com
+
+`Bradley Chambers`_ from `RadiantSolutions`_ has contributed numerous features
+and capabilities to the PDAL project, including :ref:`Poisson sampling
+<dart-throwing-tutorial>` and :ref:`Progressive Morphological Filters
+<pcl_ground>`. He is also a prolific :ref:`tutorial` writer.
 
 .. _`Bradley Chambers`: https://github.com/chambbj
-.. _`DigitalGlobe`: https://www.digitalglobe.com/
+.. _`RadiantSolutions`: http://radiantsolutions.com/
 
 
 Funding Contributors

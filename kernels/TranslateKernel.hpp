@@ -65,6 +65,7 @@ private:
     std::string m_writerType;
     std::string m_filterJSON;
     std::string m_metadataFile;
+    bool m_noStream;
 };
 
 } // namespace pdal

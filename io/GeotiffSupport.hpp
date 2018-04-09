@@ -39,6 +39,15 @@
 namespace pdal
 {
 
+namespace Geotiff
+{
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+}
+
 class GeotiffSrs
 {
 public:
@@ -54,12 +63,6 @@ private:
 class GeotiffTags
 {
 public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
     GeotiffTags(const SpatialReference& srs);
 
     std::vector<uint8_t>& directoryData()

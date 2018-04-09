@@ -37,6 +37,7 @@
 #include "Support.hpp"
 
 #include <pdal/util/FileUtils.hpp>
+#include <io/BufferReader.hpp>
 #include <io/TextReader.hpp>
 #include <io/TextWriter.hpp>
 
@@ -104,3 +105,51 @@ TEST(TextWriterTest, t2)
 
     EXPECT_EQ(Support::compare_text_files(infile, outfile), true);
 }
+
+TEST(TextWriterTest, precision)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims( { Id::X, Id::Y, Id::Z, Id::Intensity } );
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 1);
+    view->setField(Id::Y, 0, 1);
+    view->setField(Id::Z, 0, 1);
+    view->setField(Id::Intensity, 0, 1);
+
+    view->setField(Id::X, 1, 2.2222222222);
+    view->setField(Id::Y, 1, 2.2222222222);
+    view->setField(Id::Z, 1, 2.2222222222);
+    view->setField(Id::Intensity, 1, 2.22222222);
+
+    view->setField(Id::X, 2, 3.33);
+    view->setField(Id::Y, 2, 3.33);
+    view->setField(Id::Z, 2, 3.33);
+    view->setField(Id::Intensity, 2, 3.33);
+
+    BufferReader r;
+    r.addView(view);
+
+    std::string outfile(Support::temppath("precision.txt"));
+
+    TextWriter w;
+
+    Options o;
+    o.add("precision", 5);
+    o.add("order", "X:0,Y:0,Z:0,Intensity:0");
+    o.add("filename", outfile);
+
+    w.setInput(r);
+    w.setOptions(o);
+
+    w.prepare(table);
+    w.execute(table);
+
+    std::string out = FileUtils::readFileIntoString(outfile);
+    EXPECT_NE(out.find("1,1,1,1"), std::string::npos);
+    EXPECT_NE(out.find("2,2,2,2"), std::string::npos);
+    EXPECT_NE(out.find("3,3,3,3"), std::string::npos);
+}
+

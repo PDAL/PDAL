@@ -55,6 +55,8 @@ bool Streamable::pipelineStreamable() const
 // Streamed execution.
 void Streamable::execute(StreamPointTable& table)
 {
+    m_log->get(LogLevel::Debug) << "Executing pipeline in stream mode." <<
+        std::endl;
     struct StreamableList : public std::list<Streamable *>
     {
         StreamableList operator - (const StreamableList& other) const
@@ -98,7 +100,8 @@ void Streamable::execute(StreamPointTable& table)
     };
 
     if (!pipelineStreamable())
-        return;
+        throwError("Attempting to use stream mode with a stage that doesn't "
+            "support streaming.");
 
     SpatialReference srs;
     std::list<StreamableList> lists;

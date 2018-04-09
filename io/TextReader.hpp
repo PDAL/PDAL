@@ -136,8 +136,9 @@ private:
     Dimension::IdList m_dims;
     StringList m_fields;
     size_t m_line;
-    std::string m_headerOverride;
-    std::string m_headerInsert;
+    std::string m_header;
+    size_t m_skip;
+    std::streampos m_dataStart;
 };
 
 } // namespace pdal

@@ -43,11 +43,14 @@ namespace
 {
 
 #if defined(__APPLE__) && defined(__MACH__)
-    const std::string dynamicLibraryExtension("dylib");
+    static const std::string dynamicLibraryExtension("dylib");
+    static const char pathSeparator(':');
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
-    const std::string dynamicLibraryExtension("so");
+    static const std::string dynamicLibraryExtension("so");
+    static const char pathSeparator(':');
 #elif defined _WIN32
-    const std::string dynamicLibraryExtension("dll");
+    static const std::string dynamicLibraryExtension("dll");
+    static const char pathSeparator(';');
 #endif
 
 StringList pluginSearchPaths()
@@ -58,7 +61,7 @@ StringList pluginSearchPaths()
     Utils::getenv("PDAL_DRIVER_PATH", envOverride);
 
     if (!envOverride.empty())
-        searchPaths = Utils::split2(envOverride, ':');
+        searchPaths = Utils::split2(envOverride, pathSeparator);
     else
     {
         StringList standardPaths { ".", "./lib", "../lib", "./bin", "../bin" };
