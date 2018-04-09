@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
+
 #include <pdal/FlexWriter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
@@ -52,15 +53,13 @@ using laszip_POINTER = void *;
 
 #include <json/json.h>
 
-extern "C" int32_t LasWriter_ExitFunc();
-extern "C" PF_ExitFunc LasWriter_InitPlugin();
-
 namespace pdal
 {
 class LeInserter;
 class LasTester;
 class NitfWriter;
 class GeotiffSupport;
+class LazPerfVlrCompressor;
 
 struct VlrOptionInfo
 {
@@ -71,16 +70,15 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL LasWriter : public FlexWriter
+class PDAL_DLL LasWriter : public FlexWriter, public Streamable
 {
     friend class LasTester;
     friend class NitfWriter;
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     LasWriter();
+    ~LasWriter();
 
 protected:
     void prepOutput(std::ostream *out, const SpatialReference& srs);
@@ -90,7 +88,7 @@ private:
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
-    std::unique_ptr<LazPerfVlrCompressor> m_compressor;
+    LazPerfVlrCompressor *m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;
@@ -124,12 +122,12 @@ private:
     // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
     // them as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_creationYear;
-    StringHeaderVal<20> m_scaleX;
-    StringHeaderVal<20> m_scaleY;
-    StringHeaderVal<20> m_scaleZ;
-    StringHeaderVal<20> m_offsetX;
-    StringHeaderVal<20> m_offsetY;
-    StringHeaderVal<20> m_offsetZ;
+    StringHeaderVal<0> m_scaleX;
+    StringHeaderVal<0> m_scaleY;
+    StringHeaderVal<0> m_scaleZ;
+    StringHeaderVal<0> m_offsetX;
+    StringHeaderVal<0> m_offsetY;
+    StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
     Json::Value m_userVLRs;

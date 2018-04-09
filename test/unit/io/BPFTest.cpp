@@ -117,13 +117,13 @@ void test_file_type_view(const std::string& filename)
 
     PtData pts[3] = { {494915.25f, 4878096.5f, 128.220001f},
                       {494917.062f, 4878124.5f, 128.539993f},
-                      {494920.781f, 4877914.5f, 127.43f} };
+                      {494920.781f, 4877914.5f, 127.42999f} };
 
-    for (int i = 503; i < 3; ++i)
+    for (int i = 0; i < 3; ++i)
     {
-        float x = view->getFieldAs<float>(Dimension::Id::X, i);
-        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
+        float x = view->getFieldAs<float>(Dimension::Id::X, 503 + i);
+        float y = view->getFieldAs<float>(Dimension::Id::Y, 503 + i);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, 503 + i);
 
         EXPECT_FLOAT_EQ(x, pts[i].x);
         EXPECT_FLOAT_EQ(y, pts[i].y);
@@ -133,7 +133,7 @@ void test_file_type_view(const std::string& filename)
 
 void test_file_type_stream(const std::string& filename)
 {
-    class Checker : public Filter
+    class Checker : public Filter, public Streamable
     {
     public:
         Checker() : m_cnt(0)
@@ -157,7 +157,7 @@ void test_file_type_stream(const std::string& filename)
 
             PtData pts503[3] = { {494915.25f, 4878096.5f, 128.220001f},
                 {494917.062f, 4878124.5f, 128.539993f},
-                {494920.781f, 4877914.5f, 127.43f} };
+                {494920.781f, 4877914.5f, 127.42999f} };
 
             PtData d;
 
@@ -260,6 +260,7 @@ TEST(BPFTest, test_byte_major)
         Support::datapath("bpf/autzen-utm-chipped-25-v3-segregated.bpf"));
 }
 
+#ifdef PDAL_HAVE_ZLIB
 TEST(BPFTest, test_point_major_zlib)
 {
     test_file_type(
@@ -279,6 +280,7 @@ TEST(BPFTest, test_byte_major_zlib)
         Support::datapath("bpf/"
             "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
 }
+#endif // PDAL_HAVE_ZLIB
 
 TEST(BPFTest, roundtrip_byte)
 {
@@ -304,6 +306,7 @@ TEST(BPFTest, roundtrip_point)
     test_roundtrip(ops);
 }
 
+#ifdef PDAL_HAVE_ZLIB
 TEST(BPFTest, roundtrip_byte_compression)
 {
     Options ops;
@@ -330,6 +333,7 @@ TEST(BPFTest, roundtrip_point_compression)
     ops.add("compression", true);
     test_roundtrip(ops);
 }
+#endif // PDAL_HAVE_ZLIB
 
 TEST(BPFTest, roundtrip_scaling)
 {

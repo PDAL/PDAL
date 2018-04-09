@@ -38,13 +38,9 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/pdal_export.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <string>
-
-extern "C" int32_t GroundKernel_ExitFunc();
-extern "C" PF_ExitFunc GroundKernel_InitPlugin();
 
 namespace pdal
 {
@@ -55,13 +51,11 @@ class Stage;
 class PDAL_DLL GroundKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    GroundKernel();
 
 private:
-    GroundKernel();
     virtual void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

@@ -14,6 +14,7 @@ set PDAL_BUILD_TESTS=OFF
 
 ) ELSE (
 
+mkdir C:\pdalbin
 SET PDAL_PLUGIN_INSTALL_PATH="C:\pdalbin"
 set PDAL_BUILD_TESTS=ON
 
@@ -22,6 +23,9 @@ set PDAL_BUILD_TESTS=ON
 REM needed or else CMake won't find the Oracle library that OSGeo4W installs
 
 SET ORACLE_HOME="C:/OSGEO4W64/"
+
+mkdir build
+pushd build
 
 cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_CPD=OFF ^
@@ -34,11 +38,13 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_PCL=OFF ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_SQLITE=%PDAL_OPTIONAL_COMPONENTS% ^
+    -DLIBLZMA_LIBRARY=%OSGEO4W_ROOT%\lib\liblzma.lib ^
     -DBUILD_PLUGIN_RIVLIB=OFF ^
     -DBUILD_PLUGIN_PYTHON=%PDAL_OPTIONAL_COMPONENTS% ^
     -DENABLE_CTEST=OFF ^
     -DWITH_LAZPERF=ON ^
-	-DLazperf_DIR=%OSGEO4W_ROOT% ^
+    -DLazperf_DIR=%OSGEO4W_ROOT% ^
+    -DWITH_LZMA=ON ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=%PDAL_BUILD_TESTS% ^
 	-DPDAL_PLUGIN_INSTALL_PATH=%PDAL_PLUGIN_INSTALL_PATH% ^
@@ -59,6 +65,7 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_SQLITE_TESTS=OFF ^
     -DCMAKE_BUILD_TYPE=RelWithDebInfo ^
     -DBUILD_OCI_TESTS=OFF ^
-    .
+    ..
 
+popd
 

@@ -30,29 +30,29 @@ new feature development of PDAL over the past couple of years.
 .. _`Hobu`: http://hobu.co
 
 
-.. image:: http://radiantblue.com/wp-content/uploads/2015/12/logo1.png
-    :target: http://radiantblue.com
-
-`Michael Gerlek`_ from `DigitalGlobe`_ helped bootstrap PDAL by providing its
-first design, basic primitive objects, and first :ref:`stage <stage_index>`
-implementations.
+`Michael Gerlek`_ helped bootstrap PDAL by providing its first design, basic
+primitive objects, and first :ref:`stage <stage_index>` implementations.
 
 .. _`Michael Gerlek`: http://github.com/mpgerlek
 
 
-`Bradley Chambers`_ from `DigitalGlobe`_ has contributed numerous features and
-capabilities to the PDAL project, including :ref:`Poisson sampling
-<dart-throwing-tutorial>` and :ref:`Progressive Morphological Filters <pcl_ground>`. He is also a prolific
-:ref:`tutorial` writer.
+.. image:: ./Radiant-Solutions-Logo-Color-1920.png
+    :width: 300px
+    :target: http://radiantsolutions.com
+
+`Bradley Chambers`_ from `RadiantSolutions`_ has contributed numerous features
+and capabilities to the PDAL project, including :ref:`Poisson sampling
+<dart-throwing-tutorial>` and :ref:`Progressive Morphological Filters
+<pcl_ground>`. He is also a prolific :ref:`tutorial` writer.
 
 .. _`Bradley Chambers`: https://github.com/chambbj
-.. _`DigitalGlobe`: https://www.digitalglobe.com/
+.. _`RadiantSolutions`: http://radiantsolutions.com/
 
 
 Funding Contributors
 --------------------------------------------------------------------------------
 
-.. image:: ./rsgis_logo.png
+.. image:: ../development/rsgis_logo.png
     :target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
 
 The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at
@@ -61,10 +61,10 @@ management systems. `CRREL`_'s `GRiD`_ project manages LiDAR and point cloud
 data for a multitude of U.S. Army Corps missions. Find out more about GRiD in
 this `LiDAR Magazine article`_.
 
-.. image:: ./nsf1.png
+.. image:: ../development/nsf1.png
     :target: http://www.nsf.gov
 
-.. image:: ./uoh.png
+.. image:: ../development/uoh.png
     :target: http://www.uh.edu
 
 `NSF <http://www.nsf.gov>`_, in collaboration with `Dr. Craig Glennie

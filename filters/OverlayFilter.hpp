@@ -34,16 +34,13 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <map>
 #include <memory>
 #include <string>
-
-extern "C" int32_t OverlayFilter_ExitFunc();
-extern "C" PF_ExitFunc OverlayFilter_InitPlugin();
 
 typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
 
@@ -63,7 +60,7 @@ typedef std::shared_ptr<void> OGRGeometryPtr;
 
 class Arg;
 
-class PDAL_DLL OverlayFilter : public Filter
+class PDAL_DLL OverlayFilter : public Filter, public Streamable
 {
     struct PolyVal
     {
@@ -75,8 +72,6 @@ public:
     OverlayFilter() : m_ds(0), m_lyr(0)
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const { return "filters.overlay"; }
 
 private:

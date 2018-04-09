@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/Point.hpp"
@@ -43,9 +42,6 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-
-extern "C" int32_t NormalFilter_ExitFunc();
-extern "C" PF_ExitFunc NormalFilter_InitPlugin();
 
 namespace pdal
 {
@@ -58,15 +54,12 @@ class PDAL_DLL NormalFilter : public Filter
 {
 public:
     NormalFilter() : Filter()
-    {
-    }
+    {}
     NormalFilter& operator=(const NormalFilter&) = delete;
     NormalFilter(const NormalFilter&) = delete;
 
-    void doFilter(PointView& view);
+    void doFilter(PointView& view, int knn = 8);
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

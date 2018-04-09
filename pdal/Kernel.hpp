@@ -42,6 +42,7 @@
 #include <vector>
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PluginHelper.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

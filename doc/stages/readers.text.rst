@@ -16,9 +16,10 @@ separator can be overridden by the 'separator' option (see below).
 Each line in the file must contain the same number of fields as indicated by
 dimension names in the header.  Spaces are generally ignored in the input
 unless used as a separator.  When a space character is used as a separator,
-any number of consecutive spaces are treated as single space.
+any number of consecutive spaces are treated as single space and
+leading/trailing spaces are ignored.
 
-Blank lines after the header line are ignored.
+Blank lines are ignored after the header line is read.
 
 .. embed::
 
@@ -69,6 +70,13 @@ filename
 
 separator
   Separator character to override that found in header line.
+
+header
+  String to use as the file header.  All lines in the file as assumed to be
+  records containing point data unless skipped with the 'skip' option.
+
+skip
+  Number of lines to ignore at the beginning of the file.
 
 count
   Maximum number of points to read [Optional]

@@ -33,20 +33,8 @@
 ****************************************************************************/
 
 #include "Invocation.hpp"
-#include "Environment.hpp"
-
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127) // conditional expression is constant
-#define HAVE_ROUND // inconsistent dll linkage otherwise
-#endif
-
-#include <Python.h>
-#undef toupper
-#undef tolower
-#undef isspace
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>

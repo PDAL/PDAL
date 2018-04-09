@@ -35,14 +35,10 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include "private/DimRange.hpp"
 
 #include <string>
-
-extern "C" int32_t SMRFilter_ExitFunc();
-extern "C" PF_ExitFunc SMRFilter_InitPlugin();
 
 namespace pdal
 {
@@ -54,8 +50,6 @@ public:
     {
     }
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

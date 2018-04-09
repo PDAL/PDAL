@@ -159,6 +159,8 @@ private:
     template <std::size_t N>
     inline void setValue(const char(& c)[N]);
 
+    void setValue(const double& d, size_t precision);
+
     MetadataImplList& subnodes(const std::string &name)
     {
         auto si = m_subnodes.find(name);
@@ -239,6 +241,18 @@ inline void MetadataNodeImpl::setValue<double>(const double& d)
     if (dd == 0.0)
         dd = 0.0;
     m_value = Utils::toString(dd);
+}
+
+inline void MetadataNodeImpl::setValue(const double& d,
+    size_t precision)
+{
+    m_type = "double";
+
+    // Get rid of -0.
+    double dd = d;
+    if (dd == 0.0)
+        dd = 0.0;
+    m_value = Utils::toString(dd, precision);
 }
 
 template <>
@@ -403,6 +417,15 @@ public:
         return MetadataNode(impl);
     }
 
+    MetadataNode add(const std::string& name, const double& value,
+        const std::string& descrip = std::string(), size_t precision = 10)
+    {
+        MetadataNodeImplPtr impl = m_impl->add(name);
+        impl->setValue(value, precision);
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
     template<typename T>
     MetadataNode add(const std::string& name, const T& value,
         const std::string& descrip = std::string())
@@ -491,6 +514,9 @@ public:
             return value();
 
         std::string v(Utils::escapeJSON(value()));
+        if (m_impl->m_type == "double")
+            if (v == "NaN" || v == "Infinity" || v == "-Infinity")
+                v = "\"" + v + "\"";
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
             m_impl->m_type == "uuid" || m_impl->m_type == "matrix")
         {

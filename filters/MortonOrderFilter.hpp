@@ -35,10 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t MortonOrderFilter_ExitFunc();
-extern "C" PF_ExitFunc MortonOrderFilter_InitPlugin();
 
 namespace pdal
 {
@@ -51,12 +47,16 @@ public:
     MortonOrderFilter& operator=(const MortonOrderFilter&) = delete;
     MortonOrderFilter(const MortonOrderFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
+
+    PointViewSet reverseMorton(PointViewPtr view);
+    PointViewSet morton(PointViewPtr view);
+
+    bool m_reverse = false;
 };
 
 } // namespace pdal

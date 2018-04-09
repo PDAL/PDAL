@@ -37,18 +37,19 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-        "writers.gdal",
-        "Write a point cloud as a GDAL raster.",
-        "http://pdal.io/stages/writers.gdal.html");
+static StaticPluginInfo const s_info
+{
+    "writers.gdal",
+    "Write a point cloud as a GDAL raster.",
+    "http://pdal.io/stages/writers.gdal.html",
+    { "tif", "tiff", "vrt" }
+};
 
-
-CREATE_STATIC_PLUGIN(1, 0, GDALWriter, Writer, s_info);
+CREATE_STATIC_STAGE(GDALWriter, s_info)
 
 std::string GDALWriter::getName() const
 {
@@ -144,8 +145,15 @@ void GDALWriter::createGrid(BOX2D bounds)
     m_curBounds = bounds;
     size_t width = ((m_curBounds.maxx - m_curBounds.minx) / m_edgeLength) + 1;
     size_t height = ((m_curBounds.maxy - m_curBounds.miny) / m_edgeLength) + 1;
-    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
-        m_outputTypes, m_windowSize));
+    try
+    {
+        m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
+                    m_outputTypes, m_windowSize));
+    }
+    catch (GDALGrid::error& err)
+    {
+        throwError(err.what());
+    }
 }
 
 
@@ -211,6 +219,10 @@ bool GDALWriter::processOne(PointRef& point)
 
 void GDALWriter::doneFile()
 {
+    if (!m_grid) {
+        throw pdal_error("Unable to write GDAL data, grid is uninitialized. You "
+                "might have provided the GDALWriter zero points.");
+    }
     std::array<double, 6> pixelToPos;
 
     pixelToPos[0] = m_curBounds.minx;

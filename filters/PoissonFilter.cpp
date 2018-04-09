@@ -35,8 +35,6 @@
 #include "PoissonFilter.hpp"
 #include "NormalFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <kazhdan/PoissonRecon.h>
 #include <kazhdan/point_source/PointSource.h>
 
@@ -135,6 +133,19 @@ public:
     }
 
     virtual int newPoint(const std::array<double, 3>& position,
+        const std::array<uint8_t, 3>& color)
+    {
+        PointId cnt = m_view.size();
+        m_view.setField(Dimension::Id::X, cnt, position[0]);
+        m_view.setField(Dimension::Id::Y, cnt, position[1]);
+        m_view.setField(Dimension::Id::Z, cnt, position[2]);
+        m_view.setField(Dimension::Id::Red, cnt, color[0]);
+        m_view.setField(Dimension::Id::Green, cnt, color[1]);
+        m_view.setField(Dimension::Id::Blue, cnt, color[2]);
+        return cnt;
+    }
+
+    virtual int newPoint(const std::array<double, 3>& position,
         const std::array<uint8_t, 3>& color, double density)
     {
         PointId cnt = m_view.size();
@@ -207,11 +218,14 @@ private:
     bool m_doColor;
 };
 
-static PluginInfo const s_info =
-    PluginInfo("filters.poisson", "Poisson Surface Reconstruction Filter",
-               "http://pdal.io/stages/filters.poisson.html");
+static StaticPluginInfo const s_info
+{
+    "filters.poisson",
+    "Poisson Surface Reconstruction Filter",
+    "http://pdal.io/stages/filters.poisson.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PoissonFilter, Filter, s_info)
+CREATE_STATIC_STAGE(PoissonFilter, s_info)
 
 std::string PoissonFilter::getName() const { return s_info.name; }
 

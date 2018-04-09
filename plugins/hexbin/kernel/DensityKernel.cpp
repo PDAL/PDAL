@@ -37,20 +37,21 @@
 #include "OGR.hpp"
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.density", "Density Kernel",
-    "http://www.pdal.io/apps/density.html" );
+static PluginInfo const s_info
+{
+    "kernels.density",
+    "Density Kernel",
+    "http://www.pdal.io/apps/density.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, DensityKernel, Kernel, s_info)
+CREATE_SHARED_KERNEL(DensityKernel, s_info)
 
 std::string DensityKernel::getName() const { return s_info.name; }
-
 
 void DensityKernel::addSwitches(ProgramArgs& args)
 {
@@ -71,7 +72,7 @@ void DensityKernel::addSwitches(ProgramArgs& args)
 
 void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 {
-    HexBin* hexbin = static_cast<pdal::HexBin*>(m_hexbinStage);
+    HexBin* hexbin = dynamic_cast<HexBin*>(m_hexbinStage);
     if (!hexbin)
         throw pdal::pdal_error("unable to fetch filters.hexbin stage!");
 

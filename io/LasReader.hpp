@@ -35,10 +35,11 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip_api.h>
 #else
@@ -51,9 +52,6 @@ struct laszip_point;
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
 
-extern "C" int32_t LasReader_ExitFunc();
-extern "C" PF_ExitFunc LasReader_InitPlugin();
-
 namespace pdal
 {
 
@@ -61,8 +59,9 @@ class NitfReader;
 class LasHeader;
 class LeExtractor;
 class PointDimensions;
+class LazPerfVlrDecompressor;
 
-class PDAL_DLL LasReader : public pdal::Reader
+class PDAL_DLL LasReader : public Reader, public Streamable
 {
 protected:
     class LasStreamIf
@@ -86,11 +85,9 @@ protected:
 
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0)
-        {}
+    LasReader();
+    ~LasReader();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     const LasHeader& header() const
@@ -121,7 +118,8 @@ private:
     LasHeader m_header;
     laszip_POINTER m_laszip;
     laszip_point_struct *m_laszipPoint;
-    std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
+
+    LazPerfVlrDecompressor *m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
     StringList m_extraDimSpec;
@@ -129,6 +127,7 @@ private:
     IgnoreVLRList m_ignoreVLRs;
     std::string m_compression;
     StringList m_ignoreVLROption;
+    bool m_useEbVlr;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)

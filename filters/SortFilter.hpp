@@ -36,11 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
-extern "C" int32_t SortFilter_ExitFunc();
-extern "C" PF_ExitFunc SortFilter_InitPlugin();
 
 namespace pdal
 {
@@ -61,8 +57,6 @@ public:
     SortFilter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

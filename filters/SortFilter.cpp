@@ -33,17 +33,18 @@
  ****************************************************************************/
 
 #include "SortFilter.hpp"
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.sort",
     "Sort data based on a given dimension.",
-    "http://pdal.io/stages/filters.sort.html" );
+    "http://pdal.io/stages/filters.sort.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SortFilter, Filter, s_info)
+CREATE_STATIC_STAGE(SortFilter, s_info)
 
 std::string SortFilter::getName() const { return s_info.name; }
 

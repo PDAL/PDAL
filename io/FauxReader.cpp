@@ -36,7 +36,6 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <ctime>
@@ -44,12 +43,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.faux",
     "Faux Reader",
-    "http://pdal.io/stages/readers.faux.html" );
+    "http://pdal.io/stages/readers.faux.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, FauxReader, Reader, s_info)
+CREATE_STATIC_STAGE(FauxReader, s_info)
 
 std::string FauxReader::getName() const { return s_info.name; }
 

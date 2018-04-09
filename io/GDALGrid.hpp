@@ -113,11 +113,11 @@ private:
 
     // Convert an absolute X position to a horizontal cell index.
     int horizontalIndex(double x)
-        { return x / m_edgeLength; }
+        { return (int)(x / m_edgeLength); }
 
     // Convert an absolute Y position to a vertical cell index.
     int verticalIndex(double y)
-        { return m_height - (y / m_edgeLength) - 1; }
+        { return (int)(m_height - (y / m_edgeLength) - 1); }
 
     // Return the absolute horizontal position of the center of a cell given
     // the cell i index.
@@ -139,7 +139,7 @@ private:
     }
 
     // Update cell at i, j with value at a distance.
-    void update(int i, int j, double val, double dist);
+    void update(size_t i, size_t j, double val, double dist);
 
     // Fill cell at index \c i with the nondata value.
     void fillNodata(size_t i);

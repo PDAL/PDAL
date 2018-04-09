@@ -44,15 +44,13 @@
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
-#ifdef PDAL_HAVE_EXECINFO_H
+#ifndef _WIN32
 #include <execinfo.h> // backtrace
 #endif
 #include <dlfcn.h> // dladdr
 #endif
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
+#pragma warning(disable: 4127)  // conditional expression is constant
 
 #include <stdio.h>
 #include <iomanip>
@@ -606,7 +604,7 @@ double Utils::normalizeLongitude(double longitude)
 std::vector<std::string> Utils::backtrace()
 {
     std::vector<std::string> lines;
-#ifdef PDAL_HAVE_EXECINFO_H
+#ifndef _WIN32
     const int MAX_STACK_SIZE(100);
     void* buffer[MAX_STACK_SIZE];
     std::vector<std::string> prefixes;

@@ -36,10 +36,14 @@
 
 #include <stdexcept>
 #include <ostream>
-#include <zlib.h>
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/OStream.hpp>
+
+#ifdef PDAL_HAVE_ZLIB
+#include <zlib.h>
+#endif // PDAL_HAVE_ZLIB
 
 namespace pdal
 {
@@ -53,10 +57,16 @@ public:
         {}
     };
 
+#ifdef PDAL_HAVE_ZLIB
     BpfCompressor(OLeStream& out, size_t maxSize) :
         m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
         m_compressedSize(0)
     {}
+#else
+    BpfCompressor(OLeStream&, size_t)
+    {}
+#endif // PDAL_HAVE_ZLIB
+
     void startBlock();
     void finish();
     void compress();
@@ -64,6 +74,7 @@ public:
 private:
     static const int CHUNKSIZE = 1000000;
 
+#ifdef PDAL_HAVE_ZLIB
     OLeStream& m_out;
     Charbuf m_charbuf;
     std::vector<char> m_inbuf;
@@ -72,6 +83,8 @@ private:
     OStreamMarker m_blockStart;
     size_t m_rawSize;
     size_t m_compressedSize;
+#endif // PDAL_HAVE_ZLIB
 };
 
 } // namespace pdal
+

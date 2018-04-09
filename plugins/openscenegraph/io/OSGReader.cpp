@@ -34,7 +34,6 @@
 
 
 #include "OSGReader.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <osg/NodeVisitor>
@@ -118,12 +117,14 @@ struct CollectTrianglesVisitor : public osg::NodeVisitor
     MatrixStack _matrixStack;
 };
 
-static PluginInfo const s_info = PluginInfo(
-"readers.osg",
-"osg reader.",
-"" );
+static PluginInfo const s_info
+{
+    "readers.osg",
+    "osg reader.",
+    ""
+};
 
-CREATE_SHARED_PLUGIN(1, 0, OSGReader, Reader, s_info)
+CREATE_SHARED_STAGE(OSGReader, s_info)
 
 std::string OSGReader::getName() const { return s_info.name; }
 

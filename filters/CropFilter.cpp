@@ -38,10 +38,10 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Polygon.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/Point.hpp"
+#include "private/pnp/GridPnp.hpp"
 
 #include <sstream>
 #include <cstdarg>
@@ -49,12 +49,21 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.crop",
     "Filter points inside or outside a bounding box or a polygon",
-    "http://pdal.io/stages/filters.crop.html" );
+    "http://pdal.io/stages/filters.crop.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
+CREATE_STATIC_STAGE(CropFilter, s_info)
+
+CropFilter::ViewGeom::ViewGeom(const Polygon& poly) : m_poly(poly)
+{}
+
+CropFilter::ViewGeom::ViewGeom(ViewGeom&& vg) :
+    m_poly(std::move(vg.m_poly)), m_gridPnps(std::move(vg.m_gridPnps))
+{}
 
 std::string CropFilter::getName() const { return s_info.name; }
 
@@ -92,7 +101,7 @@ void CropFilter::initialize()
         {
             // Throws if invalid.
             poly.valid();
-            m_geoms.push_back(poly);
+            m_geoms.emplace_back(poly);
         }
     }
 
@@ -116,15 +125,16 @@ void CropFilter::ready(PointTableRef table)
                 "option.\n";
     }
     for (auto& geom : m_geoms)
-        geom.setSpatialReference(m_assignedSrs);
+        geom.m_poly.setSpatialReference(m_assignedSrs);
 }
 
 
 bool CropFilter::processOne(PointRef& point)
 {
-    for (auto& geom : m_geoms)
-        if (!crop(point, geom))
-            return false;
+    for (auto& g : m_geoms)
+        for (auto& gridPnp : g.m_gridPnps)
+            if (!crop(point, *gridPnp))
+                return false;
 
     for (auto& box : m_boxes)
         if (!crop(point, box))
@@ -146,19 +156,27 @@ void CropFilter::spatialReferenceChanged(const SpatialReference& srs)
 
 void CropFilter::transform(const SpatialReference& srs)
 {
-    // If we don't have any SRS, do nothing.
     for (auto& geom : m_geoms)
     {
         try
         {
-            geom = geom.transform(srs);
+            geom.m_poly = geom.m_poly.transform(srs);
         }
         catch (pdal_error& err)
         {
             throwError(err.what());
         }
+        geom.m_gridPnps.clear();
+        std::vector<Polygon> polys = geom.m_poly.polygons();
+        for (auto& p : polys)
+        {
+            std::unique_ptr<GridPnp> gridPnp(new GridPnp(
+                p.exteriorRing(), p.interiorRings()));
+            geom.m_gridPnps.push_back(std::move(gridPnp));
+        }
     }
 
+    // If we don't have any SRS, do nothing.
     if (srs.empty() && m_assignedSrs.empty())
         return;
     if (srs.empty() || m_assignedSrs.empty())
@@ -234,20 +252,25 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 }
 
 
-bool CropFilter::crop(const PointRef& point, const Polygon& g)
+bool CropFilter::crop(const PointRef& point, GridPnp& g)
 {
-    return (m_cropOutside != g.covers(point));
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    return (m_cropOutside != g.inside(x, y));
 }
 
 
-void CropFilter::crop(const Polygon& g, PointView& input, PointView& output)
+void CropFilter::crop(const ViewGeom& g, PointView& input, PointView& output)
 {
     PointRef point = input.point(0);
-    for (PointId idx = 0; idx < input.size(); ++idx)
+    for (auto& gridPnp : g.m_gridPnps)
     {
-        point.setPointId(idx);
-        if (crop(point, g))
-            output.appendPoint(input, idx);
+        for (PointId idx = 0; idx < input.size(); ++idx)
+        {
+            point.setPointId(idx);
+            if (crop(point, const_cast<GridPnp&>(*gridPnp)))
+                output.appendPoint(input, idx);
+        }
     }
 }
 

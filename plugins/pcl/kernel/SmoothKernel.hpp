@@ -45,13 +45,10 @@ namespace pdal
 class PDAL_DLL SmoothKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
 
 private:
-    SmoothKernel() {};
     virtual void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

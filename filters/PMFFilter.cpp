@@ -42,7 +42,6 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/Segmentation.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/DimRange.hpp"
@@ -50,11 +49,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.pmf", "Progressive morphological filter",
-               "http://pdal.io/stages/filters.pmf.html");
+static StaticPluginInfo const s_info
+{
+    "filters.pmf",
+    "Progressive morphological filter",
+    "http://pdal.io/stages/filters.pmf.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PMFFilter, Filter, s_info)
+CREATE_STATIC_STAGE(PMFFilter, s_info)
 
 std::string PMFFilter::getName() const
 {

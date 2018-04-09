@@ -35,7 +35,6 @@
 #include "SampleFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
@@ -45,11 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.sample", "Subsampling filter",
-               "http://pdal.io/stages/filters.sample.html");
+static StaticPluginInfo const s_info
+{
+    "filters.sample",
+    "Subsampling filter",
+    "http://pdal.io/stages/filters.sample.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SampleFilter, Filter, s_info)
+CREATE_STATIC_STAGE(SampleFilter, s_info)
 
 std::string SampleFilter::getName() const
 {

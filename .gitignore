@@ -50,6 +50,13 @@ ipch/
 *.suo
 *.opensdf
 *.sln.docstates
+*.ilk
+*.exe
+*.lib
+*.pdb
+*.exp
+*.dll
+*.manifest
 
 #
 # intellij, clion
@@ -78,6 +85,7 @@ test/data/local
 
 /_build*
 /build*
+/examples/build*
 /*local*.bat
 /*local*.sh
 Makefile

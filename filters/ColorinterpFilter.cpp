@@ -36,7 +36,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
@@ -55,18 +54,26 @@ namespace pdal
 static std::vector<std::string> ramps = {"awesome_green", "black_orange",
     "blue_hue", "blue_red", "heat_map", "pestel_shades", "blue_orange"};
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.colorinterp",
     "Assigns RGB colors based on a dimension and a ramp",
-    "http://pdal.io/stages/filters.colorinterp.html" );
+    "http://pdal.io/stages/filters.colorinterp.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ColorinterpFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ColorinterpFilter, s_info)
 
 std::string ColorinterpFilter::getName() const { return s_info.name; }
 
 // The VSIFILE* that VSIFileFromMemBuffer creates in this
 // macro is never cleaned up. We're opening seven PNGs in the
 // ColorInterpRamps-ramps.hpp header. We always open them so they're available.
+//
+// GDAL forces to keep track of the return value, and its being ignored here,
+// To avoid the warning message:
+// warning: ignoring return value of 'VSILFILE* VSIFileFromMemBuffer(....)'
+//          declared with attribute warn_unused_result [-Wunused-result]
+// Using a tmp variable
 #define GETRAMP(name) \
     if (pdal::Utils::iequals(#name, rampFilename)) \
     { \
@@ -75,7 +82,7 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        (void)VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
+        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE)); \
     }
 //
 std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
@@ -254,12 +261,16 @@ void ColorinterpFilter::filter(PointView& view)
 }
 
 
+bool ColorinterpFilter::pipelineStreamable() const
+{
+    if (std::isnan(m_min) || std::isnan(m_max))
+        return false;
+    return Streamable::pipelineStreamable();
+}
+
+
 bool ColorinterpFilter::processOne(PointRef& point)
 {
-    // This will throw if min or max aren't defined.
-    if (std::isnan(m_min) || std::isnan(m_max))
-        throwStreamingError();
-
     double v = point.getFieldAs<double>(m_interpDim);
 
     // Don't color points that aren't in the min/max range.

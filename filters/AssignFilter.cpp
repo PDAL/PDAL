@@ -34,7 +34,6 @@
 
 #include "AssignFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -43,12 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.assign",
-    "Assign values for a dimension using a specified value.",
-    "http://pdal.io/stages/filters.assign.html" );
+    "Assign values for a dimension range to a specified value.",
+    "http://pdal.io/stages/filters.assign.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, AssignFilter, Filter, s_info)
+CREATE_STATIC_STAGE(AssignFilter, s_info)
 
 struct AssignRange : public DimRange
 {
@@ -159,4 +160,3 @@ void AssignFilter::filter(PointView& view)
 }
 
 } // namespace pdal
-

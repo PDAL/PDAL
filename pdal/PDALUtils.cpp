@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_features.hpp>
 
 #ifdef PDAL_ARBITER_ENABLED
     #include <arbiter/arbiter.hpp>
@@ -184,7 +185,7 @@ std::string tempFilename(const std::string& path)
     const std::string basename(arbiter::util::getBasename(path));
 
     return arbiter::util::join(tempdir, basename);
-};
+}
 #endif
 
 // RAII handling of a temp file to make sure file gets deleted.
@@ -219,8 +220,6 @@ public:
         close();
         arbiter::Arbiter a;
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
-#else
-        throw pdal_error("Arbiter is not enabled for this configuration!");
 #endif
     }
 

@@ -5,8 +5,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/PointTable.hpp>
 
 #include <memory>
@@ -15,13 +13,14 @@
 
 namespace pdal {
 
-  static PluginInfo const s_info {
+  static PluginInfo const s_info
+  {
     "kernels.mykernel",
     "MyKernel",
     "http://link/to/documentation"
   };
 
-  CREATE_SHARED_PLUGIN(1, 0, MyKernel, Kernel, s_info);
+  CREATE_SHARED_KERNEL(MyKernel, s_info);
   std::string MyKernel::getName() const { return s_info.name; }
 
   MyKernel::MyKernel() : Kernel()
@@ -36,7 +35,6 @@ namespace pdal {
   int MyKernel::execute()
   {
     PointTable table;
-    StageFactory f;
 
     Stage& reader = makeReader(m_input_file, "readers.las");
 

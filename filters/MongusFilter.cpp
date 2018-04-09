@@ -34,7 +34,6 @@
 
 #include "MongusFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/EigenUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -47,11 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.mongus", "Mongus and Zalik (2012)",
-               "http://pdal.io/stages/filters.mongus.html");
+static StaticPluginInfo const s_info
+{
+    "filters.mongus",
+    "Mongus and Zalik (2012)",
+    "http://pdal.io/stages/filters.mongus.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, MongusFilter, Filter, s_info)
+CREATE_STATIC_STAGE(MongusFilter, s_info)
 
 std::string MongusFilter::getName() const
 {

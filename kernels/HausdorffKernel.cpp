@@ -39,16 +39,18 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_config.hpp>
-#include <pdal/pdal_macros.hpp>
-
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.hausdorff",
-    "Hausdorff Kernel", "http://pdal.io/apps/hausdorff.html");
+static StaticPluginInfo const s_info
+{
+    "kernels.hausdorff",
+    "Hausdorff Kernel",
+    "http://pdal.io/apps/hausdorff.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, HausdorffKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(HausdorffKernel, s_info)
 
 std::string HausdorffKernel::getName() const
 {
@@ -90,7 +92,7 @@ int HausdorffKernel::execute()
     root.add("filenames", m_sourceFile);
     root.add("filenames", m_candidateFile);
     root.add("hausdorff", hausdorff);
-    root.add("pdal_version", pdal::GetFullVersionString());
+    root.add("pdal_version", Config::fullVersionString());
     Utils::toJSON(root, std::cout);
 
     return 0;

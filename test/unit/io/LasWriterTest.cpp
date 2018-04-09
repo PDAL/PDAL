@@ -36,6 +36,7 @@
 
 #include <stdlib.h>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>

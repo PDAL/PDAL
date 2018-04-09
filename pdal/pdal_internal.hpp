@@ -39,7 +39,6 @@
 #include <iostream>
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/pdal_defines.h>
 #include <pdal/pdal_types.hpp>
 
 // This is an extraction from the gtest header.  It allows us to make test
@@ -65,7 +64,7 @@ friend class test_case_name##_##test_name##_Test
 #endif
 
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef _WIN32
 #  pragma warning(disable: 4068)  // ignore unknown pragmas (due to boost's use of GCC pragmas)
 #endif
 

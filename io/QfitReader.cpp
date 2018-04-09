@@ -167,7 +167,6 @@ Word #       Content
 #include "QfitReader.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/portable_endian.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -175,20 +174,20 @@ Word #       Content
 #include <algorithm>
 #include <map>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-
+#pragma warning(disable: 4127)  // conditional expression is constant
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.qfit",
     "QFIT Reader",
-    "http://pdal.io/stages/readers.qfit.html" );
+    "http://pdal.io/stages/readers.qfit.html",
+    { "qi" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, QfitReader, Reader, s_info)
+CREATE_STATIC_STAGE(QfitReader, s_info)
 
 std::string QfitReader::getName() const { return s_info.name; }
 

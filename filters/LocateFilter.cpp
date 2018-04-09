@@ -34,19 +34,20 @@
 
 #include "LocateFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.locate",
-               "Return a single point with min/max value in the named dimension.",
-               "http://pdal.io/stages/filters.locate.html");
+static StaticPluginInfo const s_info
+{
+    "filters.locate",
+    "Return a single point with min/max value in the named dimension.",
+    "http://pdal.io/stages/filters.locate.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LocateFilter, Filter, s_info)
+CREATE_STATIC_STAGE(LocateFilter, s_info)
 
 std::string LocateFilter::getName() const
 {

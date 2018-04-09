@@ -36,7 +36,6 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <Eigen/Dense>
@@ -47,11 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.normal", "Normal Filter",
-               "http://pdal.io/stages/filters.normal.html");
+static StaticPluginInfo const s_info
+{
+    "filters.normal",
+    "Normal Filter",
+    "http://pdal.io/stages/filters.normal.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, NormalFilter, Filter, s_info)
+CREATE_STATIC_STAGE(NormalFilter, s_info)
 
 std::string NormalFilter::getName() const
 {
@@ -76,9 +78,13 @@ void NormalFilter::addDimensions(PointLayoutPtr layout)
 }
 
 // public method to access filter, used by GreedyProjection and Poisson filters
-void NormalFilter::doFilter(PointView& view)
+void NormalFilter::doFilter(PointView& view, int knn)
 {
-    m_knn = 8;
+    m_knn = knn;
+    ProgramArgs args;
+    addArgs(args);
+    // We're never parsing anything, so we'll just end up with default vals.
+    // This makes sure that the arg pointer (m_viewpointArg) is valid.
     filter(view);
 }
 

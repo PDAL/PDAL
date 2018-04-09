@@ -33,20 +33,24 @@
 ****************************************************************************/
 
 #include "SQLiteReader.hpp"
+
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.sqlite",
     "Read data from SQLite3 database files.",
-    "" );
+    ""
+};
 
-CREATE_SHARED_PLUGIN(1, 0, SQLiteReader, Reader, s_info)
+CREATE_SHARED_STAGE(SQLiteReader, s_info)
 
 std::string SQLiteReader::getName() const { return s_info.name; }
 

@@ -38,12 +38,8 @@
 #include <string>
 
 #include <pdal/Filter.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
-extern "C" int32_t TransformationFilter_ExitFunc();
-extern "C" PF_ExitFunc TransformationFilter_InitPlugin();
 
 namespace pdal
 {
@@ -52,17 +48,16 @@ namespace pdal
 typedef std::array<double, 16> TransformationMatrix;
 
 
-TransformationMatrix PDAL_DLL transformationMatrixFromString(const std::string& s);
+TransformationMatrix
+PDAL_DLL transformationMatrixFromString(const std::string& s);
 
 
-class PDAL_DLL TransformationFilter : public Filter
+class PDAL_DLL TransformationFilter : public Filter, public Streamable
 {
 public:
     TransformationFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

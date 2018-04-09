@@ -39,15 +39,19 @@
 #endif
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <json/json.h>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.pipeline",
-    "Pipeline Kernel", "http://pdal.io/apps/pipeline.html" );
+static StaticPluginInfo const s_info
+{
+    "kernels.pipeline",
+    "Pipeline Kernel",
+    "http://pdal.io/apps/pipeline.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(PipelineKernel, s_info)
 
 std::string PipelineKernel::getName() const { return s_info.name; }
 
@@ -87,7 +91,9 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
     args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
-    args.add("stream", "Attempt to run pipeline in streaming mode.", m_stream);
+    args.add("stream", "This option is obsolete.", m_stream);
+    args.add("nostream", "Don't run in stream mode, even if technically "
+        "possible.", m_noStream);
     args.add("metadata", "Metadata filename", m_metadataFile);
 }
 
@@ -102,24 +108,39 @@ int PipelineKernel::execute()
         m_manager.setProgressFd(m_progressFd);
     }
 
-    m_manager.readPipeline(m_inputFile);
-
     if (m_validate)
     {
+        Json::Value root;
         // Validate the options of the pipeline we were
         // given, and once we succeed, we're done
-        m_manager.prepare();
+        try
+        {
+            m_manager.readPipeline(m_inputFile);
+            m_manager.prepare();
+            root["valid"] = true;
+            root["error_detail"] = "";
+            root["streamable"] = m_manager.pipelineStreamable();
+        }
+        catch (pdal::pdal_error const& e)
+        {
+            root["valid"] = false;
+            root["error_detail"] = e.what();
+            root["streamable"] = false;
+        }
         Utils::closeProgress(m_progressFd);
+        Json::StyledWriter writer;
+        std::cout << writer.write(root);
         return 0;
     }
 
-    if (m_stream)
+    m_manager.readPipeline(m_inputFile);
+    if (m_noStream || !m_manager.pipelineStreamable())
+        m_manager.execute();
+    else
     {
         FixedPointTable table(10000);
         m_manager.executeStream(table);
     }
-    else
-        m_manager.execute();
 
     if (m_metadataFile.size())
     {

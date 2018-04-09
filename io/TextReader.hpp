@@ -37,25 +37,28 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t TextReader_ExitFunc();
-extern "C" PF_ExitFunc TextReader_InitPlugin();
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL TextReader : public Reader
+class PDAL_DLL TextReader : public Reader, public Streamable
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     TextReader() : m_istream(NULL)
     {}
 
 private:
+    /**
+      Retrieve summary information for the file. NOTE - entire file must
+      be read to retrieve summary for text files.
+
+      \param table  Point table being initialized.
+    */
+    virtual QuickInfo inspect();
+
     /**
       Initialize the reader by opening the file and reading the header line.
       Closes the file on completion.
@@ -110,6 +113,22 @@ private:
 
     bool fillFields();
 
+    /**
+      Parse a header line into a list of dimension names.
+
+      \param header  Header line to parse.
+      \return  List of dimension names.
+    */
+    void parseHeader(const std::string& header);
+
+    /**
+      Check a header line to see if it appears header-like.  Display a
+      warning if it doesn't look like a header.
+
+      \param header  Header string to test.
+    */
+    void checkHeader(const std::string& header);
+
 private:
     char m_separator;
     std::istream *m_istream;
@@ -117,6 +136,9 @@ private:
     Dimension::IdList m_dims;
     StringList m_fields;
     size_t m_line;
+    std::string m_header;
+    size_t m_skip;
+    std::streampos m_dataStart;
 };
 
 } // namespace pdal

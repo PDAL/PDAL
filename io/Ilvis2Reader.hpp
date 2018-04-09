@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_features.hpp> // For PDAL_HAVE_LIBXML2
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
 #include <map>
 
 #ifndef PDAL_HAVE_LIBXML2
@@ -51,12 +52,9 @@ namespace pdal
     #include "Ilvis2MetadataReader.hpp"
 #endif
 
-extern "C" int32_t Ilvis2Reader_ExitFunc();
-extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
-
 namespace pdal
 {
-class PDAL_DLL Ilvis2Reader : public pdal::Reader
+class PDAL_DLL Ilvis2Reader : public Reader, public Streamable
 {
 public:
     enum class IlvisMapping
@@ -76,8 +74,6 @@ public:
     Ilvis2Reader()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

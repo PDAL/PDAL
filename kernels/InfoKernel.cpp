@@ -44,15 +44,18 @@
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.info", "Info Kernel",
-    "http://pdal.io/apps/info.html" );
+static StaticPluginInfo const s_info
+{
+    "kernels.info",
+    "Info Kernel",
+    "http://pdal.io/apps/info.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, InfoKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(InfoKernel, s_info)
 
 std::string InfoKernel::getName() const { return s_info.name; }
 
@@ -137,6 +140,8 @@ void InfoKernel::addSwitches(ProgramArgs& args)
         m_boundary);
     args.add("dimensions", "Dimensions on which to compute statistics",
         m_dimensions);
+    args.add("enumerate", "Dimensions whose values should be enumerated",
+        m_enumerate);
     args.add("schema", "Dump the schema", m_showSchema);
     args.add("pipeline-serialization", "Output filename for pipeline "
         "serialization", m_pipelineFile);
@@ -307,6 +312,8 @@ void InfoKernel::setup(const std::string& filename)
         Options filterOptions;
         if (m_dimensions.size())
             filterOptions.add({"dimensions", m_dimensions});
+        if (m_enumerate.size())
+            filterOptions.add({"enumerate", m_enumerate});
         m_statsStage = &m_manager.makeFilter("filters.stats", *stage,
             filterOptions);
         stage = m_statsStage;
@@ -347,7 +354,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_manager.prepare();
         dump(root);
     }
-    root.add("pdal_version", pdal::GetFullVersionString());
+    root.add("pdal_version", Config::fullVersionString());
     return root;
 }
 

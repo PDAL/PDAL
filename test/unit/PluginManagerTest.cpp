@@ -34,7 +34,10 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/PluginDirectory.hpp>
 #include <pdal/PluginManager.hpp>
+#include <pdal/PluginManager.hpp>
+#include <pdal/pdal_config.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/util/Algorithm.hpp>
 
@@ -45,9 +48,6 @@ namespace pdal
 
 struct DummyPlugin : Filter
 {
-    static std::string const name;
-    static std::string const description;
-    static std::string const link;
     // Plugin management
     static int32_t dummyExitFunc()
     {
@@ -56,64 +56,37 @@ struct DummyPlugin : Filter
 
     static PF_ExitFunc initPlugin() // PF_InitFunc
     {
-        PF_RegisterParams rp;
-        rp.version.major = 1;
-        rp.version.minor = 0;
-        rp.createFunc = create;
-        rp.destroyFunc = destroy;
-        rp.description = description;
-        rp.link = link;
-        rp.pluginType = PF_PluginType_Filter;
-        if (!PluginManager::registerObject(name, &rp))
-            return nullptr;
-        return dummyExitFunc;
-//Broken on gcc 4.7.2
-//        return []()->int32_t { return 0; };
+        PluginInfo pi { "filters.dummytest", "A dummy plugin registered at run-time", "http://somewhere" };
+        pdal::PluginManager<Stage>::registerPlugin<DummyPlugin>(pi);
     }
-    static void* create()
-    {
-        return new DummyPlugin;
-    }
-    static int32_t destroy(void *p)
-    {
-        if (!p) return -1;
-        delete (DummyPlugin*)p;
-        return 0;
-    }
+
     // Stage
-    std::string getName() const final { return name; }
+    std::string getName() const final { return "filters.dummytest"; }
     // Filter
     void filter(PointView& /*view*/) final {}
 };
-std::string const DummyPlugin::name = "filters.dummytest";
-std::string const DummyPlugin::description = "A dummy plugin registered at run-time";
-std::string const DummyPlugin::link = "http://pdal.io";
 
+/**
+ABELL - Now load at startup.
 TEST(PluginManagerTest, NoPluginsNoNames)
 {
-    auto ns = PluginManager::names(PF_PluginType_Filter
-        | PF_PluginType_Reader | PF_PluginType_Writer);
+    auto ns = PluginManager<Stage>::names();
+    EXPECT_TRUE(ns.empty());
+    ns = PluginManager<Kernel>::names();
     EXPECT_TRUE(ns.empty());
 }
-
-TEST(PluginManagerTest, InitPlugin)
-{
-    EXPECT_TRUE(PluginManager::initializePlugin(DummyPlugin::initPlugin));
-    EXPECT_TRUE(!PluginManager::names(PF_PluginType_Filter).empty());
-
-    // Try to re-register the plugin
-    EXPECT_FALSE(PluginManager::initializePlugin(DummyPlugin::initPlugin));
-}
+**/
 
 TEST(PluginManagerTest, MissingPlugin)
 {
-    std::unique_ptr<DummyPlugin> p((DummyPlugin*)PluginManager::createObject("filters.nonexistentplugin"));
+    std::unique_ptr<Stage> p(PluginManager<Stage>::createObject("filters.nonexistentplugin"));
     EXPECT_EQ(p.get(), nullptr);
 }
 
 TEST(PluginManagerTest, CreateObject)
 {
-    std::unique_ptr<DummyPlugin> p((DummyPlugin*)PluginManager::createObject(DummyPlugin::name));
+    DummyPlugin::initPlugin();
+    std::unique_ptr<Stage> p(PluginManager<Stage>::createObject("filters.dummytest"));
     EXPECT_NE(p.get(), nullptr);
 }
 
@@ -123,19 +96,29 @@ TEST(PluginManagerTest, SearchPaths)
     int set = Utils::getenv("PDAL_DRIVER_PATH", curPath);
     Utils::unsetenv("PDAL_DRIVER_PATH");
 
-    StringList paths = PluginManager::test_pluginSearchPaths();
+    StringList paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_TRUE(Utils::contains(paths, "./lib"));
     EXPECT_TRUE(Utils::contains(paths, "../lib"));
     EXPECT_TRUE(Utils::contains(paths, "../bin"));
-    EXPECT_TRUE(Utils::contains(paths, PDAL_PLUGIN_INSTALL_PATH));
+    EXPECT_TRUE(Utils::contains(paths, Config::pluginInstallPath()));
 
+#ifdef _WIN32
+    Utils::setenv("PDAL_DRIVER_PATH", "C:\foo\bar;D:\baz");
+#else
     Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
-    paths = PluginManager::test_pluginSearchPaths();
+#endif
+    paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_EQ(paths.size(), 2U);
+
+#ifdef _WIN32
+    EXPECT_TRUE(Utils::contains(paths, "C:\foo\bar"));
+    EXPECT_TRUE(Utils::contains(paths, "D:\baz"));
+#else
     EXPECT_TRUE(Utils::contains(paths, "/foo/bar"));
     EXPECT_TRUE(Utils::contains(paths, "//baz"));
+#endif
     Utils::setenv("PDAL_DRIVER_PATH", "/this/is/a/path");
-    paths = PluginManager::test_pluginSearchPaths();
+    paths = PluginDirectory::test_pluginSearchPaths();
     EXPECT_EQ(paths.size(), 1U);
     EXPECT_TRUE(Utils::contains(paths, "/this/is/a/path"));
 

@@ -34,14 +34,10 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/Writer.hpp>
 
 #include "SbetCommon.hpp"
-
-extern "C" int32_t SbetWriter_ExitFunc();
-extern "C" PF_ExitFunc SbetWriter_InitPlugin();
 
 namespace pdal
 {
@@ -49,8 +45,6 @@ namespace pdal
 class PDAL_DLL SbetWriter : public Writer
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

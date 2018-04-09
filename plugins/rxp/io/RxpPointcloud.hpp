@@ -43,10 +43,8 @@
 
 #include <riegl/scanlib.hpp>
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
-
 
 namespace pdal
 {

@@ -35,14 +35,10 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <map>
 #include <memory>
 #include <string>
-
-extern "C" int32_t OutlierFilter_ExitFunc();
-extern "C" PF_ExitFunc OutlierFilter_InitPlugin();
 
 namespace pdal
 {
@@ -62,8 +58,6 @@ public:
     {
     }
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

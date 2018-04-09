@@ -42,12 +42,8 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/FlexWriter.hpp>
 #include <pdal/util/OStream.hpp>
-#include <pdal/plugin.hpp>
 
 #include <vector>
-
-extern "C" int32_t BpfWriter_ExitFunc();
-extern "C" PF_ExitFunc BpfWriter_InitPlugin();
 
 namespace pdal
 {
@@ -64,8 +60,6 @@ public:
         int m_val;
     };
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -35,7 +35,6 @@
 #include "MbReader.hpp"
 #include "MbError.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/DimUtil.hpp>
 
@@ -44,12 +43,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.mbio",
     "MBSystem Reader",
-    "http://www.pdal.io/stages/readers.mbio.html" );
+    "http://www.pdal.io/stages/readers.mbio.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MbReader, Reader, s_info)
+CREATE_SHARED_STAGE(MbReader, s_info)
 
 std::string MbReader::getName() const { return s_info.name; }
 

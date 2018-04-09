@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -43,23 +43,20 @@
 
 #include <map>
 
-extern "C" int32_t ColorizationFilter_ExitFunc();
-extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
-
 namespace pdal
 {
 
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
-class PDAL_DLL ColorizationFilter : public Filter
+class PDAL_DLL ColorizationFilter : public Filter, public Streamable
 {
 public:
     struct BandInfo
     {
         BandInfo(const std::string& name, uint32_t band, double scale) :
             m_name(name), m_band(band), m_scale(scale),
-            m_dim(Dimension::Id::Unknown)
+            m_dim(Dimension::Id::Unknown), m_type(Dimension::Type::Double)
         {}
 
         BandInfo() : m_band(0), m_scale(1.0), m_dim(Dimension::Id::Unknown)
@@ -69,6 +66,7 @@ public:
         uint32_t m_band;
         double m_scale;
         Dimension::Id m_dim;
+        Dimension::Type m_type;
     };
 
 
@@ -77,8 +75,6 @@ public:
     ColorizationFilter& operator=(const ColorizationFilter&) = delete;
     ColorizationFilter(const ColorizationFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

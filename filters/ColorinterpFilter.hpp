@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 #include <filters/StatsFilter.hpp>
 
 #include <gdal.h>
@@ -44,9 +44,6 @@
 
 #include <map>
 
-extern "C" int32_t ColorinterpFilter_ExitFunc();
-extern "C" PF_ExitFunc ColorinterpFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -54,7 +51,7 @@ namespace pdal
 // for a given dimension
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
-class PDAL_DLL ColorinterpFilter : public Filter
+class PDAL_DLL ColorinterpFilter : public Filter, public Streamable
 {
 public:
 
@@ -71,11 +68,9 @@ public:
     {}
     ColorinterpFilter& operator=(const ColorinterpFilter&) = delete;
     ColorinterpFilter(const ColorinterpFilter&) = delete;
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
+    virtual bool pipelineStreamable() const;
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);

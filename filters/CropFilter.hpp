@@ -34,32 +34,40 @@
 
 #pragma once
 
+#include <list>
+
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include "private/Point.hpp"
-
-extern "C" int32_t CropFilter_ExitFunc();
-extern "C" PF_ExitFunc CropFilter_InitPlugin();
 
 namespace pdal
 {
 
 class ProgramArgs;
+class GridPnp;
 
 // removes any points outside of the given range
 // updates the header accordingly
-class PDAL_DLL CropFilter : public Filter
+class PDAL_DLL CropFilter : public Filter, public Streamable
 {
 public:
     CropFilter();
     ~CropFilter();
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
+    // This is just a way to marry a (multi)polygon with a list of its
+    // GridPnp's that do the actual point-in-polygon operation.
+    struct ViewGeom
+    {
+        ViewGeom(const Polygon& poly);
+        ViewGeom(ViewGeom&& vg);
+
+        Polygon m_poly;
+        std::vector<std::unique_ptr<GridPnp>> m_gridPnps;
+    };
     std::vector<Bounds> m_bounds;
     bool m_cropOutside;
     std::vector<Polygon> m_polys;
@@ -67,19 +75,20 @@ private:
     double m_distance;
     double m_distance2;
     std::vector<filter::Point> m_centers;
-    std::vector<Polygon> m_geoms;
+    std::vector<ViewGeom> m_geoms;
     std::vector<BOX2D> m_boxes;
 
     void addArgs(ProgramArgs& args);
     virtual void initialize();
+
     virtual void ready(PointTableRef table);
     virtual void spatialReferenceChanged(const SpatialReference& srs);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
     bool crop(const PointRef& point, const BOX2D& box);
     void crop(const BOX2D& box, PointView& input, PointView& output);
-    bool crop(const PointRef& point, const Polygon& g);
-    void crop(const Polygon& g, PointView& input, PointView& output);
+    bool crop(const PointRef& point, GridPnp& g);
+    void crop(const ViewGeom& g, PointView& input, PointView& output);
     bool crop(const PointRef& point, const filter::Point& center);
     void crop(const filter::Point& center, PointView& input,
         PointView& output);

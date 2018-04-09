@@ -37,18 +37,19 @@
 
 #include "MatlabReader.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.matlab",
     "Matlab Reader",
-    "http://pdal.io/stages/readers.matlab.html" );
+    "http://pdal.io/stages/readers.matlab.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MatlabReader, Reader, s_info)
+CREATE_SHARED_STAGE(MatlabReader, s_info)
 std::string MatlabReader::getName() const { return s_info.name; }
 
 void MatlabReader::initialize(PointTableRef table)

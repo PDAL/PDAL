@@ -21,7 +21,6 @@ RUN \
         py-numpy-dev \
         jsoncpp-dev \
         hdf5-dev \
-        proj4-dev \
         sqlite-dev \
         postgresql-dev \
         curl-dev \
@@ -42,6 +41,7 @@ RUN \
         jsoncpp \
         hdf5 \
         proj4 \
+        proj4-dev \
         sqlite \
         postgresql \
         libcurl \

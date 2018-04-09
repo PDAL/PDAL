@@ -35,22 +35,17 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t MergeFilter_ExitFunc();
-extern "C" PF_ExitFunc MergeFilter_InitPlugin();
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL MergeFilter : public Filter
+class PDAL_DLL MergeFilter : public Filter, public Streamable
 {
 public:
     MergeFilter ()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

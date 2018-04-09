@@ -1,18 +1,19 @@
 // MyWriter.cpp
 
 #include "MyWriter.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
-  static PluginInfo const s_info = PluginInfo(
+  static PluginInfo const s_info
+  {
     "writers.mywriter",
     "My Awesome Writer",
-    "http://path/to/documentation" );
+    "http://path/to/documentation"
+  };
 
-  CREATE_SHARED_PLUGIN(1, 0, MyWriter, Writer, s_info);
+  CREATE_SHARED_STAGE(MyWriter, s_info);
 
   std::string MyWriter::getName() const { return s_info.name; }
 
@@ -29,11 +30,10 @@ namespace pdal
     }
   };
 
-
   void MyWriter::addArgs(ProgramArgs& args)
   {
     // setPositional() Makes the argument required.
-    args.add("filename", "Output filename", m_filename).setPositional();  
+    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("newline", "Line terminator", m_newline, "\n");
     args.add("datafield", "Data field", m_datafield, "UserData");
     args.add("precision", "Precision", m_precision, 3);
@@ -51,6 +51,7 @@ namespace pdal
       throw pdal_error(out.str());
     }
   }
+
 
   void MyWriter::ready(PointTableRef table)
   {
@@ -94,5 +95,4 @@ namespace pdal
   {
     m_stream.reset();
   }
-
 }

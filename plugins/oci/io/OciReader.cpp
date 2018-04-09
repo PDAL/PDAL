@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -44,12 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.oci",
     "Read point cloud data from Oracle SDO_POINTCLOUD.",
-    "http://pdal.io/stages/readers.oci.html" );
+    "http://pdal.io/stages/readers.oci.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, OciReader, Reader, s_info)
+CREATE_SHARED_STAGE(OciReader, s_info)
 
 std::string OciReader::getName() const { return s_info.name; }
 

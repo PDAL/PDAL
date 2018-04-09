@@ -48,6 +48,7 @@ PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 PDAL_ADD_TEST(pdal_program_arg_test FILES ProgramArgsTest.cpp)
     target_include_directories(pdal_program_arg_test PRIVATE
         ${PDAL_JSONCPP_INCLUDE_DIR})
+PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
 PDAL_ADD_TEST(pdal_polygon_test FILES PolygonTest.cpp)
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
@@ -58,7 +59,18 @@ PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
-#PDAL_ADD_TEST(pdal_compression_test FILES CompressionTest.cpp)
+if (PDAL_HAVE_LAZ_PERF)
+PDAL_ADD_TEST(pdal_lazperf_test FILES LazPerfTest.cpp)
+endif()
+if (PDAL_HAVE_ZLIB)
+PDAL_ADD_TEST(pdal_deflate_test FILES DeflateTest.cpp)
+endif()
+if (PDAL_HAVE_LZMA)
+PDAL_ADD_TEST(pdal_lzma_test FILES LzmaTest.cpp)
+endif()
+if (PDAL_HAVE_ZSTD)
+PDAL_ADD_TEST(pdal_zstd_test FILES ZstdTest.cpp)
+endif()
 
 #
 # sources for the native io
@@ -96,15 +108,16 @@ PDAL_ADD_TEST(pdal_filters_colorinterp_test FILES
     filters/ColorinterpFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES
     filters/ColorizationFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_computerange_test FILES filters/ComputeRangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
+PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test FILES
     filters/AdditionalMergeTest.cpp)
 target_include_directories(pdal_filters_additional_merge_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
@@ -121,6 +134,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
+PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 endif()

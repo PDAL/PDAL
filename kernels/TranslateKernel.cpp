@@ -35,7 +35,6 @@
 
 #include "TranslateKernel.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
@@ -53,16 +52,18 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("kernels.translate",
-               "The Translate kernel allows users to construct a pipeline " \
-               "consisting of a reader, a writer, and N filter stages. " \
-               "Any supported stage type can be specified from the command " \
-               "line, reducing the need to create custom kernels for every " \
-               "combination.",
-               "http://pdal.io/apps/translate.html");
+static StaticPluginInfo const s_info
+{
+    "kernels.translate",
+    "The Translate kernel allows users to construct a pipeline " \
+        "consisting of a reader, a writer, and N filter stages. " \
+        "Any supported stage type can be specified from the command " \
+        "line, reducing the need to create custom kernels for every " \
+        "combination.",
+    "http://pdal.io/apps/translate.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(TranslateKernel, s_info)
 
 std::string TranslateKernel::getName() const
 {
@@ -87,6 +88,8 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
         m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
+    args.add("nostream", "Don't run in stream mode, even if technically "
+        "possible.", m_noStream);
 }
 
 
@@ -206,7 +209,17 @@ int TranslateKernel::execute()
             m_pipelineOutputFile);
         return 0;
     }
-    m_manager.execute();
+
+    if (m_noStream || !m_manager.pipelineStreamable())
+    {
+        m_manager.execute();
+    }
+    else
+    {
+        FixedPointTable t(10000);
+        m_manager.executeStream(t);
+    }
+
     if (metaOut)
     {
         MetadataNode m = m_manager.getMetadata();

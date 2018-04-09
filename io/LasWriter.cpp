@@ -32,13 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_features.hpp>
+
+#include <pdal/compression/LazPerfVlrCompression.hpp>
+#ifdef PDAL_HAVE_LAZPERF
+#include <laz-perf/factory.hpp>
+#include <laz-perf/io.hpp>
+#endif
+
 #include "LasWriter.hpp"
 
 #include <climits>
 #include <iostream>
 #include <vector>
 
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
@@ -47,7 +55,6 @@
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/Utils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GeotiffSupport.hpp"
@@ -55,20 +62,31 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "writers.las",
     "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
         "available if enabled at compile-time. Note that LAZ \n" \
         "does not provide LAS 1.4 support at this time.",
-    "http://pdal.io/stages/writers.las.html" );
+    "http://pdal.io/stages/writers.las.html",
+    { "las", "laz" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
+CREATE_STATIC_STAGE(LasWriter, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None),
-    m_srsCnt(0)
+LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
+    m_compression(LasCompression::None), m_srsCnt(0)
 {}
+
+
+LasWriter::~LasWriter()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_compressor;
+#endif
+}
 
 
 void LasWriter::addArgs(ProgramArgs& args)
@@ -137,7 +155,7 @@ void LasWriter::initialize()
 #endif
     try
     {
-        m_extraDims = LasUtils::parse(m_extraDimSpec);
+        m_extraDims = LasUtils::parse(m_extraDimSpec, true);
     }
     catch (const LasUtils::error& err)
     {
@@ -479,7 +497,7 @@ void LasWriter::addGeotiffVlrs()
             addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
                 "GeoTiff GeoAsciiParamsTag", tags.asciiData());
     }
-    catch (GeotiffTags::error& err)
+    catch (Geotiff::error& err)
     {
         throwError(err.what());
     }
@@ -707,8 +725,9 @@ void LasWriter::readyLazPerfCompression()
     zipvlr.extract((char *)data.data());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
 
-    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema,
-        zipvlr.chunk_size));
+    delete m_compressor;
+    m_compressor = new LazPerfVlrCompressor(*m_ostream, schema,
+        zipvlr.chunk_size);
 #endif
 }
 

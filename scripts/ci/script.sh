@@ -2,11 +2,12 @@
 # Builds and tests PDAL
 
 echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+echo "@edgecommunity http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
 apk update
 apk add \
     cmake \
     alpine-sdk \
-    eigen-dev \
+    eigen-dev@edgecommunity \
     hexer \
     hexer-dev \
     nitro \
@@ -17,6 +18,8 @@ apk add \
     geos-dev \
     laz-perf \
     laz-perf-dev \
+    libexecinfo \
+    libexecinfo-dev \
     libgeotiff \
     libgeotiff-dev \
     libxml2 \
@@ -25,6 +28,9 @@ apk add \
     python-dev \
     py-numpy \
     py-numpy-dev \
+    cython \
+    cython-dev \
+    py-pip \
     jsoncpp \
     jsoncpp-dev \
     hdf5 \
@@ -81,6 +87,15 @@ make -j2
 LD_LIBRARY_PATH=./lib
 ctest -V
 make install
+
+# Python extension testing
+pip install packaging
+git clone https://github.com/PDAL/python.git pdal-python
+cd pdal-python
+python setup.py build
+echo "current path: " `pwd`
+export PDAL_TEST_DIR=/pdal/_build/test
+python setup.py test
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do

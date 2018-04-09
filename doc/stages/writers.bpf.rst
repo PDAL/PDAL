@@ -34,7 +34,7 @@ Options
 -------
 
 filename
-    BPF file to read.  The writer will accept a filename containing
+    BPF file to write.  The writer will accept a filename containing
     a single placeholder character ('#').  If input to the writer consists
     of multiple PointViews, each will be written to a separate file, where
     the placeholder will be replaced with an incrementing integer.  If no

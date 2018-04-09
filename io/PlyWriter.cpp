@@ -37,20 +37,21 @@
 #include <limits>
 #include <sstream>
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
         "writers.ply",
         "ply writer",
-        "http://pdal.io/stages/writers.ply.html"
-        );
+        "http://pdal.io/stages/writers.ply.html",
+        { "ply" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PlyWriter, Writer, s_info)
+CREATE_STATIC_STAGE(PlyWriter, s_info)
 
 std::string PlyWriter::getName() const { return s_info.name; }
 

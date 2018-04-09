@@ -35,7 +35,6 @@
 
 #include "SmoothKernel.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <io/BufferReader.hpp>
 
 #include "../filters/PCLBlock.hpp"
@@ -43,12 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "kernels.smooth",
     "Smooth Kernel",
-    "http://pdal.io/kernels/kernels.smooth.html" );
+    "http://pdal.io/kernels/kernels.smooth.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, SmoothKernel, Kernel, s_info)
+CREATE_SHARED_KERNEL(SmoothKernel, s_info)
 
 std::string SmoothKernel::getName() const { return s_info.name; }
 
@@ -80,7 +81,7 @@ int SmoothKernel::execute()
     manager.stageOptions() = m_manager.stageOptions();
 
     BufferReader& bufferReader =
-        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+        dynamic_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
     bufferReader.addView(input_view);
 
     std::ostringstream ss;

@@ -33,11 +33,12 @@
 ****************************************************************************/
 
 #include "SQLiteWriter.hpp"
+
+#include <pdal/pdal_features.hpp>
+
 #include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/pdal_internal.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <iomanip>
@@ -49,12 +50,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.sqlite",
     "Write data to SQLite3 database files.",
-    "" );
+    ""
+};
 
-CREATE_SHARED_PLUGIN(1, 0, SQLiteWriter, Writer, s_info)
+CREATE_SHARED_STAGE(SQLiteWriter, s_info)
 
 std::string SQLiteWriter::getName() const { return s_info.name; }
 

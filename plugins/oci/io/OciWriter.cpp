@@ -32,12 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "OciWriter.hpp"
@@ -49,12 +48,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.oci",
     "Write data using SDO_PC objects to Oracle.",
-    "http://pdal.io/stages/writers.oci.html" );
+    "http://pdal.io/stages/writers.oci.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, OciWriter, Writer, s_info)
+CREATE_SHARED_STAGE(OciWriter, s_info)
 
 std::string OciWriter::getName() const { return s_info.name; }
 

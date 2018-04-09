@@ -1,6 +1,6 @@
 #
 # The seemingly strange arrangement of this cmake file allows you to build
-# lasdump as a standalone.
+# this application as a standalone.
 #
 cmake_minimum_required(VERSION 2.8.6)
 
@@ -12,6 +12,8 @@ if(NOT ROOT_DIR)
 endif()
 
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
+
+include(${PDAL_CMAKE_DIR}/execinfo.cmake)
 
 #
 # We include Utils.cpp here rather than linking in the Utils library because
@@ -27,8 +29,12 @@ target_include_directories(dimbuilder PRIVATE
     ${PDAL_INCLUDE_DIR}
     ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
+target_link_libraries(dimbuilder
+    PRIVATE
+        ${EXECINFO_LIBRARY})
 if (PDAL_HAVE_JSONCPP)
-    target_link_libraries(dimbuilder ${JSON_CPP_LINK_TYPE} ${PDAL_JSONCPP_LIB_NAME})
+    target_link_libraries(dimbuilder ${JSON_CPP_LINK_TYPE}
+        ${PDAL_JSONCPP_LIB_NAME})
 endif()
 if (UNIX AND NOT APPLE)
     target_link_libraries(dimbuilder PRIVATE  ${CMAKE_DL_LIBS})

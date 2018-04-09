@@ -19,8 +19,6 @@ limited ability to impute associated data.  However, if color dimensions
 (red, green and blue) are present in the input, colors will be reconstruced
 in the output point set.
 
-.. [Kazhdan2006] Kazhdan, Michael, Matthew Bolitho, and Hugues Hoppe. "Poisson surface reconstruction." Proceedings of the fourth Eurographics symposium on Geometry processing. Vol. 7. 2006.
-
 This integration of the algorithm with PDAL only supports a limited set of
 the options available to the implementation.  If you need support for further
 options, please let us know.
@@ -70,4 +68,3 @@ depth
   Maximum depth of the tree used for reconstruction. The output is sentsitve
   to this parameter.  Increase if the results appear unsatisfactory.
   [Default: **8**]
-

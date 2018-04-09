@@ -37,13 +37,9 @@
 #include <pdal/Options.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <vector>
-
-extern "C" int32_t TerrasolidReader_ExitFunc();
-extern "C" PF_ExitFunc TerrasolidReader_InitPlugin();
 
 namespace pdal
 {
@@ -91,9 +87,6 @@ public:
     TerrasolidReader() : pdal::Reader(),
         m_format(TERRASOLID_Format_Unknown)
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     point_count_t getNumPoints() const

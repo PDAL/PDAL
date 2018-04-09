@@ -34,12 +34,7 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 #include <pdal/Writer.hpp>
-
-extern "C" int32_t NullWriter_ExitFunc();
-extern "C" PF_ExitFunc NullWriter_InitPlugin();
 
 namespace pdal
 {
@@ -47,8 +42,6 @@ namespace pdal
 class PDAL_DLL NullWriter : public Writer
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 private:
     virtual void write(const PointViewPtr /*view*/)

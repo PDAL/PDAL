@@ -35,7 +35,6 @@
 #include "VoxelCenterNearestNeighborFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <set>
 #include <string>
@@ -45,12 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.voxelcenternearestneighbor",
-               "Voxel Center Nearest Neighbor Filter",
-               "http://pdal.io/stages/filters.voxelcenternearestneighbor.html");
+static StaticPluginInfo const s_info
+{
+    "filters.voxelcenternearestneighbor",
+    "Voxel Center Nearest Neighbor Filter",
+    "http://pdal.io/stages/filters.voxelcenternearestneighbor.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, VoxelCenterNearestNeighborFilter, Filter, s_info)
+CREATE_STATIC_STAGE(VoxelCenterNearestNeighborFilter, s_info)
 
 std::string VoxelCenterNearestNeighborFilter::getName() const
 {
@@ -78,9 +79,9 @@ PointViewSet VoxelCenterNearestNeighborFilter::run(PointViewPtr view)
         double y = view->getFieldAs<double>(Dimension::Id::Y, id);
         double x = view->getFieldAs<double>(Dimension::Id::X, id);
         double z = view->getFieldAs<double>(Dimension::Id::Z, id);
-        size_t r = static_cast<size_t>(floor(y - bounds.miny) / m_cell);
-        size_t c = static_cast<size_t>(floor(x - bounds.minx) / m_cell);
-        size_t d = static_cast<size_t>(floor(z - bounds.minz) / m_cell);
+        size_t r = static_cast<size_t>((y - bounds.miny) / m_cell);
+        size_t c = static_cast<size_t>((x - bounds.minx) / m_cell);
+        size_t d = static_cast<size_t>((z - bounds.minz) / m_cell);
         populated_voxels.emplace(std::make_tuple(r, c, d));
     }
 

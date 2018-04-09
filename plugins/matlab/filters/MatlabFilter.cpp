@@ -32,12 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-
 #include "MatlabFilter.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -47,12 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "filters.matlab",
     "Manipulate data using inline Matlab",
-    "http://pdal.io/stages/filters.matlab.html" );
+    "http://pdal.io/stages/filters.matlab.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MatlabFilter, Filter, s_info)
+CREATE_SHARED_STAGE(MatlabFilter, Filter)
 
 std::string MatlabFilter::getName() const { return s_info.name; }
 

@@ -38,18 +38,19 @@
 #include <iostream>
 #include <limits>
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.splitter",
     "Split data based on a X/Y box length.",
-    "http://pdal.io/stages/filters.splitter.html" );
+    "http://pdal.io/stages/filters.splitter.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, Filter, s_info)
+CREATE_STATIC_STAGE(SplitterFilter, s_info)
 
 SplitterFilter::SplitterFilter() : m_viewMap(CoordCompare())
 {}
@@ -70,7 +71,7 @@ void SplitterFilter::addArgs(ProgramArgs& args)
 void SplitterFilter::initialize() {
     if (!(m_buffer < m_length / 2.)) {
         std::stringstream oss;
-        oss << "Buffer (" << m_buffer << 
+        oss << "Buffer (" << m_buffer <<
             ") must be less than half of length (" << m_length << ")";
         throw pdal_error(oss.str());
     }
@@ -137,7 +138,7 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
 }
 
 bool SplitterFilter::squareContains(int xpos, int ypos, double x, double y) const {
-    double minx = m_xOrigin + xpos * m_length - m_buffer; 
+    double minx = m_xOrigin + xpos * m_length - m_buffer;
     double maxx = minx + m_length + 2 * m_buffer;
     double miny = m_yOrigin + ypos * m_length - m_buffer;
     double maxy = miny + m_length + 2 * m_buffer;

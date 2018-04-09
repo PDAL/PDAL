@@ -34,19 +34,20 @@
 
 #include "MADFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <string>
 #include <vector>
 
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.mad", "Median Absolute Deviation Filter",
-               "http://pdal.io/stages/filters.mad.html");
+static StaticPluginInfo const s_info
+{
+    "filters.mad",
+    "Median Absolute Deviation Filter",
+    "http://pdal.io/stages/filters.mad.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, MADFilter, Filter, s_info)
+CREATE_STATIC_STAGE(MADFilter, s_info)
 
 std::string MADFilter::getName() const
 {

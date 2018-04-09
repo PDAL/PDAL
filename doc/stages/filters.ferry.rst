@@ -7,11 +7,11 @@ The ferry filter copies data from one dimension to another, creates new
 dimensions or both.
 
 The filter is guided by a list of 'from' and 'to' dimensions in the format
-<from>=<to>.  Data from the 'from' dimension is copied to the 'to' dimension.
+<from>=><to>.  Data from the 'from' dimension is copied to the 'to' dimension.
 The 'from' dimension must exist.  The 'to' dimension can be pre-existing or
 will be created by the ferry filter.
 
-Alternatively, the format =<to> can be used to create a new dimension without
+Alternatively, the format =><to> can be used to create a new dimension without
 copying data from any source.  The values of the 'to' dimension are default
 initialized.
 
@@ -40,7 +40,7 @@ pre-reprojection values and the post-reprojection values.
         },
         {
           "type":"filters.ferry",
-          "dimensions":"X = StatePlaneX, Y=StatePlaneY"
+          "dimensions":"X => StatePlaneX, Y=>StatePlaneY"
         },
         {
           "type":"filters.reprojection",
@@ -71,7 +71,7 @@ so that the value can be set to '2' and written as a LAS file.
         },
         {
             "type": "filters.ferry",
-            "dimensions": "=Classification"
+            "dimensions": "=>Classification"
         },
         {
             "type": "filters.assign",
@@ -86,6 +86,10 @@ Options
 
 dimensions
   A list of dimensions whose values should be copied.
-  The format of the option is <from>=<to>, <from>=<to>,... Spaces are ignored.
+  The format of the option is <from>=><to>, <from>=><to>,...
+  Spaces are ignored.
   'from' can be left empty, in which case the 'to' dimension is created and
   default-initialized.  'to' dimensions will be created if necessary.
+
+  Note: the old syntax that used '=' instead of '=>' between dimension names
+  is still supported.

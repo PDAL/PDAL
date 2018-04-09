@@ -37,7 +37,7 @@
 #include <queue>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 extern "C"
 {
@@ -46,15 +46,12 @@ extern "C"
 
 #include "MbFormat.hpp"
 
-extern "C" int32_t MbReader_ExitFunc();
-extern "C" PF_ExitFunc MbReader_InitPlugin();
-
 namespace pdal
 {
 
 struct BathData;
 
-class PDAL_DLL MbReader : public pdal::Reader
+class PDAL_DLL MbReader : public Reader, public Streamable
 {
     struct BathData
     {
@@ -73,9 +70,6 @@ public:
     virtual ~MbReader();
     MbReader& operator=(const MbReader&) = delete;
     MbReader(const MbReader&) = delete;
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

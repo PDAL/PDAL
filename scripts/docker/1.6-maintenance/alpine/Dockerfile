@@ -19,7 +19,6 @@ RUN \
         py-numpy-dev \
         jsoncpp-dev \
         hdf5-dev \
-        proj4-dev \
         cpd-dev \
         fgt-dev \
         sqlite-dev \
@@ -29,6 +28,7 @@ RUN \
         laszip-dev \
         libspatialite-dev \
         cython-dev \
+        jsoncpp-dev \
         py-packaging \
     ; \
     apk add --no-cache \
@@ -44,6 +44,7 @@ RUN \
         jsoncpp \
         hdf5 \
         proj4 \
+        proj4-dev \
         cpd \
         fgt \
         sqlite \
@@ -51,6 +52,7 @@ RUN \
         libcurl \
         laszip \
         libspatialite \
+        jsoncpp \
         py-setuptools \
     ;\
     mkdir /vdatum; \

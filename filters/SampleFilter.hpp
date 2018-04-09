@@ -35,12 +35,8 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <string>
-
-extern "C" int32_t SampleFilter_ExitFunc();
-extern "C" PF_ExitFunc SampleFilter_InitPlugin();
 
 namespace pdal
 {
@@ -55,8 +51,6 @@ public:
     SampleFilter& operator=(const SampleFilter&) = delete;
     SampleFilter(const SampleFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -38,10 +38,6 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t PipelineKernel_ExitFunc();
-extern "C" PF_ExitFunc PipelineKernel_InitPlugin();
 
 namespace pdal
 {
@@ -49,13 +45,11 @@ namespace pdal
 class PDAL_DLL PipelineKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    PipelineKernel();
 
 private:
-    PipelineKernel();
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
     virtual bool isStagePrefix(const std::string& stage);
@@ -69,6 +63,7 @@ private:
     int m_progressFd;
     bool m_usestdin;
     bool m_stream;
+    bool m_noStream;
 };
 
 } // pdal

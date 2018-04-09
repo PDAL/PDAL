@@ -32,17 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/compression/LazPerfVlrCompression.hpp>
+
 #include "LasReader.hpp"
 
 #include <sstream>
 #include <string.h>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "GeotiffSupport.hpp"
@@ -63,24 +65,40 @@ struct invalid_stream : public std::runtime_error
 
 } // unnamed namespace
 
+LasReader::LasReader() : m_decompressor(nullptr), m_index(0)
+{}
+
+
+LasReader::~LasReader()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_decompressor;
+#endif
+}
+
+
 void LasReader::addArgs(ProgramArgs& args)
 {
     addSpatialReferenceArg(args);
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
+    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
+        m_useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
 }
 
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info {
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
         "enabled through this driver if LASzip was found during \n" \
         "compilation.",
-    "http://pdal.io/stages/readers.las.html" );
+    "http://pdal.io/stages/readers.las.html",
+    { "las", "laz" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
+CREATE_STATIC_STAGE(LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 
@@ -145,7 +163,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     try
     {
-        m_extraDims = LasUtils::parse(m_extraDimSpec);
+        m_extraDims = LasUtils::parse(m_extraDimSpec, false);
     }
     catch (const LasUtils::error& err)
     {
@@ -170,6 +188,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     ILeStream in(stream);
     try
     {
+        // This also reads the extended VLRs at the end of the data.
         in >> m_header;
     }
     catch (const LasHeader::error& e)
@@ -195,7 +214,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)m_header.pointFormat()) + ".");
 
-    if (m_header.versionAtLeast(1, 4))
+    if (m_header.versionAtLeast(1, 4) || m_useEbVlr)
         readExtraBytesVlr();
     setSrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
@@ -204,6 +223,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     m_streamIf.reset();
 }
+
 
 void LasReader::handleLaszip(int result)
 {
@@ -243,8 +263,9 @@ void LasReader::ready(PointTableRef table)
         {
             const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
-            m_decompressor.reset(new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_header.pointOffset()));
+            delete m_decompressor;
+            m_decompressor = new LazPerfVlrDecompressor(*stream,
+                vlr->data(), m_header.pointOffset());
             m_decompressorBuf.resize(m_decompressor->pointSize());
         }
 #endif
@@ -259,11 +280,36 @@ void LasReader::ready(PointTableRef table)
 }
 
 
+namespace
+{
+
+void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, double val, const std::string description,
+    size_t precision)
+{
+    MetadataNode n = m.add(name, val, description, precision);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(n);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+}
+
 // Store data in the normal metadata place.  Also store it in the private
 // lasforward metadata node.
 template <typename T>
 void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
-    const std::string& name, T val, const std::string description = "")
+    const std::string& name, T val, const std::string description)
 {
     MetadataNode n = m.add(name, val, description);
 
@@ -315,7 +361,8 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 
     addForwardMetadata(forward, m, "project_id", m_header.projectId(),
         "Project ID.");
-    addForwardMetadata(forward, m, "system_id", m_header.systemId());
+    addForwardMetadata(forward, m, "system_id", m_header.systemId(),
+        "Generating system ID.");
     addForwardMetadata(forward, m, "software_id", m_header.softwareId(),
         "Generating software description.");
     addForwardMetadata(forward, m, "creation_doy", m_header.creationDOY(),
@@ -326,17 +373,17 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         "The year, expressed as a four digit number, in which the file was "
         "created.");
     addForwardMetadata(forward, m, "scale_x", m_header.scaleX(),
-        "The scale factor for X values.");
+        "The scale factor for X values.", 20);
     addForwardMetadata(forward, m, "scale_y", m_header.scaleY(),
-        "The scale factor for Y values.");
+        "The scale factor for Y values.", 20);
     addForwardMetadata(forward, m, "scale_z", m_header.scaleZ(),
-        "The scale factor for Z values.");
+        "The scale factor for Z values.", 20);
     addForwardMetadata(forward, m, "offset_x", m_header.offsetX(),
-        "The offset for X values.");
+        "The offset for X values.", 20);
     addForwardMetadata(forward, m, "offset_y", m_header.offsetY(),
-        "The offset for Y values.");
+        "The offset for Y values.", 20);
     addForwardMetadata(forward, m, "offset_z", m_header.offsetZ(),
-        "The offset for Z values.");
+        "The offset for Z values.", 20);
 
     m.add("header_size", m_header.vlrOffset(),
         "The size, in bytes, of the header block, including any extension "
@@ -393,7 +440,6 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         m.addWithType("pdal_pipeline", std::string(pos, size), "json",
             "PDAL Processing Pipeline");
     }
-
 }
 
 
@@ -693,7 +739,9 @@ void LasReader::loadPointV10(PointRef& point, laszip_point& p)
     point.setField(Dimension::Id::NumberOfReturns, p.number_of_returns);
     point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
     point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
-    point.setField(Dimension::Id::Classification, p.classification);
+    uint8_t classification = p.classification | (p.synthetic_flag << 5) |
+        (p.keypoint_flag << 6) | (p.withheld_flag << 7);
+    point.setField(Dimension::Id::Classification, classification);
     point.setField(Dimension::Id::ScanAngleRank, p.scan_angle_rank);
     point.setField(Dimension::Id::UserData, p.user_data);
     point.setField(Dimension::Id::PointSourceId, p.point_source_ID);

@@ -37,7 +37,6 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/StageFactory.hpp>
 
 #include "../PCLConversions.hpp"
 
@@ -55,9 +54,6 @@ class PDAL_DLL PcdWriter : public Writer
 public:
     PcdWriter()
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

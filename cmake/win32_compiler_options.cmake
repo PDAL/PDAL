@@ -1,18 +1,3 @@
-if (MSVC)
-    set(PDAL_COMPILER_MSVC 1)
-    if (MSVC12)
-      set(PDAL_COMPILER_VC12 1)
-    elseif (MSVC11)
-      set(PDAL_COMPILER_VC11 1)
-    elseif (MSVC10)
-      set(PDAL_COMPILER_VC10 1)
-    elseif (MSVC9)
-      set(PDAL_COMPILER_VC9 1)
-    elseif (MSVC8)
-      set(PDAL_COMPILER_VC8 1)
-    endif()
-endif()
-
 function(PDAL_TARGET_COMPILE_SETTINGS target)
     target_compile_definitions(${target} PUBLIC -DWIN32_LEAN_AND_MEAN)
     if (MSVC)
@@ -29,14 +14,18 @@ function(PDAL_TARGET_COMPILE_SETTINGS target)
                 )
             target_compile_options(${target} PUBLIC
                 # Nitro makes use of Exception Specifications, which results in
-                # numerous warnings when compiling in MSVC. We will ignore them for
-                # now.
+                # numerous warnings when compiling in MSVC. We will ignore
+                # them for now.
                 /wd4290
                 /wd4800
-                # Windows warns about integer narrowing like crazy and it's annoying.
-                # In most cases the programmer knows what they're doing.  A good
-                # static analysis tool would be better than turning this warning off.
+                # Windows warns about integer narrowing like crazy and it's
+                # annoying.  In most cases the programmer knows what they're
+                # doing.  A good static analysis tool would be better than
+                # turning this warning off.
                 /wd4267
+                # Annoying warning about function hiding with virtual
+                # inheritance.
+                /wd4250
                 )
         endif()
 

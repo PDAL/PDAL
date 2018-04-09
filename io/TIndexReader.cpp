@@ -34,18 +34,20 @@
 
 #include "TIndexReader.hpp"
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.tindex",
     "TileIndex Reader",
-    "http://pdal.io/stages/readers.tindex.html" );
+    "http://pdal.io/stages/readers.tindex.html",
+    { "tindex" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TIndexReader, Reader, s_info)
+CREATE_STATIC_STAGE(TIndexReader, s_info)
 
 std::string TIndexReader::getName() const { return s_info.name; }
 
@@ -265,10 +267,13 @@ void TIndexReader::initialize()
     m_dataset = 0;
 }
 
+void TIndexReader::prepared(PointTableRef table)
+{
+    m_merge.prepare(table);
+}
 
 void TIndexReader::ready(PointTableRef table)
 {
-    m_merge.prepare(table);
     m_pvSet = m_merge.execute(table);
 }
 

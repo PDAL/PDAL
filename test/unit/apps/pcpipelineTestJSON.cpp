@@ -57,17 +57,21 @@ std::string appName()
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
 void run_pipeline(std::string const& pipelineFile,
-    const std::string options = std::string())
+    const std::string options = std::string(), const std::string lookFor = "")
 {
     const std::string cmd = appName();
 
     std::string output;
     std::string file(Support::configuredpath(pipelineFile));
-    int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " + options,
-        output);
+    int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " +
+        options + " 2>&1", output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
+    if (lookFor.size())
+    {
+        EXPECT_NE(output.find(lookFor), std::string::npos);
+    }
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
@@ -133,15 +137,10 @@ TEST(pipelineBaseTest, progress)
 
 class json : public testing::TestWithParam<const char*> {};
 
+// TEST_P is run for each of the values in INSTANTIATE_TEST_CASE below.
 TEST_P(json, pipeline)
 {
     run_pipeline(GetParam());
-}
-
-TEST(json, pipeline_stdin)
-{
-    run_pipeline_stdin("pipeline/las2csv.json");
-    run_pipeline_stdin("pipeline/bpf2las.json");
 }
 
 INSTANTIATE_TEST_CASE_P(base, json,
@@ -177,6 +176,29 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/transformation.json"
                         ));
 
+TEST(json, pipeline_stdin)
+{
+    run_pipeline_stdin("pipeline/las2csv.json");
+    run_pipeline_stdin("pipeline/bpf2las.json");
+}
+
+TEST(json, pipeline_verify)
+{
+    run_pipeline("pipeline/streamable.json", "--validate",
+        "\"streamable\" : true");
+    run_pipeline("pipeline/nonstreamable.json", "--validate",
+        "\"streamable\" : false");
+    run_pipeline("pipeline/invalid1.json", "--validate",
+        "Unable to parse");
+    run_pipeline("pipeline/invalid2.json", "--validate",
+        "Unexpected argument");
+    run_pipeline("pipeline/streamable.json", "-v Debug",
+        "stream mode");
+    run_pipeline("pipeline/streamable.json", "-v Debug --nostream",
+        "standard mode");
+}
+
+
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithNITF, pipeline)
@@ -191,16 +213,24 @@ TEST_P(jsonWithNITF, pipeline)
 }
 
 
+#if defined(PDAL_HAVE_LASZIP) || defined(PDAL_HAVE_LAZPERF)
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
                         testing::Values(
                             "pipeline/bpf2nitf.json",
                             "pipeline/las2nitf.json",
                             "pipeline/las2nitf-crop-with-options.json",
-#if defined PDAL_HAVE_LASZIP || defined PDAL_HAVE_LAZPERF
                             "pipeline/las2nitf-2.json",
-#endif
                             "pipeline/nitf2las.json"
                         ));
+#else
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
+                        testing::Values(
+                            "pipeline/bpf2nitf.json",
+                            "pipeline/las2nitf.json",
+                            "pipeline/las2nitf-crop-with-options.json",
+                            "pipeline/nitf2las.json"
+                        ));
+#endif
 
 class jsonWithP2G : public testing::TestWithParam<const char*> {};
 

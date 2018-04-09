@@ -1,17 +1,18 @@
 // MyReader.cpp
 
 #include "MyReader.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
-  static PluginInfo const s_info = PluginInfo(
+  static PluginInfo const s_info
+  {
     "readers.myreader",
     "My Awesome Reader",
-    "http://link/to/documentation" );
+    "http://link/to/documentation"
+  };
 
-  CREATE_SHARED_PLUGIN(1, 0, MyReader, Reader, s_info)
+  CREATE_SHARED_STAGE(MyReader, s_info)
 
   std::string MyReader::getName() const { return s_info.name; }
 
@@ -42,7 +43,8 @@ namespace pdal
       if (!bConverted)
       {
           std::stringstream oss;
-          oss << "Unable to convert " << name << ", " << s[fieldno] << ", to double";
+          oss << "Unable to convert " << name << ", " << s[fieldno] <<
+              ", to double";
           throw pdal_error(oss.str());
       }
 

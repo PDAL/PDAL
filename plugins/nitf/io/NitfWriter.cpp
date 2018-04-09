@@ -38,26 +38,13 @@
 #include "NitfWriter.hpp"
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointView.hpp>
-
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wunused-private-field"
-#endif
 
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
 #endif
 #include <nitro/c++/import/nitf.hpp>
 #include "tre_plugins.hpp"
-
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
 
 // NOTES
 //
@@ -68,12 +55,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.nitf",
     "NITF Writer",
-    "http://pdal.io/stages/writers.nitf.html" );
+    "http://pdal.io/stages/writers.nitf.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
+CREATE_SHARED_STAGE(NitfWriter, s_info)
 
 std::string NitfWriter::getName() const { return s_info.name; }
 
@@ -113,9 +102,6 @@ void NitfWriter::addArgs(ProgramArgs& args)
 
 void NitfWriter::writeView(const PointViewPtr view)
 {
-    //ABELL - Think we can just get this from the LAS file header
-    //  when we're done.
-    view->calculateBounds(m_bounds);
     LasWriter::writeView(view);
 }
 
@@ -142,7 +128,7 @@ void NitfWriter::doneFile()
     buf->sgetn(bytes.data(), size);
     m_oss.clear();
     m_nitf.wrapData(bytes.data(), size);
-    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_bounds));
+    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_lasHeader.getBounds()));
 
     try
     {

@@ -51,7 +51,7 @@ std::string makeColor()
     static uint8_t rgb[12] = { 1, 2, 3, 4 };
 
     std::string ptr = Utils::toString(&rgb);
-    if (ptr[0] != '0' && ptr[1] != 'x')
+    if (ptr[0] != '0' || ptr[1] != 'x')
         ptr = "0x" + ptr;
     std::ostringstream ss;
     ss << "MEM:::PIXELS=4,LINES=1,BANDS=3,DATAPOINTER=" << ptr;
@@ -174,7 +174,7 @@ TEST(ColorinterpFilterTest, cantstream)
 
     FixedPointTable t(10);
     c.prepare(t);
-    EXPECT_THROW(c.execute(t), pdal_error);
+    EXPECT_FALSE(c.pipelineStreamable());
 }
 
 namespace

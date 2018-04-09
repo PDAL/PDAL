@@ -35,7 +35,6 @@
 #include "KDistanceFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <string>
 #include <vector>
@@ -43,11 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.kdistance", "K-Distance Filter",
-               "http://pdal.io/stages/filters.kdistance.html");
+static PluginInfo const s_info
+{
+    "filters.kdistance",
+    "K-Distance Filter",
+    "http://pdal.io/stages/filters.kdistance.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, KDistanceFilter, Filter, s_info)
+CREATE_STATIC_STAGE(KDistanceFilter, s_info)
 
 std::string KDistanceFilter::getName() const
 {
@@ -68,16 +70,16 @@ void KDistanceFilter::addDimensions(PointLayoutPtr layout)
 void KDistanceFilter::filter(PointView& view)
 {
     using namespace Dimension;
-    
+
     // Build the 3D KD-tree.
     log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
     KD3Index index(view);
     index.build();
-    
+
     // Increment the minimum number of points, as knnSearch will be returning
     // the neighbors along with the query point.
     m_k++;
-  
+
     // Compute the k-distance for each point. The k-distance is the Euclidean
     // distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";

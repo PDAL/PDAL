@@ -34,20 +34,20 @@
 
 #include "FerryFilter.hpp"
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.ferry",
     "Copy data from one dimension to another.",
-    "http://pdal.io/stages/filters.ferry.html" );
+    "http://pdal.io/stages/filters.ferry.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
+CREATE_STATIC_STAGE(FerryFilter, s_info)
 
 std::string FerryFilter::getName() const { return s_info.name; }
 
@@ -66,8 +66,12 @@ void FerryFilter::initialize()
         StringList s = Utils::split(dim, '=');
         if (s.size() != 2)
             throwError("Invalid dimension specified '" + dim + "'.  Need "
-                "<from dimension>=<to dimension>.  See documentation for "
+                "<from dimension>=><to dimension>.  See documentation for "
                 "details.");
+        // Allow new '=>' syntax
+        if (s[1][0] == '>')
+            s[1].erase(s[1].begin());
+
         Utils::trim(s[0]);
         Utils::trim(s[1]);
         if (s[0] == s[1])
@@ -84,8 +88,12 @@ void FerryFilter::initialize()
 void FerryFilter::addDimensions(PointLayoutPtr layout)
 {
     for (auto& info : m_dims)
-        info.m_toId = layout->registerOrAssignDim(info.m_toName,
-            Dimension::Type::Double);
+    {
+        const Dimension::Id fromId = layout->findDim(info.m_fromName);
+        const Dimension::Type fromType = layout->dimType(fromId);
+
+        info.m_toId = layout->registerOrAssignDim(info.m_toName, fromType);
+    }
 }
 
 

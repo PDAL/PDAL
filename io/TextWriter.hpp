@@ -35,10 +35,6 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t TextWriter_ExitFunc();
-extern "C" PF_ExitFunc TextWriter_InitPlugin();
 
 namespace pdal
 {
@@ -47,12 +43,16 @@ typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
 class PDAL_DLL TextWriter : public Writer
 {
+    struct DimSpec
+    {
+        Dimension::Id id;
+        size_t precision;
+    };
+
 public:
     TextWriter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
@@ -69,6 +69,8 @@ private:
 
     void writeGeoJSONBuffer(const PointViewPtr view);
     void writeCSVBuffer(const PointViewPtr view);
+    DimSpec extractDim(std::string dim, PointTableRef table);
+    bool findDim(Dimension::Id id, DimSpec& ds);
 
     std::string m_filename;
     std::string m_outputType;
@@ -83,7 +85,7 @@ private:
     int m_precision;
 
     FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
+    std::vector<DimSpec> m_dims;
 
     TextWriter& operator=(const TextWriter&); // not implemented
     TextWriter(const TextWriter&); // not implemented

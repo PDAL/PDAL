@@ -42,17 +42,19 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.optech",
     "Optech reader support.",
-    "http://pdal.io/stages/readers.optech.html" );
+    "http://pdal.io/stages/readers.optech.html",
+    { "csd" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, OptechReader, Reader, s_info);
+CREATE_STATIC_STAGE(OptechReader, s_info)
 
 std::string OptechReader::getName() const
 {

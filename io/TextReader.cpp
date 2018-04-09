@@ -36,31 +36,71 @@
 #include <pdal/util/Algorithm.hpp>
 
 #include "TextReader.hpp"
-
-#include <pdal/pdal_macros.hpp>
-#include <pdal/util/Algorithm.hpp>
+#include "../filters/StatsFilter.hpp"
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.text",
     "Text Reader",
-    "http://pdal.io/stages/readers.text.html" );
+    "http://pdal.io/stages/readers.text.html",
+    { "txt", "csv" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TextReader, Reader, s_info)
+CREATE_STATIC_STAGE(TextReader, s_info)
 
 std::string TextReader::getName() const { return s_info.name; }
 
-void TextReader::initialize(PointTableRef table)
+// NOTE: - Forces reading of the entire file.
+QuickInfo TextReader::inspect()
 {
-    m_istream = Utils::openFile(m_filename);
-    if (!m_istream)
-        throwError("Unable to open text file '" + m_filename + "'.");
+    QuickInfo qi;
+    FixedPointTable t(100);
 
-    std::string buf;
-    std::getline(*m_istream, buf);
+    StatsFilter f;
+    f.setInput(*this);
 
+    f.prepare(t);
+    PointLayoutPtr layout = t.layout();
+    for (Dimension::Id id : layout->dims())
+        qi.m_dimNames.push_back(layout->dimName(id));
+    f.execute(t);
+
+    try
+    {
+        stats::Summary xSummary = f.getStats(Dimension::Id::X);
+        qi.m_pointCount = xSummary.count();
+        qi.m_bounds.minx = xSummary.minimum();
+        qi.m_bounds.maxx = xSummary.maximum();
+        stats::Summary ySummary = f.getStats(Dimension::Id::Y);
+        qi.m_bounds.miny = ySummary.minimum();
+        qi.m_bounds.maxy = ySummary.maximum();
+        stats::Summary zSummary = f.getStats(Dimension::Id::Z);
+        qi.m_bounds.minz = zSummary.minimum();
+        qi.m_bounds.maxz = zSummary.maximum();
+        qi.m_valid = true;
+    }
+    catch (pdal_error&)
+    {}
+    return qi;
+}
+
+
+void TextReader::checkHeader(const std::string& header)
+{
+    auto it = std::find_if(header.begin(), header.end(),
+        [](char c){ return std::isalpha(c); });
+    if (it == header.end())
+        log()->get(LogLevel::Warning) << getName() <<
+            ": file '" << m_filename <<
+            "' doesn't appear to contain a header line." << std::endl;
+}
+
+
+void TextReader::parseHeader(const std::string& header)
+{
     auto isspecial = [](char c)
         { return (!std::isalnum(c) && c != ' '); };
 
@@ -69,18 +109,48 @@ void TextReader::initialize(PointTableRef table)
     if (m_separator == ' ')
     {
         // Scan string for some character not a number, space or letter.
-        for (size_t i = 0; i < buf.size(); ++i)
-            if (isspecial(buf[i]))
+        for (size_t i = 0; i < header.size(); ++i)
+            if (isspecial(header[i]))
             {
-                m_separator = buf[i];
+                m_separator = header[i];
                 break;
             }
     }
 
     if (m_separator != ' ')
-        m_dimNames = Utils::split(buf, m_separator);
+        m_dimNames = Utils::split(header, m_separator);
     else
-        m_dimNames = Utils::split2(buf, m_separator);
+        m_dimNames = Utils::split2(header, m_separator);
+}
+
+
+void TextReader::initialize(PointTableRef table)
+{
+    m_istream = Utils::openFile(m_filename);
+    if (!m_istream)
+        throwError("Unable to open text file '" + m_filename + "'.");
+
+    m_line = 0;
+    // Skip lines requested.
+    std::string dummy;
+    for (size_t i = 0; i < m_skip; ++i)
+    {
+        std::getline(*m_istream, dummy);
+        m_line++;
+    }
+
+    std::string header;
+    if (m_header.size())
+        header = m_header;
+    else
+    {
+        std::getline(*m_istream, header);
+        m_line++;
+        checkHeader(header);
+    }
+
+    m_dataStart = m_istream->tellg();
+    parseHeader(header);
     Utils::closeFile(m_istream);
 }
 
@@ -88,7 +158,10 @@ void TextReader::initialize(PointTableRef table)
 void TextReader::addArgs(ProgramArgs& args)
 {
     args.add("separator", "Separator character that overrides special "
-        "character in header line", m_separator, ' ');
+        "character found in header line", m_separator, ' ');
+    args.add("header", "Use this string as the header line.", m_header);
+    args.add("skip", "Skip this number of lines before attempting to "
+        "read the header.", m_skip);
 }
 
 
@@ -114,10 +187,7 @@ void TextReader::ready(PointTableRef table)
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
-    // Skip header line.
-    std::string buf;
-    std::getline(*m_istream, buf);
-    m_line = 1;
+    m_istream->seekg(m_dataStart);
 }
 
 

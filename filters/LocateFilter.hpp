@@ -35,13 +35,9 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <map>
 #include <string>
-
-extern "C" int32_t LocateFilter_ExitFunc();
-extern "C" PF_ExitFunc LocateFilter_InitPlugin();
 
 namespace pdal
 {
@@ -55,8 +51,6 @@ public:
     LocateFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

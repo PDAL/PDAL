@@ -132,7 +132,7 @@ TEST(PlyReader, ReadBinary)
 
 TEST(PlyReader, ReadBinaryStream)
 {
-    class Checker : public Filter
+    class Checker : public Filter, public Streamable
     {
     public:
         std::string getName() const
