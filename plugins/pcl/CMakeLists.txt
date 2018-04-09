@@ -51,7 +51,6 @@ find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem sy
 #
 PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     FILES
-        io/PcdCommon.cpp
         io/PcdReader.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_reader_libname} PRIVATE
@@ -65,7 +64,6 @@ target_include_directories(${pcd_reader_libname} PRIVATE
 #
 PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
     FILES
-        io/PcdCommon.cpp
         io/PcdWriter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_writer_libname} PRIVATE

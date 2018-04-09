@@ -102,9 +102,6 @@ void NitfWriter::addArgs(ProgramArgs& args)
 
 void NitfWriter::writeView(const PointViewPtr view)
 {
-    //ABELL - Think we can just get this from the LAS file header
-    //  when we're done.
-    view->calculateBounds(m_bounds);
     LasWriter::writeView(view);
 }
 
@@ -131,7 +128,7 @@ void NitfWriter::doneFile()
     buf->sgetn(bytes.data(), size);
     m_oss.clear();
     m_nitf.wrapData(bytes.data(), size);
-    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_bounds));
+    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_lasHeader.getBounds()));
 
     try
     {

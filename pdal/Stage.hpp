@@ -123,6 +123,12 @@ public:
     */
     PointViewSet execute(PointTableRef table);
 
+    virtual void execute(StreamPointTable& table)
+    {
+        throw pdal_error("Attempting to use stream mode with a non-streamable "
+            "stage.");
+    }
+
     /**
       Determine if a pipeline with this stage as a sink is streamable.
 

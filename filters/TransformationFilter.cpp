@@ -122,6 +122,7 @@ void TransformationFilter::filter(PointView& view)
         point.setPointId(idx);
         processOne(point);
     }
+    view.invalidateProducts();
 }
 
 } // namespace pdal

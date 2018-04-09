@@ -112,18 +112,19 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     double thresh = iSrc.size()/2.0;
 
     // vote NNs
-    std::map<double, unsigned int> counts;
+    using CountMap = std::map<int, unsigned int>;
+    CountMap counts;
+    //std::map<int, unsigned int> counts;
     for (PointId id : iSrc)
     {
         temp.setPointId(id);
-        double votefor = temp.getFieldAs<double>(m_dim);
-        counts[votefor]++;
+        counts[temp.getFieldAs<int>(m_dim)]++;
     }
 
     // pick winner of the vote
     auto pr = *std::max_element(counts.begin(), counts.end(),
-        [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) {
-        return p1.second < p2.second; });
+        [](CountMap::const_reference p1, CountMap::const_reference p2)
+        { return p1.second < p2.second; });
 
     // update point
     auto oldclass = point.getFieldAs<double>(m_dim);

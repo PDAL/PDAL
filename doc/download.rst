@@ -13,22 +13,24 @@ Download
 Current Release(s)
 ------------------------------------------------------------------------------
 
-* **2017-10-12** `PDAL-1.6.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
+* **2018-04-05** `PDAL-1.7.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.6
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.7
 
-.. _`PDAL-1.6.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.6.0-src.tar.gz
-.. _`md5`: http://download.osgeo.org/pdal/PDAL-1.6.0-src.tar.gz.md5
+.. _`PDAL-1.7.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.7.0-src.tar.gz
+.. _`md5`: http://download.osgeo.org/pdal/PDAL-1.7.0-src.tar.gz.md5
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 
 
 Past Releases
 ------------------------------------------------------------------------------
 
+* **2017-10-12** `PDAL-1.6.0-src.tar.gz`_
 * **2017-04-06** `PDAL-1.5.0-src.tar.gz`_
 * **2016-12-15** `PDAL-1.4.0-src.tar.gz`_
 
 
+.. _`PDAL-1.6.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.6.0-src.tar.gz
 .. _`PDAL-1.5.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.5.0-src.tar.gz
 .. _`PDAL-1.4.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.4.0-src.tar.gz
 

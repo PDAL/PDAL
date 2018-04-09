@@ -47,7 +47,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.estimaterank",
-    "EstimateRank Filter",
+    "Computes the rank of a neighborhood of points.",
     "http://pdal.io/stages/filters.estimaterank.html"
 };
 

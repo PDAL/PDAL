@@ -6,12 +6,14 @@
 
 namespace pdal
 {
-  static PluginInfo const s_info = PluginInfo(
+  static PluginInfo const s_info
+  {
     "writers.mywriter",
     "My Awesome Writer",
-    "http://path/to/documentation" );
+    "http://path/to/documentation"
+  };
 
-  CREATE_SHARED_PLUGIN(1, 0, MyWriter, Writer, s_info);
+  CREATE_SHARED_STAGE(MyWriter, s_info);
 
   std::string MyWriter::getName() const { return s_info.name; }
 
@@ -27,7 +29,6 @@ namespace pdal
       }
     }
   };
-
 
   void MyWriter::addArgs(ProgramArgs& args)
   {
@@ -50,6 +51,7 @@ namespace pdal
       throw pdal_error(out.str());
     }
   }
+
 
   void MyWriter::ready(PointTableRef table)
   {
@@ -93,5 +95,4 @@ namespace pdal
   {
     m_stream.reset();
   }
-
 }

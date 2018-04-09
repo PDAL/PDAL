@@ -12,7 +12,7 @@ FAQ
   pronounced to rhyme with "GDAL".
 
   .. it is properly pronounced like the dog though :)
-
+|
 * Why do I get the error "Couldn't create ... stage of type ..."?
 
   In almost all cases this error occurs because you're trying to run a stage
@@ -36,6 +36,15 @@ FAQ
 
 .. index:: PCL
 
+* Why am I using 100GB of memory when trying to process a 10GB LAZ file?
+
+  If you're performing an operation that is using
+  :ref:`standard mode <processing_modes>`, PDAL will read all points into
+  memory at once.  Compressed files, like LAZ, can decompress to much larger
+  sizes before PDAL can process the data. Furthermore, some operations
+  (notably :ref:`DEM creation<writers.gdal>`) can use large amounts of
+  additional memory during processing before the output can be written.
+|
 * What is PDAL's relationship to PCL?
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
@@ -54,8 +63,13 @@ FAQ
   manipulation. libLAS was also trying to be partially compatible
   with LASlib and LAStools. PDAL, on the other hand, aims to be
   a ultimate library and a set of tools for manipulating and processing
-  point clouds and is easily extensible by its users.
+  point clouds and is easily extensible by its users. Howard Butler
+  talked more about this history in a `GeoHipster interview`_ in
+  2018.
 
+.. _`GeoHipster interview`: http://geohipster.com/2018/03/05/howard-butler-like-good-song-open-source-software-chance-immortal/
+
+|
 * Are there any command line tools in PDAL similar to LAStools?
 
   Yes. The ``pdal`` command provides a wide range of features which go

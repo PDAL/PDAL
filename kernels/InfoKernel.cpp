@@ -140,6 +140,8 @@ void InfoKernel::addSwitches(ProgramArgs& args)
         m_boundary);
     args.add("dimensions", "Dimensions on which to compute statistics",
         m_dimensions);
+    args.add("enumerate", "Dimensions whose values should be enumerated",
+        m_enumerate);
     args.add("schema", "Dump the schema", m_showSchema);
     args.add("pipeline-serialization", "Output filename for pipeline "
         "serialization", m_pipelineFile);
@@ -310,6 +312,8 @@ void InfoKernel::setup(const std::string& filename)
         Options filterOptions;
         if (m_dimensions.size())
             filterOptions.add({"dimensions", m_dimensions});
+        if (m_enumerate.size())
+            filterOptions.add({"enumerate", m_enumerate});
         m_statsStage = &m_manager.makeFilter("filters.stats", *stage,
             filterOptions);
         stage = m_statsStage;

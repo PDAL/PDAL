@@ -4,8 +4,9 @@
 pipeline
 ********************************************************************************
 
-The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
-:ref:`reading` or :ref:`pipeline` for more information.
+The ``pipeline`` command is used to execute :ref:`pipeline` JSON. The pipeline
+is run in stream mode if possible.  See :ref:`reading` or :ref:`pipeline` for
+more information.
 
 ::
 
@@ -21,9 +22,9 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
       progress information. The file/FIFO must exist. PDAL will not create the
       progress file.
   --stdin, -s               Read pipeline from standard input
-  --stream                  Attempt to run pipeline in streaming mode.
   --metadata                Metadata filename
-
+  --nostream                Don't run in stream mode, even if technically
+      possible.
 
 Substitutions
 ................................................................................

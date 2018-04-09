@@ -271,7 +271,7 @@ bool PluginManager<T>::l_loadDynamic(const std::string& driverName)
     if (path.empty())
     {
         m_log->get(LogLevel::Debug) << "No plugin file found for driver '" <<
-            driverName << "." << std::endl;
+            driverName << "'." << std::endl;
         return false;
     }
     return loadByPath(path);

@@ -126,25 +126,30 @@ void TextReader::parseHeader(const std::string& header)
 
 void TextReader::initialize(PointTableRef table)
 {
-    if (m_headerInsert.size() && m_headerOverride.size())
-        throwError("Can't specify both 'header_insert' and 'header_override' "
-            "options.");
-
     m_istream = Utils::openFile(m_filename);
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
+    m_line = 0;
+    // Skip lines requested.
+    std::string dummy;
+    for (size_t i = 0; i < m_skip; ++i)
+    {
+        std::getline(*m_istream, dummy);
+        m_line++;
+    }
+
     std::string header;
-    if (m_headerInsert.size())
-        header = m_headerInsert;
-    else if (m_headerOverride.size())
-        header = m_headerOverride;
+    if (m_header.size())
+        header = m_header;
     else
     {
         std::getline(*m_istream, header);
+        m_line++;
         checkHeader(header);
     }
 
+    m_dataStart = m_istream->tellg();
     parseHeader(header);
     Utils::closeFile(m_istream);
 }
@@ -154,10 +159,9 @@ void TextReader::addArgs(ProgramArgs& args)
 {
     args.add("separator", "Separator character that overrides special "
         "character found in header line", m_separator, ' ');
-    args.add("header_override", "Use this string as the header line.  Ignore "
-        "the first line in the file.", m_headerOverride);
-    args.add("header_insert", "Use this string as the header line. All "
-        "lines of the file are treated as data.", m_headerInsert);
+    args.add("header", "Use this string as the header line.", m_header);
+    args.add("skip", "Skip this number of lines before attempting to "
+        "read the header.", m_skip);
 }
 
 
@@ -183,15 +187,7 @@ void TextReader::ready(PointTableRef table)
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
-    // Skip header line unless we're inserting one from the command line..
-    if (m_headerInsert.size())
-        m_line = 0;
-    else
-    {
-        std::string buf;
-        std::getline(*m_istream, buf);
-        m_line = 1;
-    }
+    m_istream->seekg(m_dataStart);
 }
 
 

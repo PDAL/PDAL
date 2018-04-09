@@ -34,6 +34,13 @@ are also available via that packaging system. This document assumes you
 will be using OSGeo4W as your base, and anything more advanced is beyond
 the scope of the document.
 
+.. note::
+
+    The AppVeyor build system uses the PDAL project's configuration on the OSGeo4W
+    system. It contains a rich resource of known working examples. See
+    https://github.com/PDAL/PDAL/blob/master/appveyor.yml and
+    https://github.com/PDAL/PDAL/tree/master/scripts/appveyor for inspiration.
+
 Required Compiler
 ------------------------------------------------------------------------------
 
@@ -113,7 +120,7 @@ Switch to the ``-maintenance`` branch.
 
    ::
 
-      c:\dev> git checkout 1.6-maintenance
+      c:\dev> git checkout 1.7-maintenance
 
 
    .. note::

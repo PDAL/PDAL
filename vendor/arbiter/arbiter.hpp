@@ -42,6 +42,7 @@ SOFTWARE.
 
 
 #pragma once
+#pragma warning(disable:4251)   // DLL export warnings
 /// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
 #define ARBITER_IS_AMALGAMATION

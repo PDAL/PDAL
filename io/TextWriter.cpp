@@ -99,30 +99,70 @@ void TextWriter::initialize(PointTableRef table)
 }
 
 
+TextWriter::DimSpec TextWriter::extractDim(std::string dim, PointTableRef table)
+{
+    Utils::trim(dim);
+
+    size_t precision(0);
+    StringList s = Utils::split(dim, ':');
+    if (s.size() == 1)
+        precision = m_precision;
+    else if (s.size() == 2)
+    {
+        try
+        {
+            size_t pos;
+            int i = std::stoi(s[1], &pos);
+            if (i < 0 || pos != s[1].size())
+                throw pdal_error("Dummy");  // Throw to be caught below.
+            precision = static_cast<size_t>(i);
+        }
+        catch (...)
+        {
+            throwError("Can't convert dimension precision for '" + dim +
+                "'.");
+        }
+    }
+    else
+        throwError("Invalid dimension specification '" + dim + "'.");
+    Dimension::Id d = table.layout()->findDim(s[0]);
+    if (d == Dimension::Id::Unknown)
+        throwError("Dimension not found with name '" + dim + "'.");
+    return { d, precision };
+}
+
+
+bool TextWriter::findDim(Dimension::Id id, DimSpec& ds)
+{
+    auto it = std::find_if(m_dims.begin(), m_dims.end(),
+        [id](const DimSpec& tds){ return tds.id == id; });
+    if (it == m_dims.end())
+        return false;
+    ds = *it;
+    return true;
+}
+
 void TextWriter::ready(PointTableRef table)
 {
-    m_stream->precision(m_precision);
     *m_stream << std::fixed;
 
     // Find the dimensions listed and put them on the id list.
     StringList dimNames = Utils::split2(m_dimOrder, ',');
+
     for (std::string dim : dimNames)
-    {
-        Utils::trim(dim);
-        Dimension::Id d = table.layout()->findDim(dim);
-        if (d == Dimension::Id::Unknown)
-            throwError("Dimension not found with name '" + dim + "'.");
-        m_dims.push_back(d);
-    }
+        m_dims.push_back(extractDim(dim, table));
 
     // Add the rest of the dimensions to the list if we're doing that.
     // Yes, this isn't efficient when, but it's simple.
     if (m_dimOrder.empty() || m_writeAllDims)
     {
         Dimension::IdList all = table.layout()->dims();
-        for (auto di = all.begin(); di != all.end(); ++di)
-            if (!Utils::contains(m_dims, *di))
-                m_dims.push_back(*di);
+        for (auto id : all)
+        {
+            DimSpec ds { id, static_cast<size_t>(m_precision) };
+            if (!findDim(id, ds))
+                m_dims.push_back(ds);
+        }
     }
 
     if (!m_writeHeader)
@@ -172,9 +212,9 @@ void TextWriter::writeCSVHeader(PointTableRef table)
             *m_stream << m_delimiter;
 
         if (m_quoteHeader)
-            *m_stream << "\"" << layout->dimName(*di) << "\"";
+            *m_stream << "\"" << layout->dimName(di->id) << "\"";
         else
-            *m_stream << layout->dimName(*di);
+            *m_stream << layout->dimName(di->id);
     }
     *m_stream << m_newline;
 }
@@ -187,7 +227,8 @@ void TextWriter::writeCSVBuffer(const PointViewPtr view)
         {
             if (di != m_dims.begin())
                 *m_stream << m_delimiter;
-            *m_stream << view->getFieldAs<double>(*di, idx);
+            m_stream->precision(di->precision);
+            *m_stream << view->getFieldAs<double>(di->id, idx);
         }
         *m_stream << m_newline;
     }
@@ -197,6 +238,14 @@ void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
 {
     using namespace Dimension;
 
+    auto write = [this](Dimension::Id id, PointId idx, const PointViewPtr view)
+    {
+        DimSpec ds;
+        size_t prec = findDim(id, ds) ? ds.precision : m_precision;
+        m_stream->precision(prec);
+        *m_stream << view->getFieldAs<double>(id, idx);
+    };
+
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         if (idx)
@@ -204,9 +253,10 @@ void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
 
         *m_stream << "{ \"type\":\"Feature\",\"geometry\": "
             "{ \"type\": \"Point\", \"coordinates\": [";
-        *m_stream << view->getFieldAs<double>(Id::X, idx) << ",";
-        *m_stream << view->getFieldAs<double>(Id::Y, idx) << ",";
-        *m_stream << view->getFieldAs<double>(Id::Z, idx) << "]},";
+
+        write(Id::X, idx, view); *m_stream << ",";
+        write(Id::Y, idx, view); *m_stream << ",";
+        write(Id::Z, idx, view); *m_stream << "]},";
 
         *m_stream << "\"properties\": {";
 
@@ -215,9 +265,10 @@ void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
             if (di != m_dims.begin())
                 *m_stream << ",";
 
-            *m_stream << "\"" << view->dimName(*di) << "\":";
+            *m_stream << "\"" << view->dimName(di->id) << "\":";
             *m_stream << "\"";
-            *m_stream << view->getFieldAs<double>(*di, idx);
+            m_stream->precision(di->precision);
+            *m_stream << view->getFieldAs<double>(di->id, idx);
             *m_stream <<"\"";
         }
         *m_stream << "}"; // end properties
