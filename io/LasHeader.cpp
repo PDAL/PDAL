@@ -319,7 +319,7 @@ void LasHeader::setSrsFromGeotiff()
     }
     std::vector<uint8_t> asciiRec(data, data + dataLen);
 
-    GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec);
+    GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec, m_log);
     SpatialReference gtiffSrs = geotiff.srs();
     if (!gtiffSrs.empty())
         m_srs = gtiffSrs;
