@@ -114,7 +114,7 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     if (directoryRec.size() < declaredSize)
         return;
 
-    validateDirectory((Entry *)(header + 1), header->numKeys,
+    validateDirectory((const Entry *)(header + 1), header->numKeys,
         doublesRec.size() / sizeof(double), asciiRec.size());
 
     uint8_t *dirData = const_cast<uint8_t *>(directoryRec.data());
@@ -151,14 +151,14 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
 }
 
 
-void GeotiffSrs::validateDirectory(Entry *ent, size_t numEntries,
+void GeotiffSrs::validateDirectory(const Entry *ent, size_t numEntries,
     size_t numDoubles, size_t asciiSize)
 {
     for (size_t i = 0; i < numEntries; ++i)
     {
         if (ent->count == 0)
-            m_log->get(LogLevel::Error) << "Geotiff directory contains key " <<
-                ent->key << " with 0 count." << std::endl;
+            m_log->get(LogLevel::Warning) << "Geotiff directory contains " <<
+                "key " << ent->key << " with 0 count." << std::endl;
         if (ent->location == 0 && ent->count != 1)
             m_log->get(LogLevel::Error) << "Geotiff directory contains key " <<
                 ent->key << " with short entry and more than one value." <<

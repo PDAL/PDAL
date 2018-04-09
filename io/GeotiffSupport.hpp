@@ -63,7 +63,7 @@ private:
     SpatialReference m_srs;
     LogPtr m_log;
 
-    void validateDirectory(Entry *ent, size_t numEntries,
+    void validateDirectory(const Entry *ent, size_t numEntries,
         size_t numDoubles, size_t asciiSize);
 };
 
