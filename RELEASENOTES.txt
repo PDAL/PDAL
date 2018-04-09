@@ -130,6 +130,9 @@ Bug fixes
 -  Fixed an issue where dimensions from ``readers.pcd`` and
    ``writers.pcd`` could get confused with dimensions from
    ``readers.sbet`` and ``writers.sbet``.
+-  Fixed index computation in ``filters.voxelcentroidnearestneighbor``
+   and ``filters.voxelcenternearestneighbor`` #1901
+-  Fixed libdl linking #1900
 
 ================================================================================
 1.6.0

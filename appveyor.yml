@@ -51,7 +51,10 @@ build_script:
 test_script:
   - call scripts\\appveyor\\test.cmd
 
-deploy_script:
+# We need to install so the artifacts are ready
+# for deployment for the OSGeo4W build for all
+# other build types, no artifact is made
+after_test:
   - call scripts\\appveyor\\install.cmd
 
 artifacts:
@@ -67,7 +70,7 @@ deploy:
     secret_access_key:
       secure: cSqZlsaCxFwXgxJw0BLd7npMFvQk3Vbr74ZPLaBQWLKnOz1cKss9qab1SzSygwkh
     on:
-      branch: 1.6-maintenance
+      branch: 1.7-maintenance
     bucket: "pdal"
     folder: "osgeo4w/"
     artifact: pdalosgeo4w

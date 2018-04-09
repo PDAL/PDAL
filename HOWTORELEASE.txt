@@ -30,6 +30,8 @@ Release Process
 
   - doc/download.rst point to new release
 
+  - appveyor.yml
+
   - Make and push new release branch
 
     ::
@@ -45,8 +47,18 @@ Release Process
   - Make DockerHub build entry for new release branch.
 
 
-2) Update README to include any relevant info about the release that
-   might have changed.
+2) Write and update release notes. Use the PDAL "releases" section to create one.
+   Write the document in Markdown for convenience on GitHub.
+
+   - Manually store a copy of it in ./doc/development/release-notes/1.7.0.md
+     for future reference.
+
+   - Convert it to reStructuredText using pandoc and add the output to the
+     RELEASENOTES.txt document
+
+     ::
+
+        pandoc --from markdown --to rst --output=1.7.rst doc/development/release-notes/1.7.0.md
 
 3) Update ChangeLog with git2cl
 
