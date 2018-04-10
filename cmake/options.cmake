@@ -12,6 +12,11 @@ option(BUILD_PLUGIN_CPD
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "Coherent Point Drift (CPD) computes rigid or nonrigid transformations between point sets")
 
+option(BUILD_PLUGIN_DELAUNAY
+    "Choose if the Delaunay triangulation filter should be built" FALSE)
+add_feature_info("Delaunay plugin" BUILD_PLUGIN_DELAUNAY
+    "perform Delaunay triangulation of point cloud")
+
 option(BUILD_PLUGIN_GEOWAVE
     "Choose if GeoWave support should be built" FALSE)
 add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
