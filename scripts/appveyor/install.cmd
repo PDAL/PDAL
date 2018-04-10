@@ -1,11 +1,11 @@
 @echo off
 
 
-if "%OSGEO4W_BUILD%" NEQ "ON" (
-    REM only bother with this for OSGEO4W_BUILD situation
-    echo "Not building OSGeo4W package"
-    exit /b 0
-)
+REM if "%OSGEO4W_BUILD%" NEQ "ON" (
+REM     REM only bother with this for OSGEO4W_BUILD situation
+REM     echo "Not building OSGeo4W package"
+REM     exit /b 0
+REM )
 
 
 call %OSGEO4W_ROOT%\bin\o4w_env.bat

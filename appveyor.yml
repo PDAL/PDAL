@@ -14,7 +14,6 @@ environment:
 
   matrix:
     - PDAL_OPTIONAL_COMPONENTS: ON
-    - OSGEO4W_BUILD: ON
 
 # Should speed up repository cloning
 shallow_clone: true
