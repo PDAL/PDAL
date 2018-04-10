@@ -75,7 +75,7 @@ namespace eigen
   \param ids a vector of PointIds specifying a subset of points.
   \return the 3D centroid of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
+PDAL_DLL Eigen::Vector3d computeCentroid(PointView& view,
         std::vector<PointId> ids);
 
 /**
