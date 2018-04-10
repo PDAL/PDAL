@@ -81,6 +81,11 @@ option(BUILD_PLUGIN_RIVLIB
 add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
     "read data in the RXP format")
 
+option(BUILD_PLUGIN_RDBLIB
+    "Choose if rdblib support should be built" FALSE)
+add_feature_info("rdblib plugin" BUILD_PLUGIN_RDBLIB
+    "read data in the RDB format")
+
 option(BUILD_PLUGIN_PYTHON
     "Choose if Python support should be built" FALSE)
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
@@ -120,6 +125,9 @@ cmake_dependent_option(BUILD_OCI_TESTS
 cmake_dependent_option(BUILD_RIVLIB_TESTS
     "Choose if RiVLib tests should be built"
     ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)
+cmake_dependent_option(BUILD_RDBLIB_TESTS
+    "Choose if rdblib tests should be built"
+    ON "BUILD_PLUGIN_RDBLIB; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_PIPELINE_TESTS
     "Choose if pipeline tests should be built"
     OFF "WITH_TESTS" OFF)
