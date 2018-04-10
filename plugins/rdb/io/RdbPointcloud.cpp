@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <sstream>
+#include <array>
 #include <json/json.h>
 #include "RdbPointcloud.hpp"
 
