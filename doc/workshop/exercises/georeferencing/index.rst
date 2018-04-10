@@ -3,7 +3,7 @@
 Georeferencing
 =================
 
-.. index:: georeferencing, Optech, Riegl, GNSS/IMU, csd, UTM, WGS84
+.. index:: georeferencing, Optech, RIEGL, GNSS/IMU, csd, UTM, WGS84
 
 .. include:: ../../includes/substitutions.rst
 
@@ -22,7 +22,7 @@ and reproject that file into a UTM projection.
 
    `Optech's <http://www.teledyneoptech.com/>`__ csd format is just one of
    several vendor-specific data formats PDAL supports; we also support data
-   files directly from |Riegl| sensors and from several project-specific
+   files directly from |RIEGL| sensors and from several project-specific
    government platforms.
 
 Exercise
