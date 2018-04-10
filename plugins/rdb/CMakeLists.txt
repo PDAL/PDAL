@@ -11,7 +11,11 @@ PDAL_ADD_PLUGIN(libname reader rdb
         io/RdbReader.cpp
     LINK_WITH
     rdbcpp)
+
 target_include_directories(${libname} PUBLIC ${RDB_INCLUDE_DIR})
+target_include_directories(${libname} PUBLIC ${EIGEN_INCLUDE_DIRS})
+
+
 
 set(RDB_TEST_NAME pdal_io_rdb_reader_test)
 option(BUILD_RDBLIB_TESTS "Build rdblib tests" ON)
