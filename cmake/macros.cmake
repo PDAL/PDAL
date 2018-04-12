@@ -54,7 +54,7 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
-    PDAL_TARGET_COMPILE_SETTINGS(${_name})
+    pdal_target_compile_settings(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -74,7 +74,7 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
-    PDAL_TARGET_COMPILE_SETTINGS(${_name})
+    pdal_target_compile_settings(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -127,6 +127,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
+    pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_INCLUDE_DIR})
@@ -168,6 +169,7 @@ macro(PDAL_ADD_TEST _name)
     endif()
     add_executable(${_name} ${PDAL_ADD_TEST_FILES}
         $<TARGET_OBJECTS:${PDAL_TEST_SUPPORT_OBJS}>)
+    pdal_target_compile_settings(${_name})
     target_include_directories(${_name} PRIVATE
         ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}
