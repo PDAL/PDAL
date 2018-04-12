@@ -14,8 +14,6 @@ include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 # internal cmake settings
 #------------------------------------------------------------------------------
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_COLOR_MAKEFILE ON)
