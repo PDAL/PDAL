@@ -6,7 +6,7 @@ includedir=@CMAKE_INSTALL_PREFIX@/include
 Name: PDAL
 Description: Point Data Abstraction Library
 Requires:  @PKGCONFIG_LIBRARY_DEFINITIONS@
-Version: @PDAL_VERSION_STRING@
+Version: @PDAL_VERSION@
 Libs: -L${libdir} -l@PDAL_LIB_NAME@
 Cflags: -I${includedir}/pdal  @PDAL_CONFIG_DEFINITIONS@
 

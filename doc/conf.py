@@ -84,10 +84,10 @@ copyright = u'%d' % year
 
 def read_version(filename):
     #
-    # set(PDAL_VERSION_STRING 0.9.8 CACHE STRING "PDAL version")
+    # project(PDAL VERSION 0.9.8 LANGUAGES CXX C)
     data = open(filename).readlines()
 
-    token = 'PDAL_VERSION_STRING'
+    token = 'VERSION'
 
     import string
     punct = string.punctuation

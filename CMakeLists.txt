@@ -5,19 +5,7 @@
 
 cmake_minimum_required(VERSION 3.1.3)
 
-project(PDAL CXX C)
-string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
-
-# the next line is the ONLY place in the entire pdal system where
-# the version info is hard-coded
-set(PDAL_VERSION_STRING "1.7.1" CACHE STRING "PDAL version" FORCE)
-set(PDAL_API_VERSION "6")
-set(PDAL_BUILD_VERSION "7.0.1")
-
-# not sure the best place yet, but...
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(PDAL VERSION 1.7.1 LANGUAGES CXX C)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
@@ -25,6 +13,10 @@ include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 #------------------------------------------------------------------------------
 # internal cmake settings
 #------------------------------------------------------------------------------
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -36,6 +28,9 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 #------------------------------------------------------------------------------
 # PDAL general settings
 #------------------------------------------------------------------------------
+
+set(PDAL_API_VERSION "6")
+set(PDAL_BUILD_VERSION "7.0.1")
 
 # Name of C++ library
 
