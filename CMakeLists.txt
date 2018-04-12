@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1.3)
 
 project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -13,6 +13,11 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 set(PDAL_VERSION_STRING "1.7.1" CACHE STRING "PDAL version" FORCE)
 set(PDAL_API_VERSION "6")
 set(PDAL_BUILD_VERSION "7.0.1")
+
+# not sure the best place yet, but...
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
