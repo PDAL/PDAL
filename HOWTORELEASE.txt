@@ -17,9 +17,9 @@ Release Process
 
   - CMakeLists.txt
     * set(PDAL_VERSION_STRING "1.0.0" CACHE STRING "PDAL version")
-    * DISSECT_VERSION() CMake macro will break version down into
-      PDAL_VERSION_MAJOR, PDAL_VERSION_MINOR, PDAL_VERSION_PATCH,
-      and PDAL_CANDIDATE_VERSION strings.
+    * CMake will break version down into PDAL_VERSION_MAJOR,
+      PDAL_VERSION_MINOR, PDAL_VERSION_PATCH, and PDAL_CANDIDATE_VERSION
+      strings.
 
   - Update SO versioning
     set(PDAL_API_VERSION "1")
