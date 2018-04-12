@@ -490,12 +490,14 @@ void LasWriter::addGeotiffVlrs()
 
         addVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID,
                 "GeoTiff GeoKeyDirectoryTag", tags.directoryData());
-        addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
+        if (tags.doublesData().size())
+            addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
                 "GeoTiff GeoDoubleParamsTag", tags.doublesData());
-        addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
+        if (tags.asciiData().size())
+            addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
                 "GeoTiff GeoAsciiParamsTag", tags.asciiData());
     }
-    catch (GeotiffTags::error& err)
+    catch (Geotiff::error& err)
     {
         throwError(err.what());
     }

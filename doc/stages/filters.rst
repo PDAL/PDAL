@@ -317,10 +317,14 @@ existing KD-tree.
    :glob:
    :hidden:
 
+   filters.delaunay
    filters.greedyprojection
    filters.gridprojection
    filters.movingleastsquares
    filters.poisson
+
+:ref:`filters.delaunay`
+    Create mesh using Delaunay triangulation.
 
 :ref:`filters.greedyprojection`
     Create mesh using the Greedy Projection Triangulation approach.

@@ -1,5 +1,6 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Danish Agency for Data Supply and Efficiency,
+* sdfe@sdfe.dk
 *
 * All rights reserved.
 *
@@ -13,10 +14,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of SDFE nor the names of its contributors may be
+*       used to endorse or promote products derived from this software
+*       without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,55 +34,23 @@
 
 #pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/SpatialReference.hpp>
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
 
-namespace Geotiff
-{
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-}
-
-struct Entry;
-
-class GeotiffSrs
+class PDAL_DLL DelaunayFilter : public Filter
 {
 public:
-    GeotiffSrs(const std::vector<uint8_t>& directoryRec,
-        const std::vector<uint8_t>& doublesRec,
-        const std::vector<uint8_t>& asciiRec, LogPtr log);
-    SpatialReference srs() const
-        { return m_srs; }
-private:
-    SpatialReference m_srs;
-    LogPtr m_log;
-
-    void validateDirectory(const Entry *ent, size_t numEntries,
-        size_t numDoubles, size_t asciiSize);
-};
-
-class GeotiffTags
-{
-public:
-    GeotiffTags(const SpatialReference& srs);
-
-    std::vector<uint8_t>& directoryData()
-        { return m_directoryRec; }
-    std::vector<uint8_t>& doublesData()
-        { return m_doublesRec; }
-    std::vector<uint8_t>& asciiData()
-        { return m_asciiRec; }
+    DelaunayFilter() : Filter()
+    {}
+    std::string getName() const;
 
 private:
-    std::vector<uint8_t> m_directoryRec;
-    std::vector<uint8_t> m_doublesRec;
-    std::vector<uint8_t> m_asciiRec;
+    virtual PointViewSet run(PointViewPtr view);
+
+    DelaunayFilter& operator=(const DelaunayFilter&); // not implemented
+    DelaunayFilter(const DelaunayFilter&); // not implemented
 };
 
 } // namespace pdal

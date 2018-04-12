@@ -1237,7 +1237,7 @@ public:
             std::string nameDescrip = a->nameDescrip();
 
             info.push_back(std::make_pair(nameDescrip, a->description()));
-            namelen = std::max(namelen, nameDescrip.size());
+            namelen = (std::max)(namelen, nameDescrip.size());
         }
         size_t secondIndent = indent + 4;
         int postNameSpacing = 2;
