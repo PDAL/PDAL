@@ -84,21 +84,6 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
 endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################
-# Add an executable target.
-# _name The executable name.
-# _component The part of PDAL that this library belongs to.
-# ARGN the source files for the library.
-macro(PDAL_ADD_EXECUTABLE _name)
-    add_executable(${_name} ${ARGN})
-
-    set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
-    install(TARGETS ${_name}
-        EXPORT PDALTargets
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
-endmacro(PDAL_ADD_EXECUTABLE)
-
-
-###############################################################################
 # Add a plugin target.
 # _name The plugin name.
 # ARGN :
@@ -196,54 +181,6 @@ macro(PDAL_ADD_TEST _name)
         "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
     endif()
 endmacro(PDAL_ADD_TEST)
-
-###############################################################################
-# Add a driver. Creates object library and adds files to source_group for windows IDE.
-# _type The driver type (e.g., reader, writer, driver, filter, kernel).
-# _name The driver name.
-# _srcs The list of source files to add.
-# _incs The list of includes to add.
-# _objs The object library name that is created.
-macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
-    source_group("Header Files\\${_type}\\${_name}" FILES ${_incs})
-    source_group("Source Files\\${_type}\\${_name}" FILES ${_srcs})
-
-    set(libname ${_type}_${_name})
-    set(${_objs} $<TARGET_OBJECTS:${libname}>)
-	if (NOT WIN32)
-		add_definitions("-fPIC")
-	endif()
-    add_library(${libname} OBJECT ${_srcs} ${_incs})
-    add_dependencies(${libname} generate_dimension_hpp)
-    target_include_directories(${libname} PRIVATE
-        ${PDAL_INCLUDE_DIR})
-    set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
-endmacro(PDAL_ADD_DRIVER)
-
-###############################################################################
-# Add a kernel. Creates object library and adds files to source_group
-# for windows IDE.
-# _name The driver name.
-# _srcs The list of source files to add.
-# _incs The list of includes to add.
-# _objs The object library name that is created.
-macro(PDAL_ADD_KERNEL _name _srcs _incs _objs)
-    source_group("Header Files\\kernel\\${_name}" FILES ${_incs})
-    source_group("Source Files\\kernel\\${_name}" FILES ${_srcs})
-
-    set(libname kernel_${_name})
-    set(${_objs} $<TARGET_OBJECTS:${libname}>)
-	if (NOT WIN32)
-		add_definitions("-fPIC")
-	endif()
-    add_library(${libname} OBJECT ${_srcs} ${_incs})
-    add_dependencies(${libname} generate_dimension_hpp)
-    target_include_directories(${libname} PRIVATE
-        ${PDAL_INCLUDE_DIR}
-        ${PDAL_IO_DIR}
-        ${PDAL_FILTERS_DIR})
-    set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/kernel")
-endmacro(PDAL_ADD_KERNEL)
 
 ###############################################################################
 # Get the operating system information. Generally, CMake does a good job of
