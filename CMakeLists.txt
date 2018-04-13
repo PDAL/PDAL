@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.0.0)
 
 project(PDAL VERSION 1.7.1 LANGUAGES CXX C)
 
@@ -13,8 +13,6 @@ include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 #------------------------------------------------------------------------------
 # internal cmake settings
 #------------------------------------------------------------------------------
-
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
