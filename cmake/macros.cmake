@@ -101,9 +101,6 @@ endmacro(PDAL_ADD_FREE_LIBRARY)
 #    LINK_WITH link plugin with libraries
 #    INCLUDES header directories
 #
-# The "generate_dimension_hpp" ensures that Dimension.hpp is built before
-#  attempting to build anything else in the "library".
-#
 # NOTE: _name is the name of a variable that will hold the plugin name
 #    when the macro completes
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
@@ -112,14 +109,10 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
-    if(WIN32)
-        set(${_name} "libpdal_plugin_${_type}_${_shortname}")
-    else()
-        set(${_name} "pdal_plugin_${_type}_${_shortname}")
-    endif()
+    set(${_name} "pdal_plugin_${_type}_${_shortname}")
 
     if (WIN32)
-	    list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
+        list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
