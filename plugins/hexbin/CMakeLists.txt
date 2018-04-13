@@ -29,6 +29,7 @@ if (HEXER_FOUND)
             kernel/OGR.cpp
         LINK_WITH
             ${HEXER_LIBRARY}
+            ${GDAL_LIBRARY}
             ${libname})
 
 endif()
