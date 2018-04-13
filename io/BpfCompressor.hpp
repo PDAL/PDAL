@@ -37,7 +37,7 @@
 #include <stdexcept>
 #include <ostream>
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/OStream.hpp>
 

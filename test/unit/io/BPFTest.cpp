@@ -43,6 +43,7 @@
 #include <io/BpfReader.hpp>
 #include <io/BpfWriter.hpp>
 #include <io/BufferReader.hpp>
+#include <pdal/pdal_features.hpp>
 
 #include "Support.hpp"
 

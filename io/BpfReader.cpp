@@ -36,9 +36,12 @@
 
 #include <climits>
 
-#include <zlib.h>
-
 #include <pdal/Options.hpp>
+#include <pdal/pdal_features.hpp>
+
+#ifdef PDAL_HAVE_ZLIB
+#include <zlib.h>
+#endif
 
 namespace pdal
 {
