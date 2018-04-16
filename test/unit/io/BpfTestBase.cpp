@@ -34,256 +34,30 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <array>
-
-#include <pdal/Filter.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/util/Utils.hpp>
-#include <pdal/util/FileUtils.hpp>
-#include <io/BpfReader.hpp>
-#include <io/BpfWriter.hpp>
-#include <io/BufferReader.hpp>
-#include <pdal/pdal_features.hpp>
-
 #include "Support.hpp"
+#include "io/BpfSupport.hpp"
 
 using namespace pdal;
 
-namespace
-{
-
-template<typename LeftIter, typename RightIter>
-::testing::AssertionResult CheckEqualCollections(
-    LeftIter left_begin, LeftIter left_end, RightIter right_begin)
-{
-    bool equal(true);
-    std::string message;
-    size_t index(0);
-    while (left_begin != left_end)
-    {
-        if (*left_begin++ != *right_begin++)
-        {
-            equal = false;
-            message += "\n\tMismatch at index " + std::to_string(index);
-        }
-        ++index;
-    }
-    if (message.size())
-        message += "\n\t";
-    return equal ? ::testing::AssertionSuccess() :
-        ::testing::AssertionFailure() << message;
-}
-
-
-
-void test_file_type_view(const std::string& filename)
-{
-    PointTable table;
-
-    struct PtData
-    {
-        float x;
-        float y;
-        float z;
-    };
-
-    Options ops;
-
-    ops.add("filename", filename);
-    ops.add("count", 506);
-    std::shared_ptr<BpfReader> reader(new BpfReader);
-    reader->setOptions(ops);
-
-    reader->prepare(table);
-    PointViewSet viewSet = reader->execute(table);
-
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 506u);
-
-    PtData pts2[3] = { {494057.312f, 4877433.5f, 130.630005f},
-                       {494133.812f, 4877440.0f, 130.440002f},
-                       {494021.094f, 4877440.0f, 130.460007f} };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        float x = view->getFieldAs<float>(Dimension::Id::X, i);
-        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
-
-        EXPECT_FLOAT_EQ(x, pts2[i].x);
-        EXPECT_FLOAT_EQ(y, pts2[i].y);
-        EXPECT_FLOAT_EQ(z, pts2[i].z);
-    }
-
-    PtData pts[3] = { {494915.25f, 4878096.5f, 128.220001f},
-                      {494917.062f, 4878124.5f, 128.539993f},
-                      {494920.781f, 4877914.5f, 127.42999f} };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        float x = view->getFieldAs<float>(Dimension::Id::X, 503 + i);
-        float y = view->getFieldAs<float>(Dimension::Id::Y, 503 + i);
-        float z = view->getFieldAs<float>(Dimension::Id::Z, 503 + i);
-
-        EXPECT_FLOAT_EQ(x, pts[i].x);
-        EXPECT_FLOAT_EQ(y, pts[i].y);
-        EXPECT_FLOAT_EQ(z, pts[i].z);
-    }
-}
-
-void test_file_type_stream(const std::string& filename)
-{
-    class Checker : public Filter, public Streamable
-    {
-    public:
-        Checker() : m_cnt(0)
-        {}
-
-        struct PtData
-        {
-            float x;
-            float y;
-            float z;
-        };
-
-        std::string getName() const
-        { return "checker"; }
-
-        bool processOne(PointRef& p)
-        {
-            PtData pts0[3] = { {494057.312f, 4877433.5f, 130.630005f},
-                {494133.812f, 4877440.0f, 130.440002f},
-                {494021.094f, 4877440.0f, 130.460007f} };
-
-            PtData pts503[3] = { {494915.25f, 4878096.5f, 128.220001f},
-                {494917.062f, 4878124.5f, 128.539993f},
-                {494920.781f, 4877914.5f, 127.42999f} };
-
-            PtData d;
-
-            if (m_cnt < 3)
-               d = pts0[0 + m_cnt];
-            else if (m_cnt >= 503 && m_cnt < 506)
-               d = pts503[m_cnt - 503];
-            else
-            {
-                m_cnt++;
-                return true;
-            }
-
-            float x = p.getFieldAs<float>(Dimension::Id::X);
-            float y = p.getFieldAs<float>(Dimension::Id::Y);
-            float z = p.getFieldAs<float>(Dimension::Id::Z);
-
-            EXPECT_FLOAT_EQ(x, d.x);
-            EXPECT_FLOAT_EQ(y, d.y);
-            EXPECT_FLOAT_EQ(z, d.z);
-            EXPECT_TRUE(m_cnt < 506) << "Count exceeded amount requested "
-                "in 'count' option.";
-
-            m_cnt++;
-            return true;
-        }
-
-    private:
-        size_t m_cnt;
-    };
-
-    FixedPointTable table(50);
-
-    Options ops;
-
-    ops.add("filename", filename);
-    ops.add("count", 506);
-    BpfReader reader;
-    reader.setOptions(ops);
-
-    Checker c;
-    c.setInput(reader);
-
-    c.prepare(table);
-    c.execute(table);
-}
-
-
-void test_file_type(const std::string& filename)
-{
-    test_file_type_view(filename);
-    test_file_type_stream(filename);
-}
-
-
-void test_roundtrip(Options& writerOps)
-{
-    std::string infile(
-        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
-    std::string outfile(Support::temppath("tmp.bpf"));
-
-    PointTable table;
-
-    Options readerOps;
-
-    readerOps.add("filename", infile);
-    BpfReader reader;
-    reader.setOptions(readerOps);
-
-    writerOps.add("filename", outfile);
-    BpfWriter writer;
-    writer.setOptions(writerOps);
-    writer.setInput(reader);
-
-    FileUtils::deleteFile(outfile);
-    writer.prepare(table);
-    writer.execute(table);
-
-    test_file_type(outfile);
-}
-
-
-} //namespace
-
-TEST(BPFTest, test_point_major)
+TEST(BpfTestBase, test_point_major)
 {
     test_file_type(
         Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
 }
 
-TEST(BPFTest, test_dim_major)
+TEST(BpfTestBase, test_dim_major)
 {
     test_file_type(
         Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
 }
 
-TEST(BPFTest, test_byte_major)
+TEST(BpfTestBase, test_byte_major)
 {
     test_file_type(
         Support::datapath("bpf/autzen-utm-chipped-25-v3-segregated.bpf"));
 }
 
-#ifdef PDAL_HAVE_ZLIB
-TEST(BPFTest, test_point_major_zlib)
-{
-    test_file_type(
-        Support::datapath("bpf/"
-            "autzen-utm-chipped-25-v3-deflate-interleaved.bpf"));
-}
-
-TEST(BPFTest, test_dim_major_zlib)
-{
-    test_file_type(
-        Support::datapath("bpf/autzen-utm-chipped-25-v3-deflate.bpf"));
-}
-
-TEST(BPFTest, test_byte_major_zlib)
-{
-    test_file_type(
-        Support::datapath("bpf/"
-            "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
-}
-#endif // PDAL_HAVE_ZLIB
-
-TEST(BPFTest, roundtrip_byte)
+TEST(BpfTestBase, roundtrip_byte)
 {
     Options ops;
 
@@ -291,7 +65,7 @@ TEST(BPFTest, roundtrip_byte)
     test_roundtrip(ops);
 }
 
-TEST(BPFTest, roundtrip_dimension)
+TEST(BpfTestBase, roundtrip_dimension)
 {
     Options ops;
 
@@ -299,7 +73,7 @@ TEST(BPFTest, roundtrip_dimension)
     test_roundtrip(ops);
 }
 
-TEST(BPFTest, roundtrip_point)
+TEST(BpfTestBase, roundtrip_point)
 {
     Options ops;
 
@@ -307,36 +81,7 @@ TEST(BPFTest, roundtrip_point)
     test_roundtrip(ops);
 }
 
-#ifdef PDAL_HAVE_ZLIB
-TEST(BPFTest, roundtrip_byte_compression)
-{
-    Options ops;
-
-    ops.add("format", "BYTE");
-    ops.add("compression", true);
-    test_roundtrip(ops);
-}
-
-TEST(BPFTest, roundtrip_dimension_compression)
-{
-    Options ops;
-
-    ops.add("format", "DIMENSION");
-    ops.add("compression", true);
-    test_roundtrip(ops);
-}
-
-TEST(BPFTest, roundtrip_point_compression)
-{
-    Options ops;
-
-    ops.add("format", "POINT");
-    ops.add("compression", true);
-    test_roundtrip(ops);
-}
-#endif // PDAL_HAVE_ZLIB
-
-TEST(BPFTest, roundtrip_scaling)
+TEST(BpfTestBase, roundtrip_scaling)
 {
     Options ops;
 
@@ -350,7 +95,7 @@ TEST(BPFTest, roundtrip_scaling)
     test_roundtrip(ops);
 }
 
-TEST(BPFTest, extra_bytes)
+TEST(BpfTestBase, extra_bytes)
 {
     std::string infile(
         Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
@@ -392,7 +137,7 @@ TEST(BPFTest, extra_bytes)
     EXPECT_EQ(memcmp(outbuf.data(), buf, sizeof(buf)), 0);
 }
 
-TEST(BPFTest, bundled)
+TEST(BpfTestBase, bundled)
 {
     std::string infile(
         Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
@@ -446,7 +191,7 @@ TEST(BPFTest, bundled)
         outbuf.size() - 1), 0);
 }
 
-TEST(BPFTest, inspect)
+TEST(BpfTestBase, inspect)
 {
     Options ops;
     ops.add("filename", Support::datapath("bpf/autzen-dd.bpf"));
@@ -487,7 +232,7 @@ TEST(BPFTest, inspect)
         qi.m_dimNames.end(), std::begin(dims)));
 }
 
-TEST(BPFTest, mueller)
+TEST(BpfTestBase, mueller)
 {
     BpfMuellerMatrix xform;
 
@@ -532,7 +277,7 @@ TEST(BPFTest, mueller)
 }
 
 
-TEST(BPFTest, flex)
+TEST(BpfTestBase, flex)
 {
     std::array<std::string, 3> outname =
         {{ "test_1.bpf", "test_2.bpf", "test_3.bpf" }};
@@ -594,7 +339,7 @@ TEST(BPFTest, flex)
     }
 }
 
-TEST(BPFTest, flex2)
+TEST(BpfTestBase, flex2)
 {
     Options readerOps;
     readerOps.add("filename",
@@ -649,7 +394,7 @@ TEST(BPFTest, flex2)
     EXPECT_EQ(r.preview().m_pointCount, 1065u);
 }
 
-TEST(BPFTest, outputdims)
+TEST(BpfTestBase, outputdims)
 {
     Options ops;
     ops.add("filename", Support::datapath("bpf/autzen-dd.bpf"));
@@ -713,7 +458,7 @@ TEST(BPFTest, outputdims)
 
 }
 
-TEST(BPFTest, autoutm)
+TEST(BpfTestBase, autoutm)
 {
     std::string sourcefile(
         Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));

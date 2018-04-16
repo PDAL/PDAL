@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Connor Manning, connor@hobu.co
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,59 +32,58 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/pdal_features.hpp>
+#include "Support.hpp"
+#include "io/BpfSupport.hpp"
 
-#include <pdal/Reader.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/StageFactory.hpp>
+using namespace pdal;
 
-#ifndef PDAL_HAVE_LIBXML2
-namespace pdal
+
+TEST(BpfTestZlib, test_point_major_zlib)
 {
-  class Ilvis2MetadataReader
-  {
-  public:
-      inline void readMetadataFile(std::string filename, MetadataNode* m) {};
-  };
+    test_file_type(
+        Support::datapath("bpf/"
+            "autzen-utm-chipped-25-v3-deflate-interleaved.bpf"));
 }
-#else
-    #include <io/Ilvis2MetadataReader.hpp>
-#endif
 
-
-#include "Hdf5Handler.hpp"
-
-#include <vector>
-
-namespace pdal
+TEST(BpfTestZlib, test_dim_major_zlib)
 {
+    test_file_type(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-deflate.bpf"));
+}
 
-class PDAL_DLL IcebridgeReader : public pdal::Reader
+TEST(BpfTestZlib, test_byte_major_zlib)
 {
-public:
-    IcebridgeReader() : pdal::Reader()
-        {}
-    std::string getName() const;
+    test_file_type(
+        Support::datapath("bpf/"
+            "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
+}
 
-private:
-    Hdf5Handler m_hdf5Handler;
-    point_count_t m_index;
+TEST(BpfTestZlib, roundtrip_byte_compression)
+{
+    Options ops;
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual void done(PointTableRef table);
-    virtual bool eof();
+    ops.add("format", "BYTE");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
 
-    std::string m_metadataFile;
-    Ilvis2MetadataReader m_mdReader;
+TEST(BpfTestZlib, roundtrip_dimension_compression)
+{
+    Options ops;
 
-    IcebridgeReader& operator=(const IcebridgeReader&);   // Not implemented.
-    IcebridgeReader(const IcebridgeReader&);              // Not implemented.
-};
+    ops.add("format", "DIMENSION");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
 
-} // namespace pdal
+TEST(BpfTestZlib, roundtrip_point_compression)
+{
+    Options ops;
+
+    ops.add("format", "POINT");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
+
