@@ -59,9 +59,12 @@ class PDAL_DLL MbReader : public Reader, public Streamable
         double m_bathlat;
         double m_bath;
         double m_amp;
+        double m_time;
 
-        BathData(double bathlon, double bathlat, double bath, double amp) :
-            m_bathlon(bathlon), m_bathlat(bathlat), m_bath(bath), m_amp(amp)
+        BathData(double bathlon, double bathlat, double bath, double amp,
+                double time) :
+            m_bathlon(bathlon), m_bathlat(bathlat), m_bath(bath), m_amp(amp),
+            m_time(time)
         {}
     };
 
@@ -70,9 +73,10 @@ class PDAL_DLL MbReader : public Reader, public Streamable
         double m_sslon;
         double m_sslat;
         double m_ss;
+        double m_time;
 
-        SidescanData(double sslon, double sslat, double ss) :
-            m_sslon(sslon), m_sslat(sslat), m_ss(ss)
+        SidescanData(double sslon, double sslat, double ss, double time) :
+            m_sslon(sslon), m_sslat(sslat), m_ss(ss), m_time(time)
         {}
     };
 
@@ -98,8 +102,8 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
     bool loadData();
-    bool extractMultibeam(int numBath, int numAmp);
-    bool extractSidescan(int numSs);
+    bool extractMultibeam(int numBath, int numAmp, double time);
+    bool extractSidescan(int numSs, double time);
 
     friend std::istream& operator>>(std::istream& in,
         MbReader::DataType& mode);

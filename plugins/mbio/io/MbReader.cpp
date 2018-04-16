@@ -80,7 +80,7 @@ void MbReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
 
-    std::vector<Dimension::Id> dims { Id::X, Id::Y, Id::Z };
+    std::vector<Dimension::Id> dims { Id::X, Id::Y, Id::Z, Id::GpsTime };
 
     layout->registerDims(dims);
     if (m_dataType == DataType::Multibeam)
@@ -132,6 +132,94 @@ void MbReader::ready(PointTableRef table)
         (void **)&m_sslat, &error);
 }
 
+namespace
+{
+
+int leapSeconds(int y, int m)
+{
+    struct leap
+    {
+        int year;
+        int month;
+    };
+
+    const std::vector<leap> leaps
+    {
+        {1981, 7}, {1982, 7}, {1983, 7}, {1985, 7}, {1988, 1}, {1990, 1},
+        {1991, 1}, {1992, 7}, {1993, 7}, {1994, 7}, {1996, 1}, {1997, 1},
+        {1999, 1}, {2006, 1}, {2009, 1}, {2012, 7}, {2015, 7}, {2017, 1}
+    };
+
+    int secs = 0;
+    for (size_t i = 0; i < leaps.size(); ++i)
+    {
+        if (y > leaps[i].year)
+            secs++;
+        else if (y == leaps[i].year && m >= leaps[i].month)
+        {
+            secs++;
+            break;
+        }
+        else
+            break;
+    }
+    return secs;
+}
+
+// This is an attempt to convert mb_system's poorly defined time_i to
+// adjusted GPS standard time (GPS standard time offset by 1.0E9)
+// Most of this is from converting struct tm (assuming UTC) to time_t
+// from Eric Raymond.
+double timeconvert(int time_i[7])
+{
+    const uint8_t yearIdx = 0;
+    const uint8_t monthIdx = 1;
+    const uint8_t dayIdx = 2;
+    const uint8_t hourIdx = 3;
+    const uint8_t minuteIdx = 4;
+    const uint8_t secondIdx = 5;
+    const uint8_t microsecIdx = 6;
+    const uint8_t monthsPerYear = 12;
+    const int cumdays[monthsPerYear] =
+        { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+
+    long year;
+    time_t result;
+
+    year = 1900 + time_i[yearIdx] + time_i[monthIdx] / monthsPerYear;
+    result = (year - 1970) * 365 + cumdays[time_i[monthIdx] % monthsPerYear];
+    result += (year - 1968) / 4;
+    result -= (year - 1900) / 100;
+    result += (year - 1600) / 400;
+    if ((year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0) &&
+        (time_i[monthIdx] % monthsPerYear) < 2)
+        result--;
+    result += time_i[dayIdx] - 1;
+    result *= 24;
+    result += time_i[hourIdx];
+    result *= 60;
+    result += time_i[minuteIdx];
+    result *= 60;
+    result += time_i[secondIdx];
+    /**
+    if (t->tm_isdst == 1)
+        result -= 3600;
+    **/
+    // We should now have time_t in result.  Adjust offset to GPS standard
+    // 1/1/1970 to 6/1/1980 in seconds.  Perhaps cleaner than messing with
+    // the calculations above which are known to work.
+    result -= 315964800;
+    // Now subtract seconds for each leap second that has happened between
+    // the GPS time root.  These are "announced", so we can't really plan here.
+    result -= leapSeconds(time_i[yearIdx], (time_i[monthIdx] / 12) + 1);
+    // Now subtract for "adjusted" GPS standard time.
+    result -= 1000000000UL;
+    // Add back the microseconds as a fraction of a second and convert
+    // to double.
+    return result + (time_i[microsecIdx] / 1000000.0);
+}
+
+} // namespace
 
 bool MbReader::loadData()
 {
@@ -161,6 +249,8 @@ bool MbReader::loadData()
             m_amp, m_bathlon, m_bathlat, m_ss, m_sslon, m_sslat, comment,
             &error);
 
+        double gpsTime = timeconvert(pingTime);
+
         if (status == 0)
         {
             if (error > 0 && error != MB_ERROR_EOF)
@@ -172,9 +262,9 @@ bool MbReader::loadData()
         {
             bool ok(false);
             if (m_dataType == DataType::Multibeam)
-                ok = extractMultibeam(numBath, numAmp);
+                ok = extractMultibeam(numBath, numAmp, gpsTime);
             else
-                ok = extractSidescan(numSs);
+                ok = extractSidescan(numSs, gpsTime);
             if (ok)
                 break;
         }
@@ -183,14 +273,14 @@ bool MbReader::loadData()
 }
 
 
-bool MbReader::extractMultibeam(int numBath, int numAmp)
+bool MbReader::extractMultibeam(int numBath, int numAmp, double gpsTime)
 {
     for (size_t i = 0; i < (size_t)numBath; ++i)
     {
         if (m_bathflag[i] & 1)
             continue;
         m_bathQueue.emplace(m_bathlon[i], m_bathlat[i], -m_bath[i],
-                m_amp[i]);
+                m_amp[i], gpsTime);
     }
     if (numBath != numAmp)
         log()->get(LogLevel::Warning) << getName() << ": Number of "
@@ -200,10 +290,10 @@ bool MbReader::extractMultibeam(int numBath, int numAmp)
 }
 
 
-bool MbReader::extractSidescan(int numSs)
+bool MbReader::extractSidescan(int numSs, double gpsTime)
 {
     for (size_t i = 0; i < (size_t)numSs; ++i)
-        m_ssQueue.emplace(m_sslon[i], m_sslat[i], m_ss[i]);
+        m_ssQueue.emplace(m_sslon[i], m_sslat[i], m_ss[i], gpsTime);
     return m_ssQueue.size();
 }
 
@@ -223,6 +313,7 @@ bool MbReader::processOne(PointRef& point)
         point.setField(Dimension::Id::X, bd.m_bathlon);
         point.setField(Dimension::Id::Y, bd.m_bathlat);
         point.setField(Dimension::Id::Z, bd.m_bath);
+        point.setField(Dimension::Id::GpsTime, bd.m_time);
         point.setField(Dimension::Id::Amplitude, bd.m_amp);
         m_bathQueue.pop();
     }
@@ -236,6 +327,7 @@ bool MbReader::processOne(PointRef& point)
 
         point.setField(Dimension::Id::X, ss.m_sslon);
         point.setField(Dimension::Id::Y, ss.m_sslat);
+        point.setField(Dimension::Id::GpsTime, ss.m_time);
         point.setField(Dimension::Id::Intensity, ss.m_ss);
         m_ssQueue.pop();
     }
