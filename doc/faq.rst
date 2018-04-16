@@ -63,7 +63,12 @@ FAQ
   manipulation. libLAS was also trying to be partially compatible
   with LASlib and LAStools. PDAL, on the other hand, aims to be
   a ultimate library and a set of tools for manipulating and processing
-  point clouds and is easily extensible by its users.
+  point clouds and is easily extensible by its users. Howard Butler
+  talked more about this history in a `GeoHipster interview`_ in
+  2018.
+
+.. _`GeoHipster interview`: http://geohipster.com/2018/03/05/howard-butler-like-good-song-open-source-software-chance-immortal/
+
 |
 * Are there any command line tools in PDAL similar to LAStools?
 

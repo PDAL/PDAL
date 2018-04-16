@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "SbetReader.hpp"
+#include "SbetCommon.hpp"
 
 #include <pdal/PointRef.hpp>
 #include <pdal/util/FileUtils.hpp>

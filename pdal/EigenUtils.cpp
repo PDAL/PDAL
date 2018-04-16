@@ -52,23 +52,30 @@ namespace pdal
 namespace eigen
 {
 
-Eigen::Vector3f computeCentroid(PointView& view, std::vector<PointId> ids)
+Eigen::Vector3d computeCentroid(PointView& view, std::vector<PointId> ids)
 {
     using namespace Eigen;
-
-    auto n = ids.size();
-
+    
     double mx, my, mz;
     mx = my = mz = 0.0;
+    point_count_t n(0);
     for (auto const& j : ids)
     {
-        mx += view.getFieldAs<double>(Dimension::Id::X, j);
-        my += view.getFieldAs<double>(Dimension::Id::Y, j);
-        mz += view.getFieldAs<double>(Dimension::Id::Z, j);
+        auto update = [&n](double value, double average)
+        {
+            double delta, delta_n;
+            delta = value - average;
+            delta_n = delta / n;
+            return average + delta_n;
+        };
+        n++;
+        mx = update(view.getFieldAs<double>(Dimension::Id::X, j), mx);
+        my = update(view.getFieldAs<double>(Dimension::Id::Y, j), my);
+        mz = update(view.getFieldAs<double>(Dimension::Id::Z, j), mz);
     }
 
-    Vector3f centroid;
-    centroid << mx/n, my/n, mz/n;
+    Vector3d centroid;
+    centroid << mx, my, mz;
 
     return centroid;
 }
@@ -79,7 +86,7 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
 
     auto n = ids.size();
 
-    Vector3f centroid = computeCentroid(view, ids);
+    Vector3d centroid = computeCentroid(view, ids);
 
     // demean the neighborhood
     MatrixXf A(3, n);

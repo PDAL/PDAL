@@ -218,6 +218,11 @@ void LasHeader::setSrs()
         else
             setSrsFromGeotiff();
     }
+    catch (Geotiff::error err)
+    {
+        m_log->get(LogLevel::Error) << "Could not create an SRS: " <<
+            err.what() << std::endl;
+    }
     catch (...)
     {
         m_log->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
@@ -314,7 +319,7 @@ void LasHeader::setSrsFromGeotiff()
     }
     std::vector<uint8_t> asciiRec(data, data + dataLen);
 
-    GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec);
+    GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec, m_log);
     SpatialReference gtiffSrs = geotiff.srs();
     if (!gtiffSrs.empty())
         m_srs = gtiffSrs;

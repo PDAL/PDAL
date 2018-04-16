@@ -55,6 +55,8 @@ bool Streamable::pipelineStreamable() const
 // Streamed execution.
 void Streamable::execute(StreamPointTable& table)
 {
+    m_log->get(LogLevel::Debug) << "Executing pipeline in stream mode." <<
+        std::endl;
     struct StreamableList : public std::list<Streamable *>
     {
         StreamableList operator - (const StreamableList& other) const

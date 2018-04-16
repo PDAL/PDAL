@@ -1,5 +1,6 @@
 /******************************************************************************
-* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2018, Danish Agency for Data Supply and Efficiency,
+* sdfe@sdfe.dk
 *
 * All rights reserved.
 *
@@ -13,10 +14,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of SDFE nor the names of its contributors may be
+*       used to endorse or promote products derived from this software
+*       without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,25 +32,25 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "PcdCommon.hpp"
+#pragma once
+
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
 
-Dimension::IdList fileDimensions()
+class PDAL_DLL DelaunayFilter : public Filter
 {
-    Dimension::IdList ids;
+public:
+    DelaunayFilter() : Filter()
+    {}
+    std::string getName() const;
 
-    using namespace Dimension;
-    ids.push_back(Id::X);
-    ids.push_back(Id::Y);
-    ids.push_back(Id::Z);
-    ids.push_back(Id::Intensity);
-    ids.push_back(Id::Red);
-    ids.push_back(Id::Green);
-    ids.push_back(Id::Blue);
+private:
+    virtual PointViewSet run(PointViewPtr view);
 
-    return ids;
-}
+    DelaunayFilter& operator=(const DelaunayFilter&); // not implemented
+    DelaunayFilter(const DelaunayFilter&); // not implemented
+};
 
 } // namespace pdal

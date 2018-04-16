@@ -39,8 +39,6 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/IStream.hpp>
 
-#include "SbetCommon.hpp"
-
 namespace pdal
 {
 
