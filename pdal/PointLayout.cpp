@@ -241,7 +241,7 @@ bool PointLayout::update(Dimension::Detail dd, const std::string& name)
     Dimension::Detail *cur = &(*di);
 
     {
-        auto sorter = [this](const Dimension::Detail& d1,
+        auto sorter = [](const Dimension::Detail& d1,
                 const Dimension::Detail& d2) -> bool
         {
             if (d1.size() > d2.size())

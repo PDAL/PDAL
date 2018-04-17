@@ -158,6 +158,9 @@ protected:
     {}
 
 public:
+    virtual ~Arg()
+    {}
+
     /**
       Indicate that the argument shouldn't be shown in help text.
 
