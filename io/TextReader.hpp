@@ -138,7 +138,6 @@ private:
     size_t m_line;
     std::string m_header;
     size_t m_skip;
-    std::streampos m_dataStart;
 };
 
 } // namespace pdal
