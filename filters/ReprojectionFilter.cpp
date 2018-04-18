@@ -93,6 +93,7 @@ void ReprojectionFilter::initialize()
         throwError("Invalid output spatial reference '" + m_outSRS.getWKT() +
             "'.  This is usually caused by a bad value for the 'out_srs' "
             "option.");
+    setSpatialReference(m_outSRS);
 }
 
 
@@ -146,9 +147,6 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     }
 
     viewSet.insert(outView);
-    view->setSpatialReference(m_outSRS);
-    outView->setSpatialReference(m_outSRS);
-
     return viewSet;
 }
 

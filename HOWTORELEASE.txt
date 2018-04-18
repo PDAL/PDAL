@@ -4,7 +4,7 @@ Steps for Making a PDAL Release
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 05/31/2017
+:Date: 04/04/2018
 
 This document describes the process for releasing a new version of PDAL.
 
@@ -21,9 +21,6 @@ Release Process
       PDAL_VERSION_MAJOR, PDAL_VERSION_MINOR, PDAL_VERSION_PATCH,
       and PDAL_CANDIDATE_VERSION strings.
 
-  - python/VERSION.txt
-    python/pdal/__init.py
-
   - Update SO versioning
     set(PDAL_API_VERSION "1")
     set(PDAL_BUILD_VERSION "1.0.0")
@@ -31,23 +28,37 @@ Release Process
 
   - doc/quickstart.rst has a number of current-release references
 
+  - doc/download.rst point to new release
+
+  - appveyor.yml
+
   - Make and push new release branch
 
     ::
 
-        git branch 1.6-maintenance
-        git push origin 1.6-maintenance
+        git branch 1.7-maintenance
+        git push origin 1.7-maintenance
 
 
   - Increment the doc build branch of .travis.yml:
 
-    "$TRAVIS_BRANCH" = "1.6-maintenance"
+    "$TRAVIS_BRANCH" = "1.7-maintenance"
 
   - Make DockerHub build entry for new release branch.
 
 
-2) Update README to include any relevant info about the release that
-   might have changed.
+2) Write and update release notes. Use the PDAL "releases" section to create one.
+   Write the document in Markdown for convenience on GitHub.
+
+   - Manually store a copy of it in ./doc/development/release-notes/1.7.0.md
+     for future reference.
+
+   - Convert it to reStructuredText using pandoc and add the output to the
+     RELEASENOTES.txt document
+
+     ::
+
+        pandoc --from markdown --to rst --output=1.7.rst doc/development/release-notes/1.7.0.md
 
 3) Update ChangeLog with git2cl
 
@@ -101,30 +112,25 @@ Release Process
 
 10) Write the release notes. Email PDAL mailing list with notice about release
 
-11) Upload Python extension to PyPI
 
-  ::
-
-      cd python; python setup.py sdist upload
-
-12) Upload new OSGeo4W package to download.osgeo.org:/osgeo/download/osgeo4w/x86_64/release/pdal
+11) Upload new OSGeo4W package to download.osgeo.org:/osgeo/download/osgeo4w/x86_64/release/pdal
 
   - Go to https://ci.appveyor.com/project/hobu/pdal
   - Choose ``OSGEO4W_BUILD=ON`` build
   - Scroll to very bottom
-  - Fetch tarball "OSGeo4W64 build will be uploaded to https://s3.amazonaws.com/pdal/osgeo4w/pdal-a4af2420b09725a4a0fff1ef277b1e6370c497d2.tar.bz2"
+  - Fetch tarball "OSGeo4W64 build will be uploaded to https://s3.amazonaws.com/pdal/osgeo4w/pdal-a4af2420b09725a4a0fff1ef277b1.7370c497d2.tar.bz2"
 
   - rename to match current release and set OSGeo4W build number to 1
 
     ::
 
-        mv pdal-a4af2420b09725a4a0fff1ef277b1e6370c497d2.tar.bz2 pdal-1.6.0-1.tar.bz2
+        mv pdal-a4af2420b09725a4a0fff1ef277b1.7370c497d2.tar.bz2 pdal-1.7.0-1.tar.bz2
 
   - copy to OSGeo4W server
 
     ::
 
-        scp pdal-1.6.0-1.tar.bz2 hobu@download.osgeo.org:/osgeo/download/osgeo4w/x86_64/release/pdal
+        scp pdal-1.7.0-1.tar.bz2 hobu@download.osgeo.org:/osgeo/download/osgeo4w/x86_64/release/pdal
 
   - refresh OSGeo4W
 

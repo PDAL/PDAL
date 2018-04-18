@@ -23,7 +23,7 @@
 .. |CRREL| replace:: `CRREL <http://www.erdc.usace.army.mil/Locations/ColdRegionsResearchandEngineeringLaboratory.aspx>`__
 .. |Hobu| replace:: `Hobu <httsp://hobu.co/>`__
 .. |Optech| replace:: `Optech <http://www.teledyneoptech.com/>`__
-.. |Riegl| replace:: `Riegl <http://riegl.com/>`__
+.. |RIEGL| replace:: `RIEGL <http://riegl.com/>`__
 .. |Greyhound| replace:: `Greyhound <http://greyhound.io/>`__
 .. |NCALM| replace:: `NCALM <http://ncalm.cive.uh.edu/>`__
 .. |UTM| replace:: `UTM <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`__

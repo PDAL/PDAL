@@ -3,7 +3,7 @@
 readers.rxp
 ===========
 
-The **RXP reader** read from files in the RXP format, the in-house streaming format used by `RIEGL Laser Measurement Systems`_.
+The **RXP reader** read from files in the RXP format, the in-house streaming format used by `RIEGL Laser Measurement Systems GmbH`_.
 
 .. warning::
    This software has not been developed by RIEGL, and RIEGL will not provide any support for this driver.
@@ -85,6 +85,6 @@ max_reflectance
   The high end of the reflectance-to-intensity map.
   [default: 5.0]
 
-.. _RIEGL Laser Measurement Systems: http://www.riegl.com
+.. _RIEGL Laser Measurement Systems GmbH: http://www.riegl.com
 .. _RIEGL download pages: http://www.riegl.com/members-area/software-downloads/libraries/
 .. _the optional library documentation: http://www.pdal.io/compilation/unix.html#configure-your-optional-libraries

@@ -24,7 +24,6 @@ function(PDAL_TARGET_COMPILE_SETTINGS target)
         ${PDAL_CXX_STANDARD}
         -Wextra
         -Wpedantic
-        -Werror
         -Wall
         -Wno-unused-parameter
         -Wno-unused-variable

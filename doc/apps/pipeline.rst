@@ -23,7 +23,8 @@ more information.
       progress file.
   --stdin, -s               Read pipeline from standard input
   --metadata                Metadata filename
-
+  --nostream                Don't run in stream mode, even if technically
+      possible.
 
 Substitutions
 ................................................................................

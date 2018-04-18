@@ -49,8 +49,7 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.las`
     Write ASPRS LAS versions 1.0 - 1.4 formatted data. LAZ support is also
-    available if enabled at compile-time. Note that LAZ does not provide LAS
-    1.4 support at this time.
+    available if enabled at compile-time.
 
 :ref:`writers.matlab`
     Write MATLAB .mat files. The output has a single array struct.

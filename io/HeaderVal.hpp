@@ -49,7 +49,7 @@ protected:
     BaseHeaderVal() : m_val(T()), m_valSet(false)
     {}
 
-    BaseHeaderVal(const T& t) : m_defVal(t), m_valSet(false)
+    BaseHeaderVal(const T& t) : m_val(T()), m_defVal(t), m_valSet(false)
     {}
 
 public:

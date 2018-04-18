@@ -8,7 +8,6 @@ RUN \
         alpine-sdk \
         unzip \
         cmake \
-        eigen-dev@edgecommunity \
         hexer-dev \
         nitro-dev \
         gdal-dev \
@@ -36,6 +35,7 @@ RUN \
         zlib-dev \
     ; \
     apk add --no-cache \
+        eigen-dev@edgecommunity \
         hexer \
         nitro \
         gdal \
@@ -99,6 +99,7 @@ RUN \
     rm -rf /laszip; \
     git clone https://github.com/PDAL/PDAL.git /pdal; \
     cd /pdal; \
+    git checkout 1.7-maintenance; \
     mkdir -p _build; \
     cd _build; \
     cmake .. \

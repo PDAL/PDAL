@@ -75,6 +75,7 @@ R"PDALEXTENSIONS(
     "writers.nitf" : "nitf, nsf, ntf",
     "readers.pcd" : "pcd",
     "writers.pcd" : "pcd",
+    "readers.rdb" : "rdbx",
     "readers.sqlite" : "sqlite, gpkg",
     "writers.sqlite" : "sqlite, gpkg",
     "readers.mrsid" : "sid",

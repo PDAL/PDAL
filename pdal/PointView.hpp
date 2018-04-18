@@ -69,6 +69,7 @@ typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
 class PDAL_DLL PointView : public PointContainer
 {
+    friend class Stage;
     friend class plang::Invocation;
     friend class PointIdxRef;
     friend struct PointViewLess;
@@ -212,8 +213,8 @@ public:
         { return layout()->dimTypes(); }
     inline PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
-    void setSpatialReference(const SpatialReference& spatialRef)
-        { m_spatialReference = spatialRef; }
+    inline PointTableRef table() const
+        { return m_pointTable;}
     SpatialReference spatialReference() const
         { return m_spatialReference; }
 
@@ -325,6 +326,8 @@ private:
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
+    void setSpatialReference(const SpatialReference& spatialRef)
+        { m_spatialReference = spatialRef; }
 };
 
 struct PointViewLess
