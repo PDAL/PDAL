@@ -26,10 +26,7 @@ target_include_directories(${PDAL_UTIL_LIB_NAME} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost)
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries(${PDAL_UTIL_LIB_NAME}
-        PRIVATE
-            dl
-    )
+    target_link_libraries(${PDAL_UTIL_LIB_NAME} PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
 set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES
