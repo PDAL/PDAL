@@ -47,7 +47,7 @@ class Vlr
 {
 public:
     bool matches(std::string userId, uint16_t recordId)
-        { return userId == userId && recordId == m_recordId; }
+        { return userId == m_userId && recordId == m_recordId; }
     const char *data() const
         { return (const char *)m_data.data(); }
     uint64_t dataLen() const
