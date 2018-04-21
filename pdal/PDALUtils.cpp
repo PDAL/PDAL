@@ -192,7 +192,7 @@ std::string tempFilename(const std::string& path)
 class TempFile
 {
 public:
-    TempFile(const std::string path) : m_filename(path)
+    TempFile(const std::string& path) : m_filename(path)
     {}
 
     virtual ~TempFile()

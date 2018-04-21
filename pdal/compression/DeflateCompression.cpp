@@ -42,7 +42,7 @@ namespace pdal
 class DeflateCompressorImpl
 {
 public:
-    DeflateCompressorImpl(BlockCb cb) : m_cb(cb)
+    DeflateCompressorImpl(const BlockCb& cb) : m_cb(cb)
     {
         m_strm.zalloc = Z_NULL;
         m_strm.zfree = Z_NULL;
@@ -125,7 +125,7 @@ private:
 };
 
 
-DeflateCompressor::DeflateCompressor(BlockCb cb) :
+DeflateCompressor::DeflateCompressor(const BlockCb& cb) :
     m_impl(new DeflateCompressorImpl(cb))
 {}
 
@@ -149,7 +149,7 @@ void DeflateCompressor::done()
 class DeflateDecompressorImpl
 {
 public:
-    DeflateDecompressorImpl(BlockCb cb) : m_cb(cb)
+    DeflateDecompressorImpl(const BlockCb& cb) : m_cb(cb)
     {
         m_strm.zalloc = Z_NULL;
         m_strm.zfree = Z_NULL;
@@ -230,7 +230,7 @@ private:
 };
 
 
-DeflateDecompressor::DeflateDecompressor(BlockCb cb) :
+DeflateDecompressor::DeflateDecompressor(const BlockCb& cb) :
     m_impl(new DeflateDecompressorImpl(cb))
 {}
 

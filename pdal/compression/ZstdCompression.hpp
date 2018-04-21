@@ -43,7 +43,7 @@ class ZstdCompressorImpl;
 class ZstdCompressor : public Compressor
 {
 public:
-    PDAL_DLL ZstdCompressor(BlockCb cb);
+    PDAL_DLL ZstdCompressor(const BlockCb& cb);
     PDAL_DLL ~ZstdCompressor();
 
     PDAL_DLL void compress(const char *buf, size_t bufsize);
@@ -58,7 +58,7 @@ class ZstdDecompressorImpl;
 class ZstdDecompressor : public Decompressor
 {
 public:
-    PDAL_DLL ZstdDecompressor(BlockCb cb);
+    PDAL_DLL ZstdDecompressor(const BlockCb& cb);
     PDAL_DLL ~ZstdDecompressor();
 
     PDAL_DLL void decompress(const char *buf, size_t bufsize);

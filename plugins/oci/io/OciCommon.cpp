@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-Connection connect(std::string connSpec)
+Connection connect(const std::string& connSpec)
 {
     using namespace std;
 
@@ -133,7 +133,7 @@ XMLSchema fetchSchema(Statement stmt, BlockPtr block)
 }
 
 
-Block::Block(Connection connection) : num_points(0), m_connection(connection),
+Block::Block(const Connection& connection) : num_points(0), m_connection(connection),
     m_num_remaining(0), m_fetched(false)
 {
     m_connection->CreateType(&blk_extent);

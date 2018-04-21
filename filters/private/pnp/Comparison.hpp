@@ -140,7 +140,7 @@ class FloatingPoint {
   // Reinterprets a bit pattern as a floating-point number.
   //
   // This function is needed to test the AlmostEquals() method.
-  static RawType ReinterpretBits(const Bits bits) {
+  static RawType ReinterpretBits(const Bits& bits) {
     FloatingPoint fp(0);
     fp.u_.bits_ = bits;
     return fp.u_.value_;

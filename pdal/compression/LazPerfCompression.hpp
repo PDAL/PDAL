@@ -45,7 +45,7 @@ class LazPerfCompressorImpl;
 class LazPerfCompressor : public Compressor
 {
 public:
-    PDAL_DLL LazPerfCompressor(BlockCb cb, const DimTypeList& dims);
+    PDAL_DLL LazPerfCompressor(const BlockCb& cb, const DimTypeList& dims);
     PDAL_DLL ~LazPerfCompressor();
 
     PDAL_DLL void compress(const char *buf, size_t bufsize);
@@ -64,7 +64,7 @@ class LazPerfDecompressorImpl;
 class LazPerfDecompressor : public Decompressor
 {
 public:
-    PDAL_DLL LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
+    PDAL_DLL LazPerfDecompressor(const BlockCb& cb, const DimTypeList& dims,
         size_t numPoints);
     PDAL_DLL ~LazPerfDecompressor();
 

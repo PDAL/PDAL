@@ -104,7 +104,7 @@ size_t addFields(LasZipEngine& engine, const DimTypeList& dims)
 class LazPerfCompressorImpl
 {
 public:
-    LazPerfCompressorImpl(BlockCb cb, const DimTypeList& dims) :
+    LazPerfCompressorImpl(const BlockCb& cb, const DimTypeList& dims) :
         m_cb(cb),
         m_encoder(*this),
         m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
@@ -170,7 +170,7 @@ private:
 };
 
 
-LazPerfCompressor::LazPerfCompressor(BlockCb cb, const DimTypeList& dims) :
+LazPerfCompressor::LazPerfCompressor(const BlockCb& cb, const DimTypeList& dims) :
     m_impl(new LazPerfCompressorImpl(cb, dims))
 {}
 
@@ -194,7 +194,7 @@ void LazPerfCompressor::done()
 class LazPerfDecompressorImpl
 {
 public:
-    LazPerfDecompressorImpl(BlockCb cb, const DimTypeList& dims,
+    LazPerfDecompressorImpl(const BlockCb& cb, const DimTypeList& dims,
             size_t numPoints) :
         m_decoder(*this),
         m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder)),
@@ -248,7 +248,7 @@ private:
     size_t m_pointSize;
 };
 
-LazPerfDecompressor::LazPerfDecompressor(BlockCb cb, const DimTypeList& dims,
+LazPerfDecompressor::LazPerfDecompressor(const BlockCb& cb, const DimTypeList& dims,
         size_t numPoints) :
     m_impl(new LazPerfDecompressorImpl(cb, dims, numPoints))
 {}

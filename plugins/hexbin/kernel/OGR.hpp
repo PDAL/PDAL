@@ -56,7 +56,7 @@ class OGR
 
 
 public:
-    OGR(std::string const& filename, std::string srs, std::string driver = "ESRI Shapefile", std::string layerName ="");
+    OGR(std::string const& filename, const std::string& srs, const std::string& driver = "ESRI Shapefile", const std::string& layerName ="");
     ~OGR();
 
     void writeBoundary(hexer::HexGrid *grid);

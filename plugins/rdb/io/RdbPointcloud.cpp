@@ -47,7 +47,7 @@ namespace pdal
 RdbPointcloud::AttributeBuffer::AttributeBuffer(
     const pdal::Dimension::Id   id,
     const pdal::Dimension::Type type,
-    const std::string           name,
+    const std::string&          name,
     const size_t                size
 ):
     id  (id),

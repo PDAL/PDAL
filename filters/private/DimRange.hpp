@@ -49,7 +49,7 @@ struct DimRange
         {}
     };
 
-    DimRange(const std::string name,
+    DimRange(const std::string& name,
         double lower_bound,
         double upper_bound,
         bool inclusive_lower_bound,

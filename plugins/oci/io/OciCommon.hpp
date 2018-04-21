@@ -60,7 +60,7 @@ public:
 class Block
 {
 public:
-    Block(Connection connection);
+    Block(const Connection& connection);
     ~Block();
 
     point_count_t numRemaining() const

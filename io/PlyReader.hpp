@@ -106,7 +106,7 @@ private:
 
     struct Element
     {
-        Element(const std::string name, size_t count) :
+        Element(const std::string& name, size_t count) :
             m_name(name), m_count(count)
         {}
 

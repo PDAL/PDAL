@@ -96,12 +96,12 @@ static const std::string drive = "A:";
 static const std::string drive = "";
 #endif
 
-static std::string normalize(const std::string p)
+static std::string normalize(const std::string& p)
 {
     return Utils::replaceAll(p, "\\", "/");
 }
 
-static void compare_paths(const std::string a, const std::string b)
+static void compare_paths(const std::string& a, const std::string& b)
 {
     EXPECT_EQ(normalize(a), normalize(b));
 }

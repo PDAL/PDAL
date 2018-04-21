@@ -55,7 +55,7 @@ public:
         data = Utils::toString(v);
     }
 
-    column(std::string v) : null(false), blobBuf(0), blobLen(0)
+    column(const std::string& v) : null(false), blobBuf(0), blobLen(0)
     {
         data = v;
     }

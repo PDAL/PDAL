@@ -42,7 +42,7 @@ namespace pdal
 class Lzma
 {
 protected:
-    Lzma(BlockCb cb) : m_cb(cb)
+    Lzma(const BlockCb& cb) : m_cb(cb)
     {
         m_strm = LZMA_STREAM_INIT;
     }
@@ -95,7 +95,7 @@ private:
 class LzmaCompressorImpl : public Lzma
 {
 public:
-    LzmaCompressorImpl(BlockCb cb) : Lzma(cb)
+    LzmaCompressorImpl(const BlockCb& cb) : Lzma(cb)
     {
         if (lzma_easy_encoder(&m_strm, 2, LZMA_CHECK_CRC64) != LZMA_OK)
             throw compression_error("Can't create compressor");
@@ -113,7 +113,7 @@ public:
 };
 
 
-LzmaCompressor::LzmaCompressor(BlockCb cb) :
+LzmaCompressor::LzmaCompressor(const BlockCb& cb) :
     m_impl(new LzmaCompressorImpl(cb))
 {}
 
@@ -137,7 +137,7 @@ void LzmaCompressor::done()
 class LzmaDecompressorImpl : public Lzma
 {
 public:
-    LzmaDecompressorImpl(BlockCb cb) : Lzma(cb)
+    LzmaDecompressorImpl(const BlockCb& cb) : Lzma(cb)
     {
         if (lzma_auto_decoder(&m_strm, std::numeric_limits<uint32_t>::max(),
             LZMA_TELL_UNSUPPORTED_CHECK))
@@ -155,7 +155,7 @@ public:
     }
 };
 
-LzmaDecompressor::LzmaDecompressor(BlockCb cb) :
+LzmaDecompressor::LzmaDecompressor(const BlockCb& cb) :
     m_impl(new LzmaDecompressorImpl(cb))
 {}
 

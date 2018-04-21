@@ -37,7 +37,7 @@
 namespace pdal
 {
 
-void Ilvis2MetadataReader::readMetadataFile(std::string filename,
+void Ilvis2MetadataReader::readMetadataFile(const std::string& filename,
     MetadataNode* m)
 {
     xmlDocPtr doc;
@@ -549,7 +549,7 @@ void Ilvis2MetadataReader::parsePSA(xmlNodePtr node, MetadataNode * m)
 
 // Since the Browse, PH, QA, and MP product nodes have the same structure
 // just differing prefixes, they can share this code.
-void Ilvis2MetadataReader::parseXXProduct(std::string type, xmlNodePtr node,
+void Ilvis2MetadataReader::parseXXProduct(const std::string& type, xmlNodePtr node,
     MetadataNode * m)
 {
     std::string fullBase = type + "Product";
@@ -630,7 +630,7 @@ xmlNodePtr Ilvis2MetadataReader::getFirstChildElementNode(xmlNodePtr node)
 }
 
 // Verifies the name of the node matches what's expected
-bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
+bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, const std::string& expected)
 {
     if (!node)
     {
@@ -643,7 +643,7 @@ bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
 
 
 // Throws an error if the next element is not what it expects
-void Ilvis2MetadataReader::assertElementIs(xmlNodePtr node, std::string expected)
+void Ilvis2MetadataReader::assertElementIs(xmlNodePtr node, const std::string& expected)
 {
     if (!node || !nodeElementIs(node, expected))
         throw error("Expected element '" + expected + "', found '" +
@@ -662,7 +662,7 @@ void Ilvis2MetadataReader::assertEndOfElements(xmlNodePtr node)
 
 // Counts the number of child element nodes with a given name
 int Ilvis2MetadataReader::countChildElements(xmlNodePtr node,
-    std::string childName)
+    const std::string& childName)
 {
     xmlNodePtr child = getFirstChildElementNode(node);
     int ctr = 0;
