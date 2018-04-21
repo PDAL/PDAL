@@ -272,8 +272,6 @@ void SQLiteWriter::CreateCloudTable()
     log()->get(LogLevel::Debug) << "Created cloud table '"
         << Utils::tolower(m_cloud_table) << "'" << std::endl;
 
-    uint32_t nDim = 2;
-
     oss.str("");
     oss << "SELECT AddGeometryColumn('"
         << Utils::tolower(m_cloud_table)
@@ -319,10 +317,6 @@ void SQLiteWriter::CreateIndexes(std::string const& table_name,
     std::string const& spatial_column_name, bool is3d)
 {
     std::ostringstream oss;
-    std::ostringstream index_name_ss;
-
-    index_name_ss << table_name << "_cloud_idx";
-    std::string index_name = index_name_ss.str().substr(0,29);
 
     // Spatial indexes
     oss << "SELECT CreateSpatialIndex('"<< Utils::tolower(table_name) <<

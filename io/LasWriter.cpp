@@ -225,7 +225,7 @@ void LasWriter::addUserVlrs()
         std::string userId("");
         std::string description("");
         std::string b64data("");
-        std::string user("");
+
         if (! v.isMember("user_id"))
             throw pdal_error("VLR must contain a 'user_id'!");
         userId = v["user_id"].asString();

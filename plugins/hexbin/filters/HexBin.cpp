@@ -192,7 +192,6 @@ void HexBin::done(PointTableRef table)
     {
         // Compute a UTM polygon
         BOX3D box = p.bounds();
-        int zone = SpatialReference::calculateZone(box.minx, box.miny);
 
         auto makezone = [] (int zone) -> std::string
         {
@@ -204,6 +203,7 @@ void HexBin::done(PointTableRef table)
             return z.str();
         };
 
+        int zone = SpatialReference::calculateZone(box.minx, box.miny);
         SpatialReference utm(makezone(zone));
         density_p = p.transform(utm);
     }
@@ -230,11 +230,7 @@ void HexBin::done(PointTableRef table)
         "Number of points per square unit (total area)");
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
 
-    double moving_avg(0.0);
-    double avg_count(0.0);
-
     double hex_area(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
-    int n(0);
     point_count_t totalCount(0);
     double totalArea(0.0);
     for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
@@ -242,7 +238,6 @@ void HexBin::done(PointTableRef table)
         HexInfo h = *hi;
         totalCount += h.density();
         totalArea += hex_area;
-        ++n;
     }
 
     double avg_density = totalArea /(double) totalCount;

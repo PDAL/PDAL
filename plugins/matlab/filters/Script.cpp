@@ -85,7 +85,7 @@ std::string Script::getSRSWKT(mxArray* array, LogPtr log)
             size_t len = mxGetN(s);
             std::string data;
             data.resize(len+1);
-            int ret = mxGetString(s, const_cast<char*>(data.data()), len+1);
+            mxGetString(s, const_cast<char*>(data.data()), len+1);
             output = std::string(data);
         }
     }
@@ -162,7 +162,7 @@ void Script::getMatlabStruct(mxArray* array, PointViewPtr view, const Dimension:
                 size_t len = mxGetN(args);
                 std::string data;
                 data.resize(len+1);
-                int ret = mxGetString(args, const_cast<char*>(data.data()),
+                mxGetString(args, const_cast<char*>(data.data()),
                     len+1);
                 pdalargs = std::string(data);
             }

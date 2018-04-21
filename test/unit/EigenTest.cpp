@@ -126,6 +126,7 @@ TEST(EigenTest, ComputeValues)
     EXPECT_NEAR(269.8718, afd, 0.0001);
 
     double hs = eigen::computeHillshade(A, spacing, 45.0, 315.0);
+    // FIXME: untested hs
 
     MatrixXd out = eigen::gradX(A);
 

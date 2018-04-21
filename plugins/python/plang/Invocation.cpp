@@ -175,7 +175,6 @@ void *Invocation::extractResult(std::string const& name,
     PyArrayObject* arr = (PyArrayObject*)xarr;
 
     npy_intp one = 0;
-    const int pyDataType = pdal::plang::Environment::getPythonDataType(t);
     PyArray_Descr *dtype = PyArray_DESCR(arr);
 
     if (static_cast<uint32_t>(dtype->elsize) != Dimension::size(t))

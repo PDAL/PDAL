@@ -117,7 +117,6 @@ void MatlabReader::addDimensions(PointLayoutPtr layout)
     int nDimensionNumber(0);
     for(auto d: dims)
     {
-        std::string dimName = matlabLayout->dimName(d);
         const Dimension::Detail* detail = matlabLayout->dimDetail(d);
         Dimension::Id id = detail->id();
         Dimension::Type t = detail->type();

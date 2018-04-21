@@ -234,7 +234,7 @@ void Dumper::loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& b
         {
             in = reinterpret_cast<const char *>(&(zipPoint->rgb));
             std::copy(in, in + 8, out); // RBG, NIR
-            out += 8;
+            //out += 8;
         }
     }
 }

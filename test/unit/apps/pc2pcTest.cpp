@@ -124,7 +124,6 @@ TEST(pc2pcTest, pc2pc_test_switches)
     std::string cmd = appName();
 
     std::string inputLas = Support::datapath("apps/simple.las");
-    std::string inputLaz = Support::datapath("apps/simple.laz");
     std::string outputLas = Support::temppath("temp.las");
     std::string outputLaz = Support::temppath("temp.laz");
 

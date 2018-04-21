@@ -127,9 +127,6 @@ TEST(UtilsTest, test_base64)
 TEST(UtilsTest, blanks)
 {
     std::string base("This is a test");
-    std::string trail("This is a test   ");
-    std::string lead("  This is a test");
-    std::string both("  This is a test    ");
     std::string empty;
 
     std::string s = "This is a test  \t  ";

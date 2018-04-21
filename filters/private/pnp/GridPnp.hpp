@@ -188,13 +188,11 @@ private:
         m_yMin = yval(p);
         m_yMax = yval(p);
 
-        size_t numEdges = 0;
         // The first point is duplicated as the last, so we skip the last
         // point when looping.
         for (size_t id = 0; id < outer.size() - 1; ++id)
         {
             const Point& p1 = outer[id];
-            const Point& p2 = outer[id + 1];
 
             // Calculate bounding box.
             m_xMin = std::min(m_xMin, xval(p1));

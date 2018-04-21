@@ -718,8 +718,8 @@ TEST(LasWriterTest, laszip1_4)
     {
        view1->getPackedPoint(dims, idx, buf1.get());
        view2->getPackedPoint(dims, idx, buf2.get());
-       char *b1 = buf1.get();
-       char *b2 = buf2.get();
+       //char *b1 = buf1.get();
+       //char *b2 = buf2.get();
        // Uncomment this to figure out the exact byte at which things are
        // broken.
        /**

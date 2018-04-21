@@ -74,6 +74,7 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
         SpatialReference ref(proj4);
         EXPECT_TRUE(!ref.empty());
         const std::string ret = ref.getProj4();
+        // FIXME: untest return value
     }
 
     {
@@ -95,8 +96,6 @@ TEST(SpatialReferenceTest, test_userstring_roundtrip)
 {
     std::string code = "EPSG:4326";
     std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs";
-    std::string proj4_ellps =
-        "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     const std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
     SpatialReference ref(code);
 

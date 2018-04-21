@@ -196,7 +196,7 @@ std::string SpatialReference::getVerticalUnits() const
 
     std::string wkt = getVertical();
     const char* poWKT = wkt.c_str();
-    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(poWKT);
     if (poSRS)
     {
         OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
@@ -240,7 +240,7 @@ std::string SpatialReference::getHorizontalUnits() const
 {
     std::string wkt = getHorizontal();
     const char* poWKT = wkt.c_str();
-    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(poWKT);
 
     if (!poSRS)
         return std::string();
@@ -250,7 +250,7 @@ std::string SpatialReference::getHorizontalUnits() const
     // The returned value remains internal to the OGRSpatialReference
     // and should not be freed, or modified. It may be invalidated on
     // the next OGRSpatialReference call.
-    double u = poSRS->GetLinearUnits(&units);
+    poSRS->GetLinearUnits(&units);
     std::string tmp(units);
     Utils::trim(tmp);
     return tmp;
