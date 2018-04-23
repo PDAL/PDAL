@@ -80,7 +80,7 @@ void FerryFilter::initialize()
             throwError("Can't ferry two source dimensions to the same "
                 "destination dimension.");
         toNames.push_back(s[1]);
-        m_dims.emplace_back( s[0], s[1] );
+        m_dims.emplace_back(s[0], s[1]);
     }
 }
 
@@ -90,7 +90,11 @@ void FerryFilter::addDimensions(PointLayoutPtr layout)
     for (auto& info : m_dims)
     {
         const Dimension::Id fromId = layout->findDim(info.m_fromName);
-        const Dimension::Type fromType = layout->dimType(fromId);
+        // Dimensions being created with the "=>Dim" syntax won't have
+        // be in the layout, so we have to assign a default type.
+        Dimension::Type fromType = layout->dimType(fromId);
+        if (fromType == Dimension::Type::None)
+            fromType = Dimension::Type::Double;
 
         info.m_toId = layout->registerOrAssignDim(info.m_toName, fromType);
     }

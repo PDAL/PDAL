@@ -160,6 +160,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     Options op3;
 
     op3.add("dimensions", "NewX = X");
+    op3.add("dimensions", "=>NewY");
     FerryFilter f3;
     f3.setInput(reader);
     f3.setOptions(op3);
@@ -184,4 +185,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     f5.setOptions(op5);
     f5.prepare(table);
     EXPECT_TRUE(table.layout()->findDim("Foobar") != Dimension::Id::Unknown);
+    Dimension::Id id = table.layout()->findDim("NewY");
+    EXPECT_TRUE(id != Dimension::Id::Unknown);
+    EXPECT_TRUE(table.layout()->dimType(id) != Dimension::Type::None);
 }
