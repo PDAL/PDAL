@@ -427,8 +427,8 @@ bool XMLSchema::load(xmlDocPtr doc)
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n)
                 {
-                    return false;
                     std::cerr << "Unable to fetch minimum value.\n";
+                    return false;
                 }
                 dim.m_min = std::atof((const char*)n);
                 xmlFree(n);
