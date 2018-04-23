@@ -39,6 +39,8 @@
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
 
+#include <cpl_conv.h>
+
 PDAL_C_START
 
 // These functions are available from GDAL, but they
@@ -146,7 +148,10 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     {
         char *wkt = GTIFGetOGISDefn(ctx.gtiff, &sGTIFDefn);
         if (wkt)
+        {
             m_srs.set(wkt);
+            VSIFree(wkt);
+        }
     }
 }
 

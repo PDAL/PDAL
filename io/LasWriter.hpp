@@ -102,7 +102,7 @@ private:
     std::string m_curFilename;
     StringList m_forwardSpec;
     std::set<std::string> m_forwards;
-    bool m_forwardVlrs;
+    bool m_forwardVlrs = false;
     LasCompression m_compression;
     std::vector<char> m_pointBuf;
     SpatialReference m_aSrs;
