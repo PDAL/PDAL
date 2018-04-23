@@ -131,6 +131,7 @@ private:
 
 private:
     char m_separator;
+    Arg *m_separatorArg;
     std::istream *m_istream;
     StringList m_dimNames;
     Dimension::IdList m_dims;

@@ -102,11 +102,11 @@ void TextReader::checkHeader(const std::string& header)
 void TextReader::parseHeader(const std::string& header)
 {
     auto isspecial = [](char c)
-        { return (!std::isalnum(c) && c != ' '); };
+        { return (!std::isalnum(c)); };
 
     // If the separator wasn't provided on the command line extract it
     // from the header line.
-    if (m_separator == ' ')
+    if (!m_separatorArg->set())
     {
         // Scan string for some character not a number, space or letter.
         for (size_t i = 0; i < header.size(); ++i)
@@ -117,7 +117,7 @@ void TextReader::parseHeader(const std::string& header)
             }
     }
 
-    if (m_separator != ' ')
+    if (!isspace(m_separator))
         m_dimNames = Utils::split(header, m_separator);
     else
         m_dimNames = Utils::split2(header, m_separator);
@@ -156,8 +156,8 @@ void TextReader::initialize(PointTableRef table)
 
 void TextReader::addArgs(ProgramArgs& args)
 {
-    args.add("separator", "Separator character that overrides special "
-        "character found in header line", m_separator, ' ');
+    m_separatorArg = &(args.add("separator", "Separator character that "
+        "overrides special character found in header line", m_separator, ' '));
     args.add("header", "Use this string as the header line.", m_header);
     args.add("skip", "Skip this number of lines before attempting to "
         "read the header.", m_skip);
