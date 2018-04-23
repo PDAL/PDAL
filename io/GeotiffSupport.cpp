@@ -39,14 +39,13 @@
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
 
-#include <cpl_conv.h>
-
 PDAL_C_START
 
 // These functions are available from GDAL, but they
 // aren't exported.
 char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+void VSIFree(void *data);
 
 PDAL_C_END
 
