@@ -75,7 +75,10 @@ endif()
 #
 # sources for the native io
 #
-PDAL_ADD_TEST(pdal_io_bpf_test FILES io/BPFTest.cpp)
+PDAL_ADD_TEST(pdal_io_bpf_base_test FILES io/BpfTestBase.cpp)
+if (PDAL_HAVE_ZLIB)
+    PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
+endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/GDALReaderTest.cpp)

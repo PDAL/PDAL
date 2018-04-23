@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_features.hpp>
+#include <pdal/pdal_features.hpp>  // PDAL_ARBITER_ENABLED
 
 #ifdef PDAL_ARBITER_ENABLED
     #include <arbiter/arbiter.hpp>

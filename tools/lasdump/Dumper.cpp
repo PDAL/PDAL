@@ -140,36 +140,31 @@ void Dumper::readPoints(ILeStream& in)
 }
 
 
-namespace {
-void handleLaszip(int result)
+void Dumper::handleLaszip(int result)
 {
-#ifdef PDAL_HAVE_LASZIP
      if (result)
      {
          char *buf;
-         laszip_get_error(m_laszip, &buf);
+         laszip_get_error(m_zip, &buf);
          std::cerr << buf;
          exit(-1);
      }
-#endif
 }
-} // namespace
 
 
 void Dumper::readCompressedPoints(ILeStream& in)
 {
-    laszip_POINTER zip;
     laszip_BOOL compressed;
     laszip_point_struct *zipPoint;
 
-    handleLaszip(laszip_create(&zip));
-    handleLaszip(laszip_open_reader_stream(zip, *in.stream(), &compressed));
-    handleLaszip(laszip_get_point_pointer(zip, &zipPoint));
+    handleLaszip(laszip_create(&m_zip));
+    handleLaszip(laszip_open_reader_stream(m_zip, *in.stream(), &compressed));
+    handleLaszip(laszip_get_point_pointer(m_zip, &zipPoint));
 
     std::vector<char> buf(m_header.pointLen());
     for (size_t i = 0; i < m_header.pointCount(); ++i)
     {
-        handleLaszip(laszip_read_point(zip));
+        handleLaszip(laszip_read_point(m_zip));
         loadPoint(zipPoint, buf);
         *m_out << cksum(buf) << "\n";
     }
