@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,59 +32,58 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <stdexcept>
-#include <ostream>
+#include "Support.hpp"
+#include "io/BpfSupport.hpp"
 
-#include <pdal/pdal_features.hpp>
-#include <pdal/util/Charbuf.hpp>
-#include <pdal/util/OStream.hpp>
+using namespace pdal;
 
-#ifdef PDAL_HAVE_ZLIB
-#include <zlib.h>
-#endif // PDAL_HAVE_ZLIB
 
-namespace pdal
+TEST(BpfTestZlib, test_point_major_zlib)
 {
+    test_file_type(
+        Support::datapath("bpf/"
+            "autzen-utm-chipped-25-v3-deflate-interleaved.bpf"));
+}
 
-class BpfCompressor
+TEST(BpfTestZlib, test_dim_major_zlib)
 {
-public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
+    test_file_type(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-deflate.bpf"));
+}
 
-#ifdef PDAL_HAVE_ZLIB
-    BpfCompressor(OLeStream& out, size_t maxSize) :
-        m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
-        m_compressedSize(0)
-    {}
-#else
-    BpfCompressor(OLeStream&, size_t)
-    {}
-#endif // PDAL_HAVE_ZLIB
+TEST(BpfTestZlib, test_byte_major_zlib)
+{
+    test_file_type(
+        Support::datapath("bpf/"
+            "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
+}
 
-    void startBlock();
-    void finish();
-    void compress();
+TEST(BpfTestZlib, roundtrip_byte_compression)
+{
+    Options ops;
 
-private:
-    static const int CHUNKSIZE = 1000000;
+    ops.add("format", "BYTE");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
 
-#ifdef PDAL_HAVE_ZLIB
-    OLeStream& m_out;
-    Charbuf m_charbuf;
-    std::vector<char> m_inbuf;
-    z_stream m_strm;
-    unsigned char m_tmpbuf[CHUNKSIZE];
-    OStreamMarker m_blockStart;
-    size_t m_rawSize;
-    size_t m_compressedSize;
-#endif // PDAL_HAVE_ZLIB
-};
+TEST(BpfTestZlib, roundtrip_dimension_compression)
+{
+    Options ops;
 
-} // namespace pdal
+    ops.add("format", "DIMENSION");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
+
+TEST(BpfTestZlib, roundtrip_point_compression)
+{
+    Options ops;
+
+    ops.add("format", "POINT");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
 
