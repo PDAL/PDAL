@@ -31,11 +31,10 @@ target_include_directories(dimbuilder PRIVATE
 PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
 target_link_libraries(dimbuilder
     PRIVATE
-        ${EXECINFO_LIBRARY})
+        ${EXECINFO_LIBRARY}
+        ${CMAKE_DL_LIBS}
+)
 if (PDAL_HAVE_JSONCPP)
     target_link_libraries(dimbuilder ${JSON_CPP_LINK_TYPE}
         ${PDAL_JSONCPP_LIB_NAME})
-endif()
-if (UNIX AND NOT APPLE)
-    target_link_libraries(dimbuilder PRIVATE  ${CMAKE_DL_LIBS})
 endif()
