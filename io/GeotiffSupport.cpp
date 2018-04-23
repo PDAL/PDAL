@@ -45,6 +45,7 @@ PDAL_C_START
 // aren't exported.
 char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+void VSIFree(void *data);
 
 PDAL_C_END
 
@@ -146,7 +147,10 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     {
         char *wkt = GTIFGetOGISDefn(ctx.gtiff, &sGTIFDefn);
         if (wkt)
+        {
             m_srs.set(wkt);
+            VSIFree(wkt);
+        }
     }
 }
 

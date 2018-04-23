@@ -42,11 +42,6 @@
 namespace pdal
 {
 
-namespace gdal
-{
-    class ErrorHandler;
-}
-
 class PDAL_DLL ReprojectionFilter : public Filter, public Streamable
 {
 public:
@@ -74,7 +69,6 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-    gdal::ErrorHandler* m_errorHandler;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented
