@@ -46,7 +46,6 @@
 #include <memory>
 #include <queue>
 #include <set>
-#include <vector>
 #include <deque>
 
 #pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
