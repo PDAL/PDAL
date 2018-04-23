@@ -1118,6 +1118,41 @@ TEST(LasWriterTest, oversize_vlr)
 }
 
 
+TEST(LasWriterTest, issue1940)
+{
+    StageFactory f;
+
+    Stage& r = *(f.createStage("readers.faux"));
+    Options ro;
+    ro.add("mode", "constant");
+    ro.add("bounds", "([55,55],[55,55],[55,55])");
+    ro.add("count", 20);
+    r.addOptions(ro);
+
+    LasWriter w;
+    Options wo;
+    //LogPtr log(new Log("TEST", &std::clog));
+    //log->setLevel((LogLevel)5);
+    //w.setLog(log);
+    wo.add("filename", Support::temppath("out.las"));
+    wo.add("scale_x", "auto");
+    wo.add("offset_y", "auto");
+    w.addOptions(wo);
+    w.setInput(r);
+
+    FixedPointTable t(100);
+    w.prepare(t);
+    w.execute(t);
+
+    LasTester tester;
+    LasHeader *h = tester.header(w);
+    EXPECT_DOUBLE_EQ(h->offsetX(), 0);
+    EXPECT_DOUBLE_EQ(h->offsetY(), 55);
+    EXPECT_DOUBLE_EQ(h->scaleX(), 1.0);
+    EXPECT_DOUBLE_EQ(h->scaleY(), .01);
+}
+
+
 /**
 
 namespace
