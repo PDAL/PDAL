@@ -66,6 +66,9 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 
     const double postX = -93.351563;
     const double postY = 41.577148;
+    // proj 4 transformed to 16 exactly, but proj 5 will consider
+    // +ellps=GRS80 +towgs84=0,0,0 to be slighly different than +datum=WGS84
+    // and return 15.999954
     const double postZ = 16.000000;
 
     {
@@ -93,7 +96,7 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 
         EXPECT_FLOAT_EQ(x, postX);
         EXPECT_FLOAT_EQ(y, postY);
-        EXPECT_FLOAT_EQ(z, postZ);
+        EXPECT_NEAR(z, postZ, 5e-5);
     }
 }
 
@@ -120,13 +123,16 @@ TEST(ReprojectionFilterTest, stream_test_1)
         static int i = 0;
         const double x = -93.351563;
         const double y = 41.577148;
+        // proj 4 transformed to 16 exactly, but proj 5 will consider
+        // +ellps=GRS80 +towgs84=0,0,0 to be slighly different than +datum=WGS84
+        // and return 15.999954
         const double z = 16.000000;
 
         if (i == 0)
         {
             EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::X), x);
             EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::Y), y);
-            EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::Z), z);
+            EXPECT_NEAR(point.getFieldAs<float>(Dimension::Id::Z), z, 5e-5);
         }
         ++i;
         return true;

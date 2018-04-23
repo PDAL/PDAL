@@ -213,6 +213,8 @@ public:
         { return layout()->dimTypes(); }
     inline PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
+    inline PointTableRef table() const
+        { return m_pointTable;}
     SpatialReference spatialReference() const
         { return m_spatialReference; }
 
