@@ -295,6 +295,7 @@ void LasWriter::fillForwardList()
 
 void LasWriter::readyTable(PointTableRef table)
 {
+    m_firstPoint = true;
     m_forwardMetadata = table.privateMetadata("lasforward");
     if(m_writePDALMetadata)
     {
@@ -742,7 +743,51 @@ void LasWriter::openCompression()
 }
 
 
+// This is only called in stream mode.
 bool LasWriter::processOne(PointRef& point)
+{
+    if (m_firstPoint)
+    {
+        auto doScale = [this](const XForm::XFormComponent& scale,
+            const std::string& name)
+        {
+            if (scale.m_auto)
+                log()->get(LogLevel::Warning) << "Auto scale for " << name <<
+                "requested in stream mode.  Using value of 1.0." << std::endl;
+        };
+
+        doScale(m_scaling.m_xXform.m_scale, "X");
+        doScale(m_scaling.m_yXform.m_scale, "Y");
+        doScale(m_scaling.m_zXform.m_scale, "Z");
+
+        auto doOffset = [this](XForm::XFormComponent& offset, double val,
+            const std::string name)
+        {
+            if (offset.m_auto)
+            {
+                offset.m_val = val;
+                log()->get(LogLevel::Warning) << "Auto offset for " << name <<
+                    "requested in stream mode.  Using value of " <<
+                    offset.m_val << "." << std::endl;
+            }
+        };
+
+        doOffset(m_scaling.m_xXform.m_offset,
+            point.getFieldAs<double>(Dimension::Id::X), "X");
+        doOffset(m_scaling.m_yXform.m_offset,
+            point.getFieldAs<double>(Dimension::Id::Y), "Y");
+        doOffset(m_scaling.m_zXform.m_offset,
+            point.getFieldAs<double>(Dimension::Id::Z), "Z");
+
+        m_firstPoint = false;
+    }
+    return processPoint(point);
+}
+
+
+// This is separated from processOne so that we're sure when processOne is
+// called we know we're in stream mode.
+bool LasWriter::processPoint(PointRef& point)
 {
     //ABELL - Need to do something about auto offset.
 
@@ -785,7 +830,7 @@ void LasWriter::writeView(const PointViewPtr view)
         for (PointId idx = 0; idx < view->size(); ++idx)
         {
             point.setPointId(idx);
-            processOne(point);
+            processPoint(point);
         }
     }
     else

@@ -131,6 +131,7 @@ private:
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
     Json::Value m_userVLRs;
+    bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -174,6 +175,7 @@ private:
     bool addWktVlr();
     void finishLasZipOutput();
     void finishLazPerfOutput();
+    bool processPoint(PointRef& point);
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented
