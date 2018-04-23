@@ -117,7 +117,7 @@ void TextReader::parseHeader(const std::string& header)
             }
     }
 
-    if (!isspace(m_separator))
+    if (m_separator != ' ')
         m_dimNames = Utils::split(header, m_separator);
     else
         m_dimNames = Utils::split2(header, m_separator);
