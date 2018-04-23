@@ -157,9 +157,9 @@ private:
     };
 
 
-    Point& point1(EdgeId id)
+    Point& point1(const EdgeId& id)
         { return m_rings[id]; }
-    Point& point2(EdgeId id)
+    Point& point2(const EdgeId& id)
         { return m_rings[id + 1]; }
     double xval(const Point& p)
         { return p.first; }
@@ -327,7 +327,7 @@ private:
 
 
     // Determine if a point is collinear with an edge.
-    bool pointCollinear(double x, double y, EdgeId edgeId)
+    bool pointCollinear(double x, double y, const EdgeId& edgeId)
     {
         Point& p1 = point1(edgeId);
         Point& p2 = point2(edgeId);

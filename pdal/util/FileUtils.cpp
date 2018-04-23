@@ -280,7 +280,7 @@ std::string toAbsolutePath(const std::string& filename)
 //
 // note: if base dir is not absolute, first make it absolute via
 // toAbsolutePath(base)
-std::string toAbsolutePath(const std::string& filename, const std::string base)
+std::string toAbsolutePath(const std::string& filename, const std::string& base)
 {
     const std::string newbase = toAbsolutePath(base);
     return pdalboost::filesystem::absolute(filename, newbase).string();

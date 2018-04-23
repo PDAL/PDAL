@@ -55,7 +55,7 @@ namespace hexdensity
 namespace writer
 {
 
-OGR::OGR(std::string const& filename, std::string srs, std::string driver, std::string layerName)
+OGR::OGR(std::string const& filename, const std::string& srs, const std::string& driver, const std::string& layerName)
     : m_filename(filename)
     , m_driver(driver)
     , m_srs(srs)

@@ -52,7 +52,7 @@ public:
     {}
 
     typedef std::function<bool(PointRef&)> CallbackFunc;
-    void setCallback(CallbackFunc cb)
+    void setCallback(const CallbackFunc& cb)
         { m_callback = cb; }
 
 private:

@@ -47,7 +47,7 @@ public:
     char m_tmpbuf[CHUNKSIZE];
     BlockCb m_cb;
 
-    ZstdCompressorImpl(BlockCb cb) : m_cb(cb)
+    ZstdCompressorImpl(const BlockCb& cb) : m_cb(cb)
     {
         m_strm = ZSTD_createCStream();
         ZSTD_initCStream(m_strm, 15);
@@ -91,7 +91,7 @@ public:
     }
 };
 
-ZstdCompressor::ZstdCompressor(BlockCb cb) :
+ZstdCompressor::ZstdCompressor(const BlockCb& cb) :
     m_impl(new ZstdCompressorImpl(cb))
 {}
 
@@ -115,7 +115,7 @@ void ZstdCompressor::done()
 class ZstdDecompressorImpl
 {
 public:
-    ZstdDecompressorImpl(BlockCb cb) : m_cb(cb)
+    ZstdDecompressorImpl(const BlockCb& cb) : m_cb(cb)
     {
         m_strm = ZSTD_createDStream();
         ZSTD_initDStream(m_strm);
@@ -153,7 +153,7 @@ private:
     char m_tmpbuf[CHUNKSIZE];
 };
 
-ZstdDecompressor::ZstdDecompressor(BlockCb cb) :
+ZstdDecompressor::ZstdDecompressor(const BlockCb& cb) :
     m_impl(new ZstdDecompressorImpl(cb))
 {}
 

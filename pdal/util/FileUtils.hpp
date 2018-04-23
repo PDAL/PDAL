@@ -213,7 +213,7 @@ namespace FileUtils
       \return  Absolute version of provided filename relative to base.
     */
     PDAL_DLL std::string toAbsolutePath(const std::string& filename,
-        const std::string base);
+        const std::string& base);
     
     /**
       Get the file creation and modification times.

@@ -115,7 +115,7 @@ class GreyhoundParams
 public:
     GreyhoundParams() { }
     GreyhoundParams(const GreyhoundArgs& args);
-    GreyhoundParams(std::string resourceRoot, Json::Value params)
+    GreyhoundParams(const std::string& resourceRoot, Json::Value params)
         : m_url(resourceRoot)
         , m_params(params)
     {

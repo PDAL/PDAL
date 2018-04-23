@@ -43,7 +43,7 @@ class DeflateCompressorImpl;
 class DeflateCompressor : public Compressor
 {
 public:
-    PDAL_DLL DeflateCompressor(BlockCb cb);
+    PDAL_DLL DeflateCompressor(const BlockCb& cb);
     PDAL_DLL ~DeflateCompressor();
 
     PDAL_DLL void compress(const char *buf, size_t bufsize);
@@ -59,7 +59,7 @@ class DeflateDecompressorImpl;
 class DeflateDecompressor : public Decompressor
 {
 public:
-    PDAL_DLL DeflateDecompressor(BlockCb cb);
+    PDAL_DLL DeflateDecompressor(const BlockCb& cb);
     PDAL_DLL ~DeflateDecompressor();
 
     PDAL_DLL void decompress(const char *buf, size_t bufsize);

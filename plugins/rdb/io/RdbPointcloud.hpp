@@ -113,7 +113,7 @@ private:
         AttributeBuffer(
             const pdal::Dimension::Id   id,   //!< PDAL dimension ID
             const pdal::Dimension::Type type, //!< PDAL dimension type
-            const std::string           name, //!< PDAL dimension name
+            const std::string&          name, //!< PDAL dimension name
             const size_t                size  //!< number of points
         );
 

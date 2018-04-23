@@ -396,7 +396,7 @@ TEST(LasReaderTest, lazperf)
 }
 #endif
 
-void streamTest(const std::string src, const std::string compression)
+void streamTest(const std::string& src, const std::string& compression)
 {
     Options ops1;
     ops1.add("filename", src);

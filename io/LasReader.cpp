@@ -284,7 +284,7 @@ namespace
 {
 
 void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
-    const std::string& name, double val, const std::string description,
+    const std::string& name, double val, const std::string& description,
     size_t precision)
 {
     MetadataNode n = m.add(name, val, description, precision);
@@ -309,7 +309,7 @@ void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
 // lasforward metadata node.
 template <typename T>
 void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
-    const std::string& name, T val, const std::string description)
+    const std::string& name, T val, const std::string& description)
 {
     MetadataNode n = m.add(name, val, description);
 

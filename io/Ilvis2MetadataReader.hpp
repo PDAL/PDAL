@@ -55,7 +55,7 @@ public:
         {}
     };
 
-    void readMetadataFile(std::string filename, MetadataNode* m);
+    void readMetadataFile(const std::string& filename, MetadataNode* m);
 
 protected:
     // These methods are written to parse specific nodes.  It doesn't
@@ -77,7 +77,7 @@ protected:
     void parseCampaign(xmlNodePtr node, MetadataNode* m);
     void parsePSAs(xmlNodePtr node, MetadataNode* m);
     void parsePSA(xmlNodePtr node, MetadataNode* m);
-    void parseXXProduct(std::string type, xmlNodePtr node, MetadataNode* m);
+    void parseXXProduct(const std::string& type, xmlNodePtr node, MetadataNode* m);
 
     void parseSpatialDomainContainer(xmlNodePtr node, MetadataNode* m);
     void parseGPolygon(xmlNodePtr node, MetadataNode* m);
@@ -102,10 +102,10 @@ private:
     xmlNodePtr getNextElementNode(xmlNodePtr node);
     xmlNodePtr getFirstChildElementNode(xmlNodePtr node);
 
-    bool nodeElementIs(xmlNodePtr node, std::string expected);
-    void assertElementIs(xmlNodePtr node, std::string expected);
+    bool nodeElementIs(xmlNodePtr node, const std::string& expected);
+    void assertElementIs(xmlNodePtr node, const std::string& expected);
     void assertEndOfElements(xmlNodePtr node);
-    int countChildElements(xmlNodePtr node, std::string childName);
+    int countChildElements(xmlNodePtr node, const std::string& childName);
 };
 
 }

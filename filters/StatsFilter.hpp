@@ -57,7 +57,7 @@ typedef std::map<double, point_count_t> EnumMap;
 typedef std::vector<double> DataVector;
 
 public:
-    Summary(std::string name, EnumType enumerate) :
+    Summary(const std::string& name, EnumType enumerate) :
         m_name(name), m_enumerate(enumerate)
     { reset(); }
 

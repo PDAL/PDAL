@@ -79,7 +79,7 @@ inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
 
 struct ExtraDim
 {
-    ExtraDim(const std::string name, Dimension::Type type,
+    ExtraDim(const std::string& name, Dimension::Type type,
             double scale = 1.0, double offset = 0.0) :
         m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset),
         m_size(0)

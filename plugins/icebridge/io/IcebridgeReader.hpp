@@ -44,7 +44,7 @@ namespace pdal
   class Ilvis2MetadataReader
   {
   public:
-      inline void readMetadataFile(std::string filename, MetadataNode* m) {};
+      inline void readMetadataFile(const std::string& filename, MetadataNode* m) {};
   };
 }
 #else

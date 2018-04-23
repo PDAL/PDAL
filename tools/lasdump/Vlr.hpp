@@ -46,7 +46,7 @@ namespace lasdump
 class Vlr
 {
 public:
-    bool matches(std::string userId, uint16_t recordId)
+    bool matches(const std::string& userId, uint16_t recordId)
         { return userId == m_userId && recordId == m_recordId; }
     const char *data() const
         { return (const char *)m_data.data(); }

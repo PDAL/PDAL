@@ -155,7 +155,7 @@ public:
     StringHeaderVal(const std::string& s) : BaseHeaderVal(s)
     {}
 
-    bool setVal(std::string val)
+    bool setVal(const std::string& val)
     {
         m_valSet = true;
         m_val = val;
