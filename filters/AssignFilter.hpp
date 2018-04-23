@@ -37,6 +37,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
+#include "private/DimRange.hpp"
+
 namespace pdal
 {
 
@@ -60,6 +62,7 @@ private:
     AssignFilter(const AssignFilter&) = delete;
 
     std::vector<AssignRange> m_assignments;
+    DimRange m_condition;
 };
 
 } // namespace pdal
