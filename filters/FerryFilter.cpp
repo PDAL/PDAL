@@ -90,7 +90,7 @@ void FerryFilter::addDimensions(PointLayoutPtr layout)
     for (auto& info : m_dims)
     {
         const Dimension::Id fromId = layout->findDim(info.m_fromName);
-        // Dimensions being created with the "=>Dim" syntax won't have
+        // Dimensions being created with the "=>Dim" syntax won't
         // be in the layout, so we have to assign a default type.
         Dimension::Type fromType = layout->dimType(fromId);
         if (fromType == Dimension::Type::None)
