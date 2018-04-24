@@ -72,7 +72,7 @@ public:
     point_count_t numPoints() const
         { return num_points; }
     char *data() const
-        { return (char *)chunk.data(); }
+        { return reinterpret_cast<char *>(const_cast<uint8_t *>(chunk.data())); }
     void reset()
         { m_num_remaining = num_points; }
     bool fetched() const

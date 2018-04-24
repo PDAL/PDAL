@@ -139,7 +139,7 @@ struct compute_inverse_size4<Architecture::SSE, float, MatrixType, ResultType>
     iC = _mm_sub_ps(iC, _mm_mul_ps(_mm_shuffle_ps(A,A,0xB1), _mm_shuffle_ps(DC,DC,0x66)));
 
     rd = _mm_shuffle_ps(rd,rd,0);
-    rd = _mm_xor_ps(rd, _mm_load_ps((float*)_Sign_PNNP));
+    rd = _mm_xor_ps(rd, _mm_load_ps((const float*)_Sign_PNNP));
 
     //  iB = C*|B| - D*B#*A
     iB = _mm_sub_ps(_mm_mul_ps(C,_mm_shuffle_ps(dB,dB,0)), iB);
