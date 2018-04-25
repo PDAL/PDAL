@@ -66,27 +66,18 @@ struct DummyPlugin : Filter
     void filter(PointView& /*view*/) final {}
 };
 
-/**
-ABELL - Now load at startup.
-TEST(PluginManagerTest, NoPluginsNoNames)
-{
-    auto ns = PluginManager<Stage>::names();
-    EXPECT_TRUE(ns.empty());
-    ns = PluginManager<Kernel>::names();
-    EXPECT_TRUE(ns.empty());
-}
-**/
-
 TEST(PluginManagerTest, MissingPlugin)
 {
-    std::unique_ptr<Stage> p(PluginManager<Stage>::createObject("filters.nonexistentplugin"));
+    std::unique_ptr<Stage> p(
+        PluginManager<Stage>::createObject("filters.nonexistentplugin"));
     EXPECT_EQ(p.get(), nullptr);
 }
 
 TEST(PluginManagerTest, CreateObject)
 {
     DummyPlugin::initPlugin();
-    std::unique_ptr<Stage> p(PluginManager<Stage>::createObject("filters.dummytest"));
+    std::unique_ptr<Stage> p(
+        PluginManager<Stage>::createObject("filters.dummytest"));
     EXPECT_NE(p.get(), nullptr);
 }
 
@@ -124,6 +115,57 @@ TEST(PluginManagerTest, SearchPaths)
 
     if (set == 0)
         Utils::setenv("PDAL_DRIVER_PATH", curPath);
+}
+
+TEST(PluginManagerTest, validnames)
+{
+#if defined(__APPLE__) && defined(__MACH__)
+    static const std::string dlext(".dylib");
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || \
+      defined(__FreeBSD_kernel__) || defined(__GNU__)
+    static const std::string dlext(".so");
+#elif defined _WIN32
+    static const std::string dlext(".dll");
+#endif
+
+    StringList type1 { "reader", "writer" };
+    StringList type2 { "foo" };
+
+    // Invalid names
+    EXPECT_EQ(PluginDirectory::test_validPlugin("I'm a plugin", { "foo" }), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_ac.dylib" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_a_b_c.dylib" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "reader_a" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_rea_a" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_a" + dlext, type2), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_" , type1), "");
+
+    // Almost valid names
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_writer" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_writer_" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_aP" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_1a_b" + dlext, type1), "");
+    EXPECT_EQ(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_a+_b" + dlext, type1), "");
+
+    // Valid names.
+    EXPECT_NE(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_a" + dlext, type1), "");
+    EXPECT_NE(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_foo_foo" + dlext, type2), "");
+    EXPECT_NE(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_a_b" + dlext, type1), "");
+
 }
 
 } // namespace pdal
