@@ -327,9 +327,9 @@ void Stage::setSpatialReference(MetadataNode& m,
 bool Stage::parseName(std::string o, std::string::size_type& pos)
 {
     auto isStageChar = [](char c)
-        { return std::islower(c) || std::isdigit(c) || c == '_'; };
+        { return std::isalpha(c) || std::isdigit(c) || c == '_'; };
 
-    if (o.empty() || !std::islower(o[pos]))
+    if (o.empty() || !std::isalpha(o[pos]))
         return false;
     pos++;
     pos += Utils::extract(o, pos, isStageChar);

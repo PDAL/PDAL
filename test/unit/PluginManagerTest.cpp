@@ -152,15 +152,19 @@ TEST(PluginManagerTest, validnames)
     EXPECT_EQ(PluginDirectory::test_validPlugin(
         "libpdal_plugin_writer_" + dlext, type1), "");
     EXPECT_EQ(PluginDirectory::test_validPlugin(
-        "libpdal_plugin_reader_aP" + dlext, type1), "");
-    EXPECT_EQ(PluginDirectory::test_validPlugin(
         "libpdal_plugin_reader_1a_b" + dlext, type1), "");
     EXPECT_EQ(PluginDirectory::test_validPlugin(
         "libpdal_plugin_reader_a+_b" + dlext, type1), "");
 
     // Valid names.
     EXPECT_NE(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_aP" + dlext, type1), "");
+    EXPECT_NE(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_Pa" + dlext, type1), "");
+    EXPECT_NE(PluginDirectory::test_validPlugin(
         "libpdal_plugin_reader_a" + dlext, type1), "");
+    EXPECT_NE(PluginDirectory::test_validPlugin(
+        "libpdal_plugin_reader_projecta_vendor1_IntensitySeparationWithTreeWeights" + dlext, type1), "");
     EXPECT_NE(PluginDirectory::test_validPlugin(
         "libpdal_plugin_foo_foo" + dlext, type2), "");
     EXPECT_NE(PluginDirectory::test_validPlugin(
