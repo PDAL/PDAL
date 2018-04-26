@@ -1,51 +1,71 @@
 #!/bin/bash
 
 
-# Build PDAL package, including RC number of specified
+# Build PDAL package
 # ./package.sh
-# ./package.sh RC1
-
-RC=$1
 
 
-version=`./bin/pdal-config --version`
+GITSHA="$(git rev-parse HEAD)"
 
-package_name="PDAL-"$version"-src"
+echo "Cutting release for SHA $GITSHA"
+
+HERE=`pwd`
+CONTAINER="pdal/dependencies"
+DOCKER="docker"
+CONTAINERRUN="$DOCKER run -it -d --entrypoint /bin/sh -v $HERE:/data $CONTAINER"
 
 
+CONTAINERID=`$CONTAINERRUN`
+echo "Starting container: " $CONTAINERID
+cat > docker-package.sh << "EOF"
+#!/bin/sh
 
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-MD5="md5sum"
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Mac OSX
-MD5="md5"
-fi
+git clone https://github.com/PDAL/PDAL.git;
+cd /PDAL;
+EOF
+
+echo "git checkout $GITSHA" >> docker-package.sh
+
+cat >> docker-package.sh << "EOF"
+mkdir build; cd build;
+cmake .. ;
 
 make dist
+PDAL_VERSION=$(./bin/pdal-config --version)
+
+OUTPUTDIR="/data/release-$PDAL_VERSION"
+mkdir $OUTPUTDIR
 
 extensions=".tar.gz .tar.bz2"
 for ext in $extensions
 do
 
-    filename=$package_name$ext
-    if [ -n "$RC" ]; then
 
-        rcname="PDAL-"$version$RC$ext
-        echo $rcname
-        cp $filename $rcname
-        `$MD5 $rcname > $rcname.md5`
-    fi
+    for filename in $(ls *$ext)
+    do
 
-    echo "$MD5 $filename > $filename.md5"
-    `$MD5 $filename > $filename.md5`
-
+        `md5sum $filename > $filename.md5`
+        `sha256sum $filename > $filename.sha256sum`
+        `sha512sum $filename > $filename.sha512sum`
+        cp $filename $OUTPUTDIR
+        cp $filename.md5 $OUTPUTDIR
+        cp $filename.sha256sum $OUTPUTDIR
+        cp $filename.sha512sum $OUTPUTDIR
+    done
 done
 
-# name=`echo $filename|cut -d'.' -f1-3`
-# extension=`echo $filename|cut -d'.' -f4-`
-# echo $name
 
+EOF
 
-# newname="$name$RC.$extension"
-# mv $filename "$newname"
-# `md5sum $newname > $newname.md5`
+chmod +x docker-package.sh
+docker cp docker-package.sh $CONTAINERID:/docker-package.sh
+
+docker exec -it $CONTAINERID /docker-package.sh
+
+# run this to halt into the container
+#docker exec -it $CONTAINERID bash
+
+command="$DOCKER stop $CONTAINERID"
+echo $command
+$command
+
