@@ -99,7 +99,7 @@ protected:
 
        \param srs  New spatial reference.
     */
-    virtual void spatialReferenceChanged(const SpatialReference& srs)
+    virtual void spatialReferenceChanged(const SpatialReference& /*srs*/)
     {}
 };
 
