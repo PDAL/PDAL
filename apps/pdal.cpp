@@ -73,7 +73,6 @@ private:
     void outputOptions();
     void outputOptions(const std::string& stageName,std::ostream& strm);
     void addArgs(ProgramArgs& args);
-    std::string findKernel();
 
     std::ostream& m_out;
 
@@ -114,7 +113,7 @@ void App::outputHelp(const ProgramArgs& args)
     // Load all kernels so that we can report the names.
     StageFactory f;
     PluginManager<Kernel>::loadAll();
-    outputCommands("  -");
+    outputCommands("  - ");
     m_out << std::endl;
     m_out << "See http://pdal.io/apps/ for more detail" << std::endl;
 }
@@ -160,7 +159,6 @@ void App::outputDrivers()
     }
     else
     {
-
         Json::Value array(Json::arrayValue);
         for (auto name : stages)
         {
@@ -172,9 +170,7 @@ void App::outputDrivers()
             node["link"] = link;
             array.append(node);
         }
-
         m_out << array;
-
     }
 }
 
@@ -183,8 +179,13 @@ void App::outputCommands(const std::string& leader)
 {
     StageFactory f;
     PluginManager<Kernel>::loadAll();
+    std::string kernelbase("kernels.");
     for (auto name : PluginManager<Kernel>::names())
+    {
+        if (Utils::startsWith(name, kernelbase))
+            name = name.substr(kernelbase.size());
         m_out << leader << name << std::endl;
+    }
 }
 
 
@@ -199,7 +200,6 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         std::cerr << "Unable to create stage " << stageName << "\n";
         return;
     }
-
 
     ProgramArgs args;
     s->addAllArgs(args);
@@ -226,7 +226,6 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         object[stageName] = array;
 
         strm  << object;
-
     }
 }
 
@@ -245,7 +244,8 @@ void App::outputOptions()
             outputOptions(n, m_out);
             m_out << std::endl;
         }
-    } else
+    }
+    else
     {
         std::ostringstream strm;
         Json::Value options (Json::arrayValue);
@@ -260,7 +260,6 @@ void App::outputOptions()
 
             strm.str("");
         }
-
         m_out << options;
     }
 }
@@ -300,35 +299,6 @@ int main(int argc, char* argv[])
     for (int i = 1; i < argc; ++i)
         cmdArgs.push_back(argv[i]);
     return pdal.execute(cmdArgs, logPtr);
-}
-
-
-std::string App::findKernel()
-{
-    StringList loadedKernels;
-
-    auto kernelSurname = [](const std::string& name)
-    {
-        StringList names = Utils::split2(name, '.');
-        return names.size() == 2 ? names[1] : std::string();
-    };
-
-    StageFactory f(true);
-    // Discover available kernels without plugins, and test to see if
-    // the positional option 'command' is a valid kernel
-    loadedKernels = PluginManager<Kernel>::names();
-    for (auto& name : loadedKernels)
-        if (m_command == kernelSurname(name))
-            return name;
-
-    // Force loading of plugins.
-    StageFactory f2(false);
-    loadedKernels = PluginManager<Kernel>::names();
-    for (auto& name : loadedKernels)
-        if (m_command == kernelSurname(name))
-            return name;
-
-    return std::string();
 }
 
 
@@ -374,12 +344,13 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     if (!m_command.empty())
     {
         int ret = 0;
-        std::string name(findKernel());
-        if (name.size())
+        std::string name("kernels." + m_command);
+
+        Kernel *kernel = PluginManager<Kernel>::createObject(name);
+        if (kernel)
         {
             if (m_help)
                 cmdArgs.push_back("--help");
-            Kernel *kernel = PluginManager<Kernel>::createObject(name);
             // This shouldn't throw.  If it does, it's something awful, so
             // not cleaning up seems inconsequential.
             log->setLeader("pdal " + m_command);

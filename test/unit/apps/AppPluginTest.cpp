@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2016, Hobu Inc., (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,47 +31,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Log.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/Kernel.hpp>
-
-#include <map>
-#include <memory>
-#include <mutex>
 #include <string>
-#include <vector>
+
+#include <pdal/pdal_test_main.hpp>
+
+#include "Support.hpp"
+
+namespace
+{
+std::string appName()
+{
+    return Support::binpath("pdal");
+}
+} // unnamed namespace
 
 namespace pdal
 {
 
-class PluginDirectory
+// The Cmake file makes sure we're building the hexbin plugin.
+TEST(PdalAppPlugin, load)
 {
-    FRIEND_TEST(PluginManagerTest, SearchPaths);
-    FRIEND_TEST(PluginManagerTest, validnames);
+    std::string output;
 
-private:
-    PluginDirectory();
+    Utils::run_shell_command(appName() + " density 2>&1", output);
+    EXPECT_TRUE(output.find("kernels.density") != std::string::npos);
+}
 
-public:
-    // This is actually thread-safe in C++11. How nice :)
-    static PluginDirectory& get()
-    {
-        static PluginDirectory instance;
-
-        return instance;
-    }
-
-    std::map<std::string, std::string> m_kernels;
-    std::map<std::string, std::string> m_drivers;
-
-private:
-    static PluginDirectory *m_instance;
-    PDAL_DLL static StringList test_pluginSearchPaths();
-    PDAL_DLL static std::string test_validPlugin(const std::string& path,
-        const StringList& types);
-};
-
-} // namespace pdal
-
+} // unnamed namespace
