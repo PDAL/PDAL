@@ -49,7 +49,7 @@ TEST(Stats, simple)
     Options ops;
     ops.add("bounds", bounds);
     ops.add("count", 1000);
-    ops.add("mode", "constant");
+    ops.add("mode", "ramp");
 
     StageFactory f;
 
@@ -77,13 +77,25 @@ TEST(Stats, simple)
     EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
     EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
 
-    EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
-    EXPECT_FLOAT_EQ(statsY.maximum(), 2.0);
-    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
+    EXPECT_FLOAT_EQ(statsX.maximum(), 101.0);
+    EXPECT_FLOAT_EQ(statsY.maximum(), 102.0);
+    EXPECT_FLOAT_EQ(statsZ.maximum(), 103.0);
 
-    EXPECT_FLOAT_EQ(statsX.average(), 1.0);
-    EXPECT_FLOAT_EQ(statsY.average(), 2.0);
-    EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
+    EXPECT_FLOAT_EQ(statsX.average(), 51.0);
+    EXPECT_FLOAT_EQ(statsY.average(), 52.0);
+    EXPECT_FLOAT_EQ(statsZ.average(), 53.0);
+
+    EXPECT_FLOAT_EQ(statsX.variance(), 837.09351);
+    EXPECT_FLOAT_EQ(statsY.variance(), 837.0965);
+    EXPECT_FLOAT_EQ(statsZ.variance(), 837.1015);
+
+    EXPECT_NEAR(statsX.skewness(), 7.6279972e+11, 10000);
+    EXPECT_NEAR(statsY.skewness(), 6.1023649e+12, 100000);
+    EXPECT_NEAR(statsZ.skewness(), 2.0595297e+13, 1000000);
+
+    EXPECT_NEAR(statsX.kurtosis(), -527558696e+4, 10000);
+    EXPECT_NEAR(statsY.kurtosis(), -422043928e+5, 100000);
+    EXPECT_NEAR(statsZ.kurtosis(), -142438122e+6, 1000000);
 }
 
 
