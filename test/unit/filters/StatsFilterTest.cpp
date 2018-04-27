@@ -89,6 +89,49 @@ TEST(Stats, simple)
     EXPECT_FLOAT_EQ(statsY.variance(), 837.0965);
     EXPECT_FLOAT_EQ(statsZ.variance(), 837.1015);
 
+    EXPECT_DOUBLE_EQ(statsX.skewness(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.skewness(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.skewness(), 0.0);
+
+    EXPECT_DOUBLE_EQ(statsX.kurtosis(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.kurtosis(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.kurtosis(), 0.0);
+}
+
+TEST(Stats, advanced)
+{
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 1000);
+    ops.add("mode", "ramp");
+
+    StageFactory f;
+
+    Stage* reader(f.createStage("readers.faux"));
+    EXPECT_TRUE(reader);
+    reader->setOptions(ops);
+
+    StatsFilter filter;
+    Options so;
+    so.add("advanced", true);
+
+    filter.setInput(*reader);
+    filter.setOptions(so);
+    EXPECT_EQ(filter.getName(), "filters.stats");
+
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+
+    EXPECT_EQ(statsX.count(), 1000u);
+    EXPECT_EQ(statsY.count(), 1000u);
+    EXPECT_EQ(statsZ.count(), 1000u);
+
     EXPECT_NEAR(statsX.skewness(), 7.6279972e+11, 10000);
     EXPECT_NEAR(statsY.skewness(), 6.1023649e+12, 100000);
     EXPECT_NEAR(statsZ.skewness(), 2.0595297e+13, 1000000);

@@ -57,8 +57,8 @@ typedef std::map<double, point_count_t> EnumMap;
 typedef std::vector<double> DataVector;
 
 public:
-    Summary(std::string name, EnumType enumerate) :
-        m_name(name), m_enumerate(enumerate)
+    Summary(std::string name, EnumType enumerate, bool advanced = true) :
+        m_name(name), m_enumerate(enumerate), m_advanced(advanced)
     { reset(); }
 
     double minimum() const
@@ -72,9 +72,11 @@ public:
     double stddev() const
         { return std::sqrt(variance()); }
     double skewness() const
-        { return std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5); }
+        { return (M2 && m_advanced) ?
+            std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5) : 0.0; }
     double kurtosis() const
-        { return double(m_cnt)*M4 / (M2*M2) - 3.0; }
+        { return (M2 && m_advanced) ?
+            double(m_cnt)*M4 / (M2*M2) - 3.0 : 0.0; }
     double median() const
         { return m_median; }
     double mad() const
@@ -128,12 +130,16 @@ public:
         M1 += delta_n;
 
         double delta_2 = pow(delta, 2.0);
-        double delta_n2 = pow(delta_n, 2.0);
-        // Fourth moment - kurtosis (sum part)
-        M4 += delta_2 * delta_n2 * (n*n - 3*n + 3) +
-            (6 * delta_n2 * M2) - (4 * delta_n * M3);
-        // Third moment - skewness (sum part)
-        M3 += delta_2 * delta_n * (n - 2) - 3 * delta_n * M2;
+
+        if (m_advanced)
+        {
+            double delta_n2 = pow(delta_n, 2.0);
+            // Fourth moment - kurtosis (sum part)
+            M4 += delta_2 * delta_n2 * (n*n - 3*n + 3) +
+                (6 * delta_n2 * M2) - (4 * delta_n * M3);
+            // Third moment - skewness (sum part)
+            M3 += delta_2 * delta_n * (n - 2) - 3 * delta_n * M2;
+        }
         // Second moment - variance (sum part)
         M2 += delta_2;
     }
@@ -141,6 +147,7 @@ public:
 private:
     std::string m_name;
     EnumType m_enumerate;
+    bool m_advanced;
     double m_max;
     double m_min;
     double m_mad;
@@ -180,6 +187,7 @@ private:
     StringList m_enums;
     StringList m_counts;
     StringList m_global;
+    bool m_advanced;
     std::map<Dimension::Id, stats::Summary> m_stats;
 };
 
