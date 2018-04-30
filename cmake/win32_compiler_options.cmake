@@ -33,7 +33,7 @@ function(pdal_target_compile_settings target)
         endif()
 
         # check for MSVC 9+
-        if (MSVC_VERSION VERSION_GREATER_EQUAL 1500))
+        if (MSVC_VERSION VERSION_GREATER_EQUAL 1500)
             include(ProcessorCount)
             ProcessorCount(N)
             if(NOT N EQUAL 0)
