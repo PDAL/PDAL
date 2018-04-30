@@ -34,7 +34,7 @@
 
 #include <cstddef> // NULL
 #include "DelaunayFilter.hpp"
-#include "Delaunay_psm.h"
+#include "private/Delaunay_psm.h"
 
 namespace pdal
 {
@@ -46,7 +46,7 @@ static PluginInfo const s_info
     "http://pdal.io/stages/filters.delaunay.html"
 };
 
-CREATE_SHARED_STAGE(DelaunayFilter, s_info)
+CREATE_STATIC_STAGE(DelaunayFilter, s_info)
 
 std::string DelaunayFilter::getName() const
 {
