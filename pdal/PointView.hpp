@@ -46,7 +46,6 @@
 #include <memory>
 #include <queue>
 #include <set>
-#include <vector>
 #include <deque>
 
 #pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
@@ -213,6 +212,8 @@ public:
         { return layout()->dimTypes(); }
     inline PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
+    inline PointTableRef table() const
+        { return m_pointTable;}
     SpatialReference spatialReference() const
         { return m_spatialReference; }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
+* Copyright (c) 2016, Hobu Inc., (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,59 +31,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <string>
 
-#include <stdexcept>
-#include <ostream>
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/pdal_features.hpp>
-#include <pdal/util/Charbuf.hpp>
-#include <pdal/util/OStream.hpp>
+#include "Support.hpp"
 
-#ifdef PDAL_HAVE_ZLIB
-#include <zlib.h>
-#endif // PDAL_HAVE_ZLIB
+namespace
+{
+std::string appName()
+{
+    return Support::binpath("pdal");
+}
+} // unnamed namespace
 
 namespace pdal
 {
 
-class BpfCompressor
+// The Cmake file makes sure we're building the hexbin plugin.
+TEST(PdalAppPlugin, load)
 {
-public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
+    std::string output;
 
-#ifdef PDAL_HAVE_ZLIB
-    BpfCompressor(OLeStream& out, size_t maxSize) :
-        m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
-        m_compressedSize(0)
-    {}
-#else
-    BpfCompressor(OLeStream&, size_t)
-    {}
-#endif // PDAL_HAVE_ZLIB
+    Utils::run_shell_command(appName() + " density 2>&1", output);
+    EXPECT_TRUE(output.find("kernels.density") != std::string::npos);
+}
 
-    void startBlock();
-    void finish();
-    void compress();
-
-private:
-    static const int CHUNKSIZE = 1000000;
-
-#ifdef PDAL_HAVE_ZLIB
-    OLeStream& m_out;
-    Charbuf m_charbuf;
-    std::vector<char> m_inbuf;
-    z_stream m_strm;
-    unsigned char m_tmpbuf[CHUNKSIZE];
-    OStreamMarker m_blockStart;
-    size_t m_rawSize;
-    size_t m_compressedSize;
-#endif // PDAL_HAVE_ZLIB
-};
-
-} // namespace pdal
-
+} // unnamed namespace

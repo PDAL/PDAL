@@ -15,7 +15,7 @@ dimensions of the point cloud.
 
 .. _Geogram: http://alice.loria.fr/software/geogram/doc/html/index.html
 
-.. embed::
+.. plugin::
 
 Example
 -------

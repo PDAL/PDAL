@@ -52,7 +52,8 @@ namespace pdal
 namespace eigen
 {
 
-Eigen::Vector3d computeCentroid(PointView& view, std::vector<PointId> ids)
+Eigen::Vector3d computeCentroid(PointView& view,
+    const std::vector<PointId>& ids)
 {
     using namespace Eigen;
     
@@ -80,7 +81,8 @@ Eigen::Vector3d computeCentroid(PointView& view, std::vector<PointId> ids)
     return centroid;
 }
 
-Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
+Eigen::Matrix3f computeCovariance(PointView& view,
+    const std::vector<PointId>& ids)
 {
     using namespace Eigen;
 
@@ -102,7 +104,8 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
     return A * A.transpose() / (ids.size()-1);
 }
 
-uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
+uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
+    double threshold)
 {
     using namespace Eigen;
 

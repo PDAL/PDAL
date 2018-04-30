@@ -212,6 +212,25 @@ TEST(TextReaderTest, strip_whitespace_from_dimension_names)
     }
 }
 
+TEST(TextReaderTest, issue1939)
+{
+    TextReader reader;
+    Options options;
+    options.add("filename", Support::datapath("text/crlf_test2.txt"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet pointViewSet = reader.execute(table);
+    PointViewPtr pointViewPtr = *pointViewSet.begin();
+
+    EXPECT_EQ(pointViewPtr->size(), 10U);
+    for (PointId i = 0; i < pointViewPtr->size(); ++i) {
+        EXPECT_EQ(
+            i, pointViewPtr->getFieldAs<uint16_t>(Dimension::Id::Intensity, i));
+    }
+}
+
 TEST(TextReaderTest, warnMissingHeader)
 {
     std::string infile = Support::datapath("text/missingheader.txt");

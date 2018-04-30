@@ -64,7 +64,7 @@ int StartingPolynomial<Degree>::operator < (const StartingPolynomial<Degree>& sp
 }
 template<int Degree>
 int StartingPolynomial<Degree>::Compare(const void* v1,const void* v2){
-	double d=((StartingPolynomial*)(v1))->start-((StartingPolynomial*)(v2))->start;
+	double d=((const StartingPolynomial*)(v1))->start-((const StartingPolynomial*)(v2))->start;
 	if     ( d<0 ) return -1;
 	else if( d>0 ) return  1;
 	else           return  0;

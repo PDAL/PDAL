@@ -85,7 +85,10 @@ endif()
 #
 # sources for the native io
 #
-PDAL_ADD_TEST(pdal_io_bpf_test FILES io/BPFTest.cpp)
+PDAL_ADD_TEST(pdal_io_bpf_base_test FILES io/BpfTestBase.cpp)
+if (PDAL_HAVE_ZLIB)
+    PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
+endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/GDALReaderTest.cpp)
@@ -149,6 +152,9 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
+if (BUILD_PLUGIN_HEXBIN)
+    PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
+endif()
 PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)

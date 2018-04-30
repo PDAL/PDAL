@@ -50,6 +50,7 @@ namespace pdal
 class PluginDirectory
 {
     FRIEND_TEST(PluginManagerTest, SearchPaths);
+    FRIEND_TEST(PluginManagerTest, validnames);
 
 private:
     PluginDirectory();
@@ -69,6 +70,8 @@ public:
 private:
     static PluginDirectory *m_instance;
     PDAL_DLL static StringList test_pluginSearchPaths();
+    PDAL_DLL static std::string test_validPlugin(const std::string& path,
+        const StringList& types);
 };
 
 } // namespace pdal

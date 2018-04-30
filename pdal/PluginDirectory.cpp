@@ -43,13 +43,13 @@ namespace
 {
 
 #if defined(__APPLE__) && defined(__MACH__)
-    static const std::string dynamicLibraryExtension("dylib");
+    static const std::string dynamicLibraryExtension(".dylib");
     static const char pathSeparator(':');
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
-    static const std::string dynamicLibraryExtension("so");
+    static const std::string dynamicLibraryExtension(".so");
     static const char pathSeparator(':');
 #elif defined _WIN32
-    static const std::string dynamicLibraryExtension("dll");
+    static const std::string dynamicLibraryExtension(".dll");
     static const char pathSeparator(';');
 #endif
 
@@ -89,21 +89,36 @@ std::string validPlugin(const std::string& path, const StringList& types)
         return false;
     };
 
+    // Strip off the leader.
     std::string file = FileUtils::getFilename(path);
-    StringList parts = Utils::split(file, '_');
-    if (parts.size() != 4 || parts[0] != "libpdal" || parts[1] != "plugin")
+    const std::string leader("libpdal_plugin_");
+    auto pos = file.find(leader);
+    if (pos != 0)
         return std::string();
-    StringList subparts = Utils::split(parts[3], '.');
+    file = file.substr(leader.size());
 
-    if (subparts.size() != 2 || subparts[1] != dynamicLibraryExtension)
-        return std::string();
-
-    std::string type = parts[2];
-    std::string plugin = subparts[0];
-
+    // Strip off the type.
+    std::string type;
+    pos = file.find('_');
+    if (pos != std::string::npos && pos < file.size() - 1)
+         type = file.substr(0, pos);
     if (!typeValid(type))
         return std::string();
-    return type + "s." + plugin;
+    file = file.substr(pos + 1);
+
+    // Strip the extension off of the end.
+    pos = file.rfind('.');
+    if (pos == std::string::npos || file.substr(pos) != dynamicLibraryExtension)
+        return std::string();
+    file = file.substr(0, pos);
+
+    // Make sure what's left is valid.  NOTE - pos is modified by parseName().
+    pos = 0;
+    if (!Stage::parseName(file, pos) || (pos != file.size()))
+        return std::string();
+
+    // Coerce the filename to the stage name.
+    return type + "s." + file;
 }
 
 } // unnamed namespace;
@@ -135,6 +150,12 @@ PluginDirectory::PluginDirectory()
 StringList PluginDirectory::test_pluginSearchPaths()
 {
     return pluginSearchPaths();
+}
+
+std::string PluginDirectory::test_validPlugin(const std::string& path,
+    const StringList& types)
+{
+    return validPlugin(path, types);
 }
 
 } // namespace pdal
