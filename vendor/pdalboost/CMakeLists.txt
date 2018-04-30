@@ -26,6 +26,13 @@ endif()
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
 
 PDAL_ADD_FREE_LIBRARY(${PDAL_BOOST_LIB_NAME} STATIC "${PDAL_BOOST_SOURCES}")
+#
+# This stops "auto" library builds with #pragma lib
+#
+target_compile_definitions(${PDAL_BOOST_LIB_NAME}
+    PRIVATE
+        -DBOOST_ALL_NO_LIB
+)
 set_target_properties(${PDAL_BOOST_LIB_NAME} PROPERTIES
     VERSION "${PDAL_BUILD_VERSION}"
     SOVERSION "${PDAL_API_VERSION}"
