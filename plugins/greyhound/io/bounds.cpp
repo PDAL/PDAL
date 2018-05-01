@@ -111,8 +111,8 @@ Json::Value Bounds::toJson() const
 
 void Bounds::grow(const Bounds& other)
 {
-    grow(other.min());
-    grow(other.max());
+    grow(other.minimum());
+    grow(other.maximum());
 }
 
 void Bounds::grow(const Point& p)
@@ -128,8 +128,8 @@ void Bounds::grow(const Point& p)
 
 void Bounds::shrink(const Bounds& other)
 {
-    m_min = (Point::max)(m_min, other.min());
-    m_max = (Point::min)(m_max, other.max());
+    m_min = Point::maximum(m_min, other.minimum());
+    m_max = Point::minimum(m_max, other.maximum());
     setMid();
 }
 
@@ -150,7 +150,7 @@ std::ostream& operator<<(std::ostream& os, const Bounds& bounds)
 
     os << std::setprecision(2) << std::fixed;
 
-    os << "[" << bounds.min() << ", " << bounds.max() << "]";
+    os << "[" << bounds.minimum() << ", " << bounds.maximum() << "]";
 
     os << std::setprecision(precision);
     os.flags(flags);

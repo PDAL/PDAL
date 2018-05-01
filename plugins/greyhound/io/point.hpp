@@ -385,7 +385,7 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point)
 
     auto printCoord([&os](double d)
     {
-        if (d == (std::numeric_limits<double>::ma)x()) os << "max";
+        if (d == (std::numeric_limits<double>::max)()) os << "max";
         else if (d == std::numeric_limits<double>::lowest()) os << "min";
         else if (std::trunc(d) == d) os << static_cast<long>(d);
         else

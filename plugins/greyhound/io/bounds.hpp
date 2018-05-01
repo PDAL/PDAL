@@ -64,8 +64,10 @@ public:
         return
             width() > 0 && depth() > 0 &&
             other.width() > 0 && other.depth() > 0 &&
-            max().x > other.minimum().x && minimum().x < other.maximum().x &&
-            max().y > other.minimum().y && minimum().y < other.maximum().y &&
+            maximum().x > other.minimum().x &&
+            minimum().x < other.maximum().x &&
+            maximum().y > other.minimum().y &&
+            minimum().y < other.maximum().y &&
             (force2d || (
                 (!height() && !other.height()) || (
                     height() > 0 && other.height() > 0 &&
