@@ -197,10 +197,10 @@ private:
             const Point& p2 = outer[id + 1];
 
             // Calculate bounding box.
-            m_xMin = std::min(m_xMin, xval(p1));
-            m_xMax = std::max(m_xMax, xval(p1));
-            m_yMin = std::min(m_yMin, yval(p1));
-            m_yMax = std::max(m_yMax, yval(p1));
+            m_xMin = (std::min)(m_xMin, xval(p1));
+            m_xMax = (std::max)(m_xMax, xval(p1));
+            m_yMin = (std::min)(m_yMin, yval(p1));
+            m_yMax = (std::max)(m_yMax, yval(p1));
         }
     }
 
@@ -272,7 +272,7 @@ private:
         // I'm setting a minmum number of cells as 1000, because, why not?
         // m_rings isn't necessarily an exact count of edges, but it's close
         // enough for this purpose.
-        size_t m = std::max((size_t)1000, m_rings.size());
+        size_t m = (std::max)((size_t)1000, m_rings.size());
 
         // See paper for this calc.
         double scalex = ((m_xMax - m_xMin) * yAvgLen) /
