@@ -60,7 +60,7 @@ void ClusterFilter::addArgs(ProgramArgs& args)
     args.add("min_points", "Min points per cluster", m_minPoints,
         static_cast<uint64_t>(1));
     args.add("max_points", "Max points per cluster", m_maxPoints,
-        std::numeric_limits<uint64_t>::max());
+        (std::numeric_limits<uint64_t>::max)());
     args.add("tolerance", "Radius", m_tolerance, 1.0);
 }
 
