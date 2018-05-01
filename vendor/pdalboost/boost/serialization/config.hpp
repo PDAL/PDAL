@@ -48,27 +48,4 @@
     #define BOOST_SERIALIZATION_DECL
 #endif
 
-//  enable automatic library variant selection  ------------------------------// 
-
-#if !defined(BOOST_ALL_NO_LIB) && !defined(BOOST_SERIALIZATION_NO_LIB) \
-&&  !defined(BOOST_ARCHIVE_SOURCE) && !defined(BOOST_WARCHIVE_SOURCE)  \
-&&  !defined(BOOST_SERIALIZATION_SOURCE)
-    //
-    // Set the name of our library, this will get undef'ed by auto_link.hpp
-    // once it's done with it:
-    //
-    #define BOOST_LIB_NAME pdalboost_serialization
-    //
-    // If we're importing code from a dll, then tell auto_link.hpp about it:
-    //
-    #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_SERIALIZATION_DYN_LINK)
-    #  define BOOST_DYN_LINK
-    #endif
-    //
-    // And include the header that does the work:
-    //
-    #include <boost/config/auto_link.hpp>
-
-#endif  
-
 #endif // BOOST_SERIALIZATION_CONFIG_HPP

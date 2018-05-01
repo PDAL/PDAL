@@ -136,27 +136,6 @@ namespace std {
 #  define BOOST_DATE_TIME_DECL
 #endif
 
-//
-// Automatically link to the correct build variant where possible. 
-// 
-#if !defined(BOOST_ALL_NO_LIB) && !defined(BOOST_DATE_TIME_NO_LIB) && !defined(BOOST_DATE_TIME_SOURCE)
-//
-// Set the name of our library, this will get undef'ed by auto_link.hpp
-// once it's done with it:
-//
-#define BOOST_LIB_NAME pdalboost_date_time
-//
-// If we're importing code from a dll, then tell auto_link.hpp about it:
-//
-#if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_DATE_TIME_DYN_LINK)
-#  define BOOST_DYN_LINK
-#endif
-//
-// And include the header that does the work:
-//
-#include <boost/config/auto_link.hpp>
-#endif  // auto-linking disabled
-
 #if defined(BOOST_HAS_THREADS) 
 #  if defined(_MSC_VER) || defined(__MWERKS__) || defined(__MINGW32__) ||  defined(__BORLANDC__)
      //no reentrant posix functions (eg: localtime_r)
