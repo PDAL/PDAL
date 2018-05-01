@@ -7317,7 +7317,7 @@ namespace GEO {
 #ifdef GEO_OS_WINDOWS
             return rand();
 #else
-            return int32(random() % std::numeric_limits<int32>::max());
+            return int32(random() % (std::numeric_limits<int32>::max)());
 #endif
         }
 
@@ -7329,7 +7329,7 @@ namespace GEO {
             // (problem at link time)
             return
                 float(random_int32()) /
-                float(std::numeric_limits<int32>::max());
+                float((std::numeric_limits<int32>::max)());
 #else
             return float(drand48());
 #endif
@@ -7343,7 +7343,7 @@ namespace GEO {
             // (problem at link time)
             return
                 double(random_int32()) /
-                double(std::numeric_limits<int32>::max());
+                double((std::numeric_limits<int32>::max)());
 #else
             return double(drand48());
 #endif

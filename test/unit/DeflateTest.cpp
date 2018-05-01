@@ -43,7 +43,7 @@ using namespace pdal;
 TEST(Compression, deflate)
 {
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+    std::uniform_int_distribution<int> dist((std::numeric_limits<int>::min)());
 
     // Choosing a size that isn't a multiple of the internal buffer.
     std::vector<int> orig(1000357);

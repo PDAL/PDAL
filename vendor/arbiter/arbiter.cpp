@@ -3793,7 +3793,7 @@ Contents parse(const std::string& s)
         line = util::stripWhitespace(line);
         const std::size_t semiPos(line.find_first_of(';'));
         const std::size_t hashPos(line.find_first_of('#'));
-        line = line.substr(0, std::min(semiPos, hashPos));
+        line = line.substr(0, (std::min)(semiPos, hashPos));
 
         if (line.size())
         {

@@ -836,7 +836,7 @@ void LasWriter::writeView(const PointViewPtr view)
     else
     {
         // Make a buffer of at most a meg.
-        m_pointBuf.resize(std::min((point_count_t)1000000,
+        m_pointBuf.resize((std::min)((point_count_t)1000000,
                     pointLen * view->size()));
 
         const PointView& viewRef(*view.get());
@@ -1125,7 +1125,7 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
     PointId startId, std::vector<char>& buf)
 {
     point_count_t blocksize = buf.size() / m_lasHeader.pointLen();
-    blocksize = std::min(blocksize, view.size() - startId);
+    blocksize = (std::min)(blocksize, view.size() - startId);
     PointId lastId = startId + blocksize;
 
     LeInserter ostream(buf.data(), buf.size());

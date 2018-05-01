@@ -853,11 +853,11 @@ void compareFiles(const std::string& name1, const std::string& name2,
     EXPECT_EQ(d1.size(), d2.size());
     EXPECT_EQ(size1, size2);
 
-    for (PointId i = 0; i < std::min(size1, size2); i += increment)
+    for (PointId i = 0; i < (std::min)(size1, size2); i += increment)
     {
        v1->getPackedPoint(d1, i, buf1.data());
        v2->getPackedPoint(d2, i, buf2.data());
-       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), std::min(size1, size2)), 0);
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), (std::min)(size1, size2)), 0);
     }
 }
 

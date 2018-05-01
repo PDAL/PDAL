@@ -460,7 +460,7 @@ namespace GEO {
         typedef double float64;
 
         inline float32 max_float32() {
-            return std::numeric_limits<float32>::max();
+            return (std::numeric_limits<float32>::max)();
         }
 
         inline float32 min_float32() {
@@ -471,7 +471,7 @@ namespace GEO {
         }
 
         inline float64 max_float64() {
-            return std::numeric_limits<float64>::max();
+            return (std::numeric_limits<float64>::max)();
         }
 
         inline float64 min_float64() {
@@ -568,17 +568,17 @@ namespace GEO {
     typedef geo_index_t index_t;
 
     inline index_t max_index_t() {
-        return std::numeric_limits<index_t>::max();
+        return (std::numeric_limits<index_t>::max)();
     }
 
     typedef geo_signed_index_t signed_index_t;
 
     inline signed_index_t max_signed_index_t() {
-        return std::numeric_limits<signed_index_t>::max();
+        return (std::numeric_limits<signed_index_t>::max)();
     }
 
     inline signed_index_t min_signed_index_t() {
-        return std::numeric_limits<signed_index_t>::min();
+        return (std::numeric_limits<signed_index_t>::min)();
     }
 
     typedef geo_coord_index_t coord_index_t;
@@ -4768,8 +4768,8 @@ namespace GEO {
 #endif
             if(
                 end != s && *end == '\0' && errno == 0 &&
-                v >= std::numeric_limits<T>::min() &&
-                v <= std::numeric_limits<T>::max()
+                v >= (std::numeric_limits<T>::min)() &&
+                v <= (std::numeric_limits<T>::max)()
             ) {
                 value = static_cast<T>(v);
                 return true;
@@ -4816,7 +4816,7 @@ namespace GEO {
 #endif
             if(
                 end != s && *end == '\0' && errno == 0 &&
-                v <= std::numeric_limits<T>::max()
+                v <= (std::numeric_limits<T>::max)()
             ) {
                 value = static_cast<T>(v);
                 return true;

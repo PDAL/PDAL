@@ -143,7 +143,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
     cy.setConstant(std::numeric_limits<double>::quiet_NaN());
 
     MatrixXd cz(m_numRows, m_numCols);
-    cz.setConstant(std::numeric_limits<double>::max());
+    cz.setConstant((std::numeric_limits<double>::max)());
 
     // find initial set of Z minimums at native resolution
     for (point_count_t i = 0; i < np; ++i)
@@ -250,7 +250,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
 
         double sum = 0.0;
         double maxcoeff = std::numeric_limits<double>::lowest();
-        double mincoeff = std::numeric_limits<double>::max();
+        double mincoeff = (std::numeric_limits<double>::max)();
         for (auto i = 0; i < R.size(); ++i)
         {
             if (std::isnan(R(i)))
@@ -322,7 +322,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
 
         sum = 0.0;
         maxcoeff = std::numeric_limits<double>::lowest();
-        mincoeff = std::numeric_limits<double>::max();
+        mincoeff = (std::numeric_limits<double>::max)();
         for (auto i = 0; i < M.size(); ++i)
         {
             if (std::isnan(M(i)))
@@ -477,13 +477,13 @@ void MongusFilter::downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
     dcy->setConstant(std::numeric_limits<double>::quiet_NaN());
 
     dcz->resize(nr, nc);
-    dcz->setConstant(std::numeric_limits<double>::max());
+    dcz->setConstant((std::numeric_limits<double>::max)());
 
     for (auto c = 0; c < cz->cols(); ++c)
     {
         for (auto r = 0; r < cz->rows(); ++r)
         {
-            if ((*cz)(r, c) == std::numeric_limits<double>::max())
+            if ((*cz)(r, c) == (std::numeric_limits<double>::max)())
                 continue;
 
             int rr = std::floor(r/cell_size);

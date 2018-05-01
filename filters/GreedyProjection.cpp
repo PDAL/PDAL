@@ -135,7 +135,7 @@ void GreedyProjection::filter(PointView& view)
     const double sqr_mu = mu_ * mu_;
     const double sqr_max_edge = search_radius_*search_radius_;
 
-    nnn_ = (int)std::min((point_count_t)nnn_, view.size());
+    nnn_ = (int)(std::min)((point_count_t)nnn_, view.size());
 
     // Variables to hold the results of nearest neighbor searches
     std::vector<PointId> nnIdx(nnn_);

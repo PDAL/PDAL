@@ -257,7 +257,7 @@ void compare(const PointViewPtr candidate, std::string filename)
     PointViewPtr source = *viewSet.begin();
 
     EXPECT_EQ(source->size(), candidate->size());
-    PointId limit = std::min(source->size(), candidate->size());
+    PointId limit = (std::min)(source->size(), candidate->size());
 
     for (PointId i = 0; i < limit; ++i)
     {

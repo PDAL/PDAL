@@ -394,7 +394,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
     maxDistSrcToCand = std::sqrt(maxDistSrcToCand);
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
 
-    return std::max(maxDistSrcToCand, maxDistCandToSrc);
+    return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
 }
 
 } // namespace Utils

@@ -62,7 +62,7 @@ namespace pdal
     m_stream.reset(new ILeStream(m_filename));
 
     size_t HEADERSIZE(1);
-    size_t skip_lines(std::max(HEADERSIZE, (size_t)m_index));
+    size_t skip_lines((std::max)(HEADERSIZE, (size_t)m_index));
     size_t line_no(1);
     for (std::string line; std::getline(*m_stream->stream(), line); line_no++)
     {

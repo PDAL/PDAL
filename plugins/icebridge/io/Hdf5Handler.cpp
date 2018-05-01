@@ -74,7 +74,7 @@ void Hdf5Handler::initialize(
                         ColumnData(predType, dataSet, dataSpace)));
 
             // Does not check whether all the columns are the same length.
-            m_numPoints = std::max((uint64_t)getColumnNumEntries(dataSetName),
+            m_numPoints = (std::max)((uint64_t)getColumnNumEntries(dataSetName),
                 m_numPoints);
         }
     }

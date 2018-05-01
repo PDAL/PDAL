@@ -239,8 +239,8 @@ point_count_t OptechReader::read(PointViewPtr data,
 
 size_t OptechReader::fillBuffer()
 {
-    size_t numRecords = std::min<size_t>(m_header.numRecords - m_recordIndex,
-                                         MaxNumRecordsInBuffer);
+    size_t numRecords = (std::min)(m_header.numRecords - m_recordIndex,
+        MaxNumRecordsInBuffer);
 
     buffer_size_t bufferSize = NumBytesInRecord * numRecords;
     m_buffer.resize(bufferSize);

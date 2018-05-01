@@ -121,7 +121,7 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
 
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
-    count = std::min(count, remaining);
+    count = (std::min)(count, remaining);
 
     std::unique_ptr<unsigned char>
         rawData(new unsigned char[count * sizeof(float)]);

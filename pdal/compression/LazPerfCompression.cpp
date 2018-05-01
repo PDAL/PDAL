@@ -116,7 +116,7 @@ public:
     {
         while (bufsize)
         {
-            size_t copyCnt = std::min(m_avail, bufsize);
+            size_t copyCnt = (std::min)(m_avail, bufsize);
             std::copy(buf, buf + copyCnt, m_tmpbuf + (CHUNKSIZE - m_avail));
             m_avail -= copyCnt;
             if (m_avail == 0)
@@ -214,7 +214,7 @@ public:
 
     void getBytes(uint8_t *dst, size_t dstsize)
     {
-        size_t count = std::min(dstsize, m_srcsize);
+        size_t count = (std::min)(dstsize, m_srcsize);
         uint8_t *src = const_cast<uint8_t *>(
             reinterpret_cast<const uint8_t *>(m_srcbuf));
         std::copy(src, src + count, dst);
