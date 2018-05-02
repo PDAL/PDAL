@@ -3,25 +3,23 @@
 filters.approximatecoplanar
 ===============================================================================
 
-``filters.approximatecoplanar`` filter estimates the planarity of a neighborhood
-of points by first computing eigenvalues for the points and then tagging those
-points for which the following is true:
+``filters.approximatecoplanar`` implements a portion of the algorithm presented
+in [Limberger2015]_. Prior to clustering points, the authors first apply an
+approximate coplanarity test, where points that meet the following criteria are
+labeled as approximately coplanar.
 
 .. math::
 
-  \lambda_1 > (thresh_1 * \lambda_0) \&\& (\lambda_1 * thresh_2) > \lambda_2
+  \lambda_2 > (s_{\alpha}\lambda_1) \&\& (s_{\beta}\lambda_2) > \lambda_3
 
-where :math:`\lambda_0`, :math:`\lambda_1`, :math:`\lambda_2` are the
-eigenvalues in ascending order. The threshold values :math:`thresh_1` and
-:math:`thresh_2` are user-defined and default to 25 and 6 respectively.
+:math:`\lambda_1`, :math:`\lambda_2`, :math:`\lambda_3` are the eigenvalues of
+a neighborhood of points (defined by ``knn`` nearest neighbors) in ascending
+order. The threshold values :math:`s_{\alpha}` and :math:`s_{\beta}` are
+user-defined and default to 25 and 6 respectively.
 
-The filter returns a point cloud with a new dimension  ``Coplanar`` that
+The filter returns a point cloud with a new dimension ``Coplanar`` that
 indicates those points that are part of a neighborhood that is approximately
 coplanar (1) or not (0).
-
-Eigenvalue estimation is performed using Eigen's ``SelfAdjointEigenSolver``. For
-more information see
-https://eigen.tuxfamily.org/dox/classEigen_1_1SelfAdjointEigenSolver.html.
 
 .. embed::
 
