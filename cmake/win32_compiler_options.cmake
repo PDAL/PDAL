@@ -4,6 +4,7 @@
 #
 
 function(pdal_target_compile_settings target)
+    message("*** Compile settings for ${target} ***")
     target_compile_definitions(${target} PRIVATE
         -DWIN32_LEAN_AND_MEAN)
     if (MSVC)
