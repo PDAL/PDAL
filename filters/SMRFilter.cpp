@@ -375,8 +375,7 @@ std::vector<int> SMRFilter::createObjMask(std::vector<double> const& ZImin)
             m_args->m_dir);
         MatrixXi Obj = Map<MatrixXi>(ObjV.data(), m_rows, m_cols);
         writeMatrix(Obj.cast<double>(), fname, "GTiff",
-            m_args->m_cell, m_bounds,
-                    m_srs);
+            m_args->m_cell, m_bounds, m_srs);
     }
 
     return ObjV;
