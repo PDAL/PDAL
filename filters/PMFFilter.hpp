@@ -47,6 +47,7 @@ class PDAL_DLL PMFFilter : public Filter
 {
 public:
     PMFFilter();
+    ~PMFFilter();
 
     std::string getName() const;
 

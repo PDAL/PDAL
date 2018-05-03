@@ -90,6 +90,10 @@ SMRFilter::SMRFilter() : m_args(new SMRArgs)
 {}
 
 
+SMRFilter::~SMRFilter()
+{}
+
+
 std::string SMRFilter::getName() const
 {
     return s_info.name;

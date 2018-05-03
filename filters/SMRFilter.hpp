@@ -48,6 +48,7 @@ class PDAL_DLL SMRFilter : public Filter
 {
 public:
     SMRFilter();
+    ~SMRFilter();
 
     std::string getName() const;
 

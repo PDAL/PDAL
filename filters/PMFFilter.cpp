@@ -74,6 +74,11 @@ CREATE_STATIC_STAGE(PMFFilter, s_info)
 PMFFilter::PMFFilter() : m_args(new PMFArgs)
 {}
 
+
+PMFFilter::~PMFFilter()
+{}
+
+
 std::string PMFFilter::getName() const
 {
     return s_info.name;
