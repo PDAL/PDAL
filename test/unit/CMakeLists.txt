@@ -43,6 +43,7 @@ PDAL_ADD_TEST(pdal_options_test
         OptionsTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
+        ${GDAL_LIBRARY}
 )
     target_include_directories(pdal_options_test PRIVATE
         ${PDAL_JSONCPP_INCLUDE_DIR})
@@ -60,9 +61,19 @@ PDAL_ADD_TEST(pdal_program_arg_test
         ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
-PDAL_ADD_TEST(pdal_polygon_test FILES PolygonTest.cpp)
+PDAL_ADD_TEST(pdal_polygon_test
+    FILES
+        PolygonTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
-PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
+PDAL_ADD_TEST(pdal_spatial_reference_test
+    FILES
+        SpatialReferenceTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 target_include_directories(pdal_spatial_reference_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
@@ -91,7 +102,12 @@ if (PDAL_HAVE_ZLIB)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
-PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/GDALReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_gdal_reader_test
+    FILES
+        io/GDALReaderTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
@@ -122,11 +138,24 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 target_include_directories(pdal_filters_chipper_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
-PDAL_ADD_TEST(pdal_filters_colorinterp_test FILES
-    filters/ColorinterpFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_colorization_test FILES
-    filters/ColorizationFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_colorinterp_test
+    FILES
+        filters/ColorinterpFilterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_filters_colorization_test
+    FILES
+        filters/ColorizationFilterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_filters_crop_test
+    FILES
+        filters/CropFilterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)

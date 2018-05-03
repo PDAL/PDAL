@@ -35,15 +35,11 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
-
-
 #include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
-
 #include <pdal/Polygon.hpp>
+
 #include "Support.hpp"
-
-
 
 namespace pdal
 {

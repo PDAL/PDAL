@@ -10,7 +10,9 @@ if (HEXER_FOUND)
         FILES
             filters/HexBin.cpp
         LINK_WITH
-            ${HEXER_LIBRARY})
+            ${HEXER_LIBRARY}
+            ${GDAL_LIBRARY}
+    )
     target_include_directories(${libname} PRIVATE ${PDAL_VENDOR_DIR}/pdalboost)
     target_include_directories(${libname} PUBLIC ${HEXER_INCLUDE_DIR})
 

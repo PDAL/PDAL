@@ -131,10 +131,13 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_INCLUDE_DIR})
-    target_link_libraries(${${_name}} PUBLIC
-        ${PDAL_BASE_LIB_NAME}
-        ${PDAL_UTIL_LIB_NAME}
-        ${PDAL_ADD_PLUGIN_LINK_WITH})
+    target_link_libraries(${${_name}}
+        PUBLIC
+            ${PDAL_BASE_LIB_NAME}
+            ${PDAL_UTIL_LIB_NAME}
+            ${PDAL_ADD_PLUGIN_LINK_WITH}
+            ${WINSOCK_LIBRARY}
+    )
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
     set_target_properties(${${_name}} PROPERTIES
@@ -176,13 +179,14 @@ macro(PDAL_ADD_TEST _name)
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
-    set_target_properties(${_name}
-        PROPERTIES
-            COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} PRIVATE
-        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} gtest
-        ${PDAL_ADD_TEST_LINK_WITH})
+    target_link_libraries(${_name}
+        PRIVATE
+            ${PDAL_BASE_LIB_NAME}
+	    ${PDAL_UTIL_LIB_NAME} gtest
+            ${PDAL_ADD_TEST_LINK_WITH}
+            ${WINSOCK_LIBRARY}
+    )
     add_test(NAME ${_name}
         COMMAND
             "${PROJECT_BINARY_DIR}/bin/${_name}"
@@ -191,11 +195,11 @@ macro(PDAL_ADD_TEST _name)
     # Ensure plugins are loaded from build dir
     # https://github.com/PDAL/PDAL/issues/840
     if (WIN32)
-      set_property(TEST ${_name} PROPERTY ENVIRONMENT
-        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/bin")
+        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+            "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/bin")
     else()
-      set_property(TEST ${_name} PROPERTY ENVIRONMENT
-        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
+        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+            "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
     endif()
 endmacro(PDAL_ADD_TEST)
 
