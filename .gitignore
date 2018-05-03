@@ -65,6 +65,11 @@ ipch/
 *.iml
 
 #
+# Vim backup
+#
+*.*~
+
+#
 # doxygen cruft
 #
 doc/doxygen/html
