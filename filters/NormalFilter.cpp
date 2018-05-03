@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "NormalFilter.hpp"
+#include "private/Point.hpp"
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
@@ -55,6 +56,21 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(NormalFilter, s_info)
 
+struct NormalArgs
+{
+    int m_knn;
+    filter::Point m_viewpoint;
+    bool m_up;
+};
+
+NormalFilter::NormalFilter() : m_args(new NormalArgs)
+{}
+
+
+NormalFilter::~NormalFilter()
+{}
+
+
 std::string NormalFilter::getName() const
 {
     return s_info.name;
@@ -62,11 +78,11 @@ std::string NormalFilter::getName() const
 
 void NormalFilter::addArgs(ProgramArgs& args)
 {
-    args.add("knn", "k-Nearest Neighbors", m_knn, 8);
-    m_viewpointArg =
-        &args.add("viewpoint", "Viewpoint as WKT or GeoJSON", m_viewpoint);
-    args.add("always_up", "Normals always oriented with positive Z?", m_up,
-             true);
+    args.add("knn", "k-Nearest Neighbors", m_args->m_knn, 8);
+    m_viewpointArg = &args.add("viewpoint",
+        "Viewpoint as WKT or GeoJSON", m_args->m_viewpoint);
+    args.add("always_up", "Normals always oriented with positive Z?",
+        m_args->m_up, true);
 }
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
@@ -80,7 +96,7 @@ void NormalFilter::addDimensions(PointLayoutPtr layout)
 // public method to access filter, used by GreedyProjection and Poisson filters
 void NormalFilter::doFilter(PointView& view, int knn)
 {
-    m_knn = knn;
+    m_args->m_knn = knn;
     ProgramArgs args;
     addArgs(args);
     // We're never parsing anything, so we'll just end up with default vals.
@@ -90,11 +106,11 @@ void NormalFilter::doFilter(PointView& view, int knn)
 
 void NormalFilter::prepared(PointTableRef table)
 {
-    if (m_up && m_viewpointArg->set())
+    if (m_args->m_up && m_viewpointArg->set())
     {
         log()->get(LogLevel::Warning)
             << "Viewpoint provided. Ignoring always_up = TRUE." << std::endl;
-        m_up = false;
+        m_args->m_up = false;
     }
 }
 
@@ -105,7 +121,7 @@ void NormalFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         // find the k-nearest neighbors
-        auto ids = kdi.neighbors(i, m_knn);
+        auto ids = kdi.neighbors(i, m_args->m_knn);
 
         // compute covariance of the neighborhood
         auto B = eigen::computeCovariance(view, ids);
@@ -121,13 +137,13 @@ void NormalFilter::filter(PointView& view)
         {
             PointRef p = view.point(i);
             Eigen::Vector3f vp(
-                m_viewpoint.x - p.getFieldAs<double>(Dimension::Id::X),
-                m_viewpoint.y - p.getFieldAs<double>(Dimension::Id::Y),
-                m_viewpoint.z - p.getFieldAs<double>(Dimension::Id::Z));
+                m_args->m_viewpoint.x - p.getFieldAs<double>(Dimension::Id::X),
+                m_args->m_viewpoint.y - p.getFieldAs<double>(Dimension::Id::Y),
+                m_args->m_viewpoint.z - p.getFieldAs<double>(Dimension::Id::Z));
             if (vp.dot(normal) < 0)
                 normal *= -1.0;
         }
-        else if (m_up)
+        else if (m_args->m_up)
         {
             if (normal[2] < 0)
                 normal *= -1.0;
