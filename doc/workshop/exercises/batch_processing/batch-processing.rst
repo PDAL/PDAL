@@ -6,7 +6,7 @@ Batch Processing
 
 PDAL doesn't handle matching multiple file inputs except for glob handling for merge operations,
 but does allow for command line substitution parameters to make batch processing simpler,  
-:ref:`substitutions`. Substitions work with both :ref:`pipeline` operations as well as with 
+substitutions. Substitions work with both :ref:`pipeline` operations as well as with 
 other applications such as :ref:`translate`. 
 
 
@@ -17,7 +17,7 @@ Operating system variations
 How substitutions are passed generally depends on the operating system and tools available.
 In the unix/linux environments, this is primarily using the `find` and `ls` programs to get
 lists of files (either with directories or just filenames) and the `xargs` program to pass 
-those files to the `pdal` application (although `-exec` with `find` can also be used). These
+those files to the :ref:`pdal` application (although `-exec` with `find` can also be used). These
 tools are available in the `docker` environment if you are running `PDAL` under docker. They
 are also available under Windows one installs `Cygwin` or `MinGW`. They are also available if
 Git for Windows is installed. They are also available as win32 command line programs installed
@@ -72,9 +72,9 @@ Exercise - Pipeline Substitions:
 ----------------------------------
 
 For the most flexibility, pipelines are used to apply a series of opertations to a file (or group
-of files). In this excersise, we build on the `dtm` pipeline example, but run this pipline over 4 files and
-reproject, calculate a bare earth using the `filters.srtm` filter, remove those points that aren't bare earth
-with `filters.range` and then write the output using the `writers.gdal`.
+of files). In this excersise, we build on the :ref:`workshop-dtm` pipeline example, but run this pipline over 4 files and
+reproject, calculate a bare earth using the :ref:`filters.smrf` filter, remove those points that aren't bare earth
+with :ref:`filters.range` and then write the output using the :ref:`writers.gdal`.
 
 The pipeline we are using is:
 
@@ -84,10 +84,15 @@ The pipeline we are using is:
 
 You might have spotted that this pipeline doesn't have any input or output file references, or a value for the 
 output spatial reference. We will be adding those at the command line, not within the actual pipeline and 
-using the :ref:`substitutions` syntax to do this. 
+using the substitutions syntax to do this. 
 
-.. include:: ./batch-dtm-powershell.txt
-    :code:powershell
+.. code-block:: powershell
+
+  $env:PATH="$PATH;C:\OSGeo4W64\bin\"
+  $env:GDAL_DATA="C:\OSGeo4W64\share\gdal\"
+
+  PS C:\Users\hobu\exercises\batch> Get-ChildItem  C:\Users\administrator\exercises\batch\ll\*.laz | foreach {pdal pipeline C:\Users\hobu\exercises\batch\batch_srs_gdal.json --readers.las.filename=.\ll\$($_.BaseName).laz --writers.gdal.filename=.\dtm\$($_.BaseName).tif --filters.reprojection.out_srs=epsg:26919}
+  
 
 
 
