@@ -45,6 +45,7 @@ Analysis
    analysis/thinning/thinning
    analysis/ground/ground
    analysis/dtm/dtm
+   batch_processing/batch-processing.rst
 
 Python
 --------------------------------------------------------------------------------
