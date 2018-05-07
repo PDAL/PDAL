@@ -183,7 +183,8 @@ macro(PDAL_ADD_TEST _name)
     target_link_libraries(${_name}
         PRIVATE
             ${PDAL_BASE_LIB_NAME}
-	    ${PDAL_UTIL_LIB_NAME} gtest
+            ${PDAL_UTIL_LIB_NAME}
+            gtest
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )

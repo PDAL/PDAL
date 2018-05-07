@@ -1,5 +1,6 @@
 function(pdal_target_compile_settings target)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
         if (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 7.0)
             target_compile_options(${target} PRIVATE
@@ -32,6 +33,5 @@ function(pdal_target_compile_settings target)
         -Wno-long-long
         -Wno-unknown-pragmas
         -Wno-deprecated-declarations
-     )
-#    target_include_directories(${target} SYSTEM PUBLIC /usr/local/include)
+    )
 endfunction()

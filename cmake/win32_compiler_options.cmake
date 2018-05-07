@@ -1,9 +1,10 @@
 #
-# We assume you're using MSVC if you're on WIN32.  This may be a bad
-# assumption, in which case things should change.
+# We assume you're using MSVC if you're on WIN32.
 #
 
 function(pdal_target_compile_settings target)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     target_compile_definitions(${target} PRIVATE
         -DWIN32_LEAN_AND_MEAN)
     if (MSVC)

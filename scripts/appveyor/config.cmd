@@ -30,7 +30,7 @@ SET ORACLE_HOME="C:/OSGEO4W64/"
 mkdir build
 pushd build
 
-cmake -v -G "NMake Makefiles" ^
+cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_HEXBIN=%PDAL_OPTIONAL_COMPONENTS% ^
