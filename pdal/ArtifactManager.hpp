@@ -52,7 +52,7 @@ public:
     }
 
     template <typename T>
-    bool replace(const std::string& name, const std::shared_ptr<T> artifact)
+    bool replace(const std::string& name, std::shared_ptr<T> art)
     {
         auto it = m_storage.find(name);
         if (it == m_storage.end())
@@ -60,7 +60,15 @@ public:
 
         if (!std::dynamic_pointer_cast<T>(it->second))
             return false;
-        it->second = artifact;
+        it->second = art;
+        return true;
+    }
+
+    template<typename T>
+    bool replaceOrPut(const std::string& name, std::shared_ptr<T> art)
+    {
+        if (!replace(name, art))
+            return put(name, art);
         return true;
     }
 
