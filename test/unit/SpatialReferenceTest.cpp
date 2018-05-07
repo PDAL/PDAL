@@ -392,6 +392,7 @@ TEST(SpatialReferenceTest, test_bounds)
 
 }
 
+// Make sure we get positive, negative and 0 back for UTM zones.
 TEST(SpatialReferenceTest, issue_1989)
 {
     SpatialReference srs;
@@ -400,7 +401,7 @@ TEST(SpatialReferenceTest, issue_1989)
     SpatialReference north("EPSG:2027");
     EXPECT_EQ(15, north.getUTMZone());
 
-    SpatialReference south("EPSG:2988");
-    EXPECT_EQ(-1, south.getUTMZone());
+    SpatialReference south("EPSG:32732");
+    EXPECT_EQ(-32, south.getUTMZone());
 }
 
