@@ -77,4 +77,48 @@ TEST(ArtifactTest, simple)
     EXPECT_EQ(t.artifactManager().get<TestArtifact2>("MyTest"), nullptr);
 }
 
+TEST(ArtifactTest, replace)
+{
+    using TAPtr = std::shared_ptr<TestArtifact>;
+    using TAPtr2 = std::shared_ptr<TestArtifact2>;
+    TAPtr ta(new TestArtifact("MyTest"));
+    TAPtr taa(new TestArtifact("MyTestA"));
+    TAPtr2 ta2(new TestArtifact2);
+
+    PointTable t;
+    EXPECT_FALSE(t.artifactManager().exists("MyTest"));
+    EXPECT_FALSE(t.artifactManager().replace("MyTest", ta));
+    t.artifactManager().put("MyTest", ta);
+    EXPECT_FALSE(t.artifactManager().replace("MyTest", ta2));
+    EXPECT_TRUE(t.artifactManager().replace("MyTest", taa));
+    EXPECT_TRUE(t.artifactManager().exists("MyTest"));
+    EXPECT_EQ(t.artifactManager().get<TestArtifact>("MyTest")->m_val,
+        "MyTestA");
+    EXPECT_FALSE(t.artifactManager().erase("MyOtherTest"));
+    EXPECT_TRUE(t.artifactManager().erase("MyTest"));
+    EXPECT_FALSE(t.artifactManager().exists("MyTest"));
+}
+
+TEST(ArtifactTest, replaceOrPut)
+{
+    using TAPtr = std::shared_ptr<TestArtifact>;
+    using TAPtr2 = std::shared_ptr<TestArtifact2>;
+
+    TAPtr ta(new TestArtifact("MyTest"));
+    TAPtr taa(new TestArtifact("MyTestA"));
+    TAPtr2 ta2(new TestArtifact2);
+
+    PointTable t;
+    EXPECT_FALSE(t.artifactManager().exists("MyTest"));
+    EXPECT_TRUE(t.artifactManager().replaceOrPut("MyTest", ta));
+    EXPECT_EQ(t.artifactManager().get<TestArtifact>("MyTest")->m_val,
+        "MyTest");
+    EXPECT_TRUE(t.artifactManager().exists("MyTest"));
+    EXPECT_TRUE(t.artifactManager().replaceOrPut("MyTest", taa));
+    EXPECT_TRUE(t.artifactManager().exists("MyTest"));
+    EXPECT_EQ(t.artifactManager().get<TestArtifact>("MyTest")->m_val,
+        "MyTestA");
+    EXPECT_FALSE(t.artifactManager().replaceOrPut("MyTest", ta2));
+}
+
 } // namespace pdal
