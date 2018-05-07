@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "DensityKernel.hpp"
-#include "../filters/HexBin.hpp"
+#include "../filters/HexBinFilter.hpp"
 #include "OGR.hpp"
 
 #include <pdal/GDALUtils.hpp>

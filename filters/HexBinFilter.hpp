@@ -37,9 +37,12 @@
 #include <pdal/Filter.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexGrid.hpp>
-#include <hexer/Processor.hpp>
+
+#include "private/hexer/Mathpair.hpp"
+#include "private/hexer/HexGrid.hpp"
+#include "private/hexer/Processor.hpp"
+
+//namespace hexer = pdalhexer;
 
 namespace pdal
 {
