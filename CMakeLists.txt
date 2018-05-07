@@ -263,7 +263,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
-    PUBLIC
+    PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
         ${GEOS_LIBRARY}
@@ -275,12 +275,10 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${ZSTD_STATIC_LIB}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
-    PRIVATE
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-    ${JSON_CPP_LINK_TYPE}
         ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}

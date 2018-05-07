@@ -38,21 +38,42 @@ PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
-PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
+PDAL_ADD_TEST(pdal_options_test
+    FILES
+        OptionsTest.cpp
+    LINK_WITH
+        ${PDAL_JSONCPP_LIB_NAME}
+        ${GDAL_LIBRARY}
+)
     target_include_directories(pdal_options_test PRIVATE
         ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
-PDAL_ADD_TEST(pdal_program_arg_test FILES ProgramArgsTest.cpp)
+PDAL_ADD_TEST(pdal_program_arg_test
+    FILES
+        ProgramArgsTest.cpp
+    LINK_WITH
+        ${PDAL_JSONCPP_LIB_NAME}
+)
     target_include_directories(pdal_program_arg_test PRIVATE
         ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
-PDAL_ADD_TEST(pdal_polygon_test FILES PolygonTest.cpp)
+PDAL_ADD_TEST(pdal_polygon_test
+    FILES
+        PolygonTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
-PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
+PDAL_ADD_TEST(pdal_spatial_reference_test
+    FILES
+        SpatialReferenceTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 target_include_directories(pdal_spatial_reference_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
@@ -81,8 +102,18 @@ if (PDAL_HAVE_ZLIB)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
-PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/GDALReaderTest.cpp)
-PDAL_ADD_TEST(pdal_io_gdal_writer_test FILES io/GDALWriterTest.cpp)
+PDAL_ADD_TEST(pdal_io_gdal_reader_test
+    FILES
+        io/GDALReaderTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_io_gdal_writer_test
+    FILES
+        io/GDALWriterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/LasReaderTest.cpp)
 target_include_directories(pdal_io_las_reader_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/LasWriterTest.cpp)
@@ -107,11 +138,24 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 target_include_directories(pdal_filters_chipper_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
-PDAL_ADD_TEST(pdal_filters_colorinterp_test FILES
-    filters/ColorinterpFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_colorization_test FILES
-    filters/ColorizationFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_colorinterp_test
+    FILES
+        filters/ColorinterpFilterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_filters_colorization_test
+    FILES
+        filters/ColorizationFilterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_filters_crop_test
+    FILES
+        filters/CropFilterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
@@ -162,7 +206,12 @@ if(PDAL_HAVE_LIBXML2)
         io/Ilvis2ReaderWithMDReaderTest.cpp)
     target_include_directories(pdal_io_ilvis2_reader_metadata_test PRIVATE
         ${LIBXML2_INCLUDE_DIR})
-    PDAL_ADD_TEST(xml_schema_test FILES XMLSchemaTest.cpp)
+    PDAL_ADD_TEST(xml_schema_test
+        FILES
+            XMLSchemaTest.cpp
+        LINK_WITH
+            ${LIBXML2_LIBRARIES}
+    )
     target_include_directories(xml_schema_test PRIVATE
         ${LIBXML2_INCLUDE_DIR})
     PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/Ilvis2ReaderTest.cpp)
