@@ -2,7 +2,10 @@ function(pdal_target_compile_settings target)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
-        if (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 7.0)
+        #
+        # VERSION_GREATER_EQUAL doesn't come until cmake 3.7
+        #
+        if (NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0)
             target_compile_options(${target} PRIVATE
                 -Wno-implicit-fallthrough
                 -Wno-int-in-bool-context
