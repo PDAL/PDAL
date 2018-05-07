@@ -57,7 +57,7 @@ Enhancements
    files.
 -  ``pdal info`` now provides the ``--enumerate`` option. See the
    documentation for
-   `filters.stats <https://www.pdal.io/stages/filters.stats.html>`__ for
+   `filters.stats <https://pdal.io/stages/filters.stats.html>`__ for
    details.
 -  Added a general option ``--logtiming`` to cause log output to contain
    the elapsed time from the start of the program. (#1882)
@@ -339,12 +339,12 @@ Enhancements
 -  ``filters.pmf`` and ``filters.smrf`` improved performance #1531 and
    #1541
 -  ``filters.assign`` now supports
-   `Range <https://www.pdal.io/stages/filters.range.html>`__-based
+   `Range <https://pdal.io/stages/filters.range.html>`__-based
    filters
 -  ``filters.outlier`` now accepts a user-specified ``class`` to
    override the default value of ``7`` for points deemed outliers. #1545
 -  ``filters.pmf`` and ``filters.smrf`` now accept a
-   `Range <https://www.pdal.io/stages/ranges.html#ranges>`__ via the
+   `Range <https://pdal.io/stages/ranges.html#ranges>`__ via the
    ``ignore`` option to specify values that should be excluded from
    ground segmentation. #1545
 -  ``filters.pmf`` and ``filters.smrf`` now consider only last returns

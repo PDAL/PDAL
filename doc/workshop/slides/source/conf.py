@@ -315,6 +315,6 @@ slide_theme_options = {
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'pdal': ('https://www.pdal.io/', None),
+intersphinx_mapping = {'pdal': ('https://pdal.io/', None),
                        'unavco': ('../../_build/html/../../../../_build/html/', '../../_build/html/objects.inv')}
 

@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "readers.mrsid",
     "MrSID Reader",
-    "http://www.pdal.io/stages/readers.mrsid.html"
+    "http://pdal.io/stages/readers.mrsid.html"
 };
 
 CREATE_SHARED_STAGE(MrsidReader, s_info)
