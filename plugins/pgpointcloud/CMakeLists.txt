@@ -54,7 +54,10 @@ if (BUILD_PGPOINTCLOUD_TESTS)
         FILES
             test/PgpointcloudWriterTest.cpp
         LINK_WITH
-            ${reader_libname} ${writer_libname})
+            ${reader_libname}
+            ${writer_libname}
+            ${POSTGRESQL_LIBRARIES}
+    )
     target_include_directories(pgpointcloudtest PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/include)
 endif()

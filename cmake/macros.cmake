@@ -132,7 +132,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_INCLUDE_DIR})
     target_link_libraries(${${_name}}
-        PUBLIC
+        PRIVATE
             ${PDAL_BASE_LIB_NAME}
             ${PDAL_UTIL_LIB_NAME}
             ${PDAL_ADD_PLUGIN_LINK_WITH}

@@ -36,8 +36,13 @@ target_include_directories(${writer_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
 #
 if(BUILD_SQLITE_TESTS)
 	PDAL_ADD_TEST(sqlitetest
-        FILES test/SQLiteTest.cpp
-        LINK_WITH ${reader_libname} ${writer_libname})
+        FILES
+            test/SQLiteTest.cpp
+        LINK_WITH
+            ${reader_libname}
+            ${writer_libname}
+            ${SQLITE3_LIBRARY}
+    )
     target_include_directories(sqlitetest PRIVATE
         ${PDAL_IO_DIR}
         ${LIBXML2_INCLUDE_DIR})
