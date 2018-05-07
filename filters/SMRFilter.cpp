@@ -73,6 +73,27 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(SMRFilter, s_info)
 
+struct SMRArgs
+{
+    double m_cell;
+    double m_slope;
+    double m_window;
+    double m_scalar;
+    double m_threshold;
+    double m_cut;
+    std::string m_dir;
+    DimRange m_ignored;
+    bool m_lastOnly;
+};
+
+SMRFilter::SMRFilter() : m_args(new SMRArgs)
+{}
+
+
+SMRFilter::~SMRFilter()
+{}
+
+
 std::string SMRFilter::getName() const
 {
     return s_info.name;
@@ -80,15 +101,15 @@ std::string SMRFilter::getName() const
 
 void SMRFilter::addArgs(ProgramArgs& args)
 {
-    args.add("cell", "Cell size?", m_cell, 1.0);
-    args.add("slope", "Percent slope?", m_slope, 0.15);
-    args.add("window", "Max window size?", m_window, 18.0);
-    args.add("scalar", "Elevation scalar?", m_scalar, 1.25);
-    args.add("threshold", "Elevation threshold?", m_threshold, 0.5);
-    args.add("cut", "Cut net size?", m_cut, 0.0);
-    args.add("dir", "Optional output directory for debugging", m_dir);
-    args.add("ignore", "Ignore values", m_ignored);
-    args.add("last", "Consider last returns only?", m_lastOnly, true);
+    args.add("cell", "Cell size?", m_args->m_cell, 1.0);
+    args.add("slope", "Percent slope?", m_args->m_slope, 0.15);
+    args.add("window", "Max window size?", m_args->m_window, 18.0);
+    args.add("scalar", "Elevation scalar?", m_args->m_scalar, 1.25);
+    args.add("threshold", "Elevation threshold?", m_args->m_threshold, 0.5);
+    args.add("cut", "Cut net size?", m_args->m_cut, 0.0);
+    args.add("dir", "Optional output directory for debugging", m_args->m_dir);
+    args.add("ignore", "Ignore values", m_args->m_ignored);
+    args.add("last", "Consider last returns only?", m_args->m_lastOnly, true);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -100,9 +121,9 @@ void SMRFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    m_ignored.m_id = layout->findDim(m_ignored.m_name);
+    m_args->m_ignored.m_id = layout->findDim(m_args->m_ignored.m_name);
 
-    if (m_lastOnly)
+    if (m_args->m_lastOnly)
     {
         if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
             !layout->hasDim(Dimension::Id::NumberOfReturns))
@@ -111,18 +132,18 @@ void SMRFilter::prepared(PointTableRef table)
                                              "NumberOfReturns. Skipping "
                                              "segmentation of last returns and "
                                              "proceeding with all returns.\n";
-            m_lastOnly = false;
+            m_args->m_lastOnly = false;
         }
     }
 }
 
 void SMRFilter::ready(PointTableRef table)
 {
-    if (m_dir.empty())
+    if (m_args->m_dir.empty())
         return;
 
-    if (!FileUtils::directoryExists(m_dir))
-        throwError("Output directory '" + m_dir + "' does not exist");
+    if (!FileUtils::directoryExists(m_args->m_dir))
+        throwError("Output directory '" + m_args->m_dir + "' does not exist");
 }
 
 PointViewSet SMRFilter::run(PointViewPtr view)
@@ -134,15 +155,16 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = view->makeNew();
     PointViewPtr keptView = view->makeNew();
-    if (m_ignored.m_id == Dimension::Id::Unknown)
+    if (m_args->m_ignored.m_id == Dimension::Id::Unknown)
         keptView->append(*view);
     else
-        Segmentation::ignoreDimRange(m_ignored, view, keptView, ignoredView);
+        Segmentation::ignoreDimRange(m_args->m_ignored, view, keptView,
+            ignoredView);
 
     // Segment kept view into last/other-than-last return views.
     PointViewPtr lastView = keptView->makeNew();
     PointViewPtr nonlastView = keptView->makeNew();
-    if (m_lastOnly)
+    if (m_args->m_lastOnly)
         Segmentation::segmentLastReturns(keptView, lastView, nonlastView);
     else
         lastView->append(*keptView);
@@ -153,8 +175,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     m_srs = lastView->spatialReference();
 
     lastView->calculateBounds(m_bounds);
-    m_cols = ((m_bounds.maxx - m_bounds.minx) / m_cell) + 1;
-    m_rows = ((m_bounds.maxy - m_bounds.miny) / m_cell) + 1;
+    m_cols = ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1;
+    m_rows = ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1;
 
     // Create raster of minimum Z values per element.
     std::vector<double> ZImin = createZImin(lastView);
@@ -207,7 +229,7 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
     MatrixXd thresh(m_rows, m_cols);
     {
         MatrixXd ZIproM = Map<MatrixXd>(ZIpro.data(), m_rows, m_cols);
-        MatrixXd scaled = ZIproM / m_cell;
+        MatrixXd scaled = ZIproM / m_args->m_cell;
 
         MatrixXd gx = gradX(scaled);
         MatrixXd gy = gradY(scaled);
@@ -216,26 +238,31 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
                                     gsurfs.data() + gsurfs.size());
         std::vector<double> gsurfs_fillV = knnfill(view, gsurfsV);
         gsurfs = Map<MatrixXd>(gsurfs_fillV.data(), m_rows, m_cols);
-        thresh = (m_threshold + m_scalar * gsurfs.array()).matrix();
+        thresh = (m_args->m_threshold + m_args->m_scalar *
+            gsurfs.array()).matrix();
 
-        if (!m_dir.empty())
+        if (!m_args->m_dir.empty())
         {
-            std::string fname = FileUtils::toAbsolutePath("gx.tif", m_dir);
-            writeMatrix(gx, fname, "GTiff", m_cell, m_bounds, m_srs);
+            std::string fname = FileUtils::toAbsolutePath("gx.tif",
+                m_args->m_dir);
+            writeMatrix(gx, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
-            fname = FileUtils::toAbsolutePath("gy.tif", m_dir);
-            writeMatrix(gy, fname, "GTiff", m_cell, m_bounds, m_srs);
+            fname = FileUtils::toAbsolutePath("gy.tif", m_args->m_dir);
+            writeMatrix(gy, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
-            fname = FileUtils::toAbsolutePath("gsurfs.tif", m_dir);
-            writeMatrix(gsurfs, fname, "GTiff", m_cell, m_bounds, m_srs);
+            fname = FileUtils::toAbsolutePath("gsurfs.tif", m_args->m_dir);
+            writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell,
+                m_bounds, m_srs);
 
-            fname = FileUtils::toAbsolutePath("gsurfs_fill.tif", m_dir);
+            fname = FileUtils::toAbsolutePath("gsurfs_fill.tif", m_args->m_dir);
             MatrixXd gsurfs_fill =
                 Map<MatrixXd>(gsurfs_fillV.data(), m_rows, m_cols);
-            writeMatrix(gsurfs_fill, fname, "GTiff", m_cell, m_bounds, m_srs);
+            writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell,
+                m_bounds, m_srs);
 
-            fname = FileUtils::toAbsolutePath("thresh.tif", m_dir);
-            writeMatrix(thresh, fname, "GTiff", m_cell, m_bounds, m_srs);
+            fname = FileUtils::toAbsolutePath("thresh.tif", m_args->m_dir);
+            writeMatrix(thresh, fname, "GTiff", m_args->m_cell,
+                m_bounds, m_srs);
         }
     }
 
@@ -245,8 +272,10 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        size_t c = static_cast<size_t>(std::floor(x - m_bounds.minx) / m_cell);
-        size_t r = static_cast<size_t>(std::floor(y - m_bounds.miny) / m_cell);
+        size_t c = static_cast<size_t>(std::floor(x - m_bounds.minx) /
+            m_args->m_cell);
+        size_t r = static_cast<size_t>(std::floor(y - m_bounds.miny) /
+            m_args->m_cell);
 
         // TODO(chambbj): We don't quite do this by the book and yet it seems to
         // work reasonably well:
@@ -287,12 +316,13 @@ std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
                    [](double v) { return -v; });
     std::vector<int> LowV = progressiveFilter(negZImin, 5.0, 1.0);
 
-    if (!m_dir.empty())
+    if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zilow.tif", m_dir);
+        std::string fname = FileUtils::toAbsolutePath("zilow.tif",
+            m_args->m_dir);
         MatrixXi Low = Map<MatrixXi>(LowV.data(), m_rows, m_cols);
-        writeMatrix(Low.cast<double>(), fname, "GTiff", m_cell, m_bounds,
-                    m_srs);
+        writeMatrix(Low.cast<double>(), fname, "GTiff", m_args->m_cell,
+            m_bounds, m_srs);
     }
 
     return LowV;
@@ -308,9 +338,9 @@ std::vector<int> SMRFilter::createNetMask()
     // values are found by applying a morphological open operation with a disk
     // shaped structuring element of radius (2*wkmax)."
     std::vector<int> isNetCell(m_rows * m_cols, 0);
-    if (m_cut > 0.0)
+    if (m_args->m_cut > 0.0)
     {
-        int v = std::ceil(m_cut / m_cell);
+        int v = std::ceil(m_args->m_cut / m_args->m_cell);
 
         for (auto c = 0; c < m_cols; c += v)
         {
@@ -336,14 +366,16 @@ std::vector<int> SMRFilter::createObjMask(std::vector<double> const& ZImin)
     // "The second stage of the ground identification algorithm involves the
     // application of a progressive morphological filter to the minimum surface
     // grid (ZImin)."
-    std::vector<int> ObjV = progressiveFilter(ZImin, m_slope, m_window);
+    std::vector<int> ObjV = progressiveFilter(ZImin, m_args->m_slope,
+        m_args->m_window);
 
-    if (!m_dir.empty())
+    if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("ziobj.tif", m_dir);
+        std::string fname = FileUtils::toAbsolutePath("ziobj.tif",
+            m_args->m_dir);
         MatrixXi Obj = Map<MatrixXi>(ObjV.data(), m_rows, m_cols);
-        writeMatrix(Obj.cast<double>(), fname, "GTiff", m_cell, m_bounds,
-                    m_srs);
+        writeMatrix(Obj.cast<double>(), fname, "GTiff",
+            m_args->m_cell, m_bounds, m_srs);
     }
 
     return ObjV;
@@ -365,8 +397,8 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = static_cast<int>(floor(x - m_bounds.minx) / m_cell);
-        int r = static_cast<int>(floor(y - m_bounds.miny) / m_cell);
+        int c = static_cast<int>(floor(x - m_bounds.minx) / m_args->m_cell);
+        int r = static_cast<int>(floor(y - m_bounds.miny) / m_args->m_cell);
 
         if (z < ZIminV[c * m_rows + r] || std::isnan(ZIminV[c * m_rows + r]))
             ZIminV[c * m_rows + r] = z;
@@ -378,15 +410,16 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
     // matrix) with values calculated from other nearby values."
     std::vector<double> ZImin_fillV = knnfill(view, ZIminV);
 
-    if (!m_dir.empty())
+    if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zimin.tif", m_dir);
+        std::string fname = FileUtils::toAbsolutePath("zimin.tif",
+            m_args->m_dir);
         MatrixXd ZImin = Map<MatrixXd>(ZIminV.data(), m_rows, m_cols);
-        writeMatrix(ZImin, fname, "GTiff", m_cell, m_bounds, m_srs);
+        writeMatrix(ZImin, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
-        fname = FileUtils::toAbsolutePath("zimin_fill.tif", m_dir);
+        fname = FileUtils::toAbsolutePath("zimin_fill.tif", m_args->m_dir);
         MatrixXd ZImin_fill = Map<MatrixXd>(ZImin_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZImin_fill, fname, "GTiff", m_cell, m_bounds, m_srs);
+        writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZImin_fillV;
@@ -403,9 +436,9 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     // values are found by applying a morphological open operation with a disk
     // shaped structuring element of radius (2*wkmax)."
     std::vector<double> ZInetV = ZImin;
-    if (m_cut > 0.0)
+    if (m_args->m_cut > 0.0)
     {
-        int v = std::ceil(m_cut / m_cell);
+        int v = std::ceil(m_args->m_cut / m_args->m_cell);
         std::vector<double> bigErode =
             erodeDiamond(ZImin, m_rows, m_cols, 2 * v);
         std::vector<double> bigOpen =
@@ -422,11 +455,12 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
         }
     }
 
-    if (!m_dir.empty())
+    if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zinet.tif", m_dir);
+        std::string fname = FileUtils::toAbsolutePath("zinet.tif",
+            m_args->m_dir);
         MatrixXd ZInet = Map<MatrixXd>(ZInetV.data(), m_rows, m_cols);
-        writeMatrix(ZInet, fname, "GTiff", m_cell, m_bounds, m_srs);
+        writeMatrix(ZInet, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZInetV;
@@ -453,15 +487,17 @@ std::vector<double> SMRFilter::createZIpro(PointViewPtr view,
     // previously, producing a provisional DEM (ZIpro)."
     std::vector<double> ZIpro_fillV = knnfill(view, ZIproV);
 
-    if (!m_dir.empty())
+    if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zipro.tif", m_dir);
+        std::string fname = FileUtils::toAbsolutePath("zipro.tif",
+            m_args->m_dir);
         MatrixXd ZIpro = Map<MatrixXd>(ZIproV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro, fname, "GTiff", m_cell, m_bounds, m_srs);
+        writeMatrix(ZIpro, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
-        fname = FileUtils::toAbsolutePath("zipro_fill.tif", m_dir);
+        fname = FileUtils::toAbsolutePath("zipro_fill.tif", m_args->m_dir);
         MatrixXd ZIpro_fill = Map<MatrixXd>(ZIpro_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro_fill, fname, "GTiff", m_cell, m_bounds, m_srs);
+        writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell,
+            m_bounds, m_srs);
     }
 
     return ZIpro_fillV;
@@ -482,8 +518,10 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
             if (std::isnan(cz[c * m_rows + r]))
                 continue;
 
-            temp->setField(Id::X, i, m_bounds.minx + (c + 0.5) * m_cell);
-            temp->setField(Id::Y, i, m_bounds.miny + (r + 0.5) * m_cell);
+            temp->setField(Id::X, i, m_bounds.minx + (c + 0.5) *
+                m_args->m_cell);
+            temp->setField(Id::Y, i, m_bounds.miny + (r + 0.5) *
+                m_args->m_cell);
             temp->setField(Id::Z, i, cz[c * m_rows + r]);
             i++;
         }
@@ -503,8 +541,8 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
             if (!std::isnan(out[c * m_rows + r]))
                 continue;
 
-            double x = m_bounds.minx + (c + 0.5) * m_cell;
-            double y = m_bounds.miny + (r + 0.5) * m_cell;
+            double x = m_bounds.minx + (c + 0.5) * m_args->m_cell;
+            double y = m_bounds.miny + (r + 0.5) * m_args->m_cell;
             int k = 8;
             std::vector<PointId> neighbors(k);
             std::vector<double> sqr_dists(k);
@@ -536,7 +574,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     // but is internally converted to a pixel equivalent by dividing it by the
     // cell size and rounding the result toward positive infinity (i.e., taking
     // the ceiling value)."
-    int max_radius = std::ceil(max_window / m_cell);
+    int max_radius = std::ceil(max_window / m_args->m_cell);
     std::vector<double> prevSurface = ZImin;
     std::vector<double> prevErosion = ZImin;
 
@@ -557,7 +595,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
         // "An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product
         // of the window radius and the cell size."
-        double threshold = slope * m_cell * radius;
+        double threshold = slope * m_args->m_cell * radius;
 
         // "This elevation threshold is applied to the difference of the minimum
         // and the opened surfaces."
