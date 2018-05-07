@@ -39,6 +39,10 @@
 
 #pragma once
 
+// This is for M_PI on Windows. cmath 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <fstream>
 #include <iostream>
 
