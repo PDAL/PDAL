@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "kernels.density",
     "Density Kernel",
-    "http://www.pdal.io/apps/density.html"
+    "http://pdal.io/apps/density.html"
 };
 
 CREATE_SHARED_KERNEL(DensityKernel, s_info)
