@@ -52,6 +52,29 @@ public:
     }
 
     template <typename T>
+    bool replace(const std::string& name, const std::shared_ptr<T> artifact)
+    {
+        auto it = m_storage.find(name);
+        if (it == m_storage.end())
+            return false;
+
+        if (!std::dynamic_pointer_cast<T>(it->second))
+            return false;
+        it->second = artifact;
+        return true;
+    }
+
+    bool erase(const std::string& name)
+    {
+        return m_storage.erase(name);
+    }
+
+    bool exists(const std::string& name)
+    {
+        return (m_storage.find(name) != m_storage.end());
+    }
+
+    template <typename T>
     std::shared_ptr<T> get(const std::string& name)
     {
         std::shared_ptr<T> art;
