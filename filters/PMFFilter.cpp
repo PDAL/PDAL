@@ -56,7 +56,28 @@ static StaticPluginInfo const s_info
     "http://pdal.io/stages/filters.pmf.html"
 };
 
+struct PMFArgs
+{
+    double m_cellSize;
+    bool m_exponential;
+    DimRange m_ignored;
+    double m_initialDistance;
+    bool m_lastOnly;
+    double m_maxDistance;
+    double m_maxWindowSize;
+    double m_slope;
+};
+
+
 CREATE_STATIC_STAGE(PMFFilter, s_info)
+
+PMFFilter::PMFFilter() : m_args(new PMFArgs)
+{}
+
+
+PMFFilter::~PMFFilter()
+{}
+
 
 std::string PMFFilter::getName() const
 {
@@ -65,15 +86,17 @@ std::string PMFFilter::getName() const
 
 void PMFFilter::addArgs(ProgramArgs& args)
 {
-    args.add("cell_size", "Cell size", m_cellSize, 1.0);
-    args.add("exponential", "Exponential growth of window size?", m_exponential,
-             true);
-    args.add("ignore", "Ignore values", m_ignored);
-    args.add("initial_distance", "Initial distance", m_initialDistance, 0.15);
-    args.add("last", "Consider last returns only?", m_lastOnly, true);
-    args.add("max_distance", "Maximum distance", m_maxDistance, 2.5);
-    args.add("max_window_size", "Maximum window size", m_maxWindowSize, 33.0);
-    args.add("slope", "Slope", m_slope, 1.0);
+    args.add("cell_size", "Cell size", m_args->m_cellSize, 1.0);
+    args.add("exponential", "Exponential growth of window size?",
+        m_args->m_exponential, true);
+    args.add("ignore", "Ignore values", m_args->m_ignored);
+    args.add("initial_distance", "Initial distance",
+        m_args->m_initialDistance, 0.15);
+    args.add("last", "Consider last returns only?", m_args->m_lastOnly, true);
+    args.add("max_distance", "Maximum distance", m_args->m_maxDistance, 2.5);
+    args.add("max_window_size", "Maximum window size",
+        m_args->m_maxWindowSize, 33.0);
+    args.add("slope", "Slope", m_args->m_slope, 1.0);
 }
 
 void PMFFilter::addDimensions(PointLayoutPtr layout)
@@ -85,9 +108,9 @@ void PMFFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    m_ignored.m_id = layout->findDim(m_ignored.m_name);
+    m_args->m_ignored.m_id = layout->findDim(m_args->m_ignored.m_name);
 
-    if (m_lastOnly)
+    if (m_args->m_lastOnly)
     {
         if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
             !layout->hasDim(Dimension::Id::NumberOfReturns))
@@ -96,7 +119,7 @@ void PMFFilter::prepared(PointTableRef table)
                                              "NumberOfReturns. Skipping "
                                              "segmentation of last returns and "
                                              "proceeding with all returns.\n";
-            m_lastOnly = false;
+            m_args->m_lastOnly = false;
         }
     }
 }
@@ -110,10 +133,11 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = input->makeNew();
     PointViewPtr keptView = input->makeNew();
-    if (m_ignored.m_id == Dimension::Id::Unknown)
+    if (m_args->m_ignored.m_id == Dimension::Id::Unknown)
         keptView->append(*input);
     else
-        Segmentation::ignoreDimRange(m_ignored, input, keptView, ignoredView);
+        Segmentation::ignoreDimRange(m_args->m_ignored, input,
+            keptView, ignoredView);
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
@@ -123,7 +147,7 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     // Segment kept view into last/other-than-last return views.
     PointViewPtr lastView = keptView->makeNew();
     PointViewPtr nonlastView = keptView->makeNew();
-    if (m_lastOnly)
+    if (m_args->m_lastOnly)
         Segmentation::segmentLastReturns(keptView, lastView, nonlastView);
     else
         lastView->append(*keptView);
@@ -146,8 +170,8 @@ void PMFFilter::processGround(PointViewPtr view)
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
     view->calculateBounds(bounds);
-    size_t cols = ((bounds.maxx - bounds.minx) / m_cellSize) + 1;
-    size_t rows = ((bounds.maxy - bounds.miny) / m_cellSize) + 1;
+    size_t cols = ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1;
+    size_t rows = ((bounds.maxy - bounds.miny) / m_args->m_cellSize) + 1;
 
     // initialize surface to NaN
     std::vector<double> ZImin(rows * cols,
@@ -160,8 +184,8 @@ void PMFFilter::processGround(PointViewPtr view)
         double x = view->getFieldAs<double>(Dimension::Id::X, i);
         double y = view->getFieldAs<double>(Dimension::Id::Y, i);
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
-        int c = static_cast<int>(floor(x - bounds.minx) / m_cellSize);
-        int r = static_cast<int>(floor(y - bounds.miny) / m_cellSize);
+        int c = static_cast<int>(floor(x - bounds.minx) / m_args->m_cellSize);
+        int r = static_cast<int>(floor(y - bounds.miny) / m_args->m_cellSize);
         size_t idx = c * rows + r;
         if (z < ZImin[idx] || std::isnan(ZImin[idx]))
             ZImin[idx] = z;
@@ -177,8 +201,8 @@ void PMFFilter::processGround(PointViewPtr view)
             size_t idx = c * rows + r;
             if (std::isnan(ZImin[idx]))
                 continue;
-            double x = bounds.minx + (c + 0.5) * m_cellSize;
-            double y = bounds.miny + (r + 0.5) * m_cellSize;
+            double x = bounds.minx + (c + 0.5) * m_args->m_cellSize;
+            double y = bounds.miny + (r + 0.5) * m_args->m_cellSize;
             temp->setField(Dimension::Id::X, i, x);
             temp->setField(Dimension::Id::Y, i, y);
             temp->setField(Dimension::Id::Z, i, ZImin[idx]);
@@ -200,8 +224,8 @@ void PMFFilter::processGround(PointViewPtr view)
             size_t idx = c * rows + r;
             if (!std::isnan(out[idx]))
                 continue;
-            double x = bounds.minx + (c + 0.5) * m_cellSize;
-            double y = bounds.miny + (r + 0.5) * m_cellSize;
+            double x = bounds.minx + (c + 0.5) * m_args->m_cellSize;
+            double y = bounds.miny + (r + 0.5) * m_args->m_cellSize;
             int k = 1;
             std::vector<PointId> neighbors(k);
             std::vector<double> sqr_dists(k);
@@ -225,24 +249,24 @@ void PMFFilter::processGround(PointViewPtr view)
     float ht = 0.0f;
 
     // pre-compute window sizes and height thresholds
-    while (ws < m_maxWindowSize)
+    while (ws < m_args->m_maxWindowSize)
     {
         // Determine the initial window size.
-        if (m_exponential)
-            ws = m_cellSize * (2.0f * std::pow(2, iter) + 1.0f);
+        if (m_args->m_exponential)
+            ws = m_args->m_cellSize * (2.0f * std::pow(2, iter) + 1.0f);
         else
-            ws = m_cellSize * (2.0f * (iter + 1) * 2 + 1.0f);
+            ws = m_args->m_cellSize * (2.0f * (iter + 1) * 2 + 1.0f);
 
         // Calculate the height threshold to be used in the next iteration.
         if (iter == 0)
-            ht = m_initialDistance;
+            ht = m_args->m_initialDistance;
         else
-            ht = m_slope * (ws - wsvec[iter - 1]) * m_cellSize +
-                 m_initialDistance;
+            ht = m_args->m_slope * (ws - wsvec[iter - 1]) *
+                m_args->m_cellSize + m_args->m_initialDistance;
 
         // Enforce max distance on height threshold
-        if (ht > m_maxDistance)
-            ht = m_maxDistance;
+        if (ht > m_args->m_maxDistance)
+            ht = m_args->m_maxDistance;
 
         wsvec.push_back(ws);
         htvec.push_back(ht);
@@ -269,8 +293,10 @@ void PMFFilter::processGround(PointViewPtr view)
             double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
             double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
 
-            int c = static_cast<int>(floor((x - bounds.minx) / m_cellSize));
-            int r = static_cast<int>(floor((y - bounds.miny) / m_cellSize));
+            int c = static_cast<int>(floor((x - bounds.minx) /
+                m_args->m_cellSize));
+            int r = static_cast<int>(floor((y - bounds.miny) /
+                m_args->m_cellSize));
 
             if ((z - mo[c * rows + r]) < htvec[j])
                 groundNewIdx.push_back(p_idx);

@@ -58,6 +58,16 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(CropFilter, s_info)
 
+struct CropArgs
+{
+    bool m_cropOutside;
+    SpatialReference m_assignedSrs;
+    std::vector<Bounds> m_bounds;
+    std::vector<filter::Point> m_centers;
+    double m_distance;
+    std::vector<Polygon> m_polys;
+};
+
 CropFilter::ViewGeom::ViewGeom(const Polygon& poly) : m_poly(poly)
 {}
 
@@ -67,25 +77,28 @@ CropFilter::ViewGeom::ViewGeom(ViewGeom&& vg) :
 
 std::string CropFilter::getName() const { return s_info.name; }
 
-CropFilter::CropFilter() : m_cropOutside(false)
+CropFilter::CropFilter() : m_args(new CropArgs)
 {}
+
 
 CropFilter::~CropFilter()
 {}
 
+
 void CropFilter::addArgs(ProgramArgs& args)
 {
     args.add("outside", "Whether we keep points inside or outside of the "
-        "bounding region", m_cropOutside);
-    args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
-    args.add("bounds", "Point box for cropped points", m_bounds);
+        "bounding region", m_args->m_cropOutside);
+    args.add("a_srs", "Spatial reference for bounding region",
+        m_args->m_assignedSrs);
+    args.add("bounds", "Point box for cropped points", m_args->m_bounds);
     args.add("point", "Center of circular/spherical crop region.  Use with "
-        "'distance'.", m_centers).setErrorText("Invalid point specification.  "
-            "Must be valid GeoJSON/WKT. "
-            "Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
+        "'distance'.", m_args->m_centers).
+        setErrorText("Invalid point specification.  Must be valid "
+            "GeoJSON/WKT. Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
-        m_distance);
-    args.add("polygon", "Bounding polying for cropped points", m_polys).
+        m_args->m_distance);
+    args.add("polygon", "Bounding polying for cropped points", m_args->m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
 }
@@ -94,10 +107,10 @@ void CropFilter::addArgs(ProgramArgs& args)
 void CropFilter::initialize()
 {
     // Set geometry from polygons.
-    if (m_polys.size())
+    if (m_args->m_polys.size())
     {
         m_geoms.clear();
-        for (Polygon& poly : m_polys)
+        for (Polygon& poly : m_args->m_polys)
         {
             // Throws if invalid.
             poly.valid();
@@ -106,26 +119,26 @@ void CropFilter::initialize()
     }
 
     m_boxes.clear();
-    for (auto& bound : m_bounds)
+    for (auto& bound : m_args->m_bounds)
         m_boxes.push_back(bound.to2d());
 
-    m_distance2 = m_distance * m_distance;
+    m_distance2 = m_args->m_distance * m_args->m_distance;
 }
 
 
 void CropFilter::ready(PointTableRef table)
 {
     // If the user didn't provide an SRS, take one from the table.
-    if (m_assignedSrs.empty())
+    if (m_args->m_assignedSrs.empty())
     {
-        m_assignedSrs = table.anySpatialReference();
+        m_args->m_assignedSrs = table.anySpatialReference();
         if (!table.spatialReferenceUnique())
             log()->get(LogLevel::Warning) << "Can't determine spatial "
                 "reference for provided bounds.  Consider using 'a_srs' "
                 "option.\n";
     }
     for (auto& geom : m_geoms)
-        geom.m_poly.setSpatialReference(m_assignedSrs);
+        geom.m_poly.setSpatialReference(m_args->m_assignedSrs);
 }
 
 
@@ -140,7 +153,7 @@ bool CropFilter::processOne(PointRef& point)
         if (!crop(point, box))
             return false;
 
-    for (auto& center: m_centers)
+    for (auto& center: m_args->m_centers)
         if (!crop(point, center))
             return false;
 
@@ -177,26 +190,27 @@ void CropFilter::transform(const SpatialReference& srs)
     }
 
     // If we don't have any SRS, do nothing.
-    if (srs.empty() && m_assignedSrs.empty())
+    if (srs.empty() && m_args->m_assignedSrs.empty())
         return;
-    if (srs.empty() || m_assignedSrs.empty())
+    if (srs.empty() || m_args->m_assignedSrs.empty())
         throwError("Unable to transform crop geometry to point "
             "coordinate system.");
 
     for (auto& box : m_boxes)
     {
-        if (!gdal::reprojectBounds(box, m_assignedSrs.getWKT(), srs.getWKT()))
+        if (!gdal::reprojectBounds(box, m_args->m_assignedSrs.getWKT(),
+            srs.getWKT()))
             throwError("Unable to reproject bounds.");
     }
-    for (auto& point : m_centers)
+    for (auto& point : m_args->m_centers)
     {
         if (!gdal::reprojectPoint(point.x, point.y, point.z,
-            m_assignedSrs.getWKT(), srs.getWKT()))
+            m_args->m_assignedSrs.getWKT(), srs.getWKT()))
             throwError("Unable to reproject point center.");
     }
     // Set the assigned SRS for the points/bounds to the one we've
     // transformed to.
-    m_assignedSrs = srs;
+    m_args->m_assignedSrs = srs;
 }
 
 
@@ -219,7 +233,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
         viewSet.insert(outView);
     }
 
-    for (auto& point: m_centers)
+    for (auto& point: m_args->m_centers)
     {
         PointViewPtr outView = view->makeNew();
         crop(point, *view, *outView);
@@ -236,7 +250,7 @@ bool CropFilter::crop(const PointRef& point, const BOX2D& box)
     double y = point.getFieldAs<double>(Dimension::Id::Y);
 
     // Return true if we're keeping a point.
-    return (m_cropOutside != box.contains(x, y));
+    return (m_args->m_cropOutside != box.contains(x, y));
 }
 
 
@@ -246,7 +260,7 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         point.setPointId(idx);
-        if (m_cropOutside != crop(point, box))
+        if (m_args->m_cropOutside != crop(point, box))
             output.appendPoint(input, idx);
     }
 }
@@ -256,7 +270,7 @@ bool CropFilter::crop(const PointRef& point, GridPnp& g)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
-    return (m_cropOutside != g.inside(x, y));
+    return (m_args->m_cropOutside != g.inside(x, y));
 }
 
 
@@ -281,21 +295,21 @@ bool CropFilter::crop(const PointRef& point, const filter::Point& center)
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     x = std::abs(x - center.x);
     y = std::abs(y - center.y);
-    if (x > m_distance || y > m_distance)
-        return (m_cropOutside);
+    if (x > m_args->m_distance || y > m_args->m_distance)
+        return (m_args->m_cropOutside);
 
     bool inside;
     if (center.is3d())
     {
         double z = point.getFieldAs<double>(Dimension::Id::Z);
         z = std::abs(z - center.z);
-        if (z > m_distance)
-            return (m_cropOutside);
+        if (z > m_args->m_distance)
+            return (m_args->m_cropOutside);
         inside = (x * x + y * y + z * z < m_distance2);
     }
     else
         inside = (x * x + y * y < m_distance2);
-    return (m_cropOutside != inside);
+    return (m_args->m_cropOutside != inside);
 }
 
 
