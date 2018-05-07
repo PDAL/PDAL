@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.diff",
     "Diff Kernel",
-    "http://www.pdal.io/apps/diff.html"
+    "http://pdal.io/apps/diff.html"
 };
 
 CREATE_STATIC_KERNEL(DiffKernel, s_info)

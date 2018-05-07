@@ -37,7 +37,7 @@ extensions = [
 today='July 25th, 2017'
 docstitle='Home'
 
-intersphinx_mapping = {'pdal': ('https://www.pdal.io/', None)}
+intersphinx_mapping = {'pdal': ('https://pdal.io/', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

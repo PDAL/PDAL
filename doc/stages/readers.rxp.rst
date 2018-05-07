@@ -87,4 +87,4 @@ max_reflectance
 
 .. _RIEGL Laser Measurement Systems: http://www.riegl.com
 .. _RIEGL download pages: http://www.riegl.com/members-area/software-downloads/libraries/
-.. _the optional library documentation: http://www.pdal.io/compilation/unix.html#configure-your-optional-libraries
+.. _the optional library documentation: http://pdal.io/compilation/unix.html#configure-your-optional-libraries
