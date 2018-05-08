@@ -21,7 +21,7 @@
 .. |Docker| replace:: `Docker <https://www.docker.com/>`__
 .. |LiDAR| replace:: `LiDAR <https://en.wikipedia.org/wiki/Lidar>`__
 .. |CRREL| replace:: `CRREL <http://www.erdc.usace.army.mil/Locations/ColdRegionsResearchandEngineeringLaboratory.aspx>`__
-.. |Hobu| replace:: `Hobu <httsp://hobu.co/>`__
+.. |Hobu| replace:: `Hobu <https://hobu.co/>`__
 .. |Optech| replace:: `Optech <http://www.teledyneoptech.com/>`__
 .. |RIEGL| replace:: `RIEGL <http://riegl.com/>`__
 .. |Greyhound| replace:: `Greyhound <http://greyhound.io/>`__

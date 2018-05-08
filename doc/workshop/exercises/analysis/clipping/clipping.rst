@@ -80,7 +80,9 @@ Pipeline breakdown
 .. note::
 
     This pipeline is available in your workshop materials in the
-    ``./exercises/analysis/clipping/clipping.json`` file.
+    ``./exercises/analysis/clipping/clipping.json`` file. Remember
+	to replace each occurance of ``c:/Users/Hobu/PDAL/`` with the
+	correct location for your machine.
 
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,10 +105,10 @@ The attributes in the ``attributes.json`` file include polygons with values
 ``2``, ``5``, and ``6``. We will use :ref:`filters.range` to keep points with
 ``Classification`` values in the range of ``6:6``.
 
-3. Writer
+4. Writer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* We will write our content back out using an :ref:`writers.las`.
+We will write our content back out using an :ref:`writers.las`.
 
 Execution
 ................................................................................
