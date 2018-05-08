@@ -22,7 +22,9 @@ http://potree.entwine.io/data/dublin.html
 .. index:: Potree
 
 
-1. View the ``greyhound.json`` file in your editor
+1. View the ``greyhound.json`` file in your editor. If the file does not exist, navigate
+   to the ``C:\Users\hobu\PDAL\exercises\translation`` folder and create it. Then, copy
+   and paste the following JSON into it:
 
 
     .. literalinclude:: ./greyhound.json
