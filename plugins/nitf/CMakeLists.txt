@@ -17,6 +17,7 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         io/NitfReader.cpp
     LINK_WITH
         ${NITRO_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
 target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
