@@ -42,6 +42,7 @@ if(BUILD_SQLITE_TESTS)
             ${reader_libname}
             ${writer_libname}
             ${SQLITE3_LIBRARY}
+            ${LIBXML2_LIBRARY}
     )
     target_include_directories(sqlitetest PRIVATE
         ${PDAL_IO_DIR}
