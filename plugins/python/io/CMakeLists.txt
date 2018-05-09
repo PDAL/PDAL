@@ -26,5 +26,5 @@ if (WITH_TESTS)
         FILES
             ../test/NumpyReaderTest.cpp
         LINK_WITH
-            ${numpy_reader})
+            ${numpy_reader} ${PYTHON_LIBRARY})
 endif()

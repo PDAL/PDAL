@@ -1118,6 +1118,7 @@ TEST(LasWriterTest, oversize_vlr)
 }
 
 
+// Test auto scale/offset for streaming mode.
 TEST(LasWriterTest, issue1940)
 {
     StageFactory f;
