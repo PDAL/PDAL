@@ -82,8 +82,8 @@ Pipeline breakdown
 
     This pipeline is available in your workshop materials in the
     ``./exercises/analysis/clipping/clipping.json`` file. Remember
-	to replace each occurance of ``c:/Users/Hobu/PDAL/`` with the
-	correct location for your machine.
+    to replace each occurance of ``c:/Users/Hobu/PDAL/`` with the
+    correct location for your machine.
 
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
