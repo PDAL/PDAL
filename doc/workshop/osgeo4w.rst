@@ -61,3 +61,9 @@ Installing OSGeo4W
    section and choose the ``PDAL`` package.
 
    .. image:: ./images/osgeo4w-pdal-selection.png
+
+5. Search for "QGIS" in the search box or drill down through the Desktop
+   section and choose the ``QGIS`` package. This will be used in a later
+   section of the workshop.
+
+   .. image:: ./images/osgeo4w-qgis-selection.png
