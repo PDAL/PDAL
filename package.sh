@@ -4,8 +4,6 @@
 # Build PDAL package
 # ./package.sh
 
-SUFFIX=$1
-
 GITSHA="$(git rev-parse HEAD)"
 
 echo "Cutting release for SHA $GITSHA"
@@ -33,6 +31,7 @@ cmake .. ;
 
 make dist
 PDAL_VERSION=$(./bin/pdal-config --version)
+SUFFIX=$1
 
 OUTPUTDIR="/data/release-$PDAL_VERSION"
 mkdir $OUTPUTDIR
@@ -62,7 +61,7 @@ EOF
 chmod +x docker-package.sh
 docker cp docker-package.sh $CONTAINERID:/docker-package.sh
 
-docker exec -it $CONTAINERID /docker-package.sh
+docker exec -it $CONTAINERID /docker-package.sh $@
 
 # run this to halt into the container
 #docker exec -it $CONTAINERID bash
