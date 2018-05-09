@@ -108,7 +108,7 @@ The attributes in the ``attributes.json`` file include polygons with values
 4. Writer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We will write our content back out using an :ref:`writers.las`.
+We will write our content back out using a :ref:`writers.las`.
 
 Execution
 ................................................................................
