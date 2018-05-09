@@ -1,4 +1,28 @@
 ================================================================================
+1.7.2
+================================================================================
+
+Bug Fixes
+=========
+
+-  Don't write LAS GeoTIFF VLRs if they contain no data (#1914)
+-  Centroid computation should use doubles instead of floats (#1919)
+-  Fixup `-Werror`-related warnings (#1915)
+-  Fix linking to libdl for dlopen (#1902)
+-  BPF doesn't build with ZLIB (#1929)
+-  Packaging improvements (#1942, #1976, #1980, #1943)
+-  Explicitly allow underscores and capital letters in stage names
+   (implicit pre-1.7, hardened to disallow in 1.7.1) (#1923)
+-  Warn about auto scaling ``writers.las`` in stream mode (#1940)
+-  Handle cr/lf endings in Windows for ``readers.text`` (#1939 ) 
+-  Make ``pdal-config`` owner writeable for `Conda packaging <https://github.com/conda/conda-build/issues/2824#issuecomment-382776831>`__ (#1964) 
+-  Allow replacement of artifacts (#1994)
+-  Fixed problem with UTM calculation for southern zones (#1989)
+-  Fixed issue with kernel plugins failing to load (#1971)
+-  Fixed problem where ``filters.ferry`` would create dimensions with
+   bad types (#1930)
+
+================================================================================
 1.7.0
 ================================================================================
 
