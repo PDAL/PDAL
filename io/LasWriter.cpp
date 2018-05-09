@@ -789,8 +789,6 @@ bool LasWriter::processOne(PointRef& point)
 // called we know we're in stream mode.
 bool LasWriter::processPoint(PointRef& point)
 {
-    //ABELL - Need to do something about auto offset.
-
     if (m_compression == LasCompression::LasZip)
     {
         if (!writeLasZipBuf(point))
