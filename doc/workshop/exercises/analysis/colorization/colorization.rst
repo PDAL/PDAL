@@ -27,6 +27,13 @@ to define it.
 .. literalinclude:: ./colorize.json
     :linenos:
 
+.. note::
+
+    This JSON file is available in your workshop materials in the
+    ``./exercises/analysis/colorization/colorize.json`` file. Remember to
+    open this file and replace each occurance of ``c:/Users/hobu/PDAL/``
+    with the correct path for your machine.
+
 Pipeline breakdown
 ................................................................................
 
