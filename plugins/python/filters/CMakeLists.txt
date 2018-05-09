@@ -20,6 +20,6 @@ if (WITH_TESTS)
         FILES
             ../test/PythonFilterTest.cpp
         LINK_WITH
-            ${python_libname}
+            ${python_libname} ${PYTHON_LIBRARY}
     )
 endif()

@@ -1,0 +1,2 @@
+pdal pipeline ^
+   c:/Users/hobu/PDAL/exercises/analysis/rasterize/classification.json

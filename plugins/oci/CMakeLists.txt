@@ -46,7 +46,7 @@ if(BUILD_OCI_TESTS)
     PDAL_ADD_TEST(ocitest
         FILES
             test/OCITest.cpp
-        LINK_WITH ${reader_libname} ${writer_libname})
+        LINK_WITH ${reader_libname} ${writer_libname} ${GDAL_LIBRARY} ${LIBXML2_LIBRARY})
     target_include_directories(ocitest PRIVATE
         ${ORACLE_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR})
