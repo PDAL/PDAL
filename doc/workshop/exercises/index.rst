@@ -45,11 +45,8 @@ Analysis
    analysis/thinning/thinning
    analysis/ground/ground
    analysis/dtm/dtm
-<<<<<<< HEAD
    batch_processing/batch-processing.rst
-=======
    analysis/rasterize/rasterize
->>>>>>> 525cc11bb... Workshop doc fixes (#2007)
 
 Python
 --------------------------------------------------------------------------------
