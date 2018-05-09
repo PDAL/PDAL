@@ -54,7 +54,7 @@ capability to reproject the data for us on-the-fly:
 .. note::
 
     This VRT file is available in your workshop materials in the
-    ``./exercises/analysis/clipping/attributes.json`` file. A GDAL or OGR VRT
+    ``./exercises/analysis/clipping/attributes.vrt`` file. A GDAL or OGR VRT
     is a kind of "virtual" data source definition type that combines a
     definition of data and a processing operation into a single, readable data
     stream.
