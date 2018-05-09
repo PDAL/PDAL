@@ -17,7 +17,7 @@ CONTAINERRUN="$DOCKER run -it -d --entrypoint /bin/sh -v $HERE:/data $CONTAINER"
 CONTAINERID=`$CONTAINERRUN`
 echo "Starting container: " $CONTAINERID
 cat > docker-package.sh << "EOF"
-#!/bin/sh
+#!/bin/bash
 
 git clone https://github.com/PDAL/PDAL.git;
 cd /PDAL;
