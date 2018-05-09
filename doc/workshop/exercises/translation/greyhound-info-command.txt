@@ -1,2 +1,1 @@
-pdal info just-ground.laz | ^
-    jq .stats.bbox.native
+pdal info just-ground.laz | jq .stats.bbox.native
