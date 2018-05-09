@@ -44,7 +44,7 @@ do
     do
         filename=${name/$PDAL_VERSION/$PDAL_VERSION$SUFFIX}
         if [ $name != $filename ]
-            mv $name $filename
+            then mv $name $filename
         fi
         `md5sum $filename > $filename.md5`
         `sha256sum $filename > $filename.sha256sum`
