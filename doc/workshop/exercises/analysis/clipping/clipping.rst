@@ -55,7 +55,11 @@ capability to reproject the data for us on-the-fly:
 .. note::
 
     This VRT file is available in your workshop materials in the
-    ``./exercises/analysis/clipping/attributes.vrt`` file. A GDAL or OGR VRT
+    ``./exercises/analysis/clipping/attributes.vrt`` file. You will need to
+    open this file, go to line 4 and replace ``c:/Users/hobu/PDAL/`` with
+    the correct path for your machine.
+
+    A GDAL or OGR VRT
     is a kind of "virtual" data source definition type that combines a
     definition of data and a processing operation into a single, readable data
     stream.
@@ -82,8 +86,8 @@ Pipeline breakdown
 
     This pipeline is available in your workshop materials in the
     ``./exercises/analysis/clipping/clipping.json`` file. Remember
-    to replace each occurance of ``c:/Users/Hobu/PDAL/`` with the
-    correct location for your machine.
+    to replace each of the three occurances of ``c:/Users/Hobu/PDAL/``
+    in this file with the correct location for your machine.
 
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
