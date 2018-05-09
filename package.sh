@@ -4,6 +4,7 @@
 # Build PDAL package
 # ./package.sh
 
+SUFFIX=$1
 
 GITSHA="$(git rev-parse HEAD)"
 
@@ -39,11 +40,12 @@ mkdir $OUTPUTDIR
 extensions=".tar.gz .tar.bz2"
 for ext in $extensions
 do
-
-
-    for filename in $(ls *$ext)
+    for name in $(ls *$ext)
     do
-
+        filename=${name/$PDAL_VERSION/$PDAL_VERSION$SUFFIX}
+        if [ $name != $filename ]
+            then mv $name $filename
+        fi
         `md5sum $filename > $filename.md5`
         `sha256sum $filename > $filename.sha256sum`
         `sha512sum $filename > $filename.sha512sum`
