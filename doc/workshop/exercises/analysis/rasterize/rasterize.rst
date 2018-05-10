@@ -5,10 +5,10 @@ Rasterizing Attributes
 
 .. include:: ../../../includes/substitutions.rst
 
-.. index:: elevation model, DTM, DSM, classifications,
+.. index:: classification, intensity, rasterization
 
 This exercise uses PDAL to generate a raster surface using a fully classified
-point cloud with PDAL's :ref:`writers.gdal` operation.
+point cloud with PDAL's :ref:`writers.gdal`.
 
 
 Exercise
@@ -16,11 +16,10 @@ Exercise
 
 
 .. note::
+    The exercise fetches its data from a `Greyhound`_ service that organizes the
+    point cloud collection for the entire country of Denmark. You can view the
+    data online at http://potree.entwine.io/data/denmark.html
 
-    The primary input for `Digital Terrain Model`_ generation is a point cloud
-    with ground classifications. We created this file, called
-    ``denoised-ground-only.laz``, in the :ref:`ground` exercise. Please produce that
-    file by following that exercise before starting this one.
 
 .. _`Digital Terrain Model`: https://en.wikipedia.org/wiki/Digital_elevation_model
 
@@ -33,16 +32,17 @@ Command
 
 Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
 
-PDAL capability to generate rasterized output is provided by the :ref:`writers.gdal`
-stage. There is no :ref:`application <apps>` to drive this stage, and we
-must use a pipeline.
+PDAL capability to generate rasterized output is provided by the :ref:`writers.gdal` stage.
+There is no :ref:`application <apps>` to drive this stage, and we must use a pipeline.
+
+
 
 Pipeline breakdown
 ................................................................................
 
 
-.. include:: ./gdal.json
-    :literal:
+.. literalinclude:: ./classification.json
+    :highlight-lines: 3-7
 
 .. note::
 
@@ -54,87 +54,102 @@ Pipeline breakdown
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``denoised-ground-only`` is the |LASzip| file we will clip. You should have
-created this output as part of the :ref:`ground` exercise.
+.. literalinclude:: ./classification.json
+    :lines: 3-7
+
+The data is read from a readers.greyhound server that hosts the Denmark data.
+We’re going to download a small patch of data by the Copenhagen airport that is
+the “full depth” of the tree.
 
 
 2. :ref:`writers.gdal`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ref:`writers.gdal` writer that bins the point cloud data into an elevation
-surface.
+The :ref:`writers.gdal` writer that bins the point cloud data with classification
+values.
+
+.. literalinclude:: ./classification.json
+    :lines: 7-14
 
 Execution
 ................................................................................
 
-.. literalinclude:: ./dtm-run-command.txt
-    :linenos:
+Issue the :ref:`pipeline <pipeline>` operation to execute the interpolation:
 
-.. image:: ../../../images/dtm-run-command.png
-    :target: ../../../../_images/dtm-run-command.png
+.. literalinclude:: ./classify-command.txt
+
+.. literalinclude:: ./classification.json
+
+.. image:: ../../../images/rasterization-classification-run-command.png
+    :target: ../../../../_images/rasterization-classification-run-command.png
 
 Visualization
 ................................................................................
 
-Something happened, and some files were written, but we cannot really
-see what was produced. Let us use :ref:`qgis` to visualize the output.
+.. figure:: ../../../images/rasterization-denmark-no-ramp.png
+    :target: ../../../../_images/rasterization-denmark-no-ramp.png
+    :scale: 200%
 
-1. Open :ref:`qgis` and `Add Raster Layer`:
-
-   .. image:: ../../../images/dtm-add-raster-layer.png
-        :target: ../../../../_images/dtm-add-raster-layer.png
-
-2. Add the `dtm.tif` file from your ``./PDAL/exercises/analysis/dtm``
-   directory.
-
-   .. image:: ../../../images/dtm-add-raster-mean.png
-        :target: ../../../../_images/dtm-add-raster-mean.png
-
-   .. image:: ../../../images/dtm-qgis-added.png
-        :target: ../../../../_images/dtm-qgis-added.png
-
-3. Classify the DTM by right-clicking on the `dtm.tif` and choosing
-   `Properties`. Pick the pseudocolor rendering type, and then
-   choose a color ramp and click `Classify`.
-
-   .. image:: ../../../images/dtm-qgis-classify.png
-        :target: ../../../../_images/dtm-qgis-classify.png
-
-   .. image:: ../../../images/dtm-qgis-colorize-dtm.png
-        :target: ../../../../_images/dtm-qgis-colorize-dtm.png
+    Basic interpolation of data with :ref:`writers.gdal` will output raw
+    classification values into the resulting raster file. We will need to add a
+    color ramp to the data for a satisfactory preview.
 
 
-4. :ref:`qgis` provides access to |GDAL| processing tools, and we
-   are going to use that to create a hillshade of our surface.
-   Choose `Raster-->Analysis-->Dem`:
+Unfortunately, this doesn’t give us a very satisfactory image to view. The
+reason is there is no color ramp associated with the file, and we’re looking at
+pixel values with values from 0-31 according to the ASPRS LAS specification.
 
-   .. image:: ../../../images/dtm-qgis-select-hillshade.png
-        :target: ../../../../_images/dtm-qgis-select-hillshade.png
+We want colors that correspond to the classification values a bit more
+directly. We can use a color ramp to assign explicit values. :ref:`qgis` allows us to
+create a text file color ramp that gdaldem can consume to apply colors to the
+data.
 
-5. Click the window for the `Output file` and select a location
-   to save the ``hillshade.tif`` file.
+.. literalinclude:: ./ramp.txt
+   :linenos:
 
-   .. image:: ../../../images/dtm-qgis-gdaldem.png
-        :target: ../../../../_images/dtm-qgis-gdaldem.png
+With the ramp, we can use `gdaldem`_ to apply it to a new image:
 
-
-   .. literalinclude:: ./dtm-hillshade-command.txt
-       :linenos:
+.. literalinclude:: ./gdaldem-run-command.txt
+   :linenos:
 
 
-6. Click `OK` and the hillshade of your DTM is now available
+.. figure:: ../../../images/rasterization-colored-classification.png
+    :target: ../../../../_images/rasterization-colored-classification.png
+    :scale: 200%
 
-   .. image:: ../../../images/dtm-qgis-hillshade-done.png
-        :target: ../../../../_images/dtm-qgis-hillshade-done.png
+    The use of ``-exact_color_entry`` for gdaldem ensures that specific
+    classification values are given the requested color. For categorical
+    data such as a classification surface, interpolated output would look
+    poor.
+
+Intensity
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With PDAL’s ability to override pipeline via commands, we can generate a
+relative intensity image:
+
+.. literalinclude:: ./intensity-run-command.txt
+   :linenos:
+
+.. figure:: ../../../images/rasterization-colored-intensity.png
+    :target: ../../../../_images/rasterization-colored-intensity.png
+    :scale: 200%
+
+    The same pipeline can be used to generate a preview image of the Intensity
+    channel of the data by overriding pipeline arguments at the command line.
+
+
 
 Notes
 --------------------------------------------------------------------------------
 
-1. `gdaldem`_, which powers the :ref:`qgis` DEM tools, is a very powerful
-   command line utility you can use for processing data.
+1. :ref:`writers.gdal`  can output any dimension PDAL can provide, but it is is
+   up to the user to interpolate the values. For categorical data, neighborhood
+   smoothing might produce undesirable results, for example.
 
-2. :ref:`writers.gdal` can be used for large data, but it does not interpolate a
-   typical `TIN`_ surface model.
+2. :ref:`pipeline` contains more information about overrides and organizing complex pipelines.
+
 
 .. _`TIN`: https://en.wikipedia.org/wiki/Triangulated_irregular_network
 .. _`gdaldem`: http://www.gdal.org/gdaldem.html
+.. _`Greyhound`: https://greyhound.io
