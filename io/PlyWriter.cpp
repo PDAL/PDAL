@@ -109,7 +109,7 @@ std::string PlyWriter::getType(Dimension::Type type) const
     {
         return types.at(type);
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {
         throwError("Can't write dimension of type '" +
                 Dimension::interpretationName(type) + "'.");

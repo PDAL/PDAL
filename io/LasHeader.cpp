@@ -218,7 +218,7 @@ void LasHeader::setSrs()
         else
             setSrsFromGeotiff();
     }
-    catch (Geotiff::error err)
+    catch (Geotiff::error& err)
     {
         m_log->get(LogLevel::Error) << "Could not create an SRS: " <<
             err.what() << std::endl;

@@ -24,7 +24,6 @@ function(pdal_target_compile_settings target)
         ${PDAL_CXX_STANDARD}
         -Wall
         -Wextra
-        -Wpedantic
         -Wpointer-arith
         -Wcast-align
         -Wcast-qual
