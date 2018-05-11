@@ -517,6 +517,8 @@ public:
         }
         catch (MetadataDetail::value_error&)
         {
+            // Reset in case the fromString conversion messed it up.
+            t = T();
             std::cerr << "Error converting metadata [" << name() <<
                 "] = " << m_impl->m_value << " to type " <<
                 Utils::typeidName<T>() << " -- return default initialized.";
