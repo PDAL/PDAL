@@ -349,6 +349,34 @@ inline void MetadataNodeImpl::setValue(const Uuid& u)
     m_value = u.toString();
 }
 
+namespace MetadataDetail
+{
+
+class value_error
+{};
+
+template<typename T>
+T value(const std::string& type, const std::string& value)
+{
+    T t{};
+
+    if (type == "base64Binary")
+    {
+        std::vector<uint8_t> encVal = Utils::base64_decode(value);
+        encVal.resize(sizeof(T));
+        memcpy(&t, encVal.data(), sizeof(T));
+    }
+    else if (!Utils::fromString(value, t))
+        throw value_error();
+    return t;
+}
+
+template<>
+inline std::string value(const std::string&, const std::string& value)
+{ return value; }
+
+} // namespace MetadataDetail
+
 
 class PDAL_DLL MetadataNode
 {
@@ -483,30 +511,25 @@ public:
     {
         T t{};
 
-        if (m_impl->m_type == "base64Binary")
+        try
         {
-            std::vector<uint8_t> encVal =
-                Utils::base64_decode(m_impl->m_value);
-            encVal.resize(sizeof(T));
-            memcpy(&t, encVal.data(), sizeof(T));
+            t = MetadataDetail::value<T>(m_impl->m_type, m_impl->m_value);
         }
-        else
+        catch (MetadataDetail::value_error&)
         {
-            if (!Utils::fromString(m_impl->m_value, t))
-            {
-                // Static to get default initialization.
-                static T t2;
-                std::cerr << "Error converting metadata [" << name() <<
-                    "] = " << m_impl->m_value << " to type " <<
-                    Utils::typeidName<T>() << " -- return default initialized.";
-                t = t2;
-            }
+            // Reset in case the fromString conversion messed it up.
+            t = T();
+            std::cerr << "Error converting metadata [" << name() <<
+                "] = " << m_impl->m_value << " to type " <<
+                Utils::typeidName<T>() << " -- return default initialized.";
         }
         return t;
     }
 
     std::string value() const
-        { return m_impl->m_value; }
+    {
+        return value<std::string>();
+    }
 
     std::string jsonValue() const
     {
@@ -711,7 +734,6 @@ private:
     std::string m_name;
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
-
 
 } // namespace pdal
 

@@ -264,7 +264,7 @@ int Kernel::innerRun(ProgramArgs& args)
         // do any user-level sanity checking
         validateSwitches(args);
     }
-    catch (pdal_error e)
+    catch (pdal_error& e)
     {
         Utils::printError(e.what());
         outputHelp(args);

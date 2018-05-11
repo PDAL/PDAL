@@ -242,7 +242,7 @@ int Octree< Real >::init(PointSource& source , LocalDepth maxDepth ,
                 if (!colorSource.nextPoint(_p, _d))
                     break;
             }
-            catch (std::bad_cast)
+            catch (std::bad_cast&)
             {
                 if (!source.nextPoint(_p))
                     break;
