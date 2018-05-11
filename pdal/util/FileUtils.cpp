@@ -154,7 +154,7 @@ std::vector<std::string> directoryList(const std::string& dir)
             it++;
         }
     }
-    catch (pdalboost::filesystem::filesystem_error)
+    catch (pdalboost::filesystem::filesystem_error&)
     {
         files.clear();
     }
@@ -213,7 +213,7 @@ bool fileExists(const std::string& name)
     {
         return pdalboost::filesystem::exists(name);
     }
-    catch (pdalboost::filesystem::filesystem_error)
+    catch (pdalboost::filesystem::filesystem_error&)
     {
     }
     return false;

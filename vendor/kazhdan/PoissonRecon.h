@@ -372,7 +372,7 @@ int loadOctTree(Octree<Real>& tree, XForm4x4<Real>& xForm, PointSource& source,
         return tree.template init< Point3D< Real >>(xsource, depth,
             confidence, *samples, sampleData);
     }
-    catch (std::bad_cast)
+    catch (std::bad_cast&)
     {}
 
     TransformedPointSource xsource(xForm, source);

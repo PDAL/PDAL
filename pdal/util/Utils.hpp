@@ -941,7 +941,7 @@ namespace Utils
                 return true;
             }
         }
-        catch (std::invalid_argument) // Character that isn't a number?
+        catch (std::invalid_argument&) // Character that isn't a number?
         {
             if (s.length() == 1)
             {
@@ -973,7 +973,7 @@ namespace Utils
                 return true;
             }
         }
-        catch (std::invalid_argument) // Character that isn't a number?
+        catch (std::invalid_argument&) // Character that isn't a number?
         {
             if (s.length() == 1)
             {
@@ -1005,7 +1005,7 @@ namespace Utils
                 return true;
             }
         }
-        catch (std::invalid_argument) // Character that isn't a number?
+        catch (std::invalid_argument&) // Character that isn't a number?
         {
             if (s.length() == 1)
             {

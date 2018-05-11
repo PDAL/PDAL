@@ -2032,7 +2032,7 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
         {
             xml.parse<0>(data.data());
         }
-        catch (Xml::parse_error)
+        catch (Xml::parse_error&)
         {
             throw ArbiterError("Could not parse S3 response.");
         }

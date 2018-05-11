@@ -184,6 +184,8 @@ template< typename P > struct assert_arg_pred_not
     typedef typename assert_arg_pred_impl<p>::type type;
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wparentheses"
 template< typename Pred >
 failed ************ (Pred::************ 
       assert_arg( void (*)(Pred), typename assert_arg_pred<Pred>::type )
@@ -193,6 +195,7 @@ template< typename Pred >
 failed ************ (pdalboost::mpl::not_<Pred>::************ 
       assert_not_arg( void (*)(Pred), typename assert_arg_pred_not<Pred>::type )
     );
+#pragma GCC diagnostic pop
 
 template< typename Pred >
 AUX778076_ASSERT_ARG(assert<false>)

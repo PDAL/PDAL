@@ -393,7 +393,7 @@ void TIndexKernel::mergeFile()
         options.add("offset_z", "auto");
         writer.addOptions(options);
     }
-    catch (std::bad_cast)
+    catch (std::bad_cast&)
     {}
 
     PointTable table;
@@ -457,7 +457,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         {
             err = OSRExportToProj4(srcSrs.get(), &pszProj4);
         }
-        catch (pdal_error)
+        catch (pdal_error&)
         {}
         if (err != OGRERR_NONE)
         {

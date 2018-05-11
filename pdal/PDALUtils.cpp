@@ -272,7 +272,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
             ofs = new ArbiterOutStream(tempFilename(path), path,
                 asBinary ? ios::out | ios::binary : ios::out);
         }
-        catch (arbiter::ArbiterError)
+        catch (arbiter::ArbiterError&)
         {}
         if (ofs && !ofs->good())
         {
@@ -305,7 +305,7 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return new ArbiterInStream(tempFilename(path), path,
                 asBinary ? ios::in | ios::binary : ios::in);
         }
-        catch (arbiter::ArbiterError)
+        catch (arbiter::ArbiterError&)
         {
             return nullptr;
         }
