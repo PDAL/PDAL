@@ -59,6 +59,7 @@ std::string KDistanceFilter::getName() const
 void KDistanceFilter::addArgs(ProgramArgs& args)
 {
     args.add("k", "k neighbors", m_k, 10);
+    args.add("average", "Compute the average distance of the point's k nearest neighbors", m_average, false);
 }
 
 void KDistanceFilter::addDimensions(PointLayoutPtr layout)
@@ -88,7 +89,16 @@ void KDistanceFilter::filter(PointView& view)
         std::vector<PointId> indices(m_k);
         std::vector<double> sqr_dists(m_k);
         index.knnSearch(i, m_k, &indices, &sqr_dists);
-        view.setField(m_kdist, i, std::sqrt(sqr_dists[m_k-1]));
+
+        if (m_average){
+            double sqr_dists_sum = 0.0;
+            for (int j = 0; j < m_k; j++){
+                sqr_dists_sum += sqr_dists[j];
+            }
+            view.setField(m_kdist, i, std::sqrt(sqr_dists_sum / m_k));
+        }else{
+            view.setField(m_kdist, i, std::sqrt(sqr_dists[m_k-1]));
+        }
     }
 }
 
