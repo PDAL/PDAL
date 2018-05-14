@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_features.hpp>  // PDAL_ARBITER_ENABLED
 
 #ifdef PDAL_ARBITER_ENABLED
     #include <arbiter/arbiter.hpp>
@@ -177,17 +178,15 @@ void toJSON(const MetadataNode& m, std::ostream& o)
 namespace
 {
 
+#ifdef PDAL_ARBITER_ENABLED
 std::string tempFilename(const std::string& path)
 {
-#ifdef PDAL_ARBITER_ENABLED
     const std::string tempdir(arbiter::fs::getTempPath());
     const std::string basename(arbiter::util::getBasename(path));
 
     return arbiter::util::join(tempdir, basename);
-#else
-    throw pdal_error("Arbiter is not enabled for this configuration (tempFilename)!");
+}
 #endif
-};
 
 // RAII handling of a temp file to make sure file gets deleted.
 class TempFile
@@ -221,8 +220,6 @@ public:
         close();
         arbiter::Arbiter a;
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
-#else
-        throw pdal_error("Arbiter is not enabled for this configuration!");
 #endif
     }
 
@@ -275,7 +272,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
             ofs = new ArbiterOutStream(tempFilename(path), path,
                 asBinary ? ios::out | ios::binary : ios::out);
         }
-        catch (arbiter::ArbiterError)
+        catch (arbiter::ArbiterError&)
         {}
         if (ofs && !ofs->good())
         {
@@ -308,7 +305,7 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return new ArbiterInStream(tempFilename(path), path,
                 asBinary ? ios::in | ios::binary : ios::in);
         }
-        catch (arbiter::ArbiterError)
+        catch (arbiter::ArbiterError&)
         {
             return nullptr;
         }
@@ -362,16 +359,16 @@ bool fileExists(const std::string& path)
 double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 {
     using namespace Dimension;
-        
+
     KD3Index srcIndex(*srcView);
     srcIndex.build();
-    
+
     KD3Index candIndex(*candView);
     candIndex.build();
-    
+
     double maxDistSrcToCand = std::numeric_limits<double>::lowest();
     double maxDistCandToSrc = std::numeric_limits<double>::lowest();
-    
+
     for (PointId i = 0; i < srcView->size(); ++i)
     {
         std::vector<PointId> indices(1);
@@ -396,7 +393,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     maxDistSrcToCand = std::sqrt(maxDistSrcToCand);
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
-    
+
     return std::max(maxDistSrcToCand, maxDistCandToSrc);
 }
 

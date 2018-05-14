@@ -39,18 +39,19 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.overlay",
     "Assign values to a dimension based on the extent of an OGR-readable data "
-    " source or an OGR SQL query.",
-    "http://pdal.io/stages/filters.overlay.html" );
+        " source or an OGR SQL query.",
+    "http://pdal.io/stages/filters.overlay.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, OverlayFilter, Filter, s_info)
+CREATE_STATIC_STAGE(OverlayFilter, s_info)
 
 struct OGRDataSourceDeleter
 {

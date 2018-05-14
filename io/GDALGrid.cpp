@@ -44,11 +44,19 @@ namespace pdal
 {
 
 GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
-        double radius, double noData, int outputTypes, size_t windowSize) :
+        double radius, int outputTypes, size_t windowSize) :
     m_width(width), m_height(height), m_windowSize(windowSize),
-    m_edgeLength(edgeLength), m_radius(radius), m_noData(noData),
-    m_outputTypes(outputTypes)
+    m_edgeLength(edgeLength), m_radius(radius), m_outputTypes(outputTypes)
 {
+    if (width > std::numeric_limits<int>::max() ||
+        height > std::numeric_limits<int>::max())
+    {
+        std::ostringstream oss;
+        oss << "Grid width or height is too large. Width and height are "
+            "limited to " << std::numeric_limits<int>::max() << " cells."
+            "Try setting bounds or increasing resolution.";
+        throw error(oss.str());
+    }
     size_t size(width * height);
 
     m_count.reset(new DataVec(size));
@@ -89,7 +97,7 @@ void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
 
     // Grid (raster) works upside down from standard X/Y.
     yshift = height - (m_height + yshift);
-    auto moveVec = [=](DataPtr& src, double initializer = 0)
+    auto moveVec = [=](DataPtr& src, double initializer)
     {
         // Compute an index in the destination given source index coords.
         auto dstIndex = [width, xshift, yshift](size_t i, size_t j)
@@ -109,20 +117,20 @@ void GDALGrid::expand(size_t width, size_t height, size_t xshift, size_t yshift)
         src = std::move(dst);
     };
 
-    moveVec(m_count);
+    moveVec(m_count, 0);
     if (m_outputTypes & statMin)
         moveVec(m_min, std::numeric_limits<double>::max());
     if (m_outputTypes & statMax)
         moveVec(m_max, std::numeric_limits<double>::lowest());
     if (m_outputTypes & statIdw)
     {
-        moveVec(m_idw);
-        moveVec(m_idwDist);
+        moveVec(m_idw, 0);
+        moveVec(m_idwDist, 0);
     }
     if ((m_outputTypes & statMean) || (m_outputTypes & statStdDev))
-        moveVec(m_mean);
+        moveVec(m_mean, 0);
     if (m_outputTypes & statStdDev)
-        moveVec(m_stdDev);
+        moveVec(m_stdDev, 0);
     m_width = width;
     m_height = height;
 }
@@ -148,26 +156,20 @@ int GDALGrid::numBands() const
 }
 
 
-uint8_t *GDALGrid::data(const std::string& name)
+double *GDALGrid::data(const std::string& name)
 {
-    if (name == "count")
-        return (m_outputTypes & statCount ?
-            (uint8_t *)m_count->data() : nullptr);
-    if (name == "min")
-        return (m_outputTypes & statMin ?
-            (uint8_t *)m_min->data() : nullptr);
-    if (name == "max")
-        return (m_outputTypes & statMax ?
-            (uint8_t *)m_max->data() : nullptr);
-    if (name == "mean")
-        return (m_outputTypes & statMean ?
-            (uint8_t *)m_mean->data() : nullptr);
-    if (name == "idw")
-        return (m_outputTypes & statIdw ?
-            (uint8_t *)m_idw->data() : nullptr);
-    if (name == "stdev")
-        return (m_outputTypes & statStdDev ?
-            (uint8_t *)m_stdDev->data() : nullptr);
+    if (name == "count" && (m_outputTypes & statCount))
+        return m_count->data();
+    if (name == "min" && (m_outputTypes & statMin))
+        return m_min->data();
+    if (name == "max" && (m_outputTypes & statMax))
+        return m_max->data();
+    if (name == "mean" && (m_outputTypes & statMean))
+        return m_mean->data();
+    if (name == "idw" && (m_outputTypes & statIdw))
+         return m_idw->data();
+    if (name == "stdev" && (m_outputTypes & statStdDev))
+        return m_stdDev->data();
     return nullptr;
 }
 
@@ -206,9 +208,11 @@ void GDALGrid::addPoint(double x, double y, double z)
     //         <- v
 
 
+    int i, j;
+    int iStart, jStart;
     // First quadrant;
-    int i = iOrigin + 1;
-    int j = jOrigin;
+    i = iStart = std::max(0, iOrigin + 1);
+    j = std::min(jOrigin, int(m_height - 1));
     while (i < (int)m_width && j >= 0)
     {
         double d = distance(i, j, x, y);
@@ -219,16 +223,16 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (i == iOrigin + 1)
+            if (i == iStart)
                 break;
-            i = iOrigin + 1;
+            i = iStart;
             j--;
         }
     }
 
     // Second quadrant;
-    i = iOrigin;
-    j = jOrigin - 1;
+    i = std::min(iOrigin, int(m_width - 1));
+    j = jStart = std::min(jOrigin - 1, int(m_height - 1));
     while (i >= 0 && j >= 0)
     {
         double d = distance(i, j, x, y);
@@ -239,16 +243,16 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (j == jOrigin - 1)
+            if (j == jStart)
                 break;
-            j = jOrigin - 1;
+            j = jStart;
             i--;
         }
     }
 
     // Third quadrant;
-    i = iOrigin - 1;
-    j = jOrigin;
+    i = iStart = std::min(iOrigin - 1, int(m_width - 1));
+    j = std::max(jOrigin, 0);
     while (i >= 0 && j < (int)m_height)
     {
         double d = distance(i, j, x, y);
@@ -259,15 +263,15 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (i == iOrigin - 1)
+            if (i == iStart)
                 break;
-            i = iOrigin - 1;
+            i = iStart;
             j++;
         }
     }
     // Fourth quadrant;
-    i = iOrigin;
-    j = jOrigin + 1;
+    i = std::max(iOrigin, 0);
+    j = jStart = std::max(jOrigin + 1, 0);
     while (i < (int)m_width && j < (int)m_height)
     {
         double d = distance(i, j, x, y);
@@ -278,9 +282,9 @@ void GDALGrid::addPoint(double x, double y, double z)
         }
         else
         {
-            if (j == jOrigin + 1)
+            if (j == jStart)
                 break;
-            j = jOrigin + 1;
+            j = jStart;
             i++;
         }
     }
@@ -290,11 +294,11 @@ void GDALGrid::addPoint(double x, double y, double z)
     double d = distance(iOrigin, jOrigin, x, y);
     if (d < m_radius &&
         iOrigin >= 0 && jOrigin >= 0 &&
-        iOrigin < (int)m_width && jOrigin <= (int)m_height)
+        iOrigin < (int)m_width && jOrigin < (int)m_height)
         update(iOrigin, jOrigin, z, d);
 }
 
-void GDALGrid::update(int i, int j, double val, double dist)
+void GDALGrid::update(size_t i, size_t j, double val, double dist)
 {
     // Once we determine that a point is close enough to a cell to count it,
     // this function does the actual math.  We use the value of the
@@ -391,15 +395,15 @@ void GDALGrid::finalize()
 void GDALGrid::fillNodata(size_t i)
 {
     if (m_min)
-        (*m_min)[i] = m_noData;
+        (*m_min)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_max)
-        (*m_max)[i] = m_noData;
+        (*m_max)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_mean)
-        (*m_mean)[i] = m_noData;
+        (*m_mean)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_idw)
-        (*m_idw)[i] = m_noData;
+        (*m_idw)[i] = std::numeric_limits<double>::quiet_NaN();
     if (m_stdDev)
-        (*m_stdDev)[i] = m_noData;
+        (*m_stdDev)[i] = std::numeric_limits<double>::quiet_NaN();
 }
 
 
@@ -428,7 +432,7 @@ void GDALGrid::windowFill(size_t dstI, size_t dstJ)
                 continue;
             // The ternaries just avoid underflow UB.  We're just trying to
             // find the distance from j to dstJ or i to dstI.
-            double distance = std::max(j > dstJ ? j - dstJ : dstJ - j,
+            double distance = (double)std::max(j > dstJ ? j - dstJ : dstJ - j,
                 i > dstI ? i - dstI : dstI - i);
             windowFillCell(srcIdx, dstIdx, distance);
             distSum += (1 / distance);

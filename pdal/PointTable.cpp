@@ -32,10 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/ArtifactManager.hpp>
 #include <pdal/PointTable.hpp>
 
 namespace pdal
 {
+
+BasePointTable::BasePointTable(PointLayout& layout) :
+    m_metadata(new Metadata()), m_layoutRef(layout)
+{}
+
+
+BasePointTable::~BasePointTable()
+{}
+
 
 MetadataNode BasePointTable::privateMetadata(const std::string& name)
 {
@@ -57,6 +67,15 @@ void BasePointTable::addSpatialReference(const SpatialReference& spatialRef)
     // If not the first element, move the found element to the front.
     else if (it != m_spatialRefs.begin())
         m_spatialRefs.splice(m_spatialRefs.begin(), m_spatialRefs, it);
+}
+
+
+ArtifactManager& BasePointTable::artifactManager()
+{
+    if (!m_artifactManager)
+        m_artifactManager.reset(new ArtifactManager);
+
+    return *m_artifactManager;
 }
 
 

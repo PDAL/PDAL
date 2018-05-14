@@ -32,12 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-
 #include "MatlabFilter.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -47,12 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "filters.matlab",
     "Manipulate data using inline Matlab",
-    "http://pdal.io/stages/filters.matlab.html" );
+    "http://pdal.io/stages/filters.matlab.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MatlabFilter, Filter, s_info)
+CREATE_SHARED_STAGE(MatlabFilter, Filter)
 
 std::string MatlabFilter::getName() const { return s_info.name; }
 
@@ -76,6 +75,8 @@ void MatlabFilter::ready(PointTableRef table)
 {
     if (m_script.m_source.empty())
         m_script.m_source = FileUtils::readFileIntoString(m_script.m_scriptFilename);
+
+    m_tableMetadata = table.metadata();
 }
 
 
@@ -93,7 +94,7 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
 
     Dimension::IdList dims;
 
-    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, log());
+    mxArray* matlabData = mlang::Script::setMatlabStruct(view, dims, m_pdalargs, m_tableMetadata, log());
     if (engPutVariable(engine, m_structName.c_str(), matlabData))
     {
         std::ostringstream oss;
@@ -141,10 +142,9 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
     }
     else
     {
-        mlang::Script::getMatlabStruct(matlabData, view, dims, log());
+        mlang::Script::getMatlabStruct(matlabData, view, dims, m_pdalargs, m_tableMetadata, log());
         viewSet.insert(view);
     }
-
     return viewSet;
 
 }
@@ -152,9 +152,6 @@ PointViewSet MatlabFilter::run(PointViewPtr view)
 
 void MatlabFilter::done(PointTableRef table)
 {
-//     static_cast<plang::Environment*>(plang::Environment::get())->reset_stdout();
-//     delete m_pythonMethod;
-//     delete m_script;
 }
 
 } // namespace pdal

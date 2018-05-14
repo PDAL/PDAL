@@ -34,32 +34,42 @@
 
 #pragma once
 
+#include <pdal/Log.hpp>
 #include <pdal/SpatialReference.hpp>
 
 namespace pdal
 {
+
+namespace Geotiff
+{
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+}
+
+struct Entry;
 
 class GeotiffSrs
 {
 public:
     GeotiffSrs(const std::vector<uint8_t>& directoryRec,
         const std::vector<uint8_t>& doublesRec,
-        const std::vector<uint8_t>& asciiRec);
+        const std::vector<uint8_t>& asciiRec, LogPtr log);
     SpatialReference srs() const
         { return m_srs; }
 private:
     SpatialReference m_srs;
+    LogPtr m_log;
+
+    void validateDirectory(const Entry *ent, size_t numEntries,
+        size_t numDoubles, size_t asciiSize);
 };
 
 class GeotiffTags
 {
 public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
     GeotiffTags(const SpatialReference& srs);
 
     std::vector<uint8_t>& directoryData()

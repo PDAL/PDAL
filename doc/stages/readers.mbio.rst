@@ -51,7 +51,17 @@ format
   Name of number of format of file being read.  See MB-System documentation
   for a list of `all formats`_. [Required]
 
+timegap
+  The maximum number of seconds that can elapse between pings before the
+  end of the data stream is assumed. [Default: 1.0]
+
+speedmin
+  The minimum speed that the ship can be moving to before the end of the
+  data stream is assumed. [Default: 0]
 
 .. _MB-System: http://www.ldeo.columbia.edu/res/pi/MB-System/
 
 .. _all formats: https://www.ldeo.columbia.edu/res/pi/MB-System/html/mbio.html#lbAI
+
+count
+  Maximum number of points to read [Optional]

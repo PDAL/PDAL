@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <pdal/pdal_features.hpp>
+
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
@@ -64,9 +66,6 @@ class PDAL_DLL IcebridgeReader : public pdal::Reader
 public:
     IcebridgeReader() : pdal::Reader()
         {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

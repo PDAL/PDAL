@@ -6,6 +6,8 @@ filters.cluster
 
 The Cluster filter first performs Euclidean Cluster Extraction on the input
 ``PointView`` and then labels each point with its associated cluster ID.
+Cluster IDs start with the value 1.  Points that don't belong to any
+cluster will are given a cluster ID of 0.
 
 .. embed::
 

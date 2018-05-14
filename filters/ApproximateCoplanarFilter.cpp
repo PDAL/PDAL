@@ -36,7 +36,6 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <Eigen/Dense>
@@ -47,11 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.approximatecoplanar", "ApproximateCoplanar Filter",
-               "http://pdal.io/stages/filters.approximatecoplanar.html");
+static StaticPluginInfo const s_info
+{
+    "filters.approximatecoplanar",
+    "Estimates the planarity of a neighborhood of points using eigenvalues.",
+    "http://pdal.io/stages/filters.approximatecoplanar.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ApproximateCoplanarFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ApproximateCoplanarFilter, s_info)
 
 std::string ApproximateCoplanarFilter::getName() const
 {

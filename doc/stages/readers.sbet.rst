@@ -28,3 +28,6 @@ Options
 
 filename
   File to read from [Required]
+
+count
+  Maximum number of points to read [Optional]

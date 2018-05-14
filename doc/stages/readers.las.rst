@@ -85,15 +85,21 @@ _`extra_dims`
 
   .. note::
 
-      The presence of an extra bytes VLR causes when reading a version 1.4 LAS file
+      The presence of an extra bytes VLR when reading a version
+      1.4 file or a version 1.0 - 1.3 file with **use_eb_vlr** set
       causes this option to be ignored.
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _LAS Specification: http://www.asprs.org/a/society/committees/standards/LAS_1_4_r13.pdf
 
+_`use_eb_vlr`
+  If an extra bytes VLR is found in a version 1.0 - 1.3 file, use it as if it
+  were in a 1.4 file. This option has no effect when reading a version 1.4 file.
+  [Default: false]
+
 _`compression`
   May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
-  or the LasZip decompressor for LAZ files.  PDAL must have been build with
+  or the LASzip decompressor for LAZ files.  PDAL must have been built with
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS.
   [Default: "laszip"]
@@ -101,4 +107,7 @@ _`compression`
 _`spatialreference`
   Sets the spatial reference for the file data.  Overrides any spatial
   reference information in the file itself.  Most text-based formats of
-  SRS information are accepted, including WKT and proj.4.
+  SRS information are accepted, including WKT and proj.4. [Optional]
+
+_`count`
+    Maximum number of points read [Optional]

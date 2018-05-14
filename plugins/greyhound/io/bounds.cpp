@@ -3,7 +3,8 @@
 *
 * Entwine -- Point cloud indexing
 *
-* Supporting libraries released under PDAL licensing by Hobu, inc.
+* Entwine is available under the terms of the LGPL2 license. See COPYING
+* for specific license text and more information.
 *
 ******************************************************************************/
 
@@ -37,7 +38,7 @@ Bounds::Bounds(const Point& min, const Point& max)
     }
 }
 
-Bounds::Bounds(const Json::Value& json) : m_min(), m_max(), m_mid()
+Bounds::Bounds(const Json::Value& json)
 {
     if (!json.isArray() || (json.size() != 4 && json.size() != 6))
     {
@@ -68,8 +69,7 @@ Bounds::Bounds(const Json::Value& json) : m_min(), m_max(), m_mid()
                 json.get(Json::ArrayIndex(3), 0).asDouble());
     }
 
-    Bounds self(m_min, m_max);
-    *this = self;
+    setMid();
 }
 
 Bounds::Bounds(const Point& center, const double radius)

@@ -35,36 +35,24 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
-#include "private/DimRange.hpp"
-
-extern "C" int32_t PMFFilter_ExitFunc();
-extern "C" PF_ExitFunc PMFFilter_InitPlugin();
+#include <memory>
 
 namespace pdal
 {
 
+struct PMFArgs;
+
 class PDAL_DLL PMFFilter : public Filter
 {
 public:
-    PMFFilter() : Filter()
-    {
-    }
+    PMFFilter();
+    ~PMFFilter();
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:
-    double m_cellSize;
-    bool m_exponential;
-    DimRange m_ignored;
-    double m_initialDistance;
-    bool m_lastOnly;
-    double m_maxDistance;
-    double m_maxWindowSize;
-    double m_slope;
+    std::unique_ptr<PMFArgs> m_args;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

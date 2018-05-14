@@ -97,10 +97,10 @@ namespace
 {
 void get(ILeStream& in, Uuid& uuid)
 {
-    char buf[uuid.size];
+    std::vector<char> buf(uuid.size);
 
-    in.get(buf, uuid.size);
-    uuid.unpack(buf);
+    in.get(buf.data(), uuid.size);
+    uuid.unpack(buf.data());
 }
 
 } // unnamed namespace;
@@ -130,7 +130,7 @@ ILeStream& operator>>(ILeStream& in, Header& h)
     if (h.m_pointFormat & 0x80)
         h.setCompressed(true);
     h.m_pointFormat &= ~0xC0;
-    
+
     for (size_t i = 0; i < Header::LEGACY_RETURN_COUNT; ++i)
     {
         in >> legacyReturnCount;
@@ -139,7 +139,7 @@ ILeStream& operator>>(ILeStream& in, Header& h)
 
     in >> h.m_scales[0] >> h.m_scales[1] >> h.m_scales[2];
     in >> h.m_offsets[0] >> h.m_offsets[1] >> h.m_offsets[2];
-    
+
     double maxX, minX;
     double maxY, minY;
     double maxZ, minZ;

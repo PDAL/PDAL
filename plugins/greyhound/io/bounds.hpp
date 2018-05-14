@@ -3,7 +3,8 @@
 *
 * Entwine -- Point cloud indexing
 *
-* Supporting libraries released under PDAL licensing by Hobu, inc.
+* Entwine is available under the terms of the LGPL2 license. See COPYING
+* for specific license text and more information.
 *
 ******************************************************************************/
 
@@ -11,7 +12,7 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <algorithm>
+#include <limits>
 
 #include <json/json.h>
 
@@ -60,15 +61,15 @@ public:
     // Returns true if these Bounds share any area in common with another.
     bool overlaps(const Bounds& other, bool force2d = false) const
     {
-        Point otherMid(other.mid());
-
         return
-            std::abs(m_mid.x - otherMid.x) <=
-                width() / 2.0 + other.width() / 2.0 &&
-            std::abs(m_mid.y - otherMid.y) <=
-                depth() / 2.0 + other.depth() / 2.0 &&
-            (force2d || std::abs(m_mid.z - otherMid.z) <=
-                height() / 2.0 + other.height() / 2.0);
+            width() > 0 && depth() > 0 &&
+            other.width() > 0 && other.depth() > 0 &&
+            max().x > other.min().x && min().x < other.max().x &&
+            max().y > other.min().y && min().y < other.max().y &&
+            (force2d || (
+                (!height() && !other.height()) || (
+                    height() > 0 && other.height() > 0 &&
+                    max().z > other.min().z && min().z < other.max().z)));
     }
 
     // Returns true if the requested Bounds are contained within these Bounds.
@@ -89,11 +90,18 @@ public:
     }
 
     // Returns true if the requested point is contained within these Bounds.
-    bool contains(const Point& p) const { return p >= m_min && p < m_max; }
+    bool contains(const Point& p) const
+    {
+        if (is3d()) return p >= m_min && p < m_max;
+        else return
+            p.x >= m_min.x && p.x < m_max.x &&
+            p.y >= m_min.y && p.y < m_max.y;
+    }
 
     double width()  const { return m_max.x - m_min.x; } // Length in X.
     double depth()  const { return m_max.y - m_min.y; } // Length in Y.
     double height() const { return m_max.z - m_min.z; } // Length in Z.
+    explicit operator bool() const { return width() && depth() && height(); }
 
     double area() const { return width() * depth(); }
     double volume() const { return width() * depth() * height(); }
@@ -187,6 +195,11 @@ public:
     Bounds getSwu() const { Bounds b(*this); b.goSwu(); return b; }
     Bounds getSeu() const { Bounds b(*this); b.goSeu(); return b; }
 
+    Bounds getNw() const { return getNwd(true); }
+    Bounds getNe() const { return getNed(true); }
+    Bounds getSw() const { return getSwd(true); }
+    Bounds getSe() const { return getSed(true); }
+
     void go(Dir dir, bool force2d = false)
     {
         if (force2d) dir = toDir(toIntegral(dir, true));
@@ -225,10 +238,12 @@ public:
                 std::to_string(toIntegral(dir)));
     }
 
-    bool exists() const { return Point::exists(m_min) || Point::exists(m_max); }
-    bool is3d() const { return m_min.z || m_max.z; }
+    bool empty() const { return !exists(); }
+    bool exists() const { return min().exists() || max().exists(); }
+    bool is3d() const { return m_min.z != m_max.z; }
 
     Json::Value toJson() const;
+    Bounds to2d() const { return Bounds(min().x, min().y, max().x, max().y); }
 
     void grow(const Bounds& bounds);
     void grow(const Point& p);
@@ -242,6 +257,7 @@ public:
     Bounds growBy(double ratio) const;
 
     std::vector<Bounds> explode() const;
+    std::vector<Bounds> explode(std::size_t delta) const;
 
     Bounds transform(const Transformation& t) const
     {
@@ -250,21 +266,50 @@ public:
 
     Bounds intersection(const Bounds& b) const
     {
+        if (!this->overlaps(b)) return Bounds();
         return Bounds(Point::max(min(), b.min()), Point::min(max(), b.max()));
     }
 
-    Bounds scale(const Point& scale, const Point& offset)
+    Bounds scale(const Point& scale, const Point& offset) const
     {
         return Bounds(
                 Point::scale(min(), scale, offset),
                 Point::scale(max(), scale, offset));
     }
 
-    Bounds unscale(const Point& scale, const Point& offset)
+    Bounds unscale(const Point& scale, const Point& offset) const
     {
         return Bounds(
                 Point::unscale(min(), scale, offset),
                 Point::unscale(max(), scale, offset));
+    }
+
+    static Bounds everything()
+    {
+        static const double dmin(std::numeric_limits<double>::lowest());
+        static const double dmax(std::numeric_limits<double>::max());
+        return Bounds(dmin, dmin, dmin, dmax, dmax, dmax);
+    }
+
+    static Bounds expander()
+    {
+        static const double dmin(std::numeric_limits<double>::lowest());
+        static const double dmax(std::numeric_limits<double>::max());
+
+        // Use Bounds::set to avoid malformed bounds warning.
+        Bounds b;
+        b.set(Point(dmax, dmax, dmax), Point(dmin, dmin, dmin));
+        return b;
+    }
+
+    double operator[](std::size_t i) const
+    {
+        return i < 3 ? min()[i] : max()[i - 3];
+    }
+
+    Bounds make2d() const
+    {
+        return Bounds(min().x, min().y, max().x, max().y);
     }
 
 private:
@@ -303,6 +348,11 @@ PDAL_DLL inline bool operator==(const Bounds& lhs, const Bounds& rhs)
 PDAL_DLL inline bool operator!=(const Bounds& lhs, const Bounds& rhs)
 {
     return !(lhs == rhs);
+}
+
+PDAL_DLL inline Bounds operator+(const Bounds& b, const Point& p)
+{
+    return Bounds(b.min() + p, b.max() + p);
 }
 
 } // namespace entwine

@@ -34,20 +34,19 @@
 
 #include "TransformationFilter.hpp"
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_macros.hpp>
-
 #include <sstream>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.transformation",
     "Transform each point using a 4x4 transformation matrix",
-    "http://pdal.io/stages/filters.transformation.html" );
+    "http://pdal.io/stages/filters.transformation.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TransformationFilter, Filter, s_info)
+CREATE_STATIC_STAGE(TransformationFilter, s_info)
 
 std::string TransformationFilter::getName() const { return s_info.name; }
 
@@ -123,6 +122,7 @@ void TransformationFilter::filter(PointView& view)
         point.setPointId(idx);
         processOne(point);
     }
+    view.invalidateProducts();
 }
 
 } // namespace pdal

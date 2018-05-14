@@ -37,8 +37,7 @@
 namespace pdal
 {
 
-const uint16_t LasVLR::MAX_DATA_SIZE =
-    (std::numeric_limits<uint16_t>::max)();
+const uint16_t LasVLR::MAX_DATA_SIZE = 65535;
 
 ILeStream& operator>>(ILeStream& in, LasVLR& v)
 {

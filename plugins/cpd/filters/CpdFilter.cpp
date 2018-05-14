@@ -37,7 +37,6 @@
 #include <cpd/rigid.hpp>
 #include <filters/CpdFilter.hpp>
 #include <pdal/EigenUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -45,7 +44,7 @@ namespace
 {
 void movePoints(PointViewPtr moving, const cpd::Matrix& result)
 {
-    assert(moving->size() == result.rows());
+    assert(moving->size() == (point_count_t)result.rows());
     for (PointId i = 0; i < moving->size(); ++i)
     {
         moving->setField(Dimension::Id::X, i, result(i, 0));
@@ -63,10 +62,14 @@ void addMetadata(CpdFilter* filter, const cpd::Result& result)
 }
 }
 
-static PluginInfo const s_info = PluginInfo(
-    "filters.change", "CPD filter", "http://pdal.io/stages/filters.cpd.html");
+static PluginInfo const s_info
+{
+    "filters.cpd",
+    "CPD filter",
+    "http://pdal.io/stages/filters.cpd.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, CpdFilter, Filter, s_info);
+CREATE_SHARED_STAGE(CpdFilter, s_info)
 
 std::string CpdFilter::getName() const
 {
@@ -90,7 +93,7 @@ PointViewSet CpdFilter::run(PointViewPtr view)
     if (this->m_complete)
     {
         throw pdal_error(
-            "filters.change must have two point view inputs, no more, no less");
+            "filters.cpd must have two point view inputs, no more, no less");
     }
     else if (this->m_fixed)
     {
@@ -98,7 +101,7 @@ PointViewSet CpdFilter::run(PointViewPtr view)
         PointViewPtr result = this->change(this->m_fixed, view);
         viewSet.insert(result);
         this->m_complete = true;
-        log()->get(LogLevel::Debug2) << "filters.change complete\n";
+        log()->get(LogLevel::Debug2) << "filters.cpd complete\n";
     }
     else
     {
@@ -113,7 +116,7 @@ void CpdFilter::done(PointTableRef _)
     if (!this->m_complete)
     {
         throw pdal_error(
-            "filters.change must have two point view inputs, no more, no less");
+            "filters.cpd must have two point view inputs, no more, no less");
     }
 }
 
@@ -122,7 +125,7 @@ PointViewPtr CpdFilter::change(PointViewPtr fixed, PointViewPtr moving)
     MetadataNode root = this->getMetadata();
     root.add("method", this->m_method);
     log()->get(LogLevel::Debug2)
-        << "filters.change running method:" << this->m_method << "\n";
+        << "filters.cpd running method:" << this->m_method << "\n";
     if (this->m_method == "rigid")
     {
         this->cpd_rigid(fixed, moving);
@@ -138,7 +141,7 @@ PointViewPtr CpdFilter::change(PointViewPtr fixed, PointViewPtr moving)
     else
     {
         std::stringstream ss;
-        ss << "Invalid change detection method: " << this->m_method;
+        ss << "Invalid cpd detection method: " << this->m_method;
         throw pdal_error(ss.str());
     }
     return moving;

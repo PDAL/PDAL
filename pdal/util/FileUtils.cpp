@@ -144,12 +144,19 @@ std::vector<std::string> directoryList(const std::string& dir)
 {
     std::vector<std::string> files;
 
-    pdalboost::filesystem::directory_iterator it(dir);
-    pdalboost::filesystem::directory_iterator end;
-    while (it != end)
+    try
     {
-        files.push_back(it->path().string());
-        it++;
+        pdalboost::filesystem::directory_iterator it(dir);
+        pdalboost::filesystem::directory_iterator end;
+        while (it != end)
+        {
+            files.push_back(it->path().string());
+            it++;
+        }
+    }
+    catch (pdalboost::filesystem::filesystem_error&)
+    {
+        files.clear();
     }
     return files;
 }
@@ -206,7 +213,7 @@ bool fileExists(const std::string& name)
     {
         return pdalboost::filesystem::exists(name);
     }
-    catch (pdalboost::filesystem::filesystem_error)
+    catch (pdalboost::filesystem::filesystem_error&)
     {
     }
     return false;

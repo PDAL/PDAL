@@ -46,12 +46,9 @@
 #include <memory>
 #include <queue>
 #include <set>
-#include <vector>
 #include <deque>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
-#endif
+#pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
 
 namespace pdal
 {
@@ -71,6 +68,7 @@ typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
 class PDAL_DLL PointView : public PointContainer
 {
+    friend class Stage;
     friend class plang::Invocation;
     friend class PointIdxRef;
     friend struct PointViewLess;
@@ -212,10 +210,10 @@ public:
          { return layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return layout()->dimTypes(); }
-    PointLayoutPtr layout() const
+    inline PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
-    void setSpatialReference(const SpatialReference& spatialRef)
-        { m_spatialReference = spatialRef; }
+    inline PointTableRef table() const
+        { return m_pointTable;}
     SpatialReference spatialReference() const
         { return m_spatialReference; }
 
@@ -275,6 +273,8 @@ public:
     }
     MetadataNode toMetadata() const;
 
+    void invalidateProducts();
+
     /**
       Creates a mesh with the specified name.
 
@@ -325,6 +325,8 @@ private:
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
+    void setSpatialReference(const SpatialReference& spatialRef)
+        { m_spatialReference = spatialRef; }
 };
 
 struct PointViewLess

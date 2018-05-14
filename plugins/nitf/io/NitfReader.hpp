@@ -83,9 +83,6 @@ typedef pdalboost::iostreams::stream<RDevice> RStream;
 public:
     NitfReader() : LasReader(), m_offset(0), m_length(0)
     {}
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 protected:

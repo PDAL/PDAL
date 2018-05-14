@@ -35,13 +35,11 @@
 
 #include "GroundKernel.hpp"
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <memory>
 #include <string>
@@ -50,10 +48,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.ground", "Ground Kernel",
-                                            "http://pdal.io/apps/ground.html");
+static StaticPluginInfo const s_info
+{
+    "kernels.ground",
+    "Ground Kernel",
+    "http://pdal.io/apps/ground.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(GroundKernel, s_info)
 
 std::string GroundKernel::getName() const
 {
@@ -77,7 +79,6 @@ void GroundKernel::addSwitches(ProgramArgs& args)
     args.add("initial_distance", "Initial distance", m_initialDistance, .15);
     args.add("cell_size", "Cell size", m_cellSize, 1.0);
     args.add("extract", "extract ground returns?", m_extract);
-    args.add("approximate", "Use approximate PMF?", m_approximate, true);
 }
 
 int GroundKernel::execute()
@@ -90,7 +91,6 @@ int GroundKernel::execute()
     groundOptions.add("max_distance", m_maxDistance);
     groundOptions.add("initial_distance", m_initialDistance);
     groundOptions.add("cell_size", m_cellSize);
-    groundOptions.add("approximate", m_approximate);
 
     Options rangeOptions;
     rangeOptions.add("limits", "Classification[2:2]");

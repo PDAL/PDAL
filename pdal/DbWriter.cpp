@@ -126,19 +126,22 @@ void DbWriter::ready(PointTableRef /*table*/)
             {
                 xmlDim.m_dimType.m_xform = m_scaling.m_xXform;
                 xmlDim.m_dimType.m_type = Type::Signed32;
-                m_xOffsets = std::make_pair(m_packedPointSize, m_dbPointSize);
+                m_xOffsets =
+                    std::make_pair((int)m_packedPointSize, (int)m_dbPointSize);
             }
             if (xmlDim.m_dimType.m_id == Id::Y)
             {
                 xmlDim.m_dimType.m_xform = m_scaling.m_yXform;
                 xmlDim.m_dimType.m_type = Type::Signed32;
-                m_yOffsets = std::make_pair(m_packedPointSize, m_dbPointSize);
+                m_yOffsets =
+                    std::make_pair((int)m_packedPointSize, (int)m_dbPointSize);
             }
             if (xmlDim.m_dimType.m_id == Id::Z)
             {
                 xmlDim.m_dimType.m_xform = m_scaling.m_zXform;
                 xmlDim.m_dimType.m_type = Type::Signed32;
-                m_zOffsets = std::make_pair(m_packedPointSize, m_dbPointSize);
+                m_zOffsets =
+                    std::make_pair((int)m_packedPointSize, (int)m_dbPointSize);
             }
         }
         m_packedPointSize += Dimension::size(dt.m_type);

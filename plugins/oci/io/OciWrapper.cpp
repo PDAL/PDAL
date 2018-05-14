@@ -32,7 +32,7 @@
 
 #include <iostream>
 
-namespace pdal 
+namespace pdal
 {
 
 
@@ -1764,7 +1764,9 @@ unsigned long OWStatement::GetBlobLength(OCILobLocator* phLocator)
         return 0;
     }
 
-    return nLength;
+    // For absurdly long blobs where sizeof(long) < sizeof(long long) this
+    // is broken.
+    return (unsigned long)nLength;
 }
 
 bool OWStatement::OpenBlob(OCILobLocator* phLocator,
@@ -1853,7 +1855,7 @@ sb4 callback(void *ctxp, void *bufp, oraub8 *lenp,
              ub1 *piece, void **changed_bufpp,
              oraub8 *changed_lenp)
 {
-    ub4 nbytes(0);
+    oraub8 nbytes(0);
     cbctx * ctx = (cbctx *) ctxp;
     oraub8 amt = (*lenp > ctx->buffer_len) ? ctx->buffer_len : *lenp;
     oraub8 rem = ctx->length - (ctx->position - 1);
@@ -2331,7 +2333,7 @@ const char* OWParseSDO_GEOR_INIT(const char* pszInsert, int nField)
 
     pszEnd++;
 
-    int nLength = pszEnd - pszStart + 1;
+    size_t nLength = pszEnd - pszStart + 1;
 
     char szBuffer[OWTEXT];
 

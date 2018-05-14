@@ -9,14 +9,15 @@ set(MAKE_COLOR_MAKEFILE ON)
 if(NOT ROOT_DIR)
     project(LASDUMP)
     set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
+    include(FeatureSummary)
+    include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
+    set(PDAL_UTIL_LIB_NAME pdal_util)
 endif()
-include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
 #
 # Add necessary modules.
 #
 include(${PDAL_CMAKE_DIR}/laszip.cmake)
-find_package(LASzip QUIET)
 
 #
 # Right now we don't bother if we don't have LASzip.
@@ -35,5 +36,6 @@ if (LASZIP_FOUND)
     if (WIN32)
         target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
     endif()
+    PDAL_TARGET_COMPILE_SETTINGS(lasdump)
 endif()
 

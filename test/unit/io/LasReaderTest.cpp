@@ -34,9 +34,11 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/pdal_features.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/Streamable.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
@@ -243,7 +245,9 @@ TEST(LasReaderTest, test_vlr)
         std::string name("vlr_");
         name += std::to_string(i);
         MetadataNode m = root.findChild(name);
-        EXPECT_TRUE(!m.value().empty()) << "No node " << i;
+        EXPECT_TRUE(!m.empty()) << "No node " << i;
+        m = m.findChild("data");
+        EXPECT_TRUE(!m.empty()) << "No value for node " << i;
     }
 }
 
@@ -406,7 +410,7 @@ void streamTest(const std::string src, const std::string compression)
     PointViewSet s = lasReader.execute(t);
     PointViewPtr p = *s.begin();
 
-    class Checker : public Filter
+    class Checker : public Filter, public Streamable
     {
     public:
         std::string getName() const
@@ -499,5 +503,33 @@ TEST(LasReaderTest, EmptyGeotiffVlr)
     PointViewPtr view = *viewSet.begin();
 
     EXPECT_EQ(43u, view->size());
+
+}
+
+TEST(LasReaderTest, IgnoreVLRs)
+{
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/lots_of_vlr.las"));
+    readOps.add("ignore_vlr", "Merrick");
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+
+    // First two VLRs are SRS info, the other 388 would be
+    // Merrick ones that we want to ignore/remove
+    MetadataNode root = reader.getMetadata();
+    for (size_t i = 2; i < 390; ++i)
+    {
+        std::string name("vlr_");
+        name += std::to_string(i);
+        MetadataNode m = root.findChild(name);
+        EXPECT_FALSE(!m.empty()) << "No node " << i;
+        m = m.findChild("data");
+        EXPECT_FALSE(!m.empty()) << "No value for node " << i;
+    }
 
 }

@@ -52,9 +52,11 @@ column
   Table column to read patches from. [Default: **pa**]
 
 spatialreference
-  _`spatialreference`
-    Sets the spatial reference for the point data.  Overrides any spatial
-    reference information read from the database.  Most text-based formats of
-    SRS information are accepted, including WKT and proj.4.
+  Sets the spatial reference for the point data.  Overrides any spatial
+  reference information read from the database.  Most text-based formats of
+  SRS information are accepted, including WKT and proj.4.
+
+count
+  Maximum number of points to read [Optional]
 
 .. _PostgreSQL Pointcloud: https://github.com/pramsey/pointcloud

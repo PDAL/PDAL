@@ -35,10 +35,6 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t SplitKernel_ExitFunc();
-extern "C" PF_ExitFunc SplitKernel_InitPlugin();
 
 namespace pdal
 {
@@ -46,8 +42,6 @@ namespace pdal
 class PDAL_DLL SplitKernel : public Kernel
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
 

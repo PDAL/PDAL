@@ -35,14 +35,10 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <cstdint>
 #include <memory>
 #include <string>
-
-extern "C" int32_t EigenvaluesFilter_ExitFunc();
-extern "C" PF_ExitFunc EigenvaluesFilter_InitPlugin();
 
 namespace pdal
 {
@@ -59,8 +55,6 @@ public:
     EigenvaluesFilter& operator=(const EigenvaluesFilter&) = delete;
     EigenvaluesFilter(const EigenvaluesFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

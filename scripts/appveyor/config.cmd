@@ -1,27 +1,21 @@
 @echo off
 
-REM If OSGEO4W_BUILD is set, we build an OSGeo4W64 tarball package and 
-REM and install it to C:\pdalbin before letting AppVeyor upload it as 
+REM If OSGEO4W_BUILD is set, we build an OSGeo4W64 tarball package and
+REM and install it to C:\pdalbin before letting AppVeyor upload it as
 REM an artifact to S3.
 
-if "%OSGEO4W_BUILD%"=="ON" (
-
-SET PDAL_OPTIONAL_COMPONENTS=ON
+SET PDAL_INSTALL_PREFIX="C:/OSGeo4W64/"
 SET PDAL_PLUGIN_INSTALL_PATH="C:/OSGeo4W64/bin"
-set PDAL_BUILD_TESTS=OFF
-
-) ELSE (
-
-SET PDAL_PLUGIN_INSTALL_PATH="C:\pdalbin"
 set PDAL_BUILD_TESTS=ON
-
-)
 
 REM needed or else CMake won't find the Oracle library that OSGeo4W installs
 
 SET ORACLE_HOME="C:/OSGEO4W64/"
 
-cmake -G "Visual Studio 14 2015 Win64" ^
+mkdir build
+pushd build
+
+cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_HEXBIN=%PDAL_OPTIONAL_COMPONENTS% ^
@@ -32,11 +26,13 @@ cmake -G "Visual Studio 14 2015 Win64" ^
     -DBUILD_PLUGIN_PCL=OFF ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_SQLITE=%PDAL_OPTIONAL_COMPONENTS% ^
+    -DLIBLZMA_LIBRARY=%OSGEO4W_ROOT%\lib\liblzma.lib ^
     -DBUILD_PLUGIN_RIVLIB=OFF ^
     -DBUILD_PLUGIN_PYTHON=%PDAL_OPTIONAL_COMPONENTS% ^
     -DENABLE_CTEST=OFF ^
     -DWITH_LAZPERF=ON ^
-	-DLazperf_DIR=%OSGEO4W_ROOT% ^
+    -DLazperf_DIR=%OSGEO4W_ROOT% ^
+    -DWITH_LZMA=ON ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=%PDAL_BUILD_TESTS% ^
 	-DPDAL_PLUGIN_INSTALL_PATH=%PDAL_PLUGIN_INSTALL_PATH% ^
@@ -51,11 +47,13 @@ cmake -G "Visual Studio 14 2015 Win64" ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_ROOT%/apps/python36/lib/site-packages/numpy/core/include ^
 	-DNUMPY_VERSION=1.12.0 ^
     -Dgtest_force_shared_crt=ON ^
-    -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^
+    -DCMAKE_INSTALL_PREFIX=%PDAL_INSTALL_PREFIX% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     -DBUILD_PGPOINTCLOUD_TESTS=OFF ^
     -DBUILD_SQLITE_TESTS=OFF ^
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo ^
     -DBUILD_OCI_TESTS=OFF ^
-    .
-	
-	
+    ..
+
+popd
+

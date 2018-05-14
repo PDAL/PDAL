@@ -35,10 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t PoissonFilter_ExitFunc();
-extern "C" PF_ExitFunc PoissonFilter_InitPlugin();
 
 namespace pdal
 {
@@ -51,8 +47,6 @@ public:
     PoissonFilter& operator=(const PoissonFilter&) = delete;
     PoissonFilter(const PoissonFilter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

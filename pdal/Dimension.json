@@ -58,7 +58,7 @@
     "name": "ScanAngleRank",
     "alt_names": "ScanAngle",
     "type": "float",
-    "description": "Angle degree at which the laster point was output from the system, including the roll of the aircraft.  The scan angle is based on being nadir, and -90 the left side of the aircraft in the direction of flight"
+    "description": "Angle degree at which the laser point was output from the system, including the roll of the aircraft.  The scan angle is based on being nadir, and -90 the left side of the aircraft in the direction of flight"
     },
     {
     "name": "UserData",
@@ -365,6 +365,11 @@
     "name": "Density",
     "type": "double",
     "description": "Estimate of point density"
+    },
+    {
+    "name": "Omit",
+    "type": "uint8_t",
+    "description": "Used to shallowly mark a point as being omitted without removing it"
     }
 
 ] }

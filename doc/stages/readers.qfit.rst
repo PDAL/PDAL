@@ -45,6 +45,8 @@ scale_z
 little_endian
   Are data in little endian format? This should be automatically detected by the driver.
 
+count 
+  Maximum number of points to read [Optional]
 
 .. _QFIT format: http://nsidc.org/data/docs/daac/icebridge/ilatm1b/docs/ReadMe.qfit.txt
 

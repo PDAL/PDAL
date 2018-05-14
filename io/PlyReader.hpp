@@ -40,19 +40,14 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t PlyReader_ExitFunc();
-extern "C" PF_ExitFunc PlyReader_InitPlugin();
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL PlyReader : public Reader
+class PDAL_DLL PlyReader : public Reader, public Streamable
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     typedef std::map<std::string, Dimension::Id> DimensionMap;
@@ -70,6 +65,8 @@ private:
     struct Property
     {
         Property(const std::string& name) : m_name(name)
+        {}
+        virtual ~Property()
         {}
 
         std::string m_name;

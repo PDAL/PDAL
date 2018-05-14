@@ -37,14 +37,10 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/util/Utils.hpp>
 
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic ignored "-Wenum-compare"
-#endif
-
+#pragma GCC diagnostic ignored "-Wenum-compare"
 
 namespace pdal
 {
-
 
 MetadataReader::MetadataReader(::nitf::Record& record,
                                MetadataNode& node,

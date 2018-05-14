@@ -36,10 +36,6 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t TailFilter_ExitFunc();
-extern "C" PF_ExitFunc TailFilter_InitPlugin();
 
 namespace pdal
 {
@@ -51,8 +47,6 @@ public:
     {
     }
 
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:

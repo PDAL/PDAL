@@ -32,16 +32,18 @@
  ****************************************************************************/
 
 #include "HeadFilter.hpp"
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "filters.head", "Return N points from beginning of the point cloud.",
-    "http://pdal.io/stages/filters.head.html");
+static StaticPluginInfo const s_info
+{
+    "filters.head",
+    "Return N points from beginning of the point cloud.",
+    "http://pdal.io/stages/filters.head.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, HeadFilter, Filter, s_info)
+CREATE_STATIC_STAGE(HeadFilter, s_info)
 
 std::string HeadFilter::getName() const
 {

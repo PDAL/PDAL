@@ -44,7 +44,7 @@ namespace pdal
 
 class Reader;
 
-class PDAL_DLL Reader : public Stage
+class PDAL_DLL Reader : public virtual Stage
 {
 public:
     typedef std::function<void(PointView&, PointId)> PointReadFunc;

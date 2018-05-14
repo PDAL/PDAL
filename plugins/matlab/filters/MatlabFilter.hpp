@@ -49,9 +49,6 @@ class PDAL_DLL MatlabFilter : public Filter
 public:
     MatlabFilter() : Filter()
         {}
-
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
@@ -69,8 +66,8 @@ private:
     MatlabFilter& operator=(const MatlabFilter&); // not implemented
     MatlabFilter(const MatlabFilter&); // not implemented
 
-    MetadataNode m_totalMetadata;
-    Json::Value m_pdalargs;
+    MetadataNode m_tableMetadata;
+    std::string m_pdalargs;
     std::string m_structName;
 
 };

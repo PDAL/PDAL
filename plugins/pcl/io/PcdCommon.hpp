@@ -39,6 +39,13 @@
 namespace pdal
 {
 
-PDAL_DLL Dimension::IdList fileDimensions();
+// This is static so as to be made local to the translation units in which
+// it's included.
+static inline Dimension::IdList fileDimensions()
+{
+    using namespace Dimension;
+
+    return { Id::X, Id::Y, Id::Z, Id::Intensity, Id::Red, Id::Green, Id::Blue };
+}
 
 } // namespace pdal

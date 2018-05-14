@@ -11,7 +11,7 @@ to a provided value that pass a range filter.
 Example 1
 ---------
 
-This pipeline resets the Classification of all points with classiciations
+This pipeline resets the Classification of all points with classifications
 2 or 3 to 0 and all points with classification of 5 to 4.
 
 .. code-block:: json

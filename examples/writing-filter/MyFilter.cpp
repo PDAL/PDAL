@@ -3,10 +3,8 @@
 #include "MyFilter.hpp"
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -16,7 +14,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.name", "My awesome filter",
                "http://link/to/documentation");
 
-CREATE_STATIC_PLUGIN(1, 0, MyFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, MyFilter, Filter, s_info)
 
 std::string MyFilter::getName() const
 {

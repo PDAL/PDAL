@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <list>
 #include <vector>
 
@@ -46,19 +47,18 @@
 namespace pdal
 {
 
+class ArtifactManager;
+
 class PDAL_DLL BasePointTable : public PointContainer
 {
     FRIEND_TEST(PointTable, srs);
     friend class PointView;
 
 protected:
-    BasePointTable(PointLayout& layout) : m_metadata(new Metadata()),
-        m_layoutRef(layout)
-    {}
+    BasePointTable(PointLayout& layout);
 
 public:
-    virtual ~BasePointTable()
-        {}
+    virtual ~BasePointTable();
 
     // Layout operations.
     virtual PointLayoutPtr layout() const
@@ -93,6 +93,7 @@ public:
         { return false; }
     MetadataNode privateMetadata(const std::string& name);
     MetadataNode toMetadata() const;
+    ArtifactManager& artifactManager();
 
 private:
     // Point data operations.
@@ -105,6 +106,7 @@ protected:
     MetadataPtr m_metadata;
     std::list<SpatialReference> m_spatialRefs;
     PointLayout& m_layoutRef;
+    std::unique_ptr<ArtifactManager> m_artifactManager;
 };
 typedef BasePointTable& PointTableRef;
 typedef BasePointTable const & ConstPointTableRef;
@@ -206,6 +208,9 @@ public:
             m_buf.resize(pointsToBytes(m_capacity + 1));
         }
     }
+
+    virtual void reset()
+        { std::fill(m_buf.begin(), m_buf.end(), 0); }
 
     point_count_t capacity() const
         { return m_capacity; }

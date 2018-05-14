@@ -35,7 +35,6 @@
 #include "OutlierFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
@@ -45,11 +44,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.outlier", "Outlier removal",
-               "http://pdal.io/stages/filters.outlier.html");
+static StaticPluginInfo const s_info
+{
+    "filters.outlier",
+    "Outlier removal",
+    "http://pdal.io/stages/filters.outlier.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, OutlierFilter, Filter, s_info)
+CREATE_STATIC_STAGE(OutlierFilter, s_info)
 
 std::string OutlierFilter::getName() const
 {
@@ -103,14 +105,15 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
     std::vector<PointId> inliers, outliers;
 
     std::vector<double> distances(np, 0.0);
+
+    // we increase the count by one because the query point itself will
+    // be included with a distance of 0
+    point_count_t count = m_meanK + 1;
+    std::vector<PointId> indices(count);
+    std::vector<double> sqr_dists(count);
     for (PointId i = 0; i < np; ++i)
     {
-        // we increase the count by one because the query point itself will
-        // be included with a distance of 0
-        point_count_t count = m_meanK + 1;
 
-        std::vector<PointId> indices(count);
-        std::vector<double> sqr_dists(count);
         index.knnSearch(i, count, &indices, &sqr_dists);
 
         for (size_t j = 1; j < count; ++j)
@@ -118,6 +121,8 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
             double delta = std::sqrt(sqr_dists[j]) - distances[i];
             distances[i] += (delta / j);
         }
+        indices.clear(); indices.resize(count);
+        sqr_dists.clear(); sqr_dists.resize(count);
     }
 
     size_t n(0);

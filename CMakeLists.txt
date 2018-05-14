@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.5.0" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.7.1" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-set(PDAL_API_VERSION "4")
-set(PDAL_BUILD_VERSION "5.1.0")
+set(PDAL_API_VERSION "6")
+set(PDAL_BUILD_VERSION "7.0.1")
 
 # Name of C++ library
 
@@ -58,6 +58,7 @@ endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
+set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -66,7 +67,11 @@ set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_INSTALL_DIR}")
 
 # allow override of PDAL_PLUGIN_INSTALL_PATH path
 if (NOT PDAL_PLUGIN_INSTALL_PATH)
-    set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+    if (WIN32)
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}")
+    else()
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+    endif()
 endif()
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
@@ -80,19 +85,20 @@ set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
 
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
-  foreach(config ${CMAKE_CONFIGURATION_TYPES})
-    string(TOUPPER ${config} CONFIG)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_LIB_DIR}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
-    # ---[ Windows requires DLLs (shared libraries) to be installed in
-    # ---[ the same directory as executables
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
-  endforeach(config)
-else(WIN32)
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_LIB_DIR}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
+  # ---[ Windows requires DLLs (shared libraries) to be installed in
+  # ---[ the same directory as executables
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
 endif(WIN32)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+if(WIN32)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+else()
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+endif()
 
 # Choose package components
 
@@ -113,22 +119,19 @@ include(${PDAL_CMAKE_DIR}/geos.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/pdaljni.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
+include(${PDAL_CMAKE_DIR}/lzma.cmake)
+include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/curl.cmake)
-if (CURL_FOUND)
-    set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
-endif()
 include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
-include(${PDAL_CMAKE_DIR}/python.cmake)
+include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 
 #------------------------------------------------------------------------------
-# generate the pdal_defines.h header
+# generate the pdal_features.hpp header
 #------------------------------------------------------------------------------
 
 # from http://stackoverflow.com/questions/1435953/how-can-i-pass-git-sha1-to-compiler-as-definition-using-cmake
@@ -139,7 +142,7 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
   "${PROJECT_SOURCE_DIR}/pdal/gitsha.cpp")
 
-# needs to come before configuration of pdal_defines
+# needs to come before configuration of pdal_features
 if(APPLE)
     option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
     if (PDAL_BUNDLE)
@@ -147,9 +150,10 @@ if(APPLE)
     endif()
 endif()
 
-set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
-set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
-configure_file(${pdal_defines_h_in} ${pdal_defines_h})
+set(pdal_features_hpp_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_features.hpp.in")
+set(pdal_features_hpp
+    "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_features.hpp")
+configure_file(${pdal_features_hpp_in} ${pdal_features_hpp})
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -173,14 +177,12 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
-
 if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
 endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
-
 #
 # On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
 # so that users only need link libpdalcpp.
@@ -198,21 +200,47 @@ file(GLOB BASE_SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/*.cpp)
+    ${PDAL_SRC_DIR}/*.cpp
+    ${PDAL_SRC_DIR}/compression/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
     ${PDAL_KERNELS_DIR}/private/*.cpp
     ${PDAL_SRC_DIR}/private/*.cpp)
 list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
+
+#
+# Remove stuff we don't want to build.
+#
 if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
-        pdal/DbWriter.cpp
-        pdal/DbReader.cpp
-        pdal/XMLSchema.cpp)
+        ${PDAL_SRC_DIR}/DbWriter.cpp
+        ${PDAL_SRC_DIR}/DbReader.cpp
+        ${PDAL_SRC_DIR}/XMLSchema.cpp)
     list(REMOVE_ITEM SRCS ${XML_SRCS})
+endif()
+if (NOT PDAL_HAVE_ZSTD)
+    file(GLOB ZSTD_SRCS
+        ${PDAL_SRC_DIR}/compression/ZstdCompression.cpp)
+    list(REMOVE_ITEM SRCS ${ZSTD_SRCS})
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    file(GLOB ZLIB_SRCS
+        ${PDAL_SRC_DIR}/compression/DeflateCompression.cpp)
+    list(REMOVE_ITEM SRCS ${ZLIB_SRCS})
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    file(GLOB LZMA_SRCS
+        ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
+    list(REMOVE_ITEM SRCS ${LZMA_SRCS})
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    file(GLOB LAZPERF_SRCS
+        ${PDAL_SRC_DIR}/compression/LazPerfCompression.cpp
+        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
+    list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 
@@ -229,12 +257,13 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
+        ${ZSTD_INCLUDE_DIR}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
-    PUBLIC
+    PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
         ${GEOS_LIBRARY}
@@ -242,14 +271,14 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${LIBLZMA_LIBRARIES}
+        ${ZSTD_STATIC_LIB}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
-    PRIVATE
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-    ${JSON_CPP_LINK_TYPE}
         ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
@@ -262,6 +291,12 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
+
+# shut off -Wpedantic selectively
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+endif()
+
 #
 # On Linux, we install a linker script as libpdalcpp.so.  That file
 # specifies linking in libpdal_base.so and libpdal_util.so.  This allows
@@ -287,11 +322,6 @@ install(DIRECTORY ${PDAL_KERNELS_DIR}
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_VENDOR_DIR}/nanoflann
-    DESTINATION include/pdal
-    FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
-)
 install(DIRECTORY ${PDAL_IO_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
@@ -303,7 +333,7 @@ install(DIRECTORY ${PDAL_FILTERS_DIR}
     PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_defines_h}
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
   DESTINATION include/pdal
 )
 

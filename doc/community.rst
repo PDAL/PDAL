@@ -53,6 +53,13 @@ you will need an account to get started.
 
 .. _`Gitter`: https://gitter.im/PDAL/PDAL
 
+Keybase
+..............................................................................
+
+Some PDAL developers are available via Keybase's ``pdal`` chat. See
+https://keybase.io/blog/keybase-chat for more details.
+
+
 IRC
 ..............................................................................
 

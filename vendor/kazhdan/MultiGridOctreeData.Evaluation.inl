@@ -59,7 +59,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		{
 			int dir , off;
 			Cube::FactorFaceIndex( f , dir , off );
-			double vv[3] , dv[3];
+			double vv[3] = {0.0, 0.0, 0.0};
+			double dv[3] = {0.0, 0.0, 0.0};
 			switch( dir )
 			{
 			case 0:
@@ -96,7 +97,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		{
 			int orientation , i1 , i2;
 			Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
-			double vv[3] , dv[3];
+			double vv[3] = {0.0, 0.0, 0.0};
+			double dv[3] = {0.0, 0.0, 0.0};
 			switch( orientation )
 			{
 			case 0:
@@ -172,7 +174,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			{
 				int dir , off;
 				Cube::FactorFaceIndex( f , dir , off );
-				double vv[3] , dv[3];
+				double vv[3] = {0.0, 0.0, 0.0};
+				double dv[3] = {0.0, 0.0, 0.0};
 				switch( dir )
 				{
 				case 0:
@@ -209,7 +212,8 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			{
 				int orientation , i1 , i2;
 				Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
-				double vv[3] , dv[3];
+				double vv[3] = {0.0, 0.0, 0.0};
+				double dv[3] = {0.0, 0.0, 0.0};
 				switch( orientation )
 				{
 				case 0:
@@ -306,10 +310,15 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 	LocalDepth d = _localDepth( node );
 
 	for( int dd=0 ; dd<3 ; dd++ )
-		if     ( p[dd]==0 ) p[dd] = (Real)(0.+1e-6);
-		else if( p[dd]==1 ) p[dd] = (Real)(1.-1e-6);
+		if     ( p[dd]==0 )
+            p[dd] = (Real)(0.+1e-6);
+		else
+        {
+            if( p[dd]==1 )
+                p[dd] = (Real)(1.-1e-6);
+        }
 
-		{
+    {
 			const typename TreeOctNode::ConstNeighbors< SupportSize >& neighbors = _neighbors< LeftPointSupportRadius , RightPointSupportRadius >( neighborKey , node );
 
 			for( int i=0 ; i<SupportSize ; i++ ) for( int j=0 ; j<SupportSize ; j++ ) for( int k=0 ; k<SupportSize ; k++ )
@@ -358,8 +367,8 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 					}
 				}
 			}
-		}
-		return value;
+	}
+    return value;
 }
 template< class Real >
 template< int FEMDegree , BoundaryType BType >
@@ -413,6 +422,7 @@ std::pair< Real , Point3D< Real > > Octree< Real >::_getValueAndGradient( const 
 	LocalDepth d = _localDepth( node );
 
 	for( int dd=0 ; dd<3 ; dd++ )
+	{
 		if     ( p[dd]==0 ) p[dd] = (Real)(0.+1e-6);
 		else if( p[dd]==1 ) p[dd] = (Real)(1.-1e-6);
 
@@ -478,7 +488,8 @@ std::pair< Real , Point3D< Real > > Octree< Real >::_getValueAndGradient( const 
 				}
 			}
 		}
-		return std::pair< Real , Point3D< Real > >( value , gradient );
+	}
+	return std::pair< Real , Point3D< Real > >( value , gradient );
 }
 template< class Real >
 template< class V , int FEMDegree , BoundaryType BType >

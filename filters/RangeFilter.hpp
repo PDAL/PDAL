@@ -35,28 +35,23 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <memory>
 #include <map>
 #include <string>
-
-extern "C" int32_t RangeFilter_ExitFunc();
-extern "C" PF_ExitFunc RangeFilter_InitPlugin();
 
 namespace pdal
 {
 
 struct DimRange;
 
-class PDAL_DLL RangeFilter : public pdal::Filter
+class PDAL_DLL RangeFilter : public Filter,  public Streamable
 {
 public:
     RangeFilter();
     ~RangeFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

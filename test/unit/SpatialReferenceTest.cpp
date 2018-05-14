@@ -48,18 +48,6 @@
 
 using namespace pdal;
 
-TEST(SpatialReferenceTest, test_env_vars)
-{
-
-#ifdef _MSC_VER
-    const char* gdal_data = getenv("GDAL_DATA");
-    const char* proj_lib = getenv("PROJ_LIB");
-
-    EXPECT_TRUE(FileUtils::fileExists(gdal_data));
-    EXPECT_TRUE(FileUtils::fileExists(proj_lib));
-#endif
-}
-
 TEST(SpatialReferenceTest, test_ctor)
 {
     SpatialReference srs;
@@ -403,3 +391,17 @@ TEST(SpatialReferenceTest, test_bounds)
     EXPECT_FLOAT_EQ(static_cast<float>(b2.maxy), 39.01261687f);
 
 }
+
+// Make sure we get positive, negative and 0 back for UTM zones.
+TEST(SpatialReferenceTest, issue_1989)
+{
+    SpatialReference srs;
+    EXPECT_EQ(0, srs.getUTMZone());
+
+    SpatialReference north("EPSG:2027");
+    EXPECT_EQ(15, north.getUTMZone());
+
+    SpatialReference south("EPSG:32732");
+    EXPECT_EQ(-32, south.getUTMZone());
+}
+

@@ -11,8 +11,7 @@ Exercise
 PDAL doesn't provide every possible analysis option, but it strives to make it
 convenient to link PDAL to other places with substantial functionality.  One of
 those is the Python/Numpy universe, which is accessed through PDAL's
-:ref:`python` bindings and the :ref:`filters.programmable` and
-:ref:`filters.predicate` filters. These tools allow you to manipulate point
+:ref:`python` bindings and :ref:`filters.python` filter. These tools allow you to manipulate point
 cloud data with convenient Python tools rather than constructing substantial
 C/C++ software to achieve simple tasks, compute simple statistics, or
 investigate data quality issues.
@@ -35,7 +34,7 @@ PDAL Pipeline
 ................................................................................
 
 We're going to create a PDAL :ref:`pipeline` to tell PDAL to run our Python
-script in a :ref:`filters.programmable` stage.
+script in a :ref:`filters.python` stage.
 
 
 .. literalinclude:: ./histogram.json

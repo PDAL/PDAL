@@ -35,3 +35,5 @@ Options
 filename
   text file to read [Required]
 
+count 
+  Maximum number of points to read [Optional]

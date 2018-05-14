@@ -171,7 +171,15 @@ struct error : public std::runtime_error
     {}
 };
 
-std::vector<ExtraDim> parse(const StringList& dimString);
+std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
+
+
+struct IgnoreVLR
+{
+    std::string m_userId;
+    uint16_t m_recordId;
+};
+std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
 
 } // namespace LasUtils
 

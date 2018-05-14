@@ -54,7 +54,7 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
-    PDAL_TARGET_COMPILE_SETTINGS(${_name})
+    pdal_target_compile_settings(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -74,7 +74,7 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
-    PDAL_TARGET_COMPILE_SETTINGS(${_name})
+    pdal_target_compile_settings(${_name})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -127,13 +127,17 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
+    pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_INCLUDE_DIR})
-    target_link_libraries(${${_name}} PUBLIC
-        ${PDAL_BASE_LIB_NAME}
-        ${PDAL_UTIL_LIB_NAME}
-        ${PDAL_ADD_PLUGIN_LINK_WITH})
+    target_link_libraries(${${_name}}
+        PRIVATE
+            ${PDAL_BASE_LIB_NAME}
+            ${PDAL_UTIL_LIB_NAME}
+            ${PDAL_ADD_PLUGIN_LINK_WITH}
+            ${WINSOCK_LIBRARY}
+    )
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
     set_target_properties(${${_name}} PROPERTIES
@@ -162,27 +166,28 @@ macro(PDAL_ADD_TEST _name)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    set(common_srcs
-        ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-    )
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
         add_definitions("-DPDAL_DLL_EXPORT=1")
     endif()
-    add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
+    add_executable(${_name} ${PDAL_ADD_TEST_FILES}
+        $<TARGET_OBJECTS:${PDAL_TEST_SUPPORT_OBJS}>)
+    pdal_target_compile_settings(${_name})
     target_include_directories(${_name} PRIVATE
         ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
-    set_target_properties(${_name}
-        PROPERTIES
-            COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} PRIVATE
-        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} gtest
-        ${PDAL_ADD_TEST_LINK_WITH})
+    target_link_libraries(${_name}
+        PRIVATE
+            ${PDAL_BASE_LIB_NAME}
+            ${PDAL_UTIL_LIB_NAME}
+            gtest
+            ${PDAL_ADD_TEST_LINK_WITH}
+            ${WINSOCK_LIBRARY}
+    )
     add_test(NAME ${_name}
         COMMAND
             "${PROJECT_BINARY_DIR}/bin/${_name}"
@@ -191,11 +196,11 @@ macro(PDAL_ADD_TEST _name)
     # Ensure plugins are loaded from build dir
     # https://github.com/PDAL/PDAL/issues/840
     if (WIN32)
-      set_property(TEST ${_name} PROPERTY ENVIRONMENT
-        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/bin")
+        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+            "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/bin")
     else()
-      set_property(TEST ${_name} PROPERTY ENVIRONMENT
-        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
+        set_property(TEST ${_name} PROPERTY ENVIRONMENT
+            "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
     endif()
 endmacro(PDAL_ADD_TEST)
 

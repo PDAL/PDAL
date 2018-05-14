@@ -40,11 +40,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/plugin.hpp>
-
-
-extern "C" int32_t QfitReader_ExitFunc();
-extern "C" PF_ExitFunc QfitReader_InitPlugin();
 
 namespace pdal
 {
@@ -62,8 +57,6 @@ class PDAL_DLL QfitReader : public pdal::Reader
 public:
     QfitReader();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

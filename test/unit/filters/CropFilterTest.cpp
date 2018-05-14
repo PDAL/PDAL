@@ -267,7 +267,7 @@ TEST(CropFilterTest, stream)
     table.layout()->registerDim(Id::Y);
     table.layout()->registerDim(Id::Z);
 
-    class StreamReader : public Reader
+    class StreamReader : public Reader, public Streamable
     {
     public:
         std::string getName() const

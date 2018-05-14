@@ -35,12 +35,8 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
-
-extern "C" int32_t KDistanceFilter_ExitFunc();
-extern "C" PF_ExitFunc KDistanceFilter_InitPlugin();
 
 namespace pdal
 {
@@ -55,14 +51,12 @@ public:
     KDistanceFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
     Dimension::Id m_kdist;
     int m_k;
-    
+
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);

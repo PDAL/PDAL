@@ -42,12 +42,8 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/FlexWriter.hpp>
 #include <pdal/util/OStream.hpp>
-#include <pdal/plugin.hpp>
 
 #include <vector>
-
-extern "C" int32_t BpfWriter_ExitFunc();
-extern "C" PF_ExitFunc BpfWriter_InitPlugin();
 
 namespace pdal
 {
@@ -55,8 +51,15 @@ namespace pdal
 class PDAL_DLL BpfWriter : public FlexWriter
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
+    struct CoordId
+    {
+        CoordId() : m_auto(false), m_val(0)
+        {}
+
+        bool m_auto;
+        int m_val;
+    };
+
     std::string getName() const;
 
 private:
@@ -67,6 +70,7 @@ private:
     std::vector<uint8_t> m_extraData;
     std::vector<BpfUlemFile> m_bundledFiles;
     bool m_compression;
+    CoordId m_coordId;
     std::string m_extraDataSpec;
     StringList m_bundledFilesSpec;
     std::string m_curFilename;

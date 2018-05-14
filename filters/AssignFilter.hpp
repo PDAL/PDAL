@@ -34,25 +34,20 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
-
-extern "C" int32_t AssignFilter_ExitFunc();
-extern "C" PF_ExitFunc AssignFilter_InitPlugin();
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
 struct AssignRange;
 
-class PDAL_DLL AssignFilter : public Filter
+class PDAL_DLL AssignFilter : public Filter, public Streamable
 {
 public:
     AssignFilter();
     ~AssignFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const { return "filters.assign"; }
 
 private:

@@ -11,7 +11,7 @@ are run by invoking the ``pdal`` application along with a command name:
 
     $ pdal info myfile.las
     $ pdal translate input.las output.las
-    $ pdal pipeline --stdin < myxml.xml
+    $ pdal pipeline --stdin < pipeline.json
 
 Help for each command can be retrieved via the ``--help`` switch. The
 ``--drivers`` and ``--options`` switches can tell you more about particular

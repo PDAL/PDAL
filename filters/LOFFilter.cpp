@@ -35,7 +35,6 @@
 #include "LOFFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
 
 #include <string>
 #include <vector>
@@ -43,11 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.lof", "LOF Filter",
-               "http://pdal.io/stages/filters.lof.html");
+static StaticPluginInfo const s_info
+{
+    "filters.lof",
+    "LOF Filter",
+    "http://pdal.io/stages/filters.lof.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, LOFFilter, Filter, s_info)
+CREATE_STATIC_STAGE(LOFFilter, s_info)
 
 std::string LOFFilter::getName() const
 {
@@ -70,16 +72,16 @@ void LOFFilter::addDimensions(PointLayoutPtr layout)
 void LOFFilter::filter(PointView& view)
 {
     using namespace Dimension;
-    
+
     // Build the 3D KD-tree.
     KD3Index index(view);
     log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
     index.build();
-    
+
     // Increment the minimum number of points, as knnSearch will be returning
     // the neighbors along with the query point.
     m_minpts++;
-  
+
     // First pass: Compute the k-distance for each point.
     // The k-distance is the Euclidean distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
@@ -90,7 +92,7 @@ void LOFFilter::filter(PointView& view)
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts-1]));
     }
-    
+
     // Second pass: Compute the local reachability distance for each point.
     // For each neighbor point, the reachability distance is the maximum value
     // of that neighbor's k-distance and the distance between the neighbor and
@@ -112,7 +114,7 @@ void LOFFilter::filter(PointView& view)
         }
         view.setField(m_lrd, i, 1.0 / M1);
     }
-    
+
     // Third pass: Compute the local outlier factor for each point.
     // The LOF is the average of the lrd's for a neighborhood of points.
     log()->get(LogLevel::Debug) << "Computing LOF...\n";

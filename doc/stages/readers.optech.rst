@@ -35,3 +35,6 @@ Options
 
 filename
   csd file to read [Required]
+
+count
+  Maximum number of points read [Optional]

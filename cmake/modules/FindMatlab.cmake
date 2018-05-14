@@ -225,6 +225,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+        "R2017b=9.3"
         "R2017a=9.2"
         "R2016b=9.1"
         "R2016a=9.0"

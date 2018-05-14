@@ -35,12 +35,8 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <string>
-
-extern "C" int32_t MADFilter_ExitFunc();
-extern "C" PF_ExitFunc MADFilter_InitPlugin();
 
 namespace pdal
 {
@@ -55,8 +51,6 @@ public:
     MADFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

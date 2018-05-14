@@ -33,7 +33,7 @@ Examples
             "fixed.las",
             "moving.las",
             {
-                "type": "filters.rigid",
+                "type": "filters.cpd",
                 "method": "rigid"
             },
             "output.las"

@@ -35,10 +35,6 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t SortKernel_ExitFunc();
-extern "C" PF_ExitFunc SortKernel_InitPlugin();
 
 namespace pdal
 {
@@ -46,13 +42,11 @@ namespace pdal
 class PDAL_DLL SortKernel : public Kernel
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    SortKernel();
 
 private:
-    SortKernel();
     void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;

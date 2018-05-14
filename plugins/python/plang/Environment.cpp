@@ -45,20 +45,17 @@
 #include <sstream>
 #include <mutex>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
+#pragma warning(disable: 4127)  // conditional expression is constant
 
-#include <Python.h>
 #include <pystate.h>
 #undef toupper
 #undef tolower
 #undef isspace
 
-// See ticket #1010.  This function runs when libplang is loaded.  It makes
-// sure python symbols can be found by extention module .so's since on some
-// platforms (notably Ubuntu), they aren't linked with libpython even though
-// they depend on it.  If a platform doesn't support
+// See ticket #1010.  This function runs when a shared lib containing this
+// object is loaded.  It makes sure python symbols can be found by extention
+// module .so's since on some platforms (notably Ubuntu), they aren't linked
+// with libpython even though they depend on it.  If a platform doesn't support
 // __attribute__ ((constructor)) this does nothing.  We'll have to deal with
 // those as they come up.
 #ifndef _WIN32
@@ -347,6 +344,39 @@ int Environment::getPythonDataType(Dimension::Type t)
 }
 
 
+Dimension::Type Environment::getPDALDataType(int t)
+{
+    using namespace Dimension;
+
+    switch (t)
+    {
+    case NPY_FLOAT32:
+        return Type::Float;
+    case NPY_FLOAT64:
+        return Type::Double;
+    case NPY_INT8:
+        return Type::Signed8;
+    case NPY_INT16:
+        return Type::Signed16;
+    case NPY_INT32:
+        return Type::Signed32;
+    case NPY_INT64:
+        return Type::Signed64;
+    case NPY_UINT8:
+        return Type::Unsigned8;
+    case NPY_UINT16:
+        return Type::Unsigned16;
+    case NPY_UINT32:
+        return Type::Unsigned32;
+    case NPY_UINT64:
+        return Type::Unsigned64;
+    default:
+        return Type::None;
+    }
+    assert(0);
+
+    return Type::None;
+}
 
 } // namespace plang
 } // namespace pdal

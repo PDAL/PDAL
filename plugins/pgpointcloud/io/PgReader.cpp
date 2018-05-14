@@ -36,7 +36,6 @@
 #include "PgReader.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/XMLSchema.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <iostream>
@@ -44,13 +43,15 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.pgpointcloud",
     "Read data from pgpointcloud format. \"query\" option needs to be a \n" \
         "SQL statement selecting the data.",
-    "http://pdal.io/stages/readers.pgpointcloud.html" );
+    "http://pdal.io/stages/readers.pgpointcloud.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, PgReader, Reader, s_info)
+CREATE_SHARED_STAGE(PgReader, s_info)
 
 std::string PgReader::getName() const { return s_info.name; }
 

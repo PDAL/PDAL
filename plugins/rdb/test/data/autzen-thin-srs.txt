@@ -1,0 +1,20 @@
+Sample RIEGL RDB file generated from:
+
+  PDAL/test/data/autzen/autzen-thin-srs.las
+
+Software used:
+  - LAStools (by martin@rapidlasso.com) version 170203
+  - RiSCAN PRO 64 bit v2.6.3
+  - RDB Library 2.1.6-1677 (x86_64-windows, Apr  5 2018, 10:58:39)
+  - GeoSysManager 2.0.8 64 bit
+
+Conversion procedure:
+  - scale RGB from 8 bit to 16 bit with las2las and "-scale_rgb_up"
+  - import LAS file's SRS from EPSG online registry to GeoSysManager
+  - setup RiSCAN PRO project, use min x/y/z to define project origin
+  - import LAS file with RiSCAN PRO (converts from LAS SRS to PRCS)
+  - open point cloud in 3D view to check point colors
+
+Spatial Reference Systems:
+  - LAS file: EPSG:2994 = NAD83(HARN) / OR GIC Lam (ft)
+  - RDB file: EPSG:4956 = NAD83(HARN) / Geocentric

@@ -43,6 +43,6 @@ namespace MbError
 {
 
 std::string text(int errorCode);
-};
+}
 
 } // namespace pdal

@@ -35,18 +35,22 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
-#include <pdal/Compression.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip_api.h>
+#else
+using laszip_POINTER = void *;
+using laszip_point_struct = void *;
+struct laszip_point;
+#endif
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
-#include "LasZipPoint.hpp"
-
-extern "C" int32_t LasReader_ExitFunc();
-extern "C" PF_ExitFunc LasReader_InitPlugin();
 
 namespace pdal
 {
@@ -55,8 +59,9 @@ class NitfReader;
 class LasHeader;
 class LeExtractor;
 class PointDimensions;
+class LazPerfVlrDecompressor;
 
-class PDAL_DLL LasReader : public pdal::Reader
+class PDAL_DLL LasReader : public Reader, public Streamable
 {
 protected:
     class LasStreamIf
@@ -80,11 +85,9 @@ protected:
 
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0)
-        {}
+    LasReader();
+    ~LasReader();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     const LasHeader& header() const
@@ -110,16 +113,21 @@ protected:
     std::unique_ptr<LasStreamIf> m_streamIf;
 
 private:
-    LasError m_error;
+    typedef std::vector<LasUtils::IgnoreVLR> IgnoreVLRList;
+
     LasHeader m_header;
-    std::unique_ptr<LasZipPoint> m_zipPoint;
-    std::unique_ptr<LASunzipper> m_unzipper;
-    std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
+    laszip_POINTER m_laszip;
+    laszip_point_struct *m_laszipPoint;
+
+    LazPerfVlrDecompressor *m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
     StringList m_extraDimSpec;
     std::vector<ExtraDim> m_extraDims;
+    IgnoreVLRList m_ignoreVLRs;
     std::string m_compression;
+    StringList m_ignoreVLROption;
+    bool m_useEbVlr;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
@@ -139,12 +147,16 @@ private:
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
+    void loadPoint(PointRef& point, laszip_point& p);
+    void loadPointV10(PointRef& point, laszip_point& p);
+    void loadPointV14(PointRef& point, laszip_point& p);
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
     void loadPointV10(PointRef& point, char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
     point_count_t readFileBlock(std::vector<char>& buf,
         point_count_t maxPoints);
+    void handleLaszip(int result);
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented

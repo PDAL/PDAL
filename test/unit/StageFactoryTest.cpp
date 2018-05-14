@@ -47,42 +47,12 @@ TEST(StageFactoryTest, Load)
 {
     StageFactory f(false);
 
-    StringList ns = PluginManager::names(PF_PluginType_Filter |
-        PF_PluginType_Reader | PF_PluginType_Writer);
+    StringList ns = PluginManager<Stage>::names();
     ASSERT_TRUE(Utils::contains(ns, "filters.crop"));
     ASSERT_TRUE(Utils::contains(ns, "readers.las"));
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
 
-TEST(StageFactoryTest, Load2)
-{
-    StageFactory f(false);
-
-    StringList ns = PluginManager::names(PF_PluginType_Filter);
-    ASSERT_TRUE(Utils::contains(ns, "filters.crop"));
-    ASSERT_FALSE(Utils::contains(ns, "readers.las"));
-    ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
-}
-
-TEST(StageFactoryTest, Load3)
-{
-    StageFactory f(false);
-
-    StringList ns = PluginManager::names(PF_PluginType_Reader);
-    ASSERT_FALSE(Utils::contains(ns, "filters.crop"));
-    ASSERT_TRUE(Utils::contains(ns, "readers.las"));
-    ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
-}
-
-TEST(StageFactoryTest, Load4)
-{
-    StageFactory f(false);
-
-    StringList ns = PluginManager::names(PF_PluginType_Writer);
-    ASSERT_FALSE(Utils::contains(ns, "filters.crop"));
-    ASSERT_FALSE(Utils::contains(ns, "readers.las"));
-    ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
-}
 
 TEST(StageFactoryTest, extensionTest)
 {
@@ -97,15 +67,12 @@ TEST(StageFactoryTest, extensionTest)
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.laz"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.laz"), "readers.las");
+
     EXPECT_EQ(StageFactory::inferReaderDriver("greyhound://foo.bar.baz"),
         "readers.greyhound");
 
-    StringList ext = { "las", "laz" };
-    EXPECT_EQ(StageFactory::extensions("writers.las"), ext);
-    ext = { "csv", "json", "txt", "xyz" };
-    EXPECT_EQ(StageFactory::extensions("writers.text"), ext);
-    ext = { "tif", "tiff", "vrt" };
-    EXPECT_EQ(StageFactory::extensions("writers.gdal"), ext);
+    EXPECT_EQ(StageFactory::inferReaderDriver("foo.ntf"), "readers.nitf");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.ntf"), "writers.nitf");
 }
 
 } // namespace pdal

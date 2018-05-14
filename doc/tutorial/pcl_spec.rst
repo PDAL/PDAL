@@ -150,7 +150,7 @@ ApproximateProgressiveMorphologicalFilter (APMF)
 
 .. seealso:
 
-    :ref:`filters.ground` utilizes ApproximateProgressiveMorphologicalFilter in
+    :ref:`filters.pmf` utilizes ApproximateProgressiveMorphologicalFilter in
     the context of a PDAL filter
 
 This filter removes nonground points to produce a bare-earth point cloud. It is

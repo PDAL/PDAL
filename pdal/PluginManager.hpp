@@ -40,14 +40,16 @@
 #pragma once
 
 #include <pdal/Log.hpp>
-#include <pdal/pdal_internal.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/PluginInfo.hpp>
+#include <pdal/StageExtensions.hpp>
 
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
+#include <functional>
+
 
 namespace pdal
 {
@@ -59,61 +61,86 @@ class DynamicLibrary;
  * through the factories, but we'll leave it as public for now.
  */
 
+template <typename T>
 class PDAL_DLL PluginManager
 {
-    FRIEND_TEST(PluginManagerTest, SearchPaths);
-
+    struct Info
+    {
+        std::string name;
+        std::string link;
+        std::string description;
+        std::function<T *()> create;
+    };
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
     typedef std::map<std::string, DynLibPtr> DynamicLibraryMap;
-    typedef std::vector<PF_ExitFunc> ExitFuncVec;
-    typedef std::map<std::string, PF_RegisterParams> RegistrationInfoMap;
+    typedef std::map<std::string, Info> RegistrationInfoMap;
 
 public:
-    PluginManager();
+    PluginManager(const PluginManager&) = delete;
+    PluginManager& operator=(const PluginManager&) = delete;
     ~PluginManager();
 
     static std::string description(const std::string& name);
     static std::string link(const std::string& name);
-    static bool registerObject(const std::string& name,
-        const PF_RegisterParams *params);
-    static bool initializePlugin(PF_InitFunc initFunc);
+    template <typename C>
+    static bool registerPlugin(const PluginInfo& info)
+        { return get().template l_registerPlugin<C>(info); }
+    template <typename C>
+    static bool registerPlugin(const StaticPluginInfo& info)
+        { return get().template l_registerPlugin<C>(info); }
     static bool loadPlugin(const std::string& pluginFilename);
-    static void loadAll(int type);
-    static void *createObject(const std::string& objectType);
-    static StringList names(int typeMask);
+    static T *createObject(const std::string& objectType);
+    static StringList names();
     static void setLog(LogPtr& log);
+    static void loadAll();
+    static bool loadDynamic(const std::string& driverName);
+    static PluginManager<T>& get();
+    StageExtensions& extensions()
+        { return m_extensions; }
 
 private:
-    // These functions return true if successful.
-    bool shutdown();
-    bool guessLoadByPath(const std::string & driverName);
-    bool loadByPath(const std::string & path, PF_PluginType type);
-    bool libraryLoaded(const std::string& path);
-    void loadAll(const std::string& pluginDirectory, int type);
-    bool l_initializePlugin(PF_InitFunc initFunc);
-    void *l_createObject(const std::string& objectType);
-    bool l_registerObject(const std::string& name,
-        const PF_RegisterParams *params);
+    PluginManager();
+
+    std::string getPath(const std::string& driver);
+    void shutdown();
+    bool loadByPath(const std::string & path);
+    bool l_loadDynamic(const std::string& driverName);
+    DynamicLibrary *libraryLoaded(const std::string& path);
+    DynamicLibrary *loadLibrary(const std::string& path);
+    T *l_createObject(const std::string& objectType);
+    template <class C>
+    bool l_registerPlugin(const PluginInfo& pi)
+    {
+        auto f = [&]()
+        {
+            T *t = dynamic_cast<T *>(new C);
+            return t;
+        };
+        Info info {pi.name, pi.link, pi.description, f};
+        std::lock_guard<std::mutex> lock(m_pluginMutex);
+        m_plugins.insert(std::make_pair(pi.name, info));
+        return true;
+    }
+    template <class C>
+    bool l_registerPlugin(const StaticPluginInfo& pi)
+    {
+        l_registerPlugin<C>((const PluginInfo&)pi);
+        m_extensions.set(pi.name, pi.extensions);
+        return true;
+    }
+
     bool l_loadPlugin(const std::string& pluginFilename);
-    void l_loadAll(int type);
-    StringList l_names(int typeMask);
+    StringList l_names();
     std::string l_description(const std::string& name);
     std::string l_link(const std::string& name);
-    DynamicLibrary *loadLibrary(const std::string& path,
-        std::string& errorString);
+    void l_loadAll();
 
-    static StringList test_pluginSearchPaths();
-
-    PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;
-    ExitFuncVec m_exitFuncVec;
     RegistrationInfoMap m_plugins;
-    std::mutex m_mutex;
+    std::mutex m_pluginMutex;
+    std::mutex m_libMutex;
     LogPtr m_log;
-
-    // Disable copy/assignment.
-    PluginManager(const PluginManager&);
-    PluginManager& operator=(const PluginManager&);
+    StageExtensions m_extensions;
 };
 
 } // namespace pdal

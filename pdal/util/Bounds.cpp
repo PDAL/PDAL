@@ -168,7 +168,7 @@ Bounds::Bounds(const BOX2D& box) : m_box(box)
 
 BOX3D Bounds::to3d() const
 {
-    if (m_box.minz == HIGHEST && m_box.maxz == LOWEST)
+    if (!is3d())
         return BOX3D();
     return m_box;
 }

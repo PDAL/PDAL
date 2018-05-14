@@ -37,8 +37,6 @@
 #include <json/json.h>
 
 #include <pdal/Options.hpp>
-#include <pdal/PDALUtils.hpp>
-#include <io/FauxReader.hpp>
 #include <filters/CropFilter.hpp>
 
 #include "Support.hpp"

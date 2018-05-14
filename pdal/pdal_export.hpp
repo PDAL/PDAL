@@ -34,10 +34,8 @@
 
 #pragma once
 
-#include <pdal/pdal_defines.h>
-
 #ifndef PDAL_DLL
-#if defined(PDAL_COMPILER_MSVC)
+#ifdef _WIN32
 #if defined(PDAL_DLL_EXPORT)
 #   define PDAL_DLL   __declspec(dllexport)
 #elif defined(PDAL_DLL_IMPORT)
@@ -54,7 +52,7 @@
 #endif
 #endif
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef _WIN32
 #pragma warning(disable:4251)// [templated class] needs to have dll-interface...
 #endif
 

@@ -34,11 +34,8 @@
 
 #pragma once
 
-#include <pdal/plugin.hpp>
 #include <pdal/Reader.hpp>
-
-extern "C" int32_t FauxReader_ExitFunc();
-extern "C" PF_ExitFunc FauxReader_InitPlugin();
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
@@ -124,14 +121,12 @@ inline std::ostream& operator<<(std::ostream& out, const Mode& m)
 // activated by passing a numeric value as "number_of_returns" to the
 // reader constructor.
 //
-class PDAL_DLL FauxReader : public Reader
+class PDAL_DLL FauxReader : public Reader, public Streamable
 {
 public:
     FauxReader()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

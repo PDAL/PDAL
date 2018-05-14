@@ -41,10 +41,11 @@
 namespace pdal
 {
 
-Log::Log(std::string const& leaderString,
-         std::string const& outputName)
+Log::Log(std::string const& leaderString, std::string const& outputName,
+        bool timing)
     : m_level(LogLevel::Warning)
     , m_deleteStreamOnCleanup(false)
+    , m_timing(timing)
 {
 
     if (Utils::iequals(outputName, "stdlog"))
@@ -61,16 +62,20 @@ Log::Log(std::string const& leaderString,
         m_deleteStreamOnCleanup = true;
     }
     m_leaders.push(leaderString);
+    if (m_timing)
+        m_start = m_clock.now();
 }
 
 
-Log::Log(std::string const& leaderString,
-         std::ostream* v)
+Log::Log(std::string const& leaderString, std::ostream* v, bool timing)
     : m_level(LogLevel::Error)
     , m_deleteStreamOnCleanup(false)
+    , m_timing(timing)
 {
     m_log = v;
     m_leaders.push(leaderString);
+    if (m_timing)
+        m_start = m_clock.now();
 }
 
 
@@ -111,7 +116,10 @@ std::ostream& Log::get(LogLevel level)
         *m_log << "(" << l;
          if (l.size())
              *m_log << " ";
-         *m_log << getLevelString(level) <<") " <<
+         *m_log << getLevelString(level);
+         if (m_timing)
+             *m_log << " " << now();
+         *m_log <<") " <<
          std::string(incoming < nativeDebug ? 0 : incoming - nativeDebug,
              '\t');
         return *m_log;
@@ -136,6 +144,17 @@ std::string Log::getLevelString(LogLevel level) const
         default:
             return "Debug";
     }
+}
+
+std::string Log::now() const
+{
+    std::chrono::steady_clock::time_point end = m_clock.now();
+
+    std::chrono::duration<double> diff = end - m_start;
+    std::stringstream ss;
+
+    ss << std::fixed << std::setprecision(3) << diff.count();
+    return ss.str();
 }
 
 } // namespace

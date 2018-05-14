@@ -33,19 +33,22 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include "private/PipelineReaderXML.hpp"
-
-#if defined(PDAL_COMPILER_CLANG) || defined(PDAL_COMPILER_GCC)
-#  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#endif
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
 namespace pdal
 {
+
+PipelineManager::PipelineManager() : m_factory(new StageFactory),
+    m_tablePtr(new PointTable()), m_table(*m_tablePtr),
+    m_progressFd(-1), m_input(nullptr)
+{}
+
 
 PipelineManager::~PipelineManager()
 {
@@ -61,35 +64,13 @@ void PipelineManager::readPipeline(std::istream& input)
     std::string s(std::istreambuf_iterator<char>(input), eos);
 
     std::istringstream ss(s);
-    if (s.find("?xml") != std::string::npos)
-        PipelineReaderXML(*this).readPipeline(ss);
-    else if (s.find("\"pipeline\"") != std::string::npos)
-        PipelineReaderJSON(*this).readPipeline(ss);
-    else
-    {
-        try
-        {
-            PipelineReaderXML(*this).readPipeline(ss);
-        }
-        catch (pdal_error)
-        {
-            // Rewind to make sure the stream is properly positioned after
-            // attempting an XML pipeline.
-            ss.seekg(0);
-            PipelineReaderJSON(*this).readPipeline(ss);
-        }
-    }
+    PipelineReaderJSON(*this).readPipeline(ss);
 }
 
 
 void PipelineManager::readPipeline(const std::string& filename)
 {
-    if (FileUtils::extension(filename) == ".xml")
-    {
-        PipelineReaderXML pipeReader(*this);
-        return pipeReader.readPipeline(filename);
-    }
-    else if (FileUtils::extension(filename) == ".json")
+    if (FileUtils::extension(filename) == ".json")
     {
         PipelineReaderJSON pipeReader(*this);
         return pipeReader.readPipeline(filename);
@@ -115,7 +96,7 @@ void PipelineManager::readPipeline(const std::string& filename)
 
 Stage& PipelineManager::addReader(const std::string& type)
 {
-    Stage *reader = m_factory.createStage(type);
+    Stage *reader = m_factory->createStage(type);
     if (!reader)
     {
         std::ostringstream ss;
@@ -131,7 +112,7 @@ Stage& PipelineManager::addReader(const std::string& type)
 
 Stage& PipelineManager::addFilter(const std::string& type)
 {
-    Stage *filter = m_factory.createStage(type);
+    Stage *filter = m_factory->createStage(type);
     if (!filter)
     {
         std::ostringstream ss;
@@ -147,7 +128,7 @@ Stage& PipelineManager::addFilter(const std::string& type)
 
 Stage& PipelineManager::addWriter(const std::string& type)
 {
-    Stage *writer = m_factory.createStage(type);
+    Stage *writer = m_factory->createStage(type);
     if (!writer)
     {
         std::ostringstream ss;
@@ -181,6 +162,17 @@ void PipelineManager::validateStageOptions() const
             throw pdal_error(oss.str());
         }
     }
+}
+
+
+bool PipelineManager::pipelineStreamable() const
+{
+    bool streamable = false;
+
+    Stage *s = getStage();
+    if (s)
+        streamable = s->pipelineStreamable();
+    return streamable;
 }
 
 
@@ -451,11 +443,27 @@ void PipelineManager::replace(Stage *sOld, Stage *sNew)
     for (Stage * & s : m_stages)
     {
         if (s == sOld)
+        {
             s = sNew;
+            // Copy inputs from the old stage to new one.
+            for (Stage *ss : sOld->getInputs())
+                sNew->setInput(*ss);
+        }
+        // Reset the inputs that refer to the replaced stage.
         for (Stage * & ss : s->getInputs())
             if (ss == sOld)
                 ss = sNew;
     }
 }
+
+
+void PipelineManager::destroyStage(Stage *s)
+{
+    if (s)
+        m_factory->destroyStage(s);
+    else
+        m_factory.reset(new StageFactory());
+}
+
 
 } // namespace pdal

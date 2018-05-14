@@ -1,0 +1,13 @@
+#pragma once
+
+namespace pdal
+{
+
+
+inline std::string testDataPath()
+{
+    return "@CMAKE_SOURCE_DIR@/plugins/rdb/test/data/";
+}
+
+
+}

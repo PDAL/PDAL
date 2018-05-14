@@ -180,7 +180,39 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 namespace LasUtils
 {
 
-std::vector<ExtraDim> parse(const StringList& dimString)
+std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
+{
+    std::vector<IgnoreVLR> ignoredVLRs;
+    for (auto& v: ignored)
+    {
+
+        StringList s = Utils::split2(v, '/');
+        if (s.size() == 2)
+        {
+            Utils::trim(s[0]);
+            Utils::trim(s[1]);
+            int i = std::stoi(s[1]);
+            uint16_t id = (uint16_t)i;
+            IgnoreVLR v;
+            v.m_userId = s[0];
+            v.m_recordId = id;
+            ignoredVLRs.push_back(v);
+        } else if (s.size() == 1)
+        {
+            Utils::trim(s[0]);
+            IgnoreVLR v;
+            v.m_userId = s[0];
+            v.m_recordId = 0;
+            ignoredVLRs.push_back(v);
+        } else
+        {
+            throw error("Invalid VLR user_id/record_id specified");
+        }
+    }
+    return ignoredVLRs;
+
+}
+std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
     bool all = false;
@@ -189,6 +221,11 @@ std::vector<ExtraDim> parse(const StringList& dimString)
     {
         if (dim == "all")
         {
+            // We only accept all for LasWriter.
+            if (!allOk)
+                throw error("Invalid extra dimension specified: '" + dim +
+                    "'.  Need <dimension>=<type>.  See documentation "
+                    " for details.");
             all = true;
             continue;
         }

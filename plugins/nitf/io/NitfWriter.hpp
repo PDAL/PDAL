@@ -47,9 +47,6 @@ class PDAL_DLL NitfWriter : public LasWriter
 {
 public:
     NitfWriter();
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

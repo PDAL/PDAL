@@ -78,7 +78,7 @@ void BufferedReadWriteFile::reset( void )
 bool BufferedReadWriteFile::write( const void* data , size_t size )
 {
 	if( !size ) return true;
-	char* _data = (char*) data;
+	auto _data = static_cast<const char*>(data);
 	size_t sz = _bufferSize - _bufferIndex;
 	while( sz<=size )
 	{

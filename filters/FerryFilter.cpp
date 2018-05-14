@@ -34,19 +34,20 @@
 
 #include "FerryFilter.hpp"
 
-#include <pdal/pdal_export.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.ferry",
     "Copy data from one dimension to another.",
-    "http://pdal.io/stages/filters.ferry.html" );
+    "http://pdal.io/stages/filters.ferry.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
+CREATE_STATIC_STAGE(FerryFilter, s_info)
 
 std::string FerryFilter::getName() const { return s_info.name; }
 
@@ -59,57 +60,68 @@ void FerryFilter::addArgs(ProgramArgs& args)
 
 void FerryFilter::initialize()
 {
+    std::vector<std::string> toNames;
     for (auto& dim : m_dimSpec)
     {
-        StringList s = Utils::split2(dim, '=');
+        StringList s = Utils::split(dim, '=');
         if (s.size() != 2)
             throwError("Invalid dimension specified '" + dim + "'.  Need "
-                "<from dimension>=<to dimension>.  See documentation for "
+                "<from dimension>=><to dimension>.  See documentation for "
                 "details.");
+        // Allow new '=>' syntax
+        if (s[1][0] == '>')
+            s[1].erase(s[1].begin());
+
         Utils::trim(s[0]);
         Utils::trim(s[1]);
         if (s[0] == s[1])
             throwError("Can't ferry dimension '" + s[0] + "' to itself.");
-        m_name_map[s[0]] = s[1];
+        if (Utils::contains(toNames, s[1]))
+            throwError("Can't ferry two source dimensions to the same "
+                "destination dimension.");
+        toNames.push_back(s[1]);
+        m_dims.emplace_back(s[0], s[1]);
     }
 }
 
 
 void FerryFilter::addDimensions(PointLayoutPtr layout)
 {
-    for (const auto& dim_par : m_name_map)
+    for (auto& info : m_dims)
     {
-        layout->registerOrAssignDim(dim_par.second, Dimension::Type::Double);
+        const Dimension::Id fromId = layout->findDim(info.m_fromName);
+        // Dimensions being created with the "=>Dim" syntax won't
+        // be in the layout, so we have to assign a default type.
+        Dimension::Type fromType = layout->dimType(fromId);
+        if (fromType == Dimension::Type::None)
+            fromType = Dimension::Type::Double;
+
+        info.m_toId = layout->registerOrAssignDim(info.m_toName, fromType);
     }
 }
 
 
 void FerryFilter::prepared(PointTableRef table)
 {
-    for (const auto& dims : m_name_map)
-        if (table.layout()->findDim(dims.first) == Dimension::Id::Unknown)
-            throwError("Can't ferry dimension '" + dims.first + "'. "
-                "Dimension doesn't exist.");
-}
-
-void FerryFilter::ready(PointTableRef table)
-{
-    const PointLayoutPtr layout(table.layout());
-    for (const auto& dim_par : m_name_map)
+    for (auto& info : m_dims)
     {
-        Dimension::Id f = layout->findDim(dim_par.first);
-        Dimension::Id t = layout->findDim(dim_par.second);
-        m_dimensions_map.insert(std::make_pair(f,t));
+        info.m_fromId = table.layout()->findDim(info.m_fromName);
+        if (info.m_fromId == Dimension::Id::Unknown && info.m_fromName.size())
+            throwError("Can't ferry dimension '" + info.m_fromName + "'. "
+                "Dimension doesn't exist.");
     }
 }
 
 
 bool FerryFilter::processOne(PointRef& point)
 {
-    for (const auto& dim_par : m_dimensions_map)
+    for (const auto& info : m_dims)
     {
-        double v = point.getFieldAs<double>(dim_par.first);
-        point.setField(dim_par.second, v);
+        if (info.m_fromId != Dimension::Id::Unknown)
+        {
+            double v = point.getFieldAs<double>(info.m_fromId);
+            point.setField(info.m_toId, v);
+        }
     }
     return true;
 }

@@ -42,12 +42,9 @@
 namespace pdal
 {
 
-
 class PDAL_DLL DensityKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
 

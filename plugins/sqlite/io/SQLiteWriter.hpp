@@ -46,9 +46,6 @@ class PDAL_DLL SQLiteWriter : public DbWriter
 {
 public:
     SQLiteWriter();
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
@@ -95,7 +92,7 @@ private:
     std::string m_cloudBoundary;
     long m_pcId;
     bool m_is3d;
-    bool m_doCompression;;
+    bool m_doCompression;
     bool m_overwrite;
     PatchPtr m_patch;
 };

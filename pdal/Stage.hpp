@@ -44,6 +44,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PipelineWriter.hpp>
+#include <pdal/PluginHelper.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/PointView.hpp>
@@ -57,6 +58,7 @@ namespace pdal
 class ProgramArgs;
 class StageRunner;
 class StageWrapper;
+class Streamable;
 
 /**
   A stage performs the actual processing in PDAL.  Stages may read data,
@@ -72,6 +74,7 @@ class PDAL_DLL Stage
     FRIEND_TEST(OptionsTest, conditional);
     friend class StageWrapper;
     friend class StageRunner;
+    friend class Streamable;
 public:
     Stage();
     virtual ~Stage()
@@ -120,23 +123,19 @@ public:
     */
     PointViewSet execute(PointTableRef table);
 
+    virtual void execute(StreamPointTable& table)
+    {
+        throw pdal_error("Attempting to use stream mode with a non-streamable "
+            "stage.");
+    }
+
     /**
-      Execute a prepared pipeline (linked set of stages) in streaming mode.
+      Determine if a pipeline with this stage as a sink is streamable.
 
-      This performs the action associated with the stage by executing the
-      \ref processOne function of each stage in depth first order.  Points
-      are processed up to the capacity of the provided StreamPointTable.
-      Not all stages support streaming mode and an exception will be thrown
-      when attempting to \ref execute an unsupported stage.
-
-      Streaming points can reduce memory consumption, but may limit access
-      to algorithms that need to operate on full point sets.
-
-      \param table  Streming point table used for stage pipeline.  This must be
-        the same \ref table used in the \ref prepare function.
-
+      \return Whether the pipeline is streamable.
     */
-    void execute(StreamPointTable& table);
+    virtual bool pipelineStreamable() const
+    { return false; }
 
     /**
       Set the spatial reference of a stage.
@@ -228,14 +227,12 @@ public:
     /**
       Push the stage's leader into the log.
     */
-    void pushLogLeader() const
-        { m_log->pushLeader(m_logLeader); }
+    void startLogging() const;
 
     /**
         Pop the stage's leader from the log.
     */
-    void popLogLeader() const
-        { m_log->popLeader(); }
+    void stopLogging() const;
 
     /**
       Determine whether the stage is in debug mode or not.
@@ -243,7 +240,7 @@ public:
       \return  The stage's debug state.
     */
     bool isDebug() const
-        { return m_debug; }
+        { return m_log && m_log->getLevel() > LogLevel::Debug; }
 
     /**
       Return the name of a stage.
@@ -339,7 +336,6 @@ protected:
         { return m_faceCount; }
 
 private:
-    bool m_debug;
     uint32_t m_verbose;
     std::string m_logname;
     std::vector<Stage *> m_inputs;
@@ -354,6 +350,9 @@ private:
     std::string m_userDataJSON;
     point_count_t m_pointCount;
     point_count_t m_faceCount;
+    // This is never used, but we want something to bind to the argument
+    // we stick in ProgramArgs so that it shows up in help and an options list.
+    std::string m_optionFile;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
@@ -440,31 +439,6 @@ private:
         {}
 
     /**
-      Process a single point (streaming mode).  Implement in sublcass.
-
-      \param point  Point to process.
-      \return  Readers return false when no more points are to be read.
-        Filters return false if a point is to be filtered-out (not passed
-        to subsequent stages).
-    */
-    virtual bool processOne(PointRef& /*point*/)
-    {
-        std::ostringstream oss;
-        oss << "Point streaming not supported for stage " << getName() << ".";
-        throw pdal_error(oss.str());
-    }
-
-    /**
-      (Streaming mode)  Notification that the points that will follow in
-      processing are from a spatial reference different than the previous
-      spatial reference.
-
-       \param srs  New spatial reference.
-    */
-    virtual void spatialReferenceChanged(const SpatialReference& srs)
-    {}
-
-    /**
       Process all points in a view.  Implement in subclass.
 
       \param view  PointView to process.
@@ -482,8 +456,6 @@ private:
     */
     virtual void done(PointTableRef /*table*/)
         {}
-
-    void execute(StreamPointTable& table, std::list<Stage *>& stages);
 
     /*
       Test hook.

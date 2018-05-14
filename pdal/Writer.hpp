@@ -49,7 +49,7 @@ class UserCallback;
   to a file, but this isn't a requirement.  The class provides support for
   some operations common for producing point output.
 */
-class PDAL_DLL Writer : public Stage
+class PDAL_DLL Writer : public virtual Stage
 {
     friend class WriterWrapper;
     friend class DbWriter;

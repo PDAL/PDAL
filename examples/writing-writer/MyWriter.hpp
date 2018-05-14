@@ -16,8 +16,6 @@ namespace pdal{
     MyWriter()
     {}
 
-    static void  * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
   private:

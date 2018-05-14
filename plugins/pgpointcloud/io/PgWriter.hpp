@@ -47,9 +47,6 @@ class PDAL_DLL PgWriter : public DbWriter
 public:
     PgWriter();
     ~PgWriter();
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

@@ -35,12 +35,8 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <string>
-
-extern "C" int32_t ClusterFilter_ExitFunc();
-extern "C" PF_ExitFunc ClusterFilter_InitPlugin();
 
 namespace pdal
 {
@@ -53,8 +49,6 @@ public:
     ClusterFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

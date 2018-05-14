@@ -35,25 +35,33 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
-#include <map>
+#include <vector>
 #include <string>
-
-extern "C" int32_t FerryFilter_ExitFunc();
-extern "C" PF_ExitFunc FerryFilter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL FerryFilter : public Filter
+class PDAL_DLL FerryFilter : public Filter, public Streamable
 {
+    struct Info
+    {
+        std::string m_fromName;
+        std::string m_toName;
+        Dimension::Id m_fromId;
+        Dimension::Id m_toId;
+
+        Info(const std::string& fromName, const std::string& toName) :
+            m_fromName(fromName), m_toName(toName),
+            m_fromId(Dimension::Id::Unknown),
+            m_toId(Dimension::Id::Unknown)
+        {}
+    };
 public:
     FerryFilter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
@@ -61,7 +69,6 @@ private:
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
@@ -69,8 +76,7 @@ private:
     FerryFilter(const FerryFilter&) = delete;
 
     StringList m_dimSpec;
-    std::map<std::string, std::string> m_name_map;
-    std::map<Dimension::Id, Dimension::Id> m_dimensions_map;
+    std::vector<Info> m_dims;
 };
 
 } // namespace pdal

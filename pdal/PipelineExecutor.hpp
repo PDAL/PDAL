@@ -37,6 +37,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_export.hpp>
 
 #include <string>
 
@@ -50,7 +51,7 @@ namespace pdal
   It is constructed with JSON defining a pipeline.
 */
 
-class PipelineExecutor {
+class PDAL_DLL PipelineExecutor {
 public:
 
     /**

@@ -39,11 +39,6 @@
 #include <mat.h>
 
 #include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t MatlabWriter_ExitFunc();
-extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
-
 
 namespace pdal
 {
@@ -51,8 +46,6 @@ namespace pdal
 class PDAL_DLL MatlabWriter : public Writer
 {
 public:
-    static void* create();
-    static int32_t destroy(void*);
     std::string getName() const;
 
 private:
@@ -68,6 +61,7 @@ private:
     // Can't use unique_ptr b/c MATFile is an incomplete type.
     MATFile * m_matfile;
     Dimension::IdList m_dims;
+    MetadataNode m_tableMetadata;
 };
 
 

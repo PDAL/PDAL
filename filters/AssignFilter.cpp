@@ -34,7 +34,6 @@
 
 #include "AssignFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -43,12 +42,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.assign",
-    "Assign values for a dimension using a specified value.",
-    "http://pdal.io/stages/filters.assign.html" );
+    "Assign values for a dimension range to a specified value.",
+    "http://pdal.io/stages/filters.assign.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, AssignFilter, Filter, s_info)
+CREATE_STATIC_STAGE(AssignFilter, s_info)
 
 struct AssignRange : public DimRange
 {
@@ -63,14 +64,14 @@ void AssignRange::parse(const std::string& r)
     char *end;
 
     pos = subParse(r);
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     if (r[pos] != '=')
         throw error("Missing '=' assignment separator.");
     pos++;
 
-    count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+    count = Utils::extractSpaces(r, pos);
     pos += count;
 
     // Extract value
@@ -90,7 +91,14 @@ std::istream& operator>>(std::istream& in, AssignRange& r)
     std::string s;
 
     std::getline(in, s);
-    r.parse(s);
+    try
+    {
+        r.parse(s);
+    }
+    catch (DimRange::error&)
+    {
+        in.setstate(std::ios_base::failbit);
+    }
     return in;
 }
 
@@ -126,7 +134,7 @@ void AssignFilter::prepared(PointTableRef table)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
-            throwError("Invalid dimension name in 'values' option: '" +
+            throwError("Invalid dimension name in 'assignment' option: '" +
                 r.m_name + "'.");
     }
 }
@@ -152,4 +160,3 @@ void AssignFilter::filter(PointView& view)
 }
 
 } // namespace pdal
-

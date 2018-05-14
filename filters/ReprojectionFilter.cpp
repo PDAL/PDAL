@@ -35,7 +35,6 @@
 #include "ReprojectionFilter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -47,12 +46,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "filters.reprojection",
     "Reproject data using GDAL from one coordinate system to another.",
-    "http://pdal.io/stages/filters.reprojection.html" );
+    "http://pdal.io/stages/filters.reprojection.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
+CREATE_STATIC_STAGE(ReprojectionFilter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
@@ -61,7 +62,6 @@ ReprojectionFilter::ReprojectionFilter()
     , m_in_ref_ptr(NULL)
     , m_out_ref_ptr(NULL)
     , m_transform_ptr(NULL)
-    , m_errorHandler(new gdal::ErrorHandler())
 {}
 
 
@@ -92,6 +92,7 @@ void ReprojectionFilter::initialize()
         throwError("Invalid output spatial reference '" + m_outSRS.getWKT() +
             "'.  This is usually caused by a bad value for the 'out_srs' "
             "option.");
+    setSpatialReference(m_outSRS);
 }
 
 
@@ -145,9 +146,6 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     }
 
     viewSet.insert(outView);
-    view->setSpatialReference(m_outSRS);
-    outView->setSpatialReference(m_outSRS);
-
     return viewSet;
 }
 

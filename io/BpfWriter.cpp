@@ -37,30 +37,49 @@
 #include <climits>
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_export.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <zlib.h>
-
 #include "BpfCompressor.hpp"
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "writers.bpf",
     "\"Binary Point Format\" (BPF) writer support. BPF is a simple \n" \
         "DoD and research format that is used by some sensor and \n" \
         "processing chains.",
-    "http://pdal.io/stages/writers.bpf.html" );
+    "http://pdal.io/stages/writers.bpf.html",
+    { "bpf" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, BpfWriter, Writer, s_info)
+CREATE_STATIC_STAGE(BpfWriter, s_info)
 
 std::string BpfWriter::getName() const { return s_info.name; }
+
+std::istream& operator>>(std::istream& in, BpfWriter::CoordId& id)
+{
+    std::string s;
+    in >> s;
+    if (s == "auto")
+        id.m_auto = true;
+    else if (!Utils::fromString(s, id.m_val) || id.m_val < -60 || id.m_val > 60)
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const BpfWriter::CoordId& id)
+{
+    if (id.m_auto)
+        out << "auto";
+    else
+        out << id.m_val;
+    return out;
+}
 
 void BpfWriter::addArgs(ProgramArgs& args)
 {
@@ -69,7 +88,7 @@ void BpfWriter::addArgs(ProgramArgs& args)
     args.add("header_data", "Base64-encoded header data", m_extraDataSpec);
     args.add("format", "Output format", m_header.m_pointFormat,
         BpfFormat::DimMajor);
-    args.add("coord_id", "UTM coordinate ID", m_header.m_coordId, -9999);
+    args.add("coord_id", "UTM coordinate ID", m_coordId);
     args.add("bundledfile", "List of files to bundle in output",
         m_bundledFilesSpec);
     args.add("output_dims", "Output dimensions", m_outputDims);
@@ -79,18 +98,17 @@ void BpfWriter::addArgs(ProgramArgs& args)
 
 void BpfWriter::initialize()
 {
+    m_header.m_coordId = m_coordId.m_val;
+    m_header.m_coordType = Utils::toNative(m_header.m_coordId ?
+        BpfCoordType::UTM : BpfCoordType::Cartesian);
+#ifndef PDAL_HAVE_ZLIB
+    if (m_compression)
+        throwError("Can't write compressed BPF. PDAL wasn't built with "
+            "Zlib support.");
+#endif
     m_header.m_compression = Utils::toNative(
             m_compression ? BpfCompression::Zlib : BpfCompression::None);
     m_extraData = Utils::base64_decode(m_extraDataSpec);
-    if (m_header.m_coordId == -9999)
-    {
-        m_header.m_coordId = 0;
-        m_header.m_coordType = Utils::toNative(BpfCoordType::Cartesian);
-    }
-    else
-    {
-        m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
-    }
 
     for (auto file : m_bundledFilesSpec)
     {
@@ -128,7 +146,8 @@ void BpfWriter::prepared(PointTableRef table)
 }
 
 
-void BpfWriter::readyFile(const std::string& filename, const SpatialReference&)
+void BpfWriter::readyFile(const std::string& filename,
+    const SpatialReference& srs)
 {
     m_curFilename = filename;
     m_stream.open(filename);
@@ -136,6 +155,13 @@ void BpfWriter::readyFile(const std::string& filename, const SpatialReference&)
     m_header.m_numDim = m_dims.size();
     m_header.m_numPts = 0;
     m_header.setLog(log());
+
+    if (m_coordId.m_auto)
+    {
+        m_header.m_coordId = 0;
+        if (m_header.trySetSpatialReference(srs))
+            m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
+    }
 
     // We will re-write the header and dimensions to account for the point
     // count and dimension min/max.
@@ -268,12 +294,11 @@ void BpfWriter::writePointMajor(const PointView* data)
 
 void BpfWriter::writeDimMajor(const PointView* data)
 {
-    // We're going to pretend for now that we only even have one point buffer.
+    // We're going to pretend for now that we only ever have one point buffer.
     BpfCompressor compressor(m_stream, data->size() * sizeof(float));
 
     for (auto & bpfDim : m_dims)
     {
-
         if (m_header.m_compression)
             compressor.startBlock();
         for (PointId idx = 0; idx < data->size(); ++idx)

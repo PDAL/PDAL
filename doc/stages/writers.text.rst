@@ -42,14 +42,24 @@ filename
 format
   Output format to use. One of "geojson" or "csv". [Default: **csv**]
 
+precision
+  Decimal Precision for output of values. This can be overridden for
+  individual dimensions using the **order** option. [Default: 3]
+
 order
-  Comma-separated list of dimension names, giving the desired column order in the output file, for example "X,Y,Z,Red,Green,Blue". [Default: none]
+  Comma-separated list of dimension names in the desired output order.
+  For example "X,Y,Z,Red,Green,Blue". Dimension names
+  can optionally be followed with a colon (':') and an integer to indicate the
+  precision to use for output. Ex: "X:3, Y:5,Z:0" If no precision is specified
+  the value provided with the **precision** option is used. [Default: none]
 
 keep_unspecified
-  Should we output any fields that are not specified in the dimension order? [Default: **true**]
+  If true, writes all dimensions.  Dimensions specified with the **order**
+  option precede those not specified. [Default: **true**]
 
 jscallback
-  When producing GeoJSON, the callback allows you to wrap the data in a function, so the output can be evaluated in a <script> tag.
+  When producing GeoJSON, the callback allows you to wrap the data in
+  a function, so the output can be evaluated in a <script> tag.
 
 quote_header
   When producing CSV, should the column header named by quoted? [Default: **true**]

@@ -43,13 +43,11 @@ namespace pdal
 class PDAL_DLL PCLKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    PCLKernel();
 
 private:
-    PCLKernel();
     virtual void addSwitches(ProgramArgs& args);
 
     std::unique_ptr<PipelineManager> m_manager;

@@ -35,18 +35,12 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/plugin.hpp>
 
 #include <geos_c.h>
 
 #include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
 using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
-
-extern "C" int32_t GeoWaveReader_ExitFunc();
-extern "C" PF_ExitFunc GeoWaveReader_InitPlugin();
-
 
 namespace pdal
 {
@@ -54,8 +48,6 @@ namespace pdal
     class PDAL_DLL GeoWaveReader : public Reader
     {
     public:
-        static void * create();
-        static int32_t destroy(void *);
         std::string getName() const;
 
     private:

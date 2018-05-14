@@ -41,7 +41,8 @@ Options
 filename
   ply file to read [Required]
 
-
+count 
+  Maximum number of points to read [Optional]
 
 .. _polygon file format: http://paulbourke.net/dataformats/ply/
 .. _rply library: http://w3.impa.br/~diego/software/rply/

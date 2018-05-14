@@ -16,7 +16,8 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         io/tre_plugins.cpp
         io/NitfReader.cpp
     LINK_WITH
-        ${NITRO_LIBRARIES})
+        ${NITRO_LIBRARIES}
+)
 target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
 	${PDAL_JSONCPP_INCLUDE_DIR}
@@ -33,7 +34,9 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         io/MetadataReader.cpp
         io/tre_plugins.cpp
     LINK_WITH
-        ${NITRO_LIBRARIES})
+        ${NITRO_LIBRARIES}
+        ${GDAL_LIBRARY}
+)
 target_include_directories(${writer_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
 	${PDAL_JSONCPP_INCLUDE_DIR}

@@ -35,21 +35,16 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <functional>
-
-extern "C" int32_t StreamCallbackFilter_ExitFunc();
-extern "C" PF_ExitFunc StreamCallbackFilter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL StreamCallbackFilter : public Filter
+class PDAL_DLL StreamCallbackFilter : public Filter, public Streamable
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const
         { return "filters.streamcallback"; }
 
@@ -61,6 +56,16 @@ public:
         { m_callback = cb; }
 
 private:
+    virtual void filter(PointView& view)
+    {
+        PointRef p(view, 0);
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            p.setPointId(idx);
+            processOne(p);
+        }
+    }
+
     virtual bool processOne(PointRef& point)
     {
         if (m_callback)

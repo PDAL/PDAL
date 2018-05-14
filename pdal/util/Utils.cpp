@@ -44,13 +44,13 @@
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
+#ifndef _WIN32
 #include <execinfo.h> // backtrace
+#endif
 #include <dlfcn.h> // dladdr
 #endif
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
+#pragma warning(disable: 4127)  // conditional expression is constant
 
 #include <stdio.h>
 #include <iomanip>
@@ -604,7 +604,7 @@ double Utils::normalizeLongitude(double longitude)
 std::vector<std::string> Utils::backtrace()
 {
     std::vector<std::string> lines;
-#ifndef WIN32
+#ifndef _WIN32
     const int MAX_STACK_SIZE(100);
     void* buffer[MAX_STACK_SIZE];
     std::vector<std::string> prefixes;
@@ -693,6 +693,59 @@ std::string Utils::hexDump(const char *buf, size_t count)
       bytes = (count > 16) ? 16 : count;
    }
    return (out);
+}
+
+
+std::vector<std::string> Utils::simpleWordexp(const std::string& cmdline)
+{
+    std::string temp;
+    bool instring = false;
+    bool escape = false;
+    std::vector<std::string> cmdArgs;
+    for (size_t i = 0; i < cmdline.size(); ++i)
+    {
+        if (instring)
+        {
+            if (escape)
+            {
+                if (cmdline[i] != '"' && cmdline[i] != '\\')
+                    temp += '\\';
+                escape = false;
+                temp += cmdline[i];
+            }
+            else if (cmdline[i] == '"')
+                instring = false;
+            else if (cmdline[i] == '\\')
+                escape = true;
+            else
+                temp += cmdline[i];
+        }
+        else
+        {
+            if (escape)
+            {
+                escape = false;
+                temp += cmdline[i];
+            }
+            else if (cmdline[i] == '"')
+                instring = true;
+            else if (cmdline[i] ==  '\\')
+                escape = true;
+            else if (std::isspace(cmdline[i]))
+            {
+                if (temp.size())
+                {
+                    cmdArgs.push_back(temp);
+                    temp.clear();
+                }
+            }
+            else
+                temp += cmdline[i];
+        }
+    }
+    if (!instring && temp.size())
+        cmdArgs.push_back(temp);
+    return cmdArgs;
 }
 
 } // namespace pdal

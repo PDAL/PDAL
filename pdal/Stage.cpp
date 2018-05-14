@@ -49,8 +49,8 @@
 namespace pdal
 {
 
-Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0),
-    m_pointCount(0), m_faceCount(0)
+Stage::Stage() : m_progressFd(-1), m_verbose(0), m_pointCount(0),
+    m_faceCount(0)
 {}
 
 
@@ -98,9 +98,22 @@ void Stage::addAllArgs(ProgramArgs& args)
 void Stage::handleOptions()
 {
     addAllArgs(*m_args);
+
+    StringList files = m_options.getValues("option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file));
+    m_options.remove(Option("option_file", 0));
+
+    // Special stuff for GRiD so that no error is thrown when a file
+    // isn't found.
+    files = m_options.getValues("grid_option_file");
+    for (std::string& file : files)
+        m_options.addConditional(Options::fromFile(file, false));
+    m_options.remove(Option("grid_option_file", 0));
+
+    StringList cmdline = m_options.toCommandLine();
     try
     {
-        StringList cmdline = m_options.toCommandLine();
         m_args->parse(cmdline);
     }
     catch (arg_error error)
@@ -115,9 +128,9 @@ QuickInfo Stage::preview()
 {
     m_args.reset(new ProgramArgs);
     handleOptions();
-    pushLogLeader();
+    startLogging();
     QuickInfo qi = inspect();
-    popLogLeader();
+    stopLogging();
     return qi;
 }
 
@@ -131,18 +144,18 @@ void Stage::prepare(PointTableRef table)
         prev->prepare(table);
     }
     handleOptions();
-    pushLogLeader();
+    startLogging();
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
     prepared(table);
-    popLogLeader();
+    stopLogging();
 }
 
 
 PointViewSet Stage::execute(PointTableRef table)
 {
-    pushLogLeader();
+    startLogging();
     table.finalize();
 
     PointViewSet views;
@@ -150,6 +163,8 @@ PointViewSet Stage::execute(PointTableRef table)
     // If the inputs are empty, we're a reader.
     if (m_inputs.empty())
     {
+        m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
+            std::endl;
         views.insert(PointViewPtr(new PointView(table)));
     }
     else
@@ -177,7 +192,6 @@ PointViewSet Stage::execute(PointTableRef table)
     // first on the list for table.
     for (auto it = views.rbegin(); it != views.rend(); it++)
         table.addSpatialReference((*it)->spatialReference());
-    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
     // Count the number of views and the number of points and faces so they're
     // available to stages.
@@ -216,191 +230,12 @@ PointViewSet Stage::execute(PointTableRef table)
         outViews.insert(temp.begin(), temp.end());
     }
     l_done(table);
-    popLogLeader();
+    stopLogging();
     m_pointCount = 0;
     m_faceCount = 0;
     return outViews;
 }
 
-
-// Streamed execution.
-void Stage::execute(StreamPointTable& table)
-{
-    struct StageList : public std::list<Stage *>
-    {
-        StageList operator - (const StageList& other) const
-        {
-            StageList resultList;
-            auto ti = rbegin();
-            auto oi = other.rbegin();
-
-            while (oi != other.rend() && ti != rend() && *ti == *oi)
-            {
-                oi++;
-                ti++;
-            }
-            while (ti != rend())
-                resultList.push_front(*ti++);
-            return resultList;
-        };
-
-        void ready(PointTableRef& table)
-        {
-            for (auto s : *this)
-            {
-                s->pushLogLeader();
-                s->ready(table);
-                s->pushLogLeader();
-                SpatialReference srs = s->getSpatialReference();
-                if (!srs.empty())
-                    table.setSpatialReference(srs);
-            }
-        }
-
-        void done(PointTableRef& table)
-        {
-            for (auto s : *this)
-            {
-                s->pushLogLeader();
-                s->l_done(table);
-                s->popLogLeader();
-            }
-        }
-    };
-
-    SpatialReference srs;
-    std::list<StageList> lists;
-    StageList stages;
-    StageList lastRunStages;
-
-    table.finalize();
-
-    // Walk from the current stage backwards.  As we add each input, copy
-    // the list of stages and push it on a list.  We then pull a list from the
-    // back of list and keep going.  Pushing on the front and pulling from the
-    // back insures that the stages will be executed in the order that they
-    // were added.  If we hit stage with no previous stages, we execute
-    // the stage list.
-    // All this often amounts to a bunch of list copying for
-    // no reason, but it's more simple than what we might otherwise do and
-    // this should be a nit in the grand scheme of execution time.
-    //
-    // As an example, if there are four paths from the end stage (writer) to
-    // reader stages, there will be four stage lists and execute(table, stages)
-    // will be called four times.
-    Stage *s = this;
-    stages.push_front(s);
-    while (true)
-    {
-        if (s->m_inputs.empty())
-        {
-            // Call done on all the stages we ran last time and aren't
-            // using this time.
-            (lastRunStages - stages).done(table);
-            // Call ready on all the stages we didn't run last time.
-            (stages - lastRunStages).ready(table);
-            execute(table, stages);
-            lastRunStages = stages;
-        }
-        else
-        {
-            for (auto s2 : s->m_inputs)
-            {
-                StageList newStages(stages);
-                newStages.push_front(s2);
-                lists.push_front(newStages);
-            }
-        }
-        if (lists.empty())
-        {
-            lastRunStages.done(table);
-            break;
-        }
-        stages = lists.back();
-        lists.pop_back();
-        s = stages.front();
-    }
-}
-
-
-void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
-{
-    std::vector<bool> skips(table.capacity());
-    std::list<Stage *> filters;
-    SpatialReference srs;
-    std::map<Stage *, SpatialReference> srsMap;
-
-    // Separate out the first stage.
-    Stage *reader = stages.front();
-
-    // Build a list of all stages except the first.  We may have a writer in
-    // this list in addition to filters, but we treat them in the same way.
-    auto begin = stages.begin();
-    begin++;
-    std::copy(begin, stages.end(), std::back_inserter(filters));
-
-    // Loop until we're finished.  We handle the number of points up to
-    // the capacity of the StreamPointTable that we've been provided.
-
-    bool finished = false;
-    while (!finished)
-    {
-        // Clear the spatial reference when processing starts.
-        table.clearSpatialReferences();
-        PointId idx = 0;
-        PointRef point(table, idx);
-        point_count_t pointLimit = table.capacity();
-
-        reader->pushLogLeader();
-        // When we get false back from a reader, we're done, so set
-        // the point limit to the number of points processed in this loop
-        // of the table.
-        if (!pointLimit)
-            finished = true;
-
-        for (PointId idx = 0; idx < pointLimit; idx++)
-        {
-            point.setPointId(idx);
-            finished = !reader->processOne(point);
-            if (finished)
-                pointLimit = idx;
-        }
-        reader->popLogLeader();
-        srs = reader->getSpatialReference();
-        if (!srs.empty())
-            table.setSpatialReference(srs);
-
-        // When we get a false back from a filter, we're filtering out a
-        // point, so add it to the list of skips so that it doesn't get
-        // processed by subsequent filters.
-        for (Stage *s : filters)
-        {
-            if (srsMap[s] != srs)
-            {
-                s->spatialReferenceChanged(srs);
-                srsMap[s] = srs;
-            }
-            s->pushLogLeader();
-            for (PointId idx = 0; idx < pointLimit; idx++)
-            {
-                if (skips[idx])
-                    continue;
-                point.setPointId(idx);
-                if (!s->processOne(point))
-                    skips[idx] = true;
-            }
-            srs = s->getSpatialReference();
-            if (!srs.empty())
-                table.setSpatialReference(srs);
-            s->popLogLeader();
-        }
-
-        // Yes, vector<bool> is terrible.  Can do something better later.
-        for (size_t i = 0; i < skips.size(); ++i)
-            skips[i] = false;
-        table.reset();
-    }
-}
 
 void Stage::l_done(PointTableRef table)
 {
@@ -411,6 +246,11 @@ void Stage::l_addArgs(ProgramArgs& args)
 {
     args.add("user_data", "User JSON", m_userDataJSON);
     args.add("log", "Debug output filename", m_logname);
+    // We never really bind anything to this variable.  We extract the option
+    // before parsing the command line.  This entry allows a line in the
+    // help and options list.
+    args.add("option_file", "File from which to read additional options",
+        m_optionFile);
     readerAddArgs(args);
 }
 
@@ -436,8 +276,7 @@ void Stage::setupLog()
         m_logLeader += " ";
     m_logLeader += getName();
 
-    bool debug(l > LogLevel::Debug);
-    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, debug);
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, isDebug());
 }
 
 
@@ -488,10 +327,9 @@ void Stage::setSpatialReference(MetadataNode& m,
 bool Stage::parseName(std::string o, std::string::size_type& pos)
 {
     auto isStageChar = [](char c)
-        { return std::islower(c) || std::isdigit(c); };
+        { return std::isalpha(c) || std::isdigit(c) || c == '_'; };
 
-    std::string::size_type start = pos;
-    if (!std::islower(o[pos]))
+    if (o.empty() || !std::isalpha(o[pos]))
         return false;
     pos++;
     pos += Utils::extract(o, pos, isStageChar);
@@ -504,7 +342,6 @@ bool Stage::parseTagName(std::string o, std::string::size_type& pos)
     auto isTagChar = [](char c)
         { return std::isalnum(c) || c == '_'; };
 
-    std::string::size_type start = pos;
     if (!std::isalpha(o[pos]))
         return false;
     pos++;
@@ -516,6 +353,19 @@ bool Stage::parseTagName(std::string o, std::string::size_type& pos)
 void Stage::throwError(const std::string& s) const
 {
     throw pdal_error(getName() + ": " + s);
+}
+
+
+void Stage::startLogging() const
+{
+    m_log->pushLeader(m_logLeader);
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, isDebug());
+}
+
+
+void Stage::stopLogging() const
+{
+    m_log->popLeader();
 }
 
 } // namespace pdal

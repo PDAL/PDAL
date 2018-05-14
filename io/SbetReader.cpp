@@ -32,22 +32,24 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PointRef.hpp>
-
 #include "SbetReader.hpp"
+#include "SbetCommon.hpp"
 
-#include <pdal/pdal_macros.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.sbet",
     "SBET Reader",
-    "http://pdal.io/stages/readers.sbet.html" );
+    "http://pdal.io/stages/readers.sbet.html",
+    { "sbet" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
+CREATE_STATIC_STAGE(SbetReader, s_info)
 
 std::string SbetReader::getName() const { return s_info.name; }
 

@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <filters/RangeFilter.hpp>
 #include <io/GDALWriter.hpp>
 #include <io/LasReader.hpp>
 #include <io/TextReader.hpp>
@@ -48,13 +49,13 @@ using namespace pdal;
 namespace
 {
 
-void runGdalWriter(const Options& wo, const std::string& outfile,
-    const std::string& values)
+void runGdalWriter(const Options& wo, const std::string& infile,
+    const std::string& outfile, const std::string& values)
 {
     FileUtils::deleteFile(outfile);
 
     Options ro;
-    ro.add("filename", Support::datapath("gdal/grid.txt"));
+    ro.add("filename", infile);
 
     TextReader r;
     r.setOptions(ro);
@@ -88,11 +89,10 @@ void runGdalWriter(const Options& wo, const std::string& outfile,
     {
         throw pdal_error(raster.errorMsg());
     }
-    std::vector<uint8_t> data;
+    std::vector<double> data;
     raster.readBand(data, 1);
-    double *d = reinterpret_cast<double *>(data.data());
     for (size_t i = 0; i < arr.size(); ++i)
-        EXPECT_NEAR(arr[i], *d++, .001);
+        EXPECT_NEAR(arr[i], data[i], .001);
 }
 
 void runGdalWriter2(const Options& wo, const std::string& outfile,
@@ -152,17 +152,17 @@ void runGdalWriter2(const Options& wo, const std::string& outfile,
     {
         throw pdal_error(raster.errorMsg());
     }
-    std::vector<uint8_t> data;
+    std::vector<double> data;
     raster.readBand(data, 1);
-    double *d = reinterpret_cast<double *>(data.data());
     for (size_t i = 0; i < arr.size(); ++i)
-        EXPECT_NEAR(arr[i], *d++, .001);
+        EXPECT_NEAR(arr[i], data[i], .001);
 }
 
 }
 
 TEST(GDALWriterTest, min)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -175,11 +175,11 @@ TEST(GDALWriterTest, min)
     const std::string output =
         "5.000 -9999.000     7.000     8.000     8.900 "
         "4.000 -9999.000     6.000     7.000     8.000 "
-        "3.000     4.000     5.000     5.500     6.500 "
-        "2.000     3.000     4.000     4.500     5.500 "
+        "3.000     4.000     5.000     5.400     6.400 "
+        "2.000     3.000     4.000     4.400     5.400 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, min2)
@@ -201,8 +201,8 @@ TEST(GDALWriterTest, min2)
         "-9999.000 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00 "
         "-9999.000 -9999.00     5.00 -9999.00     7.00     8.00     8.90 "
         "-9999.000 -9999.00     4.00 -9999.00     6.00     7.00     8.00 "
-        "-9999.000 -9999.00     3.00     4.00     5.00     5.50     6.50 "
-        "-9999.000 -9999.00     2.00     3.00     4.00     4.50     5.50 "
+        "-9999.000 -9999.00     3.00     4.00     5.00     5.40     6.40 "
+        "-9999.000 -9999.00     2.00     3.00     4.00     4.40     5.40 "
         "-9999.000 -9999.00     1.00     2.00     3.00     4.00     5.00 "
         "   -1.000    -1.00 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00 "
         "   -1.000    -1.00 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00";
@@ -214,6 +214,7 @@ TEST(GDALWriterTest, min2)
 
 TEST(GDALWriterTest, minWindow)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -225,17 +226,18 @@ TEST(GDALWriterTest, minWindow)
     wo.add("window_size", 2);
 
     const std::string output =
-        "5.000     5.464     7.000     8.000     8.900 "
-        "4.000     4.857     6.000     7.000     8.000 "
-        "3.000     4.000     5.000     5.500     6.500 "
-        "2.000     3.000     4.000     4.500     5.500 "
+        "5.000     5.457     7.000     8.000     8.900 "
+        "4.000     4.848     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.400     6.400 "
+        "2.000     3.000     4.000     4.400     5.400 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, max)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -249,14 +251,15 @@ TEST(GDALWriterTest, max)
         "5.000 -9999.000     7.000     8.000     9.100 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.500     6.500 "
-        "1.000     2.000     3.000     4.500     5.500 ";
+        "2.000     3.000     4.000     5.400     6.400 "
+        "1.000     2.000     3.000     4.400     5.400 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, maxWindow)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -269,16 +272,17 @@ TEST(GDALWriterTest, maxWindow)
 
     const std::string output =
         "5.000     5.500     7.000     8.000     9.100 "
-        "4.000     4.929     6.000     7.000     8.000 "
+        "4.000     4.924     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.500     6.500 "
-        "1.000     2.000     3.000     4.500     5.500 ";
+        "2.000     3.000     4.000     5.400     6.400 "
+        "1.000     2.000     3.000     4.400     5.400 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, mean)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -291,15 +295,16 @@ TEST(GDALWriterTest, mean)
     const std::string output =
         "5.000 -9999.000     7.000     8.000     8.967 "
         "4.000 -9999.000     6.000     7.000     8.000 "
-        "3.000     4.000     5.000     5.750     6.750 "
-        "2.000     3.000     4.000     4.875     5.875 "
-        "1.000     2.000     3.000     4.250     5.250 ";
+        "3.000     4.000     5.000     5.700     6.700 "
+        "2.000     3.000     4.000     4.800     5.800 "
+        "1.000     2.000     3.000     4.200     5.200 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, meanWindow)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -311,17 +316,18 @@ TEST(GDALWriterTest, meanWindow)
     wo.add("window_size", 2);
 
     const std::string output =
-        "5.000     5.482     7.000     8.000     8.967 "
-        "4.000     4.887     6.000     7.000     8.000 "
-        "3.000     4.000     5.000     5.750     6.750 "
-        "2.000     3.000     4.000     4.875     5.875 "
-        "1.000     2.000     3.000     4.250     5.250 ";
+        "5.000     5.478     7.000     8.000     8.967 "
+        "4.000     4.881     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.700     6.700 "
+        "2.000     3.000     4.000     4.800     5.800 "
+        "1.000     2.000     3.000     4.200     5.200 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, idw)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -338,11 +344,12 @@ TEST(GDALWriterTest, idw)
         "2.000     3.000     4.000     5.000     6.000 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, idwWindow)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -360,11 +367,12 @@ TEST(GDALWriterTest, idwWindow)
         "2.000     3.000     4.000     5.000     6.000 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, count)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -381,11 +389,12 @@ TEST(GDALWriterTest, count)
         "1.000     1.000     1.000     4.000     4.000 "
         "1.000     1.000     1.000     2.000     2.000 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, stdev)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -398,15 +407,16 @@ TEST(GDALWriterTest, stdev)
     const std::string output =
         "0.000 -9999.000     0.000     0.000     0.094 "
         "0.000 -9999.000     0.000     0.000     0.000 "
-        "0.000     0.000     0.000     0.250     0.250 "
-        "0.000     0.000     0.000     0.415     0.415 "
-        "0.000     0.000     0.000     0.250     0.250 ";
+        "0.000     0.000     0.000     0.300     0.300 "
+        "0.000     0.000     0.000     0.424     0.424 "
+        "0.000     0.000     0.000     0.200     0.200 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, stdevWindow)
 {
+    std::string infile = Support::datapath("gdal/grid.txt");
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
@@ -418,13 +428,13 @@ TEST(GDALWriterTest, stdevWindow)
     wo.add("window_size", 2);
 
     const std::string output =
-        "0.000     0.018     0.000     0.000     0.094 "
-        "0.000     0.032     0.000     0.000     0.000 "
-        "0.000     0.000     0.000     0.250     0.250 "
-        "0.000     0.000     0.000     0.415     0.415 "
-        "0.000     0.000     0.000     0.250     0.250 ";
+        "0.000     0.021     0.000     0.000     0.094 "
+        "0.000     0.034     0.000     0.000     0.000 "
+        "0.000     0.000     0.000     0.300     0.300 "
+        "0.000     0.000     0.000     0.424     0.424 "
+        "0.000     0.000     0.000     0.200     0.200 ";
 
-    runGdalWriter(wo, outfile, output);
+    runGdalWriter(wo, infile, outfile, output);
 }
 
 TEST(GDALWriterTest, additionalDim)
@@ -466,3 +476,139 @@ TEST(GDALWriterTest, additionalDim)
     PointTable t2;
     EXPECT_THROW(w.prepare(t2), pdal_error);
 }
+
+TEST(GDALWriterTest, btbad)
+{
+    std::string infile = Support::datapath("gdal/grid.txt");
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "BT");
+    wo.add("output_type", "min");
+    wo.add("resolution", 1);
+    wo.add("radius", .7071);
+    wo.add("data_type", "double");
+    wo.add("filename", outfile);
+
+    const std::string output =
+        "5.000 -9999.000     7.000     8.000     8.900 "
+        "4.000 -9999.000     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.000     6.000 "
+        "2.000     3.000     4.000     4.000     5.000 "
+        "1.000     2.000     3.000     4.000     5.000 ";
+
+    EXPECT_THROW(runGdalWriter(wo, infile, outfile, output), pdal_error);
+}
+
+TEST(GDALWriterTest, btint)
+{
+    std::string outfile = Support::temppath("tmp.bt");
+    FileUtils::deleteFile(outfile);
+
+    Options ro;
+    ro.add("filename", Support::datapath("gdal/grid.txt"));
+
+    TextReader r;
+    r.setOptions(ro);
+
+    GDALWriter w;
+    Options wo;
+    wo.add("gdaldriver", "BT");
+    wo.add("output_type", "min");
+    wo.add("resolution", 1);
+    wo.add("radius", .7071);
+    wo.add("data_type", "int32");
+    wo.add("filename", outfile);
+    w.setOptions(wo);
+    w.setInput(r);
+
+    PointTable t;
+
+    w.prepare(t);
+    w.execute(t);
+
+    using namespace gdal;
+
+    const std::string values =
+        "5.000 -9999.000     7.000     8.000     9.000 "
+        "4.000 -9999.000     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.000     6.000 "
+        "2.000     3.000     4.000     4.000     5.000 "
+        "1.000     2.000     3.000     4.000     5.000 ";
+    std::istringstream iss(values);
+
+    std::vector<double> arr;
+    while (true)
+    {
+        double d;
+        iss >> d;
+        if (!iss)
+            break;
+        arr.push_back(d);
+    }
+
+    registerDrivers();
+    Raster raster(outfile, "BT");
+    if (raster.open() != GDALError::None)
+    {
+        throw pdal_error(raster.errorMsg());
+    }
+    std::vector<int32_t> data;
+    raster.readBand(data, 1);
+    for (size_t i = 0; i < arr.size(); ++i)
+        EXPECT_NEAR(arr[i], data[i], .001);
+}
+
+TEST(GDALWriterTest, no_points)
+{
+    std::string outfile(Support::temppath("out.tif"));
+    FileUtils::deleteFile(outfile);
+
+    LasReader r;
+    Options ro;
+    ro.add("filename", Support::datapath("las/no-points.las"));
+    r.setOptions(ro);
+
+    RangeFilter f;
+    f.setInput(r);
+    Options fo;
+    fo.add("limits", "Classification[2:2]");
+    f.setOptions(fo);
+
+    GDALWriter w;
+    w.setInput(f);
+    Options wo;
+    wo.add("resolution", 2);
+    wo.add("filename", outfile);
+    w.setOptions(wo);
+
+    PointTable t;
+    w.prepare(t);
+    EXPECT_THROW(w.execute(t), pdal_error);
+}
+
+// Check that we don't crash with bad X/Y's in grid_bounds.txt and a preset
+// grid bounds.
+TEST(GDALWriterTest, bounds)
+{
+    std::string infile = Support::datapath("gdal/grid_bounds.txt");
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "mean");
+    wo.add("resolution", 1);
+    wo.add("radius", .7071);
+    wo.add("filename", outfile);
+    wo.add("bounds", "([0, 4.5],[0, 4.5])");
+
+    const std::string output =
+        "5.000 -9999.000     7.000     8.000     8.967 "
+        "4.000 -9999.000     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.700     6.700 "
+        "2.000     3.000     4.000     4.800     5.800 "
+        "1.000     2.000     3.000     4.200     5.200 ";
+
+    runGdalWriter(wo, infile, outfile, output);
+}
+

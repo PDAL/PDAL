@@ -37,17 +37,18 @@
 
 #include "PtsReader.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static StaticPluginInfo const s_info
+{
     "readers.pts",
     "Pts Reader",
-    "http://pdal.io/stages/readers.pts.html" );
+    "http://pdal.io/stages/readers.pts.html",
+    { "pts" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, PtsReader, Reader, s_info)
+CREATE_STATIC_STAGE(PtsReader, s_info)
 
 std::string PtsReader::getName() const { return s_info.name; }
 

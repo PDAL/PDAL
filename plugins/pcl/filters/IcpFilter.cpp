@@ -32,21 +32,23 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "PCLConversions.hpp"
-#include <filters/IcpFilter.hpp>
+#include "../PCLConversions.hpp"
+#include "IcpFilter.hpp"
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pdal/EigenUtils.hpp>
-#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.icp", "Iterative Closest Point (ICP) filter",
-               "http://pdal.io/stages/filters.icp.html");
+static PluginInfo const s_info
+{
+    "filters.icp",
+    "Iterative Closest Point (ICP) filter",
+    "http://pdal.io/stages/filters.icp.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, IcpFilter, Filter, s_info);
+CREATE_SHARED_STAGE(IcpFilter, s_info)
 
 std::string IcpFilter::getName() const
 {
@@ -77,7 +79,7 @@ void IcpFilter::done(PointTableRef _)
     if (!this->m_complete)
     {
         throw pdal_error(
-            "filters.change must have two point view inputs, no more, no less");
+            "filters.icp must have two point view inputs, no more, no less");
     }
 }
 

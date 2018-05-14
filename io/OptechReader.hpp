@@ -41,13 +41,8 @@
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Georeference.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 #include "OptechCommon.hpp"
-
-extern "C" int32_t OptechReader_ExitFunc();
-extern "C" PF_ExitFunc OptechReader_InitPlugin();
 
 namespace pdal
 {
@@ -56,8 +51,6 @@ namespace pdal
 class PDAL_DLL OptechReader : public Reader
 {
 public:
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
     static const size_t MaximumNumberOfReturns = 4;

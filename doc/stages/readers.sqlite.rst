@@ -42,5 +42,7 @@ query
 spatialreference
   The spatial reference to use for the points. Over-rides the value read from the database.
 
+count
+  Maximum number of points to read [Optional]
 
 .. _SQLite: https://sqlite.org/

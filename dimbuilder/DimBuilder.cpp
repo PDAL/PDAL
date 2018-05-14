@@ -174,9 +174,11 @@ bool DimBuilder::execute()
 void DimBuilder::extractDim(Json::Value& dim)
 {
     DimSpec d;
+    Json::Value empty;
 
     // Get dimension name.
-    Json::Value name = dim.removeMember("name");
+    Json::Value name = dim.get("name", empty);
+    dim.removeMember("name");
     if (name.isNull())
         throw dimbuilder_error("Dimension missing name.");
     if (!name.isString())
@@ -185,7 +187,8 @@ void DimBuilder::extractDim(Json::Value& dim)
     validateDimension(d.m_name);
 
     // Get dimension description.
-    Json::Value description = dim.removeMember("description");
+    Json::Value description = dim.get("description", empty);
+    dim.removeMember("description");
     if (description.isNull())
     {
         std::ostringstream oss;
@@ -204,7 +207,8 @@ void DimBuilder::extractDim(Json::Value& dim)
     d.m_description = description.asString();
 
     // Get dimension type
-    Json::Value type = dim.removeMember("type");
+    Json::Value type = dim.get("type", empty);
+    dim.removeMember("type");
     if (type.isNull())
     {
         std::ostringstream oss;
@@ -222,7 +226,8 @@ void DimBuilder::extractDim(Json::Value& dim)
         throw dimbuilder_error(oss.str());
     }
 
-    Json::Value altNames = dim.removeMember("alt_names");
+    Json::Value altNames = dim.get("alt_names", empty);
+    dim.removeMember("alt_names");
     if (!altNames.isNull())
     {
         if (!altNames.isString())

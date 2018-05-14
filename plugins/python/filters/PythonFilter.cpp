@@ -36,20 +36,20 @@
 
 #include "PythonFilter.hpp"
 #include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "filters.python",
     "Manipulate data using inline Python",
-    "http://pdal.io/stages/filters.python.html" );
+    "http://pdal.io/stages/filters.python.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, PythonFilter, Filter, s_info)
+CREATE_SHARED_STAGE(PythonFilter, s_info)
 
 std::string PythonFilter::getName() const { return s_info.name; }
 

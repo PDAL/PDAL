@@ -48,8 +48,6 @@ class PDAL_DLL PcdReader : public pdal::Reader
 public:
     PcdReader() : Reader() {};
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

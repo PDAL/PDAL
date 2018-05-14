@@ -37,10 +37,6 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/plugin.hpp>
-
-extern "C" int32_t PtsReader_ExitFunc();
-extern "C" PF_ExitFunc PtsReader_InitPlugin();
 
 namespace pdal
 {
@@ -48,12 +44,9 @@ namespace pdal
 class PDAL_DLL PtsReader : public Reader
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
     PtsReader() : m_separator(' '), m_PointCount(0), m_istream(NULL)
     {}
+    std::string getName() const;
 
 private:
     /**

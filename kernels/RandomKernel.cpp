@@ -34,16 +34,19 @@
 
 #include "RandomKernel.hpp"
 
-#include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/Stage.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo("kernels.random", "Random Kernel",
-    "http://pdal.io/apps/random.html" );
+static StaticPluginInfo const s_info
+{
+    "kernels.random",
+    "Random Kernel",
+    "http://pdal.io/apps/random.html"
+};
 
-CREATE_STATIC_PLUGIN(1, 0, RandomKernel, Kernel, s_info)
+CREATE_STATIC_KERNEL(RandomKernel, s_info)
 
 std::string RandomKernel::getName() const { return s_info.name; }
 

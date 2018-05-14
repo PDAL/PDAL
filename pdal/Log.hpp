@@ -37,6 +37,7 @@
 #include <cassert>
 #include <memory> // shared_ptr
 #include <stack>
+#include <chrono>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/NullOStream.hpp>
@@ -56,13 +57,16 @@ public:
     /// @param leaderString A string to presage all log entries with
     /// @param outputName A filename or one of 'stdout', 'stdlog', or 'stderr'
     ///                   to use for outputting log information.
-    Log(std::string const& leaderString, std::string const& outputName);
+    /// @param timing Set to true to get timing output with log messages.
+    Log(std::string const& leaderString, std::string const& outputName,
+        bool timing = false);
 
     /// Constructs a pdal::Log instance.
     /// @param leaderString A string to presage all log entries with
     /// @param v An existing std::ostream to use for logging (instead of the
     ///          the instance creating its own)
-    Log(std::string const& leaderString, std::ostream* v);
+    /// @param timing Set to true to get timing output with log messages.
+    Log(std::string const& leaderString, std::ostream* v, bool timing = false);
 
     /** @name Destructor
     */
@@ -136,13 +140,17 @@ protected:
     std::ostream *m_log;
 
 private:
-    Log(const Log&);
-    Log& operator =(const Log&);
+    Log(const Log&) = delete;
+    Log& operator =(const Log&) = delete;
+    std::string now() const;
 
     LogLevel m_level;
     bool m_deleteStreamOnCleanup;
     std::stack<std::string> m_leaders;
     NullOStream m_nullStream;
+    bool m_timing;
+    std::chrono::steady_clock m_clock;
+    std::chrono::steady_clock::time_point m_start;
 };
 
 typedef std::shared_ptr<Log> LogPtr;

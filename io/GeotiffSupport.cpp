@@ -37,15 +37,15 @@
 #include <sstream>
 
 #include <geo_normalize.h>
-#include <ogr_spatialref.h>
 #include <geo_simpletags.h>
 
 PDAL_C_START
 
 // These functions are available from GDAL, but they
 // aren't exported.
-char CPL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
-int CPL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
+int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+void VSIFree(void *data);
 
 PDAL_C_END
 
@@ -78,9 +78,20 @@ public:
 
 }
 
+#pragma pack(push)
+#pragma pack(1)
+struct Entry
+{
+    uint16_t key;
+    uint16_t location;
+    uint16_t count;
+    uint16_t offset;
+};
+#pragma pack(pop)
+
 GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     const std::vector<uint8_t>& doublesRec,
-    const std::vector<uint8_t>& asciiRec)
+    const std::vector<uint8_t>& asciiRec, LogPtr log) : m_log(log)
 {
     GeotiffCtx ctx;
 
@@ -104,6 +115,9 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     if (directoryRec.size() < declaredSize)
         return;
 
+    validateDirectory((const Entry *)(header + 1), header->numKeys,
+        doublesRec.size() / sizeof(double), asciiRec.size());
+
     uint8_t *dirData = const_cast<uint8_t *>(directoryRec.data());
     ST_SetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
         (1 + header->numKeys) * 4, STT_SHORT, (void *)dirData);
@@ -124,13 +138,46 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     }
 
     ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
+    if (!ctx.gtiff)
+        throw Geotiff::error("Couldn't create Geotiff tags from "
+            "Geotiff definition.");
 
     GTIFDefn sGTIFDefn;
     if (GTIFGetDefn(ctx.gtiff, &sGTIFDefn))
     {
         char *wkt = GTIFGetOGISDefn(ctx.gtiff, &sGTIFDefn);
         if (wkt)
+        {
             m_srs.set(wkt);
+            VSIFree(wkt);
+        }
+    }
+}
+
+
+void GeotiffSrs::validateDirectory(const Entry *ent, size_t numEntries,
+    size_t numDoubles, size_t asciiSize)
+{
+    for (size_t i = 0; i < numEntries; ++i)
+    {
+        if (ent->count == 0)
+            m_log->get(LogLevel::Warning) << "Geotiff directory contains " <<
+                "key " << ent->key << " with 0 count." << std::endl;
+        if (ent->location == 0 && ent->count != 1)
+            m_log->get(LogLevel::Error) << "Geotiff directory contains key " <<
+                ent->key << " with short entry and more than one value." <<
+                std::endl;
+        if (ent->location == GEOTIFF_DIRECTORY_RECORD_ID)
+            if (ent->offset + ent->count > numDoubles)
+                m_log->get(LogLevel::Error) << "Geotiff directory contains " <<
+                    "key " << ent->key << " with count/offset outside of valid "
+                    "range of doubles record." << std::endl;
+        if (ent->location == GEOTIFF_ASCII_RECORD_ID)
+            if (ent->offset + ent->count > asciiSize)
+                m_log->get(LogLevel::Error) << "Geotiff directory contains " <<
+                    " key " << ent->key << " with count/offset outside of "
+                    "valid range of ascii record." << std::endl;
+        ent++;
     }
 }
 
@@ -145,7 +192,7 @@ GeotiffTags::GeotiffTags(const SpatialReference& srs)
 
     // Set tiff tags from WKT
     if (!GTIFSetFromOGISDefn(ctx.gtiff, srs.getWKT().c_str()))
-        throw error("Could not set m_gtiff from WKT");
+        throw Geotiff::error("Could not set m_gtiff from WKT");
     GTIFWriteKeys(ctx.gtiff);
 
     auto sizeFromType = [](int type, int count) -> size_t

@@ -35,12 +35,8 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
-
-extern "C" int32_t LOFFilter_ExitFunc();
-extern "C" PF_ExitFunc LOFFilter_InitPlugin();
 
 namespace pdal
 {
@@ -55,14 +51,12 @@ public:
     LOFFilter() : Filter()
     {}
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
     Dimension::Id m_kdist, m_lrd, m_lof;
     int m_minpts;
-    
+
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);

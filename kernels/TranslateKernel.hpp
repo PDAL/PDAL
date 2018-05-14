@@ -37,15 +37,10 @@
 
 #include <pdal/Kernel.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <string>
 #include <vector>
-
-extern "C" int32_t TranslateKernel_ExitFunc();
-extern "C" PF_ExitFunc TranslateKernel_InitPlugin();
 
 namespace pdal
 {
@@ -53,13 +48,11 @@ namespace pdal
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
     int execute();
+    TranslateKernel();
 
 private:
-    TranslateKernel();
     virtual void addSwitches(ProgramArgs& args);
     void makeJSONPipeline();
     void makeArgPipeline();
@@ -72,6 +65,7 @@ private:
     std::string m_writerType;
     std::string m_filterJSON;
     std::string m_metadataFile;
+    bool m_noStream;
 };
 
 } // namespace pdal

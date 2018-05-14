@@ -378,7 +378,7 @@ void Octree< Real >::_setSliceIsoVertices( const BSplineData< ColorDegree , BTyp
 							if( stillOwner )
 							{
 								// We only need to pass the iso-vertex down if the edge it lies on is adjacent to a coarser leaf
-								bool isNeeded;
+								bool isNeeded(false);
 								switch( o )
 								{
 								case 0: isNeeded = ( !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][2*y][1] ) || !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][2*y][2*z] ) || !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][1][2*z] ) ) ; break;

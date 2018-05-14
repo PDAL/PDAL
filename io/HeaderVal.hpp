@@ -46,10 +46,10 @@ protected:
     T m_defVal;
     bool m_valSet;
 
-    BaseHeaderVal() : m_valSet(false)
+    BaseHeaderVal() : m_val(T()), m_valSet(false)
     {}
 
-    BaseHeaderVal(const T& t) : m_defVal(t), m_valSet(false)
+    BaseHeaderVal(const T& t) : m_val(T()), m_defVal(t), m_valSet(false)
     {}
 
 public:
@@ -159,8 +159,9 @@ public:
     {
         m_valSet = true;
         m_val = val;
-        m_val.resize(std::min(m_val.length(), LEN));
-        return val.length() <= LEN;
+        if (LEN > 0)
+            m_val.resize(std::min(m_val.length(), LEN));
+        return (LEN == 0 || val.length() <= LEN);
     }
 
     std::string val() const

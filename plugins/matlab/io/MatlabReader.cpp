@@ -37,18 +37,19 @@
 
 #include "MatlabReader.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "readers.matlab",
     "Matlab Reader",
-    "http://pdal.io/stages/readers.matlab.html" );
+    "http://pdal.io/stages/readers.matlab.html"
+};
 
-CREATE_SHARED_PLUGIN(1, 0, MatlabReader, Reader, s_info)
+CREATE_SHARED_STAGE(MatlabReader, s_info)
 std::string MatlabReader::getName() const { return s_info.name; }
 
 void MatlabReader::initialize(PointTableRef table)
@@ -57,9 +58,26 @@ void MatlabReader::initialize(PointTableRef table)
     if (!m_matfile)
         throwError("Could not open file '" + m_filename + "' for reading.");
 
+    m_structArray = matGetVariable(m_matfile, m_structName.c_str());
+    if (!m_structArray)
+    {
+        std::ostringstream oss;
+        oss << "Array struct with name '" << m_structName << "' not found ";
+        oss << "in file '" << m_filename << "'";
+        throwError(oss.str());
+    }
+
     m_pointIndex = 0;
     m_numElements = 0;
     m_numFields = 0;
+
+    std::string wkt = mlang::Script::getSRSWKT(m_structArray, log());
+    if (wkt.size())
+    {
+        SpatialReference srs(wkt);
+        setSpatialReference(srs);
+    }
+    m_tableMetadata = table.metadata();
 }
 
 
@@ -74,14 +92,7 @@ void MatlabReader::addDimensions(PointLayoutPtr layout)
     log()->get(LogLevel::Debug) << "Opening file" <<
         " '" << m_filename << "'." << std::endl;
 
-    m_structArray = matGetVariable(m_matfile, m_structName.c_str());
-    if (!m_structArray)
-    {
-        std::ostringstream oss;
-        oss << "Array struct with name '" << m_structName << "' not found ";
-        oss << "in file '" << m_filename << "'";
-        throwError(oss.str());
-    }
+
 
     // For now we read all of the fields in the given
     // array structure
@@ -166,8 +177,6 @@ bool MatlabReader::processOne(PointRef& point)
             char* p = (char*)mxGetData(f) + (m_pointIndex*size);
             point.setField(d, t, (void*)p);
         }
-
-
     }
 
     m_pointIndex++;

@@ -34,15 +34,10 @@
 
 #pragma once
 
-
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-
+#include <Python.h>
+#undef toupper
+#undef tolower
+#undef isspace
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
@@ -56,10 +51,10 @@ namespace pdal
 namespace plang
 {
 
-PyObject *fromMetadata(MetadataNode m);
-void addMetadata(PyObject *list, MetadataNode m);
+PDAL_DLL PyObject *fromMetadata(MetadataNode m);
+PDAL_DLL void addMetadata(PyObject *list, MetadataNode m);
 
-std::string getTraceback();
+PDAL_DLL std::string getTraceback();
 
 class Environment;
 typedef Environment *EnvironmentPtr;
@@ -79,6 +74,7 @@ public:
     static EnvironmentPtr get();
 
     static int getPythonDataType(Dimension::Type t);
+    static pdal::Dimension::Type getPDALDataType(int t);
 
 private:
     Redirector m_redirector;

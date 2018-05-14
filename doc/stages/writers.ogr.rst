@@ -1,6 +1,6 @@
-.. _writers.pcd:
+.. _writers.ogr:
 
-writers.pcd
+writers.ogr
 ===========
 
 The **OGR Writer** will create files of various `vector formats`_ as supported

@@ -69,9 +69,11 @@ TEST(MatlabFilterTest, simple_fetch)
     Options xfilter_opts;
     {
         const Option source("source",
-            "PDAL.X = PDAL.X + 10;PDAL.X(1,1)"
+            "PDAL.X = PDAL.X + 10;PDAL.X(1,1); PDAL.metadata"
             );
         xfilter_opts.add(source);
+        const Option args("pdalargs","pdalargs");
+        xfilter_opts.add(args);
     }
 
     StageFactory f;
@@ -81,15 +83,32 @@ TEST(MatlabFilterTest, simple_fetch)
         reader.setOptions(reader_opts);
 
         Stage* xfilter(f.createStage("filters.matlab"));
-//         LogPtr log = LogPtr(new Log("matlab.log", "stderr"));
-//         log->setLevel(LogLevel::Debug2);
-//         xfilter->setLog(log);
+        LogPtr log = LogPtr(new Log("matlab.log", "stderr"));
+        log->setLevel(LogLevel::Debug2);
+        xfilter->setLog(log);
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 
         PointTable table;
         xfilter->prepare(table);
         PointViewSet pvSet = xfilter->execute(table);
+
+        PointLayoutPtr layout(table.layout());
+        MetadataNode m = table.metadata();
+        m = m.findChild("filters.matlab");
+        MetadataNodeList l = m.children();
+
+        EXPECT_EQ(l.size(), 0u);
+        if (l.size())
+        {
+            // Matlab filter doesn't i/o metadata
+            EXPECT_EQ(l[0].name(), "filters.matlab");
+            EXPECT_EQ(l[0].value(), "52");
+            EXPECT_EQ(l[0].description(), "a filter description");
+
+        }
+
+
         EXPECT_EQ(pvSet.size(), 1u);
         PointViewPtr view = *pvSet.begin();
         EXPECT_EQ(view->size(), 10u);

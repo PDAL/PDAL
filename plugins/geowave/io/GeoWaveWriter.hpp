@@ -48,9 +48,6 @@ namespace pdal
     class PDAL_DLL GeoWaveWriter : public Writer
     {
     public:
-
-        static void * create();
-        static int32_t destroy(void *);
         std::string getName() const;
 
     private:

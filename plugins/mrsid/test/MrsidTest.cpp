@@ -44,10 +44,7 @@
 
 #include <iostream>
 
-#ifdef PDAL_COMPILER_GCC
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
-
 
 using namespace pdal;
 

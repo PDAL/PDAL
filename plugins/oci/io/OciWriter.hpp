@@ -48,9 +48,6 @@ class PDAL_DLL OciWriter : public DbWriter
 {
 public:
     OciWriter();
-
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

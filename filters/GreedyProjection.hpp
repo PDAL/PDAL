@@ -39,14 +39,15 @@
 
 #pragma once
 
+// This is for M_PI on Windows.
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <fstream>
 #include <iostream>
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-#include <Eigen/Dense>
 
-extern "C" int32_t GreedyProjection_ExitFunc();
-extern "C" PF_ExitFunc GreedyProjection_InitPlugin();
+#include <pdal/Filter.hpp>
+#include <Eigen/Dense>
 
 namespace pdal
 {
@@ -131,7 +132,7 @@ namespace pdal
     * \author Zoltan Csaba Marton
     * \ingroup surface
     */
-  class GreedyProjection : public Filter
+  class PDAL_DLL GreedyProjection : public Filter
   {
     public:
 
@@ -184,8 +185,6 @@ namespace pdal
         mesh_(nullptr)
       {};
 
-      static void * create();
-      static int32_t destroy(void *);
       std::string getName() const;
 
       /** \brief Don't consider points for triangulation if their normal deviates more than this value from the query point's normal.

@@ -34,7 +34,7 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/KernelFactory.hpp>
+#include <pdal/Kernel.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
@@ -69,11 +69,10 @@ private:
     void outputVersion();
     void outputHelp(const ProgramArgs& args);
     void outputDrivers();
-    void outputCommands();
+    void outputCommands(const std::string& leader);
     void outputOptions();
     void outputOptions(const std::string& stageName,std::ostream& strm);
     void addArgs(ProgramArgs& args);
-    std::string findKernel();
 
     std::ostream& m_out;
 
@@ -87,13 +86,14 @@ private:
     std::string m_showOptions;
     bool m_showJSON;
     std::string m_log;
+    bool m_logtiming;
 };
 
 
 void App::outputVersion()
 {
     m_out << headline << std::endl;
-    m_out << "pdal " << GetFullVersionString() << std::endl;
+    m_out << "pdal " << Config::fullVersionString() << std::endl;
     m_out << headline << std::endl;
     m_out << std::endl;
 }
@@ -110,11 +110,11 @@ void App::outputHelp(const ProgramArgs& args)
 
     m_out << "The following commands are available:" << std::endl;
 
-    KernelFactory f(false);
-    StringList loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
-
-    for (auto name : loaded_kernels)
-        m_out << "   - " << name << std::endl;
+    // Load all kernels so that we can report the names.
+    StageFactory f;
+    PluginManager<Kernel>::loadAll();
+    outputCommands("  - ");
+    m_out << std::endl;
     m_out << "See http://pdal.io/apps/ for more detail" << std::endl;
 }
 
@@ -122,10 +122,9 @@ void App::outputHelp(const ProgramArgs& args)
 void App::outputDrivers()
 {
     // Force plugin loading.
-    StageFactory f(false);
-
-    StringList stages = PluginManager::names(PF_PluginType_Filter |
-        PF_PluginType_Reader | PF_PluginType_Writer);
+    StageFactory f;
+    PluginManager<Stage>::loadAll();
+    StringList stages = PluginManager<Stage>::names();
 
     if (!m_showJSON)
     {
@@ -146,7 +145,7 @@ void App::outputDrivers()
 
         for (auto name : stages)
         {
-            std::string descrip = PluginManager::description(name);
+            std::string descrip = PluginManager<Stage>::description(name);
             StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
             for (size_t i = 0; i < lines.size(); ++i)
             {
@@ -160,32 +159,33 @@ void App::outputDrivers()
     }
     else
     {
-
         Json::Value array(Json::arrayValue);
         for (auto name : stages)
         {
-            std::string description = PluginManager::description(name);
-            std::string link = PluginManager::link(name);
+            std::string description = PluginManager<Stage>::description(name);
+            std::string link = PluginManager<Stage>::link(name);
             Json::Value node(Json::objectValue);
             node["name"] = name;
             node["description"] = description;
             node["link"] = link;
             array.append(node);
         }
-
         m_out << array;
-
     }
 }
 
 
-void App::outputCommands()
+void App::outputCommands(const std::string& leader)
 {
-    KernelFactory f(false);
-    std::vector<std::string> loaded_kernels;
-    loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
-    for (auto name : loaded_kernels)
-        m_out << name << std::endl;
+    StageFactory f;
+    PluginManager<Kernel>::loadAll();
+    std::string kernelbase("kernels.");
+    for (auto name : PluginManager<Kernel>::names())
+    {
+        if (Utils::startsWith(name, kernelbase))
+            name = name.substr(kernelbase.size());
+        m_out << leader << name << std::endl;
+    }
 }
 
 
@@ -201,13 +201,12 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         return;
     }
 
-
     ProgramArgs args;
     s->addAllArgs(args);
 
     if (!m_showJSON)
     {
-        strm  << stageName << " -- " << PluginManager::link(stageName) <<
+        strm  << stageName << " -- " << PluginManager<Stage>::link(stageName) <<
             std::endl;
         strm  << headline << std::endl;
 
@@ -227,7 +226,6 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         object[stageName] = array;
 
         strm  << object;
-
     }
 }
 
@@ -237,8 +235,7 @@ void App::outputOptions()
     // Force plugin loading.
     StageFactory f(false);
 
-    StringList nv = PluginManager::names(PF_PluginType_Filter |
-        PF_PluginType_Reader | PF_PluginType_Writer);
+    StringList nv = PluginManager<Stage>::names();
 
     if (!m_showJSON)
     {
@@ -247,7 +244,8 @@ void App::outputOptions()
             outputOptions(n, m_out);
             m_out << std::endl;
         }
-    } else
+    }
+    else
     {
         std::ostringstream strm;
         Json::Value options (Json::arrayValue);
@@ -262,7 +260,6 @@ void App::outputOptions()
 
             strm.str("");
         }
-
         m_out << options;
     }
 }
@@ -283,6 +280,7 @@ void App::addArgs(ProgramArgs& args)
         m_showOptions);
     args.add("log", "Log filename (accepts stderr, stdout, stdlog, devnull"
         " as special cases)", m_log, "stderr");
+    args.add("logtiming", "Turn on timing for log messages", m_logtiming);
     Arg& json = args.add("showjson", "List options or drivers as JSON output",
         m_showJSON);
     json.setHidden();
@@ -304,35 +302,6 @@ int main(int argc, char* argv[])
 }
 
 
-std::string App::findKernel()
-{
-    StringList loadedKernels;
-
-    auto kernelSurname = [](const std::string& name)
-    {
-        StringList names = Utils::split2(name, '.');
-        return names.size() == 2 ? names[1] : std::string();
-    };
-
-    KernelFactory f(true);
-    // Discover available kernels without plugins, and test to see if
-    // the positional option 'command' is a valid kernel
-    loadedKernels = PluginManager::names(PF_PluginType_Kernel);
-    for (auto& name : loadedKernels)
-        if (m_command == kernelSurname(name))
-            return name;
-
-    // Force loading of plugins.
-    KernelFactory f2(false);
-    loadedKernels = PluginManager::names(PF_PluginType_Kernel);
-    for (auto& name : loadedKernels)
-        if (m_command == kernelSurname(name))
-            return name;
-
-    return std::string();
-}
-
-
 int App::execute(StringList& cmdArgs, LogPtr& log)
 {
     ProgramArgs args;
@@ -348,12 +317,14 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         return -1;
     }
 
-    log.reset(new Log("PDAL", m_log));
+    log.reset(new Log("PDAL", m_log, m_logtiming));
     if (m_logLevel != LogLevel::None)
         log->setLevel(m_logLevel);
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
-    PluginManager::setLog(log);
+    log->get(LogLevel::Debug) << "Debugging..." << std::endl;
+    PluginManager<Stage>::setLog(log);
+    PluginManager<Kernel>::setLog(log);
 #ifndef _WIN32
     if (m_debug)
     {
@@ -373,13 +344,13 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     if (!m_command.empty())
     {
         int ret = 0;
-        std::string name(findKernel());
-        if (name.size())
+        std::string name("kernels." + m_command);
+
+        Kernel *kernel = PluginManager<Kernel>::createObject(name);
+        if (kernel)
         {
             if (m_help)
                 cmdArgs.push_back("--help");
-            void *obj = PluginManager::createObject(name);
-            Kernel *kernel(static_cast<Kernel *>(obj));
             // This shouldn't throw.  If it does, it's something awful, so
             // not cleaning up seems inconsequential.
             log->setLeader("pdal " + m_command);
@@ -411,4 +382,3 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         outputHelp(args);
     return 0;
 }
-

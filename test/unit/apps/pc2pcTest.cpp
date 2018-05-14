@@ -39,6 +39,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_features.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
@@ -50,7 +51,7 @@ static std::string appName()
 }
 
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef _WIN32
 TEST(pc2pcTest, pc2pcTest_test_no_input)
 {
     std::string cmd = appName();
@@ -85,7 +86,8 @@ static bool fileIsOkay(const std::string& name)
 {
     if (!FileUtils::fileExists(name))
         return false;
-    if (FileUtils::fileSize(name) < 1000)
+    // 375 is the size of the LAS header.
+    if (FileUtils::fileSize(name) < 375)
         return false;
     return true;
 }

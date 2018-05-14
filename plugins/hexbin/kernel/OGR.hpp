@@ -34,16 +34,11 @@
 #pragma once
 
 #include <hexer/hexer.hpp>
-
 #include <hexer/Processor.hpp>
-
 #include <hexer/hexer_defines.h>
 #include <hexer/Mathpair.hpp>
 #include <hexer/HexInfo.hpp>
 #include <hexer/export.hpp>
-#include <pdal/pdal_macros.hpp>
-
-
 
 #include "ogr_api.h"
 #include "gdal.h"
@@ -52,8 +47,6 @@ namespace pdal
 {
 namespace hexdensity
 {
-
-
 namespace writer
 {
 

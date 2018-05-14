@@ -35,22 +35,20 @@
 #include "MatlabWriter.hpp"
 #include "../filters/Script.hpp"
 
-#include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "writers.matlab",
     "Matlab .mat file writer.",
-    "http://pdal.io/stages/writers.matlab.html");
+    "http://pdal.io/stages/writers.matlab.html"
+};
 
-
-CREATE_SHARED_PLUGIN(1, 0, MatlabWriter, Writer, s_info)
+CREATE_SHARED_STAGE(MatlabWriter, s_info)
 std::string MatlabWriter::getName() const { return s_info.name; }
-
 
 void MatlabWriter::addArgs(ProgramArgs& args)
 {
@@ -86,13 +84,15 @@ void MatlabWriter::ready(PointTableRef table)
     m_matfile = matOpen(m_filename.c_str(), "w");
     if (!m_matfile)
         throwError("Could not open file '" + m_filename + "' for writing.");
+
+    m_tableMetadata = table.metadata();
 }
 
 
 void MatlabWriter::write(const PointViewPtr view)
 {
 
-    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, log());
+    mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, "", m_tableMetadata, log());
     if (matPutVariable(m_matfile, m_structName.c_str(), data))
         throwError("Could not write points to file '" + m_filename + "'.");
 

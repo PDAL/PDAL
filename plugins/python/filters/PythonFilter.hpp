@@ -50,8 +50,6 @@ public:
     PythonFilter() : Filter(), m_script(NULL)
         {}
 
-    static void *create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:

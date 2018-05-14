@@ -65,7 +65,7 @@ TEST(FerryFilterTest, stream)
     r.setOptions(ro);
 
     Options fo;
-    fo.add("dimensions", "X=FooX,Y=BarY");
+    fo.add("dimensions", "X=FooX,Y=>BarY");
 
     FerryFilter f;
     f.setOptions(fo);
@@ -120,7 +120,9 @@ TEST(FerryFilterTest, test_ferry_copy_json)
     double y = view->getFieldAs<double>(state_plane_y, 0);
 
     EXPECT_DOUBLE_EQ(-117.2501328350574, lon);
-    EXPECT_DOUBLE_EQ(49.341077824192915, lat);
+    // proj 5 will consider +ellps=GRS80 +towgs84=0,0,0 to be slighly different
+    // than +datum=WGS84 and return 49.341077823260804.
+    EXPECT_NEAR(49.341077824192915, lat, 1e-9);
     EXPECT_DOUBLE_EQ(637012.24, x);
     EXPECT_DOUBLE_EQ(849028.31, y);
 }
@@ -158,6 +160,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     Options op3;
 
     op3.add("dimensions", "NewX = X");
+    op3.add("dimensions", "=>NewY");
     FerryFilter f3;
     f3.setInput(reader);
     f3.setOptions(op3);
@@ -167,11 +170,22 @@ TEST(FerryFilterTest, test_ferry_invalid)
 
     Options op4;
 
-    op4.add("dimensions", "X = Y, X = NewZ = NewQ");
+    op4.add("dimensions", "X = Y, X => NewZ = NewQ");
     FerryFilter f4;
     f4.setInput(reader);
     f4.setOptions(op4);
 
     // Make sure we reject bad option format.
     EXPECT_THROW(f4.prepare(table), pdal_error);
+
+    Options op5;
+    op5.add("dimensions", "=Foobar");
+    FerryFilter f5;
+    f5.setInput(reader);
+    f5.setOptions(op5);
+    f5.prepare(table);
+    EXPECT_TRUE(table.layout()->findDim("Foobar") != Dimension::Id::Unknown);
+    Dimension::Id id = table.layout()->findDim("NewY");
+    EXPECT_TRUE(id != Dimension::Id::Unknown);
+    EXPECT_TRUE(table.layout()->dimType(id) != Dimension::Type::None);
 }

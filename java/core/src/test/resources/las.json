@@ -1,8 +1,0 @@
-{
-  "pipeline":[
-    {
-      "filename":"../test/data/las/1.2-with-color.las",
-      "spatialreference":"EPSG:2993"
-    }
-  ]
-}

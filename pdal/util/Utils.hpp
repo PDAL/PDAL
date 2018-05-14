@@ -459,6 +459,17 @@ namespace Utils
     }
 
     /**
+      Count the number of characters spaces in a string at a position.
+
+      \param s  String in which to start counting characters.
+      \param p  Position in input string at which to start counting.
+      \return  Then number of space-y characters matching the predicate.
+    */
+    PDAL_DLL inline std::string::size_type
+    extractSpaces(const std::string& s, std::string::size_type p)
+        { return extract(s, p, (int(*)(int))std::isspace); }
+
+    /**
       Split a string into substrings based on a predicate.  Characters
       matching the predicate are discarded.
 
@@ -555,6 +566,20 @@ namespace Utils
         auto pred = [tChar](char c){ return(c == tChar); };
         return split2(s, pred);
     }
+
+    /**
+      Perform shell-style word expansion (break a string into arguments).
+      This only does simple handling of quoted values and backslashes
+      and doesn't support fancier shell behavior.  Use the real wordexp()
+      if you need all that.  The behavior of escaped values in a string
+      was surprising to me, so try the shell first if you think you've
+      found a problem.
+
+      \param s  Input string to parse.
+      \return  List of arguments.
+    */
+    PDAL_DLL std::vector<std::string>
+    simpleWordexp(const std::string& s);
 
     /**
       Return a string representation of a type specified by the template
@@ -739,10 +764,16 @@ namespace Utils
       \param from  Value to convert.
       \return  String representation of numeric value.
     */
-    inline std::string toString(double from)
+    inline std::string toString(double from, size_t precision = 10)
     {
         std::ostringstream oss;
-        oss << std::setprecision(10) << from;
+        // Standardize nan/inf output to the JAVA property names because
+        // when we convert to a string, we usually convert to JSON.
+        if (std::isnan(from))
+            return "NaN";
+        if (std::isinf(from))
+            return (from < 0 ? "-Infinity" : "Infinity");
+        oss << std::setprecision(precision) << from;
         return oss.str();
     }
 
@@ -849,6 +880,23 @@ namespace Utils
     inline std::string toString(signed char from)
         { return std::to_string((int)from); }
 
+
+    template<typename T>
+    bool fromString(const std::string& from, T* & to)
+    {
+        void *v;
+        // Uses sscanf instead of operator>>(istream, void*&) as a workaround
+        // for https://bugs.llvm.org/show_bug.cgi?id=19740, which presents with
+        // clang-800.0.42.1 for x86_64-apple-darwin15.6.0.
+        int result = sscanf(from.c_str(), "%p", &v);
+        if (result != 1) {
+            return false;
+        }
+        to = reinterpret_cast<T*>(v);
+        return true;
+    }
+
+
     /**
       Convert a string to a value by reading from a string stream.
 
@@ -893,7 +941,7 @@ namespace Utils
                 return true;
             }
         }
-        catch (std::invalid_argument) // Character that isn't a number?
+        catch (std::invalid_argument&) // Character that isn't a number?
         {
             if (s.length() == 1)
             {
@@ -925,7 +973,7 @@ namespace Utils
                 return true;
             }
         }
-        catch (std::invalid_argument) // Character that isn't a number?
+        catch (std::invalid_argument&) // Character that isn't a number?
         {
             if (s.length() == 1)
             {
@@ -957,7 +1005,7 @@ namespace Utils
                 return true;
             }
         }
-        catch (std::invalid_argument) // Character that isn't a number?
+        catch (std::invalid_argument&) // Character that isn't a number?
         {
             if (s.length() == 1)
             {
