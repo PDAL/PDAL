@@ -32,29 +32,24 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-/**
-#include "TextWriter.hpp"
-
-#include <pdal/pdal_export.hpp>
-#include <pdal/PDALUtils.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/util/Algorithm.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include "CesiumWriter.hpp"
 
 #include <iostream>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "writers.text",
-    "Text Writer",
-    "http://pdal.io/stages/writers.text.html" );
+static StaticPluginInfo const s_info
+{
+    "writers.cesium",
+    "Cesium Writer",
+    "http://pdal.io/stages/writers.cesium.html",
+    { "gltf" }
+};
 
-CREATE_STATIC_PLUGIN(1, 0, TextWriter, Writer, s_info)
+CREATE_STATIC_STAGE(CesiumWriter, s_info)
 
-std::string TextWriter::getName() const { return s_info.name; }
+std::string CesiumWriter::getName() const { return s_info.name; }
 
 struct FileStreamDeleter
 {
@@ -71,173 +66,30 @@ struct FileStreamDeleter
 };
 
 
-void TextWriter::addArgs(ProgramArgs& args)
+void CesiumWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename);
-    args.add("format", "Output format", m_outputType, "csv");
-    args.add("jscallback", "", m_callback);
-    args.add("keep_unspecified", "Write all dimensions", m_writeAllDims, true);
-    args.add("order", "Dimension order", m_dimOrder);
-    args.add("write_header", "Whether a header should be written",
-        m_writeHeader, true);
-    args.add("newline", "String to use as newline", m_newline, "\n");
-    args.add("delimiter", "Dimension delimiter", m_delimiter, ",");
-    args.add("quote_header", "Whether a header should be quoted",
-        m_quoteHeader, true);
-    args.add("precision", "Output precision", m_precision, 3);
 }
 
 
-void TextWriter::initialize(PointTableRef table)
+void CesiumWriter::initialize(PointTableRef table)
 {
     m_stream = FileStreamPtr(Utils::createFile(m_filename, true),
         FileStreamDeleter());
     if (!m_stream)
         throwError("Couldn't open '" + m_filename + "' for output.");
-    m_outputType = Utils::toupper(m_outputType);
 }
 
 
-void TextWriter::ready(PointTableRef table)
+void CesiumWriter::ready(PointTableRef table)
 {
-    m_stream->precision(m_precision);
-    *m_stream << std::fixed;
-
-    // Find the dimensions listed and put them on the id list.
-    StringList dimNames = Utils::split2(m_dimOrder, ',');
-    for (std::string dim : dimNames)
-    {
-        Utils::trim(dim);
-        Dimension::Id d = table.layout()->findDim(dim);
-        if (d == Dimension::Id::Unknown)
-            throwError("Dimension not found with name '" + dim + "'.");
-        m_dims.push_back(d);
-    }
-
-    // Add the rest of the dimensions to the list if we're doing that.
-    // Yes, this isn't efficient when, but it's simple.
-    if (m_dimOrder.empty() || m_writeAllDims)
-    {
-        Dimension::IdList all = table.layout()->dims();
-        for (auto di = all.begin(); di != all.end(); ++di)
-            if (!Utils::contains(m_dims, *di))
-                m_dims.push_back(*di);
-    }
-
-    if (!m_writeHeader)
-        log()->get(LogLevel::Debug) << "Not writing header" << std::endl;
-    else
-        writeHeader(table);
+/**
+    m_stream.reset(new OLEStream(m_filename));
+    m_stream << "glTF";         // Magic
+    m_stream << (uint32_t)2;    // Version
+    m_stream <<
+**/
 }
 
-
-void TextWriter::writeHeader(PointTableRef table)
-{
-    log()->get(LogLevel::Debug) << "Writing header to filename: " <<
-        m_filename << std::endl;
-    if (m_outputType == "GEOJSON")
-        writeGeoJSONHeader();
-    else if (m_outputType == "CSV")
-        writeCSVHeader(table);
-}
-
-
-void TextWriter::writeFooter()
-{
-    if (m_outputType == "GEOJSON")
-    {
-        *m_stream << "]}";
-        if (m_callback.size())
-            *m_stream  <<")";
-    }
-    m_stream.reset();
-}
-
-
-void TextWriter::writeGeoJSONHeader()
-{
-    if (m_callback.size())
-        *m_stream << m_callback <<"(";
-    *m_stream << "{ \"type\": \"FeatureCollection\", \"features\": [";
-}
-
-
-void TextWriter::writeCSVHeader(PointTableRef table)
-{
-    const PointLayoutPtr layout(table.layout());
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        if (di != m_dims.begin())
-            *m_stream << m_delimiter;
-
-        if (m_quoteHeader)
-            *m_stream << "\"" << layout->dimName(*di) << "\"";
-        else
-            *m_stream << layout->dimName(*di);
-    }
-    *m_stream << m_newline;
-}
-
-void TextWriter::writeCSVBuffer(const PointViewPtr view)
-{
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        {
-            if (di != m_dims.begin())
-                *m_stream << m_delimiter;
-            *m_stream << view->getFieldAs<double>(*di, idx);
-        }
-        *m_stream << m_newline;
-    }
-}
-
-void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
-{
-    using namespace Dimension;
-
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        if (idx)
-            *m_stream << ",";
-
-        *m_stream << "{ \"type\":\"Feature\",\"geometry\": "
-            "{ \"type\": \"Point\", \"coordinates\": [";
-        *m_stream << view->getFieldAs<double>(Id::X, idx) << ",";
-        *m_stream << view->getFieldAs<double>(Id::Y, idx) << ",";
-        *m_stream << view->getFieldAs<double>(Id::Z, idx) << "]},";
-
-        *m_stream << "\"properties\": {";
-
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        {
-            if (di != m_dims.begin())
-                *m_stream << ",";
-
-            *m_stream << "\"" << view->dimName(*di) << "\":";
-            *m_stream << "\"";
-            *m_stream << view->getFieldAs<double>(*di, idx);
-            *m_stream <<"\"";
-        }
-        *m_stream << "}"; // end properties
-        *m_stream << "}"; // end feature
-    }
-}
-
-void TextWriter::write(const PointViewPtr view)
-{
-    if (m_outputType == "CSV")
-        writeCSVBuffer(view);
-    else if (m_outputType == "GEOJSON")
-        writeGeoJSONBuffer(view);
-}
-
-
-void TextWriter::done(PointTableRef)
-{
-    writeFooter();
-    getMetadata().addList("filename", m_filename);
-}
 
 } // namespace pdal
-**/

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Hobu Inc., info@hobu.co
+* Copyright (c) 2018, Hobu Inc., info@hobu.co
 *
 * All rights reserved.
 *
@@ -34,68 +34,31 @@
 
 #pragma once
 
-/**
-#include <pdal/pdal_export.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
-
-#include <memory>
-#include <vector>
-#include <string>
-
-extern "C" int32_t TextWriter_ExitFunc();
-extern "C" PF_ExitFunc TextWriter_InitPlugin();
 
 namespace pdal
 {
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL TextWriter : public Writer
+class PDAL_DLL CesiumWriter : public Writer
 {
 public:
-    TextWriter()
+    CesiumWriter()
     {}
+    CesiumWriter(const CesiumWriter&) = delete;
+    CesiumWriter& operator=(const CesiumWriter&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const;
 
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
-
-    void writeHeader(PointTableRef table);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointTableRef table);
-
-    void writeGeoJSONBuffer(const PointViewPtr view);
-    void writeCSVBuffer(const PointViewPtr view);
 
     std::string m_filename;
-    std::string m_outputType;
-    std::string m_callback;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    bool m_writeHeader;
-    std::string m_newline;
-    std::string m_delimiter;
-    bool m_quoteHeader;
-    bool m_packRgb;
-    int m_precision;
 
     FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
-
-    TextWriter& operator=(const TextWriter&); // not implemented
-    TextWriter(const TextWriter&); // not implemented
 };
 
 } // namespace pdal
-**/
