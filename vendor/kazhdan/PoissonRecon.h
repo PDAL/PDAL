@@ -72,11 +72,11 @@ void DumpOutput2( std::vector< char* >& comments , const char* format , ... );
 template<typename Real>
 XForm4x4<Real> GetPointXForm(PointSource& source, Real scaleFactor)
 {
-	Point3D<double> min , max;
-	source.boundingBox(min, max);
-	Point3D<double> center = ( max + min ) / 2;
-	Real scale = std::max( max[0]-min[0],
-        std::max(max[1]-min[1], max[2]-min[2]));
+	Point3D<double> minimum, maximum;
+	source.boundingBox(minimum, maximum);
+	Point3D<double> center = (maximum + minimum) / 2;
+	Real scale = (std::max)(maximum[0]-minimum[0],
+        (std::max)(maximum[1]-minimum[1], maximum[2]-minimum[2]));
 	scale *= scaleFactor;
 	for( int i=0 ; i<3 ; i++ )
         center[i] -= scale/2;
@@ -479,7 +479,7 @@ void PoissonRecon<Real>::solve()
     solverInfo.verbose = m_opts.m_verbose;
     solverInfo.showResidual = m_opts.m_showResidual;
     solverInfo.lowResIterMultiplier =
-        std::max((Real)1.0, m_opts.m_lowResIterMult);
+        (std::max)((Real)1.0, m_opts.m_lowResIterMult);
 
     m_solution = m_tree.template solveSystem<Degree, BType>(
         FEMSystemFunctor<Degree, BType>(0, 1, 0), m_interp, m_constraints,
