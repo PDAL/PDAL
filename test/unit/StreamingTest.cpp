@@ -37,6 +37,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/PointTable.hpp>
 #include <io/FauxReader.hpp>
+#include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 #include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
@@ -105,4 +106,52 @@ TEST(Streaming, filter)
     f.prepare(t);
     f.execute(t);
     EXPECT_EQ(cnt, 400);
+}
+
+// Test that SRS changes aren't repeated when new input is processed.
+TEST(Streaming, issue_2009)
+{
+    StageFactory f;
+
+    Stage& r1 = *(f.createStage("readers.las"));
+    Options r1Opts;
+    r1Opts.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    r1.setOptions(r1Opts);
+
+    Stage& r2 = *(f.createStage("readers.las"));
+    Options r2Opts;
+    r2Opts.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    r2.setOptions(r2Opts);
+
+    class TestFilter : public Filter, public Streamable
+    {
+    public:
+        TestFilter() : m_srsCnt(0)
+        {}
+
+        std::string getName() const { return "filters.test"; }
+
+        int m_srsCnt;
+
+    private:
+        virtual void spatialReferenceChanged(const SpatialReference&)
+        {
+            m_srsCnt++;
+        }
+
+        virtual bool processOne(PointRef&)
+        {
+            return true;
+        }
+    };
+
+    TestFilter t;
+    t.setInput(r1);
+    t.setInput(r2);
+
+    FixedPointTable table(100);
+    t.prepare(table);
+    t.execute(table);
+
+    EXPECT_EQ(t.m_srsCnt, 1);
 }
