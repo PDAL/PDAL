@@ -28,7 +28,6 @@ function(pdal_target_compile_settings target)
         -Wcast-align
         -Wcast-qual
         -Wno-error=cast-qual
-        -Wno-error=parentheses
         -Wredundant-decls
 
         -Wno-unused-parameter

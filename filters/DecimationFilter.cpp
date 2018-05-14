@@ -57,7 +57,7 @@ void DecimationFilter::addArgs(ProgramArgs& args)
     args.add("offset", "Index of first point to consider including in output",
         m_offset);
     args.add("limit", "Index of last point to consider including in output",
-        m_limit, std::numeric_limits<point_count_t>::max());
+        m_limit, (std::numeric_limits<point_count_t>::max)());
 }
 
 PointViewSet DecimationFilter::run(PointViewPtr inView)
@@ -84,7 +84,7 @@ bool DecimationFilter::processOne(PointRef& point)
 
 void DecimationFilter::decimate(PointView& input, PointView& output)
 {
-    PointId last_idx = std::min(m_limit, input.size());
+    PointId last_idx = (std::min)(m_limit, input.size());
     for (PointId idx = m_offset; idx < last_idx; idx += m_step)
         output.appendPoint(input, idx);
 }

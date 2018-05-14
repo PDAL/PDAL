@@ -327,7 +327,7 @@ point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
     if (m_istream->stream()->eof())
         throwError("End of file detected.");
 
-    count = std::min(m_numPoints - m_index, count);
+    count = (std::min)(m_numPoints - m_index, count);
     std::vector<char> buf(m_size);
     PointId nextId = data->size();
     point_count_t numRead = 0;
