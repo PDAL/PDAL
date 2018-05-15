@@ -34,6 +34,15 @@
 
 #include <pdal/util/OStream.hpp>
 
+#pragma push_macro("min")
+#pragma push_macro("max")
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <laz-perf/common/common.hpp>
 #include <laz-perf/compressor.hpp>
 #include <laz-perf/decompressor.hpp>
@@ -43,6 +52,9 @@
 #include <laz-perf/formats.hpp>
 #include <laz-perf/io.hpp>
 #include <laz-perf/las.hpp>
+
+#pragma pop_macro("max")
+#pragma pop_macro("min")
 
 #include "LazPerfCompression.hpp"
 
