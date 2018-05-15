@@ -36,8 +36,13 @@
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 #ifdef PDAL_HAVE_LAZPERF
+#pragma push_macro("NOMINMAX")
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <laz-perf/factory.hpp>
 #include <laz-perf/io.hpp>
+#pragma pop_macro("NOMINMAX")
 #endif
 
 #include "LasWriter.hpp"
