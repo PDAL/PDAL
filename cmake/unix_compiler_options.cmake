@@ -27,6 +27,7 @@ function(pdal_target_compile_settings target)
         -Wpointer-arith
         -Wcast-align
         -Wcast-qual
+        -Wno-error=parentheses
         -Wno-error=cast-qual
         -Wredundant-decls
 
