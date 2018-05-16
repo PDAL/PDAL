@@ -20,19 +20,19 @@ namespace pdal
 namespace entwine
 {
 
-Bounds::Bounds(const Point& min, const Point& max)
+Bounds::Bounds(const Point& minimum, const Point& maximum)
     : m_min(
-            (std::min)(min.x, max.x),
-            (std::min)(min.y, max.y),
-            (std::min)(min.z, max.z))
+            (std::min)(minimum.x, maximum.x),
+            (std::min)(minimum.y, maximum.y),
+            (std::min)(minimum.z, maximum.z))
     , m_max(
-            (std::max)(min.x, max.x),
-            (std::max)(min.y, max.y),
-            (std::max)(min.z, max.z))
+            (std::max)(minimum.x, maximum.x),
+            (std::max)(minimum.y, maximum.y),
+            (std::max)(minimum.z, maximum.z))
     , m_mid()
 {
     setMid();
-    if (min.x > max.x || min.y > max.y || min.z > max.z)
+    if (minimum.x > maximum.x || minimum.y > maximum.y || minimum.z > maximum.z)
     {
         std::cout << "Correcting malformed Bounds" << std::endl;
     }

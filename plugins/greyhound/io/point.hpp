@@ -458,8 +458,6 @@ inline std::ostream& operator<<(std::ostream& os, const Color& c)
     return os;
 }
 
-#undef STOP_EXPANSION
-
 } // namespace entwine
 } // namespace pdal
 
