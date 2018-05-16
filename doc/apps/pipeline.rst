@@ -31,9 +31,8 @@ Substitutions
 
 The ``pipeline`` command can accept command-line option substitutions and
 they replace
-existing options that are specified in the input JSON pipeline.  If
-multiple stages of the same name exist in the pipeline, `all` stages would
-be overridden. For example, to set the output and input LAS files for a
+existing options that are specified in the input JSON pipeline.
+For example, to set the output and input LAS files for a
 pipeline that does a translation, the ``filename`` for the reader and the
 writer can be overridden:
 
@@ -41,6 +40,33 @@ writer can be overridden:
 
     $ pdal pipeline translate.json --writers.las.filename=output.laz \
         --readers.las.filename=input.las
+
+If multiple stages of the same name exist in the pipeline, `all` stages would
+be overridden. In the following example, both colorization filters would
+have their `dimensions` option overridden to the value
+"Red:1:1.0, Blue, Green::256.0" by the command shown below:
+
+::
+
+    {
+        "pipeline" : [
+            "input.las",
+            {
+                "type" : "filters.colorization",
+                "raster" : "raster1.tiff"
+                "dimensions": "Red"
+            },
+            {
+                "type" : "filters.colorization",
+                "raster" : "raster2.tiff"
+                "dimensions": "Blue"
+            },
+            "placeholder.laz"
+        ]
+    }
+
+    $ pdal pipeline colorize.json --filters.colorization.dimensions= \
+        "Red:1:1.0, Blue, Green::256.0"
 
 Option substitution can also refer to the tag of an individual stage.
 This can be done by using the syntax --stage.<tagname>.<option>.  This
