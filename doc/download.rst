@@ -61,7 +61,7 @@ These include Delaunay, GeoWave, MATLAB, MBIO, MRSID, OpenSceneGraph, RDBLIB,
 and RiVLib. To enable any of these plugins, the reader will need to install any
 required dependencies and build PDAL from source.
 
-.. csv-table:: PDAL Distrubtion Feature Comparison
+.. csv-table:: PDAL Distribution Feature Comparison
    :header: "", "Docker", "OSGeo4W", "RPMs", "Debian", "Alpine", "Conda"
    :widths: 20, 20, 20, 20, 20, 20, 20
 
