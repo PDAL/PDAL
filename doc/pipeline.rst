@@ -122,7 +122,7 @@ exist.
 Each of these output sets is called a point view.  Point views are carried
 through a PDAL pipeline individually.  Some writers can produce separate
 output for each input point view.  These writers use a placeholder character
-(#) in the output filename which is replaced by a incrementing integer for
+(#) in the output filename which is replaced by an incrementing integer for
 each input point view.
 
 The following pipeline provides an example of writing multiple output
