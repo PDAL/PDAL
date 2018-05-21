@@ -263,6 +263,7 @@ R"(
     PipelineManager mgr2;
     mgr2.readPipeline(iss);
     mgr2.execute();
+    output = oss.str();
     Utils::restore(std::cout, ctx);
     EXPECT_NE(output.find("DGHEEFBBBBCAAAAA"), std::string::npos);
 }
