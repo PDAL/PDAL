@@ -142,7 +142,7 @@ void TerrasolidReader::ready(PointTableRef)
 
 point_count_t TerrasolidReader::read(PointViewPtr view, point_count_t count)
 {
-    count = std::min(count, getNumPoints() - m_index);
+    count = (std::min)(count, getNumPoints() - m_index);
 
     std::vector<char> buf(m_size * count);
     m_istream->get(buf);
