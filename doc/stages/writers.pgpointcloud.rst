@@ -34,7 +34,7 @@ Example
         {
           "type":"filters.chipper",
           "capacity":400
-        }
+        },
         {
           "type":"writers.pgpointcloud",
           "connection":"host='localhost' dbname='lidar' user='pramsey'",

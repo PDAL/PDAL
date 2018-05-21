@@ -123,6 +123,7 @@ void Streamable::execute(StreamPointTable& table)
     // As an example, if there are four paths from the end stage (writer) to
     // reader stages, there will be four stage lists and execute(table, stages)
     // will be called four times.
+    SrsMap srsMap;
     Streamable *s = this;
     stages.push_front(s);
     while (true)
@@ -134,7 +135,7 @@ void Streamable::execute(StreamPointTable& table)
             (lastRunStages - stages).done(table);
             // Call ready on all the stages we didn't run last time.
             (stages - lastRunStages).ready(table);
-            execute(table, stages);
+            execute(table, stages, srsMap);
             lastRunStages = stages;
         }
         else
@@ -159,12 +160,11 @@ void Streamable::execute(StreamPointTable& table)
 
 
 void Streamable::execute(StreamPointTable& table,
-    std::list<Streamable *>& stages)
+    std::list<Streamable *>& stages, SrsMap& srsMap)
 {
     std::vector<bool> skips(table.capacity());
     std::list<Streamable *> filters;
     SpatialReference srs;
-    std::map<Streamable *, SpatialReference> srsMap;
 
     // Separate out the first stage.
     Streamable *reader = stages.front();

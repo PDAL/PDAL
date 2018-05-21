@@ -15,7 +15,6 @@ function(pdal_target_compile_settings target)
                 -D_CRT_SECURE_NO_WARNINGS
                 -D_CRT_NONSTDC_NO_WARNING
                 -D_SCL_SECURE_NO_WARNINGS
-                -DNOMINMAX
             )
             target_compile_options(${target} PRIVATE
                 # Nitro makes use of Exception Specifications, which results in

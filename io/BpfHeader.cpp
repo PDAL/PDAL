@@ -373,7 +373,7 @@ bool BpfUlemFile::write(OLeStream& stream)
     char buf[MAX_BLOCKSIZE];
     while (len)
     {
-        uint32_t blocksize = std::min(MAX_BLOCKSIZE, len);
+        uint32_t blocksize = (std::min)(MAX_BLOCKSIZE, len);
         in.read(buf, blocksize);
         stream.put(buf, blocksize);
         len -= blocksize;
