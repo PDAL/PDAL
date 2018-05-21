@@ -130,12 +130,12 @@ TEST(ArtifactTest, key_access)
     EXPECT_TRUE(t.artifactManager().keys().empty());
 
     t.artifactManager().put("MyTest", ta);
-    EXPECT_EQ(t.artifactManager().keys().size(), 1);
+    EXPECT_EQ(t.artifactManager().keys().size(), 1U);
     EXPECT_EQ(t.artifactManager().keys().at(0), "MyTest");
 
     t.artifactManager().put("MyTest2", ta);
     auto keys = t.artifactManager().keys();
-    EXPECT_EQ(keys.size(), 2);
+    EXPECT_EQ(keys.size(), 2U);
     EXPECT_EQ(std::find(keys.begin(), keys.end(), "Foo"), keys.end());
     EXPECT_NE(std::find(keys.begin(), keys.end(), "MyTest"), keys.end());
     EXPECT_NE(std::find(keys.begin(), keys.end(), "MyTest2"), keys.end());
