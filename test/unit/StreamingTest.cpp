@@ -1,5 +1,4 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -106,3 +105,165 @@ TEST(Streaming, filter)
     f.execute(t);
     EXPECT_EQ(cnt, 400);
 }
+
+namespace
+{
+
+class R : public Reader, public Streamable
+{
+
+public:
+    R() : m_entered(false)
+    {}
+
+    std::string getName() const
+    { return "readers.r"; }
+
+private:
+    virtual bool processOne(PointRef& point)
+    {
+        if (!m_entered)
+        {
+            std::cout << tag();
+            m_entered = true;
+            return true;
+        }
+        return false;
+    }
+
+    virtual point_count_t read(PointViewPtr, point_count_t)
+    {
+        std::cout << tag();
+        return 0;
+    }
+private:
+    bool m_entered;
+};
+
+class F : public Filter, public Streamable
+{
+
+public:
+    std::string getName() const
+    { return "filters.f"; };
+
+private:
+    virtual bool processOne(PointRef& point)
+    {
+        std::cout << tag();
+        return true;
+    }
+
+    virtual void filter(PointView& view)
+    {
+        std::cout << tag();
+    }
+};
+
+} // unnamed pdal
+
+TEST(Streaming, order)
+{
+
+StaticPluginInfo const f_info
+{
+    "filters.f",
+    "F Filter",
+    "",
+    {}
+};
+
+CREATE_STATIC_STAGE(F, f_info)
+
+StaticPluginInfo const r_info
+{
+    "readers.r",
+    "R Reader",
+    "",
+    {}
+};
+
+CREATE_STATIC_STAGE(R, r_info)
+
+std::string pipeline =
+R"(
+{
+    "pipeline" : [
+        {
+            "type": "readers.r",
+            "tag": "G"
+        },
+        {
+            "type": "readers.r",
+            "tag": "H"
+        },
+        {
+            "type": "readers.r",
+            "tag": "D"
+        },
+        {
+            "type": "filters.f",
+            "tag": "E",
+            "inputs": [ "G", "H" ]
+        },
+        {
+            "type": "readers.r",
+            "tag": "F"
+        },
+        {
+            "type": "filters.f",
+            "tag": "B",
+            "inputs": [ "D", "E", "F" ]
+        },
+        {
+            "type": "readers.r",
+            "tag": "C"
+        },
+        {
+            "type": "filters.f",
+            "tag": "A",
+            "inputs": [ "B", "C" ]
+        }
+    ]
+}
+)";
+
+/**
+  Tree representation of the pipeline above:
+
+       G   H
+        \ /
+     D   E   F
+      \  |  /
+       \ | /
+         B  C
+         | /
+         A
+**/
+
+    std::ostringstream oss;
+
+    // Order of traversal based on one point from each source.
+    auto ctx = Utils::redirect(std::cout, oss);
+    std::istringstream iss(pipeline);
+    PipelineManager mgr;
+    mgr.readPipeline(iss);
+    FixedPointTable t(10000);
+    mgr.executeStream(t);
+    Utils::restore(std::cout, ctx);
+    std::string output(oss.str());
+    EXPECT_NE(output.find("DBAGEBAHEBAFBACA"), std::string::npos);
+
+    // In non-stream mode we get a letter for each point view.
+    oss.clear();
+    oss.str("");
+    std::cerr << oss.str() << "!\n";
+    iss.seekg(0);
+    ctx = Utils::redirect(std::cout, oss);
+    PipelineManager mgr2;
+    mgr2.readPipeline(iss);
+    mgr2.execute();
+    Utils::restore(std::cout, ctx);
+    EXPECT_NE(output.find("DGHEEFBBBBCAAAAA"), std::string::npos);
+}
+

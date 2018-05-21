@@ -139,10 +139,10 @@ void Streamable::execute(StreamPointTable& table)
         }
         else
         {
-            for (auto s2 : s->m_inputs)
+            for (auto bi = s->m_inputs.rbegin(); bi != s->m_inputs.rend(); bi++)
             {
                 StreamableList newStages(stages);
-                newStages.push_front(dynamic_cast<Streamable *>(s2));
+                newStages.push_front(dynamic_cast<Streamable *>(*bi));
                 lists.push_front(newStages);
             }
         }
@@ -151,8 +151,8 @@ void Streamable::execute(StreamPointTable& table)
             lastRunStages.done(table);
             break;
         }
-        stages = lists.back();
-        lists.pop_back();
+        stages = lists.front();
+        lists.pop_front();
         s = stages.front();
     }
 }
