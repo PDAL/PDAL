@@ -283,8 +283,6 @@ bool Geometry::valid() const
 
 std::string Geometry::validReason() const
 {
-    int gtype = GEOSGeomTypeId_r(m_geoserr.ctx(), m_geom.get());
-
     char *reason = GEOSisValidReason_r(m_geoserr.ctx(), m_geom.get());
     std::string output(reason);
     GEOSFree_r(m_geoserr.ctx(), reason);

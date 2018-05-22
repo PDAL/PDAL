@@ -226,7 +226,6 @@ MetadataNode InfoKernel::dumpPoints(PointViewPtr inView) const
     }
 
     MetadataNode tree = outView->toMetadata();
-    std::string prefix("point ");
     for (size_t i = 0; i < outView->size(); ++i)
     {
         MetadataNode n = tree.findChild(std::to_string(i));

@@ -95,7 +95,7 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
 
     // ::soci::row r;
     // ::soci::indicator ind = ::soci::i_null;
-    int64_t srid(0);
+    //int64_t srid(0);
     // ::soci::statement clouds =
    //      (m_session->prepare << query, ::soci::into(r, ind));
    //  clouds.execute();
@@ -300,7 +300,6 @@ point_count_t SQLiteReader::read(PointViewPtr view, point_count_t count)
         totalNumRead = readPatch(view, count);
     }
 
-    int patch_count(0);
     while (totalNumRead < count)
     {
         if (m_patch->remaining == 0)
@@ -315,7 +314,6 @@ point_count_t SQLiteReader::read(PointViewPtr view, point_count_t count)
         point_count_t numRead = readPatch(view, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
-        patch_count++;
     }
     return totalNumRead;
 }

@@ -128,7 +128,7 @@ XMLSchema fetchSchema(Statement stmt, BlockPtr block)
         CPLFree(pc_schema);
     }
     std::ostringstream fname;
-    int cloudId = stmt->GetInteger(&(block->pc->pc_id)) ;
+    int cloudId = stmt->GetInteger(&(block->pc->pc_id)) ; // FIXME?: unused return value
     return XMLSchema(pc_schema_xml);
 }
 

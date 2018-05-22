@@ -785,7 +785,6 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
 
 void OciWriter::writeDimMajor(PointViewPtr view, std::vector<char>& outbuf)
 {
-    size_t interrupt = dbDimTypes().size() * 100;
     size_t totalSize = 0;
     char *pos = outbuf.data();
 
@@ -845,7 +844,6 @@ void OciWriter::writeTile(const PointViewPtr view)
     // a point's data, but it may be larger than the actual size of a point
     // if location scaling is being used.
     std::vector<char> outbuf(packedPointSize() * view->size());
-    size_t totalSize = 0;
     if (m_orientation == Orientation::DimensionMajor)
         writeDimMajor(view, outbuf);
     else if (m_orientation == Orientation::PointMajor)

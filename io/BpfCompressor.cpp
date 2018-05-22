@@ -82,7 +82,7 @@ void BpfCompressor::compress()
     m_strm.next_out = m_tmpbuf;
     while (m_strm.avail_in)
     {
-        int ret = ::deflate(&m_strm, Z_NO_FLUSH);
+        int ret = ::deflate(&m_strm, Z_NO_FLUSH); //FIXME: test ret
         size_t written = CHUNKSIZE - m_strm.avail_out;
         m_compressedSize += written;
         m_out.put(m_tmpbuf, written);

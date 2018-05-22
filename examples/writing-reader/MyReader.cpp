@@ -74,7 +74,6 @@ namespace pdal
       // MyReader format:  X::Y::Z::Data
       StringList s = Utils::split2(line, ':');
 
-      unsigned long u64(0);
       if (s.size() != 4)
       {
         std::stringstream oss;

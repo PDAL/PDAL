@@ -225,7 +225,6 @@ std::istream& operator>>(std::istream& istr, BOX2D& bounds)
     if (!eat(istr,'('))
         istr.setstate(std::ios_base::failbit);
 
-    bool done = false;
     for (int i = 0; i < 2; ++i)
     {
         double low, high;
@@ -278,7 +277,6 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
     if (!eat(istr,'('))
         istr.setstate(std::ios_base::failbit);
 
-    bool done = false;
     for (int i = 0; i < 3; ++i)
     {
         double low, high;

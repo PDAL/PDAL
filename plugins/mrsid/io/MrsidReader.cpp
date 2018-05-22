@@ -204,7 +204,6 @@ void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::Point
     {
         std::string name = layout.dimName(dims[idx]);
         Dimension::Type t = layout.dimType(dims[idx]);
-        size_t size = layout.dimSize(dims[idx]);
 
         if (Utils::iequals(name, "EdgeOfFlightLine")) name = CHANNEL_NAME_EdgeFlightLine;
         if (Utils::iequals(name, "Classification")) name = CHANNEL_NAME_ClassId;

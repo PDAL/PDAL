@@ -142,7 +142,6 @@ TEST(DividerFilterTest, round_robin_count)
     for (PointViewPtr v : s)
         EXPECT_EQ(v->size(), 100u);
 
-    unsigned viewNum = 0;
     PointId start = 1;
     for (PointViewPtr v : s)
     {
@@ -187,7 +186,6 @@ TEST(DividerFilterTest, round_robin_capacity)
     for (PointViewPtr v : s)
         EXPECT_EQ(v->size(), 25u);
 
-    unsigned viewNum = 0;
     PointId start = 1;
     for (PointViewPtr v : s)
     {
