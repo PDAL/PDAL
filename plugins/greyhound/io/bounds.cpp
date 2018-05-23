@@ -20,19 +20,19 @@ namespace pdal
 namespace entwine
 {
 
-Bounds::Bounds(const Point& min, const Point& max)
+Bounds::Bounds(const Point& minimum, const Point& maximum)
     : m_min(
-            std::min(min.x, max.x),
-            std::min(min.y, max.y),
-            std::min(min.z, max.z))
+            (std::min)(minimum.x, maximum.x),
+            (std::min)(minimum.y, maximum.y),
+            (std::min)(minimum.z, maximum.z))
     , m_max(
-            std::max(min.x, max.x),
-            std::max(min.y, max.y),
-            std::max(min.z, max.z))
+            (std::max)(minimum.x, maximum.x),
+            (std::max)(minimum.y, maximum.y),
+            (std::max)(minimum.z, maximum.z))
     , m_mid()
 {
     setMid();
-    if (min.x > max.x || min.y > max.y || min.z > max.z)
+    if (minimum.x > maximum.x || minimum.y > maximum.y || minimum.z > maximum.z)
     {
         std::cout << "Correcting malformed Bounds" << std::endl;
     }
@@ -111,25 +111,25 @@ Json::Value Bounds::toJson() const
 
 void Bounds::grow(const Bounds& other)
 {
-    grow(other.min());
-    grow(other.max());
+    grow(other.minimum());
+    grow(other.maximum());
 }
 
 void Bounds::grow(const Point& p)
 {
-    m_min.x = std::min(m_min.x, p.x);
-    m_min.y = std::min(m_min.y, p.y);
-    m_min.z = std::min(m_min.z, p.z);
-    m_max.x = std::max(m_max.x, p.x);
-    m_max.y = std::max(m_max.y, p.y);
-    m_max.z = std::max(m_max.z, p.z);
+    m_min.x = (std::min)(m_min.x, p.x);
+    m_min.y = (std::min)(m_min.y, p.y);
+    m_min.z = (std::min)(m_min.z, p.z);
+    m_max.x = (std::max)(m_max.x, p.x);
+    m_max.y = (std::max)(m_max.y, p.y);
+    m_max.z = (std::max)(m_max.z, p.z);
     setMid();
 }
 
 void Bounds::shrink(const Bounds& other)
 {
-    m_min = Point::max(m_min, other.min());
-    m_max = Point::min(m_max, other.max());
+    m_min = Point::maximum(m_min, other.minimum());
+    m_max = Point::minimum(m_max, other.maximum());
     setMid();
 }
 
@@ -150,7 +150,7 @@ std::ostream& operator<<(std::ostream& os, const Bounds& bounds)
 
     os << std::setprecision(2) << std::fixed;
 
-    os << "[" << bounds.min() << ", " << bounds.max() << "]";
+    os << "[" << bounds.minimum() << ", " << bounds.maximum() << "]";
 
     os << std::setprecision(precision);
     os.flags(flags);

@@ -45,12 +45,12 @@ namespace
 #if defined(__APPLE__) && defined(__MACH__)
     static const std::string dynamicLibraryExtension(".dylib");
     static const char pathSeparator(':');
-#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
-    static const std::string dynamicLibraryExtension(".so");
-    static const char pathSeparator(':');
 #elif defined _WIN32
     static const std::string dynamicLibraryExtension(".dll");
     static const char pathSeparator(';');
+#else
+    static const std::string dynamicLibraryExtension(".so");
+    static const char pathSeparator(':');
 #endif
 
 StringList pluginSearchPaths()

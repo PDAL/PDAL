@@ -95,7 +95,7 @@ std::string::size_type DimRange::subParse(const std::string& r)
     start = r.data() + pos;
     ub = std::strtod(start, &end);
     if (start == end)
-        ub = std::numeric_limits<double>::max();
+        ub = (std::numeric_limits<double>::max)();
     pos += (end - start);
 
     count = Utils::extractSpaces(r, pos);
@@ -159,7 +159,7 @@ std::ostream& operator<<(std::ostream& out, const DimRange& r)
     if (r.m_lower_bound != std::numeric_limits<double>::lowest())
         out << r.m_lower_bound;
     out << ':';
-    if (r.m_upper_bound != std::numeric_limits<double>::max())
+    if (r.m_upper_bound != (std::numeric_limits<double>::max)())
         out << r.m_upper_bound;
     out << (r.m_inclusive_upper_bound ? ']' : ')');
     return out;

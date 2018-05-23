@@ -109,7 +109,7 @@ void LOFFilter::filter(PointView& view)
         for (PointId j = 0; j < indices.size(); ++j)
         {
             double k = view.getFieldAs<double>(m_kdist, indices[j]);
-            double reachdist = std::max(k, std::sqrt(sqr_dists[j]));
+            double reachdist = (std::max)(k, std::sqrt(sqr_dists[j]));
             M1 += (reachdist - M1) / ++n;
         }
         view.setField(m_lrd, i, 1.0 / M1);

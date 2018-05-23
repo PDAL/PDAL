@@ -506,7 +506,7 @@ StringList Utils::wordWrap2(std::string const& s, size_t lineLength,
     size_t startPos = 0;
     while (true)
     {
-        size_t endPos = std::min(startPos + len - 1, s.size() - 1);
+        size_t endPos = (std::min)(startPos + len - 1, s.size() - 1);
         if (endPos + 1 == s.size())
         {
             pushWord(startPos, endPos);
@@ -627,7 +627,7 @@ std::vector<std::string> Utils::backtrace()
             prefix = std::to_string(i) + "  ???";
         trimTrailing(prefix);
         prefixes.push_back(prefix);
-        maxPrefix = std::max(prefix.size(), maxPrefix);
+        maxPrefix = (std::max)(prefix.size(), maxPrefix);
     }
     free(symbols);
 

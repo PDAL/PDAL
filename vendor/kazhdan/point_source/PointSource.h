@@ -41,12 +41,12 @@ public:
 
     virtual void reset() = 0;
     virtual bool nextPoint(Point& point) = 0;
-    void boundingBox(Point3D<double>& min, Point3D<double>& max)
+    void boundingBox(Point3D<double>& minimum, Point3D<double>& maximum)
 	{
         for (size_t i = 0; i < 3; ++i)
         {
-            min[i] = std::numeric_limits<double>::max();
-            max[i] = std::numeric_limits<double>::lowest();
+            minimum[i] = (std::numeric_limits<double>::max)();
+            maximum[i] = (std::numeric_limits<double>::lowest)();
         }
 
         Point p;
@@ -54,8 +54,8 @@ public:
 		{
 			for( int i=0 ; i<3 ; i++ )
 			{
-                min[i] = std::min(min[i], p.p[i]);
-                max[i] = std::max(max[i], p.p[i]);
+                minimum[i] = (std::min)(minimum[i], p.p[i]);
+                maximum[i] = (std::max)(maximum[i], p.p[i]);
 			}
 		}
 		reset();

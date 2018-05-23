@@ -615,7 +615,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
                            return (x > threshold) ? int(1) : int(0);
                        });
         std::transform(Obj.begin(), Obj.end(), foo.begin(), Obj.begin(),
-                       [](int a, int b) { return std::max(a, b); });
+                       [](int a, int b) { return (std::max)(a, b); });
 
         // "The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting

@@ -1080,8 +1080,10 @@ namespace nanoflann
 				node->node_type.sub.divhigh = right_bbox[cutfeat].low;
 
 				for (int i=0; i<(DIM>0 ? DIM : dim); ++i) {
-					bbox[i].low = std::min(left_bbox[i].low, right_bbox[i].low);
-					bbox[i].high = std::max(left_bbox[i].high, right_bbox[i].high);
+					bbox[i].low = (std::min)(left_bbox[i].low,
+                        right_bbox[i].low);
+					bbox[i].high = (std::max)(left_bbox[i].high,
+                        right_bbox[i].high);
 				}
 			}
 
