@@ -244,7 +244,7 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
         const char *buf = reinterpret_cast<const char *>(
             (*r)[position].blobBuf.data());
         bufsize = (*r)[position].blobBuf.size();
-        count = std::min(count, size_t(numPts));
+        count = (std::min)(count, size_t(numPts));
         LazPerfDecompressor(cb, dbDimTypes(), count).
             decompress(buf, bufsize);
 

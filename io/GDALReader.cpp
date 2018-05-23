@@ -128,7 +128,7 @@ void GDALReader::ready(PointTableRef table)
 
 point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
 {
-    point_count_t count = std::min(num, m_count - m_index);
+    point_count_t count = (std::min)(num, m_count - m_index);
     PointId nextId = view->size();
 
     std::array<double, 2> coords;

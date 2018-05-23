@@ -139,11 +139,12 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
 void PipelineReaderJSON::readPipeline(std::istream& input)
 {
     Json::Value root;
-    Json::Reader jsonReader;
-    if (!jsonReader.parse(input, root))
+    Json::CharReaderBuilder builder;
+    builder["rejectDupKeys"] = true;
+    std::string err;
+    if (!parseFromStream(builder, input, &root, &err))
     {
-        std::string err = "JSON pipeline: Unable to parse pipeline:\n";
-        err += jsonReader.getFormattedErrorMessages();
+        err = "JSON pipeline: Unable to parse pipeline:\n" + err;
         throw pdal_error(err);
     }
 
@@ -306,6 +307,30 @@ std::vector<Stage *> PipelineReaderJSON::extractInputs(Json::Value& node,
     return inputs;
 }
 
+namespace
+{
+
+bool extractOption(Options& options, const std::string& name,
+    const Json::Value& node)
+{
+    if (node.isString())
+        options.add(name, node.asString());
+    else if (node.isInt())
+        options.add(name, node.asInt64());
+    else if (node.isUInt())
+        options.add(name, node.asUInt64());
+    else if (node.isDouble())
+        options.add(name, node.asDouble());
+    else if (node.isBool())
+        options.add(name, node.asBool());
+    else if (node.isNull())
+        options.add(name, "");
+    else
+        return false;
+    return true;
+}
+
+} // unnamed namespace
 
 Options PipelineReaderJSON::extractOptions(Json::Value& node)
 {
@@ -313,31 +338,30 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
 
     for (const std::string& name : node.getMemberNames())
     {
+        Json::Value& subnode(node[name]);
+
         if (name == "plugin")
         {
-            PluginManager<Stage>::loadPlugin(node[name].asString());
+            PluginManager<Stage>::loadPlugin(subnode.asString());
 
             // Don't actually put a "plugin" option on
             // any stage
             continue;
         }
 
-        if (node[name].isString())
-            options.add(name, node[name].asString());
-        else if (node[name].isInt())
-            options.add(name, node[name].asInt64());
-        else if (node[name].isUInt())
-            options.add(name, node[name].asUInt64());
-        else if (node[name].isDouble())
-            options.add(name, node[name].asDouble());
-        else if (node[name].isBool())
-            options.add(name, node[name].asBool());
-        else if (node[name].isNull())
-            options.add(name, "");
-        else if (node[name].isArray() || node[name].isObject())
+        if (extractOption(options, name, subnode))
+            continue;
+        else if (subnode.isArray())
+        {
+            for (const Json::Value& val : subnode)
+                if (!extractOption(options, name, val))
+                    throw pdal_error("JSON pipeline: Invalid value type for "
+                        "option list '" + name + "'.");
+        }
+        else if (subnode.isObject())
         {
             Json::FastWriter w;
-            options.add(name, w.write(node[name]));
+            options.add(name, w.write(subnode));
         }
         else
             throw pdal_error("JSON pipeline: Value of stage option '" +

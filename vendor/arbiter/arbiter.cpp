@@ -1249,11 +1249,6 @@ LocalHandle::~LocalHandle()
 #include <arbiter/drivers/http.hpp>
 #endif
 
-#ifdef ARBITER_WINDOWS
-#undef min
-#undef max
-#endif
-
 #include <algorithm>
 #include <cstring>
 #include <iostream>
@@ -3793,7 +3788,7 @@ Contents parse(const std::string& s)
         line = util::stripWhitespace(line);
         const std::size_t semiPos(line.find_first_of(';'));
         const std::size_t hashPos(line.find_first_of('#'));
-        line = line.substr(0, std::min(semiPos, hashPos));
+        line = line.substr(0, (std::min)(semiPos, hashPos));
 
         if (line.size())
         {
@@ -4494,7 +4489,7 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-    if (utcOffset > std::numeric_limits<int>::max())
+    if (utcOffset > (std::numeric_limits<int>::max)())
     	throw ArbiterError("Can't convert offset time in seconds to tm type.");
 
     tm.tm_sec -= (int)utcOffset;

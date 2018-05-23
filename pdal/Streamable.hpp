@@ -75,7 +75,10 @@ protected:
     Streamable& operator=(const Streamable&) = delete;
     Streamable(const Streamable&); // not implemented
 
-    void execute(StreamPointTable& table, std::list<Streamable *>& stages);
+    using SrsMap = std::map<Streamable *, SpatialReference>;
+
+    void execute(StreamPointTable& table, std::list<Streamable *>& stages,
+        SrsMap& srsMap);
 
     /**
       Process a single point (streaming mode).  Implement in sublcass.
