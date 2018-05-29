@@ -180,6 +180,8 @@ BOX3D Geometry::bounds() const
 
 bool Geometry::valid() const
 {
+    throwNoGeos();
+
     return (bool)m_geom->IsValid();
 }
 
