@@ -34,10 +34,6 @@
 
 #include "BacktraceImpl.hpp"
 
-//ABELL
-#include <iostream>
-
-#include <stack>
 #include <string>
 
 #define UNW_LOCAL_ONLY
