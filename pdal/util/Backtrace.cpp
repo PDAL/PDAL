@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -37,7 +37,6 @@
 
 #include <vector>
 #include <string>
-#include <sstream>
 
 #include <pdal/util/Utils.hpp>
 
