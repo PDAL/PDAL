@@ -69,6 +69,7 @@ PDAL_DLL std::vector<std::string> Utils::backtrace()
 
         line = std::to_string(i);
         line += std::string(4 - line.size(), ' ');
+        // Should the directory info be stripped from the libname?
         line += be.libname;
         line += std::string(maxLibnameLen + 2 - be.libname.size(), ' ');
         if (be.symname.size())
@@ -76,7 +77,9 @@ PDAL_DLL std::vector<std::string> Utils::backtrace()
         else
         {
             std::ostringstream oss;
-            oss << std::hex << be.addr;
+            intptr_t ip(reinterpret_cast<intptr_t>(be.addr));
+            oss << "0x" << std::hex << std::setw(sizeof(ip) * 2) <<
+                std::setfill('0') << ip;
             line += oss.str();
         }
         line += " + " + std::to_string(be.offset);

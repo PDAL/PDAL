@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -42,59 +42,29 @@ namespace pdal
 
 Utils::BacktraceEntries Utils::backtraceImpl()
 {
-    std::vector<std::string> lines;
+    Utils::BacktraceEntries entries;
     const int MAX_STACK_SIZE(100);
     void* buffer[MAX_STACK_SIZE];
-    std::vector<std::string> prefixes;
-    size_t maxPrefix(0);
 
     std::size_t size(::backtrace(buffer, MAX_STACK_SIZE));
-    char** symbols(backtrace_symbols(buffer, size));
 
-    // Store strings and free symbols.  Start at 1 to remove this function
-    // from the stack.
-    for (std::size_t i(1); i < size; ++i)
+    for (size_t i = 0; i < size && i < MAX_STACK_SIZE; ++i)
     {
-        lines.push_back(symbols[i]);
-        const std::string& symbol = lines.back();
-        std::string prefix;
-        std::size_t pos = symbol.find("0x");
-        if (pos != std::string::npos)
-            prefix = symbol.substr(0, pos);
-        else
-            prefix = std::to_string(i) + "  ???";
-        trimTrailing(prefix);
-        prefixes.push_back(prefix);
-        maxPrefix = (std::max)(prefix.size(), maxPrefix);
-    }
-    free(symbols);
+        BacktraceEntry entry;
 
-    // Replace the simple symbol with a better representation if possible.
-    for (std::size_t i(1); i < size; ++i)
-    {
-        std::string& symbol = lines[i - 1];
-        std::string& prefix = prefixes[i - 1];
-        prefix = prefix + std::string(maxPrefix + 2 - prefix.size(), ' ');
+        entry.addr = buffer[i];
 
         Dl_info info;
-        if (dladdr(buffer[i], &info))
+        if (dladdr(entry.addr, &info))
         {
-            const std::size_t offset(static_cast<char*>(buffer[i]) -
-                        static_cast<char*>(info.dli_saddr));
-
-            // Replace the address and mangled name with a human-readable
-            // name.
-            symbol = prefix + demangle(info.dli_sname) + " + " +
-                std::to_string(offset);
+            entry.symname = info.dli_sname;
+            entry.libname = info.dli_fname;
+            entry.offset = reinterpret_cast<char *>(entry.addr) -
+                reinterpret_cast<char *>(info.dli_saddr);
         }
-        else
-        {
-            symbol = symbol.substr(maxPrefix + 2);
-            trimLeading(symbol);
-            symbol = prefix + symbol;
-        }
+        entries.push_back(entry);
     }
-    return lines;
+    return entries;
 }
 
 } // namespace pdal
