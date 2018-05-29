@@ -59,15 +59,10 @@ CREATE_STATIC_KERNEL(InfoKernel, s_info)
 
 std::string InfoKernel::getName() const { return s_info.name; }
 
-InfoKernel::InfoKernel()
-    : m_showStats(false)
-    , m_showSchema(false)
-    , m_showAll(false)
-    , m_showMetadata(false)
-    , m_boundary(false)
-    , m_showSummary(false)
-    , m_needPoints(false)
-    , m_statsStage(NULL)
+InfoKernel::InfoKernel() : m_showStats(false), m_showSchema(false),
+    m_showAll(false), m_showMetadata(false), m_boundary(false),
+    m_showSummary(false), m_needPoints(false), m_statsStage(nullptr),
+    m_hexbinStage(nullptr), m_infoStage(nullptr), m_reader(nullptr)
 {}
 
 
@@ -244,7 +239,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
         BasePointTable *table;
         if (m_needPoints || m_showMetadata)
         {
-            FixedPointTable fixedTable(10000);
+            FixedPointTable fixedTable(1000);
             m_manager.executeStream(fixedTable);
             table = &fixedTable;
         }
