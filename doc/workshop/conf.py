@@ -34,7 +34,7 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
-today='July 25th, 2017'
+today='May 17th, 2018'
 docstitle='Home'
 
 intersphinx_mapping = {'pdal': ('https://pdal.io/', None)}
@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Point Cloud Processing and Analysis with PDAL'
-copyright = u'2017, Howard Butler, Pete Gadomski, Dr. Craig Glennie'
+copyright = u'2018, Howard Butler, Pete Gadomski, Dr. Craig Glennie'
 author = u'Howard Butler, Pete Gadomski, Dr. Craig Glennie'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -246,7 +246,7 @@ latex_elements = {
 
 # Latex figure (float) alignment
 'figure_align': 'htbp',
-'releasename':'07/25/2017',
+'releasename':'05/17/2018',
 # 'tocdepth':3,
 }
 

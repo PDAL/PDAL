@@ -288,7 +288,7 @@ Dimension::Type PointLayout::resolveType(Dimension::Type t1,
     if (t1 == t2)
         return t1;
     if (base(t1) == base(t2))
-        return std::max(t1, t2);
+        return (std::max)(t1, t2);
     //Prefer floating to non-floating.
     if (base(t1) == BaseType::Floating && base(t2) != BaseType::Floating)
         return t1;
@@ -301,7 +301,7 @@ Dimension::Type PointLayout::resolveType(Dimension::Type t1,
     if (base(t2) == BaseType::Unsigned && size(t2) < size(t1))
         return t1;
     // Signed type is smaller or the the sizes are equal.
-    switch (std::max(size(t1), size(t2)))
+    switch ((std::max)(size(t1), size(t2)))
     {
     case 1:
         return Type::Signed16;

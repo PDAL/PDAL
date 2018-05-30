@@ -147,11 +147,11 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
         if (m_reflectanceAsIntensity) {
             uint16_t intensity;
             if (t.reflectance > m_maxReflectance) {
-                intensity = std::numeric_limits<uint16_t>::max();
+                intensity = (std::numeric_limits<uint16_t>::max)();
             } else if (t.reflectance < m_minReflectance) {
                 intensity = 0;
             } else {
-                intensity = uint16_t(std::roundf(double(std::numeric_limits<uint16_t>::max()) * 
+                intensity = uint16_t(std::roundf(double((std::numeric_limits<uint16_t>::max)()) * 
                         (t.reflectance - m_minReflectance) / (m_maxReflectance - m_minReflectance)));
             }
             m_view->setField(Id::Intensity, idx, intensity);

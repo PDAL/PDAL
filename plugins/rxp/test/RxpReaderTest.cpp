@@ -158,5 +158,5 @@ TEST(RxpReaderTest, testReflectanceAsIntensity)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
     uint16_t intensity = view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0);
-    EXPECT_EQ(std::numeric_limits<uint16_t>::max(), intensity);
+    EXPECT_EQ((std::numeric_limits<uint16_t>::max)(), intensity);
 }

@@ -75,9 +75,9 @@ namespace Utils
      * \return the value to clamped to the given bounds.
      */
     template <class T>
-    PDAL_DLL const T& clamp(const T& t, const T& min, const T& max)
+    PDAL_DLL const T& clamp(const T& t, const T& minimum, const T& maximum)
     {
-        return ((t < min) ? min : ((t > max) ? max : t));
+        return ((t < minimum) ? minimum : ((t > maximum) ? maximum : t));
     }
 
     /**
@@ -686,8 +686,8 @@ namespace Utils
         }
 
         return std::is_same<double, T_OUT>::value ||
-           (in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest()) &&
-            in <= static_cast<double>(std::numeric_limits<T_OUT>::max()));
+            (in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest()) &&
+             in <= static_cast<double>((std::numeric_limits<T_OUT>::max)()));
     }
 
     /**
@@ -727,7 +727,7 @@ namespace Utils
         if (std::is_integral<T_OUT>::value)
             in = static_cast<T_IN>(sround((double)in));
         if ((std::is_same<T_OUT, double>::value) ||
-            (in <= static_cast<double>(std::numeric_limits<T_OUT>::max()) &&
+            (in <= static_cast<double>((std::numeric_limits<T_OUT>::max)()) &&
              in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
         {
             out = static_cast<T_OUT>(in);
@@ -935,7 +935,7 @@ namespace Utils
         {
             int i = std::stoi(s);
             if (i >= std::numeric_limits<char>::lowest() &&
-                    i <= std::numeric_limits<char>::max())
+                    i <= (std::numeric_limits<char>::max)())
             {
                 to = static_cast<char>(i);
                 return true;
@@ -967,7 +967,7 @@ namespace Utils
         {
             int i  = std::stoi(s);
             if (i >= std::numeric_limits<unsigned char>::lowest() &&
-                i <= std::numeric_limits<unsigned char>::max())
+                i <= (std::numeric_limits<unsigned char>::max)())
             {
                 to = static_cast<unsigned char>(i);
                 return true;
@@ -999,7 +999,7 @@ namespace Utils
         {
             int i = std::stoi(s);
             if (i >= std::numeric_limits<signed char>::lowest() &&
-                    i <= std::numeric_limits<signed char>::max())
+                i <= (std::numeric_limits<signed char>::max)())
             {
                 to = static_cast<signed char>(i);
                 return true;

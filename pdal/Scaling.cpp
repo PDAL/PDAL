@@ -75,20 +75,20 @@ void Scaling::setAutoXForm(const PointViewPtr view)
         if (xmod)
         {
             double x = view->getFieldAs<double>(Dimension::Id::X, idx);
-            xmin = std::min(x, xmin);
-            xmax = std::max(x, xmax);
+            xmin = (std::min)(x, xmin);
+            xmax = (std::max)(x, xmax);
         }
         if (ymod)
         {
             double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
-            ymin = std::min(y, ymin);
-            ymax = std::max(y, ymax);
+            ymin = (std::min)(y, ymin);
+            ymax = (std::max)(y, ymax);
         }
         if (zmod)
         {
             double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
-            zmin = std::min(z, zmin);
-            zmax = std::max(z, zmax);
+            zmin = (std::min)(z, zmin);
+            zmax = (std::max)(z, zmax);
         }
     }
 

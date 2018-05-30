@@ -37,6 +37,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <pdal/Artifact.hpp>
 
@@ -80,6 +81,14 @@ public:
     bool exists(const std::string& name)
     {
         return (m_storage.find(name) != m_storage.end());
+    }
+
+    std::vector<std::string> keys() const
+    {
+        std::vector<std::string> ks;
+        for (auto e : m_storage)
+            ks.push_back(e.first);
+        return ks;
     }
 
     template <typename T>

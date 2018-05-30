@@ -67,7 +67,7 @@ inline int32_t cksum(const void *c, size_t size)
     while (size)
     {
         int32_t val = 0;
-        memcpy(&val, p, std::min(sizeof(int32_t), size));
+        memcpy(&val, p, (std::min)(sizeof(int32_t), size));
         sum += val;
         p++;
         if (size <= sizeof(int32_t))
