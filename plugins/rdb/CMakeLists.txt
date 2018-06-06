@@ -13,7 +13,7 @@ PDAL_ADD_PLUGIN(libname reader rdb
     ${PDAL_JSONCPP_LIB_NAME}
     rdbcpp)
 
-target_include_directories(${libname} PUBLIC ${RDB_INCLUDE_DIR}/cpp)
+target_include_directories(${libname} PUBLIC ${RDB_INCLUDE_CPP_DIR})
 target_include_directories(${libname} PUBLIC ${EIGEN_INCLUDE_DIRS})
 
 
@@ -29,7 +29,7 @@ if (BUILD_RDBLIB_TESTS)
     PDAL_ADD_TEST(${RDB_TEST_NAME}
         FILES test/RdbReaderTest.cpp
         LINK_WITH ${libname})
-    target_include_directories(${RDB_TEST_NAME} PUBLIC ${RDB_INCLUDE_DIR})
+    target_include_directories(${RDB_TEST_NAME} PUBLIC ${RDB_INCLUDE_CPP_DIR})
     target_include_directories(${RDB_TEST_NAME} PRIVATE
         ${PROJECT_BINARY_DIR}/plugins/rdb/test
         ${PROJECT_SOURCE_DIR}/plugins/rdb/io)
