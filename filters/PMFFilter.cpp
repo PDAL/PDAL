@@ -152,6 +152,12 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     else
         lastView->append(*keptView);
 
+    if (!lastView->size())
+    {
+        log()->get(LogLevel::Error) << "No last returns found. Try running again with --filters.pmf.last=false.\n";
+        return viewSet;
+    }
+
     // Run the actual PMF algorithm.
     processGround(lastView);
 

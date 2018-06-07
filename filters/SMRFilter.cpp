@@ -169,6 +169,12 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     else
         lastView->append(*keptView);
 
+    if (!lastView->size())
+    {
+        log()->get(LogLevel::Error) << "No last returns found. Try running again with --filters.smrf.last=false.\n";
+        return viewSet;
+    }
+
     for (PointId i = 0; i < nonlastView->size(); ++i)
         nonlastView->setField(Dimension::Id::Classification, i, 1);
 
