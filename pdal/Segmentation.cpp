@@ -130,12 +130,11 @@ void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
 void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                         PointViewPtr other)
 {
-    PointRef point(*input, 0);
     for (PointId i = 0; i < input->size(); ++i)
     {
-        point.setPointId(i);
-        if (point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber) ==
-            point.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns))
+        uint8_t rn = input->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t nr = input->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        if ((rn == nr) && (nr > 1))
             last->appendPoint(*input, i);
         else
             other->appendPoint(*input, i);
