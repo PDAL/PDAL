@@ -476,7 +476,7 @@ void LasReader::readExtraBytesVlr()
     }
     if (m_extraDims.size() && m_extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
-            "in pineline and VLR don't match.  Ignoring pipeline-specified "
+            "in pipeline and VLR don't match.  Ignoring pipeline-specified "
             "dimensions";
     m_extraDims = extraDims;
 }
