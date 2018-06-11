@@ -141,5 +141,67 @@ void segmentLastReturns(PointViewPtr input, PointViewPtr last,
     }
 }
 
+void segmentReturns(PointViewPtr input, PointViewPtr first,
+                    PointViewPtr second, StringList returns)
+{
+    static const int returnFirst = 1;
+    static const int returnIntermediate = 2;
+    static const int returnLast = 4;
+    static const int returnOnly = 8;
+
+    int outputTypes = 0;
+
+    for (auto& r : returns)
+    {
+        Utils::trim(r);
+        if (r == "first")
+            outputTypes |= returnFirst;
+        else if (r == "intermediate")
+            outputTypes |= returnIntermediate;
+        else if (r == "last")
+            outputTypes |= returnLast;
+        else if (r == "only")
+            outputTypes |= returnOnly;
+    }
+
+    for (PointId i = 0; i < input->size(); ++i)
+    {
+        PointRef p = input->point(i);
+        uint8_t rn = input->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t nr = input->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        if ((rn == 1) && (nr > 1))
+        {
+            if (outputTypes & returnFirst)
+                first->appendPoint(*input.get(), i);
+            else
+                second->appendPoint(*input.get(), i);
+        }
+        else if ((rn > 1) && (rn < nr))
+        {
+            if (outputTypes & returnIntermediate)
+                first->appendPoint(*input.get(), i);
+            else
+                second->appendPoint(*input.get(), i);
+        }
+        else if ((rn == nr) && (nr > 1))
+        {
+            if (outputTypes & returnLast)
+                first->appendPoint(*input.get(), i);
+            else
+                second->appendPoint(*input.get(), i);
+        }
+        else if (nr ==1)
+        {
+            if (outputTypes & returnOnly)
+                first->appendPoint(*input.get(), i);
+            else
+                second->appendPoint(*input.get(), i);
+        }
+        else
+            second->appendPoint(*input.get(), i);
+    }
+    std::cerr << first->size() << ", " << second->size() << std::endl;
+}
+
 } // namespace Segmentation
 } // namespace pdal
