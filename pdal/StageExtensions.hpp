@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <map>
 #include <mutex>
 
 #include <pdal/Log.hpp>
