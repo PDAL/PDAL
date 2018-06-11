@@ -38,6 +38,7 @@
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
+#include <pdal/util/Backtrace.hpp>
 
 #include <iomanip>
 #include <iostream>
