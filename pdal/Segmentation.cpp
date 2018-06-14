@@ -144,60 +144,40 @@ void segmentLastReturns(PointViewPtr input, PointViewPtr last,
 void segmentReturns(PointViewPtr input, PointViewPtr first,
                     PointViewPtr second, StringList returns)
 {
-    static const int returnFirst = 1;
-    static const int returnIntermediate = 2;
-    static const int returnLast = 4;
-    static const int returnOnly = 8;
-
-    int outputTypes = 0;
+    bool returnFirst = false;
+    bool returnIntermediate = false;
+    bool returnLast = false;
+    bool returnOnly = false;
 
     for (auto& r : returns)
     {
         Utils::trim(r);
         if (r == "first")
-            outputTypes |= returnFirst;
+            returnFirst = true;
         else if (r == "intermediate")
-            outputTypes |= returnIntermediate;
+            returnIntermediate = true;
         else if (r == "last")
-            outputTypes |= returnLast;
+            returnLast = true;
         else if (r == "only")
-            outputTypes |= returnOnly;
+            returnOnly = true;
     }
 
     for (PointId i = 0; i < input->size(); ++i)
     {
         uint8_t rn = input->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
         uint8_t nr = input->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
-        if ((rn == 1) && (nr > 1))
+        
+        if ((((rn == 1) && (nr > 1)) && returnFirst) ||
+            (((rn > 1) && (rn < nr)) && returnIntermediate) ||
+            (((rn == nr) && (nr > 1)) && returnLast) ||
+            ((nr == 1) && returnOnly))
         {
-            if (outputTypes & returnFirst)
-                first->appendPoint(*input.get(), i);
-            else
-                second->appendPoint(*input.get(), i);
-        }
-        else if ((rn > 1) && (rn < nr))
-        {
-            if (outputTypes & returnIntermediate)
-                first->appendPoint(*input.get(), i);
-            else
-                second->appendPoint(*input.get(), i);
-        }
-        else if ((rn == nr) && (nr > 1))
-        {
-            if (outputTypes & returnLast)
-                first->appendPoint(*input.get(), i);
-            else
-                second->appendPoint(*input.get(), i);
-        }
-        else if (nr ==1)
-        {
-            if (outputTypes & returnOnly)
-                first->appendPoint(*input.get(), i);
-            else
-                second->appendPoint(*input.get(), i);
+            first->appendPoint(*input.get(), i);
         }
         else
+        {
             second->appendPoint(*input.get(), i);
+        }
     }
 }
 
