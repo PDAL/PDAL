@@ -166,7 +166,6 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
 
     for (PointId i = 0; i < input->size(); ++i)
     {
-        PointRef p = input->point(i);
         uint8_t rn = input->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
         uint8_t nr = input->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
         if ((rn == 1) && (nr > 1))
@@ -200,7 +199,6 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
         else
             second->appendPoint(*input.get(), i);
     }
-    std::cerr << first->size() << ", " << second->size() << std::endl;
 }
 
 } // namespace Segmentation
