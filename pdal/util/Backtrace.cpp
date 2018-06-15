@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2017, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -33,41 +32,59 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/util/Backtrace.hpp>
+#include "private/BacktraceImpl.hpp"
 
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#include <memory>
+#include <vector>
 #include <string>
+
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
-class Options;
-class Stage;
-
-class PDAL_DLL GroundKernel : public Kernel
+PDAL_DLL std::vector<std::string> Utils::backtrace()
 {
-public:
-    std::string getName() const;
-    int execute();
-    GroundKernel();
+    std::vector<std::string> lines;
+    BacktraceEntries entries = backtraceImpl();
 
-private:
-    virtual void addSwitches(ProgramArgs& args);
+    // Remove the frame for the unwinding itself.
+    if (entries.size())
+        entries.pop_front();
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_extract;
-    bool m_reset;
-    bool m_denoise;
-};
+    size_t maxLibnameLen(0);
+    for (auto& be : entries)
+    {
+        if (be.libname.empty())
+            be.libname = "???";
+        maxLibnameLen = std::max(maxLibnameLen, be.libname.size());
+    }
+
+    // Replace the simple symbol with a better representation if possible.
+    for (size_t i = 0; i < entries.size(); ++i)
+    {
+        BacktraceEntry& be = entries[i];
+        std::string line;
+
+        line = std::to_string(i);
+        line += std::string(4 - line.size(), ' ');
+        // Should the directory info be stripped from the libname?
+        line += be.libname;
+        line += std::string(maxLibnameLen + 2 - be.libname.size(), ' ');
+        if (be.symname.size())
+            line += demangle(be.symname);
+        else
+        {
+            std::ostringstream oss;
+            intptr_t ip(reinterpret_cast<intptr_t>(be.addr));
+            oss << "0x" << std::hex << std::setw(sizeof(ip) * 2) <<
+                std::setfill('0') << ip;
+            line += oss.str();
+        }
+        line += " + " + std::to_string(be.offset);
+        lines.push_back(line);
+    }
+    return lines;
+}
 
 } // namespace pdal

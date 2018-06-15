@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2017, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -33,41 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#include <memory>
-#include <string>
+#include "BacktraceImpl.hpp"
 
 namespace pdal
 {
 
-class Options;
-class Stage;
-
-class PDAL_DLL GroundKernel : public Kernel
+namespace Utils
 {
-public:
-    std::string getName() const;
-    int execute();
-    GroundKernel();
 
-private:
-    virtual void addSwitches(ProgramArgs& args);
+BacktraceEntries backtraceImpl()
+{
+    return BacktraceEntries();
+}
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_extract;
-    bool m_reset;
-    bool m_denoise;
-};
+} // namespace Utils
 
 } // namespace pdal

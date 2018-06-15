@@ -45,6 +45,7 @@ DAMAGE.
 #ifdef _OPENMP
 #include <omp.h>
 #endif // _OPENMP
+#include <memory>
 
 #include "MultiGridOctreeData.h"
 #include "Mesh.h"
@@ -75,7 +76,7 @@ XForm4x4<Real> GetPointXForm(PointSource& source, Real scaleFactor)
 	Point3D<double> minimum, maximum;
 	source.boundingBox(minimum, maximum);
 	Point3D<double> center = (maximum + minimum) / 2;
-	Real scale = (std::max)(maximum[0]-minimum[0],
+	double scale = (std::max)(maximum[0]-minimum[0],
         (std::max)(maximum[1]-minimum[1], maximum[2]-minimum[2]));
 	scale *= scaleFactor;
 	for( int i=0 ; i<3 ; i++ )
@@ -86,7 +87,7 @@ XForm4x4<Real> GetPointXForm(PointSource& source, Real scaleFactor)
 	for( int i=0 ; i<3 ; i++ )
     {
         sXForm(i,i) = (Real)(1./scale );
-        tXForm(3,i) = -center[i];
+        tXForm(3,i) = -(Real)center[i];
     }
 	return sXForm * tXForm;
 }
@@ -143,14 +144,14 @@ struct PoissonOpts
     int m_fullDepth;
     Real m_scale;
 
-    PoissonOpts() : m_threads(1), m_voxelDepth(-1), m_primalVoxel(false),
-        m_verbose(false), m_confidence(false), m_color(16),
-        m_samplesPerNode(1.5), m_depth(8), m_cgDepth(0), m_iterations(8),
-        m_showResidual(false), m_lowResIterMult(1), m_kernelDepth(0),
-        m_solveDepth(0), m_solverAccuracy(1e-3), m_pointWeight(4),
-        m_adaptExponent(1), m_density(false), m_linearFit(false),
-        m_nonManifold(false), m_polygonMesh(false), m_fullDepth(5),
-        m_scale(1.1)
+    PoissonOpts() : m_threads(1), m_voxelDepth(-1),
+        m_primalVoxel(false), m_verbose(false), m_confidence(false),
+        m_color(16), m_samplesPerNode(1.5F), m_depth(8), m_cgDepth(0),
+        m_iterations(8), m_showResidual(false), m_lowResIterMult(1),
+        m_kernelDepth(0), m_solveDepth(0), m_solverAccuracy(1e-3F),
+        m_pointWeight(4), m_adaptExponent(1), m_density(false),
+        m_linearFit(false), m_nonManifold(false), m_polygonMesh(false),
+        m_fullDepth(5), m_scale(1.1F)
     {}
 
     void dump()
@@ -509,8 +510,8 @@ template<typename Real>
 void PoissonRecon<Real>::evaluate()
 {
     m_profiler.start();
-    double valueSum = 0;
-    double weightSum = 0;
+    Real valueSum = 0;
+    Real weightSum = 0;
     typename Octree<Real>::template MultiThreadedEvaluator<Degree, BType>
         evaluator(&m_tree, m_solution, m_opts.m_threads);
     for (auto & s : *m_samples)

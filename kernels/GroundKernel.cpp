@@ -65,7 +65,7 @@ std::string GroundKernel::getName() const
 GroundKernel::GroundKernel()
     : Kernel(), m_inputFile(""), m_outputFile(""), m_maxWindowSize(33),
       m_slope(1), m_maxDistance(2.5), m_initialDistance(0.15), m_cellSize(1),
-      m_extract(false)
+      m_extract(false), m_reset(false), m_denoise(false)
 {
 }
 
@@ -78,12 +78,19 @@ void GroundKernel::addSwitches(ProgramArgs& args)
     args.add("max_distance", "Max distance", m_maxDistance, 2.5);
     args.add("initial_distance", "Initial distance", m_initialDistance, .15);
     args.add("cell_size", "Cell size", m_cellSize, 1.0);
-    args.add("extract", "extract ground returns?", m_extract);
+    args.add("extract", "Extract ground returns?", m_extract);
+    args.add("reset", "Reset classifications prior to segmenting?", m_reset);
+    args.add("denoise", "Apply statistical outlier removal prior to segmenting?", m_denoise);
 }
 
 int GroundKernel::execute()
 {
     PointTable table;
+
+    Options assignOptions;
+    assignOptions.add("assignment", "Classification[:]=0");
+
+    Options outlierOptions;
 
     Options groundOptions;
     groundOptions.add("max_window_size", m_maxWindowSize);
@@ -91,12 +98,22 @@ int GroundKernel::execute()
     groundOptions.add("max_distance", m_maxDistance);
     groundOptions.add("initial_distance", m_initialDistance);
     groundOptions.add("cell_size", m_cellSize);
+    groundOptions.add("ignore", "Classification[7:7]");
 
     Options rangeOptions;
     rangeOptions.add("limits", "Classification[2:2]");
 
     Stage& readerStage(makeReader(m_inputFile, ""));
-    Stage& groundStage = makeFilter("filters.pmf", readerStage, groundOptions);
+
+    Stage* assignStage = &readerStage;
+    if (m_reset)
+        assignStage = &makeFilter("filters.assign", readerStage, assignOptions);
+
+    Stage* outlierStage = assignStage;
+    if (m_denoise)
+        outlierStage = &makeFilter("filters.outlier", *assignStage, outlierOptions);
+
+    Stage& groundStage = makeFilter("filters.pmf", *outlierStage, groundOptions);
 
     Stage* rangeStage = &groundStage;
     if (m_extract)

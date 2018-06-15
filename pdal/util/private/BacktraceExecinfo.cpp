@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2017, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -33,41 +32,39 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "BacktraceImpl.hpp"
 
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#include <memory>
-#include <string>
+#include <execinfo.h> // backtrace
+#include <dlfcn.h> // dladdr
 
 namespace pdal
 {
 
-class Options;
-class Stage;
-
-class PDAL_DLL GroundKernel : public Kernel
+Utils::BacktraceEntries Utils::backtraceImpl()
 {
-public:
-    std::string getName() const;
-    int execute();
-    GroundKernel();
+    Utils::BacktraceEntries entries;
+    const int MAX_STACK_SIZE(100);
+    void* buffer[MAX_STACK_SIZE];
 
-private:
-    virtual void addSwitches(ProgramArgs& args);
+    std::size_t size(::backtrace(buffer, MAX_STACK_SIZE));
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_extract;
-    bool m_reset;
-    bool m_denoise;
-};
+    for (size_t i = 0; i < size && i < MAX_STACK_SIZE; ++i)
+    {
+        BacktraceEntry entry;
+
+        entry.addr = buffer[i];
+
+        Dl_info info;
+        if (dladdr(entry.addr, &info))
+        {
+            entry.symname = info.dli_sname;
+            entry.libname = info.dli_fname;
+            entry.offset = reinterpret_cast<char *>(entry.addr) -
+                reinterpret_cast<char *>(info.dli_saddr);
+        }
+        entries.push_back(entry);
+    }
+    return entries;
+}
 
 } // namespace pdal
