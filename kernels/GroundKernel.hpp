@@ -66,6 +66,8 @@ private:
     double m_initialDistance;
     double m_cellSize;
     bool m_extract;
+    bool m_reset;
+    bool m_denoise;
 };
 
 } // namespace pdal
