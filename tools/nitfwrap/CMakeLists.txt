@@ -9,7 +9,8 @@ add_executable(nitfwrap
     ${PDAL_NITF_DIR}/NitfFileReader.cpp
     ${PDAL_NITF_DIR}/NitfFileWriter.cpp
     ${PDAL_NITF_DIR}/tre_plugins.cpp
- )
+)
+pdal_target_compile_settings(nitfwrap)
 add_dependencies(nitfwrap generate_dimension_hpp)
 target_link_libraries(nitfwrap PRIVATE
     ${PDAL_BASE_LIB_NAME}
