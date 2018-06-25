@@ -124,6 +124,16 @@ void SMRFilter::prepared(PointTableRef table)
 
     if (m_args->m_returns.size())
     {
+        for (auto& r : m_args->m_returns)
+        {
+            Utils::trim(r);
+            if ((r != "first") && (r != "intermediate") && (r != "last") &&
+                (r != "only"))
+            {
+                throwError("Unrecognized 'returns' value: '" + r + "'.");
+            }
+        }
+
         if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
             !layout->hasDim(Dimension::Id::NumberOfReturns))
         {
@@ -163,15 +173,20 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // Segment kept view into two views
     PointViewPtr firstView = keptView->makeNew();
     PointViewPtr secondView = keptView->makeNew();
-    Segmentation::segmentReturns(keptView, firstView, secondView,
-                                 m_args->m_returns);
+    if (m_args->m_returns.size())
+    {
+        Segmentation::segmentReturns(keptView, firstView, secondView,
+                                     m_args->m_returns);
+    }
+    else
+    {
+        for (PointId i = 0; i < keptView->size(); ++i)
+            firstView->appendPoint(*keptView.get(), i);
+    }
 
     if (!firstView->size())
     {
-        log()->get(LogLevel::Error)
-            << "No last returns found. Try running again with "
-               "--filters.smrf.last=false.\n";
-        return viewSet;
+        throwError("No returns to process.");
     }
 
     for (PointId i = 0; i < secondView->size(); ++i)
