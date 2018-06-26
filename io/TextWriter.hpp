@@ -49,6 +49,16 @@ class PDAL_DLL TextWriter : public Writer
         size_t precision;
     };
 
+    enum class OutputType
+    {
+        CSV,
+        GEOJSON
+    };
+
+    friend std::istream& operator >> (std::istream& in, OutputType& type);
+    friend std::ostream& operator << (std::ostream& out,
+        const OutputType& type);
+
 public:
     TextWriter()
     {}
@@ -61,6 +71,7 @@ private:
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
+    virtual bool processOne(PointRef& point);
 
     void writeHeader(PointTableRef table);
     void writeFooter();
@@ -73,7 +84,7 @@ private:
     bool findDim(Dimension::Id id, DimSpec& ds);
 
     std::string m_filename;
-    std::string m_outputType;
+    OutputType m_outputType;
     std::string m_callback;
     bool m_writeAllDims;
     std::string m_dimOrder;
@@ -86,6 +97,9 @@ private:
 
     FileStreamPtr m_stream;
     std::vector<DimSpec> m_dims;
+    DimSpec m_xDim;
+    DimSpec m_yDim;
+    DimSpec m_zDim;
 
     TextWriter& operator=(const TextWriter&); // not implemented
     TextWriter(const TextWriter&); // not implemented
