@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 
 namespace pdal
@@ -41,12 +42,13 @@ namespace pdal
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL TextWriter : public Writer
+class PDAL_DLL TextWriter : public Writer, public Streamable
 {
     struct DimSpec
     {
         Dimension::Id id;
         size_t precision;
+        std::string name;
     };
 
     enum class OutputType
@@ -77,9 +79,9 @@ private:
     void writeFooter();
     void writeGeoJSONHeader();
     void writeCSVHeader(PointTableRef table);
+    void processOneCSV(PointRef& point);
+    void processOneGeoJSON(PointRef& point);
 
-    void writeGeoJSONBuffer(const PointViewPtr view);
-    void writeCSVBuffer(const PointViewPtr view);
     DimSpec extractDim(std::string dim, PointTableRef table);
     bool findDim(Dimension::Id id, DimSpec& ds);
 

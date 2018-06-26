@@ -151,7 +151,7 @@ TextWriter::DimSpec TextWriter::extractDim(std::string dim, PointTableRef table)
     Dimension::Id d = table.layout()->findDim(s[0]);
     if (d == Dimension::Id::Unknown)
         throwError("Dimension not found with name '" + dim + "'.");
-    return { d, precision };
+    return { d, precision, table.layout()->dimName(d) };
 }
 
 
@@ -170,9 +170,12 @@ void TextWriter::ready(PointTableRef table)
 {
     *m_stream << std::fixed;
 
-    m_xDim = { Dimension::Id::X, static_cast<size_t>(m_precision) };
-    m_yDim = { Dimension::Id::Y, static_cast<size_t>(m_precision) };
-    m_zDim = { Dimension::Id::Z, static_cast<size_t>(m_precision) };
+    m_xDim = { Dimension::Id::X, static_cast<size_t>(m_precision),
+        table.layout()->dimName(Dimension::Id::X) };
+    m_yDim = { Dimension::Id::Y, static_cast<size_t>(m_precision),
+        table.layout()->dimName(Dimension::Id::Y) };
+    m_zDim = { Dimension::Id::Z, static_cast<size_t>(m_precision),
+        table.layout()->dimName(Dimension::Id::Z) };
 
     // Find the dimensions listed and put them on the id list.
     StringList dimNames = Utils::split2(m_dimOrder, ',');
@@ -195,7 +198,8 @@ void TextWriter::ready(PointTableRef table)
         Dimension::IdList all = table.layout()->dims();
         for (auto id : all)
         {
-            DimSpec ds { id, static_cast<size_t>(m_precision) };
+            DimSpec ds { id, static_cast<size_t>(m_precision),
+                table.layout()->dimName(id) };
             if (!findDim(id, ds))
                 m_dims.push_back(ds);
         }
@@ -236,6 +240,7 @@ void TextWriter::writeGeoJSONHeader()
     if (m_callback.size())
         *m_stream << m_callback <<"(";
     *m_stream << "{ \"type\": \"FeatureCollection\", \"features\": [";
+    *m_stream << ",";
 }
 
 
@@ -255,70 +260,75 @@ void TextWriter::writeCSVHeader(PointTableRef table)
     *m_stream << m_newline;
 }
 
-void TextWriter::writeCSVBuffer(const PointViewPtr view)
+
+void TextWriter::processOneCSV(PointRef& point)
 {
-    for (PointId idx = 0; idx < view->size(); ++idx)
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        {
-            if (di != m_dims.begin())
-                *m_stream << m_delimiter;
-            m_stream->precision(di->precision);
-            *m_stream << view->getFieldAs<double>(di->id, idx);
-        }
-        *m_stream << m_newline;
+        if (di != m_dims.begin())
+            *m_stream << m_delimiter;
+        m_stream->precision(di->precision);
+        *m_stream << point.getFieldAs<double>(di->id);
     }
+    *m_stream << m_newline;
+}
+
+void TextWriter::processOneGeoJSON(PointRef& point)
+{
+    *m_stream << "{ \"type\":\"Feature\",\"geometry\": "
+        "{ \"type\": \"Point\", \"coordinates\": [";
+
+    m_stream->precision(m_xDim.precision);
+    *m_stream << point.getFieldAs<double>(Dimension::Id::X) << ",";
+    m_stream->precision(m_yDim.precision);
+    *m_stream << point.getFieldAs<double>(Dimension::Id::Y) << ",";
+    m_stream->precision(m_zDim.precision);
+    *m_stream << point.getFieldAs<double>(Dimension::Id::Z) << "]},";
+
+    *m_stream << "\"properties\": {";
+
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        if (di != m_dims.begin())
+            *m_stream << ",";
+
+        *m_stream << "\"" << di->name << "\":";
+        *m_stream << "\"";
+        m_stream->precision(di->precision);
+        *m_stream << point.getFieldAs<double>(di->id);
+        *m_stream <<"\"";
+    }
+    *m_stream << "}"; // end properties
+    *m_stream << "}"; // end feature
 }
 
 
 bool TextWriter::processOne(PointRef& point)
 {
+    if (m_outputType == OutputType::CSV)
+        processOneCSV(point);
+    else
+        processOneGeoJSON(point);
     return true;
 }
 
-void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
-{
-    using namespace Dimension;
-
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        if (idx)
-            *m_stream << ",";
-
-        *m_stream << "{ \"type\":\"Feature\",\"geometry\": "
-            "{ \"type\": \"Point\", \"coordinates\": [";
-
-        m_stream->precision(m_xDim.precision);
-        *m_stream << view->getFieldAs<double>(Id::X, idx) << ",";
-        m_stream->precision(m_yDim.precision);
-        *m_stream << view->getFieldAs<double>(Id::Y, idx) << ",";
-        m_stream->precision(m_zDim.precision);
-        *m_stream << view->getFieldAs<double>(Id::Z, idx) << "]},";
-
-        *m_stream << "\"properties\": {";
-
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        {
-            if (di != m_dims.begin())
-                *m_stream << ",";
-
-            *m_stream << "\"" << view->dimName(di->id) << "\":";
-            *m_stream << "\"";
-            m_stream->precision(di->precision);
-            *m_stream << view->getFieldAs<double>(di->id, idx);
-            *m_stream <<"\"";
-        }
-        *m_stream << "}"; // end properties
-        *m_stream << "}"; // end feature
-    }
-}
 
 void TextWriter::write(const PointViewPtr view)
 {
+    PointRef point(*view, 0);
+
     if (m_outputType == OutputType::CSV)
-        writeCSVBuffer(view);
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            point.setPointId(idx);
+            processOneCSV(point);
+        }
     else if (m_outputType == OutputType::GEOJSON)
-        writeGeoJSONBuffer(view);
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            point.setPointId(idx);
+            processOneGeoJSON(point);
+        }
 }
 
 
