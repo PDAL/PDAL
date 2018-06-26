@@ -67,7 +67,13 @@ private:
     virtual void writerInitialize(PointTableRef table)
     {
         Writer::writerInitialize(table);
-        m_hashPos = handleFilenameTemplate(m_filename);
+        try {
+            m_hashPos = handleFilenameTemplate(m_filename);
+        }
+        catch (const pdal_error& err)
+        {
+            throwError(err.what());
+        }
     }
 
     std::string generateFilename()

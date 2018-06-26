@@ -3,6 +3,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
@@ -40,6 +41,15 @@ class WriterWrapper : public StageWrapper
 public:
     static void write(Writer& w, PointViewPtr view)
         { w.write(view); }
+};
+
+// Provide access to private members of Streamable.
+class StreamableWrapper : public StageWrapper
+{
+public:
+    static bool processOne(Streamable& s, PointRef& point)
+        { return s.processOne(point); }
+
 };
 
 } //namespace pdal

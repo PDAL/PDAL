@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Hobu Inc. (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,62 +34,40 @@
 
 #pragma once
 
-#include <pdal/Options.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
+#include <map>
+
+#include <pdal/Kernel.hpp>
+#include <filters/SplitterFilter.hpp>
 
 namespace pdal
 {
 
-class Writer;
-class UserCallback;
-
-/**
-  A Writer is a terminal stage for a PDAL pipeline.  It usually writes output
-  to a file, but this isn't a requirement.  The class provides support for
-  some operations common for producing point output.
-*/
-class PDAL_DLL Writer : public virtual Stage
+class PDAL_DLL TileKernel : public Kernel
 {
-    friend class WriterWrapper;
-    friend class DbWriter;
-    friend class FlexWriter;
+    using Coord = std::pair<int, int>;
 
 public:
-    /**
-      Construct a writer.
-    */
-    Writer()
-        {}
-
-    /**
-      Locate template placeholder ('#') and validate filename with respect
-      to placeholder.
-    */
-    static std::string::size_type
-        handleFilenameTemplate(const std::string& filename);
+    TileKernel();
+    std::string getName() const;
+    int execute();
 
 private:
-    virtual PointViewSet run(PointViewPtr view)
-    {
-        PointViewSet viewSet;
-        write(view);
-        viewSet.insert(view);
-        return viewSet;
-    }
-    virtual void writerInitialize(PointTableRef table)
-    {}
+    void addSwitches(ProgramArgs& args);
+    void validateSwitches(ProgramArgs& args);
+    Streamable *prepareReader(const std::string& filename);
+    void process(const std::vector<Streamable *>& readers);
+    void adder(PointRef& point, int xpos, int ypos);
 
-    /**
-      Write the point in a PointView.  This is a simplification of the
-      \ref run() interface for convenience.  Impelment in subclass if desired.
-    */
-    virtual void write(const PointViewPtr /*view*/)
-        { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    std::string m_inputFile;
+    std::string m_outputFile;
+    double m_length;
+    double m_xOrigin;
+    double m_yOrigin;
+    double m_buffer;
+    std::map<Coord, Streamable *> m_writers;
+    FixedPointTable m_table;
+    SplitterFilter m_splitter;
+    std::string::size_type m_hashPos;
 };
 
 } // namespace pdal
-
