@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 
 namespace pdal
@@ -41,13 +42,24 @@ namespace pdal
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL TextWriter : public Writer
+class PDAL_DLL TextWriter : public Writer, public Streamable
 {
     struct DimSpec
     {
         Dimension::Id id;
         size_t precision;
+        std::string name;
     };
+
+    enum class OutputType
+    {
+        CSV,
+        GEOJSON
+    };
+
+    friend std::istream& operator >> (std::istream& in, OutputType& type);
+    friend std::ostream& operator << (std::ostream& out,
+        const OutputType& type);
 
 public:
     TextWriter()
@@ -61,19 +73,20 @@ private:
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
+    virtual bool processOne(PointRef& point);
 
     void writeHeader(PointTableRef table);
     void writeFooter();
     void writeGeoJSONHeader();
     void writeCSVHeader(PointTableRef table);
+    void processOneCSV(PointRef& point);
+    void processOneGeoJSON(PointRef& point);
 
-    void writeGeoJSONBuffer(const PointViewPtr view);
-    void writeCSVBuffer(const PointViewPtr view);
     DimSpec extractDim(std::string dim, PointTableRef table);
     bool findDim(Dimension::Id id, DimSpec& ds);
 
     std::string m_filename;
-    std::string m_outputType;
+    OutputType m_outputType;
     std::string m_callback;
     bool m_writeAllDims;
     std::string m_dimOrder;
@@ -86,6 +99,9 @@ private:
 
     FileStreamPtr m_stream;
     std::vector<DimSpec> m_dims;
+    DimSpec m_xDim;
+    DimSpec m_yDim;
+    DimSpec m_zDim;
 
     TextWriter& operator=(const TextWriter&); // not implemented
     TextWriter(const TextWriter&); // not implemented
