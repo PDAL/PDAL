@@ -168,7 +168,6 @@ void TileKernel::process(const std::vector<Streamable *>& readers)
 
         while (!finished)
         {
-            std::cerr << "Looping idx = " << idx << "!\n";
             m_splitter.processPoint(point, adder);
             idx++;
             if (idx >= m_table.capacity())
@@ -190,7 +189,12 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
     auto wi = m_writers.find(loc);
     if (wi == m_writers.end())
     {
-        w = &m_manager.makeWriter(m_outputFile, "");
+        std::string filename(m_outputFile);
+        std::string xname(std::to_string(xpos));
+        std::string yname(std::to_string(ypos));
+        filename.replace(m_hashPos, 1, (xname + "_" + yname));
+
+        w = &m_manager.makeWriter(filename, "");
 		if (!w)
 			throw pdal_error("Couldn't create writer for output file '" +
 				m_outputFile + "'.");
@@ -198,14 +202,8 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
 		if (!sw)
 			throw pdal_error("Driver '" + w->getName() + "' for input file '" +
 				m_outputFile + "' is not streamable.");  
+        m_writers[loc] = sw;
 
-        std::string filename(m_outputFile);
-        std::string ps = std::to_string(xpos) + "_" + std::to_string(ypos);
-        filename.replace(m_hashPos, 1, ps);
-
-        Options opts;
-        opts.add("filename", filename);
-		sw->addOptions(opts);
         sw->prepare(m_table);
         StreamableWrapper::ready(*sw, m_table);
     }
