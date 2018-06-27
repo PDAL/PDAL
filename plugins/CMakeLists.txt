@@ -16,10 +16,6 @@ if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
     add_subdirectory(greyhound)
 endif()
 
-if(BUILD_PLUGIN_HEXBIN)
-    add_subdirectory(hexbin)
-endif()
-
 if(BUILD_PLUGIN_ICEBRIDGE)
     if (NOT PDAL_HAVE_LIBXML2)
         message(FATAL_ERROR "Can't build icebridge plugin without libxml2")
