@@ -5,24 +5,22 @@ Software installation
 
 .. include:: ../../includes/substitutions.rst
 
-(Done for you already)
+1. :ref:`workshop-osgeo4w`
+    * Install PDAL via OSGeo4W64
 
-.. 1. :ref:`Docker <docker>`
-    * Run PDAL and GDAL command line applications
-
-.. 2. :ref:`QGIS<qgis>`
+2. :ref:`QGIS<qgis>`
     * Visualize vector and raster data
 
-.. 3. `QT Reader`_
+3. `QT Reader`_
     * Visualize point cloud data
 
-.. 4. `Fugro Viewer`_
+4. `Fugro Viewer`_
     * Visualize point cloud data
 
-.. 5. http://plas.io
+5. http://plas.io
     * Visualize point cloud data
 
-.. 6. `CloudCompare`_
+6. `CloudCompare`_
     * Visualize point cloud data
 
 .. _`QT Reader`: http://appliedimagery.com/download/
@@ -32,13 +30,20 @@ Software installation
 Data installation
 ================================================================================
 
-1. Copy entire contents:
+1. Copy entire contents of USB or data download:
 
 ::
 
-    C:\Users\Howard\PDAL
+    C:\Users\hobu\PDAL
 
+::
 
+    https://s3.amazonaws.com/pdal/workshop/PDAL.zip
+
+Path Substitution
+================================================================================
+
+My username is ``hobu``, yours probably isn't.
 
 Next
 ================================================================================

@@ -121,7 +121,7 @@ public:
 
     std::vector<PointId> neighbors(double x, double y, point_count_t k)
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         std::vector<PointId> output(k);
         std::vector<double> out_dist_sqr(k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -154,7 +154,7 @@ public:
     void knnSearch(double x, double y, point_count_t k,
         std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
 
         resultSet.init(&indices->front(), &sqr_dists->front());
@@ -247,7 +247,7 @@ public:
     std::vector<PointId> neighbors(double x, double y, double z,
         point_count_t k)
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         std::vector<PointId> output(k);
         std::vector<double> out_dist_sqr(k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -283,7 +283,7 @@ public:
     void knnSearch(double x, double y, double z, point_count_t k,
         std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
 
         resultSet.init(&indices->front(), &sqr_dists->front());

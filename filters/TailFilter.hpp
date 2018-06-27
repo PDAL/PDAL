@@ -66,7 +66,7 @@ private:
                 << ") exceeds number of available points.\n";
         PointViewSet viewSet;
         PointViewPtr outView = view->makeNew();
-        for (PointId i = view->size() - std::min(m_count, view->size());
+        for (PointId i = view->size() - (std::min)(m_count, view->size());
              i < view->size(); ++i)
             outView->appendPoint(*view, i);
         viewSet.insert(outView);

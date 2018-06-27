@@ -83,16 +83,14 @@ struct SMRArgs
     double m_cut;
     std::string m_dir;
     DimRange m_ignored;
-    bool m_lastOnly;
+    StringList m_returns;
 };
 
 SMRFilter::SMRFilter() : m_args(new SMRArgs)
 {}
 
-
 SMRFilter::~SMRFilter()
 {}
-
 
 std::string SMRFilter::getName() const
 {
@@ -109,7 +107,8 @@ void SMRFilter::addArgs(ProgramArgs& args)
     args.add("cut", "Cut net size?", m_args->m_cut, 0.0);
     args.add("dir", "Optional output directory for debugging", m_args->m_dir);
     args.add("ignore", "Ignore values", m_args->m_ignored);
-    args.add("last", "Consider last returns only?", m_args->m_lastOnly, true);
+    args.add("returns", "Include last returns?", m_args->m_returns,
+             {"last", "only"});
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -123,8 +122,18 @@ void SMRFilter::prepared(PointTableRef table)
 
     m_args->m_ignored.m_id = layout->findDim(m_args->m_ignored.m_name);
 
-    if (m_args->m_lastOnly)
+    if (m_args->m_returns.size())
     {
+        for (auto& r : m_args->m_returns)
+        {
+            Utils::trim(r);
+            if ((r != "first") && (r != "intermediate") && (r != "last") &&
+                (r != "only"))
+            {
+                throwError("Unrecognized 'returns' value: '" + r + "'.");
+            }
+        }
+
         if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
             !layout->hasDim(Dimension::Id::NumberOfReturns))
         {
@@ -132,7 +141,7 @@ void SMRFilter::prepared(PointTableRef table)
                                              "NumberOfReturns. Skipping "
                                              "segmentation of last returns and "
                                              "proceeding with all returns.\n";
-            m_args->m_lastOnly = false;
+            m_args->m_returns = {""};
         }
     }
 }
@@ -159,27 +168,38 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         keptView->append(*view);
     else
         Segmentation::ignoreDimRange(m_args->m_ignored, view, keptView,
-            ignoredView);
+                                     ignoredView);
 
-    // Segment kept view into last/other-than-last return views.
-    PointViewPtr lastView = keptView->makeNew();
-    PointViewPtr nonlastView = keptView->makeNew();
-    if (m_args->m_lastOnly)
-        Segmentation::segmentLastReturns(keptView, lastView, nonlastView);
+    // Segment kept view into two views
+    PointViewPtr firstView = keptView->makeNew();
+    PointViewPtr secondView = keptView->makeNew();
+    if (m_args->m_returns.size())
+    {
+        Segmentation::segmentReturns(keptView, firstView, secondView,
+                                     m_args->m_returns);
+    }
     else
-        lastView->append(*keptView);
+    {
+        for (PointId i = 0; i < keptView->size(); ++i)
+            firstView->appendPoint(*keptView.get(), i);
+    }
 
-    for (PointId i = 0; i < nonlastView->size(); ++i)
-        nonlastView->setField(Dimension::Id::Classification, i, 1);
+    if (!firstView->size())
+    {
+        throwError("No returns to process.");
+    }
 
-    m_srs = lastView->spatialReference();
+    for (PointId i = 0; i < secondView->size(); ++i)
+        secondView->setField(Dimension::Id::Classification, i, 1);
 
-    lastView->calculateBounds(m_bounds);
+    m_srs = firstView->spatialReference();
+
+    firstView->calculateBounds(m_bounds);
     m_cols = ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1;
     m_rows = ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1;
 
     // Create raster of minimum Z values per element.
-    std::vector<double> ZImin = createZImin(lastView);
+    std::vector<double> ZImin = createZImin(firstView);
 
     // Create raster mask of pixels containing low outlier points.
     std::vector<int> Low = createLowMask(ZImin);
@@ -199,16 +219,16 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // original ZImin (not ZInet), however the net cut mask will still force
     // interpolation at these pixels.
     std::vector<double> ZIpro =
-        createZIpro(lastView, ZImin, Low, isNetCell, Obj);
+        createZIpro(firstView, ZImin, Low, isNetCell, Obj);
 
     // Classify ground returns by comparing elevation values to the provisional
     // DEM.
-    classifyGround(lastView, ZIpro);
+    classifyGround(firstView, ZIpro);
 
     PointViewPtr outView = view->makeNew();
     outView->append(*ignoredView);
-    outView->append(*nonlastView);
-    outView->append(*lastView);
+    outView->append(*secondView);
+    outView->append(*firstView);
     viewSet.insert(outView);
 
     return viewSet;
@@ -238,31 +258,31 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
                                     gsurfs.data() + gsurfs.size());
         std::vector<double> gsurfs_fillV = knnfill(view, gsurfsV);
         gsurfs = Map<MatrixXd>(gsurfs_fillV.data(), m_rows, m_cols);
-        thresh = (m_args->m_threshold + m_args->m_scalar *
-            gsurfs.array()).matrix();
+        thresh =
+            (m_args->m_threshold + m_args->m_scalar * gsurfs.array()).matrix();
 
         if (!m_args->m_dir.empty())
         {
-            std::string fname = FileUtils::toAbsolutePath("gx.tif",
-                m_args->m_dir);
+            std::string fname =
+                FileUtils::toAbsolutePath("gx.tif", m_args->m_dir);
             writeMatrix(gx, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gy.tif", m_args->m_dir);
             writeMatrix(gy, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gsurfs.tif", m_args->m_dir);
-            writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell,
-                m_bounds, m_srs);
+            writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell, m_bounds,
+                        m_srs);
 
             fname = FileUtils::toAbsolutePath("gsurfs_fill.tif", m_args->m_dir);
             MatrixXd gsurfs_fill =
                 Map<MatrixXd>(gsurfs_fillV.data(), m_rows, m_cols);
-            writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell,
-                m_bounds, m_srs);
+            writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell, m_bounds,
+                        m_srs);
 
             fname = FileUtils::toAbsolutePath("thresh.tif", m_args->m_dir);
-            writeMatrix(thresh, fname, "GTiff", m_args->m_cell,
-                m_bounds, m_srs);
+            writeMatrix(thresh, fname, "GTiff", m_args->m_cell, m_bounds,
+                        m_srs);
         }
     }
 
@@ -272,10 +292,10 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        size_t c = static_cast<size_t>(std::floor(x - m_bounds.minx) /
-            m_args->m_cell);
-        size_t r = static_cast<size_t>(std::floor(y - m_bounds.miny) /
-            m_args->m_cell);
+        size_t c =
+            static_cast<size_t>(std::floor(x - m_bounds.minx) / m_args->m_cell);
+        size_t r =
+            static_cast<size_t>(std::floor(y - m_bounds.miny) / m_args->m_cell);
 
         // TODO(chambbj): We don't quite do this by the book and yet it seems to
         // work reasonably well:
@@ -318,11 +338,11 @@ std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
 
     if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zilow.tif",
-            m_args->m_dir);
+        std::string fname =
+            FileUtils::toAbsolutePath("zilow.tif", m_args->m_dir);
         MatrixXi Low = Map<MatrixXi>(LowV.data(), m_rows, m_cols);
         writeMatrix(Low.cast<double>(), fname, "GTiff", m_args->m_cell,
-            m_bounds, m_srs);
+                    m_bounds, m_srs);
     }
 
     return LowV;
@@ -366,16 +386,16 @@ std::vector<int> SMRFilter::createObjMask(std::vector<double> const& ZImin)
     // "The second stage of the ground identification algorithm involves the
     // application of a progressive morphological filter to the minimum surface
     // grid (ZImin)."
-    std::vector<int> ObjV = progressiveFilter(ZImin, m_args->m_slope,
-        m_args->m_window);
+    std::vector<int> ObjV =
+        progressiveFilter(ZImin, m_args->m_slope, m_args->m_window);
 
     if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("ziobj.tif",
-            m_args->m_dir);
+        std::string fname =
+            FileUtils::toAbsolutePath("ziobj.tif", m_args->m_dir);
         MatrixXi Obj = Map<MatrixXi>(ObjV.data(), m_rows, m_cols);
-        writeMatrix(Obj.cast<double>(), fname, "GTiff",
-            m_args->m_cell, m_bounds, m_srs);
+        writeMatrix(Obj.cast<double>(), fname, "GTiff", m_args->m_cell,
+                    m_bounds, m_srs);
     }
 
     return ObjV;
@@ -412,14 +432,15 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
 
     if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zimin.tif",
-            m_args->m_dir);
+        std::string fname =
+            FileUtils::toAbsolutePath("zimin.tif", m_args->m_dir);
         MatrixXd ZImin = Map<MatrixXd>(ZIminV.data(), m_rows, m_cols);
         writeMatrix(ZImin, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
         fname = FileUtils::toAbsolutePath("zimin_fill.tif", m_args->m_dir);
         MatrixXd ZImin_fill = Map<MatrixXd>(ZImin_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds,
+                    m_srs);
     }
 
     return ZImin_fillV;
@@ -457,8 +478,8 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
 
     if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zinet.tif",
-            m_args->m_dir);
+        std::string fname =
+            FileUtils::toAbsolutePath("zinet.tif", m_args->m_dir);
         MatrixXd ZInet = Map<MatrixXd>(ZInetV.data(), m_rows, m_cols);
         writeMatrix(ZInet, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
@@ -489,15 +510,15 @@ std::vector<double> SMRFilter::createZIpro(PointViewPtr view,
 
     if (!m_args->m_dir.empty())
     {
-        std::string fname = FileUtils::toAbsolutePath("zipro.tif",
-            m_args->m_dir);
+        std::string fname =
+            FileUtils::toAbsolutePath("zipro.tif", m_args->m_dir);
         MatrixXd ZIpro = Map<MatrixXd>(ZIproV.data(), m_rows, m_cols);
         writeMatrix(ZIpro, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
         fname = FileUtils::toAbsolutePath("zipro_fill.tif", m_args->m_dir);
         MatrixXd ZIpro_fill = Map<MatrixXd>(ZIpro_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell,
-            m_bounds, m_srs);
+        writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell, m_bounds,
+                    m_srs);
     }
 
     return ZIpro_fillV;
@@ -518,10 +539,10 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
             if (std::isnan(cz[c * m_rows + r]))
                 continue;
 
-            temp->setField(Id::X, i, m_bounds.minx + (c + 0.5) *
-                m_args->m_cell);
-            temp->setField(Id::Y, i, m_bounds.miny + (r + 0.5) *
-                m_args->m_cell);
+            temp->setField(Id::X, i,
+                           m_bounds.minx + (c + 0.5) * m_args->m_cell);
+            temp->setField(Id::Y, i,
+                           m_bounds.miny + (r + 0.5) * m_args->m_cell);
             temp->setField(Id::Z, i, cz[c * m_rows + r]);
             i++;
         }
@@ -615,7 +636,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
                            return (x > threshold) ? int(1) : int(0);
                        });
         std::transform(Obj.begin(), Obj.end(), foo.begin(), Obj.begin(),
-                       [](int a, int b) { return std::max(a, b); });
+                       [](int a, int b) { return (std::max)(a, b); });
 
         // "The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting

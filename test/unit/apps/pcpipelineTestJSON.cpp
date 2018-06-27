@@ -65,7 +65,8 @@ void run_pipeline(std::string const& pipelineFile,
     std::string file(Support::configuredpath(pipelineFile));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " +
         options + " 2>&1", output);
-    EXPECT_EQ(0, stat);
+    EXPECT_EQ(0, stat) << "Failure running '" << pipelineFile << "' with "
+        "options '" << options << "'.";
     if (stat)
         std::cerr << output << std::endl;
     if (lookFor.size())
@@ -311,6 +312,31 @@ TEST(json, issue1417)
         Support::datapath("las/utm15.las");
     run_pipeline("pipeline/issue1417.json", options);
 }
+
+// Make sure we handle repeated options properly
+TEST(json, issue1941)
+{
+    PipelineManager manager;
+    std::string file;
+
+    file = Support::configuredpath("pipeline/range_multi_limits.json");
+    manager.readPipeline(file);
+    EXPECT_EQ(manager.execute(), (point_count_t)5);
+    const PointViewSet& s = manager.views();
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr view = *s.begin();
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 0), 3);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 1), 4);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 2), 5);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 3), 8);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 4), 9);
+
+    PipelineManager manager2;
+
+    file = Support::configuredpath("pipeline/range_bad_limits.json");
+    EXPECT_THROW(manager2.readPipeline(file), pdal_error);
+}
+
 
 // Test that stage options passed via --stage.<tagname>.<option> work.
 TEST(json, stagetags)
