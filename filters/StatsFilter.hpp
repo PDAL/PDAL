@@ -57,8 +57,8 @@ typedef std::map<double, point_count_t> EnumMap;
 typedef std::vector<double> DataVector;
 
 public:
-    Summary(std::string name, EnumType enumerate) :
-        m_name(name), m_enumerate(enumerate)
+    Summary(std::string name, EnumType enumerate, bool advanced = true) :
+        m_name(name), m_enumerate(enumerate), m_advanced(advanced)
     { reset(); }
 
     double minimum() const
@@ -66,15 +66,17 @@ public:
     double maximum() const
         { return m_max; }
     double average() const
-        { return m_avg; }
+        { return M1; }
     double variance() const
         { return M2/(m_cnt - 1.0); }
     double stddev() const
         { return std::sqrt(variance()); }
     double skewness() const
-        { return std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5); }
+        { return (M2 && m_advanced) ?
+            std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5) : 0.0; }
     double kurtosis() const
-        { return double(m_cnt)*M4 / (M2*M2) - 3.0; }
+        { return (M2 && m_advanced) ?
+            double(m_cnt)*M4 / (M2*M2) - 3.0 : 0.0; }
     double median() const
         { return m_median; }
     double mad() const
@@ -94,7 +96,6 @@ public:
         m_max = (std::numeric_limits<double>::lowest)();
         m_min = (std::numeric_limits<double>::max)();
         m_cnt = 0;
-        m_avg = 0.0;
         m_median = 0.0;
         m_mad = 0.0;
         M1 = M2 = M3 = M4 = 0.0;
@@ -102,15 +103,10 @@ public:
 
     void insert(double value)
     {
-        double delta, delta_n, delta_n2, term1;
-
-        point_count_t n1(m_cnt);
-
         m_cnt++;
-        point_count_t n(m_cnt);
         m_min = (std::min)(m_min, value);
         m_max = (std::max)(m_max, value);
-        m_avg += (value - m_avg) / m_cnt;
+
         if (m_enumerate != NoEnum)
             m_values[value]++;
         if (m_enumerate == Global)
@@ -122,24 +118,38 @@ public:
 
         // stolen from http://www.johndcook.com/blog/skewness_kurtosis/
 
-        n1 = n;
-        delta = value - M1;
-        delta_n = delta / n;
-        delta_n2 = delta_n * delta_n;
-        term1 = delta * delta_n * n1;
+        point_count_t n(m_cnt);
+
+        // Difference from the mean
+        double delta = value - M1;
+        // Portion that this point's difference from the mean that it
+        // contributes to the mean.
+        double delta_n = delta / n;
+
+        // First moment - average.
         M1 += delta_n;
-        M4 += term1 * delta_n2 * (n*n - 3*n + 3) +
-            (6 * delta_n2 * M2) - (4 * delta_n * M3);
-        M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
-        M2 += term1;
+
+        double delta_2 = pow(delta, 2.0);
+
+        if (m_advanced)
+        {
+            double delta_n2 = pow(delta_n, 2.0);
+            // Fourth moment - kurtosis (sum part)
+            M4 += delta_2 * delta_n2 * (n*n - 3*n + 3) +
+                (6 * delta_n2 * M2) - (4 * delta_n * M3);
+            // Third moment - skewness (sum part)
+            M3 += delta_2 * delta_n * (n - 2) - 3 * delta_n * M2;
+        }
+        // Second moment - variance (sum part)
+        M2 += delta_2;
     }
 
 private:
     std::string m_name;
     EnumType m_enumerate;
+    bool m_advanced;
     double m_max;
     double m_min;
-    double m_avg;
     double m_mad;
     double m_median;
     EnumMap m_values;
@@ -177,6 +187,7 @@ private:
     StringList m_enums;
     StringList m_counts;
     StringList m_global;
+    bool m_advanced;
     std::map<Dimension::Id, stats::Summary> m_stats;
 };
 

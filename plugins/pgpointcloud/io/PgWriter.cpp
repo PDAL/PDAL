@@ -219,6 +219,8 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
         compression = "dimensional";
     else if (m_patch_compression_type == CompressionType::Ght)
         compression = "ght";
+    else if (m_patch_compression_type == CompressionType::Lazperf)
+        compression = "laz";
 
     Metadata metadata;
     MetadataNode m = metadata.getNode();

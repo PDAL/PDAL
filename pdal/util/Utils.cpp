@@ -39,21 +39,20 @@
 #include <cctype>
 #include <memory>
 #include <random>
+#include <sstream>
 
 #ifndef _WIN32
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
-#ifndef _WIN32
-#include <execinfo.h> // backtrace
-#endif
-#include <dlfcn.h> // dladdr
 #endif
 
 #pragma warning(disable: 4127)  // conditional expression is constant
 
 #include <stdio.h>
 #include <iomanip>
+
+#include "private/BacktraceImpl.hpp"
 
 typedef std::vector<std::string> StringList;
 
@@ -598,66 +597,6 @@ double Utils::normalizeLongitude(double longitude)
     else if (longitude > 180)
         longitude -= 360;
     return longitude;
-}
-
-
-std::vector<std::string> Utils::backtrace()
-{
-    std::vector<std::string> lines;
-#ifndef _WIN32
-    const int MAX_STACK_SIZE(100);
-    void* buffer[MAX_STACK_SIZE];
-    std::vector<std::string> prefixes;
-    size_t maxPrefix(0);
-
-    std::size_t size(::backtrace(buffer, MAX_STACK_SIZE));
-    char** symbols(backtrace_symbols(buffer, size));
-
-    // Store strings and free symbols.  Start at 1 to remove this function
-    // from the stack.
-    for (std::size_t i(1); i < size; ++i)
-    {
-        lines.push_back(symbols[i]);
-        const std::string& symbol = lines.back();
-        std::string prefix;
-        std::size_t pos = symbol.find("0x");
-        if (pos != std::string::npos)
-            prefix = symbol.substr(0, pos);
-        else
-            prefix = std::to_string(i) + "  ???";
-        trimTrailing(prefix);
-        prefixes.push_back(prefix);
-        maxPrefix = (std::max)(prefix.size(), maxPrefix);
-    }
-    free(symbols);
-
-    // Replace the simple symbol with a better representation if possible.
-    for (std::size_t i(1); i < size; ++i)
-    {
-        std::string& symbol = lines[i - 1];
-        std::string& prefix = prefixes[i - 1];
-        prefix = prefix + std::string(maxPrefix + 2 - prefix.size(), ' ');
-
-        Dl_info info;
-        if (dladdr(buffer[i], &info))
-        {
-            const std::size_t offset(static_cast<char*>(buffer[i]) -
-                        static_cast<char*>(info.dli_saddr));
-
-            // Replace the address and mangled name with a human-readable
-            // name.
-            symbol = prefix + demangle(info.dli_sname) + " + " +
-                std::to_string(offset);
-        }
-        else
-        {
-            symbol = symbol.substr(maxPrefix + 2);
-            trimLeading(symbol);
-            symbol = prefix + symbol;
-        }
-    }
-#endif
-    return lines;
 }
 
 

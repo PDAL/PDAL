@@ -169,10 +169,12 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test FILES
     filters/AdditionalMergeTest.cpp)
 target_include_directories(pdal_filters_additional_merge_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_smrf_test FILES filters/SMRFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_sort_test FILES filters/SortFilterTest.cpp)
 target_include_directories(pdal_filters_sort_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)

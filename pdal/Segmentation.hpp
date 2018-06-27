@@ -74,5 +74,8 @@ PDAL_DLL void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
 PDAL_DLL void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                                  PointViewPtr other);
 
+PDAL_DLL void segmentReturns(PointViewPtr input, PointViewPtr first,
+                             PointViewPtr second, StringList returns);
+
 } // namespace Segmentation
 } // namespace pdal

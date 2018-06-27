@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2017, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2018, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -33,41 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
+#include <filters/PMFFilter.hpp>
 
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/util/FileUtils.hpp>
+using namespace pdal;
 
-#include <memory>
-#include <string>
-
-namespace pdal
+TEST(PMFFilterTest, invalidReturns)
 {
+    Options opts;
+    opts.add("returns", "foo");
 
-class Options;
-class Stage;
+    PMFFilter filter;
+    filter.setOptions(opts);
 
-class PDAL_DLL GroundKernel : public Kernel
+    PointTable table;
+    EXPECT_THROW(filter.prepare(table), pdal_error);
+}
+
+TEST(PMFFilterTest, validReturns)
 {
-public:
-    std::string getName() const;
-    int execute();
-    GroundKernel();
+    Options opts;
+    opts.add("returns", "last,first,intermediate,only");
 
-private:
-    virtual void addSwitches(ProgramArgs& args);
+    PMFFilter filter;
+    filter.setOptions(opts);
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_extract;
-    bool m_reset;
-    bool m_denoise;
-};
-
-} // namespace pdal
+    PointTable table;
+    EXPECT_NO_THROW(filter.prepare(table));
+}

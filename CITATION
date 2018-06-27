@@ -1,0 +1,13 @@
+To cite PDAL in publications use:
+
+  PDAL contributors (2018). PDAL: The Point Data Abstraction Library
+  URL https://pdal.io/.
+
+A BibTeX entry for LaTeX users is
+
+  @Manual{,
+    title = {{PDAL}: The Point Data Abstraction Library},
+    author = {{PDAL contributors}},
+    year = {2018},
+    url = {https://pdal.io/},
+  }

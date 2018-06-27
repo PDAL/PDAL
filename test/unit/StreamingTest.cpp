@@ -316,3 +316,47 @@ TEST(Streaming, issue_2009)
 
     EXPECT_EQ(t.m_srsCnt, 1);
 }
+
+// Test that an SRS change is emitted at the start even if there is no SRS
+// in the source.
+TEST(Streaming, issue_2038)
+{
+    StageFactory f;
+
+    Stage& r1 = *(f.createStage("readers.text"));
+    Options r1Opts;
+    r1Opts.add("filename", Support::datapath("text/utm17_1.txt"));
+    r1.setOptions(r1Opts);
+
+    class TestFilter : public Filter, public Streamable
+    {
+    public:
+        TestFilter() : m_srsCnt(0)
+        {}
+
+        std::string getName() const { return "filters.test"; }
+
+        int m_srsCnt;
+
+    private:
+        virtual void spatialReferenceChanged(const SpatialReference&)
+        {
+            m_srsCnt++;
+        }
+
+        virtual bool processOne(PointRef&)
+        {
+            EXPECT_EQ(m_srsCnt, 1);
+            return true;
+        }
+    };
+
+    TestFilter t;
+    t.setInput(r1);
+
+    FixedPointTable table(100);
+    t.prepare(table);
+    t.execute(table);
+
+    EXPECT_EQ(t.m_srsCnt, 1);
+}

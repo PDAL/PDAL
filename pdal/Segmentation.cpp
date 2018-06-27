@@ -130,15 +130,54 @@ void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
 void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                         PointViewPtr other)
 {
-    PointRef point(*input, 0);
     for (PointId i = 0; i < input->size(); ++i)
     {
-        point.setPointId(i);
-        if (point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber) ==
-            point.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns))
+        uint8_t rn = input->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t nr = input->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        if ((rn == nr) && (nr > 1))
             last->appendPoint(*input, i);
         else
             other->appendPoint(*input, i);
+    }
+}
+
+void segmentReturns(PointViewPtr input, PointViewPtr first,
+                    PointViewPtr second, StringList returns)
+{
+    bool returnFirst = false;
+    bool returnIntermediate = false;
+    bool returnLast = false;
+    bool returnOnly = false;
+
+    for (auto& r : returns)
+    {
+        Utils::trim(r);
+        if (r == "first")
+            returnFirst = true;
+        else if (r == "intermediate")
+            returnIntermediate = true;
+        else if (r == "last")
+            returnLast = true;
+        else if (r == "only")
+            returnOnly = true;
+    }
+
+    for (PointId i = 0; i < input->size(); ++i)
+    {
+        uint8_t rn = input->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t nr = input->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        
+        if ((((rn == 1) && (nr > 1)) && returnFirst) ||
+            (((rn > 1) && (rn < nr)) && returnIntermediate) ||
+            (((rn == nr) && (nr > 1)) && returnLast) ||
+            ((nr == 1) && returnOnly))
+        {
+            first->appendPoint(*input.get(), i);
+        }
+        else
+        {
+            second->appendPoint(*input.get(), i);
+        }
     }
 }
 

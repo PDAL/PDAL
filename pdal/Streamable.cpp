@@ -211,7 +211,8 @@ void Streamable::execute(StreamPointTable& table,
         // processed by subsequent filters.
         for (Streamable *s : filters)
         {
-            if (srsMap[s] != srs)
+            auto si = srsMap.find(s);
+            if (si == srsMap.end() || si->second != srs)
             {
                 s->spatialReferenceChanged(srs);
                 srsMap[s] = srs;

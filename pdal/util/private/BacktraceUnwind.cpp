@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2017, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -33,41 +32,50 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "BacktraceImpl.hpp"
 
-#include <pdal/Kernel.hpp>
-#include <pdal/pdal_export.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#include <memory>
 #include <string>
+
+#define UNW_LOCAL_ONLY
+#include <dlfcn.h>
+#include <libunwind.h>
 
 namespace pdal
 {
 
-class Options;
-class Stage;
-
-class PDAL_DLL GroundKernel : public Kernel
+Utils::BacktraceEntries Utils::backtraceImpl()
 {
-public:
-    std::string getName() const;
-    int execute();
-    GroundKernel();
+    BacktraceEntries entries;
 
-private:
-    virtual void addSwitches(ProgramArgs& args);
+    unw_cursor_t cursor;
+    unw_context_t context;
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_extract;
-    bool m_reset;
-    bool m_denoise;
-};
+    unw_getcontext(&context);
+    unw_init_local(&cursor, &context);
+
+    while (unw_step(&cursor) > 0)
+    {
+        unw_word_t val;
+        BacktraceEntry entry;
+
+        unw_get_reg(&cursor, UNW_REG_IP, &val);
+        if (val == 0)
+            break;
+        *(reinterpret_cast<unw_word_t *>(&entry.addr)) = val;
+
+        unw_word_t offset;
+        char sym[1000];
+        if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0)
+        {
+            entry.offset = (int)offset;
+            entry.symname = sym;
+        }
+        Dl_info info;
+        if (dladdr(entry.addr, &info))
+            entry.libname = info.dli_fname;
+        entries.push_back(entry);
+    }
+    return entries;
+}
 
 } // namespace pdal

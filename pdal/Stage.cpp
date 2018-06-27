@@ -155,30 +155,60 @@ void Stage::prepare(PointTableRef table)
 
 PointViewSet Stage::execute(PointTableRef table)
 {
-    startLogging();
     table.finalize();
 
-    PointViewSet views;
+    std::stack<Stage *> stages;
+    std::stack<Stage *> pending;
+    std::map<Stage *, Stage *> parents;
 
-    // If the inputs are empty, we're a reader.
-    if (m_inputs.empty())
+    m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
+        std::endl;
+
+    pending.push(this);
+    parents[this] = nullptr;
+
+    // Linearize stage execution.
+    Stage *s;
+    while (pending.size())
     {
-        m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
-            std::endl;
-        views.insert(PointViewPtr(new PointView(table)));
-    }
-    else
-    {
-        for (size_t i = 0; i < m_inputs.size(); ++i)
+        s = pending.top();
+        pending.pop();
+        stages.push(s);
+        for (auto fi = s->m_inputs.begin(); fi != s->m_inputs.end(); ++fi)
         {
-            Stage *prev = m_inputs[i];
-            PointViewSet temp = prev->execute(table);
-            views.insert(temp.begin(), temp.end());
+            parents[*fi] = s;
+            pending.push(*fi);
         }
     }
 
+    // Go through the stages in order, executing 
+    PointViewSet outViews;
+    std::map<Stage *, PointViewSet> sets;
+    while (stages.size())
+    {
+        s = stages.top();
+        stages.pop();
+        PointViewSet& inViews = sets[s];
+        if (s->m_inputs.empty())
+            inViews.insert(PointViewPtr(new PointView(table)));
+        outViews = s->execute(table, inViews);
+
+        Stage *parent = parents[s];
+        if (parent)
+            sets[parent].insert(outViews.begin(), outViews.end());
+        // Allow previous point views to be freed.
+        sets.erase(s);
+    }
+    return outViews;
+}
+
+PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
+{
+
     PointViewSet outViews;
     std::vector<StageRunnerPtr> runners;
+
+    startLogging();
 
     // Put the spatial references from the views onto the table.
     // The table's spatial references are only valid as long as the stage
