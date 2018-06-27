@@ -103,7 +103,7 @@ inline BaseType base(Type t)
     return BaseType(Utils::toNative(t) & 0xFF00);
 }
 
-static const int COUNT = std::numeric_limits<uint16_t>::max();
+static const int COUNT = (std::numeric_limits<uint16_t>::max)();
 static const int PROPRIETARY = 0xF000;
 
 /// Get a string reresentation of a datatype.

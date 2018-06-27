@@ -46,17 +46,18 @@ namespace
 
     struct BBox
     {
-        BBox(Point min, Point max)
-            : min(min)
-            , max(max)
-            , center(min.x + (max.x - min.x) / 2, min.y + (max.y - min.y) / 2)
-            , halfWidth(center.x - min.x)
-            , halfHeight(center.y - min.y)
+        BBox(Point minimum, Point maximum)
+            : minimum(minimum)
+            , maximum(maximum)
+            , center(minimum.x + (maximum.x - minimum.x) / 2,
+                minimum.y + (maximum.y - minimum.y) / 2)
+            , halfWidth(center.x - minimum.x)
+            , halfHeight(center.y - minimum.y)
         { }
 
         BBox(const BBox& other)
-            : min(other.min)
-            , max(other.max)
+            : minimum(other.minimum)
+            , maximum(other.maximum)
             , center(other.center)
             , halfWidth(other.halfWidth)
             , halfHeight(other.halfHeight)
@@ -88,11 +89,12 @@ namespace
         // Returns true if the requested point is contained within this BBox.
         bool contains(const Point& p) const
         {
-            return p.x >= min.x && p.y >= min.y && p.x < max.x && p.y < max.y;
+            return p.x >= minimum.x && p.y >= minimum.y &&
+                p.x < maximum.x && p.y < maximum.y;
         }
 
-        const Point min;
-        const Point max;
+        const Point minimum;
+        const Point maximum;
 
         // Pre-calculate these properties, rather than exposing functions to
         // calculate them on-demand, due to the large number of times that
@@ -193,7 +195,7 @@ std::size_t Tree::addPoint(const QuadPointRef* toAdd, const std::size_t curDepth
                 {
                     sw.reset(new Tree(
                             BBox(
-                                Point(bbox.min.x, bbox.min.y),
+                                Point(bbox.minimum.x, bbox.minimum.y),
                                 Point(center.x, center.y)),
                             toAdd));
 
@@ -210,8 +212,8 @@ std::size_t Tree::addPoint(const QuadPointRef* toAdd, const std::size_t curDepth
                 {
                     nw.reset(new Tree(
                             BBox(
-                                Point(bbox.min.x, center.y),
-                                Point(center.x, bbox.max.y)),
+                                Point(bbox.minimum.x, center.y),
+                                Point(center.x, bbox.maximum.y)),
                             toAdd));
 
                     return nextDepth;
@@ -230,8 +232,8 @@ std::size_t Tree::addPoint(const QuadPointRef* toAdd, const std::size_t curDepth
                 {
                     se.reset(new Tree(
                             BBox(
-                                Point(center.x, bbox.min.y),
-                                Point(bbox.max.x, center.y)),
+                                Point(center.x, bbox.minimum.y),
+                                Point(bbox.maximum.x, center.y)),
                             toAdd));
 
                     return nextDepth;
@@ -248,7 +250,7 @@ std::size_t Tree::addPoint(const QuadPointRef* toAdd, const std::size_t curDepth
                     ne.reset(new Tree(
                             BBox(
                                 Point(center.x, center.y),
-                                Point(bbox.max.x, bbox.max.y)),
+                                Point(bbox.maximum.x, bbox.maximum.y)),
                             toAdd));
 
                     return nextDepth;
@@ -550,10 +552,10 @@ QuadIndex::QImpl::QImpl(const PointView& view, std::size_t topLevel)
 {
     m_pointRefVec.resize(view.size());
 
-    double xMin(std::numeric_limits<double>::max());
-    double yMin(std::numeric_limits<double>::max());
-    double xMax(std::numeric_limits<double>::min());
-    double yMax(std::numeric_limits<double>::min());
+    double xMin((std::numeric_limits<double>::max)());
+    double yMin((std::numeric_limits<double>::max)());
+    double xMax((std::numeric_limits<double>::min)());
+    double yMax((std::numeric_limits<double>::min)());
 
     for (PointId i(0); i < view.size(); ++i)
     {
@@ -575,7 +577,7 @@ QuadIndex::QImpl::QImpl(const PointView& view, std::size_t topLevel)
 
     for (std::size_t i = 0; i < m_pointRefVec.size(); ++i)
     {
-        m_depth = std::max(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
+        m_depth = (std::max)(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
     }
 }
 
@@ -608,7 +610,7 @@ QuadIndex::QImpl::QImpl(
 
     for (std::size_t i = 0; i < m_pointRefVec.size(); ++i)
     {
-        m_depth = std::max(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
+        m_depth = (std::max)(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
     }
 }
 
@@ -630,7 +632,7 @@ QuadIndex::QImpl::QImpl(
     for (std::size_t i = 0; i < points.size(); ++i)
     {
         m_pointRefVec[i] = points[i];
-        m_depth = std::max(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
+        m_depth = (std::max)(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
     }
 }
 
@@ -642,10 +644,10 @@ void QuadIndex::QImpl::getBounds(
 {
     if (m_tree)
     {
-        xMin = m_tree->bbox.min.x;
-        yMin = m_tree->bbox.min.y;
-        xMax = m_tree->bbox.max.x;
-        yMax = m_tree->bbox.max.y;
+        xMin = m_tree->bbox.minimum.x;
+        yMin = m_tree->bbox.minimum.y;
+        xMax = m_tree->bbox.maximum.x;
+        yMax = m_tree->bbox.maximum.y;
     }
 }
 
@@ -692,17 +694,18 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
     if (m_tree)
     {
         const std::size_t exp(std::pow(2, rasterize));
-        const double xWidth(m_tree->bbox.max.x - m_tree->bbox.min.x);
-        const double yWidth(m_tree->bbox.max.y - m_tree->bbox.min.y);
+        const double xWidth(m_tree->bbox.maximum.x - m_tree->bbox.minimum.x);
+        const double yWidth(m_tree->bbox.maximum.y - m_tree->bbox.minimum.y);
 
         xStep = xWidth / exp;
         yStep = yWidth / exp;
-        xBegin =    m_tree->bbox.min.x + (xStep / 2);
-        yBegin =    m_tree->bbox.min.y + (yStep / 2);
-        xEnd =      m_tree->bbox.max.x + (xStep / 2); // One tick past the end.
-        yEnd =      m_tree->bbox.max.y + (yStep / 2);
+        xBegin =    m_tree->bbox.minimum.x + (xStep / 2);
+        yBegin =    m_tree->bbox.minimum.y + (yStep / 2);
+        // One tick past the end.
+        xEnd =      m_tree->bbox.maximum.x + (xStep / 2);
+        yEnd =      m_tree->bbox.maximum.y + (yStep / 2);
 
-        results.resize(exp * exp, std::numeric_limits<PointId>::max());
+        results.resize(exp * exp, (std::numeric_limits<PointId>::max)());
 
         m_tree->getPoints(
                 results,
@@ -733,7 +736,7 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
     {
         const std::size_t width (Utils::sround((xEnd - xBegin) / xStep));
         const std::size_t height(Utils::sround((yEnd - yBegin) / yStep));
-        results.resize(width * height, std::numeric_limits<PointId>::max());
+        results.resize(width * height, (std::numeric_limits<PointId>::max)());
 
         m_tree->getPoints(
                 results,
@@ -764,8 +767,8 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
         m_tree->getPoints(
                 results,
                 BBox(
-                    Point(std::min(xMin, xMax), std::min(yMin, yMax)),
-                    Point(std::max(xMin, xMax), std::max(yMin, yMax))),
+                    Point((std::min)(xMin, xMax), (std::min)(yMin, yMax)),
+                    Point((std::max)(xMin, xMax), (std::max)(yMin, yMax))),
                 minDepth,
                 maxDepth,
                 m_topLevel);

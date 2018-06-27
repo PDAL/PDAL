@@ -13,8 +13,6 @@ endif()
 
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
-include(${PDAL_CMAKE_DIR}/execinfo.cmake)
-
 #
 # We include Utils.cpp here rather than linking in the Utils library because
 # some people building linux packages disable rpath, which means that
@@ -35,6 +33,7 @@ target_link_libraries(dimbuilder
         ${CMAKE_DL_LIBS}
 )
 if (PDAL_HAVE_JSONCPP)
-    target_link_libraries(dimbuilder ${JSON_CPP_LINK_TYPE}
-        ${PDAL_JSONCPP_LIB_NAME})
+    target_link_libraries(dimbuilder
+        PRIVATE
+            ${PDAL_JSONCPP_LIB_NAME})
 endif()

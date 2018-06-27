@@ -109,7 +109,7 @@ std::string PlyWriter::getType(Dimension::Type type) const
     {
         return types.at(type);
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {
         throwError("Can't write dimension of type '" +
                 Dimension::interpretationName(type) + "'.");
@@ -143,9 +143,9 @@ void PlyWriter::writeHeader(PointLayoutPtr layout) const
 
 void PlyWriter::ready(PointTableRef table)
 {
-    if (pointCount() > std::numeric_limits<uint32_t>::max())
+    if (pointCount() > (std::numeric_limits<uint32_t>::max)())
         throwError("Can't write PLY file.  Only " +
-            std::to_string(std::numeric_limits<uint32_t>::max()) +
+            std::to_string((std::numeric_limits<uint32_t>::max)()) +
             " points supported.");
 
     m_stream = Utils::createFile(m_filename, true);

@@ -44,7 +44,8 @@ capability to reproject the data for us on-the-fly:
     <OGRVRTDataSource>
         <OGRVRTWarpedLayer>
             <OGRVRTLayer name="OGRGeoJSON">
-                <SrcDataSource>attributes.json</SrcDataSource>
+                <SrcDataSource>c:/Users/hobu/PDAL/exercises/analysis/clipping/attributes.json</SrcDataSource>
+                <SrcLayer>attributes</SrcLayer>
                 <LayerSRS>EPSG:4326</LayerSRS>
             </OGRVRTLayer>
             <TargetSRS>+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs</TargetSRS>
@@ -54,7 +55,11 @@ capability to reproject the data for us on-the-fly:
 .. note::
 
     This VRT file is available in your workshop materials in the
-    ``./exercises/analysis/clipping/attributes.json`` file. A GDAL or OGR VRT
+    ``./exercises/analysis/clipping/attributes.vrt`` file. You will need to
+    open this file, go to line 4 and replace ``c:/Users/hobu/PDAL/`` with
+    the correct path for your machine.
+
+    A GDAL or OGR VRT
     is a kind of "virtual" data source definition type that combines a
     definition of data and a processing operation into a single, readable data
     stream.
@@ -80,7 +85,9 @@ Pipeline breakdown
 .. note::
 
     This pipeline is available in your workshop materials in the
-    ``./exercises/analysis/clipping/clipping.json`` file.
+    ``./exercises/analysis/clipping/clipping.json`` file. Remember
+    to replace each of the three occurrences of ``c:/Users/Hobu/PDAL/``
+    in this file with the correct location for your machine.
 
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,10 +110,10 @@ The attributes in the ``attributes.json`` file include polygons with values
 ``2``, ``5``, and ``6``. We will use :ref:`filters.range` to keep points with
 ``Classification`` values in the range of ``6:6``.
 
-3. Writer
+4. Writer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* We will write our content back out using an :ref:`writers.las`.
+We will write our content back out using a :ref:`writers.las`.
 
 Execution
 ................................................................................

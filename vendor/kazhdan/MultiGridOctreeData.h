@@ -326,7 +326,14 @@ template< class Data >
 struct DenseNodeData
 {
 	DenseNodeData( void ){ _data = NullPointer( Data ) ; _sz = 0; }
-	DenseNodeData( size_t sz ){ _sz = sz ; if( sz ) _data = NewPointer< Data >( sz ) ; else _data = NullPointer( Data ); }
+	DenseNodeData( size_t sz )
+    {
+        _sz = sz ;
+        if ( sz )
+            _data = NewPointer< Data >( sz );
+        else
+            _data = NullPointer( Data );
+    }
 	DenseNodeData( const DenseNodeData&  d ) : DenseNodeData() { _resize( d._sz ) ; if( _sz ) memcpy( _data , d._data , sizeof(Data) * _sz ); }
 	DenseNodeData(       DenseNodeData&& d ){ _data = d._data , _sz = d._sz ; d._data = NullPointer( Data ) , d._sz = 0; }
 	DenseNodeData& operator = ( const DenseNodeData&  d ){ _resize( d._sz ) ; if( _sz ) memcpy( _data , d._data , sizeof(Data) * _sz ) ; return *this; }

@@ -63,6 +63,12 @@ Release Process
 3) Update ChangeLog with git2cl
 
   * git2cl . > ChangeLog
+  * Delete any lines with "Merge" in them
+
+    ::
+
+         git2cl . > Changelog
+         gsed -i '/Merge/d' ./ChangeLog
 
 4) Build and run the tests.  Really.
 

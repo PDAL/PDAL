@@ -172,7 +172,7 @@ Dimension::Type PlyReader::getType(const std::string& name)
     {
         return types.at(name);
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {}
     return Dimension::Type::None;
 }

@@ -69,9 +69,9 @@ public:
         Dimension::Type m_type;
     };
 
+    ColorizationFilter();
+    ~ColorizationFilter();
 
-    ColorizationFilter()
-    {}
     ColorizationFilter& operator=(const ColorizationFilter&) = delete;
     ColorizationFilter(const ColorizationFilter&) = delete;
 

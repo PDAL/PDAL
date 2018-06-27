@@ -115,10 +115,7 @@ void PPolynomial<Degree>::set( size_t size )
 	FreePointer( polys );
 	polyCount = size;
 	if( size )
-	{
 		polys = AllocPointer< StartingPolynomial< Degree > >( size );
-		memset( polys , 0 , sizeof( StartingPolynomial< Degree > )*size );
-	}
 }
 template< int Degree >
 void PPolynomial<Degree>::reset( size_t newSize )

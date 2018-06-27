@@ -4,167 +4,273 @@
 Quickstart
 ******************************************************************************
 
-.. index:: Docker, Quickstart
+.. index:: Conda, Quickstart
 
 Introduction
 ------------------------------------------------------------------------------
 
 It's a giant pain to build everything yourself. The quickest way to start using
 PDAL is to leverage builds that were constructed by the PDAL development team
-using `Docker`_. Docker is a containerization technology that allows you to
-run pre-built software in a way that is isolated from your system. Think of
-it like a binary that doesn't depend on your operating system's configuration
-to be able to run.
+using `Conda`_.
 
-This exercise will print the first point of an :ref:`ASPRS LAS <readers.las>` file.
-It will utilize the PDAL :ref:`command line application <apps>` to inspect the
-file.
+Directly from the Conda front page,
 
+    *Conda is an open source package management system and environment
+    management system that runs on Windows, macOS and Linux. Conda quickly
+    installs, runs and updates packages and their dependencies. Conda easily
+    creates, saves, loads and switches between environments on your local
+    computer.*
+
+This exercise will print the first point of an :ref:`ASPRS LAS <readers.las>`
+file. It will utilize the PDAL :ref:`command line application <apps>` to
+inspect the file.
 
 .. note::
-
-    While Docker is convenient, it is not for everyone. You can also obtain the
-    software by installing a Linux package from :ref:`download` or compiling it
-    yourself from :ref:`building`.
-
-    Docker is not required to use PDAL, and there are packages available on
-    Linux (Debian, RPM) and OSX (`Homebrew`_). See :ref:`download` to obtain
-    them. If you are a developer looking to leverage PDAL, you will need access
-    to the library in your environment, but this quick start document is for
-    those looking to quickly interact with data using PDAL's :ref:`command line
-    applications <apps>` and :ref:`pipeline`.
 
     If you need to compile your own copy of PDAL, see :ref:`building` for
     more details.
 
-.. _`Homebrew`: http://brew.sh
+.. _`Conda`: https://conda.io/docs/
 
-.. _docker:
 
-Install Docker
+Install Conda
 ------------------------------------------------------------------------------
 
-Docker starting documentation can be found at the following links. Read through
-them a bit for your platform so you have an idea what to expect.
+Conda installation instructions can be found at the following links. Read
+through them a bit for your platform so you have an idea what to expect.
 
-* `Windows <https://docs.docker.com/docker-for-windows/>`__
-* `OSX <https://docs.docker.com/docker-for-mac/>`__
-* `Linux <https://docs.docker.com/engine/installation/linux/>`__
-
-.. _`Docker Toolbox`: https://www.docker.com/docker-toolbox
+* `Windows <https://conda.io/docs/user-guide/install/windows.html>`__
+* `macOS <https://conda.io/docs/user-guide/install/macos.html>`__
+* `Linux <https://conda.io/docs/user-guide/install/linux.html>`__
 
 .. note::
 
     We will assume you are running on Windows, but the same commands should
-    work in OSX or Linux too -- though definition of file paths might provide
+    work in macOS or Linux too -- though definition of file paths might provide
     a significant difference.
 
-Enable Docker access to your machine
+
+Run Conda
 ................................................................................
 
-In order for Docker to be able to interact with data on your machine, you must
-make sure to tell it to be able to read your drive(s). Right-click on the
-little Docker whale icon in you System Tray, choose Settings, and click
-the Shared box by your C drive:
+On macOS and Linux, all Conda commands are typed into a terminal window. On
+Windows, commands are typed into the Anaconda Prompt window. Instructions can
+be found in the Conda `Getting Started`_ guide.
 
-.. image:: ./images/docker-quickstart-share.png
+.. _`Getting Started`: https://conda.io/docs/user-guide/getting-started.html#starting-conda
 
 
-Run Docker Quickstart Terminal
+Test Installation
 ................................................................................
 
-`Docker`_ is most easily accessed using a terminal window that it configures
-with environment variables and such. Run PowerShell or `cmd.exe` and issue
-a simple `info` command to verify that things are operating correctly:
+To test your installation, simply run the command ``conda list`` from your
+terminal window or the Anaconda Prompt. A list of installed packages should
+appear.
 
-::
 
-    docker info
-
-.. image:: ./images/docker-quickstart-env.png
-
-Obtain PDAL Image
+Install the PDAL Package
 ................................................................................
 
-A PDAL image based on the latest release, including all recent patches, is
-pushed to `Docker Hub`_ with every code change on the PDAL maintenance branch (find
-out more about that at :ref:`here <development_docker>`).
-We need to pull it locally so we can use it to run PDAL commands. Once it is
-pulled, we don't have to pull it again unless we want to refresh it for
-whatever reason.
+A PDAL package based on the latest release, including all recent patches, is
+pushed to the `conda-forge`_ channel on anaconda.org with every code change on
+the PDAL maintenance branch.
 
-::
+.. warning::
 
-    docker pull pdal/pdal:1.7
+    It is actually a very good idea to install PDAL in it's own environment (or
+    add it to an existing one). You will **NOT** want to add it to your default
+    environment named ``base``. Managing environments is beyond the scope of
+    the quickstart, but you should read more about it over at
+    https://conda.io/docs/user-guide/getting-started.html#managing-envs.
+
+To install the PDAL package so that we can use it to run PDAL commands, we run
+the following command to create an environment named ``myenv``, installing PDAL
+from the ``conda-forge`` channel. ::
+
+    conda create --yes --name myenv --channel conda-forge pdal
+
+Depending on what packages you may or may not have already installed, the
+output should look something like: ::
+
+    Solving environment: done
+
+    ## Package Plan ##
+
+      environment location: C:\Miniconda3\envs\myenv
+
+      added / updated specs:
+        - pdal
 
 
-.. image:: ./images/docker-quickstart-pull.png
+    The following packages will be downloaded:
+
+        package                    |            build
+        ---------------------------|-----------------
+        pdal-1.7.2                 |   py35h33f895e_1         8.6 MB  conda-forge
+        setuptools-39.2.0          |           py35_0         591 KB  conda-forge
+        numpy-1.14.3               |   py35h9fa60d3_2          42 KB
+        ------------------------------------------------------------
+                                               Total:         9.2 MB
+
+    The following NEW packages will be INSTALLED:
+
+        boost:           1.66.0-py35_vc14_1    conda-forge [vc14]
+        boost-cpp:       1.66.0-vc14_1         conda-forge [vc14]
+        ca-certificates: 2018.4.16-0           conda-forge
+        cairo:           1.14.10-vc14_0        conda-forge [vc14]
+        certifi:         2018.4.16-py35_0      conda-forge
+        curl:            7.60.0-vc14_0         conda-forge [vc14]
+        expat:           2.2.5-vc14_0          conda-forge [vc14]
+        flann:           1.9.1-h0953f56_2      conda-forge
+        freexl:          1.0.5-vc14_0          conda-forge [vc14]
+        geos:            3.6.2-vc14_1          conda-forge [vc14]
+        geotiff:         1.4.2-vc14_1          conda-forge [vc14]
+        hdf4:            4.2.13-vc14_0         conda-forge [vc14]
+        hdf5:            1.10.1-vc14_2         conda-forge [vc14]
+        hexer:           1.4.0-vc14_1          conda-forge [vc14]
+        icc_rt:          2017.0.4-h97af966_0
+        icu:             58.2-vc14_0           conda-forge [vc14]
+        intel-openmp:    2018.0.3-0
+        jpeg:            9b-vc14_2             conda-forge [vc14]
+        jsoncpp:         1.8.1-vc14_0          conda-forge [vc14]
+        kealib:          1.4.7-vc14_4          conda-forge [vc14]
+        krb5:            1.14.6-vc14_0         conda-forge [vc14]
+        laszip:          3.2.2-vc14_0          conda-forge [vc14]
+        laz-perf:        1.2.0-vc14_1          conda-forge [vc14]
+        libgdal:         2.2.4-vc14_4          conda-forge [vc14]
+        libiconv:        1.15-vc14_0           conda-forge [vc14]
+        libnetcdf:       4.6.1-vc14_2          conda-forge [vc14]
+        libpng:          1.6.34-vc14_0         conda-forge [vc14]
+        libpq:           9.6.3-vc14_0          conda-forge [vc14]
+        libspatialite:   4.3.0a-vc14_19        conda-forge [vc14]
+        libssh2:         1.8.0-vc14_2          conda-forge [vc14]
+        libtiff:         4.0.9-vc14_0          conda-forge [vc14]
+        libxml2:         2.9.8-vc14_0          conda-forge [vc14]
+        libxslt:         1.1.32-vc14_0         conda-forge [vc14]
+        mkl:             2018.0.3-1
+        mkl_fft:         1.0.2-py35_0          conda-forge
+        mkl_random:      1.0.1-py35_0          conda-forge
+        nitro:           2.7.dev2-vc14_0       conda-forge [vc14]
+        numpy:           1.14.3-py35h9fa60d3_2
+        numpy-base:      1.14.3-py35h5c71026_0
+        openjpeg:        2.3.0-vc14_2          conda-forge [vc14]
+        openssl:         1.0.2o-vc14_0         conda-forge [vc14]
+        pcl:             1.8.1-hd76163c_1      conda-forge
+        pdal:            1.7.2-py35h33f895e_1  conda-forge
+        pip:             9.0.3-py35_0          conda-forge
+        pixman:          0.34.0-vc14_2         conda-forge [vc14]
+        postgresql:      10.3-py35_vc14_0      conda-forge [vc14]
+        proj4:           4.9.3-vc14_5          conda-forge [vc14]
+        python:          3.5.5-1               conda-forge
+        setuptools:      39.2.0-py35_0         conda-forge
+        sqlite:          3.20.1-vc14_2         conda-forge [vc14]
+        vc:              14-0                  conda-forge
+        vs2015_runtime:  14.0.25420-0          conda-forge
+        wheel:           0.31.0-py35_0         conda-forge
+        wincertstore:    0.2-py35_0            conda-forge
+        xerces-c:        3.2.0-vc14_0          conda-forge [vc14]
+        xz:              5.2.3-0               conda-forge
+        zlib:            1.2.11-vc14_0         conda-forge [vc14]
+
+    Downloading and Extracting Packages
+    pdal-1.7.2           |  8.6 MB | ###################################### | 100%
+    setuptools-39.2.0    |  591 KB | ###################################### | 100%
+    numpy-1.14.3         |   42 KB | ###################################### | 100%
+    Preparing transaction: done
+    Verifying transaction: done
+    Executing transaction: done
+    #
+    # To activate this environment, use
+    #
+    #     $ conda activate myenv
+    #
+    # To deactivate an active environment, use
+    #
+    #     $ conda deactivate
 
 .. note::
 
-    Other PDAL versions are provided at the same `Docker Hub`_ location,
-    with an expected tag name (ie ``pdal/pdal:1.7``, or ``pdal/pdal:1.x``) for
-    major PDAL versions. The PDAL Docker hub location at
-    https://hub.docker.com/u/pdal/ has images and more information
-    on this topic.
+    PDAL's Python extension is managed separately from the PDAL package. To
+    install it, replace ``pdal`` with ``python-pdal`` in any of the commands in
+    this section. Seeing as how PDAL is a dependency of the Python extension,
+    you will actually get two for the price of one!
 
-.. _`Docker Hub`: http://hub.docker.com
+To install PDAL to an existing environment names ``myenv``, we would run the
+following command. ::
+
+    conda install --name myenv --channel conda-forge pdal
+
+Finally, to update PDAL to the latest version, run the following. ::
+
+    conda update pdal
+
+.. _`conda-forge`: https://anaconda.org/conda-forge/pdal
+
 
 Fetch Sample Data
 ------------------------------------------------------------------------------
 
-We need some sample data to play with, so we're going to download
-the ``autzen.laz`` file to your ``C:/Users/hobu/Downloads`` fold.
-Inside your terminal, issue the following command:
+We need some sample data to play with, so we're going to download the
+``autzen.laz`` file. Inside your terminal (assuming Windows), issue the
+following command: ::
 
-::
+    explorer.exe https://github.com/PDAL/data/raw/master/autzen/autzen.laz
 
-    explorer.exe http://www.liblas.org/samples/autzen/autzen.laz
-
-::
-
-    cd C:/Users/hobu/Downloads
-    copy autzen.laz ..
+In the download dialog, save the file to your ``Downloads`` folder, e.g.,
+``C:\Users\hobu\Downloads``.
 
 
 Print the first point
 ------------------------------------------------------------------------------
 
+To print the first point only, issue the following command (replacing of course
+``hobu`` with your user name, or another path altogether, depending on where
+you saved the file).
 
 ::
 
-    docker run -v /c/Users/hobu:/data pdal/pdal:1.7 pdal info /data/autzen.laz -p 0
+    pdal info C:\Users\hobu\Downloads\autzen.laz -p 0
 
 Here's a summary of what's going on with that command invocation
 
-1. ``docker``: We are running PDAL within the context of docker, so all of our
-   commands will start with the ``docker`` command.
+1. ``pdal``: We're going to run the ``pdal`` command.
 
-2. ``run``: Tells docker we're going to run an image
+2. ``info``: We want to run :ref:`info_command` on the data.
 
-3. ``-v /c/Users/hobu:/data``: Maps our home directory to a directory called
-   ``/data`` inside the container.
+3. ``autzen.laz``: The ``autzen.laz`` file that we want information from.
 
+::
 
-   .. seealso::
+    Warning 1: Cannot find datum.csv or gdal_datum.csv
+    Warning 1: Cannot find ellipsoid.csv
+    {
+      "filename": "C:\\Users\\hobu\\Downloads\\autzen.laz",
+      "pdal_version": "1.7.2 (git-version: Release)",
+      "points":
+      {
+        "point":
+        {
+          "Blue": 93,
+          "Classification": 1,
+          "EdgeOfFlightLine": 0,
+          "GpsTime": 245379.3984,
+          "Green": 102,
+          "Intensity": 4,
+          "NumberOfReturns": 1,
+          "PointId": 0,
+          "PointSourceId": 7326,
+          "Red": 84,
+          "ReturnNumber": 1,
+          "ScanAngleRank": -17,
+          "ScanDirectionFlag": 0,
+          "UserData": 128,
+          "X": 637177.98,
+          "Y": 849393.95,
+          "Z": 411.19
+        }
+      }
+    }
 
-       The `Docker Volume <https://docs.docker.com/engine/userguide/dockervolumes/>`__
-       document describes mounting volumes in more detail.
-
-4. ``pdal/pdal:1.7``: This is the Docker image we are going to run. We fetched it
-   with the command above. If it were not already fetched, Docker would attempt
-   to fetch it when we run this command.
-
-5. ``pdal``: We're finally going to run the ``pdal`` command :)
-
-6. ``info``: We want to run :ref:`info_command` on the data
-
-7. ``/data/autzen.laz``: The ``pdal`` command is now running in the context of
-   our container, which we mounted a ``/data`` directory in with the volume
-   mount operation in Step #3. Our ``autzen.laz`` file resides there.
-
-
-.. image:: ./images/docker-print-one.png
 
 What's next?
 ------------------------------------------------------------------------------
@@ -187,15 +293,3 @@ What's next?
 .. seealso::
 
     :ref:`community` is a good source to reach out to when you're stuck.
-
-
-.. _`Points2Grid`: https://github.com/CRREL/points2grid
-.. _`Oracle Point Cloud`: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
-.. _`pgpointcloud`: https://github.com/pramsey/pointcloud
-
-.. _`LASzip`: http://laszip.org
-.. _`VirtualBox`: https://www.virtualbox.org/
-.. _`GDAL`: http://gdal.org
-.. _`MapServer`: http://mapserver.org
-.. _`Mapnik`: http://mapnik.org
-.. _`PCL`: http://www.pointclouds.org

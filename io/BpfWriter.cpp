@@ -353,8 +353,8 @@ double BpfWriter::getAdjustedValue(const PointView* data,
     BpfDimension& bpfDim, PointId idx)
 {
     double d = data->getFieldAs<double>(bpfDim.m_id, idx);
-    bpfDim.m_min = std::min(bpfDim.m_min, d);
-    bpfDim.m_max = std::max(bpfDim.m_max, d);
+    bpfDim.m_min = (std::min)(bpfDim.m_min, d);
+    bpfDim.m_max = (std::max)(bpfDim.m_max, d);
 
     if (bpfDim.m_id == Dimension::Id::X)
         d /= m_scaling.m_xXform.m_scale.m_val;

@@ -140,7 +140,8 @@ TEST(Compression, types)
     };
     // Size is 42.
 
-    std::default_random_engine generator;std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist((std::numeric_limits<int>::min)());
     char pts[3][42];
 
     // Fill three "points" with some random data.

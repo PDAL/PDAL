@@ -111,7 +111,7 @@ private:
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
     NumHeaderVal<uint8_t, 0, 10> m_dataformatId;
-    // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
+    // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
     // it as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_filesourceId;
     NumHeaderVal<uint16_t, 0, 31> m_globalEncoding;

@@ -181,7 +181,7 @@ void ColorinterpFilter::filter(PointView& view)
         std::vector<double> values(view.size());
 
         stats::Summary summary(Dimension::name(m_interpDim),
-            stats::Summary::NoEnum);
+            stats::Summary::NoEnum, false);
         for (PointId idx = 0; idx < view.size(); ++idx)
         {
             double v = view.getFieldAs<double>(m_interpDim, idx);
@@ -239,7 +239,7 @@ void ColorinterpFilter::filter(PointView& view)
     else if (std::isnan(m_min) || std::isnan(m_max))
     {
         stats::Summary summary(Dimension::name(m_interpDim),
-            stats::Summary::NoEnum);
+            stats::Summary::NoEnum, false);
         for (PointId idx = 0; idx < view.size(); ++idx)
         {
             double v = view.getFieldAs<double>(m_interpDim, idx);
