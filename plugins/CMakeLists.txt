@@ -1,5 +1,7 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
+add_subdirectory(faux)
+
 if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
