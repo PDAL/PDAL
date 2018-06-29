@@ -199,3 +199,42 @@ TEST(Streaming, issue_2038)
 
     EXPECT_EQ(t.m_srsCnt, 1);
 }
+
+// Test that spatial references pass through stages that don't have an
+// explicit spatial reference.
+TEST(Streaming, issue_2069)
+{
+    StageFactory f;
+
+    Stage* r = f.createStage("readers.las");
+    Options opts;
+    opts.add("filename", Support::datapath("las/test_utm16.las"));
+    opts.add("spatialreference", "EPSG:4326");
+    r->setOptions(opts);
+
+    Stage *ferry = f.createStage("filters.ferry");
+    Options opts2;
+    opts2.add("dimensions", "X=>NewX");
+    ferry->setOptions(opts2);
+    ferry->setInput(*r);
+
+    class TestFilter : public Filter, public Streamable
+    {
+    public:
+        virtual std::string getName() const
+            { return "filters.test"; }
+    private:
+        virtual void spatialReferenceChanged(const SpatialReference& srs)
+            { EXPECT_EQ(srs, SpatialReference("EPSG:4326")); }
+        virtual bool processOne(PointRef& point)
+            { return true; }
+    };
+
+    TestFilter t;
+    t.setInput(*ferry);
+
+    FixedPointTable table(20);
+    t.prepare(table);
+    t.execute(table);
+}
+

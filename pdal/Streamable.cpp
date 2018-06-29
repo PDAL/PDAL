@@ -226,9 +226,12 @@ void Streamable::execute(StreamPointTable& table,
                 if (!s->processOne(point))
                     skips[idx] = true;
             }
-            srs = s->getSpatialReference();
-            if (!srs.empty())
+            const SpatialReference& tempSrs = s->getSpatialReference();
+            if (!tempSrs.empty())
+            {
+                srs = tempSrs;
                 table.setSpatialReference(srs);
+            }
             s->stopLogging();
         }
 
