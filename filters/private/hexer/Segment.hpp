@@ -38,7 +38,6 @@
 #include <vector>
 
 #include "Mathpair.hpp"
-#include "export.hpp"
 
 namespace hexer
 {
@@ -46,7 +45,7 @@ namespace hexer
 class Hexagon;
 class HexGrid;
 
-class HEXER_DLL Segment
+class Segment
 {
 public:
     Segment() : m_hex(NULL), m_side(0)

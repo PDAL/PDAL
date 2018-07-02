@@ -38,7 +38,6 @@
 
 #include "Mathpair.hpp"
 #include "Segment.hpp"
-#include "export.hpp"
 
 namespace hexer
 {
@@ -51,7 +50,7 @@ enum Orientation
 
 class HexGrid;
 
-class HEXER_DLL Path
+class Path
 {
 public:
     Path(HexGrid *m_grid, Orientation orient) :

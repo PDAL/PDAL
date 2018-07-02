@@ -42,8 +42,6 @@
 #include "private/hexer/HexGrid.hpp"
 #include "private/hexer/Processor.hpp"
 
-//namespace hexer = pdalhexer;
-
 namespace pdal
 {
 

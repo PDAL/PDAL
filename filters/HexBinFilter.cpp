@@ -108,7 +108,6 @@ void HexBin::done(PointTableRef table)
         m_metadata.add("boundary", "MULTIPOLYGON EMPTY",
             "Empty polygon -- unable to compute boundary");
         return;
-
     }
 
 

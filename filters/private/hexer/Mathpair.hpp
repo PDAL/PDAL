@@ -34,13 +34,11 @@
 
 #pragma once
 
-#include "export.hpp"
-
 namespace hexer
 {
 
 template <typename T>
-struct HEXER_DLL Mathpair
+struct Mathpair
 {
 public:
     Mathpair() : m_x(T(0)), m_y(T(0))

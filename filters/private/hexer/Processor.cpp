@@ -40,10 +40,6 @@
 
 #include "HexGrid.hpp"
 
-#ifdef HEXER_HAVE_GDAL
-#include "gdal.h"
-#endif
-
 #include "Mathpair.hpp"
 
 namespace hexer
@@ -93,22 +89,6 @@ void processHexes(HexGrid *grid, HexReader reader)
         grid->addDenseHexagon(x, y);
     grid->findShapes();
     grid->findParentPaths();
-}
-
-std::string GetFullVersion( void )
-{
-    std::ostringstream os;
-
-    os << "hexer "
-       << HEXER_VERSION_MAJOR << "."
-       << HEXER_VERSION_MINOR << "."
-       << HEXER_VERSION_PATCH;
-
-#ifdef HEXER_HAVE_GDAL
-    os << " with GDAL " << GDALVersionInfo("RELEASE_NAME");
-#endif
-
-    return os.str();
 }
 
 } //namespace hexer

@@ -33,14 +33,13 @@
  ****************************************************************************/
 #pragma once
 
-#include "export.hpp"
 #include "HexGrid.hpp"
 #include "HexInfo.hpp"
 
 namespace hexer
 {
 
-class HEXER_DLL HexIter
+class HexIter
 {
 public:
     HexIter(HexGrid::HexMap::iterator iter, HexGrid *grid) :

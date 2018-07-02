@@ -42,7 +42,6 @@
 #include "Mathpair.hpp"
 #include "Path.hpp"
 #include "Segment.hpp"
-#include "export.hpp"
 
 namespace hexer
 {
@@ -51,7 +50,7 @@ class HexIter;
 
 static const double SQRT_3 = 1.732050808;
 
-class HEXER_DLL HexGrid
+class HexGrid
 {
     friend class HexIter;
 public:

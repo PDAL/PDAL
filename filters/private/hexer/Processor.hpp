@@ -39,19 +39,15 @@
 #include <functional>
 
 #include "Path.hpp"
-#include "export.hpp"
 
 namespace hexer
 {
     typedef std::function<bool(double&, double&, void*&)> PointReader;
     typedef std::function<bool(int&, int&, void*&)> HexReader;
 
-    HEXER_DLL void process(HexGrid *grid, PointReader);
-    HEXER_DLL void processHexes(HexGrid *grid, HexReader);
-
-    HEXER_DLL double computeHexSize(const std::vector<Point>& samples,
+    void process(HexGrid *grid, PointReader);
+    void processHexes(HexGrid *grid, HexReader);
+    double computeHexSize(const std::vector<Point>& samples,
         int density);
-
-    HEXER_DLL std::string GetFullVersion( void );
 } // namespace hexer
 

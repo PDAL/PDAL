@@ -36,7 +36,7 @@
 namespace hexer
 {
 
-class HEXER_DLL HexInfo
+class HexInfo
 {
 public:
     Point m_center;

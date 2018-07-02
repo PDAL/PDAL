@@ -35,13 +35,12 @@
 
 #include <stdint.h>
 
-#include "export.hpp"
 #include "Mathpair.hpp"
 
 namespace hexer
 {
 
-class HEXER_DLL Hexagon
+class Hexagon
 {
 public:
     Hexagon(int x, int y) : m_x(x), m_y(y), m_count(0), m_dense(false),
