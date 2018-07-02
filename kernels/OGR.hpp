@@ -33,12 +33,12 @@
 ****************************************************************************/
 #pragma once
 
-#include <hexer/hexer.hpp>
-#include <hexer/Processor.hpp>
-#include <hexer/hexer_defines.h>
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexInfo.hpp>
-#include <hexer/export.hpp>
+#include "../filters/private/hexer/hexer.hpp"
+#include "../filters/private/hexer/Processor.hpp"
+#include "../filters/private/hexer/hexer_defines.h"
+#include "../filters/private/hexer/Mathpair.hpp"
+#include "../filters/private/hexer/HexInfo.hpp"
+#include "../filters/private/hexer/export.hpp"
 
 #include "ogr_api.h"
 #include "gdal.h"

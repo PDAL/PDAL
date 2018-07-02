@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,48 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Filter.hpp>
-#include <pdal/util/ProgramArgs.hpp>
-
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexGrid.hpp>
-#include <hexer/Processor.hpp>
+#include "FauxPluginKernel.hpp"
 
 namespace pdal
 {
 
-class PDAL_DLL HexBin : public Filter
+static PluginInfo const s_info
 {
-public:
-    HexBin() : Filter()
-        {}
-    std::string getName() const { return "filters.hexbin"; }
-
-    hexer::HexGrid* grid() const { return m_grid.get(); }
-private:
-
-    std::unique_ptr<hexer::HexGrid> m_grid;
-    std::string m_xDimName;
-    std::string m_yDimName;
-    uint32_t m_precision;
-    uint32_t m_sampleSize;
-    double m_cullArea;
-    Arg *m_cullArg;
-    int32_t m_density;
-    double m_edgeLength;
-    bool m_outputTesselation;
-    bool m_doSmooth;
-    point_count_t m_count;
-
-    virtual void addArgs(ProgramArgs& args);
-    virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
-
-    HexBin& operator=(const HexBin&); // not implemented
-    HexBin(const HexBin&); // not implemented
+    "kernels.fauxplugin",
+    "Faux Plugin Kernel",
+    "No website"
 };
+
+CREATE_SHARED_KERNEL(FauxPluginKernel, s_info)
+
+std::string FauxPluginKernel::getName() const { return s_info.name; }
+
+int FauxPluginKernel::execute()
+{
+    m_log->get(LogLevel::Info) << "FauxPluginKernel running.\n";
+    return 0;
+}
+
+
+void FauxPluginKernel::addSwitches(ProgramArgs& args)
+{
+    args.add("fakearg", "Fake argument", m_fakeArg).setPositional();
+}
 
 } // namespace pdal
