@@ -1096,6 +1096,7 @@ template<typename C>
 		return s;
 	}
     
+#ifdef ARBITER_WINDOWS
 	bool icase_wchar_cmp(wchar_t a, wchar_t b)
 	{
 		return std::toupper(a, std::locale()) == std::toupper(b, std::locale());
@@ -1108,34 +1109,11 @@ template<typename C>
 			std::equal(s1.begin(), s1.end(), s2.begin(),
 				icase_wchar_cmp);
 	}
-    
+
     Globs globOne(std::string path)
     {
         Globs results;
 
-#ifndef ARBITER_WINDOWS
-        glob_t buffer;
-        struct stat info;
-
-        ::glob(path.c_str(), GLOB_NOSORT | GLOB_MARK, 0, &buffer);
-
-        for (std::size_t i(0); i < buffer.gl_pathc; ++i)
-        {
-            const std::string val(buffer.gl_pathv[i]);
-
-            if (stat(val.c_str(), &info) == 0)
-            {
-                if (S_ISREG(info.st_mode)) results.files.push_back(val);
-                else if (S_ISDIR(info.st_mode)) results.dirs.push_back(val);
-            }
-            else
-            {
-                throw ArbiterError("Error globbing - POSIX stat failed");
-            }
-        }
-
-        globfree(&buffer);
-#else
 		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 		std::wstring wide(converter.from_bytes(path));
 
@@ -1155,7 +1133,8 @@ template<typename C>
 					continue;
    
 				std::vector<wchar_t> buf(MAX_PATH);
-				wide.erase(std::remove(wide.begin(), wide.end(), '*'), wide.end());
+				wide.erase(std::remove(wide.begin(), wide.end(), '*'),
+                    wide.end());
 
 				std::replace(wide.begin(), wide.end(), '\\', '/');
 
@@ -1165,7 +1144,8 @@ template<typename C>
 				std::wstring output(buf.data(), wcslen( buf.data()));
                 
                 // Erase any \'s
-                output.erase(std::remove(output.begin(), output.end(), '\\'), output.end());
+                output.erase(std::remove(output.begin(), output.end(), '\\'),
+                    output.end());
 
                 if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
@@ -1173,21 +1153,50 @@ template<typename C>
 
                     output.append(L"/*");
                     Globs more = globOne(converter.to_bytes(output));
-                    std::copy(more.dirs.begin(), more.dirs.end(), std::back_inserter(results.dirs));
-                    std::copy(more.files.begin(), more.files.end(), std::back_inserter(results.files));
-
+                    std::copy(more.dirs.begin(), more.dirs.end(),
+                        std::back_inserter(results.dirs));
+                    std::copy(more.files.begin(), more.files.end(),
+                        std::back_inserter(results.files));
                 }
-
-				results.files.push_back(
-					converter.to_bytes(output));
+				results.files.push_back(converter.to_bytes(output));
             }
             while (FindNextFileW(hFind, &data));
         }
 		FindClose(hFind);
-#endif
 
         return results;
     }
+
+#else
+
+    Globs globOne(std::string path)
+    {
+        Globs results;
+
+        glob_t buffer;
+        struct stat info;
+
+        ::glob(path.c_str(), GLOB_NOSORT | GLOB_MARK, 0, &buffer);
+
+        for (std::size_t i(0); i < buffer.gl_pathc; ++i)
+        {
+            const std::string val(buffer.gl_pathv[i]);
+
+            if (stat(val.c_str(), &info) == 0)
+            {
+                if (S_ISREG(info.st_mode)) results.files.push_back(val);
+                else if (S_ISDIR(info.st_mode)) results.dirs.push_back(val);
+            }
+            else
+            {
+                throw ArbiterError("Error globbing - POSIX stat failed");
+            }
+        }
+        globfree(&buffer);
+        return results;
+    }
+#endif
+
 
     std::vector<std::string> walk(std::string dir)
     {
@@ -1303,11 +1312,6 @@ LocalHandle::~LocalHandle()
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/arbiter.hpp>
 #include <arbiter/drivers/http.hpp>
-#endif
-
-#ifdef ARBITER_WINDOWS
-#undef min
-#undef max
 #endif
 
 #include <algorithm>
@@ -3857,7 +3861,7 @@ Contents parse(const std::string& s)
         line = util::stripWhitespace(line);
         const std::size_t semiPos(line.find_first_of(';'));
         const std::size_t hashPos(line.find_first_of('#'));
-        line = line.substr(0, std::min(semiPos, hashPos));
+        line = line.substr(0, (std::min)(semiPos, hashPos));
 
         if (line.size())
         {
@@ -4559,7 +4563,7 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-    if (utcOffset > std::numeric_limits<int>::max())
+    if (utcOffset > (std::numeric_limits<int>::max)())
         throw ArbiterError("Can't convert offset time in seconds to tm type.");
     tm.tm_sec -= (int)utcOffset;
     m_time = std::mktime(&tm);
