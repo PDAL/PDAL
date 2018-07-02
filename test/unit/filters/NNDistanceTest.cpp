@@ -108,20 +108,13 @@ TEST(NNDistanceTest, kdist)
         bool edge = (xe + ye + ze == 2);
         bool face = (xe + ye + ze == 1);
         if (corner)
-        {
             EXPECT_EQ(d, 1.5);
-            continue;
-        }
-        if (edge)
-        {
+        else if (edge)
             EXPECT_EQ(d, 1 + 1/3.0);
-            continue;
-        }
-        if (face)
-        {
+        else if (face)
             EXPECT_NEAR(d, .5 + 2/3.0, .000001);
-            continue;
-        }
+        else
+            EXPECT_EQ(d, 1);
     }
 }
 
