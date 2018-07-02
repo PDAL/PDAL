@@ -72,8 +72,7 @@ std::istream& operator>>(std::istream& in, NNDistanceFilter::Mode& mode)
     else if (s == "avg")
         mode = NNDistanceFilter::Mode::Average;
     else
-        throw pdal_error("filters.nndistance: Invalid 'mode' option '" + s +
-            "'. Valid options are 'kth' and 'avg'.");
+        in.setstate(std::ios_base::failbit);
     return in;
 }
 
@@ -113,29 +112,29 @@ void NNDistanceFilter::filter(PointView& view)
     KD3Index& index = view.build3dIndex();
 
     // Increment the minimum number of points, as knnSearch will be returning
-    // the neighbors along with the query point.
-    m_k++;
+    // the query point along with the neighbors.
+    size_t k = m_k + 1;
 
     // Compute the k-distance for each point. The k-distance is the Euclidean
     // distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        std::vector<PointId> indices(m_k);
-        std::vector<double> sqr_dists(m_k);
-        index.knnSearch(i, m_k, &indices, &sqr_dists);
+        std::vector<PointId> indices(k);
+        std::vector<double> sqr_dists(k);
+        index.knnSearch(i, k, &indices, &sqr_dists);
         double val;
         if (m_mode == Mode::Kth)
-            val = std::sqrt(sqr_dists[m_k - 1]);
+            val = std::sqrt(sqr_dists[k - 1]);
         else // m_mode == Mode::Average
         {
             val = 0;
 
             // We start at 1 since index 0 is the test point.
-            for (size_t i = 1; i < m_k; ++i)
+            for (size_t i = 1; i < k; ++i)
                 val += sqr_dists[i];
-            val /= (m_k - 1);
-        }    
+            val /= (k - 1);
+        }
         view.setField(Dimension::Id::NNDistance, i, val);
     }
 }
