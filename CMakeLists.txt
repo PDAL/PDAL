@@ -35,7 +35,7 @@ GET_OS_INFO()
 SET_INSTALL_DIRS()
 
 set(PDAL_API_VERSION "6")
-set(PDAL_BUILD_VERSION "7.0.1")
+set(PDAL_BUILD_VERSION "7.0.2")
 
 # Name of C++ library
 

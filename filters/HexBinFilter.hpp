@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Hobu Inc., (info@hobu.co)
+* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
 *
 * All rights reserved.
 *
@@ -13,9 +13,10 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the names of contributors
-*       may be used to endorse or promote products derived from this
-*       software without specific prior written permission.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -31,30 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <string>
+#pragma once
 
-#include <pdal/pdal_test_main.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
-#include "Support.hpp"
 
-namespace
-{
-std::string appName()
-{
-    return Support::binpath("pdal");
-}
-} // unnamed namespace
+#include "private/hexer/Mathpair.hpp"
+#include "private/hexer/HexGrid.hpp"
+#include "private/hexer/Processor.hpp"
 
 namespace pdal
 {
 
-// The Cmake file makes sure we're building the hexbin plugin.
-TEST(PdalAppPlugin, load)
+class PDAL_DLL HexBin : public Filter
 {
-    std::string output;
+public:
+    HexBin() : Filter()
+        {}
+    std::string getName() const { return "filters.hexbin"; }
 
-    Utils::run_shell_command(appName() + " fauxplugin 2>&1", output);
-    EXPECT_TRUE(output.find("kernels.fauxplugin") != std::string::npos);
-}
+    hexer::HexGrid* grid() const { return m_grid.get(); }
+private:
 
-} // unnamed namespace
+    std::unique_ptr<hexer::HexGrid> m_grid;
+    std::string m_xDimName;
+    std::string m_yDimName;
+    uint32_t m_precision;
+    uint32_t m_sampleSize;
+    double m_cullArea;
+    Arg *m_cullArg;
+    int32_t m_density;
+    double m_edgeLength;
+    bool m_outputTesselation;
+    bool m_doSmooth;
+    point_count_t m_count;
+
+    virtual void addArgs(ProgramArgs& args);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual void done(PointTableRef table);
+
+    HexBin& operator=(const HexBin&); // not implemented
+    HexBin(const HexBin&); // not implemented
+};
+
+} // namespace pdal
