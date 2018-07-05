@@ -46,12 +46,14 @@ TEST(NNDistanceTest, kdist)
     Stage *reader(f.createStage("readers.faux"));
     Stage *filter(f.createStage("filters.nndistance"));
 
+    // Make a 10x10x10 grid of points.
     Options rOpts;
     rOpts.add("mode", "grid");
     rOpts.add("bounds", "([0, 10],[0,10],[0,10])");
     rOpts.add("count", 1000);
     reader->setOptions(rOpts);
 
+    // Kth distance with k == 3
     Options fOpts;
     fOpts.add("mode", "kth");
     fOpts.add("k", 3);
@@ -66,6 +68,7 @@ TEST(NNDistanceTest, kdist)
     for (PointId i = 0; i < v->size(); ++i)
         EXPECT_EQ(v->getFieldAs<double>(Dimension::Id::NNDistance, i), 1);
 
+    // Kth distance with k == 4
     Options opts2;
     opts2.add("k", 4);
     filter->setOptions(opts2);
@@ -85,6 +88,7 @@ TEST(NNDistanceTest, kdist)
             EXPECT_EQ(d, sqrt(2));
     }
 
+    // Test for avg distance.
     Options opts3;
     opts3.add("mode", "avg");
     opts3.add("k", 6);
