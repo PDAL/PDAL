@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include "DensityKernel.hpp"
-#include "../filters/HexBin.hpp"
-#include "OGR.hpp"
+#include "../filters/HexBinFilter.hpp"
+#include "private/density/OGR.hpp"
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -78,8 +78,7 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 
     hexer::HexGrid* grid = hexbin->grid();
 
-    hexdensity::writer::OGR writer(m_outputFile, reference.getWKT(),
-        m_driverName, m_layerName);
+    OGR writer(m_outputFile, reference.getWKT(), m_driverName, m_layerName);
     writer.writeDensity(grid);
 //     writer.writeBoundary(grid);
 }

@@ -33,30 +33,25 @@
 ****************************************************************************/
 #pragma once
 
-#include <hexer/hexer.hpp>
-#include <hexer/Processor.hpp>
-#include <hexer/hexer_defines.h>
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexInfo.hpp>
-#include <hexer/export.hpp>
+#include <string>
 
 #include "ogr_api.h"
 #include "gdal.h"
 
+namespace hexer
+{
+    class HexGrid;
+}
+
 namespace pdal
 {
-namespace hexdensity
-{
-namespace writer
-{
-
 
 class OGR
 {
 
-
 public:
-    OGR(std::string const& filename, std::string srs, std::string driver = "ESRI Shapefile", std::string layerName ="");
+    OGR(std::string const& filename, std::string srs,
+        std::string driver = "ESRI Shapefile", std::string layerName ="");
     ~OGR();
 
     void writeBoundary(hexer::HexGrid *grid);
@@ -72,13 +67,7 @@ private:
     std::string m_layerName;
 
     void createLayer();
-    void collectPath(hexer::Path* path, OGRGeometryH polygon);
-    OGRGeometryH collectHexagon(hexer::HexInfo const& info, hexer::HexGrid const* grid);
-
 };
 
-} // writer
+} // namespace pdal
 
-} // namespace
-
-} //pdal

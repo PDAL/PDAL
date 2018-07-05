@@ -32,30 +32,24 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <map>
-#include <mutex>
+#pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/pdal_types.hpp>
+#include <pdal/Kernel.hpp>
 
 namespace pdal
 {
 
-class StageExtensions
+class PDAL_DLL FauxPluginKernel : public Kernel
 {
 public:
-    StageExtensions(LogPtr log);
+    std::string getName() const;
+    int execute();
 
-    PDAL_DLL void set(const std::string& stage, const StringList& exts);
-    std::string defaultReader(const std::string& filename);
-    std::string defaultWriter(const std::string& filename);
 private:
-    void load();
+    virtual void addSwitches(ProgramArgs& args);
 
-    LogPtr m_log;
-    std::mutex m_mutex;
-    std::map<std::string, std::string> m_readers;
-    std::map<std::string, std::string> m_writers;
+    int m_fakeArg;
 };
 
-}
+} // namespace pdal
+

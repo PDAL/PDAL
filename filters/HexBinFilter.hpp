@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,30 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <map>
-#include <mutex>
+#pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/pdal_types.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+
+
+#include "private/hexer/Mathpair.hpp"
+#include "private/hexer/HexGrid.hpp"
+#include "private/hexer/Processor.hpp"
 
 namespace pdal
 {
 
-class StageExtensions
+class PDAL_DLL HexBin : public Filter
 {
 public:
-    StageExtensions(LogPtr log);
+    HexBin() : Filter()
+        {}
+    std::string getName() const { return "filters.hexbin"; }
 
-    PDAL_DLL void set(const std::string& stage, const StringList& exts);
-    std::string defaultReader(const std::string& filename);
-    std::string defaultWriter(const std::string& filename);
+    hexer::HexGrid* grid() const { return m_grid.get(); }
 private:
-    void load();
 
-    LogPtr m_log;
-    std::mutex m_mutex;
-    std::map<std::string, std::string> m_readers;
-    std::map<std::string, std::string> m_writers;
+    std::unique_ptr<hexer::HexGrid> m_grid;
+    std::string m_xDimName;
+    std::string m_yDimName;
+    uint32_t m_precision;
+    uint32_t m_sampleSize;
+    double m_cullArea;
+    Arg *m_cullArg;
+    int32_t m_density;
+    double m_edgeLength;
+    bool m_outputTesselation;
+    bool m_doSmooth;
+    point_count_t m_count;
+
+    virtual void addArgs(ProgramArgs& args);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual void done(PointTableRef table);
+
+    HexBin& operator=(const HexBin&); // not implemented
+    HexBin(const HexBin&); // not implemented
 };
 
-}
+} // namespace pdal
