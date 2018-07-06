@@ -112,6 +112,12 @@ bool hasFeature(Feature f)
 }
 
 
+bool lazPerfEnabled()
+{
+    return hasFeature(Feature::LAZPERF);
+}
+
+
 int versionMajor()
 {
     return PDAL_VERSION_MAJOR;
