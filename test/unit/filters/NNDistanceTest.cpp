@@ -112,11 +112,17 @@ TEST(NNDistanceTest, kdist)
         bool edge = (xe + ye + ze == 2);
         bool face = (xe + ye + ze == 1);
         if (corner)
-            EXPECT_EQ(d, 1.5);
+        {
+            EXPECT_EQ(d, (1 + std::sqrt(2)) / 2.0);
+        }
         else if (edge)
-            EXPECT_EQ(d, 1 + 1/3.0);
+        {
+            EXPECT_EQ(d, (2 + std::sqrt(2)) / 3.0);
+        }
         else if (face)
-            EXPECT_NEAR(d, .5 + 2/3.0, .000001);
+        {
+            EXPECT_EQ(d, (5 + std::sqrt(2)) / 6.0);
+        }
         else
             EXPECT_EQ(d, 1);
     }

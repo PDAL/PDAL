@@ -118,11 +118,11 @@ void NNDistanceFilter::filter(PointView& view)
     // Compute the k-distance for each point. The k-distance is the Euclidean
     // distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
-    for (PointId i = 0; i < view.size(); ++i)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
         std::vector<PointId> indices(k);
         std::vector<double> sqr_dists(k);
-        index.knnSearch(i, k, &indices, &sqr_dists);
+        index.knnSearch(idx, k, &indices, &sqr_dists);
         double val;
         if (m_mode == Mode::Kth)
             val = std::sqrt(sqr_dists[k - 1]);
@@ -132,10 +132,10 @@ void NNDistanceFilter::filter(PointView& view)
 
             // We start at 1 since index 0 is the test point.
             for (size_t i = 1; i < k; ++i)
-                val += sqr_dists[i];
+                val += std::sqrt(sqr_dists[i]);
             val /= (k - 1);
         }
-        view.setField(Dimension::Id::NNDistance, i, val);
+        view.setField(Dimension::Id::NNDistance, idx, val);
     }
 }
 
