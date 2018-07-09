@@ -311,12 +311,35 @@ endif()
 #
 # Installation
 #
+
+#
+# Only install compression headers if we're building with the particular
+# compression type.
+#
+if (NOT PDAL_HAVE_ZSTD)
+    set(ZSTD_EXCLUDES PATTERN pdal/compression/Zstd* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    set(ZLIB_EXCLUDES PATTERN pdal/compression/Deflate* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
+endif()
+
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    ${ZSTD_EXCLUDES}
+    ${ZLIB_EXCLUDES}
+    ${LZMA_EXCLUDES}
+    ${LAZPERF_EXCLUDES}
 )
+
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
