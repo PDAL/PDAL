@@ -17,17 +17,24 @@
 
 # - Find ZSTD (zstd.h, libzstd.a, libzstd.so, and libzstd.so.0)
 # This module defines
-#  ZSTD_INCLUDE_DIR, directory containing headers
-#  ZSTD_SHARED_LIB, path to libzstd shared library
-#  ZSTD_STATIC_LIB, path to libzstd static library
+#  ZSTD_INCLUDE_DIRS, directory containing headers
+#  ZSTD_LIBRARIES, path to libzstd shared library
 #  ZSTD_FOUND, whether zstd has been found
 
 find_path(ZSTD_INCLUDE_DIR NAMES zstd.h
     PATH_SUFFIXES "include")
+mark_as_advanced(ZSTD_INCLUDE_DIR)
 
 find_library(ZSTD_LIBRARY NAMES zstd)
-
+mark_as_advanced(ZSTD_LIBRARY)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(ZSTD REQUIRED_VARS
-  ZSTD_LIBRARY ZSTD_INCLUDE_DIR)
+find_package_handle_standard_args(ZSTD
+    REQUIRED_VARS ZSTD_LIBRARY ZSTD_INCLUDE_DIR)
+
+if (ZSTD_FOUND)
+    set(ZSTD_LIBRARIES ${ZSTD_LIBRARY})
+    set(ZSTD_INCLUDE_DIRS ${ZSTD_INCLUDE_DIR})
+endif()
+
+mark_as_advanced(ZSTD_INCLUDE_DIR ZSTD_LIBRARY)
