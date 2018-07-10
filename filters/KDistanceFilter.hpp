@@ -56,6 +56,7 @@ public:
 private:
     Dimension::Id m_kdist;
     int m_k;
+    bool m_average;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);

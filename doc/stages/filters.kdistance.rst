@@ -5,7 +5,7 @@ filters.kdistance
 ===============================================================================
 
 The K-Distance filter creates a new attribute ``KDistance`` that contains the
-Euclidean distance to a point's k-th nearest neighbor.
+Euclidean distance to a point's k-th nearest neighbor. It can also be set to compute the average distance of its k nearest neighbors.
 
 .. embed::
 
@@ -35,4 +35,6 @@ Options
 
 k
   The number of k nearest neighbors. [Default: **10**]
+average
+  Compute the average distance of the point's k nearest neighbors. [Default: **false**]
 
