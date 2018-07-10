@@ -96,10 +96,9 @@ void ReprojectionFilter::initialize()
 }
 
 
-void ReprojectionFilter::ready(PointTableRef table)
+void ReprojectionFilter::spatialReferenceChanged(const SpatialReference& srs)
 {
-    if (!table.supportsView())
-        createTransform(table.anySpatialReference());
+    createTransform(srs);
 }
 
 
