@@ -6,8 +6,6 @@ Building Under Windows
 
 :Author: Howard Butler
 :Contact: howard at hobu.co
-:Author: Michael Rosen
-:Contact: unknown at lizardtech dot com
 :Date: 11/02/2017
 
 .. note::
@@ -15,13 +13,6 @@ Building Under Windows
     `OSGeo4W`_ contains a pre-built up-to-date 64 bit Windows binary. It
     is fully-featured, and if you do not need anything custom, it is likely
     the fastest way to get going.
-
-.. seealso::
-
-    :ref:`docker` describes a way to get a PDAL build and all of
-    its dependencies. If you just want to apply PDAL commandline
-    operations to data, this mechanism is likely to be much faster than
-    compiling your own.
 
 .. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
 
