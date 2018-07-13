@@ -40,7 +40,7 @@ following two files:
 Stage Operations
 -------------------------------------------------------------------------------
 
-This operation depends on two :ref:`stages <stage_index>` PDAL provides.
+This operation depends on two stages PDAL provides.
 The first is the :ref:`filters.overlay` stage, which allows you to assign
 point values based on polygons read from `OGR`_. The second is the
 :ref:`filters.range`, which allows you to keep or reject points from the

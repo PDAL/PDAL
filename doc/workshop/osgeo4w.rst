@@ -9,8 +9,6 @@ OSGeo4W
 .. include:: ./includes/substitutions.rst
 
 
-
-
 What is OSGeo4W?
 --------------------------------------------------------------------------------
 
@@ -29,13 +27,6 @@ Fortunately, OSGeo4W provides us a fully-featured known
 configuration to run our examples and exercises without having to suffer
 so much.
 
-
-.. note::
-
-    Not everyone uses Windows. Another alternative to get a known configuration
-    is to go through the workshop using :ref:`docker` as your platform. A
-    previous edition of the workshop was provided as Docker, but it was
-    found to be a bit too difficult to follow.
 
 Installing OSGeo4W
 --------------------------------------------------------------------------------

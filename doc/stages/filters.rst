@@ -45,6 +45,7 @@ invalidate an existing KD-tree.
    filters.lof
    filters.mongus
    filters.neighborclassifier
+   filters.nndistance
    filters.normal
    filters.outlier
    filters.overlay
@@ -89,7 +90,7 @@ invalidate an existing KD-tree.
 
 :ref:`filters.kdistance`
     Compute pointwise K-Distance (the Euclidean distance to a point's k-th
-    nearest neighbor).
+    nearest neighbor). [Deprecated - use :ref:`filters.nndistance`]
 
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
@@ -100,6 +101,9 @@ invalidate an existing KD-tree.
 
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
+
+:ref:`filters.nndistance`
+    Compute a distance metric based on nearest neighbors.
 
 :ref:`filters.normal`
     Compute pointwise normal and curvature, based on k-nearest neighbors.

@@ -11,8 +11,8 @@ Ground Filter Tutorial
 Background
 --------------------------------------------------------------------------------
 
-In previous tutorials :ref:`here <ground>` and :ref:`here <pcl_ground>`, we have
-introduced our implmentation of the :ref:`Progressive Morphological Filter (PMF)
+In previous tutorials we introduced our implmentation of the
+:ref:`Progressive Morphological Filter (PMF)
 <filters.pmf>`, a :ref:`ground kernel <ground_command>` to simplify command-line
 access to PMF, and a filter for :ref:`removing outliers <filters.outlier>`.
 
@@ -66,10 +66,9 @@ any data reprojections and parameter scaling that are required from one dataset
 to the next.
 
 .. literalinclude:: ground-filters-pipeline.json
-    :language: json
     :linenos:
-    :lineno-start: 3
     :lines: 3-6
+    :lineno-start: 3
 
 In this example, we show data being reprojected to ``EPSG:32632`` with X, Y, and
 Z in meters.
@@ -88,7 +87,6 @@ stating that we would like to apply a value of 0 to the ``Classification``
 dimension for every point.
 
 .. literalinclude:: ground-filters-pipeline.json
-    :language: json
     :linenos:
     :lineno-start: 7
     :lines: 7-10
@@ -109,7 +107,6 @@ generation. Noise points are **classified** with a value of ``7`` in keeping
 with the LAS specification.
 
 .. literalinclude:: ground-filters-pipeline.json
-    :language: json
     :linenos:
     :lineno-start: 11
     :lines: 11-13
@@ -123,7 +120,6 @@ points that are isolated and likely arise from noise sources. Noise points are
 **classified** with a value of ``7`` in keeping with the LAS specification.
 
 .. literalinclude:: ground-filters-pipeline.json
-    :language: json
     :linenos:
     :lineno-start: 14
     :lines: 14-16
@@ -145,7 +141,6 @@ filling voids. The morphological operations are also accelerated by moving to an
 iterative approach and using a diamond struturing element.
 
 .. literalinclude:: ground-filters-pipeline.json
-    :language: json
     :linenos:
     :lineno-start: 17
     :lines: 17-25

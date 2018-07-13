@@ -57,7 +57,7 @@ and sends it to a writer.
 
 .. literalinclude:: ../../examples/writing/tutorial.cpp
    :language: cpp
-   :lines: 45-74
+   :lines: 35-64
 
 Compiling and running the program
 -------------------------------------------------------------------------------

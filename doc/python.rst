@@ -156,3 +156,4 @@ Once the environment has been created, you will be prompted to activate it. ::
 
 .. _`pip`: https://pip.pypa.io/en/stable/
 .. _`easy_install`: https://pypi.python.org/pypi/setuptools
+.. _`conda`: https://conda.io/docs/

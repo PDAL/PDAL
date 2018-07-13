@@ -42,7 +42,7 @@ Pipeline breakdown
 
 
 .. literalinclude:: ./classification.json
-    :highlight-lines: 3-7
+    :emphasize-lines: 3-7
 
 .. note::
 
