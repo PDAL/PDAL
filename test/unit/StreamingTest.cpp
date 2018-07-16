@@ -399,3 +399,37 @@ TEST(Streaming, issue_2069)
     t.execute(table);
 }
 
+// Make sure that we take the "count" option into account when streaming.
+TEST(Streaming, issue_2086)
+{
+    StageFactory f;
+    Stage *r = f.createStage("readers.las");
+    Options opts;
+    opts.add("filename", Support::datapath("las/autzen_trim.las"));
+    opts.add("count", 35U);
+    r->setOptions(opts);
+
+    StreamCallbackFilter streamFilter;
+
+    int cnt = 0;
+    auto cb = [&cnt](PointRef&)
+    {
+        cnt++;
+        return true;
+    };
+    streamFilter.setCallback(cb);
+    streamFilter.setInput(*r);
+
+    // Use a table size smaller than count.
+    FixedPointTable t(20);
+    streamFilter.prepare(t);
+    streamFilter.execute(t);
+    EXPECT_EQ(cnt, 35);
+
+    cnt = 0;
+    // Use a table size larger than count.
+    FixedPointTable t2(100);
+    streamFilter.prepare(t2);
+    streamFilter.execute(t2);
+    EXPECT_EQ(cnt, 35);
+}

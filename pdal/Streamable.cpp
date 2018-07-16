@@ -35,6 +35,7 @@
 #include <iterator>
 
 #include <pdal/Streamable.hpp>
+#include <pdal/Reader.hpp>
 
 namespace pdal
 {
@@ -169,6 +170,11 @@ void Streamable::execute(StreamPointTable& table,
     // Separate out the first stage.
     Streamable *reader = stages.front();
 
+    // We may be limited in the number of points requested.
+    point_count_t count = std::numeric_limits<point_count_t>::max();
+    if (Reader *r = dynamic_cast<Reader *>(reader))
+        count = r->count();
+
     // Build a list of all stages except the first.  We may have a writer in
     // this list in addition to filters, but we treat them in the same way.
     auto begin = stages.begin();
@@ -185,7 +191,7 @@ void Streamable::execute(StreamPointTable& table,
         table.clearSpatialReferences();
         PointId idx = 0;
         PointRef point(table, idx);
-        point_count_t pointLimit = table.capacity();
+        point_count_t pointLimit = std::min(count, table.capacity());
 
         reader->startLogging();
         // When we get false back from a reader, we're done, so set
@@ -201,6 +207,8 @@ void Streamable::execute(StreamPointTable& table,
             if (finished)
                 pointLimit = idx;
         }
+        count -= pointLimit;
+
         reader->stopLogging();
         srs = reader->getSpatialReference();
         if (!srs.empty())
