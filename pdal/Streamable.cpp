@@ -191,7 +191,7 @@ void Streamable::execute(StreamPointTable& table,
         table.clearSpatialReferences();
         PointId idx = 0;
         PointRef point(table, idx);
-        point_count_t pointLimit = std::min(count, table.capacity());
+        point_count_t pointLimit = (std::min)(count, table.capacity());
 
         reader->startLogging();
         // When we get false back from a reader, we're done, so set
