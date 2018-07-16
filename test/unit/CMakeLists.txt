@@ -137,6 +137,7 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 #
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
+PDAL_ADD_TEST(pdal_filters_nndistance_test FILES filters/NNDistanceTest.cpp)
 target_include_directories(pdal_filters_chipper_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_filters_colorinterp_test
     FILES

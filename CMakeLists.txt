@@ -257,7 +257,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
-        ${ZSTD_INCLUDE_DIR}
+        ${ZSTD_INCLUDE_DIRS}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
@@ -272,7 +272,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
-        ${ZSTD_STATIC_LIB}
+        ${ZSTD_LIBRARIES}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
