@@ -171,7 +171,7 @@ void Streamable::execute(StreamPointTable& table,
     Streamable *reader = stages.front();
 
     // We may be limited in the number of points requested.
-    point_count_t count = std::numeric_limits<point_count_t>::max();
+    point_count_t count = (std::numeric_limits<point_count_t>::max)();
     if (Reader *r = dynamic_cast<Reader *>(reader))
         count = r->count();
 
