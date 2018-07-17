@@ -36,6 +36,7 @@ invalidate an existing KD-tree.
    filters.cluster
    filters.colorinterp
    filters.colorization
+   filters.dem
    filters.eigenvalues
    filters.estimaterank
    filters.elm
@@ -378,6 +379,6 @@ Other
     Provide a hook for a simple point-by-point callback.
 
 :ref:`filters.voxelgrid`
-    Create a new point cloud composed of voxel centroids computed from the 
+    Create a new point cloud composed of voxel centroids computed from the
     input point cloud. All incoming dimension data (e.g., intensity, RGB) will
     be lost.
