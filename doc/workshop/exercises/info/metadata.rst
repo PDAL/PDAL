@@ -84,8 +84,7 @@ at the moment either. Let's focus on extracting what we want using the
 Notes
 --------------------------------------------------------------------------------
 
-1. PDAL uses |JSON| as the exchange format when printing information from :ref:`info_command`.
-   JSON is a structured, human-readable format that is much simpler than its |XML| cousin.
+1. PDAL uses |JSON| as the exchange format when printing information from :ref:`info_command`.  JSON provides human and machine-readable text data.
 
 2. The PDAL :ref:`metadata document <metadata>` contains background and
    information about specific metadata entries and what they mean.
@@ -96,7 +95,7 @@ Notes
    :ref:`writers <writers>` can also produce metadata entries.
 
 4. Spatial reference system or coordinate system information is a kind of
-   special metadata, and is treated as something primary to a :ref:`Stage <stage_index>`
-   in PDAL.
+   special metadata.  Spatial references are come directly from source data
+   or are provided via options in PDAL.
 
 

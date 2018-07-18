@@ -130,8 +130,6 @@ files from a single pipeline.  The crop filter creates two output point views
 (one for each specified geometry) and the writer creates output files
 'output1.las' and 'output2.las' containing the two sets of points:
 
-::
-
 .. code-block:: json
 
   {
@@ -230,8 +228,11 @@ For more on PDAL stages and their options, check the PDAL documentation on
   Some options allow multiple inputs.  In those cases, provide the option
   values as a JSON array.
 
-* Applications can place a ``user_data`` node on any stage object and it will be
+* A ``user_data`` option can be added to any stage object and it will be
   carried through to any serialized pipeline output.
+
+* All stages support the ``option_file`` option that allows options to be
+  places in a separate file. See :ref:`option_files` for details.
 
 Filename Globbing
 ................................................................................
@@ -244,6 +245,33 @@ Filename Globbing
   when a filename is provided as an option through a command-line application
   like ``pdal pipeline`` or ``pdal translate``.
 
+.. _option_files:
+
+Option Files
+................................................................................
+
+All stages accept the ``option file`` option that allows extra options for a
+stage to be placed in a separate file.  The value of the option is the filename
+in which the additional options are located.
+
+Option files can be written using either JSON syntax or command line syntax.
+When using the JSON syntax, the format is a block of options just as if the
+options were placed in a pipeline:
+
+.. code-block:: json
+
+    {
+        "minor_version": 4,
+        "out_srs": "EPSG_4326"
+    }
+
+When using the command line syntax, the options are specified as they would
+be on the command line without the need to qualify the option names with
+the stage name:
+
+.. code-block:: none
+
+    --minor_version=4 --out_srs="EPSG_4326"
 
 Extended Examples
 --------------------------------------------------------------------------------
@@ -511,11 +539,6 @@ PDAL. Readers follow the pattern of :ref:`readers.las` or
 :ref:`readers.oci`, Writers follow the pattern of :ref:`writers.las` or
 :ref:`readers.oci`, with Filters using :ref:`filters.reprojection` or
 :ref:`filters.crop`.
-
-.. note::
-
-    :ref:`stage_index` contains a full listing of possible stages and
-    descriptions of their options.
 
 .. note::
 

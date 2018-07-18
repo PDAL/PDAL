@@ -43,7 +43,7 @@ the hexbin filter:
     $ pdal pipeline hexbin-pipeline.json --metadata hexbin-out.json
 
 
-.. code-block:: json
+.. code-block:: none
 
     {
       "stages":
@@ -61,7 +61,8 @@ the hexbin filter:
           "hex_offsets": "MULTIPOINT (0 0, -32.2711 55.8952, 0 111.79, 64.5422 111.79, 96.8133 55.8952, 64.5422 0)",
           "sample_size": 5000,
           "threshold": 15
-        },
+        }
+    },
     ...
 
 
