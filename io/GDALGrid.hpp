@@ -38,11 +38,14 @@
 #include <vector>
 #include <stdexcept>
 
+#include <pdal/pdal_internal.hpp>
+
 namespace pdal
 {
 
 class GDALGrid
 {
+    FRIEND_TEST(GDALWriterTest, issue_2095);
 public:
     static const int statCount = 1;
     static const int statMin = 2;
@@ -117,7 +120,7 @@ private:
 
     // Convert an absolute Y position to a vertical cell index.
     int verticalIndex(double y)
-        { return (int)(m_height - (y / m_edgeLength) - 1); }
+        { return m_height - (int)(y / m_edgeLength) - 1; }
 
     // Return the absolute horizontal position of the center of a cell given
     // the cell i index.

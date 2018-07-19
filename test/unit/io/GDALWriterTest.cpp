@@ -45,7 +45,8 @@
 #include <iostream>
 #include <sstream>
 
-using namespace pdal;
+namespace pdal
+{
 
 namespace
 {
@@ -92,8 +93,19 @@ void runGdalWriter(const Options& wo, const std::string& infile,
     }
     std::vector<double> data;
     raster.readBand(data, 1);
+
+    int row = 0;
+    int col = 0;
     for (size_t i = 0; i < arr.size(); ++i)
-        EXPECT_NEAR(arr[i], data[i], .001);
+    {
+        EXPECT_NEAR(arr[i], data[i], .001) << "Mismatch for row/col = " <<
+            row << "/" << col;
+        if (++col == raster.width())
+        {
+            col = 0;
+            row++;
+        }
+    }
 }
 
 void runGdalWriter2(const Options& wo, const std::string& outfile,
@@ -252,7 +264,7 @@ TEST(GDALWriterTest, max)
         "5.000 -9999.000     7.000     8.000     9.100 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.400     6.400 "
+        "2.000     3.000     4.400     5.400     6.400 "
         "1.000     2.000     3.000     4.400     5.400 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -273,9 +285,9 @@ TEST(GDALWriterTest, maxWindow)
 
     const std::string output =
         "5.000     5.500     7.000     8.000     9.100 "
-        "4.000     4.924     6.000     7.000     8.000 "
+        "4.000     4.942     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.400     6.400 "
+        "2.000     3.000     4.400     5.400     6.400 "
         "1.000     2.000     3.000     4.400     5.400 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -297,7 +309,7 @@ TEST(GDALWriterTest, mean)
         "5.000 -9999.000     7.000     8.000     8.967 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.700     6.700 "
-        "2.000     3.000     4.000     4.800     5.800 "
+        "2.000     3.000     4.200     4.920     5.800 "
         "1.000     2.000     3.000     4.200     5.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -318,9 +330,9 @@ TEST(GDALWriterTest, meanWindow)
 
     const std::string output =
         "5.000     5.478     7.000     8.000     8.967 "
-        "4.000     4.881     6.000     7.000     8.000 "
+        "4.000     4.896     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.700     6.700 "
-        "2.000     3.000     4.000     4.800     5.800 "
+        "2.000     3.000     4.200     4.920     5.800 "
         "1.000     2.000     3.000     4.200     5.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -387,7 +399,7 @@ TEST(GDALWriterTest, count)
         "1.000     0.000     1.000     1.000     3.000 "
         "1.000     0.000     1.000     1.000     1.000 "
         "1.000     1.000     1.000     2.000     2.000 "
-        "1.000     1.000     1.000     4.000     4.000 "
+        "1.000     1.000     2.000     5.000     4.000 "
         "1.000     1.000     1.000     2.000     2.000 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -409,7 +421,7 @@ TEST(GDALWriterTest, stdev)
         "0.000 -9999.000     0.000     0.000     0.094 "
         "0.000 -9999.000     0.000     0.000     0.000 "
         "0.000     0.000     0.000     0.300     0.300 "
-        "0.000     0.000     0.000     0.424     0.424 "
+        "0.000     0.000     0.200     0.449     0.424 "
         "0.000     0.000     0.000     0.200     0.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -430,9 +442,9 @@ TEST(GDALWriterTest, stdevWindow)
 
     const std::string output =
         "0.000     0.021     0.000     0.000     0.094 "
-        "0.000     0.034     0.000     0.000     0.000 "
+        "0.000     0.045     0.000     0.000     0.000 "
         "0.000     0.000     0.000     0.300     0.300 "
-        "0.000     0.000     0.000     0.424     0.424 "
+        "0.000     0.000     0.200     0.449     0.424 "
         "0.000     0.000     0.000     0.200     0.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -607,7 +619,7 @@ TEST(GDALWriterTest, bounds)
         "5.000 -9999.000     7.000     8.000     8.967 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.700     6.700 "
-        "2.000     3.000     4.000     4.800     5.800 "
+        "2.000     3.000     4.200     4.920     5.800 "
         "1.000     2.000     3.000     4.200     5.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -700,3 +712,17 @@ TEST(GDALWriterTest, issue_2074)
     EXPECT_EQ(raster3.width(), 7);
     EXPECT_EQ(raster3.height(), 7);
 }
+
+TEST(GDALWriterTest, issue_2095)
+{
+    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0);
+
+    EXPECT_EQ(grid.verticalIndex(0), 4);
+    EXPECT_EQ(grid.verticalIndex(.5), 4);
+    EXPECT_EQ(grid.verticalIndex(1), 3);
+    EXPECT_EQ(grid.verticalIndex(1.5), 3);
+    EXPECT_EQ(grid.verticalIndex(4), 0);
+    EXPECT_EQ(grid.verticalIndex(4.5), 0);
+}
+
+} // namespace pdal
