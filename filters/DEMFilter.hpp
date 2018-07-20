@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/Streamable.hpp>
 
 
 #include <cstdint>
@@ -51,7 +52,7 @@ class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL DEMFilter : public Filter
+class PDAL_DLL DEMFilter : public Filter, public Streamable
 {
 public:
     DEMFilter();
