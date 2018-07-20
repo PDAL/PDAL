@@ -83,8 +83,7 @@ void GDALReader::initialize()
     m_count = m_raster->width() * m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
     m_raster->close();
-    m_row = 0;
-    m_col = 0;
+
 }
 
 
@@ -128,6 +127,8 @@ void GDALReader::ready(PointTableRef table)
     m_index = 0;
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
+    m_row = 0;
+    m_col = 0;
 }
 
 
@@ -151,7 +152,7 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t numPts)
 bool GDALReader::processOne(PointRef& point)
 {
 
-    static std::array<double, 2> coords;
+    std::array<double, 2> coords;
     if (m_row == m_raster->height() &&
         m_col == m_raster->width())
         return false; // done
@@ -161,26 +162,24 @@ bool GDALReader::processOne(PointRef& point)
         m_col = 0;
         m_row ++;
     }
+
     m_raster->pixelToCoord(m_col, m_row, coords);
     double x = coords[0];
     double y = coords[1];
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
 
-    static std::vector<double> data;
+    std::vector<double> data;
+    if (m_raster->read(x, y, data) != gdal::GDALError::None)
+        return false;
 
     for (int b = 0; b < m_raster->bandCount(); ++b)
     {
-        // Bands count from 1
         Dimension::Id id = m_bandIds[b];
-
-        if (m_raster->read(x, y, data) == gdal::GDALError::None)
-        {
-            double v = data[b];
-            point.setField(id, v);
-        }
-
+        double v = data[b];
+        point.setField(id, v);
     }
+
     m_col++;
 
 
