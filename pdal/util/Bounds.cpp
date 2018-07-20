@@ -127,20 +127,34 @@ bool BOX3D::valid() const
     return !empty();
 }
 
-void BOX2D::grow(double x, double y)
+
+BOX2D& BOX2D::grow(double dist)
+{
+    assert(valid());
+    minx -= dist;
+    maxx += dist;
+    miny -= dist;
+    maxy += dist;
+    return *this;
+}
+
+
+BOX2D& BOX2D::grow(double x, double y)
 {
     if (x < minx) minx = x;
     if (x > maxx) maxx = x;
 
     if (y < miny) miny = y;
     if (y > maxy) maxy = y;
+    return *this;
 }
 
-void BOX3D::grow(double x, double y, double z)
+BOX3D& BOX3D::grow(double x, double y, double z)
 {
     BOX2D::grow(x, y);
     if (z < minz) minz = z;
     if (z > maxz) maxz = z;
+    return *this;
 }
 
 const BOX2D& BOX2D::getDefaultSpatialExtent()
