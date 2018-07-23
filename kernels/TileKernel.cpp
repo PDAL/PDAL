@@ -51,7 +51,7 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_KERNEL(TileKernel, s_info)
 
-TileKernel::TileKernel() : m_table(10000)
+TileKernel::TileKernel() : m_table(10000), m_repro(nullptr)
 {}
 
 
@@ -67,12 +67,14 @@ void TileKernel::addSwitches(ProgramArgs& args)
     args.add("output,o", "Output filename template",
         m_outputFile).setPositional();
     args.add("length", "Edge length for cells", m_length, 1000.0);
-    args.add("origin_x", "Origin in X axis for splitter cells", m_xOrigin,
+    args.add("origin_x", "Origin in X axis for cells", m_xOrigin,
         std::numeric_limits<double>::quiet_NaN());
-    args.add("origin_y", "Origin in Y axis for splitter cells", m_yOrigin,
+    args.add("origin_y", "Origin in Y axis for cells", m_yOrigin,
         std::numeric_limits<double>::quiet_NaN());
 	args.add("buffer", "Size of buffer (overlap) to include around each tile",
 		m_buffer);
+    args.add("out_srs", "Output SRS to which points will be reprojected",
+        m_outSrs);
 }
 
 
@@ -92,9 +94,10 @@ int TileKernel::execute()
         throw pdal_error("No input files found for path '" +
             m_inputFile + "'.");
 
-    std::vector<Streamable *> readers;
+    Readers readers;
     for (auto&& file : files)
-        readers.push_back(prepareReader(file));
+        readers[file] = prepareReader(file);
+    checkReaders(readers);
 
 	Options opts;
 	opts.add("length", m_length);
@@ -108,6 +111,56 @@ int TileKernel::execute()
 	for (auto&& wp : m_writers)
 		StageWrapper::done(*wp.second, m_table);
 	return 0;
+}
+
+
+void TileKernel::checkReaders(const Readers& readers)
+{
+    SpatialReference tempSrs;
+    SpatialReference srs;
+    bool needRepro(false);
+
+    for (auto& rp : readers)
+    {
+        const std::string& filename = rp.first;
+        Streamable *r = rp.second;
+
+        tempSrs = r->getSpatialReference();
+
+        // No SRS
+        if (tempSrs.empty())
+        {
+            if (!m_outSrs.empty())
+                throw pdal_error("Can't reproject file '" + filename +
+                    "' with no SRS.");
+            continue;
+        }
+
+        if (srs.empty())
+            srs = tempSrs;
+
+        // Two SRSes
+        if (tempSrs != srs)
+        {
+            if (m_outSrs.empty())
+                m_log->get(LogLevel::Warning) << "No 'out_srs' specified "
+                    "and input files have multiple SRSs." << std::endl;
+            needRepro = true;
+        }
+    }
+
+    // Non-matching SRS and we requested reprojection
+    if (!m_outSrs.empty() && srs != m_outSrs)
+        needRepro = true;
+
+    if (needRepro)
+    {
+        Options opts;
+        opts.add("out_srs", m_outSrs);
+
+        m_repro = dynamic_cast<Streamable *>(
+            &m_manager.makeFilter("filters.reprojection", opts));
+    }
 }
 
 
@@ -132,7 +185,7 @@ Streamable *TileKernel::prepareReader(const std::string& filename)
 // We calculate the origin specially in order to avoid a "first point"
 // check for every point iteration, seeing as we might have BILLIONS
 // of points to process.
-void TileKernel::process(const std::vector<Streamable *>& readers)
+void TileKernel::process(const Readers& readers)
 {
     using std::placeholders::_1;
     using std::placeholders::_2;
@@ -142,39 +195,70 @@ void TileKernel::process(const std::vector<Streamable *>& readers)
 
     bool haveOrigin(false);
     StageWrapper::ready(m_splitter, m_table);
-    for (Streamable *r : readers)
+    for (auto&& rp : readers)
     {
+        Streamable& r = *(rp.second);
+        std::vector<bool> skips(m_table.capacity());
         PointId idx(0);
         PointRef point(m_table, idx);
 
-        StreamableWrapper::ready(*r, m_table);
-        bool finished(false);
-        if (!haveOrigin)
-        {
-            if (StreamableWrapper::processOne(*r, point))
-            {
-                if (std::isnan(m_xOrigin))
-                    m_xOrigin = point.getFieldAs<double>(Dimension::Id::X);
-                if (std::isnan(m_yOrigin))
-                    m_yOrigin = point.getFieldAs<double>(Dimension::Id::Y);
-                m_splitter.setOrigin(m_xOrigin, m_yOrigin);
-                haveOrigin = true;
-            }
-            else
-                finished = true;
-        }
-        else
-            finished = !StreamableWrapper::processOne(*r, point);
+        StreamableWrapper::ready(r, m_table);
 
+        // Read first point.
+        bool finished(false);
+        finished = !StreamableWrapper::processOne(r, point);
+        if (!haveOrigin && !finished)
+        {
+            if (std::isnan(m_xOrigin))
+                m_xOrigin = point.getFieldAs<double>(Dimension::Id::X);
+            if (std::isnan(m_yOrigin))
+                m_yOrigin = point.getFieldAs<double>(Dimension::Id::Y);
+            m_splitter.setOrigin(m_xOrigin, m_yOrigin);
+            haveOrigin = true;
+        }
+
+        idx++;
         while (!finished)
         {
-            m_splitter.processPoint(point, adder);
-            idx++;
-            if (idx >= m_table.capacity())
-                idx = 0;
-            finished = !StreamableWrapper::processOne(*r, point);
+            // Read subsequent points.
+            while (true)
+            {
+                point.setPointId(idx);
+                finished = !StreamableWrapper::processOne(r, point);
+                idx++;
+                if (idx == m_table.capacity() || finished)
+                    break;
+            }
+            PointId last = idx;
+
+            // Reproject if necessary.
+            if (m_repro)
+            {
+                for (idx = 0; idx < last; ++idx)
+                {
+                    point.setPointId(idx);
+                    if (!StreamableWrapper::processOne(*m_repro, point))
+                        skips[idx] = true;
+                }
+            }
+
+            // Split and write.
+            for (idx = 0; idx < last; ++idx)
+            {
+                if (skips[idx])
+                    continue;
+
+                point.setPointId(idx);
+                m_splitter.processPoint(point, adder);
+
+            }
+            for (size_t i = 0; i < skips.size(); ++i)
+                skips[i] = false;
+            idx = 0;
         }
-        StreamableWrapper::done(*r, m_table);
+        StreamableWrapper::done(r, m_table);
+        if (m_repro)
+            StreamableWrapper::done(*m_repro, m_table);
     }
 }
 

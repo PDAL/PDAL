@@ -45,6 +45,7 @@ namespace pdal
 class PDAL_DLL TileKernel : public Kernel
 {
     using Coord = std::pair<int, int>;
+    using Readers = std::map<std::string, Streamable *>;
 
 public:
     TileKernel();
@@ -55,7 +56,8 @@ private:
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
     Streamable *prepareReader(const std::string& filename);
-    void process(const std::vector<Streamable *>& readers);
+    void process(const Readers& readers);
+    void checkReaders(const Readers& readers);
     void adder(PointRef& point, int xpos, int ypos);
 
     std::string m_inputFile;
@@ -67,6 +69,8 @@ private:
     std::map<Coord, Streamable *> m_writers;
     FixedPointTable m_table;
     SplitterFilter m_splitter;
+    Streamable *m_repro;
+    SpatialReference m_outSrs;
     std::string::size_type m_hashPos;
 };
 
