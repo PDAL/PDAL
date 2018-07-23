@@ -191,7 +191,6 @@ void GDALWriter::writeView(const PointViewPtr view)
     {
         BOX2D bounds;
         view->calculateBounds(bounds);
-        bounds.grow(m_radius);
         if (!m_grid)
             createGrid(bounds);
         else
@@ -216,17 +215,12 @@ bool GDALWriter::processOne(PointRef& point)
     if (m_expandByPoint)
     {
         if (!m_grid)
-            createGrid(BOX2D(x, y, x, y).grow(m_radius));
+            createGrid(BOX2D(x, y, x, y));
         else if (!m_curBounds.contains(x, y))
-            expandGrid(BOX2D(x, y, x, y).grow(m_radius));
+            expandGrid(BOX2D(x, y, x, y));
     }
     x -= m_curBounds.minx;
     y -= m_curBounds.miny;
-    if (!m_fixedGrid)
-    {
-        x += m_radius;
-        y += m_radius;
-    }
 
     m_grid->addPoint(x, y, z);
     return true;
