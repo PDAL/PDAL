@@ -62,22 +62,19 @@ struct PMFArgs
     bool m_exponential;
     DimRange m_ignored;
     double m_initialDistance;
-    bool m_lastOnly;
+    StringList m_returns;
     double m_maxDistance;
     double m_maxWindowSize;
     double m_slope;
 };
-
 
 CREATE_STATIC_STAGE(PMFFilter, s_info)
 
 PMFFilter::PMFFilter() : m_args(new PMFArgs)
 {}
 
-
 PMFFilter::~PMFFilter()
 {}
-
 
 std::string PMFFilter::getName() const
 {
@@ -88,14 +85,15 @@ void PMFFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell_size", "Cell size", m_args->m_cellSize, 1.0);
     args.add("exponential", "Exponential growth of window size?",
-        m_args->m_exponential, true);
+             m_args->m_exponential, true);
     args.add("ignore", "Ignore values", m_args->m_ignored);
-    args.add("initial_distance", "Initial distance",
-        m_args->m_initialDistance, 0.15);
-    args.add("last", "Consider last returns only?", m_args->m_lastOnly, true);
+    args.add("initial_distance", "Initial distance", m_args->m_initialDistance,
+             0.15);
+    args.add("returns", "Include only returns?", m_args->m_returns,
+             {"last", "only"});
     args.add("max_distance", "Maximum distance", m_args->m_maxDistance, 2.5);
-    args.add("max_window_size", "Maximum window size",
-        m_args->m_maxWindowSize, 33.0);
+    args.add("max_window_size", "Maximum window size", m_args->m_maxWindowSize,
+             33.0);
     args.add("slope", "Slope", m_args->m_slope, 1.0);
 }
 
@@ -110,8 +108,18 @@ void PMFFilter::prepared(PointTableRef table)
 
     m_args->m_ignored.m_id = layout->findDim(m_args->m_ignored.m_name);
 
-    if (m_args->m_lastOnly)
+    if (m_args->m_returns.size())
     {
+        for (auto& r : m_args->m_returns)
+        {
+            Utils::trim(r);
+            if ((r != "first") && (r != "intermediate") && (r != "last") &&
+                (r != "only"))
+            {
+                throwError("Unrecognized 'returns' value: '" + r + "'.");
+            }
+        }
+
         if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
             !layout->hasDim(Dimension::Id::NumberOfReturns))
         {
@@ -119,7 +127,7 @@ void PMFFilter::prepared(PointTableRef table)
                                              "NumberOfReturns. Skipping "
                                              "segmentation of last returns and "
                                              "proceeding with all returns.\n";
-            m_args->m_lastOnly = false;
+            m_args->m_returns = {""};
         }
     }
 }
@@ -136,36 +144,41 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     if (m_args->m_ignored.m_id == Dimension::Id::Unknown)
         keptView->append(*input);
     else
-        Segmentation::ignoreDimRange(m_args->m_ignored, input,
-            keptView, ignoredView);
+        Segmentation::ignoreDimRange(m_args->m_ignored, input, keptView,
+                                     ignoredView);
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
     for (PointId i = 0; i < keptView->size(); ++i)
         keptView->setField(Dimension::Id::Classification, i, 1);
 
-    // Segment kept view into last/other-than-last return views.
-    PointViewPtr lastView = keptView->makeNew();
-    PointViewPtr nonlastView = keptView->makeNew();
-    if (m_args->m_lastOnly)
-        Segmentation::segmentLastReturns(keptView, lastView, nonlastView);
-    else
-        lastView->append(*keptView);
-
-    if (!lastView->size())
+    // Segment kept view into two views
+    PointViewPtr firstView = keptView->makeNew();
+    PointViewPtr secondView = keptView->makeNew();
+    if (m_args->m_returns.size())
     {
-        log()->get(LogLevel::Error) << "No last returns found. Try running again with --filters.pmf.last=false.\n";
-        return viewSet;
+        Segmentation::segmentReturns(keptView, firstView, secondView,
+                                     m_args->m_returns);
+    }
+    else
+    {
+        for (PointId i = 0; i < keptView->size(); ++i)
+            firstView->appendPoint(*keptView.get(), i);
+    }
+
+    if (!firstView->size())
+    {
+        throwError("No returns to process.");
     }
 
     // Run the actual PMF algorithm.
-    processGround(lastView);
+    processGround(firstView);
 
     // Prepare the output PointView.
     PointViewPtr outView = input->makeNew();
     outView->append(*ignoredView);
-    outView->append(*nonlastView);
-    outView->append(*lastView);
+    outView->append(*secondView);
+    outView->append(*firstView);
     viewSet.insert(outView);
 
     return viewSet;
@@ -267,8 +280,8 @@ void PMFFilter::processGround(PointViewPtr view)
         if (iter == 0)
             ht = m_args->m_initialDistance;
         else
-            ht = m_args->m_slope * (ws - wsvec[iter - 1]) *
-                m_args->m_cellSize + m_args->m_initialDistance;
+            ht = m_args->m_slope * (ws - wsvec[iter - 1]) * m_args->m_cellSize +
+                 m_args->m_initialDistance;
 
         // Enforce max distance on height threshold
         if (ht > m_args->m_maxDistance)
@@ -299,10 +312,10 @@ void PMFFilter::processGround(PointViewPtr view)
             double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
             double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
 
-            int c = static_cast<int>(floor((x - bounds.minx) /
-                m_args->m_cellSize));
-            int r = static_cast<int>(floor((y - bounds.miny) /
-                m_args->m_cellSize));
+            int c =
+                static_cast<int>(floor((x - bounds.minx) / m_args->m_cellSize));
+            int r =
+                static_cast<int>(floor((y - bounds.miny) / m_args->m_cellSize));
 
             if ((z - mo[c * rows + r]) < htvec[j])
                 groundNewIdx.push_back(p_idx);

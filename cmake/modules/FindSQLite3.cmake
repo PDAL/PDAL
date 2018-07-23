@@ -29,8 +29,7 @@ find_path(SQLITE3_INCLUDE_DIR
   $ENV{SystemDrive}/SQLite/*/include
   $ENV{SystemDrive}/SQLite3/*/include
   $ENV{SQLITE_ROOT}/include
-  ${SQLITE_ROOT_DIR}/include
-  $ENV{OSGEO4W_ROOT}/include)
+  ${SQLITE_ROOT_DIR}/include)
 
 set(SQLITE3_NAMES sqlite3_i sqlite3)
 find_library(SQLITE3_LIBRARY
@@ -44,8 +43,7 @@ find_library(SQLITE3_LIBRARY
   $ENV{SystemDrive}/SQLite/*/lib
   $ENV{SystemDrive}/SQLite3/*/lib
   $ENV{SQLITE_ROOT}/lib
-  ${SQLITE_ROOT_DIR}/lib
-  $ENV{OSGEO4W_ROOT}/lib)
+  ${SQLITE_ROOT_DIR}/lib)
 
 # If sqlite3 was compiled with `OMIT_LOAD_EXTENSION`, PDAL compilation will fail due
 # to a missing symbol, `_sqlite3_enable_load_extension`.

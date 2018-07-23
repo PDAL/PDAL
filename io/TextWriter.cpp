@@ -209,6 +209,7 @@ void TextWriter::ready(PointTableRef table)
         log()->get(LogLevel::Debug) << "Not writing header" << std::endl;
     else
         writeHeader(table);
+    m_idx = 0;
 }
 
 
@@ -275,6 +276,8 @@ void TextWriter::processOneCSV(PointRef& point)
 
 void TextWriter::processOneGeoJSON(PointRef& point)
 {
+    if (m_idx)
+        *m_stream << ",";
     *m_stream << "{ \"type\":\"Feature\",\"geometry\": "
         "{ \"type\": \"Point\", \"coordinates\": [";
 
@@ -309,6 +312,7 @@ bool TextWriter::processOne(PointRef& point)
         processOneCSV(point);
     else
         processOneGeoJSON(point);
+    m_idx++;
     return true;
 }
 

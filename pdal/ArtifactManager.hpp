@@ -47,6 +47,10 @@ namespace pdal
 class ArtifactManager
 {
 public:
+    ArtifactManager() = default;
+    ArtifactManager(const ArtifactManager&) = delete;
+    ArtifactManager& operator=(const ArtifactManager&) = delete;
+
     bool put(const std::string& name, ArtifactPtr artifact)
     {
         return m_storage.insert(std::make_pair(name, artifact)).second;

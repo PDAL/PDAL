@@ -144,7 +144,7 @@ Example :ref:`pipeline`
       "pipeline":[
         "file-input.las",
         {
-          "type":"filters.smrf
+          "type":"filters.smrf"
         },
         {
           "type":"filters.python",

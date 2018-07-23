@@ -31,7 +31,7 @@ new feature development of PDAL over the past couple of years.
 
 
 `Michael Gerlek`_ helped bootstrap PDAL by providing its first design, basic
-primitive objects, and first :ref:`stage <stage_index>` implementations.
+primitive objects, and first stage implementations.
 
 .. _`Michael Gerlek`: http://github.com/mpgerlek
 
@@ -42,7 +42,7 @@ primitive objects, and first :ref:`stage <stage_index>` implementations.
 
 `Bradley Chambers`_ from `RadiantSolutions`_ has contributed numerous features
 and capabilities to the PDAL project, including :ref:`Poisson sampling
-<dart-throwing-tutorial>` and :ref:`Progressive Morphological Filters
+<filters.sample>` and :ref:`Progressive Morphological Filters
 <pcl_ground>`. He is also a prolific :ref:`tutorial` writer.
 
 .. _`Bradley Chambers`: https://github.com/chambbj

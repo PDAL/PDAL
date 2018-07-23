@@ -23,7 +23,7 @@ First, we provide a full listing of the reader header.
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.hpp
    :language: cpp
-   :lines:18-20
+   :lines: 18-20
    :linenos:
 
 ``m_stream`` is used to process the input, while ``m_index`` is used to track

@@ -48,7 +48,7 @@
 #include <set>
 #include <deque>
 
-#pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
+//#pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
 
 namespace pdal
 {

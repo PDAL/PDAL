@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
+* Copyright (c) 2017, Howard Butler (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -35,45 +35,45 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/GDALUtils.hpp>
+#include <pdal/Streamable.hpp>
 
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexGrid.hpp>
-#include <hexer/Processor.hpp>
+
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace pdal
 {
 
-class PDAL_DLL HexBin : public Filter
+struct DEMArgs;
+
+class Options;
+class PointLayout;
+class PointView;
+
+class PDAL_DLL DEMFilter : public Filter, public Streamable
 {
 public:
-    HexBin() : Filter()
-        {}
-    std::string getName() const { return "filters.hexbin"; }
+    DEMFilter();
+    ~DEMFilter();
 
-    hexer::HexGrid* grid() const { return m_grid.get(); }
+    std::string getName() const;
+
 private:
 
-    std::unique_ptr<hexer::HexGrid> m_grid;
-    std::string m_xDimName;
-    std::string m_yDimName;
-    uint32_t m_precision;
-    uint32_t m_sampleSize;
-    double m_cullArea;
-    Arg *m_cullArg;
-    int32_t m_density;
-    double m_edgeLength;
-    bool m_outputTesselation;
-    bool m_doSmooth;
-    point_count_t m_count;
+    std::unique_ptr<DEMArgs> m_args;
+    std::unique_ptr<gdal::Raster> m_raster;
 
-    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual bool processOne(PointRef& point);
 
-    HexBin& operator=(const HexBin&); // not implemented
-    HexBin(const HexBin&); // not implemented
+    DEMFilter& operator=(const DEMFilter&); // not implemented
+    DEMFilter(const DEMFilter&); // not implemented
 };
 
 } // namespace pdal

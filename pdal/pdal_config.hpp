@@ -58,7 +58,6 @@ enum class Feature
 };
 
 PDAL_DLL bool hasFeature(Feature f);
-PDAL_DLL bool lazPerfEnabled();
 PDAL_DLL std::string fullVersionString();
 PDAL_DLL std::string versionString();
 PDAL_DLL int versionInteger();

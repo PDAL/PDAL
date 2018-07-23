@@ -218,7 +218,10 @@ TEST(OldPCLBlockTests, PMF)
     fo.add("slope", 1.0);
     fo.add("initial_distance", 0.15);
     fo.add("max_distance", 2.5);
-    fo.add("last", false);
+    fo.add("returns", "first");
+    fo.add("returns", "intermediate");
+    fo.add("returns", "last");
+    fo.add("returns", "only");
 
     Stage* outlier(f.createStage("filters.pmf"));
     EXPECT_TRUE(outlier);

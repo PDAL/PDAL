@@ -65,7 +65,8 @@ void run_pipeline(std::string const& pipelineFile,
     std::string file(Support::configuredpath(pipelineFile));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " +
         options + " 2>&1", output);
-    EXPECT_EQ(0, stat);
+    EXPECT_EQ(0, stat) << "Failure running '" << pipelineFile << "' with "
+        "options '" << options << "'.";
     if (stat)
         std::cerr << output << std::endl;
     if (lookFor.size())

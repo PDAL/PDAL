@@ -96,6 +96,7 @@ private:
     bool m_quoteHeader;
     bool m_packRgb;
     int m_precision;
+    PointId m_idx;
 
     FileStreamPtr m_stream;
     std::vector<DimSpec> m_dims;
