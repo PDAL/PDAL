@@ -52,11 +52,6 @@ public:
     GDALWriter() : m_outputTypes(0), m_expandByPoint(true)
     {}
 
-    size_t gridWidth() const
-        { return m_grid->width(); }
-    size_t gridHeight() const
-        { return m_grid->height(); }
-
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();

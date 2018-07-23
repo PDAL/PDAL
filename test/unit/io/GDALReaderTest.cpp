@@ -171,7 +171,7 @@ protected:
     }
 
 private:
-    std::vector<Point> m_xyzPoints;    
+    std::vector<Point> m_xyzPoints;
     std::vector<Point> m_gdalPoints;
 };
 

@@ -121,6 +121,10 @@ void GDALWriter::prepared(PointTableRef table)
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
     m_fixedGrid = m_bounds.to2d().valid();
+    // If we've specified a grid, we don't expand by point.  We also
+    // don't expand by point if we're running in standard mode.  That's
+    // set later in writeView.
+    m_expandByPoint = !m_fixedGrid;
 }
 
 
@@ -131,10 +135,7 @@ void GDALWriter::readyFile(const std::string& filename,
     m_srs = srs;
     m_grid.reset();
     if (m_fixedGrid)
-    {
         createGrid(m_bounds.to2d());
-        m_expandByPoint = false;
-    }
 }
 
 
