@@ -66,6 +66,8 @@ private:
 
     bool loadPoint(PointRef& point, point_count_t position );
     void wakeUpNumpyArray();
+    void registerDim(PointLayoutPtr layout, const std::string& name,
+        Dimension::Type pdalType);
     void prepareFieldsArray(PointLayoutPtr layout);
     void prepareRasterArray(PointLayoutPtr layout);
 
