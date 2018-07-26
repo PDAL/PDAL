@@ -37,7 +37,7 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 
-#include <pdal/Segmentation.hpp>
+#include <filters/private/Segmentation.hpp>
 
 #include <vector>
 
