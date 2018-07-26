@@ -36,10 +36,10 @@
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Segmentation.hpp>
 #include <pdal/pdal_types.hpp>
 
-#include "../filters/private/DimRange.hpp"
+#include "DimRange.hpp"
+#include "Segmentation.hpp"
 
 #include <vector>
 
