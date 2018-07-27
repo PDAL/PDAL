@@ -97,3 +97,33 @@ TEST(NumpyReaderTest, NumpyReaderTest_read_array)
     EXPECT_EQ(view->getFieldAs<uint32_t>(pdal::Dimension::Id::Y,5023), 50u);
 }
 
+
+TEST(NumpyReaderTest, rasterWithFields)
+{
+    StageFactory f;
+
+    Options ops;
+    ops.add("filename", Support::datapath("plang/twodim.npy"));
+
+    NumpyReader reader;
+    reader.setOptions(ops);
+
+    PointTable table;
+
+    reader.prepare(table);
+
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+    PointLayoutPtr layout = view->layout();
+    Dimension::Id health = layout->findDim("Health");
+
+    EXPECT_EQ(view->size(), 6u);
+    for (PointId i = 0; i < 6; ++i)
+    {
+        int j = (int)i + 1;
+        EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, i), j);
+        EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Intensity, i), j);
+        EXPECT_EQ(view->getFieldAs<int>(health, i), j);
+        EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Y, i), 0);
+    }
+}
