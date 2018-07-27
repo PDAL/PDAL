@@ -171,18 +171,20 @@ void NumpyReader::addArgs(ProgramArgs& args)
 
 // Try to map dimension names to existing PDAL dimension names by
 // checking them with certain characters removed.
-void NumpyReader::registerDim(PointLayoutPtr layout, const std::string& name,
-    Dimension::Type pdalType)
+Dimension::Id NumpyReader::registerDim(PointLayoutPtr layout,
+    const std::string& name, Dimension::Type pdalType)
 {
-    auto registerName = [this, &layout, &pdalType](std::string name, char elim)
+    Dimension::Id id;
+
+    auto registerName = [&layout, &pdalType, &id](std::string name, char elim)
     {
         if (elim != '\0')
             Utils::remove(name, elim);
-        Dimension::Id id = Dimension::id(name);
-        if (id != Dimension::Id::Unknown)
+        Dimension::Id tempId = Dimension::id(name);
+        if (tempId != Dimension::Id::Unknown)
         {
+            id = tempId;
             layout->registerDim(id, pdalType);
-            m_ids.push_back(id);
             return true;
         }
         return false;
@@ -192,116 +194,119 @@ void NumpyReader::registerDim(PointLayoutPtr layout, const std::string& name,
     // just punt and use the name as is.
     if (!registerName(name, '\0') && !registerName(name, '-') &&
         !registerName(name, ' ') && !registerName(name, '_'))
-        m_ids.push_back(layout->registerOrAssignDim(name, pdalType));
+        id = layout->registerOrAssignDim(name, pdalType);
+    return id;
 }
 
-
-// Ready an array of dimension 1.
-void NumpyReader::prepareFieldsArray(PointLayoutPtr layout)
+namespace
 {
-    m_numFields = PyDict_Size(m_dtype->fields);
-    PyObject* names_dict = m_dtype->fields;
-    PyObject* names = PyDict_Keys(names_dict);
-    PyObject* values = PyDict_Values(names_dict);
-    if (!names || !values)
-        throw pdal::pdal_error(plang::getTraceback());
 
-    for (int i = 0; i < m_numFields; ++i)
-    {
-        // Get the dimension name and dtype
-        PyObject* pname = PyList_GetItem(names, i);
-        if (!pname)
-            throw pdal::pdal_error(plang::getTraceback());
+std::string toString(PyObject *pname)
+{
+    if (!pname)
+        return std::string();
 
-        const char* cname(0);
 #if PY_MAJOR_VERSION >= 3
-        cname = PyBytes_AsString(PyUnicode_AsUTF8String(pname));
+    return PyBytes_AsString(PyUnicode_AsUTF8String(pname));
 #else
-        cname = PyString_AsString(pname);
+    return PyString_AsString(pname);
 #endif
-        std::string name(cname);
-
-        PyObject* tup = PyList_GetItem(values, i);
-        if (!tup)
-            throw pdal_error(plang::getTraceback());
-
-        // Get offset.
-        PyObject* offset_o = PySequence_Fast_GET_ITEM(tup, 1);
-        if (!offset_o)
-            throw pdal_error(plang::getTraceback());
-        m_offsets.push_back(PyLong_AsLong(offset_o));
-
-        // Get size.
-        PyObject* dt = PySequence_Fast_GET_ITEM(tup, 0);
-        if (!dt)
-            throw pdal_error(plang::getTraceback());
-        PyArray_Descr* dtype = (PyArray_Descr*)dt;
-        m_sizes.push_back(dtype->elsize);
-
-        // Get PDAL datatype.
-        Dimension::Type p_type =
-            plang::Environment::getPDALDataType(dtype->type_num);
-        if (p_type == Dimension::Type::None)
-        {
-            std::ostringstream oss;
-            oss << "Unable to map dimension '" << name << "' because its "
-                "type '" << dtype->type_num <<"' is not mappable to PDAL";
-            throw pdal_error(oss.str());
-        }
-        m_types.push_back(p_type);
-
-        // Get dimension.
-        registerDim(layout, name, p_type);
-    }
 }
 
 
-void NumpyReader::prepareRasterArray(PointLayoutPtr layout)
+Dimension::Type getType(PyArray_Descr *dtype, const std::string& name)
 {
-    using namespace Dimension;
+    if (!dtype)
+        throw pdal_error("Can't fetch data type for numpy field.");
 
-    Dimension::Type p_type =
-        plang::Environment::getPDALDataType(m_dtype->type_num);
-    if (p_type == Dimension::Type::None)
+    Dimension::Type pdalType =
+        plang::Environment::getPDALDataType(dtype->type_num);
+    if (pdalType == Dimension::Type::None)
     {
         std::ostringstream oss;
-        oss << "Unable to map raster dimension because its type '" <<
-            m_dtype->type_num <<"' is not mappable to PDAL";
+        oss << "Unable to map dimension '" << name << "' because its "
+            "type '" << dtype->type_num <<"' is not mappable to PDAL";
         throw pdal_error(oss.str());
     }
-    m_types.push_back(p_type);
+    return pdalType;
+}
 
-    // X is dimension 1
-    // Y is dimension 2
-    layout->registerDim(Id::X, Type::Signed32);
-    layout->registerDim(Id::Y, Type::Signed32);
+} // unnamed namespace
 
-    if (m_assignZ != 0.0f)
-        layout->registerDim(Id::Z, Type::Signed32);
-    Dimension::Id id = layout->registerOrAssignDim(m_defaultDimension,
-        m_types[0]);
 
-    m_ids.push_back(id);
-    m_sizes.push_back(layout->dimSize(id));
+void NumpyReader::createFields(PointLayoutPtr layout)
+{
+    Dimension::Id id;
+    Dimension::Type type;
+    int offset;
+
+    m_numFields = 0;
+    if (m_dtype->fields)
+        m_numFields = PyDict_Size(m_dtype->fields);
+
+    // Array isn't structured - just a bunch of data.
+    if (m_numFields <= 0)
+    {
+        type = getType(m_dtype, m_defaultDimension);
+        id = registerDim(layout, m_defaultDimension, type);
+        m_fields.push_back({id, type, 0});
+    }
+    else
+    {
+        PyObject* names_dict = m_dtype->fields;
+        PyObject* names = PyDict_Keys(names_dict);
+        PyObject* values = PyDict_Values(names_dict);
+        if (!names || !values)
+            throw pdal_error("Bad field specification for numpy array layout.");
+
+        for (int i = 0; i < m_numFields; ++i)
+        {
+            std::string name = toString(PyList_GetItem(names, i));
+            PyObject *tup = PyList_GetItem(values, i);
+            if (!tup)
+                throw pdal_error(plang::getTraceback());
+
+            // Get offset.
+            PyObject* offset_o = PySequence_Fast_GET_ITEM(tup, 1);
+            if (!offset_o)
+                throw pdal_error(plang::getTraceback());
+            offset = PyLong_AsLong(offset_o);
+
+            // Get type.
+            type = getType((PyArray_Descr *)PySequence_Fast_GET_ITEM(tup, 0),
+                name);
+            id = registerDim(layout, name, type);
+            m_fields.push_back({id, type, offset});
+        }
+    }
 }
 
 
 void NumpyReader::addDimensions(PointLayoutPtr layout)
 {
-    wakeUpNumpyArray();
+    using namespace Dimension;
 
-    switch (m_ndims)
+    wakeUpNumpyArray();
+    createFields(layout);
+
+    // If we already have an X dimension, we're done.
+    for (const Field& field : m_fields)
+        if (field.m_id == Id::X)
+        {
+            m_storeXYZ = false;
+            return;
+        }
+
+    // We're storing a calculated XYZ, so register the dims.
+    layout->registerDim(Id::X, Type::Signed32);
+    if (m_ndims > 1)
     {
-    case 1:
-        prepareFieldsArray(layout);
-        break;
-    case 2:
-        prepareRasterArray(layout);
-        break;
-    default:
-        throw pdal_error("Numpy arrays of dimension > 2 are currently "
-            "unsupported.");
+        layout->registerDim(Id::Y, Type::Signed32);
+        if (m_ndims > 2)
+            layout->registerDim(Id::Z, Type::Signed32);
     }
+    if (m_assignZ)
+        layout->registerDim(Id::Z, Type::Double);
 }
 
 
@@ -338,56 +343,56 @@ void NumpyReader::ready(PointTableRef table)
             i << "' is '" << m_shape[i] <<"'" << std::endl;
 }
 
-
-bool NumpyReader::loadPoint(PointRef& point, point_count_t position )
+bool NumpyReader::nextPoint()
 {
-    using namespace Dimension;
-
-    npy_intp stride = *m_strideptr;
-
-    if (m_ndims == 1)
+    // If we are at the end of this chunk, try to fetch another.  Otherwise,
+    // just advance by the stride.
+    if (--m_chunkCount == 0)
     {
-        for (size_t dim = 0; dim < m_ids.size(); ++dim)
-            point.setField(m_ids[dim], m_types[dim],
-                (void*) (p_data + m_offsets[dim]));
-    }
-    else if (m_ndims == 2)
-    {
-        point.setField(pdal::Dimension::Id::X, position % m_shape[m_xDimNum]);
-        point.setField(pdal::Dimension::Id::Y, position / m_shape[m_xDimNum]);
-        if (m_assignZ != 0.0f)
-            point.setField(Id::Z, m_assignZ);
-        point.setField(m_ids[0], m_types[0], (void*) (p_data));
-    }
-
-    p_data += stride;
-    m_chunkCount--;
-
-    bool more = (m_chunkCount >= 0);
-    if (!more)
-    {
-        more = (bool)m_iternext(m_iter);
+        // If we can't fetch the next ite
+        if (!m_iternext(m_iter))
+            return false;
         m_chunkCount = *m_innersizeptr;
         p_data = *m_dataptr;
     }
-    return more;
+    else
+        p_data += *m_strideptr;
+    return true;
+}
+
+
+
+bool NumpyReader::loadPoint(PointRef& point, point_count_t position)
+{
+    using namespace Dimension;
+
+    for (const Field& f : m_fields)
+        point.setField(f.m_id, f.m_type, (void*)(p_data + f.m_offset));
+
+    if (m_storeXYZ)
+    {
+        point.setField(pdal::Dimension::Id::X, position % m_shape[m_xDimNum]);
+        if (m_ndims > 1)
+        {
+            position /= m_shape[m_xDimNum];
+            point.setField(pdal::Dimension::Id::Y, position);
+            if (m_ndims > 2)
+            {
+                position /= m_shape[m_yDimNum];
+                point.setField(pdal::Dimension::Id::Z, position);
+            }
+        }
+    }
+
+    return (nextPoint());
 }
 
 
 bool NumpyReader::processOne(PointRef& point)
 {
-    if (m_index >= getNumPoints())
+    if (m_index >= m_numPoints)
         return false;
     return loadPoint(point, m_index++);
-}
-
-
-point_count_t NumpyReader::getNumPoints() const
-{
-    if (m_array)
-        return (point_count_t) m_numPoints;
-    else
-        throw pdal::pdal_error("Numpy array not initialized!");
 }
 
 
