@@ -90,15 +90,18 @@ private:
 #define final final
 #endif
 
+    virtual bool srsOverridden() const
+    { return false; }
+
     virtual void ready(PointTableRef table) final
     {
         readyTable(table);
         if (m_hashPos == std::string::npos)
         {
-            if (!table.spatialReferenceUnique())
+            if (!table.spatialReferenceUnique() && !srsOverridden())
                 log()->get(LogLevel::Error) << getName() <<
                     ": Attempting to write '" << m_filename <<
-                    "' with multiple point spatial references.";
+                    "' with multiple point spatial references." << std::endl;
             readyFile(generateFilename(), table.spatialReference());
         }
     }
