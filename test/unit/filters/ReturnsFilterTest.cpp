@@ -62,6 +62,7 @@ TEST(ReturnsFilterTest, t1)
 
     EXPECT_EQ(s.size(), 2U);
     auto si = s.begin();
+
     // First view is first returns.
     PointViewPtr v = *si;
     EXPECT_EQ(v->size(), 9036U);
