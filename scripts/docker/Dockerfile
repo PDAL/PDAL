@@ -3,7 +3,11 @@ FROM alpine:3.7
 RUN \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
     echo "@edgecommunity http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
+    echo "@edgemain http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
     apk update; \
+    apk add --no-cache \
+        libressl2.7-libcrypto@edgemain \
+    ;\
     apk add --no-cache --virtual .build-deps \
         alpine-sdk \
         unzip \
@@ -33,9 +37,12 @@ RUN \
         poppler-dev \
         boost-dev \
         zlib-dev \
+        libressl2.7-libcrypto@edgecommunity \
     ; \
     apk add --no-cache \
         eigen-dev@edgecommunity \
+        libressl2.7-libcrypto@edgecommunity \
+        libressl-dev \
         hexer \
         nitro \
         gdal \
