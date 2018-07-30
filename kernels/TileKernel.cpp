@@ -63,7 +63,7 @@ std::string TileKernel::getName() const
 
 void TileKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("input,i", "Input file/path name", m_inputFile).setPositional();
     args.add("output,o", "Output filename template",
         m_outputFile).setPositional();
     args.add("length", "Edge length for cells", m_length, 1000.0);
