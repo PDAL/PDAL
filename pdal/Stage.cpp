@@ -159,13 +159,15 @@ PointViewSet Stage::execute(PointTableRef table)
 
     std::stack<Stage *> stages;
     std::stack<Stage *> pending;
-    std::map<Stage *, Stage *> parents;
+    std::map<Stage *, Stage *> children;
 
     m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
         std::endl;
 
     pending.push(this);
-    parents[this] = nullptr;
+
+    // There is no child of the terminal stage.
+    children[this] = nullptr;
 
     // Linearize stage execution.
     Stage *s;
@@ -176,7 +178,7 @@ PointViewSet Stage::execute(PointTableRef table)
         stages.push(s);
         for (auto fi = s->m_inputs.begin(); fi != s->m_inputs.end(); ++fi)
         {
-            parents[*fi] = s;
+            children[*fi] = s;
             pending.push(*fi);
         }
     }
@@ -193,9 +195,9 @@ PointViewSet Stage::execute(PointTableRef table)
             inViews.insert(PointViewPtr(new PointView(table)));
         outViews = s->execute(table, inViews);
 
-        Stage *parent = parents[s];
-        if (parent)
-            sets[parent].insert(outViews.begin(), outViews.end());
+        Stage *child = children[s];
+        if (child)
+            sets[child].insert(outViews.begin(), outViews.end());
         // Allow previous point views to be freed.
         sets.erase(s);
     }
