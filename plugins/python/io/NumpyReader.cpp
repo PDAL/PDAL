@@ -57,6 +57,37 @@ CREATE_SHARED_STAGE(NumpyReader, s_info)
 
 std::string NumpyReader::getName() const { return s_info.name; }
 
+std::ostream& operator << (std::ostream& out,
+    const NumpyReader::Order& order)
+{
+    switch (order)
+    {
+    case NumpyReader::Order::Row:
+        out << "row";
+        break;
+    case NumpyReader::Order::Column:
+        out << "column";
+        break;
+    }
+    return out;
+}
+
+
+std::istream& operator >> (std::istream& in, NumpyReader::Order& order)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "row")
+        order = NumpyReader::Order::Row;
+    else if (s == "column")
+        order = NumpyReader::Order::Column;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
 
 PyArrayObject* load_npy(std::string const& filename)
 {
@@ -160,12 +191,11 @@ void NumpyReader::wakeUpNumpyArray()
 
 void NumpyReader::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "In a 2-D array, the dimension name to map to "
-        "values.", m_defaultDimension, "Intensity");
-    args.add("x", "In a 2-D array, the dimension number to map to X",
-        m_xDimNum, size_t(0));
-    args.add("assign_z", "Assign Z dimension to a single given value",
-        m_assignZ);
+    args.add("dimension", "In an unstructured array, the dimension name to "
+        "map to values.", m_defaultDimension, "Intensity");
+    args.add("order", "Order of dimension interpretation of the array. "
+        "Either 'row'-major (C) or 'column'-major (Fortran)", m_order,
+        Order::Row);
 }
 
 
@@ -291,7 +321,7 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
 
     // If we already have an X dimension, we're done.
     for (const Field& field : m_fields)
-        if (field.m_id == Id::X)
+        if (field.m_id == Id::X || field.m_id == Id::Y || field.m_id == Id::Z)
         {
             m_storeXYZ = false;
             return;
@@ -305,8 +335,42 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
         if (m_ndims > 2)
             layout->registerDim(Id::Z, Type::Signed32);
     }
-    if (m_assignZ)
-        layout->registerDim(Id::Z, Type::Double);
+    if (m_order == Order::Row)
+    {
+        m_xIter = m_shape[m_ndims - 1];
+        m_xDiv = 1;
+        if (m_ndims > 1)
+        {
+            m_yDiv = 1;
+            m_xDiv = m_xIter;
+            m_xIter *= m_shape[m_ndims - 2];
+            m_yIter = m_shape[m_ndims - 1];
+            if (m_ndims > 2)
+            {
+                m_xDiv = m_xIter;
+                m_yDiv = m_yIter;
+                m_zDiv = 1;
+                m_xIter *= m_shape[m_ndims - 3];
+                m_yIter *= m_shape[m_ndims - 2];
+                m_zIter = m_shape[m_ndims - 1];
+            }
+        }
+    }
+    else
+    {
+        m_xIter = m_shape[0];
+        m_xDiv = 1;
+        if (m_ndims > 1)
+        {
+            m_yIter = m_shape[0] * m_shape[1];
+            m_yDiv = m_xIter;
+            if (m_ndims > 2)
+            {
+                m_zIter = m_shape[0] * m_shape[1] * m_shape[2];
+                m_zDiv = m_yIter;
+            }
+        }
+    }
 }
 
 
@@ -361,7 +425,6 @@ bool NumpyReader::nextPoint()
 }
 
 
-
 bool NumpyReader::loadPoint(PointRef& point, point_count_t position)
 {
     using namespace Dimension;
@@ -371,16 +434,12 @@ bool NumpyReader::loadPoint(PointRef& point, point_count_t position)
 
     if (m_storeXYZ)
     {
-        point.setField(pdal::Dimension::Id::X, position % m_shape[m_xDimNum]);
+        point.setField(Dimension::Id::X, (position % m_xIter) / m_xDiv);
         if (m_ndims > 1)
         {
-            position /= m_shape[m_xDimNum];
-            point.setField(pdal::Dimension::Id::Y, position);
+            point.setField(Dimension::Id::Y, (position % m_yIter) / m_yDiv);
             if (m_ndims > 2)
-            {
-                position /= m_shape[m_yDimNum];
-                point.setField(pdal::Dimension::Id::Z, position);
-            }
+                point.setField(Dimension::Id::Z, (position % m_zIter) / m_zDiv);
         }
     }
 

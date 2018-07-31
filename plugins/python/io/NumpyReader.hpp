@@ -48,6 +48,15 @@ namespace pdal
 
 class PDAL_DLL NumpyReader : public Reader, public Streamable
 {
+    enum class Order
+    {
+        Row,
+        Column
+    };
+    friend std::ostream& operator << (std::ostream& out,
+        const NumpyReader::Order& order);
+    friend std::istream& operator >> (std::istream& in,
+        NumpyReader::Order& order);
 public:
     NumpyReader& operator=(const NumpyReader&) = delete;
     NumpyReader(const NumpyReader&) = delete;
@@ -91,12 +100,14 @@ private:
 
     int m_ndims;
     std::string m_defaultDimension;
-
+    Order m_order;
     bool m_storeXYZ;
-    size_t m_xDimNum;
-    size_t m_yDimNum;
-    size_t m_zDimNum;
-    double m_assignZ;
+    size_t m_xIter;
+    size_t m_yIter;
+    size_t m_zIter;
+    size_t m_xDiv;
+    size_t m_yDiv;
+    size_t m_zDiv;
 
     struct Field
     {
