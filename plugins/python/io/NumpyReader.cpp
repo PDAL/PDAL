@@ -186,6 +186,17 @@ void NumpyReader::wakeUpNumpyArray()
     m_numPoints = 1;
     for (int i = 0; i < m_ndims; ++i)
         m_numPoints *= m_shape[i];
+
+    // If the order arg wasn't set, set order based on the internal order of
+    // the array.
+    if (!m_orderArg->set())
+    {
+        int flags = PyArray_FLAGS(m_array);
+        if (flags & NPY_ARRAY_F_CONTIGUOUS)
+            m_order = Order::Column;
+        else
+            m_order = Order::Row;
+    }
 }
 
 
@@ -193,9 +204,9 @@ void NumpyReader::addArgs(ProgramArgs& args)
 {
     args.add("dimension", "In an unstructured array, the dimension name to "
         "map to values.", m_defaultDimension, "Intensity");
-    args.add("order", "Order of dimension interpretation of the array. "
-        "Either 'row'-major (C) or 'column'-major (Fortran)", m_order,
-        Order::Row);
+    m_orderArg = &args.add("order", "Order of dimension interpretation "
+        "of the array.  Either 'row'-major (C) or 'column'-major (Fortran)",
+        m_order);
 }
 
 
@@ -319,6 +330,7 @@ void NumpyReader::addDimensions(PointLayoutPtr layout)
     wakeUpNumpyArray();
     createFields(layout);
 
+    m_storeXYZ = true;
     // If we already have an X dimension, we're done.
     for (const Field& field : m_fields)
         if (field.m_id == Id::X || field.m_id == Id::Y || field.m_id == Id::Z)

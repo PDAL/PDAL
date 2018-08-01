@@ -98,6 +98,7 @@ private:
     point_count_t m_numPoints;
     int m_numFields;
 
+    Arg *m_orderArg;
     int m_ndims;
     std::string m_defaultDimension;
     Order m_order;
