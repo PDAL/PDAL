@@ -177,7 +177,7 @@ void LasWriter::initialize()
 
 void LasWriter::spatialReferenceChanged(const SpatialReference&)
 {
-    if (++m_srsCnt > 1)
+    if (++m_srsCnt > 1 && m_aSrs.empty())
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
             "point spatial references." << std::endl;
