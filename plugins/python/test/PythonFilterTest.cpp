@@ -994,7 +994,7 @@ void verifyTestView(const PointView& view, point_count_t cnt = 17)
     }
 }
 
-TEST_F(PythonFilterTest, PythonFilterTest_addpoints)
+TEST_F(PythonFilterTest, PythonFilterTest_modify)
 {
     StageFactory f;
 
@@ -1013,12 +1013,17 @@ TEST_F(PythonFilterTest, PythonFilterTest_addpoints)
         "  X = ins['X']\n"
         "  Y = ins['Y']\n"
         "  Z = ins['Z']\n"
+        "  X = np.delete(X, (9), axis=0)\n"
+        "  Y = np.delete(Y, (9), axis=0)\n"
+        "  Z = np.delete(Z, (9), axis=0)\n"
         "  Z = np.append(Z,100)\n"
-        "  Y = ins['Y']\n"
         "  Y = np.append(Y,200)\n"
-        "  print (Z)\n"
+        "#  print (Z)\n"
+        "#  print (X)\n"
         "  outs['Z'] = Z\n"
         "  outs['Y'] = Y\n"
+        "  outs['X'] = X\n"
+        "#  print (len(X), len(Y), len(Z))\n"
         "  return True\n"
     );
     Option module("module", "MyModule");
@@ -1046,7 +1051,7 @@ TEST_F(PythonFilterTest, PythonFilterTest_addpoints)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_EQ(view->size(), 11u);
+    EXPECT_EQ(view->size(), 10u);
 
     EXPECT_DOUBLE_EQ(statsX.minimum(), 0.0);
     EXPECT_DOUBLE_EQ(statsX.maximum(), 1.0);
