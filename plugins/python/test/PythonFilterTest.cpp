@@ -703,7 +703,9 @@ TEST(PLangTest, PLangTest_outs)
     meth.compile();
     meth.execute();
     EXPECT_TRUE(meth.hasOutputVariable("X"));
-    void *output = meth.extractResult("X", Dimension::Type::Double);
+
+    size_t arrSize;
+    void *output = meth.extractResult("X", Dimension::Type::Double, arrSize);
 
     double *d = (double *)output;
     EXPECT_FLOAT_EQ(*d++, 1.0);
@@ -758,7 +760,8 @@ TEST(PLangTest, PLangTest_aliases)
         EXPECT_TRUE(meth.hasOutputVariable("Y"));
         EXPECT_TRUE(meth.hasOutputVariable("prefix.Y"));
 
-        void *output = meth.extractResult("Y", Dimension::Type::Double);
+        size_t arrSize;
+        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
         double *d = (double *)output;
         EXPECT_FLOAT_EQ(*d++, 2.0);
         EXPECT_FLOAT_EQ(*d++, 4.0);
@@ -766,7 +769,7 @@ TEST(PLangTest, PLangTest_aliases)
         EXPECT_FLOAT_EQ(*d++, 8.0);
         EXPECT_FLOAT_EQ(*d++, 10.0);
 
-        output = meth.extractResult("prefix.Y", Dimension::Type::Double);
+        output = meth.extractResult("prefix.Y", Dimension::Type::Double, arrSize);
         d = (double *)output;
         EXPECT_FLOAT_EQ(*d++, 2.0);
         EXPECT_FLOAT_EQ(*d++, 4.0);
@@ -846,7 +849,9 @@ TEST(PLangTest, PLangTest_reentry)
         double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
         meth.insertArgument("X", (uint8_t*)indata1, Dimension::Type::Double, 5);
         meth.execute();
-        void *output = meth.extractResult("Y", Dimension::Type::Double);
+
+        size_t arrSize;
+        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
 
         double *d = (double *)output;
         EXPECT_FLOAT_EQ(*d++, 1.0);
@@ -860,7 +865,9 @@ TEST(PLangTest, PLangTest_reentry)
         double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
         meth.insertArgument("X", (uint8_t*)indata2, Dimension::Type::Double, 5);
         meth.execute();
-        void *output = meth.extractResult("Y", Dimension::Type::Double);
+
+        size_t arrSize;
+        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
 
         double *d = (double *)output;
         EXPECT_FLOAT_EQ(*d++, 11.0);
@@ -985,6 +992,70 @@ void verifyTestView(const PointView& view, point_count_t cnt = 17)
         EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
             (std::numeric_limits<double>::min)()));
     }
+}
+
+TEST_F(PythonFilterTest, PythonFilterTest_addpoints)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Y = ins['Y']\n"
+        "  Z = ins['Z']\n"
+        "  Z = np.append(Z,100)\n"
+        "  Y = ins['Y']\n"
+        "  Y = np.append(Y,200)\n"
+        "  print (Z)\n"
+        "  outs['Z'] = Z\n"
+        "  outs['Y'] = Y\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setInput(*filter);
+
+    PointTable table;
+
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
+
+    EXPECT_EQ(view->size(), 11u);
+
+    EXPECT_DOUBLE_EQ(statsX.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 1.0);
+
+    EXPECT_DOUBLE_EQ(statsY.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.maximum(), 200.0);
+
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 100);
 }
 
 

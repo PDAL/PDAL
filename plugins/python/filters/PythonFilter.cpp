@@ -105,8 +105,9 @@ PointViewSet PythonFilter::run(PointViewPtr view)
     {
         PointViewPtr outview = view->makeNew();
 
+        size_t arrSize(0);
         void *pydata =
-            m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
+            m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8, arrSize);
         char *ok = (char *)pydata;
         for (PointId idx = 0; idx < view->size(); ++idx)
             if (*ok++)
