@@ -427,14 +427,7 @@ void Invocation::end(PointView& view, MetadataNode m)
         size_t arrSize(0);
         void *data = extractResult(name, dd->type(), arrSize);
         char *p = (char *)data;
-        for (PointId idx = 0; idx < view.size(); ++idx)
-        {
-            view.setField(d, dd->type(), idx, (void *)p);
-            p += size;
-        }
-
-        // Set fields for any extra points we've added
-        for (PointId idx = view.size(); idx < arrSize; ++idx)
+        for (PointId idx = 0; idx < arrSize; ++idx)
         {
             view.setField(d, dd->type(), idx, (void *)p);
             p += size;
