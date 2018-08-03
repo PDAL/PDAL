@@ -229,7 +229,7 @@ void TileKernel::process(const Readers& readers)
                 if (idx == m_table.capacity() || finished)
                     break;
             }
-            PointId last = idx;
+            PointId last = idx - 1;
 
             // Reproject if necessary.
             if (m_repro)
