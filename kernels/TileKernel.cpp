@@ -98,7 +98,8 @@ int TileKernel::execute()
     for (auto&& file : files)
         readers[file] = prepareReader(file);
     checkReaders(readers);
-
+    if (m_repro)
+        m_repro->prepare(m_table);
 	Options opts;
 	opts.add("length", m_length);
 	opts.add("buffer", m_buffer);
@@ -143,8 +144,17 @@ void TileKernel::checkReaders(const Readers& readers)
         if (tempSrs != srs)
         {
             if (m_outSrs.empty())
-                m_log->get(LogLevel::Warning) << "No 'out_srs' specified "
-                    "and input files have multiple SRSs." << std::endl;
+            {
+                static bool warned(false);
+                if (!warned)
+                {
+                    m_log->get(LogLevel::Warning) << "No 'out_srs' specified "
+                        "and input files have multiple SRSs.  Using SRS of "
+                        "first input file as output SRS." << std::endl;
+                    warned = true;
+                    m_outSrs = srs;
+                }
+            }
             needRepro = true;
         }
     }
@@ -203,6 +213,9 @@ void TileKernel::process(const Readers& readers)
         PointRef point(m_table, idx);
 
         StreamableWrapper::ready(r, m_table);
+        if (m_repro)
+            StreamableWrapper::spatialReferenceChanged(*m_repro,
+                r.getSpatialReference());
 
         // Read first point.
         bool finished(false);

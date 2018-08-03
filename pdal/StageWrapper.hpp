@@ -49,7 +49,9 @@ class StreamableWrapper : public StageWrapper
 public:
     static bool processOne(Streamable& s, PointRef& point)
         { return s.processOne(point); }
-
+    static void spatialReferenceChanged(Streamable& s,
+            const SpatialReference& srs)
+        { s.spatialReferenceChanged(srs); }
 };
 
 } //namespace pdal
