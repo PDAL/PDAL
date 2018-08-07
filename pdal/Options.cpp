@@ -252,4 +252,17 @@ Options Options::fromCmdlineFile(const std::string& filename,
     return options;
 }
 
+std::ostream& operator << (std::ostream& out, const Option& op)
+{
+    out << op.m_name << ":" << op.m_value;
+    return out;
+}
+
+std::ostream& operator << (std::ostream& out, const Options& ops)
+{
+    for (auto& op : ops.m_options)
+        out << op.second << "\n";
+    return out;
+}
+
 } // namespace pdal
