@@ -89,7 +89,9 @@ void TileKernel::validateSwitches(ProgramArgs& args)
 
 int TileKernel::execute()
 {
+    std::cerr << "Input file = " << m_inputFile << "!\n";
     const StringList& files = FileUtils::glob(m_inputFile);
+    std::cerr << "Files list size = " << files.size() << "!\n";
     if (files.empty())
         throw pdal_error("No input files found for path '" +
             m_inputFile + "'.");
