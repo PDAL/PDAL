@@ -40,8 +40,11 @@
 namespace pdal
 {
 
+class StreamableWrapper;
+
 class PDAL_DLL Streamable : public virtual Stage
 {
+    friend class StreamableWrapper;
 public:
     Streamable();
 
