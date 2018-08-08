@@ -71,8 +71,8 @@ void TileKernel::addSwitches(ProgramArgs& args)
         std::numeric_limits<double>::quiet_NaN());
     args.add("origin_y", "Origin in Y axis for cells", m_yOrigin,
         std::numeric_limits<double>::quiet_NaN());
-	args.add("buffer", "Size of buffer (overlap) to include around each tile",
-		m_buffer);
+    args.add("buffer", "Size of buffer (overlap) to include around each tile",
+        m_buffer);
     args.add("out_srs", "Output SRS to which points will be reprojected",
         m_outSrs);
 }
@@ -100,18 +100,18 @@ int TileKernel::execute()
     checkReaders(readers);
     if (m_repro)
         m_repro->prepare(m_table);
-	Options opts;
-	opts.add("length", m_length);
-	opts.add("buffer", m_buffer);
-	m_splitter.setOptions(opts);
-	m_splitter.prepare(m_table);
+    Options opts;
+    opts.add("length", m_length);
+    opts.add("buffer", m_buffer);
+    m_splitter.setOptions(opts);
+    m_splitter.prepare(m_table);
 
     m_table.finalize();
     process(readers);
-	StageWrapper::done(m_splitter, m_table);
-	for (auto&& wp : m_writers)
-		StageWrapper::done(*wp.second, m_table);
-	return 0;
+    StageWrapper::done(m_splitter, m_table);
+    for (auto&& wp : m_writers)
+        StageWrapper::done(*wp.second, m_table);
+    return 0;
 }
 
 
@@ -178,14 +178,14 @@ Streamable *TileKernel::prepareReader(const std::string& filename)
 {
     Stage* r = &(m_manager.makeReader(filename, ""));
 
-	if (!r)
-		throw pdal_error("Couldn't create reader for input file '" +
-			filename + "'.");
+    if (!r)
+        throw pdal_error("Couldn't create reader for input file '" +
+            filename + "'.");
 
-	Streamable *sr = dynamic_cast<Streamable *>(r);
-	if (!sr)
-		throw pdal_error("Driver '" + r->getName() + "' for input file '" +
-			filename + "' is not streamable.");
+    Streamable *sr = dynamic_cast<Streamable *>(r);
+    if (!sr)
+        throw pdal_error("Driver '" + r->getName() + "' for input file '" +
+            filename + "' is not streamable.");
 
     sr->prepare(m_table);
     return sr;
@@ -281,7 +281,7 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
     Coord loc(xpos, ypos);
 
     Stage *w;
-	Streamable *sw;
+    Streamable *sw;
 
     auto wi = m_writers.find(loc);
     if (wi == m_writers.end())
@@ -292,13 +292,13 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
         filename.replace(m_hashPos, 1, (xname + "_" + yname));
 
         w = &m_manager.makeWriter(filename, "");
-		if (!w)
-			throw pdal_error("Couldn't create writer for output file '" +
-				m_outputFile + "'.");
-		sw = dynamic_cast<Streamable *>(w);
-		if (!sw)
-			throw pdal_error("Driver '" + w->getName() + "' for input file '" +
-				m_outputFile + "' is not streamable.");  
+        if (!w)
+            throw pdal_error("Couldn't create writer for output file '" +
+                m_outputFile + "'.");
+        sw = dynamic_cast<Streamable *>(w);
+        if (!sw)
+            throw pdal_error("Driver '" + w->getName() + "' for input file '" +
+                m_outputFile + "' is not streamable.");  
         m_writers[loc] = sw;
 
         sw->prepare(m_table);
