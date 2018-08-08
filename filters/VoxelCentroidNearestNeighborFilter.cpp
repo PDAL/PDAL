@@ -71,8 +71,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
     BOX3D bounds;
     view->calculateBounds(bounds);
 
-    KD3Index kdi(*view);
-    kdi.build();
+    KD3Index& kdi = view->build3dIndex();
 
     // Make an initial pass through the input PointView to index PointIds by
     // row, column, and depth.

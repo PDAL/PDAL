@@ -73,8 +73,7 @@ void EstimateRankFilter::addDimensions(PointLayoutPtr layout)
 
 void EstimateRankFilter::filter(PointView& view)
 {
-    KD3Index kdi(view);
-    kdi.build();
+    KD3Index& kdi = view.build3dIndex();
 
     for (PointId i = 0; i < view.size(); ++i)
     {

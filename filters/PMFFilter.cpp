@@ -230,8 +230,7 @@ void PMFFilter::processGround(PointViewPtr view)
     }
 
     // build the 2D KD-tree
-    KD2Index kdi(*temp);
-    kdi.build();
+    KD2Index& kdi = temp->build2dIndex();
 
     // loop through all cells, and for each NaN, replace with elevation of
     // nearest neighbor

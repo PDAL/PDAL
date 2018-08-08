@@ -68,8 +68,7 @@ PointViewSet VoxelCenterNearestNeighborFilter::run(PointViewPtr view)
     BOX3D bounds;
     view->calculateBounds(bounds);
 
-    KD3Index kdi(*view);
-    kdi.build();
+    KD3Index& kdi = view->build3dIndex();
 
     // Make an initial pass through the input PointView to detect populated
     // voxels.
@@ -85,7 +84,7 @@ PointViewSet VoxelCenterNearestNeighborFilter::run(PointViewPtr view)
         populated_voxels.emplace(std::make_tuple(r, c, d));
     }
 
-    // Make a second pass through the populated voxels to find the nearest
+    // Make a pass through the populated voxels to find the nearest
     // neighbor to each voxel center.
     PointViewPtr output = view->makeNew();
     for (auto const& t : populated_voxels)

@@ -79,8 +79,7 @@ void ApproximateCoplanarFilter::filter(PointView& view)
 {
     using namespace Eigen;
 
-    KD3Index kdi(view);
-    kdi.build();
+    KD3Index& kdi = view.build3dIndex();
 
     for (PointId i = 0; i < view.size(); ++i)
     {
