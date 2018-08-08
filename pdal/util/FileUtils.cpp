@@ -394,6 +394,7 @@ std::vector<std::string> glob(std::string path)
     size_t found = path.find_last_of("/\\");
     do
     {
+        // Ignore files starting with '.' to be consistent with UNIX.
         if (ffd.cFileName[0] == '.')
             continue;
         if (found == std::string::npos)
