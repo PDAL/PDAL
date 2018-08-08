@@ -394,6 +394,8 @@ std::vector<std::string> glob(std::string path)
     size_t found = path.find_last_of("/\\");
     do
     {
+        if (ffd.cFileName[0] == '.')
+            continue;
         if (found == std::string::npos)
             filenames.push_back(ffd.cFileName);
         else
