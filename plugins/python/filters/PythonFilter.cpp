@@ -109,7 +109,7 @@ PointViewSet PythonFilter::run(PointViewPtr view)
         void *pydata =
             m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8, arrSize);
         char *ok = (char *)pydata;
-        for (PointId idx = 0; idx < view->size(); ++idx)
+        for (PointId idx = 0; idx < arrSize; ++idx)
             if (*ok++)
                 outview->appendPoint(*view, idx);
 
