@@ -148,3 +148,82 @@ TEST(ReprojectionFilterTest, stream_test_1)
     stream.execute(table);
 }
 
+
+// Test reprojecting UTM 16 AND UTM 17 to DD
+TEST(ReprojectionFilterTest, stream_test_2)
+{
+    // Fill table 1 with UTM17 data.
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/test_utm17.las"));
+    LasReader reader1;
+    reader1.setOptions(ops1);
+
+    Options ops1a;
+    ReprojectionFilter repro1;
+    ops1a.add("out_srs", "EPSG:4326");
+    repro1.setInput(reader1);
+    repro1.setOptions(ops1a);
+
+    PointTable table1;
+    repro1.prepare(table1);
+    PointViewSet s1 = repro1.execute(table1);
+    PointViewPtr v1 = *(s1.begin());
+
+    // Fill table 2 with UTM16 data.
+    Options ops2;
+    ops2.add("filename", Support::datapath("las/test_utm16.las"));
+    LasReader reader2;
+    reader2.setOptions(ops2);
+
+    Options ops2a;
+    ReprojectionFilter repro2;
+    ops2a.add("out_srs", "EPSG:4326");
+    repro2.setInput(reader2);
+    repro2.setOptions(ops2a);
+
+    PointTable table2;
+    repro2.prepare(table2);
+    PointViewSet s2 = repro2.execute(table2);
+    PointViewPtr v2 = *(s2.begin());
+
+    // Put both inputs through the first repro filter.
+    repro1.setInput(reader2);
+
+    // Make sure the data looks the same coming from the stream and
+    // non-stream operations.
+    auto cb = [&](PointRef& point)
+    {
+        static size_t i = 0;
+        EXPECT_TRUE(i < v1->size() + v2->size());
+        PointId idx;
+        if (i < v1->size())
+        {
+            idx = i;
+            EXPECT_EQ(v1->getFieldAs<double>(Dimension::Id::X, idx),
+                point.getFieldAs<double>(Dimension::Id::X));
+            EXPECT_EQ(v1->getFieldAs<double>(Dimension::Id::Y, idx),
+                point.getFieldAs<double>(Dimension::Id::Y));
+            EXPECT_EQ(v1->getFieldAs<double>(Dimension::Id::Z, idx),
+                point.getFieldAs<double>(Dimension::Id::Z));
+        }
+        else if (i < v1->size() + v2->size())
+        {
+            idx = i - v1->size();
+            EXPECT_EQ(v2->getFieldAs<double>(Dimension::Id::X, idx),
+                point.getFieldAs<double>(Dimension::Id::X));
+            EXPECT_EQ(v2->getFieldAs<double>(Dimension::Id::Y, idx),
+                point.getFieldAs<double>(Dimension::Id::Y));
+            EXPECT_EQ(v2->getFieldAs<double>(Dimension::Id::Z, idx),
+                point.getFieldAs<double>(Dimension::Id::Z));
+        }
+        i++;
+        return true;
+    };
+    StreamCallbackFilter f;
+    f.setInput(repro1);
+    f.setCallback(cb);
+
+    FixedPointTable table3(20);
+    f.prepare(table3);
+    f.execute(table3);
+}

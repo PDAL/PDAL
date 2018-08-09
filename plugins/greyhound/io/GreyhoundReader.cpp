@@ -211,7 +211,7 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
 
     const auto dimTypes(m_readLayout.dimTypes());
 #ifdef PDAL_HAVE_LAZPERF
-    auto cb = [this, &view, &dimTypes, numPoints](char *buf, size_t bufsize)
+    auto cb = [this, &view, &dimTypes](char *buf, size_t bufsize)
     {
         view->setPackedPoint(dimTypes, view->size(), buf);
         if (m_cb)

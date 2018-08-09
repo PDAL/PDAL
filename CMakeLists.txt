@@ -35,7 +35,7 @@ GET_OS_INFO()
 SET_INSTALL_DIRS()
 
 set(PDAL_API_VERSION "6")
-set(PDAL_BUILD_VERSION "7.0.1")
+set(PDAL_BUILD_VERSION "7.0.2")
 
 # Name of C++ library
 
@@ -257,7 +257,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
-        ${ZSTD_INCLUDE_DIR}
+        ${ZSTD_INCLUDE_DIRS}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
@@ -272,7 +272,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
-        ${ZSTD_STATIC_LIB}
+        ${ZSTD_LIBRARIES}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
@@ -311,12 +311,35 @@ endif()
 #
 # Installation
 #
+
+#
+# Only install compression headers if we're building with the particular
+# compression type.
+#
+if (NOT PDAL_HAVE_ZSTD)
+    set(ZSTD_EXCLUDES PATTERN pdal/compression/Zstd* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    set(ZLIB_EXCLUDES PATTERN pdal/compression/Deflate* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
+endif()
+
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    ${ZSTD_EXCLUDES}
+    ${ZLIB_EXCLUDES}
+    ${LZMA_EXCLUDES}
+    ${LAZPERF_EXCLUDES}
 )
+
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"

@@ -1,5 +1,7 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
+add_subdirectory(faux)
+
 if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
@@ -14,10 +16,6 @@ endif(BUILD_PLUGIN_GEOWAVE)
 
 if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
     add_subdirectory(greyhound)
-endif()
-
-if(BUILD_PLUGIN_HEXBIN)
-    add_subdirectory(hexbin)
 endif()
 
 if(BUILD_PLUGIN_ICEBRIDGE)

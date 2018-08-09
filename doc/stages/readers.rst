@@ -36,6 +36,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.ply
    readers.pts
    readers.qfit
+   readers.rdb
    readers.rxp
    readers.sbet
    readers.sqlite

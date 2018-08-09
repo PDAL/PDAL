@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "HexBin.hpp"
+#include "HexBinFilter.hpp"
 
-#include <hexer/HexIter.hpp>
+#include "private/hexer/HexIter.hpp"
 #include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -48,7 +48,7 @@ static PluginInfo const s_info = PluginInfo(
     "Tessellate the point's X/Y domain and determine point density and/or point boundary.",
     "http://pdal.io/stages/filters.hexbin.html" );
 
-CREATE_SHARED_STAGE(HexBin, s_info)
+CREATE_STATIC_STAGE(HexBin, s_info)
 
 void HexBin::addArgs(ProgramArgs& args)
 {
@@ -108,7 +108,6 @@ void HexBin::done(PointTableRef table)
         m_metadata.add("boundary", "MULTIPOLYGON EMPTY",
             "Empty polygon -- unable to compute boundary");
         return;
-
     }
 
 

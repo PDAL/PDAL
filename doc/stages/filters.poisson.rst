@@ -34,11 +34,11 @@ Example
       "pipeline":[
         "dense.las",
         {
-          "type":"filters.poisson",
+          "type":"filters.poisson"
         },
         {
           "type":"writers.ply",
-          "filename":"isosurface.ply",
+          "filename":"isosurface.ply"
         }
       ]
     }

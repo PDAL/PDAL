@@ -135,6 +135,7 @@ void GDALWriter::readyFile(const std::string& filename,
 {
     m_outputFilename = filename;
     m_srs = srs;
+    m_grid.reset();
     if (m_bounds.to2d().valid())
         createGrid(m_bounds.to2d());
 }

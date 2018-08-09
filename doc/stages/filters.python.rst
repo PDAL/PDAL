@@ -44,8 +44,19 @@ filter and the ``outs`` array represents the points after filtering.
 
 
 
-2) If you want to write a dimension that might not be available, use can use one
-   or more ``add_dimension`` options.
+2) If you want write a dimension that might not be available, you can specify
+   it with the ``add_dimension`` option. 
+
+    .. code-block:: json
+
+        "add_dimension": "NewDimensionOne"
+
+   To create more than one dimension, this option also accepts an array.
+
+    .. code-block:: json
+
+        "add_dimension": [ "NewDimensionOne", "NewDimensionTwo", "NewDimensionThree" ]
+
 
 .. note::
 
@@ -144,7 +155,7 @@ Example :ref:`pipeline`
       "pipeline":[
         "file-input.las",
         {
-          "type":"filters.smrf
+          "type":"filters.smrf"
         },
         {
           "type":"filters.python",
@@ -265,7 +276,7 @@ source
   The literal `Python`_ code to execute, when the script option is not being used.
 
 add_dimension
-  The name of a dimension to add to the pipeline that does not already exist.
+  A dimension name or an array of dimension names to add to the pipeline that do not already exist.
 
 pdalargs
   A JSON dictionary of items you wish to pass into the modules globals as the

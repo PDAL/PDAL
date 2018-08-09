@@ -1,5 +1,4 @@
-/******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+/****************************************************************************** * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -57,11 +56,11 @@ class PDAL_DLL PipelineReaderJSON
 
 public:
     PipelineReaderJSON(PipelineManager&);
-    void parsePipeline(Json::Value&);
 
 private:
     typedef std::map<std::string, Stage *> TagMap;
 
+    void parsePipeline(Json::Value&);
     void readPipeline(const std::string& filename);
     void readPipeline(std::istream& input);
     std::string extractType(Json::Value& node);

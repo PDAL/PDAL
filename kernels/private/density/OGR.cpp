@@ -41,21 +41,80 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <hexer/HexGrid.hpp>
-#include <hexer/HexIter.hpp>
+#include <filters/private/hexer/HexGrid.hpp>
+#include <filters/private/hexer/HexIter.hpp>
 
 using namespace std;
 
 namespace pdal
 {
 
-namespace hexdensity
+namespace
 {
 
-namespace writer
+void collectPath(hexer::Path* path, OGRGeometryH polygon)
 {
+    OGRGeometryH ring = OGR_G_CreateGeometry(wkbLinearRing);
 
-OGR::OGR(std::string const& filename, std::string srs, std::string driver, std::string layerName)
+    vector<hexer::Point> pts = path->points();
+
+    vector<hexer::Point>::const_iterator i;
+    for (i = pts.begin(); i != pts.end(); ++i)
+    {
+        OGR_G_AddPoint_2D(ring, i->m_x, i->m_y);
+    }
+
+    if( OGR_G_AddGeometryDirectly(polygon, ring) != OGRERR_NONE )
+    {
+        std::ostringstream oss;
+        oss << "Unable to add geometry with error '" <<
+            CPLGetLastErrorMsg() << "'";
+        throw pdal::pdal_error(oss.str());
+    }
+
+    vector<hexer::Path *> paths = path->subPaths();
+    for (vector<hexer::Path*>::size_type pi = 0; pi != paths.size(); ++pi)
+    {
+        hexer::Path* p = paths[pi];
+        collectPath(p, polygon);
+    }
+}
+
+OGRGeometryH collectHexagon(hexer::HexInfo const& info,
+    hexer::HexGrid const* grid)
+{
+    OGRGeometryH ring = OGR_G_CreateGeometry(wkbLinearRing);
+
+    hexer::Point pos = info.m_center;
+    pos += grid->origin();
+
+
+    OGR_G_AddPoint_2D(ring, pos.m_x, pos.m_y);
+    for (int i = 1; i <= 5; ++i)
+    {
+        hexer::Point p = pos + grid->offset(i);
+        OGR_G_AddPoint_2D(ring, p.m_x, p.m_y);
+    }
+    OGR_G_AddPoint_2D(ring, pos.m_x, pos.m_y);
+
+    OGRGeometryH polygon = OGR_G_CreateGeometry(wkbPolygon);
+    if( OGR_G_AddGeometryDirectly(polygon, ring ) != OGRERR_NONE )
+    {
+        std::ostringstream oss;
+        oss << "Unable to add ring to polygon in collectHexagon '"
+            << CPLGetLastErrorMsg() << "'";
+        throw pdal::pdal_error(oss.str());
+    }
+
+    return polygon;
+
+}
+
+} // unnamed namespace 
+
+
+OGR::OGR(std::string const& filename, std::string srs, std::string driver,
+        std::string layerName)
     : m_filename(filename)
     , m_driver(driver)
     , m_srs(srs)
@@ -65,6 +124,13 @@ OGR::OGR(std::string const& filename, std::string srs, std::string driver, std::
 {
     createLayer();
 }
+
+
+OGR::~OGR()
+{
+    OGR_DS_Destroy(m_ds);
+}
+
 
 void OGR::createLayer()
 {
@@ -162,64 +228,6 @@ void OGR::writeBoundary(hexer::HexGrid *grid)
     }
 }
 
-void OGR::collectPath(hexer::Path* path, OGRGeometryH polygon)
-{
-    OGRGeometryH ring = OGR_G_CreateGeometry(wkbLinearRing);
-
-    vector<hexer::Point> pts = path->points();
-
-    vector<hexer::Point>::const_iterator i;
-    for (i = pts.begin(); i != pts.end(); ++i)
-    {
-        OGR_G_AddPoint_2D(ring, i->m_x, i->m_y);
-    }
-
-    if( OGR_G_AddGeometryDirectly(polygon, ring) != OGRERR_NONE )
-    {
-        std::ostringstream oss;
-        oss << "Unable to add geometry with error '" <<
-            CPLGetLastErrorMsg() << "'";
-        throw pdal::pdal_error(oss.str());
-    }
-
-    vector<hexer::Path *> paths = path->subPaths();
-    for (vector<hexer::Path*>::size_type pi = 0; pi != paths.size(); ++pi)
-    {
-        hexer::Path* p = paths[pi];
-        collectPath(p, polygon);
-    }
-}
-
-OGRGeometryH OGR::collectHexagon(hexer::HexInfo const& info, hexer::HexGrid const* grid)
-{
-    OGRGeometryH ring = OGR_G_CreateGeometry(wkbLinearRing);
-
-    hexer::Point pos = info.m_center;
-    pos += grid->origin();
-
-
-    OGR_G_AddPoint_2D(ring, pos.m_x, pos.m_y);
-    for (int i = 1; i <= 5; ++i)
-    {
-        hexer::Point p = pos + grid->offset(i);
-        OGR_G_AddPoint_2D(ring, p.m_x, p.m_y);
-    }
-    OGR_G_AddPoint_2D(ring, pos.m_x, pos.m_y);
-
-    OGRGeometryH polygon = OGR_G_CreateGeometry(wkbPolygon);
-    if( OGR_G_AddGeometryDirectly(polygon, ring ) != OGRERR_NONE )
-    {
-        std::ostringstream oss;
-        oss << "Unable to add ring to polygon in collectHexagon '"
-            << CPLGetLastErrorMsg() << "'";
-        throw pdal::pdal_error(oss.str());
-    }
-
-    return polygon;
-
-}
-
-
 void OGR::writeDensity(hexer::HexGrid *grid)
 {
     int counter(0);
@@ -251,13 +259,5 @@ void OGR::writeDensity(hexer::HexGrid *grid)
     }
 }
 
-
-OGR::~OGR()
-{
-    OGR_DS_Destroy(m_ds);
-}
-
-} // namespace writer
-} // namespace hexer
 } // namespace pdal
 

@@ -54,6 +54,8 @@ public:
 
     void setReadCb(PointReadFunc cb)
         { m_cb = cb; }
+    point_count_t count() const
+        { return m_count; }
 
 protected:
     std::string m_filename;

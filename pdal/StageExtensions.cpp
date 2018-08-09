@@ -134,7 +134,8 @@ void StageExtensions::load()
     }
 }
 
-void StageExtensions::set(const std::string& stage, const StringList& exts)
+PDAL_DLL void StageExtensions::set(const std::string& stage,
+    const StringList& exts)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (Utils::startsWith(stage, "readers."))

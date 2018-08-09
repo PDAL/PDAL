@@ -137,6 +137,7 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 #
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
+PDAL_ADD_TEST(pdal_filters_nndistance_test FILES filters/NNDistanceTest.cpp)
 target_include_directories(pdal_filters_chipper_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_filters_colorinterp_test
     FILES
@@ -181,11 +182,10 @@ PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_hexbin_test FILES filters/HexbinFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
-if (BUILD_PLUGIN_HEXBIN)
-    PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
-endif()
+PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
 PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)

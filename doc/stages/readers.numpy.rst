@@ -11,22 +11,26 @@ extension ``.npy``. As of PDAL 1.7.0, ``.npz`` files were not yet supported.
 
 .. warning::
 
-    It is untested whether the version of Python PDAL was linked against and
-    the version that saved the ``.npy`` files can be mixed.
+    It is untested whether problems may occur if the versions of Python used
+    in writing the file and for reading the file don't match.
 
 Array Types
 --------------------------------------------------------------------------------
 
 :ref:`readers.numpy` supports reading data in two forms:
 
-* Arrays as named fields all of the same shape (from `laspy`_ for example)
-* 2-dimensional arrays
+* As a `structured array`_ with specified field names (from `laspy`_ for
+  example)
+* As a standard array that contains data of a single type.
 
 
-Named Field Arrays
+
+Structured Arrays
 ................................................................................
 
-`laspy`_ provides its ``.points`` Numpy array as a bunch of named fields:
+Numpy arrays can be created as structured data, where each entry is a set
+of fields.  Each field has a name.  As an example, `laspy`_ provides its
+``.points`` as an array of named fields:
 
 ::
 
@@ -37,23 +41,20 @@ Named Field Arrays
 ::
 
     array([ ((63608330, 84939865, 40735, 65, 73, 1, -11, 126, 7326,  245385.60820904),)],
-          dtype=[('point', [('X', '<i4'), ('Y', '<i4'), ('Z', '<i4'), ('intensity', '<u2'), ('flag_byte', 'u1'), ('raw_classification', 'u1'), ('scan_angle_rank', 'i1'), ('user_data', 'u1'), ('pt_src_id', '<u2'), ('gps_time', '<f8')])])
+    dtype=[('point', [('X', '<i4'), ('Y', '<i4'), ('Z', '<i4'), ('intensity', '<u2'), ('flag_byte', 'u1'), ('raw_classification', 'u1'), ('scan_angle_rank', 'i1'), ('user_data', 'u1'), ('pt_src_id', '<u2'), ('gps_time', '<f8')])])
 
-:ref:`readers.numpy` supports reading these Numpy arrays and mapping applicable
-names to :ref:`dimensions` names. It will try to remove ``_``, ``-``, and ``space`` from
-the field name and use that as a dimension name if it can match. Types are also
-preserved when mapped to PDAL.
+:ref:`readers.numpy` supports reading these Numpy arrays and mapping
+field names to standard PDAL :ref:`dimension <dimensions>` names.
+If that fails, the reader retries by removing ``_``, ``-``, or ``space``
+in turn.  If that also fails, the array field names are used to create
+custom PDAL dimensions.
 
 
-Two-dimensional Arrays
+Standard (non-structured) Arrays
 ................................................................................
 
-Typical two-dimensional `Numpy`_ arrays are also supported, with options to allow
-you to map the values in the cells using the ``dimension`` option. Additionally,
-you can override the `Z` value for the entire array by using the ``assign_z``
-option to set a single `Z` value for the entire point cloud. Mapping the values to the
-``Z`` dimension using the ``dimension`` option is also allowed.
-
+Arrays without field information contain a single datatype.  This datatype is
+mapped to a dimension specified by the ``dimension`` option.
 
 ::
 
@@ -66,11 +67,6 @@ option to set a single `Z` value for the entire point cloud. Mapping the values 
     data.dtype
     dtype('float64')
 
-
-In this case, the cell locations are mapped to X and Y dimensions, the cell
-values are mapped to ``Intensity`` using the ``dimension`` option, and the Z
-values are assigned to 4 using the ``assign_z`` option.
-
 ::
 
     pdal info perlin.npy --readers.numpy.dimension=Intensity --readers.numpy.assign_z=4
@@ -78,66 +74,65 @@ values are assigned to 4 using the ``assign_z`` option.
 ::
 
     {
-      "filename": "perlin.npy",
-      "pdal_version": "1.6.0 (git-version: 897afd)",
+      "filename": "..\/test\/data\/plang\/perlin.npy",
+      "pdal_version": "1.7.1 (git-version: 399e19)",
       "stats":
       {
-            "statistic":
-            [
-              {
-                "average": 49.995,
-                "count": 10000,
-                "kurtosis": -1.201226882,
-                "maximum": 100,
-                "minimum": 0,
-                "name": "X",
-                "position": 0,
-                "skewness": -0.0001281084091,
-                "stddev": 29.16793715,
-                "variance": 850.7685575
-              },
-              {
-                "average": 50,
-                "count": 10000,
-                "kurtosis": -1.1996846,
-                "maximum": 100,
-                "minimum": 0,
-                "name": "Y",
-                "position": 1,
-                "skewness": -8.69273658e-05,
-                "stddev": 28.87401021,
-                "variance": 833.7084657
-              },
-              {
-                "average": 4,
-                "count": 10000,
-                "kurtosis": 9997,
-                "maximum": 4,
-                "minimum": 4,
-                "name": "Z",
-                "position": 2,
-                "skewness": 1.844674407e+21,
-                "stddev": 0.04000200015,
-                "variance": 0.001600160016
-              },
-              {
-                "average": 0.01112664759,
-                "count": 10000,
-                "kurtosis": -0.5634013693,
-                "maximum": 0.5189296418,
-                "minimum": -0.5189296418,
-                "name": "Intensity",
-                "position": 3,
-                "skewness": -0.1127124452,
-                "stddev": 0.2024120437,
-                "variance": 0.04097063545
-              }
-            ]
+        "statistic":
+        [
+          {
+            "average": 49.5,
+            "count": 10000,
+            "maximum": 99,
+            "minimum": 0,
+            "name": "X",
+            "position": 0,
+            "stddev": 28.86967866,
+            "variance": 833.4583458
+          },
+          {
+            "average": 49.5,
+            "count": 10000,
+            "maximum": 99,
+            "minimum": 0,
+            "name": "Y",
+            "position": 1,
+            "stddev": 28.87633116,
+            "variance": 833.8425015
+          },
+          {
+            "average": 0.01112664759,
+            "count": 10000,
+            "maximum": 0.5189296418,
+            "minimum": -0.5189296418,
+            "name": "Intensity",
+            "position": 2,
+            "stddev": 0.2024120437,
+            "variance": 0.04097063545
           }
-        }
+        ]
+      }
+    }
+
+
+X, Y and Z Mapping
+................................................................................
+Unless the X, Y or Z dimension is specified as a field in a structured array,
+the reader will create dimensions X, Y and Z as necessary and populate them
+based on the position of each item of the array.  Although Numpy arrays always
+contain contiguous, linear data, that data can be seen to be arranged in more
+than one dimension.  A two-dimensional array will cause dimensions X and Y
+to be populated.  A three dimensional array will cause X, Y and Z to be
+populated.  An array of more than three dimensions will reuse the X, Y and Z
+indices for each dimension over three.
+
+When reading data, X Y and Z can be assigned using row-major (C) order or
+column-major (Fortran) order by using the ``order`` option.
+
 
 .. _`Numpy`: http://www.numpy.org/
 .. _`laspy`: https://github.com/laspy/laspy
+.. _`structured array`: https://docs.scipy.org/doc/numpy/user/basics.rec.html
 
 .. plugin::
 
@@ -149,19 +144,22 @@ Options
 filename
   npy file to read [Required]
 
+count
+  Maximum number of points to read. [Default: unlimited]
+
 dimension
   Dimension name from :ref:`dimensions` to map raster values
-x
-  Dimension number (starting from 0) to map to the ``X`` PDAL :ref:`dimension <dimensions>`
 
-y
-  Dimension number (starting from 0) to map to the ``Y`` PDAL :ref:`dimension <dimensions>`
+order
+  Either 'row' or 'column' to specify assigning the X,Y and Z values
+  in a row-major or column-major order. [Default: matches the natural
+  order of the array.]
 
-z
-  Dimension number (starting from 0) to map to the ``Z`` PDAL :ref:`dimension <dimensions>`
+.. note::
+    The functionality of the 'assign_z' option in previous versions is
+    provided with :ref:`filters.assign`
 
-assign_z
-  A single value to override for ``Z`` values when ``dimension`` is used to assign the
-  Numpy values to another dimension
+    The functionality of the 'x', 'y', and 'z' options in previous versions
+    are generally handled with the current 'order' option.
 
 .. _formatted: http://en.cppreference.com/w/cpp/string/basic_string/stof

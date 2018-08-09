@@ -79,3 +79,5 @@ Notes
    application. You can also use this command to merge data together
    (query across boundaries, for example).
 
+.. _qgis: https://qgis.org
+

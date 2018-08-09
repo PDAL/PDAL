@@ -199,8 +199,8 @@ void LasHeader::setSrs()
 
     if (incompatibleSrs())
     {
-        m_log->get(LogLevel::Error) << "Invalid SRS specification.  "
-            "GeoTiff not allowed with point formats 6 - 10." << std::endl;
+        m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "
+            "for point format 6 - 10." << std::endl;
     }
     else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
         findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))

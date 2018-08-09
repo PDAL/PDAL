@@ -12,7 +12,9 @@ FAQ
   pronounced to rhyme with "GDAL".
 
   .. it is properly pronounced like the dog though :) -- hobu
+
 |
+
 * Why do I get the error "Couldn't create ... stage of type ..."?
 
   In almost all cases this error occurs because you're trying to run a stage
@@ -46,7 +48,9 @@ FAQ
   additional memory during processing before the output can be written.
   Depending on the operation, PDAL will attempt operate in "stream mode" to
   limit memory consumption when possible.
+
 |
+
 * What is PDAL's relationship to PCL?
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
@@ -72,6 +76,7 @@ FAQ
 .. _`GeoHipster interview`: http://geohipster.com/2018/03/05/howard-butler-like-good-song-open-source-software-chance-immortal/
 
 |
+
 * Are there any command line tools in PDAL similar to LAStools?
 
   Yes. The :ref:`pdal <apps>` command provides a wide range of features which go

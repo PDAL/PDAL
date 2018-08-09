@@ -33,4 +33,5 @@ Example
           "filename": "output.ply",
           "faces": true
         }
+      ]
     }
