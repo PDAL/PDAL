@@ -24,7 +24,9 @@ if (FBX_FOUND)
     PDAL_ADD_PLUGIN(writer_libname writer fbx
         FILES
             io/FbxWriter.cpp
-        LINK_WITH ${FBX_LIBRARY} ${CORE_FOUNDATION})
+        LINK_WITH
+            ${FBX_LIBRARY}
+            ${CORE_FOUNDATION})
     target_include_directories(${writer_libname} PRIVATE
         ${PDAL_IO_DIR}
         ${FBX_INCLUDE_DIR})
