@@ -41,9 +41,9 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
-#include <pdal/Segmentation.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include "private/Segmentation.hpp"
 #include "private/DimRange.hpp"
 
 namespace pdal
