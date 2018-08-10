@@ -81,3 +81,7 @@ if(BUILD_PLUGIN_SQLITE)
     endif()
     add_subdirectory(sqlite)
 endif()
+
+if (BUILD_PLUGIN_FBX)
+    add_subdirectory(fbx)
+endif()
