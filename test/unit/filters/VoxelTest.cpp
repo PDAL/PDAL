@@ -63,8 +63,10 @@ TEST(VoxelTest, center)
     PointViewPtr v = *set.begin();
     EXPECT_EQ(v->size(), 7820U);
 
-    PointId sums[] = { 39811200, 35547988, 38700040, 43845452, 52001563,
-        69596800, 75166285, 50947904 };
+    // This is just a poor man's checksum.  If the algorithm gets changed in
+    // a way that actually SHOULD change the output, this test will break.
+    PointId sums[] = { 39811016, 35546903, 38699916, 43843400, 51999906,
+        69590553, 75163027, 50946932 };
     PointId sum;
     PointId id;
     size_t iter = 0;
@@ -73,14 +75,45 @@ TEST(VoxelTest, center)
         if (id % 1000 == 0)
         {
             if (id)
-            {
-            EXPECT_EQ(sums[iter++], sum);
-            }
+                EXPECT_EQ(sums[iter++], sum);
             sum = 0;
         }
         sum += v->index(id);
     }
     EXPECT_EQ(sums[iter], sum);
+}
+
+TEST(VoxelTest, center_value)
+{
+    StageFactory fac;
+
+    Stage *reader = fac.createStage("readers.faux");
+    Options ro;
+    ro.add("bounds", "([0, 9], [0, 9], [0,0])");
+    ro.add("count", 10);
+    ro.add("mode", "ramp");
+    reader->setOptions(ro);
+
+    Stage *filter = fac.createStage("filters.voxelcenternearestneighbor");
+    Options fo;
+    fo.add("cell", 2);
+    filter->setOptions(fo);
+    filter->setInput(*reader);
+
+    PointTable t;
+    filter->prepare(t);
+    PointViewSet set = filter->execute(t);
+    EXPECT_EQ(set.size(), 1U);
+    PointViewPtr v = *set.begin();
+    for (PointId i = 0; i < v->size(); ++i)
+    {
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = v->getFieldAs<double>(Dimension::Id::Z, i);
+        EXPECT_EQ(x, (2 * i) + 1);
+        EXPECT_EQ(y, (2 * i) + 1);
+        EXPECT_EQ(z, 0.0);
+    }
 }
 
 } // namespace

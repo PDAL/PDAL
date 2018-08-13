@@ -86,7 +86,7 @@ PointViewSet VoxelCenterNearestNeighborFilter::run(PointViewPtr view)
         double zv = bounds.minz + (d + 0.5) * m_cell;
         double dist = pow(xv - x, 2) + pow(yv - y, 2) + pow(zv - z, 2);
 
-        auto t = std::make_tuple(c, r, d);
+        auto t = std::make_tuple(r, c, d);
         auto pi = populated_voxels.find(t);
         if (pi == populated_voxels.end())
             populated_voxels.insert(
