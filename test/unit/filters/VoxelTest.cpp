@@ -90,7 +90,7 @@ TEST(VoxelTest, center_value)
     Stage *reader = fac.createStage("readers.faux");
     Options ro;
     ro.add("bounds", "([0, 9], [0, 9], [0,0])");
-    ro.add("count", 10);
+    ro.add("count", 100);
     ro.add("mode", "ramp");
     reader->setOptions(ro);
 
@@ -105,6 +105,7 @@ TEST(VoxelTest, center_value)
     PointViewSet set = filter->execute(t);
     EXPECT_EQ(set.size(), 1U);
     PointViewPtr v = *set.begin();
+    EXPECT_EQ(v->size(), 5U);
     for (PointId i = 0; i < v->size(); ++i)
     {
         double x = v->getFieldAs<double>(Dimension::Id::X, i);
