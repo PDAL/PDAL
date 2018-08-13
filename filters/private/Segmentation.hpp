@@ -37,7 +37,7 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
 
-#include "../filters/private/DimRange.hpp"
+#include "DimRange.hpp"
 
 #include <vector>
 
