@@ -241,6 +241,7 @@ void TextWriter::writeGeoJSONHeader()
     if (m_callback.size())
         *m_stream << m_callback <<"(";
     *m_stream << "{ \"type\": \"FeatureCollection\", \"features\": [";
+    *m_stream << ",";
 }
 
 
