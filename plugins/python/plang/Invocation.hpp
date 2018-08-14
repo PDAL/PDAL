@@ -66,7 +66,8 @@ public:
                         Dimension::Type t,
                         point_count_t count);
     void *extractResult(const std::string& name,
-                        Dimension::Type dataType);
+                        Dimension::Type dataType,
+                        size_t& arrSize);
 
     bool hasOutputVariable(const std::string& name) const;
 

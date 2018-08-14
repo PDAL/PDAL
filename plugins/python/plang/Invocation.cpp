@@ -163,7 +163,7 @@ void Invocation::insertArgument(std::string const& name, uint8_t* data,
 
 
 void *Invocation::extractResult(std::string const& name,
-    Dimension::Type t)
+    Dimension::Type t, size_t& num_elements)
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
@@ -177,6 +177,14 @@ void *Invocation::extractResult(std::string const& name,
     npy_intp one = 0;
     const int pyDataType = pdal::plang::Environment::getPythonDataType(t);
     PyArray_Descr *dtype = PyArray_DESCR(arr);
+
+    npy_intp nDims = PyArray_NDIM(arr);
+    npy_intp* shape = PyArray_SHAPE(arr);
+    npy_intp nPoints(1);
+    for (int i = 0; i < nDims; ++i)
+        nPoints *= shape[i];
+
+    num_elements = (size_t) nPoints;
 
     if (static_cast<uint32_t>(dtype->elsize) != Dimension::size(t))
     {
@@ -416,13 +424,15 @@ void Invocation::end(PointView& view, MetadataNode m)
         assert(hasOutputVariable(name));
 
         size_t size = dd->size();
-        void *data = extractResult(name, dd->type());
+        size_t arrSize(0);
+        void *data = extractResult(name, dd->type(), arrSize);
         char *p = (char *)data;
-        for (PointId idx = 0; idx < view.size(); ++idx)
+        for (PointId idx = 0; idx < arrSize; ++idx)
         {
             view.setField(d, dd->type(), idx, (void *)p);
             p += size;
         }
+
     }
     for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
         free(*bi);
