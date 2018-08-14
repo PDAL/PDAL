@@ -94,7 +94,7 @@ void Streamable::execute(StreamPointTable& table)
             for (auto s : *this)
             {
                 s->startLogging();
-                s->l_done(table);
+                s->done(table);
                 s->stopLogging();
             }
         }
