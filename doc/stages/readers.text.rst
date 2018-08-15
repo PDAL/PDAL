@@ -65,20 +65,25 @@ Example Pipeline
 Options
 -------
 
+count
+  Maximum number of points to read
+
 filename
   text file to read [Required]
-
-separator
-  Separator character to override that found in header line.
 
 header
   String to use as the file header.  All lines in the file as assumed to be
   records containing point data unless skipped with the 'skip' option.
+  [Default: None]
+
+separator
+  Separator character to override that found in header line. [Default: None]
 
 skip
-  Number of lines to ignore at the beginning of the file.
+  Number of lines to ignore at the beginning of the file. [Default: 0]
 
-count
-  Maximum number of points to read [Optional]
+spatialreference
+  Spatial reference for the file data.  Most text-based formats of
+  SRS information are accepted, including WKT and proj.4. [Default: None]   
 
 .. _formatted: http://en.cppreference.com/w/cpp/string/basic_string/stof

@@ -53,9 +53,9 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
     virtual bool processOne(PointRef& point);
+    virtual void spatialReferenceChanged(const SpatialReference& srs);
 
     void updateBounds();
     void createTransform(const SpatialReference& srs);

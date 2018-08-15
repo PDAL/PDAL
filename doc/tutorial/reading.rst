@@ -136,7 +136,8 @@ We can capture this metadata using the :ref:`info_command` utility.
 
     $ pdal info --metadata interesting.las
 
-This produces metadata that looks like :ref:`this <metadatajson>`. You can use
+This produces metadata that looks like
+`this <../_images/info-interesting-metadata.png>`_. You can use
 your `JSON`_ manipulation tools to extract this information.
 For formats that do not have the ability to
 preserve this metadata internally, you can keep a ``.json`` file

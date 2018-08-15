@@ -16,6 +16,11 @@ data, this practically means a patch size of between 400 and 600 points.
 In order to create patches of the right size, the Pointcloud writer should be
 preceded in the pipeline file by :ref:`filters.chipper`.
 
+The pgpointcloud format does not support WKT spatial reference specifications.  A subset of spatial references can be stored by using the 'srid' option, which
+allows storage of an `EPSG code`_ that covers many common spatial references.
+PDAL makes no attempt to reproject data to your specified srid.  Use 
+:ref:`filters.reprojection` for this purpose.
+
 .. plugin::
 
 Example
@@ -66,6 +71,7 @@ compression
   * **none** applies no compression
   * **dimensional** applies dynamic compression to each dimension separately
   * **ght** applies a "geohash tree" compression by sorting the points into a prefix tree
+  * **lazperf** applies a "laz" compression (using the `laz-perf`_ library in PostgreSQL Pointcloud)
 
 overwrite
   To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **false**]
@@ -95,3 +101,5 @@ output_dims
   are listed by name and separated by commas.
 
 .. _PostgreSQL Pointcloud: http://github.com/pramsey/pointcloud
+.. _laz-perf: https://github.com/hobu/laz-perf
+.. _EPSG code: http://www.epsg.org

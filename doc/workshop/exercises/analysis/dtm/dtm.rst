@@ -8,9 +8,9 @@ Generating a DTM
 .. index:: elevation model, DTM, DSM
 
 This exercise uses PDAL to generate an elevation model surface using the
-output from the :ref:`ground` exercise, PDAL's :ref:`writers.gdal` operation,
-and |GDAL| to generate an elevation and hillshade surface from point cloud
-data.
+output from the :ref:`workshop-ground` exercise, PDAL's :ref:`writers.gdal`
+operation, and |GDAL| to generate an elevation and hillshade surface from
+point cloud data.
 
 
 Exercise
@@ -21,7 +21,7 @@ Exercise
 
     The primary input for `Digital Terrain Model`_ generation is a point cloud
     with ground classifications. We created this file, called
-    ``denoised-ground-only.laz``, in the :ref:`ground` exercise. Please produce that
+    ``denoised-ground-only.laz``, in the :ref:`workshop-ground` exercise. Please produce that
     file by following that exercise before starting this one.
 
 .. _`Digital Terrain Model`: https://en.wikipedia.org/wiki/Digital_elevation_model
@@ -57,7 +57,7 @@ Pipeline breakdown
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``denoised-ground-only`` is the |LASzip| file we will clip. You should have
-created this output as part of the :ref:`ground` exercise.
+created this output as part of the :ref:`workshop-ground` exercise.
 
 
 2. :ref:`writers.gdal`

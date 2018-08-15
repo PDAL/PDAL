@@ -80,17 +80,6 @@ required dependencies and build PDAL from source.
    "SQLite", "X", "X", "", "X", "X", "X"
 
 
-Docker
-................................................................................
-
-The fastest way to get going with PDAL is to use the Docker build. See the
-:ref:`Docker tutorial <docker>` for more information.
-
-::
-
-    docker pull pdal/pdal:1.7
-
-
 Windows
 ................................................................................
 

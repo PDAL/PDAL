@@ -259,18 +259,13 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
                 v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
-    l_done(table);
+    done(table);
     stopLogging();
     m_pointCount = 0;
     m_faceCount = 0;
     return outViews;
 }
 
-
-void Stage::l_done(PointTableRef table)
-{
-    done(table);
-}
 
 void Stage::l_addArgs(ProgramArgs& args)
 {

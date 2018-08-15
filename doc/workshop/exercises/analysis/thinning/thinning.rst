@@ -11,12 +11,6 @@ This exercise uses PDAL to subsample or thin point cloud data. This might be
 done to accelerate processing (less data), normalize point density, or ease
 visualization.
 
-.. note::
-
-    This excerise is an adaptation of the :ref:`dart-throwing-tutorial` tutorial on the
-    PDAL website by Brad Chambers. It includes some images from that tutorial
-    for illustration. You can find more detail and example invocations there.
-
 Exercise
 --------------------------------------------------------------------------------
 
@@ -34,8 +28,7 @@ provides capability for all three:
 * Voxel using :ref:`filters.voxelgrid`
 
 In this exercise, we are going to thin with the Poisson method, but the concept
-should operate similarly for the :ref:`filters.voxelgrid` approach too. See
-:ref:`dart-throwing-tutorial` for description of how to randomly filter.
+should operate similarly for the :ref:`filters.voxelgrid` approach too.
 
 .. figure:: ../../../images/thinning-overview.png
     :target: ../../../../_images/thinning-overview.png

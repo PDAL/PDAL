@@ -50,6 +50,8 @@ class Option;
 
 class PDAL_DLL Option
 {
+    PDAL_DLL friend std::ostream&
+        operator<<(std::ostream& ostr, const Option&);
 public:
 
 /// @name Constructors
@@ -121,11 +123,13 @@ private:
 
 class PDAL_DLL Options
 {
+    PDAL_DLL friend std::ostream&
+        operator<<(std::ostream& ostr, const Options&);
 public:
     Options()
     {}
 
-    Options(const Option& opt)
+    explicit Options(const Option& opt)
         { add(opt); }
 
     void add(const Option& option);
@@ -237,6 +241,5 @@ private:
 };
 typedef std::map<std::string, Options> OptionsMap;
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
-
 } // namespace pdal
+

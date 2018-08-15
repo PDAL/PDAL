@@ -34,7 +34,7 @@
 
 #include "ClusterFilter.hpp"
 
-#include <pdal/Segmentation.hpp>
+#include "private/Segmentation.hpp"
 
 #include <string>
 

@@ -41,13 +41,14 @@
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
 typedef std::map<std::string, Dimension::Id> DimensionMap;
 
-class PDAL_DLL GDALReader : public Reader
+class PDAL_DLL GDALReader : public Reader , public Streamable
 {
 public:
     std::string getName() const;
@@ -61,13 +62,15 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual void done(PointTableRef table)
         { m_raster->close(); }
+    virtual bool processOne(PointRef& point);
     virtual QuickInfo inspect();
-    template<typename T>
-    void readBandData(int band, PointViewPtr view, point_count_t count);
 
     std::unique_ptr<gdal::Raster> m_raster;
     std::vector<Dimension::Type> m_bandTypes;
+    std::vector<Dimension::Id> m_bandIds;
     point_count_t m_index;
+    int m_row;
+    int m_col;
 
 };
 

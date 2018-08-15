@@ -44,7 +44,6 @@
 #include <iomanip>
 #include <istream>
 #include <limits>
-#include <map>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -432,13 +431,6 @@ namespace Utils
       \return  Buffer converted to hex string.
     */
     PDAL_DLL std::string hexDump(const char *buf, size_t count);
-
-    /**
-      Generate a backtrace as a list of strings.
-
-      \return  List of functions at the point of the call.
-    */
-    PDAL_DLL std::vector<std::string> backtrace();
 
     /**
       Count the number of characters in a string that meet a predicate.

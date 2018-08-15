@@ -61,7 +61,7 @@ Filtering
 We do not yet have a satisfactory surface for generating a DTM.  When we
 visualize the output of this ground operation, we notice there's still some
 noise. We can stack the call to PMF with a call to a the `filters.outlier`
-technique we learned about in :ref:`denoising`.
+technique we learned about in :ref:`workshop-denoising`.
 
 1. Let us start by removing the non-ground data:
 

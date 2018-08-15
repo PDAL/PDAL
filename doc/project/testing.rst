@@ -13,7 +13,7 @@ will have unit tests.  At the very least, each new class should have a
 corresponding unit test file stubbed in, even if there aren't any tests yet.
 
 *   Our unit tests also include testing of the command line :ref:`apps` and
-    (known) :ref:`plugins <stage_index>`.
+    known plugins.
 
 *    We use the `Google C++ Test Framework`_, but a local copy of it is
      embedded in the PDAL source tree, and you don't have to have it available

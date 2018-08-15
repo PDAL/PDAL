@@ -53,8 +53,8 @@ TEST(PdalAppPlugin, load)
 {
     std::string output;
 
-    Utils::run_shell_command(appName() + " density 2>&1", output);
-    EXPECT_TRUE(output.find("kernels.density") != std::string::npos);
+    Utils::run_shell_command(appName() + " fauxplugin 2>&1", output);
+    EXPECT_TRUE(output.find("kernels.fauxplugin") != std::string::npos);
 }
 
 } // unnamed namespace
