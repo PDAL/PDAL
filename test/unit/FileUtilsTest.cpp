@@ -253,3 +253,44 @@ TEST(FileUtilsTest, glob)
     EXPECT_EQ(FileUtils::glob("temp.glob").size(), 1u);
     FileUtils::deleteFile("temp.glob");
 }
+
+TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
+{
+    const std::string japanese = Support::datapath("japanese.txt");
+    EXPECT_TRUE(FileUtils::fileExists(japanese));
+
+    // コンピュータ
+    std::string japanese_text = FileUtils::readFileIntoString(japanese);
+    std::string tmp1(Support::temppath(japanese_text + ".tmp")); 
+    std::string tmp2(Support::temppath("unittest2.tmp"));
+
+    // first, clean up from any previous test run
+    FileUtils::deleteFile(tmp1);
+    FileUtils::deleteFile(tmp2);
+    EXPECT_TRUE(FileUtils::fileExists(tmp1)==false);
+    EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
+
+    // write test
+    std::ostream* ostr = FileUtils::createFile(tmp1);
+    *ostr << "yow";
+    FileUtils::closeFile(ostr);
+
+    EXPECT_EQ(FileUtils::fileExists(tmp1), true);
+    EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
+
+    // rename test
+    FileUtils::renameFile(tmp2,tmp1);
+    EXPECT_TRUE(FileUtils::fileExists(tmp1)==false);
+    EXPECT_TRUE(FileUtils::fileExists(tmp2)==true);
+
+    // read test
+    std::istream* istr = FileUtils::openFile(tmp2);
+    std::string yow;
+    *istr >> yow;
+    FileUtils::closeFile(istr);
+    EXPECT_TRUE(yow=="yow");
+
+    // delete test
+    FileUtils::deleteFile(tmp2);
+    EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
+}
