@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,64 +32,37 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
+#include <pdal/Writer.hpp>
+
+namespace fbxsdk
+{
+class FbxManager;
+class FbxScene;
+}
 
 namespace pdal
 {
 
-class Writer;
-class UserCallback;
+class Triangle;
 
-/**
-  A Writer is a terminal stage for a PDAL pipeline.  It usually writes output
-  to a file, but this isn't a requirement.  The class provides support for
-  some operations common for producing point output.
-*/
-class PDAL_DLL Writer : public virtual Stage
+class PDAL_DLL FbxWriter : public Writer
 {
-    friend class WriterWrapper;
-    friend class DbWriter;
-    friend class FlexWriter;
-
 public:
-    /**
-      Construct a writer.
-    */
-    Writer()
-        {}
+    std::string getName() const;
 
-    /**
-      Locate template placeholder ('#') and validate filename with respect
-      to placeholder.
-    */
-    static std::string::size_type
-        handleFilenameTemplate(const std::string& filename);
+    FbxWriter();
 
 private:
-    virtual PointViewSet run(PointViewPtr view)
-    {
-        PointViewSet viewSet;
-        write(view);
-        viewSet.insert(view);
-        return viewSet;
-    }
-    virtual void writerInitialize(PointTableRef table)
-    {}
+    virtual void addArgs(ProgramArgs& args);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr data);
+    virtual void done(PointTableRef table);
 
-    /**
-      Write the point in a PointView.  This is a simplification of the
-      \ref run() interface for convenience.  Impelment in subclass if desired.
-    */
-    virtual void write(const PointViewPtr /*view*/)
-        { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    std::string m_filename;
+    bool m_ascii;
+    fbxsdk::FbxManager *m_manager;
+    fbxsdk::FbxScene *m_scene;
 };
 
 } // namespace pdal
-

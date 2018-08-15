@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,64 +32,58 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/PipelineManager.hpp>
+#include "Support.hpp"
 
-namespace pdal
+using namespace pdal;
+
+TEST(ReturnsFilterTest, t1)
 {
+    StageFactory f;
 
-class Writer;
-class UserCallback;
+    Stage *reader(f.createStage("readers.las"));
+    Options rOpts;
+    rOpts.add("filename", Support::datapath("las/autzen_trim.las"));
+    reader->setOptions(rOpts);
 
-/**
-  A Writer is a terminal stage for a PDAL pipeline.  It usually writes output
-  to a file, but this isn't a requirement.  The class provides support for
-  some operations common for producing point output.
-*/
-class PDAL_DLL Writer : public virtual Stage
-{
-    friend class WriterWrapper;
-    friend class DbWriter;
-    friend class FlexWriter;
+    Stage* filter(f.createStage("filters.returns"));
+    Options fOpts;
+    fOpts.add("groups", "last, first");
+    filter->setOptions(fOpts);
+    filter->setInput(*reader);
 
-public:
-    /**
-      Construct a writer.
-    */
-    Writer()
-        {}
+    PointTable t;
+    filter->prepare(t);
+    PointViewSet s = filter->execute(t);
 
-    /**
-      Locate template placeholder ('#') and validate filename with respect
-      to placeholder.
-    */
-    static std::string::size_type
-        handleFilenameTemplate(const std::string& filename);
+    EXPECT_EQ(s.size(), 2U);
+    auto si = s.begin();
 
-private:
-    virtual PointViewSet run(PointViewPtr view)
+    // First view is first returns.
+    PointViewPtr v = *si;
+    EXPECT_EQ(v->size(), 9036U);
+    for (PointId id = 0; id < v->size(); ++id)
     {
-        PointViewSet viewSet;
-        write(view);
-        viewSet.insert(view);
-        return viewSet;
+        uint8_t rn = v->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, id);
+        uint8_t nr = v->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, id);
+        EXPECT_EQ(rn, 1);
+        EXPECT_NE(nr, 1);
     }
-    virtual void writerInitialize(PointTableRef table)
-    {}
 
-    /**
-      Write the point in a PointView.  This is a simplification of the
-      \ref run() interface for convenience.  Impelment in subclass if desired.
-    */
-    virtual void write(const PointViewPtr /*view*/)
-        { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-};
-
-} // namespace pdal
+    // Second view is last returns.
+    si++;
+    v = *si;
+    EXPECT_EQ(v->size(), 9015U);
+    for (PointId id = 0; id < v->size(); ++id)
+    {
+        uint8_t rn = v->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, id);
+        uint8_t nr = v->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, id);
+        EXPECT_EQ(rn, nr);
+        EXPECT_NE(rn, 1);
+    }
+}
 

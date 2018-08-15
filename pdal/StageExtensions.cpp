@@ -79,7 +79,8 @@ R"PDALEXTENSIONS(
     "readers.sqlite" : "sqlite, gpkg",
     "writers.sqlite" : "sqlite, gpkg",
     "readers.mrsid" : "sid",
-    "readers.rxp" : "rxp"
+    "readers.rxp" : "rxp",
+    "readers.fbx" : "fbx"
 }
 
 )PDALEXTENSIONS"
