@@ -86,7 +86,7 @@ inline std::wstring toNative(std::string const& in)
     return std::wstring(p, p + s.size());
 }
 #else
-inline std::string const& fromNative(std::string const& in) { return in; }
+// inline std::string const& fromNative(std::string const& in) { return in; }
 inline std::string const& toNative(std::string const& in) { return in; }
 #endif
 
@@ -396,12 +396,13 @@ std::vector<std::string> glob(std::string path)
 {
     std::vector<std::string> filenames;
 
-#ifdef WIN32
+
     std::string::size_type found_tilde(std::string::npos);
     found_tilde = path.find('~');
     if (found_tilde != std::string::npos)
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
+#ifdef _WIN32
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
