@@ -216,6 +216,7 @@ if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
+        io/Ilvis2Reader.cpp
         ${PDAL_SRC_DIR}/DbWriter.cpp
         ${PDAL_SRC_DIR}/DbReader.cpp
         ${PDAL_SRC_DIR}/XMLSchema.cpp)
