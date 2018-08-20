@@ -53,6 +53,17 @@ CREATE_SHARED_STAGE(PythonFilter, s_info)
 
 std::string PythonFilter::getName() const { return s_info.name; }
 
+PythonFilter::~PythonFilter()
+{
+    if (m_script)
+    {
+        delete m_pythonMethod;
+        m_pythonMethod = NULL;
+        delete m_script;
+        m_script = NULL;
+    }
+}
+
 void PythonFilter::addArgs(ProgramArgs& args)
 {
     args.add("source", "Python script to run", m_source);
@@ -62,6 +73,7 @@ void PythonFilter::addArgs(ProgramArgs& args)
     args.add("function", "Function to call", m_function);
     args.add("add_dimension", "Dimensions to add", m_addDimensions);
     args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
+    args.add("sharescript", "Allow shared the script between Point views", m_shareScript, false);
 }
 
 
@@ -77,9 +89,12 @@ void PythonFilter::ready(PointTableRef table)
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(m_scriptFile);
     static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
-    m_script = new plang::Script(m_source, m_module, m_function);
-    m_pythonMethod = new plang::Invocation(*m_script);
-    m_pythonMethod->compile();
+    if (!m_script)
+    {
+        m_script = new plang::Script(m_source, m_module, m_function);
+        m_pythonMethod = new plang::Invocation(*m_script);
+        m_pythonMethod->compile();
+    }
     m_totalMetadata = table.metadata();
 }
 
@@ -128,8 +143,14 @@ PointViewSet PythonFilter::run(PointViewPtr view)
 void PythonFilter::done(PointTableRef table)
 {
     static_cast<plang::Environment*>(plang::Environment::get())->reset_stdout();
-    delete m_pythonMethod;
-    delete m_script;
+
+    if (!m_shareScript)
+    {
+        delete m_pythonMethod;
+        m_pythonMethod = NULL;
+        delete m_script;
+        m_script = NULL;
+    }
 }
 
 } // namespace pdal

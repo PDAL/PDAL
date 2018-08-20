@@ -271,5 +271,9 @@ pdalargs
   A JSON dictionary of items you wish to pass into the modules globals as the
   ``pdalargs`` object.
 
+sharescript
+  It allows you share the Python script between Point Views. You could have a
+  script with objects or configurations you want to use repeatedly.
+
 .. _Python: http://python.org/
 .. _NumPy: http://www.numpy.org/

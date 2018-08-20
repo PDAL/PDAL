@@ -47,9 +47,9 @@ namespace pdal
 class PDAL_DLL PythonFilter : public Filter
 {
 public:
-    PythonFilter() : Filter(), m_script(NULL)
+    PythonFilter() : Filter(), m_script(NULL), m_pythonMethod(NULL), m_shareScript(false)
         {}
-
+    virtual ~PythonFilter();
     std::string getName() const;
 
 private:
@@ -60,6 +60,7 @@ private:
     std::string m_module;
     std::string m_function;
     StringList m_addDimensions;
+    bool m_shareScript;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
