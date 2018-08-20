@@ -237,7 +237,7 @@ void PointView::dump(std::ostream& ostr) const
         {
             Dimension::Id d = *di;
             const Dimension::Detail *dd = layout->dimDetail(d);
-            ostr << Dimension::name(d) << " (" <<
+            ostr << layout->dimName(d) << " (" <<
                 Dimension::interpretationName(dd->type()) << ") : ";
 
             switch (dd->type())
