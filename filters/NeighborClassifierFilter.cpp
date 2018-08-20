@@ -171,8 +171,7 @@ void NeighborClassifierFilter::filter(PointView& view)
     PointRef point_src(view, 0);
     if (m_candidateFile.empty())
     {   // No candidate file so NN comes from src file
-        KD3Index kdiSrc(view);
-        kdiSrc.build();
+        KD3Index& kdiSrc = view.build3dIndex();
         PointRef point_nn(view, 0);
         for (PointId id = 0; id < view.size(); ++id)
         {
@@ -184,8 +183,7 @@ void NeighborClassifierFilter::filter(PointView& view)
     {   // NN comes from candidate file
         PointTable candTable;
         PointViewPtr candView = loadSet(m_candidateFile, candTable);
-        KD3Index kdiCand(*candView);
-        kdiCand.build();
+        KD3Index& kdiCand = candView->build3dIndex();
         PointRef point_nn(*candView, 0);
         for (PointId id = 0; id < view.size(); ++id)
         {
