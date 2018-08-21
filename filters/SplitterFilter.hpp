@@ -58,8 +58,11 @@ private:
 
 public:
     SplitterFilter();
+    using PointAdder = std::function<void(PointRef&, int, int)>;
 
     std::string getName() const;
+    void setOrigin(double xOrigin, double yOrigin);
+    void processPoint(PointRef& p, PointAdder adder);
 
 private:
     double m_length;

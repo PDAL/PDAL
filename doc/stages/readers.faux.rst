@@ -59,7 +59,8 @@ bounds
   form "([xmin,xmax],[ymin,ymax],[zmin,zmax])". [Default: unit cube]
 
 count
-  How many synthetic points to generate before finishing? [Required]
+  How many synthetic points to generate before finishing? [Required, except
+  when mode is 'grid']
 
 mean_x|y|z
   Mean value in the x, y, or z dimension respectively. (Normal mode only)

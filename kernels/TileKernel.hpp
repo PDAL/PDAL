@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,58 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "RadialDensityFilter.hpp"
+#pragma once
 
-#include <pdal/KDIndex.hpp>
+#include <map>
 
-#include <string>
-#include <vector>
+#include <pdal/Kernel.hpp>
+#include <filters/SplitterFilter.hpp>
 
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+class PDAL_DLL TileKernel : public Kernel
 {
-    "filters.radialdensity",
-    "RadialDensity Filter",
-    "http://pdal.io/stages/filters.radialdensity.html"
+    using Coord = std::pair<int, int>;
+    using Readers = std::map<std::string, Streamable *>;
+
+public:
+    TileKernel();
+    std::string getName() const;
+    int execute();
+
+private:
+    void addSwitches(ProgramArgs& args);
+    void validateSwitches(ProgramArgs& args);
+    Streamable *prepareReader(const std::string& filename);
+    void process(const Readers& readers);
+    void checkReaders(const Readers& readers);
+    void adder(PointRef& point, int xpos, int ypos);
+
+    std::string m_inputFile;
+    std::string m_outputFile;
+    double m_length;
+    double m_xOrigin;
+    double m_yOrigin;
+    double m_buffer;
+    std::map<Coord, Streamable *> m_writers;
+    FixedPointTable m_table;
+    SplitterFilter m_splitter;
+    Streamable *m_repro;
+    SpatialReference m_outSrs;
+    std::string::size_type m_hashPos;
 };
-
-CREATE_STATIC_STAGE(RadialDensityFilter, s_info)
-
-std::string RadialDensityFilter::getName() const
-{
-    return s_info.name;
-}
-
-void RadialDensityFilter::addArgs(ProgramArgs& args)
-{
-    args.add("radius", "Radius", m_rad, 1.0);
-}
-
-void RadialDensityFilter::addDimensions(PointLayoutPtr layout)
-{
-    using namespace Dimension;
-    m_rdens = layout->registerOrAssignDim("RadialDensity", Type::Double);
-}
-
-void RadialDensityFilter::filter(PointView& view)
-{
-    using namespace Dimension;
-
-    // Build the 3D KD-tree.
-    KD3Index& index = view.build3dIndex();
-
-    // Search for neighboring points within the specified radius. The number of
-    // neighbors (which includes the query point) is normalized by the volume
-    // of the search sphere and recorded as the density.
-    log()->get(LogLevel::Debug) << "Computing densities...\n";
-    double factor = 1.0 / ((4.0 / 3.0) * 3.14159 * (m_rad * m_rad * m_rad));
-    for (PointId i = 0; i < view.size(); ++i)
-    {
-        std::vector<PointId> pts = index.radius(i, m_rad);
-        view.setField(m_rdens, i, pts.size() * factor);
-    }
-}
 
 } // namespace pdal

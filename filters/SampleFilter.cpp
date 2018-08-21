@@ -83,8 +83,7 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
     PointViewPtr outView = inView->makeNew();
 
     // Build the 3D KD-tree.
-    KD3Index index(*inView);
-    index.build();
+    KD3Index& index = inView->build3dIndex();
 
     // All points are marked as kept (1) by default. As they are masked by
     // neighbors within the user-specified radius, their value is changed to 0.

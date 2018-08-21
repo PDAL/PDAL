@@ -70,10 +70,8 @@ void FauxReader::addArgs(ProgramArgs& args)
 
 void FauxReader::initialize()
 {
-    /**
-    if (!m_countArg->set())
+    if (!m_countArg->set() && m_mode != Mode::Grid)
         throwError("Argument 'count' needs a value and none was provided.");
-    **/
     if (m_numReturns > 10)
         throwError("Option 'number_of_returns' must be in the range [0,10].");
     if (m_mode == Mode::Grid)

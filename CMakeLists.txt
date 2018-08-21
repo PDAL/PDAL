@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -216,6 +216,7 @@ if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
+        io/Ilvis2Reader.cpp
         ${PDAL_SRC_DIR}/DbWriter.cpp
         ${PDAL_SRC_DIR}/DbReader.cpp
         ${PDAL_SRC_DIR}/XMLSchema.cpp)

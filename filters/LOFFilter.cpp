@@ -73,10 +73,7 @@ void LOFFilter::filter(PointView& view)
 {
     using namespace Dimension;
 
-    // Build the 3D KD-tree.
-    KD3Index index(view);
-    log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
-    index.build();
+    KD3Index& index = view.build3dIndex();
 
     // Increment the minimum number of points, as knnSearch will be returning
     // the neighbors along with the query point.

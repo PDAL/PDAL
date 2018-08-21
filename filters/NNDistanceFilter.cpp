@@ -108,7 +108,6 @@ void NNDistanceFilter::filter(PointView& view)
     using namespace Dimension;
 
     // Build the 3D KD-tree.
-    log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
     KD3Index& index = view.build3dIndex();
 
     // Increment the minimum number of points, as knnSearch will be returning
