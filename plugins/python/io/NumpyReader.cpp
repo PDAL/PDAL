@@ -43,10 +43,28 @@
 
 #include "../plang/Environment.hpp"
 
+
+std::string toString(PyObject *pname)
+{
+    std::stringstream mssg;
+    PyObject* r = PyObject_Str(pname);
+    if (!r)
+        throw pdal::pdal_error("couldn't make string representation value");
+#if PY_MAJOR_VERSION >= 3
+    Py_ssize_t size;
+    const char *d = PyUnicode_AsUTF8AndSize(r, &size);
+#else
+    const char *d = PyString_AsString(r);
+#endif
+    mssg << d;
+    return mssg.str();
+}
+
+
 namespace pdal
 {
 
-static PluginInfo const s_info 
+static PluginInfo const s_info
 {
     "readers.numpy",
     "Read data from .npy files.",
@@ -89,6 +107,16 @@ std::istream& operator >> (std::istream& in, NumpyReader::Order& order)
 }
 
 
+void NumpyReader::setArray(PyObject* array)
+{
+    plang::Environment::get();
+    if (!PyArray_Check(array))
+        throw pdal::pdal_error("object provided to setArray is not a python numpy array!");
+
+    m_array = (PyArrayObject*)array;
+    Py_XINCREF(m_array);
+}
+
 PyArrayObject* load_npy(std::string const& filename)
 {
 
@@ -128,17 +156,21 @@ void NumpyReader::initialize()
     m_ndims = 0;
 
     m_iter = NULL;
-    m_array = NULL;
 
     p_data = NULL;
     m_dataptr = NULL;
     m_strideptr = NULL;
     m_innersizeptr = NULL;
+    m_dtype = NULL;
 
-    m_array = load_npy(m_filename);
-    if (!PyArray_Check(m_array))
-        throw pdal::pdal_error("Object in file  '" + m_filename +
-            "' is not a numpy array");
+    if (m_filename.size())
+    {
+        m_array = load_npy(m_filename);
+    }
+    if (m_array)
+        if (!PyArray_Check(m_array))
+            throw pdal::pdal_error("Object in file  '" + m_filename +
+                "' is not a numpy array");
 }
 
 
@@ -242,18 +274,6 @@ Dimension::Id NumpyReader::registerDim(PointLayoutPtr layout,
 namespace
 {
 
-std::string toString(PyObject *pname)
-{
-    if (!pname)
-        return std::string();
-
-#if PY_MAJOR_VERSION >= 3
-    return PyBytes_AsString(PyUnicode_AsUTF8String(pname));
-#else
-    return PyString_AsString(pname);
-#endif
-}
-
 
 Dimension::Type getType(PyArray_Descr *dtype, const std::string& name)
 {
@@ -282,7 +302,7 @@ void NumpyReader::createFields(PointLayoutPtr layout)
     int offset;
 
     m_numFields = 0;
-    if (m_dtype->fields)
+    if (m_dtype->fields != Py_None)
         m_numFields = PyDict_Size(m_dtype->fields);
 
     // Array isn't structured - just a bunch of data.
