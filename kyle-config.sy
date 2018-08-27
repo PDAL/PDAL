@@ -1,0 +1,22 @@
+cd ubuild
+
+echo CMake....
+
+cmake .. \
+      -G "Unix Makefiles" \
+      -DCMAKE_INSTALL_PREFIX=/home/kylea/Documents/I3S/PDAL/ubuild \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_MAKE_PROGRAM=make \
+      -DBUILD_PLUGIN_PYTHON=ON \
+      -DBUILD_PLUGIN_GREYHOUND=ON \
+      -DBUILD_PLUGIN_SQLITE=ON \
+      -DBUILD_PLUGIN_I3S=ON \
+      -DWITH_LASZIP=ON \
+      -DWITH_LAZPERF=ON \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_INSTALL_LIBDIR=lib \
+    ; \
+
+echo Make...
+
+make -j 4

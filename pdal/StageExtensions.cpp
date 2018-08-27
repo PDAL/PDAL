@@ -80,7 +80,8 @@ R"PDALEXTENSIONS(
     "writers.sqlite" : "sqlite, gpkg",
     "readers.mrsid" : "sid",
     "readers.rxp" : "rxp",
-    "readers.fbx" : "fbx"
+    "readers.fbx" : "fbx",
+    "readers.i3s" : "i3s"
 }
 
 )PDALEXTENSIONS"
