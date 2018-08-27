@@ -22,6 +22,11 @@ option(BUILD_PLUGIN_GEOWAVE
 add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
     "Read and Write data using GeoWave")
 
+option(BUILD_PLUGIN_I3S
+    "Choose if I3S support should be built" FALSE)
+add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
+    "Read from a i3s server")
+
 option(BUILD_PLUGIN_GREYHOUND
     "Choose if Greyhound support should be built" FALSE)
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
