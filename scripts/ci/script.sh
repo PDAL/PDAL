@@ -36,6 +36,7 @@ make install
 # Python extension testing
 pip install packaging
 git clone https://github.com/PDAL/python.git pdal-python
+git co 2.0.0
 cd pdal-python
 python setup.py build
 echo "current path: " `pwd`
