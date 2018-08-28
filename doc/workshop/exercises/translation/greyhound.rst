@@ -22,7 +22,14 @@ http://potree.entwine.io/data/dublin.html
 .. index:: Potree
 
 
-1. View the ``greyhound.json`` file in your editor
+1. In your |Terminal|, navigate to the ``C:\Users\hobu\PDAL\exercises\translation``
+   folder.
+
+
+    .. literalinclude:: ./greyhound-cd-command.txt
+
+2. View the ``greyhound.json`` file in your editor. If the file does not exist, create
+   it and paste the following JSON into it:
 
 
     .. literalinclude:: ./greyhound.json
@@ -34,7 +41,7 @@ http://potree.entwine.io/data/dublin.html
         browser making requests against the Greyhound server at
         http://data.greyhound.io
 
-2. Issue the following command in your |Terminal|.
+3. Issue the following command in your |Terminal|.
 
 
     .. literalinclude:: ./greyhound-command.txt
@@ -44,7 +51,7 @@ http://potree.entwine.io/data/dublin.html
 
 .. _`Developer Console`: https://developers.google.com/web/tools/chrome-devtools/console/
 
-3. Verify that the data look ok:
+4. Verify that the data look ok:
 
     .. literalinclude:: ./greyhound-info-command.txt
 
@@ -52,7 +59,7 @@ http://potree.entwine.io/data/dublin.html
         :target: ../../../_images/greyhound-info-verify.png
 
 
-4. Visualize the data in http://plas.io
+5. Visualize the data in http://plas.io
 
     .. image:: ../../images/greyhound-view.png
         :target: ../../../_images/greyhound-view.png

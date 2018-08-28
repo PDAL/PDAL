@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <pdal/pdal_features.hpp>
+
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>

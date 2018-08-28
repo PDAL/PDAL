@@ -875,7 +875,9 @@ const drivers::Http& Endpoint::getHttpDriver() const
 #include <glob.h>
 #include <sys/stat.h>
 #else
-
+#define UNICODE
+#include <Shlwapi.h>
+#include <iterator>
 #include <locale>
 #include <codecvt>
 #include <windows.h>
@@ -1054,7 +1056,10 @@ bool mkdirp(std::string raw)
         if (err && errno != EEXIST) return false;
 #else
         // Use CreateDirectory instead of _mkdir; it is more reliable when creating directories on a drive other than the working path.
-        const bool err(::CreateDirectory(cur.c_str(), NULL));
+
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		const std::wstring wide(converter.from_bytes(cur));
+		const bool err(::CreateDirectoryW(wide.c_str(), NULL));
         if (err && ::GetLastError() != ERROR_ALREADY_EXISTS) return false;
 #endif
     }
@@ -1079,11 +1084,95 @@ namespace
         std::vector<std::string> dirs;
     };
 
+template<typename C>
+	std::basic_string<C> remove_dups(std::basic_string<C> s, C c)
+	{
+		C cc[3] = { c, c };
+		auto pos = s.find(cc);
+		while (pos != s.npos) {
+			s.erase(pos, 1);
+			pos = s.find(cc, pos + 1);
+		}
+		return s;
+	}
+    
+#ifdef ARBITER_WINDOWS
+	bool icase_wchar_cmp(wchar_t a, wchar_t b)
+	{
+		return std::toupper(a, std::locale()) == std::toupper(b, std::locale());
+	}
+
+
+	bool icase_cmp(std::wstring const& s1, std::wstring const& s2)
+	{
+		return (s1.size() == s2.size()) &&
+			std::equal(s1.begin(), s1.end(), s2.begin(),
+				icase_wchar_cmp);
+	}
+
     Globs globOne(std::string path)
     {
         Globs results;
 
-#ifndef ARBITER_WINDOWS
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+		std::wstring wide(converter.from_bytes(path));
+
+		WIN32_FIND_DATAW data{};
+		LPCWSTR fname = wide.c_str();
+        HANDLE hFind(INVALID_HANDLE_VALUE);
+		hFind = FindFirstFileW(fname, &data);
+
+		if (hFind == (HANDLE)-1) return results; // bad filename
+
+        if (hFind != INVALID_HANDLE_VALUE )
+        {
+            do
+            {
+				if (icase_cmp(std::wstring(data.cFileName), L".") ||
+					icase_cmp(std::wstring(data.cFileName), L".."))
+					continue;
+   
+				std::vector<wchar_t> buf(MAX_PATH);
+				wide.erase(std::remove(wide.begin(), wide.end(), '*'),
+                    wide.end());
+
+				std::replace(wide.begin(), wide.end(), '\\', '/');
+
+				std::copy(wide.begin(), wide.end(), buf.begin()	);	
+                BOOL appended = PathAppendW(buf.data(), data.cFileName);
+
+				std::wstring output(buf.data(), wcslen( buf.data()));
+                
+                // Erase any \'s
+                output.erase(std::remove(output.begin(), output.end(), '\\'),
+                    output.end());
+
+                if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                {
+                    results.dirs.push_back(converter.to_bytes(output));
+
+                    output.append(L"/*");
+                    Globs more = globOne(converter.to_bytes(output));
+                    std::copy(more.dirs.begin(), more.dirs.end(),
+                        std::back_inserter(results.dirs));
+                    std::copy(more.files.begin(), more.files.end(),
+                        std::back_inserter(results.files));
+                }
+				results.files.push_back(converter.to_bytes(output));
+            }
+            while (FindNextFileW(hFind, &data));
+        }
+		FindClose(hFind);
+
+        return results;
+    }
+
+#else
+
+    Globs globOne(std::string path)
+    {
+        Globs results;
+
         glob_t buffer;
         struct stat info;
 
@@ -1103,35 +1192,11 @@ namespace
                 throw ArbiterError("Error globbing - POSIX stat failed");
             }
         }
-
         globfree(&buffer);
-#else
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        const std::wstring wide(converter.from_bytes(path));
-
-        LPWIN32_FIND_DATAW data{};
-        HANDLE hFind(FindFirstFileW(wide.c_str(), data));
-
-        if (hFind != INVALID_HANDLE_VALUE)
-        {
-            do
-            {
-                if ((data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-                {
-                    results.files.push_back(
-                            converter.to_bytes(data->cFileName));
-                }
-                else
-                {
-                    results.dirs.push_back(converter.to_bytes(data->cFileName));
-                }
-            }
-            while (FindNextFileW(hFind, data));
-        }
-#endif
-
         return results;
     }
+#endif
+
 
     std::vector<std::string> walk(std::string dir)
     {
@@ -1247,11 +1312,6 @@ LocalHandle::~LocalHandle()
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/arbiter.hpp>
 #include <arbiter/drivers/http.hpp>
-#endif
-
-#ifdef ARBITER_WINDOWS
-#undef min
-#undef max
 #endif
 
 #include <algorithm>
@@ -1962,6 +2022,11 @@ void S3::put(
     Headers headers(m_config->baseHeaders());
     headers.insert(userHeaders.begin(), userHeaders.end());
 
+    if (Arbiter::getExtension(rawPath) == "json")
+    {
+        headers["Content-Type"] = "application/json";
+    }
+
     const ApiV4 apiV4(
             "PUT",
             m_config->region(),
@@ -2122,7 +2187,10 @@ S3::ApiV4::ApiV4(
 
     if (verb == "PUT" || verb == "POST")
     {
-        m_headers["Content-Type"] = "application/octet-stream";
+        if (!m_headers.count("Content-Type"))
+        {
+            m_headers["Content-Type"] = "application/octet-stream";
+        }
         m_headers["Transfer-Encoding"] = "";
         m_headers["Expect"] = "";
     }
@@ -3793,7 +3861,7 @@ Contents parse(const std::string& s)
         line = util::stripWhitespace(line);
         const std::size_t semiPos(line.find_first_of(';'));
         const std::size_t hashPos(line.find_first_of('#'));
-        line = line.substr(0, std::min(semiPos, hashPos));
+        line = line.substr(0, (std::min)(semiPos, hashPos));
 
         if (line.size())
         {
@@ -4479,7 +4547,8 @@ Time::Time(const std::string& s, const std::string& format)
 {
     static const int64_t utcOffset(utcOffsetSeconds());
 
-    std::tm tm;
+    std::tm tm{};
+
 #ifndef ARBITER_WINDOWS
     // We'd prefer to use get_time, but it has poor compiler support.
     if (!strptime(s.c_str(), format.c_str(), &tm))
@@ -4494,9 +4563,8 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-    if (utcOffset > std::numeric_limits<int>::max())
-    	throw ArbiterError("Can't convert offset time in seconds to tm type.");
-
+    if (utcOffset > (std::numeric_limits<int>::max)())
+        throw ArbiterError("Can't convert offset time in seconds to tm type.");
     tm.tm_sec -= (int)utcOffset;
     m_time = std::mktime(&tm);
 }
@@ -4594,8 +4662,12 @@ std::string getBasename(const std::string fullPath)
     const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
 
     // Now do the real slash searching.
-    const std::size_t pos(stripped.rfind('/'));
-
+    std::size_t pos(stripped.rfind('/'));
+    
+    // Maybe windows
+    if (pos == std::string::npos) 
+        pos = stripped.rfind('\\');
+    
     if (pos != std::string::npos)
     {
         const std::string sub(stripped.substr(pos + 1));

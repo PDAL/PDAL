@@ -182,7 +182,7 @@ inline std::istream& operator>>(std::istream& in, LogLevel& level)
         if (val >= 0 && val < (int)logNames.size())
             level = (LogLevel)val;
     }
-    catch (std::exception)
+    catch (std::exception&)
     {
         sval = Utils::tolower(sval);
         for (size_t i = 0; i < logNames.size(); ++i)

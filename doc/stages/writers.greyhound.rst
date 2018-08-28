@@ -44,7 +44,7 @@ A string value for the name of this dimension set.  This setting is used interna
 _`dims`
 A JSON array of string names of the dimensions to be written to the Greyhound resource.
 
-.. _SMRF: https://www.pdal.io/stages/filters.smrf.html
-.. _ferry: https://www.pdal.io/stages/filters.ferry.html
-.. _Greyhound reader: https://www.pdal.io/stages/readers.greyhound.html
+.. _SMRF: https://pdal.io/stages/filters.smrf.html
+.. _ferry: https://pdal.io/stages/filters.ferry.html
+.. _Greyhound reader: https://pdal.io/stages/readers.greyhound.html
 

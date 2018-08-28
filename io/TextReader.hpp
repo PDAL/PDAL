@@ -131,6 +131,7 @@ private:
 
 private:
     char m_separator;
+    Arg *m_separatorArg;
     std::istream *m_istream;
     StringList m_dimNames;
     Dimension::IdList m_dims;
@@ -138,7 +139,6 @@ private:
     size_t m_line;
     std::string m_header;
     size_t m_skip;
-    std::streampos m_dataStart;
 };
 
 } // namespace pdal

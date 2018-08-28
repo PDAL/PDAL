@@ -126,6 +126,14 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
 
 } // unnamed namespace
 
+ColorizationFilter::ColorizationFilter()
+{}
+
+
+ColorizationFilter::~ColorizationFilter()
+{}
+
+
 void ColorizationFilter::addArgs(ProgramArgs& args)
 {
     args.add("raster", "Raster filename", m_rasterFilename);

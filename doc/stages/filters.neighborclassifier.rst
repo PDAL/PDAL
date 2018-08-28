@@ -1,7 +1,7 @@
 .. _filters.neighborclassifier:
 
 filters.neighborclassifier
-===================
+==========================
 
 The neighborclassifier filter allows you update the value of the classification
 for specific points to a value determined by a K-nearest neighbors vote.
@@ -25,6 +25,7 @@ This pipeline updates the Classification of all points with classification
 1 (unclassified) based on the consensus (majority) of its nearest 10 neighbors.
 
 .. code-block:: json
+
     {
       "pipeline":[
         "autzen_class.las",
@@ -45,6 +46,7 @@ to src.las.  Any points in src.las that are not in pred.txt will be
 assigned based on the closest point in pred.txt.
 
 .. code-block:: json
+
     {
       "pipeline":[
         "src.las",

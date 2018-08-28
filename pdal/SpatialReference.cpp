@@ -194,8 +194,6 @@ std::string SpatialReference::getVerticalUnits() const
 {
     std::string tmp;
 
-    std::string wkt = getVertical();
-    const char* poWKT = wkt.c_str();
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
     if (poSRS)
     {
@@ -238,8 +236,6 @@ std::string SpatialReference::getHorizontal() const
 
 std::string SpatialReference::getHorizontalUnits() const
 {
-    std::string wkt = getHorizontal();
-    const char* poWKT = wkt.c_str();
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
 
     if (!poSRS)
@@ -389,15 +385,15 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 
 int SpatialReference::getUTMZone() const
 {
-
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
     if (!current)
         throw pdal_error("Could not fetch current SRS");
 
     int north(0);
     int zone = OSRGetUTMZone(current.get(), &north);
-    return north*zone;
+    return (north ? 1 : -1) * zone;
 }
+
 
 int SpatialReference::computeUTMZone(const BOX3D& box) const
 {

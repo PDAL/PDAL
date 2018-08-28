@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "readers.mrsid",
     "MrSID Reader",
-    "http://www.pdal.io/stages/readers.mrsid.html"
+    "http://pdal.io/stages/readers.mrsid.html"
 };
 
 CREATE_SHARED_STAGE(MrsidReader, s_info)
@@ -183,7 +183,7 @@ QuickInfo MrsidReader::inspect()
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
     if (!Utils::numericCast(m_PS->getNumPoints(), qi.m_pointCount))
-        qi.m_pointCount = std::numeric_limits<point_count_t>::max();
+        qi.m_pointCount = (std::numeric_limits<point_count_t>::max)();
     qi.m_bounds = b;
     qi.m_srs = pdal::SpatialReference(m_PS->getWKT());
     qi.m_valid = true;

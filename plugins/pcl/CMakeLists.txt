@@ -129,10 +129,14 @@ target_include_directories(${icp_filter_libname} PRIVATE
 PDAL_ADD_PLUGIN(pcl_libname kernel pcl
     FILES
         kernel/PCLKernel.cpp
-    LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
-target_include_directories(${pcl_libname} PRIVATE
-    ${PDAL_IO_DIR}
-    ${PCL_INCLUDE_DIRS})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+        ${pclblock_libname})
+target_include_directories(${pcl_libname}
+    PRIVATE
+        ${PDAL_IO_DIR}
+        ${PCL_INCLUDE_DIRS}
+        ${PDAL_VENDOR_DIR}/eigen)
 
 #
 # Smooth Kernel
@@ -160,6 +164,8 @@ if (WITH_TESTS)
     LINK_WITH
         ${icp_filter_libname}
     )
-    target_include_directories(pdal_filters_icp_test PRIVATE
-        ${PCL_INCLUDE_DIRS})
+    target_include_directories(pdal_filters_icp_test
+        PRIVATE
+            ${PCL_INCLUDE_DIRS}
+            ${PDAL_VENDOR_DIR}/eigen)
 endif()

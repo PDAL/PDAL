@@ -19,7 +19,7 @@ and types for convenience in file format transformation.
 .. note::
 
     Only LAS or LAZ data may be stored in the LIDARA segment. PDAL uses
-    the :ref:`readers.las` and :ref:`writers.las` :ref:`stages <stage_index>`
+    the :ref:`readers.las` and :ref:`writers.las`
     to actually read and write the data.
 
 .. note::

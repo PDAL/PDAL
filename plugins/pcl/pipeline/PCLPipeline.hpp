@@ -79,10 +79,10 @@ pcl::Pipeline<PointT>::applyPassThrough(PointCloudConstPtr cloud,
     // parse params
     std::string field = vt["setFilterFieldName"].asString();
     float m1 = vt["setFilterLimits"]
-        .get("min", -std::numeric_limits<float>::max())
+        .get("min", -(std::numeric_limits<float>::max)())
         .asFloat();
     float m2 = vt["setFilterLimits"]
-        .get("max", std::numeric_limits<float>::max())
+        .get("max", (std::numeric_limits<float>::max)())
         .asFloat();
 
     // summarize settings
@@ -91,25 +91,25 @@ pcl::Pipeline<PointT>::applyPassThrough(PointCloudConstPtr cloud,
 
     if (field.compare("x") == 0)
     {
-        if (m1 != -std::numeric_limits<float>::max())
+        if (m1 != -(std::numeric_limits<float>::max)())
             m1 -= x_offset_;
-        if (m2 != std::numeric_limits<float>::max())
+        if (m2 != (std::numeric_limits<float>::max)())
             m2 -= x_offset_;
     }
 
     if (field.compare("y") == 0)
     {
-        if (m1 != -std::numeric_limits<float>::max())
+        if (m1 != -(std::numeric_limits<float>::max)())
             m1 -= y_offset_;
-        if (m2 != std::numeric_limits<float>::max())
+        if (m2 != (std::numeric_limits<float>::max)())
             m2 -= y_offset_;
     }
 
     if (field.compare("z") == 0)
     {
-        if (m1 != -std::numeric_limits<float>::max())
+        if (m1 != -(std::numeric_limits<float>::max)())
             m1 -= z_offset_;
-        if (m2 != std::numeric_limits<float>::max())
+        if (m2 != (std::numeric_limits<float>::max)())
             m2 -= z_offset_;
     }
 

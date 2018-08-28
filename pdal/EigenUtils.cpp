@@ -52,7 +52,8 @@ namespace pdal
 namespace eigen
 {
 
-Eigen::Vector3d computeCentroid(PointView& view, std::vector<PointId> ids)
+Eigen::Vector3d computeCentroid(PointView& view,
+    const std::vector<PointId>& ids)
 {
     using namespace Eigen;
     
@@ -80,7 +81,8 @@ Eigen::Vector3d computeCentroid(PointView& view, std::vector<PointId> ids)
     return centroid;
 }
 
-Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
+Eigen::Matrix3f computeCovariance(PointView& view,
+    const std::vector<PointId>& ids)
 {
     using namespace Eigen;
 
@@ -102,7 +104,8 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
     return A * A.transpose() / (ids.size()-1);
 }
 
-uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
+uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
+    double threshold)
 {
     using namespace Eigen;
 
@@ -363,7 +366,7 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     int ncols = data2.cols();
 
     MatrixXd minZ(nrows, ncols);
-    minZ.setConstant(std::numeric_limits<double>::max());
+    minZ.setConstant((std::numeric_limits<double>::max)());
     MatrixXd maxZ(nrows, ncols);
     maxZ.setConstant(std::numeric_limits<double>::lowest());
     for (auto c = 0; c < ncols; ++c)
@@ -424,7 +427,7 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     int ncols = data2.cols();
 
     MatrixXd minZ(nrows, ncols);
-    minZ.setConstant(std::numeric_limits<double>::max());
+    minZ.setConstant((std::numeric_limits<double>::max)());
     MatrixXd maxZ(nrows, ncols);
     maxZ.setConstant(std::numeric_limits<double>::lowest());
     for (auto c = 0; c < ncols; ++c)
@@ -511,7 +514,7 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
 
 std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
 {
-    std::vector<double> out(data.size(), std::numeric_limits<double>::max());
+    std::vector<double> out(data.size(), (std::numeric_limits<double>::max)());
     std::vector<size_t> idx(5);
 
     for (int iter = 0; iter < iterations; ++iter)

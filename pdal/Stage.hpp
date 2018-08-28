@@ -363,8 +363,6 @@ private:
     virtual void readerAddArgs(ProgramArgs& /*args*/)
         {}
     void l_addArgs(ProgramArgs& args);
-    void l_done(PointTableRef table);
-
     virtual void writerInitialize(PointTableRef /*table*/)
         {}
 
@@ -419,6 +417,15 @@ private:
     */
     virtual void addDimensions(PointLayoutPtr /*layout*/)
         {}
+
+    /**
+      Execute a single stage.
+
+      \param table  PointTable
+      \param pvSet  Input PointViewSet
+      \return  Output PointViewSet
+    */
+    PointViewSet execute(PointTableRef table, PointViewSet& pvSet);
 
     /**
       Functions called after dimensions have been added.  Implement in

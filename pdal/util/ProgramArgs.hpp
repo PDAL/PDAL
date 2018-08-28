@@ -158,6 +158,9 @@ protected:
     {}
 
 public:
+    virtual ~Arg()
+    {}
+
     /**
       Indicate that the argument shouldn't be shown in help text.
 
@@ -1484,7 +1487,7 @@ private:
                 {
                     throw arg_error("Value '" + value +
                         "' provided for argument '" + name +
-                        "' when none is expected.");
+                        "' when 'true' or 'false' is expected.");
                 }
             }
             else

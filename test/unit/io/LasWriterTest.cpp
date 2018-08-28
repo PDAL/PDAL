@@ -853,11 +853,11 @@ void compareFiles(const std::string& name1, const std::string& name2,
     EXPECT_EQ(d1.size(), d2.size());
     EXPECT_EQ(size1, size2);
 
-    for (PointId i = 0; i < std::min(size1, size2); i += increment)
+    for (PointId i = 0; i < (std::min)(size1, size2); i += increment)
     {
        v1->getPackedPoint(d1, i, buf1.data());
        v2->getPackedPoint(d2, i, buf2.data());
-       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), std::min(size1, size2)), 0);
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), (std::min)(size1, size2)), 0);
     }
 }
 
@@ -1115,6 +1115,42 @@ TEST(LasWriterTest, oversize_vlr)
     EXPECT_THROW(
         tester.addVlr(w, "USER ID", 555, "This is a description", data),
         pdal_error);
+}
+
+
+// Test auto scale/offset for streaming mode.
+TEST(LasWriterTest, issue1940)
+{
+    StageFactory f;
+
+    Stage& r = *(f.createStage("readers.faux"));
+    Options ro;
+    ro.add("mode", "constant");
+    ro.add("bounds", "([55,55],[55,55],[55,55])");
+    ro.add("count", 20);
+    r.addOptions(ro);
+
+    LasWriter w;
+    Options wo;
+    //LogPtr log(new Log("TEST", &std::clog));
+    //log->setLevel((LogLevel)5);
+    //w.setLog(log);
+    wo.add("filename", Support::temppath("out.las"));
+    wo.add("scale_x", "auto");
+    wo.add("offset_y", "auto");
+    w.addOptions(wo);
+    w.setInput(r);
+
+    FixedPointTable t(100);
+    w.prepare(t);
+    w.execute(t);
+
+    LasTester tester;
+    LasHeader *h = tester.header(w);
+    EXPECT_DOUBLE_EQ(h->offsetX(), 0);
+    EXPECT_DOUBLE_EQ(h->offsetY(), 55);
+    EXPECT_DOUBLE_EQ(h->scaleX(), 1.0);
+    EXPECT_DOUBLE_EQ(h->scaleY(), .01);
 }
 
 

@@ -124,5 +124,36 @@ or `easy_install`_, you have to run the command as administrator. ::
     To install pip please read
     `here <https://pip.pypa.io/en/stable/installing/>`_
 
+Install from Conda
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: Install, Python, Conda
+
+The final method to install the PDAL Python extension is to use `conda`_. An
+added advantage of using Conda to install the extension is that Conda will also
+install PDAL. ::
+
+    conda install -c conda-forge python-pdal
+
+.. note::
+
+    The official ``pdal`` and ``python-pdal`` packages reside in the
+    conda-forge channel, which can be added via ``conda config`` or manually
+    specified with the ``-c`` option, as shown in the examples below.
+
+It is recommended that you actually either install PDAL and the Python
+extension either into an existing environment ::
+
+    conda install -n <environment name> -c conda-forge python-pdal
+
+or create a new environment from scratch ::
+
+    conda create -n <environment name> -c conda-forge python-pdal
+
+Once the environment has been created, you will be prompted to activate it. ::
+
+    conda activate <environment name>
+
 .. _`pip`: https://pip.pypa.io/en/stable/
 .. _`easy_install`: https://pypi.python.org/pypi/setuptools
+.. _`conda`: https://conda.io/docs/

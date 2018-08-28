@@ -36,6 +36,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <filters/RangeFilter.hpp>
+#include <io/BufferReader.hpp>
 #include <io/GDALWriter.hpp>
 #include <io/LasReader.hpp>
 #include <io/TextReader.hpp>
@@ -44,7 +45,8 @@
 #include <iostream>
 #include <sstream>
 
-using namespace pdal;
+namespace pdal
+{
 
 namespace
 {
@@ -91,8 +93,19 @@ void runGdalWriter(const Options& wo, const std::string& infile,
     }
     std::vector<double> data;
     raster.readBand(data, 1);
+
+    int row = 0;
+    int col = 0;
     for (size_t i = 0; i < arr.size(); ++i)
-        EXPECT_NEAR(arr[i], data[i], .001);
+    {
+        EXPECT_NEAR(arr[i], data[i], .001) << "Mismatch for row/col = " <<
+            row << "/" << col;
+        if (++col == raster.width())
+        {
+            col = 0;
+            row++;
+        }
+    }
 }
 
 void runGdalWriter2(const Options& wo, const std::string& outfile,
@@ -251,7 +264,7 @@ TEST(GDALWriterTest, max)
         "5.000 -9999.000     7.000     8.000     9.100 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.400     6.400 "
+        "2.000     3.000     4.400     5.400     6.400 "
         "1.000     2.000     3.000     4.400     5.400 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -272,9 +285,9 @@ TEST(GDALWriterTest, maxWindow)
 
     const std::string output =
         "5.000     5.500     7.000     8.000     9.100 "
-        "4.000     4.924     6.000     7.000     8.000 "
+        "4.000     4.942     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.400     6.400 "
+        "2.000     3.000     4.400     5.400     6.400 "
         "1.000     2.000     3.000     4.400     5.400 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -296,7 +309,7 @@ TEST(GDALWriterTest, mean)
         "5.000 -9999.000     7.000     8.000     8.967 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.700     6.700 "
-        "2.000     3.000     4.000     4.800     5.800 "
+        "2.000     3.000     4.200     4.920     5.800 "
         "1.000     2.000     3.000     4.200     5.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -317,9 +330,9 @@ TEST(GDALWriterTest, meanWindow)
 
     const std::string output =
         "5.000     5.478     7.000     8.000     8.967 "
-        "4.000     4.881     6.000     7.000     8.000 "
+        "4.000     4.896     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.700     6.700 "
-        "2.000     3.000     4.000     4.800     5.800 "
+        "2.000     3.000     4.200     4.920     5.800 "
         "1.000     2.000     3.000     4.200     5.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -386,7 +399,7 @@ TEST(GDALWriterTest, count)
         "1.000     0.000     1.000     1.000     3.000 "
         "1.000     0.000     1.000     1.000     1.000 "
         "1.000     1.000     1.000     2.000     2.000 "
-        "1.000     1.000     1.000     4.000     4.000 "
+        "1.000     1.000     2.000     5.000     4.000 "
         "1.000     1.000     1.000     2.000     2.000 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -408,7 +421,7 @@ TEST(GDALWriterTest, stdev)
         "0.000 -9999.000     0.000     0.000     0.094 "
         "0.000 -9999.000     0.000     0.000     0.000 "
         "0.000     0.000     0.000     0.300     0.300 "
-        "0.000     0.000     0.000     0.424     0.424 "
+        "0.000     0.000     0.200     0.449     0.424 "
         "0.000     0.000     0.000     0.200     0.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -429,9 +442,9 @@ TEST(GDALWriterTest, stdevWindow)
 
     const std::string output =
         "0.000     0.021     0.000     0.000     0.094 "
-        "0.000     0.034     0.000     0.000     0.000 "
+        "0.000     0.045     0.000     0.000     0.000 "
         "0.000     0.000     0.000     0.300     0.300 "
-        "0.000     0.000     0.000     0.424     0.424 "
+        "0.000     0.000     0.200     0.449     0.424 "
         "0.000     0.000     0.000     0.200     0.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
@@ -606,9 +619,110 @@ TEST(GDALWriterTest, bounds)
         "5.000 -9999.000     7.000     8.000     8.967 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.700     6.700 "
-        "2.000     3.000     4.000     4.800     5.800 "
+        "2.000     3.000     4.200     4.920     5.800 "
         "1.000     2.000     3.000     4.200     5.200 ";
 
     runGdalWriter(wo, infile, outfile, output);
 }
 
+// Make sure we reset bounds when starting a new file.
+TEST(GDALWriterTest, issue_2074)
+{
+    FileUtils::deleteFile(Support::temppath("gdal.tif"));
+    FileUtils::deleteFile(Support::temppath("gdal1.tif"));
+    FileUtils::deleteFile(Support::temppath("gdal2.tif"));
+
+    PointTable t;
+    t.layout()->registerDim(Dimension::Id::X);
+    t.layout()->registerDim(Dimension::Id::Y);
+    t.layout()->registerDim(Dimension::Id::Z);
+
+    PointViewPtr v1(new PointView(t));
+    PointViewPtr v2(new PointView(t));
+
+    v1->setField(Dimension::Id::X, 0, 0);
+    v1->setField(Dimension::Id::Y, 0, 0);
+    v1->setField(Dimension::Id::Z, 0, 0);
+    v1->setField(Dimension::Id::X, 1, 1);
+    v1->setField(Dimension::Id::Y, 1, 1);
+    v1->setField(Dimension::Id::Z, 1, 0);
+
+    v2->setField(Dimension::Id::X, 0, 2);
+    v2->setField(Dimension::Id::Y, 0, 2);
+    v2->setField(Dimension::Id::Z, 0, 0);
+    v2->setField(Dimension::Id::X, 1, 3);
+    v2->setField(Dimension::Id::Y, 1, 3);
+    v2->setField(Dimension::Id::Z, 1, 0);
+
+    BufferReader r;
+    r.addView(v1);
+    r.addView(v2);
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "mean");
+    wo.add("filename", Support::temppath("gdal#.tif"));
+    wo.add("resolution", .5);
+
+    GDALWriter w;
+
+    w.setOptions(wo);
+    w.setInput(r);
+
+    w.prepare(t);
+    w.execute(t);
+
+    gdal::registerDrivers();
+    gdal::Raster raster(Support::temppath("gdal1.tif"), "GTiff");
+    if (raster.open() != gdal::GDALError::None)
+    {
+        throw pdal_error(raster.errorMsg());
+    }
+
+    gdal::Raster raster2(Support::temppath("gdal2.tif"), "GTiff");
+    if (raster2.open() != gdal::GDALError::None)
+    {
+        throw pdal_error(raster2.errorMsg());
+    }
+    // Make sure the output files are the same size.
+    EXPECT_EQ(raster.width(), 3);
+    EXPECT_EQ(raster.height(), 3);
+    EXPECT_EQ(raster.width(), raster2.width());
+    EXPECT_EQ(raster.height(), raster2.height());
+
+    // Make sure that we accumulate data for two views to one output raster.
+    Options wo2;
+    wo2.add("gdaldriver", "GTiff");
+    wo2.add("output_type", "mean");
+    wo2.add("filename", Support::temppath("gdal.tif"));
+    wo2.add("resolution", .5);
+
+    GDALWriter w2;
+    w2.setOptions(wo2);
+    w2.setInput(r);
+
+    w2.prepare(t);
+    w2.execute(t);
+
+    gdal::Raster raster3(Support::temppath("gdal.tif"), "GTiff");
+    if (raster3.open() != gdal::GDALError::None)
+    {
+        throw pdal_error(raster3.errorMsg());
+    }
+    EXPECT_EQ(raster3.width(), 7);
+    EXPECT_EQ(raster3.height(), 7);
+}
+
+TEST(GDALWriterTest, issue_2095)
+{
+    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0);
+
+    EXPECT_EQ(grid.verticalIndex(0), 4);
+    EXPECT_EQ(grid.verticalIndex(.5), 4);
+    EXPECT_EQ(grid.verticalIndex(1), 3);
+    EXPECT_EQ(grid.verticalIndex(1.5), 3);
+    EXPECT_EQ(grid.verticalIndex(4), 0);
+    EXPECT_EQ(grid.verticalIndex(4.5), 0);
+}
+
+} // namespace pdal

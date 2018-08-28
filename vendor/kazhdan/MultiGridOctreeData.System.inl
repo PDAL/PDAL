@@ -1910,7 +1910,6 @@ void Octree< Real >::_addFEMConstraints( const FEMConstraintFunctor& F , const C
 	delete __constraints;
 
 	DenseNodeData< D > _coefficients( _sNodesEnd(maxDepth-1) );
-	memset( &_coefficients[0] , 0 , sizeof(D) * _sNodesEnd(maxDepth-1) );
 	for( LocalDepth d=maxDepth-1 ; d>=0 ; d-- )
 	{
 #pragma omp parallel for num_threads( threads )

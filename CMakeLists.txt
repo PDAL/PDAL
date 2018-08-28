@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -35,7 +35,7 @@ GET_OS_INFO()
 SET_INSTALL_DIRS()
 
 set(PDAL_API_VERSION "6")
-set(PDAL_BUILD_VERSION "7.0.1")
+set(PDAL_BUILD_VERSION "7.0.2")
 
 # Name of C++ library
 
@@ -216,6 +216,7 @@ if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
+        io/Ilvis2Reader.cpp
         ${PDAL_SRC_DIR}/DbWriter.cpp
         ${PDAL_SRC_DIR}/DbReader.cpp
         ${PDAL_SRC_DIR}/XMLSchema.cpp)
@@ -257,13 +258,13 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
-        ${ZSTD_INCLUDE_DIR}
+        ${ZSTD_INCLUDE_DIRS}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
-    PUBLIC
+    PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
         ${GEOS_LIBRARY}
@@ -272,15 +273,13 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
-        ${ZSTD_STATIC_LIB}
+        ${ZSTD_LIBRARIES}
         ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
-    PRIVATE
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-    ${JSON_CPP_LINK_TYPE}
         ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
@@ -313,12 +312,35 @@ endif()
 #
 # Installation
 #
+
+#
+# Only install compression headers if we're building with the particular
+# compression type.
+#
+if (NOT PDAL_HAVE_ZSTD)
+    set(ZSTD_EXCLUDES PATTERN pdal/compression/Zstd* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    set(ZLIB_EXCLUDES PATTERN pdal/compression/Deflate* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
+endif()
+
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    ${ZSTD_EXCLUDES}
+    ${ZLIB_EXCLUDES}
+    ${LZMA_EXCLUDES}
+    ${LAZPERF_EXCLUDES}
 )
+
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"

@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 76c801ff63cfae132d8477c6933feb8445bdecf5
+// Git SHA: d4440118a65ee6eee792b7d8e109cf2f08c15f14
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -42,7 +42,6 @@ SOFTWARE.
 
 
 #pragma once
-#pragma warning(disable:4251)   // DLL export warnings
 /// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
 #define ARBITER_IS_AMALGAMATION
@@ -3776,6 +3775,16 @@ namespace Xml = rapidxml;
 #include <string>
 #include <vector>
 
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/exports.hpp>
+
+#ifndef ARBITER_EXTERNAL_JSON
+#include <arbiter/third/json/json.hpp>
+#endif
+
+#endif
+
+
 // MD5 implementation adapted from:
 //      https://github.com/B-Con/crypto-algorithms
 
@@ -3789,7 +3798,7 @@ namespace arbiter
 namespace crypto
 {
 
-std::string md5(const std::string& data);
+ARBITER_DLL std::string md5(const std::string& data);
 
 } // namespace crypto
 } // namespace arbiter
@@ -3818,6 +3827,16 @@ std::string md5(const std::string& data);
 #include <string>
 #include <vector>
 
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/exports.hpp>
+
+#ifndef ARBITER_EXTERNAL_JSON
+#include <arbiter/third/json/json.hpp>
+#endif
+
+#endif
+
+
 // SHA256 implementation adapted from:
 //      https://github.com/B-Con/crypto-algorithms
 // HMAC:
@@ -3833,10 +3852,10 @@ namespace arbiter
 namespace crypto
 {
 
-std::vector<char> sha256(const std::vector<char>& data);
-std::string sha256(const std::string& data);
+ARBITER_DLL std::vector<char> sha256(const std::vector<char>& data);
+ARBITER_DLL std::string sha256(const std::string& data);
 
-std::string hmacSha256(const std::string& key, const std::string& data);
+ARBITER_DLL std::string hmacSha256(const std::string& key, const std::string& data);
 
 } // namespace crypto
 } // namespace arbiter
@@ -3864,6 +3883,16 @@ std::string hmacSha256(const std::string& key, const std::string& data);
 #include <string>
 #include <vector>
 
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/exports.hpp>
+
+#ifndef ARBITER_EXTERNAL_JSON
+#include <arbiter/third/json/json.hpp>
+#endif
+
+#endif
+
+
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
 {
@@ -3874,11 +3903,11 @@ namespace arbiter
 namespace crypto
 {
 
-std::string encodeBase64(const std::vector<char>& data, bool pad = true);
-std::string encodeBase64(const std::string& data, bool pad = true);
+ARBITER_DLL std::string encodeBase64(const std::vector<char>& data, bool pad = true);
+ARBITER_DLL std::string encodeBase64(const std::string& data, bool pad = true);
 
-std::string encodeAsHex(const std::vector<char>& data);
-std::string encodeAsHex(const std::string& data);
+ARBITER_DLL std::string encodeAsHex(const std::vector<char>& data);
+ARBITER_DLL std::string encodeAsHex(const std::string& data);
 
 } // namespace crypto
 } // namespace arbiter
@@ -4011,7 +4040,11 @@ namespace util
         {
             // We are going to join current with a populated subpath, so make
             // sure they are separated by a slash.
-            sep = "/";
+#ifdef ARBITER_WINDOWS
+            sep = "\\";
+#else
+            sep = "/";   
+#endif
         }
         else if (next.empty() && currentIsDir)
         {
@@ -4019,7 +4052,12 @@ namespace util
             // directory.  Retain its trailing slash.
             if (current.size() && !isSlash(current.back()))
             {
-                sep = "/";
+#ifdef ARBITER_WINDOWS
+                sep = "\\";
+#else
+                sep = "/";   
+#endif
+
             }
         }
 
@@ -4059,13 +4097,13 @@ namespace util
     /** @brief Extract an environment variable, if it exists, independent of
      * platform.
      */
-    std::unique_ptr<std::string> env(const std::string& var);
+    ARBITER_DLL std::unique_ptr<std::string> env(const std::string& var);
 
     /** @brief Split a string on a token. */
-    std::vector<std::string> split(const std::string& s, char delimiter = '\n');
+    ARBITER_DLL std::vector<std::string> split(const std::string& s, char delimiter = '\n');
 
     /** @brief Remove whitespace. */
-    std::string stripWhitespace(const std::string& s);
+    ARBITER_DLL std::string stripWhitespace(const std::string& s);
 
     template<typename T, typename... Args>
     std::unique_ptr<T> makeUnique(Args&&... args)

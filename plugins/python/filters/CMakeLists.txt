@@ -9,6 +9,7 @@ PDAL_ADD_PLUGIN(python_libname filter python
         PythonFilter.cpp
     LINK_WITH
         ${PYTHON_LIBRARY}
+        ${PDAL_JSONCPP_LIB_NAME}
         ${CMAKE_DL_LIBS}
     )
 target_include_directories(${python_libname} PRIVATE
@@ -19,6 +20,6 @@ if (WITH_TESTS)
         FILES
             ../test/PythonFilterTest.cpp
         LINK_WITH
-            ${python_libname}
+            ${python_libname} ${PYTHON_LIBRARY}
     )
 endif()

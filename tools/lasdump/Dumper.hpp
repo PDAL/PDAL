@@ -60,6 +60,7 @@ public:
         { return m_error; }
 
 private:
+    laszip_POINTER m_zip;
     std::string m_filename;
     Header m_header;
     Vlr m_zipVlr;
@@ -71,6 +72,7 @@ private:
     void readPoints(ILeStream& in);
     void readCompressedPoints(ILeStream& in);
     void loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& buf);
+    void handleLaszip(int result);
 };
 
 } // namespace lasdump

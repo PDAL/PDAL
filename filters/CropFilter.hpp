@@ -35,18 +35,22 @@
 #pragma once
 
 #include <list>
+#include <memory>
 
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/Streamable.hpp>
-
-#include "private/Point.hpp"
 
 namespace pdal
 {
 
 class ProgramArgs;
 class GridPnp;
+struct CropArgs;
+namespace filter
+{
+    class Point;
+}
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -55,6 +59,7 @@ class PDAL_DLL CropFilter : public Filter, public Streamable
 public:
     CropFilter();
     ~CropFilter();
+
     std::string getName() const;
 
 private:
@@ -68,13 +73,8 @@ private:
         Polygon m_poly;
         std::vector<std::unique_ptr<GridPnp>> m_gridPnps;
     };
-    std::vector<Bounds> m_bounds;
-    bool m_cropOutside;
-    std::vector<Polygon> m_polys;
-    SpatialReference m_assignedSrs;
-    double m_distance;
+    std::unique_ptr<CropArgs> m_args;
     double m_distance2;
-    std::vector<filter::Point> m_centers;
     std::vector<ViewGeom> m_geoms;
     std::vector<BOX2D> m_boxes;
 

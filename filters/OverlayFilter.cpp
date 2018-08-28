@@ -157,6 +157,8 @@ void OverlayFilter::ready(PointTableRef table)
 
 void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
 {
+    if (srs.empty())
+        return;
     for (auto& poly : m_polygons)
     {
         try

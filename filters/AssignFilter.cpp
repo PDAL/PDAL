@@ -95,7 +95,7 @@ std::istream& operator>>(std::istream& in, AssignRange& r)
     {
         r.parse(s);
     }
-    catch (DimRange::error)
+    catch (DimRange::error&)
     {
         in.setstate(std::ios_base::failbit);
     }

@@ -36,10 +36,12 @@
 
 #include <algorithm>
 
+#include <pdal/pdal_config.hpp>
+#include <pdal/pdal_features.hpp>
+
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_config.hpp>
 #include <pdal/StageFactory.hpp>
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>

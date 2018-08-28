@@ -21,14 +21,6 @@ items:
 .. _`Latex`: https://en.wikipedia.org/wiki/LaTeX
 .. _`pdflatex`: https://www.tug.org/applications/pdftex/
 
-.. note::
-
-    For the website, PDAL builds the documentation using :ref:`travis` and :ref:`docker`.
-    You can get a listing of the exact Ubuntu requirements in the `Dockerfile`_.
-    See :ref:`integration` for more detail.
-
-.. _`Dockerfile`: https://github.com/PDAL/PDAL/tree/master/scripts/docker/docbuild/Dockerfile
-
 Sphinx_ and Breathe_
 --------------------------------------------------------------------------------
 
@@ -103,39 +95,9 @@ is then served via `GitHub Pages`_.
     The website is regenerated and pushed only on the ``after_success`` :ref:`travis`
     call. If the tests aren't passing, the website won't be updated.
 
-Building With Docker
-================================================================================
-
-A :ref:`docker` image, ``pdal/docs`` contains the full compliment of requirements,
-and it is used by PDAL's :ref:`travis` continuous integration to build and commit
-new versions of the website. You can easily build the docs using Docker by
-issuing the following command:
-
-::
-
-    docker run -v /path/to/pdal/root/tree:/data -w /data/doc pdal/docs make html
-
-
-Container refresh
-................................................................................
-
-The ``pdal/docs`` container can be refreshed on DockerHub by tagging a ``docbuild``
-tag and force-pushing it to the main repository:
-
-::
-
-    $ git tag -f docbuild
-    $ git push origin -f refs/tags/docbuild
-
-.. note::
-
-    The ``pdal/docs`` container is constructed from the `Dockerfile <https://github.com/PDAL/PDAL/blob/master/scripts/docker/docbuild/Dockerfile>`__ at whatever revision the ``docbuild`` tag points to.
 
 .. _`GitHub Pages`: https://pages.github.com/
 .. _`GitHub`: http://github.com/PDAL/PDAL
-
-.. _`Digital Ocean`: digitalocean.com
-
 .. _Sphinx: http://sphinx-doc.org/
 .. _Breathe: https://github.com/michaeljones/breathe
 .. _virtual environments: https://pypi.python.org/pypi/virtualenv

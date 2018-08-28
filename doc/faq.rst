@@ -11,8 +11,10 @@ FAQ
   The proper spelling of the project name is PDAL, in uppercase. It is
   pronounced to rhyme with "GDAL".
 
-  .. it is properly pronounced like the dog though :)
+  .. it is properly pronounced like the dog though :) -- hobu
+
 |
+
 * Why do I get the error "Couldn't create ... stage of type ..."?
 
   In almost all cases this error occurs because you're trying to run a stage
@@ -44,7 +46,11 @@ FAQ
   sizes before PDAL can process the data. Furthermore, some operations
   (notably :ref:`DEM creation<writers.gdal>`) can use large amounts of
   additional memory during processing before the output can be written.
+  Depending on the operation, PDAL will attempt operate in "stream mode" to
+  limit memory consumption when possible.
+
 |
+
 * What is PDAL's relationship to PCL?
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
@@ -70,9 +76,10 @@ FAQ
 .. _`GeoHipster interview`: http://geohipster.com/2018/03/05/howard-butler-like-good-song-open-source-software-chance-immortal/
 
 |
+
 * Are there any command line tools in PDAL similar to LAStools?
 
-  Yes. The ``pdal`` command provides a wide range of features which go
+  Yes. The :ref:`pdal <apps>` command provides a wide range of features which go
   far beyond basic LIDAR data processing. Additionally, PDAL is licensed
   under an open source license (this applies to the whole library and
   all command line tools).
@@ -88,3 +95,19 @@ FAQ
   focus on usability and readability. You will find that the ``pdal``
   command has several well-organized subcommands such as ``info``
   or ``translate`` (see :ref:`apps`).
+
+* I get GeoTIFF errors. What can I do about them?
+
+  ::
+
+    (readers.las Error) Geotiff directory contains key 0 with short entry and more than one value.
+
+  If :ref:`readers.las` is outputting error messages about GeoTIFF, this means
+  the keys that were written into your file were incorrect or at least not
+  readable by `libgeotiff`_. Rewrite the file using PDAL to fix the issue:
+
+  ::
+
+    pdal translate badfile.las goodfile.las --writers.las.forward=all
+
+.. _`libgeotiff`: https://trac.osgeo.org/geotif

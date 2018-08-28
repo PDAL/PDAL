@@ -52,6 +52,9 @@ TEST(AssignFilterTest, value)
 
     Options fo;
     fo.add("assignment", "X[:]=27.5");
+    fo.add("assignment", "Classification[:]=0");
+    fo.add("assignment", "GpsTime[:]=3000");
+    fo.add("assignment", "Red[:]=255");
 
     Stage& f = *(factory.createStage("filters.assign"));
     f.setInput(r);
@@ -81,7 +84,15 @@ TEST(AssignFilterTest, value)
     PointViewSet s = test.execute(t2);
     PointViewPtr v = *s.begin();
     for (PointId i = 0; i < v->size(); ++i)
+    {
         EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
+        EXPECT_EQ(v->getFieldAs<uint16_t>(
+            Dimension::Id::Classification, i), 0);
+        EXPECT_DOUBLE_EQ(v->getFieldAs<double>(
+            Dimension::Id::GpsTime, i), 3000.0);
+        EXPECT_EQ(v->getFieldAs<int>(
+            Dimension::Id::Red, i), 255);
+    }
 }
 
 

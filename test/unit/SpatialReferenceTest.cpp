@@ -391,3 +391,17 @@ TEST(SpatialReferenceTest, test_bounds)
     EXPECT_FLOAT_EQ(static_cast<float>(b2.maxy), 39.01261687f);
 
 }
+
+// Make sure we get positive, negative and 0 back for UTM zones.
+TEST(SpatialReferenceTest, issue_1989)
+{
+    SpatialReference srs;
+    EXPECT_EQ(0, srs.getUTMZone());
+
+    SpatialReference north("EPSG:2027");
+    EXPECT_EQ(15, north.getUTMZone());
+
+    SpatialReference south("EPSG:32732");
+    EXPECT_EQ(-32, south.getUTMZone());
+}
+

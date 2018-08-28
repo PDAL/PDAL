@@ -19,7 +19,7 @@ What is its big idea?
 --------------------------------------------------------------------------------
 
 PDAL allows you to compose :ref:`operations <filters>` on point clouds into
-:ref:`pipelines <pipeline>` of :ref:`stages <stage_index>`. These pipelines can
+:ref:`pipelines <pipeline>` of stages. These pipelines can
 be written in a declarative JSON syntax or constructed using the available API.
 
 Why would you want to do that?

@@ -76,6 +76,7 @@ PointViewSet ReturnsFilter::run(PointViewPtr inView)
     if (!inView->size())
         return viewSet;
 
+    m_outputTypes = 0;
     for (auto& r : m_returnsString)
     {
         Utils::trim(r);

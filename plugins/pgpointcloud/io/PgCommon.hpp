@@ -50,9 +50,7 @@ inline pdal::CompressionType getCompressionType(
     compression_type = Utils::tolower(compression_type);
     if (compression_type == "dimensional")
         return CompressionType::Dimensional;
-    else if (compression_type == "ght")
-        return CompressionType::Ght;
-    else if (compression_type == "laszperf")
+    else if (compression_type == "lazperf")
         return CompressionType::Lazperf;
     return CompressionType::None;
 }

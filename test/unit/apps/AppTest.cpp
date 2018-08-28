@@ -48,6 +48,20 @@ std::string appName()
 namespace pdal
 {
 
+TEST(PdalApp, load)
+{
+    std::string output;
+
+    Utils::run_shell_command(appName() + " 2>&1", output);
+    EXPECT_TRUE(output.find("Usage") != std::string::npos);
+
+    Utils::run_shell_command(appName() + " sort 2>&1", output);
+    EXPECT_TRUE(output.find("kernels.sort") != std::string::npos);
+
+    Utils::run_shell_command(appName() + " foobar 2>&1", output);
+    EXPECT_TRUE(output.find("not recognized") != std::string::npos);
+}
+
 TEST(PdalApp, log)
 {
     std::string output;

@@ -1,0 +1,18 @@
+{
+  "pipeline":[
+    {
+      "type": "readers.faux",
+      "bounds": "([1,10], [101,110], [201,210])",
+      "mode": "ramp",
+      "count": 10
+    },
+    {
+      "type": "filters.range",
+      "limits": "Y[108:109]",
+      "limits": "X[2:5]",
+      "limits": "Z[1:1000]",
+      "limits": "X[7:9]",
+      "limits": "Y[103:105]"
+    }
+  ]
+}

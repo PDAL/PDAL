@@ -47,7 +47,7 @@ static PluginInfo const s_info
 {
     "readers.mbio",
     "MBSystem Reader",
-    "http://www.pdal.io/stages/readers.mbio.html"
+    "http://pdal.io/stages/readers.mbio.html"
 };
 
 CREATE_SHARED_STAGE(MbReader, s_info)
@@ -91,7 +91,7 @@ void MbReader::ready(PointTableRef table)
     int lonflip = 0; // Longitude -180 -> 180
     double bounds[4] { -180, 180, -90, 90 };
     int btime_i[7] { 0, 0, 0, 0, 0, 0, 0 };
-    int etime_i[7] { std::numeric_limits<int>::max(), 0, 0, 0, 0, 0 };
+    int etime_i[7] { (std::numeric_limits<int>::max)(), 0, 0, 0, 0, 0 };
     char *mbio_ptr;
     double btime_d;
     double etime_d;

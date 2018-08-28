@@ -36,29 +36,23 @@
 
 #include <pdal/Filter.hpp>
 
-#include "private/DimRange.hpp"
+#include <memory>
 
 namespace pdal
 {
 
+struct PMFArgs;
+
 class PDAL_DLL PMFFilter : public Filter
 {
 public:
-    PMFFilter() : Filter()
-    {
-    }
+    PMFFilter();
+    ~PMFFilter();
 
     std::string getName() const;
 
 private:
-    double m_cellSize;
-    bool m_exponential;
-    DimRange m_ignored;
-    double m_initialDistance;
-    bool m_lastOnly;
-    double m_maxDistance;
-    double m_maxWindowSize;
-    double m_slope;
+    std::unique_ptr<PMFArgs> m_args;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

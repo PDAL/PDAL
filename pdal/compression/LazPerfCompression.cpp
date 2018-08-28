@@ -34,6 +34,15 @@
 
 #include <pdal/util/OStream.hpp>
 
+#pragma push_macro("min")
+#pragma push_macro("max")
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <laz-perf/common/common.hpp>
 #include <laz-perf/compressor.hpp>
 #include <laz-perf/decompressor.hpp>
@@ -43,6 +52,9 @@
 #include <laz-perf/formats.hpp>
 #include <laz-perf/io.hpp>
 #include <laz-perf/las.hpp>
+
+#pragma pop_macro("max")
+#pragma pop_macro("min")
 
 #include "LazPerfCompression.hpp"
 
@@ -116,7 +128,7 @@ public:
     {
         while (bufsize)
         {
-            size_t copyCnt = std::min(m_avail, bufsize);
+            size_t copyCnt = (std::min)(m_avail, bufsize);
             std::copy(buf, buf + copyCnt, m_tmpbuf + (CHUNKSIZE - m_avail));
             m_avail -= copyCnt;
             if (m_avail == 0)
@@ -214,7 +226,7 @@ public:
 
     void getBytes(uint8_t *dst, size_t dstsize)
     {
-        size_t count = std::min(dstsize, m_srcsize);
+        size_t count = (std::min)(dstsize, m_srcsize);
         uint8_t *src = const_cast<uint8_t *>(
             reinterpret_cast<const uint8_t *>(m_srcbuf));
         std::copy(src, src + count, dst);
