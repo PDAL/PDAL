@@ -53,7 +53,7 @@ static int runTranslate(std::string const& cmdline, std::string& output)
     return Utils::run_shell_command(cmd + " " + cmdline, output);
 }
 
-TEST(translateTest, t1)
+TEST(TranslateTest, t1)
 {
     std::string output;
 
@@ -72,7 +72,7 @@ TEST(translateTest, t1)
 }
 
 // Tests for processing JSON input.
-TEST(translateTest, t2)
+TEST(TranslateTest, t2)
 {
     std::string output;
 
@@ -190,7 +190,7 @@ TEST(translateTest, t2)
         output), 0);
 }
 
-TEST(translateTest, t3)
+TEST(TranslateTest, t3)
 {
     std::string output;
 
@@ -206,3 +206,32 @@ TEST(translateTest, t3)
     EXPECT_EQ(std::stoi(output), 1);
 #endif
 }
+
+// Make sure that repeated inputs ("groups" in this case), are propagated
+// to stage.
+TEST(TranslateTest, issue_2114)
+{
+    FileUtils::deleteFile(Support::temppath("out1.las"));
+    FileUtils::deleteFile(Support::temppath("out2.las"));
+    FileUtils::deleteFile(Support::temppath("out3.las"));
+    FileUtils::deleteFile(Support::temppath("out4.las"));
+
+    std::string output;
+    std::string in = Support::datapath("las/autzen_trim.las");
+    std::string out = Support::temppath("out#.las");
+
+    EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out1.las")));
+    EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out2.las")));
+    EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out3.las")));
+    EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out4.las")));
+
+    EXPECT_EQ(runTranslate(in + " " + out + " -f returns "
+        "--filters.returns.groups=last --filters.returns.groups=first",
+        output), 0);
+
+    EXPECT_TRUE(FileUtils::fileExists(Support::temppath("out1.las")));
+    EXPECT_TRUE(FileUtils::fileExists(Support::temppath("out2.las")));
+    EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out3.las")));
+    EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out4.las")));
+}
+
