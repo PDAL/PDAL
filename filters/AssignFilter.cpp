@@ -134,8 +134,9 @@ void AssignFilter::prepared(PointTableRef table)
 
     m_condition.m_id = layout->findDim(m_condition.m_name);
     if (m_condition.m_id == Dimension::Id::Unknown)
-        throwError("Invalid dimension name in 'condition' option: '" +
-            m_condition.m_name + "'.");
+        m_doCondition = false;
+    else
+        m_doCondition = true;
 
     for (auto& r : m_assignments)
     {
@@ -149,10 +150,20 @@ void AssignFilter::prepared(PointTableRef table)
 
 bool AssignFilter::processOne(PointRef& point)
 {
-    for (AssignRange& r : m_assignments)
-        if (r.valuePasses(point.getFieldAs<double>(r.m_id)) &&
-            m_condition.valuePasses(point.getFieldAs<double>(m_condition.m_id)))
-            point.setField(r.m_id, r.m_value);
+    if (m_doCondition)
+    {
+        bool condition = m_condition.valuePasses(point.getFieldAs<double>(m_condition.m_id));
+        for (AssignRange& r : m_assignments)
+            if (r.valuePasses(point.getFieldAs<double>(r.m_id)) &&
+                condition)
+                point.setField(r.m_id, r.m_value);
+    } else
+    {
+
+        for (AssignRange& r : m_assignments)
+            if (r.valuePasses(point.getFieldAs<double>(r.m_id)) )
+                point.setField(r.m_id, r.m_value);
+    }
     return true;
 }
 

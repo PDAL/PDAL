@@ -63,6 +63,7 @@ private:
 
     std::vector<AssignRange> m_assignments;
     DimRange m_condition;
+    bool m_doCondition;
 };
 
 } // namespace pdal
