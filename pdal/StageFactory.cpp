@@ -51,18 +51,18 @@ namespace pdal
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     static const std::string ghPrefix("greyhound://");
-
+    static const std::string i3sPrefix("i3s://");
     std::string ext;
     // filename may actually be a greyhound uri + pipelineId
     if (Utils::iequals(filename.substr(0, ghPrefix.size()), ghPrefix))
         ext = ".greyhound";      // Make it look like an extension.
+    else if(Utils::iequals(filename.substr(0, i3sPrefix.size()), i3sPrefix))
+        ext = ".i3s";
     else
         ext = FileUtils::extension(filename);
-
     // Strip off '.' and make lowercase.
     if (ext.length())
         ext = Utils::tolower(ext.substr(1));
-
     PluginManager<Stage>& mgr = PluginManager<Stage>::get();
     return mgr.extensions().defaultReader(ext);
 }
