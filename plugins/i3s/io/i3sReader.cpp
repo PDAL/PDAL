@@ -71,6 +71,7 @@ namespace pdal
 
   void I3SReader::addDimensions(PointLayoutPtr layout)
   {
+
     Json::StreamWriterBuilder writer;
     writer.settings_["indentation"] = "";
 
@@ -79,25 +80,37 @@ namespace pdal
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
 
-    
-    Json::Value attributes = m_args.body["layers"][0]["attributeStorageInfo"];
-    for(int i = 0; i < attributes.size(); i ++)
-    {
-      std::string name = Json::writeString(writer, attributes[i]["name"]);
-      name.erase(
-        remove( name.begin(), name.end(), '\"' ),
-        name.end()
-      );
-      std::cout << name << "\n";
-      std::string type;
-      
-      if (attributes[0].isMember("attributeValues")) {
-        type = Json::writeString(writer,
-            attributes["attributeValues"]["valueType"]);
-        layout->registerOrAssignDim(name, pdal::Dimension::type(type));
+    for (int j = 0; j < m_args.body["layers"].size(); j++) {
+
+      Json::Value attributes = m_args.body["layers"][j]["attributeStorageInfo"];
+
+      for(int i = 0; i < attributes.size(); i ++)
+      {
+        
+        std::string name = Json::writeString(writer, attributes[i]["name"]);
+        
+        name.erase(
+          remove( name.begin(), name.end(), '\"' ),
+          name.end()
+        );
+
+        std::string type;
+        /*Check the entry has an attributevalues object
+         TODO check if name is a part of pdal's wanted parameters
+         TODO manage struct from header file
+         */ 
+        if (attributes[i].isMember("attributeValues")) {
+          type = Json::writeString(writer,
+              attributes[i]["attributeValues"]["valueType"]);
+          layout->registerOrAssignDim(name, pdal::Dimension::type(type));
+          m_layout.registerOrAssignDim(name, pdal::Dimension::type(type));
+        }
+        else{
+          layout->registerOrAssignDim(name, Dimension::Type::Double);
+          m_layout.registerOrAssignDim(name, Dimension::Type::Double);
+        }
+
       }
-      else
-        layout->registerOrAssignDim(name, Dimension::Type::Double);
     }
   }
 
@@ -112,17 +125,40 @@ namespace pdal
 
   point_count_t I3SReader::read(PointViewPtr view, point_count_t count)
   {
-/*request 3scenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>*/
-//node index document: <layer-url >/nodes/<node-id>
-//shared resources: <node-url>/shared/
-//feature data: <node-url>/features/<feature-data-bundle-id>
-//geometry data: <node-url>/geometries/<geometry-data-bundle-id>
-//texture data: <node-url>/textures/<texture-data-bundle-id>
+    /*
+    -3scenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
+    -node index document: <layer-url >/nodes/<node-id>
+    -shared resources: <node-url>/shared/
+    -feature data: <node-url>/features/<feature-data-bundle-id>
+    -geometry data: <node-url>/geometries/<geometry-data-bundle-id>
+    -texture data: <node-url>/textures/<texture-data-bundle-id>
+    */
     
+    log()->get(LogLevel::Debug) << "fetching info from " << 
+        m_args.url + "/layers/0/nodes/0/geometries/0" << "\n"; 
+
+    std::string urlGeo = m_args.url + "/layers/0/nodes/0/geometries/0";
+     
+    auto response(m_arbiter->getBinary(urlGeo));
+        
+    const std::size_t pointSize(view->layout()->pointSize());
+    uint32_t numPoints(0);
+    std::copy(
+            response.data() + response.size() - sizeof(uint32_t),
+            response.data() + response.size(),
+            reinterpret_cast<char*>(&numPoints));
+    log()->get(LogLevel::Debug) <<
+        "Fetched " << numPoints << " points" << std::endl;
+    log()->get(LogLevel::Debug) <<
+        "Fetched " << response.size() << " bytes" << std::endl;
+ 
+
     view->setField(pdal::Dimension::Id::X, 0, 12);
     view->setField(pdal::Dimension::Id::Y, 0, 13);
     view->setField(pdal::Dimension::Id::Z, 0, 14);
-    view->setField(pdal::Dimension::Id::INTENSITY, 0, 55);
+    view->setField(pdal::Dimension::Id::Intensity, 0, 55);
+    
+    
 
     return 0;
   }
