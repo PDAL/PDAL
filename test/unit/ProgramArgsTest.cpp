@@ -544,4 +544,26 @@ TEST(ProgramArgsTest, invalidJson)
     EXPECT_ANY_THROW(args.parse(s));
 }
 
+// Test to make sure negative numbers work in lists.
+TEST(ProgramArgsTest, issue_2155)
+{
+    ProgramArgs args;
+
+    std::vector<int> m_vec;
+
+    args.add("foo", "Vec description", m_vec);
+
+    StringList s = toStringList("--foo=-1 --foo 2 --foo=-3");
+    args.parse(s);
+
+    EXPECT_EQ(m_vec.size(), 3U);
+    EXPECT_EQ(m_vec[0], -1);
+    EXPECT_EQ(m_vec[1], 2);
+    EXPECT_EQ(m_vec[2], -3);
+
+    args.reset();
+
+    s = toStringList("--foo=-1 --foo");
+    EXPECT_THROW(args.parse(s), arg_val_error);
+}
 #endif
