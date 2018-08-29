@@ -60,9 +60,10 @@ class PDAL_DLL NumpyReader : public Reader, public Streamable
 public:
     NumpyReader& operator=(const NumpyReader&) = delete;
     NumpyReader(const NumpyReader&) = delete;
-    NumpyReader()
+    NumpyReader() : m_array(NULL)
     {}
 
+    void setArray(PyObject* array);
     std::string getName() const;
 
 private:

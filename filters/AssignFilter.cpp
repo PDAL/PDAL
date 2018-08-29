@@ -123,12 +123,20 @@ void AssignFilter::addArgs(ProgramArgs& args)
 {
     args.add("assignment", "Values to assign to dimensions based on range.",
         m_assignments);
+    args.add("condition", "Condition for assignment based on range.",
+        m_condition);
 }
 
 
 void AssignFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
+
+    m_condition.m_id = layout->findDim(m_condition.m_name);
+    if (m_condition.m_id == Dimension::Id::Unknown)
+        m_doCondition = false;
+    else
+        m_doCondition = true;
 
     for (auto& r : m_assignments)
     {
@@ -142,9 +150,20 @@ void AssignFilter::prepared(PointTableRef table)
 
 bool AssignFilter::processOne(PointRef& point)
 {
-    for (AssignRange& r : m_assignments)
-        if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
-            point.setField(r.m_id, r.m_value);
+    if (m_doCondition)
+    {
+        bool condition = m_condition.valuePasses(point.getFieldAs<double>(m_condition.m_id));
+        for (AssignRange& r : m_assignments)
+            if (r.valuePasses(point.getFieldAs<double>(r.m_id)) &&
+                condition)
+                point.setField(r.m_id, r.m_value);
+    } else
+    {
+
+        for (AssignRange& r : m_assignments)
+            if (r.valuePasses(point.getFieldAs<double>(r.m_id)) )
+                point.setField(r.m_id, r.m_value);
+    }
     return true;
 }
 

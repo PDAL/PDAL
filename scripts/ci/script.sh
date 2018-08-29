@@ -37,6 +37,7 @@ make install
 pip install packaging
 git clone https://github.com/PDAL/python.git pdal-python
 cd pdal-python
+git checkout 2.0.0
 python setup.py build
 echo "current path: " `pwd`
 export PDAL_TEST_DIR=/pdal/_build/test
