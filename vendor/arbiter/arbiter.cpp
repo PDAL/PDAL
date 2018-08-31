@@ -1961,6 +1961,9 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
 {
     std::unique_ptr<std::size_t> size;
 
+    Headers headers(m_config->baseHeaders());
+    headers.erase("x-amz-server-side-encryption");
+
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
             "HEAD",
@@ -1968,7 +1971,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
             resource,
             m_auth->fields(),
             Query(),
-            Headers(),
+            headers,
             empty);
 
     drivers::Http http(m_pool);
