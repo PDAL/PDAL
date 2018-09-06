@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 7da80808840ddc56990c30ab40c37e5865cf1fea
+// Git SHA: ffe727de1979b58ce6e3770fb27f21f78a65b423
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -54,9 +54,14 @@ SOFTWARE.
 
 #pragma once
 
+#ifdef ARBITER_ZLIB
+
 #ifndef ZLIB_CONST
 #define ZLIB_CONST
 #endif
+
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/third/gzip/config.hpp
@@ -70,6 +75,10 @@ SOFTWARE.
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/third/gzip/utils.hpp
 // //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#ifdef ARBITER_ZLIB
 
 #include <cstdint>
 #include <cstdlib>
@@ -95,6 +104,9 @@ inline bool is_compressed(const char* data, std::size_t size)
 }
 } // namespace gzip
 
+#endif
+
+
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/third/gzip/utils.hpp
 // //////////////////////////////////////////////////////////////////////
@@ -109,6 +121,8 @@ inline bool is_compressed(const char* data, std::size_t size)
 // //////////////////////////////////////////////////////////////////////
 
 #pragma once
+
+#ifdef ARBITER_ZLIB
 
 /// The major version number
 #define GZIP_VERSION_MAJOR 1
@@ -125,6 +139,9 @@ inline bool is_compressed(const char* data, std::size_t size)
 /// Version number as string
 #define GZIP_VERSION_STRING "1.0.0"
 
+#endif
+
+
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/third/gzip/version.hpp
 // //////////////////////////////////////////////////////////////////////
@@ -137,6 +154,10 @@ inline bool is_compressed(const char* data, std::size_t size)
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/third/gzip/compress.hpp
 // //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#ifdef ARBITER_ZLIB
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include "config.hpp"
@@ -254,6 +275,9 @@ inline std::string compress(const char* data,
 
 } // namespace gzip
 
+#endif // ARBITER_ZLIB
+
+
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/third/gzip/compress.hpp
 // //////////////////////////////////////////////////////////////////////
@@ -266,6 +290,10 @@ inline std::string compress(const char* data,
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/third/gzip/decompress.hpp
 // //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#ifdef ARBITER_ZLIB
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include "config.hpp"
@@ -375,6 +403,9 @@ inline std::string decompress(const char* data, std::size_t size)
 }
 
 } // namespace gzip
+
+#endif // ARBITER_ZLIB
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/third/gzip/decompress.hpp
