@@ -15,6 +15,7 @@ cmake .. \
       -DWITH_LAZPERF=ON \
       -DCMAKE_INSTALL_PREFIX=/usr \
       -DCMAKE_INSTALL_LIBDIR=lib \
+      -DCMAKE_BUILD_TYPE=Debug \
     ; \
 
 echo Make...
