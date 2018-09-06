@@ -126,6 +126,31 @@ bool DimRange::valuePasses(double v) const
     return !fail;
 }
 
+// Important - range list must be sorted.
+bool DimRange::pointPasses(const std::vector<DimRange>& ranges, PointRef& point)
+{
+    Dimension::Id lastId = ranges.front().m_id;
+    bool passes = false;
+    for (auto const& r : ranges)
+    {
+        // If we're at a new dimension, return false if we haven't passed
+        // the dimension, otherwise reset passes to false for the next
+        // dimension and keep checking.
+        if (r.m_id != lastId)
+        {
+            if (!passes)
+                return false;
+            lastId = r.m_id;
+            passes = false;
+        }
+        // If we've already passed this dimension, continue until we find
+        // a new dimension.
+        else if (passes)
+            continue;
+        passes = r.valuePasses(point.getFieldAs<double>(r.m_id));
+    }
+    return passes;
+}
 
 void DimRange::parse(const std::string& r)
 {
