@@ -1,7 +1,18 @@
 // I3SReader.cpp
 
 #include "i3sReader.hpp"
+#include "../lepcc/src/include/lepcc_c_api.h"                                   
+#include "../lepcc/src/include/lepcc_types.h" 
 
+#include <istream>
+#include <cstdint>
+#include <cstring>                                               
+#include <cmath>                                                    
+#include <stdio.h>                                               
+#include <iostream>                                                
+#include <vector>                                                    
+#include <algorithm>                                                
+#include <chrono>                                                               
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
@@ -62,110 +73,174 @@ namespace pdal
 
   void I3SReader::addArgs(ProgramArgs& args)
   {
-    args.add("url", "URL", m_args.url);
-    args.add("body", "JSON formatted body", m_args.body);
-    args.add("itemId", "ID of the current item", m_args.itemId);
-    args.add("name", "Name of the point cloud data", m_args.name);
-
+      args.add("url", "URL", m_args.url);
+      args.add("body", "JSON formatted body", m_args.body);
+      args.add("itemId", "ID of the current item", m_args.itemId);
+      args.add("name", "Name of the point cloud data", m_args.name);
   }
 
   void I3SReader::addDimensions(PointLayoutPtr layout)
   {
 
-    Json::StreamWriterBuilder writer;
-    writer.settings_["indentation"] = "";
+      Json::StreamWriterBuilder writer;
+      writer.settings_["indentation"] = "";
 
-    //register default values X, Y and Z
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-    layout->registerDim(Dimension::Id::Z);
-
-    for (int j = 0; j < m_args.body["layers"].size(); j++) {
-
-      Json::Value attributes = m_args.body["layers"][j]["attributeStorageInfo"];
-
-      for(int i = 0; i < attributes.size(); i ++)
+      for (int j = 0; j < m_args.body["layers"].size(); j++) 
       {
         
-        std::string name = Json::writeString(writer, attributes[i]["name"]);
-        
-        name.erase(
-          remove( name.begin(), name.end(), '\"' ),
-          name.end()
-        );
+          Json::Value attributes = 
+              m_args.body["layers"][j]["attributeStorageInfo"];
 
-        std::string type;
-        /*Check the entry has an attributevalues object
-         TODO check if name is a part of pdal's wanted parameters
-         TODO manage struct from header file
-         */ 
-        if (attributes[i].isMember("attributeValues")) {
-          type = Json::writeString(writer,
-              attributes[i]["attributeValues"]["valueType"]);
-          layout->registerOrAssignDim(name, pdal::Dimension::type(type));
-          m_layout.registerOrAssignDim(name, pdal::Dimension::type(type));
-        }
-        else{
-          layout->registerOrAssignDim(name, Dimension::Type::Double);
-          m_layout.registerOrAssignDim(name, Dimension::Type::Double);
-        }
+          for(int i = 0; i < attributes.size(); i ++)
+          {
 
+              std::string readName = 
+                  Json::writeString(writer, attributes[i]["name"]);
+              //remove quotes from json object
+              readName.erase(
+                  remove( readName.begin(), readName.end(), '\"' ),
+                  readName.end()
+              );
+              //remove random underscores
+              readName.erase(
+                  remove( readName.begin(), readName.end(), '_' ),
+                  readName.end()
+              );
+
+              if(Dimension::id(readName) != Dimension::Id::Unknown)
+              {
+                  Dimension::Id name = Dimension::id(readName);
+                  layout->registerDim(name);
+                  m_layout.registerDim(name);
+              }else if(readName.compare("RGB") == 0)
+              {
+                  m_layout.registerDim(Dimension::Id::Red);
+                  m_layout.registerDim(Dimension::Id::Green);
+                  m_layout.registerDim(Dimension::Id::Blue);
+                  
+                  layout->registerDim(Dimension::Id::Red);
+                  layout->registerDim(Dimension::Id::Green);
+                  layout->registerDim(Dimension::Id::Blue);
+              }
+              else if(readName.compare("FLAGS") == 0)
+              {
+                  m_layout.registerDim(Dimension::Id::Flag);
+                  layout->registerDim(Dimension::Id::Flag);
+              }
+              else if(readName.compare("RETURNS") == 0)
+              {
+                  m_layout.registerDim(Dimension::Id::NumberOfReturns);
+                  layout->registerDim(Dimension::Id::NumberOfReturns);
+              }
+              else if(readName.compare("ELEVATION") == 0)
+              {
+                  layout->registerDim(Dimension::Id::X);
+                  layout->registerDim(Dimension::Id::Y);
+                  layout->registerDim(Dimension::Id::Z);
+
+                  m_layout.registerDim(Dimension::Id::X);
+                  m_layout.registerDim(Dimension::Id::Y);
+                  m_layout.registerDim(Dimension::Id::Z);
+              }
+              else if(readName.compare("CLASSCODE") == 0)
+              {
+                  m_layout.registerDim(Dimension::Id::ClassFlags);
+                  layout->registerDim(Dimension::Id::ClassFlags);
+              }
+              else if(readName.compare("POINTSRCID") == 0)
+              {
+                  m_layout.registerDim(Dimension::Id::PointSourceId);
+                  layout->registerDim(Dimension::Id::PointSourceId);
+              }
+              else//if it isn't in pdal dimensions and isn't a special case
+              {
+                  std::string type;
+                  if (attributes[i].isMember("attributeValues")) 
+                  {
+                      std::string type;
+                      type = Json::writeString(writer,
+                          attributes[i]["attributeValues"]["valueType"]);
+                      layout->registerOrAssignDim(readName, 
+                              pdal::Dimension::type(type));
+                      m_layout.registerOrAssignDim(readName, 
+                              pdal::Dimension::type(type));
+                  }
+                  else
+                  {
+                      layout->registerOrAssignDim(readName, 
+                              Dimension::Type::Double);
+                      m_layout.registerOrAssignDim(readName, 
+                              Dimension::Type::Double);
+                  }
+              }
+          }
       }
-    }
   }
 
   void I3SReader::ready(PointTableRef)
   {
-
-    SpatialReference ref("EPSG:4385");
-    setSpatialReference(ref);
+      Json::StreamWriterBuilder writer;
+      writer.settings_["indentation"] = "";
+      Json::Value spatialJson = 
+          m_args.body["layers"][0]["spatialReference"];
+      std::string spatialStr =
+          "EPSG:" +
+          Json::writeString(writer,
+          spatialJson["wkid"]);
+      //if(spatialJson.isMember("vcsWkid"))
+      //    spatialStr += ("+" +
+      //        Json::writeString(writer,
+      //        spatialJson["vcsWkid"])
+      //    );
+      SpatialReference ref(spatialStr);
+      setSpatialReference(ref);
   }
-
 
 
   point_count_t I3SReader::read(PointViewPtr view, point_count_t count)
   {
-    /*
-    -3scenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
-    -node index document: <layer-url >/nodes/<node-id>
-    -shared resources: <node-url>/shared/
-    -feature data: <node-url>/features/<feature-data-bundle-id>
-    -geometry data: <node-url>/geometries/<geometry-data-bundle-id>
-    -texture data: <node-url>/textures/<texture-data-bundle-id>
-    */
-    
-    log()->get(LogLevel::Debug) << "fetching info from " << 
-        m_args.url + "/layers/0/nodes/0/geometries/0" << "\n"; 
-
-    std::string urlGeo = m_args.url + "/layers/0/nodes/0/geometries/0";
-     
-    auto response(m_arbiter->getBinary(urlGeo));
+      /*
+      -3scenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
+      -node index document: <layer-url >/nodes/<node-id>
+      -shared resources: <node-url>/shared/
+      -feature data: <node-url>/features/<feature-data-bundle-id>
+      -geometry data: <node-url>/geometries/<geometry-data-bundle-id>
+      -texture data: <node-url>/textures/<texture-data-bundle-id>
+      */
         
-    const std::size_t pointSize(view->layout()->pointSize());
-    uint32_t numPoints(0);
-    std::copy(
-            response.data() + response.size() - sizeof(uint32_t),
-            response.data() + response.size(),
-            reinterpret_cast<char*>(&numPoints));
-    log()->get(LogLevel::Debug) <<
-        "Fetched " << numPoints << " points" << std::endl;
-    log()->get(LogLevel::Debug) <<
-        "Fetched " << response.size() << " bytes" << std::endl;
- 
+      /*Determine number of nodes*/
+      Json::Value config;
 
-    view->setField(pdal::Dimension::Id::X, 0, 12);
-    view->setField(pdal::Dimension::Id::Y, 0, 13);
-    view->setField(pdal::Dimension::Id::Z, 0, 14);
-    view->setField(pdal::Dimension::Id::Intensity, 0, 55);
-    
-    
+      std::string nodeUrl = m_args.url + "/layers/0/nodepages/0";
+      //Json::Value nodeIndex = parse(m_arbiter->get(nodeUrl));
+      //int nodeSize = nodeIndex.size();
+      std::cout << nodeUrl << std::endl ; 
+      //std::cout <<"Hello worldi" << nodeIndex << std::endl;
+      int pointCloudCount = 0;
+      for(int i = 0; i < 64; i++)
+      {
+          /*Retrieve binary*/
+          std::string urlGeo = m_args.url + 
+              "/layers/0/nodes/" + std::to_string(i) + "/geometries/0";
+          std::vector<char> response = m_arbiter->getBinary(urlGeo);
+          std::vector<lepcc::Point3D> pointcloud = 
+              decompress(true, true, &response, i);
+          for(std::size_t j = 0; j < pointcloud.size(); j ++)
+          {    
+              view->setField(pdal::Dimension::Id::X, pointCloudCount, pointcloud[j].x);
+              view->setField(pdal::Dimension::Id::Y, pointCloudCount, pointcloud[j].y);
+              view->setField(pdal::Dimension::Id::Z, pointCloudCount, pointcloud[j].z);
+              pointCloudCount++;
+          }
+      }
+      const std::size_t pointSize(view->layout()->pointSize());
 
-    return 0;
+
+      return 0;
   }
 
   void I3SReader::done(PointTableRef)
   {
     m_stream.reset();
   }
-
 } //namespace pdal

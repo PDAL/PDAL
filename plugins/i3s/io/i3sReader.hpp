@@ -2,20 +2,23 @@
 
 #pragma once
 
+#include "../lepcc/src/include/lepcc_c_api.h"
+#include "../lepcc/src/include/lepcc_types.h"
+#include "i3sReceiver.hpp"
+
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
-#include "i3sReceiver.hpp"
 #include <pdal/PointLayout.hpp>
 
 #include <functional>
 #include <queue>
 #include <vector>
+#include <algorithm>                                                            
+#include <chrono>     
 
 #include <json/json.h>
-
 #include <arbiter/arbiter.hpp>
-
 #include <pdal/StageFactory.hpp>
 
 
@@ -65,12 +68,13 @@ namespace pdal
         }
 
         Added m_added;
-    };
+  };
   class I3SReader : public Reader
   {
   public:
     I3SReader() : Reader() {};
     std::string getName() const;
+                                                         
 
   private:
     std::unique_ptr<ILeStream> m_stream;
@@ -81,14 +85,13 @@ namespace pdal
     I3SArgs m_args;
     Json::Value m_info;
     FixedPointLayout m_layout;
-
+    
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
-
 
   };
 }
