@@ -76,12 +76,16 @@ std::string addTrailingSlash(std::string path)
 #ifdef WIN32
 inline std::string fromNative(std::wstring const& in)
 {
+    // TODO: C++11 define convert with static thread_local
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
     auto p = reinterpret_cast<unsigned short const*>(in.data());
-    return std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short>().to_bytes(p, p + in.size());
+    return convert.to_bytes(p, p + in.size());
 }
 inline std::wstring toNative(std::string const& in)
 {
-    auto s = std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short>().from_bytes(in);
+    // TODO: C++11 define convert with static thread_local
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    auto s = convert.from_bytes(in);
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
 }
@@ -419,7 +423,7 @@ std::vector<std::string> glob(std::string path)
         if (found == std::string::npos)
             filenames.push_back(fromNative(ffd.cFileName));
         else
-            filenames.push_back(path.substr(0, found) + "\\" + fromNative(ffd.cFileName));
+            filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(ffd.cFileName));
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
