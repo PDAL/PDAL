@@ -3192,6 +3192,12 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <arbiter/util/curl.hpp>
 #include <arbiter/util/http.hpp>
 #include <arbiter/util/util.hpp>
+
+
+#ifdef ARBITER_ZLIB
+#include <arbiter/third/gzip/decompress.hpp>
+#endif
+
 #endif
 
 #ifdef ARBITER_CURL
@@ -3492,6 +3498,24 @@ Response Curl::get(
 
     // Run the command.
     const int httpCode(perform());
+
+    for (auto& h : receivedHeaders)
+    {
+        std::string& v(h.second);
+        while (v.size() && v.front() == ' ') v = v.substr(1);
+        while (v.size() && v.back() == ' ') v.pop_back();
+    }
+
+    if (receivedHeaders["Content-Encoding"] == "gzip")
+    {
+#ifdef ARBITER_ZLIB
+        std::string s(gzip::decompress(data.data(), data.size()));
+        data.assign(s.begin(), s.end());
+#else
+        throw ArbiterError("Cannot decompress zlib");
+#endif
+    }
+
     return Response(httpCode, data, receivedHeaders);
 #else
     throw ArbiterError(fail);
