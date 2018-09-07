@@ -106,9 +106,10 @@ public:
     // return the pipeline reader endpoint (or nullptr, if not a reader
     // pipeline)
     Stage* getStage() const
-        {
-            const auto& llist = leaves();
-            return llist.size() ? llist[0] : nullptr; }
+    {
+        const auto& llist = leaves();
+        return llist.size() ? llist[0] : nullptr;
+    }
 
     // Set the log to be available to stages.
     void setLog(LogPtr& log)
