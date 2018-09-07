@@ -200,7 +200,7 @@ namespace pdal
   point_count_t I3SReader::read(PointViewPtr view, point_count_t count)
   {
       /*
-      -3scenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
+      -3Dscenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
       -node index document: <layer-url >/nodes/<node-id>
       -shared resources: <node-url>/shared/
       -feature data: <node-url>/features/<feature-data-bundle-id>
@@ -208,31 +208,44 @@ namespace pdal
       -texture data: <node-url>/textures/<texture-data-bundle-id>
       */
         
-      /*Determine number of nodes*/
-      Json::Value config;
 
-      std::string nodeUrl = m_args.url + "/layers/0/nodepages/0";
-      //Json::Value nodeIndex = parse(m_arbiter->get(nodeUrl));
-      //int nodeSize = nodeIndex.size();
-      std::cout << nodeUrl << std::endl ; 
-      //std::cout <<"Hello worldi" << nodeIndex << std::endl;
+
+      
+      std::string nodeUrl = m_args.url + "/layers/0/nodepages/";
+      int nodePageIndex = 0;
+      Json::Value nodeIndexJson =
+          parse(m_arbiter->get(nodeUrl + std::to_string(nodePageIndex)));
+      std::cout << nodeIndexJson;
       int pointCloudCount = 0;
-      for(int i = 0; i < 64; i++)
+      while(!nodeIndexJson.isMember("error"))
       {
-          /*Retrieve binary*/
-          std::string urlGeo = m_args.url + 
-              "/layers/0/nodes/" + std::to_string(i) + "/geometries/0";
-          std::vector<char> response = m_arbiter->getBinary(urlGeo);
-          std::vector<lepcc::Point3D> pointcloud = 
-              decompress(true, true, &response, i);
-          for(std::size_t j = 0; j < pointcloud.size(); j ++)
-          {    
-              view->setField(pdal::Dimension::Id::X, pointCloudCount, pointcloud[j].x);
-              view->setField(pdal::Dimension::Id::Y, pointCloudCount, pointcloud[j].y);
-              view->setField(pdal::Dimension::Id::Z, pointCloudCount, pointcloud[j].z);
-              pointCloudCount++;
+          int nodeSize = nodeIndexJson["nodes"].size();
+          int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
+          for(int i = initialNode; i < initialNode + nodeSize; i++)
+          {
+              /*Retrieve binary*/
+              std::string urlGeo = m_args.url + 
+                  "/layers/0/nodes/" + std::to_string(i) + "/geometries/0";
+              std::vector<char> response = m_arbiter->getBinary(urlGeo);
+              std::vector<lepcc::Point3D> pointcloud = 
+                  decompress(true, true, &response, i);
+              for(std::size_t j = 0; j < pointcloud.size(); j ++)
+              {    //for each vector item
+                  view->setField(pdal::Dimension::Id::X,
+                          pointCloudCount, pointcloud[j].x);
+                  view->setField(pdal::Dimension::Id::Y,
+                          pointCloudCount, pointcloud[j].y);
+                  view->setField(pdal::Dimension::Id::Z,
+                          pointCloudCount, pointcloud[j].z);
+                  pointCloudCount++;
+              }
           }
+          nodeIndexJson = 
+              parse(m_arbiter->get(nodeUrl+std::to_string(++nodePageIndex)));
       }
+      std::cout << "Final point count: " << pointCloudCount << std::endl;
+
+      
       const std::size_t pointSize(view->layout()->pointSize());
 
 
