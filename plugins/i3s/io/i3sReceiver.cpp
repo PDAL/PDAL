@@ -20,9 +20,6 @@ namespace pdal
     lepcc_blobType bt;
     lepcc::uint32 blobSize = 0;
     
-    lepcc::ErrCode errCode = (lepcc::ErrCode)lepcc_getBlobInfo(ctx, compressed, nInfo, &bt, &blobSize); 
-    
-    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1; 
 
     lepcc::Byte vec;  
     lepcc_status stat;
@@ -32,6 +29,11 @@ namespace pdal
      
     if(elevation) 
     {
+        lepcc::ErrCode errCode = 
+            (lepcc::ErrCode)lepcc_getBlobInfo(
+                    ctx, compressed, nInfo, &bt, &blobSize); 
+    
+        int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1; 
         if (nBytes > 0)
         {
             stat = lepcc_getPointCount(ctx, pByte, nBytes, &nPts); 
