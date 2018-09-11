@@ -117,27 +117,7 @@ void RangeFilter::prepared(PointTableRef table)
 // common case.
 bool RangeFilter::processOne(PointRef& point)
 {
-    Dimension::Id lastId = m_range_list.front().m_id;
-    bool passes = false;
-    for (auto const& r : m_range_list)
-    {
-        // If we're at a new dimension, return false if we haven't passed
-        // the dimension, otherwise reset passes to false for the next
-        // dimension and keep checking.
-        if (r.m_id != lastId)
-        {
-            if (!passes)
-                return false;
-            lastId = r.m_id;
-            passes = false;
-        }
-        // If we've already passed this dimension, continue until we find
-        // a new dimension.
-        else if (passes)
-            continue;
-        passes = r.valuePasses(point.getFieldAs<double>(r.m_id));
-    }
-    return passes;
+    return DimRange::pointPasses(m_range_list, point);
 }
 
 
