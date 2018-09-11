@@ -127,6 +127,10 @@ bool DimRange::valuePasses(double v) const
 }
 
 // Important - range list must be sorted.
+// This applies OR logic when there are multiple ranges for the same
+// dimension and AND logic for different dimensions.  It depends on
+// the range list being sorted such that ranges for the same dimension
+// are contiguous.
 bool DimRange::pointPasses(const std::vector<DimRange>& ranges, PointRef& point)
 {
     Dimension::Id lastId = ranges.front().m_id;
@@ -134,14 +138,12 @@ bool DimRange::pointPasses(const std::vector<DimRange>& ranges, PointRef& point)
     for (auto const& r : ranges)
     {
         // If we're at a new dimension, return false if we haven't passed
-        // the dimension, otherwise reset passes to false for the next
-        // dimension and keep checking.
+        // the dimension, otherwise reset lastId and keep checking.
         if (r.m_id != lastId)
         {
             if (!passes)
                 return false;
             lastId = r.m_id;
-            passes = false;
         }
         // If we've already passed this dimension, continue until we find
         // a new dimension.
