@@ -14,35 +14,59 @@
 
 namespace pdal
 {
-  /*Return value of data in json format*/
-  static inline Json::Value parse(const std::string& data)
-  {
-      Json::Value json;
-      Json::Reader reader;
-      if (data.size())
-      {
-          if (!reader.parse(data, json, false))
-          {
-              const std::string jsonError(reader.getFormattedErrorMessages());
-              if (!jsonError.empty())
-              {
-                  throw pdal_error("Error during parsing: " + jsonError);
-              }
-          }
-      }
-      return json;
-  }
+    /*Return value of data in json format*/
+    static inline Json::Value parse(const std::string& data)
+    {
+        Json::Value json;
+        Json::Reader reader;
+        if (data.size())
+        {
+            if (!reader.parse(data, json, false))
+            {
+                const std::string jsonError(reader.getFormattedErrorMessages());
+                if (!jsonError.empty())
+                {
+                    throw pdal_error("Error during parsing: " + jsonError);
+                }
+            }
+        }
+        return json;
+    }
 
-  struct I3SArgs
-  {
-    std::string url;
-    Json::Value body;
-    std::string name;
-    std::string itemId;
-    std::string intensity;
-  };
+    struct I3SArgs
+    {
+      std::string url;
+      Json::Value body;
+      std::string name;
+      std::string itemId;
+      std::string intensity;
+    };
 
+    struct compare3d
+    {
+        bool operator()(const lepcc::Point3D & first, const lepcc::Point3D & second) const 
+        {
+            if(first.x < second.x)
+                return true;
+            if(first.x > second.x)
+                return false;
+            if(first.y < second.y)
+                return true;
+            if(first.y > second.y)
+                return false;
+            if(first.z < second.z)
+                return true;
+            return false;
+            
+        }
+    };
 
-  std::vector<lepcc::Point3D> decompress(
-          bool elevation, bool rgb, std::vector<char>* compData, int nodeNum);
+    std::vector<lepcc::Point3D> decompressXYZ(
+            std::vector<char>* compData, int nodeNum);
+
+    std::vector<lepcc::RGB_t> decompressRGB(
+            std::vector<char>* compData, int nodeNum);
+
+    std::vector<uint16_t> decompressIntensity(
+            std::vector<char>* compData, int nodeNum);
 }
