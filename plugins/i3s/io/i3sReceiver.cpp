@@ -1,4 +1,4 @@
-//i3sRecevier.cpg
+//i3sRecevier.cpp
 #include "i3sReceiver.hpp"
 
 namespace pdal
