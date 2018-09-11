@@ -28,6 +28,18 @@ Contributors:  Ronald Poirrier, Thomas Maurer
 #define LEPCC_EXPORT
 #endif
 
+
+// all version info in one place;
+// increment this if any of the module versions increments:
+#define VERSION_LEPCC 1
+
+// LEPCC module versions:
+#define VERSION_LEPCC_XYZ 1
+#define VERSION_LEPCC_RGB 1
+#define VERSION_LEPCC_INTENSITY 1
+#define VERSION_LEPCC_FLAGBYTES 1
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -42,10 +42,240 @@ using namespace lepcc;
 
 int ReadBlobSize(lepcc_ContextHdl ctx, FILE* fp);
 
+int HasError(ErrCode errCode, const string& fctName)
+{
+  if (errCode != ErrCode::Ok)
+    printf("Error in main(): %s failed. Error code = %d\n", fctName.c_str(), errCode);
+  return (int)errCode;
+}
+
 // -------------------------------------------------------------------------- ;
 
 int main(int argc, char* argv[])
 {
+  {
+    // open a small test binary slpk blob which has some LEPCC blobs embedded
+
+    string fnIn = "../testData/SMALL_AUTZEN_LAS_All.slpk";
+    string fnGT = "../testData/SMALL_AUTZEN_LAS_All.bin";    // decoded ground truth stored as raw binary arrays
+    bool bWriteGT = false;    // toggle between write or read the ground truth
+
+    FILE* fp = 0;
+    fp = fopen(fnIn.c_str(), "rb");
+    if (!fp)
+    {
+      printf("Error in main(): Cannot read from file %s.\n", fnIn.c_str());
+      return 0;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    size_t len = ftell(fp);
+    rewind(fp);
+
+    vector<Byte> byteVec(len, 0);
+    fread(&byteVec[0], 1, len, fp);
+    fclose(fp);
+
+    FILE* fpGT = 0;
+    fpGT = fopen(fnGT.c_str(), bWriteGT ? "wb" : "rb");
+    if (!fpGT)
+    {
+      printf("Error in main(): Cannot open file %s.\n", fnGT.c_str());
+      return 0;
+    }
+
+    // search for LEPCC blobs
+
+    vector<string> magicStrings;
+    magicStrings.push_back("LEPCC     ");
+    magicStrings.push_back("ClusterRGB");
+    magicStrings.push_back("Intensity ");
+
+    lepcc_ContextHdl ctx = lepcc_createContext();
+    int nInfo = lepcc_getBlobInfoSize();
+    ErrCode errCode;
+
+    size_t magicLen = 10;
+    for (size_t pos = 0; pos < len - magicLen; pos++)
+    {
+      for (size_t blobType = 0; blobType < magicStrings.size(); blobType++)
+      {
+        if (0 == memcmp(&byteVec[pos], magicStrings[blobType].c_str(), magicLen))
+        {
+          const Byte* ptr = &byteVec[pos];
+          uint32 blobSize = 0;
+          lepcc_blobType bt;
+          errCode = (ErrCode)lepcc_getBlobInfo(ctx, ptr, nInfo, &bt, &blobSize);
+          if (HasError(errCode, "lepcc_getBlobInfo()"))
+            return 0;
+
+          switch (blobType)
+          {
+          case 0:
+          {
+            uint32 nPts = 0;
+            errCode = (ErrCode)lepcc_getPointCount(ctx, ptr, len - pos, &nPts);
+            if (HasError(errCode, "lepcc_getPointCount()"))
+              return 0;
+
+            vector<Point3D> ptVec(nPts);
+            errCode = (ErrCode)lepcc_decodeXYZ(ctx, &ptr, len - pos, &nPts, (double*)(&ptVec[0]));
+            if (HasError(errCode, "lepcc_decodeXYZ()"))
+              return 0;
+
+            printf("decode xyz blob succeeded.\n");
+
+            if (bWriteGT)
+            {
+              fwrite(&nPts, 4, 1, fpGT);
+              fwrite(&ptVec[0], sizeof(Point3D), nPts, fpGT);
+            }
+            else
+            {
+              uint32 nPts2 = 0;
+              fread(&nPts2, 4, 1, fpGT);
+              if (nPts2 != nPts)
+              {
+                printf("Error in main(): mismatch in number of elements %d vs %d\n", nPts, nPts2);
+                return 0;
+              }
+              vector<Point3D> ptVec2(nPts);
+              fread(&ptVec2[0], sizeof(Point3D), nPts, fpGT);
+
+              // compare
+              double dxMax(0), dyMax(0), dzMax(0);
+              for (int i = 0; i < (int)nPts; i++)
+              {
+                const Point3D* p = &ptVec[i];
+                const Point3D* q = &ptVec2[i];
+
+                double dx = abs(q->x - p->x);
+                double dy = abs(q->y - p->y);
+                double dz = abs(q->z - p->z);
+
+                dxMax = max(dx, dxMax);
+                dyMax = max(dy, dyMax);
+                dzMax = max(dz, dzMax);
+              }
+
+              printf("number of points = %d, dxMax = %f, dyMax = %f, dzMax = %f\n", nPts, dxMax, dyMax, dzMax);
+            }
+          }
+          break;
+
+          case 1:
+          {
+            uint32 nPts = 0;
+            errCode = (ErrCode)lepcc_getRGBCount(ctx, ptr, len - pos, &nPts);
+            if (HasError(errCode, "lepcc_getRGBCount()"))
+              return 0;
+
+            vector<RGB_t> rgbVec(nPts);
+            errCode = (ErrCode)lepcc_decodeRGB(ctx, &ptr, len - pos, &nPts, (Byte*)(&rgbVec[0]));
+            if (HasError(errCode, "lepcc_decodeRGB()"))
+              return 0;
+
+            printf("decode RGB blob succeeded.\n");
+
+            if (bWriteGT)
+            {
+              fwrite(&nPts, 4, 1, fpGT);
+              fwrite(&rgbVec[0], sizeof(RGB_t), nPts, fpGT);
+            }
+            else
+            {
+              uint32 nPts2 = 0;
+              fread(&nPts2, 4, 1, fpGT);
+              if (nPts2 != nPts)
+              {
+                printf("Error in main(): mismatch in number of elements %d vs %d\n", nPts, nPts2);
+                return 0;
+              }
+              vector<RGB_t> rgbVec2(nPts);
+              fread(&rgbVec2[0], sizeof(RGB_t), nPts, fpGT);
+
+              // compare
+              double dxMax(0), dyMax(0), dzMax(0);
+              for (int i = 0; i < (int)nPts; i++)
+              {
+                const RGB_t* p = &rgbVec[i];
+                const RGB_t* q = &rgbVec2[i];
+
+                double dx = abs(q->r - p->r);
+                double dy = abs(q->g - p->g);
+                double dz = abs(q->b - p->b);
+
+                dxMax = max(dx, dxMax);
+                dyMax = max(dy, dyMax);
+                dzMax = max(dz, dzMax);
+              }
+
+              printf("number of points = %d, dxMax = %f, dyMax = %f, dzMax = %f\n", nPts, dxMax, dyMax, dzMax);
+            }
+          }
+          break;
+
+          case 2:
+          {
+            uint32 nPts = 0;
+            errCode = (ErrCode)lepcc_getIntensityCount(ctx, ptr, len - pos, &nPts);
+            if (HasError(errCode, "lepcc_getIntensityCount()"))
+              return 0;
+
+            vector<unsigned short> intensityVec(nPts);
+            errCode = (ErrCode)lepcc_decodeIntensity(ctx, &ptr, len - pos, &nPts, (unsigned short*)(&intensityVec[0]));
+            if (HasError(errCode, "lepcc_decodeIntensity()"))
+              return 0;
+
+            printf("decode intensity blob succeeded.\n");
+
+            if (bWriteGT)
+            {
+              fwrite(&nPts, 4, 1, fpGT);
+              fwrite(&intensityVec[0], sizeof(unsigned short), nPts, fpGT);
+            }
+            else
+            {
+              uint32 nPts2 = 0;
+              fread(&nPts2, 4, 1, fpGT);
+              if (nPts2 != nPts)
+              {
+                printf("Error in main(): mismatch in number of elements %d vs %d\n", nPts, nPts2);
+                return 0;
+              }
+              vector<unsigned short> intensityVec2(nPts);
+              fread(&intensityVec2[0], sizeof(unsigned short), nPts, fpGT);
+
+              // compare
+              double dxMax(0);
+              for (int i = 0; i < (int)nPts; i++)
+              {
+                int intensity0 = intensityVec[i];
+                int intensity1 = intensityVec2[i];
+                double dx = abs(intensity1 - intensity0);
+                dxMax = max(dx, dxMax);
+              }
+
+              printf("number of points = %d, dxMax = %f\n", nPts, dxMax);
+            }
+          }
+          break;
+
+          default:
+            printf("Error in main(): Test for this LEPCC blob type not implemented.\n");
+          }
+
+          pos += blobSize - 1;
+        }
+      }
+    }
+
+    fclose(fpGT);
+    return 0;
+  }
+
+  // -------------- see below for examples on how to encode and decode --------
+
   double maxXErr = 9e-8, maxYErr = maxXErr;
   double maxZErr = 0.01;
 
@@ -73,7 +303,7 @@ int main(int argc, char* argv[])
   }
 
   FILE* fp = 0;
-  fopen_s(&fp, fn.c_str(), "rb");
+  fp = fopen( fn.c_str(), "rb");
   if (!fp)
   {
     printf("Error in main(): Cannot read from file %s.\n", fn.c_str());  return 0;
@@ -82,13 +312,13 @@ int main(int argc, char* argv[])
   FILE* fpOut = 0;
   if (mode == 1 || mode == 2)    //  || mode == 0)
   {
-    fopen_s(&fpOut, fnOut.c_str(), "wb");
+    fpOut = fopen(fnOut.c_str(), "wb");
     if (!fpOut)
     {
       printf("Error in main(): Cannot write to file %s.\n", fnOut.c_str());  return 0;
     }
     fclose(fpOut);
-    fopen_s(&fpOut, fnOut.c_str(), "ab");    // open again in append mode
+    fpOut = fopen(fnOut.c_str(), "ab");    // open again in append mode
   }
 
   double totalNumPoints = 0, totalNumTiles = 0;
@@ -109,7 +339,7 @@ int main(int argc, char* argv[])
   vector<uint32> orderVec;
 
   high_resolution_clock::time_point t0 = high_resolution_clock::now();
-  
+
   if (mode != 2)    // simulate, encode, or test
   {
     bool done = false;
@@ -230,19 +460,19 @@ int main(int argc, char* argv[])
 
         // encode
         if (ptVec.size() > 0)
-          if (hr = lepcc_encodeXYZ(ctx, &pByte, nBytesXYZ))
+          if ((hr = lepcc_encodeXYZ(ctx, &pByte, nBytesXYZ)))
           {
             printf("Error in main(): lepcc_encodeXYZ(...) failed.\n");  return 0;
           }
 
         if (rgbVec.size() > 0)
-          if (hr = lepcc_encodeRGB(ctx, &pByte, nBytesRGB))
+          if ((hr = lepcc_encodeRGB(ctx, &pByte, nBytesRGB)))
           {
             printf("Error in main(): lepcc_encodeRGB(...) failed.\n");  return 0;
           }
 
         if (intensityVec.size() > 0)
-          if (hr = lepcc_encodeIntensity(ctx, &pByte, nBytesIntensity, &intensityVec[0], nPts))
+          if ((hr = lepcc_encodeIntensity(ctx, &pByte, nBytesIntensity, &intensityVec[0], nPts)))
           {
             printf("Error in main(): lepcc_encodeIntensity(...) failed.\n");  return 0;
           }
@@ -260,7 +490,7 @@ int main(int argc, char* argv[])
           if (!lepcc_getPointCount(ctxDec, pByte, nBytesXYZ, &nPts2) && nPts2 > 0)
           {
             decPtVec.resize(nPts2);
-            if (hr = lepcc_decodeXYZ(ctxDec, &pByte, nBytesXYZ, &nPts2, (double*)(&decPtVec[0])))
+            if ((hr = lepcc_decodeXYZ(ctxDec, &pByte, nBytesXYZ, &nPts2, (double*)(&decPtVec[0]))))
             {
               printf("Error in main(): lepcc_decodeXYZ(...) failed.\n");  return 0;
             }
@@ -285,7 +515,7 @@ int main(int argc, char* argv[])
           if (!lepcc_getRGBCount(ctxDec, pByte, nBytesRGB, &nPts2) && nPts2 > 0)
           {
             decRgbVec.resize(nPts2);
-            if (hr = lepcc_decodeRGB(ctxDec, &pByte, nBytesRGB, &nPts2, (Byte*)(&decRgbVec[0])))
+            if ((hr = lepcc_decodeRGB(ctxDec, &pByte, nBytesRGB, &nPts2, (Byte*)(&decRgbVec[0]))))
             {
               printf("Error in main(): lepcc_decodeRGB(...) failed.\n");  return 0;
             }
@@ -312,7 +542,7 @@ int main(int argc, char* argv[])
           if (!lepcc_getIntensityCount(ctxDec, pByte, nBytesIntensity, &nPts2) && nPts2 > 0)
           {
             decIntensityVec.resize(nPts2);
-            if (hr = lepcc_decodeIntensity(ctxDec, &pByte, nBytesIntensity, &nPts2, &decIntensityVec[0]))
+            if ((hr = lepcc_decodeIntensity(ctxDec, &pByte, nBytesIntensity, &nPts2, &decIntensityVec[0])))
             {
               printf("Error in main(): lepcc_decodeIntensity(...) failed.\n");  return 0;
             }
@@ -347,7 +577,7 @@ int main(int argc, char* argv[])
       if (origHasXYZ)
       {
         nBytes = ReadBlobSize(ctxDec, fp);
-        
+
         if (nBytes == 0)
         {
           done = true;
@@ -471,7 +701,7 @@ int main(int argc, char* argv[])
 
 // -------------------------------------------------------------------------- ;
 
-// only for this little test program; 
+// only for this little test program;
 // a real app should keep track of the order compressed blobs are written to the stream, and their sizes;
 
 int ReadBlobSize(lepcc_ContextHdl ctx, FILE* fp)
