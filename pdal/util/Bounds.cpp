@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <assert.h>
+//#include <assert.h>
 #include <iostream>
 #include <limits>
 #include <vector>
