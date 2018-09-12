@@ -4,7 +4,7 @@
 namespace pdal
 {
     std::vector<lepcc::Point3D> decompressXYZ(
-            std::vector<char>* compData, int nodeNum)
+            std::vector<char>* compData)
     {
         unsigned char* c = new unsigned char [compData->size()];
         
@@ -51,7 +51,7 @@ namespace pdal
 
 
     std::vector<lepcc::RGB_t> decompressRGB(
-            std::vector<char>* compData, int nodeNum)
+            std::vector<char>* compData)
     {
         unsigned char* c = new unsigned char [compData->size()];
         
@@ -96,7 +96,7 @@ namespace pdal
     }
 
 
-    std::vector<uint16_t> decompressIntensity(std::vector<char>* compData,int nodenum)
+    std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
     {
         
         unsigned char* c = new unsigned char [compData->size()];

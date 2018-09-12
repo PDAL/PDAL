@@ -215,7 +215,6 @@ namespace pdal
         /*Retrive initial node page*/
         Json::Value nodeIndexJson =
             parse(m_arbiter->get(nodeUrl + std::to_string(nodePageIndex)));
-        int pointId = 0;
         int index = 0;
         std::vector<int> nodePullArr;
         int totalCount = 0;
@@ -245,87 +244,117 @@ namespace pdal
         std::cout<< " FinalCount: " << vertexCount << std::endl;
         for(int i = 0; i < index; i++) 
         {
-            Pool p(4);
+            std::cout << i << "/" << index << std::endl;
+            Pool p(8);
             std::string localUrl = m_args.url + 
                 "/layers/0/nodes/" + std::to_string(nodePullArr[i]); 
 
-            p.add([&localUrl, this, &i](std::unique_ptr<arbiter::Arbiter> m_arbiter){binaryFetch(localUrl);});
+
+            p.add([localUrl, this, &view]()
+                    {
+                        binaryFetch(localUrl, view);
+                    });
         }
-        std::cout << "Final point count: " << pointId << std::endl;
+        std::cout << "Final point count: " << view->size() << std::endl;
         const std::size_t pointSize(view->layout()->pointSize());
 
         return 0;
     }
 
-    void binaryFetch(std::string localUrl)
+    void I3SReader::binaryFetch(std::string localUrl, PointViewPtr view)
     {
-            /*Retrieve geometry binary*/
-            
-            std::string urlGeo = localUrl + "/geometries/0";
-            //TODO add try catch block on arbiter(what if inet goes down)
-            std::vector<char> response = m_arbiter->getBinary(urlGeo);
-            std::vector<lepcc::Point3D> pointcloud = 
-                decompressXYZ(&response, i);
+            Pool p(8); 
+            std::vector<char> response;
+            p.add([this, &response, localUrl](){    
+                /*Retrieve geometry binary*/
+                std::string urlGeo = localUrl + "/geometries/0";
+                //TODO add try catch block on arbiter(what if inet goes down)
+                response = m_arbiter->getBinary(urlGeo);
+            });
 
-            /*Retrieve intensity data*/
-            std::string urlIntensity = localUrl + "/attributes/2";
-            std::vector<char> intensityResponse = 
-                m_arbiter->getBinary(urlIntensity);
-            std::vector<uint16_t> intensity = 
-                decompressIntensity(&intensityResponse, i);
-
+            std::vector<char> intensityResponse;
+            p.add([this, &intensityResponse, localUrl](){
+                /*Retrieve intensity data*/
+                std::string urlIntensity = localUrl + "/attributes/2";
+                intensityResponse = 
+                    m_arbiter->getBinary(urlIntensity);
+            });
             /*Retrieve rgb data*/
-            std::string urlRgb = localUrl + "/attributes/4"; 
-            //TODO add try catch block on arbiter(what if inet goes down)
-            std::vector<char> rgbResponse = m_arbiter->getBinary(urlRgb);
-            std::vector<lepcc::RGB_t> rgbPoints = 
-                decompressRGB(&rgbResponse, i);
-            
+
+
+            std::vector<char> rgbResponse;
+            p.add([this, &rgbResponse, localUrl]()
+            {    
+                std::string urlRgb = localUrl + "/attributes/4"; 
+                rgbResponse = m_arbiter->getBinary(urlRgb);
+            });
             /*Retrieve Class Code*/
-            std::string urlClass = localUrl + "/attributes/8";
-            std::vector<char> classFlags = m_arbiter->getBinary(urlClass);
-
+            std::vector<char> classFlags; 
+            
+            p.add([this, &classFlags, localUrl]()
+            {    
+                std::string urlClass = localUrl + "/attributes/8";
+                classFlags = m_arbiter->getBinary(urlClass);
+            });
             /*Flags*/
-            std::string urlFlags = localUrl + "/attributes/16";
-            std::vector<char> flags = m_arbiter->getBinary(urlFlags);
-
+            std::vector<char> flags;
+            p.add([this, &flags, localUrl]()
+            {
+                std::string urlFlags = localUrl + "/attributes/16";
+                flags = m_arbiter->getBinary(urlFlags);
+            });
             /*Returns*/
-            std::string urlReturns = localUrl + "/attributes/32";
-            std::vector<char> returns = m_arbiter->getBinary(urlReturns);
+            std::vector<char> returns;
+            p.add([this, &returns, localUrl]()
+            {
+                std::string urlReturns = localUrl + "/attributes/32";
+                returns = m_arbiter->getBinary(urlReturns);
+            });
+
+            p.await();
+            /*Decompression methods*/
+            std::vector<lepcc::Point3D> pointcloud = 
+                decompressXYZ(&response);
+
+            std::vector<uint16_t> intensity = 
+                decompressIntensity(&intensityResponse);
+
+            std::vector<lepcc::RGB_t> rgbPoints = 
+                decompressRGB(&rgbResponse);
+            
 
             std::lock_guard<std::mutex> lock(m_mutex);
             /*Iterate through vector item and add to view*/
             for(std::size_t j = 0; j < pointcloud.size(); j ++)
             {  
+                PointId id = view->size();
                 //XYZ
                 view->setField(pdal::Dimension::Id::X,
-                        pointId, pointcloud[j].x);
+                        id, pointcloud[j].x);
                 view->setField(pdal::Dimension::Id::Y,
-                        pointId, pointcloud[j].y);
+                        id, pointcloud[j].y);
                 view->setField(pdal::Dimension::Id::Z,
-                        pointId, pointcloud[j].z);
+                        id, pointcloud[j].z);
                 //RGB
                 view->setField(pdal::Dimension::Id::Red,
-                        pointId, rgbPoints[j].r);
+                        id, rgbPoints[j].r);
                 view->setField(pdal::Dimension::Id::Green,
-                        pointId, rgbPoints[j].g);
+                        id, rgbPoints[j].g);
                 view->setField(pdal::Dimension::Id::Blue,
-                        pointId, rgbPoints[j].b);
+                        id, rgbPoints[j].b);
 
                 //INTENSITY
                 view->setField(pdal::Dimension::Id::Intensity,
-                        pointId, intensity[j]);
+                        id, intensity[j]);
 
                 //CLASSCODES
                 view->setField(pdal::Dimension::Id::ClassFlags,
-                        pointId, classFlags[j]);
+                        id, classFlags[j]);
 
                 //FLAGS
                 view->setField(pdal::Dimension::Id::Flag,
-                        pointId, flags[j]);
+                        id, flags[j]);
 
-                //Returns
-                pointId++;
             }
 
     }
