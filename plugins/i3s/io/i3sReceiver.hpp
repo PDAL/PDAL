@@ -36,7 +36,6 @@ namespace pdal
     struct I3SArgs
     {
       std::string url;
-      Json::Value body;
       std::string name;
       std::string itemId;
       std::string intensity;

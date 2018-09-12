@@ -57,26 +57,21 @@ namespace pdal
         log()->get(LogLevel::Debug) << "Fetching info from " << m_args.url <<
             std::endl;
 
-
-      /*request 3scenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>*/
         try
         {
-            m_args.body = parse(m_arbiter->get(m_args.url));
+            m_info = parse(m_arbiter->get(m_args.url));
         }
         catch (std::exception& e)
         {
             throw pdal_error(std::string("Failed to fetch info: ") + e.what());
         }
-        Json::StreamWriterBuilder writer;
-        writer.settings_["indentation"] = "";
-        m_args.name = Json::writeString(writer, m_args.body["name"]);
-        m_args.itemId = Json::writeString(writer, m_args.body["serviceItemId"]);
+        m_args.name = m_info["name"].asString();
+        m_args.itemId = m_info["serviceItemId"].asString();
     }
 
     void I3SReader::addArgs(ProgramArgs& args)
     {
         args.add("url", "URL", m_args.url);
-        args.add("body", "JSON formatted body", m_args.body);
         args.add("itemId", "ID of the current item", m_args.itemId);
         args.add("name", "Name of the point cloud data", m_args.name);
     }
@@ -87,11 +82,11 @@ namespace pdal
         Json::StreamWriterBuilder writer;
         writer.settings_["indentation"] = "";
 
-        for (int j = 0; j < m_args.body["layers"].size(); j++) 
+        for (int j = 0; j < m_info["layers"].size(); j++) 
         {
           
             Json::Value attributes = 
-                m_args.body["layers"][j]["attributeStorageInfo"];
+                m_info["layers"][j]["attributeStorageInfo"];
 
             for(int i = 0; i < attributes.size(); i ++)
             {
@@ -184,7 +179,7 @@ namespace pdal
         Json::StreamWriterBuilder writer;
         writer.settings_["indentation"] = "";
         Json::Value spatialJson = 
-            m_args.body["layers"][0]["spatialReference"];
+            m_info["layers"][0]["spatialReference"];
         std::string spatialStr =
             "EPSG:" +
             Json::writeString(writer,
@@ -251,9 +246,9 @@ namespace pdal
 
 
             p.add([localUrl, this, &view]()
-                    {
-                        binaryFetch(localUrl, view);
-                    });
+            {
+                binaryFetch(localUrl, view);
+            });
         }
         std::cout << "Final point count: " << view->size() << std::endl;
         const std::size_t pointSize(view->layout()->pointSize());
