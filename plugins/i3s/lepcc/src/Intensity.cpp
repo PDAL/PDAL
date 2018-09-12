@@ -28,6 +28,7 @@ Contributors:  Thomas Maurer
 #include "BitStuffer2.h"
 #include "Common.h"
 #include "utl_const_array.h"
+#include <climits>
 
 using namespace std;
 using namespace lepcc;

@@ -74,7 +74,7 @@ namespace pdal
   public:
     I3SReader() : Reader() {};
     std::string getName() const;
-                                                         
+    void binaryFetch(std::string localUrl);
 
   private:
     std::unique_ptr<ILeStream> m_stream;
@@ -85,6 +85,7 @@ namespace pdal
     I3SArgs m_args;
     Json::Value m_info;
     FixedPointLayout m_layout;
+    std::mutex m_mutex;
     
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table) override;

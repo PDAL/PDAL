@@ -20,7 +20,7 @@ http://github.com/Esri/lepcc/
 
 Contributors:  Thomas Maurer
 */
-
+#include <climits>
 #include <algorithm>
 #include <cstring>
 #include "FlagBytes.h"

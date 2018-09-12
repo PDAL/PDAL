@@ -3,6 +3,7 @@
 #include "i3sReader.hpp"
 #include "../lepcc/src/include/lepcc_c_api.h"                                   
 #include "../lepcc/src/include/lepcc_types.h" 
+#include "pool.hpp"
 
 #include <istream>
 #include <cstdint>
@@ -16,6 +17,7 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
+
 
 
 namespace pdal
@@ -214,7 +216,6 @@ namespace pdal
         Json::Value nodeIndexJson =
             parse(m_arbiter->get(nodeUrl + std::to_string(nodePageIndex)));
         int pointId = 0;
-        std::set< lepcc::Point3D, compare3d> pointMap;
         int index = 0;
         std::vector<int> nodePullArr;
         int totalCount = 0;
@@ -244,9 +245,22 @@ namespace pdal
         std::cout<< " FinalCount: " << vertexCount << std::endl;
         for(int i = 0; i < index; i++) 
         {
+            Pool p(4);
             std::string localUrl = m_args.url + 
                 "/layers/0/nodes/" + std::to_string(nodePullArr[i]); 
+
+            p.add([&localUrl, this, &i](std::unique_ptr<arbiter::Arbiter> m_arbiter){binaryFetch(localUrl);});
+        }
+        std::cout << "Final point count: " << pointId << std::endl;
+        const std::size_t pointSize(view->layout()->pointSize());
+
+        return 0;
+    }
+
+    void binaryFetch(std::string localUrl)
+    {
             /*Retrieve geometry binary*/
+            
             std::string urlGeo = localUrl + "/geometries/0";
             //TODO add try catch block on arbiter(what if inet goes down)
             std::vector<char> response = m_arbiter->getBinary(urlGeo);
@@ -266,17 +280,23 @@ namespace pdal
             std::vector<char> rgbResponse = m_arbiter->getBinary(urlRgb);
             std::vector<lepcc::RGB_t> rgbPoints = 
                 decompressRGB(&rgbResponse, i);
-            std::cout << "Node: " << nodePullArr[i] << std::endl;
             
             /*Retrieve Class Code*/
-            /*std::string urlClass = localUrl + "/attributes/8";
-            std::vector<char> classResponse = m_arbiter->getBinary(urlClass);
-            std::cout << classResponse[0] << std::endl;*/
+            std::string urlClass = localUrl + "/attributes/8";
+            std::vector<char> classFlags = m_arbiter->getBinary(urlClass);
 
+            /*Flags*/
+            std::string urlFlags = localUrl + "/attributes/16";
+            std::vector<char> flags = m_arbiter->getBinary(urlFlags);
+
+            /*Returns*/
+            std::string urlReturns = localUrl + "/attributes/32";
+            std::vector<char> returns = m_arbiter->getBinary(urlReturns);
+
+            std::lock_guard<std::mutex> lock(m_mutex);
             /*Iterate through vector item and add to view*/
             for(std::size_t j = 0; j < pointcloud.size(); j ++)
             {  
-                pointMap.insert(pointcloud[j]);
                 //XYZ
                 view->setField(pdal::Dimension::Id::X,
                         pointId, pointcloud[j].x);
@@ -291,17 +311,23 @@ namespace pdal
                         pointId, rgbPoints[j].g);
                 view->setField(pdal::Dimension::Id::Blue,
                         pointId, rgbPoints[j].b);
+
                 //INTENSITY
                 view->setField(pdal::Dimension::Id::Intensity,
                         pointId, intensity[j]);
+
+                //CLASSCODES
+                view->setField(pdal::Dimension::Id::ClassFlags,
+                        pointId, classFlags[j]);
+
+                //FLAGS
+                view->setField(pdal::Dimension::Id::Flag,
+                        pointId, flags[j]);
+
+                //Returns
                 pointId++;
             }
-        }
-        std::cout << "Final point count: " << pointId << std::endl;
-        std::cout << "Actual point count: " << pointMap.size() << std::endl; 
-        const std::size_t pointSize(view->layout()->pointSize());
 
-        return 0;
     }
 
     void I3SReader::done(PointTableRef)

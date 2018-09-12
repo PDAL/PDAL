@@ -24,6 +24,8 @@ Contributors:  Thomas Maurer
 #ifndef LEPCC_H
 #define LEPCC_H
 
+#include <cstring>
+#include <string>
 #include <vector>
 #include "lepcc_types.h"
 
