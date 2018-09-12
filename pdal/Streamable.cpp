@@ -94,7 +94,7 @@ void Streamable::execute(StreamPointTable& table)
             for (auto s : *this)
             {
                 s->startLogging();
-                s->l_done(table);
+                s->done(table);
                 s->stopLogging();
             }
         }
@@ -246,6 +246,7 @@ void Streamable::execute(StreamPointTable& table,
         // Yes, vector<bool> is terrible.  Can do something better later.
         for (size_t i = 0; i < skips.size(); ++i)
             skips[i] = false;
+        table.setNumPoints(pointLimit);
         table.reset();
     }
 }

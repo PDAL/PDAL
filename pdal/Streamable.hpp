@@ -40,8 +40,11 @@
 namespace pdal
 {
 
+class StreamableWrapper;
+
 class PDAL_DLL Streamable : public virtual Stage
 {
+    friend class StreamableWrapper;
 public:
     Streamable();
 
@@ -81,7 +84,7 @@ protected:
         SrsMap& srsMap);
 
     /**
-      Process a single point (streaming mode).  Implement in sublcass.
+      Process a single point (streaming mode).  Implement in subclass.
 
       \param point  Point to process.
       \return  Readers return false when no more points are to be read.

@@ -3,7 +3,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 RUN     git clone https://github.com/PDAL/PDAL.git /pdal; \
     cd /pdal; \
-    git checkout 1.7-maintenance; \
+    git checkout master; \
     mkdir -p _build; \
     cd _build; \
     cmake .. \

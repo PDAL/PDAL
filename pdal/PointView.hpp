@@ -68,6 +68,7 @@ typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
 class PDAL_DLL PointView : public PointContainer
 {
+    FRIEND_TEST(VoxelTest, center);
     friend class Stage;
     friend class plang::Invocation;
     friend class PointIdxRef;
@@ -327,6 +328,10 @@ private:
         { m_temps.push(id); }
     void setSpatialReference(const SpatialReference& spatialRef)
         { m_spatialReference = spatialRef; }
+
+    // For testing only.
+    PointId index(PointId id) const
+        { return m_index[id]; }
 };
 
 struct PointViewLess

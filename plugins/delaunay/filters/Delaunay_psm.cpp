@@ -20554,6 +20554,7 @@ namespace GEO {
     void Delaunay::set_vertices(
         index_t nb_vertices, const double* vertices
     ) {
+        nb_cells_ = 0;
         nb_vertices_ = nb_vertices;
         vertices_ = vertices;
         if(nb_vertices_ < index_t(dimension()) + 1) {

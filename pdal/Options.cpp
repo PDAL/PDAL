@@ -99,10 +99,21 @@ void Options::addConditional(const Option& option)
 }
 
 
-void Options::addConditional(const Options& options)
+void Options::addConditional(const Options& other)
 {
-    for (auto& o : options.m_options)
-        addConditional(o.second);
+    for (auto oi = other.m_options.begin(); oi != other.m_options.end();)
+    {
+        const std::string& name = oi->first;
+        if (m_options.find(name) == m_options.end())
+        {
+            do
+            {
+                m_options.insert(*oi++);
+            } while (oi != other.m_options.end() && name == oi->first);
+        }
+        else
+            oi++;
+    }
 }
 
 
@@ -250,6 +261,19 @@ Options Options::fromCmdlineFile(const std::string& filename,
         options.add(o);
     }
     return options;
+}
+
+std::ostream& operator << (std::ostream& out, const Option& op)
+{
+    out << op.m_name << ":" << op.m_value;
+    return out;
+}
+
+std::ostream& operator << (std::ostream& out, const Options& ops)
+{
+    for (auto& op : ops.m_options)
+        out << op.second << "\n";
+    return out;
 }
 
 } // namespace pdal

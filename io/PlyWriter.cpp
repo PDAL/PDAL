@@ -66,11 +66,15 @@ void PlyWriter::addArgs(ProgramArgs& args)
     args.add("storage_mode", "PLY Storage Mode", m_format, Format::Ascii);
     args.add("dims", "Dimension names", m_dimNames);
     args.add("faces", "Write faces", m_faces);
+    m_precisionArg = &args.add("precision", "Output precision", m_precision, 3);
 }
 
 
 void PlyWriter::prepared(PointTableRef table)
 {
+    if (m_precisionArg->set() && m_format != Format::Ascii)
+        throwError("Option 'precision' can only be set of the 'storage_mode' "
+            "is ascii.");
     if (m_dimNames.size())
     {
         for (auto& name : m_dimNames)
@@ -149,6 +153,11 @@ void PlyWriter::ready(PointTableRef table)
             " points supported.");
 
     m_stream = Utils::createFile(m_filename, true);
+    if (m_format == Format::Ascii && m_precisionArg->set())
+    {
+        *m_stream << std::fixed;
+        m_stream->precision(m_precision);
+    }
     writeHeader(table.layout());
 }
 

@@ -65,6 +65,9 @@ macro(config_compiler_and_linker)
       # Compatibility warnings not applicable to Google Test.
       # Resolved overload was found by argument-dependent lookup.
       set(cxx_base_flags "${cxx_base_flags} -wd4675")
+    elseif (MSVC_VERSION GREATER 1900)
+      # VS2017, https://github.com/google/googletest/issues/1111
+      set(cxx_base_flags "${cxx_base_flags} -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
     endif()
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")

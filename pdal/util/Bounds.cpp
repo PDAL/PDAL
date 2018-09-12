@@ -181,6 +181,8 @@ Bounds::Bounds(const BOX2D& box) : m_box(box)
     m_box.maxz = LOWEST;
 }
 
+// We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
+// BOX3D ctor that takes a BOX2D if that's what you want.
 BOX3D Bounds::to3d() const
 {
     if (!is3d())

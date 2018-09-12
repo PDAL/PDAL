@@ -139,6 +139,8 @@ private:
     virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
+    virtual bool srsOverridden() const
+        { return m_aSrs.valid(); }
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
     void spatialReferenceChanged(const SpatialReference& srs);

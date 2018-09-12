@@ -166,6 +166,28 @@ private:
     PointLayout m_layout;
 };
 
+class PDAL_DLL ContiguousPointTable : public SimplePointTable
+{
+private:
+    std::vector<char> m_buf;
+    point_count_t m_numPts;
+
+public:
+    ContiguousPointTable() : SimplePointTable(m_layout), m_numPts(0)
+        {}
+    virtual ~ContiguousPointTable();
+    virtual bool supportsView() const
+        { return true; }
+
+protected:
+    virtual char *getPoint(PointId idx);
+
+private:
+    virtual PointId addPoint();
+
+    PointLayout m_layout;
+};
+
 /// A StreamPointTable must provide storage for point data up to its capacity.
 /// It must implement getPoint() which returns a pointer to a buffer of
 /// sufficient size to contain a point's data.  The minimum size required
@@ -185,6 +207,11 @@ public:
     /// Called when execute() is started.  Typically used to set buffer size
     /// when all dimensions are known.
     virtual void finalize()
+    {}
+    /// Called before the StreamPointTable is reset indicating the number of
+    /// points that were populated, which must be less than or equal to its
+    /// capacity.
+    virtual void setNumPoints(PointId n)
     {}
     /// Called when the contents of StreamPointTable have been consumed and
     /// the point data will be potentially overwritten.
