@@ -79,10 +79,8 @@ void SQLiteReader::initialize()
             std::string(e.what()));
     }
 
-    if (m_spatialRef.empty())
-        m_spatialRef = fetchSpatialReference(m_query);
-    setSpatialReference(m_spatialRef);
-
+    if (getSpatialReference().empty())
+        setSpatialReference(fetchSpatialReference(m_query));
     m_patch = PatchPtr(new Patch());
 }
 
@@ -123,8 +121,6 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
 
 void SQLiteReader::addArgs(ProgramArgs& args)
 {
-    args.add("spatialreference", "Spatial reference to apply to points if "
-       "one doesn't exist", m_spatialRef);
     args.add("query", "SELECT statement that returns point cloud", m_query);
     args.add("connection", "Database connection string", m_connection);
     args.add("module", "Spatialite module name", m_modulename);

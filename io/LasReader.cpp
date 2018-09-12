@@ -79,7 +79,6 @@ LasReader::~LasReader()
 
 void LasReader::addArgs(ProgramArgs& args)
 {
-    addSpatialReferenceArg(args);
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
