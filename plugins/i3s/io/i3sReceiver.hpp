@@ -36,9 +36,9 @@ namespace pdal
     struct I3SArgs
     {
       std::string url;
-      std::string name;
-      std::string itemId;
-      std::string intensity;
+      std::string bounds;
+      int depth;
+      int threads = 8;
     };
 
     struct compare3d

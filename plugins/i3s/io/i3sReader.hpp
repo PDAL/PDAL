@@ -86,6 +86,7 @@ namespace pdal
     Json::Value m_info;
     FixedPointLayout m_layout;
     std::mutex m_mutex;
+    Bounds m_bounds;
     
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table) override;

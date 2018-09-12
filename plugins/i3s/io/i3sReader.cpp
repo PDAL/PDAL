@@ -15,6 +15,7 @@
 #include <algorithm>                                                
 #include <chrono>                                                               
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 
@@ -37,6 +38,7 @@ namespace pdal
 
     void I3SReader::initialize(PointTableRef table)
     {
+        
 
         Json::Value config;
         if (log()->getLevel() > LogLevel::Debug4)
@@ -65,15 +67,28 @@ namespace pdal
         {
             throw pdal_error(std::string("Failed to fetch info: ") + e.what());
         }
-        m_args.name = m_info["name"].asString();
-        m_args.itemId = m_info["serviceItemId"].asString();
+        //create pdal Bounds
+
+        if(m_args.bounds.size())
+        {
+            if(m_args.bounds.find('(') != std::string::npos)
+            {
+                std::istringstream iss(m_args.bounds);
+                iss >> m_bounds;
+            }    
+        }
+        std::cout << "\n\nFileName: " << m_args.url << std::endl;
+        std::cout << "\nThread Count: " << m_args.threads << std::endl;
+        std::cout << "Bounds: " << m_args.bounds << std::endl;
     }
 
     void I3SReader::addArgs(ProgramArgs& args)
     {
         args.add("url", "URL", m_args.url);
-        args.add("itemId", "ID of the current item", m_args.itemId);
-        args.add("name", "Name of the point cloud data", m_args.name);
+        args.add("bounds", "Bounds of the point cloud", m_args.bounds);
+        args.add("depth", "Resolution of the point cloud", m_args.depth);
+        args.add("threads", "Number of threads to be used."
+                "This number will be squared", m_args.threads);
     }
 
     void I3SReader::addDimensions(PointLayoutPtr layout)
@@ -217,7 +232,6 @@ namespace pdal
         int vertexCount = 0;
         while(!nodeIndexJson.isMember("error"))
         {
-            std::cout << "totalCount: " << ++totalCount << std::endl;
             int pageSize = nodeIndexJson["nodes"].size();
             int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
             nodePullArr.resize(initialNode + pageSize);
@@ -236,11 +250,12 @@ namespace pdal
             nodeIndexJson = 
                 parse(m_arbiter->get(nodeUrl+std::to_string(++pageIndex)));
         }
-        std::cout<< " FinalCount: " << vertexCount << std::endl;
+        std::cout << "Fetching binaries" << std::endl;
+        Pool p(m_args.threads);
         for(int i = 0; i < index; i++) 
         {
-            std::cout << i << "/" << index << std::endl;
-            Pool p(8);
+            std::cout << "\r" << i << "/" << index;
+            std::cout.flush();
             std::string localUrl = m_args.url + 
                 "/layers/0/nodes/" + std::to_string(nodePullArr[i]); 
 
@@ -250,15 +265,14 @@ namespace pdal
                 binaryFetch(localUrl, view);
             });
         }
-        std::cout << "Final point count: " << view->size() << std::endl;
+        std::cout << "\nFinal point count: " << view->size() << std::endl;
         const std::size_t pointSize(view->layout()->pointSize());
-
         return 0;
     }
 
     void I3SReader::binaryFetch(std::string localUrl, PointViewPtr view)
     {
-            Pool p(8); 
+            Pool p(m_args.threads); 
             std::vector<char> response;
             p.add([this, &response, localUrl](){    
                 /*Retrieve geometry binary*/
@@ -319,40 +333,56 @@ namespace pdal
             
 
             std::lock_guard<std::mutex> lock(m_mutex);
+            
             /*Iterate through vector item and add to view*/
             for(std::size_t j = 0; j < pointcloud.size(); j ++)
             {  
-                PointId id = view->size();
-                //XYZ
-                view->setField(pdal::Dimension::Id::X,
-                        id, pointcloud[j].x);
-                view->setField(pdal::Dimension::Id::Y,
-                        id, pointcloud[j].y);
-                view->setField(pdal::Dimension::Id::Z,
-                        id, pointcloud[j].z);
-                //RGB
-                view->setField(pdal::Dimension::Id::Red,
-                        id, rgbPoints[j].r);
-                view->setField(pdal::Dimension::Id::Green,
-                        id, rgbPoints[j].g);
-                view->setField(pdal::Dimension::Id::Blue,
-                        id, rgbPoints[j].b);
+                double x = pointcloud[j].x;
+                double y = pointcloud[j].y;
+                double z = pointcloud[j].z;
+                if((m_bounds.is3d() && m_bounds.to3d().contains(x,y,z))
+                || (!m_bounds.is3d() && m_bounds.to2d().contains(x,y))
+                || !m_args.bounds.size())
+                {
 
-                //INTENSITY
-                view->setField(pdal::Dimension::Id::Intensity,
-                        id, intensity[j]);
+                    PointId id = view->size();
 
-                //CLASSCODES
-                view->setField(pdal::Dimension::Id::ClassFlags,
-                        id, classFlags[j]);
+                    //XYZ
+                    view->setField(pdal::Dimension::Id::X,
+                            id, pointcloud[j].x);
+                    view->setField(pdal::Dimension::Id::Y,
+                            id, pointcloud[j].y);
+                    view->setField(pdal::Dimension::Id::Z,
+                            id, pointcloud[j].z);
 
-                //FLAGS
-                view->setField(pdal::Dimension::Id::Flag,
-                        id, flags[j]);
+                    //RGB
+                    view->setField(pdal::Dimension::Id::Red,
+                            id, rgbPoints[j].r);
+                    view->setField(pdal::Dimension::Id::Green,
+                            id, rgbPoints[j].g);
+                    view->setField(pdal::Dimension::Id::Blue,
+                            id, rgbPoints[j].b);
 
+                    //INTENSITY
+                    view->setField(pdal::Dimension::Id::Intensity,
+                            id, intensity[j]);
+
+                    //CLASSCODES
+                    view->setField(pdal::Dimension::Id::ClassFlags,
+                            id, classFlags[j]);
+
+                    //FLAGS
+                    view->setField(pdal::Dimension::Id::Flag,
+                            id, flags[j]);
+
+                    //RETURNS
+                    view->setField(pdal::Dimension::Id::NumberOfReturns,
+                            id, returns[j]);
+                }
             }
 
     }
+
 
     void I3SReader::done(PointTableRef)
     {
