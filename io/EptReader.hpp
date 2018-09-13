@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstddef>
 
 #include "EptSupport.hpp"
@@ -67,9 +68,11 @@ private:
     // Aggregate all EPT keys overlapping our query bounds and their number of
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
-    void overlaps(Pool& pool, const Json::Value& heirarchy, const Key& key);
+    void overlaps(const Json::Value& heirarchy, const Key& key);
 
-    void readOne(PointViewPtr view, const Key& key) const;
+    void readLaszip(PointView& view, const Key& key) const;
+    void readBinary(PointView& view, const Key& key) const;
+    void process(PointView& view, PointRef& pr, bool unscale = false) const;
 
     std::string m_root;
 
@@ -79,24 +82,13 @@ private:
     Json::Value m_info;
     BOX3D m_bounds;
     uint64_t m_hierarchyStep = 0;
+    std::string m_dataType;
 
     class Args
     {
     public:
         Bounds& boundsArg() { return m_bounds; }
-        BOX3D bounds() const
-        {
-            if (m_bounds.is3d())
-                return m_bounds.to3d();
-
-            const BOX2D b(m_bounds.to2d());
-            if (b.empty())
-                return BOX3D();
-
-            return BOX3D(
-                    b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
-                    b.maxx, b.maxy, (std::numeric_limits<double>::max)());
-        }
+        BOX3D bounds() const;
 
         std::string& originArg() { return m_originArg; }
         const std::string& origin() const { return m_originArg; }
@@ -111,14 +103,19 @@ private:
     };
 
     Args m_args;
-
     BOX3D m_queryBounds;
     std::unique_ptr<uint64_t> m_queryOriginId;
+    std::unique_ptr<Pool> m_pool;
+    DimTypeList m_dimTypes;
 
     mutable std::mutex m_mutex;
 
     std::set<Key> m_overlapKeys;
     uint64_t m_overlapPoints = 0;
+
+    std::array<double, 3> m_scale;
+    std::array<double, 3> m_offset;
+    mutable FixedPointLayout m_remoteLayout;
 };
 
 } // namespace pdal

@@ -48,13 +48,18 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
+#include <pdal/PointLayout.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
 class PDAL_DLL Key
 {
+    // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
+    // representing a data node, as well as the bounds of the contained data.
 public:
     Key(BOX3D b) : b(b) { }
 
@@ -144,6 +149,124 @@ inline BOX3D toBox3d(const Json::Value& b)
     return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
             b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
 }
+
+inline std::array<double, 3> toArray3(const Json::Value& json)
+{
+    std::array<double, 3> result;
+
+    if (json.isArray())
+    {
+        result[0] = json[0].asDouble();
+        result[1] = json[1].asDouble();
+        result[2] = json[2].asDouble();
+    }
+    else
+    {
+        result[0] = result[1] = result[2] = json.asDouble();
+    }
+
+    return result;
+}
+
+class PDAL_DLL FixedPointLayout : public PointLayout
+{
+    // The default PointLayout class may reorder dimension entries for packing
+    // efficiency.  However if a PointLayout is intended to be mapped to data
+    // coming from a remote source, then the dimensions must retain their order.
+    // FixedPointLayout retains the order of dimensions as they are registered.
+protected:
+    virtual bool update(
+            pdal::Dimension::Detail dimDetail,
+            const std::string& name) override
+    {
+        if (!m_finalized)
+        {
+            if (!contains(m_used, dimDetail.id()))
+            {
+                dimDetail.setOffset(m_pointSize);
+
+                m_pointSize += dimDetail.size();
+                m_used.push_back(dimDetail.id());
+                m_detail[Utils::toNative(dimDetail.id())] = dimDetail;
+
+                return true;
+            }
+        }
+        else return m_propIds.count(name);
+
+        return false;
+    }
+
+    bool contains(
+            const Dimension::IdList& idList,
+            const Dimension::Id id) const
+    {
+        for (const auto current : idList)
+        {
+            if (current == id) return true;
+        }
+
+        return false;
+    }
+};
+
+class PDAL_DLL ShallowPointTable : public BasePointTable
+{
+    // PointTable semantics around a raw buffer of data matching the specified
+    // layout.  Intended for accessing data from a remote source.
+public:
+    ShallowPointTable(PointLayout& layout, char* data, std::size_t size)
+        : BasePointTable(layout)
+        , m_data(data)
+        , m_size(size)
+    {}
+
+    std::size_t numPoints() const { return m_size / layout()->pointSize(); }
+
+protected:
+    virtual PointId addPoint() override
+    {
+        throw pdal_error("Cannot add points to ShallowPointTable");
+    }
+
+    virtual char* getPoint(PointId i) override
+    {
+        return m_data + i * layout()->pointSize();
+    }
+
+    // Identical to SimplePointTable's implementation.
+    void setFieldInternal(Dimension::Id id, PointId idx, const void* value)
+        override
+    {
+        const Dimension::Detail* d = layout()->dimDetail(id);
+        const char* src  = (const char*)value;
+        char* dst = getDimension(d, idx);
+        std::copy(src, src + d->size(), dst);
+    }
+
+    void getFieldInternal(Dimension::Id id, PointId idx, void* value) const
+        override
+    {
+        const Dimension::Detail* d = layout()->dimDetail(id);
+        const char* src = getDimension(d, idx);
+        char* dst = (char*)value;
+        std::copy(src, src + d->size(), dst);
+    }
+
+    char *getDimension(const Dimension::Detail* d, PointId idx)
+    {
+        return getPoint(idx) + d->offset();
+    }
+
+    const char *getDimension(const Dimension::Detail* d, PointId idx) const
+    {
+        ShallowPointTable* ncThis = const_cast<ShallowPointTable*>(this);
+        return ncThis->getPoint(idx) + d->offset();
+    }
+
+    char* m_data;
+    std::size_t m_size;
+};
 
 class PDAL_DLL Pool
 {
