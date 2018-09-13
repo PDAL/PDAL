@@ -36,7 +36,6 @@
 
 #include "private/hexer/HexIter.hpp"
 #include <pdal/Polygon.hpp>
-#include <pdal/StageFactory.hpp>
 
 using namespace hexer;
 
@@ -82,13 +81,22 @@ void HexBin::ready(PointTableRef table)
 
 void HexBin::filter(PointView& view)
 {
+    PointRef p(view, 0);
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
-        m_grid->addPoint(x, y);
+        p.setPointId(idx);
+        processOne(p);
     }
     m_count += view.size();
+}
+
+
+bool HexBin::processOne(PointRef& point)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    m_grid->addPoint(x, y);
+    return true;
 }
 
 
@@ -109,7 +117,6 @@ void HexBin::done(PointTableRef table)
             "Empty polygon -- unable to compute boundary");
         return;
     }
-
 
     std::ostringstream offsets;
     offsets << "MULTIPOINT (";
