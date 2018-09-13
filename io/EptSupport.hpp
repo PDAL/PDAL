@@ -56,6 +56,83 @@
 namespace pdal
 {
 
+inline BOX3D toBox3d(const Json::Value& b)
+{
+    return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
+            b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
+}
+
+inline std::array<double, 3> toArray3(const Json::Value& json)
+{
+    std::array<double, 3> result;
+
+    if (json.isArray())
+    {
+        result[0] = json[0].asDouble();
+        result[1] = json[1].asDouble();
+        result[2] = json[2].asDouble();
+    }
+    else
+    {
+        result[0] = result[1] = result[2] = json.asDouble();
+    }
+
+    return result;
+}
+
+class PDAL_DLL EptInfo
+{
+public:
+    enum class DataType
+    {
+        Laszip,
+        Binary
+    };
+
+    EptInfo(Json::Value info) : m_info(info)
+    {
+        m_bounds = toBox3d(m_info["bounds"]);
+        m_hierarchyStep = m_info["hierarchyStep"].asUInt64();
+        m_numPoints = m_info["numPoints"].asUInt64();
+        m_srs = m_info["srs"].asString();
+
+        if (m_info.isMember("scale"))
+            m_scale = toArray3(m_info["scale"]);
+
+        if (m_info.isMember("offset"))
+            m_offset = toArray3(m_info["offset"]);
+
+        const std::string dt(m_info["dataType"].asString());
+        if (dt == "laszip")
+            m_dataType = DataType::Laszip;
+        else if (dt == "binary")
+            m_dataType = DataType::Binary;
+        else
+            throw pdal_error("Unrecognized EPT dataType: " + dt);
+    }
+
+    const BOX3D& bounds() const { return m_bounds; }
+    uint64_t hierarchyStep() const { return m_hierarchyStep; }
+    uint64_t numPoints() const { return m_numPoints; }
+    const std::array<double, 3>& scale() const { return m_scale; }
+    const std::array<double, 3>& offset() const { return m_offset; }
+    DataType dataType() const { return m_dataType; }
+    const std::string& srs() const { return m_srs; }
+    const Json::Value& schema() const { return m_info["schema"]; }
+
+    const Json::Value& json() { return m_info; }
+
+private:
+    const Json::Value m_info;
+    BOX3D m_bounds;
+    uint64_t m_hierarchyStep = 0;
+    uint64_t m_numPoints = 0;
+    std::array<double, 3> m_scale { { 1, 1, 1 } };
+    std::array<double, 3> m_offset { { 0, 0, 0 } };
+    DataType m_dataType;
+    std::string m_srs;
+};
+
 class PDAL_DLL Key
 {
     // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
@@ -142,30 +219,6 @@ inline bool operator<(const Key& a, const Key& b)
 
     if (a.z < b.z) return true;
     return false;
-}
-
-inline BOX3D toBox3d(const Json::Value& b)
-{
-    return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
-            b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
-}
-
-inline std::array<double, 3> toArray3(const Json::Value& json)
-{
-    std::array<double, 3> result;
-
-    if (json.isArray())
-    {
-        result[0] = json[0].asDouble();
-        result[1] = json[1].asDouble();
-        result[2] = json[2].asDouble();
-    }
-    else
-    {
-        result[0] = result[1] = result[2] = json.asDouble();
-    }
-
-    return result;
 }
 
 class PDAL_DLL FixedPointLayout : public PointLayout

@@ -78,11 +78,7 @@ private:
 
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     std::unique_ptr<arbiter::Endpoint> m_ep;
-
-    Json::Value m_info;
-    BOX3D m_bounds;
-    uint64_t m_hierarchyStep = 0;
-    std::string m_dataType;
+    std::unique_ptr<EptInfo> m_info;
 
     class Args
     {
@@ -113,8 +109,6 @@ private:
     std::set<Key> m_overlapKeys;
     uint64_t m_overlapPoints = 0;
 
-    std::array<double, 3> m_scale;
-    std::array<double, 3> m_offset;
     mutable FixedPointLayout m_remoteLayout;
 };
 

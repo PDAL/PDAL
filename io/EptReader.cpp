@@ -115,35 +115,16 @@ void EptReader::initialize()
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
     m_pool.reset(new Pool(m_args.threads()));
-
     log()->get(LogLevel::Debug) << "Endpoint: " << m_ep->prefixedRoot() <<
         std::endl;
 
-    // Get the top-level metadata and parse out the entries we need.
-    m_info = parse(m_ep->get("entwine.json"));
-    m_bounds = toBox3d(m_info["bounds"]);
-    m_hierarchyStep = m_info["hierarchyStep"].asUInt64();
-    m_dataType = m_info["dataType"].asString();
-
-    for (double& s : m_scale)
-        s = 1.0;
-    for (double& o : m_offset)
-        o = 0.0;
-
-    if (m_info.isMember("scale"))
-        m_scale = toArray3(m_info["scale"]);
-
-    if (m_info.isMember("offset"))
-        m_offset = toArray3(m_info["offset"]);
-
-    if (m_dataType != "laszip" && m_dataType != "binary")
-        throw pdal_error("Unrecognized dataType: " + m_dataType);
-
-    log()->get(LogLevel::Debug) << "Got info" << std::endl;
+    m_info.reset(new EptInfo(parse(m_ep->get("entwine.json"))));
+    log()->get(LogLevel::Debug) << "Got EPT info" << std::endl;
 
     try
     {
-        setSpatialReference(m_info["srs"].asString());
+        if (!m_info->srs().empty())
+            setSpatialReference(m_info->srs());
     }
     catch (...)
     {
@@ -154,12 +135,15 @@ void EptReader::initialize()
     m_queryBounds = m_args.bounds();
     handleOriginQuery();
 
+    const auto& scale(m_info->scale());
+    const auto& offset(m_info->offset());
+
     log()->get(LogLevel::Debug) << "Query bounds: " << m_queryBounds <<
         std::endl;
     log()->get(LogLevel::Debug) << "Scale: " <<
-        m_scale[0] << ", " << m_scale[1] << ", " << m_scale[2] << std::endl;
+        scale[0] << ", " << scale[1] << ", " << scale[2] << std::endl;
     log()->get(LogLevel::Debug) << "Offset: " <<
-        m_offset[0] << ", " << m_offset[1] << ", " << m_offset[2] << std::endl;
+        offset[0] << ", " << offset[1] << ", " << offset[2] << std::endl;
     log()->get(LogLevel::Debug) << "Threads: " << m_pool->size() << std::endl;
 }
 
@@ -223,17 +207,18 @@ void EptReader::handleOriginQuery()
                 *m_queryOriginId)]);
     BOX3D q(toBox3d(found["bounds"]));
 
-    if (m_info.isMember("scale"))
+    if (m_info->json().isMember("scale"))
     {
         // Make sure floating point precision doesn't make us discard points
         // from a file query.  We'll be checking the OriginId anyway so we have
         // leeway to bloat the query bounds as needed.
-        q.minx -= m_scale[0];
-        q.miny -= m_scale[1];
-        q.minz -= m_scale[2];
-        q.maxx += m_scale[0];
-        q.maxy += m_scale[1];
-        q.maxz += m_scale[2];
+        const auto& scale(m_info->scale());
+        q.minx -= scale[0];
+        q.miny -= scale[1];
+        q.minz -= scale[2];
+        q.maxx += scale[0];
+        q.maxy += scale[1];
+        q.maxz += scale[2];
     }
 
     // Clip the bounds to the queried origin bounds.  Don't just overwrit it -
@@ -251,15 +236,13 @@ QuickInfo EptReader::inspect()
 
     initialize();
 
-    const Json::Value& bounds(m_info["boundsConforming"]);
-    qi.m_bounds = toBox3d(bounds);
-    qi.m_srs = m_info["srs"].asString();
-    qi.m_pointCount = m_info["numPoints"].asUInt64();
+    qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
+    qi.m_srs = m_info->srs();
+    qi.m_pointCount = m_info->numPoints();
 
-    const Json::Value& schema(m_info["schema"]);
-    for (Json::ArrayIndex i(0); i < schema.size(); ++i)
+    for (Json::ArrayIndex i(0); i < m_info->schema().size(); ++i)
     {
-        qi.m_dimNames.push_back(schema[i]["name"].asString());
+        qi.m_dimNames.push_back(m_info->schema()[i]["name"].asString());
     }
 
     qi.m_valid = true;
@@ -269,7 +252,7 @@ QuickInfo EptReader::inspect()
 
 void EptReader::addDimensions(PointLayoutPtr layout)
 {
-    const Json::Value& schema(m_info["schema"]);
+    const Json::Value& schema(m_info->schema());
 
     // Register XYZ directly since they may appear as scaled int32 values in the
     // schema.  Either way we want doubles.
@@ -295,7 +278,7 @@ void EptReader::ready(PointTableRef table)
     // Determine all the keys that overlap the queried area by traversing the
     // EPT hierarchy (see https://git.io/fAiuR).  Because this may require
     // fetching lots of JSON files, it'll run in our thread pool.
-    const Key key(m_bounds);
+    const Key key(m_info->bounds());
     const Json::Value hier(parse(m_ep->get("h/" + key.toString() + ".json")));
     overlaps(hier, key);
     m_pool->await();
@@ -337,7 +320,7 @@ void EptReader::overlaps(const Json::Value& hier, const Key& key)
         m_overlapPoints += np;
     }
 
-    if (m_hierarchyStep != 0 && key.d % m_hierarchyStep == 0)
+    if (m_info->hierarchyStep() != 0 && key.d % m_info->hierarchyStep() == 0)
     {
         log()->get(LogLevel::Debug) << "Hierarchy: " <<
             key.toString() << std::endl;
@@ -378,7 +361,7 @@ PointViewSet EptReader::run(PointViewPtr base)
 
         m_pool->add([this, view, &key]()
         {
-            if (m_dataType == "laszip")
+            if (m_info->dataType() == EptInfo::DataType::Laszip)
                 readLaszip(*view, key);
             else
                 readBinary(*view, key);
@@ -445,9 +428,9 @@ void EptReader::process(PointView& dst, PointRef& pr, bool unscale) const
 
     if (unscale)
     {
-        x = x * m_scale[0] + m_offset[0];
-        y = y * m_scale[1] + m_offset[1];
-        z = z * m_scale[2] + m_offset[2];
+        x = x * m_info->scale()[0] + m_info->offset()[0];
+        x = x * m_info->scale()[1] + m_info->offset()[1];
+        x = x * m_info->scale()[2] + m_info->offset()[2];
     }
 
     const auto pointId(dst.size());
