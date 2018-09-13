@@ -310,6 +310,17 @@ bool SpatialReference::isGeocentric() const
     return output;
 }
 
+
+bool SpatialReference::isProjected() const
+{
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    if (!current)
+        return false;
+
+    bool output = OSRIsProjected(current.get());
+    return output;
+}
+
 int SpatialReference::calculateZone(double lon, double lat)
 {
     int zone = 0;
