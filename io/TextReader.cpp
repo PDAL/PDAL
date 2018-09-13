@@ -156,7 +156,6 @@ void TextReader::initialize(PointTableRef table)
 
 void TextReader::addArgs(ProgramArgs& args)
 {
-    addSpatialReferenceArg(args);
     m_separatorArg = &(args.add("separator", "Separator character that "
         "overrides special character found in header line", m_separator, ' '));
     args.add("header", "Use this string as the header line.", m_header);
