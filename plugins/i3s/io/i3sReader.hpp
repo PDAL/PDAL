@@ -74,7 +74,7 @@ namespace pdal
   public:
     I3SReader() : Reader() {};
     std::string getName() const;
-    void binaryFetch(std::string localUrl, PointViewPtr view);
+    void createView(std::string localUrl, PointViewPtr view);
 
   private:
     std::unique_ptr<ILeStream> m_stream;

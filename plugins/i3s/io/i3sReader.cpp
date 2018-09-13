@@ -39,13 +39,13 @@ namespace pdal
     void I3SReader::initialize(PointTableRef table)
     {
         
-
+        //set up arbiter
         Json::Value config;
         if (log()->getLevel() > LogLevel::Debug4)
             config["arbiter"]["verbose"] = true;
         m_arbiter.reset(new arbiter::Arbiter(config));
 
-
+        /*Check for */
         if (m_filename.size() && m_args.url.empty())
         {
             m_args.url = m_filename;
@@ -55,6 +55,9 @@ namespace pdal
             if (m_args.url.find("https://") == std::string::npos)
                 m_args.url = "https://" + m_args.url;
         }
+        //TODO remove tailing '/'
+        if(m_args.url.back() == '/')
+            m_args.url.pop_back();
 
         log()->get(LogLevel::Debug) << "Fetching info from " << m_args.url <<
             std::endl;
@@ -77,9 +80,12 @@ namespace pdal
                 iss >> m_bounds;
             }    
         }
-        std::cout << "\n\nFileName: " << m_args.url << std::endl;
-        std::cout << "\nThread Count: " << m_args.threads << std::endl;
-        std::cout << "Bounds: " << m_args.bounds << std::endl;
+        log()->get(LogLevel::Debug) << "\n\nFileName: " 
+            << m_args.url << std::endl;
+        log()->get(LogLevel::Debug) << "\nThread Count: " 
+            << m_args.threads << std::endl;
+        log()->get(LogLevel::Debug) << "Bounds: " 
+            << m_args.bounds << std::endl;
     }
 
     void I3SReader::addArgs(ProgramArgs& args)
@@ -262,7 +268,7 @@ namespace pdal
 
             p.add([localUrl, this, &view]()
             {
-                binaryFetch(localUrl, view);
+                createView(localUrl, view);
             });
         }
         std::cout << "\nFinal point count: " << view->size() << std::endl;
@@ -270,7 +276,7 @@ namespace pdal
         return 0;
     }
 
-    void I3SReader::binaryFetch(std::string localUrl, PointViewPtr view)
+    void I3SReader::createView(std::string localUrl, PointViewPtr view)
     {
             Pool p(m_args.threads); 
             std::vector<char> response;
