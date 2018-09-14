@@ -208,6 +208,11 @@ public:
     /// when all dimensions are known.
     virtual void finalize()
     {}
+    /// Called before the StreamPointTable is reset indicating the number of
+    /// points that were populated, which must be less than or equal to its
+    /// capacity.
+    virtual void setNumPoints(PointId n)
+    {}
     /// Called when the contents of StreamPointTable have been consumed and
     /// the point data will be potentially overwritten.
     virtual void reset()

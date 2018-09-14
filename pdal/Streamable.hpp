@@ -84,7 +84,7 @@ protected:
         SrsMap& srsMap);
 
     /**
-      Process a single point (streaming mode).  Implement in sublcass.
+      Process a single point (streaming mode).  Implement in subclass.
 
       \param point  Point to process.
       \return  Readers return false when no more points are to be read.

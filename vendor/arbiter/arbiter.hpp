@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: f9c0fb7acc6c1c71359d7060ef2d9cba2115aa4c
+// Git SHA: e63504fef0e8e4c875b09b98d6ef013204ff21fe
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -460,13 +460,13 @@ namespace rapidxml
     public:
 
         //! \cond internal
-        typedef void *(alloc_func)(std::size_t);       // Type of user-defined function used to allocate memory
+        typedef void *(alloc_function)(std::size_t);       // Type of user-defined function used to allocate memory
         typedef void (free_func)(void *);              // Type of user-defined function used to free memory
         //! \endcond
 
         //! Constructs empty pool with default allocator functions.
         memory_pool()
-            : m_alloc_func(0)
+            : m_alloc_function(0)
             , m_free_func(0)
         {
             init();
@@ -627,10 +627,10 @@ namespace rapidxml
         //! </code><br>
         //! \param af Allocation function, or 0 to restore default function
         //! \param ff Free function, or 0 to restore default function
-        void set_allocator(alloc_func *af, free_func *ff)
+        void set_allocator(alloc_function *af, free_func *ff)
         {
             assert(m_begin == m_static_memory && m_ptr == align(m_begin));    // Verify that no memory is allocated yet
-            m_alloc_func = af;
+            m_alloc_function = af;
             m_free_func = ff;
         }
 
@@ -658,9 +658,9 @@ namespace rapidxml
         {
             // Allocate
             void *memory;
-            if (m_alloc_func)   // Allocate memory using either user-specified allocation function or global operator new[]
+            if (m_alloc_function)   // Allocate memory using either user-specified allocation function or global operator new[]
             {
-                memory = m_alloc_func(size);
+                memory = m_alloc_function(size);
                 assert(memory); // Allocator is not allowed to return 0, on failure it must either throw, stop the program or use longjmp
             }
             else
@@ -712,7 +712,7 @@ namespace rapidxml
         char *m_ptr;                                        // First free byte in current pool
         char *m_end;                                        // One past last available byte in current pool
         char m_static_memory[RAPIDXML_STATIC_POOL_SIZE];    // Static raw memory
-        alloc_func *m_alloc_func;                           // Allocator function, or 0 if default is to be used
+        alloc_function *m_alloc_function;                           // Allocator function, or 0 if default is to be used
         free_func *m_free_func;                             // Free function, or 0 if default is to be used
     };
 

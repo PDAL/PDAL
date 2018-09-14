@@ -42,7 +42,7 @@ namespace pdal
 enum class CompressionType
 {
     None = 0,
-    Ght = 1,
+//    Ght = 1,   -- Removed compression type
     Dimensional = 2,
     Lazperf = 3,
     Unknown = 256

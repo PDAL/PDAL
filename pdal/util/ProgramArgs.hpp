@@ -752,13 +752,9 @@ public:
     */
     virtual void setValue(const std::string& s)
     {
-        if (s.size() && s[0] == '-')
-        {
-            throw arg_val_error("Argument '" + m_longname +
-                "' needs a value and none was provided.");
-        }
-        m_rawVal = s;
         T var;
+
+        m_rawVal = s;
         if (!Utils::fromString(s, var))
         {
             std::string error(m_error);
@@ -869,11 +865,9 @@ public:
         for (auto& ts : slist)
             Utils::trim(ts);
 
-        if ((s.size() && s[0] == '-') || slist.empty())
-        {
+        if (slist.empty())
             throw arg_val_error("Missing value for argument '" + m_longname +
                 "'.");
-        }
         m_rawVal = s;
         if (!m_set)
             m_var.clear();

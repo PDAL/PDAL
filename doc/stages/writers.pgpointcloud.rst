@@ -70,7 +70,6 @@ compression
 
   * **none** applies no compression
   * **dimensional** applies dynamic compression to each dimension separately
-  * **ght** applies a "geohash tree" compression by sorting the points into a prefix tree
   * **lazperf** applies a "laz" compression (using the `laz-perf`_ library in PostgreSQL Pointcloud)
 
 overwrite

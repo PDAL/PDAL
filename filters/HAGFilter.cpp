@@ -96,8 +96,7 @@ void HAGFilter::filter(PointView& view)
             "as ground");
 
     // Build the 2D KD-tree.
-    KD2Index kdi(*gView);
-    kdi.build();
+    KD2Index& kdi = gView->build2dIndex();
 
     // Second pass: Find Z difference between non-ground points and the nearest
     // neighbor (2D) in the ground view.

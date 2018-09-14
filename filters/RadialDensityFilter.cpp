@@ -72,9 +72,7 @@ void RadialDensityFilter::filter(PointView& view)
     using namespace Dimension;
 
     // Build the 3D KD-tree.
-    log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
-    KD3Index index(view);
-    index.build();
+    KD3Index& index = view.build3dIndex();
 
     // Search for neighboring points within the specified radius. The number of
     // neighbors (which includes the query point) is normalized by the volume

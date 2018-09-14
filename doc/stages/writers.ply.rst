@@ -43,7 +43,7 @@ filename
 storage_mode
   Type of ply file to write. Valid values are 'ascii', 'little endian',
   'big endian', and 'default'. 'default' is binary output in the endianness
-  of the machine. [Default: 'default']
+  of the machine. [Default: 'ascii']
 
 dims
   List of dimensions to write as elements. [Default: all dimensions]
@@ -52,4 +52,11 @@ faces
   Write a mesh as faces in addition to writing points as vertices.
   [Default: false]
 
+precision
+  If specified, the number of digits to the right of the decimal place
+  using f-style formatting.  Only permitted when 'storage_mode' is 'ascii'.
+  See the `printf`_ reference for more information.
+  [Default: g-style formatting (variable precision)]
+
 .. _polygon file format: http://paulbourke.net/dataformats/ply/
+.. _printf: https://en.cppreference.com/w/cpp/io/c/fprintf

@@ -141,6 +141,8 @@ public:
 
     bool isGeographic() const;
     bool isGeocentric() const;
+    bool isProjected() const;
+
     int computeUTMZone(const BOX3D& box) const;
 
     const std::string& getName() const;

@@ -39,6 +39,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <io/LasReader.hpp>
+#include <filters/StatsFilter.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -307,7 +308,7 @@ TEST(json, tags)
     EXPECT_EQ(totalInputs, 3U);
 }
 
-TEST(json, issue1417)
+TEST(json, issue_1417)
 {
     std::string options = "--readers.las.filename=" +
         Support::datapath("las/utm15.las");
@@ -315,7 +316,7 @@ TEST(json, issue1417)
 }
 
 // Make sure we handle repeated options properly
-TEST(json, issue1941)
+TEST(json, issue_1941)
 {
     PipelineManager manager;
     std::string file;
@@ -337,7 +338,6 @@ TEST(json, issue1941)
     file = Support::configuredpath("pipeline/range_bad_limits.json");
     EXPECT_THROW(manager2.readPipeline(file), pdal_error);
 }
-
 
 // Test that stage options passed via --stage.<tagname>.<option> work.
 TEST(json, stagetags)
@@ -413,6 +413,52 @@ TEST(json, stagetags)
         " --stage.reader.compression=laszip "
         "--stage.reader.compression=lazperf", output);
     EXPECT_NE(stat, 0);
+}
+
+// Make sure that spatialreference works for random readers
+TEST(json, issue_2159)
+{
+    class XReader : public Reader
+    {
+        std::string getName() const
+            { return "readers.x"; }
+
+        virtual void addDimensions(PointLayoutPtr layout)
+        {
+            using namespace Dimension;
+
+            layout->registerDims( { Id::X, Id::Y, Id::Z } );
+        }
+
+        virtual point_count_t read(PointViewPtr v, point_count_t count)
+        {
+            using namespace Dimension;
+
+            for (PointId idx = 0; idx < count; ++idx)
+            {
+                v->setField(Id::X, idx, idx);
+                v->setField(Id::Y, idx, 10 * idx);
+                v->setField(Id::Z, idx, 1.152);
+            }
+            return count;
+        }
+    };
+
+    XReader xr;
+    Options rOpts;
+    rOpts.add("count", "1000");
+    rOpts.add("spatialreference", "EPSG:4326");
+    xr.setOptions(rOpts);
+
+    StatsFilter f;
+    f.setInput(xr);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    PointViewPtr v = *(s.begin());
+    SpatialReference srs = v->spatialReference();
+    EXPECT_EQ(srs, SpatialReference("EPSG:4326"));
 }
 
 } // namespace pdal
