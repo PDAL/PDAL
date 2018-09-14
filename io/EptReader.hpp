@@ -40,10 +40,19 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-#include <arbiter/arbiter.hpp>
+namespace Json
+{
+    class Value;
+}
 
 namespace pdal
 {
+
+namespace arbiter
+{
+    class Arbiter;
+    class Endpoint;
+}
 
 class EptInfo;
 class FixedPointLayout;

@@ -39,6 +39,8 @@
 #include "private/EptSupport.hpp"
 #include "LasReader.hpp"
 
+#include <arbiter/arbiter.hpp>
+
 namespace pdal
 {
 
