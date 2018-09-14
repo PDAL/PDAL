@@ -37,8 +37,6 @@
 #include <array>
 #include <cstddef>
 
-#include "EptSupport.hpp"
-
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
@@ -47,9 +45,16 @@
 namespace pdal
 {
 
+class EptInfo;
+class FixedPointLayout;
+class Key;
+class Pool;
+
 class PDAL_DLL EptReader : public Reader
 {
 public:
+    EptReader();
+    virtual ~EptReader();
     std::string getName() const override;
 
     virtual void addArgs(ProgramArgs& args) override;
@@ -109,7 +114,7 @@ private:
     std::set<Key> m_overlapKeys;
     uint64_t m_overlapPoints = 0;
 
-    mutable FixedPointLayout m_remoteLayout;
+    std::unique_ptr<FixedPointLayout> m_remoteLayout;
 };
 
 } // namespace pdal

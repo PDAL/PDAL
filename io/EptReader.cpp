@@ -36,6 +36,7 @@
 
 #include <limits>
 
+#include "private/EptSupport.hpp"
 #include "LasReader.hpp"
 
 namespace pdal
@@ -70,6 +71,12 @@ namespace
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
+
+EptReader::EptReader()
+{}
+
+EptReader::~EptReader()
+{}
 
 std::string EptReader::getName() const { return s_info.name; }
 
@@ -114,7 +121,7 @@ void EptReader::initialize()
 
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
-    m_pool.reset(new Pool(m_args.threads()));
+    m_pool.reset(new Pool(std::max<uint64_t>(m_args.threads(), 4)));
     log()->get(LogLevel::Debug) << "Endpoint: " << m_ep->prefixedRoot() <<
         std::endl;
 
@@ -221,7 +228,7 @@ void EptReader::handleOriginQuery()
         q.maxz += scale[2];
     }
 
-    // Clip the bounds to the queried origin bounds.  Don't just overwrit it -
+    // Clip the bounds to the queried origin bounds.  Don't just overwrite it -
     // it's possible that both a bounds and an origin are specified.
     m_queryBounds.clip(q);
 
@@ -253,6 +260,7 @@ QuickInfo EptReader::inspect()
 void EptReader::addDimensions(PointLayoutPtr layout)
 {
     const Json::Value& schema(m_info->schema());
+    m_remoteLayout.reset(new FixedPointLayout());
 
     // Register XYZ directly since they may appear as scaled int32 values in the
     // schema.  Either way we want doubles.
@@ -267,10 +275,10 @@ void EptReader::addDimensions(PointLayoutPtr layout)
         log()->get(LogLevel::Debug) << "Registering dim " << name << std::endl;
         const Dimension::Type type(Dimension::type(dim["type"].asString()));
         layout->registerOrAssignDim(name, type);
-        m_remoteLayout.registerOrAssignDim(name, type);
+        m_remoteLayout->registerOrAssignDim(name, type);
     }
 
-    m_remoteLayout.finalize();
+    m_remoteLayout->finalize();
 }
 
 void EptReader::ready(PointTableRef table)
@@ -296,8 +304,8 @@ void EptReader::ready(PointTableRef table)
 
     using D = Dimension::Id;
 
-    // Since we might need to revert a scale/offset for XYZ, they'll be handled
-    // separately.
+    // Since we might need to revert a scale/offset for XYZ if the dataType is
+    // binary, they'll be handled separately.
     m_dimTypes = table.layout()->dimTypes();
     m_dimTypes.erase(std::remove_if(
                 m_dimTypes.begin(),
@@ -322,8 +330,8 @@ void EptReader::overlaps(const Json::Value& hier, const Key& key)
 
     if (m_info->hierarchyStep() != 0 && key.d % m_info->hierarchyStep() == 0)
     {
-        log()->get(LogLevel::Debug) << "Hierarchy: " <<
-            key.toString() << std::endl;
+        log()->get(LogLevel::Debug) << "Hierarchy: " << key.toString() <<
+            std::endl;
 
         m_pool->add([this, key]()
         {
@@ -343,23 +351,15 @@ void EptReader::overlaps(const Json::Value& hier, const Key& key)
     }
 }
 
-PointViewSet EptReader::run(PointViewPtr base)
+PointViewSet EptReader::run(PointViewPtr view)
 {
-    // We'll use a different PointView for each data file.
-    PointViewSet views;
-
     uint64_t i(0);
     for (const Key& key : m_overlapKeys)
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        auto view(base->makeNew());
-        views.insert(view);
-        lock.unlock();
-
         log()->get(LogLevel::Debug) << "Data " << ++i << "/" <<
             m_overlapKeys.size() << ": " << key.toString() << std::endl;
 
-        m_pool->add([this, view, &key]()
+        m_pool->add([this, &view, &key]()
         {
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 readLaszip(*view, key);
@@ -372,6 +372,8 @@ PointViewSet EptReader::run(PointViewPtr base)
 
     log()->get(LogLevel::Debug) << "Done reading!" << std::endl;
 
+    PointViewSet views;
+    views.insert(view);
     return views;
 }
 
@@ -407,7 +409,7 @@ void EptReader::readLaszip(PointView& dst, const Key& key) const
 void EptReader::readBinary(PointView& dst, const Key& key) const
 {
     auto data(m_ep->getBinary(key.toString() + ".bin"));
-    ShallowPointTable table(m_remoteLayout, data.data(), data.size());
+    ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -429,21 +431,21 @@ void EptReader::process(PointView& dst, PointRef& pr, bool unscale) const
     if (unscale)
     {
         x = x * m_info->scale()[0] + m_info->offset()[0];
-        x = x * m_info->scale()[1] + m_info->offset()[1];
-        x = x * m_info->scale()[2] + m_info->offset()[2];
+        y = y * m_info->scale()[1] + m_info->offset()[1];
+        z = z * m_info->scale()[2] + m_info->offset()[2];
     }
 
     const auto pointId(dst.size());
-
-    dst.setField(Dimension::Id::X, pointId, x);
-    dst.setField(Dimension::Id::Y, pointId, y);
-    dst.setField(Dimension::Id::Z, pointId, z);
 
     const double o = pr.getFieldAs<uint64_t>(Dimension::Id::OriginId);
     const bool selected = !m_queryOriginId || o == *m_queryOriginId;
 
     if (selected && m_queryBounds.contains(x, y, z))
     {
+        dst.setField(Dimension::Id::X, pointId, x);
+        dst.setField(Dimension::Id::Y, pointId, y);
+        dst.setField(Dimension::Id::Z, pointId, z);
+
         char* pos(dst.getPoint(pointId));
 
         for (const DimType& dim : m_dimTypes)

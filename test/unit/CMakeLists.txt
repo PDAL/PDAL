@@ -101,6 +101,8 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
+PDAL_ADD_TEST(pdal_io_ept_reader_test FILES io/EptReaderTest.cpp)
+target_include_directories(pdal_io_ept_reader_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES

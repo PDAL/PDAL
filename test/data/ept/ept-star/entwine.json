@@ -1,0 +1,29 @@
+{
+	"bounds" : [515363, 4918339, 2309, 515407, 4918383, 2353],
+	"boundsConforming" : [515368, 4918340, 2322, 515402, 4918382, 2339],
+	"dataType" : "laszip",
+	"hierarchyStep" : 2,
+	"hierarchyType" : "json",
+	"numPoints" : 518862,
+	"offset" : [515385, 4918361, 2331],
+	"scale" : 0.00025,
+	"schema" :
+	[
+		{ "name" : "X", "type" : "int32" },
+		{ "name" : "Y", "type" : "int32" },
+		{ "name" : "Z", "type" : "int32" },
+		{ "name" : "Intensity", "type" : "uint16" },
+		{ "name" : "ReturnNumber", "type" : "uint8" },
+		{ "name" : "NumberOfReturns", "type" : "uint8" },
+		{ "name" : "ScanDirectionFlag", "type" : "uint8" },
+		{ "name" : "EdgeOfFlightLine", "type" : "uint8" },
+		{ "name" : "Classification", "type" : "uint8" },
+		{ "name" : "ScanAngleRank", "type" : "float" },
+		{ "name" : "UserData", "type" : "uint8" },
+		{ "name" : "PointSourceId", "type" : "uint16" },
+		{ "name" : "GpsTime", "type" : "double" },
+		{ "name" : "OriginId", "type" : "uint32" }
+	],
+	"srs" : "GEOCCS[\"unnamed\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"unknown\",1]]",
+	"ticks" : 128
+}
