@@ -35,8 +35,8 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
 
 #include "private/hexer/Mathpair.hpp"
 #include "private/hexer/HexGrid.hpp"
@@ -45,16 +45,19 @@
 namespace pdal
 {
 
-class PDAL_DLL HexBin : public Filter
+class PDAL_DLL HexBin : public Filter, public Streamable
 {
 public:
     HexBin() : Filter()
         {}
-    std::string getName() const { return "filters.hexbin"; }
+    HexBin& operator=(const HexBin&) = delete;
+    HexBin(const HexBin&) = delete;
+
+    std::string getName() const{ return "filters.hexbin"; }
 
     hexer::HexGrid* grid() const { return m_grid.get(); }
-private:
 
+private:
     std::unique_ptr<hexer::HexGrid> m_grid;
     std::string m_xDimName;
     std::string m_yDimName;
@@ -71,10 +74,8 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
+    virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
-
-    HexBin& operator=(const HexBin&); // not implemented
-    HexBin(const HexBin&); // not implemented
 };
 
 } // namespace pdal
