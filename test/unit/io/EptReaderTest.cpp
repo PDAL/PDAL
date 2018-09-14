@@ -254,7 +254,6 @@ TEST(EptReaderTest, originRead)
         reader.prepare(table);
         const auto set(reader.execute(table));
 
-        double x, y, z;
         uint64_t o;
         for (const PointViewPtr& view : set)
         {
