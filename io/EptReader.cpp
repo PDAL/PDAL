@@ -426,9 +426,11 @@ void EptReader::readBinary(PointView& dst, const Key& key) const
 
 void EptReader::process(PointView& dst, PointRef& pr, bool unscale) const
 {
+    const auto pointId(dst.size());
     double x = pr.getFieldAs<double>(Dimension::Id::X);
     double y = pr.getFieldAs<double>(Dimension::Id::Y);
     double z = pr.getFieldAs<double>(Dimension::Id::Z);
+    const uint64_t o = pr.getFieldAs<uint64_t>(Dimension::Id::OriginId);
 
     if (unscale)
     {
@@ -437,9 +439,6 @@ void EptReader::process(PointView& dst, PointRef& pr, bool unscale) const
         z = z * m_info->scale()[2] + m_info->offset()[2];
     }
 
-    const auto pointId(dst.size());
-
-    const double o = pr.getFieldAs<uint64_t>(Dimension::Id::OriginId);
     const bool selected = !m_queryOriginId || o == *m_queryOriginId;
 
     if (selected && m_queryBounds.contains(x, y, z))
