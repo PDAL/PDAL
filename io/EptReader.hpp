@@ -36,9 +36,14 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <mutex>
+#include <set>
 
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace Json
 {
