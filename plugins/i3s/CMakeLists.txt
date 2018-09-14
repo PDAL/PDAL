@@ -25,3 +25,19 @@ target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}
     ${LEPCC_INCLUDE_DIR}
 )
+
+if (WITH_TESTS)
+    PDAL_ADD_TEST(pdal_io_i3s_reader_test
+            FILES
+                test/i3sReaderTest.cpp
+            LINK_WITH
+                ${reader_libname}
+                ${writer_libname}
+                ${PDAL_JSONCPP_LIB_NAME}
+    )
+    target_include_directories(pdal_io_i3s_reader_test PRIVATE
+            ${PDAL_JSONCPP_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
+            ${LEPCC_INCLUDE_DIR}
+    )
+endif()

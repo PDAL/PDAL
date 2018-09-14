@@ -45,54 +45,42 @@ namespace pdal
             config["arbiter"]["verbose"] = true;
         m_arbiter.reset(new arbiter::Arbiter(config));
 
-        /*Check for */
-        if (m_filename.size() && m_args.url.empty())
-        {
-            m_args.url = m_filename;
-            const std::string pre("i3s://");
-            if (m_args.url.find(pre) == 0)
-                m_args.url = m_args.url.substr(pre.size());
-            if (m_args.url.find("https://") == std::string::npos)
-                m_args.url = "https://" + m_args.url;
-        }
-        //TODO remove tailing '/'
-        if(m_args.url.back() == '/')
-            m_args.url.pop_back();
+        /*Check for i3s protocol and remove */
+        const std::string pre("i3s://");
+        if (m_filename.find(pre) == 0)
+            m_filename = m_filename.substr(pre.size());
 
-        log()->get(LogLevel::Debug) << "Fetching info from " << m_args.url <<
+        // remove tailing '/'
+        if (m_filename.back() == '/')
+            m_filename.pop_back();
+
+        log()->get(LogLevel::Debug) << "Fetching info from " << m_filename <<
             std::endl;
 
         try
         {
-            m_info = parse(m_arbiter->get(m_args.url));
+            m_info = parse(m_arbiter->get(m_filename));
         }
         catch (std::exception& e)
         {
             throw pdal_error(std::string("Failed to fetch info: ") + e.what());
         }
         //create pdal Bounds
+        m_bounds = createBounds();
 
-        if(m_args.bounds.size())
-        {
-            if(m_args.bounds.find('(') != std::string::npos)
-            {
-                std::istringstream iss(m_args.bounds);
-                iss >> m_bounds;
-            }    
-        }
+        
         log()->get(LogLevel::Debug) << "\n\nFileName: " 
-            << m_args.url << std::endl;
+            << m_filename << std::endl;
         log()->get(LogLevel::Debug) << "\nThread Count: " 
             << m_args.threads << std::endl;
         log()->get(LogLevel::Debug) << "Bounds: " 
             << m_args.bounds << std::endl;
     }
 
+
     void I3SReader::addArgs(ProgramArgs& args)
     {
-        args.add("url", "URL", m_args.url);
         args.add("bounds", "Bounds of the point cloud", m_args.bounds);
-        args.add("depth", "Resolution of the point cloud", m_args.depth);
         args.add("threads", "Number of threads to be used."
                 "This number will be squared", m_args.threads);
     }
@@ -103,17 +91,18 @@ namespace pdal
         Json::StreamWriterBuilder writer;
         writer.settings_["indentation"] = "";
 
-        for (int j = 0; j < m_info["layers"].size(); j++) 
+        for (uint64_t j = 0; j < m_info["layers"].size(); j++) 
         {
           
             Json::Value attributes = 
-                m_info["layers"][j]["attributeStorageInfo"];
+                m_info["layers"][static_cast<Json::ArrayIndex>(j)]["attributeStorageInfo"];
 
-            for(int i = 0; i < attributes.size(); i ++)
+            for (uint64_t i = 0; i < attributes.size(); i++)
             {
 
                 std::string readName = 
-                    Json::writeString(writer, attributes[i]["name"]);
+                    Json::writeString(writer, attributes
+                            [static_cast<Json::ArrayIndex>(i)]["name"]);
                 //remove quotes from json object
                 readName.erase(
                     remove( readName.begin(), readName.end(), '\"' ),
@@ -125,69 +114,60 @@ namespace pdal
                     readName.end()
                 );
 
-                if(Dimension::id(readName) != Dimension::Id::Unknown)
+                if(readName == "INTENSITY")
                 {
-                    Dimension::Id name = Dimension::id(readName);
-                    layout->registerDim(name);
-                    m_layout.registerDim(name);
-                }else if(readName.compare("RGB") == 0)
+                    isIntensity = true;
+                    layout->registerDim(Dimension::Id::Intensity);
+                }else if (readName.compare("RGB") == 0)
                 {
-                    m_layout.registerDim(Dimension::Id::Red);
-                    m_layout.registerDim(Dimension::Id::Green);
-                    m_layout.registerDim(Dimension::Id::Blue);
-                    
+                    isRGB = true;
                     layout->registerDim(Dimension::Id::Red);
                     layout->registerDim(Dimension::Id::Green);
                     layout->registerDim(Dimension::Id::Blue);
                 }
-                else if(readName.compare("FLAGS") == 0)
+                else if (readName.compare("FLAGS") == 0)
                 {
-                    m_layout.registerDim(Dimension::Id::Flag);
+                    isFlags = true;
                     layout->registerDim(Dimension::Id::Flag);
                 }
-                else if(readName.compare("RETURNS") == 0)
+                else if (readName.compare("RETURNS") == 0)
                 {
-                    m_layout.registerDim(Dimension::Id::NumberOfReturns);
+                    isReturns = true;
                     layout->registerDim(Dimension::Id::NumberOfReturns);
                 }
-                else if(readName.compare("ELEVATION") == 0)
+                else if (readName.compare("ELEVATION") == 0)
                 {
+                    isElevation = true;
                     layout->registerDim(Dimension::Id::X);
                     layout->registerDim(Dimension::Id::Y);
                     layout->registerDim(Dimension::Id::Z);
-
-                    m_layout.registerDim(Dimension::Id::X);
-                    m_layout.registerDim(Dimension::Id::Y);
-                    m_layout.registerDim(Dimension::Id::Z);
                 }
-                else if(readName.compare("CLASSCODE") == 0)
+                else if (readName.compare("CLASSCODE") == 0)
                 {
-                    m_layout.registerDim(Dimension::Id::ClassFlags);
+                    isClass = true;
                     layout->registerDim(Dimension::Id::ClassFlags);
                 }
-                else if(readName.compare("POINTSRCID") == 0)
+                else if (readName.compare("POINTSRCID") == 0)
                 {
-                    m_layout.registerDim(Dimension::Id::PointSourceId);
+                    isSourceId = true;
                     layout->registerDim(Dimension::Id::PointSourceId);
                 }
                 else//if it isn't in pdal dimensions and isn't a special case
                 {
                     std::string type;
-                    if (attributes[i].isMember("attributeValues")) 
+                    if (attributes[static_cast<Json::ArrayIndex>(i)].isMember(
+                                "attributeValues")) 
                     {
                         std::string type;
                         type = Json::writeString(writer,
-                            attributes[i]["attributeValues"]["valueType"]);
+                            attributes[static_cast<Json::ArrayIndex>(i)]
+                            ["attributeValues"]["valueType"]);
                         layout->registerOrAssignDim(readName, 
-                                pdal::Dimension::type(type));
-                        m_layout.registerOrAssignDim(readName, 
                                 pdal::Dimension::type(type));
                     }
                     else
                     {
                         layout->registerOrAssignDim(readName, 
-                                Dimension::Type::Double);
-                        m_layout.registerOrAssignDim(readName, 
                                 Dimension::Type::Double);
                     }
                 }
@@ -205,7 +185,7 @@ namespace pdal
             "EPSG:" +
             Json::writeString(writer,
             spatialJson["wkid"]);
-        //if(spatialJson.isMember("vcsWkid"))
+        //if (spatialJson.isMember("vcsWkid"))
         //    spatialStr += ("+" +
         //        Json::writeString(writer,
         //        spatialJson["vcsWkid"])
@@ -226,30 +206,40 @@ namespace pdal
         -texture data: <node-url>/textures/<texture-data-bundle-id>
         */
         
-        std::string nodeUrl = m_args.url + "/layers/0/nodepages/";
+        std::string nodeUrl = m_filename + "/layers/0/nodepages/";
         int nodePageIndex = 0;
         /*Retrive initial node page*/
         Json::Value nodeIndexJson =
             parse(m_arbiter->get(nodeUrl + std::to_string(nodePageIndex)));
         int index = 0;
-        std::vector<int> nodePullArr;
+        std::vector<Node> nodePullArr;
         int totalCount = 0;
         int pageIndex = 0;
         int vertexCount = 0;
-        while(!nodeIndexJson.isMember("error"))
+        while (!nodeIndexJson.isMember("error"))
         {
             int pageSize = nodeIndexJson["nodes"].size();
             int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
             nodePullArr.resize(initialNode + pageSize);
-            for(int i = 0; i < pageSize; i++)
+            for (int i = 0; i < pageSize; i++)
             {
-                
+                Node newNode;
+                Json::Value coord = nodeIndexJson["nodes"][i]["center"];
+                Json::Value rad = nodeIndexJson["nodes"][i]["halfSize"];
                 int localCount = 
                     nodeIndexJson["nodes"][i]["vertexCount"].asInt();
-                if(nodeIndexJson["nodes"][i]["childCount"].asInt() == 0)
+
+                int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
+                Node node(coord[0], coord[1], coord[2], rad[0], rad[1], rad[2],
+                        cCount, initialNode); 
+
+                if (node.childCount == 0)
                 {
-                    nodePullArr[index++] = initialNode + i;
-                    vertexCount = vertexCount + localCount; 
+                    if (m_bounds.contains(coord[0], coord[1], coord[2])
+                    {
+                        nodePullArr[index++] = initialNode + i;
+                        vertexCount = vertexCount + localCount; 
+                    }
                 }
 
             }
@@ -258,13 +248,12 @@ namespace pdal
         }
         std::cout << "Fetching binaries" << std::endl;
         Pool p(m_args.threads);
-        for(int i = 0; i < index; i++) 
+        for (int i = 0; i < index; i++) 
         {
             std::cout << "\r" << i << "/" << index;
             std::cout.flush();
-            std::string localUrl = m_args.url + 
+            std::string localUrl = m_filename + 
                 "/layers/0/nodes/" + std::to_string(nodePullArr[i]); 
-
 
             p.add([localUrl, this, &view]()
             {
@@ -273,61 +262,79 @@ namespace pdal
         }
         std::cout << "\nFinal point count: " << view->size() << std::endl;
         const std::size_t pointSize(view->layout()->pointSize());
-        return 0;
+        return view->size();
     }
 
     void I3SReader::createView(std::string localUrl, PointViewPtr view)
     {
             Pool p(m_args.threads); 
             std::vector<char> response;
-            p.add([this, &response, localUrl](){    
-                /*Retrieve geometry binary*/
-                std::string urlGeo = localUrl + "/geometries/0";
-                //TODO add try catch block on arbiter(what if inet goes down)
-                response = m_arbiter->getBinary(urlGeo);
-            });
 
             std::vector<char> intensityResponse;
-            p.add([this, &intensityResponse, localUrl](){
-                /*Retrieve intensity data*/
+            std::vector<char> rgbResponse;
+            std::vector<char> classFlags; 
+            std::vector<char> flags;
+            std::vector<char> returns;
+            std::vector<char> pointSrcId;
+            if(isIntensity)
+            {
+               fetchBinary(intensityResponse, localUrl, 2, p); 
+            }
+            if(isRGB)
+            {
+               fetchBinary(rgbResponse, localUrl, 4, p); 
+            }
+            if(isClass)
+            {
+               fetchBinary(classFlags, localUrl, 8, p); 
+            }
+            if(isFlags)
+            {
+               fetchBinary(flags, localUrl, 16, p); 
+            }
+            if(isReturns)
+            {
+                fetchBinary(returns, localUrl, 32, p);
+            }
+            if(isSourceId)
+            {
+                fetchBinary(pointSrcId, localUrl, 64, p);
+            }
+
+            /*p.add([this, &intensityResponse, localUrl](){
+                //Retrieve intensity data
                 std::string urlIntensity = localUrl + "/attributes/2";
                 intensityResponse = 
                     m_arbiter->getBinary(urlIntensity);
             });
-            /*Retrieve rgb data*/
-
-
-            std::vector<char> rgbResponse;
+            //Retrieve rgb data
             p.add([this, &rgbResponse, localUrl]()
             {    
                 std::string urlRgb = localUrl + "/attributes/4"; 
                 rgbResponse = m_arbiter->getBinary(urlRgb);
             });
-            /*Retrieve Class Code*/
-            std::vector<char> classFlags; 
+            //Retrieve Class Code
             
             p.add([this, &classFlags, localUrl]()
             {    
                 std::string urlClass = localUrl + "/attributes/8";
                 classFlags = m_arbiter->getBinary(urlClass);
             });
-            /*Flags*/
-            std::vector<char> flags;
+            //Flags
             p.add([this, &flags, localUrl]()
             {
                 std::string urlFlags = localUrl + "/attributes/16";
                 flags = m_arbiter->getBinary(urlFlags);
             });
-            /*Returns*/
-            std::vector<char> returns;
+            //Returns
             p.add([this, &returns, localUrl]()
             {
                 std::string urlReturns = localUrl + "/attributes/32";
                 returns = m_arbiter->getBinary(urlReturns);
-            });
+            });*/
 
             p.await();
-            /*Decompression methods*/
+            //Decompression methods
             std::vector<lepcc::Point3D> pointcloud = 
                 decompressXYZ(&response);
 
@@ -339,20 +346,19 @@ namespace pdal
             
 
             std::lock_guard<std::mutex> lock(m_mutex);
-            
-            /*Iterate through vector item and add to view*/
-            for(std::size_t j = 0; j < pointcloud.size(); j ++)
+            std::cout << intensity.size();
+            //Iterate through vector item and add to view
+
+            for (std::size_t j = 0; j < pointcloud.size(); j ++)
             {  
                 double x = pointcloud[j].x;
                 double y = pointcloud[j].y;
                 double z = pointcloud[j].z;
-                if((m_bounds.is3d() && m_bounds.to3d().contains(x,y,z))
-                || (!m_bounds.is3d() && m_bounds.to2d().contains(x,y))
-                || !m_args.bounds.size())
+                if (m_bounds.contains(x,y,z))
                 {
 
                     PointId id = view->size();
-
+                    
                     //XYZ
                     view->setField(pdal::Dimension::Id::X,
                             id, pointcloud[j].x);
@@ -361,34 +367,82 @@ namespace pdal
                     view->setField(pdal::Dimension::Id::Z,
                             id, pointcloud[j].z);
 
-                    //RGB
-                    view->setField(pdal::Dimension::Id::Red,
-                            id, rgbPoints[j].r);
-                    view->setField(pdal::Dimension::Id::Green,
-                            id, rgbPoints[j].g);
-                    view->setField(pdal::Dimension::Id::Blue,
-                            id, rgbPoints[j].b);
-
-                    //INTENSITY
-                    view->setField(pdal::Dimension::Id::Intensity,
-                            id, intensity[j]);
-
-                    //CLASSCODES
-                    view->setField(pdal::Dimension::Id::ClassFlags,
-                            id, classFlags[j]);
-
-                    //FLAGS
-                    view->setField(pdal::Dimension::Id::Flag,
-                            id, flags[j]);
-
-                    //RETURNS
-                    view->setField(pdal::Dimension::Id::NumberOfReturns,
-                            id, returns[j]);
+                    if(isRGB){
+                        //RGB
+                        view->setField(pdal::Dimension::Id::Red,
+                                id, rgbPoints[j].r);
+                        view->setField(pdal::Dimension::Id::Green,
+                                id, rgbPoints[j].g);
+                        view->setField(pdal::Dimension::Id::Blue,
+                                id, rgbPoints[j].b);
+                    }
+                    if (isIntensity)
+                    {
+                        //INTENSITY
+                        view->setField(pdal::Dimension::Id::Intensity,
+                                id, intensity[j]);
+                    }
+                    if (isClass)
+                    {
+                        //CLASSCODES
+                        view->setField(pdal::Dimension::Id::ClassFlags,
+                                id, classFlags[j]);
+                    }
+                    if (isFlags)
+                    {
+                        //FLAGS
+                        view->setField(pdal::Dimension::Id::Flag,
+                                id, flags[j]);
+                    }
+                    if (isReturns)
+                    {
+                        //RETURNS
+                        view->setField(pdal::Dimension::Id::NumberOfReturns,
+                                id, returns[j]);
+                    }
+                    if(isSourceId)
+                    {
+                        view->setField(pdal::Dimension::Id::PointSourceId,
+                                id, pointSrcId[j]);
+                    }
                 }
             }
+    }
+
+    std::vector<Node> I3SReader::treeTraverse(int nodePageIndex, Json::Value page, Json::Value node)
+    {
 
     }
 
+    BOX3D I3SReader::createBounds()
+    {
+        if (m_args.bounds.is3d())
+            return m_args.bounds.to3d();
+
+        // If empty, return maximal extents to select everything.
+        const BOX2D b(m_args.bounds.to2d());
+        if (b.empty())
+        {
+            double mn((std::numeric_limits<double>::lowest)());
+            double mx((std::numeric_limits<double>::max)());
+            return BOX3D(mn, mn, mn, mx, mx, mx);
+        }
+
+        // Finally if 2D and non-empty, convert to 3D with all-encapsulating
+        // Z-values.
+        return BOX3D(
+                b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
+                b.maxx, b.maxy, (std::numeric_limits<double>::max)());
+    }
+
+    void I3SReader::fetchBinary(std::vector<char>& response, std::string url, int attNum, Pool& p)
+    {
+        p.add([this, &response, url, attNum]( )
+        {    
+            std::string fetchUrl = url + "/attributes/" + std::to_string(attNum); 
+            response = m_arbiter->getBinary(fetchUrl);
+        });
+    }
 
     void I3SReader::done(PointTableRef)
     {

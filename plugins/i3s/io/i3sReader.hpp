@@ -5,11 +5,14 @@
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
 #include "i3sReceiver.hpp"
-
+#include "pool.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/PointLayout.hpp>
+#include <pdal/StageFactory.hpp>
+#include <json/json.h>
+#include <arbiter/arbiter.hpp>
 
 #include <functional>
 #include <queue>
@@ -17,65 +20,19 @@
 #include <algorithm>                                                            
 #include <chrono>     
 
-#include <json/json.h>
-#include <arbiter/arbiter.hpp>
-#include <pdal/StageFactory.hpp>
 
 
 namespace pdal
 {
-    class FixedPointLayout : public pdal::PointLayout
-    {
-    public:
-        using Added = std::map<std::string, pdal::Dimension::Detail>;
-        const Added& added() const { return m_added; }
-
-    private:
-        virtual bool update(
-                pdal::Dimension::Detail dimDetail,
-                const std::string& name) override
-        {
-            m_added[name] = dimDetail;
-
-            if (!m_finalized)
-            {
-                if (!contains(m_used, dimDetail.id()))
-                {
-                    dimDetail.setOffset(m_pointSize);
-
-                    m_pointSize += dimDetail.size();
-                    m_used.push_back(dimDetail.id());
-                    m_detail[pdal::Utils::toNative(dimDetail.id())] = dimDetail;
-
-                    return true;
-                }
-            }
-            else return m_propIds.count(name);
-
-            return false;
-        }
-
-        bool contains(
-                const pdal::Dimension::IdList& idList,
-                const pdal::Dimension::Id id) const
-        {
-            for (const auto current : idList)
-            {
-                if (current == id) return true;
-            }
-
-            return false;
-        }
-
-        Added m_added;
-  };
   class I3SReader : public Reader
   {
   public:
     I3SReader() : Reader() {};
     std::string getName() const;
     void createView(std::string localUrl, PointViewPtr view);
-
+    void fetchBinary(std::vector<char>& response, std::string url, int attNum, Pool& p);
+    BOX3D createBounds();
+    
   private:
     std::unique_ptr<ILeStream> m_stream;
     point_count_t m_index;
@@ -84,10 +41,29 @@ namespace pdal
 
     I3SArgs m_args;
     Json::Value m_info;
-    FixedPointLayout m_layout;
     std::mutex m_mutex;
-    Bounds m_bounds;
+    BOX3D m_bounds;
+
+    struct Node 
+    {
+        int name;
+        double minx, maxx;
+        double miny, maxy;
+        double minz, maxz;
+        
+        int childCount;
+        Node parent;
+        Node* children;
+    };
     
+    bool isRGB = false;
+    bool isElevation = false;
+    bool isFlags = false;
+    bool isReturns = false;
+    bool isClass = false;
+    bool isSourceId = false;
+    bool isIntensity = false;
+
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout);
