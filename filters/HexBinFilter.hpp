@@ -38,9 +38,10 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "private/hexer/Mathpair.hpp"
-#include "private/hexer/HexGrid.hpp"
-#include "private/hexer/Processor.hpp"
+namespace hexer
+{
+    class HexGrid;
+};
 
 namespace pdal
 {
@@ -48,14 +49,14 @@ namespace pdal
 class PDAL_DLL HexBin : public Filter, public Streamable
 {
 public:
-    HexBin() : Filter()
-        {}
+    HexBin();
+    ~HexBin();
+
     HexBin& operator=(const HexBin&) = delete;
     HexBin(const HexBin&) = delete;
 
-    std::string getName() const{ return "filters.hexbin"; }
-
-    hexer::HexGrid* grid() const { return m_grid.get(); }
+    std::string getName() const;
+    hexer::HexGrid* grid() const;
 
 private:
     std::unique_ptr<hexer::HexGrid> m_grid;

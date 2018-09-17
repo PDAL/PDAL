@@ -34,6 +34,7 @@
 
 #include "HexBinFilter.hpp"
 
+#include "private/hexer/HexGrid.hpp"
 #include "private/hexer/HexIter.hpp"
 #include <pdal/Polygon.hpp>
 
@@ -48,6 +49,25 @@ static PluginInfo const s_info = PluginInfo(
     "http://pdal.io/stages/filters.hexbin.html" );
 
 CREATE_STATIC_STAGE(HexBin, s_info)
+
+HexBin::HexBin()
+{}
+
+
+HexBin::~HexBin()
+{}
+
+std::string HexBin::getName() const
+{
+    return s_info.name;
+}
+
+
+hexer::HexGrid *HexBin::grid() const
+{
+    return m_grid.get();
+}
+
 
 void HexBin::addArgs(ProgramArgs& args)
 {
