@@ -87,6 +87,7 @@ private:
     // Aggregate all EPT keys overlapping our query bounds and their number of
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
+    void overlaps();
     void overlaps(const Json::Value& heirarchy, const Key& key);
 
     void readLaszip(PointView& view, const Key& key) const;

@@ -266,13 +266,8 @@ void EptReader::ready(PointTableRef table)
     m_overlapKeys.clear();
     m_overlapPoints = 0;
 
-    // Determine all the keys that overlap the queried area by traversing the
-    // EPT hierarchy (see https://git.io/fAiuR).  Because this may require
-    // fetching lots of JSON files, it'll run in our thread pool.
-    const Key key(m_info->bounds());
-    const Json::Value hier(parse(m_ep->get("h/" + key.toString() + ".json")));
-    overlaps(hier, key);
-    m_pool->await();
+    // Determine all overlapping data files we'll need to fetch.
+    overlaps();
 
     log()->get(LogLevel::Debug) << "Overlap nodes: " << m_overlapKeys.size() <<
         std::endl;
@@ -294,6 +289,17 @@ void EptReader::ready(PointTableRef table)
     {
         return d.m_id == D::X || d.m_id == D::Y || d.m_id == D::Z;
     });
+}
+
+void EptReader::overlaps()
+{
+    // Determine all the keys that overlap the queried area by traversing the
+    // EPT hierarchy (see https://git.io/fAiuR).  Because this may require
+    // fetching lots of JSON files, it'll run in our thread pool.
+    const Key key(m_info->bounds());
+    const Json::Value hier(parse(m_ep->get("h/" + key.toString() + ".json")));
+    overlaps(hier, key);
+    m_pool->await();
 }
 
 void EptReader::overlaps(const Json::Value& hier, const Key& key)
