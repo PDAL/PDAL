@@ -58,6 +58,11 @@ namespace pdal
 
 inline BOX3D toBox3d(const Json::Value& b)
 {
+    if (!b.isArray() || b.size() != 6)
+    {
+        throw pdal_error("Invalid bounds specification: " + b.toStyledString());
+    }
+
     return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
             b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
 }
@@ -66,15 +71,20 @@ inline std::array<double, 3> toArray3(const Json::Value& json)
 {
     std::array<double, 3> result;
 
-    if (json.isArray())
+    if (json.isArray() && json.size() == 3)
     {
         result[0] = json[0].asDouble();
         result[1] = json[1].asDouble();
         result[2] = json[2].asDouble();
     }
-    else
+    else if (json.isNumeric())
     {
         result[0] = result[1] = result[2] = json.asDouble();
+    }
+    else
+    {
+        throw pdal_error("Invalid scale specification: " +
+                json.toStyledString());
     }
 
     return result;

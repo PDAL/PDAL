@@ -45,7 +45,7 @@ origin
     The integral form of this option selects a source file by its ``OriginId`` dimension, which can be found via the files position in EPT metadata file ``entwine-files.json``.
 
 threads
-    Number of worker threads used to download and process EPT data.
+    Number of worker threads used to download and process EPT data.  A minimum of 4 will be used no matter what value is specified.
 
 .. _Entwine Point Tile: https://github.com/connormanning/entwine/blob/master/doc/entwine-point-tile.md
 .. _Entwine: https://entwine.io/

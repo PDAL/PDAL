@@ -41,6 +41,8 @@
 
 #include <arbiter/arbiter.hpp>
 
+#include <pdal/util/Algorithm.hpp>
+
 namespace pdal
 {
 
@@ -106,22 +108,15 @@ void EptReader::initialize()
 
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
-    m_pool.reset(new Pool(std::max<uint64_t>(m_args.threads(), 4)));
+    m_pool.reset(new Pool(m_args.threads()));
     log()->get(LogLevel::Debug) << "Endpoint: " << m_ep->prefixedRoot() <<
         std::endl;
 
     m_info.reset(new EptInfo(parse(m_ep->get("entwine.json"))));
     log()->get(LogLevel::Debug) << "Got EPT info" << std::endl;
 
-    try
-    {
-        if (!m_info->srs().empty())
-            setSpatialReference(m_info->srs());
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    if (!m_info->srs().empty())
+        setSpatialReference(m_info->srs());
 
     // Figure out our query parameters.
     m_queryBounds = m_args.bounds();
@@ -196,6 +191,7 @@ void EptReader::handleOriginQuery()
 
     const Json::Value& found(files[static_cast<Json::ArrayIndex>(
                 *m_queryOriginId)]);
+
     BOX3D q(toBox3d(found["bounds"]));
 
     if (m_info->json().isMember("scale"))
@@ -204,12 +200,12 @@ void EptReader::handleOriginQuery()
         // from a file query.  We'll be checking the OriginId anyway so we have
         // leeway to bloat the query bounds as needed.
         const auto& scale(m_info->scale());
-        q.minx -= scale[0];
-        q.miny -= scale[1];
-        q.minz -= scale[2];
-        q.maxx += scale[0];
-        q.maxy += scale[1];
-        q.maxz += scale[2];
+        q.minx -= std::fabs(scale[0]);
+        q.miny -= std::fabs(scale[1]);
+        q.minz -= std::fabs(scale[2]);
+        q.maxx += std::fabs(scale[0]);
+        q.maxy += std::fabs(scale[1]);
+        q.maxz += std::fabs(scale[2]);
     }
 
     // Clip the bounds to the queried origin bounds.  Don't just overwrite it -
@@ -267,6 +263,9 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 
 void EptReader::ready(PointTableRef table)
 {
+    m_overlapKeys.clear();
+    m_overlapPoints = 0;
+
     // Determine all the keys that overlap the queried area by traversing the
     // EPT hierarchy (see https://git.io/fAiuR).  Because this may require
     // fetching lots of JSON files, it'll run in our thread pool.
@@ -291,13 +290,10 @@ void EptReader::ready(PointTableRef table)
     // Since we might need to revert a scale/offset for XYZ if the dataType is
     // binary, they'll be handled separately.
     m_dimTypes = table.layout()->dimTypes();
-    m_dimTypes.erase(std::remove_if(
-                m_dimTypes.begin(),
-                m_dimTypes.end(),
-                [](const pdal::DimType& d)
-                {
-                    return d.m_id == D::X || d.m_id == D::Y || d.m_id == D::Z;
-                }));
+    Utils::remove_if(m_dimTypes, [](const pdal::DimType& d)
+    {
+        return d.m_id == D::X || d.m_id == D::Y || d.m_id == D::Z;
+    });
 }
 
 void EptReader::overlaps(const Json::Value& hier, const Key& key)
@@ -385,7 +381,7 @@ void EptReader::readLaszip(PointView& dst, const Key& key) const
         for (uint64_t i(0); i < src->size(); ++i)
         {
             pr.setPointId(i);
-            process(dst, pr);
+            process(dst, pr, false);
         }
     }
 }

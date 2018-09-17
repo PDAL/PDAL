@@ -91,7 +91,7 @@ private:
 
     void readLaszip(PointView& view, const Key& key) const;
     void readBinary(PointView& view, const Key& key) const;
-    void process(PointView& view, PointRef& pr, bool unscale = false) const;
+    void process(PointView& view, PointRef& pr, bool unscale) const;
 
     Json::Value parse(const std::string& data) const;
 
@@ -111,7 +111,7 @@ private:
         const std::string& origin() const { return m_originArg; }
 
         uint64_t& threadsArg() { return m_threads; }
-        uint64_t threads() const { return std::min<uint64_t>(4, m_threads); }
+        uint64_t threads() const { return std::max<uint64_t>(4, m_threads); }
 
     private:
         Bounds m_bounds;
@@ -121,6 +121,7 @@ private:
 
     Args m_args;
     BOX3D m_queryBounds;
+    // This is a pointer since zero is a valid query OriginId.
     std::unique_ptr<uint64_t> m_queryOriginId;
     std::unique_ptr<Pool> m_pool;
     DimTypeList m_dimTypes;
