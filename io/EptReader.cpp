@@ -365,6 +365,9 @@ PointViewSet EptReader::run(PointViewPtr view)
 
 void EptReader::readLaszip(PointView& dst, const Key& key) const
 {
+    // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
+    // download the file and `localPath` will return the location of the
+    // downloaded file in a temporary directory.  Otherwise it's a no-op.
     auto handle(m_ep->getLocalHandle(key.toString() + ".laz"));
 
     PointTable table;
