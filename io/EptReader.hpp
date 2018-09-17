@@ -93,6 +93,8 @@ private:
     void readBinary(PointView& view, const Key& key) const;
     void process(PointView& view, PointRef& pr, bool unscale = false) const;
 
+    Json::Value parse(const std::string& data) const;
+
     std::string m_root;
 
     std::unique_ptr<arbiter::Arbiter> m_arbiter;

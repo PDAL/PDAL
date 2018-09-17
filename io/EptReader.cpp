@@ -53,23 +53,6 @@ namespace
         "http://pdal.io/stages/reader.ept.html",
         { "ept" }
     };
-
-    Json::Value parse(const std::string& data)
-    {
-        Json::Value json;
-        Json::Reader reader;
-
-        if (!reader.parse(data, json, false))
-        {
-            const std::string jsonError(reader.getFormattedErrorMessages());
-            if (!jsonError.empty())
-            {
-                throw pdal_error("Error during parsing: " + jsonError);
-            }
-        }
-
-        return json;
-    }
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -169,8 +152,7 @@ void EptReader::handleOriginQuery()
 
     if (!files.isArray())
     {
-        throw pdal_error("Unexpected entwine-files list: " +
-                files.toStyledString());
+        throwError("Unexpected entwine-files list: " + files.toStyledString());
     }
 
     if (search.find_first_not_of("0123456789") == std::string::npos)
@@ -192,7 +174,7 @@ void EptReader::handleOriginQuery()
             {
                 if (m_queryOriginId)
                 {
-                    throw pdal_error("Origin search path is not unique");
+                    throwError("Origin search path is not unique");
                 }
                 m_queryOriginId.reset(new uint64_t(i));
             }
@@ -201,12 +183,12 @@ void EptReader::handleOriginQuery()
 
     if (!m_queryOriginId)
     {
-        throw pdal_error("Failed lookup of origin: " + search);
+        throwError("Failed lookup of origin: " + search);
     }
 
     if (*m_queryOriginId >= files.size())
     {
-        throw pdal_error("Invalid origin ID");
+        throwError("Invalid origin ID");
     }
 
     // Now that we have our OriginId value, clamp the bounds to select only the
@@ -455,6 +437,23 @@ void EptReader::process(PointView& dst, PointRef& pr, bool unscale) const
                     dim.m_id, dim.m_type);
         }
     }
+}
+
+Json::Value EptReader::parse(const std::string& data) const
+{
+    Json::Value json;
+    Json::Reader reader;
+
+    if (!reader.parse(data, json, false))
+    {
+        const std::string jsonError(reader.getFormattedErrorMessages());
+        if (!jsonError.empty())
+        {
+            throwError("Error during parsing: " + jsonError);
+        }
+    }
+
+    return json;
 }
 
 } // namespace pdal
