@@ -63,7 +63,6 @@ void OciReader::addArgs(ProgramArgs& args)
     args.add("connection", "Connection string", m_connSpec);
     args.add("populate_pointsourceid", "Set point source ID",
         m_updatePointSourceId);
-    addSpatialReferenceArg(args);
 }
 
 

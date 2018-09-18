@@ -34,9 +34,9 @@
 
 #include "HexBinFilter.hpp"
 
+#include "private/hexer/HexGrid.hpp"
 #include "private/hexer/HexIter.hpp"
 #include <pdal/Polygon.hpp>
-#include <pdal/StageFactory.hpp>
 
 using namespace hexer;
 
@@ -49,6 +49,25 @@ static PluginInfo const s_info = PluginInfo(
     "http://pdal.io/stages/filters.hexbin.html" );
 
 CREATE_STATIC_STAGE(HexBin, s_info)
+
+HexBin::HexBin()
+{}
+
+
+HexBin::~HexBin()
+{}
+
+std::string HexBin::getName() const
+{
+    return s_info.name;
+}
+
+
+hexer::HexGrid *HexBin::grid() const
+{
+    return m_grid.get();
+}
+
 
 void HexBin::addArgs(ProgramArgs& args)
 {
@@ -82,13 +101,22 @@ void HexBin::ready(PointTableRef table)
 
 void HexBin::filter(PointView& view)
 {
+    PointRef p(view, 0);
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
-        m_grid->addPoint(x, y);
+        p.setPointId(idx);
+        processOne(p);
     }
     m_count += view.size();
+}
+
+
+bool HexBin::processOne(PointRef& point)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    m_grid->addPoint(x, y);
+    return true;
 }
 
 
@@ -109,7 +137,6 @@ void HexBin::done(PointTableRef table)
             "Empty polygon -- unable to compute boundary");
         return;
     }
-
 
     std::ostringstream offsets;
     offsets << "MULTIPOINT (";

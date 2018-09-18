@@ -201,7 +201,7 @@ public:
       \param other  Box to test for overlap.
       \return  Whether the provided box overlaps this box.
     */
-    bool overlaps(const BOX2D& other)
+    bool overlaps(const BOX2D& other) const
     {
         return minx <= other.maxx && maxx >= other.minx &&
             miny <= other.maxy && maxy >= other.miny;
@@ -454,7 +454,7 @@ public:
       \param other  Box to test for overlap.
       \return  Whether the provided box overlaps this box.
     */
-    bool overlaps(const BOX3D& other)
+    bool overlaps(const BOX3D& other) const
     {
         return BOX2D::overlaps(other) &&
            minz <= other.maxz && maxz >= other.minz;

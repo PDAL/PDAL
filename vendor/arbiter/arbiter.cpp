@@ -55,7 +55,9 @@ SOFTWARE.
 #include <arbiter/arbiter.hpp>
 
 #include <arbiter/driver.hpp>
+#include <arbiter/util/sha256.hpp>
 #include <arbiter/util/util.hpp>
+#include <arbiter/util/transforms.hpp>
 #endif
 
 #include <algorithm>
@@ -427,15 +429,13 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
             throw ArbiterError("Temporary endpoint must be local.");
         }
 
-        std::string name(path);
-        std::replace(name.begin(), name.end(), '/', '-');
-        std::replace(name.begin(), name.end(), '\\', '-');
-        std::replace(name.begin(), name.end(), ':', '_');
-
-        tempEndpoint.put(name, getBinary(path));
-
+        const auto ext(getExtension(path));
+        const std::string basename(
+                crypto::encodeAsHex(crypto::sha256(stripExtension(path))) +
+                (ext.size() ? "." + ext : ""));
+        tempEndpoint.put(basename, getBinary(path));
         localHandle.reset(
-                new fs::LocalHandle(tempEndpoint.root() + name, true));
+                new fs::LocalHandle(tempEndpoint.root() + basename, true));
     }
     else
     {
@@ -486,6 +486,12 @@ std::string Arbiter::getExtension(const std::string path)
 
     if (pos != std::string::npos) return path.substr(pos + 1);
     else return std::string();
+}
+
+std::string Arbiter::stripExtension(const std::string path)
+{
+    const std::size_t pos(path.find_last_of('.'));
+    return path.substr(0, pos);
 }
 
 } // namespace arbiter
@@ -629,6 +635,9 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 
 #include <arbiter/arbiter.hpp>
 #include <arbiter/driver.hpp>
+#include <arbiter/drivers/fs.hpp>
+#include <arbiter/util/sha256.hpp>
+#include <arbiter/util/transforms.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -682,6 +691,36 @@ bool Endpoint::isLocal() const
 bool Endpoint::isHttpDerived() const
 {
     return tryGetHttpDriver() != nullptr;
+}
+
+std::unique_ptr<fs::LocalHandle> Endpoint::getLocalHandle(
+        const std::string subpath) const
+{
+    std::unique_ptr<fs::LocalHandle> handle;
+
+    if (isRemote())
+    {
+        const std::string tmp(fs::getTempPath());
+        const auto ext(Arbiter::getExtension(subpath));
+        const std::string basename(
+                crypto::encodeAsHex(crypto::sha256(Arbiter::stripExtension(
+                            prefixedRoot() + subpath))) +
+                    (ext.size() ? "." + ext : ""));
+
+        const std::string local(tmp + basename);
+
+        drivers::Fs fs;
+        fs.put(local, getBinary(subpath));
+
+        handle.reset(new fs::LocalHandle(local, true));
+    }
+    else
+    {
+        handle.reset(
+                new fs::LocalHandle(fs::expandTilde(fullPath(subpath)), false));
+    }
+
+    return handle;
 }
 
 std::string Endpoint::get(const std::string subpath) const
@@ -1258,17 +1297,21 @@ std::string expandTilde(std::string in)
 
 std::string getTempPath()
 {
+    std::string tmp;
 #ifndef ARBITER_WINDOWS
-    if (const auto t = util::env("TMPDIR"))     return *t;
-    if (const auto t = util::env("TMP"))        return *t;
-    if (const auto t = util::env("TEMP"))       return *t;
-    if (const auto t = util::env("TEMPDIR"))    return *t;
-    return "/tmp";
+    if (const auto t = util::env("TMPDIR"))         tmp = *t;
+    else if (const auto t = util::env("TMP"))       tmp = *t;
+    else if (const auto t = util::env("TEMP"))      tmp = *t;
+    else if (const auto t = util::env("TEMPDIR"))   tmp = *t;
+    else tmp = "/tmp";
 #else
     std::vector<char> path(MAX_PATH, '\0');
-    if (GetTempPath(MAX_PATH, path.data())) return path.data();
-    else throw ArbiterError("Could not find a temp path.");
+    if (GetTempPath(MAX_PATH, path.data())) tmp.assign(path.data());
 #endif
+
+    if (tmp.empty()) throw ArbiterError("Could not find a temp path.");
+    if (tmp.back() != '/') tmp += '/';
+    return tmp;
 }
 
 LocalHandle::LocalHandle(const std::string localPath, const bool isRemote)
@@ -2749,24 +2792,24 @@ std::string Google::Auth::sign(
 
     EVP_PKEY* key(loadKey(pkey, false));
 
-    EVP_MD_CTX ctx;
-    EVP_MD_CTX_init(&ctx);
-    EVP_DigestSignInit(&ctx, nullptr, EVP_sha256(), nullptr, key);
+    EVP_MD_CTX* ctx(EVP_MD_CTX_new());
+    EVP_MD_CTX_init(ctx);
+    EVP_DigestSignInit(ctx, nullptr, EVP_sha256(), nullptr, key);
 
-    if (EVP_DigestSignUpdate(&ctx, data.data(), data.size()) == 1)
+    if (EVP_DigestSignUpdate(ctx, data.data(), data.size()) == 1)
     {
         std::size_t size(0);
-        if (EVP_DigestSignFinal(&ctx, nullptr, &size) == 1)
+        if (EVP_DigestSignFinal(ctx, nullptr, &size) == 1)
         {
             std::vector<unsigned char> v(size, 0);
-            if (EVP_DigestSignFinal(&ctx, v.data(), &size) == 1)
+            if (EVP_DigestSignFinal(ctx, v.data(), &size) == 1)
             {
                 signature.assign(reinterpret_cast<const char*>(v.data()), size);
             }
         }
     }
 
-    EVP_MD_CTX_cleanup(&ctx);
+    EVP_MD_CTX_free(ctx);
     if (signature.empty()) throw ArbiterError("Could not sign JWT");
     return signature;
 #else
