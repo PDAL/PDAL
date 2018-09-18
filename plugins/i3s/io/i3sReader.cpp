@@ -18,6 +18,7 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
+#include <gdal.h>
 
 
 
@@ -67,8 +68,9 @@ namespace pdal
         }
         //create pdal Bounds
         m_bounds = createBounds();
+        m_nodeCap = 
+            m_info["layers"][0]["store"]["index"]["nodesPerPage"].asInt();
 
-        
         log()->get(LogLevel::Debug) << "\n\nFileName: " 
             << m_filename << std::endl;
         log()->get(LogLevel::Debug) << "\nThread Count: " 
@@ -96,7 +98,6 @@ namespace pdal
           
             Json::Value attributes = 
                 m_info["layers"][static_cast<Json::ArrayIndex>(j)]["attributeStorageInfo"];
-
             for (uint64_t i = 0; i < attributes.size(); i++)
             {
 
@@ -185,11 +186,6 @@ namespace pdal
             "EPSG:" +
             Json::writeString(writer,
             spatialJson["wkid"]);
-        //if (spatialJson.isMember("vcsWkid"))
-        //    spatialStr += ("+" +
-        //        Json::writeString(writer,
-        //        spatialJson["vcsWkid"])
-        //    );
         SpatialReference ref(spatialStr);
         setSpatialReference(ref);
     }
@@ -212,48 +208,45 @@ namespace pdal
         Json::Value nodeIndexJson =
             parse(m_arbiter->get(nodeUrl + std::to_string(nodePageIndex)));
         int index = 0;
-        std::vector<Node> nodePullArr;
+        std::vector<int> nodeArr;
         int totalCount = 0;
         int pageIndex = 0;
         int vertexCount = 0;
+        //tree traversal
         while (!nodeIndexJson.isMember("error"))
         {
             int pageSize = nodeIndexJson["nodes"].size();
             int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-            nodePullArr.resize(initialNode + pageSize);
+            nodeArr.resize(initialNode + pageSize);
             for (int i = 0; i < pageSize; i++)
             {
-                Node newNode;
-                Json::Value coord = nodeIndexJson["nodes"][i]["center"];
-                Json::Value rad = nodeIndexJson["nodes"][i]["halfSize"];
                 int localCount = 
                     nodeIndexJson["nodes"][i]["vertexCount"].asInt();
-
+                BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
                 int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-                Node node(coord[0], coord[1], coord[2], rad[0], rad[1], rad[2],
-                        cCount, initialNode); 
 
-                if (node.childCount == 0)
+                bool overlap = m_bounds.overlaps(nodeBox);
+                if (cCount == 0 && overlap)
                 {
-                    if (m_bounds.contains(coord[0], coord[1], coord[2])
-                    {
-                        nodePullArr[index++] = initialNode + i;
-                        vertexCount = vertexCount + localCount; 
-                    }
+                    nodeArr[index++] = (initialNode + i);
+                    vertexCount = vertexCount + localCount; 
                 }
 
             }
             nodeIndexJson = 
                 parse(m_arbiter->get(nodeUrl+std::to_string(++pageIndex)));
         }
+
+        //Create view with overlapping leaf nodes
         std::cout << "Fetching binaries" << std::endl;
         Pool p(m_args.threads);
+        //index = nodeArr.size();
         for (int i = 0; i < index; i++) 
         {
             std::cout << "\r" << i << "/" << index;
             std::cout.flush();
             std::string localUrl = m_filename + 
-                "/layers/0/nodes/" + std::to_string(nodePullArr[i]); 
+                "/layers/0/nodes/" + std::to_string(nodeArr[i]); 
 
             p.add([localUrl, this, &view]()
             {
@@ -265,10 +258,118 @@ namespace pdal
         return view->size();
     }
 
+
+    BOX3D I3SReader::parseBox(Json::Value base)
+    {
+        Json::Value center = base["obb"]["center"];
+        Json::Value hsize = base["obb"]["halfSize"];
+        Json::Value quat = base["obb"]["quaternion"];
+
+        //pull the data from the json object
+        double x, y, z;
+        x = center[0].asDouble();
+        y = center[1].asDouble();
+        z = center[2].asDouble();
+
+        double hx, hy, hz;
+        hx = hsize[0].asDouble();
+        hy = hsize[1].asDouble();
+        hz = hsize[2].asDouble();
+
+        double w, i, j, k;
+        w = quat[0].asDouble();
+        i = quat[1].asDouble();
+        j = quat[2].asDouble();
+        k = quat[3].asDouble();
+
+        //Calculations
+        Eigen::Quaterniond q(w, i, j, k);
+        q.normalize();
+
+        //Here we'll convert our halfsizes to x, y, and z vectors in respective
+        //directions, which will give us new bounding planes
+        Eigen::Vector3d vxmax(hx,   0,   0);
+        Eigen::Vector3d vymax(0,   hy,   0);
+        Eigen::Vector3d vzmax(0,    0,  hz);
+
+        //Create quaternion-like vectors
+        Eigen::Quaterniond pxmax, pxmin, pymax, pymin, pzmax, pzmin;
+        pxmax.w() = 0;
+        pymax.w() = 0;
+        pzmax.w() = 0;
+        pxmax.vec() = vxmax;
+        pymax.vec() = vymax;
+        pzmax.vec() = vzmax;
+
+        //Rotate all the individual vectors
+        //gives us offset for the of the new x/y/zmax/min planes
+        Eigen::Quaterniond rxmax = q * pxmax * q.inverse(); 
+        Eigen::Quaterniond rymax = q * pymax * q.inverse(); 
+        Eigen::Quaterniond rzmax = q * pzmax * q.inverse(); 
+
+
+        m_srsIn.set("EPSG:4326");
+        m_srsOut.set("EPSG:4978");
+        m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
+        setSpatialReference(m_srsOut);
+        m_in_ref_ptr = OSRNewSpatialReference(m_srsIn.getWKT().c_str());
+        m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
+            m_out_ref_ptr);
+        double newz = 0;
+        OCTTransform(m_transform_ptr, 1, &x, &y, &newz);
+
+        //Create new bounding planes
+        double maxx = (rxmax.vec()[0] < 0) 
+            ? (x-rxmax.vec()[0]):(x+rxmax.vec()[0]);
+        double minx = (rxmax.vec()[0] > 0) 
+            ? (x-rxmax.vec()[0]):(x+rxmax.vec()[0]);
+        double maxy = (rymax.vec()[1] < 0) 
+            ? (y-rymax.vec()[1]):(y+rymax.vec()[1]);
+        double miny = (rymax.vec()[1] > 0) 
+            ? (y-rymax.vec()[1]):(y+rymax.vec()[1]);
+        double maxz = (rzmax.vec()[2] < 0) 
+            ? (z-rzmax.vec()[2]):(z+rzmax.vec()[2]);
+        double minz = (rzmax.vec()[2] > 0) 
+            ? (z-rzmax.vec()[2]):(z+rzmax.vec()[2]);
+
+        m_srsIn.set("EPSG:4978");
+        m_srsOut.set("EPSG:4326");
+
+        if (m_transform_ptr)
+            OCTDestroyCoordinateTransformation(m_transform_ptr);
+        if (m_in_ref_ptr)
+            OSRDestroySpatialReference(m_in_ref_ptr);
+        if (m_out_ref_ptr)
+            OSRDestroySpatialReference(m_out_ref_ptr);
+        m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
+        m_in_ref_ptr = OSRNewSpatialReference(m_srsIn.getWKT().c_str());
+        setSpatialReference(m_srsOut);
+        m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
+                m_out_ref_ptr);
+
+        double tempz = newz;
+
+        OCTTransform(m_transform_ptr, 1, &minx, &miny, &tempz);
+
+        OCTTransform(m_transform_ptr, 1, &maxx, &maxy, &newz);
+
+        BOX3D returnBox(minx, miny, minz, maxx, maxy, maxz);
+                        
+        //populate BOX3D
+
+        return returnBox;
+    }
+
     void I3SReader::createView(std::string localUrl, PointViewPtr view)
     {
             Pool p(m_args.threads); 
             std::vector<char> response;
+            p.add([this, &response, localUrl]( )
+            {    
+                std::string fetchUrl = localUrl + "/geometries/0";
+                response = m_arbiter->getBinary(fetchUrl);
+            });
+
 
             std::vector<char> intensityResponse;
             std::vector<char> rgbResponse;
@@ -301,38 +402,6 @@ namespace pdal
                 fetchBinary(pointSrcId, localUrl, 64, p);
             }
 
-            /*p.add([this, &intensityResponse, localUrl](){
-                //Retrieve intensity data
-                std::string urlIntensity = localUrl + "/attributes/2";
-                intensityResponse = 
-                    m_arbiter->getBinary(urlIntensity);
-            });
-            //Retrieve rgb data
-            p.add([this, &rgbResponse, localUrl]()
-            {    
-                std::string urlRgb = localUrl + "/attributes/4"; 
-                rgbResponse = m_arbiter->getBinary(urlRgb);
-            });
-            //Retrieve Class Code
-            
-            p.add([this, &classFlags, localUrl]()
-            {    
-                std::string urlClass = localUrl + "/attributes/8";
-                classFlags = m_arbiter->getBinary(urlClass);
-            });
-            //Flags
-            p.add([this, &flags, localUrl]()
-            {
-                std::string urlFlags = localUrl + "/attributes/16";
-                flags = m_arbiter->getBinary(urlFlags);
-            });
-            //Returns
-            p.add([this, &returns, localUrl]()
-            {
-                std::string urlReturns = localUrl + "/attributes/32";
-                returns = m_arbiter->getBinary(urlReturns);
-            });*/
-
             p.await();
             //Decompression methods
             std::vector<lepcc::Point3D> pointcloud = 
@@ -346,9 +415,9 @@ namespace pdal
             
 
             std::lock_guard<std::mutex> lock(m_mutex);
-            std::cout << intensity.size();
             //Iterate through vector item and add to view
 
+            m_count = 0;
             for (std::size_t j = 0; j < pointcloud.size(); j ++)
             {  
                 double x = pointcloud[j].x;
@@ -356,7 +425,7 @@ namespace pdal
                 double z = pointcloud[j].z;
                 if (m_bounds.contains(x,y,z))
                 {
-
+                    m_count ++;
                     PointId id = view->size();
                     
                     //XYZ
@@ -409,10 +478,6 @@ namespace pdal
             }
     }
 
-    std::vector<Node> I3SReader::treeTraverse(int nodePageIndex, Json::Value page, Json::Value node)
-    {
-
-    }
 
     BOX3D I3SReader::createBounds()
     {
@@ -437,6 +502,7 @@ namespace pdal
 
     void I3SReader::fetchBinary(std::vector<char>& response, std::string url, int attNum, Pool& p)
     {
+        //Add to thread pool and fetch the binary data form arbiter
         p.add([this, &response, url, attNum]( )
         {    
             std::string fetchUrl = url + "/attributes/" + std::to_string(attNum); 

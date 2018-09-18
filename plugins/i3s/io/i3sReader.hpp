@@ -11,16 +11,19 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <json/json.h>
 #include <arbiter/arbiter.hpp>
 
+#include <array>
 #include <functional>
 #include <queue>
 #include <vector>
 #include <algorithm>                                                            
 #include <chrono>     
-
-
+#include <Eigen/Geometry>
+#include <gdal.h>
+#include <ogr_spatialref.h>
 
 namespace pdal
 {
@@ -43,19 +46,20 @@ namespace pdal
     Json::Value m_info;
     std::mutex m_mutex;
     BOX3D m_bounds;
+    int m_nodeCap;
+    int m_count = 0;
 
-    struct Node 
-    {
-        int name;
-        double minx, maxx;
-        double miny, maxy;
-        double minz, maxz;
-        
-        int childCount;
-        Node parent;
-        Node* children;
-    };
-    
+    //Spatial Reference variables
+    SpatialReference m_srsIn;
+    SpatialReference m_srsOut;
+    bool m_inferInputSRS;
+    typedef void* ReferencePtr;
+    typedef void* TransformPtr;
+    ReferencePtr m_in_ref_ptr;
+    ReferencePtr m_out_ref_ptr;
+    TransformPtr m_transform_ptr;
+
+    //Dimension booleans
     bool isRGB = false;
     bool isElevation = false;
     bool isFlags = false;
@@ -70,6 +74,6 @@ namespace pdal
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
-
+    BOX3D parseBox(Json::Value base);
   };
 }

@@ -24,6 +24,8 @@ target_include_directories(${reader_libname} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}
     ${PDAL_VENDOR_DIR}
     ${LEPCC_INCLUDE_DIR}
+    ${PDAL_VENDOR_DIR}/eigen
+    ${GDAL_INCLUDE_DIR}
 )
 
 if (WITH_TESTS)
@@ -39,5 +41,7 @@ if (WITH_TESTS)
             ${PDAL_JSONCPP_INCLUDE_DIR}
             ${PDAL_VENDOR_DIR}
             ${LEPCC_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}/eigen
+            ${GDAL_INCLUDE_DIR}
     )
 endif()
