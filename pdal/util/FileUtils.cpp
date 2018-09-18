@@ -161,6 +161,12 @@ bool createDirectory(const std::string& dirname)
 }
 
 
+bool createDirectories(const std::string& dirname)
+{
+    return pdalboost::filesystem::create_directories(dirname);
+}
+
+
 void deleteDirectory(const std::string& dirname)
 {
     pdalboost::filesystem::remove_all(dirname);
