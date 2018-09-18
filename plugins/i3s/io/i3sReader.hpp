@@ -49,6 +49,9 @@ namespace pdal
     int m_nodeCap;
     int m_count = 0;
 
+    //File System vs Curl
+    bool m_file = false;
+
     //Spatial Reference variables
     SpatialReference m_srsIn;
     SpatialReference m_srsOut;

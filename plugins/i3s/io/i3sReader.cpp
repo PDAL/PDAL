@@ -57,20 +57,39 @@ namespace pdal
 
         log()->get(LogLevel::Debug) << "Fetching info from " << m_filename <<
             std::endl;
+        if(m_filename.find("http://")==0)//stored on server
+        {
+            try
+            {
+                m_info = parse(m_arbiter->get(m_filename));
+            }
+            catch (std::exception& e)
+            {
+                throw pdal_error(std::string("Failed to fetch info: ") + e.what());
+            }
+        }else//slpk locally
+        {
+            try
+            {
+                auto decompData = m_arbiter->get(m_filename+ 
+                        "/3dSceneLayer.json.gz"),
+                std::string jsonString(gzip::decompress(
+                            decompData,
+                            decompData.size()));
+                m_info = parse(jsonString);
 
-        try
-        {
-            m_info = parse(m_arbiter->get(m_filename));
-        }
-        catch (std::exception& e)
-        {
-            throw pdal_error(std::string("Failed to fetch info: ") + e.what());
+            }
+            catch (std::exception& e)
+            {
+                throw pdal_error(std::string("Failed to fetch info: ") 
+                        + e.what());
+            }
+            m_file = true;
         }
         //create pdal Bounds
         m_bounds = createBounds();
         m_nodeCap = 
             m_info["layers"][0]["store"]["index"]["nodesPerPage"].asInt();
-
         log()->get(LogLevel::Debug) << "\n\nFileName: " 
             << m_filename << std::endl;
         log()->get(LogLevel::Debug) << "\nThread Count: " 
@@ -367,7 +386,16 @@ namespace pdal
             p.add([this, &response, localUrl]( )
             {    
                 std::string fetchUrl = localUrl + "/geometries/0";
-                response = m_arbiter->getBinary(fetchUrl);
+                if(m_file)
+                {
+                    auto decompData = 
+                        m_arbiter->getBinary(fetchUrl + ".bin.gz"),
+                    gzip::decompress<std::vector<char>>(response
+                        decompData, decompData.size());
+                }else
+                {
+                    response = m_arbiter->getBinary(fetchUrl);
+                }
             });
 
 
@@ -478,6 +506,18 @@ namespace pdal
             }
     }
 
+    //Create
+    void I3SReader::fetchBinary(std::vector<char>& response, std::string url, int attNum, Pool& p)
+    {
+        //Add to thread pool and fetch the binary data form arbiter
+        p.add([this, &response, url, attNum]( )
+        {   
+            std::string fetchUrl = url + "/attributes/" 
+                + std::to_string(attNum); 
+            response = m_arbiter->getBinary(fetchUrl);
+        });
+    }
+
 
     BOX3D I3SReader::createBounds()
     {
@@ -500,15 +540,6 @@ namespace pdal
                 b.maxx, b.maxy, (std::numeric_limits<double>::max)());
     }
 
-    void I3SReader::fetchBinary(std::vector<char>& response, std::string url, int attNum, Pool& p)
-    {
-        //Add to thread pool and fetch the binary data form arbiter
-        p.add([this, &response, url, attNum]( )
-        {    
-            std::string fetchUrl = url + "/attributes/" + std::to_string(attNum); 
-            response = m_arbiter->getBinary(fetchUrl);
-        });
-    }
 
     void I3SReader::done(PointTableRef)
     {
