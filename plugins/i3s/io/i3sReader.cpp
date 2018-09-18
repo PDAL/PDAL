@@ -72,10 +72,12 @@ namespace pdal
             try
             {
                 auto decompData = m_arbiter->get(m_filename+ 
-                        "/3dSceneLayer.json.gz"),
-                std::string jsonString(gzip::decompress(
-                            decompData,
-                            decompData.size()));
+                        "/3dSceneLayer.json.gz");
+                std::string jsonString;
+                //arbiter::gzip::decompress(
+                //        jsonString,
+                //        decompData,
+                //        decompData.size());
                 m_info = parse(jsonString);
 
             }
@@ -389,8 +391,8 @@ namespace pdal
                 if(m_file)
                 {
                     auto decompData = 
-                        m_arbiter->getBinary(fetchUrl + ".bin.gz"),
-                    gzip::decompress<std::vector<char>>(response
+                        m_arbiter->getBinary(fetchUrl + ".bin.gz"));
+                    arbiter::gzip::decompress<std::vector<char>>(response
                         decompData, decompData.size());
                 }else
                 {
