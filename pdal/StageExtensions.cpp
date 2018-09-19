@@ -82,6 +82,7 @@ R"PDALEXTENSIONS(
     "readers.rxp" : "rxp",
     "readers.fbx" : "fbx",
     "readers.i3s" : "i3s"
+    "readers.i3s" : "slpk"
 }
 
 )PDALEXTENSIONS"

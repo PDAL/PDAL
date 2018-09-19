@@ -47,6 +47,7 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_features.hpp>
@@ -307,28 +308,27 @@ namespace pdal
         Json::Value nodeIndexJson;
         std::string nodeUrl = m_filename + "/nodepages/"
             + std::to_string(pageIndex);
+
         if (m_file)//local file
         {
             std::string ext = ".json.gz";
-            try
-            {
-                SlpkExtractor nodeUnarchive(
-                        nodeUrl+ext,
-                        m_filename+"/nodepages");
-                nodeUnarchive.extract();
-                std::string output;
-                auto compressed = m_arbiter->get(nodeUrl+ext);
-                m_decomp.decompress<std::string>(
-                        output,
-                        compressed.data(),
-                        compressed.size());
-                nodeIndexJson = parse(output);
 
-            }
-            catch (arbiter::ArbiterError& e)//file until file can't be read
+            if(!FileUtils::fileExists(nodeUrl+ext))
             {
+                std::cout << "FUCKIN MADE IT BRUH" << std::endl;
                 return;
             }
+            SlpkExtractor nodeUnarchive(
+                    nodeUrl+ext,
+                    m_filename+"/nodepages");
+            nodeUnarchive.extract();
+            std::string output;
+            auto compressed = m_arbiter->get(nodeUrl+ext);
+            m_decomp.decompress<std::string>(
+                    output,
+                    compressed.data(),
+                    compressed.size());
+            nodeIndexJson = parse(output);
         }else//server based
         {
             nodeIndexJson = parse(m_arbiter->get(nodeUrl));
