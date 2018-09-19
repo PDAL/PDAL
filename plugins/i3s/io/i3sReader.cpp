@@ -261,7 +261,7 @@ namespace pdal
         //through the node list for the nodes to be pulled.
         std::cout << "Fetching binaries" << std::endl;
         Pool p(m_args.threads);
-        for (int i = 0; i < nodeArr.size(); i++) 
+        for (std::size_t i = 0; i < nodeArr.size(); i++) 
         {
             std::cout << "\r" << i << "/" << nodeArr.size();
             std::cout.flush();

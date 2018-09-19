@@ -83,12 +83,12 @@ namespace pdal
     std::string idIntensity;
 
     //methods
-    virtual void addArgs(ProgramArgs& args);
+    virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual void done(PointTableRef table);
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void ready(PointTableRef table) override;
+    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    virtual void done(PointTableRef table) override;
     BOX3D parseBox(Json::Value base);
   };
 }
