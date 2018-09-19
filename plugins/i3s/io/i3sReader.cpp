@@ -158,7 +158,7 @@ namespace pdal
                 std::remove(readName.begin(), readName.end(), '_'),
                 readName.end());
 
-            if(readName == "INTENSITY")
+            if (readName == "INTENSITY")
             {
                 isIntensity = true;
                 idIntensity = id;
@@ -275,7 +275,7 @@ namespace pdal
         Json::Value nodeIndexJson;
         std::string nodeUrl = m_filename + "/nodepages/" +
             std::to_string(pageIndex);
-        if(m_file) //local file
+        if (m_file) //local file
         {
             std::string ext = ".json.gz";
             SlpkExtractor nodeUnarchive(nodeUrl + ext, m_filename + "/nodepages");
@@ -291,7 +291,7 @@ namespace pdal
         else //server based
         {
             nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-            if(nodeIndexJson.isMember("error"))
+            if (nodeIndexJson.isMember("error"))
                 return;
         }
         int pageSize = nodeIndexJson["nodes"].size();
@@ -312,7 +312,7 @@ namespace pdal
     }
 
 
-    //Create the BOX3D for the node. This will be used for testing overlap.
+    // Create the BOX3D for the node. This will be used for testing overlap.
     BOX3D I3SReader::parseBox(Json::Value base)
     {
         Json::Value center = base["obb"]["center"];
@@ -320,33 +320,30 @@ namespace pdal
         Json::Value quat = base["obb"]["quaternion"];
 
         //pull the data from the json object
-        double x, y, z;
-        x = center[0].asDouble();
-        y = center[1].asDouble();
-        z = center[2].asDouble();
+        double x = center[0].asDouble();
+        double y = center[1].asDouble();
+        const double z = center[2].asDouble();
 
-        double hx, hy, hz;
-        hx = hsize[0].asDouble();
-        hy = hsize[1].asDouble();
-        hz = hsize[2].asDouble();
+        const double hx = hsize[0].asDouble();
+        const double hy = hsize[1].asDouble();
+        const double hz = hsize[2].asDouble();
 
-        double w, i, j, k;
-        w = quat[0].asDouble();
-        i = quat[1].asDouble();
-        j = quat[2].asDouble();
-        k = quat[3].asDouble();
+        const double w = quat[0].asDouble();
+        const double i = quat[1].asDouble();
+        const double j = quat[2].asDouble();
+        const double k = quat[3].asDouble();
 
-        //Create quat object and normalize it for use
+        // Create quat object and normalize it for use
         Eigen::Quaterniond q(w, i, j, k);
         q.normalize();
 
-        //Here we'll convert our halfsizes to x, y, and z vectors in respective
-        //directions, which will give us new bounding planes
+        // Here we'll convert our halfsizes to x, y, and z vectors in respective
+        // directions, which will give us new bounding planes
         Eigen::Vector3d vxmax(hx,   0,   0);
         Eigen::Vector3d vymax(0,   hy,   0);
         Eigen::Vector3d vzmax(0,    0,  hz);
 
-        //Create quaternion-like vectors
+        // Create quaternion-like vectors
         Eigen::Quaterniond pxmax, pxmin, pymax, pymin, pzmax, pzmin;
         pxmax.w() = 0;
         pymax.w() = 0;
@@ -355,13 +352,13 @@ namespace pdal
         pymax.vec() = vymax;
         pzmax.vec() = vzmax;
 
-        //Rotate all the individual vectors
-        //gives us offset for the of the new x/y/zmax/min planes
+        // Rotate all the individual vectors
+        // gives us offset for the of the new x/y/zmax/min planes
         Eigen::Quaterniond rxmax = q * pxmax * q.inverse();
         Eigen::Quaterniond rymax = q * pymax * q.inverse();
         Eigen::Quaterniond rzmax = q * pzmax * q.inverse();
 
-        //Convert to EPSG:4978 so the offsets(meters) will match up
+        // Convert to EPSG:4978 so the offsets(meters) will match up
         m_srsIn.set(m_i3sRef.getWKT());
         m_srsOut.set("EPSG:4978");
         m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
@@ -370,25 +367,25 @@ namespace pdal
         m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
             m_out_ref_ptr);
 
-        //create fake z for the transformation so we get values at the surface
+        // create fake z for the transformation so we get values at the surface
         double newz = 0;
         OCTTransform(m_transform_ptr, 1, &x, &y, &newz);
 
-        //Create new bounding planes in 4978
+        // Create new bounding planes in 4978
         double maxx = (rxmax.vec()[0] < 0)
-            ? (x-rxmax.vec()[0]):(x+rxmax.vec()[0]);
+            ? (x - rxmax.vec()[0]) : (x + rxmax.vec()[0]);
         double minx = (rxmax.vec()[0] > 0)
-            ? (x-rxmax.vec()[0]):(x+rxmax.vec()[0]);
+            ? (x - rxmax.vec()[0]) : (x + rxmax.vec()[0]);
         double maxy = (rymax.vec()[1] < 0)
-            ? (y-rymax.vec()[1]):(y+rymax.vec()[1]);
+            ? (y - rymax.vec()[1]) : (y + rymax.vec()[1]);
         double miny = (rymax.vec()[1] > 0)
-            ? (y-rymax.vec()[1]):(y+rymax.vec()[1]);
+            ? (y - rymax.vec()[1]) : (y + rymax.vec()[1]);
         double maxz = (rzmax.vec()[2] < 0)
-            ? (z-rzmax.vec()[2]):(z+rzmax.vec()[2]);
+            ? (z - rzmax.vec()[2]) : (z + rzmax.vec()[2]);
         double minz = (rzmax.vec()[2] > 0)
-            ? (z-rzmax.vec()[2]):(z+rzmax.vec()[2]);
+            ? (z - rzmax.vec()[2]) : (z + rzmax.vec()[2]);
 
-        //Transform back to original spatial reference
+        // Transform back to original spatial reference
         m_srsIn.set("EPSG:4978");
         m_srsOut.set(m_i3sRef.getWKT());
 
@@ -409,25 +406,21 @@ namespace pdal
         OCTTransform(m_transform_ptr, 1, &minx, &miny, &tempz);
         OCTTransform(m_transform_ptr, 1, &maxx, &maxy, &newz);
 
-        //populate BOX3D
-        BOX3D returnBox(minx, miny, minz, maxx, maxy, maxz);
-
-
-        return returnBox;
+        return BOX3D(minx, miny, minz, maxx, maxy, maxz);
     }
 
     void I3SReader::createView(std::string localUrl, PointViewPtr view)
     {
             std::vector<char> response;
-                std::string fetchUrl = localUrl + "/geometries/0";
-                if(m_file)
-                {
-                    response =
-                        m_arbiter->getBinary(fetchUrl + ".bin.pccxyz");
-                }else
-                {
-                    response = m_arbiter->getBinary(fetchUrl);
-                }
+            std::string fetchUrl = localUrl + "/geometries/0";
+            if (m_file)
+            {
+                response = m_arbiter->getBinary(fetchUrl + ".bin.pccxyz");
+            }
+            else
+            {
+                response = m_arbiter->getBinary(fetchUrl);
+            }
 
             std::vector<char> intensityResponse;
             std::vector<char> rgbResponse;
@@ -435,32 +428,32 @@ namespace pdal
             std::vector<char> flags;
             std::vector<char> returns;
             std::vector<uint16_t> pointSrcId;
-            if(isIntensity)
+            if (isIntensity)
             {
-               fetchBinary(intensityResponse, localUrl,
-                       idIntensity,".bin.pccint");
+               fetchBinary(intensityResponse, localUrl, idIntensity,
+                       ".bin.pccint");
             }
-            if(isRGB)
+            if (isRGB)
             {
                fetchBinary(rgbResponse, localUrl, idRGB, ".bin.gz");
             }
-            if(isClass)
+            if (isClass)
             {
                fetchBinary(classFlags, localUrl, idClass, ".bin.gz");
             }
-            if(isFlags)
+            if (isFlags)
             {
                fetchBinary(flags, localUrl, idFlags, ".bin.gz");
             }
-            if(isReturns)
+            if (isReturns)
             {
                 fetchBinary(returns, localUrl, idReturns, ".bin.gz");
             }
-            /*if(isSourceId)
+            /*if (isSourceId)
             {
                 //fetchBinary(pointSrcId, localUrl, idSourceId, ".bin.gz");
                 std::string fetchUrl = localUrl + "/attributes/" + idSourceId;
-                if(m_file)
+                if (m_file)
                 {
                     auto compressed =
                         m_arbiter->getBinary(fetchUrl + "bin.gz");
@@ -486,16 +479,15 @@ namespace pdal
             std::lock_guard<std::mutex> lock(m_mutex);
 
             //Iterate through vector item and add to view
-            for (std::size_t j = 0; j < pointcloud.size(); j ++)
+            for (std::size_t j = 0; j < pointcloud.size(); j++)
             {
                 double x = pointcloud[j].x;
                 double y = pointcloud[j].y;
                 double z = pointcloud[j].z;
-                if (m_bounds.contains(x,y,z))
+                if (m_bounds.contains(x, y, z))
                 {
                     PointId id = view->size();
 
-                    //XYZ
                     view->setField(pdal::Dimension::Id::X,
                             id, pointcloud[j].x);
                     view->setField(pdal::Dimension::Id::Y,
@@ -503,8 +495,8 @@ namespace pdal
                     view->setField(pdal::Dimension::Id::Z,
                             id, pointcloud[j].z);
 
-                    if(isRGB){
-                        //RGB
+                    if (isRGB)
+                    {
                         view->setField(pdal::Dimension::Id::Red,
                                 id, rgbPoints[j].r);
                         view->setField(pdal::Dimension::Id::Green,
@@ -514,29 +506,25 @@ namespace pdal
                     }
                     if (isIntensity)
                     {
-                        //INTENSITY
                         view->setField(pdal::Dimension::Id::Intensity,
                                 id, intensity[j]);
                     }
                     if (isClass)
                     {
-                        //CLASSCODES
                         view->setField(pdal::Dimension::Id::ClassFlags,
                                 id, classFlags[j]);
                     }
                     if (isFlags)
                     {
-                        //FLAGS
                         view->setField(pdal::Dimension::Id::Flag,
                                 id, flags[j]);
                     }
                     if (isReturns)
                     {
-                        //RETURNS
                         view->setField(pdal::Dimension::Id::NumberOfReturns,
                                 id, returns[j]);
                     }
-                    /*if(isSourceId)
+                    /*if (isSourceId)
                     {
                         view->setField(pdal::Dimension::Id::PointSourceId,
                                 id, pointSrcId[j]);
@@ -554,15 +542,13 @@ namespace pdal
         //If the files are local, fetch and decompress them first
 
             std::string fetchUrl = url + "/attributes/" + attNum;
-            if(m_file)
+            if (m_file)
             {
-                if(ext!=".bin.pccint")
+                if (ext != ".bin.pccint")
                 {
-                    auto compressed =
-                        m_arbiter->getBinary(fetchUrl + ext);
-                    m_decomp.decompress<std::vector<char>>(
-                            response, compressed.data(),
-                        compressed.size());
+                    auto compressed = m_arbiter->getBinary(fetchUrl + ext);
+                    m_decomp.decompress<std::vector<char>>(response,
+                            compressed.data(), compressed.size());
                 }
                 else
                 {
