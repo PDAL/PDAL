@@ -24,6 +24,7 @@ Contributors:  Thomas Maurer
 #ifndef CLUSTERRGB_H
 #define CLUSTERRGB_H
 
+#include <string>
 #include <vector>
 #include <unordered_map>
 #include "BitMask.h"
