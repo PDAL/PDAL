@@ -1,27 +1,25 @@
 // I3SReader.cpp
 
 #include "i3sReader.hpp"
-#include "../lepcc/src/include/lepcc_c_api.h"                                   
-#include "../lepcc/src/include/lepcc_types.h" 
+#include "../lepcc/src/include/lepcc_c_api.h"
+#include "../lepcc/src/include/lepcc_types.h"
 #include "pool.hpp"
 #include "SlpkExtractor.hpp"
 
 #include <istream>
 #include <cstdint>
-#include <cstring>                                               
-#include <cmath>                                                    
-#include <stdio.h>                                               
-#include <iostream>                                                
-#include <vector>                                                    
-#include <algorithm>                                                
-#include <chrono>                                                               
+#include <cstring>
+#include <cmath>
+#include <cstdio>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <gdal.h>
-
-
 
 namespace pdal
 {
@@ -40,38 +38,36 @@ namespace pdal
 
     void I3SReader::initialize(PointTableRef table)
     {
-        
-        //set up arbiter
         Json::Value config;
         if (log()->getLevel() > LogLevel::Debug4)
             config["arbiter"]["verbose"] = true;
         m_arbiter.reset(new arbiter::Arbiter(config));
 
-        /*Check for i3s protocol and remove */
         const std::string pre("i3s://");
-        if (m_filename.find(pre) == 0)
+        if (Utils::startsWith(m_filename, pre))
             m_filename = m_filename.substr(pre.size());
 
-        // remove tailing '/'
         if (m_filename.back() == '/')
             m_filename.pop_back();
 
         log()->get(LogLevel::Debug) << "Fetching info from " << m_filename <<
             std::endl;
-        if(m_filename.find("https://")==0)//stored on server
+
+        if (Utils::startsWith(m_filename, "https://"))
         {
             try
             {
                 m_info = parse(m_arbiter->get(m_filename));
-                m_filename = m_filename+"/layers/0";
+                m_filename = m_filename + "/layers/0";
                 m_info = m_info["layers"][0];
             }
             catch (std::exception& e)
             {
-                throw pdal_error(std::string("Failed to fetch info: ") + 
+                throw pdal_error(std::string("Failed to fetch info: ") +
                         e.what());
             }
-        }else//slpk local
+        }
+        else //slpk local
         {
             try
             {
@@ -80,27 +76,28 @@ namespace pdal
                 std::string subPath = m_filename;
 
                 //find last slpk filename and slpk extension place
-                std::string::size_type filestart = subPath.rfind("/");
-                std::string::size_type fileEnd = subPath.find(".slpk");
+                std::size_t filestart = subPath.rfind("/");
+                std::size_t fileEnd = subPath.find(".slpk");
 
-                //trim path to make new subdirectory in tmp                
+                //trim path to make new subdirectory in tmp
                 //erase .slpk and remove leading '/'
-                if(fileEnd != std::string::npos)
+                if (fileEnd != std::string::npos)
                     subPath = subPath.erase(fileEnd, subPath.size());
-                if(filestart != std::string::npos)
-                    subPath = subPath.substr(filestart+1, 
+
+                if (filestart != std::string::npos)
+                    subPath = subPath.substr(filestart + 1,
                             subPath.size() - filestart);
 
                 //use arbiter to create new directory if doesn't already exist
-                std::string fullPath = path+subPath; 
+                std::string fullPath = path+subPath;
                 arbiter::fs::mkdirp(fullPath);
 
                 //un-archive the slpk archive
-                SlpkExtractor slpk(m_filename, fullPath); 
+                SlpkExtractor slpk(m_filename, fullPath);
                 slpk.extract();
                 m_filename = fullPath;
 
-                //unarchive and decompress the 3dscenelayer 
+                //unarchive and decompress the 3dscenelayer
                 //and create json info object
                 SlpkExtractor sceneLayer(m_filename
                         + "3dSceneLayer.json.gz", m_filename);
@@ -108,8 +105,8 @@ namespace pdal
                 auto compressed = m_arbiter->get(m_filename
                         + "/3dSceneLayer.json.gz");
                 std::string jsonString;
-                
-                m_decomp.decompress(jsonString, compressed.data(), 
+
+                m_decomp.decompress(jsonString, compressed.data(),
                         compressed.size());
                 m_info = parse(jsonString);
                 m_file = true;
@@ -117,7 +114,7 @@ namespace pdal
             }
             catch (std::exception& e)
             {
-                throw pdal_error(std::string("Failed to fetch info: ") 
+                throw pdal_error(std::string("Failed to fetch info: ")
                         + e.what());
             }
         }
@@ -126,11 +123,11 @@ namespace pdal
         //find number of nodes per nodepage
         m_nodeCap = m_info["store"]["index"]["nodesPerPage"].asInt();
 
-        log()->get(LogLevel::Debug) << "\n\nFileName: " 
+        log()->get(LogLevel::Debug) << "\n\nFileName: "
             << m_filename << std::endl;
-        log()->get(LogLevel::Debug) << "\nThread Count: " 
+        log()->get(LogLevel::Debug) << "\nThread Count: "
             << m_args.threads << std::endl;
-        log()->get(LogLevel::Debug) << "Bounds: " 
+        log()->get(LogLevel::Debug) << "Bounds: "
             << m_args.bounds << std::endl;
     }
 
@@ -144,34 +141,33 @@ namespace pdal
 
     void I3SReader::addDimensions(PointLayoutPtr layout)
     {
-        Json::Value attributes = 
-            m_info["attributeStorageInfo"];
-        for (uint64_t i = 0; i < attributes.size(); i++)
+        Json::Value attributes = m_info["attributeStorageInfo"];
+
+        for (Json::ArrayIndex i = 0; i < attributes.size(); i++)
         {
-            std::string readName = attributes
-                [static_cast<Json::ArrayIndex>(i)]["name"].asString();
-            std::string id = attributes
-                [static_cast<Json::ArrayIndex>(i)]["key"].asString();
+            std::string readName = attributes[i]["name"].asString();
+            std::string id = attributes[i]["key"].asString();
+
             //remove quotes from json object
             readName.erase(
-                remove( readName.begin(), readName.end(), '\"' ),
-                readName.end()
-            );
+                std::remove(readName.begin(), readName.end(), '\"'),
+                readName.end());
+
             //remove random underscores
             readName.erase(
-                remove( readName.begin(), readName.end(), '_' ),
-                readName.end()
-            );
+                std::remove(readName.begin(), readName.end(), '_'),
+                readName.end());
 
-            if(readName == "INTENSITY")
+            if (readName == "INTENSITY")
             {
                 isIntensity = true;
-                idIntensity = id; 
+                idIntensity = id;
                 layout->registerDim(Dimension::Id::Intensity);
-            }else if (readName.compare("RGB") == 0)
+            }
+            else if (readName.compare("RGB") == 0)
             {
                 isRGB = true;
-                idRGB = id; 
+                idRGB = id;
                 layout->registerDim(Dimension::Id::Red);
                 layout->registerDim(Dimension::Id::Green);
                 layout->registerDim(Dimension::Id::Blue);
@@ -208,30 +204,22 @@ namespace pdal
                 isSourceId = true;
                 layout->registerDim(Dimension::Id::PointSourceId);
             }
-            else//if it isn't in pdal dimensions and isn't a special case
+            else if (attributes[i].isMember("attributeValues"))
             {
-                std::string type;
-                if (attributes[static_cast<Json::ArrayIndex>(i)].isMember(
-                            "attributeValues")) 
-                {
-                    std::string type;
-                    type = attributes[static_cast<Json::ArrayIndex>(i)]
-                        ["attributeValues"]["valueType"].asString();
-                    layout->registerOrAssignDim(readName, 
-                            pdal::Dimension::type(type));
-                }
-                else
-                {
-                    layout->registerOrAssignDim(readName, 
-                            Dimension::Type::Double);
-                }
+                std::string s =
+                    attributes[i]["attributeValues"]["valueType"].asString();
+                layout->registerOrAssignDim(readName, pdal::Dimension::type(s));
+            }
+            else
+            {
+                layout->registerOrAssignDim(readName, Dimension::Type::Double);
             }
         }
     }
 
     void I3SReader::ready(PointTableRef)
     {
-        Json::Value spatialJson = 
+        Json::Value spatialJson =
             m_info["spatialReference"];
         std::string spatialStr =
             "EPSG:" + spatialJson["wkid"].asString();
@@ -261,11 +249,11 @@ namespace pdal
         //through the node list for the nodes to be pulled.
         std::cout << "Fetching binaries" << std::endl;
         Pool p(m_args.threads);
-        for (std::size_t i = 0; i < nodeArr.size(); i++) 
+        for (std::size_t i = 0; i < nodeArr.size(); i++)
         {
             std::cout << "\r" << i << "/" << nodeArr.size();
             std::cout.flush();
-            std::string localUrl; 
+            std::string localUrl;
 
             localUrl = m_filename + "/nodes/" + std::to_string(nodeArr[i]);
 
@@ -279,48 +267,31 @@ namespace pdal
     }
 
     //Traverse tree through nodepages. Create a nodebox for each node in
-    //the tree and test if it overlaps with the bounds created by user. 
+    //the tree and test if it overlaps with the bounds created by user.
     //If it's a leaf node(the highest resolution) and it overlaps, add
     //it to the list of nodes to be pulled later.
     void I3SReader::buildNodeList(std::vector<int>& nodeArr, int pageIndex)
     {
         Json::Value nodeIndexJson;
-        std::string nodeUrl = m_filename + "/nodepages/" 
-            + std::to_string(pageIndex);
-        if(m_file)//local file
+        std::string nodeUrl = m_filename + "/nodepages/" +
+            std::to_string(pageIndex);
+        if (m_file) //local file
         {
             std::string ext = ".json.gz";
-            try
-            {
-                SlpkExtractor nodeUnarchive(
-                        nodeUrl+ext, 
-                        m_filename+"/nodepages");
-                nodeUnarchive.extract();
-                std::string output;
-                auto compressed = m_arbiter->get(nodeUrl+ext);
-                m_decomp.decompress<std::string>(
-                        output,
-                        compressed.data(),
-                        compressed.size());
-                nodeIndexJson = parse(output);
-
-            }
-            catch (pdal::slpk_error& e)
-            {
-                //throw pdal_error(std::string("Failed to fetch info: ") 
-                //        + e.what());
-                std::cout << "SLPK ERROR" << std::endl;
-                return;
-            }
-            catch (arbiter::ArbiterError& e)
-            {
-                std::cout << "ARBITER ERROR" << std::endl;
-                return;
-            }
-        }else//server based
+            SlpkExtractor nodeUnarchive(nodeUrl + ext, m_filename + "/nodepages");
+            nodeUnarchive.extract();
+            std::string output;
+            auto compressed = m_arbiter->get(nodeUrl + ext);
+            m_decomp.decompress<std::string>(
+                    output,
+                    compressed.data(),
+                    compressed.size());
+            nodeIndexJson = parse(output);
+        }
+        else //server based
         {
             nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-            if(nodeIndexJson.isMember("error"))
+            if (nodeIndexJson.isMember("error"))
                 return;
         }
         int pageSize = nodeIndexJson["nodes"].size();
@@ -341,7 +312,7 @@ namespace pdal
     }
 
 
-    //Create the BOX3D for the node. This will be used for testing overlap.
+    // Create the BOX3D for the node. This will be used for testing overlap.
     BOX3D I3SReader::parseBox(Json::Value base)
     {
         Json::Value center = base["obb"]["center"];
@@ -349,33 +320,30 @@ namespace pdal
         Json::Value quat = base["obb"]["quaternion"];
 
         //pull the data from the json object
-        double x, y, z;
-        x = center[0].asDouble();
-        y = center[1].asDouble();
-        z = center[2].asDouble();
+        double x = center[0].asDouble();
+        double y = center[1].asDouble();
+        const double z = center[2].asDouble();
 
-        double hx, hy, hz;
-        hx = hsize[0].asDouble();
-        hy = hsize[1].asDouble();
-        hz = hsize[2].asDouble();
+        const double hx = hsize[0].asDouble();
+        const double hy = hsize[1].asDouble();
+        const double hz = hsize[2].asDouble();
 
-        double w, i, j, k;
-        w = quat[0].asDouble();
-        i = quat[1].asDouble();
-        j = quat[2].asDouble();
-        k = quat[3].asDouble();
+        const double w = quat[0].asDouble();
+        const double i = quat[1].asDouble();
+        const double j = quat[2].asDouble();
+        const double k = quat[3].asDouble();
 
-        //Create quat object and normalize it for use
+        // Create quat object and normalize it for use
         Eigen::Quaterniond q(w, i, j, k);
         q.normalize();
 
-        //Here we'll convert our halfsizes to x, y, and z vectors in respective
-        //directions, which will give us new bounding planes
+        // Here we'll convert our halfsizes to x, y, and z vectors in respective
+        // directions, which will give us new bounding planes
         Eigen::Vector3d vxmax(hx,   0,   0);
         Eigen::Vector3d vymax(0,   hy,   0);
         Eigen::Vector3d vzmax(0,    0,  hz);
 
-        //Create quaternion-like vectors
+        // Create quaternion-like vectors
         Eigen::Quaterniond pxmax, pxmin, pymax, pymin, pzmax, pzmin;
         pxmax.w() = 0;
         pymax.w() = 0;
@@ -384,13 +352,13 @@ namespace pdal
         pymax.vec() = vymax;
         pzmax.vec() = vzmax;
 
-        //Rotate all the individual vectors
-        //gives us offset for the of the new x/y/zmax/min planes
-        Eigen::Quaterniond rxmax = q * pxmax * q.inverse(); 
-        Eigen::Quaterniond rymax = q * pymax * q.inverse(); 
-        Eigen::Quaterniond rzmax = q * pzmax * q.inverse(); 
+        // Rotate all the individual vectors
+        // gives us offset for the of the new x/y/zmax/min planes
+        Eigen::Quaterniond rxmax = q * pxmax * q.inverse();
+        Eigen::Quaterniond rymax = q * pymax * q.inverse();
+        Eigen::Quaterniond rzmax = q * pzmax * q.inverse();
 
-        //Convert to EPSG:4978 so the offsets(meters) will match up
+        // Convert to EPSG:4978 so the offsets(meters) will match up
         m_srsIn.set(m_i3sRef.getWKT());
         m_srsOut.set("EPSG:4978");
         m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
@@ -399,25 +367,25 @@ namespace pdal
         m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
             m_out_ref_ptr);
 
-        //create fake z for the transformation so we get values at the surface
+        // create fake z for the transformation so we get values at the surface
         double newz = 0;
         OCTTransform(m_transform_ptr, 1, &x, &y, &newz);
 
-        //Create new bounding planes in 4978
-        double maxx = (rxmax.vec()[0] < 0) 
-            ? (x-rxmax.vec()[0]):(x+rxmax.vec()[0]);
-        double minx = (rxmax.vec()[0] > 0) 
-            ? (x-rxmax.vec()[0]):(x+rxmax.vec()[0]);
-        double maxy = (rymax.vec()[1] < 0) 
-            ? (y-rymax.vec()[1]):(y+rymax.vec()[1]);
-        double miny = (rymax.vec()[1] > 0) 
-            ? (y-rymax.vec()[1]):(y+rymax.vec()[1]);
-        double maxz = (rzmax.vec()[2] < 0) 
-            ? (z-rzmax.vec()[2]):(z+rzmax.vec()[2]);
-        double minz = (rzmax.vec()[2] > 0) 
-            ? (z-rzmax.vec()[2]):(z+rzmax.vec()[2]);
+        // Create new bounding planes in 4978
+        double maxx = (rxmax.vec()[0] < 0)
+            ? (x - rxmax.vec()[0]) : (x + rxmax.vec()[0]);
+        double minx = (rxmax.vec()[0] > 0)
+            ? (x - rxmax.vec()[0]) : (x + rxmax.vec()[0]);
+        double maxy = (rymax.vec()[1] < 0)
+            ? (y - rymax.vec()[1]) : (y + rymax.vec()[1]);
+        double miny = (rymax.vec()[1] > 0)
+            ? (y - rymax.vec()[1]) : (y + rymax.vec()[1]);
+        double maxz = (rzmax.vec()[2] < 0)
+            ? (z - rzmax.vec()[2]) : (z + rzmax.vec()[2]);
+        double minz = (rzmax.vec()[2] > 0)
+            ? (z - rzmax.vec()[2]) : (z + rzmax.vec()[2]);
 
-        //Transform back to original spatial reference
+        // Transform back to original spatial reference
         m_srsIn.set("EPSG:4978");
         m_srsOut.set(m_i3sRef.getWKT());
 
@@ -438,63 +406,59 @@ namespace pdal
         OCTTransform(m_transform_ptr, 1, &minx, &miny, &tempz);
         OCTTransform(m_transform_ptr, 1, &maxx, &maxy, &newz);
 
-        //populate BOX3D
-        BOX3D returnBox(minx, miny, minz, maxx, maxy, maxz);
-                        
-
-        return returnBox;
+        return BOX3D(minx, miny, minz, maxx, maxy, maxz);
     }
 
     void I3SReader::createView(std::string localUrl, PointViewPtr view)
     {
             std::vector<char> response;
-                std::string fetchUrl = localUrl + "/geometries/0";
-                if(m_file)
-                {
-                    response = 
-                        m_arbiter->getBinary(fetchUrl + ".bin.pccxyz");
-                }else
-                {
-                    response = m_arbiter->getBinary(fetchUrl);
-                }
+            std::string fetchUrl = localUrl + "/geometries/0";
+            if (m_file)
+            {
+                response = m_arbiter->getBinary(fetchUrl + ".bin.pccxyz");
+            }
+            else
+            {
+                response = m_arbiter->getBinary(fetchUrl);
+            }
 
             std::vector<char> intensityResponse;
             std::vector<char> rgbResponse;
-            std::vector<char> classFlags; 
+            std::vector<char> classFlags;
             std::vector<char> flags;
             std::vector<char> returns;
             std::vector<uint16_t> pointSrcId;
-            if(isIntensity)
+            if (isIntensity)
             {
-               fetchBinary(intensityResponse, localUrl, 
-                       idIntensity,".bin.pccint"); 
+               fetchBinary(intensityResponse, localUrl, idIntensity,
+                       ".bin.pccint");
             }
-            if(isRGB)
+            if (isRGB)
             {
-               fetchBinary(rgbResponse, localUrl, idRGB, ".bin.gz"); 
+               fetchBinary(rgbResponse, localUrl, idRGB, ".bin.gz");
             }
-            if(isClass)
+            if (isClass)
             {
-               fetchBinary(classFlags, localUrl, idClass, ".bin.gz"); 
+               fetchBinary(classFlags, localUrl, idClass, ".bin.gz");
             }
-            if(isFlags)
+            if (isFlags)
             {
-               fetchBinary(flags, localUrl, idFlags, ".bin.gz"); 
+               fetchBinary(flags, localUrl, idFlags, ".bin.gz");
             }
-            if(isReturns)
+            if (isReturns)
             {
                 fetchBinary(returns, localUrl, idReturns, ".bin.gz");
             }
-            /*if(isSourceId)
+            /*if (isSourceId)
             {
                 //fetchBinary(pointSrcId, localUrl, idSourceId, ".bin.gz");
-                std::string fetchUrl = localUrl + "/attributes/" + idSourceId; 
-                if(m_file)
+                std::string fetchUrl = localUrl + "/attributes/" + idSourceId;
+                if (m_file)
                 {
-                    auto compressed = 
+                    auto compressed =
                         m_arbiter->getBinary(fetchUrl + "bin.gz");
                     m_decomp.decompress<std::vector<uint16_t>>(
-                            pointSrcId, compressed.data(), 
+                            pointSrcId, compressed.data(),
                         compressed.size());
                 }else
                 {
@@ -503,28 +467,27 @@ namespace pdal
             }*/
 
             //Decompression methods
-            std::vector<lepcc::Point3D> pointcloud = 
+            std::vector<lepcc::Point3D> pointcloud =
                 decompressXYZ(&response);
 
-            std::vector<uint16_t> intensity = 
+            std::vector<uint16_t> intensity =
                 decompressIntensity(&intensityResponse);
 
-            std::vector<lepcc::RGB_t> rgbPoints = 
+            std::vector<lepcc::RGB_t> rgbPoints =
                 decompressRGB(&rgbResponse);
 
             std::lock_guard<std::mutex> lock(m_mutex);
 
             //Iterate through vector item and add to view
-            for (std::size_t j = 0; j < pointcloud.size(); j ++)
-            {  
+            for (std::size_t j = 0; j < pointcloud.size(); j++)
+            {
                 double x = pointcloud[j].x;
                 double y = pointcloud[j].y;
                 double z = pointcloud[j].z;
-                if (m_bounds.contains(x,y,z))
+                if (m_bounds.contains(x, y, z))
                 {
                     PointId id = view->size();
-                    
-                    //XYZ
+
                     view->setField(pdal::Dimension::Id::X,
                             id, pointcloud[j].x);
                     view->setField(pdal::Dimension::Id::Y,
@@ -532,8 +495,8 @@ namespace pdal
                     view->setField(pdal::Dimension::Id::Z,
                             id, pointcloud[j].z);
 
-                    if(isRGB){
-                        //RGB
+                    if (isRGB)
+                    {
                         view->setField(pdal::Dimension::Id::Red,
                                 id, rgbPoints[j].r);
                         view->setField(pdal::Dimension::Id::Green,
@@ -543,29 +506,25 @@ namespace pdal
                     }
                     if (isIntensity)
                     {
-                        //INTENSITY
                         view->setField(pdal::Dimension::Id::Intensity,
                                 id, intensity[j]);
                     }
                     if (isClass)
                     {
-                        //CLASSCODES
                         view->setField(pdal::Dimension::Id::ClassFlags,
                                 id, classFlags[j]);
                     }
                     if (isFlags)
                     {
-                        //FLAGS
                         view->setField(pdal::Dimension::Id::Flag,
                                 id, flags[j]);
                     }
                     if (isReturns)
                     {
-                        //RETURNS
                         view->setField(pdal::Dimension::Id::NumberOfReturns,
                                 id, returns[j]);
                     }
-                    /*if(isSourceId)
+                    /*if (isSourceId)
                     {
                         view->setField(pdal::Dimension::Id::PointSourceId,
                                 id, pointSrcId[j]);
@@ -581,17 +540,15 @@ namespace pdal
     {
         //Add to thread pool and fetch the binary data using arbiter
         //If the files are local, fetch and decompress them first
-        
-            std::string fetchUrl = url + "/attributes/" + attNum; 
-            if(m_file)
+
+            std::string fetchUrl = url + "/attributes/" + attNum;
+            if (m_file)
             {
-                if(ext!=".bin.pccint")
+                if (ext != ".bin.pccint")
                 {
-                    auto compressed = 
-                        m_arbiter->getBinary(fetchUrl + ext);
-                    m_decomp.decompress<std::vector<char>>(
-                            response, compressed.data(), 
-                        compressed.size());
+                    auto compressed = m_arbiter->getBinary(fetchUrl + ext);
+                    m_decomp.decompress<std::vector<char>>(response,
+                            compressed.data(), compressed.size());
                 }
                 else
                 {
