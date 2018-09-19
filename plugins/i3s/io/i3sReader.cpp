@@ -58,7 +58,7 @@ namespace pdal
 
         log()->get(LogLevel::Debug) << "Fetching info from " << m_filename <<
             std::endl;
-        if(m_filename.find("https://")==0)//stored on server
+        if (m_filename.find("https://")==0)//stored on server
         {
             try
             {
@@ -85,9 +85,9 @@ namespace pdal
 
                 //trim path to make new subdirectory in tmp                
                 //erase .slpk and remove leading '/'
-                if(fileEnd != std::string::npos)
+                if (fileEnd != std::string::npos)
                     subPath = subPath.erase(fileEnd, subPath.size());
-                if(filestart != std::string::npos)
+                if (filestart != std::string::npos)
                     subPath = subPath.substr(filestart+1, 
                             subPath.size() - filestart);
 
@@ -163,7 +163,7 @@ namespace pdal
                 readName.end()
             );
 
-            if(readName == "INTENSITY")
+            if (readName == "INTENSITY")
             {
                 isIntensity = true;
                 idIntensity = id; 
@@ -287,7 +287,7 @@ namespace pdal
         Json::Value nodeIndexJson;
         std::string nodeUrl = m_filename + "/nodepages/" 
             + std::to_string(pageIndex);
-        if(m_file)//local file
+        if (m_file)//local file
         {
             std::string ext = ".json.gz";
             try
@@ -320,7 +320,7 @@ namespace pdal
         }else//server based
         {
             nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-            if(nodeIndexJson.isMember("error"))
+            if (nodeIndexJson.isMember("error"))
                 return;
         }
         int pageSize = nodeIndexJson["nodes"].size();
@@ -449,7 +449,7 @@ namespace pdal
     {
             std::vector<char> response;
                 std::string fetchUrl = localUrl + "/geometries/0";
-                if(m_file)
+                if (m_file)
                 {
                     response = 
                         m_arbiter->getBinary(fetchUrl + ".bin.pccxyz");
@@ -464,32 +464,32 @@ namespace pdal
             std::vector<char> flags;
             std::vector<char> returns;
             std::vector<uint16_t> pointSrcId;
-            if(isIntensity)
+            if (isIntensity)
             {
                fetchBinary(intensityResponse, localUrl, 
                        idIntensity,".bin.pccint"); 
             }
-            if(isRGB)
+            if (isRGB)
             {
                fetchBinary(rgbResponse, localUrl, idRGB, ".bin.gz"); 
             }
-            if(isClass)
+            if (isClass)
             {
                fetchBinary(classFlags, localUrl, idClass, ".bin.gz"); 
             }
-            if(isFlags)
+            if (isFlags)
             {
                fetchBinary(flags, localUrl, idFlags, ".bin.gz"); 
             }
-            if(isReturns)
+            if (isReturns)
             {
                 fetchBinary(returns, localUrl, idReturns, ".bin.gz");
             }
-            /*if(isSourceId)
+            /*if (isSourceId)
             {
                 //fetchBinary(pointSrcId, localUrl, idSourceId, ".bin.gz");
                 std::string fetchUrl = localUrl + "/attributes/" + idSourceId; 
-                if(m_file)
+                if (m_file)
                 {
                     auto compressed = 
                         m_arbiter->getBinary(fetchUrl + "bin.gz");
@@ -532,7 +532,7 @@ namespace pdal
                     view->setField(pdal::Dimension::Id::Z,
                             id, pointcloud[j].z);
 
-                    if(isRGB){
+                    if (isRGB){
                         //RGB
                         view->setField(pdal::Dimension::Id::Red,
                                 id, rgbPoints[j].r);
@@ -565,7 +565,7 @@ namespace pdal
                         view->setField(pdal::Dimension::Id::NumberOfReturns,
                                 id, returns[j]);
                     }
-                    /*if(isSourceId)
+                    /*if (isSourceId)
                     {
                         view->setField(pdal::Dimension::Id::PointSourceId,
                                 id, pointSrcId[j]);
@@ -583,9 +583,9 @@ namespace pdal
         //If the files are local, fetch and decompress them first
         
             std::string fetchUrl = url + "/attributes/" + attNum; 
-            if(m_file)
+            if (m_file)
             {
-                if(ext!=".bin.pccint")
+                if (ext!=".bin.pccint")
                 {
                     auto compressed = 
                         m_arbiter->getBinary(fetchUrl + ext);
