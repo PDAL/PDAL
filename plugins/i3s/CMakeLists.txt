@@ -12,13 +12,22 @@ PDAL_ADD_PLUGIN(reader_libname reader i3s
     FILES
       io/i3sReader.cpp
       io/i3sReceiver.cpp
+      io/SlpkExtractor.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
 )
+
 target_link_libraries(${reader_libname} PRIVATE
+    ${GDAL_LIBRARY}
+    ${ZLIB_LIBRARY} 
     lepcc
 )
+
+include(${PDAL_CMAKE_DIR}/zlib.cmake)
+if (ZLIB_FOUND)
+    target_compile_definitions(${reader_libname} PRIVATE -DARBITER_ZLIB)
+endif()
 
 target_include_directories(${reader_libname} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}

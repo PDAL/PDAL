@@ -1,7 +1,7 @@
 // I3SReader.hpp
 
 #pragma once
-
+#define ARBITER_ZLIB
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
 #include "i3sReceiver.hpp"
@@ -33,8 +33,10 @@ namespace pdal
     I3SReader() : Reader() {};
     std::string getName() const;
     void createView(std::string localUrl, PointViewPtr view);
-    void fetchBinary(std::vector<char>& response, std::string url, int attNum, Pool& p);
+    void fetchBinary(std::vector<char>& response, std::string url,
+            std::string attNum, std::string ext);
     BOX3D createBounds();
+    void buildNodeList(std::vector<int>& nodeArr, int pageIndex);
     
   private:
     std::unique_ptr<ILeStream> m_stream;
@@ -51,8 +53,10 @@ namespace pdal
 
     //File System vs Curl
     bool m_file = false;
+    gzip::Decompressor m_decomp;
 
     //Spatial Reference variables
+    SpatialReference m_i3sRef;
     SpatialReference m_srsIn;
     SpatialReference m_srsOut;
     bool m_inferInputSRS;
@@ -62,15 +66,23 @@ namespace pdal
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
 
-    //Dimension booleans
+    //Dimension variables
     bool isRGB = false;
+    std::string idRGB;
     bool isElevation = false;
+    std::string idElevation;
     bool isFlags = false;
+    std::string idFlags;
     bool isReturns = false;
+    std::string idReturns;
     bool isClass = false;
+    std::string idClass;
     bool isSourceId = false;
+    std::string idSourceId;
     bool isIntensity = false;
+    std::string idIntensity;
 
+    //methods
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout);

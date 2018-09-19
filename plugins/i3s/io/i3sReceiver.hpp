@@ -35,7 +35,6 @@ namespace pdal
 
     struct I3SArgs
     {
-      std::string url;
       Bounds bounds;
       int threads = 8;
     };

@@ -3,8 +3,7 @@
 
 namespace pdal
 {
-    std::vector<lepcc::Point3D> decompressXYZ(
-            std::vector<char>* compData)
+    std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
     {
         unsigned char* c = new unsigned char [compData->size()];
         
@@ -50,8 +49,7 @@ namespace pdal
     }
 
 
-    std::vector<lepcc::RGB_t> decompressRGB(
-            std::vector<char>* compData)
+    std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
     {
         unsigned char* c = new unsigned char [compData->size()];
         
