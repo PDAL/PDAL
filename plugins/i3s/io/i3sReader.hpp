@@ -19,8 +19,8 @@
 #include <functional>
 #include <queue>
 #include <vector>
-#include <algorithm>                                                            
-#include <chrono>     
+#include <algorithm>
+#include <chrono>
 #include <Eigen/Geometry>
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -37,7 +37,7 @@ namespace pdal
             std::string attNum, std::string ext);
     BOX3D createBounds();
     void buildNodeList(std::vector<int>& nodeArr, int pageIndex);
-    
+
   private:
     std::unique_ptr<ILeStream> m_stream;
     point_count_t m_index;
