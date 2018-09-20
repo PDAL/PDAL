@@ -315,7 +315,6 @@ namespace pdal
 
             if(!FileUtils::fileExists(nodeUrl+ext))
             {
-                std::cout << "FUCKIN MADE IT BRUH" << std::endl;
                 return;
             }
             SlpkExtractor nodeUnarchive(
