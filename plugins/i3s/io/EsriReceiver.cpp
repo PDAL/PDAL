@@ -31,7 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#include "i3sReceiver.hpp"
+#include "EsriReceiver.hpp"
 
 namespace pdal
 {

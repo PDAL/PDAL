@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "i3sReader.hpp"
+#include "EsriReader.hpp"
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
 #include "pool.hpp"
@@ -56,28 +56,6 @@
 
 namespace pdal
 {
-
-    static PluginInfo const i3sInfo
-    {
-        "readers.i3s",
-        "I3S Reader",
-        "http://pdal.io/stages/reader.i3s.html"
-    };
-
-    static PluginInfo const slpkInfo
-    {
-        "readers.slpk",
-        "SLPK Reader",
-        "http://pdal.io/stages/reader.slpk.html"
-    };
-
-    CREATE_SHARED_STAGE(I3SReader, i3sInfo)
-    // TODO Can't seem to use this macro twice in one file.
-    // CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
-
-    std::string I3SReader::getName() const { return i3sInfo.name; }
-    std::string SlpkReader::getName() const { return slpkInfo.name; }
-
     void EsriReader::addArgs(ProgramArgs& args)
     {
         args.add("bounds", "Bounds of the point cloud", m_args.bounds);
@@ -122,54 +100,6 @@ namespace pdal
             << m_args.threads << std::endl;
         log()->get(LogLevel::Debug) << "Bounds: "
             << m_args.bounds << std::endl;
-    }
-
-    void I3SReader::initInfo()
-    {
-        m_info = parse(m_arbiter->get(m_filename))["layers"][0];
-        m_filename += "/layers/0";
-    }
-
-    void SlpkReader::initInfo()
-    {
-        //create temp path
-        std::string path = arbiter::fs::getTempPath();
-        std::string subPath = m_filename;
-
-        //find last slpk filename and slpk extension place
-        std::size_t filestart = subPath.rfind("/");
-        std::size_t fileEnd = subPath.find(".slpk");
-
-        //trim path to make new subdirectory in tmp
-        //erase .slpk and remove leading '/'
-        if (fileEnd != std::string::npos)
-            subPath = subPath.erase(fileEnd, subPath.size());
-
-        if (filestart != std::string::npos)
-            subPath = subPath.substr(filestart + 1,
-                    subPath.size() - filestart);
-
-        //use arbiter to create new directory if doesn't already exist
-        std::string fullPath = path+subPath;
-        arbiter::fs::mkdirp(fullPath);
-
-        //un-archive the slpk archive
-        SlpkExtractor slpk(m_filename, fullPath);
-        slpk.extract();
-        m_filename = fullPath;
-
-        //unarchive and decompress the 3dscenelayer
-        //and create json info object
-        SlpkExtractor sceneLayer(m_filename
-                + "3dSceneLayer.json.gz", m_filename);
-        sceneLayer.extract();
-        auto compressed = m_arbiter->get(m_filename
-                + "/3dSceneLayer.json.gz");
-        std::string jsonString;
-
-        m_decomp.decompress(jsonString, compressed.data(),
-                compressed.size());
-        m_info = parse(jsonString);
     }
 
     void EsriReader::addDimensions(PointLayoutPtr layout)
@@ -299,80 +229,6 @@ namespace pdal
         return view->size();
     }
 
-    //Traverse tree through nodepages. Create a nodebox for each node in
-    //the tree and test if it overlaps with the bounds created by user.
-    //If it's a leaf node(the highest resolution) and it overlaps, add
-    //it to the list of nodes to be pulled later.
-    void I3SReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
-    {
-        Json::Value nodeIndexJson;
-        std::string nodeUrl = m_filename + "/nodepages/"
-            + std::to_string(pageIndex);
-
-        // TODO Avoid doing this by using the max child node to figure out when
-        // to stop traversing.
-        nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-        if (nodeIndexJson.isMember("error"))
-            return;
-
-        int pageSize = nodeIndexJson["nodes"].size();
-        int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-
-        for (int i = 0; i < pageSize; i++)
-        {
-            BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
-            int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-            bool overlap = m_bounds.overlaps(nodeBox);
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-            if (cCount == 0 && overlap)
-            {
-                nodes.push_back(name);
-            }
-        }
-        buildNodeList(nodes, ++pageIndex);
-    }
-
-    void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
-    {
-        Json::Value nodeIndexJson;
-        std::string nodeUrl = m_filename + "/nodepages/"
-            + std::to_string(pageIndex);
-
-        std::string ext = ".json.gz";
-        if(!FileUtils::fileExists(nodeUrl + ext))
-        {
-            return;
-        }
-        SlpkExtractor nodeUnarchive(
-                nodeUrl+ext,
-                m_filename+"/nodepages");
-        nodeUnarchive.extract();
-        std::string output;
-        auto compressed = m_arbiter->get(nodeUrl+ext);
-        m_decomp.decompress<std::string>(
-                output,
-                compressed.data(),
-                compressed.size());
-        nodeIndexJson = parse(output);
-
-        int pageSize = nodeIndexJson["nodes"].size();
-        int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-
-        for (int i = 0; i < pageSize; i++)
-        {
-            BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
-            int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-            bool overlap = m_bounds.overlaps(nodeBox);
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-            if (cCount == 0 && overlap)
-            {
-                nodes.push_back(name);
-            }
-        }
-        buildNodeList(nodes, ++pageIndex);
-    }
-
-
     // Create the BOX3D for the node. This will be used for testing overlap.
     BOX3D EsriReader::parseBox(Json::Value base)
     {
@@ -419,6 +275,26 @@ namespace pdal
         Eigen::Quaterniond rymax = q * pymax * q.inverse();
         Eigen::Quaterniond rzmax = q * pzmax * q.inverse();
 
+        double mx = std::max(
+                rxmax.vec()[0],
+                std::max(
+                    std::fabs(rymax.vec()[0])),
+                    std::fabs(rzmax.vec()[0]));
+
+        double my = std::max(
+                rymax.vec()[1],
+                std::max(
+                    std::fabs(rymax.vec()[1])),
+                    std::fabs(rzmax.vec()[1]));
+
+        double mz = std::max(
+                rymax.vec()[2],
+                std::max(
+                    std::fabs(rymax.vec()[2])),
+                    std::fabs(rzmax.vec()[2]));
+
+
+
         // Convert to EPSG:4978 so the offsets(meters) will match up
         m_srsIn.set(m_i3sRef.getWKT());
         m_srsOut.set("EPSG:4978");
@@ -433,18 +309,12 @@ namespace pdal
         OCTTransform(m_transform_ptr, 1, &x, &y, &newz);
 
         // Create new bounding planes in 4978
-        double maxx = (rxmax.vec()[0] < 0)
-            ? (x - rxmax.vec()[0]) : (x + rxmax.vec()[0]);
-        double minx = (rxmax.vec()[0] > 0)
-            ? (x - rxmax.vec()[0]) : (x + rxmax.vec()[0]);
-        double maxy = (rymax.vec()[1] < 0)
-            ? (y - rymax.vec()[1]) : (y + rymax.vec()[1]);
-        double miny = (rymax.vec()[1] > 0)
-            ? (y - rymax.vec()[1]) : (y + rymax.vec()[1]);
-        double maxz = (rzmax.vec()[2] < 0)
-            ? (z - rzmax.vec()[2]) : (z + rzmax.vec()[2]);
-        double minz = (rzmax.vec()[2] > 0)
-            ? (z - rzmax.vec()[2]) : (z + rzmax.vec()[2]);
+        double maxx = x + mx;
+        double minx = x - mx;
+        double maxy = y + my;
+        double miny = y - my;
+        double maxz = z + mz;
+        double minz = z - mz;
 
         // Transform back to original spatial reference
         m_srsIn.set("EPSG:4978");
@@ -461,6 +331,8 @@ namespace pdal
         setSpatialReference(m_srsOut);
         m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
                 m_out_ref_ptr);
+
+
 
         //Create another tempz so we can apply this transformation twice
         double tempz = newz;
@@ -586,30 +458,6 @@ namespace pdal
         }
     }
 
-    std::vector<char> I3SReader::fetchBinary(std::string url,
-            std::string attNum, std::string ext) const
-    {
-        // For the REST I3S endpoint there are no file extensions.
-        return m_arbiter->getBinary(url + attNum);
-    }
-
-    std::vector<char> SlpkReader::fetchBinary(std::string url,
-            std::string attNum, std::string ext) const
-    {
-        url += attNum + ext;
-
-        auto data(m_arbiter->getBinary(url));
-
-        if (FileUtils::extension(url) != ".gz")
-            return data;
-
-        std::vector<char> decomp;
-        m_decomp.decompress<std::vector<char>>(decomp, data.data(),
-                data.size());
-        return decomp;
-    }
-
-
     //Create bounding box that the user specified
     BOX3D EsriReader::createBounds()
     {
@@ -631,7 +479,6 @@ namespace pdal
                 b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
                 b.maxx, b.maxy, (std::numeric_limits<double>::max)());
     }
-
 
     void EsriReader::done(PointTableRef)
     {

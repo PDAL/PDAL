@@ -36,7 +36,7 @@
 #define ARBITER_ZLIB
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
-#include "i3sReceiver.hpp"
+#include "EsriReceiver.hpp"
 #include "pool.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
