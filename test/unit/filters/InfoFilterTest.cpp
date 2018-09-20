@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,65 +32,39 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/StageFactory.hpp>
 
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
+#include "Support.hpp"
 
 namespace pdal
 {
 
-class PDAL_DLL InfoKernel : public Kernel
+TEST(InfoFilterTest, one)
 {
-public:
-    std::string getName() const;
-    int execute(); // overrride
+    StageFactory factory;
+    
+    Stage *r = factory.createStage("readers.las");
+    Options rOpts;
+    rOpts.add("filename", Support::datapath("las/autzen_trim.las"));
+    r->setOptions(rOpts);
 
-    InfoKernel();
-    void setup(const std::string& filename);
-    MetadataNode run(const std::string& filename);
+    Stage *f = factory.createStage("filters.info");
+    Options fOpts;
+//    fOpts.add("point", "0-9");
+    fOpts.add("query", "636133,849000");
+    f->setOptions(fOpts);
+    f->setInput(*r);
 
-    inline bool showAll() { return m_showAll; }
-    inline void doShowAll(bool value) { m_showAll = value; }
-    inline void doComputeSummary(bool value) { m_showSummary = value; }
-    inline void doComputeBoundary(bool value) { m_boundary = value; }
+    FixedPointTable t(1000);
 
-private:
-    void addSwitches(ProgramArgs& args);
-    void validateSwitches(ProgramArgs& args);
-    void makeReader(const std::string& filename);
-    void makePipeline();
-    void dump(PointTableRef table, MetadataNode& root);
-    MetadataNode dumpSummary(const QuickInfo& qi);
+    f->prepare(t);
+    f->execute(t);
 
-    std::string m_inputFile;
-    bool m_showStats;
-    bool m_showSchema;
-    bool m_showAll;
-    bool m_showMetadata;
-    bool m_boundary;
-    std::string m_pointIndexes;
-    std::string m_dimensions;
-    std::string m_enumerate;
-    std::string m_queryPoint;
-    std::string m_pipelineFile;
-    bool m_showSummary;
-    bool m_needPoints;
-    bool m_usestdin;
+    MetadataNode m = f->getMetadata();
 
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_infoStage;
-    Stage *m_reader;
-
-    MetadataNode m_tree;
-};
+    Utils::toJSON(m, std::cout);
+}
 
 } // namespace pdal

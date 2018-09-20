@@ -164,6 +164,8 @@ public:
         Dimension::Type type) const;
     inline void setField(Dimension::Id dim,
         Dimension::Type type, const void *val);
+    inline void toMetadata(MetadataNode node) const;
+    inline MetadataNode toMetadata() const;
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
@@ -282,6 +284,23 @@ inline void PointRef::setField(Dimension::Id dim,
             break;
         case Dimension::Type::None:
             break;
+    }
+}
+
+inline MetadataNode PointRef::toMetadata() const
+{
+    MetadataNode node;
+
+    toMetadata(node);
+    return node;
+}
+
+inline void PointRef::toMetadata(MetadataNode node) const
+{
+    for (Dimension::Id id : m_layout.dims())
+    {
+        double v = getFieldAs<double>(id);
+        node.add(m_layout.dimName(id), v);
     }
 }
 
