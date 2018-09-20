@@ -59,21 +59,21 @@
 
 namespace pdal
 {
-  class I3SReader : public Reader
-  {
-  public:
-    I3SReader() : Reader() {};
-    std::string getName() const;
-    void createView(std::string localUrl, PointViewPtr view);
-    void fetchBinary(std::vector<char>& response, std::string url,
-            std::string attNum, std::string ext);
-    BOX3D createBounds();
-    void buildNodeList(std::vector<int>& nodeArr, int pageIndex);
 
-  private:
+class EsriReader : public Reader
+{
+public:
+    BOX3D createBounds();
+
+protected:
+    virtual void initInfo() = 0;
+    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) = 0;
+    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
+            std::string ext) const = 0;
+
+    void createView(std::string localUrl, PointViewPtr view);
+
     std::unique_ptr<ILeStream> m_stream;
-    point_count_t m_index;
-    double m_scale_z;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
     I3SArgs m_args;
@@ -81,7 +81,6 @@ namespace pdal
     std::mutex m_mutex;
     BOX3D m_bounds;
     int m_nodeCap;
-    int m_count = 0;
 
     //File System vs Curl
     bool m_file = false;
@@ -91,7 +90,6 @@ namespace pdal
     SpatialReference m_i3sRef;
     SpatialReference m_srsIn;
     SpatialReference m_srsOut;
-    bool m_inferInputSRS;
     typedef void* ReferencePtr;
     typedef void* TransformPtr;
     ReferencePtr m_in_ref_ptr;
@@ -122,5 +120,33 @@ namespace pdal
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
     BOX3D parseBox(Json::Value base);
-  };
-}
+};
+
+// m_file = false
+class I3SReader : public EsriReader
+{
+public:
+    std::string getName() const override;
+
+protected:
+    virtual void initInfo() override;
+    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) override;
+    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
+            std::string ext) const override;
+};
+
+// m_file = true
+class SlpkReader : public EsriReader
+{
+public:
+    std::string getName() const override;
+
+protected:
+    virtual void initInfo() override;
+    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) override;
+    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
+            std::string ext) const override;
+};
+
+} // namespace pdal
+

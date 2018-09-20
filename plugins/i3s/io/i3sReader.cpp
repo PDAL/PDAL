@@ -56,20 +56,36 @@
 
 namespace pdal
 {
-    static PluginInfo const s_info
+
+    static PluginInfo const i3sInfo
     {
         "readers.i3s",
         "I3S Reader",
         "http://pdal.io/stages/reader.i3s.html"
     };
 
-    CREATE_SHARED_STAGE(I3SReader, s_info)
+    static PluginInfo const slpkInfo
+    {
+        "readers.slpk",
+        "SLPK Reader",
+        "http://pdal.io/stages/reader.slpk.html"
+    };
 
+    CREATE_SHARED_STAGE(I3SReader, i3sInfo)
+    // TODO Can't seem to use this macro twice in one file.
+    // CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
 
+    std::string I3SReader::getName() const { return i3sInfo.name; }
+    std::string SlpkReader::getName() const { return slpkInfo.name; }
 
-    std::string I3SReader::getName() const { return s_info.name; }
+    void EsriReader::addArgs(ProgramArgs& args)
+    {
+        args.add("bounds", "Bounds of the point cloud", m_args.bounds);
+        args.add("threads", "Number of threads to be used."
+                "This number will be squared", m_args.threads);
+    }
 
-    void I3SReader::initialize(PointTableRef table)
+    void EsriReader::initialize(PointTableRef table)
     {
         Json::Value config;
         if (log()->getLevel() > LogLevel::Debug4)
@@ -86,71 +102,15 @@ namespace pdal
         log()->get(LogLevel::Debug) << "Fetching info from " << m_filename <<
             std::endl;
 
-        if (Utils::startsWith(m_filename, "https://"))
+        try
         {
-            try
-            {
-                m_info = parse(m_arbiter->get(m_filename));
-                m_filename = m_filename + "/layers/0";
-                m_info = m_info["layers"][0];
-            }
-            catch (std::exception& e)
-            {
-                throw pdal_error(std::string("Failed to fetch info: ") +
-                        e.what());
-            }
+            initInfo();
         }
-        else //slpk local
+        catch (std::exception& e)
         {
-            try
-            {
-                //create temp path
-                std::string path = arbiter::fs::getTempPath();
-                std::string subPath = m_filename;
-
-                //find last slpk filename and slpk extension place
-                std::size_t filestart = subPath.rfind("/");
-                std::size_t fileEnd = subPath.find(".slpk");
-
-                //trim path to make new subdirectory in tmp
-                //erase .slpk and remove leading '/'
-                if (fileEnd != std::string::npos)
-                    subPath = subPath.erase(fileEnd, subPath.size());
-
-                if (filestart != std::string::npos)
-                    subPath = subPath.substr(filestart + 1,
-                            subPath.size() - filestart);
-
-                //use arbiter to create new directory if doesn't already exist
-                std::string fullPath = path+subPath;
-                arbiter::fs::mkdirp(fullPath);
-
-                //un-archive the slpk archive
-                SlpkExtractor slpk(m_filename, fullPath);
-                slpk.extract();
-                m_filename = fullPath;
-
-                //unarchive and decompress the 3dscenelayer
-                //and create json info object
-                SlpkExtractor sceneLayer(m_filename
-                        + "3dSceneLayer.json.gz", m_filename);
-                sceneLayer.extract();
-                auto compressed = m_arbiter->get(m_filename
-                        + "/3dSceneLayer.json.gz");
-                std::string jsonString;
-
-                m_decomp.decompress(jsonString, compressed.data(),
-                        compressed.size());
-                m_info = parse(jsonString);
-                m_file = true;
-
-            }
-            catch (std::exception& e)
-            {
-                throw pdal_error(std::string("Failed to fetch info: ")
-                        + e.what());
-            }
+            throw pdal_error(std::string("Failed to fetch info: ") + e.what());
         }
+
         //create pdal Bounds
         m_bounds = createBounds();
         //find number of nodes per nodepage
@@ -164,15 +124,55 @@ namespace pdal
             << m_args.bounds << std::endl;
     }
 
-
-    void I3SReader::addArgs(ProgramArgs& args)
+    void I3SReader::initInfo()
     {
-        args.add("bounds", "Bounds of the point cloud", m_args.bounds);
-        args.add("threads", "Number of threads to be used."
-                "This number will be squared", m_args.threads);
+        m_info = parse(m_arbiter->get(m_filename))["layers"][0];
+        m_filename += "/layers/0";
     }
 
-    void I3SReader::addDimensions(PointLayoutPtr layout)
+    void SlpkReader::initInfo()
+    {
+        //create temp path
+        std::string path = arbiter::fs::getTempPath();
+        std::string subPath = m_filename;
+
+        //find last slpk filename and slpk extension place
+        std::size_t filestart = subPath.rfind("/");
+        std::size_t fileEnd = subPath.find(".slpk");
+
+        //trim path to make new subdirectory in tmp
+        //erase .slpk and remove leading '/'
+        if (fileEnd != std::string::npos)
+            subPath = subPath.erase(fileEnd, subPath.size());
+
+        if (filestart != std::string::npos)
+            subPath = subPath.substr(filestart + 1,
+                    subPath.size() - filestart);
+
+        //use arbiter to create new directory if doesn't already exist
+        std::string fullPath = path+subPath;
+        arbiter::fs::mkdirp(fullPath);
+
+        //un-archive the slpk archive
+        SlpkExtractor slpk(m_filename, fullPath);
+        slpk.extract();
+        m_filename = fullPath;
+
+        //unarchive and decompress the 3dscenelayer
+        //and create json info object
+        SlpkExtractor sceneLayer(m_filename
+                + "3dSceneLayer.json.gz", m_filename);
+        sceneLayer.extract();
+        auto compressed = m_arbiter->get(m_filename
+                + "/3dSceneLayer.json.gz");
+        std::string jsonString;
+
+        m_decomp.decompress(jsonString, compressed.data(),
+                compressed.size());
+        m_info = parse(jsonString);
+    }
+
+    void EsriReader::addDimensions(PointLayoutPtr layout)
     {
         Json::Value attributes = m_info["attributeStorageInfo"];
 
@@ -250,7 +250,7 @@ namespace pdal
         }
     }
 
-    void I3SReader::ready(PointTableRef)
+    void EsriReader::ready(PointTableRef)
     {
         Json::Value spatialJson =
             m_info["spatialReference"];
@@ -262,7 +262,7 @@ namespace pdal
     }
 
 
-    point_count_t I3SReader::read(PointViewPtr view, point_count_t count)
+    point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     {
         /*
         -3Dscenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
@@ -274,21 +274,21 @@ namespace pdal
         */
 
         //Build the node list that will tell us which nodes overlap with bounds
-        std::vector<int> nodeArr;
-        buildNodeList(nodeArr, 0);
+        std::vector<int> nodes;
+        buildNodeList(nodes, 0);
 
         //Create view with overlapping leaf nodes
         //Will create a thread pool on the createview class and iterate
         //through the node list for the nodes to be pulled.
         std::cout << "Fetching binaries" << std::endl;
         Pool p(m_args.threads);
-        for (std::size_t i = 0; i < nodeArr.size(); i++)
+        for (std::size_t i = 0; i < nodes.size(); i++)
         {
-            std::cout << "\r" << i << "/" << nodeArr.size();
+            std::cout << "\r" << i << "/" << nodes.size();
             std::cout.flush();
             std::string localUrl;
 
-            localUrl = m_filename + "/nodes/" + std::to_string(nodeArr[i]);
+            localUrl = m_filename + "/nodes/" + std::to_string(nodes[i]);
 
             p.add([localUrl, this, &view]()
             {
@@ -303,37 +303,18 @@ namespace pdal
     //the tree and test if it overlaps with the bounds created by user.
     //If it's a leaf node(the highest resolution) and it overlaps, add
     //it to the list of nodes to be pulled later.
-    void I3SReader::buildNodeList(std::vector<int>& nodeArr, int pageIndex)
+    void I3SReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
     {
         Json::Value nodeIndexJson;
         std::string nodeUrl = m_filename + "/nodepages/"
             + std::to_string(pageIndex);
 
-        if (m_file)//local file
-        {
-            std::string ext = ".json.gz";
+        // TODO Avoid doing this by using the max child node to figure out when
+        // to stop traversing.
+        nodeIndexJson = parse(m_arbiter->get(nodeUrl));
+        if (nodeIndexJson.isMember("error"))
+            return;
 
-            if(!FileUtils::fileExists(nodeUrl+ext))
-            {
-                return;
-            }
-            SlpkExtractor nodeUnarchive(
-                    nodeUrl+ext,
-                    m_filename+"/nodepages");
-            nodeUnarchive.extract();
-            std::string output;
-            auto compressed = m_arbiter->get(nodeUrl+ext);
-            m_decomp.decompress<std::string>(
-                    output,
-                    compressed.data(),
-                    compressed.size());
-            nodeIndexJson = parse(output);
-        }else//server based
-        {
-            nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-            if (nodeIndexJson.isMember("error"))
-                return;
-        }
         int pageSize = nodeIndexJson["nodes"].size();
         int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
 
@@ -345,15 +326,55 @@ namespace pdal
             int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
             if (cCount == 0 && overlap)
             {
-                nodeArr.push_back(name);
+                nodes.push_back(name);
             }
         }
-        buildNodeList(nodeArr, ++pageIndex);
+        buildNodeList(nodes, ++pageIndex);
+    }
+
+    void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+    {
+        Json::Value nodeIndexJson;
+        std::string nodeUrl = m_filename + "/nodepages/"
+            + std::to_string(pageIndex);
+
+        std::string ext = ".json.gz";
+        if(!FileUtils::fileExists(nodeUrl + ext))
+        {
+            return;
+        }
+        SlpkExtractor nodeUnarchive(
+                nodeUrl+ext,
+                m_filename+"/nodepages");
+        nodeUnarchive.extract();
+        std::string output;
+        auto compressed = m_arbiter->get(nodeUrl+ext);
+        m_decomp.decompress<std::string>(
+                output,
+                compressed.data(),
+                compressed.size());
+        nodeIndexJson = parse(output);
+
+        int pageSize = nodeIndexJson["nodes"].size();
+        int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
+
+        for (int i = 0; i < pageSize; i++)
+        {
+            BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
+            int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
+            bool overlap = m_bounds.overlaps(nodeBox);
+            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
+            if (cCount == 0 && overlap)
+            {
+                nodes.push_back(name);
+            }
+        }
+        buildNodeList(nodes, ++pageIndex);
     }
 
 
     // Create the BOX3D for the node. This will be used for testing overlap.
-    BOX3D I3SReader::parseBox(Json::Value base)
+    BOX3D EsriReader::parseBox(Json::Value base)
     {
         Json::Value center = base["obb"]["center"];
         Json::Value hsize = base["obb"]["halfSize"];
@@ -449,159 +470,148 @@ namespace pdal
         return BOX3D(minx, miny, minz, maxx, maxy, maxz);
     }
 
-    void I3SReader::createView(std::string localUrl, PointViewPtr view)
+    void EsriReader::createView(std::string localUrl, PointViewPtr view)
     {
-            std::vector<char> response;
-            std::string fetchUrl = localUrl + "/geometries/0";
+        const std::string geomUrl = localUrl + "/geometries/";
+        auto xyz = fetchBinary(geomUrl, "0", ".bin.pccxyz");
+
+        std::vector<char> intensityResponse;
+        std::vector<char> rgbResponse;
+        std::vector<char> classFlags;
+        std::vector<char> flags;
+        std::vector<char> returns;
+        std::vector<uint16_t> pointSrcId;
+
+        const std::string attrUrl = localUrl + "/attributes/";
+
+        if (isIntensity)
+        {
+           intensityResponse = fetchBinary(attrUrl, idIntensity,
+                   ".bin.pccint");
+        }
+        if (isRGB)
+        {
+           rgbResponse = fetchBinary(attrUrl, idRGB, ".bin.pccrgb");
+        }
+        if (isClass)
+        {
+           classFlags = fetchBinary(attrUrl, idClass, ".bin.gz");
+        }
+        if (isFlags)
+        {
+           flags = fetchBinary(attrUrl, idFlags, ".bin.gz");
+        }
+        if (isReturns)
+        {
+            returns = fetchBinary(attrUrl, idReturns, ".bin.gz");
+        }
+        /*if (isSourceId)
+        {
+            //fetchBinary(pointSrcId, localUrl, idSourceId, ".bin.gz");
+            std::string fetchUrl = localUrl + "/attributes/" + idSourceId;
             if (m_file)
             {
-                response = m_arbiter->getBinary(fetchUrl + ".bin.pccxyz");
-            }
-            else
-            {
-                response = m_arbiter->getBinary(fetchUrl);
-            }
-
-            std::vector<char> intensityResponse;
-            std::vector<char> rgbResponse;
-            std::vector<char> classFlags;
-            std::vector<char> flags;
-            std::vector<char> returns;
-            std::vector<uint16_t> pointSrcId;
-            if (isIntensity)
-            {
-               fetchBinary(intensityResponse, localUrl, idIntensity,
-                       ".bin.pccint");
-            }
-            if (isRGB)
-            {
-               fetchBinary(rgbResponse, localUrl, idRGB, ".bin.gz");
-            }
-            if (isClass)
-            {
-               fetchBinary(classFlags, localUrl, idClass, ".bin.gz");
-            }
-            if (isFlags)
-            {
-               fetchBinary(flags, localUrl, idFlags, ".bin.gz");
-            }
-            if (isReturns)
-            {
-                fetchBinary(returns, localUrl, idReturns, ".bin.gz");
-            }
-            /*if (isSourceId)
-            {
-                //fetchBinary(pointSrcId, localUrl, idSourceId, ".bin.gz");
-                std::string fetchUrl = localUrl + "/attributes/" + idSourceId;
-                if (m_file)
-                {
-                    auto compressed =
-                        m_arbiter->getBinary(fetchUrl + "bin.gz");
-                    m_decomp.decompress<std::vector<uint16_t>>(
-                            pointSrcId, compressed.data(),
-                        compressed.size());
-                }else
-                {
-                    pointSrcId = m_arbiter->getBinary(fetchUrl);
-                }
-            }*/
-
-            //Decompression methods
-            std::vector<lepcc::Point3D> pointcloud =
-                decompressXYZ(&response);
-
-            std::vector<uint16_t> intensity =
-                decompressIntensity(&intensityResponse);
-
-            std::vector<lepcc::RGB_t> rgbPoints =
-                decompressRGB(&rgbResponse);
-
-            std::lock_guard<std::mutex> lock(m_mutex);
-
-            //Iterate through vector item and add to view
-            for (std::size_t j = 0; j < pointcloud.size(); j++)
-            {
-                double x = pointcloud[j].x;
-                double y = pointcloud[j].y;
-                double z = pointcloud[j].z;
-                if (m_bounds.contains(x, y, z))
-                {
-                    PointId id = view->size();
-
-                    view->setField(pdal::Dimension::Id::X,
-                            id, pointcloud[j].x);
-                    view->setField(pdal::Dimension::Id::Y,
-                            id, pointcloud[j].y);
-                    view->setField(pdal::Dimension::Id::Z,
-                            id, pointcloud[j].z);
-
-                    if (isRGB)
-                    {
-                        view->setField(pdal::Dimension::Id::Red,
-                                id, rgbPoints[j].r);
-                        view->setField(pdal::Dimension::Id::Green,
-                                id, rgbPoints[j].g);
-                        view->setField(pdal::Dimension::Id::Blue,
-                                id, rgbPoints[j].b);
-                    }
-                    if (isIntensity)
-                    {
-                        view->setField(pdal::Dimension::Id::Intensity,
-                                id, intensity[j]);
-                    }
-                    if (isClass)
-                    {
-                        view->setField(pdal::Dimension::Id::ClassFlags,
-                                id, classFlags[j]);
-                    }
-                    if (isFlags)
-                    {
-                        view->setField(pdal::Dimension::Id::Flag,
-                                id, flags[j]);
-                    }
-                    if (isReturns)
-                    {
-                        view->setField(pdal::Dimension::Id::NumberOfReturns,
-                                id, returns[j]);
-                    }
-                    /*if (isSourceId)
-                    {
-                        view->setField(pdal::Dimension::Id::PointSourceId,
-                                id, pointSrcId[j]);
-                    }
-                    */
-                }
-            }
-    }
-
-    //Fetch binaries from local files or remote server
-    void I3SReader::fetchBinary(std::vector<char>& response, std::string url,
-            std::string attNum, std::string ext)
-    {
-        //Add to thread pool and fetch the binary data using arbiter
-        //If the files are local, fetch and decompress them first
-
-            std::string fetchUrl = url + "/attributes/" + attNum;
-            if (m_file)
-            {
-                if (ext != ".bin.pccint")
-                {
-                    auto compressed = m_arbiter->getBinary(fetchUrl + ext);
-                    m_decomp.decompress<std::vector<char>>(response,
-                            compressed.data(), compressed.size());
-                }
-                else
-                {
-                    response = m_arbiter->getBinary(fetchUrl+ext);
-                }
+                auto compressed =
+                    m_arbiter->getBinary(fetchUrl + "bin.gz");
+                m_decomp.decompress<std::vector<uint16_t>>(
+                        pointSrcId, compressed.data(),
+                    compressed.size());
             }else
             {
-                response = m_arbiter->getBinary(fetchUrl);
+                pointSrcId = m_arbiter->getBinary(fetchUrl);
             }
+        }*/
+
+        // Decompression methods
+        std::vector<lepcc::Point3D> pointcloud = decompressXYZ(&xyz);
+        std::vector<uint16_t> intensity =
+            decompressIntensity(&intensityResponse);
+        std::vector<lepcc::RGB_t> rgbPoints = decompressRGB(&rgbResponse);
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        //Iterate through vector item and add to view
+        for (std::size_t j = 0; j < pointcloud.size(); j++)
+        {
+            double x = pointcloud[j].x;
+            double y = pointcloud[j].y;
+            double z = pointcloud[j].z;
+            if (m_bounds.contains(x, y, z))
+            {
+                PointId id = view->size();
+
+                view->setField(pdal::Dimension::Id::X,
+                        id, pointcloud[j].x);
+                view->setField(pdal::Dimension::Id::Y,
+                        id, pointcloud[j].y);
+                view->setField(pdal::Dimension::Id::Z,
+                        id, pointcloud[j].z);
+
+                if (isRGB)
+                {
+                    view->setField(pdal::Dimension::Id::Red,
+                            id, rgbPoints[j].r);
+                    view->setField(pdal::Dimension::Id::Green,
+                            id, rgbPoints[j].g);
+                    view->setField(pdal::Dimension::Id::Blue,
+                            id, rgbPoints[j].b);
+                }
+                if (isIntensity)
+                {
+                    view->setField(pdal::Dimension::Id::Intensity,
+                            id, intensity[j]);
+                }
+                if (isClass)
+                {
+                    view->setField(pdal::Dimension::Id::ClassFlags,
+                            id, classFlags[j]);
+                }
+                if (isFlags)
+                {
+                    view->setField(pdal::Dimension::Id::Flag,
+                            id, flags[j]);
+                }
+                if (isReturns)
+                {
+                    view->setField(pdal::Dimension::Id::NumberOfReturns,
+                            id, returns[j]);
+                }
+                /*if (isSourceId)
+                {
+                    view->setField(pdal::Dimension::Id::PointSourceId,
+                            id, pointSrcId[j]);
+                }
+                */
+            }
+        }
     }
 
+    std::vector<char> I3SReader::fetchBinary(std::string url,
+            std::string attNum, std::string ext) const
+    {
+        // For the REST I3S endpoint there are no file extensions.
+        return m_arbiter->getBinary(url + attNum);
+    }
+
+    std::vector<char> SlpkReader::fetchBinary(std::string url,
+            std::string attNum, std::string ext) const
+    {
+        url += attNum + ext;
+
+        auto data(m_arbiter->getBinary(url));
+
+        if (FileUtils::extension(url) != ".gz")
+            return data;
+
+        std::vector<char> decomp;
+        m_decomp.decompress<std::vector<char>>(decomp, data.data(),
+                data.size());
+        return decomp;
+    }
+
+
     //Create bounding box that the user specified
-    BOX3D I3SReader::createBounds()
+    BOX3D EsriReader::createBounds()
     {
         if (m_args.bounds.is3d())
             return m_args.bounds.to3d();
@@ -623,7 +633,7 @@ namespace pdal
     }
 
 
-    void I3SReader::done(PointTableRef)
+    void EsriReader::done(PointTableRef)
     {
       m_stream.reset();
     }
