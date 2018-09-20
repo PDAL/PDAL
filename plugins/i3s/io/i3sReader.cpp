@@ -59,8 +59,8 @@ namespace pdal
     static PluginInfo const s_info
     {
         "readers.i3s",
-        "Read file from i3s server",
-        "http://why.com/doyouthink/ihave/documentation"
+        "I3S Reader",
+        "http://pdal.io/stages/reader.i3s.html"
     };
 
     CREATE_SHARED_STAGE(I3SReader, s_info)
