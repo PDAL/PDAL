@@ -232,19 +232,32 @@ namespace pdal
     // Create the BOX3D for the node. This will be used for testing overlap.
     BOX3D EsriReader::parseBox(Json::Value base)
     {
+        // Pull XYZ in lat/lon.
         Json::Value center = base["obb"]["center"];
-        Json::Value hsize = base["obb"]["halfSize"];
-        Json::Value quat = base["obb"]["quaternion"];
-
-        //pull the data from the json object
         double x = center[0].asDouble();
         double y = center[1].asDouble();
-        const double z = center[2].asDouble();
+        double z = center[2].asDouble();
 
+        // Convert to EPSG:4978 so the offsets(meters) will match up
+        m_srsIn.set(m_i3sRef.getWKT());
+        m_srsOut.set("EPSG:4978");
+        m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
+        setSpatialReference(m_srsOut);
+        m_in_ref_ptr = OSRNewSpatialReference(m_srsIn.getWKT().c_str());
+        m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
+            m_out_ref_ptr);
+
+        // create fake z for the transformation so we get values at the surface
+        OCTTransform(m_transform_ptr, 1, &x, &y, &z);
+
+        // std::cout << x << " " << y << " " << z << std::endl;
+
+        Json::Value hsize = base["obb"]["halfSize"];
         const double hx = hsize[0].asDouble();
         const double hy = hsize[1].asDouble();
         const double hz = hsize[2].asDouble();
 
+        Json::Value quat = base["obb"]["quaternion"];
         const double w = quat[0].asDouble();
         const double i = quat[1].asDouble();
         const double j = quat[2].asDouble();
@@ -275,38 +288,119 @@ namespace pdal
         Eigen::Quaterniond rymax = q * pymax * q.inverse();
         Eigen::Quaterniond rzmax = q * pzmax * q.inverse();
 
+        double minx, miny, minz, maxx, maxy, maxz;
+        minx = miny = minz = std::numeric_limits<double>::max();
+        maxx = maxy = maxz = std::numeric_limits<double>::lowest();
+
+        assert(hx == sqrt(rxmax[0]^2 + rxmax[1]^2 + rxmax[2]^2);
+
+        std::cout << "C: " << center << std::endl;
+        std::cout << "E: " << x << " " << y << " " << z << std::endl;
+        std::cout <<
+            "X " <<
+            rxmax.vec()[0] << " " <<
+            rxmax.vec()[1] << " " <<
+            rxmax.vec()[2] << " " << std::endl;
+
+        std::cout <<
+            "Y " <<
+            rymax.vec()[0] << " " <<
+            rymax.vec()[1] << " " <<
+            rymax.vec()[2] << " " << std::endl;
+
+        std::cout <<
+            "Z " <<
+            rzmax.vec()[0] << " " <<
+            rzmax.vec()[1] << " " <<
+            rzmax.vec()[2] << " " << std::endl;
+
+        for (std::size_t i(0); i < 8; ++i)
+        {
+            double a(x), b(y), c(z);
+
+            a += rxmax.vec()[0] * (i & 1 ? 1.0 : -1.0);
+            b += rxmax.vec()[1] * (i & 1 ? 1.0 : -1.0);
+            c += rxmax.vec()[2] * (i & 1 ? 1.0 : -1.0);
+
+            a += rymax.vec()[0] * (i & 2 ? 1.0 : -1.0);
+            b += rymax.vec()[1] * (i & 2 ? 1.0 : -1.0);
+            c += rymax.vec()[2] * (i & 2 ? 1.0 : -1.0);
+
+            a += rzmax.vec()[0] * (i & 4 ? 1.0 : -1.0);
+            b += rzmax.vec()[1] * (i & 4 ? 1.0 : -1.0);
+            c += rzmax.vec()[2] * (i & 4 ? 1.0 : -1.0);
+
+            m_srsIn.set("EPSG:4978");
+            m_srsOut.set(m_i3sRef.getWKT());
+
+            if (m_transform_ptr)
+                OCTDestroyCoordinateTransformation(m_transform_ptr);
+            if (m_in_ref_ptr)
+                OSRDestroySpatialReference(m_in_ref_ptr);
+            if (m_out_ref_ptr)
+                OSRDestroySpatialReference(m_out_ref_ptr);
+            m_out_ref_ptr = OSRNewSpatialReference(
+                    m_srsOut.getWKT().c_str());
+            m_in_ref_ptr = OSRNewSpatialReference(
+                    m_srsIn.getWKT().c_str());
+            setSpatialReference(m_srsOut);
+            m_transform_ptr = OCTNewCoordinateTransformation(
+                    m_in_ref_ptr, m_out_ref_ptr);
+
+            OCTTransform(m_transform_ptr, 1, &a, &b, &c);
+
+            minx = std::min(minx, a);
+            miny = std::min(miny, b);
+            minz = std::min(minz, c);
+            maxx = std::max(maxx, a);
+            maxy = std::max(maxy, b);
+            maxz = std::max(maxz, c);
+        }
+
+        /*
+        std::cout << "Min: " << minx << " " << miny << " " << minz << std::endl;
+        std::cout << "Max: " << maxx << " " << maxy << " " << maxz << std::endl;
+        */
+
+        return BOX3D(minx, miny, minz, maxx, maxy, maxz);
+
+        /*
         double mx = std::max(
                 rxmax.vec()[0],
                 std::max(
-                    std::fabs(rymax.vec()[0])),
-                    std::fabs(rzmax.vec()[0]));
+                    std::fabs(rymax.vec()[0]),
+                    std::fabs(rzmax.vec()[0])));
 
         double my = std::max(
                 rymax.vec()[1],
                 std::max(
-                    std::fabs(rymax.vec()[1])),
-                    std::fabs(rzmax.vec()[1]));
+                    std::fabs(rymax.vec()[1]),
+                    std::fabs(rzmax.vec()[1])));
 
         double mz = std::max(
                 rymax.vec()[2],
                 std::max(
-                    std::fabs(rymax.vec()[2])),
-                    std::fabs(rzmax.vec()[2]));
+                    std::fabs(rymax.vec()[2]),
+                    std::fabs(rzmax.vec()[2])));
 
+        std::cout <<
+            "X " << x << ": " <<
+            rxmax.vec()[0] << " " <<
+            rxmax.vec()[1] << " " <<
+            rxmax.vec()[2] << " " << std::endl;
 
+        std::cout <<
+            "Y " << y << ": " <<
+            rymax.vec()[0] << " " <<
+            rymax.vec()[1] << " " <<
+            rymax.vec()[2] << " " << std::endl;
 
-        // Convert to EPSG:4978 so the offsets(meters) will match up
-        m_srsIn.set(m_i3sRef.getWKT());
-        m_srsOut.set("EPSG:4978");
-        m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
-        setSpatialReference(m_srsOut);
-        m_in_ref_ptr = OSRNewSpatialReference(m_srsIn.getWKT().c_str());
-        m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
-            m_out_ref_ptr);
-
-        // create fake z for the transformation so we get values at the surface
-        double newz = 0;
-        OCTTransform(m_transform_ptr, 1, &x, &y, &newz);
+        std::cout <<
+            "Z " << z << ": " <<
+            rzmax.vec()[0] << " " <<
+            rzmax.vec()[1] << " " <<
+            rzmax.vec()[2] << " " << std::endl;
+        std::cout << "HS " << hx << " " << hy << " " << hz << std::endl;
 
         // Create new bounding planes in 4978
         double maxx = x + mx;
@@ -335,11 +429,14 @@ namespace pdal
 
 
         //Create another tempz so we can apply this transformation twice
-        double tempz = newz;
-        OCTTransform(m_transform_ptr, 1, &minx, &miny, &tempz);
-        OCTTransform(m_transform_ptr, 1, &maxx, &maxy, &newz);
+        OCTTransform(m_transform_ptr, 1, &minx, &miny, &minz);
+        OCTTransform(m_transform_ptr, 1, &maxx, &maxy, &maxz);
+
+        // std::cout << "Min: " << minx << " " << miny << " " << minz << std::endl;
+        // std::cout << "Max: " << maxx << " " << maxy << " " << maxz << std::endl;
 
         return BOX3D(minx, miny, minz, maxx, maxy, maxz);
+        */
     }
 
     void EsriReader::createView(std::string localUrl, PointViewPtr view)

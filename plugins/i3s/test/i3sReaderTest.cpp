@@ -118,6 +118,7 @@ TEST(i3sReaderTest, i3sReaderTest_remote_bounded)
 }
 
 
+/*
 TEST(i3sReaderTest, slpkReaderTest_bounded)
 {
     StageFactory f;
@@ -147,3 +148,4 @@ TEST(i3sReaderTest, slpkReaderTest_bounded)
         ASSERT_TRUE(bounds.contains(x,y,z));
     }
 }
+*/
