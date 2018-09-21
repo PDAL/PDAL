@@ -154,13 +154,21 @@ namespace pdal
 
     void EsriReader::ready(PointTableRef)
     {
-        Json::Value spatialJson =
-            m_info["spatialReference"];
-        std::string spatialStr =
-            "EPSG:" + spatialJson["wkid"].asString();
-        SpatialReference ref(spatialStr);
-        m_i3sRef = ref;
-        setSpatialReference(m_i3sRef);
+        Json::Value spatialJson = m_info["spatialReference"];
+        std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
+        m_nativeSrs = SpatialReference(spatialStr);
+        setSpatialReference(m_nativeSrs);
+
+        m_ecefSrs = SpatialReference("EPSG:4978");
+
+        m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
+        m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
+
+        m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef,
+                m_ecefRef);
+
+        m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
+                m_nativeRef);
     }
 
 
@@ -210,19 +218,8 @@ namespace pdal
         double y = center[1].asDouble();
         double z = center[2].asDouble();
 
-        // Convert to EPSG:4978 so the offsets(meters) will match up
-        m_srsIn.set(m_i3sRef.getWKT());
-        m_srsOut.set("EPSG:4978");
-        m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
-        setSpatialReference(m_srsOut);
-        m_in_ref_ptr = OSRNewSpatialReference(m_srsIn.getWKT().c_str());
-        m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
-            m_out_ref_ptr);
-
-        // create fake z for the transformation so we get values at the surface
-        OCTTransform(m_transform_ptr, 1, &x, &y, &z);
-
-        // std::cout << x << " " << y << " " << z << std::endl;
+        // Convert to ECEF so the OBB offsets in meters will match up.
+        OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
 
         Json::Value hsize = base["obb"]["halfSize"];
         const double hx = hsize[0].asDouble();
@@ -281,24 +278,7 @@ namespace pdal
             b += rzmax.vec()[1] * (i & 4 ? 1.0 : -1.0);
             c += rzmax.vec()[2] * (i & 4 ? 1.0 : -1.0);
 
-            m_srsIn.set("EPSG:4978");
-            m_srsOut.set(m_i3sRef.getWKT());
-
-            if (m_transform_ptr)
-                OCTDestroyCoordinateTransformation(m_transform_ptr);
-            if (m_in_ref_ptr)
-                OSRDestroySpatialReference(m_in_ref_ptr);
-            if (m_out_ref_ptr)
-                OSRDestroySpatialReference(m_out_ref_ptr);
-            m_out_ref_ptr = OSRNewSpatialReference(
-                    m_srsOut.getWKT().c_str());
-            m_in_ref_ptr = OSRNewSpatialReference(
-                    m_srsIn.getWKT().c_str());
-            setSpatialReference(m_srsOut);
-            m_transform_ptr = OCTNewCoordinateTransformation(
-                    m_in_ref_ptr, m_out_ref_ptr);
-
-            OCTTransform(m_transform_ptr, 1, &a, &b, &c);
+            OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
 
             minx = std::min(minx, a);
             miny = std::min(miny, b);
@@ -439,6 +419,17 @@ namespace pdal
 
     void EsriReader::done(PointTableRef)
     {
-      m_stream.reset();
+        m_stream.reset();
+
+        if (m_nativeRef)
+            OSRDestroySpatialReference(m_nativeRef);
+        if (m_ecefRef)
+            OSRDestroySpatialReference(m_ecefRef);
+        if (m_toEcefTransform)
+            OCTDestroyCoordinateTransformation(m_toEcefTransform);
+        if (m_toNativeTransform)
+            OCTDestroyCoordinateTransformation(m_toNativeTransform);
     }
+
 } //namespace pdal
+

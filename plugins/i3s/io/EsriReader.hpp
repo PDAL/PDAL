@@ -82,19 +82,19 @@ protected:
     BOX3D m_bounds;
     int m_nodeCap;
 
-    //File System vs Curl
-    bool m_file = false;
     gzip::Decompressor m_decomp;
 
     //Spatial Reference variables
-    SpatialReference m_i3sRef;
-    SpatialReference m_srsIn;
-    SpatialReference m_srsOut;
+    SpatialReference m_nativeSrs;
+    SpatialReference m_ecefSrs;
+
     typedef void* ReferencePtr;
     typedef void* TransformPtr;
-    ReferencePtr m_in_ref_ptr;
-    ReferencePtr m_out_ref_ptr;
-    TransformPtr m_transform_ptr;
+    ReferencePtr m_nativeRef;
+    ReferencePtr m_ecefRef;
+
+    TransformPtr m_toEcefTransform;
+    TransformPtr m_toNativeTransform;
 
     struct dimData
     {
@@ -127,7 +127,6 @@ protected:
         }
     }
 
-    //methods
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
@@ -138,7 +137,6 @@ protected:
     BOX3D parseBox(Json::Value base);
 };
 
-// m_file = false
 class I3SReader : public EsriReader
 {
 public:
@@ -151,7 +149,6 @@ protected:
             std::string ext) const override;
 };
 
-// m_file = true
 class SlpkReader : public EsriReader
 {
 public:
