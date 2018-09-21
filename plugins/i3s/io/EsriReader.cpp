@@ -135,11 +135,11 @@ namespace pdal
                 layout->registerDim(Dimension::Id::Intensity);
                 m_dimMap[Dimension::Id::Intensity] = data;
             }
-            else if (readName.compare("ELEVATION") == 0)
+            else if (readName == "ELEVATION")
             {
 
             }
-            else if (readName.compare("RGB") == 0)
+            else if (readName == "RGB")
             {
                 layout->registerDim(Dimension::Id::Red);
                 layout->registerDim(Dimension::Id::Green);
@@ -148,37 +148,37 @@ namespace pdal
                 // we'll use Red as our indicator that RGB exists.
                 m_dimMap[Dimension::Id::Red] = data;
             }
-            else if (readName.compare("FLAGS") == 0)
+            else if (readName == "FLAGS")
             {
                 layout->registerDim(Dimension::Id::Flag);
                 m_dimMap[Dimension::Id::Flag] = data;
             }
-            else if (readName.compare("RETURNS") == 0)
+            else if (readName == "RETURNS")
             {
                 layout->registerDim(Dimension::Id::NumberOfReturns);
                 m_dimMap[Dimension::Id::NumberOfReturns] = data;
             }
-            else if (readName.compare("CLASSCODE") == 0)
+            else if (readName == "CLASSCODE")
             {
                 layout->registerDim(Dimension::Id::ClassFlags);
                 m_dimMap[Dimension::Id::ClassFlags] = data;
             }
-            else if (readName.compare("POINTSRCID") == 0)
+            else if (readName == "POINTSRCID")
             {
                 layout->registerDim(Dimension::Id::PointSourceId);
                 m_dimMap[Dimension::Id::PointSourceId] = data;
             }
-            else if (readName.compare("USERDATA") == 0)
+            else if (readName == "USERDATA")
             {
                 layout->registerDim(Dimension::Id::UserData);
                 m_dimMap[Dimension::Id::UserData] = data;
             }
-            else if (readName.compare("GPSTIME") == 0)
+            else if (readName == "GPSTIME")
             {
                 layout->registerDim(Dimension::Id::GpsTime);
                 m_dimMap[Dimension::Id::GpsTime] = data;
             }
-            else if (readName.compare("SCANANGLE") == 0)
+            else if (readName == "SCANANGLE")
             {
                 layout->registerDim(Dimension::Id::ScanAngleRank);
                 m_dimMap[Dimension::Id::ScanAngleRank] = data;
