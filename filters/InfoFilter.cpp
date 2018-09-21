@@ -218,7 +218,6 @@ bool InfoFilter::processOne(PointRef& point)
 
 void InfoFilter::done(PointTableRef table)
 {
-std::cerr << "InfoFilter::done!\n";
     // Point list
     MetadataNode points("points");
     for (NearPoint& np: m_results)

@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-TEST(InfoFilterTest, one)
+MetadataNode run(Options& fOpts)
 {
     StageFactory factory;
     
@@ -51,9 +51,6 @@ TEST(InfoFilterTest, one)
     r->setOptions(rOpts);
 
     Stage *f = factory.createStage("filters.info");
-    Options fOpts;
-//    fOpts.add("point", "0-9");
-    fOpts.add("query", "636133,849000");
     f->setOptions(fOpts);
     f->setInput(*r);
 
@@ -61,10 +58,42 @@ TEST(InfoFilterTest, one)
 
     f->prepare(t);
     f->execute(t);
+    return f->getMetadata();
+}
 
-    MetadataNode m = f->getMetadata();
+TEST(InfoFilterTest, point)
+{
 
-    Utils::toJSON(m, std::cout);
+    Options fOpts;
+    fOpts.add("point", "0-9");
+    MetadataNode m = run(fOpts);
+    MetadataNode p = m.findChild("points");
+    MetadataNodeList l = p.children();
+    EXPECT_EQ(l.size(), 10U);
+
+    //Utils::toJSON(m, std::cout);
+}
+
+TEST(InfoFilterTest, query)
+{
+    std::vector<int> v;
+    std::vector<int> vtest { 107596, 108135, 107595, 108136, 107565, 107566,
+        108164, 108134, 107597, 108163 };
+
+    Options fOpts;
+    fOpts.add("query", "636133,849000/10");
+    MetadataNode m = run(fOpts);
+    MetadataNode p = m.findChild("points");
+    MetadataNodeList l = p.children();
+    EXPECT_EQ(l.size(), 10U);
+    for (MetadataNode& n : l)
+        v.push_back(n.findChild("PointId").value<int>());
+    std::sort(v.begin(), v.end());
+    std::sort(vtest.begin(), vtest.end());
+    for (size_t i = 0; i < vtest.size(); ++i)
+        EXPECT_EQ(v[i], vtest[i]);
+
+    //Utils::toJSON(m, std::cout);
 }
 
 } // namespace pdal
