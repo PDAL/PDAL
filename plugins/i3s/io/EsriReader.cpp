@@ -114,31 +114,13 @@ namespace pdal
             std::string readName = attributes[i]["name"].asString();
             int key = std::stoi(attributes[i]["key"].asString());
             data.key = key;
+
             if(attributes[i].isMember("valueType"))
             {
                 std::string type = attributes[i]["valueType"].asString();
                 data.dataType = type;
             }
 
-            //remove quotes from json object
-            readName.erase(
-                std::remove(readName.begin(), readName.end(), '\"'),
-                readName.end());
-
-            //remove random underscores
-            readName.erase(
-                std::remove(readName.begin(), readName.end(), '_'),
-                readName.end());
-
-            if (readName == "INTENSITY")
-            {
-                layout->registerDim(Dimension::Id::Intensity);
-                m_dimMap[Dimension::Id::Intensity] = data;
-            }
-            else if (readName == "ELEVATION")
-            {
-
-            }
             else if (readName == "RGB")
             {
                 layout->registerDim(Dimension::Id::Red);
@@ -148,40 +130,11 @@ namespace pdal
                 // we'll use Red as our indicator that RGB exists.
                 m_dimMap[Dimension::Id::Red] = data;
             }
-            else if (readName == "FLAGS")
+            else if (m_dimensions.find(readName) != m_dimensions.end())
             {
-                layout->registerDim(Dimension::Id::Flag);
-                m_dimMap[Dimension::Id::Flag] = data;
-            }
-            else if (readName == "RETURNS")
-            {
-                layout->registerDim(Dimension::Id::NumberOfReturns);
-                m_dimMap[Dimension::Id::NumberOfReturns] = data;
-            }
-            else if (readName == "CLASSCODE")
-            {
-                layout->registerDim(Dimension::Id::ClassFlags);
-                m_dimMap[Dimension::Id::ClassFlags] = data;
-            }
-            else if (readName == "POINTSRCID")
-            {
-                layout->registerDim(Dimension::Id::PointSourceId);
-                m_dimMap[Dimension::Id::PointSourceId] = data;
-            }
-            else if (readName == "USERDATA")
-            {
-                layout->registerDim(Dimension::Id::UserData);
-                m_dimMap[Dimension::Id::UserData] = data;
-            }
-            else if (readName == "GPSTIME")
-            {
-                layout->registerDim(Dimension::Id::GpsTime);
-                m_dimMap[Dimension::Id::GpsTime] = data;
-            }
-            else if (readName == "SCANANGLE")
-            {
-                layout->registerDim(Dimension::Id::ScanAngleRank);
-                m_dimMap[Dimension::Id::ScanAngleRank] = data;
+                layout->registerDim(m_dimensions.at(readName));
+                m_dimMap[m_dimensions.at(readName)] = data;
+
             }
             else if (attributes[i].isMember("attributeValues"))
             {
@@ -448,11 +401,15 @@ namespace pdal
                     setAs<int8_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Int16")
                     setAs<int16_t>(dimId, data, selected, view, startId);
+                else if(dataType == "Int32")
+                    setAs<int32_t>(dimId, data, selected, view, startId);
+                else if(dataType == "Int64")
+                    setAs<int64_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Double")
                     setAs<double>(dimId, data, selected, view, startId);
                 else if(dataType == "Float64")
                     setAs<double>(dimId, data, selected, view, startId);
-                else if(dataType == "Float")
+                else if(dataType == "Float32")
                     setAs<float>(dimId, data, selected, view, startId);
             }
         }

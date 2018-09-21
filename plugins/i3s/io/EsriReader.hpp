@@ -71,7 +71,7 @@ protected:
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const = 0;
 
-    void createView(std::string localUrl, PointViewPtr view);
+
 
     std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
@@ -102,6 +102,16 @@ protected:
         std::string dataType;
     };
     std::map<Dimension::Id, dimData> m_dimMap;
+    std::map<std::string, Dimension::Id> m_dimensions {
+            {"INTENSITY",   Dimension::Id::Intensity},
+            {"CLASS_CODE",  Dimension::Id::ClassFlags},
+            {"FLAGS",       Dimension::Id::Flag},
+            {"RETURNS",     Dimension::Id::NumberOfReturns},
+            {"USER_DATA",   Dimension::Id::UserData},
+            {"POINT_SRC_ID",Dimension::Id::PointSourceId},
+            {"GPS_TIME",    Dimension::Id::GpsTime},
+            {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank}
+            };
 
     template<typename T>
     void setAs(Dimension::Id id, const std::vector<char>& data,
@@ -124,6 +134,7 @@ protected:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
+    void createView(std::string localUrl, PointViewPtr view);
     BOX3D parseBox(Json::Value base);
 };
 
