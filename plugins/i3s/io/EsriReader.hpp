@@ -104,15 +104,16 @@ protected:
     std::map<Dimension::Id, dimData> m_dimMap;
 
     template<typename T>
-    void setAs(Dimension::Id id, const std::vector<char>& data, std::vector<int> index, PointViewPtr view, std::vector<PointId> idIndex)
+    void setAs(Dimension::Id id, const std::vector<char>& data,
+            const std::vector<int>& index, PointViewPtr view, uint64_t startId)
     {
         const T* pos(reinterpret_cast<const T*>(data.data()));
-        //const T* end(reinterpret_cast<T*>(data.data() + data.size()));
 
-        std::lock_guard<std::mutex> lock(m_mutex);
-        for(const int j : index)
+        std::size_t offset(0);
+        for (const int j : index)
         {
-            view->setField(id, idIndex[j], *(pos + j));
+            view->setField(id, startId + offset, *(pos + j));
+            ++offset;
         }
     }
 

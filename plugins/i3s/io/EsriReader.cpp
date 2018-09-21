@@ -362,30 +362,33 @@ namespace pdal
         const std::string geomUrl = localUrl + "/geometries/";
         auto xyz = fetchBinary(geomUrl, "0", ".bin.pccxyz");
         std::vector<lepcc::Point3D> pointcloud = decompressXYZ(&xyz);
-        //create index of points that fit in the bounds
-        std::vector<PointId> idIndex;
-        std::vector<int> index;
-        uint64_t pointViewStart(view->size());
-        for (uint64_t j = 0; j < pointcloud.size(); ++j)
+
+        std::vector<int> selected;
+        uint64_t startId;
+
         {
-            double x = pointcloud[j].x;
-            double y = pointcloud[j].y;
-            double z = pointcloud[j].z;
-            PointId id = view->size();
-            idIndex.push_back(id);
             std::lock_guard<std::mutex> lock(m_mutex);
-            if (m_bounds.contains(x, y, z))
+            startId = view->size();
+
+            for (uint64_t j = 0; j < pointcloud.size(); ++j)
             {
-                index.push_back(j);
-                view->setField(pdal::Dimension::Id::X, id, pointcloud[j].x);
-                view->setField(pdal::Dimension::Id::Y, id, pointcloud[j].y);
-                view->setField(pdal::Dimension::Id::Z, id, pointcloud[j].z);
+                double x = pointcloud[j].x;
+                double y = pointcloud[j].y;
+                double z = pointcloud[j].z;
+
+                if (m_bounds.contains(x, y, z))
+                {
+                    PointId id = view->size();
+                    selected.push_back(j);
+                    view->setField(pdal::Dimension::Id::X, id, pointcloud[j].x);
+                    view->setField(pdal::Dimension::Id::Y, id, pointcloud[j].y);
+                    view->setField(pdal::Dimension::Id::Z, id, pointcloud[j].z);
+                }
             }
         }
 
         const std::string attrUrl = localUrl + "/attributes/";
 
-        //fetch data and add the view based on the previously determined index
         for (const auto& dimEntry : m_dimMap)
         {
             const Dimension::Id dimId(dimEntry.first);
@@ -397,62 +400,61 @@ namespace pdal
                 auto data = fetchBinary(
                         attrUrl, std::to_string(key), ".bin.pccrgb");
                 std::vector<lepcc::RGB_t> rgbPoints = decompressRGB(&data);
+
                 std::lock_guard<std::mutex> lock(m_mutex);
-                uint64_t current(pointViewStart);
-                for (const uint64_t j : index)
+
+                for (std::size_t i(0); i < selected.size(); ++i)
                 {
-                    /*view->setField(Dimension::Id::Red, current, rgbPoints[j].r);
-                    view->setField(Dimension::Id::Red, current, rgbPoints[j].r);
-                    view->setField(Dimension::Id::Red, current, rgbPoints[j].r);
-                    ++current;
-                    */
-
                     view->setField(pdal::Dimension::Id::Red,
-                            idIndex[j], rgbPoints[j].r);
+                            startId + i, rgbPoints[selected[i]].r);
                     view->setField(pdal::Dimension::Id::Green,
-                            idIndex[j], rgbPoints[j].g);
+                            startId + i, rgbPoints[selected[i]].g);
                     view->setField(pdal::Dimension::Id::Blue,
-                            idIndex[j], rgbPoints[j].b);
-
+                            startId + i, rgbPoints[selected[i]].b);
                 }
             }
             else if (dimId == Dimension::Id::Intensity)
             {
-                auto data = fetchBinary(attrUrl, std::to_string(key), ".bin.pccint");
-                std::vector<uint16_t> intensity =
-                    decompressIntensity(&data);
+                auto data = fetchBinary(attrUrl, std::to_string(key),
+                        ".bin.pccint");
+
+                std::vector<uint16_t> intensity = decompressIntensity(&data);
+
                 std::lock_guard<std::mutex> lock(m_mutex);
-                for (const uint64_t j : index)
+                for (std::size_t i(0); i < selected.size(); ++i)
                 {
                     view->setField(pdal::Dimension::Id::Intensity,
-                            idIndex[j], intensity[j]);
+                            startId + i, intensity[selected[i]]);
                 }
             }
-            else if (false)
+            else
             {
                 const auto data = fetchBinary(
                         attrUrl, std::to_string(key), ".bin.gz");
+
+                std::lock_guard<std::mutex> lock(m_mutex);
+
+                // TODO Correct types.
                 if(dataType == "Uint8")
-                    setAs<uint8_t>(dimId, data, index, view, idIndex);
+                    setAs<uint8_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Uint16")
-                    setAs<uint16_t>(dimId, data, index, view, idIndex);
+                    setAs<uint16_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Uint32")
-                    setAs<uint32_t>(dimId, data, index, view, idIndex);
+                    setAs<uint32_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Uint64")
-                    setAs<uint64_t>(dimId, data, index, view, idIndex);
+                    setAs<uint64_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Int8")
-                    setAs<int8_t>(dimId, data, index, view, idIndex);
+                    setAs<int8_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Int16")
-                    setAs<int16_t>(dimId, data, index, view, idIndex);
+                    setAs<int16_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Double")
-                    setAs<double>(dimId, data, index, view, idIndex);
+                    setAs<double>(dimId, data, selected, view, startId);
                 else if(dataType == "Float64")
-                    setAs<double>(dimId, data, index, view, idIndex);
+                    setAs<double>(dimId, data, selected, view, startId);
                 else if(dataType == "Float")
-                    setAs<float>(dimId, data, index, view, idIndex);
+                    setAs<float>(dimId, data, selected, view, startId);
             }
         }
-
     }
 
     //Create bounding box that the user specified
