@@ -105,11 +105,20 @@ namespace pdal
     void EsriReader::addDimensions(PointLayoutPtr layout)
     {
         Json::Value attributes = m_info["attributeStorageInfo"];
-
+        layout->registerDim(Dimension::Id::X);
+        layout->registerDim(Dimension::Id::Y);
+        layout->registerDim(Dimension::Id::Z);
         for (Json::ArrayIndex i = 0; i < attributes.size(); i++)
         {
+            dimData data;
             std::string readName = attributes[i]["name"].asString();
-            std::string id = attributes[i]["key"].asString();
+            int key = std::stoi(attributes[i]["key"].asString());
+            data.key = key;
+            if(attributes[i].isMember("valueType"))
+            {
+                std::string type = attributes[i]["valueType"].asString();
+                data.dataType = type;
+            }
 
             //remove quotes from json object
             readName.erase(
@@ -123,58 +132,56 @@ namespace pdal
 
             if (readName == "INTENSITY")
             {
-                isIntensity = true;
-                idIntensity = id;
-
                 layout->registerDim(Dimension::Id::Intensity);
-                dimMap[Dimension::Id::Intensity] = key;
+                m_dimMap[Dimension::Id::Intensity] = data;
+            }
+            else if (readName.compare("ELEVATION") == 0)
+            {
+
             }
             else if (readName.compare("RGB") == 0)
             {
-                isRGB = true;
-                idRGB = id;
                 layout->registerDim(Dimension::Id::Red);
                 layout->registerDim(Dimension::Id::Green);
                 layout->registerDim(Dimension::Id::Blue);
-
                 // Since RGB are always packed together and handled specially,
                 // we'll use Red as our indicator that RGB exists.
-                dimMap[Dimension::Id::Red] = key;
+                m_dimMap[Dimension::Id::Red] = data;
             }
             else if (readName.compare("FLAGS") == 0)
             {
-                isFlags = true;
-                idFlags = id;
                 layout->registerDim(Dimension::Id::Flag);
-                dimMap[Dimension::Id::Flag] = id;
+                m_dimMap[Dimension::Id::Flag] = data;
             }
             else if (readName.compare("RETURNS") == 0)
             {
-                isReturns = true;
-                idReturns = id;
                 layout->registerDim(Dimension::Id::NumberOfReturns);
+                m_dimMap[Dimension::Id::NumberOfReturns] = data;
             }
-            /*
-            else if (readName.compare("ELEVATION") == 0)
-            {
-                isElevation = true;
-                idElevation = id;
-                layout->registerDim(Dimension::Id::X);
-                layout->registerDim(Dimension::Id::Y);
-                layout->registerDim(Dimension::Id::Z);
-            }
-            */
             else if (readName.compare("CLASSCODE") == 0)
             {
-                idClass = id;
-                isClass = true;
                 layout->registerDim(Dimension::Id::ClassFlags);
+                m_dimMap[Dimension::Id::ClassFlags] = data;
             }
             else if (readName.compare("POINTSRCID") == 0)
             {
-                idSourceId = id;
-                isSourceId = true;
                 layout->registerDim(Dimension::Id::PointSourceId);
+                m_dimMap[Dimension::Id::PointSourceId] = data;
+            }
+            else if (readName.compare("USERDATA") == 0)
+            {
+                layout->registerDim(Dimension::Id::UserData);
+                m_dimMap[Dimension::Id::UserData] = data;
+            }
+            else if (readName.compare("GPSTIME") == 0)
+            {
+                layout->registerDim(Dimension::Id::GpsTime);
+                m_dimMap[Dimension::Id::GpsTime] = data;
+            }
+            else if (readName.compare("SCANANGLE") == 0)
+            {
+                layout->registerDim(Dimension::Id::ScanAngleRank);
+                m_dimMap[Dimension::Id::ScanAngleRank] = data;
             }
             else if (attributes[i].isMember("attributeValues"))
             {
@@ -183,8 +190,7 @@ namespace pdal
 
                 const pdal::Dimension::Id id = layout->registerOrAssignDim(
                         readName, pdal::Dimension::type(s));
-
-                m_dimMap[id] = key;
+                m_dimMap[id] = data;
             }
             else
             {
@@ -305,27 +311,6 @@ namespace pdal
         minx = miny = minz = std::numeric_limits<double>::max();
         maxx = maxy = maxz = std::numeric_limits<double>::lowest();
 
-        assert(hx == sqrt(rxmax[0]^2 + rxmax[1]^2 + rxmax[2]^2);
-
-        std::cout << "C: " << center << std::endl;
-        std::cout << "E: " << x << " " << y << " " << z << std::endl;
-        std::cout <<
-            "X " <<
-            rxmax.vec()[0] << " " <<
-            rxmax.vec()[1] << " " <<
-            rxmax.vec()[2] << " " << std::endl;
-
-        std::cout <<
-            "Y " <<
-            rymax.vec()[0] << " " <<
-            rymax.vec()[1] << " " <<
-            rymax.vec()[2] << " " << std::endl;
-
-        std::cout <<
-            "Z " <<
-            rzmax.vec()[0] << " " <<
-            rzmax.vec()[1] << " " <<
-            rzmax.vec()[2] << " " << std::endl;
 
         for (std::size_t i(0); i < 8; ++i)
         {
@@ -369,7 +354,6 @@ namespace pdal
             maxy = std::max(maxy, b);
             maxz = std::max(maxz, c);
         }
-
         return BOX3D(minx, miny, minz, maxx, maxy, maxz);
     }
 
@@ -377,144 +361,98 @@ namespace pdal
     {
         const std::string geomUrl = localUrl + "/geometries/";
         auto xyz = fetchBinary(geomUrl, "0", ".bin.pccxyz");
-
-        const std::string attrUrl = localUrl + "/attributes/";
-
-        for (const auto& dimEntry : dimMap)
-        {
-            const Dimension::Id dimId(dimEntry.first);
-            const uint64_t key(dimEntry.second);
-
-            if (dimId == Dimension::Id::Red)
-            {
-            }
-            else if (dimId == Dimension::Id::Intensity)
-            {
-            }
-            else
-            {
-                const auto data = fetchBinary(attrUrl, key, ".bin.gz");
-
-                switch (dataType)
-                {
-                    case "uint8": setAs<uint16_t>(dimId, data); break;
-                    case "uint16": setAs<uint16_t>(dimId, data);
-                    case "uint16": setAs<uint16_t>(dimId, data);
-                    case "uint16": setAs<uint16_t>(dimId, data);
-                }
-            }
-        }
-
-        std::vector<char> intensityResponse;
-        std::vector<char> rgbResponse;
-        std::vector<char> classFlags;
-        std::vector<char> flags;
-        std::vector<char> returns;
-        std::vector<uint16_t> pointSrcId;
-
-        const std::string attrUrl = localUrl + "/attributes/";
-
-
-        if (isIntensity)
-        {
-           intensityResponse = fetchBinary(attrUrl, idIntensity,
-                   ".bin.pccint");
-        }
-        if (isRGB)
-        {
-           rgbResponse = fetchBinary(attrUrl, idRGB, ".bin.pccrgb");
-        }
-        if (isClass)
-        {
-           classFlags = fetchBinary(attrUrl, idClass, ".bin.gz");
-        }
-        if (isFlags)
-        {
-           flags = fetchBinary(attrUrl, idFlags, ".bin.gz");
-        }
-        if (isReturns)
-        {
-            returns = fetchBinary(attrUrl, idReturns, ".bin.gz");
-        }
-        /*if (isSourceId)
-        {
-            //fetchBinary(pointSrcId, localUrl, idSourceId, ".bin.gz");
-            std::string fetchUrl = localUrl + "/attributes/" + idSourceId;
-            if (m_file)
-            {
-                auto compressed =
-                    m_arbiter->getBinary(fetchUrl + "bin.gz");
-                m_decomp.decompress<std::vector<uint16_t>>(
-                        pointSrcId, compressed.data(),
-                    compressed.size());
-            }else
-            {
-                pointSrcId = m_arbiter->getBinary(fetchUrl);
-            }
-        }*/
-
-        // Decompression methods
         std::vector<lepcc::Point3D> pointcloud = decompressXYZ(&xyz);
-        std::vector<uint16_t> intensity =
-            decompressIntensity(&intensityResponse);
-        std::vector<lepcc::RGB_t> rgbPoints = decompressRGB(&rgbResponse);
-
-        std::lock_guard<std::mutex> lock(m_mutex);
-
-        //Iterate through vector item and add to view
-        for (std::size_t j = 0; j < pointcloud.size(); j++)
+        //create index of points that fit in the bounds
+        std::vector<PointId> idIndex;
+        std::vector<int> index;
+        uint64_t pointViewStart(view->size());
+        for (uint64_t j = 0; j < pointcloud.size(); ++j)
         {
             double x = pointcloud[j].x;
             double y = pointcloud[j].y;
             double z = pointcloud[j].z;
+            PointId id = view->size();
+            idIndex.push_back(id);
+            std::lock_guard<std::mutex> lock(m_mutex);
             if (m_bounds.contains(x, y, z))
             {
-                PointId id = view->size();
-
+                index.push_back(j);
                 view->setField(pdal::Dimension::Id::X, id, pointcloud[j].x);
                 view->setField(pdal::Dimension::Id::Y, id, pointcloud[j].y);
                 view->setField(pdal::Dimension::Id::Z, id, pointcloud[j].z);
-
-                if (isRGB)
-                {
-                    view->setField(pdal::Dimension::Id::Red,
-                            id, rgbPoints[j].r);
-                    view->setField(pdal::Dimension::Id::Green,
-                            id, rgbPoints[j].g);
-                    view->setField(pdal::Dimension::Id::Blue,
-                            id, rgbPoints[j].b);
-                }
-                if (isIntensity)
-                {
-                    view->setField(pdal::Dimension::Id::Intensity,
-                            id, intensity[j]);
-                }
-                if (isClass)
-                {
-                    view->setField(pdal::Dimension::Id::ClassFlags,
-                            id, classFlags[j]);
-                }
-                if (isFlags)
-                {
-                    view->setField(pdal::Dimension::Id::Flag,
-                            id, flags[j]);
-                }
-                if (isReturns)
-                {
-                    view->setField(pdal::Dimension::Id::NumberOfReturns,
-                            id, returns[j]);
-                }
-                if (isAsdf)
-                {
-                }
-                /*if (isSourceId)
-                {
-                    view->setField(pdal::Dimension::Id::PointSourceId,
-                            id, pointSrcId[j]);
-                }
-                */
             }
         }
+
+        const std::string attrUrl = localUrl + "/attributes/";
+
+        //fetch data and add the view based on the previously determined index
+        for (const auto& dimEntry : m_dimMap)
+        {
+            const Dimension::Id dimId(dimEntry.first);
+            const uint64_t key(dimEntry.second.key);
+            std::string dataType(dimEntry.second.dataType);
+
+            if (dimId == Dimension::Id::Red)
+            {
+                auto data = fetchBinary(
+                        attrUrl, std::to_string(key), ".bin.pccrgb");
+                std::vector<lepcc::RGB_t> rgbPoints = decompressRGB(&data);
+                std::lock_guard<std::mutex> lock(m_mutex);
+                uint64_t current(pointViewStart);
+                for (const uint64_t j : index)
+                {
+                    /*view->setField(Dimension::Id::Red, current, rgbPoints[j].r);
+                    view->setField(Dimension::Id::Red, current, rgbPoints[j].r);
+                    view->setField(Dimension::Id::Red, current, rgbPoints[j].r);
+                    ++current;
+                    */
+
+                    view->setField(pdal::Dimension::Id::Red,
+                            idIndex[j], rgbPoints[j].r);
+                    view->setField(pdal::Dimension::Id::Green,
+                            idIndex[j], rgbPoints[j].g);
+                    view->setField(pdal::Dimension::Id::Blue,
+                            idIndex[j], rgbPoints[j].b);
+
+                }
+            }
+            else if (dimId == Dimension::Id::Intensity)
+            {
+                auto data = fetchBinary(attrUrl, std::to_string(key), ".bin.pccint");
+                std::vector<uint16_t> intensity =
+                    decompressIntensity(&data);
+                std::lock_guard<std::mutex> lock(m_mutex);
+                for (const uint64_t j : index)
+                {
+                    view->setField(pdal::Dimension::Id::Intensity,
+                            idIndex[j], intensity[j]);
+                }
+            }
+            else if (false)
+            {
+                const auto data = fetchBinary(
+                        attrUrl, std::to_string(key), ".bin.gz");
+                if(dataType == "Uint8")
+                    setAs<uint8_t>(dimId, data, index, view, idIndex);
+                else if(dataType == "Uint16")
+                    setAs<uint16_t>(dimId, data, index, view, idIndex);
+                else if(dataType == "Uint32")
+                    setAs<uint32_t>(dimId, data, index, view, idIndex);
+                else if(dataType == "Uint64")
+                    setAs<uint64_t>(dimId, data, index, view, idIndex);
+                else if(dataType == "Int8")
+                    setAs<int8_t>(dimId, data, index, view, idIndex);
+                else if(dataType == "Int16")
+                    setAs<int16_t>(dimId, data, index, view, idIndex);
+                else if(dataType == "Double")
+                    setAs<double>(dimId, data, index, view, idIndex);
+                else if(dataType == "Float64")
+                    setAs<double>(dimId, data, index, view, idIndex);
+                else if(dataType == "Float")
+                    setAs<float>(dimId, data, index, view, idIndex);
+            }
+        }
+
     }
 
     //Create bounding box that the user specified

@@ -96,34 +96,23 @@ protected:
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
 
-    //Dimension variables
-    bool isRGB = false;
-    std::string idRGB;
-    bool isElevation = false;
-    std::string idElevation;
-    bool isFlags = false;
-    std::string idFlags;
-    bool isReturns = false;
-    std::string idReturns;
-    bool isClass = false;
-    std::string idClass;
-    bool isSourceId = false;
-    std::string idSourceId;
-    bool isIntensity = false;
-    std::string idIntensity;
-
-    std::map<Dimension::Id, uint64_t> m_dimMap;
+    struct dimData
+    {
+        int key;
+        std::string dataType;
+    };
+    std::map<Dimension::Id, dimData> m_dimMap;
 
     template<typename T>
-    void setAs(Dimension::Id id, uint64_t index, const std::vector<char>& data)
+    void setAs(Dimension::Id id, const std::vector<char>& data, std::vector<int> index, PointViewPtr view, std::vector<PointId> idIndex)
     {
-        T* pos(reinterpret_cast<T*>(data.data()));
-        const T* end(reinterpret_cast<T*>(data.data() + data.size()));
+        const T* pos(reinterpret_cast<const T*>(data.data()));
+        //const T* end(reinterpret_cast<T*>(data.data() + data.size()));
 
-        while (pos < end)
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for(const int j : index)
         {
-            view->setField(id, index++, *pos);
-            ++pos;
+            view->setField(id, idIndex[j], *(pos + j));
         }
     }
 
