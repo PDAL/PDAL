@@ -125,7 +125,9 @@ namespace pdal
             {
                 isIntensity = true;
                 idIntensity = id;
+
                 layout->registerDim(Dimension::Id::Intensity);
+                dimMap[Dimension::Id::Intensity] = key;
             }
             else if (readName.compare("RGB") == 0)
             {
@@ -134,12 +136,17 @@ namespace pdal
                 layout->registerDim(Dimension::Id::Red);
                 layout->registerDim(Dimension::Id::Green);
                 layout->registerDim(Dimension::Id::Blue);
+
+                // Since RGB are always packed together and handled specially,
+                // we'll use Red as our indicator that RGB exists.
+                dimMap[Dimension::Id::Red] = key;
             }
             else if (readName.compare("FLAGS") == 0)
             {
                 isFlags = true;
                 idFlags = id;
                 layout->registerDim(Dimension::Id::Flag);
+                dimMap[Dimension::Id::Flag] = id;
             }
             else if (readName.compare("RETURNS") == 0)
             {
@@ -147,6 +154,7 @@ namespace pdal
                 idReturns = id;
                 layout->registerDim(Dimension::Id::NumberOfReturns);
             }
+            /*
             else if (readName.compare("ELEVATION") == 0)
             {
                 isElevation = true;
@@ -155,6 +163,7 @@ namespace pdal
                 layout->registerDim(Dimension::Id::Y);
                 layout->registerDim(Dimension::Id::Z);
             }
+            */
             else if (readName.compare("CLASSCODE") == 0)
             {
                 idClass = id;
@@ -171,7 +180,11 @@ namespace pdal
             {
                 std::string s =
                     attributes[i]["attributeValues"]["valueType"].asString();
-                layout->registerOrAssignDim(readName, pdal::Dimension::type(s));
+
+                const pdal::Dimension::Id id = layout->registerOrAssignDim(
+                        readName, pdal::Dimension::type(s));
+
+                m_dimMap[id] = key;
             }
             else
             {
@@ -357,92 +370,40 @@ namespace pdal
             maxz = std::max(maxz, c);
         }
 
-        /*
-        std::cout << "Min: " << minx << " " << miny << " " << minz << std::endl;
-        std::cout << "Max: " << maxx << " " << maxy << " " << maxz << std::endl;
-        */
-
         return BOX3D(minx, miny, minz, maxx, maxy, maxz);
-
-        /*
-        double mx = std::max(
-                rxmax.vec()[0],
-                std::max(
-                    std::fabs(rymax.vec()[0]),
-                    std::fabs(rzmax.vec()[0])));
-
-        double my = std::max(
-                rymax.vec()[1],
-                std::max(
-                    std::fabs(rymax.vec()[1]),
-                    std::fabs(rzmax.vec()[1])));
-
-        double mz = std::max(
-                rymax.vec()[2],
-                std::max(
-                    std::fabs(rymax.vec()[2]),
-                    std::fabs(rzmax.vec()[2])));
-
-        std::cout <<
-            "X " << x << ": " <<
-            rxmax.vec()[0] << " " <<
-            rxmax.vec()[1] << " " <<
-            rxmax.vec()[2] << " " << std::endl;
-
-        std::cout <<
-            "Y " << y << ": " <<
-            rymax.vec()[0] << " " <<
-            rymax.vec()[1] << " " <<
-            rymax.vec()[2] << " " << std::endl;
-
-        std::cout <<
-            "Z " << z << ": " <<
-            rzmax.vec()[0] << " " <<
-            rzmax.vec()[1] << " " <<
-            rzmax.vec()[2] << " " << std::endl;
-        std::cout << "HS " << hx << " " << hy << " " << hz << std::endl;
-
-        // Create new bounding planes in 4978
-        double maxx = x + mx;
-        double minx = x - mx;
-        double maxy = y + my;
-        double miny = y - my;
-        double maxz = z + mz;
-        double minz = z - mz;
-
-        // Transform back to original spatial reference
-        m_srsIn.set("EPSG:4978");
-        m_srsOut.set(m_i3sRef.getWKT());
-
-        if (m_transform_ptr)
-            OCTDestroyCoordinateTransformation(m_transform_ptr);
-        if (m_in_ref_ptr)
-            OSRDestroySpatialReference(m_in_ref_ptr);
-        if (m_out_ref_ptr)
-            OSRDestroySpatialReference(m_out_ref_ptr);
-        m_out_ref_ptr = OSRNewSpatialReference(m_srsOut.getWKT().c_str());
-        m_in_ref_ptr = OSRNewSpatialReference(m_srsIn.getWKT().c_str());
-        setSpatialReference(m_srsOut);
-        m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
-                m_out_ref_ptr);
-
-
-
-        //Create another tempz so we can apply this transformation twice
-        OCTTransform(m_transform_ptr, 1, &minx, &miny, &minz);
-        OCTTransform(m_transform_ptr, 1, &maxx, &maxy, &maxz);
-
-        // std::cout << "Min: " << minx << " " << miny << " " << minz << std::endl;
-        // std::cout << "Max: " << maxx << " " << maxy << " " << maxz << std::endl;
-
-        return BOX3D(minx, miny, minz, maxx, maxy, maxz);
-        */
     }
 
     void EsriReader::createView(std::string localUrl, PointViewPtr view)
     {
         const std::string geomUrl = localUrl + "/geometries/";
         auto xyz = fetchBinary(geomUrl, "0", ".bin.pccxyz");
+
+        const std::string attrUrl = localUrl + "/attributes/";
+
+        for (const auto& dimEntry : dimMap)
+        {
+            const Dimension::Id dimId(dimEntry.first);
+            const uint64_t key(dimEntry.second);
+
+            if (dimId == Dimension::Id::Red)
+            {
+            }
+            else if (dimId == Dimension::Id::Intensity)
+            {
+            }
+            else
+            {
+                const auto data = fetchBinary(attrUrl, key, ".bin.gz");
+
+                switch (dataType)
+                {
+                    case "uint8": setAs<uint16_t>(dimId, data); break;
+                    case "uint16": setAs<uint16_t>(dimId, data);
+                    case "uint16": setAs<uint16_t>(dimId, data);
+                    case "uint16": setAs<uint16_t>(dimId, data);
+                }
+            }
+        }
 
         std::vector<char> intensityResponse;
         std::vector<char> rgbResponse;
@@ -452,6 +413,7 @@ namespace pdal
         std::vector<uint16_t> pointSrcId;
 
         const std::string attrUrl = localUrl + "/attributes/";
+
 
         if (isIntensity)
         {
@@ -509,12 +471,9 @@ namespace pdal
             {
                 PointId id = view->size();
 
-                view->setField(pdal::Dimension::Id::X,
-                        id, pointcloud[j].x);
-                view->setField(pdal::Dimension::Id::Y,
-                        id, pointcloud[j].y);
-                view->setField(pdal::Dimension::Id::Z,
-                        id, pointcloud[j].z);
+                view->setField(pdal::Dimension::Id::X, id, pointcloud[j].x);
+                view->setField(pdal::Dimension::Id::Y, id, pointcloud[j].y);
+                view->setField(pdal::Dimension::Id::Z, id, pointcloud[j].z);
 
                 if (isRGB)
                 {
@@ -544,6 +503,9 @@ namespace pdal
                 {
                     view->setField(pdal::Dimension::Id::NumberOfReturns,
                             id, returns[j]);
+                }
+                if (isAsdf)
+                {
                 }
                 /*if (isSourceId)
                 {

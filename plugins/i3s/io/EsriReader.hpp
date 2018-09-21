@@ -112,6 +112,21 @@ protected:
     bool isIntensity = false;
     std::string idIntensity;
 
+    std::map<Dimension::Id, uint64_t> m_dimMap;
+
+    template<typename T>
+    void setAs(Dimension::Id id, uint64_t index, const std::vector<char>& data)
+    {
+        T* pos(reinterpret_cast<T*>(data.data()));
+        const T* end(reinterpret_cast<T*>(data.data() + data.size()));
+
+        while (pos < end)
+        {
+            view->setField(id, index++, *pos);
+            ++pos;
+        }
+    }
+
     //methods
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
