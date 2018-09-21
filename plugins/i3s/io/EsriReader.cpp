@@ -359,21 +359,26 @@ namespace pdal
 
     void EsriReader::createView(std::string localUrl, PointViewPtr view)
     {
+        //pull the geometries to start
         const std::string geomUrl = localUrl + "/geometries/";
         auto xyz = fetchBinary(geomUrl, "0", ".bin.pccxyz");
         std::vector<lepcc::Point3D> pointcloud = decompressXYZ(&xyz);
+
         //create index of points that fit in the bounds
         std::vector<PointId> idIndex;
         std::vector<int> index;
+
+        std::unique_lock<std::mutex> lock(m_mutex);
         uint64_t pointViewStart(view->size());
+        lock.unlock();
         for (uint64_t j = 0; j < pointcloud.size(); ++j)
         {
             double x = pointcloud[j].x;
             double y = pointcloud[j].y;
             double z = pointcloud[j].z;
+            std::lock_guard<std::mutex> lock(m_mutex);
             PointId id = view->size();
             idIndex.push_back(id);
-            std::lock_guard<std::mutex> lock(m_mutex);
             if (m_bounds.contains(x, y, z))
             {
                 index.push_back(j);
