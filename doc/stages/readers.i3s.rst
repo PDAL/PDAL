@@ -3,8 +3,7 @@
 readers.i3s
 ===========
 
-`Indexed 3d Scene Layer (I3S)`_ and `Scene Layer Packages (SLPK)`_ are
-specifications created by Esri as a format for their 3D Scene Layer and scene services. The I3S reader both handles the reading of SLPK archived files locally as well as data stored in the I3S format remotely.
+`Indexed 3d Scene Layer (I3S)`_ is a specification created by Esri as a format for their 3D Scene Layer and scene services. The I3S reader handles RESTful webservices in an I3S file structure/format.
 
 Example
 --------------------------------------------------------------------------------
@@ -30,9 +29,8 @@ This example will download the Autzen dataset from the arcgis scene server, repr
 Options
 --------------------------------------------------------------------------------
 filename
-    I3S file stored remotely, or a SLPK file stored locally. Remote files must be prefaced with an "i3s://", and local files must have the ".slpk" file extension.
+    I3S file stored remotely, or a SLPK file stored locally. Remote files must be prefaced with an "i3s://".
     Exmaple remote file: ``pdal translate i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer autzen.las``
-    Example local file: ``pdal info /PDAL/test/data/i3s/SMALL_AUTZEN_LAS_ALL.slpk``
 
 threads
     This specifies the number of threads that you would like to use while reading. The default number of threads to buse used is 8. This affects the speed at which files are fetched and added to the PDAL view.
@@ -43,4 +41,3 @@ bounds
     Example:``readers.i3s.bounds="([xmin,xmax],[ymin,ymax],[zmin,zmax])"``
 
 .. _Indexed 3d Scene Layer (I3S): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md
-.. _Scene Layer Packages (SLPK): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md#_8_1
