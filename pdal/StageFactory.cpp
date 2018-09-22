@@ -70,8 +70,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     if (protocol != protocols.end())
         ext = "." + *protocol;
-    else if (filename.find(".slpk") != std::string::npos)
-        ext = ".i3s";
     else
         ext = FileUtils::extension(filename);
     // Strip off '.' and make lowercase.

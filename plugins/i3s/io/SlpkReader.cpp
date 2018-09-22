@@ -1,0 +1,173 @@
+/******************************************************************************
+* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+*
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following
+* conditions are met:
+*
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in
+*       the documentation and/or other materials provided
+*       with the distribution.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+* OF SUCH DAMAGE.
+****************************************************************************/
+
+#include "EsriReader.hpp"
+#include "../lepcc/src/include/lepcc_c_api.h"
+#include "../lepcc/src/include/lepcc_types.h"
+#include "pool.hpp"
+#include "SlpkExtractor.hpp"
+
+#include <istream>
+#include <cstdint>
+#include <cstring>
+#include <cmath>
+#include <cstdio>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Bounds.hpp>
+#include <pdal/pdal_features.hpp>
+#include <pdal/compression/LazPerfCompression.hpp>
+#include <gdal.h>
+
+namespace pdal
+{
+
+    static PluginInfo const slpkInfo
+    {
+        "readers.slpk",
+        "SLPK Reader",
+        "http://pdal.io/stages/reader.slpk.html"
+    };
+
+    CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
+
+    std::string SlpkReader::getName() const { return slpkInfo.name; }
+
+    void SlpkReader::initInfo()
+    {
+        //create temp path
+        std::string path = arbiter::fs::getTempPath();
+        std::string subPath = m_filename;
+
+        //find last slpk filename and slpk extension place
+        std::size_t filestart = subPath.rfind("/");
+        std::size_t fileEnd = subPath.find(".slpk");
+
+        //trim path to make new subdirectory in tmp
+        //erase .slpk and remove leading '/'
+        if (fileEnd != std::string::npos)
+            subPath = subPath.erase(fileEnd, subPath.size());
+
+        if (filestart != std::string::npos)
+            subPath = subPath.substr(filestart + 1,
+                    subPath.size() - filestart);
+
+        //use arbiter to create new directory if doesn't already exist
+        std::string fullPath = path+subPath;
+        arbiter::fs::mkdirp(fullPath);
+
+        //un-archive the slpk archive
+        SlpkExtractor slpk(m_filename, fullPath);
+        slpk.extract();
+        m_filename = fullPath;
+
+        //unarchive and decompress the 3dscenelayer
+        //and create json info object
+        SlpkExtractor sceneLayer(m_filename
+                + "3dSceneLayer.json.gz", m_filename);
+        sceneLayer.extract();
+        auto compressed = m_arbiter->get(m_filename
+                + "/3dSceneLayer.json.gz");
+        std::string jsonString;
+
+        m_decomp.decompress(jsonString, compressed.data(),
+                compressed.size());
+        m_info = parse(jsonString);
+    }
+
+    //Traverse tree through nodepages. Create a nodebox for each node in
+    //the tree and test if it overlaps with the bounds created by user.
+    //If it's a leaf node(the highest resolution) and it overlaps, add
+    //it to the list of nodes to be pulled later.
+    void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+    {
+        Json::Value nodeIndexJson;
+        std::string nodeUrl = m_filename + "/nodepages/"
+            + std::to_string(pageIndex);
+
+        std::string ext = ".json.gz";
+        if(!FileUtils::fileExists(nodeUrl + ext))
+        {
+            return;
+        }
+        SlpkExtractor nodeUnarchive(
+                nodeUrl+ext,
+                m_filename+"/nodepages");
+        nodeUnarchive.extract();
+        std::string output;
+        auto compressed = m_arbiter->get(nodeUrl+ext);
+        m_decomp.decompress<std::string>(
+                output,
+                compressed.data(),
+                compressed.size());
+        nodeIndexJson = parse(output);
+
+        int pageSize = nodeIndexJson["nodes"].size();
+        int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
+
+        for (int i = 0; i < pageSize; i++)
+        {
+            BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
+            int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
+            bool overlap = m_bounds.overlaps(nodeBox);
+            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
+            if (cCount == 0 && overlap)
+            {
+                nodes.push_back(name);
+            }
+        }
+        buildNodeList(nodes, ++pageIndex);
+    }
+
+    std::vector<char> SlpkReader::fetchBinary(std::string url,
+            std::string attNum, std::string ext) const
+    {
+        url += attNum + ext;
+
+        auto data(m_arbiter->getBinary(url));
+
+        if (FileUtils::extension(url) != ".gz")
+            return data;
+
+        std::vector<char> decomp;
+        m_decomp.decompress<std::vector<char>>(decomp, data.data(),
+                data.size());
+        return decomp;
+    }
+
+} //namespace pdal
