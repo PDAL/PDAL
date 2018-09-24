@@ -188,12 +188,12 @@ namespace pdal
         //Create view with overlapping leaf nodes
         //Will create a thread pool on the createview class and iterate
         //through the node list for the nodes to be pulled.
-        std::cout << "Fetching binaries" << std::endl;
+        log()->get(LogLevel::Debug) << "Fetching binaries" << std::endl;
         Pool p(m_args.threads);
         for (std::size_t i = 0; i < nodes.size(); i++)
         {
-            std::cout << "\r" << i << "/" << nodes.size();
-            std::cout.flush();
+            log()->get(LogLevel::Debug) << "\r" << i << "/" << nodes.size();
+            log()->get(LogLevel::Debug).flush();
             std::string localUrl;
 
             localUrl = m_filename + "/nodes/" + std::to_string(nodes[i]);
