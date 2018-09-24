@@ -511,7 +511,18 @@ private:
         if (m_band->WriteBlock(x, y, m_buf.data()) != CPLE_None)
             throw CantWriteBlock();
     }
+
+    void statistics(double* minimum, double* maximum,
+                    double* mean, double* stddev,
+                    int bApprox, int bForce) const
+    {
+        m_band->GetStatistics(bApprox, bForce, minimum, maximum, mean, stddev);
+    }
+
+
+
 };
+
 
 class PDAL_DLL Raster
 {
@@ -732,6 +743,51 @@ public:
         { return m_height; }
 
     std::string const& filename() { return m_filename; }
+
+    void statistics(int nBand,
+                    double* minimum,
+                    double* maximum,
+                    double* mean,
+                    double* stddev,
+                    int bApprox=TRUE,
+                    int bForce=TRUE) const
+    {
+        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev, bApprox, bForce);
+    }
+
+    BOX2D bounds() const
+    {
+
+        std::array<double, 2> coords;
+
+        pixelToCoord(height(),
+                     width(),
+                     coords);
+        double maxx = coords[0];
+        double maxy = coords[1];
+
+        pixelToCoord(0,
+                     0,
+                     coords);
+        double minx = coords[0];
+        double miny = coords[1];
+        BOX2D output(minx, miny, maxx, maxy);
+        return output;
+    }
+
+    BOX3D bounds(int nBand) const
+    {
+
+        BOX2D box2 = bounds();
+
+        double minimum; double maximum;
+        double mean; double stddev;
+        statistics(nBand, &minimum, &maximum, &mean, &stddev);
+
+        BOX3D output(box2.minx, box2.miny, minimum,
+                     box2.maxx, box2.maxy, maximum);
+        return output;
+    }
 
 private:
     std::string m_filename;

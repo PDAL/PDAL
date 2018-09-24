@@ -60,6 +60,7 @@ TEST(GDALReaderTest, simple)
 {
     Options ro;
     ro.add("filename", Support::datapath("png/autzen-height.png"));
+    ro.add("header", "Intensity,Userdata,Z");
 
     GDALReader gr;
     gr.setOptions(ro);
@@ -69,9 +70,9 @@ TEST(GDALReaderTest, simple)
     PointViewSet s = gr.execute(t);
     PointViewPtr v = *s.begin();
     PointLayoutPtr l = t.layout();
-    Dimension::Id id1 = l->findDim("band-1");
-    Dimension::Id id2 = l->findDim("band-2");
-    Dimension::Id id3 = l->findDim("band-3");
+    Dimension::Id id1 = l->findDim("Intensity");
+    Dimension::Id id2 = l->findDim("Userdata");
+    Dimension::Id id3 = l->findDim("Z");
     EXPECT_EQ(v->size(), (size_t)(735 * 973));
 
     auto verify = [v, id1, id2, id3]
