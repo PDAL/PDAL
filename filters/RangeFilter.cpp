@@ -73,26 +73,7 @@ RangeFilter::~RangeFilter()
 
 void RangeFilter::addArgs(ProgramArgs& args)
 {
-    args.add("limits", "Range limits", m_rangeSpec).setPositional();
-}
-
-
-void RangeFilter::initialize()
-{
-    // Would be better to have the range know how to read from an input stream.
-    for (auto const& r : m_rangeSpec)
-    {
-        try
-        {
-            DimRange range;
-            range.parse(r);
-            m_range_list.push_back(range);
-        }
-        catch (const DimRange::error& err)
-        {
-            throwError("Invalid 'limits' option: '" + r + "': " + err.what());
-        }
-    }
+    args.add("limits", "Range limits", m_ranges).setPositional();
 }
 
 
@@ -100,14 +81,14 @@ void RangeFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    for (auto& r : m_range_list)
+    for (auto& r : m_ranges)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
             throwError("Invalid dimension name in 'limits' option: '" +
                 r.m_name + "'.");
     }
-    std::sort(m_range_list.begin(), m_range_list.end());
+    std::sort(m_ranges.begin(), m_ranges.end());
 }
 
 
@@ -117,27 +98,7 @@ void RangeFilter::prepared(PointTableRef table)
 // common case.
 bool RangeFilter::processOne(PointRef& point)
 {
-    Dimension::Id lastId = m_range_list.front().m_id;
-    bool passes = false;
-    for (auto const& r : m_range_list)
-    {
-        // If we're at a new dimension, return false if we haven't passed
-        // the dimension, otherwise reset passes to false for the next
-        // dimension and keep checking.
-        if (r.m_id != lastId)
-        {
-            if (!passes)
-                return false;
-            lastId = r.m_id;
-            passes = false;
-        }
-        // If we've already passed this dimension, continue until we find
-        // a new dimension.
-        else if (passes)
-            continue;
-        passes = r.valuePasses(point.getFieldAs<double>(r.m_id));
-    }
-    return passes;
+    return DimRange::pointPasses(m_ranges, point);
 }
 
 

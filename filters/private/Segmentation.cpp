@@ -127,6 +127,21 @@ void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
     }
 }
 
+void ignoreDimRanges(std::vector<DimRange>& ranges, PointViewPtr input,
+    PointViewPtr keep, PointViewPtr ignore)
+{
+    std::sort(ranges.begin(), ranges.end());
+    PointRef point(*input, 0);
+    for (PointId i = 0; i < input->size(); ++i)
+    {
+        point.setPointId(i);
+        if (DimRange::pointPasses(ranges, point))
+            ignore->appendPoint(*input, i);
+        else
+            keep->appendPoint(*input, i);
+    }
+}
+
 void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                         PointViewPtr other)
 {
