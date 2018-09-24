@@ -43,6 +43,14 @@
 namespace pdal
 {
 
+//ABELL - In the beginning this data needed to be contiguous, as it was passed
+//  directly to GDAL to write.  Since we started supporting various data types
+//  in GDAL output, we end up copying/casting data to a block for output,
+//  so there's no reason that we must have contiguous data -- we just need
+//  an iterator that allows traversal of the data in row-major order.  So,
+//  this should probably be re-implemented in some way that doesn't require
+//  moving data around every time the grid is resized.
+
 GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
         double radius, int outputTypes, size_t windowSize) :
     m_width(width), m_height(height), m_windowSize(windowSize),
