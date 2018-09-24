@@ -86,12 +86,12 @@ namespace FileUtils
     PDAL_DLL bool createDirectory(const std::string& dirname);
 
     /**
-      Create a set of directories.
+      Create all directories in the provided path.
 
-      \param dirname  Directory name.
-      \return  Whether the directory was created.
+      \param dirname  Path name.
+      \return  \false on failure
     */
-    PDAL_DLL bool createDirectories(const std::string& dirname);
+    PDAL_DLL bool createDirectories(const std::string& path);
 
     /**
       Delete a directory and its contents.
