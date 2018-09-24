@@ -65,7 +65,6 @@ private:
     virtual bool processOne(PointRef& point);
     virtual QuickInfo inspect();
 
-    BOX3D getBounds() const;
     std::unique_ptr<gdal::Raster> m_raster;
     std::vector<Dimension::Type> m_bandTypes;
     std::vector<Dimension::Id> m_bandIds;

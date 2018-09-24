@@ -514,10 +514,13 @@ private:
 
     void statistics(double* minimum, double* maximum,
                     double* mean, double* stddev,
-                    int bApprox=TRUE, int bForce=TRUE)
+                    int bApprox, int bForce) const
     {
         m_band->GetStatistics(bApprox, bForce, minimum, maximum, mean, stddev);
     }
+
+
+
 };
 
 
@@ -741,10 +744,41 @@ public:
 
     std::string const& filename() { return m_filename; }
 
-    void statistics(int nBand, double* minimum, double* maximum, double* mean, double* stddev)
+    void statistics(int nBand,
+                    double* minimum,
+                    double* maximum,
+                    double* mean,
+                    double* stddev,
+                    int bApprox=TRUE,
+                    int bForce=TRUE) const
+    {
+        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev, bApprox, bForce);
+    }
+
+    BOX3D bounds() const
     {
 
-        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev);
+        std::array<double, 2> coords;
+
+        pixelToCoord(height(),
+                     width(),
+                     coords);
+        double maxx = coords[0];
+        double maxy = coords[1];
+
+        pixelToCoord(0,
+                     0,
+                     coords);
+        double minx = coords[0];
+        double miny = coords[1];
+
+        double minimum; double maximum;
+        double mean; double stddev;
+        statistics(1, &minimum, &maximum, &mean, &stddev);
+
+        BOX3D output(minx, miny, minimum,
+                     maxx, maxy, maximum);
+        return output;
     }
 
 private:
