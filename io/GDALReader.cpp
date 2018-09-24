@@ -87,20 +87,47 @@ void GDALReader::initialize()
 }
 
 
+BOX3D GDALReader::getBounds() const
+{
+
+    std::array<double, 2> coords;
+
+    m_raster->pixelToCoord(m_raster->height(),
+                           m_raster->width(),
+                           coords);
+    double maxx = coords[0];
+    double maxy = coords[1];
+
+    m_raster->pixelToCoord(0,
+                           0,
+                           coords);
+    double minx = coords[0];
+    double miny = coords[1];
+
+    double minimum; double maximum;
+    double mean; double stddev;
+    m_raster->statistics(1, &minimum, &maximum, &mean, &stddev);
+
+    BOX3D output(minx, miny, minimum,
+                 maxx, maxy, maximum);
+    return output;
+}
+
+
 QuickInfo GDALReader::inspect()
 {
     QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    addDimensions(layout.get());
     initialize();
+    addDimensions(layout.get());
 
     m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
 
     qi.m_pointCount = m_raster->width() * m_raster->height();
-    // qi.m_bounds = ???;
+    qi.m_bounds = getBounds();
     qi.m_srs = m_raster->getSpatialRef();
     qi.m_valid = true;
 

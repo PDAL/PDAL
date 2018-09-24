@@ -511,7 +511,15 @@ private:
         if (m_band->WriteBlock(x, y, m_buf.data()) != CPLE_None)
             throw CantWriteBlock();
     }
+
+    void statistics(double* minimum, double* maximum,
+                    double* mean, double* stddev,
+                    int bApprox=TRUE, int bForce=TRUE)
+    {
+        m_band->GetStatistics(bApprox, bForce, minimum, maximum, mean, stddev);
+    }
 };
+
 
 class PDAL_DLL Raster
 {
@@ -732,6 +740,12 @@ public:
         { return m_height; }
 
     std::string const& filename() { return m_filename; }
+
+    void statistics(int nBand, double* minimum, double* maximum, double* mean, double* stddev)
+    {
+
+        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev);
+    }
 
 private:
     std::string m_filename;
