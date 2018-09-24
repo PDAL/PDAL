@@ -7,7 +7,7 @@
         "Option":
         {
             "Name": "filename",
-            "Value": ".\/apps\/simple.las"
+            "Value": "./apps/simple.las"
         }
     },
     "NumPoints": "1065",

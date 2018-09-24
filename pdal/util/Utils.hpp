@@ -379,15 +379,6 @@ namespace Utils
         size_t lineLength, size_t firstLength = 0);
 
     /**
-      Add escape characters or otherwise transform an input string so as to
-      be a valid JSON string.
-
-      \param s  Input string.
-      \return  Valid JSON version of input string.
-    */
-    PDAL_DLL std::string escapeJSON(const std::string &s);
-
-    /**
       Demangle a C++ symbol into readable form.
 
       \param s  String to demangle.
