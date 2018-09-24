@@ -536,7 +536,7 @@ public:
         if (m_impl->m_type == "json")
             return value();
 
-        std::string v(Utils::escapeJSON(value()));
+        std::string v(value());
         if (m_impl->m_type == "double")
             if (v == "NaN" || v == "Infinity" || v == "-Infinity")
                 v = "\"" + v + "\"";
