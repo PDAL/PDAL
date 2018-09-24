@@ -755,7 +755,7 @@ public:
         Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev, bApprox, bForce);
     }
 
-    BOX3D bounds() const
+    BOX2D bounds() const
     {
 
         std::array<double, 2> coords;
@@ -771,13 +771,21 @@ public:
                      coords);
         double minx = coords[0];
         double miny = coords[1];
+        BOX2D output(minx, miny, maxx, maxy);
+        return output;
+    }
+
+    BOX3D bounds(int nBand) const
+    {
+
+        BOX2D box2 = bounds();
 
         double minimum; double maximum;
         double mean; double stddev;
-        statistics(1, &minimum, &maximum, &mean, &stddev);
+        statistics(nBand, &minimum, &maximum, &mean, &stddev);
 
-        BOX3D output(minx, miny, minimum,
-                     maxx, maxy, maximum);
+        BOX3D output(box2.minx, box2.miny, minimum,
+                     box2.maxx, box2.maxy, maximum);
         return output;
     }
 

@@ -100,7 +100,7 @@ QuickInfo GDALReader::inspect()
         throwError("Couldn't open raster file '" + m_filename + "'.");
 
     qi.m_pointCount = m_raster->width() * m_raster->height();
-    qi.m_bounds = m_raster->bounds();
+    qi.m_bounds = m_raster->bounds(1);
     qi.m_srs = m_raster->getSpatialRef();
     qi.m_valid = true;
 
