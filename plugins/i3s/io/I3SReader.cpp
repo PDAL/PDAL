@@ -33,10 +33,6 @@
 ****************************************************************************/
 
 #include "EsriReader.hpp"
-#include "../lepcc/src/include/lepcc_c_api.h"
-#include "../lepcc/src/include/lepcc_types.h"
-#include "pool.hpp"
-#include "SlpkExtractor.hpp"
 
 #include <istream>
 #include <cstdint>
@@ -61,7 +57,7 @@ namespace pdal
     {
         "readers.i3s",
         "I3S Reader",
-        "http://pdal.io/stages/reader.i3s.html"
+        "http://pdal.io/stages/readers.i3s.html"
     };
 
     CREATE_SHARED_STAGE(I3SReader, i3sInfo)
@@ -71,6 +67,7 @@ namespace pdal
     void I3SReader::initInfo()
     {
         m_info = parse(m_arbiter->get(m_filename))["layers"][0];
+
         m_filename += "/layers/0";
     }
 
@@ -87,8 +84,6 @@ namespace pdal
         // TODO Avoid doing this by using the max child node to figure out when
         // to stop traversing.
         nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-        if (nodeIndexJson.isMember("error"))
-            return;
 
         int pageSize = nodeIndexJson["nodes"].size();
         int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
@@ -103,6 +98,15 @@ namespace pdal
             {
                 nodes.push_back(name);
             }
+            //keeps track of largest node so recursive loop knows when to stop
+            if ((nodeIndexJson["nodes"][i]["firstChild"].asInt() +
+                    cCount - 1) > m_maxNode)
+            {
+                m_maxNode = nodeIndexJson["nodes"][i]["firstChild"].asInt() +
+                    cCount - 1;
+            }
+            else if (initialNode + i == m_maxNode)
+                return;
         }
         buildNodeList(nodes, ++pageIndex);
     }

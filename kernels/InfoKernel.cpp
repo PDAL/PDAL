@@ -277,9 +277,7 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 
 void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
 {
-    if (filename.find("://") != std::string::npos)
-          m_log->get(LogLevel::Debug) << "Protocol Found" << std::endl;
-    else if (!pdal::Utils::fileExists(filename))
+    if (!pdal::Utils::fileExists(filename))
         throw pdal_error("File not found: " + filename);
 
     if (filename == "STDIN")

@@ -76,11 +76,19 @@ protected:
     std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
+    struct I3SArgs
+    {
+      Bounds bounds;
+      int threads = 8;
+    };
+
     I3SArgs m_args;
     Json::Value m_info;
     std::mutex m_mutex;
     BOX3D m_bounds;
     int m_nodeCap;
+    int m_maxNode = 0;
+
 
     gzip::Decompressor m_decomp;
 
@@ -102,7 +110,7 @@ protected:
         std::string dataType;
     };
     std::map<Dimension::Id, dimData> m_dimMap;
-    std::map<std::string, Dimension::Id> m_dimensions {
+    std::map<std::string, Dimension::Id> const m_dimensions {
             {"INTENSITY",   Dimension::Id::Intensity},
             {"CLASS_CODE",  Dimension::Id::ClassFlags},
             {"FLAGS",       Dimension::Id::Flag},

@@ -37,11 +37,6 @@ namespace pdal
 {
     std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
     {
-        unsigned char* c = new unsigned char [compData->size()];
-
-        std::copy(compData->begin(), compData->end(), c);
-
-        const unsigned char* compressed = c;
         int nInfo = lepcc_getBlobInfoSize();
         lepcc_ContextHdl ctx(nullptr);
         ctx = lepcc_createContext();
@@ -49,6 +44,8 @@ namespace pdal
         lepcc::uint32 blobSize = 0;
 
 
+        const unsigned char* compressed = reinterpret_cast<const unsigned char*>
+            (compData->data());
         lepcc::Byte vec;
         lepcc_status stat;
         std::vector<lepcc::Point3D> decVec;
@@ -58,23 +55,22 @@ namespace pdal
             (lepcc::ErrCode)lepcc_getBlobInfo(
                     ctx, compressed, nInfo, &bt, &blobSize);
 
-        const lepcc::Byte* pByte = &compressed[0];
+        const lepcc::Byte* pByte = reinterpret_cast<const lepcc::Byte*>(
+                compData->data());
         int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
         if (nBytes > 0)
         {
             stat = lepcc_getPointCount(ctx, pByte, nBytes, &xyzPts);
             if(stat != (lepcc_status) lepcc::ErrCode::Ok)
             {
-                std::cout << "lepcc_getPointCount() failed. \n";
-                return decVec;//TODO throw error here
+                throw (std::string("LEPCC point count fetch failed"));
             }
             decVec.resize(xyzPts);
             stat = lepcc_decodeXYZ(
                     ctx, &pByte, nBytes, &xyzPts, (double*)(&decVec[0]));
             if(stat != (lepcc_status) lepcc::ErrCode::Ok)
             {
-                std::cout << "lepcc_decodeXYZ() failed. \n";
-                return decVec;//TODO throw error here
+                throw (std::string("LEPCC decompression failed"));
             }
         }
         return decVec;
@@ -109,17 +105,14 @@ namespace pdal
             stat = lepcc_getRGBCount(ctx, pByte, nBytes, &nPts);
             if(stat != (lepcc_status) lepcc::ErrCode::Ok)
             {
-                std::cout << stat << std::endl;
-                std::cout << "lepcc_getPointRGB() failed. \n";
-                //TODO throw error here
+                throw (std::string("RGB point count fetch failed"));
             }
             rgbVec.resize(nPts);
             stat = lepcc_decodeRGB(
                     ctx, &pByte, nBytes, &nPts, (lepcc::Byte*)(&rgbVec[0]));
             if(stat != (lepcc_status) lepcc::ErrCode::Ok)
             {
-                std::cout << "lepcc_decodergb() failed. \n";
-                return rgbVec;//TODO throw error here
+                throw (std::string("RGB decompression failed"));
             }
         }
         return rgbVec;
@@ -154,17 +147,14 @@ namespace pdal
             stat = lepcc_getIntensityCount(ctx, pByte, nBytes, &nPts);
             if(stat != (lepcc_status) lepcc::ErrCode::Ok)
             {
-                std::cout << stat << std::endl;
-                std::cout << "lepcc_getPointRGB() failed. \n";
-                //TODO throw error here
+                throw (std::string("Intensity point count fetch failed"));
             }
             intVec.resize(nPts);
             stat = lepcc_decodeIntensity(
                     ctx, &pByte, nBytes, &nPts, (unsigned short*)(&intVec[0]));
             if(stat != (lepcc_status) lepcc::ErrCode::Ok)
             {
-                std::cout << "lepcc_decodergb() failed. \n";
-                return intVec;//TODO throw error here
+                throw (std::string("Intensity decompression failed"));
             }
 
             return intVec;

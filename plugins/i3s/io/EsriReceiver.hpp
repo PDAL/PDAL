@@ -65,12 +65,6 @@ namespace pdal
         return json;
     }
 
-    struct I3SArgs
-    {
-      Bounds bounds;
-      int threads = 8;
-    };
-
     struct compare3d
     {
         bool operator()(const lepcc::Point3D & first,
@@ -87,7 +81,6 @@ namespace pdal
             if(first.z < second.z)
                 return true;
             return false;
-
         }
     };
 

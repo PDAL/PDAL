@@ -61,7 +61,7 @@ namespace pdal
     {
         "readers.slpk",
         "SLPK Reader",
-        "http://pdal.io/stages/reader.slpk.html"
+        "http://pdal.io/stages/readers.slpk.html"
     };
 
     CREATE_SHARED_STAGE(SlpkReader, slpkInfo)

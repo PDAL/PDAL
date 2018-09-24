@@ -112,16 +112,14 @@ namespace pdal
         {
             dimData data;
             std::string readName = attributes[i]["name"].asString();
-            int key = std::stoi(attributes[i]["key"].asString());
-            data.key = key;
+            data.key = std::stoi(attributes[i]["key"].asString());
 
             if(attributes[i].isMember("valueType"))
             {
-                std::string type = attributes[i]["valueType"].asString();
-                data.dataType = type;
+                data.dataType = attributes[i]["valueType"].asString();
             }
 
-            else if (readName == "RGB")
+            if (readName == "RGB")
             {
                 layout->registerDim(Dimension::Id::Red);
                 layout->registerDim(Dimension::Id::Green);
