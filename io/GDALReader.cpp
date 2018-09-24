@@ -121,32 +121,21 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
-
+    std::vector<std::string> dimNames;
     if (m_header.size())
     {
-        std::vector<std::string> dimNames = Utils::split(m_header, ',');
-
+        dimNames = Utils::split(m_header, ',');
         if (dimNames.size() != (size_t)m_raster->bandCount())
             throwError("Dimension names are not the same count as raster bands!");
-
-        for (int i=0; i < m_raster->bandCount(); ++i)
-        {
-
-            std::cerr << "Adding dimension '" << dimNames[i] << "'" << std::endl;
-            Dimension::Id id = layout->registerOrAssignDim(dimNames[i], m_bandTypes[i]);
-            m_bandIds.push_back(id);
-        }
-
     }
-    else
+
+    for (int i = 0; i < m_raster->bandCount(); ++i)
     {
-        for (int i = 0; i < m_raster->bandCount(); ++i)
-        {
-            std::ostringstream oss;
-            oss << "band-" << (i + 1);
-            Dimension::Id id = layout->registerOrAssignDim(oss.str(), m_bandTypes[i]);
-            m_bandIds.push_back(id);
-        }
+        std::ostringstream oss;
+        oss << "band-" << (i + 1);
+        std::string name(dimNames.empty() ? oss.str() : dimNames[i]);
+        Dimension::Id id = layout->registerOrAssignDim(name, m_bandTypes[i]);
+        m_bandIds.push_back(id);
     }
 }
 
@@ -154,7 +143,6 @@ void GDALReader::addArgs(ProgramArgs& args)
 {
     args.add("header", "A comma-separated list of dimension IDs to map raster bands to dimension id", m_header);
 }
-
 
 
 void GDALReader::ready(PointTableRef table)
