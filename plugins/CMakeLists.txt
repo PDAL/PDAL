@@ -1,7 +1,10 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
 add_subdirectory(faux)
-if(BUILD_PLUGIN_I3S AND ZLIB_FOUND)
+if(BUILD_PLUGIN_I3S)
+    if(NOT ZLIB_FOUND)
+        message(FATAL_ERROR "Can't build i3s and slpk plugins without zlib")
+    endif()
     add_subdirectory(i3s)
 endif()
 
