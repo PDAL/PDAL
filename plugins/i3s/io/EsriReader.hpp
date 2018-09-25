@@ -55,36 +55,37 @@
 #include <Eigen/Geometry>
 #include <gdal.h>
 #include <ogr_spatialref.h>
+
+
+namespace pdal
+{
 namespace
 {
 std::map<std::string, pdal::Dimension::Id> const m_dimensions
 {
-        {"INTENSITY",   pdal::Dimension::Id::Intensity},
-        {"CLASS_CODE",  pdal::Dimension::Id::ClassFlags},
-        {"FLAGS",       pdal::Dimension::Id::Flag},
-        {"RETURNS",     pdal::Dimension::Id::NumberOfReturns},
-        {"USER_DATA",   pdal::Dimension::Id::UserData},
-        {"POINT_SRC_ID",pdal::Dimension::Id::PointSourceId},
-        {"GPS_TIME",    pdal::Dimension::Id::GpsTime},
-        {"SCAN_ANGLE",  pdal::Dimension::Id::ScanAngleRank}
+        {"INTENSITY",   Dimension::Id::Intensity},
+        {"CLASS_CODE",  Dimension::Id::ClassFlags},
+        {"FLAGS",       Dimension::Id::Flag},
+        {"RETURNS",     Dimension::Id::NumberOfReturns},
+        {"USER_DATA",   Dimension::Id::UserData},
+        {"POINT_SRC_ID",Dimension::Id::PointSourceId},
+        {"GPS_TIME",    Dimension::Id::GpsTime},
+        {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank}
 };
 std::map<std::string, pdal::Dimension::Type> const dimTypes
 {
-        {"UInt8", pdal::Dimension::Type::Unsigned8},
-        {"UInt16", pdal::Dimension::Type::Unsigned16},
-        {"UInt32", pdal::Dimension::Type::Unsigned32},
-        {"UInt64", pdal::Dimension::Type::Unsigned64},
-        {"Int8", pdal::Dimension::Type::Signed8},
-        {"Int16", pdal::Dimension::Type::Signed16},
-        {"Int32", pdal::Dimension::Type::Signed32},
-        {"Int64", pdal::Dimension::Type::Signed64},
-        {"Float64", pdal::Dimension::Type::Double},
-        {"Float32", pdal::Dimension::Type::Float}
+        {"UInt8", Dimension::Type::Unsigned8},
+        {"UInt16", Dimension::Type::Unsigned16},
+        {"UInt32", Dimension::Type::Unsigned32},
+        {"UInt64", Dimension::Type::Unsigned64},
+        {"Int8", Dimension::Type::Signed8},
+        {"Int16", Dimension::Type::Signed16},
+        {"Int32", Dimension::Type::Signed32},
+        {"Int64", Dimension::Type::Signed64},
+        {"Float64", Dimension::Type::Double},
+        {"Float32", Dimension::Type::Float}
 };
 }
-
-namespace pdal
-{
 
 class EsriReader : public Reader
 {
@@ -146,7 +147,7 @@ protected:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
-    void createView(std::string localUrl, PointViewPtr view);
+    void createView(std::string localUrl, PointView& view);
     BOX3D parseBox(Json::Value base);
 };
 

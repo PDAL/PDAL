@@ -103,7 +103,7 @@ void EsriReader::initialize(PointTableRef table)
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
-    Json::Value attributes = m_info["attributeStorageInfo"];
+    const Json::Value attributes = m_info["attributeStorageInfo"];
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
@@ -156,7 +156,6 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         }
         else if (attributes[i].isMember("attributeValues"))
         {
-
             std::string s =
                 attributes[i]["attributeValues"]["valueType"].asString();
             const pdal::Dimension::Id id = layout->registerOrAssignDim(
@@ -166,9 +165,11 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         }
         else
         {
-            const pdal::Dimension::Id id = layout->
-                registerOrAssignDim(readName, Dimension::Type::Double);
-            m_dimMap[id] = data;
+            //Expect that Elevation will be bundled with xyz
+            if(readName != "ELEVATION")
+                log()->get(LogLevel::Warning) <<
+                    "Attribute does not have a type." <<
+                    std::endl;
         }
     }
 }
@@ -222,9 +223,10 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 
         p.add([localUrl, this, &view]()
         {
-            createView(localUrl, view);
+            createView(localUrl, *view);
         });
     }
+    p.await();
     return view->size();
 }
 
@@ -309,33 +311,33 @@ BOX3D EsriReader::parseBox(Json::Value base)
     return BOX3D(minx, miny, minz, maxx, maxy, maxz);
 }
 
-void EsriReader::createView(std::string localUrl, PointViewPtr view)
+void EsriReader::createView(std::string localUrl, PointView& view)
 {
     //pull the geometries to start
     const std::string geomUrl = localUrl + "/geometries/";
-    auto xyz = fetchBinary(geomUrl, "0", ".bin.pccxyz");
-    std::vector<lepcc::Point3D> pointcloud = decompressXYZ(&xyz);
+    auto xyzFetch = fetchBinary(geomUrl, "0", ".bin.pccxyz");
+    std::vector<lepcc::Point3D> xyz = decompressXYZ(&xyzFetch);
 
     std::vector<int> selected;
     uint64_t startId;
 
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        startId = view->size();
+        startId = view.size();
 
-        for (uint64_t j = 0; j < pointcloud.size(); ++j)
+        for (uint64_t j = 0; j < xyz.size(); ++j)
         {
-            double x = pointcloud[j].x;
-            double y = pointcloud[j].y;
-            double z = pointcloud[j].z;
+            double x = xyz[j].x;
+            double y = xyz[j].y;
+            double z = xyz[j].z;
 
             if (m_bounds.contains(x, y, z))
             {
-                PointId id = view->size();
+                PointId id = view.size();
                 selected.push_back(j);
-                view->setField(pdal::Dimension::Id::X, id, pointcloud[j].x);
-                view->setField(pdal::Dimension::Id::Y, id, pointcloud[j].y);
-                view->setField(pdal::Dimension::Id::Z, id, pointcloud[j].z);
+                view.setField(pdal::Dimension::Id::X, id, xyz[j].x);
+                view.setField(pdal::Dimension::Id::Y, id, xyz[j].y);
+                view.setField(pdal::Dimension::Id::Z, id, xyz[j].z);
             }
         }
     }
@@ -355,15 +357,22 @@ void EsriReader::createView(std::string localUrl, PointViewPtr view)
                     attrUrl, std::to_string(key), ".bin.pccrgb");
             std::vector<lepcc::RGB_t> rgbPoints = decompressRGB(&data);
 
-            std::lock_guard<std::mutex> lock(m_mutex);
 
+            std::size_t dimSize = Dimension::size(dimType);
+            if (rgbPoints.size() != xyz.size())
+            {
+                throwError(std::string("Bad data fetch. Data id: " +
+                            dimEntry.second.name));
+            }
+
+            std::lock_guard<std::mutex> lock(m_mutex);
             for (std::size_t i(0); i < selected.size(); ++i)
             {
-                view->setField(pdal::Dimension::Id::Red,
+                view.setField(pdal::Dimension::Id::Red,
                         startId + i, rgbPoints[selected[i]].r);
-                view->setField(pdal::Dimension::Id::Green,
+                view.setField(pdal::Dimension::Id::Green,
                         startId + i, rgbPoints[selected[i]].g);
-                view->setField(pdal::Dimension::Id::Blue,
+                view.setField(pdal::Dimension::Id::Blue,
                         startId + i, rgbPoints[selected[i]].b);
             }
         }
@@ -374,10 +383,17 @@ void EsriReader::createView(std::string localUrl, PointViewPtr view)
 
             std::vector<uint16_t> intensity = decompressIntensity(&data);
 
+            std::size_t dimSize = Dimension::size(dimType);
+            if (intensity.size() != xyz.size())
+            {
+                throwError(std::string("Bad data fetch. Data id: " +
+                            dimEntry.second.name));
+            }
+
             std::lock_guard<std::mutex> lock(m_mutex);
             for (std::size_t i(0); i < selected.size(); ++i)
             {
-                view->setField(pdal::Dimension::Id::Intensity,
+                view.setField(pdal::Dimension::Id::Intensity,
                         startId + i, intensity[selected[i]]);
             }
         }
@@ -386,12 +402,16 @@ void EsriReader::createView(std::string localUrl, PointViewPtr view)
             const auto data = fetchBinary(
                     attrUrl, std::to_string(key), ".bin.gz");
 
-            std::lock_guard<std::mutex> lock(m_mutex);
             std::size_t dimSize = Dimension::size(dimType);
 
+            if (data.size() != xyz.size() * dimSize)
+                throwError(std::string("Bad data fetch. Data id: " +
+                            dimEntry.second.name));
+
+            std::lock_guard<std::mutex> lock(m_mutex);
             for (std::size_t i(0); i < selected.size(); ++i)
             {
-                view->setField(dimId, dimType, startId + i,
+                view.setField(dimId, dimType, startId + i,
                         data.data() + selected[i] * dimSize);
             }
         }

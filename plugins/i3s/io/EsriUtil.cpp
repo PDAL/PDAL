@@ -55,8 +55,7 @@ namespace pdal
             (lepcc::ErrCode)lepcc_getBlobInfo(
                     ctx, compressed, nInfo, &bt, &blobSize);
 
-        const lepcc::Byte* pByte = reinterpret_cast<const lepcc::Byte*>(
-                compData->data());
+        const lepcc::Byte* pByte = compressed;
         int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
         if (nBytes > 0)
         {
@@ -97,8 +96,7 @@ namespace pdal
                     ctx, compressed, nInfo, &bt, &blobSize);
 
         int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        const lepcc::Byte* pByte = reinterpret_cast<lepcc::Byte*>
-            (compData->data());
+        const lepcc::Byte* pByte = compressed;
 
         if (nBytes > 0)
         {
@@ -137,8 +135,7 @@ namespace pdal
                     ctx, compressed, nInfo, &bt, &blobSize);
 
         int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        const lepcc::Byte* pByte = reinterpret_cast<lepcc::Byte*>
-            (compData->data());
+        const lepcc::Byte* pByte = compressed;
         std::vector<uint16_t> intVec;
         if (nBytes > 0)
         {
