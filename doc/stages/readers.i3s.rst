@@ -7,7 +7,7 @@ readers.i3s
 
 Example
 --------------------------------------------------------------------------------
-This example will download the Autzen dataset from the arcgis scene server, reproject it to another spatial reference, and output it to a las file. This is done through PDAL's command line interface or through the pipeline.
+This example will download the Autzen dataset from the arcgis scene server and output it to a las file. This is done through PDAL's command line interface or through the pipeline.
 
 .. code-block:: json,
     {

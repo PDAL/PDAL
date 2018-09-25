@@ -10,10 +10,7 @@ than find information through REST.
 
 Example
 --------------------------------------------------------------------------------
-This example will unarchive the slpk file, store it in a temp directory, and
-traverse it. The data will be reprojected to another spatial reference, and
-output to a las file. This is done through PDAL's command line interface or
-through the pipeline.
+This example will unarchive the slpk file, store it in a temp directory, and traverse it. The data will be output to a las file. This is done through PDAL's command line interface or through the pipeline.
 
 .. code-block:: json,
     {
@@ -33,7 +30,7 @@ through the pipeline.
 Options
 --------------------------------------------------------------------------------
 filename
-    SLPK file stored locally and must have a file extension of .slpk
+    SLPK file must have a file extension of .slpk.
     Example: ``pdal info /PDAL/test/data/i3s/SMALL_AUTZEN_LAS_ALL.slpk``
 
 bounds
