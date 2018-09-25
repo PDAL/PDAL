@@ -41,7 +41,10 @@
 
 extern "C"
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-register"
 #include <mb_define.h>
+#pragma GCC diagnostic pop
 }
 
 #include "MbFormat.hpp"

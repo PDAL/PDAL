@@ -37,6 +37,12 @@
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic ignored "-Wnull-dereference"
 #pragma GCC diagnostic ignored "-Wcast-qual"
+//ABELL - The issue with the diag below is that the FBX SDK sets packing
+//  around a ton of include files which ends up setting packing for some
+//  system includes.  Bad.  I've filed an issue with both Apple (which can
+//  improve its header file to mitigate) and Autodesk (which can avoid doing
+//  something so stupid).
+#pragma GCC diagnostic ignored "-Wpragma-pack"
 #include <fbxsdk.h>
 #pragma GCC diagnostic pop
 
