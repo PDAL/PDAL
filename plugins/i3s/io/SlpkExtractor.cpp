@@ -70,7 +70,7 @@ void SlpkExtractor::extract() const
     std::vector<char> extra;
     int32_t magic;
 
-    in >> magic;
+    in.get(reinterpret_cast<char *>(&magic), sizeof(magic));
     while (magic == 0x04034b50)
     {
         in >> h.m_version;
@@ -96,7 +96,7 @@ void SlpkExtractor::extract() const
             throw slpk_error("Compressed and uncompressed sizes don't match "
                 "in slpk archive.");
         writeFile(name, in, h.m_compressedSize);
-        in >> magic;
+        in.get(reinterpret_cast<char *>(&magic), sizeof(magic));
     }
 }
 
