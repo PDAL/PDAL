@@ -392,6 +392,13 @@ TEST(SpatialReferenceTest, test_bounds)
 
 }
 
+TEST(SpatialReferenceTest, identifyEPSG)
+{
+    SpatialReference web("EPSG:3857");
+    EXPECT_EQ(web.identifyHorizontalEPSG(), "3857");
+    EXPECT_EQ(web.identifyVerticalEPSG(), "");
+}
+
 // Make sure we get positive, negative and 0 back for UTM zones.
 TEST(SpatialReferenceTest, issue_1989)
 {
