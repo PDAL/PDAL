@@ -103,6 +103,7 @@ void EsriReader::initialize(PointTableRef table)
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
+
     const Json::Value attributes = m_info["attributeStorageInfo"];
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
@@ -113,15 +114,19 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         std::string readName = attributes[i]["name"].asString();
         data.name = readName;
         data.key = std::stoi(attributes[i]["key"].asString());
-        data.dataType =
-            attributes[i]["attributeValues"]["valueType"].asString();
 
-
-        if (attributes[i].isMember("valueType"))
+        if (!attributes[i].isMember("attributeValues"))
         {
-            data.dataType = attributes[i]["valueType"].asString();
+            //Expect that Elevation will be bundled with xyz
+            if (readName != "ELEVATION")
+                log()->get(LogLevel::Warning) <<
+                    "Attribute does not have a type." <<
+                    std::endl;
+            continue;
         }
 
+        data.dataType =
+            attributes[i]["attributeValues"]["valueType"].asString();
 
         if (readName == "RGB")
         {
@@ -154,7 +159,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
                     readName << std::endl;
             }
         }
-        else if (attributes[i].isMember("attributeValues"))
+        else
         {
             std::string s =
                 attributes[i]["attributeValues"]["valueType"].asString();
@@ -162,14 +167,6 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
                     readName, pdal::Dimension::type(s));
             if(data.dimType != Dimension::Type::None)
                 m_dimMap[id] = data;
-        }
-        else
-        {
-            //Expect that Elevation will be bundled with xyz
-            if(readName != "ELEVATION")
-                log()->get(LogLevel::Warning) <<
-                    "Attribute does not have a type." <<
-                    std::endl;
         }
     }
 }

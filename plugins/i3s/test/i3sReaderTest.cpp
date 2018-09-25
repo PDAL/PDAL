@@ -41,7 +41,7 @@ TEST(i3sReaderTest, i3sReaderTest_read_local)
     StageFactory f;
     //create args
     Options slpk_options;
-    slpk_options.add("filename", Support::datapath("SMALL_AUTZEN_LAS_All.slpk"));
+    slpk_options.add("filename", Support::datapath("i3s/SMALL_AUTZEN_LAS_All.slpk"));
     slpk_options.add("threads", 64);
 
     SlpkReader reader;
@@ -122,7 +122,7 @@ TEST(i3sReaderTest, slpkReaderTest_bounded)
     StageFactory f;
     //create args
     Options slpk_options;
-    slpk_options.add("filename", Support::datapath("SMALL_AUTZEN_LAS_All.slpk"));
+    slpk_options.add("filename", Support::datapath("i3s/SMALL_AUTZEN_LAS_All.slpk"));
     slpk_options.add("threads", 64);
     slpk_options.add("bounds", "([-123.077,-123.063],[44.053, 44.060], [130, 175])");
 
@@ -140,6 +140,7 @@ TEST(i3sReaderTest, slpkReaderTest_bounded)
     double x, y, z;
     for(std::size_t i = 0; i < view->size(); i++)
     {
+
         x = view->getFieldAs<double>(Dimension::Id::X, i);
         y = view->getFieldAs<double>(Dimension::Id::Y, i);
         z = view->getFieldAs<double>(Dimension::Id::Z, i);
@@ -147,7 +148,7 @@ TEST(i3sReaderTest, slpkReaderTest_bounded)
     }
 
     Options slpk2_options;
-    slpk2_options.add("filename", Support::datapath("SMALL_AUTZEN_LAS_All.slpk"));
+    slpk2_options.add("filename", Support::datapath("i3s/SMALL_AUTZEN_LAS_All.slpk"));
     slpk2_options.add("threads", 64);
 
     SlpkReader reader2;
@@ -171,6 +172,5 @@ TEST(i3sReaderTest, slpkReaderTest_bounded)
     }
 
     EXPECT_EQ(view->size(), count);
-
 
 }

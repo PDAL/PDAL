@@ -82,12 +82,11 @@ namespace pdal
         SlpkExtractor slpk(m_filename, fullPath);
         slpk.extract();
         m_filename = fullPath;
+        log()->get(LogLevel::Debug) << "Making directory at: " <<
+            fullPath << std::endl;
 
         //unarchive and decompress the 3dscenelayer
         //and create json info object
-        SlpkExtractor sceneLayer(m_filename
-                + "3dSceneLayer.json.gz", m_filename);
-        sceneLayer.extract();
         auto compressed = m_arbiter->get(m_filename
                 + "/3dSceneLayer.json.gz");
         std::string jsonString;
