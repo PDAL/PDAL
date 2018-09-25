@@ -161,7 +161,8 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
                 attributes[i]["attributeValues"]["valueType"].asString();
             const pdal::Dimension::Id id = layout->registerOrAssignDim(
                     readName, pdal::Dimension::type(s));
-            m_dimMap[id] = data;
+            if(data.dimType != Dimension::Type::None)
+                m_dimMap[id] = data;
         }
         else
         {

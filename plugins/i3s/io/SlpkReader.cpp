@@ -74,7 +74,8 @@ namespace pdal
         std::string path = arbiter::fs::getTempPath();
 
         //use arbiter to create new directory if doesn't already exist
-        std::string fullPath(path+ FileUtils::stem(FileUtils::getFilename(m_filename)));
+        std::string fullPath(path+ FileUtils::stem(
+                    FileUtils::getFilename(m_filename)));
         arbiter::fs::mkdirp(fullPath);
 
         //un-archive the slpk archive
