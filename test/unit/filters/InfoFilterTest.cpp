@@ -63,6 +63,22 @@ MetadataNode run(Options& fOpts)
 
 TEST(InfoFilterTest, point)
 {
+    struct rgb
+    {
+        int r;
+        int g;
+        int b;
+
+        bool operator == (const rgb& o) const
+        {
+            return o.r == r && o.g == g && o.b == b;
+        }
+    };
+
+    std::vector<rgb> vtest { {84, 102, 93}, {82, 98, 90}, {80, 96, 90},
+        {79, 96, 90}, {78, 94, 89}, {82, 98, 90}, {80, 98, 90},
+        {89, 106, 99}, {80, 100, 90}, {77, 93, 86} };
+    std::vector<rgb> v;
 
     Options fOpts;
     fOpts.add("point", "0-9");
@@ -70,8 +86,17 @@ TEST(InfoFilterTest, point)
     MetadataNode p = m.findChild("points");
     MetadataNodeList l = p.children();
     EXPECT_EQ(l.size(), 10U);
+    for (MetadataNode& n : l)
+    {
+        int r = n.findChild("Red").value<int>();
+        int g = n.findChild("Green").value<int>();
+        int b = n.findChild("Blue").value<int>();
+        v.push_back({r, g, b});
+    }
+    for (size_t i = 0; i < vtest.size(); ++i)
+        EXPECT_EQ(v[i], vtest[i]);
 
-    //Utils::toJSON(m, std::cout);
+//    Utils::toJSON(p, std::cout);
 }
 
 TEST(InfoFilterTest, query)
@@ -92,8 +117,6 @@ TEST(InfoFilterTest, query)
     std::sort(vtest.begin(), vtest.end());
     for (size_t i = 0; i < vtest.size(); ++i)
         EXPECT_EQ(v[i], vtest[i]);
-
-    //Utils::toJSON(m, std::cout);
 }
 
 } // namespace pdal
