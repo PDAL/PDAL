@@ -12,12 +12,12 @@ Example
 --------------------------------------------------------------------------------
 This example will unarchive the slpk file, store it in a temp directory, and traverse it. The data will be output to a las file. This is done through PDAL's command line interface or through the pipeline.
 
-.. code-block:: json,
+.. code-block:: json
     {
         "pipeline":[
             {
                 "type": "readers.slpk",
-                "filename": "PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk"
+                "filename": "PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk",
                 "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
             }
         ]

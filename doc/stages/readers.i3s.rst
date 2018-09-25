@@ -9,12 +9,12 @@ Example
 --------------------------------------------------------------------------------
 This example will download the Autzen dataset from the arcgis scene server and output it to a las file. This is done through PDAL's command line interface or through the pipeline.
 
-.. code-block:: json,
+.. code-block:: json
     {
         "pipeline":[
             {
                 "type": "readers.i3s",
-                "filename": "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer"
+                "filename": "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer",
                 "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
             }
         ]
