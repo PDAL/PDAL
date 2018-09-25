@@ -157,10 +157,8 @@ namespace pdal
                     data.dimType = Dimension::Type::Double;
                 else if(data.dataType == "Float32")
                     data.dimType = Dimension::Type::Float;
-                /*
                 else
-                    throw pdal_error(std::string ("Undefined dimension type"));
-                    */
+                    throwError(std::string ("Undefined dimension type"));
 
                 if (data.dimType != Dimension::Type::None)
                 {
