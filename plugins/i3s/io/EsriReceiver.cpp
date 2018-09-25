@@ -79,11 +79,9 @@ namespace pdal
 
     std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
     {
-        unsigned char* c = new unsigned char [compData->size()];
 
-        std::copy(compData->begin(), compData->end(), c);
-
-        const unsigned char* compressed = c;
+        const unsigned char* compressed = reinterpret_cast<const unsigned char*>
+            (compData->data());
         int nInfo = lepcc_getBlobInfoSize();
         lepcc_ContextHdl ctx(nullptr);
         ctx = lepcc_createContext();
@@ -99,7 +97,9 @@ namespace pdal
                     ctx, compressed, nInfo, &bt, &blobSize);
 
         int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        const lepcc::Byte* pByte = &compressed[0];
+        const lepcc::Byte* pByte = reinterpret_cast<lepcc::Byte*>
+            (compData->data());
+
         if (nBytes > 0)
         {
             stat = lepcc_getRGBCount(ctx, pByte, nBytes, &nPts);
@@ -122,11 +122,8 @@ namespace pdal
     std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
     {
 
-        unsigned char* c = new unsigned char [compData->size()];
-
-        std::copy(compData->begin(), compData->end(), c);
-
-        const unsigned char* compressed = c;
+        const unsigned char* compressed = reinterpret_cast<const unsigned char*>
+            (compData->data());
         int nInfo = lepcc_getBlobInfoSize();
         lepcc_ContextHdl ctx(nullptr);
         ctx = lepcc_createContext();
@@ -140,7 +137,8 @@ namespace pdal
                     ctx, compressed, nInfo, &bt, &blobSize);
 
         int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        const lepcc::Byte* pByte = &compressed[0];
+        const lepcc::Byte* pByte = reinterpret_cast<lepcc::Byte*>
+            (compData->data());
         std::vector<uint16_t> intVec;
         if (nBytes > 0)
         {

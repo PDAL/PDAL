@@ -31,7 +31,6 @@ TEST(i3sReaderTest, i3sReaderTest_read_url)
 
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
-
     EXPECT_EQ(view->size(), 10653336u);
 
 }

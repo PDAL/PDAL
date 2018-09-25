@@ -112,12 +112,17 @@ namespace pdal
         {
             dimData data;
             std::string readName = attributes[i]["name"].asString();
+            data.name = readName;
             data.key = std::stoi(attributes[i]["key"].asString());
+            data.dataType =
+                attributes[i]["attributeValues"]["valueType"].asString();
+
 
             if(attributes[i].isMember("valueType"))
             {
                 data.dataType = attributes[i]["valueType"].asString();
             }
+
 
             if (readName == "RGB")
             {
@@ -126,26 +131,64 @@ namespace pdal
                 layout->registerDim(Dimension::Id::Blue);
                 // Since RGB are always packed together and handled specially,
                 // we'll use Red as our indicator that RGB exists.
+
                 m_dimMap[Dimension::Id::Red] = data;
             }
+            //Available dimension types can be found at https://git.io/fAbxS
             else if (m_dimensions.find(readName) != m_dimensions.end())
             {
-                layout->registerDim(m_dimensions.at(readName));
-                m_dimMap[m_dimensions.at(readName)] = data;
+                data.dimType = Dimension::Type::None;
+                if(data.dataType == "UInt8")
+                    data.dimType = Dimension::Type::Unsigned8;
+                else if(data.dataType == "UInt16")
+                    data.dimType = Dimension::Type::Unsigned16;
+                else if(data.dataType == "UInt32")
+                    data.dimType = Dimension::Type::Unsigned32;
+                else if(data.dataType == "UInt64")
+                    data.dimType = Dimension::Type::Unsigned64;
+                else if(data.dataType == "Int8")
+                    data.dimType = Dimension::Type::Signed8;
+                else if(data.dataType == "Int16")
+                    data.dimType = Dimension::Type::Signed16;
+                else if(data.dataType == "Int32")
+                    data.dimType = Dimension::Type::Signed32;
+                else if(data.dataType == "Int64")
+                    data.dimType = Dimension::Type::Signed64;
+                else if(data.dataType == "Float64")
+                    data.dimType = Dimension::Type::Double;
+                else if(data.dataType == "Float32")
+                    data.dimType = Dimension::Type::Float;
+                /*
+                else
+                    throw pdal_error(std::string ("Undefined dimension type"));
+                    */
 
+                if (data.dimType != Dimension::Type::None)
+                {
+                    layout->registerDim(m_dimensions.at(readName));
+                    m_dimMap[m_dimensions.at(readName)] = data;
+                }
+                else
+                {
+                    log()->get(LogLevel::Warning) <<
+                        "Could not find Dimension type for " <<
+                        readName << std::endl;
+                }
             }
             else if (attributes[i].isMember("attributeValues"))
             {
+
                 std::string s =
                     attributes[i]["attributeValues"]["valueType"].asString();
-
                 const pdal::Dimension::Id id = layout->registerOrAssignDim(
                         readName, pdal::Dimension::type(s));
                 m_dimMap[id] = data;
             }
             else
             {
-                layout->registerOrAssignDim(readName, Dimension::Type::Double);
+                const pdal::Dimension::Id id = layout->
+                    registerOrAssignDim(readName, Dimension::Type::Double);
+                m_dimMap[id] = data;
             }
         }
     }
@@ -193,7 +236,6 @@ namespace pdal
         for (std::size_t i = 0; i < nodes.size(); i++)
         {
             log()->get(LogLevel::Debug) << "\r" << i << "/" << nodes.size();
-            log()->get(LogLevel::Debug).flush();
             std::string localUrl;
 
             localUrl = m_filename + "/nodes/" + std::to_string(nodes[i]);
@@ -324,8 +366,9 @@ namespace pdal
         for (const auto& dimEntry : m_dimMap)
         {
             const Dimension::Id dimId(dimEntry.first);
+            const Dimension::Type dimType(dimEntry.second.dimType);
             const uint64_t key(dimEntry.second.key);
-            std::string dataType(dimEntry.second.dataType);
+            const std::string name(dimEntry.second.name);
 
             if (dimId == Dimension::Id::Red)
             {
@@ -365,9 +408,14 @@ namespace pdal
                         attrUrl, std::to_string(key), ".bin.gz");
 
                 std::lock_guard<std::mutex> lock(m_mutex);
+                std::size_t dimSize = Dimension::size(dimType);
 
-                // TODO Correct types.
-                if(dataType == "Uint8")
+                for (std::size_t i(0); i < selected.size(); ++i)
+                {
+                    view->setField(dimId, dimType, startId + i,
+                            data.data() + selected[i] * dimSize);
+                }
+                /*if(dataType == "Uint8")
                     setAs<uint8_t>(dimId, data, selected, view, startId);
                 else if(dataType == "Uint16")
                     setAs<uint16_t>(dimId, data, selected, view, startId);
@@ -389,6 +437,7 @@ namespace pdal
                     setAs<double>(dimId, data, selected, view, startId);
                 else if(dataType == "Float32")
                     setAs<float>(dimId, data, selected, view, startId);
+                */
             }
         }
     }

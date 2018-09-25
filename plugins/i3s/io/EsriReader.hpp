@@ -56,6 +56,19 @@
 #include <Eigen/Geometry>
 #include <gdal.h>
 #include <ogr_spatialref.h>
+namespace
+{
+std::map<std::string, pdal::Dimension::Id> const m_dimensions {
+        {"INTENSITY",   pdal::Dimension::Id::Intensity},
+        {"CLASS_CODE",  pdal::Dimension::Id::ClassFlags},
+        {"FLAGS",       pdal::Dimension::Id::Flag},
+        {"RETURNS",     pdal::Dimension::Id::NumberOfReturns},
+        {"USER_DATA",   pdal::Dimension::Id::UserData},
+        {"POINT_SRC_ID",pdal::Dimension::Id::PointSourceId},
+        {"GPS_TIME",    pdal::Dimension::Id::GpsTime},
+        {"SCAN_ANGLE",  pdal::Dimension::Id::ScanAngleRank}
+        };
+}
 
 namespace pdal
 {
@@ -108,18 +121,10 @@ protected:
     {
         int key;
         std::string dataType;
+        Dimension::Type dimType;
+        std::string name;
     };
     std::map<Dimension::Id, dimData> m_dimMap;
-    std::map<std::string, Dimension::Id> const m_dimensions {
-            {"INTENSITY",   Dimension::Id::Intensity},
-            {"CLASS_CODE",  Dimension::Id::ClassFlags},
-            {"FLAGS",       Dimension::Id::Flag},
-            {"RETURNS",     Dimension::Id::NumberOfReturns},
-            {"USER_DATA",   Dimension::Id::UserData},
-            {"POINT_SRC_ID",Dimension::Id::PointSourceId},
-            {"GPS_TIME",    Dimension::Id::GpsTime},
-            {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank}
-            };
 
     template<typename T>
     void setAs(Dimension::Id id, const std::vector<char>& data,

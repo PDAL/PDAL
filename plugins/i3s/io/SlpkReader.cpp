@@ -72,23 +72,9 @@ namespace pdal
     {
         //create temp path
         std::string path = arbiter::fs::getTempPath();
-        std::string subPath = m_filename;
-
-        //find last slpk filename and slpk extension place
-        std::size_t filestart = subPath.rfind("/");
-        std::size_t fileEnd = subPath.find(".slpk");
-
-        //trim path to make new subdirectory in tmp
-        //erase .slpk and remove leading '/'
-        if (fileEnd != std::string::npos)
-            subPath = subPath.erase(fileEnd, subPath.size());
-
-        if (filestart != std::string::npos)
-            subPath = subPath.substr(filestart + 1,
-                    subPath.size() - filestart);
 
         //use arbiter to create new directory if doesn't already exist
-        std::string fullPath = path+subPath;
+        std::string fullPath(path+ FileUtils::stem(FileUtils::getFilename(m_filename)));
         arbiter::fs::mkdirp(fullPath);
 
         //un-archive the slpk archive

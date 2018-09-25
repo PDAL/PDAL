@@ -3,11 +3,17 @@
 readers.slpk
 ===========
 
-`Scene Layer Packages (SLPK)`_ is a specification created by Esri as a format for their 3D Scene Layer and scene services. SLPK is a format that allows you to package all the necessary I3S files together and store them locally rather than find information through REST.
+`Scene Layer Packages (SLPK)`_ is a specification created by Esri as a format
+for their 3D Scene Layer and scene services. SLPK is a format that allows you
+to package all the necessary I3S files together and store them locally rather
+than find information through REST.
 
 Example
 --------------------------------------------------------------------------------
-This example will unarchive the slpk file, store it in a temp directory, and traverse it. The data will be reprojected to another spatial reference, and output to a las file. This is done through PDAL's command line interface or through the pipeline.
+This example will unarchive the slpk file, store it in a temp directory, and
+traverse it. The data will be reprojected to another spatial reference, and
+output to a las file. This is done through PDAL's command line interface or
+through the pipeline.
 
 .. code-block:: json
     {

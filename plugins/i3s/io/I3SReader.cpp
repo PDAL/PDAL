@@ -47,7 +47,6 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_features.hpp>
-#include <pdal/compression/LazPerfCompression.hpp>
 #include <gdal.h>
 
 namespace pdal
@@ -66,7 +65,16 @@ namespace pdal
 
     void I3SReader::initInfo()
     {
-        m_info = parse(m_arbiter->get(m_filename))["layers"][0];
+        try
+        {
+            m_info = parse(m_arbiter->get(m_filename))["layers"][0];
+        }catch(pdal_error& e)
+        {
+            throw pdal_error(std::string("Error parsing Json object. "
+                        "This could be due to a bad endpoint."));
+        }
+        if(m_info.empty())
+            throw pdal_error(std::string("Json object doesn't exist"));
 
         m_filename += "/layers/0";
     }
@@ -81,8 +89,6 @@ namespace pdal
         std::string nodeUrl = m_filename + "/nodepages/"
             + std::to_string(pageIndex);
 
-        // TODO Avoid doing this by using the max child node to figure out when
-        // to stop traversing.
         nodeIndexJson = parse(m_arbiter->get(nodeUrl));
 
         int pageSize = nodeIndexJson["nodes"].size();
