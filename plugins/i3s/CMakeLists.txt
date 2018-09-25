@@ -12,7 +12,7 @@ set_property(TARGET lepcc PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
     FILES
       io/I3SReader.cpp
-      io/EsriReceiver.cpp
+      io/EsriUtil.cpp
       io/SlpkExtractor.cpp
       io/EsriReader.cpp
     LINK_WITH
@@ -23,7 +23,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
 PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
     FILES
         io/SlpkReader.cpp
-        io/EsriReceiver.cpp
+        io/EsriUtil.cpp
         io/EsriReader.cpp
         io/SlpkExtractor.cpp
     LINK_WITH

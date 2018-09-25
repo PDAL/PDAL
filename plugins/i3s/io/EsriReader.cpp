@@ -244,7 +244,6 @@ namespace pdal
                 createView(localUrl, view);
             });
         }
-        const std::size_t pointSize(view->layout()->pointSize());
         return view->size();
     }
 
@@ -277,24 +276,24 @@ namespace pdal
 
         // Here we'll convert our halfsizes to x, y, and z vectors in respective
         // directions, which will give us new bounding planes
-        Eigen::Vector3d vxmax(hx,   0,   0);
-        Eigen::Vector3d vymax(0,   hy,   0);
-        Eigen::Vector3d vzmax(0,    0,  hz);
+        Eigen::Vector3d vecx(hx,   0,   0);
+        Eigen::Vector3d vecy(0,   hy,   0);
+        Eigen::Vector3d vecz(0,    0,  hz);
 
         // Create quaternion-like vectors
-        Eigen::Quaterniond pxmax, pxmin, pymax, pymin, pzmax, pzmin;
-        pxmax.w() = 0;
-        pymax.w() = 0;
-        pzmax.w() = 0;
-        pxmax.vec() = vxmax;
-        pymax.vec() = vymax;
-        pzmax.vec() = vzmax;
+        Eigen::Quaterniond quatVecX, pxmin, quatVecY, pymin, quatVecZ, pzmin;
+        quatVecX.w() = 0;
+        quatVecY.w() = 0;
+        quatVecZ.w() = 0;
+        quatVecX.vec() = vecx;
+        quatVecY.vec() = vecy;
+        quatVecZ.vec() = vecz;
 
         // Rotate all the individual vectors
         // gives us offset for the of the new x/y/zmax/min planes
-        Eigen::Quaterniond rxmax = q * pxmax * q.inverse();
-        Eigen::Quaterniond rymax = q * pymax * q.inverse();
-        Eigen::Quaterniond rzmax = q * pzmax * q.inverse();
+        Eigen::Quaterniond rotx = q * quatVecX * q.inverse();
+        Eigen::Quaterniond roty = q * quatVecY * q.inverse();
+        Eigen::Quaterniond rotz = q * quatVecZ * q.inverse();
 
         double minx, miny, minz, maxx, maxy, maxz;
         minx = miny = minz = std::numeric_limits<double>::max();
@@ -305,17 +304,17 @@ namespace pdal
         {
             double a(x), b(y), c(z);
 
-            a += rxmax.vec()[0] * (i & 1 ? 1.0 : -1.0);
-            b += rxmax.vec()[1] * (i & 1 ? 1.0 : -1.0);
-            c += rxmax.vec()[2] * (i & 1 ? 1.0 : -1.0);
+            a += rotx.vec()[0] * (i & 1 ? 1.0 : -1.0);
+            b += rotx.vec()[1] * (i & 1 ? 1.0 : -1.0);
+            c += rotx.vec()[2] * (i & 1 ? 1.0 : -1.0);
 
-            a += rymax.vec()[0] * (i & 2 ? 1.0 : -1.0);
-            b += rymax.vec()[1] * (i & 2 ? 1.0 : -1.0);
-            c += rymax.vec()[2] * (i & 2 ? 1.0 : -1.0);
+            a += roty.vec()[0] * (i & 2 ? 1.0 : -1.0);
+            b += roty.vec()[1] * (i & 2 ? 1.0 : -1.0);
+            c += roty.vec()[2] * (i & 2 ? 1.0 : -1.0);
 
-            a += rzmax.vec()[0] * (i & 4 ? 1.0 : -1.0);
-            b += rzmax.vec()[1] * (i & 4 ? 1.0 : -1.0);
-            c += rzmax.vec()[2] * (i & 4 ? 1.0 : -1.0);
+            a += rotz.vec()[0] * (i & 4 ? 1.0 : -1.0);
+            b += rotz.vec()[1] * (i & 4 ? 1.0 : -1.0);
+            c += rotz.vec()[2] * (i & 4 ? 1.0 : -1.0);
 
             OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
 
@@ -414,29 +413,6 @@ namespace pdal
                     view->setField(dimId, dimType, startId + i,
                             data.data() + selected[i] * dimSize);
                 }
-                /*if(dataType == "Uint8")
-                    setAs<uint8_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Uint16")
-                    setAs<uint16_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Uint32")
-                    setAs<uint32_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Uint64")
-                    setAs<uint64_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Int8")
-                    setAs<int8_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Int16")
-                    setAs<int16_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Int32")
-                    setAs<int32_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Int64")
-                    setAs<int64_t>(dimId, data, selected, view, startId);
-                else if(dataType == "Double")
-                    setAs<double>(dimId, data, selected, view, startId);
-                else if(dataType == "Float64")
-                    setAs<double>(dimId, data, selected, view, startId);
-                else if(dataType == "Float32")
-                    setAs<float>(dimId, data, selected, view, startId);
-                */
             }
         }
     }

@@ -35,7 +35,7 @@
 #pragma once
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
-#include "EsriReceiver.hpp"
+#include "EsriUtil.hpp"
 #include "pool.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
@@ -125,19 +125,6 @@ protected:
     };
     std::map<Dimension::Id, dimData> m_dimMap;
 
-    template<typename T>
-    void setAs(Dimension::Id id, const std::vector<char>& data,
-            const std::vector<int>& index, PointViewPtr view, uint64_t startId)
-    {
-        const T* pos(reinterpret_cast<const T*>(data.data()));
-
-        std::size_t offset(0);
-        for (const int j : index)
-        {
-            view->setField(id, startId + offset, *(pos + j));
-            ++offset;
-        }
-    }
 
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;

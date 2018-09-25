@@ -74,7 +74,7 @@ namespace pdal
                         "This could be due to a bad endpoint."));
         }
         if(m_info.isMember("layers"))
-            throwError(std::string("Json object doesn't exist"));
+            throwError(std::string("Incorrect Json object"));
 
         m_filename += "/layers/0";
     }
