@@ -57,7 +57,8 @@
 #include <ogr_spatialref.h>
 namespace
 {
-std::map<std::string, pdal::Dimension::Id> const m_dimensions {
+std::map<std::string, pdal::Dimension::Id> const m_dimensions
+{
         {"INTENSITY",   pdal::Dimension::Id::Intensity},
         {"CLASS_CODE",  pdal::Dimension::Id::ClassFlags},
         {"FLAGS",       pdal::Dimension::Id::Flag},
@@ -66,7 +67,20 @@ std::map<std::string, pdal::Dimension::Id> const m_dimensions {
         {"POINT_SRC_ID",pdal::Dimension::Id::PointSourceId},
         {"GPS_TIME",    pdal::Dimension::Id::GpsTime},
         {"SCAN_ANGLE",  pdal::Dimension::Id::ScanAngleRank}
-        };
+};
+std::map<std::string, pdal::Dimension::Type> const dimTypes
+{
+        {"UInt8", pdal::Dimension::Type::Unsigned8},
+        {"UInt16", pdal::Dimension::Type::Unsigned16},
+        {"UInt32", pdal::Dimension::Type::Unsigned32},
+        {"UInt64", pdal::Dimension::Type::Unsigned64},
+        {"Int8", pdal::Dimension::Type::Signed8},
+        {"Int16", pdal::Dimension::Type::Signed16},
+        {"Int32", pdal::Dimension::Type::Signed32},
+        {"Int64", pdal::Dimension::Type::Signed64},
+        {"Float64", pdal::Dimension::Type::Double},
+        {"Float32", pdal::Dimension::Type::Float}
+};
 }
 
 namespace pdal

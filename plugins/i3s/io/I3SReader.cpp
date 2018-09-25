@@ -73,7 +73,7 @@ namespace pdal
             throwError(std::string("Error parsing Json object. "
                         "This could be due to a bad endpoint."));
         }
-        if(!m_info.isMember("layers"))
+        if(m_info.empty())
             throwError(std::string("Incorrect Json object"));
 
         m_filename += "/layers/0";
