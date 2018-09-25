@@ -1,8 +1,7 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
 add_subdirectory(faux)
-
-if(BUILD_PLUGIN_I3S)
+if(BUILD_PLUGIN_I3S AND ZLIB_FOUND)
     add_subdirectory(i3s)
 endif()
 

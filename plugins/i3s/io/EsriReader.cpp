@@ -59,8 +59,7 @@ namespace pdal
     void EsriReader::addArgs(ProgramArgs& args)
     {
         args.add("bounds", "Bounds of the point cloud", m_args.bounds);
-        args.add("threads", "Number of threads to be used."
-                "This number will be squared", m_args.threads);
+        args.add("threads", "Number of threads to be used." , m_args.threads);
     }
 
     void EsriReader::initialize(PointTableRef table)
@@ -86,7 +85,7 @@ namespace pdal
         }
         catch (std::exception& e)
         {
-            throw pdal_error(std::string("Failed to fetch info: ") + e.what());
+            throwError(std::string("Failed to fetch info: ") + e.what());
         }
 
         //create pdal Bounds
@@ -94,12 +93,12 @@ namespace pdal
         //find number of nodes per nodepage
         m_nodeCap = m_info["store"]["index"]["nodesPerPage"].asInt();
 
-        log()->get(LogLevel::Debug) << "\n\nFileName: "
-            << m_filename << std::endl;
-        log()->get(LogLevel::Debug) << "\nThread Count: "
-            << m_args.threads << std::endl;
-        log()->get(LogLevel::Debug) << "Bounds: "
-            << m_args.bounds << std::endl;
+        log()->get(LogLevel::Debug) << "FileName: " <<
+            m_filename << std::endl;
+        log()->get(LogLevel::Debug) << "Thread Count: " <<
+            m_args.threads << std::endl;
+        log()->get(LogLevel::Debug) << "Bounds: " <<
+            m_args.bounds << std::endl;
     }
 
     void EsriReader::addDimensions(PointLayoutPtr layout)

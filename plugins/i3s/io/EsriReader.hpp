@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #pragma once
-#define ARBITER_ZLIB
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
 #include "EsriReceiver.hpp"

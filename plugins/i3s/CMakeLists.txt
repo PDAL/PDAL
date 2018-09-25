@@ -3,6 +3,7 @@ add_definitions(-DHAVE_JSONCPP=1)
 if (WIN32)
 add_definitions("-DARBITER_DLL_IMPORT")
 endif()
+add_definitions(-DARBITER_ZLIB)
 
 add_subdirectory(lepcc)
 set_property(TARGET lepcc PROPERTY POSITION_INDEPENDENT_CODE TRUE)

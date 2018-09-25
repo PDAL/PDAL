@@ -70,11 +70,11 @@ namespace pdal
             m_info = parse(m_arbiter->get(m_filename))["layers"][0];
         }catch(pdal_error& e)
         {
-            throw pdal_error(std::string("Error parsing Json object. "
+            throwError(std::string("Error parsing Json object. "
                         "This could be due to a bad endpoint."));
         }
-        if(m_info.empty())
-            throw pdal_error(std::string("Json object doesn't exist"));
+        if(m_info.isMember("layers"))
+            throwError(std::string("Json object doesn't exist"));
 
         m_filename += "/layers/0";
     }
@@ -99,9 +99,9 @@ namespace pdal
             BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
             int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
             bool overlap = m_bounds.overlaps(nodeBox);
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
             if (cCount == 0 && overlap)
             {
+                int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
                 nodes.push_back(name);
             }
             //keeps track of largest node so recursive loop knows when to stop

@@ -131,9 +131,9 @@ namespace pdal
             BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
             int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
             bool overlap = m_bounds.overlaps(nodeBox);
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
             if (cCount == 0 && overlap)
             {
+                int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
                 nodes.push_back(name);
             }
         }

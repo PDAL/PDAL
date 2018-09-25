@@ -9,7 +9,7 @@ Example
 --------------------------------------------------------------------------------
 This example will download the Autzen dataset from the arcgis scene server, reproject it to another spatial reference, and output it to a las file. This is done through PDAL's command line interface or through the pipeline.
 
-.. code-block:: json
+.. code-block:: json,
     {
         "pipeline":[
             {
@@ -22,14 +22,13 @@ This example will download the Autzen dataset from the arcgis scene server, repr
 
 ``pdal traslate i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer \
         autzen.las \
-        reprojection --filters.reprojection.out_srs=EPSG:3857 \
         --readers.i3s.threads=64 \
         --readers.i3s.bounds="([-123.075542,-123.06196],[44.049719,44.06278])"``
 
 Options
 --------------------------------------------------------------------------------
 filename
-    I3S file stored remotely, or a SLPK file stored locally. Remote files must be prefaced with an "i3s://".
+    I3S file stored remotely. These must be prefaced with an "i3s://".
     Exmaple remote file: ``pdal translate i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer autzen.las``
 
 threads
