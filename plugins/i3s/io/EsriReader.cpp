@@ -64,9 +64,12 @@ void EsriReader::addArgs(ProgramArgs& args)
 
 void EsriReader::initialize(PointTableRef table)
 {
+
     Json::Value config;
-    if (log()->getLevel() > LogLevel::Debug4)
+
+    if (isDebug() && log()->getLevel() > LogLevel::Debug4)
         config["arbiter"]["verbose"] = true;
+
     m_arbiter.reset(new arbiter::Arbiter(config));
 
     const std::string pre("i3s://");
