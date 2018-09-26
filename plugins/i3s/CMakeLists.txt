@@ -67,21 +67,38 @@ target_include_directories(${slpk_reader_libname} PRIVATE
 )
 
 if (WITH_TESTS)
-    PDAL_ADD_TEST(pdal_io_i3s_reader_test
+    PDAL_ADD_TEST(pdal_io_slpk_reader_test
             FILES
-                test/i3sReaderTest.cpp
+                test/SlpkReaderTest.cpp
             LINK_WITH
                 ${slpk_reader_libname}
-                ${i3s_reader_libname}
                 ${PDAL_JSONCPP_LIB_NAME}
                 ${GDAL_LIBRARY}
     )
-    target_include_directories(pdal_io_i3s_reader_test PRIVATE
+    target_include_directories(pdal_io_slpk_reader_test PRIVATE
             ${PDAL_JSONCPP_INCLUDE_DIR}
             ${PDAL_VENDOR_DIR}
             ${LEPCC_INCLUDE_DIR}
             ${PDAL_VENDOR_DIR}/eigen
             ${GDAL_INCLUDE_DIR}
     )
+
+    if (BUILD_PGPOINTCLOUD_TESTS)
+        PDAL_ADD_TEST(pdal_io_i3s_reader_test
+                FILES
+                    test/i3sReaderTest.cpp
+                LINK_WITH
+                    ${i3s_reader_libname}
+                    ${PDAL_JSONCPP_LIB_NAME}
+                    ${GDAL_LIBRARY}
+        )
+        target_include_directories(pdal_io_i3s_reader_test PRIVATE
+                ${PDAL_JSONCPP_INCLUDE_DIR}
+                ${PDAL_VENDOR_DIR}
+                ${LEPCC_INCLUDE_DIR}
+                ${PDAL_VENDOR_DIR}/eigen
+                ${GDAL_INCLUDE_DIR}
+        )
+    endif()
 endif()
 
