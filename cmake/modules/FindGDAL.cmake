@@ -92,12 +92,9 @@ SET(GDAL_NAMES gdal)
 IF(WIN32)
 
     SET(OSGEO4W_IMPORT_LIBRARY gdal_i)
-    IF(DEFINED ENV{OSGEO4W_ROOT})
-        SET(OSGEO4W_ROOT_DIR $ENV{OSGEO4W_ROOT})
-        #MESSAGE(STATUS " FindGDAL: trying OSGeo4W using environment variable OSGEO4W_ROOT=$ENV{OSGEO4W_ROOT}")
-    ELSE()
-        SET(OSGEO4W_ROOT_DIR c:/OSGeo4W)
-        #MESSAGE(STATUS " FindGDAL: trying OSGeo4W using default location OSGEO4W_ROOT=${OSGEO4W_ROOT_DIR}")
+    IF(DEFINED ENV{OSGEO4W_HOME})
+        SET(OSGEO4W_INCLUDE_DIR $ENV{OSGEO4W_ROOT}/include)
+        SET(OSGEO4W_LIB_DIR $ENV{OSGEO4W_ROOT}/lib)
     ENDIF()
 
     IF(MINGW)
@@ -108,7 +105,7 @@ IF(WIN32)
             /usr/local/include
             /usr/include
             c:/msys/local/include
-            ${OSGEO4W_ROOT_DIR}/include)
+            ${OSGEO4W_INCLUDE_DIR})
 
         FIND_LIBRARY(GDAL_LIBRARY
             NAMES ${GDAL_NAMES}
@@ -117,29 +114,26 @@ IF(WIN32)
             /usr/local/lib
             /usr/lib
             c:/msys/local/lib
-            ${OSGEO4W_ROOT_DIR}/lib)
+            ${OSGEO4W_LIB_DIR})
     ENDIF(MINGW)
 
     IF(MSVC)
-
         FIND_PATH(GDAL_INCLUDE_DIR
             NAMES gdal.h
-            PATH_PREFIXES gdal gdal-1.6
+            PATH_PREFIXES gdal
             PATHS
-            "${OSGEO4W_ROOT_DIR}/apps/gdal-dev/include"
-            "$ENV{LIB_DIR}/include/gdal"
-            ${OSGEO4W_ROOT_DIR}/include)
+            "${OSGEO4W_INCLUDE_DIR}"
+            "$ENV{LIB_DIR}/include/gdal")
 
         SET(GDAL_NAMES ${OSGEO4W_IMPORT_LIBRARY} ${GDAL_NAMES})
         FIND_LIBRARY(GDAL_LIBRARY
             NAMES ${GDAL_NAMES}
-            PATH_PREFIXES gdal gdal-1.6
+            PATH_PREFIXES gdal
             PATHS
             "$ENV{LIB_DIR}/lib"
             /usr/lib
             c:/msys/local/lib
-            "${OSGEO4W_ROOT_DIR}/apps/gdal-dev/lib"
-            ${OSGEO4W_ROOT_DIR}/lib)
+            "${OSGEO4W_LIB_DIR}")
 
         IF(GDAL_LIBRARY)
             SET(GDAL_LIBRARY;odbc32;odbccp32 CACHE STRING INTERNAL)
@@ -175,7 +169,6 @@ ELSEIF(UNIX)
         HINTS
         ${GDAL_CONFIG_PREFER_PATH}
         ${GDAL_CONFIG_PREFER_OSGEO4W_PATH}
-        ${GDAL_CONFIG_PREFER_FWTOOLS_PATH}
         ${GDAL_MAC_PATH}
         /usr/local/bin/
         /usr/bin/)

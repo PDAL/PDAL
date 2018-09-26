@@ -79,7 +79,6 @@ LasReader::~LasReader()
 
 void LasReader::addArgs(ProgramArgs& args)
 {
-    addSpatialReferenceArg(args);
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
     args.add("compression", "Decompressor to use", m_compression, "EITHER");
@@ -115,7 +114,7 @@ QuickInfo LasReader::inspect()
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
     if (!Utils::numericCast(m_header.pointCount(), qi.m_pointCount))
-        qi.m_pointCount = std::numeric_limits<point_count_t>::max();
+        qi.m_pointCount = (std::numeric_limits<point_count_t>::max)();
     qi.m_bounds = m_header.getBounds();
     qi.m_srs = getSpatialReference();
     qi.m_valid = true;
@@ -476,7 +475,7 @@ void LasReader::readExtraBytesVlr()
     }
     if (m_extraDims.size() && m_extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
-            "in pineline and VLR don't match.  Ignoring pipeline-specified "
+            "in pipeline and VLR don't match.  Ignoring pipeline-specified "
             "dimensions";
     m_extraDims = extraDims;
 }
@@ -619,7 +618,7 @@ bool LasReader::processOne(PointRef& point)
 point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
     size_t pointLen = m_header.pointLen();
-    count = std::min(count, getNumPoints() - m_index);
+    count = (std::min)(count, getNumPoints() - m_index);
 
     PointId i = 0;
     if (m_header.compressed())
@@ -646,8 +645,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
         point_count_t remaining = count;
 
         // Make a buffer at most a meg.
-        size_t bufsize = std::min<size_t>((point_count_t)1000000,
-            count * pointLen);
+        size_t bufsize = (std::min)((point_count_t)1000000, count * pointLen);
         std::vector<char> buf(bufsize);
         try
         {
@@ -686,7 +684,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
     size_t ptLen = m_header.pointLen();
     point_count_t blockpoints = buf.size() / ptLen;
 
-    blockpoints = std::min(maxpoints, blockpoints);
+    blockpoints = (std::min)(maxpoints, blockpoints);
     if (stream->eof())
         throw invalid_stream("stream is done");
 

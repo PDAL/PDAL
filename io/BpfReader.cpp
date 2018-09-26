@@ -36,9 +36,12 @@
 
 #include <climits>
 
-#include <zlib.h>
-
 #include <pdal/Options.hpp>
+#include <pdal/pdal_features.hpp>
+
+#ifdef PDAL_HAVE_ZLIB
+#include <zlib.h>
+#endif
 
 namespace pdal
 {
@@ -560,7 +563,7 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
         uint32_t u32;
     };
     std::unique_ptr<union uu> uArr(
-        new uu[std::min(count, numPoints() - m_index)]);
+        new uu[(std::min)(count, numPoints() - m_index)]);
 
     for (size_t d = 0; d < m_dims.size(); ++d)
     {

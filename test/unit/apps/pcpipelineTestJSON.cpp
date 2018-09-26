@@ -39,6 +39,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <io/LasReader.hpp>
+#include <filters/StatsFilter.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -65,7 +66,8 @@ void run_pipeline(std::string const& pipelineFile,
     std::string file(Support::configuredpath(pipelineFile));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " +
         options + " 2>&1", output);
-    EXPECT_EQ(0, stat);
+    EXPECT_EQ(0, stat) << "Failure running '" << pipelineFile << "' with "
+        "options '" << options << "'.";
     if (stat)
         std::cerr << output << std::endl;
     if (lookFor.size())
@@ -157,6 +159,7 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/decimate.json",
                             "pipeline/ferry-reproject.json",
                             "pipeline/las2csv.json",
+                            "pipeline/las2csv-with-unicode-paths.json",
                             "pipeline/las2geojson.json",
                             "pipeline/las2space-delimited.json",
                             "pipeline/merge.json",
@@ -305,11 +308,35 @@ TEST(json, tags)
     EXPECT_EQ(totalInputs, 3U);
 }
 
-TEST(json, issue1417)
+TEST(json, issue_1417)
 {
     std::string options = "--readers.las.filename=" +
         Support::datapath("las/utm15.las");
     run_pipeline("pipeline/issue1417.json", options);
+}
+
+// Make sure we handle repeated options properly
+TEST(json, issue_1941)
+{
+    PipelineManager manager;
+    std::string file;
+
+    file = Support::configuredpath("pipeline/range_multi_limits.json");
+    manager.readPipeline(file);
+    EXPECT_EQ(manager.execute(), (point_count_t)5);
+    const PointViewSet& s = manager.views();
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr view = *s.begin();
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 0), 3);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 1), 4);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 2), 5);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 3), 8);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 4), 9);
+
+    PipelineManager manager2;
+
+    file = Support::configuredpath("pipeline/range_bad_limits.json");
+    EXPECT_THROW(manager2.readPipeline(file), pdal_error);
 }
 
 // Test that stage options passed via --stage.<tagname>.<option> work.
@@ -386,6 +413,52 @@ TEST(json, stagetags)
         " --stage.reader.compression=laszip "
         "--stage.reader.compression=lazperf", output);
     EXPECT_NE(stat, 0);
+}
+
+// Make sure that spatialreference works for random readers
+TEST(json, issue_2159)
+{
+    class XReader : public Reader
+    {
+        std::string getName() const
+            { return "readers.x"; }
+
+        virtual void addDimensions(PointLayoutPtr layout)
+        {
+            using namespace Dimension;
+
+            layout->registerDims( { Id::X, Id::Y, Id::Z } );
+        }
+
+        virtual point_count_t read(PointViewPtr v, point_count_t count)
+        {
+            using namespace Dimension;
+
+            for (PointId idx = 0; idx < count; ++idx)
+            {
+                v->setField(Id::X, idx, idx);
+                v->setField(Id::Y, idx, 10 * idx);
+                v->setField(Id::Z, idx, 1.152);
+            }
+            return count;
+        }
+    };
+
+    XReader xr;
+    Options rOpts;
+    rOpts.add("count", "1000");
+    rOpts.add("spatialreference", "EPSG:4326");
+    xr.setOptions(rOpts);
+
+    StatsFilter f;
+    f.setInput(xr);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    PointViewPtr v = *(s.begin());
+    SpatialReference srs = v->spatialReference();
+    EXPECT_EQ(srs, SpatialReference("EPSG:4326"));
 }
 
 } // namespace pdal

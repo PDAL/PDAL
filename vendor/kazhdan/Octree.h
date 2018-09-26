@@ -150,7 +150,7 @@ public:
 		template< bool CreateNodes > bool getChildNeighbors( int cIdx , int d , Neighbors< Width >& childNeighbors , void (*Initializer)( OctNode& )=NULL ) const;
 		template< bool CreateNodes , class Real > bool getChildNeighbors( Point3D< Real > p , int d , Neighbors< Width >& childNeighbors , void (*Initializer)( OctNode& )=NULL ) const;
 		typename OctNode< NodeData >::template Neighbors< LeftRadius+RightRadius+1 >& getNeighbors( const OctNode* node ) { return getNeighbors< false >( const_cast<OctNode*>(node), NULL ); }
-		template< unsigned int _LeftRadius , unsigned int _RightRadius > void getNeighbors( const OctNode* node , Neighbors< _LeftRadius + _RightRadius + 1 >& neighbors ){ return getNeighbors< false , _LeftRadius , _RightRadius >( (OctNode*)node , NULL ); }
+		template< unsigned int _LeftRadius , unsigned int _RightRadius > void getNeighbors( const OctNode* node , Neighbors< _LeftRadius + _RightRadius + 1 >& neighbors ){ return getNeighbors< false , _LeftRadius , _RightRadius >( (const OctNode*)node , NULL ); }
 		bool getChildNeighbors( int cIdx , int d , Neighbors< Width >& childNeighbors ) const { return getChildNeighbors< false >( cIdx , d , childNeighbors , NULL ); }
 		template< class Real > bool getChildNeighbors( Point3D< Real > p , int d , Neighbors< Width >& childNeighbors ) const { return getChildNeighbors< false , Real >( p , d , childNeighbors , NULL ); }
 	};

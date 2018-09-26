@@ -158,6 +158,9 @@ protected:
     {}
 
 public:
+    virtual ~Arg()
+    {}
+
     /**
       Indicate that the argument shouldn't be shown in help text.
 
@@ -749,13 +752,9 @@ public:
     */
     virtual void setValue(const std::string& s)
     {
-        if (s.size() && s[0] == '-')
-        {
-            throw arg_val_error("Argument '" + m_longname +
-                "' needs a value and none was provided.");
-        }
-        m_rawVal = s;
         T var;
+
+        m_rawVal = s;
         if (!Utils::fromString(s, var))
         {
             std::string error(m_error);
@@ -866,11 +865,9 @@ public:
         for (auto& ts : slist)
             Utils::trim(ts);
 
-        if ((s.size() && s[0] == '-') || slist.empty())
-        {
+        if (slist.empty())
             throw arg_val_error("Missing value for argument '" + m_longname +
                 "'.");
-        }
         m_rawVal = s;
         if (!m_set)
             m_var.clear();
@@ -1237,7 +1234,7 @@ public:
             std::string nameDescrip = a->nameDescrip();
 
             info.push_back(std::make_pair(nameDescrip, a->description()));
-            namelen = std::max(namelen, nameDescrip.size());
+            namelen = (std::max)(namelen, nameDescrip.size());
         }
         size_t secondIndent = indent + 4;
         int postNameSpacing = 2;
@@ -1484,7 +1481,7 @@ private:
                 {
                     throw arg_error("Value '" + value +
                         "' provided for argument '" + name +
-                        "' when none is expected.");
+                        "' when 'true' or 'false' is expected.");
                 }
             }
             else

@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "pdal/pdal_features.hpp"
+
 #include "PipelineKernel.hpp"
 
 #ifdef PDAL_HAVE_LIBXML2

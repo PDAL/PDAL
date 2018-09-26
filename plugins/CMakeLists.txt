@@ -1,8 +1,14 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
+add_subdirectory(faux)
+
 if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
+
+if(BUILD_PLUGIN_DELAUNAY)
+    add_subdirectory(delaunay)
+endif(BUILD_PLUGIN_DELAUNAY)
 
 if(BUILD_PLUGIN_GEOWAVE)
     add_subdirectory(geowave)
@@ -10,10 +16,6 @@ endif(BUILD_PLUGIN_GEOWAVE)
 
 if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
     add_subdirectory(greyhound)
-endif()
-
-if(BUILD_PLUGIN_HEXBIN)
-    add_subdirectory(hexbin)
 endif()
 
 if(BUILD_PLUGIN_ICEBRIDGE)
@@ -65,6 +67,10 @@ if(BUILD_PLUGIN_OPENSCENEGRAPH)
     add_subdirectory(openscenegraph)
 endif()
 
+if(BUILD_PLUGIN_RDBLIB)
+    add_subdirectory(rdb)
+endif(BUILD_PLUGIN_RDBLIB)
+
 if(BUILD_PLUGIN_RIVLIB)
     add_subdirectory(rxp)
 endif(BUILD_PLUGIN_RIVLIB)
@@ -74,4 +80,8 @@ if(BUILD_PLUGIN_SQLITE)
         message(FATAL_ERROR "Can't build sqlite plugin without libxml2")
     endif()
     add_subdirectory(sqlite)
+endif()
+
+if (BUILD_PLUGIN_FBX)
+    add_subdirectory(fbx)
 endif()

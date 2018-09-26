@@ -113,6 +113,37 @@ with the :ref:`writers.gdal` writer:
 
 .. _processing_modes:
 
+Point Views and Multiple Outputs
+................................................................................
+
+Some filters produce sets of points as output.  filters.splitter, for example,
+creates a point set for each tile (rectangular area) in which input points
+exist.
+Each of these output sets is called a point view.  Point views are carried
+through a PDAL pipeline individually.  Some writers can produce separate
+output for each input point view.  These writers use a placeholder character
+(#) in the output filename which is replaced by an incrementing integer for
+each input point view.
+
+The following pipeline provides an example of writing multiple output
+files from a single pipeline.  The crop filter creates two output point views
+(one for each specified geometry) and the writer creates output files
+'output1.las' and 'output2.las' containing the two sets of points:
+
+.. code-block:: json
+
+  {
+      "pipeline":[
+          "input.las",
+          {
+              "type" : "filters.crop",
+              "bounds" :
+                  [ "([0, 75], [0, 75])", "([50, 125], [50, 125])" ],
+          },
+          "output#.las"
+      ]
+  }
+
 Processing Modes
 --------------------------------------------------------------------------------
 
@@ -194,9 +225,14 @@ For more on PDAL stages and their options, check the PDAL documentation on
 * A stage object may have additional members with names corresponding to
   stage-specific option names and their respective values. Values provided as
   JSON objects or arrays will be stringified and parsed within the stage.
+  Some options allow multiple inputs.  In those cases, provide the option
+  values as a JSON array.
 
-* Applications can place a ``user_data`` node on any stage object and it will be
+* A ``user_data`` option can be added to any stage object and it will be
   carried through to any serialized pipeline output.
+
+* All stages support the ``option_file`` option that allows options to be
+  places in a separate file. See :ref:`option_files` for details.
 
 Filename Globbing
 ................................................................................
@@ -204,6 +240,38 @@ Filename Globbing
 * A filename may contain the wildcard character ``*`` to match any string of
   characters. This can be useful if working with multiple input files in a
   directory (e.g., merging all files).
+
+  Filename globbing ONLY works in pipeline specifications.  It doesn't work
+  when a filename is provided as an option through a command-line application
+  like ``pdal pipeline`` or ``pdal translate``.
+
+.. _option_files:
+
+Option Files
+................................................................................
+
+All stages accept the ``option file`` option that allows extra options for a
+stage to be placed in a separate file.  The value of the option is the filename
+in which the additional options are located.
+
+Option files can be written using either JSON syntax or command line syntax.
+When using the JSON syntax, the format is a block of options just as if the
+options were placed in a pipeline:
+
+.. code-block:: json
+
+    {
+        "minor_version": 4,
+        "out_srs": "EPSG_4326"
+    }
+
+When using the command line syntax, the options are specified as they would
+be on the command line without the need to qualify the option names with
+the stage name:
+
+.. code-block:: none
+
+    --minor_version=4 --out_srs="EPSG_4326"
 
 Extended Examples
 --------------------------------------------------------------------------------
@@ -331,7 +399,7 @@ written as ASCII text.
           {
               "type":"colorization",
               "raster":"autzen.tif",
-              "dimensions":"Red:1:1, Green:2:1, Blue:3:1"
+              "dimensions": ["Red:1:1", "Green:2:1", "Blue:3:1" ]
           },
           {
               "filename":"junk.txt",
@@ -341,12 +409,11 @@ written as ASCII text.
       ]
   }
 
-Merge & Reproject
+Reproject
 ................................................................................
 
 Our first example with multiple readers, this pipeline infers the reader types,
-and assigns spatial reference information to each. Next, the
-:ref:`filters.merge` merges points from all previous readers, and the
+and assigns spatial reference information to each.
 :ref:`filters.reprojection` filter reprojects data to the specified output
 spatial reference system.
 
@@ -361,9 +428,6 @@ spatial reference system.
           {
               "filename":"1.2-with-color.las",
               "spatialreference":"EPSG:2027"
-          },
-          {
-              "type":"filters.merge"
           },
           {
               "type":"reprojection",
@@ -419,9 +483,9 @@ is a consumer of data, and a Filter is an actor on data.
 
 .. note::
 
-   As a C++ API consumer, you are generally not supposed to worry about the underlying
-   storage of the PointView, but there might be times when you simply just
-   "want the data." In those situations, you can use the
+   As a C++ API consumer, you are generally not supposed to worry about
+   the underlying storage of the PointView, but there might be times when
+   you simply just "want the data." In those situations, you can use the
    :cpp:func:`pdal::PointView::getBytes` method to stream out the raw storage.
 
 
@@ -475,11 +539,6 @@ PDAL. Readers follow the pattern of :ref:`readers.las` or
 :ref:`readers.oci`, Writers follow the pattern of :ref:`writers.las` or
 :ref:`readers.oci`, with Filters using :ref:`filters.reprojection` or
 :ref:`filters.crop`.
-
-.. note::
-
-    :ref:`stage_index` contains a full listing of possible stages and
-    descriptions of their options.
 
 .. note::
 

@@ -27,24 +27,6 @@
 // Specify the name of the .lib file.
 #  pragma comment(lib, BOOST_STRINGIZE(BOOST_ZLIB_BINARY))
 # endif
-#else 
-# if !defined(BOOST_IOSTREAMS_SOURCE) && \
-     !defined(BOOST_ALL_NO_LIB) && \
-     !defined(BOOST_IOSTREAMS_NO_LIB) \
-     /**/
-
-// Set the name of our library, this will get undef'ed by auto_link.hpp
-// once it's done with it.
-#  define BOOST_LIB_NAME pdalboost_zlib
-
-// If we're importing code from a dll, then tell auto_link.hpp about it.
-#  if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_IOSTREAMS_DYN_LINK)
-#   define BOOST_DYN_LINK
-#  endif
-
-// And include the header that does the work.
-#  include <boost/config/auto_link.hpp>
-# endif
 #endif
 
 #endif // #ifndef BOOST_IOSTREAMS_DETAIL_CONFIG_ZLIB_HPP_INCLUDED

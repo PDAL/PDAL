@@ -40,6 +40,7 @@ Debug/
 Release/
 RelWithDebInfo/
 ipch/
+CMakeSettings.json
 *.sln
 *.vcxproj
 *.vcxproj.filters
@@ -63,6 +64,11 @@ ipch/
 #
 .idea
 *.iml
+
+#
+# Vim backup
+#
+*.*~
 
 #
 # doxygen cruft

@@ -36,6 +36,7 @@
 #include <pdal/PluginManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -50,12 +51,23 @@ namespace pdal
 */
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
-    static const std::string ghPrefix("greyhound://");
-
     std::string ext;
-    // filename may actually be a greyhound uri + pipelineId
-    if (Utils::iequals(filename.substr(0, ghPrefix.size()), ghPrefix))
-        ext = ".greyhound";      // Make it look like an extension.
+
+    static const std::vector<std::string> protocols {
+        "ept",
+        "greyhound"
+    };
+
+    const auto protocol = std::find_if(protocols.begin(), protocols.end(),
+            [&filename](std::string protocol)
+            {
+                const std::string search(protocol + "://");
+                return Utils::iequals(filename.substr(0, search.size()),
+                        search);
+            });
+
+    if (protocol != protocols.end())
+        ext = "." + *protocol;
     else
         ext = FileUtils::extension(filename);
 

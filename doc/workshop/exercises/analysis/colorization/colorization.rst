@@ -27,6 +27,13 @@ to define it.
 .. literalinclude:: ./colorize.json
     :linenos:
 
+.. note::
+
+    This JSON file is available in your workshop materials in the
+    ``./exercises/analysis/colorization/colorize.json`` file. Remember to
+    open this file and replace each occurrence of ``c:/Users/hobu/PDAL/``
+    with the correct path for your machine.
+
 Pipeline breakdown
 ................................................................................
 
@@ -99,8 +106,7 @@ add a few options to have finer control over what is written. These include:
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `Docker
-Quickstart Terminal`:
+Invoke the following command, substituting accordingly, in your |Terminal|:
 
 
 .. literalinclude:: ./colorization-run-command.txt

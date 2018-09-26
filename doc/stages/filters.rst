@@ -36,6 +36,7 @@ invalidate an existing KD-tree.
    filters.cluster
    filters.colorinterp
    filters.colorization
+   filters.dem
    filters.eigenvalues
    filters.estimaterank
    filters.elm
@@ -45,6 +46,7 @@ invalidate an existing KD-tree.
    filters.lof
    filters.mongus
    filters.neighborclassifier
+   filters.nndistance
    filters.normal
    filters.outlier
    filters.overlay
@@ -89,7 +91,7 @@ invalidate an existing KD-tree.
 
 :ref:`filters.kdistance`
     Compute pointwise K-Distance (the Euclidean distance to a point's k-th
-    nearest neighbor).
+    nearest neighbor). [Deprecated - use :ref:`filters.nndistance`]
 
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
@@ -100,6 +102,9 @@ invalidate an existing KD-tree.
 
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
+
+:ref:`filters.nndistance`
+    Compute a distance metric based on nearest neighbors.
 
 :ref:`filters.normal`
     Compute pointwise normal and curvature, based on k-nearest neighbors.
@@ -317,10 +322,14 @@ existing KD-tree.
    :glob:
    :hidden:
 
+   filters.delaunay
    filters.greedyprojection
    filters.gridprojection
    filters.movingleastsquares
    filters.poisson
+
+:ref:`filters.delaunay`
+    Create mesh using Delaunay triangulation.
 
 :ref:`filters.greedyprojection`
     Create mesh using the Greedy Projection Triangulation approach.
@@ -374,6 +383,6 @@ Other
     Provide a hook for a simple point-by-point callback.
 
 :ref:`filters.voxelgrid`
-    Create a new point cloud composed of voxel centroids computed from the 
+    Create a new point cloud composed of voxel centroids computed from the
     input point cloud. All incoming dimension data (e.g., intensity, RGB) will
     be lost.

@@ -75,10 +75,12 @@ R"PDALEXTENSIONS(
     "writers.nitf" : "nitf, nsf, ntf",
     "readers.pcd" : "pcd",
     "writers.pcd" : "pcd",
+    "readers.rdb" : "rdbx",
     "readers.sqlite" : "sqlite, gpkg",
     "writers.sqlite" : "sqlite, gpkg",
     "readers.mrsid" : "sid",
-    "readers.rxp" : "rxp"
+    "readers.rxp" : "rxp",
+    "readers.fbx" : "fbx"
 }
 
 )PDALEXTENSIONS"
@@ -132,7 +134,8 @@ void StageExtensions::load()
     }
 }
 
-void StageExtensions::set(const std::string& stage, const StringList& exts)
+PDAL_DLL void StageExtensions::set(const std::string& stage,
+    const StringList& exts)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (Utils::startsWith(stage, "readers."))

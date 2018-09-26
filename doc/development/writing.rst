@@ -9,16 +9,16 @@ Writing with PDAL
 :Date: 11/02/2017
 
 
-This tutorial will describe a complete example of using PDAL C++ objects to write
-a LAS file. The example will show fetching data from your own data source rather than
-interacting with a :ref:`reader stage <stage_index>`.
+This tutorial will describe a complete example of using PDAL C++ objects
+to write a LAS file. The example will show fetching data from your own
+data source rather than interacting with a PDAL stage.
 
 .. note::
 
      If you implement your own :ref:`readers` that conforms to
-     PDAL's :cpp:class:`pdal::Stage`, you can implement a simple read-filter-write
-     pipeline using :ref:`pipeline` and not have to code anything explicit
-     yourself.
+     PDAL's :cpp:class:`pdal::Stage`, you can implement a simple
+     read-filter-write pipeline using :ref:`pipeline` and not have to
+     code anything explicit yourself.
 
 Includes
 -------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ and sends it to a writer.
 
 .. literalinclude:: ../../examples/writing/tutorial.cpp
    :language: cpp
-   :lines: 45-74
+   :lines: 35-64
 
 Compiling and running the program
 -------------------------------------------------------------------------------

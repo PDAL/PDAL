@@ -126,16 +126,16 @@ void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 
 void GreedyProjection::filter(PointView& view)
 {
-    pdal::NormalFilter().doFilter(view);
+    NormalFilter().doFilter(view);
 
-    pdal::KD3Index& tree = view.build3dIndex();
+    KD3Index& tree = view.build3dIndex();
 
     view_ = &view;
     mesh_ = view_->createMesh(getName());
     const double sqr_mu = mu_ * mu_;
     const double sqr_max_edge = search_radius_*search_radius_;
 
-    nnn_ = (int)std::min((point_count_t)nnn_, view.size());
+    nnn_ = (int)(std::min)((point_count_t)nnn_, view.size());
 
     // Variables to hold the results of nearest neighbor searches
     std::vector<PointId> nnIdx(nnn_);
@@ -154,17 +154,17 @@ void GreedyProjection::filter(PointView& view)
     already_connected_ = false; // see declaration for comments :P
 
     // initializing states and fringe neighbors
-    part_.clear ();
-    state_.clear ();
-    source_.clear ();
-    ffn_.clear ();
-    sfn_.clear ();
-    part_.resize(view.size ()); // indices of point's part
-    state_.resize(view.size (), GP3Type::FREE);
-    source_.resize(view.size ());
+    part_.clear();
+    state_.clear();
+    source_.clear();
+    ffn_.clear();
+    sfn_.clear();
+    part_.resize(view.size()); // indices of point's part
+    state_.resize(view.size(), GP3Type::FREE);
+    source_.resize(view.size());
     ffn_.resize(view.size());
     sfn_.resize(view.size());
-    fringe_queue_.clear ();
+    fringe_queue_.clear();
     int fqIdx = 0; // current fringe's index in the queue to be processed
 
   // Avoiding NaN coordinates if needed

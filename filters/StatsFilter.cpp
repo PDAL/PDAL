@@ -74,18 +74,22 @@ void Summary::extractMetadata(MetadataNode &m)
     if (!std::isinf(std) && !std::isnan(std))
         m.add("stddev", std, "standard deviation");
 
-    double k = kurtosis();
-    if (!std::isinf(k) && !std::isnan(k))
-        m.add("kurtosis", k, "kurtosis");
-
-    double sk = skewness();
-    if (!std::isinf(sk) && !std::isnan(sk))
-        m.add("skewness", skewness(), "skewness");
-
     double v = variance();
     if (!std::isinf(v) && !std::isnan(v))
         m.add("variance", v, "variance");
     m.add("name", m_name, "name");
+
+    if (m_advanced)
+    {
+        double k = kurtosis();
+        if (!std::isinf(k) && !std::isnan(k))
+            m.add("kurtosis", k, "kurtosis");
+
+        double sk = skewness();
+        if (!std::isinf(sk) && !std::isnan(sk))
+            m.add("skewness", skewness(), "skewness");
+    }
+
     if (m_enumerate == Enumerate)
     {
         for (auto& v : m_values)
@@ -169,6 +173,7 @@ void StatsFilter::addArgs(ProgramArgs& args)
     args.add("global", "Dimensions to compute global stats (median, mad, mode)",
         m_global);
     args.add("count", "Dimensions whose values should be counted", m_counts);
+    args.add("advanced", "Calculate skewness and kurtosis", m_advanced);
 }
 
 
@@ -232,7 +237,7 @@ void StatsFilter::prepared(PointTableRef table)
     // Create the summary objects.
     for (auto& dv : dims)
         m_stats.insert(std::make_pair(layout->findDim(dv.first),
-            Summary(dv.first, dv.second)));
+            Summary(dv.first, dv.second, m_advanced)));
 }
 
 

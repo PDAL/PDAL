@@ -36,6 +36,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.ply
    readers.pts
    readers.qfit
+   readers.rdb
    readers.rxp
    readers.sbet
    readers.sqlite
@@ -115,6 +116,10 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 :ref:`readers.rxp`
     Read data in the RXP format, the in-house streaming format used by RIEGL.
     The reader requires a copy of RiVLib during compilation.
+
+:ref:`readers.rdb`
+    Read data in the RDB format, the in-house database format used by RIEGL.
+    The reader requires a copy of rdblib during compilation and usage.
 
 :ref:`readers.sbet`
     Read the SBET format.

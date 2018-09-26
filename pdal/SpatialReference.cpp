@@ -98,6 +98,34 @@ bool SpatialReference::valid() const
 }
 
 
+std::string SpatialReference::identifyHorizontalEPSG() const
+{
+    OGRScopedSpatialReference srs(ogrCreateSrs(getHorizontal()));
+
+    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
+        return "";
+
+    if (const char* c = srs->GetAuthorityCode(nullptr))
+        return std::string(c);
+
+    return "";
+}
+
+
+std::string SpatialReference::identifyVerticalEPSG() const
+{
+    OGRScopedSpatialReference srs(ogrCreateSrs(getVertical()));
+
+    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
+        return "";
+
+    if (const char* c = srs->GetAuthorityCode(nullptr))
+        return std::string(c);
+
+    return "";
+}
+
+
 std::string SpatialReference::getWKT() const
 {
     return m_wkt;
@@ -194,8 +222,6 @@ std::string SpatialReference::getVerticalUnits() const
 {
     std::string tmp;
 
-    std::string wkt = getVertical();
-    const char* poWKT = wkt.c_str();
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
     if (poSRS)
     {
@@ -238,8 +264,6 @@ std::string SpatialReference::getHorizontal() const
 
 std::string SpatialReference::getHorizontalUnits() const
 {
-    std::string wkt = getHorizontal();
-    const char* poWKT = wkt.c_str();
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
 
     if (!poSRS)
@@ -311,6 +335,17 @@ bool SpatialReference::isGeocentric() const
         return false;
 
     bool output = OSRIsGeocentric(current.get());
+    return output;
+}
+
+
+bool SpatialReference::isProjected() const
+{
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    if (!current)
+        return false;
+
+    bool output = OSRIsProjected(current.get());
     return output;
 }
 
@@ -389,15 +424,15 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 
 int SpatialReference::getUTMZone() const
 {
-
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
     if (!current)
         throw pdal_error("Could not fetch current SRS");
 
     int north(0);
     int zone = OSRGetUTMZone(current.get(), &north);
-    return north*zone;
+    return (north ? 1 : -1) * zone;
 }
+
 
 int SpatialReference::computeUTMZone(const BOX3D& box) const
 {

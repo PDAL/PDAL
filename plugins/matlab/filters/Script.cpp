@@ -125,8 +125,6 @@ PointLayoutPtr Script::getStructLayout(mxArray* array, LogPtr log)
             mt == mxINT16_CLASS  ||
             mt == mxUINT16_CLASS ||
             mt == mxINT32_CLASS  ||
-            mt == mxDOUBLE_CLASS ||
-            mt == mxINT32_CLASS  ||
             mt == mxUINT32_CLASS ||
             mt == mxINT64_CLASS  ||
             mt == mxUINT64_CLASS )

@@ -120,20 +120,20 @@ public:
         return 0;
     }
 
-    static Point max(const Point& a, const Point& b)
+    static Point maximum(const Point& a, const Point& b)
     {
         return Point(
-                std::max(a.x, b.x),
-                std::max(a.y, b.y),
-                std::max(a.z, b.z));
+                (std::max)(a.x, b.x),
+                (std::max)(a.y, b.y),
+                (std::max)(a.z, b.z));
     }
 
-    static Point min(const Point& a, const Point& b)
+    static Point minimum(const Point& a, const Point& b)
     {
         return Point(
-                std::min(a.x, b.x),
-                std::min(a.y, b.y),
-                std::min(a.z, b.z));
+                (std::min)(a.x, b.x),
+                (std::min)(a.y, b.y),
+                (std::min)(a.z, b.z));
     }
 
     static Point normalize(const Point& p)
@@ -385,7 +385,7 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point)
 
     auto printCoord([&os](double d)
     {
-        if (d == std::numeric_limits<double>::max()) os << "max";
+        if (d == (std::numeric_limits<double>::max)()) os << "max";
         else if (d == std::numeric_limits<double>::lowest()) os << "min";
         else if (std::trunc(d) == d) os << static_cast<long>(d);
         else
@@ -433,20 +433,20 @@ public:
     Color() : r(0), g(0), b(0) { }
     Color(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) { }
 
-    static Color min(const Color& a, const Color& b)
+    static Color minimum(const Color& a, const Color& b)
     {
         return Color(
-                std::min(a.r, b.r),
-                std::min(a.g, b.g),
-                std::min(a.b, b.b));
+                (std::min)(a.r, b.r),
+                (std::min)(a.g, b.g),
+                (std::min)(a.b, b.b));
     }
 
-    static Color max(const Color& a, const Color& b)
+    static Color maximum(const Color& a, const Color& b)
     {
         return Color(
-                std::max(a.r, b.r),
-                std::max(a.g, b.g),
-                std::max(a.b, b.b));
+                (std::max)(a.r, b.r),
+                (std::max)(a.g, b.g),
+                (std::max)(a.b, b.b));
     }
 
     uint8_t r, g, b;

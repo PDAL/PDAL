@@ -75,7 +75,7 @@ TEST(PlyWriter, Write)
     writer.execute(table);
 }
 
-TEST(PlyWriter, mesh)
+void testMesh(const std::string referenceFile, int precision)
 {
     std::string outfile(Support::temppath("out.ply"));
     std::string testfile(Support::datapath("ply/mesh.ply"));
@@ -117,13 +117,43 @@ TEST(PlyWriter, mesh)
     wo.add("filename", outfile);
     wo.add("storage_mode", "ascii");
     wo.add("faces", true);
+    if (precision >= 0)
+        wo.add("precision", precision);
     w.setInput(r);
     w.setOptions(wo);
 
     w.prepare(t);
     w.execute(t);
 
-    EXPECT_TRUE(Support::compare_text_files(outfile, testfile));
+    EXPECT_TRUE(Support::compare_text_files(outfile, referenceFile));
 }
 
+
+TEST(PlyWriter, mesh)
+{
+    testMesh(Support::datapath("ply/mesh.ply"), -1);
+    testMesh(Support::datapath("ply/mesh_fixed.ply"), 3);
 }
+
+// Make sure that you can't use precision with ascii output.
+TEST(PlyWriter, precisionException)
+{
+    Options readerOptions;
+    readerOptions.add("count", 750);
+    readerOptions.add("mode", "random");
+    FauxReader reader;
+    reader.setOptions(readerOptions);
+
+    Options writerOptions;
+    writerOptions.add("filename", Support::temppath("out.ply"));
+    writerOptions.add("storage_mode", "little endian");
+    writerOptions.add("precision", 3);
+    PlyWriter writer;
+    writer.setOptions(writerOptions);
+    writer.setInput(reader);
+
+    PointTable table;
+    EXPECT_THROW(writer.prepare(table), pdal_error);
+}
+
+} // namespace pdal

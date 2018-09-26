@@ -66,6 +66,8 @@ private:
     {
         Property(const std::string& name) : m_name(name)
         {}
+        virtual ~Property()
+        {}
 
         std::string m_name;
 

@@ -19,6 +19,8 @@ References
 
 .. [Li2010] Li, Ruosi, et al. "Polygonizing extremal surfaces with manifold guarantees." Proceedings of the 14th ACM Symposium on Solid and Physical Modeling. ACM, 2010.
 
+.. [Limberger2015] Limberger, Frederico A., and Manuel M. Oliveira. “Real-Time Detection of Planar Regions in Unorganized Point Clouds.” Pattern Recognition 48.6 (2015): 2043–2053. Web.
+
 .. [Mesh2009] ALoopingIcon. "Meshing Point Clouds." *MESHLAB STUFF*. n.p., 7 Sept. 2009. Web. 13 Nov. 2015.
 
 .. [Mongus2012] Mongus, D., Zalik, B., 2012. Parameter-free ground filtering of LiDAR data for automatic DTM generation. ISPRS J. Photogramm. Remote Sens. 67, 1–12.

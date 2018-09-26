@@ -8,10 +8,6 @@ Order of business
 * PDF http://pdal.io/PDAL.pdf
 * Links everywhere
 
-Guinea Pigs
-================================================================================
-
-    .. image:: ./img/guinea.gif
 
 Goals
 ================================================================================
@@ -27,8 +23,7 @@ Who are we
 ================================================================================
 
 * Howard Butler
-* Connor Manning
-* Rick Brown
+* Michael Smith
 
 
 Howard Butler
@@ -41,20 +36,13 @@ Howard Butler
 
 .. _`Hobu, Inc.`: http://hobu.co
 
-Connor Manning
+Michael Smith
 ================================================================================
 
-* Works @ `Hobu, Inc.`_
-* Develops Entwine https://entwine.io
-* Develops Greyhound http://greyhound.io
-* Tweets @ http://twitter.com/csmannin
-
-Rick Brown
-================================================================================
-
-* Works here!
-* LiDAR data processing and management
-* Entwine with Connor Manning
+* Physical Research Scientist, USACE CRREL
+* Develops open source GIS and LiDAR software
+* Commits over 15 years
+* Tweets @ http://twitter.com/michael_smith
 
 Next
 ================================================================================

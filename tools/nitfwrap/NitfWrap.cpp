@@ -156,7 +156,7 @@ void NitfWrap::unwrap()
     in->seekg(offset, std::istream::beg);
     while (length)
     {
-        size_t size = std::min(length, bufsize);
+        size_t size = (std::min)(length, bufsize);
         in->read(buf.data(), size);
         out->write(buf.data(), size);
         length -= size;

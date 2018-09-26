@@ -3,17 +3,26 @@
 filters.estimaterank
 ===============================================================================
 
-``filters.estimaterank`` computes the rank (i.e., the number of nonzero singular
-values) of a neighborhood of points.
+``filters.estimaterank`` uses singular value decomposition (SVD) to estimate
+the rank of a set of points. Point sets with rank 1 correspond to linear
+features, while sets with rank 2 correspond to planar features. Rank 3
+corresponds to a full 3D feature. In practice this can be used alone, or
+possibly in conjunction with other filters to extract features (e.g.,
+buildings, vegetation).
 
-This method uses Eigen's JacobiSVD class to solve the singular value
-decomposition and to estimate the rank using the user-specified threshold. A
-singular value will be considered nonzero if its absolute value is greater than
-the product of the user-supplied threshold and the absolute value of the maximum
-singular value.
+Two parameters are required to estimate rank (though the default values will be
+suitable in many cases). First, the ``knn`` parameter defines the number of
+points to consider when computing the SVD and estimated rank. Second, the
+``thresh`` parameter is used to determine when a singular value shall be
+considered non-zero (when the absolute value of the singular value is greater
+than the threshold).
 
-More on JacobiSVD can be found at
-https://eigen.tuxfamily.org/dox/classEigen_1_1JacobiSVD.html.
+The rank estimation is performed on a pointwise basis, meaning for each point
+in the input point cloud, we find its ``knn`` neighbors, compute the SVD, and
+estimate rank. ``filters.estimaterank`` creates a new dimension called ``Rank``
+that can be used downstream of this filter stage in the pipeline. The type of
+writer used will determine whether or not the ``Rank`` dimension itself can be
+saved to disk.
 
 .. embed::
 

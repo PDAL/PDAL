@@ -5,20 +5,8 @@ REM and install it to C:\pdalbin before letting AppVeyor upload it as
 REM an artifact to S3.
 
 SET PDAL_INSTALL_PREFIX="C:/OSGeo4W64/"
-
-if "%OSGEO4W_BUILD%"=="ON" (
-
-SET PDAL_OPTIONAL_COMPONENTS=ON
 SET PDAL_PLUGIN_INSTALL_PATH="C:/OSGeo4W64/bin"
-set PDAL_BUILD_TESTS=OFF
-
-) ELSE (
-
-mkdir C:\pdalbin
-SET PDAL_PLUGIN_INSTALL_PATH="C:\pdalbin"
 set PDAL_BUILD_TESTS=ON
-
-)
 
 REM needed or else CMake won't find the Oracle library that OSGeo4W installs
 

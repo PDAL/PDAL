@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <assert.h>
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -127,20 +128,34 @@ bool BOX3D::valid() const
     return !empty();
 }
 
-void BOX2D::grow(double x, double y)
+
+BOX2D& BOX2D::grow(double dist)
+{
+    assert(valid());
+    minx -= dist;
+    maxx += dist;
+    miny -= dist;
+    maxy += dist;
+    return *this;
+}
+
+
+BOX2D& BOX2D::grow(double x, double y)
 {
     if (x < minx) minx = x;
     if (x > maxx) maxx = x;
 
     if (y < miny) miny = y;
     if (y > maxy) maxy = y;
+    return *this;
 }
 
-void BOX3D::grow(double x, double y, double z)
+BOX3D& BOX3D::grow(double x, double y, double z)
 {
     BOX2D::grow(x, y);
     if (z < minz) minz = z;
     if (z > maxz) maxz = z;
+    return *this;
 }
 
 const BOX2D& BOX2D::getDefaultSpatialExtent()
@@ -166,6 +181,8 @@ Bounds::Bounds(const BOX2D& box) : m_box(box)
     m_box.maxz = LOWEST;
 }
 
+// We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
+// BOX3D ctor that takes a BOX2D if that's what you want.
 BOX3D Bounds::to3d() const
 {
     if (!is3d())

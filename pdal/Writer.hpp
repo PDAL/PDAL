@@ -62,12 +62,12 @@ public:
     Writer()
         {}
 
-protected:
     /**
       Locate template placeholder ('#') and validate filename with respect
       to placeholder.
     */
-    std::string::size_type handleFilenameTemplate(const std::string& filename);
+    static std::string::size_type
+        handleFilenameTemplate(const std::string& filename);
 
 private:
     virtual PointViewSet run(PointViewPtr view)

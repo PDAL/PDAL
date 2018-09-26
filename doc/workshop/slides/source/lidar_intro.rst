@@ -53,7 +53,7 @@ Georeferencing
 How is LiDAR processed?
 ================================================================================
 
-* Vendor-specific software (e.g. RiSCAN Pro and RiProcess, from |Riegl|)
+* Vendor-specific software (e.g. RiSCAN PRO and RiPROCESS, from |RIEGL|)
 * Other commercial softwares (e.g. TerraStation, QT Modeler)
 * Mixed-source software (e.g. LASTools)
 * Open-source software (e.g. CloudCompare, PDAL, laspy)

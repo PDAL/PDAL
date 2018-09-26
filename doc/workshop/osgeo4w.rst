@@ -9,8 +9,6 @@ OSGeo4W
 .. include:: ./includes/substitutions.rst
 
 
-
-
 What is OSGeo4W?
 --------------------------------------------------------------------------------
 
@@ -29,13 +27,6 @@ Fortunately, OSGeo4W provides us a fully-featured known
 configuration to run our examples and exercises without having to suffer
 so much.
 
-
-.. note::
-
-    Not everyone uses Windows. Another alternative to get a known configuration
-    is to go through the workshop using :ref:`docker` as your platform. A
-    previous edition of the workshop was provided as Docker, but it was
-    found to be a bit too difficult to follow.
 
 Installing OSGeo4W
 --------------------------------------------------------------------------------
@@ -61,3 +52,21 @@ Installing OSGeo4W
    section and choose the ``PDAL`` package.
 
    .. image:: ./images/osgeo4w-pdal-selection.png
+
+5. Search for "QGIS" in the search box or drill down through the Desktop
+   section and choose the ``QGIS`` package. This will be used in a later
+   section of the workshop.
+
+   .. image:: ./images/osgeo4w-qgis-selection.png
+
+6. You will probably get a screen telling you that you have unmet dependencies.
+   You must check the box next to ``Install these packages to meet dependencies (RECOMMENDED)``
+   for PDAL to work.
+
+   .. image:: ./images/osgeo4w-dep-selection.png
+
+7. You will probably get at least one screen asking you to accept a license agreement.
+   You must check the box next to ``I agreed with the above license terms`` on each screen
+   for PDAL to work.
+
+   .. image:: ./images/osgeo4w-license-selection.png

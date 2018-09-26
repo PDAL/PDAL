@@ -55,7 +55,9 @@ SOFTWARE.
 #include <arbiter/arbiter.hpp>
 
 #include <arbiter/driver.hpp>
+#include <arbiter/util/sha256.hpp>
 #include <arbiter/util/util.hpp>
+#include <arbiter/util/transforms.hpp>
 #endif
 
 #include <algorithm>
@@ -427,15 +429,13 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
             throw ArbiterError("Temporary endpoint must be local.");
         }
 
-        std::string name(path);
-        std::replace(name.begin(), name.end(), '/', '-');
-        std::replace(name.begin(), name.end(), '\\', '-');
-        std::replace(name.begin(), name.end(), ':', '_');
-
-        tempEndpoint.put(name, getBinary(path));
-
+        const auto ext(getExtension(path));
+        const std::string basename(
+                crypto::encodeAsHex(crypto::sha256(stripExtension(path))) +
+                (ext.size() ? "." + ext : ""));
+        tempEndpoint.put(basename, getBinary(path));
         localHandle.reset(
-                new fs::LocalHandle(tempEndpoint.root() + name, true));
+                new fs::LocalHandle(tempEndpoint.root() + basename, true));
     }
     else
     {
@@ -486,6 +486,12 @@ std::string Arbiter::getExtension(const std::string path)
 
     if (pos != std::string::npos) return path.substr(pos + 1);
     else return std::string();
+}
+
+std::string Arbiter::stripExtension(const std::string path)
+{
+    const std::size_t pos(path.find_last_of('.'));
+    return path.substr(0, pos);
 }
 
 } // namespace arbiter
@@ -629,6 +635,9 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 
 #include <arbiter/arbiter.hpp>
 #include <arbiter/driver.hpp>
+#include <arbiter/drivers/fs.hpp>
+#include <arbiter/util/sha256.hpp>
+#include <arbiter/util/transforms.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -682,6 +691,36 @@ bool Endpoint::isLocal() const
 bool Endpoint::isHttpDerived() const
 {
     return tryGetHttpDriver() != nullptr;
+}
+
+std::unique_ptr<fs::LocalHandle> Endpoint::getLocalHandle(
+        const std::string subpath) const
+{
+    std::unique_ptr<fs::LocalHandle> handle;
+
+    if (isRemote())
+    {
+        const std::string tmp(fs::getTempPath());
+        const auto ext(Arbiter::getExtension(subpath));
+        const std::string basename(
+                crypto::encodeAsHex(crypto::sha256(Arbiter::stripExtension(
+                            prefixedRoot() + subpath))) +
+                    (ext.size() ? "." + ext : ""));
+
+        const std::string local(tmp + basename);
+
+        drivers::Fs fs;
+        fs.put(local, getBinary(subpath));
+
+        handle.reset(new fs::LocalHandle(local, true));
+    }
+    else
+    {
+        handle.reset(
+                new fs::LocalHandle(fs::expandTilde(fullPath(subpath)), false));
+    }
+
+    return handle;
 }
 
 std::string Endpoint::get(const std::string subpath) const
@@ -875,7 +914,9 @@ const drivers::Http& Endpoint::getHttpDriver() const
 #include <glob.h>
 #include <sys/stat.h>
 #else
-
+#define UNICODE
+#include <Shlwapi.h>
+#include <iterator>
 #include <locale>
 #include <codecvt>
 #include <windows.h>
@@ -1054,7 +1095,10 @@ bool mkdirp(std::string raw)
         if (err && errno != EEXIST) return false;
 #else
         // Use CreateDirectory instead of _mkdir; it is more reliable when creating directories on a drive other than the working path.
-        const bool err(::CreateDirectory(cur.c_str(), NULL));
+
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		const std::wstring wide(converter.from_bytes(cur));
+		const bool err(::CreateDirectoryW(wide.c_str(), NULL));
         if (err && ::GetLastError() != ERROR_ALREADY_EXISTS) return false;
 #endif
     }
@@ -1078,6 +1122,33 @@ namespace
         std::vector<std::string> files;
         std::vector<std::string> dirs;
     };
+
+template<typename C>
+	std::basic_string<C> remove_dups(std::basic_string<C> s, C c)
+	{
+		C cc[3] = { c, c };
+		auto pos = s.find(cc);
+		while (pos != s.npos) {
+			s.erase(pos, 1);
+			pos = s.find(cc, pos + 1);
+		}
+		return s;
+	}
+
+#ifdef ARBITER_WINDOWS
+	bool icase_wchar_cmp(wchar_t a, wchar_t b)
+	{
+		return std::toupper(a, std::locale()) == std::toupper(b, std::locale());
+	}
+
+
+	bool icase_cmp(std::wstring const& s1, std::wstring const& s2)
+	{
+		return (s1.size() == s2.size()) &&
+			std::equal(s1.begin(), s1.end(), s2.begin(),
+				icase_wchar_cmp);
+	}
+#endif
 
     Globs globOne(std::string path)
     {
@@ -1106,28 +1177,54 @@ namespace
 
         globfree(&buffer);
 #else
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        const std::wstring wide(converter.from_bytes(path));
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+		std::wstring wide(converter.from_bytes(path));
 
-        LPWIN32_FIND_DATAW data{};
-        HANDLE hFind(FindFirstFileW(wide.c_str(), data));
+		WIN32_FIND_DATAW data{};
+		LPCWSTR fname = wide.c_str();
+        HANDLE hFind(INVALID_HANDLE_VALUE);
+		hFind = FindFirstFileW(fname, &data);
 
-        if (hFind != INVALID_HANDLE_VALUE)
+		if (hFind == (HANDLE)-1) return results; // bad filename
+
+        if (hFind != INVALID_HANDLE_VALUE )
         {
             do
             {
-                if ((data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+				if (icase_cmp(std::wstring(data.cFileName), L".") ||
+					icase_cmp(std::wstring(data.cFileName), L".."))
+					continue;
+
+				std::vector<wchar_t> buf(MAX_PATH);
+				wide.erase(std::remove(wide.begin(), wide.end(), '*'), wide.end());
+
+				std::replace(wide.begin(), wide.end(), '\\', '/');
+
+				std::copy(wide.begin(), wide.end(), buf.begin()	);
+                BOOL appended = PathAppendW(buf.data(), data.cFileName);
+
+				std::wstring output(buf.data(), wcslen( buf.data()));
+
+                // Erase any \'s
+                output.erase(std::remove(output.begin(), output.end(), '\\'), output.end());
+
+                if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
-                    results.files.push_back(
-                            converter.to_bytes(data->cFileName));
+                    results.dirs.push_back(converter.to_bytes(output));
+
+                    output.append(L"/*");
+                    Globs more = globOne(converter.to_bytes(output));
+                    std::copy(more.dirs.begin(), more.dirs.end(), std::back_inserter(results.dirs));
+                    std::copy(more.files.begin(), more.files.end(), std::back_inserter(results.files));
+
                 }
-                else
-                {
-                    results.dirs.push_back(converter.to_bytes(data->cFileName));
-                }
+
+				results.files.push_back(
+					converter.to_bytes(output));
             }
-            while (FindNextFileW(hFind, data));
+            while (FindNextFileW(hFind, &data));
         }
+		FindClose(hFind);
 #endif
 
         return results;
@@ -1200,17 +1297,21 @@ std::string expandTilde(std::string in)
 
 std::string getTempPath()
 {
+    std::string tmp;
 #ifndef ARBITER_WINDOWS
-    if (const auto t = util::env("TMPDIR"))     return *t;
-    if (const auto t = util::env("TMP"))        return *t;
-    if (const auto t = util::env("TEMP"))       return *t;
-    if (const auto t = util::env("TEMPDIR"))    return *t;
-    return "/tmp";
+    if (const auto t = util::env("TMPDIR"))         tmp = *t;
+    else if (const auto t = util::env("TMP"))       tmp = *t;
+    else if (const auto t = util::env("TEMP"))      tmp = *t;
+    else if (const auto t = util::env("TEMPDIR"))   tmp = *t;
+    else tmp = "/tmp";
 #else
     std::vector<char> path(MAX_PATH, '\0');
-    if (GetTempPath(MAX_PATH, path.data())) return path.data();
-    else throw ArbiterError("Could not find a temp path.");
+    if (GetTempPath(MAX_PATH, path.data())) tmp.assign(path.data());
 #endif
+
+    if (tmp.empty()) throw ArbiterError("Could not find a temp path.");
+    if (tmp.back() != '/') tmp += '/';
+    return tmp;
 }
 
 LocalHandle::LocalHandle(const std::string localPath, const bool isRemote)
@@ -1729,14 +1830,32 @@ S3::Config::Config(
     , m_baseUrl(extractBaseUrl(json, m_region))
     , m_precheck(json["precheck"].asBool())
 {
-    if (json["sse"].asBool())
+    if (json["sse"].asBool() || env("AWS_SSE"))
     {
         m_baseHeaders["x-amz-server-side-encryption"] = "AES256";
     }
 
-    if (json["requesterPays"].asBool())
+    if (json["requesterPays"].asBool() || env("AWS_REQUESTER_PAYS"))
     {
         m_baseHeaders["x-amz-request-payer"] = "requester";
+    }
+
+    if (json.isMember("headers"))
+    {
+        const auto& headers(json["headers"]);
+
+        if (headers.isObject())
+        {
+            for (const std::string key : headers.getMemberNames())
+            {
+                m_baseHeaders[key] = headers[key].asString();
+            }
+        }
+        else
+        {
+            std::cout << "s3.headers expected to be object - skipping" <<
+                std::endl;
+        }
     }
 }
 
@@ -1750,17 +1869,17 @@ std::string S3::Config::extractRegion(
 
     drivers::Fs fsDriver;
 
-    if (auto p = util::env("AWS_REGION"))
+    if (!json.isNull() && json.isMember("region"))
+    {
+        return json["region"].asString();
+    }
+    else if (auto p = util::env("AWS_REGION"))
     {
         return *p;
     }
     else if (auto p = util::env("AWS_DEFAULT_REGION"))
     {
         return *p;
-    }
-    else if (!json.isNull() && json.isMember("region"))
-    {
-        return json["region"].asString();
     }
     else if (std::unique_ptr<std::string> c = fsDriver.tryGet(configPath))
     {
@@ -1885,6 +2004,9 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
 {
     std::unique_ptr<std::size_t> size;
 
+    Headers headers(m_config->baseHeaders());
+    headers.erase("x-amz-server-side-encryption");
+
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
             "HEAD",
@@ -1892,7 +2014,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
             resource,
             m_auth->fields(),
             Query(),
-            Headers(),
+            headers,
             empty);
 
     drivers::Http http(m_pool);
@@ -1961,6 +2083,11 @@ void S3::put(
 
     Headers headers(m_config->baseHeaders());
     headers.insert(userHeaders.begin(), userHeaders.end());
+
+    if (Arbiter::getExtension(rawPath) == "json")
+    {
+        headers["Content-Type"] = "application/json";
+    }
 
     const ApiV4 apiV4(
             "PUT",
@@ -2122,9 +2249,12 @@ S3::ApiV4::ApiV4(
 
     if (verb == "PUT" || verb == "POST")
     {
-        m_headers["Content-Type"] = "application/octet-stream";
-        m_headers["Transfer-Encoding"] = "";
-        m_headers["Expect"] = "";
+        if (!m_headers.count("Content-Type"))
+        {
+            m_headers["Content-Type"] = "application/octet-stream";
+        }
+        m_headers.erase("Transfer-Encoding");
+        m_headers.erase("Expect");
     }
 
     const Headers normalizedHeaders(
@@ -2311,7 +2441,6 @@ std::string S3::Resource::host() const
 #ifdef ARBITER_CUSTOM_NAMESPACE
 }
 #endif
-
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/s3.cpp
@@ -2663,24 +2792,24 @@ std::string Google::Auth::sign(
 
     EVP_PKEY* key(loadKey(pkey, false));
 
-    EVP_MD_CTX ctx;
-    EVP_MD_CTX_init(&ctx);
-    EVP_DigestSignInit(&ctx, nullptr, EVP_sha256(), nullptr, key);
+    EVP_MD_CTX* ctx(EVP_MD_CTX_new());
+    EVP_MD_CTX_init(ctx);
+    EVP_DigestSignInit(ctx, nullptr, EVP_sha256(), nullptr, key);
 
-    if (EVP_DigestSignUpdate(&ctx, data.data(), data.size()) == 1)
+    if (EVP_DigestSignUpdate(ctx, data.data(), data.size()) == 1)
     {
         std::size_t size(0);
-        if (EVP_DigestSignFinal(&ctx, nullptr, &size) == 1)
+        if (EVP_DigestSignFinal(ctx, nullptr, &size) == 1)
         {
             std::vector<unsigned char> v(size, 0);
-            if (EVP_DigestSignFinal(&ctx, v.data(), &size) == 1)
+            if (EVP_DigestSignFinal(ctx, v.data(), &size) == 1)
             {
                 signature.assign(reinterpret_cast<const char*>(v.data()), size);
             }
         }
     }
 
-    EVP_MD_CTX_cleanup(&ctx);
+    EVP_MD_CTX_free(ctx);
     if (signature.empty()) throw ArbiterError("Could not sign JWT");
     return signature;
 #else
@@ -3106,6 +3235,12 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <arbiter/util/curl.hpp>
 #include <arbiter/util/http.hpp>
 #include <arbiter/util/util.hpp>
+
+
+#ifdef ARBITER_ZLIB
+#include <arbiter/third/gzip/decompress.hpp>
+#endif
+
 #endif
 
 #ifdef ARBITER_CURL
@@ -3406,6 +3541,24 @@ Response Curl::get(
 
     // Run the command.
     const int httpCode(perform());
+
+    for (auto& h : receivedHeaders)
+    {
+        std::string& v(h.second);
+        while (v.size() && v.front() == ' ') v = v.substr(1);
+        while (v.size() && v.back() == ' ') v.pop_back();
+    }
+
+    if (receivedHeaders["Content-Encoding"] == "gzip")
+    {
+#ifdef ARBITER_ZLIB
+        std::string s(gzip::decompress(data.data(), data.size()));
+        data.assign(s.begin(), s.end());
+#else
+        throw ArbiterError("Cannot decompress zlib");
+#endif
+    }
+
     return Response(httpCode, data, receivedHeaders);
 #else
     throw ArbiterError(fail);
@@ -4479,7 +4632,8 @@ Time::Time(const std::string& s, const std::string& format)
 {
     static const int64_t utcOffset(utcOffsetSeconds());
 
-    std::tm tm;
+    std::tm tm{};
+
 #ifndef ARBITER_WINDOWS
     // We'd prefer to use get_time, but it has poor compiler support.
     if (!strptime(s.c_str(), format.c_str(), &tm))
@@ -4495,8 +4649,7 @@ Time::Time(const std::string& s, const std::string& format)
     }
 #endif
     if (utcOffset > std::numeric_limits<int>::max())
-    	throw ArbiterError("Can't convert offset time in seconds to tm type.");
-
+        throw ArbiterError("Can't convert offset time in seconds to tm type.");
     tm.tm_sec -= (int)utcOffset;
     m_time = std::mktime(&tm);
 }
@@ -4594,8 +4747,12 @@ std::string getBasename(const std::string fullPath)
     const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
 
     // Now do the real slash searching.
-    const std::size_t pos(stripped.rfind('/'));
-
+    std::size_t pos(stripped.rfind('/'));
+    
+    // Maybe windows
+    if (pos == std::string::npos) 
+        pos = stripped.rfind('\\');
+    
     if (pos != std::string::npos)
     {
         const std::string sub(stripped.substr(pos + 1));

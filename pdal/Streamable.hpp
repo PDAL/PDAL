@@ -40,8 +40,11 @@
 namespace pdal
 {
 
+class StreamableWrapper;
+
 class PDAL_DLL Streamable : public virtual Stage
 {
+    friend class StreamableWrapper;
 public:
     Streamable();
 
@@ -75,10 +78,13 @@ protected:
     Streamable& operator=(const Streamable&) = delete;
     Streamable(const Streamable&); // not implemented
 
-    void execute(StreamPointTable& table, std::list<Streamable *>& stages);
+    using SrsMap = std::map<Streamable *, SpatialReference>;
+
+    void execute(StreamPointTable& table, std::list<Streamable *>& stages,
+        SrsMap& srsMap);
 
     /**
-      Process a single point (streaming mode).  Implement in sublcass.
+      Process a single point (streaming mode).  Implement in subclass.
 
       \param point  Point to process.
       \return  Readers return false when no more points are to be read.
@@ -99,7 +105,7 @@ protected:
 
        \param srs  New spatial reference.
     */
-    virtual void spatialReferenceChanged(const SpatialReference& srs)
+    virtual void spatialReferenceChanged(const SpatialReference& /*srs*/)
     {}
 };
 

@@ -75,8 +75,8 @@ namespace eigen
   \param ids a vector of PointIds specifying a subset of points.
   \return the 3D centroid of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
-        std::vector<PointId> ids);
+PDAL_DLL Eigen::Vector3d computeCentroid(PointView& view,
+    const std::vector<PointId>& ids);
 
 /**
   Compute the covariance matrix of a collection of points.
@@ -101,7 +101,7 @@ PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
   \return the covariance matrix of the XYZ dimensions.
 */
 PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view,
-        std::vector<PointId> ids);
+    const std::vector<PointId>& ids);
 
 /**
   Compute second derivative in X direction using central difference method.
@@ -232,7 +232,7 @@ PDAL_DLL Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data);
   \param ids a vector of PointIds specifying a subset of points.
   \return the estimated rank.
 */
-PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids,
+PDAL_DLL uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
                              double threshold);
 
 /**

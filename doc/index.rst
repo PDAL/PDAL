@@ -28,10 +28,10 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**04-05-2018**
+**04-06-2018**
 ................................................................................
 
-PDAL 1.7.0 has been released. Visit :ref:`download` to obtain a copy of the
+PDAL 1.7.1 has been released. Visit :ref:`download` to obtain a copy of the
 source code, or follow the :ref:`quickstart` to get going in a hurry with
 `Docker`_.
 

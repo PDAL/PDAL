@@ -22,20 +22,23 @@ IF(WIN32)
   ENDIF (MINGW)
 
   IF (MSVC)
-    IF(DEFINED ENV{OSGEO4W_ROOT})
-      SET(OSGEO4W_ROOT_DIR $ENV{OSGEO4W_ROOT})
-    ELSE()
-      SET(OSGEO4W_ROOT_DIR c:/OSGeo4W64)
-    ENDIF()  
+    # Try to use OSGeo4W installation
+    IF(DEFINED ENV{OSGEO4W_HOME})
+        SET(OSGEO4W_INCLUDE_DIR $ENV{OSGEO4W_ROOT}/include)
+        SET(OSGEO4W_LIB_DIR $ENV{OSGEO4W_ROOT}/lib)
+    ENDIF()
 
-    FIND_PATH(GEOS_INCLUDE_DIR geos_c.h $ENV{LIB_DIR}/include $ENV{INCLUDE} ${OSGEO4W_ROOT_DIR}/include)
+    FIND_PATH(GEOS_INCLUDE_DIR geos_c.h 
+		$ENV{LIB_DIR}/include 
+		$ENV{INCLUDE} 
+		${OSGEO4W_INCLUDE_DIR})
     FIND_LIBRARY(GEOS_LIBRARY NAMES geos geos_c PATHS 
       "$ENV{LIB}/lib"
       $ENV{LIB}
       #mingw
       c:/msys/local/lib
-	  ${OSGEO4W_ROOT_DIR}/lib
-      NO_DEFAULT_PATH
+	  ${OSGEO4W_LIB_DIR}
+      
       )
     IF (GEOS_LIBRARY)
        SET (
@@ -161,6 +164,19 @@ ENDIF(WIN32)
 IF (GEOS_INCLUDE_DIR AND GEOS_LIBRARY)
    SET(GEOS_FOUND TRUE)
 ENDIF (GEOS_INCLUDE_DIR AND GEOS_LIBRARY)
+
+if (NOT GEOS_INCLUDE_DIR OR NOT GEOS_LIBRARY)
+  include(SelectLibraryConfigurations)
+  select_library_configurations(GEOS)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(GEOS REQUIRED_VARS GEOS_LIBRARY GEOS_INCLUDE_DIR)
+  if(GEOS_FOUND)
+    set(GEOS_INCLUDE_DIRS ${GEOS_INCLUDE_DIR})
+    if(NOT GEOS_LIBRARIES)
+      set(GEOS_LIBRARIES ${GEOS_LIBRARY})
+    endif()
+  endif()
+endif()
 
 IF (GEOS_FOUND)
 

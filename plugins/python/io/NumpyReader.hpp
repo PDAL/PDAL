@@ -48,12 +48,23 @@ namespace pdal
 
 class PDAL_DLL NumpyReader : public Reader, public Streamable
 {
+    enum class Order
+    {
+        Row,
+        Column
+    };
+    friend std::ostream& operator << (std::ostream& out,
+        const NumpyReader::Order& order);
+    friend std::istream& operator >> (std::istream& in,
+        NumpyReader::Order& order);
 public:
-    NumpyReader()
+    NumpyReader& operator=(const NumpyReader&) = delete;
+    NumpyReader(const NumpyReader&) = delete;
+    NumpyReader() : m_array(NULL)
     {}
 
+    void setArray(PyObject* array);
     std::string getName() const;
-    point_count_t getNumPoints() const;
 
 private:
     virtual void initialize();
@@ -64,8 +75,12 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
-    bool loadPoint(PointRef& point, point_count_t position );
+    void createFields(PointLayoutPtr layout);
+    bool nextPoint();
+    bool loadPoint(PointRef& point, point_count_t position);
     void wakeUpNumpyArray();
+    Dimension::Id registerDim(PointLayoutPtr layout, const std::string& name,
+        Dimension::Type pdalType);
     void prepareFieldsArray(PointLayoutPtr layout);
     void prepareRasterArray(PointLayoutPtr layout);
 
@@ -84,22 +99,26 @@ private:
     point_count_t m_numPoints;
     int m_numFields;
 
+    Arg *m_orderArg;
     int m_ndims;
     std::string m_defaultDimension;
+    Order m_order;
+    bool m_storeXYZ;
+    size_t m_xIter;
+    size_t m_yIter;
+    size_t m_zIter;
+    size_t m_xDiv;
+    size_t m_yDiv;
+    size_t m_zDiv;
 
-    size_t m_xDimNum;
-    size_t m_yDimNum;
-    size_t m_zDimNum;
-    double m_assignZ;
-
-    std::vector<pdal::Dimension::Id> m_ids;
-    std::vector<pdal::Dimension::Type> m_types;
-    std::vector<int> m_sizes;
-    std::vector<int> m_offsets;
+    struct Field
+    {
+        Dimension::Id m_id;
+        Dimension::Type m_type;
+        int m_offset;
+    };
+    std::vector<Field> m_fields;
     point_count_t m_index;
-
-    NumpyReader& operator=(const NumpyReader&); // not implemented
-    NumpyReader(const NumpyReader&); // not implemented
 };
 
 } // namespace pdal

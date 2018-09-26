@@ -120,13 +120,11 @@ void GDALWriter::prepared(PointTableRef table)
             "' does not exist.");
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
-}
-
-
-void GDALWriter::readyTable(PointTableRef table)
-{
-    if (m_bounds.to2d().empty() && !table.supportsView())
-        throwError("Option 'bounds' required in streaming mode.");
+    m_fixedGrid = m_bounds.to2d().valid();
+    // If we've specified a grid, we don't expand by point.  We also
+    // don't expand by point if we're running in standard mode.  That's
+    // set later in writeView.
+    m_expandByPoint = !m_fixedGrid;
 }
 
 
@@ -135,7 +133,8 @@ void GDALWriter::readyFile(const std::string& filename,
 {
     m_outputFilename = filename;
     m_srs = srs;
-    if (m_bounds.to2d().valid())
+    m_grid.reset();
+    if (m_fixedGrid)
         createGrid(m_bounds.to2d());
 }
 
@@ -148,7 +147,7 @@ void GDALWriter::createGrid(BOX2D bounds)
     try
     {
         m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
-                    m_outputTypes, m_windowSize));
+            m_outputTypes, m_windowSize));
     }
     catch (GDALGrid::error& err)
     {
@@ -184,16 +183,20 @@ void GDALWriter::expandGrid(BOX2D bounds)
 
 void GDALWriter::writeView(const PointViewPtr view)
 {
-    BOX2D bounds;
-    if (m_bounds.to2d().valid())
-        bounds = m_bounds.to2d();
-    else
-        view->calculateBounds(bounds);
+    m_expandByPoint = false;
 
-    if (!m_grid)
-        createGrid(bounds);
-    else
-        expandGrid(bounds);
+    // When we're running in standard mode, it's better to get the bounds and
+    // expand once, rather than have to do this for every point, since an
+    // expansion causes data to move.
+    if (!m_fixedGrid)
+    {
+        BOX2D bounds;
+        view->calculateBounds(bounds);
+        if (!m_grid)
+            createGrid(bounds);
+        else
+            expandGrid(bounds);
+    }
 
     PointRef point(*view, 0);
     for (PointId idx = 0; idx < view->size(); ++idx)
@@ -206,11 +209,19 @@ void GDALWriter::writeView(const PointViewPtr view)
 
 bool GDALWriter::processOne(PointRef& point)
 {
-    double x = point.getFieldAs<double>(Dimension::Id::X) -
-        m_curBounds.minx;
-    double y = point.getFieldAs<double>(Dimension::Id::Y) -
-        m_curBounds.miny;
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(m_interpDim);
+
+    if (m_expandByPoint)
+    {
+        if (!m_grid)
+            createGrid(BOX2D(x, y, x, y));
+        else if (!m_curBounds.contains(x, y))
+            expandGrid(BOX2D(x, y, x, y));
+    }
+    x -= m_curBounds.minx;
+    y -= m_curBounds.miny;
 
     m_grid->addPoint(x, y, z);
     return true;
@@ -219,10 +230,10 @@ bool GDALWriter::processOne(PointRef& point)
 
 void GDALWriter::doneFile()
 {
-    if (!m_grid) {
-        throw pdal_error("Unable to write GDAL data, grid is uninitialized. You "
-                "might have provided the GDALWriter zero points.");
-    }
+    if (!m_grid)
+        throw pdal_error("Unable to write GDAL data with no points "
+            "for output.");
+
     std::array<double, 6> pixelToPos;
 
     pixelToPos[0] = m_curBounds.minx;

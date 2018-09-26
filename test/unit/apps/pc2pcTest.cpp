@@ -39,6 +39,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_features.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 

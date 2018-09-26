@@ -36,8 +36,18 @@
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 #ifdef PDAL_HAVE_LAZPERF
+#pragma push_macro("min")
+#pragma push_macro("max")
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <laz-perf/factory.hpp>
 #include <laz-perf/io.hpp>
+#pragma pop_macro("max")
+#pragma pop_macro("min")
 #endif
 
 #include "LasWriter.hpp"
@@ -167,7 +177,7 @@ void LasWriter::initialize()
 
 void LasWriter::spatialReferenceChanged(const SpatialReference&)
 {
-    if (++m_srsCnt > 1)
+    if (++m_srsCnt > 1 && m_aSrs.empty())
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
             "point spatial references." << std::endl;
@@ -295,6 +305,7 @@ void LasWriter::fillForwardList()
 
 void LasWriter::readyTable(PointTableRef table)
 {
+    m_firstPoint = true;
     m_forwardMetadata = table.privateMetadata("lasforward");
     if(m_writePDALMetadata)
     {
@@ -490,12 +501,14 @@ void LasWriter::addGeotiffVlrs()
 
         addVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID,
                 "GeoTiff GeoKeyDirectoryTag", tags.directoryData());
-        addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
+        if (tags.doublesData().size())
+            addVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID,
                 "GeoTiff GeoDoubleParamsTag", tags.doublesData());
-        addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
+        if (tags.asciiData().size())
+            addVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID,
                 "GeoTiff GeoAsciiParamsTag", tags.asciiData());
     }
-    catch (GeotiffTags::error& err)
+    catch (Geotiff::error& err)
     {
         throwError(err.what());
     }
@@ -740,10 +753,52 @@ void LasWriter::openCompression()
 }
 
 
+// This is only called in stream mode.
 bool LasWriter::processOne(PointRef& point)
 {
-    //ABELL - Need to do something about auto offset.
+    if (m_firstPoint)
+    {
+        auto doScale = [this](const XForm::XFormComponent& scale,
+            const std::string& name)
+        {
+            if (scale.m_auto)
+                log()->get(LogLevel::Warning) << "Auto scale for " << name <<
+                "requested in stream mode.  Using value of 1.0." << std::endl;
+        };
 
+        doScale(m_scaling.m_xXform.m_scale, "X");
+        doScale(m_scaling.m_yXform.m_scale, "Y");
+        doScale(m_scaling.m_zXform.m_scale, "Z");
+
+        auto doOffset = [this](XForm::XFormComponent& offset, double val,
+            const std::string name)
+        {
+            if (offset.m_auto)
+            {
+                offset.m_val = val;
+                log()->get(LogLevel::Warning) << "Auto offset for " << name <<
+                    "requested in stream mode.  Using value of " <<
+                    offset.m_val << "." << std::endl;
+            }
+        };
+
+        doOffset(m_scaling.m_xXform.m_offset,
+            point.getFieldAs<double>(Dimension::Id::X), "X");
+        doOffset(m_scaling.m_yXform.m_offset,
+            point.getFieldAs<double>(Dimension::Id::Y), "Y");
+        doOffset(m_scaling.m_zXform.m_offset,
+            point.getFieldAs<double>(Dimension::Id::Z), "Z");
+
+        m_firstPoint = false;
+    }
+    return processPoint(point);
+}
+
+
+// This is separated from processOne so that we're sure when processOne is
+// called we know we're in stream mode.
+bool LasWriter::processPoint(PointRef& point)
+{
     if (m_compression == LasCompression::LasZip)
     {
         if (!writeLasZipBuf(point))
@@ -783,13 +838,13 @@ void LasWriter::writeView(const PointViewPtr view)
         for (PointId idx = 0; idx < view->size(); ++idx)
         {
             point.setPointId(idx);
-            processOne(point);
+            processPoint(point);
         }
     }
     else
     {
         // Make a buffer of at most a meg.
-        m_pointBuf.resize(std::min((point_count_t)1000000,
+        m_pointBuf.resize((std::min)((point_count_t)1000000,
                     pointLen * view->size()));
 
         const PointView& viewRef(*view.get());
@@ -1078,7 +1133,7 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
     PointId startId, std::vector<char>& buf)
 {
     point_count_t blocksize = buf.size() / m_lasHeader.pointLen();
-    blocksize = std::min(blocksize, view.size() - startId);
+    blocksize = (std::min)(blocksize, view.size() - startId);
     PointId lastId = startId + blocksize;
 
     LeInserter ostream(buf.data(), buf.size());

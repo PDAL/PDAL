@@ -66,11 +66,15 @@ void PlyWriter::addArgs(ProgramArgs& args)
     args.add("storage_mode", "PLY Storage Mode", m_format, Format::Ascii);
     args.add("dims", "Dimension names", m_dimNames);
     args.add("faces", "Write faces", m_faces);
+    m_precisionArg = &args.add("precision", "Output precision", m_precision, 3);
 }
 
 
 void PlyWriter::prepared(PointTableRef table)
 {
+    if (m_precisionArg->set() && m_format != Format::Ascii)
+        throwError("Option 'precision' can only be set of the 'storage_mode' "
+            "is ascii.");
     if (m_dimNames.size())
     {
         for (auto& name : m_dimNames)
@@ -109,7 +113,7 @@ std::string PlyWriter::getType(Dimension::Type type) const
     {
         return types.at(type);
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {
         throwError("Can't write dimension of type '" +
                 Dimension::interpretationName(type) + "'.");
@@ -143,12 +147,17 @@ void PlyWriter::writeHeader(PointLayoutPtr layout) const
 
 void PlyWriter::ready(PointTableRef table)
 {
-    if (pointCount() > std::numeric_limits<uint32_t>::max())
+    if (pointCount() > (std::numeric_limits<uint32_t>::max)())
         throwError("Can't write PLY file.  Only " +
-            std::to_string(std::numeric_limits<uint32_t>::max()) +
+            std::to_string((std::numeric_limits<uint32_t>::max)()) +
             " points supported.");
 
     m_stream = Utils::createFile(m_filename, true);
+    if (m_format == Format::Ascii && m_precisionArg->set())
+    {
+        *m_stream << std::fixed;
+        m_stream->precision(m_precision);
+    }
     writeHeader(table.layout());
 }
 

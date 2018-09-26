@@ -14,7 +14,10 @@ PDAL_ADD_PLUGIN(reader_libname reader oci
         io/OciReader.cpp
         io/OciWrapper.cpp
     LINK_WITH
-        ${ORACLE_LIBRARY})
+        ${ORACLE_LIBRARY}
+        ${GDAL_LIBRARY}
+        ${LIBXML2_LIBRARIES}
+)
 target_include_directories(${reader_libname} PRIVATE
     ${ORACLE_INCLUDE_DIR}
     ${PDAL_VENDOR_DIR}/pdalboost
@@ -27,7 +30,11 @@ PDAL_ADD_PLUGIN(writer_libname writer oci
         io/OciCommon.cpp
         io/OciWrapper.cpp
         io/OciWriter.cpp
-    LINK_WITH ${ORACLE_LIBRARY})
+    LINK_WITH
+        ${ORACLE_LIBRARY}
+        ${GDAL_LIBRARY}
+        ${LIBXML2_LIBRARIES}
+)
 target_include_directories(${writer_libname} PRIVATE
     ${ORACLE_INCLUDE_DIR}
     ${PDAL_VENDOR_DIR}/pdalboost
@@ -39,7 +46,7 @@ if(BUILD_OCI_TESTS)
     PDAL_ADD_TEST(ocitest
         FILES
             test/OCITest.cpp
-        LINK_WITH ${reader_libname} ${writer_libname})
+        LINK_WITH ${reader_libname} ${writer_libname} ${GDAL_LIBRARY} ${LIBXML2_LIBRARY})
     target_include_directories(ocitest PRIVATE
         ${ORACLE_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR})

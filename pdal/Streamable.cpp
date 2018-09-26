@@ -35,6 +35,7 @@
 #include <iterator>
 
 #include <pdal/Streamable.hpp>
+#include <pdal/Reader.hpp>
 
 namespace pdal
 {
@@ -93,7 +94,7 @@ void Streamable::execute(StreamPointTable& table)
             for (auto s : *this)
             {
                 s->startLogging();
-                s->l_done(table);
+                s->done(table);
                 s->stopLogging();
             }
         }
@@ -123,6 +124,7 @@ void Streamable::execute(StreamPointTable& table)
     // As an example, if there are four paths from the end stage (writer) to
     // reader stages, there will be four stage lists and execute(table, stages)
     // will be called four times.
+    SrsMap srsMap;
     Streamable *s = this;
     stages.push_front(s);
     while (true)
@@ -134,15 +136,15 @@ void Streamable::execute(StreamPointTable& table)
             (lastRunStages - stages).done(table);
             // Call ready on all the stages we didn't run last time.
             (stages - lastRunStages).ready(table);
-            execute(table, stages);
+            execute(table, stages, srsMap);
             lastRunStages = stages;
         }
         else
         {
-            for (auto s2 : s->m_inputs)
+            for (auto bi = s->m_inputs.rbegin(); bi != s->m_inputs.rend(); bi++)
             {
                 StreamableList newStages(stages);
-                newStages.push_front(dynamic_cast<Streamable *>(s2));
+                newStages.push_front(dynamic_cast<Streamable *>(*bi));
                 lists.push_front(newStages);
             }
         }
@@ -151,23 +153,27 @@ void Streamable::execute(StreamPointTable& table)
             lastRunStages.done(table);
             break;
         }
-        stages = lists.back();
-        lists.pop_back();
+        stages = lists.front();
+        lists.pop_front();
         s = stages.front();
     }
 }
 
 
 void Streamable::execute(StreamPointTable& table,
-    std::list<Streamable *>& stages)
+    std::list<Streamable *>& stages, SrsMap& srsMap)
 {
     std::vector<bool> skips(table.capacity());
     std::list<Streamable *> filters;
     SpatialReference srs;
-    std::map<Streamable *, SpatialReference> srsMap;
 
     // Separate out the first stage.
     Streamable *reader = stages.front();
+
+    // We may be limited in the number of points requested.
+    point_count_t count = (std::numeric_limits<point_count_t>::max)();
+    if (Reader *r = dynamic_cast<Reader *>(reader))
+        count = r->count();
 
     // Build a list of all stages except the first.  We may have a writer in
     // this list in addition to filters, but we treat them in the same way.
@@ -185,7 +191,7 @@ void Streamable::execute(StreamPointTable& table,
         table.clearSpatialReferences();
         PointId idx = 0;
         PointRef point(table, idx);
-        point_count_t pointLimit = table.capacity();
+        point_count_t pointLimit = (std::min)(count, table.capacity());
 
         reader->startLogging();
         // When we get false back from a reader, we're done, so set
@@ -201,6 +207,8 @@ void Streamable::execute(StreamPointTable& table,
             if (finished)
                 pointLimit = idx;
         }
+        count -= pointLimit;
+
         reader->stopLogging();
         srs = reader->getSpatialReference();
         if (!srs.empty())
@@ -211,7 +219,8 @@ void Streamable::execute(StreamPointTable& table,
         // processed by subsequent filters.
         for (Streamable *s : filters)
         {
-            if (srsMap[s] != srs)
+            auto si = srsMap.find(s);
+            if (si == srsMap.end() || si->second != srs)
             {
                 s->spatialReferenceChanged(srs);
                 srsMap[s] = srs;
@@ -225,15 +234,19 @@ void Streamable::execute(StreamPointTable& table,
                 if (!s->processOne(point))
                     skips[idx] = true;
             }
-            srs = s->getSpatialReference();
-            if (!srs.empty())
+            const SpatialReference& tempSrs = s->getSpatialReference();
+            if (!tempSrs.empty())
+            {
+                srs = tempSrs;
                 table.setSpatialReference(srs);
+            }
             s->stopLogging();
         }
 
         // Yes, vector<bool> is terrible.  Can do something better later.
         for (size_t i = 0; i < skips.size(); ++i)
             skips[i] = false;
+        table.setNumPoints(pointLimit);
         table.reset();
     }
 }

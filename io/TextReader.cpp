@@ -102,11 +102,11 @@ void TextReader::checkHeader(const std::string& header)
 void TextReader::parseHeader(const std::string& header)
 {
     auto isspecial = [](char c)
-        { return (!std::isalnum(c) && c != ' '); };
+        { return (!std::isalnum(c)); };
 
     // If the separator wasn't provided on the command line extract it
     // from the header line.
-    if (m_separator == ' ')
+    if (!m_separatorArg->set())
     {
         // Scan string for some character not a number, space or letter.
         for (size_t i = 0; i < header.size(); ++i)
@@ -126,7 +126,7 @@ void TextReader::parseHeader(const std::string& header)
 
 void TextReader::initialize(PointTableRef table)
 {
-    m_istream = Utils::openFile(m_filename);
+    m_istream = Utils::openFile(m_filename, false);
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
@@ -149,7 +149,6 @@ void TextReader::initialize(PointTableRef table)
         checkHeader(header);
     }
 
-    m_dataStart = m_istream->tellg();
     parseHeader(header);
     Utils::closeFile(m_istream);
 }
@@ -157,8 +156,8 @@ void TextReader::initialize(PointTableRef table)
 
 void TextReader::addArgs(ProgramArgs& args)
 {
-    args.add("separator", "Separator character that overrides special "
-        "character found in header line", m_separator, ' ');
+    m_separatorArg = &(args.add("separator", "Separator character that "
+        "overrides special character found in header line", m_separator, ' '));
     args.add("header", "Use this string as the header line.", m_header);
     args.add("skip", "Skip this number of lines before attempting to "
         "read the header.", m_skip);
@@ -183,11 +182,13 @@ void TextReader::addDimensions(PointLayoutPtr layout)
 
 void TextReader::ready(PointTableRef table)
 {
-    m_istream = Utils::openFile(m_filename);
+    m_istream = Utils::openFile(m_filename, false);
     if (!m_istream)
         throwError("Unable to open text file '" + m_filename + "'.");
 
-    m_istream->seekg(m_dataStart);
+    std::string dummy;
+    for (size_t i = 0; i < m_line; ++i)
+	std::getline(*m_istream, dummy);
 }
 
 
