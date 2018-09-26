@@ -106,7 +106,8 @@ void EsriReader::initialize(PointTableRef table)
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
-
+    if(!m_info.isMember("attributeStorageInfo"))
+        throwError("Attributes do not exist for this object");
     const Json::Value attributes = m_info["attributeStorageInfo"];
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
@@ -142,7 +143,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
             m_dimMap[Dimension::Id::Red] = data;
         }
         //Available dimension types can be found at https://git.io/fAbxS
-        else if (m_dimensions.find(readName) != m_dimensions.end())
+        else if (esriDims.find(readName) != esriDims.end())
         {
             data.dimType = Dimension::Type::None;
 
@@ -152,8 +153,8 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
             if (data.dimType != Dimension::Type::None)
             {
-                layout->registerDim(m_dimensions.at(readName));
-                m_dimMap[m_dimensions.at(readName)] = data;
+                layout->registerDim(esriDims.at(readName));
+                m_dimMap[esriDims.at(readName)] = data;
             }
             else
             {

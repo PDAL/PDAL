@@ -57,103 +57,106 @@
 namespace pdal
 {
 
-    static PluginInfo const slpkInfo
+static PluginInfo const slpkInfo
+{
+    "readers.slpk",
+    "SLPK Reader",
+    "http://pdal.io/stages/readers.slpk.html"
+};
+
+CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
+
+std::string SlpkReader::getName() const { return slpkInfo.name; }
+
+void SlpkReader::initInfo()
+{
+    //create temp path
+    std::string path = arbiter::fs::getTempPath();
+
+    //use arbiter to create new directory if doesn't already exist
+    std::string fullPath(path+ FileUtils::stem(
+                FileUtils::getFilename(m_filename)));
+    arbiter::fs::mkdirp(fullPath);
+
+    //un-archive the slpk archive
+    SlpkExtractor slpk(m_filename, fullPath);
+    slpk.extract();
+    m_filename = fullPath;
+    log()->get(LogLevel::Debug) << "Making directory at: " <<
+        fullPath << std::endl;
+
+    //unarchive and decompress the 3dscenelayer
+    //and create json info object
+    auto compressed = m_arbiter->get(m_filename
+            + "/3dSceneLayer.json.gz");
+    std::string jsonString;
+
+    m_decomp.decompress(jsonString, compressed.data(),
+            compressed.size());
+    m_info = parse(jsonString);
+    if (m_info.empty())
+        throwError(std::string("Incorrect Json object"));
+
+}
+
+//Traverse tree through nodepages. Create a nodebox for each node in
+//the tree and test if it overlaps with the bounds created by user.
+//If it's a leaf node(the highest resolution) and it overlaps, add
+//it to the list of nodes to be pulled later.
+void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+{
+    std::string nodeUrl = m_filename + "/nodepages/"
+        + std::to_string(pageIndex);
+
+    std::string ext = ".json.gz";
+
+    if(!FileUtils::fileExists(nodeUrl + ext))
     {
-        "readers.slpk",
-        "SLPK Reader",
-        "http://pdal.io/stages/readers.slpk.html"
-    };
-
-    CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
-
-    std::string SlpkReader::getName() const { return slpkInfo.name; }
-
-    void SlpkReader::initInfo()
-    {
-        //create temp path
-        std::string path = arbiter::fs::getTempPath();
-
-        //use arbiter to create new directory if doesn't already exist
-        std::string fullPath(path+ FileUtils::stem(
-                    FileUtils::getFilename(m_filename)));
-        arbiter::fs::mkdirp(fullPath);
-
-        //un-archive the slpk archive
-        SlpkExtractor slpk(m_filename, fullPath);
-        slpk.extract();
-        m_filename = fullPath;
-        log()->get(LogLevel::Debug) << "Making directory at: " <<
-            fullPath << std::endl;
-
-        //unarchive and decompress the 3dscenelayer
-        //and create json info object
-        auto compressed = m_arbiter->get(m_filename
-                + "/3dSceneLayer.json.gz");
-        std::string jsonString;
-
-        m_decomp.decompress(jsonString, compressed.data(),
-                compressed.size());
-        m_info = parse(jsonString);
+        return;
     }
 
-    //Traverse tree through nodepages. Create a nodebox for each node in
-    //the tree and test if it overlaps with the bounds created by user.
-    //If it's a leaf node(the highest resolution) and it overlaps, add
-    //it to the list of nodes to be pulled later.
-    void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
-    {
-        Json::Value nodeIndexJson;
-        std::string nodeUrl = m_filename + "/nodepages/"
-            + std::to_string(pageIndex);
+    std::string output;
+    auto compressed = m_arbiter->get(nodeUrl+ext);
+    m_decomp.decompress<std::string>(
+            output,
+            compressed.data(),
+            compressed.size());
+    const Json::Value nodeIndexJson = parse(output);
 
-        std::string ext = ".json.gz";
-        if(!FileUtils::fileExists(nodeUrl + ext))
+    if(nodeIndexJson.empty() || !nodeIndexJson.isMember("nodes"))
+        throwError(std::string("Could not find node information"));
+
+    int pageSize = nodeIndexJson["nodes"].size();
+    int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
+
+    for (int i = 0; i < pageSize; i++)
+    {
+        BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
+        int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
+        bool overlap = m_bounds.overlaps(nodeBox);
+        if (cCount == 0 && overlap)
         {
-            return;
+            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
+            nodes.push_back(name);
         }
-        SlpkExtractor nodeUnarchive(
-                nodeUrl+ext,
-                m_filename+"/nodepages");
-        nodeUnarchive.extract();
-        std::string output;
-        auto compressed = m_arbiter->get(nodeUrl+ext);
-        m_decomp.decompress<std::string>(
-                output,
-                compressed.data(),
-                compressed.size());
-        nodeIndexJson = parse(output);
-
-        int pageSize = nodeIndexJson["nodes"].size();
-        int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-
-        for (int i = 0; i < pageSize; i++)
-        {
-            BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
-            int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-            bool overlap = m_bounds.overlaps(nodeBox);
-            if (cCount == 0 && overlap)
-            {
-                int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-                nodes.push_back(name);
-            }
-        }
-        buildNodeList(nodes, ++pageIndex);
     }
+    buildNodeList(nodes, ++pageIndex);
+}
 
-    std::vector<char> SlpkReader::fetchBinary(std::string url,
-            std::string attNum, std::string ext) const
-    {
-        url += attNum + ext;
+std::vector<char> SlpkReader::fetchBinary(std::string url,
+        std::string attNum, std::string ext) const
+{
+    url += attNum + ext;
 
-        auto data(m_arbiter->getBinary(url));
+    auto data(m_arbiter->getBinary(url));
 
-        if (FileUtils::extension(url) != ".gz")
-            return data;
+    if (FileUtils::extension(url) != ".gz")
+        return data;
 
-        std::vector<char> decomp;
-        m_decomp.decompress<std::vector<char>>(decomp, data.data(),
-                data.size());
-        return decomp;
-    }
+    std::vector<char> decomp;
+    m_decomp.decompress<std::vector<char>>(decomp, data.data(),
+            data.size());
+    return decomp;
+}
 
 } //namespace pdal

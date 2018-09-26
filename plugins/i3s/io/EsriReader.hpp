@@ -61,7 +61,7 @@ namespace pdal
 {
 namespace
 {
-std::map<std::string, pdal::Dimension::Id> const m_dimensions
+std::map<std::string, pdal::Dimension::Id> const esriDims
 {
         {"INTENSITY",   Dimension::Id::Intensity},
         {"CLASS_CODE",  Dimension::Id::ClassFlags},

@@ -37,76 +37,83 @@
 namespace pdal
 {
 
-    static PluginInfo const i3sInfo
+static PluginInfo const i3sInfo
+{
+    "readers.i3s",
+    "I3S Reader",
+    "http://pdal.io/stages/readers.i3s.html"
+};
+
+CREATE_SHARED_STAGE(I3SReader, i3sInfo)
+
+std::string I3SReader::getName() const { return i3sInfo.name; }
+
+void I3SReader::initInfo()
+{
+    try
     {
-        "readers.i3s",
-        "I3S Reader",
-        "http://pdal.io/stages/readers.i3s.html"
-    };
+        m_info = parse(m_arbiter->get(m_filename));
 
-    CREATE_SHARED_STAGE(I3SReader, i3sInfo)
-
-    std::string I3SReader::getName() const { return i3sInfo.name; }
-
-    void I3SReader::initInfo()
-    {
-        try
-        {
-            m_info = parse(m_arbiter->get(m_filename))["layers"][0];
-        }catch(pdal_error& )
-        {
-            throwError(std::string("Error parsing Json object. "
-                        "This could be due to a bad endpoint."));
-        }
-        if(m_info.empty())
+        if (m_info.empty())
             throwError(std::string("Incorrect Json object"));
+        if (!m_info.isMember("layers"))
+            throwError(std::string("Json object contains no layers"));
 
-        m_filename += "/layers/0";
+        m_info = m_info["layers"][0];
+    }catch(pdal_error& e)
+    {
+        throwError(std::string("Error parsing Json object: ")+e.what());
     }
 
-    //Traverse tree through nodepages. Create a nodebox for each node in
-    //the tree and test if it overlaps with the bounds created by user.
-    //If it's a leaf node(the highest resolution) and it overlaps, add
-    //it to the list of nodes to be pulled later.
-    void I3SReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+    m_filename += "/layers/0";
+}
+
+//Traverse tree through nodepages. Create a nodebox for each node in
+//the tree and test if it overlaps with the bounds created by user.
+//If it's a leaf node(the highest resolution) and it overlaps, add
+//it to the list of nodes to be pulled later.
+void I3SReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+{
+    std::string nodeUrl = m_filename + "/nodepages/"
+        + std::to_string(pageIndex);
+
+    const Json::Value nodeIndexJson = parse(m_arbiter->get(nodeUrl));
+
+
+    if(nodeIndexJson.empty() || !nodeIndexJson.isMember("nodes"))
+        throwError(std::string("Could not find node information"));
+
+    int pageSize = nodeIndexJson["nodes"].size();
+    int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
+
+    for (int i = 0; i < pageSize; i++)
     {
-        Json::Value nodeIndexJson;
-        std::string nodeUrl = m_filename + "/nodepages/"
-            + std::to_string(pageIndex);
-
-        nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-
-        int pageSize = nodeIndexJson["nodes"].size();
-        int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-
-        for (int i = 0; i < pageSize; i++)
+        BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
+        int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
+        bool overlap = m_bounds.overlaps(nodeBox);
+        if (cCount == 0 && overlap)
         {
-            BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
-            int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-            bool overlap = m_bounds.overlaps(nodeBox);
-            if (cCount == 0 && overlap)
-            {
-                int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-                nodes.push_back(name);
-            }
-            //keeps track of largest node so recursive loop knows when to stop
-            if ((nodeIndexJson["nodes"][i]["firstChild"].asInt() +
-                    cCount - 1) > m_maxNode)
-            {
-                m_maxNode = nodeIndexJson["nodes"][i]["firstChild"].asInt() +
-                    cCount - 1;
-            }
-            else if (initialNode + i == m_maxNode)
-                return;
+            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
+            nodes.push_back(name);
         }
-        buildNodeList(nodes, ++pageIndex);
+        //keeps track of largest node so recursive loop knows when to stop
+        if ((nodeIndexJson["nodes"][i]["firstChild"].asInt() +
+                cCount - 1) > m_maxNode)
+        {
+            m_maxNode = nodeIndexJson["nodes"][i]["firstChild"].asInt() +
+                cCount - 1;
+        }
+        else if (initialNode + i == m_maxNode)
+            return;
     }
+    buildNodeList(nodes, ++pageIndex);
+}
 
-    std::vector<char> I3SReader::fetchBinary(std::string url,
-            std::string attNum, std::string ext) const
-    {
-        // For the REST I3S endpoint there are no file extensions.
-        return m_arbiter->getBinary(url + attNum);
-    }
+std::vector<char> I3SReader::fetchBinary(std::string url,
+        std::string attNum, std::string ext) const
+{
+    // For the REST I3S endpoint there are no file extensions.
+    return m_arbiter->getBinary(url + attNum);
+}
 
 } //namespace pdal
