@@ -23,7 +23,7 @@ TEST(i3sReaderTest, i3sReaderTest_read_url)
     i3s_options.add("threads", 64);
     i3s_options.add("bounds",
             "([-123.075542,-123.06196],[44.049719,44.06278]))");//full extents
-    i3s_options.add("dimensions", "RGB, INTENSITY");
+    i3s_options.add("dimensions", "RGB, intenSITY");
 
     I3SReader reader;
     reader.setOptions(i3s_options);

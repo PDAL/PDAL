@@ -104,14 +104,15 @@ protected:
     std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
-    struct I3SArgs
+    struct EsriArgs
     {
       Bounds bounds;
-      int threads = 8;
+      uint16_t threads = 8;
       std::vector<std::string> dimensions;
+      uint64_t lod;
     };
 
-    I3SArgs m_args;
+    EsriArgs m_args;
     Json::Value m_info;
     std::mutex m_mutex;
     BOX3D m_bounds;

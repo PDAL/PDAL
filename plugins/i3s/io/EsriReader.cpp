@@ -61,6 +61,7 @@ void EsriReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
     args.add("threads", "Number of threads to be used." , m_args.threads);
     args.add("dimensions", "Dimensions to be used in pulls", m_args.dimensions);
+    args.add("lod", "Depth to view. Higher number", m_args.dimensions);
 }
 
 void EsriReader::initialize(PointTableRef table)
@@ -164,6 +165,13 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
             // we'll use Red as our indicator that RGB exists.
 
             m_dimMap[Dimension::Id::Red] = data;
+        }
+        else if (readName =="RETURNS")
+        {
+            layout->registerDim(Dimension::Id::NumberOfReturns);
+            layout->registerDim(Dimension::Id::ReturnNumber);
+            //These are packed together. We'll refer to it as NumberOfReturns
+            m_dimMap[Dimension::Id::NumberOfReturns] = data;
         }
         //Available dimension types can be found at https://git.io/fAbxS
         else if (esriDims.find(readName) != esriDims.end())
@@ -407,7 +415,6 @@ void EsriReader::createView(std::string localUrl, PointView& view)
 
             std::vector<uint16_t> intensity = decompressIntensity(&data);
 
-            std::size_t dimSize = Dimension::size(dimType);
             if (intensity.size() != xyz.size())
             {
                 throwError(std::string("Bad data fetch. Data id: " +
@@ -420,6 +427,34 @@ void EsriReader::createView(std::string localUrl, PointView& view)
                 view.setField(pdal::Dimension::Id::Intensity,
                         startId + i, intensity[selected[i]]);
             }
+        }
+        else if (dimId == Dimension::Id::NumberOfReturns)
+        {
+            const std::vector<char> data = fetchBinary(
+                    attrUrl, std::to_string(key), ".bin.gz");
+
+            const uint8_t* returnData =
+                reinterpret_cast<const uint8_t*> (data.data());
+
+            if (data.size() != xyz.size())
+                throwError(std::string("Bad data fetch. Data id: " +
+                            dimEntry.second.name));
+
+
+            std::lock_guard<std::mutex> lock(m_mutex);
+            for (std::size_t i(0); i < selected.size(); ++i)
+            {
+                //unpack returns to return number and number of returns
+                uint8_t offset = returnData[selected[i]];
+                uint8_t returnNum = offset & 0x0F;//4 lsb
+                uint8_t numReturns = (offset >> 4) & 0x0F;//4 msb
+
+                view.setField(Dimension::Id::ReturnNumber,
+                        startId + i, returnNum);
+                view.setField(Dimension::Id::NumberOfReturns,
+                        startId + i, numReturns);
+            }
+
         }
         else
         {
