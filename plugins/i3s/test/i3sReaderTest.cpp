@@ -23,6 +23,7 @@ TEST(i3sReaderTest, i3sReaderTest_read_url)
     i3s_options.add("threads", 64);
     i3s_options.add("bounds",
             "([-123.075542,-123.06196],[44.049719,44.06278]))");//full extents
+    i3s_options.add("dims", "RGB, INTENSITY");
 
     I3SReader reader;
     reader.setOptions(i3s_options);
@@ -33,8 +34,13 @@ TEST(i3sReaderTest, i3sReaderTest_read_url)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 10653336u);
+    ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::Red));
+    ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::Intensity));
+    ASSERT_FALSE(table.layout()->hasDim(Dimension::Id::NumberOfReturns));
+
 
 }
+
 
 //Test full autzen lidar i3s bounded compared to the full without bounds.
 //Check that the node trimming is working correctly

@@ -60,11 +60,23 @@ void EsriReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
     args.add("threads", "Number of threads to be used." , m_args.threads);
+    args.add("dims", "Dimensions to be used in pulls", m_args.dimensions);
 }
 
 void EsriReader::initialize(PointTableRef table)
 {
 
+    //create dimensions map for future lookup
+    if (!m_args.dimensions.empty())
+    {
+        for (std::string& dim : m_args.dimensions)
+        {
+            if(esriDims.find(dim) != esriDims.end())
+                m_dimensions[dim] = esriDims.at(dim);
+            else
+                m_dimensions[dim];
+        }
+    }
     Json::Value config;
 
     if (isDebug() && log()->getLevel() > LogLevel::Debug4)
@@ -109,6 +121,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
     if(!m_info.isMember("attributeStorageInfo"))
         throwError("Attributes do not exist for this object");
     const Json::Value attributes = m_info["attributeStorageInfo"];
+    //automatically add xyz point dimensions
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
@@ -117,6 +130,11 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         dimData data;
         std::string readName = attributes[i]["name"].asString();
         data.name = readName;
+        //test if this dimensions was requested by user
+        if(m_args.dimensions.empty()){}
+        else if(m_dimensions.find(readName) == m_dimensions.end())
+            continue;
+
         data.key = std::stoi(attributes[i]["key"].asString());
 
         if (!attributes[i].isMember("attributeValues"))

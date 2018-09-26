@@ -70,7 +70,8 @@ std::map<std::string, pdal::Dimension::Id> const esriDims
         {"USER_DATA",   Dimension::Id::UserData},
         {"POINT_SRC_ID",Dimension::Id::PointSourceId},
         {"GPS_TIME",    Dimension::Id::GpsTime},
-        {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank}
+        {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank},
+        {"RGB",         Dimension::Id::Red}
 };
 std::map<std::string, pdal::Dimension::Type> const dimTypes
 {
@@ -107,12 +108,14 @@ protected:
     {
       Bounds bounds;
       int threads = 8;
+      std::vector<std::string> dimensions;
     };
 
     I3SArgs m_args;
     Json::Value m_info;
     std::mutex m_mutex;
     BOX3D m_bounds;
+    std::map<std::string, Dimension::Id> m_dimensions;
     int m_nodeCap;
     int m_maxNode = 0;
 
