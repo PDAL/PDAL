@@ -60,7 +60,7 @@ struct PMFArgs
 {
     double m_cellSize;
     bool m_exponential;
-    DimRange m_ignored;
+    std::vector<DimRange> m_ignored;
     double m_initialDistance;
     StringList m_returns;
     double m_maxDistance;
@@ -106,7 +106,13 @@ void PMFFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    m_args->m_ignored.m_id = layout->findDim(m_args->m_ignored.m_name);
+    for (auto& r : m_args->m_ignored)
+    {
+        r.m_id = layout->findDim(r.m_name);
+        if (r.m_id == Dimension::Id::Unknown)
+            throwError("Invalid dimension name in 'ignored' option: '" +
+                r.m_name + "'.");
+    }
 
     if (m_args->m_returns.size())
     {
@@ -141,11 +147,12 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = input->makeNew();
     PointViewPtr keptView = input->makeNew();
-    if (m_args->m_ignored.m_id == Dimension::Id::Unknown)
+
+    if (m_args->m_ignored.empty())
         keptView->append(*input);
     else
-        Segmentation::ignoreDimRange(m_args->m_ignored, input, keptView,
-                                     ignoredView);
+        Segmentation::ignoreDimRanges(m_args->m_ignored,
+            input, keptView, ignoredView);
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.

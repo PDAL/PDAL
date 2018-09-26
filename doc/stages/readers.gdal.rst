@@ -85,3 +85,8 @@ filename
 
 count
     Maximum number of points to read [Optional]
+
+header
+    A comma-separated list of :ref:`dimensions` IDs to map
+    bands to. The length of the list must match the number
+    of bands in the raster.

@@ -64,10 +64,12 @@ private:
         { m_raster->close(); }
     virtual bool processOne(PointRef& point);
     virtual QuickInfo inspect();
+    virtual void addArgs(ProgramArgs& args);
 
     std::unique_ptr<gdal::Raster> m_raster;
     std::vector<Dimension::Type> m_bandTypes;
     std::vector<Dimension::Id> m_bandIds;
+    std::string m_header;
     point_count_t m_index;
     int m_row;
     int m_col;

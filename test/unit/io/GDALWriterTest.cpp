@@ -54,58 +54,73 @@ namespace
 void runGdalWriter(const Options& wo, const std::string& infile,
     const std::string& outfile, const std::string& values)
 {
-    FileUtils::deleteFile(outfile);
-
-    Options ro;
-    ro.add("filename", infile);
-
-    TextReader r;
-    r.setOptions(ro);
-
-    GDALWriter w;
-    w.setOptions(wo);
-    w.setInput(r);
-
-    PointTable t;
-
-    w.prepare(t);
-    w.execute(t);
-
-    using namespace gdal;
-
-    std::istringstream iss(values);
-
-    std::vector<double> arr;
-    while (true)
+    auto run = [=](bool streamMode)
     {
-        double d;
-        iss >> d;
-        if (!iss)
-            break;
-        arr.push_back(d);
-    }
+        FileUtils::deleteFile(outfile);
 
-    registerDrivers();
-    Raster raster(outfile, "GTiff");
-    if (raster.open() != GDALError::None)
-    {
-        throw pdal_error(raster.errorMsg());
-    }
-    std::vector<double> data;
-    raster.readBand(data, 1);
+        Options ro;
+        ro.add("filename", infile);
 
-    int row = 0;
-    int col = 0;
-    for (size_t i = 0; i < arr.size(); ++i)
-    {
-        EXPECT_NEAR(arr[i], data[i], .001) << "Mismatch for row/col = " <<
-            row << "/" << col;
-        if (++col == raster.width())
+        TextReader r;
+        r.setOptions(ro);
+
+        GDALWriter w;
+        w.setOptions(wo);
+        w.setInput(r);
+
+        if (streamMode)
         {
-            col = 0;
-            row++;
+            FixedPointTable t(100);
+
+            w.prepare(t);
+            w.execute(t);
         }
-    }
+        else
+        {
+            PointTable t;
+
+            w.prepare(t);
+            w.execute(t);
+        }
+
+        using namespace gdal;
+
+        std::istringstream iss(values);
+
+        std::vector<double> arr;
+        while (true)
+        {
+            double d;
+            iss >> d;
+            if (!iss)
+                break;
+            arr.push_back(d);
+        }
+
+        registerDrivers();
+        Raster raster(outfile, "GTiff");
+        if (raster.open() != GDALError::None)
+        {
+            throw pdal_error(raster.errorMsg());
+        }
+        std::vector<double> data;
+        raster.readBand(data, 1);
+        int row = 0;
+        int col = 0;
+        for (size_t i = 0; i < arr.size(); ++i)
+        {
+            EXPECT_NEAR(arr[i], data[i], .001) << "Error row/col = " <<
+                row << "/" << col << std::endl;
+            if (++col == raster.width())
+            {
+                col = 0;
+                row++;
+            }
+        }
+    };
+
+    run(false);
+    run(true);
 }
 
 void runGdalWriter2(const Options& wo, const std::string& outfile,

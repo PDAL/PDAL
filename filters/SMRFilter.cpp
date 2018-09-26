@@ -82,7 +82,7 @@ struct SMRArgs
     double m_threshold;
     double m_cut;
     std::string m_dir;
-    DimRange m_ignored;
+    std::vector<DimRange> m_ignored;
     StringList m_returns;
 };
 
@@ -120,8 +120,13 @@ void SMRFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    m_args->m_ignored.m_id = layout->findDim(m_args->m_ignored.m_name);
-
+    for (auto & r : m_args->m_ignored)
+    {
+        r.m_id = layout->findDim(r.m_name);
+        if (r.m_id == Dimension::Id::Unknown)
+            throwError("Invalid dimension name in 'ignored' option: '" +
+                r.m_name + "'.");
+    }
     if (m_args->m_returns.size())
     {
         for (auto& r : m_args->m_returns)
@@ -164,11 +169,11 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = view->makeNew();
     PointViewPtr keptView = view->makeNew();
-    if (m_args->m_ignored.m_id == Dimension::Id::Unknown)
+    if (m_args->m_ignored.empty())
         keptView->append(*view);
     else
-        Segmentation::ignoreDimRange(m_args->m_ignored, view, keptView,
-                                     ignoredView);
+        Segmentation::ignoreDimRanges(m_args->m_ignored, view, keptView,
+            ignoredView);
 
     // Segment kept view into two views
     PointViewPtr firstView = keptView->makeNew();
