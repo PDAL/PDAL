@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <filters/InfoFilter.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -115,6 +116,28 @@ TEST(InfoFilterTest, query)
     std::sort(vtest.begin(), vtest.end());
     for (size_t i = 0; i < vtest.size(); ++i)
         EXPECT_EQ(v[i], vtest[i]);
+}
+
+TEST(InfoFilterTest, direct_bounds)
+{
+    StageFactory factory;
+    
+    Stage *r = factory.createStage("readers.las");
+    Options rOpts;
+    rOpts.add("filename", Support::datapath("las/autzen_trim.las"));
+    r->setOptions(rOpts);
+
+    Stage *f = factory.createStage("filters.info");
+    f->setInput(*r);
+
+    FixedPointTable t(1000);
+
+    f->prepare(t);
+    f->execute(t);
+
+    BOX3D box = dynamic_cast<InfoFilter *>(f)->bounds();
+    EXPECT_EQ(box.minx, 636001.76);
+    EXPECT_EQ(box.maxz, 520.51);
 }
 
 TEST(InfoFilterTest, misc)

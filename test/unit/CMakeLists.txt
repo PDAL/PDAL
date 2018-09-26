@@ -189,6 +189,7 @@ PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
+PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
 PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
