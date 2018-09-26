@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <fstream>
+#include <algorithm>
 
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -117,7 +118,7 @@ void SlpkExtractor::writeFile(std::string filename, ILeStream& in,
     char buf[bufsize];
     while (count)
     {
-        size_t size = std::min(bufsize, count);
+        size_t size = (std::min)(bufsize, count);
         in.get(buf, size);
         out.write(buf, size);
         count -= size;

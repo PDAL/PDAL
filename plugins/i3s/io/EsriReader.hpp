@@ -87,7 +87,7 @@ std::map<std::string, pdal::Dimension::Type> const dimTypes
 };
 }
 
-class EsriReader : public Reader
+class PDAL_DLL EsriReader : public Reader
 {
 public:
     BOX3D createBounds();
@@ -151,29 +151,7 @@ protected:
     BOX3D parseBox(Json::Value base);
 };
 
-class I3SReader : public EsriReader
-{
-public:
-    std::string getName() const override;
 
-protected:
-    virtual void initInfo() override;
-    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) override;
-    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
-            std::string ext) const override;
-};
-
-class SlpkReader : public EsriReader
-{
-public:
-    std::string getName() const override;
-
-protected:
-    virtual void initInfo() override;
-    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) override;
-    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
-            std::string ext) const override;
-};
 
 } // namespace pdal
 

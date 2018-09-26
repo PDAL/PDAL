@@ -32,22 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "EsriReader.hpp"
-
-#include <istream>
-#include <cstdint>
-#include <cstring>
-#include <cmath>
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <chrono>
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/util/ProgramArgs.hpp>
-#include <pdal/util/Bounds.hpp>
-#include <pdal/pdal_features.hpp>
-#include <gdal.h>
+#include "I3SReader.hpp"
 
 namespace pdal
 {
@@ -68,7 +53,7 @@ namespace pdal
         try
         {
             m_info = parse(m_arbiter->get(m_filename))["layers"][0];
-        }catch(pdal_error& e)
+        }catch(pdal_error& )
         {
             throwError(std::string("Error parsing Json object. "
                         "This could be due to a bad endpoint."));

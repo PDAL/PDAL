@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "EsriReader.hpp"
+#include "SlpkReader.hpp"
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
 #include "pool.hpp"

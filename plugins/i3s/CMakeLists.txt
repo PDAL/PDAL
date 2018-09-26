@@ -74,6 +74,7 @@ if (WITH_TESTS)
                 ${slpk_reader_libname}
                 ${i3s_reader_libname}
                 ${PDAL_JSONCPP_LIB_NAME}
+                ${GDAL_LIBRARY}
     )
     target_include_directories(pdal_io_i3s_reader_test PRIVATE
             ${PDAL_JSONCPP_INCLUDE_DIR}

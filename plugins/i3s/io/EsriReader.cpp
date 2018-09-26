@@ -276,8 +276,8 @@ BOX3D EsriReader::parseBox(Json::Value base)
     Eigen::Quaterniond rotz = q * quatVecZ * q.inverse();
 
     double minx, miny, minz, maxx, maxy, maxz;
-    minx = miny = minz = std::numeric_limits<double>::max();
-    maxx = maxy = maxz = std::numeric_limits<double>::lowest();
+    minx = miny = minz = (std::numeric_limits<double>::max)();
+    maxx = maxy = maxz = (std::numeric_limits<double>::lowest)();
 
 
     for (std::size_t i(0); i < 8; ++i)
@@ -298,12 +298,12 @@ BOX3D EsriReader::parseBox(Json::Value base)
 
         OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
 
-        minx = std::min(minx, a);
-        miny = std::min(miny, b);
-        minz = std::min(minz, c);
-        maxx = std::max(maxx, a);
-        maxy = std::max(maxy, b);
-        maxz = std::max(maxz, c);
+        minx = (std::min)(minx, a);
+        miny = (std::min)(miny, b);
+        minz = (std::min)(minz, c);
+        maxx = (std::max)(maxx, a);
+        maxy = (std::max)(maxy, b);
+        maxz = (std::max)(maxz, c);
     }
     return BOX3D(minx, miny, minz, maxx, maxy, maxz);
 }
@@ -315,7 +315,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
     auto xyzFetch = fetchBinary(geomUrl, "0", ".bin.pccxyz");
     std::vector<lepcc::Point3D> xyz = decompressXYZ(&xyzFetch);
 
-    std::vector<int> selected;
+    std::vector<point_count_t> selected;
     uint64_t startId;
 
     {

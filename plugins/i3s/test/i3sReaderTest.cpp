@@ -9,7 +9,8 @@
 
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
-#include "../io/EsriReader.hpp"
+#include "../io/I3SReader.hpp"
+#include "../io/SlpkReader.hpp"
 
 using namespace pdal;
 //test full autzen lidar i3s with bounds that hold the entire data
