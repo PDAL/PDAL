@@ -31,11 +31,27 @@ Options
 --------------------------------------------------------------------------------
 filename
     SLPK file must have a file extension of .slpk.
-    Example: ``pdal info /PDAL/test/data/i3s/SMALL_AUTZEN_LAS_ALL.slpk``
+    Example: ``pdal translate /PDAL/test/data/i3s/SMALL_AUTZEN_LAS_ALL.slpk output.las``
 
 bounds
     The bounds refers to the extents of the resource in X, Y, Z coordinates with the Z dimension being optional. This must be input as a string.
     Example:``readers.slpk.bounds="([xmin,xmax],[ymin,ymax],[zmin,zmax])"``
+
+dimensions
+    These are the dimensions that the user would like to use for this read of the SLPK archive. Only these dimensions will be added to the layout. Here is a list of supported dimensions and their corresponding pdal dimensions:
+        Esri            Pdal
+        =============== ===============
+        INTENSITY       Intensity
+        CLASS_CODE      ClassFlags
+        FLAGS           Flag
+        RETURNS         NumberOfReturns
+        USER_DATA       UserData
+        POINT_SRC_ID    PointSourceId
+        GPS_TIME        GpsTime
+        SCAN_ANGLE      ScanAngleRank
+        RGB             Red
+
+    Example: ``readers.slpk.dimensions="rgb, intensity"``
 
 .. _Scene Layer Packages (SLPK): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md#_8_1
 .. _I3S: https://pdal.io/readers.i3s.html

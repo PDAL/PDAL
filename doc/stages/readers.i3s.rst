@@ -39,4 +39,20 @@ bounds
     The bounds refers to the extents of the resource in X, Y, Z coordinates with the Z dimension being optional. This must be input as a string.
     Example:``readers.i3s.bounds="([xmin,xmax],[ymin,ymax],[zmin,zmax])"``
 
+dimensions
+    These are the dimensions that the user would like to use for this read of the I3S files. Only these dimensions will be added to the layout. Here is a list of supported I3S dimensions and their corresponding pdal dimensions:
+        Esri            Pdal
+        =============   ===============
+        INTENSITY       Intensity
+        CLASS_CODE      ClassFlags
+        FLAGS           Flag
+        RETURNS         NumberOfReturns
+        USER_DATA       UserData
+        POINT_SRC_ID    PointSourceId
+        GPS_TIME        GpsTime
+        SCAN_ANGLE      ScanAngleRank
+        RGB             Red
+
+    Example: ``readers.i3s.dimensions="returns, rgb"``
+
 .. _Indexed 3d Scene Layer (I3S): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md

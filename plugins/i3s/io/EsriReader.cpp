@@ -60,7 +60,7 @@ void EsriReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
     args.add("threads", "Number of threads to be used." , m_args.threads);
-    args.add("dims", "Dimensions to be used in pulls", m_args.dimensions);
+    args.add("dimensions", "Dimensions to be used in pulls", m_args.dimensions);
 }
 
 void EsriReader::initialize(PointTableRef table)
@@ -71,6 +71,11 @@ void EsriReader::initialize(PointTableRef table)
     {
         for (std::string& dim : m_args.dimensions)
         {
+            std::transform(
+                    dim.begin(),
+                    dim.end(),
+                    dim.begin(),
+                    [](unsigned char c){ return std::toupper(c); });
             if(esriDims.find(dim) != esriDims.end())
                 m_dimensions[dim] = esriDims.at(dim);
             else

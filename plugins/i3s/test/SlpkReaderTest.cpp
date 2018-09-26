@@ -22,6 +22,7 @@ TEST(SlpkReaderTest, SlpkReaderTest_read_local)
     Options slpk_options;
     slpk_options.add("filename", Support::datapath("i3s/SMALL_AUTZEN_LAS_All.slpk"));
     slpk_options.add("threads", 64);
+    slpk_options.add("dimensions", "intensity, returns");
 
     SlpkReader reader;
     reader.setOptions(slpk_options);
@@ -33,6 +34,9 @@ TEST(SlpkReaderTest, SlpkReaderTest_read_local)
     PointViewPtr view = *viewSet.begin();
 
     EXPECT_EQ(view->size(), 106u);
+    ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::Intensity));
+    ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::NumberOfReturns));
+    ASSERT_FALSE(table.layout()->hasDim(Dimension::Id::GpsTime));
 }
 
 
