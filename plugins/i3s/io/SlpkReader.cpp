@@ -133,8 +133,13 @@ void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
     {
         BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
         int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
+        //density calculated as (number of points in node) / (lod threshold)
+        int pCount =  nodeIndexJson["nodes"][i]["vertexCount"].asInt();
+        double lodThreshold =
+            nodeIndexJson["nodes"][i]["lodThreshold"].asDouble();
+        double density = (double)pCount / lodThreshold;
         bool overlap = m_bounds.overlaps(nodeBox);
-        if (cCount == 0 && overlap)
+        if (density > m_args.lod && density < m_args.lod + 0.5 && overlap)
         {
             int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
             nodes.push_back(name);

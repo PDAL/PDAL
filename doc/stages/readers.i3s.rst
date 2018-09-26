@@ -40,7 +40,7 @@ bounds
     Example:``readers.i3s.bounds="([xmin,xmax],[ymin,ymax],[zmin,zmax])"``
 
 dimensions
-    These are the dimensions that the user would like to use for this read of the I3S files. Only these dimensions will be added to the layout. Here is a list of supported I3S dimensions and their corresponding pdal dimensions:
+    These are the dimensions that the user would like to use for this read of the I3S files. Only these dimensions will be added to the layout. Here is a list of supported I3S dimensions and their corresponding PDAL dimensions:
         Esri            Pdal
         =============   ===============
         INTENSITY       Intensity
@@ -53,6 +53,10 @@ dimensions
         SCAN_ANGLE      ScanAngleRank
         RGB             Red
 
-    Example: ``readers.i3s.dimensions="returns, rgb"``
+    Example: ``--readers.i3s.dimensions="returns, rgb"``
+
+lod
+    This is the density of the points in the nodes that will be selected during the read. A density of 0 will select any nodes with a density calculated to be between 0 and 0.5. A higher density means the same extents will be looked at, but more points within thos bounds will be viewed. Higher resolution means more file fetches, so a lower resolution will most likely be faster. This number may change between files.
+    Example: ``--readers.i3s.lod=2``
 
 .. _Indexed 3d Scene Layer (I3S): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md

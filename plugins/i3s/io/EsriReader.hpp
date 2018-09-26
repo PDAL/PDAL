@@ -109,7 +109,7 @@ protected:
       Bounds bounds;
       uint16_t threads = 8;
       std::vector<std::string> dimensions;
-      uint64_t lod;
+      double lod;
     };
 
     EsriArgs m_args;
