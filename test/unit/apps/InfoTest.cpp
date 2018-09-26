@@ -58,6 +58,7 @@ void test(const std::string options, const std::string validation)
     cmd = appName() + " " + options + " " +
         Support::datapath("las/autzen_trim.las") + " 2>&1";
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+std::cerr << "Output = \n" << output << "\n";
 
     EXPECT_NE(output.find(validation), std::string::npos);
 }
