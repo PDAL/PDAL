@@ -95,8 +95,6 @@ TEST(InfoFilterTest, point)
     }
     for (size_t i = 0; i < vtest.size(); ++i)
         EXPECT_EQ(v[i], vtest[i]);
-
-//    Utils::toJSON(p, std::cout);
 }
 
 TEST(InfoFilterTest, query)
@@ -117,6 +115,39 @@ TEST(InfoFilterTest, query)
     std::sort(vtest.begin(), vtest.end());
     for (size_t i = 0; i < vtest.size(); ++i)
         EXPECT_EQ(v[i], vtest[i]);
+}
+
+TEST(InfoFilterTest, misc)
+{
+    Options fOpts;
+    MetadataNode m = run(fOpts);
+
+    MetadataNodeList s = m.findChild("schema").children();
+    EXPECT_EQ(s.size(), 16U);
+    if (s.size() == 16U)
+    {
+        auto orderbyname = [](const MetadataNode& m1, const MetadataNode& m2)
+        {
+            MetadataNode m1c = m1.findChild("name");
+            MetadataNode m2c = m2.findChild("name");
+            return m1c.value() < m2c.value();
+        };
+        std::sort(s.begin(), s.end(), orderbyname);
+        std::vector<std::string> dims { "Blue", "Classification",
+            "EdgeOfFlightLine", "GpsTime", "Green", "Intensity",
+            "NumberOfReturns", "PointSourceId", "Red", "ReturnNumber",
+            "ScanAngleRank", "ScanDirectionFlag", "UserData", "X", "Y", "Z" };
+
+        size_t i = 0;
+        for (MetadataNode& m : s)
+            EXPECT_EQ(m.findChild("name").value(), dims[i++]);
+    }
+    MetadataNode n = m.findChild("bbox");
+    EXPECT_EQ(n.findChild("maxz").value(), "520.51");
+
+    EXPECT_TRUE(m.findChild("dimensions").valid());
+
+    EXPECT_TRUE(m.findChild("srs:compoundwkt").valid());
 }
 
 } // namespace pdal
