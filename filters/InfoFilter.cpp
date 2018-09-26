@@ -34,6 +34,8 @@
 
 #include "InfoFilter.hpp"
 
+#include <cmath>
+
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -197,7 +199,7 @@ bool InfoFilter::processOne(PointRef& point)
     else if (m_querySpec.size() && m_queryCount)
     {
         double dist = std::pow(x - m_queryX, 2) + std::pow(y - m_queryY, 2);
-        if (!isnan(m_queryZ))
+        if (!std::isnan(m_queryZ))
             dist += std::pow(z - m_queryZ, 2);
         if (m_results.size() < m_queryCount || dist < m_results.back().m_dist)
         {
