@@ -45,7 +45,7 @@ namespace pdal
 class PDAL_DLL PointRef
 {
 public:
-    PointRef(PointContainer& container, PointId idx) :
+    PointRef(PointContainer& container, PointId idx = 0) :
         m_container(container), m_layout(*container.layout()), m_idx(idx)
     {}
 

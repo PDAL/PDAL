@@ -22,6 +22,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libhdf5-cpp-100 \
         liblapack-dev \
         libtiff5-dev \
+        libgeotiff-epsg \
         openssh-client \
         python-dev \
         python-numpy \

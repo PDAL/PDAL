@@ -91,15 +91,19 @@ public:
     void clear();
 
     /**
-      Expand the bounds of the box if a value is less than the current
-      minimum or greater than the current maximum.  If the bounds box is
-      currently empty, both minimum and maximum box bounds will be set to
-      the provided value.
+      Expand the bounds of the box to include the specified point.
 
-      \param x  X dimension value.
-      \param y  Y dimension value.
+      \param x  X point location.
+      \param y  Y point location.
     */
-    void grow(double x, double y);
+    BOX2D& grow(double x, double y);
+
+    /**
+      Expand the bounds of the box in all directions by a specified amount.
+
+      \param dist  Distance by which to expand the box.
+    */
+    BOX2D& grow(double dist);
 
     /**
       Determine if a bounds box contains a point.
@@ -157,13 +161,14 @@ public:
 
       \param other  Box that this box should contain.
     */
-    void grow(const BOX2D& other)
+    BOX2D& grow(const BOX2D& other)
     {
         if (other.minx < minx) minx = other.minx;
         if (other.maxx > maxx) maxx = other.maxx;
 
         if (other.miny < miny) miny = other.miny;
         if (other.maxy > maxy) maxy = other.maxy;
+        return *this;
     }
 
     /**
@@ -201,7 +206,7 @@ public:
       \param other  Box to test for overlap.
       \return  Whether the provided box overlaps this box.
     */
-    bool overlaps(const BOX2D& other)
+    bool overlaps(const BOX2D& other) const
     {
         return minx <= other.maxx && maxx >= other.minx &&
             miny <= other.maxy && maxy >= other.miny;
@@ -347,7 +352,7 @@ public:
       \param y  Y dimension value.
       \param z  Z dimension value.
     */
-    void grow(double x, double y, double z);
+    BOX3D& grow(double x, double y, double z);
 
     /**
       Clear the bounds box to an empty state.
@@ -428,11 +433,25 @@ public:
 
       \param other  Box that this box should contain.
     */
-    void grow(const BOX3D& other)
+    BOX3D& grow(const BOX3D& other)
     {
         BOX2D::grow(other);
         if (other.minz < minz) minz = other.minz;
         if (other.maxz > maxz) maxz = other.maxz;
+        return *this;
+    }
+
+    /**
+      Expand this box by a specified amount.
+
+      \param dist  Distance by which box should be expanded.
+    */
+    BOX3D& grow(double dist)
+    {
+        BOX2D::grow(dist);
+        minz -= dist;
+        maxz += dist;
+        return *this;
     }
 
     /**
@@ -454,7 +473,7 @@ public:
       \param other  Box to test for overlap.
       \return  Whether the provided box overlaps this box.
     */
-    bool overlaps(const BOX3D& other)
+    bool overlaps(const BOX3D& other) const
     {
         return BOX2D::overlaps(other) &&
            minz <= other.maxz && maxz >= other.minz;

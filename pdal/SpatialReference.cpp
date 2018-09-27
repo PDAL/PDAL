@@ -98,6 +98,34 @@ bool SpatialReference::valid() const
 }
 
 
+std::string SpatialReference::identifyHorizontalEPSG() const
+{
+    OGRScopedSpatialReference srs(ogrCreateSrs(getHorizontal()));
+
+    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
+        return "";
+
+    if (const char* c = srs->GetAuthorityCode(nullptr))
+        return std::string(c);
+
+    return "";
+}
+
+
+std::string SpatialReference::identifyVerticalEPSG() const
+{
+    OGRScopedSpatialReference srs(ogrCreateSrs(getVertical()));
+
+    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
+        return "";
+
+    if (const char* c = srs->GetAuthorityCode(nullptr))
+        return std::string(c);
+
+    return "";
+}
+
+
 std::string SpatialReference::getWKT() const
 {
     return m_wkt;
