@@ -52,6 +52,7 @@ dimensions
         RGB             Red
 
     Example: ``--readers.slpk.dimensions="rgb, intensity"``
+
 lod
     This is the density of the points in the nodes that will be selected during the read. A density of 0 will select any nodes with a density calculated to be between 0 and 0.5. A higher density means the same extents will be looked at, but more points within thos bounds will be viewed. This number may change between files.
     Example: ``--readers.slpk.lod=2``

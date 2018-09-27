@@ -61,7 +61,8 @@ void EsriReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
     args.add("threads", "Number of threads to be used." , m_args.threads);
     args.add("dimensions", "Dimensions to be used in pulls", m_args.dimensions);
-    args.add("lod", "Point density of nodes selected", m_args.lod);
+    args.add("lod", "Point density of nodes selected", m_args.lod, -1.00);
+
 }
 
 void EsriReader::initialize(PointTableRef table)

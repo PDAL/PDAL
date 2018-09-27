@@ -14,15 +14,13 @@
 
 using namespace pdal;
 //test full autzen lidar i3s with bounds that hold the entire data
-TEST(i3sReaderTest, i3sReaderTest_read_url)
+TEST(i3sReaderTest, options_test)
 {
     StageFactory f;
     //create args
     Options i3s_options;
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     i3s_options.add("threads", 64);
-    i3s_options.add("bounds",
-            "([-123.075542,-123.06196],[44.049719,44.06278]))");//full extents
     i3s_options.add("dimensions", "RGB, intenSITY");
 
     I3SReader reader;
@@ -43,8 +41,9 @@ TEST(i3sReaderTest, i3sReaderTest_read_url)
 
 
 //Test full autzen lidar i3s bounded compared to the full without bounds.
+//also test that lod is working correctly so we don't have a second huge pull
 //Check that the node trimming is working correctly
-TEST(i3sReaderTest, i3sReaderTest_remote_bounded)
+TEST(i3sReaderTest, bounds_and_lod_test)
 {
     //first run
     StageFactory f;
@@ -53,6 +52,9 @@ TEST(i3sReaderTest, i3sReaderTest_remote_bounded)
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     i3s_options.add("threads", 64);
     i3s_options.add("bounds", "([-123.077,-123.063],[44.053, 44.060], [130, 175])");
+    i3s_options.add("lod", 0);
+
+
 
     I3SReader reader;
     reader.setOptions(i3s_options);
@@ -65,11 +67,14 @@ TEST(i3sReaderTest, i3sReaderTest_remote_bounded)
 
     BOX3D bounds = reader.createBounds();
 
+
     //second run
     StageFactory f2;
     Options options2;
     options2.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     options2.add("threads", 64);
+    options2.add("lod", 0);
+
 
     I3SReader reader2;
     reader2.setOptions(options2);
@@ -80,6 +85,7 @@ TEST(i3sReaderTest, i3sReaderTest_remote_bounded)
     PointViewSet viewSet2 = reader2.execute(table2);
     PointViewPtr view2 = *viewSet2.begin();
 
+    //test bounds
     double x, y, z;
     for(std::size_t i = 0; i < view->size(); i++)
     {
@@ -99,6 +105,34 @@ TEST(i3sReaderTest, i3sReaderTest_remote_bounded)
                 pointcount++;
     }
     EXPECT_EQ(view->size(), pointcount);
+
+    //create LoD standard and test against view2 size
+    std::unique_ptr<arbiter::Arbiter> arbiter;
+    Json::Value config;
+
+    arbiter.reset(new arbiter::Arbiter(config));
+    std::string url = "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer/layers/0/nodepages/";
+
+
+
+    uint64_t finalCount = 0;
+    for (int i = 0; i < 31; ++i)
+    {
+        const Json::Value nodepage = parse(arbiter->get(
+                    url + std::to_string(i)));
+        for(const Json::Value& node : nodepage["nodes"])
+        {
+            double lodThreshold = node["lodThreshold"].asDouble();
+            uint64_t pCount = node["vertexCount"].asUInt64();
+            double density = (double) pCount / lodThreshold;
+            if (density > 0 &&
+                density <  0.5)
+            {
+                finalCount += pCount;
+            }
+        }
+    }
+    EXPECT_EQ(view2->size(), finalCount);
 
 }
 
