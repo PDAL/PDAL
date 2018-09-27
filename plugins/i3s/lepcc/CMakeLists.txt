@@ -23,9 +23,9 @@ target_include_directories(lepcc PRIVATE
         ${LEPCC_INCLUDE_DIR})
 
 
-add_executable(lepcctest ${TEST_SRCS})
-target_include_directories(lepcctest PRIVATE
-        ${LEPCC_INCLUDE_DIR})
-target_link_libraries(lepcctest lepcc)
+#add_executable(lepcctest ${TEST_SRCS})
+#target_include_directories(lepcctest PRIVATE
+#        ${LEPCC_INCLUDE_DIR})
+#target_link_libraries(lepcctest lepcc)
 
 add_compile_options(-fPIC)

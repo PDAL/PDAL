@@ -99,67 +99,21 @@ void SlpkReader::initInfo()
 
 }
 
-//Traverse tree through nodepages. Create a nodebox for each node in
-//the tree and test if it overlaps with the bounds created by user.
-//If it's a leaf node(the highest resolution) and it overlaps, add
-//it to the list of nodes to be pulled later.
-void SlpkReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+
+//fetch json because they can't make it the same type
+Json::Value SlpkReader::fetchJson(std::string filepath)
 {
-    std::string nodeUrl = m_filename + "/nodepages/"
-        + std::to_string(pageIndex);
-
-    std::string ext = ".json.gz";
-
-    if(!FileUtils::fileExists(nodeUrl + ext))
-    {
-        return;
-    }
-
     std::string output;
-    auto compressed = m_arbiter->get(nodeUrl+ext);
+    auto compressed = m_arbiter->get(filepath + ".json.gz");
     m_decomp.decompress<std::string>(
             output,
             compressed.data(),
             compressed.size());
-    const Json::Value nodeIndexJson = parse(output);
+    return parse(output);
 
-    if(nodeIndexJson.empty() || !nodeIndexJson.isMember("nodes"))
-        throwError(std::string("Could not find node information"));
-
-    int pageSize = nodeIndexJson["nodes"].size();
-    int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-
-    for (int i = 0; i < pageSize; i++)
-    {
-        BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
-        int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-
-        //density calculated as (number of points in node) / (lod threshold)
-        int pCount =  nodeIndexJson["nodes"][i]["vertexCount"].asInt();
-        double lodThreshold =
-            nodeIndexJson["nodes"][i]["lodThreshold"].asDouble();
-        double density = (double)pCount / lodThreshold;
-        bool overlap = m_bounds.overlaps(nodeBox);
-
-        //if density is within desired lod and the bounds overlap with node
-        //lod is default at -1, meaning no user input. This will grab only
-        //leaf nodes, or the highest resolution.
-        if(m_args.lod == -1 && overlap && cCount == 0)
-        {
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-            nodes.push_back(name);
-        }
-        else if (density > m_args.lod &&
-            density < (m_args.lod + 0.5) &&
-            overlap)
-        {
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-            nodes.push_back(name);
-        }
-    }
-    buildNodeList(nodes, ++pageIndex);
 }
 
+//fetch data using arbiter to get a char vector
 std::vector<char> SlpkReader::fetchBinary(std::string url,
         std::string attNum, std::string ext) const
 {

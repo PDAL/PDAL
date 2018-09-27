@@ -53,9 +53,9 @@ dimensions
 
     Example: ``--readers.slpk.dimensions="rgb, intensity"``
 
-lod
-    This is the density of the points in the nodes that will be selected during the read. A density of 0 will select any nodes with a density calculated to be between 0 and 0.5. A higher density means the same extents will be looked at, but more points within thos bounds will be viewed. This number may change between files.
-    Example: ``--readers.slpk.lod=2``
+depth
+    The depth refers to the depth of the node tree that the user would like to see data from. This essentially alters the viewed resolution. This will select the highest resolution closest to the depth selected. 0 represents the 0th depth of the tree, and the minimum resolution of the data. Selecting nothing here will output the highest resolution in every node subtree.
+    Example: ``--readers.slpk.depth=2``
 
 .. _Scene Layer Packages (SLPK): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md#_8_1
 .. _I3S: https://pdal.io/readers.i3s.html

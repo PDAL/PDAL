@@ -68,65 +68,9 @@ void I3SReader::initInfo()
     m_filename += "/layers/0";
 }
 
-//Traverse tree through nodepages. Create a nodebox for each node in
-//the tree and test if it overlaps with the bounds created by user.
-//If it's a leaf node(the highest resolution) and it overlaps, add
-//it to the list of nodes to be pulled later.
-void I3SReader::buildNodeList(std::vector<int>& nodes, int pageIndex)
+Json::Value I3SReader::fetchJson(std::string filepath)
 {
-    std::string nodeUrl = m_filename + "/nodepages/"
-        + std::to_string(pageIndex);
-
-    const Json::Value nodeIndexJson = parse(m_arbiter->get(nodeUrl));
-
-
-    if(nodeIndexJson.empty() || !nodeIndexJson.isMember("nodes"))
-        throwError(std::string("Could not find node information"));
-
-    int pageSize = nodeIndexJson["nodes"].size();
-    int initialNode = nodeIndexJson["nodes"][0]["resourceId"].asInt();
-
-    for (int i = 0; i < pageSize; i++)
-    {
-        BOX3D nodeBox = parseBox(nodeIndexJson["nodes"][i]);
-        int cCount = nodeIndexJson["nodes"][i]["childCount"].asInt();
-
-        //density calculated as (number of points in node) / (lod threshold)
-        int pCount =  nodeIndexJson["nodes"][i]["vertexCount"].asInt();
-        double lodThreshold =
-            nodeIndexJson["nodes"][i]["lodThreshold"].asDouble();
-        double density = (double)pCount / lodThreshold;
-        bool overlap = m_bounds.overlaps(nodeBox);
-
-        //if density is within desired lod and the bounds overlap with node
-        //lod is default at -1, meaning no user input. This will grab only
-        //leaf nodes, or the highest resolution.
-        if (m_args.lod == -1 && overlap && cCount == 0)
-        {
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-            nodes.push_back(name);
-        }
-        //0.5 represents a large enough gap to find the related nodes
-        //while also separating from different resolution sets
-        else if (density > m_args.lod &&
-            density < (m_args.lod + 0.5) &&
-            overlap)
-        {
-            int name = nodeIndexJson["nodes"][i]["resourceId"].asInt();
-            nodes.push_back(name);
-        }
-
-        //keeps track of largest node so recursive loop knows when to stop
-        if ((nodeIndexJson["nodes"][i]["firstChild"].asInt() +
-                cCount - 1) > m_maxNode)
-        {
-            m_maxNode = nodeIndexJson["nodes"][i]["firstChild"].asInt() +
-                cCount - 1;
-        }
-        else if (initialNode + i == m_maxNode)
-            return;
-    }
-    buildNodeList(nodes, ++pageIndex);
+    return parse(m_arbiter->get(filepath));
 }
 
 std::vector<char> I3SReader::fetchBinary(std::string url,

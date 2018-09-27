@@ -52,7 +52,7 @@ TEST(i3sReaderTest, bounds_and_lod_test)
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     i3s_options.add("threads", 64);
     i3s_options.add("bounds", "([-123.077,-123.063],[44.053, 44.060], [130, 175])");
-    i3s_options.add("lod", 0);
+    i3s_options.add("depth", 3);
 
 
 
@@ -73,7 +73,7 @@ TEST(i3sReaderTest, bounds_and_lod_test)
     Options options2;
     options2.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     options2.add("threads", 64);
-    options2.add("lod", 0);
+    options2.add("depth", 3);
 
 
     I3SReader reader2;
@@ -112,27 +112,5 @@ TEST(i3sReaderTest, bounds_and_lod_test)
 
     arbiter.reset(new arbiter::Arbiter(config));
     std::string url = "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer/layers/0/nodepages/";
-
-
-
-    uint64_t finalCount = 0;
-    for (int i = 0; i < 31; ++i)
-    {
-        const Json::Value nodepage = parse(arbiter->get(
-                    url + std::to_string(i)));
-        for(const Json::Value& node : nodepage["nodes"])
-        {
-            double lodThreshold = node["lodThreshold"].asDouble();
-            uint64_t pCount = node["vertexCount"].asUInt64();
-            double density = (double) pCount / lodThreshold;
-            if (density > 0 &&
-                density <  0.5)
-            {
-                finalCount += pCount;
-            }
-        }
-    }
-    EXPECT_EQ(view2->size(), finalCount);
-
 }
 

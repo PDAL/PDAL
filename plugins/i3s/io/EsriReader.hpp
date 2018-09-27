@@ -95,10 +95,9 @@ public:
 
 protected:
     virtual void initInfo() = 0;
-    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) = 0;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const = 0;
-
+    virtual Json::Value fetchJson(std::string) = 0;
 
 
     std::unique_ptr<ILeStream> m_stream;
@@ -109,7 +108,7 @@ protected:
       Bounds bounds;
       uint16_t threads = 8;
       std::vector<std::string> dimensions;
-      double lod = -1;
+      double depth;
     };
 
     EsriArgs m_args;
@@ -143,6 +142,7 @@ protected:
         std::string name;
     };
     std::map<Dimension::Id, dimData> m_dimMap;
+    std::map<int, Json::Value> m_nodepages;
 
 
     virtual void addArgs(ProgramArgs& args) override;
@@ -153,6 +153,8 @@ protected:
     virtual void done(PointTableRef table) override;
     void createView(std::string localUrl, PointView& view);
     BOX3D parseBox(Json::Value base);
+    void traverseTree(Json::Value page, int index,
+            std::vector<int>& nodes, int depth, int pageIndex);
 };
 
 

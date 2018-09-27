@@ -37,7 +37,7 @@
 
 namespace pdal
 {
-    
+
 class PDAL_DLL I3SReader : public EsriReader
 {
 public:
@@ -45,8 +45,8 @@ public:
 
 protected:
     virtual void initInfo() override;
-    virtual void buildNodeList(std::vector<int>& nodes, int pageIndex) override;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const override;
+    virtual Json::Value fetchJson(std::string) override;
 };
 }

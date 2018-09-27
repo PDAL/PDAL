@@ -61,7 +61,7 @@ void EsriReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
     args.add("threads", "Number of threads to be used." , m_args.threads);
     args.add("dimensions", "Dimensions to be used in pulls", m_args.dimensions);
-    args.add("lod", "Point density of nodes selected", m_args.lod, -1.00);
+    args.add("depth", "Point density of nodes selected", m_args.depth, -1.00);
 
 }
 
@@ -230,7 +230,7 @@ void EsriReader::ready(PointTableRef)
 point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 {
     /*
-    -3Dscenelayerinfo: URL Pattern <scene-server-url/layers/<layer-id>
+    -3Dscenelayerinfo: <scene-server-url/layers/<layer-id>
     -node index document: <layer-url >/nodepages/<iterative node page id>
     -shared resources: <node-url>/shared/
     -feature data: <node-url>/features/<feature-data-bundle-id>
@@ -240,9 +240,10 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 
     //Build the node list that will tell us which nodes overlap with bounds
     std::vector<int> nodes;
-    buildNodeList(nodes, 0);
+    const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
+    traverseTree(initJson, 0, nodes, 0, 0);
 
-    //Create view with overlapping leaf nodes
+    //Create view with overlapping nodes at desired depth
     //Will create a thread pool on the createview class and iterate
     //through the node list for the nodes to be pulled.
     log()->get(LogLevel::Debug) << "Fetching binaries" << std::endl;
@@ -263,6 +264,74 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     return view->size();
 }
 
+//Traverse tree through nodepages. Create a nodebox for each node in
+//the tree and test if it overlaps with the bounds created by user.
+//If it's a leaf node(the highest resolution) and it overlaps, add
+//it to the list of nodes to be pulled later.
+void EsriReader::traverseTree(Json::Value page, int index,
+        std::vector<int>& nodes, int depth, int pageIndex)
+{
+
+    //find node information
+    int name = page["nodes"][index]["resourceId"].asInt();
+    int firstChild = page["nodes"][index]["firstChild"].asInt();
+    int cCount = page["nodes"][index]["childCount"].asInt();
+
+    //update maximum node to stop reading files at the right time
+    if ((firstChild + cCount - 1) > m_maxNode)
+    {
+        m_maxNode = firstChild + cCount - 1;
+    }
+
+    //create box from OBB information and check for overlaps
+    BOX3D nodeBox = parseBox(page["nodes"][index]);
+    bool overlap = m_bounds.overlaps(nodeBox);
+
+    //if it doesn't overlap, then none of the nodes in this subtree will
+    if(!overlap)
+        return;
+    //if it's a child node and the depth hasn't been reached, add it
+    if (cCount == 0)
+    {
+        nodes.push_back(name);
+        return;
+    }
+    else if (depth == m_args.depth)
+    {
+        nodes.push_back(name);
+        return;
+    }
+    else
+    {
+        //if we've already reached the last node stop, other wise increment
+        //depth and begin looking at child nodes
+        if (name == m_maxNode)
+            return;
+        ++depth;
+        for (int i = 0; i < cCount; ++i)
+        {
+            if ((firstChild + i)/m_nodeCap != pageIndex)
+            {
+                pageIndex = (firstChild + i)/m_nodeCap;
+                std::string output;
+
+                if(m_nodepages.find(pageIndex) != m_nodepages.end())
+                    page = m_nodepages[pageIndex];
+                else
+                {
+                    page = fetchJson(m_filename + "/nodepages/" +
+                            std::to_string(pageIndex));
+                    m_nodepages[pageIndex] = page;
+                }
+            }
+            if(pageIndex != 0)
+                index = (firstChild + i) % (m_nodeCap*pageIndex);
+            else
+                index = firstChild + i;
+            traverseTree(page, index, nodes, depth, pageIndex);
+        }
+    }
+}
 // Create the BOX3D for the node. This will be used for testing overlap.
 BOX3D EsriReader::parseBox(Json::Value base)
 {
@@ -377,6 +446,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
 
     const std::string attrUrl = localUrl + "/attributes/";
 
+    //the extensions seen in this part correspond with slpk
     for (const auto& dimEntry : m_dimMap)
     {
         const Dimension::Id dimId(dimEntry.first);
