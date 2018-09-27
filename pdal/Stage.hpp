@@ -138,6 +138,15 @@ public:
     { return false; }
 
     /**
+      Determine if a pipeline with this stage as a sink is streamable.
+
+      \return Nullptr if the stage is streamable, a pointer to this stage
+        otherwise.
+    */
+    virtual const Stage *checkStreamable() const
+    { return this; }
+
+    /**
       Set the spatial reference of a stage.
 
       Set the spatial reference that will override that being carried by the

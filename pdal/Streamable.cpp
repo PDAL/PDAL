@@ -53,6 +53,20 @@ bool Streamable::pipelineStreamable() const
 }
 
 
+const Stage *Streamable::checkStreamable() const
+{
+    const Stage *nonstreamable;
+
+    for (const Stage *s : m_inputs)
+    {
+        nonstreamable = s->checkStreamable();
+        if (nonstreamable)
+            return nonstreamable;
+    }
+    return nullptr;
+}
+
+
 // Streamed execution.
 void Streamable::execute(StreamPointTable& table)
 {
@@ -100,9 +114,10 @@ void Streamable::execute(StreamPointTable& table)
         }
     };
 
-    if (!pipelineStreamable())
-        throwError("Attempting to use stream mode with a stage that doesn't "
-            "support streaming.");
+    const Stage *nonstreaming = checkStreamable();
+    if (nonstreaming)
+        nonstreaming->throwError("Attempting to use stream mode with a "
+            "stage that doesn't support streaming.");
 
     SpatialReference srs;
     std::list<StreamableList> lists;

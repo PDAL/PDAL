@@ -107,6 +107,14 @@ protected:
     */
     virtual void spatialReferenceChanged(const SpatialReference& /*srs*/)
     {}
+
+    /**
+      Determine if a pipeline is streamable.
+
+      \return  NULL if the pipeline is streamable, otherwise returns
+        a pointer to a stage that's not streamable.
+    */
+    const Stage *checkStreamable() const;
 };
 
 } // namespace pdal
