@@ -239,9 +239,17 @@ MetadataNode InfoKernel::run(const std::string& filename)
         BasePointTable *table;
         if (m_needPoints || m_showMetadata)
         {
-            FixedPointTable fixedTable(1000);
-            m_manager.executeStream(fixedTable);
-            table = &fixedTable;
+            if (m_manager.pipelineStreamable())
+            {
+                FixedPointTable fixedTable(10000);
+                m_manager.executeStream(fixedTable);
+                table = &fixedTable;
+            }
+            else
+            {
+                m_manager.execute();
+                table = &m_manager.pointTable();
+            }
         }
         else
         {
