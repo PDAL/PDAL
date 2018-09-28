@@ -53,13 +53,13 @@ bool Streamable::pipelineStreamable() const
 }
 
 
-const Stage *Streamable::checkStreamable() const
+const Stage *Streamable::findNonstreamable() const
 {
     const Stage *nonstreamable;
 
     for (const Stage *s : m_inputs)
     {
-        nonstreamable = s->checkStreamable();
+        nonstreamable = s->findNonstreamable();
         if (nonstreamable)
             return nonstreamable;
     }
@@ -114,7 +114,7 @@ void Streamable::execute(StreamPointTable& table)
         }
     };
 
-    const Stage *nonstreaming = checkStreamable();
+    const Stage *nonstreaming = findNonstreamable();
     if (nonstreaming)
         nonstreaming->throwError("Attempting to use stream mode with a "
             "stage that doesn't support streaming.");

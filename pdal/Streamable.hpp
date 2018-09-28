@@ -109,12 +109,12 @@ protected:
     {}
 
     /**
-      Determine if a pipeline is streamable.
+      Find the first nonstreamable stage in a pipeline.
 
-      \return  NULL if the pipeline is streamable, otherwise returns
-        a pointer to a stage that's not streamable.
+      \return  NULL if the pipeline is streamable, otherwise return
+        a pointer to the first found stage that's not streamable.
     */
-    const Stage *checkStreamable() const;
+    const Stage *findNonstreamable() const;
 };
 
 } // namespace pdal

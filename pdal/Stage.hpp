@@ -138,12 +138,13 @@ public:
     { return false; }
 
     /**
-      Determine if a pipeline with this stage as a sink is streamable.
+      Return a pointer to a pipeline's first non-streamable stage,
+      if one exists.
 
-      \return Nullptr if the stage is streamable, a pointer to this stage
+      \return  nullptr if the stage is streamable, a pointer to this stage
         otherwise.
     */
-    virtual const Stage *checkStreamable() const
+    virtual const Stage *findNonstreamable() const
     { return this; }
 
     /**
