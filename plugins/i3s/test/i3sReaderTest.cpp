@@ -14,6 +14,7 @@
 
 using namespace pdal;
 //test full autzen lidar i3s with bounds that hold the entire data
+//also tests that default depth pulls full resolution of data
 TEST(i3sReaderTest, options_test)
 {
     StageFactory f;
@@ -40,10 +41,31 @@ TEST(i3sReaderTest, options_test)
 }
 
 
+TEST(i3sReaderTest, depth_test)
+{
+    StageFactory f;
+
+    Options i3s_options;
+    i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
+    i3s_options.add("threads", 64);
+    i3s_options.add("depth", 1);
+
+    I3SReader reader;
+    reader.setOptions(i3s_options);
+
+    PointTable table;
+    reader.prepare(table);
+
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    //59994 is the number of points in the first depth of the autzen data
+    EXPECT_EQ(view->size(), 59994u);
+}
+
+
 //Test full autzen lidar i3s bounded compared to the full without bounds.
-//also test that lod is working correctly so we don't have a second huge pull
-//Check that the node trimming is working correctly
-TEST(i3sReaderTest, bounds_and_lod_test)
+TEST(i3sReaderTest, bounds_test)
 {
     //first run
     StageFactory f;
@@ -112,5 +134,6 @@ TEST(i3sReaderTest, bounds_and_lod_test)
 
     arbiter.reset(new arbiter::Arbiter(config));
     std::string url = "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer/layers/0/nodepages/";
+
 }
 
