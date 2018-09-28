@@ -54,6 +54,7 @@ public:
     std::string getName() const;
 
     GDALReader();
+    ~GDALReader();
 
 private:
     virtual void initialize();
@@ -70,6 +71,7 @@ private:
     std::vector<Dimension::Type> m_bandTypes;
     std::vector<Dimension::Id> m_bandIds;
     std::string m_header;
+    bool m_useMemoryCopy;
     point_count_t m_index;
     int m_row;
     int m_col;

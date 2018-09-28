@@ -64,6 +64,11 @@ GDALReader::GDALReader()
     : m_index(0)
 {}
 
+GDALReader::~GDALReader()
+{
+    m_raster.reset();
+}
+
 
 void GDALReader::initialize()
 {
@@ -71,6 +76,10 @@ void GDALReader::initialize()
     m_raster.reset(new gdal::Raster(m_filename));
 
     m_raster->open();
+
+    if (m_useMemoryCopy)
+        m_raster.reset(m_raster->memoryCopy());
+
     try
     {
         setSpatialReference(m_raster->getSpatialRef());
@@ -82,7 +91,6 @@ void GDALReader::initialize()
 
     m_count = m_raster->width() * m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
-    m_raster->close();
 
 }
 
@@ -142,16 +150,18 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 void GDALReader::addArgs(ProgramArgs& args)
 {
     args.add("header", "A comma-separated list of dimension IDs to map raster bands to dimension id", m_header);
+    args.add("memorycopy", "Load the given raster file entirely to memory", m_useMemoryCopy, false);
 }
 
 
 void GDALReader::ready(PointTableRef table)
 {
     m_index = 0;
-    if (m_raster->open() == gdal::GDALError::CantOpen)
+    if (m_raster->open() == gdal::GDALError::CantOpen && ! m_useMemoryCopy)
         throwError("Couldn't open raster file '" + m_filename + "'.");
     m_row = 0;
     m_col = 0;
+
 }
 
 
