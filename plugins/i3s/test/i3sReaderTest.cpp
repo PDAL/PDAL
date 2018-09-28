@@ -41,14 +41,15 @@ TEST(i3sReaderTest, options_test)
 }
 
 
-TEST(i3sReaderTest, depth_test)
+TEST(i3sReaderTest, density_test)
 {
     StageFactory f;
 
     Options i3s_options;
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     i3s_options.add("threads", 64);
-    i3s_options.add("depth", 1);
+    i3s_options.add("min_density", 0);
+    i3s_options.add("max_density", 0.5);
 
     I3SReader reader;
     reader.setOptions(i3s_options);
@@ -60,7 +61,7 @@ TEST(i3sReaderTest, depth_test)
     PointViewPtr view = *viewSet.begin();
 
     //59994 is the number of points in the first depth of the autzen data
-    EXPECT_EQ(view->size(), 59994u);
+    EXPECT_EQ(view->size(), 14998u);
 }
 
 
@@ -74,7 +75,8 @@ TEST(i3sReaderTest, bounds_test)
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     i3s_options.add("threads", 64);
     i3s_options.add("bounds", "([-123.077,-123.063],[44.053, 44.060], [130, 175])");
-    i3s_options.add("depth", 3);
+    i3s_options.add("min_density", 1);
+    i3s_options.add("max_density", 1.5);
 
 
 
@@ -95,7 +97,8 @@ TEST(i3sReaderTest, bounds_test)
     Options options2;
     options2.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
     options2.add("threads", 64);
-    options2.add("depth", 3);
+    options2.add("min_density", 1);
+    options2.add("max_density", 1.5);
 
 
     I3SReader reader2;

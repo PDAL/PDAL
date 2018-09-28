@@ -61,12 +61,18 @@ void EsriReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
     args.add("threads", "Number of threads to be used." , m_args.threads);
     args.add("dimensions", "Dimensions to be used in pulls", m_args.dimensions);
-    args.add("depth", "Point density of nodes selected", m_args.depth, -1.00);
+    args.add("min_density", "Minimum point density",
+            m_args.min_density, -1.0);
+    args.add("max_density", "Maximum point density",
+            m_args.max_density, -1.0);
 
 }
 
 void EsriReader::initialize(PointTableRef table)
 {
+    //create proper density if min was set but max wasn't
+    if(m_args.min_density >= 0 && m_args.max_density < 0)
+        m_args.max_density = std::numeric_limits<double>::max();
 
     //create dimensions map for future lookup
     if (!m_args.dimensions.empty())
@@ -277,6 +283,12 @@ void EsriReader::traverseTree(Json::Value page, int index,
     int firstChild = page["nodes"][index]["firstChild"].asInt();
     int cCount = page["nodes"][index]["childCount"].asInt();
 
+    //find density information
+    double area = page["nodes"][index]["lodThreshold"].asDouble();
+    int pCount = page["nodes"][index]["vertexCount"].asInt();
+    double density = (double)pCount / area;
+
+
     //update maximum node to stop reading files at the right time
     if ((firstChild + cCount - 1) > m_maxNode)
     {
@@ -296,15 +308,15 @@ void EsriReader::traverseTree(Json::Value page, int index,
         nodes.push_back(name);
         return;
     }
-    else if (depth == m_args.depth)
+    else if (density < m_args.max_density && density > m_args.min_density)
     {
         nodes.push_back(name);
         return;
     }
     else
     {
-        //if we've already reached the last node stop, other wise increment
-        //depth and begin looking at child nodes
+        //if we've already reached the last node stop process, other wise
+        //increment depth and begin looking at child nodes
         if (name == m_maxNode)
             return;
         ++depth;
