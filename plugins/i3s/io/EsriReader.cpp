@@ -72,7 +72,7 @@ void EsriReader::initialize(PointTableRef table)
 {
     //create proper density if min was set but max wasn't
     if(m_args.min_density >= 0 && m_args.max_density < 0)
-        m_args.max_density = std::numeric_limits<double>::max();
+        m_args.max_density = (std::numeric_limits<double>::max());
 
     //create dimensions map for future lookup
     if (!m_args.dimensions.empty())
@@ -300,22 +300,19 @@ void EsriReader::traverseTree(Json::Value page, int index,
     bool overlap = m_bounds.overlaps(nodeBox);
 
     //if it doesn't overlap, then none of the nodes in this subtree will
-    if(!overlap)
+    if (!overlap)
         return;
-    //if it's a child node and the depth hasn't been reached, add it
-    if (cCount == 0)
-    {
-        nodes.push_back(name);
-        return;
-    }
-    else if (density < m_args.max_density && density > m_args.min_density)
+    //if it's a child node and the density hasn't been set, add leaf nodes
+    if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
     {
         nodes.push_back(name);
         return;
     }
     else
     {
-        //if we've already reached the last node stop process, other wise
+        if (density < m_args.max_density && density > m_args.min_density)
+            nodes.push_back(name);
+        //if we've already reached the last node, stop the process, otherwise
         //increment depth and begin looking at child nodes
         if (name == m_maxNode)
             return;

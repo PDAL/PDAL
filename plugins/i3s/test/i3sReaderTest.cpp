@@ -60,8 +60,8 @@ TEST(i3sReaderTest, density_test)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    //59994 is the number of points in the first depth of the autzen data
-    EXPECT_EQ(view->size(), 14998u);
+    //1,709,518 points in the autzen data between 0 and 0.5
+    EXPECT_EQ(view->size(), 1709518u);
 }
 
 
