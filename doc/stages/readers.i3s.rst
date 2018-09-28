@@ -55,9 +55,9 @@ dimensions
 
     Example: ``--readers.i3s.dimensions="returns, rgb"``
 
-depth
-    The depth refers to the depth of the node tree that the user would like to see data from. This essentially alters the viewed resolution. This will select the highest resolution closest to the depth selected. 0 represents the 0th depth of the tree, and the minimum resolution of the data. Selecting nothing here will output the highest resolution in every node subtree.
-
-    Example: ``--readers.i3s.depth=2``
+min_density and max_density
+    This is the range of density of the points in the nodes that will be selected during the read. The density of a node is calculated by the vertex count divided by the effective area of the node. Nodes do not have a uniform density acrossdepths in the tree, so some sections may be more or less dense than others. The default values for these parameters will pull all the leaf nodes (the highest resolution).
+    Example: ``--readers.i3s.min_density=2``
+    Example: ``--readers.i3s.max_density=2.5``
 
 .. _Indexed 3d Scene Layer (I3S): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md

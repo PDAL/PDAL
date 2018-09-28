@@ -130,13 +130,5 @@ TEST(i3sReaderTest, bounds_test)
                 pointcount++;
     }
     EXPECT_EQ(view->size(), pointcount);
-
-    //create LoD standard and test against view2 size
-    std::unique_ptr<arbiter::Arbiter> arbiter;
-    Json::Value config;
-
-    arbiter.reset(new arbiter::Arbiter(config));
-    std::string url = "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer/layers/0/nodepages/";
-
 }
 
