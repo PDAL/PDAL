@@ -107,7 +107,6 @@ void HexBin::filter(PointView& view)
         p.setPointId(idx);
         processOne(p);
     }
-    m_count += view.size();
 }
 
 
@@ -116,6 +115,7 @@ bool HexBin::processOne(PointRef& point)
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     m_grid->addPoint(x, y);
+    m_count++;
     return true;
 }
 
