@@ -72,7 +72,7 @@ void EsriReader::initialize(PointTableRef table)
 {
     //create proper density if min was set but max wasn't
     if(m_args.min_density >= 0 && m_args.max_density < 0)
-        m_args.max_density = (std::numeric_limits<double>::max());
+        m_args.max_density = (std::numeric_limits<double>::max)();
 
     //create dimensions map for future lookup
     if (!m_args.dimensions.empty())
