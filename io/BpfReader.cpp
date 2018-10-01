@@ -200,6 +200,7 @@ void BpfReader::initialize()
     if (pos > m_header.m_len)
         throwError("BPF Header length exceeded that reported by file.");
     m_stream.close();
+    Utils::closeFile(m_istreamPtr);
 }
 
 
@@ -280,8 +281,7 @@ bool BpfReader::readPolarData()
 
 void BpfReader::ready(PointTableRef)
 {
-    if (!m_istreamPtr)
-        throwError("Reader is not initialized");
+    m_istreamPtr = Utils::openFile(m_filename);
     m_stream = ILeStream(m_istreamPtr);
     m_stream.seek(m_header.m_len);
     m_index = 0;
