@@ -137,9 +137,9 @@ void NormalFilter::filter(PointView& view)
         {
             PointRef p = view.point(i);
             Eigen::Vector3f vp(
-                m_args->m_viewpoint.x - p.getFieldAs<double>(Dimension::Id::X),
-                m_args->m_viewpoint.y - p.getFieldAs<double>(Dimension::Id::Y),
-                m_args->m_viewpoint.z - p.getFieldAs<double>(Dimension::Id::Z));
+               (float) m_args->m_viewpoint.x - p.getFieldAs<float>(Dimension::Id::X),
+               (float) m_args->m_viewpoint.y - p.getFieldAs<float>(Dimension::Id::Y),
+               (float) m_args->m_viewpoint.z - p.getFieldAs<float>(Dimension::Id::Z));
             if (vp.dot(normal) < 0)
                 normal *= -1.0;
         }

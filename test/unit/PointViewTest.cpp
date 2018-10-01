@@ -58,8 +58,8 @@ PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
     for (PointId i = 0; i < cnt; i++)
     {
         const uint8_t x = (uint8_t)(i + 1);
-        const int32_t y = i * 10;
-        const double z = i * 100;
+        const int32_t y = (int32_t)(i * 10);
+        const double z = (double)(i * 100);
 
         view->setField(Dimension::Id::Classification, i, x);
         view->setField(Dimension::Id::X, i, y);
@@ -233,12 +233,12 @@ static void check_bounds(const BOX3D& box,
                          double miny, double maxy,
                          double minz, double maxz)
 {
-    EXPECT_FLOAT_EQ(box.minx, minx);
-    EXPECT_FLOAT_EQ(box.maxx, maxx);
-    EXPECT_FLOAT_EQ(box.miny, miny);
-    EXPECT_FLOAT_EQ(box.maxy, maxy);
-    EXPECT_FLOAT_EQ(box.minz, minz);
-    EXPECT_FLOAT_EQ(box.maxz, maxz);
+    EXPECT_DOUBLE_EQ(box.minx, minx);
+    EXPECT_DOUBLE_EQ(box.maxx, maxx);
+    EXPECT_DOUBLE_EQ(box.miny, miny);
+    EXPECT_DOUBLE_EQ(box.maxy, maxy);
+    EXPECT_DOUBLE_EQ(box.minz, minz);
+    EXPECT_DOUBLE_EQ(box.maxz, maxz);
 }
 
 

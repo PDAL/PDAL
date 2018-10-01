@@ -110,7 +110,7 @@ public:
     { resetIterator(); }
 
     virtual int pointCount() const
-        { return m_view.size(); }
+        { return (int) m_view.size(); }
     virtual int polygonCount() const
         { return m_mesh.size(); }
     virtual int newPoint(const std::array<double, 3>& position)
@@ -119,7 +119,7 @@ public:
         m_view.setField(Dimension::Id::X, cnt, position[0]);
         m_view.setField(Dimension::Id::Y, cnt, position[1]);
         m_view.setField(Dimension::Id::Z, cnt, position[2]);
-        return cnt;
+        return (int) cnt;
     }
 
     virtual int newPoint(const std::array<double, 3>& position, double density)
@@ -129,7 +129,7 @@ public:
         m_view.setField(Dimension::Id::Y, cnt, position[1]);
         m_view.setField(Dimension::Id::Z, cnt, position[2]);
         m_view.setField(Dimension::Id::Density, cnt, density);
-        return cnt;
+        return (int) cnt;
     }
 
     virtual int newPoint(const std::array<double, 3>& position,
@@ -142,7 +142,7 @@ public:
         m_view.setField(Dimension::Id::Red, cnt, color[0]);
         m_view.setField(Dimension::Id::Green, cnt, color[1]);
         m_view.setField(Dimension::Id::Blue, cnt, color[2]);
-        return cnt;
+        return (int) cnt;
     }
 
     virtual int newPoint(const std::array<double, 3>& position,
@@ -156,7 +156,7 @@ public:
         m_view.setField(Dimension::Id::Green, cnt, color[1]);
         m_view.setField(Dimension::Id::Blue, cnt, color[2]);
         m_view.setField(Dimension::Id::Density, cnt, density);
-        return cnt;
+        return (int) cnt;
     }
 
     virtual void newPolygon(std::vector<int>& poly)

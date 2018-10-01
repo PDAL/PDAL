@@ -245,7 +245,7 @@ void LasWriter::addUserVlrs()
         b64data = v["data"].asString();
 
         if (v.isMember("record_id"))
-            recordId = v["record_id"].asUInt64();
+            recordId = (uint16_t)v["record_id"].asUInt64();
 
         if (v.isMember("description"))
             description = v["description"].asString();
@@ -942,7 +942,7 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
         p.extended_number_of_returns = numberOfReturns;
         p.extended_scanner_channel = scanChannel;
         p.extended_scan_angle =
-            roundf(point.getFieldAs<float>(Id::ScanAngleRank) / .006);
+            (laszip_I16)(roundf(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         p.extended_classification_flags = classFlags;
         p.extended_classification = classification;
         p.classification = (classification & 0x1F) | (classFlags << 5);
@@ -1093,7 +1093,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     if (has14Format)
     {
          int16_t scanAngleRank =
-             point.getFieldAs<float>(Id::ScanAngleRank) / .006;
+             (int16_t) (point.getFieldAs<float>(Id::ScanAngleRank) / .006);
          ostream << userData << scanAngleRank;
     }
     else

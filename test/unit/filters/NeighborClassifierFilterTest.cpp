@@ -41,7 +41,7 @@
 #include <filters/StatsFilter.hpp>
 
 using namespace pdal;
-const stats::Summary::EnumMap GetClassifications(Stage &s, unsigned int *count = NULL)
+const stats::Summary::EnumMap GetClassifications(Stage &s, point_count_t *count = NULL)
 {
     StatsFilter stats;
     stats.setInput(s);
@@ -66,7 +66,7 @@ TEST(NeighborClassifierFilterTest, singleRange)
     StageFactory factory;
     Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
-    unsigned int count = 0;
+    point_count_t count = 0;
     stats::Summary::EnumMap OrigClassifications = GetClassifications(r, &count);
 
     std::vector<unsigned int> kvals = {1, 3};
@@ -119,7 +119,7 @@ TEST(NeighborClassifierFilterTest, multipleRange)
     StageFactory factory;
     Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
-    unsigned int count = 0;
+    point_count_t count = 0;
     stats::Summary::EnumMap OrigClassifications = GetClassifications(r, &count);
 
     std::vector<unsigned int> kvals = {1, 3};
@@ -168,7 +168,7 @@ TEST(NeighborClassifierFilterTest, candidate)
     StageFactory factory;
 
     Options rClassifications;
-    unsigned int count = 0;
+    point_count_t count = 0;
     rClassifications.add("filename", Support::datapath("las/sample_c.las"));
     Stage& rC = *(factory.createStage("readers.las"));
     rC.setOptions(rClassifications);

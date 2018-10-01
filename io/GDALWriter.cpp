@@ -142,8 +142,8 @@ void GDALWriter::readyFile(const std::string& filename,
 void GDALWriter::createGrid(BOX2D bounds)
 {
     m_curBounds = bounds;
-    size_t width = ((m_curBounds.maxx - m_curBounds.minx) / m_edgeLength) + 1;
-    size_t height = ((m_curBounds.maxy - m_curBounds.miny) / m_edgeLength) + 1;
+    size_t width = (size_t)((m_curBounds.maxx - m_curBounds.minx) / m_edgeLength) + 1;
+    size_t height = (size_t)((m_curBounds.maxy - m_curBounds.miny) / m_edgeLength) + 1;
     try
     {
         m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
@@ -162,13 +162,13 @@ void GDALWriter::expandGrid(BOX2D bounds)
         return;
 
     bounds.grow(m_curBounds);
-    size_t xshift = ceil((m_curBounds.minx - bounds.minx) / m_edgeLength);
+    size_t xshift = (size_t)ceil((m_curBounds.minx - bounds.minx) / m_edgeLength);
     bounds.minx = m_curBounds.minx - (xshift * m_edgeLength);
-    size_t yshift = ceil((m_curBounds.miny - bounds.miny) / m_edgeLength);
+    size_t yshift = (size_t)ceil((m_curBounds.miny - bounds.miny) / m_edgeLength);
     bounds.miny = m_curBounds.miny - (yshift * m_edgeLength);
 
-    size_t width = ((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
-    size_t height = ((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    size_t width = (size_t)((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    size_t height = (size_t)((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
     try
     {
         m_grid->expand(width, height, xshift, yshift);
