@@ -100,7 +100,6 @@ void SlpkReader::initInfo()
 }
 
 
-//fetch json because they can't make it the same type
 Json::Value SlpkReader::fetchJson(std::string filepath)
 {
     std::string output;

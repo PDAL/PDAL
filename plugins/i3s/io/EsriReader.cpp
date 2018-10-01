@@ -119,7 +119,17 @@ void EsriReader::initialize(PointTableRef table)
     //create pdal Bounds
     m_bounds = createBounds();
     //find number of nodes per nodepage
-    m_nodeCap = m_info["store"]["index"]["nodesPerPage"].asInt();
+    if(m_info["store"]["index"].isMember("nodesPerPage"))
+        m_nodeCap = m_info["store"]["index"]["nodesPerPage"].asInt();
+    else if(m_info["store"]["index"].isMember("nodePerIndexBlock"))
+        m_nodeCap = m_info["store"]["index"]["nodePerIndexBlock"].asInt();
+    else
+    {
+        log()->get(LogLevel::Warning) <<
+            "Number of nodes per page not specified. Default is 64." <<
+                std::endl;
+        m_nodeCap = 64;
+    }
 
     log()->get(LogLevel::Debug) << "FileName: " <<
         m_filename << std::endl;
