@@ -200,8 +200,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     m_srs = firstView->spatialReference();
 
     firstView->calculateBounds(m_bounds);
-    m_cols = ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1;
-    m_rows = ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1;
+    m_cols = (int)((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1;
+    m_rows = (int)((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1;
 
     // Create raster of minimum Z values per element.
     std::vector<double> ZImin = createZImin(firstView);
@@ -365,7 +365,7 @@ std::vector<int> SMRFilter::createNetMask()
     std::vector<int> isNetCell(m_rows * m_cols, 0);
     if (m_args->m_cut > 0.0)
     {
-        int v = std::ceil(m_args->m_cut / m_args->m_cell);
+        int v = (int)std::ceil(m_args->m_cut / m_args->m_cell);
 
         for (auto c = 0; c < m_cols; c += v)
         {
@@ -464,7 +464,7 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     std::vector<double> ZInetV = ZImin;
     if (m_args->m_cut > 0.0)
     {
-        int v = std::ceil(m_args->m_cut / m_args->m_cell);
+        int v = (int)std::ceil(m_args->m_cut / m_args->m_cell);
         std::vector<double> bigErode =
             erodeDiamond(ZImin, m_rows, m_cols, 2 * v);
         std::vector<double> bigOpen =
@@ -599,7 +599,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     // but is internally converted to a pixel equivalent by dividing it by the
     // cell size and rounding the result toward positive infinity (i.e., taking
     // the ceiling value)."
-    int max_radius = std::ceil(max_window / m_args->m_cell);
+    int max_radius = (int) std::ceil(max_window / m_args->m_cell);
     std::vector<double> prevSurface = ZImin;
     std::vector<double> prevErosion = ZImin;
 

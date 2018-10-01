@@ -89,21 +89,21 @@ void FauxReader::initialize()
         else
         {
             m_delX = m_bounds.maxx - m_bounds.minx;
-            m_count *= m_delX;
+            m_count *= (point_count_t) m_delX;
         }
         if (m_bounds.maxy <= m_bounds.miny)
             m_delY = 0;
         else
         {
             m_delY = m_bounds.maxy - m_bounds.miny;
-            m_count *= m_delY;
+            m_count *= (point_count_t) m_delY;
         }
         if (m_bounds.maxz <= m_bounds.minz)
             m_delZ = 0;
         else
         {
             m_delZ = m_bounds.maxz - m_bounds.minz;
-            m_count *= m_delZ;
+            m_count *= (point_count_t) m_delZ;
         }
         if (!m_delX && !m_delY && !m_delZ)
             m_count = 0;
@@ -188,24 +188,24 @@ bool FauxReader::processOne(PointRef& point)
     case Mode::Grid:
     {
         if (m_delX)
-            x = m_index % (point_count_t)m_delX;
+            x = (double) (m_index % (point_count_t)m_delX);
 
         if (m_delY)
         {
             if (m_delX)
-                y = (m_index / (point_count_t)m_delX) % (point_count_t)m_delY;
+                y = (double)((m_index / (point_count_t)m_delX) % (point_count_t)m_delY);
             else
-                y = m_index % (point_count_t)m_delY;
+                y = (double)(m_index % (point_count_t)m_delY);
         }
 
         if (m_delZ)
         {
             if (m_delX && m_delY)
-                z = m_index / (point_count_t)(m_delX * m_delY);
+                z = (double) m_index / (point_count_t)(m_delX * m_delY);
             else if (m_delX)
-                z = m_index / (point_count_t)m_delX;
+                z = (double) m_index / (point_count_t)m_delX;
             else if (m_delY)
-                z = m_index / (point_count_t)m_delY;
+                z = (double) m_index / (point_count_t)m_delY;
         }
         break;
     }

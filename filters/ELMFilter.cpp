@@ -76,8 +76,8 @@ void ELMFilter::filter(PointView& view)
     BOX2D bounds;
     view.calculateBounds(bounds);
 
-    size_t cols = ((bounds.maxx - bounds.minx) / m_cell) + 1;
-    size_t rows = ((bounds.maxy - bounds.miny) / m_cell) + 1;
+    size_t cols = (size_t) ((bounds.maxx - bounds.minx) / m_cell) + 1;
+    size_t rows = (size_t) ((bounds.maxy - bounds.miny) / m_cell) + 1;
 
     // Make an initial pass through the input PointView to index elevation
     // values and PointIds by row and column.

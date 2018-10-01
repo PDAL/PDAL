@@ -76,22 +76,22 @@ TEST(ViewTest, test_basic)
     EXPECT_EQ(view->size(), 20u);
 
     stats::Summary xSummary = s.getStats(Dimension::Id::X);
-    EXPECT_FLOAT_EQ(xSummary.minimum(), 0);
-    EXPECT_FLOAT_EQ(xSummary.maximum(), 19);
+    EXPECT_DOUBLE_EQ(xSummary.minimum(), 0);
+    EXPECT_DOUBLE_EQ(xSummary.maximum(), 19);
     EXPECT_EQ(xSummary.count(), 20u);
-    EXPECT_FLOAT_EQ(xSummary.average(), 9.5);
+    EXPECT_DOUBLE_EQ(xSummary.average(), 9.5);
 
     stats::Summary ySummary = s.getStats(Dimension::Id::Y);
-    EXPECT_FLOAT_EQ(ySummary.minimum(), 0);
-    EXPECT_FLOAT_EQ(ySummary.maximum(), 38);
+    EXPECT_DOUBLE_EQ(ySummary.minimum(), 0);
+    EXPECT_DOUBLE_EQ(ySummary.maximum(), 38);
     EXPECT_EQ(ySummary.count(), 20u);
     EXPECT_FLOAT_EQ(ySummary.average(), 19);
 
     stats::Summary zSummary = s.getStats(Dimension::Id::Z);
-    EXPECT_FLOAT_EQ(zSummary.minimum(), -19);
-    EXPECT_FLOAT_EQ(zSummary.maximum(), 0);
+    EXPECT_DOUBLE_EQ(zSummary.minimum(), -19);
+    EXPECT_DOUBLE_EQ(zSummary.maximum(), 0);
     EXPECT_EQ(zSummary.count(), 20u);
-    EXPECT_FLOAT_EQ(zSummary.average(), -9.5);
+    EXPECT_DOUBLE_EQ(zSummary.average(), -9.5);
 }
 
 }

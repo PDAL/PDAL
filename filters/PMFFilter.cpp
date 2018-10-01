@@ -196,8 +196,8 @@ void PMFFilter::processGround(PointViewPtr view)
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
     view->calculateBounds(bounds);
-    size_t cols = ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1;
-    size_t rows = ((bounds.maxy - bounds.miny) / m_args->m_cellSize) + 1;
+    size_t cols = (size_t) ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1;
+    size_t rows = (size_t) ((bounds.maxy - bounds.miny) / m_args->m_cellSize) + 1;
 
     // initialize surface to NaN
     std::vector<double> ZImin(rows * cols,
@@ -278,20 +278,20 @@ void PMFFilter::processGround(PointViewPtr view)
     {
         // Determine the initial window size.
         if (m_args->m_exponential)
-            ws = m_args->m_cellSize * (2.0f * std::pow(2, iter) + 1.0f);
+            ws = (float) m_args->m_cellSize * (2.0f * (float)std::pow(2, iter) + 1.0f);
         else
-            ws = m_args->m_cellSize * (2.0f * (iter + 1) * 2 + 1.0f);
+            ws = (float) m_args->m_cellSize * (2.0f * (iter + 1) * 2 + 1.0f);
 
         // Calculate the height threshold to be used in the next iteration.
         if (iter == 0)
-            ht = m_args->m_initialDistance;
+            ht = (float) m_args->m_initialDistance;
         else
-            ht = m_args->m_slope * (ws - wsvec[iter - 1]) * m_args->m_cellSize +
-                 m_args->m_initialDistance;
+            ht = (float) m_args->m_slope * (ws - wsvec[iter - 1]) * (float) m_args->m_cellSize +
+                 (float) m_args->m_initialDistance;
 
         // Enforce max distance on height threshold
         if (ht > m_args->m_maxDistance)
-            ht = m_args->m_maxDistance;
+            ht = (float) m_args->m_maxDistance;
 
         wsvec.push_back(ws);
         htvec.push_back(ht);
@@ -306,7 +306,7 @@ void PMFFilter::processGround(PointViewPtr view)
             << "Iteration " << j << " (height threshold = " << htvec[j]
             << ", window size = " << wsvec[j] << ")...\n";
 
-        int iters = 0.5 * (wsvec[j] - 1);
+        int iters = (int) (0.5 * (wsvec[j] - 1));
         using namespace eigen;
         std::vector<double> me = erodeDiamond(ZImin, rows, cols, iters);
         std::vector<double> mo = dilateDiamond(me, rows, cols, iters);

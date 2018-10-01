@@ -110,8 +110,8 @@ TEST(PolygonTest, smooth)
 {
     pdal::Polygon p(getJSON());
     pdal::Polygon p2 = p.simplify(100000.0, 0.0);
-    EXPECT_FLOAT_EQ(p.area(), 703744.56f);
-    EXPECT_FLOAT_EQ(p2.area(), 492958.44f);
+    EXPECT_DOUBLE_EQ(p.area(), 703744.56f);
+    EXPECT_DOUBLE_EQ(p2.area(), 492958.44f);
 }
 
 TEST(PolygonTest, covers)
@@ -148,12 +148,12 @@ TEST(PolygonTest, bounds)
 {
     pdal::Polygon p(getWKT());
     BOX3D b = p.bounds();
-    EXPECT_FLOAT_EQ(b.minx, 636539.12f);
-    EXPECT_FLOAT_EQ(b.miny, 850511.81f);
-    EXPECT_FLOAT_EQ(b.minz, 420.50977f);
-    EXPECT_FLOAT_EQ(b.maxx, 637589.94f);
-    EXPECT_FLOAT_EQ(b.maxy, 851528.5f);
-    EXPECT_FLOAT_EQ(b.maxz, 438.70996f);
+    EXPECT_DOUBLE_EQ(b.minx, 636539.12f);
+    EXPECT_DOUBLE_EQ(b.miny, 850511.81f);
+    EXPECT_DOUBLE_EQ(b.minz, 420.50977f);
+    EXPECT_DOUBLE_EQ(b.maxx, 637589.94f);
+    EXPECT_DOUBLE_EQ(b.maxy, 851528.5f);
+    EXPECT_DOUBLE_EQ(b.maxz, 438.70996f);
 }
 
 TEST(PolygonTest, bounds2d)
@@ -162,12 +162,12 @@ TEST(PolygonTest, bounds2d)
     pdal::Polygon p(box);
 
     BOX3D b = p.bounds();
-    EXPECT_FLOAT_EQ(b.minx, 636539.12f);
-    EXPECT_FLOAT_EQ(b.miny, 850511.81f);
-    EXPECT_FLOAT_EQ(b.minz, 0.0f);
-    EXPECT_FLOAT_EQ(b.maxx, 637589.94f);
-    EXPECT_FLOAT_EQ(b.maxy, 851528.5f);
-    EXPECT_FLOAT_EQ(b.maxz, 0.0f);
+    EXPECT_DOUBLE_EQ(b.minx, 636539.12f);
+    EXPECT_DOUBLE_EQ(b.miny, 850511.81f);
+    EXPECT_DOUBLE_EQ(b.minz, 0.0f);
+    EXPECT_DOUBLE_EQ(b.maxx, 637589.94f);
+    EXPECT_DOUBLE_EQ(b.maxy, 851528.5f);
+    EXPECT_DOUBLE_EQ(b.maxz, 0.0f);
 }
 
 TEST(PolygonTest, bounds3d)
@@ -176,12 +176,12 @@ TEST(PolygonTest, bounds3d)
     pdal::Polygon p(box);
 
     BOX3D b = p.bounds();
-    EXPECT_FLOAT_EQ(b.minx, 636539.12f);
-    EXPECT_FLOAT_EQ(b.miny, 850511.81f);
-    EXPECT_FLOAT_EQ(b.minz, 420.50977f);
-    EXPECT_FLOAT_EQ(b.maxx, 637589.94f);
-    EXPECT_FLOAT_EQ(b.maxy, 851528.5f);
-    EXPECT_FLOAT_EQ(b.maxz, 438.70996f);
+    EXPECT_DOUBLE_EQ(b.minx, 636539.12f);
+    EXPECT_DOUBLE_EQ(b.miny, 850511.81f);
+    EXPECT_DOUBLE_EQ(b.minz, 420.50977f);
+    EXPECT_DOUBLE_EQ(b.maxx, 637589.94f);
+    EXPECT_DOUBLE_EQ(b.maxy, 851528.5f);
+    EXPECT_DOUBLE_EQ(b.maxz, 438.70996f);
 }
 
 

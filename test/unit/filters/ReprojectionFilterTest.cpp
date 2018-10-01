@@ -94,8 +94,8 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
         double x, y, z;
         getPoint(*view.get(), x, y, z);
 
-        EXPECT_FLOAT_EQ(x, postX);
-        EXPECT_FLOAT_EQ(y, postY);
+        EXPECT_DOUBLE_EQ(x, postX);
+        EXPECT_DOUBLE_EQ(y, postY);
         EXPECT_NEAR(z, postZ, 5e-5);
     }
 }
@@ -130,8 +130,8 @@ TEST(ReprojectionFilterTest, stream_test_1)
 
         if (i == 0)
         {
-            EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::X), x);
-            EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::Y), y);
+            EXPECT_DOUBLE_EQ(point.getFieldAs<float>(Dimension::Id::X), x);
+            EXPECT_DOUBLE_EQ(point.getFieldAs<float>(Dimension::Id::Y), y);
             EXPECT_NEAR(point.getFieldAs<float>(Dimension::Id::Z), z, 5e-5);
         }
         ++i;

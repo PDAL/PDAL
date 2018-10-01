@@ -178,7 +178,7 @@ void BpfWriter::readyFile(const std::string& filename,
         file.write(m_stream);
     m_stream.put((const char *)m_extraData.data(), m_extraData.size());
 
-    m_header.m_len = m_stream.position();
+    m_header.m_len = (int32_t) m_stream.position();
 
     m_header.m_xform.m_vals[0] = m_scaling.m_xXform.m_scale.m_val;
     m_header.m_xform.m_vals[5] = m_scaling.m_yXform.m_scale.m_val;
@@ -254,7 +254,7 @@ void BpfWriter::writeView(const PointViewPtr dataShared)
     {
         throwError(err.what());
     }
-    m_header.m_numPts += data->size();
+    m_header.m_numPts += (int32_t)data->size();
 }
 
 

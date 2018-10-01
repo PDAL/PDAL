@@ -135,7 +135,7 @@ private:
 
 PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
 {
-    const int32_t cell = sqrt(inView->size());
+    const int32_t cell = (int32_t) sqrt(inView->size());
 
     // compute range
     BOX2D buffer_bounds;
@@ -151,10 +151,10 @@ PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
         const double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
-        const int32_t xpos = floor((x - buffer_bounds.minx) / cell_width);
+        const int32_t xpos = (int32_t) floor((x - buffer_bounds.minx) / cell_width);
 
         const double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
-        const int32_t ypos = floor((y - buffer_bounds.miny) / cell_height);
+        const int32_t ypos = (int32_t) floor((y - buffer_bounds.miny) / cell_height);
 
         const uint32_t code = ReverseZOrder::encode_morton(xpos, ypos);
         const uint32_t reverse = ReverseZOrder::reverse_morton( code );
