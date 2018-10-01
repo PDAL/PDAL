@@ -103,7 +103,8 @@ void BpfReader::initialize()
     // Logfile doesn't get set until options are processed.
     m_header.setLog(log());
 
-    m_stream.open(m_filename);
+    m_istreamPtr = Utils::openFile(m_filename);
+    m_stream = ILeStream(m_istreamPtr);
 
     // Resets the stream position in case it was already open.
     m_stream.seek(0);
@@ -279,7 +280,9 @@ bool BpfReader::readPolarData()
 
 void BpfReader::ready(PointTableRef)
 {
-    m_stream.open(m_filename);
+    if (!m_istreamPtr)
+        throwError("Reader is not initialized");
+    m_stream = ILeStream(m_istreamPtr);
     m_stream.seek(m_header.m_len);
     m_index = 0;
     m_start = m_stream.position();
@@ -306,6 +309,7 @@ void BpfReader::done(PointTableRef)
     if (auto s = m_stream.popStream())
         delete s;
     m_stream.close();
+    Utils::closeFile(m_istreamPtr);
 }
 
 
