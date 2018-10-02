@@ -124,6 +124,13 @@ void EsriReader::initialize(PointTableRef table)
     //create pdal Bounds
     m_bounds = createBounds();
 
+    //find version
+    if(jsonBody["store"].isMember("version"))
+        m_version = Version(jsonBody["store"]["version"].asString());
+    if(Version("2.0") < m_version || m_version < Version("1.6"))
+        log()->get(LogLevel::Warning) << "This version may not work with "
+            "the current implementation of i3s/slpk reader" << std::endl;
+
     //find number of nodes per nodepage
     if(jsonBody["store"]["index"].isMember("nodesPerPage"))
         m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].asInt();
@@ -146,15 +153,23 @@ void EsriReader::initialize(PointTableRef table)
             throwError(std::string("Only lepcc encoding is supported "
                         "by this driver"));
     }
-    if(jsonBody["store"].isMember("version"))
-        m_version = jsonBody["store"]["version"].asString();
 
-    log()->get(LogLevel::Debug) << "FileName: " <<
+    //output arguments for debugging
+    log()->get(LogLevel::Debug) << "filename: " <<
         m_filename << std::endl;
-    log()->get(LogLevel::Debug) << "Thread Count: " <<
+    log()->get(LogLevel::Debug) << "threads: " <<
         m_args.threads << std::endl;
-    log()->get(LogLevel::Debug) << "Bounds: " <<
+    log()->get(LogLevel::Debug) << "bounds: " <<
         m_args.bounds << std::endl;
+    log()->get(LogLevel::Debug) << "min_density: " <<
+        m_args.min_density << std::endl;
+    log()->get(LogLevel::Debug) << "max_density: " <<
+        m_args.max_density << std::endl;
+    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
+    for (std::string& dim : m_args.dimensions)
+    {
+        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
+    }
 }
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
@@ -313,8 +328,14 @@ void EsriReader::traverseTree(Json::Value page, int index,
     int cCount = page["nodes"][index]["childCount"].asInt();
 
     //find density information
-    double area = page["nodes"][index]["lodThreshold"].asDouble();
-    int pCount = page["nodes"][index]["vertexCount"].asInt();
+    double area = page["nodes"][index][
+        Version("2.0") < m_version || Version("2.0") == m_version?
+            "lodThreshold" :
+            "effectiveArea" ].asDouble();
+    int pCount = page["nodes"][index][
+        Version("2.0") < m_version || Version("2.0") == m_version?
+            "vertexCount" :
+            "pointCount"  ].asInt();
     double density = (double)pCount / area;
 
 
@@ -353,9 +374,9 @@ void EsriReader::traverseTree(Json::Value page, int index,
             if ((firstChild + i) > (firstNode + m_nodeCap - 1))
             {
                 pageIndex =
-                    m_version == "1.6" ?
-                    ((firstChild + i)/m_nodeCap) * m_nodeCap :
-                    (firstChild + i)/m_nodeCap;
+                    Version("2.0") < m_version || Version("2.0") == m_version?
+                    (firstChild + i)/m_nodeCap:
+                    ((firstChild + i)/m_nodeCap) * m_nodeCap;
 
                 std::string output;
 
@@ -369,9 +390,10 @@ void EsriReader::traverseTree(Json::Value page, int index,
                 }
             }
             if(pageIndex != 0)
-                index = m_version == "1.6" ?
-                    (firstChild + i) % (pageIndex) :
-                    (firstChild + i) % (m_nodeCap*pageIndex);
+                index =
+                    Version("2.0") < m_version || Version("2.0") == m_version ?
+                    (firstChild + i) % (m_nodeCap*pageIndex):
+                    (firstChild + i) % (pageIndex);
             else
                 index = firstChild + i;
             traverseTree(page, index, nodes, depth, pageIndex);

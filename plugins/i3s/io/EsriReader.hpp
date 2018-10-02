@@ -46,6 +46,7 @@
 #include <json/json.h>
 #include <arbiter/arbiter.hpp>
 
+#include <sstream>
 #include <array>
 #include <functional>
 #include <queue>
@@ -63,28 +64,28 @@ namespace
 {
 std::map<std::string, pdal::Dimension::Id> const esriDims
 {
-        {"INTENSITY",   Dimension::Id::Intensity},
-        {"CLASS_CODE",  Dimension::Id::ClassFlags},
-        {"FLAGS",       Dimension::Id::Flag},
-        {"RETURNS",     Dimension::Id::NumberOfReturns},
-        {"USER_DATA",   Dimension::Id::UserData},
-        {"POINT_SRC_ID",Dimension::Id::PointSourceId},
-        {"GPS_TIME",    Dimension::Id::GpsTime},
-        {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank},
-        {"RGB",         Dimension::Id::Red}
+    {"INTENSITY",   Dimension::Id::Intensity},
+    {"CLASS_CODE",  Dimension::Id::ClassFlags},
+    {"FLAGS",       Dimension::Id::Flag},
+    {"RETURNS",     Dimension::Id::NumberOfReturns},
+    {"USER_DATA",   Dimension::Id::UserData},
+    {"POINT_SRC_ID",Dimension::Id::PointSourceId},
+    {"GPS_TIME",    Dimension::Id::GpsTime},
+    {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank},
+    {"RGB",         Dimension::Id::Red}
 };
 std::map<std::string, pdal::Dimension::Type> const dimTypes
 {
-        {"UInt8", Dimension::Type::Unsigned8},
-        {"UInt16", Dimension::Type::Unsigned16},
-        {"UInt32", Dimension::Type::Unsigned32},
-        {"UInt64", Dimension::Type::Unsigned64},
-        {"Int8", Dimension::Type::Signed8},
-        {"Int16", Dimension::Type::Signed16},
-        {"Int32", Dimension::Type::Signed32},
-        {"Int64", Dimension::Type::Signed64},
-        {"Float64", Dimension::Type::Double},
-        {"Float32", Dimension::Type::Float}
+    {"UInt8", Dimension::Type::Unsigned8},
+    {"UInt16", Dimension::Type::Unsigned16},
+    {"UInt32", Dimension::Type::Unsigned32},
+    {"UInt64", Dimension::Type::Unsigned64},
+    {"Int8", Dimension::Type::Signed8},
+    {"Int16", Dimension::Type::Signed16},
+    {"Int32", Dimension::Type::Signed32},
+    {"Int64", Dimension::Type::Signed64},
+    {"Float64", Dimension::Type::Double},
+    {"Float32", Dimension::Type::Float}
 };
 }
 
@@ -100,17 +101,61 @@ protected:
     virtual Json::Value fetchJson(std::string) = 0;
 
 
-    std::unique_ptr<ILeStream> m_stream;
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
     struct EsriArgs
     {
-      Bounds bounds;
-      uint16_t threads = 8;
-      std::vector<std::string> dimensions;
-      double min_density;
-      double max_density;
+        Bounds bounds;
+        uint16_t threads = 8;
+        std::vector<std::string> dimensions;
+        double min_density;
+        double max_density;
     };
+
+    struct Version
+    {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+        Version(){};
+        Version(std::string vString)
+        {
+            std::istringstream iss(vString);
+            std::string token;
+            if(std::getline(iss, token, '.'))
+                if(!token.empty())
+                    major = std::stoi(token);
+            if(std::getline(iss, token, '.'))
+                if(!token.empty())
+                    minor = std::stoi(token);
+            if(std::getline(iss, token, '.'))
+                if(!token.empty())
+                    patch = std::stoi(token);
+        }
+        bool operator<(const Version& other)
+        {
+            if(this->major < other.major)
+                return true;
+            if(this->minor < other.minor && this->major == other.major)
+                return true;
+            if(this->patch < other.patch &&
+                    this->major == other.major &&
+                    this->minor == other.minor)
+                return true;
+            return false;
+        }
+        bool operator==(const Version& other)
+        {
+            if(this->patch == other.patch &&
+                    this->major == other.major &&
+                    this->minor == other.minor)
+                return true;
+            return false;
+        }
+    };
+
+    std::unique_ptr<ILeStream> m_stream;
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    gzip::Decompressor m_decomp;
 
     EsriArgs m_args;
     Json::Value m_info;
@@ -119,10 +164,8 @@ protected:
     std::map<std::string, Dimension::Id> m_dimensions;
     int m_nodeCap;
     int m_maxNode = 0;
-    std::string m_version = "2.0";
+    Version m_version;
 
-
-    gzip::Decompressor m_decomp;
 
     //Spatial Reference variables
     SpatialReference m_nativeSrs;
