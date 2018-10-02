@@ -107,6 +107,14 @@ protected:
     */
     virtual void spatialReferenceChanged(const SpatialReference& /*srs*/)
     {}
+
+    /**
+      Find the first nonstreamable stage in a pipeline.
+
+      \return  NULL if the pipeline is streamable, otherwise return
+        a pointer to the first found stage that's not streamable.
+    */
+    const Stage *findNonstreamable() const;
 };
 
 } // namespace pdal
