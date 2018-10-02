@@ -106,8 +106,13 @@ QuickInfo GDALReader::inspect()
     int nBand(1);
     if (p != m_bandIds.end())
     {
-        nBand = (int) std::distance(m_bandIds.begin(), p);
+        // Bands are 1-based.
+        nBand = (int) std::distance(m_bandIds.begin(), p) + 1;
     }
+
+    Dimension::IdList dims = layout->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        qi.m_dimNames.push_back(layout->dimName(*di));
 
     qi.m_bounds = m_raster->bounds(nBand);
     qi.m_srs = m_raster->getSpatialRef();
