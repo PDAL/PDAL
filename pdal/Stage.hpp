@@ -138,6 +138,16 @@ public:
     { return false; }
 
     /**
+      Return a pointer to a pipeline's first non-streamable stage,
+      if one exists.
+
+      \return  nullptr if the stage is streamable, a pointer to this stage
+        otherwise.
+    */
+    virtual const Stage *findNonstreamable() const
+    { return this; }
+
+    /**
       Set the spatial reference of a stage.
 
       Set the spatial reference that will override that being carried by the
