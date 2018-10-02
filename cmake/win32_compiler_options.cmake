@@ -27,9 +27,12 @@ function(pdal_target_compile_settings target)
                 # doing.  A good static analysis tool would be better than
                 # turning this warning off.
                 /wd4267
+                /wd4244
                 # Annoying warning about function hiding with virtual
                 # inheritance.
                 /wd4250
+                /wd4068
+                /wd4251
                 )
         endif()
 
