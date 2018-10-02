@@ -119,6 +119,7 @@ protected:
     std::map<std::string, Dimension::Id> m_dimensions;
     int m_nodeCap;
     int m_maxNode = 0;
+    std::string m_version = "2.0";
 
 
     gzip::Decompressor m_decomp;

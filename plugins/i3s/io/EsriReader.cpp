@@ -97,6 +97,7 @@ void EsriReader::initialize(PointTableRef table)
 
     m_arbiter.reset(new arbiter::Arbiter(config));
 
+    //adjust filename string
     const std::string pre("i3s://");
     if (Utils::startsWith(m_filename, pre))
         m_filename = m_filename.substr(pre.size());
@@ -107,6 +108,7 @@ void EsriReader::initialize(PointTableRef table)
     log()->get(LogLevel::Debug) << "Fetching info from " << m_filename <<
         std::endl;
 
+    //personalize for slpk or i3s
     try
     {
         initInfo();
@@ -116,13 +118,17 @@ void EsriReader::initialize(PointTableRef table)
         throwError(std::string("Failed to fetch info: ") + e.what());
     }
 
+    //create const for looking into
+    const Json::Value jsonBody = m_info;
+
     //create pdal Bounds
     m_bounds = createBounds();
+
     //find number of nodes per nodepage
-    if(m_info["store"]["index"].isMember("nodesPerPage"))
-        m_nodeCap = m_info["store"]["index"]["nodesPerPage"].asInt();
-    else if(m_info["store"]["index"].isMember("nodePerIndexBlock"))
-        m_nodeCap = m_info["store"]["index"]["nodePerIndexBlock"].asInt();
+    if(jsonBody["store"]["index"].isMember("nodesPerPage"))
+        m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].asInt();
+    else if(jsonBody["store"]["index"].isMember("nodePerIndexBlock"))
+        m_nodeCap = jsonBody["store"]["index"]["nodePerIndexBlock"].asInt();
     else
     {
         log()->get(LogLevel::Warning) <<
@@ -130,6 +136,18 @@ void EsriReader::initialize(PointTableRef table)
                 std::endl;
         m_nodeCap = 64;
     }
+
+    //find the type of encoding
+    if(jsonBody["store"]["defaultGeometrySchema"].isMember("encoding"))
+    {
+        std::string encoding = jsonBody["store"]
+            ["defaultGeometrySchema"]["encoding"].asString();
+        if(encoding != "lepcc-xyz")
+            throwError(std::string("Only lepcc encoding is supported "
+                        "by this driver"));
+    }
+    if(jsonBody["store"].isMember("version"))
+        m_version = jsonBody["store"]["version"].asString();
 
     log()->get(LogLevel::Debug) << "FileName: " <<
         m_filename << std::endl;
@@ -289,6 +307,7 @@ void EsriReader::traverseTree(Json::Value page, int index,
 {
 
     //find node information
+    int firstNode = page["nodes"][0]["resourceId"].asInt();
     int name = page["nodes"][index]["resourceId"].asInt();
     int firstChild = page["nodes"][index]["firstChild"].asInt();
     int cCount = page["nodes"][index]["childCount"].asInt();
@@ -321,7 +340,9 @@ void EsriReader::traverseTree(Json::Value page, int index,
     else
     {
         if (density < m_args.max_density && density > m_args.min_density)
+        {
             nodes.push_back(name);
+        }
         //if we've already reached the last node, stop the process, otherwise
         //increment depth and begin looking at child nodes
         if (name == m_maxNode)
@@ -329,9 +350,13 @@ void EsriReader::traverseTree(Json::Value page, int index,
         ++depth;
         for (int i = 0; i < cCount; ++i)
         {
-            if ((firstChild + i)/m_nodeCap != pageIndex)
+            if ((firstChild + i) > (firstNode + m_nodeCap - 1))
             {
-                pageIndex = (firstChild + i)/m_nodeCap;
+                pageIndex =
+                    m_version == "1.6" ?
+                    ((firstChild + i)/m_nodeCap) * m_nodeCap :
+                    (firstChild + i)/m_nodeCap;
+
                 std::string output;
 
                 if(m_nodepages.find(pageIndex) != m_nodepages.end())
@@ -344,7 +369,9 @@ void EsriReader::traverseTree(Json::Value page, int index,
                 }
             }
             if(pageIndex != 0)
-                index = (firstChild + i) % (m_nodeCap*pageIndex);
+                index = m_version == "1.6" ?
+                    (firstChild + i) % (pageIndex) :
+                    (firstChild + i) % (m_nodeCap*pageIndex);
             else
                 index = firstChild + i;
             traverseTree(page, index, nodes, depth, pageIndex);
