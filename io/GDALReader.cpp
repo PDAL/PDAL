@@ -150,7 +150,8 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 void GDALReader::addArgs(ProgramArgs& args)
 {
     args.add("header", "A comma-separated list of dimension IDs to map raster bands to dimension id", m_header);
-    args.add("memorycopy", "Load the given raster file entirely to memory", m_useMemoryCopy, false);
+    pdal::Arg& cp = args.add("memorycopy", "Load the given raster file entirely to memory", m_useMemoryCopy, false);
+    cp.setHidden(true);
 }
 
 
