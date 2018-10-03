@@ -71,19 +71,17 @@ void MatlabReader::initialize(PointTableRef table)
     m_numElements = 0;
     m_numFields = 0;
 
-    std::string wkt = mlang::Script::getSRSWKT(m_structArray, log());
-    if (wkt.size())
-    {
-        SpatialReference srs(wkt);
-        setSpatialReference(srs);
-    }
+    // Set SRS if not overridden.
+    if (getSpatialReference().empty())
+        setSpatialReference(mlang::Script::getSRSWKT(m_structArray, log()));
     m_tableMetadata = table.metadata();
 }
 
 
 void MatlabReader::addArgs(ProgramArgs& args)
 {
-    args.add("struct", "Name of struct to read from file", m_structName, "PDAL");
+    args.add("struct", "Name of struct to read from file",
+        m_structName, "PDAL");
 }
 
 

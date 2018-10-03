@@ -73,7 +73,9 @@ void GDALReader::initialize()
     m_raster->open();
     try
     {
-        setSpatialReference(m_raster->getSpatialRef());
+        // Set the SRS from the file if we don't have an override.
+        if (getSpatialReference().empty())
+            setSpatialReference(m_raster->getSpatialRef());
     }
     catch (...)
     {

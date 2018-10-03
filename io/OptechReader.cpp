@@ -77,11 +77,7 @@ OptechReader::OptechReader()
     , m_recordIndex(0)
     , m_returnIndex(0)
     , m_pulse()
-{
-    // The Optech docs say that their lat/longs are referenced
-    // to the WGS84 reference frame.
-    setSpatialReference(SpatialReference("EPSG:4326"));
-}
+{}
 
 
 const CsdHeader& OptechReader::getHeader() const { return m_header; }
@@ -117,6 +113,13 @@ void OptechReader::initialize()
         m_header.misalignmentAngles[0] + m_header.imuOffsets[0],
         m_header.misalignmentAngles[1] + m_header.imuOffsets[1],
         m_header.misalignmentAngles[2] + m_header.imuOffsets[2]);
+
+    // The Optech docs say that their lat/longs are referenced
+    // to the WGS84 reference frame.
+    // Set default SRS if not overridden.
+    SpatialReference srs = getSpatialReference();
+    if (getSpatialReference().empty())
+        setSpatialReference(SpatialReference("EPSG:4326"));
 }
 
 
