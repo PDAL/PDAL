@@ -318,13 +318,13 @@ void EsriReader::traverseTree(Json::Value page, int index,
 
     // find density information
     double area = page["nodes"][index][
-        Version("2.0") < m_version || Version("2.0") == m_version?
+        m_version >= Version("2.0") ?
             "lodThreshold" :
             "effectiveArea" ].asDouble();
     int pCount = page["nodes"][index][
-        Version("2.0") < m_version || Version("2.0") == m_version?
+        m_version >= Version("2.0") ?
             "vertexCount" :
-            "pointCount"  ].asInt();
+            "pointCount" ].asInt();
     double density = (double)pCount / area;
 
     // update maximum node to stop reading files at the right time
@@ -362,8 +362,8 @@ void EsriReader::traverseTree(Json::Value page, int index,
         {
             if ((firstChild + i) > (firstNode + m_nodeCap - 1))
             {
-                pageIndex = (Version("2.0") < m_version) ||
-                    (Version("2.0") == m_version ?
+                pageIndex =
+                    (m_version >= Version("2.0") ?
                         (firstChild + i) / m_nodeCap :
                         ((firstChild + i) / m_nodeCap) * m_nodeCap);
 
@@ -377,8 +377,8 @@ void EsriReader::traverseTree(Json::Value page, int index,
                 }
             }
             if (pageIndex != 0)
-                index = (Version("2.0") < m_version) ||
-                    (Version("2.0") == m_version ?
+                index =
+                    (m_version >= Version("2.0") ?
                         (firstChild + i) % (m_nodeCap * pageIndex):
                         (firstChild + i) % (pageIndex));
             else

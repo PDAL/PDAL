@@ -132,6 +132,12 @@ protected:
             return (this->patch == other.patch && this->major == other.major &&
                 this->minor == other.minor);
         }
+        bool operator <=(const Version& other)
+            { return *this < other || *this == other; }
+        bool operator >=(const Version& other)
+            { return !(*this < other); }
+        bool operator > (const Version& other)
+            { return !(*this < other) && !(*this == other); }
     };
 
     std::unique_ptr<ILeStream> m_stream;
