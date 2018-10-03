@@ -363,9 +363,9 @@ void EsriReader::traverseTree(Json::Value page, int index,
             if ((firstChild + i) > (firstNode + m_nodeCap - 1))
             {
                 pageIndex = (Version("2.0") < m_version) ||
-                    (Version("2.0") == m_version ?
+                    (Version("2.0") == m_version) ?
                         (firstChild + i) / m_nodeCap :
-                        ((firstChild + i) / m_nodeCap) * m_nodeCap);
+                        ((firstChild + i) / m_nodeCap) * m_nodeCap;
 
                 if (m_nodepages.find(pageIndex) != m_nodepages.end())
                     page = m_nodepages[pageIndex];
@@ -378,9 +378,9 @@ void EsriReader::traverseTree(Json::Value page, int index,
             }
             if (pageIndex != 0)
                 index = (Version("2.0") < m_version) ||
-                    (Version("2.0") == m_version ?
+                    (Version("2.0") == m_version) ?
                         (firstChild + i) % (m_nodeCap * pageIndex):
-                        (firstChild + i) % (pageIndex));
+                        (firstChild + i) % (pageIndex);
             else
                 index = firstChild + i;
             traverseTree(page, index, nodes, depth, pageIndex);
