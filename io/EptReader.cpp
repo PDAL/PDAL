@@ -115,7 +115,8 @@ void EptReader::initialize()
     m_info.reset(new EptInfo(parse(m_ep->get("entwine.json"))));
     log()->get(LogLevel::Debug) << "Got EPT info" << std::endl;
 
-    if (!m_info->srs().empty())
+    // Set spatial reference if it's not overriden.
+    if (getSpatialReference().empty())
         setSpatialReference(m_info->srs());
 
     // Figure out our query parameters.
