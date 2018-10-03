@@ -71,7 +71,6 @@ std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
         decVec.resize(xyzPts);
         stat = lepcc_decodeXYZ(ctx, &pByte, nBytes, &xyzPts,
             (double*)(&decVec[0]));
-        //ABELL - throw string?
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
             throw decompression_error("LEPCC decompression failed");
     }
