@@ -365,7 +365,7 @@ void EsriReader::traverseTree(Json::Value page, int index,
                 pageIndex =
                     (m_version >= Version("2.0") ?
                         (firstChild + i) / m_nodeCap :
-                        ((firstChild + i) / m_nodeCap) * m_nodeCap);
+                        ((firstChild + i) / m_nodeCap) * m_nodeCap;
 
                 if (m_nodepages.find(pageIndex) != m_nodepages.end())
                     page = m_nodepages[pageIndex];

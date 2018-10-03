@@ -34,6 +34,7 @@
 
 #include "I3SReader.hpp"
 #include "EsriUtil.hpp"
+#include <thread>
 
 namespace pdal
 {
@@ -81,7 +82,20 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
     std::string attNum, std::string ext) const
 {
     // For the REST I3S endpoint there are no file extensions.
-    return m_arbiter->getBinary(url + attNum);
+    std::vector<char> returnVec;
+    for (int i = 0; i < 5; ++i)
+    {
+        try
+        {
+            returnVec =  m_arbiter->getBinary(url + attNum);
+            break;
+        }
+        catch(std::exception& e)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        }
+    }
+    return returnVec;
 }
 
 } //namespace pdal
