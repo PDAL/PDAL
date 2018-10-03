@@ -168,13 +168,12 @@ void BpfReader::initialize()
             << "' and coordinate id: '" << m_header.m_coordId << "'";
        throwError(oss.str());
     }
-    SpatialReference srs(code);
-    setSpatialReference(srs);
 
     try
     {
-        SpatialReference srs(code);
-        setSpatialReference(srs);
+        // If there is no override SRS, set the file SRS.
+        if (getSpatialReference().empty())
+            setSpatialReference(code);
     }
     catch (...)
     {

@@ -136,6 +136,8 @@ TEST_F(OptechReaderTest, ReadingPoints)
 TEST_F(OptechReaderTest, Spatialreference)
 {
     SpatialReference expected("EPSG:4326");
+    PointTable table;
+    m_reader.prepare(table);
     EXPECT_EQ(expected, m_reader.getSpatialReference());
 }
 }
