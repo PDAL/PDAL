@@ -33,26 +33,11 @@
 ****************************************************************************/
 
 #include "SlpkReader.hpp"
-#include "../lepcc/src/include/lepcc_c_api.h"
-#include "../lepcc/src/include/lepcc_types.h"
-#include "pool.hpp"
-#include "SlpkExtractor.hpp"
-
-#include <istream>
-#include <cstdint>
-#include <cstring>
-#include <cmath>
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <chrono>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/util/ProgramArgs.hpp>
-#include <pdal/util/Bounds.hpp>
-#include <pdal/pdal_features.hpp>
-#include <pdal/compression/LazPerfCompression.hpp>
-#include <gdal.h>
+
+#include "pool.hpp"
+#include "EsriUtil.hpp"
+#include "SlpkExtractor.hpp"
 
 namespace pdal
 {
@@ -70,33 +55,29 @@ std::string SlpkReader::getName() const { return slpkInfo.name; }
 
 void SlpkReader::initInfo()
 {
-    //create temp path
+    // create temp path
     std::string path = arbiter::fs::getTempPath();
 
-    //use arbiter to create new directory if doesn't already exist
-    std::string fullPath(path+ FileUtils::stem(
-                FileUtils::getFilename(m_filename)));
+    // use arbiter to create new directory if doesn't already exist
+    std::string fullPath(path + FileUtils::stem(
+        FileUtils::getFilename(m_filename)));
     arbiter::fs::mkdirp(fullPath);
 
-    //un-archive the slpk archive
+    // un-archive the slpk archive
     SlpkExtractor slpk(m_filename, fullPath);
     slpk.extract();
     m_filename = fullPath;
     log()->get(LogLevel::Debug) << "Making directory at: " <<
         fullPath << std::endl;
 
-    //unarchive and decompress the 3dscenelayer
-    //and create json info object
-    auto compressed = m_arbiter->get(m_filename
-            + "/3dSceneLayer.json.gz");
+    // unarchive and decompress the 3dscenelayer and create json info object
+    auto compressed = m_arbiter->get(m_filename + "/3dSceneLayer.json.gz");
     std::string jsonString;
 
-    m_decomp.decompress(jsonString, compressed.data(),
-            compressed.size());
-    m_info = parse(jsonString);
+    m_decomp.decompress(jsonString, compressed.data(), compressed.size());
+    m_info = EsriUtil::parse(jsonString);
     if (m_info.empty())
         throwError(std::string("Incorrect Json object"));
-
 }
 
 
@@ -104,17 +85,15 @@ Json::Value SlpkReader::fetchJson(std::string filepath)
 {
     std::string output;
     auto compressed = m_arbiter->get(filepath + ".json.gz");
-    m_decomp.decompress<std::string>(
-            output,
-            compressed.data(),
-            compressed.size());
-    return parse(output);
+    m_decomp.decompress<std::string>(output, compressed.data(),
+        compressed.size());
+    return EsriUtil::parse(output);
 
 }
 
-//fetch data using arbiter to get a char vector
-std::vector<char> SlpkReader::fetchBinary(std::string url,
-        std::string attNum, std::string ext) const
+// fetch data using arbiter to get a char vector
+std::vector<char> SlpkReader::fetchBinary(std::string url, std::string attNum,
+    std::string ext) const
 {
     url += attNum + ext;
 

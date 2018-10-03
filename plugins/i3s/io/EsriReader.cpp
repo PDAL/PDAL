@@ -33,26 +33,16 @@
 ****************************************************************************/
 
 #include "EsriReader.hpp"
-#include "../lepcc/src/include/lepcc_c_api.h"
+
+#include <Eigen/Geometry>
+#include <ogr_spatialref.h>
+
 #include "../lepcc/src/include/lepcc_types.h"
+
+#include "EsriUtil.hpp"
 #include "pool.hpp"
 #include "SlpkExtractor.hpp"
 
-#include <istream>
-#include <cstdint>
-#include <cstring>
-#include <cmath>
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <chrono>
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/util/ProgramArgs.hpp>
-#include <pdal/util/Bounds.hpp>
-#include <pdal/pdal_features.hpp>
-#include <pdal/compression/LazPerfCompression.hpp>
-#include <gdal.h>
 
 namespace pdal
 {
@@ -125,16 +115,16 @@ void EsriReader::initialize(PointTableRef table)
     m_bounds = createBounds();
 
     //find version
-    if(jsonBody["store"].isMember("version"))
+    if (jsonBody["store"].isMember("version"))
         m_version = Version(jsonBody["store"]["version"].asString());
-    if(Version("2.0") < m_version || m_version < Version("1.6"))
+    if (Version("2.0") < m_version || m_version < Version("1.6"))
         log()->get(LogLevel::Warning) << "This version may not work with "
             "the current implementation of i3s/slpk reader" << std::endl;
 
     //find number of nodes per nodepage
-    if(jsonBody["store"]["index"].isMember("nodesPerPage"))
+    if (jsonBody["store"]["index"].isMember("nodesPerPage"))
         m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].asInt();
-    else if(jsonBody["store"]["index"].isMember("nodePerIndexBlock"))
+    else if (jsonBody["store"]["index"].isMember("nodePerIndexBlock"))
         m_nodeCap = jsonBody["store"]["index"]["nodePerIndexBlock"].asInt();
     else
     {
@@ -145,13 +135,13 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //find the type of encoding
-    if(jsonBody["store"]["defaultGeometrySchema"].isMember("encoding"))
+    if (jsonBody["store"]["defaultGeometrySchema"].isMember("encoding"))
     {
         std::string encoding = jsonBody["store"]
             ["defaultGeometrySchema"]["encoding"].asString();
-        if(encoding != "lepcc-xyz")
+        if (encoding != "lepcc-xyz")
             throwError(std::string("Only lepcc encoding is supported "
-                        "by this driver"));
+                "by this driver"));
     }
 
     //output arguments for debugging
@@ -174,7 +164,7 @@ void EsriReader::initialize(PointTableRef table)
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
-    if(!m_info.isMember("attributeStorageInfo"))
+    if (!m_info.isMember("attributeStorageInfo"))
         throwError("Attributes do not exist for this object");
     const Json::Value attributes = m_info["attributeStorageInfo"];
     //automatically add xyz point dimensions
@@ -186,9 +176,10 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         dimData data;
         std::string readName = attributes[i]["name"].asString();
         data.name = readName;
+
         //test if this dimensions was requested by user
-        if(m_args.dimensions.empty()){}
-        else if(m_dimensions.find(readName) == m_dimensions.end())
+        if (!m_args.dimensions.empty() &&
+            (m_dimensions.find(readName) == m_dimensions.end()))
             continue;
 
         data.key = std::stoi(attributes[i]["key"].asString());
@@ -216,7 +207,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
             m_dimMap[Dimension::Id::Red] = data;
         }
-        else if (readName =="RETURNS")
+        else if (readName == "RETURNS")
         {
             layout->registerDim(Dimension::Id::NumberOfReturns);
             layout->registerDim(Dimension::Id::ReturnNumber);
@@ -256,6 +247,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
     }
 }
 
+
 void EsriReader::ready(PointTableRef)
 {
     Json::Value spatialJson = m_info["spatialReference"];
@@ -267,12 +259,9 @@ void EsriReader::ready(PointTableRef)
 
     m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
     m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
-
-    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef,
-            m_ecefRef);
-
+    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
     m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
-            m_nativeRef);
+        m_nativeRef);
 }
 
 
@@ -287,14 +276,14 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     -texture data: <node-url>/textures/<texture-data-bundle-id>
     */
 
-    //Build the node list that will tell us which nodes overlap with bounds
+    // Build the node list that will tell us which nodes overlap with bounds
     std::vector<int> nodes;
     const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
     traverseTree(initJson, 0, nodes, 0, 0);
 
-    //Create view with overlapping nodes at desired depth
-    //Will create a thread pool on the createview class and iterate
-    //through the node list for the nodes to be pulled.
+    // Create view with overlapping nodes at desired depth
+    // Will create a thread pool on the createview class and iterate
+    // through the node list for the nodes to be pulled.
     log()->get(LogLevel::Debug) << "Fetching binaries" << std::endl;
     Pool p(m_args.threads);
     for (std::size_t i = 0; i < nodes.size(); i++)
@@ -313,21 +302,21 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     return view->size();
 }
 
+
 //Traverse tree through nodepages. Create a nodebox for each node in
 //the tree and test if it overlaps with the bounds created by user.
 //If it's a leaf node(the highest resolution) and it overlaps, add
 //it to the list of nodes to be pulled later.
 void EsriReader::traverseTree(Json::Value page, int index,
-        std::vector<int>& nodes, int depth, int pageIndex)
+    std::vector<int>& nodes, int depth, int pageIndex)
 {
-
-    //find node information
+    // find node information
     int firstNode = page["nodes"][0]["resourceId"].asInt();
     int name = page["nodes"][index]["resourceId"].asInt();
     int firstChild = page["nodes"][index]["firstChild"].asInt();
     int cCount = page["nodes"][index]["childCount"].asInt();
 
-    //find density information
+    // find density information
     double area = page["nodes"][index][
         Version("2.0") < m_version || Version("2.0") == m_version?
             "lodThreshold" :
@@ -338,21 +327,20 @@ void EsriReader::traverseTree(Json::Value page, int index,
             "pointCount"  ].asInt();
     double density = (double)pCount / area;
 
-
-    //update maximum node to stop reading files at the right time
+    // update maximum node to stop reading files at the right time
     if ((firstChild + cCount - 1) > m_maxNode)
     {
         m_maxNode = firstChild + cCount - 1;
     }
 
-    //create box from OBB information and check for overlaps
+    // create box from OBB information and check for overlaps
     BOX3D nodeBox = parseBox(page["nodes"][index]);
     bool overlap = m_bounds.overlaps(nodeBox);
 
     //if it doesn't overlap, then none of the nodes in this subtree will
     if (!overlap)
         return;
-    //if it's a child node and the density hasn't been set, add leaf nodes
+    // if it's a child node and the density hasn't been set, add leaf nodes
     if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
     {
         nodes.push_back(name);
@@ -364,42 +352,43 @@ void EsriReader::traverseTree(Json::Value page, int index,
         {
             nodes.push_back(name);
         }
-        //if we've already reached the last node, stop the process, otherwise
-        //increment depth and begin looking at child nodes
+        // if we've already reached the last node, stop the process, otherwise
+        // increment depth and begin looking at child nodes
         if (name == m_maxNode)
             return;
+
         ++depth;
         for (int i = 0; i < cCount; ++i)
         {
             if ((firstChild + i) > (firstNode + m_nodeCap - 1))
             {
-                pageIndex =
-                    Version("2.0") < m_version || Version("2.0") == m_version?
-                    (firstChild + i)/m_nodeCap:
-                    ((firstChild + i)/m_nodeCap) * m_nodeCap;
+                pageIndex = (Version("2.0") < m_version) ||
+                    (Version("2.0") == m_version ?
+                        (firstChild + i) / m_nodeCap :
+                        ((firstChild + i) / m_nodeCap) * m_nodeCap);
 
-                std::string output;
-
-                if(m_nodepages.find(pageIndex) != m_nodepages.end())
+                if (m_nodepages.find(pageIndex) != m_nodepages.end())
                     page = m_nodepages[pageIndex];
                 else
                 {
                     page = fetchJson(m_filename + "/nodepages/" +
-                            std::to_string(pageIndex));
+                        std::to_string(pageIndex));
                     m_nodepages[pageIndex] = page;
                 }
             }
-            if(pageIndex != 0)
-                index =
-                    Version("2.0") < m_version || Version("2.0") == m_version ?
-                    (firstChild + i) % (m_nodeCap*pageIndex):
-                    (firstChild + i) % (pageIndex);
+            if (pageIndex != 0)
+                index = (Version("2.0") < m_version) ||
+                    (Version("2.0") == m_version ?
+                        (firstChild + i) % (m_nodeCap * pageIndex):
+                        (firstChild + i) % (pageIndex));
             else
                 index = firstChild + i;
             traverseTree(page, index, nodes, depth, pageIndex);
         }
     }
 }
+
+
 // Create the BOX3D for the node. This will be used for testing overlap.
 BOX3D EsriReader::parseBox(Json::Value base)
 {
@@ -448,11 +437,7 @@ BOX3D EsriReader::parseBox(Json::Value base)
     Eigen::Quaterniond roty = q * quatVecY * q.inverse();
     Eigen::Quaterniond rotz = q * quatVecZ * q.inverse();
 
-    double minx, miny, minz, maxx, maxy, maxz;
-    minx = miny = minz = (std::numeric_limits<double>::max)();
-    maxx = maxy = maxz = (std::numeric_limits<double>::lowest)();
-
-
+    BOX3D bounds;
     for (std::size_t i(0); i < 8; ++i)
     {
         double a(x), b(y), c(z);
@@ -470,23 +455,26 @@ BOX3D EsriReader::parseBox(Json::Value base)
         c += rotz.vec()[2] * (i & 4 ? 1.0 : -1.0);
 
         OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-
-        minx = (std::min)(minx, a);
-        miny = (std::min)(miny, b);
-        minz = (std::min)(minz, c);
-        maxx = (std::max)(maxx, a);
-        maxy = (std::max)(maxy, b);
-        maxz = (std::max)(maxz, c);
+        bounds.grow(a, b, c);
     }
-    return BOX3D(minx, miny, minz, maxx, maxy, maxz);
+    return bounds;
 }
+
 
 void EsriReader::createView(std::string localUrl, PointView& view)
 {
-    //pull the geometries to start
+    // pull the geometries to start
     const std::string geomUrl = localUrl + "/geometries/";
     auto xyzFetch = fetchBinary(geomUrl, "0", ".bin.pccxyz");
-    std::vector<lepcc::Point3D> xyz = decompressXYZ(&xyzFetch);
+    std::vector<lepcc::Point3D> xyz;
+    try
+    {
+        xyz = EsriUtil::decompressXYZ(&xyzFetch);
+    }
+    catch (const EsriUtil::decompression_error& e)
+    {
+        throwError(e.what());
+    }
 
     std::vector<point_count_t> selected;
     uint64_t startId;
@@ -526,8 +514,15 @@ void EsriReader::createView(std::string localUrl, PointView& view)
         {
             auto data = fetchBinary(
                     attrUrl, std::to_string(key), ".bin.pccrgb");
-            std::vector<lepcc::RGB_t> rgbPoints = decompressRGB(&data);
-
+            std::vector<lepcc::RGB_t> rgbPoints;
+            try
+            {
+                rgbPoints = EsriUtil::decompressRGB(&data);
+            }
+            catch (const EsriUtil::decompression_error& e)
+            {
+                throwError(e.what());
+            }
 
             std::size_t dimSize = Dimension::size(dimType);
             if (rgbPoints.size() != xyz.size())
@@ -552,7 +547,15 @@ void EsriReader::createView(std::string localUrl, PointView& view)
             auto data = fetchBinary(attrUrl, std::to_string(key),
                     ".bin.pccint");
 
-            std::vector<uint16_t> intensity = decompressIntensity(&data);
+            std::vector<uint16_t> intensity;
+            try
+            {
+                intensity = EsriUtil::decompressIntensity(&data);
+            }
+            catch (const EsriUtil::decompression_error& e)
+            {
+                throwError(e.what());
+            }
 
             if (intensity.size() != xyz.size())
             {
@@ -616,6 +619,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
     }
 }
 
+
 //Create bounding box that the user specified
 BOX3D EsriReader::createBounds()
 {
@@ -637,6 +641,7 @@ BOX3D EsriReader::createBounds()
             b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
             b.maxx, b.maxy, (std::numeric_limits<double>::max)());
 }
+
 
 void EsriReader::done(PointTableRef)
 {

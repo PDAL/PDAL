@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #pragma once
+
 #include "EsriReader.hpp"
 
 namespace pdal

@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "I3SReader.hpp"
+#include "EsriUtil.hpp"
 
 namespace pdal
 {
@@ -52,7 +53,7 @@ void I3SReader::initInfo()
 {
     try
     {
-        m_info = parse(m_arbiter->get(m_filename));
+        m_info = EsriUtil::parse(m_arbiter->get(m_filename));
 
         if (m_info.empty())
             throwError(std::string("Incorrect Json object"));
@@ -60,21 +61,24 @@ void I3SReader::initInfo()
             throwError(std::string("Json object contains no layers"));
 
         m_info = m_info["layers"][0];
-    }catch(pdal_error& e)
+    }
+    catch(EsriUtil::json_parse_error& e)
     {
-        throwError(std::string("Error parsing Json object: ")+e.what());
+        throwError(std::string("Error parsing Json object: ") + e.what());
     }
 
     m_filename += "/layers/0";
 }
 
+
 Json::Value I3SReader::fetchJson(std::string filepath)
 {
-    return parse(m_arbiter->get(filepath));
+    return EsriUtil::parse(m_arbiter->get(filepath));
 }
 
+
 std::vector<char> I3SReader::fetchBinary(std::string url,
-        std::string attNum, std::string ext) const
+    std::string attNum, std::string ext) const
 {
     // For the REST I3S endpoint there are no file extensions.
     return m_arbiter->getBinary(url + attNum);

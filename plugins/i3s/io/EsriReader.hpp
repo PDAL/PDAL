@@ -33,30 +33,16 @@
 ****************************************************************************/
 
 #pragma once
-#include "../lepcc/src/include/lepcc_c_api.h"
-#include "../lepcc/src/include/lepcc_types.h"
-#include "EsriUtil.hpp"
-#include "pool.hpp"
-#include <pdal/PointView.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
-#include <pdal/PointLayout.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/SpatialReference.hpp>
+
+#include <vector>
+#include <map>
+
 #include <json/json.h>
 #include <arbiter/arbiter.hpp>
 
-#include <sstream>
-#include <array>
-#include <functional>
-#include <queue>
-#include <vector>
-#include <algorithm>
-#include <chrono>
-#include <Eigen/Geometry>
-#include <gdal.h>
-#include <ogr_spatialref.h>
-
+#include <pdal/Reader.hpp>
+#include <pdal/util/Bounds.hpp>
+#include <pdal/util/IStream.hpp>
 
 namespace pdal
 {
@@ -99,8 +85,6 @@ protected:
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const = 0;
     virtual Json::Value fetchJson(std::string) = 0;
-
-
 
     struct EsriArgs
     {
@@ -145,11 +129,8 @@ protected:
         }
         bool operator==(const Version& other)
         {
-            if(this->patch == other.patch &&
-                    this->major == other.major &&
-                    this->minor == other.minor)
-                return true;
-            return false;
+            return (this->patch == other.patch && this->major == other.major &&
+                this->minor == other.minor);
         }
     };
 
@@ -165,7 +146,6 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
-
 
     //Spatial Reference variables
     SpatialReference m_nativeSrs;
@@ -189,7 +169,6 @@ protected:
     std::map<Dimension::Id, dimData> m_dimMap;
     std::map<int, Json::Value> m_nodepages;
 
-
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
@@ -198,8 +177,8 @@ protected:
     virtual void done(PointTableRef table) override;
     void createView(std::string localUrl, PointView& view);
     BOX3D parseBox(Json::Value base);
-    void traverseTree(Json::Value page, int index,
-            std::vector<int>& nodes, int depth, int pageIndex);
+    void traverseTree(Json::Value page, int index, std::vector<int>& nodes,
+        int depth, int pageIndex);
 };
 
 

@@ -31,129 +31,123 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #include "EsriUtil.hpp"
+
+#include "../lepcc/src/include/lepcc_c_api.h"
+#include "../lepcc/src/include/lepcc_types.h"
 
 namespace pdal
 {
-    std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
+namespace EsriUtil
+{
+
+std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
+{
+    int nInfo = lepcc_getBlobInfoSize();
+    lepcc_ContextHdl ctx(nullptr);
+    ctx = lepcc_createContext();
+    lepcc_blobType bt;
+    lepcc::uint32 blobSize = 0;
+
+    const unsigned char* compressed = reinterpret_cast<const unsigned char*>
+        (compData->data());
+    lepcc::Byte vec;
+    lepcc_status stat;
+    std::vector<lepcc::Point3D> decVec;
+    lepcc::uint32 xyzPts = 0;
+
+    lepcc::ErrCode errCode = (lepcc::ErrCode)lepcc_getBlobInfo(ctx,
+        compressed, nInfo, &bt, &blobSize);
+
+    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
+    if (nBytes > 0)
     {
-        int nInfo = lepcc_getBlobInfoSize();
-        lepcc_ContextHdl ctx(nullptr);
-        ctx = lepcc_createContext();
-        lepcc_blobType bt;
-        lepcc::uint32 blobSize = 0;
-
-
-        const unsigned char* compressed = reinterpret_cast<const unsigned char*>
-            (compData->data());
-        lepcc::Byte vec;
-        lepcc_status stat;
-        std::vector<lepcc::Point3D> decVec;
-        lepcc::uint32 xyzPts = 0;
-
-        lepcc::ErrCode errCode =
-            (lepcc::ErrCode)lepcc_getBlobInfo(
-                    ctx, compressed, nInfo, &bt, &blobSize);
-
         const lepcc::Byte* pByte = compressed;
-        int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        if (nBytes > 0)
-        {
-            stat = lepcc_getPointCount(ctx, pByte, nBytes, &xyzPts);
-            if(stat != (lepcc_status) lepcc::ErrCode::Ok)
-            {
-                throw (std::string("LEPCC point count fetch failed"));
-            }
-            decVec.resize(xyzPts);
-            stat = lepcc_decodeXYZ(
-                    ctx, &pByte, nBytes, &xyzPts, (double*)(&decVec[0]));
-            if(stat != (lepcc_status) lepcc::ErrCode::Ok)
-            {
-                throw (std::string("LEPCC decompression failed"));
-            }
-        }
-        return decVec;
+        stat = lepcc_getPointCount(ctx, pByte, nBytes, &xyzPts);
+        if (stat != (lepcc_status) lepcc::ErrCode::Ok)
+            throw decompression_error("LEPCC point count fetch failed");
+
+        decVec.resize(xyzPts);
+        stat = lepcc_decodeXYZ(ctx, &pByte, nBytes, &xyzPts,
+            (double*)(&decVec[0]));
+        //ABELL - throw string?
+        if (stat != (lepcc_status) lepcc::ErrCode::Ok)
+            throw decompression_error("LEPCC decompression failed");
     }
-
-
-    std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
-    {
-
-        const unsigned char* compressed = reinterpret_cast<const unsigned char*>
-            (compData->data());
-        int nInfo = lepcc_getBlobInfoSize();
-        lepcc_ContextHdl ctx(nullptr);
-        ctx = lepcc_createContext();
-        lepcc_blobType bt;
-        lepcc::uint32 blobSize = 0;
-
-        lepcc_status stat;
-        std::vector<lepcc::RGB_t> rgbVec;
-
-        lepcc::uint32 nPts = 0;
-        lepcc::ErrCode errCode =
-            (lepcc::ErrCode)lepcc_getBlobInfo(
-                    ctx, compressed, nInfo, &bt, &blobSize);
-
-        int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        const lepcc::Byte* pByte = compressed;
-
-        if (nBytes > 0)
-        {
-            stat = lepcc_getRGBCount(ctx, pByte, nBytes, &nPts);
-            if(stat != (lepcc_status) lepcc::ErrCode::Ok)
-            {
-                throw (std::string("RGB point count fetch failed"));
-            }
-            rgbVec.resize(nPts);
-            stat = lepcc_decodeRGB(
-                    ctx, &pByte, nBytes, &nPts, (lepcc::Byte*)(&rgbVec[0]));
-            if(stat != (lepcc_status) lepcc::ErrCode::Ok)
-            {
-                throw (std::string("RGB decompression failed"));
-            }
-        }
-        return rgbVec;
-    }
-
-
-    std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
-    {
-
-        const unsigned char* compressed = reinterpret_cast<const unsigned char*>
-            (compData->data());
-        int nInfo = lepcc_getBlobInfoSize();
-        lepcc_ContextHdl ctx(nullptr);
-        ctx = lepcc_createContext();
-        lepcc_blobType bt;
-        lepcc::uint32 blobSize = 0;
-
-        lepcc_status stat;
-        lepcc::uint32 nPts = 0;
-        lepcc::ErrCode errCode =
-            (lepcc::ErrCode)lepcc_getBlobInfo(
-                    ctx, compressed, nInfo, &bt, &blobSize);
-
-        int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
-        const lepcc::Byte* pByte = compressed;
-        std::vector<uint16_t> intVec;
-        if (nBytes > 0)
-        {
-            stat = lepcc_getIntensityCount(ctx, pByte, nBytes, &nPts);
-            if(stat != (lepcc_status) lepcc::ErrCode::Ok)
-            {
-                throw (std::string("Intensity point count fetch failed"));
-            }
-            intVec.resize(nPts);
-            stat = lepcc_decodeIntensity(
-                    ctx, &pByte, nBytes, &nPts, (unsigned short*)(&intVec[0]));
-            if(stat != (lepcc_status) lepcc::ErrCode::Ok)
-            {
-                throw (std::string("Intensity decompression failed"));
-            }
-
-            return intVec;
-        }
-        return intVec;
-    }
+    return decVec;
 }
+
+
+std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
+{
+    const unsigned char* compressed = reinterpret_cast<const unsigned char*>
+        (compData->data());
+    int nInfo = lepcc_getBlobInfoSize();
+    lepcc_ContextHdl ctx(nullptr);
+    ctx = lepcc_createContext();
+    lepcc_blobType bt;
+    lepcc::uint32 blobSize = 0;
+
+    lepcc_status stat;
+    std::vector<lepcc::RGB_t> rgbVec;
+
+    lepcc::uint32 nPts = 0;
+    lepcc::ErrCode errCode =
+        (lepcc::ErrCode)lepcc_getBlobInfo(
+                ctx, compressed, nInfo, &bt, &blobSize);
+
+    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
+
+    if (nBytes > 0)
+    {
+        const lepcc::Byte* pByte = compressed;
+        stat = lepcc_getRGBCount(ctx, pByte, nBytes, &nPts);
+        if (stat != (lepcc_status) lepcc::ErrCode::Ok)
+            throw decompression_error("RGB point count fetch failed");
+
+        rgbVec.resize(nPts);
+        stat = lepcc_decodeRGB(
+                ctx, &pByte, nBytes, &nPts, (lepcc::Byte*)(&rgbVec[0]));
+        if (stat != (lepcc_status) lepcc::ErrCode::Ok)
+            throw decompression_error("RGB decompression failed");
+    }
+    return rgbVec;
+}
+
+
+std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
+{
+    const unsigned char* compressed = reinterpret_cast<const unsigned char*>
+        (compData->data());
+    int nInfo = lepcc_getBlobInfoSize();
+    lepcc_ContextHdl ctx(nullptr);
+    ctx = lepcc_createContext();
+    lepcc_blobType bt;
+    lepcc::uint32 blobSize = 0;
+
+    lepcc_status stat;
+    lepcc::uint32 nPts = 0;
+    lepcc::ErrCode errCode =
+        (lepcc::ErrCode)lepcc_getBlobInfo(
+                ctx, compressed, nInfo, &bt, &blobSize);
+
+    int nBytes = (errCode == lepcc::ErrCode::Ok) ? (int)blobSize : -1;
+    std::vector<uint16_t> intVec;
+    if (nBytes > 0)
+    {
+        const lepcc::Byte* pByte = compressed;
+        stat = lepcc_getIntensityCount(ctx, pByte, nBytes, &nPts);
+        if (stat != (lepcc_status) lepcc::ErrCode::Ok)
+            throw decompression_error("Intensity point count fetch failed");
+        intVec.resize(nPts);
+        stat = lepcc_decodeIntensity(
+                ctx, &pByte, nBytes, &nPts, (unsigned short*)(&intVec[0]));
+        if (stat != (lepcc_status) lepcc::ErrCode::Ok)
+            throw decompression_error("Intensity decompression failed");
+    }
+    return intVec;
+}
+
+} // namespace EsriUtil
+} // namespace pdal
