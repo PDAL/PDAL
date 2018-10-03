@@ -33,10 +33,12 @@ a pipeline provides useful advantages for more complex things:
 Introduction
 --------------------------------------------------------------------------------
 
+A PDAL processing pipeline is represented in JSON.  The structure may either:
 
-A JSON object represents a PDAL processing pipeline.  The structure is always a
-JSON object, with the primary object called ``pipeline`` being an array of
-inferred or explicit PDAL :ref:`stage_object` representations.
+- a JSON object, with a key called ``pipeline`` whose value is an array of
+  inferred or explicit PDAL :ref:`stage_object` representations.
+- a JSON array, being the array described above without being encapsulated by a
+  JSON object.
 
 Simple Example
 ................................................................................
