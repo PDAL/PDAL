@@ -92,7 +92,6 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
         }
         catch(std::exception& e)
         {
-            std::cout << "Node: " << attNum << " \ni: "<< i << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
     }
