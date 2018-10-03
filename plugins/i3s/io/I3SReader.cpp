@@ -88,7 +88,7 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
         try
         {
             returnVec =  m_arbiter->getBinary(url + attNum);
-            continue;
+            break;
         }
         catch(std::exception& e)
         {
