@@ -57,7 +57,7 @@ public:
       Not all stages support streaming mode and an exception will be thrown
       when attempting to \ref execute an unsupported stage.
 
-      Streaming points can reduce memory consumption, but may limit access
+      Streaming points can reduce memory consumption, but will limit access
       to algorithms that need to operate on full point sets.
 
       \param table  Streaming point table used for stage pipeline.  This must be

@@ -146,18 +146,18 @@ bool CropFilter::processOne(PointRef& point)
 {
     for (auto& g : m_geoms)
         for (auto& gridPnp : g.m_gridPnps)
-            if (!crop(point, *gridPnp))
-                return false;
+            if (crop(point, *gridPnp))
+                return true;
 
     for (auto& box : m_boxes)
-        if (!crop(point, box))
-            return false;
+        if (crop(point, box))
+            return true;
 
     for (auto& center: m_args->m_centers)
-        if (!crop(point, center))
-            return false;
+        if (crop(point, center))
+            return true;
 
-    return true;
+    return false;
 }
 
 
