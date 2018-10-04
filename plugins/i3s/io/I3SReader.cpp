@@ -81,16 +81,24 @@ Json::Value I3SReader::fetchJson(std::string filepath)
 std::vector<char> I3SReader::fetchBinary(std::string url,
     std::string attNum, std::string ext) const
 {
+    const int NumRetries(5);
+    int retry = 0;
+
     // For the REST I3S endpoint there are no file extensions.
-    std::vector<char> returnVec;
+    std::vector<char> result;
     for (int i = 0; i < 5; ++i)
     {
-        if (auto data = m_arbiter->tryGetBinary(url + attNum))
-            return *data;
-        else if (i != 4)
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        auto data = m_arbiter->tryGetBinary(url + attNum);
+        if (data)
+        {
+            result = std::move(*data);
+            break;
+        }
+        if (++i == NumRetries)
+            throwError(std::string("Failed to fetch: " + url + attNum));
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
-    throwError(std::string("Failed to fetch: " + url + attNum));
+    return result;
 }
 
 } //namespace pdal
