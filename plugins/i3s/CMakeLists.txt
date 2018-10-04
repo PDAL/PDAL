@@ -83,7 +83,7 @@ if (WITH_TESTS)
             ${GDAL_INCLUDE_DIR}
     )
 
-    if (BUILD_PGPOINTCLOUD_TESTS)
+    if (BUILD_I3S_TESTS)
         PDAL_ADD_TEST(pdal_io_i3s_reader_test
                 FILES
                     test/i3sReaderTest.cpp
