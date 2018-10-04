@@ -56,6 +56,9 @@ void Reader::readerAddArgs(ProgramArgs& args)
 
 void Reader::readerInitialize(PointTableRef)
 {
+    if (!m_overrideSrsArg.empty() && !m_defaultSrsArg.empty())
+        throwError("Cannot specify both 'override_srs' and 'default_srs'");
+
     if (!m_overrideSrsArg.empty())
         setSpatialReference(m_overrideSrsArg);
     else if (!m_defaultSrsArg.empty())
