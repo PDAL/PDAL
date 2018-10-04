@@ -1,13 +1,5 @@
 
-add_definitions(-DHAVE_JSONCPP=1)
-if (WIN32)
-add_definitions("-DARBITER_DLL_IMPORT")
-endif()
-add_definitions(-DARBITER_ZLIB)
-
 add_subdirectory(lepcc)
-set_property(TARGET lepcc PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-
 
 PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
     FILES
@@ -45,10 +37,16 @@ target_link_libraries(${slpk_reader_libname} PRIVATE
 )
 
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
-if (ZLIB_FOUND)
-    target_compile_definitions(${i3s_reader_libname} PRIVATE -DARBITER_ZLIB)
-    target_compile_definitions(${slpk_reader_libname} PRIVATE -DARBITER_ZLIB)
-endif()
+target_compile_definitions(${i3s_reader_libname}
+    PRIVATE
+        ARBITER_ZLIB
+        ARBITER_DLL_IMPORT
+)
+target_compile_definitions(${slpk_reader_libname}
+    PRIVATE
+        ARBITER_ZLIB
+        ARBITER_DLL_IMPORT
+)
 
 target_include_directories(${i3s_reader_libname} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}
@@ -82,8 +80,13 @@ if (WITH_TESTS)
             ${PDAL_VENDOR_DIR}/eigen
             ${GDAL_INCLUDE_DIR}
     )
+    target_compile_definitions(pdal_io_slpk_reader_test
+        PRIVATE
+            ARBITER_ZLIB
+            ARBITER_DLL_IMPORT
+    )
 
-    if (BUILD_PGPOINTCLOUD_TESTS)
+    if (BUILD_I3S_TESTS)
         PDAL_ADD_TEST(pdal_io_i3s_reader_test
                 FILES
                     test/i3sReaderTest.cpp
@@ -98,6 +101,11 @@ if (WITH_TESTS)
                 ${LEPCC_INCLUDE_DIR}
                 ${PDAL_VENDOR_DIR}/eigen
                 ${GDAL_INCLUDE_DIR}
+        )
+        target_compile_definitions(pdal_io_i3s_reader_test
+            PRIVATE
+                ARBITER_ZLIB
+                ARBITER_DLL_IMPORT
         )
     endif()
 endif()

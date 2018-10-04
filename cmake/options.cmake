@@ -146,3 +146,6 @@ cmake_dependent_option(BUILD_RDBLIB_TESTS
 cmake_dependent_option(BUILD_PIPELINE_TESTS
     "Choose if pipeline tests should be built"
     OFF "WITH_TESTS" OFF)
+cmake_dependent_option(BUILD_I3S_TESTS
+    "Choose if I3S tests should be built"
+    OFF "WITH_TESTS" OFF)
