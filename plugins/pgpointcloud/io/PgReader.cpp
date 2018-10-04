@@ -75,7 +75,6 @@ void PgReader::addArgs(ProgramArgs& args)
     args.add("column", "Column name", m_column_name, "pa");
     args.add("schema", "Schema name", m_schema_name);
     args.add("where", "Where clause for selection", m_where);
-    addSpatialReferenceArg(args);
 }
 
 
