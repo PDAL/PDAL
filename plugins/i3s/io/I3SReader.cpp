@@ -85,17 +85,12 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
     std::vector<char> returnVec;
     for (int i = 0; i < 5; ++i)
     {
-        try
-        {
-            returnVec =  m_arbiter->getBinary(url + attNum);
-            break;
-        }
-        catch(std::exception& e)
-        {
+        if (auto data = m_arbiter->tryGetBinary(url + attNum))
+            return *data;
+        else if (i != 4)
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        }
     }
-    return returnVec;
+    throwError(std::string("Failed to fetch: " + url + attNum));
 }
 
 } //namespace pdal
