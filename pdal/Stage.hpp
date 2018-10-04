@@ -159,9 +159,6 @@ public:
       'spatialreference' or 'override_srs', then this function will have no
       effect.
 
-      If an exception is thrown during this function, it will be caught and the
-      spatial reference will not be set.
-
       \param srs  Spatial reference to set.
     */
     void setSpatialReference(SpatialReference const& srs);
