@@ -316,6 +316,59 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
 
 }
 
+TEST(SpatialReferenceTest, readerOptions)
+{
+    const std::string utm16(SpatialReference("EPSG:26916").getWKT());
+    std::string native;
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        native = r.getSpatialReference().getWKT();
+    }
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        o.add("spatialreference", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference().getWKT(), utm16);
+    }
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        o.add("override_srs", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference().getWKT(), utm16);
+    }
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        o.add("default_srs", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference().getWKT(), native);
+    }
+}
+
 TEST(SpatialReferenceTest, merge)
 {
     Options o1;

@@ -71,16 +71,7 @@ void GDALReader::initialize()
     m_raster.reset(new gdal::Raster(m_filename));
 
     m_raster->open();
-    try
-    {
-        // Set the SRS from the file if we don't have an override.
-        if (getSpatialReference().empty())
-            setSpatialReference(m_raster->getSpatialRef());
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    setSpatialReference(m_raster->getSpatialRef());
 
     m_count = m_raster->width() * m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();

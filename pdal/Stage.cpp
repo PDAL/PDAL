@@ -183,7 +183,7 @@ PointViewSet Stage::execute(PointTableRef table)
         }
     }
 
-    // Go through the stages in order, executing 
+    // Go through the stages in order, executing
     PointViewSet outViews;
     std::map<Stage *, PointViewSet> sets;
     while (stages.size())
@@ -310,6 +310,12 @@ void Stage::setupLog()
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
+
+    if (!m_overrideSrsArg.empty())
+        setSpatialReference(m_overrideSrsArg);
+    else if (!m_defaultSrsArg.empty())
+        setSpatialReference(m_defaultSrsArg);
+
     writerInitialize(table);
 }
 
@@ -317,9 +323,18 @@ void Stage::l_initialize(PointTableRef table)
 // This function allows m_spatialReference to remain private.
 void Stage::addSpatialReferenceArg(ProgramArgs& args)
 {
-    args.add("spatialreference", "Spatial reference to apply to data",
-        m_spatialReference);
+    args.add("spatialreference",
+            "Spatial reference to apply to data - alias of 'override_srs'",
+            m_overrideSrsArg);
+
+    args.add("override_srs", "Spatial reference to apply to data",
+            m_overrideSrsArg);
+
+    args.add("default_srs",
+            "Spatial reference to apply to data if one cannot be inferred",
+            m_defaultSrsArg);
 }
+
 
 const SpatialReference& Stage::getSpatialReference() const
 {
@@ -336,17 +351,28 @@ void Stage::setSpatialReference(const SpatialReference& spatialRef)
 void Stage::setSpatialReference(MetadataNode& m,
     const SpatialReference& spatialRef)
 {
-    m_spatialReference = spatialRef;
-
-    auto pred = [](MetadataNode m){ return m.name() == "spatialreference"; };
-
-    MetadataNode spatialNode = m.findChild(pred);
-    if (spatialNode.empty())
+    try
     {
-        m.add(spatialRef.toMetadata());
-        m.add("spatialreference", spatialRef.getWKT(), "SRS of this stage");
-        m.add("comp_spatialreference", spatialRef.getWKT(),
-            "SRS of this stage");
+        if (!m_spatialReference.empty() && !m_overrideSrsArg.empty())
+            return;
+
+        m_spatialReference = spatialRef;
+
+        auto pred = [](MetadataNode m)
+            { return m.name() == "spatialreference"; };
+
+        MetadataNode spatialNode = m.findChild(pred);
+        if (spatialNode.empty())
+        {
+            m.add(spatialRef.toMetadata());
+            m.add("spatialreference", spatialRef.getWKT(), "SRS of this stage");
+            m.add("comp_spatialreference", spatialRef.getWKT(),
+                "SRS of this stage");
+        }
+    }
+    catch (...)
+    {
+        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
     }
 }
 

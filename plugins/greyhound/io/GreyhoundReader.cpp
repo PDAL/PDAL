@@ -101,7 +101,7 @@ void GreyhoundReader::initialize(PointTableRef table)
         throw pdal_error(std::string("Failed to fetch info: ") + e.what());
     }
 
-    if (m_info.isMember("srs") && getSpatialReference().empty())
+    if (m_info.isMember("srs"))
         setSpatialReference(m_info["srs"].asString());
 }
 

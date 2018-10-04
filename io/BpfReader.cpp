@@ -169,16 +169,7 @@ void BpfReader::initialize()
        throwError(oss.str());
     }
 
-    try
-    {
-        // If there is no override SRS, set the file SRS.
-        if (getSpatialReference().empty())
-            setSpatialReference(code);
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    setSpatialReference(code);
 
     if (m_header.m_version >= 3)
     {

@@ -155,6 +155,13 @@ public:
       to a new spatial reference.  The stage spatial reference will be carried
       by PointViews processes by this stage to subsequent stages.
 
+      If called by a Reader whose spatial reference has been set with option
+      'spatialreference' or 'override_srs', then this function will have no
+      effect.
+
+      If an exception is thrown during this function, it will be caught and the
+      spatial reference will not be set.
+
       \param srs  Spatial reference to set.
     */
     void setSpatialReference(SpatialReference const& srs);
@@ -352,6 +359,8 @@ private:
     LogPtr m_log;
     std::string m_logLeader;
     SpatialReference m_spatialReference;
+    SpatialReference m_overrideSrsArg;
+    SpatialReference m_defaultSrsArg;
     std::unique_ptr<ProgramArgs> m_args;
     std::string m_tag;
     // This is never used after it is set.  It just provides a place to
