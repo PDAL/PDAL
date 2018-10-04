@@ -323,12 +323,10 @@ void Stage::l_initialize(PointTableRef table)
 // This function allows m_spatialReference to remain private.
 void Stage::addSpatialReferenceArg(ProgramArgs& args)
 {
-    args.add("spatialreference",
-            "Spatial reference to apply to data - alias of 'override_srs'",
-            m_overrideSrsArg);
-
     args.add("override_srs", "Spatial reference to apply to data",
             m_overrideSrsArg);
+
+    args.addSynonym("override_srs", "spatialreference");
 
     args.add("default_srs",
             "Spatial reference to apply to data if one cannot be inferred",
