@@ -73,12 +73,10 @@ GDALReader::~GDALReader()
 void GDALReader::initialize()
 {
     gdal::registerDrivers();
+
     m_raster.reset(new gdal::Raster(m_filename));
-
-    m_raster->open();
-
-    if (m_useMemoryCopy)
-        m_raster.reset(m_raster->memoryCopy());
+    if (m_raster->open() == gdal::GDALError::CantOpen)
+        throwError("Couldn't open raster file '" + m_filename + "'.");
 
     try
     {
@@ -89,9 +87,10 @@ void GDALReader::initialize()
         log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
     }
 
-    m_count = m_raster->width() * m_raster->height();
+    m_width = m_raster->width();
+    m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
-
+    m_raster.reset();
 }
 
 
@@ -103,11 +102,7 @@ QuickInfo GDALReader::inspect()
     initialize();
     addDimensions(layout.get());
 
-    m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
-    if (m_raster->open() == gdal::GDALError::CantOpen)
-        throwError("Couldn't open raster file '" + m_filename + "'.");
-
-    qi.m_pointCount = m_raster->width() * m_raster->height();
+    qi.m_pointCount = m_width * m_height;
 
     auto p = std::find(m_bandIds.begin(), m_bandIds.end(), Dimension::Id::Z);
 
@@ -129,40 +124,54 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
+
     std::vector<std::string> dimNames;
     if (m_header.size())
     {
         dimNames = Utils::split(m_header, ',');
-        if (dimNames.size() != (size_t)m_raster->bandCount())
-            throwError("Dimension names are not the same count as raster bands!");
+        if (dimNames.size() != m_bandTypes.size())
+            throwError("Dimension names are not the same count as "
+                "raster bands.");
     }
 
-    for (int i = 0; i < m_raster->bandCount(); ++i)
+    for (size_t i = 0; i < m_bandTypes.size(); ++i)
     {
         std::ostringstream oss;
         oss << "band-" << (i + 1);
         std::string name(dimNames.empty() ? oss.str() : dimNames[i]);
-        Dimension::Id id = layout->registerOrAssignDim(name, m_bandTypes[i]);
-        m_bandIds.push_back(id);
+        m_bandIds.push_back(layout->registerOrAssignDim(name, m_bandTypes[i]));
     }
 }
 
+
 void GDALReader::addArgs(ProgramArgs& args)
 {
-    args.add("header", "A comma-separated list of dimension IDs to map raster bands to dimension id", m_header);
-    pdal::Arg& cp = args.add("memorycopy", "Load the given raster file entirely to memory", m_useMemoryCopy, false);
-    cp.setHidden(true);
+    args.add("header", "A comma-separated list of dimension IDs to map "
+        "raster bands to dimension id", m_header);
+    args.add("memorycopy", "Load the given raster file "
+        "entirely to memory", m_useMemoryCopy, false).setHidden();
 }
 
 
 void GDALReader::ready(PointTableRef table)
 {
-    m_index = 0;
-    if (m_raster->open() == gdal::GDALError::CantOpen && ! m_useMemoryCopy)
+    m_raster.reset(new gdal::Raster(m_filename));
+    if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
+
+    if (m_useMemoryCopy)
+    {
+        gdal::Raster *r = m_raster->memoryCopy();
+        if (r)
+            m_raster.reset(r);
+        else
+            log()->get(LogLevel::Warning) << "Couldn't create raster memory "
+                "copy.  Using standard interface.";
+    }
+
+    m_index = 0;
     m_row = 0;
     m_col = 0;
-
 }
 
 
@@ -185,17 +194,9 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t numPts)
 
 bool GDALReader::processOne(PointRef& point)
 {
-
     std::array<double, 2> coords;
-    if (m_row == m_raster->height() &&
-        m_col == m_raster->width())
+    if (m_row == m_height)
         return false; // done
-
-    if (m_col == m_raster->width())
-    {
-        m_col = 0;
-        m_row ++;
-    }
 
     m_raster->pixelToCoord(m_col, m_row, coords);
     double x = coords[0];
@@ -213,9 +214,12 @@ bool GDALReader::processOne(PointRef& point)
         double v = data[b];
         point.setField(id, v);
     }
-
     m_col++;
-
+    if (m_col == m_width)
+    {
+        m_col = 0;
+        m_row++;
+    }
 
     return true;
 }
