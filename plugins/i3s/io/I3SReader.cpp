@@ -86,7 +86,7 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
 
     // For the REST I3S endpoint there are no file extensions.
     std::vector<char> result;
-    for (int i = 0; i < 5; ++i)
+    while (true)
     {
         auto data = m_arbiter->tryGetBinary(url + attNum);
         if (data)
@@ -94,7 +94,7 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
             result = std::move(*data);
             break;
         }
-        if (++i == NumRetries)
+        if (++retry == NumRetries)
             throwError(std::string("Failed to fetch: " + url + attNum));
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
