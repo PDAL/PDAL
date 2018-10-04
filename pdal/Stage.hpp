@@ -331,9 +331,10 @@ protected:
     Options m_options;          ///< Stage's options.
     MetadataNode m_metadata;    ///< Stage's metadata.
     int m_progressFd;           ///< Descriptor for progress info.
+    SpatialReference m_overrideSrsArg;
+    SpatialReference m_defaultSrsArg;
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
-    void addSpatialReferenceArg(ProgramArgs& args);
     void throwError(const std::string& s) const;
     /**
       Return the point count of all point views at the start of execution.
@@ -359,8 +360,6 @@ private:
     LogPtr m_log;
     std::string m_logLeader;
     SpatialReference m_spatialReference;
-    SpatialReference m_overrideSrsArg;
-    SpatialReference m_defaultSrsArg;
     std::unique_ptr<ProgramArgs> m_args;
     std::string m_tag;
     // This is never used after it is set.  It just provides a place to
@@ -379,9 +378,11 @@ private:
     void setupLog();
     void handleOptions();
 
+    void l_addArgs(ProgramArgs& args);
     virtual void readerAddArgs(ProgramArgs& /*args*/)
         {}
-    void l_addArgs(ProgramArgs& args);
+    virtual void readerInitialize(PointTableRef /*table*/)
+        {}
     virtual void writerInitialize(PointTableRef /*table*/)
         {}
 

@@ -310,27 +310,8 @@ void Stage::setupLog()
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
-
-    if (!m_overrideSrsArg.empty())
-        setSpatialReference(m_overrideSrsArg);
-    else if (!m_defaultSrsArg.empty())
-        setSpatialReference(m_defaultSrsArg);
-
+    readerInitialize(table);
     writerInitialize(table);
-}
-
-
-// This function allows m_spatialReference to remain private.
-void Stage::addSpatialReferenceArg(ProgramArgs& args)
-{
-    args.add("override_srs", "Spatial reference to apply to data",
-            m_overrideSrsArg);
-
-    args.addSynonym("override_srs", "spatialreference");
-
-    args.add("default_srs",
-            "Spatial reference to apply to data if one cannot be inferred",
-            m_defaultSrsArg);
 }
 
 

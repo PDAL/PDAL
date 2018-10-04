@@ -43,7 +43,23 @@ void Reader::readerAddArgs(ProgramArgs& args)
     m_filenameArg = &args.add("filename", "Name of file to read", m_filename);
     m_countArg = &args.add("count", "Maximum number of points read", m_count,
         (std::numeric_limits<point_count_t>::max)());
-    addSpatialReferenceArg(args);
+
+    args.add("override_srs", "Spatial reference to apply to data",
+            m_overrideSrsArg);
+
+    args.addSynonym("override_srs", "spatialreference");
+
+    args.add("default_srs",
+            "Spatial reference to apply to data if one cannot be inferred",
+            m_defaultSrsArg);
+}
+
+void Reader::readerInitialize(PointTableRef)
+{
+    if (!m_overrideSrsArg.empty())
+        setSpatialReference(m_overrideSrsArg);
+    else if (!m_defaultSrsArg.empty())
+        setSpatialReference(m_defaultSrsArg);
 }
 
 } // namespace pdal
