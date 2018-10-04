@@ -142,7 +142,7 @@ protected:
 
     std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
-    gzip::Decompressor m_decomp;
+    arbiter::gzip::Decompressor m_decomp;
 
     EsriArgs m_args;
     Json::Value m_info;
