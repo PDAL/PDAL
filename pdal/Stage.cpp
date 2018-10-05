@@ -330,7 +330,7 @@ void Stage::setSpatialReference(const SpatialReference& spatialRef)
 void Stage::setSpatialReference(MetadataNode& m,
     const SpatialReference& spatialRef)
 {
-    if (!m_spatialReference.empty() && !m_overrideSrsArg.empty())
+    if (!m_spatialReference.empty() && !m_overrideSrs.empty())
     {
         log()->get(LogLevel::Debug) <<
             "Ignoring setSpatialReference attempt: an override was set";

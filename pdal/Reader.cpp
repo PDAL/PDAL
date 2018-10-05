@@ -45,24 +45,24 @@ void Reader::readerAddArgs(ProgramArgs& args)
         (std::numeric_limits<point_count_t>::max)());
 
     args.add("override_srs", "Spatial reference to apply to data",
-            m_overrideSrsArg);
+            m_overrideSrs);
 
     args.addSynonym("override_srs", "spatialreference");
 
     args.add("default_srs",
             "Spatial reference to apply to data if one cannot be inferred",
-            m_defaultSrsArg);
+            m_defaultSrs);
 }
 
 void Reader::readerInitialize(PointTableRef)
 {
-    if (!m_overrideSrsArg.empty() && !m_defaultSrsArg.empty())
+    if (!m_overrideSrs.empty() && !m_defaultSrs.empty())
         throwError("Cannot specify both 'override_srs' and 'default_srs'");
 
-    if (!m_overrideSrsArg.empty())
-        setSpatialReference(m_overrideSrsArg);
-    else if (!m_defaultSrsArg.empty())
-        setSpatialReference(m_defaultSrsArg);
+    if (!m_overrideSrs.empty())
+        setSpatialReference(m_overrideSrs);
+    else if (!m_defaultSrs.empty())
+        setSpatialReference(m_defaultSrs);
 }
 
 } // namespace pdal
