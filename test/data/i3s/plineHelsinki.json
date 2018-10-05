@@ -1,0 +1,13 @@
+{
+    "pipeline":[
+        {
+            "filename":"i3s://https://tiles.arcgis.com/tiles/cFEFS0EWrhfDeVw9/arcgis/rest/services/PCL__3857__F_Helsinki__CityCenter_PointCloud_RGB/SceneServer/",
+            "threads": 64,
+            "bounds":"([2770000,2775000],[8431000,8436000])",
+            "dimensions":"returns, rgb, intensity",
+            "min_density":1.0,
+            "max_density":3.0
+        },
+        "I3SHelsinki.las"
+    ]
+}
