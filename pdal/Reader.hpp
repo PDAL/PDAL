@@ -64,6 +64,13 @@ protected:
     Arg *m_filenameArg;
     Arg *m_countArg;
 
+    SpatialReference m_overrideSrs;
+    SpatialReference m_defaultSrs;
+
+    using Stage::setSpatialReference;
+    virtual void setSpatialReference(MetadataNode& m,
+            const SpatialReference& srs);
+
 private:
     virtual PointViewSet run(PointViewPtr view)
     {

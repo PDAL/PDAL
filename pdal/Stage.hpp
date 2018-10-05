@@ -328,10 +328,8 @@ protected:
     Options m_options;          ///< Stage's options.
     MetadataNode m_metadata;    ///< Stage's metadata.
     int m_progressFd;           ///< Descriptor for progress info.
-    SpatialReference m_overrideSrs;
-    SpatialReference m_defaultSrs;
 
-    void setSpatialReference(MetadataNode& m, SpatialReference const&);
+    virtual void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void throwError(const std::string& s) const;
     /**
       Return the point count of all point views at the start of execution.

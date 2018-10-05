@@ -54,6 +54,7 @@ void Reader::readerAddArgs(ProgramArgs& args)
             m_defaultSrs);
 }
 
+
 void Reader::readerInitialize(PointTableRef)
 {
     if (!m_overrideSrs.empty() && !m_defaultSrs.empty())
@@ -63,6 +64,20 @@ void Reader::readerInitialize(PointTableRef)
         setSpatialReference(m_overrideSrs);
     else if (!m_defaultSrs.empty())
         setSpatialReference(m_defaultSrs);
+}
+
+
+void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
+{
+    if (getSpatialReference().empty() || m_overrideSrs.empty())
+    {
+        Stage::setSpatialReference(m, srs);
+    }
+    else
+    {
+        log()->get(LogLevel::Debug) <<
+            "Ignoring setSpatialReference attempt: an override was set";
+    }
 }
 
 } // namespace pdal
