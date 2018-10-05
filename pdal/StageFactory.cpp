@@ -55,8 +55,10 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     static const std::vector<std::string> protocols {
         "ept",
-        "greyhound"
+        "greyhound",
+        "i3s"
     };
+
 
     const auto protocol = std::find_if(protocols.begin(), protocols.end(),
             [&filename](std::string protocol)
@@ -70,11 +72,9 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         ext = "." + *protocol;
     else
         ext = FileUtils::extension(filename);
-
     // Strip off '.' and make lowercase.
     if (ext.length())
         ext = Utils::tolower(ext.substr(1));
-
     PluginManager<Stage>& mgr = PluginManager<Stage>::get();
     return mgr.extensions().defaultReader(ext);
 }

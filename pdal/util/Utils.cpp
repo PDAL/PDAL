@@ -434,7 +434,7 @@ std::string Utils::escapeJSON(const std::string &str)
 
     size_t pos(0);
 
-    while((pos = escaped.find_first_of("\"\\/", pos)) != std::string::npos)
+    while((pos = escaped.find_first_of("\"\\", pos)) != std::string::npos)
     {
         escaped.insert(pos, "\\");
         pos += 2;
