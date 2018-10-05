@@ -41,8 +41,11 @@
 namespace pdal
 {
 
-namespace
+
+namespace PipelineWriter
 {
+
+
 
 std::string generateTag(Stage *stage, PipelineWriter::TagMap& tags)
 {
@@ -76,11 +79,6 @@ void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
         generateTags(s, tags);
     tags[stage] = generateTag(stage, tags);
 }
-
-} // anonymous namespace
-
-namespace PipelineWriter
-{
 
 PDAL_DLL void writePipeline(Stage *stage, const std::string& filename)
 {

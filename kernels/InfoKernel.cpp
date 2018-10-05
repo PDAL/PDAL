@@ -302,6 +302,15 @@ void InfoKernel::dump(PointTableRef table, MetadataNode& root)
         else
             root.add(m_hexbinStage->getMetadata().clone("boundary"));
     }
+
+
+    pdal::PipelineWriter::TagMap tags;
+    PipelineWriter::generateTags(m_manager.getStage(), tags);
+
+    MetadataNode pipeline;
+    m_manager.getStage()->serialize(pipeline, tags);
+
+    root.add(pipeline.clone("pipeline"));
 }
 
 

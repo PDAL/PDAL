@@ -50,6 +50,7 @@ namespace PipelineWriter
 
     PDAL_DLL void writePipeline(Stage *s, const std::string& filename);
     PDAL_DLL void writePipeline(Stage *s, std::ostream& strm);
+    PDAL_DLL void generateTags(Stage *stage, PipelineWriter::TagMap& tags);
 }
 
 } // namespace pdal
