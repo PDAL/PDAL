@@ -90,7 +90,6 @@ void InfoFilter::parsePointSpec()
             m_idList.push_back(low++);
     };
 
-    //Remove whitespace from string with awful remove/erase idiom.
     Utils::trim(m_pointSpec);
 
     StringList ranges = Utils::split2(m_pointSpec, ',');
