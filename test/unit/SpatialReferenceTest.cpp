@@ -318,18 +318,16 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
 
 TEST(SpatialReferenceTest, readerOptions)
 {
-    const std::string utm16(SpatialReference("EPSG:26916").getWKT());
-    std::string native;
+    const SpatialReference utm16("EPSG:26916");
+    SpatialReference native;
 
     {
         Options o;
         o.add("filename", Support::datapath("las/test_utm17.las"));
         LasReader r;
         r.setOptions(o);
-
-        PointTable t;
-        r.prepare(t);
-        native = r.getSpatialReference().getWKT();
+        const auto qi(r.preview());
+        native = qi.m_srs;
     }
 
     {
@@ -341,7 +339,7 @@ TEST(SpatialReferenceTest, readerOptions)
 
         PointTable t;
         r.prepare(t);
-        EXPECT_EQ(r.getSpatialReference().getWKT(), utm16);
+        EXPECT_EQ(r.getSpatialReference(), utm16);
     }
 
     {
@@ -353,7 +351,7 @@ TEST(SpatialReferenceTest, readerOptions)
 
         PointTable t;
         r.prepare(t);
-        EXPECT_EQ(r.getSpatialReference().getWKT(), utm16);
+        EXPECT_EQ(r.getSpatialReference(), utm16);
     }
 
     {
@@ -365,7 +363,7 @@ TEST(SpatialReferenceTest, readerOptions)
 
         PointTable t;
         r.prepare(t);
-        EXPECT_EQ(r.getSpatialReference().getWKT(), native);
+        EXPECT_EQ(r.getSpatialReference(), native);
     }
 }
 
