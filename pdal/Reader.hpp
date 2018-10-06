@@ -57,6 +57,8 @@ public:
     point_count_t count() const
         { return m_count; }
 
+    using Stage::setSpatialReference;
+
 protected:
     std::string m_filename;
     point_count_t m_count;
@@ -67,7 +69,6 @@ protected:
     SpatialReference m_overrideSrs;
     SpatialReference m_defaultSrs;
 
-    using Stage::setSpatialReference;
     virtual void setSpatialReference(MetadataNode& m,
             const SpatialReference& srs);
 
