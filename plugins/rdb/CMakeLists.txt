@@ -14,6 +14,7 @@ PDAL_ADD_PLUGIN(libname reader rdb
     rdbcpp)
 
 target_include_directories(${libname} PUBLIC "${PDAL_VENDOR_DIR}/eigen")
+target_include_directories(${libname} PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 
 
 
