@@ -510,7 +510,7 @@ public:
         return m;
     }
 
-    MetadataNode addOrUpdate(MetadataNode& n)
+    MetadataNode addOrUpdate(MetadataNode n)
     {
         if (m_impl->nodeType(n.name()) == MetadataType::Array)
             throw pdal_error("Can't call addOrUpdate() on subnode list.");
