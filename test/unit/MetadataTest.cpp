@@ -275,15 +275,6 @@ TEST(MetadataTest, find_child_string)
     EXPECT_EQ(n.value(), "220");
 }
 
-/**
-TEST(MetadataTest, sanitize)
-{
-    MetadataNode top(" Test;semicolon:colon space'apostrophe\"quote:");
-    EXPECT_EQ(top.name(),
-        "_Test_semicolon_colon_space_apostrophe_quote_");
-}
-**/
-
 // Make sure that we handle double-precision values to 10 decimal places.
 TEST(MetadataTest, test_float)
 {
@@ -326,4 +317,45 @@ TEST(MetadataTest, infnan)
     d = -d;
     n2 = n.add("value2", d);
     EXPECT_EQ(n2.jsonValue(), "\"-Infinity\"");
+}
+
+// Test the addOrUpdate functions.
+TEST(MetadataTest, update)
+{
+    MetadataNode root("root");
+
+    EXPECT_EQ(false, root.hasChildren());
+    root.addOrUpdate("test", 21);
+    EXPECT_EQ(1U, root.children().size());
+    root.addOrUpdate("test", 22, "description");
+    EXPECT_EQ(1U, root.children().size());
+    MetadataNodeList l = root.children();
+    MetadataNode n = l.front();
+    EXPECT_EQ("test", n.name());
+    EXPECT_EQ("description", n.description());
+    EXPECT_EQ(22, n.value<int>());
+
+    MetadataNode root2("root2");
+    MetadataNode child("child");
+    child.add("subchild1", 1);
+    child.add("subchild2", 2);
+    root2.add(child);
+
+    MetadataNode child2("child");
+    child2.add("subchild3", 3);
+    child2.add("subchild4", 4);
+    child2.add("subchild5", 5);
+    root2.addOrUpdate(child2);
+
+    l = root2.children();
+    EXPECT_EQ(l.size(), 1U);
+    MetadataNode c = l.front();
+    l = c.children();
+    EXPECT_EQ(l.size(), 3U);
+    EXPECT_EQ(l[0].value<int>(), 3);
+    EXPECT_EQ(l[1].value<int>(), 4);
+    EXPECT_EQ(l[2].value<int>(), 5);
+
+    root2.add(c);
+    EXPECT_THROW(root2.addOrUpdate(c), pdal_error);
 }
