@@ -148,10 +148,18 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
         throw pdal_error(err);
     }
 
-    Json::Value& subtree = root["pipeline"];
-    if (!subtree)
+    if (root.isObject() && root.isMember("pipeline"))
+    {
+        parsePipeline(root["pipeline"]);
+    }
+    else if (root.isArray())
+    {
+        parsePipeline(root);
+    }
+    else
+    {
         throw pdal_error("JSON pipeline: Root element is not a Pipeline");
-    parsePipeline(subtree);
+    }
 }
 
 

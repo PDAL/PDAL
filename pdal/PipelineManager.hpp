@@ -118,7 +118,7 @@ public:
     QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
-    void executeStream(FixedPointTable& table);
+    void executeStream(StreamPointTable& table);
     void validateStageOptions() const;
     bool pipelineStreamable() const;
 

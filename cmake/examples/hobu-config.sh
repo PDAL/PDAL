@@ -11,7 +11,6 @@ SO_EXT=dylib
 ORACLE_HOME=$HOME/oracle
 LAZPERF_HOME=$USR_LOCAL
 export ORACLE_HOME
-MATLAB_HOME=/Applications/MATLAB_R2017b.app
 export GDAL_HOME=/usr/local/opt/gdal2
 
 CONFIG="Unix Makefiles"
@@ -38,12 +37,14 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_I3S=ON \
-        -DBUILD_PLUGIN_RDBLIB=OFF \
+        -DBUILD_PLUGIN_RDBLIB=ON \
         -DBUILD_PLUGIN_OPENSCENEGRAPH=OFF \
         -DWITH_LAZPERF=ON \
         -DWITH_LASZIP=ON \
         -DWITH_EXAMPLES=ON \
         -Drdb_DIR=/Users/hobu/dev/release/riegl/rdblib-2.1.5-x86_64-darwin/interface/cpp \
+        -DCURL_INCLUDE_DIR=/usr/local/opt/curl/include \
+        -DCURL_LIBRARY=/usr/local/opt/curl/lib/libcurl.dylib \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
@@ -51,9 +52,9 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} \
-        -DPYTHON_EXECUTABLE=/usr/local/bin/python2 \
+        -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/libpython3.7.dylib \
-        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/include/python3.7m/ \
+        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/include/python3.7m/\
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
 #        -DBUILD_PLUGIN_MATLAB=ON \
