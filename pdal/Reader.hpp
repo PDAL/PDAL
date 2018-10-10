@@ -74,6 +74,7 @@ private:
         viewSet.insert(view);
         return viewSet;
     }
+    virtual void readerInitialize(PointTableRef);
     virtual void readerAddArgs(ProgramArgs& args);
     virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)
         { return 0; }

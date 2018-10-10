@@ -46,4 +46,12 @@ void Reader::readerAddArgs(ProgramArgs& args)
     addSpatialReferenceArg(args);
 }
 
+void Reader::readerInitialize(PointTableRef)
+{
+    // Make sure that we go through the setSpatialReference() logic
+    // if an SRS was set through an option.
+    if (getSpatialReference().valid())
+        setSpatialReference(getSpatialReference());
+}
+
 } // namespace pdal

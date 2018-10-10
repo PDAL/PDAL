@@ -310,6 +310,7 @@ void Stage::setupLog()
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
+    readerInitialize(table);
     writerInitialize(table);
 }
 
@@ -338,16 +339,11 @@ void Stage::setSpatialReference(MetadataNode& m,
 {
     m_spatialReference = spatialRef;
 
-    auto pred = [](MetadataNode m){ return m.name() == "spatialreference"; };
-
-    MetadataNode spatialNode = m.findChild(pred);
-    if (spatialNode.empty())
-    {
-        m.add(spatialRef.toMetadata());
-        m.add("spatialreference", spatialRef.getWKT(), "SRS of this stage");
-        m.add("comp_spatialreference", spatialRef.getWKT(),
-            "SRS of this stage");
-    }
+    MetadataNode srsMetadata = spatialRef.toMetadata();
+    m.addOrUpdate(spatialRef.toMetadata());
+    m.addOrUpdate("spatialreference", spatialRef.getWKT(), "SRS of this stage");
+    m.addOrUpdate("comp_spatialreference", spatialRef.getWKT(),
+        "SRS of this stage");
 }
 
 
