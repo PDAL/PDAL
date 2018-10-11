@@ -210,21 +210,29 @@ public:
     {}
     /// Called before the StreamPointTable is reset indicating the number of
     /// points that were populated, which must be less than or equal to its
-    /// capacity.
-    virtual void setNumPoints(PointId n)
+    /// capacity.  Skipped points are still included in this count.
+    virtual void setNumPoints(point_count_t n)
     {}
     /// Called when the contents of StreamPointTable have been consumed and
     /// the point data will be potentially overwritten.
     virtual void reset()
     {}
     virtual point_count_t capacity() const = 0;
+
+    /// Indicate that a point has been filtered during pipeline execution and
+    /// should be skipped during processing of the next reset().
+    virtual void setSkip(PointId n)
+    {}
+
+    virtual bool skip(PointId n) const
+        { return false; }
 };
 
 class PDAL_DLL FixedPointTable : public StreamPointTable
 {
 public:
     FixedPointTable(point_count_t capacity) : StreamPointTable(m_layout),
-        m_capacity(capacity)
+        m_capacity(capacity), m_skips(m_capacity, false)
     {}
 
     virtual void finalize()
@@ -237,10 +245,20 @@ public:
     }
 
     virtual void reset()
-        { std::fill(m_buf.begin(), m_buf.end(), 0); }
+    {
+        std::fill(m_buf.begin(), m_buf.end(), 0);
+        std::fill(m_skips.begin(), m_skips.end(), false);
+    }
 
     point_count_t capacity() const
         { return m_capacity; }
+
+    virtual void setSkip(PointId n)
+        { m_skips[n] = true; }
+
+    virtual bool skip(PointId n) const
+        { return m_skips[n]; }
+
 protected:
     virtual char *getPoint(PointId idx)
         { return m_buf.data() + pointsToBytes(idx); }
@@ -248,6 +266,7 @@ protected:
 private:
     std::vector<char> m_buf;
     point_count_t m_capacity;
+    std::vector<bool> m_skips;
     PointLayout m_layout;
 };
 
