@@ -86,6 +86,7 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_showStats = true;
         m_showMetadata = true;
         m_showSchema = true;
+        m_boundary = true;
     }
 
     if (m_boundary)
