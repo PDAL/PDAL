@@ -229,9 +229,11 @@ public:
         return &(m_detail[Utils::toNative(id)]);
     }
 
+    /**
+        Convert the point layout to a metadata format.
 
-
-
+        \return  A metadata node that contains the layout information.
+    */
     PDAL_DLL MetadataNode toMetadata() const;
 
 private:

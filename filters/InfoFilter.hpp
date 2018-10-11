@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2018, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,63 +34,70 @@
 
 #pragma once
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL InfoKernel : public Kernel
+// This is just a pass-through filter, which collects some data about
+// the points that are fed through it
+class PDAL_DLL InfoFilter : public Filter, public Streamable
 {
+    struct NearPoint
+    {
+        NearPoint(PointId id, double dist, std::vector<char>&& data) :
+            m_id(id), m_dist(dist), m_data(data)
+        {}
+
+        PointId m_id;
+        double m_dist;
+        std::vector<char> m_data;
+
+        bool operator < (const NearPoint& other) const
+            { return m_dist < other.m_dist; }
+    };
+
 public:
+    InfoFilter() :
+        m_pointRoot("point"), m_queryCount(10),
+        m_queryZ(std::numeric_limits<double>::quiet_NaN())
+    {}
+
     std::string getName() const;
-    int execute(); // overrride
-
-    InfoKernel();
-    void setup(const std::string& filename);
-    MetadataNode run(const std::string& filename);
-
-    inline bool showAll() { return m_showAll; }
-    inline void doShowAll(bool value) { m_showAll = value; }
-    inline void doComputeSummary(bool value) { m_showSummary = value; }
-    inline void doComputeBoundary(bool value) { m_boundary = value; }
+    BOX3D bounds() const
+        { return m_bounds; }
 
 private:
-    void addSwitches(ProgramArgs& args);
-    void validateSwitches(ProgramArgs& args);
-    void makeReader(const std::string& filename);
-    void makePipeline();
-    void dump(PointTableRef table, MetadataNode& root);
-    MetadataNode dumpSummary(const QuickInfo& qi);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point);
+    virtual void prepared(PointTableRef table);
+    virtual void done(PointTableRef table);
+    virtual void filter(PointView& view);
 
-    std::string m_inputFile;
-    bool m_showStats;
-    bool m_showSchema;
-    bool m_showAll;
-    bool m_showMetadata;
-    bool m_boundary;
-    std::string m_pointIndexes;
-    std::string m_dimensions;
-    std::string m_enumerate;
-    std::string m_queryPoint;
-    std::string m_pipelineFile;
-    bool m_showSummary;
-    bool m_needPoints;
-    bool m_usestdin;
+    void parsePointSpec();
+    void parseQuerySpec();
 
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_infoStage;
-    Stage *m_reader;
+    MetadataNode m_pointRoot;
 
-    MetadataNode m_tree;
+    std::string m_querySpec;
+    point_count_t m_queryCount;
+    double m_queryX;
+    double m_queryY;
+    double m_queryZ;
+    std::list<NearPoint> m_results;
+
+    std::string m_pointSpec;
+    std::vector<PointId> m_idList;
+    std::vector<PointId>::const_iterator m_idCur;
+    DimTypeList m_dims;
+    size_t m_pointSize;
+    PointId m_count;
+
+    BOX3D m_bounds;
 };
 
 } // namespace pdal
