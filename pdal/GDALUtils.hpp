@@ -554,6 +554,22 @@ public:
     ~Raster();
 
     /**
+      Constructor.
+
+      \param ds Pointer to existing GDALDataset
+      \param drivername  Optional name of driver to use to open raster file.
+      \param srs  SpatialReference of the raster.
+      \param pixelToPos  Transformation matrix to convert raster positions to
+        geolocations.
+    */
+    Raster(GDALDataset *ds) : m_ds (ds) {};
+
+    /**
+      Return a GDAL MEM driver copy of the raster
+    */
+    Raster* memoryCopy() const;
+
+    /**
       Open raster file for reading.
     */
     GDALError open();
@@ -802,6 +818,8 @@ private:
     GDALDataset *m_ds;
     Dimension::Type m_bandType;
     double m_dstNoData;
+
+    GDALError wake();
 
     std::string m_errorMsg;
     mutable std::vector<pdal::Dimension::Type> m_types;
