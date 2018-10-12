@@ -317,7 +317,7 @@ Dimension::Type PointLayout::resolveType(Dimension::Type t1,
 MetadataNode PointLayout::toMetadata() const
 {
 
-    MetadataNode root;
+    MetadataNode root("schema");
 
     for (const auto& id : dims())
     {

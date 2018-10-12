@@ -65,14 +65,10 @@ public:
 private:
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
-
-    void dump(MetadataNode& root);
-    MetadataNode dumpPoints(PointViewPtr inView) const;
-    MetadataNode dumpStats() const;
-    void dumpPipeline() const;
+    void makeReader(const std::string& filename);
+    void makePipeline();
+    void dump(PointTableRef table, MetadataNode& root);
     MetadataNode dumpSummary(const QuickInfo& qi);
-    MetadataNode dumpQuery(PointViewPtr inView) const;
-    void makePipeline(const std::string& filename, bool noPoints);
 
     std::string m_inputFile;
     bool m_showStats;
@@ -87,11 +83,11 @@ private:
     std::string m_pipelineFile;
     bool m_showSummary;
     bool m_needPoints;
-    std::string m_PointCloudSchemaOutput;
     bool m_usestdin;
 
     Stage *m_statsStage;
     Stage *m_hexbinStage;
+    Stage *m_infoStage;
     Stage *m_reader;
 
     MetadataNode m_tree;

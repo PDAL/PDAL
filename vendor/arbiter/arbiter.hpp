@@ -2449,7 +2449,6 @@ namespace rapidxml
              1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // E
              1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1   // F
         };
-
         // Text (i.e. PCDATA) that does not require processing when ws normalization is disabled
         // (anything but < \0 &)
         template<int Dummy>

@@ -41,7 +41,9 @@ install:
   - call %OSGEO4W_ROOT%\bin\py3_env.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - set PATH=%PATH%;C:\Program Files (x86)\CMake\bin
+  - ps: (new-object net.webclient).DownloadFile("http://curl.haxx.se/ca/cacert.pem", "c:\osgeo4w64\bin\curl-ca-bundle.crt")
   - call scripts\\appveyor\\config.cmd
+ 
 
 build_script:
   - call scripts\\appveyor\\build.cmd
