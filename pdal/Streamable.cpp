@@ -178,7 +178,6 @@ void Streamable::execute(StreamPointTable& table)
 void Streamable::execute(StreamPointTable& table,
     std::list<Streamable *>& stages, SrsMap& srsMap)
 {
-    std::vector<bool> skips(table.capacity());
     std::list<Streamable *> filters;
     SpatialReference srs;
 
@@ -243,11 +242,11 @@ void Streamable::execute(StreamPointTable& table,
             s->startLogging();
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
-                if (skips[idx])
+                if (table.skip(idx))
                     continue;
                 point.setPointId(idx);
                 if (!s->processOne(point))
-                    skips[idx] = true;
+                    table.setSkip(idx);
             }
             const SpatialReference& tempSrs = s->getSpatialReference();
             if (!tempSrs.empty())
@@ -258,11 +257,7 @@ void Streamable::execute(StreamPointTable& table,
             s->stopLogging();
         }
 
-        // Yes, vector<bool> is terrible.  Can do something better later.
-        for (size_t i = 0; i < skips.size(); ++i)
-            skips[i] = false;
-        table.setNumPoints(pointLimit);
-        table.reset();
+        table.clear(pointLimit);
     }
 }
 
