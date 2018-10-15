@@ -125,9 +125,7 @@ void Ilvis2Reader::initialize(PointTableRef)
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
     // background
-    // Set the SRS to the default if not overridden.
-    if (getSpatialReference().empty())
-        setSpatialReference(SpatialReference("EPSG:4326"));
+    setSpatialReference(SpatialReference("EPSG:4326"));
 }
 
 

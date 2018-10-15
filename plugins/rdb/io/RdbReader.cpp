@@ -144,9 +144,7 @@ void RdbReader::addArgs(ProgramArgs& args)
 void RdbReader::initialize()
 {
     m_pointcloud.reset(new RdbPointcloud(m_filename, m_filter, m_extras));
-    // Set spatial reference form source if not overridden.
-    if (getSpatialReference().empty())
-        setSpatialReference(getSpatialReferenceSystem(*m_pointcloud));
+    setSpatialReference(getSpatialReferenceSystem(*m_pointcloud));
     readMetadata(*m_pointcloud, getMetadata());
 }
 

@@ -155,6 +155,10 @@ public:
       to a new spatial reference.  The stage spatial reference will be carried
       by PointViews processes by this stage to subsequent stages.
 
+      If called by a Reader whose spatial reference has been set with option
+      'spatialreference' or 'override_srs', then this function will have no
+      effect.
+
       \param srs  Spatial reference to set.
     */
     void setSpatialReference(SpatialReference const& srs);
@@ -325,8 +329,7 @@ protected:
     MetadataNode m_metadata;    ///< Stage's metadata.
     int m_progressFd;           ///< Descriptor for progress info.
 
-    void setSpatialReference(MetadataNode& m, SpatialReference const&);
-    void addSpatialReferenceArg(ProgramArgs& args);
+    virtual void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void throwError(const std::string& s) const;
     /**
       Return the point count of all point views at the start of execution.
@@ -370,9 +373,9 @@ private:
     void setupLog();
     void handleOptions();
 
+    void l_addArgs(ProgramArgs& args);
     virtual void readerAddArgs(ProgramArgs& /*args*/)
         {}
-    void l_addArgs(ProgramArgs& args);
     virtual void readerInitialize(PointTableRef /*table*/)
         {}
     virtual void writerInitialize(PointTableRef /*table*/)

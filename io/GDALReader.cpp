@@ -78,16 +78,8 @@ void GDALReader::initialize()
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
 
-    try
-    {
-        // Set the SRS from the file if we don't have an override.
-        if (getSpatialReference().empty())
-            setSpatialReference(m_raster->getSpatialRef());
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    m_raster->open();
+    setSpatialReference(m_raster->getSpatialRef());
 
     m_width = m_raster->width();
     m_height = m_raster->height();

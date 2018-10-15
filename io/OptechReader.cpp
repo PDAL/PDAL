@@ -116,10 +116,7 @@ void OptechReader::initialize()
 
     // The Optech docs say that their lat/longs are referenced
     // to the WGS84 reference frame.
-    // Set default SRS if not overridden.
-    SpatialReference srs = getSpatialReference();
-    if (getSpatialReference().empty())
-        setSpatialReference(SpatialReference("EPSG:4326"));
+    setSpatialReference(SpatialReference("EPSG:4326"));
 }
 
 

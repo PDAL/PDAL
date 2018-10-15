@@ -43,15 +43,43 @@ void Reader::readerAddArgs(ProgramArgs& args)
     m_filenameArg = &args.add("filename", "Name of file to read", m_filename);
     m_countArg = &args.add("count", "Maximum number of points read", m_count,
         (std::numeric_limits<point_count_t>::max)());
-    addSpatialReferenceArg(args);
+
+    args.add("override_srs", "Spatial reference to apply to data",
+            m_overrideSrs);
+
+    args.addSynonym("override_srs", "spatialreference");
+
+    args.add("default_srs",
+            "Spatial reference to apply to data if one cannot be inferred",
+            m_defaultSrs);
 }
+
+
+void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
+{
+    if (getSpatialReference().empty() || m_overrideSrs.empty())
+    {
+        Stage::setSpatialReference(m, srs);
+    }
+    else
+    {
+        log()->get(LogLevel::Debug) <<
+            "Ignoring setSpatialReference attempt: an override was set";
+    }
+}
+
 
 void Reader::readerInitialize(PointTableRef)
 {
-    // Make sure that we go through the setSpatialReference() logic
-    // if an SRS was set through an option.
-    if (getSpatialReference().valid())
-        setSpatialReference(getSpatialReference());
+    if (m_overrideSrs.valid() && m_defaultSrs.valid())
+        throwError("Cannot specify both 'override_srs' and 'default_srs'");
+
+    if (m_overrideSrs.valid())
+        setSpatialReference(m_overrideSrs);
+    else if (m_defaultSrs.valid())
+        setSpatialReference(m_defaultSrs);
 }
 
+
 } // namespace pdal
+

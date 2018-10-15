@@ -71,9 +71,7 @@ void MatlabReader::initialize(PointTableRef table)
     m_numElements = 0;
     m_numFields = 0;
 
-    // Set SRS if not overridden.
-    if (getSpatialReference().empty())
-        setSpatialReference(mlang::Script::getSRSWKT(m_structArray, log()));
+    setSpatialReference(mlang::Script::getSRSWKT(m_structArray, log()));
     m_tableMetadata = table.metadata();
 }
 

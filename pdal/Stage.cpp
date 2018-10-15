@@ -183,7 +183,7 @@ PointViewSet Stage::execute(PointTableRef table)
         }
     }
 
-    // Go through the stages in order, executing 
+    // Go through the stages in order, executing
     PointViewSet outViews;
     std::map<Stage *, PointViewSet> sets;
     while (stages.size())
@@ -314,13 +314,6 @@ void Stage::l_initialize(PointTableRef table)
     writerInitialize(table);
 }
 
-
-// This function allows m_spatialReference to remain private.
-void Stage::addSpatialReferenceArg(ProgramArgs& args)
-{
-    args.add("spatialreference", "Spatial reference to apply to data",
-        m_spatialReference);
-}
 
 const SpatialReference& Stage::getSpatialReference() const
 {

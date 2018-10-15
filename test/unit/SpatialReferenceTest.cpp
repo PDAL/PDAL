@@ -318,6 +318,57 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
 
 }
 
+TEST(SpatialReferenceTest, readerOptions)
+{
+    const SpatialReference utm16("EPSG:26916");
+    SpatialReference native;
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        LasReader r;
+        r.setOptions(o);
+        const auto qi(r.preview());
+        native = qi.m_srs;
+    }
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        o.add("spatialreference", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference(), utm16);
+    }
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        o.add("override_srs", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference(), utm16);
+    }
+
+    {
+        Options o;
+        o.add("filename", Support::datapath("las/test_utm17.las"));
+        o.add("default_srs", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference(), native);
+    }
+}
+
 TEST(SpatialReferenceTest, merge)
 {
     Options o1;
@@ -444,6 +495,8 @@ TEST(SpatialReferenceTest, set_srs)
     EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"4326\"]]"),
         std::string::npos);
 
+    //
+    s = factory.createStage("readers.ilvis2");
     ops2.add("spatialreference", "EPSG:2029");
     s->setOptions(ops2);
     s->prepare(t);

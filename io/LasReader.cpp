@@ -483,13 +483,7 @@ void LasReader::readExtraBytesVlr()
 
 void LasReader::setSrs(MetadataNode& m)
 {
-    // If the user is already overriding this by setting it on the stage, we'll
-    // take their overridden value
-    SpatialReference srs = getSpatialReference();
-
-    if (srs.getWKT().empty())
-        srs = m_header.srs();
-    setSpatialReference(m, srs);
+    setSpatialReference(m, m_header.srs());
 }
 
 
