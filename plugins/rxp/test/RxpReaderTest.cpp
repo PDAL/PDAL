@@ -142,6 +142,7 @@ TEST(RxpReaderTest, testNoPpsSync)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
+    EXPECT_EQ(view->size(), 185925u);
     checkPoint(view, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
             0.14050000667339191, 0.689999998, -14.4898596, 3, false, 1, 1);
 }
