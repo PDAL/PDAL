@@ -324,6 +324,24 @@ void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
     }
 }
 
+Raster* Raster::memoryCopy() const
+{
+
+    GDALDriver *mem= GetGDALDriverManager()->GetDriverByName( "MEM");
+    if (!mem)
+    {
+        return nullptr;
+    }
+
+    if (!m_ds)
+        throw pdal::pdal_error("driver is not open!");
+
+    GDALDataset* mem_ds = mem->CreateCopy("", m_ds, FALSE, nullptr, nullptr, nullptr);
+
+    Raster* r = new Raster(mem_ds);
+    r->wake();
+    return r;
+}
 
 Raster::Raster(const std::string& filename, const std::string& drivername)
     : m_filename(filename)
@@ -454,6 +472,8 @@ GDALError Raster::open(int width, int height, int numBands,
 }
 
 
+
+
 GDALError Raster::open()
 {
     GDALError error = GDALError::None;
@@ -474,6 +494,13 @@ GDALError Raster::open()
 #else
     m_ds = (GDALDataset *)GDALOpen(m_filename.c_str(), GA_ReadOnly);
 #endif
+    error = wake();
+    return error;
+}
+
+GDALError Raster::wake()
+{
+    GDALError error = GDALError::None;
     if (m_ds == NULL)
     {
         m_errorMsg = "Unable to open GDAL datasource '" + m_filename + "'.";
@@ -680,7 +707,7 @@ Raster::~Raster()
 
 void Raster::close()
 {
-    delete m_ds;
+    GDALClose(m_ds);
     m_ds = nullptr;
     m_types.clear();
 }

@@ -57,12 +57,20 @@ public:
     point_count_t count() const
         { return m_count; }
 
+    using Stage::setSpatialReference;
+
 protected:
     std::string m_filename;
     point_count_t m_count;
     PointReadFunc m_cb;
     Arg *m_filenameArg;
     Arg *m_countArg;
+
+    SpatialReference m_overrideSrs;
+    SpatialReference m_defaultSrs;
+
+    virtual void setSpatialReference(MetadataNode& m,
+            const SpatialReference& srs);
 
 private:
     virtual PointViewSet run(PointViewPtr view)
@@ -75,6 +83,7 @@ private:
         return viewSet;
     }
     virtual void readerAddArgs(ProgramArgs& args);
+    virtual void readerInitialize(PointTableRef table);
     virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)
         { return 0; }
 };

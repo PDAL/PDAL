@@ -102,7 +102,7 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # Add a plugin target.
 # _name The plugin name.
 # ARGN :
-#    FILES the srouce files for the plugin
+#    FILES the source files for the plugin
 #    LINK_WITH link plugin with libraries
 #
 # The "generate_dimension_hpp" ensures that Dimension.hpp is built before

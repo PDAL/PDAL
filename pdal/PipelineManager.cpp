@@ -215,7 +215,7 @@ point_count_t PipelineManager::execute()
 }
 
 
-void PipelineManager::executeStream(FixedPointTable& table)
+void PipelineManager::executeStream(StreamPointTable& table)
 {
     validateStageOptions();
     Stage *s = getStage();

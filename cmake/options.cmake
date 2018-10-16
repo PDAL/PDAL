@@ -22,6 +22,11 @@ option(BUILD_PLUGIN_GEOWAVE
 add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
     "Read and Write data using GeoWave")
 
+option(BUILD_PLUGIN_I3S
+    "Choose if I3S and SLPK support should be built" FALSE)
+add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
+    "Read from a I3S server or from a SLPK file")
+
 option(BUILD_PLUGIN_GREYHOUND
     "Choose if Greyhound support should be built" FALSE)
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
@@ -140,4 +145,7 @@ cmake_dependent_option(BUILD_RDBLIB_TESTS
     ON "BUILD_PLUGIN_RDBLIB; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_PIPELINE_TESTS
     "Choose if pipeline tests should be built"
+    OFF "WITH_TESTS" OFF)
+cmake_dependent_option(BUILD_I3S_TESTS
+    "Choose if I3S tests should be built"
     OFF "WITH_TESTS" OFF)

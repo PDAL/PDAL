@@ -183,7 +183,7 @@ PointViewSet Stage::execute(PointTableRef table)
         }
     }
 
-    // Go through the stages in order, executing 
+    // Go through the stages in order, executing
     PointViewSet outViews;
     std::map<Stage *, PointViewSet> sets;
     while (stages.size())
@@ -310,16 +310,10 @@ void Stage::setupLog()
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
+    readerInitialize(table);
     writerInitialize(table);
 }
 
-
-// This function allows m_spatialReference to remain private.
-void Stage::addSpatialReferenceArg(ProgramArgs& args)
-{
-    args.add("spatialreference", "Spatial reference to apply to data",
-        m_spatialReference);
-}
 
 const SpatialReference& Stage::getSpatialReference() const
 {
@@ -338,16 +332,11 @@ void Stage::setSpatialReference(MetadataNode& m,
 {
     m_spatialReference = spatialRef;
 
-    auto pred = [](MetadataNode m){ return m.name() == "spatialreference"; };
-
-    MetadataNode spatialNode = m.findChild(pred);
-    if (spatialNode.empty())
-    {
-        m.add(spatialRef.toMetadata());
-        m.add("spatialreference", spatialRef.getWKT(), "SRS of this stage");
-        m.add("comp_spatialreference", spatialRef.getWKT(),
-            "SRS of this stage");
-    }
+    MetadataNode srsMetadata = spatialRef.toMetadata();
+    m.addOrUpdate(spatialRef.toMetadata());
+    m.addOrUpdate("spatialreference", spatialRef.getWKT(), "SRS of this stage");
+    m.addOrUpdate("comp_spatialreference", spatialRef.getWKT(),
+        "SRS of this stage");
 }
 
 

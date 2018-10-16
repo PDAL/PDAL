@@ -168,18 +168,8 @@ void BpfReader::initialize()
             << "' and coordinate id: '" << m_header.m_coordId << "'";
        throwError(oss.str());
     }
-    SpatialReference srs(code);
-    setSpatialReference(srs);
 
-    try
-    {
-        SpatialReference srs(code);
-        setSpatialReference(srs);
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    setSpatialReference(code);
 
     if (m_header.m_version >= 3)
     {

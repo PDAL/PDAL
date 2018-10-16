@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: e63504fef0e8e4c875b09b98d6ef013204ff21fe
+// Git SHA: dcd8b5e47aaeb83bb8136f2850d8036d0f19f045
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2449,7 +2449,6 @@ namespace rapidxml
              1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // E
              1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1   // F
         };
-
         // Text (i.e. PCDATA) that does not require processing when ws normalization is disabled
         // (anything but < \0 &)
         template<int Dummy>
@@ -2746,6 +2745,14 @@ namespace Xml = rapidxml;
 #include <cstdint>
 #include <cstdlib>
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+
 namespace gzip {
 
 // These live in gzip.hpp because it doesnt need to use deps.
@@ -2766,6 +2773,13 @@ inline bool is_compressed(const char* data, std::size_t size)
                (static_cast<uint8_t>(data[0]) == 0x1F && static_cast<uint8_t>(data[1]) == 0x8B));
 }
 } // namespace gzip
+
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 #endif
 
@@ -2833,6 +2847,14 @@ inline bool is_compressed(const char* data, std::size_t size)
 #include <limits>
 #include <stdexcept>
 #include <string>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
 
 namespace gzip {
 
@@ -2938,6 +2960,12 @@ inline std::string compress(const char* data,
 
 } // namespace gzip
 
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 #endif // ARBITER_ZLIB
 
 
@@ -2970,6 +2998,14 @@ inline std::string compress(const char* data,
 #include <limits>
 #include <stdexcept>
 #include <string>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
 
 namespace gzip {
 
@@ -3066,6 +3102,12 @@ inline std::string decompress(const char* data, std::size_t size)
 }
 
 } // namespace gzip
+
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
 
 #endif // ARBITER_ZLIB
 
