@@ -621,6 +621,8 @@ public:
         return names;
     }
 
+    operator bool () const
+        { return !empty(); }
     bool operator ! ()
         { return empty(); }
     bool valid() const
