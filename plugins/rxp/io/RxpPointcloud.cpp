@@ -127,7 +127,7 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
     point_count_t idx = m_view->size();
     unsigned int returnNumber = 1;
     Id timeId = getTimeDimensionId(m_syncToPps);
-    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i)
+    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++idx, ++returnNumber)
     {
         auto t = targets[i];
         m_view->setField(Id::X, idx, t.vertex[0]);
@@ -157,7 +157,6 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
             }
             m_view->setField(Id::Intensity, idx, intensity);
         }
-        ++idx, ++returnNumber;
     }
 }
 
