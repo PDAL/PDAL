@@ -3475,19 +3475,19 @@ private:
     http::Response exec(std::function<http::Response()> f);
 };
 
-class ARBITER_DLL Pool
+class Pool
 {
     // Only HttpResource may release.
     friend class Resource;
 
 public:
-    Pool(
+    ARBITER_DLL Pool(
             std::size_t concurrent = 4,
             std::size_t retry = 4,
             Json::Value json = Json::Value());
-    ~Pool();
+    ARBITER_DLL ~Pool();
 
-    Resource acquire();
+    ARBITER_DLL Resource acquire();
 
 private:
     void release(std::size_t id);
@@ -3588,7 +3588,7 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-class ARBITER_DLL Time
+class Time
 {
 public:
     static const std::string iso8601;
@@ -3596,7 +3596,8 @@ public:
     static const std::string dateNoSeparators;
 
     Time();
-    Time(const std::string& s, const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
+    Time(const std::string& s,
+        const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
 
     std::string str(const std::string& format = "%Y-%m-%dT%H:%M:%SZ") const;
 
