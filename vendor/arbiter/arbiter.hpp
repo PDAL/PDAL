@@ -3354,7 +3354,7 @@ private:
     long m_timeout = defaultHttpTimeout;
     bool m_followRedirect = true;
     bool m_verifyPeer = true;
-    std::unique_ptr<std::string> m_caPath;
+    ARBITER_DLL std::unique_ptr<std::string> m_caPath;
     std::unique_ptr<std::string> m_caInfo;
 
     std::vector<char> m_data;
