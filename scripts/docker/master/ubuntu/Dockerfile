@@ -115,18 +115,6 @@ RUN \
     make install; \
     cd /; \
     rm -rf /laszip; \
-    git clone https://github.com/hobu/hexer.git; \
-    cd hexer; \
-    mkdir build; \
-    cd build; \
-    cmake .. \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_BUILD_TYPE="Release" \
-    ; \
-    make; \
-    make install; \
-    cd /; \
-    rm -rf /hexer; \
     git clone  https://github.com/hobu/laz-perf.git; \
     cd laz-perf; \
     mkdir build; \
@@ -206,7 +194,6 @@ RUN \
         -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_MBIO=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
-        -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_MRSID=ON \
         -DBUILD_PLUGIN_NITF=ON \
