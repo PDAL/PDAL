@@ -435,8 +435,7 @@ void GreedyProjection::filter(PointView& view)
 
       const Eigen::Vector3d c(getCoord(R_));
       // Projecting point onto the surface
-      float dist = nc.dot (c);
-      proj_qp_ = c - dist * nc;
+      proj_qp_ = c - nc.dot(c)* nc;
 
       // Converting coords, calculating angles and saving the projected
       // near boundary edges

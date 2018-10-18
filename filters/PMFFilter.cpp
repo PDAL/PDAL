@@ -196,12 +196,16 @@ void PMFFilter::processGround(PointViewPtr view)
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
     view->calculateBounds(bounds);
-    size_t cols = ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1;
-    size_t rows = ((bounds.maxy - bounds.miny) / m_args->m_cellSize) + 1;
+    size_t cols =
+        static_cast<size_t>(((bounds.maxx - bounds.minx) /
+            m_args->m_cellSize) + 1);
+    size_t rows =
+        static_cast<size_t>(((bounds.maxy - bounds.miny) /
+            m_args->m_cellSize) + 1);
 
     // initialize surface to NaN
     std::vector<double> ZImin(rows * cols,
-                              std::numeric_limits<double>::quiet_NaN());
+        std::numeric_limits<double>::quiet_NaN());
 
     // loop through all points, identifying minimum Z value for each populated
     // cell
@@ -269,9 +273,9 @@ void PMFFilter::processGround(PointViewPtr view)
     // Compute the series of window sizes and height thresholds
     std::vector<float> htvec;
     std::vector<float> wsvec;
-    int iter = 0;
-    float ws = 0.0f;
-    float ht = 0.0f;
+    int iter(0);
+    float ws(0);
+    float ht(0);
 
     // pre-compute window sizes and height thresholds
     while (ws < m_args->m_maxWindowSize)
