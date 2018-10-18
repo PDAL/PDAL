@@ -3435,8 +3435,6 @@ ARBITER_DLL std::string buildQueryString(const http::Query& query);
 
 /** @cond arbiter_internal */
 
-class ARBITER_DLL Pool;
-
 class ARBITER_DLL Resource
 {
 public:
