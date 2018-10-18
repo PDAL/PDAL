@@ -3840,7 +3840,7 @@ namespace fs
      *
      * See Arbiter::getLocalHandle for details about construction.
      */
-    class ARBITER_DLL LocalHandle
+    class LocalHandle
     {
         friend class arbiter::Arbiter;
         friend class arbiter::Endpoint;
