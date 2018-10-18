@@ -5368,7 +5368,7 @@ namespace http { class Pool; }
  *
  * All Arbiter operations are thread-safe except unless otherwise noted.
  */
-class ARBITER_DLL Arbiter
+class Arbiter
 {
 public:
     /** Construct a basic Arbiter with only drivers the don't require
