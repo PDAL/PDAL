@@ -5129,7 +5129,7 @@ class Driver;
  *
  * An Endpoint may be created using Arbiter::getEndpoint.
  */
-class ARBITER_DLL Endpoint
+class Endpoint
 {
     // Only Arbiter may construct.
     friend class Arbiter;
