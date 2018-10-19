@@ -580,7 +580,7 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
                 u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
                 if (b == 3)
                 {
-                    u.f += m_dims[d].m_offset;
+                    u.f += static_cast<float>(m_dims[d].m_offset);
                     data->setField(m_dims[d].m_id, nextId, u.f);
                 }
             }

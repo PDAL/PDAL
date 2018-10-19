@@ -71,6 +71,18 @@ static StaticPluginInfo const s_info
     "http://pdal.io/stages/filters.smrf.html"
 };
 
+// Without the cast, MSVC complains, which is ridiculous when the output
+// is, by definition, an int.
+namespace
+{
+template<typename T>
+T ceil(double d)
+{
+    return static_cast<T>(std::ceil(d));
+}
+
+}
+
 CREATE_STATIC_STAGE(SMRFilter, s_info)
 
 struct SMRArgs
@@ -367,7 +379,7 @@ std::vector<int> SMRFilter::createNetMask()
     std::vector<int> isNetCell(m_rows * m_cols, 0);
     if (m_args->m_cut > 0.0)
     {
-        int v = std::ceil(m_args->m_cut / m_args->m_cell);
+        int v = ceil<int>(m_args->m_cut / m_args->m_cell);
 
         for (auto c = 0; c < m_cols; c += v)
         {
@@ -466,7 +478,7 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     std::vector<double> ZInetV = ZImin;
     if (m_args->m_cut > 0.0)
     {
-        int v = std::ceil(m_args->m_cut / m_args->m_cell);
+        int v = ceil<int>(m_args->m_cut / m_args->m_cell);
         std::vector<double> bigErode =
             erodeDiamond(ZImin, m_rows, m_cols, 2 * v);
         std::vector<double> bigOpen =
