@@ -941,8 +941,9 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
         p.extended_return_number = returnNumber;
         p.extended_number_of_returns = numberOfReturns;
         p.extended_scanner_channel = scanChannel;
-        p.extended_scan_angle =
-            std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f);
+        // This should always work if ScanAngleRank isn't wonky.
+        p.extended_scan_angle = static_cast<laszip_I16>(
+            std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         p.extended_classification_flags = classFlags;
         p.extended_classification = classification;
         p.classification = (classification & 0x1F) | (classFlags << 5);

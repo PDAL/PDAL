@@ -151,6 +151,8 @@ void FauxReader::ready(PointTableRef /*table*/)
 }
 
 
+#pragma warning (push)
+#pragma warning (disable: 4244)
 bool FauxReader::processOne(PointRef& point)
 {
     double x(0);
@@ -226,6 +228,7 @@ bool FauxReader::processOne(PointRef& point)
     m_index++;
     return true;
 }
+#pragma warning (pop)
 
 
 point_count_t FauxReader::read(PointViewPtr view, point_count_t count)

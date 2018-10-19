@@ -118,7 +118,7 @@ uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
     Matrix3f B = computeCovariance(view, ids);
 
     JacobiSVD<Matrix3f> svd(B);
-    svd.setThreshold(threshold);
+    svd.setThreshold((float)threshold);
 
     return static_cast<uint8_t>(svd.rank());
 }
@@ -129,8 +129,12 @@ Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
 {
     using namespace Eigen;
 
-    int num_rows = xx.rows();
-    int num_cols = xx.cols();
+    int num_rows;
+    int num_cols;
+    
+    if (!Utils::numericCast(xx.rows(), num_rows) ||
+        !Utils::numericCast(xx.cols(), num_cols))
+        throw pdal_error("Too many columns/rows for spline computation");
 
     MatrixXd S = MatrixXd::Zero(num_rows, num_cols);
 
@@ -143,8 +147,8 @@ Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
             // neighbourhood is used in our case) of the cell being filtered.
             int radius = 3;
 
-            int c = std::floor(col/2);
-            int r = std::floor(row/2);
+            int c = static_cast<int>(std::floor(col/2));
+            int r = static_cast<int>(std::floor(row/2));
 
             int cs = Utils::clamp(c-radius, 0, static_cast<int>(z.cols()-1));
             int ce = Utils::clamp(c+radius, 0, static_cast<int>(z.cols()-1));
