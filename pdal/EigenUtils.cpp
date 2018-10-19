@@ -51,6 +51,8 @@ namespace pdal
 
 namespace eigen
 {
+#pragma warning (push)
+#pragma warning (disable: 4244)
 
 Eigen::Vector3d computeCentroid(PointView& view,
     const std::vector<PointId>& ids)
@@ -366,13 +368,14 @@ Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
     return ZImin;
 }
 
+
 Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
 {
     using namespace Eigen;
 
     MatrixXd data2 = padMatrix(data, radius);
 
-    int nrows = data2.rows();
+    int nrows = static_cast<int>(data2.rows());
     int ncols = data2.cols();
 
     MatrixXd minZ(nrows, ncols);
@@ -708,6 +711,7 @@ Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data)
 
     return data;
 }
+#pragma warning (pop)
 
 } // namespace eigen
 

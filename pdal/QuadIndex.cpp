@@ -318,13 +318,13 @@ void Tree::getPoints(
     {
         if (data)
         {
-            const std::size_t xOffset(
-                    Utils::sround((bbox.center.x - xBegin) / xStep));
-            const double yOffset(
-                    Utils::sround((bbox.center.y - yBegin) / yStep));
+            double xOffset(Utils::sround((bbox.center.x - xBegin) / xStep));
+            double yOffset(Utils::sround((bbox.center.y - yBegin) / yStep));
 
             const std::size_t index(
-                Utils::sround(yOffset * (xEnd - xBegin) / xStep + xOffset));
+                static_cast<size_t>(
+                    Utils::sround(yOffset * (xEnd - xBegin) / xStep +
+                        xOffset)));
 
             results.at(index) = data->pbIndex;
         }
@@ -435,13 +435,12 @@ void Tree::getPoints(
             data->point.x < xEnd - xStep &&
             data->point.y < yEnd - yStep)
     {
-        const std::size_t xOffset(
-                Utils::sround((data->point.x - xBegin) / xStep));
-        const std::size_t yOffset(
-                Utils::sround((data->point.y - yBegin) / yStep));
+        double xOffset(Utils::sround((data->point.x - xBegin) / xStep));
+        double yOffset(Utils::sround((data->point.y - yBegin) / yStep));
 
-        const std::size_t index(
-            Utils::sround(yOffset * (xEnd - xBegin) / xStep + xOffset));
+        std::size_t index(
+            static_cast<size_t>(
+                Utils::sround(yOffset * (xEnd - xBegin) / xStep + xOffset)));
 
         if (index < results.size())
         {
@@ -693,7 +692,7 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
 
     if (m_tree)
     {
-        const std::size_t exp(std::pow(2, rasterize));
+        const size_t exp(static_cast<size_t>(std::pow(2, rasterize)));
         const double xWidth(m_tree->bbox.maximum.x - m_tree->bbox.minimum.x);
         const double yWidth(m_tree->bbox.maximum.y - m_tree->bbox.minimum.y);
 
@@ -734,8 +733,10 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
 
     if (m_tree)
     {
-        const std::size_t width (Utils::sround((xEnd - xBegin) / xStep));
-        const std::size_t height(Utils::sround((yEnd - yBegin) / yStep));
+        size_t width(
+            static_cast<size_t>(Utils::sround((xEnd - xBegin) / xStep)));
+        std::size_t height(
+            static_cast<size_t>(Utils::sround((yEnd - yBegin) / yStep)));
         results.resize(width * height, (std::numeric_limits<PointId>::max)());
 
         m_tree->getPoints(
