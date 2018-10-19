@@ -7,13 +7,13 @@ The Delaunay filter creates a triangulated mesh fulfilling the Delaunay
 condition from a collection of points.
 
 The filter is implemented using the `delaunator-cpp`_ library, a C++ port of
-the JavaScript `delaunator`_ library.
+the JavaScript `Delaunator`_ library.
 
 The filter currently only supports 2D Delaunay triangulation, using the x and y
 dimensions of the point cloud.
 
 .. _`delaunator-cpp`: https://github.com/delfrrr/delaunator-cpp
-.. _`delaunator`: https://github.com/mapbox/delaunator
+.. _`Delaunator`: https://github.com/mapbox/delaunator
 
 .. embed::
 
