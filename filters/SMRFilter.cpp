@@ -613,7 +613,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     // but is internally converted to a pixel equivalent by dividing it by the
     // cell size and rounding the result toward positive infinity (i.e., taking
     // the ceiling value)."
-    int max_radius = std::ceil(max_window / m_args->m_cell);
+    int max_radius = static_cast<int>(std::ceil(max_window / m_args->m_cell));
     std::vector<double> prevSurface = ZImin;
     std::vector<double> prevErosion = ZImin;
 

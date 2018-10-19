@@ -95,9 +95,15 @@ Eigen::Matrix3f computeCovariance(PointView& view,
     size_t k = 0;
     for (auto const& j : ids)
     {
-        A(0, k) = view.getFieldAs<double>(Dimension::Id::X, j) - centroid[0];
-        A(1, k) = view.getFieldAs<double>(Dimension::Id::Y, j) - centroid[1];
-        A(2, k) = view.getFieldAs<double>(Dimension::Id::Z, j) - centroid[2];
+        A(0, k) =
+            static_cast<float>(view.getFieldAs<double>(Dimension::Id::X, j) -
+                centroid[0]);
+        A(1, k) =
+            static_cast<float>(view.getFieldAs<double>(Dimension::Id::Y, j) -
+                centroid[1]);
+        A(2, k) =
+            static_cast<float>(view.getFieldAs<double>(Dimension::Id::Z, j) -
+                centroid[2]);
         k++;
     }
 

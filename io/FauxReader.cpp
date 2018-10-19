@@ -83,30 +83,32 @@ void FauxReader::initialize()
         m_bounds.minz = ceil(m_bounds.minz);
         m_bounds.maxz = ceil(m_bounds.maxz);
         // Here delX/Y/Z represent the number of points in each direction.
-        m_count = 1;
+        double count = 1.0;
         if (m_bounds.maxx <= m_bounds.minx)
             m_delX = 0;
         else
         {
             m_delX = m_bounds.maxx - m_bounds.minx;
-            m_count *= m_delX;
+            count *= m_delX;
         }
         if (m_bounds.maxy <= m_bounds.miny)
             m_delY = 0;
         else
         {
             m_delY = m_bounds.maxy - m_bounds.miny;
-            m_count *= m_delY;
+            count *= m_delY;
         }
         if (m_bounds.maxz <= m_bounds.minz)
             m_delZ = 0;
         else
         {
             m_delZ = m_bounds.maxz - m_bounds.minz;
-            m_count *= m_delZ;
+            count *= m_delZ;
         }
         if (!m_delX && !m_delY && !m_delZ)
-            m_count = 0;
+            count = 0;
+        if (!Utils::numericCast(count, m_count))
+            throwError("Requested range generates more points than supported.");
     }
     else
     {
