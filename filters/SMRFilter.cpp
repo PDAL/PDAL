@@ -200,8 +200,10 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     m_srs = firstView->spatialReference();
 
     firstView->calculateBounds(m_bounds);
-    m_cols = ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1;
-    m_rows = ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1;
+    m_cols = static_cast<int>(((m_bounds.maxx - m_bounds.minx) /
+            m_args->m_cell) + 1);
+    m_rows = static_cast<int>(((m_bounds.maxy - m_bounds.miny) /
+        m_args->m_cell) + 1);
 
     // Create raster of minimum Z values per element.
     std::vector<double> ZImin = createZImin(firstView);
