@@ -25,6 +25,8 @@
 // This file is from delaunator-cpp, see
 // https://github.com/delfrrr/delaunator-cpp
 // (commit: 6e9799316001ccb3f1e067029a7bf9eb3b95c6e6)
+// Modified to include copyright information and to work around min/max
+// macros on Windows.
 // 
 // Delaunator-cpp is a port of https://github.com/mapbox/delaunator
 //     ISC License
@@ -94,7 +96,7 @@ inline double circumradius(
     if ((bl > 0.0 || bl < 0.0) && (cl > 0.0 || cl < 0.0) && (d > 0.0 || d < 0.0)) {
         return x * x + y * y;
     } else {
-        return std::numeric_limits<double>::max();
+        return (std::numeric_limits<double>::max)();
     }
 }
 
@@ -179,7 +181,7 @@ inline bool in_circle(
 }
 
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();
-constexpr std::size_t INVALID_INDEX = std::numeric_limits<std::size_t>::max();
+constexpr std::size_t INVALID_INDEX = (std::numeric_limits<std::size_t>::max)();
 
 inline bool check_pts_equal(double x1, double y1, double x2, double y2) {
     return std::fabs(x1 - x2) <= EPSILON &&
@@ -251,10 +253,10 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
       m_edge_stack() {
     std::size_t n = coords.size() >> 1;
 
-    double max_x = std::numeric_limits<double>::min();
-    double max_y = std::numeric_limits<double>::min();
-    double min_x = std::numeric_limits<double>::max();
-    double min_y = std::numeric_limits<double>::max();
+    double max_x = (std::numeric_limits<double>::min)();
+    double max_y = (std::numeric_limits<double>::min)();
+    double min_x = (std::numeric_limits<double>::max)();
+    double min_y = (std::numeric_limits<double>::max)();
     std::vector<std::size_t> ids;
     ids.reserve(n);
 
@@ -271,7 +273,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     }
     const double cx = (min_x + max_x) / 2;
     const double cy = (min_y + max_y) / 2;
-    double min_dist = std::numeric_limits<double>::max();
+    double min_dist = (std::numeric_limits<double>::max)();
 
     std::size_t i0 = INVALID_INDEX;
     std::size_t i1 = INVALID_INDEX;
@@ -289,7 +291,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     const double i0x = coords[2 * i0];
     const double i0y = coords[2 * i0 + 1];
 
-    min_dist = std::numeric_limits<double>::max();
+    min_dist = (std::numeric_limits<double>::max)();
 
     // find the point closest to the seed
     for (std::size_t i = 0; i < n; i++) {
@@ -304,7 +306,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     double i1x = coords[2 * i1];
     double i1y = coords[2 * i1 + 1];
 
-    double min_radius = std::numeric_limits<double>::max();
+    double min_radius = (std::numeric_limits<double>::max)();
 
     // find the third point which forms the smallest circumcircle with the first two
     for (std::size_t i = 0; i < n; i++) {
@@ -319,7 +321,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
         }
     }
 
-    if (!(min_radius < std::numeric_limits<double>::max())) {
+    if (!(min_radius < (std::numeric_limits<double>::max)())) {
         throw std::runtime_error("not triangulation");
     }
 
