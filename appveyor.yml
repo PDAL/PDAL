@@ -19,11 +19,11 @@ environment:
 shallow_clone: true
 clone_depth: 5
 
-#init:
-#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-# on_finish:
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+ - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   # make a temp directory for downloading osgeo4w-setup.exe
@@ -34,15 +34,17 @@ install:
   - ps: mkdir $env:OSGEO4W_ROOT | out-null
   # make an install directory for packacing
   # get the OSGeo installer
-  - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
+  - ps: (new-object net.webclient).DownloadFile("https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe", "C:\temp\conda-install.exe")
   # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,msys,nitro,laz-perf,proj,proj4dll,zlib,python3-core,python3-devel,python3-numpy,oci,oci-devel,laz-perf,jsoncpp,xz-devel,zstd -R %OSGEO4W_ROOT% > NUL
-  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-  - call %OSGEO4W_ROOT%\bin\py3_env.bat
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
-  - set PATH=%PATH%;C:\Program Files (x86)\CMake\bin
-  - ps: (new-object net.webclient).DownloadFile("http://curl.haxx.se/ca/cacert.pem", "c:\osgeo4w64\bin\curl-ca-bundle.crt")
-  - call scripts\\appveyor\\config.cmd
+  - C:\temp\conda-install.exe /InstallationType=JustMe /RegisterPython=0 /S /D=c:\temp\miniconda3 > NUL
+  - set PATH=c:\temp\miniconda3\scripts;%PATH%;C:\Program Files (x86)\CMake\bin
+    #  - C:\temp\conda-install.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,msys,nitro,laz-perf,proj,proj4dll,zlib,python3-core,python3-devel,python3-numpy,oci,oci-devel,laz-perf,jsoncpp,xz-devel,zstd -R %OSGEO4W_ROOT% > NUL
+    #  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
+    #  - call %OSGEO4W_ROOT%\bin\py3_env.bat
+    #  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+    #  - set PATH=%PATH%;C:\Program Files (x86)\CMake\bin
+    #  - ps: (new-object net.webclient).DownloadFile("http://curl.haxx.se/ca/cacert.pem", "c:\osgeo4w64\bin\curl-ca-bundle.crt")
+    - call scripts\\appveyor\\config.cmd
 
 
 build_script:
