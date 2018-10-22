@@ -4,13 +4,12 @@ REM If OSGEO4W_BUILD is set, we build an OSGeo4W64 tarball package and
 REM and install it to C:\pdalbin before letting AppVeyor upload it as
 REM an artifact to S3.
 
-SET PDAL_INSTALL_PREFIX="C:/OSGeo4W64/"
-SET PDAL_PLUGIN_INSTALL_PATH="C:/OSGeo4W64/bin"
+SET PDAL_INSTALL_PREFIX="C:/temp/install"
+SET PDAL_PLUGIN_INSTALL_PATH="C:/temp/install/bin"
 set PDAL_BUILD_TESTS=ON
 
 REM needed or else CMake won't find the Oracle library that OSGeo4W installs
 
-SET ORACLE_HOME="C:/OSGEO4W64/"
 
 mkdir build
 pushd build
@@ -22,31 +21,27 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_ICEBRIDGE=OFF ^
     -DBUILD_PLUGIN_MRSID=OFF ^
     -DBUILD_PLUGIN_NITF=%PDAL_OPTIONAL_COMPONENTS% ^
-    -DBUILD_PLUGIN_OCI=%PDAL_OPTIONAL_COMPONENTS% ^
-    -DBUILD_PLUGIN_PCL=OFF ^
+    -DBUILD_PLUGIN_PCL=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_SQLITE=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_I3S=%PDAL_OPTIONAL_COMPONENTS% ^
-    -DLIBLZMA_LIBRARY=%OSGEO4W_ROOT%\lib\liblzma.lib ^
+    -DLIBLZMA_LIBRARY=%CONDA_ROOT%\Library\lib\liblzma.lib ^
     -DBUILD_PLUGIN_RIVLIB=OFF ^
     -DBUILD_PLUGIN_PYTHON=%PDAL_OPTIONAL_COMPONENTS% ^
     -DENABLE_CTEST=OFF ^
     -DWITH_LAZPERF=ON ^
-    -DLazperf_DIR=%OSGEO4W_ROOT% ^
+    -DLazperf_DIR=%CONDA_ROOT% ^
     -DWITH_LZMA=ON ^
     -DWITH_LASZIP=ON ^
     -DWITH_TESTS=%PDAL_BUILD_TESTS% ^
 	-DPDAL_PLUGIN_INSTALL_PATH=%PDAL_PLUGIN_INSTALL_PATH% ^
-	-DGDAL_INCLUDE_DIR=%OSGEO4W_ROOT%/include ^
-	-DGDAL_LIBRARY=%OSGEO4W_ROOT%/lib/gdal_i.lib ^
-	-DPYTHON_EXECUTABLE=%OSGEO4W_ROOT%/apps/python37/python.exe ^
-	-DPYTHON_INCLUDE_DIR=%OSGEO4W_ROOT%/apps/python37/include ^
-	-DPYTHON_LIBRARY=%OSGEO4W_ROOT%/apps/python37/libs/python37.lib ^
-	-DPYTHON_DEBUG_LIBRARY=%OSGEO4W_ROOT%/apps/python37/libs/python37.lib ^
-	-DCURL_INCLUDE_DIR=%OSGEO4W_ROOT%/include ^
-	-DCURL_LIBRARY=%OSGEO4W_ROOT%/lib/libcurl.lib ^
-	-DNUMPY_INCLUDE_DIR=%OSGEO4W_ROOT%/apps/python37/lib/site-packages/numpy/core/include ^
-	-DNUMPY_VERSION=1.15.2 ^
+	-DGDAL_INCLUDE_DIR=%CONDA_ROOT%/include ^
+	-DGDAL_LIBRARY=%CONDA_ROOT%/Library/lib/gdal_i.lib ^
+	-DPYTHON_EXECUTABLE=%CONDA_ROOT%/python.exe ^
+	-DPYTHON_LIBRARY=%CONDA_ROOT%/libs/python37.lib ^
+	-DPYTHON_DEBUG_LIBRARY=%CONDA_ROOT%libs/python37.lib ^
+	-DCURL_INCLUDE_DIR=%CONDA_ROOT%/include ^
+	-DCURL_LIBRARY=%CONDA_ROOT%/Library/lib/libcurl.lib ^
     -Dgtest_force_shared_crt=ON ^
     -DCMAKE_INSTALL_PREFIX=%PDAL_INSTALL_PREFIX% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
