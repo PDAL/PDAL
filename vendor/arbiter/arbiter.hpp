@@ -5396,7 +5396,7 @@ public:
     void addDriver(std::string type, std::unique_ptr<Driver> driver);
 
     /** Get data or throw if inaccessible. */
-    std::string get(std::string path) const;
+    ARBITER_DLL std::string get(std::string path) const;
 
     /** Get data if accessible. */
     std::unique_ptr<std::string> tryGet(std::string path) const;
@@ -5405,7 +5405,8 @@ public:
     std::vector<char> getBinary(std::string path) const;
 
     /** Get data in binary form if accessible. */
-    std::unique_ptr<std::vector<char>> tryGetBinary(std::string path) const;
+    ARBITER_DLL std::unique_ptr<std::vector<char>>
+    tryGetBinary(std::string path) const;
 
     /** Get file size in bytes or throw if inaccessible. */
     std::size_t getSize(std::string path) const;
