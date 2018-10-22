@@ -37,7 +37,8 @@ install:
   - ps: (new-object net.webclient).DownloadFile("https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe", "C:\temp\conda-install.exe")
   # and install our dependencies
   - C:\temp\conda-install.exe /InstallationType=JustMe /RegisterPython=0 /S /D=c:\temp\miniconda3 > NUL
-  - set PATH=c:\temp\miniconda3\scripts;%PATH%;C:\Program Files (x86)\CMake\bin
+  - set "CONDA_ROOT=C:\temp\miniconda3"
+  - set PATH=%CONDA_ROOT%;%CONDA_ROOT%\scripts;%CONDA_ROOT%\Library\bin;%PATH%;C:\Program Files (x86)\CMake\bin
   - conda config --set always_yes yes
   - conda update -q conda
   - conda config --set auto_update_conda no
