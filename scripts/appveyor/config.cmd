@@ -48,6 +48,7 @@ cmake -G "NMake Makefiles" ^
     -Dgtest_force_shared_crt=ON ^
     -DBUILD_PGPOINTCLOUD_TESTS=OFF ^
     -DBUILD_SQLITE_TESTS=OFF ^
+    -DBUILD_I3S_TESTS=OFF ^
     -DBUILD_OCI_TESTS=OFF ^
     ..
 
