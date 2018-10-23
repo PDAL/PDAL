@@ -708,11 +708,11 @@ TEST(PLangTest, PLangTest_outs)
     void *output = meth.extractResult("X", Dimension::Type::Double, arrSize);
 
     double *d = (double *)output;
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
 }
 
 
@@ -763,19 +763,19 @@ TEST(PLangTest, PLangTest_aliases)
         size_t arrSize;
         void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
         double *d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 2.0);
-        EXPECT_FLOAT_EQ(*d++, 4.0);
-        EXPECT_FLOAT_EQ(*d++, 6.0);
-        EXPECT_FLOAT_EQ(*d++, 8.0);
-        EXPECT_FLOAT_EQ(*d++, 10.0);
+        EXPECT_DOUBLE_EQ(*d++, 2.0);
+        EXPECT_DOUBLE_EQ(*d++, 4.0);
+        EXPECT_DOUBLE_EQ(*d++, 6.0);
+        EXPECT_DOUBLE_EQ(*d++, 8.0);
+        EXPECT_DOUBLE_EQ(*d++, 10.0);
 
         output = meth.extractResult("prefix.Y", Dimension::Type::Double, arrSize);
         d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 2.0);
-        EXPECT_FLOAT_EQ(*d++, 4.0);
-        EXPECT_FLOAT_EQ(*d++, 6.0);
-        EXPECT_FLOAT_EQ(*d++, 8.0);
-        EXPECT_FLOAT_EQ(*d++, 10.0);
+        EXPECT_DOUBLE_EQ(*d++, 2.0);
+        EXPECT_DOUBLE_EQ(*d++, 4.0);
+        EXPECT_DOUBLE_EQ(*d++, 6.0);
+        EXPECT_DOUBLE_EQ(*d++, 8.0);
+        EXPECT_DOUBLE_EQ(*d++, 10.0);
     }
 
     {
@@ -854,11 +854,11 @@ TEST(PLangTest, PLangTest_reentry)
         void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
 
         double *d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 1.0);
-        EXPECT_FLOAT_EQ(*d++, 2.0);
-        EXPECT_FLOAT_EQ(*d++, 3.0);
-        EXPECT_FLOAT_EQ(*d++, 4.0);
-        EXPECT_FLOAT_EQ(*d++, 5.0);
+        EXPECT_DOUBLE_EQ(*d++, 1.0);
+        EXPECT_DOUBLE_EQ(*d++, 2.0);
+        EXPECT_DOUBLE_EQ(*d++, 3.0);
+        EXPECT_DOUBLE_EQ(*d++, 4.0);
+        EXPECT_DOUBLE_EQ(*d++, 5.0);
     }
 
     {
@@ -870,11 +870,11 @@ TEST(PLangTest, PLangTest_reentry)
         void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
 
         double *d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 11.0);
-        EXPECT_FLOAT_EQ(*d++, 21.0);
-        EXPECT_FLOAT_EQ(*d++, 31.0);
-        EXPECT_FLOAT_EQ(*d++, 41.0);
-        EXPECT_FLOAT_EQ(*d++, 51.0);
+        EXPECT_DOUBLE_EQ(*d++, 11.0);
+        EXPECT_DOUBLE_EQ(*d++, 21.0);
+        EXPECT_DOUBLE_EQ(*d++, 31.0);
+        EXPECT_DOUBLE_EQ(*d++, 41.0);
+        EXPECT_DOUBLE_EQ(*d++, 51.0);
     }
 }
 
@@ -965,9 +965,9 @@ PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
     // write the data into the view
     for (PointId i = 0; i < cnt; i++)
     {
-        const uint8_t x = (uint8_t)(i + 1);
-        const int32_t y = i * 10;
-        const double z = i * 100;
+        const uint8_t x = static_cast<uint8_t>(i + 1);
+        const int32_t y = static_cast<int32_t>(i * 10);
+        const double z = static_cast<double>(i * 100);
 
         view->setField(Dimension::Id::Classification, i, x);
         view->setField(Dimension::Id::X, i, y);

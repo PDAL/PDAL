@@ -303,7 +303,7 @@ void NumpyReader::createFields(PointLayoutPtr layout)
 
     m_numFields = 0;
     if (m_dtype->fields != Py_None)
-        m_numFields = PyDict_Size(m_dtype->fields);
+        m_numFields = static_cast<int>(PyDict_Size(m_dtype->fields));
 
     // Array isn't structured - just a bunch of data.
     if (m_numFields <= 0)

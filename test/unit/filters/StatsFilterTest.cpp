@@ -73,21 +73,21 @@ TEST(Stats, simple)
     EXPECT_EQ(statsY.count(), 1000u);
     EXPECT_EQ(statsZ.count(), 1000u);
 
-    EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
-    EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
-    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.minimum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsY.minimum(), 2.0);
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 3.0);
 
-    EXPECT_FLOAT_EQ(statsX.maximum(), 101.0);
-    EXPECT_FLOAT_EQ(statsY.maximum(), 102.0);
-    EXPECT_FLOAT_EQ(statsZ.maximum(), 103.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 101.0);
+    EXPECT_DOUBLE_EQ(statsY.maximum(), 102.0);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 103.0);
 
-    EXPECT_FLOAT_EQ(statsX.average(), 51.0);
-    EXPECT_FLOAT_EQ(statsY.average(), 52.0);
-    EXPECT_FLOAT_EQ(statsZ.average(), 53.0);
+    EXPECT_DOUBLE_EQ(statsX.average(), 51.0);
+    EXPECT_DOUBLE_EQ(statsY.average(), 52.0);
+    EXPECT_DOUBLE_EQ(statsZ.average(), 53.0);
 
-    EXPECT_FLOAT_EQ(statsX.variance(), 837.09351);
-    EXPECT_FLOAT_EQ(statsY.variance(), 837.0965);
-    EXPECT_FLOAT_EQ(statsZ.variance(), 837.1015);
+    EXPECT_DOUBLE_EQ(statsX.variance(), 837.09351);
+    EXPECT_DOUBLE_EQ(statsY.variance(), 837.0965);
+    EXPECT_DOUBLE_EQ(statsZ.variance(), 837.1015);
 
     EXPECT_DOUBLE_EQ(statsX.skewness(), 0.0);
     EXPECT_DOUBLE_EQ(statsY.skewness(), 0.0);
@@ -172,17 +172,17 @@ TEST(Stats, stream)
     EXPECT_EQ(statsY.count(), 1000u);
     EXPECT_EQ(statsZ.count(), 1000u);
 
-    EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
-    EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
-    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.minimum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsY.minimum(), 2.0);
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 3.0);
 
-    EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
-    EXPECT_FLOAT_EQ(statsY.maximum(), 2.0);
-    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsY.maximum(), 2.0);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 3.0);
 
-    EXPECT_FLOAT_EQ(statsX.average(), 1.0);
-    EXPECT_FLOAT_EQ(statsY.average(), 2.0);
-    EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.average(), 1.0);
+    EXPECT_DOUBLE_EQ(statsY.average(), 2.0);
+    EXPECT_DOUBLE_EQ(statsZ.average(), 3.0);
 }
 
 
@@ -217,14 +217,14 @@ TEST(Stats, dimset)
     EXPECT_EQ(statsX.count(), 1000u);
     EXPECT_EQ(statsZ.count(), 1000u);
 
-    EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
-    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.minimum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 3.0);
 
-    EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
-    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 3.0);
 
-    EXPECT_FLOAT_EQ(statsX.average(), 1.0);
-    EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
+    EXPECT_DOUBLE_EQ(statsX.average(), 1.0);
+    EXPECT_DOUBLE_EQ(statsZ.average(), 3.0);
 }
 
 
