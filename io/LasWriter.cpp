@@ -228,7 +228,6 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-
     for (const auto& v : m_userVLRs)
     {
         uint16_t recordId(1);
@@ -244,8 +243,9 @@ void LasWriter::addUserVlrs()
             throw pdal_error("VLR must contain a base64-encoded 'data' member");
         b64data = v["data"].asString();
 
+        // Record ID should always be no more than 2 bytes.
         if (v.isMember("record_id"))
-            recordId = v["record_id"].asUInt64();
+            recordId = static_cast<uint16_t>(v["record_id"].asUInt64());
 
         if (v.isMember("description"))
             description = v["description"].asString();
@@ -941,8 +941,9 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
         p.extended_return_number = returnNumber;
         p.extended_number_of_returns = numberOfReturns;
         p.extended_scanner_channel = scanChannel;
-        p.extended_scan_angle =
-            roundf(point.getFieldAs<float>(Id::ScanAngleRank) / .006);
+        // This should always work if ScanAngleRank isn't wonky.
+        p.extended_scan_angle = static_cast<laszip_I16>(
+            std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         p.extended_classification_flags = classFlags;
         p.extended_classification = classification;
         p.classification = (classification & 0x1F) | (classFlags << 5);
@@ -1092,9 +1093,11 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
     if (has14Format)
     {
-         int16_t scanAngleRank =
-             point.getFieldAs<float>(Id::ScanAngleRank) / .006;
-         ostream << userData << scanAngleRank;
+         // Guaranteed to fit if scan angle rank isn't wonky.
+        int16_t scanAngleRank =
+            static_cast<int16_t>(std::round(
+                point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+        ostream << userData << scanAngleRank;
     }
     else
     {

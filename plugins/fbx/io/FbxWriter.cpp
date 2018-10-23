@@ -42,7 +42,8 @@
 //  system includes.  Bad.  I've filed an issue with both Apple (which can
 //  improve its header file to mitigate) and Autodesk (which can avoid doing
 //  something so stupid).
-#pragma GCC diagnostic ignored "-Wpragma-pack"
+// This went away for some reason, so we can't ignore it.
+//#pragma GCC diagnostic ignored "-Wpragma-pack"
 #include <fbxsdk.h>
 #pragma GCC diagnostic pop
 
