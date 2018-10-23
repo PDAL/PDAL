@@ -76,8 +76,10 @@ void ELMFilter::filter(PointView& view)
     BOX2D bounds;
     view.calculateBounds(bounds);
 
-    size_t cols = ((bounds.maxx - bounds.minx) / m_cell) + 1;
-    size_t rows = ((bounds.maxy - bounds.miny) / m_cell) + 1;
+    size_t cols =
+        static_cast<size_t>(((bounds.maxx - bounds.minx) / m_cell) + 1);
+    size_t rows =
+        static_cast<size_t>(((bounds.maxy - bounds.miny) / m_cell) + 1);
 
     // Make an initial pass through the input PointView to index elevation
     // values and PointIds by row and column.
@@ -88,8 +90,8 @@ void ELMFilter::filter(PointView& view)
         double y = view.getFieldAs<double>(Dimension::Id::Y, id);
         double z = view.getFieldAs<double>(Dimension::Id::Z, id);
 
-        size_t c = static_cast<size_t>(floor(x - bounds.minx) / m_cell);
-        size_t r = static_cast<size_t>(floor(y - bounds.miny) / m_cell);
+        size_t c = static_cast<size_t>(std::floor(x - bounds.minx) / m_cell);
+        size_t r = static_cast<size_t>(std::floor(y - bounds.miny) / m_cell);
 
         hash[c * rows + r].emplace(z, id);
     }

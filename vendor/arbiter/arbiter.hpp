@@ -3307,7 +3307,7 @@ namespace http
 
 class Pool;
 
-class ARBITER_DLL Curl
+class Curl
 {
     friend class Pool;
 
@@ -3435,8 +3435,6 @@ ARBITER_DLL std::string buildQueryString(const http::Query& query);
 
 /** @cond arbiter_internal */
 
-class ARBITER_DLL Pool;
-
 class ARBITER_DLL Resource
 {
 public:
@@ -3475,19 +3473,19 @@ private:
     http::Response exec(std::function<http::Response()> f);
 };
 
-class ARBITER_DLL Pool
+class Pool
 {
     // Only HttpResource may release.
     friend class Resource;
 
 public:
-    Pool(
+    ARBITER_DLL Pool(
             std::size_t concurrent = 4,
             std::size_t retry = 4,
             Json::Value json = Json::Value());
-    ~Pool();
+    ARBITER_DLL ~Pool();
 
-    Resource acquire();
+    ARBITER_DLL Resource acquire();
 
 private:
     void release(std::size_t id);
@@ -3588,7 +3586,7 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-class ARBITER_DLL Time
+class Time
 {
 public:
     static const std::string iso8601;
@@ -3596,7 +3594,8 @@ public:
     static const std::string dateNoSeparators;
 
     Time();
-    Time(const std::string& s, const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
+    Time(const std::string& s,
+        const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
 
     std::string str(const std::string& format = "%Y-%m-%dT%H:%M:%SZ") const;
 
@@ -3841,7 +3840,7 @@ namespace fs
      *
      * See Arbiter::getLocalHandle for details about construction.
      */
-    class ARBITER_DLL LocalHandle
+    class LocalHandle
     {
         friend class arbiter::Arbiter;
         friend class arbiter::Endpoint;
@@ -5130,7 +5129,7 @@ class Driver;
  *
  * An Endpoint may be created using Arbiter::getEndpoint.
  */
-class ARBITER_DLL Endpoint
+class Endpoint
 {
     // Only Arbiter may construct.
     friend class Arbiter;
@@ -5369,19 +5368,19 @@ namespace http { class Pool; }
  *
  * All Arbiter operations are thread-safe except unless otherwise noted.
  */
-class ARBITER_DLL Arbiter
+class Arbiter
 {
 public:
     /** Construct a basic Arbiter with only drivers the don't require
      * external configuration parameters.
      */
-    Arbiter();
+    ARBITER_DLL Arbiter();
 
     /** @brief Construct an Arbiter with driver configurations. */
-    Arbiter(const Json::Value& json);
+    ARBITER_DLL Arbiter(const Json::Value& json);
 
     /** True if a Driver has been registered for this file type. */
-    bool hasDriver(std::string path) const;
+    ARBITER_DLL bool hasDriver(std::string path) const;
 
     /** @brief Add a custom driver for the supplied type.
      *
@@ -5397,28 +5396,30 @@ public:
     void addDriver(std::string type, std::unique_ptr<Driver> driver);
 
     /** Get data or throw if inaccessible. */
-    std::string get(std::string path) const;
+    ARBITER_DLL std::string get(std::string path) const;
 
     /** Get data if accessible. */
     std::unique_ptr<std::string> tryGet(std::string path) const;
 
     /** Get data in binary form or throw if inaccessible. */
-    std::vector<char> getBinary(std::string path) const;
+    ARBITER_DLL std::vector<char>
+    getBinary(std::string path) const;
 
     /** Get data in binary form if accessible. */
-    std::unique_ptr<std::vector<char>> tryGetBinary(std::string path) const;
+    ARBITER_DLL std::unique_ptr<std::vector<char>>
+    tryGetBinary(std::string path) const;
 
     /** Get file size in bytes or throw if inaccessible. */
     std::size_t getSize(std::string path) const;
 
     /** Get file size in bytes if accessible. */
-    std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
+    ARBITER_DLL std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
 
     /** Write data to path. */
-    void put(std::string path, const std::string& data) const;
+    ARBITER_DLL void put(std::string path, const std::string& data) const;
 
     /** Write data to path. */
-    void put(std::string path, const std::vector<char>& data) const;
+    ARBITER_DLL void put(std::string path, const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if
      * isHttpDerived is false for this path. */
@@ -5450,7 +5451,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    void put(
+    ARBITER_DLL void put(
             std::string path,
             const std::string& data,
             http::Headers headers,
@@ -5458,7 +5459,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    void put(
+    ARBITER_DLL void put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,

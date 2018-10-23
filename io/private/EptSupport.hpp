@@ -192,12 +192,12 @@ public:
         Key key(*this);
         ++key.d;
 
-        auto step([&key, direction](uint64_t i)
+        auto step([&key, direction](uint8_t i)
         {
             key.idAt(i) *= 2;
 
             const double mid(key[i] + (key[i + 3] - key[i]) / 2.0);
-            const bool positive(direction & (1UL << i));
+            const bool positive(direction & (((uint64_t)1) << i));
             if (positive)
             {
                 key[i] = mid;
@@ -209,7 +209,7 @@ public:
             }
         });
 
-        for (uint64_t i(0); i < 3; ++i)
+        for (uint8_t i(0); i < 3; ++i)
             step(i);
 
         return key;
@@ -231,14 +231,14 @@ inline bool operator<(const Key& a, const Key& b)
     return false;
 }
 
-class PDAL_DLL FixedPointLayout : public PointLayout
+class FixedPointLayout : public PointLayout
 {
     // The default PointLayout class may reorder dimension entries for packing
     // efficiency.  However if a PointLayout is intended to be mapped to data
     // coming from a remote source, then the dimensions must retain their order.
     // FixedPointLayout retains the order of dimensions as they are registered.
 protected:
-    virtual bool update(
+    PDAL_DLL virtual bool update(
             pdal::Dimension::Detail dimDetail,
             const std::string& name) override
     {
@@ -260,7 +260,7 @@ protected:
         return false;
     }
 
-    bool contains(
+    PDAL_DLL bool contains(
             const Dimension::IdList& idList,
             const Dimension::Id id) const
     {

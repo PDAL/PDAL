@@ -52,7 +52,6 @@ std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
 
     const unsigned char* compressed = reinterpret_cast<const unsigned char*>
         (compData->data());
-    lepcc::Byte vec;
     lepcc_status stat;
     std::vector<lepcc::Point3D> decVec;
     lepcc::uint32 xyzPts = 0;

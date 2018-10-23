@@ -181,13 +181,13 @@ void ChipperFilter::partition(point_count_t size)
 }
 
 
-void ChipperFilter::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& spare,
-    PointId pleft, PointId pright)
+void ChipperFilter::decideSplit(ChipRefList& v1, ChipRefList& v2,
+    ChipRefList& spare, PointId pleft, PointId pright)
 {
     double v1range;
     double v2range;
-    uint32_t left = m_partitions[pleft];
-    uint32_t right = m_partitions[pright] - 1;
+    PointId left = m_partitions[pleft];
+    PointId right = m_partitions[pright] - 1;
 
     // Decide the wider direction of the block, and split in that direction
     // to maintain squareness.
@@ -199,8 +199,8 @@ void ChipperFilter::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& s
         split(v2, v1, spare, pleft, pright);
 }
 
-void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
-    PointId pleft, PointId pright)
+void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow,
+    ChipRefList& spare, PointId pleft, PointId pright)
 {
     PointId lstart;
     PointId rstart;

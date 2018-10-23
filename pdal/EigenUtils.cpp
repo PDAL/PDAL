@@ -51,6 +51,8 @@ namespace pdal
 
 namespace eigen
 {
+#pragma warning (push)
+#pragma warning (disable: 4244)
 
 Eigen::Vector3d computeCentroid(PointView& view,
     const std::vector<PointId>& ids)
@@ -95,9 +97,15 @@ Eigen::Matrix3f computeCovariance(PointView& view,
     size_t k = 0;
     for (auto const& j : ids)
     {
-        A(0, k) = view.getFieldAs<double>(Dimension::Id::X, j) - centroid[0];
-        A(1, k) = view.getFieldAs<double>(Dimension::Id::Y, j) - centroid[1];
-        A(2, k) = view.getFieldAs<double>(Dimension::Id::Z, j) - centroid[2];
+        A(0, k) =
+            static_cast<float>(view.getFieldAs<double>(Dimension::Id::X, j) -
+                centroid[0]);
+        A(1, k) =
+            static_cast<float>(view.getFieldAs<double>(Dimension::Id::Y, j) -
+                centroid[1]);
+        A(2, k) =
+            static_cast<float>(view.getFieldAs<double>(Dimension::Id::Z, j) -
+                centroid[2]);
         k++;
     }
 
@@ -112,7 +120,7 @@ uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
     Matrix3f B = computeCovariance(view, ids);
 
     JacobiSVD<Matrix3f> svd(B);
-    svd.setThreshold(threshold);
+    svd.setThreshold((float)threshold);
 
     return static_cast<uint8_t>(svd.rank());
 }
@@ -123,8 +131,12 @@ Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
 {
     using namespace Eigen;
 
-    int num_rows = xx.rows();
-    int num_cols = xx.cols();
+    int num_rows;
+    int num_cols;
+    
+    if (!Utils::numericCast(xx.rows(), num_rows) ||
+        !Utils::numericCast(xx.cols(), num_cols))
+        throw pdal_error("Too many columns/rows for spline computation");
 
     MatrixXd S = MatrixXd::Zero(num_rows, num_cols);
 
@@ -137,8 +149,8 @@ Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
             // neighbourhood is used in our case) of the cell being filtered.
             int radius = 3;
 
-            int c = std::floor(col/2);
-            int r = std::floor(row/2);
+            int c = static_cast<int>(std::floor(col/2));
+            int r = static_cast<int>(std::floor(row/2));
 
             int cs = Utils::clamp(c-radius, 0, static_cast<int>(z.cols()-1));
             int ce = Utils::clamp(c+radius, 0, static_cast<int>(z.cols()-1));
@@ -356,13 +368,14 @@ Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
     return ZImin;
 }
 
+
 Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
 {
     using namespace Eigen;
 
     MatrixXd data2 = padMatrix(data, radius);
 
-    int nrows = data2.rows();
+    int nrows = static_cast<int>(data2.rows());
     int ncols = data2.cols();
 
     MatrixXd minZ(nrows, ncols);
@@ -698,6 +711,7 @@ Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data)
 
     return data;
 }
+#pragma warning (pop)
 
 } // namespace eigen
 

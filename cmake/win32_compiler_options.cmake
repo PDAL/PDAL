@@ -17,6 +17,8 @@ function(pdal_target_compile_settings target)
                 -D_SCL_SECURE_NO_WARNINGS
             )
             target_compile_options(${target} PRIVATE
+                # Yes, we don't understand GCC pragmas
+                /wd4068 
                 # Nitro makes use of Exception Specifications, which results in
                 # numerous warnings when compiling in MSVC. We will ignore
                 # them for now.

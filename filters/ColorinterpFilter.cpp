@@ -279,7 +279,7 @@ bool ColorinterpFilter::processOne(PointRef& point)
 
     double factor = (v - m_min) / (m_max - m_min);
     size_t img_width = m_redBand.size();
-    size_t position = std::floor(factor * img_width);
+    size_t position = size_t(std::floor(factor * img_width));
 
     if (m_invertRamp)
         position = (img_width - 1) - position;
