@@ -9,7 +9,7 @@ SET CMAKE_BUILD_TYPE=RelWithDebInfo
 mkdir build
 pushd build
 
-activate base
+REM activate base
 set ORACLE_HOME=%CONDA_ROOT%
 
 cmake -G "NMake Makefiles" ^
