@@ -5402,7 +5402,7 @@ public:
     std::unique_ptr<std::string> tryGet(std::string path) const;
 
     /** Get data in binary form or throw if inaccessible. */
-    ARBITER_DLL std::vector<char> getBinary(std::string path) const;
+    std::vector<char> getBinary(std::string path) const;
 
     /** Get data in binary form if accessible. */
     ARBITER_DLL std::unique_ptr<std::vector<char>>
