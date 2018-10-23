@@ -176,12 +176,12 @@ TEST(PolygonTest, bounds3d)
     pdal::Polygon p(box);
 
     BOX3D b = p.bounds();
-    EXPECT_FLOAT_EQ(b.minx, 636539.12f);
-    EXPECT_FLOAT_EQ(b.miny, 850511.81f);
-    EXPECT_FLOAT_EQ(b.minz, 420.50977f);
-    EXPECT_FLOAT_EQ(b.maxx, 637589.94f);
-    EXPECT_FLOAT_EQ(b.maxy, 851528.5f);
-    EXPECT_FLOAT_EQ(b.maxz, 438.70996f);
+    EXPECT_NEAR(b.minx, 636539.12, .01);
+    EXPECT_NEAR(b.miny, 850511.81, .01);
+    EXPECT_NEAR(b.minz, 420.5097, .0001);
+    EXPECT_NEAR(b.maxx, 637589.94, .01);
+    EXPECT_NEAR(b.maxy, 851528.5, .1);
+    EXPECT_NEAR(b.maxz, 438.70996, .00001);
 }
 
 

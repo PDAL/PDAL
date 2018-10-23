@@ -85,9 +85,9 @@ TEST(Stats, simple)
     EXPECT_DOUBLE_EQ(statsY.average(), 52.0);
     EXPECT_DOUBLE_EQ(statsZ.average(), 53.0);
 
-    EXPECT_DOUBLE_EQ(statsX.variance(), 837.09351);
-    EXPECT_DOUBLE_EQ(statsY.variance(), 837.0965);
-    EXPECT_DOUBLE_EQ(statsZ.variance(), 837.1015);
+    EXPECT_NEAR(statsX.variance(), 837.09351, .00001);
+    EXPECT_NEAR(statsY.variance(), 837.0965, .0001);
+    EXPECT_NEAR(statsZ.variance(), 837.1015, .0001);
 
     EXPECT_DOUBLE_EQ(statsX.skewness(), 0.0);
     EXPECT_DOUBLE_EQ(statsY.skewness(), 0.0);
