@@ -46,7 +46,8 @@ TEST(RandomizeFilterTest, simple)
     point_count_t count = 1000;
 
     Options readerOps;
-    readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
     readerOps.add("mode", "ramp");
     readerOps.add("count", count);
 
