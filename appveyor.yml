@@ -32,12 +32,9 @@ install:
   # directory
   - ps: mkdir C:\temp | out-null
   - ps: mkdir $env:OSGEO4W_ROOT | out-null
-  # make an install directory for packacing
-  # get the OSGeo installer
-  - ps: (new-object net.webclient).DownloadFile("https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe", "C:\temp\conda-install.exe")
-  # and install our dependencies
-  - C:\temp\conda-install.exe /InstallationType=JustMe /RegisterPython=0 /S /D=c:\temp\miniconda3 > NUL
-  - set "CONDA_ROOT=C:\temp\miniconda3"
+
+  - set "CONDA_ROOT=C:\Miniconda3"
+
   - set PATH=%CONDA_ROOT%;%CONDA_ROOT%\scripts;%CONDA_ROOT%\Library\bin;%PATH%;C:\Program Files (x86)\CMake\bin
   - conda config --set always_yes yes
   - conda update -q conda
