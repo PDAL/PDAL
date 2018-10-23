@@ -343,6 +343,17 @@ TEST(PointViewTest, issue1264)
     EXPECT_THROW(v.setField(foo, 0, d), pdal_error);
 }
 
+TEST(PointViewTest, getFloatNan)
+{
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
+    layout->registerDim(Dimension::Id::ScanAngleRank, Dimension::Type::Float);
+    PointViewPtr view(new PointView(table));
+    const float scanAngleRank = std::numeric_limits<float>::quiet_NaN();
+    view->setField(Dimension::Id::ScanAngleRank, 0, scanAngleRank);
+    float retrieved = view->getFieldAs<float>(Dimension::Id::ScanAngleRank, 0);
+}
+
 // Per discussions with @abellgithub (https://github.com/gadomski/PDAL/commit/c1d54e56e2de841d37f2a1b1c218ed723053f6a9#commitcomment-14415138)
 // we only do bounds checking on `PointView`s when in debug mode.
 #ifndef NDEBUG
