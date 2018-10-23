@@ -43,6 +43,10 @@ add_definitions(${PCL_DEFINITIONS})
 #    add_definitions("-fvisibility-inlines-hidden")
 #endif()
 
+if (WIN32)
+    add_definitions("-DNOMINMAX")
+endif()
+
 # PCL's configuration clobbers Boost find_package - do it again
 find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
 
