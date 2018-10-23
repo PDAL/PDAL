@@ -35,7 +35,7 @@ install:
   - python -c "import sys; print(sys.prefix)"
   - conda config --add channels conda-forge
   - conda update -q --all
-  - conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5
+  - conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - call scripts\\appveyor\\config.cmd
 

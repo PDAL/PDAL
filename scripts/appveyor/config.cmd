@@ -9,7 +9,8 @@ SET CMAKE_BUILD_TYPE=RelWithDebInfo
 mkdir build
 pushd build
 
-conda activate base
+activate base
+set ORACLE_HOME=%CONDA_ROOT%
 
 cmake -G "NMake Makefiles" ^
     -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ^
@@ -27,6 +28,7 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_NITF=ON ^
     -DBUILD_PLUGIN_PCL=ON ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
+    -DBUILD_PLUGIN_OCI=ON ^
     -DBUILD_PLUGIN_SQLITE=ON ^
     -DBUILD_PLUGIN_I3S=ON ^
     -DBUILD_PLUGIN_RIVLIB=OFF ^
