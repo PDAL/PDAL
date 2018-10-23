@@ -1,20 +1,17 @@
 @echo off
 
-REM If OSGEO4W_BUILD is set, we build an OSGeo4W64 tarball package and
-REM and install it to C:\pdalbin before letting AppVeyor upload it as
-REM an artifact to S3.
-
 SET PDAL_INSTALL_PREFIX="C:/temp/install"
 SET PDAL_PLUGIN_INSTALL_PATH="C:/temp/install/bin"
-set PDAL_BUILD_TESTS=ON
-
-REM needed or else CMake won't find the Oracle library that OSGeo4W installs
-
+SET PDAL_BUILD_TESTS=ON
+SET CMAKE_BUILD_TYPE=RelWithDebInfo
 
 mkdir build
 pushd build
 
 cmake -G "NMake Makefiles" ^
+    -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ^
+    -DCMAKE_LIBRARY_PATH:FILEPATH="=%CONDA_ROOT%/Library/lib" ^
+    -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_ROOT%/Library/include" ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=ON ^
     -DBUILD_PLUGIN_HEXBIN=ON ^
@@ -33,7 +30,7 @@ cmake -G "NMake Makefiles" ^
     -DLazperf_DIR:FILEPATH=%CONDA_ROOT% ^
     -DWITH_LZMA=ON ^
     -DWITH_LASZIP=ON ^
-    -DWITH_TESTS=ON ^
+    -DWITH_TESTS=%PDAL_BUILD_TESTS% ^
 	-DPDAL_PLUGIN_INSTALL_PATH:FILEPATH=%PDAL_PLUGIN_INSTALL_PATH% ^
 	-DGDAL_INCLUDE_DIR:FILEPATH=%CONDA_ROOT%/Library/include ^
 	-DGDAL_LIBRARY:FILEPATH=%CONDA_ROOT%/Library/lib/gdal_i.lib ^
