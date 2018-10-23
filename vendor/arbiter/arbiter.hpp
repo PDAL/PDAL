@@ -5374,10 +5374,10 @@ public:
     /** Construct a basic Arbiter with only drivers the don't require
      * external configuration parameters.
      */
-    Arbiter();
+    ARBITER_DLL Arbiter();
 
     /** @brief Construct an Arbiter with driver configurations. */
-    Arbiter(const Json::Value& json);
+    ARBITER_DLL Arbiter(const Json::Value& json);
 
     /** True if a Driver has been registered for this file type. */
     bool hasDriver(std::string path) const;
