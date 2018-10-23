@@ -337,9 +337,9 @@ void Support::checkXYZ(const std::string& file1, const std::string& file2)
 void Support::check_pN(const pdal::PointView& data, PointId index,
     double xref, double yref, double zref)
 {
-    double x0 = data.getFieldAs<double>(Dimension::Id::X, index);
-    double y0 = data.getFieldAs<double>(Dimension::Id::Y, index);
-    double z0 = data.getFieldAs<double>(Dimension::Id::Z, index);
+    float x0 = data.getFieldAs<float>(Dimension::Id::X, index);
+    float y0 = data.getFieldAs<float>(Dimension::Id::Y, index);
+    float z0 = data.getFieldAs<float>(Dimension::Id::Z, index);
 
     EXPECT_FLOAT_EQ(x0, xref);
     EXPECT_FLOAT_EQ(y0, yref);
@@ -405,11 +405,11 @@ void Support::check_p710_p711_p712(const pdal::PointView& data)
 
 void Support::compareBounds(const BOX3D& p, const BOX3D& q)
 {
-    EXPECT_FLOAT_EQ(p.minx, q.minx);
-    EXPECT_FLOAT_EQ(p.miny, q.miny);
-    EXPECT_FLOAT_EQ(p.minz, q.minz);
-    EXPECT_FLOAT_EQ(p.maxx, q.maxx);
-    EXPECT_FLOAT_EQ(p.maxy, q.maxy);
-    EXPECT_FLOAT_EQ(p.maxz, q.maxz);
+    EXPECT_DOUBLE_EQ(p.minx, q.minx);
+    EXPECT_DOUBLE_EQ(p.miny, q.miny);
+    EXPECT_DOUBLE_EQ(p.minz, q.minz);
+    EXPECT_DOUBLE_EQ(p.maxx, q.maxx);
+    EXPECT_DOUBLE_EQ(p.maxy, q.maxy);
+    EXPECT_DOUBLE_EQ(p.maxz, q.maxz);
 }
 
