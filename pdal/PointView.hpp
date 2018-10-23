@@ -441,54 +441,67 @@ inline T PointView::getFieldAs(Dimension::Id dim,
 {
     assert(pointIndex < m_size);
     T retval;
+    bool ok = false;
     const Dimension::Detail *dd = layout()->dimDetail(dim);
-    double val;
+    Everything e;
 
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        val = getFieldInternal<float>(dim, pointIndex);
+        e.f = getFieldInternal<float>(dim, pointIndex);
+        ok = Utils::numericCast(e.f, retval);
         break;
     case Dimension::Type::Double:
-        val = getFieldInternal<double>(dim, pointIndex);
+        e.d = getFieldInternal<double>(dim, pointIndex);
+        ok = Utils::numericCast(e.d, retval);
         break;
     case Dimension::Type::Signed8:
-        val = getFieldInternal<int8_t>(dim, pointIndex);
+        e.s8 = getFieldInternal<int8_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.s8, retval);
         break;
     case Dimension::Type::Signed16:
-        val = getFieldInternal<int16_t>(dim, pointIndex);
+        e.s16 = getFieldInternal<int16_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.s16, retval);
         break;
     case Dimension::Type::Signed32:
-        val = getFieldInternal<int32_t>(dim, pointIndex);
+        e.s32 = getFieldInternal<int32_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.s32, retval);
         break;
     case Dimension::Type::Signed64:
-        val = static_cast<double>(getFieldInternal<int64_t>(dim, pointIndex));
+        e.s64 = getFieldInternal<int64_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.s64, retval);
         break;
     case Dimension::Type::Unsigned8:
-        val = getFieldInternal<uint8_t>(dim, pointIndex);
+        e.u8 = getFieldInternal<uint8_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.u8, retval);
         break;
     case Dimension::Type::Unsigned16:
-        val = getFieldInternal<uint16_t>(dim, pointIndex);
+        e.u16 = getFieldInternal<uint16_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.u16, retval);
         break;
     case Dimension::Type::Unsigned32:
-        val = getFieldInternal<uint32_t>(dim, pointIndex);
+        e.u32 = getFieldInternal<uint32_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.u32, retval);
         break;
     case Dimension::Type::Unsigned64:
-        val = static_cast<double>(getFieldInternal<uint64_t>(dim, pointIndex));
+        e.u64 = getFieldInternal<uint64_t>(dim, pointIndex);
+        ok = Utils::numericCast(e.u64, retval);
         break;
     case Dimension::Type::None:
     default:
-        val = 0;
+        ok = true;
+        retval = 0;
         break;
-    }
+    } // switch
 
-    if (!Utils::numericCast(val, retval))
+    if (!ok)
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
         oss << Dimension::name(dim) << ":" <<
             Dimension::interpretationName(dd->type()) <<
-            "(" << (double)val << ") -> " << Utils::typeidName<T>();
+            "(" << Utils::toDouble(e, dd->type()) << ") -> " <<
+            Utils::typeidName<T>();
         throw pdal_error(oss.str());
     }
 
