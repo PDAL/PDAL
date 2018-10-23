@@ -50,9 +50,9 @@ cmake -G "NMake Makefiles" ^
 	-DNITRO_INCLUDE_DIR:FILEPATH=%CONDA_ROOT%/Library/include ^
 	-DNITRO_CPP_LIBRARY:FILEPATH=%CONDA_ROOT%/Library/lib/nitf-cpp.lib ^
 	-DNITRO_C_LIBRARY:FILEPATH=%CONDA_ROOT%/Library/lib/nitf-c.lib ^
-	-DEIGEN_INCLUDE_DIRS:FILEPATH=%CONDA_ROOT%/Library/include ^
+	-DEIGEN_INCLUDE_DIRS:FILEPATH=%CONDA_ROOT%/Library/include/eigen3 ^
 	-DPOSTGRESQL_INCLUDE_DIR:FILEPATH=%CONDA_ROOT%/Library/include ^
-	-DPOSTGRESQL_LIBRARIES:FILEPATH=%CONDA_ROOT%/Library/lib/postgres.lib ^
+	-DPOSTGRESQL_LIBRARIES:FILEPATH=%CONDA_ROOT%/Library/lib/libpq.lib ^
 	-DSQLITE3_INCLUDE_DIR:FILEPATH=%CONDA_ROOT%/Library/include ^
 	-DSQLITE3_LIBRARY:FILEPATH=%CONDA_ROOT%/Library/lib/sqlite3.lib ^
     -DLazperf_DIR:FILEPATH=%CONDA_ROOT%/Library/cmake ^
