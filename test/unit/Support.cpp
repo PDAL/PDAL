@@ -341,9 +341,9 @@ void Support::check_pN(const pdal::PointView& data, PointId index,
     float y0 = data.getFieldAs<float>(Dimension::Id::Y, index);
     float z0 = data.getFieldAs<float>(Dimension::Id::Z, index);
 
-    EXPECT_FLOAT_EQ(x0, xref);
-    EXPECT_FLOAT_EQ(y0, yref);
-    EXPECT_FLOAT_EQ(z0, zref);
+    EXPECT_FLOAT_EQ(x0, static_cast<float>(xref));
+    EXPECT_FLOAT_EQ(y0, static_cast<float>(yref));
+    EXPECT_FLOAT_EQ(z0, static_cast<float>(zref));
 }
 
 
@@ -356,7 +356,7 @@ void Support::check_pN(const PointView& data, PointId index,
     if (data.hasDim(Dimension::Id::GpsTime))
     {
         double t0 = data.getFieldAs<double>(Dimension::Id::GpsTime, index);
-        EXPECT_FLOAT_EQ(t0, tref);
+        EXPECT_DOUBLE_EQ(t0, tref);
     }
 
     if (data.hasDim(Dimension::Id::Red))

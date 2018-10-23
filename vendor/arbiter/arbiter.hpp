@@ -5380,7 +5380,7 @@ public:
     ARBITER_DLL Arbiter(const Json::Value& json);
 
     /** True if a Driver has been registered for this file type. */
-    bool hasDriver(std::string path) const;
+    ARBITER_DLL bool hasDriver(std::string path) const;
 
     /** @brief Add a custom driver for the supplied type.
      *
@@ -5413,7 +5413,7 @@ public:
     std::size_t getSize(std::string path) const;
 
     /** Get file size in bytes if accessible. */
-    std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
+    ARBITER_DLL std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
 
     /** Write data to path. */
     ARBITER_DLL void put(std::string path, const std::string& data) const;
