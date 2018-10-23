@@ -48,7 +48,7 @@ install:
   - python -c "import sys; print(sys.prefix)"
   - conda config --add channels conda-forge
   - conda update -q --all
-  - conda install geotiff jsoncpp laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz
+  - conda install geotiff jsoncpp laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5
     #  - C:\temp\conda-install.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,msys,nitro,laz-perf,proj,proj4dll,zlib,python3-core,python3-devel,python3-numpy,oci,oci-devel,laz-perf,jsoncpp,xz-devel,zstd -R %OSGEO4W_ROOT% > NUL
     #  - call %OSGEO4W_ROOT%\bin\o4w_env.bat
     #  - call %OSGEO4W_ROOT%\bin\py3_env.bat
