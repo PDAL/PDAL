@@ -35,7 +35,7 @@ cmake -G "NMake Makefiles" ^
     -DBUILD_PLUGIN_PYTHON=ON ^
     -DENABLE_CTEST=OFF ^
     -DWITH_LAZPERF=ON ^
-    -DWITH_LZMA=ON ^"
+    -DWITH_LZMA=ON ^
     -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_ROOT%\Library\lib\liblzma.lib ^
     -DWITH_LASZIP=ON ^
     -DORACLE_INCLUDE_DIR=%CONDA_ROOT%/include ^
