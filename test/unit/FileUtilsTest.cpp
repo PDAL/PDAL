@@ -39,8 +39,6 @@
 
 #include "Support.hpp"
 
-#include <iostream>
-
 using namespace pdal;
 
 TEST(FileUtilsTest, test_file_ops)
