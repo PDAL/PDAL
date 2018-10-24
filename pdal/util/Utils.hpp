@@ -729,6 +729,28 @@ namespace Utils
     }
 
     /**
+      Convert a numeric value from double to float.  Specialization to handle
+      NaN.
+
+      \param in  Value to convert.
+      \param out  Converted value.
+      \return  \c true if the conversion was successful, \c false if the
+        datatypes/input value don't allow conversion.
+    */
+    template<>
+    inline bool numericCast(double in, float& out)
+    {
+        if ((in <= static_cast<double>((std::numeric_limits<float>::max)()) &&
+            in >= static_cast<double>(std::numeric_limits<float>::lowest())) ||
+            std::isnan(in))
+        {
+            out = static_cast<float>(in);
+            return true;
+        }
+        return false;
+    }
+
+    /**
       Convert a value to its string representation by writing to a stringstream.
 
       \param from  Value to convert.
