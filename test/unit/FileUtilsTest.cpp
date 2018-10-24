@@ -39,6 +39,8 @@
 
 #include "Support.hpp"
 
+#include <iostream>
+
 using namespace pdal;
 
 TEST(FileUtilsTest, test_file_ops)
@@ -256,41 +258,61 @@ TEST(FileUtilsTest, glob)
 
 TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
 {
-    const std::string japanese = Support::datapath("japanese.txt");
-    EXPECT_TRUE(FileUtils::fileExists(japanese));
+    // 1. Read Unicode encoded word, ie. Japanese, from .txt file.
+    // 2. Create temporary directory named using the word.
+    // 3. Create a file in the directory.
+    // 4. Exercise the FileUtils using the Unicode-based path.
 
-    // コンピュータ
-    std::string japanese_text = FileUtils::readFileIntoString(japanese);
-    std::string tmp1(Support::temppath(japanese_text + ".tmp")); 
-    std::string tmp2(Support::temppath("unittest2.tmp"));
+    for (std::string japanese_txt: {"japanese-pr2135.txt", "japanese-pr2227.txt"})
+    {
+        japanese_txt = Support::datapath("unicode/" + japanese_txt);
+        EXPECT_TRUE(FileUtils::fileExists(japanese_txt));
+        auto const japanese = FileUtils::readFileIntoString(japanese_txt);
+        EXPECT_FALSE(japanese.empty());
 
-    // first, clean up from any previous test run
-    FileUtils::deleteFile(tmp1);
-    FileUtils::deleteFile(tmp2);
-    EXPECT_TRUE(FileUtils::fileExists(tmp1)==false);
-    EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
+        auto const japanese_dir = Support::temppath(japanese);
+        EXPECT_TRUE(FileUtils::createDirectories(japanese_dir));
+        std::string tmp1(japanese_dir + "/06LC743.unicode");
+        std::string tmp2(Support::temppath("nonunicode.tmp"));
 
-    // write test
-    std::ostream* ostr = FileUtils::createFile(tmp1);
-    *ostr << "yow";
-    FileUtils::closeFile(ostr);
+        // first, clean up from any previous test run
+        FileUtils::deleteFile(tmp1);
+        FileUtils::deleteFile(tmp2);
+        EXPECT_FALSE(FileUtils::fileExists(tmp1));
+        EXPECT_FALSE(FileUtils::fileExists(tmp2));
 
-    EXPECT_EQ(FileUtils::fileExists(tmp1), true);
-    EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
+        // write test
+        std::ostream *ostr = FileUtils::createFile(tmp1);
+        EXPECT_TRUE(ostr != nullptr);
+        *ostr << "yow";
+        FileUtils::closeFile(ostr);
 
-    // rename test
-    FileUtils::renameFile(tmp2,tmp1);
-    EXPECT_TRUE(FileUtils::fileExists(tmp1)==false);
-    EXPECT_TRUE(FileUtils::fileExists(tmp2)==true);
+        EXPECT_EQ(FileUtils::fileExists(tmp1), true);
+        EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
 
-    // read test
-    std::istream* istr = FileUtils::openFile(tmp2);
-    std::string yow;
-    *istr >> yow;
-    FileUtils::closeFile(istr);
-    EXPECT_TRUE(yow=="yow");
+        // glob for files with Unicode path
+        auto const filenames = FileUtils::glob(japanese_dir + "/*");
+        EXPECT_GE(filenames.size(), 1U);
+        auto const tmp1count = std::count_if(filenames.cbegin(), filenames.cend(),
+            [&tmp1](std::string const& f) { return normalize(f) == normalize(tmp1); });
+        EXPECT_EQ(tmp1count, 1);
 
-    // delete test
-    FileUtils::deleteFile(tmp2);
-    EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
+        // rename test
+        FileUtils::renameFile(tmp2, tmp1);
+        EXPECT_FALSE(FileUtils::fileExists(tmp1));
+        EXPECT_TRUE(FileUtils::fileExists(tmp2));
+
+        // read test
+        std::istream *istr = FileUtils::openFile(tmp2);
+        std::string yow;
+        *istr >> yow;
+        FileUtils::closeFile(istr);
+        EXPECT_TRUE(yow == "yow");
+
+        // delete test
+        FileUtils::deleteFile(tmp2);
+        EXPECT_FALSE(FileUtils::fileExists(tmp2));
+        FileUtils::deleteDirectory(japanese_dir);
+        EXPECT_FALSE(FileUtils::directoryExists(japanese_dir));
+    }
 }
