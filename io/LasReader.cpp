@@ -416,7 +416,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<uint32_t>("count",
+    m.add<point_count_t>("count",
         m_header.pointCount(), "This field contains the total "
         "number of point records within the file.");
 

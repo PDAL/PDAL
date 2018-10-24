@@ -155,8 +155,8 @@ private:
     {
         xpos = (xpos - m_xCellOrigin) / m_cellWidth;
         if (Comparison::closeEnough(xpos, std::ceil(xpos)))
-            return std::ceil(xpos);
-        return std::floor(xpos);
+            return (int)std::ceil(xpos);
+        return (int)std::floor(xpos);
     }
 
     // Determine Y cell index from the external Y position
@@ -164,7 +164,7 @@ private:
     {
         ypos = (ypos - m_yCellOrigin) / m_cellHeight;
         if (Comparison::closeEnough(ypos, std::ceil(ypos)))
-            return std::ceil(ypos);
-        return std::floor(ypos);
+            return (int)std::ceil(ypos);
+        return (int)std::floor(ypos);
     }
 };

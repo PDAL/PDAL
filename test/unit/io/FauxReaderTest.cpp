@@ -62,9 +62,9 @@ TEST(FauxReaderTest, test_constant_mode_sequential_iter)
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
         uint64_t t = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
-        EXPECT_FLOAT_EQ(x, 1.0);
-        EXPECT_FLOAT_EQ(y, 2.0);
-        EXPECT_FLOAT_EQ(z, 3.0);
+        EXPECT_DOUBLE_EQ(x, 1.0);
+        EXPECT_DOUBLE_EQ(y, 2.0);
+        EXPECT_DOUBLE_EQ(z, 3.0);
         EXPECT_EQ(t, i);
     }
 }
@@ -136,14 +136,14 @@ TEST(FauxReaderTest, test_ramp_mode_1)
     double z1 = view->getFieldAs<double>(Dimension::Id::Z, 1);
     uint64_t t1 = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
 
-    EXPECT_FLOAT_EQ(x0, 0.0);
-    EXPECT_FLOAT_EQ(y0, 0.0);
-    EXPECT_FLOAT_EQ(z0, 0.0);
+    EXPECT_DOUBLE_EQ(x0, 0.0);
+    EXPECT_DOUBLE_EQ(y0, 0.0);
+    EXPECT_DOUBLE_EQ(z0, 0.0);
     EXPECT_EQ(t0, 0u);
 
-    EXPECT_FLOAT_EQ(x1, 4.0);
-    EXPECT_FLOAT_EQ(y1, 4.0);
-    EXPECT_FLOAT_EQ(z1, 4.0);
+    EXPECT_DOUBLE_EQ(x1, 4.0);
+    EXPECT_DOUBLE_EQ(y1, 4.0);
+    EXPECT_DOUBLE_EQ(z1, 4.0);
     EXPECT_EQ(t1, 1u);
 }
 
@@ -176,9 +176,9 @@ TEST(FauxReaderTest, test_ramp_mode_2)
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
         uint64_t t = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
-        EXPECT_FLOAT_EQ(x, 1.0 + delX * i);
-        EXPECT_FLOAT_EQ(y, 2.0 + delY * i);
-        EXPECT_FLOAT_EQ(z, 3.0 + delZ * i);
+        EXPECT_DOUBLE_EQ(x, 1.0 + delX * i);
+        EXPECT_DOUBLE_EQ(y, 2.0 + delY * i);
+        EXPECT_DOUBLE_EQ(z, 3.0 + delZ * i);
         EXPECT_EQ(t, i);
     }
 }
@@ -252,7 +252,8 @@ void testGrid(point_count_t xlimit, point_count_t ylimit, point_count_t zlimit)
 
     Options ops;
 
-    ops.add("bounds", BOX3D(0, 0, 0, xlimit, ylimit, zlimit));
+    ops.add("bounds", BOX3D(0, 0, 0,
+        (double)xlimit, (double)ylimit, (double)zlimit));
     ops.add("mode", "grid");
     FauxReader reader;
     reader.setOptions(ops);

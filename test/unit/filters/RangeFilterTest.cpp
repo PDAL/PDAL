@@ -87,9 +87,9 @@ TEST(RangeFilterTest, singleDimension)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(3u, view->size());
-    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_DOUBLE_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_DOUBLE_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }
 
 TEST(RangeFilterTest, multipleDimensions)
@@ -119,12 +119,12 @@ TEST(RangeFilterTest, multipleDimensions)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(3u, view->size());
-    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Y, 0));
-    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Y, 1));
-    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Y, 2));
-    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_DOUBLE_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Y, 0));
+    EXPECT_DOUBLE_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Y, 1));
+    EXPECT_DOUBLE_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Y, 2));
+    EXPECT_DOUBLE_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_DOUBLE_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }
 
 TEST(RangeFilterTest, multipleDimsBusted)
@@ -192,11 +192,11 @@ TEST(RangeFilterTest, onlyMin)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(5u, view->size());
-    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(7.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(8.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
-    EXPECT_FLOAT_EQ(9.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
-    EXPECT_FLOAT_EQ(10.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
+    EXPECT_DOUBLE_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(7.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_DOUBLE_EQ(8.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_DOUBLE_EQ(9.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
+    EXPECT_DOUBLE_EQ(10.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
 TEST(RangeFilterTest, onlyMax)
@@ -226,11 +226,11 @@ TEST(RangeFilterTest, onlyMax)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(5u, view->size());
-    EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(2.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(3.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
-    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
-    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
+    EXPECT_DOUBLE_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(2.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_DOUBLE_EQ(3.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_DOUBLE_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
+    EXPECT_DOUBLE_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
 TEST(RangeFilterTest, negation)
@@ -260,12 +260,12 @@ TEST(RangeFilterTest, negation)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(6u, view->size());
-    EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(7.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
-    EXPECT_FLOAT_EQ(8.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
-    EXPECT_FLOAT_EQ(9.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
-    EXPECT_FLOAT_EQ(10.0, view->getFieldAs<double>(Dimension::Id::Z, 5));
+    EXPECT_DOUBLE_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_DOUBLE_EQ(7.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_DOUBLE_EQ(8.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
+    EXPECT_DOUBLE_EQ(9.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
+    EXPECT_DOUBLE_EQ(10.0, view->getFieldAs<double>(Dimension::Id::Z, 5));
 }
 
 TEST(RangeFilterTest, equals)
@@ -294,7 +294,7 @@ TEST(RangeFilterTest, equals)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(1u, view->size());
-    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
 }
 
 TEST(RangeFilterTest, negativeValues)
@@ -323,8 +323,8 @@ TEST(RangeFilterTest, negativeValues)
 
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(2u, view->size());
-    EXPECT_FLOAT_EQ(-1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(0.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_DOUBLE_EQ(-1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(0.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
 }
 
 TEST(RangeFilterTest, simple_logic)

@@ -237,8 +237,7 @@ void GreedyProjection::filter(PointView& view)
 
       // Projecting point onto the surface
       Eigen::Vector3d coord(getCoord(R_));
-      float dist = nc.dot (coord);
-      proj_qp_ = coord - dist * nc;
+      proj_qp_ = coord - nc.dot(coord) * nc;
 
       // Converting coords, calculating angles and saving the
       // projected near boundary edges
@@ -316,13 +315,13 @@ void GreedyProjection::filter(PointView& view)
           break;
         else
         {
-          int right = left+1;
+          PointId right = left+1;
           do
           {
-            while ((right < nnn_) &&
+            while ((right < (PointId)nnn_) &&
                 ((!angles_[right].visible) || stateSet(nnIdx[right])))
                     right++;
-            if (right >= nnn_)
+            if (right >= (PointId)nnn_)
               break;
             else if ((getCoord(nnIdx[left]) -
                 getCoord(nnIdx[right])).squaredNorm () > sqr_max_edge)
@@ -436,8 +435,7 @@ void GreedyProjection::filter(PointView& view)
 
       const Eigen::Vector3d c(getCoord(R_));
       // Projecting point onto the surface
-      float dist = nc.dot (c);
-      proj_qp_ = c - dist * nc;
+      proj_qp_ = c - nc.dot(c)* nc;
 
       // Converting coords, calculating angles and saving the projected
       // near boundary edges

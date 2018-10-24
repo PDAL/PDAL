@@ -54,7 +54,7 @@ void checkPoint(const PointView& data, PointId index, double time,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);
-        EXPECT_FLOAT_EQ(expected, actual);
+        EXPECT_NEAR(expected, actual, .0001);
     };
 
     checkDimension(Dimension::Id::GpsTime, time);

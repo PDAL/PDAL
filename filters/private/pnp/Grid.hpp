@@ -29,12 +29,13 @@ public:
     T& cell(Pos pos)
         { return cell(pos.first, pos.second); }
 
-    // Convert an x/y location to a cell position.
     /**
       Convert external coordinates to a grid position.
 
       \return  false if the coordinates fall outside the grid.
     */
+#pragma warning(push)
+#pragma warning(disable: 4244)
     bool cellPos(double x, double y, Pos& pos)
     {
         x -= m_xOrigin;
@@ -45,6 +46,7 @@ public:
         pos.second = y / m_cellHeight;
         return (pos.first < m_width && pos.second < m_height);
     }
+#pragma warning(pop)
 
     /**
       Determine the origin of the specified cell in external coordinates.
