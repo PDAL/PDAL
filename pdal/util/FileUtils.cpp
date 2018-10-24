@@ -157,19 +157,19 @@ bool directoryExists(const std::string& dirname)
 
 bool createDirectory(const std::string& dirname)
 {
-    return pdalboost::filesystem::create_directory(dirname);
+    return pdalboost::filesystem::create_directory(toNative(dirname));
 }
 
 
 bool createDirectories(const std::string& dirname)
 {
-    return pdalboost::filesystem::create_directories(dirname);
+    return pdalboost::filesystem::create_directories(toNative(dirname));
 }
 
 
 void deleteDirectory(const std::string& dirname)
 {
-    pdalboost::filesystem::remove_all(dirname);
+    pdalboost::filesystem::remove_all(toNative(dirname));
 }
 
 
@@ -420,13 +420,13 @@ std::vector<std::string> glob(std::string path)
     if (INVALID_HANDLE_VALUE == handle)
         return filenames;
 
-    size_t found = path.find_last_of("/\\");
+    size_t found = wpath.find_last_of(L"/\\");
     do
     {
         // Ignore files starting with '.' to be consistent with UNIX.
         if (ffd.cFileName[0] == L'.')
             continue;
-        if (found == std::string::npos)
+        if (found == std::wstring::npos)
             filenames.push_back(fromNative(ffd.cFileName));
         else
             filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(ffd.cFileName));
