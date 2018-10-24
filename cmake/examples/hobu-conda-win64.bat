@@ -1,10 +1,14 @@
-del /s /q build
-mkdir build
-cd build
+REM del /s /q build
+mkdir build-project
+cd build-project
 
-set CONDA_ROOT=c:\users\hobu\miniconda3
+set GENERATOR="Visual Studio 14 2015 Win64"
+REM set GENERATOR="NMake Makefiles"
+REM set GENERATOR="Ninja"
+
+set CONDA_ROOT=c:\miniconda3-x64
 set ORACLE_HOME=%CONDA_ROOT%
-cmake -G "NMake Makefiles" ^
+cmake -G %GENERATOR% ^
       -DCMAKE_INSTALL_PREFIX:PATH="%CONDA_ROOT%" ^
       -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo ^
       -DCMAKE_LIBRARY_PATH:FILEPATH="=%CONDA_ROOT%/Library/lib" ^

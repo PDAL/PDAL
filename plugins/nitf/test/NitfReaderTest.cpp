@@ -58,7 +58,7 @@ TEST(NitfReaderTest, test_one)
     PointTable table;
 
     Stage* nitf_reader(f.createStage("readers.nitf"));
-    EXPECT_TRUE(nitf_reader);
+    EXPECT_NEQ(nitf_reader,0);
     nitf_reader->setOptions(nitf_opts);
     nitf_reader->prepare(table);
     PointViewSet pbSet = nitf_reader->execute(table);
