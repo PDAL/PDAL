@@ -130,13 +130,13 @@ void SplitterFilter::processPoint(PointRef& point, PointAdder adder)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double dx = x - m_xOrigin;
-    int xpos = dx / m_length;
+    int xpos = static_cast<int>(dx / m_length);
     if (dx < 0)
         xpos--;
 
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double dy = y - m_yOrigin;
-    int ypos = dy / m_length;
+    int ypos = static_cast<int>(dy / m_length);
     if (dy < 0)
         ypos--;
 

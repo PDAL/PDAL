@@ -22,7 +22,10 @@ target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
 	${PDAL_JSONCPP_INCLUDE_DIR}
     ${ROOT_DIR})
-
+if (WIN32)
+target_compile_definitions(${reader_libname} PRIVATE
+    NOMINMAX)
+endif()
 #
 # NITF Writer
 #
@@ -41,6 +44,10 @@ target_include_directories(${writer_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
 	${PDAL_JSONCPP_INCLUDE_DIR}
     ${ROOT_DIR})
+if (WIN32)
+target_compile_definitions(${writer_libname} PRIVATE
+    NOMINMAX)
+endif()
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_nitf_writer_test

@@ -419,7 +419,7 @@ namespace pdal
         * \param[in] s index of the source point
         */
       inline void
-      addFringePoint (int v, int s)
+      addFringePoint (PointId v, PointId s)
       {
         source_[v] = s;
         part_[v] = part_[s];

@@ -435,8 +435,11 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
 
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {
-        uint32_t legacyReturnCount = (std::min)(h.m_pointCountByReturn[i],
-            (uint64_t)(std::numeric_limits<uint32_t>::max)());
+        //ABELL - This needs fixing.  Should set to 0 when we exceed
+        // std::numeric_limits<uint32_t>::max().
+        uint32_t legacyReturnCount =
+            static_cast<uint32_t>((std::min)(h.m_pointCountByReturn[i],
+                (uint64_t)(std::numeric_limits<uint32_t>::max)()));
         out << legacyReturnCount;
     }
 

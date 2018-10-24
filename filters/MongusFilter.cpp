@@ -133,7 +133,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         static_cast<int>(ceil((m_bounds.maxx - m_bounds.minx)/m_cellSize)) + 1;
     m_numRows =
         static_cast<int>(ceil((m_bounds.maxy - m_bounds.miny)/m_cellSize)) + 1;
-    m_maxRow = m_bounds.miny + m_numRows * m_cellSize;
+    m_maxRow = static_cast<int>(m_bounds.miny + m_numRows * m_cellSize);
 
     // create control points matrix at default cell size
     MatrixXd cx(m_numRows, m_numCols);
@@ -465,8 +465,8 @@ void MongusFilter::downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
                                  Eigen::MatrixXd *dcy, Eigen::MatrixXd* dcz,
                                  double cell_size)
 {
-    int nr = ceil(cz->rows() / cell_size);
-    int nc = ceil(cz->cols() / cell_size);
+    int nr = static_cast<int>(std::ceil(cz->rows() / cell_size));
+    int nc = static_cast<int>(std::ceil(cz->cols() / cell_size));
 
     // std::cerr << nr << "\t" << nc << "\t" << cell_size << std::endl;
 
@@ -486,8 +486,8 @@ void MongusFilter::downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
             if ((*cz)(r, c) == (std::numeric_limits<double>::max)())
                 continue;
 
-            int rr = std::floor(r/cell_size);
-            int cc = std::floor(c/cell_size);
+            int rr = static_cast<int>(std::floor(r / cell_size));
+            int cc = static_cast<int>(std::floor(c / cell_size));
 
             if ((*cz)(r, c) < (*dcz)(rr, cc))
             {

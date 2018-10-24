@@ -142,7 +142,7 @@ void GreyhoundWriter::write(const PointViewPtr view)
     m_params["compress"] = true;
 
     std::vector<char> comp;
-    comp.reserve(static_cast<float>(data.size()) * 0.2);
+    comp.reserve(data.size() / 5);
 
     auto cb([&comp](char* p, std::size_t s)
     {
