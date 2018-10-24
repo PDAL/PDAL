@@ -1,4 +1,4 @@
-REM del /s /q build
+del /s /q build-project
 mkdir build-project
 cd build-project
 
@@ -11,7 +11,7 @@ set ORACLE_HOME=%CONDA_ROOT%
 cmake -G %GENERATOR% ^
       -DCMAKE_INSTALL_PREFIX:PATH="%CONDA_ROOT%" ^
       -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo ^
-      -DCMAKE_LIBRARY_PATH:FILEPATH="=%CONDA_ROOT%/Library/lib" ^
+      -DCMAKE_LIBRARY_PATH:FILEPATH="=%CONDA_ROOT%/Library/lib"ninj ^
       -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_ROOT%/Library/include" ^
       -DBUILD_PLUGIN_GREYHOUND=ON ^
       -DBUILD_PLUGIN_PCL=ON ^
@@ -28,6 +28,7 @@ cmake -G %GENERATOR% ^
 	-DORACLE_INCLUDE_DIR=%CONDA_ROOT%/include ^
 	-DORACLE_LIBRARY=%CONDA_ROOT%/libs/oci.lib ^
     -DLazperf_DIR=%CONDA_ROOT%/Library/cmake ^
+	-DPYTHON_DEBUG_LIBRARY= ^
     -DHDF5_DIR=%CONDA_ROOT%/Library/cmake ^
     -DPCL_DIR=%CONDA_ROOT%/Library/cmake ^
     -DWITH_ZLIB=ON ^
