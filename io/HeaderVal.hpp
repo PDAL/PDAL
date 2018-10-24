@@ -104,13 +104,15 @@ inline std::istream& operator>>(std::istream& in, NumHeaderVal<T, MIN, MAX>& h)
     return in;
 }
 
+
 template<typename T, T MIN, T MAX>
 inline std::ostream& operator<<(std::ostream& out,
     const NumHeaderVal<T, MIN, MAX>& h)
 {
-    out << h.val();
+    out << Utils::toString(h.val());
     return out;
 }
+
 
 class DoubleHeaderVal : public BaseHeaderVal<double>
 {
