@@ -48,8 +48,8 @@ template <typename T>
 void checkDimension(const PointView& data, std::size_t index,
     Dimension::Id dim, T expected)
 {
-    float actual = data.getFieldAs<T>(dim, index);
-    EXPECT_FLOAT_EQ(expected, actual);
+    T actual = data.getFieldAs<T>(dim, index);
+    EXPECT_FLOAT_EQ((float)expected, (float)actual);
 }
 
 void checkPoint(
@@ -108,9 +108,9 @@ TEST(IcebridgeReaderTest, testRead)
     checkPoint(
             *view,
             0,
-            141437548,     // time
-            82.605319,      // latitude
-            -58.593811,     // longitude
+            1414375e2f,     // time
+            82.60531f,      // latitude
+            -58.59381f,     // longitude
             18.678,         // elevation
             2408,           // xmtSig
             181,            // rcvSig
@@ -124,9 +124,9 @@ TEST(IcebridgeReaderTest, testRead)
     checkPoint(
             *view,
             1,
-            141437548,     // time
-            82.605287,      // latitude
-            -58.595123,     // longitude
+            1414375e2f,     // time
+            82.60528f,      // latitude
+            -58.59512f,     // longitude
             18.688,         // elevation
             2642,           // xmtSig
             173,            // rcvSig

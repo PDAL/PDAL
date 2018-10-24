@@ -166,9 +166,9 @@ TEST(PointTable, userView)
         double y = customView.getFieldAs<double>(Dimension::Id::Y, id);
         double z = customView.getFieldAs<double>(Dimension::Id::Z, id);
 
-        EXPECT_FLOAT_EQ(xDef, x);
-        EXPECT_FLOAT_EQ(yDef, y);
-        EXPECT_FLOAT_EQ(zDef, z);
+        EXPECT_DOUBLE_EQ(xDef, x);
+        EXPECT_DOUBLE_EQ(yDef, y);
+        EXPECT_DOUBLE_EQ(zDef, z);
     };
 
     reader.setReadCb(readCb);

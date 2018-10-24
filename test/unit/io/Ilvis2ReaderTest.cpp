@@ -50,7 +50,7 @@ void checkPoint(const PointView& data, PointId index, double time,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);
-        EXPECT_FLOAT_EQ(expected, actual);
+        EXPECT_DOUBLE_EQ(expected, actual);
     };
 
     checkDimension(Dimension::Id::Y, latitude);

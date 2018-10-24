@@ -121,7 +121,7 @@ void NitfWriter::doneFile()
     finishOutput();
 
     std::streambuf *buf = m_oss.rdbuf();
-    long size = buf->pubseekoff(0, m_oss.end);
+    std::streamoff size = buf->pubseekoff(0, m_oss.end);
     buf->pubseekoff(0, m_oss.beg);
 
     std::vector<char> bytes(size);
