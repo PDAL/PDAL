@@ -91,6 +91,8 @@ void RxpReader::addArgs(ProgramArgs& args)
     args.add("reflectance_as_intensity", "Reflectance as intensity", m_reflectanceAsIntensity, DEFAULT_REFLECTANCE_AS_INTENSITY);
     args.add("min_reflectance", "Minimum reflectance", m_minReflectance, DEFAULT_MIN_REFLECTANCE);
     args.add("max_reflectance", "Maximum reflectance", m_maxReflectance, DEFAULT_MAX_REFLECTANCE);
+    args.add("minimal", "Load only X, Y, Z, time and Intensity dimensions "
+        "to save memory", m_minimal);
 }
 
 void RxpReader::initialize()
