@@ -1,7 +1,7 @@
 @echo off
 
 SET PDAL_INSTALL_PREFIX="C:/projects/pdal/install"
-SET PDAL_PLUGIN_INSTALL_PATH="C:/projects/pdal/bin"
+SET PDAL_PLUGIN_INSTALL_PATH="C:/projects/pdal/build/bin"
 SET PDAL_BUILD_TESTS=ON
 SET CMAKE_VERBOSE_MAKEFILE=OFF
 SET CMAKE_BUILD_TYPE=RelWithDebInfo
