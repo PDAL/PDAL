@@ -32,11 +32,6 @@ option(BUILD_PLUGIN_GREYHOUND
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
     "read points from a Greyhound server")
 
-option(BUILD_PLUGIN_HEXBIN
-    "Choose if the HexBin filter is built" FALSE)
-add_feature_info("Hexbin plugin" BUILD_PLUGIN_HEXBIN
-    "determine boundary and density of a point cloud")
-
 option(BUILD_PLUGIN_ICEBRIDGE
     "Choose if Icebridge support should be built" FALSE)
 add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
