@@ -79,7 +79,7 @@ private:
     int m_col;
 
     BOX3D m_bounds;
-    std::vector<std::string> m_dimNames;
+    StringList m_dimNames;
 };
 
 } // namespace pdal
