@@ -57,13 +57,10 @@ option(BUILD_PLUGIN_OPENSCENEGRAPH
 add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
     "read/write OpenSceneGraph objects")
 
-if(DEFINED ENV{ORACLE_HOME})
-    set(DEFINED_ORACLE_HOME TRUE)
-else(DEFINED ENV{ORACLE_HOME})
-    set(DEFINED_ORACLE_HOME FALSE)
-endif(DEFINED ENV{ORACLE_HOME})
 option(BUILD_PLUGIN_OCI
-    "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME} FALSE)
+    "Choose if OCI support should be built" FALSE)
+add_feature_info("Oracle OCI plugin" BUILD_PLUGIN_OCI
+    "Read/write point clould patches to Oracle")
 
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
