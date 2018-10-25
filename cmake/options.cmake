@@ -63,7 +63,7 @@ else(DEFINED ENV{ORACLE_HOME})
     set(DEFINED_ORACLE_HOME FALSE)
 endif(DEFINED ENV{ORACLE_HOME})
 option(BUILD_PLUGIN_OCI
-    "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME})
+    "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME} FALSE)
 
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
