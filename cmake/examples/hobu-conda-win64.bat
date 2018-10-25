@@ -4,7 +4,7 @@ cd build-project
 
 set GENERATOR="Visual Studio 14 2015 Win64"
 REM set GENERATOR="NMake Makefiles"
-REM set GENERATOR="Ninja"
+set GENERATOR="Ninja"
 
 set CONDA_ROOT=c:\miniconda3-x64
 set ORACLE_HOME=%CONDA_ROOT%
@@ -21,7 +21,6 @@ cmake -G %GENERATOR% ^
       -DBUILD_PLUGIN_I3S=ON ^
       -DBUILD_PLUGIN_SQLITE=ON ^
       -DBUILD_PLUGIN_ICEBRIDGE=ON ^
-      -DBUILD_PLUGIN_HEXBIN=ON ^
       -DBUILD_PLUGIN_NITF=ON ^
       -DENABLE_CTEST=OFF ^
       -DWITH_TESTS=ON ^
