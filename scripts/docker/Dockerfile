@@ -12,7 +12,6 @@ RUN \
         alpine-sdk \
         unzip \
         cmake \
-        hexer-dev \
         nitro-dev \
         gdal-dev \
         geos-dev \
@@ -43,7 +42,6 @@ RUN \
         eigen-dev@edgecommunity \
         libressl2.7-libcrypto@edgecommunity \
         libressl-dev \
-        hexer \
         nitro \
         gdal \
         geos \
@@ -116,7 +114,6 @@ RUN \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
-        -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
