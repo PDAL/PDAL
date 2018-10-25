@@ -1,8 +1,13 @@
 #!/bin/bash
 
-
 # Build PDAL package
 # ./package.sh
+
+if [ $# -gt 1 ]
+then
+    echo "Usage: package [RELEASE NAME]"
+    exit
+fi
 
 
 GITSHA="$(git rev-parse HEAD)"
@@ -44,8 +49,6 @@ OUTPUTDIR="/data/release-$RELNAME"
 if [ ! -e $OUTPUTDIR ]
 then
     mkdir $OUTPUTDIR
-else
-    echo "Output dir $OUTPUTDIR exists"
 fi
 
 extensions=".tar.gz .tar.bz2"
@@ -72,7 +75,6 @@ if [ $# -eq 1 ]
 then
     RELNAME=$1
 fi
-echo "RELNAME for exec = $RELNAME"
 docker exec -it $CONTAINERID /docker-package.sh $RELNAME
 
 # run this to halt into the container
