@@ -84,19 +84,9 @@ void GDALReader::initialize()
     m_width = m_raster->width();
     m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
-    m_raster.reset();
-}
 
-
-QuickInfo GDALReader::inspect()
-{
-    QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
-
-    initialize();
     addDimensions(layout.get());
-
-    qi.m_pointCount = m_width * m_height;
 
     auto p = std::find(m_bandIds.begin(), m_bandIds.end(), Dimension::Id::Z);
 
@@ -107,13 +97,27 @@ QuickInfo GDALReader::inspect()
         nBand = (int) std::distance(m_bandIds.begin(), p) + 1;
     }
 
+    m_dimNames.clear();
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
-        qi.m_dimNames.push_back(layout->dimName(*di));
+        m_dimNames.push_back(layout->dimName(*di));
+    m_bounds = m_raster->bounds(nBand);
 
-    qi.m_bounds = m_raster->bounds(nBand);
-    qi.m_srs = m_raster->getSpatialRef();
+    m_raster.reset();
+}
+
+
+QuickInfo GDALReader::inspect()
+{
+    QuickInfo qi;
+
+    initialize();
+
+    qi.m_pointCount = m_width * m_height;
+    qi.m_srs = getSpatialReference();
+    qi.m_bounds = m_bounds;
     qi.m_valid = true;
+    qi.m_dimNames = m_dimNames;
 
     return qi;
 }
