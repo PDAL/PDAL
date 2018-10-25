@@ -35,7 +35,7 @@
 #pragma once
 
 #include <string>
-
+#include <vector>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Reader.hpp>
@@ -77,6 +77,9 @@ private:
     point_count_t m_index;
     int m_row;
     int m_col;
+
+    BOX3D m_bounds;
+    StringList m_dimNames;
 };
 
 } // namespace pdal
