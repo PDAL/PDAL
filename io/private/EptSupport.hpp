@@ -102,15 +102,35 @@ public:
     EptInfo(Json::Value info) : m_info(info)
     {
         m_bounds = toBox3d(m_info["bounds"]);
-        m_hierarchyStep = m_info["hierarchyStep"].asUInt64();
-        m_numPoints = m_info["numPoints"].asUInt64();
-        m_srs = m_info["srs"].asString();
+        m_points = m_info["points"].asUInt64();
+        m_srs = m_info["srs"]["wkt"].asString();
 
-        if (m_info.isMember("scale"))
-            m_scale = toArray3(m_info["scale"]);
+        if (m_srs.empty())
+        {
+            if (m_info["srs"].isMember("authority") &&
+                    m_info["srs"].isMember("horizontal"))
+            {
+                m_srs = m_info["srs"]["authority"].asString() + ":" +
+                    m_info["srs"]["horizontal"].asString();
+            }
 
-        if (m_info.isMember("offset"))
-            m_offset = toArray3(m_info["offset"]);
+            if (m_info["srs"].isMember("vertical"))
+            {
+                m_srs += "+" + m_info["srs"]["vertical"].asString();
+            }
+        }
+
+        for (const Json::Value& dim : m_info["schema"])
+        {
+            XForm transform;
+
+            if (dim.isMember("scale"))
+                transform.m_scale = dim["scale"].asDouble();
+            if (dim.isMember("offset"))
+                transform.m_offset = dim["offset"].asDouble();
+
+            m_transforms[dim["name"].asString()] = transform;
+        }
 
         const std::string dt(m_info["dataType"].asString());
         if (dt == "laszip")
@@ -122,23 +142,31 @@ public:
     }
 
     const BOX3D& bounds() const { return m_bounds; }
-    uint64_t hierarchyStep() const { return m_hierarchyStep; }
-    uint64_t numPoints() const { return m_numPoints; }
-    const std::array<double, 3>& scale() const { return m_scale; }
-    const std::array<double, 3>& offset() const { return m_offset; }
+    uint64_t points() const { return m_points; }
     DataType dataType() const { return m_dataType; }
     const std::string& srs() const { return m_srs; }
     const Json::Value& schema() const { return m_info["schema"]; }
+    const Json::Value dim(std::string name) const
+    {
+        for (Json::ArrayIndex i(0); i < schema().size(); ++i)
+        {
+            if (schema()[i]["name"].asString() == name)
+            {
+                return schema()[i];
+            }
+        }
+        return Json::nullValue;
+    }
+
+    uint64_t sources() const { return m_info["sources"].asUInt64(); }
 
     const Json::Value& json() { return m_info; }
 
 private:
     const Json::Value m_info;
     BOX3D m_bounds;
-    uint64_t m_hierarchyStep = 0;
-    uint64_t m_numPoints = 0;
-    std::array<double, 3> m_scale { { 1, 1, 1 } };
-    std::array<double, 3> m_offset { { 0, 0, 0 } };
+    uint64_t m_points = 0;
+    std::map<std::string, XForm> m_transforms;
     DataType m_dataType;
     std::string m_srs;
 };

@@ -55,6 +55,46 @@ namespace
         "http://pdal.io/stages/reader.ept.html",
         { "ept" }
     };
+
+    Dimension::Type getType(const Json::Value& dim)
+    {
+        if (dim.isMember("scale"))
+            return Dimension::Type::Double;
+
+        const std::string type(dim["type"].asString());
+        const uint64_t size(dim["size"].asUInt64());
+
+        if (type == "signed")
+        {
+            switch (size)
+            {
+                case 1: return Dimension::Type::Signed8;
+                case 2: return Dimension::Type::Signed16;
+                case 4: return Dimension::Type::Signed32;
+                case 8: return Dimension::Type::Signed64;
+            }
+        }
+        else if (type == "unsigned")
+        {
+            switch (size)
+            {
+                case 1: return Dimension::Type::Unsigned8;
+                case 2: return Dimension::Type::Unsigned16;
+                case 4: return Dimension::Type::Unsigned32;
+                case 8: return Dimension::Type::Unsigned64;
+            }
+        }
+        else if (type == "float")
+        {
+            switch (size)
+            {
+                case 4: return Dimension::Type::Float;
+                case 8: return Dimension::Type::Double;
+            }
+        }
+
+        return Dimension::Type::None;
+    }
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -112,7 +152,7 @@ void EptReader::initialize()
     log()->get(LogLevel::Debug) << "Endpoint: " << m_ep->prefixedRoot() <<
         std::endl;
 
-    m_info.reset(new EptInfo(parse(m_ep->get("entwine.json"))));
+    m_info.reset(new EptInfo(parse(m_ep->get("ept.json"))));
     log()->get(LogLevel::Debug) << "Got EPT info" << std::endl;
 
     setSpatialReference(m_info->srs());
@@ -121,15 +161,8 @@ void EptReader::initialize()
     m_queryBounds = m_args.bounds();
     handleOriginQuery();
 
-    const auto& scale(m_info->scale());
-    const auto& offset(m_info->offset());
-
     log()->get(LogLevel::Debug) << "Query bounds: " << m_queryBounds <<
         std::endl;
-    log()->get(LogLevel::Debug) << "Scale: " <<
-        scale[0] << ", " << scale[1] << ", " << scale[2] << std::endl;
-    log()->get(LogLevel::Debug) << "Offset: " <<
-        offset[0] << ", " << offset[1] << ", " << offset[2] << std::endl;
     log()->get(LogLevel::Debug) << "Threads: " << m_pool->size() << std::endl;
 }
 
@@ -137,16 +170,21 @@ void EptReader::handleOriginQuery()
 {
     if (m_args.origin().empty()) return;
 
+    if (m_info->sources() == 0)
+    {
+        throwError("Cannot query sources - EPT source list does not exist");
+    }
+
     const std::string search(m_args.origin());
-    log()->get(LogLevel::Debug) << "Searching files for " << search <<
+    log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
-    const Json::Value files(parse(m_ep->get("entwine-files.json")));
-    log()->get(LogLevel::Debug) << "Fetched files list" << std::endl;
+    const Json::Value sources(parse(m_ep->get("ept-sources/list.json")));
+    log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
-    if (!files.isArray())
+    if (!sources.isArray())
     {
-        throwError("Unexpected entwine-files list: " + files.toStyledString());
+        throwError("Unexpected sources list: " + sources.toStyledString());
     }
 
     if (search.find_first_not_of("0123456789") == std::string::npos)
@@ -159,11 +197,11 @@ void EptReader::handleOriginQuery()
     {
         // Otherwise it's a file path (or part of one - for example selecting
         // by a basename or a tile ID rather than a full path is convenient).
-        // Find it within the files list, and make sure it's specified uniquely
-        // enough to select only one filt.
-        for (Json::ArrayIndex i(0); i < files.size(); ++i)
+        // Find it within the sources list, and make sure it's specified
+        // uniquely enough to select only one filt.
+        for (Json::ArrayIndex i(0); i < sources.size(); ++i)
         {
-            const Json::Value& entry(files[i]);
+            const Json::Value& entry(sources[i]);
             if (entry["path"].asString().find(search) != std::string::npos)
             {
                 if (m_queryOriginId)
@@ -180,32 +218,18 @@ void EptReader::handleOriginQuery()
         throwError("Failed lookup of origin: " + search);
     }
 
-    if (*m_queryOriginId >= files.size())
+    if (*m_queryOriginId >= sources.size())
     {
         throwError("Invalid origin ID");
     }
 
     // Now that we have our OriginId value, clamp the bounds to select only the
-    // data files that overlap the selected origin.
+    // data sources that overlap the selected origin.
 
-    const Json::Value& found(files[static_cast<Json::ArrayIndex>(
+    const Json::Value& found(sources[static_cast<Json::ArrayIndex>(
                 *m_queryOriginId)]);
 
     BOX3D q(toBox3d(found["bounds"]));
-
-    if (m_info->json().isMember("scale"))
-    {
-        // Make sure floating point precision doesn't make us discard points
-        // from a file query.  We'll be checking the OriginId anyway so we have
-        // leeway to bloat the query bounds as needed.
-        const auto& scale(m_info->scale());
-        q.minx -= std::fabs(scale[0]);
-        q.miny -= std::fabs(scale[1]);
-        q.minz -= std::fabs(scale[2]);
-        q.maxx += std::fabs(scale[0]);
-        q.maxy += std::fabs(scale[1]);
-        q.maxz += std::fabs(scale[2]);
-    }
 
     // Clip the bounds to the queried origin bounds.  Don't just overwrite it -
     // it's possible that both a bounds and an origin are specified.
@@ -224,7 +248,7 @@ QuickInfo EptReader::inspect()
 
     qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
     qi.m_srs = m_info->srs();
-    qi.m_pointCount = m_info->numPoints();
+    qi.m_pointCount = m_info->points();
 
     for (Json::ArrayIndex i(0); i < m_info->schema().size(); ++i)
     {
@@ -241,23 +265,45 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     const Json::Value& schema(m_info->schema());
     m_remoteLayout.reset(new FixedPointLayout());
 
-    // Register XYZ directly since they may appear as scaled int32 values in the
-    // schema.  Either way we want doubles.
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-    layout->registerDim(Dimension::Id::Z);
-
     for (Json::ArrayIndex i(0); i < schema.size(); ++i)
     {
         const Json::Value& dim(schema[i]);
         const std::string name(dim["name"].asString());
-        log()->get(LogLevel::Debug) << "Registering dim " << name << std::endl;
-        const Dimension::Type type(Dimension::type(dim["type"].asString()));
+
+        // If the dimension has a scale, make sure we register it as a double
+        // rather than its serialized type.
+        const Dimension::Type type = getType(dim);
+
+        log()->get(LogLevel::Debug) << "Registering dim " << name << ": " <<
+            Dimension::interpretationName(type) << std::endl;
+
         layout->registerOrAssignDim(name, type);
         m_remoteLayout->registerOrAssignDim(name, type);
     }
 
     m_remoteLayout->finalize();
+
+    using D = Dimension::Id;
+
+    m_dimTypes = m_remoteLayout->dimTypes();
+    for (DimType& dt : m_dimTypes)
+    {
+        // If the data is stored as Laszip, then PDAL's LasReader will unscale
+        // XYZ for us.
+        if (m_info->dataType() == EptInfo::DataType::Laszip &&
+                (dt.m_id == D::X || dt.m_id == D::Y || dt.m_id == D::Z))
+        {
+            continue;
+        }
+
+        const Json::Value dim(m_info->dim(m_remoteLayout->dimName(dt.m_id)));
+        if (dim.isNull())
+            throwError("Invalid dimension lookup");
+        if (dim.isMember("scale"))
+            dt.m_xform.m_scale.m_val = dim["scale"].asDouble();
+        if (dim.isMember("offset"))
+            dt.m_xform.m_offset.m_val = dim["offset"].asDouble();
+    }
 }
 
 void EptReader::ready(PointTableRef table)
@@ -278,16 +324,6 @@ void EptReader::ready(PointTableRef table)
         log()->get(LogLevel::Warning) << m_overlapPoints <<
             " will be downloaded" << std::endl;
     }
-
-    using D = Dimension::Id;
-
-    // Since we might need to revert a scale/offset for XYZ if the dataType is
-    // binary, they'll be handled separately.
-    m_dimTypes = table.layout()->dimTypes();
-    Utils::remove_if(m_dimTypes, [](const pdal::DimType& d)
-    {
-        return d.m_id == D::X || d.m_id == D::Y || d.m_id == D::Z;
-    });
 }
 
 void EptReader::overlaps()
@@ -296,7 +332,8 @@ void EptReader::overlaps()
     // EPT hierarchy (see https://git.io/fAiuR).  Because this may require
     // fetching lots of JSON files, it'll run in our thread pool.
     const Key key(m_info->bounds());
-    const Json::Value hier(parse(m_ep->get("h/" + key.toString() + ".json")));
+    const Json::Value hier(parse(m_ep->get(
+                    "ept-hierarchy/" + key.toString() + ".json")));
     overlaps(hier, key);
     m_pool->await();
 }
@@ -304,31 +341,31 @@ void EptReader::overlaps()
 void EptReader::overlaps(const Json::Value& hier, const Key& key)
 {
     if (!key.b.overlaps(m_queryBounds)) return;
-    const uint64_t np(hier[key.toString()].asUInt64());
+    const int64_t np(hier[key.toString()].asInt64());
     if (!np) return;
 
+    if (np == -1)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_overlapKeys.insert(key);
-        m_overlapPoints += np;
-    }
-
-    if (m_info->hierarchyStep() != 0 && key.d % m_info->hierarchyStep() == 0)
-    {
+        // If the hierarchy points value here is -1, then we need to fetch the
+        // hierarchy subtree corresponding to this root.
         log()->get(LogLevel::Debug) << "Hierarchy: " << key.toString() <<
             std::endl;
 
         m_pool->add([this, key]()
         {
-            const auto next(parse(m_ep->get("h/" + key.toString() + ".json")));
-            for (uint64_t dir(0); dir < 8; ++dir)
-            {
-                overlaps(next, key.bisect(dir));
-            }
+            const auto subRoot(parse(m_ep->get(
+                            "ept-hierarchy/" + key.toString() + ".json")));
+            overlaps(subRoot, key);
         });
     }
     else
     {
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_overlapKeys.insert(key);
+            m_overlapPoints += static_cast<uint64_t>(np);
+        }
+
         for (uint64_t dir(0); dir < 8; ++dir)
         {
             overlaps(hier, key.bisect(dir));
@@ -367,7 +404,7 @@ void EptReader::readLaszip(PointView& dst, const Key& key) const
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
-    auto handle(m_ep->getLocalHandle(key.toString() + ".laz"));
+    auto handle(m_ep->getLocalHandle("ept-data/" + key.toString() + ".laz"));
 
     PointTable table;
 
@@ -381,64 +418,74 @@ void EptReader::readLaszip(PointView& dst, const Key& key) const
     std::lock_guard<std::mutex> lock(m_mutex);
     reader.prepare(table);
 
-    // While the laszip data type will contain a scale/offset in the Entwine
-    // metadata, the LasReader will handle the transformation.
     for (auto& src : reader.execute(table))
     {
         PointRef pr(*src);
         for (uint64_t i(0); i < src->size(); ++i)
         {
             pr.setPointId(i);
-            process(dst, pr, false);
+            process(dst, pr);
         }
     }
 }
 
 void EptReader::readBinary(PointView& dst, const Key& key) const
 {
-    auto data(m_ep->getBinary(key.toString() + ".bin"));
+    auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
     ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    // Binary data scale/offset needs to be handled here.
     for (uint64_t i(0); i < table.numPoints(); ++i)
     {
         pr.setPointId(i);
-        process(dst, pr, true);
+        process(dst, pr);
     }
 }
 
-void EptReader::process(PointView& dst, PointRef& pr, bool unscale) const
+void EptReader::process(PointView& dst, PointRef& pr) const
 {
-    const auto pointId(dst.size());
-    double x = pr.getFieldAs<double>(Dimension::Id::X);
-    double y = pr.getFieldAs<double>(Dimension::Id::Y);
-    double z = pr.getFieldAs<double>(Dimension::Id::Z);
-    const uint64_t o = pr.getFieldAs<uint64_t>(Dimension::Id::OriginId);
-
-    if (unscale)
+    auto dimIndex = [this](Dimension::Id id)->uint64_t
     {
-        x = x * m_info->scale()[0] + m_info->offset()[0];
-        y = y * m_info->scale()[1] + m_info->offset()[1];
-        z = z * m_info->scale()[2] + m_info->offset()[2];
-    }
+        for (uint64_t i(0); i < m_remoteLayout->dims().size(); ++i)
+        {
+            if (m_remoteLayout->dims()[i] == id)
+            {
+                return i;
+            }
+        }
+        throw pdal_error("Invalid dimIndex lookup");
+    };
+
+    using D = Dimension::Id;
+    const std::array<XForm, 3> xforms { {
+        m_dimTypes[dimIndex(D::X)].m_xform,
+        m_dimTypes[dimIndex(D::Y)].m_xform,
+        m_dimTypes[dimIndex(D::Z)].m_xform,
+    } };
+
+    const point_count_t pointId(dst.size());
+
+    const double x = pr.getFieldAs<double>(Dimension::Id::X) *
+        xforms[0].m_scale.m_val + xforms[0].m_offset.m_val;
+    const double y = pr.getFieldAs<double>(Dimension::Id::Y) *
+        xforms[1].m_scale.m_val + xforms[1].m_offset.m_val;
+    const double z = pr.getFieldAs<double>(Dimension::Id::Z) *
+        xforms[2].m_scale.m_val + xforms[2].m_offset.m_val;
+
+    const uint64_t o = pr.getFieldAs<uint64_t>(Dimension::Id::OriginId);
 
     const bool selected = !m_queryOriginId || o == *m_queryOriginId;
 
     if (selected && m_queryBounds.contains(x, y, z))
     {
-        dst.setField(Dimension::Id::X, pointId, x);
-        dst.setField(Dimension::Id::Y, pointId, y);
-        dst.setField(Dimension::Id::Z, pointId, z);
-
-        char* pos(dst.getPoint(pointId));
-
-        for (const DimType& dim : m_dimTypes)
+        for (const DimType& dt : m_dimTypes)
         {
-            pr.getField(pos + dst.layout()->dimOffset(dim.m_id),
-                    dim.m_id, dim.m_type);
+            const double d = pr.getFieldAs<double>(dt.m_id) *
+                dt.m_xform.m_scale.m_val + dt.m_xform.m_offset.m_val;
+
+            dst.setField(dt.m_id, pointId, d);
         }
     }
 }
