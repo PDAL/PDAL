@@ -168,6 +168,12 @@ PDAL_ADD_TEST(pdal_filters_crop_test
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_expression_test
+    FILES
+        filters/ExpressionFilterTest.cpp
+    LINK_WITH
+        ${PDAL_JSONCPP_LIB_NAME}
+)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
