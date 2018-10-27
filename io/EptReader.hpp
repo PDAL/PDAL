@@ -122,8 +122,7 @@ private:
 
     Args m_args;
     BOX3D m_queryBounds;
-    // This is a pointer since zero is a valid query OriginId.
-    std::unique_ptr<uint64_t> m_queryOriginId;
+    int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
 
     mutable std::mutex m_mutex;
@@ -133,6 +132,7 @@ private:
 
     std::unique_ptr<FixedPointLayout> m_remoteLayout;
     DimTypeList m_dimTypes;
+    std::array<XForm, 3> m_xyzTransforms;
 };
 
 } // namespace pdal

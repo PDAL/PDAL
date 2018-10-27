@@ -120,18 +120,6 @@ public:
             }
         }
 
-        for (const Json::Value& dim : m_info["schema"])
-        {
-            XForm transform;
-
-            if (dim.isMember("scale"))
-                transform.m_scale = dim["scale"].asDouble();
-            if (dim.isMember("offset"))
-                transform.m_offset = dim["offset"].asDouble();
-
-            m_transforms[dim["name"].asString()] = transform;
-        }
-
         const std::string dt(m_info["dataType"].asString());
         if (dt == "laszip")
             m_dataType = DataType::Laszip;
@@ -166,7 +154,6 @@ private:
     const Json::Value m_info;
     BOX3D m_bounds;
     uint64_t m_points = 0;
-    std::map<std::string, XForm> m_transforms;
     DataType m_dataType;
     std::string m_srs;
 };

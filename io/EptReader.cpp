@@ -170,11 +170,6 @@ void EptReader::handleOriginQuery()
 {
     if (m_args.origin().empty()) return;
 
-    if (m_info->sources() == 0)
-    {
-        throwError("Cannot query sources - EPT source list does not exist");
-    }
-
     const std::string search(m_args.origin());
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
@@ -191,7 +186,7 @@ void EptReader::handleOriginQuery()
     {
         // If the origin search is integral, then the OriginId value has been
         // specified directly.
-        m_queryOriginId.reset(new uint64_t(std::stoull(search)));
+        m_queryOriginId = std::stoll(search);
     }
     else
     {
@@ -204,21 +199,21 @@ void EptReader::handleOriginQuery()
             const Json::Value& entry(sources[i]);
             if (entry["path"].asString().find(search) != std::string::npos)
             {
-                if (m_queryOriginId)
+                if (m_queryOriginId != -1)
                 {
                     throwError("Origin search path is not unique");
                 }
-                m_queryOriginId.reset(new uint64_t(i));
+                m_queryOriginId = static_cast<int64_t>(i);
             }
         }
     }
 
-    if (!m_queryOriginId)
+    if (m_queryOriginId == -1)
     {
         throwError("Failed lookup of origin: " + search);
     }
 
-    if (*m_queryOriginId >= sources.size())
+    if (m_queryOriginId >= sources.size())
     {
         throwError("Invalid origin ID");
     }
@@ -227,7 +222,7 @@ void EptReader::handleOriginQuery()
     // data sources that overlap the selected origin.
 
     const Json::Value& found(sources[static_cast<Json::ArrayIndex>(
-                *m_queryOriginId)]);
+                m_queryOriginId)]);
 
     BOX3D q(toBox3d(found["bounds"]));
 
@@ -236,7 +231,7 @@ void EptReader::handleOriginQuery()
     m_queryBounds.clip(q);
 
     log()->get(LogLevel::Debug) << "Query origin " <<
-        *m_queryOriginId << ": " << found["path"].asString() <<
+        m_queryOriginId << ": " << found["path"].asString() <<
         std::endl;
 }
 
@@ -304,6 +299,22 @@ void EptReader::addDimensions(PointLayoutPtr layout)
         if (dim.isMember("offset"))
             dt.m_xform.m_offset.m_val = dim["offset"].asDouble();
     }
+
+    auto dimIndex = [this](Dimension::Id id)->uint64_t
+    {
+        for (uint64_t i(0); i < m_remoteLayout->dims().size(); ++i)
+        {
+            if (m_remoteLayout->dims()[i] == id)
+            {
+                return i;
+            }
+        }
+        throw pdal_error("Invalid dimIndex lookup");
+    };
+
+    m_xyzTransforms[0] = m_dimTypes[dimIndex(D::X)].m_xform;
+    m_xyzTransforms[1] = m_dimTypes[dimIndex(D::Y)].m_xform;
+    m_xyzTransforms[2] = m_dimTypes[dimIndex(D::Z)].m_xform;
 }
 
 void EptReader::ready(PointTableRef table)
@@ -446,46 +457,35 @@ void EptReader::readBinary(PointView& dst, const Key& key) const
 
 void EptReader::process(PointView& dst, PointRef& pr) const
 {
-    auto dimIndex = [this](Dimension::Id id)->uint64_t
-    {
-        for (uint64_t i(0); i < m_remoteLayout->dims().size(); ++i)
-        {
-            if (m_remoteLayout->dims()[i] == id)
-            {
-                return i;
-            }
-        }
-        throw pdal_error("Invalid dimIndex lookup");
-    };
-
     using D = Dimension::Id;
-    const std::array<XForm, 3> xforms { {
-        m_dimTypes[dimIndex(D::X)].m_xform,
-        m_dimTypes[dimIndex(D::Y)].m_xform,
-        m_dimTypes[dimIndex(D::Z)].m_xform,
-    } };
 
     const point_count_t pointId(dst.size());
 
-    const double x = pr.getFieldAs<double>(Dimension::Id::X) *
-        xforms[0].m_scale.m_val + xforms[0].m_offset.m_val;
-    const double y = pr.getFieldAs<double>(Dimension::Id::Y) *
-        xforms[1].m_scale.m_val + xforms[1].m_offset.m_val;
-    const double z = pr.getFieldAs<double>(Dimension::Id::Z) *
-        xforms[2].m_scale.m_val + xforms[2].m_offset.m_val;
+    const double x = pr.getFieldAs<double>(D::X) *
+        m_xyzTransforms[0].m_scale.m_val + m_xyzTransforms[0].m_offset.m_val;
+    const double y = pr.getFieldAs<double>(D::Y) *
+        m_xyzTransforms[1].m_scale.m_val + m_xyzTransforms[1].m_offset.m_val;
+    const double z = pr.getFieldAs<double>(D::Z) *
+        m_xyzTransforms[2].m_scale.m_val + m_xyzTransforms[2].m_offset.m_val;
 
-    const uint64_t o = pr.getFieldAs<uint64_t>(Dimension::Id::OriginId);
-
-    const bool selected = !m_queryOriginId || o == *m_queryOriginId;
+    const bool selected = m_queryOriginId == -1 ||
+        pr.getFieldAs<int64_t>(D::OriginId) == m_queryOriginId;
 
     if (selected && m_queryBounds.contains(x, y, z))
     {
+        dst.setField(Dimension::Id::X, pointId, x);
+        dst.setField(Dimension::Id::Y, pointId, y);
+        dst.setField(Dimension::Id::Z, pointId, z);
+
         for (const DimType& dt : m_dimTypes)
         {
-            const double d = pr.getFieldAs<double>(dt.m_id) *
-                dt.m_xform.m_scale.m_val + dt.m_xform.m_offset.m_val;
+            if (dt.m_id != D::X && dt.m_id != D::Y && dt.m_id != D::Z)
+            {
+                const double d = pr.getFieldAs<double>(dt.m_id) *
+                    dt.m_xform.m_scale.m_val + dt.m_xform.m_offset.m_val;
 
-            dst.setField(dt.m_id, pointId, d);
+                dst.setField(dt.m_id, pointId, d);
+            }
         }
     }
 }
