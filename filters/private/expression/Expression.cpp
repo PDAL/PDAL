@@ -78,7 +78,7 @@ void Expression::build(LogicGate& gate, const Json::Value& json)
         else if (!val.isObject() || val.size() == 1)
         {
             // A comparison object.
-            active->push(makeUnique<Comparison>(m_layout, key, val));
+            active->push(Comparison::create(m_layout, key, val));
         }
         else
         {
@@ -92,10 +92,9 @@ void Expression::build(LogicGate& gate, const Json::Value& json)
             // within val, since we've already selected a dimension.
             for (const std::string& innerKey : val.getMemberNames())
             {
-                Json::Value next;
-                next[innerKey] = val[innerKey];
-                active->push(
-                        makeUnique<Comparison>(m_layout, key, next));
+                Json::Value nest;
+                nest[innerKey] = val[innerKey];
+                active->push(Comparison::create(m_layout, key, nest));
             }
         }
     }

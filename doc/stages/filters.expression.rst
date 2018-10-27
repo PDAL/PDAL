@@ -30,6 +30,23 @@ This example passes through only the points whose Classification is non-zero.
         "filtered.las"
     ]
 
+This example passes through only the points whose ReturnNumber is equal to the
+NumberOfReturns and the NumberOfReturns is greater than 1.
+
+.. code-block:: json
+
+    [
+        "input.las",
+        {
+            "type": "filters.expression",
+            "expression": { "$and": [
+                { "ReturnNumber": "NumberOfReturns" },
+                { "NumberOfReturns": { "$gt": 1 } }
+            ] }
+        },
+        "filtered.las"
+    ]
+
 Options
 -------
 
@@ -60,14 +77,14 @@ There are 8 valid query comparison operators:
     - ``$in``: Matches any of the values specified in the array.
     - ``$nin``: Matches none of the values specified in the array.
 
-Comparison operators compare a point cloud attribute with a value or an array
-of values.  For all comparison operators except for ``$in`` and ``$nin``, the
-value must be a number.  For ``$in`` and ``$nin``, the value must be an array
-of numbers.
+Comparison operators compare a point cloud attribute with an operand or an
+array of operands.  An *operand* is either a numeric constant or a string
+representing a dimension name.  For all comparison operators except for ``$in``
+and ``$nin``, the comparison value must be a single operand.  For ``$in`` and
+``$nin``, the value must be an array of operands.
 
-Comparison operators are applied directly to attribute values, and thus must be
-contained within an attribute selection by which an attribute is selected by its
-name.  For example:
+Comparison operator specifications must be contained within an object whose key
+is the dimension name to be compared.
 
 .. code-block:: json
 
@@ -119,8 +136,8 @@ contain further nested logical operators.  For example:
     { "$or": [
         { "Classification": 2 },
         { "$and": [
-            { "ReturnNumber": { "$gt": 0 } },
-            { "Z": { "$lte": 42 } }
+            { "ReturnNumber": "NumberOfReturns" },
+            { "NumberOfReturns": { "$gt": 1 } }
         ] }
     ] }
 
@@ -135,4 +152,11 @@ contain further nested logical operators.  For example:
             ] }
         ] }
     }
+
+For any individual dimension, the logical **and** may be implicitly invoked
+via multiple comparisons within the comparison object.  For example:
+
+.. code-block:: json
+
+    { "X": { "$gt": 0, "$lt": 42 } }
 

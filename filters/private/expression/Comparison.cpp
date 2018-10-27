@@ -37,29 +37,15 @@
 namespace pdal
 {
 
-namespace
-{
-
-template<typename O>
-std::unique_ptr<ComparisonSingle<O>> createSingle(
-        ComparisonType type,
-        O op,
-        double d)
-{
-    return makeUnique<ComparisonSingle<O>>(type, op, d);
-}
-
-} // unnamed namespace
-
-std::unique_ptr<ComparisonOperator> ComparisonOperator::create(
-        const Json::Value& json)
+std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
+        const std::string dimName, const Json::Value& json)
 {
     if (!json.isObject())
     {
         // If it's a value specified without the $eq operator, convert it.
         Json::Value converted;
         converted["$eq"] = json;
-        return create(converted);
+        return create(layout, dimName, converted);
     }
 
     if (json.size() != 1)
@@ -71,30 +57,29 @@ std::unique_ptr<ComparisonOperator> ComparisonOperator::create(
     const ComparisonType co(toComparisonType(key));
     const auto& val(json[key]);
 
+    const Dimension::Id dimId(layout.findDim(dimName));
+    if (dimId == pdal::Dimension::Id::Unknown)
+    {
+        throw pdal_error("Unknown dimension: " + dimName);
+    }
+
     if (isSingle(co))
     {
-        if (!val.isConvertibleTo(Json::ValueType::realValue))
-        {
-            throw pdal_error("Invalid comparison operand: " +
-                    val.toStyledString());
-        }
-
-        const double d(val.asDouble());
-
+        Operand op(layout, val);
         switch (co)
         {
         case ComparisonType::eq:
-            return createSingle(co, std::equal_to<double>(), d);
+            return makeUnique<ComparisonEqual>(dimId, op);
         case ComparisonType::gt:
-            return createSingle(co, std::greater<double>(), d);
+            return makeUnique<ComparisonGreater>(dimId, op);
         case ComparisonType::gte:
-            return createSingle(co, std::greater_equal<double>(), d);
+            return makeUnique<ComparisonGreaterEqual>(dimId, op);
         case ComparisonType::lt:
-            return createSingle(co, std::less<double>(), d);
+            return makeUnique<ComparisonLess>(dimId, op);
         case ComparisonType::lte:
-            return createSingle(co, std::less_equal<double>(), d);
+            return makeUnique<ComparisonLessEqual>(dimId, op);
         case ComparisonType::ne:
-            return createSingle(co, std::not_equal_to<double>(), d);
+            return makeUnique<ComparisonNotEqual>(dimId, op);
         default:
             throw pdal_error("Invalid single comparison operator");
         }
@@ -103,29 +88,21 @@ std::unique_ptr<ComparisonOperator> ComparisonOperator::create(
     {
         if (!val.isArray())
         {
-            throw pdal_error("Invalid comparison list: " +
-                    val.toStyledString());
+            throw pdal_error("Invalid comparisons: " + val.toStyledString());
         }
 
-        std::vector<double> vals;
-
-        for (const Json::Value& single : val)
+        Operands ops;
+        for (const Json::Value& op : val)
         {
-            if (!single.isConvertibleTo(Json::ValueType::realValue))
-            {
-                throw pdal_error("Invalid multi comparison operand: " +
-                        val.toStyledString());
-            }
-
-            vals.push_back(single.asDouble());
+            ops.emplace_back(layout, op);
         }
 
         switch (co)
         {
         case ComparisonType::in:
-            return makeUnique<ComparisonAny>(vals);
+            return makeUnique<ComparisonAny>(dimId, ops);
         case ComparisonType::nin:
-            return makeUnique<ComparisonNone>(vals);
+            return makeUnique<ComparisonNone>(dimId, ops);
         default:
             throw pdal_error("Invalid multi comparison operator");
         }

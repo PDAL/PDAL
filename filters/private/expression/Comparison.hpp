@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -96,140 +98,230 @@ inline bool isMultiple(ComparisonType co)
     return !isSingle(co);
 }
 
-class ComparisonOperator : public Comparable
+// Represents the RHS portion of a comparison specification.  It may be either
+// a constant or a Dimension name.
+class Operand
 {
 public:
-    ComparisonOperator(ComparisonType type) : m_type(type) { }
+    Operand(const PointLayout& layout, Json::Value json)
+    {
+        if (json.isString())
+        {
+            m_id = layout.findDim(json.asString());
+            if (m_id == Dimension::Id::Unknown)
+            {
+                throw pdal_error("Invalid dimension: " + json.asString());
+            }
+        }
+        else if (json.isConvertibleTo(Json::ValueType::realValue))
+        {
+            m_value = json.asDouble();
+        }
+        else
+        {
+            throw pdal_error("Invalid comparison operand: " +
+                    json.toStyledString());
+        }
+    }
 
-    virtual ~ComparisonOperator() { }
+    double get(const pdal::PointRef& pr) const
+    {
+        if (m_id == Dimension::Id::Unknown)
+            return m_value;
+        else
+            return pr.getFieldAs<double>(m_id);
+    }
 
-    // Accepts a JSON value of the form:
-    // { "$<op>": <val> }       // E.g. { "$eq": 42 }
-    //
-    // or the special case for the "$eq" operator:
-    //      <val>               // Equivalent to the above.
-    //
-    //
-    // Returns a pointer to a functor that performs the requested comparison.
-    static std::unique_ptr<ComparisonOperator> create(const Json::Value& json);
+    std::string toString() const
+    {
+        if (m_id == Dimension::Id::Unknown)
+            return std::to_string(m_value);
+        else
+            return Dimension::name(m_id);
+    }
 
-    ComparisonType type() const { return m_type; }
-
-protected:
-    ComparisonType m_type;
+private:
+    double m_value = 0;
+    Dimension::Id m_id = Dimension::Id::Unknown;
 };
 
-template<typename Op>
-class ComparisonSingle : public ComparisonOperator
+using Operands = std::vector<Operand>;
+
+class Comparison : public Filterable
 {
 public:
-    ComparisonSingle(ComparisonType type, Op op, double val)
-        : ComparisonOperator(type)
-        , m_op(op)
-        , m_val(val)
+    Comparison(Dimension::Id dimId) : m_dimId(dimId) { }
+
+    static std::unique_ptr<Comparison> create(const PointLayout& layout,
+            std::string dimName, const Json::Value& json);
+
+protected:
+    virtual ComparisonType type() const = 0;
+
+    const Dimension::Id m_dimId;
+};
+
+class ComparisonSingle : public Comparison
+{
+public:
+    ComparisonSingle(Dimension::Id id, Operand op)
+        : Comparison(id)
+        , m_operand(op)
     { }
 
-    virtual bool operator()(double in) const override
+    virtual bool operator()(const pdal::PointRef& pr) const override
     {
-        return m_op(in, m_val);
+        return compare(pr.getFieldAs<double>(m_dimId), m_operand.get(pr));
     }
 
     virtual std::string toString(std::string pre) const override
     {
         std::ostringstream ss;
-        ss << pre << typeToString(m_type) << " " << m_val << std::endl;
+        ss << pre << Dimension::name(m_dimId) << " ";
+        ss << pre << typeToString(type()) << " " << m_operand.toString() <<
+            std::endl;
         return ss.str();
     }
 
 protected:
-    Op m_op;
-    double m_val;
+    virtual bool compare(double a, double b) const = 0;
+
+private:
+    Operand m_operand;
 };
 
-class ComparisonMulti : public ComparisonOperator
+class ComparisonEqual : public ComparisonSingle
 {
 public:
-    ComparisonMulti(ComparisonType type, const std::vector<double>& vals)
-        : ComparisonOperator(type)
-        , m_vals(vals)
+    ComparisonEqual(Dimension::Id id, Operand op)
+        : ComparisonSingle(id, op)
+    { }
+
+protected:
+    virtual bool compare(double a, double b) const override { return a == b; }
+    virtual ComparisonType type() const override { return ComparisonType::eq; }
+};
+
+class ComparisonGreater : public ComparisonSingle
+{
+public:
+    ComparisonGreater(Dimension::Id id, Operand op)
+        : ComparisonSingle(id, op)
+    { }
+
+protected:
+    virtual bool compare(double a, double b) const override { return a > b; }
+    virtual ComparisonType type() const override { return ComparisonType::gt; }
+};
+
+class ComparisonGreaterEqual : public ComparisonSingle
+{
+public:
+    ComparisonGreaterEqual(Dimension::Id id, Operand op)
+        : ComparisonSingle(id, op)
+    { }
+
+protected:
+    virtual bool compare(double a, double b) const override { return a >= b; }
+    virtual ComparisonType type() const override { return ComparisonType::gte; }
+};
+
+class ComparisonLess : public ComparisonSingle
+{
+public:
+    ComparisonLess(Dimension::Id id, Operand op)
+        : ComparisonSingle(id, op)
+    { }
+
+protected:
+    virtual bool compare(double a, double b) const override { return a < b; }
+    virtual ComparisonType type() const override { return ComparisonType::lt; }
+};
+
+class ComparisonLessEqual : public ComparisonSingle
+{
+public:
+    ComparisonLessEqual(Dimension::Id id, Operand op)
+        : ComparisonSingle(id, op)
+    { }
+
+protected:
+    virtual bool compare(double a, double b) const override { return a <= b; }
+    virtual ComparisonType type() const override { return ComparisonType::lte; }
+};
+
+class ComparisonNotEqual : public ComparisonSingle
+{
+public:
+    ComparisonNotEqual(Dimension::Id id, Operand op)
+        : ComparisonSingle(id, op)
+    { }
+
+protected:
+    virtual bool compare(double a, double b) const override { return a != b; }
+    virtual ComparisonType type() const override { return ComparisonType::ne; }
+};
+
+class ComparisonMulti : public Comparison
+{
+public:
+    ComparisonMulti(Dimension::Id id, Operands ops)
+        : Comparison(id)
+        , m_operands(ops)
     { }
 
     virtual std::string toString(std::string pre) const override
     {
         std::ostringstream ss;
-        ss << pre << typeToString(m_type) << " ";
-        for (const double d : m_vals) ss << d << " ";
+        ss << pre << Dimension::name(m_dimId) << " ";
+        ss << pre << typeToString(type()) << " ";
+        for (const auto& op : m_operands) ss << op.toString() << " ";
         ss << std::endl;
         return ss.str();
     }
 
 protected:
-    std::vector<double> m_vals;
+    const Operands m_operands;
 };
 
 class ComparisonAny : public ComparisonMulti
 {
 public:
-    ComparisonAny(const std::vector<double>& vals)
-        : ComparisonMulti(ComparisonType::in, vals)
+    ComparisonAny(Dimension::Id id, Operands ops)
+        : ComparisonMulti(id, ops)
     { }
 
-    virtual bool operator()(double in) const override
+protected:
+    virtual ComparisonType type() const override { return ComparisonType::in; }
+
+    virtual bool operator()(const pdal::PointRef& pr) const override
     {
-        return std::any_of(m_vals.begin(), m_vals.end(), [in](double val)
-        {
-            return in == val;
-        });
+        const double val(pr.getFieldAs<double>(m_dimId));
+        return std::any_of(
+                m_operands.begin(),
+                m_operands.end(),
+                [&pr, val](const Operand& op) { return val == op.get(pr); });
     }
 };
 
 class ComparisonNone : public ComparisonMulti
 {
 public:
-    ComparisonNone(const std::vector<double>& vals)
-        : ComparisonMulti(ComparisonType::nin, vals)
+    ComparisonNone(Dimension::Id id, Operands ops)
+        : ComparisonMulti(id, ops)
     { }
 
-    virtual bool operator()(double in) const override
-    {
-        return std::none_of(m_vals.begin(), m_vals.end(), [in](double val)
-        {
-            return in == val;
-        });
-    }
-};
-
-class Comparison : public Filterable
-{
-public:
-    Comparison(const PointLayout& layout, std::string dimName, Json::Value json)
-        : m_dimName(dimName)
-        , m_dimId(layout.findDim(dimName))
-        , m_op(ComparisonOperator::create(json))
-    {
-        if (m_dimId == pdal::Dimension::Id::Unknown)
-        {
-            throw pdal_error("Unknown dimension: " + dimName);
-        }
-    }
-
-    bool operator()(const pdal::PointRef& pointRef) const override
-    {
-        return (*m_op)(pointRef.getFieldAs<double>(m_dimId));
-    }
-
-    virtual std::string toString(std::string pre) const override
-    {
-        std::ostringstream ss;
-        ss << pre << m_dimName << " ";
-        ss << m_op->toString("");
-        return ss.str();
-    }
-
 protected:
-    std::string m_dimName;
-    pdal::Dimension::Id m_dimId;
-    std::unique_ptr<ComparisonOperator> m_op;
+    virtual ComparisonType type() const override { return ComparisonType::nin; }
+
+    virtual bool operator()(const pdal::PointRef& pr) const override
+    {
+        const double val(pr.getFieldAs<double>(m_dimId));
+        return std::none_of(
+                m_operands.begin(),
+                m_operands.end(),
+                [&pr, val](const Operand& op) { return val == op.get(pr); });
+    }
 };
 
 } // namespace pdal

@@ -92,9 +92,19 @@ TEST(ExpressionFilterTest, missingDimension)
     auto table(makeTable());
     PointRef pr(*table, 0);
 
-    Json::Value e;
-    e["Red"] = 42;
-    EXPECT_THROW(makeFilter(*table, e), pdal_error);
+    {
+        // Missing LHS dimension.
+        Json::Value e;
+        e["Red"] = 42;
+        EXPECT_THROW(makeFilter(*table, e), pdal_error);
+    }
+
+    {
+        // Missing RHS dimension.
+        Json::Value e;
+        e["X"] = "Red";
+        EXPECT_THROW(makeFilter(*table, e), pdal_error);
+    }
 }
 
 TEST(ExpressionFilterTest, invalidSingleComparisons)
@@ -122,8 +132,8 @@ TEST(ExpressionFilterTest, singleComparisons)
     auto table(makeTable());
     PointRef pr(*table, 0);
 
-    // Implicit $eq.
     {
+        // Implicit $eq.
         Json::Value e;
         e["X"] = 0;
         auto f(makeFilter(*table, e));
@@ -136,10 +146,23 @@ TEST(ExpressionFilterTest, singleComparisons)
 
         pr.setField(Dimension::Id::X, 1);
         EXPECT_FALSE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_FALSE(f->processOne(pr));
     }
 
-    // Explicit $eq.
     {
+        // Explicit $eq.
         Json::Value e;
         e["X"]["$eq"] = 0;
         auto f(makeFilter(*table, e));
@@ -152,10 +175,23 @@ TEST(ExpressionFilterTest, singleComparisons)
 
         pr.setField(Dimension::Id::X, 1);
         EXPECT_FALSE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"]["$eq"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_FALSE(f->processOne(pr));
     }
 
-    // $ne
     {
+        // $ne
         Json::Value e;
         e["X"]["$ne"] = 0;
         auto f(makeFilter(*table, e));
@@ -168,10 +204,24 @@ TEST(ExpressionFilterTest, singleComparisons)
 
         pr.setField(Dimension::Id::X, 1);
         EXPECT_TRUE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"]["$ne"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_TRUE(f->processOne(pr));
+
     }
 
-    // $gt
     {
+        // $gt
         Json::Value e;
         e["X"]["$gt"] = 0;
         auto f(makeFilter(*table, e));
@@ -184,10 +234,24 @@ TEST(ExpressionFilterTest, singleComparisons)
 
         pr.setField(Dimension::Id::X, 1);
         EXPECT_TRUE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"]["$gt"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_TRUE(f->processOne(pr));
+
     }
 
-    // $gte
     {
+        // $gte
         Json::Value e;
         e["X"]["$gte"] = 0;
         auto f(makeFilter(*table, e));
@@ -200,10 +264,23 @@ TEST(ExpressionFilterTest, singleComparisons)
 
         pr.setField(Dimension::Id::X, 1);
         EXPECT_TRUE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"]["$gte"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_TRUE(f->processOne(pr));
     }
 
-    // $lt
     {
+        // $lt
         Json::Value e;
         e["X"]["$lt"] = 0;
         auto f(makeFilter(*table, e));
@@ -216,13 +293,39 @@ TEST(ExpressionFilterTest, singleComparisons)
 
         pr.setField(Dimension::Id::X, 1);
         EXPECT_FALSE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"]["$lt"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_FALSE(f->processOne(pr));
     }
 
-    // $gte
     {
+        // $lte
         Json::Value e;
         e["X"]["$lte"] = 0;
         auto f(makeFilter(*table, e));
+
+        pr.setField(Dimension::Id::X, -1);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_FALSE(f->processOne(pr));
+
+        // Across dimensions.
+        e["X"]["$lte"] = "Y";
+        pr.setField(Dimension::Id::Y, 0);
 
         pr.setField(Dimension::Id::X, -1);
         EXPECT_TRUE(f->processOne(pr));
@@ -240,7 +343,6 @@ TEST(ExpressionFilterTest, inValidMultiComparisons)
     auto table(makeTable());
     PointRef pr(*table, 0);
 
-    // Invalid multi-comparisons.
     {
         // Comparison operators must take arrays, not values.
         Json::Value e;
@@ -251,6 +353,12 @@ TEST(ExpressionFilterTest, inValidMultiComparisons)
         // Comparison operators must take arrays, not objects.
         Json::Value e;
         e["X"]["$in"]["asdf"] = 42;
+        EXPECT_THROW(makeFilter(*table, e), pdal_error);
+    }
+    {
+        // Dimensions must exist.
+        Json::Value e;
+        e["X"]["$in"].append("Red");
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 }
@@ -278,6 +386,26 @@ TEST(ExpressionFilterTest, multiComparisons)
         EXPECT_FALSE(f->processOne(pr));
     }
 
+    // $in across dimensions.
+    {
+        Json::Value e;
+        e["X"]["$in"].append(0);
+        e["X"]["$in"].append(1);
+        e["X"]["$in"].append("Y");
+        auto f(makeFilter(*table, e));
+
+        pr.setField(Dimension::Id::Y, 2);
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 2);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 4);
+        EXPECT_FALSE(f->processOne(pr));
+    }
+
     // $nin.
     {
         Json::Value e;
@@ -285,6 +413,26 @@ TEST(ExpressionFilterTest, multiComparisons)
         e["X"]["$nin"].append(1);
         e["X"]["$nin"].append(2);
         auto f(makeFilter(*table, e));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 2);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 4);
+        EXPECT_TRUE(f->processOne(pr));
+    }
+
+    // $nin across dimensions.
+    {
+        Json::Value e;
+        e["X"]["$nin"].append(0);
+        e["X"]["$nin"].append(1);
+        e["X"]["$nin"].append("Y");
+        auto f(makeFilter(*table, e));
+
+        pr.setField(Dimension::Id::Y, 2);
 
         pr.setField(Dimension::Id::X, 0);
         EXPECT_FALSE(f->processOne(pr));
@@ -351,7 +499,43 @@ TEST(ExpressionFilterTest, logicalOperators)
     auto table(makeTable());
     PointRef pr(*table, 0);
 
-    std::array<double, 3> vals { { 0, 1, 2, } };
+    std::array<double, 3> vals { { 0, 1, 2 } };
+
+    // Implicit $and.
+    {
+        Json::Value e;
+        e["X"]["$gt"] = 0;
+        e["X"]["$lt"] = 2;
+        auto f(makeFilter(*table, e));
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 2);
+        EXPECT_FALSE(f->processOne(pr));
+    }
+
+    // Implicit $and across dimensions.
+    {
+        Json::Value e;
+        e["X"]["$gt"] = 0;
+        e["X"]["$lt"] = "Y";
+        auto f(makeFilter(*table, e));
+
+        pr.setField(Dimension::Id::Y, 2);
+
+        pr.setField(Dimension::Id::X, 0);
+        EXPECT_FALSE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 1);
+        EXPECT_TRUE(f->processOne(pr));
+
+        pr.setField(Dimension::Id::X, 2);
+        EXPECT_FALSE(f->processOne(pr));
+    }
 
     // $and.
     {
