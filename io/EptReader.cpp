@@ -197,11 +197,11 @@ void EptReader::handleOriginQuery()
         for (Json::ArrayIndex i(0); i < sources.size(); ++i)
         {
             const Json::Value& entry(sources[i]);
-            if (entry["path"].asString().find(search) != std::string::npos)
+            if (entry["id"].asString().find(search) != std::string::npos)
             {
                 if (m_queryOriginId != -1)
                 {
-                    throwError("Origin search path is not unique");
+                    throwError("Origin search ID is not unique");
                 }
                 m_queryOriginId = static_cast<int64_t>(i);
             }
@@ -231,7 +231,7 @@ void EptReader::handleOriginQuery()
     m_queryBounds.clip(q);
 
     log()->get(LogLevel::Debug) << "Query origin " <<
-        m_queryOriginId << ": " << found["path"].asString() <<
+        m_queryOriginId << ": " << found["id"].asString() <<
         std::endl;
 }
 

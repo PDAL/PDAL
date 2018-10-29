@@ -1,5 +1,5 @@
 {
-	"bounds" : 
+	"bounds" :
 	[
 		515363,
 		4918339,
@@ -8,7 +8,7 @@
 		4918383,
 		2353
 	],
-	"boundsConforming" : 
+	"boundsConforming" :
 	[
 		515368,
 		4918340,
@@ -20,7 +20,7 @@
 	"dataType" : "laszip",
 	"hierarchyType" : "json",
 	"points" : 518862,
-	"schema" : 
+	"schema" :
 	[
 		{
 			"name" : "X",
@@ -99,8 +99,7 @@
 			"type" : "unsigned"
 		}
 	],
-	"sources" : 4,
-	"srs" : 
+	"srs" :
 	{
 		"wkt" : "GEOCCS[\"unnamed\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"unknown\",1]]"
 	},
