@@ -51,8 +51,7 @@ TEST(GDALReaderTest, badfile)
     gr.setOptions(ro);
 
     PointTable t;
-    gr.prepare(t);
-    EXPECT_THROW(gr.execute(t), pdal_error);
+    EXPECT_THROW(gr.prepare(t), pdal_error);
 }
 
 
