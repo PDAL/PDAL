@@ -1,11 +1,56 @@
 FROM ubuntu:bionic as builder
 MAINTAINER Howard Butler <howard@hobu.co>
 
+<<<<<<< HEAD
 ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
 
 ENV CC gcc
 ENV CXX g++
+=======
+RUN     git clone https://github.com/PDAL/PDAL.git /pdal; \
+    cd /pdal; \
+    git checkout master; \
+    mkdir -p _build; \
+    cd _build; \
+    cmake .. \
+        -G "Unix Makefiles" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_MAKE_PROGRAM=make \
+        -DBUILD_PLUGIN_PYTHON=ON \
+        -DBUILD_PLUGIN_CPD=ON \
+        -DBUILD_PLUGIN_GREYHOUND=ON \
+        -DBUILD_PLUGIN_NITF=ON \
+        -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+        -DBUILD_PLUGIN_SQLITE=ON \
+        -DBUILD_PLUGIN_PCL=ON \
+        -DWITH_LASZIP=ON \
+        -DWITH_LAZPERF=ON \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+    ; \
+    make -j2; \
+    make install; \
+    cd ../python; \
+    python setup.py install; \
+    cd /; \
+    rm -rf /pdal; \
+    git clone https://github.com/PDAL/PRC.git ; \
+    cd PRC; \
+    git checkout master ; \
+    mkdir build ; \
+    cd build ; \
+    cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPDAL_DIR=/usr/lib/cmake/PDAL \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        .. ; \
+    make; \
+    make install; \
+    cd /; \
+    rm -rf /PRC;
+>>>>>>> 85d0274eb... cmake: install PDALConfig where CMake can find it by default
 
 RUN apt-get update -qq; \
     apt-get -qq remove postgis; \
