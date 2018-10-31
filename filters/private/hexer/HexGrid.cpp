@@ -271,12 +271,12 @@ Hexagon *HexGrid::getHexagon(int x, int y)
 
 // Walk the outside of the hexagons to make a path.  Hexagon sides are labeled:
 //
-//     __0_
-//  1 /    \ 5
-//   /      \
-//   \      /
-//  2 \____/ 4
-//      3
+/*     __0_     */
+/*  1 /    \ 5  */
+/*   /      \   */
+/*   \      /   */
+/*  2 \____/ 4  */
+/*      3       */
 //
 void HexGrid::findShapes()
 {
