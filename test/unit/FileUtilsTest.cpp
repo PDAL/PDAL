@@ -79,6 +79,7 @@ TEST(FileUtilsTest, test_file_ops)
     EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
 
     EXPECT_THROW(FileUtils::openFile("~foo1.glob"), pdal::pdal_error);
+    EXPECT_NO_THROW(FileUtils::openFile("foo~1.glob"));
 }
 
 TEST(FileUtilsTest, test_readFileIntoString)
@@ -248,6 +249,7 @@ TEST(FileUtilsTest, glob)
 
 #ifdef _WIN32
     EXPECT_THROW(FileUtils::glob(TP("~foo1.glob")), pdal::pdal_error);
+    EXPECT_NO_THROW(FileUtils::glob(TP("foo1~.glob")));
 #endif
 
     FileUtils::deleteFile("temp.glob");
