@@ -36,7 +36,7 @@ RUN     git clone https://github.com/PDAL/PDAL.git /pdal; \
     cd build ; \
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DPDAL_DIR=/usr/lib/pdal/cmake \
+        -DPDAL_DIR=/usr/lib/cmake/PDAL \
         -DCMAKE_INSTALL_PREFIX=/usr \
         .. ; \
     make; \
