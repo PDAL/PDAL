@@ -1,14 +1,13 @@
-export CONDA_PREFIX=/Users/hobu/miniconda3/
+export CONDA_EXE=/Users/hobu/miniconda3/bin/conda
+source /Users/hobu/miniconda3/bin/activate base
 
-export PATH=$CONDA_PREFIX/bin:$PATH
 
-echo $PATH
-
-conda remove pdal
-conda activate pdal
-conda config --add channels conda-forge
-conda create --name pdal -y
-conda install   -y laz-perf \
+$CONDA_EXE remove pdal
+$CONDA_EXE activate pdal
+source /Users/hobu/miniconda3/bin/activate pdal
+$CONDA_EXE config --add channels conda-forge
+$CONDA_EXE create --name pdal -y
+$CONDA_EXE install  -y laz-perf \
                 laszip \
                 libunwind \
                 geotiff \
@@ -55,7 +54,6 @@ cd $BUILDDIR
 CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
-        -DBoost_DIR:FILEPATH="$CONDA_PREFIX/" \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
         -DBUILD_PLUGIN_SQLITE=ON \
