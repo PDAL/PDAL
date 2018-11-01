@@ -1,3 +1,27 @@
+2018-11-01
+	* Andrew Bell <andrew.bell.ia@gmail.com> Only check for tildes as the first character in a filename. (#2264) (19:46:04)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Streamable skips. (#2224) (16:06:33)
+
+2018-10-31
+	* Andrew Bell <andrew.bell.ia@gmail.com> * Any code coming from Entwine is now BSD because Hobu is relicensing it * Two LGPLv2 files from Eigen are removed. We are not using them and we want to keep clean (#2265) (20:02:54)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix warning in gcc-8. (19:22:42)
+
+2018-10-29
+	* Andrew Bell <andrew.bell.ia@gmail.com> Update EptReader for EPT formatting changes before EPT release. (#2252) (18:04:34)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fixes for gcc8. (17:57:32)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Remove private header from AssignFilter.hpp (#2249) (17:57:21)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't reference an out-of-scope PointTable. (#2255) (14:36:18)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Clairfy description of reflectance_as_intensity. (#2251) (14:34:12)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't use a destructed value in GDALReader::inspect. (#2247) (14:33:45)
+	* Andrew Bell <andrew.bell.ia@gmail.com> add 'memorycopy' option to readers.gdal (#2190) (14:30:35)
+
+2018-10-25
+	* Andrew Bell <andrew.bell.ia@gmail.com> Small updates to package script. (15:57:36)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Fix install issues. (14:56:14)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Treat OCI like everything else. (01:25:05)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Don't build OCI by default. (01:15:55)
+	* Andrew Bell <andrew.bell.ia@gmail.com> Packaging stuff. (01:02:03)
+
 2018-10-24
 	* Andrew Bell <andrew.bell.ia@gmail.com> Remove references to hexbin as a plugin. (#2245) (18:10:36)
 	* Andrew Bell <andrew.bell.ia@gmail.com> Super-minor clean-ups. (16:34:48)
