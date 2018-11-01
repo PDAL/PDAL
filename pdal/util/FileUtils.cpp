@@ -101,9 +101,7 @@ namespace FileUtils
 
 std::istream *openFile(std::string const& filename, bool asBinary)
 {
-    std::string::size_type found_tilde(std::string::npos);
-    found_tilde = filename.find('~');
-    if (found_tilde == 0)
+    if (filename[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
     std::ifstream *ifs = nullptr;
@@ -406,10 +404,7 @@ std::vector<std::string> glob(std::string path)
 {
     std::vector<std::string> filenames;
 
-
-    std::string::size_type found_tilde(std::string::npos);
-    found_tilde = path.find('~');
-    if (found_tilde == 0)
+    if (path[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
 #ifdef _WIN32

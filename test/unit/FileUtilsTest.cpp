@@ -248,7 +248,7 @@ TEST(FileUtilsTest, glob)
     EXPECT_EQ(FileUtils::glob(TP("foo1.glob")).size(), 0u);
 
 #ifdef _WIN32
-    EXPECT_THROW(FileUtils::glob(TP("~foo1.glob")), pdal::pdal_error);
+    EXPECT_THROW(FileUtils::glob("~foo1.glob"), pdal::pdal_error);
     EXPECT_NO_THROW(FileUtils::glob(TP("foo1~.glob")));
 #endif
 
