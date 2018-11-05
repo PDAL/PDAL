@@ -2,40 +2,38 @@ export CONDA_EXE=/Users/hobu/miniconda3/bin/conda
 source /Users/hobu/miniconda3/bin/activate base
 
 
-# $CONDA_EXE remove pdal
-# $CONDA_EXE activate pdal
+$CONDA_EXE remove pdal
+$CONDA_EXE activate pdal
 source /Users/hobu/miniconda3/bin/activate pdal
-# $CONDA_EXE config --add channels conda-forge
-# $CONDA_EXE create --name pdal -y
-# $CONDA_EXE install  -y laz-perf \
-#                 laszip \
-#                 libunwind \
-#                 geotiff \
-#                 jsoncpp \
-#                 sqlite \
-#                 libxml2 \
-#                 nitro \
-#                 curl \
-#                 gdal=2.3.2 \
-#                 postgresql \
-#                 hdf5 \
-#                 pcl \
-#                 cmake \
-#                 clang_osx-64 \
-#                 clangxx_osx-64 \
-#                 libspatialite \
-#                 eigen \
-#                 ninja \
-#                 libgdal \
-#                 geos \
-#                 zstd \
-#                 python=3.7 \
-#                 numpy
-# #
+$CONDA_EXE config --add channels conda-forge
+$CONDA_EXE create --name pdal -y
+$CONDA_EXE install  -y laz-perf \
+                laszip \
+                libunwind \
+                geotiff \
+                jsoncpp \
+                sqlite \
+                libxml2 \
+                nitro \
+                curl \
+                gdal=2.3.2 \
+                postgresql \
+                hdf5 \
+                pcl \
+                cmake \
+                clang_osx-64 \
+                clangxx_osx-64 \
+                libspatialite \
+                eigen \
+                ninja \
+                libgdal \
+                geos \
+                zstd \
+                python=3.7 \
+                numpy
+
 BUILDDIR=conda-build
 
-#export CC=/usr/bin/clang
-#export CXX=/usr/bin/clang++
 export CC=${CONDA_PREFIX}/bin/clang
 export CXX=${CONDA_PREFIX}/bin/clang++
 export GDAL_HOME=${CONDA_PREFIX}
