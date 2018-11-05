@@ -37,14 +37,14 @@
 namespace hexer
 {
 
-//
+/**
 //     __0_
 //  1 /    \ 5
 //   /      \
 //   \      /
 //  2 \____/ 4
 //      3
-//
+**/
 
 bool Hexagon::less(const Hexagon *h) const
 {

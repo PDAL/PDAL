@@ -41,7 +41,10 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
 #include <riegl/scanlib.hpp>
+#pragma GCC diagnostic pop
 
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
