@@ -44,11 +44,11 @@ namespace pdal
 
 class Expression;
 
-class PDAL_DLL ExpressionFilter : public Filter, public Streamable
+class PDAL_DLL MongoExpressionFilter : public Filter, public Streamable
 {
 public:
-    ExpressionFilter();
-    ~ExpressionFilter();
+    MongoExpressionFilter();
+    ~MongoExpressionFilter();
 
     std::string getName() const override;
     virtual bool processOne(PointRef& point) override;

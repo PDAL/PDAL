@@ -168,9 +168,9 @@ PDAL_ADD_TEST(pdal_filters_crop_test
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_expression_test
+PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES
-        filters/ExpressionFilterTest.cpp
+        filters/MongoExpressionFilterTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
 )

@@ -42,7 +42,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <filters/ExpressionFilter.hpp>
+#include <filters/MongoExpressionFilter.hpp>
 
 using namespace pdal;
 
@@ -60,12 +60,12 @@ std::unique_ptr<FixedPointTable> makeTable()
     return table;
 }
 
-std::unique_ptr<ExpressionFilter> makeFilter(BasePointTable& table,
+std::unique_ptr<MongoExpressionFilter> makeFilter(BasePointTable& table,
         Json::Value expression)
 {
     Options o;
     o.add("expression", expression.toStyledString());
-    std::unique_ptr<ExpressionFilter> filter(new ExpressionFilter());
+    std::unique_ptr<MongoExpressionFilter> filter(new MongoExpressionFilter());
     filter->setOptions(o);
     filter->prepare(table);
     return filter;
@@ -73,21 +73,21 @@ std::unique_ptr<ExpressionFilter> makeFilter(BasePointTable& table,
 
 } // unnamed namespace
 
-TEST(ExpressionFilterTest, createStage)
+TEST(MongoExpressionFilterTest, createStage)
 {
     StageFactory f;
-    Stage* filter(f.createStage("filters.expression"));
+    Stage* filter(f.createStage("filters.mongo"));
     EXPECT_TRUE(filter);
 }
 
-TEST(ExpressionFilterTest, noExpression)
+TEST(MongoExpressionFilterTest, noExpression)
 {
-    ExpressionFilter filter;
+    MongoExpressionFilter filter;
     PointTable table;
     EXPECT_THROW(filter.prepare(table), pdal_error);
 }
 
-TEST(ExpressionFilterTest, missingDimension)
+TEST(MongoExpressionFilterTest, missingDimension)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);
@@ -107,7 +107,7 @@ TEST(ExpressionFilterTest, missingDimension)
     }
 }
 
-TEST(ExpressionFilterTest, invalidSingleComparisons)
+TEST(MongoExpressionFilterTest, invalidSingleComparisons)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);
@@ -127,7 +127,7 @@ TEST(ExpressionFilterTest, invalidSingleComparisons)
     }
 }
 
-TEST(ExpressionFilterTest, singleComparisons)
+TEST(MongoExpressionFilterTest, singleComparisons)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);
@@ -338,7 +338,7 @@ TEST(ExpressionFilterTest, singleComparisons)
     }
 }
 
-TEST(ExpressionFilterTest, inValidMultiComparisons)
+TEST(MongoExpressionFilterTest, inValidMultiComparisons)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);
@@ -363,7 +363,7 @@ TEST(ExpressionFilterTest, inValidMultiComparisons)
     }
 }
 
-TEST(ExpressionFilterTest, multiComparisons)
+TEST(MongoExpressionFilterTest, multiComparisons)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);
@@ -445,7 +445,7 @@ TEST(ExpressionFilterTest, multiComparisons)
     }
 }
 
-TEST(ExpressionFilterTest, invalidLogicalOperators)
+TEST(MongoExpressionFilterTest, invalidLogicalOperators)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);
@@ -494,7 +494,7 @@ TEST(ExpressionFilterTest, invalidLogicalOperators)
     }
 }
 
-TEST(ExpressionFilterTest, logicalOperators)
+TEST(MongoExpressionFilterTest, logicalOperators)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);

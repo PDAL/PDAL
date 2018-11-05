@@ -32,39 +32,39 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "ExpressionFilter.hpp"
+#include "MongoExpressionFilter.hpp"
 
-#include "private/expression/Expression.hpp"
+#include "private/mongoexpression/Expression.hpp"
 
 namespace pdal
 {
 
 static const StaticPluginInfo s_info
 {
-    "filters.expression",
+    "filters.mongo",
     "Pass only points that pass a logic filter.",
     "http://pdal.io/stages/filters.logic.html"
 };
 
-CREATE_STATIC_STAGE(ExpressionFilter, s_info);
+CREATE_STATIC_STAGE(MongoExpressionFilter, s_info);
 
-std::string ExpressionFilter::getName() const
+std::string MongoExpressionFilter::getName() const
 {
     return s_info.name;
 }
 
-ExpressionFilter::ExpressionFilter()
+MongoExpressionFilter::MongoExpressionFilter()
 {}
 
-ExpressionFilter::~ExpressionFilter()
+MongoExpressionFilter::~MongoExpressionFilter()
 {}
 
-void ExpressionFilter::addArgs(ProgramArgs& args)
+void MongoExpressionFilter::addArgs(ProgramArgs& args)
 {
     args.add("expression", "Logical query expression", m_json).setPositional();
 }
 
-void ExpressionFilter::prepared(PointTableRef table)
+void MongoExpressionFilter::prepared(PointTableRef table)
 {
     log()->get(LogLevel::Debug) << "Building expression from: " << m_json <<
         std::endl;
@@ -75,7 +75,7 @@ void ExpressionFilter::prepared(PointTableRef table)
         std::endl;
 }
 
-PointViewSet ExpressionFilter::run(PointViewPtr inView)
+PointViewSet MongoExpressionFilter::run(PointViewPtr inView)
 {
     PointViewSet views;
     PointViewPtr view(inView->makeNew());
@@ -93,7 +93,7 @@ PointViewSet ExpressionFilter::run(PointViewPtr inView)
     return views;
 }
 
-bool ExpressionFilter::processOne(PointRef& pr)
+bool MongoExpressionFilter::processOne(PointRef& pr)
 {
     return m_expression->check(pr);
 }
