@@ -233,9 +233,10 @@ PyObject *fromMetadata(MetadataNode m)
     std::string description = m.description();
 
     MetadataNodeList children = m.children();
-    PyObject *submeta = PyList_New(0);
+	PyObject *submeta(0);
     if (children.size())
     {
+		submeta = PyList_New(0);
         for (MetadataNode& child : children)
             PyList_Append(submeta, fromMetadata(child));
     }
@@ -244,8 +245,10 @@ PyObject *fromMetadata(MetadataNode m)
     PyDict_SetItemString(data, "value", PyUnicode_FromString(value.data()));
     PyDict_SetItemString(data, "type", PyUnicode_FromString(type.data()));
     PyDict_SetItemString(data, "description", PyUnicode_FromString(description.data()));
-    PyDict_SetItemString(data, "children", submeta);
-
+	if (children.size())
+	{
+		PyDict_SetItemString(data, "children", submeta);
+	}
     return data;
 }
 

@@ -182,3 +182,20 @@ std::string r = R"foo(
     test("--schema", r);
 }
 
+TEST(Info, all)
+{
+std::string r = R"foo(
+      {
+        "name": "Z",
+        "size": 8,
+        "type": "floating"
+      },
+      {
+        "name": "Intensity",
+        "size": 2,
+        "type": "unsigned"
+      },
+)foo";
+
+    test("--all", r);
+}

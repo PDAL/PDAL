@@ -92,7 +92,7 @@ private:
 
     void readLaszip(PointView& view, const Key& key) const;
     void readBinary(PointView& view, const Key& key) const;
-    void process(PointView& view, PointRef& pr, bool unscale) const;
+    void process(PointView& view, PointRef& pr) const;
 
     Json::Value parse(const std::string& data) const;
 
@@ -122,10 +122,8 @@ private:
 
     Args m_args;
     BOX3D m_queryBounds;
-    // This is a pointer since zero is a valid query OriginId.
-    std::unique_ptr<uint64_t> m_queryOriginId;
+    int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
-    DimTypeList m_dimTypes;
 
     mutable std::mutex m_mutex;
 
@@ -133,6 +131,8 @@ private:
     uint64_t m_overlapPoints = 0;
 
     std::unique_ptr<FixedPointLayout> m_remoteLayout;
+    DimTypeList m_dimTypes;
+    std::array<XForm, 3> m_xyzTransforms;
 };
 
 } // namespace pdal

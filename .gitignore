@@ -164,6 +164,7 @@ test/data/qfit/little-endian-conversion.xml
 test/data/qfit/pipeline.xml
 test/data/qfit/reader.xml
 test/data/sbet/pipeline.xml
+test/data/**/*.aux.xml
 
 python/*.egg*
 python/build/*

@@ -1,3 +1,4 @@
 pushd build
-nmake /f Makefile
+REM nmake /f Makefile
+ninja
 popd
