@@ -1,7 +1,7 @@
 .. _filters.mongoexpression:
 
-filters.emongoxpression
-==================
+filters.mongoexpression
+========================
 
 .. contents::
 
