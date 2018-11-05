@@ -174,6 +174,9 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
 )
+
+target_include_directories(pdal_filters_mongoexpression_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
+
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
