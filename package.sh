@@ -9,7 +9,6 @@ then
     exit
 fi
 
-
 GITSHA="$(git rev-parse HEAD)"
 
 echo "Cutting release for SHA $GITSHA"
@@ -20,16 +19,12 @@ DOCKER="docker"
 
 CONTAINERRUN="$DOCKER run -it -d --entrypoint /bin/sh -v $HERE:/data $CONTAINER"
 
-
 CONTAINERID=`$CONTAINERRUN`
-echo "Starting container: " $CONTAINERID
 cat > docker-package.sh << "EOF"
 #!/bin/sh
 
-if [ $# -eq 0 ]
+if [ $# -eq 1 ]
 then
-    RELNAME=$(./bin/pdal-config --version)
-else
     RELNAME=$1
 fi
 
@@ -37,13 +32,21 @@ git clone https://github.com/PDAL/PDAL.git;
 cd /PDAL;
 EOF
 
+
 echo "git checkout $GITSHA" >> docker-package.sh
+
 
 cat >> docker-package.sh << "EOF"
 mkdir build; cd build;
-cmake -DPDAL_VERSION_STRING=$RELNAME .. ;
 
+if [ -n "${RELNAME+x}" ]
+then
+    cmake -DPDAL_VERSION_STRING=$RELNAME ..
+else
+    cmake ..
+fi
 make dist
+RELNAME=$(./bin/pdal-config --version)
 
 OUTPUTDIR="/data/release-$RELNAME"
 if [ ! -e $OUTPUTDIR ]
