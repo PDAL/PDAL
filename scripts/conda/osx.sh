@@ -31,11 +31,9 @@ $CONDA_EXE install  -y laz-perf \
                 zstd \
                 python=3.7 \
                 numpy
-#
+
 BUILDDIR=conda-build
 
-#export CC=/usr/bin/clang
-#export CXX=/usr/bin/clang++
 export CC=${CONDA_PREFIX}/bin/clang
 export CXX=${CONDA_PREFIX}/bin/clang++
 export GDAL_HOME=${CONDA_PREFIX}
