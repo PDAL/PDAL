@@ -80,6 +80,5 @@ void Reader::readerInitialize(PointTableRef)
         setSpatialReference(m_defaultSrs);
 }
 
-
 } // namespace pdal
 
