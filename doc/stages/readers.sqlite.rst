@@ -39,10 +39,6 @@ Options
 query
   SQL statement that selects a schema XML, cloud id, bbox, and extent [Required]
 
-spatialreference
-  The spatial reference to use for the points. Over-rides the value read from the database.
-
-count
-  Maximum number of points to read [Optional]
+.. include:: reader_opts.rst
 
 .. _SQLite: https://sqlite.org/

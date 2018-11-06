@@ -23,6 +23,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.gdal
    readers.geowave
    readers.greyhound
+   readers.i3s
    readers.ilvis2
    readers.las
    readers.matlab
@@ -41,6 +42,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.rxp
    readers.sbet
    readers.sqlite
+   readers.slpk
    readers.terrasolid
    readers.text
    readers.tindex
@@ -68,6 +70,10 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.greyhound`
     Query point cloud data from a Greyhound server.
+
+:ref:`readers.i3s`
+    Read data stored in the Esri I3S format.  The data is read from an
+    appropriate server.
 
 :ref:`readers.ilvis2`
     Read from files in the ILVIS2 format.
@@ -130,6 +136,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.sqlite`
     Read data stored in a SQLite database.
+
+:ref:`readers.slpk`
+    Read data stored in an Esri SLPK file.
 
 :ref:`readers.terrasolid`
     TerraSolid Reader

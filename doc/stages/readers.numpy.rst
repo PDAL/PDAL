@@ -1,7 +1,7 @@
 .. _readers.numpy:
 
 readers.numpy
-================================================================================
+=============
 
 PDAL has support for processing data using :ref:`filters.python`, but it is also
 convenient to read data from `Numpy`_ for processing in PDAL.
@@ -15,7 +15,7 @@ extension ``.npy``. As of PDAL 1.7.0, ``.npz`` files were not yet supported.
     in writing the file and for reading the file don't match.
 
 Array Types
---------------------------------------------------------------------------------
+-----------
 
 :ref:`readers.numpy` supports reading data in two forms:
 
@@ -26,7 +26,7 @@ Array Types
 
 
 Structured Arrays
-................................................................................
+.................
 
 Numpy arrays can be created as structured data, where each entry is a set
 of fields.  Each field has a name.  As an example, `laspy`_ provides its
@@ -51,7 +51,7 @@ custom PDAL dimensions.
 
 
 Standard (non-structured) Arrays
-................................................................................
+................................
 
 Arrays without field information contain a single datatype.  This datatype is
 mapped to a dimension specified by the ``dimension`` option.
@@ -144,8 +144,7 @@ Options
 filename
   npy file to read [Required]
 
-count
-  Maximum number of points to read. [Default: unlimited]
+.. include:: reader_opts.rst
 
 dimension
   Dimension name from :ref:`dimensions` to map raster values

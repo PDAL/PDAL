@@ -47,9 +47,15 @@ Options
 filename
   Filename to read from [Required]
 
+.. include:: reader_opts.rst
+
 format
   Name of number of format of file being read.  See MB-System documentation
   for a list of `all formats`_. [Required]
+
+datatype
+  Type of data to read.  Either 'multibeam' or 'sidescan'.
+  [Default: 'multibeam']
 
 timegap
   The maximum number of seconds that can elapse between pings before the
@@ -63,5 +69,3 @@ speedmin
 
 .. _all formats: https://www.ldeo.columbia.edu/res/pi/MB-System/html/mbio.html#lbAI
 
-count
-  Maximum number of points to read [Optional]

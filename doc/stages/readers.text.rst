@@ -65,11 +65,10 @@ Example Pipeline
 Options
 -------
 
-count
-  Maximum number of points to read
-
 filename
   text file to read [Required]
+
+.. include:: reader_opts.rst
 
 header
   String to use as the file header.  All lines in the file as assumed to be
@@ -81,9 +80,5 @@ separator
 
 skip
   Number of lines to ignore at the beginning of the file. [Default: 0]
-
-spatialreference
-  Spatial reference for the file data.  Most text-based formats of
-  SRS information are accepted, including WKT and proj.4. [Default: None]   
 
 .. _formatted: http://en.cppreference.com/w/cpp/string/basic_string/stof

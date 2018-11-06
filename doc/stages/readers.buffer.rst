@@ -19,3 +19,4 @@ See :ref:`writing` for an example usage scenario for :ref:`readers.buffer`.
 Options
 -------
 
+.. include:: reader_opts.rst

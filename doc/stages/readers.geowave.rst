@@ -43,6 +43,8 @@ Example
 Options
 -------
 
+.. include:: reader_opts.rst
+
 zookeeper_url
   The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance. [Required]
 

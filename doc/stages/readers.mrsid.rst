@@ -31,8 +31,9 @@ Options
 -------
 
 filename
-  Filename to read from [Required]
+  Filename to read from. [Required]
 
+.. include:: reader_opts.rst
 
 .. _Lidar_DSDK: https://www.lizardtech.com/developer/
 
