@@ -18,6 +18,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
    readers.bpf
    readers.buffer
+   readers.ept
    readers.faux
    readers.gdal
    readers.geowave
@@ -51,6 +52,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 :ref:`readers.buffer`
     Special stage that allows you to read data from your own PointView rather
     than fetching data from a specific reader.
+
+:ref:`readers.ept`
+    Used for reading `Entwine Point Tile <https://entwine.io>`__ format.
 
 :ref:`readers.faux`
     Used for testing pipelines. It does not read from a file or database, but
