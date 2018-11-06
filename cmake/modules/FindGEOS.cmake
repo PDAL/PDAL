@@ -32,7 +32,8 @@ IF(WIN32)
 		$ENV{LIB_DIR}/include 
 		$ENV{INCLUDE} 
 		${OSGEO4W_INCLUDE_DIR})
-    FIND_LIBRARY(GEOS_LIBRARY NAMES geos geos_c PATHS 
+    
+    FIND_LIBRARY(GEOS_LIBRARY NAMES geos_c PATHS 
       "$ENV{LIB}/lib"
       $ENV{LIB}
       #mingw

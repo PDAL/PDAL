@@ -42,9 +42,11 @@ if(DEFINED ENV{ORACLE_HOME})
   set(ORACLE_LIB_DIR 
     ${ORACLE_HOME}/      
     ${ORACLE_HOME}/lib
+    ${ORACLE_HOME}/libs # conda
     ${ORACLE_HOME}/sdk/lib       # Oracle SDK
     ${ORACLE_HOME}/sdk/lib/msvc
     ${ORACLE_HOME}/OCI/lib/msvc) # Oracle XE on Windows
+    
 
   find_library(ORACLE_OCI_LIBRARY  NAMES ${ORACLE_OCI_NAMES} PATHS ${ORACLE_LIB_DIR})
 

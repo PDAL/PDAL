@@ -76,11 +76,14 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
         ${PDAL_INCLUDE_DIR})
     pdal_target_compile_settings(${_name})
 
-    install(TARGETS ${_name}
-        EXPORT PDALTargets
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    # Don't install static libraries - they're already built into libpdalXXX
+    if (NOT ${_library_type} STREQUAL "STATIC")
+        install(TARGETS ${_name}
+            EXPORT PDALTargets
+            RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+            LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+            ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    endif()
 endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################

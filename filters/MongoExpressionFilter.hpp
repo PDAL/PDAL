@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2014, Hobu Inc. (howard@hobu.co)
+ * Copyright (c) 2018, Connor Manning (connor@hobu.co)
  *
  * All rights reserved.
  *
@@ -13,10 +13,10 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Howard Butler or Hobu, Inc.
- *       the names of its contributors may be
- *       used to endorse or promote products derived from this software
- *       without specific prior written permission.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,63 +32,35 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Hexagon.hpp"
+#pragma once
 
-namespace hexer
+#include <json/json.h>
+
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
+
+namespace pdal
 {
 
-/**
-//     __0_
-//  1 /    \ 5
-//   /      \
-//   \      /
-//  2 \____/ 4
-//      3
-**/
+class Expression;
 
-bool Hexagon::less(const Hexagon *h) const
+class PDAL_DLL MongoExpressionFilter : public Filter, public Streamable
 {
-    if (y() < h->y())
-        return true;
-    if (y() > h->y())
-        return false;
-    if (xeven() && h->xodd())
-        return true;
-    if (xodd() && h->xeven())
-        return false;
-    return x() < h->x();
-}
+public:
+    MongoExpressionFilter();
+    ~MongoExpressionFilter();
 
-bool Hexagon::yless(Hexagon *h) const
-{
-    if (y() < h->y())
-        return true;
-    if (y() > h->y())
-        return false;
-    return (xeven() && h->xodd());
-}
+    std::string getName() const override;
+    virtual bool processOne(PointRef& point) override;
 
-// Find the X and Y in hex coordinates of the hexagon next to this hexagon
-// in the direction specified.
-Coord Hexagon::neighborCoord(int dir) const
-{
-    static int evenx[] = { 0, -1, -1, 0, 1, 1 };
-    static int eveny[] = { -1, -1, 0, 1, 0, -1 };
-    static int oddx[] = { 0, -1, -1, 0, 1, 1 };
-    static int oddy[] = { -1, 0, 1, 1, 1, 0 };
+private:
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual PointViewSet run(PointViewPtr view) override;
 
-    Coord coord(m_x, m_y);
-    if (xeven())
-    {
-        coord.m_x += evenx[dir];
-        coord.m_y += eveny[dir];
-    }
-    else
-    {
-        coord.m_x += oddx[dir];
-        coord.m_y += oddy[dir];
-    }
-    return coord;
-}
+    Json::Value m_json;
+    std::unique_ptr<Expression> m_expression;
+};
 
-} // namespace hexer
+} // namespace pdal
+
