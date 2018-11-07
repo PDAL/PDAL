@@ -62,6 +62,9 @@ count
   How many synthetic points to generate before finishing? [Required, except
   when mode is 'grid']
 
+spatialreference
+  Spatial reference to apply to data. [Optional]
+
 mean_x|y|z
   Mean value in the x, y, or z dimension respectively. (Normal mode only)
   [Default: 0]

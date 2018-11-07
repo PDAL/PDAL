@@ -34,6 +34,8 @@ Options
 filename
     EPT resource from which to read.  Because EPT resources do not have a file extension, to specify an EPT resource as a string, it must be prefixed with ``ept://``.  For example, ``pdal translate ept://http://na.entwine.io/autzen autzen.laz``. [Required]
 
+.. include:: reader_opts.rst
+
 bounds
     The extents of the resource to select in 2 or 3 dimensions, expressed as a string, e.g.: ``([xmin, xmax], [ymin, ymax], [zmin, zmax])``.  If omitted, the entire dataset will be selected.
 

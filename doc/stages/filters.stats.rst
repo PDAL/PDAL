@@ -48,3 +48,11 @@ enumerate
 count
   Identical to the --enumerate option, but provides a count of the number
   of points in each enumerated category.
+
+global
+  A comma-separated list of dimensions for which global statistics (median,
+  mad, mode) should be calculated.
+
+advanced
+  Calculate advanced statistics (skewness, kurtosis). [Default: false]
+

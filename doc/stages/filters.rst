@@ -42,6 +42,7 @@ invalidate an existing KD-tree.
    filters.elm
    filters.ferry
    filters.hag
+   filters.info
    filters.kdistance
    filters.lof
    filters.mongus
@@ -208,6 +209,10 @@ the input. These filters will invalidate an existing KD-tree.
 :ref:`filters.decimation`
     Keep every Nth point.
 
+:ref:`filters.dem`
+    Remove points that are in a raster cell but have a value far from the
+    value of the raster.
+
 :ref:`filters.head`
     Return N points from beginning of the point cloud.
 
@@ -312,8 +317,13 @@ invalidate an existing KD-tree.
 :ref:`filters.hexbin`
     Tessellate XY domain and determine point density and/or point boundary.
 
+:ref:`filters.info`
+    Generate metadata about the point set, including a point count and
+    spatial reference information.
+
 :ref:`filters.stats`
     Compute statistics about each dimension (mean, min, max, etc.).
+
 
 Mesh
 ----

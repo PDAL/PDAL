@@ -40,6 +40,8 @@ Options
 filename
   File to read from [Required]
 
+.. include:: reader_opts.rst
+
 mapping
   Which ILVIS2 field type to map to X, Y, Z dimensions
   'LOW', 'CENTROID', or 'HIGH' ['CENTROID']
@@ -47,5 +49,3 @@ mapping
 metadata
   XML metadata file to coincidentally read [Optional]
 
-count
-  Maximum number of points to read [Optional]
