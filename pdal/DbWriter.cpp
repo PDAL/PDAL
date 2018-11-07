@@ -155,7 +155,7 @@ void DbWriter::setAutoXForm(const PointViewPtr view)
 {
     using namespace Dimension;
 
-    m_scaling.setAutoXForm(view);
+    m_scaling.setAutoXForm({view});
     for (auto& xmlDim : m_dbDims)
     {
         if (xmlDim.m_dimType.m_id == Id::X)

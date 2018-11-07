@@ -239,6 +239,7 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
+    prerun(views);
     for (auto const& it : views)
     {
         StageRunnerPtr runner(new StageRunner(this, it));
