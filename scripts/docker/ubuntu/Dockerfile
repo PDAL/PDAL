@@ -1,7 +1,7 @@
 FROM ubuntu:bionic as builder
 MAINTAINER Howard Butler <howard@hobu.co>
 
-ARG PDAL_VERSION=1.8.0
+ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
 
 ENV CC gcc
