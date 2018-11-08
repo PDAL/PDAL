@@ -255,6 +255,7 @@ RUN date
 
 COPY --from=builder  /build/usr/bin/ /usr/bin/
 COPY --from=builder  /build/usr/lib/ /usr/lib/
+COPY --from=builder  /build/usr/include/ /usr/include/
 
 RUN \
     curl -LOs http://download.osgeo.org/proj/vdatum/usa_geoid2012.zip && unzip -j -u usa_geoid2012.zip -d /usr/share/proj; \
