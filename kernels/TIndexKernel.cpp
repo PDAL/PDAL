@@ -441,13 +441,12 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     // Failing that, get the proj.4 version.  Not sure what's supposed to
     // happen if we overflow 254 with proj.4.
 
-    const char* pszAuthorityCode = OSRGetAuthorityCode(srcSrs.get(), NULL);
-    const char* pszAuthorityName = OSRGetAuthorityName(srcSrs.get(), NULL);
-    if (pszAuthorityName && pszAuthorityCode)
+    std::string epsg =
+        SpatialReference(fileInfo.m_srs).identifyHorizontalEPSG();
+    if (epsg.size())
     {
-        std::string auth = std::string(pszAuthorityName) + ":" +
-            pszAuthorityCode;
-        OGR_F_SetFieldString(hFeature, indexes.m_srs, auth.data());
+        epsg = "EPSG:" + epsg;
+        OGR_F_SetFieldString(hFeature, indexes.m_srs, epsg.data());
     }
     else
     {
@@ -487,16 +486,7 @@ bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
     if (!qi.valid())
         return false;
 
-    std::stringstream polygon;
-    polygon << "POLYGON ((";
-
-    polygon <<         qi.m_bounds.minx << " " << qi.m_bounds.miny;
-    polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.miny;
-    polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.maxy;
-    polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.maxy;
-    polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.miny;
-    polygon << "))";
-    fileInfo.m_boundary = polygon.str();
+    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
     if (!qi.m_srs.empty())
         fileInfo.m_srs = qi.m_srs.getWKT();
     return true;
