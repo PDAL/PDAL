@@ -446,7 +446,6 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     if (epsg.size())
     {
         epsg = "EPSG:" + epsg;
-        std::cerr << "Out = " << epsg << "!\n";
         OGR_F_SetFieldString(hFeature, indexes.m_srs, epsg.data());
     }
     else
