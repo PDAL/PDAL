@@ -133,7 +133,7 @@ void PMFFilter::prepared(PointTableRef table)
                                              "NumberOfReturns. Skipping "
                                              "segmentation of last returns and "
                                              "proceeding with all returns.\n";
-            m_args->m_returns = {""};
+            m_args->m_returns.clear();
         }
     }
 }
