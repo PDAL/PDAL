@@ -64,7 +64,7 @@ TEST(SMRFilterTest, validReturns)
     EXPECT_NO_THROW(filter.prepare(table));
 }
 
-// Test that for issue 2275
+// Issue 2775.  Test that files without return counts are processed correctly.
 TEST(SMRFFilterTest, noreturns)
 {
     StageFactory factory;
