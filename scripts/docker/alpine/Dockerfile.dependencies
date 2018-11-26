@@ -44,13 +44,15 @@ RUN \
     ; \
     apk add --no-cache \
         eigen-dev \
-        py-numpy \
+        py3-numpy \
         py-numpy-dev \
         libxml2-dev \
         python3-dev \
         curl-dev \
         postgresql-dev \
+        sqlite-dev \
         libcrypto1.1@edgemain \
+        libspatialite-dev@edgetesting \
         gdal-dev@edgetesting \
         geos-dev@edgetesting \
         libgeotiff-dev@edgetesting \
