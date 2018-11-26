@@ -34,6 +34,7 @@ RUN \
 
 RUN \
     echo "@edgetesting http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
+    echo "@edgemain http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
     apk update; \
     apk add --no-cache \
         git \
@@ -42,12 +43,14 @@ RUN \
         g++ \
     ; \
     apk add --no-cache \
+        eigen-dev \
         py-numpy \
         py-numpy-dev \
         libxml2-dev \
         python3-dev \
         curl-dev \
         postgresql-dev \
+        libcrypto1.1@edgemain \
         gdal-dev@edgetesting \
         geos-dev@edgetesting \
         libgeotiff-dev@edgetesting \
@@ -59,8 +62,6 @@ RUN \
         proj4@edgetesting \
     ; \
     \
-    git clone https://github.com/PDAL/PDAL.git --branch 1.8-maintenance --single-branch pdal; \
-    \
 #
 # These use PDAL's vendor/eigen
 #
@@ -70,7 +71,7 @@ RUN \
     cd build; \
     cmake .. \
         -G Ninja \
-        -DEIGEN3_INCLUDE_DIR=/pdal/vendor/eigen \
+        -DCMAKE_BUILD_TYPE=Release \
     ; \
     ninja install; \
     cd /; \
@@ -82,7 +83,7 @@ RUN \
     cd build; \
     cmake .. \
         -G Ninja \
-        -DEIGEN3_INCLUDE_DIR=/pdal/vendor/eigen \
+        -DCMAKE_BUILD_TYPE=Release \
     ; \
     ninja install; \
     cd /; \

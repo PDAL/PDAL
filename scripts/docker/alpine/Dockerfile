@@ -1,6 +1,7 @@
-FROM pdal/alpinebase:latest
+FROM pdal/alpinebase:latest as builder
 
 RUN    \
+    git clone https://github.com/PDAL/PDAL.git --branch 1.8-maintenance --single-branch pdal; \
     cd pdal; \
     mkdir build; \
     cd build; \
@@ -16,7 +17,7 @@ RUN    \
         -DWITH_LASZIP=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_LAZPERF=ON \
-        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_PREFIX=/usr/local \
         -DCMAKE_INSTALL_LIBDIR=lib \
         ; \
     ninja install; \
@@ -27,5 +28,16 @@ RUN    \
         git \
         cmake \
         ninja \
-        g++\
-    ;
+        g++ \
+    ; \
+    rm -rf /usr/share/hdf5_examples; \
+    rm /usr/lib/*.a; \
+    rm /usr/bin/gdal*; \
+    rm /usr/bin/ogr*; \
+    rm /usr/bin/h5*;
+
+FROM alpine:3.8
+
+COPY --from=builder /usr/ /usr/
+COPY --from=builder /lib/ /lib/
+
