@@ -49,7 +49,7 @@ static PluginInfo const s_info
     "http://pdal.io/apps/density.html"
 };
 
-CREATE_SHARED_KERNEL(DensityKernel, s_info)
+CREATE_STATIC_KERNEL(DensityKernel, s_info)
 
 std::string DensityKernel::getName() const { return s_info.name; }
 
