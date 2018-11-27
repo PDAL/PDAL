@@ -28,9 +28,10 @@ cmake .. \
 ninja -v
 ctest -V
 ninja install
+cd /
 
 # Python extension testing
-pip3 install packaging
+pip3 install packaging cython
 git clone https://github.com/PDAL/python.git pdal-python
 cd pdal-python
 git checkout 2.0.0
