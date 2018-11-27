@@ -9,7 +9,7 @@ before_install:
   - docker pull pdal/alpinebase:latest
 
 script:
-  - docker run -v $TRAVIS_BUILD_DIR:/pdal /pdal/scripts/ci/script.sh
+  - docker run -v $TRAVIS_BUILD_DIR:/pdal -t pdal/alpinebase:latest /pdal/scripts/ci/script.sh
 
 after_success:
   - echo "secure travis:" "$TRAVIS_SECURE_ENV_VARS"
