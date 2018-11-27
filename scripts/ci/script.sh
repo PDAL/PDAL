@@ -25,20 +25,19 @@ cmake .. \
     -DWITH_LAZPERF=ON \
     -DWITH_TESTS=ON
 
-ninja
-#LD_LIBRARY_PATH=./lib
+ninja -v
 ctest -V
-make install
+ninja install
 
 # Python extension testing
-pip install packaging
+pip3 install packaging
 git clone https://github.com/PDAL/python.git pdal-python
 cd pdal-python
 git checkout 2.0.0
-python setup.py build
+python3 setup.py build
 echo "current path: " `pwd`
-export PDAL_TEST_DIR=/pdal/_build/test
-python setup.py test
+#export PDAL_TEST_DIR=/pdal/_build/test
+PDAL_TEST_DIR=/pdal/_build/test python3 setup.py test
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do
