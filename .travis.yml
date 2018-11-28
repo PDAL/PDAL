@@ -13,12 +13,10 @@ script:
 
 after_success: |+
   if [[ "$TRAVIS_SECURE_ENV_VARS" == "true" &&
-        "$TRAVIS_BRANCH" = "1.8-maintenance" ]]
+        "$TRAVIS_BRANCH" == "1.8-maintenance" ]]
   then
       ./scripts/ci/after_success.sh $TRAVIS_BUILD_DIR
   fi
-#  - echo "secure travis:" "$TRAVIS_SECURE_ENV_VARS"
-#  - sh -c 'if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "1.8-maintenance"; then echo "publish website"; ./scripts/ci/build_docs.sh; ./scripts/ci/add_deploy_key.sh; ./scripts/ci/deploy_website.sh $TRAVIS_BUILD_DIR/doc/build /tmp; fi'
 
 notifications:
   on_success: always
