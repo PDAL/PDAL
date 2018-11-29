@@ -114,13 +114,15 @@ class R : public Reader, public Streamable
 {
 
 public:
-    R() : m_entered(false)
-    {}
-
     std::string getName() const
     { return "readers.r"; }
 
 private:
+    virtual void ready(PointTableRef table)
+    {
+        m_entered = false;
+    }
+
     virtual bool processOne(PointRef& point)
     {
         if (!m_entered)
@@ -432,4 +434,97 @@ TEST(Streaming, issue_2086)
     streamFilter.prepare(t2);
     streamFilter.execute(t2);
     EXPECT_EQ(cnt, 35);
+}
+
+//
+// Make sure we execute diamond-shaped pipelines properly by repeating
+// stage execution as necessary.
+//
+TEST(Streaming, issue_2287)
+{
+
+StaticPluginInfo const f_info
+{
+    "filters.f",
+    "F Filter",
+    "",
+    {}
+};
+
+CREATE_STATIC_STAGE(F, f_info)
+
+StaticPluginInfo const r_info
+{
+    "readers.r",
+    "R Reader",
+    "",
+    {}
+};
+
+CREATE_STATIC_STAGE(R, r_info)
+
+std::string pipeline =
+R"(
+{
+    "pipeline" : [
+        {
+            "type": "readers.r",
+            "tag": "D"
+        },
+        {
+            "type": "filters.f",
+            "tag": "B",
+            "inputs": "D"
+        },
+        {
+            "type": "filters.f",
+            "tag": "C",
+            "inputs": "D"
+        },
+        {
+            "type": "filters.f",
+            "tag": "A",
+            "inputs": [ "B", "C" ]
+        }
+    ]
+}
+)";
+
+/**
+  Tree representation of the pipeline above:
+
+         D
+        / \
+       B   C
+        \ /
+         A
+**/
+
+
+    // Order of traversal based on one point from each source.
+    {
+        std::ostringstream oss;
+        std::istringstream iss(pipeline);
+        auto ctx = Utils::redirect(std::cout, oss);
+        PipelineManager mgr;
+        mgr.readPipeline(iss);
+        FixedPointTable t(10000);
+        mgr.executeStream(t);
+        Utils::restore(std::cout, ctx);
+        std::string output(oss.str());
+        EXPECT_NE(output.find("DBADCA"), std::string::npos);
+    }
+
+    // In non-stream mode we get a letter for each point view.
+    {
+        std::ostringstream oss;
+        std::istringstream iss(pipeline);
+        auto ctx = Utils::redirect(std::cout, oss);
+        PipelineManager mgr;
+        mgr.readPipeline(iss);
+        mgr.execute();
+        std::string output(oss.str());
+        Utils::restore(std::cout, ctx);
+        EXPECT_NE(output.find("DBDCA"), std::string::npos);
+    }
 }

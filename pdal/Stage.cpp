@@ -157,49 +157,67 @@ PointViewSet Stage::execute(PointTableRef table)
 {
     table.finalize();
 
-    std::stack<Stage *> stages;
-    std::stack<Stage *> pending;
-    std::map<Stage *, Stage *> children;
+    // We store stage instances instead of stages because a stage may get
+    // executed more than once.  A stage instance is created for each
+    // execution of a stage in a pipeline.  This properly builds out
+    // diamond-shaped pipelines.
+    int stageInstanceId = 1;
+    struct StageInstance
+    {
+        Stage *m_stage;
+        int m_id;
+
+        StageInstance(Stage *s, int id) : m_stage(s), m_id(id)
+        {}
+        StageInstance() : m_stage(nullptr), m_id(0)
+        {}
+
+        bool operator<(const StageInstance& other) const
+        { return m_id < other.m_id; }
+    };
+
+    std::stack<StageInstance> stages;
+    std::stack<StageInstance> pending;
+    std::map<StageInstance, StageInstance> children;
 
     m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
         std::endl;
 
-    pending.push(this);
-
-    // There is no child of the terminal stage.
-    children[this] = nullptr;
+    pending.push(StageInstance(this, stageInstanceId++));
 
     // Linearize stage execution.
-    Stage *s;
     while (pending.size())
     {
-        s = pending.top();
+        StageInstance si = pending.top();
         pending.pop();
-        stages.push(s);
-        for (auto fi = s->m_inputs.begin(); fi != s->m_inputs.end(); ++fi)
+        stages.push(si);
+        for (Stage *in : si.m_stage->m_inputs)
         {
-            children[*fi] = s;
-            pending.push(*fi);
+            StageInstance parent(in, stageInstanceId++);
+            pending.push(parent);
+            children[parent] = si;
         }
     }
 
     // Go through the stages in order, executing
     PointViewSet outViews;
-    std::map<Stage *, PointViewSet> sets;
+    std::map<StageInstance, PointViewSet> sets;
     while (stages.size())
     {
-        s = stages.top();
+        StageInstance si = stages.top();
         stages.pop();
-        PointViewSet& inViews = sets[s];
-        if (s->m_inputs.empty())
+        PointViewSet& inViews = sets[si];
+        if (inViews.empty())
             inViews.insert(PointViewPtr(new PointView(table)));
-        outViews = s->execute(table, inViews);
+        outViews = si.m_stage->execute(table, inViews);
 
-        Stage *child = children[s];
-        if (child)
+        StageInstance child = children[si];
+
+        // If a stage has no child it is the terminal stage.  We're done.
+        if (child.m_stage)
             sets[child].insert(outViews.begin(), outViews.end());
         // Allow previous point views to be freed.
-        sets.erase(s);
+        sets.erase(si);
     }
     return outViews;
 }
