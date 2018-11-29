@@ -96,6 +96,8 @@ private:
     virtual void ready(PointTableRef table) final
     {
         readyTable(table);
+
+        // Ready the file if we're writing a single file.
         if (m_hashPos == std::string::npos)
         {
             if (!table.spatialReferenceUnique() && !srsOverridden())
@@ -104,6 +106,14 @@ private:
                     "' with multiple point spatial references." << std::endl;
             readyFile(generateFilename(), table.spatialReference());
         }
+    }
+
+    virtual void prerun(const PointViewSet& views) final
+    {
+        // If the output is a consolidation of all views, call
+        // prerun with all views.
+        if (m_hashPos == std::string::npos)
+            prerunFile(views);
     }
 
     // This essentially moves ready() and done() into write(), which means
@@ -117,7 +127,9 @@ private:
         {
             if (view->size() == 0)
                 return;
+            // Ready the file - we're writing each view separately.
             readyFile(generateFilename(), view->spatialReference());
+            prerunFile({view});
         }
         writeView(view);
         if (m_hashPos != std::string::npos)
@@ -141,6 +153,8 @@ private:
 
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs) = 0;
+    virtual void prerunFile(const PointViewSet& pvSet)
+    {}
     virtual void writeView(const PointViewPtr view) = 0;
     virtual void doneFile()
     {}

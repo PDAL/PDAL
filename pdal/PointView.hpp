@@ -192,9 +192,7 @@ public:
         \endverbatim
     */
     void calculateBounds(BOX2D& box) const;
-    static void calculateBounds(const PointViewSet&, BOX2D& box);
     void calculateBounds(BOX3D& box) const;
-    static void calculateBounds(const PointViewSet&, BOX3D& box);
 
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id id) const
