@@ -163,17 +163,14 @@ void GDALWriter::expandGrid(BOX2D bounds)
         return;
 
     bounds.grow(m_curBounds);
-    size_t xshift =
-        static_cast<size_t>(std::ceil((m_curBounds.minx - bounds.minx) /
-            m_edgeLength));
-    bounds.minx = m_curBounds.minx - (xshift * m_edgeLength);
-    size_t yshift =
-        static_cast<size_t>(std::ceil((m_curBounds.miny - bounds.miny) /
-            m_edgeLength));
-    bounds.miny = m_curBounds.miny - (yshift * m_edgeLength);
 
+    size_t xshift = static_cast<size_t>((m_curBounds.minx - bounds.minx) /
+        m_edgeLength);
     size_t width =
         static_cast<size_t>(((bounds.maxx - bounds.minx) / m_edgeLength) + 1);
+
+    size_t yshift = static_cast<size_t>((m_curBounds.miny - bounds.miny) /
+        m_edgeLength);
     size_t height =
         static_cast<size_t>(((bounds.maxy - bounds.miny) / m_edgeLength) + 1);
     try
