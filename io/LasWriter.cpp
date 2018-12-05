@@ -822,11 +822,16 @@ bool LasWriter::processPoint(PointRef& point)
 }
 
 
+void LasWriter::prerunFile(const PointViewSet& pvSet)
+{
+    m_scaling.setAutoXForm(pvSet);
+}
+
+
 void LasWriter::writeView(const PointViewPtr view)
 {
     Utils::writeProgress(m_progressFd, "READYVIEW",
         std::to_string(view->size()));
-    m_scaling.setAutoXForm(view);
 
     point_count_t pointLen = m_lasHeader.pointLen();
 

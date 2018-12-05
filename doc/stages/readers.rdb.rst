@@ -57,10 +57,7 @@ filename
   Name of file to read
   [Required]
 
-count
-  Maximum number of points to read
-  [Optional]
-  [Default: read all points]
+.. include:: reader_opts.rst
 
 filter
   Point filter expression string (see RDB SDK documentation for details)

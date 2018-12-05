@@ -67,7 +67,7 @@ private:
     void validateSwitches(ProgramArgs& args);
     void makeReader(const std::string& filename);
     void makePipeline();
-    void dump(PointTableRef table, MetadataNode& root);
+    void dump(MetadataNode& root);
     MetadataNode dumpSummary(const QuickInfo& qi);
 
     std::string m_inputFile;

@@ -9,8 +9,6 @@ not very sophisticated.
 .. embed::
 
 
-
-
 Example Pipeline
 ----------------
 
@@ -33,7 +31,7 @@ Options
 -------
 
 filename
-  text file to read [Required]
+  File to read. [Required]
 
-count 
-  Maximum number of points to read [Optional]
+.. include:: reader_opts.rst
+

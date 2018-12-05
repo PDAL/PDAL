@@ -33,7 +33,10 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
+#include <pdal/StageFactory.hpp>
 #include <filters/SMRFilter.hpp>
+
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -59,4 +62,35 @@ TEST(SMRFilterTest, validReturns)
 
     PointTable table;
     EXPECT_NO_THROW(filter.prepare(table));
+}
+
+// Issue 2775.  Test that files without return counts are processed correctly.
+TEST(SMRFFilterTest, noreturns)
+{
+    StageFactory factory;
+
+    Stage *r = factory.createStage("readers.text");
+    Stage *f = factory.createStage("filters.smrf");
+
+    Options rOptions;
+    rOptions.add("filename", Support::datapath("text/utm17_1.txt"));
+    r->setOptions(rOptions);
+
+    f->setInput(*r);
+
+    PointTable t;
+    f->prepare(t);
+    PointViewSet s = f->execute(t);
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr v = *s.begin();
+    EXPECT_EQ(v->size(), 10U);
+    std::map<int, int> classCount;
+    for (PointId idx = 0; idx < v->size(); ++idx)
+    {
+        int classification = v->getFieldAs<int>(Dimension::Id::Classification,
+            idx);
+        classCount[classification]++;
+    }
+    EXPECT_EQ(classCount.size(), 1U);
+    EXPECT_EQ(classCount[2], 10);
 }

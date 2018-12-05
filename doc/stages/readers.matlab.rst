@@ -50,7 +50,9 @@ Options
 -------
 
 filename
-  Output file name [REQUIRED]
+  Input file name. [Required]
+
+.. include:: reader_opts.rst
 
 struct
-  Array structure name to read [OPTIONAL, defaults ``PDAL``]
+  Array structure name to read. [Default: 'PDAL']

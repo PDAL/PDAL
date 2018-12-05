@@ -324,7 +324,7 @@ TEST(MetadataTest, update)
 {
     MetadataNode root("root");
 
-    EXPECT_EQ(false, root.hasChildren());
+    EXPECT_FALSE(root.hasChildren());
     root.addOrUpdate("test", 21);
     EXPECT_EQ(1U, root.children().size());
     root.addOrUpdate("test", 22, "description");

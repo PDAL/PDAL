@@ -4,8 +4,20 @@
 References
 ******************************************************************************
 
-.. index:: References
+.. index:: Citation
 
+Citation
+--------------------------------------------------------------------------------
+
+The PDAL project can be cited in publications as follows:
+
+::
+
+   PDAL: Point Data Abstraction Library [Computer software]. (2018). Retrieved from https://pdal.io.
+
+
+
+.. index:: References
 
 .. [Alexa2003] Alexa, Marc, et al. "Computing and rendering point set surfaces." Visualization and Computer Graphics, IEEE Transactions on 9.1 (2003): 3-15.
 

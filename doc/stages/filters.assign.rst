@@ -40,3 +40,7 @@ assignment
   A :ref:`range <ranges>` followed by an assignment of a value (see example).
   Can be specified multiple times.  The assignments are applied sequentially
   to the dimension value as set when the filter began processing.
+
+condition
+  A list of :ref:`ranges <ranges>` that a point's values must pass in order
+  for the assignment to be performed. [Default: none]
