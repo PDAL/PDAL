@@ -215,6 +215,9 @@ public:
 
     void clear(point_count_t count)
     {
+        if (!count)
+            return;
+
         m_numPoints = count;
         reset();
         std::fill(m_skips.begin(), m_skips.end(), false);
