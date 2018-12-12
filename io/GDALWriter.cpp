@@ -184,10 +184,10 @@ void GDALWriter::expandGrid(BOX2D bounds)
     Cell low = cell(bounds.minx, bounds.miny);
     Cell high = cell(bounds.maxx, bounds.maxy);
 
-    long w = std::max(width(), high.x + 1);
-    long h = std::max(height(), high.y + 1);
-    long xshift = std::max(-low.x, 0L);
-    long yshift = std::max(-low.y, 0L);
+    long w = (std::max)(width(), high.x + 1);
+    long h = (std::max)(height(), high.y + 1);
+    long xshift = (std::max)(-low.x, 0L);
+    long yshift = (std::max)(-low.y, 0L);
     if (xshift)
     {
         w += xshift;
