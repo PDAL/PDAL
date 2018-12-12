@@ -485,3 +485,74 @@ TEST(CropFilterTest, sphere)
     }
 }
 
+TEST(CropFilterTest, bounds_inside_outside)
+{
+    point_count_t nStreamPoints = 0;
+    auto LCounter = [&nStreamPoints](PointRef&) -> bool
+    {
+        ++nStreamPoints;
+        return true;
+    };
+
+    // Tests cropping interesting.las with outside == false and outside == true
+    //  with non-streaming and streaming point tables.
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("las/interesting.las"));
+    LasReader lasReader;
+    lasReader.setOptions(readerOptions);
+
+    // Test outside == false.
+    Options cropInsideOptions;
+    cropInsideOptions.add("bounds", "([638000, 640000], [849000, 849500])");
+    cropInsideOptions.add("outside", false);
+    CropFilter cropInsideFilter;
+    cropInsideFilter.setOptions(cropInsideOptions);
+    cropInsideFilter.setInput(lasReader);
+    PointTable insideTable;
+    cropInsideFilter.prepare(insideTable);
+    PointViewSet insideViewSet = cropInsideFilter.execute(insideTable);
+    EXPECT_EQ(insideViewSet.size(), 1u);
+    PointViewPtr pInsidePointView = *(insideViewSet.begin());
+    // Expect 39 points when cropping to the inside of the bounds.
+    EXPECT_EQ(pInsidePointView->size(), 39);
+
+    // Test outside == true.
+    Options cropOutsideOptions;
+    cropOutsideOptions.add("bounds", "([638000, 640000], [849000, 849500])");
+    cropOutsideOptions.add("outside", true);
+    CropFilter cropOutsideFilter;
+    cropOutsideFilter.setOptions(cropOutsideOptions);
+    cropOutsideFilter.setInput(lasReader);
+    PointTable outsideTable;
+    cropOutsideFilter.prepare(outsideTable);
+    PointViewSet outsideViewSet = cropOutsideFilter.execute(insideTable);
+    EXPECT_EQ(outsideViewSet.size(), 1u);
+    PointViewPtr pOutsidePointView = *(outsideViewSet.begin());
+    // Expect 1026 points when cropping to the outside of the bounds.
+    EXPECT_EQ(pOutsidePointView->size(), 1026);
+
+    // Run same tests again with streaming point tables instead.
+    // Uses the StreamCallbackFilter to check the cropped point count.
+
+    // Test outside == false.
+    nStreamPoints = 0;
+    StreamCallbackFilter insideCallbackFilter;
+    insideCallbackFilter.setCallback(LCounter);
+    insideCallbackFilter.setInput(cropInsideFilter);
+    FixedPointTable insideStreamTable(1065);
+    insideCallbackFilter.prepare(insideStreamTable);
+    insideCallbackFilter.execute(insideStreamTable);
+    // Expect 39 points when cropping to the inside of the bounds.
+    EXPECT_EQ(nStreamPoints, 39);
+
+    // Test outside == true.
+    nStreamPoints = 0;
+    StreamCallbackFilter outsideCallbackFilter;
+    outsideCallbackFilter.setCallback(LCounter);
+    outsideCallbackFilter.setInput(cropOutsideFilter);
+    FixedPointTable outsideStreamTable(1065);
+    outsideCallbackFilter.prepare(outsideStreamTable);
+    outsideCallbackFilter.execute(outsideStreamTable);
+    // Expect 1026 points when cropping to the outside of the bounds.
+    EXPECT_EQ(nStreamPoints, 1026);
+}
