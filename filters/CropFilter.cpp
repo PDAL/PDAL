@@ -260,7 +260,7 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         point.setPointId(idx);
-        if (m_args->m_cropOutside != crop(point, box))
+        if (crop(point, box))
             output.appendPoint(input, idx);
     }
 }
