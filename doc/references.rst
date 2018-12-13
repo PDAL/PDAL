@@ -9,12 +9,24 @@ References
 Citation
 --------------------------------------------------------------------------------
 
-The PDAL project can be cited in publications as follows:
+To cite PDAL in publications use:
 
-::
+  PDAL contributors (2018). PDAL Point Data Abstraction Library
+  URL https://pdal.io
 
-   PDAL: Point Data Abstraction Library [Computer software]. (2018). Retrieved from https://pdal.io.
+A BibTeX entry for LaTeX users is
 
+  @Manual{,
+    title = {{PDAL} Point Data Abstraction Library},
+    author = {{PDAL contributors}},
+    year = {2018},
+    url = {https://pdal.io},
+  }
+
+
+
+Reference
+--------------------------------------------------------------------------------
 
 
 .. index:: References
