@@ -511,10 +511,10 @@ TEST(CropFilterTest, bounds_inside_outside)
     PointTable insideTable;
     cropInsideFilter.prepare(insideTable);
     PointViewSet insideViewSet = cropInsideFilter.execute(insideTable);
-    EXPECT_EQ(insideViewSet.size(), 1u);
+    EXPECT_EQ(insideViewSet.size(), 1U);
     PointViewPtr pInsidePointView = *(insideViewSet.begin());
     // Expect 39 points when cropping to the inside of the bounds.
-    EXPECT_EQ(pInsidePointView->size(), 39);
+    EXPECT_EQ(pInsidePointView->size(), 39U);
 
     // Test outside == true.
     Options cropOutsideOptions;
@@ -526,10 +526,10 @@ TEST(CropFilterTest, bounds_inside_outside)
     PointTable outsideTable;
     cropOutsideFilter.prepare(outsideTable);
     PointViewSet outsideViewSet = cropOutsideFilter.execute(insideTable);
-    EXPECT_EQ(outsideViewSet.size(), 1u);
+    EXPECT_EQ(outsideViewSet.size(), 1U);
     PointViewPtr pOutsidePointView = *(outsideViewSet.begin());
     // Expect 1026 points when cropping to the outside of the bounds.
-    EXPECT_EQ(pOutsidePointView->size(), 1026);
+    EXPECT_EQ(pOutsidePointView->size(), 1026U);
 
     // Run same tests again with streaming point tables instead.
     // Uses the StreamCallbackFilter to check the cropped point count.
@@ -543,7 +543,7 @@ TEST(CropFilterTest, bounds_inside_outside)
     insideCallbackFilter.prepare(insideStreamTable);
     insideCallbackFilter.execute(insideStreamTable);
     // Expect 39 points when cropping to the inside of the bounds.
-    EXPECT_EQ(nStreamPoints, 39);
+    EXPECT_EQ(nStreamPoints, 39U);
 
     // Test outside == true.
     nStreamPoints = 0;
@@ -554,5 +554,5 @@ TEST(CropFilterTest, bounds_inside_outside)
     outsideCallbackFilter.prepare(outsideStreamTable);
     outsideCallbackFilter.execute(outsideStreamTable);
     // Expect 1026 points when cropping to the outside of the bounds.
-    EXPECT_EQ(nStreamPoints, 1026);
+    EXPECT_EQ(nStreamPoints, 1026U);
 }
