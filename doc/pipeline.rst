@@ -4,11 +4,12 @@
 Pipeline
 ******************************************************************************
 
-Pipelines are the operative construct in PDAL, and it is how data are modeled
-from reading, processing, and writing. PDAL internally constructs a pipeline to
+Pipelines define the processing of data within PDAL.  They describe how point
+cloud data are read, processed and written.
+PDAL internally constructs a pipeline to
 perform data translation operations using :ref:`translate_command`, for
 example. While specific :ref:`applications <apps>` are useful in many contexts,
-a pipeline provides useful advantages for more complex things:
+a pipeline provides useful advantages for many workflows:
 
 1. You have a record of the operation(s) applied to the data
 2. You can construct a skeleton of an operation and substitute specific
@@ -20,12 +21,6 @@ a pipeline provides useful advantages for more complex things:
 
     :ref:`pipeline_command` is used to invoke pipeline operations
     via the command line.
-
-
-.. warning::
-
-    As of PDAL 1.2, `JSON`_ is the preferred specification language
-    for PDAL pipelines. XML was dropped at the 1.6 release.
 
 .. _`JSON`: http://www.json.org/
 
@@ -118,9 +113,9 @@ with the :ref:`writers.gdal` writer:
 Point Views and Multiple Outputs
 ................................................................................
 
-Some filters produce sets of points as output.  filters.splitter, for example,
-creates a point set for each tile (rectangular area) in which input points
-exist.
+Some filters produce sets of points as output.  :ref:`filters.splitter`,
+for example, creates a point set for each tile (rectangular area) in
+which input points exist.
 Each of these output sets is called a point view.  Point views are carried
 through a PDAL pipeline individually.  Some writers can produce separate
 output for each input point view.  These writers use a placeholder character
@@ -161,7 +156,7 @@ reduces memory requirements.
 
 When using :ref:`pdal translate<translate_command>` or
 :ref:`pdal pipeline<pipeline_command>`
-PDAL uses stream mode if possible.  If stream mode can't use used
+PDAL uses stream mode if possible.  If stream mode can't be used
 the applications fall back to standard mode processing.  Users can explicitly
 choose to use standard mode by using the ``--nostream`` option.
 
@@ -324,8 +319,8 @@ code at `hag.py`_.
       "pipeline":[
           "autzen.las",
           {
-              "type":"ferry",
-              "dimensions":"Z=HAG"
+              "type":"filters.ferry",
+              "dimensions":"Z=>HAG"
           },
           {
               "type":"filters.python",
@@ -354,8 +349,7 @@ then creates the DTM using the :ref:`writers.gdal`.
       "pipeline":[
           "autzen-full.las",
           {
-              "type":"ground",
-              "approximate":true,
+              "type":"filters.pmf",
               "max_window_size":33,
               "slope":1.0,
               "max_distance":2.5,
@@ -363,7 +357,7 @@ then creates the DTM using the :ref:`writers.gdal`.
               "cell_size":1.0
           },
           {
-              "type":"range",
+              "type":"filters.range",
               "limits":"Classification[2:2]"
           },
           {
@@ -371,8 +365,7 @@ then creates the DTM using the :ref:`writers.gdal`.
               "filename":"autzen-surface.tif",
               "output_type":"min",
               "output_format":"tif",
-              "grid_dist_x":1.0,
-              "grid_dist_y":1.0
+              "resolution":1.0
           }
       ]
   }
@@ -394,12 +387,12 @@ written as ASCII text.
               "spatialreference":"EPSG:2993"
           },
           {
-              "type":"decimation",
+              "type":"filters.decimation",
               "step":2,
               "offset":1
           },
           {
-              "type":"colorization",
+              "type":"filters.colorization",
               "raster":"autzen.tif",
               "dimensions": ["Red:1:1", "Green:2:1", "Blue:3:1" ]
           },
@@ -432,7 +425,7 @@ spatial reference system.
               "spatialreference":"EPSG:2027"
           },
           {
-              "type":"reprojection",
+              "type":"filters.reprojection",
               "out_srs":"EPSG:2028"
           }
       ]
@@ -477,27 +470,27 @@ pipeline and transfers the actual data as it moves through the pipeline. A
 itself contains a list of :cpp:class:`pdal::Dimension` objects that define the
 actual channels that are stored in the :cpp:class:`pdal::PointView`.
 
-PDAL provides four types of stages -- :cpp:class:`pdal::Reader`,
-:cpp:class:`pdal::Writer`, :cpp:class:`pdal::Filter`, and
-:cpp:class:`pdal::MultiFilter` -- with the latter being hardly used (just
-:ref:`filters.merge`) at this point. A Reader is a producer of data, a Writer
+PDAL provides three types of stages -- :cpp:class:`pdal::Reader`,
+:cpp:class:`pdal::Writer` and :cpp:class:`pdal::Filter`.
+A Reader is a producer of data, a Writer
 is a consumer of data, and a Filter is an actor on data.
 
 .. note::
 
-   As a C++ API consumer, you are generally not supposed to worry about
-   the underlying storage of the PointView, but there might be times when
-   you simply just "want the data." In those situations, you can use the
-   :cpp:func:`pdal::PointView::getBytes` method to stream out the raw storage.
+   As a C++ API consumer, it isn't necessary to be aware of the underlying
+   storage of point data, but in cases where you just "want the data",
+   the function :cpp:func:`pdal::PointView::getBytes` exists.  The class
+   :cpp:class:`pdal::PointLayout` provides information about the actual
+   data layout.
 
 
 Usage
 ..............................................................................
 
-While pipeline objects are manipulable through C++ objects, the other, more
-convenient way is through an JSON syntax. The JSON syntax mirrors the
-arrangement of the Pipeline, with options and auxiliary metadata added on a
-per-stage basis.
+While pipeline objects are manipulable through C++ objects, it is often
+convenient to provide a pipline directly using JSON.
+The JSON syntax mirrors the arrangement of the Pipeline, with options and
+auxiliary metadata added on a per-stage basis.
 
 We have two use cases specifically in mind:
 
@@ -534,13 +527,9 @@ We have two use cases specifically in mind:
 Stage Types
 ..............................................................................
 
-
 :cpp:class:`pdal::Reader`, :cpp:class:`pdal::Writer`, and
 :cpp:class:`pdal::Filter` are the C++ classes that define the stage types in
-PDAL. Readers follow the pattern of :ref:`readers.las` or
-:ref:`readers.oci`, Writers follow the pattern of :ref:`writers.las` or
-:ref:`readers.oci`, with Filters using :ref:`filters.reprojection` or
-:ref:`filters.crop`.
+PDAL.
 
 .. note::
 
