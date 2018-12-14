@@ -128,6 +128,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "ESRI Shapefile");
         args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
         args.add("polygon", "Well-known text of polygon to clip output", m_wkt);
+        args.add("t_srs", "Spatial reference of the clipping geometry",
+            m_tgtSrsString, "EPSG:4326");
     }
 }
 
