@@ -157,10 +157,9 @@ reduces memory requirements.
 When using :ref:`pdal translate<translate_command>` or
 :ref:`pdal pipeline<pipeline_command>`
 PDAL uses stream mode if possible.  If stream mode can't be used
-the applications fall back to standard mode processing.  Users can explicitly
-choose to use standard mode by using the ``--nostream`` option.
-
-Users of the PDAL API can explicitly control the selection of the PDAL
+the applications fall back to standard mode processing.  Streamable stages are
+tagged in the stage documentation with a blue bar.  Users can explicitly
+choose to use standard mode by using the ``--nostream`` option.  Users of the PDAL API can explicitly control the selection of the PDAL
 processing mode.
 
 Pipeline Objects
@@ -339,7 +338,7 @@ DTM
 
 A common task is to create a digital terrain model (DTM) from the input point
 cloud. This pipeline infers the reader type, applies an approximate ground
-segmentation filter using :ref:`filters.pmf`, filters out all points but the
+segmentation filter using :ref:`filters.smrf`, filters out all points but the
 ground returns (classification value of 2) using the :ref:`filters.range`, and
 then creates the DTM using the :ref:`writers.gdal`.
 
@@ -349,12 +348,11 @@ then creates the DTM using the :ref:`writers.gdal`.
       "pipeline":[
           "autzen-full.las",
           {
-              "type":"filters.pmf",
-              "max_window_size":33,
+              "type":"filters.smrf",
+              "window":33,
               "slope":1.0,
-              "max_distance":2.5,
-              "initial_distance":0.15,
-              "cell_size":1.0
+              "threshold":0.15,
+              "cell":1.0
           },
           {
               "type":"filters.range",
