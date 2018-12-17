@@ -39,6 +39,8 @@ Example
 Options
 -------
 
+.. include:: reader_opts.rst
+
 connection
   PostgreSQL connection string. In the form *"host=hostname dbname=database user=username password=pw port=5432"* [Required]
 
@@ -50,13 +52,5 @@ schema
 
 column
   Table column to read patches from. [Default: **pa**]
-
-spatialreference
-  Sets the spatial reference for the point data.  Overrides any spatial
-  reference information read from the database.  Most text-based formats of
-  SRS information are accepted, including WKT and proj.4.
-
-count
-  Maximum number of points to read [Optional]
 
 .. _PostgreSQL Pointcloud: https://github.com/pramsey/pointcloud

@@ -39,8 +39,7 @@ Options
 filename
   PCD file to read [Required]
 
-count
-  Maximum number of points to read [Optional]
+.. include:: reader_opts.rst
 
 .. _Point Cloud Data (PCD): http://pointclouds.org/documentation/tutorials/pcd_file_format.php
 .. _Point Cloud Library (PCL): http://pointclouds.org

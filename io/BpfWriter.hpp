@@ -80,6 +80,7 @@ private:
     virtual void prepared(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
+    void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr data);
     virtual void doneFile();
 

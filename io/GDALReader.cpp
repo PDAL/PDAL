@@ -106,7 +106,6 @@ void GDALReader::initialize()
     m_raster.reset();
 }
 
-
 QuickInfo GDALReader::inspect()
 {
     QuickInfo qi;

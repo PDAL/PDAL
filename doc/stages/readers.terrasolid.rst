@@ -30,5 +30,5 @@ Options
 filename
   Input file name [Required]
 
-count
-  Maximum number of points to read. [Default: read all points]
+.. include:: reader_opts.rst
+

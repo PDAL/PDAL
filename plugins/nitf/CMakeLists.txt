@@ -6,6 +6,10 @@ if (NOT NITRO_FOUND)
     message(FATAL_ERROR "Can't find NITRO support required by NITF.")
 endif()
 
+if (WIN32)
+    add_definitions("-DNOMINMAX")
+endif()
+
 #
 # NITF Reader
 #

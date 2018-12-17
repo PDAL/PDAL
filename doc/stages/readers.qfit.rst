@@ -36,6 +36,8 @@ Options
 filename
   File to read from [Required]
 
+.. include:: reader_opts.rst
+
 flip_coordinates
   Flip coordinates from 0-360 to -180-180 [Default: **true**]
 
@@ -44,9 +46,6 @@ scale_z
 
 little_endian
   Are data in little endian format? This should be automatically detected by the driver.
-
-count 
-  Maximum number of points to read [Optional]
 
 .. _QFIT format: http://nsidc.org/data/docs/daac/icebridge/ilatm1b/docs/ReadMe.qfit.txt
 

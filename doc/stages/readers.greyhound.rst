@@ -41,6 +41,8 @@ Options
 
 Many of the options to this reader are reproductions of Greyhound query parameter options (see Greyhound `read`_ query documentation).  These options may be specified as query parameters to the **url** parameter or specified separately.  Separately specified parameters take precedence over query-parameter specified parameters.
 
+.. include:: reader_opts.rst
+
 _`url`
   Greyhound server URL, or a full Greyhound `read`_ query URL.  If specified as a full Greyhound query URL, no other options need to be present.
 

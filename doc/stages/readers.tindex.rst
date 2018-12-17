@@ -62,6 +62,8 @@ Options
 filename
   OGROpen'able raster file to read [Required]
 
+.. include:: reader_opts.rst
+
 lyr_name
   The OGR layer name for the data source to use to
   fetch the tile index information.
@@ -105,10 +107,5 @@ dialect
   `OGR SQL`_ dialect to use when querying tile index layer
   [Default: OGRSQL]
 
-count
-  Maximum number of points to read [Optional]
-
 .. _`OGR SQL`: http://www.gdal.org/ogr_sql.html
-
-
 

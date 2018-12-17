@@ -133,7 +133,7 @@ Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
 
     int num_rows;
     int num_cols;
-    
+
     if (!Utils::numericCast(xx.rows(), num_rows) ||
         !Utils::numericCast(xx.cols(), num_cols))
         throw pdal_error("Too many columns/rows for spline computation");

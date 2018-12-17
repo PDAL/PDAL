@@ -42,5 +42,5 @@ Options
 filename
     BPF file to read [Required]
 
-count
-    Maximum number of points to read [Optional]
+.. include:: reader_opts.rst
+

@@ -68,6 +68,8 @@ Options
 filename
   File to read from, or rdtp URI for network-accessible scanner. [Required]
 
+.. include:: reader_opts.rst
+
 rdtp
   Boolean to switch from file-based reading to RDTP-based. [default: false]
 

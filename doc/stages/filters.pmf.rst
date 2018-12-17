@@ -90,9 +90,10 @@ ignore
 initial_distance
   Initial distance. [Default: **0.15**]
 
-last
-  Consider only last returns (when return information is available)? [Default:
-  **true**]
+returns
+  Comma-separated list of return types into which data should be segmented.
+  Valid groups are "last", "first", "intermediate" and "only". [Default:
+  **"last, only"**]
   
 max_distance
   Maximum distance. [Default: **2.5**]
