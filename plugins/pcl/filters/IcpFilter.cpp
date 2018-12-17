@@ -115,4 +115,6 @@ PointViewPtr IcpFilter::icp(PointViewPtr fixed, PointViewPtr moving) const
     }
     return moving;
 }
-}
+
+} // namespace pdal
+

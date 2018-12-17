@@ -40,6 +40,7 @@
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/EigenUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -102,6 +103,7 @@ TEST(IcpFilterTest, DefaultIdentity)
     EXPECT_EQ(100u, (*viewSet.begin())->size());
 
     MetadataNode root = filter->getMetadata();
+    std::cerr << Utils::toJSON(root);
     MetadataNode transform = root.findChild("transform");
     EXPECT_EQ("matrix", transform.type());
     Eigen::MatrixXd transformMatrix = transform.value<Eigen::MatrixXd>();
