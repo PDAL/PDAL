@@ -872,44 +872,6 @@ void LasWriter::writeView(const PointViewPtr view)
         std::to_string(view->size()));
 }
 
-namespace
-{
-void dump(laszip_point_struct& p)
-{
-      static size_t cnt = 0;
-      if (cnt >= 600)
-          return;
-    std::cerr << "Point = " << cnt++ << "\n";
-    std::cerr << "X = " << p.X << "\n";
-    std::cerr << "Y = " << p.Y << "\n";
-    std::cerr << "Z = " << p.Z << "\n";
-    std::cerr << "Intensity = " << p.intensity << "\n";
-    std::cerr << "return_number = " << (int)p.return_number << "\n";
-    std::cerr << "number_of_returns = " << (int)p.number_of_returns << "\n";
-    std::cerr << "scan_dir_flag = " << (int)p.scan_direction_flag << "\n";
-    std::cerr << "edge_of_flight_line = " << (int)p.edge_of_flight_line << "\n";
-    std::cerr << "classification = " << (int)p.classification << "\n";
-    std::cerr << "synthetic_flag = " << (int)p.synthetic_flag << "\n";
-    std::cerr << "keypoint_flag = " << (int)p.keypoint_flag << "\n";
-    std::cerr << "withheld_flag = " << (int)p.withheld_flag << "\n";
-    std::cerr << "scan_angle_rank = " << (int)p.scan_angle_rank << "\n";
-    std::cerr << "user_data = " << (int)p.user_data << "\n";
-    std::cerr << "point_source_ID = " << (int)p.point_source_ID << "\n";
-    std::cerr << "extended_scan_angle = " << (int)p.extended_scan_angle << "\n";
-    std::cerr << "extended_point_type = " << (int)p.extended_point_type << "\n";
-    std::cerr << "extended_scanner_channel = " << (int)p.extended_scanner_channel << "\n";
-    std::cerr << "extended_classification_flags = " << (int)p.extended_classification_flags << "\n";
-    std::cerr << "extended_classification = " << (int)p.extended_classification << "\n";
-    std::cerr << "extended_return_number = " << (int)p.extended_return_number << "\n";
-    std::cerr << "extended_number_of_returns = " << (int)p.extended_number_of_returns << "\n";
-    std::cerr << "gps_time = " << (int)p.gps_time<< "\n";
-    std::cerr << "rgb[0] = " << (int)p.rgb[0] << "\n";
-    std::cerr << "rgb[1] = " << (int)p.rgb[1] << "\n";
-    std::cerr << "rgb[2] = " << (int)p.rgb[2] << "\n";
-    std::cerr << "rgb[3] = " << (int)p.rgb[3] << "\n";
-    std::cerr << "\n";
-}
-}
 
 bool LasWriter::writeLasZipBuf(PointRef& point)
 {
@@ -970,49 +932,43 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
         classFlags = classification >> 5;
 
     laszip_point_struct p;
-//ABELL
-memset(&p, 0, sizeof(p));
     p.X = converter(x, Id::X);
     p.Y = converter(y, Id::Y);
     p.Z = converter(z, Id::Z);
     p.intensity = point.getFieldAs<uint16_t>(Id::Intensity);
     p.scan_direction_flag = scanDirectionFlag;
     p.edge_of_flight_line = edgeOfFlightLine;
+    p.synthetic_flag = classFlags & 0x1;
+    p.keypoint_flag = (classFlags >> 1) & 0x1;
+    p.withheld_flag = (classFlags >> 2) & 0x1;
+    p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
+    p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
 
     if (has14Format)
     {
-        p.extended_point_type = 1;
+        p.classification = (classification & 0x1F) | (classFlags << 5);
+        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.number_of_returns = std::min((uint8_t)7, numberOfReturns);
+        p.return_number = std::min((uint8_t)7, returnNumber);
 
-        p.extended_return_number = returnNumber;
-        p.extended_number_of_returns = numberOfReturns;
-        p.extended_scanner_channel = scanChannel;
         // This should always work if ScanAngleRank isn't wonky.
         p.extended_scan_angle = static_cast<laszip_I16>(
             std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+        p.extended_point_type = 1;
+        p.extended_scanner_channel = scanChannel;
         p.extended_classification_flags = classFlags;
         p.extended_classification = classification;
-        p.classification = (classification & 0x1F) | (classFlags << 5);
+        p.extended_return_number = returnNumber;
+        p.extended_number_of_returns = numberOfReturns;
 
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
-        /*
-        p.withheld_flag = (classFlags >> 2) & 0x1;
-        p.number_of_returns = std::min((uint8_t)7, numberOfReturns);
-        p.return_number = std::min((uint8_t)7, returnNumber);
-        **/
     }
     else
     {
-        p.synthetic_flag = classFlags & 0x1;
-        p.keypoint_flag = (classFlags >> 1) & 0x1;
-        p.withheld_flag = (classFlags >> 2) & 0x1;
         p.return_number = returnNumber;
         p.number_of_returns = numberOfReturns;
         p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
         p.classification = classification;
     }
-    p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
-
-    p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
 
     if (m_lasHeader.hasTime())
         p.gps_time = point.getFieldAs<double>(Id::GpsTime);
@@ -1044,7 +1000,6 @@ memset(&p, 0, sizeof(p));
 
     m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
 
-//    dump(p);
     handleLaszip(laszip_set_point(m_laszip, &p));
     handleLaszip(laszip_write_point(m_laszip));
 #endif
