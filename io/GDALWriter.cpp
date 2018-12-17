@@ -38,6 +38,8 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 
+#include "private/GDALGrid.hpp"
+
 namespace pdal
 {
 
@@ -139,16 +141,36 @@ void GDALWriter::readyFile(const std::string& filename,
 }
 
 
+GDALWriter::Cell GDALWriter::cell(double x, double y)
+{
+    Cell c;
+    c.x = static_cast<long>(std::floor((x - m_origin.x) / m_edgeLength));
+    c.y = static_cast<long>(std::floor((y - m_origin.y) / m_edgeLength));
+    return c;
+}
+
+
+long GDALWriter::width() const
+{
+    return static_cast<long>(m_grid->width());
+}
+
+
+long GDALWriter::height() const
+{
+    return static_cast<long>(m_grid->height());
+}
+
+
 void GDALWriter::createGrid(BOX2D bounds)
 {
-    m_curBounds = bounds;
-    size_t width = static_cast<size_t>(((m_curBounds.maxx - m_curBounds.minx) /
-        m_edgeLength) + 1);
-    size_t height = static_cast<size_t>(((m_curBounds.maxy - m_curBounds.miny) /        m_edgeLength) + 1);
+    m_origin = { bounds.minx, bounds.miny };
+    Cell c = cell(bounds.maxx, bounds.maxy);
+
     try
     {
-        m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius,
-            m_outputTypes, m_windowSize));
+        m_grid.reset(new GDALGrid(c.x + 1, c.y + 1, m_edgeLength,
+            m_radius, m_outputTypes, m_windowSize));
     }
     catch (GDALGrid::error& err)
     {
@@ -159,32 +181,32 @@ void GDALWriter::createGrid(BOX2D bounds)
 
 void GDALWriter::expandGrid(BOX2D bounds)
 {
-    if (bounds == m_curBounds)
-        return;
+    Cell low = cell(bounds.minx, bounds.miny);
+    Cell high = cell(bounds.maxx, bounds.maxy);
 
-    bounds.grow(m_curBounds);
-    size_t xshift =
-        static_cast<size_t>(std::ceil((m_curBounds.minx - bounds.minx) /
-            m_edgeLength));
-    bounds.minx = m_curBounds.minx - (xshift * m_edgeLength);
-    size_t yshift =
-        static_cast<size_t>(std::ceil((m_curBounds.miny - bounds.miny) /
-            m_edgeLength));
-    bounds.miny = m_curBounds.miny - (yshift * m_edgeLength);
+    long w = (std::max)(width(), high.x + 1);
+    long h = (std::max)(height(), high.y + 1);
+    long xshift = (std::max)(-low.x, 0L);
+    long yshift = (std::max)(-low.y, 0L);
+    if (xshift)
+    {
+        w += xshift;
+        m_origin.x -= xshift * m_edgeLength;
+    }
+    if (yshift)
+    {
+        h += yshift;
+        m_origin.y -= yshift * m_edgeLength;
+    }
 
-    size_t width =
-        static_cast<size_t>(((bounds.maxx - bounds.minx) / m_edgeLength) + 1);
-    size_t height =
-        static_cast<size_t>(((bounds.maxy - bounds.miny) / m_edgeLength) + 1);
     try
     {
-        m_grid->expand(width, height, xshift, yshift);
+        m_grid->expand(w, h, xshift, yshift);
     }
     catch (const GDALGrid::error& err)
     {
         throwError(err.what()); // Add the stage name onto the error text.
     }
-    m_curBounds = bounds;
 }
 
 
@@ -222,13 +244,15 @@ bool GDALWriter::processOne(PointRef& point)
 
     if (m_expandByPoint)
     {
+        Cell c = cell(x, y);
         if (!m_grid)
             createGrid(BOX2D(x, y, x, y));
-        else if (!m_curBounds.contains(x, y))
+        else if (c.x < 0 || c.y < 0 ||
+                 c.x >= width() || c.y >= height())
             expandGrid(BOX2D(x, y, x, y));
     }
-    x -= m_curBounds.minx;
-    y -= m_curBounds.miny;
+    x -= m_origin.x;
+    y -= m_origin.y;
 
     m_grid->addPoint(x, y, z);
     return true;
@@ -243,10 +267,10 @@ void GDALWriter::doneFile()
 
     std::array<double, 6> pixelToPos;
 
-    pixelToPos[0] = m_curBounds.minx;
+    pixelToPos[0] = m_origin.x;
     pixelToPos[1] = m_edgeLength;
     pixelToPos[2] = 0;
-    pixelToPos[3] = m_curBounds.miny + (m_edgeLength * m_grid->height());
+    pixelToPos[3] = m_origin.y + (m_edgeLength * m_grid->height());
     pixelToPos[4] = 0;
     pixelToPos[5] = -m_edgeLength;
     gdal::Raster raster(m_outputFilename, m_drivername, m_srs, pixelToPos);

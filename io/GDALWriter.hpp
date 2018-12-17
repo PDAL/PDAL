@@ -39,13 +39,24 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "GDALGrid.hpp"
-
 namespace pdal
 {
 
+class GDALGrid;
+
 class PDAL_DLL GDALWriter : public FlexWriter, public Streamable
 {
+    struct Cell
+    {
+        long x;
+        long y;
+    };
+    struct Position
+    {
+        double x;
+        double y;
+    };
+
 public:
     std::string getName() const;
 
@@ -63,12 +74,15 @@ private:
     virtual void doneFile();
     void createGrid(BOX2D bounds);
     void expandGrid(BOX2D bounds);
+    Cell cell(double x, double y);
+    long width() const;
+    long height() const;
 
     std::string m_outputFilename;
     std::string m_drivername;
     SpatialReference m_srs;
     Bounds m_bounds;
-    BOX2D m_curBounds;
+    Position m_origin;
     double m_edgeLength;
     Arg *m_radiusArg;
     double m_radius;
@@ -76,7 +90,7 @@ private:
     StringList m_outputTypeString;
     size_t m_windowSize;
     int m_outputTypes;
-    GDALGridPtr m_grid;
+    std::unique_ptr<GDALGrid> m_grid;
     double m_noData;
     Dimension::Id m_interpDim;
     std::string m_interpDimString;
