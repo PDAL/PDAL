@@ -92,7 +92,7 @@ PointViewPtr IcpFilter::icp(PointViewPtr fixed, PointViewPtr moving) const
     Cloud::Ptr movingCloud(new Cloud());
     pclsupport::PDALtoPCD(moving, *movingCloud);
     pcl::IterativeClosestPoint<Point, Point> icp;
-    icp.setInputCloud(movingCloud);
+    icp.setInputSource(movingCloud);
     icp.setInputTarget(fixedCloud);
     Cloud result;
     icp.align(result);
