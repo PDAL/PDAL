@@ -948,8 +948,8 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     {
         p.classification = (classification & 0x1F) | (classFlags << 5);
         p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
-        p.number_of_returns = std::min((uint8_t)7, numberOfReturns);
-        p.return_number = std::min((uint8_t)7, returnNumber);
+        p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
+        p.return_number = (std::min)((uint8_t)7, returnNumber);
 
         // This should always work if ScanAngleRank isn't wonky.
         p.extended_scan_angle = static_cast<laszip_I16>(
