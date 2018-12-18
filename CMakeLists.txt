@@ -274,7 +274,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
-        ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
