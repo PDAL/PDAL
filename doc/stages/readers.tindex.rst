@@ -88,15 +88,16 @@ bounds
 
 wkt
   A geometry to pre-filter the tile index using
-  OGR
+  OGR.
 
 t_srs
   Reproject the layer SRS, otherwise default to the
-  tile index layer's SRS.
+  tile index layer's SRS. [Default: "EPSG:4326"]
 
 filter_srs
   Transforms any ``wkt`` or ``boundary`` option to this
   coordinate system before filtering or reading data.
+  [Default: "EPSG:4326"]
 
 where
   `OGR SQL`_ filter clause to use on the layer. It only
