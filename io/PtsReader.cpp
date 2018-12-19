@@ -63,27 +63,34 @@ void PtsReader::initialize(PointTableRef table)
 
     // Very first line is point count
     Utils::fromString(buf, m_PointCount);
+
+    // Peek second line to determine dimensions to add.
+    // Allows reading of PTS files with only X Y Z dimensions.
+    // Only allow 3 fields or 7 fields.
+    m_dims.push_back(Dimension::Id::X);
+    m_dims.push_back(Dimension::Id::Y);
+    m_dims.push_back(Dimension::Id::Z);
+    std::getline(*m_istream, buf);
+    StringList fields = Utils::split2(buf, m_separator);
+    if(fields.size() != 3 && fields.size() != 7)
+    {
+        throwError("Invalid number of fields for point 1 in file '" + m_filename + "'.");
+    }
+    else if(fields.size() == 7)
+    {
+        m_dims.push_back(Dimension::Id::Intensity);
+        m_dims.push_back(Dimension::Id::Red);
+        m_dims.push_back(Dimension::Id::Green);
+        m_dims.push_back(Dimension::Id::Blue);
+    }
+
     Utils::closeFile(m_istream);
 }
 
 
 void PtsReader::addDimensions(PointLayoutPtr layout)
 {
-    // Dimensions are fixed in PTS
-
-    m_dims.push_back(Dimension::Id::X);
-    m_dims.push_back(Dimension::Id::Y);
-    m_dims.push_back(Dimension::Id::Z);
-    m_dims.push_back(Dimension::Id::Intensity);
-    m_dims.push_back(Dimension::Id::Red);
-    m_dims.push_back(Dimension::Id::Green);
-    m_dims.push_back(Dimension::Id::Blue);
-
-    for (auto d: m_dims)
-    {
-        layout->registerDim(d);
-    }
-
+    layout->registerDims(m_dims);
 }
 
 
@@ -106,7 +113,9 @@ point_count_t PtsReader::read(PointViewPtr view, point_count_t numPts)
     point_count_t cnt = 0;
     size_t line = 1;
 
-    while (m_istream->good() && cnt < numPts)
+    // Continue reading while count less than max points and count less than 
+    // the expected point count.
+    while (m_istream->good() && cnt < numPts && cnt < m_PointCount)
     {
         std::string buf;
         StringList fields;
