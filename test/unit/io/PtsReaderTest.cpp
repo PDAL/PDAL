@@ -95,4 +95,24 @@ TEST(PtsReader, ReadPtsThreeDims)
     EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Z, 0), 0.004474);
 }
 
+TEST(PtsReader, ReadPtsFourDims)
+{
+    PtsReader reader;
+    Options options;
+    options.add("filename", Support::datapath("pts/site_56_8.pts"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 8u);
+
+    EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::X, 0), 6691.797611);
+    EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Y, 0), 17.347517);
+    EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Z, 0), 1203.033447);
+    EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Intensity, 0), -255 + 2048);
+}
+
 }

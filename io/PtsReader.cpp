@@ -62,26 +62,42 @@ void PtsReader::initialize(PointTableRef table)
     std::getline(*m_istream, buf);
 
     // Very first line is point count
-    Utils::fromString(buf, m_PointCount);
+    if(!Utils::fromString(buf, m_PointCount))
+    {
+        throwError("Unable to read expected point count at top of the file '" + m_filename + "'.");
+    }
 
     // Peek second line to determine dimensions to add.
-    // Allows reading of PTS files with only X Y Z dimensions.
-    // Only allow 3 fields or 7 fields.
-    m_dims.push_back(Dimension::Id::X);
-    m_dims.push_back(Dimension::Id::Y);
-    m_dims.push_back(Dimension::Id::Z);
+    // Expect points in the formats:
+    //      X Y Z,
+    //      X Y Z Intensity,
+    //      X Y Z Intensity R G B
     std::getline(*m_istream, buf);
     StringList fields = Utils::split2(buf, m_separator);
-    if(fields.size() != 3 && fields.size() != 7)
+    switch(fields.size())
     {
-        throwError("Invalid number of fields for point 1 in file '" + m_filename + "'.");
-    }
-    else if(fields.size() == 7)
-    {
-        m_dims.push_back(Dimension::Id::Intensity);
-        m_dims.push_back(Dimension::Id::Red);
-        m_dims.push_back(Dimension::Id::Green);
-        m_dims.push_back(Dimension::Id::Blue);
+        case 3:
+            m_dims.push_back(Dimension::Id::X);
+            m_dims.push_back(Dimension::Id::Y);
+            m_dims.push_back(Dimension::Id::Z);
+            break;
+        case 4:
+            m_dims.push_back(Dimension::Id::X);
+            m_dims.push_back(Dimension::Id::Y);
+            m_dims.push_back(Dimension::Id::Z);
+            m_dims.push_back(Dimension::Id::Intensity);
+            break;
+        case 7:
+            m_dims.push_back(Dimension::Id::X);
+            m_dims.push_back(Dimension::Id::Y);
+            m_dims.push_back(Dimension::Id::Z);
+            m_dims.push_back(Dimension::Id::Intensity);
+            m_dims.push_back(Dimension::Id::Red);
+            m_dims.push_back(Dimension::Id::Green);
+            m_dims.push_back(Dimension::Id::Blue);
+            break;
+        default:
+            throwError("Invalid number of fields for the first point in file '" + m_filename + "'.");
     }
 
     Utils::closeFile(m_istream);
@@ -155,6 +171,13 @@ point_count_t PtsReader::read(PointViewPtr view, point_count_t numPts)
         cnt++;
         idx++;
     }
+
+    if(cnt < m_PointCount)
+    {
+        log()->get(LogLevel::Warning) << "Expected " << m_PointCount
+            << " points but only " << cnt << " were found." << std::endl;
+    }
+
     return cnt;
 }
 
