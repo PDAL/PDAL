@@ -27,7 +27,7 @@ install:
   - set "CONDA_ROOT=C:\Miniconda3-x64"
   - set PATH=%CONDA_ROOT%;%CONDA_ROOT%\\scripts;%CONDA_ROOT%\\Library\\bin;%PATH%;C:\\Program Files (x86)\\CMake\\bin
   - conda config --set always_yes yes
-  - conda config --add channels conda-forge
+  - conda config --add channels conda-forge anaconda
   - conda update -q conda
   - conda config --set auto_update_conda no
   - conda update -q --all
@@ -36,7 +36,7 @@ install:
   - python -c "import sys; print(sys.executable)"
   - python -c "import sys; print(sys.prefix)"
   - call "%CONDA_ROOT%\Scripts\activate.bat" base
-  - conda install geotiff laszip nitro curl gdal=2.2.4 pcl cmake eigen ninja libgdal geos zstd numpy=1.15.3 xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=1.15.3
+  - conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - call scripts\\appveyor\\config.cmd
 
