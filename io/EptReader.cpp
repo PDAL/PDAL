@@ -166,23 +166,23 @@ void EptReader::initialize()
     const double querySpacing(m_args.spacing());
     if (querySpacing)
     {
-        double spacing = (m_info->bounds().maxx - m_info->bounds().minx) /
-            m_info->span();
+        double currentSpacing =
+            (m_info->bounds().maxx - m_info->bounds().minx) / m_info->span();
 
-        debug << "Root spacing: " << spacing << std::endl;
+        debug << "Root spacing: " << currentSpacing << std::endl;
 
         // To select the current spacing level, we need depthEnd to be one
         // beyond it - this is a non-inclusive parameter.
         ++m_depthEnd;
 
-        while (spacing > querySpacing)
+        while (currentSpacing > querySpacing)
         {
-            spacing /= 2;
+            currentSpacing /= 2;
             ++m_depthEnd;
         }
 
         debug << "Query spacing:  " << querySpacing << "\n";
-        debug << "Actual spacing: " << spacing << "\n";
+        debug << "Actual spacing: " << currentSpacing << "\n";
         debug << "Depth end: " << m_depthEnd << "\n";
     }
 
