@@ -39,6 +39,9 @@ filename
 bounds
     The extents of the resource to select in 2 or 3 dimensions, expressed as a string, e.g.: ``([xmin, xmax], [ymin, ymax], [zmin, zmax])``.  If omitted, the entire dataset will be selected.
 
+spacing
+    A point spacing limit to select, in resource coordinate system units.  The actual resulting spacing may be slightly greater than the requested spacing since this selection is performed on octree nodes, whose spacing halves at increasing tree depths.  For example, a ``spacing`` value of 10, for a coordinate system in meters, will select a minimum resolution of at least 0.001 points per cubic meter.
+
 origin
     EPT datasets are lossless aggregations of potentially multiple source files.  The *origin* options can be used to select all points from a single source file.  This option may be specified as a string or an integral ID.
 

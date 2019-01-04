@@ -103,6 +103,7 @@ public:
     {
         m_bounds = toBox3d(m_info["bounds"]);
         m_points = m_info["points"].asUInt64();
+        m_span = m_info["span"].asUInt64();
         m_srs = m_info["srs"]["wkt"].asString();
 
         if (m_srs.empty())
@@ -131,6 +132,7 @@ public:
 
     const BOX3D& bounds() const { return m_bounds; }
     uint64_t points() const { return m_points; }
+    uint64_t span() const { return m_span; }
     DataType dataType() const { return m_dataType; }
     const std::string& srs() const { return m_srs; }
     const Json::Value& schema() const { return m_info["schema"]; }
@@ -154,6 +156,7 @@ private:
     const Json::Value m_info;
     BOX3D m_bounds;
     uint64_t m_points = 0;
+    uint64_t m_span = 0;
     DataType m_dataType;
     std::string m_srs;
 };

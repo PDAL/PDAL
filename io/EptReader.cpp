@@ -112,6 +112,7 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounds to fetch", m_args.boundsArg());
     args.add("origin", "Origin of source file to fetch", m_args.originArg());
     args.add("threads", "Number of worker threads", m_args.threadsArg());
+    args.add("spacing", "Point spacing limit", m_args.spacingArg());
 }
 
 BOX3D EptReader::Args::bounds() const
@@ -149,21 +150,44 @@ void EptReader::initialize()
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
     m_pool.reset(new Pool(m_args.threads()));
-    log()->get(LogLevel::Debug) << "Endpoint: " << m_ep->prefixedRoot() <<
-        std::endl;
+    auto& debug(log()->get(LogLevel::Debug));
 
+    debug << "Endpoint: " << m_ep->prefixedRoot() << std::endl;
     m_info.reset(new EptInfo(parse(m_ep->get("ept.json"))));
-    log()->get(LogLevel::Debug) << "Got EPT info" << std::endl;
-
+    debug << "Got EPT info" << std::endl;
+    debug << "SRS: " << m_info->srs() << std::endl;
     setSpatialReference(m_info->srs());
 
     // Figure out our query parameters.
     m_queryBounds = m_args.bounds();
     handleOriginQuery();
 
-    log()->get(LogLevel::Debug) << "Query bounds: " << m_queryBounds <<
-        std::endl;
-    log()->get(LogLevel::Debug) << "Threads: " << m_pool->size() << std::endl;
+    // Figure out our max depth.
+    const double querySpacing(m_args.spacing());
+    if (querySpacing)
+    {
+        double spacing = (m_info->bounds().maxx - m_info->bounds().minx) /
+            m_info->span();
+
+        debug << "Root spacing: " << spacing << std::endl;
+
+        // To select the current spacing level, we need depthEnd to be one
+        // beyond it - this is a non-inclusive parameter.
+        ++m_depthEnd;
+
+        while (spacing > querySpacing)
+        {
+            spacing /= 2;
+            ++m_depthEnd;
+        }
+
+        debug << "Query spacing:  " << querySpacing << "\n";
+        debug << "Actual spacing: " << spacing << "\n";
+        debug << "Depth end: " << m_depthEnd << "\n";
+    }
+
+    debug << "Query bounds: " << m_queryBounds << "\n";
+    debug << "Threads: " << m_pool->size() << std::endl;
 }
 
 void EptReader::handleOriginQuery()
@@ -193,7 +217,7 @@ void EptReader::handleOriginQuery()
         // Otherwise it's a file path (or part of one - for example selecting
         // by a basename or a tile ID rather than a full path is convenient).
         // Find it within the sources list, and make sure it's specified
-        // uniquely enough to select only one filt.
+        // uniquely enough to select only one file.
         for (Json::ArrayIndex i(0); i < sources.size(); ++i)
         {
             const Json::Value& entry(sources[i]);
@@ -352,6 +376,7 @@ void EptReader::overlaps()
 void EptReader::overlaps(const Json::Value& hier, const Key& key)
 {
     if (!key.b.overlaps(m_queryBounds)) return;
+    if (m_depthEnd && key.d >= m_depthEnd) return;
     const int64_t np(hier[key.toString()].asInt64());
     if (!np) return;
 
