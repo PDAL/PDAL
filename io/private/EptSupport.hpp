@@ -153,10 +153,19 @@ public:
     const Json::Value& json() { return m_info; }
 
 private:
+    // Info comes from the values here:
+    // https://entwine.io/entwine-point-tile.html#ept-json
     const Json::Value m_info;
     BOX3D m_bounds;
     uint64_t m_points = 0;
+
+    // The span is the length, width, and depth of the octree grid.  For
+    // example, a dataset oriented as a 256*256*256 octree grid would have a
+    // span of 256.
+    //
+    // See: https://entwine.io/entwine-point-tile.html#span
     uint64_t m_span = 0;
+
     DataType m_dataType;
     std::string m_srs;
 };
