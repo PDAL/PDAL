@@ -108,18 +108,18 @@ private:
         Bounds& boundsArg() { return m_bounds; }
         std::string& originArg() { return m_origin; }
         uint64_t& threadsArg() { return m_threads; }
-        double& spacingArg() { return m_spacing; }
+        double& resolutionArg() { return m_resolution; }
 
         BOX3D bounds() const;
         std::string origin() const { return m_origin; }
         uint64_t threads() const { return std::max<uint64_t>(4, m_threads); }
-        double spacing() const { return m_spacing; }
+        double resolution() const { return m_resolution; }
 
     private:
         Bounds m_bounds;
         std::string m_origin;
         uint64_t m_threads = 0;
-        double m_spacing = 0;
+        double m_resolution = 0;
     };
 
     Args m_args;

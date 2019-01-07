@@ -112,7 +112,7 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounds to fetch", m_args.boundsArg());
     args.add("origin", "Origin of source file to fetch", m_args.originArg());
     args.add("threads", "Number of worker threads", m_args.threadsArg());
-    args.add("spacing", "Point spacing limit", m_args.spacingArg());
+    args.add("resolution", "Resolution limit", m_args.resolutionArg());
 }
 
 BOX3D EptReader::Args::bounds() const
@@ -163,26 +163,26 @@ void EptReader::initialize()
     handleOriginQuery();
 
     // Figure out our max depth.
-    const double querySpacing(m_args.spacing());
-    if (querySpacing)
+    const double queryResolution(m_args.resolution());
+    if (queryResolution)
     {
-        double currentSpacing =
+        double currentResolution =
             (m_info->bounds().maxx - m_info->bounds().minx) / m_info->span();
 
-        debug << "Root spacing: " << currentSpacing << std::endl;
+        debug << "Root resolution: " << currentResolution << std::endl;
 
-        // To select the current spacing level, we need depthEnd to be one
+        // To select the current resolution level, we need depthEnd to be one
         // beyond it - this is a non-inclusive parameter.
         ++m_depthEnd;
 
-        while (currentSpacing > querySpacing)
+        while (currentResolution > queryResolution)
         {
-            currentSpacing /= 2;
+            currentResolution /= 2;
             ++m_depthEnd;
         }
 
-        debug << "Query spacing:  " << querySpacing << "\n";
-        debug << "Actual spacing: " << currentSpacing << "\n";
+        debug << "Query resolution:  " << queryResolution << "\n";
+        debug << "Actual resolution: " << currentResolution << "\n";
         debug << "Depth end: " << m_depthEnd << "\n";
     }
 
