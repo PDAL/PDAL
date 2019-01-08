@@ -152,6 +152,7 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
+    std::map<int, BOX3D> m_nodeBounds;
 
     //Spatial Reference variables
     SpatialReference m_nativeSrs;
@@ -181,7 +182,7 @@ protected:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
-    void createView(std::string localUrl, PointView& view);
+    void createView(std::string localUrl, int nodeIndex, PointView& view);
     BOX3D parseBox(Json::Value base);
     void traverseTree(Json::Value page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);

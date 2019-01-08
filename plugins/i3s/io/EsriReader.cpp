@@ -279,7 +279,10 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     // Build the node list that will tell us which nodes overlap with bounds
     std::vector<int> nodes;
     const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
+    log()->get(LogLevel::Debug) << "Traversing metadata" << std::endl;
     traverseTree(initJson, 0, nodes, 0, 0);
+    log()->get(LogLevel::Debug) << "Overlapping nodes: " << nodes.size() <<
+        std::endl;
 
     // Create view with overlapping nodes at desired depth
     // Will create a thread pool on the createview class and iterate
@@ -292,10 +295,11 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
         std::string localUrl;
 
         localUrl = m_filename + "/nodes/" + std::to_string(nodes[i]);
+        int nodeIndex(nodes[i]);
 
-        p.add([localUrl, this, &view]()
+        p.add([localUrl, nodeIndex, this, &view]()
         {
-            createView(localUrl, *view);
+            createView(localUrl, nodeIndex, *view);
         });
     }
     p.await();
@@ -337,10 +341,13 @@ void EsriReader::traverseTree(Json::Value page, int index,
     BOX3D nodeBox = parseBox(page["nodes"][index]);
     bool overlap = m_bounds.overlaps(nodeBox);
 
-    //if it doesn't overlap, then none of the nodes in this subtree will
+    // if it doesn't overlap, then none of the nodes in this subtree will
     if (!overlap)
         return;
-    // if it's a child node and the density hasn't been set, add leaf nodes
+
+    m_nodeBounds[name] = nodeBox;
+
+    // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
     {
         nodes.push_back(name);
@@ -461,7 +468,7 @@ BOX3D EsriReader::parseBox(Json::Value base)
 }
 
 
-void EsriReader::createView(std::string localUrl, PointView& view)
+void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view)
 {
     // pull the geometries to start
     const std::string geomUrl = localUrl + "/geometries/";
@@ -483,6 +490,8 @@ void EsriReader::createView(std::string localUrl, PointView& view)
         std::lock_guard<std::mutex> lock(m_mutex);
         startId = view.size();
 
+        BOX3D nodeBounds = m_nodeBounds[nodeIndex];
+
         for (uint64_t j = 0; j < xyz.size(); ++j)
         {
             double x = xyz[j].x;
@@ -497,8 +506,19 @@ void EsriReader::createView(std::string localUrl, PointView& view)
                 view.setField(pdal::Dimension::Id::Y, id, xyz[j].y);
                 view.setField(pdal::Dimension::Id::Z, id, xyz[j].z);
             }
+
+            if (!nodeBounds.contains(x, y, z))
+            {
+                std::cout << std::string(20, '-') << std::endl;
+                std::cout << "OUT: " << nodeBounds << std::endl;
+                std::cout << std::fixed << std::setprecision(12) <<
+                    x << ", " << y << ", " << z << std::endl;
+            }
         }
     }
+
+    // TODO Skipping other attributes.
+    return;
 
     const std::string attrUrl = localUrl + "/attributes/";
 
