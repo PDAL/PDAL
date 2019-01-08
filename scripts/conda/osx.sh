@@ -27,7 +27,6 @@ $CONDA_EXE install  -y laz-perf \
                 eigen \
                 ninja \
                 libgdal \
-                geos \
                 zstd \
                 python=3.7 \
                 numpy

@@ -52,7 +52,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libhdf5-dev \
         unixodbc-dev \
         libsqlite3-dev \
-        libgeos-dev \
         libltdl-dev \
         libcurl4-openssl-dev \
         libspatialite-dev \
@@ -61,7 +60,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         time \
         ninja-build \
         python-setuptools \
-        libgeos++-dev \
         unzip \
         libeigen3-dev \
         libxml2-dev \
@@ -224,7 +222,6 @@ RUN apt-get update; \
         libgeotiff-epsg \
         libexpat1 \
         libxml2 \
-        libgeos-c1v5 \
         libjsoncpp1 \
         libwebp6 \
         netcdf-bin \

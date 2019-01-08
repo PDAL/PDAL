@@ -115,7 +115,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #------------------------------------------------------------------------------
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
-include(${PDAL_CMAKE_DIR}/geos.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
@@ -267,7 +266,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
-        ${GEOS_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}

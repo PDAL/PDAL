@@ -54,7 +54,6 @@ RUN \
         libcrypto1.1@edgemain \
         libspatialite-dev@edgetesting \
         gdal-dev@edgetesting \
-        geos-dev@edgetesting \
         libgeotiff-dev@edgetesting \
         nitro@edgetesting \
         nitro-dev@edgetesting \

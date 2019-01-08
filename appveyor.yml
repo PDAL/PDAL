@@ -36,7 +36,7 @@ install:
   - python -c "import sys; print(sys.executable)"
   - python -c "import sys; print(sys.prefix)"
   - call "%CONDA_ROOT%\Scripts\activate.bat" base
-  - conda install geotiff laszip nitro curl gdal=2.2.4 pcl cmake eigen ninja libgdal geos zstd numpy=1.15.3 xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=1.15.3
+  - conda install geotiff laszip nitro curl gdal=2.2.4 pcl cmake eigen ninja libgdal zstd numpy=1.15.3 xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=1.15.3
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - call scripts\\appveyor\\config.cmd
 
