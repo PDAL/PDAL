@@ -3150,6 +3150,11 @@ inline std::string decompress(const char* data, std::size_t size)
 #endif
 #endif
 
+#ifdef _WIN32
+#pragma warning(disable:4251)// [templated class] needs to have dll-interface...
+#endif
+
+
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/exports.hpp
 // //////////////////////////////////////////////////////////////////////
