@@ -41,19 +41,25 @@
 
 #pragma once
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-private-field"
-#include <riegl/scanlib.hpp>
-#pragma GCC diagnostic pop
-
+#include <pdal/Dimension.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/PointTable.hpp>
-#include <pdal/PointView.hpp>
+
+#include <riegl/scanlib.hpp>
 
 namespace pdal
 {
 
 
 Dimension::Id getTimeDimensionId(bool syncToPps);
+
+struct Point {
+    Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns);
+
+    scanlib::target target;
+    unsigned int returnNumber;
+    unsigned int numberOfReturns;
+};
 
 
 class PDAL_DLL RxpPointcloud : public scanlib::pointcloud
@@ -62,14 +68,14 @@ public:
     RxpPointcloud(
             const std::string& uri,
             bool isSyncToPps,
-            bool m_minimal,
             bool m_reflectanceAsIntensity,
             float m_minReflectance,
             float m_maxReflectance,
             PointTableRef table);
     virtual ~RxpPointcloud();
 
-    point_count_t read(PointViewPtr view, point_count_t count);
+    bool endOfInput() const;
+    bool readOne(PointRef& point);
 
     inline bool isSyncToPps() const
     {
@@ -80,18 +86,18 @@ protected:
     void on_echo_transformed(echo_type echo);
 
 private:
-    virtual point_count_t writeSavedPoints(PointViewPtr view, point_count_t count);
+    bool readSavedPoint(PointRef& point);
+    void copyPoint(const Point& from, PointRef& to) const;
+    void savePoints();
 
-    PointViewPtr m_view;
-    point_count_t m_idx;
     bool m_syncToPps;
-    bool m_minimal;
     bool m_reflectanceAsIntensity;
     float m_minReflectance;
     float m_maxReflectance;
     std::shared_ptr<scanlib::basic_rconnection> m_rc;
     scanlib::decoder_rxpmarker m_dec;
     scanlib::buffer m_rxpbuf;
+    std::deque<Point> m_points;
 
 };
 
