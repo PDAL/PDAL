@@ -4,5 +4,5 @@ To update the bundle:
 
 cd <arbiter-location>
 python amalgamate -c pdal -j
-cd ./dist/* <pdal-location>/vendor/arbiter
+cp ./dist/* <pdal-location>/vendor/arbiter
 
