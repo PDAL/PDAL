@@ -4,8 +4,32 @@
 References
 ******************************************************************************
 
-.. index:: References
+.. index:: Citation
 
+Citation
+--------------------------------------------------------------------------------
+
+To cite PDAL in publications use:
+
+  PDAL contributors (2018). PDAL Point Data Abstraction Library
+  URL https://pdal.io
+
+A BibTeX entry for LaTeX users is
+
+  @Manual{,
+    title = {{PDAL} Point Data Abstraction Library},
+    author = {{PDAL contributors}},
+    year = {2018},
+    url = {https://pdal.io},
+  }
+
+
+
+Reference
+--------------------------------------------------------------------------------
+
+
+.. index:: References
 
 .. [Alexa2003] Alexa, Marc, et al. "Computing and rendering point set surfaces." Visualization and Computer Graphics, IEEE Transactions on 9.1 (2003): 3-15.
 

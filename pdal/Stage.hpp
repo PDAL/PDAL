@@ -461,6 +461,15 @@ private:
         {}
 
     /**
+      Pass all the point views at once to the stage for cases where we need
+      such information.  You normally shouldn't need to implement this call.
+
+      \param pvSet  PointViewSet being processed for the stage.
+    */
+    virtual void prerun(const PointViewSet& /*pvSet*/)
+        {}
+
+    /**
       Process all points in a view.  Implement in subclass.
 
       \param view  PointView to process.

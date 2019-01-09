@@ -141,6 +141,7 @@ private:
         const SpatialReference& srs);
     virtual bool srsOverridden() const
         { return m_aSrs.valid(); }
+    void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
     void spatialReferenceChanged(const SpatialReference& srs);

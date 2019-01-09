@@ -285,10 +285,6 @@ TEST(PointViewTest, calcBounds)
     BOX3D box_b2;
     b2->calculateBounds(box_b2);
     check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
-
-    BOX3D box_bs;
-    PointView::calculateBounds(bs, box_bs);
-    check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
 }
 
 TEST(PointViewTest, order)

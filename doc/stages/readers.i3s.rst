@@ -15,7 +15,7 @@ This example will download the Autzen dataset from the arcgis scene server and o
         "pipeline":[
             {
                 "type": "readers.i3s",
-                "filename": "https://tiles.arcgis.com/tiles/arcgis/rest/services/AUTZEN_LiDAR/SceneServer",
+                "filename": "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer",
                 "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
             }
         ]
@@ -23,7 +23,7 @@ This example will download the Autzen dataset from the arcgis scene server and o
 
 .. code::
 
-    pdal traslate i3s://https://tiles.arcgis.com/tiles/arcgis/rest/services/AUTZEN_LiDAR/SceneServer \
+    pdal translate i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer \
         autzen.las \
         --readers.i3s.threads=64 \
         --readers.i3s.bounds="([-123.075542,-123.06196],[44.049719,44.06278])"

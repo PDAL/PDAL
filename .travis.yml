@@ -1,5 +1,7 @@
 # .travis.yml
 # Configure Travis CI service for http://github.com/PDAL
+# NOTE: The | below in 'after_success' enables YAML block mode so that we
+# can maintain newlines and write reasonable shell script.
 
 sudo: required
 
@@ -11,11 +13,14 @@ before_install:
 script:
   - docker run -v $TRAVIS_BUILD_DIR:/pdal -t pdal/alpinebase:latest /pdal/scripts/ci/script.sh
 
-after_success: |+
+after_success: |
   if [[ "$TRAVIS_SECURE_ENV_VARS" == "true" &&
-        "$TRAVIS_BRANCH" == "1.8-maintenance" ]]
+        "$TRAVIS_BRANCH" == "1.8-maintenance" &&
+        -n "$encrypted_6a5172b96922_key" ]]
   then
-      ./scripts/ci/after_success.sh $TRAVIS_BUILD_DIR
+      cd scripts/ci
+      ./after_success.sh $TRAVIS_BUILD_DIR $encrypted_6a5172b96922_key \
+            $encrypted_6a5172b96922_iv
   fi
 
 notifications:

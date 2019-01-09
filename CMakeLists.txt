@@ -274,7 +274,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
-        ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
@@ -382,7 +381,6 @@ install(
         "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
-export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)

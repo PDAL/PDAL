@@ -110,16 +110,6 @@ void PointView::calculateBounds(BOX2D& output) const
 }
 
 
-void PointView::calculateBounds(const PointViewSet& set, BOX2D& output)
-{
-    for (auto iter = set.begin(); iter != set.end(); ++iter)
-    {
-        PointViewPtr buf = *iter;
-        buf->calculateBounds(output);
-    }
-}
-
-
 void PointView::calculateBounds(BOX3D& output) const
 {
     for (PointId idx = 0; idx < size(); idx++)
@@ -129,16 +119,6 @@ void PointView::calculateBounds(BOX3D& output) const
         double z = getFieldAs<double>(Dimension::Id::Z, idx);
 
         output.grow(x, y, z);
-    }
-}
-
-
-void PointView::calculateBounds(const PointViewSet& set, BOX3D& output)
-{
-    for (auto iter = set.begin(); iter != set.end(); ++iter)
-    {
-        PointViewPtr buf = *iter;
-        buf->calculateBounds(output);
     }
 }
 

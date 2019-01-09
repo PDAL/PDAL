@@ -40,6 +40,7 @@
 #include <io/GDALWriter.hpp>
 #include <io/LasReader.hpp>
 #include <io/TextReader.hpp>
+#include <io/private/GDALGrid.hpp>
 #include "Support.hpp"
 
 #include <iostream>

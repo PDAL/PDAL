@@ -106,18 +106,20 @@ private:
     {
     public:
         Bounds& boundsArg() { return m_bounds; }
-        BOX3D bounds() const;
-
-        std::string& originArg() { return m_originArg; }
-        const std::string& origin() const { return m_originArg; }
-
+        std::string& originArg() { return m_origin; }
         uint64_t& threadsArg() { return m_threads; }
+        double& resolutionArg() { return m_resolution; }
+
+        BOX3D bounds() const;
+        std::string origin() const { return m_origin; }
         uint64_t threads() const { return std::max<uint64_t>(4, m_threads); }
+        double resolution() const { return m_resolution; }
 
     private:
         Bounds m_bounds;
-        std::string m_originArg;
-        uint64_t m_threads;
+        std::string m_origin;
+        uint64_t m_threads = 0;
+        double m_resolution = 0;
     };
 
     Args m_args;
@@ -129,6 +131,7 @@ private:
 
     std::set<Key> m_overlapKeys;
     uint64_t m_overlapPoints = 0;
+    uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
 
     std::unique_ptr<FixedPointLayout> m_remoteLayout;
     DimTypeList m_dimTypes;
