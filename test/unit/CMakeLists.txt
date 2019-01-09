@@ -168,8 +168,12 @@ PDAL_ADD_TEST(pdal_filters_crop_test
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_mongoexpression_test FILES
-    filters/MongoExpressionFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_mongoexpression_test
+    FILES
+        filters/MongoExpressionFilterTest.cpp
+    LINK_WITH
+        ${PDAL_JSONCPP_LIB_NAME}
+)
 target_include_directories(pdal_filters_mongoexpression_test
     PRIVATE ${PDAL_VENDOR_DIR})
 
