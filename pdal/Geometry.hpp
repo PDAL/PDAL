@@ -61,20 +61,11 @@ public:
     OGRGeometryH getOGRHandle();
 
     virtual void update(const std::string& wkt_or_json);
+    virtual bool valid() const;
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref); 
     SpatialReference getSpatialReference() const;
     void transform(const SpatialReference& ref) const;
-
-    /**
-    bool equals(const Geometry& other, double tolerance=0.0001) const;
-    bool operator==(const Geometry& other) const;
-    bool operator!=(const Geometry& other) const;
-    bool operator<(const Geometry& other) const
-        { return wkt() < other.wkt(); }
-    **/
-
-    virtual  bool valid() const;
 
     std::string wkt(double precision=15, bool bOutputZ=false) const;
     std::string json(double precision=15) const;

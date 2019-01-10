@@ -339,6 +339,8 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
     // The number of boundaries is essentially the number of sub-polygons
     int numBoundaries = countChildElements(node, "Boundary");
 
+    // NOTE: Ownership of these rings is transferred to an OGR geometry and
+    //   deleted with that geometry.
     std::vector<OGRLinearRing *> rings;
     while (nodeElementIs(child, "Boundary"))
     {

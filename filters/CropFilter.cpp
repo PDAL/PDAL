@@ -206,11 +206,6 @@ void CropFilter::transform(const SpatialReference& srs)
     {
         point.setSpatialReference(m_args->m_assignedSrs);
         point.transform(srs);
-        /**
-        if (!gdal::reprojectPoint(point.x(), point.y(), point.z(),
-            m_args->m_assignedSrs.getWKT(), srs.getWKT()))
-            throwError("Unable to reproject point center.");
-        **/
     }
     // Set the assigned SRS for the points/bounds to the one we've
     // transformed to.

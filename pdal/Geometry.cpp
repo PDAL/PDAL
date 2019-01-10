@@ -53,15 +53,12 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
 }
 
 
-Geometry::Geometry(const Geometry& input)
-{
-    m_geom.reset(input.m_geom->clone());
-}
+Geometry::Geometry(const Geometry& input) : m_geom(input.m_geom->clone())
+{}
 
 
 Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
-{
-}
+{}
 
 
 Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) :
@@ -90,9 +87,8 @@ void Geometry::update(const std::string& wkt_or_json)
     }
     else
     {
-        OGRErr err = OGRGeometryFactory::createFromWkt(input, nullptr,
-            &newGeom);
-        if (err != OGRERR_NONE)
+        if (OGRGeometryFactory::createFromWkt(input, nullptr,
+                &newGeom) != OGRERR_NONE)
             throw pdal_error("Unable to create geometry from input WKT");
     }
 
@@ -129,25 +125,9 @@ void Geometry::transform(const SpatialReference& ref) const
         throw pdal_error("Geometry::transform() failed.  NULL target SRS.");
 
     OGRSpatialReference *input = m_geom->getSpatialReference();
-
-    /**
-    std::cerr << "About to validate!\n";
-    OGRErr err = input->Validate();
-    if (err == OGRERR_NONE)
-        std::cerr << "No error!\n";
-    else if (err == OGRERR_CORRUPT_DATA)
-        std::cerr << "Malformed!\n";
-    else if (err == OGRERR_UNSUPPORTED_SRS)
-        std::cerr << "Unsupported!\n";
-    else
-        std::cerr << "Err = " << (int)err << "!\n";
-
-    std::cerr << "WKT = " << ref.getWKT() << "!\n";
-    **/
     OGRSpatialReference output(ref.getWKT().data());
     OGRCoordinateTransformation *xform = OGRCreateCoordinateTransformation(
         input, &output);
-
     m_geom->transform(xform);
     delete xform;
 }
@@ -158,17 +138,11 @@ void Geometry::setSpatialReference(const SpatialReference& srs)
     OGRSpatialReference *oSrs;
 
     if (!srs.valid())
-    {
-        oSrs = m_geom->getSpatialReference();
-        if (oSrs)
-            oSrs->Clear();
-    }
+        oSrs = new OGRSpatialReference();
     else
-    {
         oSrs = new OGRSpatialReference(srs.getWKT().data());
-        m_geom->assignSpatialReference(oSrs);
-        oSrs->Release();
-    }
+    m_geom->assignSpatialReference(oSrs);
+    oSrs->Release();
 }
 
 
@@ -176,11 +150,10 @@ SpatialReference Geometry::getSpatialReference() const
 {
     SpatialReference srs;
 
-    OGRSpatialReference *oSrs = m_geom->getSpatialReference();
-    if (oSrs && oSrs->GetRoot())
+    if (srsValid())
     {
         char *buf;
-        oSrs->exportToWkt(&buf);
+        m_geom->getSpatialReference()->exportToWkt(&buf);
         srs.set(buf);
         CPLFree(buf);
     }
@@ -223,8 +196,9 @@ std::string Geometry::wkt(double precision, bool bOutputZ) const
     OGRErr err = m_geom->exportToWkt(&buf);
     if (err != OGRERR_NONE)
         throw pdal_error("Geometry::wkt: unable to export geometry to WKT.");
-
-    return std::string(buf);
+    std::string wkt(buf);
+    CPLFree(buf);
+    return wkt;
 }
 
 

@@ -68,7 +68,7 @@ void Point::update(const std::string& wkt_or_json)
     {
         m_geom.reset(new OGRPoint());
         throw pdal_error("Can't set Point from string.  String doesn't "
-            "represent a string.");
+            "represent a point");
     }
 
     // We use a sentinel for 3D that's different from what GDAL uses.

@@ -114,13 +114,9 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
 
     OGRwkbGeometryType t = m_geom->getGeometryType();
     if (t == wkbPolygon || t == wkbPolygon25D)
-    {
-        std::cerr << "Simplify poly!\n";
         deleteSmallRings(m_geom.get());
-    }
     else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
-        std::cerr << "Simplify multi poly!\n";
         OGRMultiPolygon *mpoly = m_geom->toMultiPolygon();
         for (auto it = mpoly->begin(); it != mpoly->end(); ++it)
             deleteSmallRings(*it);
