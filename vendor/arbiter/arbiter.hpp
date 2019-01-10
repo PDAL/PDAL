@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: dcd8b5e47aaeb83bb8136f2850d8036d0f19f045
+// Git SHA: 8fde10accb5a534b4ddf4e6b9cee902de0511c2d
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2449,6 +2449,7 @@ namespace rapidxml
              1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // E
              1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1   // F
         };
+
         // Text (i.e. PCDATA) that does not require processing when ws normalization is disabled
         // (anything but < \0 &)
         template<int Dummy>
@@ -3149,6 +3150,11 @@ inline std::string decompress(const char* data, std::size_t size)
 #endif
 #endif
 
+#ifdef _WIN32
+#pragma warning(disable:4251)// [templated class] needs to have dll-interface...
+#endif
+
+
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/exports.hpp
 // //////////////////////////////////////////////////////////////////////
@@ -3307,7 +3313,7 @@ namespace http
 
 class Pool;
 
-class Curl
+class ARBITER_DLL Curl
 {
     friend class Pool;
 
@@ -3435,6 +3441,8 @@ ARBITER_DLL std::string buildQueryString(const http::Query& query);
 
 /** @cond arbiter_internal */
 
+class ARBITER_DLL Pool;
+
 class ARBITER_DLL Resource
 {
 public:
@@ -3473,19 +3481,19 @@ private:
     http::Response exec(std::function<http::Response()> f);
 };
 
-class Pool
+class ARBITER_DLL Pool
 {
     // Only HttpResource may release.
     friend class Resource;
 
 public:
-    ARBITER_DLL Pool(
+    Pool(
             std::size_t concurrent = 4,
             std::size_t retry = 4,
             Json::Value json = Json::Value());
-    ARBITER_DLL ~Pool();
+    ~Pool();
 
-    ARBITER_DLL Resource acquire();
+    Resource acquire();
 
 private:
     void release(std::size_t id);
@@ -3586,7 +3594,7 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-class Time
+class ARBITER_DLL Time
 {
 public:
     static const std::string iso8601;
@@ -3594,8 +3602,7 @@ public:
     static const std::string dateNoSeparators;
 
     Time();
-    Time(const std::string& s,
-        const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
+    Time(const std::string& s, const std::string& format = "%Y-%m-%dT%H:%M:%SZ");
 
     std::string str(const std::string& format = "%Y-%m-%dT%H:%M:%SZ") const;
 
@@ -3840,7 +3847,7 @@ namespace fs
      *
      * See Arbiter::getLocalHandle for details about construction.
      */
-    class LocalHandle
+    class ARBITER_DLL LocalHandle
     {
         friend class arbiter::Arbiter;
         friend class arbiter::Endpoint;
@@ -5129,7 +5136,7 @@ class Driver;
  *
  * An Endpoint may be created using Arbiter::getEndpoint.
  */
-class Endpoint
+class ARBITER_DLL Endpoint
 {
     // Only Arbiter may construct.
     friend class Arbiter;
@@ -5368,19 +5375,19 @@ namespace http { class Pool; }
  *
  * All Arbiter operations are thread-safe except unless otherwise noted.
  */
-class Arbiter
+class ARBITER_DLL Arbiter
 {
 public:
     /** Construct a basic Arbiter with only drivers the don't require
      * external configuration parameters.
      */
-    ARBITER_DLL Arbiter();
+    Arbiter();
 
     /** @brief Construct an Arbiter with driver configurations. */
-    ARBITER_DLL Arbiter(const Json::Value& json);
+    Arbiter(const Json::Value& json);
 
     /** True if a Driver has been registered for this file type. */
-    ARBITER_DLL bool hasDriver(std::string path) const;
+    bool hasDriver(std::string path) const;
 
     /** @brief Add a custom driver for the supplied type.
      *
@@ -5396,30 +5403,28 @@ public:
     void addDriver(std::string type, std::unique_ptr<Driver> driver);
 
     /** Get data or throw if inaccessible. */
-    ARBITER_DLL std::string get(std::string path) const;
+    std::string get(std::string path) const;
 
     /** Get data if accessible. */
     std::unique_ptr<std::string> tryGet(std::string path) const;
 
     /** Get data in binary form or throw if inaccessible. */
-    ARBITER_DLL std::vector<char>
-    getBinary(std::string path) const;
+    std::vector<char> getBinary(std::string path) const;
 
     /** Get data in binary form if accessible. */
-    ARBITER_DLL std::unique_ptr<std::vector<char>>
-    tryGetBinary(std::string path) const;
+    std::unique_ptr<std::vector<char>> tryGetBinary(std::string path) const;
 
     /** Get file size in bytes or throw if inaccessible. */
     std::size_t getSize(std::string path) const;
 
     /** Get file size in bytes if accessible. */
-    ARBITER_DLL std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
+    std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
 
     /** Write data to path. */
-    ARBITER_DLL void put(std::string path, const std::string& data) const;
+    void put(std::string path, const std::string& data) const;
 
     /** Write data to path. */
-    ARBITER_DLL void put(std::string path, const std::vector<char>& data) const;
+    void put(std::string path, const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if
      * isHttpDerived is false for this path. */
@@ -5451,7 +5456,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    ARBITER_DLL void put(
+    void put(
             std::string path,
             const std::string& data,
             http::Headers headers,
@@ -5459,7 +5464,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    ARBITER_DLL void put(
+    void put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
