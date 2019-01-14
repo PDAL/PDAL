@@ -57,6 +57,9 @@ void Reader::readerAddArgs(ProgramArgs& args)
 
 void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
 {
+    if (srs.empty() && !m_defaultSrs.empty())
+        return;
+
     if (getSpatialReference().empty() || m_overrideSrs.empty())
     {
         Stage::setSpatialReference(m, srs);
