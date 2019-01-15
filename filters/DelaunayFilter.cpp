@@ -76,9 +76,9 @@ PointViewSet DelaunayFilter::run(PointViewPtr pointView)
         
         for (std::size_t i = 0; i < triangulation.triangles.size(); i += 3)
         {
-            mesh->add(triangulation.triangles[i],
+            mesh->add(triangulation.triangles[i+2],
                 triangulation.triangles[i+1],
-                triangulation.triangles[i+2]);
+                triangulation.triangles[i]);
         }
     }
     
