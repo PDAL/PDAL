@@ -83,6 +83,7 @@ TEST(DelaunayFilterTest, test1)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 6u);
     TriangularMesh *mesh = view->mesh("delaunay2d");
+    EXPECT_EQ(mesh->size(), expectedTriangles.size());
     
     // Loop through the triangles of the generated mesh...
     for (size_t i = 0; i < mesh->size(); i++)
