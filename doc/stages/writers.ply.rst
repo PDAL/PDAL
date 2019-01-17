@@ -11,8 +11,6 @@ mesh suitable for output as faces.
 
 .. embed::
 
-.. streamable::
-
 Example
 -------
 
