@@ -38,43 +38,55 @@ PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
+
 PDAL_ADD_TEST(pdal_options_test
     FILES
         OptionsTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
-    target_include_directories(pdal_options_test PRIVATE
+target_include_directories(pdal_options_test
+    PRIVATE
+        ${GDAL_INCLUDE_DIRS}
         ${PDAL_JSONCPP_INCLUDE_DIR})
+
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
+
 PDAL_ADD_TEST(pdal_program_arg_test
     FILES
         ProgramArgsTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
 )
-    target_include_directories(pdal_program_arg_test PRIVATE
-        ${PDAL_JSONCPP_INCLUDE_DIR})
+target_include_directories(pdal_program_arg_test PRIVATE
+    ${PDAL_JSONCPP_INCLUDE_DIR})
+
 PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
 PDAL_ADD_TEST(pdal_polygon_test
     FILES
         PolygonTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
+target_include_directories(pdal_polygon_test
+    PRIVATE
+        ${GDAL_INCLUDE_DIRS})
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test
     FILES
         SpatialReferenceTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
-target_include_directories(pdal_spatial_reference_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
+    target_include_directories(pdal_spatial_reference_test
+        PRIVATE
+            ${GDAL_INCLUDE_DIRS})
+            ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
@@ -105,23 +117,34 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
+        ${GDAL_LIBRARIES} # EptReaderTest uses the crop filter.
 )
+    target_include_directories(pdal_io_ept_reader_test
+        PRIVATE
+            ${GDAL_INCLUDE_DIRS}
+            ${PDAL_JSONCPP_INCLUDE_DIR})
 
-target_include_directories(pdal_io_ept_reader_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
         io/GDALReaderTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
+    target_include_directories(pdal_io_gdal_reader_test
+        PRIVATE
+            ${GDAL_INCLUDE_DIRS})
+
 PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
+    target_include_directories(pdal_io_gdal_writer_test
+        PRIVATE
+            ${GDAL_INCLUDE_DIRS})
+
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/LasReaderTest.cpp)
 target_include_directories(pdal_io_las_reader_test PRIVATE ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/LasWriterTest.cpp)
@@ -151,19 +174,20 @@ PDAL_ADD_TEST(pdal_filters_colorinterp_test
     FILES
         filters/ColorinterpFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
+    target_
 PDAL_ADD_TEST(pdal_filters_colorization_test
     FILES
         filters/ColorizationFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
 )
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)

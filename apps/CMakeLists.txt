@@ -22,7 +22,6 @@ target_link_libraries(${PDAL_APP}
         ${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_JSONCPP_LIB_NAME}
-        ${GDAL_LIBRARY}
         ${WINSOCK_LIBRARY}
 )
 target_include_directories(${PDAL_APP} PRIVATE

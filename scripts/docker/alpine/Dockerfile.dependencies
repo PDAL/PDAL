@@ -34,7 +34,6 @@ RUN \
 
 RUN \
     echo "@edgetesting http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
-    echo "@edgemain http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
     apk update; \
     apk add --no-cache \
         git \
@@ -51,9 +50,8 @@ RUN \
         curl-dev \
         postgresql-dev \
         sqlite-dev \
-        libcrypto1.1@edgemain \
+        libressl2.7-libcrypto \
         libspatialite-dev@edgetesting \
-        gdal-dev@edgetesting \
         geos-dev@edgetesting \
         libgeotiff-dev@edgetesting \
         nitro@edgetesting \
@@ -61,12 +59,19 @@ RUN \
         laszip-dev@edgetesting \
         laz-perf-dev@edgetesting \
         hdf5-dev@edgetesting \
-        proj4@edgetesting \
-    ; \
-    \
+        proj4@edgetesting
+
+COPY gdal-dev-2.4.0-r0.apk .
+COPY gdal-2.4.0-r0.apk .
+
+RUN \
+    apk add --no-cache --allow-untrusted ./gdal-dev-2.4.0-r0.apk ./gdal-2.4.0-r0.apk; \
+    rm ./gdal-dev-2.4.0-r0.apk ./gdal-2.4.0-r0.apk
+
 #
 # These use PDAL's vendor/eigen
 #
+RUN \
     git clone https://github.com/gadomski/fgt.git; \
     cd fgt; \
     mkdir build; \

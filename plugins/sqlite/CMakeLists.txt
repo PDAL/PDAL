@@ -26,10 +26,13 @@ PDAL_ADD_PLUGIN(writer_libname writer sqlite
         io/SQLiteWriter.cpp
     LINK_WITH
         ${SQLITE3_LIBRARY}
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
         ${LIBXML2_LIBRARIES}
 )
-target_include_directories(${writer_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
+target_include_directories(${writer_libname}
+    PRIVATE
+        ${GDAL_INCLUDE_DIRS}
+        ${LIBXML2_INCLUDE_DIR})
 
 #
 # SQLite tests

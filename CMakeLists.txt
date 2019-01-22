@@ -260,13 +260,13 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
     INTERFACE
-        ${GDAL_INCLUDE_DIR}
+        ${GDAL_INCLUDE_DIRS}
         ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
         ${GEOS_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}
@@ -339,6 +339,16 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     ${ZLIB_EXCLUDES}
     ${LZMA_EXCLUDES}
     ${LAZPERF_EXCLUDES}
+install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "gitsha.h"
+    PATTERN "pdal/private" EXCLUDE
+    PATTERN "pdal/util/private" EXCLUDE
+    ${ZSTD_EXCLUDES}
+    ${ZLIB_EXCLUDES}
+    ${LZMA_EXCLUDES}
+    ${LAZPERF_EXCLUDES}
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}
@@ -368,17 +378,6 @@ include (${PDAL_CMAKE_DIR}/cpack.cmake)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-export(
-    TARGETS
-        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}
-    FILE
-        "${PDAL_BINARY_DIR}/PDALTargets.cmake")
-
-install(
-    EXPORT
-        PDALTargets
-    DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 

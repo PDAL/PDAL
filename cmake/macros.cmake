@@ -167,7 +167,7 @@ endmacro(PDAL_ADD_PLUGIN)
 macro(PDAL_ADD_TEST _name)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH)
+    set(multiValueArgs FILES LINK_WITH INCLUDES)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -179,6 +179,7 @@ macro(PDAL_ADD_TEST _name)
     target_include_directories(${_name} PRIVATE
         ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}
+        ${PDAL_ADD_TEST_INCLUDES}
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
