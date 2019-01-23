@@ -26,17 +26,21 @@ if (FBX_FOUND)
             io/FbxWriter.cpp
         LINK_WITH
             ${FBX_LIBRARY}
-            ${CORE_FOUNDATION})
-    target_include_directories(${writer_libname} PRIVATE
-        ${PDAL_IO_DIR}
-        ${FBX_INCLUDE_DIR})
+            ${CORE_FOUNDATION}
+        INCLUDES
+            ${PDAL_IO_DIR}
+            ${FBX_INCLUDE_DIR}
+    )
 
     if (WITH_TESTS)
         PDAL_ADD_TEST(fbxtest
-            FILES test/FbxWriterTest.cpp
-            LINK_WITH ${writer_libname})
-        target_include_directories(fbxtest PRIVATE
-            ${PDAL_IO_DIR})
+            FILES
+                test/FbxWriterTest.cpp
+            LINK_WITH
+                ${writer_libname}
+            INCLUDES
+                ${PDAL_IO_DIR}
+        )
     endif()
 else()
     message(STATUS "Building without FBX support")
