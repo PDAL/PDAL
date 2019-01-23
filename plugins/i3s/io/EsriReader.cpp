@@ -114,6 +114,7 @@ void EsriReader::initialize(PointTableRef table)
     //create pdal Bounds
     m_bounds = createBounds();
 
+
     //find version
     if (jsonBody["store"].isMember("version"))
         m_version = Version(jsonBody["store"]["version"].asString());
@@ -251,7 +252,10 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 void EsriReader::ready(PointTableRef)
 {
     Json::Value spatialJson = m_info["spatialReference"];
-    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
+    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString() ;
+//    if(spatialJson.isMember("vcsWkid"))
+//        spatialStr = spatialStr + "+" + spatialJson["vcsWkid"].asString();
+    std::cout << "SRS: " << spatialStr << std::endl;
     m_nativeSrs = SpatialReference(spatialStr);
     setSpatialReference(m_nativeSrs);
 
@@ -262,6 +266,18 @@ void EsriReader::ready(PointTableRef)
     m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
     m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
         m_nativeRef);
+
+    //create ECEF Bounds
+    double minx(m_bounds.minx), maxx(m_bounds.maxx), miny(m_bounds.miny), maxy(m_bounds.maxy), minz(m_bounds.minz), maxz(m_bounds.maxz);
+
+    for (std::size_t i(0); i < 8; ++i)
+    {
+        double a = (i & 1 ? minx: maxx);
+        double b = (i & 2 ? miny: maxy);
+        double c = (i & 4 ? minz: maxz);
+        OCTTransform(m_toEcefTransform, 1, &a, &b, 0);
+        m_ecefBounds.grow(a, b, c);
+    }
 }
 
 
@@ -337,9 +353,9 @@ void EsriReader::traverseTree(Json::Value page, int index,
         m_maxNode = firstChild + cCount - 1;
     }
 
-    // create box from OBB information and check for overlaps
-    BOX3D nodeBox = parseBox(page["nodes"][index]);
-    bool overlap = m_bounds.overlaps(nodeBox);
+
+    BOX3D nodeBox = createCube(page["nodes"][index]);
+    bool overlap = m_ecefBounds.overlaps(nodeBox);
 
     // if it doesn't overlap, then none of the nodes in this subtree will
     if (!overlap)
@@ -395,9 +411,10 @@ void EsriReader::traverseTree(Json::Value page, int index,
     }
 }
 
-
-// Create the BOX3D for the node. This will be used for testing overlap.
-BOX3D EsriReader::parseBox(Json::Value base)
+//Finds a sphere from the given center and halfsize vector of the OBB
+//and makes a cube around it. This should help with collision detection
+//and pruning of nodes before fetching binaries.
+BOX3D EsriReader::createCube(Json::Value base)
 {
     // Pull XYZ in lat/lon.
     Json::Value center = base["obb"]["center"];
@@ -405,66 +422,31 @@ BOX3D EsriReader::parseBox(Json::Value base)
     double y = center[1].asDouble();
     double z = center[2].asDouble();
 
-    // Convert to ECEF so the OBB offsets in meters will match up.
+    Json::Value hsize = base["obb"]["halfSize"];
+    double hx = hsize[0].asDouble();
+    double hy = hsize[1].asDouble();
+    double hz = hsize[2].asDouble();
+
     OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
 
-    Json::Value hsize = base["obb"]["halfSize"];
-    const double hx = hsize[0].asDouble();
-    const double hy = hsize[1].asDouble();
-    const double hz = hsize[2].asDouble();
-
-    Json::Value quat = base["obb"]["quaternion"];
-    const double w = quat[0].asDouble();
-    const double i = quat[1].asDouble();
-    const double j = quat[2].asDouble();
-    const double k = quat[3].asDouble();
-
-    // Create quat object and normalize it for use
-    Eigen::Quaterniond q(w, i, j, k);
-    q.normalize();
-
-    // Here we'll convert our halfsizes to x, y, and z vectors in respective
-    // directions, which will give us new bounding planes
-    Eigen::Vector3d vecx(hx,   0,   0);
-    Eigen::Vector3d vecy(0,   hy,   0);
-    Eigen::Vector3d vecz(0,    0,  hz);
-
-    // Create quaternion-like vectors
-    Eigen::Quaterniond quatVecX, pxmin, quatVecY, pymin, quatVecZ, pzmin;
-    quatVecX.w() = 0;
-    quatVecY.w() = 0;
-    quatVecZ.w() = 0;
-    quatVecX.vec() = vecx;
-    quatVecY.vec() = vecy;
-    quatVecZ.vec() = vecz;
-
-    // Rotate all the individual vectors
-    // gives us offset for the of the new x/y/zmax/min planes
-    Eigen::Quaterniond rotx = q * quatVecX * q.inverse();
-    Eigen::Quaterniond roty = q * quatVecY * q.inverse();
-    Eigen::Quaterniond rotz = q * quatVecZ * q.inverse();
-
-    BOX3D bounds;
+    //find radius
+    double r = std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
+    //create cube around this sphere
+    //combining all of these will create the 8 corners needed for a box
+    double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
+    BOX3D nodeBox;
     for (std::size_t i(0); i < 8; ++i)
     {
-        double a(x), b(y), c(z);
-
-        a += rotx.vec()[0] * (i & 1 ? 1.0 : -1.0);
-        b += rotx.vec()[1] * (i & 1 ? 1.0 : -1.0);
-        c += rotx.vec()[2] * (i & 1 ? 1.0 : -1.0);
-
-        a += roty.vec()[0] * (i & 2 ? 1.0 : -1.0);
-        b += roty.vec()[1] * (i & 2 ? 1.0 : -1.0);
-        c += roty.vec()[2] * (i & 2 ? 1.0 : -1.0);
-
-        a += rotz.vec()[0] * (i & 4 ? 1.0 : -1.0);
-        b += rotz.vec()[1] * (i & 4 ? 1.0 : -1.0);
-        c += rotz.vec()[2] * (i & 4 ? 1.0 : -1.0);
-
-        OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-        bounds.grow(a, b, c);
+        double a, b, c;
+        a = (i & 1) ? maxx : minx;
+        b = (i & 2) ? maxy : miny;
+        c = (i & 4) ? maxz : minz;
+        //OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
+        nodeBox.grow(a,b,c);
     }
-    return bounds;
+
+    //returning in ecef
+    return nodeBox;
 }
 
 
@@ -506,19 +488,37 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
                 view.setField(pdal::Dimension::Id::Y, id, xyz[j].y);
                 view.setField(pdal::Dimension::Id::Z, id, xyz[j].z);
             }
+            double a(x), b(y), c(z);
+            OCTTransform(m_toEcefTransform, 1, &a, &b, &c);
 
-            if (!nodeBounds.contains(x, y, z))
+
+            //nodeBounds is the product of createCube function
+            //box is in ecef
+            if (!nodeBounds.contains(a, b, c))
             {
-                std::cout << std::string(20, '-') << std::endl;
-                std::cout << "OUT: " << nodeBounds << std::endl;
-                std::cout << std::fixed << std::setprecision(12) <<
-                    x << ", " << y << ", " << z << std::endl;
+
+                outpoint A;
+                if (a > nodeBounds.maxx || a < nodeBounds.minx)
+                    A.point[0] = (a < nodeBounds.minx ?
+                            a - nodeBounds.minx : a - nodeBounds.maxx);
+                else
+                    A.point[0] = 0;
+                if (b > nodeBounds.maxy || b < nodeBounds.miny)
+                    A.point[1] = (b < nodeBounds.miny ?
+                            a - nodeBounds.miny : a - nodeBounds.maxy);
+                else
+                    A.point[1] = 0;
+                if (c > nodeBounds.maxz || c < nodeBounds.minz)
+                    A.point[2] = (c < nodeBounds.minz ?
+                            c - nodeBounds.minz : a - nodeBounds.maxz);
+                else
+                    A.point[2] = 0;
+
+
+                m_op.push_back(A);
             }
         }
     }
-
-    // TODO Skipping other attributes.
-    return;
 
     const std::string attrUrl = localUrl + "/attributes/";
 
@@ -666,6 +666,61 @@ BOX3D EsriReader::createBounds()
 void EsriReader::done(PointTableRef)
 {
     m_stream.reset();
+    std::cout << "Points fell outside the bounds of nodeboxes " << m_op.size() << " times: "  << std::endl;
+    double posx(0), negx(0), posy(0), negy(0), posz(0), negz(0);
+
+
+    double avposx(0), avnegx(0), avposy(0), avnegy(0), avposz(0), avnegz(0);
+    for (size_t i(0); i < m_op.size(); ++i)
+    {
+
+        if(m_op[i].point[0] < 0){
+            negx++;
+            avnegx+=m_op[i].point[0];
+        }
+        else if(m_op[i].point[0] > 0){
+            posx++;
+            avposx++;
+            avposx+=m_op[i].point[0];
+        }
+
+        if(m_op[i].point[1] < 0){
+            negy++;
+            avnegy+=m_op[i].point[1];
+        }
+        else if(m_op[i].point[1] > 0){
+            posy++;
+            avposy+=m_op[i].point[1];
+        }
+
+        if(m_op[i].point[2] < 0){
+            negz++;
+            avnegz += m_op[i].point[2];
+        }
+        else if(m_op[i].point[2] > 0){
+            posz++;
+            avposz += m_op[i].point[2];
+        }
+    }
+    avposx = avposx / posx;
+    avnegx = avnegx / negx;
+    avposy = avposy / posy;
+    avnegy = avnegy / negy;
+    avposz = avposz / posz;
+    avnegz = avnegz / negz;
+
+    std::cout << "Negative X: " << negx << "/" << m_op.size() << " times.\n";
+    std::cout << "^ Average ^ : " << avnegx << std::endl;
+    std::cout << "Positive X: " << posx << "/" << m_op.size() << " times.\n";
+    std::cout << "^ Average ^ : " << avposx<< std::endl;
+    std::cout << "Negative Y: " << negy << "/" << m_op.size() << " times.\n";
+    std::cout << "^ Average ^ : " << avnegy<< std::endl;
+    std::cout << "Positive Y: " << posy << "/" << m_op.size() << " times.\n";
+    std::cout << "^ Average ^ : " << avposy<< std::endl;
+    std::cout << "Negative Z: " << negz << "/" << m_op.size() << " times.\n";
+    std::cout << "^ Average ^ : " << avnegz<< std::endl;
+    std::cout << "Positive Z: " << posz << "/" << m_op.size() << " times.\n";
+    std::cout << "^ Average ^ : " << avposz<< std::endl;
 
     if (m_nativeRef)
         OSRDestroySpatialReference(m_nativeRef);
