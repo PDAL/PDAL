@@ -165,7 +165,12 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
 # sources for the native filters
 #
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
+PDAL_ADD_TEST(pdal_filters_chipper_test
+    FILES
+        filters/ChipperTest.cpp
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_filters_nndistance_test
     FILES
         filters/NNDistanceTest.cpp
