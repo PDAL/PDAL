@@ -428,22 +428,25 @@ BOX3D EsriReader::createCube(Json::Value base)
     double hz = hsize[2].asDouble();
 
     OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
-
+    //double a(hx/(111111*std::cos(hy))), b(hy/111111), c(hz);
+    //OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
     //find radius
-    double r = std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
+    double r = 10 * std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
     //create cube around this sphere
     //combining all of these will create the 8 corners needed for a box
     double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
-    BOX3D nodeBox;
-    for (std::size_t i(0); i < 8; ++i)
-    {
-        double a, b, c;
-        a = (i & 1) ? maxx : minx;
-        b = (i & 2) ? maxy : miny;
-        c = (i & 4) ? maxz : minz;
-        //OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-        nodeBox.grow(a,b,c);
-    }
+    BOX3D nodeBox(minx,miny,minz,maxx,maxy,maxz);
+    nodeBox.grow(r);
+//    BOX3D nodeBox2;
+//    for (std::size_t i(0); i < 8; ++i)
+//    {
+//        double a, b, c;
+//        a = (i & 1) ? maxx : minx;
+//        b = (i & 2) ? maxy : miny;
+//        c = (i & 4) ? maxz : minz;
+//        //OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
+//        nodeBox2.grow(a,b,c);
+//    }
 
     //returning in ecef
     return nodeBox;
@@ -490,12 +493,17 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
             }
             double a(x), b(y), c(z);
             OCTTransform(m_toEcefTransform, 1, &a, &b, &c);
-
+            double xwidth(nodeBounds.maxx-nodeBounds.minx);
+            double ywidth(nodeBounds.maxy-nodeBounds.miny);
+            double zwidth(nodeBounds.maxz-nodeBounds.minz);
 
             //nodeBounds is the product of createCube function
             //box is in ecef
             if (!nodeBounds.contains(a, b, c))
             {
+
+                //std::cout << "Size of node Box: " << xwidth*ywidth*zwidth << "m^3" << std::endl;
+                m_outBounds[nodeIndex] = nodeBounds;
 
                 outpoint A;
                 if (a > nodeBounds.maxx || a < nodeBounds.minx)
@@ -505,12 +513,12 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
                     A.point[0] = 0;
                 if (b > nodeBounds.maxy || b < nodeBounds.miny)
                     A.point[1] = (b < nodeBounds.miny ?
-                            a - nodeBounds.miny : a - nodeBounds.maxy);
+                            b - nodeBounds.miny : b - nodeBounds.maxy);
                 else
                     A.point[1] = 0;
                 if (c > nodeBounds.maxz || c < nodeBounds.minz)
                     A.point[2] = (c < nodeBounds.minz ?
-                            c - nodeBounds.minz : a - nodeBounds.maxz);
+                            c - nodeBounds.minz : c - nodeBounds.maxz);
                 else
                     A.point[2] = 0;
 

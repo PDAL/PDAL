@@ -158,6 +158,7 @@ protected:
     int m_maxNode = 0;
     Version m_version;
     std::map<int, BOX3D> m_nodeBounds;
+    std::map<int, BOX3D> m_outBounds;
 
     //Spatial Reference variables
     SpatialReference m_nativeSrs;
