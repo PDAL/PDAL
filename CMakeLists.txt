@@ -264,6 +264,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${GDAL_INCLUDE_DIRS}
         ${LASZIP_INCLUDE_DIR}
 )
+message("*** GDAL_LIBRARIES = ${GDAL_LIBRARIES} ***")
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
@@ -330,16 +331,6 @@ if (NOT PDAL_HAVE_LAZPERF)
     set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
 endif()
 
-install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
-    DESTINATION include
-    FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "gitsha.h"
-    PATTERN "pdal/private" EXCLUDE
-    PATTERN "pdal/util/private" EXCLUDE
-    ${ZSTD_EXCLUDES}
-    ${ZLIB_EXCLUDES}
-    ${LZMA_EXCLUDES}
-    ${LAZPERF_EXCLUDES}
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"

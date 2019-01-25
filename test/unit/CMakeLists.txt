@@ -199,7 +199,6 @@ PDAL_ADD_TEST(pdal_filters_colorinterp_test
     LINK_WITH
         ${GDAL_LIBRARIES}
 )
-    target_
 PDAL_ADD_TEST(pdal_filters_colorization_test
     FILES
         filters/ColorizationFilterTest.cpp
