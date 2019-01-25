@@ -42,7 +42,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         io/tre_plugins.cpp
     LINK_WITH
         ${NITRO_LIBRARIES}
-        ${GDAL_LIBRARY}
+        ${GDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}

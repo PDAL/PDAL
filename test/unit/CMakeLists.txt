@@ -81,7 +81,6 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
         SpatialReferenceTest.cpp
     LINK_WITH
         ${GDAL_LIBRARIES}
-        ${GDAL_LIBRARY}
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
