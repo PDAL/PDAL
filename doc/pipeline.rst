@@ -47,7 +47,7 @@ writer from filenames, and able to be specified as a set of sequential steps:
       "pipeline":[
           "input.las",
           {
-              "type":"crop",
+              "type":"filters.crop",
               "bounds":"([0,100],[0,100])"
           },
           "output.bpf"

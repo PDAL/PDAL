@@ -39,6 +39,11 @@ filename
 bounds
     The extents of the resource to select in 2 or 3 dimensions, expressed as a string, e.g.: ``([xmin, xmax], [ymin, ymax], [zmin, zmax])``.  If omitted, the entire dataset will be selected.
 
+resolution
+    A point resolution limit to select, expressed as a grid cell edge length.  Units correspond to resource coordinate system units.  For example, for a coordinate system expressed in meters, a ``resolution`` value of ``0.1`` will select points up to a ground resolution of 100 points per square meter.
+
+    The resulting resolution may not be exactly this value: the minimum possible resolution that is at *least* as precise as the requested resolution will be selected.  Therefore the result may be a bit more precise than requested.
+
 origin
     EPT datasets are lossless aggregations of potentially multiple source files.  The *origin* options can be used to select all points from a single source file.  This option may be specified as a string or an integral ID.
 

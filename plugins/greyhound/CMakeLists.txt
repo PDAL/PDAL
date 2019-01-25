@@ -20,6 +20,9 @@ PDAL_ADD_PLUGIN(reader_libname reader greyhound
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 PDAL_ADD_PLUGIN(writer_libname writer greyhound
@@ -31,15 +34,11 @@ PDAL_ADD_PLUGIN(writer_libname writer greyhound
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
-target_include_directories(${reader_libname} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
-    ${PDAL_VENDOR_DIR})
-
-target_include_directories(${writer_libname} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
-    ${PDAL_VENDOR_DIR})
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_greyhound_reader_test
@@ -49,8 +48,8 @@ if (WITH_TESTS)
             ${reader_libname}
             ${writer_libname}
             ${PDAL_JSONCPP_LIB_NAME}
+        INCLUDES
+            ${PDAL_JSONCPP_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
-    target_include_directories(pdal_io_greyhound_reader_test PRIVATE
-        ${PDAL_JSONCPP_INCLUDE_DIR}
-        ${PDAL_VENDOR_DIR})
 endif()

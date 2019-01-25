@@ -103,6 +103,6 @@
 	{
 		"wkt" : "GEOCCS[\"unnamed\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"unknown\",1]]"
 	},
-	"ticks" : 128,
+	"span" : 128,
 	"version" : "1.0.0"
 }
