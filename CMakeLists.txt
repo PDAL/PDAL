@@ -264,7 +264,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${GDAL_INCLUDE_DIRS}
         ${LASZIP_INCLUDE_DIR}
 )
-message("*** GDAL_LIBRARIES = ${GDAL_LIBRARIES} ***")
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
@@ -274,6 +273,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${OPENSSL_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
         ${WINSOCK_LIBRARY}
