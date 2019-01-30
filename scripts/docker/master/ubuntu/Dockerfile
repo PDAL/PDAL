@@ -5,6 +5,9 @@ ENV CC gcc
 ENV CXX g++
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
+ARG tiledb_version=1.4.1
+
+
 RUN \
     apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 16126D3A3E5C1192; \
     apt-get update -qq; \
@@ -184,10 +187,24 @@ RUN \
     wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj; \
     cd /; \
     rm -rf /vdatum; \
-    wget https://github.com/PDAL/PDAL/archive/master.tar.gz; \
-    tar -xf master.tar.gz; \
-    rm master.tar.gz; \
+    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
+    tar xzf ${tiledb_version}.tar.gz; \
+    rm ${tiledb_version}.tar.gz; \
+    cd TileDB-${tiledb_version}; \
+    mkdir build; \
+    cd build; \
+    ../bootstrap --prefix=/usr --enable-s3; \
+    make -j2; \
+    make install-tiledb; \
+    cd /; \
+    rm -rf TileDB-${tiledb_version}; \
+    # wget https://github.com/PDAL/PDAL/archive/master.tar.gz; \
+    # tar -xf master.tar.gz; \
+    # rm master.tar.gz; \
+    # cd /PDAL-master; \
+    git clone https://github.com/TileDB-Inc/PDAL.git /PDAL-master; \
     cd /PDAL-master; \
+    git checkout pdal-tiledb; \
     mkdir build; \
     cd build; \
     cmake .. \
@@ -203,6 +220,7 @@ RUN \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_RIVLIB=OFF \
         -DBUILD_PLUGIN_PYTHON=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DENABLE_CTEST=OFF \
         -DWITH_APPS=ON \

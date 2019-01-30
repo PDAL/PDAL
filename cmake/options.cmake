@@ -103,6 +103,11 @@ option(BUILD_PLUGIN_FBX
 add_feature_info("FBX plugin" BUILD_PLUGIN_FBX
     "add features that depend on FBX")
 
+option(BUILD_PLUGIN_TILEDB
+    "Choose if TileDB support should be built" FALSE)
+add_feature_info("TileDB plugin" BUILD_PLUGIN_TILEDB
+    "read/write data from TileDB")
+
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 
 option(WITH_TESTS
