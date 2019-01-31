@@ -189,7 +189,7 @@ protected:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
-    void createView(std::string localUrl, int nodeIndex, PointView& view);
+    void createView(std::string localUrl, int nodeIndex,  PointView& view);
     BOX3D createCube(Json::Value base);
     BOX3D parseBox(Json::Value base);
     void traverseTree(Json::Value page, int index, std::vector<int>& nodes,

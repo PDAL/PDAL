@@ -252,7 +252,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 void EsriReader::ready(PointTableRef)
 {
     Json::Value spatialJson = m_info["spatialReference"];
-    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString() ;
+    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
 //    if(spatialJson.isMember("vcsWkid"))
 //        spatialStr = spatialStr + "+" + spatialJson["vcsWkid"].asString();
     std::cout << "SRS: " << spatialStr << std::endl;
@@ -427,26 +427,13 @@ BOX3D EsriReader::createCube(Json::Value base)
     double hy = hsize[1].asDouble();
     double hz = hsize[2].asDouble();
 
+    //transform (x,y,z) to ECEF to match the half sizes in meters.
     OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
-    //double a(hx/(111111*std::cos(hy))), b(hy/111111), c(hz);
-    //OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-    //find radius
-    double r = 10 * std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
-    //create cube around this sphere
-    //combining all of these will create the 8 corners needed for a box
+    //take half size vector and find magnitude of it multiplied by sqrt(2)
+    double r = std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
+    //create cube around this radius
     double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
     BOX3D nodeBox(minx,miny,minz,maxx,maxy,maxz);
-    nodeBox.grow(r);
-//    BOX3D nodeBox2;
-//    for (std::size_t i(0); i < 8; ++i)
-//    {
-//        double a, b, c;
-//        a = (i & 1) ? maxx : minx;
-//        b = (i & 2) ? maxy : miny;
-//        c = (i & 4) ? maxz : minz;
-//        //OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-//        nodeBox2.grow(a,b,c);
-//    }
 
     //returning in ecef
     return nodeBox;
@@ -502,26 +489,38 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
             if (!nodeBounds.contains(a, b, c))
             {
 
-                //std::cout << "Size of node Box: " << xwidth*ywidth*zwidth << "m^3" << std::endl;
                 m_outBounds[nodeIndex] = nodeBounds;
+                //std::cout << "(x,y,z): (" << a << "," << b << "," << c << ")\n";
 
                 outpoint A;
                 if (a > nodeBounds.maxx || a < nodeBounds.minx)
+                {
                     A.point[0] = (a < nodeBounds.minx ?
                             a - nodeBounds.minx : a - nodeBounds.maxx);
+                }
                 else
                     A.point[0] = 0;
                 if (b > nodeBounds.maxy || b < nodeBounds.miny)
+                {
                     A.point[1] = (b < nodeBounds.miny ?
                             b - nodeBounds.miny : b - nodeBounds.maxy);
+                }
                 else
                     A.point[1] = 0;
                 if (c > nodeBounds.maxz || c < nodeBounds.minz)
+                {
                     A.point[2] = (c < nodeBounds.minz ?
                             c - nodeBounds.minz : c - nodeBounds.maxz);
+                }
                 else
                     A.point[2] = 0;
 
+                std::cout << "\nNode: " << nodeIndex << std::endl;
+                std::cout << "Bounding Box: " << nodeBounds << std::endl;
+                std::cout << "Out of the box by this much (x,y,z): (" <<
+                    A.point[0] << "," <<
+                    A.point[1] << "," <<
+                    A.point[2] << ")\n";
 
                 m_op.push_back(A);
             }
@@ -600,6 +599,7 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
         }
         else if (dimId == Dimension::Id::NumberOfReturns)
         {
+
             const std::vector<char> data = fetchBinary(
                     attrUrl, std::to_string(key), ".bin.gz");
 
@@ -674,7 +674,8 @@ BOX3D EsriReader::createBounds()
 void EsriReader::done(PointTableRef)
 {
     m_stream.reset();
-    std::cout << "Points fell outside the bounds of nodeboxes " << m_op.size() << " times: "  << std::endl;
+    std::cout << "\nPoints fell outside the bounds of nodeboxes " <<
+        m_op.size() << " times: "  << std::endl;
     double posx(0), negx(0), posy(0), negy(0), posz(0), negz(0);
 
 
@@ -717,18 +718,18 @@ void EsriReader::done(PointTableRef)
     avposz = avposz / posz;
     avnegz = avnegz / negz;
 
-    std::cout << "Negative X: " << negx << "/" << m_op.size() << " times.\n";
-    std::cout << "^ Average ^ : " << avnegx << std::endl;
-    std::cout << "Positive X: " << posx << "/" << m_op.size() << " times.\n";
-    std::cout << "^ Average ^ : " << avposx<< std::endl;
-    std::cout << "Negative Y: " << negy << "/" << m_op.size() << " times.\n";
-    std::cout << "^ Average ^ : " << avnegy<< std::endl;
-    std::cout << "Positive Y: " << posy << "/" << m_op.size() << " times.\n";
-    std::cout << "^ Average ^ : " << avposy<< std::endl;
-    std::cout << "Negative Z: " << negz << "/" << m_op.size() << " times.\n";
-    std::cout << "^ Average ^ : " << avnegz<< std::endl;
-    std::cout << "Positive Z: " << posz << "/" << m_op.size() << " times.\n";
-    std::cout << "^ Average ^ : " << avposz<< std::endl;
+    std::cout << "Negative X: " << negx << "/" << m_op.size() << std::endl;
+    std::cout << "   Average: " << avnegx << std::endl;
+    std::cout << "Positive X: " << posx << "/" << m_op.size() << std::endl;
+    std::cout << "   Average: " << avposx<< std::endl;
+    std::cout << "Negative Y: " << negy << "/" << m_op.size() << std::endl;
+    std::cout << "   Average: " << avnegy<< std::endl;
+    std::cout << "Positive Y: " << posy << "/" << m_op.size() << std::endl;
+    std::cout << "   Average: " << avposy<< std::endl;
+    std::cout << "Negative Z: " << negz << "/" << m_op.size() << std::endl;
+    std::cout << "   Average: " << avnegz<< std::endl;
+    std::cout << "Positive Z: " << posz << "/" << m_op.size() << std::endl;
+    std::cout << "   Average: " << avposz<< std::endl;
 
     if (m_nativeRef)
         OSRDestroySpatialReference(m_nativeRef);
