@@ -33,9 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_features.hpp>  // PDAL_ARBITER_ENABLED
+#include <pdal/pdal_features.hpp>  // PDAL_HAVE_ARBITER
 
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
     #include <arbiter/arbiter.hpp>
 #endif
 
@@ -178,7 +178,7 @@ void toJSON(const MetadataNode& m, std::ostream& o)
 namespace
 {
 
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
 std::string tempFilename(const std::string& path)
 {
     const std::string tempdir(arbiter::fs::getTempPath());
@@ -216,7 +216,7 @@ public:
 
     virtual ~ArbiterOutStream()
     {
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
         close();
         arbiter::Arbiter a;
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
@@ -235,7 +235,7 @@ public:
             std::ios::openmode mode) :
         m_localFile(localPath)
     {
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
         arbiter::Arbiter a;
         a.put(localPath, a.getBinary(remotePath));
         open(localPath, mode);
@@ -261,7 +261,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 {
     ostream *ofs(nullptr);
 
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
     arbiter::Arbiter a;
     const bool remote(a.hasDriver(path) && a.isRemote(path));
 
@@ -296,7 +296,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 */
 std::istream *openFile(const std::string& path, bool asBinary)
 {
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
     arbiter::Arbiter a;
     if (a.hasDriver(path) && a.isRemote(path))
     {
@@ -344,7 +344,7 @@ void closeFile(std::istream *in)
 */
 bool fileExists(const std::string& path)
 {
-#ifdef PDAL_ARBITER_ENABLED
+#ifdef PDAL_HAVE_ARBITER
     arbiter::Arbiter a;
     if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
     {

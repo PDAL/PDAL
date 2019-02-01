@@ -244,6 +244,11 @@ if (NOT PDAL_HAVE_LAZPERF)
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
+if (NOT PDAL_HAVE_ARBITER)
+    file(GLOB ARBITER_SRCS
+        io/EptReader.cpp)
+    list(REMOVE_ITEM SRCS ${ARBITER_SRCS})
+endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 
 #
