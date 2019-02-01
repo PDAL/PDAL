@@ -171,7 +171,6 @@ void EsriReader::initialize(PointTableRef table)
         OCTTransform(m_toEcefTransform, 1, &a, &b, 0);
         m_ecefBounds.grow(a, b, c);
     }
-
 }
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
@@ -262,6 +261,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
 void EsriReader::ready(PointTableRef)
 {
+
     //output arguments for debugging
     log()->get(LogLevel::Debug) << "filename: " <<
         m_filename << std::endl;
@@ -357,8 +357,10 @@ void EsriReader::traverseTree(Json::Value page, int index,
     BOX3D nodeBox = createCube(page["nodes"][index]);
     bool overlap = m_ecefBounds.overlaps(nodeBox);
 
-    // if it doesn't overlap, then none of the nodes in this subtree will if (!overlap)
+    // if it doesn't overlap, then none of the nodes in this subtree will
+    if (!overlap)
         return;
+
 
     // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
@@ -458,6 +460,7 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         startId = view.size();
+
 
         for (uint64_t j = 0; j < xyz.size(); ++j)
         {
@@ -623,6 +626,7 @@ BOX3D EsriReader::createBounds()
 void EsriReader::done(PointTableRef)
 {
     m_stream.reset();
+
     if (m_nativeRef)
         OSRDestroySpatialReference(m_nativeRef);
     if (m_ecefRef)
