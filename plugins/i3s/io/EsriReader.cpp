@@ -297,8 +297,6 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
     log()->get(LogLevel::Debug) << "Traversing metadata" << std::endl;
     traverseTree(initJson, 0, nodes, 0, 0);
-    log()->get(LogLevel::Debug) << "Overlapping nodes: " << nodes.size() <<
-        std::endl;
 
     // Create view with overlapping nodes at desired depth
     // Will create a thread pool on the createview class and iterate
