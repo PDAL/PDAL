@@ -2467,6 +2467,12 @@ std::string S3::Resource::host() const
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+
+// See: https://www.openssl.org/docs/manmaster/man3/OPENSSL_VERSION_NUMBER.html
+#   if OPENSSL_VERSION_NUMBER >= 0x010100000
+#   define ARBITER_OPENSSL_ATLEAST_1_1
+#   endif
+
 #endif
 
 #ifndef ARBITER_IS_AMALGAMATION
@@ -2671,7 +2677,15 @@ std::unique_ptr<Google::Auth> Google::Auth::create(const Json::Value& json)
     {
         if (const auto file = drivers::Fs().tryGet(*path))
         {
-            return util::makeUnique<Auth>(util::parse(*file));
+            try
+            {
+                return util::makeUnique<Auth>(util::parse(*file));
+            }
+            catch (const ArbiterError& e)
+            {
+                std::cout << e.what() << std::endl;
+                return std::unique_ptr<Auth>();
+            }
         }
     }
     else if (json.isString())
@@ -2742,7 +2756,12 @@ void Google::Auth::maybeRefresh() const
     drivers::Https https(pool);
     const auto res(https.internalPost(tokenRequestUrl, body, headers));
 
-    if (!res.ok()) throw ArbiterError("Failed to get token: " + res.str());
+    if (!res.ok())
+    {
+        throw ArbiterError(
+                "Failed to get token for Google authentication, "
+                "request came back with response: " + res.str());
+    }
 
     const Json::Value token(util::parse(res.str()));
     m_headers["Authorization"] = "Bearer " + token["access_token"].asString();
@@ -2792,7 +2811,12 @@ std::string Google::Auth::sign(
 
     EVP_PKEY* key(loadKey(pkey, false));
 
+#   ifdef ARBITER_OPENSSL_ATLEAST_1_1
     EVP_MD_CTX* ctx(EVP_MD_CTX_new());
+#   else
+    EVP_MD_CTX ctxAlloc;
+    EVP_MD_CTX* ctx(&ctxAlloc);
+#   endif
     EVP_MD_CTX_init(ctx);
     EVP_DigestSignInit(ctx, nullptr, EVP_sha256(), nullptr, key);
 
@@ -2809,7 +2833,12 @@ std::string Google::Auth::sign(
         }
     }
 
+#   ifdef ARBITER_OPENSSL_ATLEAST_1_1
     EVP_MD_CTX_free(ctx);
+#   else
+    EVP_MD_CTX_cleanup(ctx);
+#   endif
+
     if (signature.empty()) throw ArbiterError("Could not sign JWT");
     return signature;
 #else
@@ -4609,10 +4638,9 @@ namespace
 {
     std::mutex mutex;
 
-    int64_t utcOffsetSeconds()
+    int64_t utcOffsetSeconds(const std::time_t& now)
     {
         std::lock_guard<std::mutex> lock(mutex);
-        std::time_t now(std::time(nullptr));
         std::tm utc(*std::gmtime(&now));
         std::tm loc(*std::localtime(&now));
         return (int64_t)std::difftime(std::mktime(&utc), std::mktime(&loc));
@@ -4630,8 +4658,6 @@ Time::Time()
 
 Time::Time(const std::string& s, const std::string& format)
 {
-    static const int64_t utcOffset(utcOffsetSeconds());
-
     std::tm tm{};
 
 #ifndef ARBITER_WINDOWS
@@ -4648,6 +4674,8 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
+    const int64_t utcOffset(utcOffsetSeconds(std::mktime(&tm)));
+
     if (utcOffset > std::numeric_limits<int>::max())
         throw ArbiterError("Can't convert offset time in seconds to tm type.");
     tm.tm_sec -= (int)utcOffset;
@@ -4748,11 +4776,11 @@ std::string getBasename(const std::string fullPath)
 
     // Now do the real slash searching.
     std::size_t pos(stripped.rfind('/'));
-    
+
     // Maybe windows
-    if (pos == std::string::npos) 
+    if (pos == std::string::npos)
         pos = stripped.rfind('\\');
-    
+
     if (pos != std::string::npos)
     {
         const std::string sub(stripped.substr(pos + 1));
