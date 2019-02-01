@@ -148,7 +148,6 @@ void EsriReader::initialize(PointTableRef table)
     //create spatial reference objects
     Json::Value spatialJson = m_info["spatialReference"];
     std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
-    std::cout << "SRS: " << spatialStr << std::endl;
     m_nativeSrs = SpatialReference(spatialStr);
     setSpatialReference(m_nativeSrs);
 
