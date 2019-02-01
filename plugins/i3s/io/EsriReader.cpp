@@ -145,22 +145,33 @@ void EsriReader::initialize(PointTableRef table)
                 "by this driver"));
     }
 
-    //output arguments for debugging
-    log()->get(LogLevel::Debug) << "filename: " <<
-        m_filename << std::endl;
-    log()->get(LogLevel::Debug) << "threads: " <<
-        m_args.threads << std::endl;
-    log()->get(LogLevel::Debug) << "bounds: " <<
-        m_args.bounds << std::endl;
-    log()->get(LogLevel::Debug) << "min_density: " <<
-        m_args.min_density << std::endl;
-    log()->get(LogLevel::Debug) << "max_density: " <<
-        m_args.max_density << std::endl;
-    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
-    for (std::string& dim : m_args.dimensions)
+    //create spatial reference objects
+    Json::Value spatialJson = m_info["spatialReference"];
+    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
+    std::cout << "SRS: " << spatialStr << std::endl;
+    m_nativeSrs = SpatialReference(spatialStr);
+    setSpatialReference(m_nativeSrs);
+
+    m_ecefSrs = SpatialReference("EPSG:4978");
+
+    m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
+    m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
+    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
+    m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
+        m_nativeRef);
+
+    //create bounds in ECEF
+    double minx(m_bounds.minx), maxx(m_bounds.maxx), miny(m_bounds.miny), maxy(m_bounds.maxy), minz(m_bounds.minz), maxz(m_bounds.maxz);
+
+    for (std::size_t i(0); i < 8; ++i)
     {
-        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
+        double a = (i & 1 ? minx: maxx);
+        double b = (i & 2 ? miny: maxy);
+        double c = (i & 4 ? minz: maxz);
+        OCTTransform(m_toEcefTransform, 1, &a, &b, 0);
+        m_ecefBounds.grow(a, b, c);
     }
+
 }
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
@@ -251,32 +262,21 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
 void EsriReader::ready(PointTableRef)
 {
-    Json::Value spatialJson = m_info["spatialReference"];
-    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
-//    if(spatialJson.isMember("vcsWkid"))
-//        spatialStr = spatialStr + "+" + spatialJson["vcsWkid"].asString();
-    std::cout << "SRS: " << spatialStr << std::endl;
-    m_nativeSrs = SpatialReference(spatialStr);
-    setSpatialReference(m_nativeSrs);
-
-    m_ecefSrs = SpatialReference("EPSG:4978");
-
-    m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
-    m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
-    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
-    m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
-        m_nativeRef);
-
-    //create ECEF Bounds
-    double minx(m_bounds.minx), maxx(m_bounds.maxx), miny(m_bounds.miny), maxy(m_bounds.maxy), minz(m_bounds.minz), maxz(m_bounds.maxz);
-
-    for (std::size_t i(0); i < 8; ++i)
+    //output arguments for debugging
+    log()->get(LogLevel::Debug) << "filename: " <<
+        m_filename << std::endl;
+    log()->get(LogLevel::Debug) << "threads: " <<
+        m_args.threads << std::endl;
+    log()->get(LogLevel::Debug) << "bounds: " <<
+        m_args.bounds << std::endl;
+    log()->get(LogLevel::Debug) << "min_density: " <<
+        m_args.min_density << std::endl;
+    log()->get(LogLevel::Debug) << "max_density: " <<
+        m_args.max_density << std::endl;
+    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
+    for (std::string& dim : m_args.dimensions)
     {
-        double a = (i & 1 ? minx: maxx);
-        double b = (i & 2 ? miny: maxy);
-        double c = (i & 4 ? minz: maxz);
-        OCTTransform(m_toEcefTransform, 1, &a, &b, 0);
-        m_ecefBounds.grow(a, b, c);
+        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
     }
 }
 
@@ -357,11 +357,8 @@ void EsriReader::traverseTree(Json::Value page, int index,
     BOX3D nodeBox = createCube(page["nodes"][index]);
     bool overlap = m_ecefBounds.overlaps(nodeBox);
 
-    // if it doesn't overlap, then none of the nodes in this subtree will
-    if (!overlap)
+    // if it doesn't overlap, then none of the nodes in this subtree will if (!overlap)
         return;
-
-    m_nodeBounds[name] = nodeBox;
 
     // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
@@ -462,8 +459,6 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
         std::lock_guard<std::mutex> lock(m_mutex);
         startId = view.size();
 
-        BOX3D nodeBounds = m_nodeBounds[nodeIndex];
-
         for (uint64_t j = 0; j < xyz.size(); ++j)
         {
             double x = xyz[j].x;
@@ -477,52 +472,6 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
                 view.setField(pdal::Dimension::Id::X, id, xyz[j].x);
                 view.setField(pdal::Dimension::Id::Y, id, xyz[j].y);
                 view.setField(pdal::Dimension::Id::Z, id, xyz[j].z);
-            }
-            double a(x), b(y), c(z);
-            OCTTransform(m_toEcefTransform, 1, &a, &b, &c);
-            double xwidth(nodeBounds.maxx-nodeBounds.minx);
-            double ywidth(nodeBounds.maxy-nodeBounds.miny);
-            double zwidth(nodeBounds.maxz-nodeBounds.minz);
-
-            //nodeBounds is the product of createCube function
-            //box is in ecef
-            if (!nodeBounds.contains(a, b, c))
-            {
-
-                m_outBounds[nodeIndex] = nodeBounds;
-                //std::cout << "(x,y,z): (" << a << "," << b << "," << c << ")\n";
-
-                outpoint A;
-                if (a > nodeBounds.maxx || a < nodeBounds.minx)
-                {
-                    A.point[0] = (a < nodeBounds.minx ?
-                            a - nodeBounds.minx : a - nodeBounds.maxx);
-                }
-                else
-                    A.point[0] = 0;
-                if (b > nodeBounds.maxy || b < nodeBounds.miny)
-                {
-                    A.point[1] = (b < nodeBounds.miny ?
-                            b - nodeBounds.miny : b - nodeBounds.maxy);
-                }
-                else
-                    A.point[1] = 0;
-                if (c > nodeBounds.maxz || c < nodeBounds.minz)
-                {
-                    A.point[2] = (c < nodeBounds.minz ?
-                            c - nodeBounds.minz : c - nodeBounds.maxz);
-                }
-                else
-                    A.point[2] = 0;
-
-                std::cout << "\nNode: " << nodeIndex << std::endl;
-                std::cout << "Bounding Box: " << nodeBounds << std::endl;
-                std::cout << "Out of the box by this much (x,y,z): (" <<
-                    A.point[0] << "," <<
-                    A.point[1] << "," <<
-                    A.point[2] << ")\n";
-
-                m_op.push_back(A);
             }
         }
     }
@@ -674,63 +623,6 @@ BOX3D EsriReader::createBounds()
 void EsriReader::done(PointTableRef)
 {
     m_stream.reset();
-    std::cout << "\nPoints fell outside the bounds of nodeboxes " <<
-        m_op.size() << " times: "  << std::endl;
-    double posx(0), negx(0), posy(0), negy(0), posz(0), negz(0);
-
-
-    double avposx(0), avnegx(0), avposy(0), avnegy(0), avposz(0), avnegz(0);
-    for (size_t i(0); i < m_op.size(); ++i)
-    {
-
-        if(m_op[i].point[0] < 0){
-            negx++;
-            avnegx+=m_op[i].point[0];
-        }
-        else if(m_op[i].point[0] > 0){
-            posx++;
-            avposx++;
-            avposx+=m_op[i].point[0];
-        }
-
-        if(m_op[i].point[1] < 0){
-            negy++;
-            avnegy+=m_op[i].point[1];
-        }
-        else if(m_op[i].point[1] > 0){
-            posy++;
-            avposy+=m_op[i].point[1];
-        }
-
-        if(m_op[i].point[2] < 0){
-            negz++;
-            avnegz += m_op[i].point[2];
-        }
-        else if(m_op[i].point[2] > 0){
-            posz++;
-            avposz += m_op[i].point[2];
-        }
-    }
-    avposx = avposx / posx;
-    avnegx = avnegx / negx;
-    avposy = avposy / posy;
-    avnegy = avnegy / negy;
-    avposz = avposz / posz;
-    avnegz = avnegz / negz;
-
-    std::cout << "Negative X: " << negx << "/" << m_op.size() << std::endl;
-    std::cout << "   Average: " << avnegx << std::endl;
-    std::cout << "Positive X: " << posx << "/" << m_op.size() << std::endl;
-    std::cout << "   Average: " << avposx<< std::endl;
-    std::cout << "Negative Y: " << negy << "/" << m_op.size() << std::endl;
-    std::cout << "   Average: " << avnegy<< std::endl;
-    std::cout << "Positive Y: " << posy << "/" << m_op.size() << std::endl;
-    std::cout << "   Average: " << avposy<< std::endl;
-    std::cout << "Negative Z: " << negz << "/" << m_op.size() << std::endl;
-    std::cout << "   Average: " << avnegz<< std::endl;
-    std::cout << "Positive Z: " << posz << "/" << m_op.size() << std::endl;
-    std::cout << "   Average: " << avposz<< std::endl;
-
     if (m_nativeRef)
         OSRDestroySpatialReference(m_nativeRef);
     if (m_ecefRef)

@@ -145,8 +145,6 @@ protected:
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     arbiter::gzip::Decompressor m_decomp;
 
-    struct outpoint{double point[3];};
-    std::vector<outpoint> m_op;
 
     EsriArgs m_args;
     Json::Value m_info;
@@ -157,8 +155,6 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
-    std::map<int, BOX3D> m_nodeBounds;
-    std::map<int, BOX3D> m_outBounds;
 
     //Spatial Reference variables
     SpatialReference m_nativeSrs;
@@ -180,6 +176,7 @@ protected:
         Dimension::Type dimType;
         std::string name;
     };
+
     std::map<Dimension::Id, dimData> m_dimMap;
     std::map<int, Json::Value> m_nodepages;
 
@@ -191,7 +188,6 @@ protected:
     virtual void done(PointTableRef table) override;
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
     BOX3D createCube(Json::Value base);
-    BOX3D parseBox(Json::Value base);
     void traverseTree(Json::Value page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);
 };
