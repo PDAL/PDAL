@@ -12,6 +12,6 @@
             "type":"filters.reprojection",
             "out_srs":"EPSG:3857"
         },
-        "autzen.las"
+        "I3SAutzen.las"
     ]
 }
