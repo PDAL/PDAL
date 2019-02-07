@@ -79,13 +79,6 @@ sync_to_pps
   time.
   [default: true]
 
-minimal
-  If "true", only write X, Y, Z, and time values to the data stream.
-  If "false", write all available values as derived from the rxp file.
-  Use this feature to reduce the memory footprint of a PDAL run, if you
-  don't need any values but the points themselves.
-  [default: false]
-
 reflectance_as_intensity
   If "true", in addition to storing reflectance values directly, also
   stores the values as Intensity by mapping the reflectance values in the

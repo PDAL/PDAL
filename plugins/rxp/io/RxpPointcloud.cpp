@@ -52,19 +52,22 @@ Dimension::Id getTimeDimensionId(bool syncToPps)
 }
 
 
+Point::Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns)
+    : target(target)
+    , returnNumber(returnNumber)
+    , numberOfReturns(numberOfReturns)
+{}
+
+
 RxpPointcloud::RxpPointcloud(
         const std::string& uri,
         bool syncToPps,
-        bool minimal,
         bool reflectanceAsIntensity,
         float minReflectance,
         float maxReflectance,
         PointTableRef table)
     : scanlib::pointcloud(syncToPps)
-    , m_view(new PointView(table))
-    , m_idx(0)
     , m_syncToPps(syncToPps)
-    , m_minimal(minimal)
     , m_reflectanceAsIntensity(reflectanceAsIntensity)
     , m_minReflectance(minReflectance)
     , m_maxReflectance(maxReflectance)
@@ -79,39 +82,74 @@ RxpPointcloud::~RxpPointcloud()
 }
 
 
-point_count_t RxpPointcloud::read(PointViewPtr view, point_count_t count)
+bool RxpPointcloud::readOne(PointRef& point)
 {
-    point_count_t numRead = 0;
-
-    if (m_idx < m_view->size())
-    {
-        numRead += writeSavedPoints(view, count);
-        if (numRead == count)
-            return numRead;
+    if (readSavedPoint(point)) {
+        return true;
     }
-
-    for (m_dec.get(m_rxpbuf); !m_dec.eoi(); m_dec.get(m_rxpbuf))
-    {
-        dispatch(m_rxpbuf.begin(), m_rxpbuf.end());
-        if (m_view->size() - m_idx + numRead >= count) break;
-    }
-
-    numRead += writeSavedPoints(view, count - numRead);
-
-    return numRead;
+    savePoints();
+    return readSavedPoint(point);
 }
 
 
-point_count_t RxpPointcloud::writeSavedPoints(PointViewPtr view, point_count_t count)
+bool RxpPointcloud::readSavedPoint(PointRef& point)
 {
-    point_count_t numRead = 0;
-    while (m_idx < m_view->size() && numRead < count)
-    {
-        view->appendPoint(*m_view, m_idx);
-        ++m_idx, ++numRead;
+    if (!m_points.empty()) {
+        copyPoint(m_points.front(), point);
+        m_points.pop_front();
+        return true;
+    } else {
+        return false;
     }
-    return numRead;
 };
+
+
+void RxpPointcloud::savePoints() {
+    if (endOfInput()) {
+        return;
+    }
+    for (m_dec.get(m_rxpbuf); !m_dec.eoi(); m_dec.get(m_rxpbuf))
+    {
+        dispatch(m_rxpbuf.begin(), m_rxpbuf.end());
+        if (!m_points.empty()) return;
+    }
+}
+
+
+void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
+    using namespace Dimension;
+    to.setField(Id::X, from.target.vertex[0]);
+    to.setField(Id::Y, from.target.vertex[1]);
+    to.setField(Id::Z, from.target.vertex[2]);
+    to.setField(getTimeDimensionId(m_syncToPps), from.target.time);
+    to.setField(Id::Amplitude, from.target.amplitude);
+    to.setField(Id::Reflectance, from.target.reflectance);
+    to.setField(Id::ReturnNumber, from.returnNumber);
+    to.setField(Id::NumberOfReturns, from.numberOfReturns);
+    to.setField(Id::EchoRange, from.target.echo_range);
+    to.setField(Id::Deviation, from.target.deviation);
+    to.setField(Id::BackgroundRadiation, from.target.background_radiation);
+    to.setField(Id::IsPpsLocked, from.target.is_pps_locked);
+
+    if (m_reflectanceAsIntensity) {
+        uint16_t intensity;
+        if (from.target.reflectance > m_maxReflectance) {
+            intensity = (std::numeric_limits<uint16_t>::max)();
+        } else if (from.target.reflectance < m_minReflectance) {
+            intensity = 0;
+        } else {
+            intensity = uint16_t(std::roundf(double((std::numeric_limits<uint16_t>::max)()) *
+                        (from.target.reflectance - m_minReflectance) / (m_maxReflectance - m_minReflectance)));
+        }
+        to.setField(Id::Intensity, intensity);
+    }
+}
+
+
+bool RxpPointcloud::endOfInput() const
+{
+    return m_dec.eoi();
+}
 
 
 void RxpPointcloud::on_echo_transformed(echo_type echo)
@@ -122,41 +160,10 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
         return;
     }
 
-    using namespace Dimension;
-
-    point_count_t idx = m_view->size();
     unsigned int returnNumber = 1;
-    Id timeId = getTimeDimensionId(m_syncToPps);
-    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++idx, ++returnNumber)
+    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
     {
-        auto t = targets[i];
-        m_view->setField(Id::X, idx, t.vertex[0]);
-        m_view->setField(Id::Y, idx, t.vertex[1]);
-        m_view->setField(Id::Z, idx, t.vertex[2]);
-        m_view->setField(timeId, idx, t.time);
-        if (!m_minimal)
-        {
-            m_view->setField(Id::Amplitude, idx, t.amplitude);
-            m_view->setField(Id::Reflectance, idx, t.reflectance);
-            m_view->setField(Id::ReturnNumber, idx, returnNumber);
-            m_view->setField(Id::NumberOfReturns, idx, target_count);
-            m_view->setField(Id::EchoRange, idx, t.echo_range);
-            m_view->setField(Id::Deviation, idx, t.deviation);
-            m_view->setField(Id::BackgroundRadiation, idx, t.background_radiation);
-            m_view->setField(Id::IsPpsLocked, idx, t.is_pps_locked);
-        }
-        if (m_reflectanceAsIntensity) {
-            uint16_t intensity;
-            if (t.reflectance > m_maxReflectance) {
-                intensity = (std::numeric_limits<uint16_t>::max)();
-            } else if (t.reflectance < m_minReflectance) {
-                intensity = 0;
-            } else {
-                intensity = uint16_t(std::roundf(double((std::numeric_limits<uint16_t>::max)()) *
-                        (t.reflectance - m_minReflectance) / (m_maxReflectance - m_minReflectance)));
-            }
-            m_view->setField(Id::Intensity, idx, intensity);
-        }
+        m_points.emplace_back(targets[i], returnNumber, target_count);
     }
 }
 
