@@ -29,6 +29,7 @@ if (BUILD_RIVLIB_TESTS)
         LINK_WITH
             ${libname}
         INCLUDES
+            ${RiVLib_INCLUDE_DIRS}
             ${PROJECT_BINARY_DIR}/plugins/rxp/test
             ${PROJECT_SOURCE_DIR}/plugins/rxp/io
     )
