@@ -1,5 +1,14 @@
 @echo off
 
+mkdir c:\projects\pdal\conda
+cd c:\projects\pdal\conda
+git clone https://github.com/conda-forge/pdal-feedstock.git
+cd pdal-feedstock
+
+set "CONDA_ROOT=C:\Miniconda3-x64"
+set PATH=%CONDA_ROOT%;%CONDA_ROOT%\\scripts;%CONDA_ROOT%\\Library\\bin;%PATH%;C:\\Program Files (x86)\\CMake\\bin
+
+conda build .
 
 REM pushd c:\projects\pdal\build
 
