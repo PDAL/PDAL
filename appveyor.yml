@@ -41,8 +41,6 @@ for:
 
    after_test:
      - call scripts\\appveyor\\test\\install.cmd
-
-for:
  -
    matrix:
      only:
