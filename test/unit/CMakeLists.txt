@@ -74,7 +74,7 @@ PDAL_ADD_TEST(pdal_polygon_test
 )
 target_include_directories(pdal_polygon_test
     PRIVATE
-        ${GDAL_INCLUDE_DIRS})
+        ${GDAL_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test
     FILES
@@ -128,7 +128,7 @@ PDAL_ADD_TEST(pdal_io_gdal_reader_test
 )
     target_include_directories(pdal_io_gdal_reader_test
         PRIVATE
-            ${GDAL_INCLUDE_DIRS})
+            ${GDAL_INCLUDE_DIR})
 
 PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
@@ -136,7 +136,7 @@ PDAL_ADD_TEST(pdal_io_gdal_writer_test
     LINK_WITH
         ${GDAL_LIBRARY}
     INCLUDES
-        ${GDAL_INCLUDE_DIRS}
+        ${GDAL_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_las_reader_test
     FILES
