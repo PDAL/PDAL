@@ -24,14 +24,14 @@ clone_depth: 5
 cache:
     C:\Miniconda3-x64\pkgs -> appveyor.yml
 
+install:
+ - call scripts\\appveyor\\config.cmd
+
 for:
  -
    matrix:
      only:
        - configuration: Testing
-
-   install:
-     - call scripts\\appveyor\\test\\config.cmd
 
    build_script:
      - call scripts\\appveyor\\test\\build.cmd
@@ -45,9 +45,6 @@ for:
    matrix:
      only:
        - configuration: Conda
-
-   install:
-     - call scripts\\appveyor\\conda\\config.cmd
 
    build_script:
      - call scripts\\appveyor\\conda\\build.cmd
