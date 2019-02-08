@@ -25,40 +25,40 @@ cache:
     C:\Miniconda3-x64\pkgs -> appveyor.yml
 
 for:
--
-  matrix:
-    only:
-      - configuration: Testing
+ -
+   matrix:
+     only:
+       - configuration: Testing
 
-  install:
-    - call scripts\\appveyor\\test\\config.cmd
+   install:
+     - call scripts\\appveyor\\test\\config.cmd
 
-  build_script:
-    - call scripts\\appveyor\\test\\build.cmd
+   build_script:
+     - call scripts\\appveyor\\test\\build.cmd
 
-  test_script:
-    - call scripts\\appveyor\\test\\test.cmd
+   test_script:
+     - call scripts\\appveyor\\test\\test.cmd
 
-  after_test:
-    - call scripts\\appveyor\\test\\install.cmd
+   after_test:
+     - call scripts\\appveyor\\test\\install.cmd
 
 for:
--
-  matrix:
-    only:
-      - configuration: Conda
+ -
+   matrix:
+     only:
+       - configuration: Conda
 
-  install:
-    - call scripts\\appveyor\\conda\\config.cmd
+   install:
+     - call scripts\\appveyor\\conda\\config.cmd
 
-  build_script:
-    - call scripts\\appveyor\\conda\\build.cmd
+   build_script:
+     - call scripts\\appveyor\\conda\\build.cmd
 
-  test_script:
-    - call scripts\\appveyor\\conda\\test.cmd
+   test_script:
+     - call scripts\\appveyor\\conda\\test.cmd
 
-  after_test:
-    - call scripts\\appveyor\\conda\\install.cmd
+   after_test:
+     - call scripts\\appveyor\\conda\\install.cmd
 
 artifacts:
   - path: pdal-$(APPVEYOR_REPO_COMMIT).tar.bz2
