@@ -27,6 +27,7 @@ target_link_libraries(${PDAL_APP}
 target_include_directories(${PDAL_APP} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
+    ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
 #------------------------------------------------------------------------------
