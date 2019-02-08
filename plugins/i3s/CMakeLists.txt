@@ -12,7 +12,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${ZLIB_LIBRARY}
         lepcc
     INCLUDES
@@ -20,7 +20,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         ${PDAL_VENDOR_DIR}
         ${LEPCC_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}/eigen
-        ${GDAL_INCLUDE_DIRS}
+        ${GDAL_INCLUDE_DIR}
 )
 target_compile_definitions(${i3s_reader_libname}
     PRIVATE
@@ -37,7 +37,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${ZLIB_LIBRARY}
         lepcc
     INCLUDES
@@ -45,7 +45,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         ${PDAL_VENDOR_DIR}
         ${LEPCC_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}/eigen
-        ${GDAL_INCLUDE_DIRS}
+        ${GDAL_INCLUDE_DIR}
 )
 target_compile_definitions(${slpk_reader_libname}
     PRIVATE
@@ -60,13 +60,13 @@ if (WITH_TESTS)
             LINK_WITH
                 ${slpk_reader_libname}
                 ${PDAL_JSONCPP_LIB_NAME}
-                ${GDAL_LIBRARIES}
+                ${GDAL_LIBRARY}
             INCLUDES
                 ${PDAL_JSONCPP_INCLUDE_DIR}
                 ${PDAL_VENDOR_DIR}
                 ${LEPCC_INCLUDE_DIR}
                 ${PDAL_VENDOR_DIR}/eigen
-                ${GDAL_INCLUDE_DIRS}
+                ${GDAL_INCLUDE_DIR}
     )
     target_compile_definitions(pdal_io_slpk_reader_test
         PRIVATE
@@ -81,13 +81,13 @@ if (WITH_TESTS)
                 LINK_WITH
                     ${i3s_reader_libname}
                     ${PDAL_JSONCPP_LIB_NAME}
-                    ${GDAL_LIBRARIES}
+                    ${GDAL_LIBRARY}
                 INCLUDES
                     ${PDAL_JSONCPP_INCLUDE_DIR}
                     ${PDAL_VENDOR_DIR}
                     ${LEPCC_INCLUDE_DIR}
                     ${PDAL_VENDOR_DIR}/eigen
-                    ${GDAL_INCLUDE_DIRS}
+                    ${GDAL_INCLUDE_DIR}
         )
         target_compile_definitions(pdal_io_i3s_reader_test
             PRIVATE

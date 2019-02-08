@@ -259,14 +259,14 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
-    INTERFACE
-        ${GDAL_INCLUDE_DIRS}
+    PUBLIC
+        ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${GEOS_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}

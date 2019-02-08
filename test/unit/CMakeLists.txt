@@ -46,7 +46,7 @@ PDAL_ADD_TEST(pdal_options_test
         OptionsTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
@@ -70,7 +70,7 @@ PDAL_ADD_TEST(pdal_polygon_test
     FILES
         PolygonTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
 target_include_directories(pdal_polygon_test
     PRIVATE
@@ -80,7 +80,7 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
     FILES
         SpatialReferenceTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
@@ -115,7 +115,7 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES} # EptReaderTest uses the crop filter.
+        ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
@@ -124,7 +124,7 @@ PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
         io/GDALReaderTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
     target_include_directories(pdal_io_gdal_reader_test
         PRIVATE
@@ -134,7 +134,7 @@ PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
     INCLUDES
         ${GDAL_INCLUDE_DIRS}
 )
@@ -196,19 +196,19 @@ PDAL_ADD_TEST(pdal_filters_colorinterp_test
     FILES
         filters/ColorinterpFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
 PDAL_ADD_TEST(pdal_filters_colorization_test
     FILES
         filters/ColorizationFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)

@@ -27,10 +27,10 @@ PDAL_ADD_PLUGIN(writer_libname writer sqlite
         io/SQLiteWriter.cpp
     LINK_WITH
         ${SQLITE3_LIBRARY}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${LIBXML2_LIBRARIES}
     INCLUDES
-        ${GDAL_INCLUDE_DIRS}
+        ${GDAL_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
 )
 

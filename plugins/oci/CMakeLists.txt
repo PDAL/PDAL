@@ -15,7 +15,7 @@ PDAL_ADD_PLUGIN(reader_libname reader oci
         io/OciWrapper.cpp
     LINK_WITH
         ${ORACLE_LIBRARY}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${ORACLE_INCLUDE_DIR}
@@ -32,7 +32,7 @@ PDAL_ADD_PLUGIN(writer_libname writer oci
         io/OciWriter.cpp
     LINK_WITH
         ${ORACLE_LIBRARY}
-        ${GDAL_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${ORACLE_INCLUDE_DIR}
@@ -49,7 +49,7 @@ if(BUILD_OCI_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${GDAL_LIBRARIES}
+            ${GDAL_LIBRARY}
             ${LIBXML2_LIBRARY}
         INCLUDES
             ${ORACLE_INCLUDE_DIR}

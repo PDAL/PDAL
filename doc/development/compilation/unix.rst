@@ -115,8 +115,8 @@ substituting accordingly, to values that match your system layout.
 .. csv-table::
 
     "`GDAL`_","GDAL_CONFIG", "/usr/local/bin/gdal-config"
-    "","GDAL_INCLUDE_DIRS", "/usr/local/include"
-    "","GDAL_LIBRARIES", "/usr/local/lib/libgdal.so"
+    "","GDAL_INCLUDE_DIR", "/usr/local/include"
+    "","GDAL_LIBRARY", "/usr/local/lib/libgdal.so"
     "`GeoTIFF`_","GEOTIFF_INCLUDE_DIR","/usr/local/include"
     "","GEOTIFF_LIBRARY","/usr/local/lib/libgeotiff.so"
     "`OCI`_","ORACLE_INCLUDE_DIR","/home/oracle/sdk/include"
