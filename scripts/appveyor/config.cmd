@@ -12,6 +12,5 @@ conda info
 python -c "import sys; print(sys.version)"
 python -c "import sys; print(sys.executable)"
 python -c "import sys; print(sys.prefix)"
-call "%CONDA_ROOT%\Scripts\activate.bat" base
-conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base tiledb conda-build
+
 
