@@ -1,8 +1,11 @@
 call "%CONDA_ROOT%\Scripts\activate.bat" base
 conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base tiledb conda-build
 
+echo "before vcvars"
+dir
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 
+echo "after vcvars"
 
 SET PDAL_INSTALL_PREFIX="C:/projects/pdal/install"
 SET PDAL_PLUGIN_INSTALL_PATH="C:/projects/pdal/build/bin"

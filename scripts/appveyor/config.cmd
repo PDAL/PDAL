@@ -13,4 +13,5 @@ python -c "import sys; print(sys.version)"
 python -c "import sys; print(sys.executable)"
 python -c "import sys; print(sys.prefix)"
 
+dir
 
