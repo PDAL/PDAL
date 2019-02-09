@@ -38,9 +38,6 @@ for:
 
    test_script:
      - call scripts\\appveyor\\test\\test.cmd
-
-   after_test:
-     - call scripts\\appveyor\\test\\install.cmd
  -
    matrix:
      only:
