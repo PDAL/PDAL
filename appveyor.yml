@@ -49,15 +49,9 @@ for:
    build_script:
      - call scripts\\appveyor\\conda\\build.cmd
 
-   test_script:
-     - call scripts\\appveyor\\conda\\test.cmd
-
-   after_test:
-     - call scripts\\appveyor\\conda\\install.cmd
-
 artifacts:
-  - path: pdal-$(APPVEYOR_REPO_COMMIT).tar.bz2
-    name: pdalosgeo4w
+  - path: pdal-$(APPVEYOR_REPO_COMMIT)-py37_appveyor.tar.bz2
+    name: pdalconda
     type: file
 
 deploy:
@@ -68,10 +62,10 @@ deploy:
     secret_access_key:
       secure: cSqZlsaCxFwXgxJw0BLd7npMFvQk3Vbr74ZPLaBQWLKnOz1cKss9qab1SzSygwkh
     on:
-      branch: 1.8-maintenance
+      branch: conda-appveyor
     bucket: "pdal"
-    folder: "osgeo4w/"
-    artifact: pdalosgeo4w
+    folder: "conda/"
+    artifact: pdalconda
     set_public: true
 
 notifications:
