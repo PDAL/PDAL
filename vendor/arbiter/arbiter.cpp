@@ -2677,15 +2677,7 @@ std::unique_ptr<Google::Auth> Google::Auth::create(const Json::Value& json)
     {
         if (const auto file = drivers::Fs().tryGet(*path))
         {
-            try
-            {
-                return util::makeUnique<Auth>(util::parse(*file));
-            }
-            catch (const ArbiterError& e)
-            {
-                std::cout << e.what() << std::endl;
-                return std::unique_ptr<Auth>();
-            }
+            return util::makeUnique<Auth>(util::parse(*file));
         }
     }
     else if (json.isString())
@@ -2756,12 +2748,7 @@ void Google::Auth::maybeRefresh() const
     drivers::Https https(pool);
     const auto res(https.internalPost(tokenRequestUrl, body, headers));
 
-    if (!res.ok())
-    {
-        throw ArbiterError(
-                "Failed to get token for Google authentication, "
-                "request came back with response: " + res.str());
-    }
+    if (!res.ok()) throw ArbiterError("Failed to get token: " + res.str());
 
     const Json::Value token(util::parse(res.str()));
     m_headers["Authorization"] = "Bearer " + token["access_token"].asString();
@@ -4776,11 +4763,11 @@ std::string getBasename(const std::string fullPath)
 
     // Now do the real slash searching.
     std::size_t pos(stripped.rfind('/'));
-
+    
     // Maybe windows
-    if (pos == std::string::npos)
+    if (pos == std::string::npos) 
         pos = stripped.rfind('\\');
-
+    
     if (pos != std::string::npos)
     {
         const std::string sub(stripped.substr(pos + 1));

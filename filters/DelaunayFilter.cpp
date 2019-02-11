@@ -34,7 +34,7 @@
 
 #include <cstddef> // NULL
 #include "DelaunayFilter.hpp"
-#include "Delaunay_psm.h"
+#include "private/delaunator.hpp"
 
 namespace pdal
 {
@@ -46,7 +46,7 @@ static PluginInfo const s_info
     "http://pdal.io/stages/filters.delaunay.html"
 };
 
-CREATE_SHARED_STAGE(DelaunayFilter, s_info)
+CREATE_STATIC_STAGE(DelaunayFilter, s_info)
 
 std::string DelaunayFilter::getName() const
 {
@@ -71,25 +71,14 @@ PointViewSet DelaunayFilter::run(PointViewPtr pointView)
             delaunayPoints.push_back(y);
         }
         
-        GEO::initialize();
-        
-        GEO::index_t numDimensions = 2;
-        
-        // Pick the 2D Delaunay algorithm
-        GEO::Delaunay_var triangulation = GEO::Delaunay::create(GEO::coord_index_t(numDimensions), "BDEL2d");
-        GEO::index_t numPoints = delaunayPoints.size() / numDimensions;
-        
         // Actually perform the triangulation
-        triangulation->set_vertices(numPoints, delaunayPoints.data());
+        delaunator::Delaunator triangulation(delaunayPoints);
         
-        
-        for (GEO::index_t i = 0; i < triangulation->nb_cells(); i++)
+        for (std::size_t i = 0; i < triangulation.triangles.size(); i += 3)
         {
-            GEO::index_t v_0 = triangulation->cell_vertex(i, 0);
-            GEO::index_t v_1 = triangulation->cell_vertex(i, 1);
-            GEO::index_t v_2 = triangulation->cell_vertex(i, 2);
-            
-            mesh->add((int)v_0, (int)v_1, (int)v_2);
+            mesh->add(triangulation.triangles[i+2],
+                triangulation.triangles[i+1],
+                triangulation.triangles[i]);
         }
     }
     

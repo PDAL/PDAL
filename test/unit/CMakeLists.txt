@@ -197,6 +197,7 @@ PDAL_ADD_TEST(pdal_filters_crop_test
 )
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_delaunay_test FILES filters/DelaunayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES
