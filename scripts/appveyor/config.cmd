@@ -2,8 +2,8 @@
 
 set "CONDA_ROOT=C:\Miniconda3-x64"
 set PATH=%CONDA_ROOT%;%CONDA_ROOT%\\scripts;%CONDA_ROOT%\\Library\\bin;%PATH%;C:\\Program Files (x86)\\CMake\\bin
-conda clean --all
 conda config --set always_yes yes
+conda clean --all
 conda config --add channels conda-forge
 conda config --add channels anaconda
 conda update -q conda
