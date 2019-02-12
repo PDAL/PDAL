@@ -48,41 +48,69 @@ namespace pdal
 
 class TileDBReaderTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp()
+    protected:
+        virtual void SetUp()
+        {
+        }
+    };
+
+    TEST_F(TileDBReaderTest, constructor)
     {
+        TileDBReader reader;
     }
-};
 
-TEST_F(TileDBReaderTest, constructor)
-{
-    TileDBReader reader;
-}
+    TEST_F(TileDBReaderTest, findStage)
+    {
+        StageFactory factory;
+        Stage* stage(factory.createStage("readers.tiledb"));
+        EXPECT_TRUE(stage);
+    }
 
-TEST_F(TileDBReaderTest, findStage)
-{
-    StageFactory factory;
-    Stage* stage(factory.createStage("readers.tiledb"));
-    EXPECT_TRUE(stage);
-}
+    TEST_F(TileDBReaderTest, read)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth(Support::datapath("tiledb/array"));
 
-TEST_F(TileDBReaderTest, read)
-{
-    tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
+        Options opts;
+        opts.add("array_name", pth);
 
-    Options opts;
-    opts.add("array_name", Support::datapath("tiledb/array"));
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+        auto domain = array.non_empty_domain<double>();
+        std::vector<double> subarray;
 
-    TileDBReader reader;
-    reader.setOptions(opts);
+        for (const auto& kv: domain)
+        {
+            subarray.push_back(kv.second.first);
+            subarray.push_back(kv.second.second);
+        }
 
-    PointTable table;
-    reader.prepare(table);
-    PointViewSet ts = reader.execute(table);
-    EXPECT_EQ(ts.size(), 1U);
-    PointViewPtr tv = *ts.begin();
-    EXPECT_EQ(tv->size(), 100U);
-}
+        tiledb::Query q(ctx, array, TILEDB_READ);
+        q.set_subarray(subarray);
 
+        auto max_el = array.max_buffer_elements(subarray);
+        std::vector<double> coords(max_el[TILEDB_COORDS].second);
+        q.set_coordinates(coords);
+        q.submit();
+        array.close();
+
+        TileDBReader reader;
+        reader.setOptions(opts);
+
+        PointTable table;
+        reader.prepare(table);
+        PointViewSet ts = reader.execute(table);
+        EXPECT_EQ(ts.size(), 1U);
+        PointViewPtr tv = *ts.begin();
+        EXPECT_EQ(tv->size(), coords.size() / 3);
+
+        BOX3D bbox;
+        tv->calculateBounds(bbox);
+        ASSERT_DOUBLE_EQ(subarray[0], bbox.minx);
+        ASSERT_DOUBLE_EQ(subarray[2], bbox.miny);
+        ASSERT_DOUBLE_EQ(subarray[4], bbox.minz);
+        ASSERT_DOUBLE_EQ(subarray[1], bbox.maxx);
+        ASSERT_DOUBLE_EQ(subarray[3], bbox.maxy);
+        ASSERT_DOUBLE_EQ(subarray[5], bbox.maxz);
+    }
 }

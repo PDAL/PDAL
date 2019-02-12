@@ -56,7 +56,6 @@ private:
 
     std::string m_arrayName;
     std::string m_cfgFileName;
-    std::vector<double> m_ranges;
     point_count_t m_chunkSize;
     bool m_stats;
     BOX3D m_bbox;

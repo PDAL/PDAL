@@ -61,6 +61,43 @@ void makeBuffer(tiledb::Query& query, std::map<std::string, pdalboost::any>& mp,
         query.set_buffer(key, *sp);
 }
 
+Dimension::Type getPdalType(tiledb_datatype_t t)
+{
+    switch (t)
+    {
+        case TILEDB_INT8:
+            return Dimension::Type::Signed8;
+        case TILEDB_UINT8:
+            return Dimension::Type::Unsigned8;
+        case TILEDB_INT16:
+            return Dimension::Type::Signed16;
+        case TILEDB_UINT16:
+            return Dimension::Type::Unsigned16;
+        case TILEDB_INT32:
+            return Dimension::Type::Signed32;
+        case TILEDB_UINT32:
+            return Dimension::Type::Unsigned32;
+        case TILEDB_INT64:
+            return Dimension::Type::Signed64;
+        case TILEDB_UINT64:
+            return Dimension::Type::Unsigned64;
+        case TILEDB_FLOAT32:
+        case TILEDB_FLOAT64:
+            return Dimension::Type::Float;
+        case TILEDB_CHAR:
+        case TILEDB_STRING_ASCII:
+        case TILEDB_STRING_UTF8:
+        case TILEDB_STRING_UTF16:
+        case TILEDB_STRING_UTF32:
+        case TILEDB_STRING_UCS2:
+        case TILEDB_STRING_UCS4:
+        case TILEDB_ANY:
+        default:
+            // Not supported tiledb domain types
+            throw pdal_error("Invalid Dim type from TileDB");
+    }
+}
+
 void TileDBReader::addArgs(ProgramArgs& args)
 {
     args.add("array_name", "TileDB array name", m_arrayName).setPositional();
@@ -91,16 +128,11 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
 
     for (const auto& dim: dims)
     {
-        layout->registerDim(Dimension::id(dim.name()));
-        m_ranges.push_back(dim.domain<double>().first);
-        m_ranges.push_back(dim.domain<double>().second);
+        layout->registerOrAssignDim(dim.name(), getPdalType(dim.type()));
     }
 
-
     for (const auto& a : attrs) {
-        std::string attrName = a.first;
-        Dimension::Id id = Dimension::id(attrName);
-        layout->registerDim(id);
+        layout->registerOrAssignDim(a.first, getPdalType(a.second.type()));
     }
 
 }
@@ -145,8 +177,8 @@ point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
 
     for (const auto& a : attrs) {
         std::string attrName = a.first;
-        Dimension::Id id = Dimension::id(attrName);
-        Dimension::Type t = Dimension::defaultType(id);
+        Dimension::Id id = view->layout()->findDim(a.first);
+        Dimension::Type t = view->dimType(id);
 
         switch (t)
         {
@@ -242,8 +274,9 @@ point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
                 // read tiledb attributes, this has to be done point by point for future streaming support
                 for (const auto &kv : buffers) {
                     if (kv.first != TILEDB_COORDS) {
-                        Dimension::Id id = Dimension::id(kv.first);
-                        Dimension::Type t = Dimension::defaultType(id);
+                        Dimension::Id id = view->layout()->findDim(kv.first);
+                        Dimension::Type t = view->dimType(id);
+
                         int p = i / nDims;
                         switch (t) {
                             case Dimension::Type::Double: {

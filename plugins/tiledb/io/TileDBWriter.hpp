@@ -55,10 +55,10 @@ private:
     std::string m_arrayName;
     std::string m_cfgFileName;
 
-    unsigned m_tile_capacity;
-    unsigned m_x_tile_size;
-    unsigned m_y_tile_size;
-    unsigned m_z_tile_size;
+    size_t m_tile_capacity;
+    size_t m_x_tile_size;
+    size_t m_y_tile_size;
+    size_t m_z_tile_size;
 
     bool m_stats;
 

@@ -76,9 +76,9 @@ namespace pdal
     {
         tiledb::Context ctx;
         tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_out");
 
         Options options;
-        std::string pth = Support::temppath("tiledb_test_out");
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
 
@@ -93,10 +93,44 @@ namespace pdal
 
         PointTable table;
         writer.prepare(table);
-        writer.execute(table);
+        PointViewSet ts = writer.execute(table);
+        EXPECT_EQ(ts.size(), 1U);
+        PointViewPtr tv = *ts.begin();
+
+        BOX3D bbox;
+        tv->calculateBounds(bbox);
 
         // check the sidecar exists
         EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+        auto domain = array.non_empty_domain<double>();
+        std::vector<double> subarray;
+
+        for (const auto& kv: domain)
+        {
+            subarray.push_back(kv.second.first);
+            subarray.push_back(kv.second.second);
+        }
+
+        tiledb::Query q(ctx, array, TILEDB_READ);
+        q.set_subarray(subarray);
+
+        auto max_el = array.max_buffer_elements(subarray);
+        std::vector<double> coords(max_el[TILEDB_COORDS].second);
+        q.set_coordinates(coords);
+        q.submit();
+        array.close();
+
+        EXPECT_EQ(m_reader.count() * 3, coords.size());
+        EXPECT_EQ(tv->size() * 3, coords.size());
+
+        ASSERT_DOUBLE_EQ(subarray[0], bbox.minx);
+        ASSERT_DOUBLE_EQ(subarray[2], bbox.miny);
+        ASSERT_DOUBLE_EQ(subarray[4], bbox.minz);
+        ASSERT_DOUBLE_EQ(subarray[1], bbox.maxx);
+        ASSERT_DOUBLE_EQ(subarray[3], bbox.maxy);
+        ASSERT_DOUBLE_EQ(subarray[5], bbox.maxz);
     }
 }
 

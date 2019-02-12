@@ -7,9 +7,5 @@ set_package_properties(TileDB PROPERTIES
         URL "https://www.tiledb.io"
         PURPOSE "TileDB support")
 
-if(TILEDB_FOUND)
-    set(CMAKE_REQUIRED_LIBRARIES "${TILEDB_LIBRARIES}")
-    include_directories(${TILEDB_INCLUDE_DIRS})
-    mark_as_advanced(CLEAR TILEDB_INCLUDE_DIRS)
-    mark_as_advanced(CLEAR TILEDB_LIBRARIES)
-endif()
+mark_as_advanced(CLEAR TILEDB_INCLUDE_DIRS)
+mark_as_advanced(CLEAR TILEDB_LIBRARIES)

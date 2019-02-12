@@ -76,7 +76,7 @@ void setAttrAnyValue(std::map<std::string, pdalboost::any>& mp, const std::strin
 void writeAttributeValue(const std::string& attrName,
         const PointViewPtr view, const PointId idx, std::map<std::string, pdalboost::any>& mp)
 {
-    Dimension::Id id = Dimension::id(attrName);
+    Dimension::Id id = view->layout()->findDim(attrName);
     Dimension::Type t = view->dimType(id);
 
     switch (t)
@@ -174,10 +174,10 @@ void TileDBWriter::addArgs(ProgramArgs& args)
 {
     args.add("array_name", "TileDB array name", m_arrayName).setPositional();
     args.add("config_file", "TileDB configuration file location", m_cfgFileName);
-    args.add("data_tile_capacity", "TileDB tile capacity", m_tile_capacity, unsigned(100000));
-    args.add("x_tile_size", "TileDB tile size", m_x_tile_size, unsigned(1000));
-    args.add("y_tile_size", "TileDB tile size", m_y_tile_size, unsigned(1000));
-    args.add("z_tile_size", "TileDB tile size", m_z_tile_size, unsigned(1000));
+    args.add("data_tile_capacity", "TileDB tile capacity", m_tile_capacity, size_t(100000));
+    args.add("x_tile_size", "TileDB tile size", m_x_tile_size, size_t(1000));
+    args.add("y_tile_size", "TileDB tile size", m_y_tile_size, size_t(1000));
+    args.add("z_tile_size", "TileDB tile size", m_z_tile_size, size_t(1000));
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
     args.add("compression", "TileDB compression type for attributes", m_compressor);
     args.add("compression_level", "TileDB compression level", m_compressionLevel, -1);
@@ -215,47 +215,36 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     // x,y,z will be tiledb dimensions other pdal dimensions will be tiledb attributes
     tiledb::Domain domain(*m_ctx);
     auto layout = table.layout();
-    DimType xt = layout->findDimType("X");
+    auto all = layout->dims();
+    double dimMin = std::numeric_limits<double>::lowest();
+    double dimMax = std::numeric_limits<double>::max();
 
-    if ((xt.m_type != Dimension::Type::None) &&
-            (xt.m_type == layout->findDimType("Y").m_type) &&
-                    (xt.m_type == layout->findDimType("Z").m_type))
+    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X", {{dimMin, dimMax}}, m_x_tile_size))
+            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y", {{dimMin, dimMax}}, m_y_tile_size))
+            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z", {{dimMin, dimMax}}, m_z_tile_size));
+
+    for (const auto& d : all)
     {
-        auto all = layout->dims();
-        double dimMin = std::numeric_limits<double>::lowest();
-        double dimMax = std::numeric_limits<double>::max();
-
-        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X", {{dimMin, dimMax}}, m_x_tile_size))
-                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y", {{dimMin, dimMax}}, m_y_tile_size))
-                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z", {{dimMin, dimMax}}, m_z_tile_size));
-
-        for (const auto& d : all)
+        std::string dimName = layout->dimName(d);
+        if ((dimName != "X") && (dimName != "Y") && (dimName != "Z"))
         {
-            std::string dimName = layout->dimName(d);
-            if ((dimName != "X") && (dimName != "Y") && (dimName != "Z"))
-            {
-                tiledb::Attribute att = createAttribute(*m_ctx, dimName, layout->dimType(d));
+            tiledb::Attribute att = createAttribute(*m_ctx, dimName, layout->dimType(d));
 
-                if (!m_compressor.empty())
-                    att.set_filter_list(*m_filterList);
+            if (!m_compressor.empty())
+                att.set_filter_list(*m_filterList);
 
-                m_schema->add_attribute(att);
-            }
+            m_schema->add_attribute(att);
         }
-
-        m_schema->set_domain(domain).set_order({{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
-        m_schema->set_capacity(m_tile_capacity);
-
-        tiledb::Array::create(m_arrayName, *m_schema);
-
-        m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
-        m_query.reset(new tiledb::Query(*m_ctx, *m_array));
-        m_query->set_layout(TILEDB_UNORDERED);
     }
-    else
-    {
-        throwError("TileDB requires the X,Y,Z dimensions to be the same type.");
-    }
+
+    m_schema->set_domain(domain).set_order({{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
+    m_schema->set_capacity(m_tile_capacity);
+
+    tiledb::Array::create(m_arrayName, *m_schema);
+
+    m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
+    m_query.reset(new tiledb::Query(*m_ctx, *m_array));
+    m_query->set_layout(TILEDB_UNORDERED);
 }
 
 void TileDBWriter::write(const PointViewPtr view)
@@ -289,7 +278,7 @@ void TileDBWriter::write(const PointViewPtr view)
     // set tiledb buffers
     for (const auto& kv : mapAttrVals)
     {
-        Dimension::Id id = Dimension::id(kv.first);
+        Dimension::Id id = view->layout()->findDim(kv.first);
         Dimension::Type t = view->dimType(id);
         switch (t)
         {
