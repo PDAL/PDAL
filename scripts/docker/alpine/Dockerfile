@@ -1,4 +1,4 @@
-FROM pdal/alpinebase:latest as builder
+FROM pdal/alpinebase:test as builder
 
 RUN    \
     git clone https://github.com/PDAL/PDAL.git --branch 1.8-maintenance --single-branch pdal; \
