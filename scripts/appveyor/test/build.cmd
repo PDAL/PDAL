@@ -1,5 +1,5 @@
 call "%CONDA_ROOT%\Scripts\activate.bat" base
-call conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base tiledb conda-build -y
+call conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal geos zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 numpy-base tiledb conda-build -y
 
 echo "before vcvars"
 dir
@@ -32,7 +32,7 @@ cmake -G "Ninja" ^
     -DBUILD_PLUGIN_NITF=ON ^
     -DBUILD_PLUGIN_PCL=ON ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
-    -DBUILD_PLUGIN_OCI=ON ^
+    -DBUILD_PLUGIN_OCI=OFF ^
     -DBUILD_PLUGIN_SQLITE=ON ^
     -DBUILD_PLUGIN_I3S=ON ^
     -DBUILD_PLUGIN_RIVLIB=OFF ^
