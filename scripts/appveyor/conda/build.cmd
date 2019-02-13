@@ -10,4 +10,11 @@ popd
 
 pushd build
 dir
+FOR /F %%I IN ('DIR c:\projects\pdal\build\win-64\*.bz2 /B /O:-D')  DO echo %%I > condaPackage
+set /p CONDA_PACKAGE= < condaPackage
+dir
+DEL condaPackage
+copy %CONDA_PACKAGE% c:\projects\pdal\pdal-%APPVEYOR_REPO_COMMIT%-py37_appveyor.tar.bz2
+
+dir c:\projects\pdal
 popd
