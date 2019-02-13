@@ -5,7 +5,7 @@ pushd "scripts\\appveyor\\conda\\recipe"
 REM pdal-%APPVEYOR_REPO_COMMIT%-py37_appveyor
 mkdir build
 dir
-conda build  --output-folder c:\projects\pdal\build .
+call conda build  --output-folder c:\projects\pdal\build .
 
 dir
 FOR /F %%I IN ('DIR c:\projects\pdal\build\win-64\*.bz2 /B /O:-D')  DO echo %%I > condaPackage
