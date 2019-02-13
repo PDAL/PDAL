@@ -367,6 +367,19 @@ TEST(SpatialReferenceTest, readerOptions)
         r.prepare(t);
         EXPECT_EQ(r.getSpatialReference(), native);
     }
+
+    {
+        Options o;
+        // This file has no spatial reference.
+        o.add("filename", Support::datapath("las/100-points.las"));
+        o.add("default_srs", "EPSG:26916");
+        LasReader r;
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        EXPECT_EQ(r.getSpatialReference(), SpatialReference("EPSG:26916"));
+    }
 }
 
 TEST(SpatialReferenceTest, merge)

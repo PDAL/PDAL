@@ -45,6 +45,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include "RxpPointcloud.hpp"
 
@@ -60,15 +61,15 @@ const float DEFAULT_MIN_REFLECTANCE = -25.0;
 const float DEFAULT_MAX_REFLECTANCE = 5.0;
 
 std::string extractRivlibURI(const Options& options);
-Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
+Dimension::IdList getRxpDimensions(bool syncToPps);
 
-class PDAL_DLL RxpReader : public pdal::Reader
+class PDAL_DLL RxpReader : public pdal::Reader, public pdal::Streamable
 {
 public:
     RxpReader()
         : pdal::Reader()
+        , pdal::Streamable()
         , m_syncToPps(DEFAULT_SYNC_TO_PPS)
-        , m_minimal(false)
         , m_reflectanceAsIntensity(DEFAULT_REFLECTANCE_AS_INTENSITY)
         , m_minReflectance(DEFAULT_MIN_REFLECTANCE)
         , m_maxReflectance(DEFAULT_MAX_REFLECTANCE)
@@ -82,12 +83,12 @@ private:
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual point_count_t read(PointViewPtr view, point_count_t num);
+    virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
     std::string m_uri;
     bool m_syncToPps;
-    bool m_minimal;
     bool m_isRdtp;
     bool m_reflectanceAsIntensity;
     float m_minReflectance;

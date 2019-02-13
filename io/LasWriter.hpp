@@ -51,7 +51,7 @@
 using laszip_POINTER = void *;
 #endif
 
-#include <json/json.h>
+namespace Json { class Value; }
 
 namespace pdal
 {
@@ -130,7 +130,7 @@ private:
     StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
-    Json::Value m_userVLRs;
+    std::unique_ptr<Json::Value> m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);

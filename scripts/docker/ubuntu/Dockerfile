@@ -178,9 +178,12 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
     ninja install; \
     rm -rf /pdal-git
 
+#
+# Haru hasn't been updated for years.  This tag is the head.
+#
 RUN git clone https://github.com/libharu/libharu \
     && cd libharu \
-    && git checkout RELEASE_2_3_0 \
+    && git checkout d84867ebf9f3de6afd661d2cdaff102457fbc371 \
     && mkdir build \
     && cd build \
     && cmake \
