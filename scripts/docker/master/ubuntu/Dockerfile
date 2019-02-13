@@ -198,13 +198,10 @@ RUN \
     make install-tiledb; \
     cd /; \
     rm -rf TileDB-${tiledb_version}; \
-    # wget https://github.com/PDAL/PDAL/archive/master.tar.gz; \
-    # tar -xf master.tar.gz; \
-    # rm master.tar.gz; \
-    # cd /PDAL-master; \
-    git clone https://github.com/TileDB-Inc/PDAL.git /PDAL-master; \
+    wget https://github.com/PDAL/PDAL/archive/master.tar.gz; \
+    tar -xf master.tar.gz; \
+    rm master.tar.gz; \
     cd /PDAL-master; \
-    git checkout pdal-tiledb; \
     mkdir build; \
     cd build; \
     cmake .. \
