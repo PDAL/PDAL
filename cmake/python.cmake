@@ -4,7 +4,7 @@
 
 # Try to find version 3.  If not, we fall back to version 2.
 find_package(PythonInterp QUIET 3)
-find_package(PythonInterp QUIET 2.4)
+find_package(PythonInterp QUIET 2.7)
 
 # Looking for PythonLibs will use the version of the intpreter found to
 # tell it which version of the libraries to use.
