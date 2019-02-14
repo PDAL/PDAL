@@ -3,6 +3,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
+ARG tiledb_version=1.4.1
 
 ENV CC gcc
 ENV CXX g++
@@ -165,6 +166,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_RIVLIB=OFF \
         -DBUILD_PLUGIN_PYTHON=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
         -DENABLE_CTEST=OFF \
         -DWITH_LAZPERF=ON \
         -DWITH_LASZIP=ON \
@@ -213,6 +215,19 @@ RUN git clone https://github.com/PDAL/PRC \
     && ninja \
     && ninja install \
     && rm -rf /PRC
+
+RUN \
+    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
+    tar xzf ${tiledb_version}.tar.gz; \
+    rm ${tiledb_version}.tar.gz; \
+    cd TileDB-${tiledb_version}; \
+    mkdir build; \
+    cd build; \
+    ../bootstrap --prefix=/usr --enable-s3; \
+    make -j2; \
+    make install-tiledb; \
+    cd /; \
+    rm -rf TileDB-${tiledb_version};
 
 FROM ubuntu:bionic as runner
 
