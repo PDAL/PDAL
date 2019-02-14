@@ -151,6 +151,15 @@ void SplitterFilter::processPoint(PointRef& point, PointAdder adder)
             adder(point, xpos, ypos - 1);
         else if (squareContains(xpos, ypos + 1, x, y))
             adder(point, xpos, ypos + 1);
+
+        if (squareContains(xpos - 1, ypos - 1, x, y))
+            adder(point, xpos - 1, ypos - 1);
+        else if (squareContains(xpos - 1, ypos + 1, x, y))
+            adder(point, xpos - 1, ypos + 1);
+        else if (squareContains(xpos + 1, ypos - 1, x, y))
+            adder(point, xpos + 1, ypos - 1);
+        else if (squareContains(xpos + 1, ypos + 1, x, y))
+            adder(point, xpos + 1, ypos + 1);
     }
 }
 
@@ -162,6 +171,7 @@ bool SplitterFilter::squareContains(int xpos, int ypos,
     double maxx = minx + m_length + 2 * m_buffer;
     double miny = m_yOrigin + ypos * m_length - m_buffer;
     double maxy = miny + m_length + 2 * m_buffer;
+
     return minx < x && x < maxx && miny < y && y < maxy;
 }
 

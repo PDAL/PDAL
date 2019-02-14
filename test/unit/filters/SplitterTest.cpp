@@ -35,8 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
-#include <pdal/StageWrapper.hpp>
 #include <io/LasReader.hpp>
+#include <io/FauxReader.hpp>
 #include <filters/SplitterFilter.hpp>
 #include "Support.hpp"
 
@@ -62,18 +62,8 @@ TEST(SplitterTest, test_tile_filter)
     s.setInput(r);
 
     PointTable table;
-    PointViewPtr view(new PointView(table));
     s.prepare(table);
-
-    StageWrapper::ready(r, table);
-    PointViewSet viewSet = StageWrapper::run(r, view);
-    StageWrapper::done(r, table);
-    EXPECT_EQ(viewSet.size(), 1u);
-    view = *viewSet.begin();
-
-    StageWrapper::ready(s, table);
-    viewSet = StageWrapper::run(s, view);
-    StageWrapper::done(s, table);
+    PointViewSet viewSet = s.execute(table);
 
     std::vector<PointViewPtr> views;
     std::map<PointViewPtr, BOX2D> bounds;
@@ -130,22 +120,11 @@ TEST(SplitterTest, test_buffer)
     splitter.setInput(reader);
 
     PointTable table;
-    PointViewPtr view(new PointView(table));
     splitter.prepare(table);
-
-    StageWrapper::ready(reader, table);
-    PointViewSet viewSet = StageWrapper::run(reader, view);
-    StageWrapper::done(reader, table);
-    ASSERT_EQ(viewSet.size(), 1u);
-    view = *viewSet.begin();
-
-    StageWrapper::ready(splitter, table);
-    viewSet = StageWrapper::run(splitter, view);
-    StageWrapper::done(splitter, table);
+    PointViewSet viewSet = splitter.execute(table);
 
     std::vector<PointViewPtr> views;
     std::map<PointViewPtr, BOX2D> bounds;
-
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
     {
         BOX2D b;
@@ -169,11 +148,65 @@ TEST(SplitterTest, test_buffer)
     std::sort(views.begin(), views.end(), sorter);
 
     EXPECT_EQ(views.size(), 24u);
-    size_t counts[] = {26, 26, 3, 28, 27, 13, 65, 80, 47, 80, 89, 12, 94,
+    size_t counts[] = {26, 26, 3, 28, 27, 13, 14, 65, 80, 47, 80, 89, 94,
         77, 5, 79, 65, 34, 63, 67, 74, 69, 36, 5};
-    for (size_t i = 0; i < views.size(); ++i)
-    {
-        PointViewPtr view = views[i];
-        EXPECT_EQ(view->size(), counts[i]);
-    }
+    size_t i = 0;
+    for (PointViewPtr view : views)
+        EXPECT_EQ(view->size(), counts[i++]);
 }
+
+// This test make sure bounds are correct by using known and calculable counts.
+TEST(SplitterTest, test_buffer2)
+{
+    Options readerOptions;
+    readerOptions.add("mode", "grid");
+    readerOptions.add("bounds", BOX3D(0, 0, 0, 1000, 1000, 0));
+
+    FauxReader reader;
+    reader.setOptions(readerOptions);
+
+    Options splitterOptions;
+    splitterOptions.add("length", 300);
+    splitterOptions.add("origin_x", 500);
+    splitterOptions.add("origin_y", 500);
+    splitterOptions.add("buffer", 25);
+
+    SplitterFilter splitter;
+    splitter.setOptions(splitterOptions);
+    splitter.setInput(reader);
+
+    PointTable table;
+    splitter.prepare(table);
+    PointViewSet s = splitter.execute(table);
+
+    EXPECT_EQ(s.size(), 16U); 
+
+    std::vector<PointViewPtr> vvec;
+    std::map<PointViewPtr, BOX2D> bounds;
+    for (PointViewPtr v : s)
+    {
+        BOX2D b;
+        v->calculateBounds(b);
+        bounds[v] = b;
+        vvec.push_back(v);
+    }
+
+    auto sorter = [&bounds](PointViewPtr p1, PointViewPtr p2)
+    {
+        BOX2D b1 = bounds[p1];
+        BOX2D b2 = bounds[p2];
+
+        return b1.minx < b2.minx ?  true :
+            b1.minx > b2.minx ? false :
+            b1.miny < b2.miny;
+    };
+    std::sort(vvec.begin(), vvec.end(), sorter);
+
+    size_t counts[] = { 50625, 78525, 78525, 50400, 78525, 121801, 121801, 
+        78176, 78525, 121801, 121801, 78176, 50400, 78176, 78176, 50176 };
+
+    size_t i = 0;
+    for (PointViewPtr v : vvec)
+        EXPECT_EQ(v->size(), counts[i++]);
+}
+
