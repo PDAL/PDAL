@@ -29,7 +29,8 @@ $CONDA_EXE install  -y laz-perf \
                 libgdal \
                 zstd \
                 python=3.7 \
-                numpy
+                numpy \
+                tiledb
 
 BUILDDIR=conda-build
 
@@ -60,6 +61,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \
         -DWITH_LASZIP=ON \

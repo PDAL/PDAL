@@ -163,6 +163,7 @@ output should look something like: ::
         python:          3.5.5-1               conda-forge
         setuptools:      39.2.0-py35_0         conda-forge
         sqlite:          3.20.1-vc14_2         conda-forge [vc14]
+        tiledb:          1.4.1                 conda-forge
         vc:              14-0                  conda-forge
         vs2015_runtime:  14.0.25420-0          conda-forge
         wheel:           0.31.0-py35_0         conda-forge

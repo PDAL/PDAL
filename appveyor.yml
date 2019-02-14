@@ -37,7 +37,7 @@ install:
   - python -c "import sys; print(sys.executable)"
   - python -c "import sys; print(sys.prefix)"
   - call "%CONDA_ROOT%\Scripts\activate.bat" base
-  - conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base
+  - conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base tiledb
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - call scripts\\appveyor\\config.cmd
 
@@ -84,5 +84,4 @@ notifications:
   - provider: Slack
     incoming_webhook:
       secure: KxbDvaPmsvNmYpsp0TH3m3hJr7PqQL1sxR8xILBzaF2Lbku03M3mJ/h787TvDGQGX3IlyZtfTP0wvSRqMl4nMmdvDQZoAe8+Gyfc7BOkYIg=
-
 
