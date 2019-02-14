@@ -22,7 +22,7 @@ IF ERRORLEVEL 1 GOTO CLEANUP
 call conda config --add channels conda-forge
 IF ERRORLEVEL 1 GOTO CLEANUP
 
-call conda install geotiff laszip nitro curl gdal=%GDAL_VERSION% pcl cmake eigen ninja libgdal=%GDAL_VERSION% geos zstd numpy=%NUMPY_VERSION% xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=%NUMPY_VERSION%
+call conda install geotiff laszip nitro curl gdal=%GDAL_VERSION% pcl cmake eigen ninja libgdal=%GDAL_VERSION% zstd numpy=%NUMPY_VERSION% xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=%NUMPY_VERSION% tiledb
 
 IF ERRORLEVEL 1 GOTO CLEANUP
 

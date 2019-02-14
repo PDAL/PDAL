@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2019 TileDB, Inc
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,77 +31,40 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <memory>
+#include <iostream>
 
-#include <geos_c.h>
-
-#include <pdal/pdal_types.hpp>
-#include <pdal/Log.hpp>
+#include <pdal/Reader.hpp>
+#include <tiledb/tiledb>
 
 namespace pdal
 {
 
-namespace geos
-{
-
-class PDAL_DLL ErrorHandler
+class PDAL_DLL TileDBReader : public Reader
 {
 public:
-    ~ErrorHandler();
-
-    /**
-      Get the singleton error handler.
-
-      \return  Reference to the error handler.
-    */
-    static ErrorHandler& get();
-
-    /**
-      Set the log and debug state of the error handler.  This is a convenience
-      and is equivalent to calling setLog() and setDebug().
-
-      \param log  Log to write to.
-      \param doDebug  Debug state of the error handler.
-    */
-    void set(LogPtr log, bool doDebug);
-
-    /**
-      Set the log to which error/debug messages should be written.
-
-      \param log  Log to write to.
-    */
-    void setLog(LogPtr log);
-
-    /**
-      Set the debug state of the error handler.  If the error handler is set
-      to debug, output is logged instead of causing an exception.
-
-      \param debug  The debug state of the error handler.
-    */
-    void setDebug(bool debug);
-
-    /**
-      Get the GEOS context handle.
-
-      \return  The GEOS context handle.
-    */
-    GEOSContextHandle_t ctx() const;
-
+    TileDBReader() = default;
+    std::string getName() const;
 private:
-    ErrorHandler();
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
 
-    void handle(const char *msg, bool notice);
-    static void vaErrorCb(const char *msg, ...);
-    static void vaNoticeCb(const char *msg, ...);
+    std::string m_arrayName;
+    std::string m_cfgFileName;
+    point_count_t m_chunkSize;
+    bool m_stats;
+    BOX3D m_bbox;
 
-    GEOSContextHandle_t m_ctx;
-    bool m_debug;
-    LogPtr m_log;
-    static std::unique_ptr<ErrorHandler> m_instance;
+    std::unique_ptr<tiledb::Context> m_ctx;
+    std::unique_ptr<tiledb::Array> m_array;
+
+    TileDBReader(const TileDBReader&) = delete;
+    TileDBReader& operator=(const TileDBReader&) = delete;
 };
 
-} // namespace geos
 } // namespace pdal
-

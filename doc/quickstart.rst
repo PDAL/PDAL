@@ -123,7 +123,6 @@ output should look something like: ::
         expat:           2.2.5-vc14_0          conda-forge [vc14]
         flann:           1.9.1-h0953f56_2      conda-forge
         freexl:          1.0.5-vc14_0          conda-forge [vc14]
-        geos:            3.6.2-vc14_1          conda-forge [vc14]
         geotiff:         1.4.2-vc14_1          conda-forge [vc14]
         hdf4:            4.2.13-vc14_0         conda-forge [vc14]
         hdf5:            1.10.1-vc14_2         conda-forge [vc14]
@@ -164,6 +163,7 @@ output should look something like: ::
         python:          3.5.5-1               conda-forge
         setuptools:      39.2.0-py35_0         conda-forge
         sqlite:          3.20.1-vc14_2         conda-forge [vc14]
+        tiledb:          1.4.1                 conda-forge
         vc:              14-0                  conda-forge
         vs2015_runtime:  14.0.25420-0          conda-forge
         wheel:           0.31.0-py35_0         conda-forge

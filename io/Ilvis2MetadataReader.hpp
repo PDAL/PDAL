@@ -38,7 +38,6 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <geos_c.h>
 #include <string>
 #include <iostream>
 #include <stdlib.h>
