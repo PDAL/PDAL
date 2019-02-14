@@ -161,6 +161,18 @@ PCL must be 1.7.2+. We do our best to keep this up-to-date with PCL master.
     `Homebrew`_-based OSX builds use PCL 1.7.2, but you may need to switch
     off `VTK`_ support depending on the configuration.
 
+TileDB
+..............................................................................
+
+`TileDB`_ is an efficient multi-dimensional array management system which
+introduces a novel on-disk format that can effectively store dense and sparse
+array data with support for fast updates and reads. It features excellent
+compression, and an efficient parallel I/O system with high scalability. It is
+used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.
+
+.. note::
+    `TileDB`_ must be 1.4.1+.
+
 .. _`Homebrew`: http://brew.sh
 .. _`VTK`: http://vtk.org
 
@@ -187,3 +199,4 @@ PCL must be 1.7.2+. We do our best to keep this up-to-date with PCL master.
 
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
+.. _`TileDB`: https://www.tiledb.io
