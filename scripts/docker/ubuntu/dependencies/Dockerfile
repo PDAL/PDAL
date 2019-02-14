@@ -56,7 +56,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libxerces-c-dev \
         unixodbc-dev \
         libsqlite3-dev \
-        libgeos-dev \
         libmysqlclient-dev \
         libltdl-dev \
         libcurl4-openssl-dev \
@@ -68,7 +67,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         time \
         libhpdf-dev \
         python-setuptools \
-        libgeos++-dev \
         libhpdf-dev \
         unzip \
         libopenscenegraph-dev \

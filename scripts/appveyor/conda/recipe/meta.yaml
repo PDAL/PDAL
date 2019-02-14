@@ -22,7 +22,6 @@ requirements:
     - python
     - numpy
     - libgdal
-    - geos
     - geotiff
     - postgresql
     - jsoncpp
@@ -46,7 +45,6 @@ requirements:
     - laszip
     - pcl
     - hdf5
-    - geos
     - libgdal
     - {{ pin_compatible('numpy') }}
     - nitro

@@ -51,12 +51,14 @@ public:
     bool is3d() const;
     bool empty() const;
     void clear();
+    double x() const;
+    double y() const;
+    double z() const;
+    void x(double x);
+    void y(double y);
+    void z(double z);
 
     virtual void update(const std::string& wkt_or_json);
-
-    double x;
-    double y;
-    double z;
 };
 
 } // namespace filter

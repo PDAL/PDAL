@@ -123,7 +123,6 @@ output should look something like: ::
         expat:           2.2.5-vc14_0          conda-forge [vc14]
         flann:           1.9.1-h0953f56_2      conda-forge
         freexl:          1.0.5-vc14_0          conda-forge [vc14]
-        geos:            3.6.2-vc14_1          conda-forge [vc14]
         geotiff:         1.4.2-vc14_1          conda-forge [vc14]
         hdf4:            4.2.13-vc14_0         conda-forge [vc14]
         hdf5:            1.10.1-vc14_2         conda-forge [vc14]

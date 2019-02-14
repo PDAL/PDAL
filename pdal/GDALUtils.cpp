@@ -188,36 +188,6 @@ bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
 }
 
 
-/**
-  Reproject a point from a source projection to a destination.
-  \param x  X coordinate of point to be reprojected.
-  \param y  Y coordinate of point to be reprojected.
-  \param z  Z coordinate of point to be reprojected.
-  \param srcSrs  String in WKT or other suitable format of box coordinates.
-  \param dstSrs  String in WKT or other suitable format to which
-    coordinates should be projected.
-  \return  Whether the reprojection was successful or not.
-*/
-bool reprojectPoint(double& x, double& y, double& z, const std::string& srcSrs,
-    const std::string& dstSrs)
-{
-    OGRSpatialReference src;
-    OGRSpatialReference dst;
-
-    OGRErr srcOk = OSRSetFromUserInput(&src, srcSrs.c_str());
-    OGRErr dstOk = OSRSetFromUserInput(&dst, dstSrs.c_str());
-    if (srcOk != OGRERR_NONE || dstOk != OGRERR_NONE)
-        return false;
-
-    OGRCoordinateTransformationH transform =
-        OCTNewCoordinateTransformation(&src, &dst);
-
-    bool ok = (OCTTransform(transform, 1, &x, &y, &z));
-    OCTDestroyCoordinateTransformation(transform);
-    return ok;
-}
-
-
 std::string lastError()
 {
     return CPLGetLastErrorMsg();

@@ -8,7 +8,6 @@ echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-
 echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
 sudo apt-get install -y -q  git \
                            cmake \
-                           libgeos-dev \
                            libgdal-dev \
                            libpq-dev \
                            python-all-dev \
@@ -26,7 +25,6 @@ sudo apt-get install -y -q  git \
                            postgresql-server-dev-9.3 \
                            postgresql-9.3-postgis-2.1 \
                            libmsgpack-dev \
-                           libgeos++-dev \
                            vim \
                            libeigen3-dev \
                            libflann-dev \

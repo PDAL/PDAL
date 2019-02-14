@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/GEOSUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>

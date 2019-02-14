@@ -37,8 +37,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/util/Bounds.hpp>
 
-#include <geos_c.h>
-
 #include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
 using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
 

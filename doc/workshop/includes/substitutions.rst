@@ -15,7 +15,6 @@
 .. |NumPy| replace:: `NumPy <http://www.numpy.org/>`__
 .. |Bash| replace:: `Bash <https://en.wikipedia.org/wiki/Bash_(Unix_shell)>`__
 .. |OSGeo4W| replace:: `OSGeo4W <https://trac.osgeo.org/osgeo4w/>`__
-.. |GEOS| replace:: `GEOS <https://trac.osgeo.org/geos/>`__
 .. |LASzip| replace:: `LASzip <http://laszip.org>`__
 .. |Python| replace:: `Python <http://python.org/>`__
 .. |Docker| replace:: `Docker <https://www.docker.com/>`__

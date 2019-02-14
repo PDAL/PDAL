@@ -231,11 +231,12 @@ void HexBin::done(PointTableRef table)
         };
 
         SpatialReference utm(makezone(zone));
-        density_p = p.transform(utm);
+        density_p = p;
+        density_p.transform(utm);
     }
 
     if (m_doSmooth)
-        p = p.simplify(tolerance, cull);
+        p.simplify(tolerance, cull);
 
     std::string boundary_text = p.wkt(m_precision);
 
