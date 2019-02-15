@@ -1,7 +1,7 @@
 mkdir build
 cd build
 
-cmake -G "NMake Makefiles" ^
+cmake -G "Ninja" ^
       -DCMAKE_INSTALL_PREFIX:PATH="%LIBRARY_PREFIX%" ^
       -DCMAKE_BUILD_TYPE:STRING=Release ^
       -DCMAKE_LIBRARY_PATH="%LIBRARY_LIB%" ^
@@ -23,10 +23,10 @@ cmake -G "NMake Makefiles" ^
       %SRC_DIR%
 if errorlevel 1 exit 1
 
-nmake
+ninja
 if errorlevel 1 exit 1
 
-nmake install
+ninja install
 if errorlevel 1 exit 1
 
 set ACTIVATE_DIR=%PREFIX%\etc\conda\activate.d

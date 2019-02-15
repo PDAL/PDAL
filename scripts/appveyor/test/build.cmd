@@ -1,5 +1,5 @@
 call "%CONDA_ROOT%\Scripts\activate.bat" base
-call conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 numpy-base tiledb conda-build -y
+call conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 numpy-base tiledb conda-build ninja -y
 
 echo "before vcvars"
 dir
