@@ -11,5 +11,4 @@ set /p CONDA_PACKAGE= < condaPackage
 DEL condaPackage
 copy c:\projects\pdal\build\win-64\%CONDA_PACKAGE% c:\projects\pdal\pdal-%APPVEYOR_REPO_COMMIT%-py37_appveyor.tar.bz2
 
-conda build purge
 popd
