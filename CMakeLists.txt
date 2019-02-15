@@ -258,7 +258,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
-    INTERFACE
+    PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )

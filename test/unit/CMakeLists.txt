@@ -40,6 +40,7 @@ PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
+
 PDAL_ADD_TEST(pdal_options_test
     FILES
         OptionsTest.cpp
@@ -47,11 +48,14 @@ PDAL_ADD_TEST(pdal_options_test
         ${PDAL_JSONCPP_LIB_NAME}
         ${GDAL_LIBRARY}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR})
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
+
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
+
 PDAL_ADD_TEST(pdal_program_arg_test
     FILES
         ProgramArgsTest.cpp
@@ -68,6 +72,9 @@ PDAL_ADD_TEST(pdal_polygon_test
     LINK_WITH
         ${GDAL_LIBRARY}
 )
+target_include_directories(pdal_polygon_test
+    PRIVATE
+        ${GDAL_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test
     FILES
@@ -77,6 +84,7 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
+
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
@@ -118,11 +126,17 @@ PDAL_ADD_TEST(pdal_io_gdal_reader_test
     LINK_WITH
         ${GDAL_LIBRARY}
 )
+    target_include_directories(pdal_io_gdal_reader_test
+        PRIVATE
+            ${GDAL_INCLUDE_DIR})
+
 PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
     LINK_WITH
         ${GDAL_LIBRARY}
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_las_reader_test
     FILES
@@ -136,6 +150,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
+
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
