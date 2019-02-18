@@ -141,6 +141,9 @@ void SplitterFilter::processPoint(PointRef& point, PointAdder adder)
         ypos--;
 
     adder(point, xpos, ypos);
+
+    // We check in initialize() to make sure that the buffer value isn't more
+    // than have the cell edge length.
     if (m_buffer > 0.0) {
         if (squareContains(xpos - 1, ypos, x, y))
             adder(point, xpos - 1, ypos);
