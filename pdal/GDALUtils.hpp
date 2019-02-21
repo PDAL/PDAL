@@ -50,6 +50,7 @@
 #include <cpl_conv.h>
 #include <gdal_priv.h>
 #include <ogr_api.h>
+#include <ogr_geometry.h>
 #include <ogr_srs_api.h>
 
 namespace pdal
