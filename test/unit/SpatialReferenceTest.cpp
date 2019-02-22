@@ -478,6 +478,8 @@ TEST(SpatialReferenceTest, issue_1989)
     EXPECT_EQ(-32, south.getUTMZone());
 }
 
+// Ilvis needs XML2
+#ifdef PDAL_HAVE_LIBXML2
 TEST(SpatialReferenceTest, set_srs)
 {
     StageFactory factory;
@@ -487,6 +489,7 @@ TEST(SpatialReferenceTest, set_srs)
     ops.add("filename", Support::datapath("text/file3.txt"));
 
     Stage *s = factory.createStage("readers.text");
+    std::cerr << "Setting test options!\n";
     s->setOptions(ops);
 
     PointTable t;
@@ -511,11 +514,13 @@ TEST(SpatialReferenceTest, set_srs)
     //
     s = factory.createStage("readers.ilvis2");
     ops2.add("spatialreference", "EPSG:2029");
+    std::cerr << "Setting opts3!\n";
     s->setOptions(ops2);
     s->prepare(t);
     m = s->getMetadata().findChild("spatialreference");
     EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"2029\"]]"),
         std::string::npos);
 }
+#endif // PDAL_HAVE_LIBXML2
 
 } // namespace pdal

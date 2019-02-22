@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <ogr_geometry.h>
+
 #include <pdal/Geometry.hpp>
 
 namespace pdal
