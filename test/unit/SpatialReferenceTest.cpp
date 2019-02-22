@@ -489,7 +489,6 @@ TEST(SpatialReferenceTest, set_srs)
     ops.add("filename", Support::datapath("text/file3.txt"));
 
     Stage *s = factory.createStage("readers.text");
-    std::cerr << "Setting test options!\n";
     s->setOptions(ops);
 
     PointTable t;
@@ -514,7 +513,6 @@ TEST(SpatialReferenceTest, set_srs)
     //
     s = factory.createStage("readers.ilvis2");
     ops2.add("spatialreference", "EPSG:2029");
-    std::cerr << "Setting opts3!\n";
     s->setOptions(ops2);
     s->prepare(t);
     m = s->getMetadata().findChild("spatialreference");
