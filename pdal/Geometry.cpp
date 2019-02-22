@@ -62,7 +62,7 @@ Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 
 
 Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) :
-    m_geom((OGRGeometry*)g->clone())
+    m_geom((OGRGeometry*)(g)->clone())
 {
     setSpatialReference(srs);
 }
@@ -98,7 +98,7 @@ void Geometry::update(const std::string& wkt_or_json)
                 &newGeom) != OGRERR_NONE)
             throw pdal_error("Unable to create geometry from input WKT");
 #else
-        if (OGRGeometryFactory::createFromWkt(&input, nullptr,
+        if (OGRGeometryFactory::createFromWkt((char**)&input, nullptr,
                 &newGeom) != OGRERR_NONE)
             throw pdal_error("Unable to create geometry from input WKT");
 #endif
@@ -221,7 +221,7 @@ std::string Geometry::json(double precision) const
     papszOptions = CSLSetNameValue(papszOptions, "COORDINATE_PRECISION",
         p.data());
 
-    char* json = OGR_G_ExportToJsonEx((OGRGeometry*)m_geom.get()),
+    char* json = OGR_G_ExportToJsonEx((OGRGeometryH)(m_geom.get())),
         papszOptions);
     std::string output(json);
     OGRFree(json);
