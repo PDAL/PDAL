@@ -62,7 +62,7 @@ Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 
 
 Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) :
-    m_geom(OGRGeometry::FromHandle(g)->clone())
+    m_geom((OGRGeometry*)g->clone())
 {
     setSpatialReference(srs);
 }
@@ -81,15 +81,27 @@ void Geometry::update(const std::string& wkt_or_json)
     const char *input = wkt_or_json.data();
     if (isJson)
     {
+#if (GDAL_VERSION_MAJOR > 1)
         newGeom = OGRGeometryFactory::createFromGeoJson(input);
         if (!newGeom)
             throw pdal_error("Unable to create geometry from input GeoJSON");
+#else
+
+        throw pdal_error("Unable to create geometry from input GeoJSON because GDAL 1.x does not have constructor support");
+
+#endif
     }
     else
     {
+#if (GDAL_VERSION_MAJOR > 1)
         if (OGRGeometryFactory::createFromWkt(input, nullptr,
                 &newGeom) != OGRERR_NONE)
             throw pdal_error("Unable to create geometry from input WKT");
+#else
+        if (OGRGeometryFactory::createFromWkt(&input, nullptr,
+                &newGeom) != OGRERR_NONE)
+            throw pdal_error("Unable to create geometry from input WKT");
+#endif
     }
 
     // m_geom may be null if update() is called from a ctor.
@@ -209,7 +221,7 @@ std::string Geometry::json(double precision) const
     papszOptions = CSLSetNameValue(papszOptions, "COORDINATE_PRECISION",
         p.data());
 
-    char* json = OGR_G_ExportToJsonEx(OGRGeometry::ToHandle(m_geom.get()),
+    char* json = OGR_G_ExportToJsonEx((OGRGeometry*)m_geom.get()),
         papszOptions);
     std::string output(json);
     OGRFree(json);
