@@ -53,6 +53,9 @@
 #include <ogr_geometry.h>
 #include <ogr_srs_api.h>
 
+class OGRSpatialReference;
+class OGRGeometry;
+
 namespace pdal
 {
 
@@ -830,11 +833,50 @@ private:
     GDALError computePDALDimensionTypes();
 };
 
+
 } // namespace gdal
 
+namespace oldgdalsupport
+{
+OGRErr createFromWkt(const char *s, OGRSpatialReference *srs,
+    OGRGeometry **newGeom);
+OGRGeometry* createFromGeoJson(const char *s);
+} // namespace oldgdalsupport
+
+namespace gdal
+{
+// We need this, but they aren't around until GDAL 2.3
+inline OGRGeometry *createFromWkt(const char *s)
+{
+    OGRGeometry *newGeom;
+#if (GDAL_VERSION_MAJOR < 2) || \
+    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
+    oldgdalsupport::createFromWkt(s, nullptr, &newGeom);
+#else
+    OGRGeometryFactory::createFromWkt(s, nullptr, &newGeom);
+#endif
+    return newGeom;
+}
+
+inline OGRGeometry *createFromGeoJson(const char *s)
+{
+#if (GDAL_VERSION_MAJOR < 2) || \
+    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
+    return oldgdalsupport::createFromGeoJson(s);
+#else
+    return OGRGeometryFactory::createFromGeoJson(s);
+#endif
+}
+
+inline OGRGeometry *fromHandle(OGRGeometryH geom)
+{ return reinterpret_cast<OGRGeometry *>(geom); }
+
+inline OGRGeometryH toHandle(OGRGeometry *h)
+{ return reinterpret_cast<OGRGeometryH>(h); }
+
+} // namespace gdal
 
 PDAL_DLL std::string transformWkt(std::string wkt, const SpatialReference& from,
     const SpatialReference& to);
 
 } // namespace pdal
-

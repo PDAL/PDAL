@@ -41,6 +41,8 @@
 
 #include <memory>
 
+class OGRGeometry;
+
 namespace pdal
 {
 

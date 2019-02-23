@@ -478,6 +478,8 @@ TEST(SpatialReferenceTest, issue_1989)
     EXPECT_EQ(-32, south.getUTMZone());
 }
 
+// Ilvis needs XML2
+#ifdef PDAL_HAVE_LIBXML2
 TEST(SpatialReferenceTest, set_srs)
 {
     StageFactory factory;
@@ -517,5 +519,6 @@ TEST(SpatialReferenceTest, set_srs)
     EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"2029\"]]"),
         std::string::npos);
 }
+#endif // PDAL_HAVE_LIBXML2
 
 } // namespace pdal
