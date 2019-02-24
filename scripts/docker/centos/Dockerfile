@@ -20,7 +20,8 @@ RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
         curl-devel \
         python34-pip \
         sqlite-devel \
-        libtiff-devel
+        libtiff-devel \
+        geos-devel
 
 
 ENV PATH /opt/rh/devtoolset-7/root/usr/bin:$PATH
@@ -54,6 +55,7 @@ RUN git clone --branch master https://github.com/OSGeo/gdal.git \
             --with-rename-internal-libtiff-symbols=yes \
             --with-rename-internal-libgeotiff-symbols=yes \
             --with-libtiff=/usr/ \
+            --with-geos=/usr/bin/geos-config \
             --with-geotiff=/build/usr \
             --with-proj=/build/usr \
             --with-geos \
@@ -138,10 +140,11 @@ RUN git clone  --branch ${PDAL_VERSION}  https://github.com/PDAL/PDAL.git pdal-g
     ninja-build; \
     ninja-build install;
 
+RUN  rm /build/usr/lib/*.a
 
 FROM centos:7.6.1810 as runner
 
-RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
+RUN yum update -y &&\
     yum install epel-release -y && \
     yum install centos-release-scl -y && \
     yum install -y  \
@@ -151,7 +154,8 @@ RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
         libxml2 \
         curl \
         sqlite \
-        libtiff
+        libtiff \
+        geos
 
 
 
