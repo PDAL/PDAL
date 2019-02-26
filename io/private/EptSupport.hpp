@@ -34,12 +34,14 @@
 
 #pragma once
 
+#include <array>
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
 #include <iostream>
 #include <mutex>
 #include <queue>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -53,8 +55,74 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
+#include <arbiter/arbiter.hpp>
+
 namespace pdal
 {
+
+inline Dimension::Type getType(const Json::Value& dim)
+{
+    if (dim.isMember("scale"))
+        return Dimension::Type::Double;
+
+    const std::string type(dim["type"].asString());
+    const uint64_t size(dim["size"].asUInt64());
+
+    if (type == "signed")
+    {
+        switch (size)
+        {
+            case 1: return Dimension::Type::Signed8;
+            case 2: return Dimension::Type::Signed16;
+            case 4: return Dimension::Type::Signed32;
+            case 8: return Dimension::Type::Signed64;
+        }
+    }
+    else if (type == "unsigned")
+    {
+        switch (size)
+        {
+            case 1: return Dimension::Type::Unsigned8;
+            case 2: return Dimension::Type::Unsigned16;
+            case 4: return Dimension::Type::Unsigned32;
+            case 8: return Dimension::Type::Unsigned64;
+        }
+    }
+    else if (type == "float")
+    {
+        switch (size)
+        {
+            case 4: return Dimension::Type::Float;
+            case 8: return Dimension::Type::Double;
+        }
+    }
+
+    return Dimension::Type::None;
+}
+
+inline std::string stringify(const Json::Value& json)
+{
+    Json::StreamWriterBuilder builder;
+    builder.settings_["indentation"] = "";
+    return Json::writeString(builder, json);
+}
+
+inline Json::Value parse(const std::string& data)
+{
+    Json::Value json;
+    Json::Reader reader;
+
+    if (!reader.parse(data, json, false))
+    {
+        const std::string jsonError(reader.getFormattedErrorMessages());
+        if (!jsonError.empty())
+        {
+            throw std::runtime_error("Error during parsing: " + jsonError);
+        }
+    }
+
+    return json;
+}
 
 inline BOX3D toBox3d(const Json::Value& b)
 {
@@ -89,6 +157,117 @@ inline std::array<double, 3> toArray3(const Json::Value& json)
 
     return result;
 }
+
+class PDAL_DLL Key
+{
+    // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
+    // representing a data node, as well as the bounds of the contained data.
+public:
+    Key(BOX3D b) : b(b) { }
+
+    BOX3D b;
+    uint64_t d = 0;
+    uint64_t x = 0;
+    uint64_t y = 0;
+    uint64_t z = 0;
+
+    std::string toString() const
+    {
+        return std::to_string(d) + '-' + std::to_string(x) + '-' +
+            std::to_string(y) + '-' + std::to_string(z);
+    }
+
+    double& operator[](uint64_t i)
+    {
+        switch (i)
+        {
+            case 0: return b.minx;
+            case 1: return b.miny;
+            case 2: return b.minz;
+            case 3: return b.maxx;
+            case 4: return b.maxy;
+            case 5: return b.maxz;
+            default: throw pdal_error("Invalid Key[] index");
+        }
+    }
+
+    uint64_t& idAt(uint64_t i)
+    {
+        switch (i)
+        {
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            default: throw pdal_error("Invalid Key::idAt index");
+        }
+    }
+
+    Key bisect(uint64_t direction) const
+    {
+        Key key(*this);
+        ++key.d;
+
+        auto step([&key, direction](uint8_t i)
+        {
+            key.idAt(i) *= 2;
+
+            const double mid(key[i] + (key[i + 3] - key[i]) / 2.0);
+            const bool positive(direction & (((uint64_t)1) << i));
+            if (positive)
+            {
+                key[i] = mid;
+                ++key.idAt(i);
+            }
+            else
+            {
+                key[i + 3] = mid;
+            }
+        });
+
+        for (uint8_t i(0); i < 3; ++i)
+            step(i);
+
+        return key;
+    }
+};
+
+using EptHierarchy = std::map<Key, uint64_t>;
+
+class PDAL_DLL Addon
+{
+public:
+    Addon(const PointLayout& layout, const arbiter::Endpoint& ep,
+            Dimension::Id id)
+        : m_ep(ep)
+        , m_id(id)
+        , m_type(layout.dimType(m_id))
+        , m_size(layout.dimSize(m_id))
+        , m_name(layout.dimName(m_id))
+    { }
+
+    const arbiter::Endpoint& ep() const { return m_ep; }
+    Dimension::Id id() const { return m_id; }
+    Dimension::Type type() const { return m_type; }
+    uint64_t size() const { return m_size; }
+    const std::string& name() const { return m_name; }
+
+    EptHierarchy& hierarchy() { return m_hierarchy; }
+    uint64_t count(const Key& key) const
+    {
+        if (m_hierarchy.count(key)) return m_hierarchy.at(key);
+        return 0;
+    }
+
+private:
+    const arbiter::Endpoint m_ep;
+
+    const Dimension::Id m_id = Dimension::Id::Unknown;
+    const Dimension::Type m_type = Dimension::Type::None;
+    const uint64_t m_size = 0;
+    const std::string m_name;
+
+    EptHierarchy m_hierarchy;
+};
 
 class PDAL_DLL EptInfo
 {
@@ -168,79 +347,6 @@ private:
 
     DataType m_dataType;
     std::string m_srs;
-};
-
-class PDAL_DLL Key
-{
-    // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
-    // representing a data node, as well as the bounds of the contained data.
-public:
-    Key(BOX3D b) : b(b) { }
-
-    BOX3D b;
-    uint64_t d = 0;
-    uint64_t x = 0;
-    uint64_t y = 0;
-    uint64_t z = 0;
-
-    std::string toString() const
-    {
-        return std::to_string(d) + '-' + std::to_string(x) + '-' +
-            std::to_string(y) + '-' + std::to_string(z);
-    }
-
-    double& operator[](uint64_t i)
-    {
-        switch (i)
-        {
-            case 0: return b.minx;
-            case 1: return b.miny;
-            case 2: return b.minz;
-            case 3: return b.maxx;
-            case 4: return b.maxy;
-            case 5: return b.maxz;
-            default: throw pdal_error("Invalid Key[] index");
-        }
-    }
-
-    uint64_t& idAt(uint64_t i)
-    {
-        switch (i)
-        {
-            case 0: return x;
-            case 1: return y;
-            case 2: return z;
-            default: throw pdal_error("Invalid Key::idAt index");
-        }
-    }
-
-    Key bisect(uint64_t direction) const
-    {
-        Key key(*this);
-        ++key.d;
-
-        auto step([&key, direction](uint8_t i)
-        {
-            key.idAt(i) *= 2;
-
-            const double mid(key[i] + (key[i + 3] - key[i]) / 2.0);
-            const bool positive(direction & (((uint64_t)1) << i));
-            if (positive)
-            {
-                key[i] = mid;
-                ++key.idAt(i);
-            }
-            else
-            {
-                key[i + 3] = mid;
-            }
-        });
-
-        for (uint8_t i(0); i < 3; ++i)
-            step(i);
-
-        return key;
-    }
 };
 
 inline bool operator<(const Key& a, const Key& b)
