@@ -38,6 +38,9 @@
 #include <pdal/PointRef.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace pdal
 {
 
@@ -53,33 +56,44 @@ CREATE_STATIC_STAGE(SbetReader, s_info)
 
 std::string SbetReader::getName() const { return s_info.name; }
 
+void SbetReader::addArgs(ProgramArgs& args)
+{
+    args.add("angles_as_degrees", "Convert all angles to degrees", m_anglesAsDegrees, true);
+}
+
 void SbetReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(fileDimensions());
+    layout->registerDims(sbet::fileDimensions());
 }
 
 
 void SbetReader::ready(PointTableRef)
 {
     size_t fileSize = FileUtils::fileSize(m_filename);
-    size_t pointSize = fileDimensions().size() * sizeof(double);
+    size_t pointSize = sbet::fileDimensions().size() * sizeof(double);
     if (fileSize % pointSize != 0)
         throwError("Invalid file size.");
     m_numPts = fileSize / pointSize;
     m_index = 0;
     m_stream.reset(new ILeStream(m_filename));
-    m_dims = fileDimensions();
+    m_dims = sbet::fileDimensions();
     seek(m_index);
 }
 
 
 bool SbetReader::processOne(PointRef& point)
 {
+    auto radiansToDegrees = [](double radians) {
+        return radians * 180.0 / M_PI;
+    };
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
         double d;
         *m_stream >> d;
         Dimension::Id dim = *di;
+        if (m_anglesAsDegrees && sbet::isAngularDimension(dim)) {
+            d = radiansToDegrees(d);
+        }
         point.setField(dim, d);
     }
     return (m_stream->good());
@@ -116,7 +130,7 @@ bool SbetReader::eof()
 
 void SbetReader::seek(PointId idx)
 {
-    m_stream->seek(idx * sizeof(double) * fileDimensions().size());
+    m_stream->seek(idx * sizeof(double) * sbet::fileDimensions().size());
 }
 
 } // namespace pdal

@@ -50,6 +50,7 @@ public:
 private:
     std::unique_ptr<OLeStream> m_stream;
     std::string m_filename;
+    bool m_anglesAreDegrees;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
