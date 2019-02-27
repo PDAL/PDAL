@@ -34,6 +34,8 @@
 
 #include "EptWriter.hpp"
 
+#include <cassert>
+
 #include <json/json.h>
 
 #include <arbiter/arbiter.hpp>
@@ -102,13 +104,14 @@ void EptWriter::ready(PointTableRef table)
 
     for (const std::string s : keys.getMemberNames())
     {
-        m_hierarchy[s] = keys[s].asUInt64();
+        m_hierarchy[Key(s)] = keys[s].asUInt64();
     }
 
     const PointLayout& layout(*table.layout());
     for (const std::string path : m_addonsArg->getMemberNames())
     {
-        const auto endpoint(m_arbiter->getEndpoint(path));
+        const auto endpoint(
+                m_arbiter->getEndpoint(arbiter::fs::expandTilde(path)));
         const std::string dimName((*m_addonsArg)[path].asString());
         const Dimension::Id id(layout.findDim(dimName));
         m_addons.emplace_back(new Addon(layout, endpoint, id));
@@ -119,10 +122,12 @@ void EptWriter::write(const PointViewPtr view)
 {
     for (const auto& addon : m_addons)
     {
-        log()->get(LogLevel::Debug) << "Writing addon: " << addon->name() <<
-            " to " << addon->ep().prefixedRoot() << std::endl;
+        log()->get(LogLevel::Debug) << "Writing addon dimension " <<
+            addon->name() << " to " << addon->ep().prefixedRoot() << std::endl;
 
         writeOne(view, *addon);
+
+        log()->get(LogLevel::Debug) << "\tWritten" << std::endl;
     }
 }
 
@@ -131,11 +136,13 @@ void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     std::vector<std::vector<char>> buffers;
     buffers.reserve(m_hierarchy.size());
 
+    // Create an addon buffer for each node we're going to write.
     for (const auto& p : m_hierarchy)
     {
         buffers.emplace_back(p.second * addon.size(), 0);
     }
 
+    // Fill in our buffers with the data from the view.
     PointRef pr(*view);
     uint64_t nodeId(0);
     uint64_t pointId(0);
@@ -151,7 +158,9 @@ void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
         nodeId -= 1;
         pointId = pr.getFieldAs<uint64_t>(m_pointIdDim);
 
-        char* dst = buffers.at(nodeId).data() + pointId * addon.size();
+        auto& buffer(buffers.at(nodeId));
+        assert(pointId * addon.size() + addon.size() <= buffer.size());
+        char* dst = buffer.data() + pointId * addon.size();
         pr.getField(dst, addon.id(), addon.type());
     }
 
@@ -165,15 +174,15 @@ void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
         arbiter::fs::mkdirp(hierEp.root());
     }
 
-    // Binary dimension data.
+    // Write the binary dimension data for the addon.
     nodeId = 0;
     for (const auto& p : m_hierarchy)
     {
-        const std::string& key(p.first);
+        const Key key(p.first);
 
         m_pool->add([&dataEp, &buffers, key, nodeId]()
         {
-            dataEp.put(key + ".bin", buffers.at(nodeId));
+            dataEp.put(key.toString() + ".bin", buffers.at(nodeId));
         });
 
         ++nodeId;
@@ -181,6 +190,7 @@ void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
     m_pool->await();
 
+    // Write the addon hierarchy data.
     Json::Value h;
     const Key key(m_info->bounds());
     writeHierarchy(h, Key(m_info->bounds()), hierEp);
@@ -188,7 +198,7 @@ void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
     m_pool->await();
 
-    // Top-level metadata;
+    // Write the top-level addon metadata.
     Json::Value meta;
     meta["type"] = getTypeString(addon.type());
     meta["size"] = static_cast<Json::UInt64>(addon.size());

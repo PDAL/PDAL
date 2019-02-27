@@ -164,6 +164,16 @@ class PDAL_DLL Key
     // representing a data node, as well as the bounds of the contained data.
 public:
     Key(BOX3D b) : b(b) { }
+    Key(std::string s)
+    {
+        const std::vector<std::string> tokens(Utils::split(s, '-'));
+        if (tokens.size() != 4)
+            throw std::runtime_error("Invalid EPT KEY: " + s);
+        d = std::stoull(tokens[0]);
+        x = std::stoull(tokens[1]);
+        y = std::stoull(tokens[2]);
+        z = std::stoull(tokens[3]);
+    }
 
     BOX3D b;
     uint64_t d = 0;

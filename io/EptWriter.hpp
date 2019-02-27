@@ -83,7 +83,7 @@ private:
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
     std::unique_ptr<EptInfo> m_info;
-    std::map<std::string, uint64_t> m_hierarchy;
+    std::map<Key, uint64_t> m_hierarchy;
     uint64_t m_hierarchyStep = 0;
 };
 
