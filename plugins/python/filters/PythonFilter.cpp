@@ -61,7 +61,8 @@ void PythonFilter::addArgs(ProgramArgs& args)
         m_module);
     args.add("function", "Function to call", m_function);
     args.add("add_dimension", "Dimensions to add", m_addDimensions);
-    args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
+    args.add("pdalargs", "Dictionary to add to module globals when "
+        "calling function", m_pdalargs);
 }
 
 
@@ -76,10 +77,15 @@ void PythonFilter::ready(PointTableRef table)
 {
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(m_scriptFile);
-    static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
+    plang::Environment::get()->set_stdout(log()->getLogStream());
+    std::cerr << "Set log stream!\n";
+    std::cerr << "Source = " << m_source << "!\n";
     m_script = new plang::Script(m_source, m_module, m_function);
+    std::cerr << "Made script!\n";
     m_pythonMethod = new plang::Invocation(*m_script);
+    std::cerr << "Made method!\n";
     m_pythonMethod->compile();
+    std::cerr << "Compiled!\n";
     m_totalMetadata = table.metadata();
 }
 
