@@ -34,11 +34,11 @@
 
 #include <algorithm>
 
-#include <boost/any.hpp>
-
 #include "TileDBReader.hpp"
 
 namespace pdal {
+
+using TR = TileDBReader;
 
 static PluginInfo const s_info
 {
@@ -49,17 +49,6 @@ static PluginInfo const s_info
 
 CREATE_SHARED_STAGE(TileDBReader, s_info)
 std::string TileDBReader::getName() const { return s_info.name; }
-
-template <typename T>
-void makeBuffer(tiledb::Query& query, std::map<std::string, pdalboost::any>& mp,  const std::string& key,
-        const unsigned bufSize)
-{
-    auto sp = std::make_shared<std::vector<T>>(bufSize);
-    mp[key] = sp;
-
-    if (key != TILEDB_COORDS)
-        query.set_buffer(key, *sp);
-}
 
 Dimension::Type getPdalType(tiledb_datatype_t t)
 {
@@ -82,8 +71,9 @@ Dimension::Type getPdalType(tiledb_datatype_t t)
         case TILEDB_UINT64:
             return Dimension::Type::Unsigned64;
         case TILEDB_FLOAT32:
-        case TILEDB_FLOAT64:
             return Dimension::Type::Float;
+        case TILEDB_FLOAT64:
+            return Dimension::Type::Double;
         case TILEDB_CHAR:
         case TILEDB_STRING_ASCII:
         case TILEDB_STRING_UTF8:
@@ -101,11 +91,13 @@ Dimension::Type getPdalType(tiledb_datatype_t t)
 void TileDBReader::addArgs(ProgramArgs& args)
 {
     args.add("array_name", "TileDB array name", m_arrayName).setPositional();
-    args.add("config_file", "TileDB configuration file location", m_cfgFileName);
-    args.add("chunk_size", "TileDB read chunk size", m_chunkSize, point_count_t(1000000));
+    args.add("config_file", "TileDB configuration file location",
+        m_cfgFileName);
+    args.add("chunk_size", "TileDB read chunk size", m_chunkSize,
+        point_count_t(1000000));
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
     args.add("bbox3d", "Bounding box subarray to read from TileDB in format "
-                       "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
+        "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
 }
 
 void TileDBReader::initialize()
@@ -123,44 +115,129 @@ void TileDBReader::initialize()
 
 void TileDBReader::addDimensions(PointLayoutPtr layout)
 {
-    std::vector<tiledb::Dimension> dims = m_array->schema().domain().dimensions();
-    auto attrs = m_array->schema().attributes();
+    // Dimensions are X/Y and maybe Z
+    std::vector<tiledb::Dimension> dims =
+        m_array->schema().domain().dimensions();
 
-    for (const auto& dim: dims)
+    Dimension::Id id;
+    for (size_t i = 0; i < dims.size(); ++i)
     {
-        layout->registerOrAssignDim(dim.name(), getPdalType(dim.type()));
+        tiledb::Dimension& dim = dims[i];
+
+        DimInfo di;
+
+        di.m_name = dim.name();
+        di.m_offset = i;
+        di.m_span = dims.size();
+        di.m_dimCategory = DimCategory::Dimension;
+        di.m_tileType = dim.type();
+        di.m_type = getPdalType(di.m_tileType);
+        di.m_id = layout->registerOrAssignDim(dim.name(), di.m_type);
+
+        m_dims.push_back(di);
     }
 
-    for (const auto& a : attrs) {
-        layout->registerOrAssignDim(a.first, getPdalType(a.second.type()));
+    auto attrs = m_array->schema().attributes();
+    for (const auto& a : attrs)
+    {
+        DimInfo di;
+
+        di.m_name = a.first;
+        di.m_offset = 0;
+        di.m_span = 1;
+        di.m_dimCategory = DimCategory::Attribute;
+        di.m_tileType = a.second.type();
+        di.m_type = getPdalType(di.m_tileType);
+        di.m_id = layout->registerOrAssignDim(a.first, di.m_type);
+
+        m_dims.push_back(di);
     }
 
+    //ABELL
+    // Should we check X Y and Z exist and remap the primary/secondary
+    // dimensions to X Y and Z if necessary?
 }
 
-point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
+template <typename T>
+void TileDBReader::setQueryBuffer(const DimInfo& di)
 {
-    PointId idx = view->size();
-    PointRef point(*view, idx);
-    point_count_t numRead = 0;
-    tiledb::Query query(*m_ctx, *m_array);
-    std::vector<tiledb::Dimension> dims = m_array->schema().domain().dimensions();
-    point_count_t chunkSize = std::min(m_chunkSize, count);
-    int nDims = dims.size();
+    m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
+}
 
-    std::map<std::string, pdalboost::any> buffers;
+void TileDBReader::setQueryBuffer(const DimInfo& di)
+{
+    switch(di.m_tileType)
+    {
+    case TILEDB_INT8:
+        setQueryBuffer<int8_t>(di);
+        break;
+    case TILEDB_UINT8:
+        setQueryBuffer<uint8_t>(di);
+        break;
+    case TILEDB_INT16:
+        setQueryBuffer<int16_t>(di);
+        break;
+    case TILEDB_UINT16:
+        setQueryBuffer<uint16_t>(di);
+        break;
+    case TILEDB_INT32:
+        setQueryBuffer<int32_t>(di);
+        break;
+    case TILEDB_UINT32:
+        setQueryBuffer<uint32_t>(di);
+        break;
+    case TILEDB_INT64:
+        setQueryBuffer<int64_t>(di);
+        break;
+    case TILEDB_UINT64:
+        setQueryBuffer<uint64_t>(di);
+        break;
+    case TILEDB_FLOAT32:
+        setQueryBuffer<float>(di);
+        break;
+    case TILEDB_FLOAT64:
+        setQueryBuffer<double>(di);
+        break;
+    default:
+        throwError("TileDB dimension '" + di.m_name + "' can't be mapped "
+            "to trivial type.");
+    }
+}
 
-    auto attrs = m_array->schema().attributes();
+void TileDBReader::ready(PointTableRef)
+{
+    int numDims = m_array->schema().domain().dimensions().size();
 
-    makeBuffer<double>(query, buffers, TILEDB_COORDS, chunkSize * dims.size());
-    auto spCoords = pdalboost::any_cast<std::shared_ptr<std::vector<double>>>(buffers[TILEDB_COORDS]);
-    query.set_coordinates(*spCoords);
+    m_query.reset(new tiledb::Query(*m_ctx, *m_array));
 
+    // Build the buffer for the dimensions.
+    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
+    m_buffers.push_back(std::move(dimBuf));
+    setQueryBuffer(di);
+    query.set_coordinates(dimBuf->get<double>(), dimBuf->size());
+
+    for (DimInfo& di : m_dims)
+    {
+        if (di.m_dimCategory == DimCategory::Dimension)
+            di.m_buffer = dimBuf;
+        else
+        {
+            Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize);
+            m_buffers.push_back(std::move(dimBuf));
+            di.m_buffer = dimBuf;
+            setQueryBuffer(m_query.get(), di);
+        }
+    }
+
+// Set the extent of the query.
     if (!m_bbox.empty())
     {
-        if (nDims == 2)
-            query.set_subarray({m_bbox.minx, m_bbox.minx, m_bbox.miny, m_bbox.maxy});
+        if (numDims == 2)
+            m_query->set_subarray({m_bbox.minx, m_bbox.minx,
+                m_bbox.miny, m_bbox.maxy});
         else
-            query.set_subarray({m_bbox.minx, m_bbox.minx, m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
+            m_query->set_subarray({m_bbox.minx, m_bbox.minx,
+                m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
     }
     else
     {
@@ -172,81 +249,61 @@ point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
             subarray.push_back(kv.second.first);
             subarray.push_back(kv.second.second);
         }
-        query.set_subarray(subarray);
+        m_query->set_subarray(subarray);
     }
+}
 
-    for (const auto& a : attrs) {
-        std::string attrName = a.first;
-        Dimension::Id id = view->layout()->findDim(a.first);
-        Dimension::Type t = view->dimType(id);
+TileDBReader::setField(DimInfo di, PointId idx, size_t offset) 
+{
+    offset = offset * di.m_span + di.m_offset;
+    switch (di.m_type)
+    {
+    case Dimension::Type::Signed8:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<int8_t>() + offset));
+        break;
+    case Dimension::Type::Unsigned8:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<uint8_t>() + offset));
+        break;
+    case Dimension::Type::Signed16:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<int16_t>() + offset));
+        break;
+    case Dimension::Type::Unsigned16:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<uint16_t>() + offset));
+        break;
+    case Dimension::Type::Signed32:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<int32_t>() + offset));
+        break;
+    case Dimension::Type::Unsigned32:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<uint32_t>() + offset));
+        break;
+    case Dimension::Type::Signed64:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<int64_t>() + offset));
+        break;
+    case Dimension::Type::Unsigned64:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<uint64_t>() + offset));
+        break;
+    case Dimension::Type::Float:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<float>() + offset));
+        break;
+    case Dimension::Type::Double:
+        view->setField(di.m_id, idx, *(di.m_buffer.get<double>() + offset));
+        break;
+    default:
+        throwError("Invalid dimension type when setting data.");
+}
 
-        switch (t)
-        {
-            case Dimension::Type::Double:
-            {
-                makeBuffer<double>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Float:
-            {
-                makeBuffer<float>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Signed8:
-            {
-                makeBuffer<char>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Signed16:
-            {
-                makeBuffer<short>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Signed32:
-            {
-                makeBuffer<int>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Signed64:
-            {
-                makeBuffer<long>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Unsigned8:
-            {
-                makeBuffer<unsigned char>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Unsigned16:
-            {
-                makeBuffer<unsigned short>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Unsigned32:
-            {
-                makeBuffer<unsigned int>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::Unsigned64:
-            {
-                makeBuffer<unsigned long>(query, buffers, attrName, chunkSize);
-                break;
-            }
-            case Dimension::Type::None:
-            default:
-                throw pdal_error("Unsupported attribute type for " + attrName);
-        }
-    }
+
+point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
+{
+    PointId idx = view->size();
+    point_count_t numRead = 0;
 
     tiledb::Query::Status status;
-
     do
     {
         if (m_stats)
             tiledb::Stats::enable();
-
-        query.submit();
-
+        m_query->submit();
         if (m_stats)
         {
             tiledb::Stats::dump(stdout);
@@ -255,104 +312,36 @@ point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
 
         status = query.query_status();
 
-        auto result_num = (int)query.result_buffer_elements()[TILEDB_COORDS].second;
-        if (status == tiledb::Query::Status::INCOMPLETE &&
-            result_num == 0)
-        {
+        if (status == tiledb::Query::Status::INCOMPLETE && result_num == 0)
             throwError("Need to increase chunk_size for reader.");
-        }
-        else
+
+        // The result buffer count represents the total number of items
+        // returned by the query for dimensions.  So if there are three
+        // dimensions, the number of points returns is the buffer count
+        // divided by the number of dimensions.
+        size_t result_num = 
+            (int)query.result_buffer_elements()[TILEDB_COORDS].second /
+            m_array->schema().domain().dimensions().size());
+        for (int i = 0; i < result_num; ++i)
         {
-            point.setPointId(idx);
-            for (int i = 0; i < result_num; i += nDims) {
-                view->setField(Dimension::id("X"), idx, (*spCoords)[i]);
-                view->setField(Dimension::id("Y"), idx, (*spCoords)[i + 1]);
+            for (DimInfo& dim : m_dims)
+                setField(view, dim, i);
 
-                if (nDims == 3)
-                    view->setField(Dimension::id("Z"), idx, (*spCoords)[i + 2]);
+            // progess callback
+            if (m_cb)
+                m_cb(*view, idx);
 
-                // read tiledb attributes, this has to be done point by point for future streaming support
-                for (const auto &kv : buffers) {
-                    if (kv.first != TILEDB_COORDS) {
-                        Dimension::Id id = view->layout()->findDim(kv.first);
-                        Dimension::Type t = view->dimType(id);
+            idx++;
+            numRead++;
 
-                        int p = i / nDims;
-                        switch (t) {
-                            case Dimension::Type::Double: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<double>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Float: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<float>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Signed8: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<char>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Signed16: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<short>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Signed32: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<int>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Signed64: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<long>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Unsigned8: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<unsigned char>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Unsigned16: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<unsigned short>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Unsigned32: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<unsigned int>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::Unsigned64: {
-                                auto sp = pdalboost::any_cast<std::shared_ptr<std::vector<unsigned long>>>(kv.second);
-                                view->setField(id, idx, (*sp)[p]);
-                                break;
-                            }
-                            case Dimension::Type::None:
-                            default:
-                                throw pdal_error("Unsupported attribute type for " + kv.first);
-                        }
-                    }
-                }
-                // progess callback
-                if (m_cb)
-                    m_cb(*view, idx);
-
-                idx++;
-                numRead++;
-
-                if (numRead == count)
-                    break;
-            } // end for loop
+            if (numRead == count)
+                break;
         }
     }
     while(status == tiledb::Query::Status::INCOMPLETE);
 
-
     if (status == tiledb::Query::Status::FAILED)
         throwError("Unable to read from " + m_arrayName);
-
     return numRead;
 }
 

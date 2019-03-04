@@ -44,13 +44,48 @@ namespace pdal
 
 class PDAL_DLL TileDBReader : public Reader
 {
+    struct Buffer
+    {
+        size_t m_count;  // Number of instances of the type.
+        std::vector<uint8_t> m_data;
+
+        Buffer(tiledb_datatype_t type, size_t count) : m_count(count),
+            m_data(count * tiledb_datatype_size(type))
+        {}
+        size_t count() const
+        { return m_count; }
+        
+        template<typename T>
+        T *get()
+        { return reinterpret_cast<T*>(m_data.data()); }
+    };
+
+    enum class DimCategory
+    {
+        Dimension,
+        Attribute
+    };
+
 public:
+    struct DimInfo
+    {
+        Buffer *m_buffer;
+        DimCategory m_dimCategory;
+        size_t m_span;
+        size_t m_offset;
+        tiledb_datatype_t m_tileType;
+        Dimension::Type m_type;
+        Dimension::Id m_id;
+        std::string m_name;
+    };
+
     TileDBReader() = default;
     std::string getName() const;
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
@@ -59,12 +94,19 @@ private:
     point_count_t m_chunkSize;
     bool m_stats;
     BOX3D m_bbox;
+    std::vector<std::unique_ptr<Buffer>> m_buffers;
+    std::vector<DimInfo> m_dims;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
+    std::unique_ptr<tiledb::Query> m_query;
 
     TileDBReader(const TileDBReader&) = delete;
     TileDBReader& operator=(const TileDBReader&) = delete;
+
+    template<typename T>
+    void setQueryBuffer(const DimInfo& di);
+    void setQueryBuffer(const DimInfo& di);
 };
 
 } // namespace pdal
