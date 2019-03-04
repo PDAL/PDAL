@@ -41,6 +41,7 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
+#include <pdal/util/Utils.hpp>
 
 #include <sstream>
 #include <mutex>
@@ -62,7 +63,12 @@
 __attribute__ ((constructor))
 static void loadPython()
 {
-    ::dlopen(PDAL_PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
+    std::string libname;
+
+    pdal::Utils::getenv("PDAL_PYTHON_LIBRARY", libname);
+    if (libname.empty())
+        libname = "libPython" + pdal::Utils::dynamicLibExtension;
+    ::dlopen(libname.data(), RTLD_LAZY | RTLD_GLOBAL);
 }
 #endif
 

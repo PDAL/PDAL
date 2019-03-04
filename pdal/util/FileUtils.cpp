@@ -314,18 +314,14 @@ std::string toAbsolutePath(const std::string& filename)
 std::string toAbsolutePath(const std::string& filename, const std::string base)
 {
     const std::string newbase = toAbsolutePath(base);
-    return pdalboost::filesystem::absolute(toNative(filename), toNative(newbase)).string();
+    return pdalboost::filesystem::absolute(toNative(filename),
+        toNative(newbase)).string();
 }
+
 
 std::string getFilename(const std::string& path)
 {
-#ifdef _WIN32
-    std::string pathsep("\\/");
-#else
-    char pathsep = '/';
-#endif
-
-    std::string::size_type pos = path.find_last_of(pathsep);
+    std::string::size_type pos = path.find_last_of(Utils::dirSeparator);
     if (pos == std::string::npos)
         return path;
     return path.substr(pos + 1);
