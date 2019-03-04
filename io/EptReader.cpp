@@ -120,6 +120,9 @@ void EptReader::initialize()
         m_root = m_root.substr(0, m_root.size() - postfix.size());
     }
 
+    if (m_root.empty())
+        throwError("Missing input filename");
+
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
     m_pool.reset(new Pool(m_args.threads()));
@@ -315,11 +318,11 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     {
         std::string root(m_args.addons()[dimName].asString());
         const std::string postfix("ept-addon.json");
-        if (Utils::endsWith(m_root, postfix))
+        if (Utils::endsWith(root, postfix))
         {
-            m_root = m_root.substr(0, m_root.size() - postfix.size());
+            root = root.substr(0, root.size() - postfix.size());
         }
-        m_root = arbiter::fs::expandTilde(m_root);
+        root = arbiter::fs::expandTilde(root);
 
         const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
         const Json::Value addonInfo(parse(ep.get("ept-addon.json")));

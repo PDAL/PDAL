@@ -97,6 +97,10 @@ void EptWriter::ready(PointTableRef table)
     m_pool.reset(new Pool(std::max<uint64_t>(m_numThreads, 4)));
 
     MetadataNode meta(table.privateMetadata("ept"));
+
+    if (meta.findChild("info").value().empty())
+        throwError("EPT writer must descend from EPT reader");
+
     const auto info(parse(meta.findChild("info").value<std::string>()));
     const auto keys(parse(meta.findChild("keys").value<std::string>()));
     m_hierarchyStep = meta.findChild("step").value<uint64_t>();
