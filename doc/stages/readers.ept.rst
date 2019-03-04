@@ -16,16 +16,14 @@ This example downloads a small area around the the Statue of Liberty from the Ne
 
 .. code-block:: json
 
-    {
-      "pipeline": [
-        {
-          "type": "readers.ept",
-          "filename": "http://na.entwine.io/nyc",
-          "bounds": "([-8242669, -8242529], [4966549, 4966674])"
-        },
-        "statue-of-liberty.las"
-      ]
-    }
+   [
+      {
+         "type": "readers.ept",
+         "filename": "http://na.entwine.io/nyc/ept.json",
+         "bounds": "([-8242669, -8242529], [4966549, 4966674])"
+      },
+      "statue-of-liberty.las"
+   ]
 
 
 Options
@@ -44,6 +42,11 @@ resolution
 
     The resulting resolution may not be exactly this value: the minimum possible resolution that is at *least* as precise as the requested resolution will be selected.  Therefore the result may be a bit more precise than requested.
 
+addons
+    A mapping of assignments of the form ``DimensionName: AddonPath``, which assigns dimensions from the specified paths to the named dimensions.  These addon dimensions are created by the `EPT writer`_.  If the dimension names already exist in the EPT `Schema`_ for the given resource, then their values will be overwritten with those from the appropriate addon.
+
+    Addons may used to override well-known dimensions (see `Dimensions`_).  For example, an addon assignment of ``"Classification": "~/addons/autzen/MyGroundDimension/"`` will override an existing EPT ``Classification`` dimension with the custom dimension.
+
 origin
     EPT datasets are lossless aggregations of potentially multiple source files.  The *origin* options can be used to select all points from a single source file.  This option may be specified as a string or an integral ID.
 
@@ -58,4 +61,7 @@ threads
 .. _Entwine: https://entwine.io/
 .. _Potree: http://potree.entwine.io/data/nyc.html
 .. _Plasio: http://speck.ly/?s=http%3A%2F%2Fc%5B0-7%5D.greyhound.io&r=ept%3A%2F%2Fna.entwine.io%2Fnyc&ca=-0&ce=49.06&ct=-8239196%2C4958509.308%2C337&cd=42640.943&cmd=125978.13&ps=2&pa=0.1&ze=1&c0s=remote%3A%2F%2Fimagery%3Furl%3Dhttp%3A%2F%2Fserver.arcgisonline.com%2FArcGIS%2Frest%2Fservices%2FWorld_Imagery%2FMapServer%2Ftile%2F%7B%7Bz%7D%7D%2F%7B%7By%7D%7D%2F%7B%7Bx%7D%7D.jpg
+.. _Dimensions: https://pdal.io/dimensions.html
+.. _Schema: https://entwine.io/entwine-point-tile.html#schema
+.. _EPT writer: https://pdal.io/stages/writers.ept.html
 
