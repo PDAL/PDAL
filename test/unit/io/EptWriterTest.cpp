@@ -249,7 +249,7 @@ TEST(EptWriterTest, mustDescendFromEptReader)
     {
         Options o;
         Json::Value addons;
-        addons[Support::datapath("ept/bad-addon")] = "ReturnNumber";
+        addons[Support::datapath("ept/addon/bad")] = "ReturnNumber";
         o.add("addons", addons);
         writer.setOptions(o);
         writer.setInput(reader);
