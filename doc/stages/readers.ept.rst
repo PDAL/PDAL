@@ -43,7 +43,7 @@ resolution
     The resulting resolution may not be exactly this value: the minimum possible resolution that is at *least* as precise as the requested resolution will be selected.  Therefore the result may be a bit more precise than requested.
 
 addons
-    A mapping of assignments of the form ``DimensionName: AddonPath``, which assigns dimensions from the specified paths to the named dimensions.  These addon dimensions are created by the :ref:`writers.ept_addon`_.  If the dimension names already exist in the EPT `Schema`_ for the given resource, then their values will be overwritten with those from the appropriate addon.
+    A mapping of assignments of the form ``DimensionName: AddonPath``, which assigns dimensions from the specified paths to the named dimensions.  These addon dimensions are created by the :ref:`writers.ept_addon <EPT addon writer>`_.  If the dimension names already exist in the EPT `Schema`_ for the given resource, then their values will be overwritten with those from the appropriate addon.
 
     Addons may used to override well-known :ref:`dimensions`_.  For example, an addon assignment of ``"Classification": "~/addons/autzen/MyGroundDimension/"`` will override an existing EPT ``Classification`` dimension with the custom dimension.
 
