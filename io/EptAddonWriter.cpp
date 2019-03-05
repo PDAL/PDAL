@@ -227,7 +227,7 @@ void EptAddonWriter::writeHierarchy(Json::Value& curr, const Key& key,
     const uint64_t np(m_hierarchy.at(keyName));
     if (!np) return;
 
-    if (m_hierarchyStep && key.d && key.d == m_hierarchyStep)
+    if (m_hierarchyStep && key.d && (key.d % m_hierarchyStep == 0))
     {
         curr[keyName] = -1;
 
