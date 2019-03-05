@@ -193,8 +193,9 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
     // Write the addon hierarchy data.
     Json::Value h;
-    const Key key(m_info->bounds());
-    writeHierarchy(h, Key(m_info->bounds()), hierEp);
+    Key key;
+    key.b = m_info->bounds();
+    writeHierarchy(h, key, hierEp);
     hierEp.put(key.toString() + ".json", h.toStyledString());
 
     m_pool->await();

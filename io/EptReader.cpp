@@ -396,7 +396,8 @@ void EptReader::overlaps()
     //
     // Because this may require fetching lots of JSON files, it'll run in our
     // thread pool.
-    const Key key(m_info->bounds());
+    Key key;
+    key.b = m_info->bounds();
     const std::string file("ept-hierarchy/" + key.toString() + ".json");
 
     {

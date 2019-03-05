@@ -164,7 +164,7 @@ class PDAL_DLL Key
     // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
     // representing a data node, as well as the bounds of the contained data.
 public:
-    Key(BOX3D b) : b(b) { }
+    Key() { }
     Key(std::string s)
     {
         const std::vector<std::string> tokens(Utils::split(s, '-'));
