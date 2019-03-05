@@ -255,6 +255,7 @@ bool Invocation::hasOutputVariable(const std::string& name) const
 
 bool Invocation::execute()
 {
+std::cerr << "Execute!\n";
     if (!m_bytecode)
         throw pdal::pdal_error("No code has been compiled");
 
@@ -263,8 +264,10 @@ bool Invocation::execute()
     m_scriptArgs = PyTuple_New(numArgs);
 
     if (numArgs > 2)
-        throw pdal::pdal_error("Only two arguments -- ins and outs numpy arrays -- can be passed!");
+        throw pdal::pdal_error("Only two arguments -- ins and outs "
+            "numpy arrays -- can be passed!");
 
+std::cerr << "Set in vars!\n";
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
     {
@@ -274,6 +277,7 @@ bool Invocation::execute()
 
     int success(0);
 
+std::cerr << "Set metadata obj!\n";
     if (m_metadata_PyObject)
     {
         success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
@@ -282,6 +286,7 @@ bool Invocation::execute()
         Py_INCREF(m_metadata_PyObject);
     }
 
+std::cerr << "Set schema obj!\n";
     if (m_schema_PyObject)
     {
         success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
@@ -290,6 +295,7 @@ bool Invocation::execute()
         Py_INCREF(m_srs_PyObject);
     }
 
+std::cerr << "Set SRS obj!\n";
     if (m_srs_PyObject)
     {
         success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
@@ -298,6 +304,7 @@ bool Invocation::execute()
         Py_INCREF(m_schema_PyObject);
     }
 
+std::cerr << "Set args obj!\n";
     if (m_pdalargs_PyObject)
     {
         success = PyModule_AddObject(m_module, "pdalargs", m_pdalargs_PyObject);
@@ -306,17 +313,20 @@ bool Invocation::execute()
         Py_INCREF(m_pdalargs_PyObject);
     }
 
+std::cerr << "Call script!\n";
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
     if (!PyBool_Check(m_scriptResult))
-        throw pdal::pdal_error("User function return value not a boolean type.");
+        throw pdal::pdal_error("User function return value not boolean.");
 
+std::cerr << "Get module dict!\n";
     PyObject* mod_vars = PyModule_GetDict(m_module);
 
     PyObject* b =  PyUnicode_FromString("metadata");
     if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
         m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
+std::cerr << "Returning from execute!\n";
 
     return (m_scriptResult == Py_True);
 }
@@ -391,17 +401,17 @@ void Invocation::begin(PointView& view, MetadataNode m)
 
     // Put 'schema' dict into module scope
     std::cerr << "Put schema obj!\n";
-    Py_XDECREF(m_schema_PyObject);
     MetadataNode s = view.layout()->toMetadata();
     std::ostringstream ostrm;
     Utils::toJSON(s, ostrm);
+    Py_XDECREF(m_schema_PyObject);
     m_schema_PyObject = getPyJSON(ostrm.str());
     ostrm.str("");
 
     std::cerr << "Decref pyobj!\n";
-    Py_XDECREF(m_srs_PyObject);
     MetadataNode srs = view.spatialReference().toMetadata();
     Utils::toJSON(srs, ostrm);
+    Py_XDECREF(m_srs_PyObject);
     m_srs_PyObject = getPyJSON(ostrm.str());
     std::cerr << "Leaving!\n";
 }
