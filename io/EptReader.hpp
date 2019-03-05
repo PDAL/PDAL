@@ -114,20 +114,23 @@ private:
 
         Bounds& boundsArg() { return m_bounds; }
         std::string& originArg() { return m_origin; }
-        uint64_t& threadsArg() { return m_threads; }
+        std::size_t& threadsArg() { return m_threads; }
         double& resolutionArg() { return m_resolution; }
         Json::Value& addonsArg() { return *m_addons; }
 
         BOX3D bounds() const;
         std::string origin() const { return m_origin; }
-        uint64_t threads() const { return std::max<uint64_t>(4, m_threads); }
+        std::size_t threads() const
+        {
+            return std::max<std::size_t>(4, m_threads);
+        }
         double resolution() const { return m_resolution; }
         const Json::Value& addons() const { return *m_addons; }
 
     private:
         Bounds m_bounds;
         std::string m_origin;
-        uint64_t m_threads = 0;
+        std::size_t m_threads = 0;
         double m_resolution = 0;
         std::unique_ptr<Json::Value> m_addons;
     };

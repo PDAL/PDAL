@@ -125,7 +125,13 @@ void EptReader::initialize()
 
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
-    m_pool.reset(new Pool(m_args.threads()));
+    const std::size_t threads(m_args.threads());
+    if (threads > 100)
+    {
+        log()->get(LogLevel::Warning) << "Using a large thread count: " <<
+            threads << " threads" << std::endl;
+    }
+    m_pool.reset(new Pool(threads));
 
     debug << "Endpoint: " << m_ep->prefixedRoot() << std::endl;
     m_info.reset(new EptInfo(parse(m_ep->get("ept.json"))));

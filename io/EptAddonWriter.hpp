@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <memory>
 
 #include <pdal/Writer.hpp>
@@ -77,7 +78,7 @@ private:
     void writeHierarchy(Json::Value& hier, const Key& key,
             const arbiter::Endpoint& hierEp) const;
 
-    uint64_t m_numThreads = 0;
+    std::size_t m_numThreads = 0;
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;

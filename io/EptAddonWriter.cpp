@@ -94,7 +94,13 @@ void EptAddonWriter::addDimensions(PointLayoutPtr layout)
 void EptAddonWriter::ready(PointTableRef table)
 {
     m_arbiter.reset(new arbiter::Arbiter());
-    m_pool.reset(new Pool(std::max<uint64_t>(m_numThreads, 4)));
+    const std::size_t threads(std::max<std::size_t>(m_numThreads, 4));
+    if (threads > 100)
+    {
+        log()->get(LogLevel::Warning) << "Using a large thread count: " <<
+            threads << " threads" << std::endl;
+    }
+    m_pool.reset(new Pool(threads));
 
     MetadataNode meta(table.privateMetadata("ept"));
 
