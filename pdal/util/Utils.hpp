@@ -205,8 +205,8 @@ namespace Utils
     {
         if (postfix.size() > s.size())
             return false;
-        return (strncmp(postfix.data(), s.data() + s.size() - postfix.size(),
-                    postfix.size()) == 0);
+        return (strcmp(postfix.data(),
+                    s.data() + s.size() - postfix.size()) == 0);
     }
 
     /**
