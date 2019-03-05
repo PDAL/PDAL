@@ -25,6 +25,20 @@ This example downloads a small area around the the Statue of Liberty from the Ne
       "statue-of-liberty.las"
    ]
 
+Additional attributes created by the :ref:`writers.ept_addon <EPT addon writer>` can be referenced with the ``addon`` option.  Here is an example that overrides the ``Classification`` dimension with an addon dimension derived from the original dataset:
+
+.. code-block:: json
+
+   [{
+      "type": "readers.ept",
+      "filename": "http://na.entwine.io/autzen/ept.json",
+      "addons": { "Classification": "~/entwine/addons/autzen/smrf" }
+   }, {
+      "type": "writers.las",
+      "filename": "autzen-ept-smrf.las"
+   }]
+
+For more details about addon dimensions and how to produce them, see :ref:`writers.ept_addon`.
 
 Options
 --------------------------------------------------------------------------------
