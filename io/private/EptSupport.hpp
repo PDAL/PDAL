@@ -61,6 +61,12 @@
 namespace pdal
 {
 
+class ept_error : public pdal_error
+{
+public:
+    ept_error(std::string msg) : pdal_error(msg) { }
+};
+
 inline Dimension::Type getType(const Json::Value& dim)
 {
     if (dim.isMember("scale"))
@@ -118,7 +124,7 @@ inline Json::Value parse(const std::string& data)
         const std::string jsonError(reader.getFormattedErrorMessages());
         if (!jsonError.empty())
         {
-            throw pdal_error("Error during parsing: " + jsonError);
+            throw ept_error("Error during parsing: " + jsonError);
         }
     }
 
@@ -129,34 +135,11 @@ inline BOX3D toBox3d(const Json::Value& b)
 {
     if (!b.isArray() || b.size() != 6)
     {
-        throw pdal_error("Invalid bounds specification: " + b.toStyledString());
+        throw ept_error("Invalid bounds specification: " + b.toStyledString());
     }
 
     return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
             b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
-}
-
-inline std::array<double, 3> toArray3(const Json::Value& json)
-{
-    std::array<double, 3> result;
-
-    if (json.isArray() && json.size() == 3)
-    {
-        result[0] = json[0].asDouble();
-        result[1] = json[1].asDouble();
-        result[2] = json[2].asDouble();
-    }
-    else if (json.isNumeric())
-    {
-        result[0] = result[1] = result[2] = json.asDouble();
-    }
-    else
-    {
-        throw pdal_error("Invalid scale specification: " +
-                json.toStyledString());
-    }
-
-    return result;
 }
 
 class PDAL_DLL Key
@@ -169,7 +152,7 @@ public:
     {
         const std::vector<std::string> tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
-            throw pdal_error("Invalid EPT KEY: " + s);
+            throw ept_error("Invalid EPT KEY: " + s);
         d = std::stoull(tokens[0]);
         x = std::stoull(tokens[1]);
         y = std::stoull(tokens[2]);
@@ -198,7 +181,7 @@ public:
             case 3: return b.maxx;
             case 4: return b.maxy;
             case 5: return b.maxz;
-            default: throw pdal_error("Invalid Key[] index");
+            default: throw ept_error("Invalid Key[] index");
         }
     }
 
@@ -209,7 +192,7 @@ public:
             case 0: return x;
             case 1: return y;
             case 2: return z;
-            default: throw pdal_error("Invalid Key::idAt index");
+            default: throw ept_error("Invalid Key::idAt index");
         }
     }
 
@@ -316,7 +299,7 @@ public:
         else if (dt == "binary")
             m_dataType = DataType::Binary;
         else
-            throw pdal_error("Unrecognized EPT dataType: " + dt);
+            throw ept_error("Unrecognized EPT dataType: " + dt);
     }
 
     const BOX3D& bounds() const { return m_bounds; }
@@ -432,7 +415,7 @@ public:
 protected:
     virtual PointId addPoint() override
     {
-        throw pdal_error("Cannot add points to ShallowPointTable");
+        throw ept_error("Cannot add points to ShallowPointTable");
     }
 
     virtual char* getPoint(PointId i) override
@@ -553,7 +536,7 @@ public:
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
         {
-            throw pdal_error("Attempted to add a task to a stopped Pool");
+            throw ept_error("Attempted to add a task to a stopped Pool");
         }
 
         m_produceCv.wait(lock, [this]()

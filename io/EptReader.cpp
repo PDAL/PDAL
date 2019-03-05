@@ -134,14 +134,29 @@ void EptReader::initialize()
     m_pool.reset(new Pool(threads));
 
     debug << "Endpoint: " << m_ep->prefixedRoot() << std::endl;
-    m_info.reset(new EptInfo(parse(m_ep->get("ept.json"))));
+    try
+    {
+        m_info.reset(new EptInfo(parse(m_ep->get("ept.json"))));
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
+    }
+
     debug << "Got EPT info" << std::endl;
     debug << "SRS: " << m_info->srs() << std::endl;
     setSpatialReference(m_info->srs());
 
     // Figure out our query parameters.
     m_queryBounds = m_args.bounds();
-    handleOriginQuery();
+    try
+    {
+        handleOriginQuery();
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
+    }
 
     // Figure out our max depth.
     const double queryResolution(m_args.resolution());
@@ -229,29 +244,43 @@ void EptReader::handleOriginQuery()
     const Json::Value& found(sources[static_cast<Json::ArrayIndex>(
                 m_queryOriginId)]);
 
-    BOX3D q(toBox3d(found["bounds"]));
+    try
+    {
+        BOX3D q(toBox3d(found["bounds"]));
 
-    // Clip the bounds to the queried origin bounds.  Don't just overwrite it -
-    // it's possible that both a bounds and an origin are specified.
-    m_queryBounds.clip(q);
+        // Clip the bounds to the queried origin bounds.  Don't just overwrite
+        // it - it's possible that both a bounds and an origin are specified.
+        m_queryBounds.clip(q);
 
-    log()->get(LogLevel::Debug) << "Query origin " <<
-        m_queryOriginId << ": " << found["id"].asString() << std::endl;
+        log()->get(LogLevel::Debug) << "Query origin " <<
+            m_queryOriginId << ": " << found["id"].asString() << std::endl;
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
+    }
 }
 
 QuickInfo EptReader::inspect()
 {
     QuickInfo qi;
 
-    initialize();
-
-    qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
-    qi.m_srs = m_info->srs();
-    qi.m_pointCount = m_info->points();
-
-    for (Json::ArrayIndex i(0); i < m_info->schema().size(); ++i)
+    try
     {
-        qi.m_dimNames.push_back(m_info->schema()[i]["name"].asString());
+        initialize();
+
+        qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
+        qi.m_srs = m_info->srs();
+        qi.m_pointCount = m_info->points();
+
+        for (Json::ArrayIndex i(0); i < m_info->schema().size(); ++i)
+        {
+            qi.m_dimNames.push_back(m_info->schema()[i]["name"].asString());
+        }
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
     }
 
     qi.m_valid = true;
@@ -320,26 +349,34 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     m_xyzTransforms[1] = m_dimTypes[dimIndex(D::Y)].m_xform;
     m_xyzTransforms[2] = m_dimTypes[dimIndex(D::Z)].m_xform;
 
-    for (const std::string dimName : m_args.addons().getMemberNames())
+    try
     {
-        std::string root(m_args.addons()[dimName].asString());
-        const std::string postfix("ept-addon.json");
-        if (Utils::endsWith(root, postfix))
+        for (const std::string dimName : m_args.addons().getMemberNames())
         {
-            root = root.substr(0, root.size() - postfix.size());
+            std::string root(m_args.addons()[dimName].asString());
+            const std::string postfix("ept-addon.json");
+            if (Utils::endsWith(root, postfix))
+            {
+                root = root.substr(0, root.size() - postfix.size());
+            }
+            root = arbiter::fs::expandTilde(root);
+
+            const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
+            const Json::Value addonInfo(parse(ep.get("ept-addon.json")));
+            const Dimension::Type type(getType(addonInfo));
+            const Dimension::Id id(layout->registerOrAssignDim(dimName, type));
+
+            m_addons.emplace_back(new Addon(*layout, ep, id));
+
+            log()->get(LogLevel::Debug) << "Registering addon dim " <<
+                dimName << ": " <<
+                Dimension::interpretationName(m_addons.back()->type()) <<
+                ", from " << root << std::endl;
         }
-        root = arbiter::fs::expandTilde(root);
-
-        const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
-        const Json::Value addonInfo(parse(ep.get("ept-addon.json")));
-        const Dimension::Type type(getType(addonInfo));
-        const Dimension::Id id(layout->registerOrAssignDim(dimName, type));
-
-        m_addons.emplace_back(new Addon(*layout, ep, id));
-
-        log()->get(LogLevel::Debug) << "Registering addon dim " << dimName <<
-            ": " << Dimension::interpretationName(m_addons.back()->type()) <<
-            ", from " << root << std::endl;
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
     }
 }
 
@@ -353,7 +390,14 @@ void EptReader::ready(PointTableRef table)
     m_overlaps.clear();
 
     // Determine all overlapping data files we'll need to fetch.
-    overlaps();
+    try
+    {
+        overlaps();
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
+    }
 
     uint64_t overlapPoints(0);
     Json::Value json;
