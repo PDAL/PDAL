@@ -77,6 +77,7 @@ private:
     void writeOne(const PointViewPtr view, const Addon& addon) const;
     void writeHierarchy(Json::Value& hier, const Key& key,
             const arbiter::Endpoint& hierEp) const;
+    std::string getTypeString(Dimension::Type t) const;
 
     std::size_t m_numThreads = 0;
 

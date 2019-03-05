@@ -52,6 +52,7 @@
 #include <pdal/pdal_types.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
@@ -117,7 +118,7 @@ inline Json::Value parse(const std::string& data)
         const std::string jsonError(reader.getFormattedErrorMessages());
         if (!jsonError.empty())
         {
-            throw std::runtime_error("Error during parsing: " + jsonError);
+            throw pdal_error("Error during parsing: " + jsonError);
         }
     }
 
@@ -168,7 +169,7 @@ public:
     {
         const std::vector<std::string> tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
-            throw std::runtime_error("Invalid EPT KEY: " + s);
+            throw pdal_error("Invalid EPT KEY: " + s);
         d = std::stoull(tokens[0]);
         x = std::stoull(tokens[1]);
         y = std::stoull(tokens[2]);
@@ -552,8 +553,7 @@ public:
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
         {
-            throw std::runtime_error(
-                    "Attempted to add a task to a stopped Pool");
+            throw pdal_error("Attempted to add a task to a stopped Pool");
         }
 
         m_produceCv.wait(lock, [this]()

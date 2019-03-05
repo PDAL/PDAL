@@ -54,15 +54,6 @@ namespace
         "http://pdal.io/stages/writers.ept.html",
         { "ept_addon", "ept-addon" }
     };
-
-    std::string getTypeString(Dimension::Type t)
-    {
-        const auto base(Dimension::base(t));
-        if (base == Dimension::BaseType::Signed) return "signed";
-        if (base == Dimension::BaseType::Unsigned) return "unsigned";
-        if (base == Dimension::BaseType::Floating) return "float";
-        throw std::runtime_error("Invalid dimension type");
-    }
 }
 
 CREATE_STATIC_STAGE(EptAddonWriter, s_info)
@@ -252,6 +243,23 @@ void EptAddonWriter::writeHierarchy(Json::Value& curr, const Key& key,
             writeHierarchy(curr, key.bisect(dir), hierEp);
         }
     }
+}
+
+std::string EptAddonWriter::getTypeString(Dimension::Type t) const
+{
+    std::string s;
+    const auto base(Dimension::base(t));
+
+    if (base == Dimension::BaseType::Signed)
+        s = "signed";
+    else if (base == Dimension::BaseType::Unsigned)
+        s = "unsigned";
+    else if (base == Dimension::BaseType::Floating)
+        s = "float";
+    else
+        throwError("Invalid dimension type");
+
+    return s;
 }
 
 }
