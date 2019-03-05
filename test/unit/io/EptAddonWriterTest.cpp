@@ -40,13 +40,13 @@
 #include <filters/AssignFilter.hpp>
 #include <filters/FerryFilter.hpp>
 #include <io/EptReader.hpp>
-#include <io/EptWriter.hpp>
+#include <io/EptAddonWriter.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
-TEST(EptWriterTest, fullLoop)
+TEST(EptAddonWriterTest, fullLoop)
 {
     // Test the writing, and subsequent reading, of EPT addons from both
     // well-known and proprietary dimensions.
@@ -90,7 +90,7 @@ TEST(EptWriterTest, fullLoop)
             assign2.setInput(ferry);
         }
 
-        EptWriter writer;
+        EptAddonWriter writer;
         {
             Json::Value addons;
             addons[addonDir + "class"] = "Classification";
@@ -138,7 +138,7 @@ TEST(EptWriterTest, fullLoop)
     }
 }
 
-TEST(EptWriterTest, boundedWrite)
+TEST(EptAddonWriterTest, boundedWrite)
 {
     // Assign the result of a bounded query.  This should write the attribute
     // for only the values selected by these bounds, leaving the relevant
@@ -167,7 +167,7 @@ TEST(EptWriterTest, boundedWrite)
             assign.setInput(reader);
         }
 
-        EptWriter writer;
+        EptAddonWriter writer;
         {
             Json::Value addons;
             addons[addonDir + "bounded"] = "Classification";
@@ -233,7 +233,7 @@ TEST(EptWriterTest, boundedWrite)
     EXPECT_GT(out, 0);
 }
 
-TEST(EptWriterTest, mustDescendFromEptReader)
+TEST(EptAddonWriterTest, mustDescendFromEptReader)
 {
     // Make sure the EPT writer throws if it is not used in tandem with an EPT
     // reader.
@@ -245,7 +245,7 @@ TEST(EptWriterTest, mustDescendFromEptReader)
         reader.setOptions(o);
     }
 
-    EptWriter writer;
+    EptAddonWriter writer;
     {
         Options o;
         Json::Value addons;

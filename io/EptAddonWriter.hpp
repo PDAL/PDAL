@@ -54,11 +54,11 @@ class EptInfo;
 class Key;
 class Pool;
 
-class PDAL_DLL EptWriter : public Writer
+class PDAL_DLL EptAddonWriter : public Writer
 {
 public:
-    EptWriter();
-    virtual ~EptWriter();
+    EptAddonWriter();
+    virtual ~EptAddonWriter();
 
     std::string getName() const override;
     virtual void addArgs(ProgramArgs& args) override;

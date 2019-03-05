@@ -119,9 +119,9 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_io_ept_writer_test
+PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
     FILES
-        io/EptWriterTest.cpp
+        io/EptAddonWriterTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${GDAL_LIBRARY}

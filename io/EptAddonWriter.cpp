@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "EptWriter.hpp"
+#include "EptAddonWriter.hpp"
 
 #include <cassert>
 
@@ -49,10 +49,10 @@ namespace
 {
     const StaticPluginInfo s_info
     {
-        "writers.ept",
+        "writers.ept_addon",
         "EPT Writer",
         "http://pdal.io/stages/writers.ept.html",
-        { "ept" }
+        { "ept_addon", "ept-addon" }
     };
 
     std::string getTypeString(Dimension::Type t)
@@ -65,25 +65,25 @@ namespace
     }
 }
 
-CREATE_STATIC_STAGE(EptWriter, s_info)
+CREATE_STATIC_STAGE(EptAddonWriter, s_info)
 
-EptWriter::EptWriter()
+EptAddonWriter::EptAddonWriter()
     : m_addonsArg(new Json::Value())
 { }
 
-EptWriter::~EptWriter()
+EptAddonWriter::~EptAddonWriter()
 { }
 
-std::string EptWriter::getName() const { return s_info.name; }
+std::string EptAddonWriter::getName() const { return s_info.name; }
 
-void EptWriter::addArgs(ProgramArgs& args)
+void EptAddonWriter::addArgs(ProgramArgs& args)
 {
     args.add("addons", "Mapping of output locations to their dimension names",
             *m_addonsArg);
     args.add("threads", "Number of worker threads", m_numThreads);
 }
 
-void EptWriter::addDimensions(PointLayoutPtr layout)
+void EptAddonWriter::addDimensions(PointLayoutPtr layout)
 {
     m_nodeIdDim = layout->registerOrAssignDim("EptNodeId",
             Dimension::Type::Unsigned32);
@@ -91,7 +91,7 @@ void EptWriter::addDimensions(PointLayoutPtr layout)
             Dimension::Type::Unsigned32);
 }
 
-void EptWriter::ready(PointTableRef table)
+void EptAddonWriter::ready(PointTableRef table)
 {
     m_arbiter.reset(new arbiter::Arbiter());
     m_pool.reset(new Pool(std::max<uint64_t>(m_numThreads, 4)));
@@ -122,7 +122,7 @@ void EptWriter::ready(PointTableRef table)
     }
 }
 
-void EptWriter::write(const PointViewPtr view)
+void EptAddonWriter::write(const PointViewPtr view)
 {
     for (const auto& addon : m_addons)
     {
@@ -135,7 +135,7 @@ void EptWriter::write(const PointViewPtr view)
     }
 }
 
-void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
+void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 {
     std::vector<std::vector<char>> buffers;
     buffers.reserve(m_hierarchy.size());
@@ -212,7 +212,7 @@ void EptWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     ep.put("ept-addon.json", meta.toStyledString());
 }
 
-void EptWriter::writeHierarchy(Json::Value& curr, const Key& key,
+void EptAddonWriter::writeHierarchy(Json::Value& curr, const Key& key,
         const arbiter::Endpoint& hierEp) const
 {
     const std::string keyName(key.toString());

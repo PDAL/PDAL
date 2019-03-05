@@ -1,9 +1,9 @@
-.. _writers.ept:
+.. _writers.ept_addon:
 
-writers.ept
-===========
+writers.ept_addon
+=================
 
-The **EPT writer** supports writing additional dimensions to `Entwine Point Tile`_ datasets.  Thus the EPT Writer is unique among most other PDAL writers due to its limitation that it may only be used along with an `EPT reader`_.
+The **EPT addon writer** supports writing additional dimensions to `Entwine Point Tile`_ datasets.  Thus the EPT addon writer is unique among most other PDAL writers due to its limitation that it may only be used along with an `EPT reader`_ and modifies and existing dataset rather than creating a brand new one.
 
 The addon dimensions created by this writer may be stored independently from the corresponding EPT dataset, therefore write-access to the EPT resource itself is not required to create and use addon dimensions.
 
@@ -26,7 +26,7 @@ This example downloads the Autzen dataset (10M points) and runs the `SMRF filter
    }, {
       "type": "filters.smrf"
    }, {
-      "type": "writers.ept",
+      "type": "writers.ept_addon",
       "addons": { "~/entwine/addons/autzen/smrf": "Classification" },
       "threads": 12
    }]
@@ -54,7 +54,7 @@ addons
 
 .. note::
 
-   The ``addons`` option is reversed between the EPT reader and writer: in each case, the right-hand side represents an assignment to the left-hand side.  In the writer, the dimension value is assigned to an addon path.  In the reader, the addon path is assigned to a dimension.
+   The ``addons`` option is reversed between the EPT reader and addon-writer: in each case, the right-hand side represents an assignment to the left-hand side.  In the writer, the dimension value is assigned to an addon path.  In the reader, the addon path is assigned to a dimension.
 
 threads
     Number of worker threads used to write EPT addon data.  A minimum of 4 will be used no matter what value is specified.
