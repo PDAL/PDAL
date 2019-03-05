@@ -97,7 +97,9 @@ PointViewSet PythonFilter::run(PointViewPtr view)
     log()->get(LogLevel::Debug5) << "filters.python " << *m_script <<
         " processing " << view->size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
+    std::cerr << "Reset arguments!\n";
     m_pythonMethod->begin(*view, m_totalMetadata);
+    std::cerr << "Begin method!\n";
 
     std::cerr << "Checking args!\n";
     if (!m_pdalargs.empty())

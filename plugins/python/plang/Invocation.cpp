@@ -363,11 +363,15 @@ void Invocation::begin(PointView& view, MetadataNode m)
     PointLayoutPtr layout(view.m_pointTable.layout());
     Dimension::IdList const& dims = layout->dims();
 
+    std::cerr << "About to loop dims!\n";
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
+        std::cerr << "Looping dim = " << layout->dimName(*di) << "!\n";
         Dimension::Id d = *di;
         const Dimension::Detail *dd = layout->dimDetail(d);
+        std::cerr << "Before malloc!\n";
         void *data = malloc(dd->size() * view.size());
+        std::cerr << "After malloc!\n";
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;
         for (PointId idx = 0; idx < view.size(); ++idx)
@@ -375,6 +379,7 @@ void Invocation::begin(PointView& view, MetadataNode m)
             view.getFieldInternal(d, idx, (void *)p);
             p += dd->size();
         }
+        std::cerr << "Done data fetch!\n";
         std::string name = layout->dimName(*di);
         insertArgument(name, (uint8_t *)data, dd->type(), view.size());
     }
