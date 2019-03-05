@@ -384,11 +384,13 @@ void Invocation::begin(PointView& view, MetadataNode m)
         insertArgument(name, (uint8_t *)data, dd->type(), view.size());
     }
 
+    std::cerr << "Put metadata obj!\n";
     // Put pipeline 'metadata' variable into module scope
     Py_XDECREF(m_metadata_PyObject);
-    m_metadata_PyObject= plang::fromMetadata(m);
+    m_metadata_PyObject = plang::fromMetadata(m);
 
     // Put 'schema' dict into module scope
+    std::cerr << "Put schema obj!\n";
     Py_XDECREF(m_schema_PyObject);
     MetadataNode s = view.layout()->toMetadata();
     std::ostringstream ostrm;
@@ -396,11 +398,12 @@ void Invocation::begin(PointView& view, MetadataNode m)
     m_schema_PyObject = getPyJSON(ostrm.str());
     ostrm.str("");
 
+    std::cerr << "Decref pyobj!\n";
     Py_XDECREF(m_srs_PyObject);
     MetadataNode srs = view.spatialReference().toMetadata();
     Utils::toJSON(srs, ostrm);
     m_srs_PyObject = getPyJSON(ostrm.str());
-    ostrm.str("");
+    std::cerr << "Leaving!\n";
 }
 
 
