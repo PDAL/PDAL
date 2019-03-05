@@ -87,26 +87,31 @@ void PythonFilter::ready(PointTableRef table)
     m_pythonMethod->compile();
     std::cerr << "Compiled!\n";
     m_totalMetadata = table.metadata();
+    std::cerr << "Got metadata!\n";
 }
 
 
 PointViewSet PythonFilter::run(PointViewPtr view)
 {
+    std::cerr << "Running filter!\n";
     log()->get(LogLevel::Debug5) << "filters.python " << *m_script <<
         " processing " << view->size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
     m_pythonMethod->begin(*view, m_totalMetadata);
 
+    std::cerr << "Checking args!\n";
     if (!m_pdalargs.empty())
     {
         std::ostringstream args;
         args << m_pdalargs;
         m_pythonMethod->setKWargs(args.str());
     }
+    std::cerr << "Execute method!\n";
     m_pythonMethod->execute();
 
     PointViewSet viewSet;
 
+    std::cerr << "Checking mask var!\n";
     if (m_pythonMethod->hasOutputVariable("Mask"))
     {
         PointViewPtr outview = view->makeNew();
@@ -123,12 +128,12 @@ PointViewSet PythonFilter::run(PointViewPtr view)
     }
     else
     {
+        std::cerr << "End!\n";
         m_pythonMethod->end(*view, getMetadata());
         viewSet.insert(view);
     }
-
+    std::cerr << "Returning!\n";
     return viewSet;
-
 }
 
 
