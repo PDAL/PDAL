@@ -96,7 +96,11 @@ void EptAddonWriter::ready(PointTableRef table)
     MetadataNode meta(table.privateMetadata("ept"));
 
     if (meta.findChild("info").value().empty())
-        throwError("EPT writer must descend from EPT reader");
+    {
+        throwError(
+                "Cannot use writers.ept_addon without reading using "
+                "readers.ept");
+    }
 
     try
     {
