@@ -593,7 +593,7 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         const uint64_t pointId) const
 {
-    const uint64_t np(addon.count(key));
+    const uint64_t np(addon.points(key));
     if (!np)
     {
         // If our addon has no points, then we are reading a superset of this

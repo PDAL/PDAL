@@ -262,10 +262,9 @@ public:
     const std::string& name() const { return m_name; }
 
     EptHierarchy& hierarchy() { return m_hierarchy; }
-    uint64_t count(const Key& key) const
+    uint64_t points(const Key& key) const
     {
-        if (m_hierarchy.count(key)) return m_hierarchy.at(key);
-        return 0;
+        return m_hierarchy.count(key) ? m_hierarchy.at(key) : 0;
     }
 
 private:

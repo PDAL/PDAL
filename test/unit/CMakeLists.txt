@@ -124,7 +124,6 @@ PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
         io/EptAddonWriterTest.cpp
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
-        ${GDAL_LIBRARY}
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
