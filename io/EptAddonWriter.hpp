@@ -64,6 +64,7 @@ public:
     std::string getName() const override;
     virtual void addArgs(ProgramArgs& args) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void prepared(PointTableRef table) override;
     virtual void ready(PointTableRef table) override;
     virtual void write(const PointViewPtr view) override;
 

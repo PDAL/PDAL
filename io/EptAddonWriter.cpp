@@ -82,9 +82,10 @@ void EptAddonWriter::addDimensions(PointLayoutPtr layout)
             Dimension::Type::Unsigned32);
 }
 
-void EptAddonWriter::ready(PointTableRef table)
+void EptAddonWriter::prepared(PointTableRef table)
 {
     m_arbiter.reset(new arbiter::Arbiter());
+
     const std::size_t threads(std::max<std::size_t>(m_numThreads, 4));
     if (threads > 100)
     {
@@ -93,6 +94,24 @@ void EptAddonWriter::ready(PointTableRef table)
     }
     m_pool.reset(new Pool(threads));
 
+    const PointLayout& layout(*table.layout());
+    for (const std::string path : m_addonsArg->getMemberNames())
+    {
+        const auto endpoint(
+                m_arbiter->getEndpoint(arbiter::fs::expandTilde(path)));
+
+        const std::string dimName((*m_addonsArg)[path].asString());
+        const Dimension::Id id(layout.findDim(dimName));
+
+        if (id == Dimension::Id::Unknown)
+            throwError("Cannot find dimension: " + dimName);
+
+        m_addons.emplace_back(new Addon(layout, endpoint, id));
+    }
+}
+
+void EptAddonWriter::ready(PointTableRef table)
+{
     MetadataNode meta(table.privateMetadata("ept"));
 
     if (meta.findChild("info").value().empty())
@@ -113,16 +132,6 @@ void EptAddonWriter::ready(PointTableRef table)
         for (const std::string s : keys.getMemberNames())
         {
             m_hierarchy[Key(s)] = keys[s].asUInt64();
-        }
-
-        const PointLayout& layout(*table.layout());
-        for (const std::string path : m_addonsArg->getMemberNames())
-        {
-            const auto endpoint(
-                    m_arbiter->getEndpoint(arbiter::fs::expandTilde(path)));
-            const std::string dimName((*m_addonsArg)[path].asString());
-            const Dimension::Id id(layout.findDim(dimName));
-            m_addons.emplace_back(new Addon(layout, endpoint, id));
         }
     }
     catch (std::exception& e)
