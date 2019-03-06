@@ -408,10 +408,13 @@ void Invocation::begin(PointView& view, MetadataNode m)
     m_schema_PyObject = getPyJSON(ostrm.str());
     ostrm.str("");
 
-    std::cerr << "Decref pyobj!\n";
+    std::cerr << "SRS handling!\n";
     MetadataNode srs = view.spatialReference().toMetadata();
+    std::cerr << "Got SRS from view!\n";
     Utils::toJSON(srs, ostrm);
+    std::cerr << "To JSON!\n";
     Py_XDECREF(m_srs_PyObject);
+    std::cerr << "Done decref!\n";
     m_srs_PyObject = getPyJSON(ostrm.str());
     std::cerr << "Leaving!\n";
 }
