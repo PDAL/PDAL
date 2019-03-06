@@ -333,16 +333,18 @@ std::cerr << "Returning from execute!\n";
 
 PyObject* getPyJSON(std::string const& str)
 {
-
+    std::cerr << "Get json!\n";
     PyObject* raw_json =  PyUnicode_FromString(str.c_str());
     PyObject* json_module = PyImport_ImportModule("json");
     if (!json_module)
         throw pdal::pdal_error(getTraceback());
 
+    std::cerr << "Get dict!\n";
     PyObject* json_mod_dict = PyModule_GetDict(json_module);
     if (!json_mod_dict)
         throw pdal::pdal_error(getTraceback());
 
+    std::cerr << "Get loads!\n";
     PyObject* loads_func = PyDict_GetItemString(json_mod_dict, "loads");
     if (!loads_func)
         throw pdal::pdal_error(getTraceback());
@@ -351,14 +353,17 @@ PyObject* getPyJSON(std::string const& str)
     if (!json_args)
         throw pdal::pdal_error(getTraceback());
 
+    std::cerr << "Set args!\n";
     int success = PyTuple_SetItem(json_args, 0, raw_json);
     if (success != 0)
         throw pdal::pdal_error(getTraceback());
 
+    std::cerr << "Invoke object!\n";
     PyObject* json = PyObject_CallObject(loads_func, json_args);
     if (!json)
         throw pdal::pdal_error(getTraceback());
 
+    std::cerr << "Return json!\n";
     return json;
 }
 
