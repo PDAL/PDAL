@@ -420,6 +420,7 @@ void Invocation::begin(PointView& view, MetadataNode m)
     std::cerr << "To JSON!\n";
     Py_XDECREF(m_srs_PyObject);
     std::cerr << "Done decref!\n";
+    std::cerr << "SRS is: " << ostrm.str() << "!\n";
     m_srs_PyObject = getPyJSON(ostrm.str());
     std::cerr << "Leaving!\n";
 }
