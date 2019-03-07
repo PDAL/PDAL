@@ -43,6 +43,27 @@
 namespace pdal
 {
 
+namespace
+{
+
+const std::vector<std::string> protocols { "ept", "greyhound", "i3s" };
+
+std::string getDriverProtocol(std::string filename)
+{
+    const auto protocol = std::find_if(protocols.begin(), protocols.end(),
+            [&filename](std::string protocol)
+            {
+                const std::string search(protocol + "://");
+                return Utils::startsWith(filename, search);
+            });
+
+    if (protocol != protocols.end())
+        return *protocol;
+    return "";
+}
+
+}
+
 /**
   Find the default reader for a file.
 
@@ -53,23 +74,10 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     std::string ext;
 
-    static const std::vector<std::string> protocols {
-        "ept",
-        "greyhound",
-        "i3s"
-    };
+    const std::string driverProtocol = getDriverProtocol(filename);
 
-
-    const auto protocol = std::find_if(protocols.begin(), protocols.end(),
-            [&filename](std::string protocol)
-            {
-                const std::string search(protocol + "://");
-                return Utils::iequals(filename.substr(0, search.size()),
-                        search);
-            });
-
-    if (protocol != protocols.end())
-        ext = "." + *protocol;
+    if (!driverProtocol.empty())
+        ext = "." + driverProtocol;
     else
         ext = FileUtils::extension(filename);
     // Strip off '.' and make lowercase.
@@ -90,12 +98,12 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
     std::string ext;
 
-    static const std::string ghPrefix("greyhound://");
+    const std::string driverProtocol = getDriverProtocol(filename);
 
     if (filename == "STDOUT")
         ext = ".txt";
-    else if (Utils::iequals(filename.substr(0, ghPrefix.size()), ghPrefix))
-        ext = ".greyhound";      // Make it look like an extension.
+    else if (!driverProtocol.empty())
+        ext = "." + driverProtocol;
     else
         ext = Utils::tolower(FileUtils::extension(filename));
     // Strip off '.' and make lowercase.
@@ -107,9 +115,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 }
 
 
-StageFactory::StageFactory(bool ignored)
+StageFactory::StageFactory(bool /* legacy */)
 {
-    (void)ignored;
 }
 
 

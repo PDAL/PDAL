@@ -119,6 +119,14 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
+    FILES
+        io/EptAddonWriterTest.cpp
+    LINK_WITH
+        ${PDAL_JSONCPP_LIB_NAME}
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
