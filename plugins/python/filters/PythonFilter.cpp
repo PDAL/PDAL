@@ -78,42 +78,30 @@ void PythonFilter::ready(PointTableRef table)
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(m_scriptFile);
     plang::Environment::get()->set_stdout(log()->getLogStream());
-    std::cerr << "Set log stream!\n";
-    std::cerr << "Source = " << m_source << "!\n";
     m_script = new plang::Script(m_source, m_module, m_function);
-    std::cerr << "Made script!\n";
     m_pythonMethod = new plang::Invocation(*m_script);
-    std::cerr << "Made method!\n";
     m_pythonMethod->compile();
-    std::cerr << "Compiled!\n";
     m_totalMetadata = table.metadata();
-    std::cerr << "Got metadata!\n";
 }
 
 
 PointViewSet PythonFilter::run(PointViewPtr view)
 {
-    std::cerr << "Running filter!\n";
     log()->get(LogLevel::Debug5) << "filters.python " << *m_script <<
         " processing " << view->size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
-    std::cerr << "Reset arguments!\n";
     m_pythonMethod->begin(*view, m_totalMetadata);
-    std::cerr << "Begin method!\n";
 
-    std::cerr << "Checking args!\n";
     if (!m_pdalargs.empty())
     {
         std::ostringstream args;
         args << m_pdalargs;
         m_pythonMethod->setKWargs(args.str());
     }
-    std::cerr << "Execute method!\n";
     m_pythonMethod->execute();
 
     PointViewSet viewSet;
 
-    std::cerr << "Checking mask var!\n";
     if (m_pythonMethod->hasOutputVariable("Mask"))
     {
         PointViewPtr outview = view->makeNew();
@@ -130,11 +118,9 @@ PointViewSet PythonFilter::run(PointViewPtr view)
     }
     else
     {
-        std::cerr << "End!\n";
         m_pythonMethod->end(*view, getMetadata());
         viewSet.insert(view);
     }
-    std::cerr << "Returning!\n";
     return viewSet;
 }
 

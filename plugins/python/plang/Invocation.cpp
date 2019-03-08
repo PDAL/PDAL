@@ -255,7 +255,6 @@ bool Invocation::hasOutputVariable(const std::string& name) const
 
 bool Invocation::execute()
 {
-std::cerr << "Execute!\n";
     if (!m_bytecode)
         throw pdal::pdal_error("No code has been compiled");
 
@@ -267,7 +266,6 @@ std::cerr << "Execute!\n";
         throw pdal::pdal_error("Only two arguments -- ins and outs "
             "numpy arrays -- can be passed!");
 
-std::cerr << "Set in vars!\n";
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
     {
@@ -277,7 +275,6 @@ std::cerr << "Set in vars!\n";
 
     int success(0);
 
-std::cerr << "Set metadata obj!\n";
     if (m_metadata_PyObject)
     {
         success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
@@ -286,7 +283,6 @@ std::cerr << "Set metadata obj!\n";
         Py_INCREF(m_metadata_PyObject);
     }
 
-std::cerr << "Set schema obj!\n";
     if (m_schema_PyObject)
     {
         success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
@@ -295,7 +291,6 @@ std::cerr << "Set schema obj!\n";
         Py_INCREF(m_srs_PyObject);
     }
 
-std::cerr << "Set SRS obj!\n";
     if (m_srs_PyObject)
     {
         success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
@@ -304,7 +299,6 @@ std::cerr << "Set SRS obj!\n";
         Py_INCREF(m_schema_PyObject);
     }
 
-std::cerr << "Set args obj!\n";
     if (m_pdalargs_PyObject)
     {
         success = PyModule_AddObject(m_module, "pdalargs", m_pdalargs_PyObject);
@@ -313,38 +307,32 @@ std::cerr << "Set args obj!\n";
         Py_INCREF(m_pdalargs_PyObject);
     }
 
-std::cerr << "Call script!\n";
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
     if (!PyBool_Check(m_scriptResult))
         throw pdal::pdal_error("User function return value not boolean.");
 
-std::cerr << "Get module dict!\n";
     PyObject* mod_vars = PyModule_GetDict(m_module);
 
     PyObject* b =  PyUnicode_FromString("metadata");
     if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
         m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
-std::cerr << "Returning from execute!\n";
 
     return (m_scriptResult == Py_True);
 }
 
 PyObject* getPyJSON(std::string const& str)
 {
-    std::cerr << "Get json!\n";
     PyObject* raw_json =  PyUnicode_FromString(str.c_str());
     PyObject* json_module = PyImport_ImportModule("json");
     if (!json_module)
         throw pdal::pdal_error(getTraceback());
 
-    std::cerr << "Get dict!\n";
     PyObject* json_mod_dict = PyModule_GetDict(json_module);
     if (!json_mod_dict)
         throw pdal::pdal_error(getTraceback());
 
-    std::cerr << "Get loads!\n";
     PyObject* loads_func = PyDict_GetItemString(json_mod_dict, "loads");
     if (!loads_func)
         throw pdal::pdal_error(getTraceback());
@@ -353,17 +341,14 @@ PyObject* getPyJSON(std::string const& str)
     if (!json_args)
         throw pdal::pdal_error(getTraceback());
 
-    std::cerr << "Set args!\n";
     int success = PyTuple_SetItem(json_args, 0, raw_json);
     if (success != 0)
         throw pdal::pdal_error(getTraceback());
 
-    std::cerr << "Invoke object!\n";
     PyObject* json = PyObject_CallObject(loads_func, json_args);
     if (!json)
         throw pdal::pdal_error(getTraceback());
 
-    std::cerr << "Return json!\n";
     return json;
 }
 
@@ -378,15 +363,11 @@ void Invocation::begin(PointView& view, MetadataNode m)
     PointLayoutPtr layout(view.m_pointTable.layout());
     Dimension::IdList const& dims = layout->dims();
 
-    std::cerr << "About to loop dims!\n";
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        std::cerr << "Looping dim = " << layout->dimName(*di) << "!\n";
         Dimension::Id d = *di;
         const Dimension::Detail *dd = layout->dimDetail(d);
-        std::cerr << "Before malloc!\n";
         void *data = malloc(dd->size() * view.size());
-        std::cerr << "After malloc!\n";
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;
         for (PointId idx = 0; idx < view.size(); ++idx)
@@ -394,18 +375,15 @@ void Invocation::begin(PointView& view, MetadataNode m)
             view.getFieldInternal(d, idx, (void *)p);
             p += dd->size();
         }
-        std::cerr << "Done data fetch!\n";
         std::string name = layout->dimName(*di);
         insertArgument(name, (uint8_t *)data, dd->type(), view.size());
     }
 
-    std::cerr << "Put metadata obj!\n";
     // Put pipeline 'metadata' variable into module scope
     Py_XDECREF(m_metadata_PyObject);
     m_metadata_PyObject = plang::fromMetadata(m);
 
     // Put 'schema' dict into module scope
-    std::cerr << "Put schema obj!\n";
     MetadataNode s = view.layout()->toMetadata();
     std::ostringstream ostrm;
     Utils::toJSON(s, ostrm);
@@ -413,16 +391,10 @@ void Invocation::begin(PointView& view, MetadataNode m)
     m_schema_PyObject = getPyJSON(ostrm.str());
     ostrm.str("");
 
-    std::cerr << "SRS handling!\n";
     MetadataNode srs = view.spatialReference().toMetadata();
-    std::cerr << "Got SRS from view!\n";
     Utils::toJSON(srs, ostrm);
-    std::cerr << "To JSON!\n";
     Py_XDECREF(m_srs_PyObject);
-    std::cerr << "Done decref!\n";
-    std::cerr << "SRS is: " << ostrm.str() << "!\n";
     m_srs_PyObject = getPyJSON(ostrm.str());
-    std::cerr << "Leaving!\n";
 }
 
 
