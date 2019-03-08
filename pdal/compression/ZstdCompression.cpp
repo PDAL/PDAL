@@ -92,7 +92,7 @@ public:
 };
 
 ZstdCompressor::ZstdCompressor(BlockCb cb) :
-    ZstdCompressor(cb, 15)
+    m_impl(new ZstdCompressorImpl(cb, 15))
 {}
 
 
