@@ -118,7 +118,10 @@ radius
     [Default: resolution_ * sqrt(2)]
 
 gdaldriver
-    Name of the GDAL driver to use to write the output. [Default: "GTiff"]
+    GDAL code of the `GDAL driver`_ to use to write the output.
+    [Default: "GTiff"]
+
+.. _`GDAL driver`: http://www.gdal.org/formats_list.html
 
 gdalopts
     A list of key/value options to pass directly to the GDAL driver.  The

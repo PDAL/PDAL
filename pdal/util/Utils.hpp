@@ -210,6 +210,21 @@ namespace Utils
     }
 
     /**
+      Determine if a string ends with a particular postfix.
+
+      \param s  String to check for postfix.
+      \param postfix Postfix to search for.
+      \return  Whether the string ends with the postfix.
+    */
+    inline bool endsWith(const std::string& s, const std::string& postfix)
+    {
+        if (postfix.size() > s.size())
+            return false;
+        return (strcmp(postfix.data(),
+                    s.data() + s.size() - postfix.size()) == 0);
+    }
+
+    /**
       Generate a checksum that is the integer sum of the values of the bytes
       in a buffer.
 
