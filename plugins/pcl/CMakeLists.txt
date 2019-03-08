@@ -48,7 +48,7 @@ if (WIN32)
 endif()
 
 # PCL's configuration clobbers Boost find_package - do it again
-find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
+#find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
 
 #set (PCL_LIBRARIES "${PCL_COMMON_LIBRARY};${PCL_REGISTRATION_LIBRARY};${PCL_FEATURES_LIBRARY};${PCL_FILTERS_LIBRARY};${PCL_SEARCH_LIBRARY};${PCL_SEGMENTATION_LIBRARY};${PCL_IO_LIBRARY}")
 #

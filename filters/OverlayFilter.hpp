@@ -42,8 +42,6 @@
 #include <memory>
 #include <string>
 
-typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
-
 typedef void *OGRLayerH;
 
 namespace pdal

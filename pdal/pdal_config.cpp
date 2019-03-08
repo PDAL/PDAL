@@ -47,8 +47,6 @@
 #include <gdal.h>
 #pragma clang diagnostic pop
 
-#include <geos_c.h>
-
 #ifdef PDAL_HAVE_LIBXML2
 #include <libxml/xmlversion.h>
 #endif
@@ -183,9 +181,6 @@ std::string debugInformation()
 
     os << "Enabled libraries" << std::endl;
     os << headline << std::endl << std::endl;
-
-    os << "GEOS (" << GEOS_VERSION << ") - " <<
-        "http://trac.osgeo.org/geos" << std::endl;
 
     os << "GDAL (" << GDALVersionInfo("RELEASE_NAME") << ") - " <<
         "http://www.gdal.org" << std::endl;

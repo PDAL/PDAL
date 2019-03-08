@@ -19,7 +19,7 @@ project provides Windows builds through this distribution.
 How will we use OSGeo4W?
 --------------------------------------------------------------------------------
 
-PDAL stands on the shoulders of giants. It uses GDAL, GEOS, and
+PDAL stands on the shoulders of giants. It uses GDAL and
 :ref:`many other dependencies <building>`. Because of this, it is very
 challenging to build it yourself. We could easily burn an entire workshop
 learning the esoteric build miseries of PDAL and all of its dependencies.

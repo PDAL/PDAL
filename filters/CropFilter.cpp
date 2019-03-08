@@ -173,7 +173,7 @@ void CropFilter::transform(const SpatialReference& srs)
     {
         try
         {
-            geom.m_poly = geom.m_poly.transform(srs);
+            geom.m_poly.transform(srs);
         }
         catch (pdal_error& err)
         {
@@ -204,9 +204,8 @@ void CropFilter::transform(const SpatialReference& srs)
     }
     for (auto& point : m_args->m_centers)
     {
-        if (!gdal::reprojectPoint(point.x, point.y, point.z,
-            m_args->m_assignedSrs.getWKT(), srs.getWKT()))
-            throwError("Unable to reproject point center.");
+        point.setSpatialReference(m_args->m_assignedSrs);
+        point.transform(srs);
     }
     // Set the assigned SRS for the points/bounds to the one we've
     // transformed to.
@@ -293,8 +292,9 @@ bool CropFilter::crop(const PointRef& point, const filter::Point& center)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
-    x = std::abs(x - center.x);
-    y = std::abs(y - center.y);
+
+    x = std::abs(x - center.x());
+    y = std::abs(y - center.y());
     if (x > m_args->m_distance || y > m_args->m_distance)
         return (m_args->m_cropOutside);
 
@@ -302,7 +302,7 @@ bool CropFilter::crop(const PointRef& point, const filter::Point& center)
     if (center.is3d())
     {
         double z = point.getFieldAs<double>(Dimension::Id::Z);
-        z = std::abs(z - center.z);
+        z = std::abs(z - center.z());
         if (z > m_args->m_distance)
             return (m_args->m_cropOutside);
         inside = (x * x + y * y + z * z < m_distance2);
