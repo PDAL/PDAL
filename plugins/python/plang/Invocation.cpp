@@ -252,6 +252,31 @@ bool Invocation::hasOutputVariable(const std::string& name) const
     return (PyDict_GetItemString(m_varsOut, name.c_str()) != NULL);
 }
 
+PyObject* addGlobalObject(PyObject* module, 
+						  PyObject* obj, 
+						  const std::string& name)
+{
+	PyObject* output(NULL);
+	PyObject* mod_vars = PyModule_GetDict(module);
+	if (!mod_vars)
+		throw pdal::pdal_error("Unable to get module dictionary");
+
+
+	PyObject* nameObj = PyUnicode_FromString(name.c_str());
+	if (PyDict_Contains(mod_vars, nameObj) == 1)
+		output = PyDict_GetItem(mod_vars, nameObj);
+	else
+	{
+		int success = PyModule_AddObject(module, name.c_str(), obj);
+		if (success)
+			throw pdal::pdal_error("unable to set" + name + "global");
+		Py_INCREF(obj);
+		output = obj;
+	}
+	return output;
+
+}
+
 
 bool Invocation::execute()
 {
@@ -276,34 +301,22 @@ bool Invocation::execute()
 
     if (m_metadata_PyObject)
     {
-        success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set metadata global");
-        Py_INCREF(m_metadata_PyObject);
+		addGlobalObject(m_module, m_metadata_PyObject, "metadata");
     }
 
     if (m_schema_PyObject)
     {
-        success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set schema global");
-        Py_INCREF(m_srs_PyObject);
+		addGlobalObject(m_module, m_schema_PyObject, "schema");
     }
 
     if (m_srs_PyObject)
     {
-        success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set spatialreference global");
-        Py_INCREF(m_schema_PyObject);
-    }
+		addGlobalObject(m_module, m_srs_PyObject, "spatialreference");
+	}
 
     if (m_pdalargs_PyObject)
     {
-        success = PyModule_AddObject(m_module, "pdalargs", m_pdalargs_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set pdalargs global");
-        Py_INCREF(m_pdalargs_PyObject);
+		addGlobalObject(m_module, m_pdalargs_PyObject, "pdalargs");
     }
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
@@ -321,10 +334,26 @@ bool Invocation::execute()
     return (m_scriptResult == Py_True);
 }
 
-PyObject* getPyJSON(std::string const& str)
+void Printobject(PyObject* o)
+{
+	PyObject* r = PyObject_Repr(o);
+	if (!r)
+		throw pdal::pdal_error("couldn't make string representation of traceback value");
+#if PY_MAJOR_VERSION >= 3
+	Py_ssize_t size;
+	const char *d = PyUnicode_AsUTF8AndSize(r, &size);
+#else
+	const char *d = PyString_AsString(r);
+#endif
+	std::cout << "raw_json" << d << std::endl;
+}
+PyObject* getPyJSON(std::string const& s)
 {
 
-    PyObject* raw_json =  PyUnicode_FromString(str.c_str());
+    PyObject* raw_json =  PyUnicode_FromString(s.c_str());
+	if (!raw_json)
+		throw pdal::pdal_error(getTraceback());
+
     PyObject* json_module = PyImport_ImportModule("json");
     if (!json_module)
         throw pdal::pdal_error(getTraceback());
@@ -336,19 +365,27 @@ PyObject* getPyJSON(std::string const& str)
     PyObject* loads_func = PyDict_GetItemString(json_mod_dict, "loads");
     if (!loads_func)
         throw pdal::pdal_error(getTraceback());
+	Py_INCREF(loads_func);
 
     PyObject* json_args = PyTuple_New(1);
     if (!json_args)
         throw pdal::pdal_error(getTraceback());
 
-    int success = PyTuple_SetItem(json_args, 0, raw_json);
-    if (success != 0)
+    int bFail = PyTuple_SetItem(json_args, 0, raw_json);
+    if (bFail)
         throw pdal::pdal_error(getTraceback());
 
-    PyObject* json = PyObject_CallObject(loads_func, json_args);
+	PyObject* strict = PyDict_New();
+	if (!strict)
+		throw pdal::pdal_error(getTraceback());
+
+	bFail = PyDict_SetItemString(strict, "strict", Py_False);
+	if (bFail)
+		throw pdal::pdal_error(getTraceback());
+
+    PyObject* json = PyObject_Call(loads_func, json_args, strict);
     if (!json)
         throw pdal::pdal_error(getTraceback());
-
     return json;
 }
 
