@@ -214,14 +214,14 @@ std::string getTraceback()
 #endif
         mssg << d;
     }
-    else
+     else
         mssg << "unknown error that we are unable to get a traceback for."
             "Was it already printed/taken?";
 
     Py_XDECREF(value);
     Py_XDECREF(type);
     Py_XDECREF(traceback);
-
+	PyErr_Clear();
     return mssg.str();
 }
 

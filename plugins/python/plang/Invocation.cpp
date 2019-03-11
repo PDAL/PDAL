@@ -88,9 +88,22 @@ Invocation::~Invocation()
     cleanup();
 }
 
-
+void Printobject(PyObject* o)
+{
+	PyObject* r = PyObject_Repr(o);
+	if (!r)
+		throw pdal::pdal_error("couldn't make string representation of traceback value");
+#if PY_MAJOR_VERSION >= 3
+	Py_ssize_t size;
+	const char *d = PyUnicode_AsUTF8AndSize(r, &size);
+#else
+	const char *d = PyString_AsString(r);
+#endif
+	std::cout << "raw_json" << d << std::endl;
+}
 void Invocation::compile()
 {
+	Py_XDECREF(m_bytecode);
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(),
         Py_file_input);
     if (!m_bytecode)
@@ -98,13 +111,28 @@ void Invocation::compile()
 
     Py_INCREF(m_bytecode);
 
+	Py_XDECREF(m_module);
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()),
         m_bytecode);
     if (!m_module)
         throw pdal::pdal_error(getTraceback());
+	Py_INCREF(m_module);
 
+	Py_XDECREF(m_dictionary);
     m_dictionary = PyModule_GetDict(m_module);
-    m_function = PyDict_GetItemString(m_dictionary, m_script.function());
+	if (!m_dictionary)
+	{
+		std::ostringstream oss;
+		oss << "unable to fetch module dictionary";
+		throw pdal::pdal_error(oss.str());
+	}
+	Py_INCREF(m_dictionary);
+
+	// PyDict_GetItemString returns borrowed reference
+	// we need to increment the count after we fetch this 
+	// to keep it around
+    m_function = PyDict_GetItemString(m_dictionary, 
+									  m_script.function());
     if (!m_function)
     {
         std::ostringstream oss;
@@ -112,6 +140,8 @@ void Invocation::compile()
             "' in module.";
         throw pdal::pdal_error(oss.str());
     }
+	Py_INCREF(m_function);
+
     if (!PyCallable_Check(m_function))
         throw pdal::pdal_error(getTraceback());
 }
@@ -119,6 +149,7 @@ void Invocation::compile()
 
 void Invocation::cleanup()
 {
+
     Py_XDECREF(m_varsIn);
     Py_XDECREF(m_varsOut);
     Py_XDECREF(m_scriptResult);
@@ -127,6 +158,15 @@ void Invocation::cleanup()
         Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
     Py_XDECREF(m_bytecode);
+	Py_XDECREF(m_module);
+
+	//	Py_XDECREF(m_function);
+	Py_XDECREF(m_dictionary);
+
+	Py_XDECREF(m_metadata_PyObject);
+	Py_XDECREF(m_srs_PyObject);
+	Py_XDECREF(m_pdalargs_PyObject);
+
 }
 
 
@@ -325,28 +365,14 @@ bool Invocation::execute()
     if (!PyBool_Check(m_scriptResult))
         throw pdal::pdal_error("User function return value not a boolean type.");
 
-    PyObject* mod_vars = PyModule_GetDict(m_module);
-
     PyObject* b =  PyUnicode_FromString("metadata");
-    if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
+    if (PyDict_Contains(m_dictionary, PyUnicode_FromString("metadata")) == 1)
         m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
 
     return (m_scriptResult == Py_True);
 }
 
-void Printobject(PyObject* o)
-{
-	PyObject* r = PyObject_Repr(o);
-	if (!r)
-		throw pdal::pdal_error("couldn't make string representation of traceback value");
-#if PY_MAJOR_VERSION >= 3
-	Py_ssize_t size;
-	const char *d = PyUnicode_AsUTF8AndSize(r, &size);
-#else
-	const char *d = PyString_AsString(r);
-#endif
-	std::cout << "raw_json" << d << std::endl;
-}
+
 PyObject* getPyJSON(std::string const& s)
 {
 

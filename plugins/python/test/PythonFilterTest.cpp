@@ -156,10 +156,10 @@ TEST_F(PythonFilterTest, add_dimension)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Option source("source", "import numpy\n"
+    Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
-        "  outs['AddedIntensity'] = np.zeros(ins['X'].size, dtype=numpy.double) + 1\n"
-        "  outs['AddedPointSourceId'] = np.zeros(ins['X'].size, dtype=numpy.double) + 2\n"
+        "  outs['AddedIntensity'] = np.zeros(ins['X'].size, dtype=np.double) + 1\n"
+        "  outs['AddedPointSourceId'] = np.zeros(ins['X'].size, dtype=np.double) + 2\n"
         "  return True\n"
     );
     Option module("module", "MyModule");
