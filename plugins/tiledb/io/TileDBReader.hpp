@@ -44,6 +44,7 @@ namespace pdal
 
 class PDAL_DLL TileDBReader : public Reader
 {
+public:
     struct Buffer
     {
         size_t m_count;  // Number of instances of the type.
@@ -54,7 +55,7 @@ class PDAL_DLL TileDBReader : public Reader
         {}
         size_t count() const
         { return m_count; }
-        
+
         template<typename T>
         T *get()
         { return reinterpret_cast<T*>(m_data.data()); }
@@ -66,7 +67,6 @@ class PDAL_DLL TileDBReader : public Reader
         Attribute
     };
 
-public:
     struct DimInfo
     {
         Buffer *m_buffer;

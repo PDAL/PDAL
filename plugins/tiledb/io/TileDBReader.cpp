@@ -38,7 +38,7 @@
 
 namespace pdal {
 
-using TR = TileDBReader;
+//using TR = TileDBReader;
 
 static PluginInfo const s_info
 {
@@ -154,7 +154,7 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
     }
 
     //ABELL
-    // Should we check X Y and Z exist and remap the primary/secondary
+    // Should we check that X Y and Z exist and remap the primary/secondary
     // dimensions to X Y and Z if necessary?
 }
 
@@ -211,21 +211,28 @@ void TileDBReader::ready(PointTableRef)
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
 
     // Build the buffer for the dimensions.
-    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
+    auto it = std::find_if(m_dims.begin(), m_dims.end(),
+        [](DimInfo& di){ return di.m_dimCategory == DimCategory::Dimension; });
+
+    DimInfo& di = *it;
+    std::unique_ptr<Buffer> dimBuf(
+        new Buffer(di.m_tileType, m_chunkSize * numDims));
     m_buffers.push_back(std::move(dimBuf));
     setQueryBuffer(di);
-    query.set_coordinates(dimBuf->get<double>(), dimBuf->size());
+    m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
 
     for (DimInfo& di : m_dims)
     {
+        // All dimensions use the same buffer.
         if (di.m_dimCategory == DimCategory::Dimension)
-            di.m_buffer = dimBuf;
+            di.m_buffer = dimBuf.get();
         else
         {
-            Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize);
+            std::unique_ptr<Buffer> dimBuf(
+                new Buffer(di.m_tileType, m_chunkSize));
+            di.m_buffer = dimBuf.get();
             m_buffers.push_back(std::move(dimBuf));
-            di.m_buffer = dimBuf;
-            setQueryBuffer(m_query.get(), di);
+            setQueryBuffer(di);
         }
     }
 
@@ -253,45 +260,56 @@ void TileDBReader::ready(PointTableRef)
     }
 }
 
-TileDBReader::setField(DimInfo di, PointId idx, size_t offset) 
+namespace
 {
-    offset = offset * di.m_span + di.m_offset;
+
+bool setField(PointViewPtr view, TileDBReader::DimInfo di, PointId idx,
+    size_t bufOffset)
+{
+    // Span is a count of the number of elements in each set of data, so
+    // offset is a count of item types.  We're doing pointer arithmetic
+    // below, so the size of the type is accounted for.
+    bufOffset = bufOffset * di.m_span + di.m_offset;
+    TileDBReader::Buffer& buf = *di.m_buffer;
     switch (di.m_type)
     {
     case Dimension::Type::Signed8:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<int8_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<int8_t>() + bufOffset));
         break;
     case Dimension::Type::Unsigned8:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<uint8_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<uint8_t>() + bufOffset));
         break;
     case Dimension::Type::Signed16:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<int16_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<int16_t>() + bufOffset));
         break;
     case Dimension::Type::Unsigned16:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<uint16_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<uint16_t>() + bufOffset));
         break;
     case Dimension::Type::Signed32:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<int32_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<int32_t>() + bufOffset));
         break;
     case Dimension::Type::Unsigned32:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<uint32_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<uint32_t>() + bufOffset));
         break;
     case Dimension::Type::Signed64:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<int64_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<int64_t>() + bufOffset));
         break;
     case Dimension::Type::Unsigned64:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<uint64_t>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<uint64_t>() + bufOffset));
         break;
     case Dimension::Type::Float:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<float>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<float>() + bufOffset));
         break;
     case Dimension::Type::Double:
-        view->setField(di.m_id, idx, *(di.m_buffer.get<double>() + offset));
+        view->setField(di.m_id, idx, *(buf.get<double>() + bufOffset));
         break;
     default:
-        throwError("Invalid dimension type when setting data.");
+        return false;
+    }
+    return true;
 }
 
+} // unnamed namespace
 
 point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
 {
@@ -310,22 +328,24 @@ point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
             tiledb::Stats::disable();
         }
 
-        status = query.query_status();
+        status = m_query->query_status();
+
+        // The result buffer count represents the total number of items
+        // returned by the query for dimensions.  So if there are three
+        // dimensions, the number of points returned is the buffer count
+        // divided by the number of dimensions.
+        size_t result_num =
+            (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
+            m_array->schema().domain().dimensions().size();
 
         if (status == tiledb::Query::Status::INCOMPLETE && result_num == 0)
             throwError("Need to increase chunk_size for reader.");
 
-        // The result buffer count represents the total number of items
-        // returned by the query for dimensions.  So if there are three
-        // dimensions, the number of points returns is the buffer count
-        // divided by the number of dimensions.
-        size_t result_num = 
-            (int)query.result_buffer_elements()[TILEDB_COORDS].second /
-            m_array->schema().domain().dimensions().size());
-        for (int i = 0; i < result_num; ++i)
+        for (size_t i = 0; i < result_num; ++i)
         {
             for (DimInfo& dim : m_dims)
-                setField(view, dim, i);
+                if (!setField(view, dim, idx, i))
+                    throwError("Invalid dimension type when setting data.");
 
             // progess callback
             if (m_cb)
