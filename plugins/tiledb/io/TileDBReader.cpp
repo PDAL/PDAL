@@ -215,17 +215,15 @@ void TileDBReader::ready(PointTableRef)
         [](DimInfo& di){ return di.m_dimCategory == DimCategory::Dimension; });
 
     DimInfo& di = *it;
-    std::unique_ptr<Buffer> dimBuf(
-        new Buffer(di.m_tileType, m_chunkSize * numDims));
-    m_buffers.push_back(std::move(dimBuf));
-    setQueryBuffer(di);
+    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
     m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
+    m_buffers.push_back(std::unique_ptr<Buffer>(dimBuf));
 
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
         if (di.m_dimCategory == DimCategory::Dimension)
-            di.m_buffer = dimBuf.get();
+            di.m_buffer = dimBuf;
         else
         {
             std::unique_ptr<Buffer> dimBuf(
