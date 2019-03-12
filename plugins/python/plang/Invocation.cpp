@@ -313,7 +313,8 @@ bool Invocation::execute()
     m_scriptArgs = PyTuple_New(numArgs);
 
     if (numArgs > 2)
-        throw pdal::pdal_error("Only two arguments -- ins and outs numpy arrays -- can be passed!");
+        throw pdal::pdal_error("Only two arguments -- ins and outs "
+            "numpy arrays -- can be passed!");
 
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
@@ -348,7 +349,7 @@ bool Invocation::execute()
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
     if (!PyBool_Check(m_scriptResult))
-        throw pdal::pdal_error("User function return value not a boolean type.");
+        throw pdal::pdal_error("User function return value not boolean.");
 
     PyObject* b = PyUnicode_FromString("metadata");
     if (PyDict_Contains(m_dictionary, PyUnicode_FromString("metadata")) == 1)
@@ -430,18 +431,17 @@ void Invocation::begin(PointView& view, MetadataNode m)
     m_metadata_PyObject = plang::fromMetadata(m);
 
     // Put 'schema' dict into module scope
-    Py_XDECREF(m_schema_PyObject);
     MetadataNode s = view.layout()->toMetadata();
     std::ostringstream ostrm;
     Utils::toJSON(s, ostrm);
+    Py_XDECREF(m_schema_PyObject);
     m_schema_PyObject = getPyJSON(ostrm.str());
     ostrm.str("");
 
-    Py_XDECREF(m_srs_PyObject);
     MetadataNode srs = view.spatialReference().toMetadata();
     Utils::toJSON(srs, ostrm);
+    Py_XDECREF(m_srs_PyObject);
     m_srs_PyObject = getPyJSON(ostrm.str());
-    ostrm.str("");
 }
 
 void Invocation::end(PointView& view, MetadataNode m)

@@ -62,6 +62,21 @@ namespace pdal
 
 namespace Utils
 {
+
+#if defined(__APPLE__) && defined(__MACH__)
+    const std::string dynamicLibExtension = ".dylib";
+    const char dirSeparator = '/';
+    const char pathListSeparator = ':';
+#elif defined _WIN32
+    const std::string dynamicLibExtension = ".dll";
+    const char dirSeparator = '\\';
+    const char pathListSeparator = ';';
+#else
+    const std::string dynamicLibExtension = ".so";
+    const char dirSeparator = '/';
+    const char pathListSeparator = ':';
+#endif
+
     /**
      * \brief Clamp value to given bounds.
      *
@@ -924,7 +939,6 @@ namespace Utils
         to = reinterpret_cast<T*>(v);
         return true;
     }
-
 
     /**
       Convert a string to a value by reading from a string stream.
