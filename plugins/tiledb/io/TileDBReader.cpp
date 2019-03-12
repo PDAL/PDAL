@@ -38,8 +38,6 @@
 
 namespace pdal {
 
-//using TR = TileDBReader;
-
 static PluginInfo const s_info
 {
         "readers.tiledb",
