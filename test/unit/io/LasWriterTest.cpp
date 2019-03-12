@@ -1296,6 +1296,48 @@ TEST(LasWriterTest, issue1940)
 }
 
 
+#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
+// Make sure that we can translate this special test data to 1.4, dataformat 6.
+TEST(LasWriterTest, issue2320)
+{
+    std::string outfile(Support::temppath("2320.laz"));
+
+    {
+        LasReader r;
+        Options ro;
+        ro.add("filename", Support::datapath("las/wontcompress3.las"));
+        r.setOptions(ro);
+
+        LasWriter w;
+        Options wo;
+        wo.add("minor_version", 4);
+        wo.add("dataformat_id", 6);
+        wo.add("filename", outfile);
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    // Check that we can read.
+    {
+        LasReader r;
+        Options ro;
+        ro.add("filename", outfile);
+        r.setOptions(ro);
+
+        PointTable t;
+        r.prepare(t);
+        PointViewSet s = r.execute(t);
+        EXPECT_EQ(s.size(), 1U);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->size(), 1000U);
+    }
+}
+#endif
+
 /**
 
 namespace

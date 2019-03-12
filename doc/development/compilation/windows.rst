@@ -66,7 +66,7 @@ line to install PDAL's prerequisite packages.
 ::
 
    C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 ^
-         -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,^
+         -P eigen,gdal,iconv,laszip,libgeotiff,libpq,libtiff,^
             libxml2,msys,nitro,laz-perf,proj,zlib,python3-core,python3-devel,^
             python3-numpy,oci,oci-devel,laz-perf,jsoncpp -R c:/OSGeo4W64
 

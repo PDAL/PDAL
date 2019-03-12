@@ -41,7 +41,6 @@
 
 namespace
 {
-
 int argCount(PyObject *function)
 {
     PyObject *module = PyImport_ImportModule("inspect");
@@ -53,16 +52,14 @@ int argCount(PyObject *function)
     PyTuple_SetItem(inArgs, 0, function);
     PyObject *outArgs = PyObject_CallObject(getargFunc, inArgs);
     PyObject *arglist = PyTuple_GetItem(outArgs, (Py_ssize_t)0);
-    return (int) PyList_Size(arglist);
+    return (int)PyList_Size(arglist);
 }
-
 }
 
 namespace pdal
 {
 namespace plang
 {
-
 Invocation::Invocation(const Script& script)
     : m_script(script)
     , m_bytecode(NULL)
@@ -82,15 +79,27 @@ Invocation::Invocation(const Script& script)
     resetArguments();
 }
 
-
 Invocation::~Invocation()
 {
     cleanup();
 }
 
-
+void Printobject(PyObject* o)
+{
+    PyObject* r = PyObject_Repr(o);
+    if (!r)
+        throw pdal::pdal_error("couldn't make string representation of traceback value");
+#if PY_MAJOR_VERSION >= 3
+    Py_ssize_t size;
+    const char *d = PyUnicode_AsUTF8AndSize(r, &size);
+#else
+    const char *d = PyString_AsString(r);
+#endif
+    std::cout << "raw_json" << d << std::endl;
+}
 void Invocation::compile()
 {
+    Py_XDECREF(m_bytecode);
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(),
         Py_file_input);
     if (!m_bytecode)
@@ -98,13 +107,28 @@ void Invocation::compile()
 
     Py_INCREF(m_bytecode);
 
+    Py_XDECREF(m_module);
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()),
         m_bytecode);
     if (!m_module)
         throw pdal::pdal_error(getTraceback());
+    Py_INCREF(m_module);
 
+    Py_XDECREF(m_dictionary);
     m_dictionary = PyModule_GetDict(m_module);
-    m_function = PyDict_GetItemString(m_dictionary, m_script.function());
+    if (!m_dictionary)
+    {
+        std::ostringstream oss;
+        oss << "unable to fetch module dictionary";
+        throw pdal::pdal_error(oss.str());
+    }
+    Py_INCREF(m_dictionary);
+
+    // PyDict_GetItemString returns borrowed reference
+    // we need to increment the count after we fetch this
+    // to keep it around
+    m_function = PyDict_GetItemString(m_dictionary,
+        m_script.function());
     if (!m_function)
     {
         std::ostringstream oss;
@@ -112,10 +136,11 @@ void Invocation::compile()
             "' in module.";
         throw pdal::pdal_error(oss.str());
     }
+    Py_INCREF(m_function);
+
     if (!PyCallable_Check(m_function))
         throw pdal::pdal_error(getTraceback());
 }
-
 
 void Invocation::cleanup()
 {
@@ -127,8 +152,15 @@ void Invocation::cleanup()
         Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
     Py_XDECREF(m_bytecode);
-}
+    Py_XDECREF(m_module);
 
+    //	Py_XDECREF(m_function);
+    Py_XDECREF(m_dictionary);
+
+    Py_XDECREF(m_metadata_PyObject);
+    Py_XDECREF(m_srs_PyObject);
+    Py_XDECREF(m_pdalargs_PyObject);
+}
 
 void Invocation::resetArguments()
 {
@@ -136,7 +168,6 @@ void Invocation::resetArguments()
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
 }
-
 
 void Invocation::insertArgument(std::string const& name, uint8_t* data,
     Dimension::Type t, point_count_t count)
@@ -161,7 +192,6 @@ void Invocation::insertArgument(std::string const& name, uint8_t* data,
     PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
 }
 
-
 void *Invocation::extractResult(std::string const& name,
     Dimension::Type t, size_t& num_elements)
 {
@@ -184,7 +214,7 @@ void *Invocation::extractResult(std::string const& name,
     for (int i = 0; i < nDims; ++i)
         nPoints *= shape[i];
 
-    num_elements = (size_t) nPoints;
+    num_elements = (size_t)nPoints;
 
     if (static_cast<uint32_t>(dtype->elsize) != Dimension::size(t))
     {
@@ -225,7 +255,6 @@ void *Invocation::extractResult(std::string const& name,
     return PyArray_GetPtr(arr, &one);
 }
 
-
 void Invocation::getOutputNames(std::vector<std::string>& names)
 {
     names.clear();
@@ -246,12 +275,33 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
     }
 }
 
-
 bool Invocation::hasOutputVariable(const std::string& name) const
 {
     return (PyDict_GetItemString(m_varsOut, name.c_str()) != NULL);
 }
 
+PyObject* addGlobalObject(PyObject* module,
+    PyObject* obj,
+    const std::string& name)
+{
+    PyObject* output(NULL);
+    PyObject* mod_vars = PyModule_GetDict(module);
+    if (!mod_vars)
+        throw pdal::pdal_error("Unable to get module dictionary");
+
+    PyObject* nameObj = PyUnicode_FromString(name.c_str());
+    if (PyDict_Contains(mod_vars, nameObj) == 1)
+        output = PyDict_GetItem(mod_vars, nameObj);
+    else
+    {
+        int success = PyModule_AddObject(module, name.c_str(), obj);
+        if (success)
+            throw pdal::pdal_error("unable to set" + name + "global");
+        Py_INCREF(obj);
+        output = obj;
+    }
+    return output;
+}
 
 bool Invocation::execute()
 {
@@ -263,7 +313,8 @@ bool Invocation::execute()
     m_scriptArgs = PyTuple_New(numArgs);
 
     if (numArgs > 2)
-        throw pdal::pdal_error("Only two arguments -- ins and outs numpy arrays -- can be passed!");
+        throw pdal::pdal_error("Only two arguments -- ins and outs "
+            "numpy arrays -- can be passed!");
 
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     if (numArgs > 1)
@@ -276,55 +327,43 @@ bool Invocation::execute()
 
     if (m_metadata_PyObject)
     {
-        success = PyModule_AddObject(m_module, "metadata", m_metadata_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set metadata global");
-        Py_INCREF(m_metadata_PyObject);
+        addGlobalObject(m_module, m_metadata_PyObject, "metadata");
     }
 
     if (m_schema_PyObject)
     {
-        success = PyModule_AddObject(m_module, "schema", m_schema_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set schema global");
-        Py_INCREF(m_srs_PyObject);
+        addGlobalObject(m_module, m_schema_PyObject, "schema");
     }
 
     if (m_srs_PyObject)
     {
-        success = PyModule_AddObject(m_module, "spatialreference", m_srs_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set spatialreference global");
-        Py_INCREF(m_schema_PyObject);
+        addGlobalObject(m_module, m_srs_PyObject, "spatialreference");
     }
 
     if (m_pdalargs_PyObject)
     {
-        success = PyModule_AddObject(m_module, "pdalargs", m_pdalargs_PyObject);
-        if (success)
-            throw pdal::pdal_error("unable to set pdalargs global");
-        Py_INCREF(m_pdalargs_PyObject);
+        addGlobalObject(m_module, m_pdalargs_PyObject, "pdalargs");
     }
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
         throw pdal::pdal_error(getTraceback());
     if (!PyBool_Check(m_scriptResult))
-        throw pdal::pdal_error("User function return value not a boolean type.");
+        throw pdal::pdal_error("User function return value not boolean.");
 
-    PyObject* mod_vars = PyModule_GetDict(m_module);
-
-    PyObject* b =  PyUnicode_FromString("metadata");
-    if (PyDict_Contains(mod_vars, PyUnicode_FromString("metadata")) == 1)
+    PyObject* b = PyUnicode_FromString("metadata");
+    if (PyDict_Contains(m_dictionary, PyUnicode_FromString("metadata")) == 1)
         m_metadata_PyObject = PyDict_GetItem(m_dictionary, b);
 
     return (m_scriptResult == Py_True);
 }
 
-PyObject* getPyJSON(std::string const& str)
+PyObject* getPyJSON(std::string const& s)
 {
+    PyObject* raw_json = PyUnicode_FromString(s.c_str());
+    if (!raw_json)
+        throw pdal::pdal_error(getTraceback());
 
-    PyObject* raw_json =  PyUnicode_FromString(str.c_str());
     PyObject* json_module = PyImport_ImportModule("json");
     if (!json_module)
         throw pdal::pdal_error(getTraceback());
@@ -336,19 +375,27 @@ PyObject* getPyJSON(std::string const& str)
     PyObject* loads_func = PyDict_GetItemString(json_mod_dict, "loads");
     if (!loads_func)
         throw pdal::pdal_error(getTraceback());
+    Py_INCREF(loads_func);
 
     PyObject* json_args = PyTuple_New(1);
     if (!json_args)
         throw pdal::pdal_error(getTraceback());
 
-    int success = PyTuple_SetItem(json_args, 0, raw_json);
-    if (success != 0)
+    int bFail = PyTuple_SetItem(json_args, 0, raw_json);
+    if (bFail)
         throw pdal::pdal_error(getTraceback());
 
-    PyObject* json = PyObject_CallObject(loads_func, json_args);
+    PyObject* strict = PyDict_New();
+    if (!strict)
+        throw pdal::pdal_error(getTraceback());
+
+    bFail = PyDict_SetItemString(strict, "strict", Py_False);
+    if (bFail)
+        throw pdal::pdal_error(getTraceback());
+
+    PyObject* json = PyObject_Call(loads_func, json_args, strict);
     if (!json)
         throw pdal::pdal_error(getTraceback());
-
     return json;
 }
 
@@ -381,23 +428,21 @@ void Invocation::begin(PointView& view, MetadataNode m)
 
     // Put pipeline 'metadata' variable into module scope
     Py_XDECREF(m_metadata_PyObject);
-    m_metadata_PyObject= plang::fromMetadata(m);
+    m_metadata_PyObject = plang::fromMetadata(m);
 
     // Put 'schema' dict into module scope
-    Py_XDECREF(m_schema_PyObject);
     MetadataNode s = view.layout()->toMetadata();
     std::ostringstream ostrm;
     Utils::toJSON(s, ostrm);
+    Py_XDECREF(m_schema_PyObject);
     m_schema_PyObject = getPyJSON(ostrm.str());
     ostrm.str("");
 
-    Py_XDECREF(m_srs_PyObject);
     MetadataNode srs = view.spatialReference().toMetadata();
     Utils::toJSON(srs, ostrm);
+    Py_XDECREF(m_srs_PyObject);
     m_srs_PyObject = getPyJSON(ostrm.str());
-    ostrm.str("");
 }
-
 
 void Invocation::end(PointView& view, MetadataNode m)
 {
@@ -432,7 +477,6 @@ void Invocation::end(PointView& view, MetadataNode m)
             view.setField(d, dd->type(), idx, (void *)p);
             p += size;
         }
-
     }
     for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
         free(*bi);
@@ -440,7 +484,5 @@ void Invocation::end(PointView& view, MetadataNode m)
     if (m_metadata_PyObject)
         addMetadata(m_metadata_PyObject, m);
 }
-
 } // namespace plang
 } // namespace pdal
-

@@ -289,15 +289,15 @@ void StatsFilter::extractMetadata(PointTableRef table)
         {
             p.setSpatialReference(ref);
             SpatialReference epsg4326("EPSG:4326");
-            pdal::Polygon pdd = p.transform(epsg4326);
-            BOX3D ddbox = pdd.bounds();
+            p.transform(epsg4326);
+            BOX3D ddbox = p.bounds();
             MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
             MetadataNode dddbox = box_metadata.add("EPSG:4326");
             dddbox.add(epsg_4326_box);
 
             Json::Reader jsonReader;
             Json::Value json;
-            jsonReader.parse(pdd.json(), json);
+            jsonReader.parse(p.json(), json);
 
             MetadataNode ddboundary = dddbox.addWithType("boundary",
                 json.toStyledString(), "json", "GeoJSON boundary");

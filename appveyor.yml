@@ -4,7 +4,9 @@ os: Visual Studio 2015
 
 platform: x64
 
-configuration: Release
+configuration:
+  - Testing
+  - Conda
 
 matrix:
   fast_finish: true
@@ -23,41 +25,30 @@ cache:
     C:\Miniconda3-x64\pkgs -> appveyor.yml
 
 install:
+ - call scripts\\appveyor\\config.cmd
 
-  - set "CONDA_ROOT=C:\Miniconda3-x64"
-  - set PATH=%CONDA_ROOT%;%CONDA_ROOT%\\scripts;%CONDA_ROOT%\\Library\\bin;%PATH%;C:\\Program Files (x86)\\CMake\\bin
-  - conda config --set always_yes yes
-  - conda config --add channels conda-forge
-  - conda update -q conda
-  - conda config --set auto_update_conda no
-  - conda update -q --all
-  - conda info
-  - python -c "import sys; print(sys.version)"
-  - python -c "import sys; print(sys.executable)"
-  - python -c "import sys; print(sys.prefix)"
-  - call "%CONDA_ROOT%\Scripts\activate.bat" base
-  - conda install geotiff laszip nitro curl gdal=2.2.4 pcl cmake eigen ninja libgdal geos zstd numpy=1.15.3 xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=1.15.3
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
-  - call scripts\\appveyor\\config.cmd
+for:
+ -
+   matrix:
+     only:
+       - configuration: Testing
 
+   build_script:
+     - call scripts\\appveyor\\test\\build.cmd
 
-build_script:
-  - call "%CONDA_ROOT%\Scripts\activate.bat" base
-  - call scripts\\appveyor\\build.cmd
+   test_script:
+     - call scripts\\appveyor\\test\\test.cmd
+ -
+   matrix:
+     only:
+       - configuration: Conda
 
-test_script:
-  - call "%CONDA_ROOT%\Scripts\activate.bat" base
-  - call scripts\\appveyor\\test.cmd
-
-# We need to install so the artifacts are ready
-# for deployment for the OSGeo4W build for all
-# other build types, no artifact is made
-after_test:
-  - call scripts\\appveyor\\install.cmd
+   build_script:
+     - call scripts\\appveyor\\conda\\build.cmd
 
 artifacts:
-  - path: pdal-$(APPVEYOR_REPO_COMMIT).tar.bz2
-    name: pdalosgeo4w
+  - path: pdal-$(APPVEYOR_REPO_COMMIT)-py37_appveyor.tar.bz2
+    name: pdalconda
     type: file
 
 deploy:
@@ -68,10 +59,10 @@ deploy:
     secret_access_key:
       secure: cSqZlsaCxFwXgxJw0BLd7npMFvQk3Vbr74ZPLaBQWLKnOz1cKss9qab1SzSygwkh
     on:
-      branch: 1.8-maintenance
+      branch: conda-appveyor
     bucket: "pdal"
-    folder: "osgeo4w/"
-    artifact: pdalosgeo4w
+    folder: "conda/"
+    artifact: pdalconda
     set_public: true
 
 notifications:
@@ -83,5 +74,4 @@ notifications:
   - provider: Slack
     incoming_webhook:
       secure: KxbDvaPmsvNmYpsp0TH3m3hJr7PqQL1sxR8xILBzaF2Lbku03M3mJ/h787TvDGQGX3IlyZtfTP0wvSRqMl4nMmdvDQZoAe8+Gyfc7BOkYIg=
-
 

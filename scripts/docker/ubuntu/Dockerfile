@@ -3,6 +3,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
+ARG tiledb_version=1.4.1
 
 ENV CC gcc
 ENV CXX g++
@@ -52,7 +53,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libhdf5-dev \
         unixodbc-dev \
         libsqlite3-dev \
-        libgeos-dev \
         libltdl-dev \
         libcurl4-openssl-dev \
         libspatialite-dev \
@@ -61,7 +61,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         time \
         ninja-build \
         python-setuptools \
-        libgeos++-dev \
         unzip \
         libeigen3-dev \
         libxml2-dev \
@@ -167,6 +166,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_RIVLIB=OFF \
         -DBUILD_PLUGIN_PYTHON=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
         -DENABLE_CTEST=OFF \
         -DWITH_LAZPERF=ON \
         -DWITH_LASZIP=ON \
@@ -180,9 +180,12 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
     ninja install; \
     rm -rf /pdal-git
 
+#
+# Haru hasn't been updated for years.  This tag is the head.
+#
 RUN git clone https://github.com/libharu/libharu \
     && cd libharu \
-    && git checkout RELEASE_2_3_0 \
+    && git checkout d84867ebf9f3de6afd661d2cdaff102457fbc371 \
     && mkdir build \
     && cd build \
     && cmake \
@@ -213,6 +216,19 @@ RUN git clone https://github.com/PDAL/PRC \
     && ninja install \
     && rm -rf /PRC
 
+RUN \
+    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
+    tar xzf ${tiledb_version}.tar.gz; \
+    rm ${tiledb_version}.tar.gz; \
+    cd TileDB-${tiledb_version}; \
+    mkdir build; \
+    cd build; \
+    ../bootstrap --prefix=/usr --enable-s3; \
+    make -j2; \
+    make install-tiledb; \
+    cd /; \
+    rm -rf TileDB-${tiledb_version};
+
 FROM ubuntu:bionic as runner
 
 RUN apt-get update; \
@@ -224,7 +240,6 @@ RUN apt-get update; \
         libgeotiff-epsg \
         libexpat1 \
         libxml2 \
-        libgeos-c1v5 \
         libjsoncpp1 \
         libwebp6 \
         netcdf-bin \

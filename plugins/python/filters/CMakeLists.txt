@@ -11,9 +11,10 @@ PDAL_ADD_PLUGIN(python_libname filter python
         ${PYTHON_LIBRARY}
         ${PDAL_JSONCPP_LIB_NAME}
         ${CMAKE_DL_LIBS}
-    )
-target_include_directories(${python_libname} PRIVATE
-    ${PYTHON_INCLUDE_DIR} ${PDAL_JSONCPP_INCLUDE_DIR})
+    INCLUDES
+        ${PYTHON_INCLUDE_DIR}
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_filters_python_test

@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <map>
+#include <math.h>
 
 #include <json/json.h>
 #include <arbiter/arbiter.hpp>
@@ -144,10 +145,12 @@ protected:
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     arbiter::gzip::Decompressor m_decomp;
 
+
     EsriArgs m_args;
     Json::Value m_info;
     std::mutex m_mutex;
     BOX3D m_bounds;
+    BOX3D m_ecefBounds;
     std::map<std::string, Dimension::Id> m_dimensions;
     int m_nodeCap;
     int m_maxNode = 0;
@@ -165,6 +168,7 @@ protected:
     TransformPtr m_toEcefTransform;
     TransformPtr m_toNativeTransform;
 
+
     struct dimData
     {
         int key;
@@ -181,7 +185,8 @@ protected:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
-    void createView(std::string localUrl, PointView& view);
+    void createView(std::string localUrl, int nodeIndex,  PointView& view);
+    BOX3D createCube(Json::Value base);
     BOX3D parseBox(Json::Value base);
     void traverseTree(Json::Value page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);

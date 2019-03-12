@@ -107,6 +107,55 @@ TEST(EptReaderTest, fullRead)
     EXPECT_EQ(np, expNumPoints);
 }
 
+TEST(EptReaderTest, resolutionLimit)
+{
+    Options options;
+    options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+
+    // Our test data cube is 44 units in length, with a span of 128.  Therefore
+    // our resolution cell width values for the first few depths are:
+    //      Depth 0: 0.34375
+    //      Depth 1: 0.171875
+    //      Depth 2: 0.0859375
+    //
+    // Any resolution option between 0.171875 and 0.0859375 will select all of
+    // depths 0, 1, and 2, so we'll test a corresponding query.
+    options.add("resolution", 0.1);
+
+    // This expected value corresponds to the sum of the point counts of all
+    // files in our dataset whose depth is less than 3.  This value is summed
+    // from the hierarchy for depths 0 through 2 (our test dataset has depths
+    // through 3, which are omitted here).
+    const point_count_t expectedCount = 303955;
+
+    PointTable table;
+
+    EptReader reader;
+    reader.setOptions(options);
+    reader.prepare(table);
+    const auto set(reader.execute(table));
+
+    double x, y, z;
+    uint64_t o;
+    uint64_t np(0);
+    for (const PointViewPtr& view : set)
+    {
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            ++np;
+
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            z = view->getFieldAs<double>(Dimension::Id::Z, i);
+            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+            ASSERT_TRUE(expBoundsConforming.contains(x, y, z));
+            ASSERT_TRUE(o < 4);
+        }
+    }
+
+    EXPECT_EQ(np, expectedCount);
+}
+
 TEST(EptReaderTest, boundedRead2d)
 {
     const std::string boundsString("([515380, 515400], [4918350, 4918370])");

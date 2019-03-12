@@ -14,7 +14,6 @@ RUN \
         cmake \
         nitro-dev \
         gdal-dev \
-        geos-dev \
         laz-perf-dev \
         libexecinfo-dev \
         libgeotiff-dev \
@@ -44,7 +43,6 @@ RUN \
         libressl-dev \
         nitro \
         gdal \
-        geos \
         laz-perf \
         libexecinfo \
         libgeotiff \

@@ -59,6 +59,7 @@ namespace arbiter
     class Endpoint;
 }
 
+class Addon;
 class EptInfo;
 class FixedPointLayout;
 class Key;
@@ -88,13 +89,17 @@ private:
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(const Json::Value& heirarchy, const Key& key);
+    void overlaps(
+            const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
+            const Json::Value& current, const Key& key);
 
-    void readLaszip(PointView& view, const Key& key) const;
-    void readBinary(PointView& view, const Key& key) const;
-    void process(PointView& view, PointRef& pr) const;
+    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
+    uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
+    void process(PointView& view, PointRef& pr, uint64_t nodeId,
+            uint64_t pointId) const;
 
-    Json::Value parse(const std::string& data) const;
+    void readAddon(PointView& dst, const Key& key, const Addon& addon,
+            uint64_t startId) const;
 
     std::string m_root;
 
@@ -105,34 +110,49 @@ private:
     class Args
     {
     public:
+        Args();
+
         Bounds& boundsArg() { return m_bounds; }
+        std::string& originArg() { return m_origin; }
+        std::size_t& threadsArg() { return m_threads; }
+        double& resolutionArg() { return m_resolution; }
+        Json::Value& addonsArg() { return *m_addons; }
+
         BOX3D bounds() const;
-
-        std::string& originArg() { return m_originArg; }
-        const std::string& origin() const { return m_originArg; }
-
-        uint64_t& threadsArg() { return m_threads; }
-        uint64_t threads() const { return std::max<uint64_t>(4, m_threads); }
+        std::string origin() const { return m_origin; }
+        std::size_t threads() const
+        {
+            return std::max<std::size_t>(4, m_threads);
+        }
+        double resolution() const { return m_resolution; }
+        const Json::Value& addons() const { return *m_addons; }
 
     private:
         Bounds m_bounds;
-        std::string m_originArg;
-        uint64_t m_threads;
+        std::string m_origin;
+        std::size_t m_threads = 0;
+        double m_resolution = 0;
+        std::unique_ptr<Json::Value> m_addons;
     };
 
     Args m_args;
     BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
+    std::vector<std::unique_ptr<Addon>> m_addons;
 
     mutable std::mutex m_mutex;
 
-    std::set<Key> m_overlapKeys;
-    uint64_t m_overlapPoints = 0;
+    std::map<Key, uint64_t> m_overlaps;
+    uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
+    uint64_t m_hierarchyStep = 0;
 
     std::unique_ptr<FixedPointLayout> m_remoteLayout;
     DimTypeList m_dimTypes;
     std::array<XForm, 3> m_xyzTransforms;
+
+    Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
+    Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 };
 
 } // namespace pdal

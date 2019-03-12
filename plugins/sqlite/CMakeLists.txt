@@ -14,8 +14,9 @@ PDAL_ADD_PLUGIN(reader_libname reader sqlite
     LINK_WITH
         ${SQLITE3_LIBRARY}
         ${LIBXML2_LIBRARIES}
+    INCLUDES
+        ${LIBXML2_INCLUDE_DIR}
 )
-target_include_directories(${reader_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
 
 #
 # SQLite Writer
@@ -28,8 +29,10 @@ PDAL_ADD_PLUGIN(writer_libname writer sqlite
         ${SQLITE3_LIBRARY}
         ${GDAL_LIBRARY}
         ${LIBXML2_LIBRARIES}
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+        ${LIBXML2_INCLUDE_DIR}
 )
-target_include_directories(${writer_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
 
 #
 # SQLite tests
@@ -43,8 +46,8 @@ if(BUILD_SQLITE_TESTS)
             ${writer_libname}
             ${SQLITE3_LIBRARY}
             ${LIBXML2_LIBRARY}
+        INCLUDES
+            ${PDAL_IO_DIR}
+            ${LIBXML2_INCLUDE_DIR}
     )
-    target_include_directories(sqlitetest PRIVATE
-        ${PDAL_IO_DIR}
-        ${LIBXML2_INCLUDE_DIR})
 endif()
