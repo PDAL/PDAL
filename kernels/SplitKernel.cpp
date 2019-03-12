@@ -36,6 +36,7 @@
 
 #include <io/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -70,17 +71,11 @@ void SplitKernel::addSwitches(ProgramArgs& args)
 
 void SplitKernel::validateSwitches(ProgramArgs& args)
 {
-#ifdef WIN32
-    char pathSeparator = '\\';
-#else
-    char pathSeparator = '/';
-#endif
-
     if (m_length && m_capacity)
         throw pdal_error("Can't specify both length and capacity.");
     if (!m_length && !m_capacity)
         m_capacity = 100000;
-    if (m_outputFile.back() == pathSeparator)
+    if (m_outputFile.back() == Utils::dirSeparator)
         m_outputFile += m_inputFile;
 }
 
