@@ -269,6 +269,7 @@ Hexagon *HexGrid::getHexagon(int x, int y)
     return hex_p;
 }
 
+/**
 // Walk the outside of the hexagons to make a path.  Hexagon sides are labeled:
 //
 //     __0_
@@ -277,7 +278,7 @@ Hexagon *HexGrid::getHexagon(int x, int y)
 //   \      /
 //  2 \____/ 4
 //      3
-//
+**/
 void HexGrid::findShapes()
 {
     if (m_pos_roots.empty())

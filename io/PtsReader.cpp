@@ -62,28 +62,51 @@ void PtsReader::initialize(PointTableRef table)
     std::getline(*m_istream, buf);
 
     // Very first line is point count
-    Utils::fromString(buf, m_PointCount);
+    if(!Utils::fromString(buf, m_PointCount))
+    {
+        throwError("Unable to read expected point count at top of the file '" + m_filename + "'.");
+    }
+
+    // Peek second line to determine dimensions to add.
+    // Expect points in the formats:
+    //      X Y Z,
+    //      X Y Z Intensity,
+    //      X Y Z Intensity R G B
+    std::getline(*m_istream, buf);
+    StringList fields = Utils::split2(buf, m_separator);
+    switch(fields.size())
+    {
+        case 3:
+            m_dims.push_back(Dimension::Id::X);
+            m_dims.push_back(Dimension::Id::Y);
+            m_dims.push_back(Dimension::Id::Z);
+            break;
+        case 4:
+            m_dims.push_back(Dimension::Id::X);
+            m_dims.push_back(Dimension::Id::Y);
+            m_dims.push_back(Dimension::Id::Z);
+            m_dims.push_back(Dimension::Id::Intensity);
+            break;
+        case 7:
+            m_dims.push_back(Dimension::Id::X);
+            m_dims.push_back(Dimension::Id::Y);
+            m_dims.push_back(Dimension::Id::Z);
+            m_dims.push_back(Dimension::Id::Intensity);
+            m_dims.push_back(Dimension::Id::Red);
+            m_dims.push_back(Dimension::Id::Green);
+            m_dims.push_back(Dimension::Id::Blue);
+            break;
+        default:
+            throwError("Invalid number of fields for the first point in file '" + m_filename + "'.");
+    }
+
     Utils::closeFile(m_istream);
 }
 
 
 void PtsReader::addDimensions(PointLayoutPtr layout)
 {
-    // Dimensions are fixed in PTS
-
-    m_dims.push_back(Dimension::Id::X);
-    m_dims.push_back(Dimension::Id::Y);
-    m_dims.push_back(Dimension::Id::Z);
-    m_dims.push_back(Dimension::Id::Intensity);
-    m_dims.push_back(Dimension::Id::Red);
-    m_dims.push_back(Dimension::Id::Green);
-    m_dims.push_back(Dimension::Id::Blue);
-
-    for (auto d: m_dims)
-    {
-        layout->registerDim(d);
-    }
-
+    layout->registerDims(m_dims);
 }
 
 
@@ -106,7 +129,9 @@ point_count_t PtsReader::read(PointViewPtr view, point_count_t numPts)
     point_count_t cnt = 0;
     size_t line = 1;
 
-    while (m_istream->good() && cnt < numPts)
+    // Continue reading while count less than max points and count less than 
+    // the expected point count.
+    while (m_istream->good() && cnt < numPts && cnt < m_PointCount)
     {
         std::string buf;
         StringList fields;
@@ -146,6 +171,13 @@ point_count_t PtsReader::read(PointViewPtr view, point_count_t numPts)
         cnt++;
         idx++;
     }
+
+    if(cnt < m_PointCount)
+    {
+        log()->get(LogLevel::Warning) << "Expected " << m_PointCount
+            << " points but only " << cnt << " were found." << std::endl;
+    }
+
     return cnt;
 }
 

@@ -74,7 +74,7 @@ public:
 
       \param view  PointView on which scale should be computed.
     */
-    virtual void setAutoXForm(const PointViewPtr view);
+    virtual void setAutoXForm(const PointViewSet& pvSet);
 
     /**
       Add option/command-line arguments for transform variables.

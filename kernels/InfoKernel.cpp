@@ -237,27 +237,19 @@ MetadataNode InfoKernel::run(const std::string& filename)
     else
     {
         makePipeline();
-        BasePointTable *table;
         if (m_needPoints || m_showMetadata)
         {
             if (m_manager.pipelineStreamable())
             {
                 FixedPointTable fixedTable(10000);
                 m_manager.executeStream(fixedTable);
-                table = &fixedTable;
             }
             else
-            {
                 m_manager.execute();
-                table = &m_manager.pointTable();
-            }
         }
         else
-        {
             m_manager.prepare();
-            table = &m_manager.pointTable();
-        }
-        dump(*table, root);
+        dump(root);
     }
     root.add("filename", filename);
     root.add("pdal_version", Config::fullVersionString());
@@ -265,7 +257,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
 }
 
 
-void InfoKernel::dump(PointTableRef table, MetadataNode& root)
+void InfoKernel::dump(MetadataNode& root)
 {
     if (m_pipelineFile.size() > 0)
         PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineFile);
@@ -282,7 +274,7 @@ void InfoKernel::dump(PointTableRef table, MetadataNode& root)
         root.add(points);
 
     if (m_showSchema)
-        root.add(table.layout()->toMetadata());
+        root.add(node.findChild("schema"));
 
     // Stats stage.
     if (m_showStats)

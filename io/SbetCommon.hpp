@@ -38,6 +38,8 @@
 
 namespace pdal
 {
+namespace sbet
+{
 
 // This is static so as to be made local (internal linkage) in the translation
 // units in which it's included.
@@ -56,4 +58,23 @@ static inline Dimension::IdList fileDimensions()
         Id::YBodyAngRate, Id::ZBodyAngRate };
 }
 
+static inline bool isAngularDimension(Dimension::Id dimension) {
+    using namespace Dimension;
+    switch (dimension) {
+        case Id::X:
+        case Id::Y:
+        case Id::Roll:
+        case Id::Pitch:
+        case Id::Azimuth:
+        case Id::WanderAngle:
+        case Id::XBodyAngRate:
+        case Id::YBodyAngRate:
+        case Id::ZBodyAngRate:
+            return true;
+        default:
+            return false;
+    }
+};
+
+} // namespace sbet
 } // namespace pdal

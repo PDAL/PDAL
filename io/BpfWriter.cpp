@@ -225,10 +225,14 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 }
 
 
+void BpfWriter::prerunFile(const PointViewSet& pvSet)
+{
+    m_scaling.setAutoXForm(pvSet);
+}
+
+
 void BpfWriter::writeView(const PointViewPtr dataShared)
 {
-    m_scaling.setAutoXForm(dataShared);
-
     // Avoid reference count overhead internally.
     const PointView* data(dataShared.get());
 

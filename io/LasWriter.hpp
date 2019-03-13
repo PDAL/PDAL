@@ -51,7 +51,7 @@
 using laszip_POINTER = void *;
 #endif
 
-#include <json/json.h>
+namespace Json { class Value; }
 
 namespace pdal
 {
@@ -130,7 +130,7 @@ private:
     StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
-    Json::Value m_userVLRs;
+    std::unique_ptr<Json::Value> m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);
@@ -141,6 +141,7 @@ private:
         const SpatialReference& srs);
     virtual bool srsOverridden() const
         { return m_aSrs.valid(); }
+    void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
     void spatialReferenceChanged(const SpatialReference& srs);

@@ -37,6 +37,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace pdal
 {
 
@@ -55,6 +58,7 @@ std::string SbetWriter::getName() const { return s_info.name; }
 void SbetWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("angles_are_degrees", "Angles coming into the writer are in degrees", m_anglesAreDegrees, true);
 }
 
 
@@ -66,15 +70,21 @@ void SbetWriter::ready(PointTableRef)
 
 void SbetWriter::write(const PointViewPtr view)
 {
-    Dimension::IdList dims = fileDimensions();
+    auto degreesToRadians = [](double degrees) {
+        return degrees * M_PI / 180.0;
+    };
+    Dimension::IdList dims = sbet::fileDimensions();
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             // If a dimension doesn't exist, write 0.
             Dimension::Id dim = *di;
-            *m_stream << (view->hasDim(dim) ?
-                view->getFieldAs<double>(dim, idx) : 0.0);
+            double value = (view->hasDim(dim) ? view->getFieldAs<double>(dim, idx) : 0.0);
+            if (m_anglesAreDegrees && sbet::isAngularDimension(dim)) {
+                value = degreesToRadians(value);
+            }
+            *m_stream << value;
         }
     }
 }

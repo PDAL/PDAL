@@ -28,7 +28,7 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.8.0" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.8.0" CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
@@ -115,7 +115,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #------------------------------------------------------------------------------
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
-include(${PDAL_CMAKE_DIR}/geos.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
@@ -259,7 +258,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
-    INTERFACE
+    PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
@@ -267,14 +266,12 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
-        ${GEOS_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
-        ${CURL_LIBRARIES}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
@@ -335,6 +332,7 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    PATTERN "pdal/util/private" EXCLUDE
     ${ZSTD_EXCLUDES}
     ${ZLIB_EXCLUDES}
     ${LZMA_EXCLUDES}
@@ -378,10 +376,9 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
+        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
-export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)

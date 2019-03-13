@@ -12,10 +12,6 @@ if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
 
-if(BUILD_PLUGIN_DELAUNAY)
-    add_subdirectory(delaunay)
-endif(BUILD_PLUGIN_DELAUNAY)
-
 if(BUILD_PLUGIN_GEOWAVE)
     add_subdirectory(geowave)
 endif(BUILD_PLUGIN_GEOWAVE)
@@ -90,4 +86,8 @@ endif()
 
 if (BUILD_PLUGIN_FBX)
     add_subdirectory(fbx)
+endif()
+
+if(BUILD_PLUGIN_TILEDB)
+    add_subdirectory(tiledb)
 endif()

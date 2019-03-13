@@ -32,10 +32,10 @@ IF(WIN32)
   ENDIF()
 
 ENDIF()
-     
+
 FIND_PATH(GEOTIFF_INCLUDE_DIR
   geotiff.h
-  PATH_SUFFIXES geotiff
+  PATH_SUFFIXES geotiff libgeotiff
   PATHS
   ${OSGEO4W_INCLUDE_DIR})
 

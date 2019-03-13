@@ -12,11 +12,6 @@ option(BUILD_PLUGIN_CPD
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "Coherent Point Drift (CPD) computes rigid or nonrigid transformations between point sets")
 
-option(BUILD_PLUGIN_DELAUNAY
-    "Choose if the Delaunay triangulation filter should be built" FALSE)
-add_feature_info("Delaunay plugin" BUILD_PLUGIN_DELAUNAY
-    "perform Delaunay triangulation of point cloud")
-
 option(BUILD_PLUGIN_GEOWAVE
     "Choose if GeoWave support should be built" FALSE)
 add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
@@ -31,11 +26,6 @@ option(BUILD_PLUGIN_GREYHOUND
     "Choose if Greyhound support should be built" FALSE)
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
     "read points from a Greyhound server")
-
-option(BUILD_PLUGIN_HEXBIN
-    "Choose if the HexBin filter is built" FALSE)
-add_feature_info("Hexbin plugin" BUILD_PLUGIN_HEXBIN
-    "determine boundary and density of a point cloud")
 
 option(BUILD_PLUGIN_ICEBRIDGE
     "Choose if Icebridge support should be built" FALSE)
@@ -62,13 +52,10 @@ option(BUILD_PLUGIN_OPENSCENEGRAPH
 add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
     "read/write OpenSceneGraph objects")
 
-if(DEFINED ENV{ORACLE_HOME})
-    set(DEFINED_ORACLE_HOME TRUE)
-else(DEFINED ENV{ORACLE_HOME})
-    set(DEFINED_ORACLE_HOME FALSE)
-endif(DEFINED ENV{ORACLE_HOME})
 option(BUILD_PLUGIN_OCI
-    "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME})
+    "Choose if OCI support should be built" FALSE)
+add_feature_info("Oracle OCI plugin" BUILD_PLUGIN_OCI
+    "Read/write point clould patches to Oracle")
 
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
@@ -110,6 +97,11 @@ option(BUILD_PLUGIN_FBX
     "Choose if FBX support should be built" FALSE)
 add_feature_info("FBX plugin" BUILD_PLUGIN_FBX
     "add features that depend on FBX")
+
+option(BUILD_PLUGIN_TILEDB
+    "Choose if TileDB support should be built" FALSE)
+add_feature_info("TileDB plugin" BUILD_PLUGIN_TILEDB
+    "read/write data from TileDB")
 
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 

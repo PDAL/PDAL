@@ -4,9 +4,10 @@ filters.dem
 ===============================================================================
 
 
-:ref:`filters.dem` uses a raster to keep data within a range of the raster cell. For
-example, atmospheric or MTA noise in a scene can be quickly removed by keeping all
-data within 100m above and 20m below a pre-existing elevation model.
+:ref:`filters.dem` uses a raster to keep data within a range of the raster
+cell. For example, atmospheric or MTA noise in a scene can be quickly
+removed by keeping all data within 100m above and 20m below a pre-existing
+elevation model.
 
 .. embed::
 

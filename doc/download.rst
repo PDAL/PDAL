@@ -172,7 +172,7 @@ extension is
 
 ::
 
-    conda install -c conda-forge pdal python-pdal
+    conda install -c conda-forge pdal python-pdal gdal
 
 It is strongly recommended that you make use of Conda's environment management
 system and install PDAL in a separate environment (i.e., not the base

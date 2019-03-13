@@ -19,7 +19,7 @@ contains a much tighter data bound, expressed as a well-known text polygon. In
 order to write out the metadata record, the `pdal` pipeline command must be
 invoked using the `--pipeline-serialization` option:
 
-.. plugin::
+.. streamable::
 
 Example 1
 ---------

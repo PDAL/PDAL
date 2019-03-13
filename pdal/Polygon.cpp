@@ -40,328 +40,237 @@
 namespace pdal
 {
 
-Polygon& Polygon::operator=(const Polygon& input)
-{
-
-    if (&input!= this)
-    {
-        m_geoserr = input.m_geoserr;
-        m_srs = input.m_srs;
-        geos::GeometryDeleter geom_del(m_geoserr);
-        GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom.get()), geom_del);
-        m_geom.swap(p);
-
-        prepare();
-    }
-    return *this;
-}
-
-
-
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
 {
-    OGRwkbGeometryType t = OGR_G_GetGeometryType(g);
+    // If the handle was null, we need to create an empty polygon.
+    if (!m_geom)
+    {
+        m_geom.reset(new OGRPolygon());
+        return;
+    }
+
+    OGRwkbGeometryType t = m_geom->getGeometryType();
 
     if (!(t == wkbPolygon ||
         t == wkbMultiPolygon ||
         t == wkbPolygon25D ||
         t == wkbMultiPolygon25D))
     {
-        std::ostringstream oss;
-        oss << "pdal::Polygon cannot construct geometry because "
-            "OGR geometry is not Polygon or MultiPolygon!";
-        throw pdal::pdal_error(oss.str());
+        throw pdal::pdal_error("pdal::Polygon() cannot construct geometry "
+            "because OGR geometry is not Polygon or MultiPolygon.");
     }
-
-    OGRGeometry *ogr_g = (OGRGeometry*)g;
-    //
-    // Convert the the GDAL geom to WKB in order to avoid the version
-    // context issues with exporting directoly to GEOS.
-    OGRwkbByteOrder bo =
-        GEOS_getWKBByteOrder() == GEOS_WKB_XDR ? wkbXDR : wkbNDR;
-    int wkbSize = ogr_g->WkbSize();
-    std::vector<unsigned char> wkb(wkbSize);
-
-    ogr_g->exportToWkb(bo, wkb.data());
-    geos::GeometryDeleter geom_del(m_geoserr);
-    GEOSGeomPtr p(GEOSGeomFromWKB_buf_r(m_geoserr.ctx(), wkb.data(), wkbSize), geom_del);
-    m_geom.swap(p);
-    prepare();
-
 }
 
-Polygon::Polygon(const BOX2D& box) : Geometry ()
+Polygon::Polygon(const BOX2D& box)
 {
-    BOX3D box3(box.minx, box.miny, 0.0,
-               box.maxx, box.maxy, 0.0);
-    initializeFromBounds(box3);
+    OGRPolygon *poly = new OGRPolygon();
+    m_geom.reset(poly);
+    OGRLinearRing *lr = new OGRLinearRing();
+    lr->addPoint(box.minx, box.miny);
+    lr->addPoint(box.maxx, box.miny);
+    lr->addPoint(box.maxx, box.maxy);
+    lr->addPoint(box.minx, box.maxy);
+    lr->addPoint(box.minx, box.miny);
+    poly->addRingDirectly(lr);
 }
 
 
-Polygon::Polygon(const BOX3D& box) : Geometry ()
-
+Polygon::Polygon(const BOX3D& box)
 {
-    initializeFromBounds(box);
+    OGRPolygon *poly = new OGRPolygon();
+    m_geom.reset(poly);
+    OGRLinearRing *lr = new OGRLinearRing();
+    lr->addPoint(box.minx, box.miny, box.minz);
+    lr->addPoint(box.minx, box.maxy, box.minz);
+    lr->addPoint(box.maxx, box.maxy, box.maxz);
+    lr->addPoint(box.maxx, box.miny, box.maxz);
+    lr->addPoint(box.minx, box.miny, box.minz);
+    poly->addRingDirectly(lr);
 }
 
 
-void Polygon::initializeFromBounds(const BOX3D& box)
+void Polygon::simplify(double distance_tolerance, double area_tolerance)
 {
-    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_geoserr.ctx(), 5, 3);
-    auto set_coordinate = [coords, this](int pt_num, const double&x,
-        const double& y, const double& z)
+    auto deleteSmallRings = [area_tolerance](OGRGeometry *geom)
     {
-        if (!GEOSCoordSeq_setX_r(m_geoserr.ctx(), coords, pt_num, x))
-            throw pdal_error("unable to set x for coordinate sequence");
-        if (!GEOSCoordSeq_setY_r(m_geoserr.ctx(), coords, pt_num, y))
-            throw pdal_error("unable to set y for coordinate sequence");
-        if (!GEOSCoordSeq_setZ_r(m_geoserr.ctx(), coords, pt_num, z))
-            throw pdal_error("unable to set z for coordinate sequence");
+// Missing until GDAL 2.3.
+//        OGRPolygon *poly = geom->toPolygon();
+        OGRPolygon *poly = static_cast<OGRPolygon *>(geom);
+
+        std::vector<int> deleteRings;
+        for (int i = 0; i < poly->getNumInteriorRings(); ++i)
+        {
+            OGRLinearRing *lr = poly->getInteriorRing(i);
+            if (lr->get_Area() < area_tolerance)
+                deleteRings.push_back(i + 1);
+        }
+        // Note that interior rings are in a list with the exterior ring,
+        // which is why the ring numbers are offset by one when used in
+        // this context (what a mess).
+        for (auto i : deleteRings)
+// Missing until 2.3
+//            poly->removeRing(i, true);
+            OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
     };
 
-    set_coordinate(0, box.minx, box.miny, box.minz);
-    set_coordinate(1, box.minx, box.maxy, box.minz);
-    set_coordinate(2, box.maxx, box.maxy, box.maxz);
-    set_coordinate(3, box.maxx, box.miny, box.maxz);
-    set_coordinate(4, box.minx, box.miny, box.minz);
+    OGRGeometry *g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    m_geom.reset(g);
 
-
-    GEOSGeometry* ring = GEOSGeom_createLinearRing_r(m_geoserr.ctx(), coords);
-    if (!ring)
-        throw pdal_error("unable to create linear ring from BOX2D");
-
-
-    geos::GeometryDeleter geom_del(m_geoserr);
-    GEOSGeomPtr p(GEOSGeom_createPolygon_r(m_geoserr.ctx(), ring, 0, 0), geom_del);
-    m_geom.swap(p);
-    if (!m_geom.get())
-        throw pdal_error("unable to create polygon from linear ring in "
-            "BOX2D constructor");
-    prepare();
-}
-
-
-Polygon Polygon::transform(const SpatialReference& ref) const
-{
-    if (ref.empty() && m_srs.empty())
-        return *this;
-
-    if (m_srs.empty())
-        throw pdal_error("Polygon::transform failed due to m_srs being empty");
-    if (ref.empty())
-        throw pdal_error("Polygon::transform failed due to ref being empty");
-
-    gdal::SpatialRef fromRef(m_srs.getWKT());
-    gdal::SpatialRef toRef(ref.getWKT());
-    gdal::Geometry geom(wkt(12, true), fromRef);
-    geom.transform(toRef);
-    return Polygon(geom.wkt(), ref);
-}
-
-
-Polygon Polygon::simplify(double distance_tolerance,
-    double area_tolerance) const
-{
-    GEOSGeometry *smoothed =
-        GEOSTopologyPreserveSimplify_r(m_geoserr.ctx(), m_geom.get(), distance_tolerance);
-    if (!smoothed)
-        throw pdal_error("Unable to simplify input geometry!");
-
-    std::vector<GEOSGeometry*> geometries;
-
-    int numGeom = GEOSGetNumGeometries_r(m_geoserr.ctx(), smoothed);
-    for (int n = 0; n < numGeom; ++n)
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+    if (t == wkbPolygon || t == wkbPolygon25D)
+        deleteSmallRings(m_geom.get());
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
-        const GEOSGeometry* m = GEOSGetGeometryN_r(m_geoserr.ctx(), smoothed, n);
-        if (!m)
-            throw pdal::pdal_error("Unable to Get GeometryN");
-
-        const GEOSGeometry* ering = GEOSGetExteriorRing_r(m_geoserr.ctx(), m);
-        if (!ering)
-            throw pdal::pdal_error("Unable to Get Exterior Ring");
-
-        GEOSGeometry* exterior = GEOSGeom_clone_r(m_geoserr.ctx(),
-            GEOSGetExteriorRing_r(m_geoserr.ctx(), m));
-        if (!exterior)
-            throw pdal::pdal_error("Unable to clone exterior ring!");
-
-        std::vector<GEOSGeometry*> keep_rings;
-        int numRings = GEOSGetNumInteriorRings_r(m_geoserr.ctx(), m);
-        for (int i = 0; i < numRings; ++i)
-        {
-            double area(0.0);
-
-            const GEOSGeometry* iring =
-                GEOSGetInteriorRingN_r(m_geoserr.ctx(), m, i);
-            if (!iring)
-                throw pdal::pdal_error("Unable to Get Interior Ring");
-
-            GEOSGeometry* cring = GEOSGeom_clone_r(m_geoserr.ctx(), iring);
-            if (!cring)
-                throw pdal::pdal_error("Unable to clone interior ring!");
-            GEOSGeometry* aring = GEOSGeom_createPolygon_r(m_geoserr.ctx(), cring,
-                NULL, 0);
-
-            int errored = GEOSArea_r(m_geoserr.ctx(), aring, &area);
-            if (errored == 0)
-                throw pdal::pdal_error("Unable to get area of ring!");
-            if (area > area_tolerance)
-            {
-                keep_rings.push_back(cring);
-            }
-        }
-
-        GEOSGeometry* p = GEOSGeom_createPolygon_r(m_geoserr.ctx(), exterior,
-            keep_rings.data(), keep_rings.size());
-        if (p == NULL)
-            throw pdal_error("smooth polygon could not be created!" );
-        geometries.push_back(p);
+// Missing until 2.3
+/**
+        OGRMultiPolygon *mpoly = m_geom->toMultiPolygon();
+        for (auto it = mpoly->begin(); it != mpoly->end(); ++it)
+            deleteSmallRings(*it);
+**/
+        OGRMultiPolygon *mpoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = 0; i < mpoly->getNumGeometries(); ++i)
+            deleteSmallRings(mpoly->getGeometryRef(i));
     }
-
-    GEOSGeometry* o = GEOSGeom_createCollection_r(m_geoserr.ctx(), GEOS_MULTIPOLYGON,
-        geometries.data(), geometries.size());
-    Polygon p(o, m_srs);
-    GEOSGeom_destroy_r(m_geoserr.ctx(), smoothed);
-    GEOSGeom_destroy_r(m_geoserr.ctx(), o);
-
-    return p;
 }
+
 
 double Polygon::area() const
 {
-    double output(0.0);
-    int errored = GEOSArea_r(m_geoserr.ctx(), m_geom.get(), &output);
-    if (errored == 0)
-        throw pdal::pdal_error("Unable to get area of ring!");
-    return output;
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+// Not until GDAL 2.3
+/**
+    if (t == wkbPolygon || t == wkbPolygon25D)
+        return m_geom->toPolygon()->get_Area();
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
+        return m_geom->toMultiPolygon()->get_Area();
+**/
+    if (t == wkbPolygon || t == wkbPolygon25D)
+    {
+        OGRPolygon *p = static_cast<OGRPolygon *>(m_geom.get());
+        return p->get_Area();
+    }
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
+    {
+        OGRMultiPolygon *p = static_cast<OGRMultiPolygon *>(m_geom.get());
+        return p->get_Area();
+    }
+    return 0;
 }
 
 
 bool Polygon::covers(const PointRef& ref) const
 {
-    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_geoserr.ctx(), 1, 3);
-    if (!coords)
-        throw pdal_error("Unable to allocate coordinate sequence");
+    double x = ref.getFieldAs<double>(Dimension::Id::X);
+    double y = ref.getFieldAs<double>(Dimension::Id::Y);
+    double z = ref.getFieldAs<double>(Dimension::Id::Z);
 
-    const double x = ref.getFieldAs<double>(Dimension::Id::X);
-    const double y = ref.getFieldAs<double>(Dimension::Id::Y);
-    const double z = ref.getFieldAs<double>(Dimension::Id::Z);
-
-    if (!GEOSCoordSeq_setX_r(m_geoserr.ctx(), coords, 0, x))
-        throw pdal_error("unable to set x for coordinate sequence");
-    if (!GEOSCoordSeq_setY_r(m_geoserr.ctx(), coords, 0, y))
-        throw pdal_error("unable to set y for coordinate sequence");
-    if (!GEOSCoordSeq_setZ_r(m_geoserr.ctx(), coords, 0, z))
-        throw pdal_error("unable to set z for coordinate sequence");
-    GEOSGeometry* p = GEOSGeom_createPoint_r(m_geoserr.ctx(), coords);
-    if (!p)
-        throw pdal_error("unable to allocate candidate test point");
-
-    bool covers = (bool)(GEOSPreparedCovers_r(m_geoserr.ctx(), m_prepGeom, p));
-    GEOSGeom_destroy_r(m_geoserr.ctx(), p);
-
-    return covers;
+    OGRPoint p(x, y, z);
+    return m_geom->Contains(&p) || m_geom->Touches(&p);
 }
 
-bool Polygon::covers(const Polygon& p) const
-{
-    return (bool) GEOSCovers_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
-}
 
 bool Polygon::overlaps(const Polygon& p) const
 {
-    return (bool) GEOSOverlaps_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
+    return m_geom->Overlaps(p.m_geom.get());
 }
 
 bool Polygon::contains(const Polygon& p) const
 {
-    return (bool) GEOSContains_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
+    return m_geom->Contains(p.m_geom.get());
 }
 
 bool Polygon::touches(const Polygon& p) const
 {
-    return (bool) GEOSTouches_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
+    return m_geom->Touches(p.m_geom.get());
 }
 
 bool Polygon::within(const Polygon& p) const
 {
-    return (bool) GEOSWithin_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
+    return m_geom->Within(p.m_geom.get());
 }
 
 bool Polygon::crosses(const Polygon& p) const
 {
-    return (bool) GEOSCrosses_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
+    return m_geom->Crosses(p.m_geom.get());
 }
 
 std::vector<Polygon> Polygon::polygons() const
 {
     std::vector<Polygon> polys;
-    int numPolys = GEOSGetNumGeometries_r(m_geoserr.ctx(), m_geom.get());
-    for (int i = 0; i < numPolys; ++i)
+
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+
+    if (t == wkbPolygon || t == wkbPolygon25D)
+        polys.emplace_back(*this);
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
-        const GEOSGeometry* constGeom = GEOSGetGeometryN_r(m_geoserr.ctx(),
-            m_geom.get(), i);
-        GEOSGeometry *geom = GEOSGeom_clone_r(m_geoserr.ctx(), constGeom);
-        polys.push_back(Polygon(geom, m_srs));
+        // Not until GDAL 2.3
+        /**
+        OGRMultiPolygon *mPoly = m_geom->toMultiPolygon();
+        for (auto it = mPoly->begin(); it != mPoly->end(); ++it)
+        {
+            Polygon p;
+            p.m_geom.reset((*it)->clone());
+            polys.push_back(p);
+        }
+        **/
+        OGRMultiPolygon *mPoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = 0; i < mPoly->getNumGeometries(); ++i)
+        {
+            Polygon p;
+            p.m_geom.reset(mPoly->getGeometryRef(i)->clone());
+            polys.push_back(p);
+        }
     }
     return polys;
 }
+
 
 Polygon::Ring Polygon::exteriorRing() const
 {
     Ring r;
 
-    const GEOSGeometry *geom(m_geom.get());
-    GEOSContextHandle_t ctx(m_geoserr.ctx());
-
-    if (GEOSGeomTypeId_r(ctx, geom) != GEOS_POLYGON)
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+    if (t != wkbPolygon && t != wkbPolygon25D)
         throw pdal_error("Request for exterior ring on non-polygon.");
-    const GEOSGeometry *ring = GEOSGetExteriorRing_r(ctx, geom);
-    const GEOSCoordSequence *coords = GEOSGeom_getCoordSeq_r(ctx, ring);
 
-    unsigned size;
-    GEOSCoordSeq_getSize_r(ctx, coords, &size);
-    for (unsigned i = 0; i < size; ++i)
-    {
-        double x, y;
+    // Not until GDAL 2.3
+    /**
+    OGRLinearRing *er = m_geom->toPolygon()->getExteriorRing();
 
-        GEOSCoordSeq_getX_r(ctx, coords, i, &x);
-        GEOSCoordSeq_getY_r(ctx, coords, i, &y);
-        r.push_back({x, y});
-    }
+    // For some reason there's no operator -> on an iterator.
+    for (auto it = er->begin(); it != er->end(); ++it)
+        r.push_back({(*it).getX(), (*it).getY()});
+    **/
+    OGRLinearRing *er =
+        static_cast<OGRPolygon *>(m_geom.get())->getExteriorRing();
+    for (int i = 0; i < er->getNumPoints(); ++i)
+        r.push_back({er->getX(i), er->getY(i)});
+
     return r;
 }
 
+
 std::vector<Polygon::Ring> Polygon::interiorRings() const
 {
-    std::vector<Polygon::Ring> rings;
+    std::vector<Ring> rings;
 
-    const GEOSGeometry *geom(m_geom.get());
-    GEOSContextHandle_t ctx(m_geoserr.ctx());
-
-    if (GEOSGeomTypeId_r(ctx, geom) != GEOS_POLYGON)
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+    if (t != wkbPolygon && t != wkbPolygon25D)
         throw pdal_error("Request for exterior ring on non-polygon.");
-    int numRings = GEOSGetNumInteriorRings_r(ctx, geom);
 
-    for (int n = 0; n < numRings; ++n)
+//    OGRPolygon *poly = m_geom->toPolygon();
+     OGRPolygon *poly = static_cast<OGRPolygon *>(m_geom.get());
+    for (int i = 0; i < poly->getNumInteriorRings(); ++i)
     {
-        const GEOSGeometry *ring = GEOSGetInteriorRingN_r(ctx, geom, n);
-        const GEOSCoordSequence *coords = GEOSGeom_getCoordSeq_r(ctx, ring);
+        OGRLinearRing *er = poly->getInteriorRing(i);
 
-        unsigned size;
-        GEOSCoordSeq_getSize_r(ctx, coords, &size);
         Ring r;
-        for (unsigned i = 0; i < size; ++i)
-        {
-            double x, y;
-
-            GEOSCoordSeq_getX_r(ctx, coords, i, &x);
-            GEOSCoordSeq_getY_r(ctx, coords, i, &y);
-            r.push_back({x, y});
-        }
+        for (int j = 0; j < er->getNumPoints(); ++j)
+            r.push_back({er->getX(j), er->getY(j)});
         rings.push_back(r);
     }
     return rings;
 }
 
-} // namespace geos
+} // namespace pdal

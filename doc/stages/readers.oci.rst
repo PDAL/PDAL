@@ -34,17 +34,13 @@ Example
 Options
 -------
 
+.. include:: reader_opts.rst
+
 connection
   Oracle connection string to connect to database, in the form "user/pass@host/instance" [Required]
 
 query
   SELECT statement that returns an SDO_PC object as its first and only queried item [Required]
-
-spatialreference
-  _`spatialreference`
-    Sets the spatial reference for the point ata.  Overrides any spatial
-    reference information read from the database.  Most text-based formats of
-    SRS information are accepted, including WKT and proj.4.
 
 xml_schema_dump
   Filename to dump the XML schema to.

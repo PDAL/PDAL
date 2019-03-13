@@ -12,10 +12,8 @@ RUN \
         alpine-sdk \
         unzip \
         cmake \
-        hexer-dev \
         nitro-dev \
         gdal-dev \
-        geos-dev \
         laz-perf-dev \
         libexecinfo-dev \
         libgeotiff-dev \
@@ -43,10 +41,8 @@ RUN \
         eigen-dev@edgecommunity \
         libressl2.7-libcrypto@edgecommunity \
         libressl-dev \
-        hexer \
         nitro \
         gdal \
-        geos \
         laz-perf \
         libexecinfo \
         libgeotiff \
@@ -116,7 +112,6 @@ RUN \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
-        -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
@@ -139,7 +134,7 @@ RUN \
     cd build ; \
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DPDAL_DIR=/usr/lib/pdal/cmake \
+        -DPDAL_DIR=/usr/lib/cmake/PDAL \
         -DCMAKE_INSTALL_PREFIX=/usr \
         .. ; \
     make; \

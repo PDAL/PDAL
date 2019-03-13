@@ -1,4 +1,6 @@
 
+include(${PDAL_CMAKE_DIR}/zlib.cmake)
+
 add_subdirectory(lepcc)
 
 PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
@@ -10,6 +12,20 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
+        ${GDAL_LIBRARY}
+        ${ZLIB_LIBRARY}
+        lepcc
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
+        ${LEPCC_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+        ${GDAL_INCLUDE_DIR}
+)
+target_compile_definitions(${i3s_reader_libname}
+    PRIVATE
+        ARBITER_ZLIB
+        ARBITER_DLL_IMPORT
 )
 
 PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
@@ -21,47 +37,20 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
         ${WINSOCK_LIBRARY}
-)
-
-
-target_link_libraries(${i3s_reader_libname} PRIVATE
-    ${GDAL_LIBRARY}
-    ${ZLIB_LIBRARY}
-    lepcc
-)
-
-target_link_libraries(${slpk_reader_libname} PRIVATE
-    ${GDAL_LIBRARY}
-    ${ZLIB_LIBRARY}
-    lepcc
-)
-
-include(${PDAL_CMAKE_DIR}/zlib.cmake)
-target_compile_definitions(${i3s_reader_libname}
-    PRIVATE
-        ARBITER_ZLIB
-        ARBITER_DLL_IMPORT
+        ${GDAL_LIBRARY}
+        ${ZLIB_LIBRARY}
+        lepcc
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
+        ${LEPCC_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+        ${GDAL_INCLUDE_DIR}
 )
 target_compile_definitions(${slpk_reader_libname}
     PRIVATE
         ARBITER_ZLIB
         ARBITER_DLL_IMPORT
-)
-
-target_include_directories(${i3s_reader_libname} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
-    ${PDAL_VENDOR_DIR}
-    ${LEPCC_INCLUDE_DIR}
-    ${PDAL_VENDOR_DIR}/eigen
-    ${GDAL_INCLUDE_DIR}
-)
-
-target_include_directories(${slpk_reader_libname} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
-    ${PDAL_VENDOR_DIR}
-    ${LEPCC_INCLUDE_DIR}
-    ${PDAL_VENDOR_DIR}/eigen
-    ${GDAL_INCLUDE_DIR}
 )
 
 if (WITH_TESTS)
@@ -72,13 +61,12 @@ if (WITH_TESTS)
                 ${slpk_reader_libname}
                 ${PDAL_JSONCPP_LIB_NAME}
                 ${GDAL_LIBRARY}
-    )
-    target_include_directories(pdal_io_slpk_reader_test PRIVATE
-            ${PDAL_JSONCPP_INCLUDE_DIR}
-            ${PDAL_VENDOR_DIR}
-            ${LEPCC_INCLUDE_DIR}
-            ${PDAL_VENDOR_DIR}/eigen
-            ${GDAL_INCLUDE_DIR}
+            INCLUDES
+                ${PDAL_JSONCPP_INCLUDE_DIR}
+                ${PDAL_VENDOR_DIR}
+                ${LEPCC_INCLUDE_DIR}
+                ${PDAL_VENDOR_DIR}/eigen
+                ${GDAL_INCLUDE_DIR}
     )
     target_compile_definitions(pdal_io_slpk_reader_test
         PRIVATE
@@ -94,13 +82,12 @@ if (WITH_TESTS)
                     ${i3s_reader_libname}
                     ${PDAL_JSONCPP_LIB_NAME}
                     ${GDAL_LIBRARY}
-        )
-        target_include_directories(pdal_io_i3s_reader_test PRIVATE
-                ${PDAL_JSONCPP_INCLUDE_DIR}
-                ${PDAL_VENDOR_DIR}
-                ${LEPCC_INCLUDE_DIR}
-                ${PDAL_VENDOR_DIR}/eigen
-                ${GDAL_INCLUDE_DIR}
+                INCLUDES
+                    ${PDAL_JSONCPP_INCLUDE_DIR}
+                    ${PDAL_VENDOR_DIR}
+                    ${LEPCC_INCLUDE_DIR}
+                    ${PDAL_VENDOR_DIR}/eigen
+                    ${GDAL_INCLUDE_DIR}
         )
         target_compile_definitions(pdal_io_i3s_reader_test
             PRIVATE

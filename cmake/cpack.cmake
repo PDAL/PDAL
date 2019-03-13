@@ -39,6 +39,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/_static/logo/dongle/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "pdal_features.hpp$")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "package.sh")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".gz2")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".bz2")
 
