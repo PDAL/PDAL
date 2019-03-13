@@ -503,6 +503,9 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
             size_t index = col*rows;
             for (size_t row = 0; row < rows; ++row)
             {
+                // Find the index into the vector of the current cell.  Then
+                // find the index of the cells to the right/left/above/below
+                // if they exist.
                 size_t j = 0;
                 idx[j++] = index+row;
                 if (row > 0)
@@ -513,6 +516,9 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
                     idx[j++] = idx[0]-rows;
                 if (col < cols-1)
                     idx[j++] = idx[0]+rows;
+                // If the data at the test cell pos is greater than that
+                // from the last iteration, set the value to the maximum of
+                // the value of those cells.
                 for (size_t i = 0; i < j; ++i)
                 {
                     if (data[idx[i]] > out[index+row])
