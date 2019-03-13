@@ -34,93 +34,43 @@
 #pragma once
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/GEOSUtils.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 
-#include <geos_c.h>
-
 #include <memory>
+
+class OGRGeometry;
 
 namespace pdal
 {
 
-namespace geos {
-
-class ErrorHandler;
-
-
-struct GeometryDeleter
-{
-    explicit GeometryDeleter(pdal::geos::ErrorHandler& ctx)
-    : m_ctx(ctx)
-    {}
-
-    GeometryDeleter() : m_ctx(geos::ErrorHandler::get()) {};
-
-    GeometryDeleter& operator=(const GeometryDeleter& other)
-    {
-       if (&other!= this)
-           m_ctx = other.m_ctx;
-       return *this;
-    }
-
-    GeometryDeleter(const GeometryDeleter& other) : m_ctx(other.m_ctx) {};
-
-    void operator()(GEOSGeometry* geometry) const
-    {
-        GEOSGeom_destroy_r(m_ctx.ctx(), geometry);
-    }
-
-    pdal::geos::ErrorHandler& m_ctx;
-};
-
-} // namespace geos
-
-
-typedef std::unique_ptr<GEOSGeometry, geos::GeometryDeleter> GEOSGeomPtr;
-
 class PDAL_DLL Geometry
 {
-public:
+protected:
     Geometry();
     Geometry(const Geometry&);
     Geometry(Geometry&&);
-    virtual ~Geometry();
     Geometry(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
-
-    Geometry(GEOSGeometry* g, const SpatialReference& srs);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
 
+public:
     Geometry& operator=(const Geometry&);
+    virtual ~Geometry();
 
     OGRGeometryH getOGRHandle();
 
     virtual void update(const std::string& wkt_or_json);
+    virtual bool valid() const;
+    bool srsValid() const;
+    void setSpatialReference(const SpatialReference& ref); 
+    SpatialReference getSpatialReference() const;
+    void transform(const SpatialReference& ref) const;
 
-    void setSpatialReference( const SpatialReference& ref)
-        { m_srs = ref; }
-
-    const SpatialReference& getSpatialReference() const
-        { return m_srs; }
-
-    Geometry transform(const SpatialReference& ref) const;
-
-    bool equals(const Geometry& other, double tolerance=0.0001) const;
-    bool operator==(const Geometry& other) const;
-    bool operator!=(const Geometry& other) const;
-    bool operator<(const Geometry& other) const
-        { return wkt() < other.wkt(); }
-
-
-    virtual  bool valid() const;
-    virtual std::string validReason() const;
-
-    std::string wkt(double precision=8, bool bOutputZ=false) const;
-    std::string json(double precision=8) const;
+    std::string wkt(double precision=15, bool bOutputZ=false) const;
+    std::string json(double precision=15) const;
 
     BOX3D bounds() const;
 
@@ -128,13 +78,7 @@ public:
         { return m_geom != NULL; }
 
 protected:
-    GEOSGeomPtr m_geom;
-    const GEOSPreparedGeometry *m_prepGeom;
-
-    SpatialReference m_srs;
-    geos::ErrorHandler& m_geoserr;
-
-    void prepare();
+    std::unique_ptr<OGRGeometry> m_geom;
 
     friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
         const Geometry& p);

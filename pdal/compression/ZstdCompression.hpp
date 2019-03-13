@@ -44,6 +44,7 @@ class ZstdCompressor : public Compressor
 {
 public:
     PDAL_DLL ZstdCompressor(BlockCb cb);
+    PDAL_DLL ZstdCompressor(BlockCb cb, int compressionLevel);
     PDAL_DLL ~ZstdCompressor();
 
     PDAL_DLL void compress(const char *buf, size_t bufsize);

@@ -1,7 +1,7 @@
 USR_LOCAL="/usr/local"
 USR="/usr"
 TIFF_HOME=$USR_LOCAL
-LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.7/
+LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.9_2/
 WEBSOCKETPP_HOME=/Users/hobu/dev/git/websocketpp
 SQLITE_HOME="/usr/local/opt/sqlite"
 SO_EXT=dylib
@@ -34,7 +34,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_MBIO=ON \
         -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
-        -DBUILD_PLUGIN_PCL=ON \
+        -DBUILD_PLUGIN_PCL=OFF \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_I3S=ON \
         -DBUILD_PLUGIN_RDBLIB=ON \
@@ -53,8 +53,8 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} \
         -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
-        -DPYTHON_LIBRARY=/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/libpython3.7.dylib \
-        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/include/python3.7m/\
+        -DPYTHON_LIBRARY=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/lib/libpython3.7.dylib \
+        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/include/python3.7m/\
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
 #        -DBUILD_PLUGIN_MATLAB=ON \

@@ -448,9 +448,9 @@ TEST(SpatialReferenceTest, test_bounds)
     BOX2D box17(289814.15, 4320978.61, 289818.50, 4320980.59);
     pdal::Polygon p(box17);
     p.setSpatialReference(utm17);
-    pdal::Polygon p2 = p.transform(wgs84);
+    p.transform(wgs84);
 
-    BOX3D b2 = p2.bounds();
+    BOX3D b2 = p.bounds();
     EXPECT_FLOAT_EQ(static_cast<float>(b2.minx), -83.42759776f);
     EXPECT_FLOAT_EQ(static_cast<float>(b2.miny), 39.01259905f);
     EXPECT_FLOAT_EQ(static_cast<float>(b2.maxx), -83.427551f);
@@ -478,6 +478,8 @@ TEST(SpatialReferenceTest, issue_1989)
     EXPECT_EQ(-32, south.getUTMZone());
 }
 
+// Ilvis needs XML2
+#ifdef PDAL_HAVE_LIBXML2
 TEST(SpatialReferenceTest, set_srs)
 {
     StageFactory factory;
@@ -517,5 +519,6 @@ TEST(SpatialReferenceTest, set_srs)
     EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"2029\"]]"),
         std::string::npos);
 }
+#endif // PDAL_HAVE_LIBXML2
 
 } // namespace pdal

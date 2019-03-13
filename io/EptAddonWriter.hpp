@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2019, Connor Manning (connor@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,77 +31,64 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
+#include <cstddef>
 #include <memory>
 
-#include <geos_c.h>
+#include <pdal/Writer.hpp>
 
-#include <pdal/pdal_types.hpp>
-#include <pdal/Log.hpp>
+namespace Json { class Value; }
 
 namespace pdal
 {
 
-namespace geos
+namespace arbiter
 {
+    class Arbiter;
+    class Endpoint;
+}
 
-class PDAL_DLL ErrorHandler
+class Addon;
+class EptInfo;
+class Key;
+class Pool;
+
+class PDAL_DLL EptAddonWriter : public Writer
 {
 public:
-    ~ErrorHandler();
+    EptAddonWriter();
+    virtual ~EptAddonWriter();
 
-    /**
-      Get the singleton error handler.
-
-      \return  Reference to the error handler.
-    */
-    static ErrorHandler& get();
-
-    /**
-      Set the log and debug state of the error handler.  This is a convenience
-      and is equivalent to calling setLog() and setDebug().
-
-      \param log  Log to write to.
-      \param doDebug  Debug state of the error handler.
-    */
-    void set(LogPtr log, bool doDebug);
-
-    /**
-      Set the log to which error/debug messages should be written.
-
-      \param log  Log to write to.
-    */
-    void setLog(LogPtr log);
-
-    /**
-      Set the debug state of the error handler.  If the error handler is set
-      to debug, output is logged instead of causing an exception.
-
-      \param debug  The debug state of the error handler.
-    */
-    void setDebug(bool debug);
-
-    /**
-      Get the GEOS context handle.
-
-      \return  The GEOS context handle.
-    */
-    GEOSContextHandle_t ctx() const;
+    std::string getName() const override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual void ready(PointTableRef table) override;
+    virtual void write(const PointViewPtr view) override;
 
 private:
-    ErrorHandler();
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    std::unique_ptr<Pool> m_pool;
 
-    void handle(const char *msg, bool notice);
-    static void vaErrorCb(const char *msg, ...);
-    static void vaNoticeCb(const char *msg, ...);
+    std::unique_ptr<Json::Value> m_addonsArg;
+    std::vector<std::unique_ptr<Addon>> m_addons;
 
-    GEOSContextHandle_t m_ctx;
-    bool m_debug;
-    LogPtr m_log;
-    static std::unique_ptr<ErrorHandler> m_instance;
+    void writeOne(const PointViewPtr view, const Addon& addon) const;
+    void writeHierarchy(Json::Value& hier, const Key& key,
+            const arbiter::Endpoint& hierEp) const;
+    std::string getTypeString(Dimension::Type t) const;
+
+    std::size_t m_numThreads = 0;
+
+    Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
+    Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
+
+    std::unique_ptr<EptInfo> m_info;
+    std::map<Key, uint64_t> m_hierarchy;
+    uint64_t m_hierarchyStep = 0;
 };
 
-} // namespace geos
-} // namespace pdal
+}
 

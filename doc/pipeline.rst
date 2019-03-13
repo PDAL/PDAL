@@ -362,7 +362,8 @@ then creates the DTM using the :ref:`writers.gdal`.
               "type":"writers.gdal",
               "filename":"autzen-surface.tif",
               "output_type":"min",
-              "output_format":"tif",
+              "gdaldriver":"GTiff",
+              "window_size":3,
               "resolution":1.0
           }
       ]
