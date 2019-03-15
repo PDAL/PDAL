@@ -67,7 +67,6 @@ public:
 
     bool covers(const PointRef& ref) const;
     bool equal(const Polygon& p) const;
-//   bool covers(const Polygon& p) const;
     bool overlaps(const Polygon& p) const;
     bool contains(const Polygon& p) const;
     bool touches(const Polygon& p) const;

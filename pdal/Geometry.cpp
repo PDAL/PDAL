@@ -41,6 +41,14 @@
 namespace pdal
 {
 
+void Geometry::throwNoGeos()
+{
+    if (!OGRGeometryFactory::haveGEOS())
+        throw pdal_error("PDAL must be using a version of GDAL built with "
+            "GEOS support to use this function.");
+}
+
+
 Geometry::Geometry()
 {}
 

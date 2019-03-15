@@ -91,6 +91,8 @@ Polygon::Polygon(const BOX3D& box)
 
 void Polygon::simplify(double distance_tolerance, double area_tolerance)
 {
+    throwNoGeos();
+
     auto deleteSmallRings = [area_tolerance](OGRGeometry *geom)
     {
 // Missing until GDAL 2.3.
@@ -136,6 +138,8 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
 
 double Polygon::area() const
 {
+    throwNoGeos();
+
     OGRwkbGeometryType t = m_geom->getGeometryType();
 // Not until GDAL 2.3
 /**
@@ -160,6 +164,8 @@ double Polygon::area() const
 
 bool Polygon::covers(const PointRef& ref) const
 {
+    throwNoGeos();
+
     double x = ref.getFieldAs<double>(Dimension::Id::X);
     double y = ref.getFieldAs<double>(Dimension::Id::Y);
     double z = ref.getFieldAs<double>(Dimension::Id::Z);
@@ -171,26 +177,36 @@ bool Polygon::covers(const PointRef& ref) const
 
 bool Polygon::overlaps(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Overlaps(p.m_geom.get());
 }
 
 bool Polygon::contains(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Contains(p.m_geom.get());
 }
 
 bool Polygon::touches(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Touches(p.m_geom.get());
 }
 
 bool Polygon::within(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Within(p.m_geom.get());
 }
 
 bool Polygon::crosses(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Crosses(p.m_geom.get());
 }
 
