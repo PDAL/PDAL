@@ -41,6 +41,14 @@
 namespace pdal
 {
 
+void Geometry::throwNoGeos()
+{
+    if (!OGRGeometryFactory::haveGEOS())
+        throw pdal_error("PDAL must be using a version of GDAL built with "
+            "GEOS support to use this function.");
+}
+
+
 Geometry::Geometry()
 {}
 
@@ -172,6 +180,8 @@ BOX3D Geometry::bounds() const
 
 bool Geometry::valid() const
 {
+    throwNoGeos();
+
     return (bool)m_geom->IsValid();
 }
 
