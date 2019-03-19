@@ -12,6 +12,7 @@ matrix:
   fast_finish: true
 
 # Should speed up repository cloning
+#
 shallow_clone: true
 clone_depth: 5
 
