@@ -55,7 +55,8 @@ bool SubcommandKernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
         const StringList& subs = subcommands();
         assert(subs.size());
         hargs.add("help,h", "Print help message", help);
-        hargs.add("subcommand", "Subcommand for application", m_subcommand).                setPositional();
+        hargs.add("subcommand", "Subcommand for application", m_subcommand).
+            setPositional();
         hargs.parseSimple(stringArgs);
         if (help)
             return false;
