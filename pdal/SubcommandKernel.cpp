@@ -100,8 +100,9 @@ void SubcommandKernel::outputHelp()
 
     if (Utils::contains(subcommands(), m_subcommand))
     {
-        // We're repeating addSwitches here, but it keeps things cleaner
-        // since the other call also writes output.
+        // We're repeating addSubSwitches here (it's also called from
+        // outputSubOpts), but it keeps things cleaner since outputSubOpts
+        // also writes output.
         ProgramArgs args;
         addSubSwitches(args, m_subcommand);
 
@@ -122,7 +123,7 @@ void SubcommandKernel::outputHelp()
             outputSubOpts(subcmd);
     }
 
-    std::cout <<"\nFor more information, see the full documentation for "
+    std::cout << "\nFor more information, see the full documentation for "
         "PDAL at http://pdal.io/\n" << std::endl;
 }
 
