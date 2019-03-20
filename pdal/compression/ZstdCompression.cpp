@@ -47,10 +47,10 @@ public:
     char m_tmpbuf[CHUNKSIZE];
     BlockCb m_cb;
 
-    ZstdCompressorImpl(BlockCb cb) : m_cb(cb)
+    ZstdCompressorImpl(BlockCb cb, int compressionLevel) : m_cb(cb)
     {
         m_strm = ZSTD_createCStream();
-        ZSTD_initCStream(m_strm, 15);
+        ZSTD_initCStream(m_strm, compressionLevel);
     }
 
     ~ZstdCompressorImpl()
@@ -92,7 +92,12 @@ public:
 };
 
 ZstdCompressor::ZstdCompressor(BlockCb cb) :
-    m_impl(new ZstdCompressorImpl(cb))
+    m_impl(new ZstdCompressorImpl(cb, 15))
+{}
+
+
+ZstdCompressor::ZstdCompressor(BlockCb cb, int compressionLevel) :
+    m_impl(new ZstdCompressorImpl(cb, compressionLevel))
 {}
 
 

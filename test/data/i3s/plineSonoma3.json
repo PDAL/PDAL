@@ -1,0 +1,15 @@
+{
+    "pipeline":[
+        {
+            "filename":"i3s://http://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SONOMA_AREA3_LiDAR/SceneServer",
+            "threads": 64,
+            "bounds":"([-123.60, -123.5],[38.39, 38.55])",
+            "dimensions":"returns, rgb, intensity"
+        },
+        {
+            "type":"filters.reprojection",
+            "out_srs":"EPSG:3857"
+        },
+        "I3S_Sonoma3.las"
+    ]
+}

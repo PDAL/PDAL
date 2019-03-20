@@ -16,8 +16,6 @@ if(PYTHONLIBS_FOUND)
     include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
     add_definitions(-DHAVE_PYTHON=1)
     set(PDAL_HAVE_PYTHON 1)
-    add_definitions(-DPDAL_PYTHON_LIBRARY="${PYTHON_LIBRARY}")
-    set(PDAL_HAVE_PYTHON 1)
     set(PDAL_PYTHON_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}" CACHE STRING "PDAL Python version" FORCE)
 
     find_package(NumPy QUIET 1.5 REQUIRED)

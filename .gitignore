@@ -106,6 +106,7 @@ test/unit/TestConfig.hpp
 
 test/data/bpf/bpf.xml
 test/data/bpf/bpf2nitf.xml
+test/data/ept/addon/*
 test/data/filters/attribute.xml
 test/data/filters/chip.xml
 test/data/filters/chipper.xml

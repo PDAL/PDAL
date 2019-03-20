@@ -41,6 +41,8 @@
 
 #include <memory>
 
+class OGRGeometry;
+
 namespace pdal
 {
 
@@ -63,7 +65,7 @@ public:
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
     bool srsValid() const;
-    void setSpatialReference(const SpatialReference& ref); 
+    void setSpatialReference(const SpatialReference& ref);
     SpatialReference getSpatialReference() const;
     void transform(const SpatialReference& ref) const;
 
@@ -74,6 +76,7 @@ public:
 
     operator bool () const
         { return m_geom != NULL; }
+    static void throwNoGeos();
 
 protected:
     std::unique_ptr<OGRGeometry> m_geom;

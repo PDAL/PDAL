@@ -41,6 +41,7 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
+#include <pdal/util/Utils.hpp>
 
 #include <sstream>
 #include <mutex>
@@ -59,10 +60,15 @@
 // __attribute__ ((constructor)) this does nothing.  We'll have to deal with
 // those as they come up.
 #ifndef _WIN32
-__attribute__ ((constructor))
+__attribute__((constructor))
 static void loadPython()
 {
-    ::dlopen(PDAL_PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
+    std::string libname;
+
+    pdal::Utils::getenv("PDAL_PYTHON_LIBRARY", libname);
+    if (libname.empty())
+        libname = "libPython" + pdal::Utils::dynamicLibExtension;
+    ::dlopen(libname.data(), RTLD_LAZY | RTLD_GLOBAL);
 }
 #endif
 
@@ -74,8 +80,7 @@ namespace pdal
 {
 namespace plang
 {
-
-static Environment* g_environment=0;
+static Environment* g_environment = 0;
 //
 EnvironmentPtr Environment::get()
 {
@@ -108,10 +113,11 @@ Environment::Environment()
     {
         PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
         Py_Initialize();
-    } else
+    }
+    else
     {
         m_redirector.init();
-        PyObject* added  = PyImport_AddModule("redirector");
+        PyObject* added = PyImport_AddModule("redirector");
         if (!added)
             throw pdal_error("unable to add redirector module!");
     }
@@ -120,24 +126,20 @@ Environment::Environment()
     PyImport_ImportModule("redirector");
 }
 
-
 Environment::~Environment()
 {
     Py_Finalize();
 }
-
 
 void Environment::set_stdout(std::ostream* ostr)
 {
     m_redirector.set_stdout(ostr);
 }
 
-
 void Environment::reset_stdout()
 {
     m_redirector.reset_stdout();
 }
-
 
 std::string getTraceback()
 {
@@ -216,12 +218,12 @@ std::string getTraceback()
     }
     else
         mssg << "unknown error that we are unable to get a traceback for."
-            "Was it already printed/taken?";
+        "Was it already printed/taken?";
 
     Py_XDECREF(value);
     Py_XDECREF(type);
     Py_XDECREF(traceback);
-
+    PyErr_Clear();
     return mssg.str();
 }
 
@@ -233,10 +235,10 @@ PyObject *fromMetadata(MetadataNode m)
     std::string description = m.description();
 
     MetadataNodeList children = m.children();
-	PyObject *submeta(0);
+    PyObject *submeta(0);
     if (children.size())
     {
-		submeta = PyList_New(0);
+        submeta = PyList_New(0);
         for (MetadataNode& child : children)
             PyList_Append(submeta, fromMetadata(child));
     }
@@ -245,10 +247,10 @@ PyObject *fromMetadata(MetadataNode m)
     PyDict_SetItemString(data, "value", PyUnicode_FromString(value.data()));
     PyDict_SetItemString(data, "type", PyUnicode_FromString(type.data()));
     PyDict_SetItemString(data, "description", PyUnicode_FromString(description.data()));
-	if (children.size())
-	{
-		PyDict_SetItemString(data, "children", submeta);
-	}
+    if (children.size())
+    {
+        PyDict_SetItemString(data, "children", submeta);
+    }
     return data;
 }
 
@@ -279,13 +281,12 @@ std::string readPythonString(PyObject* dict, const std::string& key)
 }
 void addMetadata(PyObject *dict, MetadataNode m)
 {
-
-    if (! dict)
+    if (!dict)
     {
         return;
     }
 
-    if (!PyDict_Check(dict) )
+    if (!PyDict_Check(dict))
         throw pdal::pdal_error("'metadata' member must be a dictionary!");
 
     std::string name = readPythonString(dict, "name");
@@ -308,7 +309,7 @@ void addMetadata(PyObject *dict, MetadataNode m)
             PyObject* p = PyList_GetItem(submeta, i);
             addMetadata(p, m);
         }
-        MetadataNode child =  m.addWithType(name, value, type, description);
+        MetadataNode child = m.addWithType(name, value, type, description);
     }
 }
 
@@ -346,7 +347,6 @@ int Environment::getPythonDataType(Dimension::Type t)
     return -1;
 }
 
-
 Dimension::Type Environment::getPDALDataType(int t)
 {
     using namespace Dimension;
@@ -380,7 +380,5 @@ Dimension::Type Environment::getPDALDataType(int t)
 
     return Type::None;
 }
-
 } // namespace plang
 } // namespace pdal
-

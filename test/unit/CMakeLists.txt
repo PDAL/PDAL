@@ -119,6 +119,14 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
+    FILES
+        io/EptAddonWriterTest.cpp
+    LINK_WITH
+        ${PDAL_JSONCPP_LIB_NAME}
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
@@ -226,6 +234,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
 
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)

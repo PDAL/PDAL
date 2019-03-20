@@ -99,37 +99,37 @@ bool Point::is3d() const
 
 double Point::x() const
 {
-    return m_geom->toPoint()->getX();
+    return static_cast<OGRPoint *>(m_geom.get())->getX();
 }
 
 
 double Point::y() const
 {
-    return m_geom->toPoint()->getY();
+    return static_cast<OGRPoint *>(m_geom.get())->getY();
 }
 
 
 double Point::z() const
 {
-    return m_geom->toPoint()->getZ();
+    return static_cast<OGRPoint *>(m_geom.get())->getZ();
 }
 
 
 void Point::x(double xval)
 {
-    m_geom->toPoint()->setX(xval);
+    static_cast<OGRPoint *>(m_geom.get())->setX(xval);
 }
 
 
 void Point::y(double yval)
 {
-    m_geom->toPoint()->setY(yval);
+    static_cast<OGRPoint *>(m_geom.get())->setY(yval);
 }
 
 
 void Point::z(double zval)
 {
-    m_geom->toPoint()->setZ(zval);
+    static_cast<OGRPoint *>(m_geom.get())->setZ(zval);
 }
 
 } // namespace filter

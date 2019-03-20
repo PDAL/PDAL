@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2019, Connor Manning (connor@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,39 +34,61 @@
 
 #pragma once
 
-#include <pdal/PointView.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Streamable.hpp>
-#include <pdal/util/IStream.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <cstddef>
+#include <memory>
+
+#include <pdal/Writer.hpp>
+
+namespace Json { class Value; }
 
 namespace pdal
 {
 
-class PDAL_DLL SbetReader : public Reader, public Streamable
+namespace arbiter
+{
+    class Arbiter;
+    class Endpoint;
+}
+
+class Addon;
+class EptInfo;
+class Key;
+class Pool;
+
+class PDAL_DLL EptAddonWriter : public Writer
 {
 public:
-    SbetReader() : Reader()
-        {}
+    EptAddonWriter();
+    virtual ~EptAddonWriter();
 
-    std::string getName() const;
+    std::string getName() const override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual void ready(PointTableRef table) override;
+    virtual void write(const PointViewPtr view) override;
 
 private:
-    std::unique_ptr<ILeStream> m_stream;
-    // Number of points in the file.
-    point_count_t m_numPts;
-    point_count_t m_index;
-    Dimension::IdList m_dims;
-    bool m_anglesAsDegrees;
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    std::unique_ptr<Pool> m_pool;
 
-    virtual bool processOne(PointRef& point);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual bool eof();
+    std::unique_ptr<Json::Value> m_addonsArg;
+    std::vector<std::unique_ptr<Addon>> m_addons;
 
-    void seek(PointId idx);
+    void writeOne(const PointViewPtr view, const Addon& addon) const;
+    void writeHierarchy(Json::Value& hier, const Key& key,
+            const arbiter::Endpoint& hierEp) const;
+    std::string getTypeString(Dimension::Type t) const;
+
+    std::size_t m_numThreads = 0;
+
+    Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
+    Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
+
+    std::unique_ptr<EptInfo> m_info;
+    std::map<Key, uint64_t> m_hierarchy;
+    uint64_t m_hierarchyStep = 0;
 };
 
-} // namespace pdal
+}
+
