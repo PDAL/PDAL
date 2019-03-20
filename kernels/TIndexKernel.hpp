@@ -35,8 +35,8 @@
 #pragma once
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
+#include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
@@ -44,7 +44,7 @@ namespace pdal
 
 class StageFactory;
 
-class PDAL_DLL TIndexKernel : public Kernel
+class PDAL_DLL TIndexKernel : public SubcommandKernel
 {
     struct FileInfo
     {
@@ -65,12 +65,14 @@ class PDAL_DLL TIndexKernel : public Kernel
 
 public:
     std::string getName() const;
-    int execute(); // overrride
     TIndexKernel();
 
 private:
-    virtual void addSwitches(ProgramArgs& args);
+    virtual void addSubSwitches(ProgramArgs& args,
+        const std::string& subcommand);
     virtual void validateSwitches(ProgramArgs& args);
+    virtual int execute();
+    virtual StringList subcommands() const;
 
     void createFile();
     void mergeFile();
@@ -100,7 +102,6 @@ private:
     std::string m_srsColumnName;
     std::string m_wkt;
     BOX2D m_bounds;
-    bool m_merge;
     bool m_absPath;
 
     void *m_dataset;
