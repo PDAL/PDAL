@@ -43,8 +43,8 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "private/Segmentation.hpp"
 #include "private/DimRange.hpp"
+#include "private/Segmentation.hpp"
 
 namespace pdal
 {
@@ -111,7 +111,7 @@ void PMFFilter::prepared(PointTableRef table)
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
             throwError("Invalid dimension name in 'ignored' option: '" +
-                r.m_name + "'.");
+                       r.m_name + "'.");
     }
 
     if (m_args->m_returns.size())
@@ -151,8 +151,8 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     if (m_args->m_ignored.empty())
         keptView->append(*input);
     else
-        Segmentation::ignoreDimRanges(m_args->m_ignored,
-            input, keptView, ignoredView);
+        Segmentation::ignoreDimRanges(m_args->m_ignored, input, keptView,
+                                      ignoredView);
 
     // Check for 0's in ReturnNumber and NumberOfReturns
     bool nrOneZero(false);
@@ -233,16 +233,14 @@ void PMFFilter::processGround(PointViewPtr view)
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
     view->calculateBounds(bounds);
-    size_t cols =
-        static_cast<size_t>(((bounds.maxx - bounds.minx) /
-            m_args->m_cellSize) + 1);
-    size_t rows =
-        static_cast<size_t>(((bounds.maxy - bounds.miny) /
-            m_args->m_cellSize) + 1);
+    size_t cols = static_cast<size_t>(
+        ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1);
+    size_t rows = static_cast<size_t>(
+        ((bounds.maxy - bounds.miny) / m_args->m_cellSize) + 1);
 
     // initialize surface to NaN
     std::vector<double> ZImin(rows * cols,
-        std::numeric_limits<double>::quiet_NaN());
+                              std::numeric_limits<double>::quiet_NaN());
 
     // loop through all points, identifying minimum Z value for each populated
     // cell
