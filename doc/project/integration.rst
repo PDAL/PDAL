@@ -49,9 +49,8 @@ https://github.com/PDAL/PDAL/blob/master/appveyor.yml All administrators of the
 GitHub `PDAL` group have rights to modify the AppVeyor configuration.
 
 `Howard Butler`_ currently pays the bill to run in the AppVeyor upper
-performance processing tier. The AppVeyor configuration depends on `OSGeo4W64`_
+performance processing tier. The AppVeyor configuration depends on :ref:`conda`
 for dependencies. If you want to add new test functionality based on a
-dependency, you will need to update OSGeo4W64 with a new package to do so.
+dependency, you will need to update :ref:`conda` with a new package to do so.
 
-.. _`OSGeo4W64`: http://trac.osgeo.org/osgeo4w/
 .. _`Howard Butler`: http://github.com/hobu

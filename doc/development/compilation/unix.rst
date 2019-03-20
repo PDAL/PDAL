@@ -135,7 +135,6 @@ substituting accordingly, to values that match your system layout.
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 .. _`Debian`: http://www.debian.org
 .. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
-.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
 
 
 CCMake and cmake-gui
@@ -309,5 +308,4 @@ configure your :ref:`dependencies`.
 .. _`Curses`: http://en.wikipedia.org/wiki/Curses_%28programming_library%29
 .. _`Autoconf`: http://www.gnu.org/software/autoconf/
 .. _`LLVM`: http://llvm.org/
-.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
 

@@ -118,7 +118,7 @@ We will write our content back out using a :ref:`writers.las`.
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
+Invoke the following command, substituting accordingly, in your |Terminal|:
 
 
 .. literalinclude:: ./clipping-run-command.txt

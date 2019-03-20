@@ -55,8 +55,7 @@ point cloud:
 Command
 .............
 
-Invoke the following command, substituting accordingly, into your `OSGeo4W
-Shell`:
+Invoke the following command, substituting accordingly, into your |Terminal|:
 
 .. literalinclude:: georeferencing-command.txt
 
