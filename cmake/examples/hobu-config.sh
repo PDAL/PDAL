@@ -52,7 +52,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} \
-        -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
+        -DPYTHON_EXECUTABLE=python \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/lib/libpython3.7.dylib \
         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/include/python3.7m/\
         -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
