@@ -187,18 +187,49 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         Segmentation::ignoreDimRanges(m_args->m_ignored, view, keptView,
             ignoredView);
 
+    // Check for 0's in ReturnNumber and NumberOfReturns
+    bool nrOneZero(false);
+    bool rnOneZero(false);
+    bool nrAllZero(true);
+    bool rnAllZero(true);
+    for (PointId i = 0; i < keptView->size(); ++i)
+    {
+        uint8_t nr = keptView->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        uint8_t rn = keptView->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        if ((nr == 0) && !nrOneZero)
+            nrOneZero = true;
+        if ((rn == 0) && !rnOneZero)
+            rnOneZero = true;
+        if (nr != 0)
+            nrAllZero = false;
+        if (rn != 0)
+            rnAllZero = false;
+    }
+
+    if ((nrOneZero || rnOneZero) && !(nrAllZero && rnAllZero))
+        throwError("Some NumberOfReturns or ReternNumber values were 0, but not all. Check that all values in the input file are >= 1.");
+
     // Segment kept view into two views
     PointViewPtr firstView = keptView->makeNew();
     PointViewPtr secondView = keptView->makeNew();
-    if (m_args->m_returns.size())
+    if (nrAllZero && rnAllZero)
     {
-        Segmentation::segmentReturns(keptView, firstView, secondView,
-                                     m_args->m_returns);
+        log()->get(LogLevel::Warning) << "Both NumberOfReturns and ReturnNumber are filled with 0's. Proceeding without any further return filtering.\n";
+        for (PointId i = 0; i < keptView->size(); ++i)
+            firstView->appendPoint(*keptView.get(), i);
     }
     else
     {
-        for (PointId i = 0; i < keptView->size(); ++i)
-            firstView->appendPoint(*keptView.get(), i);
+        if (m_args->m_returns.size())
+        {
+            Segmentation::segmentReturns(keptView, firstView, secondView,
+                                         m_args->m_returns);
+        }
+        else
+        {
+            for (PointId i = 0; i < keptView->size(); ++i)
+                firstView->appendPoint(*keptView.get(), i);
+        }
     }
 
     if (!firstView->size())
