@@ -6,7 +6,7 @@ Software installation
 .. include:: ../../includes/substitutions.rst
 
 1. :ref:`workshop-osgeo4w`
-    * Install PDAL via OSGeo4W64
+    * Install PDAL via :ref:`conda`
 
 2. :ref:`QGIS<qgis>`
     * Visualize vector and raster data
