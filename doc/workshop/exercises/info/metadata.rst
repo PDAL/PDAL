@@ -11,7 +11,7 @@ Exercise
 --------------------------------------------------------------------------------
 
 This exercise uses PDAL to print metadata information. Issue the
-following command in your `OSGeo4W Shell`.
+following command in your |Terminal|:
 
 
 .. literalinclude:: ./metadata-command.txt

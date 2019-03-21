@@ -22,7 +22,7 @@ simple interpolation, which we will use for visualization in |QGIS|.
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
+Invoke the following command, substituting accordingly, in your |Terminal|:
 
 .. literalinclude:: ./density-command.txt
     :linenos:
