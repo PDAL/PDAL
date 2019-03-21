@@ -29,13 +29,10 @@ ability, you must have GDAL (and GeoTIFF_) linked in at compile time.
 
 Obtain `GDAL`_ via whatever method is convenient.  Linux platforms such as
 `Debian`_ have `DebianGIS`_, Mac OS X has the `KyngChaos`_ software frameworks,
-and Windows has the `OSGeo4W`_ platform.
+and Windows has the `Conda Forge`_ platform.
 
-* GDAL 1.9+ is required.
+* GDAL 2.2+ is required.
 
-.. warning::
-    If you are using `OSGeo4W`_ as your provider of GDAL, you must make sure
-    to use the GDAL 1.9 package.
 
 GeoTIFF
 ..............................................................................
@@ -52,7 +49,7 @@ LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
     meaning that PDAL can't simply link against `GDAL`_.  If you are
     building both of these libraries yourself, make sure you build GDAL
     using the "External libgeotiff" option, which will prevent the
-    insanity that can ensue on some platforms.  `OSGeo4W`_ users, including
+    insanity that can ensue on some platforms.  `Conda Forge`_ users, including
     those using that platform to link and build PDAL themselves, do
     not need to worry about this issue.
 
@@ -187,7 +184,7 @@ used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 .. _`Debian`: http://www.debian.org
 .. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
-.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
+.. _`Conda Forge`: https://anaconda.org/conda-forge/pdal
 
 .. _Boost: http://www.boost.org
 .. _GDAL: http://www.gdal.org
@@ -197,6 +194,5 @@ used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.
 .. _CMake: http://www.cmake.org
 .. _`libpq`: http://www.postgresql.org/docs/9.3/static/libpq.html
 
-.. _`Points2Grid`: https://github.com/CRREL/points2grid
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
 .. _`TileDB`: https://www.tiledb.io

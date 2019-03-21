@@ -33,7 +33,7 @@ generate a ground surface.
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
+Invoke the following command, substituting accordingly, in your |Terminal|:
 
 .. literalinclude:: ./ground-run-no-filter.txt
     :linenos:
