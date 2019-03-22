@@ -16,18 +16,16 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.optech",
           "filename":"input.csd"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options

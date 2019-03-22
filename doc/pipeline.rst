@@ -43,16 +43,14 @@ writer from filenames, and able to be specified as a set of sequential steps:
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          "input.las",
-          {
-              "type":"filters.crop",
-              "bounds":"([0,100],[0,100])"
-          },
-          "output.bpf"
-      ]
-  }
+    [
+        "input.las",
+        {
+            "type":"filters.crop",
+            "bounds":"([0,100],[0,100])"
+        },
+        "output.bpf"
+    ]
 
 .. figure:: ./images/las-crop-bpf-pipeline.png
 
@@ -68,8 +66,7 @@ with the :ref:`writers.gdal` writer:
 
 .. code-block:: json
 
-  {
-      "pipeline":[
+      [
           {
               "filename":"A.las",
               "spatialreference":"EPSG:26916"
@@ -97,7 +94,6 @@ with the :ref:`writers.gdal` writer:
               "filename":"output.tif"
           }
       ]
-  }
 
 .. figure:: ./images/reproject-merge-pipeline.png
 
@@ -129,17 +125,14 @@ files from a single pipeline.  The crop filter creates two output point views
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          "input.las",
-          {
-              "type" : "filters.crop",
-              "bounds" :
-                  [ "([0, 75], [0, 75])", "([50, 125], [50, 125])" ],
-          },
-          "output#.las"
-      ]
-  }
+  [
+      "input.las",
+      {
+          "type" : "filters.crop",
+          "bounds" : [ "([0, 75], [0, 75])", "([50, 125], [50, 125])" ],
+      },
+      "output#.las"
+  ]
 
 Processing Modes
 --------------------------------------------------------------------------------
@@ -162,20 +155,41 @@ tagged in the stage documentation with a blue bar.  Users can explicitly
 choose to use standard mode by using the ``--nostream`` option.  Users of the PDAL API can explicitly control the selection of the PDAL
 processing mode.
 
-Pipeline Objects
+Pipelines
 --------------------------------------------------------------------------------
-
-PDAL JSON pipelines always consist of a single object. This object (referred to
-as the PDAL JSON object below) represents a processing pipeline.
-
-* The PDAL JSON object may have any number of members (name/value pairs).
-
-* The PDAL JSON object must have a :ref:`pipeline_array`.
-
-.. _pipeline_array:
 
 Pipeline Array
 ................................................................................
+
+PDAL JSON pipelines are an array of stages.
+
+.. note::
+
+    In versions of PDAL prior to 1.9, the array of stages needed to be the
+    value of a key named "pipeline" which was encapsulated in an object.
+    The earlier format is still accepted for backward compatibility.
+
+    Old format:
+
+    .. code-block:: json
+
+        {
+            "pipeline" :
+            [
+                "inputfile",
+                "outputfile"
+            ]
+        }
+
+    Equivalent new format:
+
+    .. code-block:: json
+
+        [
+            "inputfile",
+            "outputfile"
+        ]
+
 
 * The pipeline array may have any number of string or :ref:`stage_object`
   elements.
@@ -237,9 +251,9 @@ Filename Globbing
   characters. This can be useful if working with multiple input files in a
   directory (e.g., merging all files).
 
-  Filename globbing ONLY works in pipeline specifications.  It doesn't work
-  when a filename is provided as an option through a command-line application
-  like ``pdal pipeline`` or ``pdal translate``.
+  Filename globbing ONLY works in pipeline file specifications.  It doesn't
+  work when a filename is provided as an option through a command-line
+  application like ``pdal pipeline`` or ``pdal translate``.
 
 .. _option_files:
 
@@ -281,20 +295,18 @@ setting a number of options on the writer stage.
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          "utm15.bpf",
-          {
-              "filename":"out2.las",
-              "scale_x":0.01,
-              "offset_x":311898.23,
-              "scale_y":0.01,
-              "offset_y":4703909.84,
-              "scale_z":0.01,
-              "offset_z":7.385474
-          }
-      ]
-  }
+  [
+      "utm15.bpf",
+      {
+          "filename":"out2.las",
+          "scale_x":0.01,
+          "offset_x":311898.23,
+          "scale_y":0.01,
+          "offset_y":4703909.84,
+          "scale_z":0.01,
+          "offset_z":7.385474
+      }
+  ]
 
 Python HAG
 ................................................................................
@@ -314,22 +326,20 @@ code at `hag.py`_.
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          "autzen.las",
-          {
-              "type":"filters.ferry",
-              "dimensions":"Z=>HAG"
-          },
-          {
-              "type":"filters.python",
-              "script":"hag.py",
-              "function":"filter",
-              "module":"anything"
-          },
-          "autzen-hag.las"
-      ]
-  }
+  [
+      "autzen.las",
+      {
+          "type":"filters.ferry",
+          "dimensions":"Z=>HAG"
+      },
+      {
+          "type":"filters.python",
+          "script":"hag.py",
+          "function":"filter",
+          "module":"anything"
+      },
+      "autzen-hag.las"
+  ]
 
 .. _`hag.py`: https://raw.githubusercontent.com/PDAL/PDAL/master/test/data/autzen/hag.py.in
 
@@ -344,30 +354,28 @@ then creates the DTM using the :ref:`writers.gdal`.
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          "autzen-full.las",
-          {
-              "type":"filters.smrf",
-              "window":33,
-              "slope":1.0,
-              "threshold":0.15,
-              "cell":1.0
-          },
-          {
-              "type":"filters.range",
-              "limits":"Classification[2:2]"
-          },
-          {
-              "type":"writers.gdal",
-              "filename":"autzen-surface.tif",
-              "output_type":"min",
-              "gdaldriver":"GTiff",
-              "window_size":3,
-              "resolution":1.0
-          }
-      ]
-  }
+    [
+        "autzen-full.las",
+        {
+            "type":"filters.smrf",
+            "window":33,
+            "slope":1.0,
+            "threshold":0.15,
+            "cell":1.0
+        },
+        {
+            "type":"filters.range",
+            "limits":"Classification[2:2]"
+        },
+        {
+            "type":"writers.gdal",
+            "filename":"autzen-surface.tif",
+            "output_type":"min",
+            "gdaldriver":"GTiff",
+            "window_size":3,
+            "resolution":1.0
+        }
+    ]
 
 Decimate & Colorize
 ................................................................................
@@ -379,29 +387,27 @@ written as ASCII text.
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          {
-              "filename":"1.2-with-color.las",
-              "spatialreference":"EPSG:2993"
-          },
-          {
-              "type":"filters.decimation",
-              "step":2,
-              "offset":1
-          },
-          {
-              "type":"filters.colorization",
-              "raster":"autzen.tif",
-              "dimensions": ["Red:1:1", "Green:2:1", "Blue:3:1" ]
-          },
-          {
-              "filename":"junk.txt",
-              "delimiter":",",
-              "write_header":false
-          }
-      ]
-  }
+  [
+      {
+          "filename":"1.2-with-color.las",
+          "spatialreference":"EPSG:2993"
+      },
+      {
+          "type":"filters.decimation",
+          "step":2,
+          "offset":1
+      },
+      {
+          "type":"filters.colorization",
+          "raster":"autzen.tif",
+          "dimensions": ["Red:1:1", "Green:2:1", "Blue:3:1" ]
+      },
+      {
+          "filename":"junk.txt",
+          "delimiter":",",
+          "write_header":false
+      }
+  ]
 
 Reproject
 ................................................................................
@@ -413,22 +419,20 @@ spatial reference system.
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          {
-              "filename":"1.2-with-color.las",
-              "spatialreference":"EPSG:2027"
-          },
-          {
-              "filename":"1.2-with-color.las",
-              "spatialreference":"EPSG:2027"
-          },
-          {
-              "type":"filters.reprojection",
-              "out_srs":"EPSG:2028"
-          }
-      ]
-  }
+  [
+      {
+          "filename":"1.2-with-color.las",
+          "spatialreference":"EPSG:2027"
+      },
+      {
+          "filename":"1.2-with-color.las",
+          "spatialreference":"EPSG:2027"
+      },
+      {
+          "type":"filters.reprojection",
+          "out_srs":"EPSG:2028"
+      }
+  ]
 
 Globbed Inputs
 ................................................................................
@@ -438,12 +442,10 @@ multiple input LAS files from a given directory.
 
 .. code-block:: json
 
-  {
-      "pipeline":[
-          "/path/to/data/\*.las",
-          "output.las"
-      ]
-  }
+  [
+      "/path/to/data/\*.las",
+      "output.las"
+  ]
 
 
 .. seealso::
@@ -452,83 +454,6 @@ multiple input LAS files from a given directory.
     are used for testing. You might find these inspiring. Go to
     https://github.com/PDAL/PDAL/tree/master/test/data/pipeline to find
     more.
-
-API Considerations
-------------------------------------------------------------------------------
-
-A `Pipeline` is composed as an array of :cpp:class:`pdal::Stage` , with the
-first stage at the beginning and the last at the end.  There are two primary
-building blocks in PDAL, :cpp:class:`pdal::Stage` and
-:cpp:class:`pdal::PointView`. :cpp:class:`pdal::Reader`,
-:cpp:class:`pdal::Writer`, and :cpp:class:`pdal::Filter` are all subclasses of
-:cpp:class:`pdal::Stage`.
-
-:cpp:class:`pdal::PointView` is the substrate that flows between stages in a
-pipeline and transfers the actual data as it moves through the pipeline. A
-:cpp:class:`pdal::PointView` contains a :cpp:class:`pdal::PointTablePtr`, which
-itself contains a list of :cpp:class:`pdal::Dimension` objects that define the
-actual channels that are stored in the :cpp:class:`pdal::PointView`.
-
-PDAL provides three types of stages -- :cpp:class:`pdal::Reader`,
-:cpp:class:`pdal::Writer` and :cpp:class:`pdal::Filter`.
-A Reader is a producer of data, a Writer
-is a consumer of data, and a Filter is an actor on data.
-
-.. note::
-
-   As a C++ API consumer, it isn't necessary to be aware of the underlying
-   storage of point data, but in cases where you just "want the data",
-   the function :cpp:func:`pdal::PointView::getBytes` exists.  The class
-   :cpp:class:`pdal::PointLayout` provides information about the actual
-   data layout.
-
-
-Usage
-..............................................................................
-
-While pipeline objects are manipulable through C++ objects, it is often
-convenient to provide a pipline directly using JSON.
-The JSON syntax mirrors the arrangement of the Pipeline, with options and
-auxiliary metadata added on a per-stage basis.
-
-We have two use cases specifically in mind:
-
-* a :ref:`command-line <pipeline_command>` application that reads an JSON
-  file to allow a user to easily construct arbitrary writer pipelines, as
-  opposed to having to build applications custom to individual needs with
-  arbitrary options, filters, etc.
-
-* a user can provide JSON for a reader pipeline, construct it via a simple call
-  to the PipelineManager API, and then use the :cpp:func:`pdal::Stage::read()`
-  function to perform the read and then do any processing of the points.  This
-  style of operation is very appropriate for using PDAL from within
-  environments like Python where the focus is on just getting the points, as
-  opposed to complex pipeline construction.
-
-
-.. code-block:: json
-
-    {
-      "pipeline":[
-        "/path/to/my/file/input.las",
-        "output.las"
-      ]
-    }
-
-
-.. note::
-
-    https://github.com/PDAL/PDAL/blob/master/test/data/pipeline/ contains
-    test suite pipeline files that provide an excellent example of the
-    currently possible operations.
-
-
-Stage Types
-..............................................................................
-
-:cpp:class:`pdal::Reader`, :cpp:class:`pdal::Writer`, and
-:cpp:class:`pdal::Filter` are the C++ classes that define the stage types in
-PDAL.
 
 .. note::
 

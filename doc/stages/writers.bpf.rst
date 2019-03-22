@@ -3,9 +3,10 @@
 writers.bpf
 ===========
 
-BPF is an NGA specification for point cloud data. The specification can be
-found at https://nsgreg.nga.mil/doc/view?i=4202 The PDAL **BPF Writer**
+BPF is an `NGA specification`_ for point cloud data.  The PDAL **BPF Writer**
 only supports writing of version 3 BPF format files.
+
+.. _NGA specification: https://nsgreg.nga.mil/doc/view?i=4202
 
 .. embed::
 
@@ -14,21 +15,18 @@ only supports writing of version 3 BPF format files.
 Example
 -------
 
-
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.bpf"
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.bpf",
           "filename":"outputfile.bpf"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
@@ -51,11 +49,11 @@ compression
 format
     Specifies the format for storing points in the file. [Default: dim]
 
-    * dim == Dimension-major (non-interleaved).  All data for a single dimension
+    * dim: Dimension-major (non-interleaved).  All data for a single dimension
       are stored contiguously.
-    * point == Point-major (interleaved).  All data for a single point
+    * point: Point-major (interleaved).  All data for a single point
       are stored contiguously.
-    * byte == Byte-major (byte-segregated).  All data for a single dimension are
+    * byte: Byte-major (byte-segregated).  All data for a single dimension are
       stored contiguously, but bytes are arranged such that the first bytes for
       all points are stored contiguously, followed by the second bytes of all
       points, etc.  See the BPF specification for further information.

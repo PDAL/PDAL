@@ -11,15 +11,13 @@ This example will download the Autzen dataset from the arcgis scene server and o
 
 .. code-block:: json
 
-    {
-        "pipeline":[
-            {
-                "type": "readers.i3s",
-                "filename": "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer",
-                "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
-            }
-        ]
-    }
+  [
+      {
+          "type": "readers.i3s",
+          "filename": "https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer",
+          "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
+      }
+  ]
 
 .. code::
 
