@@ -70,7 +70,7 @@ std::string EptAddonWriter::getName() const { return s_info.name; }
 void EptAddonWriter::addArgs(ProgramArgs& args)
 {
     args.add("addons", "Mapping of output locations to their dimension names",
-            *m_addonsArg);
+            *m_addonsArg).setPositional();
     args.add("threads", "Number of worker threads", m_numThreads);
 }
 
