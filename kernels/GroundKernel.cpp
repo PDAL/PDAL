@@ -73,8 +73,8 @@ void GroundKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("output,o", "Output filename", m_outputFile).setPositional();
-    args.add("max_window_size", "Max window size", m_maxWindowSize, 33.0);
-    args.add("slope", "Slope", m_slope, 1.0);
+    args.add("max_window_size", "Max window size", m_maxWindowSize, 18.0);
+    args.add("slope", "Slope", m_slope, 0.15);
     args.add("max_distance", "Max distance", m_maxDistance, 2.5);
     args.add("initial_distance", "Initial distance", m_initialDistance, .15);
     args.add("cell_size", "Cell size", m_cellSize, 1.0);
@@ -104,6 +104,7 @@ int GroundKernel::execute()
     groundOptions.add("slope", m_slope);
     groundOptions.add("cell", m_cellSize);
     groundOptions.add("cut", m_cut);
+    groundOptions.add("scalar", m_scalar);
     for (auto& s: m_returns)
         groundOptions.add("returns", s);
     for(DimRange& r: m_ignored)
