@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "pdal_util_export.hpp"
 #include "portable_endian.hpp"
 

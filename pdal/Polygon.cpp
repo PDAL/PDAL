@@ -91,9 +91,13 @@ Polygon::Polygon(const BOX3D& box)
 
 void Polygon::simplify(double distance_tolerance, double area_tolerance)
 {
+    throwNoGeos();
+
     auto deleteSmallRings = [area_tolerance](OGRGeometry *geom)
     {
-        OGRPolygon *poly = geom->toPolygon();
+// Missing until GDAL 2.3.
+//        OGRPolygon *poly = geom->toPolygon();
+        OGRPolygon *poly = static_cast<OGRPolygon *>(geom);
 
         std::vector<int> deleteRings;
         for (int i = 0; i < poly->getNumInteriorRings(); ++i)
@@ -106,7 +110,9 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
         // which is why the ring numbers are offset by one when used in
         // this context (what a mess).
         for (auto i : deleteRings)
-            poly->removeRing(i, true);
+// Missing until 2.3
+//            poly->removeRing(i, true);
+            OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
     };
 
     OGRGeometry *g = m_geom->SimplifyPreserveTopology(distance_tolerance);
@@ -117,26 +123,49 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
         deleteSmallRings(m_geom.get());
     else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
+// Missing until 2.3
+/**
         OGRMultiPolygon *mpoly = m_geom->toMultiPolygon();
         for (auto it = mpoly->begin(); it != mpoly->end(); ++it)
             deleteSmallRings(*it);
+**/
+        OGRMultiPolygon *mpoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = 0; i < mpoly->getNumGeometries(); ++i)
+            deleteSmallRings(mpoly->getGeometryRef(i));
     }
 }
 
 
 double Polygon::area() const
 {
+    throwNoGeos();
+
     OGRwkbGeometryType t = m_geom->getGeometryType();
+// Not until GDAL 2.3
+/**
     if (t == wkbPolygon || t == wkbPolygon25D)
         return m_geom->toPolygon()->get_Area();
     else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
         return m_geom->toMultiPolygon()->get_Area();
+**/
+    if (t == wkbPolygon || t == wkbPolygon25D)
+    {
+        OGRPolygon *p = static_cast<OGRPolygon *>(m_geom.get());
+        return p->get_Area();
+    }
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
+    {
+        OGRMultiPolygon *p = static_cast<OGRMultiPolygon *>(m_geom.get());
+        return p->get_Area();
+    }
     return 0;
 }
 
 
 bool Polygon::covers(const PointRef& ref) const
 {
+    throwNoGeos();
+
     double x = ref.getFieldAs<double>(Dimension::Id::X);
     double y = ref.getFieldAs<double>(Dimension::Id::Y);
     double z = ref.getFieldAs<double>(Dimension::Id::Z);
@@ -148,26 +177,36 @@ bool Polygon::covers(const PointRef& ref) const
 
 bool Polygon::overlaps(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Overlaps(p.m_geom.get());
 }
 
 bool Polygon::contains(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Contains(p.m_geom.get());
 }
 
 bool Polygon::touches(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Touches(p.m_geom.get());
 }
 
 bool Polygon::within(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Within(p.m_geom.get());
 }
 
 bool Polygon::crosses(const Polygon& p) const
 {
+    throwNoGeos();
+
     return m_geom->Crosses(p.m_geom.get());
 }
 
@@ -181,11 +220,21 @@ std::vector<Polygon> Polygon::polygons() const
         polys.emplace_back(*this);
     else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
+        // Not until GDAL 2.3
+        /**
         OGRMultiPolygon *mPoly = m_geom->toMultiPolygon();
         for (auto it = mPoly->begin(); it != mPoly->end(); ++it)
         {
             Polygon p;
             p.m_geom.reset((*it)->clone());
+            polys.push_back(p);
+        }
+        **/
+        OGRMultiPolygon *mPoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = 0; i < mPoly->getNumGeometries(); ++i)
+        {
+            Polygon p;
+            p.m_geom.reset(mPoly->getGeometryRef(i)->clone());
             polys.push_back(p);
         }
     }
@@ -201,11 +250,19 @@ Polygon::Ring Polygon::exteriorRing() const
     if (t != wkbPolygon && t != wkbPolygon25D)
         throw pdal_error("Request for exterior ring on non-polygon.");
 
+    // Not until GDAL 2.3
+    /**
     OGRLinearRing *er = m_geom->toPolygon()->getExteriorRing();
 
     // For some reason there's no operator -> on an iterator.
     for (auto it = er->begin(); it != er->end(); ++it)
         r.push_back({(*it).getX(), (*it).getY()});
+    **/
+    OGRLinearRing *er =
+        static_cast<OGRPolygon *>(m_geom.get())->getExteriorRing();
+    for (int i = 0; i < er->getNumPoints(); ++i)
+        r.push_back({er->getX(i), er->getY(i)});
+
     return r;
 }
 
@@ -218,15 +275,15 @@ std::vector<Polygon::Ring> Polygon::interiorRings() const
     if (t != wkbPolygon && t != wkbPolygon25D)
         throw pdal_error("Request for exterior ring on non-polygon.");
 
-    OGRPolygon *poly = m_geom->toPolygon();
+//    OGRPolygon *poly = m_geom->toPolygon();
+     OGRPolygon *poly = static_cast<OGRPolygon *>(m_geom.get());
     for (int i = 0; i < poly->getNumInteriorRings(); ++i)
     {
         OGRLinearRing *er = poly->getInteriorRing(i);
 
-        // No operator -> on an iterator.
         Ring r;
-        for (auto it = er->begin(); it != er->end(); ++it)
-            r.push_back({(*it).getX(), (*it).getY()});
+        for (int j = 0; j < er->getNumPoints(); ++j)
+            r.push_back({er->getX(j), er->getY(j)});
         rings.push_back(r);
     }
     return rings;

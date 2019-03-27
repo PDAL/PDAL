@@ -27,8 +27,8 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         liblapack-dev \
         libtiff5-dev \
         openssh-client \
-        python-dev \
-        python-numpy \
+        python3-dev \
+        python3-numpy \
         wget \
         automake \
         libtool \
@@ -57,10 +57,10 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libcurl4-openssl-dev \
         libspatialite-dev \
         cython \
-        python-pip \
+        python3-pip \
         time \
         ninja-build \
-        python-setuptools \
+        python3-setuptools \
         unzip \
         libeigen3-dev \
         libxml2-dev \
@@ -81,6 +81,7 @@ RUN    git clone https://github.com/LASzip/LASzip.git laszip; \
      . ; \
     ninja ; \
     ninja install; \
+    DESTDIR=/ ninja install; \
     rm -rf laszip
 
 RUN git clone  https://github.com/hobu/laz-perf.git; \
@@ -94,6 +95,7 @@ RUN git clone  https://github.com/hobu/laz-perf.git; \
     ; \
     ninja; \
     ninja install; \
+    DESTDIR=/ ninja install; \
     rm -rf /laz-perf
 
 
@@ -106,8 +108,9 @@ RUN mkdir /nitro; cd /nitro; \
         -G Ninja -DCMAKE_INSTALL_PREFIX=/usr/ \
     ; \
     ninja; \
-    ninja install \
-    && rm -rf /nitro
+    ninja install; \
+    DESTDIR=/ ninja install; \
+    rm -rf /nitro
 
 RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
     && cd fgt \
@@ -120,6 +123,7 @@ RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
         -G "Ninja" \
     && ninja \
     && ninja install \
+    && DESTDIR=/ ninja install \
     && rm -rf /fgt
 
 RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
@@ -139,8 +143,22 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
         -G "Ninja" \
     && ninja  \
     && ninja install \
+    && DESTDIR=/ ninja install  \
     && rm -rf /cpd
 
+#RUN \
+#    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
+#    tar xzf ${tiledb_version}.tar.gz; \
+#    rm ${tiledb_version}.tar.gz; \
+#    cd TileDB-${tiledb_version}; \
+#    mkdir build; \
+#    cd build; \
+#    ../bootstrap --prefix=/usr --enable-s3; \
+#    make -j2; \
+#    make install-tiledb; \
+#    DESTDIR=/ make install-tiledb; \
+#    cd /; \
+#    rm -rf TileDB-${tiledb_version};
 
 RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.git pdal-git; \
     cd pdal-git;  \
@@ -149,9 +167,6 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
     cmake .. \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr/ \
-        -DCMAKE_PREFIX_PATH:FILEPATH="${DESTDIR}" \
-        -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
-        -DCMAKE_CXX_FLAGS="-isystem ${DESTDIR}/usr/include" \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_MBIO=OFF \
         -DBUILD_PLUGIN_GREYHOUND=ON \
@@ -163,10 +178,11 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_OCI=OFF \
         -DBUILD_PLUGIN_PCL=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+        -DPYTHON_EXECUTABLE=/usr/bin/python3 \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_RIVLIB=OFF \
         -DBUILD_PLUGIN_PYTHON=ON \
-        -DBUILD_PLUGIN_TILEDB=ON \
+        -DBUILD_PLUGIN_TILEDB=OFF \
         -DENABLE_CTEST=OFF \
         -DWITH_LAZPERF=ON \
         -DWITH_LASZIP=ON \
@@ -178,6 +194,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
     ; \
     ninja; \
     ninja install; \
+    DESTDIR=/ ninja install; \
     rm -rf /pdal-git
 
 #
@@ -198,6 +215,7 @@ RUN git clone https://github.com/libharu/libharu \
       ..; \
     ninja; \
     ninja install; \
+    DESTDIR=/ ninja install; \
     rm -rf /libharu
 
 RUN git clone https://github.com/PDAL/PRC \
@@ -205,29 +223,31 @@ RUN git clone https://github.com/PDAL/PRC \
     && mkdir build \
     && cd build \
     && CXXFLAGS="-fno-stack-protector" CFLAGS="-fno-stack-protector" cmake \
-        -DCMAKE_PREFIX_PATH:FILEPATH="${DESTDIR}" \
         -DCMAKE_INSTALL_PREFIX=/usr/ \
-        -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
-        -DCMAKE_CXX_FLAGS="-isystem ${DESTDIR}/usr/include -L${DESTDIR}/usr/lib" \
-        -DPDAL_DIR="${DESTDIR}/usr/lib/pdal/cmake" \
+        -DPDAL_DIR="/usr/lib/pdal/cmake" \
         -DCMAKE_BUILD_TYPE=Release  .. \
       -G "Ninja" \
     && ninja \
     && ninja install \
+    && DESTDIR=/ ninja install \
     && rm -rf /PRC
 
+
+
 RUN \
-    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
-    tar xzf ${tiledb_version}.tar.gz; \
-    rm ${tiledb_version}.tar.gz; \
-    cd TileDB-${tiledb_version}; \
-    mkdir build; \
-    cd build; \
-    ../bootstrap --prefix=/usr --enable-s3; \
-    make -j2; \
-    make install-tiledb; \
-    cd /; \
-    rm -rf TileDB-${tiledb_version};
+    git clone https://github.com/pubgeo/pubgeo.git \
+    && cd pubgeo \
+    && mkdir build \
+    && cd build \
+    && CXXFLAGS="-fno-stack-protector" CFLAGS="-fno-stack-protector" cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr/ \
+        -DPDAL_DIR="/usr/lib/pdal/cmake" \
+        -DCMAKE_BUILD_TYPE=Release  .. \
+      -G "Ninja" \
+    && ninja \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf /pubgeo
 
 FROM ubuntu:bionic as runner
 
@@ -259,8 +279,7 @@ RUN apt-get update; \
         proj-data \
         zlib1g \
         libpng16-16 \
-        python-pip \
-        python-setuptools \
+        python3-setuptools \
         liblzma5 \
         libzstd1 \
         libhdf5-cpp-100 ;\
@@ -273,13 +292,10 @@ COPY --from=builder  /build/usr/lib/ /usr/lib/
 COPY --from=builder  /build/usr/include/ /usr/include/
 
 RUN \
-    curl -LOs http://download.osgeo.org/proj/vdatum/usa_geoid2012.zip && unzip -j -u usa_geoid2012.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/usa_geoid2009.zip && unzip -j -u usa_geoid2009.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/usa_geoid2003.zip && unzip -j -u usa_geoid2003.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/usa_geoid1999.zip && unzip -j -u usa_geoid1999.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/vertcon/vertconc.gtx && mv vertconc.gtx /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/vertcon/vertcone.gtx && mv vertcone.gtx /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/vertcon/vertconw.gtx && mv vertconw.gtx /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx && mv egm96_15.gtx /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj;
+
 

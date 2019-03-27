@@ -1,9 +1,9 @@
 export CONDA_EXE=/Users/hobu/miniconda3/bin/conda
 source /Users/hobu/miniconda3/bin/activate base
 
+export CONDA_BUILD_SYSROOT=/opt/MacOSX10.10.sdk
 
 $CONDA_EXE remove pdal
-$CONDA_EXE activate pdal
 source /Users/hobu/miniconda3/bin/activate pdal
 $CONDA_EXE config --add channels conda-forge
 $CONDA_EXE create --name pdal -y
@@ -16,19 +16,17 @@ $CONDA_EXE install  -y laz-perf \
                 libxml2 \
                 nitro \
                 curl \
-                gdal=2.3.2 \
+                gdal \
                 postgresql \
                 hdf5 \
                 pcl \
                 cmake \
-                clang_osx-64 \
-                clangxx_osx-64 \
+                compilers \
                 libspatialite \
                 eigen \
                 ninja \
                 libgdal \
                 zstd \
-                python=3.7 \
                 numpy \
                 tiledb
 

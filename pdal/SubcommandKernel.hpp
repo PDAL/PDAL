@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,39 +34,38 @@
 
 #pragma once
 
-#include <pdal/PointView.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Streamable.hpp>
-#include <pdal/util/IStream.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/Kernel.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL SbetReader : public Reader, public Streamable
+class PDAL_DLL SubcommandKernel : public Kernel
 {
 public:
-    SbetReader() : Reader()
-        {}
+    SubcommandKernel& operator=(const Kernel&) = delete;
+    SubcommandKernel(const SubcommandKernel&) = delete;
+    virtual ~SubcommandKernel()
+    {}
 
-    std::string getName() const;
+protected:
+    SubcommandKernel()
+    {}
+
+    std::string m_subcommand;
 
 private:
-    std::unique_ptr<ILeStream> m_stream;
-    // Number of points in the file.
-    point_count_t m_numPts;
-    point_count_t m_index;
-    Dimension::IdList m_dims;
-    bool m_anglesAsDegrees;
+    /// \return true on success, false if the user is asking for help
+    virtual bool doSwitches(const StringList& cmdArgs, ProgramArgs& args);
+    // Prevent the standard addSwitches() from being defined.
+    virtual void addSwitches(ProgramArgs& args) final
+    {}
+    virtual void addSubSwitches(ProgramArgs& args,
+        const std::string& subcommand)
+    {}
 
-    virtual bool processOne(PointRef& point);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual bool eof();
-
-    void seek(PointId idx);
+    virtual StringList subcommands() const = 0;
+    virtual void outputHelp();
 };
 
 } // namespace pdal
+

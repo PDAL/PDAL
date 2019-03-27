@@ -64,31 +64,29 @@ and RiVLib. To enable any of these plugins, the reader will need to install any
 required dependencies and build PDAL from source.
 
 .. csv-table:: PDAL Distribution Feature Comparison
-   :header: "", "Docker", "OSGeo4W", "RPMs", "Debian", "Alpine", "Conda"
-   :widths: 20, 20, 20, 20, 20, 20, 20
+   :header: "", "Docker", "RPMs", "Debian", "Alpine", ":ref:`Conda`"
+   :widths: 20, 20, 20, 20, 20, 20
 
-   "Platform(s)", "linux", "win", "linux", "linux", "linux", "win, mac, linux"
-   "CPD", "X", "", "", "", "X", ""
-   "Greyhound", "X", "X", "", "X", "X", "X"
-   "Hexbin", "X", "X", "X", "", "X", "X"
-   "Icebridge", "X", "", "X", "X", "X", "X"
-   "laszip", "X", "X", "X", "", "X", "X"
-   "laz-perf", "X", "X", "", "", "X", "X"
-   "NITF", "X", "X", "", "", "X", "X"
-   "OCI", "", "X", "", "", "", ""
-   "PCL", "", "", "X", "", "", "X"
-   "pgpointcloud", "X", "X", "X", "X", "X", "X"
-   "Python", "X", "X", "", "X", "X", "X"
-   "SQLite", "X", "X", "", "X", "X", "X"
+   "Platform(s)", "linux", "linux", "linux", "linux", "win64, mac, linux"
+   "CPD", "X", "", "", "X", ""
+   "Greyhound", "X", "", "X", "X", "X"
+   "Icebridge", "X",  "X", "X", "X", "X"
+   "laszip", "X",  "X", "", "X", "X"
+   "laz-perf", "X",  "", "", "X", "X"
+   "NITF", "X",  "", "", "X", "X"
+   "OCI", "",  "", "", "", ""
+   "PCL", "",  "X", "", "", "X"
+   "pgpointcloud", "X",  "X", "X", "X", "X"
+   "Python", "X",  "", "X", "X", "X"
+   "SQLite", "X",  "", "X", "X", "X"
 
 
 Windows
 ................................................................................
 
-Windows builds are available via `OSGeo4W`_ (64-bit only). See the
-:ref:`workshop-osgeo4w` page for more detailed information.
+Windows builds are available via `Conda Forge`_ (64-bit only). See the
+:ref:`conda` for more detailed information.
 
-.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
 
 
 RPMs
@@ -142,6 +140,9 @@ the Python extension.
 
 .. _`Alpine Linux`: https://www.alpinelinux.org/
 
+.. _`Conda Forge`: https://anaconda.org/conda-forge/pdal
+
+.. _conda:
 
 Conda
 ................................................................................
@@ -166,7 +167,7 @@ To install one or more Conda packages, use the following command.
 
     conda install [-c channel] [package...]
 
-Because the PDAL package (and it's dependencies) live in the `conda-forge`_
+Because the PDAL package (and it's dependencies) live in the `Conda Forge`_
 channel, the command to install both the PDAL application and the Python
 extension is
 
@@ -178,5 +179,3 @@ It is strongly recommended that you make use of Conda's environment management
 system and install PDAL in a separate environment (i.e., not the base
 environment). Instructions can be found on the Conda website.
 
-.. _`Conda`: https://conda.io/docs/
-.. _`conda-forge`: https://conda-forge.org/

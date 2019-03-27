@@ -43,6 +43,18 @@ namespace pdal
 class PDAL_DLL TileDBWriter : public Writer
 {
 public:
+    struct DimBuffer
+    {
+        std::string m_name;
+        Dimension::Id m_id;
+        Dimension::Type m_type;
+        std::vector<uint8_t> m_buffer;
+
+        DimBuffer(const std::string& name, Dimension::Id id,
+            Dimension::Type type) : m_name(name), m_id(id), m_type(type)
+        {}
+    };
+
     TileDBWriter() = default;
     std::string getName() const;
 private:
@@ -72,6 +84,7 @@ private:
     std::unique_ptr<tiledb::ArraySchema> m_schema;
     std::unique_ptr<tiledb::Array> m_array;
     std::unique_ptr<tiledb::Query> m_query;
+    std::vector<DimBuffer> m_attrs;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;

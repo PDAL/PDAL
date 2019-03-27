@@ -5,6 +5,7 @@ set PATH=%CONDA_ROOT%;%CONDA_ROOT%\\scripts;%CONDA_ROOT%\\Library\\bin;%PATH%;C:
 conda config --set always_yes yes
 conda config --add channels conda-forge
 conda config --set auto_update_conda no
+conda config --set channel_priority true
 conda update -q --all
 conda info
 python -c "import sys; print(sys.version)"
