@@ -102,11 +102,11 @@ canonical Python extension install.
 Install from local
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the source code of PDAL there is a ``python`` folder, you have to enter
-there and run ::
+Fetch a copy of the PDAL Python extension from `https://pypi.org/project/PDAL/
+<https://pypi.org/project/PDAL/>`__, enter the ``python`` folder, and issue the
+build:
 
     python setup.py build
-    # this should be run as administrator/super user
     python setup.py install
 
 Install from repository
