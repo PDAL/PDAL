@@ -44,19 +44,25 @@ class PDAL_DLL HeadFilter : public Filter
 {
 public:
     HeadFilter()
-    {
-    }
+    {}
+    HeadFilter& operator=(const HeadFilter&) = delete;
+    HeadFilter(const HeadFilter&) = delete;
 
     std::string getName() const;
 
 private:
     point_count_t m_count;
+    bool m_invert;
 
     void addArgs(ProgramArgs& args)
     {
-        args.add("count", "Number of points to return from beginning.", m_count,
-                 point_count_t(10));
+        args.add("count", "Number of points to return from beginning.  "
+            "If 'invert' is true, number of points to drop from the beginning.",
+            m_count, point_count_t(10));
+        args.add("invert", "If true, 'count' specifies the number of points "
+            "to skip from the beginning.", m_invert);
     }
+
 
     PointViewSet run(PointViewPtr view)
     {
@@ -66,14 +72,23 @@ private:
                 << ") exceeds number of available points.\n";
         PointViewSet viewSet;
         PointViewPtr outView = view->makeNew();
-        for (PointId i = 0; i < (std::min)(m_count, view->size()); ++i)
+        PointId start;
+        PointId end;
+        if (m_invert)
+        {
+            start = m_count;
+            end = view->size();
+        }
+        else
+        {
+            start = 0;
+            end = (std::min)(m_count, view->size());
+        }
+        for (PointId i = start; i < end; ++i)
             outView->appendPoint(*view, i);
         viewSet.insert(outView);
         return viewSet;
     }
-
-    HeadFilter& operator=(const HeadFilter&); // not implemented
-    HeadFilter(const HeadFilter&);            // not implemented
 };
 
 } // namespace pdal

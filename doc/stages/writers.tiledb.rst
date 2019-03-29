@@ -55,6 +55,4 @@ stats
   Dump query stats to stdout [Optional]
 
 
-.. include:: writers_opts.rst
-
 .. _TileDB: https://tiledb.io

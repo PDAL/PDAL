@@ -45,6 +45,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.slpk
    readers.terrasolid
    readers.text
+   readers.tiledb
    readers.tindex
 
 :ref:`readers.bpf`
@@ -145,6 +146,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.text`
     Read point clouds from ASCII text files.
+
+:ref:`readers.tiledb`
+    Read point cloud data from a TileDB instance.
 
 :ref:`readers.tindex`
     The tindex (tile index) reader allows you to automatically merge and query

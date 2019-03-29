@@ -234,6 +234,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
 
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
