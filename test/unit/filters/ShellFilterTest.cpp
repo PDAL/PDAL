@@ -45,7 +45,7 @@ TEST(ShellFilterTest, test_shell_filter)
 {
     PipelineManager mgr;
 
-    mgr.readPipeline(Support::datapath("pipeline/shell.json"));
+    mgr.readPipeline(Support::configuredpath("pipeline/shell.json"));
 
     mgr.execute();
     ConstPointTableRef table(mgr.pointTable());
