@@ -1,6 +1,6 @@
 if (UNIX)
     find_package(OpenSSL 1.1)
-    if (OPENSSL_FOUND AND UNIX)
+    if (OPENSSL_FOUND)
         set(ARBITER_OPENSSL TRUE)
     else ()
         message("OpenSSL NOT found - `export OPENSSL_ROOT_DIR=___`")
