@@ -128,7 +128,7 @@ AssignFilter::~AssignFilter()
 void AssignFilter::addArgs(ProgramArgs& args)
 {
     args.add("assignment", "Values to assign to dimensions based on range.",
-        m_args->m_assignments);
+        m_args->m_assignments).setPositional();
     args.add("condition", "Condition for assignment based on range.",
         m_args->m_condition);
 }
