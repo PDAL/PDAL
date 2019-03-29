@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 project(LEPCC CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
