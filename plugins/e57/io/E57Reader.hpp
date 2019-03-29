@@ -41,7 +41,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-#include "scan.hpp"
+#include "Scan.hpp"
 
 namespace pdal {
 class E57Reader: public Reader, public Streamable
@@ -52,7 +52,7 @@ class ChunkReader
 public:
     ChunkReader(pdal::point_count_t pointOffset,pdal::point_count_t maxPointRead,
         std::shared_ptr<e57::Scan> scan, 
-        const std::set<std::string>& e57Dimensions); // TODO make this 1000 a static variable
+        const std::set<std::string>& e57Dimensions);
     ~ChunkReader();
 
     // returns false if the index falls out of the [pointOffset,pointOffset + m_maxPointRead] interval
@@ -112,11 +112,10 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     // virtual void done(PointTableRef table);
 
-    void openFile_(std::string filename);
-    void setupReader_(pdal::point_count_t pointNumber);
-    e57::Node getNode_(const e57::Node &parent, std::string childName) const;
-    point_count_t getNumberPoints_() const;
-    void extractScans_();
+    void openFile(std::string filename);
+    void setupReader(pdal::point_count_t pointNumber);
+    point_count_t extractNumberPoints() const;
+    void extractScans();
 
     // members
     std::unique_ptr<e57::ImageFile> m_imf; 
@@ -130,7 +129,6 @@ private:
 
     // Chunk data reader
     std::unique_ptr<ChunkReader> m_chunk;
-    int m_currentScanIndex;
     point_count_t m_currentPoint; // Variable for streaming mode
 
     // Cache the total number of points

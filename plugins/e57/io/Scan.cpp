@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "scan.hpp"
-#include "utils.hpp"
+#include "Scan.hpp"
+#include "Utils.hpp"
 
 namespace e57
 {
@@ -72,8 +72,6 @@ bool Scan::hasPose() const
 
 void Scan::transformPoint(pdal::PointRef pt) const
 {
-    // TODO Refactor that and the quaternion builder into a separate class
-    // TODO Add tets for pose transformation
     double x = pt.getFieldAs<double>(pdal::Dimension::Id::X);
     double y = pt.getFieldAs<double>(pdal::Dimension::Id::Y);
     double z = pt.getFieldAs<double>(pdal::Dimension::Id::Z);

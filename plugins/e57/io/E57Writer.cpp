@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "e57writer.hpp"
-#include "utils.hpp"
-#include "uuid.hpp"
+#include "E57Writer.hpp"
+#include "Utils.hpp"
+#include "Uuid.hpp"
 
 namespace pdal{
 static pdal::StaticPluginInfo const s_info

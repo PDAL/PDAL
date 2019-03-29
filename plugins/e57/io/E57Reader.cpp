@@ -35,8 +35,8 @@
 #include <iostream>
 #include <E57Exception.h>
 
-#include "e57reader.hpp"
-#include "utils.hpp"
+#include "E57Reader.hpp"
+#include "Utils.hpp"
 
 namespace pdal
 {
@@ -167,10 +167,9 @@ void E57Reader::initialize()
 	{
 		m_filename = m_filenameManual;
 	}
-	openFile_(m_filename);
-	extractScans_();
-	m_pointCount = getNumberPoints_();
-	m_currentScanIndex = -1;
+    openFile(m_filename);
+    extractScans();
+	m_pointCount = extractNumberPoints();
 	m_chunk = std::unique_ptr<ChunkReader>(nullptr);
 	m_currentPoint = 0;	
 }
@@ -227,7 +226,7 @@ bool E57Reader::processOne(pdal::PointRef& point)
 	if (!m_chunk || !m_chunk->isInScope(m_currentPoint))
 	{
 		// setup new reader
-		setupReader_(m_currentPoint);
+        setupReader(m_currentPoint);
 		m_chunk->read(m_currentPoint);
 	}
 
@@ -323,7 +322,7 @@ pdal::point_count_t E57Reader::getNumberPoints() const
 	return m_pointCount;
 }
 
-void E57Reader::openFile_(std::string filename)
+void E57Reader::openFile(std::string filename)
 {
 	try
 	{	
@@ -353,7 +352,7 @@ void E57Reader::openFile_(std::string filename)
 	}
 }
 
-void E57Reader::setupReader_(pdal::point_count_t pointNumber)
+void E57Reader::setupReader(pdal::point_count_t pointNumber)
 {
 	int currentScan = getScanIndex(pointNumber);
 	if (currentScan == -1)
@@ -373,7 +372,7 @@ void E57Reader::setupReader_(pdal::point_count_t pointNumber)
 	m_chunk = std::unique_ptr<ChunkReader>(new ChunkReader(offset,maxRead,m_scans[currentScan],getDimensions()));
 }
 
-pdal::point_count_t E57Reader::getNumberPoints_() const 
+pdal::point_count_t E57Reader::extractNumberPoints() const
 {
 	pdal::point_count_t count = 0;
 	for (auto& scan: m_scans)    
@@ -383,7 +382,7 @@ pdal::point_count_t E57Reader::getNumberPoints_() const
 	return count;
 }
 
-void E57Reader::extractScans_()
+void E57Reader::extractScans()
 {
 	e57::StructureNode root = m_imf->root();
 	if (!root.isDefined("/data3D"))

@@ -34,7 +34,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../io/uuid.hpp"
+#include "plugins/e57/io/Uuid.hpp"
 
 using namespace uuid;
 

@@ -35,8 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 #include "Support.hpp"
 
-#include "../io/e57reader.hpp"
-#include "../io/utils.hpp"
+#include "plugins/e57/io/E57Reader.hpp"
+#include "plugins/e57/io/Utils.hpp"
 
 using namespace pdal;
 
@@ -67,7 +67,7 @@ TEST(E57Reader, testGetDimension)
     reader.prepare(table);
 
     auto dimensions = reader.getDimensions();
-    ASSERT_EQ(dimensions.size(),7);
+    ASSERT_EQ(dimensions.size(),7u);
     std::vector<std::string> expectedDimensions = {"cartesianX","cartesianY","cartesianZ",
         "colorRed","colorGreen","colorBlue","intensity"};
     for (auto dim: expectedDimensions)
@@ -97,17 +97,17 @@ TEST(E57Reader, pointCount)
 {
     E57Reader reader(Support::datapath("e57/A4.e57"));
     auto count = reader.getNumberPoints();
-    ASSERT_EQ(count,4);
+    ASSERT_EQ(count,4u);
 }
 
 TEST(E57Reader, getScans)
 {
     E57Reader reader(Support::datapath("e57/A_B.e57"));
     auto scans = reader.getScans();
-    ASSERT_EQ(scans.size(),2);
+    ASSERT_EQ(scans.size(),2u);
     E57Reader reader2(Support::datapath("e57/A4.e57"));
     scans = reader2.getScans();
-    ASSERT_EQ(scans.size(),1);
+    ASSERT_EQ(scans.size(),1u);
 }
 
 TEST(E57Reader, testRead) 
@@ -119,10 +119,10 @@ TEST(E57Reader, testRead)
     PointTable table;
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
-    ASSERT_EQ(viewSet.size(),1);
+    ASSERT_EQ(viewSet.size(),1u);
 
     auto cloud = *viewSet.begin();
-    ASSERT_EQ(cloud->size(),4);
+    ASSERT_EQ(cloud->size(),4u);
 
     auto pt = cloud->point(0);
     ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::X),-44.300098);
@@ -149,14 +149,13 @@ PointViewSet readertest_readE57(std::string filename,PointTableRef table)
     return reader.execute(table);
 }
 
-
 TEST(E57Reader, testMultipleClouds) 
 {
     PointTable table;
     PointViewSet viewSet = readertest_readE57(Support::datapath("e57/A_B.e57"),table);
-    ASSERT_EQ(viewSet.size(),1);
+    ASSERT_EQ(viewSet.size(),1u);
     auto cloud = *viewSet.begin();
-    ASSERT_EQ(cloud->size(),6);
+    ASSERT_EQ(cloud->size(),6u);
 
     PointTable tableA;
     PointViewSet viewSetA = readertest_readE57(Support::datapath("e57/A4.e57"),tableA);
@@ -193,9 +192,9 @@ TEST(E57Reader, testTransformMerge)
 {
     PointTable table;
     PointViewSet viewSet = readertest_readE57(Support::datapath("e57/A_moved_B.e57"),table);
-    ASSERT_EQ(viewSet.size(),1);
+    ASSERT_EQ(viewSet.size(),1u);
     auto cloud = *viewSet.begin();
-    ASSERT_EQ(cloud->size(),6);
+    ASSERT_EQ(cloud->size(),6u);
 
     PointTable tableA;
     PointViewSet viewSetA = readertest_readE57(Support::datapath("e57/A4_moved.e57"),tableA);

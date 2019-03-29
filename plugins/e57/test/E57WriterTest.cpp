@@ -36,9 +36,9 @@
 #include <pdal/pdal_test_main.hpp>
 #include "Support.hpp"
 
-#include "../io/e57writer.hpp"
-#include "../io/e57reader.hpp"
-#include "../io/utils.hpp"
+#include "plugins/e57/io/E57Writer.hpp"
+#include "plugins/e57/io/E57Reader.hpp"
+#include "plugins/e57/io/Utils.hpp"
 
 using namespace pdal;
 

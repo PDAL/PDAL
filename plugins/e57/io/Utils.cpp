@@ -34,7 +34,7 @@
 
 #include <limits>
 
-#include "utils.hpp"
+#include "Utils.hpp"
 
 pdal::Dimension::Id pdal::e57plugin::e57ToPdal(std::string e57Dimension) {
     if (e57Dimension == "cartesianX")
@@ -303,43 +303,5 @@ std::string pdal::e57plugin::getDescription(const e57::Node &node)
 //		break;
 //	}
 	return infoStr;
-}
-
-e57::Node pdal::e57plugin::getNode(const e57::Node &parent, std::string childName)
-{
-	if (parent.type() == e57::E57_STRUCTURE)
-	{
-		e57::StructureNode s = static_cast<e57::StructureNode>(parent);
-		if (!s.isDefined(childName))
-		{
-			std::string message =
-				"Node " +  parent.elementName() + " does not have a children named " + childName;
-			throw std::invalid_argument(message);
-		}
-		else
-		{
-			return s.get(childName);
-		}
-	}
-	else if (parent.type() == e57::E57_VECTOR)
-	{
-		e57::VectorNode v = static_cast<e57::VectorNode>(parent);
-		if (!v.isDefined(childName))
-		{
-			std::string message =
-                    "Node " +  parent.elementName() + " does not have a children named " + childName;
-			throw std::invalid_argument(message);
-		}
-		else
-		{
-			return v.get(childName);
-		}
-	}
-else
-	{
-		std::string message =
-			"Node " + parent.elementName() + " is not hierarchical and does not have children";
-		throw std::invalid_argument(message);
-	}
 }
 

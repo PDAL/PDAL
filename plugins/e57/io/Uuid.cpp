@@ -32,50 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <gtest/gtest.h>
+#include "Uuid.hpp"
 
-#include "../io/utils.hpp"
-
-using namespace pdal::e57plugin;
-
-TEST(E57Utils, e57ToPdalTranslation)
+namespace uuid{
+unsigned char random_char()
 {
-    ASSERT_EQ(e57ToPdal("cartesianX"),pdal::Dimension::Id::X);
-    ASSERT_EQ(e57ToPdal("fake"),pdal::Dimension::Id::Unknown);
-    ASSERT_EQ(e57ToPdal("cartesianY"),pdal::Dimension::Id::Y);
-    ASSERT_EQ(e57ToPdal("cartesianZ"),pdal::Dimension::Id::Z);
-    ASSERT_EQ(e57ToPdal("colorRed"),pdal::Dimension::Id::Red);
-    ASSERT_EQ(e57ToPdal("colorGreen"),pdal::Dimension::Id::Green);
-    ASSERT_EQ(e57ToPdal("colorBlue"),pdal::Dimension::Id::Blue);
-    ASSERT_EQ(e57ToPdal("intensity"),pdal::Dimension::Id::Intensity);
+    std::random_device rd;
+    std::mt19937 gen(rd()); 
+    std::uniform_int_distribution<> dis(0, 255);
+    return static_cast<unsigned char>(dis(gen));
 }
 
-TEST(E57Utils, pdalToE57Translation)
+std::string generate_hex(const unsigned int len) 
 {
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::X),"cartesianX");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Y),"cartesianY");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Z),"cartesianZ");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Red),"colorRed");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Green),"colorGreen");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Blue),"colorBlue");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Intensity),"intensity");
+    std::stringstream ss;
+    for(unsigned int i = 0; i < len; i++) {
+        auto rc = random_char();
+        std::stringstream hexstream;
+        hexstream << std::hex << int(rc);
+        auto hex = hexstream.str(); 
+        ss << (hex.length() < 2 ? '0' + hex : hex);
+    }        
+    return ss.str();
 }
 
-TEST(E57Utils, rescaleE57ToPdal)
+std::string generate_uuid()
 {
-    ASSERT_FLOAT_EQ(rescaleE57ToPdalValue("fake",10.0,{0,100}),10.0) ;
-    ASSERT_FLOAT_EQ(rescaleE57ToPdalValue("intensity",0.5,{0,1}),std::numeric_limits<uint16_t>::max()/2.0) ;
-    ASSERT_FLOAT_EQ(rescaleE57ToPdalValue("intensity",5,{0,10}),std::numeric_limits<uint16_t>::max()/2.0) ;
+    return generate_hex(4) + '-' + generate_hex(2) + "-" + generate_hex(2)+ "-" + generate_hex(2) + "-" + generate_hex(6); 
 }
-
-
-TEST(E57Utils, getPdalBounds)
-{
-    using pdal::Dimension::Id;
-    auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity};
-    for (auto type: pdalTypes)
-    {
-        ASSERT_NO_THROW(getPdalBounds(type));
-    }
-    ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::Unknown));
 }
