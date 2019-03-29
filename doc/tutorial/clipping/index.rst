@@ -1,6 +1,5 @@
 .. _clipping:
 
-================================================================================
 Clipping with Geometries
 ================================================================================
 
@@ -14,7 +13,7 @@ Introduction
 
 This tutorial describes how to construct a pipeline that takes in geometries
 and clips out data with given geometry attributes.  It is common to desire
-being able to cut or clip point cloud data with 2D geometries, often from
+to cut or clip point cloud data with 2D geometries, often from
 auxillary data sources such as `OGR`_-readable `Shapefiles`_.  This tutorial
 describes how to construct a pipeline that takes in geometries and clips out
 point cloud data inside geometries with matching attributes.
@@ -34,7 +33,7 @@ This tutorial utilizes the Autzen dataset. In addition to typical PDAL
 software (fetch it from :ref:`download`), you will need to download the
 following two files:
 
-* http://www.liblas.org/samples/autzen/autzen.laz
+* https://github.com/PDAL/data/autzen/autzen.laz
 * https://github.com/PDAL/PDAL/raw/master/test/data/autzen/attributes.json
 
 Stage Operations
@@ -42,18 +41,16 @@ Stage Operations
 
 This operation depends on two stages PDAL provides.
 The first is the :ref:`filters.overlay` stage, which allows you to assign
-point values based on polygons read from `OGR`_. The second is the
+point values based on polygons read from `OGR`_. The second is
 :ref:`filters.range`, which allows you to keep or reject points from the
 set that match given criteria.
 
 .. seealso::
 
-    :ref:`filters.python` or :ref:`filters.matlab` allows you to construct sophisticated logic
-    for keeping or rejecting points in a more expressive environment (`Python`_) or
-    (`Matlab`_)..
+    :ref:`filters.python` allow you to construct sophisticated logic
+    for keeping or rejecting points in a more expressive environment.
 
 .. _`Python`: http://www.python.org
-.. _`Matlab`: http://www.mathworks.com
 
 Data Preparation
 -------------------------------------------------------------------------------
@@ -90,14 +87,15 @@ for us on-the-fly:
     so we are explictly setting one with the LayerSRS parameter. If your
     data does have coordinate system information, you don't need to do that.
 
-Save this VRT definition to a file, called ``attributes.vrt`` in the same location where you
+Save this VRT definition to a file, called ``attributes.vrt`` in the same
+location where you
 stored the ``autzen.laz`` and ``attributes.json`` files.
 
 
 The attribute GeoJSON file has a couple of features with different attributes.
-For our scenario, we want to clip out the yellow-green polygon, marked number "5",
+For our scenario, we want to clip out the yellow-green polygon, marked
+number "5",
 in the upper right hand corner.
-
 
 
 .. figure:: autzen-shapes-to-clip.png
@@ -111,13 +109,12 @@ in the upper right hand corner.
 Pipeline
 -------------------------------------------------------------------------------
 
-A PDAL :ref:`pipeline` is how you define a set of actions to happen to data
-as they are read, filtered, and written.
+A PDAL :ref:`pipeline <pipeline>` is how you define a set of actions to
+apply to data as they are read, filtered, and written.
 
 .. code-block:: json
 
-  {
-    "pipeline":[
+  [
       "autzen.laz",
       {
         "type":"filters.overlay",
@@ -131,8 +128,7 @@ as they are read, filtered, and written.
         "limits":"Classification[5:5]"
       },
       "output.las"
-    ]
-  }
+  ]
 
 * :ref:`readers.las`: Define a reader that can read `ASPRS LAS`_ or `LASzip`_
   data.
@@ -143,7 +139,7 @@ as they are read, filtered, and written.
   for the points that have coincident polygons to 2, 5, and 6, only keep
   ``Classification`` values in the range of ``5:5``. This functionally means
   we're only keeping those points with a classification value of 5.
-* :ref:`writers.las`: write our content back out using an `ASPRS LAS`_ writer.
+* :ref:`writers.las`: write our content out using an `ASPRS LAS`_ writer.
 
 .. note::
 
@@ -156,17 +152,17 @@ as they are read, filtered, and written.
 Processing
 -------------------------------------------------------------------------------
 
-1) Save the pipeline to a file called ``shape-clip.json`` in the same directory as
-   your ``attributes.json`` and ``autzen.laz`` files.
+1) Save the pipeline to a file called ``shape-clip.json`` in the
+  same directory as your ``attributes.json`` and ``autzen.laz`` files.
 
-2) Call ``pdal pipeline`` on the :ref:`pipeline`.
+2) Run ``pdal pipeline`` on the json file.
 
     ::
 
         $ pdal pipeline shape-clip.json
 
-3) Visualize ``output.las`` in an environment capable of viewing it. http://plas.io
-   or `CloudCompare`_ should do the trick.
+3) Visualize ``output.las`` in an environment capable of viewing it.
+   http://plas.io or `CloudCompare`_ should do the trick.
 
     .. image:: autzen-shapes-clipped.png
         :scale: 30%

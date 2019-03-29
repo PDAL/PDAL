@@ -3,8 +3,8 @@
 filters.tail
 ===============================================================================
 
-The TailFilter returns a specified number of points from the end of the
-PointView.
+The **Tail Filter** returns a specified number of points from the end of the
+``PointView``.
 
 .. note::
 
@@ -13,27 +13,25 @@ PointView.
 
 .. embed::
 
-Example #1
-----------
+Example
+-------
 
 Sort and extract the 100 lowest intensity points.
 
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"filters.sort",
           "dimension":"Intensity",
           "order":"DESC"
-        },
-        {
+      },
+      {
           "type":"filters.tail",
           "count":100
-        }
-      ]
-    }
+      }
+  ]
 
 
 .. seealso::
@@ -45,4 +43,4 @@ Options
 -------------------------------------------------------------------------------
 
 count
-  Number of points to return. [Default: **10**]
+  Number of points to return. [Default: 10]

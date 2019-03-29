@@ -14,33 +14,14 @@ Reading with PDAL
    :depth: 3
    :backlinks: none
 
-This tutorial will be presented in two parts -- the first being an introduction
-to the command-line utilities that can be used to perform processing operations
-with PDAL, and the second being an introductory C++ tutorial of how to use the
-:ref:`PDAL API <cppapi>` to accomplish similar tasks.
-
-Introduction
-------------------------------------------------------------------------------
-
-PDAL is both a C++ library and a collection of command-line utilities for
-data processing operations.  While it is similar to `LAStools`_ in a few
-aspects, and borrows some of its lineage in others, the PDAL library
-is an attempt to construct a library that is primarily intended as a
-data translation library first, and a exploitation and filtering library
-second.  PDAL exists to provide an abstract API for software developers
-wishing to navigate the multitude of point cloud formats that are out there.
-Its value and niche is explicitly modeled after the hugely successful `GDAL`_
-library, which provides an abstract API for data formats in the GIS raster
-data space.
-
-.. _`GDAL`: http://www.gdal.org
-.. _`LAStools`: http://lastools.org
+This tutorial is an introduction to using PDAL to read data using pdal
+from the command line.
 
 A basic inquiry example
 ------------------------------------------------------------------------------
 
 Our first example to demonstrate PDAL's utility will be to simply query an
-`ASPRS LAS`_ file to determine the data that are in it in the very first point.
+`LAS`_ file to determine the data that are in it in the very first point.
 
 .. note::
 
@@ -87,22 +68,15 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 A conversion example
 ------------------------------------------------------------------------------
 
-Conversion of one file format to another can be a hairy topic. You should
-expect *leakage* of details of data in the source format as it is converted to
-the destination format. :ref:`metadata`, file organization, and data themselves
-may not be able to be represented as you move from one format to another.
-Conversion is by definition lossy, if not in terms of the actual data
-themselves, but possibly in terms of the auxiliary data the format also
-carries.
-
-It is also important to recognize that both fixed and flexible point cloud
-formats exist, and conversion of flexible formats to fixed formats will often
-leak. The dimensions might even match in terms of type or name, but not in
-terms of width or interpretation.
-
-.. seealso::
-
-    See :cpp:class:`pdal::Dimension` for details on PDAL dimensions.
+Conversion of data from one format to another may be lossy, in that some
+data in the source format may not be representable in the same format or
+at all in the destination format.  For example, some formats don't support
+spatial references for point data, some have no metadata support and others
+have limited :ref:`dimension <dimensions>` support.  Even when data types are
+supported in both source and destination formats, there may be limitations
+with regard to data type, precision or , scaling.  PDAL attempts to convert
+data as accurately as possible, but you should make sure that you're
+aware of the capabilities of the data formats you're using.
 
 ::
 
@@ -119,20 +93,18 @@ terms of width or interpretation.
     636451.97,849250.59,435.17,48,1,1,0,0,1,-9,122,7326,245384,99,85,95
     ...
 
-The text format, of course, is the ultimate flexible-definition format -- at
-least for the point data themselves. For the other header information, like
-the spatial reference system, or the `ASPRS LAS`_ `UUID`_, the conversion
-leaks. In short, you may need to preserve some more information as part of
+The text format supports all point attributes, but provides no support for
+metadata such as the input spatial reference system or the `LAS`_ header
+fields, such as `UUID`_.
+You may need to preserve some more information as part of
 your conversion to make it useful down the road.
 
-:ref:`metadata`
+Metadata
 ..............................................................................
 
-PDAL transmits this other information in the form of :ref:`metadata` that is
-carried per-stage throughout the PDAL :ref:`processing pipeline <pipeline>`.
-We can capture this metadata using the :ref:`info_command` utility.
-
-::
+PDAL carries :ref:`metadata <metadata>` for each stage through the PDAL
+:ref:`processing pipeline <pipeline>`.  The metadata can be written in
+JSON form using the pdal :ref:`info <info_command>` command ::
 
     $ pdal info --metadata interesting.las
 
@@ -143,52 +115,42 @@ For formats that do not have the ability to
 preserve this metadata internally, you can keep a ``.json`` file
 alongside the ``.txt`` file as auxiliary information.
 
-.. seealso::
-    :ref:`metadata` contains much more detail of metadata workflow in PDAL.
-
-A :ref:`pipeline_command` example
+A Pipeline Example
 ------------------------------------------------------------------------------
 
 The full power of PDAL comes in the form of :ref:`pipeline_command` invocations.
-While :ref:`translate_command` provides some utility as far as simple conversion of
-one format to another, it does not provide much power to a user to be able
-to filter or alter data as they are converted.  Pipelines are the way to take
-advantage of PDAL's ability to manipulate data as they are converted. This
-section will provide a basic example and demonstration of :ref:`pipeline`,
-but the :ref:`pipeline` document contains more detailed exposition of the
+Pipelines allow you to take advantage of PDAL's ability to manipulate data
+as they are converted. This section will provide a basic example and
+demonstration of pipeline usage.  See the
+:ref:`pipeline specification <pipeline>`, for more detailed exposition of the
 topic.
 
-.. note::
-
-    The :ref:`pipeline_command` document contains detailed examples and background
-    information.
-
-The :ref:`pipeline_command` PDAL utility is one that takes in a ``.json`` file
-containing :ref:`pipeline <pipeline_command>` description that defines a PDAL
-processing pipeline. Options can be given at each :cpp:class:`pdal::Stage` of
-the pipeline to affect different aspects of the processing pipeline, and
-stages may be chained together into multiple combinations to have varying
-effects.
+The :ref:`pipeline_command` describes a series of processing stages to
+be performed in JSON format.  Each stage can be provided a set of options
+that control the details of processing. PDAL is single-threaded and stages
+are executed in a linear order.  Some stages support what is known as
+"stream mode".  If all stages in a pipeline support stream mode the command
+is run using using stream mode to reduce the memory processing footprint.
+Even when run in stream mode, execution is single-threaded and can be
+thought of as linear.
 
 Simple conversion
 ..............................................................................
 
-The following `JSON`_ document defines a :ref:`pipeline` that takes the ``file.las``
-`ASPRS LAS`_ file and converts it to a new file called ``output.las``.
+The following `JSON`_ document defines a pipeline that takes the ``file.las``
+`LAS`_ file and converts it to a new file called ``output.las``.
 
 .. code-block:: json
 
-  {
-    "pipeline":[
+  [
       "file.las",
       "output.las"
-    ]
-  }
+  ]
 
 Loop a directory and filter it through a pipeline
 ................................................................................
 
-This little bash script loops through a directory and pushes the las files through
+This bash script loops through a directory and pushes the las files through
 a pipeline, substituting the input and output as it goes.
 
 ::
@@ -213,4 +175,4 @@ Here is an example doing something similar with Windows PowerShell
 .. _`JSON`: http://www.json.org/
 .. _`UUID`: http://en.wikipedia.org/wiki/Universally_unique_identifier
 .. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/las/interesting.las?raw=true
-.. _`ASPRS LAS`: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html
+.. _`LAS`: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html

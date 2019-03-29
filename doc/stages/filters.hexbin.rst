@@ -10,14 +10,17 @@ within the bounds.
 
 .. figure:: filters.hexbin.img1.jpg
     :scale: 50 %
-    :alt: Hexbin derive from input point buffer
+    :alt: Hexbin derived from input point buffer
 
-    Hexbin output shows boundary of actual points in point buffer, not just rectangular extents.
+    Hexbin output shows boundary of actual points in point buffer, not
+    just rectangular extents.
 
 The hexbin filter reads a point stream and writes out a metadata record that
-contains a much tighter data bound, expressed as a well-known text polygon. In
-order to write out the metadata record, the `pdal` pipeline command must be
-invoked using the `--pipeline-serialization` option:
+contains a boundary, expressed as a well-known text polygon. The filter counts
+the points in each hexagonal area to determine if that area should be included
+as part of the boundary.  In
+order to write out the metadata record, the *pdal* pipeline command must be
+invoked using the "--pipeline-serialization" option:
 
 .. streamable::
 
@@ -30,17 +33,16 @@ the hexbin filter:
 
 ::
 
-    {
-        "pipeline": [
-            "/Users/me/pdal/test/data/las/autzen_trim.las",
-            {
-                "type" : "filters.hexbin"
-            }
-        ]
-    }
+  [
+      "/Users/me/pdal/test/data/las/autzen_trim.las",
+      {
+          "type" : "filters.hexbin"
+      }
+  ]
 
+::
 
-    $ pdal pipeline hexbin-pipeline.json --metadata hexbin-out.json
+  $ pdal pipeline hexbin-pipeline.json --metadata hexbin-out.json
 
 
 .. code-block:: none
@@ -99,16 +101,19 @@ As a convenience, the ``pdal info`` command will produce similar output:
 Options
 -------
 
-edge_size
+_`edge_size`
   If not set, the hexbin filter will estimate a hex size based on a sample of
   the data. If set, hexbin will use the provided size in constructing the
   hexbins to test.
 
 sample_size
-  How many points to sample when automatically calculating the edge size? [Default: **5000**]
+  How many points to sample when automatically calculating the edge
+  size? Only applies if edge_size_ is not explicitly set. [Default: 5000]
 
 threshold
-  Number of points that have to fall within a hexbin before it is considered "in" the data set. [Default: **15**]
+  Number of points that have to fall within a hexagon boundary before it
+  is considered "in" the data set. [Default: 15]
 
 precision
-  Coordinate precision to use in writing out the well-known text of the boundary polygon. [Default: **8**]
+  Coordinate precision to use in writing out the well-known text
+  of the boundary polygon. [Default: 8]

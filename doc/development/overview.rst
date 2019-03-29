@@ -10,8 +10,9 @@ PDAL Architecture Overview
 
 PDAL is a set of applications and library to facilitate translation of point
 cloud data between various formats.  In addition, it provides some facilities
-for transformation of data between various geometric projections and
-manipulations and can calculate some statistical, boundary and density data.
+for transformation of data between various geometric projections
+and can calculate some statistical, boundary and density data.  PDAL also
+provides point classification algorithms.
 PDAL provides an API that can be used by programmers for integration into their
 own projects or to allow extension of existing capabilities.
 
@@ -25,13 +26,14 @@ PDAL reads data from a set of input sources using format-specific readers.
 Point data can be passed through various filters that transform data or create
 metadata.  If desired, points can be written to an output stream using a
 format-specific writer.  PDAL can merge data from various input sources into a
-single output source, preserving attribute data where supported by the input and
-output formats.
+single output source, preserving attribute data where supported by the input
+and output formats.
 
 .. image:: pipeline.png
 
 The above diagram shows a possible arrangement of PDAL readers, filters and
-writers, all of which are known as stages.  Any merge operation or filter may be
+writers, all of which are known as stages.  Any merge operation or filter
+may be
 placed after any reader.  Output filters are distinct from other filters only in
 that they may create more than one set of points to be further filtered or
 written.  The arrangement of readers, filters and writers is called a PDAL
@@ -175,7 +177,8 @@ pipeline.
     implement the no-argument version.  Whether to place initialization code
     at this step or in prepared() or ready() (see below) is a judgement call,
     but detection of errors earlier in the process allows faster termination of
-    a command..
+    a command.  Files opened in this step should also be closed before
+    returning.
 
 3) void addDimensions(PointLayoutPtr layout)
 
@@ -222,9 +225,9 @@ is called once for each point view to be processed by the stage.
 3) void done(PointTablePtr table)
 
     This function allows a stage to clean up resources not released by a
-    stage’s destructor.  It also allows other termination functions, such
-    a closing of databases, writing file footers, rewriting headers or
-    closing or renaming files.
+    stage’s destructor.  It also allows other execution of termination
+    functions, such a closing of databases, writing file footers,
+    rewriting headers or closing or renaming files.
 
 Streaming Stage Execution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

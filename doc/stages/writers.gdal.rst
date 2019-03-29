@@ -3,8 +3,8 @@
 writers.gdal
 ================================================================================
 
-The `GDAL`_ writer creates a raster from a point cloud using an interpolation
-algorithm.  Output is produced using GDAL and can use any `driver
+The **GDAL writer** creates a raster from a point cloud using an interpolation
+algorithm.  Output is produced using `GDAL`_ and can use any `driver
 that supports creation of rasters`_.  A data_type_ can be specified for the
 raster (double, float, int32, etc.).  If no data type is specified, the
 data type with the largest range supported by the driver is used.
@@ -81,16 +81,14 @@ whose values contribute to the cell value is 14.14.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "pdal/test/data/las/autzen_trim.las",
-        {
+  [
+      "pdal/test/data/las/autzen_trim.las",
+      {
           "resolution": 10,
           "radius": 14.14,
           "filename":"outputfile.tif"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options

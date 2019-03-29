@@ -4,13 +4,11 @@
 filters.gridprojection
 ===============================================================================
 
-The Grid Projection filter passes data through the Point Cloud Library (`PCL`_)
-GridProjection algorithm.
+The **Grid Projection Filter** passes data through the
+Point Cloud Library `GridProjection <http://docs.pointclouds.org/1.7.1/classpcl_1_1_grid_projection.html>`_ algorithm.
 
 GridProjection is an implementation of the surface reconstruction method
 described in [Li2010]_.
-
-.. _`PCL`: http://www.pointclouds.org
 
 .. plugin::
 
@@ -19,22 +17,19 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.gridprojection"
-        },
-        {
+      },
+      {
           "type":"writers.ply",
           "faces":true,
           "filename":"output.ply"
-        }
-      ]
-    }
-
+      }
+  ]
 
 Options
 -------------------------------------------------------------------------------
 
-None at the moment. Relying on defaults within PCL.
+None.

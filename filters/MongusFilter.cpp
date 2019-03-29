@@ -43,6 +43,8 @@
 
 #include <Eigen/Dense>
 
+// NOTE: This filter is deprecated as of 3/2019
+
 namespace pdal
 {
 
