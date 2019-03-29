@@ -70,7 +70,6 @@ TEST(E57Reader, testGetDimension)
     }
 }
 
-// TODO test multiple scans with different data
 TEST(E57Reader, testHeader) 
 {
     Options ops;
