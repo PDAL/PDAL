@@ -221,7 +221,6 @@ std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &p
             max = static_cast<e57::FloatNode>(prototype.get(fieldName)).maximum();  
 		}
 	}
-
     return {min,max};
 }
 

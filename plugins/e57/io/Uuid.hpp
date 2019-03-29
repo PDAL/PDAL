@@ -45,6 +45,6 @@
 
 namespace pdal {
     namespace uuidGenerator {
-std::string generate_uuid();
+        std::string generate_uuid();
 }
 }

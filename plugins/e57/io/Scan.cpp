@@ -37,7 +37,6 @@
 
 namespace e57
 {
-
     Scan::Scan(const e57::StructureNode &node) : m_numPoints(0)
 {
     m_rawData = std::unique_ptr<e57::StructureNode>(new e57::StructureNode(node));

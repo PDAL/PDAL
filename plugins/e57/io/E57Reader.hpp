@@ -47,35 +47,35 @@ namespace pdal {
 class E57Reader: public Reader, public Streamable
 {
 
-class ChunkReader
-{
-public:
-    ChunkReader(pdal::point_count_t pointOffset, pdal::point_count_t maxPointRead,
-                const std::shared_ptr<e57::Scan> &scan,
-                const std::set<std::string>& e57Dimensions);
-    ~ChunkReader();
+    class ChunkReader {
+    public:
+        ChunkReader(pdal::point_count_t pointOffset, pdal::point_count_t maxPointRead,
+                    const std::shared_ptr<e57::Scan> &scan,
+                    const std::set<std::string> &e57Dimensions);
 
-    // returns false if the index falls out of the [pointOffset,pointOffset + m_maxPointRead] interval
-    bool isInScope(pdal::point_count_t index) const;
+        ~ChunkReader();
 
-    bool isInChunk(pdal::point_count_t index) const;
+        // returns false if the index falls out of the [pointOffset,pointOffset + m_maxPointRead] interval
+        bool isInScope(pdal::point_count_t index) const;
 
-    void setPoint(pdal::point_count_t pointIndex, pdal::PointRef point, 
-        const std::set<std::string>& e57Dimensions) const;
+        bool isInChunk(pdal::point_count_t index) const;
 
-    // Reads a new chunk of data
-    pdal::point_count_t read(pdal::point_count_t index);
+        void setPoint(pdal::point_count_t pointIndex, pdal::PointRef point,
+                      const std::set<std::string> &e57Dimensions) const;
 
-private:
-    pdal::point_count_t m_startIndex;
-    pdal::point_count_t m_pointOffset;
-    pdal::point_count_t m_maxPointRead;
-    const pdal::point_count_t m_defaultChunkSize;
-    std::map<std::string,std::vector<double>> m_doubleBuffers;
-    std::vector<e57::SourceDestBuffer> m_e57buffers;
-    std::unique_ptr<e57::CompressedVectorReader> m_dataReader;
-    std::shared_ptr<e57::Scan> m_scan;
-};
+        // Reads a new chunk of data
+        pdal::point_count_t read(pdal::point_count_t index);
+
+    private:
+        pdal::point_count_t m_startIndex;
+        pdal::point_count_t m_pointOffset;
+        pdal::point_count_t m_maxPointRead;
+        const pdal::point_count_t m_defaultChunkSize;
+        std::map<std::string, std::vector<double>> m_doubleBuffers;
+        std::vector<e57::SourceDestBuffer> m_e57buffers;
+        std::unique_ptr<e57::CompressedVectorReader> m_dataReader;
+        std::shared_ptr<e57::Scan> m_scan;
+    };
 
 public:
     E57Reader(): Reader(), Streamable() {};

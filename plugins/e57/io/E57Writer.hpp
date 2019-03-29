@@ -44,21 +44,21 @@ namespace pdal
 class E57Writer : public pdal::Writer, public pdal::Streamable 
 {
 
-class ChunkWriter
-{
-public:
-    ChunkWriter(const std::vector<std::string>& dimensionsToWrite,e57::CompressedVectorNode& vectorNode);
+    class ChunkWriter {
+    public:
+        ChunkWriter(const std::vector<std::string> &dimensionsToWrite, e57::CompressedVectorNode &vectorNode);
 
-    void write(pdal::PointRef& point);
-    void finalise();
+        void write(pdal::PointRef &point);
 
-private:
-    const pdal::point_count_t m_defaultChunkSize;
-    pdal::point_count_t m_currentIndex;
-    std::map<std::string,std::vector<double>> m_doubleBuffers;
-    std::vector<e57::SourceDestBuffer> m_e57buffers;
-    std::unique_ptr<e57::CompressedVectorWriter> m_dataWriter;
-};
+        void finalise();
+
+    private:
+        const pdal::point_count_t m_defaultChunkSize;
+        pdal::point_count_t m_currentIndex;
+        std::map<std::string, std::vector<double>> m_doubleBuffers;
+        std::vector<e57::SourceDestBuffer> m_e57buffers;
+        std::unique_ptr<e57::CompressedVectorWriter> m_dataWriter;
+    };
 
 public:
     E57Writer();

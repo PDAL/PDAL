@@ -154,14 +154,11 @@ void E57Writer::ready(PointTableRef table)
             m_dimensionsToWrite.push_back(e57Dimension);
         }
     }
-
     setupWriter();
-
 }
 
 void E57Writer::write(const PointViewPtr view)
 {
-
     for (PointId id = 0; id < view->size(); ++id)
     {
         PointRef point = view->point(id);
@@ -304,6 +301,5 @@ void E57Writer::done(PointTableRef table)
         std::string msg = "E57 error with code " + std::to_string(e.errorCode()) + " - " + e.context();
         throwError(msg);
     }
-
 }
 }
