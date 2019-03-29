@@ -81,9 +81,7 @@ scale_x, scale_y, scale_z
     which causes the writer to select a scale to set the stored values of the
     dimensions to range from [0, 2147483647].  [Default: .01]
 
-    .. note::
-
-        written value = (nominal value - offset) / scale.
+    Note: written value = (nominal value - offset) / scale.
 
 offset_x, offset_y, offset_z
     Offset to be subtracted from the X, Y and Z nominal values, respectively,
@@ -91,9 +89,7 @@ offset_x, offset_y, offset_z
     which causes the writer to set the offset to the minimum value of the
     dimension.  [Default: auto]
 
-    .. note::
-
-        written value = (nominal value - offset) / scale.
+    Note: written value = (nominal value - offset) / scale.
 
     .. note::
 

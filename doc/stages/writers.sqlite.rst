@@ -13,17 +13,16 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"filters.chipper",
           "capacity":50
-        }
-        {
+      },
+      {
           "type":"writers.sqlite",
           "connection":"output.sqlite",
           "cloud_table_name":"SIMPLE_CLOUD",
@@ -32,10 +31,8 @@ Example
           "block_table_name":"SIMPLE_BLOCKS",
           "cloud_column_name":"CLOUD",
           "filename":"outputfile.pcd"
-        }
-      ]
-    }
-
+      }
+  ]
 
 
 Options
@@ -51,13 +48,14 @@ block_table_name
   Name of table to store patch information [Required]
 
 cloud_column_name
-  Name of column to store primary cloud_id key [Default: **cloud**]
+  Name of column to store primary cloud_id key [Default: "cloud"]
 
 compression
-  Use https://github.com/verma/laz-perf compression technique to store patches
+  Use LAZperf_ compression technique to store patches. [Default: false]
 
 overwrite
-  To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **true**]
+  Drop the table before writing.  To append to the table set to ``false``.
+  [Default: true]
 
 pre_sql
   Optional SQL to execute *before* running the translation. If the value references a file, the file is read and any SQL inside is executed. Otherwise the value is executed as SQL itself.
@@ -78,3 +76,4 @@ output_dims
   are listed by name and separated by commas.
 
 .. _SQLite: http://sqlite.org
+.. _LAZperf: https://github.com/hobu/laz-perf

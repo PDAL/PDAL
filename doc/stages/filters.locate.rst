@@ -1,14 +1,12 @@
 .. _filters.locate:
 
-===============================================================================
 filters.locate
 ===============================================================================
 
-The Locate filter searches the specified ``dimension`` for the minimum or
+The Locate filter searches the specified dimension_ for the minimum or
 maximum value and returns a single point at this location. If multiple points
-share the min/max value, the first will be returned. All dimensions of the input
-``PointView`` will be output, subject to any overriding writer options.
-
+share the min/max value, the first will be returned. All dimensions of the
+input ``PointView`` will be output, subject to any overriding writer options.
 
 .. embed::
 
@@ -19,22 +17,20 @@ This example returns the point at the highest elevation.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.locate",
           "dimension":"Z",
           "minmax":"max"
-        },
-        "output.las"
-      ]
-    }
+      },
+      "output.las"
+  ]
 
 Options
 -------
 
-dimension
+_`dimension`
   Name of the dimension in which to search for min/max value.
 
 minmax

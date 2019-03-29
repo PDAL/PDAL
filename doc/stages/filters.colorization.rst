@@ -17,10 +17,9 @@ read from the raster and applied to any dimension name desired.
 .. note::
 
     `GDAL`_ is used to read the color information and any GDAL-readable
-    `supported format`_ can be read.
+    supported `format`_ can be read.
 
 .. _GDAL: http://www.gdal.org
-.. _`supported format`: www.gdal.org/formats_list.html
 
 The bands of the raster to apply to each are selected using the "band" option,
 and the values of the band may be scaled before being written to the dimension.
@@ -36,8 +35,7 @@ Example
 
 .. code-block:: json
 
-  {
-    "pipeline":[
+  [
       "uncolored.las",
       {
         "type":"filters.colorization",
@@ -45,17 +43,16 @@ Example
         "raster":"aerial.tif"
       },
       "colorized.las"
-    ]
-  }
+  ]
 
 Considerations
 --------------------------------------------------------------------------------
 
-Certain data configurations can cause degenerate filter behavior. One significant
-knob to adjust is the ``GDAL_CACHEMAX`` environment variable. One driver which
-can have issues is when a `TIFF`_ file is striped vs. tiled. GDAL's data access
-in that situation is likely to cause lots of re-reading if the cache isn't large
-enough.
+Certain data configurations can cause degenerate filter behavior.
+One significant knob to adjust is the ``GDAL_CACHEMAX`` environment
+variable. One driver which can have issues is when a `TIFF`_ file is
+striped vs. tiled. GDAL's data access in that situation is likely to
+cause lots of re-reading if the cache isn't large enough.
 
 Consider a striped TIFF file of 286mb:
 
@@ -65,16 +62,14 @@ Consider a striped TIFF file of 286mb:
 
 .. code-block:: json
 
-  {
-    "pipeline":[
+  [
       "colourless.laz",
       {
         "type":"filters.colorization",
         "raster":"orth-striped.tif"
       },
       "coloured-striped.las"
-    ]
-  }
+  ]
 
 Simple application of the :ref:`filters.colorization` using the striped `TIFF`_
 with a 268mb :ref:`readers.las` file will take nearly 1:54.
@@ -106,9 +101,8 @@ Options
 -------
 
 raster
-  The raster file to read the band from. Any format supported by `GDAL`_ may be read.
-
-dimensions
+  The raster file to read the band from. Any `format`_ supported by
+  `GDAL`_ may be read.  dimensions
   A comma separated list of dimensions to populate with values from the raster
   file. Dimensions will be created if they don't already exist.  The format
   of each dimension is <name>:<band_number>:<scale_factor>.
@@ -117,3 +111,5 @@ dimensions
   begin at 1 and increment from the band number of the previous dimension.
   If not supplied, the scaling factor is 1.0.
   [Default: "Red:1:1.0, Green:2:1.0, Blue:3:1.0"]
+
+.. _format: https://www.gdal.org/formats_list.html

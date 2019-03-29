@@ -107,15 +107,6 @@ Point Cloud read/write support.
 .. note::
     MSVC should only require the oci.lib and oci.dll library and dlls.
 
-Hexer
-..............................................................................
-
-`Hexer`_ is a library with a simple `CMake`-based build system that
-provides simple hexagon gridding of large point sets for density surface
-generation and boundary approximation. It can be obtained via github.com at
-https://github.com/hobu/hexer It is used by :ref:`filters.hexbin` to output
-density surfaces and boundary approximations.
-
 Nitro
 ..............................................................................
 
@@ -189,7 +180,6 @@ used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.
 .. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
 
-.. _Boost: http://www.boost.org
 .. _GDAL: http://www.gdal.org
 .. _Proj.4: http://trac.osgeo.org/proj
 .. _GeoTIFF: http://trac.osgeo.org/geotiff

@@ -3,7 +3,7 @@
 filters.icp
 ==============
 
-The ICP filter uses the `PCL's Iterative Closest Point (ICP)`_ algorithm to
+The **ICP filter** uses the `PCL's Iterative Closest Point (ICP)`_ algorithm to
 calculate a rigid (rotation and translation) transformation that best aligns
 two datasets.  The first input to the ICP filter is considered the "fixed"
 points, and all subsequent points are "moving" points.  The output from the
@@ -18,18 +18,17 @@ Examples
 
 .. code-block:: json
 
-    {
-        "pipeline": [
-            "fixed.las",
-            "moving.las",
-            {
-                "type": "filters.icp"
-            },
-            "output.las"
-        ]
-    }
+  [
+      "fixed.las",
+      "moving.las",
+      {
+          "type": "filters.icp"
+      },
+      "output.las"
+  ]
 
-To get the transform matrix, you'll need to use the ``--metadata`` option:
+To get the transform matrix, you'll need to use the ``--metadata`` option
+from the pipeline command:
 
 ::
 

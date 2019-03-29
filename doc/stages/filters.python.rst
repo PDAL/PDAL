@@ -1,11 +1,11 @@
 .. _filters.python:
 
 filters.python
-====================
+==============
 
-The ``filters.python`` filter allows `Python`_ software to be embedded in a
-:ref:`pipeline` that interacts with a `NumPy`_ array of the data and allows
-you to modify those points. Additionally, some global :ref:`metadata` is also
+The **Python Filter** allows `Python`_ software to be embedded in a
+:ref:`pipeline` that allows modification of PDAL points through a `NumPy`_
+array.  Additionally, some global :ref:`metadata` is also
 available that Python functions can interact with.
 
 The function must have two `NumPy`_ arrays as arguments, ``ins`` and ``outs``.
@@ -13,17 +13,10 @@ The ``ins`` array represents the points before the ``filters.python``
 filter and the ``outs`` array represents the points after filtering.
 
 .. warning::
-    :ref:`filters.python` was called ``filters.programmable`` and
-    ``filters.predicate`` before PDAL 1.6. The functionality of
-    ``filters.programmable`` and ``filters.predicate`` was rolled into
-    :ref:`filters.python`, and the filter was renamed for clarity.
 
-
-.. warning::
-
-    Each array contains all the :ref:`dimensions` of the incoming ``ins`` point schema.
-    Each array in the ``outs`` list match `NumPy`_ array of the
-    same type as provided as ``ins`` for shape and type.
+    Each array contains all the :ref:`dimensions` of the incoming ``ins``
+    point schema.  Each array in the ``outs`` list matches the `NumPy`_
+    array of the same type as provided as ``ins`` for shape and type.
 
 .. plugin::
 
@@ -38,58 +31,49 @@ filter and the ``outs`` array represents the points after filtering.
       return True
 
 
-
-1) The function must always return `True` upon success. If the function returned `False`,
-   an error would be thrown and the :ref:`pipeline` exited.
+1) The function must always return `True` upon success. If the function
+   returned `False`, an error would be thrown and the :ref:`pipeline` exited.
 
 
 
 2) If you want write a dimension that might not be available, you can specify
-   it with the ``add_dimension`` option. 
+   it with the add_dimension_ option:
 
-    .. code-block:: json
+   ::
 
-        "add_dimension": "NewDimensionOne"
+       "add_dimension": "NewDimensionOne"
 
-   To create more than one dimension, this option also accepts an array.
+   To create more than one dimension, this option also accepts an array:
 
-    .. code-block:: json
+   ::
 
-        "add_dimension": [ "NewDimensionOne", "NewDimensionTwo", "NewDimensionThree" ]
+       "add_dimension": [ "NewDimensionOne", "NewDimensionTwo", "NewDimensionThree" ]
 
-
-.. note::
-
-    To filter points based on a `Python`_ function, use the
-    :ref:`filters.python` filter.
 
 Modification Example
 --------------------------------------------------------------------------------
 
-
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "file-input.las",
-        {
+  [
+      "file-input.las",
+      {
           "type":"filters.smrf"
-        },
-        {
+      },
+      {
           "type":"filters.python",
           "script":"multiply_z.py",
           "function":"multiply_z",
           "module":"anything"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"file-filtered.las"
-        }
-      ]
-    }
+      }
+  ]
 
 The JSON pipeline file referenced the external `multiply_z.py` `Python`_ script,
-which scales up the Z coordinate by a factor of 10.
+which scales the ``Z`` coordinate by a factor of 10.
 
 .. code-block:: python
 
@@ -132,7 +116,6 @@ classified 1 or 2 to be dropped from the point stream.
      outs['Mask'] = keep
      return True
 
-
 .. note::
 
     :ref:`filters.range` is a specialized filter that implements the exact
@@ -142,44 +125,40 @@ classified 1 or 2 to be dropped from the point stream.
 
 .. seealso::
 
-    If you want to just read a :ref:`pipeline` of operations into a numpy
-    array, the PDAL Python extension might be what you want. See it at
-    https://pypi.python.org/pypi/PDAL
+    If you want to read a :ref:`pipeline` of operations into a numpy
+    array, the `PDAL Python extension <https://pypi.python.org/pypi/PDAL>`_
+    is available.
 
-Example :ref:`pipeline`
+Example pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "file-input.las",
-        {
+  [
+      "file-input.las",
+      {
           "type":"filters.smrf"
-        },
-        {
+      },
+      {
           "type":"filters.python",
           "script":"filter_pdal.py",
           "function":"filter",
           "module":"anything"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"file-filtered.las"
-        }
-      ]
-    }
-
-
-
-
+      }
+  ]
 
 Module Globals
 --------------------------------------------------------------------------------
 
 Three global variables are added to the Python module as it is run to allow
-you to get :ref:`dimensions`, :ref:`metadata`, and coordinate system information.
-Additionally, the ``metadata`` object can be set by the function to modify metadata
+you to get :ref:`dimensions`, :ref:`metadata`, and coordinate system
+information.
+Additionally, the ``metadata`` object can be set by the function
+to modify metadata
 for the in-scope :ref:`filters.python` :cpp:class:`pdal::Stage`.
 
 .. code-block:: python
@@ -194,7 +173,8 @@ for the in-scope :ref:`filters.python` :cpp:class:`pdal::Stage`.
 Updating metadata
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The filter can update the global ``metadata`` dictionary as needed, define it as a
+The filter can update the global ``metadata`` dictionary as needed,
+define it as a
 **global** Python variable for the function's scope, and the updates will be
 reflected back into the pipeline from that stage forward.
 
@@ -208,33 +188,32 @@ reflected back into the pipeline from that stage forward.
 Passing Python objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As of PDAL 1.5, it is possible to pass an option to :ref:`filters.python` and
-:ref:`filters.python` of JSON representing a Python dictionary containing objects
-you want to use in your function. This feature is useful in situations where you
+An JSON-formatted option can be passed to the filter representing a
+Python dictionary containing objects you want to use in your function.
+This feature is useful in situations where you
 wish to call :ref:`pipeline_command` with substitutions.
 
-If we needed to be able to provide the Z scaling factor of `Example Pipeline`_ with a
+If we needed to be able to provide the Z scaling factor of `Example Pipeline`_
+with a
 Python argument, we can place that in a dictionary and pass that to the filter
 as a separate argument. This feature allows us to be able easily reuse the same
 basic Python function while substituting values as necessary.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.python",
           "module":"anything",
           "function":"filter",
           "source":"arguments.py",
           "pdalargs":"{\"factor\":0.3048,\"an_argument\":42, \"another\": \"a string\"}"
-        },
-        "output.las"
-      ]
-    }
+      },
+      "output.las"
+  ]
 
-With that option set, you can now fetch the ``pdalargs`` dictionary in your
+With that option set, you can now fetch the pdalargs_ dictionary in your
 Python script and use it:
 
 .. code-block:: python
@@ -248,13 +227,12 @@ Python script and use it:
       return True
 
 
-
-
 Standard output and error
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A ``redirector`` module is available for scripts to output to PDAL's log stream
-explicitly. The module handles redirecting ``sys.stderr`` and ``sys.stdout`` for you
+explicitly. The module handles redirecting ``sys.stderr`` and
+``sys.stdout`` for you
 transparently, but it can be used directly by scripts. See the PDAL source
 code for more details.
 
@@ -264,21 +242,23 @@ Options
 
 script
   When reading a function from a separate `Python`_ file, the file name to read
-  from. [Example: functions.py]
+  from.
+
+source
+  The literal `Python`_ code to execute, when the script option is
+  not being used.
 
 module
   The Python module that is holding the function to run. [Required]
 
 function
-  The function to call.
+  The function to call. [Required]
 
-source
-  The literal `Python`_ code to execute, when the script option is not being used.
 
-add_dimension
+_`add_dimension`
   A dimension name or an array of dimension names to add to the pipeline that do not already exist.
 
-pdalargs
+_`pdalargs`
   A JSON dictionary of items you wish to pass into the modules globals as the
   ``pdalargs`` object.
 
