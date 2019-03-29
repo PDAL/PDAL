@@ -1,7 +1,3 @@
-//
-// Created by Nicolas Chaulet on 2018-12-14.
-//
-
 #ifndef E57IO_E57WRITER_HPP
 #define E57IO_E57WRITER_HPP
 
@@ -9,7 +5,6 @@
 #include <E57Format.h>
 #include <pdal/Writer.hpp>
 #include <pdal/Streamable.hpp>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace pdal
 {
@@ -40,7 +35,6 @@ public:
     std::string getName() const;
 
 private:
-    // Implement pdal::Writer interface
     virtual void addArgs(ProgramArgs &args);
     virtual void initialize();
     virtual bool processOne(PointRef & point);
@@ -50,8 +44,6 @@ private:
 
     void setupFileHeader_();
     void setupWriter_();
-
-    std::shared_ptr<spdlog::logger> m_logger;
 
     // Writer parameters
     std::string m_filename;

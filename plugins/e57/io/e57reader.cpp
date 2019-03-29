@@ -129,11 +129,6 @@ std::string E57Reader::getName() const
 
 void E57Reader::initialize() 
 {
-	m_logger =  spdlog::get("PDAL - E57Reader");
-	if (!m_logger)
-	{
-		m_logger = spdlog::stderr_color_mt("PDAL - E57Reader");
-	}
 	if (m_filename.size() == 0)
 	{
 		m_filename = m_filenameManual;
@@ -228,11 +223,11 @@ std::string E57Reader::getHeader() const
 std::string E57Reader::getSummary() const 
 {
 	std::string info = getHeader();
-	info += fmt::format("This file contains %i scans.\n", m_scans.size());
+	info += "This file contains " + std::to_string(m_scans.size()) + " scans.\n";
 	
 	for (unsigned i = 0; i < m_scans.size(); i++)    
 	{
-		info += fmt::format("    Scan %i with %i points.\n",i+1,m_scans[i]->getNumPoints());
+		info += "    Scan " + std::to_string(i+1) + " with " + std::to_string(m_scans[i]->getNumPoints()) +" points.\n";
 	}
 	return info;
 }
@@ -313,13 +308,13 @@ void E57Reader::openFile_(std::string filename)
 	}
 	catch(const e57::E57Exception& e)
 	{
-		m_logger->error("E57 error with code {} -  {}",e.errorCode(),e.context());
+        std::cout<< "E57 error with code ";
 		throw pdal_error(e.context());
 	}
 	catch(...)
 	{
 		std::string msg("Unknown error");
-		m_logger->error(msg);
+		std::cout<< msg << std::endl;
 		throw pdal_error(msg);
 	}
 }

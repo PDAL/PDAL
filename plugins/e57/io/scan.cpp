@@ -1,6 +1,5 @@
 #include "scan.hpp"
 #include "utils.hpp"
-#include <spdlog/fmt/fmt.h>
 
 namespace e57
 {

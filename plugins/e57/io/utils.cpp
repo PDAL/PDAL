@@ -1,7 +1,5 @@
 #include <limits>
 
-#include <spdlog/fmt/fmt.h>
-
 #include "utils.hpp"
 
 pdal::Dimension::Id pdal::e57plugin::e57ToPdal(std::string e57Dimension) {
@@ -206,70 +204,70 @@ std::pair<double,double> pdal::e57plugin::getPdalBounds(pdal::Dimension::Id id)
         case Dim::Intensity:
             return {std::numeric_limits<uint16_t>::min(),std::numeric_limits<uint16_t>::max()};
         default:
-            std::string msg = fmt::format("Dimension %s is not currently supported.",pdal::Dimension::name(id));
+            std::string msg ="Dimension " + pdal::Dimension::name(id) + " is not currently supported.";
             throw std::invalid_argument(msg);
     }
 }
 
 std::string pdal::e57plugin::getDescription(const e57::Node &node)
 {
-	std::string infoStr = fmt::format("'%s' - ",node.elementName().c_str());
-	switch(node.type())
-	{
-	case e57::E57_STRUCTURE:
-		{
-			e57::StructureNode s = static_cast<e57::StructureNode>(node);
-			infoStr += fmt::format("STRUCTURE, %d child(ren)",s.childCount());
-		}
-		break;
-	case e57::E57_VECTOR:
-		{
-			e57::VectorNode v = static_cast<e57::VectorNode>(node);
-			infoStr += fmt::format("VECTOR, %d child(ren)",v.childCount());
-		}
-		break;
-	case e57::E57_COMPRESSED_VECTOR:
-		{
-			e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(node);
-			infoStr += fmt::format("COMPRESSED VECTOR, %d elements",cv.childCount());
-		}
-		break;
-	case e57::E57_INTEGER:
-		{
-			e57::IntegerNode i = static_cast<e57::IntegerNode>(node);
-			infoStr += fmt::format("%d (INTEGER)",i.value());
-		}
-		break;
-	case e57::E57_SCALED_INTEGER:
-		{
-			e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(node);
-			infoStr += fmt::format("%d (SCALED INTEGER)",si.scaledValue());
-		}
-		break;
-	case e57::E57_FLOAT:
-		{
-			e57::FloatNode f = static_cast<e57::FloatNode>(node);
-			infoStr += fmt::format("%.2f (FLOAT)",f.value());
-		}
-		break;
-	case e57::E57_STRING:
-		{
-			e57::StringNode s = static_cast<e57::StringNode>(node);
-			infoStr += s.value();
-		}
-		break;
-	case e57::E57_BLOB:
-		{
-			e57::BlobNode b = static_cast<e57::BlobNode>(node);
-			infoStr += fmt::format("BLOB, size=%d",b.byteCount());
-		}
-		break;
-	default:
-		{
-			infoStr += "INVALID";
-		}
-		break;
-	}
+	std::string infoStr = node.elementName() + " - ";
+//	switch(node.type())
+//	{
+//	case e57::E57_STRUCTURE:
+//		{
+//			e57::StructureNode s = static_cast<e57::StructureNode>(node);
+//			infoStr += fmt::format("STRUCTURE, %d child(ren)",s.childCount());
+//		}
+//		break;
+//	case e57::E57_VECTOR:
+//		{
+//			e57::VectorNode v = static_cast<e57::VectorNode>(node);
+//			infoStr += fmt::format("VECTOR, %d child(ren)",v.childCount());
+//		}
+//		break;
+//	case e57::E57_COMPRESSED_VECTOR:
+//		{
+//			e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(node);
+//			infoStr += fmt::format("COMPRESSED VECTOR, %d elements",cv.childCount());
+//		}
+//		break;
+//	case e57::E57_INTEGER:
+//		{
+//			e57::IntegerNode i = static_cast<e57::IntegerNode>(node);
+//			infoStr += fmt::format("%d (INTEGER)",i.value());
+//		}
+//		break;
+//	case e57::E57_SCALED_INTEGER:
+//		{
+//			e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(node);
+//			infoStr += fmt::format("%d (SCALED INTEGER)",si.scaledValue());
+//		}
+//		break;
+//	case e57::E57_FLOAT:
+//		{
+//			e57::FloatNode f = static_cast<e57::FloatNode>(node);
+//			infoStr += fmt::format("%.2f (FLOAT)",f.value());
+//		}
+//		break;
+//	case e57::E57_STRING:
+//		{
+//			e57::StringNode s = static_cast<e57::StringNode>(node);
+//			infoStr += s.value();
+//		}
+//		break;
+//	case e57::E57_BLOB:
+//		{
+//			e57::BlobNode b = static_cast<e57::BlobNode>(node);
+//			infoStr += fmt::format("BLOB, size=%d",b.byteCount());
+//		}
+//		break;
+//	default:
+//		{
+//			infoStr += "INVALID";
+//		}
+//		break;
+//	}
 	return infoStr;
 }
 
@@ -280,8 +278,8 @@ e57::Node pdal::e57plugin::getNode(const e57::Node &parent, std::string childNam
 		e57::StructureNode s = static_cast<e57::StructureNode>(parent);
 		if (!s.isDefined(childName))
 		{
-			std::string message = fmt::format(
-				"Node %s does not have a children named %s", parent.elementName().c_str(), childName.c_str());
+			std::string message =
+				"Node " +  parent.elementName() + " does not have a children named " + childName;
 			throw std::invalid_argument(message);
 		}
 		else
@@ -294,8 +292,8 @@ e57::Node pdal::e57plugin::getNode(const e57::Node &parent, std::string childNam
 		e57::VectorNode v = static_cast<e57::VectorNode>(parent);
 		if (!v.isDefined(childName))
 		{
-			std::string message = fmt::format(
-				"Node %s does not have a children named %s", parent.elementName().c_str(), childName.c_str());
+			std::string message =
+                    "Node " +  parent.elementName() + " does not have a children named " + childName;
 			throw std::invalid_argument(message);
 		}
 		else
@@ -305,8 +303,8 @@ e57::Node pdal::e57plugin::getNode(const e57::Node &parent, std::string childNam
 	}
 else
 	{
-		std::string message = fmt::format(
-			"Node %s is not hierarchical and does not have children", parent.elementName().c_str());
+		std::string message =
+			"Node " + parent.elementName() + " is not hierarchical and does not have children";
 		throw std::invalid_argument(message);
 	}
 }

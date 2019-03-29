@@ -1,8 +1,3 @@
-//
-// Created by Nicolas Chaulet on 2018-12-14.
-//
-#include <spdlog/fmt/fmt.h>
-
 #include "e57writer.hpp"
 #include "utils.hpp"
 #include "uuid.hpp"
@@ -84,11 +79,6 @@ void E57Writer::ChunkWriter::finalise()
 
 E57Writer::E57Writer(): m_doublePrecision(false),Streamable(), Writer()
 {
-    m_logger =  spdlog::get("PDAL - E57Writer");
-	if (!m_logger)
-	{
-		m_logger = spdlog::stderr_color_mt("PDAL - E57Writer");
-	}
 }
 
 E57Writer::~E57Writer()
@@ -116,8 +106,8 @@ void E57Writer::initialize()
     }
     catch (...) 
     {
-        std::string msg = fmt::format("Could not open file {}", m_filename);
-        m_logger->error(msg);
+        std::string msg = "Could not open file " + m_filename;
+        std::cout<<msg<<std::endl;
         throw pdal_error(msg);
     }
 }
@@ -159,7 +149,7 @@ bool E57Writer::processOne(PointRef& point)
     }
     else
     {
-        throw pdal_error("Something went wrong, e57 writer has not been initailised correctly.");
+        throw pdal_error("Something went wrong, e57 writer has not been initialised correctly.");
     }
     return true;
 }
@@ -282,7 +272,8 @@ void E57Writer::setupWriter_()
     }
     catch (e57::E57Exception e)
     {
-        m_logger->error("E57 error with code {} - {}",e.errorCode(),e.context());
+        std::string msg = "E57 error with code " + std::to_string(e.errorCode()) + " - " + e.context();
+        std::cout<<msg<<std::endl;
         throw e;
     }
 

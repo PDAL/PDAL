@@ -7,7 +7,6 @@
 #include <E57Format.h>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include "scan.hpp"
 
@@ -89,7 +88,6 @@ private:
     // members
     std::unique_ptr<e57::ImageFile> m_imf; 
     std::vector<std::shared_ptr<e57::Scan>> m_scans;
-    std::shared_ptr<spdlog::logger> m_logger;
 
     // Allows construction by filename
     std::string m_filenameManual;
