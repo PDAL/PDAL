@@ -17,12 +17,10 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "sbetfile.sbet",
-        "output.las"
-      ]
-    }
+  [
+      "sbetfile.sbet",
+      "output.las"
+  ]
 
 
 Options
@@ -31,8 +29,9 @@ Options
 filename
   File to read from [Required]
 
+.. include:: reader_opts.rst
+
 angles_as_degrees
   Convert all angles to degrees. If false, angles are read as radians. [Default: true]
 
-.. include:: reader_opts.rst
 

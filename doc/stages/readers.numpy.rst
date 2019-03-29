@@ -17,7 +17,7 @@ extension ``.npy``. As of PDAL 1.7.0, ``.npz`` files were not yet supported.
 Array Types
 -----------
 
-:ref:`readers.numpy` supports reading data in two forms:
+readers.numpy supports reading data in two forms:
 
 * As a `structured array`_ with specified field names (from `laspy`_ for
   example)
@@ -43,7 +43,7 @@ of fields.  Each field has a name.  As an example, `laspy`_ provides its
     array([ ((63608330, 84939865, 40735, 65, 73, 1, -11, 126, 7326,  245385.60820904),)],
     dtype=[('point', [('X', '<i4'), ('Y', '<i4'), ('Z', '<i4'), ('intensity', '<u2'), ('flag_byte', 'u1'), ('raw_classification', 'u1'), ('scan_angle_rank', 'i1'), ('user_data', 'u1'), ('pt_src_id', '<u2'), ('gps_time', '<f8')])])
 
-:ref:`readers.numpy` supports reading these Numpy arrays and mapping
+The numpy reader supports reading these Numpy arrays and mapping
 field names to standard PDAL :ref:`dimension <dimensions>` names.
 If that fails, the reader retries by removing ``_``, ``-``, or ``space``
 in turn.  If that also fails, the array field names are used to create
@@ -147,7 +147,7 @@ filename
 .. include:: reader_opts.rst
 
 dimension
-  Dimension name from :ref:`dimensions` to map raster values
+  :ref:`Dimension <dimensions>` name to map raster values
 
 order
   Either 'row' or 'column' to specify assigning the X,Y and Z values

@@ -9,7 +9,7 @@ interchange file format for LIDAR data.
 .. warning::
 
     Scale/offset are not preserved from an input LAS file.  See below for
-    information on the scale/offset options and the ``forward`` option.
+    information on the scale/offset options and the `forward`_ option.
 
 .. embed::
 
@@ -23,53 +23,44 @@ containing `user_id` and `data` items.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "vlrs": [{
-                    "description": "A description under 32 bytes",
-                    "record_id": 42,
-                    "user_id": "hobu",
-                    "data": "dGhpcyBpcyBzb21lIHRleHQ="
-                   },
-                   {
-                    "description": "A description under 32 bytes",
-                    "record_id": 43,
-                    "user_id": "hobu",
-                    "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
-                    }
-                  ],
+              "description": "A description under 32 bytes",
+              "record_id": 42,
+              "user_id": "hobu",
+              "data": "dGhpcyBpcyBzb21lIHRleHQ="
+              },
+              {
+              "description": "A description under 32 bytes",
+              "record_id": 43,
+              "user_id": "hobu",
+              "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
+              }],
           "filename":"outputfile.las"
-        }
-      ]
-    }
-
-
-
-
+      }
+  ]
 
 Example
 -------
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -86,7 +77,7 @@ filename
   :ref:`filters.divider`.
   [Required]
 
-forward
+_`forward`
   List of header fields whose values should be preserved from a source
   LAS file.  The
   option can be specified multiple times, which has the same effect as
@@ -212,7 +203,7 @@ extra_dims
 
 pdal_metadata
   Write two VLRs containing `JSON`_ output with both the :ref:`metadata` and
-  :ref:`pipeline` serialization. [Default: **false**]
+  :ref:`pipeline` serialization. [Default: false]
 
 .. _`JSON`: http://www.json.org/
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html

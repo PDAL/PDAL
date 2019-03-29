@@ -287,6 +287,7 @@ location of our test file. This is similar to the :ref:`same command
     :alt: Setting the arguments for lasinfo
 
 
+.. _optional-libraries:
 
 Configure :ref:`Optional Libraries <dependencies>`
 ------------------------------------------------------------------------------

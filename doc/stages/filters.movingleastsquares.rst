@@ -5,12 +5,11 @@ filters.movingleastsquares
 ===============================================================================
 
 The Moving Least Squares filter passes data through the Point Cloud Library
-(`PCL`_) MovingLeastSquares algorithm.
+`moving least squares <http://docs.pointclouds.org/trunk/classpcl_1_1_moving_least_squares.html>`_ algorithm.
 
-MovingLeastSquares is an implementation of the MLS (Moving Least Squares)
-algorithm for data smoothing and improved normal estimation described in
-[Alexa2003]_. It also contains methods for upsampling the resulting cloud based
-on the parametric fit.
+Moving least squares is intended to smooth data and improve normal estiation
+as described in [Alexa2003]_. It also contains methods for upsampling
+the resulting cloud based on the parametric fit.
 
 .. _`PCL`: http://www.pointclouds.org
 
@@ -21,22 +20,19 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.movingleastsquares"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"output.las"
-        }
-      ]
-    }
-
+      }
+  ]
 
 
 Options
 -------------------------------------------------------------------------------
 
-None at the moment. Relying on defaults within PCL.
+None.
