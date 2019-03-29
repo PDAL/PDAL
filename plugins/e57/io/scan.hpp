@@ -78,7 +78,7 @@ private:
 
     // Pose information
     double m_translation[3] = {0};
-    double m_rotation[3][3] = {0}; 
+    double m_rotation[3][3] = {{0}};
     bool m_hasPose = false;
 };
 }

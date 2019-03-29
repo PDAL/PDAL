@@ -101,7 +101,7 @@ TEST(E57WRiter,testWrite)
 
     auto expectedDimensions = {pdal::Dimension::Id::X,pdal::Dimension::Id::Y,pdal::Dimension::Id::Z,
         pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue,pdal::Dimension::Id::Intensity};
-    for (int i =0; i < cloudout->size();i++)
+    for (pdal::point_count_t i =0; i < cloudout->size();i++)
     {
         auto ptB = cloudin->point(i);
         auto pt = cloudout->point(i);

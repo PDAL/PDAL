@@ -44,7 +44,7 @@ namespace pdal
 E57Reader::ChunkReader::ChunkReader(pdal::point_count_t pointOffset,pdal::point_count_t maxPointRead,
 	std::shared_ptr<e57::Scan> scan, 
     const std::set<std::string>& e57Dimensions):
-    m_startIndex(0), m_defaultChunkSize(1e6), m_maxPointRead(maxPointRead), m_scan(scan)
+    m_startIndex(0), m_maxPointRead(maxPointRead), m_defaultChunkSize(1e6), m_scan(scan)
 {
     // Initialise the read buffers
     for (auto& dimension: e57Dimensions)
@@ -278,7 +278,7 @@ int E57Reader::getScanIndex(pdal::point_count_t pointIndex) const
 		return -1;
 	}
 	pdal::point_count_t counter = 0;
-	for (auto i=0; i < m_scans.size(); i++)
+	for (pdal::point_count_t i=0; i < m_scans.size(); i++)
 	{
 		counter += m_scans[i]->getNumPoints();
 		if (pointIndex <counter)

@@ -111,7 +111,7 @@ void E57Writer::ChunkWriter::finalise()
 
 
 
-E57Writer::E57Writer(): m_doublePrecision(false),Streamable(), Writer()
+E57Writer::E57Writer(): Writer(), Streamable(), m_doublePrecision(false)
 {
 }
 

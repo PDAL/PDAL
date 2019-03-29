@@ -34,7 +34,6 @@ if (WITH_TESTS)
             FILES
                 test/reader-test.cpp
                 test/scan-test.cpp
-                test/uuid-test.cpp
                 test/utils-test.cpp
             LINK_WITH
                 ${e57plugin_reader}
@@ -45,6 +44,7 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_e57_writer_test
             FILES
                 test/writer-test.cpp
+                test/uuid-test.cpp
             LINK_WITH
                 ${e57plugin_reader}
                 ${e57plugin_writer}

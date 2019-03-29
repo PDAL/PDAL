@@ -57,13 +57,13 @@ std::vector<std::string> split(const std::string& s, char c) {
 TEST(UUID, uuidGenerate)
 {
     std::string id = generate_uuid();
-    ASSERT_EQ(id.size(), 36);
+    ASSERT_EQ(id.size(),(unsigned long)36);
 
     std::vector<std::string> components = split(id,'-');
-    ASSERT_EQ(components.size(),5);
-    ASSERT_EQ(components[0].size(),8);
-    ASSERT_EQ(components[1].size(),4);
-    ASSERT_EQ(components[2].size(),4);
-    ASSERT_EQ(components[3].size(),4);
-    ASSERT_EQ(components[4].size(),12);
+    ASSERT_EQ(components.size(),(unsigned long)5);
+    ASSERT_EQ(components[0].size(),(unsigned long)8);
+    ASSERT_EQ(components[1].size(),(unsigned long)4);
+    ASSERT_EQ(components[2].size(),(unsigned long)4);
+    ASSERT_EQ(components[3].size(),(unsigned long)4);
+    ASSERT_EQ(components[4].size(),(unsigned long)12);
 }
