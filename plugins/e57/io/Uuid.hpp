@@ -43,8 +43,8 @@
 #include <functional>
 #include <string>
 
-namespace uuid{
-unsigned char random_char();
-std::string generate_hex(const unsigned int len) ;
+namespace pdal {
+    namespace uuidGenerator {
 std::string generate_uuid();
+}
 }

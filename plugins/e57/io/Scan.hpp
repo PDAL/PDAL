@@ -61,9 +61,9 @@ public:
 
 private:
     /// Called only once on constructor called
-    void decodeHeader_();
+    void decodeHeader();
 
-    void getPose_();
+    void getPose();
 
     // Core data holders for underlying e57 object
     std::unique_ptr<e57::StructureNode> m_rawData;

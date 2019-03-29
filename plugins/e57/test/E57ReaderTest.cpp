@@ -51,12 +51,6 @@ TEST(E57Reader, testCtr)
     ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::X));
 }
 
-TEST(E57Reader, testSummary) 
-{
-    E57Reader reader(Support::datapath("e57/A4.e57"));
-    std::string txt = reader.getSummary();
-}
-
 TEST(E57Reader, testGetDimension) 
 {
     Options ops;

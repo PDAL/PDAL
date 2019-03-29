@@ -50,9 +50,9 @@ class E57Reader: public Reader, public Streamable
 class ChunkReader
 {
 public:
-    ChunkReader(pdal::point_count_t pointOffset,pdal::point_count_t maxPointRead,
-        std::shared_ptr<e57::Scan> scan, 
-        const std::set<std::string>& e57Dimensions);
+    ChunkReader(pdal::point_count_t pointOffset, pdal::point_count_t maxPointRead,
+                const std::shared_ptr<e57::Scan> &scan,
+                const std::set<std::string>& e57Dimensions);
     ~ChunkReader();
 
     // returns false if the index falls out of the [pointOffset,pointOffset + m_maxPointRead] interval
@@ -84,12 +84,6 @@ public:
 
     std::string getName() const;
 
-    /// Extract the header and return in a human readable format
-    std::string getHeader() const;
-
-    /// Extract the file's structure and return in human readable format
-    std::string getSummary() const;
-
     /// Get the total number of points in the scan
     point_count_t getNumberPoints() const;
 
@@ -112,7 +106,7 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     // virtual void done(PointTableRef table);
 
-    void openFile(std::string filename);
+    void openFile(const std::string &filename);
     void setupReader(pdal::point_count_t pointNumber);
     point_count_t extractNumberPoints() const;
     void extractScans();

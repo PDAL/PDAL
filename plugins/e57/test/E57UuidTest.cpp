@@ -36,8 +36,7 @@
 
 #include "plugins/e57/io/Uuid.hpp"
 
-using namespace uuid;
-
+using namespace pdal::uuidGenerator;
 
 std::vector<std::string> split(const std::string& s, char c) {
     std::string::size_type i = 0;

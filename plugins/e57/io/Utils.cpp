@@ -36,7 +36,7 @@
 
 #include "Utils.hpp"
 
-pdal::Dimension::Id pdal::e57plugin::e57ToPdal(std::string e57Dimension) {
+pdal::Dimension::Id pdal::e57plugin::e57ToPdal(const std::string &e57Dimension) {
     if (e57Dimension == "cartesianX")
     {
         return pdal::Dimension::Id::X;
@@ -139,7 +139,8 @@ std::vector<std::string> pdal::e57plugin::supportedE57Types()
     return {"cartesianX","cartesianY","cartesianZ","colorRed","colorGreen","colorBlue","intensity"};
 }
 
-double pdal::e57plugin::rescaleE57ToPdalValue(std::string e57Dimension, double value, const std::pair<double,double>& e57Bounds)
+double pdal::e57plugin::rescaleE57ToPdalValue(
+        const std::string &e57Dimension, double value, const std::pair<double, double> &e57Bounds)
 {
     assert(e57Bounds.second >= e57Bounds.first);
     if (e57Bounds.second == e57Bounds.first)
@@ -153,7 +154,7 @@ double pdal::e57plugin::rescaleE57ToPdalValue(std::string e57Dimension, double v
     {
         minmax = getPdalBounds(pdalDimension);
     }
-    catch (std::invalid_argument e)
+    catch (std::invalid_argument &e)
     {
         return value;
     }
@@ -162,7 +163,7 @@ double pdal::e57plugin::rescaleE57ToPdalValue(std::string e57Dimension, double v
     return value;
 }
 
-std::pair<double,double> pdal::e57plugin::getLimits(const e57::StructureNode &prototype, std::string fieldName)
+std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &prototype, const std::string &fieldName)
 {
     double max = std::nan("max");
     double min = std::nan("min");
@@ -241,67 +242,5 @@ std::pair<double,double> pdal::e57plugin::getPdalBounds(pdal::Dimension::Id id)
             std::string msg ="Dimension " + pdal::Dimension::name(id) + " is not currently supported.";
             throw std::invalid_argument(msg);
     }
-}
-
-std::string pdal::e57plugin::getDescription(const e57::Node &node)
-{
-	std::string infoStr = node.elementName() + " - ";
-//	switch(node.type())
-//	{
-//	case e57::E57_STRUCTURE:
-//		{
-//			e57::StructureNode s = static_cast<e57::StructureNode>(node);
-//			infoStr += fmt::format("STRUCTURE, %d child(ren)",s.childCount());
-//		}
-//		break;
-//	case e57::E57_VECTOR:
-//		{
-//			e57::VectorNode v = static_cast<e57::VectorNode>(node);
-//			infoStr += fmt::format("VECTOR, %d child(ren)",v.childCount());
-//		}
-//		break;
-//	case e57::E57_COMPRESSED_VECTOR:
-//		{
-//			e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(node);
-//			infoStr += fmt::format("COMPRESSED VECTOR, %d elements",cv.childCount());
-//		}
-//		break;
-//	case e57::E57_INTEGER:
-//		{
-//			e57::IntegerNode i = static_cast<e57::IntegerNode>(node);
-//			infoStr += fmt::format("%d (INTEGER)",i.value());
-//		}
-//		break;
-//	case e57::E57_SCALED_INTEGER:
-//		{
-//			e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(node);
-//			infoStr += fmt::format("%d (SCALED INTEGER)",si.scaledValue());
-//		}
-//		break;
-//	case e57::E57_FLOAT:
-//		{
-//			e57::FloatNode f = static_cast<e57::FloatNode>(node);
-//			infoStr += fmt::format("%.2f (FLOAT)",f.value());
-//		}
-//		break;
-//	case e57::E57_STRING:
-//		{
-//			e57::StringNode s = static_cast<e57::StringNode>(node);
-//			infoStr += s.value();
-//		}
-//		break;
-//	case e57::E57_BLOB:
-//		{
-//			e57::BlobNode b = static_cast<e57::BlobNode>(node);
-//			infoStr += fmt::format("BLOB, size=%d",b.byteCount());
-//		}
-//		break;
-//	default:
-//		{
-//			infoStr += "INVALID";
-//		}
-//		break;
-//	}
-	return infoStr;
 }
 

@@ -41,9 +41,9 @@
 namespace pdal
 {
 
-E57Reader::ChunkReader::ChunkReader(pdal::point_count_t pointOffset,pdal::point_count_t maxPointRead,
-	std::shared_ptr<e57::Scan> scan, 
-    const std::set<std::string>& e57Dimensions):
+E57Reader::ChunkReader::ChunkReader(pdal::point_count_t pointOffset, pdal::point_count_t maxPointRead,
+                                    const std::shared_ptr<e57::Scan> &scan,
+                                    const std::set<std::string>& e57Dimensions):
     m_startIndex(0), m_maxPointRead(maxPointRead), m_defaultChunkSize(1e6), m_scan(scan)
 {
     // Initialise the read buffers
@@ -109,7 +109,7 @@ void E57Reader::ChunkReader::setPoint(pdal::point_count_t pointIndex, pdal::Poin
 				auto minmax = m_scan->getLimits(pdalDimension);
 				value = pdal::e57plugin::rescaleE57ToPdalValue(keyValue.first,keyValue.second[index],minmax);
 			}
-			catch (std::out_of_range e)
+            catch (std::out_of_range &e)
 			{
 				value = keyValue.second[index];
 			}			
@@ -150,7 +150,7 @@ E57Reader::~E57Reader()
 	}
 }
 
-E57Reader::E57Reader(std::string filename) : Reader(), Streamable()
+    E57Reader::E57Reader(std::string filename) : Reader(), Streamable(), m_currentPoint(0), m_pointCount(0)
 {
 	m_filenameManual = filename;
 	initialize();
@@ -163,7 +163,7 @@ std::string E57Reader::getName() const
 
 void E57Reader::initialize() 
 {
-	if (m_filename.size() == 0)
+    if (m_filename.empty())
 	{
 		m_filename = m_filenameManual;
 	}
@@ -177,7 +177,7 @@ void E57Reader::initialize()
 void E57Reader::addDimensions(PointLayoutPtr layout)
 {
 	std::set<pdal::Dimension::Id> supportedDimensions;
-	if (m_scans.size() == 0)
+    if (m_scans.empty())
 	{
 		return;
 	}
@@ -239,32 +239,6 @@ bool E57Reader::processOne(pdal::PointRef& point)
 	return true;
 }
 
-std::string E57Reader::getHeader() const
-{
-	e57::StructureNode root = m_imf->root();
-	std::string info = "";
-	unsigned childCount = root.childCount();
-	for (unsigned i =0; i< childCount; i++) 
-	{
-		e57::Node child = root.get(i);
-		info += pdal::e57plugin::getDescription(child);
-		info += '\n';
-	}
-	return info;
-}
-
-std::string E57Reader::getSummary() const 
-{
-	std::string info = getHeader();
-	info += "This file contains " + std::to_string(m_scans.size()) + " scans.\n";
-	
-	for (unsigned i = 0; i < m_scans.size(); i++)    
-	{
-		info += "    Scan " + std::to_string(i+1) + " with " + std::to_string(m_scans[i]->getNumPoints()) +" points.\n";
-	}
-	return info;
-}
-
 std::vector<std::shared_ptr<e57::Scan>> E57Reader::getScans() const
 {
 	return m_scans;
@@ -295,13 +269,13 @@ std::set<std::string> E57Reader::getDimensions()
 		return m_validDimensions;
 	}
 
-	// Extract smallest common denominator accross all scans (Should we do union of dimensions instead?)
+    // Extract smallest common denominator across all scans
 	auto commonDimensions = m_scans[0]->getDimensions();
 	std::vector<std::string> dimensionsToRemove;
-	for (auto scan: m_scans)
+    for (auto &scan: m_scans)
 	{
 		auto newDims = scan->getDimensions();
-		for (auto dim: commonDimensions)
+        for (auto &dim: commonDimensions)
 		{
 			if (newDims.find(dim) == newDims.end())
 			{
@@ -309,7 +283,7 @@ std::set<std::string> E57Reader::getDimensions()
 			}
 		}
 	}
-	for (auto dim: dimensionsToRemove)
+    for (auto &dim: dimensionsToRemove)
 	{
 		commonDimensions.erase(dim);
 	}
@@ -322,14 +296,14 @@ pdal::point_count_t E57Reader::getNumberPoints() const
 	return m_pointCount;
 }
 
-void E57Reader::openFile(std::string filename)
+    void E57Reader::openFile(const std::string &filename)
 {
 	try
 	{	
 		m_imf = std::unique_ptr<e57::ImageFile>(new e57::ImageFile(filename,"r",e57::CHECKSUM_POLICY_SPARSE));	
 		if (!m_imf->isOpen())
 		{
-			std::cout<<"Failed opening the file"<<std::endl;
+            throwError("Failed opening the file : " + filename);
 		}
 
 		static const e57::ustring normalsExtension("http://www.libe57.org/E57_NOR_surface_normals.txt");
@@ -341,14 +315,12 @@ void E57Reader::openFile(std::string filename)
 	}
 	catch(const e57::E57Exception& e)
 	{
-        std::cout<< "E57 error with code ";
-		throw pdal_error(e.context());
+        throwError("E57 error with code " + std::to_string(e.errorCode()) + " : " + e.context());
 	}
 	catch(...)
 	{
-		std::string msg("Unknown error");
-		std::cout<< msg << std::endl;
-		throw pdal_error(msg);
+        std::string msg("Unknown error in E57 plugin");
+        throwError(msg);
 	}
 }
 
@@ -389,20 +361,17 @@ void E57Reader::extractScans()
 	{
 		throw std::invalid_argument("File does not contain valid 3D data");
 	}
-	e57::VectorNode n(root.get("/data3D")); //E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
+    //E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
+    e57::VectorNode n(root.get("/data3D"));
 	for (unsigned i = 0; i < n.childCount(); i++)
 	{
 		try {
 			e57::StructureNode scanNode(n.get(i));
 			m_scans.emplace_back(new e57::Scan(scanNode));
 		}
-		catch (const e57::E57Exception& e)
-		{
-			std::cout<<e.what()<<std::endl;
-		}
 		catch (const std::exception& e)
 		{
-			std::cout<<e.what()<<std::endl;
+            throwError(std::string("Failed to extract scans from the E57 file: ") + e.what());
 		}
 	}
 }

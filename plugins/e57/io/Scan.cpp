@@ -38,11 +38,11 @@
 namespace e57
 {
 
-Scan::Scan(const e57::StructureNode& node)
+    Scan::Scan(const e57::StructureNode &node) : m_numPoints(0)
 {
     m_rawData = std::unique_ptr<e57::StructureNode>(new e57::StructureNode(node));
     m_rawPoints = std::unique_ptr<CompressedVectorNode>(new CompressedVectorNode(m_rawData->get("points")));
-    decodeHeader_();
+    decodeHeader();
 }
 
 pdal::point_count_t Scan::getNumPoints() const
@@ -72,16 +72,16 @@ bool Scan::hasPose() const
 
 void Scan::transformPoint(pdal::PointRef pt) const
 {
-    double x = pt.getFieldAs<double>(pdal::Dimension::Id::X);
-    double y = pt.getFieldAs<double>(pdal::Dimension::Id::Y);
-    double z = pt.getFieldAs<double>(pdal::Dimension::Id::Z);
+    auto x = pt.getFieldAs<double>(pdal::Dimension::Id::X);
+    auto y = pt.getFieldAs<double>(pdal::Dimension::Id::Y);
+    auto z = pt.getFieldAs<double>(pdal::Dimension::Id::Z);
 
     pt.setField(pdal::Dimension::Id::X, x*m_rotation[0][0] + y*m_rotation[0][1] + z*m_rotation[0][2] + m_translation[0]);
     pt.setField(pdal::Dimension::Id::Y,  x*m_rotation[1][0] + y*m_rotation[1][1] + z*m_rotation[1][2]  + m_translation[1]);
     pt.setField(pdal::Dimension::Id::Z,  x*m_rotation[2][0] + y*m_rotation[2][1] + z*m_rotation[2][2]  + m_translation[2]);
 }
 
-void Scan::decodeHeader_()
+    void Scan::decodeHeader()
 {
     m_numPoints = m_rawPoints->childCount();
 
@@ -97,7 +97,7 @@ void Scan::decodeHeader_()
         }
     }
     // Get pose estimation
-    getPose_();
+    getPose();
 
     // Get bounds
     for (auto& field: supportedFields)
@@ -110,7 +110,7 @@ void Scan::decodeHeader_()
     }
 }
 
-void Scan::getPose_()
+    void Scan::getPose()
 {
     if (m_rawData->isDefined("pose"))
 	{
@@ -125,8 +125,6 @@ void Scan::getPose_()
 			q[2] = e57::FloatNode(rotNode.get("y")).value();
 			q[3] = e57::FloatNode(rotNode.get("z")).value();
 
-			
-			double q00 = q[0] * q[0];
 			double q11 = q[1] * q[1];
 			double q22 = q[2] * q[2];
 			double q33 = q[3] * q[3];
@@ -161,9 +159,6 @@ void Scan::getPose_()
 			m_hasPose = true;
 		}
 	}
-    if (m_hasPose)
-        std::cout<<"Found pose!"<<std::endl;
-
 }
 
 }

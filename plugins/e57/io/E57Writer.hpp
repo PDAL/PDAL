@@ -48,7 +48,6 @@ class ChunkWriter
 {
 public:
     ChunkWriter(const std::vector<std::string>& dimensionsToWrite,e57::CompressedVectorNode& vectorNode);
-    ~ChunkWriter();
 
     void write(pdal::PointRef& point);
     void finalise();
@@ -75,8 +74,9 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    void setupFileHeader_();
-    void setupWriter_();
+    void setupFileHeader();
+
+    void setupWriter();
 
     // Writer parameters
     std::string m_filename;
