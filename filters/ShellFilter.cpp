@@ -67,6 +67,10 @@ void ShellFilter::addArgs(ProgramArgs& args)
 
 void ShellFilter::initialize()
 {
+	std::string allowed;
+    int set = Utils::getenv("PDAL_ALLOW_SHELL", allowed);
+	if (set == -1)
+		throw pdal::pdal_error("PDAL_ALLOW_SHELL environment variable not set, shell access is not allowed");
 }
 
 

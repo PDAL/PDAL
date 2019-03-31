@@ -44,7 +44,7 @@ using namespace pdal;
 TEST(ShellFilterTest, test_shell_filter)
 {
     PipelineManager mgr;
-
+	Utils::setenv("PDAL_ALLOW_SHELL", "1");
     mgr.readPipeline(Support::configuredpath("pipeline/shell.json"));
 
     mgr.execute();
