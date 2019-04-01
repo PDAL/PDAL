@@ -6,10 +6,10 @@
 # Version 3.12 has shiny new FindPython2 and FindPython3 scripts
 #
 if (NOT (CMAKE_VERSION VERSION_LESS "3.12.0"))
-    find_package(Python3 QUIET COMPONENTS Interpreter Development NumPy)
-    if (NOT PYTHON3_FOUND)
-        find_package(Python2 2.7 REQUIRED
-            COMPONENTS Interpreter Development Numpy)
+    find_package(Python3 COMPONENTS Interpreter Development NumPy)
+    if (NOT Python3_FOUND)
+        find_package(Python2 2.7 REQUIRED EXACT
+            COMPONENTS Interpreter Development NumPy)
 
         # Since we've required 2.7, these should all be valid
         set(PYTHON_LIBRARY ${Python2_LIBRARIES}
@@ -39,4 +39,3 @@ else()
     find_package(NumPy 1.5 REQUIRED)
 endif()
 set(PYTHON_ALL_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
-message("*** ALL INCLUDES = ${PYTHON_ALL_INCLUDE_DIRS}")
