@@ -12,13 +12,19 @@ if (NOT (CMAKE_VERSION VERSION_LESS "3.12.0"))
             COMPONENTS Interpreter Development Numpy)
 
         # Since we've required 2.7, these should all be valid
-        set(PYTHON_LIBRARY ${Python2_LIBRARIES} CACHE)
-        set(PYTHON_INCLUDE_DIR ${Python2_INCLUDE_DIRS} CACHE)
-        set(PYTHON_NUMPY_INCLUDE_DIR ${Python2_NumPy_INCLUDE_DIRS} CACHE)
+        set(PYTHON_LIBRARY ${Python2_LIBRARIES}
+	    CACHE FILEPATH "Python library")
+        set(PYTHON_INCLUDE_DIR ${Python2_INCLUDE_DIRS}
+            CACHE PATH "Location of Python include files")
+        set(PYTHON_NUMPY_INCLUDE_DIR ${Python2_NumPy_INCLUDE_DIRS}
+            CACHE PATH "Location of NumPy include files.")
     else()
-        set(PYTHON_LIBRARY ${Python3_LIBRARIES} CACHE)
-        set(PYTHON_INCLUDE_DIR ${Python3_INCLUDE_DIRS} CACHE)
-        set(PYTHON_NUMPY_INCLUDE_DIR ${Python3_NumPy_INCLUDE_DIRS} CACHE)
+        set(PYTHON_LIBRARY ${Python3_LIBRARIES}
+	    CACHE FILEPATH "Python library")
+        set(PYTHON_INCLUDE_DIR ${Python3_INCLUDE_DIRS}
+	    CACHE PATH "Location of Python include files.")
+        set(PYTHON_NUMPY_INCLUDE_DIR ${Python3_NumPy_INCLUDE_DIRS}
+	    CACHE PATH "Location of NumPy include files.")
     endif()
     set(PDAL_HAVE_PYTHON 1)
 else()
@@ -33,3 +39,4 @@ else()
     find_package(NumPy 1.5 REQUIRED)
 endif()
 set(PYTHON_ALL_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
+message("*** ALL INCLUDES = ${PYTHON_ALL_INCLUDE_DIRS}")
