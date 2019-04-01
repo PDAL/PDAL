@@ -3,7 +3,7 @@
 writers.ept_addon
 =================
 
-The **EPT addon writer** supports writing additional dimensions to
+The **EPT Addon Writer** supports writing additional dimensions to
 `Entwine Point Tile`_ datasets.  The EPT addon writer may only
 be used in a pipeline with an :ref:`EPT reader <readers.ept>`, and it
 creates additional attributes for an existing dataset rather than
