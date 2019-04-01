@@ -14,7 +14,7 @@ PDAL_ADD_PLUGIN(python_libname filter python
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
     SYSTEM_INCLUDES
-        ${PYTHON_INCLUDE_DIR}
+        ${PYTHON_ALL_INCLUDE_DIRS}
 )
 
 if (WITH_TESTS)
@@ -24,6 +24,6 @@ if (WITH_TESTS)
         LINK_WITH
             ${python_libname} ${PYTHON_LIBRARY}
         SYSTEM_INCLUDES
-            ${PYTHON_INCLUDE_DIR}
+            ${PYTHON_ALL_INCLUDE_DIRS}
     )
 endif()

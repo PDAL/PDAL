@@ -8,7 +8,7 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
         ${PYTHON_LIBRARY}
         ${CMAKE_DL_LIBS}
     SYSTEM_INCLUDES
-        ${PYTHON_INCLUDE_DIR}
+        ${PYTHON_ALL_INCLUDE_DIRS}
     )
 
 # Install headers so Python extension
@@ -26,6 +26,6 @@ if (WITH_TESTS)
         LINK_WITH
             ${numpy_reader} ${PYTHON_LIBRARY}
         SYSTEM_INCLUDES
-            ${PYTHON_INCLUDE_DIR}
+            ${PYTHON_ALL_INCLUDE_DIRS}
         )
 endif()
