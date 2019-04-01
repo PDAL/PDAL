@@ -7,7 +7,7 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
     LINK_WITH
         ${PYTHON_LIBRARY}
         ${CMAKE_DL_LIBS}
-    INCLUDES
+    SYSTEM_INCLUDES
         ${PYTHON_INCLUDE_DIR}
     )
 
@@ -24,5 +24,8 @@ if (WITH_TESTS)
         FILES
             ../test/NumpyReaderTest.cpp
         LINK_WITH
-            ${numpy_reader} ${PYTHON_LIBRARY})
+            ${numpy_reader} ${PYTHON_LIBRARY}
+        SYSTEM_INCLUDES
+            ${PYTHON_INCLUDE_DIR}
+        )
 endif()
