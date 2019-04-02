@@ -45,6 +45,7 @@
 
 namespace pdal
 {
+    size_t count = 100;
     class TileDBWriterTest : public ::testing::Test
     {
     protected:
@@ -52,7 +53,7 @@ namespace pdal
         {
             Options options;
             options.add("mode", "ramp");
-            options.add("count", 100);
+            options.add("count", count);
             m_reader.setOptions(options);
         }
 
@@ -70,6 +71,7 @@ namespace pdal
         StageFactory factory;
         Stage* stage(factory.createStage("writers.tiledb"));
         EXPECT_TRUE(stage);
+        EXPECT_TRUE(stage->pipelineStreamable());
     }
 
     TEST_F(TileDBWriterTest, write)
@@ -81,6 +83,7 @@ namespace pdal
         Options options;
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
+        options.add("chunk_size", 80);
 
         if (vfs.is_dir(pth))
         {
@@ -99,6 +102,7 @@ namespace pdal
 
         BOX3D bbox;
         tv->calculateBounds(bbox);
+        EXPECT_EQ(tv->size(), count);
 
         // check the sidecar exists
         EXPECT_TRUE(pdal::Utils::fileExists(sidecar));

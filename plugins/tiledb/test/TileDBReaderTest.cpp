@@ -64,6 +64,7 @@ class TileDBReaderTest : public ::testing::Test
         StageFactory factory;
         Stage* stage(factory.createStage("readers.tiledb"));
         EXPECT_TRUE(stage);
+        EXPECT_TRUE(stage->pipelineStreamable());
     }
 
     TEST_F(TileDBReaderTest, read)
@@ -106,6 +107,16 @@ class TileDBReaderTest : public ::testing::Test
 
         BOX3D bbox;
         tv->calculateBounds(bbox);
+
+        // fetch offset time and check it is monotonically increasing
+        for (std::size_t i(0); i < tv->size(); ++i)
+        {
+            ASSERT_EQ(
+                tv->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i),
+                size_t(i)
+            );
+        }
+
         ASSERT_DOUBLE_EQ(subarray[0], bbox.minx);
         ASSERT_DOUBLE_EQ(subarray[2], bbox.miny);
         ASSERT_DOUBLE_EQ(subarray[4], bbox.minz);
