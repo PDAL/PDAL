@@ -117,7 +117,7 @@ endmacro(PDAL_ADD_EXECUTABLE)
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH INCLUDES)
+    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
     if(WIN32)
@@ -137,6 +137,10 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         ${PDAL_INCLUDE_DIR}
         ${PDAL_ADD_PLUGIN_INCLUDES}
     )
+    if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
+        target_include_directories(${${_name}} SYSTEM PRIVATE
+            ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
+    endif()
     target_link_libraries(${${_name}}
         PRIVATE
             ${PDAL_BASE_LIB_NAME}
@@ -172,7 +176,7 @@ endmacro(PDAL_ADD_PLUGIN)
 macro(PDAL_ADD_TEST _name)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH INCLUDES)
+    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -188,6 +192,10 @@ macro(PDAL_ADD_TEST _name)
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
+    if (PDAL_ADD_TEST_SYSTEM_INCLUDES)
+        target_include_directories(${_name} SYSTEM PRIVATE
+            ${PDAL_ADD_TEST_SYSTEM_INCLUDES})
+    endif()
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name}
         PRIVATE
