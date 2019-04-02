@@ -10,19 +10,19 @@ than find information through REST.
 
 Example
 --------------------------------------------------------------------------------
-This example will unarchive the slpk file, store it in a temp directory, and traverse it. The data will be output to a las file. This is done through PDAL's command line interface or through the pipeline.
+This example will unarchive the slpk file, store it in a temp directory,
+and traverse it. The data will be output to a las file. This is done
+through PDAL's command line interface or through the pipeline.
 
 .. code-block:: json
 
-    {
-        "pipeline":[
-            {
-                "type": "readers.slpk",
-                "filename": "PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk",
-                "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
-            }
-        ]
-    }
+  [
+      {
+          "type": "readers.slpk",
+          "filename": "PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk",
+          "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
+      }
+  ]
 
 ::
 
@@ -39,7 +39,9 @@ filename
 .. include:: reader_opts.rst
 
 bounds
-    The bounds refers to the extents of the resource in X, Y, Z coordinates with the Z dimension being optional. This must be input as a string.
+    The bounds refers to the extents of the resource in X, Y, Z
+    coordinates with the Z dimension being optional. This must be input
+    as a string.
 
     Example:``readers.slpk.bounds="([xmin,xmax],[ymin,ymax],[zmin,zmax])"``
 
@@ -64,7 +66,12 @@ dimensions
     Example: ``--readers.slpk.dimensions="rgb, intensity"``
 
 min_density and max_density
-    This is the range of density of the points in the nodes that will be selected during the read. The density of a node is calculated by the vertex count divided by the effective area of the node. Nodes do not have a uniform density acrossdepths in the tree, so some sections may be more or less dense than others. Default values for these parameters will select all leaf nodes (the highest resolution)`.
+    This is the range of density of the points in the nodes that will
+    be selected during the read. The density of a node is calculated by
+    the vertex count divided by the effective area of the node. Nodes do
+    not have a uniform density across depths in the tree, so some sections
+    may be more or less dense than others. Default values for these
+    parameters will select all leaf nodes (the highest resolution).
 
     Example: ``--readers.slpk.min_density=2 --readers.slpk.max_density=2.5``
 

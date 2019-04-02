@@ -21,21 +21,17 @@ Basic Example
 Simply writing every pixel of a JPEG to a text file is not very useful.
 
 .. code-block:: json
-    :linenos:
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.gdal",
           "filename":"./pdal/test/data/autzen/autzen.jpg"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
-
+      }
+  ]
 
 
 LAS Example
@@ -47,23 +43,19 @@ RGB values of an `ASPRS LAS`_ file using :ref:`writers.las`.
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 
 .. code-block:: json
-    :linenos:
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.gdal",
           "filename":"./pdal/test/data/autzen/autzen.jpg",
           "header", "Red, Green, Blue"
 
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
-
+      }
+  ]
 
 
 Options
@@ -77,6 +69,6 @@ filename
 .. include:: reader_opts.rst
 
 header
-    A comma-separated list of :ref:`dimensions` IDs to map
+    A comma-separated list of :ref:`dimension <dimensions>` IDs to map
     bands to. The length of the list must match the number
     of bands in the raster.

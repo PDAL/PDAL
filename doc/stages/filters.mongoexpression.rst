@@ -3,17 +3,16 @@
 filters.mongoexpression
 ========================
 
-.. contents::
-
-The expression filter applies query logic to the input point cloud based on a
-MongoDB-style query expression using the point cloud attributes.
+The **Mongo Expression Filter** applies query logic to the input
+point cloud based on a MongoDB-style query expression using the
+point cloud attributes.
 
 .. embed::
 
 .. streamable::
 
-Pipeline Example
-----------------
+Example
+-------
 
 This example passes through only the points whose Classification is non-zero.
 
@@ -30,8 +29,9 @@ This example passes through only the points whose Classification is non-zero.
         "filtered.las"
     ]
 
-This example passes through only the points whose ReturnNumber is equal to the
-NumberOfReturns and the NumberOfReturns is greater than 1.
+This example passes through only the points whose ``ReturnNumber``
+is equal to the ``NumberOfReturns`` and the ``NumberOfReturns``
+is greater than 1.
 
 .. code-block:: json
 
@@ -54,7 +54,6 @@ expression
     A JSON query :ref:`expression` containing a combination of query comparisons
     and logical operators.
 
-
 .. _expression:
 
 Expression
@@ -68,6 +67,7 @@ Comparison operators
 ................................................................................
 
 There are 8 valid query comparison operators:
+
     - ``$eq``: Matches values equal to a specified value.
     - ``$gt``: Matches values greater than a specified value.
     - ``$gte``: Matches values greater than or equal to a specified value.
@@ -109,6 +109,7 @@ Logical operators
 ................................................................................
 
 There are 4 valid logical operators:
+
     - ``$and``: Applies a logical **and** on the expressions of the array and
       returns a match only if all expressions match.
     - ``$not``: Inverts the value of the single sub-expression.

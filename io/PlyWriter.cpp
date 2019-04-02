@@ -153,11 +153,6 @@ void PlyWriter::ready(PointTableRef table)
             " points supported.");
 
     m_stream = Utils::createFile(m_filename, true);
-    if (m_format == Format::Ascii && m_precisionArg->set())
-    {
-        *m_stream << std::fixed;
-        m_stream->precision(m_precision);
-    }
     writeHeader(table.layout());
 }
 
@@ -174,6 +169,14 @@ void PlyWriter::writeValue(PointRef& point, Dimension::Id dim,
     if (m_format == Format::Ascii)
     {
         double d = point.getFieldAs<double>(dim);
+        if (m_precisionArg->set() &&
+            Dimension::base(type) == Dimension::BaseType::Floating)
+        {
+            *m_stream << std::fixed;
+            m_stream->precision(m_precision);
+        }
+        else
+            m_stream->unsetf(std::ios_base::fixed);
         *m_stream << d;
     }
     else if (m_format == Format::BinaryLe)

@@ -13,28 +13,24 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type": "readers.greyhound",
           "url": "data.greyhound.io/resource/iowa-z",
           "filter": {"$and": [
             {"Path": "02004736.laz"},
             {"Classification": {"$ne": 7}}
           ]}
-        },
-        "output.laz"
-      ]
-    }
+      },
+      "output.laz"
+  ]
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "greyhound://data.greyhound.io/resource/iowa-z/read?filter={\"Path\":\"02004736.laz\"}",
-        "02004736.laz"
-      ]
-    }
+  [
+      "greyhound://data.greyhound.io/resource/iowa-z/read?filter={\"Path\":\"02004736.laz\"}",
+      "02004736.laz"
+  ]
 
 Options
 -------
@@ -112,7 +108,7 @@ _`buffer`
   bounds by 15%.
 
 .. _Greyhound: https://github.com/hobu/greyhound
-.. _bounds array: https://github.com/hobu/greyhound/blob/master/doc/clientDevelopment.rst#bounds-option
+.. _bounds array: https://greyhound.io/clientDevelopment.html#bounds-option
 .. _info: https://greyhound.io/clientDevelopment.html#the-info-query
 .. _read: https://greyhound.io/clientDevelopment.html#the-read-query
 .. _comparison: https://docs.mongodb.com/manual/reference/operator/query-comparison/

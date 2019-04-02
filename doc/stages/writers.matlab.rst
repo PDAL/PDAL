@@ -12,8 +12,8 @@ The produced files has a single variable, `PDAL`, an array struct.
 .. note::
 
     The Matlab writer requires the Mat-File API from MathWorks, and
-    it must be explicitly enabled at compile time with the ``BUILD_PLUGIN_MATLAB=ON``
-    variable
+    it must be explicitly enabled at compile time with the
+    ``BUILD_PLUGIN_MATLAB=ON`` variable
 
 .. plugin::
 
@@ -22,28 +22,28 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.matlab",
           "output_dims":"X,Y,Z,Intensity",
           "filename":"outputfile.mat"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
 
 filename
-  Output file name [REQUIRED]
+  Output file name [Required]
 
 output_dims
-  Dimensions to include in the output file [OPTIONAL, defaults to all available dimensions]
+  A comma-separated list of dimensions to include in the output file.
+  May also be specified as an array of strings. [Default: all available
+  dimensions]
 
 struct
-  Array structure name to read [OPTIONAL, defaults ``PDAL``]
+  Array structure name to read [Default: "PDAL"]

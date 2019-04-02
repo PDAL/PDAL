@@ -156,4 +156,42 @@ TEST(PlyWriter, precisionException)
     EXPECT_THROW(writer.prepare(table), pdal_error);
 }
 
+// Make sure we don't write ints as floats.
+TEST(PlyWriter, issue_2421)
+{
+    std::string outfile(Support::temppath("out.ply"));
+    std::string referenceFile(Support::datapath("ply/issue_2421.ply"));
+
+    FileUtils::deleteFile(outfile);
+
+    PointTable t;
+
+    t.layout()->registerDim(Dimension::Id::X);
+    t.layout()->registerDim(Dimension::Id::Y);
+    t.layout()->registerDim(Dimension::Id::Z);
+    Dimension::Id iid = t.layout()->assignDim("I", Dimension::Type::Signed32);
+
+    PointViewPtr v(new PointView(t));
+    v->setField(Dimension::Id::X, 0, 1.23456789012345);
+    v->setField(Dimension::Id::Y, 0, 12345.6789012345);
+    v->setField(Dimension::Id::Z, 0, 1234567890.12345);
+    v->setField(iid, 0, 12345);
+
+    BufferReader r;
+    r.addView(v);
+
+    PlyWriter w;
+    Options wo;
+    wo.add("filename", outfile);
+    wo.add("storage_mode", "ascii");
+    wo.add("precision", 5);
+    w.setInput(r);
+    w.setOptions(wo);
+
+    w.prepare(t);
+    w.execute(t);
+
+    EXPECT_TRUE(Support::compare_text_files(outfile, referenceFile));
+}
+
 } // namespace pdal

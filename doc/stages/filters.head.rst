@@ -3,8 +3,8 @@
 filters.head
 ===============================================================================
 
-The HeadFilter returns a specified number of points from the beginning of the
-PointView.
+The **Head filter** returns a specified number of points from the beginning
+of a ``PointView``.
 
 .. note::
 
@@ -23,17 +23,15 @@ Thin a point cloud by first shuffling the point order with
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"filters.randomize"
-        },
-        {
+      },
+      {
           "type":"filters.head",
           "count":10000
-        }
-      ]
-    }
+      }
+  ]
 
 
 Example #2
@@ -44,26 +42,23 @@ Compute height above ground and extract the ten highest points.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"filters.smrf"
-        },
-        {
+      },
+      {
           "type":"filters.hag"
-        },
-        {
+      },
+      {
           "type":"filters.sort",
           "dimension":"HeightAboveGround",
           "order":"DESC"
-        },
-        {
+      },
+      {
           "type":"filters.head",
           "count":10
-        }
-      ]
-    }
-
+      }
+  ]
 
 .. seealso::
 
@@ -74,4 +69,4 @@ Options
 -------------------------------------------------------------------------------
 
 count
-  Number of points to return. [Default: **10**]
+  Number of points to return. [Default: 10]

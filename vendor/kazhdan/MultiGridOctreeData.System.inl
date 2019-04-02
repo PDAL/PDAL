@@ -1588,10 +1588,13 @@ void Octree< Real >::_updateConstraintsFromCoarser( const FEMSystemFunctor& F , 
 	_localDepthAndOffset( node , d , off );
 
 	// Offset the constraints using the solution from lower resolutions.
-	int startX , endX , startY , endY , startZ , endZ;
+	int startX = 0, endX = 0, startY = 0, endY = 0, startZ = 0, endZ = 0;
+
 	_SetParentOverlapBounds< FEMDegree , FEMDegree >( node , startX , endX , startY , endY , startZ , endZ );
 
-	for( int x=startX ; x<endX ; x++ ) for( int y=startY ; y<endY ; y++ ) for( int z=startZ ; z<endZ ; z++ )
+	for( int x=startX ; x<endX ; x++ )
+        for( int y=startY ; y<endY ; y++ )
+            for( int z=startZ ; z<endZ ; z++ )
 		if( _isValidFEMNode( pNeighbors.neighbors[x][y][z] ) )
 		{
 			const TreeOctNode* _node = pNeighbors.neighbors[x][y][z];
