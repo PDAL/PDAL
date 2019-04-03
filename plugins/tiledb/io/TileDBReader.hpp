@@ -94,8 +94,9 @@ private:
     std::string m_arrayName;
     std::string m_cfgFileName;
     point_count_t m_chunkSize;
-    point_count_t m_offset = 0;
-    point_count_t m_read = 0;
+    point_count_t m_offset;
+    point_count_t m_resultSize;
+    bool m_complete;
     bool m_stats;
     BOX3D m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;

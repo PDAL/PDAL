@@ -73,9 +73,6 @@ class TileDBReaderTest : public ::testing::Test
         tiledb::VFS vfs(ctx);
         std::string pth(Support::datapath("tiledb/array"));
 
-        Options opts;
-        opts.add("array_name", pth);
-
         tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
@@ -96,6 +93,11 @@ class TileDBReaderTest : public ::testing::Test
         array.close();
 
         TileDBReader reader;
+
+        // pick the chunk size to be 1/2 expected number of points + 1 to test processOne paging
+        Options opts;
+        opts.add("array_name", pth);
+        opts.add("chunk_size", (coords.size() / 6) + 1); 
         reader.setOptions(opts);
 
         PointTable table;

@@ -254,6 +254,11 @@ void TileDBReader::ready(PointTableRef)
         }
         m_query->set_subarray(subarray);
     }
+
+    // initialize read buffer variables
+    m_offset = 0;
+    m_resultSize = 0;
+    m_complete = false;
 }
 
 namespace
@@ -309,61 +314,64 @@ bool setField(PointRef& point, TileDBReader::DimInfo di, size_t bufOffset)
 
 bool TileDBReader::processOne(PointRef& point)
 {
+    if (m_offset == m_resultSize)
+    {
+        if (m_complete)
+        {
+            return false;
+        }
+        else
+        {
+            tiledb::Query::Status status;
+            if (m_stats)
+                tiledb::Stats::enable();
+            m_query->submit();
+            if (m_stats)
+            {
+                tiledb::Stats::dump(stdout);
+                tiledb::Stats::disable();
+            }
+
+            status = m_query->query_status();
+
+            // The result buffer count represents the total number of items
+            // returned by the query for dimensions.  So if there are three
+            // dimensions, the number of points returned is the buffer count
+            // divided by the number of dimensions.
+            m_resultSize =
+                (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
+                m_array->schema().domain().dimensions().size();
+
+            if (status == tiledb::Query::Status::INCOMPLETE &&
+                    m_resultSize == 0)
+                throwError("Need to increase chunk_size for reader.");
+
+            if (status == tiledb::Query::Status::COMPLETE)
+                m_complete = true;
+
+            m_offset = 0;
+        }     
+    }
+
     for (DimInfo& dim : m_dims)
         if (!setField(point, dim, m_offset))
             throwError("Invalid dimension type when setting data.");
 
+    ++m_offset;
     return true;
 }
 
 point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
 {
-    point_count_t start = m_read;
-    PointId nextId = view->size();
-    tiledb::Query::Status status;
-    do
+    PointRef point = view->point(0);
+    PointId id;
+    for (id = 0; id < count; ++id)
     {
-        m_offset = 0;
- 
-        if (m_stats)
-            tiledb::Stats::enable();
-        m_query->submit();
-        if (m_stats)
-        {
-            tiledb::Stats::dump(stdout);
-            tiledb::Stats::disable();
-        }
-
-        status = m_query->query_status();
-
-        // The result buffer count represents the total number of items
-        // returned by the query for dimensions.  So if there are three
-        // dimensions, the number of points returned is the buffer count
-        // divided by the number of dimensions.
-        size_t result_num =
-            (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
-            m_array->schema().domain().dimensions().size();
-
-        if (status == tiledb::Query::Status::INCOMPLETE && result_num == 0)
-            throwError("Need to increase chunk_size for reader.");
-
-        PointRef point = view->point(0);
-        PointId id;
-        for (id = 0; id < result_num; ++id)
-        {
-            point.setPointId(nextId++);
-            processOne(point);
-            ++m_offset;
-            ++m_read;
-            if ((m_read - start) == count)
-                break;
-        }
+        point.setPointId(id);
+        if (!processOne(point))
+            break;
     }
-    while(status == tiledb::Query::Status::INCOMPLETE);
-
-    if (status == tiledb::Query::Status::FAILED)
-        throwError("Unable to read from " + m_arrayName);
-    return m_read - start;
+    return id;   
 }
 
 void TileDBReader::done(pdal::BasePointTable &table)
