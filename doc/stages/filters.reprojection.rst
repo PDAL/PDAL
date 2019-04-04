@@ -3,22 +3,19 @@
 filters.reprojection
 ===========================
 
-The reprojection filter converts the X, Y and/or Z dimensions to a new spatial
-reference system. The old coordinates are replaced by the new ones,
-if you want to preserve the old coordinates for future processing, use a
-:ref:`filters.ferry` to create a new dimension and stuff them there.
+The **reprojection filter** converts the X, Y and/or Z dimensions to a
+new spatial
+reference system. The old coordinates are replaced by the new ones.
+If you want to preserve the old coordinates for future processing, use a
+:ref:`filters.ferry` to create copies of the original dimensions before
+reprojecting.
 
 .. note::
 
-    X, Y, and Z dimensions in PDAL are carried as doubles, with their
-    scale information applied. Set the output scale (`scale_x`, `scale_y`, or
-    `scale_z`) on your writer to descale the data on the way out.
-
-    Many LIDAR formats store coordinate information in 32-bit address spaces, and
-    use scaling and offsetting to ensure that accuracy is not lost while fitting
-    the information into a limited address space. When changing projections, the
-    coordinate values will change, which may change the optimal scale and offset
-    for storing the data.
+    When coordinates are reprojected, it may significantly change the precision
+    necessary to represent the values in some output formats.  Make sure
+    that you're familiar with any scaling necessary for your output format
+    based on the projection you've used.
 
 .. embed::
 
@@ -34,23 +31,22 @@ precision in the output coordinates.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "filename":"input.las",
           "type":"readers.las",
           "spatialreference":"EPSG:26916"
-        },
-        {
+      },
+      {
           "type":"filters.range",
           "limits":"Z[0:100],Classification[2:2]"
-        },
-        {
+      },
+      {
           "type":"filters.reprojection",
           "in_srs":"EPSG:26916",
           "out_srs":"EPSG:4326"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "scale_x":"0.0000001",
           "scale_y":"0.0000001",
@@ -59,9 +55,8 @@ precision in the output coordinates.
           "offset_y":"auto",
           "offset_z":"auto",
           "filename":"example-geog.las"
-        }
-      ]
-    }
+      }
+  ]
 
 Example 2
 --------------------------------------------------------------------------------
@@ -78,33 +73,31 @@ vertical datum as "Unnamed Vertical Datum" in the spatial reference VLR.
 
 
 .. code-block:: json
-    :linenos:
 
-    {
-      "pipeline":[
-        "./1km_6135_632.laz",
-        {
-            "type":"filters.reprojection",
-            "in_srs":"EPSG:25832",
-            "out_srs":"+init=epsg:25832 +geoidgrids=C:/data/geoids/dvr90.gtx"
-        },
-        {
+  [
+      "./1km_6135_632.laz",
+      {
+          "type":"filters.reprojection",
+          "in_srs":"EPSG:25832",
+          "out_srs":"+init=epsg:25832 +geoidgrids=C:/data/geoids/dvr90.gtx"
+      },
+      {
           "type":"writers.las",
           "a_srs":"EPSG:7416",
           "filename":"1km_6135_632_DVR90.laz"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
 
 in_srs
   Spatial reference system of the input data. Express as an EPSG string (eg
-  "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text string. [Required if
-  input reader does not supply SRS information]
+  "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text
+  string. [Required if not part of the input data set]
 
 out_srs
   Spatial reference system of the output data. Express as an EPSG string (eg
-  "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text string. [Required]
+  "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text
+  string. [Required]
 

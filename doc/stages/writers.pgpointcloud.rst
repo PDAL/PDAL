@@ -18,7 +18,7 @@ preceded in the pipeline file by :ref:`filters.chipper`.
 
 The pgpointcloud format does not support WKT spatial reference specifications.  A subset of spatial references can be stored by using the 'srid' option, which
 allows storage of an `EPSG code`_ that covers many common spatial references.
-PDAL makes no attempt to reproject data to your specified srid.  Use 
+PDAL makes no attempt to reproject data to your specified srid.  Use
 :ref:`filters.reprojection` for this purpose.
 
 .. plugin::
@@ -29,26 +29,24 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las",
           "spatialreference":"EPSG:26916"
-        },
-        {
+      },
+      {
           "type":"filters.chipper",
           "capacity":400
-        },
-        {
+      },
+      {
           "type":"writers.pgpointcloud",
           "connection":"host='localhost' dbname='lidar' user='pramsey'",
           "table":"example",
           "compression":"dimensional",
           "srid":"26916"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
@@ -60,32 +58,40 @@ table
   Database table to write to. [Required]
 
 schema
-  Database schema to write to. [Default: **public**]
+  Database schema to write to. [Default: "public"]
 
 column
-  Table column to put patches into. [Default: **pa**]
+  Table column to put patches into. [Default: "pa"]
 
 compression
-  Patch compression type to use. [Default: **dimensional**]
+  Patch compression type to use. [Default: ""dimensional""]
 
   * **none** applies no compression
   * **dimensional** applies dynamic compression to each dimension separately
   * **lazperf** applies a "laz" compression (using the `laz-perf`_ library in PostgreSQL Pointcloud)
 
 overwrite
-  To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **false**]
+  To drop the table before writing set to 'true'. To append to the table
+  set to 'false'. [Default: false]
 
 srid
-  Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS) to store with the point cloud schema. [Default: **4326**]
+  Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS)
+  to store with the point cloud schema. [Default: 4326]
 
 pcid
-  An optional existing PCID to use for the point cloud schema. If specified, the schema must be present. If not specified, a match will still be looked for, or a new schema will be inserted.
+  An optional existing PCID to use for the point cloud schema. If specified,
+  the schema must be present. If not specified, a match will still be
+  looked for, or a new schema will be inserted. [Default: 0]
 
 pre_sql
-  Optional SQL to execute *before* running the translation. If the value references a file, the file is read and any SQL inside is executed. Otherwise the value is executed as SQL itself.
+  SQL to execute *before* running the translation. If the value
+  references a file, the file is read and any SQL inside is executed.
+  Otherwise the value is executed as SQL itself. [Optional]
 
 post_sql
-  Optional SQL to execute *after* running the translation. If the value references a file, the file is read and any SQL inside is executed. Otherwise the value is executed as SQL itself.
+  SQL to execute *after* running the translation. If the value references
+  a file, the file is read and any SQL inside is executed. Otherwise the
+  value is executed as SQL itself. [Optional]
 
 scale_x, scale_y, scale_z / offset_x, offset_y, offset_z
   If ANY of these options are specified the X, Y and Z dimensions are adjusted

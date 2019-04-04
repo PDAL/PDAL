@@ -6,7 +6,7 @@ readers.faux
 The faux reader is used for testing pipelines. It does not read from a
 file or database, but generates synthetic data to feed into the pipeline.
 
-The faux reader requires a mode argume to define the method in which points
+The faux reader requires a mode argument to define the method in which points
 should be generated.  Valid modes are as follows:
 
 constant
@@ -35,34 +35,32 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.faux",
           "bounds":"([0,1000000],[0,1000000],[0,100])",
           "count":"10000",
           "mode":"random"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
 -------
 
 bounds
-  What spatial extent should points be generated within? Text string of the
-  form "([xmin,xmax],[ymin,ymax],[zmin,zmax])". [Default: unit cube]
+  The spatial extent within which points should be generated.
+  Specified as a string in the form "([xmin,xmax],[ymin,ymax],[zmin,zmax])".
+  [Default: unit cube]
 
 count
-  How many synthetic points to generate before finishing? [Required, except
-  when mode is 'grid']
+  The number of points to generate. [Required, except when mode is 'grid']
 
-spatialreference
+override_srs
   Spatial reference to apply to data. [Optional]
 
 mean_x|y|z

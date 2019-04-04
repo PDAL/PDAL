@@ -3,9 +3,10 @@
 filters.mad
 ===============================================================================
 
-The ``filters.mad`` filter automatically crops the input point cloud based on
-the distribution of points in the specified dimension. Specifically, we choose
-the method of median absolute deviation from the median (commonly referred to as
+The **MAD filter** filter crops the input point cloud based on
+the distribution of points in the specified dimension_. Specifically, we choose
+the method of median absolute deviation from the median (commonly referred to
+as
 MAD), which is robust to outliers (as opposed to mean and standard deviation).
 
 .. note::
@@ -20,30 +21,29 @@ MAD), which is robust to outliers (as opposed to mean and standard deviation).
 Example
 -------
 
-The sample pipeline below uses ``filters.mad`` to automatically crop the Z
-dimension and remove possible outliers. The number of deviations from the median
-has been adjusted to be less agressive and to only crop those outliers that are
+The sample pipeline below uses filters.mad to automatically crop the ``Z``
+dimension and remove possible outliers. The number of deviations from the
+median has been adjusted to be less agressive and to only crop those
+outliers that are
 greater than four deviations from the median.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.mad",
           "dimension":"Z",
           "k":4.0
-        },
-        "output.laz"
-      ]
-    }
+      },
+      "output.laz"
+  ]
 
 Options
 -------------------------------------------------------------------------------
 
 k
-  The number of deviations from the median. [Default: **2.0**]
+  The number of deviations from the median. [Default: 2.0]
 
-dimension
+_`dimension`
   The name of the dimension to filter.

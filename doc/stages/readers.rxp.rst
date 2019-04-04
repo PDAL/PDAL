@@ -15,6 +15,8 @@ The **RXP reader** read from files in the RXP format, the in-house streaming for
 
 .. plugin::
 
+.. streamable::
+
 Installation
 ------------
 
@@ -23,8 +25,7 @@ RiVLib installation.  RiVLib can be obtained from the `RIEGL download pages`_
 with a properly enabled user account.  The RiVLib files do not need to be
 in a system-level directory, though they could be (e.g. they could be
 in ``/usr/local``, or just in your home directory somewhere).  For help
-building PDAL with optional libraries, see
-`the optional library documentation`_.
+building PDAL with optional libraries, see :ref:`the optional library documentation <optional-libraries>`.
 
 
 Example
@@ -38,21 +39,19 @@ intensity values using sensible defaults.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type": "readers.rxp",
           "filename": "120304_204030.rxp",
           "sync_to_pps": "true",
           "reflectance_as_intensity": "true"
-        },
-        {
+      },
+      {
           "type": "writers.las",
           "filename": "outputfile.las",
           "discard_high_return_numbers": "true"
-        }
-      ]
-    }
+      }
+  ]
 
 
 We set the ``discard_high_return_numbers`` option to ``true`` on the
@@ -71,13 +70,12 @@ filename
 .. include:: reader_opts.rst
 
 rdtp
-  Boolean to switch from file-based reading to RDTP-based. [default: false]
+  Boolean to switch from file-based reading to RDTP-based. [Default: false]
 
 sync_to_pps
   If "true", ensure all incoming points have a valid pps timestamp, usually
   provided by some sort of GPS clock.  If "false", use the scanner's internal
-  time.
-  [default: true]
+  time.  [Default: true]
 
 reflectance_as_intensity
   If "true", in addition to storing reflectance values directly, also
@@ -85,16 +83,14 @@ reflectance_as_intensity
   range from `min_reflectance` to `max_reflectance` to the range 0-65535.
   Values less than `min_reflectance` are assigned the value 0.
   Values greater `max_reflectance` are assigned the value 65535.
-  [default: true]
+  [Default: true]
 
 min_reflectance
-  The low end of the reflectance-to-intensity map.
-  [default: -25.0]
+  The low end of the reflectance-to-intensity map.  [Default: -25.0]
 
 max_reflectance
-  The high end of the reflectance-to-intensity map.
-  [default: 5.0]
+  The high end of the reflectance-to-intensity map.  [Default: 5.0]
 
 .. _RIEGL Laser Measurement Systems GmbH: http://www.riegl.com
 .. _RIEGL download pages: http://www.riegl.com/members-area/software-downloads/libraries/
-.. _the optional library documentation: http://pdal.io/compilation/unix.html#configure-your-optional-libraries
+

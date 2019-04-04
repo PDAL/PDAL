@@ -3,9 +3,14 @@
 readers.ept
 ===========
 
-`Entwine Point Tile`_ (EPT) is a hierarchical octree-based point cloud format suitable for real-time rendering and lossless archival.  `Entwine`_ is a producer of this format.  The **EPT Reader** supports reading data from the EPT format, including spatially accelerated queries and file reconstruction queries.
+`Entwine Point Tile`_ (EPT) is a hierarchical octree-based point cloud format
+suitable for real-time rendering and lossless archival.  `Entwine`_ is a
+producer of this format.  The EPT Reader supports reading data from the
+EPT format, including spatially accelerated queries and file reconstruction
+queries.
 
-Sample EPT datasets of hundreds of billions of points in size may be viewed at http://potree.entwine.io and http://speck.ly.
+Sample EPT datasets of hundreds of billions of points in size may be viewed
+with `Potree`_ or `Plasio`_.
 
 .. embed::
 
@@ -25,18 +30,22 @@ This example downloads a small area around the the Statue of Liberty from the Ne
       "statue-of-liberty.las"
    ]
 
-Additional attributes created by the :ref:`writers.ept_addon <EPT addon writer>` can be referenced with the ``addon`` option.  Here is an example that overrides the ``Classification`` dimension with an addon dimension derived from the original dataset:
+Additional attributes created by the
+:ref:`EPT addon writer <writers.ept_addon>` can be referenced with the ``addon`` option.  Here is an example that overrides the ``Classification`` dimension with an addon dimension derived from the original dataset:
 
 .. code-block:: json
 
-   [{
-      "type": "readers.ept",
-      "filename": "http://na.entwine.io/autzen/ept.json",
-      "addons": { "Classification": "~/entwine/addons/autzen/smrf" }
-   }, {
-      "type": "writers.las",
-      "filename": "autzen-ept-smrf.las"
-   }]
+  [
+      {
+          "type": "readers.ept",
+          "filename": "http://na.entwine.io/autzen/ept.json",
+          "addons": { "Classification": "~/entwine/addons/autzen/smrf" }
+      },
+      {
+          "type": "writers.las",
+          "filename": "autzen-ept-smrf.las"
+      }
+  ]
 
 For more details about addon dimensions and how to produce them, see :ref:`writers.ept_addon`.
 
@@ -59,19 +68,35 @@ resolution
     The resulting resolution may not be exactly this value: the minimum possible resolution that is at *least* as precise as the requested resolution will be selected.  Therefore the result may be a bit more precise than requested.
 
 addons
-    A mapping of assignments of the form ``DimensionName: AddonPath``, which assigns dimensions from the specified paths to the named dimensions.  These addon dimensions are created by the :ref:`writers.ept_addon <EPT addon writer>`_.  If the dimension names already exist in the EPT `Schema`_ for the given resource, then their values will be overwritten with those from the appropriate addon.
+    A mapping of assignments of the form ``DimensionName: AddonPath``, which
+    assigns dimensions from the specified paths to the named dimensions.
+    These addon dimensions are created by the
+    :ref:`EPT addon writer <writers.ept_addon>`.  If the dimension names
+    already exist in the EPT `Schema`_ for the given resource, then their
+    values will be overwritten with those from the appropriate addon.
 
-    Addons may used to override well-known :ref:`dimensions`_.  For example, an addon assignment of ``"Classification": "~/addons/autzen/MyGroundDimension/"`` will override an existing EPT ``Classification`` dimension with the custom dimension.
+    Addons may used to override well-known :ref:`dimension <dimensions>`.  For example, an addon assignment of ``"Classification": "~/addons/autzen/MyGroundDimension/"`` will override an existing EPT ``Classification`` dimension with the custom dimension.
 
 origin
-    EPT datasets are lossless aggregations of potentially multiple source files.  The *origin* options can be used to select all points from a single source file.  This option may be specified as a string or an integral ID.
+    EPT datasets are lossless aggregations of potentially multiple source
+    files.  The *origin* options can be used to select all points from a
+    single source file.  This option may be specified as a string or an
+    integral ID.
 
-    The string form of this option selects a source file by its original file path.  This may be a substring instead of the entire path, but the string must uniquely select only one source file (via substring search).  For example, for an EPT dataset created from source files *one.las*, *two.las*, and *two.bpf*, `"one"` is a sufficient selector, but `"two"` is not.
+    The string form of this option selects a source file by its original
+    file path.  This may be a substring instead of the entire path, but
+    the string must uniquely select only one source file (via substring
+    search).  For example, for an EPT dataset created from source files
+    *one.las*, *two.las*, and *two.bpf*, "one" is a sufficient selector,
+    but "two" is not.
 
-    The integral form of this option selects a source file by its ``OriginId`` dimension, which can be found via the files position in EPT metadata file ``entwine-files.json``.
+    The integral form of this option selects a source file by its ``OriginId``
+    dimension, which can be determined from  the file's position in EPT
+    metadata file ``entwine-files.json``.
 
 threads
-    Number of worker threads used to download and process EPT data.  A minimum of 4 will be used no matter what value is specified.
+    Number of worker threads used to download and process EPT data.  A
+    minimum of 4 will be used no matter what value is specified.
 
 .. _Entwine Point Tile: https://github.com/connormanning/entwine/blob/master/doc/entwine-point-tile.md
 .. _Entwine: https://entwine.io/

@@ -12,17 +12,19 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.randomize"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"output.las"
-        }
-      ]
-    }
+      }
+  ]
 
+Options
+-------
+
+None.
 

@@ -376,7 +376,7 @@ T value(const std::string& type, const std::string& value)
     {
         std::vector<uint8_t> encVal = Utils::base64_decode(value);
         encVal.resize(sizeof(T));
-        memcpy(&t, encVal.data(), sizeof(T));
+        t = *(reinterpret_cast<T *>(encVal.data()));
     }
     else if (!Utils::fromString(value, t))
         throw value_error();

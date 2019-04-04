@@ -24,36 +24,32 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.nitf",
           "compression":"laszip",
           "idatim":"20160102220000",
           "forward":"all",
           "acftb":"SENSOR_ID:LIDAR,SENSOR_ID_TYPE:LILN",
           "filename":"outputfile.ntf"
-        }
-      ]
-    }
-
+      }
+  ]
 
 
 **Example Two**
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.nitf",
           "compression":"laszip",
           "idatim":"20160102220000",
@@ -61,10 +57,8 @@ Example
           "acftb":"SENSOR_ID:LIDAR,SENSOR_ID_TYPE:LILN",
           "aimidb":"ACQUISITION_DATE:20160102235900",
           "filename":"outputfile.ntf"
-        }
-      ]
-    }
-
+      }
+  ]
 
 Options
 -------
@@ -127,9 +121,4 @@ acftb
   (Aircraft Information) TRE record (format name:value). Required:
   SENSOR_ID, SENSOR_ID_TYPE [Default: NITF defaults]
 
-
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
-
-.. _NITF 2.1: http://www.gwg.nga.mil/ntb/baseline/docs/2500c/index.html
-
-.. _DES segment: http://jitc.fhu.disa.mil/cgi/nitf/registers/desreg.aspx

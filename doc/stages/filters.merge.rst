@@ -3,7 +3,7 @@
 filters.merge
 ===============================================================================
 
-The merge filter combines input from multiple sources into a single output.
+The **Merge Filter** combines input from multiple sources into a single output.
 In most cases, this happens automatically on output and use of the merge
 filter is unnecessary.  However, there may be special cases where
 merging points prior to a particular filter or writer is necessary
@@ -12,8 +12,7 @@ or desirable.
 The merge filter will log a warning if its input point sets are based on
 different spatial references.  No checks are made to ensure that points
 from various sources being merged have similar dimensions or are generally
-compatible.  Notably, dimensions are not initialized when points merged
-from various sources do not have dimensions in common.
+compatible.
 
 .. embed::
 
@@ -27,17 +26,15 @@ filter will yield the same result).
 
 .. code-block:: json
 
-    {
-      "pipeline": [
-        "file1",
-        "file2",
-        "file3",
-        {
+  [
+      "file1",
+      "file2",
+      "file3",
+      {
           "type": "filters.merge"
-        },
-        "output.las"
-      ]
-    }
+      },
+      "output.las"
+  ]
 
 Example 2
 ---------
@@ -52,14 +49,12 @@ contains the points in "utm3.las".
 
 .. code-block:: json
 
-    {
-      "pipeline": [
-        "utm1.las"
-        "utm2.las",
-        "utm3.las",
-        "out#.las"
-      ]
-    }
+  [
+      "utm1.las"
+      "utm2.las",
+      "utm3.las",
+      "out#.las"
+  ]
 
 Here is the same pipeline with a merge filter added.  The merge filter will
 combine the points in its input: "utm1.las" and "utm2.las".  Then the result
@@ -69,15 +64,13 @@ and "utm2.las", while "out2.las" contains the points from "utm3.las".
 
 .. code-block:: json
 
-    {
-      "pipeline": [
-        "utm1.las"
-        "utm2.las",
-        {
-            "type" : "filters.merge"
-        },
-        "utm3.las",
-        "out#.las"
-      ]
-    }
+  [
+      "utm1.las"
+      "utm2.las",
+      {
+          "type" : "filters.merge"
+      },
+      "utm3.las",
+      "out#.las"
+  ]
 
