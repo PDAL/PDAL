@@ -481,7 +481,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
                 compressor.compress(outbuf.data(), size);
             }
         }
-        catch (pdal_error)
+        catch (pdal_error&)
         {
             compressor.done();
             throw;

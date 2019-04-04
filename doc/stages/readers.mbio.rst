@@ -26,19 +26,17 @@ This reads beams from a sonar data file and writes points to a LAS file.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type" : "readers.mbio",
           "filename" : "shipdata.m57",
           "format" : "MBF_EM3000RAW"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -65,7 +63,6 @@ speedmin
   The minimum speed that the ship can be moving to before the end of the
   data stream is assumed. [Default: 0]
 
-.. _MB-System: http://www.ldeo.columbia.edu/res/pi/MB-System/
-
-.. _all formats: https://www.ldeo.columbia.edu/res/pi/MB-System/html/mbio.html#lbAI
+.. _MB-System: https://www.mbari.org/products/research-software/mb-system/
+.. _all formats: http://www3.mbari.org/products/mbsystem/html/mbsystem_formats.html
 

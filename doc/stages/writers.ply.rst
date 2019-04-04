@@ -17,19 +17,17 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.pcd",
           "filename":"inputfile.pcd"
-        },
-        {
+      },
+      {
           "type":"writers.ply",
           "storage_mode":"little endian",
           "filename":"outputfile.ply"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -41,7 +39,7 @@ filename
 storage_mode
   Type of ply file to write. Valid values are 'ascii', 'little endian',
   'big endian', and 'default'. 'default' is binary output in the endianness
-  of the machine. [Default: 'ascii']
+  of the machine. [Default: "ascii"]
 
 dims
   List of dimensions to write as elements. [Default: all dimensions]

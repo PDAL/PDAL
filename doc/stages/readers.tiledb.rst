@@ -12,8 +12,7 @@ Example
 
 .. code-block:: json
 
-  {
-    "pipeline":[
+  [
       {
         "type":"readers.tiledb",
         "array_name":"my_array"
@@ -22,27 +21,26 @@ Example
         "type":"writers.las",
         "filename":"outputfile.las"
       }
-    ]
-  }
+  ]
 
 
 Options
 -------
 
 array_name
-`TileDB`_ array to read from. [Required]
+  `TileDB`_ array to read from. [Required]
 
 config_file
-`TileDB`_ configuration file [Optional]
+  `TileDB`_ configuration file [Optional]
 
 chunk_size
-Size of chunks to read from TileDB array [Optional]
+  Size of chunks to read from TileDB array [Optional]
 
 stats
-Dump query stats to stdout [Optional]
+  Dump query stats to stdout [Optional]
 
 bbox3d
-TileDB subarray to read in format ([minx, maxx], [miny, maxy], [minz, maxz]) [Optional]
+  TileDB subarray to read in format ([minx, maxx], [miny, maxy], [minz, maxz]) [Optional]
 
 .. include:: reader_opts.rst
 

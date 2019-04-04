@@ -20,18 +20,16 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.pcd",
           "filename":"inputfile.pcd"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
