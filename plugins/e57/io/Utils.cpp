@@ -97,35 +97,25 @@ pdal::Dimension::Id pdal::e57plugin::e57ToPdal(const std::string &e57Dimension) 
 
 std::string pdal::e57plugin::pdalToE57(pdal::Dimension::Id pdalDimension)
 {
-    if (pdalDimension == pdal::Dimension::Id::X)
+    switch (pdalDimension)
     {
-        return  "cartesianX";
+        case pdal::Dimension::Id::X:
+            return "cartesianX";
+        case pdal::Dimension::Id::Y:
+            return "cartesianY";
+        case pdal::Dimension::Id::Z:
+            return "cartesianZ";
+        case pdal::Dimension::Id::Red:
+            return "colorRed";
+        case pdal::Dimension::Id::Green:
+            return "colorGreen";
+        case pdal::Dimension::Id::Blue:
+            return "colorBlue";
+        case pdal::Dimension::Id::Intensity:
+            return "intensity";
+        default:
+            return std::string();
     }
-    else if (pdalDimension == pdal::Dimension::Id::Y)
-    {
-        return  "cartesianY";
-    }
-    else if (pdalDimension == pdal::Dimension::Id::Z)
-    {
-        return  "cartesianZ";
-    }
-    else if (pdalDimension == pdal::Dimension::Id::Red)
-    {
-        return  "colorRed";
-    }
-    else if (pdalDimension == pdal::Dimension::Id::Blue)
-    {
-        return  "colorBlue";
-    }
-    else if (pdalDimension == pdal::Dimension::Id::Green)
-    {
-        return  "colorGreen";
-    }
-    else if (pdalDimension == pdal::Dimension::Id::Intensity)
-    {
-        return  "intensity";
-    }
-    return std::string();
 }
 
 std::vector<pdal::Dimension::Id> pdal::e57plugin::supportedPdalTypes()
@@ -144,10 +134,8 @@ double pdal::e57plugin::rescaleE57ToPdalValue(
 {
     assert(e57Bounds.second >= e57Bounds.first);
     if (e57Bounds.second == e57Bounds.first)
-    {
         return value;
-    }
-    
+
     auto pdalDimension = pdal::e57plugin::e57ToPdal(e57Dimension);
     std::pair<double,double> minmax;
     try
@@ -174,10 +162,7 @@ std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &p
     std::string boundingBoxName = fieldName+"Limits";
 
     if (fieldName.substr(0,5) == "color")
-    {
         boundingBoxName = "colorLimits";
-    }
-
 
     if ( prototype.isDefined(boundingBoxName) )
 	{

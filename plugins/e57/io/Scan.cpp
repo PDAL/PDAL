@@ -103,9 +103,7 @@ void Scan::transformPoint(pdal::PointRef pt) const
     {
         auto minmax = pdal::e57plugin::getLimits(*m_rawData,field);
         if (minmax == minmax) // not nan
-        {
             m_valueBounds[pdal::e57plugin::e57ToPdal(field)] = minmax;
-        }
     }
 }
 
@@ -134,9 +132,6 @@ void Scan::transformPoint(pdal::PointRef pt) const
 			double q12 = q[1] * q[2];
 			double q01 = q[0] * q[1];
 
-            // 			m_rotation[0][0] = q00 + q11 - q22 - q33;
-			// m_rotation[1][1] = q00 - q11 + q22 - q33;
-			// m_rotation[2][2] = q00 - q11 - q22 + q33;
 			m_rotation[0][0] = 1 - 2.0*(q22 + q33);
 			m_rotation[1][1] = 1 - 2.0*(q11 + q33);
 			m_rotation[2][2] = 1 - 2.0*(q11 + q22);

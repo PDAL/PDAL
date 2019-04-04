@@ -63,6 +63,8 @@ class E57Writer : public pdal::Writer, public pdal::Streamable
 public:
     E57Writer();
     ~E57Writer();
+    E57Writer(const E57Writer &) = delete;
+    E57Writer& operator=(const E57Writer&) = delete;
 
     std::string getName() const;
 

@@ -49,7 +49,7 @@ class E57Reader: public Reader, public Streamable
 
     class ChunkReader {
     public:
-        ChunkReader(pdal::point_count_t pointOffset, pdal::point_count_t maxPointRead,
+        ChunkReader(const pdal::point_count_t &pointOffset, const pdal::point_count_t &maxPointRead,
                     const std::shared_ptr<e57::Scan> &scan,
                     const std::set<std::string> &e57Dimensions);
 
@@ -81,6 +81,8 @@ public:
     E57Reader(): Reader(), Streamable() {};
     E57Reader(std::string filename);
     ~E57Reader();
+    E57Reader(const E57Reader &) = delete;
+    E57Reader& operator=(const E57Reader&) = delete;
 
     std::string getName() const;
 
@@ -100,7 +102,6 @@ private:
 
     /* Pdal section */
     virtual void addDimensions(PointLayoutPtr layout);
-    // // virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
