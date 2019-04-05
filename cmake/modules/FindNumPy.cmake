@@ -1,6 +1,6 @@
 # - Try to find the Python module NumPy
 #
-# This module defines: 
+# This module defines:
 #  NUMPY_INCLUDE_DIR: include path for arrayobject.h
 
 # Copyright (c) 2009-2012 Arnaud Barré <arnaud.barre@gmail.com>
@@ -31,6 +31,5 @@ find_package_handle_standard_args(NumPy DEFAULT_MSG PYTHON_NUMPY_VERSION PYTHON_
 
 set(PYTHON_NUMPY_INCLUDE_DIR ${PYTHON_NUMPY_INCLUDE_DIRS}
     CACHE PATH "Location of NumPy include files.")
-message("NUMPY include dir = ${PYTHON_NUMPY_INCLUDE_DIR}")
 mark_as_advanced(PYTHON_NUMPY_INCLUDE_DIR)
 
