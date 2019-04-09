@@ -14,6 +14,7 @@ so the following instructions use that build tool, though building with
 GNU Makefiles works similarly (simply replace "ninja" with "make" when
 running the build tool).
 
+.. _`CMake`: https://cmake.org
 .. _`generators`: https://cmake.org/cmake/help/v3.5/manual/cmake-generators.7.html
 .. _`Ninja`: https://ninja-build.org/
 .. _`GNU Makefiles`: https://www.gnu.org/software/make/manual/make.html
@@ -205,3 +206,4 @@ PDAL can be installed to the default location (usually subdirectories of
 
 ::
 
+    $ ninja install

@@ -28,15 +28,12 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**10-12-2018**
+**04-09-2018**
 ................................................................................
 
-PDAL 1.8.0 has been released. Visit :ref:`download` to obtain a copy of the
-source code, or follow the :ref:`quickstart` to get going in a hurry with
-`Docker`_.
-
-
-.. _`Docker`: https://www.docker.com/
+PDAL 1.9.0 has been released. You can :ref:`download <download>` the source
+code or follow the :ref:`quickstart <quickstart>` to get going in a
+hurry with Conda.
 
 .. _`Howard Butler`: http://github.com/hobu
 .. _`Brad Chambers`: http://github.com/chambbj
