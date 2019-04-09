@@ -48,7 +48,7 @@ command
 
 ::
 
-    git clone https://github.com/PDAL/PDAL.git pdal
+    git clone https://github.com/PDAL/PDAL.git
 
 
 Binaries
