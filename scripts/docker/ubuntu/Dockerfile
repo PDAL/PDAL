@@ -1,7 +1,7 @@
 FROM ubuntu:bionic as builder
 MAINTAINER Howard Butler <howard@hobu.co>
 
-ARG PDAL_VERSION=master
+ARG PDAL_VERSION=1.9-maintenance
 ARG DESTDIR="/build"
 ARG tiledb_version=1.4.1
 
