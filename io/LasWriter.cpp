@@ -273,18 +273,15 @@ void LasWriter::fillForwardList()
 
     static const StringList offset = { "offset_x", "offset_y", "offset_z" };
 
-    static StringList all;
-    all.insert(all.begin(), header.begin(), header.end());
-    all.insert(all.begin(), scale.begin(), scale.end());
-    all.insert(all.begin(), offset.begin(), offset.end());
-
     // Build the forward list, replacing special keywords with the proper
     // field names.
     for (auto& name : m_forwardSpec)
     {
         if (name == "all")
         {
-            m_forwards.insert(all.begin(), all.end());
+            m_forwards.insert(header.begin(), header.end());
+            m_forwards.insert(scale.begin(), scale.end());
+            m_forwards.insert(offset.begin(), offset.end());
             m_forwardVlrs = true;
         }
         else if (name == "header")
@@ -297,7 +294,11 @@ void LasWriter::fillForwardList()
             m_forwards.insert("dataformat_id");
         else if (name == "vlr")
             m_forwardVlrs = true;
-        else if (Utils::contains(all, name))
+        else if (
+            Utils::contains(header, name) ||
+            Utils::contains(scale, name) ||
+            Utils::contains(offset, name)
+        )
             m_forwards.insert(name);
         else
             throwError("Error in 'forward' option.  Unknown field for "
