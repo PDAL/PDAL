@@ -359,7 +359,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             {
                 root = root.substr(0, root.size() - postfix.size());
             }
-            root = arbiter::fs::expandTilde(root);
+            root = arbiter::expandTilde(root);
 
             const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
             const Json::Value addonInfo(parse(ep.get("ept-addon.json")));

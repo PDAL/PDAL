@@ -181,10 +181,10 @@ namespace
 #ifdef PDAL_ARBITER_ENABLED
 std::string tempFilename(const std::string& path)
 {
-    const std::string tempdir(arbiter::fs::getTempPath());
-    const std::string basename(arbiter::util::getBasename(path));
+    const std::string tempdir(arbiter::getTempPath());
+    const std::string basename(arbiter::getBasename(path));
 
-    return arbiter::util::join(tempdir, basename);
+    return arbiter::join(tempdir, basename);
 }
 #endif
 
