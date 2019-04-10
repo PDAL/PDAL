@@ -80,12 +80,8 @@ void EsriReader::initialize(PointTableRef table)
                 m_dimensions[dim];
         }
     }
-    Json::Value config;
 
-    if (isDebug() && log()->getLevel() > LogLevel::Debug4)
-        config["arbiter"]["verbose"] = true;
-
-    m_arbiter.reset(new arbiter::Arbiter(config));
+    m_arbiter.reset(new arbiter::Arbiter());
 
     //adjust filename string
     const std::string pre("i3s://");

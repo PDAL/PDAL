@@ -56,12 +56,12 @@ std::string SlpkReader::getName() const { return slpkInfo.name; }
 void SlpkReader::initInfo()
 {
     // create temp path
-    std::string path = arbiter::fs::getTempPath();
+    std::string path = arbiter::getTempPath();
 
     // use arbiter to create new directory if doesn't already exist
     std::string fullPath(path + FileUtils::stem(
         FileUtils::getFilename(m_filename)));
-    arbiter::fs::mkdirp(fullPath);
+    arbiter::mkdirp(fullPath);
 
     // un-archive the slpk archive
     SlpkExtractor slpk(m_filename, fullPath);

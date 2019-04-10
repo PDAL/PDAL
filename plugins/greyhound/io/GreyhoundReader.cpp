@@ -72,10 +72,7 @@ void GreyhoundReader::initialize(PointTableRef table)
     // Parse the URL and query parameters (although we won't handle the schema
     // until addDimensions) and fetch the dataset `info`.
 
-    Json::Value config;
-    if (log()->getLevel() > LogLevel::Debug4)
-        config["arbiter"]["verbose"] = true;
-    m_arbiter.reset(new arbiter::Arbiter(config));
+    m_arbiter.reset(new arbiter::Arbiter());
 
     // If this stage was parsed from a string parameter rather than JSON object
     // specification, normalize it to our URL.
