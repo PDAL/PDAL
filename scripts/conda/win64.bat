@@ -4,28 +4,6 @@ del /s /q  %CONDA_ENVIRO%
 mkdir %CONDA_ENVIRO%
 pushd %CONDA_ENVIRO%
 
-set GDAL_VERSION=2.2.4
-set NUMPY_VERSION=1.15.3
-
-call conda config --set always_yes yes
-IF ERRORLEVEL 1 GOTO CLEANUP
-
-call conda remove --name %CONDA_ENVIRO% -y --all
-IF ERRORLEVEL 1 GOTO CLEANUP
-
-call conda create --name %CONDA_ENVIRO% -y
-IF ERRORLEVEL 1 GOTO CLEANUP
-
-call %CONDA_PREFIX%\\Scripts\activate.bat %CONDA_ENVIRO%
-IF ERRORLEVEL 1 GOTO CLEANUP
-
-call conda config --add channels conda-forge
-IF ERRORLEVEL 1 GOTO CLEANUP
-
-call conda install geotiff laszip nitro curl gdal=%GDAL_VERSION% pcl cmake eigen ninja libgdal=%GDAL_VERSION% zstd numpy=%NUMPY_VERSION% xz libxml2 laz-perf qhull sqlite hdf5 oracle-instantclient numpy-base=%NUMPY_VERSION% tiledb
-
-IF ERRORLEVEL 1 GOTO CLEANUP
-
 REM set GENERATOR="Visual Studio 14 2015 Win64"
 REM set GENERATOR="NMake Makefiles"
 set GENERATOR="Ninja"
@@ -39,7 +17,7 @@ cmake -G %GENERATOR% ^
       -DBUILD_PLUGIN_PCL=ON ^
       -DBUILD_PLUGIN_PYTHON=ON ^
       -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
-      -DBUILD_PLUGIN_OCI=ON ^
+      -DBUILD_PLUGIN_OCI=OFF ^
       -DBUILD_PLUGIN_I3S=ON ^
       -DBUILD_PLUGIN_SQLITE=ON ^
       -DBUILD_PLUGIN_ICEBRIDGE=ON ^
@@ -56,10 +34,4 @@ cmake -G %GENERATOR% ^
       .. --debug-trycompile
 
 call ninja
-IF ERRORLEVEL 1 GOTO CLEANUP
-
-:CLEANUP
-call conda deactivate
-popd
-exit /b
 

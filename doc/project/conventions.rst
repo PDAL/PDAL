@@ -5,11 +5,12 @@ Coding Conventions
 ================================================================================
 
 To the extent possible and reasonable, we value consistency of source code
-formatting, class and variable naming, and so forth.
+formatting, class and variable naming, and so forth.  Please follow existing
+code, rather than introducing your own (of course, better) formatting or
+change existing code unless you're changing behavior.
 
-This Note lists some such conventions that we would like to follow, where
+This note lists some such conventions that we would like to follow, where
 it makes sense to do so.
-
 
 Source Formatting
 =================
@@ -19,6 +20,8 @@ source code files in a consistent fashion.  The file astylerc, at the top
 of the github repo, contains the default settings we use.
 
 Our conventions are:
+
+* Lines should be kept to 80 characters where reasonable.
 
 * LF endings (unix style), not CRLF (windows style)
 
@@ -50,26 +53,19 @@ Naming Conventions
 * member variables should be prefixed with "m\_", followed by the name in
   lowerCamelCase -- for example, "m_numberOfPoints"
 
-* there should be only one class per file, and the name of the file should
+* there should be one class per file, and the name of the file should
   match the class name -- that is, class PointData should live in files
-  PointData.hpp and PointData.cpp
+  PointData.hpp and PointData.cpp.
 
 
 Other Conventions
 =================
 
-* the use of getter and setter methods is preferred to exposing member
-  variables
-
 * Surround all code with "namespace pdal {...}"; where justifiable, you
   may introduce a nested namespace.
 
-* Use exceptions for exceptional events that are not going to be handled
-  directly within the context of where the event occurs.  Avoid status
-  codes.  See pdal_error.hpp for a set of pdal-specific exception types
-  you may throw.
-
-* Describe use of "debug" and "verbose" settings.
+* All exceptions that are not caught internally should be of type pdal_error.
+  Exceptions used as local error handling should always be caught.
 
 * Don't put member function bodies in the class declaration in the
   header file, unless clearly justified for performance reasons.
@@ -82,16 +78,6 @@ Other Conventions
 * Document all public (and protected) member functions using
   doxygen markup.
 
-Layout/Organization of Source Tree
-==================================
-
-* public headers in ./include
-
-* private headers alongside source files in src/
-
-* ...
-
-
 #include Conventions
 ====================
 
@@ -99,16 +85,7 @@ Layout/Organization of Source Tree
   #include <pdal/Stage.h>
 
 * For private headers (from somehwere in ./src), use quotes:
-  #include "support.hpp"
-
-* #include lines should be grouped and arranged in this order: C++/std headers,
-  3rd-party headers (e.g. gdal), pdal headers, local headers.  The
-  pdal headers may be further grouped by subdirectory, e.g. drivers/liblas,
-  filters, etc.
-
-* Exception to the above: source files (.cpp) should #include their
-  corresponding .hpp file first.  This assures that the header is including
-  all the files it needs to.
+  #include "Support.hpp"
 
 * Don't #include a file where a simple forward declaration will do.
   (Note: this only applies to pdal files; don't forward declare from system

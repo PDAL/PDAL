@@ -4,43 +4,38 @@
 Dependencies
 ==============================================================================
 
-:Author: Howard Butler
-:Contact: howard@hobu.co
-:Date: 11/03/2015
+PDAL depends on a number of libraries to do its work.  You should make sure
+those dependencies are installed on your system before installing PDAL
+or use a packaging system that will automatically ensure that prerequisites
+are satisified.  Packaging system such as `apt`_ or `Conda`_ can
+be used to install dependencies on your system.
 
-PDAL explicitly stands on the shoulders of giants that have come before it.
-Specifically, PDAL depends on a number of libraries to do its work. Most are
-not required. For optional dependencies, PDAL utilizes a dynamically-linked
-plugin architecture that loads them at runtime.
-
+.. _`apt`: https://help.ubuntu.com/lts/serverguide/apt.html
+.. _`Conda`: https://conda.io/en/latest/
 
 Required Dependencies
 ------------------------------------------------------------------------------
 
-GDAL
+GDAL (2.2+)
 ..............................................................................
 
 PDAL uses GDAL for spatial reference system description manipulation, and image
 reading supporting for the NITF driver, and :ref:`writers.oci` support. In
 conjunction with GeoTIFF_, GDAL is used to convert GeoTIFF keys and OGC WKT SRS
-description strings into formats required by specific drivers. While PDAL can
-be built without GDAL support, if you want SRS manipulation and description
-ability, you must have GDAL (and GeoTIFF_) linked in at compile time.
+description strings into formats required by specific drivers.  ::
 
-Obtain `GDAL`_ via whatever method is convenient.  Linux platforms such as
-`Debian`_ have `DebianGIS`_, Mac OS X has the `KyngChaos`_ software frameworks,
-and Windows has the `Conda Forge`_ platform.
+    Source: https://github.com/OSGeo/gdal
+    Conda: https://anaconda.org/conda-forge/gdal
 
-* GDAL 2.2+ is required.
-
-
-GeoTIFF
+GeoTIFF (1.3+)
 ..............................................................................
 
 PDAL uses GeoTIFF in conjunction with GDAL for GeoTIFF key support in the
-LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
+LAS driver.  GeoTIFF is typically a dependency of GDAL, so installing GDAL
+from a package will generally install GeoTIFF as well. ::
 
-* libgeotiff 1.3.0+ is required
+    Source: https://github.com/OSGeo/libgeotiff
+    Conda: https://anaconda.org/conda-forge/geotiff
 
 .. note::
     `GDAL` surreptitiously embeds a copy of `GeoTIFF`_ in its library build
@@ -53,33 +48,49 @@ LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
     those using that platform to link and build PDAL themselves, do
     not need to worry about this issue.
 
-Proj.4
-..............................................................................
-
-Proj.4_ is the projection engine that PDAL uses for the
-:ref:`filters.reprojection` filter. It is used by GDAL.
-
-.. note::
-
-    Proj.4 4.9.0+ is required if you need vertical datum
-    transformation support. Otherwise, older versions should be
-    sufficient.
-
 Optional Dependencies
 ------------------------------------------------------------------------------
 
-libxml2
+LASzip (Latest package/source recommended)
+..............................................................................
+
+`LASzip`_ is a library with a `CMake`-based build system that
+provides periodic compression of `ASPRS LAS`_ data. It is used by the
+:ref:`writers.las` and :ref:`readers.las` to provide
+compressed LAS support.::
+
+    Source: https://github.com/LASzip/LASzip
+    Conda: https://anaconda.org/conda-forge/laszip
+
+laz-perf (Latest package/source recommended)
+..............................................................................
+
+laz-perf provides an alternative LAS compression/decompression engine that
+may be slightly faster in some circumstances.  laz-perf supports fewer LAS
+point types and versions than does LASzip.  It is also used as a
+compression type for :ref:`writers.oci` and :ref:`writers.sqlite`::
+
+    Source: https://github.com/verma/laz-perf/
+    Conda: https://anaconda.org/conda-forge/laz-perf
+
+libxml2  (2.7+)
 ..............................................................................
 
 libxml2_ is used to serialize PDAL dimension descriptions into XML for the
 database drivers such as :ref:`writers.oci`, :ref:`readers.sqlite`, or
-:ref:`readers.pgpointcloud`
+:ref:`readers.pgpointcloud`.::
 
-.. note::
+    Source: http://www.xmlsoft.org/
+    Conda: https://anaconda.org/conda-forge/libxml2
 
-    libxml 2.7.0+ is required. Older versions may also work but are untested.
+Plugin Dependencies
+------------------------------------------------------------------------------
 
-`OCI`_
+PDAL comes with optional plugin stages that require other libraries in order
+to run.  Many of these libraries are licensed in a way incompatible with
+the PDAL license or they may be commercial products that require purchase.
+
+OCI (10g+)
 ..............................................................................
 
 Obtain the `Oracle Instant Client`_ and install in a location on your system.
@@ -87,82 +98,41 @@ Be sure to install both the "Basic" and the "SDK" modules. Set your
 ``ORACLE_HOME`` environment variable system- or user-wide to point to this
 location so the CMake configuration can find your install. OCI is used by
 both :ref:`writers.oci` and :ref:`readers.oci` for Oracle
-Point Cloud read/write support.
+Point Cloud read/write support.  In order to obtain the OCI libraries
+you must register with Oracle.::
 
-.. warning::
-    `OCI`_'s libraries are inconsistently named.  You may need to create
-    symbolic links for some library names in order for the `CMake`_ to find
-    them::
+    Libraries: https://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html
 
-        cd $ORACLE_HOME
-        ln -s libocci.so.11.1 libocci.so
-        ln -s libclntsh.so.11.1 libclntsh.so
-        ln -s libociei.so.11.1 libociei.so
-
-* OCI 10g+ is required.
-
-.. note::
-    MSVC should only require the oci.lib and oci.dll library and dlls.
-
-Nitro
+Nitro (Requires specific source package)
 ..............................................................................
 
 Nitro is a library that provides `NITF`_ support for PDAL to write LAS-in-NITF
-files for :ref:`writers.nitf`. PDAL can only use a fork of Nitro located at
-http://github.com/hobu/nitro instead of the mainline tree for two reasons:
+files for :ref:`writers.nitf`.  You must use the specific version of Nitro
+referenced below for licensing and compatibility reasons.::
 
-1) The fork contains a simple `CMake`-based build system
-2) The fork properly dynamically links on Windows to maintain LGPL compliance.
+    Source: http://github.com/hobu/nitro
 
-It is expected that the fork will go away once these items are incorporated into
-the main source tree.
-
-
-LASzip
-..............................................................................
-
-`LASzip`_ is a library with a simple `CMake`-based build system that
-provides periodic compression of `ASPRS LAS`_ data. It is used by the
-:ref:`writers.las` and :ref:`readers.las` to provide
-compressed LAS support.
-
-laz-perf
-..............................................................................
-
-In addition to `LASzip`_, you can use the alternative `laz-perf`_ library.
-`laz-perf`_ provides slightly faster decompression capability for typical
-LAS files. It is also used as a compression type for :ref:`writers.oci` and
-:ref:`writers.sqlite`
-
-.. _`laz-perf`: https://github.com/verma/laz-perf/
-
-PCL
+PCL  (1.7.2+)
 ..............................................................................
 
 The `Point Cloud Library (PCL)`_ is used by the :ref:`pcl_command`,
 :ref:`writers.pcd`, :ref:`readers.pcd`, and :ref:`filters.pclblock` to provide
-support for various PCL-related operations.
+support for various PCL-related operations.::
 
-PCL must be 1.7.2+. We do our best to keep this up-to-date with PCL master.
+    Source: https://github.com/PointCloudLibrary/pcl
+    Conda: https://anaconda.org/conda-forge/pcl
 
-.. note::
-    `Homebrew`_-based OSX builds use PCL 1.7.2, but you may need to switch
-    off `VTK`_ support depending on the configuration.
-
-TileDB
+TileDB  (1.4.1+)
 ..............................................................................
 
 `TileDB`_ is an efficient multi-dimensional array management system which
 introduces a novel on-disk format that can effectively store dense and sparse
 array data with support for fast updates and reads. It features excellent
 compression, and an efficient parallel I/O system with high scalability. It is
-used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.
+used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.::
 
-.. note::
-    `TileDB`_ must be 1.4.1+.
-
-.. _`Homebrew`: http://brew.sh
-.. _`VTK`: http://vtk.org
+    Source: https://github.com/TileDB-Inc/TileDB
+    Conda: https://anaconda.org/conda-forge/tiledb
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _`LASzip`: http://laszip.org
@@ -174,15 +144,11 @@ used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.
 .. _`Oracle Point Cloud`: http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 .. _`Debian`: http://www.debian.org
-.. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
 .. _`Conda Forge`: https://anaconda.org/conda-forge/pdal
 
 .. _GDAL: http://www.gdal.org
-.. _Proj.4: http://trac.osgeo.org/proj
 .. _GeoTIFF: http://trac.osgeo.org/geotiff
 .. _libxml2: http://xmlsoft.org
 .. _CMake: http://www.cmake.org
-.. _`libpq`: http://www.postgresql.org/docs/9.3/static/libpq.html
-
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
 .. _`TileDB`: https://www.tiledb.io
