@@ -13,7 +13,7 @@ will be created by the ferry filter.
 
 Alternatively, the format =><to> can be used to create a new dimension without
 copying data from any source.  The values of the 'to' dimension are default
-initialized.
+initialized (set to 0).
 
 .. embed::
 
@@ -22,64 +22,62 @@ initialized.
 Example 1
 ---------
 
-In this scenario, we are making copies of the X and Y dimensions into the
-dimensions StatePlaneX and StatePlaneY.  Since the reprojection filter will
-modify the dimensions X and Y, this allows us to maintain both the
+In this scenario, we are making copies of the ``X`` and ``Y`` dimensions
+into the
+dimensions ``StatePlaneX`` and ``StatePlaneY``.  Since the reprojection
+filter will
+modify the dimensions ``X`` and ``Y``, this allows us to maintain both the
 pre-reprojection values and the post-reprojection values.
 
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "uncompressed.las",
-        {
+  [
+      "uncompressed.las",
+      {
           "type":"readers.las",
           "spatialreference":"EPSG:2993",
           "filename":"../las/1.2-with-color.las"
-        },
-        {
+      },
+      {
           "type":"filters.ferry",
           "dimensions":"X => StatePlaneX, Y=>StatePlaneY"
-        },
-        {
+      },
+      {
           "type":"filters.reprojection",
           "out_srs":"EPSG:4326+4326"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "scale_x":"0.0000001",
           "scale_y":"0.0000001",
           "filename":"colorized.las"
-        }
-      ]
-    }
+      }
+  ]
 
 Example 2
 ---------
 
-The ferry filter is being used to add a dimension 'Classification' to points
+The ferry filter is being used to add a dimension ``Classification`` to points
 so that the value can be set to '2' and written as a LAS file.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
             "type": "readers.gdal",
             "filename": "somefile.tif"
-        },
-        {
+      },
+      {
             "type": "filters.ferry",
             "dimensions": "=>Classification"
-        },
-        {
+      },
+      {
             "type": "filters.assign",
             "assignment": "Classification[:]=2"
-        },
-        "out.las"
-      ]
-    }
+      },
+      "out.las"
+  ]
 
 Options
 -------

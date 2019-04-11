@@ -57,6 +57,14 @@ void Reader::readerAddArgs(ProgramArgs& args)
 
 void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
 {
+    if (srs.empty() && !m_defaultSrs.empty())
+    {
+        // If an attempt comes in to clear the SRS but we have a default,
+        // revert to the default rather than clearing.
+        Stage::setSpatialReference(m, m_defaultSrs);
+        return;
+    }
+
     if (getSpatialReference().empty() || m_overrideSrs.empty())
     {
         Stage::setSpatialReference(m, srs);

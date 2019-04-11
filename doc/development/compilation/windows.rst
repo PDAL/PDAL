@@ -6,28 +6,27 @@ Building Under Windows
 
 :Author: Howard Butler
 :Contact: howard at hobu.co
-:Date: 11/02/2017
+:Date: 03/20/2019
 
 .. note::
 
-    `OSGeo4W`_ contains a pre-built up-to-date 64 bit Windows binary. It
+    :ref:`conda` contains a pre-built up-to-date 64 bit Windows binary. It
     is fully-featured, and if you do not need anything custom, it is likely
     the fastest way to get going.
 
-.. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
 
 Introduction
 ------------------------------------------------------------------------------
 
-Pre-built binary packages for Windows are available via `OSGeo4W`_ (64-bit version),
+Pre-built binary packages for Windows are available via :ref:`conda` (64-bit version),
 and all of the prerequisites required for compilation of a fully featured build
 are also available via that packaging system. This document assumes you
-will be using OSGeo4W as your base, and anything more advanced is beyond
+will be using Conda Forge as your base, and anything more advanced is beyond
 the scope of the document.
 
 .. note::
 
-    The AppVeyor build system uses the PDAL project's configuration on the OSGeo4W
+    The AppVeyor build system uses the PDAL project's configuration on the Conda Forge
     system. It contains a rich resource of known working examples. See
     https://github.com/PDAL/PDAL/blob/master/appveyor.yml and
     https://github.com/PDAL/PDAL/tree/master/scripts/appveyor for inspiration.
@@ -44,54 +43,37 @@ with good support for those features is required.
 
 .. _CMake: http://www.cmake.org
 
-Prerequiste Libraries
+Prerequisite Libraries
 ------------------------------------------------------------------------------
 
 PDAL uses the `AppVeyor`_ continuous integration platform for building and
 testing itself on Windows. The configuration that PDAL uses is valuable
 raw materials for configuring your own environment because the PDAL
-team must keep it up to date with both the OSGeo4W environment and
+team must keep it up to date with both the :ref:`conda` environment and
 the Microsoft compiler situation.
 
 You can see the current AppVeyor configuration at
-https://github.com/PDAL/PDAL/blob/master/appveyor.yml The most interesting
-bits are the ``install`` section, the ``config.cmd``, and the ``build.cmd``.
+https://github.com/PDAL/PDAL/blob/master/appveyor.yml The most interesting bits
+are the ``install`` section, the ``config.cmd``, and the ``build.cmd`` scripts.
+The AppVeyor configuration already has Miniconda installed, and the
+``config.cmd`` script installs all of PDAL's prerequisites via the command
+line.
 
-The AppVeyor configuration installs OSGeo4W and all of PDAL's prerequisites
-via the command line.
-
-After downloading the `OSGeo4W setup`_, you can invoke it via the command
-line to install PDAL's prerequisite packages.
 
 ::
 
-   C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 ^
-         -P eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,^
-            libxml2,msys,nitro,laz-perf,proj,zlib,python3-core,python3-devel,^
-            python3-numpy,oci,oci-devel,laz-perf,jsoncpp -R c:/OSGeo4W64
+   conda install geotiff laszip nitro curl ^
+      gdal pcl cmake eigen ninja libgdal ^
+      zstd numpy xz libxml2 laz-perf qhull ^
+      sqlite hdf5 tiledb conda-build ninja -y
 
 .. note::
 
     The package list here might change over time. The canonnical location
-    to learn the OSGeo4W prerequisite list for PDAL is the ``appveyor.yml``
+    to learn the  prerequisite list for PDAL is the ``scripts/appveyor/test/build.cmd``
     file in PDAL's source tree.
 
-.. seealso::
-
-    If you don't wish to run via the command line, you can choose the GUI
-    for installation. Visit :ref:`workshop-osgeo4w` for a description, and then
-    choose all of the listed support libraries (minus ``PDAL`` of course)
-    to schedule them for installation.
-
-.. warning::
-
-    There are a number of package scripts that assume ``c:/OSGeo4W64`` as the
-    installation path, and it is likely that you will run into some
-    trouble attempting to install in other locations. It's possible it will
-    work with some elbow grease, but it might not work out of the box.
-
 .. _`AppVeyor`: https://ci.appveyor.com/project/hobu/pdal/history
-.. _`OSGeo4W setup`: http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe
 
 
 Fetching the Source
@@ -111,7 +93,7 @@ Switch to the ``-maintenance`` branch.
 
    ::
 
-      c:\dev> git checkout 1.7-maintenance
+      c:\dev> git checkout 1.9-maintenance
 
 
    .. note::
@@ -138,7 +120,7 @@ for inspiration on this topic.
 
 1. The AppVeyor build configuration https://github.com/PDAL/PDAL/blob/master/scripts/appveyor/config.cmd#L26
 
-2. Howard Butler's example build configuration https://github.com/PDAL/PDAL/blob/master/cmake/examples/hobu-windows.bat
+2. Howard Butler's example build configuration https://github.com/PDAL/PDAL/blob/master/scripts/conda/wind64.bat
 
 
 .. note::
@@ -170,6 +152,5 @@ After you've built the tree, you can run ``pdal.exe`` by issuing it
 
 .. note::
 
-    You need to have your OSGeo4W shell active to enable access to
-    PDAL's dependencies. Issue ``c:\osgeo4w64\bin\o4w_env.bat`` in
-    your shell to activiate it.
+    You may need to have your Conda environment active to enable access to
+    PDAL's dependencies.

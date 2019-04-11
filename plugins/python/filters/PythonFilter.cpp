@@ -55,13 +55,14 @@ std::string PythonFilter::getName() const { return s_info.name; }
 
 void PythonFilter::addArgs(ProgramArgs& args)
 {
+    args.add("module", "Python module containing the function to run",
+        m_module).setPositional();
+    args.add("function", "Function to call", m_function).setPositional();
     args.add("source", "Python script to run", m_source);
     args.add("script", "File containing script to run", m_scriptFile);
-    args.add("module", "Python module containing the function to run",
-        m_module);
-    args.add("function", "Function to call", m_function);
     args.add("add_dimension", "Dimensions to add", m_addDimensions);
-    args.add("pdalargs", "Dictionary to add to module globals when calling function", m_pdalargs);
+    args.add("pdalargs", "Dictionary to add to module globals when "
+        "calling function", m_pdalargs);
 }
 
 
@@ -76,9 +77,10 @@ void PythonFilter::ready(PointTableRef table)
 {
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(m_scriptFile);
-    static_cast<plang::Environment*>(plang::Environment::get())->set_stdout(log()->getLogStream());
+    plang::Environment::get()->set_stdout(log()->getLogStream());
     m_script = new plang::Script(m_source, m_module, m_function);
-    m_pythonMethod = new plang::Invocation(*m_script);
+
+	m_pythonMethod = new plang::Invocation(*m_script);
     m_pythonMethod->compile();
     m_totalMetadata = table.metadata();
 }
@@ -120,9 +122,7 @@ PointViewSet PythonFilter::run(PointViewPtr view)
         m_pythonMethod->end(*view, getMetadata());
         viewSet.insert(view);
     }
-
     return viewSet;
-
 }
 
 

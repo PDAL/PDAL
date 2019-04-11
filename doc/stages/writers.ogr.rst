@@ -19,21 +19,19 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "inputfile.las",
-        {
+  [
+      "inputfile.las",
+      {
           "type": "writers.ogr",
           "filename" "outfile.geojson",
           "measure_dim": "Compression"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
 
-filename
+_`filename`
   Output file to write.  The writer will accept a filename containing
   a single placeholder character (`#`).  If input to the writer consists
   of multiple PointViews, each will be written to a separate file, where
@@ -67,8 +65,7 @@ measure_dim
 
 ogrdriver
   The OGR driver to use for output.  This option overrides any inference made
-  about output drivers from 'filename'.
-
+  about output drivers from filename_.
 
 .. _vector formats: http://www.gdal.org/ogr_formats.html
 

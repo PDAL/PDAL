@@ -48,7 +48,7 @@ if (WIN32)
 endif()
 
 # PCL's configuration clobbers Boost find_package - do it again
-find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
+#find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
 
 #set (PCL_LIBRARIES "${PCL_COMMON_LIBRARY};${PCL_REGISTRATION_LIBRARY};${PCL_FEATURES_LIBRARY};${PCL_FILTERS_LIBRARY};${PCL_SEARCH_LIBRARY};${PCL_SEGMENTATION_LIBRARY};${PCL_IO_LIBRARY}")
 #
@@ -57,9 +57,11 @@ find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem sy
 PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     FILES
         io/PcdReader.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${pcd_reader_libname} PRIVATE
-    ${PCL_INCLUDE_DIRS})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
         set_source_files_properties(io/PcdReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
     endif()
@@ -70,9 +72,11 @@ target_include_directories(${pcd_reader_libname} PRIVATE
 PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
     FILES
         io/PcdWriter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${pcd_writer_libname} PRIVATE
-    ${PCL_INCLUDE_DIRS})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+    )
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
         set_source_files_properties(io/PcdWriter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
     endif()
@@ -87,46 +91,46 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
     LINK_WITH
         ${PCL_LIBRARIES}
         ${PDAL_JSONCPP_LIB_NAME}
-)
-target_include_directories(${pclblock_libname}
-    PRIVATE
-      ${PCL_INCLUDE_DIRS}
-      ${PDAL_JSONCPP_INCLUDE_DIR}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+        ${PDAL_JSONCPP_INCLUDE_DIR}
 )
 
 PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
     FILES
         filters/VoxelGridFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${voxelgrid_filter_libname}
-    PRIVATE
-      ${PCL_INCLUDE_DIRS}
+    LINK_WITH
+        ${PCL_LIBRARIES}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
 )
 
 PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
     FILES
         filters/MovingLeastSquaresFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${movingleastsquares_filter_libname} PRIVATE
-    ${PCL_INCLUDE_DIRS})
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
-        set_source_files_properties(filters/MovingLeastSquaresFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
-    endif()
-
+    LINK_WITH
+        ${PCL_LIBRARIES}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+)
 
 PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
     FILES
         filters/GridProjectionFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${gridprojection_filter_libname} PRIVATE
-    ${PCL_INCLUDE_DIRS})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+)
 
 PDAL_ADD_PLUGIN(icp_filter_libname filter icp
     FILES
         filters/IcpFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${icp_filter_libname} PRIVATE
-    ${PCL_INCLUDE_DIRS})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+)
 
 #
 # PCL Kernel
@@ -136,24 +140,26 @@ PDAL_ADD_PLUGIN(pcl_libname kernel pcl
         kernel/PCLKernel.cpp
     LINK_WITH
         ${PCL_LIBRARIES}
-        ${pclblock_libname})
-target_include_directories(${pcl_libname}
-    PRIVATE
+        ${pclblock_libname}
+    INCLUDES
         ${PDAL_IO_DIR}
         ${PCL_INCLUDE_DIRS}
-        ${PDAL_VENDOR_DIR}/eigen)
+        ${PDAL_VENDOR_DIR}/eigen
+)
 
 #
 # Smooth Kernel
 #
-
 PDAL_ADD_PLUGIN(smooth_libname kernel smooth
     FILES
         kernel/SmoothKernel.cpp
-    LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
-target_include_directories(${smooth_libname} PRIVATE
-    ${PCL_INCLUDE_DIRS}
-    ${PDAL_IO_DIR})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+        ${pclblock_libname}
+    INCLUDES
+        ${PCL_INCLUDE_DIRS}
+        ${PDAL_IO_DIR}
+)
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_filters_pcl_block_test
@@ -164,13 +170,12 @@ if (WITH_TESTS)
     )
 
     PDAL_ADD_TEST(pdal_filters_icp_test
-    FILES
-        test/IcpFilterTest.cpp
-    LINK_WITH
-        ${icp_filter_libname}
-    )
-    target_include_directories(pdal_filters_icp_test
-        PRIVATE
+        FILES
+            test/IcpFilterTest.cpp
+        LINK_WITH
+            ${icp_filter_libname}
+        INCLUDES
             ${PCL_INCLUDE_DIRS}
-            ${PDAL_VENDOR_DIR}/eigen)
+            ${PDAL_VENDOR_DIR}/eigen
+    )
 endif()

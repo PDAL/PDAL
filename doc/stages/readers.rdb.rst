@@ -8,6 +8,7 @@ used by `RIEGL Laser Measurement Systems GmbH`_.
 
 .. plugin::
 
+.. streamable::
 
 Installation
 ------------
@@ -20,7 +21,8 @@ in a system-level directory, though they could be (e.g. they could be in
 PDAL with optional libraries, see `the optional library documentation`_.
 
 .. note::
-   - Minimum rdblib version required to build the driver and run the tests: 2.1.6
+   - Minimum rdblib version required to build the driver and run
+     the tests: 2.1.6
    - This driver was developed and tested on Ubuntu 17.10 using GCC 7.2.0.
 
 
@@ -29,25 +31,23 @@ Example
 
 This example pipeline reads points from a RDB file and stores them in LAS
 format. Only points classified as "ground points" are read since option
-``filter`` is set to "riegl.class == 2" (see line 6).
+``filter`` is set to "riegl.class == 2" (see line 5).
 
 .. code-block:: json
-   :emphasize-lines: 6
-   :linenos:
+  :emphasize-lines: 5
+  :linenos:
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type": "readers.rdb",
           "filename": "autzen-thin-srs.rdbx",
           "filter": "riegl.class == 2"
-        },
-        {
+      },
+      {
           "type": "writers.las",
           "filename": "autzen-thin-srs.rdbx"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options

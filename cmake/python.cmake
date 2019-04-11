@@ -1,18 +1,41 @@
 #
 # Python
 #
-find_package(PythonInterp QUIET)
-find_package(PythonLibs QUIET 2.4)
-set_package_properties(PythonInterp PROPERTIES TYPE REQUIRED)
-if(PYTHONLIBS_FOUND)
-    set(CMAKE_REQUIRED_LIBRARIES "${PYTHON_LIBRARY}")
-    include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
-    add_definitions(-DHAVE_PYTHON=1)
-    set(PDAL_HAVE_PYTHON 1)
-    add_definitions(-DPDAL_PYTHON_LIBRARY="${PYTHON_LIBRARY}")
-    set(PDAL_HAVE_PYTHON 1)
-    set(PDAL_PYTHON_VERSION_STRING "${PYTHONLIBS_VERSION_STRING}" CACHE STRING "PDAL Python version" FORCE)
 
-    find_package(NumPy QUIET 1.5 REQUIRED)
-    include_directories(SYSTEM ${NUMPY_INCLUDE_DIR})
+#
+# Version 3.12 has shiny new FindPython2 and FindPython3 scripts
+#
+if (NOT (CMAKE_VERSION VERSION_LESS "3.12.0"))
+    find_package(Python3 COMPONENTS Interpreter Development NumPy)
+    if (NOT Python3_FOUND)
+        find_package(Python2 2.7 REQUIRED EXACT
+            COMPONENTS Interpreter Development NumPy)
+
+        # Since we've required 2.7, these should all be valid
+        set(PYTHON_LIBRARY ${Python2_LIBRARIES}
+	    CACHE FILEPATH "Python library")
+        set(PYTHON_INCLUDE_DIR ${Python2_INCLUDE_DIRS}
+            CACHE PATH "Location of Python include files")
+        set(PYTHON_NUMPY_INCLUDE_DIR ${Python2_NumPy_INCLUDE_DIRS}
+            CACHE PATH "Location of NumPy include files.")
+    else()
+        set(PYTHON_LIBRARY ${Python3_LIBRARIES}
+	    CACHE FILEPATH "Python library")
+        set(PYTHON_INCLUDE_DIR ${Python3_INCLUDE_DIRS}
+	    CACHE PATH "Location of Python include files.")
+        set(PYTHON_NUMPY_INCLUDE_DIR ${Python3_NumPy_INCLUDE_DIRS}
+	    CACHE PATH "Location of NumPy include files.")
+    endif()
+    set(PDAL_HAVE_PYTHON 1)
+else()
+    find_package(PythonInterp 3 QUIET)
+    find_package(PythonLibs 3 QUIET)
+    if ((NOT PYTHONINTERP_FOUND) OR (NOT PYTHONLIBS_FOUND))
+        unset(PYTHON_EXECUTABLE CACHE)
+        find_package(PythonInterp 2.7 EXACT REQUIRED)
+        find_package(PythonLibs 2.7 EXACT REQUIRED)
+    endif()
+    set(PDAL_HAVE_PYTHON 1)
+    find_package(NumPy 1.5 REQUIRED)
 endif()
+set(PYTHON_ALL_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})

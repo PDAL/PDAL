@@ -4,18 +4,17 @@
 filters.pclblock
 ===============================================================================
 
-The PCL Block filter allows users to specify a block of Point Cloud Library
+The **PCL Block filter** allows users to specify a block of Point Cloud Library
 (`PCL`_) operations on a PDAL ``PointView``, applying the necessary conversions
 between PDAL and PCL point cloud representations.
 
-This filter is under active development. The current implementation serves as a
-proof of concept for linking PCL into PDAL and converting data. The PCL Block
-filter creates a PCL ``Pipeline`` object and passes it a single argument, the
+The PCL Block
+filter creates a PCL pipeline object and passes it a single argument, the
 JSON file containing the PCL block definition. After filtering, the resulting
 indices can be retrieved and used to create a new PDAL ``PointView`` containing
 only those points that passed the filtering stages.
 
-At this stage in its development, the PCL ``Pipeline`` does not allow complex
+At this stage in its development, the PCL pipeline does not allow complex
 operations that may change the point type (e.g., ``PointXYZ`` to
 ``PointNormal``) or alter points.  We will continue to look into use cases that
 are of value and feasible, but for now are limited primarily to PCL functions
@@ -23,59 +22,29 @@ that filter or segment the point cloud, returning a list of indices of the
 filtered points (e.g., ground or object, noise or signal). The main reason for
 this design decision is that we want to avoid converting all ``PointView``
 dimensions to the PCL ``PointCloud``. In the case of an LAS reader, we may very
-well not want to operate on fields such as return number, but we do not want to
+well not want to operate on fields such as ``ReturnNumber``, but we do not
+want to
 lose this information post PCL filtering. The easy solution is to simply retain
 the index between the ``PointView`` and ``PointCloud`` objects and update as
 necessary.
+
+.. note::
+
+    Most of the functionality of this filter has been superceded by native
+    PDAL filters that re-implement the functionality of the supported PCL
+    filters.
 
 .. seealso::
 
     See :ref:`pcl_block_tutorial` for more on using the PCL Block including
     examples.
 
-    See :ref:`pcl_json_specification` for complete details on the PCL Block JSON syntax
-    and the filters available.
+    See :ref:`pcl_json_specification` for complete details on the PCL Block
+    JSON syntax and the filters available.
 
 .. _`PCL`: http://www.pointclouds.org
 
-
 .. plugin::
-
-Options
--------------------------------------------------------------------------------
-
-filename
-  Path to external PCL JSON file describing the pipeline
-
-methods
-  Raw PCL JSON array describing the pipeline
-
-
-
-PCL Block Schema
--------------------------------------------------------------------------------
-
-The PCL Block json object describes the filter chain to be constructed within
-PCL. Here is an example:
-
-.. code-block:: json
-
-    [
-        {
-            "name": "FilterOne",
-            "setFooParameter": "value"
-        },
-        {
-            "name": "FilterTwo",
-            "setBarParameter": false,
-            "setBounds":
-            {
-                "upper": 42,
-                "lower": 17
-            }
-        }
-    ]
-
 
 
 Implemented Filters
@@ -85,7 +54,7 @@ The list of PCL filters that are accessible through the PCL Block depends on PCL
 itself. PDAL is rather dumb in this respect, merely converting the PDAL
 ``PointView`` to a PCL ``PointCloud`` object and passing the JSON filename. The
 parsing of the JSON file and implementation of the PCL filters is entirely
-embedded within the PCL ``Pipeline``.
+embedded within the PCL pipeline.
 
 A summary of the currently available filters is listed below. For full details
 of the filters and their parameters, see the :ref:`pcl_json_specification`.
@@ -115,7 +84,6 @@ VoxelGrid
     filters the data
 
 
-
 Adding a New Filter
 -------------------------------------------------------------------------------
 
@@ -136,3 +104,38 @@ judicious copying and pasting.
 
 5. Add a test to ``PCLBlockFilterTest.cpp``. Make sure each parameter is
    independently verified.
+
+Example
+-------
+
+The PCL Block json object describes the filter chain to be constructed within
+PCL. Here is an example:
+
+.. code-block:: json
+
+    [
+        {
+            "name": "FilterOne",
+            "setFooParameter": "value"
+        },
+        {
+            "name": "FilterTwo",
+            "setBarParameter": false,
+            "setBounds":
+            {
+                "upper": 42,
+                "lower": 17
+            }
+        }
+    ]
+
+
+Options
+-------------------------------------------------------------------------------
+
+filename
+  Path to external PCL JSON file describing the pipeline
+
+methods
+  Raw PCL JSON array describing the pipeline
+

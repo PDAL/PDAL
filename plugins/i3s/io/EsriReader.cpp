@@ -114,6 +114,7 @@ void EsriReader::initialize(PointTableRef table)
     //create pdal Bounds
     m_bounds = createBounds();
 
+
     //find version
     if (jsonBody["store"].isMember("version"))
         m_version = Version(jsonBody["store"]["version"].asString());
@@ -144,21 +145,30 @@ void EsriReader::initialize(PointTableRef table)
                 "by this driver"));
     }
 
-    //output arguments for debugging
-    log()->get(LogLevel::Debug) << "filename: " <<
-        m_filename << std::endl;
-    log()->get(LogLevel::Debug) << "threads: " <<
-        m_args.threads << std::endl;
-    log()->get(LogLevel::Debug) << "bounds: " <<
-        m_args.bounds << std::endl;
-    log()->get(LogLevel::Debug) << "min_density: " <<
-        m_args.min_density << std::endl;
-    log()->get(LogLevel::Debug) << "max_density: " <<
-        m_args.max_density << std::endl;
-    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
-    for (std::string& dim : m_args.dimensions)
+    //create spatial reference objects
+    Json::Value spatialJson = m_info["spatialReference"];
+    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
+    m_nativeSrs = SpatialReference(spatialStr);
+    setSpatialReference(m_nativeSrs);
+
+    m_ecefSrs = SpatialReference("EPSG:4978");
+
+    m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
+    m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
+    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
+    m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
+        m_nativeRef);
+
+    //create bounds in ECEF
+    double minx(m_bounds.minx), maxx(m_bounds.maxx), miny(m_bounds.miny), maxy(m_bounds.maxy), minz(m_bounds.minz), maxz(m_bounds.maxz);
+
+    for (std::size_t i(0); i < 8; ++i)
     {
-        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
+        double a = (i & 1 ? minx: maxx);
+        double b = (i & 2 ? miny: maxy);
+        double c = (i & 4 ? minz: maxz);
+        OCTTransform(m_toEcefTransform, 1, &a, &b, 0);
+        m_ecefBounds.grow(a, b, c);
     }
 }
 
@@ -250,18 +260,23 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
 void EsriReader::ready(PointTableRef)
 {
-    Json::Value spatialJson = m_info["spatialReference"];
-    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
-    m_nativeSrs = SpatialReference(spatialStr);
-    setSpatialReference(m_nativeSrs);
 
-    m_ecefSrs = SpatialReference("EPSG:4978");
-
-    m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
-    m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
-    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
-    m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
-        m_nativeRef);
+    //output arguments for debugging
+    log()->get(LogLevel::Debug) << "filename: " <<
+        m_filename << std::endl;
+    log()->get(LogLevel::Debug) << "threads: " <<
+        m_args.threads << std::endl;
+    log()->get(LogLevel::Debug) << "bounds: " <<
+        m_args.bounds << std::endl;
+    log()->get(LogLevel::Debug) << "min_density: " <<
+        m_args.min_density << std::endl;
+    log()->get(LogLevel::Debug) << "max_density: " <<
+        m_args.max_density << std::endl;
+    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
+    for (std::string& dim : m_args.dimensions)
+    {
+        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
+    }
 }
 
 
@@ -279,6 +294,7 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
     // Build the node list that will tell us which nodes overlap with bounds
     std::vector<int> nodes;
     const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
+    log()->get(LogLevel::Debug) << "Traversing metadata" << std::endl;
     traverseTree(initJson, 0, nodes, 0, 0);
 
     // Create view with overlapping nodes at desired depth
@@ -292,10 +308,11 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
         std::string localUrl;
 
         localUrl = m_filename + "/nodes/" + std::to_string(nodes[i]);
+        int nodeIndex(nodes[i]);
 
-        p.add([localUrl, this, &view]()
+        p.add([localUrl, nodeIndex, this, &view]()
         {
-            createView(localUrl, *view);
+            createView(localUrl, nodeIndex, *view);
         });
     }
     p.await();
@@ -333,14 +350,16 @@ void EsriReader::traverseTree(Json::Value page, int index,
         m_maxNode = firstChild + cCount - 1;
     }
 
-    // create box from OBB information and check for overlaps
-    BOX3D nodeBox = parseBox(page["nodes"][index]);
-    bool overlap = m_bounds.overlaps(nodeBox);
 
-    //if it doesn't overlap, then none of the nodes in this subtree will
+    BOX3D nodeBox = createCube(page["nodes"][index]);
+    bool overlap = m_ecefBounds.overlaps(nodeBox);
+
+    // if it doesn't overlap, then none of the nodes in this subtree will
     if (!overlap)
         return;
-    // if it's a child node and the density hasn't been set, add leaf nodes
+
+
+    // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
     {
         nodes.push_back(name);
@@ -388,9 +407,10 @@ void EsriReader::traverseTree(Json::Value page, int index,
     }
 }
 
-
-// Create the BOX3D for the node. This will be used for testing overlap.
-BOX3D EsriReader::parseBox(Json::Value base)
+//Finds a sphere from the given center and halfsize vector of the OBB
+//and makes a cube around it. This should help with collision detection
+//and pruning of nodes before fetching binaries.
+BOX3D EsriReader::createCube(Json::Value base)
 {
     // Pull XYZ in lat/lon.
     Json::Value center = base["obb"]["center"];
@@ -398,70 +418,25 @@ BOX3D EsriReader::parseBox(Json::Value base)
     double y = center[1].asDouble();
     double z = center[2].asDouble();
 
-    // Convert to ECEF so the OBB offsets in meters will match up.
-    OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
-
     Json::Value hsize = base["obb"]["halfSize"];
-    const double hx = hsize[0].asDouble();
-    const double hy = hsize[1].asDouble();
-    const double hz = hsize[2].asDouble();
+    double hx = hsize[0].asDouble();
+    double hy = hsize[1].asDouble();
+    double hz = hsize[2].asDouble();
 
-    Json::Value quat = base["obb"]["quaternion"];
-    const double w = quat[0].asDouble();
-    const double i = quat[1].asDouble();
-    const double j = quat[2].asDouble();
-    const double k = quat[3].asDouble();
+    //transform (x,y,z) to ECEF to match the half sizes in meters.
+    OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
+    //take half size vector and find magnitude of it multiplied by sqrt(2)
+    double r = std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
+    //create cube around this radius
+    double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
+    BOX3D nodeBox(minx,miny,minz,maxx,maxy,maxz);
 
-    // Create quat object and normalize it for use
-    Eigen::Quaterniond q(w, i, j, k);
-    q.normalize();
-
-    // Here we'll convert our halfsizes to x, y, and z vectors in respective
-    // directions, which will give us new bounding planes
-    Eigen::Vector3d vecx(hx,   0,   0);
-    Eigen::Vector3d vecy(0,   hy,   0);
-    Eigen::Vector3d vecz(0,    0,  hz);
-
-    // Create quaternion-like vectors
-    Eigen::Quaterniond quatVecX, pxmin, quatVecY, pymin, quatVecZ, pzmin;
-    quatVecX.w() = 0;
-    quatVecY.w() = 0;
-    quatVecZ.w() = 0;
-    quatVecX.vec() = vecx;
-    quatVecY.vec() = vecy;
-    quatVecZ.vec() = vecz;
-
-    // Rotate all the individual vectors
-    // gives us offset for the of the new x/y/zmax/min planes
-    Eigen::Quaterniond rotx = q * quatVecX * q.inverse();
-    Eigen::Quaterniond roty = q * quatVecY * q.inverse();
-    Eigen::Quaterniond rotz = q * quatVecZ * q.inverse();
-
-    BOX3D bounds;
-    for (std::size_t i(0); i < 8; ++i)
-    {
-        double a(x), b(y), c(z);
-
-        a += rotx.vec()[0] * (i & 1 ? 1.0 : -1.0);
-        b += rotx.vec()[1] * (i & 1 ? 1.0 : -1.0);
-        c += rotx.vec()[2] * (i & 1 ? 1.0 : -1.0);
-
-        a += roty.vec()[0] * (i & 2 ? 1.0 : -1.0);
-        b += roty.vec()[1] * (i & 2 ? 1.0 : -1.0);
-        c += roty.vec()[2] * (i & 2 ? 1.0 : -1.0);
-
-        a += rotz.vec()[0] * (i & 4 ? 1.0 : -1.0);
-        b += rotz.vec()[1] * (i & 4 ? 1.0 : -1.0);
-        c += rotz.vec()[2] * (i & 4 ? 1.0 : -1.0);
-
-        OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-        bounds.grow(a, b, c);
-    }
-    return bounds;
+    //returning in ecef
+    return nodeBox;
 }
 
 
-void EsriReader::createView(std::string localUrl, PointView& view)
+void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view)
 {
     // pull the geometries to start
     const std::string geomUrl = localUrl + "/geometries/";
@@ -482,6 +457,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         startId = view.size();
+
 
         for (uint64_t j = 0; j < xyz.size(); ++j)
         {
@@ -572,6 +548,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
         }
         else if (dimId == Dimension::Id::NumberOfReturns)
         {
+
             const std::vector<char> data = fetchBinary(
                     attrUrl, std::to_string(key), ".bin.gz");
 

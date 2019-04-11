@@ -17,21 +17,19 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "format":"geojson",
           "order":"X,Y,Z",
           "keep_unspecified":"false",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
@@ -40,21 +38,21 @@ filename
   File to write to, or "STDOUT" to write to standard out [Required]
 
 format
-  Output format to use. One of "geojson" or "csv". [Default: **csv**]
+  Output format to use. One of ``geojson`` or ``csv``. [Default: "csv"]
 
-precision
+_`precision`
   Decimal Precision for output of values. This can be overridden for
-  individual dimensions using the **order** option. [Default: 3]
+  individual dimensions using the order option. [Default: 3]
 
-order
+_`order`
   Comma-separated list of dimension names in the desired output order.
   For example "X,Y,Z,Red,Green,Blue". Dimension names
   can optionally be followed with a colon (':') and an integer to indicate the
   precision to use for output. Ex: "X:3, Y:5,Z:0" If no precision is specified
-  the value provided with the **precision** option is used. [Default: none]
+  the value provided with the precision_ option is used. [Default: none]
 
 keep_unspecified
-  If true, writes all dimensions.  Dimensions specified with the **order**
+  If true, writes all dimensions.  Dimensions specified with the order_
   option precede those not specified. [Default: **true**]
 
 jscallback
@@ -62,13 +60,15 @@ jscallback
   a function, so the output can be evaluated in a <script> tag.
 
 quote_header
-  When producing CSV, should the column header named by quoted? [Default: **true**]
+  When producing CSV, should the column header named by quoted?
+  [Default: true]
 
 newline
-  When producing CSV, what newline character should be used? (For Windows, "\\r\\n" is common.) [Default: **\\n**]
+  When producing CSV, what newline character should be used? (For Windows,
+  ``\\r\\n`` is common.) [Default: "\\n"]
 
 delimiter
-  When producing CSV, what character to use as a delimiter? [Default: **,**]
+  When producing CSV, what character to use as a delimiter? [Default: ","]
 
 
 .. _GeoJSON: http://geojson.org

@@ -41,6 +41,7 @@
 #include <map>
 
 #include <ogr_spatialref.h>
+#include <ogr_p.h>
 
 #pragma warning(disable: 4127)  // conditional expression is constant
 
@@ -185,36 +186,6 @@ bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
     bool res = reprojectBounds(b, srcSrs, dstSrs);
     box = b.to2d();
     return res;
-}
-
-
-/**
-  Reproject a point from a source projection to a destination.
-  \param x  X coordinate of point to be reprojected.
-  \param y  Y coordinate of point to be reprojected.
-  \param z  Z coordinate of point to be reprojected.
-  \param srcSrs  String in WKT or other suitable format of box coordinates.
-  \param dstSrs  String in WKT or other suitable format to which
-    coordinates should be projected.
-  \return  Whether the reprojection was successful or not.
-*/
-bool reprojectPoint(double& x, double& y, double& z, const std::string& srcSrs,
-    const std::string& dstSrs)
-{
-    OGRSpatialReference src;
-    OGRSpatialReference dst;
-
-    OGRErr srcOk = OSRSetFromUserInput(&src, srcSrs.c_str());
-    OGRErr dstOk = OSRSetFromUserInput(&dst, dstSrs.c_str());
-    if (srcOk != OGRERR_NONE || dstOk != OGRERR_NONE)
-        return false;
-
-    OGRCoordinateTransformationH transform =
-        OCTNewCoordinateTransformation(&src, &dst);
-
-    bool ok = (OCTTransform(transform, 1, &x, &y, &z));
-    OCTDestroyCoordinateTransformation(transform);
-    return ok;
 }
 
 
@@ -728,5 +699,131 @@ std::string transformWkt(std::string wkt, const SpatialReference& from,
     return geom.wkt();
 }
 
-} // namespace pdal
+#if (GDAL_VERSION_MAJOR < 2) || \
+    (GDAL_VERSION_MAJOR == 2) && (GDAL_VERSION_MINOR < 3)
+namespace oldgdalsupport
+{
+OGRErr createFromWkt(const char *s, OGRSpatialReference * poSR,
+        OGRGeometry **ppoReturn )
 
+{
+    const char *pszInput = s;
+    *ppoReturn = nullptr;
+
+/* -------------------------------------------------------------------- */
+/*      Get the first token, which should be the geometry type.         */
+/* -------------------------------------------------------------------- */
+    char szToken[1000] = {};
+    if( OGRWktReadToken( pszInput, szToken ) == nullptr )
+        return OGRERR_CORRUPT_DATA;
+
+/* -------------------------------------------------------------------- */
+/*      Instantiate a geometry of the appropriate type.                 */
+/* -------------------------------------------------------------------- */
+    OGRGeometry *poGeom = nullptr;
+    if( STARTS_WITH_CI(szToken, "POINT") )
+    {
+        poGeom = new OGRPoint();
+    }
+    else if( STARTS_WITH_CI(szToken, "LINESTRING") )
+    {
+        poGeom = new OGRLineString();
+    }
+    else if( STARTS_WITH_CI(szToken, "POLYGON") )
+    {
+        poGeom = new OGRPolygon();
+    }
+    else if( STARTS_WITH_CI(szToken,"TRIANGLE") )
+    {
+        poGeom = new OGRTriangle();
+    }
+    else if( STARTS_WITH_CI(szToken, "GEOMETRYCOLLECTION") )
+    {
+        poGeom = new OGRGeometryCollection();
+    }
+    else if( STARTS_WITH_CI(szToken, "MULTIPOLYGON") )
+    {
+        poGeom = new OGRMultiPolygon();
+    }
+    else if( STARTS_WITH_CI(szToken, "MULTIPOINT") )
+    {
+        poGeom = new OGRMultiPoint();
+    }
+    else if( STARTS_WITH_CI(szToken, "MULTILINESTRING") )
+    {
+        poGeom = new OGRMultiLineString();
+    }
+    else if( STARTS_WITH_CI(szToken, "CIRCULARSTRING") )
+    {
+        poGeom = new OGRCircularString();
+    }
+    else if( STARTS_WITH_CI(szToken, "COMPOUNDCURVE") )
+    {
+        poGeom = new OGRCompoundCurve();
+    }
+    else if( STARTS_WITH_CI(szToken, "CURVEPOLYGON") )
+    {
+        poGeom = new OGRCurvePolygon();
+    }
+    else if( STARTS_WITH_CI(szToken, "MULTICURVE") )
+    {
+        poGeom = new OGRMultiCurve();
+    }
+    else if( STARTS_WITH_CI(szToken, "MULTISURFACE") )
+    {
+        poGeom = new OGRMultiSurface();
+    }
+
+    else if( STARTS_WITH_CI(szToken,"POLYHEDRALSURFACE") )
+    {
+        poGeom = new OGRPolyhedralSurface();
+    }
+
+    else if( STARTS_WITH_CI(szToken,"TIN") )
+    {
+        poGeom = new OGRTriangulatedSurface();
+    }
+
+    else
+    {
+        return OGRERR_UNSUPPORTED_GEOMETRY_TYPE;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Do the import.                                                  */
+/* -------------------------------------------------------------------- */
+    const OGRErr eErr = poGeom->importFromWkt( const_cast<char **>(&pszInput ));
+
+/* -------------------------------------------------------------------- */
+/*      Assign spatial reference system.                                */
+/* -------------------------------------------------------------------- */
+    if( eErr == OGRERR_NONE )
+    {
+        if( poGeom->hasCurveGeometry() &&
+            CPLTestBool(CPLGetConfigOption("OGR_STROKE_CURVE", "FALSE")) )
+        {
+            OGRGeometry* poNewGeom = poGeom->getLinearGeometry();
+            delete poGeom;
+            poGeom = poNewGeom;
+        }
+        poGeom->assignSpatialReference( poSR );
+        *ppoReturn = poGeom;
+    }
+    else
+    {
+        delete poGeom;
+    }
+
+    return eErr;
+}
+
+OGRGeometry* createFromGeoJson(const char *s)
+{
+    OGRGeometryH h = OGR_G_CreateGeometryFromJson(s);
+    return (reinterpret_cast<OGRGeometry *>(h));
+}
+
+} // namespace oldgdalsupport
+#endif // GDAL version limit
+
+} // namespace pdal

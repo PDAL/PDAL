@@ -38,6 +38,17 @@ if (ZLIB_FOUND)
         PRIVATE
             ARBITER_ZLIB)
 endif()
+if (OPENSSL_FOUND)
+    target_include_directories(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ${OPENSSL_INCLUDE_DIR})
+    target_link_libraries(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ${OPENSSL_LIBRARIES})
+    target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ARBITER_OPENSSL)
+endif()
 
 set_target_properties(${PDAL_ARBITER_LIB_NAME} PROPERTIES
     VERSION "${PDAL_BUILD_VERSION}"

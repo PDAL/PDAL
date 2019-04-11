@@ -12,10 +12,10 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
     LINK_WITH
         ${POSTGRESQL_LIBRARIES}
         ${LIBXML2_LIBRARIES}
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/pdalboost
+        ${LIBXML2_INCLUDE_DIR}
 )
-target_include_directories(${reader_libname} PRIVATE
-    ${PDAL_VENDOR_DIR}/pdalboost
-    ${LIBXML2_INCLUDE_DIR})
 
 #
 # PgPointCloud Writer
@@ -26,10 +26,10 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
     LINK_WITH
         ${POSTGRESQL_LIBRARIES}
         ${LIBXML2_LIBRARIES}
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/pdalboost
+        ${LIBXML2_INCLUDE_DIR}
 )
-target_include_directories(${writer_libname} PRIVATE
-    ${PDAL_VENDOR_DIR}/pdalboost
-    ${LIBXML2_INCLUDE_DIR})
 #
 # PgPointCloud tests
 #
@@ -57,7 +57,7 @@ if (BUILD_PGPOINTCLOUD_TESTS)
             ${reader_libname}
             ${writer_libname}
             ${POSTGRESQL_LIBRARIES}
+        INCLUDES
+            ${CMAKE_CURRENT_BINARY_DIR}/include
     )
-    target_include_directories(pgpointcloudtest PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}/include)
 endif()

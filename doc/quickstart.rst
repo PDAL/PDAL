@@ -9,9 +9,8 @@ Quickstart
 Introduction
 ------------------------------------------------------------------------------
 
-It's a giant pain to build everything yourself. The quickest way to start using
-PDAL is to leverage builds that were constructed by the PDAL development team
-using `Conda`_.
+The quickest way to start using PDAL is to leverage builds that were
+constructed by the PDAL development team using `Conda`_.
 
 Directly from the Conda front page,
 
@@ -77,11 +76,10 @@ the PDAL maintenance branch.
 
 .. warning::
 
-    It is actually a very good idea to install PDAL in it's own environment (or
+    It is a good idea to install PDAL in it's own environment (or
     add it to an existing one). You will **NOT** want to add it to your default
     environment named ``base``. Managing environments is beyond the scope of
-    the quickstart, but you should read more about it over at
-    https://conda.io/docs/user-guide/getting-started.html#managing-envs.
+    the quickstart, but you can read more about it `here <https://conda.io/docs/user-guide/getting-started.html#managing-envs>`_.
 
 To install the PDAL package so that we can use it to run PDAL commands, we run
 the following command to create an environment named ``myenv``, installing PDAL
@@ -123,7 +121,6 @@ output should look something like: ::
         expat:           2.2.5-vc14_0          conda-forge [vc14]
         flann:           1.9.1-h0953f56_2      conda-forge
         freexl:          1.0.5-vc14_0          conda-forge [vc14]
-        geos:            3.6.2-vc14_1          conda-forge [vc14]
         geotiff:         1.4.2-vc14_1          conda-forge [vc14]
         hdf4:            4.2.13-vc14_0         conda-forge [vc14]
         hdf5:            1.10.1-vc14_2         conda-forge [vc14]
@@ -164,6 +161,7 @@ output should look something like: ::
         python:          3.5.5-1               conda-forge
         setuptools:      39.2.0-py35_0         conda-forge
         sqlite:          3.20.1-vc14_2         conda-forge [vc14]
+        tiledb:          1.4.1                 conda-forge
         vc:              14-0                  conda-forge
         vs2015_runtime:  14.0.25420-0          conda-forge
         wheel:           0.31.0-py35_0         conda-forge

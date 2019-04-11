@@ -8,13 +8,12 @@ A `GDAL tile index`_ is an `OGR`_-readable data source of boundary information.
 PDAL provides a similar concept for PDAL-readable point cloud data. You can use
 the :ref:`tindex_command` application to generate tile index files in any
 format that `OGR`_ supports writing. Once you have the tile index, you can then
-use the :ref:`readers.tindex` driver to automatically merge and query the
-data described by the tiles.
+use the tindex reader to automatically merge and query the data described by
+the tiles.
 
 .. _`GDAL`: http://gdal.org
 .. _`OGR`: http://gdal.org/ogr/
 .. _`GDAL tile index`: http://www.gdal.org/gdaltindex.html
-
 
 
 .. embed::
@@ -33,27 +32,25 @@ Given a tile index that was generated with the following scenario:
         --lyr_name "pdal" \
         --t_srs "EPSG:4326"
 
-Use the following :ref:`pipeline` example to read and automatically
+Use the following :ref:`pipeline <pipeline>` example to read and automatically
 merge the data.
 
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.tindex",
           "filter_srs":"+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs",
           "filename":"index.sqlite",
           "where":"location LIKE \'%nteresting.las%\'",
           "wkt":"POLYGON ((635629.85000000 848999.70000000, 635629.85000000 853535.43000000, 638982.55000000 853535.43000000, 638982.55000000 848999.70000000, 635629.85000000 848999.70000000))"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -64,7 +61,7 @@ filename
 
 .. include:: reader_opts.rst
 
-lyr_name
+_`lyr_name`
   The OGR layer name for the data source to use to
   fetch the tile index information.
 
@@ -82,11 +79,11 @@ tindex_name
 sql
   `OGR SQL`_ to use to define the tile index layer.
 
-bounds
+_`bounds`
   A 2D box to pre-filter the tile index. If it is set,
-  it will override any ``wkt`` option.
+  it will override any `wkt`_ option.
 
-wkt
+_`wkt`
   A geometry to pre-filter the tile index using
   OGR.
 
@@ -95,14 +92,14 @@ t_srs
   tile index layer's SRS. [Default: "EPSG:4326"]
 
 filter_srs
-  Transforms any ``wkt`` or ``boundary`` option to this
+  Transforms any `wkt`_ or `bounds`_ option to this
   coordinate system before filtering or reading data.
   [Default: "EPSG:4326"]
 
 where
   `OGR SQL`_ filter clause to use on the layer. It only
   works in combination with tile index layers that are
-  defined with ``lyr_name``
+  defined with `lyr_name`_
 
 dialect
   `OGR SQL`_ dialect to use when querying tile index layer

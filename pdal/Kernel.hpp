@@ -58,6 +58,8 @@ class PDAL_DLL Kernel
     FRIEND_TEST(KernelTest, parseOption);
 
 public:
+    Kernel& operator=(const Kernel&) = delete;
+    Kernel(const Kernel&) = delete;
     virtual ~Kernel()
     {}
 
@@ -72,8 +74,10 @@ public:
     }
 
 protected:
-    // this is protected; your derived class ctor will be the public entry point
     Kernel();
+
+    void addBasicSwitches(ProgramArgs& args);
+    StringList extractStageOptions(const StringList& cmdArgs); 
     Stage& makeReader(const std::string& inputFile, std::string driver);
     Stage& makeReader(const std::string& inputFile, std::string driver,
         Options options);
@@ -87,31 +91,28 @@ protected:
         std::string driver, Options options);
     virtual bool isStagePrefix(const std::string& stageType);
 
-public:
+    LogPtr m_log;
+    PipelineManager m_manager;
+    std::string m_driverOverride;
+
+private:
     virtual void addSwitches(ProgramArgs& args)
     {}
 
-    // implement this, to do sanity checking of cmd line
-    // will throw if the user gave us bad options
+    // Implement this to do sanity checking of cmd line
+    // will throw if the user gave us bad options.
     virtual void validateSwitches(ProgramArgs& args)
     {}
 
     // implement this, to do your actual work
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
+    virtual void outputHelp();
+    /// \return  True on success, false if the user is asking for help.
+    virtual bool doSwitches(const StringList& cmdArgs, ProgramArgs& args);
 
-protected:
-    LogPtr m_log;
-    PipelineManager m_manager;
-    std::string m_driverOverride;
-
-private:
     int innerRun(ProgramArgs& args);
-    void outputHelp(ProgramArgs& args);
     void outputVersion();
-    void addBasicSwitches(ProgramArgs& args);
-
-    void doSwitches(const StringList& cmdArgs, ProgramArgs& args);
     int doStartup();
     int doExecution(ProgramArgs& args);
     bool parseStageOption(std::string o, std::string& stage,
@@ -120,14 +121,10 @@ private:
     static bool test_parseStageOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
 
-    bool m_showHelp;
     bool m_showOptions;
     bool m_showTime;
     bool m_hardCoreDebug;
     std::string m_label;
-
-    Kernel& operator=(const Kernel&); // not implemented
-    Kernel(const Kernel&); // not implemented
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Kernel&);

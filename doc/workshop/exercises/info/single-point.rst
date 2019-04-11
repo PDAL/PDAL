@@ -11,7 +11,7 @@ Exercise
 --------------------------------------------------------------------------------
 
 This exercise uses PDAL to print information from the first point. Issue the
-following command in your `OSGeo4W Shell`.
+following command in your |Terminal|:
 
 .. literalinclude:: ./single-point-command.txt
     :linenos:

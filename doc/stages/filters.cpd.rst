@@ -3,7 +3,8 @@
 filters.cpd
 ==============
 
-The CPD filter uses the Coherent Point Drift :cite:`Myronenko` algorithm to
+The **Coherent Point Drift (CPD) filter** uses the algorithm of
+:cite:`Myronenko` algorithm to
 compute a rigid, nonrigid, or affine transformation between datasets.  The
 rigid and affine are what you'd expect; the nonrigid transformation uses Motion
 Coherence Theory :cite:`Yuille1998` to "bend" the points to find a best
@@ -12,8 +13,8 @@ alignment.
 .. note::
 
     CPD is computationally intensive and can be slow when working with many
-    points (i.e. :math:`> 10,000`).  Nonrigid is significatly slower than rigid and
-    affine.
+    points (i.e. > 10,000).  Nonrigid is significatly slower
+    than rigid and affine.
 
 The first input to the change filter are considered the "fixed" points, and all
 subsequent inputs are "moving" points.  The output from the change filter are
@@ -28,20 +29,19 @@ Examples
 
 .. code-block:: json
 
-    {
-        "pipeline": [
-            "fixed.las",
-            "moving.las",
-            {
-                "type": "filters.cpd",
-                "method": "rigid"
-            },
-            "output.las"
-        ]
-    }
+  [
+      "fixed.las",
+      "moving.las",
+      {
+          "type": "filters.cpd",
+          "method": "rigid"
+      },
+      "output.las"
+  ]
 
-If "method" is not provided, the cpd filter will default to using the rigid registration method.
-To get the transform matrix, you'll need to use the ``--metadata`` option:
+If method_ is not provided, the cpd filter will default to using the
+rigid registration method.  To get the transform matrix, you'll need to
+use the "metadata" option of the pipeline command:
 
 ::
 
@@ -71,10 +71,10 @@ The metadata output might start something like:
 Options
 --------
 
-method
+_`method`
     Change detection method to use.
     Valid values are "rigid", "affine", and "nonrigid".
-    [Default: **rigid**]
+    [Default: "rigid""]
 
 .. _Coherent Point Drift (CPD): https://github.com/gadomski/cpd
 
