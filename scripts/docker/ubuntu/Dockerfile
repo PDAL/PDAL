@@ -73,7 +73,7 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
 
 RUN    git clone https://github.com/LASzip/LASzip.git laszip; \
     cd laszip; \
-    git checkout 3.1.1; \
+    git checkout 3.4.1; \
     cmake  \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr/ \
@@ -292,10 +292,10 @@ COPY --from=builder  /build/usr/lib/ /usr/lib/
 COPY --from=builder  /build/usr/include/ /usr/include/
 
 RUN \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj;
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj && rm proj-datumgrid-europe-1.2.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
 
 
