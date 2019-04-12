@@ -46,6 +46,7 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
 
 namespace pdal
 {
@@ -66,7 +67,7 @@ std::string LocalFeaturesFilter::getName() const
 
 void LocalFeaturesFilter::addArgs(ProgramArgs& args)
 {
-    args.add("knn", "k-Nearest neighbors", m_knn, 8);
+    args.add("knn", "k-Nearest neighbors", m_knn, 10);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
 }
 
@@ -104,7 +105,7 @@ void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, con
     using namespace Eigen;
 
     // find the k-nearest neighbors
-    auto ids = kdi.neighbors(id, m_knn);
+    auto ids = kdi.neighbors(id, m_knn + 1);
 
     // compute covariance of the neighborhood
     auto B = eigen::computeCovariance(view, ids);
@@ -121,15 +122,13 @@ void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, con
                                  (std::max(ev[0],0.f))};
 
     auto eigenVectors = solver.eigenvectors();
-    std::vector<float> v1 = {eigenVectors.col(2)(0)
-            , eigenVectors.col(2)(1)
-            , eigenVectors.col(2)(2)};
-    std::vector<float> v2 = {eigenVectors.col(1)(0)
-            , eigenVectors.col(1)(1)
-            , eigenVectors.col(1)(2)};
-    std::vector<float> v3 = {eigenVectors.col(0)(0)
-            , eigenVectors.col(0)(1)
-            , eigenVectors.col(0)(2)};
+    std::vector<float> v1(3), v2(3), v3(3);
+    for (int i=0; i < 3; i++)
+    {
+        v1[i] = eigenVectors.col(2)(i);
+        v2[i] = eigenVectors.col(1)(i);
+        v3[i] = eigenVectors.col(0)(i);
+    }
 
     float linearity  = (std::sqrtf(lambda[0]) - std::sqrtf(lambda[1])) / std::sqrtf(lambda[0]);
     float planarity  = (std::sqrtf(lambda[1]) - std::sqrtf(lambda[2])) / std::sqrtf(lambda[0]);
@@ -138,12 +137,14 @@ void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, con
     view.setField(m_planarity, id, planarity);
     view.setField(m_scattering, id, scattering);
 
-    std::vector<float> unary_vector =
-            {lambda[0] * std::fabsf(v1[0]) + lambda[1] * std::fabsf(v2[0]) + lambda[2] * std::fabsf(v3[0])
-                    ,lambda[0] * std::fabsf(v1[1]) + lambda[1] * std::fabsf(v2[1]) + lambda[2] * std::fabsf(v3[1])
-                    ,lambda[0] * std::fabsf(v1[2]) + lambda[1] * std::fabsf(v2[2]) + lambda[2] * std::fabsf(v3[2])};
-    float norm = std::sqrt(unary_vector[0] * unary_vector[0] + unary_vector[1] * unary_vector[1]
-                           + unary_vector[2] * unary_vector[2]);
+    std::vector<float> unary_vector(3);
+    float norm = 0;
+    for (int i=0; i <3 ; i++)
+    {
+        unary_vector[i] = lambda[0] * std::fabsf(v1[i]) + lambda[1] * std::fabsf(v2[i]) + lambda[2] * std::fabsf(v3[i]);
+        norm += unary_vector[i] * unary_vector[i];
+    }
+    norm = std::sqrt(norm);
     view.setField(m_verticality, id, unary_vector[2] / norm);
 }
 
