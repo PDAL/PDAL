@@ -115,5 +115,5 @@ threshold
   is considered "in" the data set. [Default: 15]
 
 precision
-  Coordinate precision to use in writing out the well-known text
-  of the boundary polygon. [Default: 8]
+  Minimum number of significant digits to use in writing out the
+  well-known text of the boundary polygon. [Default: 8]
