@@ -52,7 +52,7 @@ namespace pdal
 
 static StaticPluginInfo const s_info
 {
-    "filters.locfeat",
+    "filters.localfeatures",
     "Filter that calculates local features based on the covariance matrix",
     "http://pdal.io/stages/filters.localfeatures.html"
 };
@@ -67,6 +67,7 @@ std::string LocalFeaturesFilter::getName() const
 void LocalFeaturesFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 8);
+    args.add("threads", "Number of threads used to run this filter", m_threads, 1);
 }
 
 void LocalFeaturesFilter::addDimensions(PointLayoutPtr layout)
@@ -79,56 +80,71 @@ void LocalFeaturesFilter::addDimensions(PointLayoutPtr layout)
 
 void LocalFeaturesFilter::filter(PointView& view)
 {
-    using namespace Eigen;
 
     KD3Index& kdi = view.build3dIndex();
 
-    for (PointId i = 0; i < view.size(); ++i)
+    point_count_t nloops = view.size();
+    std::vector<std::thread> threadPool(m_threads);
+    for(int t = 0;t<m_threads;t++)
     {
-        // find the k-nearest neighbors
-        auto ids = kdi.neighbors(i, m_knn);
-
-        // compute covariance of the neighborhood
-        auto B = eigen::computeCovariance(view, ids);
-
-        // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3f> solver(B);
-        if (solver.info() != Success)
-            throwError("Cannot perform eigen decomposition.");
-
-        // Extract eigenvalues and eigenvectors in decreasing order (largest eigenvalue first)
-        auto ev = solver.eigenvalues();
-        std::vector<float> lambda = {(std::max(ev[2],0.f)),
-                                     (std::max(ev[1],0.f)),
-                                     (std::max(ev[0],0.f))};
-
-        auto eigenVectors = solver.eigenvectors();
-        std::vector<float> v1 = {eigenVectors.col(2)(0)
-                , eigenVectors.col(2)(1)
-                , eigenVectors.col(2)(2)};
-        std::vector<float> v2 = {eigenVectors.col(1)(0)
-                , eigenVectors.col(1)(1)
-                , eigenVectors.col(1)(2)};
-        std::vector<float> v3 = {eigenVectors.col(0)(0)
-                , eigenVectors.col(0)(1)
-                , eigenVectors.col(0)(2)};
-
-        float linearity  = (std::sqrtf(lambda[0]) - std::sqrtf(lambda[1])) / std::sqrtf(lambda[0]);
-        float planarity  = (std::sqrtf(lambda[1]) - std::sqrtf(lambda[2])) / std::sqrtf(lambda[0]);
-        float scattering =  std::sqrtf(lambda[2]) / std::sqrtf(lambda[0]);
-        view.setField(m_linearity, i, linearity);
-        view.setField(m_planarity, i, planarity);
-        view.setField(m_scattering, i, scattering);
-
-        std::vector<float> unary_vector =
-                        {lambda[0] * std::fabsf(v1[0]) + lambda[1] * std::fabsf(v2[0]) + lambda[2] * std::fabsf(v3[0])
-                        ,lambda[0] * std::fabsf(v1[1]) + lambda[1] * std::fabsf(v2[1]) + lambda[2] * std::fabsf(v3[1])
-                        ,lambda[0] * std::fabsf(v1[2]) + lambda[1] * std::fabsf(v2[2]) + lambda[2] * std::fabsf(v3[2])};
-        float norm = std::sqrt(unary_vector[0] * unary_vector[0] + unary_vector[1] * unary_vector[1]
-                          + unary_vector[2] * unary_vector[2]);
-        view.setField(m_verticality, i, unary_vector[2] / norm);
-
+        threadPool[t] = std::thread(std::bind(
+                [&](const PointId start, const PointId end, const PointId t)
+                {
+                    for(PointId i = start;i<end;i++)
+                        setSinglePoint(view, i, kdi);
+                },
+                t*nloops/m_threads,(t+1)==m_threads?nloops:(t+1)*nloops/m_threads,t));
     }
+    for (auto &t: threadPool)
+        t.join();
+}
+
+void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, const KD3Index &kdi)
+{
+    using namespace Eigen;
+
+    // find the k-nearest neighbors
+    auto ids = kdi.neighbors(id, m_knn);
+
+    // compute covariance of the neighborhood
+    auto B = eigen::computeCovariance(view, ids);
+
+    // perform the eigen decomposition
+    SelfAdjointEigenSolver<Matrix3f> solver(B);
+    if (solver.info() != Success)
+        throwError("Cannot perform eigen decomposition.");
+
+    // Extract eigenvalues and eigenvectors in decreasing order (largest eigenvalue first)
+    auto ev = solver.eigenvalues();
+    std::vector<float> lambda = {(std::max(ev[2],0.f)),
+                                 (std::max(ev[1],0.f)),
+                                 (std::max(ev[0],0.f))};
+
+    auto eigenVectors = solver.eigenvectors();
+    std::vector<float> v1 = {eigenVectors.col(2)(0)
+            , eigenVectors.col(2)(1)
+            , eigenVectors.col(2)(2)};
+    std::vector<float> v2 = {eigenVectors.col(1)(0)
+            , eigenVectors.col(1)(1)
+            , eigenVectors.col(1)(2)};
+    std::vector<float> v3 = {eigenVectors.col(0)(0)
+            , eigenVectors.col(0)(1)
+            , eigenVectors.col(0)(2)};
+
+    float linearity  = (std::sqrtf(lambda[0]) - std::sqrtf(lambda[1])) / std::sqrtf(lambda[0]);
+    float planarity  = (std::sqrtf(lambda[1]) - std::sqrtf(lambda[2])) / std::sqrtf(lambda[0]);
+    float scattering =  std::sqrtf(lambda[2]) / std::sqrtf(lambda[0]);
+    view.setField(m_linearity, id, linearity);
+    view.setField(m_planarity, id, planarity);
+    view.setField(m_scattering, id, scattering);
+
+    std::vector<float> unary_vector =
+            {lambda[0] * std::fabsf(v1[0]) + lambda[1] * std::fabsf(v2[0]) + lambda[2] * std::fabsf(v3[0])
+                    ,lambda[0] * std::fabsf(v1[1]) + lambda[1] * std::fabsf(v2[1]) + lambda[2] * std::fabsf(v3[1])
+                    ,lambda[0] * std::fabsf(v1[2]) + lambda[1] * std::fabsf(v2[2]) + lambda[2] * std::fabsf(v3[2])};
+    float norm = std::sqrt(unary_vector[0] * unary_vector[0] + unary_vector[1] * unary_vector[1]
+                           + unary_vector[2] * unary_vector[2]);
+    view.setField(m_verticality, id, unary_vector[2] / norm);
 }
 
 }
