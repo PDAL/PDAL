@@ -9,15 +9,15 @@ The features introduced in [Demantke2011]_ describe the shape of the neighborhoo
 the local geometry is more linear (1D), planar (2D) or volumetric (3D) while the one introduced in
 [Guinard2017]_ adds the idea of a structure being vertical.
 
-The filter introduces the following four descriptors that are computed from the covariance matrix of the `knn` neighbors:
+The filter introduces the following four descriptors that are computed from the covariance matrix of the ``knn`` neighbors:
 
-    linearity - higher for long thin strips
-    planarity - higher for planar surfaces
-    scattering - higher for complex 3d neighbourhoods
-    verticality - higher for thin vertical strips
+* linearity - higher for long thin strips
+* planarity - higher for planar surfaces
+* scattering - higher for complex 3d neighbourhoods
+* verticality - higher for vertical structures, highest for thin vertical strips
 
 It introduces four new dimensions that hold each one of these values: ``Linearity``  ``Planarity``  ``Scattering``
-and  ``Verticality``
+and  ``Verticality``.
 
 Example
 -------------------------------------------------------------------------------
