@@ -36,7 +36,7 @@
 // WEAKLY SUPERVISED SEGMENTATION-AIDED CLASSIFICATION OF URBANSCENES FROM 3D LIDAR POINT CLOUDS
 // Stéphane Guinard, Loïc Landrieu, 2017
 
-#include "LocalFeaturesFilter.hpp"
+#include "DimensionalityFilter.hpp"
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
@@ -53,25 +53,25 @@ namespace pdal
 
 static StaticPluginInfo const s_info
 {
-    "filters.localfeatures",
-    "Filter that calculates local features based on the covariance matrix",
-    "http://pdal.io/stages/filters.localfeatures.html"
+    "filters.dimensionality",
+    "Filter that calculates local features that capture the dimensionality of a neighborhood.",
+    "http://pdal.io/stages/filters.dimensionality.html"
 };
 
-CREATE_STATIC_STAGE(LocalFeaturesFilter, s_info)
+CREATE_STATIC_STAGE(DimensionalityFilter, s_info)
 
-std::string LocalFeaturesFilter::getName() const
+std::string DimensionalityFilter::getName() const
 {
     return s_info.name;
 }
 
-void LocalFeaturesFilter::addArgs(ProgramArgs& args)
+void DimensionalityFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 10);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
 }
 
-void LocalFeaturesFilter::addDimensions(PointLayoutPtr layout)
+void DimensionalityFilter::addDimensions(PointLayoutPtr layout)
 {
     m_linearity = layout->registerOrAssignDim("Linearity", Dimension::Type::Float);
     m_planarity = layout->registerOrAssignDim("Planarity", Dimension::Type::Float);
@@ -79,7 +79,7 @@ void LocalFeaturesFilter::addDimensions(PointLayoutPtr layout)
     m_verticality = layout->registerOrAssignDim("Verticality", Dimension::Type::Float);
 }
 
-void LocalFeaturesFilter::filter(PointView& view)
+void DimensionalityFilter::filter(PointView& view)
 {
 
     KD3Index& kdi = view.build3dIndex();
@@ -100,7 +100,7 @@ void LocalFeaturesFilter::filter(PointView& view)
         t.join();
 }
 
-void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, const KD3Index &kdi)
+void DimensionalityFilter::setSinglePoint(PointView &view, const PointId &id, const KD3Index &kdi)
 {
     using namespace Eigen;
 
@@ -130,9 +130,9 @@ void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, con
         v3[i] = eigenVectors.col(0)(i);
     }
 
-    float linearity  = (std::sqrtf(lambda[0]) - std::sqrtf(lambda[1])) / std::sqrtf(lambda[0]);
-    float planarity  = (std::sqrtf(lambda[1]) - std::sqrtf(lambda[2])) / std::sqrtf(lambda[0]);
-    float scattering =  std::sqrtf(lambda[2]) / std::sqrtf(lambda[0]);
+    float linearity  = (sqrtf(lambda[0]) - sqrtf(lambda[1])) / sqrtf(lambda[0]);
+    float planarity  = (sqrtf(lambda[1]) - sqrtf(lambda[2])) / sqrtf(lambda[0]);
+    float scattering =  sqrtf(lambda[2]) / sqrtf(lambda[0]);
     view.setField(m_linearity, id, linearity);
     view.setField(m_planarity, id, planarity);
     view.setField(m_scattering, id, scattering);
@@ -141,10 +141,10 @@ void LocalFeaturesFilter::setSinglePoint(PointView &view, const PointId &id, con
     float norm = 0;
     for (int i=0; i <3 ; i++)
     {
-        unary_vector[i] = lambda[0] * std::fabsf(v1[i]) + lambda[1] * std::fabsf(v2[i]) + lambda[2] * std::fabsf(v3[i]);
+        unary_vector[i] = lambda[0] * fabsf(v1[i]) + lambda[1] * fabsf(v2[i]) + lambda[2] * fabsf(v3[i]);
         norm += unary_vector[i] * unary_vector[i];
     }
-    norm = std::sqrt(norm);
+    norm = sqrtf(norm);
     view.setField(m_verticality, id, unary_vector[2] / norm);
 }
 

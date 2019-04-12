@@ -37,13 +37,13 @@
 #include <pdal/PointView.hpp>
 #include <io/BufferReader.hpp>
 #include <io/TextReader.hpp>
-#include <filters/LocalFeaturesFilter.hpp>
+#include <filters/DimensionalityFilter.hpp>
 
 #include "Support.hpp"
 
 namespace pdal {
 
-TEST(LocalFeaturesTest, Linearity)
+TEST(DimensionalityTest, Linearity)
 {
     using namespace Dimension;
 
@@ -51,7 +51,7 @@ TEST(LocalFeaturesTest, Linearity)
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
-    LocalFeaturesFilter filter;
+    DimensionalityFilter filter;
     Options ops;
     ops.add("knn", 3);
     filter.setInput(bufferReader);
@@ -87,7 +87,7 @@ TEST(LocalFeaturesTest, Linearity)
     }
 }
 
-TEST(LocalFeaturesTest, Planarity)
+TEST(DimensionalityTest, Planarity)
 {
     using namespace Dimension;
 
@@ -95,7 +95,7 @@ TEST(LocalFeaturesTest, Planarity)
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
-    LocalFeaturesFilter filter;
+    DimensionalityFilter filter;
     Options ops;
     filter.setInput(bufferReader);
     filter.prepare(table);
@@ -134,7 +134,7 @@ TEST(LocalFeaturesTest, Planarity)
     }
 }
 
-TEST(LocalFeaturesTest, Scattering)
+TEST(DimensionalityTest, Scattering)
 {
     using namespace Dimension;
 
@@ -142,7 +142,7 @@ TEST(LocalFeaturesTest, Scattering)
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
-    LocalFeaturesFilter filter;
+    DimensionalityFilter filter;
     Options ops;
     filter.setInput(bufferReader);
     filter.prepare(table);

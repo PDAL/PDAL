@@ -40,12 +40,12 @@
 
 namespace pdal {
 
-class PDAL_DLL LocalFeaturesFilter: public Filter
+class PDAL_DLL DimensionalityFilter: public Filter
 {
 public:
-    LocalFeaturesFilter() : Filter() {}
-    LocalFeaturesFilter &operator=(const LocalFeaturesFilter &) = delete;
-    LocalFeaturesFilter(const LocalFeaturesFilter &) = delete;
+    DimensionalityFilter() : Filter() {}
+    DimensionalityFilter &operator=(const DimensionalityFilter &) = delete;
+    DimensionalityFilter(const DimensionalityFilter &) = delete;
 
     std::string getName() const;
 
