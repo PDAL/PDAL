@@ -37,6 +37,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <set>
@@ -93,19 +94,27 @@ private:
             const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
             const Json::Value& current, const Key& key);
 
-    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
-    uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
-    void process(PointView& view, PointRef& pr, uint64_t nodeId,
-            uint64_t pointId) const;
+    std::vector<PointId> readNode(PointView& view, const Key& key,
+            uint64_t nodeId) const;
+    std::vector<PointId> readLaszip(PointView& view, const Key& key,
+            uint64_t nodeId) const;
+    std::vector<PointId> readBinary(PointView& view, const Key& key,
+            uint64_t nodeId) const;
+    std::vector<PointId> processNode(PointView& view, uint64_t nodeId,
+            PointRef& pr, uint64_t np) const;
+
+    bool process(PointView& view, PointRef& pr, uint64_t nodeId,
+            uint64_t pointId, uint64_t dstId) const;
 
     void readAddon(PointView& dst, const Key& key, const Addon& addon,
-            uint64_t startId) const;
+            const std::vector<PointId>& pointIds) const;
 
     std::string m_root;
 
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     std::unique_ptr<arbiter::Endpoint> m_ep;
     std::unique_ptr<EptInfo> m_info;
+    std::deque<PointId> m_index;
 
     class Args
     {
