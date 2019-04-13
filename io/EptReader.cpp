@@ -555,13 +555,17 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     LasReader reader;
     reader.setOptions(options);
 
-    std::lock_guard<std::mutex> lock(m_mutex);
-    reader.prepare(table);
+    std::unique_lock<std::mutex> lock(m_mutex);
+    reader.prepare(table);  // Geotiff SRS initialization is not thread-safe.
+    lock.unlock();
 
-    const uint64_t startId(dst.size());
+    const auto views(reader.execute(table));
 
     uint64_t pointId(0);
-    for (auto& src : reader.execute(table))
+
+    lock.lock();
+    const uint64_t startId(dst.size());
+    for (auto& src : views)
     {
         PointRef pr(*src);
         for (uint64_t i(0); i < src->size(); ++i)
