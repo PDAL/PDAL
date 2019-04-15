@@ -56,6 +56,15 @@ std::string HAGFilter::getName() const
     return s_info.name;
 }
 
+void HAGFilter::addArgs(ProgramArgs& args)
+{
+    args.add("count", "The number of points to fetch to determine the ground point [default: 1].",
+            m_count, point_count_t(1));
+    args.add("max_distance", "The maximum distance to the farthest nearest neighbor before the height above ground is not calculated [default: 0 (disabled)]", m_max_distance);
+    args.add("allow_extrapolation", "If true and count > 1, allow extrapolation [default: true].",
+            m_allow_extrapolation, true);
+}
+
 void HAGFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::HeightAboveGround);
@@ -103,9 +112,56 @@ void HAGFilter::filter(PointView& view)
     for (PointId i = 0; i < ngView->size(); ++i)
     {
         PointRef point = ngView->point(i);
+        double x0 = point.getFieldAs<double>(Dimension::Id::X);
+        double y0 = point.getFieldAs<double>(Dimension::Id::Y);
         double z0 = point.getFieldAs<double>(Dimension::Id::Z);
-        auto ids = kdi.neighbors(point, 1);
-        double z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
+        auto ids = kdi.neighbors(point, m_count);
+        double z1 = std::numeric_limits<double>::quiet_NaN();
+        assert(ids.size() > 0);
+        if (ids.size() == 1) {
+            z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
+        } else {
+            auto min_x = std::numeric_limits<double>::max();
+            auto max_x = std::numeric_limits<double>::min();
+            auto min_y = std::numeric_limits<double>::max();
+            auto max_y = std::numeric_limits<double>::min();
+            double weights = 0;
+            double z_accumulator = 0;
+            bool exact_match = false;
+            for (unsigned long j = 0; j < ids.size(); ++j) {
+                auto x = gView->getFieldAs<double>(Dimension::Id::X, ids[j]);
+                auto y = gView->getFieldAs<double>(Dimension::Id::Y, ids[j]);
+                auto z = gView->getFieldAs<double>(Dimension::Id::Z, ids[j]);
+                auto distance = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
+                if (distance == 0) {
+                    exact_match = true;
+                    z1 = z;
+                    break;
+                }
+                if (m_max_distance > 0 && distance > m_max_distance) {
+                    break;
+                } else {
+                    auto weight = 1 / std::pow(distance, 2);
+                    weights += weight;
+                    z_accumulator += weight * z;
+                }
+                if (x > max_x) {
+                    max_x = x;
+                }
+                if (x < min_x) {
+                    min_x = x;
+                }
+                if (y > max_y) {
+                    max_y = y;
+                }
+                if (y < min_y) {
+                    min_y = y;
+                }
+            }
+            if (exact_match || m_allow_extrapolation || (x0 > min_x && x0 < max_x && y0 > min_y && y0 < max_y)) {
+                z1 = z_accumulator / weights;
+            }
+        }
         view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
     }
 

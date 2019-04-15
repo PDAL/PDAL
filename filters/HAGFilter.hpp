@@ -57,12 +57,17 @@ public:
 
 private:
 
+    virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 
     HAGFilter& operator=(const HAGFilter&); // not implemented
     HAGFilter(const HAGFilter&); // not implemented
+
+    bool m_allow_extrapolation;
+    double m_max_distance;
+    point_count_t m_count;
 };
 
 } // namespace pdal
