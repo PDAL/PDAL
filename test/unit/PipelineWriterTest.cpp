@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2019, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,74 +32,38 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_test_main.hpp>
+
+#include <sstream>
+
+#include "Support.hpp"
+
 #include <pdal/PipelineWriter.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/util/FileUtils.hpp>
 
-#include <pdal/Metadata.hpp>
-#include <pdal/PDALUtils.hpp>
-#include <pdal/Stage.hpp>
+using namespace pdal;
 
-namespace pdal
+// Make sure we handle duplicate stages properly.
+TEST(PipelineManagerTest, issue_2458)
 {
+    std::string in = R"(
+        [
+            "in.las",
+            "in2.las",
+            "out.las"
+        ]
+    )";
 
-namespace
-{
+    PipelineManager mgr;
+    std::istringstream iss(in);
+    mgr.readPipeline(iss);
 
-std::string generateTag(Stage *stage, PipelineWriter::TagMap& tags)
-{
-    auto tagExists = [tags](const std::string& tag)
-    {
-        for (auto& t : tags)
-        {
-            if (t.second == tag)
-                return true;
-        }
-        return false;
-    };
+    std::ostringstream oss;
+    PipelineWriter::writePipeline(mgr.getStage(), oss);
 
-    std::string tag = stage->tag();
-    if (tag.empty())
-    {
-        for (size_t i = 1; ; ++i)
-        {
-            tag = stage->getName() + std::to_string(i);
-            tag = Utils::replaceAll(tag, ".", "_");
-            if (!tagExists(tag))
-                break;
-        }
-    }
-    return tag;
+    std::string out = oss.str();
+    EXPECT_TRUE(out.find("readers_las1") != std::string::npos);
+    EXPECT_TRUE(out.find("readers_las2") != std::string::npos);
+    EXPECT_TRUE(out.find("writers_las1") != std::string::npos);
 }
-
-void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
-{
-    for (Stage *s : stage->getInputs())
-        generateTags(s, tags);
-    tags[stage] = generateTag(stage, tags);
-}
-
-} // anonymous namespace
-
-namespace PipelineWriter
-{
-
-PDAL_DLL void writePipeline(Stage *stage, const std::string& filename)
-{
-    std::ostream *out = Utils::createFile(filename, false);
-    writePipeline(stage, *out);
-    Utils::closeFile(out);
-}
-
-PDAL_DLL void writePipeline(Stage *stage, std::ostream& strm)
-{
-    TagMap tags;
-    generateTags(stage, tags);
-
-    MetadataNode root;
-    stage->serialize(root, tags);
-    Utils::toJSON(root, strm);
-}
-
-} // namespace PipelineWriter
-
-} // namespace pdal
-
