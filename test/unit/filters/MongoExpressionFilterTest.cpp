@@ -338,7 +338,7 @@ TEST(MongoExpressionFilterTest, singleComparisons)
     }
 }
 
-TEST(MongoExpressionFilterTest, inValidMultiComparisons)
+TEST(MongoExpressionFilterTest, invalidMultiComparisons)
 {
     auto table(makeTable());
     PointRef pr(*table, 0);

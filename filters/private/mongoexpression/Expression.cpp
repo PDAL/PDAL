@@ -92,9 +92,11 @@ void Expression::build(LogicGate& gate, const NL::json& json)
             //
             // There cannot be any further nested logical operators
             // within val, since we've already selected a dimension.
-            for (auto it : val.items())
+            for (auto inner : val.items())
             {
-                active->push(Comparison::create(m_layout, key, it.value()));
+                NL::json nest;
+                nest[inner.key()] = inner.value();
+                active->push(Comparison::create(m_layout, key, nest));
             }
         }
     }

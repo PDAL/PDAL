@@ -128,6 +128,7 @@ include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 
 #------------------------------------------------------------------------------
@@ -259,6 +260,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
+        ${NLOHMANN_INCLUDE_DIR}
     PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}

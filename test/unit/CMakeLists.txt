@@ -45,10 +45,9 @@ PDAL_ADD_TEST(pdal_options_test
     FILES
         OptionsTest.cpp
     LINK_WITH
-        ${PDAL_JSONCPP_LIB_NAME}
         ${GDAL_LIBRARY}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
@@ -61,7 +60,7 @@ PDAL_ADD_TEST(pdal_program_arg_test
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
@@ -124,7 +123,7 @@ PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
     LINK_WITH
         ${PDAL_JSONCPP_LIB_NAME}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
@@ -228,6 +227,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
         ${PDAL_JSONCPP_LIB_NAME}
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)

@@ -90,16 +90,13 @@ std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
     else
     {
         if (!val.is_array())
-        {
-            throw pdal_error("Invalid comparisons: " + val.get<std::string>());
-        }
+            throw pdal_error("Invalid comparisons: " + val.dump());
 
         Operands ops;
         for (auto& op : val)
         {
             ops.emplace_back(layout, op);
         }
-
         switch (co)
         {
         case ComparisonType::in:

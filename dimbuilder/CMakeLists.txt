@@ -25,7 +25,7 @@ add_executable(dimbuilder
     ${PDAL_JSONCPP_SRC})
 target_include_directories(dimbuilder PRIVATE
     ${PDAL_INCLUDE_DIR}
-    ${PDAL_JSONCPP_INCLUDE_DIR})
+    ${NLOHMANN_INCLUDE_DIR})
 PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
 target_link_libraries(dimbuilder
     PRIVATE
