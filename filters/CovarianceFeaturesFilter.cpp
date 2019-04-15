@@ -36,7 +36,7 @@
 // WEAKLY SUPERVISED SEGMENTATION-AIDED CLASSIFICATION OF URBANSCENES FROM 3D LIDAR POINT CLOUDS
 // Stéphane Guinard, Loïc Landrieu, 2017
 
-#include "DimensionalityFilter.hpp"
+#include "CovarianceFeaturesFilter.hpp"
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
@@ -53,25 +53,26 @@ namespace pdal
 
 static StaticPluginInfo const s_info
 {
-    "filters.dimensionality",
-    "Filter that calculates local features that capture the dimensionality of a neighborhood.",
-    "http://pdal.io/stages/filters.dimensionality.html"
+    "filters.covariancefeatures",
+    "Filter that calculates local features based on the covariance matrix of a point's neighborhood.",
+    "http://pdal.io/stages/filters.covariancefeatures.html"
 };
 
-CREATE_STATIC_STAGE(DimensionalityFilter, s_info)
+CREATE_STATIC_STAGE(CovarianceFeaturesFilter, s_info)
 
-std::string DimensionalityFilter::getName() const
+std::string CovarianceFeaturesFilter::getName() const
 {
     return s_info.name;
 }
 
-void DimensionalityFilter::addArgs(ProgramArgs& args)
+void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 10);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
+    args.add("feature_set", "Set of features to be computed", m_featureSet, "Dimensionality");
 }
 
-void DimensionalityFilter::addDimensions(PointLayoutPtr layout)
+void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
 {
     m_linearity = layout->registerOrAssignDim("Linearity", Dimension::Type::Float);
     m_planarity = layout->registerOrAssignDim("Planarity", Dimension::Type::Float);
@@ -79,7 +80,7 @@ void DimensionalityFilter::addDimensions(PointLayoutPtr layout)
     m_verticality = layout->registerOrAssignDim("Verticality", Dimension::Type::Float);
 }
 
-void DimensionalityFilter::filter(PointView& view)
+void CovarianceFeaturesFilter::filter(PointView& view)
 {
 
     KD3Index& kdi = view.build3dIndex();
@@ -92,7 +93,7 @@ void DimensionalityFilter::filter(PointView& view)
                 [&](const PointId start, const PointId end, const PointId t)
                 {
                     for(PointId i = start;i<end;i++)
-                        setSinglePoint(view, i, kdi);
+                        setDimensionality(view, i, kdi);
                 },
                 t*nloops/m_threads,(t+1)==m_threads?nloops:(t+1)*nloops/m_threads,t));
     }
@@ -100,12 +101,12 @@ void DimensionalityFilter::filter(PointView& view)
         t.join();
 }
 
-void DimensionalityFilter::setSinglePoint(PointView &view, const PointId &id, const KD3Index &kdi)
+void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId &id, const KD3Index &kid)
 {
     using namespace Eigen;
 
     // find the k-nearest neighbors
-    auto ids = kdi.neighbors(id, m_knn + 1);
+    auto ids = kid.neighbors(id, m_knn + 1);
 
     // compute covariance of the neighborhood
     auto B = eigen::computeCovariance(view, ids);
@@ -120,6 +121,9 @@ void DimensionalityFilter::setSinglePoint(PointView &view, const PointId &id, co
     std::vector<float> lambda = {(std::max(ev[2],0.f)),
                                  (std::max(ev[1],0.f)),
                                  (std::max(ev[0],0.f))};
+
+    if (lambda[0] == 0)
+        throwError("Eigenvalues are all 0. Can't compute local features.");
 
     auto eigenVectors = solver.eigenvectors();
     std::vector<float> v1(3), v2(3), v3(3);
@@ -147,5 +151,4 @@ void DimensionalityFilter::setSinglePoint(PointView &view, const PointId &id, co
     norm = sqrtf(norm);
     view.setField(m_verticality, id, unary_vector[2] / norm);
 }
-
 }

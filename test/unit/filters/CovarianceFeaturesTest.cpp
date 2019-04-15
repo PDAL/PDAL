@@ -37,7 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <io/BufferReader.hpp>
 #include <io/TextReader.hpp>
-#include <filters/DimensionalityFilter.hpp>
+#include <filters/CovarianceFeaturesFilter.hpp>
 
 #include "Support.hpp"
 
@@ -51,7 +51,7 @@ TEST(DimensionalityTest, Linearity)
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
-    DimensionalityFilter filter;
+    CovarianceFeaturesFilter filter;
     Options ops;
     ops.add("knn", 3);
     filter.setInput(bufferReader);
@@ -95,7 +95,7 @@ TEST(DimensionalityTest, Planarity)
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
-    DimensionalityFilter filter;
+    CovarianceFeaturesFilter filter;
     Options ops;
     filter.setInput(bufferReader);
     filter.prepare(table);
@@ -142,7 +142,7 @@ TEST(DimensionalityTest, Scattering)
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
-    DimensionalityFilter filter;
+    CovarianceFeaturesFilter filter;
     Options ops;
     filter.setInput(bufferReader);
     filter.prepare(table);

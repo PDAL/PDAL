@@ -40,24 +40,26 @@
 
 namespace pdal {
 
-class PDAL_DLL DimensionalityFilter: public Filter
+class PDAL_DLL CovarianceFeaturesFilter: public Filter
 {
 public:
-    DimensionalityFilter() : Filter() {}
-    DimensionalityFilter &operator=(const DimensionalityFilter &) = delete;
-    DimensionalityFilter(const DimensionalityFilter &) = delete;
+    CovarianceFeaturesFilter() : Filter() {}
+    CovarianceFeaturesFilter &operator=(const CovarianceFeaturesFilter &) = delete;
+    CovarianceFeaturesFilter(const CovarianceFeaturesFilter &) = delete;
 
     std::string getName() const;
 
 private:
+
     int m_knn;
     int m_threads;
+    std::string m_featureSet;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs &args);
     virtual void filter(PointView &view);
 
-    void setSinglePoint(PointView &view, const PointId &id, const KD3Index &kid);
+    void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
 
     Dimension::Id m_linearity;
     Dimension::Id m_planarity;
