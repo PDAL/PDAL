@@ -52,6 +52,12 @@ PDAL_ADD_TEST(pdal_options_test
 )
 
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
+PDAL_ADD_TEST(pdal_pipeline_writer_test
+    FILES
+        PipelineWriterTest.cpp
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
