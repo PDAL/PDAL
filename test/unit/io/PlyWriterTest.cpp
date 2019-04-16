@@ -194,10 +194,6 @@ TEST(PlyWriter, issue_2421)
     w.prepare(t);
     w.execute(t);
 
-std::string ref = FileUtils::readFileIntoString(referenceFile);
-std::string out = FileUtils::readFileIntoString(outfile);
-std::cerr << "REF = " << ref << "!\n";
-std::cerr << "TEST = " << out << "!\n";
     EXPECT_TRUE(Support::compare_text_files(outfile, referenceFile));
 }
 
