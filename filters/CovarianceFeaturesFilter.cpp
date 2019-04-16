@@ -74,10 +74,11 @@ void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
 
 void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_linearity = layout->registerOrAssignDim("Linearity", Dimension::Type::Float);
-    m_planarity = layout->registerOrAssignDim("Planarity", Dimension::Type::Float);
-    m_scattering = layout->registerOrAssignDim("Scattering", Dimension::Type::Float);
-    m_verticality = layout->registerOrAssignDim("Verticality", Dimension::Type::Float);
+    if (m_featureSet == "Dimensionality")
+    {
+        for (auto dim: {"Linearity", "Planarity", "Scattering", "Verticality"})
+            m_extraDims[dim] = layout->registerOrAssignDim(dim, Dimension::Type::Float);
+    }
 }
 
 void CovarianceFeaturesFilter::filter(PointView& view)
@@ -137,9 +138,9 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     float linearity  = (sqrtf(lambda[0]) - sqrtf(lambda[1])) / sqrtf(lambda[0]);
     float planarity  = (sqrtf(lambda[1]) - sqrtf(lambda[2])) / sqrtf(lambda[0]);
     float scattering =  sqrtf(lambda[2]) / sqrtf(lambda[0]);
-    view.setField(m_linearity, id, linearity);
-    view.setField(m_planarity, id, planarity);
-    view.setField(m_scattering, id, scattering);
+    view.setField(m_extraDims["Linearity"], id, linearity);
+    view.setField(m_extraDims["Planarity"], id, planarity);
+    view.setField(m_extraDims["Scattering"], id, scattering);
 
     std::vector<float> unary_vector(3);
     float norm = 0;
@@ -149,6 +150,6 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
         norm += unary_vector[i] * unary_vector[i];
     }
     norm = sqrtf(norm);
-    view.setField(m_verticality, id, unary_vector[2] / norm);
+    view.setField(m_extraDims["Verticality"], id, unary_vector[2] / norm);
 }
 }

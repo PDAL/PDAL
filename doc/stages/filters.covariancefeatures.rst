@@ -5,7 +5,7 @@ filters.covariancefeatures
 ===============================================================================
 
 This filter implements various local feature descriptors introduced that are based on the covariance matrix of a
-point's neighborhood. The suer can pick a set of feature descriptors by
+point's neighborhood. The user can pick a set of feature descriptors by
 setting the ``feature_set`` option. Currently, the only supported feature is the dimensionality_
 set of feature descriptors introduced below.
 

@@ -54,17 +54,13 @@ private:
     int m_knn;
     int m_threads;
     std::string m_featureSet;
+    std::map<std::string,Dimension::Id> m_extraDims;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs &args);
     virtual void filter(PointView &view);
 
     void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
-
-    Dimension::Id m_linearity;
-    Dimension::Id m_planarity;
-    Dimension::Id m_scattering;
-    Dimension::Id m_verticality;
 };
 }
 
