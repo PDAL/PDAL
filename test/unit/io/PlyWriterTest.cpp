@@ -138,6 +138,9 @@ TEST(PlyWriter, mesh)
 // Make sure that you can't use precision with ascii output.
 TEST(PlyWriter, precisionException)
 {
+    std::string outfile(Support::temppath("out.ply"));
+    FileUtils::deleteFile(outfile);
+
     Options readerOptions;
     readerOptions.add("count", 750);
     readerOptions.add("mode", "random");
@@ -145,7 +148,7 @@ TEST(PlyWriter, precisionException)
     reader.setOptions(readerOptions);
 
     Options writerOptions;
-    writerOptions.add("filename", Support::temppath("out.ply"));
+    writerOptions.add("filename", outfile);
     writerOptions.add("storage_mode", "little endian");
     writerOptions.add("precision", 3);
     PlyWriter writer;
@@ -175,7 +178,7 @@ TEST(PlyWriter, issue_2421)
     v->setField(Dimension::Id::X, 0, 1.23456789012345);
     v->setField(Dimension::Id::Y, 0, 12345.6789012345);
     v->setField(Dimension::Id::Z, 0, 1234567890.12345);
-    v->setField(iid, 0, 12345);
+    v->setField(iid, 0, 1234567890);
 
     BufferReader r;
     r.addView(v);
@@ -192,6 +195,66 @@ TEST(PlyWriter, issue_2421)
     w.execute(t);
 
     EXPECT_TRUE(Support::compare_text_files(outfile, referenceFile));
+}
+
+TEST(PlyWriter, dimtypes)
+{
+    std::string outfile(Support::temppath("out.ply"));
+
+    PointTable t;
+
+    t.layout()->registerDim(Dimension::Id::X);
+    t.layout()->registerDim(Dimension::Id::Y);
+    t.layout()->registerDim(Dimension::Id::Z);
+    Dimension::Id iid = t.layout()->assignDim("I", Dimension::Type::Double);
+    Dimension::Id jid = t.layout()->assignDim("J", Dimension::Type::Double);
+
+    PointViewPtr v(new PointView(t));
+    v->setField(Dimension::Id::X, 0, 1.23456789012345);
+    v->setField(Dimension::Id::Y, 0, 12345.6789012345);
+    v->setField(Dimension::Id::Z, 0, 1234567890.12345);
+    v->setField(iid, 0, 1234567890);
+    v->setField(jid, 0, 12345);
+
+    BufferReader r;
+    r.addView(v);
+
+    {
+        PlyWriter w;
+        Options wo;
+        wo.add("filename", outfile);
+        wo.add("storage_mode", "ascii");
+        wo.add("precision", 5);
+        wo.add("dims", "X=int8_t,Y=ushort,J=int,I=double");
+        w.setInput(r);
+        w.setOptions(wo);
+
+        FileUtils::deleteFile(outfile);
+        w.prepare(t);
+        w.execute(t);
+
+        std::string referenceFile(Support::datapath("ply/sized_dims.ply"));
+        EXPECT_TRUE(Support::compare_text_files(outfile, referenceFile));
+    }
+
+    {
+        PlyWriter w;
+        Options wo;
+        wo.add("filename", outfile);
+        wo.add("storage_mode", "ascii");
+        wo.add("precision", 5);
+        wo.add("sized_types", false);
+        wo.add("dims", "Y=ushort,X=int8_t,I,J=int");
+        w.setInput(r);
+        w.setOptions(wo);
+
+        FileUtils::deleteFile(outfile);
+        w.prepare(t);
+        w.execute(t);
+
+        std::string referenceFile(Support::datapath("ply/unsized_dims.ply"));
+        EXPECT_TRUE(Support::compare_text_files(outfile, referenceFile));
+    }
 }
 
 } // namespace pdal
