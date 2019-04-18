@@ -115,7 +115,7 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
     LINK_WITH
         ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
     FILES
