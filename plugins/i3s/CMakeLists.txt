@@ -17,6 +17,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         lepcc
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
         ${LEPCC_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}/eigen
@@ -42,6 +43,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         lepcc
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
         ${LEPCC_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}/eigen
@@ -63,6 +65,7 @@ if (WITH_TESTS)
                 ${GDAL_LIBRARY}
             INCLUDES
                 ${PDAL_JSONCPP_INCLUDE_DIR}
+                ${NLOHMANN_INCLUDE_DIR}
                 ${PDAL_VENDOR_DIR}
                 ${LEPCC_INCLUDE_DIR}
                 ${PDAL_VENDOR_DIR}/eigen
@@ -84,6 +87,7 @@ if (WITH_TESTS)
                     ${GDAL_LIBRARY}
                 INCLUDES
                     ${PDAL_JSONCPP_INCLUDE_DIR}
+                    ${NLOHMANN_INCLUDE_DIR}
                     ${PDAL_VENDOR_DIR}
                     ${LEPCC_INCLUDE_DIR}
                     ${PDAL_VENDOR_DIR}/eigen

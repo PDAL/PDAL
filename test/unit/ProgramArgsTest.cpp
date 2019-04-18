@@ -448,7 +448,7 @@ TEST(ProgramArgsTest, parseSimple)
 
 TEST(ProgramArgsTest, json)
 {
-    // Test JSON arguments.  If the arg refers to an underlying Json::Value,
+    // Test JSON arguments.  If the arg refers to an underlying NL::json,
     // it should be parsed into that Json::Value.  If a string, then that
     // string should contain the stringified JSON (which should be parsable
     // into equivalent JSON).

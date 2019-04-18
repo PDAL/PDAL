@@ -10,11 +10,12 @@ endif()
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
 target_include_directories(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
-        ${PDAL_JSONCPP_INCLUDE_DIR})
+        ${NLOHMANN_INCLUDE_DIR}
+)
 target_link_libraries(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         ${CURL_LIBRARIES}
-        ${PDAL_JSONCPP_LIB_NAME})
+)
 target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         ARBITER_CURL)
