@@ -72,8 +72,9 @@ private:
     Format m_format;
     bool m_faces;
     StringList m_dimNames;
-    Dimension::IdList m_dims;
+    DimTypeList m_dims;
     int m_precision;
+    bool m_sizedTypes;
     Arg *m_precisionArg;
     std::vector<PointViewPtr> m_views;
 };

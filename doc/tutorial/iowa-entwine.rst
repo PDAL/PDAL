@@ -10,7 +10,7 @@ This tutorial describes how to use `Conda`_, `Entwine`_, `PDAL`_, and `GDAL`_ to
 read data from the `USGS 3DEP AWS Public Dataset`_. We will be using PDAL's
 `readers.ept`_ to fetch data, we will filter it for noise using `filters.outlier`_,
 we will classify the data as ground/not-ground using `filters.smrf`_, and we will
-write out a digital terrain model with `writers.gdal`. Once our elevation model
+write out a digital terrain model with :ref:`writers.gdal`. Once our elevation model
 is constructed, we will use GDAL `gdaldem`_ operations to create hillshade, slope,
 and color relief.
 
@@ -150,7 +150,7 @@ each point to ``0``.
 .. figure:: ../images/pipeline-example-filters.assign.png
    :scale: 50%
 
-   :ref`filters.assign` can also take in an option to apply assignments
+   :ref:`filters.assign` can also take in an option to apply assignments
    based on a conditional. If you want to assign values based on a
    bounding geometry, use :ref:`filters.overlay`.
 

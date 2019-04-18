@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2019, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -31,45 +31,39 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
-#include <string>
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/GDALUtils.hpp>
+#include <sstream>
 
-#include "ogr_api.h"
-#include "gdal.h"
+#include "Support.hpp"
 
-namespace hexer
+#include <pdal/PipelineWriter.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/util/FileUtils.hpp>
+
+using namespace pdal;
+
+// Make sure we handle duplicate stages properly.
+TEST(PipelineManagerTest, issue_2458)
 {
-    class HexGrid;
+    std::string in = R"(
+        [
+            "in.las",
+            "in2.las",
+            "out.las"
+        ]
+    )";
+
+    PipelineManager mgr;
+    std::istringstream iss(in);
+    mgr.readPipeline(iss);
+
+    std::ostringstream oss;
+    PipelineWriter::writePipeline(mgr.getStage(), oss);
+
+    std::string out = oss.str();
+    EXPECT_TRUE(out.find("readers_las1") != std::string::npos);
+    EXPECT_TRUE(out.find("readers_las2") != std::string::npos);
+    EXPECT_TRUE(out.find("writers_las1") != std::string::npos);
 }
-
-namespace pdal
-{
-
-class OGR
-{
-
-public:
-    OGR(std::string const& filename, std::string srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
-
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
-
-private:
-    std::string m_filename;
-    std::string m_driver;
-    gdal::SpatialRef m_srs;
-
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
-
-    void createLayer();
-};
-
-} // namespace pdal
-
