@@ -98,7 +98,7 @@ void EptAddonWriter::prepared(PointTableRef table)
         const std::string& dimName = it.value().get<std::string>();
 
         const auto endpoint(
-                m_arbiter->getEndpoint(arbiter::fs::expandTilde(path)));
+                m_arbiter->getEndpoint(arbiter::expandTilde(path)));
 
         const Dimension::Id id(layout.findDim(dimName));
         if (id == Dimension::Id::Unknown)
@@ -187,8 +187,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
     if (ep.isLocal())
     {
-        arbiter::fs::mkdirp(dataEp.root());
-        arbiter::fs::mkdirp(hierEp.root());
+        arbiter::mkdirp(dataEp.root());
+        arbiter::mkdirp(hierEp.root());
     }
 
     // Write the binary dimension data for the addon.

@@ -336,7 +336,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             {
                 root = root.substr(0, root.size() - addonFilename.size());
             }
-            root = arbiter::fs::expandTilde(root);
+            root = arbiter::expandTilde(root);
 
             const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
             try
