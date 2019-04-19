@@ -64,15 +64,6 @@ static inline NL::json parse(const std::string& data)
     return j;
 }
 
-//ABELL
-/**
-static inline std::string dense(const Json::Value& json)
-{
-    Json::StreamWriterBuilder builder;
-    builder.settings_["indentation"] = "";
-    return Json::writeString(builder, json);
-}
-**/
 
 static inline NL::json layoutToSchema(PointLayout& layout)
 {
