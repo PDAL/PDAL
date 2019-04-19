@@ -35,7 +35,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libspatialite-dev \
         libsqlite3-mod-spatialite \
         libhdf5-dev \
-        libjsoncpp-dev \
         libboost-filesystem1.65-dev \
         libboost-iostreams1.65-dev \
         libboost-program-options1.65-dev \
@@ -130,7 +129,6 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
     && cd cpd \
     && cmake . \
         -DWITH_TESTS=OFF \
-        -DWITH_JSONCPP=OFF \
         -DWITH_FGT=ON \
         -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
         -DCMAKE_CXX_FLAGS="-isystem ${DESTDIR}/usr/include" \
@@ -260,7 +258,6 @@ RUN apt-get update; \
         libgeotiff-epsg \
         libexpat1 \
         libxml2 \
-        libjsoncpp1 \
         libwebp6 \
         netcdf-bin \
         libhdf4-0-alt \
