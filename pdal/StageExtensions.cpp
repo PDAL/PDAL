@@ -34,7 +34,7 @@
 
 #include <sstream>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/StageExtensions.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -93,7 +93,6 @@ R"PDALEXTENSIONS(
 StageExtensions::StageExtensions(LogPtr log) : m_log(log)
 {}
 
-// Called under lock from the get functions.
 void StageExtensions::load()
 {
     static bool loaded(false);
@@ -102,37 +101,41 @@ void StageExtensions::load()
         return;
     loaded = true;
 
-    Json::Value root;
-    Json::Reader reader;
+    NL::json root;
 
-    std::istringstream in(extension_json);
-    if (!reader.parse(in, root))
+    try
     {
-        std::string err = "Unable to parse 'pdal_extensions.json': " +
-            reader.getFormattedErrorMessages() +
+        root = NL::json::parse(extension_json);
+    }
+    catch (const NL::json::parse_error& err)
+    {
+        std::string e = "Unable to parse 'pdal_extensions.json': " +
+            std::string(err.what()) +
             " Plugins will not be able to be inferred from filenames.";
-        throw pdal_error(err);
+        throw pdal_error(e);
     }
 
-    if (!root.isObject())
+    if (!root.is_object())
     {
         throw pdal_error("Invalid root object in 'pdal_extensions.json'. "
             "Must be an object.");
     }
 
-    for (const std::string& stage : root.getMemberNames())
+    for (auto it : root.items())
     {
+        const std::string& stage = it.key();
+        const NL::json& val = it.value();
+
         if (!Utils::startsWith(stage, "readers") &&
             !Utils::startsWith(stage, "writers"))
         {
             throw pdal_error("Only readers and writers may define "
                 "extensions. '" +  stage + "' invalid.");
         }
-        Json::Value val = root[stage];
-        if (!val.isString())
+        if (!val.is_string())
             throw pdal_error("Extension value for '" + stage +
                 "' must be a string.");
-        set(stage, parse(val.asString()));
+        set(stage, parse(val.get<std::string>()));
     }
 }
 

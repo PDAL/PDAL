@@ -105,24 +105,23 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //create const for looking into
-    const Json::Value jsonBody = m_info;
+    const NL::json jsonBody = m_info;
 
     //create pdal Bounds
     m_bounds = createBounds();
 
-
     //find version
-    if (jsonBody["store"].isMember("version"))
-        m_version = Version(jsonBody["store"]["version"].asString());
+    if (jsonBody["store"].contains("version"))
+        m_version = Version(jsonBody["store"]["version"].get<std::string>());
     if (Version("2.0") < m_version || m_version < Version("1.6"))
         log()->get(LogLevel::Warning) << "This version may not work with "
             "the current implementation of i3s/slpk reader" << std::endl;
 
     //find number of nodes per nodepage
-    if (jsonBody["store"]["index"].isMember("nodesPerPage"))
-        m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].asInt();
-    else if (jsonBody["store"]["index"].isMember("nodePerIndexBlock"))
-        m_nodeCap = jsonBody["store"]["index"]["nodePerIndexBlock"].asInt();
+    if (jsonBody["store"]["index"].contains("nodesPerPage"))
+        m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].get<int>();
+    else if (jsonBody["store"]["index"].contains("nodePerIndexBlock"))
+        m_nodeCap = jsonBody["store"]["index"]["nodePerIndexBlock"].get<int>();
     else
     {
         log()->get(LogLevel::Warning) <<
@@ -132,18 +131,22 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //find the type of encoding
-    if (jsonBody["store"]["defaultGeometrySchema"].isMember("encoding"))
+    if (jsonBody["store"]["defaultGeometrySchema"].contains("encoding"))
     {
         std::string encoding = jsonBody["store"]
-            ["defaultGeometrySchema"]["encoding"].asString();
+            ["defaultGeometrySchema"]["encoding"].get<std::string>();
         if (encoding != "lepcc-xyz")
             throwError(std::string("Only lepcc encoding is supported "
                 "by this driver"));
     }
 
     //create spatial reference objects
-    Json::Value spatialJson = m_info["spatialReference"];
-    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
+    NL::json wkid = m_info["spatialReference"]["wkid"];
+    std::string spatialStr = "EPSG:";
+    if (wkid.is_string())
+        spatialStr += wkid.get<std::string>();
+    else if (wkid.is_number_unsigned())
+        spatialStr += std::to_string(wkid.get<uint64_t>());
     m_nativeSrs = SpatialReference(spatialStr);
     setSpatialReference(m_nativeSrs);
 
@@ -170,17 +173,18 @@ void EsriReader::initialize(PointTableRef table)
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
-    if (!m_info.isMember("attributeStorageInfo"))
+    if (!m_info.contains("attributeStorageInfo"))
         throwError("Attributes do not exist for this object");
-    const Json::Value attributes = m_info["attributeStorageInfo"];
+    const NL::json& attributes = m_info["attributeStorageInfo"];
     //automatically add xyz point dimensions
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
-    for (Json::ArrayIndex i = 0; i < attributes.size(); i++)
+
+    for (auto el : attributes)
     {
         dimData data;
-        std::string readName = attributes[i]["name"].asString();
+        std::string readName = el["name"].get<std::string>();
         data.name = readName;
 
         //test if this dimensions was requested by user
@@ -188,9 +192,9 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
             (m_dimensions.find(readName) == m_dimensions.end()))
             continue;
 
-        data.key = std::stoi(attributes[i]["key"].asString());
+        data.key = std::stoi(el["key"].get<std::string>());
 
-        if (!attributes[i].isMember("attributeValues"))
+        if (!el.contains("attributeValues"))
         {
             //Expect that Elevation will be bundled with xyz
             if (readName != "ELEVATION")
@@ -200,8 +204,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
             continue;
         }
 
-        data.dataType =
-            attributes[i]["attributeValues"]["valueType"].asString();
+        data.dataType = el["attributeValues"]["valueType"].get<std::string>();
 
         if (readName == "RGB")
         {
@@ -244,7 +247,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         else
         {
             std::string s =
-                attributes[i]["attributeValues"]["valueType"].asString();
+                el["attributeValues"]["valueType"].get<std::string>();
             const pdal::Dimension::Id id = layout->registerOrAssignDim(
                     readName, pdal::Dimension::type(s));
             if(data.dimType != Dimension::Type::None)
@@ -289,7 +292,7 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 
     // Build the node list that will tell us which nodes overlap with bounds
     std::vector<int> nodes;
-    const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
+    NL::json initJson = fetchJson(m_filename + "/nodepages/0");
     log()->get(LogLevel::Debug) << "Traversing metadata" << std::endl;
     traverseTree(initJson, 0, nodes, 0, 0);
 
@@ -320,25 +323,26 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 //the tree and test if it overlaps with the bounds created by user.
 //If it's a leaf node(the highest resolution) and it overlaps, add
 //it to the list of nodes to be pulled later.
-void EsriReader::traverseTree(Json::Value page, int index,
+void EsriReader::traverseTree(NL::json& page, int index,
     std::vector<int>& nodes, int depth, int pageIndex)
 {
     // find node information
-    int firstNode = page["nodes"][0]["resourceId"].asInt();
-    int name = page["nodes"][index]["resourceId"].asInt();
-    int firstChild = page["nodes"][index]["firstChild"].asInt();
-    int cCount = page["nodes"][index]["childCount"].asInt();
+    int firstNode = page["nodes"][0]["resourceId"].get<int>();
+    int name = page["nodes"][index]["resourceId"].get<int>();
+    int firstChild = page["nodes"][index]["firstChild"].get<int>();
+    int cCount = page["nodes"][index]["childCount"].get<int>();
 
     // find density information
     double area = page["nodes"][index][
         m_version >= Version("2.0") ?
             "lodThreshold" :
-            "effectiveArea" ].asDouble();
+            "effectiveArea" ].get<double>();
     int pCount = page["nodes"][index][
         m_version >= Version("2.0") ?
             "vertexCount" :
-            "pointCount" ].asInt();
-    double density = (double)pCount / area;
+            "pointCount" ].get<int>();
+
+    double density = pCount / area;
 
     // update maximum node to stop reading files at the right time
     if ((firstChild + cCount - 1) > m_maxNode)
@@ -406,23 +410,24 @@ void EsriReader::traverseTree(Json::Value page, int index,
 //Finds a sphere from the given center and halfsize vector of the OBB
 //and makes a cube around it. This should help with collision detection
 //and pruning of nodes before fetching binaries.
-BOX3D EsriReader::createCube(Json::Value base)
+BOX3D EsriReader::createCube(const NL::json& base)
 {
     // Pull XYZ in lat/lon.
-    Json::Value center = base["obb"]["center"];
-    double x = center[0].asDouble();
-    double y = center[1].asDouble();
-    double z = center[2].asDouble();
+    const NL::json& center = base["obb"]["center"];
+    double x = center[0].get<double>();
+    double y = center[1].get<double>();
+    double z = center[2].get<double>();
 
-    Json::Value hsize = base["obb"]["halfSize"];
-    double hx = hsize[0].asDouble();
-    double hy = hsize[1].asDouble();
-    double hz = hsize[2].asDouble();
+    const NL::json& hsize = base["obb"]["halfSize"];
+    double hx = hsize[0].get<double>();
+    double hy = hsize[1].get<double>();
+    double hz = hsize[2].get<double>();
 
     //transform (x,y,z) to ECEF to match the half sizes in meters.
     OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
     //take half size vector and find magnitude of it multiplied by sqrt(2)
-    double r = std::sqrt(2) * std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
+    double r = std::sqrt(2) *
+        std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
     //create cube around this radius
     double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
     BOX3D nodeBox(minx,miny,minz,maxx,maxy,maxz);

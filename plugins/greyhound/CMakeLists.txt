@@ -2,7 +2,6 @@
 # Greyhound plugin CMake configuration
 #
 
-add_definitions(-DHAVE_JSONCPP=1)
 if (WIN32)
 add_definitions("-DARBITER_DLL_IMPORT")
 endif()
@@ -20,7 +19,6 @@ PDAL_ADD_PLUGIN(reader_libname reader greyhound
     LINK_WITH
         ${WINSOCK_LIBRARY}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
 )
@@ -34,7 +32,6 @@ PDAL_ADD_PLUGIN(writer_libname writer greyhound
     LINK_WITH
         ${WINSOCK_LIBRARY}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
 )
@@ -48,7 +45,6 @@ if (WITH_TESTS)
             ${reader_libname}
             ${writer_libname}
         INCLUDES
-            ${PDAL_JSONCPP_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
             ${PDAL_VENDOR_DIR}
     )

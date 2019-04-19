@@ -199,11 +199,6 @@ TEST_F(GreyhoundReaderTest, filter)
         Options opts;
         opts.add("bounds", bounds.toJson());
         opts.add("filter", filter);
-        /**
-        Json::Value json;
-        json["bounds"] = bounds.toJson();
-        json["filter"]["X"]["$gte"] = center.x;
-        **/
         run(opts);
     }
 

@@ -9,10 +9,9 @@ PDAL_ADD_PLUGIN(python_libname filter python
         PythonFilter.cpp
     LINK_WITH
         ${PYTHON_LIBRARY}
-        ${PDAL_JSONCPP_LIB_NAME}
         ${CMAKE_DL_LIBS}
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
     SYSTEM_INCLUDES
         ${PYTHON_ALL_INCLUDE_DIRS}
 )

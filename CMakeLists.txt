@@ -124,7 +124,6 @@ include(${PDAL_CMAKE_DIR}/lzma.cmake)
 include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
@@ -178,9 +177,6 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
-if (NOT PDAL_HAVE_JSONCPP)
-    add_subdirectory(vendor/jsoncpp/dist)
-endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -257,7 +253,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}
         ${PDAL_VENDOR_DIR}/eigen
         ${PDAL_VENDOR_DIR}/pdalboost
-        ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -280,7 +275,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-        ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )

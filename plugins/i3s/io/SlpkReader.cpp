@@ -81,7 +81,7 @@ void SlpkReader::initInfo()
 }
 
 
-Json::Value SlpkReader::fetchJson(std::string filepath)
+NL::json SlpkReader::fetchJson(std::string filepath)
 {
     std::string output;
     auto compressed = m_arbiter->get(filepath + ".json.gz");
