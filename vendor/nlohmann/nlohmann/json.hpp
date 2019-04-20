@@ -2287,6 +2287,8 @@ struct adl_serializer
 
 // #include <nlohmann/detail/macro_scope.hpp>
 
+//ABELL
+#undef snprintf
 
 namespace nlohmann
 {
