@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2019, Helix Re Inc. nicolas@helix.re
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Helix Re Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,45 +31,36 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <string>
+#include <thread>
 
-#include <pdal/GDALUtils.hpp>
+#include <pdal/Filter.hpp>
 
-#include "ogr_api.h"
-#include "gdal.h"
+namespace pdal {
 
-namespace hexer
+class PDAL_DLL CovarianceFeaturesFilter: public Filter
 {
-    class HexGrid;
-}
-
-namespace pdal
-{
-
-class OGR
-{
-
 public:
-    OGR(std::string const& filename, std::string srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
+    CovarianceFeaturesFilter() : Filter() {}
+    CovarianceFeaturesFilter &operator=(const CovarianceFeaturesFilter &) = delete;
+    CovarianceFeaturesFilter(const CovarianceFeaturesFilter &) = delete;
 
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
+    std::string getName() const;
 
 private:
-    std::string m_filename;
-    std::string m_driver;
-    gdal::SpatialRef m_srs;
 
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
+    int m_knn;
+    int m_threads;
+    std::string m_featureSet;
+    std::map<std::string,Dimension::Id> m_extraDims;
 
-    void createLayer();
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void addArgs(ProgramArgs &args);
+    virtual void filter(PointView &view);
+
+    void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
 };
-
-} // namespace pdal
+}
 

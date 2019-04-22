@@ -24,7 +24,7 @@ reprojecting.
 Example 1
 --------------------------------------------------------------------------------
 
-This pipeline reprojecs terrain points with Z-values between 0 and 100 by first
+This pipeline reprojects terrain points with Z-values between 0 and 100 by first
 applying a range filter and then specifing both the input and output spatial
 reference as EPSG-codes. The X and Y dimensions are scaled to allow enough
 precision in the output coordinates.

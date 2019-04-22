@@ -50,6 +50,12 @@ PDAL_ADD_TEST(pdal_options_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
+PDAL_ADD_TEST(pdal_pipeline_writer_test
+    FILES
+        PipelineWriterTest.cpp
+    INCLUDES
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
@@ -211,6 +217,7 @@ PDAL_ADD_TEST(pdal_filters_crop_test
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_delaunay_test FILES filters/DelaunayFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_covariancefeatures_test FILES filters/CovarianceFeaturesTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES

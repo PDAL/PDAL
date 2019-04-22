@@ -120,7 +120,7 @@ for inspiration on this topic.
 
 1. The AppVeyor build configuration https://github.com/PDAL/PDAL/blob/master/scripts/appveyor/config.cmd#L26
 
-2. Howard Butler's example build configuration https://github.com/PDAL/PDAL/blob/master/scripts/conda/wind64.bat
+2. Howard Butler's example build configuration https://github.com/PDAL/PDAL/blob/master/scripts/conda/win64.bat
 
 
 .. note::
