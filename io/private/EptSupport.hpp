@@ -268,20 +268,19 @@ public:
         m_bounds = toBox3d(m_info["bounds"]);
         m_points = m_info["points"].get<uint64_t>();
         m_span = m_info["span"].get<uint64_t>();
-        m_srs = m_info["srs"]["wkt"].get<std::string>();
-
-        if (m_srs.empty())
+        auto it = m_info.find("srs");
+        if (it != m_info.end())
         {
-            if (m_info["srs"].contains("authority") &&
-                m_info["srs"].contains("horizontal"))
-            {
-                m_srs = m_info["srs"]["authority"].get<std::string>() + ":" +
-                    m_info["srs"]["horizontal"].get<std::string>();
-            }
+            const NL::json& srs = *it;
+            m_srs = srs.value("wkt", "");
 
-            if (m_info["srs"].contains("vertical"))
+            if (m_srs.empty())
             {
-                m_srs += "+" + m_info["srs"]["vertical"].get<std::string>();
+                if (srs.contains("authority") && srs.contains("horizontal"))
+                    m_srs = srs["authority"].get<std::string>() + ":" +
+                        srs["horizontal"].get<std::string>();
+                if (srs.contains("vertical"))
+                    m_srs += "+" + srs["vertical"].get<std::string>();
             }
         }
 
