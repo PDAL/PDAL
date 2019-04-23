@@ -38,8 +38,6 @@
 #include <queue>
 #include <vector>
 
-#include <json/json.h>
-
 #include <arbiter/arbiter.hpp>
 
 #include <pdal/Reader.hpp>
@@ -66,7 +64,7 @@ private:
     GreyhoundParams m_params;
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
-    Json::Value m_info;
+    NL::json m_info;
     PointLayout m_readLayout;
 };
 

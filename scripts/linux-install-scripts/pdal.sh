@@ -26,7 +26,6 @@ cmake   -G "Unix Makefiles"  \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DLAZPERF_INCLUDE_DIR=/home/vagrant/laz-perf \
-        -DJSONCPP_ROOT_DIR=/usr/include/jsoncpp \
         -DBUILD_PLUGIN_GEOWAVE=ON \
         -DGEOWAVE_RUNTIME_JAR=/home/vagrant/geowave/geowave-jace.jar \
         -DJACE_INCLUDE_DIR=/home/vagrant/geowave/include \

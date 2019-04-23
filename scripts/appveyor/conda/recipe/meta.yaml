@@ -24,7 +24,6 @@ requirements:
     - libgdal
     - geotiff
     - postgresql
-    - jsoncpp
     - libkml
     - eigen
     - sqlite
@@ -38,7 +37,6 @@ requirements:
   run:
     - python
     - numpy
-    - jsoncpp
     - postgresql
     - laz-perf
     - geotiff

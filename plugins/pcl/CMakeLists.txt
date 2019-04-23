@@ -90,10 +90,9 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
         filters/PCLBlock.cpp
     LINK_WITH
         ${PCL_LIBRARIES}
-        ${PDAL_JSONCPP_LIB_NAME}
     INCLUDES
         ${PCL_INCLUDE_DIRS}
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid

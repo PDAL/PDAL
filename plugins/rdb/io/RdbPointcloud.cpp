@@ -34,7 +34,7 @@
 
 #include <sstream>
 #include <array>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 #include "RdbPointcloud.hpp"
 
 namespace pdal
@@ -176,23 +176,20 @@ RdbPointcloud::RdbPointcloud(
     // query spatial reference system
     if (m_pointcloud.metaData().exists("riegl.geo_tag"))
     {
-        Json::Value  node;
-        Json::Reader reader;
-        if (reader.parse(m_pointcloud.metaData().get("riegl.geo_tag"), node))
+        NL::json node;
+
+        try
         {
-            if (node["crs"]["epsg"].isIntegral())
+            std::string s = m_pointcloud.metaData().get("riegl.geo_tag");
+            node = NL::json::parse(s);
+            if (node["crs"]["epsg"].is_number_integer())
+                m_crs_epsg = node["crs"]["epsg"].get<int>();
+            if (node["crs"]["wkt"].is_string())
+                m_crs_wkt = node["crs"]["wkt"].get<std::string>();
+            if (node["pose"].is_array())
             {
-                m_crs_epsg = node["crs"]["epsg"].asInt();
-            }
-            if (node["crs"]["wkt"].isString())
-            {
-                m_crs_wkt = node["crs"]["wkt"].asString();
-            }
-            if (node["pose"].isArray())
-            {
-                const Json::Value pose = node["pose"];
-                if (
-                    (pose   .size() == 4) &&
+                const NL::json pose = node["pose"];
+                if ( (pose.size() == 4) &&
                     (pose[0].size() == 4) &&
                     (pose[1].size() == 4) &&
                     (pose[2].size() == 4) &&
@@ -203,12 +200,14 @@ RdbPointcloud::RdbPointcloud(
                     for (int row = 0; row < 4; ++row)
                     for (int col = 0; col < 4; ++col)
                     {
-                        matrix(row, col) = pose[row][col].asDouble();
+                        matrix(row, col) = pose[row][col].get<double>();
                     }
                     m_crs_pose = std::make_shared<Eigen::Matrix4d>(matrix);
                 }
             }
         }
+        catch (const NL::json::parse_error&)
+        {}
     }
 
     // setup read query and attribute buffers

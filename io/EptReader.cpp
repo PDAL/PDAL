@@ -55,6 +55,8 @@ namespace
         "http://pdal.io/stages/reader.ept.html",
         { "ept" }
     };
+
+    const std::string addonFilename { "ept-addon.json" };
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -64,10 +66,6 @@ EptReader::EptReader()
 
 EptReader::~EptReader()
 {}
-
-EptReader::Args::Args()
-    : m_addons(new Json::Value())
-{ }
 
 std::string EptReader::getName() const { return s_info.name; }
 
@@ -194,12 +192,12 @@ void EptReader::handleOriginQuery()
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
-    const Json::Value sources(parse(m_ep->get("ept-sources/list.json")));
+    const NL::json sources(parse(m_ep->get("ept-sources/list.json")));
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
-    if (!sources.isArray())
+    if (!sources.is_array())
     {
-        throwError("Unexpected sources list: " + sources.toStyledString());
+        throwError("Unexpected sources list: " + sources.dump());
     }
 
     if (search.find_first_not_of("0123456789") == std::string::npos)
@@ -214,15 +212,13 @@ void EptReader::handleOriginQuery()
         // by a basename or a tile ID rather than a full path is convenient).
         // Find it within the sources list, and make sure it's specified
         // uniquely enough to select only one file.
-        for (Json::ArrayIndex i(0); i < sources.size(); ++i)
+        for (size_t i = 0; i < sources.size(); ++i)
         {
-            const Json::Value& entry(sources[i]);
-            if (entry["id"].asString().find(search) != std::string::npos)
+            const NL::json& el = sources.at(i);
+            if (el["id"].get<std::string>().find(search) != std::string::npos)
             {
                 if (m_queryOriginId != -1)
-                {
-                    throwError("Origin search ID is not unique");
-                }
+                    throwError("Origin search ID is not unique.");
                 m_queryOriginId = static_cast<int64_t>(i);
             }
         }
@@ -233,7 +229,7 @@ void EptReader::handleOriginQuery()
         throwError("Failed lookup of origin: " + search);
     }
 
-    if (m_queryOriginId >= sources.size())
+    if (m_queryOriginId >= (int64_t)sources.size())
     {
         throwError("Invalid origin ID");
     }
@@ -241,8 +237,7 @@ void EptReader::handleOriginQuery()
     // Now that we have our OriginId value, clamp the bounds to select only the
     // data sources that overlap the selected origin.
 
-    const Json::Value& found(sources[static_cast<Json::ArrayIndex>(
-                m_queryOriginId)]);
+    const NL::json found(sources.at(m_queryOriginId));
 
     try
     {
@@ -252,8 +247,8 @@ void EptReader::handleOriginQuery()
         // it - it's possible that both a bounds and an origin are specified.
         m_queryBounds.clip(q);
 
-        log()->get(LogLevel::Debug) << "Query origin " <<
-            m_queryOriginId << ": " << found["id"].asString() << std::endl;
+        log()->get(LogLevel::Debug) << "Query origin " << m_queryOriginId <<
+            ": " << found["id"].get<std::string>() << std::endl;
     }
     catch (std::exception& e)
     {
@@ -273,10 +268,8 @@ QuickInfo EptReader::inspect()
         qi.m_srs = m_info->srs();
         qi.m_pointCount = m_info->points();
 
-        for (Json::ArrayIndex i(0); i < m_info->schema().size(); ++i)
-        {
-            qi.m_dimNames.push_back(m_info->schema()[i]["name"].asString());
-        }
+        for (auto& el : m_info->schema())
+            qi.m_dimNames.push_back(el["name"].get<std::string>());
     }
     catch (std::exception& e)
     {
@@ -290,17 +283,16 @@ QuickInfo EptReader::inspect()
 
 void EptReader::addDimensions(PointLayoutPtr layout)
 {
-    const Json::Value& schema(m_info->schema());
+    const NL::json schema {m_info->schema()};
     m_remoteLayout.reset(new FixedPointLayout());
 
-    for (Json::ArrayIndex i(0); i < schema.size(); ++i)
+    for (auto& el : schema)
     {
-        const Json::Value& dim(schema[i]);
-        const std::string name(dim["name"].asString());
+        const std::string name(el["name"].get<std::string>());
 
         // If the dimension has a scale, make sure we register it as a double
         // rather than its serialized type.
-        const Dimension::Type type = getType(dim);
+        const Dimension::Type type = getType(el);
 
         log()->get(LogLevel::Debug) << "Registering dim " << name << ": " <<
             Dimension::interpretationName(type) << std::endl;
@@ -308,7 +300,6 @@ void EptReader::addDimensions(PointLayoutPtr layout)
         layout->registerOrAssignDim(name, type);
         m_remoteLayout->registerOrAssignDim(name, type);
     }
-
     m_remoteLayout->finalize();
 
     using D = Dimension::Id;
@@ -316,57 +307,52 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     m_dimTypes = m_remoteLayout->dimTypes();
     for (DimType& dt : m_dimTypes)
     {
-        // If the data is stored as Laszip, then PDAL's LasReader will unscale
-        // XYZ for us.
-        if (m_info->dataType() == EptInfo::DataType::Laszip &&
-                (dt.m_id == D::X || dt.m_id == D::Y || dt.m_id == D::Z))
-        {
-            continue;
-        }
+        const NL::json dim(m_info->dim(m_remoteLayout->dimName(dt.m_id)));
 
-        const Json::Value dim(m_info->dim(m_remoteLayout->dimName(dt.m_id)));
-        if (dim.isNull())
-            throwError("Invalid dimension lookup");
-        if (dim.isMember("scale"))
-            dt.m_xform.m_scale.m_val = dim["scale"].asDouble();
-        if (dim.isMember("offset"))
-            dt.m_xform.m_offset.m_val = dim["offset"].asDouble();
+        dt.m_xform.m_scale.m_val = dim.value("scale", 1.0);
+        dt.m_xform.m_offset.m_val = dim.value("offset", 0);
+
+        // For LAS, we allow the LAS reader to transform, so here
+        // we leave the transforms default-initialized (scale 1/offset 0)
+        if (m_info->dataType() != EptInfo::DataType::Laszip)
+        {
+            if (dt.m_id == D::X)
+                m_xyzTransforms[0] = dt.m_xform;
+            else if (dt.m_id == D::Y)
+                m_xyzTransforms[1] = dt.m_xform;
+            else if (dt.m_id == D::Z)
+                m_xyzTransforms[2] = dt.m_xform;
+        }
     }
-
-    auto dimIndex = [this](Dimension::Id id)->uint64_t
-    {
-        for (uint64_t i(0); i < m_remoteLayout->dims().size(); ++i)
-        {
-            if (m_remoteLayout->dims()[i] == id)
-            {
-                return i;
-            }
-        }
-        throw pdal_error("Invalid dimIndex lookup");
-    };
-
-    m_xyzTransforms[0] = m_dimTypes[dimIndex(D::X)].m_xform;
-    m_xyzTransforms[1] = m_dimTypes[dimIndex(D::Y)].m_xform;
-    m_xyzTransforms[2] = m_dimTypes[dimIndex(D::Z)].m_xform;
 
     try
     {
-        for (const std::string dimName : m_args.addons().getMemberNames())
+        for (auto it : m_args.addons().items())
         {
-            std::string root(m_args.addons()[dimName].asString());
-            const std::string postfix("ept-addon.json");
-            if (Utils::endsWith(root, postfix))
+            std::string dimName = it.key();
+            const NL::json& val = it.value();
+            std::string root(val.get<std::string>());
+            if (Utils::endsWith(root, addonFilename))
             {
-                root = root.substr(0, root.size() - postfix.size());
+                root = root.substr(0, root.size() - addonFilename.size());
             }
-            root = arbiter::fs::expandTilde(root);
+            root = arbiter::expandTilde(root);
 
             const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
-            const Json::Value addonInfo(parse(ep.get("ept-addon.json")));
-            const Dimension::Type type(getType(addonInfo));
-            const Dimension::Id id(layout->registerOrAssignDim(dimName, type));
-
-            m_addons.emplace_back(new Addon(*layout, ep, id));
+            try
+            {
+                const NL::json addonInfo
+                    { NL::json::parse(ep.get(addonFilename)) };
+                const Dimension::Type type(getType(addonInfo));
+                const Dimension::Id id(
+                    layout->registerOrAssignDim(dimName, type));
+                m_addons.emplace_back(new Addon(*layout, ep, id));
+            }
+            catch (NL::json::parse_error& err)
+            {
+                throwError("Unable to parse EPT addon file '" +
+                    addonFilename + "'.");
+            }
 
             log()->get(LogLevel::Debug) << "Registering addon dim " <<
                 dimName << ": " <<
@@ -400,14 +386,13 @@ void EptReader::ready(PointTableRef table)
     }
 
     uint64_t overlapPoints(0);
-    Json::Value json;
 
+    // Convert the key/overlap map to JSON for output as metadata.
+    NL::json j;
     for (const auto& p : m_overlaps)
     {
-        const Key& key(p.first);
-        const Json::UInt64 np(p.second);
-        overlapPoints += np;
-        json[key.toString()] = np;
+        overlapPoints += p.second;
+        j[p.first.toString()] = p.second;
     }
 
     log()->get(LogLevel::Debug) << "Overlap nodes: " << m_overlaps.size() <<
@@ -426,14 +411,29 @@ void EptReader::ready(PointTableRef table)
         // If we have an EPT writer in this pipeline, serialize some metadata
         // which will be needed to create addon dimensions.
         MetadataNode meta(table.privateMetadata("ept"));
-        meta.add("info", stringify(m_info->json()));
-        meta.add("keys", stringify(json));
+        meta.add("info", m_info->json().dump());
+        meta.add("keys", j.dump());
         meta.add("step", m_hierarchyStep);
     }
 }
 
 void EptReader::overlaps()
 {
+    auto parseEndpoint = [this](const arbiter::Endpoint& ep,
+        const std::string file)
+    {
+        NL::json j;
+        try
+        {
+            j = NL::json::parse(ep.get(file));
+        }
+        catch (NL::json::parse_error& err)
+        {
+            throwError("Error parsing EPT hierarchy file '" + file + "'.");
+        }
+        return j;
+    };
+
     // Determine all the keys that overlap the queried area by traversing the
     // EPT hierarchy:
     //      https://entwine.io/entwine-point-tile.html#ept-hierarchy)
@@ -445,8 +445,8 @@ void EptReader::overlaps()
     const std::string file("ept-hierarchy/" + key.toString() + ".json");
 
     {
+        const NL::json root = parseEndpoint(*m_ep, file);
         // First, determine the overlapping nodes from the EPT resource.
-        const Json::Value root(parse(m_ep->get(file)));
         overlaps(*m_ep, m_overlaps, root, key);
         m_pool->await();
     }
@@ -454,24 +454,29 @@ void EptReader::overlaps()
     for (auto& addon : m_addons)
     {
         // Next, determine the overlapping nodes from each addon dimension.
-        const Json::Value root(parse(addon->ep().get(file)));
+        const NL::json root = parseEndpoint(addon->ep(), file);
         overlaps(addon->ep(), addon->hierarchy(), root, key);
         m_pool->await();
     }
 }
 
 void EptReader::overlaps(const arbiter::Endpoint& ep,
-        std::map<Key, uint64_t>& target, const Json::Value& hier,
+        std::map<Key, uint64_t>& target, const NL::json& hier,
         const Key& key)
 {
     if (!key.b.overlaps(m_queryBounds)) return;
     if (m_depthEnd && key.d >= m_depthEnd) return;
-    const int64_t np(hier[key.toString()].asInt64());
-    if (!np) return;
 
-    if (np == -1)
+    auto it = hier.find(key.toString());
+    if (it == hier.end())
+        return;
+
+    int64_t numPoints = it->get<int64_t>();
+
+    if (numPoints == -1)
     {
-        if (!m_hierarchyStep) m_hierarchyStep = key.d;
+        if (!m_hierarchyStep)
+            m_hierarchyStep = key.d;
 
         // If the hierarchy points value here is -1, then we need to fetch the
         // hierarchy subtree corresponding to this root.
@@ -486,13 +491,11 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
     {
         {
             std::lock_guard<std::mutex> lock(m_mutex);
-            target[key] = static_cast<uint64_t>(np);
+            target[key] = static_cast<uint64_t>(numPoints);
         }
 
         for (uint64_t dir(0); dir < 8; ++dir)
-        {
             overlaps(ep, target, hier, key.bisect(dir));
-        }
     }
 }
 
