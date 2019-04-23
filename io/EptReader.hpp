@@ -45,10 +45,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-namespace Json
-{
-    class Value;
-}
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -91,7 +88,7 @@ private:
     void overlaps();
     void overlaps(
             const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
-            const Json::Value& current, const Key& key);
+            const NL::json& current, const Key& key);
 
     uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
     uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
@@ -110,13 +107,11 @@ private:
     class Args
     {
     public:
-        Args();
-
         Bounds& boundsArg() { return m_bounds; }
         std::string& originArg() { return m_origin; }
         std::size_t& threadsArg() { return m_threads; }
         double& resolutionArg() { return m_resolution; }
-        Json::Value& addonsArg() { return *m_addons; }
+        NL::json& addonsArg() { return m_addons; }
 
         BOX3D bounds() const;
         std::string origin() const { return m_origin; }
@@ -125,14 +120,14 @@ private:
             return std::max<std::size_t>(4, m_threads);
         }
         double resolution() const { return m_resolution; }
-        const Json::Value& addons() const { return *m_addons; }
+        const NL::json& addons() const { return m_addons; }
 
     private:
         Bounds m_bounds;
         std::string m_origin;
         std::size_t m_threads = 0;
         double m_resolution = 0;
-        std::unique_ptr<Json::Value> m_addons;
+        NL::json m_addons;
     };
 
     Args m_args;

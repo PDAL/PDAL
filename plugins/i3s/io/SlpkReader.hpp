@@ -47,7 +47,7 @@ protected:
     virtual void initInfo() override;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const override;
-    virtual Json::Value fetchJson(std::string) override;
+    virtual NL::json fetchJson(std::string) override;
 
 };
 

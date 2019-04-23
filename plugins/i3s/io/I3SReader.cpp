@@ -58,7 +58,7 @@ void I3SReader::initInfo()
 
         if (m_info.empty())
             throwError(std::string("Incorrect Json object"));
-        if (!m_info.isMember("layers"))
+        if (!m_info.contains("layers"))
             throwError(std::string("Json object contains no layers"));
 
         m_info = m_info["layers"][0];
@@ -72,7 +72,7 @@ void I3SReader::initInfo()
 }
 
 
-Json::Value I3SReader::fetchJson(std::string filepath)
+NL::json I3SReader::fetchJson(std::string filepath)
 {
     return EsriUtil::parse(m_arbiter->get(filepath));
 }

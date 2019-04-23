@@ -41,7 +41,6 @@ PDAL_ADD_PLUGIN(matlab_libname filter matlab
         ${Matlab_MAT_LIBRARY}
     INCLUDES
         ${Matlab_INCLUDE_DIR}
-        ${PDAL_JSONCPP_INCLUDE_DIR}
 )
 
 if (WITH_TESTS)
@@ -88,7 +87,6 @@ if (WITH_TESTS)
         INCLUDES
             ${ROOT_DIR}
             ${Matlab_INCLUDE_DIR}
-            ${PDAL_JSONCPP_INCLUDE_DIR}
     )
     set_target_properties(pdal_filters_matlab_test
         PROPERTIES

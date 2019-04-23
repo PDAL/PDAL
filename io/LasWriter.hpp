@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_features.hpp>
 
 #include <pdal/FlexWriter.hpp>
@@ -50,8 +52,6 @@
 #else
 using laszip_POINTER = void *;
 #endif
-
-namespace Json { class Value; }
 
 namespace pdal
 {
@@ -130,7 +130,7 @@ private:
     StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
-    std::unique_ptr<Json::Value> m_userVLRs;
+    NL::json m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);

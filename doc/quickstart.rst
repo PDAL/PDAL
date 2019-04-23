@@ -129,7 +129,6 @@ output should look something like: ::
         icu:             58.2-vc14_0           conda-forge [vc14]
         intel-openmp:    2018.0.3-0
         jpeg:            9b-vc14_2             conda-forge [vc14]
-        jsoncpp:         1.8.1-vc14_0          conda-forge [vc14]
         kealib:          1.4.7-vc14_4          conda-forge [vc14]
         krb5:            1.14.6-vc14_0         conda-forge [vc14]
         laszip:          3.2.2-vc14_0          conda-forge [vc14]

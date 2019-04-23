@@ -147,25 +147,25 @@ inline Type type(std::string s)
 {
     s = Utils::tolower(s);
 
-    if (s == "int8_t" || s == "int8")
+    if (s == "int8_t" || s == "int8" || s == "char")
        return Type::Signed8;
-    if (s == "int16_t" || s == "int16")
+    if (s == "int16_t" || s == "int16" || s == "short")
        return Type::Signed16;
-    if (s == "int32_t" || s == "int32")
+    if (s == "int32_t" || s == "int32" || s == "int")
        return Type::Signed32;
-    if (s == "int64_t" || s == "int64")
+    if (s == "int64_t" || s == "int64" || s == "long")
        return Type::Signed64;
-    if (s == "uint8_t" || s == "uint8")
+    if (s == "uint8_t" || s == "uint8" || s == "uchar")
         return Type::Unsigned8;
-    if (s == "uint16_t" || s == "uint16")
+    if (s == "uint16_t" || s == "uint16" || s == "ushort")
         return Type::Unsigned16;
-    if (s == "uint32_t" || s == "uint32")
+    if (s == "uint32_t" || s == "uint32" || s == "uint")
         return Type::Unsigned32;
-    if (s == "uint64_t" || s == "uint64")
+    if (s == "uint64_t" || s == "uint64" || s == "ulong")
         return Type::Unsigned64;
-    if (s == "float")
+    if (s == "float" || s == "float32")
         return Type::Float;
-    if (s == "double")
+    if (s == "double" || s == "float64")
         return Type::Double;
     return Type::None;
 }

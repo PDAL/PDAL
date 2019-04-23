@@ -21,12 +21,11 @@ target_link_libraries(${PDAL_APP}
     PRIVATE
         ${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
-        ${PDAL_JSONCPP_LIB_NAME}
         ${GDAL_LIBRARY}
         ${WINSOCK_LIBRARY}
 )
 target_include_directories(${PDAL_APP} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
+    ${NLOHMANN_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
     ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)

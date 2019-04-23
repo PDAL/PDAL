@@ -62,10 +62,10 @@ std::string generateTag(Stage *stage, PipelineWriter::TagMap& tags)
         for (size_t i = 1; ; ++i)
         {
             tag = stage->getName() + std::to_string(i);
+            tag = Utils::replaceAll(tag, ".", "_");
             if (!tagExists(tag))
                 break;
         }
-        tag = Utils::replaceAll(tag, ".", "_");
     }
     return tag;
 }

@@ -10,7 +10,6 @@ RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
     yum install centos-release-scl -y && \
     yum install devtoolset-7 -y && \
     yum install -y  \
-        jsoncpp-devel \
         wget \
         cmake3 \
         ninja-build \
@@ -148,7 +147,6 @@ RUN yum update -y &&\
     yum install epel-release -y && \
     yum install centos-release-scl -y && \
     yum install -y  \
-        jsoncpp \
         zlib \
         python34 \
         libxml2 \

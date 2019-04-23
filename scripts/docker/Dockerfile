@@ -76,18 +76,6 @@ RUN \
     wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj; \
     cd /; \
     rm -rf /vdatum; \
-    git clone https://github.com/hobu/jsoncpp.git /jsoncpp; \
-    cd /jsoncpp; \
-    cmake -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_SHARED_LIBS=ON \
-        -DBUILD_STATIC_LIBS=OFF \
-        -DCMAKE_INSTALL_LIBDIR=lib \
-    ; \
-    make -j2; \
-    make install; \
-    cd /; \
-    rm -rf /jsoncpp; \
     git clone https://github.com/LASzip/LASzip.git /laszip; \
     cd /laszip; \
     cmake -DCMAKE_BUILD_TYPE=Release \

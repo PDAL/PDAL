@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+* Copyright (c) 2019, Helix Re Inc. nicolas@helix.re
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Helix Re Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,23 +31,36 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include "EsriReader.hpp"
+#include <thread>
 
-namespace pdal
-{
+#include <pdal/Filter.hpp>
 
-class PDAL_DLL I3SReader : public EsriReader
+namespace pdal {
+
+class PDAL_DLL CovarianceFeaturesFilter: public Filter
 {
 public:
-    std::string getName() const override;
+    CovarianceFeaturesFilter() : Filter() {}
+    CovarianceFeaturesFilter &operator=(const CovarianceFeaturesFilter &) = delete;
+    CovarianceFeaturesFilter(const CovarianceFeaturesFilter &) = delete;
 
-protected:
-    virtual void initInfo() override;
-    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
-        std::string ext) const override;
-    virtual NL::json fetchJson(std::string) override;
+    std::string getName() const;
+
+private:
+
+    int m_knn;
+    int m_threads;
+    std::string m_featureSet;
+    std::map<std::string,Dimension::Id> m_extraDims;
+
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void addArgs(ProgramArgs &args);
+    virtual void filter(PointView &view);
+
+    void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
 };
+}
 
-} // namespace pdal

@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <array>
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
@@ -46,7 +45,7 @@
 #include <thread>
 #include <vector>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
@@ -67,13 +66,13 @@ public:
     ept_error(std::string msg) : pdal_error(msg) { }
 };
 
-inline Dimension::Type getType(const Json::Value& dim)
+inline Dimension::Type getType(const NL::json& dim)
 {
-    if (dim.isMember("scale"))
+    if (dim.contains("scale"))
         return Dimension::Type::Double;
 
-    const std::string type(dim["type"].asString());
-    const uint64_t size(dim["size"].asUInt64());
+    const std::string type(dim["type"].get<std::string>());
+    const uint64_t size(dim["size"].get<uint64_t>());
 
     if (type == "signed")
     {
@@ -107,39 +106,30 @@ inline Dimension::Type getType(const Json::Value& dim)
     return Dimension::Type::None;
 }
 
-inline std::string stringify(const Json::Value& json)
+inline NL::json parse(const std::string& data)
 {
-    Json::StreamWriterBuilder builder;
-    builder.settings_["indentation"] = "";
-    return Json::writeString(builder, json);
+    NL::json j;
+
+    try
+    {
+        j = NL::json::parse(data);
+    }
+    catch (NL::json::parse_error& err)
+    {
+        throw ept_error(std::string("Error during parsing: ") + err.what());
+    }
+    return j;
 }
 
-inline Json::Value parse(const std::string& data)
+inline BOX3D toBox3d(const NL::json& b)
 {
-    Json::Value json;
-    Json::Reader reader;
-
-    if (!reader.parse(data, json, false))
+    if (!b.is_array() || b.size() != 6)
     {
-        const std::string jsonError(reader.getFormattedErrorMessages());
-        if (!jsonError.empty())
-        {
-            throw ept_error("Error during parsing: " + jsonError);
-        }
+        throw ept_error("Invalid bounds specification: " + b.dump());
     }
 
-    return json;
-}
-
-inline BOX3D toBox3d(const Json::Value& b)
-{
-    if (!b.isArray() || b.size() != 6)
-    {
-        throw ept_error("Invalid bounds specification: " + b.toStyledString());
-    }
-
-    return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
-            b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
+    return BOX3D(b[0].get<double>(), b[1].get<double>(), b[2].get<double>(),
+            b[3].get<double>(), b[4].get<double>(), b[5].get<double>());
 }
 
 class PDAL_DLL Key
@@ -147,10 +137,12 @@ class PDAL_DLL Key
     // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
     // representing a data node, as well as the bounds of the contained data.
 public:
-    Key() { }
+    Key()
+    {}
+
     Key(std::string s)
     {
-        const std::vector<std::string> tokens(Utils::split(s, '-'));
+        const StringList tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
             throw ept_error("Invalid EPT KEY: " + s);
         d = std::stoull(tokens[0]);
@@ -271,29 +263,28 @@ public:
         Binary
     };
 
-    EptInfo(Json::Value info) : m_info(info)
+    EptInfo(const NL::json& info) : m_info(info)
     {
         m_bounds = toBox3d(m_info["bounds"]);
-        m_points = m_info["points"].asUInt64();
-        m_span = m_info["span"].asUInt64();
-        m_srs = m_info["srs"]["wkt"].asString();
-
-        if (m_srs.empty())
+        m_points = m_info["points"].get<uint64_t>();
+        m_span = m_info["span"].get<uint64_t>();
+        auto it = m_info.find("srs");
+        if (it != m_info.end())
         {
-            if (m_info["srs"].isMember("authority") &&
-                    m_info["srs"].isMember("horizontal"))
-            {
-                m_srs = m_info["srs"]["authority"].asString() + ":" +
-                    m_info["srs"]["horizontal"].asString();
-            }
+            const NL::json& srs = *it;
+            m_srs = srs.value("wkt", "");
 
-            if (m_info["srs"].isMember("vertical"))
+            if (m_srs.empty())
             {
-                m_srs += "+" + m_info["srs"]["vertical"].asString();
+                if (srs.contains("authority") && srs.contains("horizontal"))
+                    m_srs = srs["authority"].get<std::string>() + ":" +
+                        srs["horizontal"].get<std::string>();
+                if (srs.contains("vertical"))
+                    m_srs += "+" + srs["vertical"].get<std::string>();
             }
         }
 
-        const std::string dt(m_info["dataType"].asString());
+        const std::string dt(m_info["dataType"].get<std::string>());
         if (dt == "laszip")
             m_dataType = DataType::Laszip;
         else if (dt == "binary")
@@ -307,27 +298,29 @@ public:
     uint64_t span() const { return m_span; }
     DataType dataType() const { return m_dataType; }
     const std::string& srs() const { return m_srs; }
-    const Json::Value& schema() const { return m_info["schema"]; }
-    const Json::Value dim(std::string name) const
+    const NL::json& schema() const { return m_info["schema"]; }
+    const NL::json dim(std::string name) const
     {
-        for (Json::ArrayIndex i(0); i < schema().size(); ++i)
+        NL::json j;
+        for (auto el : schema())
         {
-            if (schema()[i]["name"].asString() == name)
+            if (el["name"].get<std::string>() == name)
             {
-                return schema()[i];
+                j = el;
+                break;
             }
         }
-        return Json::nullValue;
+        return j;
     }
 
-    uint64_t sources() const { return m_info["sources"].asUInt64(); }
+    uint64_t sources() const { return m_info["sources"].get<uint64_t>(); }
 
-    const Json::Value& json() { return m_info; }
+    const NL::json& json() { return m_info; }
 
 private:
     // Info comes from the values here:
     // https://entwine.io/entwine-point-tile.html#ept-json
-    const Json::Value m_info;
+    const NL::json m_info;
     BOX3D m_bounds;
     uint64_t m_points = 0;
 

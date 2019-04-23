@@ -47,7 +47,7 @@
 #include <string>
 #include <vector>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #ifndef _WIN32
 #include <csignal>
@@ -160,18 +160,19 @@ void App::outputDrivers()
     }
     else
     {
-        Json::Value array(Json::arrayValue);
+        NL::json j;
         for (auto name : stages)
         {
             std::string description = PluginManager<Stage>::description(name);
             std::string link = PluginManager<Stage>::link(name);
-            Json::Value node(Json::objectValue);
-            node["name"] = name;
-            node["description"] = description;
-            node["link"] = link;
-            array.append(node);
+            j.push_back(
+                { {"name", name},
+                  {"description", description},
+                  {"link", link}
+                }
+            );
         }
-        m_out << array;
+        m_out << j;
     }
 }
 
@@ -217,15 +218,16 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
     {
         std::ostringstream ostr;
         args.dump3(ostr);
-        std::string json = ostr.str();
 
-        Json::Reader jsonReader;
-        Json::Value array;
-        Json::Value object(Json::objectValue);
-        jsonReader.parse(json, array);
+        NL::json array;
+        try
+        {
+            array = NL::json::parse(ostr.str());
+        }
+        catch (NL::json::parse_error)
+        {}
 
-        object[stageName] = array;
-
+        NL::json object = { stageName, array };
         strm  << object;
     }
 }
@@ -248,17 +250,19 @@ void App::outputOptions()
     }
     else
     {
-        std::ostringstream strm;
-        Json::Value options (Json::arrayValue);
+        std::stringstream strm;
+        NL::json options;
         for (auto const& n : nv)
         {
             outputOptions(n, strm);
-            std::string json(strm.str());
-            Json::Reader jsonReader;
-            Json::Value array;
-            jsonReader.parse(json, array);
-            options.append(array);
-
+            NL::json j;
+            try
+            {
+                strm >> j;
+            }
+            catch (NL::json::parse_error&)
+            {}
+            options.push_back(j);
             strm.str("");
         }
         m_out << options;
