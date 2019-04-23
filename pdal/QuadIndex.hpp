@@ -37,9 +37,8 @@
 #include <vector>
 #include <memory>
 
-#include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/util/Box.hpp>
 
 namespace pdal
 {

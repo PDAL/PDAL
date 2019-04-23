@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2019, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -31,52 +30,45 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/PointRef.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/Geometry.hpp>
+#include <pdal/util/Box.hpp>
 
 namespace pdal
 {
 
-class BOX2D;
-class BOX3D;
-
-class PDAL_DLL Polygon : public Geometry
+/**
+  Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
+  to facilitate streaming either a BOX2D or BOX3D
+*/
+class PDAL_DLL Bounds
 {
-    using Point = std::pair<double, double>;
-    using Ring = std::vector<Point>;
 public:
-    Polygon()
-    {}
-    Polygon(const std::string& wkt_or_json,
-        SpatialReference ref = SpatialReference()) :
-        Geometry(wkt_or_json, ref)
+    Bounds()
     {}
 
-    Polygon(const BOX2D&);
-    Polygon(const BOX3D&);
-    Polygon(OGRGeometryH g, const SpatialReference& srs);
-    using Geometry::operator=;
+    explicit Bounds(const BOX3D& box);
+    explicit Bounds(const BOX2D& box);
 
-    OGRGeometryH getOGRHandle();
+    BOX3D to3d() const;
+    BOX2D to2d() const;
+    bool is3d() const;
 
-    void simplify(double distance_tolerance, double area_tolerance);
-    double area() const;
-    std::vector<Polygon> polygons() const;
+    friend PDAL_DLL std::istream& operator >> (std::istream& in,
+        Bounds& bounds);
+    friend PDAL_DLL std::ostream& operator << (std::ostream& out,
+        const Bounds& bounds);
 
-    bool covers(const PointRef& ref) const;
-    bool equal(const Polygon& p) const;
-    bool overlaps(const Polygon& p) const;
-    bool contains(const Polygon& p) const;
-    bool touches(const Polygon& p) const;
-    bool within(const Polygon& p) const;
-    bool crosses(const Polygon& p) const;
-    Ring exteriorRing() const;
-    std::vector<Ring> interiorRings() const;
+private:
+    BOX3D m_box;
+
+    void set(const BOX3D& box);
+    void set(const BOX2D& box);
 };
+
+PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& in, const Bounds& bounds);
 
 } // namespace pdal
 

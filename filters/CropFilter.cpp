@@ -34,6 +34,7 @@
 
 #include "CropFilter.hpp"
 
+#include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>

@@ -40,7 +40,7 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/util/Box.hpp>
 #include <pdal/util/Uuid.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>

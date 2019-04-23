@@ -34,18 +34,17 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Dimension.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
-
-#include <pdal/Log.hpp>
-
 #include <array>
 #include <functional>
 #include <mutex>
 #include <sstream>
 #include <vector>
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Box.hpp>
 
 #include <cpl_conv.h>
 #include <gdal_priv.h>
@@ -58,8 +57,6 @@ class OGRGeometry;
 
 namespace pdal
 {
-
-class SpatialReference;
 
 namespace gdal
 {

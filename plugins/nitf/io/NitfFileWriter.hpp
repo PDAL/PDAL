@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Options.hpp>
+#include <pdal/util/Box.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <vector>

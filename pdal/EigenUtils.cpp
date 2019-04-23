@@ -37,7 +37,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/util/Box.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <Eigen/Dense>
@@ -58,7 +58,7 @@ Eigen::Vector3d computeCentroid(PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
-    
+
     double mx, my, mz;
     mx = my = mz = 0.0;
     point_count_t n(0);

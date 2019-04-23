@@ -41,9 +41,9 @@
 #include <mutex>
 #include <set>
 
+#include <pdal/Bounds.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
-#include <pdal/util/Bounds.hpp>
 
 namespace Json
 {
