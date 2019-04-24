@@ -35,7 +35,18 @@ SOFTWARE.
 // End of content of file: LICENSE
 // //////////////////////////////////////////////////////////////////////
 
+#include <atomic>
 
+namespace
+{
+
+int nextId()
+{
+    static std::atomic<int> id(0);
+    return id++;
+}
+
+}
 
 
 
@@ -430,8 +441,7 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
         }
 
         const auto ext(getExtension(path));
-        const std::string basename(
-                crypto::encodeAsHex(crypto::sha256(stripExtension(path))) +
+        const std::string basename(std::to_string(nextId()) +
                 (ext.size() ? "." + ext : ""));
         tempEndpoint.put(basename, getBinary(path));
         localHandle.reset(
@@ -702,9 +712,7 @@ std::unique_ptr<fs::LocalHandle> Endpoint::getLocalHandle(
     {
         const std::string tmp(fs::getTempPath());
         const auto ext(Arbiter::getExtension(subpath));
-        const std::string basename(
-                crypto::encodeAsHex(crypto::sha256(Arbiter::stripExtension(
-                            prefixedRoot() + subpath))) +
+        const std::string basename(std::to_string(nextId()) +
                     (ext.size() ? "." + ext : ""));
 
         const std::string local(tmp + basename);
@@ -4763,11 +4771,11 @@ std::string getBasename(const std::string fullPath)
 
     // Now do the real slash searching.
     std::size_t pos(stripped.rfind('/'));
-    
+
     // Maybe windows
-    if (pos == std::string::npos) 
+    if (pos == std::string::npos)
         pos = stripped.rfind('\\');
-    
+
     if (pos != std::string::npos)
     {
         const std::string sub(stripped.substr(pos + 1));
