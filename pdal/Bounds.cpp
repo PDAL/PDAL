@@ -31,6 +31,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <limits>
+
 #include <pdal/Bounds.hpp>
 
 namespace
