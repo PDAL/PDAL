@@ -38,50 +38,7 @@
 #include <vector>
 
 #include <pdal/util/Box.hpp>
-
-namespace
-{
-
-template <typename PREDICATE>
-void eat(std::istream& in, PREDICATE p)
-{
-    while (p((char)in.get()))
-        ;
-    if (in.eof())
-        in.clear(in.rdstate() & ~std::ios::failbit);
-    else
-        in.unget();
-}
-
-bool eat(std::istream& in, char c)
-{
-    if ((char)in.get() == c)
-        return true;
-    in.unget();
-    return false;
-}
-
-void readpair(std::istream& istr, double& low, double& high)
-{
-    eat(istr, isspace);
-    if (!eat(istr,'['))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> low;
-
-    eat(istr, isspace);
-    if (!eat(istr,','))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> high;
-
-    if (!eat(istr,']'))
-        istr.setstate(std::ios_base::failbit);
-}
-
-} // unnamed namespace
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -172,111 +129,117 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
 }
 
 
-std::istream& operator>>(std::istream& istr, BOX2D& bounds)
+namespace
 {
-    //ABELL - Not sure the point of this.  I get that one can have an "empty"
-    // BOX2D, but when would it be useful to create one from a string?
-    // A really dirty way to check for an empty bounds object right off
-    // the bat
-    char left_paren = (char)istr.get();
-    if (!istr.good())
-    {
-        istr.setstate(std::ios_base::failbit);
-        return istr;
-    }
-    const char right_paren = (char)istr.get();
 
-    if (left_paren == '(' && right_paren == ')')
-    {
-        bounds = BOX2D();
-        return istr;
-    }
-    istr.unget();
-    istr.unget(); // ()
+template <typename T>
+void parsePair(const std::string& s, std::string::size_type& pos,
+    double& low, double& high)
+{
+    low = high = 0;
+    const char *start;
+    char *end;
 
-    std::vector<double> v;
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != '[')
+        throw typename T::error("No opening '[' in range.");
 
-    eat(istr, isspace);
-    if (!eat(istr,'('))
-        istr.setstate(std::ios_base::failbit);
+    pos += Utils::extractSpaces(s, pos);
+    start = s.data() + pos;
+    low = std::strtod(start, &end);
+    if (start == end)
+        throw typename T::error("No valid minimum value for range.");
+    pos += (end - start);
 
-    bool done = false;
-    for (int i = 0; i < 2; ++i)
-    {
-        double low, high;
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ',')
+        throw typename T::error("No ',' separating minimum/maximum values.");
 
-        readpair(istr, low, high);
+    pos += Utils::extractSpaces(s, pos);
+    start = s.data() + pos;
+    high = std::strtod(start, &end);
+    if (start == end)
+        throw typename T::error("No valid maximum value for range.");
+    pos += (end - start);
 
-        eat(istr, isspace);
-        if (!eat(istr, i == 1 ? ')' : ','))
-            istr.setstate(std::ios_base::failbit);
-        v.push_back(low);
-        v.push_back(high);
-    }
-
-    if (istr.good())
-    {
-        bounds.minx = v[0];
-        bounds.maxx = v[1];
-        bounds.miny = v[2];
-        bounds.maxy = v[3];
-    }
-    return istr;
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ']')
+        throw typename T::error("No closing ']' in range.");
 }
 
-std::istream& operator>>(std::istream& istr, BOX3D& bounds)
+} // unnamed namespace
+
+// This parses the guts of a 2D range.
+void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 {
-    //ABELL - Not sure the point of this.  I get that one can have an "empty"
-    // BOX3D, but when would it be useful to create one from a string?
-    // A really dirty way to check for an empty bounds object right off
-    // the bat
-    char left_paren = (char)istr.get();
-    if (!istr.good())
-    {
-        istr.setstate(std::ios_base::failbit);
-        return istr;
-    }
-    const char right_paren = (char)istr.get();
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != '(')
+        throw error("No opening '('.");
+    parsePair<BOX2D>(s, pos, minx, maxx);
 
-    if (left_paren == '(' && right_paren == ')')
-    {
-        BOX3D output;
-        bounds = output;
-        return istr;
-    }
-    istr.unget();
-    istr.unget(); // ()
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ',')
+        throw error("No comma separating 'X' and 'Y' dimensions.");
+    parsePair<BOX2D>(s, pos, miny, maxy);
 
-    std::vector<double> v;
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ')')
+        throw error("No closing ')'.");
 
-    eat(istr, isspace);
-    if (!eat(istr,'('))
-        istr.setstate(std::ios_base::failbit);
+    pos += Utils::extractSpaces(s, pos);
+}
 
-    bool done = false;
-    for (int i = 0; i < 3; ++i)
-    {
-        double low, high;
+void BOX3D::parse(const std::string& s, std::string::size_type& pos)
+{
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != '(')
+        throw error("No opening '('.");
+    parsePair<BOX3D>(s, pos, minx, maxx);
 
-        readpair(istr, low, high);
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ',')
+        throw error("No comma separating 'X' and 'Y' dimensions.");
+    parsePair<BOX3D>(s, pos, miny, maxy);
 
-        eat(istr, isspace);
-        if (!eat(istr, i == 2 ? ')' : ','))
-            istr.setstate(std::ios_base::failbit);
-        v.push_back(low);
-        v.push_back(high);
-    }
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ',')
+        throw error("No comma separating 'Y' and 'Z' dimensions.");
+    parsePair<BOX3D>(s, pos, minz, maxz);
 
-    if (istr.good())
-    {
-        bounds.minx = v[0];
-        bounds.maxx = v[1];
-        bounds.miny = v[2];
-        bounds.maxy = v[3];
-        bounds.minz = v[4];
-        bounds.maxz = v[5];
-    }
-    return istr;
+    pos += Utils::extractSpaces(s, pos);
+    if (s[pos++] != ')')
+        throw error("No closing ')'.");
+
+    pos += Utils::extractSpaces(s, pos);
+}
+
+
+std::istream& operator>>(std::istream& in, BOX2D& box)
+{
+    std::string s;
+
+    std::getline(in, s);
+    std::string::size_type pos(0);
+
+    box.parse(s, pos);
+    if (pos != s.size())
+        throw BOX2D::error("Invalid characters following valid 2d-bounds.");
+    return in;
+}
+
+
+
+std::istream& operator>>(std::istream& in, BOX3D& box)
+{
+    std::string s;
+
+    std::getline(in, s);
+    std::string::size_type pos(0);
+
+    box.parse(s, pos);
+    if (pos != s.size())
+        throw BOX3D::error("Invalid characters following valid 3d-bounds.");
+    return in;
 }
 
 } // namespace pdal
