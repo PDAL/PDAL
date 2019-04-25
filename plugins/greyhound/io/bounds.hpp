@@ -42,7 +42,7 @@
 #include <iostream>
 #include <limits>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include "dir.hpp"
 #include "point.hpp"
@@ -58,7 +58,7 @@ public:
     Bounds() = default;
     Bounds(const Point& min, const Point& max);
     Bounds(const Point& center, double radius);
-    Bounds(const Json::Value& json);
+    Bounds(const NL::json& json);
     Bounds(double xMin, double yMin, double xMax, double yMax);
     Bounds(
             double xMin,
@@ -273,9 +273,9 @@ public:
     bool exists() const { return minimum().exists() || maximum().exists(); }
     bool is3d() const { return m_min.z != m_max.z; }
 
-    Json::Value toJson() const;
-    Bounds to2d() const { return Bounds(minimum().x, minimum().y,
-        maximum().x, maximum().y); }
+    NL::json toJson() const;
+    Bounds to2d() const
+    { return Bounds(minimum().x, minimum().y, maximum().x, maximum().y); }
 
     void grow(const Bounds& bounds);
     void grow(const Point& p);

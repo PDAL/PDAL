@@ -10,7 +10,6 @@ $CONDA_EXE install  -y laz-perf \
                 laszip \
                 libunwind \
                 geotiff \
-                jsoncpp \
                 sqlite \
                 libxml2 \
                 nitro \

@@ -47,14 +47,13 @@
 
 #include <pcl/filters/filter_indices.h>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 
 // Pipeline needs to be in the `pcl` namespace in order for the instantiation
 // macros to work
 namespace pcl
 {
-
 
 /** \brief @b Pipeline composes a linear series of PCL operations to be applied to the source point cloud.
 * \details TBD
@@ -103,11 +102,14 @@ public:
         std::ifstream f(filename.c_str());
 
         filename_set_ = true;
-        Json::Reader jsonReader;
-        if (!jsonReader.parse(f, pt_))
+        try
+        {
+            pt_ = NL::json::parse(f);
+        }
+        catch (const NL::json::parse_error& e)
         {
             std::string err = "PCL pipeline: Unable to parse pipeline file:\n";
-            err += jsonReader.getFormattedErrorMessages();
+            err += e.what();
             throw pdal::pdal_error(err);
         }
         json_set_ = true;
@@ -120,13 +122,17 @@ public:
     setMethods(const std::string &methods)
     {
         if (filename_set_)
-            PCL_WARN("Filename and methods have both been specified. Using only methods!\n");
-        std::stringstream ss(methods);
-        Json::Reader jsonReader;
-        if (!jsonReader.parse(ss, pt_))
+            PCL_WARN("Filename and methods have both been specified. "
+                "Using only methods!\n");
+        try
         {
-            std::string err = "PCL pipeline: Unable to parse pipeline methods:\n";
-            err += jsonReader.getFormattedErrorMessages();
+            pt_ = NL::json::parse(methods);
+        }
+        catch (const NL::json::parse_error& e)
+        {
+            std::string err = "PCL pipeline: Unable to parse pipeline "
+                "methods:\n";
+            err += e.what();
             throw pdal::pdal_error(err);
         }
         json_set_ = true;
@@ -162,61 +168,61 @@ protected:
      *  \param[out] output The resultant point cloud.
      *  \param[in] value_type The parameters.
      */
-    void
-    applyPassThrough(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyPassThrough(PointCloudConstPtr cloud, PointCloud &output,
+        NL::json const& vt);
 
     /** \brief Apply statistical outlier removal filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
      *  \param[out] output The resultant point cloud.
      *  \param[in] value_type The parameters.
      */
-    void
-    applyStatisticalOutlierRemoval(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyStatisticalOutlierRemoval(PointCloudConstPtr cloud,
+        PointCloud &output, const NL::json& vt);
 
     /** \brief Apply radius outlier removal filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
      *  \param[out] output The resultant point cloud.
      *  \param[in] value_type The parameters.
      */
-    void
-    applyRadiusOutlierRemoval(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyRadiusOutlierRemoval(PointCloudConstPtr cloud,
+        PointCloud &output, const NL::json& vt);
 
     /** \brief Apply voxel grid filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
      *  \param[out] output The resultant point cloud.
      *  \param[in] value_type The parameters.
      */
-    void
-    applyVoxelGrid(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyVoxelGrid(PointCloudConstPtr cloud, PointCloud &output,
+        const NL::json& vt);
 
     /** \brief Apply grid minimum filter to input cloud, using parameters specified in property tree.
       *  \param[in] cloud The input point cloud.
       *  \param[out] output The resultant point cloud.
       *  \param[in] value_type The parameters.
       */
-    void
-    applyGridMinimum(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyGridMinimum(PointCloudConstPtr cloud, PointCloud &output,
+        const NL::json& vt);
 
     /** \brief Apply approximate progressive morphological filter to input cloud, using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
      *  \param[out] output The resultant point cloud.
      *  \param[in] value_type The parameters.
      */
-    void
-    applyApproximateProgressiveMorphologicalFilter(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyApproximateProgressiveMorphologicalFilter(
+        PointCloudConstPtr cloud, PointCloud &output, const NL::json& vt);
 
-    /** \brief Apply progressive morphological filter to input cloud, using parameters specified in property tree.
+    /** \brief Apply progressive morphological filter to input cloud,
+          using parameters specified in property tree.
      *  \param[in] cloud The input point cloud.
      *  \param[out] output The resultant point cloud.
      *  \param[in] value_type The parameters.
      */
-    void
-    applyProgressiveMorphologicalFilter(PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt);
+    void applyProgressiveMorphologicalFilter(PointCloudConstPtr cloud,
+        PointCloud &output, const NL::json& vt);
 
 private:
     bool filename_set_, json_set_;
-
-    Json::Value pt_;
+    NL::json pt_;
 
     /** \brief The offsets to the data in the x, y, and z dimension. */
     double x_offset_, y_offset_, z_offset_;

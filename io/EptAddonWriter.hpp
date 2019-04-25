@@ -37,9 +37,9 @@
 #include <cstddef>
 #include <memory>
 
-#include <pdal/Writer.hpp>
+#include <nlohmann/json.hpp>
 
-namespace Json { class Value; }
+#include <pdal/Writer.hpp>
 
 namespace pdal
 {
@@ -72,11 +72,11 @@ private:
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     std::unique_ptr<Pool> m_pool;
 
-    std::unique_ptr<Json::Value> m_addonsArg;
+    NL::json m_addonsArg;
     std::vector<std::unique_ptr<Addon>> m_addons;
 
     void writeOne(const PointViewPtr view, const Addon& addon) const;
-    void writeHierarchy(Json::Value& hier, const Key& key,
+    void writeHierarchy(NL::json& hier, const Key& key,
             const arbiter::Endpoint& hierEp) const;
     std::string getTypeString(Dimension::Type t) const;
 

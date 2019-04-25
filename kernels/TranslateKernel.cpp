@@ -43,7 +43,6 @@
 #include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <json/json.h>
 
 #include <memory>
 #include <string>

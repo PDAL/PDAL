@@ -23,7 +23,7 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         ${NITRO_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}/pdalboost
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
         ${ROOT_DIR}
 )
 if (WIN32)
@@ -45,7 +45,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${GDAL_LIBRARY}
     INCLUDES
         ${PDAL_VENDOR_DIR}/pdalboost
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
         ${ROOT_DIR}
 )
 if (WIN32)
@@ -61,7 +61,7 @@ if (WITH_TESTS)
             ${writer_libname}
         INCLUDES
             ${ROOT_DIR}
-            ${PDAL_JSONCPP_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_nitf_reader_test
@@ -71,6 +71,6 @@ if (WITH_TESTS)
             ${reader_libname}
         INCLUDES
             ${ROOT_DIR}
-            ${PDAL_JSONCPP_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 endif()

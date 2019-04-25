@@ -37,7 +37,7 @@
 #include <cstddef>
 #include <string>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/pdal_types.hpp>
 #include <pdal/PointLayout.hpp>
@@ -49,36 +49,25 @@ namespace pdal
 
 namespace greyhound = entwine;
 
-static inline Json::Value parse(const std::string& data)
+static inline NL::json parse(const std::string& data)
 {
-    Json::Value json;
-    Json::Reader reader;
+    NL::json j;
 
-    if (data.size())
+    try
     {
-        if (!reader.parse(data, json, false))
-        {
-            const std::string jsonError(reader.getFormattedErrorMessages());
-            if (!jsonError.empty())
-            {
-                throw pdal_error("Error during parsing: " + jsonError);
-            }
-        }
+        j= NL::json::parse(data);
     }
-
-    return json;
+    catch (const NL::json::parse_error& err)
+    {
+        throw pdal_error(std::string("Error during parsing: ") + err.what());
+    }
+    return j;
 }
 
-static inline std::string dense(const Json::Value& json)
-{
-    Json::StreamWriterBuilder builder;
-    builder.settings_["indentation"] = "";
-    return Json::writeString(builder, json);
-}
 
-static inline Json::Value layoutToSchema(PointLayout& layout)
+static inline NL::json layoutToSchema(PointLayout& layout)
 {
-    Json::Value schema;
+    NL::json schema;
 
     layout.finalize();
     for (const Dimension::Id id : layout.dims())
@@ -86,11 +75,12 @@ static inline Json::Value layoutToSchema(PointLayout& layout)
         const Dimension::Detail& d(*layout.dimDetail(id));
         const std::string name(layout.dimName(id));
 
-        Json::Value j;
-        j["name"] = name;
-        j["type"] = Dimension::toName(base(d.type()));
-        j["size"] = static_cast<int>(Dimension::size(d.type()));
-        schema.append(j);
+        NL::json j {
+            { "name", name },
+            { "type", Dimension::toName(base(d.type())) },
+            { "size", Dimension::size(d.type()) }
+        };
+        schema.push_back(j);
     }
 
     return schema;
@@ -104,9 +94,9 @@ struct GreyhoundArgs
     std::size_t depthBegin = 0;
     std::size_t depthEnd = 0;
     std::string tilePath;
-    Json::Value filter;
-    Json::Value dims;
-    Json::Value schema;
+    NL::json filter;
+    NL::json dims;
+    NL::json schema;
     double buffer = 0;
 };
 
@@ -115,40 +105,51 @@ class GreyhoundParams
 public:
     GreyhoundParams() { }
     GreyhoundParams(const GreyhoundArgs& args);
-    GreyhoundParams(std::string resourceRoot, Json::Value params)
+    GreyhoundParams(std::string resourceRoot, NL::json params)
         : m_url(resourceRoot)
         , m_params(params)
     {
-        if (m_params.isMember("obounds"))
+        auto it = m_params.find("obounds");
+        if (it != m_params.end())
         {
-            m_obounds = m_params["obounds"];
-            m_params.removeMember("obounds");
+            m_obounds = *it;
+            m_params.erase(it);
         }
     }
 
-    std::string root() const { return m_url; }
+    std::string root() const
+        { return m_url; }
     std::string qs() const;
 
-    Json::Value& operator[](std::string key) { return m_params[key]; }
-    Json::Value toJson() const
+    NL::json& operator[](std::string key)
+        { return m_params[key]; }
+    NL::json toJson() const
     {
-        Json::Value json(m_params);
-        if (!m_obounds.isNull())
-            json["obounds"] = m_obounds;
-        return json;
+        NL::json j(m_params);
+        if (!m_obounds.is_null())
+            j["obounds"] = m_obounds;
+        return j;
     }
 
-    Json::Value obounds() const { return m_obounds; }
-    void removeMember(std::string key) { m_params.removeMember(key); }
+    NL::json obounds() const
+        { return m_obounds; }
+    void removeMember(std::string key)
+    {
+        try
+        {
+            m_params.erase(key);
+        }
+        catch (...)
+        {}
+    }
 
 private:
     std::string extractUrl(const GreyhoundArgs& args) const;
-    Json::Value extractParams(const GreyhoundArgs& args);
+    NL::json extractParams(const GreyhoundArgs& args);
 
-    Json::Value m_obounds;
-
+    NL::json m_obounds;
     std::string m_url;
-    Json::Value m_params;
+    NL::json m_params;
 };
 
 } // namespace pdal

@@ -36,8 +36,6 @@
 
 #include <string>
 
-#include <json/json.h>
-
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
 
