@@ -34,6 +34,7 @@
 
 #include <algorithm>
 
+#include <pdal/Bounds.hpp>
 #include <pdal/FlexWriter.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Streamable.hpp>

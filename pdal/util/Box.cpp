@@ -37,7 +37,7 @@
 #include <limits>
 #include <vector>
 
-#include <pdal/util/Bounds.hpp>
+#include <pdal/util/Box.hpp>
 
 namespace
 {
@@ -171,48 +171,6 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
     return v;
 }
 
-Bounds::Bounds(const BOX3D& box) : m_box(box)
-{}
-
-
-Bounds::Bounds(const BOX2D& box) : m_box(box)
-{
-    m_box.minz = HIGHEST;
-    m_box.maxz = LOWEST;
-}
-
-// We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
-// BOX3D ctor that takes a BOX2D if that's what you want.
-BOX3D Bounds::to3d() const
-{
-    if (!is3d())
-        return BOX3D();
-    return m_box;
-}
-
-BOX2D Bounds::to2d() const
-{
-    return m_box.to2d();
-}
-
-bool Bounds::is3d() const
-{
-    return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
-}
-
-
-void Bounds::set(const BOX3D& box)
-{
-    m_box = box;
-}
-
-
-void Bounds::set(const BOX2D& box)
-{
-    m_box = BOX3D(box);
-    m_box.minz = HIGHEST;
-    m_box.maxz = LOWEST;
-}
 
 std::istream& operator>>(std::istream& istr, BOX2D& bounds)
 {
@@ -319,34 +277,6 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         bounds.maxz = v[5];
     }
     return istr;
-}
-
-std::istream& operator>>(std::istream& in, Bounds& bounds)
-{
-    std::streampos start = in.tellg();
-    BOX3D b3d;
-    in >> b3d;
-    if (in.fail())
-    {
-        in.clear();
-        in.seekg(start);
-        BOX2D b2d;
-        in >> b2d;
-        if (!in.fail())
-            bounds.set(b2d);
-    }
-    else
-        bounds.set(b3d);
-    return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const Bounds& bounds)
-{
-    if (bounds.is3d())
-        out << bounds.to3d();
-    else
-        out << bounds.to2d();
-    return out;
 }
 
 } // namespace pdal

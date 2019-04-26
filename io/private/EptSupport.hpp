@@ -52,7 +52,7 @@
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/util/Box.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <arbiter/arbiter.hpp>

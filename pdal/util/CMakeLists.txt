@@ -20,7 +20,7 @@ else()
 endif()
 
 set(PDAL_UTIL_SOURCES
-    "${PDAL_UTIL_DIR}/Bounds.cpp"
+    "${PDAL_UTIL_DIR}/Box.cpp"
     "${PDAL_UTIL_DIR}/Charbuf.cpp"
     "${PDAL_UTIL_DIR}/FileUtils.cpp"
     "${PDAL_UTIL_DIR}/Georeference.cpp"
