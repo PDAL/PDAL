@@ -169,6 +169,7 @@ void parsePair(const std::string& s, std::string::size_type& pos,
 
 } // unnamed namespace
 
+
 // This parses the guts of a 2D range.
 void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 {
@@ -188,6 +189,7 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 
     pos += Utils::extractSpaces(s, pos);
 }
+
 
 void BOX3D::parse(const std::string& s, std::string::size_type& pos)
 {
@@ -226,7 +228,6 @@ std::istream& operator>>(std::istream& in, BOX2D& box)
         throw BOX2D::error("Invalid characters following valid 2d-bounds.");
     return in;
 }
-
 
 
 std::istream& operator>>(std::istream& in, BOX3D& box)

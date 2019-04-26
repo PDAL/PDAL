@@ -33,7 +33,9 @@
 
 #pragma once
 
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Box.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -54,20 +56,56 @@ public:
     BOX3D to3d() const;
     BOX2D to2d() const;
     bool is3d() const;
+    SpatialReference spatialReference() const
+        { return m_srs; }
 
     friend PDAL_DLL std::istream& operator >> (std::istream& in,
         Bounds& bounds);
     friend PDAL_DLL std::ostream& operator << (std::ostream& out,
         const Bounds& bounds);
 
+    friend bool Utils::fromString<Bounds>(const std::string& s, Bounds& bounds);
+
 private:
     BOX3D m_box;
+    SpatialReference m_srs;
 
     void set(const BOX3D& box);
     void set(const BOX2D& box);
 };
 
-PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
+namespace Utils
+{
+    template<>
+    inline bool fromString<Bounds>(const std::string& s, Bounds& bounds)
+    {
+        std::string::size_type pos(0);
+
+        try
+        {
+            BOX3D b3d;
+            b3d.parse(s, pos);
+            bounds.set(b3d);
+        }
+        catch (BOX3D::error&)
+        {
+            BOX2D b2d;
+            pos = 0;
+            b2d.parse(s, pos);
+            bounds.set(b2d);
+        }
+        if (s.size() != pos)
+        {
+            if (s[pos++] != '/')
+                throw BOX3D::error("Invalid character following valid bounds.");
+
+            pos += Utils::extractSpaces(s, pos);
+            bounds.m_srs.set(s.substr(pos));
+        }
+        return true;
+    }
+}
+
 PDAL_DLL std::ostream& operator << (std::ostream& in, const Bounds& bounds);
 
 } // namespace pdal

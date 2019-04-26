@@ -141,10 +141,6 @@ void SpatialReference::set(std::string v)
         return;
     }
 
-    std::string newV = FileUtils::readFileIntoString(v);
-    if (newV.size())
-        v = newV;
-
     if (isWKT(v))
     {
         m_wkt = v;

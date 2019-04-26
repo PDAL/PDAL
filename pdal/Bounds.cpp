@@ -92,29 +92,6 @@ void Bounds::set(const BOX2D& box)
     m_box.maxz = LOWEST;
 }
 
-std::istream& operator>>(std::istream& in, Bounds& bounds)
-{
-    std::string s;
-    std::string::size_type pos(0);
-
-    std::getline(in, s);
-
-    try
-    {
-        BOX3D b3d;
-        b3d.parse(s, pos);
-        bounds.set(b3d);
-    }
-    catch (BOX3D::error&)
-    {
-        BOX2D b2d;
-        pos = 0;
-        b2d.parse(s, pos);
-        bounds.set(b2d);
-    }
-
-    return in;
-}
 
 std::ostream& operator<<(std::ostream& out, const Bounds& bounds)
 {
