@@ -23,7 +23,7 @@ point view per input.  Any additional information about the cpd registration,
 e.g. the rigid transformation matrix, will be placed in the stage's metadata.
 
 When to use CPD vs ICP
----------
+----------------------
 
 Summarized from the `Non-rigid point set registration: Coherent Point Drift
 <http://graphics.stanford.edu/courses/cs468-07-winter/Papers/nips2006_0613.pdf>`_ paper.
