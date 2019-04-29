@@ -210,7 +210,16 @@ void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::Point
         if (Utils::iequals(name, "Classification")) name = CHANNEL_NAME_ClassId;
         if (Utils::iequals(name, "ScanAngleRank")) name = CHANNEL_NAME_ScanAngle;
         if (Utils::iequals(name, "ScanDirectionFlag")) name = CHANNEL_NAME_ScanDir;
+#ifdef CHANNEL_NAME_GPSTime
         if (Utils::iequals(name, "GpsTime")) name = CHANNEL_NAME_GPSTime;
+#endif
+#ifdef CHANNEL_NAME_GPSTime_Week
+        if (Utils::iequals(name, "GpsTime")) name = CHANNEL_NAME_GPSTime_Week;
+#endif
+#ifdef CHANNEL_NAME_GPSTime_Adjusted
+        //FIXME: We should account for header metadata if we have it
+        if (Utils::iequals(name, "GpsTime")) name = CHANNEL_NAME_GPSTime_Adjusted;
+#endif
         if (Utils::iequals(name, "PointSourceId")) name = CHANNEL_NAME_SourceId;
         if (Utils::iequals(name, "ReturnNumber")) name = CHANNEL_NAME_ReturnNum;
         if (Utils::iequals(name, "NumberOfReturns")) name = CHANNEL_NAME_NumReturns;
@@ -307,13 +316,34 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
                                             pointIndex,
                                             getData<int32_t>(points, CHANNEL_NAME_Z, pointIndex));
                 }
-            } else if (Utils::iequals(name, "GpsTime") &&
+            }
+#ifdef CHANNEL_NAME_GPSTime
+            else if (Utils::iequals(name, "GpsTime") &&
                        m_pointInfo.hasChannel(CHANNEL_NAME_GPSTime))
             {
                 view->setField<double>( d,
                                         pointIndex,
                                         getData<double>(points, CHANNEL_NAME_GPSTime, pointIndex));
             }
+#endif
+#ifdef CHANNEL_NAME_GPSTime_Week
+            else if (Utils::iequals(name, "GpsTime") &&
+                       m_pointInfo.hasChannel(CHANNEL_NAME_GPSTime_Week))
+            {
+                view->setField<double>( d,
+                                        pointIndex,
+                                        getData<double>(points, CHANNEL_NAME_GPSTime_Week, pointIndex));
+            }
+#endif
+#ifdef CHANNEL_NAME_GPSTime_Adjusted
+            else if (Utils::iequals(name, "GpsTime") &&
+                       m_pointInfo.hasChannel(CHANNEL_NAME_GPSTime_Week))
+            {
+                view->setField<double>( d,
+                                        pointIndex,
+                                        getData<double>(points, CHANNEL_NAME_GPSTime_Adjusted, pointIndex));
+            }
+#endif
             else if (Utils::iequals(name, "Intensity") &&
                      m_pointInfo.hasChannel(CHANNEL_NAME_Intensity))
             {
