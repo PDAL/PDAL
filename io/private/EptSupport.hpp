@@ -35,27 +35,34 @@
 #pragma once
 
 #include <condition_variable>
+/**
 #include <cstddef>
 #include <functional>
 #include <iostream>
 #include <mutex>
-#include <queue>
 #include <stdexcept>
 #include <string>
+
+
+#include <pdal/pdal_export.hpp>
+#include <pdal/Stage.hpp>
+**/
+
+#include <queue>
 #include <thread>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
-#include <pdal/pdal_export.hpp>
+#include <arbiter/arbiter.hpp>
+
 #include <pdal/pdal_types.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
-#include <pdal/Stage.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Box.hpp>
 #include <pdal/util/Utils.hpp>
-
-#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
@@ -65,46 +72,6 @@ class ept_error : public pdal_error
 public:
     ept_error(std::string msg) : pdal_error(msg) { }
 };
-
-inline Dimension::Type getType(const NL::json& dim)
-{
-    if (dim.contains("scale"))
-        return Dimension::Type::Double;
-
-    const std::string type(dim["type"].get<std::string>());
-    const uint64_t size(dim["size"].get<uint64_t>());
-
-    if (type == "signed")
-    {
-        switch (size)
-        {
-            case 1: return Dimension::Type::Signed8;
-            case 2: return Dimension::Type::Signed16;
-            case 4: return Dimension::Type::Signed32;
-            case 8: return Dimension::Type::Signed64;
-        }
-    }
-    else if (type == "unsigned")
-    {
-        switch (size)
-        {
-            case 1: return Dimension::Type::Unsigned8;
-            case 2: return Dimension::Type::Unsigned16;
-            case 4: return Dimension::Type::Unsigned32;
-            case 8: return Dimension::Type::Unsigned64;
-        }
-    }
-    else if (type == "float")
-    {
-        switch (size)
-        {
-            case 4: return Dimension::Type::Float;
-            case 8: return Dimension::Type::Double;
-        }
-    }
-
-    return Dimension::Type::None;
-}
 
 inline NL::json parse(const std::string& data)
 {
@@ -217,6 +184,21 @@ public:
     }
 };
 
+inline bool operator<(const Key& a, const Key& b)
+{
+    if (a.d < b.d) return true;
+    if (a.d > b.d) return false;
+
+    if (a.x < b.x) return true;
+    if (a.x > b.x) return false;
+
+    if (a.y < b.y) return true;
+    if (a.y > b.y) return false;
+
+    if (a.z < b.z) return true;
+    return false;
+}
+
 using EptHierarchy = std::map<Key, uint64_t>;
 
 class PDAL_DLL Addon
@@ -263,41 +245,13 @@ public:
         Binary
     };
 
-    EptInfo(const NL::json& info) : m_info(info)
-    {
-        m_bounds = toBox3d(m_info["bounds"]);
-        m_points = m_info["points"].get<uint64_t>();
-        m_span = m_info["span"].get<uint64_t>();
-        auto it = m_info.find("srs");
-        if (it != m_info.end())
-        {
-            const NL::json& srs = *it;
-            m_srs = srs.value("wkt", "");
-
-            if (m_srs.empty())
-            {
-                if (srs.contains("authority") && srs.contains("horizontal"))
-                    m_srs = srs["authority"].get<std::string>() + ":" +
-                        srs["horizontal"].get<std::string>();
-                if (srs.contains("vertical"))
-                    m_srs += "+" + srs["vertical"].get<std::string>();
-            }
-        }
-
-        const std::string dt(m_info["dataType"].get<std::string>());
-        if (dt == "laszip")
-            m_dataType = DataType::Laszip;
-        else if (dt == "binary")
-            m_dataType = DataType::Binary;
-        else
-            throw ept_error("Unrecognized EPT dataType: " + dt);
-    }
+    EptInfo(const NL::json& info);
 
     const BOX3D& bounds() const { return m_bounds; }
     uint64_t points() const { return m_points; }
     uint64_t span() const { return m_span; }
     DataType dataType() const { return m_dataType; }
-    const std::string& srs() const { return m_srs; }
+    const SpatialReference& srs() const { return m_srs; }
     const NL::json& schema() const { return m_info["schema"]; }
     const NL::json dim(std::string name) const
     {
@@ -332,23 +286,9 @@ private:
     uint64_t m_span = 0;
 
     DataType m_dataType;
-    std::string m_srs;
+    SpatialReference m_srs;
 };
 
-inline bool operator<(const Key& a, const Key& b)
-{
-    if (a.d < b.d) return true;
-    if (a.d > b.d) return false;
-
-    if (a.x < b.x) return true;
-    if (a.x > b.x) return false;
-
-    if (a.y < b.y) return true;
-    if (a.y > b.y) return false;
-
-    if (a.z < b.z) return true;
-    return false;
-}
 
 class FixedPointLayout : public PointLayout
 {
@@ -363,7 +303,7 @@ protected:
     {
         if (!m_finalized)
         {
-            if (!contains(m_used, dimDetail.id()))
+            if (!Utils::contains(m_used, dimDetail.id()))
             {
                 dimDetail.setOffset(m_pointSize);
 
@@ -379,17 +319,17 @@ protected:
         return false;
     }
 
-    PDAL_DLL bool contains(
-            const Dimension::IdList& idList,
-            const Dimension::Id id) const
+    /**
+    PDAL_DLL bool contains(const Dimension::IdList& idList,
+        const Dimension::Id id) const
     {
         for (const auto current : idList)
-        {
-            if (current == id) return true;
-        }
+            if (current == id)
+                return true;
 
         return false;
     }
+    **/
 };
 
 class PDAL_DLL ShallowPointTable : public BasePointTable
@@ -551,54 +491,7 @@ public:
 private:
     // Worker thread function.  Wait for a task and run it - or if stop() is
     // called, complete any outstanding task and return.
-    void work()
-    {
-        while (true)
-        {
-            std::unique_lock<std::mutex> lock(m_mutex);
-            m_consumeCv.wait(lock, [this]()
-            {
-                return m_tasks.size() || !m_running;
-            });
-
-            if (m_tasks.size())
-            {
-                ++m_outstanding;
-                auto task(std::move(m_tasks.front()));
-                m_tasks.pop();
-
-                lock.unlock();
-
-                // Notify add(), which may be waiting for a spot in the queue.
-                m_produceCv.notify_all();
-
-                std::string err;
-                try { task(); }
-                catch (std::exception& e) { err = e.what(); }
-                catch (...) { err = "Unknown error"; }
-
-                lock.lock();
-                --m_outstanding;
-                if (err.size())
-                {
-                    if (m_verbose)
-                    {
-                        std::cout << "Exception in pool task: " << err <<
-                            std::endl;
-                    }
-                    m_errors.push_back(err);
-                }
-                lock.unlock();
-
-                // Notify await(), which may be waiting for a running task.
-                m_produceCv.notify_all();
-            }
-            else if (!m_running)
-            {
-                return;
-            }
-        }
-    }
+    void work();
 
     bool m_verbose;
     std::size_t m_numThreads;

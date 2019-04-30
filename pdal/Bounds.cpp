@@ -57,6 +57,34 @@ Bounds::Bounds(const BOX2D& box) : m_box(box)
 }
 
 
+bool Bounds::valid() const
+{
+    return (m_box.minx <= m_box.maxx && m_box.miny <= m_box.maxy);
+}
+
+
+void Bounds::grow(double x, double y)
+{
+    if (!is3d())
+    {
+        m_box.minx = std::min(x, m_box.minx);
+        m_box.miny = std::min(y, m_box.miny);
+        m_box.maxx = std::max(x, m_box.maxx);
+        m_box.maxy = std::max(y, m_box.maxy);
+    }
+}
+
+void Bounds::grow(double x, double y, double z)
+{
+    m_box.minx = std::min(x, m_box.minx);
+    m_box.miny = std::min(y, m_box.miny);
+    m_box.minz = std::min(z, m_box.minz);
+    m_box.maxx = std::max(x, m_box.maxx);
+    m_box.maxy = std::max(y, m_box.maxy);
+    m_box.maxz = std::max(z, m_box.maxz);
+}
+
+
 // We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
 // BOX3D ctor that takes a BOX2D if that's what you want.
 BOX3D Bounds::to3d() const

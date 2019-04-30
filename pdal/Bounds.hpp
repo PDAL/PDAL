@@ -56,6 +56,9 @@ public:
     BOX3D to3d() const;
     BOX2D to2d() const;
     bool is3d() const;
+    bool valid() const;
+    void grow(double x, double y);
+    void grow(double x, double y, double z);
     SpatialReference spatialReference() const
         { return m_srs; }
 

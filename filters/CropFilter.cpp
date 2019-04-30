@@ -193,6 +193,10 @@ void CropFilter::transform(const SpatialReference& srs)
     // If we don't have any SRS, do nothing.
     if (srs.empty() && m_args->m_assignedSrs.empty())
         return;
+
+    // Note that we should never have assigned SRS empty here since
+    // if it is missing we assign it from the point data.
+    assert(!m_args->m_assignedSrs.empty());
     if (srs.empty() || m_args->m_assignedSrs.empty())
         throwError("Unable to transform crop geometry to point "
             "coordinate system.");
