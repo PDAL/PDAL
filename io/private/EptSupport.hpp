@@ -35,18 +35,6 @@
 #pragma once
 
 #include <condition_variable>
-/**
-#include <cstddef>
-#include <functional>
-#include <iostream>
-#include <mutex>
-#include <stdexcept>
-#include <string>
-
-
-#include <pdal/pdal_export.hpp>
-#include <pdal/Stage.hpp>
-**/
 
 #include <queue>
 #include <thread>
