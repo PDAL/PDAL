@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/util/Bounds.hpp>
 #include <pdal/Metadata.hpp>
 
 #include <Eigen/Dense>
@@ -45,6 +44,7 @@
 
 namespace pdal
 {
+class BOX2D;
 class PointView;
 class SpatialReference;
 
@@ -269,7 +269,7 @@ PDAL_DLL Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
 */
 PDAL_DLL Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
         double cell_size, BOX2D bounds);
-        
+
 /**
   Find local minimum elevations by extended local minimum.
 
@@ -328,7 +328,7 @@ PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
   \param data the input raster.
   \param rows the number of rows.
   \param cols the number of cols.
-  \param iterations the number of iterations used to approximate a larger 
+  \param iterations the number of iterations used to approximate a larger
          structuring element.
   \return the morphological dilation of the input raster.
 */
@@ -347,7 +347,7 @@ PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
   \param data the input raster.
   \param rows the number of rows.
   \param cols the number of cols.
-  \param iterations the number of iterations used to approximate a larger 
+  \param iterations the number of iterations used to approximate a larger
          structuring element.
   \return the morphological erosion of the input raster.
 */

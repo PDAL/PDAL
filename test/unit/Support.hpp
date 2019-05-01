@@ -37,12 +37,12 @@
 // support functions for unit testing
 
 #include <pdal/pdal_types.hpp>
-#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
     class PointView;
     class Stage;
+    class BOX3D;
 }
 
 #include <string>

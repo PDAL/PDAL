@@ -20,4 +20,29 @@ title = {{The Motion Coherence Theory}},
 year = {1988}
 }
 
+@article{Xuechen2019,
+abstract = {The rigid registration of two 3D point sets is a fundamental problem in
+computer vision. The current trend is to solve this problem globally using the
+BnB optimization framework. However, the existing global methods are slow for
+two main reasons: the computational complexity of BnB is exponential to the
+problem dimensionality (which is six for 3D rigid registration), and the bound
+evaluation used in BnB is inefficient. In this paper, we propose two
+techniques to address these problems. First, we introduce the idea of
+translation invariant vectors, which allows us to decompose the search of a 6D
+rigid transformation into a search of 3D rotation followed by a search of 3D
+translation, each of which is solved by a separate BnB algorithm. This
+transformation decomposition reduces the problem dimensionality of BnB
+algorithms and substantially improves its efficiency. Then, we propose a new
+data structure, named 3D Integral Volume, to accelerate the bound evaluation
+in both BnB algorithms. By combining these two techniques, we implement an
+efficient algorithm for rigid registration of 3D point sets. Extensive
+experiments on both synthetic and real data show that the proposed algorithm
+is three orders of magnitude faster than the existing state-of-the-art global
+methods.},
+author = {Xuechen Li and Yinlong Liu and Yiru Wang and Chen Wang and Manning Wang and Zhijian Song},
+title = {{Fast and Globally Optimal Rigid Registration of 3D Point Sets by Transformation Decomposition}},
+year = {2019},
+note = {Available at \url{https://arxiv.org/pdf/1812.11307.pdf}}
+}
+
 %======
