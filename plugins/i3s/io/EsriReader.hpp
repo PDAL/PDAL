@@ -40,8 +40,8 @@
 
 #include <arbiter/arbiter.hpp>
 
-#include <pdal/Bounds.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/IStream.hpp>
 
 namespace pdal

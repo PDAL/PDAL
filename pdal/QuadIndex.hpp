@@ -38,7 +38,7 @@
 #include <memory>
 
 #include <pdal/pdal_types.hpp>
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {

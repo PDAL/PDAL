@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/util/Uuid.hpp>
 
