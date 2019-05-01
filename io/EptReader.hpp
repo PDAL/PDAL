@@ -103,8 +103,7 @@ private:
 
     struct Args;
 
-    std::unique_ptr<Args> m_argsPtr;
-    Args& m_args;
+    std::unique_ptr<Args> m_args;
 
     BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;

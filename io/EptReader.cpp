@@ -117,7 +117,7 @@ public:
 };
 
 
-EptReader::EptReader() : m_argsPtr(new EptReader::Args), m_args(*m_argsPtr)
+EptReader::EptReader() : m_args(new EptReader::Args)
 {}
 
 EptReader::~EptReader()
@@ -127,12 +127,12 @@ std::string EptReader::getName() const { return s_info.name; }
 
 void EptReader::addArgs(ProgramArgs& args)
 {
-    args.add("bounds", "Bounds to fetch", m_args.m_bounds);
-    args.add("origin", "Origin of source file to fetch", m_args.m_origin);
-    args.add("threads", "Number of worker threads", m_args.m_threads);
-    args.add("resolution", "Resolution limit", m_args.m_resolution);
+    args.add("bounds", "Bounds to fetch", m_args->m_bounds);
+    args.add("origin", "Origin of source file to fetch", m_args->m_origin);
+    args.add("threads", "Number of worker threads", m_args->m_threads);
+    args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
-            m_args.m_addons);
+        m_args->m_addons);
 }
 
 
@@ -159,7 +159,7 @@ void EptReader::initialize()
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
 
-    const std::size_t threads(std::max(m_args.m_threads, size_t(4)));
+    const std::size_t threads(std::max(m_args->m_threads, size_t(4)));
     if (threads > 100)
     {
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
@@ -179,14 +179,14 @@ void EptReader::initialize()
     debug << "Got EPT info" << std::endl;
     debug << "SRS: " << m_info->srs() << std::endl;
 
-    const SpatialReference& boundsSrs = m_args.m_bounds.spatialReference();
+    const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
         throwError("Can't use bounds with SRS with data source that has "
             "no SRS.");
 
     setSpatialReference(m_info->srs());
 
-    m_queryBounds = m_args.m_bounds.to3d();
+    m_queryBounds = m_args->m_bounds.to3d();
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
             boundsSrs.getWKT(), m_info->srs().getWKT());
@@ -201,7 +201,7 @@ void EptReader::initialize()
     }
 
     // Figure out our max depth.
-    const double queryResolution(m_args.m_resolution);
+    const double queryResolution(m_args->m_resolution);
     if (queryResolution)
     {
         double currentResolution =
@@ -231,7 +231,7 @@ void EptReader::initialize()
 
 void EptReader::handleOriginQuery()
 {
-    const std::string search(m_args.m_origin);
+    const std::string search(m_args->m_origin);
 
     if (search.empty())
         return;
@@ -374,7 +374,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 
     try
     {
-        for (auto it : m_args.m_addons.items())
+        for (auto it : m_args->m_addons.items())
         {
             std::string dimName = it.key();
             const NL::json& val = it.value();
