@@ -1,7 +1,7 @@
 FROM pdal/alpinebase:latest as builder
 
 RUN    \
-    git clone https://github.com/PDAL/PDAL.git --branch 1.8-maintenance --single-branch pdal; \
+    git clone https://github.com/PDAL/PDAL.git --branch 1.9-maintenance --single-branch pdal; \
     cd pdal; \
     mkdir build; \
     cd build; \
@@ -38,7 +38,7 @@ RUN    \
     rm /usr/bin/ogr*; \
     rm /usr/bin/h5*;
 
-FROM alpine:3.8
+FROM alpine:3.9
 
 COPY --from=builder /usr/ /usr/
 COPY --from=builder /lib/ /lib/
