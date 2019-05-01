@@ -39,7 +39,7 @@
 
 #include "../plang/Invocation.hpp"
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -71,7 +71,7 @@ private:
     PythonFilter(const PythonFilter&); // not implemented
 
     MetadataNode m_totalMetadata;
-    Json::Value m_pdalargs;
+    NL::json m_pdalargs;
 };
 
 } // namespace pdal

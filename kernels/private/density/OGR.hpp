@@ -35,6 +35,8 @@
 
 #include <string>
 
+#include <pdal/GDALUtils.hpp>
+
 #include "ogr_api.h"
 #include "gdal.h"
 
@@ -60,7 +62,7 @@ public:
 private:
     std::string m_filename;
     std::string m_driver;
-    std::string m_srs;
+    gdal::SpatialRef m_srs;
 
     OGRDataSourceH m_ds;
     OGRLayerH m_layer;

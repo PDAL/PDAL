@@ -35,7 +35,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libspatialite-dev \
         libsqlite3-mod-spatialite \
         libhdf5-dev \
-        libjsoncpp-dev \
         libboost-filesystem1.65-dev \
         libboost-iostreams1.65-dev \
         libboost-program-options1.65-dev \
@@ -73,7 +72,7 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
 
 RUN    git clone https://github.com/LASzip/LASzip.git laszip; \
     cd laszip; \
-    git checkout 3.1.1; \
+    git checkout 3.4.1; \
     cmake  \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr/ \
@@ -130,7 +129,6 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
     && cd cpd \
     && cmake . \
         -DWITH_TESTS=OFF \
-        -DWITH_JSONCPP=OFF \
         -DWITH_FGT=ON \
         -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
         -DCMAKE_CXX_FLAGS="-isystem ${DESTDIR}/usr/include" \
@@ -260,7 +258,6 @@ RUN apt-get update; \
         libgeotiff-epsg \
         libexpat1 \
         libxml2 \
-        libjsoncpp1 \
         libwebp6 \
         netcdf-bin \
         libhdf4-0-alt \
@@ -292,10 +289,10 @@ COPY --from=builder  /build/usr/lib/ /usr/lib/
 COPY --from=builder  /build/usr/include/ /usr/include/
 
 RUN \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj; \
-    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj;
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj && rm proj-datumgrid-europe-1.2.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
 
 

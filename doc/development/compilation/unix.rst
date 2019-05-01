@@ -4,309 +4,205 @@
 Unix Compilation
 ******************************************************************************
 
-:Author: Howard Butler
-:Contact: howard@hobu.co
-:Date: 10/27/2015
+PDAL comes with support for building with `CMake`_.  PDAL requires at
+least version 3.5 of CMake.
+CMake is a cross-platform meta-build system that provides a unified system
+for building applications on multiple platforms with various build tools.
+CMake has `generators`_ for many build tools, though PDAL has been tested
+only with `Ninja`_ and `GNU Makefiles`_ on Unix/OSX.  Ninja builds PDAL faster,
+so the following instructions use that build tool, though building with
+GNU Makefiles works similarly (simply replace "ninja" with "make" when
+running the build tool).
 
-`CMake`_ 2.8.11+ is the prescribed tool for building from source, with `CMake`_
-3.0+ being desired. `CMake`_ is a cross-platform build system that provides a
-number of benefits, and its usage ensures a single, up-to-date build system for
-all PDAL-supported operating systems and compiler platforms.
+.. _`CMake`: https://cmake.org
+.. _`generators`: https://cmake.org/cmake/help/v3.5/manual/cmake-generators.7.html
+.. _`Ninja`: https://ninja-build.org/
+.. _`GNU Makefiles`: https://www.gnu.org/software/make/manual/make.html
 
-Like a combination of autoconf/autotools, except that it works on Windows with
-minimal eye-stabbing pain, `CMake`_ is somewhat of a meta-building tool. It can
-be used to generate MSVC project files, GNU Makefiles, NMake files for MSVC,
-XCode projects on Mac OS X, and Eclipse projects (as well as many others).
-This functionality allows the PDAL project to avoid maintaining these build
-options by hand and target a single configuration and build platform.
+Dependencies
+------------------------------------------------------------------------------
 
-This tutorial will describe how to build PDAL using CMake on a Unix platform.
-PDAL is known to compile on Linux 2.6's of various flavors and OSX with XCode.
+Building PDAL successfully depends on having other libraries configured
+and installed.  These :ref:`dependencies <dependencies>` can be built
+from source or
+can be installed via a packaging system (`apt`_ works well on Ubuntu and
+Debian-based Linux systems. `Conda`_ works well on most systems.  Some have
+had success with `brew`_ on OSX systems.)
+Often, the only package that
+needs to be installed prior to building PDAL is GDAL.  Installing a GDAL
+package will normally install other PDAL dependencies automatically.
 
-.. note::
+::
 
-    :ref:`dependencies` contains more information about specific library
-    version requirements and notes about building or acquiring them.
+    $ apt install libgdal-dev
 
-Using "Unix Makefiles" on Linux
-..............................................................................
+    OR
+
+    $ conda install gdal
+
+    OR
+
+    $ brew install gdal
+
+.. _`apt`: https://help.ubuntu.com/lts/serverguide/apt.html
+.. _`Conda`: https://conda.io/en/latest/
+.. _`brew`: https://brew.sh/
+
+Using Ninja on Linux or OSX
+------------------------------------------------------------------------------
 
 Get the source code
-------------------------------------------------------------------------------
+..............................................................................
 
-See :ref:`source` for how to obtain the latest development version or visit
-:ref:`download` to get the latest released version.
+PDAL can be cloned from :ref:`GitHub <source>` or you can download a
+:ref:`release bundle <download>`
 
 Prepare a build directory
-------------------------------------------------------------------------------
+..............................................................................
 
-CMake allows you to generate different builders for a project, and in this
-example, we are going to generate a "Unix Makefiles" builder
-for PDAL on Mac OS X.
+CMake allows you to generate different builders for a project.  Here we're
+using Mac OSX, but the procedure and output are nearly identical on Linux
+distributions.
 
 ::
 
     $ cd PDAL
-    $ mkdir makefiles
-    $ cd makefiles
+    $ mkdir build
+    $ cd build
 
-Configure base library
-------------------------------------------------------------------------------
-
-Configure the basic core library for the "Unix Makefiles" target:
-
-::
-
-    $ cmake -G "Unix Makefiles" ../
-    -- The C compiler identification is GNU
-    -- The CXX compiler identification is GNU
-    -- Checking whether C compiler has -isysroot
-    -- Checking whether C compiler has -isysroot - yes
-    -- Check for working C compiler: /usr/bin/gcc
-    -- Check for working C compiler: /usr/bin/gcc -- works
-    -- Detecting C compiler ABI info
-    -- Detecting C compiler ABI info - done
-    -- Checking whether CXX compiler has -isysroot
-    -- Checking whether CXX compiler has -isysroot - yes
-    -- Check for working CXX compiler: /usr/bin/c++
-    -- Check for working CXX compiler: /usr/bin/c++ -- works
-    -- Detecting CXX compiler ABI info
-    -- Detecting CXX compiler ABI info - done
-    -- Enable PDAL utilities to build - done
-    -- Configuring done
-    -- Generating done
-    -- Build files have been written to: /Users/hobu/dev/git/PDAL-cmake/makefiles
-
-
-.. note::
-
-    The ``./cmake/examples/hobu-config.sh`` shell script contains a number of common
-    settings that I use to configure my `Homebrew`-based Macintosh
-    system.
-
-.. _`Homebrew`: http://brew.sh/
-
-Issue the `make` command
-------------------------------------------------------------------------------
-
-This will build a base build of the library, with no extra libraries being
-configured.
-
-
-.. _make_install:
-
-Run ``make install`` and test your installation with a :ref:`pdal_test` command
--------------------------------------------------------------------------------
-
-``make install`` will install the :ref:`utilities <apps>` in the location that
-was specified for 'CMAKE_INSTALL_PREFIX'.  Once installed, ensure that you can
-run `pdal info`.
-
-
-.. _configure_optional_libraries:
-
-Configure your :ref:`Optional Libraries <dependencies>`.
-------------------------------------------------------------------------------
-
-By checking the "on" button for each, CMake may find your installations of
-these libraries, but in case it does not, set the following variables,
-substituting accordingly, to values that match your system layout.
-
-.. csv-table::
-
-    "`GDAL`_","GDAL_CONFIG", "/usr/local/bin/gdal-config"
-    "","GDAL_INCLUDE_DIR", "/usr/local/include"
-    "","GDAL_LIBRARY", "/usr/local/lib/libgdal.so"
-    "`GeoTIFF`_","GEOTIFF_INCLUDE_DIR","/usr/local/include"
-    "","GEOTIFF_LIBRARY","/usr/local/lib/libgeotiff.so"
-    "`OCI`_","ORACLE_INCLUDE_DIR","/home/oracle/sdk/include"
-    "","ORACLE_NNZ_LIBRARY","/home/oracle/libnnz10.so"
-    "","ORACLE_OCCI_LIBRARY","/home/oracle/libocci.so"
-    "","ORACLE_OCIEI_LIBRARY","/home/oracle/libociei.so"
-    "","ORACLE_OCI_LIBRARY","/home/oracle/libclntsh.so"
-
-.. _GDAL: http://www.gdal.org
-.. _Proj.4: http://trac.osgeo.org/proj
-.. _GeoTIFF: http://trac.osgeo.org/geotiff
-.. _libxml2: http://xmlsoft.org
-.. _`OCI`: http://www.oracle.com/technology/tech/oci/index.html
-.. _`Oracle Instant Client`: http://www.oracle.com/technology/tech/oci/instantclient/index.html
-.. _`Oracle Point Cloud`: http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
-.. _`DebianGIS`: http://wiki.debian.org/DebianGis
-.. _`Debian`: http://www.debian.org
-.. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
-
-
-CCMake and cmake-gui
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-
-    The following was just swiped from the libLAS compilation document
-    and it has not been updated for PDAL. The basics should be the same, however.
-    Please ask on the :ref:`mailing list<community>` if you run into any issues.
-
-While `CMake`_ can be run from the command-line, and this is the preferred
-way for many individuals, it can be much easier to run CMake from a GUI.
-Now that we have a basic library building, we will use CMake's GUIs to
-help us configure the rest of the optional components of the library. Run
-``ccmake ../`` for the `Curses`_ interface or ``cmake-gui ../`` for a GUI
-version.
-
-
-.. figure:: media/ccmake-osx-start.png
-    :alt: Running CCMake in OS X
-
-    Running the `Curses`_ `CMake`_ interface.  This interface is available to
-    all unix-like operating systems.
-
-.. note::
-
-    If your arrow keys are not working with in CCMake, use CTRL-N and
-    CTRL-P to move back and forth between the options.
-
-.. figure:: media/cmake-gui-osx-start.png
-    :alt: Running cmake-gui in OS X
-
-    Running the cmake-gui `CMake`_ interface.  This interface is available
-    on Linux, Windows, and Mac OS X.
-
-Build and install
-------------------------------------------------------------------------------
-
-Once you have configured your additional libraries, you can install the
-software.  The main pieces that will be installed are:
-
-* PDAL headers (typically in a location ./include/pdal/...)
-* PDAL C++ (PDAL.a or PDAL.so) library
-* PDAL C (PDAL_c.a or PDAL_c.so) library
-* :ref:`Utility <apps>` programs
-
-::
-
-    make install
-
-Using "XCode" on OS X
+Run CMake
 ..............................................................................
 
-
-Get the source code
-------------------------------------------------------------------------------
-
-See :ref:`source` for how to obtain the latest development version or visit
-:ref:`download` to get the latest released version.
-
-Prepare a build directory
-------------------------------------------------------------------------------
-
-CMake allows you to generate different builders for a project, and in this
-example, we are going to generate an "Xcode" builder for PDAL on Mac OS X.
-Additionally, we're going to use an alternative compiler -- `LLVM`_ -- which
-under certain situations can produce much faster code on Mac OS X.
+Running CMake uses the specified generator to create
+an environment suitable for building PDAL with the requested tool.
+(Ninja in this case).
 
 ::
 
-    $ export CC=/usr/bin/llvm-gcc
-    $ export CXX=/usr/bin/llvm-g++
-    $ cd PDAL
-    $ mkdir xcode
-    $ cd xcode/
+    $ cmake -G Ninja ..
+    -- Numpy output: /usr/lib/python2.7/dist-packages/numpy/core/include
+    1.13.3
 
-Configure base library
-------------------------------------------------------------------------------
+    -- Could NOT find LIBEXECINFO (missing: LIBEXECINFO_LIBRARY)
+    -- Could NOT find LIBUNWIND (missing: LIBUNWIND_LIBRARY LIBUNWIND_INCLUDE_DIR)
+    -- The following features have been enabled:
 
-Configure the basic core library for the Xcode build:
+     * PostgreSQL PointCloud plugin, read/write PostgreSQL PointCloud objects
+     * Python plugin, add features that depend on python
+     * Unit tests, PDAL unit tests
 
-::
+    -- The following OPTIONAL packages have been found:
 
-    $ cmake -G "Xcode" ..
-    -- The C compiler identification is GNU
-    -- The CXX compiler identification is GNU
-    -- Checking whether C compiler has -isysroot
-    -- Checking whether C compiler has -isysroot - yes
-    -- Check for working C compiler: /usr/bin/llvm-gcc
-    -- Check for working C compiler: /usr/bin/llvm-gcc -- works
-    -- Detecting C compiler ABI info
-    -- Detecting C compiler ABI info - done
-    -- Checking whether CXX compiler has -isysroot
-    -- Checking whether CXX compiler has -isysroot - yes
-    -- Check for working CXX compiler: /usr/bin/llvm-g++
-    -- Check for working CXX compiler: /usr/bin/llvm-g++ -- works
-    -- Detecting CXX compiler ABI info
-    -- Detecting CXX compiler ABI info - done
-    -- Enable PDAL utilities to build - done
-    -- Enable PDAL unit tests to build - done
+     * PkgConfig
+     * LibXml2
+     * Curl
+
+    -- The following REQUIRED packages have been found:
+
+     * GDAL (required version >= 2.2.0)
+       Provides general purpose raster, vector, and reference system support
+    ...
+    -- The following RECOMMENDED packages have not been found:
+
+     * LASzip (required version >= 3.1)
+       Provides LASzip compression
+
     -- Configuring done
     -- Generating done
-    -- Build files have been written to: /Users/hobu/hg/PDAL-cmake/xcode
+    -- Build files have been written to: /home/foo/pdal/build
 
+Issue the `ninja` command
+..............................................................................
 
-Alternatively, if you have `KyngChaos`_ frameworks for `GDAL`_ and `GeoTIFF`_
-installed, you can provide locations for those as part of your ``cmake``
-invocation:
-
-::
-
-    $ cmake -G "Xcode" \
-      -D GDAL_CONFIG=/Library/Frameworks/GDAL.framework/Programs/gdal-config \
-      -D GEOTIFF_INCLUDE_DIR=/Library/Frameworks/UnixImageIO.framework/unix/include \
-      -D GEOTIFF_LIBRARY=/Library/Frameworks/UnixImageIO.framework/unix/lib/libgeotiff.dylib \
-      ..
-
-.. note::
-
-    I recommend that you use in `Homebrew`_ for `GDAL`_ and friends. Its configuration
-    is featureful and up-to-date.
+If cmake runs to completion (reports that build files have been written),
+you can run Ninja to build PDAL.
 
 ::
 
-    $ open PDAL.xcodeproj/
+    $ ninja
 
-.. figure:: media/xcode-start.png
-    :alt: Building PDAL using the XCode project
+If no errors are reported, Ninja will have created the ``pdal`` program
+in the ``bin`` directory.  A set of necessary support libraries will have
+been created in the ``lib`` directory.
 
-Set default command for XCode
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+::
 
-Set the default executable for the project to be ``lasinfo`` by opening the
-"Executables" tree, choosing "lasinfo," and clicking the bubble next to
-the "Executable name" in the right-hand panel.
+    $ ls bin/pdal
+    bin/pdal
 
-.. figure:: media/xcode-set-default-executable.png
-    :alt: Setting the default executable
+    $ ls lib/libpdalcpp*
+    lib/libpdalcpp.8.dylib
+    lib/libpdalcpp.dylib
+    lib/libpdalcpp.9.0.0.dylib
 
-Set arguments for :ref:`pdal_test`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Checking the build and running PDAL tests
+..............................................................................
 
-Set the arguments for :ref:`pdal_test` so it can be run from within XCode. We
-use the ${PROJECT_DIR} environment variable to be able to tell pdal_test the
-location of our test file. This is similar to the :ref:`same command
-<make_install>` above in the "Unix Makefiles" section.
+You can quickly check that PDAL has built properly by running the `pdal info`
+command.
 
-.. figure:: media/xcode-lasinfo-arguments.png
-    :alt: Setting the arguments for lasinfo
+::
 
+    $ bin/pdal info ../test/data/las/autzen_trim.las
+    {
+      "filename": "../test/data/las/autzen_trim.las",
+      "pdal_version": "1.8.0 (git-version: c39e62)",
+      "stats":
+      {
+        "bbox":
+        {
+          "EPSG:4326":
+          {
+            "bbox":
+            {
+              "maxx": -123.0689038,
+              "maxy": 44.0515451,
+              "maxz": 158.651448,
+              "minx": -123.0734481,
+              "miny": 44.04990077,
+              "minz": 123.828048
+            },
+    ...
 
-.. _optional-libraries:
+CMake will normally build a set of tests that can be used to verify that PDAL
+executes most functions properly.  You can run these tests yourself if
+desired, though it's not typically necessary.
 
-Configure :ref:`Optional Libraries <dependencies>`
-------------------------------------------------------------------------------
+::
 
-As :ref:`before <configure_optional_libraries>`, use ``ccmake ../`` or ``cmake-gui ../`` to
-configure your :ref:`dependencies`.
+    $ ctest
+    Test project /Users/foo/pdal.master/build
+          Start  1: pdal_filters_pcl_block_test
+     1/97 Test  #1: pdal_filters_pcl_block_test ............   Passed    0.23 sec
+          Start  2: pdal_filters_icp_test
+     2/97 Test  #2: pdal_filters_icp_test ..................   Passed    0.12 sec
+          Start  3: pdal_filters_python_test
+     3/97 Test  #3: pdal_filters_python_test ...............   Passed    3.52 sec
+          Start  4: pdal_io_numpy_test
+     4/97 Test  #4: pdal_io_numpy_test .....................   Passed    0.31 sec
+      ...
+    93/96 Test #93: pdal_io_ilvis2_metadata_test ...........   Passed    0.03 sec
+          Start 94: pdal_io_ilvis2_reader_metadata_test
+    94/96 Test #94: pdal_io_ilvis2_reader_metadata_test ....   Passed    0.05 sec
+          Start 95: xml_schema_test
+    95/96 Test #95: xml_schema_test ........................   Passed    0.04 sec
+          Start 96: pdal_io_ilvis2_test
+    96/96 Test #96: pdal_io_ilvis2_test ....................   Passed    0.04 sec
 
+    100% tests passed, 0 tests failed out of 96
 
-.. figure:: media/cmake-gui-osx-configured.png
-    :alt: Configuring optional libraries with CMake GUI
+    Total Test time (real) =  39.54 sec
 
+Failed tests may not indicate problems other than a lack of support for some
+feature on your system.  For example, tests for database drivers will fail if
+the database isn't installed or configured properly.
 
-.. _`CMake`: http://www.cmake.org/
-.. _`CTest`: http://cmake.org/cmake/help/ctest-2-8-docs.html
-.. _`CMake 2.8.0+`: http://www.cmake.org/cmake/help/cmake-2-8-docs.html
-.. _`CDash`: http://www.cdash.org/
-.. _`continuous integration`: http://en.wikipedia.org/wiki/Continuous_integration
-.. _`PDAL CDash`: http://my.cdash.org/index.php?project=PDAL
-.. _`Curses`: http://en.wikipedia.org/wiki/Curses_%28programming_library%29
-.. _`Autoconf`: http://www.gnu.org/software/autoconf/
-.. _`LLVM`: http://llvm.org/
+Install PDAL
+..............................................................................
 
+PDAL can be installed to the default location (usually subdirectories of
+/usr/local) using Ninja.
+
+::
+
+    $ ninja install

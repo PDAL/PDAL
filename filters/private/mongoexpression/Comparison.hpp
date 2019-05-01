@@ -36,6 +36,8 @@
 
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -103,24 +105,24 @@ inline bool isMultiple(ComparisonType co)
 class Operand
 {
 public:
-    Operand(const PointLayout& layout, Json::Value json)
+    Operand(const PointLayout& layout, NL::json json)
     {
-        if (json.isString())
+        if (json.is_string())
         {
-            m_id = layout.findDim(json.asString());
+            m_id = layout.findDim(json);
             if (m_id == Dimension::Id::Unknown)
             {
-                throw pdal_error("Invalid dimension: " + json.asString());
+                throw pdal_error("Invalid dimension: " +
+                    json.get<std::string>());
             }
         }
-        else if (json.isConvertibleTo(Json::ValueType::realValue))
+        else if (json.is_number())
         {
-            m_value = json.asDouble();
+            m_value = json;
         }
         else
         {
-            throw pdal_error("Invalid comparison operand: " +
-                    json.toStyledString());
+            throw pdal_error("Invalid comparison operand: " + json.dump(4));
         }
     }
 
@@ -153,7 +155,7 @@ public:
     Comparison(Dimension::Id dimId) : m_dimId(dimId) { }
 
     static std::unique_ptr<Comparison> create(const PointLayout& layout,
-            std::string dimName, const Json::Value& json);
+            std::string dimName, const NL::json& json);
 
 protected:
     virtual ComparisonType type() const = 0;
