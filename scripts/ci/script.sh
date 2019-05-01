@@ -9,6 +9,7 @@ cd /pdal
 mkdir -p _build || exit 1
 cd _build || exit 1
 
+apk add python3-dev
 cmake .. \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
