@@ -44,7 +44,7 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <cpl_conv.h>
 #include <gdal_priv.h>

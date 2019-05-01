@@ -576,6 +576,35 @@ public:
 };
 
 /**
+  Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
+  to facilitate streaming either a BOX2D or BOX3D
+*/
+class PDAL_DLL Bounds
+{
+public:
+    Bounds()
+    {}
+
+    explicit Bounds(const BOX3D& box);
+    explicit Bounds(const BOX2D& box);
+
+    BOX3D to3d() const;
+    BOX2D to2d() const;
+    bool is3d() const;
+
+    friend PDAL_DLL std::istream& operator >> (std::istream& in,
+        Bounds& bounds);
+    friend PDAL_DLL std::ostream& operator << (std::ostream& out,
+        const Bounds& bounds);
+
+private:
+    BOX3D m_box;
+
+    void set(const BOX3D& box);
+    void set(const BOX2D& box);
+};
+
+/**
   Write a 2D bounds box to a stream in a format used by PDAL options.
 
   \param ostr  Stream to write to.
@@ -639,5 +668,8 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
   \param bounds  Bounds box to populate.
 */
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
+
+PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& in, const Bounds& bounds);
 
 } // namespace pdal

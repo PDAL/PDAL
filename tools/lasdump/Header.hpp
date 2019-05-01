@@ -37,7 +37,7 @@
 #include <array>
 #include <cassert>
 
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/Uuid.hpp>
 
