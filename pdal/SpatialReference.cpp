@@ -132,6 +132,12 @@ std::string SpatialReference::getWKT() const
 }
 
 
+void SpatialReference::parse(const std::string& s, std::string::size_type& pos)
+{
+    set(s.substr(pos));
+}
+
+
 void SpatialReference::set(std::string v)
 {
     m_horizontalWkt.clear();
@@ -542,8 +548,6 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 
 std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 {
-    SpatialReference ref;
-
     std::ostringstream oss;
     oss << istr.rdbuf();
     srs.set(oss.str());

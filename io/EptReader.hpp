@@ -40,8 +40,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include <pdal/Bounds.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/util/Bounds.hpp>
+
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {

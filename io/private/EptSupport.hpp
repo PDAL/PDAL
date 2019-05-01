@@ -49,7 +49,7 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Algorithm.hpp>
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal

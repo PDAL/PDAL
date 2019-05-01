@@ -37,7 +37,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <Eigen/Dense>

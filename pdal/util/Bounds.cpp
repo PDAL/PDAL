@@ -37,7 +37,7 @@
 #include <limits>
 #include <vector>
 
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -128,6 +128,66 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
     return v;
 }
 
+Bounds::Bounds(const BOX3D& box) : m_box(box)
+{}
+
+
+Bounds::Bounds(const BOX2D& box) : m_box(box)
+{
+    m_box.minz = HIGHEST;
+    m_box.maxz = LOWEST;
+}
+
+// We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
+// BOX3D ctor that takes a BOX2D if that's what you want.
+BOX3D Bounds::to3d() const
+{
+    if (!is3d())
+        return BOX3D();
+    return m_box;
+}
+
+BOX2D Bounds::to2d() const
+{
+    return m_box.to2d();
+}
+
+bool Bounds::is3d() const
+{
+    return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
+}
+
+
+void Bounds::grow(double x, double y)
+{
+    if (!is3d())
+    {
+        m_box.minx = std::min(x, m_box.minx);
+        m_box.miny = std::min(y, m_box.miny);
+        m_box.maxx = std::max(x, m_box.maxx);
+        m_box.maxy = std::max(y, m_box.maxy);
+    }
+}
+
+
+void Bounds::grow(double x, double y, double z)
+{
+    m_box.grow(x, y, z);
+}
+
+
+void Bounds::set(const BOX3D& box)
+{
+    m_box = box;
+}
+
+
+void Bounds::set(const BOX2D& box)
+{
+    m_box = BOX3D(box);
+    m_box.minz = HIGHEST;
+    m_box.maxz = LOWEST;
+}
 
 namespace
 {
@@ -241,6 +301,50 @@ std::istream& operator>>(std::istream& in, BOX3D& box)
     if (pos != s.size())
         throw BOX3D::error("Invalid characters following valid 3d-bounds.");
     return in;
+}
+
+void Bounds::parse(const std::string& s, std::string::size_type& pos)
+{
+    try
+    {
+        BOX3D box3d;
+        box3d.parse(s, pos);
+        set(box3d);
+    }
+    catch (const BOX3D::error&)
+    {
+        try
+        {
+            pos = 0;
+            BOX2D box2d;
+            box2d.parse(s, pos);
+            set(box2d);
+        }
+        catch (const BOX2D::error& err)
+        {
+            throw Bounds::error(err.what());
+        }
+    }
+}
+
+std::istream& operator>>(std::istream& in, Bounds& bounds)
+{
+    std::string s;
+
+    std::getline(in, s);
+    std::string::size_type pos(0);
+
+    bounds.parse(s, pos);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Bounds& bounds)
+{
+    if (bounds.is3d())
+        out << bounds.to3d();
+    else
+        out << bounds.to2d();
+    return out;
 }
 
 } // namespace pdal

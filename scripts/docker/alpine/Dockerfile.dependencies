@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
 #
 # Nitro looks for unistd.h in the wrong place.
@@ -52,6 +52,7 @@ RUN \
         postgresql-dev \
         sqlite-dev \
         libcrypto1.1@edgemain \
+        xerces-c@edgetesting \
         libspatialite-dev@edgetesting \
         gdal-dev@edgetesting \
         libgeotiff-dev@edgetesting \

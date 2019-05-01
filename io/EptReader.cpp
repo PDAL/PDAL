@@ -43,6 +43,7 @@
 #include <arbiter/arbiter.hpp>
 
 #include <pdal/GDALUtils.hpp>
+#include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal
@@ -74,13 +75,13 @@ namespace
 
 CREATE_STATIC_STAGE(EptReader, s_info);
 
-class EptBounds : public Bounds
+class EptBounds : public SrsBounds
 {
 public:
     static constexpr double LOWEST = (std::numeric_limits<double>::lowest)();
     static constexpr double HIGHEST = (std::numeric_limits<double>::max)();
 
-    EptBounds() : Bounds(BOX3D(LOWEST, LOWEST, LOWEST,
+    EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
 };
@@ -90,10 +91,11 @@ namespace Utils
     template<>
     bool fromString<EptBounds>(const std::string& s, EptBounds& bounds)
     {
-
-        if (!fromString(s, (Bounds&)bounds))
+        if (!fromString(s, (SrsBounds&)bounds))
             return false;
 
+        // If we're setting 2D bounds, grow to 3D by explicitly setting
+        // Z dimensions.
         if (!bounds.is3d())
         {
             BOX2D box = bounds.to2d();
