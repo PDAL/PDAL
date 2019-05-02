@@ -159,7 +159,7 @@ void EptReader::initialize()
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
 
-    const std::size_t threads(std::max(m_args->m_threads, size_t(4)));
+    const std::size_t threads((std::max)(m_args->m_threads, size_t(4)));
     if (threads > 100)
     {
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<

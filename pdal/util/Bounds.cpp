@@ -162,10 +162,10 @@ void Bounds::grow(double x, double y)
 {
     if (!is3d())
     {
-        m_box.minx = std::min(x, m_box.minx);
-        m_box.miny = std::min(y, m_box.miny);
-        m_box.maxx = std::max(x, m_box.maxx);
-        m_box.maxy = std::max(y, m_box.maxy);
+        m_box.minx = (std::min)(x, m_box.minx);
+        m_box.miny = (std::min)(y, m_box.miny);
+        m_box.maxx = (std::max)(x, m_box.maxx);
+        m_box.maxy = (std::max)(y, m_box.maxy);
     }
 }
 
