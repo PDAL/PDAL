@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include <pdal/util/Box.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 
 namespace pdal
