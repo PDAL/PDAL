@@ -9,12 +9,10 @@ cd /pdal
 mkdir -p _build || exit 1
 cd _build || exit 1
 
-apk add python3-dev
 cmake .. \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_PLUGIN_PYTHON=ON \
-    -DPYTHON_EXECUTABLE:FILEPATH="/usr/bin/python3" \
     -DBUILD_PLUGIN_CPD=ON \
     -DBUILD_PLUGIN_GREYHOUND=ON \
     -DBUILD_PLUGIN_I3S=ON \
