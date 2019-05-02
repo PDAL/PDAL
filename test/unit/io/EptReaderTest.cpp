@@ -39,6 +39,7 @@
 #include <io/EptReader.hpp>
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
+#include <pdal/SrsBounds.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -47,7 +48,7 @@ namespace
 {
     const BOX3D expBoundsConforming(515368, 4918340, 2322,
             515402, 4918382, 2339);
-    const std::string expSrsWkt("GEOCCS[\"unnamed\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"unknown\",1]]");
+    const std::string expSrsWkt = R"(PROJCS["NAD83 / UTM zone 12N",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-111],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","26912"]])";
     const point_count_t expNumPoints(518862);
     const std::vector<std::string> expDimNames = {
          "X", "Y", "Z", "Intensity", "ReturnNumber", "NumberOfReturns",
@@ -156,9 +157,44 @@ TEST(EptReaderTest, resolutionLimit)
     EXPECT_EQ(np, expectedCount);
 }
 
+TEST(EptReaderTest, bounds2dXform)
+{
+    SrsBounds eptBounds(BOX2D(515380, 4918360, 515390, 4918370));
+    SrsBounds boxBounds(
+        BOX2D(-110.80680478060, 44.418368816508,
+              -110.80667887010, 44.418458631945),
+        SpatialReference("EPSG:4326"));
+
+    PointViewPtr v1;
+    PointViewPtr v2;
+    {
+        EptReader reader;
+        Options options;
+        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("bounds", eptBounds);
+        reader.setOptions(options);
+        PointTable eptTable;
+        reader.prepare(eptTable);
+        auto vset = reader.execute(eptTable);
+        v1 = *vset.begin();
+    }
+    {
+        EptReader reader;
+        Options options;
+        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("bounds", boxBounds);
+        reader.setOptions(options);
+        PointTable eptTable;
+        reader.prepare(eptTable);
+        auto vset = reader.execute(eptTable);
+        v2 = *vset.begin();
+    }
+
+    EXPECT_EQ(v1->size(), v2->size());
+}
+
 TEST(EptReaderTest, boundedRead2d)
 {
-    const std::string boundsString("([515380, 515400], [4918350, 4918370])");
     BOX2D bounds(515380, 4918350, 515400, 4918370);
 
     // First we'll query the EptReader for these bounds.
@@ -166,7 +202,7 @@ TEST(EptReaderTest, boundedRead2d)
     {
         Options options;
         options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
-        options.add("bounds", boundsString);
+        options.add("bounds", bounds);
         reader.setOptions(options);
     }
     PointTable eptTable;
@@ -220,8 +256,6 @@ TEST(EptReaderTest, boundedRead2d)
 
 TEST(EptReaderTest, boundedRead3d)
 {
-    const std::string boundsString(
-            "([515380, 515400], [4918350, 4918370], [2320, 2325])");
     BOX3D bounds(515380, 4918350, 2320, 515400, 4918370, 2325);
 
     // First we'll query the EptReader for these bounds.
@@ -229,7 +263,7 @@ TEST(EptReaderTest, boundedRead3d)
     {
         Options options;
         options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
-        options.add("bounds", boundsString);
+        options.add("bounds", bounds);
         reader.setOptions(options);
     }
     PointTable eptTable;

@@ -46,7 +46,9 @@ public:
     {}
 
     explicit SrsBounds(const BOX3D& box);
+    explicit SrsBounds(const BOX3D& box, const SpatialReference& srs);
     explicit SrsBounds(const BOX2D& box);
+    explicit SrsBounds(const BOX2D& box, const SpatialReference& srs);
 
     void parse(const std::string& s, std::string::size_type& pos);
     SpatialReference spatialReference()

@@ -50,7 +50,17 @@ SrsBounds::SrsBounds(const BOX3D& box) : Bounds(box)
 {}
 
 
+SrsBounds::SrsBounds(const BOX3D& box, const SpatialReference& srs) :
+    Bounds(box), m_srs(srs)
+{}
+
+
 SrsBounds::SrsBounds(const BOX2D& box) : Bounds(box)
+{}
+
+
+SrsBounds::SrsBounds(const BOX2D& box, const SpatialReference& srs) :
+    Bounds(box), m_srs(srs)
 {}
 
 
