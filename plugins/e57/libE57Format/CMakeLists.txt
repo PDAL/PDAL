@@ -51,18 +51,18 @@ set(${PROJECT_NAME}_PATCH_VERSION 1)
 include(Tags)
 
 # propose a default installation directory
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    string(REGEX REPLACE "/${PROJECT_NAME}" "" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-    set(T_ ${PROJECT_NAME})
-    set(T_ ${T_}-${${PROJECT_NAME}_MAJOR_VERSION})
-    set(T_ ${T_}.${${PROJECT_NAME}_MINOR_VERSION})
-    set(T_ ${T_}-${${PROJECT_NAME}_BUILD_TAG})
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${T_}
-        CACHE PATH
-        "Install path prefix, prepended onto install directories."
-        FORCE
-    )
-endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#    string(REGEX REPLACE "/${PROJECT_NAME}" "" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+#    set(T_ ${PROJECT_NAME})
+#    set(T_ ${T_}-${${PROJECT_NAME}_MAJOR_VERSION})
+#    set(T_ ${T_}.${${PROJECT_NAME}_MINOR_VERSION})
+#    set(T_ ${T_}-${${PROJECT_NAME}_BUILD_TAG})
+#    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${T_}
+#        CACHE PATH
+#        "Install path prefix, prepended onto install directories."
+#        FORCE
+#    )
+#endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 find_package( Threads REQUIRED )
 
