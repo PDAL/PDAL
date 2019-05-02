@@ -67,15 +67,15 @@ PDAL requires that filter names always begin with ``filters.``, and end with a
 string that uniquely identifies the filter. The description will be displayed
 to users of the PDAL CLI (``pdal --drivers``).
 
-Next, we pass the following to the ``CREATE_STATIC_STAGE`` macro, passing in
+Next, we pass the following to the ``CREATE_SHARED_STAGE`` macro, passing in
 the name of the stage and the ``PluginInfo`` struct.
 
 .. literalinclude:: ../../examples/writing-filter/MyFilter.cpp
    :language: cpp
    :lines: 17
 
-To create a shared stage, we simply change ``CREATE_STATIC_STAGE`` to
-``CREATE_SHARED_STAGE``.
+To create a static stage, we simply change ``CREATE_SHARED_STAGE`` to
+``CREATE_STATC_STAGE``.
 
 Finally, we implement a method to get the plugin name, which is primarily used
 by the PDAL CLI when using the ``--drivers`` or ``--options`` arguments.

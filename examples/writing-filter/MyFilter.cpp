@@ -14,7 +14,7 @@ static PluginInfo const s_info
     "http://link/to/documentation"
 };
 
-CREATE_STATIC_STAGE(MyFilter, s_info)
+CREATE_SHARED_STAGE(MyFilter, s_info)
 
 std::string MyFilter::getName() const { return s_info.name; }
 
