@@ -64,8 +64,9 @@ void SrsBounds::parse(const std::string& s, std::string::size_type& pos)
     if (s[pos++] != '/')
         throw Bounds::error("Invalid character following valid bounds box.");
 
+    pos += Utils::extractSpaces(s, pos);
     SpatialReference srs;
-    srs.parse(s, pos);
+    m_srs.parse(s, pos);
     pos += Utils::extractSpaces(s, pos);
 }
 

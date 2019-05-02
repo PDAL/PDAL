@@ -306,18 +306,6 @@ protected:
 
         return false;
     }
-
-    /**
-    PDAL_DLL bool contains(const Dimension::IdList& idList,
-        const Dimension::Id id) const
-    {
-        for (const auto current : idList)
-            if (current == id)
-                return true;
-
-        return false;
-    }
-    **/
 };
 
 class PDAL_DLL ShallowPointTable : public BasePointTable
