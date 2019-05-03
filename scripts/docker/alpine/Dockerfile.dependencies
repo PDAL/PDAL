@@ -62,6 +62,7 @@ RUN \
         laz-perf-dev@edgetesting \
         hdf5-dev@edgetesting \
         proj4@edgetesting \
+        xerces-c@edgetesting \
     ; \
     \
 #
