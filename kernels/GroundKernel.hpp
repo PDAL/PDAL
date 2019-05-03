@@ -38,7 +38,7 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/pdal_export.hpp>
 #include <pdal/util/FileUtils.hpp>
-
+#include "../filters/private/DimRange.hpp"
 #include <memory>
 #include <string>
 
@@ -60,6 +60,7 @@ private:
 
     std::string m_inputFile;
     std::string m_outputFile;
+    std::string m_ignore;
     double m_maxWindowSize;
     double m_slope;
     double m_maxDistance;
@@ -68,6 +69,13 @@ private:
     bool m_extract;
     bool m_reset;
     bool m_denoise;
+    StringList m_returns;
+    double m_scalar;
+    double m_threshold;
+    double m_cut;
+    std::string m_dir;
+    std::vector<DimRange> m_ignored;
+
 };
 
 } // namespace pdal
