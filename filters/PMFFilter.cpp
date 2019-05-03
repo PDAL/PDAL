@@ -188,8 +188,7 @@ PointViewSet PMFFilter::run(PointViewPtr input)
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        for (PointId i = 0; i < keptView->size(); ++i)
-            firstView->appendPoint(*keptView.get(), i);
+        firstView->append(*keptView);
     }
     else
     {
@@ -200,8 +199,7 @@ PointViewSet PMFFilter::run(PointViewPtr input)
         }
         else
         {
-            for (PointId i = 0; i < keptView->size(); ++i)
-                firstView->appendPoint(*keptView.get(), i);
+            firstView->append(*keptView);
         }
     }
 

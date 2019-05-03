@@ -220,8 +220,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        for (PointId i = 0; i < keptView->size(); ++i)
-            firstView->appendPoint(*keptView.get(), i);
+        firstView->append(*keptView);
     }
     else
     {
@@ -232,8 +231,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         }
         else
         {
-            for (PointId i = 0; i < keptView->size(); ++i)
-                firstView->appendPoint(*keptView.get(), i);
+            firstView->append(*keptView);
         }
     }
 
