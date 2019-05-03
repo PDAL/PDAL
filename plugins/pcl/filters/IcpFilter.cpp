@@ -113,9 +113,9 @@ PointViewPtr IcpFilter::icp(PointViewPtr fixed, PointViewPtr moving) const
     assert(moving->size() == result.points.size());
     for (PointId i = 0; i < moving->size(); ++i)
     {
-        moving->setField(Dimension::Id::X, i, result.points[i].x);
-        moving->setField(Dimension::Id::Y, i, result.points[i].y);
-        moving->setField(Dimension::Id::Z, i, result.points[i].z);
+        moving->setField(Dimension::Id::X, i, result.points[i].x) + buffer_bounds.minx;
+        moving->setField(Dimension::Id::Y, i, result.points[i].y) + buffer_bounds.miny;
+        moving->setField(Dimension::Id::Z, i, result.points[i].z) + buffer_bounds.minz;
     }
     return moving;
 }
