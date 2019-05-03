@@ -36,11 +36,13 @@
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
 #include <pdal/Geometry.hpp>
 
 namespace pdal
 {
+
+class BOX2D;
+class BOX3D;
 
 class PDAL_DLL Polygon : public Geometry
 {

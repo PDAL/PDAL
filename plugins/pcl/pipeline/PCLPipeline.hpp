@@ -63,27 +63,23 @@
 
 #include <pdal/util/Utils.hpp>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 using namespace pdal;
 
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyPassThrough(PointCloudConstPtr cloud,
-    PointCloud &output, Json::Value const& vt)
+    PointCloud &output, const NL::json& vt)
 {
     // initial setup
     pcl::PassThrough<PointT> pass;
     pass.setInputCloud(cloud);
 
     // parse params
-    std::string field = vt["setFilterFieldName"].asString();
-    float m1 = vt["setFilterLimits"]
-        .get("min", -(std::numeric_limits<float>::max)())
-        .asFloat();
-    float m2 = vt["setFilterLimits"]
-        .get("max", (std::numeric_limits<float>::max)())
-        .asFloat();
+    std::string field = vt["setFilterFieldName"].get<std::string>();
+    float m1 = vt["setFilterLimits"].value("min", -(std::numeric_limits<float>::max)());
+    float m2 = vt["setFilterLimits"].value("max", (std::numeric_limits<float>::max)());
 
     // summarize settings
     PCL_DEBUG("\tField name: %s\n", field.c_str());
@@ -126,15 +122,15 @@ pcl::Pipeline<PointT>::applyPassThrough(PointCloudConstPtr cloud,
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyStatisticalOutlierRemoval(PointCloudConstPtr cloud,
-    PointCloud &output, Json::Value const& vt)
+    PointCloud &output, const NL::json& vt)
 {
     // initial setup
     pcl::StatisticalOutlierRemoval<PointT> sor;
     sor.setInputCloud(cloud);
 
     // parse params
-    int nr_k = vt.get("setMeanK", 2).asInt();
-    double stddev_mult = vt.get("setStddevMulThresh", 0.0).asDouble();
+    int nr_k = vt.value("setMeanK", 2);
+    double stddev_mult = vt.value("setStddevMulThresh", 0.0);
 
     // summarize settings
     PCL_DEBUG("\t%d neighbors and %f multiplier\n", nr_k, stddev_mult);
@@ -152,15 +148,15 @@ pcl::Pipeline<PointT>::applyStatisticalOutlierRemoval(PointCloudConstPtr cloud,
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyRadiusOutlierRemoval(PointCloudConstPtr cloud,
-    PointCloud &output, Json::Value const& vt)
+    PointCloud &output, const NL::json& vt)
 {
     // initial setup
     pcl::RadiusOutlierRemoval<PointT> ror;
     ror.setInputCloud(cloud);
 
     // parse params
-    int min_neighbors = vt.get("setMinNeighborsInRadius", 2).asInt();
-    double radius = vt.get("setRadiusSearch", 1.0).asDouble();
+    int min_neighbors = vt.value("setMinNeighborsInRadius", 2);
+    double radius = vt.value("setRadiusSearch", 1.0);
 
     // summarize settings
     PCL_DEBUG("\t%d neighbors and %f radius\n", min_neighbors, radius);
@@ -178,16 +174,16 @@ pcl::Pipeline<PointT>::applyRadiusOutlierRemoval(PointCloudConstPtr cloud,
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyVoxelGrid(PointCloudConstPtr cloud,
-    PointCloud &output, Json::Value const& vt)
+    PointCloud &output, const NL::json& vt)
 {
     // initial setup
     pcl::VoxelGrid<PointT> vg;
     vg.setInputCloud(cloud);
 
     // parse params
-    float x = vt["setLeafSize"].get("x", 1.0).asFloat();
-    float y = vt["setLeafSize"].get("y", 1.0).asFloat();
-    float z = vt["setLeafSize"].get("z", 1.0).asFloat();
+    float x = vt["setLeafSize"].value("x", 1.0f);
+    float y = vt["setLeafSize"].value("y", 1.0f);
+    float z = vt["setLeafSize"].value("z", 1.0f);
 
     // summarize settings
     PCL_DEBUG("\tleaf size: %f, %f, %f\n", x, y, z);
@@ -201,10 +197,10 @@ pcl::Pipeline<PointT>::applyVoxelGrid(PointCloudConstPtr cloud,
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyGridMinimum(PointCloudConstPtr cloud,
-    PointCloud &output, Json::Value const& vt)
+    PointCloud &output, const NL::json& vt)
 {
     // parse params
-    float r = vt.get("setResolution", 1.0).asFloat();
+    float r = vt.value("setResolution", 1.0f);
 
     // summarize settings
     PCL_DEBUG("\tresolution: %f\n", r);
@@ -221,19 +217,19 @@ pcl::Pipeline<PointT>::applyGridMinimum(PointCloudConstPtr cloud,
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyApproximateProgressiveMorphologicalFilter(
-    PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt)
+    PointCloudConstPtr cloud, PointCloud &output, const NL::json& vt)
 {
     pcl::ApproximateProgressiveMorphologicalFilter<PointT> pmf;
 
     // parse params
-    int w = vt.get("setMaxWindowSize", 33).asInt();
-    float s = vt.get("setSlope", 1.0).asFloat();
-    float md = vt.get("setMaxDistance", 2.5).asFloat();
-    float id = vt.get("setInitialDistance", 0.15).asFloat();
-    float c = vt.get("setCellSize", 1.0).asFloat();
-    float b = vt.get("setBase", 2.0).asFloat();
-    bool e = vt.get("setExponential", true).asBool();
-    bool n = vt.get("setNegative", false).asBool();
+    int w = vt.value("setMaxWindowSize", 33);
+    float s = vt.value("setSlope", 1.0f);
+    float md = vt.value("setMaxDistance", 2.5f);
+    float id = vt.value("setInitialDistance", 0.15f);
+    float c = vt.value("setCellSize", 1.0f);
+    float b = vt.value("setBase", 2.0f);
+    bool e = vt.value("setExponential", true);
+    bool n = vt.value("setNegative", false);
 
     // summarize settings
     PCL_DEBUG("\tmax window size: %d\n", w);
@@ -271,19 +267,19 @@ pcl::Pipeline<PointT>::applyApproximateProgressiveMorphologicalFilter(
 
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyProgressiveMorphologicalFilter(
-    PointCloudConstPtr cloud, PointCloud &output, Json::Value const& vt)
+    PointCloudConstPtr cloud, PointCloud &output, const NL::json& vt)
 {
     pcl::ProgressiveMorphologicalFilter<PointT> pmf;
 
     // parse params
-    int w = vt.get("setMaxWindowSize", 33).asInt();
-    float s = vt.get("setSlope", 1.0).asFloat();
-    float md = vt.get("setMaxDistance", 2.5).asFloat();
-    float id = vt.get("setInitialDistance", 0.15).asFloat();
-    float c = vt.get("setCellSize", 1.0).asFloat();
-    float b = vt.get("setBase", 2.0).asFloat();
-    bool e = vt.get("setExponential", true).asBool();
-    bool n = vt.get("setNegative", false).asBool();
+    int w = vt.value("setMaxWindowSize", 33);
+    float s = vt.value("setSlope", 1.0f);
+    float md = vt.value("setMaxDistance", 2.5f);
+    float id = vt.value("setInitialDistance", 0.15f);
+    float c = vt.value("setCellSize", 1.0f);
+    float b = vt.value("setBase", 2.0f);
+    bool e = vt.value("setExponential", true);
+    bool n = vt.value("setNegative", false);
 
     // summarize settings
     PCL_DEBUG("\tmax window size: %d\n", w);
@@ -353,8 +349,8 @@ pcl::Pipeline<PointT>::applyFilter(PointCloud &output)
 
         for (auto const& vt : pt_)
         {
-            std::string name(vt.get("name", "").asString());
-            
+            std::string name(vt.value("name", ""));
+
             using namespace Utils;
 
             if (iequals(name, "PassThrough"))

@@ -58,7 +58,7 @@ Eigen::Vector3d computeCentroid(PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
-    
+
     double mx, my, mz;
     mx = my = mz = 0.0;
     point_count_t n(0);

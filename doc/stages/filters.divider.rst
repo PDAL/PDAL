@@ -3,7 +3,7 @@
 filters.divider
 ===============================================================================
 
-The divider filter breaks a point view into a set of smaller point views
+The **Divider Filter** breaks a point view into a set of smaller point views
 based on simple criteria.  The number of subsets can be specified explicitly,
 or one can specify a maximum point count for each subset.  Additionally,
 points can be placed into each subset sequentially (as they appear in the
@@ -22,37 +22,35 @@ This pipeline will create 10 output files from the input file readers.las.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "example.las",
-        {
+  [
+      "example.las",
+      {
           "type":"filters.divider",
           "count":"10"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"out_#.las"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
 
-mode
-  A mode of 'partition' will write sequential points to an output view until
-  the view meets its predetermined size. 'round_robin' mode will iterate
+_`mode`
+  A mode of "partition" will write sequential points to an output view until
+  the view meets its predetermined size. "round_robin" mode will iterate
   through the output views as it writes sequential points.
-  [Default: 'partition']
+  [Default: "partition"]
 
-count
+_`count`
   Number of output views.  [Default: none]
 
-capacity
+_`capacity`
   Maximum number of points in each output view.  Views will contain
   approximately equal numbers of points.  [Default: none]
 
 .. warning::
 
-    You must specify exactly one of either ``count`` or ``capacity``.
+    You must specify exactly one of either count_ or capacity_.
 

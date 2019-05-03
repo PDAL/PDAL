@@ -38,6 +38,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/Point.hpp"

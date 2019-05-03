@@ -38,7 +38,11 @@ Reference
 
 .. [Cook1986] Cook, Robert L. "Stochastic sampling in computer graphics." *ACM Transactions on Graphics (TOG)* 5.1 (1986): 51-72.
 
+.. [Demantke2011] Demantké J., Mallet C., David N., Vallet, B. "Dimensionality Based Scale Selection in 3d LIDAR Point Clouds."  Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci, XXXVIII-5/W12, 97-102, 2011
+
 .. [Dippe1985] Dippé, Mark AZ, and Erling Henry Wold. "Antialiasing through stochastic sampling." *ACM Siggraph Computer Graphics* 19.3 (1985): 69-78.
+
+.. [Guinard2017] Guinard S., Landrieu L. "Weakly Supervised Segmented-Aided Classification of Urban Scenes From 3D LIDAR Point Clouds." Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci., XLII-1/W1, 151-157, 2017
 
 .. [Kazhdan2006] Kazhdan, Michael, Matthew Bolitho, and Hugues Hoppe. "Poisson surface reconstruction." Proceedings of the fourth Eurographics symposium on Geometry processing. Vol. 7. 2006.
 

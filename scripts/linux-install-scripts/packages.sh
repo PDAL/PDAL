@@ -30,7 +30,6 @@ sudo apt-get install -y -q  git \
                            libflann-dev \
                            libglew-dev \
                            libhdf5-serial-dev \
-                           libjsoncpp-dev \
                            vtk6 \
                            libvtk6-dev \
                            gcc-multilib \
@@ -38,6 +37,5 @@ sudo apt-get install -y -q  git \
                            libglew-dev \
                            oracle-java7-installer \
                            maven
-
 
 

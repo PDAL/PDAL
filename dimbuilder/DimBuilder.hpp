@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-#include <json/forwards.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/DimUtil.hpp>
 
@@ -71,7 +71,7 @@ private:
     std::string m_output;
     std::vector<DimSpec> m_dims;
 
-    void extractDim(Json::Value& dim);
+    void extractDim(NL::json& dim);
     void writeOutput(std::ostream& out);
     void writeHeader(std::ostream& out);
     void writeFooter(std::ostream& out);

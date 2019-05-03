@@ -13,7 +13,7 @@ In order to use compresed LAS (LAZ), your version of PDAL must be built
 with one of the two supported decompressors, `LASzip`_ or `LAZperf`_.
 See the :ref:`compression <las_compression>` option below for more information.
 
-.. _LASzip: http://www.laszip.org
+.. _LASzip: http://laszip.org
 .. _LAZperf: https://github.com/verma/laz-perf
 
 .. note::
@@ -55,20 +55,17 @@ Example
 -------
 
 .. code-block:: json
-    :linenos:
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt",
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------

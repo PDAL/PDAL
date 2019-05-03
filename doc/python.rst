@@ -56,12 +56,15 @@ Extend
 
 .. index:: Extension, Python
 
-PDAL provides a Python extension that gives users access to executing
-:ref:`pipeline` instantiations and capturing the results as `Numpy`_ arrays.
+PDAL provides a Python `extension <https://pypi.python.org/pypi/PDAL>`_
+that gives users access to executing
+:ref:`pipeline <pipeline>` instantiations and capturing the results
+as `Numpy`_ arrays.
 This mode of operation is useful if you are looking to have PDAL simply act as
 your data format and processing handler.
 
-Python extension users are expected to construct their own JSON :ref:`pipeline`
+Python extension users are expected to construct their own PDAL
+:ref:`pipeline <pipeline>`
 using Python's ``json`` library, or whatever other libraries they wish to
 manipulate JSON. They then feed it into the extension and get back the
 results as `Numpy`_ arrays:
@@ -71,7 +74,7 @@ results as `Numpy`_ arrays:
 
     json = """
     {
-      "pipeline": [
+      [
         "1.2-with-color.las",
         {
             "type": "filters.sort",
@@ -92,30 +95,22 @@ results as `Numpy`_ arrays:
 Installation
 ................................................................................
 
-PDAL Python bindings require a working PDAL install (:ref:`PDAL <building>`)
-and then installation of the Python extension. The extension lives on `PyPI`_
-at https://pypi.python.org/pypi/PDAL and you should use that version as your
-canonical Python extension install.
-
-.. _`PyPI`: https://pypi.python.org/pypi/PDAL
-
-Install from local
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In the source code of PDAL there is a ``python`` folder, you have to enter
-there and run ::
-
-    python setup.py build
-    # this should be run as administrator/super user
-    python setup.py install
-
-Install from repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 .. index:: Install, Python
 
-The second method to install the PDAL Python extension is to use `pip`_
-or `easy_install`_, you have to run the command as administrator. ::
+The PDAL Python extension requires a working
+:ref:`PDAL installation <download>`.  Unless you choose the Conda installation
+method, make sure that you a current, working version of PDAL before
+installing the extension.
+
+
+Installation Using pip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: Install, Python, pip
+
+As administrator, you can install PDAL using pip:
+
+::
 
     pip install PDAL
 
@@ -124,36 +119,46 @@ or `easy_install`_, you have to run the command as administrator. ::
     To install pip please read
     `here <https://pip.pypa.io/en/stable/installing/>`_
 
-Install from Conda
+Installation from Source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: Install, Python, Source
+
+The PDAL Python extension is hosted on
+`GitHub <https://github.com/PDAL/python>`_.  If you have a working PDAL
+installation and a working Python installation, you can install the extension
+using the following procedure on Unix.  The procedure on Windows is similar ::
+
+    $ git clone https://github.com/PDAL/python pdalextension
+    $ cd pdalextension
+    $ python setup.py build
+    # this should be run as administrator/super user
+    $ python setup.py install
+
+Install using Conda
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. index:: Install, Python, Conda
 
-The final method to install the PDAL Python extension is to use `conda`_. An
-added advantage of using Conda to install the extension is that Conda will also
-install PDAL. ::
+The PDAL Python extension can also be installed using the `Conda`_
+package manager.  An advantage of using Conda to install the extension is
+that Conda will install PDAL. We recommend installing PDAL and the PDAL
+Python extension in an environment other than the base environment.  To
+install in an existing environment, use the following ::
 
-    conda install -c conda-forge python-pdal
+    conda install -n <environment name> -c conda-forge python-pdal
+
+Use the following command to install PDAL and the PDAL Python extension
+into a new environment and activate that environment ::
+
+    conda create -n <environment name> -c conda-forge python-pdal
+    conda activate <environment name>
 
 .. note::
 
     The official ``pdal`` and ``python-pdal`` packages reside in the
     conda-forge channel, which can be added via ``conda config`` or manually
-    specified with the ``-c`` option, as shown in the examples below.
-
-It is recommended that you actually either install PDAL and the Python
-extension either into an existing environment ::
-
-    conda install -n <environment name> -c conda-forge python-pdal
-
-or create a new environment from scratch ::
-
-    conda create -n <environment name> -c conda-forge python-pdal
-
-Once the environment has been created, you will be prompted to activate it. ::
-
-    conda activate <environment name>
+    specified with the ``-c`` option, as shown in the examples above.
 
 .. _`pip`: https://pip.pypa.io/en/stable/
-.. _`easy_install`: https://pypi.python.org/pypi/setuptools
-.. _`conda`: https://conda.io/docs/
+.. _`Conda`: https://conda.io/docs/

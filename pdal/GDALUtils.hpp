@@ -34,18 +34,17 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Dimension.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
-
-#include <pdal/Log.hpp>
-
 #include <array>
 #include <functional>
 #include <mutex>
 #include <sstream>
 #include <vector>
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <cpl_conv.h>
 #include <gdal_priv.h>
@@ -58,8 +57,6 @@ class OGRGeometry;
 
 namespace pdal
 {
-
-class SpatialReference;
 
 namespace gdal
 {
@@ -287,6 +284,7 @@ enum class GDALError
     CantOpen,
     NoData,
     InvalidBand,
+    BadBand,
     NoTransform,
     NotInvertible,
     CantReadBlock,
@@ -299,6 +297,7 @@ enum class GDALError
 };
 
 struct InvalidBand {};
+struct BadBand {};
 struct CantReadBlock {};
 struct CantWriteBlock
 {
@@ -322,14 +321,14 @@ class Band
 friend class Raster;
 
 private:
-    GDALDataset *m_ds;               /// Dataset handle
-    int m_bandNum;                   /// Band number.  Band numbers start at 1.
-    double m_dstNoData;              /// Output no data value.
-    GDALRasterBand *m_band;          /// Band handle
-    int m_xTotalSize, m_yTotalSize;  /// Total size (x and y) of the raster
-    int m_xBlockSize, m_yBlockSize;  /// Size (x and y) of blocks
-    int m_xBlockCnt, m_yBlockCnt;    /// Number of blocks in each direction
-    std::vector<T> m_buf;            /// Block read buffer.
+    GDALDataset *m_ds;                  /// Dataset handle
+    int m_bandNum;                      /// Band number. 1-indexed.
+    double m_dstNoData;                 /// Output no data value.
+    GDALRasterBand *m_band;             /// Band handle
+    size_t m_xTotalSize, m_yTotalSize;  /// Total size (x and y) of the raster
+    size_t m_xBlockSize, m_yBlockSize;  /// Size (x and y) of blocks
+    size_t m_xBlockCnt, m_yBlockCnt;    /// Number of blocks in each direction
+    std::vector<T> m_buf;               /// Block read buffer.
     std::string m_name;              /// Band name.
 
     /**
@@ -358,10 +357,19 @@ private:
             m_band->SetOffset(m_band->GetOffset(NULL) - .00001);
         }
 
-        m_xTotalSize = m_band->GetXSize();
-        m_yTotalSize = m_band->GetYSize();
+        int xTotalSize = m_band->GetXSize();
+        int yTotalSize = m_band->GetYSize();
 
-        m_band->GetBlockSize(&m_xBlockSize, &m_yBlockSize);
+        int xBlockSize, yBlockSize;
+        m_band->GetBlockSize(&xBlockSize, &yBlockSize);
+        if (xBlockSize <= 0 || yBlockSize <= 0 ||
+            xTotalSize <= 0 || yTotalSize <= 0)
+            throw BadBand();
+
+        m_xTotalSize = (size_t)xTotalSize;
+        m_yTotalSize = (size_t)yTotalSize;
+        m_xBlockSize = (size_t)xBlockSize;
+        m_yBlockSize = (size_t)yBlockSize;
         m_buf.resize(m_xBlockSize * m_yBlockSize);
 
         m_xBlockCnt = ((m_xTotalSize - 1) / m_xBlockSize) + 1;
@@ -382,8 +390,8 @@ private:
     {
         data.resize(m_xTotalSize * m_yTotalSize);
 
-        for (int y = 0; y < m_yBlockCnt; ++y)
-            for (int x = 0; x < m_xBlockCnt; ++x)
+        for (size_t y = 0; y < m_yBlockCnt; ++y)
+            for (size_t x = 0; x < m_xBlockCnt; ++x)
                 readBlock(x, y, data);
     }
 
@@ -399,19 +407,22 @@ private:
        \param data  Pointer to the data vector that contains the
           raster information.
      */
-    void readBlock(int x, int y, std::vector<T>& data)
+    void readBlock(size_t x, size_t y, std::vector<T>& data)
     {
         uint8_t *buf = reinterpret_cast<uint8_t *>(m_buf.data());
-        if (m_band->ReadBlock(x, y, buf) != CPLE_None)
+
+        // Block indices are guaranteed not to overflow an int.
+        if (m_band->ReadBlock(static_cast<int>(x),
+                              static_cast<int>(y), buf) != CPLE_None)
             throw CantReadBlock();
 
-        int xWidth = 0;
+        size_t xWidth = 0;
         if (x == m_xBlockCnt - 1)
             xWidth = m_xTotalSize % m_xBlockSize;
         if (xWidth == 0)
             xWidth = m_xBlockSize;
 
-        int yHeight = 0;
+        size_t yHeight = 0;
         if (y == m_yBlockCnt - 1)
             yHeight = m_yTotalSize % m_yBlockSize;
         if (yHeight == 0)
@@ -420,10 +431,10 @@ private:
         auto bi = m_buf.begin();
         // Go through rows copying data.  Increment the buffer pointer by the
         // width of the row.
-        for (int row = 0; row < yHeight; ++row)
+        for (size_t row = 0; row < yHeight; ++row)
         {
-            int wholeRows = m_xTotalSize * ((y * m_yBlockSize) + row);
-            int partialRows = m_xBlockSize * x;
+            size_t wholeRows = m_xTotalSize * ((y * m_yBlockSize) + row);
+            size_t partialRows = m_xBlockSize * x;
             auto di = data.begin() + (wholeRows + partialRows);
             std::copy(bi, bi + xWidth, di);
 
@@ -441,8 +452,8 @@ private:
     template <typename SOURCE_ITER>
     void write(SOURCE_ITER si, ITER_VAL<SOURCE_ITER> srcNoData)
     {
-        for (int y = 0; y < m_yBlockCnt; ++y)
-            for (int x = 0; x < m_xBlockCnt; ++x)
+        for (size_t y = 0; y < m_yBlockCnt; ++y)
+            for (size_t x = 0; x < m_xBlockCnt; ++x)
                 writeBlock(x, y, si, srcNoData);
     }
 
@@ -461,16 +472,16 @@ private:
     }
 
     template <typename SOURCE_ITER>
-    void writeBlock(int x, int y, SOURCE_ITER sourceBegin,
+    void writeBlock(size_t x, size_t y, SOURCE_ITER sourceBegin,
         ITER_VAL<SOURCE_ITER> srcNoData)
     {
-        int xWidth = 0;
+        size_t xWidth = 0;
         if (x == m_xBlockCnt - 1)
             xWidth = m_xTotalSize % m_xBlockSize;
         if (xWidth == 0)
             xWidth = m_xBlockSize;
 
-        int yHeight = 0;
+        size_t yHeight = 0;
         if (y == m_yBlockCnt - 1)
             yHeight = m_yTotalSize % m_yBlockSize;
        if (yHeight == 0)
@@ -480,14 +491,14 @@ private:
         auto di = m_buf.begin();
         // Go through rows copying data.  Increment the destination iterator
         // by the width of the row.
-        for (int row = 0; row < yHeight; ++row)
+        for (size_t row = 0; row < yHeight; ++row)
         {
             // Find the offset location in the source container.
-            int wholeRowElts = m_xTotalSize * ((y * m_yBlockSize) + row);
-            int partialRowElts = m_xBlockSize * x;
+            size_t wholeRowElts = m_xTotalSize * ((y * m_yBlockSize) + row);
+            size_t partialRowElts = m_xBlockSize * x;
 
             auto si = sourceBegin + (wholeRowElts + partialRowElts);
-            std::transform(si, si + m_xBlockSize, di,
+            std::transform(si, si + xWidth, di,
                 [srcNoData, dstNoData](ITER_VAL<SOURCE_ITER> s){
                     T t;
 
@@ -510,7 +521,10 @@ private:
             // is valid, so we use m_xBlockSize instead of xWidth.
             di += m_xBlockSize;
         }
-        if (m_band->WriteBlock(x, y, m_buf.data()) != CPLE_None)
+
+        //  x and y are guaranteed to fit into an int
+        if (m_band->WriteBlock(static_cast<int>(x),
+                               static_cast<int>(y), m_buf.data()) != CPLE_None)
             throw CantWriteBlock();
     }
 
@@ -520,9 +534,6 @@ private:
     {
         m_band->GetStatistics(bApprox, bForce, minimum, maximum, mean, stddev);
     }
-
-
-
 };
 
 
@@ -611,18 +622,20 @@ public:
         }
         catch (InvalidBand)
         {
-            std::stringstream oss;
-            oss << "Unable to get band " << nBand << " from raster '" <<
-                m_filename << "'.";
-            m_errorMsg = oss.str();
+            m_errorMsg = "Unable to get band " + std::to_string(nBand) +
+                " from raster '" + m_filename + "'.";
             return GDALError::InvalidBand;
+        }
+        catch (BadBand)
+        {
+            m_errorMsg = "Unable to read band/block information from "
+                "raster '" + m_filename + "'.";
+            return GDALError::BadBand;
         }
         catch (CantReadBlock)
         {
-            std::ostringstream oss;
-            oss << "Unable to read block for for raster '" << m_filename <<
-                "'.";
-            m_errorMsg = oss.str();
+            m_errorMsg = "Unable to read block for for raster '" +
+                m_filename + "'.";
             return GDALError::CantReadBlock;
         }
         return GDALError::None;
@@ -644,58 +657,68 @@ public:
         {
             switch(m_bandType)
             {
-                case Dimension::Type::Unsigned8:
-                    Band<uint8_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Signed8:
-                    Band<int8_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Unsigned16:
-                    Band<uint16_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Signed16:
-                    Band<int16_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Unsigned32:
-                    Band<uint32_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Signed32:
-                    Band<int32_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Unsigned64:
-                    Band<uint64_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Signed64:
-                    Band<int64_t>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Float:
-                    Band<float>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::Double:
-                    Band<double>(m_ds, nBand, m_dstNoData, name).
-                        write(si, srcNoData);
-                    break;
-                case Dimension::Type::None:
-                    throw CantWriteBlock();
+            case Dimension::Type::Unsigned8:
+                Band<uint8_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Signed8:
+                Band<int8_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Unsigned16:
+                Band<uint16_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Signed16:
+                Band<int16_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Unsigned32:
+                Band<uint32_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Signed32:
+                Band<int32_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Unsigned64:
+                Band<uint64_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Signed64:
+                Band<int64_t>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Float:
+                Band<float>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::Double:
+                Band<double>(m_ds, nBand, m_dstNoData, name).
+                    write(si, srcNoData);
+                break;
+            case Dimension::Type::None:
+                throw CantWriteBlock();
             }
+        }
+        catch (InvalidBand)
+        {
+            m_errorMsg = "Unable to get band " + std::to_string(nBand) +
+                " from raster '" + m_filename + "'.";
+            return GDALError::InvalidBand;
+        }
+        catch (BadBand)
+        {
+            m_errorMsg = "Unable to read band/block information from "
+                "raster '" + m_filename + "'.";
+            return GDALError::BadBand;
         }
         catch (CantWriteBlock err)
         {
-            std::ostringstream oss;
-            oss << "Unable to write block for for raster '" << m_filename <<
-                "'.";
+            m_errorMsg = "Unable to write block for for raster '" +
+                m_filename + "'.";
             if (err.what.size())
-                oss << "\n" << err.what;
-            m_errorMsg = oss.str();
+                m_errorMsg += "\n" + err.what;
             return GDALError::CantWriteBlock;
         }
         return GDALError::None;
@@ -762,49 +785,37 @@ public:
 
     std::string const& filename() { return m_filename; }
 
-    void statistics(int nBand,
-                    double* minimum,
-                    double* maximum,
-                    double* mean,
-                    double* stddev,
-                    int bApprox=TRUE,
-                    int bForce=TRUE) const
+    void statistics(int nBand, double* minimum, double* maximum, double* mean,
+        double* stddev, int bApprox = TRUE, int bForce = TRUE) const
     {
-        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev, bApprox, bForce);
+        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
+            bApprox, bForce);
     }
 
     BOX2D bounds() const
     {
-
         std::array<double, 2> coords;
 
-        pixelToCoord(height(),
-                     width(),
-                     coords);
+        pixelToCoord(height(), width(), coords);
         double maxx = coords[0];
         double maxy = coords[1];
 
-        pixelToCoord(0,
-                     0,
-                     coords);
+        pixelToCoord(0, 0, coords);
         double minx = coords[0];
         double miny = coords[1];
-        BOX2D output(minx, miny, maxx, maxy);
-        return output;
+        return BOX2D(minx, miny, maxx, maxy);
     }
 
     BOX3D bounds(int nBand) const
     {
-
         BOX2D box2 = bounds();
 
         double minimum; double maximum;
         double mean; double stddev;
         statistics(nBand, &minimum, &maximum, &mean, &stddev);
 
-        BOX3D output(box2.minx, box2.miny, minimum,
+        return BOX3D(box2.minx, box2.miny, minimum,
                      box2.maxx, box2.maxy, maximum);
-        return output;
     }
 
 private:

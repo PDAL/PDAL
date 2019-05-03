@@ -55,11 +55,11 @@ std::string PythonFilter::getName() const { return s_info.name; }
 
 void PythonFilter::addArgs(ProgramArgs& args)
 {
+    args.add("module", "Python module containing the function to run",
+        m_module).setPositional();
+    args.add("function", "Function to call", m_function).setPositional();
     args.add("source", "Python script to run", m_source);
     args.add("script", "File containing script to run", m_scriptFile);
-    args.add("module", "Python module containing the function to run",
-        m_module);
-    args.add("function", "Function to call", m_function);
     args.add("add_dimension", "Dimensions to add", m_addDimensions);
     args.add("pdalargs", "Dictionary to add to module globals when "
         "calling function", m_pdalargs);

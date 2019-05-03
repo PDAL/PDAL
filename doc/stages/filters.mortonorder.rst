@@ -31,22 +31,22 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "uncompressed.las",
-        {
+  [
+      "uncompressed.las",
+      {
           "type":"filters.mortonorder",
           "reverse":"false"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"compressed.laz",
           "compression":"true"
-        }
-      ]
-    }
+      }
+  ]
 
 
-Notes
------
+Options
+--------
+
+None.
 

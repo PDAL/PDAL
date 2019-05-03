@@ -12,6 +12,7 @@ if (MRSID_FOUND)
             ${MRSID_LIBRARY}
         INCLUDES
             ${PDAL_IO_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
             ${MRSID_INCLUDE_DIR}
     )
     target_compile_definitions(${reader_libname} PRIVATE -DHAVE_MRSID=1)
@@ -24,6 +25,9 @@ if (MRSID_FOUND)
                 ${reader_libname}
             INCLUDES
                 ${PDAL_IO_DIR}
+                ${NLOHMANN_INCLUDE_DIR}
+                ${MRSID_INCLUDE_DIR}
+
         )
     endif()
 else()

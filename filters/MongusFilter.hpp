@@ -49,6 +49,8 @@ class PointView;
 
 typedef std::unordered_map<int, std::vector<PointId>> PointIdHash;
 
+// NOTE: This filter is deprecated as of 3/2019.
+
 class PDAL_DLL MongusFilter : public Filter
 {
 public:

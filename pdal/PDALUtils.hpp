@@ -37,6 +37,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 

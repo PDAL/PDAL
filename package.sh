@@ -14,7 +14,7 @@ GITSHA="$(git rev-parse HEAD)"
 echo "Cutting release for SHA $GITSHA"
 
 HERE=`pwd`
-CONTAINER="pdal/dependencies"
+CONTAINER="pdal/alpinebase"
 DOCKER="docker"
 
 CONTAINERRUN="$DOCKER run -it -d --entrypoint /bin/sh -v $HERE:/data $CONTAINER"
@@ -41,11 +41,11 @@ mkdir build; cd build;
 
 if [ -n "${RELNAME+x}" ]
 then
-    cmake -DPDAL_VERSION_STRING=$RELNAME ..
+    cmake -G Ninja -DPDAL_VERSION_STRING=$RELNAME ..
 else
-    cmake ..
+    cmake -G Ninja ..
 fi
-make dist
+ninja dist
 RELNAME=$(./bin/pdal-config --version)
 
 OUTPUTDIR="/data/release-$RELNAME"

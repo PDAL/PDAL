@@ -9,9 +9,8 @@ Quickstart
 Introduction
 ------------------------------------------------------------------------------
 
-It's a giant pain to build everything yourself. The quickest way to start using
-PDAL is to leverage builds that were constructed by the PDAL development team
-using `Conda`_.
+The quickest way to start using PDAL is to leverage builds that were
+constructed by the PDAL development team using `Conda`_.
 
 Directly from the Conda front page,
 
@@ -77,11 +76,10 @@ the PDAL maintenance branch.
 
 .. warning::
 
-    It is actually a very good idea to install PDAL in it's own environment (or
+    It is a good idea to install PDAL in it's own environment (or
     add it to an existing one). You will **NOT** want to add it to your default
     environment named ``base``. Managing environments is beyond the scope of
-    the quickstart, but you should read more about it over at
-    https://conda.io/docs/user-guide/getting-started.html#managing-envs.
+    the quickstart, but you can read more about it `here <https://conda.io/docs/user-guide/getting-started.html#managing-envs>`_.
 
 To install the PDAL package so that we can use it to run PDAL commands, we run
 the following command to create an environment named ``myenv``, installing PDAL
@@ -131,7 +129,6 @@ output should look something like: ::
         icu:             58.2-vc14_0           conda-forge [vc14]
         intel-openmp:    2018.0.3-0
         jpeg:            9b-vc14_2             conda-forge [vc14]
-        jsoncpp:         1.8.1-vc14_0          conda-forge [vc14]
         kealib:          1.4.7-vc14_4          conda-forge [vc14]
         krb5:            1.14.6-vc14_0         conda-forge [vc14]
         laszip:          3.2.2-vc14_0          conda-forge [vc14]
