@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <nlohmann/json.hpp>
 
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
@@ -161,8 +162,6 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
 
 void PipelineReaderJSON::readPipeline(const std::string& filename)
 {
-    m_inputJSONFile = filename;
-
     std::istream* input = Utils::openFile(filename);
     if (!input)
     {
@@ -181,7 +180,6 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     }
 
     Utils::closeFile(input);
-    m_inputJSONFile = "";
 }
 
 
