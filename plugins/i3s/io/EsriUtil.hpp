@@ -35,7 +35,7 @@
 
 #include <stdexcept>
 
-#include <nlohmann/json.hpp>
+#include <pdal/JsonFwd.hpp>
 
 namespace lepcc
 {
@@ -62,26 +62,7 @@ public:
     {}
 };
 
-/*Return value of data in json format*/
-inline NL::json parse(const std::string& data)
-{
-    NL::json j;
-
-    if (data.size())
-    {
-        try
-        {
-            j = NL::json::parse(data);
-        }
-        catch (const NL::json::parse_error& err)
-        {
-            throw json_parse_error(std::string("Error during parsing: ") +
-                err.what());
-        }
-    }
-    return j;
-}
-
+NL::json parse(const std::string& data);
 std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData);
 std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData);
 std::vector<uint16_t> decompressIntensity(std::vector<char>* compData);
