@@ -87,10 +87,14 @@ PointViewPtr IcpFilter::icp(PointViewPtr fixed, PointViewPtr moving) const
 {
     typedef pcl::PointXYZ Point;
     typedef pcl::PointCloud<Point> Cloud;
+
+    BOX3D buffer_bounds;
+    fixed->calculateBounds(buffer_bounds);
+
     Cloud::Ptr fixedCloud(new Cloud());
-    pclsupport::PDALtoPCD(fixed, *fixedCloud);
+    pclsupport::PDALtoPCD(fixed, *fixedCloud, buffer_bounds);
     Cloud::Ptr movingCloud(new Cloud());
-    pclsupport::PDALtoPCD(moving, *movingCloud);
+    pclsupport::PDALtoPCD(moving, *movingCloud, buffer_bounds);
     pcl::IterativeClosestPoint<Point, Point> icp;
     icp.setInputSource(movingCloud);
     icp.setInputTarget(fixedCloud);
