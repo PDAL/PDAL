@@ -37,6 +37,7 @@
 #include <cassert>
 
 #include <arbiter/arbiter.hpp>
+#include <nlohmann/json.hpp>
 
 #include "private/EptSupport.hpp"
 
@@ -56,7 +57,13 @@ namespace
 
 CREATE_STATIC_STAGE(EptAddonWriter, s_info)
 
-EptAddonWriter::EptAddonWriter()
+struct EptAddonWriter::Args
+{
+    NL::json m_addons;
+    std::size_t m_numThreads;
+};
+
+EptAddonWriter::EptAddonWriter() : m_args(new Args)
 {}
 
 EptAddonWriter::~EptAddonWriter()
@@ -67,8 +74,8 @@ std::string EptAddonWriter::getName() const { return s_info.name; }
 void EptAddonWriter::addArgs(ProgramArgs& args)
 {
     args.add("addons", "Mapping of output locations to their dimension names",
-            m_addonsArg).setPositional();
-    args.add("threads", "Number of worker threads", m_numThreads);
+            m_args->m_addons).setPositional();
+    args.add("threads", "Number of worker threads", m_args->m_numThreads);
 }
 
 void EptAddonWriter::addDimensions(PointLayoutPtr layout)
@@ -83,7 +90,7 @@ void EptAddonWriter::prepared(PointTableRef table)
 {
     m_arbiter.reset(new arbiter::Arbiter());
 
-    const std::size_t threads(std::max<std::size_t>(m_numThreads, 4));
+    const std::size_t threads(std::max<std::size_t>(m_args->m_numThreads, 4));
     if (threads > 100)
     {
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
@@ -92,7 +99,7 @@ void EptAddonWriter::prepared(PointTableRef table)
     m_pool.reset(new Pool(threads));
 
     const PointLayout& layout(*table.layout());
-    for (auto it : m_addonsArg.items())
+    for (auto it : m_args->m_addons.items())
     {
         const std::string& path = it.key();
         const std::string& dimName = it.value().get<std::string>();

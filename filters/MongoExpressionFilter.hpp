@@ -34,9 +34,8 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/Filter.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/Streamable.hpp>
 
 namespace pdal

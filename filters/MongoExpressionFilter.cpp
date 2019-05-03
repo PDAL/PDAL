@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <nlohmann/json.hpp>
+
 #include "MongoExpressionFilter.hpp"
 
 #include "private/mongoexpression/Expression.hpp"
