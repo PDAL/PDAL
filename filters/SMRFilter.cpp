@@ -224,15 +224,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     }
     else
     {
-        if (m_args->m_returns.size())
-        {
-            Segmentation::segmentReturns(keptView, firstView, secondView,
-                                         m_args->m_returns);
-        }
-        else
-        {
-            firstView->append(*keptView);
-        }
+        Segmentation::segmentReturns(keptView, firstView, secondView,
+                                     m_args->m_returns);
     }
 
     if (!firstView->size())
