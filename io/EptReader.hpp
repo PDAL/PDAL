@@ -62,6 +62,8 @@ class Pool;
 
 class PDAL_DLL EptReader : public Reader
 {
+    FRIEND_TEST(EptReaderTest, getType);
+
 public:
     EptReader();
     virtual ~EptReader();
@@ -94,6 +96,9 @@ private:
 
     void readAddon(PointView& dst, const Key& key, const Addon& addon,
             uint64_t startId) const;
+
+    // To allow testing of hidden getType();
+    static Dimension::Type getTypeTest(const NL::json& dimInfo);
 
     std::string m_root;
 

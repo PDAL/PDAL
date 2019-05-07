@@ -63,13 +63,20 @@ namespace
 
     Dimension::Type getType(const NL::json& dim)
     {
-        if (dim.contains("scale"))
+        if (dim.contains("scale") && dim["scale"].is_number())
             return Dimension::Type::Double;
-
-        const std::string typestring(dim["type"].get<std::string>());
-        const uint64_t size(dim["size"].get<uint64_t>());
-
-        return Dimension::type(typestring, size);
+        else if (dim.contains("type") && dim.contains("size"))
+        {
+            try
+            {
+                const std::string typestring(dim["type"].get<std::string>());
+                const uint64_t size(dim["size"].get<uint64_t>());
+                return Dimension::type(typestring, size);
+            }
+            catch (const NL::json::type_error&)
+            {}
+        }
+        return Dimension::Type::None;
     }
 }
 
@@ -726,6 +733,12 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         dst.setField(addon.id(), addon.type(), id, pos);
         pos += dimSize;
     }
+}
+
+
+Dimension::Type EptReader::getTypeTest(const NL::json& j)
+{
+    return getType(j);
 }
 
 } // namespace pdal
