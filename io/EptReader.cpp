@@ -283,7 +283,7 @@ QuickInfo EptReader::inspect()
 
 void EptReader::addDimensions(PointLayoutPtr layout)
 {
-    const NL::json schema {m_info->schema()};
+    const NL::json& schema(m_info->schema());
     m_remoteLayout.reset(new FixedPointLayout());
 
     for (auto& el : schema)

@@ -2,17 +2,11 @@
 
 #pragma once
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/Stage.hpp>
-
-#include <memory>
 
 namespace pdal
 {
-
-class Options;
-class PointLayout;
-class PointView;
 
 class PDAL_DLL MyFilter : public Filter
 {
