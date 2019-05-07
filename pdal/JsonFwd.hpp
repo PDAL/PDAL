@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#define INCLUDE_NLOHMANN_JSON_FWD_HPP_
 
 #include <cstdint> // int64_t, uint64_t
 #include <map> // map
@@ -53,5 +54,8 @@ uses the standard template types.
 */
 using json = basic_json<>;
 }  // namespace nlohmann
+
+#endif
+
 namespace NL = nlohmann;
 
