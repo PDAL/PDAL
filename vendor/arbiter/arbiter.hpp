@@ -4379,6 +4379,12 @@ namespace arbiter
 /** General utilities. */
 namespace util
 {
+    /**
+     Returns a random number based on a random device if one exists on
+     the system.
+    */
+    ARBITER_DLL uint64_t randomNumber();
+
     /** Returns @p path, less any trailing glob indicators (one or two
      * asterisks) as well as any possible trailing slash.
      */
@@ -4463,7 +4469,7 @@ namespace util
 #ifdef ARBITER_WINDOWS
             sep = "\\";
 #else
-            sep = "/";   
+            sep = "/";
 #endif
         }
         else if (next.empty() && currentIsDir)
@@ -4475,7 +4481,7 @@ namespace util
 #ifdef ARBITER_WINDOWS
                 sep = "\\";
 #else
-                sep = "/";   
+                sep = "/";
 #endif
 
             }
