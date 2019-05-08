@@ -56,6 +56,8 @@
 #include <iostream>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -87,7 +89,8 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0)
+    m_compression(LasCompression::None), m_srsCnt(0),
+    m_userVLRs(new NL::json)
 {}
 
 
@@ -144,7 +147,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
-    args.add("vlrs", "List of VLRs to set", m_userVLRs);
+    args.add("vlrs", "List of VLRs to set", *m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -228,7 +231,7 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-    for (const auto& v : m_userVLRs)
+    for (const auto& v : *m_userVLRs)
     {
         uint16_t recordId(1);
         std::string userId("");

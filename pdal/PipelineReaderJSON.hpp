@@ -34,9 +34,8 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
-
-#include <nlohmann/json.hpp>
 
 #include <vector>
 #include <string>
@@ -58,6 +57,9 @@ public:
     PipelineReaderJSON(PipelineManager&);
 
 private:
+    PipelineReaderJSON& operator=(const PipelineReaderJSON&) = delete;
+    PipelineReaderJSON(const PipelineReaderJSON&) = delete;
+
     typedef std::map<std::string, Stage *> TagMap;
 
     void parsePipeline(NL::json&);
@@ -72,10 +74,6 @@ private:
         std::vector<Stage *>& inputs);
 
     PipelineManager& m_manager;
-    std::string m_inputJSONFile;
-
-    PipelineReaderJSON& operator=(const PipelineReaderJSON&); // not implemented
-    PipelineReaderJSON(const PipelineReaderJSON&); // not implemented
 };
 
 } // namespace pdal

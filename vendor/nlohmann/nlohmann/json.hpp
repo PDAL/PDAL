@@ -874,7 +874,6 @@ uses the standard template types.
 */
 using json = basic_json<>;
 }  // namespace nlohmann
-namespace NL = nlohmann;
 
 #endif  // INCLUDE_NLOHMANN_JSON_FWD_HPP_
 
@@ -20890,5 +20889,6 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 #undef NLOHMANN_BASIC_JSON_TPL_DECLARATION
 #undef NLOHMANN_BASIC_JSON_TPL
 
-
 #endif  // INCLUDE_NLOHMANN_JSON_HPP_
+
+namespace NL = nlohmann;

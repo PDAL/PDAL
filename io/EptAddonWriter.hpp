@@ -37,8 +37,7 @@
 #include <cstddef>
 #include <memory>
 
-#include <nlohmann/json.hpp>
-
+#include <pdal/JsonFwd.hpp>
 #include <pdal/Writer.hpp>
 
 namespace pdal
@@ -62,30 +61,29 @@ public:
     virtual ~EptAddonWriter();
 
     std::string getName() const override;
+
+private:
+    struct Args;
+    std::unique_ptr<Args> m_args;
+
     virtual void addArgs(ProgramArgs& args) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void prepared(PointTableRef table) override;
     virtual void ready(PointTableRef table) override;
     virtual void write(const PointViewPtr view) override;
 
-private:
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
-    std::unique_ptr<Pool> m_pool;
-
-    NL::json m_addonsArg;
-    std::vector<std::unique_ptr<Addon>> m_addons;
-
     void writeOne(const PointViewPtr view, const Addon& addon) const;
     void writeHierarchy(NL::json& hier, const Key& key,
             const arbiter::Endpoint& hierEp) const;
     std::string getTypeString(Dimension::Type t) const;
 
-    std::size_t m_numThreads = 0;
-
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    std::unique_ptr<Pool> m_pool;
     std::unique_ptr<EptInfo> m_info;
+    std::vector<std::unique_ptr<Addon>> m_addons;
     std::map<Key, uint64_t> m_hierarchy;
     uint64_t m_hierarchyStep = 0;
 };
