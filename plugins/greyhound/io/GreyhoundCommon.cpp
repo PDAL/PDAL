@@ -150,8 +150,7 @@ NL::json GreyhoundParams::extractParams(const GreyhoundArgs& args)
         {
             // This is a PDAL-specified bounds.
             Bounds pdalBounds;
-            std::istringstream iss(args.sbounds);
-            iss >> pdalBounds;
+            Utils::fromString(args.sbounds, pdalBounds);
             if (pdalBounds.is3d())
             {
                 const auto box(pdalBounds.to3d());

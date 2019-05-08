@@ -37,10 +37,13 @@
 #include <limits>
 
 #include "private/EptSupport.hpp"
+
 #include "LasReader.hpp"
 
 #include <arbiter/arbiter.hpp>
 
+#include <pdal/GDALUtils.hpp>
+#include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal
@@ -57,11 +60,71 @@ namespace
     };
 
     const std::string addonFilename { "ept-addon.json" };
+
+    Dimension::Type getType(const NL::json& dim)
+    {
+        if (dim.contains("scale") && dim["scale"].is_number())
+            return Dimension::Type::Double;
+        else if (dim.contains("type") && dim.contains("size"))
+        {
+            try
+            {
+                const std::string typestring(dim["type"].get<std::string>());
+                const uint64_t size(dim["size"].get<uint64_t>());
+                return Dimension::type(typestring, size);
+            }
+            catch (const NL::json::type_error&)
+            {}
+        }
+        return Dimension::Type::None;
+    }
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
 
-EptReader::EptReader()
+class EptBounds : public SrsBounds
+{
+public:
+    static constexpr double LOWEST = (std::numeric_limits<double>::lowest)();
+    static constexpr double HIGHEST = (std::numeric_limits<double>::max)();
+
+    EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
+        HIGHEST, HIGHEST, HIGHEST))
+    {}
+};
+
+namespace Utils
+{
+    template<>
+    bool fromString<EptBounds>(const std::string& s, EptBounds& bounds)
+    {
+        if (!fromString(s, (SrsBounds&)bounds))
+            return false;
+
+        // If we're setting 2D bounds, grow to 3D by explicitly setting
+        // Z dimensions.
+        if (!bounds.is3d())
+        {
+            BOX2D box = bounds.to2d();
+            bounds.grow(box.minx, box.miny, EptBounds::LOWEST);
+            bounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
+        }
+        return true;
+    }
+}
+
+struct EptReader::Args
+{
+public:
+    EptBounds m_bounds;
+    std::string m_origin;
+    std::size_t m_threads = 0;
+    double m_resolution = 0;
+    NL::json m_addons;
+};
+
+
+EptReader::EptReader() : m_args(new EptReader::Args)
 {}
 
 EptReader::~EptReader()
@@ -71,35 +134,14 @@ std::string EptReader::getName() const { return s_info.name; }
 
 void EptReader::addArgs(ProgramArgs& args)
 {
-    args.add("bounds", "Bounds to fetch", m_args.boundsArg());
-    args.add("origin", "Origin of source file to fetch", m_args.originArg());
-    args.add("threads", "Number of worker threads", m_args.threadsArg());
-    args.add("resolution", "Resolution limit", m_args.resolutionArg());
+    args.add("bounds", "Bounds to fetch", m_args->m_bounds);
+    args.add("origin", "Origin of source file to fetch", m_args->m_origin);
+    args.add("threads", "Number of worker threads", m_args->m_threads);
+    args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
-            m_args.addonsArg());
+        m_args->m_addons);
 }
 
-BOX3D EptReader::Args::bounds() const
-{
-    // If already 3D (which is non-empty), return it as-is.
-    if (m_bounds.is3d())
-        return m_bounds.to3d();
-
-    // If empty, return maximal extents to select everything.
-    const BOX2D b(m_bounds.to2d());
-    if (b.empty())
-    {
-        const double mn((std::numeric_limits<double>::lowest)());
-        const double mx((std::numeric_limits<double>::max)());
-        return BOX3D(mn, mn, mn, mx, mx, mx);
-    }
-
-    // Finally if 2D and non-empty, convert to 3D with all-encapsulating
-    // Z-values.
-    return BOX3D(
-            b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
-            b.maxx, b.maxy, (std::numeric_limits<double>::max)());
-}
 
 void EptReader::initialize()
 {
@@ -123,7 +165,8 @@ void EptReader::initialize()
 
     m_arbiter.reset(new arbiter::Arbiter());
     m_ep.reset(new arbiter::Endpoint(m_arbiter->getEndpoint(m_root)));
-    const std::size_t threads(m_args.threads());
+
+    const std::size_t threads((std::max)(m_args->m_threads, size_t(4)));
     if (threads > 100)
     {
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
@@ -140,13 +183,21 @@ void EptReader::initialize()
     {
         throwError(e.what());
     }
-
     debug << "Got EPT info" << std::endl;
     debug << "SRS: " << m_info->srs() << std::endl;
+
+    const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
+    if (!m_info->srs().valid() && boundsSrs.valid())
+        throwError("Can't use bounds with SRS with data source that has "
+            "no SRS.");
+
     setSpatialReference(m_info->srs());
 
-    // Figure out our query parameters.
-    m_queryBounds = m_args.bounds();
+    m_queryBounds = m_args->m_bounds.to3d();
+    if (boundsSrs.valid())
+        gdal::reprojectBounds(m_queryBounds,
+            boundsSrs.getWKT(), m_info->srs().getWKT());
+
     try
     {
         handleOriginQuery();
@@ -157,7 +208,7 @@ void EptReader::initialize()
     }
 
     // Figure out our max depth.
-    const double queryResolution(m_args.resolution());
+    const double queryResolution(m_args->m_resolution);
     if (queryResolution)
     {
         double currentResolution =
@@ -184,11 +235,14 @@ void EptReader::initialize()
     debug << "Threads: " << m_pool->size() << std::endl;
 }
 
+
 void EptReader::handleOriginQuery()
 {
-    if (m_args.origin().empty()) return;
+    const std::string search(m_args->m_origin);
 
-    const std::string search(m_args.origin());
+    if (search.empty())
+        return;
+
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
@@ -327,7 +381,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 
     try
     {
-        for (auto it : m_args.addons().items())
+        for (auto it : m_args->m_addons.items())
         {
             std::string dimName = it.key();
             const NL::json& val = it.value();
@@ -679,6 +733,12 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         dst.setField(addon.id(), addon.type(), id, pos);
         pos += dimSize;
     }
+}
+
+
+Dimension::Type EptReader::getTypeTest(const NL::json& j)
+{
+    return getType(j);
 }
 
 } // namespace pdal
