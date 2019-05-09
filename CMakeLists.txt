@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.9.0" CACHE STRING "PDAL version")
+set(PDAL_VERSION_STRING "1.9.1" CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
 set(PDAL_API_VERSION "8")
-set(PDAL_BUILD_VERSION "9.0.0")
+set(PDAL_BUILD_VERSION "9.0.1")
 
 # Name of C++ library
 
