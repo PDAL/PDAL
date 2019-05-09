@@ -384,6 +384,8 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     addForwardMetadata(forward, m, "offset_z", m_header.offsetZ(),
         "The offset for Z values.", 20);
 
+    m.add("point_length", m_header.pointLen(),
+        "The size, in bytes, of each point records.");
     m.add("header_size", m_header.vlrOffset(),
         "The size, in bytes, of the header block, including any extension "
         "by specific software.");
