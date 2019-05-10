@@ -103,6 +103,9 @@ TEST(HexbinFilterTest, issue_2507)
 
     // This is an arrangement with two holes.  One of the holes has two
     // islands and one of those islands has a hole.
+    // Here's a link to the picture.  the green numbers represent the hexes
+    // represented:
+    // https://photos.app.goo.gl/P3B3mU4Zre6zADEQ6
     std::vector<std::pair<int, int>> hexes {
         {0, 3}, {0, 4}, {0,5}, {0, 6},
         {1, 2}, {1, 6},
