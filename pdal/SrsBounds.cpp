@@ -82,7 +82,7 @@ void SrsBounds::parse(const std::string& s, std::string::size_type& pos)
 
 std::ostream& operator << (std::ostream& out, const SrsBounds& srsBounds)
 {
-    out << (Bounds&)srsBounds;
+    out << static_cast<const Bounds&>(srsBounds);
     out << " / " << srsBounds.m_srs;
     return out;
 }
