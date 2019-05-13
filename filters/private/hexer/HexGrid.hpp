@@ -66,22 +66,24 @@ public:
             delete m_paths[i];
     }
 
+    // Exported for testing.
+    PDAL_DLL void findShapes();
+    PDAL_DLL void findParentPaths();
+    PDAL_DLL void toWKT(std::ostream&) const;
+    PDAL_DLL void addDenseHexagon(int x, int y);
+
     bool dense(Hexagon *h);
     void addPoint(double x, double y)
         { addPoint(Point(x, y)); }
     void addPoint(Point p);
     void processSample();
-    // Exported for testing.
-    PDAL_DLL void findShapes();
-    PDAL_DLL void findParentPaths();
-    PDAL_DLL void toWKT(std::ostream&) const;
+
     void extractShapes();
     void dumpInfo();
     void drawHexagons();
     Hexagon *getHexagon(int x, int y);
     Hexagon *getHexagon(const Coord& c)
         { return getHexagon(c.m_x, c.m_y); }
-    void addDenseHexagon(int x, int y);
     HexIter hexBegin();
     HexIter hexEnd();
     double width() const
