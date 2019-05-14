@@ -74,7 +74,7 @@ E57Reader::ChunkReader::~ChunkReader()
 bool E57Reader::ChunkReader::isInScope(pdal::point_count_t index) const
 {
     pdal::point_count_t actualIndex = index - m_pointOffset;
-    return (actualIndex>=0 && actualIndex < m_maxPointRead);
+    return (actualIndex < m_maxPointRead);
 }
 
 bool E57Reader::ChunkReader::isInChunk(pdal::point_count_t index) const
