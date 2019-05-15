@@ -63,11 +63,11 @@ struct OGRDeleter
 using OGRScopedSpatialReference =
     std::unique_ptr<OGRSpatialReference, OGRDeleter>;
 
-OGRScopedSpatialReference ogrCreateSrs(std::string s = "EPSG:4326")
+OGRScopedSpatialReference ogrCreateSrs(std::string s = "")
 {
     return OGRScopedSpatialReference(
-            static_cast<OGRSpatialReference*>(
-                OSRNewSpatialReference(s.c_str())));
+        static_cast<OGRSpatialReference*>(
+            OSRNewSpatialReference(s.size() ? s.c_str() : nullptr)));
 }
 
 }
