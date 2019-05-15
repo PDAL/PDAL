@@ -36,6 +36,7 @@ invalidate an existing KD-tree.
    filters.cluster
    filters.colorinterp
    filters.colorization
+   filters.covariancefeatures
    filters.dem
    filters.eigenvalues
    filters.estimaterank
@@ -73,6 +74,10 @@ invalidate an existing KD-tree.
 
 :ref:`filters.colorization`
     Fetch and assign RGB color information from a GDAL-readable datasource.
+
+:ref:`filters.covariancefeatures`
+    Filter that calculates local features based on the covariance matrix of a
+    point's neighborhood.
 
 :ref:`filters.eigenvalues`
     Compute pointwise eigenvalues, based on k-nearest neighbors.
