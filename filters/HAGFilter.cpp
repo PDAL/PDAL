@@ -65,6 +65,8 @@ void HAGFilter::addArgs(ProgramArgs& args)
     args.add("max_distance", "The maximum distance to the farthest nearest neighbor before the height above ground is not calculated [default: 0 (disabled)]", m_max_distance);
     args.add("allow_extrapolation", "If true and count > 1, allow extrapolation [default: true].",
             m_allow_extrapolation, true);
+    args.add("delaunay_fans", "Construct local Delaunay fans and infer heights from them [default: false].",
+            m_delaunay_fans, false);
 }
 
 void HAGFilter::addDimensions(PointLayoutPtr layout)
