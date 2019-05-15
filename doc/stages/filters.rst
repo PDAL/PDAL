@@ -45,7 +45,6 @@ invalidate an existing KD-tree.
    filters.info
    filters.kdistance
    filters.lof
-   filters.mongus
    filters.neighborclassifier
    filters.nndistance
    filters.normal
