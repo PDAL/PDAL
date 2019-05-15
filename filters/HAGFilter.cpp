@@ -40,6 +40,7 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
 
 namespace pdal
 {
@@ -79,6 +80,38 @@ void HAGFilter::prepared(PointTableRef table)
     const PointLayoutPtr layout(table.layout());
     if (!layout->hasDim(Dimension::Id::Classification))
         throwError("Missing Classification dimension in input PointView.");
+}
+
+inline double dot(double ax, double ay, double az, double bx, double by, double bz)
+{
+    return ax*bx + ay*by + az*bz;
+}
+
+inline double plane_point_distance(double ax, double ay, double az,
+                                                 double bx, double by, double bz,
+                                                 double cx, double cy, double cz,
+                                                 double x0, double y0, double z0
+                                                 ) {
+  bx -= cx;
+  by -= cy;
+  bz -= cz;
+  ax -= cx;
+  ay -= cy;
+  az -= cz;
+  x0 -= cx;
+  y0 -= cy;
+  z0 -= cz;
+
+  double nx = ay*bz - az*by;
+  double ny = ax*bz - az*bx;
+  double nz = ax*by - ay*bx;
+  double mag = std::sqrt(dot(nx, ny, nz, nx, ny, nz));
+
+  nx /= mag;
+  ny /= mag;
+  nz /= mag;
+
+  return std::abs(dot(x0, y0, z0, nx, ny, nz));
 }
 
 void HAGFilter::filter(PointView& view)
@@ -124,7 +157,8 @@ void HAGFilter::filter(PointView& view)
         assert(ids.size() > 0);
         if (ids.size() == 1) {
             z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
-        } else {
+            view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
+        } else if (m_delaunay_fans == false) {
             auto min_x = std::numeric_limits<double>::max();
             auto max_x = std::numeric_limits<double>::min();
             auto min_y = std::numeric_limits<double>::max();
@@ -165,14 +199,43 @@ void HAGFilter::filter(PointView& view)
             if (exact_match || m_allow_extrapolation || (x0 > min_x && x0 < max_x && y0 > min_y && y0 < max_y)) {
                 z1 = z_accumulator / weights;
             }
+            view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
+        } else if (m_delaunay_fans == true) {
+            auto neighbors = std::vector<double>();
+
+            for(unsigned int j = 0; j < ids.size(); ++j)
+            {
+                neighbors.push_back(gView->getFieldAs<double>(Dimension::Id::X, ids[j]));
+                neighbors.push_back(gView->getFieldAs<double>(Dimension::Id::Y, ids[j]));
+            }
+            auto triangulation = delaunator::Delaunator(neighbors);
+            auto triangles = triangulation.triangles;
+
+            double best_distance = std::numeric_limits<double>::infinity();
+            for (unsigned int j = 0; j < triangles.size(); j += 3)
+            {
+                auto ai = triangles[j+0];
+                auto bi = triangles[j+1];
+                auto ci = triangles[j+2];
+                double ax = gView->getFieldAs<double>(Dimension::Id::X, ids[ai]);
+                double ay = gView->getFieldAs<double>(Dimension::Id::Y, ids[ai]);
+                double az = gView->getFieldAs<double>(Dimension::Id::Z, ids[ai]);
+                double bx = gView->getFieldAs<double>(Dimension::Id::X, ids[bi]);
+                double by = gView->getFieldAs<double>(Dimension::Id::Y, ids[bi]);
+                double bz = gView->getFieldAs<double>(Dimension::Id::Z, ids[bi]);
+                double cx = gView->getFieldAs<double>(Dimension::Id::X, ids[ci]);
+                double cy = gView->getFieldAs<double>(Dimension::Id::Y, ids[ci]);
+                double cz = gView->getFieldAs<double>(Dimension::Id::Z, ids[ci]);
+
+                best_distance = std::min(best_distance, plane_point_distance(ax, ay, az, bx, by, bz, cx, cy, cz, x0, y0, z0));
+            }
+            view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], best_distance);
         }
-        view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
     }
 
     // Final pass: Ensure that all ground points have height value pegged at 0.
     for (auto const& i : gIdx)
         view.setField(Dimension::Id::HeightAboveGround, i, 0.0);
 }
-
 
 } // namespace pdal
