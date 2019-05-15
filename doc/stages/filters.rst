@@ -97,9 +97,6 @@ invalidate an existing KD-tree.
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
 
-:ref:`filters.mongus`
-    Label ground/non-ground returns using [Mongus2012]_.
-
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
 
