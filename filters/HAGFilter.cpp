@@ -36,6 +36,8 @@
 
 #include <pdal/KDIndex.hpp>
 
+#include "private/delaunator.hpp"
+
 #include <string>
 #include <vector>
 
