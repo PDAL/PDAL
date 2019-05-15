@@ -94,6 +94,7 @@ public:
         { return m_size == 0; }
 
     inline void appendPoint(const PointView& buffer, PointId id);
+    inline void appendPoints(const PointView& buffer, std::vector<PointId> ids);
     void append(const PointView& buf)
     {
         // We use size() instead of the index end because temp points
@@ -580,6 +581,12 @@ inline void PointView::appendPoint(const PointView& buffer, PointId id)
     m_index.push_back(rawId);
     m_size++;
     assert(m_temps.empty());
+}
+
+inline void PointView::appendPoints(const PointView& buffer, std::vector<PointId> ids)
+{
+    for (auto const& i : ids)
+        appendPoint(buffer, i);
 }
 
 

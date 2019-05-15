@@ -37,6 +37,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
 
+#include <numeric>
+
 namespace pdal
 {
 
@@ -72,20 +74,18 @@ private:
                 << ") exceeds number of available points.\n";
         PointViewSet viewSet;
         PointViewPtr outView = view->makeNew();
-        PointId start;
-        PointId end;
         if (m_invert)
         {
-            start = m_count;
-            end = view->size();
+            std::vector<PointId> ids(view->size()-m_count);
+            std::iota(ids.begin(), ids.end(), m_count);
+            outView->appendPoints(*view, ids);
         }
         else
         {
-            start = 0;
-            end = (std::min)(m_count, view->size());
+            std::vector<PointId> ids(m_count);
+            std::iota(ids.begin(), ids.end(), 0);
+            outView->appendPoints(*view, ids);
         }
-        for (PointId i = start; i < end; ++i)
-            outView->appendPoint(*view, i);
         viewSet.insert(outView);
         return viewSet;
     }
