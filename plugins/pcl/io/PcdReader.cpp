@@ -35,13 +35,12 @@
 #include "PcdReader.hpp"
 #include "point_types.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
 #include <pdal/PointView.hpp>
 #include "../PCLConversions.hpp"
+#include "PcdHeader.hpp"
 
 namespace pdal
 {
@@ -55,20 +54,45 @@ static PluginInfo const s_info
 
 CREATE_SHARED_STAGE(PcdReader, s_info)
 
-std::string PcdReader::getName() const { return s_info.name; }
+std::string PcdReader::getName() const
+{
+    return s_info.name;
+}
+
+QuickInfo PcdReader::inspect()
+{
+    QuickInfo qi;
+
+    initialize();
+
+    for (auto i : m_header.m_fields)
+        qi.m_dimNames.push_back(i.m_label);
+    qi.m_pointCount = m_header.m_pointCount;
+    qi.m_valid = true;
+
+    return qi;
+}
 
 void PcdReader::ready(PointTableRef table)
 {
-    pcl::PCLPointCloud2 cloud;
-    pcl::PCDReader r;
-    r.readHeader(m_filename, cloud);
-    m_numPts = cloud.height * cloud.width;
+    // initialize();
 }
 
 
 void PcdReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(fileDimensions());
+    for (auto i : m_header.m_fields)
+    {
+        Dimension::BaseType base = Dimension::BaseType::None;
+        if (i.m_type == PcdFieldType::U)
+            base = Dimension::BaseType::Unsigned;
+        else if (i.m_type == PcdFieldType::I)
+            base = Dimension::BaseType::Signed;
+        else if (i.m_type == PcdFieldType::F)
+            base = Dimension::BaseType::Floating;
+        Dimension::Type t = static_cast<Dimension::Type>(unsigned(base) | i.m_size);
+        layout->registerOrAssignDim(i.m_label, t);
+    }
 }
 
 
@@ -82,6 +106,21 @@ point_count_t PcdReader::read(PointViewPtr view, point_count_t /*count*/)
     pclsupport::PCDtoPDAL(*cloud, view);
 
     return cloud->points.size();
+}
+
+void PcdReader::initialize()
+{
+    std::istream *fs;
+    try {
+        fs = Utils::openFile(m_filename, true);
+        *fs >> m_header;
+        // std::cout << m_header; // echo back for testing
+    } catch (...) {
+        Utils::closeFile(fs);
+        throw;
+    }
+
+    Utils::closeFile(fs);
 }
 
 } // namespace pdal

@@ -56,6 +56,9 @@ endif()
 #
 PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     FILES
+        io/PcdHeader.hpp
+        io/PcdHeader.cpp
+        io/PcdReader.hpp
         io/PcdReader.cpp
     LINK_WITH
         ${PCL_LIBRARIES}
