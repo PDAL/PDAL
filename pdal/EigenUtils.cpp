@@ -83,7 +83,7 @@ Eigen::Vector3d computeCentroid(PointView& view,
     return centroid;
 }
 
-Eigen::Matrix3f computeCovariance(PointView& view,
+Eigen::Matrix3d computeCovariance(PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
@@ -93,7 +93,7 @@ Eigen::Matrix3f computeCovariance(PointView& view,
     Vector3d centroid = computeCentroid(view, ids);
 
     // demean the neighborhood
-    MatrixXf A(3, n);
+    MatrixXd A(3, n);
     size_t k = 0;
     for (auto const& j : ids)
     {
@@ -117,9 +117,9 @@ uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
 {
     using namespace Eigen;
 
-    Matrix3f B = computeCovariance(view, ids);
+    Matrix3d B = computeCovariance(view, ids);
 
-    JacobiSVD<Matrix3f> svd(B);
+    JacobiSVD<Matrix3d> svd(B);
     svd.setThreshold((float)threshold);
 
     return static_cast<uint8_t>(svd.rank());

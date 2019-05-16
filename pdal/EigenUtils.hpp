@@ -100,7 +100,7 @@ PDAL_DLL Eigen::Vector3d computeCentroid(PointView& view,
   \param ids a vector of PointIds specifying a subset of points.
   \return the covariance matrix of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view,
+PDAL_DLL Eigen::Matrix3d computeCovariance(PointView& view,
     const std::vector<PointId>& ids);
 
 /**
