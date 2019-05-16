@@ -455,3 +455,9 @@ TEST(UtilsTest, numeric_cast)
     d = (std::numeric_limits<float>::max)() / 2;
     EXPECT_TRUE(Utils::numericCast(d, f));
 }
+
+TEST(UtilsTest, escapeJSON)
+{
+    std::string escaped = Utils::escapeJSON("0.1234\n-0.9876");
+    EXPECT_EQ("0.1234\n-0.9876", escaped);
+}
