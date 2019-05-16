@@ -43,7 +43,6 @@ invalidate an existing KD-tree.
    filters.ferry
    filters.hag
    filters.info
-   filters.kdistance
    filters.lof
    filters.neighborclassifier
    filters.nndistance
@@ -88,10 +87,6 @@ invalidate an existing KD-tree.
 :ref:`filters.hag`
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
-
-:ref:`filters.kdistance`
-    Compute pointwise K-Distance (the Euclidean distance to a point's k-th
-    nearest neighbor). [Deprecated - use :ref:`filters.nndistance`]
 
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
