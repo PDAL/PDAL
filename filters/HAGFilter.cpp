@@ -82,36 +82,24 @@ void HAGFilter::prepared(PointTableRef table)
         throwError("Missing Classification dimension in input PointView.");
 }
 
-inline double dot(double ax, double ay, double az, double bx, double by, double bz)
-{
-    return ax*bx + ay*by + az*bz;
-}
+// https://en.wikipedia.org/wiki/Barycentric_coordinate_system
+static double distance_along_z(double x1, double y1, double z1,
+                               double x2, double y2, double z2,
+                               double x3, double y3, double z3,
+                               double x, double y) {
+    double detT = (y2-y3)*(x1-x3)+(x3-x2)*(y1-y3); ///detT != 0 if from well-behaved Delaunay
+    double lambda1 = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3))/detT;
+    double lambda2 = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3))/detT;
+    double lambda3 = 1 - lambda1 - lambda2;
 
-inline double plane_point_distance(double ax, double ay, double az,
-                                                 double bx, double by, double bz,
-                                                 double cx, double cy, double cz,
-                                                 double x0, double y0, double z0
-                                                 ) {
-  bx -= cx;
-  by -= cy;
-  bz -= cz;
-  ax -= cx;
-  ay -= cy;
-  az -= cz;
-  x0 -= cx;
-  y0 -= cy;
-  z0 -= cz;
-
-  double nx = ay*bz - az*by;
-  double ny = ax*bz - az*bx;
-  double nz = ax*by - ay*bx;
-  double mag = std::sqrt(dot(nx, ny, nz, nx, ny, nz));
-
-  nx /= mag;
-  ny /= mag;
-  nz /= mag;
-
-  return std::abs(dot(x0, y0, z0, nx, ny, nz));
+    if ((0 <= lambda1 && lambda1 <= 1) && (0 <= lambda2 && lambda2 <= 1) && (0 <= lambda3 && lambda3 <= 1))
+    {
+        return lambda1*z1 + lambda2*z2 + lambda3*z3;
+    }
+    else
+    {
+        return std::numeric_limits<double>::infinity();
+    }
 }
 
 void HAGFilter::filter(PointView& view)
@@ -157,8 +145,7 @@ void HAGFilter::filter(PointView& view)
         assert(ids.size() > 0);
         if (ids.size() == 1) {
             z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
-            view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
-        } else if (m_delaunay_fans == false) {
+        } else if (m_delaunay_fans == false) { // Nearest-Neighbor-based interpolation
             auto min_x = std::numeric_limits<double>::max();
             auto max_x = std::numeric_limits<double>::min();
             auto min_y = std::numeric_limits<double>::max();
@@ -199,8 +186,7 @@ void HAGFilter::filter(PointView& view)
             if (exact_match || m_allow_extrapolation || (x0 > min_x && x0 < max_x && y0 > min_y && y0 < max_y)) {
                 z1 = z_accumulator / weights;
             }
-            view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
-        } else if (m_delaunay_fans == true) {
+        } else if (m_delaunay_fans == true) { // Delaunay-based interpolation
             auto neighbors = std::vector<double>();
 
             for(unsigned int j = 0; j < ids.size(); ++j)
@@ -211,7 +197,7 @@ void HAGFilter::filter(PointView& view)
             auto triangulation = delaunator::Delaunator(neighbors);
             auto triangles = triangulation.triangles;
 
-            double best_distance = std::numeric_limits<double>::infinity();
+            z1 = std::numeric_limits<double>::infinity();
             for (unsigned int j = 0; j < triangles.size(); j += 3)
             {
                 auto ai = triangles[j+0];
@@ -227,10 +213,14 @@ void HAGFilter::filter(PointView& view)
                 double cy = gView->getFieldAs<double>(Dimension::Id::Y, ids[ci]);
                 double cz = gView->getFieldAs<double>(Dimension::Id::Z, ids[ci]);
 
-                best_distance = std::min(best_distance, plane_point_distance(ax, ay, az, bx, by, bz, cx, cy, cz, x0, y0, z0));
+                z1 = std::min(z1, distance_along_z(ax, ay, az, bx, by, bz, cx, cy, cz, x0, y0));
             }
-            view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], best_distance);
+            if (z1 == std::numeric_limits<double>::infinity())
+            {
+                z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
+            }
         }
+        view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
     }
 
     // Final pass: Ensure that all ground points have height value pegged at 0.
