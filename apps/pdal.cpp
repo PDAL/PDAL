@@ -210,11 +210,13 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
 
     if (!m_showJSON)
     {
-        strm  << stageName << " -- " << PluginManager<Stage>::link(stageName) <<
-            std::endl;
-        strm  << headline << std::endl;
-
-        args.dump2(strm , 2, 6, headline.size());
+        const size_t indentSize = 2;
+        strm << stageName << " -- " << PluginManager<Stage>::link(stageName) <<
+             std::endl;
+        strm << headline << std::endl;
+        strm << std::string(indentSize, ' ') << "Streamable: " <<
+             (s->pipelineStreamable() ? "Yes" : "No") << "\n\n";
+        args.dump2(strm, indentSize, 6, headline.size());
     }
     else
     {
