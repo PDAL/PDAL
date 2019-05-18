@@ -49,10 +49,112 @@
 namespace pdal
 {
 
-namespace eigen
-{
 #pragma warning (push)
 #pragma warning (disable: 4244)
+
+void calculateBounds(PointView& view, BOX2D& output)
+{
+    for (PointId idx = 0; idx < view.size(); idx++)
+    {
+        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
+
+        output.grow(x, y);
+    }
+}
+
+
+void calculateBounds(PointView& view, BOX3D& output)
+{
+    for (PointId idx = 0; idx < view.size(); idx++)
+    {
+        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = view.getFieldAs<double>(Dimension::Id::Z, idx);
+
+        output.grow(x, y, z);
+    }
+}
+
+PointViewPtr demeanPointView(PointView& view)
+{
+    using namespace Eigen;
+    using namespace Dimension;
+
+    std::vector<PointId> ids(view.size());
+    std::iota(ids.begin(), ids.end(), 0);
+    Vector3d centroid = computeCentroid(view, ids);
+    PointViewPtr outView = view.makeNew();
+
+    for (PointId idx = 0; idx < view.size(); idx++)
+    {
+        double x = view.getFieldAs<double>(Id::X, idx) - centroid.x();
+        double y = view.getFieldAs<double>(Id::Y, idx) - centroid.y();
+        double z = view.getFieldAs<double>(Id::Z, idx) - centroid.z();
+        outView->setField(Id::X, idx, x);
+        outView->setField(Id::Y, idx, y);
+        outView->setField(Id::Z, idx, z);
+    }
+    return outView;
+}
+
+PointViewPtr demeanPointView(PointView& view, double* centroid)
+{
+    using namespace Eigen;
+    using namespace Dimension;
+
+    PointViewPtr outView = view.makeNew();
+
+    for (PointId idx = 0; idx < view.size(); idx++)
+    {
+        double x = view.getFieldAs<double>(Id::X, idx) - centroid[0];
+        double y = view.getFieldAs<double>(Id::Y, idx) - centroid[1];
+        double z = view.getFieldAs<double>(Id::Z, idx) - centroid[2];
+        outView->setField(Id::X, idx, x);
+        outView->setField(Id::Y, idx, y);
+        outView->setField(Id::Z, idx, z);
+    }
+    return outView;
+}
+
+PointViewPtr transform(PointView& view, double* matrix)
+{
+    using namespace Dimension;
+
+    PointViewPtr outView = view.makeNew();
+    for (PointId idx = 0; idx < view.size(); idx++)
+    {
+        double x = view.getFieldAs<double>(Id::X, idx);
+        double y = view.getFieldAs<double>(Id::Y, idx);
+        double z = view.getFieldAs<double>(Id::Z, idx);
+        outView->setField(Id::X, idx,
+                          x * matrix[0] + y * matrix[4] + z * matrix[8] + matrix[12]);
+        outView->setField(Id::Y, idx,
+                          x * matrix[1] + y * matrix[5] + z * matrix[9] + matrix[13]);
+        outView->setField(Id::Z, idx,
+                          x * matrix[2] + y * matrix[6] + z * matrix[10] + matrix[14]);
+    }
+    return outView;
+}
+
+
+void transformInPlace(PointView& view, double* matrix)
+{
+    using namespace Dimension;
+
+    for (PointId idx = 0; idx < view.size(); idx++)
+    {
+        double x = view.getFieldAs<double>(Id::X, idx);
+        double y = view.getFieldAs<double>(Id::Y, idx);
+        double z = view.getFieldAs<double>(Id::Z, idx);
+        view.setField(Id::X, idx,
+                      x * matrix[0] + y * matrix[4] + z * matrix[8] + matrix[12]);
+        view.setField(Id::Y, idx,
+                      x * matrix[1] + y * matrix[5] + z * matrix[9] + matrix[13]);
+        view.setField(Id::Z, idx,
+                      x * matrix[2] + y * matrix[6] + z * matrix[10] + matrix[14]);
+    }
+}
 
 Eigen::Vector3d computeCentroid(PointView& view,
     const std::vector<PointId>& ids)
@@ -262,6 +364,19 @@ Eigen::MatrixXd pointViewToEigen(const PointView& view)
     return matrix;
 }
 
+Eigen::MatrixXd pointViewToEigen(const PointView& view, const std::vector<PointId>& ids)
+{
+    Eigen::MatrixXd matrix(ids.size(), 3);
+    for (size_t i = 0; i < ids.size(); ++i)
+    {
+        matrix(i, 0) = view.getFieldAs<double>(Dimension::Id::X, ids[i]);
+        matrix(i, 1) = view.getFieldAs<double>(Dimension::Id::Y, ids[i]);
+        matrix(i, 2) = view.getFieldAs<double>(Dimension::Id::Z, ids[i]);
+    }
+
+    return matrix;
+}
+
 void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
                  const std::string& driver, double cell_size, BOX2D bounds,
                  SpatialReference srs)
@@ -295,7 +410,5 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     raster.writeBand((float*)dataRowMajor.data(), -9999.0f, 1);
 }
 #pragma warning (pop)
-
-} // namespace eigen
 
 } // namespace pdal

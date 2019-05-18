@@ -110,7 +110,7 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     auto ids = kid.neighbors(id, m_knn + 1);
 
     // compute covariance of the neighborhood
-    auto B = eigen::computeCovariance(view, ids);
+    auto B = computeCovariance(view, ids);
 
     // perform the eigen decomposition
     SelfAdjointEigenSolver<Matrix3d> solver(B);

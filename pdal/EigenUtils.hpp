@@ -50,8 +50,23 @@ class SpatialReference;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 
-namespace eigen
-{
+/*! @return a cumulated bounds of all points in the PointView.
+    \verbatim embed:rst
+    .. note::
+
+        This method requires that an `X`, `Y`, and `Z` dimension be
+        available, and that it can be casted into a *double* data
+        type using the :cpp:func:`pdal::Dimension::applyScaling`
+        method. Otherwise, an exception will be thrown.
+    \endverbatim
+*/
+PDAL_DLL void calculateBounds(PointView& view, BOX2D& box);
+PDAL_DLL void calculateBounds(PointView& view, BOX3D& box);
+
+PDAL_DLL PointViewPtr demeanPointView(PointView& view);
+PDAL_DLL PointViewPtr demeanPointView(PointView& ,double* centroid);
+PDAL_DLL PointViewPtr transform(PointView&, double* matrix);
+PDAL_DLL void transformInPlace(PointView&, double* matrix);
 
 /**
   Compute the centroid of a collection of points.
@@ -201,6 +216,7 @@ PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
   API. It is not currently used in the PDAL codebase itself.
 */
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
+PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view, const std::vector<PointId>& ids);
 
 /**
   Write Eigen Matrix as a GDAL raster.
@@ -264,8 +280,6 @@ PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
 
     return out;
 }
-
-} // namespace eigen
 
 namespace Utils
 {

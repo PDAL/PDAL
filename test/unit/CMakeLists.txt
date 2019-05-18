@@ -29,13 +29,20 @@ PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
-    FILES EigenTest.cpp
-    INCLUDES ${PDAL_VENDOR_DIR}/eigen)
+    FILES
+        EigenTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
-    FILES KDIndexTest.cpp
-    INCLUDES ${PDAL_VENDOR_DIR})
+    FILES
+        KDIndexTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
@@ -57,7 +64,12 @@ PDAL_ADD_TEST(pdal_pipeline_writer_test
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
-PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
+PDAL_ADD_TEST(pdal_point_view_test
+    FILES
+        PointViewTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 
 PDAL_ADD_TEST(pdal_program_arg_test
@@ -191,6 +203,7 @@ PDAL_ADD_TEST(pdal_filters_chipper_test
         filters/ChipperTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
 )
 PDAL_ADD_TEST(pdal_filters_nndistance_test
     FILES
@@ -229,6 +242,12 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_icp_test
+    FILES
+        filters/IcpFilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
@@ -254,7 +273,11 @@ PDAL_ADD_TEST(pdal_filters_sort_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_splitter_test
+    FILES
+        filters/SplitterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen)
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
