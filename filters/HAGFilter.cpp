@@ -66,8 +66,8 @@ void HAGFilter::addArgs(ProgramArgs& args)
     args.add("max_distance", "The maximum distance to the farthest nearest neighbor before the height above ground is not calculated [default: 0 (disabled)]", m_max_distance);
     args.add("allow_extrapolation", "If true and count > 1, allow extrapolation [default: true].",
             m_allow_extrapolation, true);
-    args.add("delaunay_fans", "Construct local Delaunay fans and infer heights from them [default: false].",
-            m_delaunay_fans, false);
+    args.add("delaunay", "Construct local Delaunay fans and infer heights from them [default: false].",
+            m_delaunay, false);
 }
 
 void HAGFilter::addDimensions(PointLayoutPtr layout)
@@ -87,12 +87,18 @@ static double distance_along_z(double x1, double y1, double z1,
                                double x2, double y2, double z2,
                                double x3, double y3, double z3,
                                double x, double y) {
-    double detT = (y2-y3)*(x1-x3)+(x3-x2)*(y1-y3); ///detT != 0 if from well-behaved Delaunay
+    double detT = (y2-y3)*(x1-x3)+(x3-x2)*(y1-y3);
+
+    if (detT == 0.0)
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+
     double lambda1 = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3))/detT;
     double lambda2 = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3))/detT;
     double lambda3 = 1 - lambda1 - lambda2;
 
-    if ((0 <= lambda1 && lambda1 <= 1) && (0 <= lambda2 && lambda2 <= 1) && (0 <= lambda3 && lambda3 <= 1))
+    if ((0.0 <= lambda1 && lambda1 <= 1.0) && (0.0 <= lambda2 && lambda2 <= 1.0) && (0.0 <= lambda3 && lambda3 <= 1.0))
     {
         return lambda1*z1 + lambda2*z2 + lambda3*z3;
     }
@@ -133,7 +139,8 @@ void HAGFilter::filter(PointView& view)
     KD2Index& kdi = gView->build2dIndex();
 
     // Second pass: Find Z difference between non-ground points and the nearest
-    // neighbor (2D) in the ground view.
+    // neighbor (2D) in the ground view or between non-ground points and the
+    // locally-computed surface (Delaunay triangultion of the neighborhood).
     for (PointId i = 0; i < ngView->size(); ++i)
     {
         PointRef point = ngView->point(i);
@@ -145,7 +152,7 @@ void HAGFilter::filter(PointView& view)
         assert(ids.size() > 0);
         if (ids.size() == 1) {
             z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
-        } else if (m_delaunay_fans == false) { // Nearest-Neighbor-based interpolation
+        } else if (m_delaunay == false) { // Nearest-Neighbor-based interpolation
             auto min_x = std::numeric_limits<double>::max();
             auto max_x = std::numeric_limits<double>::min();
             auto min_y = std::numeric_limits<double>::max();
@@ -153,7 +160,7 @@ void HAGFilter::filter(PointView& view)
             double weights = 0;
             double z_accumulator = 0;
             bool exact_match = false;
-            for (unsigned long j = 0; j < ids.size(); ++j) {
+            for (size_t j = 0; j < ids.size(); ++j) {
                 auto x = gView->getFieldAs<double>(Dimension::Id::X, ids[j]);
                 auto y = gView->getFieldAs<double>(Dimension::Id::Y, ids[j]);
                 auto z = gView->getFieldAs<double>(Dimension::Id::Z, ids[j]);
@@ -186,7 +193,7 @@ void HAGFilter::filter(PointView& view)
             if (exact_match || m_allow_extrapolation || (x0 > min_x && x0 < max_x && y0 > min_y && y0 < max_y)) {
                 z1 = z_accumulator / weights;
             }
-        } else if (m_delaunay_fans == true) { // Delaunay-based interpolation
+        } else if (m_delaunay == true) { // Delaunay-based interpolation
             auto neighbors = std::vector<double>();
 
             for(unsigned int j = 0; j < ids.size(); ++j)

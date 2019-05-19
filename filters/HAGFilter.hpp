@@ -66,7 +66,7 @@ private:
     HAGFilter(const HAGFilter&); // not implemented
 
     bool m_allow_extrapolation;
-    bool m_delaunay_fans;
+    bool m_delaunay;
     double m_max_distance;
     point_count_t m_count;
 };
