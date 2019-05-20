@@ -161,14 +161,11 @@ TEST(PipelineManagerTest, InputGlobbing)
 TEST(PipelineManagerTest, objects)
 {
     std::string cmd = Support::binpath(Support::exename("pdal") +
-                                       " pipeline");
+                                       " pipeline --validate");
     std::string file = Support::configuredpath("pipeline/ept_addon.json");
 
     std::string output;
-    int stat = Utils::run_shell_command(cmd + " " + file, output);
-    EXPECT_EQ(stat, 0);
-
-    ASSERT_TRUE(Utils::fileExists(Support::temppath("Z/ept-addon.json")));
+    EXPECT_NO_THROW(Utils::run_shell_command(cmd + " " + file, output));
 }
 
 TEST(PipelineManagerTest, arrayPipeline)
