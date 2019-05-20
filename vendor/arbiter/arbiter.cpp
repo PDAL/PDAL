@@ -431,7 +431,7 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
 
         const auto ext(getExtension(path));
         const std::string basename(
-                crypto::encodeAsHex(crypto::sha256(stripExtension(path))) +
+                std::to_string(util::randomNumber()) +
                 (ext.size() ? "." + ext : ""));
         tempEndpoint.put(basename, getBinary(path));
         localHandle.reset(
@@ -702,9 +702,7 @@ std::unique_ptr<fs::LocalHandle> Endpoint::getLocalHandle(
     {
         const std::string tmp(fs::getTempPath());
         const auto ext(Arbiter::getExtension(subpath));
-        const std::string basename(
-                crypto::encodeAsHex(crypto::sha256(Arbiter::stripExtension(
-                            prefixedRoot() + subpath))) +
+        const std::string basename(std::to_string(util::randomNumber()) +
                     (ext.size() ? "." + ext : ""));
 
         const std::string local(tmp + basename);
@@ -4727,6 +4725,8 @@ int64_t Time::asUnix() const
 
 #include <algorithm>
 #include <cctype>
+#include <random>
+#include <mutex>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -4737,6 +4737,20 @@ namespace arbiter
 {
 namespace util
 {
+
+namespace
+{
+    std::mutex randomMutex;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<unsigned long long> distribution;
+}
+
+uint64_t randomNumber()
+{
+    std::lock_guard<std::mutex> lock(randomMutex);
+    return distribution(gen);
+}
 
 std::string stripPostfixing(const std::string path)
 {
@@ -4763,11 +4777,11 @@ std::string getBasename(const std::string fullPath)
 
     // Now do the real slash searching.
     std::size_t pos(stripped.rfind('/'));
-    
+
     // Maybe windows
-    if (pos == std::string::npos) 
+    if (pos == std::string::npos)
         pos = stripped.rfind('\\');
-    
+
     if (pos != std::string::npos)
     {
         const std::string sub(stripped.substr(pos + 1));

@@ -102,7 +102,9 @@ Options
 
 raster
   The raster file to read the band from. Any `format`_ supported by
-  `GDAL`_ may be read.  dimensions
+  `GDAL`_ may be read.
+
+dimensions
   A comma separated list of dimensions to populate with values from the raster
   file. Dimensions will be created if they don't already exist.  The format
   of each dimension is <name>:<band_number>:<scale_factor>.
