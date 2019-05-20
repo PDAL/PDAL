@@ -46,7 +46,7 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
     m_span = m_info["span"].get<uint64_t>();
 
     auto iSrs = m_info.find("srs");
-    if (iSrs != m_info.end())
+    if (iSrs != m_info.end() && iSrs->size())
     {
         std::string wkt;
         auto iWkt = iSrs->find("wkt");
