@@ -196,7 +196,7 @@ void HAGFilter::filter(PointView& view)
         } else if (m_delaunay == true) { // Delaunay-based interpolation
             auto neighbors = std::vector<double>();
 
-            for(unsigned int j = 0; j < ids.size(); ++j)
+            for(size_t j = 0; j < ids.size(); ++j)
             {
                 neighbors.push_back(gView->getFieldAs<double>(Dimension::Id::X, ids[j]));
                 neighbors.push_back(gView->getFieldAs<double>(Dimension::Id::Y, ids[j]));
@@ -205,7 +205,7 @@ void HAGFilter::filter(PointView& view)
             auto triangles = triangulation.triangles;
 
             z1 = std::numeric_limits<double>::infinity();
-            for (unsigned int j = 0; j < triangles.size(); j += 3)
+            for (size_t j = 0; j < triangles.size(); j += 3)
             {
                 auto ai = triangles[j+0];
                 auto bi = triangles[j+1];
