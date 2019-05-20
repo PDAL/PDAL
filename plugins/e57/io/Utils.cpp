@@ -89,6 +89,14 @@ pdal::Dimension::Id pdal::e57plugin::e57ToPdal(const std::string &e57Dimension) 
     {
         return pdal::Dimension::Id::Green;
     }
+    else if (e57Dimension == "cartesianInvalidState")
+    {
+        return pdal::Dimension::Id::Omit;
+    }
+    else if (e57Dimension == "sphericalInvalidState")
+    {
+        return pdal::Dimension::Id::Omit;
+    }
     else
     {
         return pdal::Dimension::Id::Unknown;
@@ -105,6 +113,12 @@ std::string pdal::e57plugin::pdalToE57(pdal::Dimension::Id pdalDimension)
             return "cartesianY";
         case pdal::Dimension::Id::Z:
             return "cartesianZ";
+        case pdal::Dimension::Id::NormalX:
+            return "nor:normalX";
+        case pdal::Dimension::Id::NormalY:
+            return "nor:normalY";
+        case pdal::Dimension::Id::NormalZ:
+            return "nor:normalZ";
         case pdal::Dimension::Id::Red:
             return "colorRed";
         case pdal::Dimension::Id::Green:
@@ -113,6 +127,8 @@ std::string pdal::e57plugin::pdalToE57(pdal::Dimension::Id pdalDimension)
             return "colorBlue";
         case pdal::Dimension::Id::Intensity:
             return "intensity";
+        case pdal::Dimension::Id::Omit:
+            return "cartesianInvalidState";
         default:
             return std::string();
     }
@@ -121,12 +137,17 @@ std::string pdal::e57plugin::pdalToE57(pdal::Dimension::Id pdalDimension)
 std::vector<pdal::Dimension::Id> pdal::e57plugin::supportedPdalTypes()
 {
     return {pdal::Dimension::Id::X,pdal::Dimension::Id::Y,pdal::Dimension::Id::Z,
-        pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue,pdal::Dimension::Id::Intensity};
+        pdal::Dimension::Id::NormalX,pdal::Dimension::Id::NormalY,pdal::Dimension::Id::NormalZ,
+        pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue,pdal::Dimension::Id::Intensity,
+        pdal::Dimension::Id::Omit};
 }
 
 std::vector<std::string> pdal::e57plugin::supportedE57Types()
 {
-    return {"cartesianX","cartesianY","cartesianZ","colorRed","colorGreen","colorBlue","intensity"};
+    return {"cartesianX","cartesianY","cartesianZ",
+        "nor:normalX","nor:normalY","nor:normalZ",
+        "colorRed","colorGreen","colorBlue","intensity",
+        "cartesianInvalidState"};
 }
 
 double pdal::e57plugin::rescaleE57ToPdalValue(
