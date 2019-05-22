@@ -186,7 +186,7 @@ protected:
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
     BOX3D createCube(const NL::json& base);
     BOX3D parseBox(const NL::json& base);
-    void traverseTree(NL::json& page, int index, std::vector<int>& nodes,
+    void traverseTree(NL::json page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);
 };
 

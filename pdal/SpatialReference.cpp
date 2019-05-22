@@ -480,6 +480,8 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
             CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
+    std::cerr << "In = " << box.minx << "/" << box.miny << "/" << box.minz << "!\n";
+    std::cerr << "Out = " << minx << "/" << miny << "/" << minz << "!\n";
 
     ret = OCTTransform(transform, 1, &maxx, &maxy, &maxz);
     if (ret == 0)
@@ -490,6 +492,8 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
             CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
+    std::cerr << "In = " << box.maxx << "/" << box.maxy << "/" << box.maxz << "!\n";
+    std::cerr << "Out = " << maxx << "/" << maxy << "/" << maxz << "!\n";
 
     int min_zone(0);
     int max_zone(0);

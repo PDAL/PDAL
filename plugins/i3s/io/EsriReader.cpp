@@ -323,7 +323,7 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 //the tree and test if it overlaps with the bounds created by user.
 //If it's a leaf node(the highest resolution) and it overlaps, add
 //it to the list of nodes to be pulled later.
-void EsriReader::traverseTree(NL::json& page, int index,
+void EsriReader::traverseTree(NL::json page, int index,
     std::vector<int>& nodes, int depth, int pageIndex)
 {
     // find node information
