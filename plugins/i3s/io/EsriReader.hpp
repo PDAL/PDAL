@@ -77,9 +77,6 @@ std::map<std::string, pdal::Dimension::Type> const dimTypes
 
 class PDAL_DLL EsriReader : public Reader
 {
-public:
-    BOX3D createBounds();
-
 protected:
     virtual void initInfo() = 0;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
@@ -160,12 +157,7 @@ protected:
 
     typedef void* ReferencePtr;
     typedef void* TransformPtr;
-    ReferencePtr m_nativeRef;
-    ReferencePtr m_ecefRef;
-
     TransformPtr m_toEcefTransform;
-    TransformPtr m_toNativeTransform;
-
 
     struct dimData
     {
@@ -186,8 +178,12 @@ protected:
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
     BOX3D createCube(const NL::json& base);
     BOX3D parseBox(const NL::json& base);
-    void traverseTree(NL::json& page, int index, std::vector<int>& nodes,
+    void traverseTree(NL::json page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);
+
+private:
+    void createBounds();
+    void createEcefTransform();
 };
 
 } // namespace pdal
