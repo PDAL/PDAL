@@ -495,7 +495,8 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     std::cerr << "In = " << box.maxx << "/" << box.maxy << "/" << box.maxz << "!\n";
     std::cerr << "Out = " << maxx << "/" << maxy << "/" << maxz << "!\n";
 
-#if GDAL_MAJOR_VERSION >= 3
+std::cerr << "GDAL_VERSION_MAJOR = " << GDAL_VERSION_MAJOR << "!\n";
+#if GDAL_VERSION_MAJOR >= 3
     double minLat = minx;
     double maxLat = maxx;
     double minLon = miny;
@@ -507,6 +508,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     double maxLat = maxy;
 #endif
 
+    std::cerr << "Lon/lat = " << minLon << "/" << minLat << "!\n";
     int min_zone = calculateZone(minLon, minLat);
     int max_zone = calculateZone(maxLon, maxLat);
 

@@ -316,6 +316,13 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
     std::vector<std::string> vertRef { {
         "VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]" } };
     std::cerr << "Vert = " << vertical << "!\n";
+    for (size_t i = 0; i < vertRef.size(); ++i)
+    {
+        std::string& r = vertRef[i];
+        for (size_t pos = 0; pos < r.size(); ++pos)
+            if (r[pos] != vertical[pos])
+                std::cerr << "Off at position = " << pos << "!\n";
+    }
     EXPECT_TRUE(Utils::contains(vertRef, vertical));
 }
 
