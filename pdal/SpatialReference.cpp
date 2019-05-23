@@ -495,10 +495,20 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     std::cerr << "In = " << box.maxx << "/" << box.maxy << "/" << box.maxz << "!\n";
     std::cerr << "Out = " << maxx << "/" << maxy << "/" << maxz << "!\n";
 
-    int min_zone(0);
-    int max_zone(0);
-    min_zone = calculateZone(minx, miny);
-    max_zone = calculateZone(maxx, maxy);
+#if GDAL_MAJOR_VERSION >= 3
+    double minLat = minx;
+    double maxLat = maxx;
+    double minLon = miny;
+    double maxLon = maxy;
+#else
+    double minLon = minx;
+    double maxLon = maxx;
+    double minLat = miny;
+    double maxLat = maxy;
+#endif
+
+    int min_zone = calculateZone(minLon, minLat);
+    int max_zone = calculateZone(maxLon, maxLat);
 
     if (min_zone != max_zone)
     {
