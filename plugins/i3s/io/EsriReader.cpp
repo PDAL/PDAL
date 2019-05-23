@@ -35,7 +35,7 @@
 #include "EsriReader.hpp"
 
 #include <Eigen/Geometry>
-#include <ogr_spatialref.h>
+#include <pdal/SrsTransform.hpp>
 
 #include "../lepcc/src/include/lepcc_types.h"
 
@@ -46,6 +46,14 @@
 
 namespace pdal
 {
+EsriReader::EsriReader()
+{}
+
+
+EsriReader::~EsriReader()
+{}
+
+
 void EsriReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
@@ -147,16 +155,11 @@ void EsriReader::initialize(PointTableRef table)
         spatialStr += wkid.get<std::string>();
     else if (wkid.is_number_unsigned())
         spatialStr += std::to_string(wkid.get<uint64_t>());
-    m_nativeSrs = SpatialReference(spatialStr);
-    setSpatialReference(m_nativeSrs);
+    SpatialReference nativeSrs(spatialStr);
+    setSpatialReference(nativeSrs);
 
-    m_ecefSrs = SpatialReference("EPSG:4978");
-
-    m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
-    m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
-    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
-    m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
-        m_nativeRef);
+    m_ecefTransform.reset(
+        new SrsTransform(nativeSrs, SpatialReference("EPSG:4978")));
 
     //create bounds in ECEF
     double minx(m_bounds.minx), maxx(m_bounds.maxx), miny(m_bounds.miny), maxy(m_bounds.maxy), minz(m_bounds.minz), maxz(m_bounds.maxz);
@@ -166,7 +169,7 @@ void EsriReader::initialize(PointTableRef table)
         double a = (i & 1 ? minx: maxx);
         double b = (i & 2 ? miny: maxy);
         double c = (i & 4 ? minz: maxz);
-        OCTTransform(m_toEcefTransform, 1, &a, &b, 0);
+        m_ecefTransform->transform(a, b, c);
         m_ecefBounds.grow(a, b, c);
     }
 }
@@ -424,7 +427,7 @@ BOX3D EsriReader::createCube(const NL::json& base)
     double hz = hsize[2].get<double>();
 
     //transform (x,y,z) to ECEF to match the half sizes in meters.
-    OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
+    m_ecefTransform->transform(x, y, z);
     //take half size vector and find magnitude of it multiplied by sqrt(2)
     double r = std::sqrt(2) *
         std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
@@ -624,15 +627,6 @@ BOX3D EsriReader::createBounds()
 void EsriReader::done(PointTableRef)
 {
     m_stream.reset();
-
-    if (m_nativeRef)
-        OSRDestroySpatialReference(m_nativeRef);
-    if (m_ecefRef)
-        OSRDestroySpatialReference(m_ecefRef);
-    if (m_toEcefTransform)
-        OCTDestroyCoordinateTransformation(m_toEcefTransform);
-    if (m_toNativeTransform)
-        OCTDestroyCoordinateTransformation(m_toNativeTransform);
 }
 
 } //namespace pdal

@@ -39,7 +39,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <filters/ReprojectionFilter.hpp>
-#include <filters/MergeFilter.hpp>
 #include <io/LasWriter.hpp>
 #include <io/LasReader.hpp>
 
@@ -313,16 +312,11 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
 
     std::string vertical = srs.getVertical();
 
-    std::vector<std::string> vertRef { {
-        "VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]" } };
-    std::cerr << "Vert = " << vertical << "!\n";
-    for (size_t i = 0; i < vertRef.size(); ++i)
-    {
-        std::string& r = vertRef[i];
-        for (size_t pos = 0; pos < r.size(); ++pos)
-            if (r[pos] != vertical[pos])
-                std::cerr << "Off at position = " << pos << "!\n";
-    }
+    std::vector<std::string> vertRef {
+        R"(VERT_CS["NAVD88 height",VERT_DATUM["North American Vertical Datum 1988",2005,AUTHORITY["EPSG","5103"],EXTENSION["PROJ4_GRIDS","g2003conus.gtx"]],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Up",UP],AUTHORITY["EPSG","5703"]])",
+        R"(VERT_CS["NAVD88 height",VERT_DATUM["North American Vertical Datum 1988",2005,EXTENSION["PROJ4_GRIDS","g2003conus.gtx"],AUTHORITY["EPSG","5103"]],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Up",UP],AUTHORITY["EPSG","5703"]])"
+    };
+
     EXPECT_TRUE(Utils::contains(vertRef, vertical));
 }
 
@@ -416,9 +410,6 @@ TEST(SpatialReferenceTest, merge)
     repro.setInput(r2);
     repro.setInput(r3);
 
-    MergeFilter merge;
-    merge.setInput(repro);
-
     FileUtils::deleteFile(Support::temppath("triple.las"));
     Options o5;
     o5.add("filename", Support::temppath("triple.las"));
@@ -427,7 +418,7 @@ TEST(SpatialReferenceTest, merge)
     o5.add("scale_z", .0001);
     LasWriter w;
     w.setOptions(o5);
-    w.setInput(merge);
+    w.setInput(repro);
 
     PointTable t1;
     w.prepare(t1);
@@ -441,11 +432,7 @@ TEST(SpatialReferenceTest, merge)
 TEST(SpatialReferenceTest, test_bounds)
 {
 
-#if GDAL_VERSION_MAJOR <=1
-    const std::string utm17_wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
-#else
     const std::string utm17_wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]";
-#endif
 
     SpatialReference utm17(utm17_wkt);
 

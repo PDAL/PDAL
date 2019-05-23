@@ -34,9 +34,10 @@
 
 #include <memory>
 
-#include <pdal/SpatialReference.hpp>
-#include <pdal/PDALUtils.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/SrsTransform.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 // gdal
@@ -436,95 +437,27 @@ int SpatialReference::getUTMZone() const
 }
 
 
-int SpatialReference::computeUTMZone(const BOX3D& box) const
+int SpatialReference::computeUTMZone(const BOX3D& cbox) const
 {
-    // Nothing we can do if we're an empty SRS
-    if (empty())
-        return 0;
+    SrsTransform transform(*this, SpatialReference("EPSG:4326"));
 
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
-    if (!current)
-        throw pdal_error("Could not fetch current SRS");
+    // We made the argument constant so copy so that we can modify.
+    BOX3D box(cbox);
 
-    OGRScopedSpatialReference wgs84 = ogrCreateSrs();
+    transform.transform(box.minx, box.miny, box.minz);
+    transform.transform(box.maxx, box.maxy, box.maxz);
 
-    if (OSRSetFromUserInput(wgs84.get(), "EPSG:4326") != OGRERR_NONE)
+    int minZone = calculateZone(box.minx, box.miny);
+    int maxZone = calculateZone(box.maxx, box.maxy);
+
+    if (minZone != maxZone)
     {
         std::ostringstream msg;
-        msg << "Could not import GDAL input spatial reference for WGS84";
+        msg << "computeUTMZone failed due to zone crossing. Zones "
+            "are " << minZone << " and " << maxZone << ".";
         throw pdal_error(msg.str());
     }
-
-    void* transform = OCTNewCoordinateTransformation(current.get(),
-            wgs84.get());
-
-    if (!transform)
-    {
-        throw pdal_error("Could not compute transform from "
-            "coordinate system to WGS84");
-    }
-
-    double minx(0.0), miny(0.0), minz(0.0);
-    double maxx(0.0), maxy(0.0), maxz(0.0);
-
-    // OCTTransform modifies values in-place
-    minx = box.minx; miny = box.miny; minz = box.minz;
-    maxx = box.maxx; maxy = box.maxy; maxz = box.maxz;
-
-    int ret = OCTTransform(transform, 1, &minx, &miny, &minz);
-    if (ret == 0)
-    {
-        OCTDestroyCoordinateTransformation(transform);
-        std::ostringstream msg;
-        msg << "Could not project minimum point for computeUTMZone::" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-    std::cerr << "In = " << box.minx << "/" << box.miny << "/" << box.minz << "!\n";
-    std::cerr << "Out = " << minx << "/" << miny << "/" << minz << "!\n";
-
-    ret = OCTTransform(transform, 1, &maxx, &maxy, &maxz);
-    if (ret == 0)
-    {
-        OCTDestroyCoordinateTransformation(transform);
-        std::ostringstream msg;
-        msg << "Could not project maximum point for computeUTMZone::" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-    std::cerr << "In = " << box.maxx << "/" << box.maxy << "/" << box.maxz << "!\n";
-    std::cerr << "Out = " << maxx << "/" << maxy << "/" << maxz << "!\n";
-
-std::cerr << "GDAL_VERSION_MAJOR = " << GDAL_VERSION_MAJOR << "!\n";
-#if GDAL_VERSION_MAJOR >= 3
-    double minLat = minx;
-    double maxLat = maxx;
-    double minLon = miny;
-    double maxLon = maxy;
-#else
-    double minLon = minx;
-    double maxLon = maxx;
-    double minLat = miny;
-    double maxLat = maxy;
-#endif
-
-    std::cerr << "Lon/lat = " << minLon << "/" << minLat << "!\n";
-    int min_zone = calculateZone(minLon, minLat);
-    int max_zone = calculateZone(maxLon, maxLat);
-
-    if (min_zone != max_zone)
-    {
-        OCTDestroyCoordinateTransformation(transform);
-        std::ostringstream msg;
-        msg << "Minimum zone is " << min_zone <<"' and maximum zone is '" <<
-            max_zone << "'. They do not match because they cross a "
-            "zone boundary";
-        throw pdal_error(msg.str());
-    }
-
-    OCTDestroyCoordinateTransformation(transform);
-
-    return min_zone;
+    return minZone;
 }
 
 

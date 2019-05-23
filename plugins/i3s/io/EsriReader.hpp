@@ -75,9 +75,13 @@ std::map<std::string, pdal::Dimension::Type> const dimTypes
 };
 }
 
+class SrsTransform;
+
 class PDAL_DLL EsriReader : public Reader
 {
 public:
+    EsriReader();
+    ~EsriReader();
     BOX3D createBounds();
 
 protected:
@@ -153,19 +157,7 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
-
-    //Spatial Reference variables
-    SpatialReference m_nativeSrs;
-    SpatialReference m_ecefSrs;
-
-    typedef void* ReferencePtr;
-    typedef void* TransformPtr;
-    ReferencePtr m_nativeRef;
-    ReferencePtr m_ecefRef;
-
-    TransformPtr m_toEcefTransform;
-    TransformPtr m_toNativeTransform;
-
+    std::unique_ptr<SrsTransform> m_ecefTransform;
 
     struct dimData
     {
