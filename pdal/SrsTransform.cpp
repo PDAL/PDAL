@@ -52,8 +52,8 @@ SrsTransform::SrsTransform(const SpatialReference& src,
 // discussion for more info.
 //
 #if GDAL_VERSION_MAJOR >= 3
-    srcRef.setAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-    dstRef.setAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    srcRef.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    dstRef.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 #endif
     m_transform.reset(OGRCreateCoordinateTransformation(&srcRef, &dstRef));
 }
