@@ -89,7 +89,7 @@ void EigenvaluesFilter::filter(PointView& view)
         auto B = eigen::computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3f> solver(B);
+        SelfAdjointEigenSolver<Matrix3d> solver(B);
         if (solver.info() != Success)
             throwError("Cannot perform eigen decomposition.");
         auto ev = solver.eigenvalues();

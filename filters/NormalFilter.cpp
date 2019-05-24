@@ -127,18 +127,18 @@ void NormalFilter::filter(PointView& view)
         auto B = eigen::computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(B);
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
         if (solver.info() != Eigen::Success)
             throwError("Cannot perform eigen decomposition.");
         auto eval = solver.eigenvalues();
-        Eigen::Vector3f normal = solver.eigenvectors().col(0);
+        Eigen::Vector3d normal = solver.eigenvectors().col(0);
 
         if (m_viewpointArg->set())
         {
             using namespace Dimension;
 
             PointRef p = view.point(i);
-            Eigen::Vector3f vp(
+            Eigen::Vector3d vp(
                 (float)(m_args->m_viewpoint.x() - p.getFieldAs<double>(Id::X)),
                 (float)(m_args->m_viewpoint.y() - p.getFieldAs<double>(Id::Y)),
                 (float)(m_args->m_viewpoint.z() - p.getFieldAs<double>(Id::Z)));
