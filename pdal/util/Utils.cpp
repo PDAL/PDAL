@@ -421,17 +421,6 @@ std::string Utils::escapeJSON(const std::string &str)
 {
     std::string escaped(str);
 
-    escaped.erase
-    (
-        remove_if(
-            escaped.begin(), escaped.end(), [](const char c)
-            {
-                return (c <= 31);
-            }
-        ),
-        escaped.end()
-    );
-
     size_t pos(0);
 
     while((pos = escaped.find_first_of("\"\\", pos)) != std::string::npos)

@@ -192,7 +192,7 @@ the input. These filters will invalidate an existing KD-tree.
    filters.iqr
    filters.locate
    filters.mad
-   filters.mongoexpression
+   filters.mongo
    filters.range
    filters.sample
    filters.tail
@@ -223,7 +223,7 @@ the input. These filters will invalidate an existing KD-tree.
     Cull points falling outside the computed Median Absolute Deviation for a
     given dimension.
 
-:ref:`filters.mongoexpression`
+:ref:`filters.mongo`
     Cull points using MongoDB-style expression syntax.
 
 :ref:`filters.range`

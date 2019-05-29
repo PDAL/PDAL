@@ -1,9 +1,9 @@
-.. _filters.mongoexpression:
+.. _filters.mongo:
 
-filters.mongoexpression
+filters.mongo
 ========================
 
-The **Mongo Expression Filter** applies query logic to the input
+The **Mongo Filter** applies query logic to the input
 point cloud based on a MongoDB-style query expression using the
 point cloud attributes.
 
@@ -21,7 +21,7 @@ This example passes through only the points whose Classification is non-zero.
     [
         "input.las",
         {
-            "type": "filters.expression",
+            "type": "filters.mongo",
             "expression": {
                 "Classification": { "$ne": 0 }
             }
@@ -38,7 +38,7 @@ is greater than 1.
     [
         "input.las",
         {
-            "type": "filters.expression",
+            "type": "filters.mongo",
             "expression": { "$and": [
                 { "ReturnNumber": "NumberOfReturns" },
                 { "NumberOfReturns": { "$gt": 1 } }
