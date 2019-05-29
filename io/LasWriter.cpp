@@ -466,7 +466,8 @@ void LasWriter::addForwardVlrs()
         const MetadataNode& recordIdNode = n.findChild("record_id");
         if (recordIdNode.valid() && userIdNode.valid())
         {
-            data = Utils::base64_decode(n.value());
+            const MetadataNode& dataNode = n.findChild("data");
+            data = Utils::base64_decode(dataNode.value());
             uint16_t recordId = (uint16_t)std::stoi(recordIdNode.value());
             addVlr(userIdNode.value(), recordId, n.description(), data);
         }
