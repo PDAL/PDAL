@@ -1235,9 +1235,22 @@ TEST(LasWriterTest, forward_spec_3)
             !temp.findChild(recPred).empty() &&
             !temp.findChild(userPred).empty();
     };
+    MetadataNode origRoot = reader.getMetadata();
+    MetadataNodeList origNodes = origRoot.findChildren(pred);
+    EXPECT_EQ(origNodes.size(), 1u);
+    MetadataNode origNode = origNodes[0];
+
     MetadataNode root = reader2.getMetadata();
     MetadataNodeList nodes = root.findChildren(pred);
     EXPECT_EQ(nodes.size(), 1u);
+    MetadataNode node = nodes[0];
+
+    // Also test that we're properly forwarding data.
+    origNode = origNode.findChild("data");
+    node = node.findChild("data");
+    EXPECT_EQ(origNode.value().size(), 28u);
+    EXPECT_EQ(node.value().size(), origNode.value().size());
+    EXPECT_EQ(node.value(), origNode.value());
 }
 
 TEST(LasWriterTest, oversize_vlr)
