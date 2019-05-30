@@ -194,9 +194,6 @@ void EptReader::initialize()
     setSpatialReference(m_info->srs());
 
     m_queryBounds = m_args->m_bounds.to3d();
-    std::cerr << "Reproject bounds from = " << boundsSrs.getWKT() << "!\n";
-    std::cerr << "Reproject bounds to = " << m_info->srs().getWKT() << "!\n";
-    std::cerr << "Query bounds = " << m_queryBounds << "!\n";
 
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
@@ -617,9 +614,7 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     reader.setOptions(options);
 
     std::lock_guard<std::mutex> lock(m_mutex);
-    std::cerr << "Prepare laszip!\n";
     reader.prepare(table);
-    std::cerr << "Done prepare laszip!\n";
     const uint64_t startId(dst.size());
 
     uint64_t pointId(0);
@@ -633,7 +628,6 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
             ++pointId;
         }
     }
-    std::cerr << "Done execute!\n";
 
     return startId;
 }

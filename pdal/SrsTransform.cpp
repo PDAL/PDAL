@@ -62,9 +62,15 @@ SrsTransform::~SrsTransform()
 {}
 
 
+OGRCoordinateTransformation *SrsTransform::get() const
+{
+    return m_transform.get();
+}
+
+
 bool SrsTransform::transform(double& x, double& y, double& z)
 {
-    return m_transform->Transform(1, &x, &y, &z);
+    return m_transform && m_transform->Transform(1, &x, &y, &z);
 }
 
 

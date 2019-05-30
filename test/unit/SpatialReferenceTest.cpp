@@ -446,11 +446,10 @@ TEST(SpatialReferenceTest, test_bounds)
     p.transform(wgs84);
 
     BOX3D b2 = p.bounds();
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.minx), -83.4275f);
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.miny), 39.01256f);
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.maxx), -83.4275f);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.minx), -83.427597f);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.miny), 39.0126f);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.maxx), -83.427551f);
     EXPECT_FLOAT_EQ(static_cast<float>(b2.maxy), 39.01261f);
-
 }
 
 TEST(SpatialReferenceTest, identifyEPSG)

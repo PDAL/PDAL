@@ -46,16 +46,22 @@ public:
     SrsTransform(const SpatialReference& src, const SpatialReference& dst);
     ~SrsTransform();
 
+    /// Get the underlying transformation.
+    /// \return  Pointer to the underlying coordinate transform.
+    OGRCoordinateTransformation *get() const;
+
     /// Transform the X, Y and Z of a point in place.
     /// \param x  X coordinate
     /// \param y  Y coordinate
     /// \param z  Z coordinate
+    /// \return  True if the transformation was successful
     bool transform(double& x, double& y, double& z);
 
     /// Transform a set of points in place.
     /// \param x  X coordinates
     /// \param y  Y coordinates
     /// \param z  Z coordinates
+    /// \return  True if the transformation was successful
     bool transform(std::vector<double>& x, std::vector<double>& y,
         std::vector<double>& z);
 
