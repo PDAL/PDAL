@@ -354,7 +354,7 @@ Options PipelineReaderJSON::extractOptions(NL::json& node)
                         "option list '" + name + "'.");
         }
         else if (subnode.is_object())
-            options.add(name, subnode.get<std::string>());
+            options.add(name, subnode);
         else
             throw pdal_error("JSON pipeline: Value of stage option '" +
                 name + "' cannot be converted.");

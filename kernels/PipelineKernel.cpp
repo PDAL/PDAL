@@ -130,7 +130,7 @@ int PipelineKernel::execute()
             root["streamable"] = false;
         }
         Utils::closeProgress(m_progressFd);
-        std::cout << root.dump(4);
+        std::cout << root.dump(4) << "\n";
         return 0;
     }
 

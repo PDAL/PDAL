@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2019, Kirk McKelvey (kirkoman@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,35 +34,78 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-
-#include <memory>
+#include <pdal/Dimension.hpp>
+#include <pdal/EigenUtils.hpp>
 
 namespace pdal
 {
 
-class PointLayout;
-class PointView;
-class ProgramArgs;
-
-class PDAL_DLL KDistanceFilter : public Filter
+enum class PcdFieldType
 {
-public:
-    KDistanceFilter() : Filter()
+    unknown,
+    I,
+    U,
+    F
+};
+std::istream& operator>>(std::istream& in, PcdFieldType& type);
+std::ostream& operator<<(std::ostream& out, PcdFieldType& type);
+
+enum class PcdVersion
+{
+    unknown,
+    PCD_V6,
+    PCD_V7
+};
+std::istream& operator>>(std::istream& in, PcdVersion& version);
+std::ostream& operator<<(std::ostream& out, PcdVersion& version);
+
+enum class PcdDataStorage
+{
+    unknown,
+    ASCII,
+    BINARY,
+    COMPRESSED
+};
+std::istream& operator>>(std::istream& in, PcdDataStorage& storage);
+std::ostream& operator<<(std::ostream& out, PcdDataStorage& storage);
+
+struct PcdField
+{
+    PcdField() : m_id(Dimension::Id::Unknown), m_size(4), m_type(PcdFieldType::unknown), m_count(1)
     {}
 
-    std::string getName() const;
+    PcdField(std::string &label) : PcdField()
+    {
+        m_id = Dimension::id(label);
+        m_label = label;
+    }
 
-private:
-    Dimension::Id m_kdist;
-    int m_k;
-
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void filter(PointView& view);
-
-    KDistanceFilter& operator=(const KDistanceFilter&); // not implemented
-    KDistanceFilter(const KDistanceFilter&); // not implemented
+    std::string m_label;
+    Dimension::Id m_id;
+    unsigned int m_size;
+    PcdFieldType m_type;
+    unsigned int m_count;
 };
+typedef std::vector<PcdField> PcdFieldList;
 
-} // namespace pdal
+struct PcdHeader
+{
+    PcdHeader() : m_version(PcdVersion::PCD_V6), m_width(1), m_height(0), m_pointCount(0), m_origin(0, 0, 0, 0), m_orientation(1, 0, 0, 0) {}
+
+    PcdVersion m_version;
+    PcdFieldList m_fields;
+    unsigned int m_width;
+    unsigned int m_height;
+    size_t m_pointCount;
+
+    Eigen::Vector4f m_origin;
+    Eigen::Quaternionf m_orientation;
+
+    PcdDataStorage m_dataStorage;
+    std::istream::pos_type m_dataOffset;
+};
+std::istream& operator>>(std::istream& in, PcdHeader& header);
+std::ostream& operator<<(std::ostream& out, PcdHeader& header);
+
+}
+

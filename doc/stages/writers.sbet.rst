@@ -3,7 +3,7 @@
 writers.sbet
 ============
 
-The **SBET writer** writes files in the SBET format, used for exchange data from interital measurement units (IMUs).
+The **SBET writer** writes files in the SBET format, used for exchange data from inertial measurement units (IMUs).
 
 .. embed::
 
