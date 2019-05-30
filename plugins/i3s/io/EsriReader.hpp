@@ -82,7 +82,6 @@ class PDAL_DLL EsriReader : public Reader
 public:
     EsriReader();
     ~EsriReader();
-    BOX3D createBounds();
 
 protected:
     virtual void initInfo() = 0;
@@ -157,7 +156,18 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
+<<<<<<< HEAD
     std::unique_ptr<SrsTransform> m_ecefTransform;
+=======
+
+    //Spatial Reference variables
+    SpatialReference m_nativeSrs;
+    SpatialReference m_ecefSrs;
+
+    typedef void* ReferencePtr;
+    typedef void* TransformPtr;
+    TransformPtr m_toEcefTransform;
+>>>>>>> i3s-gdal3
 
     struct dimData
     {
@@ -180,6 +190,10 @@ protected:
     BOX3D parseBox(const NL::json& base);
     void traverseTree(NL::json page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);
+
+private:
+    void createBounds();
+    void createEcefTransform();
 };
 
 } // namespace pdal

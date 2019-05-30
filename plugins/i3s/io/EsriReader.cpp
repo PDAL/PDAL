@@ -63,13 +63,12 @@ void EsriReader::addArgs(ProgramArgs& args)
             m_args.min_density, -1.0);
     args.add("max_density", "Maximum point density",
             m_args.max_density, -1.0);
-
 }
 
 void EsriReader::initialize(PointTableRef table)
 {
     //create proper density if min was set but max wasn't
-    if(m_args.min_density >= 0 && m_args.max_density < 0)
+    if (m_args.min_density >= 0 && m_args.max_density < 0)
         m_args.max_density = (std::numeric_limits<double>::max)();
 
     //create dimensions map for future lookup
@@ -77,12 +76,8 @@ void EsriReader::initialize(PointTableRef table)
     {
         for (std::string& dim : m_args.dimensions)
         {
-            std::transform(
-                    dim.begin(),
-                    dim.end(),
-                    dim.begin(),
-                    [](unsigned char c){ return std::toupper(c); });
-            if(esriDims.find(dim) != esriDims.end())
+            dim = Utils::toupper(dim);
+            if (esriDims.find(dim) != esriDims.end())
                 m_dimensions[dim] = esriDims.at(dim);
             else
                 m_dimensions[dim];
@@ -115,12 +110,10 @@ void EsriReader::initialize(PointTableRef table)
     //create const for looking into
     const NL::json jsonBody = m_info;
 
-    //create pdal Bounds
-    m_bounds = createBounds();
-
     //find version
     if (jsonBody["store"].contains("version"))
         m_version = Version(jsonBody["store"]["version"].get<std::string>());
+
     if (Version("2.0") < m_version || m_version < Version("1.6"))
         log()->get(LogLevel::Warning) << "This version may not work with "
             "the current implementation of i3s/slpk reader" << std::endl;
@@ -150,29 +143,104 @@ void EsriReader::initialize(PointTableRef table)
 
     //create spatial reference objects
     NL::json wkid = m_info["spatialReference"]["wkid"];
-    std::string spatialStr = "EPSG:";
+    int system(0);
     if (wkid.is_string())
-        spatialStr += wkid.get<std::string>();
-    else if (wkid.is_number_unsigned())
-        spatialStr += std::to_string(wkid.get<uint64_t>());
-    SpatialReference nativeSrs(spatialStr);
-    setSpatialReference(nativeSrs);
-
-    m_ecefTransform.reset(
-        new SrsTransform(nativeSrs, SpatialReference("EPSG:4978")));
-
-    //create bounds in ECEF
-    double minx(m_bounds.minx), maxx(m_bounds.maxx), miny(m_bounds.miny), maxy(m_bounds.maxy), minz(m_bounds.minz), maxz(m_bounds.maxz);
-
-    for (std::size_t i(0); i < 8; ++i)
     {
+        std::string sval = wkid.get<std::string>();
+        try
+        {
+            system = std::stoi(sval);
+        }
+        catch (...)
+        {}
+        if (system < 2000)
+            throwError("Invalid wkid string '" + sval + "' for spatial "
+                "reference.");
+    }
+    else if (wkid.is_number())
+    {
+        system = wkid.get<int64_t>();
+        if (system < 2000)
+            throwError("Invalid wkid value '" + std::to_string(system) +
+                "' for spatial reference.");
+    }
+    std::string systemString("EPSG:" + std::to_string(system));
+    m_nativeSrs.set(systemString);
+    if (m_nativeSrs.empty())
+        throwError("Unable to create spatial reference for i3s for '" +
+            systemString + "'.");
+    setSpatialReference(m_nativeSrs);
+
+    createEcefTransform();
+    createBounds();
+}
+
+void EsriReader::createEcefTransform()
+{
+    // All comparisons of bounding boxes are done in geocentric coords.
+    gdal::SpatialRef nativeSrs(m_nativeSrs.getWKT());
+    gdal::SpatialRef ecefSrs("EPSG:4978");
+    m_toEcefTransform = OCTNewCoordinateTransformation(nativeSrs.get(),
+        ecefSrs.get());
+}
+
+
+//Create bounding box that the user specified
+void EsriReader::createBounds()
+{
+    const double mn((std::numeric_limits<double>::lowest)());
+    const double mx((std::numeric_limits<double>::max)());
+    if (m_args.bounds.is3d())
+    {
+//ABELL
+/**
         double a = (i & 1 ? minx: maxx);
         double b = (i & 2 ? miny: maxy);
         double c = (i & 4 ? minz: maxz);
         m_ecefTransform->transform(a, b, c);
         m_ecefBounds.grow(a, b, c);
+=======
+        m_bounds = m_args.bounds.to3d();
+        m_ecefBounds = m_bounds;
+        OCTTransform(m_toEcefTransform, 1,
+            &m_ecefBounds.minx, &m_ecefBounds.miny, &m_ecefBounds.minz);
+        OCTTransform(m_toEcefTransform, 1,
+            &m_ecefBounds.maxx, &m_ecefBounds.maxy, &m_ecefBounds.maxz);
+**/
     }
+    else
+    {
+        // Distance to the center of the earth is 6.3 million meters, so
+        // 10 million should be a reasonable max for ECEF.
+        BOX2D b = m_args.bounds.to2d();
+        if (b.empty())
+        {
+            m_bounds = BOX3D(mn, mn, mn, mx, mx, mx);
+            m_ecefBounds = BOX3D(-10e6, -10e6, -10e6, 10e6, 10e6, 10e6);
+        }
+        else
+        {
+            m_bounds = BOX3D(b); // Will set z values to 0.
+            m_ecefBounds = m_bounds;
+            OCTTransform(m_toEcefTransform, 1,
+                &m_ecefBounds.minx, &m_ecefBounds.miny, &m_ecefBounds.minz);
+            OCTTransform(m_toEcefTransform, 1,
+                &m_ecefBounds.maxx, &m_ecefBounds.maxy, &m_ecefBounds.maxz);
+            m_bounds.minz = mn;
+            m_bounds.maxz = mx;
+            m_ecefBounds.minz = -10e6;
+            m_ecefBounds.maxz = 10e6;
+        }
+    }
+    // Transformation can invert coordinates
+    if (m_ecefBounds.minx > m_ecefBounds.maxx)
+        std::swap(m_ecefBounds.minx, m_ecefBounds.maxx);
+    if (m_ecefBounds.miny > m_ecefBounds.maxy)
+        std::swap(m_ecefBounds.miny, m_ecefBounds.maxy);
+    if (m_ecefBounds.minz > m_ecefBounds.maxz)
+        std::swap(m_ecefBounds.minz, m_ecefBounds.maxz);
 }
+
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
@@ -262,7 +330,6 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
 void EsriReader::ready(PointTableRef)
 {
-
     //output arguments for debugging
     log()->get(LogLevel::Debug) << "filename: " <<
         m_filename << std::endl;
@@ -275,10 +342,9 @@ void EsriReader::ready(PointTableRef)
     log()->get(LogLevel::Debug) << "max_density: " <<
         m_args.max_density << std::endl;
     log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
+
     for (std::string& dim : m_args.dimensions)
-    {
         log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
-    }
 }
 
 
@@ -410,6 +476,7 @@ void EsriReader::traverseTree(NL::json page, int index,
     }
 }
 
+
 //Finds a sphere from the given center and halfsize vector of the OBB
 //and makes a cube around it. This should help with collision detection
 //and pruning of nodes before fetching binaries.
@@ -431,16 +498,15 @@ BOX3D EsriReader::createCube(const NL::json& base)
     //take half size vector and find magnitude of it multiplied by sqrt(2)
     double r = std::sqrt(2) *
         std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
+
     //create cube around this radius
     double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
-    BOX3D nodeBox(minx,miny,minz,maxx,maxy,maxz);
-
-    //returning in ecef
-    return nodeBox;
+    return BOX3D(minx, miny, minz, maxx, maxy, maxz);
 }
 
 
-void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view)
+void EsriReader::createView(std::string localUrl, int nodeIndex,
+    PointView& view)
 {
     // pull the geometries to start
     const std::string geomUrl = localUrl + "/geometries/";
@@ -577,7 +643,6 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
                 view.setField(Dimension::Id::NumberOfReturns,
                         startId + i, numReturns);
             }
-
         }
         else
         {
@@ -598,29 +663,6 @@ void EsriReader::createView(std::string localUrl, int nodeIndex, PointView& view
             }
         }
     }
-}
-
-
-//Create bounding box that the user specified
-BOX3D EsriReader::createBounds()
-{
-    if (m_args.bounds.is3d())
-        return m_args.bounds.to3d();
-
-    // If empty, return maximal extents to select everything.
-    const BOX2D b(m_args.bounds.to2d());
-    if (b.empty())
-    {
-        double mn((std::numeric_limits<double>::lowest)());
-        double mx((std::numeric_limits<double>::max)());
-        return BOX3D(mn, mn, mn, mx, mx, mx);
-    }
-
-    // Finally if 2D and non-empty, convert to 3D with all-encapsulating
-    // Z-values.
-    return BOX3D(
-            b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
-            b.maxx, b.maxy, (std::numeric_limits<double>::max)());
 }
 
 
