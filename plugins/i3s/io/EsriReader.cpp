@@ -171,17 +171,9 @@ void EsriReader::initialize(PointTableRef table)
             systemString + "'.");
     setSpatialReference(m_nativeSrs);
 
-    createEcefTransform();
+    m_ecefTransform.reset(new SrsTransform(m_nativeSrs,
+        SpatialReference("EPSG:4978")));
     createBounds();
-}
-
-void EsriReader::createEcefTransform()
-{
-    // All comparisons of bounding boxes are done in geocentric coords.
-    gdal::SpatialRef nativeSrs(m_nativeSrs.getWKT());
-    gdal::SpatialRef ecefSrs("EPSG:4978");
-    m_toEcefTransform = OCTNewCoordinateTransformation(nativeSrs.get(),
-        ecefSrs.get());
 }
 
 
@@ -192,24 +184,20 @@ void EsriReader::createBounds()
     const double mx((std::numeric_limits<double>::max)());
     if (m_args.bounds.is3d())
     {
-//ABELL
-/**
-        double a = (i & 1 ? minx: maxx);
-        double b = (i & 2 ? miny: maxy);
-        double c = (i & 4 ? minz: maxz);
-        m_ecefTransform->transform(a, b, c);
-        m_ecefBounds.grow(a, b, c);
-=======
         m_bounds = m_args.bounds.to3d();
-        m_ecefBounds = m_bounds;
-        OCTTransform(m_toEcefTransform, 1,
-            &m_ecefBounds.minx, &m_ecefBounds.miny, &m_ecefBounds.minz);
-        OCTTransform(m_toEcefTransform, 1,
-            &m_ecefBounds.maxx, &m_ecefBounds.maxy, &m_ecefBounds.maxz);
-**/
+        for (size_t i = 0; i < 8; ++i)
+        {
+            double a = (i & 1 ? m_bounds.minx: m_bounds.maxx);
+            double b = (i & 2 ? m_bounds.miny: m_bounds.maxy);
+            double c = (i & 4 ? m_bounds.minz: m_bounds.maxz);
+            m_ecefTransform->transform(a, b, c);
+            m_ecefBounds.grow(a, b, c);
+        }
     }
     else
     {
+        // No bounds specified.
+
         // Distance to the center of the earth is 6.3 million meters, so
         // 10 million should be a reasonable max for ECEF.
         BOX2D b = m_args.bounds.to2d();
@@ -222,10 +210,10 @@ void EsriReader::createBounds()
         {
             m_bounds = BOX3D(b); // Will set z values to 0.
             m_ecefBounds = m_bounds;
-            OCTTransform(m_toEcefTransform, 1,
-                &m_ecefBounds.minx, &m_ecefBounds.miny, &m_ecefBounds.minz);
-            OCTTransform(m_toEcefTransform, 1,
-                &m_ecefBounds.maxx, &m_ecefBounds.maxy, &m_ecefBounds.maxz);
+            m_ecefTransform->transform(m_ecefBounds.minx, m_ecefBounds.miny,
+                m_ecefBounds.minz);
+            m_ecefTransform->transform(m_ecefBounds.maxx, m_ecefBounds.maxy,
+                m_ecefBounds.maxz);
             m_bounds.minz = mn;
             m_bounds.maxz = mx;
             m_ecefBounds.minz = -10e6;

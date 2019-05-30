@@ -156,18 +156,8 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
-<<<<<<< HEAD
-    std::unique_ptr<SrsTransform> m_ecefTransform;
-=======
-
-    //Spatial Reference variables
     SpatialReference m_nativeSrs;
-    SpatialReference m_ecefSrs;
-
-    typedef void* ReferencePtr;
-    typedef void* TransformPtr;
-    TransformPtr m_toEcefTransform;
->>>>>>> i3s-gdal3
+    std::unique_ptr<SrsTransform> m_ecefTransform;
 
     struct dimData
     {
@@ -193,7 +183,6 @@ protected:
 
 private:
     void createBounds();
-    void createEcefTransform();
 };
 
 } // namespace pdal
