@@ -26,7 +26,6 @@ function(pdal_target_compile_settings target)
 
     target_compile_options(${target} PRIVATE
         ${PDAL_CXX_STANDARD}
-        -Werror
         -Wall
         -Wextra
         -Wpointer-arith
