@@ -35,7 +35,7 @@
 #include "ReprojectionFilter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/SrsTransform.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 //#include <memory>

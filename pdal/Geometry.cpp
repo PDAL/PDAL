@@ -33,11 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/Geometry.hpp>
-#include <pdal/SrsTransform.hpp>
-#include "cpl_string.h"
+#include <pdal/private/SrsTransform.hpp>
 
 #include <ogr_geometry.h>
-
 
 namespace pdal
 {

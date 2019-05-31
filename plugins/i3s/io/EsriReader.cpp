@@ -35,7 +35,7 @@
 #include "EsriReader.hpp"
 
 #include <Eigen/Geometry>
-#include <pdal/SrsTransform.hpp>
+#include <pdal/private/SrsTransform.hpp>
 
 #include "../lepcc/src/include/lepcc_types.h"
 

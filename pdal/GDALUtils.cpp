@@ -34,7 +34,7 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/SrsTransform.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
 

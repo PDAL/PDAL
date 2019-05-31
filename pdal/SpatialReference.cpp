@@ -37,7 +37,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/SrsTransform.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 // gdal
