@@ -89,7 +89,7 @@ void Path::writeRing(std::ostream& out) const
 
 // WKT (or GeoJSON) doesn't allow nesting of polygons.  You can just have
 // polygons and holes.  Islands within the holes need to be described as
-// separate polygons.  To that end, we grather the islands from all holes
+// separate polygons.  To that end, we gather the islands from all holes
 // and return them to be processed as separate polygons.
 PathPtrList Path::writePolygon(std::ostream& out) const
 {
