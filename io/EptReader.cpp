@@ -402,7 +402,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
                     layout->registerOrAssignDim(dimName, type));
                 m_addons.emplace_back(new Addon(*layout, ep, id));
             }
-            catch (NL::json::parse_error&)
+            catch (NL::json::parse_error& err)
             {
                 throwError("Unable to parse EPT addon file '" +
                     addonFilename + "'.");
@@ -481,7 +481,7 @@ void EptReader::overlaps()
         {
             j = NL::json::parse(ep.get(file));
         }
-        catch (NL::json::parse_error&)
+        catch (NL::json::parse_error& err)
         {
             throwError("Error parsing EPT hierarchy file '" + file + "'.");
         }

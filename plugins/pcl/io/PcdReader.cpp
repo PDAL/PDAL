@@ -35,6 +35,8 @@
 #include "PcdReader.hpp"
 #include "point_types.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
