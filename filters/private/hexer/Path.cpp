@@ -32,8 +32,6 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <cassert>
-
 #include "Path.hpp"
 
 using namespace std;
