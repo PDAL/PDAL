@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <cassert>
+
 #include "Path.hpp"
 
 #include <cassert>

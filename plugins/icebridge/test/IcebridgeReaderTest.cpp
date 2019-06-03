@@ -108,34 +108,34 @@ TEST(IcebridgeReaderTest, testRead)
     checkPoint(
             *view,
             0,
-            1414375e2f,     // time
-            82.60531f,      // latitude
-            -58.59381f,     // longitude
-            18.678,         // elevation
-            2408,           // xmtSig
-            181,            // rcvSig
-            49.91,          // azimuth
-            -4.376,         // pitch
-            0.608,          // roll
-            2.9,            // gpsPdop
-            20.0,           // pulseWidth
-            0.0);           // relTime
+            1414375e2f,      // time
+            82.60531f,       // latitude
+            -58.59381f,      // longitude
+            18.678f,         // elevation
+            2408,            // xmtSig
+            181,             // rcvSig
+            49.91f,          // azimuth
+            -4.376f,         // pitch
+            0.608f,          // roll
+            2.9f,            // gpsPdop
+            20.0f,           // pulseWidth
+            0.0f);           // relTime
 
     checkPoint(
             *view,
             1,
-            1414375e2f,     // time
-            82.60528f,      // latitude
-            -58.59512f,     // longitude
-            18.688,         // elevation
-            2642,           // xmtSig
-            173,            // rcvSig
-            52.006,         // azimuth
-            -4.376,         // pitch
-            0.609,          // roll
-            2.9,            // gpsPdop
-            17.0,           // pulseWidth
-            0.0);           // relTime
+            1414375e2f,      // time
+            82.60528f,       // latitude
+            -58.59512f,      // longitude
+            18.688f,         // elevation
+            2642,            // xmtSig
+            173,             // rcvSig
+            52.006f,         // azimuth
+            -4.376f,         // pitch
+            0.609f,          // roll
+            2.9f,            // gpsPdop
+            17.0f,           // pulseWidth
+            0.0f);           // relTime
 }
 
 TEST(IcebridgeReaderTest, testPipeline)

@@ -224,7 +224,7 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         {
             array = NL::json::parse(ostr.str());
         }
-        catch (NL::json::parse_error)
+        catch (NL::json::parse_error&)
         {}
 
         NL::json object = { stageName, array };
