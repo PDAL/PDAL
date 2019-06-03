@@ -65,6 +65,7 @@ void EsriReader::addArgs(ProgramArgs& args)
             m_args.max_density, -1.0);
 }
 
+
 void EsriReader::initialize(PointTableRef table)
 {
     //create proper density if min was set but max wasn't
@@ -177,7 +178,8 @@ void EsriReader::initialize(PointTableRef table)
 }
 
 
-//Create bounding box that the user specified
+// We check to see if tiles (nodepages) intersect our bounding box by
+// converting them both to ECEF.
 void EsriReader::createBounds()
 {
     const double mn((std::numeric_limits<double>::lowest)());
@@ -376,10 +378,10 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 }
 
 
-//Traverse tree through nodepages. Create a nodebox for each node in
-//the tree and test if it overlaps with the bounds created by user.
-//If it's a leaf node(the highest resolution) and it overlaps, add
-//it to the list of nodes to be pulled later.
+// Traverse tree through nodepages. Create a nodebox for each node in
+// the tree and test if it overlaps with the bounds created by user.
+// If it's a leaf node(the highest resolution) and it overlaps, add
+// it to the list of nodes to be pulled later.
 void EsriReader::traverseTree(NL::json page, int index,
     std::vector<int>& nodes, int depth, int pageIndex)
 {
@@ -409,6 +411,8 @@ void EsriReader::traverseTree(NL::json page, int index,
 
 
     BOX3D nodeBox = createCube(page["nodes"][index]);
+
+    // We're always comparing ECEF rectangular solids.
     bool overlap = m_ecefBounds.overlaps(nodeBox);
 
     // if it doesn't overlap, then none of the nodes in this subtree will
@@ -476,20 +480,22 @@ BOX3D EsriReader::createCube(const NL::json& base)
     double y = center[1].get<double>();
     double z = center[2].get<double>();
 
+    // We believe that half-sizes are in meters.
     const NL::json& hsize = base["obb"]["halfSize"];
     double hx = hsize[0].get<double>();
     double hy = hsize[1].get<double>();
     double hz = hsize[2].get<double>();
 
-    //transform (x,y,z) to ECEF to match the half sizes in meters.
+    // transform (x,y,z) to ECEF to match the half sizes in meters.
     m_ecefTransform->transform(x, y, z);
-    //take half size vector and find magnitude of it multiplied by sqrt(2)
+
+    // ABELL - Not sure why we're multiplying by sqrt(2).  The rest of the
+    // calculation is to get a radius of a sphere that encloses the OBB.
     double r = std::sqrt(2) *
         std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
 
-    //create cube around this radius
-    double maxx(x+r), maxy(y+r), maxz(z+r), minx(x-r), miny(y-r), minz(z-r);
-    return BOX3D(minx, miny, minz, maxx, maxy, maxz);
+    // Create cube around the sphere oriented as ECEF.
+    return BOX3D(x - r, y - r, z - r, x + r, y + r, z + r);
 }
 
 
