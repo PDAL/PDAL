@@ -448,7 +448,6 @@ void GDALGrid::finalize()
             if (!empty(i))
             {
                 double& distSum = (*m_idwDist)[i];
-
                 if (!std::isnan(distSum))
                     (*m_idw)[i] /= distSum;
             }
