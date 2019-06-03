@@ -34,6 +34,8 @@
 
 #include "Path.hpp"
 
+#include <cassert>
+
 using namespace std;
 
 namespace hexer
