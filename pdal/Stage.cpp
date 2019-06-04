@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/GEOSUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -155,30 +154,80 @@ void Stage::prepare(PointTableRef table)
 
 PointViewSet Stage::execute(PointTableRef table)
 {
-    startLogging();
     table.finalize();
 
-    PointViewSet views;
+    // We store stage instances instead of stages because a stage may get
+    // executed more than once.  A stage instance is created for each
+    // execution of a stage in a pipeline.  This properly builds out
+    // diamond-shaped pipelines.
+    int stageInstanceId = 1;
+    struct StageInstance
+    {
+        Stage *m_stage;
+        int m_id;
 
-    // If the inputs are empty, we're a reader.
-    if (m_inputs.empty())
+        StageInstance(Stage *s, int id) : m_stage(s), m_id(id)
+        {}
+        StageInstance() : m_stage(nullptr), m_id(0)
+        {}
+
+        bool operator<(const StageInstance& other) const
+        { return m_id < other.m_id; }
+    };
+
+    std::stack<StageInstance> stages;
+    std::stack<StageInstance> pending;
+    std::map<StageInstance, StageInstance> children;
+
+    m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
+        std::endl;
+
+    pending.push(StageInstance(this, stageInstanceId++));
+
+    // Linearize stage execution.
+    while (pending.size())
     {
-        m_log->get(LogLevel::Debug) << "Executing pipeline in standard mode." <<
-            std::endl;
-        views.insert(PointViewPtr(new PointView(table)));
-    }
-    else
-    {
-        for (size_t i = 0; i < m_inputs.size(); ++i)
+        StageInstance si = pending.top();
+        pending.pop();
+        stages.push(si);
+        for (Stage *in : si.m_stage->m_inputs)
         {
-            Stage *prev = m_inputs[i];
-            PointViewSet temp = prev->execute(table);
-            views.insert(temp.begin(), temp.end());
+            StageInstance parent(in, stageInstanceId++);
+            pending.push(parent);
+            children[parent] = si;
         }
     }
 
+    // Go through the stages in order, executing
+    PointViewSet outViews;
+    std::map<StageInstance, PointViewSet> sets;
+    while (stages.size())
+    {
+        StageInstance si = stages.top();
+        stages.pop();
+        PointViewSet& inViews = sets[si];
+        if (inViews.empty())
+            inViews.insert(PointViewPtr(new PointView(table)));
+        outViews = si.m_stage->execute(table, inViews);
+
+        StageInstance child = children[si];
+
+        // If a stage has no child it is the terminal stage.  We're done.
+        if (child.m_stage)
+            sets[child].insert(outViews.begin(), outViews.end());
+        // Allow previous point views to be freed.
+        sets.erase(si);
+    }
+    return outViews;
+}
+
+PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
+{
+
     PointViewSet outViews;
     std::vector<StageRunnerPtr> runners;
+
+    startLogging();
 
     // Put the spatial references from the views onto the table.
     // The table's spatial references are only valid as long as the stage
@@ -207,6 +256,7 @@ PointViewSet Stage::execute(PointTableRef table)
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
+    prerun(views);
     for (auto const& it : views)
     {
         StageRunnerPtr runner(new StageRunner(this, it));
@@ -229,18 +279,13 @@ PointViewSet Stage::execute(PointTableRef table)
                 v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
-    l_done(table);
+    done(table);
     stopLogging();
     m_pointCount = 0;
     m_faceCount = 0;
     return outViews;
 }
 
-
-void Stage::l_done(PointTableRef table)
-{
-    done(table);
-}
 
 void Stage::l_addArgs(ProgramArgs& args)
 {
@@ -283,16 +328,10 @@ void Stage::setupLog()
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
+    readerInitialize(table);
     writerInitialize(table);
 }
 
-
-// This function allows m_spatialReference to remain private.
-void Stage::addSpatialReferenceArg(ProgramArgs& args)
-{
-    args.add("spatialreference", "Spatial reference to apply to data",
-        m_spatialReference);
-}
 
 const SpatialReference& Stage::getSpatialReference() const
 {
@@ -311,16 +350,11 @@ void Stage::setSpatialReference(MetadataNode& m,
 {
     m_spatialReference = spatialRef;
 
-    auto pred = [](MetadataNode m){ return m.name() == "spatialreference"; };
-
-    MetadataNode spatialNode = m.findChild(pred);
-    if (spatialNode.empty())
-    {
-        m.add(spatialRef.toMetadata());
-        m.add("spatialreference", spatialRef.getWKT(), "SRS of this stage");
-        m.add("comp_spatialreference", spatialRef.getWKT(),
-            "SRS of this stage");
-    }
+    MetadataNode srsMetadata = spatialRef.toMetadata();
+    m.addOrUpdate(spatialRef.toMetadata());
+    m.addOrUpdate("spatialreference", spatialRef.getWKT(), "SRS of this stage");
+    m.addOrUpdate("comp_spatialreference", spatialRef.getWKT(),
+        "SRS of this stage");
 }
 
 

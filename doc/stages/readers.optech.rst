@@ -16,18 +16,16 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.optech",
           "filename":"input.csd"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -36,5 +34,4 @@ Options
 filename
   csd file to read [Required]
 
-count
-  Maximum number of points read [Optional]
+.. include:: reader_opts.rst

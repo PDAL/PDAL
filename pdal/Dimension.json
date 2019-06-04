@@ -370,6 +370,10 @@
     "name": "Omit",
     "type": "uint8_t",
     "description": "Used to shallowly mark a point as being omitted without removing it"
+    },
+    {
+    "name": "NNDistance",
+    "type": "double",
+    "description": "Distance metric related to a point's nearest neighbors."
     }
-
 ] }

@@ -5,7 +5,7 @@ readers.matlab
 
 The **Matlab Reader** supports readers Matlab ``.mat`` files. Data
 must be in a `Matlab struct`_, with field names that correspond to
-:ref:`dimensions` names. No ability to provide a name map is yet
+:ref:`dimension <dimensions>` names. No ability to provide a name map is yet
 provided.
 
 Additionally, each array in the struct should ideally have the
@@ -32,25 +32,25 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.matlab",
           "struct":"PDAL",
           "filename":"autzen.mat"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"output.las"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
 
 filename
-  Output file name [REQUIRED]
+  Input file name. [Required]
+
+.. include:: reader_opts.rst
 
 struct
-  Array structure name to read [OPTIONAL, defaults ``PDAL``]
+  Array structure name to read. [Default: 'PDAL']

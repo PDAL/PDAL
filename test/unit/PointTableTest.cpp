@@ -166,9 +166,9 @@ TEST(PointTable, userView)
         double y = customView.getFieldAs<double>(Dimension::Id::Y, id);
         double z = customView.getFieldAs<double>(Dimension::Id::Z, id);
 
-        EXPECT_FLOAT_EQ(xDef, x);
-        EXPECT_FLOAT_EQ(yDef, y);
-        EXPECT_FLOAT_EQ(zDef, z);
+        EXPECT_DOUBLE_EQ(xDef, x);
+        EXPECT_DOUBLE_EQ(yDef, y);
+        EXPECT_DOUBLE_EQ(zDef, z);
     };
 
     reader.setReadCb(readCb);
@@ -201,6 +201,60 @@ TEST(PointTable, srs)
     EXPECT_FALSE(table.spatialReferenceUnique());
     EXPECT_EQ(table.anySpatialReference(), srs1);
     EXPECT_EQ(table.m_spatialRefs.size(), 2u);
+}
+
+void simpleTest(PointTableRef table)
+{
+    PointLayoutPtr layout = table.layout();
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+    layout->registerDim(Dimension::Id::Intensity);
+    layout->registerDim(Dimension::Id::Blue);
+
+    PointView v(table);
+    for (PointId id = 0; id < 10000; id++)
+    {
+        if (id % 200 < 100)
+        {
+            v.setField(Dimension::Id::X, id, id);
+            v.setField(Dimension::Id::Y, id, id + 1);
+            v.setField(Dimension::Id::Z, id, id + 2);
+            v.setField(Dimension::Id::Intensity, id, (id * 100) % 6523);
+        }
+        else
+            v.setField(Dimension::Id::Blue, id, 0);
+    }
+
+    for (PointId id = 0; id < 10000; id++)
+    {
+        if (id % 200 < 100)
+        {
+            EXPECT_EQ(id, v.getFieldAs<PointId>(Dimension::Id::X, id));
+            EXPECT_EQ(id + 1, v.getFieldAs<PointId>(Dimension::Id::Y, id));
+            EXPECT_EQ(id + 2, v.getFieldAs<PointId>(Dimension::Id::Z, id));
+            EXPECT_EQ((id * 100) % 6523,
+                v.getFieldAs<PointId>(Dimension::Id::Intensity, id));
+        }
+        else
+        {
+            EXPECT_EQ(0U, v.getFieldAs<PointId>(Dimension::Id::X, id));
+            EXPECT_EQ(0U, v.getFieldAs<PointId>(Dimension::Id::Y, id));
+            EXPECT_EQ(0U, v.getFieldAs<PointId>(Dimension::Id::Z, id));
+            EXPECT_EQ(0U, v.getFieldAs<PointId>(Dimension::Id::Intensity, id));
+        }
+    }
+}
+
+
+TEST(PointTable, simple)
+{
+    PointTable t;
+    simpleTest(t);
+
+    ContiguousPointTable t2;
+    simpleTest(t2);
 }
 
 } // namespace

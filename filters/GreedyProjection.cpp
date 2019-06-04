@@ -126,16 +126,16 @@ void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 
 void GreedyProjection::filter(PointView& view)
 {
-    pdal::NormalFilter().doFilter(view);
+    NormalFilter().doFilter(view);
 
-    pdal::KD3Index& tree = view.build3dIndex();
+    KD3Index& tree = view.build3dIndex();
 
     view_ = &view;
     mesh_ = view_->createMesh(getName());
     const double sqr_mu = mu_ * mu_;
     const double sqr_max_edge = search_radius_*search_radius_;
 
-    nnn_ = (int)std::min((point_count_t)nnn_, view.size());
+    nnn_ = (int)(std::min)((point_count_t)nnn_, view.size());
 
     // Variables to hold the results of nearest neighbor searches
     std::vector<PointId> nnIdx(nnn_);
@@ -154,17 +154,17 @@ void GreedyProjection::filter(PointView& view)
     already_connected_ = false; // see declaration for comments :P
 
     // initializing states and fringe neighbors
-    part_.clear ();
-    state_.clear ();
-    source_.clear ();
-    ffn_.clear ();
-    sfn_.clear ();
-    part_.resize(view.size ()); // indices of point's part
-    state_.resize(view.size (), GP3Type::FREE);
-    source_.resize(view.size ());
+    part_.clear();
+    state_.clear();
+    source_.clear();
+    ffn_.clear();
+    sfn_.clear();
+    part_.resize(view.size()); // indices of point's part
+    state_.resize(view.size(), GP3Type::FREE);
+    source_.resize(view.size());
     ffn_.resize(view.size());
     sfn_.resize(view.size());
-    fringe_queue_.clear ();
+    fringe_queue_.clear();
     int fqIdx = 0; // current fringe's index in the queue to be processed
 
   // Avoiding NaN coordinates if needed
@@ -188,7 +188,7 @@ void GreedyProjection::filter(PointView& view)
   std::vector<int> point2index (input_->points.size (), -1);
   for (int cp = 0; cp < static_cast<int> (indices_->size ()); ++cp)
   {
-    coords_.push_back(input_->points[(*indices_)[cp]].getVector3fMap());
+    coords_.push_back(input_->points[(*indices_)[cp]].getVector3dMap());
     point2index[(*indices_)[cp]] = cp;
   }
   **/
@@ -237,8 +237,7 @@ void GreedyProjection::filter(PointView& view)
 
       // Projecting point onto the surface
       Eigen::Vector3d coord(getCoord(R_));
-      float dist = nc.dot (coord);
-      proj_qp_ = coord - dist * nc;
+      proj_qp_ = coord - nc.dot(coord) * nc;
 
       // Converting coords, calculating angles and saving the
       // projected near boundary edges
@@ -316,13 +315,13 @@ void GreedyProjection::filter(PointView& view)
           break;
         else
         {
-          int right = left+1;
+          PointId right = left+1;
           do
           {
-            while ((right < nnn_) &&
+            while ((right < (PointId)nnn_) &&
                 ((!angles_[right].visible) || stateSet(nnIdx[right])))
                     right++;
-            if (right >= nnn_)
+            if (right >= (PointId)nnn_)
               break;
             else if ((getCoord(nnIdx[left]) -
                 getCoord(nnIdx[right])).squaredNorm () > sqr_max_edge)
@@ -436,8 +435,7 @@ void GreedyProjection::filter(PointView& view)
 
       const Eigen::Vector3d c(getCoord(R_));
       // Projecting point onto the surface
-      float dist = nc.dot (c);
-      proj_qp_ = c - dist * nc;
+      proj_qp_ = c - nc.dot(c)* nc;
 
       // Converting coords, calculating angles and saving the projected
       // near boundary edges

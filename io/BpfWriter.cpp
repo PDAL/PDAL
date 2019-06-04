@@ -178,7 +178,9 @@ void BpfWriter::readyFile(const std::string& filename,
         file.write(m_stream);
     m_stream.put((const char *)m_extraData.data(), m_extraData.size());
 
-    m_header.m_len = m_stream.position();
+    if (m_stream.position() > (std::numeric_limits<int32_t>::max)())
+        throwError("Data too large.  BPF only supports 2^32 - 1 bytes.");
+    m_header.m_len = static_cast<int32_t>(m_stream.position());
 
     m_header.m_xform.m_vals[0] = m_scaling.m_xXform.m_scale.m_val;
     m_header.m_xform.m_vals[5] = m_scaling.m_yXform.m_scale.m_val;
@@ -223,10 +225,14 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 }
 
 
+void BpfWriter::prerunFile(const PointViewSet& pvSet)
+{
+    m_scaling.setAutoXForm(pvSet);
+}
+
+
 void BpfWriter::writeView(const PointViewPtr dataShared)
 {
-    m_scaling.setAutoXForm(dataShared);
-
     // Avoid reference count overhead internally.
     const PointView* data(dataShared.get());
 
@@ -254,7 +260,11 @@ void BpfWriter::writeView(const PointViewPtr dataShared)
     {
         throwError(err.what());
     }
-    m_header.m_numPts += data->size();
+
+    size_t count = data->size() + m_header.m_numPts;
+    if (count > (std::numeric_limits<int32_t>::max)())
+        throwError("Too many points to write to BPF output. Limit is 2^32 -1.");
+    m_header.m_numPts = static_cast<int32_t>(count);
 }
 
 
@@ -353,8 +363,8 @@ double BpfWriter::getAdjustedValue(const PointView* data,
     BpfDimension& bpfDim, PointId idx)
 {
     double d = data->getFieldAs<double>(bpfDim.m_id, idx);
-    bpfDim.m_min = std::min(bpfDim.m_min, d);
-    bpfDim.m_max = std::max(bpfDim.m_max, d);
+    bpfDim.m_min = (std::min)(bpfDim.m_min, d);
+    bpfDim.m_max = (std::max)(bpfDim.m_max, d);
 
     if (bpfDim.m_id == Dimension::Id::X)
         d /= m_scaling.m_xXform.m_scale.m_val;

@@ -7,22 +7,48 @@ if (NOT PDAL_ARBITER_ENABLED OR EXISTS)
     return()
 endif()
 
-if (CURL_FOUND)
-    add_definitions("-DARBITER_CURL")
-endif()
-
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
-target_include_directories(${PDAL_ARBITER_LIB_NAME} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR})
-target_link_libraries(${PDAL_ARBITER_LIB_NAME})
-#
-# Arbiter is built static but is included in a shared lib.
-#
-if (UNIX)
-    target_compile_options(${PDAL_ARBITER_LIB_NAME} PRIVATE "-fPIC")
-else()
+target_include_directories(${PDAL_ARBITER_LIB_NAME}
+    PRIVATE
+        ${NLOHMANN_INCLUDE_DIR}
+)
+target_link_libraries(${PDAL_ARBITER_LIB_NAME}
+    PRIVATE
+        ${CURL_LIBRARIES}
+)
+target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
+    PRIVATE
+        ARBITER_CURL)
+
+if (MSVC)
+    find_library(SHLWAPI Shlwapi.lib)
+    target_link_libraries(${PDAL_ARBITER_LIB_NAME} PRIVATE ${SHLWAPI})
     target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
-        PUBLIC -DARBITER_DLL_EXPORT -DARBITER_CURL)
+        PRIVATE
+            ARBITER_DLL_EXPORT)
+else()
+    #
+    # Arbiter is built static but is included in a shared lib.
+    #
+    target_compile_options(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            -fPIC)
+endif()
+if (ZLIB_FOUND)
+    target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ARBITER_ZLIB)
+endif()
+if (OPENSSL_FOUND)
+    target_include_directories(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ${OPENSSL_INCLUDE_DIR})
+    target_link_libraries(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ${OPENSSL_LIBRARIES})
+    target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ARBITER_OPENSSL)
 endif()
 
 set_target_properties(${PDAL_ARBITER_LIB_NAME} PROPERTIES

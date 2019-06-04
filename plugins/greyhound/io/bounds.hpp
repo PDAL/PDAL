@@ -1,12 +1,40 @@
 /******************************************************************************
-* Copyright (c) 2016, Connor Manning (connor@hobu.co)
+* Copyright (c) 2018, Connor Manning (connor@hobu.co)
 *
-* Entwine -- Point cloud indexing
+* All rights reserved.
 *
-* Entwine is available under the terms of the LGPL2 license. See COPYING
-* for specific license text and more information.
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following
+* conditions are met:
 *
-******************************************************************************/
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in
+*       the documentation and/or other materials provided
+*       with the distribution.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+* OF SUCH DAMAGE.
+****************************************************************************/
+
+// This file was originally in Entwine, which is LGPL2, but it has been
+// relicensed for inclusion in PDAL.
+
 
 #pragma once
 
@@ -14,7 +42,7 @@
 #include <iostream>
 #include <limits>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include "dir.hpp"
 #include "point.hpp"
@@ -30,7 +58,7 @@ public:
     Bounds() = default;
     Bounds(const Point& min, const Point& max);
     Bounds(const Point& center, double radius);
-    Bounds(const Json::Value& json);
+    Bounds(const NL::json& json);
     Bounds(double xMin, double yMin, double xMax, double yMax);
     Bounds(
             double xMin,
@@ -54,8 +82,8 @@ public:
         setMid();
     }
 
-    const Point& min() const { return m_min; }
-    const Point& max() const { return m_max; }
+    const Point& minimum() const { return m_min; }
+    const Point& maximum() const { return m_max; }
     const Point& mid() const { return m_mid; }
 
     // Returns true if these Bounds share any area in common with another.
@@ -64,12 +92,15 @@ public:
         return
             width() > 0 && depth() > 0 &&
             other.width() > 0 && other.depth() > 0 &&
-            max().x > other.min().x && min().x < other.max().x &&
-            max().y > other.min().y && min().y < other.max().y &&
+            maximum().x > other.minimum().x &&
+            minimum().x < other.maximum().x &&
+            maximum().y > other.minimum().y &&
+            minimum().y < other.maximum().y &&
             (force2d || (
                 (!height() && !other.height()) || (
                     height() > 0 && other.height() > 0 &&
-                    max().z > other.min().z && min().z < other.max().z)));
+                    maximum().z > other.minimum().z &&
+                    minimum().z < other.maximum().z)));
     }
 
     // Returns true if the requested Bounds are contained within these Bounds.
@@ -239,11 +270,12 @@ public:
     }
 
     bool empty() const { return !exists(); }
-    bool exists() const { return min().exists() || max().exists(); }
+    bool exists() const { return minimum().exists() || maximum().exists(); }
     bool is3d() const { return m_min.z != m_max.z; }
 
-    Json::Value toJson() const;
-    Bounds to2d() const { return Bounds(min().x, min().y, max().x, max().y); }
+    NL::json toJson() const;
+    Bounds to2d() const
+    { return Bounds(minimum().x, minimum().y, maximum().x, maximum().y); }
 
     void grow(const Bounds& bounds);
     void grow(const Point& p);
@@ -261,40 +293,42 @@ public:
 
     Bounds transform(const Transformation& t) const
     {
-        return Bounds(Point::transform(min(), t), Point::transform(max(), t));
+        return Bounds(Point::transform(minimum(), t),
+            Point::transform(maximum(), t));
     }
 
     Bounds intersection(const Bounds& b) const
     {
         if (!this->overlaps(b)) return Bounds();
-        return Bounds(Point::max(min(), b.min()), Point::min(max(), b.max()));
+        return Bounds(Point::maximum(minimum(), b.minimum()),
+            Point::minimum(maximum(), b.maximum()));
     }
 
     Bounds scale(const Point& scale, const Point& offset) const
     {
         return Bounds(
-                Point::scale(min(), scale, offset),
-                Point::scale(max(), scale, offset));
+                Point::scale(minimum(), scale, offset),
+                Point::scale(maximum(), scale, offset));
     }
 
     Bounds unscale(const Point& scale, const Point& offset) const
     {
         return Bounds(
-                Point::unscale(min(), scale, offset),
-                Point::unscale(max(), scale, offset));
+                Point::unscale(minimum(), scale, offset),
+                Point::unscale(maximum(), scale, offset));
     }
 
     static Bounds everything()
     {
         static const double dmin(std::numeric_limits<double>::lowest());
-        static const double dmax(std::numeric_limits<double>::max());
+        static const double dmax((std::numeric_limits<double>::max)());
         return Bounds(dmin, dmin, dmin, dmax, dmax, dmax);
     }
 
     static Bounds expander()
     {
         static const double dmin(std::numeric_limits<double>::lowest());
-        static const double dmax(std::numeric_limits<double>::max());
+        static const double dmax((std::numeric_limits<double>::max)());
 
         // Use Bounds::set to avoid malformed bounds warning.
         Bounds b;
@@ -304,12 +338,12 @@ public:
 
     double operator[](std::size_t i) const
     {
-        return i < 3 ? min()[i] : max()[i - 3];
+        return i < 3 ? minimum()[i] : maximum()[i - 3];
     }
 
     Bounds make2d() const
     {
-        return Bounds(min().x, min().y, max().x, max().y);
+        return Bounds(minimum().x, minimum().y, maximum().x, maximum().y);
     }
 
 private:
@@ -342,7 +376,7 @@ PDAL_DLL inline bool operator<(const Bounds& lhs, const Bounds& rhs)
 
 PDAL_DLL inline bool operator==(const Bounds& lhs, const Bounds& rhs)
 {
-    return lhs.min() == rhs.min() && lhs.max() == rhs.max();
+    return lhs.minimum() == rhs.minimum() && lhs.maximum() == rhs.maximum();
 }
 
 PDAL_DLL inline bool operator!=(const Bounds& lhs, const Bounds& rhs)
@@ -352,7 +386,7 @@ PDAL_DLL inline bool operator!=(const Bounds& lhs, const Bounds& rhs)
 
 PDAL_DLL inline Bounds operator+(const Bounds& b, const Point& p)
 {
-    return Bounds(b.min() + p, b.max() + p);
+    return Bounds(b.minimum() + p, b.maximum() + p);
 }
 
 } // namespace entwine

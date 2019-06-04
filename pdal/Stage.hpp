@@ -138,12 +138,26 @@ public:
     { return false; }
 
     /**
+      Return a pointer to a pipeline's first non-streamable stage,
+      if one exists.
+
+      \return  nullptr if the stage is streamable, a pointer to this stage
+        otherwise.
+    */
+    virtual const Stage *findNonstreamable() const
+    { return this; }
+
+    /**
       Set the spatial reference of a stage.
 
       Set the spatial reference that will override that being carried by the
       PointView being processed.  This is usually used when reprojecting data
       to a new spatial reference.  The stage spatial reference will be carried
       by PointViews processes by this stage to subsequent stages.
+
+      If called by a Reader whose spatial reference has been set with option
+      'spatialreference' or 'override_srs', then this function will have no
+      effect.
 
       \param srs  Spatial reference to set.
     */
@@ -284,7 +298,7 @@ public:
       MetadataNode.  Used to dump a pipeline specification in a portable
       format.
 
-      \param root  Node to which a stages meatdata should be added.
+      \param root  Node to which a stages metadata should be added.
       \param tags  Pipeline writer's current list of stage tags.
     */
     void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
@@ -315,8 +329,7 @@ protected:
     MetadataNode m_metadata;    ///< Stage's metadata.
     int m_progressFd;           ///< Descriptor for progress info.
 
-    void setSpatialReference(MetadataNode& m, SpatialReference const&);
-    void addSpatialReferenceArg(ProgramArgs& args);
+    virtual void setSpatialReference(MetadataNode& m, SpatialReference const&);
     void throwError(const std::string& s) const;
     /**
       Return the point count of all point views at the start of execution.
@@ -360,11 +373,11 @@ private:
     void setupLog();
     void handleOptions();
 
+    void l_addArgs(ProgramArgs& args);
     virtual void readerAddArgs(ProgramArgs& /*args*/)
         {}
-    void l_addArgs(ProgramArgs& args);
-    void l_done(PointTableRef table);
-
+    virtual void readerInitialize(PointTableRef /*table*/)
+        {}
     virtual void writerInitialize(PointTableRef /*table*/)
         {}
 
@@ -421,6 +434,15 @@ private:
         {}
 
     /**
+      Execute a single stage.
+
+      \param table  PointTable
+      \param pvSet  Input PointViewSet
+      \return  Output PointViewSet
+    */
+    PointViewSet execute(PointTableRef table, PointViewSet& pvSet);
+
+    /**
       Functions called after dimensions have been added.  Implement in
       subclass.
 
@@ -436,6 +458,15 @@ private:
       \param table  PointTable associated with the pipeline.
     */
     virtual void ready(PointTableRef /*table*/)
+        {}
+
+    /**
+      Pass all the point views at once to the stage for cases where we need
+      such information.  You normally shouldn't need to implement this call.
+
+      \param pvSet  PointViewSet being processed for the stage.
+    */
+    virtual void prerun(const PointViewSet& /*pvSet*/)
         {}
 
     /**

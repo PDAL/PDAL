@@ -1,11 +1,12 @@
 .. _filters.neighborclassifier:
 
 filters.neighborclassifier
-===================
+==========================
 
-The neighborclassifier filter allows you update the value of the classification
+The **neighborclassifier filter** allows you update the value of
+the classification
 for specific points to a value determined by a K-nearest neighbors vote.
-For each point, the k nearest neighbors are queried and if more than half of
+For each point, the k_ nearest neighbors are queried and if more than half of
 them have the same value, the filter updates the selected point accordingly
 
 For example, if an automated classification procedure put/left erroneous
@@ -25,17 +26,16 @@ This pipeline updates the Classification of all points with classification
 1 (unclassified) based on the consensus (majority) of its nearest 10 neighbors.
 
 .. code-block:: json
-    {
-      "pipeline":[
-        "autzen_class.las",
-        {
+
+  [
+      "autzen_class.las",
+      {
           "type" : "filters.neighborclassifier",
           "domain" : "Classification[1:1]",
           "k" : 10
-        },
-        "autzen_class_refined.las"
-      ]
-    }
+      },
+      "autzen_class_refined.las"
+  ]
 
 Example 2
 ---------
@@ -45,30 +45,29 @@ to src.las.  Any points in src.las that are not in pred.txt will be
 assigned based on the closest point in pred.txt.
 
 .. code-block:: json
-    {
-      "pipeline":[
-        "src.las",
-        {
+
+  [
+      "src.las",
+      {
           "type" : "filters.neighborclassifier",
           "k" : 1,
           "candidate" : "pred.txt"
-        },
-        "dest.las"
-      ]
-    }
+      },
+      "dest.las"
+  ]
 
 Options
 -------
 
-candidate
+_`candidate`
   A filename which points to the point cloud containing the points which
   will do the voting.  If not specified, defaults to the input of the filter.
 
-domain
+_`domain`
   A :ref:`range <ranges>` which selects points to be processed by the filter.
   Can be specified multiple times.  Points satisfying any range will be
   processed
 
-k
+_`k`
   An integer which specifies the number of neighbors which vote on each
   selected point.

@@ -73,85 +73,84 @@ CREATE_STATIC_KERNEL(TIndexKernel, s_info)
 
 std::string TIndexKernel::getName() const { return s_info.name; }
 
-TIndexKernel::TIndexKernel()
-    : Kernel()
+TIndexKernel::TIndexKernel() : SubcommandKernel()
 //ABELL - need to option this.
     , m_srsColumnName("srs")
-    , m_merge(false)
     , m_dataset(NULL)
     , m_layer(NULL)
-    , m_fastBoundary(false)
     , m_overrideASrs(false)
 {}
 
 
-void TIndexKernel::addSwitches(ProgramArgs& args)
+StringList TIndexKernel::subcommands() const
 {
-    args.add("tindex", "OGR-readable/writeable tile index output",
-        m_idxFilename).setPositional();
-    args.add("filespec", "Build: Pattern of files to index. "
-        "Merge: Output filename", m_filespec).setOptionalPositional();
-    args.add("fast_boundary", "Use extent instead of exact boundary",
-        m_fastBoundary);
-    args.add("lyr_name", "OGR layer name to write into datasource",
-        m_layerName);
-    args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
-        "location");
-    args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
-        "ESRI Shapefile");
-    args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
-        "EPSG:4326");
-    args.add("a_srs", "Assign SRS of tile with no SRS to this value",
-        m_assignSrsString, "EPSG:4326");
-    args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
-    args.add("polygon", "Well-known text of polygon to clip output", m_wkt);
-    args.add("write_absolute_path",
-        "Write absolute rather than relative file paths", m_absPath);
-    args.add("merge", "Whether we're merging the entries in a tindex file.",
-        m_merge);
-    args.add("stdin,s", "Read filespec pattern from standard input",
-        m_usestdin);
+    return { "create", "merge" };
+}
+
+
+void TIndexKernel::addSubSwitches(ProgramArgs& args,
+    const std::string& subcommand)
+{
+    if (subcommand == "create")
+    {
+        args.add("tindex", "OGR-readable/writeable tile index output",
+            m_idxFilename).setPositional();
+        args.add("filespec", "Pattern of files to index",
+            m_filespec).setOptionalPositional();
+        args.add("fast_boundary", "Use extent instead of exact boundary",
+            m_fastBoundary);
+        args.add("lyr_name", "OGR layer name to write into datasource",
+            m_layerName);
+        args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
+            "location");
+        args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
+            "ESRI Shapefile");
+        args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
+            "EPSG:4326");
+        args.add("a_srs", "Assign SRS of tile with no SRS to this value",
+            m_assignSrsString, "EPSG:4326");
+        args.add("write_absolute_path",
+            "Write absolute rather than relative file paths", m_absPath);
+        args.add("stdin,s", "Read filespec pattern from standard input",
+            m_usestdin);
+    }
+    else if (subcommand == "merge")
+    {
+        args.add("tindex", "OGR-readable/writeable tile index output",
+            m_idxFilename).setPositional();
+        args.add("filespec", "Output filename",
+            m_filespec).setPositional();
+        args.add("lyr_name", "OGR layer name to write into datasource",
+            m_layerName);
+        args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
+            "location");
+        args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
+            "ESRI Shapefile");
+        args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
+        args.add("polygon", "Well-known text of polygon to clip output", m_wkt);
+        args.add("t_srs", "Spatial reference of the clipping geometry",
+            m_tgtSrsString, "EPSG:4326");
+    }
 }
 
 
 void TIndexKernel::validateSwitches(ProgramArgs& args)
 {
-    if (m_merge)
+    if (m_subcommand == "merge")
     {
         if (!m_wkt.empty() && !m_bounds.empty())
             throw pdal_error("Can't specify both 'polygon' and "
                 "'bounds' options.");
         if (!m_bounds.empty())
             m_wkt = m_bounds.toWKT();
-        if (m_filespec.empty())
-            throw pdal_error("No output filename provided.");
-        StringList invalidArgs;
-        invalidArgs.push_back("a_srs");
-        invalidArgs.push_back("src_srs_name");
-        invalidArgs.push_back("stdin");
-        invalidArgs.push_back("fast_boundary");
-        for (auto arg : invalidArgs)
-            if (args.set(arg))
-            {
-                std::ostringstream out;
-
-                out << "option '" << arg << "' not supported during merge.";
-                throw pdal_error(out.str());
-            }
     }
     else
     {
         if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("No input pattern specified");
+            throw pdal_error("Must specify either --filespec or --stdin.");
         if (m_filespec.size() && m_usestdin)
             throw pdal_error("Can't specify both --filespec and --stdin "
                 "options.");
-        if (args.set("polygon"))
-            throw pdal_error("'polygon' option not supported when building "
-                "index.");
-        if (args.set("bounds"))
-            throw pdal_error("'bounds' option not supported when building "
-                "index.");
         if (args.set("a_srs"))
             m_overrideASrs = true;
     }
@@ -162,7 +161,7 @@ int TIndexKernel::execute()
 {
     gdal::registerDrivers();
 
-    if (m_merge)
+    if (m_subcommand == "merge")
         mergeFile();
     else
     {
@@ -441,13 +440,12 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     // Failing that, get the proj.4 version.  Not sure what's supposed to
     // happen if we overflow 254 with proj.4.
 
-    const char* pszAuthorityCode = OSRGetAuthorityCode(srcSrs.get(), NULL);
-    const char* pszAuthorityName = OSRGetAuthorityName(srcSrs.get(), NULL);
-    if (pszAuthorityName && pszAuthorityCode)
+    std::string epsg =
+        SpatialReference(fileInfo.m_srs).identifyHorizontalEPSG();
+    if (epsg.size())
     {
-        std::string auth = std::string(pszAuthorityName) + ":" +
-            pszAuthorityCode;
-        OGR_F_SetFieldString(hFeature, indexes.m_srs, auth.data());
+        epsg = "EPSG:" + epsg;
+        OGR_F_SetFieldString(hFeature, indexes.m_srs, epsg.data());
     }
     else
     {
@@ -487,16 +485,7 @@ bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
     if (!qi.valid())
         return false;
 
-    std::stringstream polygon;
-    polygon << "POLYGON ((";
-
-    polygon <<         qi.m_bounds.minx << " " << qi.m_bounds.miny;
-    polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.miny;
-    polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.maxy;
-    polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.maxy;
-    polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.miny;
-    polygon << "))";
-    fileInfo.m_boundary = polygon.str();
+    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
     if (!qi.m_srs.empty())
         fileInfo.m_srs = qi.m_srs.getWKT();
     return true;

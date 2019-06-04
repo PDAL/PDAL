@@ -13,33 +13,31 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type": "readers.greyhound",
           "url": "data.greyhound.io/resource/iowa-z",
           "filter": {"$and": [
             {"Path": "02004736.laz"},
             {"Classification": {"$ne": 7}}
           ]}
-        },
-        "output.laz"
-      ]
-    }
+      },
+      "output.laz"
+  ]
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "greyhound://data.greyhound.io/resource/iowa-z/read?filter={\"Path\":\"02004736.laz\"}",
-        "02004736.laz"
-      ]
-    }
+  [
+      "greyhound://data.greyhound.io/resource/iowa-z/read?filter={\"Path\":\"02004736.laz\"}",
+      "02004736.laz"
+  ]
 
 Options
 -------
 
 Many of the options to this reader are reproductions of Greyhound query parameter options (see Greyhound `read`_ query documentation).  These options may be specified as query parameters to the **url** parameter or specified separately.  Separately specified parameters take precedence over query-parameter specified parameters.
+
+.. include:: reader_opts.rst
 
 _`url`
   Greyhound server URL, or a full Greyhound `read`_ query URL.  If specified as a full Greyhound query URL, no other options need to be present.
@@ -110,7 +108,7 @@ _`buffer`
   bounds by 15%.
 
 .. _Greyhound: https://github.com/hobu/greyhound
-.. _bounds array: https://github.com/hobu/greyhound/blob/master/doc/clientDevelopment.rst#bounds-option
+.. _bounds array: https://greyhound.io/clientDevelopment.html#bounds-option
 .. _info: https://greyhound.io/clientDevelopment.html#the-info-query
 .. _read: https://greyhound.io/clientDevelopment.html#the-read-query
 .. _comparison: https://docs.mongodb.com/manual/reference/operator/query-comparison/

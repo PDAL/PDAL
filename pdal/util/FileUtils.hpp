@@ -41,6 +41,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "pdal_util_export.hpp"
 
@@ -84,6 +85,14 @@ namespace FileUtils
       \return  Whether the directory was created.
     */
     PDAL_DLL bool createDirectory(const std::string& dirname);
+
+    /**
+      Create all directories in the provided path.
+
+      \param dirname  Path name.
+      \return  \false on failure
+    */
+    PDAL_DLL bool createDirectories(const std::string& path);
 
     /**
       Delete a directory and its contents.

@@ -15,9 +15,10 @@ function(pdal_target_compile_settings target)
                 -D_CRT_SECURE_NO_WARNINGS
                 -D_CRT_NONSTDC_NO_WARNING
                 -D_SCL_SECURE_NO_WARNINGS
-                -DNOMINMAX
             )
             target_compile_options(${target} PRIVATE
+                # Yes, we don't understand GCC pragmas
+                /wd4068 
                 # Nitro makes use of Exception Specifications, which results in
                 # numerous warnings when compiling in MSVC. We will ignore
                 # them for now.
@@ -55,6 +56,9 @@ endfunction()
 #
 set(WINSOCK_LIBRARY ws2_32)
 
-set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
-set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
-set(CMAKE_PREFIX_PATH "c:/OSGeo4W64/cmake;$ENV{CMAKE_LIBRARY_PATH}")
+IF(DEFINED ENV{OSGEO4W_HOME})
+	set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
+	set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
+    set(CMAKE_PREFIX_PATH "c:/OSGeo4W64/cmake;$ENV{CMAKE_LIBRARY_PATH}")
+ENDIF()
+

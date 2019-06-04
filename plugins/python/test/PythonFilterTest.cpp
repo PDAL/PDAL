@@ -156,10 +156,10 @@ TEST_F(PythonFilterTest, add_dimension)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Option source("source", "import numpy\n"
+    Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
-        "  outs['AddedIntensity'] = np.zeros(ins['X'].size, dtype=numpy.double) + 1\n"
-        "  outs['AddedPointSourceId'] = np.zeros(ins['X'].size, dtype=numpy.double) + 2\n"
+        "  outs['AddedIntensity'] = np.zeros(ins['X'].size, dtype=np.double) + 1\n"
+        "  outs['AddedPointSourceId'] = np.zeros(ins['X'].size, dtype=np.double) + 2\n"
         "  return True\n"
     );
     Option module("module", "MyModule");
@@ -703,14 +703,16 @@ TEST(PLangTest, PLangTest_outs)
     meth.compile();
     meth.execute();
     EXPECT_TRUE(meth.hasOutputVariable("X"));
-    void *output = meth.extractResult("X", Dimension::Type::Double);
+
+    size_t arrSize;
+    void *output = meth.extractResult("X", Dimension::Type::Double, arrSize);
 
     double *d = (double *)output;
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
-    EXPECT_FLOAT_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
+    EXPECT_DOUBLE_EQ(*d++, 1.0);
 }
 
 
@@ -758,21 +760,22 @@ TEST(PLangTest, PLangTest_aliases)
         EXPECT_TRUE(meth.hasOutputVariable("Y"));
         EXPECT_TRUE(meth.hasOutputVariable("prefix.Y"));
 
-        void *output = meth.extractResult("Y", Dimension::Type::Double);
+        size_t arrSize;
+        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
         double *d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 2.0);
-        EXPECT_FLOAT_EQ(*d++, 4.0);
-        EXPECT_FLOAT_EQ(*d++, 6.0);
-        EXPECT_FLOAT_EQ(*d++, 8.0);
-        EXPECT_FLOAT_EQ(*d++, 10.0);
+        EXPECT_DOUBLE_EQ(*d++, 2.0);
+        EXPECT_DOUBLE_EQ(*d++, 4.0);
+        EXPECT_DOUBLE_EQ(*d++, 6.0);
+        EXPECT_DOUBLE_EQ(*d++, 8.0);
+        EXPECT_DOUBLE_EQ(*d++, 10.0);
 
-        output = meth.extractResult("prefix.Y", Dimension::Type::Double);
+        output = meth.extractResult("prefix.Y", Dimension::Type::Double, arrSize);
         d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 2.0);
-        EXPECT_FLOAT_EQ(*d++, 4.0);
-        EXPECT_FLOAT_EQ(*d++, 6.0);
-        EXPECT_FLOAT_EQ(*d++, 8.0);
-        EXPECT_FLOAT_EQ(*d++, 10.0);
+        EXPECT_DOUBLE_EQ(*d++, 2.0);
+        EXPECT_DOUBLE_EQ(*d++, 4.0);
+        EXPECT_DOUBLE_EQ(*d++, 6.0);
+        EXPECT_DOUBLE_EQ(*d++, 8.0);
+        EXPECT_DOUBLE_EQ(*d++, 10.0);
     }
 
     {
@@ -846,28 +849,32 @@ TEST(PLangTest, PLangTest_reentry)
         double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
         meth.insertArgument("X", (uint8_t*)indata1, Dimension::Type::Double, 5);
         meth.execute();
-        void *output = meth.extractResult("Y", Dimension::Type::Double);
+
+        size_t arrSize;
+        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
 
         double *d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 1.0);
-        EXPECT_FLOAT_EQ(*d++, 2.0);
-        EXPECT_FLOAT_EQ(*d++, 3.0);
-        EXPECT_FLOAT_EQ(*d++, 4.0);
-        EXPECT_FLOAT_EQ(*d++, 5.0);
+        EXPECT_DOUBLE_EQ(*d++, 1.0);
+        EXPECT_DOUBLE_EQ(*d++, 2.0);
+        EXPECT_DOUBLE_EQ(*d++, 3.0);
+        EXPECT_DOUBLE_EQ(*d++, 4.0);
+        EXPECT_DOUBLE_EQ(*d++, 5.0);
     }
 
     {
         double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
         meth.insertArgument("X", (uint8_t*)indata2, Dimension::Type::Double, 5);
         meth.execute();
-        void *output = meth.extractResult("Y", Dimension::Type::Double);
+
+        size_t arrSize;
+        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
 
         double *d = (double *)output;
-        EXPECT_FLOAT_EQ(*d++, 11.0);
-        EXPECT_FLOAT_EQ(*d++, 21.0);
-        EXPECT_FLOAT_EQ(*d++, 31.0);
-        EXPECT_FLOAT_EQ(*d++, 41.0);
-        EXPECT_FLOAT_EQ(*d++, 51.0);
+        EXPECT_DOUBLE_EQ(*d++, 11.0);
+        EXPECT_DOUBLE_EQ(*d++, 21.0);
+        EXPECT_DOUBLE_EQ(*d++, 31.0);
+        EXPECT_DOUBLE_EQ(*d++, 41.0);
+        EXPECT_DOUBLE_EQ(*d++, 51.0);
     }
 }
 
@@ -958,9 +965,9 @@ PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
     // write the data into the view
     for (PointId i = 0; i < cnt; i++)
     {
-        const uint8_t x = (uint8_t)(i + 1);
-        const int32_t y = i * 10;
-        const double z = i * 100;
+        const uint8_t x = static_cast<uint8_t>(i + 1);
+        const int32_t y = static_cast<int32_t>(i * 10);
+        const double z = static_cast<double>(i * 100);
 
         view->setField(Dimension::Id::Classification, i, x);
         view->setField(Dimension::Id::X, i, y);
@@ -985,6 +992,75 @@ void verifyTestView(const PointView& view, point_count_t cnt = 17)
         EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
             (std::numeric_limits<double>::min)()));
     }
+}
+
+TEST_F(PythonFilterTest, PythonFilterTest_modify)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Y = ins['Y']\n"
+        "  Z = ins['Z']\n"
+        "  X = np.delete(X, (9), axis=0)\n"
+        "  Y = np.delete(Y, (9), axis=0)\n"
+        "  Z = np.delete(Z, (9), axis=0)\n"
+        "  Z = np.append(Z,100)\n"
+        "  Y = np.append(Y,200)\n"
+        "#  print (Z)\n"
+        "#  print (X)\n"
+        "  outs['Z'] = Z\n"
+        "  outs['Y'] = Y\n"
+        "  outs['X'] = X\n"
+        "#  print (len(X), len(Y), len(Z))\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setInput(*filter);
+
+    PointTable table;
+
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
+
+    EXPECT_EQ(view->size(), 10u);
+
+    EXPECT_DOUBLE_EQ(statsX.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 1.0);
+
+    EXPECT_DOUBLE_EQ(statsY.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.maximum(), 200.0);
+
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 100);
 }
 
 

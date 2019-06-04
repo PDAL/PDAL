@@ -18,10 +18,13 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
    readers.bpf
    readers.buffer
+   readers.ept
+   readers.e57
    readers.faux
    readers.gdal
    readers.geowave
    readers.greyhound
+   readers.i3s
    readers.ilvis2
    readers.las
    readers.matlab
@@ -36,11 +39,14 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.ply
    readers.pts
    readers.qfit
+   readers.rdb
    readers.rxp
    readers.sbet
    readers.sqlite
+   readers.slpk
    readers.terrasolid
    readers.text
+   readers.tiledb
    readers.tindex
 
 :ref:`readers.bpf`
@@ -50,6 +56,12 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 :ref:`readers.buffer`
     Special stage that allows you to read data from your own PointView rather
     than fetching data from a specific reader.
+
+:ref:`readers.ept`
+    Used for reading `Entwine Point Tile <https://entwine.io>`__ format.
+
+:ref:`readers.e57`
+    Read point clouds in the E57 format.
 
 :ref:`readers.faux`
     Used for testing pipelines. It does not read from a file or database, but
@@ -63,6 +75,10 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.greyhound`
     Query point cloud data from a Greyhound server.
+
+:ref:`readers.i3s`
+    Read data stored in the Esri I3S format.  The data is read from an
+    appropriate server.
 
 :ref:`readers.ilvis2`
     Read from files in the ILVIS2 format.
@@ -126,11 +142,17 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 :ref:`readers.sqlite`
     Read data stored in a SQLite database.
 
+:ref:`readers.slpk`
+    Read data stored in an Esri SLPK file.
+
 :ref:`readers.terrasolid`
     TerraSolid Reader
 
 :ref:`readers.text`
     Read point clouds from ASCII text files.
+
+:ref:`readers.tiledb`
+    Read point cloud data from a TileDB instance.
 
 :ref:`readers.tindex`
     The tindex (tile index) reader allows you to automatically merge and query

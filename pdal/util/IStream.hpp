@@ -58,6 +58,10 @@ class IStreamMarker;
 class IStream
 {
 public:
+    //ABELL - Should prevent copy construction.
+    //ABELL - Should enable construction from rvalue ref.
+    //ABELL - Should provide an operator << (..., string) that delegates
+    //  to std::istream
     /**
       Default constructor.
     */
@@ -196,10 +200,12 @@ public:
     }
 
     /**
-      Fetch data from the stream into a string.
+      Fetch data from the stream into a string.  NOTE - Stops when
+      a null byte is encountered.  Use a buffer/vector reader to
+      read data with embedded nulls.
 
       \param s  String to fill.
-      \param size  Number of bytes to extract.
+      \param size  Maximum number of bytes to extract.
     */
     PDAL_DLL void get(std::string& s, size_t size)
     {
@@ -217,7 +223,8 @@ public:
 
       \param buf  Buffer to fill.
     */
-    PDAL_DLL void get(std::vector<char>& buf) {
+    PDAL_DLL void get(std::vector<char>& buf)
+    {
         assert(buf.size() != 0);
         m_stream->read((char *)&buf[0], buf.size());
     }

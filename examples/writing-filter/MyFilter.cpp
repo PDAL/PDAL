@@ -2,24 +2,21 @@
 
 #include "MyFilter.hpp"
 
-#include <pdal/Options.hpp>
-#include <pdal/PointTable.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("filters.name", "My awesome filter",
-               "http://link/to/documentation");
-
-CREATE_SHARED_PLUGIN(1, 0, MyFilter, Filter, s_info)
-
-std::string MyFilter::getName() const
+static PluginInfo const s_info
 {
-    return s_info.name;
-}
+    "filters.name",
+    "My awesome filter",
+    "http://link/to/documentation"
+};
+
+CREATE_SHARED_STAGE(MyFilter, s_info)
+
+std::string MyFilter::getName() const { return s_info.name; }
 
 void MyFilter::addArgs(ProgramArgs& args)
 {

@@ -36,8 +36,18 @@
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 #ifdef PDAL_HAVE_LAZPERF
+#pragma push_macro("min")
+#pragma push_macro("max")
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <laz-perf/factory.hpp>
 #include <laz-perf/io.hpp>
+#pragma pop_macro("max")
+#pragma pop_macro("min")
 #endif
 
 #include "LasWriter.hpp"
@@ -45,6 +55,8 @@
 #include <climits>
 #include <iostream>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
@@ -77,7 +89,8 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0)
+    m_compression(LasCompression::None), m_srsCnt(0),
+    m_userVLRs(new NL::json)
 {}
 
 
@@ -134,7 +147,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
-    args.add("vlrs", "List of VLRs to set", m_userVLRs);
+    args.add("vlrs", "List of VLRs to set", *m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -167,7 +180,7 @@ void LasWriter::initialize()
 
 void LasWriter::spatialReferenceChanged(const SpatialReference&)
 {
-    if (++m_srsCnt > 1)
+    if (++m_srsCnt > 1 && m_aSrs.empty())
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
             "point spatial references." << std::endl;
@@ -218,27 +231,27 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-
-    for (const auto& v : m_userVLRs)
+    for (const auto& v : *m_userVLRs)
     {
         uint16_t recordId(1);
         std::string userId("");
         std::string description("");
         std::string b64data("");
         std::string user("");
-        if (! v.isMember("user_id"))
+        if (!v.contains("user_id"))
             throw pdal_error("VLR must contain a 'user_id'!");
-        userId = v["user_id"].asString();
+        userId = v["user_id"].get<std::string>();
 
-        if (!v.isMember("data"))
+        if (!v.contains("data"))
             throw pdal_error("VLR must contain a base64-encoded 'data' member");
-        b64data = v["data"].asString();
+        b64data = v["data"].get<std::string>();
 
-        if (v.isMember("record_id"))
-            recordId = v["record_id"].asUInt64();
+        // Record ID should always be no more than 2 bytes.
+        if (v.contains("record_id"))
+            recordId = v["record_id"].get<uint16_t>();
 
-        if (v.isMember("description"))
-            description = v["description"].asString();
+        if (v.contains("description"))
+            description = v["description"].get<std::string>();
 
         std::vector<uint8_t> data = Utils::base64_decode(b64data);
         addVlr(userId, recordId, description, data);
@@ -260,18 +273,15 @@ void LasWriter::fillForwardList()
 
     static const StringList offset = { "offset_x", "offset_y", "offset_z" };
 
-    static StringList all;
-    all.insert(all.begin(), header.begin(), header.end());
-    all.insert(all.begin(), scale.begin(), scale.end());
-    all.insert(all.begin(), offset.begin(), offset.end());
-
     // Build the forward list, replacing special keywords with the proper
     // field names.
     for (auto& name : m_forwardSpec)
     {
         if (name == "all")
         {
-            m_forwards.insert(all.begin(), all.end());
+            m_forwards.insert(header.begin(), header.end());
+            m_forwards.insert(scale.begin(), scale.end());
+            m_forwards.insert(offset.begin(), offset.end());
             m_forwardVlrs = true;
         }
         else if (name == "header")
@@ -284,7 +294,11 @@ void LasWriter::fillForwardList()
             m_forwards.insert("dataformat_id");
         else if (name == "vlr")
             m_forwardVlrs = true;
-        else if (Utils::contains(all, name))
+        else if (
+            Utils::contains(header, name) ||
+            Utils::contains(scale, name) ||
+            Utils::contains(offset, name)
+        )
             m_forwards.insert(name);
         else
             throwError("Error in 'forward' option.  Unknown field for "
@@ -452,7 +466,8 @@ void LasWriter::addForwardVlrs()
         const MetadataNode& recordIdNode = n.findChild("record_id");
         if (recordIdNode.valid() && userIdNode.valid())
         {
-            data = Utils::base64_decode(n.value());
+            const MetadataNode& dataNode = n.findChild("data");
+            data = Utils::base64_decode(dataNode.value());
             uint16_t recordId = (uint16_t)std::stoi(recordIdNode.value());
             addVlr(userIdNode.value(), recordId, n.description(), data);
         }
@@ -812,11 +827,16 @@ bool LasWriter::processPoint(PointRef& point)
 }
 
 
+void LasWriter::prerunFile(const PointViewSet& pvSet)
+{
+    m_scaling.setAutoXForm(pvSet);
+}
+
+
 void LasWriter::writeView(const PointViewPtr view)
 {
     Utils::writeProgress(m_progressFd, "READYVIEW",
         std::to_string(view->size()));
-    m_scaling.setAutoXForm(view);
 
     point_count_t pointLen = m_lasHeader.pointLen();
 
@@ -834,7 +854,7 @@ void LasWriter::writeView(const PointViewPtr view)
     else
     {
         // Make a buffer of at most a meg.
-        m_pointBuf.resize(std::min((point_count_t)1000000,
+        m_pointBuf.resize((std::min)((point_count_t)1000000,
                     pointLen * view->size()));
 
         const PointView& viewRef(*view.get());
@@ -923,34 +943,37 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     p.intensity = point.getFieldAs<uint16_t>(Id::Intensity);
     p.scan_direction_flag = scanDirectionFlag;
     p.edge_of_flight_line = edgeOfFlightLine;
+    p.synthetic_flag = classFlags & 0x1;
+    p.keypoint_flag = (classFlags >> 1) & 0x1;
+    p.withheld_flag = (classFlags >> 2) & 0x1;
+    p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
+    p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
 
     if (has14Format)
     {
-        p.extended_point_type = 1;
+        p.classification = (classification & 0x1F) | (classFlags << 5);
+        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
+        p.return_number = (std::min)((uint8_t)7, returnNumber);
 
-        p.extended_return_number = returnNumber;
-        p.extended_number_of_returns = numberOfReturns;
+        // This should always work if ScanAngleRank isn't wonky.
+        p.extended_scan_angle = static_cast<laszip_I16>(
+            std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+        p.extended_point_type = 1;
         p.extended_scanner_channel = scanChannel;
-        p.extended_scan_angle =
-            roundf(point.getFieldAs<float>(Id::ScanAngleRank) / .006);
         p.extended_classification_flags = classFlags;
         p.extended_classification = classification;
-        p.classification = (classification & 0x1F) | (classFlags << 5);
-//        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.extended_return_number = returnNumber;
+        p.extended_number_of_returns = numberOfReturns;
     }
     else
     {
-        p.synthetic_flag = classFlags & 0x1;
-        p.keypoint_flag = (classFlags >> 1) & 0x1;
-        p.withheld_flag = (classFlags >> 2) & 0x1;
         p.return_number = returnNumber;
         p.number_of_returns = numberOfReturns;
         p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
         p.classification = classification;
+        p.extended_point_type = 0;
     }
-    p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
-
-    p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
 
     if (m_lasHeader.hasTime())
         p.gps_time = point.getFieldAs<double>(Id::GpsTime);
@@ -1082,9 +1105,11 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
     if (has14Format)
     {
-         int16_t scanAngleRank =
-             point.getFieldAs<float>(Id::ScanAngleRank) / .006;
-         ostream << userData << scanAngleRank;
+         // Guaranteed to fit if scan angle rank isn't wonky.
+        int16_t scanAngleRank =
+            static_cast<int16_t>(std::round(
+                point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+        ostream << userData << scanAngleRank;
     }
     else
     {
@@ -1123,7 +1148,7 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
     PointId startId, std::vector<char>& buf)
 {
     point_count_t blocksize = buf.size() / m_lasHeader.pointLen();
-    blocksize = std::min(blocksize, view.size() - startId);
+    blocksize = (std::min)(blocksize, view.size() - startId);
     PointId lastId = startId + blocksize;
 
     LeInserter ostream(buf.data(), buf.size());

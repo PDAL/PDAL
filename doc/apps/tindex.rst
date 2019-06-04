@@ -17,7 +17,7 @@ tindex Creation Mode
 
 ::
 
-    $ pdal tindex <tindex> <filespec>
+    $ pdal tindex create <tindex> <filespec>
 
 ::
 
@@ -30,7 +30,6 @@ tindex Creation Mode
     --t_srs                Target SRS of tile index
     --a_srs                Assign SRS of tile with no SRS to this value
     --write_absolute_path  Write absolute rather than relative file paths
-    --merge                Whether we're merging the entries in a tindex file.
     --stdin, -s            Read filespec pattern from standard input
 
 
@@ -55,7 +54,7 @@ tindex Merge Mode
 
 ::
 
-    $ pdal tindex --merge <tindex> <filespec>
+    $ pdal tindex merge <tindex> <filespec>
 
 This command will read the existing index file ``tindex`` and merge the
 points in the indexed files that pass any filter that might be specified,
@@ -70,9 +69,9 @@ extension.
     --lyr_name       OGR layer name to write into datasource
     --tindex_name    Tile index column name
     --ogrdriver, -f  OGR driver name to use
-    --t_srs          Target SRS of tile index
     --bounds         Extent (in XYZ) to clip output to
     --polygon        Well-known text of polygon to clip output
+    --t_srs          Spatial reference of the clipping geometry.
 
 
 Example 1:
@@ -83,7 +82,7 @@ Find all LAS files via ``find``, send that file list via STDIN to
 
 ::
 
-    $ find las/ -iname "*.las" | pdal tindex index.sqlite -f "SQLite" \
+    $ find las/ -iname "*.las" | pdal tindex create index.sqlite -f "SQLite" \
         --stdin --lyr_name pdal
 
 Example 2:
@@ -94,7 +93,7 @@ write out an `SQLite`_ file.
 
 ::
 
-    $ pdal tindex index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" \
+    $ pdal tindex create index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" \
         --t_srs "EPSG:4326"
 
 

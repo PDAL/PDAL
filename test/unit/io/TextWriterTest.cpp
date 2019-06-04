@@ -106,6 +106,38 @@ TEST(TextWriterTest, t2)
     EXPECT_EQ(Support::compare_text_files(infile, outfile), true);
 }
 
+TEST(TextWriterTest, t2stream)
+{
+    std::string outfile(Support::temppath("utm17.txt"));
+    std::string infile(Support::datapath("text/utm17_2.txt"));
+
+    FileUtils::deleteFile(outfile);
+
+    TextReader r;
+    Options ro;
+
+    ro.add("filename", infile);
+    r.setOptions(ro);
+
+    TextWriter w;
+    Options wo;
+
+    wo.add("filename", outfile);
+    wo.add("order", "X,Y,Z");
+    wo.add("quote_header", false);
+    wo.add("precision", 2);
+    wo.add("delimiter", "  ");
+    w.setOptions(wo);
+    w.setInput(r);
+
+    FixedPointTable t(1000);
+
+    w.prepare(t);
+    w.execute(t);
+
+    EXPECT_EQ(Support::compare_text_files(infile, outfile), true);
+}
+
 TEST(TextWriterTest, precision)
 {
     using namespace Dimension;

@@ -46,7 +46,9 @@ static StaticPluginInfo const s_info
 {
     "readers.gdal",
     "Read GDAL rasters as point clouds.",
-    "http://pdal.io/stages/reader.gdal.html"
+    "http://pdal.io/stages/reader.gdal.html",
+    { "tif", "tiff", "jpeg", "jpg", "png" }
+
 };
 
 CREATE_STATIC_STAGE(GDALReader, s_info)
@@ -62,44 +64,59 @@ GDALReader::GDALReader()
     : m_index(0)
 {}
 
+GDALReader::~GDALReader()
+{
+    m_raster.reset();
+}
+
 
 void GDALReader::initialize()
 {
     gdal::registerDrivers();
+
     m_raster.reset(new gdal::Raster(m_filename));
+    if (m_raster->open() == gdal::GDALError::CantOpen)
+        throwError("Couldn't open raster file '" + m_filename + "'.");
 
     m_raster->open();
-    try
-    {
-        setSpatialReference(m_raster->getSpatialRef());
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    setSpatialReference(m_raster->getSpatialRef());
 
-    m_count = m_raster->width() * m_raster->height();
+    m_width = m_raster->width();
+    m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
-    m_raster->close();
-}
 
+    std::unique_ptr<PointLayout> layout(new PointLayout());
+    addDimensions(layout.get());
+
+    auto p = std::find(m_bandIds.begin(), m_bandIds.end(), Dimension::Id::Z);
+
+    int nBand(1);
+    if (p != m_bandIds.end())
+    {
+        // Bands are 1-based.
+        nBand = (int) std::distance(m_bandIds.begin(), p) + 1;
+    }
+
+    m_dimNames.clear();
+    Dimension::IdList dims = layout->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        m_dimNames.push_back(layout->dimName(*di));
+    m_bounds = m_raster->bounds(nBand);
+
+    m_raster.reset();
+}
 
 QuickInfo GDALReader::inspect()
 {
     QuickInfo qi;
-    std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    addDimensions(layout.get());
     initialize();
 
-    m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
-    if (m_raster->open() == gdal::GDALError::CantOpen)
-        throwError("Couldn't open raster file '" + m_filename + "'.");
-
-    qi.m_pointCount = m_raster->width() * m_raster->height();
-    // qi.m_bounds = ???;
-    qi.m_srs = m_raster->getSpatialRef();
+    qi.m_pointCount = m_width * m_height;
+    qi.m_srs = getSpatialReference();
+    qi.m_bounds = m_bounds;
     qi.m_valid = true;
+    qi.m_dimNames = m_dimNames;
 
     return qi;
 }
@@ -109,98 +126,104 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
-    for (int i = 0; i < m_raster->bandCount(); ++i)
+
+    std::vector<std::string> dimNames;
+    if (m_header.size())
+    {
+        dimNames = Utils::split(m_header, ',');
+        if (dimNames.size() != m_bandTypes.size())
+            throwError("Dimension names are not the same count as "
+                "raster bands.");
+    }
+
+    for (size_t i = 0; i < m_bandTypes.size(); ++i)
     {
         std::ostringstream oss;
         oss << "band-" << (i + 1);
-        layout->registerOrAssignDim(oss.str(), m_bandTypes[i]);
+        std::string name(dimNames.empty() ? oss.str() : dimNames[i]);
+        m_bandIds.push_back(layout->registerOrAssignDim(name, m_bandTypes[i]));
     }
+}
+
+
+void GDALReader::addArgs(ProgramArgs& args)
+{
+    args.add("header", "A comma-separated list of dimension IDs to map "
+        "raster bands to dimension id", m_header);
+    args.add("memorycopy", "Load the given raster file "
+        "entirely to memory", m_useMemoryCopy, false).setHidden();
 }
 
 
 void GDALReader::ready(PointTableRef table)
 {
-    m_index = 0;
+    m_raster.reset(new gdal::Raster(m_filename));
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
+
+    if (m_useMemoryCopy)
+    {
+        gdal::Raster *r = m_raster->memoryCopy();
+        if (r)
+            m_raster.reset(r);
+        else
+            log()->get(LogLevel::Warning) << "Couldn't create raster memory "
+                "copy.  Using standard interface.";
+    }
+
+    m_index = 0;
+    m_row = 0;
+    m_col = 0;
 }
 
 
-point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
+point_count_t GDALReader::read(PointViewPtr view, point_count_t numPts)
 {
-    point_count_t count = std::min(num, m_count - m_index);
-    PointId nextId = view->size();
-
-    std::array<double, 2> coords;
-    for (int row = 0; row < m_raster->height(); ++row)
+    PointId idx = view->size();
+    point_count_t cnt = 0;
+    PointRef point(*view, idx);
+    while (cnt < numPts)
     {
-        for (int col = 0; col < m_raster->width(); ++col)
-        {
-            m_raster->pixelToCoord(col, row, coords);
-            view->setField(Dimension::Id::X, nextId, coords[0]);
-            view->setField(Dimension::Id::Y, nextId, coords[1]);
-            nextId++;
-        }
+        point.setPointId(idx);
+        if (!processOne(point))
+            break;
+        cnt++;
+        idx++;
     }
+    return cnt;
+}
 
-    std::vector<uint8_t> band;
+
+bool GDALReader::processOne(PointRef& point)
+{
+    std::array<double, 2> coords;
+    if (m_row == m_height)
+        return false; // done
+
+    m_raster->pixelToCoord(m_col, m_row, coords);
+    double x = coords[0];
+    double y = coords[1];
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+
+    std::vector<double> data;
+    if (m_raster->read(x, y, data) != gdal::GDALError::None)
+        return false;
 
     for (int b = 0; b < m_raster->bandCount(); ++b)
     {
-        // Bands count from 1
-        switch (m_bandTypes[b])
-        {
-        case Dimension::Type::Signed8:
-            readBandData<int8_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Unsigned8:
-            readBandData<uint8_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Signed16:
-            readBandData<int16_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Unsigned16:
-            readBandData<uint16_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Signed32:
-            readBandData<int32_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Unsigned32:
-            readBandData<uint32_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Signed64:
-            readBandData<int64_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Unsigned64:
-            readBandData<uint64_t>(b + 1, view, count);
-            break;
-        case Dimension::Type::Float:
-            readBandData<float>(b + 1, view, count);
-            break;
-        case Dimension::Type::Double:
-            readBandData<double>(b + 1, view, count);
-            break;
-        case Dimension::Type::None:
-            break;
-        }
+        Dimension::Id id = m_bandIds[b];
+        double v = data[b];
+        point.setField(id, v);
     }
-    return view->size();
-}
+    m_col++;
+    if (m_col == m_width)
+    {
+        m_col = 0;
+        m_row++;
+    }
 
-
-template<typename T>
-void GDALReader::readBandData(int band, PointViewPtr view, point_count_t count)
-{
-    std::vector<T> buf;
-
-    m_raster->readBand(buf, band);
-    std::stringstream oss;
-    oss << "band-" << (band);
-    log()->get(LogLevel::Info) << "Read band '" << oss.str() << "'" <<
-       std::endl;
-    Dimension::Id d = view->layout()->findDim(oss.str());
-    for (point_count_t i = 0; i < count; ++i)
-        view->setField(d, i, buf[i]);
+    return true;
 }
 
 } // namespace pdal

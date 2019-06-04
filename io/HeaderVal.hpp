@@ -61,7 +61,7 @@ virtual void print(const std::string& s)
 };
 
 template <typename T, T MIN = std::numeric_limits<T>::lowest(),
-    T MAX = std::numeric_limits<T>::max()>
+    T MAX = (std::numeric_limits<T>::max)()>
 class NumHeaderVal : public BaseHeaderVal<T>
 {
 public:
@@ -104,13 +104,15 @@ inline std::istream& operator>>(std::istream& in, NumHeaderVal<T, MIN, MAX>& h)
     return in;
 }
 
+
 template<typename T, T MIN, T MAX>
 inline std::ostream& operator<<(std::ostream& out,
     const NumHeaderVal<T, MIN, MAX>& h)
 {
-    out << h.val();
+    out << Utils::toString(h.val());
     return out;
 }
+
 
 class DoubleHeaderVal : public BaseHeaderVal<double>
 {
@@ -160,7 +162,7 @@ public:
         m_valSet = true;
         m_val = val;
         if (LEN > 0)
-            m_val.resize(std::min(m_val.length(), LEN));
+            m_val.resize((std::min)(m_val.length(), LEN));
         return (LEN == 0 || val.length() <= LEN);
     }
 

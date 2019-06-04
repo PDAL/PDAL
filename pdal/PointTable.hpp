@@ -166,6 +166,28 @@ private:
     PointLayout m_layout;
 };
 
+class PDAL_DLL ContiguousPointTable : public SimplePointTable
+{
+private:
+    std::vector<char> m_buf;
+    point_count_t m_numPts;
+
+public:
+    ContiguousPointTable() : SimplePointTable(m_layout), m_numPts(0)
+        {}
+    virtual ~ContiguousPointTable();
+    virtual bool supportsView() const
+        { return true; }
+
+protected:
+    virtual char *getPoint(PointId idx);
+
+private:
+    virtual PointId addPoint();
+
+    PointLayout m_layout;
+};
+
 /// A StreamPointTable must provide storage for point data up to its capacity.
 /// It must implement getPoint() which returns a pointer to a buffer of
 /// sufficient size to contain a point's data.  The minimum size required
@@ -174,30 +196,66 @@ private:
 class PDAL_DLL StreamPointTable : public SimplePointTable
 {
 protected:
-    StreamPointTable(PointLayout& layout) : SimplePointTable(layout)
+    StreamPointTable(PointLayout& layout, point_count_t capacity)
+        : SimplePointTable(layout)
+        , m_capacity(capacity)
+        , m_skips(m_capacity, false)
     {}
 
 public:
     /// Called when a new point should be added.  Probably a no-op for
     /// streaming.
     virtual PointId addPoint()
-    { return 0; }
+        { return 0; }
+
     /// Called when execute() is started.  Typically used to set buffer size
     /// when all dimensions are known.
     virtual void finalize()
-    {}
+        {}
+
+    void clear(point_count_t count)
+    {
+        if (!count)
+            return;
+
+        m_numPoints = count;
+        reset();
+        std::fill(m_skips.begin(), m_skips.end(), false);
+    }
+
+    /// Returns true if a point in the table was filtered out and should be
+    /// considered omitted.
+    bool skip(PointId n) const
+        { return m_skips[n]; }
+    void setSkip(PointId n)
+        { m_skips[n] = true; }
+
+    point_count_t capacity() const
+        { return m_capacity; }
+
+    /// During a given call to reset(), this indicates the number of points
+    /// populated in the table.  This value will always be less then or equal
+    /// to capacity(), and also includes skipped points.
+    point_count_t numPoints() const
+        { return m_numPoints; }
+
+protected:
     /// Called when the contents of StreamPointTable have been consumed and
     /// the point data will be potentially overwritten.
     virtual void reset()
     {}
-    virtual point_count_t capacity() const = 0;
+
+private:
+    point_count_t m_capacity;
+    point_count_t m_numPoints;
+    std::vector<bool> m_skips;
 };
 
 class PDAL_DLL FixedPointTable : public StreamPointTable
 {
 public:
-    FixedPointTable(point_count_t capacity) : StreamPointTable(m_layout),
-        m_capacity(capacity)
+    FixedPointTable(point_count_t capacity)
+        : StreamPointTable(m_layout, capacity)
     {}
 
     virtual void finalize()
@@ -205,22 +263,19 @@ public:
         if (!m_layout.finalized())
         {
             BasePointTable::finalize();
-            m_buf.resize(pointsToBytes(m_capacity + 1));
+            m_buf.resize(pointsToBytes(capacity() + 1));
         }
     }
 
+protected:
     virtual void reset()
         { std::fill(m_buf.begin(), m_buf.end(), 0); }
 
-    point_count_t capacity() const
-        { return m_capacity; }
-protected:
     virtual char *getPoint(PointId idx)
         { return m_buf.data() + pointsToBytes(idx); }
 
 private:
     std::vector<char> m_buf;
-    point_count_t m_capacity;
     PointLayout m_layout;
 };
 

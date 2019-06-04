@@ -12,23 +12,30 @@ FAQ
   pronounced to rhyme with "GDAL".
 
   .. it is properly pronounced like the dog though :) -- hobu
+
 |
+
 * Why do I get the error "Couldn't create ... stage of type ..."?
 
   In almost all cases this error occurs because you're trying to run a stage
   that is built as a plugin and the plugin (a shared library file or DLL)
   can't be found by pdal.  You can verify whether the plugin can
-  be found by running "pdal --drivers"
+  be found by running ``pdal --drivers``
 
   If you've built pdal yourself, make sure you've requested to build the
   plugin in question (set BUILD_PLUGIN_PCL=ON, for example, in CMakeCache.txt).
 
   If you've successfully built the plugin, a
   shared object called
-  libpdal_plugin_<plugin type>_<plugin name>.<shared library extension> should
-  have been created that's installed in a location where pdal can find it.
-  pdal will search
-  the following paths for plugins: ".", "./lib", "../lib", "./bin", "../bin".
+
+  ::
+
+    libpdal_plugin_<plugin type>_<plugin name>.<shared library extension>
+
+  should have been created that's installed in a location where pdal
+  can find it.  pdal will search
+  the following paths for plugins: ``.``, ``./lib``, ``../lib``, ``./bin``,
+  ``../bin``.
 
   You can also override the default search path by setting the environment
   variable ``PDAL_DRIVER_PATH`` to a list of directories that pdal should search
@@ -44,9 +51,12 @@ FAQ
   sizes before PDAL can process the data. Furthermore, some operations
   (notably :ref:`DEM creation<writers.gdal>`) can use large amounts of
   additional memory during processing before the output can be written.
-  Depending on the operation, PDAL will attempt operate in "stream mode" to
+  Depending on the operation, PDAL will attempt operate in
+  :ref:`stream mode <processing_modes>` to
   limit memory consumption when possible.
+
 |
+
 * What is PDAL's relationship to PCL?
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
@@ -72,6 +82,7 @@ FAQ
 .. _`GeoHipster interview`: http://geohipster.com/2018/03/05/howard-butler-like-good-song-open-source-software-chance-immortal/
 
 |
+
 * Are there any command line tools in PDAL similar to LAStools?
 
   Yes. The :ref:`pdal <apps>` command provides a wide range of features which go

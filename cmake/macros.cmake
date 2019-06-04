@@ -76,11 +76,14 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
         ${PDAL_INCLUDE_DIR})
     pdal_target_compile_settings(${_name})
 
-    install(TARGETS ${_name}
-        EXPORT PDALTargets
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    # Don't install static libraries - they're already built into libpdalXXX
+    if (NOT ${_library_type} STREQUAL "STATIC")
+        install(TARGETS ${_name}
+            EXPORT PDALTargets
+            RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+            LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+            ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    endif()
 endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################
@@ -102,8 +105,9 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # Add a plugin target.
 # _name The plugin name.
 # ARGN :
-#    FILES the srouce files for the plugin
+#    FILES the source files for the plugin
 #    LINK_WITH link plugin with libraries
+#    INCLUDES header directories
 #
 # The "generate_dimension_hpp" ensures that Dimension.hpp is built before
 #  attempting to build anything else in the "library".
@@ -113,7 +117,7 @@ endmacro(PDAL_ADD_EXECUTABLE)
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH)
+    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
     if(WIN32)
@@ -130,7 +134,13 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
-        ${PDAL_INCLUDE_DIR})
+        ${PDAL_INCLUDE_DIR}
+        ${PDAL_ADD_PLUGIN_INCLUDES}
+    )
+    if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
+        target_include_directories(${${_name}} SYSTEM PRIVATE
+            ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
+    endif()
     target_link_libraries(${${_name}}
         PRIVATE
             ${PDAL_BASE_LIB_NAME}
@@ -151,7 +161,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
     if (APPLE)
         set_target_properties(${${_name}} PROPERTIES
-            INSTALL_NAME_DIR "@loader_path/../lib")
+            INSTALL_NAME_DIR "@rpath")
     endif()
 endmacro(PDAL_ADD_PLUGIN)
 
@@ -161,10 +171,12 @@ endmacro(PDAL_ADD_PLUGIN)
 # ARGN :
 #    FILES the source files for the test
 #    LINK_WITH link test executable with libraries
+#    INCLUDES header file directories
+#
 macro(PDAL_ADD_TEST _name)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs FILES LINK_WITH)
+    set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -176,9 +188,14 @@ macro(PDAL_ADD_TEST _name)
     target_include_directories(${_name} PRIVATE
         ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}
+        ${PDAL_ADD_TEST_INCLUDES}
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/include)
+    if (PDAL_ADD_TEST_SYSTEM_INCLUDES)
+        target_include_directories(${_name} SYSTEM PRIVATE
+            ${PDAL_ADD_TEST_SYSTEM_INCLUDES})
+    endif()
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name}
         PRIVATE

@@ -36,15 +36,17 @@ if(DEFINED ENV{ORACLE_HOME})
     ${ORACLE_HOME}/OCI/include) # Oracle XE on Windows
 
   set(ORACLE_OCI_NAMES clntsh libclntsh oci)
-  set(ORACLE_NNZ_NAMES nnz10 libnnz10 nnz11 nnz12 libnnz11 libnnz12 ociw32)
+  set(ORACLE_NNZ_NAMES nnz10 libnnz10 nnz11 nnz12 nnz18 libnnz11 libnnz12 libnnz18 ociw32)
   set(ORACLE_OCCI_NAMES libocci occi oraocci10 oraocci11)
 
   set(ORACLE_LIB_DIR 
     ${ORACLE_HOME}/      
     ${ORACLE_HOME}/lib
+    ${ORACLE_HOME}/libs # conda
     ${ORACLE_HOME}/sdk/lib       # Oracle SDK
     ${ORACLE_HOME}/sdk/lib/msvc
     ${ORACLE_HOME}/OCI/lib/msvc) # Oracle XE on Windows
+    
 
   find_library(ORACLE_OCI_LIBRARY  NAMES ${ORACLE_OCI_NAMES} PATHS ${ORACLE_LIB_DIR})
 

@@ -120,6 +120,18 @@ private:
         return node;
     }
 
+    MetadataNodeImplPtr replace(MetadataNodeImplPtr node)
+    {
+        auto ni = m_subnodes.find(node->m_name);
+        if (ni == m_subnodes.end())
+            return MetadataNodeImplPtr();
+        MetadataImplList& l = ni->second;
+        if (l.size() != 1)
+            return MetadataNodeImplPtr();
+        l.front() = node;
+        return node;
+    }
+
     bool operator == (const MetadataNodeImpl& m) const
     {
         if (m_name != m.m_name || m_descrip != m.m_descrip ||
@@ -364,7 +376,7 @@ T value(const std::string& type, const std::string& value)
     {
         std::vector<uint8_t> encVal = Utils::base64_decode(value);
         encVal.resize(sizeof(T));
-        memcpy(&t, encVal.data(), sizeof(T));
+        t = *(reinterpret_cast<T *>(encVal.data()));
     }
     else if (!Utils::fromString(value, t))
         throw value_error();
@@ -483,8 +495,9 @@ public:
 
         if (l.empty())
             return add(lname, value);
-        MetadataNodeImplPtr impl = *l.begin();
+        MetadataNodeImplPtr impl(new MetadataNodeImpl(lname));
         impl->setValue(value);
+        l.front() = impl;
         return MetadataNode(impl);
     }
 
@@ -493,7 +506,20 @@ public:
         const std::string& descrip)
     {
         MetadataNode m = addOrUpdate(lname, value);
-        m_impl->m_descrip = descrip;
+        m.m_impl->m_descrip = descrip;
+        return m;
+    }
+
+    MetadataNode addOrUpdate(MetadataNode n)
+    {
+        if (m_impl->nodeType(n.name()) == MetadataType::Array)
+            throw pdal_error("Can't call addOrUpdate() on subnode list.");
+
+        MetadataNode m;
+        if (m_impl->subnodes(n.name()).empty())
+            m = add(n);
+        else
+            m = MetadataNode(m_impl->replace(n.m_impl));
         return m;
     }
 
@@ -595,6 +621,8 @@ public:
         return names;
     }
 
+    operator bool () const
+        { return !empty(); }
     bool operator ! ()
         { return empty(); }
     bool valid() const

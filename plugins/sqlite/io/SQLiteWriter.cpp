@@ -426,7 +426,7 @@ void SQLiteWriter::CreateCloud()
     m_session->insert(oss.str(), rs);
     oss.str("");
 
-    long id = m_session->last_row_id();
+    int32_t id = static_cast<int32_t>(m_session->last_row_id());
     m_obj_id = id;
 
     log()->get(LogLevel::Debug) << "Point cloud id was " << id << std::endl;
@@ -481,7 +481,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
                 compressor.compress(outbuf.data(), size);
             }
         }
-        catch (pdal_error)
+        catch (pdal_error&)
         {
             compressor.done();
             throw;

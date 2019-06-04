@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "pdal/GDALUtils.hpp"
+
 #include "Ilvis2MetadataReader.hpp"
 
 namespace pdal
@@ -336,12 +338,10 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
 
     // The number of boundaries is essentially the number of sub-polygons
     int numBoundaries = countChildElements(node, "Boundary");
-    std::vector<GEOSGeom> poly(numBoundaries); // size shall never change
-    GEOSGeom fullPoly;
-    int polyNum = 0;
 
-    initGEOS(NULL, NULL);
-
+    // NOTE: Ownership of these rings is transferred to an OGR geometry and
+    //   deleted with that geometry.
+    std::vector<OGRLinearRing *> rings;
     while (nodeElementIs(child, "Boundary"))
     {
         // There must be at least 3 points to be valid per the schema.
@@ -350,10 +350,9 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
             throw error("Found a polygon boundary with less than 3 points, "
                 "invalid for this schema");
 
-        GEOSCoordSeq points = GEOSCoordSeq_create(numPoints + 1, 2);
         xmlNodePtr bdChild = getFirstChildElementNode(child);
-        int ptNum = 0;
 
+        OGRLinearRing *lr = new OGRLinearRing();
         while (nodeElementIs(bdChild, "Point"))
         {
             xmlNodePtr ptChild = getFirstChildElementNode(bdChild);
@@ -367,48 +366,39 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
             ptChild = getNextElementNode(ptChild);
             assertEndOfElements(ptChild);
 
-            GEOSCoordSeq_setX(points, ptNum, ptLon);
-            GEOSCoordSeq_setY(points, ptNum, ptLat);
+            lr->addPoint(ptLon, ptLat);
 
-            // In the file, the loop is not closed; GEOS requires polygons
-            // to be closed, so we'll do it ourselves.
-            if (ptNum == 0)
-            {
-                GEOSCoordSeq_setX(points, numPoints, ptLon);
-                GEOSCoordSeq_setY(points, numPoints, ptLat);
-            }
-
-            ptNum += 1;
             bdChild = getNextElementNode(bdChild);
         }
-
-        GEOSGeom ring = GEOSGeom_createLinearRing(points);
-        poly[polyNum] = GEOSGeom_createPolygon(ring, NULL, 0);
-
-        polyNum += 1;
+        lr->closeRings();
+        rings.push_back(lr);
         child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
 
-    // If only one sub-polygon, just make a POLYGON WKT, else make it a MULTIPOLYGON
+    // If only one sub-polygon, just make a POLYGON WKT,
+    // else make it a MULTIPOLYGON
+    std::unique_ptr<OGRGeometry> geom;
     if (numBoundaries > 1)
     {
-        fullPoly = GEOSGeom_createCollection(
-                GEOS_MULTIPOLYGON, poly.data(), numBoundaries);
+        OGRMultiPolygon *mp = new OGRMultiPolygon();
+        for (auto lr : rings)
+            mp->addGeometryDirectly(lr);
+        geom.reset(mp);
     }
     else
     {
-        fullPoly = poly[0];
+        OGRPolygon *p = new OGRPolygon();
+        // Should only be one.
+        for (auto lr : rings)
+            p->addRingDirectly(lr);
+        geom.reset(p);
     }
-    GEOSWKTWriter * writer = GEOSWKTWriter_create();
-    GEOSWKTWriter_setRoundingPrecision(writer, 5);
-
-    std::string polyStr = GEOSWKTWriter_write(writer, fullPoly);
-
+    char *polyStr;
+    geom->exportToWkt(&polyStr);
     m->add("ConvexHull", polyStr);
-
-    finishGEOS();
+    CPLFree(polyStr);
 }
 
 

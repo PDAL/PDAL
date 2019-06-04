@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <map>
 #include <mutex>
 
 #include <pdal/Log.hpp>
@@ -45,7 +46,7 @@ class StageExtensions
 public:
     StageExtensions(LogPtr log);
 
-    void set(const std::string& stage, const StringList& exts);
+    PDAL_DLL void set(const std::string& stage, const StringList& exts);
     std::string defaultReader(const std::string& filename);
     std::string defaultWriter(const std::string& filename);
 private:

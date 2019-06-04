@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-struct AssignRange;
+struct AssignArgs;
 
 class PDAL_DLL AssignFilter : public Filter, public Streamable
 {
@@ -59,7 +59,7 @@ private:
     AssignFilter& operator=(const AssignFilter&) = delete;
     AssignFilter(const AssignFilter&) = delete;
 
-    std::vector<AssignRange> m_assignments;
+    std::unique_ptr<AssignArgs> m_args;
 };
 
 } // namespace pdal

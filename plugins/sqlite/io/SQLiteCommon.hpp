@@ -446,23 +446,19 @@ public:
     {
         std::string so_extension;
         std::string lib_extension;
-#ifdef __APPLE__
+#if defined(__APPLE__)
         so_extension = ".dylib";
         lib_extension = "mod_";
-#endif
-
-#if defined(__linux__) || defined(__FreeBSD_kernel__)
+#elif defined (_WIN32)
+        so_extension = ".dll";
+        lib_extension = "pdal";
+#else
         so_extension = ".so";
 #ifdef MOD_SPATIALITE
         lib_extension = "mod_";
 #else
         lib_extension = "lib";
 #endif
-#endif
-
-#ifdef _WIN32
-        so_extension = ".dll";
-        lib_extension = "pdal";
 #endif
 
 // #if !defined(sqlite3_enable_load_extension)

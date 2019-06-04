@@ -30,8 +30,6 @@ Exercise
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
-
 PDAL capability to generate rasterized output is provided by the :ref:`writers.gdal` stage.
 There is no :ref:`application <apps>` to drive this stage, and we must use a pipeline.
 
@@ -42,7 +40,7 @@ Pipeline breakdown
 
 
 .. literalinclude:: ./classification.json
-    :highlight-lines: 3-7
+    :emphasize-lines: 3-7
 
 .. note::
 
@@ -69,7 +67,7 @@ The :ref:`writers.gdal` writer that bins the point cloud data with classificatio
 values.
 
 .. literalinclude:: ./classification.json
-    :lines: 7-14
+    :lines: 8-15
 
 Execution
 ................................................................................

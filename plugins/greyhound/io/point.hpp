@@ -17,7 +17,8 @@
 #include <vector>
 #include <algorithm>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_export.hpp>
 
 namespace pdal
@@ -40,49 +41,44 @@ public:
     Point(double x, double y) noexcept : x(x), y(y), z(Point::emptyCoord()) { }
     Point(double x, double y, double z) noexcept : x(x), y(y), z(z) { }
 
-    Point(const Json::Value& json)
-        : Point()
+    Point(const NL::json& j)
     {
-        if (!json.isNull())
+        if (j.is_null())
+            return;
+        if (j.is_array())
         {
-            if (json.isArray())
+            if (j.size() == 2)
             {
-                x = json[0].asDouble();
-                y = json[1].asDouble();
-                if (json.size() > 2) z = json[2].asDouble();
+                x = j[0].get<double>();
+                y = j[1].get<double>();
             }
-            else if (json.isNumeric())
+            else if (j.size() == 3)
             {
-                x = y = z = json.asDouble();
+                x = j[0].get<double>();
+                y = j[1].get<double>();
+                z = j[2].get<double>();
             }
-            else if (json.isObject())
-            {
-                x = json["x"].asDouble();
-                y = json["y"].asDouble();
-                z = json["z"].asDouble();
-            }
+        }
+        else if (j.is_number())
+        {
+                x = y = z = j.get<double>();
+        }
+        else if (j.is_object())
+        {
+            x = j.value("x", Point::emptyCoord());
+            y = j.value("y", Point::emptyCoord());
+            z = j.value("z", Point::emptyCoord());
         }
     }
 
-    Json::Value toJson() const { return toJsonArray(); }
+    NL::json toJson() const
+    { return toJsonArray(); }
 
-    Json::Value toJsonArray() const
-    {
-        Json::Value json;
-        json.append(x);
-        json.append(y);
-        json.append(z);
-        return json;
-    }
+    NL::json toJsonArray() const
+    { return { x, y, z }; }
 
-    Json::Value toJsonObject() const
-    {
-        Json::Value json;
-        json["x"] = x;
-        json["y"] = y;
-        json["z"] = z;
-        return json;
-    }
+    NL::json toJsonObject() const
+    { return {{ {"x", x}, {"y", y}, {"z", z} }}; }
 
     double sqDist2d(const Point& other) const
     {
@@ -120,20 +116,20 @@ public:
         return 0;
     }
 
-    static Point max(const Point& a, const Point& b)
+    static Point maximum(const Point& a, const Point& b)
     {
         return Point(
-                std::max(a.x, b.x),
-                std::max(a.y, b.y),
-                std::max(a.z, b.z));
+                (std::max)(a.x, b.x),
+                (std::max)(a.y, b.y),
+                (std::max)(a.z, b.z));
     }
 
-    static Point min(const Point& a, const Point& b)
+    static Point minimum(const Point& a, const Point& b)
     {
         return Point(
-                std::min(a.x, b.x),
-                std::min(a.y, b.y),
-                std::min(a.z, b.z));
+                (std::min)(a.x, b.x),
+                (std::min)(a.y, b.y),
+                (std::min)(a.z, b.z));
     }
 
     static Point normalize(const Point& p)
@@ -385,7 +381,7 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point)
 
     auto printCoord([&os](double d)
     {
-        if (d == std::numeric_limits<double>::max()) os << "max";
+        if (d == (std::numeric_limits<double>::max)()) os << "max";
         else if (d == std::numeric_limits<double>::lowest()) os << "min";
         else if (std::trunc(d) == d) os << static_cast<long>(d);
         else
@@ -433,20 +429,20 @@ public:
     Color() : r(0), g(0), b(0) { }
     Color(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) { }
 
-    static Color min(const Color& a, const Color& b)
+    static Color minimum(const Color& a, const Color& b)
     {
         return Color(
-                std::min(a.r, b.r),
-                std::min(a.g, b.g),
-                std::min(a.b, b.b));
+                (std::min)(a.r, b.r),
+                (std::min)(a.g, b.g),
+                (std::min)(a.b, b.b));
     }
 
-    static Color max(const Color& a, const Color& b)
+    static Color maximum(const Color& a, const Color& b)
     {
         return Color(
-                std::max(a.r, b.r),
-                std::max(a.g, b.g),
-                std::max(a.b, b.b));
+                (std::max)(a.r, b.r),
+                (std::max)(a.g, b.g),
+                (std::max)(a.b, b.b));
     }
 
     uint8_t r, g, b;

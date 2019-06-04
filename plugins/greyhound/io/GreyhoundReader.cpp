@@ -72,10 +72,7 @@ void GreyhoundReader::initialize(PointTableRef table)
     // Parse the URL and query parameters (although we won't handle the schema
     // until addDimensions) and fetch the dataset `info`.
 
-    Json::Value config;
-    if (log()->getLevel() > LogLevel::Debug4)
-        config["arbiter"]["verbose"] = true;
-    m_arbiter.reset(new arbiter::Arbiter(config));
+    m_arbiter.reset(new arbiter::Arbiter());
 
     // If this stage was parsed from a string parameter rather than JSON object
     // specification, normalize it to our URL.
@@ -101,38 +98,38 @@ void GreyhoundReader::initialize(PointTableRef table)
         throw pdal_error(std::string("Failed to fetch info: ") + e.what());
     }
 
-    if (m_info.isMember("srs"))
-        setSpatialReference(m_info["srs"].asString());
+    auto it = m_info.find("srs");
+    if (it != m_info.end() && getSpatialReference().empty())
+        setSpatialReference(it->get<std::string>());
 }
 
 void GreyhoundReader::addDimensions(PointLayoutPtr layout)
 {
-    std::map<std::string, const Json::Value*> remote;
-    for (const auto& d : m_info["schema"])
-        remote[d["name"].asString()] = &d;
+    std::map<std::string, const NL::json *> remote;
+
+    for (auto it : m_info["schema"].items())
+        remote[it.key()] = &it.value();
 
     // The dimensions we will query are determined in the following order, the
     // first of which is present taking precedence:
     //  - The `dims` PDAL option on this stage.
     //  - A `schema` query parameter parsed from the `url` option.
     //  - Finally, fall back to the full `info.schema`.
-    if (m_args.dims.isNull())
+    if (m_args.dims.is_null())
     {
         // If no dimensions are explicitly listed, only include the indexed
         // schema - omitting any appended dimensions.  Those must be explicitly
         // specified if desired.
-        Json::Value nativeSchema;
-        for (const Json::Value d : m_info["schema"])
-            if (!d["addon"].asBool())
-                nativeSchema.append(d);
+        NL::json nativeSchema;
+        for (auto el : m_info["schema"])
+            if (!el["addon"].get<bool>())
+                nativeSchema.push_back(el);
 
-        const Json::Value& readSchema = m_params["schema"].isNull() ?
+        const NL::json& readSchema = m_params["schema"].is_null() ?
             nativeSchema : m_params["schema"];
 
         for (const auto& d : readSchema)
-        {
-            m_args.dims.append(d["name"].asString());
-        }
+            m_args.dims.push_back(d["name"].get<std::string>());
     }
 
     auto isXyz([](const std::string& name)
@@ -143,7 +140,7 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
     // Build the request layout from the specified `dims`.
     for (const auto& n : m_args.dims)
     {
-        const auto name(n.asString());
+        const std::string name(n.get<std::string>());
 
         if (!remote.count(name))
             throw pdal_error(name + " does not exist in the remote schema");
@@ -151,9 +148,9 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
         const auto& d(*remote.at(name));
 
         const int baseType(
-                Utils::toNative(Dimension::fromName(d["type"].asString())));
+            Utils::toNative(Dimension::fromName(d["type"].get<std::string>())));
 
-        const int size(d["size"].asInt());
+        const int size(d["size"].get<int>());
 
         const Dimension::Type type(
                 isXyz(name) ?
@@ -164,7 +161,7 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
         m_readLayout.registerOrAssignDim(name, type);
     }
 
-    if (!m_params.obounds().isNull())
+    if (!m_params.obounds().is_null())
     {
         layout->registerDim(Dimension::Id::Omit);
     }
@@ -183,9 +180,9 @@ void GreyhoundReader::addDimensions(PointLayoutPtr layout)
 void GreyhoundReader::prepared(PointTableRef table)
 {
     MetadataNode queryNode(table.privateMetadata("greyhound"));
-    queryNode.add("info", dense(m_info));
+    queryNode.add("info", m_info.dump());
     queryNode.add("root", m_params.root());
-    queryNode.add("params", dense(m_params.toJson()));
+    queryNode.add("params", m_params.toJson().dump());
 }
 
 point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
@@ -211,7 +208,7 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
 
     const auto dimTypes(m_readLayout.dimTypes());
 #ifdef PDAL_HAVE_LAZPERF
-    auto cb = [this, &view, &dimTypes, numPoints](char *buf, size_t bufsize)
+    auto cb = [this, &view, &dimTypes](char *buf, size_t bufsize)
     {
         view->setPackedPoint(dimTypes, view->size(), buf);
         if (m_cb)
@@ -228,7 +225,7 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
             m_cb(*view, view->size() - 1);
     }
 #endif
-    if (!m_params.obounds().isNull())
+    if (!m_params.obounds().is_null())
     {
         greyhound::Bounds obounds(m_params.obounds());
         greyhound::Point p;

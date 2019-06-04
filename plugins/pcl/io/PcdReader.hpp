@@ -39,6 +39,7 @@
 #include <pdal/StageFactory.hpp>
 
 #include "PcdCommon.hpp"
+#include "PcdHeader.hpp"
 
 namespace pdal
 {
@@ -51,11 +52,14 @@ public:
     std::string getName() const;
 
 private:
-    point_count_t m_numPts;
+    PcdHeader m_header;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+
+    virtual QuickInfo inspect();
+    virtual void initialize();
 };
 
 } // namespace pdal

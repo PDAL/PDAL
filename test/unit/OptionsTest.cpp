@@ -34,7 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/Options.hpp>
 #include <filters/CropFilter.hpp>
@@ -68,16 +68,13 @@ TEST(OptionsTest, json)
 {
     // Test that a JSON option will be stringified into the option's underlying
     // value.
-    Json::Value inJson;
-    inJson["key"] = 42;
+    NL::json inJson = { { "key", 42 } };
     const Option option_j("my_json", inJson);
     EXPECT_TRUE(option_j.getName() == "my_json");
 
     // Don't string-compare, test JSON-equality, since we don't care exactly
     // how it's stringified.
-    Json::Value outJson;
-    Json::Reader().parse(option_j.getValue(), outJson);
-
+    NL::json outJson = NL::json::parse(option_j.getValue());
     EXPECT_EQ(inJson, outJson) << inJson << " != " << outJson;
 }
 

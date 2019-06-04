@@ -1,6 +1,10 @@
 function(pdal_target_compile_settings target)
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
+        set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+        set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    else()
+        set(PDAL_CXX_STANDARD "-std=c++11")
+    endif()
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
         #
         # VERSION_GREATER_EQUAL doesn't come until cmake 3.7
@@ -27,8 +31,8 @@ function(pdal_target_compile_settings target)
         -Wpointer-arith
         -Wcast-align
         -Wcast-qual
-        -Wno-error=cast-qual
         -Wno-error=parentheses
+        -Wno-error=cast-qual
         -Wredundant-decls
 
         -Wno-unused-parameter

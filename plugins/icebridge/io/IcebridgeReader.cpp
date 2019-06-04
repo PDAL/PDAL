@@ -121,7 +121,7 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
 
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
-    count = std::min(count, remaining);
+    count = (std::min)(count, remaining);
 
     std::unique_ptr<unsigned char>
         rawData(new unsigned char[count * sizeof(float)]);
@@ -204,8 +204,7 @@ void IcebridgeReader::initialize()
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
     // background
-    SpatialReference ref("EPSG:4326");
-    setSpatialReference(m_metadata, ref);
+    setSpatialReference(SpatialReference("EPSG:4326"));
 }
 
 void IcebridgeReader::done(PointTableRef table)

@@ -21,13 +21,13 @@ target_link_libraries(${PDAL_APP}
     PRIVATE
         ${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
-        ${PDAL_JSONCPP_LIB_NAME}
         ${GDAL_LIBRARY}
         ${WINSOCK_LIBRARY}
 )
 target_include_directories(${PDAL_APP} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
+    ${NLOHMANN_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
+    ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
 #------------------------------------------------------------------------------
@@ -54,9 +54,7 @@ if(LIBXML2_FOUND)
         "${PDAL_INCLUDE_DEFINITIONS} -I${LIBXML2_INCLUDE_DIR}")
 endif()
 
-set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} geos")
-set(PDAL_INCLUDE_DEFINITIONS
-    "${PDAL_INCLUDE_DEFINITIONS} -I${GEOS_INCLUDE_DIR}")
+set(PDAL_INCLUDE_DEFINITIONS ${PDAL_INCLUDE_DEFINITIONS})
 
 if (LASZIP_FOUND)
     set(PDAL_INCLUDE_DEFINITIONS

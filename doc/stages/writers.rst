@@ -17,6 +17,8 @@ dimension type, while others only understand fixed dimension names.
    :hidden:
 
    writers.bpf
+   writers.ept_addon
+   writers.e57
    writers.gdal
    writers.geowave
    writers.greyhound
@@ -32,9 +34,16 @@ dimension type, while others only understand fixed dimension names.
    writers.sbet
    writers.sqlite
    writers.text
+   writers.tiledb
 
 :ref:`writers.bpf`
     Write BPF version 3 files. BPF is an NGA specification for point cloud data.
+
+:ref:`writers.ept_addon`
+    Append additional dimensions to Entwine resources.
+
+:ref:`writers.e57`
+    Write data in the E57 format.
 
 :ref:`writers.gdal`
     Create a raster from a point cloud using an interpolation algorithm.
@@ -86,3 +95,6 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.text`
     Write points in a text file. GeoJSON and CSV formats are supported.
+
+:ref:`writers.tiledb`
+    Write points into a TileDB database.

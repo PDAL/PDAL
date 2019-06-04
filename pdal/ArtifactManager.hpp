@@ -37,6 +37,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <pdal/Artifact.hpp>
 
@@ -46,6 +47,10 @@ namespace pdal
 class ArtifactManager
 {
 public:
+    ArtifactManager() = default;
+    ArtifactManager(const ArtifactManager&) = delete;
+    ArtifactManager& operator=(const ArtifactManager&) = delete;
+
     bool put(const std::string& name, ArtifactPtr artifact)
     {
         return m_storage.insert(std::make_pair(name, artifact)).second;
@@ -80,6 +85,14 @@ public:
     bool exists(const std::string& name)
     {
         return (m_storage.find(name) != m_storage.end());
+    }
+
+    std::vector<std::string> keys() const
+    {
+        std::vector<std::string> ks;
+        for (auto e : m_storage)
+            ks.push_back(e.first);
+        return ks;
     }
 
     template <typename T>

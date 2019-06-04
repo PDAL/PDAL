@@ -114,6 +114,11 @@ public:
 
     std::string getWKT() const;
 
+    /// Parse the string starting at position `pos` as a spatial reference.
+    /// \param s    String to parse.
+    /// \param pos  Position to start parsing string.
+    void parse(const std::string& s, std::string::size_type& pos);
+
     /// Sets the SRS from a string representation.  WKT is saved as
     /// provided.
     /// \param v - a string containing the definition (filename, proj4,
@@ -132,6 +137,11 @@ public:
     std::string getVertical() const;
     std::string getVerticalUnits() const;
 
+    /// Attempt to identify an EPSG code from the spatial reference.  Returns
+    /// an empty string if a code could not be identified.
+    std::string identifyHorizontalEPSG() const;
+    std::string identifyVerticalEPSG() const;
+
     /// Returns UTM zone **if** the coordinate system is actually UTM.
     /// The method simply forwards down to OSRGetUTMZone
     int getUTMZone() const;
@@ -141,6 +151,8 @@ public:
 
     bool isGeographic() const;
     bool isGeocentric() const;
+    bool isProjected() const;
+
     int computeUTMZone(const BOX3D& box) const;
 
     const std::string& getName() const;

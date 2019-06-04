@@ -1,0 +1,5 @@
+[
+  "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-thin.las",
+  "@CMAKE_SOURCE_DIR@/test/temp/array-pipeline.las"
+]
+

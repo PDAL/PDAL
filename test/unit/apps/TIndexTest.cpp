@@ -48,7 +48,7 @@ TEST(TIndex, test1)
     std::string outSpec(Support::temppath("tindex.out"));
     std::string outPoints(Support::temppath("points.txt"));
 
-    std::string cmd = Support::binpath("pdal") + " tindex " +
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
         outSpec + " \"" + inSpec + "\"";
 
     FileUtils::deleteDirectory(outSpec);
@@ -56,7 +56,7 @@ TEST(TIndex, test1)
     std::string output;
     Utils::run_shell_command(cmd, output);
 
-    cmd = Support::binpath("pdal") + " --verbose=info tindex --merge " +
+    cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 3],[1.25, 3])\"";
 
@@ -65,7 +65,7 @@ TEST(TIndex, test1)
     std::string::size_type pos = output.find("Merge filecount: 3");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " --verbose=info tindex --merge " +
+    cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 2],[1.25, 2])\"";
     FileUtils::deleteFile(outPoints);
@@ -73,7 +73,7 @@ TEST(TIndex, test1)
     pos = output.find("Merge filecount: 2");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " --verbose=info tindex --merge " +
+    cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 1.75],[1.25, 1.75])\"";
     FileUtils::deleteFile(outPoints);
@@ -88,7 +88,7 @@ TEST(TIndex, test2)
     std::string outSpec(Support::temppath("tindex.out"));
 
     FileUtils::deleteDirectory(outSpec);
-    std::string cmd = Support::binpath("pdal") + " tindex --stdin " +
+    std::string cmd = Support::binpath("pdal") + " tindex create --stdin " +
         outSpec + " \"" + inSpec + "\" 2>&1";
 
     std::string output;
@@ -96,7 +96,7 @@ TEST(TIndex, test2)
     std::string::size_type pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " tindex --stdin " +
+    cmd = Support::binpath("pdal") + " tindex create --stdin " +
         outSpec + " --filespec=\"" + inSpec + "\" 2>&1";
     Utils::run_shell_command(cmd, output);
     pos = output.find("Can't specify both");
@@ -112,15 +112,15 @@ TEST(TIndex, test3)
     std::string outPoints(Support::temppath("points.txt"));
 
     std::string cmd = "find " + Support::datapath("tindex") +
-        " -name \"*.txt\" | " + Support::binpath("pdal") + " tindex --stdin " +
-        outSpec;
+        " -name \"*.txt\" | " + Support::binpath("pdal") +
+        " tindex create --stdin " + outSpec;
 
     FileUtils::deleteDirectory(outSpec);
 
     std::string output;
     Utils::run_shell_command(cmd, output);
 
-    cmd = Support::binpath("pdal") + " --verbose=info tindex --merge " +
+    cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 3],[1.25, 3])\"";
 
@@ -129,7 +129,7 @@ TEST(TIndex, test3)
     std::string::size_type pos = output.find("Merge filecount: 3");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " --verbose=info tindex --merge " +
+    cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 2],[1.25, 2])\"";
     FileUtils::deleteFile(outPoints);
@@ -137,7 +137,7 @@ TEST(TIndex, test3)
     pos = output.find("Merge filecount: 2");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " --verbose=info tindex --merge " +
+    cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 1.75],[1.25, 1.75])\"";
     FileUtils::deleteFile(outPoints);

@@ -51,45 +51,44 @@ void Scaling::addArgs(ProgramArgs& args)
 }
 
 
-void Scaling::setAutoXForm(const PointViewPtr view)
+void Scaling::setAutoXForm(const PointViewSet& pvSet)
 {
-   double xmin = (std::numeric_limits<double>::max)();
-   double xmax = (std::numeric_limits<double>::lowest)();
-   bool xmod = m_xXform.m_offset.m_auto || m_xXform.m_scale.m_auto;
-
-   double ymin = (std::numeric_limits<double>::max)();
-   double ymax = (std::numeric_limits<double>::lowest)();
-   bool ymod = m_yXform.m_offset.m_auto || m_yXform.m_scale.m_auto;
-
-   double zmin = (std::numeric_limits<double>::max)();
-   double zmax = (std::numeric_limits<double>::lowest)();
-   bool zmod = m_zXform.m_offset.m_auto || m_zXform.m_scale.m_auto;
-
-   if (!xmod && !ymod && !zmod)
-       return;
-   if (view->empty())
+    bool xmod = m_xXform.m_offset.m_auto || m_xXform.m_scale.m_auto;
+    bool ymod = m_yXform.m_offset.m_auto || m_yXform.m_scale.m_auto;
+    bool zmod = m_zXform.m_offset.m_auto || m_zXform.m_scale.m_auto;
+    if (!xmod && !ymod && !zmod)
         return;
 
-    for (PointId idx = 0; idx < view->size(); idx++)
+    double xmin = (std::numeric_limits<double>::max)();
+    double xmax = (std::numeric_limits<double>::lowest)();
+    double ymin = (std::numeric_limits<double>::max)();
+    double ymax = (std::numeric_limits<double>::lowest)();
+    double zmin = (std::numeric_limits<double>::max)();
+    double zmax = (std::numeric_limits<double>::lowest)();
+
+    for (const PointViewPtr view : pvSet)
     {
         if (xmod)
-        {
-            double x = view->getFieldAs<double>(Dimension::Id::X, idx);
-            xmin = std::min(x, xmin);
-            xmax = std::max(x, xmax);
-        }
+            for (PointId idx = 0; idx < view->size(); idx++)
+            {
+                double x = view->getFieldAs<double>(Dimension::Id::X, idx);
+                xmin = (std::min)(x, xmin);
+                xmax = (std::max)(x, xmax);
+            }
         if (ymod)
-        {
-            double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
-            ymin = std::min(y, ymin);
-            ymax = std::max(y, ymax);
-        }
+            for (PointId idx = 0; idx < view->size(); idx++)
+            {
+                double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
+                ymin = (std::min)(y, ymin);
+                ymax = (std::max)(y, ymax);
+            }
         if (zmod)
-        {
-            double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
-            zmin = std::min(z, zmin);
-            zmax = std::max(z, zmax);
-        }
+            for (PointId idx = 0; idx < view->size(); idx++)
+            {
+                double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
+                zmin = (std::min)(z, zmin);
+                zmax = (std::max)(z, zmax);
+            }
     }
 
     if (m_xXform.m_offset.m_auto)

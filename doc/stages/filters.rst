@@ -36,15 +36,17 @@ invalidate an existing KD-tree.
    filters.cluster
    filters.colorinterp
    filters.colorization
+   filters.covariancefeatures
+   filters.dem
    filters.eigenvalues
    filters.estimaterank
    filters.elm
    filters.ferry
    filters.hag
-   filters.kdistance
+   filters.info
    filters.lof
-   filters.mongus
    filters.neighborclassifier
+   filters.nndistance
    filters.normal
    filters.outlier
    filters.overlay
@@ -71,6 +73,10 @@ invalidate an existing KD-tree.
 :ref:`filters.colorization`
     Fetch and assign RGB color information from a GDAL-readable datasource.
 
+:ref:`filters.covariancefeatures`
+    Filter that calculates local features based on the covariance matrix of a
+    point's neighborhood.
+
 :ref:`filters.eigenvalues`
     Compute pointwise eigenvalues, based on k-nearest neighbors.
 
@@ -87,19 +93,15 @@ invalidate an existing KD-tree.
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
 
-:ref:`filters.kdistance`
-    Compute pointwise K-Distance (the Euclidean distance to a point's k-th
-    nearest neighbor).
-
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
 
-:ref:`filters.mongus`
-    Label ground/non-ground returns using [Mongus2012]_.
-
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
+
+:ref:`filters.nndistance`
+    Compute a distance metric based on nearest neighbors.
 
 :ref:`filters.normal`
     Compute pointwise normal and curvature, based on k-nearest neighbors.
@@ -190,6 +192,7 @@ the input. These filters will invalidate an existing KD-tree.
    filters.iqr
    filters.locate
    filters.mad
+   filters.mongo
    filters.range
    filters.sample
    filters.tail
@@ -201,6 +204,10 @@ the input. These filters will invalidate an existing KD-tree.
 
 :ref:`filters.decimation`
     Keep every Nth point.
+
+:ref:`filters.dem`
+    Remove points that are in a raster cell but have a value far from the
+    value of the raster.
 
 :ref:`filters.head`
     Return N points from beginning of the point cloud.
@@ -215,6 +222,9 @@ the input. These filters will invalidate an existing KD-tree.
 :ref:`filters.mad`
     Cull points falling outside the computed Median Absolute Deviation for a
     given dimension.
+
+:ref:`filters.mongo`
+    Cull points using MongoDB-style expression syntax.
 
 :ref:`filters.range`
     Pass only points given a dimension/range.
@@ -303,8 +313,13 @@ invalidate an existing KD-tree.
 :ref:`filters.hexbin`
     Tessellate XY domain and determine point density and/or point boundary.
 
+:ref:`filters.info`
+    Generate metadata about the point set, including a point count and
+    spatial reference information.
+
 :ref:`filters.stats`
     Compute statistics about each dimension (mean, min, max, etc.).
+
 
 Mesh
 ----
@@ -378,6 +393,6 @@ Other
     Provide a hook for a simple point-by-point callback.
 
 :ref:`filters.voxelgrid`
-    Create a new point cloud composed of voxel centroids computed from the 
+    Create a new point cloud composed of voxel centroids computed from the
     input point cloud. All incoming dimension data (e.g., intensity, RGB) will
     be lost.

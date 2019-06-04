@@ -55,6 +55,9 @@ SOFTWARE.
 #include <arbiter/arbiter.hpp>
 
 #include <arbiter/driver.hpp>
+#include <arbiter/util/sha256.hpp>
+#include <arbiter/util/json.hpp>
+#include <arbiter/util/transforms.hpp>
 #include <arbiter/util/util.hpp>
 #endif
 
@@ -79,89 +82,79 @@ namespace
     const std::size_t httpRetryCount(8);
 #endif
 
-    // Merge B into A, without overwriting any keys from A.
-    Json::Value merge(const Json::Value& a, const Json::Value& b)
+    json getConfig(const std::string& s)
     {
-        Json::Value out(a);
+        json in(s.size() ? json::parse(s) : json::object());
 
-        if (!b.isNull())
-        {
-            if (b.isObject())
-            {
-                for (const auto& key : b.getMemberNames())
-                {
-                    // If A doesn't have this key, then set it to B's value.
-                    // If A has the key but it's an object, then recursively
-                    // merge.
-                    // Otherwise A already has a value here that we won't
-                    // overwrite.
-                    if (!out.isMember(key)) out[key] = b[key];
-                    else if (out[key].isObject()) merge(out[key], b[key]);
-                }
-            }
-            else
-            {
-                out = b;
-            }
-        }
-
-        return out;
-    }
-
-    Json::Value getConfig(const Json::Value& in)
-    {
-        Json::Value config;
+        json config;
         std::string path("~/.arbiter/config.json");
 
-        if      (auto p = util::env("ARBITER_CONFIG_FILE")) path = *p;
-        else if (auto p = util::env("ARBITER_CONFIG_PATH")) path = *p;
+        if      (auto p = env("ARBITER_CONFIG_FILE")) path = *p;
+        else if (auto p = env("ARBITER_CONFIG_PATH")) path = *p;
 
-        if (auto data = drivers::Fs().tryGet(path))
-        {
-            std::istringstream ss(*data);
-            ss >> config;
-        }
+        if (auto data = drivers::Fs().tryGet(path)) config = json::parse(*data);
+
+        if (in.is_null()) in = json::object();
+        if (config.is_null()) config = json::object();
 
         return merge(in, config);
     }
 }
 
-Arbiter::Arbiter() : Arbiter(Json::nullValue) { }
+Arbiter::Arbiter() : Arbiter(json().dump()) { }
 
-Arbiter::Arbiter(const Json::Value& in)
+Arbiter::Arbiter(const std::string s)
     : m_drivers()
 #ifdef ARBITER_CURL
-    , m_pool(new http::Pool(concurrentHttpReqs, httpRetryCount, getConfig(in)))
+    , m_pool(
+            new http::Pool(
+                concurrentHttpReqs,
+                httpRetryCount,
+                getConfig(s).dump()))
 #endif
 {
     using namespace drivers;
 
-    const Json::Value json(getConfig(in));
+    const json c(getConfig(s));
 
-    auto fs(Fs::create(json["file"]));
-    if (fs) m_drivers[fs->type()] = std::move(fs);
+    if (auto d = Fs::create())
+    {
+        m_drivers[d->type()] = std::move(d);
+    }
 
-    auto test(Test::create(json["test"]));
-    if (test) m_drivers[test->type()] = std::move(test);
+    if (auto d = Test::create())
+    {
+        m_drivers[d->type()] = std::move(d);
+    }
 
 #ifdef ARBITER_CURL
-    auto http(Http::create(*m_pool, json["http"]));
-    if (http) m_drivers[http->type()] = std::move(http);
+    if (auto d = Http::create(*m_pool))
+    {
+        m_drivers[d->type()] = std::move(d);
+    }
 
-    auto https(Https::create(*m_pool, json["http"]));
-    if (https) m_drivers[https->type()] = std::move(https);
+    if (auto d = Https::create(*m_pool))
+    {
+        m_drivers[d->type()] = std::move(d);
+    }
 
-    auto s3(S3::create(*m_pool, json["s3"]));
-    for (auto& s : s3) m_drivers[s->type()] = std::move(s);
+    {
+        auto dlist(S3::create(*m_pool, c.value("s3", json()).dump()));
+        for (auto& d : dlist) m_drivers[d->type()] = std::move(d);
+    }
 
     // Credential-based drivers should probably all do something similar to the
     // S3 driver to support multiple profiles.
-    auto dropbox(Dropbox::create(*m_pool, json["dropbox"]));
-    if (dropbox) m_drivers[dropbox->type()] = std::move(dropbox);
+    if (auto d = Dropbox::create(*m_pool, c.value("dropbox", json()).dump()))
+    {
+        m_drivers[d->type()] = std::move(d);
+    }
 
 #ifdef ARBITER_OPENSSL
-    auto google(Google::create(*m_pool, json["gs"]));
-    if (google) m_drivers[google->type()] = std::move(google);
+    if (auto d = Google::create(*m_pool, c.value("gs", json()).dump()))
+    {
+        m_drivers[d->type()] = std::move(d);
+    }
 #endif
 
 #endif
@@ -278,7 +271,7 @@ void Arbiter::copy(
 
     // Globify the source path if it's a directory.  In this case, the source
     // already ends with a slash.
-    const std::string srcToResolve(src + (util::isDirectory(src) ? "**" : ""));
+    const std::string srcToResolve(src + (isDirectory(src) ? "**" : ""));
 
     if (srcToResolve.back() != '*')
     {
@@ -291,7 +284,7 @@ void Arbiter::copy(
         // All resolved paths will contain this common prefix, so we can
         // determine any nested paths from recursive resolutions by stripping
         // that common portion.
-        const Endpoint& srcEndpoint(getEndpoint(util::stripPostfixing(src)));
+        const Endpoint& srcEndpoint(getEndpoint(stripPostfixing(src)));
         const std::string commonPrefix(srcEndpoint.prefixedRoot());
 
         const Endpoint dstEndpoint(getEndpoint(dst));
@@ -318,7 +311,7 @@ void Arbiter::copy(
 
             if (dstEndpoint.isLocal())
             {
-                fs::mkdirp(util::getNonBasename(dstEndpoint.fullPath(subpath)));
+                mkdirp(getNonBasename(dstEndpoint.fullPath(subpath)));
             }
 
             dstEndpoint.put(subpath, getBinary(path));
@@ -335,16 +328,16 @@ void Arbiter::copyFile(
 
     const Endpoint dstEndpoint(getEndpoint(dst));
 
-    if (util::isDirectory(dst))
+    if (isDirectory(dst))
     {
         // If the destination is a directory, maintain the basename of the
         // source file.
-        dst += util::getBasename(file);
+        dst += getBasename(file);
     }
 
     if (verbose) std::cout << file << " -> " << dst << std::endl;
 
-    if (dstEndpoint.isLocal()) fs::mkdirp(util::getNonBasename(dst));
+    if (dstEndpoint.isLocal()) mkdirp(getNonBasename(dst));
 
     if (getEndpoint(file).type() == dstEndpoint.type())
     {
@@ -414,11 +407,11 @@ const drivers::Http& Arbiter::getHttpDriver(const std::string path) const
     else throw ArbiterError("Cannot get driver for " + path + " as HTTP");
 }
 
-std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
+std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
         const std::string path,
         const Endpoint& tempEndpoint) const
 {
-    std::unique_ptr<fs::LocalHandle> localHandle;
+    std::unique_ptr<LocalHandle> localHandle;
 
     if (isRemote(path))
     {
@@ -427,30 +420,28 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
             throw ArbiterError("Temporary endpoint must be local.");
         }
 
-        std::string name(path);
-        std::replace(name.begin(), name.end(), '/', '-');
-        std::replace(name.begin(), name.end(), '\\', '-');
-        std::replace(name.begin(), name.end(), ':', '_');
-
-        tempEndpoint.put(name, getBinary(path));
-
+        const auto ext(getExtension(path));
+        const std::string basename(
+                std::to_string(randomNumber()) +
+                (ext.size() ? "." + ext : ""));
+        tempEndpoint.put(basename, getBinary(path));
         localHandle.reset(
-                new fs::LocalHandle(tempEndpoint.root() + name, true));
+                new LocalHandle(tempEndpoint.root() + basename, true));
     }
     else
     {
         localHandle.reset(
-                new fs::LocalHandle(fs::expandTilde(stripType(path)), false));
+                new LocalHandle(expandTilde(stripType(path)), false));
     }
 
     return localHandle;
 }
 
-std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
+std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
         const std::string path,
         std::string tempPath) const
 {
-    if (tempPath.empty()) tempPath = fs::getTempPath();
+    if (tempPath.empty()) tempPath = getTempPath();
     return getLocalHandle(path, getEndpoint(tempPath));
 }
 
@@ -486,6 +477,12 @@ std::string Arbiter::getExtension(const std::string path)
 
     if (pos != std::string::npos) return path.substr(pos + 1);
     else return std::string();
+}
+
+std::string Arbiter::stripExtension(const std::string path)
+{
+    const std::size_t pos(path.find_last_of('.'));
+    return path.substr(0, pos);
 }
 
 } // namespace arbiter
@@ -591,7 +588,7 @@ std::vector<std::string> Driver::resolve(
     else
     {
         if (isRemote()) path = type() + "://" + path;
-        else path = fs::expandTilde(path);
+        else path = expandTilde(path);
 
         results.push_back(path);
     }
@@ -629,6 +626,10 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 
 #include <arbiter/arbiter.hpp>
 #include <arbiter/driver.hpp>
+#include <arbiter/drivers/fs.hpp>
+#include <arbiter/util/sha256.hpp>
+#include <arbiter/util/transforms.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -651,7 +652,7 @@ namespace
 
 Endpoint::Endpoint(const Driver& driver, const std::string root)
     : m_driver(driver)
-    , m_root(fs::expandTilde(postfixSlash(root)))
+    , m_root(expandTilde(postfixSlash(root)))
 { }
 
 std::string Endpoint::root() const
@@ -682,6 +683,34 @@ bool Endpoint::isLocal() const
 bool Endpoint::isHttpDerived() const
 {
     return tryGetHttpDriver() != nullptr;
+}
+
+std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
+        const std::string subpath) const
+{
+    std::unique_ptr<LocalHandle> handle;
+
+    if (isRemote())
+    {
+        const std::string tmp(getTempPath());
+        const auto ext(Arbiter::getExtension(subpath));
+        const std::string basename(
+                std::to_string(randomNumber()) +
+                (ext.size() ? "." + ext : ""));
+
+        const std::string local(tmp + basename);
+
+        drivers::Fs fs;
+        fs.put(local, getBinary(subpath));
+
+        handle.reset(new LocalHandle(local, true));
+    }
+    else
+    {
+        handle.reset(new LocalHandle(expandTilde(fullPath(subpath)), false));
+    }
+
+    return handle;
 }
 
 std::string Endpoint::get(const std::string subpath) const
@@ -875,7 +904,9 @@ const drivers::Http& Endpoint::getHttpDriver() const
 #include <glob.h>
 #include <sys/stat.h>
 #else
-
+#define UNICODE
+#include <Shlwapi.h>
+#include <iterator>
 #include <locale>
 #include <codecvt>
 #include <windows.h>
@@ -909,16 +940,16 @@ namespace
         std::string s;
 
 #ifndef ARBITER_WINDOWS
-        if (auto home = util::env("HOME")) s = *home;
+        if (auto home = env("HOME")) s = *home;
 #else
-        if (auto userProfile = util::env("USERPROFILE"))
+        if (auto userProfile = env("USERPROFILE"))
         {
             s = *userProfile;
         }
         else
         {
-            auto homeDrive(util::env("HOMEDRIVE"));
-            auto homePath(util::env("HOMEPATH"));
+            auto homeDrive(env("HOMEDRIVE"));
+            auto homePath(env("HOMEPATH"));
 
             if (homeDrive && homePath) s = *homeDrive + *homePath;
         }
@@ -932,7 +963,7 @@ namespace
 namespace drivers
 {
 
-std::unique_ptr<Fs> Fs::create(const Json::Value&)
+std::unique_ptr<Fs> Fs::create()
 {
     return std::unique_ptr<Fs>(new Fs());
 }
@@ -941,7 +972,7 @@ std::unique_ptr<std::size_t> Fs::tryGetSize(std::string path) const
 {
     std::unique_ptr<std::size_t> size;
 
-    path = fs::expandTilde(path);
+    path = expandTilde(path);
 
     std::ifstream stream(path, std::ios::in | std::ios::binary);
 
@@ -958,7 +989,7 @@ bool Fs::get(std::string path, std::vector<char>& data) const
 {
     bool good(false);
 
-    path = fs::expandTilde(path);
+    path = expandTilde(path);
     std::ifstream stream(path, std::ios::in | std::ios::binary);
 
     if (stream.good())
@@ -976,7 +1007,7 @@ bool Fs::get(std::string path, std::vector<char>& data) const
 
 void Fs::put(std::string path, const std::vector<char>& data) const
 {
-    path = fs::expandTilde(path);
+    path = expandTilde(path);
     std::ofstream stream(path, binaryTruncMode);
 
     if (!stream.good())
@@ -994,8 +1025,8 @@ void Fs::put(std::string path, const std::vector<char>& data) const
 
 void Fs::copy(std::string src, std::string dst) const
 {
-    src = fs::expandTilde(src);
-    dst = fs::expandTilde(dst);
+    src = expandTilde(src);
+    dst = expandTilde(dst);
 
     std::ifstream instream(src, std::ifstream::in | std::ifstream::binary);
     if (!instream.good())
@@ -1015,13 +1046,11 @@ void Fs::copy(std::string src, std::string dst) const
 
 std::vector<std::string> Fs::glob(std::string path, bool verbose) const
 {
-    return fs::glob(path);
+    return arbiter::glob(path);
 }
 
 } // namespace drivers
 
-namespace fs
-{
 
 bool mkdirp(std::string raw)
 {
@@ -1033,11 +1062,11 @@ bool mkdirp(std::string raw)
         // not to remove drive letters like C:\\.
         const auto end = std::unique(s.begin(), s.end(), [](char l, char r)
         {
-            return util::isSlash(l) && util::isSlash(r);
+            return isSlash(l) && isSlash(r);
         });
 
         s = std::string(s.begin(), end);
-        if (s.size() && util::isSlash(s.back())) s.pop_back();
+        if (s.size() && isSlash(s.back())) s.pop_back();
         return s;
     })());
 
@@ -1046,7 +1075,7 @@ bool mkdirp(std::string raw)
 
     do
     {
-        it = std::find_if(++it, end, util::isSlash);
+        it = std::find_if(++it, end, isSlash);
 
         const std::string cur(dir.begin(), it);
 #ifndef ARBITER_WINDOWS
@@ -1054,7 +1083,10 @@ bool mkdirp(std::string raw)
         if (err && errno != EEXIST) return false;
 #else
         // Use CreateDirectory instead of _mkdir; it is more reliable when creating directories on a drive other than the working path.
-        const bool err(::CreateDirectory(cur.c_str(), NULL));
+
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		const std::wstring wide(converter.from_bytes(cur));
+		const bool err(::CreateDirectoryW(wide.c_str(), NULL));
         if (err && ::GetLastError() != ERROR_ALREADY_EXISTS) return false;
 #endif
     }
@@ -1078,6 +1110,33 @@ namespace
         std::vector<std::string> files;
         std::vector<std::string> dirs;
     };
+
+template<typename C>
+	std::basic_string<C> remove_dups(std::basic_string<C> s, C c)
+	{
+		C cc[3] = { c, c };
+		auto pos = s.find(cc);
+		while (pos != s.npos) {
+			s.erase(pos, 1);
+			pos = s.find(cc, pos + 1);
+		}
+		return s;
+	}
+
+#ifdef ARBITER_WINDOWS
+	bool icase_wchar_cmp(wchar_t a, wchar_t b)
+	{
+		return std::toupper(a, std::locale()) == std::toupper(b, std::locale());
+	}
+
+
+	bool icase_cmp(std::wstring const& s1, std::wstring const& s2)
+	{
+		return (s1.size() == s2.size()) &&
+			std::equal(s1.begin(), s1.end(), s2.begin(),
+				icase_wchar_cmp);
+	}
+#endif
 
     Globs globOne(std::string path)
     {
@@ -1106,28 +1165,54 @@ namespace
 
         globfree(&buffer);
 #else
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        const std::wstring wide(converter.from_bytes(path));
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+		std::wstring wide(converter.from_bytes(path));
 
-        LPWIN32_FIND_DATAW data{};
-        HANDLE hFind(FindFirstFileW(wide.c_str(), data));
+		WIN32_FIND_DATAW data{};
+		LPCWSTR fname = wide.c_str();
+        HANDLE hFind(INVALID_HANDLE_VALUE);
+		hFind = FindFirstFileW(fname, &data);
 
-        if (hFind != INVALID_HANDLE_VALUE)
+		if (hFind == (HANDLE)-1) return results; // bad filename
+
+        if (hFind != INVALID_HANDLE_VALUE )
         {
             do
             {
-                if ((data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+				if (icase_cmp(std::wstring(data.cFileName), L".") ||
+					icase_cmp(std::wstring(data.cFileName), L".."))
+					continue;
+
+				std::vector<wchar_t> buf(MAX_PATH);
+				wide.erase(std::remove(wide.begin(), wide.end(), '*'), wide.end());
+
+				std::replace(wide.begin(), wide.end(), '\\', '/');
+
+				std::copy(wide.begin(), wide.end(), buf.begin()	);
+                BOOL appended = PathAppendW(buf.data(), data.cFileName);
+
+				std::wstring output(buf.data(), wcslen( buf.data()));
+
+                // Erase any \'s
+                output.erase(std::remove(output.begin(), output.end(), '\\'), output.end());
+
+                if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
-                    results.files.push_back(
-                            converter.to_bytes(data->cFileName));
+                    results.dirs.push_back(converter.to_bytes(output));
+
+                    output.append(L"/*");
+                    Globs more = globOne(converter.to_bytes(output));
+                    std::copy(more.dirs.begin(), more.dirs.end(), std::back_inserter(results.dirs));
+                    std::copy(more.files.begin(), more.files.end(), std::back_inserter(results.files));
+
                 }
-                else
-                {
-                    results.dirs.push_back(converter.to_bytes(data->cFileName));
-                }
+
+				results.files.push_back(
+					converter.to_bytes(output));
             }
-            while (FindNextFileW(hFind, data));
+            while (FindNextFileW(hFind, &data));
         }
+		FindClose(hFind);
 #endif
 
         return results;
@@ -1152,7 +1237,7 @@ std::vector<std::string> glob(std::string path)
 {
     std::vector<std::string> results;
 
-    path = fs::expandTilde(path);
+    path = expandTilde(path);
 
     if (path.find('*') == std::string::npos)
     {
@@ -1200,17 +1285,21 @@ std::string expandTilde(std::string in)
 
 std::string getTempPath()
 {
+    std::string tmp;
 #ifndef ARBITER_WINDOWS
-    if (const auto t = util::env("TMPDIR"))     return *t;
-    if (const auto t = util::env("TMP"))        return *t;
-    if (const auto t = util::env("TEMP"))       return *t;
-    if (const auto t = util::env("TEMPDIR"))    return *t;
-    return "/tmp";
+    if (const auto t = env("TMPDIR"))         tmp = *t;
+    else if (const auto t = env("TMP"))       tmp = *t;
+    else if (const auto t = env("TEMP"))      tmp = *t;
+    else if (const auto t = env("TEMPDIR"))   tmp = *t;
+    else tmp = "/tmp";
 #else
     std::vector<char> path(MAX_PATH, '\0');
-    if (GetTempPath(MAX_PATH, path.data())) return path.data();
-    else throw ArbiterError("Could not find a temp path.");
+    if (GetTempPath(MAX_PATH, path.data())) tmp.assign(path.data());
 #endif
+
+    if (tmp.empty()) throw ArbiterError("Could not find a temp path.");
+    if (tmp.back() != '/') tmp += '/';
+    return tmp;
 }
 
 LocalHandle::LocalHandle(const std::string localPath, const bool isRemote)
@@ -1220,10 +1309,9 @@ LocalHandle::LocalHandle(const std::string localPath, const bool isRemote)
 
 LocalHandle::~LocalHandle()
 {
-    if (m_erase) fs::remove(fs::expandTilde(m_localPath));
+    if (m_erase) remove(expandTilde(m_localPath));
 }
 
-} // namespace fs
 } // namespace arbiter
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -1278,7 +1366,7 @@ Http::Http(Pool& pool)
 #endif
 }
 
-std::unique_ptr<Http> Http::create(Pool& pool, const Json::Value&)
+std::unique_ptr<Http> Http::create(Pool& pool)
 {
     return std::unique_ptr<Http>(new Http(pool));
 }
@@ -1498,6 +1586,7 @@ std::string Http::typedPath(const std::string& p) const
 #include <arbiter/drivers/fs.hpp>
 #include <arbiter/third/xml/xml.hpp>
 #include <arbiter/util/ini.hpp>
+#include <arbiter/util/json.hpp>
 #include <arbiter/util/md5.hpp>
 #include <arbiter/util/sha256.hpp>
 #include <arbiter/util/transforms.hpp>
@@ -1575,7 +1664,6 @@ namespace drivers
 {
 
 using namespace http;
-using namespace util;
 
 S3::S3(
         Pool& pool,
@@ -1588,21 +1676,23 @@ S3::S3(
     , m_config(std::move(config))
 { }
 
-std::vector<std::unique_ptr<S3>> S3::create(Pool& pool, const Json::Value& json)
+std::vector<std::unique_ptr<S3>> S3::create(Pool& pool, const std::string s)
 {
     std::vector<std::unique_ptr<S3>> result;
 
-    if (json.isArray())
+    const json config(s.size() ? json::parse(s) : json());
+
+    if (config.is_array())
     {
-        for (const auto& curr : json)
+        for (const json& curr : config)
         {
-            if (auto s = createOne(pool, curr))
+            if (auto s = createOne(pool, curr.dump()))
             {
                 result.push_back(std::move(s));
             }
         }
     }
-    else if (auto s = createOne(pool, json))
+    else if (auto s = createOne(pool, config.dump()))
     {
         result.push_back(std::move(s));
     }
@@ -1610,64 +1700,70 @@ std::vector<std::unique_ptr<S3>> S3::create(Pool& pool, const Json::Value& json)
     return result;
 }
 
-std::unique_ptr<S3> S3::createOne(Pool& pool, const Json::Value& json)
+std::unique_ptr<S3> S3::createOne(Pool& pool, const std::string s)
 {
-    const std::string profile(extractProfile(json));
+    const json j(s.size() ? json::parse(s) : json());
+    const std::string profile(extractProfile(j.dump()));
 
-    auto auth(Auth::create(json, profile));
+    auto auth(Auth::create(j.dump(), profile));
     if (!auth) return std::unique_ptr<S3>();
 
-    std::unique_ptr<Config> config(new Config(json, profile));
-    return makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
+    std::unique_ptr<Config> config(new Config(j.dump(), profile));
+    auto s3 = makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
+    return s3;
 }
 
-std::string S3::extractProfile(const Json::Value& json)
+std::string S3::extractProfile(const std::string s)
 {
+    const json config(s.size() ? json::parse(s) : json());
+
     if (
-            !json.isNull() &&
-            json.isMember("profile") &&
-            json["profile"].asString().size())
+            !config.is_null() &&
+            config.count("profile") &&
+            config["profile"].get<std::string>().size())
     {
-        return json["profile"].asString();
+        return config["profile"].get<std::string>();
     }
 
-    if (auto p = util::env("AWS_PROFILE")) return *p;
-    if (auto p = util::env("AWS_DEFAULT_PROFILE")) return *p;
+    if (auto p = env("AWS_PROFILE")) return *p;
+    if (auto p = env("AWS_DEFAULT_PROFILE")) return *p;
     else return "default";
 }
 
 std::unique_ptr<S3::Auth> S3::Auth::create(
-        const Json::Value& json,
+        const std::string s,
         const std::string profile)
 {
+    const json config(s.size() ? json::parse(s) : json());
+
     // Try explicit JSON configuration first.
     if (
-            !json.isNull() &&
-            json.isMember("access") &&
-            (json.isMember("secret") || json.isMember("hidden")))
+            !config.is_null() &&
+            config.count("access") &&
+            (config.count("secret") || config.count("hidden")))
     {
         return makeUnique<Auth>(
-                json["access"].asString(),
-                json.isMember("secret") ?
-                    json["secret"].asString() :
-                    json["hidden"].asString(),
-                json["token"].asString());
+                config["access"].get<std::string>(),
+                config.count("secret") ?
+                    config["secret"].get<std::string>() :
+                    config["hidden"].get<std::string>(),
+                config.value("token", ""));
     }
 
     // Try environment settings next.
     {
-        auto access(util::env("AWS_ACCESS_KEY_ID"));
-        auto hidden(util::env("AWS_SECRET_ACCESS_KEY"));
-        auto token(util::env("AWS_SESSION_TOKEN"));
+        auto access(env("AWS_ACCESS_KEY_ID"));
+        auto hidden(env("AWS_SECRET_ACCESS_KEY"));
+        auto token(env("AWS_SESSION_TOKEN"));
 
         if (access && hidden)
         {
             return makeUnique<Auth>(*access, *hidden, token ? *token : "");
         }
 
-        access = util::env("AMAZON_ACCESS_KEY_ID");
-        hidden = util::env("AMAZON_SECRET_ACCESS_KEY");
-        token = util::env("AMAZON_SESSION_TOKEN");
+        access = env("AMAZON_ACCESS_KEY_ID");
+        hidden = env("AMAZON_SECRET_ACCESS_KEY");
+        token = env("AMAZON_SESSION_TOKEN");
 
         if (access && hidden)
         {
@@ -1676,8 +1772,8 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     }
 
     const std::string credPath(
-            util::env("AWS_CREDENTIAL_FILE") ?
-                *util::env("AWS_CREDENTIAL_FILE") : "~/.aws/credentials");
+            env("AWS_CREDENTIAL_FILE") ?
+                *env("AWS_CREDENTIAL_FILE") : "~/.aws/credentials");
 
     // Finally, try reading credentials file.
     drivers::Fs fsDriver;
@@ -1706,7 +1802,8 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     // an HTTP request on every Arbiter construction - but if we're allowed,
     // see if we can request an instance profile configuration.
     if (
-            json["allowInstanceProfile"].asBool() ||
+            (!config.is_null() &&
+                config.value("allowInstanceProfile", false)) ||
             env("AWS_ALLOW_INSTANCE_PROFILE"))
     {
         http::Pool pool;
@@ -1722,45 +1819,69 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     return std::unique_ptr<Auth>();
 }
 
-S3::Config::Config(
-        const Json::Value& json,
-        const std::string profile)
-    : m_region(extractRegion(json, profile))
-    , m_baseUrl(extractBaseUrl(json, m_region))
-    , m_precheck(json["precheck"].asBool())
+S3::Config::Config(const std::string s, const std::string profile)
+    : m_region(extractRegion(s, profile))
+    , m_baseUrl(extractBaseUrl(s, m_region))
 {
-    if (json["sse"].asBool())
+    const json c(s.size() ? json::parse(s) : json());
+    if (c.is_null()) return;
+
+    m_precheck = c.value("precheck", false);
+
+    if (c.value("sse", false)|| env("AWS_SSE"))
     {
         m_baseHeaders["x-amz-server-side-encryption"] = "AES256";
     }
 
-    if (json["requesterPays"].asBool())
+    if (c.value("requesterPays", false) || env("AWS_REQUESTER_PAYS"))
     {
         m_baseHeaders["x-amz-request-payer"] = "requester";
+    }
+
+    if (c.count("headers"))
+    {
+        const json& headers(c["headers"]);
+
+        if (headers.is_object())
+        {
+            for (const auto& p : headers.items())
+            {
+                m_baseHeaders[p.key()] = p.value().get<std::string>();
+            }
+        }
+        else
+        {
+            std::cout << "s3.headers expected to be object - skipping" <<
+                std::endl;
+        }
     }
 }
 
 std::string S3::Config::extractRegion(
-        const Json::Value& json,
+        const std::string s,
         const std::string profile)
 {
     const std::string configPath(
-            util::env("AWS_CONFIG_FILE") ?
-                *util::env("AWS_CONFIG_FILE") : "~/.aws/config");
+            env("AWS_CONFIG_FILE") ?
+                *env("AWS_CONFIG_FILE") : "~/.aws/config");
 
     drivers::Fs fsDriver;
 
-    if (auto p = util::env("AWS_REGION"))
+    const json c(s.size() ? json::parse(s) : json());
+
+    if (c.is_null()) return "us-east-1";
+
+    if (c.count("region"))
+    {
+        return c["region"].get<std::string>();
+    }
+    else if (auto p = env("AWS_REGION"))
     {
         return *p;
     }
-    else if (auto p = util::env("AWS_DEFAULT_REGION"))
+    else if (auto p = env("AWS_DEFAULT_REGION"))
     {
         return *p;
-    }
-    else if (!json.isNull() && json.isMember("region"))
-    {
-        return json["region"].asString();
     }
     else if (std::unique_ptr<std::string> c = fsDriver.tryGet(configPath))
     {
@@ -1772,7 +1893,7 @@ std::string S3::Config::extractRegion(
         }
     }
 
-    if (json["verbose"].asBool())
+    if (c.value("verbose", false))
     {
         std::cout << "Region not found - defaulting to us-east-1" << std::endl;
     }
@@ -1781,24 +1902,28 @@ std::string S3::Config::extractRegion(
 }
 
 std::string S3::Config::extractBaseUrl(
-        const Json::Value& json,
-        std::string region)
+        const std::string s,
+        const std::string region)
 {
-    if (json.isMember("endpoint") && json["endpoint"].asString().size())
+    const json c(s.size() ? json::parse(s) : json());
+
+    if (!c.is_null() &&
+            c.count("endpoint") &&
+            c["endpoint"].get<std::string>().size())
     {
-        const std::string path(json["endpoint"].asString());
+        const std::string path(c["endpoint"].get<std::string>());
         return path.back() == '/' ? path : path + '/';
     }
 
     std::string endpointsPath("~/.aws/endpoints.json");
 
-    if (const auto e = util::env("AWS_ENDPOINTS_FILE"))
+    if (const auto e = env("AWS_ENDPOINTS_FILE"))
     {
         endpointsPath = *e;
     }
-    else if (json.isMember("endpointsFile"))
+    else if (c.count("endpointsFile"))
     {
-        endpointsPath = json["endpointsFile"].asString();
+        endpointsPath = c["endpointsFile"].get<std::string>();
     }
 
     std::string dnsSuffix("amazonaws.com");
@@ -1806,24 +1931,26 @@ std::string S3::Config::extractBaseUrl(
     drivers::Fs fsDriver;
     if (std::unique_ptr<std::string> e = fsDriver.tryGet(endpointsPath))
     {
-        Json::Value ep;
-        std::istringstream ss(*e);
-        ss >> ep;
+        const json ep(json::parse(*e));
 
         for (const auto& partition : ep["partitions"])
         {
-            if (partition.isMember("dnsSuffix"))
+            if (partition.count("dnsSuffix"))
             {
-                dnsSuffix = partition["dnsSuffix"].asString();
+                dnsSuffix = partition["dnsSuffix"].get<std::string>();
             }
 
-            const auto& endpoints(partition["services"]["s3"]["endpoints"]);
-            const auto regions(endpoints.getMemberNames());
-            for (const auto& r : regions)
+            const auto& endpoints(
+                    partition.at("services").at("s3").at("endpoints"));
+
+            for (const auto& r : endpoints.items())
             {
-                if (r == region && endpoints[region].isMember("hostname"))
+                if (r.key() == region &&
+                        endpoints.value("region", json::object())
+                            .count("hostname"))
                 {
-                    return endpoints[region]["hostname"].asString() + '/';
+                    return endpoints["region"]["hostname"].get<std::string>() +
+                        '/';
                 }
             }
         }
@@ -1849,15 +1976,13 @@ S3::AuthFields S3::Auth::fields() const
             http::Pool pool;
             drivers::Http httpDriver(pool);
 
-            std::istringstream ss(httpDriver.get(credBase + *m_role));
-            Json::Value creds;
-            ss >> creds;
-            m_access = creds["AccessKeyId"].asString();
-            m_hidden = creds["SecretAccessKey"].asString();
-            m_token = creds["Token"].asString();
+            const json creds(json::parse(httpDriver.get(credBase + *m_role)));
+            m_access = creds.at("AccessKeyId").get<std::string>();
+            m_hidden = creds.at("SecretAccessKey").get<std::string>();
+            m_token = creds.at("Token").get<std::string>();
             m_expiration.reset(
                     new Time(
-                        creds["Expiration"].asString(),
+                        creds.at("Expiration").get<std::string>(),
                         arbiter::Time::iso8601));
 
             if (*m_expiration - now < reauthSeconds)
@@ -1885,6 +2010,9 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
 {
     std::unique_ptr<std::size_t> size;
 
+    Headers headers(m_config->baseHeaders());
+    headers.erase("x-amz-server-side-encryption");
+
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
             "HEAD",
@@ -1892,7 +2020,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
             resource,
             m_auth->fields(),
             Query(),
-            Headers(),
+            headers,
             empty);
 
     drivers::Http http(m_pool);
@@ -1961,6 +2089,11 @@ void S3::put(
 
     Headers headers(m_config->baseHeaders());
     headers.insert(userHeaders.begin(), userHeaders.end());
+
+    if (Arbiter::getExtension(rawPath) == "json")
+    {
+        headers["Content-Type"] = "application/json";
+    }
 
     const ApiV4 apiV4(
             "PUT",
@@ -2122,9 +2255,12 @@ S3::ApiV4::ApiV4(
 
     if (verb == "PUT" || verb == "POST")
     {
-        m_headers["Content-Type"] = "application/octet-stream";
-        m_headers["Transfer-Encoding"] = "";
-        m_headers["Expect"] = "";
+        if (!m_headers.count("Content-Type"))
+        {
+            m_headers["Content-Type"] = "application/octet-stream";
+        }
+        m_headers.erase("Transfer-Encoding");
+        m_headers.erase("Expect");
     }
 
     const Headers normalizedHeaders(
@@ -2312,7 +2448,6 @@ std::string S3::Resource::host() const
 }
 #endif
 
-
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/s3.cpp
 // //////////////////////////////////////////////////////////////////////
@@ -2338,11 +2473,18 @@ std::string S3::Resource::host() const
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+
+// See: https://www.openssl.org/docs/manmaster/man3/OPENSSL_VERSION_NUMBER.html
+#   if OPENSSL_VERSION_NUMBER >= 0x010100000
+#   define ARBITER_OPENSSL_ATLEAST_1_1
+#   endif
+
 #endif
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/arbiter.hpp>
 #include <arbiter/drivers/fs.hpp>
+#include <arbiter/util/json.hpp>
 #include <arbiter/util/transforms.hpp>
 #endif
 
@@ -2410,13 +2552,11 @@ Google::Google(http::Pool& pool, std::unique_ptr<Auth> auth)
     , m_auth(std::move(auth))
 { }
 
-std::unique_ptr<Google> Google::create(
-        http::Pool& pool,
-        const Json::Value& json)
+std::unique_ptr<Google> Google::create(http::Pool& pool, const std::string s)
 {
-    if (auto auth = Auth::create(json))
+    if (auto auth = Auth::create(s))
     {
-        return util::makeUnique<Google>(pool, std::move(auth));
+        return makeUnique<Google>(pool, std::move(auth));
     }
 
     return std::unique_ptr<Google>();
@@ -2434,7 +2574,7 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     if (res.ok() && res.headers().count("Content-Length"))
     {
         const auto& s(res.headers().at("Content-Length"));
-        return util::makeUnique<std::size_t>(std::stoul(s));
+        return makeUnique<std::size_t>(std::stoul(s));
     }
 
     return std::unique_ptr<std::size_t>();
@@ -2520,15 +2660,15 @@ std::vector<std::string> Google::glob(std::string path, bool verbose) const
             throw ArbiterError(std::to_string(res.code()) + ": " + res.str());
         }
 
-        const Json::Value json(util::parse(res.str()));
-        for (const auto& item : json["items"])
+        const json j(json::parse(res.str()));
+        for (const json& item : j.at("items"))
         {
             results.push_back(
                     type() + "://" +
-                    resource.bucket() + item["name"].asString());
+                    resource.bucket() + item.at("name").get<std::string>());
         }
 
-        pageToken = json["nextPageToken"].asString();
+        pageToken = j.value("nextPageToken", "");
     } while (pageToken.size());
 
     return results;
@@ -2536,33 +2676,43 @@ std::vector<std::string> Google::glob(std::string path, bool verbose) const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<Google::Auth> Google::Auth::create(const Json::Value& json)
+std::unique_ptr<Google::Auth> Google::Auth::create(const std::string s)
 {
-    if (auto path = util::env("GOOGLE_APPLICATION_CREDENTIALS"))
+    const json j(json::parse(s));
+    if (auto path = env("GOOGLE_APPLICATION_CREDENTIALS"))
     {
         if (const auto file = drivers::Fs().tryGet(*path))
         {
-            return util::makeUnique<Auth>(util::parse(*file));
+            try
+            {
+                return makeUnique<Auth>(*file);
+            }
+            catch (const ArbiterError& e)
+            {
+                std::cout << e.what() << std::endl;
+                return std::unique_ptr<Auth>();
+            }
         }
     }
-    else if (json.isString())
+    else if (j.is_string())
     {
-        const auto path = json.asString();
+        const auto path(j.get<std::string>());
         if (const auto file = drivers::Fs().tryGet(path))
         {
-            return util::makeUnique<Auth>(util::parse(*file));
+            return makeUnique<Auth>(*file);
         }
     }
-    else if (json.isObject())
+    else if (j.is_object())
     {
-        return util::makeUnique<Auth>(json);
+        return makeUnique<Auth>(s);
     }
 
     return std::unique_ptr<Auth>();
 }
 
-Google::Auth::Auth(const Json::Value& creds)
-    : m_creds(creds)
+Google::Auth::Auth(const std::string s)
+    : m_clientEmail(json::parse(s).at("client_email").get<std::string>())
+    , m_privateKey(json::parse(s).at("private_key").get<std::string>())
 {
     maybeRefresh();
 }
@@ -2582,21 +2732,19 @@ void Google::Auth::maybeRefresh() const
     if (m_expiration - now > 120) return;   // Refresh when under 2 mins left.
 
     // https://developers.google.com/identity/protocols/OAuth2ServiceAccount
-    Json::Value h;
-    h["alg"] = "RS256";
-    h["typ"] = "JWT";
+    const json h { { "alg", "RS256" }, { "typ", "JWT" } };
+    const json c {
+        { "iss", m_clientEmail },
+        { "scope", "https://www.googleapis.com/auth/devstorage.read_write" },
+        { "aud", "https://www.googleapis.com/oauth2/v4/token" },
+        { "iat", now },
+        { "exp", now + 3600 }
+    };
 
-    Json::Value c;
-    c["iss"] = m_creds["client_email"].asString();
-    c["scope"] = "https://www.googleapis.com/auth/devstorage.read_write";
-    c["aud"] = "https://www.googleapis.com/oauth2/v4/token";
-    c["iat"] = Json::Int64(now);
-    c["exp"] = Json::Int64(now + 3600);
+    const std::string header(encodeBase64(h.dump()));
+    const std::string claims(encodeBase64(c.dump()));
 
-    const std::string header(encodeBase64(util::toFastString(h)));
-    const std::string claims(encodeBase64(util::toFastString(c)));
-
-    const std::string key(m_creds["private_key"].asString());
+    const std::string key(m_privateKey);
     const std::string signature(
             http::sanitize(encodeBase64(sign(header + '.' + claims, key))));
 
@@ -2613,11 +2761,17 @@ void Google::Auth::maybeRefresh() const
     drivers::Https https(pool);
     const auto res(https.internalPost(tokenRequestUrl, body, headers));
 
-    if (!res.ok()) throw ArbiterError("Failed to get token: " + res.str());
+    if (!res.ok())
+    {
+        throw ArbiterError(
+                "Failed to get token for Google authentication, "
+                "request came back with response: " + res.str());
+    }
 
-    const Json::Value token(util::parse(res.str()));
-    m_headers["Authorization"] = "Bearer " + token["access_token"].asString();
-    m_expiration = now + token["expires_in"].asInt64();
+    const json token(json::parse(res.str()));
+    m_headers["Authorization"] =
+        "Bearer " + token.at("access_token").get<std::string>();
+    m_expiration = now + token.at("expires_in").get<int64_t>();
 }
 
 std::string Google::Auth::sign(
@@ -2663,24 +2817,34 @@ std::string Google::Auth::sign(
 
     EVP_PKEY* key(loadKey(pkey, false));
 
-    EVP_MD_CTX ctx;
-    EVP_MD_CTX_init(&ctx);
-    EVP_DigestSignInit(&ctx, nullptr, EVP_sha256(), nullptr, key);
+#   ifdef ARBITER_OPENSSL_ATLEAST_1_1
+    EVP_MD_CTX* ctx(EVP_MD_CTX_new());
+#   else
+    EVP_MD_CTX ctxAlloc;
+    EVP_MD_CTX* ctx(&ctxAlloc);
+#   endif
+    EVP_MD_CTX_init(ctx);
+    EVP_DigestSignInit(ctx, nullptr, EVP_sha256(), nullptr, key);
 
-    if (EVP_DigestSignUpdate(&ctx, data.data(), data.size()) == 1)
+    if (EVP_DigestSignUpdate(ctx, data.data(), data.size()) == 1)
     {
         std::size_t size(0);
-        if (EVP_DigestSignFinal(&ctx, nullptr, &size) == 1)
+        if (EVP_DigestSignFinal(ctx, nullptr, &size) == 1)
         {
             std::vector<unsigned char> v(size, 0);
-            if (EVP_DigestSignFinal(&ctx, v.data(), &size) == 1)
+            if (EVP_DigestSignFinal(ctx, v.data(), &size) == 1)
             {
                 signature.assign(reinterpret_cast<const char*>(v.data()), size);
             }
         }
     }
 
-    EVP_MD_CTX_cleanup(&ctx);
+#   ifdef ARBITER_OPENSSL_ATLEAST_1_1
+    EVP_MD_CTX_free(ctx);
+#   else
+    EVP_MD_CTX_cleanup(ctx);
+#   endif
+
     if (signature.empty()) throw ArbiterError("Could not sign JWT");
     return signature;
 #else
@@ -2723,18 +2887,10 @@ std::string Google::Auth::sign(
 #include <arbiter/drivers/fs.hpp>
 #include <arbiter/drivers/dropbox.hpp>
 #include <arbiter/third/xml/xml.hpp>
-
-#ifndef ARBITER_EXTERNAL_JSON
-#include <arbiter/third/json/json.hpp>
-#endif
-
+#include <arbiter/util/json.hpp>
 #endif
 
 
-
-#ifdef ARBITER_EXTERNAL_JSON
-#include <json/json.h>
-#endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -2759,14 +2915,6 @@ namespace
         return std::tolower(lhs) == std::tolower(rhs);
     });
 
-    std::string toSanitizedString(const Json::Value& v)
-    {
-        Json::FastWriter writer;
-        std::string f(writer.write(v));
-        f.erase(std::remove(f.begin(), f.end(), '\n'), f.end());
-        return f;
-    }
-
     const std::string dirTag("folder");
     const std::string fileTag("file");
 }
@@ -2775,24 +2923,26 @@ namespace drivers
 {
 
 using namespace http;
-using namespace util;
 
 Dropbox::Dropbox(Pool& pool, const Dropbox::Auth& auth)
     : Http(pool)
     , m_auth(auth)
 { }
 
-std::unique_ptr<Dropbox> Dropbox::create(Pool& pool, const Json::Value& json)
+std::unique_ptr<Dropbox> Dropbox::create(Pool& pool, const std::string s)
 {
-    if (!json.isNull())
+    const json j(json::parse(s));
+    if (!j.is_null())
     {
-        if (json.isObject() && json.isMember("token"))
+        if (j.is_object() && j.count("token"))
         {
-            return makeUnique<Dropbox>(pool, Auth(json["token"].asString()));
+            return makeUnique<Dropbox>(
+                    pool,
+                    Auth(j.at("token").get<std::string>()));
         }
-        else if (json.isString())
+        else if (j.is_string())
         {
-            return makeUnique<Dropbox>(pool, Auth(json.asString()));
+            return makeUnique<Dropbox>(pool, Auth(j.get<std::string>()));
         }
     }
 
@@ -2830,9 +2980,8 @@ std::unique_ptr<std::size_t> Dropbox::tryGetSize(
 
     Headers headers(httpPostHeaders());
 
-    Json::Value json;
-    json["path"] = std::string("/" + sanitize(rawPath));
-    const auto f(toSanitizedString(json));
+    json tx { { "path", "/" + sanitize(rawPath) } };
+    const std::string f(tx.dump());
     const std::vector<char> postData(f.begin(), f.end());
 
     Response res(Http::internalPost(metaUrl, postData, headers));
@@ -2841,13 +2990,10 @@ std::unique_ptr<std::size_t> Dropbox::tryGetSize(
     {
         const auto data(res.data());
 
-        Json::Value json;
-        Json::Reader reader;
-        reader.parse(std::string(data.data(), data.size()), json, false);
-
-        if (json.isMember("size"))
+        json rx(json::parse(std::string(data.data(), data.size())));
+        if (rx.count("size"))
         {
-            result.reset(new std::size_t(json["size"].asUInt64()));
+            result = makeUnique<std::size_t>(rx.at("size").get<uint64_t>());
         }
     }
 
@@ -2864,10 +3010,7 @@ bool Dropbox::get(
 
     Headers headers(httpGetHeaders());
 
-    Json::Value json;
-    json["path"] = std::string("/" + path);
-    headers["Dropbox-API-Arg"] = toSanitizedString(json);
-
+    headers["Dropbox-API-Arg"] = json{{ "path", "/" + path }}.dump();
     headers.insert(userHeaders.begin(), userHeaders.end());
 
     const Response res(Http::internalGet(getUrl, headers, query));
@@ -2882,32 +3025,29 @@ bool Dropbox::get(
                 return false;
             }
 
-            Json::Value apiJson;
-            Json::Reader reader;
-            if (reader.parse(res.headers().at("dropbox-api-result"), apiJson))
+            json rx;
+            try { rx = json::parse(res.headers().at("dropbox-api-result")); }
+            catch (...) { std::cout << "Failed to parse result" << std::endl; }
+
+            if (!rx.is_null())
             {
-                if (!apiJson.isMember("size"))
+                if (!rx.count("size"))
                 {
                     std::cout << "No size found in API result" << std::endl;
                     return false;
                 }
 
-                const std::size_t size(apiJson["size"].asUInt64());
+                const std::size_t size(rx.at("size").get<std::size_t>());
                 data = res.data();
 
                 if (size == data.size()) return true;
                 else
                 {
                     std::cout <<
-                        "Data size check failed - got " <<
-                        size << " of " << res.data().size() << " bytes." <<
-                        std::endl;
+                            "Data size check failed - got " <<
+                            size << " of " << data.size() << " bytes." <<
+                            std::endl;
                 }
-            }
-            else
-            {
-                std::cout << "Could not parse API result: " <<
-                    reader.getFormattedErrorMessages() << std::endl;
             }
         }
         else
@@ -2938,10 +3078,7 @@ void Dropbox::put(
     const std::string path(sanitize(rawPath));
 
     Headers headers(httpGetHeaders());
-
-    Json::Value json;
-    json["path"] = std::string("/" + path);
-    headers["Dropbox-API-Arg"] = toSanitizedString(json);
+    headers["Dropbox-API-Arg"] = json{{ "path", "/" + path }}.dump();
     headers["Content-Type"] = "application/octet-stream";
 
     headers.insert(userHeaders.begin(), userHeaders.end());
@@ -2955,10 +3092,7 @@ std::string Dropbox::continueFileInfo(std::string cursor) const
 {
     Headers headers(httpPostHeaders());
 
-    Json::Value json;
-    json["cursor"] = cursor;
-    const std::string f(toSanitizedString(json));
-
+    const std::string f(json{{ "cursor", cursor }}.dump());
     std::vector<char> postData(f.begin(), f.end());
     Response res(Http::internalPost(continueListUrl, postData, headers));
 
@@ -2990,13 +3124,13 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
     {
         Headers headers(httpPostHeaders());
 
-        Json::Value request;
-        request["path"] = std::string("/" + path);
-        request["recursive"] = recursive;
-        request["include_media_info"] = false;
-        request["include_deleted"] = false;
-
-        const std::string f(toSanitizedString(request));
+        const json request {
+            { "path", "/" + path },
+            { "recursive", recursive },
+            { "include_media_info", false },
+            { "include_deleted", false }
+        };
+        const std::string f(request.dump());
         std::vector<char> postData(f.begin(), f.end());
 
         // Can't fully qualify this protected method within the lambda due to a
@@ -3023,41 +3157,36 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
     bool more(false);
     std::string cursor("");
 
-    auto processPath =
-        [this, verbose, &results, &more, &cursor](std::string data)
+    auto processPath = [this, verbose, &results, &more, &cursor](std::string d)
     {
-        if (data.empty()) return;
-
+        if (d.empty()) return;
         if (verbose) std::cout << '.';
 
-        Json::Value json;
-        Json::Reader reader;
-        reader.parse(data, json, false);
-
-        const Json::Value& entries(json["entries"]);
-
-        if (entries.isNull())
+        const json j(json::parse(d));
+        if (!j.count("entries"))
         {
-            throw ArbiterError("Returned JSON from Dropbox was NULL");
+            throw ArbiterError("Returned JSON from Dropbox was null");
         }
-        if (!entries.isArray())
+        const json& entries(j.at("entries"));
+        if (!entries.is_array())
         {
             throw ArbiterError("Returned JSON from Dropbox was not an array");
         }
 
-        more = json["has_more"].asBool();
-        cursor = json["cursor"].asString();
+        more = j.value("has_more", false);
+        cursor = j.value("cursor", "");
 
         for (std::size_t i(0); i < entries.size(); ++i)
         {
-            const Json::Value& v(entries[static_cast<Json::ArrayIndex>(i)]);
-            const std::string tag(v[".tag"].asString());
+            const json& v(entries[i]);
+            const std::string tag(v.value(".tag", ""));
 
             // Only insert files.
             if (std::equal(tag.begin(), tag.end(), fileTag.begin(), ins))
             {
                 // Results already begin with a slash.
-                results.push_back(type() + ":/" + v["path_lower"].asString());
+                results.push_back(
+                        type() + ":/" + v.at("path_lower").get<std::string>());
             }
         }
     };
@@ -3106,6 +3235,13 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <arbiter/util/curl.hpp>
 #include <arbiter/util/http.hpp>
 #include <arbiter/util/util.hpp>
+#include <arbiter/util/json.hpp>
+
+
+#ifdef ARBITER_ZLIB
+#include <arbiter/third/gzip/decompress.hpp>
+#endif
+
 #endif
 
 #ifdef ARBITER_CURL
@@ -3202,10 +3338,10 @@ namespace
 #endif // ARBITER_CURL
 } // unnamed namespace
 
-Curl::Curl(const Json::Value& json)
+Curl::Curl(const std::string s)
 {
 #ifdef ARBITER_CURL
-    using namespace util;
+    const json c(s.size() ? json::parse(s) : json::object());
 
     m_curl = curl_easy_init();
 
@@ -3221,47 +3357,47 @@ Curl::Curl(const Json::Value& json)
     {
         for (const auto& key : keys)
         {
-            if (auto e = util::env(key)) return makeUnique<std::string>(*e);
+            if (auto e = env(key)) return makeUnique<std::string>(*e);
         }
         return std::unique_ptr<std::string>();
     });
 
     auto mk([](std::string s) { return makeUnique<std::string>(s); });
 
-    if (!json.isNull())
+    if (!c.is_null())
     {
-        m_verbose = json["verbose"].asBool();
-        const auto& h(json["http"]);
+        m_verbose = c.value("verbose", false);
+        const auto& h(c.value("http", json::object()));
 
-        if (!h.isNull())
+        if (!h.is_null())
         {
-            if (h.isMember("timeout"))
+            if (h.count("timeout"))
             {
-                m_timeout = long(h["timeout"].asUInt64());
+                m_timeout = h["timeout"].get<long>();
             }
 
-            if (h.isMember("followRedirect"))
+            if (h.count("followRedirect"))
             {
-                m_followRedirect = h["followRedirect"].asBool();
+                m_followRedirect = h["followRedirect"].get<bool>();
             }
 
-            if (h.isMember("caBundle"))
+            if (h.count("caBundle"))
             {
-                m_caPath = mk(h["caBundle"].asString());
+                m_caPath = mk(h["caBundle"].get<std::string>());
             }
-            else if (h.isMember("caPath"))
+            else if (h.count("caPath"))
             {
-                m_caPath = mk(h["caPath"].asString());
-            }
-
-            if (h.isMember("caInfo"))
-            {
-                m_caInfo = mk(h["caInfo"].asString());
+                m_caPath = mk(h["caPath"].get<std::string>());
             }
 
-            if (h.isMember("verifyPeer"))
+            if (h.count("caInfo"))
             {
-                m_verifyPeer = h["verifyPeer"].asBool();
+                m_caInfo = mk(h["caInfo"].get<std::string>());
+            }
+
+            if (h.count("verifyPeer"))
+            {
+                m_verifyPeer = h["verifyPeer"].get<bool>();
             }
         }
     }
@@ -3406,6 +3542,24 @@ Response Curl::get(
 
     // Run the command.
     const int httpCode(perform());
+
+    for (auto& h : receivedHeaders)
+    {
+        std::string& v(h.second);
+        while (v.size() && v.front() == ' ') v = v.substr(1);
+        while (v.size() && v.back() == ' ') v.pop_back();
+    }
+
+    if (receivedHeaders["Content-Encoding"] == "gzip")
+    {
+#ifdef ARBITER_ZLIB
+        std::string s(gzip::decompress(data.data(), data.size()));
+        data.assign(s.begin(), s.end());
+#else
+        throw ArbiterError("Cannot decompress zlib");
+#endif
+    }
+
     return Response(httpCode, data, receivedHeaders);
 #else
     throw ArbiterError(fail);
@@ -3551,6 +3705,7 @@ Response Curl::post(
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/http.hpp>
+#include <arbiter/util/json.hpp>
 #endif
 
 #ifdef ARBITER_CURL
@@ -3695,7 +3850,7 @@ Response Resource::exec(std::function<Response()> f)
 Pool::Pool(
         const std::size_t concurrent,
         const std::size_t retry,
-        const Json::Value json)
+        const std::string s)
     : m_curls(concurrent)
     , m_available(concurrent)
     , m_retry(retry)
@@ -3705,10 +3860,12 @@ Pool::Pool(
 #ifdef ARBITER_CURL
     curl_global_init(CURL_GLOBAL_ALL);
 
+    const json config(s.size() ? json::parse(s) : json::object());
+
     for (std::size_t i(0); i < concurrent; ++i)
     {
         m_available[i] = i;
-        m_curls[i].reset(new Curl(json));
+        m_curls[i].reset(new Curl(config.dump()));
     }
 #endif
 }
@@ -3788,9 +3945,9 @@ Contents parse(const std::string& s)
     Section section;
 
     const std::vector<std::string> lines;
-    for (std::string line : util::split(s))
+    for (std::string line : split(s))
     {
-        line = util::stripWhitespace(line);
+        line = stripWhitespace(line);
         const std::size_t semiPos(line.find_first_of(';'));
         const std::size_t hashPos(line.find_first_of('#'));
         line = line.substr(0, std::min(semiPos, hashPos));
@@ -4456,10 +4613,9 @@ namespace
 {
     std::mutex mutex;
 
-    int64_t utcOffsetSeconds()
+    int64_t utcOffsetSeconds(const std::time_t& now)
     {
         std::lock_guard<std::mutex> lock(mutex);
-        std::time_t now(std::time(nullptr));
         std::tm utc(*std::gmtime(&now));
         std::tm loc(*std::localtime(&now));
         return (int64_t)std::difftime(std::mktime(&utc), std::mktime(&loc));
@@ -4477,9 +4633,8 @@ Time::Time()
 
 Time::Time(const std::string& s, const std::string& format)
 {
-    static const int64_t utcOffset(utcOffsetSeconds());
+    std::tm tm{};
 
-    std::tm tm;
 #ifndef ARBITER_WINDOWS
     // We'd prefer to use get_time, but it has poor compiler support.
     if (!strptime(s.c_str(), format.c_str(), &tm))
@@ -4494,9 +4649,10 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-    if (utcOffset > std::numeric_limits<int>::max())
-    	throw ArbiterError("Can't convert offset time in seconds to tm type.");
+    const int64_t utcOffset(utcOffsetSeconds(std::mktime(&tm)));
 
+    if (utcOffset > std::numeric_limits<int>::max())
+        throw ArbiterError("Can't convert offset time in seconds to tm type.");
     tm.tm_sec -= (int)utcOffset;
     m_time = std::mktime(&tm);
 }
@@ -4559,6 +4715,8 @@ int64_t Time::asUnix() const
 
 #include <algorithm>
 #include <cctype>
+#include <mutex>
+#include <random>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -4567,8 +4725,20 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
-namespace util
+
+namespace
 {
+    std::mutex randomMutex;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<unsigned long long> distribution;
+}
+
+uint64_t randomNumber()
+{
+    std::lock_guard<std::mutex> lock(randomMutex);
+    return distribution(gen);
+}
 
 std::string stripPostfixing(const std::string path)
 {
@@ -4594,7 +4764,11 @@ std::string getBasename(const std::string fullPath)
     const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
 
     // Now do the real slash searching.
-    const std::size_t pos(stripped.rfind('/'));
+    std::size_t pos(stripped.rfind('/'));
+
+    // Maybe windows
+    if (pos == std::string::npos)
+        pos = stripped.rfind('\\');
 
     if (pos != std::string::npos)
     {
@@ -4685,7 +4859,6 @@ std::string stripWhitespace(const std::string& in)
     return out;
 }
 
-} // namespace util
 } // namespace arbiter
 
 #ifdef ARBITER_CUSTOM_NAMESPACE

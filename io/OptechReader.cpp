@@ -77,11 +77,7 @@ OptechReader::OptechReader()
     , m_recordIndex(0)
     , m_returnIndex(0)
     , m_pulse()
-{
-    // The Optech docs say that their lat/longs are referenced
-    // to the WGS84 reference frame.
-    setSpatialReference(SpatialReference("EPSG:4326"));
-}
+{}
 
 
 const CsdHeader& OptechReader::getHeader() const { return m_header; }
@@ -117,6 +113,10 @@ void OptechReader::initialize()
         m_header.misalignmentAngles[0] + m_header.imuOffsets[0],
         m_header.misalignmentAngles[1] + m_header.imuOffsets[1],
         m_header.misalignmentAngles[2] + m_header.imuOffsets[2]);
+
+    // The Optech docs say that their lat/longs are referenced
+    // to the WGS84 reference frame.
+    setSpatialReference(SpatialReference("EPSG:4326"));
 }
 
 
@@ -239,8 +239,8 @@ point_count_t OptechReader::read(PointViewPtr data,
 
 size_t OptechReader::fillBuffer()
 {
-    size_t numRecords = std::min<size_t>(m_header.numRecords - m_recordIndex,
-                                         MaxNumRecordsInBuffer);
+    size_t numRecords = (std::min)(m_header.numRecords - m_recordIndex,
+        MaxNumRecordsInBuffer);
 
     buffer_size_t bufferSize = NumBytesInRecord * numRecords;
     m_buffer.resize(bufferSize);

@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.7.1" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.9.1" CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-set(PDAL_API_VERSION "6")
-set(PDAL_BUILD_VERSION "7.0.1")
+set(PDAL_API_VERSION "8")
+set(PDAL_BUILD_VERSION "9.0.1")
 
 # Name of C++ library
 
@@ -115,7 +115,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #------------------------------------------------------------------------------
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
-include(${PDAL_CMAKE_DIR}/geos.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
@@ -125,10 +124,11 @@ include(${PDAL_CMAKE_DIR}/lzma.cmake)
 include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 
 #------------------------------------------------------------------------------
 # generate the pdal_features.hpp header
@@ -177,9 +177,6 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
-if (NOT PDAL_HAVE_JSONCPP)
-    add_subdirectory(vendor/jsoncpp/dist)
-endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -216,6 +213,7 @@ if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
         io/Ilvis2Metadata.cpp
+        io/Ilvis2Reader.cpp
         ${PDAL_SRC_DIR}/DbWriter.cpp
         ${PDAL_SRC_DIR}/DbReader.cpp
         ${PDAL_SRC_DIR}/XMLSchema.cpp)
@@ -255,10 +253,10 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}
         ${PDAL_VENDOR_DIR}/eigen
         ${PDAL_VENDOR_DIR}/pdalboost
-        ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
-        ${ZSTD_INCLUDE_DIR}
-    INTERFACE
+        ${ZSTD_INCLUDE_DIRS}
+        ${NLOHMANN_INCLUDE_DIR}
+    PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
@@ -266,20 +264,17 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
-        ${GEOS_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
-        ${ZSTD_STATIC_LIB}
-        ${CURL_LIBRARIES}
+        ${ZSTD_LIBRARIES}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-        ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )
@@ -311,12 +306,36 @@ endif()
 #
 # Installation
 #
+
+#
+# Only install compression headers if we're building with the particular
+# compression type.
+#
+if (NOT PDAL_HAVE_ZSTD)
+    set(ZSTD_EXCLUDES PATTERN pdal/compression/Zstd* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_ZLIB)
+    set(ZLIB_EXCLUDES PATTERN pdal/compression/Deflate* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LZMA)
+    set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
+endif()
+if (NOT PDAL_HAVE_LAZPERF)
+    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
+endif()
+
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    PATTERN "pdal/util/private" EXCLUDE
+    ${ZSTD_EXCLUDES}
+    ${ZLIB_EXCLUDES}
+    ${LZMA_EXCLUDES}
+    ${LAZPERF_EXCLUDES}
 )
+
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
@@ -354,10 +373,9 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
+        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
-export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)

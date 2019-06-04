@@ -42,6 +42,8 @@
 
 #include <arbiter/arbiter.hpp>
 
+#include <nlohmann/json.hpp>
+
 #include "Support.hpp"
 #include "../io/GreyhoundReader.hpp"
 #include "../io/bounds.hpp"
@@ -56,25 +58,6 @@ const std::string resource("dev/ellipsoid-multi-nyc");
 const greyhound::Point center(-8242596.04, 4966606.26);
 const greyhound::Point radius(151, 101, 51);
 const greyhound::Bounds full(center - radius, center + radius);
-
-Options toOptions(const Json::Value& json)
-{
-    Options options;
-    options.add("url", server);
-    options.add("resource", resource);
-
-    for (const auto k : json.getMemberNames())
-    {
-        const auto& v(json[k]);
-        if (v.isBool()) options.add(k, v.asBool());
-        else if (v.isIntegral()) options.add(k, v.asInt());
-        else if (v.isDouble()) options.add(k, v.asDouble());
-        else if (v.isString()) options.add(k, v.asString());
-        else if (v.isObject() || v.isArray()) options.add(k, v);
-    }
-
-    return options;
-}
 
 }
 
@@ -100,9 +83,10 @@ TEST_F(GreyhoundReaderTest, tileQuery)
     if (!doTests()) return;
 
     pdal::GreyhoundReader reader;
-    Json::Value json;
-    json["tile_path"] = "neu.laz";
-    reader.setOptions(toOptions(json));
+
+    Options opts;
+    opts.add("tile_path", "neu.laz");
+    reader.setOptions(opts);
 
     pdal::PointTable table;
     reader.prepare(table);
@@ -127,10 +111,11 @@ TEST_F(GreyhoundReaderTest, boundsQuery)
 
     const greyhound::Bounds bounds(center - 100, center + 100);
 
+    Options opts;
+    opts.add("bounds", bounds.toJson());
+
     pdal::GreyhoundReader reader;
-    Json::Value json;
-    json["bounds"] = bounds.toJson();
-    reader.setOptions(toOptions(json));
+    reader.setOptions(opts);
 
     pdal::PointTable table;
     reader.prepare(table);
@@ -156,11 +141,11 @@ TEST_F(GreyhoundReaderTest, boundsAndDepthQuery)
     const greyhound::Bounds bounds(center - 100, center + 100);
 
     pdal::GreyhoundReader reader;
-    Json::Value json;
-    json["bounds"] = bounds.toJson();
-    json["depth_begin"] = 7;
-    json["depth_end"] = 8;
-    reader.setOptions(toOptions(json));
+    Options opts;
+    opts.add("bounds", bounds.toJson());
+    opts.add("depth_begin", 7);
+    opts.add("depth_end", 8);
+    reader.setOptions(opts);
 
     pdal::PointTable table;
     reader.prepare(table);
@@ -185,10 +170,10 @@ TEST_F(GreyhoundReaderTest, filter)
 
     const greyhound::Bounds bounds(center - 100, center + 100);
 
-    auto run([&bounds](const Json::Value& json)
+    auto run([&bounds](const Options& opts)
     {
         pdal::GreyhoundReader reader;
-        reader.setOptions(toOptions(json));
+        reader.setOptions(opts);
 
         pdal::PointTable table;
         reader.prepare(table);
@@ -209,13 +194,20 @@ TEST_F(GreyhoundReaderTest, filter)
     });
 
     // Filter should work both as a JSON object and a stringified JSON object.
-    Json::Value json;
-    json["bounds"] = bounds.toJson();
-    json["filter"]["X"]["$gte"] = center.x;
-    run(json);
+    NL::json filter {{ "X", {{ "$gte", center.x }} }};
+    {
+        Options opts;
+        opts.add("bounds", bounds.toJson());
+        opts.add("filter", filter);
+        run(opts);
+    }
 
-    json["filter"] = json["filter"].toStyledString();
-    run(json);
+    {
+        Options opts;
+        opts.add("bounds", bounds.toJson());
+        opts.add("filter", filter.dump());
+        run(opts);
+    }
 }
 
 TEST_F(GreyhoundReaderTest, singleOption)
@@ -223,15 +215,14 @@ TEST_F(GreyhoundReaderTest, singleOption)
     if (!doTests()) return;
 
     const greyhound::Bounds bounds(center - 100, center + 100);
-    Json::Value filter;
-    filter["X"]["$gte"] = center.x;
+    NL::json filter {{ "X", {{ "$gte", center.x }} }};
 
     pdal::GreyhoundReader reader;
 
     pdal::Options options;
     options.add("url", server + "/resource/" + resource + "/read" +
-            "?bounds=" + dense(bounds.toJson()) +
-            "&filter=" + dense(filter) +
+            "?bounds=" + bounds.toJson().dump() +
+            "&filter=" + filter.dump() +
             "&depth=7");
     reader.setOptions(options);
 
