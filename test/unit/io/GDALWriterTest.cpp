@@ -741,4 +741,53 @@ TEST(GDALWriterTest, issue_2095)
     EXPECT_EQ(grid.verticalIndex(4.5), 0);
 }
 
+// If the radius is sufficiently large, make sure the grid is filled.
+TEST(GDALWriterTest, issue_2545)
+{
+    TextReader r;
+    Options rOpts;
+
+    rOpts.add("filename", Support::datapath("gdal/issue_2545.txt"));
+    r.setOptions(rOpts);
+
+    std::string outfile(Support::temppath("gdal.tif"));
+
+    GDALWriter w;
+    Options wOpts;
+    wOpts.add("resolution", 1);
+    wOpts.add("radius", 10);
+    wOpts.add("output_type", "idw");
+    wOpts.add("gdaldriver", "GTiff");
+    wOpts.add("bounds", BOX2D(.5, .5, 6.5, 6.5));
+    wOpts.add("filename", outfile);
+
+    w.setOptions(wOpts);
+    w.setInput(r);
+
+    PointTable t;
+    w.prepare(t);
+    w.execute(t);
+
+    gdal::Raster raster(outfile, "GTiff");
+    if (raster.open() != gdal::GDALError::None)
+        throw pdal_error(raster.errorMsg());
+
+    EXPECT_EQ(raster.width(), 7);
+    EXPECT_EQ(raster.height(), 7);
+
+    auto index = [](size_t row, size_t col)
+    {
+        return (row * 7) + col;
+    };
+
+    std::vector<double> data;
+    raster.readBand(data, 1);
+    EXPECT_EQ(data[index(1, 0)], 3.0);
+    EXPECT_EQ(data[index(2, 4)], 0.);
+    EXPECT_EQ(data[index(5, 5)], 10.0);
+    EXPECT_EQ(data[index(6, 0)], 5.0);
+    for (size_t i = 0; i < data.size(); ++i)
+        EXPECT_TRUE(data[i] <= 10.0 && data[i] >= 0);
+}
+
 } // namespace pdal
