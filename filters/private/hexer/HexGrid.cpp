@@ -368,27 +368,23 @@ void HexGrid::cleanPossibleRoot(Segment s, Path *p)
     }
 }
 
-void HexGrid::toWKT(std::ostream& output) const
+void HexGrid::toWKT(std::ostream& out) const
 {
-    auto outputPath = [this,&output](size_t pathNum)
+    auto writePath = [this, &out](size_t pathNum)
     {
-        Path *p = rootPaths()[pathNum];
-
-        output << "(";
-        p->toWKT(output);
-        output << ")";
+       rootPaths()[pathNum]->toWKT(out);
     };
 
-    output << "MULTIPOLYGON (";
+    out << "MULTIPOLYGON (";
 
     if (rootPaths().size())
-        outputPath(0);
+        writePath(0);
     for (size_t pi = 1; pi < rootPaths().size(); ++pi)
     {
-        output << ",";
-        outputPath(pi);
+        out << ",";
+        writePath(pi);
     }
-    output << ")";
+    out << ")";
 }
 
 size_t HexGrid::densePointCount() const

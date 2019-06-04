@@ -37,6 +37,8 @@
 #include <unordered_map>
 #include <set>
 
+#include <pdal/pdal_export.hpp>
+
 #include "exception.hpp"
 #include "Hexagon.hpp"
 #include "Mathpair.hpp"
@@ -54,7 +56,7 @@ class HexGrid
 {
     friend class HexIter;
 public:
-    HexGrid(int dense_limit);
+    PDAL_DLL HexGrid(int dense_limit);
     HexGrid(double height, int dense_limit) : m_dense_limit(dense_limit)
         { initialize(height); }
 
@@ -64,20 +66,24 @@ public:
             delete m_paths[i];
     }
 
+    // Exported for testing.
+    PDAL_DLL void findShapes();
+    PDAL_DLL void findParentPaths();
+    PDAL_DLL void toWKT(std::ostream&) const;
+    PDAL_DLL void addDenseHexagon(int x, int y);
+
     bool dense(Hexagon *h);
     void addPoint(double x, double y)
         { addPoint(Point(x, y)); }
     void addPoint(Point p);
     void processSample();
-    void findShapes();
-    void findParentPaths();
+
     void extractShapes();
     void dumpInfo();
     void drawHexagons();
     Hexagon *getHexagon(int x, int y);
     Hexagon *getHexagon(const Coord& c)
         { return getHexagon(c.m_x, c.m_y); }
-    void addDenseHexagon(int x, int y);
     HexIter hexBegin();
     HexIter hexEnd();
     double width() const
@@ -96,7 +102,6 @@ public:
         { return m_paths; }
     void setSampleSize(unsigned sampleSize)
         { m_maxSample = sampleSize; }
-    void toWKT(std::ostream&) const;
     size_t densePointCount() const;
 
 private:
