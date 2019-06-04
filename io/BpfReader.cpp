@@ -104,6 +104,8 @@ void BpfReader::initialize()
     m_header.setLog(log());
 
     m_istreamPtr = Utils::openFile(m_filename);
+    if (!m_istreamPtr)
+        throwError("Can't open file '" + m_filename + "'.");
     m_stream = ILeStream(m_istreamPtr);
 
     // Resets the stream position in case it was already open.
