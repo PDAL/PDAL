@@ -35,13 +35,10 @@
 #include "ReprojectionFilter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <gdal.h>
-#include <ogr_spatialref.h>
-
-#include <memory>
+//#include <memory>
 
 namespace pdal
 {
@@ -57,23 +54,12 @@ CREATE_STATIC_STAGE(ReprojectionFilter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
-ReprojectionFilter::ReprojectionFilter()
-    : m_inferInputSRS(true)
-    , m_in_ref_ptr(NULL)
-    , m_out_ref_ptr(NULL)
-    , m_transform_ptr(NULL)
+ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true)
 {}
 
 
 ReprojectionFilter::~ReprojectionFilter()
-{
-    if (m_transform_ptr)
-        OCTDestroyCoordinateTransformation(m_transform_ptr);
-    if (m_in_ref_ptr)
-        OSRDestroySpatialReference(m_in_ref_ptr);
-    if (m_out_ref_ptr)
-        OSRDestroySpatialReference(m_out_ref_ptr);
-}
+{}
 
 
 void ReprojectionFilter::addArgs(ProgramArgs& args)
@@ -86,12 +72,6 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
 void ReprojectionFilter::initialize()
 {
     m_inferInputSRS = m_inSRS.empty();
-
-    m_out_ref_ptr = OSRNewSpatialReference(m_outSRS.getWKT().c_str());
-    if (!m_out_ref_ptr)
-        throwError("Invalid output spatial reference '" + m_outSRS.getWKT() +
-            "'.  This is usually caused by a bad value for the 'out_srs' "
-            "option.");
     setSpatialReference(m_outSRS);
 }
 
@@ -111,21 +91,7 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
             throwError("source data has no spatial reference and "
                 "none is specified with the 'in_srs' option.");
     }
-
-    if (m_in_ref_ptr)
-        OSRDestroySpatialReference(m_in_ref_ptr);
-    m_in_ref_ptr = OSRNewSpatialReference(m_inSRS.getWKT().c_str());
-    if (!m_in_ref_ptr)
-        throwError("Invalid input spatial reference '" + m_inSRS.getWKT() +
-            "'.  This is usually caused by a bad value for the 'in_srs' "
-            "option or an invalid spatial reference in the source file.");
-    if (m_transform_ptr)
-        OCTDestroyCoordinateTransformation(m_transform_ptr);
-    m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr,
-        m_out_ref_ptr);
-    if (!m_transform_ptr)
-        throwError("Could not construct coordinate transformation object "
-            "in createTransform");
+    m_transform.reset(new SrsTransform(m_inSRS, m_outSRS));
 }
 
 
@@ -155,18 +121,14 @@ bool ReprojectionFilter::processOne(PointRef& point)
     double y(point.getFieldAs<double>(Dimension::Id::Y));
     double z(point.getFieldAs<double>(Dimension::Id::Z));
 
-    if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
+    bool ok = m_transform->transform(x, y, z);
+    if (ok)
     {
         point.setField(Dimension::Id::X, x);
         point.setField(Dimension::Id::Y, y);
         point.setField(Dimension::Id::Z, z);
-
-        return true;
     }
-    else
-    {
-        return false;
-    }
+    return ok;
 }
 
 } // namespace pdal

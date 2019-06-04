@@ -187,16 +187,20 @@ discard_high_return_numbers
 extra_dims
   Extra dimensions to be written as part of each point beyond those specified
   by the LAS point format.  The format of the option is
-  <dimension_name>=<type>, ... where type is one of:
-  int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double
-  ``_t`` may be added to any of the type names as well (e.g., uint32_t).  When
-  the version of the output file is specified as 1.4 or greater, an extra
-  bytes VLR (User ID: LASF_Spec, Record ID: 4), is created that describes the
-  extra dimensions specified by this option.
+  ``<dimension_name>=<type> [, ...]``.  Any valid PDAL :ref:`type <types>`
+  can be specified.
 
   The special value ``all`` can be used in place of a dimension/type list
   to request that all dimensions that can't be stored in the predefined
   LAS point record get added as extra data at the end of each point record.
+
+  PDAL writes an extra bytes VLR (User ID: LASF_Spec, Record ID: 4) when
+  extra dims are written.  The VLR describes the extra dimensions specified by
+  this option.  Note that reading of this VLR is only specified for LAS
+  version 1.4, though some systems will honor it for earlier file formats.
+  The :ref:`LAS reader <readers.las>` requires the option
+  use_eb_vlr in order to
+  read the extra bytes VLR for files written with 1.1 - 1.3 LAS format.
 
   Setting --verbose=Info will provide output on the names, types and order
   of dimensions being written as part of the LAS extra bytes.

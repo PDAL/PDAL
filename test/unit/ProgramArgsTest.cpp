@@ -527,8 +527,12 @@ TEST(ProgramArgsTest, invalidJson)
     EXPECT_NO_THROW(args.parse(s));
 
     // The string was successfully parsed, but contains invalid JSON.
-    NL::json invalidParse;
-    EXPECT_THROW(invalidParse.parse(m_string), NL::json::parse_error);
+    auto parseJson = [](const std::string& s)
+    {
+        return NL::json::parse(s);
+    };
+
+    EXPECT_THROW(parseJson(m_string), NL::json::parse_error);
 
     // If the underlying is a Json::Value, then argument parsing should fail
     // up front.
