@@ -142,6 +142,12 @@ private:
         return sqrt(pow(x1 - x, 2) + pow(y1 - y, 2));
     }
 
+    // Update cells in the Nth quadrant about point at (x, y, z)
+    void updateFirstQuadrant(double x, double y, double z);
+    void updateSecondQuadrant(double x, double y, double z);
+    void updateThirdQuadrant(double x, double y, double z);
+    void updateFourthQuadrant(double x, double y, double z);
+
     // Update cell at i, j with value at a distance.
     void update(size_t i, size_t j, double val, double dist);
 
