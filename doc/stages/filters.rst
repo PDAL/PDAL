@@ -36,6 +36,7 @@ invalidate an existing KD-tree.
    filters.cluster
    filters.colorinterp
    filters.colorization
+   filters.covariancefeatures
    filters.dem
    filters.eigenvalues
    filters.estimaterank
@@ -43,9 +44,7 @@ invalidate an existing KD-tree.
    filters.ferry
    filters.hag
    filters.info
-   filters.kdistance
    filters.lof
-   filters.mongus
    filters.neighborclassifier
    filters.nndistance
    filters.normal
@@ -74,6 +73,10 @@ invalidate an existing KD-tree.
 :ref:`filters.colorization`
     Fetch and assign RGB color information from a GDAL-readable datasource.
 
+:ref:`filters.covariancefeatures`
+    Filter that calculates local features based on the covariance matrix of a
+    point's neighborhood.
+
 :ref:`filters.eigenvalues`
     Compute pointwise eigenvalues, based on k-nearest neighbors.
 
@@ -90,16 +93,9 @@ invalidate an existing KD-tree.
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
 
-:ref:`filters.kdistance`
-    Compute pointwise K-Distance (the Euclidean distance to a point's k-th
-    nearest neighbor). [Deprecated - use :ref:`filters.nndistance`]
-
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
-
-:ref:`filters.mongus`
-    Label ground/non-ground returns using [Mongus2012]_.
 
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
@@ -196,7 +192,7 @@ the input. These filters will invalidate an existing KD-tree.
    filters.iqr
    filters.locate
    filters.mad
-   filters.mongoexpression
+   filters.mongo
    filters.range
    filters.sample
    filters.tail
@@ -227,7 +223,7 @@ the input. These filters will invalidate an existing KD-tree.
     Cull points falling outside the computed Median Absolute Deviation for a
     given dimension.
 
-:ref:`filters.mongoexpression`
+:ref:`filters.mongo`
     Cull points using MongoDB-style expression syntax.
 
 :ref:`filters.range`

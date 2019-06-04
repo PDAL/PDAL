@@ -194,6 +194,7 @@ void EptReader::initialize()
     setSpatialReference(m_info->srs());
 
     m_queryBounds = m_args->m_bounds.to3d();
+
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
             boundsSrs.getWKT(), m_info->srs().getWKT());
@@ -402,7 +403,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
                     layout->registerOrAssignDim(dimName, type));
                 m_addons.emplace_back(new Addon(*layout, ep, id));
             }
-            catch (NL::json::parse_error& err)
+            catch (NL::json::parse_error&)
             {
                 throwError("Unable to parse EPT addon file '" +
                     addonFilename + "'.");
@@ -481,7 +482,7 @@ void EptReader::overlaps()
         {
             j = NL::json::parse(ep.get(file));
         }
-        catch (NL::json::parse_error& err)
+        catch (NL::json::parse_error&)
         {
             throwError("Error parsing EPT hierarchy file '" + file + "'.");
         }
@@ -614,7 +615,6 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
 
     std::lock_guard<std::mutex> lock(m_mutex);
     reader.prepare(table);
-
     const uint64_t startId(dst.size());
 
     uint64_t pointId(0);

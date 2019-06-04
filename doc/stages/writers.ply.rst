@@ -42,8 +42,9 @@ storage_mode
   of the machine. [Default: "ascii"]
 
 dims
-  List of dimensions (and sizes) in the format <dimension_name>[=<type>],...
-  to write as output.  (e.g., "Y=int32_t, X,Red=char")
+  List of dimensions (and :ref:`types`) in the format
+  ``<dimension_name>[=<type>] [,...]`` to write as output.
+  (e.g., "Y=int32_t, X,Red=char")
   [Default: All dimensions with stored types]
 
 faces

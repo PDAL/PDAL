@@ -129,7 +129,7 @@ bool DimBuilder::execute()
     NL::json root;
     try
     {
-        root << in;
+        in >> root;
     }
     catch (NL::json::parse_error& err)
     {

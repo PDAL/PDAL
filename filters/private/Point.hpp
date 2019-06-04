@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>  // Suppresses windows 4251 warn. in ogr code.
 #include <ogr_geometry.h>
 
 #include <pdal/Geometry.hpp>
