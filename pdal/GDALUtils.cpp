@@ -34,6 +34,7 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
 
@@ -153,20 +154,11 @@ GDALDataType toGdalType(Dimension::Type t)
 bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
     const std::string& dstSrs)
 {
-    OGRSpatialReference src;
-    OGRSpatialReference dst;
+    SrsTransform transform(srcSrs, dstSrs);
 
-    OGRErr srcOk = OSRSetFromUserInput(&src, srcSrs.c_str());
-    OGRErr dstOk = OSRSetFromUserInput(&dst, dstSrs.c_str());
-    if (srcOk != OGRERR_NONE || dstOk != OGRERR_NONE)
-        return false;
-
-    OGRCoordinateTransformationH transform =
-        OCTNewCoordinateTransformation(&src, &dst);
-
-    bool ok = (OCTTransform(transform, 1, &box.minx, &box.miny, &box.minz) &&
-        OCTTransform(transform, 1, &box.maxx, &box.maxy, &box.maxz));
-    OCTDestroyCoordinateTransformation(transform);
+    bool ok = transform.transform(box.minx, box.miny, box.minz);
+    if (ok)
+        ok = transform.transform(box.maxx, box.maxy, box.maxz);
     return ok;
 }
 

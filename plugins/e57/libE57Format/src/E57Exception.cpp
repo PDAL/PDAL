@@ -366,6 +366,6 @@ namespace e57
          case E57_ERROR_INVARIANCE_VIOLATION:
             return "class invariance constraint violation in debug mode (E57_ERROR_INVARIANCE_VIOLATION)";
       }
+      return "Unknown error.";
    }
-
 }

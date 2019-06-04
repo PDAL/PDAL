@@ -49,7 +49,7 @@ namespace
 {
     const BOX3D expBoundsConforming(515368, 4918340, 2322,
             515402, 4918382, 2339);
-    const std::string expSrsWkt = R"(PROJCS["NAD83 / UTM zone 12N",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-111],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","26912"]])";
+    const std::string expSrsWkt = R"(PROJCS["NAD83 / UTM zone 12N",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-111],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["meter",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","26912"]])";
     const point_count_t expNumPoints(518862);
     const std::vector<std::string> expDimNames = {
          "X", "Y", "Z", "Intensity", "ReturnNumber", "NumberOfReturns",
@@ -70,10 +70,20 @@ TEST(EptReaderTest, inspect)
 
     EXPECT_TRUE(qi.valid());
     EXPECT_EQ(qi.m_bounds, expBoundsConforming);
-    EXPECT_EQ(qi.m_srs.getWKT(), expSrsWkt);
     EXPECT_EQ(qi.m_pointCount, expNumPoints);
     EXPECT_TRUE(std::equal(qi.m_dimNames.cbegin(), qi.m_dimNames.cend(),
                 expDimNames.cbegin()));
+
+    std::string wkt = qi.m_srs.getWKT();
+    // Sometimes we get back "metre" when we're execting "meter".
+    while (true)
+    {
+        auto pos = wkt.find("metre");
+        if (pos == std::string::npos)
+            break;
+        wkt.replace(pos, 5, "meter");
+    }
+    EXPECT_EQ(wkt, expSrsWkt);
 }
 
 TEST(EptReaderTest, fullRead)

@@ -33,10 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/Geometry.hpp>
-#include "cpl_string.h"
+#include <pdal/private/SrsTransform.hpp>
 
 #include <ogr_geometry.h>
-
 
 namespace pdal
 {
@@ -122,22 +121,18 @@ bool Geometry::srsValid() const
 }
 
 
-void Geometry::transform(const SpatialReference& ref) const
+void Geometry::transform(const SpatialReference& out) const
 {
-    if (!srsValid() && ref.empty())
+    if (!srsValid() && out.empty())
         return;
 
     if (!srsValid())
         throw pdal_error("Geometry::transform() failed.  NULL source SRS.");
-    if (ref.empty())
+    if (out.empty())
         throw pdal_error("Geometry::transform() failed.  NULL target SRS.");
 
-    OGRSpatialReference *input = m_geom->getSpatialReference();
-    OGRSpatialReference output(ref.getWKT().data());
-    OGRCoordinateTransformation *xform = OGRCreateCoordinateTransformation(
-        input, &output);
-    m_geom->transform(xform);
-    delete xform;
+    SrsTransform transform(getSpatialReference(), out);
+    m_geom->transform(transform.get());
 }
 
 
