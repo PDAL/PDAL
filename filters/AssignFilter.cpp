@@ -38,6 +38,7 @@
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/DimRange.hpp"
+#include "private/expr/Parser.hpp"
 
 namespace pdal
 {
@@ -54,7 +55,37 @@ CREATE_STATIC_STAGE(AssignFilter, s_info)
 struct AssignRange : public DimRange
 {
     void parse(const std::string& r);
+
     double m_value;
+    std::unique_ptr<expr::Parser> m_parser;
+
+    AssignRange(AssignRange&& r) : DimRange(r), m_value(r.m_value),
+        m_parser(std::move(r.m_parser))
+    {}
+
+    // We only copy or assign ranges in ProgramArgs when we're assigning
+    // the default value.  The default value has no valid parser,
+    // so just reset it in those operations.
+    AssignRange& operator = (const AssignRange& r)
+    {
+        (DimRange&)(*this) = (const DimRange &)(r);
+        m_value = 0;
+        m_parser.reset(new expr::Parser);
+        return *this;
+    }
+
+#ifdef WIN32
+    AssignRange(AssignRange& r) : DimRange(r), m_value(r.m_value),
+        m_parser(std::move(r.m_parser))
+    {}
+#else
+    AssignRange(const AssignRange& r) : DimRange(r), m_value(r.m_value),
+        m_parser(new expr::Parser)
+    {}
+#endif
+
+    AssignRange() : m_parser(new expr::Parser)
+    {}
 };
 
 struct AssignArgs
@@ -66,8 +97,6 @@ struct AssignArgs
 void AssignRange::parse(const std::string& r)
 {
     std::string::size_type pos, count;
-    const char *start;
-    char *end;
 
     pos = subParse(r);
     count = Utils::extractSpaces(r, pos);
@@ -80,15 +109,8 @@ void AssignRange::parse(const std::string& r)
     count = Utils::extractSpaces(r, pos);
     pos += count;
 
-    // Extract value
-    start = r.data() + pos;
-    m_value = std::strtod(start, &end);
-    if (start == end)
-        throw error("Missing value to assign following '='.");
-    pos += (end - start);
-
-    if (pos != r.size())
-        throw error("Invalid characters following valid range.");
+    // Build parse tree.
+    m_parser->parse(r.substr(pos));
 }
 
 
@@ -141,6 +163,7 @@ void AssignFilter::prepared(PointTableRef table)
     m_args->m_condition.m_id = layout->findDim(m_args->m_condition.m_name);
     for (auto& r : m_args->m_assignments)
     {
+        r.m_parser->prepare(layout);
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
             throwError("Invalid dimension name in 'assignment' option: '" +
@@ -159,7 +182,7 @@ bool AssignFilter::processOne(PointRef& point)
     }
     for (AssignRange& r : m_args->m_assignments)
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
-            point.setField(r.m_id, r.m_value);
+            point.setField(r.m_id, r.m_parser->eval(point));
     return true;
 }
 

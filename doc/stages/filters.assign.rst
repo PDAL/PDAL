@@ -30,11 +30,42 @@ This pipeline resets the ``Classification`` of all points with classifications
       }
   ]
 
+Example 2
+---------
+
+This pipeline sets some dimensions using arithmetic expressions even 
+fetching values from other attributes.
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "autzen-dd.las",
+        {
+          "type":"filters.assign",
+          "assignment" : "Classification[1:1]=Classification * (Z > 1000 || (Z >= 10 && Z <= 20))",
+          "assignment" : "Red[:]=(Blue + Green)",
+          "assignment" : "Userdata[:]=1000 + (Classification * 2)",
+          "assignment" : "UserData[:]=PointSourceId IN (200,500,700)",
+          "assignment" : "Z[:]=Z + 100.0",
+        },
+        {
+          "filename":"attributed.las",
+        }
+      ]
+    }
+
+It supports the most common operators (``*,/,+,-,==,!=,<>,>,<,>=,<=,&&,||``), and ``( )`` 
+for priorizing them. It supports too ``IN`` function to check the presence of a value 
+e.g. ``"PointSourceId IN (2300,2301,2302)"``.
+
+
 Options
 -------
 
 assignment
-  A :ref:`range <ranges>` followed by an assignment of a value (see example).
+  A :ref:`range <ranges>` followed by an assignment of a value or arithmetic 
+  expression (see examples).
   Can be specified multiple times.  The assignments are applied sequentially
   to the dimension value as set when the filter began processing. [Required]
 

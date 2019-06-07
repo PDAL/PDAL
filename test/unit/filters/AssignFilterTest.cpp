@@ -45,6 +45,7 @@ TEST(AssignFilterTest, value)
 {
     Options ro;
     ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
+    ro.add("count", 10);
 
     StageFactory factory;
     Stage& r = *(factory.createStage("readers.las"));
@@ -52,9 +53,11 @@ TEST(AssignFilterTest, value)
 
     Options fo;
     fo.add("assignment", "X[:]=27.5");
-    fo.add("assignment", "Classification[:]=0");
-    fo.add("assignment", "GpsTime[:]=3000");
-    fo.add("assignment", "Red[:]=255");
+    fo.add("assignment", "Classification[:]=200-199");
+    fo.add("assignment", "GpsTime[:]=(3000)");
+    fo.add("assignment", "Red[:]=GpsTime");
+    fo.add("assignment", "Green[:]=(GpsTime * 3) + 4");
+    fo.add("assignment", "Blue[:]=(GpsTime >= 3000 + 1.5 - 1.5) && (Red + 4 == GpsTime + (10 - 8) * 2) && Red IN (1, 2.5, GpsTime, 4)");
 
     Stage& f = *(factory.createStage("filters.assign"));
     f.setInput(r);
@@ -87,11 +90,15 @@ TEST(AssignFilterTest, value)
     {
         EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
         EXPECT_EQ(v->getFieldAs<uint16_t>(
-            Dimension::Id::Classification, i), 0);
+            Dimension::Id::Classification, i), 1);
         EXPECT_DOUBLE_EQ(v->getFieldAs<double>(
             Dimension::Id::GpsTime, i), 3000.0);
         EXPECT_EQ(v->getFieldAs<int>(
-            Dimension::Id::Red, i), 255);
+            Dimension::Id::Red, i), 3000.0);
+        EXPECT_EQ(v->getFieldAs<int>(
+            Dimension::Id::Blue, i), 1.0);
+        EXPECT_EQ(v->getFieldAs<int>(
+            Dimension::Id::Green, i), 9004.0);
     }
 }
 

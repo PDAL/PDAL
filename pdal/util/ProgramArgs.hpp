@@ -765,7 +765,7 @@ public:
         }
         if (!m_set)
             m_var.clear();
-        m_var.push_back(var);
+        m_var.push_back(std::move(var));
         m_set = true;
     }
 
