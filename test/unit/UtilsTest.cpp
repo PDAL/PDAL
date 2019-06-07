@@ -458,6 +458,6 @@ TEST(UtilsTest, numeric_cast)
 
 TEST(UtilsTest, escapeJSON)
 {
-    std::string escaped = Utils::escapeJSON("0.1234\n-0.9876");
-    EXPECT_EQ("0.1234\n-0.9876", escaped);
+    std::string escaped = Utils::escapeJSON("\u0001\t\f\n\\\"\u0016");
+    EXPECT_EQ(escaped, "\\u0001\\t\\f\\n\\\\\\\"\\u0016");
 }
