@@ -61,6 +61,14 @@ Token Lexer::get(char c)
 {
     Token tok(TokenType::Error);
 
+    // Is really coming a negative number?
+    if ((c == '+' || c == '-') && 
+        m_pos + 1 < m_buf.size() && isdigit(m_buf[m_pos + 1]))
+    {
+        tok = number();
+        return tok;
+    }
+
     tok = getOperator(c);
     if (tok.valid())
         return tok;

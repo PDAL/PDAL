@@ -52,12 +52,12 @@ TEST(AssignFilterTest, value)
     r.setOptions(ro);
 
     Options fo;
-    fo.add("assignment", "X[:]=27.5");
+    fo.add("assignment", "X[:]=-27.5");
     fo.add("assignment", "Classification[:]=200-199");
     fo.add("assignment", "GpsTime[:]=(3000)");
     fo.add("assignment", "Red[:]=GpsTime");
     fo.add("assignment", "Green[:]=(GpsTime * 3) + 4");
-    fo.add("assignment", "Blue[:]=(GpsTime >= 3000 + 1.5 - 1.5) && (Red + 4 == GpsTime + (10 - 8) * 2) && Red IN (1, 2.5, GpsTime, 4)");
+    fo.add("assignment", "Blue[:]=(GpsTime >= 3000 + 1.5 - +1.5) && (Red + 4 == GpsTime + (10 - 8) * 2) && Red IN (1, -2.5, GpsTime, 4)");
 
     Stage& f = *(factory.createStage("filters.assign"));
     f.setInput(r);
@@ -88,7 +88,7 @@ TEST(AssignFilterTest, value)
     PointViewPtr v = *s.begin();
     for (PointId i = 0; i < v->size(); ++i)
     {
-        EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
+        EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), -27.5);
         EXPECT_EQ(v->getFieldAs<uint16_t>(
             Dimension::Id::Classification, i), 1);
         EXPECT_DOUBLE_EQ(v->getFieldAs<double>(
