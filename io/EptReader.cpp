@@ -355,6 +355,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
         layout->registerOrAssignDim(name, type);
         m_remoteLayout->registerOrAssignDim(name, type);
     }
+
     m_remoteLayout->finalize();
 
     using D = Dimension::Id;

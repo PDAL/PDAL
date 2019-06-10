@@ -119,6 +119,38 @@ TEST(EptReaderTest, fullRead)
     EXPECT_EQ(np, expNumPoints);
 }
 
+TEST(EptReaderTest, fullReadBig)
+{
+    Options options;
+    options.add("filename", "ept://" + Support::datapath("ept/large"));
+    options.add("threads",8);
+
+    PointTable table;
+
+    EptReader reader;
+    reader.setOptions(options);
+    reader.prepare(table);
+    const auto set(reader.execute(table));
+
+    double x, y, z;
+    uint64_t o;
+    uint64_t np(0);
+    for (const PointViewPtr& view : set)
+    {
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            ++np;
+
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            z = view->getFieldAs<double>(Dimension::Id::Z, i);
+            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+            ASSERT_TRUE(expBoundsConforming.contains(x, y, z));
+            ASSERT_TRUE(o < 4);
+        }
+    }
+}
+
 TEST(EptReaderTest, resolutionLimit)
 {
     Options options;
