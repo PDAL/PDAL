@@ -1089,8 +1089,12 @@ TEST(LasWriterTest, fix1063_1064_1065)
 
     // https://github.com/PDAL/PDAL/issues/1065
     SpatialReference ref = v->spatialReference();
-    std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-    EXPECT_EQ(ref.getWKT(), wkt);
+    // This WKT is the leading common bit of WKT1 and WKT2 resolution.  When
+    // we're just doing WKT2, this can be improved.
+    std::string wkt {
+        R"(GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]])"
+    };
+    EXPECT_TRUE(Utils::startsWith(ref.getWKT(), wkt));
 }
 
 TEST(LasWriterTest, pdal_metadata)
@@ -1235,9 +1239,22 @@ TEST(LasWriterTest, forward_spec_3)
             !temp.findChild(recPred).empty() &&
             !temp.findChild(userPred).empty();
     };
+    MetadataNode origRoot = reader.getMetadata();
+    MetadataNodeList origNodes = origRoot.findChildren(pred);
+    EXPECT_EQ(origNodes.size(), 1u);
+    MetadataNode origNode = origNodes[0];
+
     MetadataNode root = reader2.getMetadata();
     MetadataNodeList nodes = root.findChildren(pred);
     EXPECT_EQ(nodes.size(), 1u);
+    MetadataNode node = nodes[0];
+
+    // Also test that we're properly forwarding data.
+    origNode = origNode.findChild("data");
+    node = node.findChild("data");
+    EXPECT_EQ(origNode.value().size(), 28u);
+    EXPECT_EQ(node.value().size(), origNode.value().size());
+    EXPECT_EQ(node.value(), origNode.value());
 }
 
 TEST(LasWriterTest, oversize_vlr)

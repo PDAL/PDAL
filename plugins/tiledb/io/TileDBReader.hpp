@@ -37,12 +37,13 @@
 #include <iostream>
 
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 #include <tiledb/tiledb>
 
 namespace pdal
 {
 
-class PDAL_DLL TileDBReader : public Reader
+class PDAL_DLL TileDBReader : public Reader, public Streamable
 {
 public:
     struct Buffer
@@ -86,12 +87,16 @@ private:
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef);
+    virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
     std::string m_arrayName;
     std::string m_cfgFileName;
     point_count_t m_chunkSize;
+    point_count_t m_offset;
+    point_count_t m_resultSize;
+    bool m_complete;
     bool m_stats;
     BOX3D m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;

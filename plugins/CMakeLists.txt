@@ -17,7 +17,8 @@ if(BUILD_PLUGIN_GEOWAVE)
 endif(BUILD_PLUGIN_GEOWAVE)
 
 if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
-    add_subdirectory(greyhound)
+    message(WARNING "*** Greyhound is deprecated as of PDAL 2.0 and will not be built ***")
+#    add_subdirectory(greyhound)
 endif()
 
 if(BUILD_PLUGIN_ICEBRIDGE)
@@ -90,4 +91,8 @@ endif()
 
 if(BUILD_PLUGIN_TILEDB)
     add_subdirectory(tiledb)
+endif()
+
+if(BUILD_PLUGIN_E57)
+    add_subdirectory(e57)
 endif()

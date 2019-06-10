@@ -7,6 +7,8 @@ Implements `TileDB`_ 1.4.1+ storage.
 
 .. plugin::
 
+.. streamable::
+
 Example
 -------
 

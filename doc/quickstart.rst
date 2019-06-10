@@ -38,9 +38,9 @@ Install Conda
 Conda installation instructions can be found at the following links. Read
 through them a bit for your platform so you have an idea what to expect.
 
-* `Windows <https://conda.io/docs/user-guide/install/windows.html>`__
-* `macOS <https://conda.io/docs/user-guide/install/macos.html>`__
-* `Linux <https://conda.io/docs/user-guide/install/linux.html>`__
+* `Windows <https://conda.io/projects/conda/en/latest/user-guide/install/windows.html>`__
+* `macOS <https://conda.io/projects/conda/en/latest/user-guide/install/macos.html>`__
+* `Linux <https://conda.io/projects/conda/en/latest/user-guide/install/linux.html>`__
 
 .. note::
 
@@ -56,7 +56,7 @@ On macOS and Linux, all Conda commands are typed into a terminal window. On
 Windows, commands are typed into the Anaconda Prompt window. Instructions can
 be found in the Conda `Getting Started`_ guide.
 
-.. _`Getting Started`: https://conda.io/docs/user-guide/getting-started.html#starting-conda
+.. _`Getting Started`: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#starting-conda
 
 
 Test Installation
@@ -79,7 +79,7 @@ the PDAL maintenance branch.
     It is a good idea to install PDAL in it's own environment (or
     add it to an existing one). You will **NOT** want to add it to your default
     environment named ``base``. Managing environments is beyond the scope of
-    the quickstart, but you can read more about it `here <https://conda.io/docs/user-guide/getting-started.html#managing-envs>`_.
+    the quickstart, but you can read more about it `here <https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs>`_.
 
 To install the PDAL package so that we can use it to run PDAL commands, we run
 the following command to create an environment named ``myenv``, installing PDAL
@@ -129,7 +129,6 @@ output should look something like: ::
         icu:             58.2-vc14_0           conda-forge [vc14]
         intel-openmp:    2018.0.3-0
         jpeg:            9b-vc14_2             conda-forge [vc14]
-        jsoncpp:         1.8.1-vc14_0          conda-forge [vc14]
         kealib:          1.4.7-vc14_4          conda-forge [vc14]
         krb5:            1.14.6-vc14_0         conda-forge [vc14]
         laszip:          3.2.2-vc14_0          conda-forge [vc14]

@@ -38,7 +38,11 @@ Reference
 
 .. [Cook1986] Cook, Robert L. "Stochastic sampling in computer graphics." *ACM Transactions on Graphics (TOG)* 5.1 (1986): 51-72.
 
+.. [Demantke2011] Demantké J., Mallet C., David N., Vallet, B. "Dimensionality Based Scale Selection in 3d LIDAR Point Clouds."  Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci, XXXVIII-5/W12, 97-102, 2011
+
 .. [Dippe1985] Dippé, Mark AZ, and Erling Henry Wold. "Antialiasing through stochastic sampling." *ACM Siggraph Computer Graphics* 19.3 (1985): 69-78.
+
+.. [Guinard2017] Guinard S., Landrieu L. "Weakly Supervised Segmented-Aided Classification of Urban Scenes From 3D LIDAR Point Clouds." Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci., XLII-1/W1, 151-157, 2017
 
 .. [Kazhdan2006] Kazhdan, Michael, Matthew Bolitho, and Hugues Hoppe. "Poisson surface reconstruction." Proceedings of the fourth Eurographics symposium on Geometry processing. Vol. 7. 2006.
 
@@ -47,8 +51,6 @@ Reference
 .. [Limberger2015] Limberger, Frederico A., and Manuel M. Oliveira. “Real-Time Detection of Planar Regions in Unorganized Point Clouds.” Pattern Recognition 48.6 (2015): 2043–2053. Web.
 
 .. [Mesh2009] ALoopingIcon. "Meshing Point Clouds." *MESHLAB STUFF*. n.p., 7 Sept. 2009. Web. 13 Nov. 2015.
-
-.. [Mongus2012] Mongus, D., Zalik, B., 2012. Parameter-free ground filtering of LiDAR data for automatic DTM generation. ISPRS J. Photogramm. Remote Sens. 67, 1–12.
 
 .. [Pingel2013] Pingel, Thomas J., Keith C. Clarke, and William A. McBride. “An Improved Simple Morphological Filter for the Terrain Classification of Airborne LIDAR Data.” ISPRS Journal of Photogrammetry and Remote Sensing 77 (2013): 21–30.
 

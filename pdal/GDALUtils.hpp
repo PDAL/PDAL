@@ -34,18 +34,17 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Dimension.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
-
-#include <pdal/Log.hpp>
-
 #include <array>
 #include <functional>
 #include <mutex>
 #include <sstream>
 #include <vector>
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <cpl_conv.h>
 #include <gdal_priv.h>
@@ -58,8 +57,6 @@ class OGRGeometry;
 
 namespace pdal
 {
-
-class SpatialReference;
 
 namespace gdal
 {
@@ -85,7 +82,8 @@ public:
     SpatialRef(const std::string& srs)
     {
         newRef(OSRNewSpatialReference(""));
-        OSRSetFromUserInput(get(), srs.data());
+        if (OSRSetFromUserInput(get(), srs.data()) != OGRERR_NONE)
+            m_ref.reset();
     }
 
     void setFromLayer(OGRLayerH layer)
@@ -106,11 +104,16 @@ public:
         { return m_ref.get(); }
     std::string wkt() const
     {
-        char *pszWKT = NULL;
-        OSRExportToWkt(m_ref.get(), &pszWKT);
-        bool valid = (bool)*pszWKT;
-        std::string output(pszWKT);
-        CPLFree(pszWKT);
+        std::string output;
+
+        if (m_ref.get())
+        {
+            char *pszWKT = NULL;
+            OSRExportToWkt(m_ref.get(), &pszWKT);
+            bool valid = (bool)*pszWKT;
+            output = pszWKT;
+            CPLFree(pszWKT);
+        }
         return output;
     }
 

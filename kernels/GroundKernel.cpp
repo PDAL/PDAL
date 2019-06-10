@@ -73,14 +73,20 @@ void GroundKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("output,o", "Output filename", m_outputFile).setPositional();
-    args.add("max_window_size", "Max window size", m_maxWindowSize, 33.0);
-    args.add("slope", "Slope", m_slope, 1.0);
+    args.add("max_window_size", "Max window size", m_maxWindowSize, 18.0);
+    args.add("slope", "Slope", m_slope, 0.15);
     args.add("max_distance", "Max distance", m_maxDistance, 2.5);
     args.add("initial_distance", "Initial distance", m_initialDistance, .15);
     args.add("cell_size", "Cell size", m_cellSize, 1.0);
     args.add("extract", "Extract ground returns?", m_extract);
     args.add("reset", "Reset classifications prior to segmenting?", m_reset);
     args.add("denoise", "Apply statistical outlier removal prior to segmenting?", m_denoise);
+    args.add("returns", "Include last returns?", m_returns,
+             {"last", "only"});
+    args.add("scalar", "Elevation scalar?", m_scalar, 1.25);
+    args.add("threshold", "Elevation threshold?", m_threshold, 0.5);
+    args.add("cut", "Cut net size?", m_cut, 0.0);
+    args.add("ignore", "A range query to ignore when processing", m_ignored);
 }
 
 int GroundKernel::execute()
@@ -93,12 +99,16 @@ int GroundKernel::execute()
     Options outlierOptions;
 
     Options groundOptions;
-    groundOptions.add("max_window_size", m_maxWindowSize);
+    groundOptions.add("window", m_maxWindowSize);
+    groundOptions.add("threshold", m_threshold);
     groundOptions.add("slope", m_slope);
-    groundOptions.add("max_distance", m_maxDistance);
-    groundOptions.add("initial_distance", m_initialDistance);
-    groundOptions.add("cell_size", m_cellSize);
-    groundOptions.add("ignore", "Classification[7:7]");
+    groundOptions.add("cell", m_cellSize);
+    groundOptions.add("cut", m_cut);
+    groundOptions.add("scalar", m_scalar);
+    for (auto& s: m_returns)
+        groundOptions.add("returns", s);
+    for(DimRange& r: m_ignored)
+        groundOptions.add("ignore", r);
 
     Options rangeOptions;
     rangeOptions.add("limits", "Classification[2:2]");
@@ -113,7 +123,8 @@ int GroundKernel::execute()
     if (m_denoise)
         outlierStage = &makeFilter("filters.outlier", *assignStage, outlierOptions);
 
-    Stage& groundStage = makeFilter("filters.pmf", *outlierStage, groundOptions);
+    Stage& groundStage = makeFilter("filters.smrf", *outlierStage, groundOptions);
+
 
     Stage* rangeStage = &groundStage;
     if (m_extract)

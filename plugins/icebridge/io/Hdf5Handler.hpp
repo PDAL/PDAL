@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>  // Suppresses windows 4251 messages
 #include "H5Cpp.h"
 
 #include <memory>

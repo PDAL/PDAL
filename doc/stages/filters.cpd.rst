@@ -22,6 +22,23 @@ the "moving" points after the calculated transformation has been applied, one
 point view per input.  Any additional information about the cpd registration,
 e.g. the rigid transformation matrix, will be placed in the stage's metadata.
 
+When to use CPD vs ICP
+----------------------
+
+Summarized from the `Non-rigid point set registration: Coherent Point Drift
+<http://graphics.stanford.edu/courses/cs468-07-winter/Papers/nips2006_0613.pdf>`_ paper.
+
+- CPD outperforms the ICP in the presence of noise and outliers by the use of
+  a probabilistic assignment of correspondences between pointsets, which is
+  innately more robust than the binary assignment used in ICP.
+
+- CPD does not work well for large in-plane rotation, such transformation can
+  be first compensated by other well known global registration techniques before
+  CPD algorithm is carried out
+
+- CPD is most effective when estimating smooth non-rigid transformations.
+
+
 .. plugin::
 
 Examples
@@ -67,6 +84,7 @@ The metadata output might start something like:
 .. seealso::
 
     :ref:`filters.transformation` to apply a transform to other points.
+    :ref:`filters.icp` for deterministic binary point pair assignments.
 
 Options
 --------

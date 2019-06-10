@@ -133,10 +133,10 @@ gdalopts
 .. _data_type:
 
 data_type
-    The data type to use for the output raster (double, float, int32,
-    uint16, etc.).  Many GDAL drivers only
-    support a limited set of output data types. The default value depends
-    on the driver.
+    The :ref:`data type <types>` to use for the output raster.
+    Many GDAL drivers only
+    support a limited set of output data types.
+    [Default: depends on the driver]
 
 .. _nodata:
 

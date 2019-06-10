@@ -80,7 +80,6 @@ an environment suitable for building PDAL with the requested tool.
 ::
 
     $ cmake -G Ninja ..
-    -- Could NOT find JSONCPP (missing: JSONCPP_LIBRARY JSONCPP_INCLUDE_DIR) (Required is at least version "1.6.2")
     -- Numpy output: /usr/lib/python2.7/dist-packages/numpy/core/include
     1.13.3
 

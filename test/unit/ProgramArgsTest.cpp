@@ -34,7 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 // No wordexp() on windows and I don't feel like doing something special.
 #ifndef _WIN32
@@ -448,13 +448,13 @@ TEST(ProgramArgsTest, parseSimple)
 
 TEST(ProgramArgsTest, json)
 {
-    // Test JSON arguments.  If the arg refers to an underlying Json::Value,
+    // Test JSON arguments.  If the arg refers to an underlying NL::json,
     // it should be parsed into that Json::Value.  If a string, then that
     // string should contain the stringified JSON (which should be parsable
     // into equivalent JSON).
-    Json::Value m_json;
+    NL::json m_json;
     std::string m_string;
-    Json::Value verify;
+    NL::json verify;
     verify["key"] = 42;
 
     const std::string stringified("\"{ \\\"key\\\": 42 }\"");
@@ -463,14 +463,11 @@ TEST(ProgramArgsTest, json)
     args.add("json,j", "JSON description", m_json);
     args.add("string,s", "String description", m_string);
 
-    StringList s;
-    Json::Reader reader;
-
     // An unset Json::Value should be null.
     {
-        s = toStringList("");
+        StringList s = toStringList("");
         EXPECT_NO_THROW(args.parse(s));
-        EXPECT_TRUE(m_json.isNull());
+        EXPECT_TRUE(m_json.is_null());
     }
 
     // Test an object.
@@ -483,40 +480,40 @@ TEST(ProgramArgsTest, json)
         EXPECT_EQ(m_json, verify) << m_json << " != " << verify;
 
         // Verify that the string value parses into the proper JSON value.
-        Json::Value fromString;
-        EXPECT_TRUE(reader.parse(m_string, fromString));
+        NL::json fromString;
+        EXPECT_NO_THROW(fromString = NL::json::parse(m_string));
         EXPECT_EQ(fromString, verify) << fromString << " != " << verify;
     }
 
     // Test non-objects.
     {
         args.reset();
-        s = toStringList("--json [1,2,3]");
+        StringList s = toStringList("--json [1,2,3]");
         EXPECT_NO_THROW(args.parse(s));
-        ASSERT_TRUE(reader.parse("[1, 2, 3]", verify));
+        verify = NL::json::parse("[1, 2, 3]");
         EXPECT_EQ(m_json, verify);
 
         args.reset();
         s = toStringList("--json 2");
         EXPECT_NO_THROW(args.parse(s));
         verify = 2;
-        EXPECT_TRUE(m_json.isNumeric());
-        EXPECT_EQ(m_json.asInt(), 2);
+        EXPECT_TRUE(m_json.is_number());
+        EXPECT_EQ(m_json.get<int>(), 2);
 
         args.reset();
         s = toStringList("--json 3.14");
         EXPECT_NO_THROW(args.parse(s));
         verify = 3.14;
-        EXPECT_TRUE(m_json.isDouble());
-        EXPECT_EQ(m_json.asDouble(), 3.14);
+        EXPECT_TRUE(m_json.is_number_float());
+        EXPECT_EQ(m_json.get<double>(), 3.14);
     }
 }
 
 TEST(ProgramArgsTest, invalidJson)
 {
-    Json::Value m_json;
+    NL::json m_json;
     std::string m_string;
-    Json::Value verify;
+    NL::json verify;
     verify["key"] = 42;
 
     ProgramArgs args;
@@ -530,8 +527,12 @@ TEST(ProgramArgsTest, invalidJson)
     EXPECT_NO_THROW(args.parse(s));
 
     // The string was successfully parsed, but contains invalid JSON.
-    Json::Value invalidParse;
-    EXPECT_FALSE(Json::Reader().parse(m_string, invalidParse));
+    auto parseJson = [](const std::string& s)
+    {
+        return NL::json::parse(s);
+    };
+
+    EXPECT_THROW(parseJson(m_string), NL::json::parse_error);
 
     // If the underlying is a Json::Value, then argument parsing should fail
     // up front.

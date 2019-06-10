@@ -22,18 +22,14 @@ include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 add_executable(dimbuilder
     DimBuilder.cpp
     ${PDAL_UTIL_DIR}/Utils.cpp
-    ${PDAL_JSONCPP_SRC})
+)
 target_include_directories(dimbuilder PRIVATE
     ${PDAL_INCLUDE_DIR}
-    ${PDAL_JSONCPP_INCLUDE_DIR})
+    ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
 target_link_libraries(dimbuilder
     PRIVATE
         ${EXECINFO_LIBRARY}
         ${CMAKE_DL_LIBS}
 )
-if (PDAL_HAVE_JSONCPP)
-    target_link_libraries(dimbuilder
-        PRIVATE
-            ${PDAL_JSONCPP_LIB_NAME})
-endif()

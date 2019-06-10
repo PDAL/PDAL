@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <nlohmann/json.hpp>
 
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
@@ -41,8 +42,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
-
-#include <json/json.h>
 
 #include <memory>
 #include <vector>
@@ -55,15 +54,15 @@ PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager) :
 {}
 
 
-void PipelineReaderJSON::parsePipeline(Json::Value& tree)
+void PipelineReaderJSON::parsePipeline(NL::json& tree)
 {
     TagMap tags;
     std::vector<Stage*> inputs;
 
-    Json::ArrayIndex last = tree.size() - 1;
-    for (Json::ArrayIndex i = 0; i < tree.size(); ++i)
+    size_t last = tree.size() - 1;
+    for (size_t i = 0; i < tree.size(); ++i)
     {
-        Json::Value& node = tree[i];
+        NL::json& node = tree.at(i);
 
         std::string filename;
         std::string tag;
@@ -72,9 +71,9 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         Options options;
 
         // strings are assumed to be filenames
-        if (node.isString())
+        if (node.is_string())
         {
-            filename = node.asString();
+            filename = node.get<std::string>();
         }
         else
         {
@@ -138,35 +137,31 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
 
 void PipelineReaderJSON::readPipeline(std::istream& input)
 {
-    Json::Value root;
-    Json::CharReaderBuilder builder;
-    builder["rejectDupKeys"] = true;
-    std::string err;
-    if (!parseFromStream(builder, input, &root, &err))
+    NL::json root;
+
+    try
     {
-        err = "JSON pipeline: Unable to parse pipeline:\n" + err;
-        throw pdal_error(err);
+        input >> root;
+    }
+    catch (NL::json::parse_error& err)
+    {
+        throw pdal_error(
+            std::string("JSON pipeline: Unable to parse pipeline:\n") +
+            err.what());
     }
 
-    if (root.isObject() && root.isMember("pipeline"))
-    {
-        parsePipeline(root["pipeline"]);
-    }
-    else if (root.isArray())
-    {
+    auto it = root.find("pipeline");
+    if (root.is_object() && it != root.end())
+        parsePipeline(*it);
+    else if (root.is_array())
         parsePipeline(root);
-    }
     else
-    {
-        throw pdal_error("JSON pipeline: Root element is not a Pipeline");
-    }
+        throw pdal_error("JSON pipeline: Root element is not a pipeline.");
 }
 
 
 void PipelineReaderJSON::readPipeline(const std::string& filename)
 {
-    m_inputJSONFile = filename;
-
     std::istream* input = Utils::openFile(filename);
     if (!input)
     {
@@ -185,70 +180,66 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     }
 
     Utils::closeFile(input);
-    m_inputJSONFile = "";
 }
 
 
-std::string PipelineReaderJSON::extractType(Json::Value& node)
+std::string PipelineReaderJSON::extractType(NL::json& node)
 {
     std::string type;
 
-    if (node.isMember("type"))
+    auto it = node.find("type");
+    if (it != node.end())
     {
-        Json::Value& val = node["type"];
-        if (!val.isNull())
+        NL::json& val = *it;
+        if (!val.is_null())
         {
-            if (val.isString())
-                type = val.asString();
+            if (val.is_string())
+                type = val.get<std::string>();
             else
                 throw pdal_error("JSON pipeline: 'type' must be specified as "
-                        "a string.");
+                    "a string.");
         }
-        node.removeMember("type");
-        if (node.isMember("type"))
-            throw pdal_error("JSON pipeline: found duplicate 'type' "
-               "entry in stage definition.");
+        node.erase(it);
     }
     return type;
 }
 
 
-std::string PipelineReaderJSON::extractFilename(Json::Value& node)
+std::string PipelineReaderJSON::extractFilename(NL::json& node)
 {
     std::string filename;
 
-    if (node.isMember("filename"))
+    auto it = node.find("filename");
+    if (it != node.end())
     {
-        Json::Value& val = node["filename"];
-        if (!val.isNull())
+        NL::json& val = *it;
+        if (!val.is_null())
         {
-            if (val.isString())
-                filename = val.asString();
+            if (val.is_string())
+                filename = val.get<std::string>();
             else
                 throw pdal_error("JSON pipeline: 'filename' must be "
                     "specified as a string.");
         }
-        node.removeMember("filename");
-        if (node.isMember("filename"))
-            throw pdal_error("JSON pipeline: found duplicate 'filename' "
-               "entry in stage definition.");
+        node.erase(it);
     }
     return filename;
 }
 
 
-std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
+std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)
 {
     std::string tag;
 
-    if (node.isMember("tag"))
+    auto it = node.find("tag");
+    if (it != node.end())
     {
-        Json::Value& val = node["tag"];
-        if (!val.isNull())
+        NL::json& val = *it;
+        if (!val.is_null())
         {
-            if (val.isString())
+            if (val.is_string())
             {
-                tag = val.asString();
+                tag = val.get<std::string>();
                 if (tags.find(tag) != tags.end())
                     throw pdal_error("JSON pipeline: duplicate tag '" +
                         tag + "'.");
@@ -257,10 +248,7 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
                 throw pdal_error("JSON pipeline: tag must be "
                     "specified as a string.");
         }
-        node.removeMember("tag");
-        if (node.isMember("tag"))
-            throw pdal_error("JSON pipeline: found duplicate 'tag' "
-               "entry in stage definition.");
+        node.erase(it);
         std::string::size_type pos = 0;
         if (!Stage::parseTagName(tag, pos) || pos != tag.size())
             throw pdal_error("JSON pipeline: Invalid tag name '" + tag + "'.  "
@@ -283,34 +271,32 @@ void PipelineReaderJSON::handleInputTag(const std::string& tag,
 }
 
 
-std::vector<Stage *> PipelineReaderJSON::extractInputs(Json::Value& node,
+std::vector<Stage *> PipelineReaderJSON::extractInputs(NL::json& node,
     TagMap& tags)
 {
     std::vector<Stage *> inputs;
     std::string filename;
 
-    if (node.isMember("inputs"))
+    auto it = node.find("inputs");
+    if (it != node.end())
     {
-        Json::Value& val = node["inputs"];
-        if (val.isString())
-            handleInputTag(val.asString(), tags, inputs);
-        else if (val.isArray())
+        NL::json& val = *it;
+        if (val.is_string())
+            handleInputTag(val.get<std::string>(), tags, inputs);
+        else if (val.is_array())
         {
-            for (const Json::Value& input : node["inputs"])
+            for (auto& input : val)
             {
-                if (!input.isString())
+                if (!input.is_string())
                     throw pdal_error("JSON pipeline: 'inputs' tag must "
-                            " be specified as a string or array of strings.");
-                handleInputTag(input.asString(), tags, inputs);
+                        " be specified as a string or array of strings.");
+                handleInputTag(input.get<std::string>(), tags, inputs);
             }
         }
         else
             throw pdal_error("JSON pipeline: 'inputs' tag must "
-                    " be specified as a string or array of strings.");
-        node.removeMember("inputs");
-        if (node.isMember("inputs"))
-            throw pdal_error("JSON pipeline: found duplicate 'inputs' "
-               "entry in stage definition.");
+                " be specified as a string or array of strings.");
+        node.erase(it);
     }
     return inputs;
 }
@@ -319,19 +305,19 @@ namespace
 {
 
 bool extractOption(Options& options, const std::string& name,
-    const Json::Value& node)
+    const NL::json& node)
 {
-    if (node.isString())
-        options.add(name, node.asString());
-    else if (node.isInt())
-        options.add(name, node.asInt64());
-    else if (node.isUInt())
-        options.add(name, node.asUInt64());
-    else if (node.isDouble())
-        options.add(name, node.asDouble());
-    else if (node.isBool())
-        options.add(name, node.asBool());
-    else if (node.isNull())
+    if (node.is_string())
+        options.add(name, node.get<std::string>());
+    else if (node.is_number_unsigned())
+        options.add(name, node.get<uint64_t>());
+    else if (node.is_number_integer())
+        options.add(name, node.get<int64_t>());
+    else if (node.is_number_float())
+        options.add(name, node.get<double>());
+    else if (node.is_boolean())
+        options.add(name, node.get<bool>());
+    else if (node.is_null())
         options.add(name, "");
     else
         return false;
@@ -340,17 +326,18 @@ bool extractOption(Options& options, const std::string& name,
 
 } // unnamed namespace
 
-Options PipelineReaderJSON::extractOptions(Json::Value& node)
+Options PipelineReaderJSON::extractOptions(NL::json& node)
 {
     Options options;
 
-    for (const std::string& name : node.getMemberNames())
+    for (auto& it : node.items())
     {
-        Json::Value& subnode(node[name]);
+        NL::json& subnode = it.value();
+        const std::string& name = it.key();
 
         if (name == "plugin")
         {
-            PluginManager<Stage>::loadPlugin(subnode.asString());
+            PluginManager<Stage>::loadPlugin(subnode.get<std::string>());
 
             // Don't actually put a "plugin" option on
             // any stage
@@ -359,18 +346,15 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
 
         if (extractOption(options, name, subnode))
             continue;
-        else if (subnode.isArray())
+        else if (subnode.is_array())
         {
-            for (const Json::Value& val : subnode)
+            for (const NL::json& val : subnode)
                 if (!extractOption(options, name, val))
                     throw pdal_error("JSON pipeline: Invalid value type for "
                         "option list '" + name + "'.");
         }
-        else if (subnode.isObject())
-        {
-            Json::FastWriter w;
-            options.add(name, w.write(subnode));
-        }
+        else if (subnode.is_object())
+            options.add(name, subnode);
         else
             throw pdal_error("JSON pipeline: Value of stage option '" +
                 name + "' cannot be converted.");

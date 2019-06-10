@@ -45,6 +45,7 @@
 
 namespace pdal
 {
+    size_t count = 100;
     class TileDBWriterTest : public ::testing::Test
     {
     protected:
@@ -52,7 +53,7 @@ namespace pdal
         {
             Options options;
             options.add("mode", "ramp");
-            options.add("count", 100);
+            options.add("count", count);
             m_reader.setOptions(options);
         }
 
@@ -70,6 +71,7 @@ namespace pdal
         StageFactory factory;
         Stage* stage(factory.createStage("writers.tiledb"));
         EXPECT_TRUE(stage);
+        EXPECT_TRUE(stage->pipelineStreamable());
     }
 
     TEST_F(TileDBWriterTest, write)
@@ -81,6 +83,7 @@ namespace pdal
         Options options;
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
+        options.add("chunk_size", 80);
 
         if (vfs.is_dir(pth))
         {
@@ -91,14 +94,9 @@ namespace pdal
         writer.setOptions(options);
         writer.setInput(m_reader);
 
-        PointTable table;
+        FixedPointTable table(100);
         writer.prepare(table);
-        PointViewSet ts = writer.execute(table);
-        EXPECT_EQ(ts.size(), 1U);
-        PointViewPtr tv = *ts.begin();
-
-        BOX3D bbox;
-        tv->calculateBounds(bbox);
+        writer.execute(table);
 
         // check the sidecar exists
         EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
@@ -123,14 +121,13 @@ namespace pdal
         array.close();
 
         EXPECT_EQ(m_reader.count() * 3, coords.size());
-        EXPECT_EQ(tv->size() * 3, coords.size());
 
-        ASSERT_DOUBLE_EQ(subarray[0], bbox.minx);
-        ASSERT_DOUBLE_EQ(subarray[2], bbox.miny);
-        ASSERT_DOUBLE_EQ(subarray[4], bbox.minz);
-        ASSERT_DOUBLE_EQ(subarray[1], bbox.maxx);
-        ASSERT_DOUBLE_EQ(subarray[3], bbox.maxy);
-        ASSERT_DOUBLE_EQ(subarray[5], bbox.maxz);
+        ASSERT_DOUBLE_EQ(subarray[0], 0.0);
+        ASSERT_DOUBLE_EQ(subarray[2], 0.0);
+        ASSERT_DOUBLE_EQ(subarray[4], 0.0);
+        ASSERT_DOUBLE_EQ(subarray[1], 1.0);
+        ASSERT_DOUBLE_EQ(subarray[3], 1.0);
+        ASSERT_DOUBLE_EQ(subarray[5], 1.0);
     }
 }
 

@@ -91,6 +91,15 @@ PointViewSet ChipperFilter::run(PointViewPtr view)
         return m_outViews;
 
     m_inView = view;
+    m_partitions.resize(0);
+    m_xvec.resize(0);
+    m_yvec.resize(0);
+    m_spare.resize(view->size());
+    m_outViews.clear();
+
+    m_xvec.reserve(view->size());
+    m_yvec.reserve(view->size());
+
     load(*view.get(), m_xvec, m_yvec, m_spare);
     partition(m_xvec.size());
     decideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
@@ -101,13 +110,6 @@ PointViewSet ChipperFilter::run(PointViewPtr view)
 void ChipperFilter::load(PointView& view, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
-    point_count_t idx;
-    std::vector<ChipPtRef>::iterator it;
-
-    xvec.reserve(view.size());
-    yvec.reserve(view.size());
-    spare.resize(view.size());
-
     for (PointId i = 0; i < view.size(); ++i)
     {
         ChipPtRef xref;
@@ -127,7 +129,7 @@ void ChipperFilter::load(PointView& view, ChipRefList& xvec, ChipRefList& yvec,
     std::stable_sort(xvec.begin(), xvec.end());
     for (size_t i = 0; i < xvec.size(); ++i)
     {
-        idx = xvec[i].m_ptindex;
+        point_count_t idx = xvec[i].m_ptindex;
         yvec[idx].m_oindex = i;
     }
 
@@ -138,8 +140,6 @@ void ChipperFilter::load(PointView& view, ChipRefList& xvec, ChipRefList& yvec,
     for (size_t i = 0; i < yvec.size(); ++i)
         xvec[yvec[i].m_oindex].m_oindex = i;
 }
-
-
 
 
 #ifdef _WIN32

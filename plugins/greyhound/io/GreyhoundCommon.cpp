@@ -102,9 +102,9 @@ std::string GreyhoundParams::extractUrl(const GreyhoundArgs& args) const
     return s;
 }
 
-Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args)
+NL::json GreyhoundParams::extractParams(const GreyhoundArgs& args)
 {
-    Json::Value json;
+    NL::json j;
 
     const std::size_t m(args.url.find('?'));
     std::string q(
@@ -132,9 +132,9 @@ Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args)
             // stringify them.  For other parameters, keep them as strings to
             // pass them along untouched.
             if (greyhoundParams.count(k))
-                json[k] = parse(v);
+                j[k] = parse(v);
             else
-                json[k] = v;
+                j[k] = v;
 
             a = b + 1;
             b = q.find_first_of('&', a);
@@ -150,8 +150,7 @@ Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args)
         {
             // This is a PDAL-specified bounds.
             Bounds pdalBounds;
-            std::istringstream iss(args.sbounds);
-            iss >> pdalBounds;
+            Utils::fromString(args.sbounds, pdalBounds);
             if (pdalBounds.is3d())
             {
                 const auto box(pdalBounds.to3d());
@@ -170,43 +169,43 @@ Json::Value GreyhoundParams::extractParams(const GreyhoundArgs& args)
             gbounds = greyhound::Bounds(parse(args.sbounds));
         }
 
-        json["bounds"] = gbounds.toJson();
+        j["bounds"] = gbounds.toJson();
     }
 
     if (args.buffer)
     {
-        if (json["bounds"].isNull())
+        if (j["bounds"].is_null())
             throw pdal_error("Cannot specify `buffer` without `bounds`");
-        m_obounds = json["bounds"];
+        m_obounds = j["bounds"];
 
-        json["bounds"] = greyhound::Bounds(json["bounds"])
-            .growBy(args.buffer).toJson();
+        j["bounds"] = greyhound::Bounds(j["bounds"]).
+            growBy(args.buffer).toJson();
     }
 
     if (args.depthBegin)
-        json["depthBegin"] = static_cast<Json::UInt64>(args.depthBegin);
+        j["depthBegin"] = args.depthBegin;
     if (args.depthEnd)
-        json["depthEnd"] = static_cast<Json::UInt64>(args.depthEnd);
+        j["depthEnd"] = args.depthEnd;
 
-    Json::Value f(args.filter);
+    NL::json f(args.filter);
 
-    if (f.isString())
-        f = parse(f.asString());
+    if (f.is_string())
+        f = parse(f.get<std::string>());
 
     if (args.tilePath.size())
         f["Path"] = args.tilePath;
 
-    if (!f.isNull())
-        json["filter"] = f;
+    if (!f.is_null())
+        j["filter"] = f;
 
-    if (!args.schema.isNull())
-        json["schema"] = args.schema;
+    if (!args.schema.is_null())
+        j["schema"] = args.schema;
 
 #ifdef PDAL_HAVE_LAZPERF
-    json["compress"] = true;
+    j["compress"] = true;
 #endif
 
-    return json;
+    return j;
 }
 
 std::string GreyhoundParams::qs() const
@@ -218,12 +217,13 @@ std::string GreyhoundParams::qs() const
         s += (s.size() ? '&' : '?') + k + '=' + v;
     });
 
-    for (const std::string key : m_params.getMemberNames())
+    for (auto it : m_params.items())
     {
+        const std::string& key = it.key();
         if (greyhoundParams.count(key))
-            add(key, dense(m_params[key]));
+            add(key, it.value().dump());
         else
-            add(key, m_params[key].asString());
+            add(key, it.value().get<std::string>());
     }
 
     return s;

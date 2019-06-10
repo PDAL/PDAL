@@ -33,7 +33,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libspatialite-dev \
         libsqlite3-mod-spatialite \
         subversion \
-        libjsoncpp-dev \
         libboost-filesystem1.65-dev \
         libboost-iostreams1.65-dev \
         libboost-program-options1.65-dev \
@@ -142,7 +141,6 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
     && cd cpd \
     && cmake . \
         -DWITH_TESTS=OFF \
-        -DWITH_JSONCPP=OFF \
         -DWITH_FGT=ON \
         -DWITH_STRICT_WARNINGS=OFF \
         -DWITH_DOCS=OFF \
