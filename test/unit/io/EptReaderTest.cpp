@@ -119,6 +119,44 @@ TEST(EptReaderTest, fullRead)
     EXPECT_EQ(np, expNumPoints);
 }
 
+TEST(EptReaderTest, zstandard)
+{
+    Options options;
+    options.add("filename", "ept://" + Support::datapath("ept/extradim"));
+
+    PointTable table;
+
+    EptReader reader;
+    reader.setOptions(options);
+    reader.prepare(table);
+    const auto set(reader.execute(table));
+
+    double x, y, z;
+    double l;
+    uint64_t np(0);
+    for (const PointViewPtr& view : set)
+    {
+        auto dim_types = view->dimTypes();
+        auto classLabelDim = dim_types[dim_types.size() - 2];
+
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            ++np;
+
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            z = view->getFieldAs<double>(Dimension::Id::Z, i);
+            l = view->getFieldAs<double>(classLabelDim.m_id, i);
+//            o = view->getFieldAs<uint8_t >(, i);
+//            std::cout<<int(l)<<std::endl;
+            ASSERT_TRUE(l < 3);
+            ASSERT_TRUE(l > -1);
+        }
+    }
+
+    EXPECT_EQ(np, expNumPoints);
+}
+
 TEST(EptReaderTest, resolutionLimit)
 {
     Options options;
