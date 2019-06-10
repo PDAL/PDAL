@@ -634,7 +634,7 @@ std::vector<PointId> EptReader::readLaszip(PointView& dst, const Key& key,
     const PointViewSet views(reader.execute(table));
     if (views.size() != 1)
     {
-        throwError("Unexpected view count: " + key.toString());
+        throwError("Something went wrong with reading the tile: " + key.toString() +".");
     }
 
     auto& src(*views.begin());
