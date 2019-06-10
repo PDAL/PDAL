@@ -45,6 +45,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
+#include <pdal/compression/ZstdCompression.hpp>
 
 namespace pdal
 {
@@ -573,8 +574,10 @@ PointViewSet EptReader::run(PointViewPtr view)
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 startId = readLaszip(*view, key, nodeId);
-            else
+            else if (m_info->dataType() == EptInfo::DataType::Binary)
                 startId = readBinary(*view, key, nodeId);
+            else
+                startId = readZstandard(*view, key, nodeId);
 
             // Read addon information after the native data, we'll possibly
             // overwrite attributes.
@@ -637,6 +640,36 @@ uint64_t EptReader::readBinary(PointView& dst, const Key& key,
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
     ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
+    PointRef pr(table);
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    const uint64_t startId(dst.size());
+
+    uint64_t pointId(0);
+    for (uint64_t pointId(0); pointId < table.numPoints(); ++pointId)
+    {
+        pr.setPointId(pointId);
+        process(dst, pr, nodeId, pointId);
+    }
+
+    return startId;
+}
+
+uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
+        const uint64_t nodeId) const
+{
+    auto compressed(m_ep->getBinary("ept-data/" + key.toString() + ".zst"));
+    std::vector<char> uncompressed;
+    pdal::ZstdDecompressor dec([&uncompressed](char* pos, std::size_t size)
+    {
+        uncompressed.insert(uncompressed.end(), pos, pos + size);
+    });
+
+    dec.decompress(compressed.data(), compressed.size());
+
+    auto tab = std::move(uncompressed);
+    ShallowPointTable table(*m_remoteLayout,tab.data(), tab.size());
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
