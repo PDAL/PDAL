@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/Filter.hpp>
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PointView.hpp>
@@ -64,16 +65,64 @@ class TileDBReaderTest : public ::testing::Test
         StageFactory factory;
         Stage* stage(factory.createStage("readers.tiledb"));
         EXPECT_TRUE(stage);
+        EXPECT_TRUE(stage->pipelineStreamable());
     }
 
     TEST_F(TileDBReaderTest, read)
     {
+        class Checker : public Filter, public Streamable
+        {
+        public:
+            std::string getName() const
+                { return "checker"; }
+        private:
+            bool processOne(PointRef& point)
+            {
+                static int cnt = 0;
+                if (cnt == 0)
+                {
+                    EXPECT_NEAR(0.f,
+                        point.getFieldAs<double>(Dimension::Id::X), 1e-1);
+                    EXPECT_NEAR(0.f,
+                        point.getFieldAs<double>(Dimension::Id::Y), 1e-1);
+                    EXPECT_NEAR(0.f,
+                        point.getFieldAs<double>(Dimension::Id::Z), 1e-1);
+                    EXPECT_EQ(0,
+                        point.getFieldAs<int>(Dimension::Id::OffsetTime));
+                }
+                if (cnt == 1)
+                {
+                    EXPECT_NEAR(0.010101f,
+                        point.getFieldAs<double>(Dimension::Id::X), 1e-5);
+                    EXPECT_NEAR(0.010101f,
+                        point.getFieldAs<double>(Dimension::Id::Y), 1e-5);
+                    EXPECT_NEAR(0.010101f,
+                        point.getFieldAs<double>(Dimension::Id::Z), 1e-5);
+                    EXPECT_EQ(1,
+                        point.getFieldAs<int>(Dimension::Id::OffsetTime));
+                }
+                if (cnt == 2)
+                {
+                    EXPECT_NEAR(0.020202f,
+                        point.getFieldAs<double>(Dimension::Id::X), 1e-5);
+                    EXPECT_NEAR(0.020202f,
+                        point.getFieldAs<double>(Dimension::Id::Y), 1e-5);
+                    EXPECT_NEAR(0.020202f,
+                        point.getFieldAs<double>(Dimension::Id::Z), 1e-5);
+                    EXPECT_EQ(2,
+                        point.getFieldAs<int>(Dimension::Id::OffsetTime));
+                }
+                cnt++;
+                return true;
+            }
+        };
+
         tiledb::Context ctx;
         tiledb::VFS vfs(ctx);
         std::string pth(Support::datapath("tiledb/array"));
+        Options options;
+        options.add("array_name", pth);
 
-        Options opts;
-        opts.add("array_name", pth);
 
         tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
@@ -95,22 +144,14 @@ class TileDBReaderTest : public ::testing::Test
         array.close();
 
         TileDBReader reader;
-        reader.setOptions(opts);
+        reader.setOptions(options);
 
-        PointTable table;
-        reader.prepare(table);
-        PointViewSet ts = reader.execute(table);
-        EXPECT_EQ(ts.size(), 1U);
-        PointViewPtr tv = *ts.begin();
-        EXPECT_EQ(tv->size(), coords.size() / 3);
+        FixedPointTable table(100);
 
-        BOX3D bbox;
-        tv->calculateBounds(bbox);
-        ASSERT_DOUBLE_EQ(subarray[0], bbox.minx);
-        ASSERT_DOUBLE_EQ(subarray[2], bbox.miny);
-        ASSERT_DOUBLE_EQ(subarray[4], bbox.minz);
-        ASSERT_DOUBLE_EQ(subarray[1], bbox.maxx);
-        ASSERT_DOUBLE_EQ(subarray[3], bbox.maxy);
-        ASSERT_DOUBLE_EQ(subarray[5], bbox.maxz);
+        Checker c;
+        c.setInput(reader);
+        c.prepare(table);
+        c.execute(table);
     }
 }
+

@@ -34,9 +34,8 @@
 
 #pragma once
 
-#include <json/json.h>
-
 #include <pdal/Filter.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/Streamable.hpp>
 
 namespace pdal
@@ -58,7 +57,7 @@ private:
     virtual void prepared(PointTableRef table) override;
     virtual PointViewSet run(PointViewPtr view) override;
 
-    Json::Value m_json;
+    NL::json m_json;
     std::unique_ptr<Expression> m_expression;
 };
 

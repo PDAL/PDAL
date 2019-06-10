@@ -34,29 +34,23 @@
 
 #pragma once
 
-#include <array>
 #include <condition_variable>
-#include <cstddef>
-#include <functional>
-#include <iostream>
-#include <mutex>
+
 #include <queue>
-#include <stdexcept>
-#include <string>
 #include <thread>
 #include <vector>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
-#include <pdal/pdal_export.hpp>
+#include <arbiter/arbiter.hpp>
+
 #include <pdal/pdal_types.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
-#include <pdal/Stage.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
-
-#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
@@ -67,79 +61,30 @@ public:
     ept_error(std::string msg) : pdal_error(msg) { }
 };
 
-inline Dimension::Type getType(const Json::Value& dim)
+inline NL::json parse(const std::string& data)
 {
-    if (dim.isMember("scale"))
-        return Dimension::Type::Double;
+    NL::json j;
 
-    const std::string type(dim["type"].asString());
-    const uint64_t size(dim["size"].asUInt64());
-
-    if (type == "signed")
+    try
     {
-        switch (size)
-        {
-            case 1: return Dimension::Type::Signed8;
-            case 2: return Dimension::Type::Signed16;
-            case 4: return Dimension::Type::Signed32;
-            case 8: return Dimension::Type::Signed64;
-        }
+        j = NL::json::parse(data);
     }
-    else if (type == "unsigned")
+    catch (NL::json::parse_error& err)
     {
-        switch (size)
-        {
-            case 1: return Dimension::Type::Unsigned8;
-            case 2: return Dimension::Type::Unsigned16;
-            case 4: return Dimension::Type::Unsigned32;
-            case 8: return Dimension::Type::Unsigned64;
-        }
+        throw ept_error(std::string("Error during parsing: ") + err.what());
     }
-    else if (type == "float")
-    {
-        switch (size)
-        {
-            case 4: return Dimension::Type::Float;
-            case 8: return Dimension::Type::Double;
-        }
-    }
-
-    return Dimension::Type::None;
+    return j;
 }
 
-inline std::string stringify(const Json::Value& json)
+inline BOX3D toBox3d(const NL::json& b)
 {
-    Json::StreamWriterBuilder builder;
-    builder.settings_["indentation"] = "";
-    return Json::writeString(builder, json);
-}
-
-inline Json::Value parse(const std::string& data)
-{
-    Json::Value json;
-    Json::Reader reader;
-
-    if (!reader.parse(data, json, false))
+    if (!b.is_array() || b.size() != 6)
     {
-        const std::string jsonError(reader.getFormattedErrorMessages());
-        if (!jsonError.empty())
-        {
-            throw ept_error("Error during parsing: " + jsonError);
-        }
+        throw ept_error("Invalid bounds specification: " + b.dump());
     }
 
-    return json;
-}
-
-inline BOX3D toBox3d(const Json::Value& b)
-{
-    if (!b.isArray() || b.size() != 6)
-    {
-        throw ept_error("Invalid bounds specification: " + b.toStyledString());
-    }
-
-    return BOX3D(b[0].asDouble(), b[1].asDouble(), b[2].asDouble(),
-            b[3].asDouble(), b[4].asDouble(), b[5].asDouble());
+    return BOX3D(b[0].get<double>(), b[1].get<double>(), b[2].get<double>(),
+            b[3].get<double>(), b[4].get<double>(), b[5].get<double>());
 }
 
 class PDAL_DLL Key
@@ -147,10 +92,12 @@ class PDAL_DLL Key
     // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
     // representing a data node, as well as the bounds of the contained data.
 public:
-    Key() { }
+    Key()
+    {}
+
     Key(std::string s)
     {
-        const std::vector<std::string> tokens(Utils::split(s, '-'));
+        const StringList tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
             throw ept_error("Invalid EPT KEY: " + s);
         d = std::stoull(tokens[0]);
@@ -225,6 +172,21 @@ public:
     }
 };
 
+inline bool operator<(const Key& a, const Key& b)
+{
+    if (a.d < b.d) return true;
+    if (a.d > b.d) return false;
+
+    if (a.x < b.x) return true;
+    if (a.x > b.x) return false;
+
+    if (a.y < b.y) return true;
+    if (a.y > b.y) return false;
+
+    if (a.z < b.z) return true;
+    return false;
+}
+
 using EptHierarchy = std::map<Key, uint64_t>;
 
 class PDAL_DLL Addon
@@ -271,63 +233,36 @@ public:
         Binary
     };
 
-    EptInfo(Json::Value info) : m_info(info)
-    {
-        m_bounds = toBox3d(m_info["bounds"]);
-        m_points = m_info["points"].asUInt64();
-        m_span = m_info["span"].asUInt64();
-        m_srs = m_info["srs"]["wkt"].asString();
-
-        if (m_srs.empty())
-        {
-            if (m_info["srs"].isMember("authority") &&
-                    m_info["srs"].isMember("horizontal"))
-            {
-                m_srs = m_info["srs"]["authority"].asString() + ":" +
-                    m_info["srs"]["horizontal"].asString();
-            }
-
-            if (m_info["srs"].isMember("vertical"))
-            {
-                m_srs += "+" + m_info["srs"]["vertical"].asString();
-            }
-        }
-
-        const std::string dt(m_info["dataType"].asString());
-        if (dt == "laszip")
-            m_dataType = DataType::Laszip;
-        else if (dt == "binary")
-            m_dataType = DataType::Binary;
-        else
-            throw ept_error("Unrecognized EPT dataType: " + dt);
-    }
+    EptInfo(const NL::json& info);
 
     const BOX3D& bounds() const { return m_bounds; }
     uint64_t points() const { return m_points; }
     uint64_t span() const { return m_span; }
     DataType dataType() const { return m_dataType; }
-    const std::string& srs() const { return m_srs; }
-    const Json::Value& schema() const { return m_info["schema"]; }
-    const Json::Value dim(std::string name) const
+    const SpatialReference& srs() const { return m_srs; }
+    const NL::json& schema() const { return m_info["schema"]; }
+    const NL::json dim(std::string name) const
     {
-        for (Json::ArrayIndex i(0); i < schema().size(); ++i)
+        NL::json j;
+        for (auto el : schema())
         {
-            if (schema()[i]["name"].asString() == name)
+            if (el["name"].get<std::string>() == name)
             {
-                return schema()[i];
+                j = el;
+                break;
             }
         }
-        return Json::nullValue;
+        return j;
     }
 
-    uint64_t sources() const { return m_info["sources"].asUInt64(); }
+    uint64_t sources() const { return m_info["sources"].get<uint64_t>(); }
 
-    const Json::Value& json() { return m_info; }
+    const NL::json& json() { return m_info; }
 
 private:
     // Info comes from the values here:
     // https://entwine.io/entwine-point-tile.html#ept-json
-    const Json::Value m_info;
+    const NL::json m_info;
     BOX3D m_bounds;
     uint64_t m_points = 0;
 
@@ -339,23 +274,9 @@ private:
     uint64_t m_span = 0;
 
     DataType m_dataType;
-    std::string m_srs;
+    SpatialReference m_srs;
 };
 
-inline bool operator<(const Key& a, const Key& b)
-{
-    if (a.d < b.d) return true;
-    if (a.d > b.d) return false;
-
-    if (a.x < b.x) return true;
-    if (a.x > b.x) return false;
-
-    if (a.y < b.y) return true;
-    if (a.y > b.y) return false;
-
-    if (a.z < b.z) return true;
-    return false;
-}
 
 class FixedPointLayout : public PointLayout
 {
@@ -370,7 +291,7 @@ protected:
     {
         if (!m_finalized)
         {
-            if (!contains(m_used, dimDetail.id()))
+            if (!Utils::contains(m_used, dimDetail.id()))
             {
                 dimDetail.setOffset(m_pointSize);
 
@@ -382,18 +303,6 @@ protected:
             }
         }
         else return m_propIds.count(name);
-
-        return false;
-    }
-
-    PDAL_DLL bool contains(
-            const Dimension::IdList& idList,
-            const Dimension::Id id) const
-    {
-        for (const auto current : idList)
-        {
-            if (current == id) return true;
-        }
 
         return false;
     }
@@ -558,54 +467,7 @@ public:
 private:
     // Worker thread function.  Wait for a task and run it - or if stop() is
     // called, complete any outstanding task and return.
-    void work()
-    {
-        while (true)
-        {
-            std::unique_lock<std::mutex> lock(m_mutex);
-            m_consumeCv.wait(lock, [this]()
-            {
-                return m_tasks.size() || !m_running;
-            });
-
-            if (m_tasks.size())
-            {
-                ++m_outstanding;
-                auto task(std::move(m_tasks.front()));
-                m_tasks.pop();
-
-                lock.unlock();
-
-                // Notify add(), which may be waiting for a spot in the queue.
-                m_produceCv.notify_all();
-
-                std::string err;
-                try { task(); }
-                catch (std::exception& e) { err = e.what(); }
-                catch (...) { err = "Unknown error"; }
-
-                lock.lock();
-                --m_outstanding;
-                if (err.size())
-                {
-                    if (m_verbose)
-                    {
-                        std::cout << "Exception in pool task: " << err <<
-                            std::endl;
-                    }
-                    m_errors.push_back(err);
-                }
-                lock.unlock();
-
-                // Notify await(), which may be waiting for a running task.
-                m_produceCv.notify_all();
-            }
-            else if (!m_running)
-            {
-                return;
-            }
-        }
-    }
+    void work();
 
     bool m_verbose;
     std::size_t m_numThreads;

@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/Writer.hpp>
 
@@ -55,11 +55,11 @@ private:
     virtual void write(const PointViewPtr view) override;
 
     std::string m_name;
-    Json::Value m_writeDims;
+    NL::json m_writeDims;
 
     PointLayout m_writeLayout;
 
-    Json::Value m_info;
+    NL::json m_info;
     GreyhoundParams m_params;
 };
 

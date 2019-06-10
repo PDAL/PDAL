@@ -157,6 +157,17 @@ TEST(PipelineManagerTest, InputGlobbing)
     FileUtils::deleteFile(Support::temppath("globbed.las"));
 }
 
+// EPT addon writer options are objects and not strings
+TEST(PipelineManagerTest, objects)
+{
+    std::string cmd = Support::binpath(Support::exename("pdal") +
+                                       " pipeline --validate");
+    std::string file = Support::configuredpath("pipeline/ept_addon.json");
+
+    std::string output;
+    EXPECT_NO_THROW(Utils::run_shell_command(cmd + " " + file, output));
+}
+
 TEST(PipelineManagerTest, arrayPipeline)
 {
     std::string cmd = Support::binpath(Support::exename("pdal") +

@@ -34,7 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/util/FileUtils.hpp>
 #include <filters/AssignFilter.hpp>
@@ -92,7 +92,7 @@ TEST(EptAddonWriterTest, fullLoop)
 
         EptAddonWriter writer;
         {
-            Json::Value addons;
+            NL::json addons;
             addons[addonDir + "class"] = "Classification";
             addons[addonDir + "other"] = "Other";
 
@@ -111,7 +111,7 @@ TEST(EptAddonWriterTest, fullLoop)
     // with the addon values.
     EptReader reader;
     {
-        Json::Value addons;
+        NL::json addons;
         addons["Classification"] = addonDir + "class";
         addons["Other"] = addonDir + "other";
 
@@ -169,7 +169,7 @@ TEST(EptAddonWriterTest, boundedWrite)
 
         EptAddonWriter writer;
         {
-            Json::Value addons;
+            NL::json addons;
             addons[addonDir + "bounded"] = "Classification";
 
             Options o;
@@ -188,7 +188,7 @@ TEST(EptAddonWriterTest, boundedWrite)
 
     EptReader reader;
     {
-        Json::Value addons;
+        NL::json addons;
         addons["Classification"] = addonDir + "bounded";
 
         Options o;
@@ -248,7 +248,7 @@ TEST(EptAddonWriterTest, mustDescendFromEptReader)
     EptAddonWriter writer;
     {
         Options o;
-        Json::Value addons;
+        NL::json addons;
         addons[Support::datapath("ept/addon/bad")] = "ReturnNumber";
         o.add("addons", addons);
         writer.setOptions(o);

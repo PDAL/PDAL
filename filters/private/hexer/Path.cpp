@@ -32,7 +32,11 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <cassert>
+
 #include "Path.hpp"
+
+#include <cassert>
 
 using namespace std;
 
@@ -66,34 +70,63 @@ vector<Point> Path::points() const
     return points;
 }
 
-void Path::toWKT( std::ostream& output) const
+void Path::writeRing(std::ostream& out) const
 {
-    vector<Point> pts = points();
-
-    auto outputPoint = [&output](Point& p)
+    auto outputPoint = [&out](const Point& p)
     {
-        output << p.m_x << " " << p.m_y;
+        out << p.m_x << " " << p.m_y;
     };
 
-    output << "(";
-
-    auto pi = pts.begin();
-    if (pi != pts.end())
-        outputPoint(*pi++);
-    for (; pi != pts.end(); ++pi)
+    const vector<Point>& pts = points();
+    assert(pts.size() > 2);
+    out << "(";
+    outputPoint(pts.front());
+    for (auto it = pts.begin() + 1; it != pts.end(); ++it)
     {
-        output << ", ";
-        outputPoint(*pi);
+        out << ", ";
+        outputPoint(*it);
     }
+    out << ")";
+}
 
-    output << ")";
+// WKT (or GeoJSON) doesn't allow nesting of polygons.  You can just have
+// polygons and holes.  Islands within the holes need to be described as
+// separate polygons.  To that end, we gather the islands from all holes
+// and return them to be processed as separate polygons.
+PathPtrList Path::writePolygon(std::ostream& out) const
+{
+    PathPtrList islands;
 
-    vector<Path *> paths = subPaths();
-    for (size_t pi = 0; pi != paths.size(); ++pi)
+    out << "(";
+    writeRing(out);
+    const PathPtrList& paths = subPaths();
+    for (auto& p : paths)
     {
-        Path* p = paths[pi];
-        output <<",";
-        p->toWKT(output);
+        out << ", ";
+        p->writeRing(out);
+        const PathPtrList& subs(p->subPaths());
+        islands.insert(islands.end(), subs.begin(), subs.end());
+    }
+    out << ")";
+    return islands;
+}
+
+
+void Path::toWKT(std::ostream& out) const
+{
+    PathPtrList islands = writePolygon(out);
+
+    // See the note on writePolygon()
+    while (islands.size())
+    {
+        PathPtrList paths;
+        paths.swap(islands);
+        for (Path *p : paths)
+        {
+            out << ", ";
+            PathPtrList subIslands = p->writePolygon(out);
+            islands.insert(islands.end(), subIslands.begin(), subIslands.end());
+        }
     }
 }
 

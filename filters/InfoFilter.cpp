@@ -39,8 +39,6 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <json/json.h>
-
 namespace pdal
 {
 

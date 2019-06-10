@@ -36,9 +36,8 @@
 
 #include <cassert>
 
-#include <json/json.h>
-
 #include <arbiter/arbiter.hpp>
+#include <nlohmann/json.hpp>
 
 #include "private/EptSupport.hpp"
 
@@ -58,20 +57,25 @@ namespace
 
 CREATE_STATIC_STAGE(EptAddonWriter, s_info)
 
-EptAddonWriter::EptAddonWriter()
-    : m_addonsArg(new Json::Value())
-{ }
+struct EptAddonWriter::Args
+{
+    NL::json m_addons;
+    std::size_t m_numThreads;
+};
+
+EptAddonWriter::EptAddonWriter() : m_args(new Args)
+{}
 
 EptAddonWriter::~EptAddonWriter()
-{ }
+{}
 
 std::string EptAddonWriter::getName() const { return s_info.name; }
 
 void EptAddonWriter::addArgs(ProgramArgs& args)
 {
     args.add("addons", "Mapping of output locations to their dimension names",
-            *m_addonsArg).setPositional();
-    args.add("threads", "Number of worker threads", m_numThreads);
+            m_args->m_addons).setPositional();
+    args.add("threads", "Number of worker threads", m_args->m_numThreads);
 }
 
 void EptAddonWriter::addDimensions(PointLayoutPtr layout)
@@ -86,7 +90,7 @@ void EptAddonWriter::prepared(PointTableRef table)
 {
     m_arbiter.reset(new arbiter::Arbiter());
 
-    const std::size_t threads(std::max<std::size_t>(m_numThreads, 4));
+    const std::size_t threads(std::max<std::size_t>(m_args->m_numThreads, 4));
     if (threads > 100)
     {
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
@@ -95,17 +99,17 @@ void EptAddonWriter::prepared(PointTableRef table)
     m_pool.reset(new Pool(threads));
 
     const PointLayout& layout(*table.layout());
-    for (const std::string path : m_addonsArg->getMemberNames())
+    for (auto it : m_args->m_addons.items())
     {
+        const std::string& path = it.key();
+        const std::string& dimName = it.value().get<std::string>();
+
         const auto endpoint(
-                m_arbiter->getEndpoint(arbiter::fs::expandTilde(path)));
+                m_arbiter->getEndpoint(arbiter::expandTilde(path)));
 
-        const std::string dimName((*m_addonsArg)[path].asString());
         const Dimension::Id id(layout.findDim(dimName));
-
         if (id == Dimension::Id::Unknown)
-            throwError("Cannot find dimension: " + dimName);
-
+            throwError("Cannot find dimension '" + dimName + "'.");
         m_addons.emplace_back(new Addon(layout, endpoint, id));
     }
 }
@@ -129,10 +133,8 @@ void EptAddonWriter::ready(PointTableRef table)
         m_hierarchyStep = meta.findChild("step").value<uint64_t>();
         m_info.reset(new EptInfo(info));
 
-        for (const std::string s : keys.getMemberNames())
-        {
-            m_hierarchy[Key(s)] = keys[s].asUInt64();
-        }
+        for (auto el : keys.items())
+            m_hierarchy[Key(el.key())] = el.value().get<uint64_t>();
     }
     catch (std::exception& e)
     {
@@ -192,8 +194,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
     if (ep.isLocal())
     {
-        arbiter::fs::mkdirp(dataEp.root());
-        arbiter::fs::mkdirp(hierEp.root());
+        arbiter::mkdirp(dataEp.root());
+        arbiter::mkdirp(hierEp.root());
     }
 
     // Write the binary dimension data for the addon.
@@ -213,25 +215,25 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     m_pool->await();
 
     // Write the addon hierarchy data.
-    Json::Value h;
+    NL::json h;
     Key key;
     key.b = m_info->bounds();
     writeHierarchy(h, key, hierEp);
-    hierEp.put(key.toString() + ".json", h.toStyledString());
+    hierEp.put(key.toString() + ".json", h.dump());
 
     m_pool->await();
 
     // Write the top-level addon metadata.
-    Json::Value meta;
+    NL::json meta;
     meta["type"] = getTypeString(addon.type());
-    meta["size"] = static_cast<Json::UInt64>(addon.size());
+    meta["size"] = addon.size();
     meta["version"] = "1.0.0";
     meta["dataType"] = "binary";
 
-    ep.put("ept-addon.json", meta.toStyledString());
+    ep.put("ept-addon.json", meta.dump());
 }
 
-void EptAddonWriter::writeHierarchy(Json::Value& curr, const Key& key,
+void EptAddonWriter::writeHierarchy(NL::json& curr, const Key& key,
         const arbiter::Endpoint& hierEp) const
 {
     const std::string keyName(key.toString());
@@ -245,21 +247,19 @@ void EptAddonWriter::writeHierarchy(Json::Value& curr, const Key& key,
         curr[keyName] = -1;
 
         // Create a new hierarchy subtree.
-        Json::Value next;
-        next[keyName] = static_cast<Json::UInt64>(np);
+        NL::json next {{ keyName, np }};
+
         for (uint64_t dir(0); dir < 8; ++dir)
-        {
             writeHierarchy(next, key.bisect(dir), hierEp);
-        }
 
         m_pool->add([&hierEp, keyName, next]()
         {
-            hierEp.put(keyName + ".json", stringify(next));
+            hierEp.put(keyName + ".json", next.dump());
         });
     }
     else
     {
-        curr[keyName] = static_cast<Json::UInt64>(np);
+        curr[keyName] = np;
         for (uint64_t dir(0); dir < 8; ++dir)
         {
             writeHierarchy(curr, key.bisect(dir), hierEp);

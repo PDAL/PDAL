@@ -36,6 +36,7 @@
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/pdal_types.hpp>
 
 #include "DimRange.hpp"
@@ -168,34 +169,41 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
     bool returnLast = false;
     bool returnOnly = false;
 
-    for (auto& r : returns)
+    if (!returns.size())
     {
-        Utils::trim(r);
-        if (r == "first")
-            returnFirst = true;
-        else if (r == "intermediate")
-            returnIntermediate = true;
-        else if (r == "last")
-            returnLast = true;
-        else if (r == "only")
-            returnOnly = true;
+        first->append(*input);
     }
-
-    for (PointId i = 0; i < input->size(); ++i)
+    else
     {
-        uint8_t rn = input->getFieldAs<uint8_t>(Id::ReturnNumber, i);
-        uint8_t nr = input->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-        
-        if ((((rn == 1) && (nr > 1)) && returnFirst) ||
-            (((rn > 1) && (rn < nr)) && returnIntermediate) ||
-            (((rn == nr) && (nr > 1)) && returnLast) ||
-            ((nr == 1) && returnOnly))
+        for (auto& r : returns)
         {
-            first->appendPoint(*input.get(), i);
+            Utils::trim(r);
+            if (r == "first")
+                returnFirst = true;
+            else if (r == "intermediate")
+                returnIntermediate = true;
+            else if (r == "last")
+                returnLast = true;
+            else if (r == "only")
+                returnOnly = true;
         }
-        else
+
+        for (PointId i = 0; i < input->size(); ++i)
         {
-            second->appendPoint(*input.get(), i);
+            uint8_t rn = input->getFieldAs<uint8_t>(Id::ReturnNumber, i);
+            uint8_t nr = input->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
+            
+            if ((((rn == 1) && (nr > 1)) && returnFirst) ||
+                (((rn > 1) && (rn < nr)) && returnIntermediate) ||
+                (((rn == nr) && (nr > 1)) && returnLast) ||
+                ((nr == 1) && returnOnly))
+            {
+                first->appendPoint(*input.get(), i);
+            }
+            else
+            {
+                second->appendPoint(*input.get(), i);
+            }
         }
     }
 }

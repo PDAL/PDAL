@@ -10,7 +10,7 @@
     },
     {
       "type": "filters.reprojection",
-      "out_srs": "EPSG:4326+4326"
+      "out_srs": "EPSG:4326+5703"
     },
     "@CMAKE_SOURCE_DIR@/test/temp/colorized.las"
   ]

@@ -34,13 +34,14 @@
 
 #pragma once
 
+#include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 #include <tiledb/tiledb>
 
 namespace pdal
 {
 
-class PDAL_DLL TileDBWriter : public Writer
+class PDAL_DLL TileDBWriter : public Writer, public Streamable
 {
 public:
     struct DimBuffer
@@ -62,7 +63,10 @@ private:
     virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
+    virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
+
+    bool flushCache(size_t size);
 
     std::string m_arrayName;
     std::string m_cfgFileName;
@@ -71,6 +75,9 @@ private:
     size_t m_x_tile_size;
     size_t m_y_tile_size;
     size_t m_z_tile_size;
+    size_t m_current_idx;
+    size_t m_cache_size;
+
 
     bool m_stats;
 
@@ -85,6 +92,7 @@ private:
     std::unique_ptr<tiledb::Array> m_array;
     std::unique_ptr<tiledb::Query> m_query;
     std::vector<DimBuffer> m_attrs;
+    std::vector<double> m_coords;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;

@@ -7,6 +7,8 @@ Implements `TileDB`_ 1.4.1+ reads from an array.
 
 .. plugin::
 
+.. streamable::
+
 Example
 -------
 
@@ -44,6 +46,9 @@ y_tile_size
 
 z_tile_size
   Tile size (z) in a Cartesian projection [Optional]
+
+chunk_size
+  Point cache size for chunked writes [Optional]
 
 compression
   TileDB compression type for attributes, default is None [Optional]

@@ -38,7 +38,6 @@
 #include <map>
 #include <math.h>
 
-#include <json/json.h>
 #include <arbiter/arbiter.hpp>
 
 #include <pdal/Reader.hpp>
@@ -76,16 +75,19 @@ std::map<std::string, pdal::Dimension::Type> const dimTypes
 };
 }
 
+class SrsTransform;
+
 class PDAL_DLL EsriReader : public Reader
 {
 public:
-    BOX3D createBounds();
+    EsriReader();
+    ~EsriReader();
 
 protected:
     virtual void initInfo() = 0;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const = 0;
-    virtual Json::Value fetchJson(std::string) = 0;
+    virtual NL::json fetchJson(std::string) = 0;
 
     struct EsriArgs
     {
@@ -145,9 +147,8 @@ protected:
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     arbiter::gzip::Decompressor m_decomp;
 
-
     EsriArgs m_args;
-    Json::Value m_info;
+    NL::json m_info;
     std::mutex m_mutex;
     BOX3D m_bounds;
     BOX3D m_ecefBounds;
@@ -155,19 +156,8 @@ protected:
     int m_nodeCap;
     int m_maxNode = 0;
     Version m_version;
-
-    //Spatial Reference variables
     SpatialReference m_nativeSrs;
-    SpatialReference m_ecefSrs;
-
-    typedef void* ReferencePtr;
-    typedef void* TransformPtr;
-    ReferencePtr m_nativeRef;
-    ReferencePtr m_ecefRef;
-
-    TransformPtr m_toEcefTransform;
-    TransformPtr m_toNativeTransform;
-
+    std::unique_ptr<SrsTransform> m_ecefTransform;
 
     struct dimData
     {
@@ -177,7 +167,7 @@ protected:
         std::string name;
     };
     std::map<Dimension::Id, dimData> m_dimMap;
-    std::map<int, Json::Value> m_nodepages;
+    std::map<int, NL::json> m_nodepages;
 
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
@@ -186,13 +176,14 @@ protected:
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
-    BOX3D createCube(Json::Value base);
-    BOX3D parseBox(Json::Value base);
-    void traverseTree(Json::Value page, int index, std::vector<int>& nodes,
+    BOX3D createCube(const NL::json& base);
+    BOX3D parseBox(const NL::json& base);
+    void traverseTree(NL::json page, int index, std::vector<int>& nodes,
         int depth, int pageIndex);
+
+private:
+    void createBounds();
 };
-
-
 
 } // namespace pdal
 

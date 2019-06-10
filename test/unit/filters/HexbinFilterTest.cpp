@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <io/LasReader.hpp>
+#include <filters/private/hexer/HexGrid.hpp>
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
@@ -94,3 +95,40 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
     out.close();
     FileUtils::deleteFile(filename);
 }
+
+// Test that we create proper WKT for geometry with islands.
+TEST(HexbinFilterTest, issue_2507)
+{
+    hexer::HexGrid grid(1);
+
+    // This is an arrangement with two holes.  One of the holes has two
+    // islands and one of those islands has a hole.
+    // Here's a link to the picture.  The green numbers indicate the hexes
+    // listed here:
+    // https://photos.app.goo.gl/P3B3mU4Zre6zADEQ6
+    std::vector<std::pair<int, int>> hexes {
+        {0, 3}, {0, 4}, {0,5}, {0, 6},
+        {1, 2}, {1, 6},
+        {2, 2}, {2, 4}, {2, 5}, {2, 7},
+        {3, 1}, {3, 3}, {3, 5}, {3, 7},
+        {4, 1}, {4, 2}, {4, 4}, {4, 5}, {4, 8},
+        {5, 0}, {5, 2}, {5, 6}, {5, 8},
+        {6, 1}, {6, 3}, {6, 4}, {6, 8},
+        {7, 1}, {7, 3}, {7, 4}, {7, 5}, {7, 7},
+        {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 6}, {8, 7}
+    };
+
+    for (auto p : hexes)
+        grid.addDenseHexagon(p.first, p.second);
+    grid.findShapes();
+    grid.findParentPaths();
+
+    std::ostringstream oss;
+    grid.toWKT(oss);
+    std::string s(oss.str());
+
+    std::string test =
+    R"delim(MULTIPOLYGON (((-5 -0.5, -5 -0.5, -6 -1, -6 -1, -7 -1.5, -7 -1.5, -8 -2, -8 -2, -8 -2, -8 -3, -8 -3, -8 -4, -8 -4, -8 -5, -8 -5, -8 -6, -8 -6, -8 -7, -8 -7, -8 -7, -7 -7.5, -7 -7.5, -6 -8, -6 -8, -5 -8.5, -5 -8.5, -5 -8.5, -4 -8, -4 -8, -3 -7.5, -3 -7.5, -2 -7, -2 -7, -1 -6.5, -1 -6.5, 0 -6, 0 -6, 0 -6, 0 -5, 0 -5, 0 -4, 0 -4, 0 -3, 0 -3, 0 -3, -1 -2.5, -1 -2.5, -2 -2, -2 -2, -3 -1.5, -3 -1.5, -4 -1, -4 -1, -5 -0.5, -5 -0.5), (-4 -2, -4 -1, -5 -0.5, -6 -1, -6 -1, -7 -1.5, -7 -1.5, -8 -2, -8 -3, -7 -3.5, -6 -3, -6 -3, -5 -2.5, -5 -2.5, -4 -2), (0 -6, 0 -5, 0 -5, 0 -4, 0 -4, 0 -3, -1 -2.5, -1 -2.5, -2 -2, -2 -2, -3 -1.5, -4 -2, -4 -2, -5 -2.5, -5 -2.5, -6 -3, -6 -4, -6 -4, -6 -4, -7 -4.5, -7 -5.5, -7 -5.5, -7 -5.5, -8 -6, -8 -7, -7 -7.5, -7 -7.5, -6 -8, -6 -8, -5 -8.5, -4 -8, -4 -8, -3 -7.5, -3 -7.5, -2 -7, -2 -7, -1 -6.5, -1 -6.5, 0 -6)), ((-3 -3.5, -3 -3.5, -4 -4, -4 -4, -4 -4, -4 -5, -4 -5, -4 -5, -3 -5.5, -3 -5.5, -3 -5.5, -2 -5, -2 -5, -2 -5, -2 -4, -2 -4, -2 -4, -3 -3.5, -3 -3.5), (-2 -5, -2 -4, -3 -3.5, -4 -4, -4 -5, -3 -5.5, -2 -5)), ((-5 -6.5, -5 -6.5, -5 -6.5, -5 -6.5, -5 -6.5, -5 -6.5, -5 -6.5))))delim";
+    EXPECT_EQ(s, test);
+}
+

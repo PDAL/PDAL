@@ -48,6 +48,12 @@ namespace pdal
 class PDAL_DLL BOX2D
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     double minx;  ///< Minimum X value.
     double maxx;  ///< Maximum X value.
     double miny;  ///< Minimum Y value.
@@ -284,7 +290,17 @@ public:
       \return  A bounds box with infinite bounds,
     */
     static const BOX2D& getDefaultSpatialExtent();
+
+    /**
+      Parse a string as a BOX2D.
+
+      \param s    String representation of the box.
+      \param pos  Position in the string at which to start parsing.
+                  On return set to parsing end position.
+    */
+    void parse(const std::string& s, std::string::size_type& pos);
 };
+
 
 /**
   BOX3D represents a three-dimensional box with double-precision bounds.
@@ -292,6 +308,12 @@ public:
 class PDAL_DLL BOX3D : private BOX2D
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     using BOX2D::minx;
     using BOX2D::maxx;
     using BOX2D::miny;
@@ -573,6 +595,15 @@ public:
       \return  A bounds box with infinite bounds,
     */
     static const BOX3D& getDefaultSpatialExtent();
+
+    /**
+      Parse a string as a BOX3D.
+
+      \param s    String representation of the box.
+      \param pos  Position in the string at which to start parsing.
+                  On return set to parsing end position.
+    */
+    void parse(const std::string& s, std::string::size_type& pos);
 };
 
 /**
@@ -582,6 +613,12 @@ public:
 class PDAL_DLL Bounds
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     Bounds()
     {}
 
@@ -591,6 +628,9 @@ public:
     BOX3D to3d() const;
     BOX2D to2d() const;
     bool is3d() const;
+    void grow(double x, double y);
+    void grow(double x, double y, double z);
+    void parse(const std::string& s, std::string::size_type& pos);
 
     friend PDAL_DLL std::istream& operator >> (std::istream& in,
         Bounds& bounds);
@@ -670,6 +710,6 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
-PDAL_DLL std::ostream& operator << (std::ostream& in, const Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds& bounds);
 
 } // namespace pdal

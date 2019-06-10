@@ -43,7 +43,7 @@ namespace pdal
 class Expression
 {
 public:
-    Expression(const PointLayout& layout, const Json::Value& json)
+    Expression(const PointLayout& layout, const NL::json& json)
         : m_layout(layout)
     {
         build(m_root, json);
@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    void build(LogicGate& gate, const Json::Value& json);
+    void build(LogicGate& gate, const NL::json& json);
 
     const PointLayout& m_layout;
     LogicalAnd m_root;
