@@ -52,7 +52,7 @@ namespace pdal
 #pragma warning (push)
 #pragma warning (disable: 4244)
 
-void calculateBounds(PointView& view, BOX2D& output)
+void calculateBounds(const PointView& view, BOX2D& output)
 {
     for (PointId idx = 0; idx < view.size(); idx++)
     {
@@ -64,7 +64,7 @@ void calculateBounds(PointView& view, BOX2D& output)
 }
 
 
-void calculateBounds(PointView& view, BOX3D& output)
+void calculateBounds(const PointView& view, BOX3D& output)
 {
     for (PointId idx = 0; idx < view.size(); idx++)
     {
@@ -76,7 +76,7 @@ void calculateBounds(PointView& view, BOX3D& output)
     }
 }
 
-PointViewPtr demeanPointView(PointView& view)
+PointViewPtr demeanPointView(const PointView& view)
 {
     using namespace Eigen;
     using namespace Dimension;
@@ -98,7 +98,7 @@ PointViewPtr demeanPointView(PointView& view)
     return outView;
 }
 
-PointViewPtr demeanPointView(PointView& view, double* centroid)
+PointViewPtr demeanPointView(const PointView& view, double* centroid)
 {
     using namespace Eigen;
     using namespace Dimension;
@@ -117,7 +117,7 @@ PointViewPtr demeanPointView(PointView& view, double* centroid)
     return outView;
 }
 
-PointViewPtr transform(PointView& view, double* matrix)
+PointViewPtr transform(const PointView& view, double* matrix)
 {
     using namespace Dimension;
 
@@ -156,7 +156,7 @@ void transformInPlace(PointView& view, double* matrix)
     }
 }
 
-Eigen::Vector3d computeCentroid(PointView& view,
+Eigen::Vector3d computeCentroid(const PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
@@ -185,7 +185,7 @@ Eigen::Vector3d computeCentroid(PointView& view,
     return centroid;
 }
 
-Eigen::Matrix3d computeCovariance(PointView& view,
+Eigen::Matrix3d computeCovariance(const PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
@@ -214,7 +214,7 @@ Eigen::Matrix3d computeCovariance(PointView& view,
     return A * A.transpose() / (ids.size()-1);
 }
 
-uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
+uint8_t computeRank(const PointView& view, const std::vector<PointId>& ids,
     double threshold)
 {
     using namespace Eigen;
@@ -227,7 +227,7 @@ uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
     return static_cast<uint8_t>(svd.rank());
 }
 
-Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
+Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows, int cols,
                                      double cell_size, BOX2D bounds)
 {
     using namespace Dimension;

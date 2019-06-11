@@ -60,12 +60,12 @@ typedef std::shared_ptr<PointView> PointViewPtr;
         method. Otherwise, an exception will be thrown.
     \endverbatim
 */
-PDAL_DLL void calculateBounds(PointView& view, BOX2D& box);
-PDAL_DLL void calculateBounds(PointView& view, BOX3D& box);
+PDAL_DLL void calculateBounds(const PointView& view, BOX2D& box);
+PDAL_DLL void calculateBounds(const PointView& view, BOX3D& box);
 
-PDAL_DLL PointViewPtr demeanPointView(PointView& view);
-PDAL_DLL PointViewPtr demeanPointView(PointView& ,double* centroid);
-PDAL_DLL PointViewPtr transform(PointView&, double* matrix);
+PDAL_DLL PointViewPtr demeanPointView(const PointView& view);
+PDAL_DLL PointViewPtr demeanPointView(const PointView& ,double* centroid);
+PDAL_DLL PointViewPtr transform(const PointView&, double* matrix);
 PDAL_DLL void transformInPlace(PointView&, double* matrix);
 
 /**
@@ -90,7 +90,7 @@ PDAL_DLL void transformInPlace(PointView&, double* matrix);
   \param ids a vector of PointIds specifying a subset of points.
   \return the 3D centroid of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Vector3d computeCentroid(PointView& view,
+PDAL_DLL Eigen::Vector3d computeCentroid(const PointView& view,
     const std::vector<PointId>& ids);
 
 /**
@@ -115,7 +115,7 @@ PDAL_DLL Eigen::Vector3d computeCentroid(PointView& view,
   \param ids a vector of PointIds specifying a subset of points.
   \return the covariance matrix of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Matrix3d computeCovariance(PointView& view,
+PDAL_DLL Eigen::Matrix3d computeCovariance(const PointView& view,
     const std::vector<PointId>& ids);
 
 /**
@@ -147,8 +147,8 @@ PDAL_DLL Eigen::Matrix3d computeCovariance(PointView& view,
   \param ids a vector of PointIds specifying a subset of points.
   \return the estimated rank.
 */
-PDAL_DLL uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
-                             double threshold);
+PDAL_DLL uint8_t computeRank(const PointView& view,
+        const std::vector<PointId>& ids, double threshold);
 
 /**
   Find local minimum elevations by extended local minimum.
@@ -168,7 +168,7 @@ PDAL_DLL uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
   \param bounds the 2D bounds of the PointView.
   \return the matrix of minimum Z values (ignoring low outliers).
 */
-PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows,
+PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows,
         int cols, double cell_size, BOX2D bounds);
 
 /**

@@ -445,7 +445,7 @@ bool KDIndex<2>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX2D bounds;
-        calculateBounds(const_cast<PointView&>(m_buf), bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
@@ -471,7 +471,7 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX3D bounds;
-        calculateBounds(const_cast<PointView&>(m_buf), bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;

@@ -101,13 +101,13 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
 
 void PointView::calculateBounds(BOX2D& output) const
 {
-    pdal::calculateBounds(const_cast<PointView&>(*this), output);
+    pdal::calculateBounds(*this, output);
 }
 
 
 void PointView::calculateBounds(BOX3D& output) const
 {
-    pdal::calculateBounds(const_cast<PointView&>(*this), output);
+    pdal::calculateBounds(*this, output);
 }
 
 
