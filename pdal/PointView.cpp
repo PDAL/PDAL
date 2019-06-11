@@ -33,15 +33,12 @@
 ****************************************************************************/
 
 #include <iomanip>
-#include <numeric>
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
 #include <pdal/util/Algorithm.hpp>
-
-#include <Eigen/Dense>
 
 namespace pdal
 {
@@ -99,6 +96,18 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
         rawId = m_index[idx];
     }
     m_pointTable.setFieldInternal(dim, rawId, buf);
+}
+
+
+void PointView::calculateBounds(BOX2D& output) const
+{
+    pdal::calculateBounds(const_cast<PointView&>(*this), output);
+}
+
+
+void PointView::calculateBounds(BOX3D& output) const
+{
+    pdal::calculateBounds(const_cast<PointView&>(*this), output);
 }
 
 

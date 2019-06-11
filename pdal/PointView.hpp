@@ -182,6 +182,19 @@ public:
         getFieldInternal(dim, idx, buf);
     }
 
+    /*! @return a cumulated bounds of all points in the PointView.
+        \verbatim embed:rst
+        .. note::
+
+            This method requires that an `X`, `Y`, and `Z` dimension be
+            available, and that it can be casted into a *double* data
+            type using the :cpp:func:`pdal::Dimension::applyScaling`
+            method. Otherwise, an exception will be thrown.
+        \endverbatim
+    */
+    void calculateBounds(BOX2D& box) const;
+    void calculateBounds(BOX3D& box) const;
+
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id id) const
         { return layout()->hasDim(id); }
