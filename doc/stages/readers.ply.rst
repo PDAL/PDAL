@@ -41,6 +41,9 @@ Options
 filename
   ply file to read [Required]
 
+force_double
+  Read all X,Y,Z coordinates with double precision, regardless of declared dimension type. [Default: false]
+
 .. include:: reader_opts.rst
 
 .. _polygon file format: http://paulbourke.net/dataformats/ply/

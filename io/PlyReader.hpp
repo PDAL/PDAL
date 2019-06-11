@@ -126,7 +126,9 @@ private:
     std::vector<Element> m_elements;
     PointId m_index;
     Element *m_vertexElt;
+    bool m_forceDouble;
 
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);

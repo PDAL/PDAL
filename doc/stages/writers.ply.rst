@@ -48,6 +48,9 @@ faces
   Write a mesh as faces in addition to writing points as vertices.
   [Default: false]
 
+normalize_names
+  Attempt to normalize PLY field names. [Default: false]
+
 precision
   If specified, the number of digits to the right of the decimal place
   using f-style formatting.  Only permitted when 'storage_mode' is 'ascii'.

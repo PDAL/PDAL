@@ -66,6 +66,7 @@ void PlyWriter::addArgs(ProgramArgs& args)
     args.add("storage_mode", "PLY Storage Mode", m_format, Format::Ascii);
     args.add("dims", "Dimension names", m_dimNames);
     args.add("faces", "Write faces", m_faces);
+    args.add("normalize_names", "Attempt to normalize PLY field names", m_normFieldNames);
     m_precisionArg = &args.add("precision", "Output precision", m_precision, 3);
 }
 
@@ -99,14 +100,14 @@ std::string PlyWriter::getType(Dimension::Type type) const
 {
    static std::map<Dimension::Type, std::string> types =
     {
-        { Dimension::Type::Signed8, "int8" },
-        { Dimension::Type::Unsigned8, "uint8" },
-        { Dimension::Type::Signed16, "int16" },
-        { Dimension::Type::Unsigned16, "uint16" },
-        { Dimension::Type::Signed32, "int32" },
-        { Dimension::Type::Unsigned32, "uint32" },
-        { Dimension::Type::Float, "float32" },
-        { Dimension::Type::Double, "float64" }
+        { Dimension::Type::Signed8, "char" },
+        { Dimension::Type::Unsigned8, "uchar" },
+        { Dimension::Type::Signed16, "short" },
+        { Dimension::Type::Unsigned16, "ushort" },
+        { Dimension::Type::Signed32, "int" },
+        { Dimension::Type::Unsigned32, "uint" },
+        { Dimension::Type::Float, "float" },
+        { Dimension::Type::Double, "double" }
     };
 
     try
@@ -134,12 +135,23 @@ void PlyWriter::writeHeader(PointLayoutPtr layout) const
     {
         std::string name = *ni++;
         std::string typeString = getType(layout->dimType(dim));
+
+        if (m_normFieldNames){
+            if (name == "normalx" || name == "normal_x") name = "nx";
+            if (name == "normaly" || name == "normal_y") name = "ny";
+            if (name == "normalz" || name == "normal_z") name = "nz";
+
+            if (name == "diffuse_red") name = "red";
+            if (name == "diffuse_green") name = "green";
+            if (name == "diffuse_blue") name = "blue";
+        }
+
         *m_stream << "property " << typeString << " " << name << std::endl;
     }
     if (m_faces)
     {
         *m_stream << "element face " << faceCount() << std::endl;
-        *m_stream << "property list uint8 uint32 vertex_indices" << std::endl;
+        *m_stream << "property list uchar uint vertex_indices" << std::endl;
     }
     *m_stream << "end_header" << std::endl;
 }

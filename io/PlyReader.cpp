@@ -58,6 +58,12 @@ PlyReader::PlyReader() : m_vertexElt(nullptr)
 {}
 
 
+void PlyReader::addArgs(ProgramArgs& args)
+{
+    args.add("force_double", "Read all X,Y,Z coordinates with double precision, regardless of declared dimension type.", m_forceDouble);
+}
+
+
 std::string PlyReader::readLine()
 {
     m_line.clear();
@@ -304,9 +310,11 @@ void PlyReader::initialize()
 void PlyReader::addDimensions(PointLayoutPtr layout)
 {
     // Override XYZ to doubles.
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-    layout->registerDim(Dimension::Id::Z);
+    if (m_forceDouble){
+        layout->registerDim(Dimension::Id::X);
+        layout->registerDim(Dimension::Id::Y);
+        layout->registerDim(Dimension::Id::Z);
+    }
 
     for (auto& elt : m_elements)
     {

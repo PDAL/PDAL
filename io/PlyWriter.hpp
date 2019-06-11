@@ -74,6 +74,7 @@ private:
     StringList m_dimNames;
     Dimension::IdList m_dims;
     int m_precision;
+    bool m_normFieldNames;
     Arg *m_precisionArg;
     std::vector<PointViewPtr> m_views;
 };
