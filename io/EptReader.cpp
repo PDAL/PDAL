@@ -668,8 +668,7 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
 
     dec.decompress(compressed.data(), compressed.size());
 
-    auto tab = std::move(uncompressed);
-    ShallowPointTable table(*m_remoteLayout,tab.data(), tab.size());
+    ShallowPointTable table(*m_remoteLayout,uncompressed.data(), uncompressed.size());
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
