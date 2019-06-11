@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2017, Connor Manning (connor@hobu.co)
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2017, Connor Manning (connor@hobu.co)
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #include "EptReader.hpp"
 
@@ -51,34 +51,32 @@ namespace pdal
 
 namespace
 {
-    const StaticPluginInfo s_info
-    {
-        "readers.ept",
-        "EPT Reader",
-        "http://pdal.io/stages/reader.ept.html",
-        { "ept" }
-    };
+const StaticPluginInfo s_info{"readers.ept",
+                              "EPT Reader",
+                              "http://pdal.io/stages/reader.ept.html",
+                              {"ept"}};
 
-    const std::string addonFilename { "ept-addon.json" };
+const std::string addonFilename{"ept-addon.json"};
 
-    Dimension::Type getType(const NL::json& dim)
+Dimension::Type getType(const NL::json& dim)
+{
+    if (dim.contains("scale") && dim["scale"].is_number())
+        return Dimension::Type::Double;
+    else if (dim.contains("type") && dim.contains("size"))
     {
-        if (dim.contains("scale") && dim["scale"].is_number())
-            return Dimension::Type::Double;
-        else if (dim.contains("type") && dim.contains("size"))
+        try
         {
-            try
-            {
-                const std::string typestring(dim["type"].get<std::string>());
-                const uint64_t size(dim["size"].get<uint64_t>());
-                return Dimension::type(typestring, size);
-            }
-            catch (const NL::json::type_error&)
-            {}
+            const std::string typestring(dim["type"].get<std::string>());
+            const uint64_t size(dim["size"].get<uint64_t>());
+            return Dimension::type(typestring, size);
         }
-        return Dimension::Type::None;
+        catch (const NL::json::type_error&)
+        {
+        }
     }
+    return Dimension::Type::None;
 }
+} // namespace
 
 CREATE_STATIC_STAGE(EptReader, s_info);
 
@@ -88,30 +86,30 @@ public:
     static constexpr double LOWEST = (std::numeric_limits<double>::lowest)();
     static constexpr double HIGHEST = (std::numeric_limits<double>::max)();
 
-    EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
-        HIGHEST, HIGHEST, HIGHEST))
-    {}
+    EptBounds()
+        : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST))
+    {
+    }
 };
 
 namespace Utils
 {
-    template<>
-    bool fromString<EptBounds>(const std::string& s, EptBounds& bounds)
-    {
-        if (!fromString(s, (SrsBounds&)bounds))
-            return false;
+template <> bool fromString<EptBounds>(const std::string& s, EptBounds& bounds)
+{
+    if (!fromString(s, (SrsBounds&)bounds))
+        return false;
 
-        // If we're setting 2D bounds, grow to 3D by explicitly setting
-        // Z dimensions.
-        if (!bounds.is3d())
-        {
-            BOX2D box = bounds.to2d();
-            bounds.grow(box.minx, box.miny, EptBounds::LOWEST);
-            bounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
-        }
-        return true;
+    // If we're setting 2D bounds, grow to 3D by explicitly setting
+    // Z dimensions.
+    if (!bounds.is3d())
+    {
+        BOX2D box = bounds.to2d();
+        bounds.grow(box.minx, box.miny, EptBounds::LOWEST);
+        bounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
     }
+    return true;
 }
+} // namespace Utils
 
 struct EptReader::Args
 {
@@ -123,14 +121,14 @@ public:
     NL::json m_addons;
 };
 
+EptReader::EptReader() : m_args(new EptReader::Args) {}
 
-EptReader::EptReader() : m_args(new EptReader::Args)
-{}
+EptReader::~EptReader() {}
 
-EptReader::~EptReader()
-{}
-
-std::string EptReader::getName() const { return s_info.name; }
+std::string EptReader::getName() const
+{
+    return s_info.name;
+}
 
 void EptReader::addArgs(ProgramArgs& args)
 {
@@ -139,9 +137,8 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("threads", "Number of worker threads", m_args->m_threads);
     args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
-        m_args->m_addons);
+             m_args->m_addons);
 }
-
 
 void EptReader::initialize()
 {
@@ -169,8 +166,9 @@ void EptReader::initialize()
     const std::size_t threads((std::max)(m_args->m_threads, size_t(4)));
     if (threads > 100)
     {
-        log()->get(LogLevel::Warning) << "Using a large thread count: " <<
-            threads << " threads" << std::endl;
+        log()->get(LogLevel::Warning)
+            << "Using a large thread count: " << threads << " threads"
+            << std::endl;
     }
     m_pool.reset(new Pool(threads));
 
@@ -189,15 +187,15 @@ void EptReader::initialize()
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
         throwError("Can't use bounds with SRS with data source that has "
-            "no SRS.");
+                   "no SRS.");
 
     setSpatialReference(m_info->srs());
 
     m_queryBounds = m_args->m_bounds.to3d();
 
     if (boundsSrs.valid())
-        gdal::reprojectBounds(m_queryBounds,
-            boundsSrs.getWKT(), m_info->srs().getWKT());
+        gdal::reprojectBounds(m_queryBounds, boundsSrs.getWKT(),
+                              m_info->srs().getWKT());
 
     try
     {
@@ -236,7 +234,6 @@ void EptReader::initialize()
     debug << "Threads: " << m_pool->size() << std::endl;
 }
 
-
 void EptReader::handleOriginQuery()
 {
     const std::string search(m_args->m_origin);
@@ -244,8 +241,8 @@ void EptReader::handleOriginQuery()
     if (search.empty())
         return;
 
-    log()->get(LogLevel::Debug) << "Searching sources for " << search <<
-        std::endl;
+    log()->get(LogLevel::Debug)
+        << "Searching sources for " << search << std::endl;
 
     const NL::json sources(parse(m_ep->get("ept-sources/list.json")));
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
@@ -302,8 +299,9 @@ void EptReader::handleOriginQuery()
         // it - it's possible that both a bounds and an origin are specified.
         m_queryBounds.clip(q);
 
-        log()->get(LogLevel::Debug) << "Query origin " << m_queryOriginId <<
-            ": " << found["id"].get<std::string>() << std::endl;
+        log()->get(LogLevel::Debug)
+            << "Query origin " << m_queryOriginId << ": "
+            << found["id"].get<std::string>() << std::endl;
     }
     catch (std::exception& e)
     {
@@ -349,8 +347,9 @@ void EptReader::addDimensions(PointLayoutPtr layout)
         // rather than its serialized type.
         const Dimension::Type type = getType(el);
 
-        log()->get(LogLevel::Debug) << "Registering dim " << name << ": " <<
-            Dimension::interpretationName(type) << std::endl;
+        log()->get(LogLevel::Debug)
+            << "Registering dim " << name << ": "
+            << Dimension::interpretationName(type) << std::endl;
 
         layout->registerOrAssignDim(name, type);
         m_remoteLayout->registerOrAssignDim(name, type);
@@ -396,8 +395,8 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
             try
             {
-                const NL::json addonInfo
-                    { NL::json::parse(ep.get(addonFilename)) };
+                const NL::json addonInfo{
+                    NL::json::parse(ep.get(addonFilename))};
                 const Dimension::Type type(getType(addonInfo));
                 const Dimension::Id id(
                     layout->registerOrAssignDim(dimName, type));
@@ -405,14 +404,14 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             }
             catch (NL::json::parse_error&)
             {
-                throwError("Unable to parse EPT addon file '" +
-                    addonFilename + "'.");
+                throwError("Unable to parse EPT addon file '" + addonFilename +
+                           "'.");
             }
 
-            log()->get(LogLevel::Debug) << "Registering addon dim " <<
-                dimName << ": " <<
-                Dimension::interpretationName(m_addons.back()->type()) <<
-                ", from " << root << std::endl;
+            log()->get(LogLevel::Debug)
+                << "Registering addon dim " << dimName << ": "
+                << Dimension::interpretationName(m_addons.back()->type())
+                << ", from " << root << std::endl;
         }
     }
     catch (std::exception& e)
@@ -450,15 +449,15 @@ void EptReader::ready(PointTableRef table)
         j[p.first.toString()] = p.second;
     }
 
-    log()->get(LogLevel::Debug) << "Overlap nodes: " << m_overlaps.size() <<
-        std::endl;
-    log()->get(LogLevel::Debug) << "Overlap points: " << overlapPoints <<
-        std::endl;
+    log()->get(LogLevel::Debug)
+        << "Overlap nodes: " << m_overlaps.size() << std::endl;
+    log()->get(LogLevel::Debug)
+        << "Overlap points: " << overlapPoints << std::endl;
 
     if (overlapPoints > 1e8)
     {
-        log()->get(LogLevel::Warning) << overlapPoints <<
-            " will be downloaded" << std::endl;
+        log()->get(LogLevel::Warning)
+            << overlapPoints << " will be downloaded" << std::endl;
     }
 
     if (m_nodeIdDim != Dimension::Id::Unknown)
@@ -475,8 +474,7 @@ void EptReader::ready(PointTableRef table)
 void EptReader::overlaps()
 {
     auto parseEndpoint = [this](const arbiter::Endpoint& ep,
-        const std::string file)
-    {
+                                const std::string file) {
         NL::json j;
         try
         {
@@ -516,11 +514,13 @@ void EptReader::overlaps()
 }
 
 void EptReader::overlaps(const arbiter::Endpoint& ep,
-        std::map<Key, uint64_t>& target, const NL::json& hier,
-        const Key& key)
+                         std::map<Key, uint64_t>& target, const NL::json& hier,
+                         const Key& key)
 {
-    if (!key.b.overlaps(m_queryBounds)) return;
-    if (m_depthEnd && key.d >= m_depthEnd) return;
+    if (!key.b.overlaps(m_queryBounds))
+        return;
+    if (m_depthEnd && key.d >= m_depthEnd)
+        return;
 
     auto it = hier.find(key.toString());
     if (it == hier.end())
@@ -535,10 +535,9 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
 
         // If the hierarchy points value here is -1, then we need to fetch the
         // hierarchy subtree corresponding to this root.
-        m_pool->add([this, &ep, &target, key]()
-        {
-            const auto subRoot(parse(ep.get(
-                            "ept-hierarchy/" + key.toString() + ".json")));
+        m_pool->add([this, &ep, &target, key]() {
+            const auto subRoot(
+                parse(ep.get("ept-hierarchy/" + key.toString() + ".json")));
             overlaps(ep, target, subRoot, key);
         });
     }
@@ -564,11 +563,11 @@ PointViewSet EptReader::run(PointViewPtr view)
     {
         const Key& key(entry.first);
 
-        log()->get(LogLevel::Debug) << "Data " << nodeId << "/" <<
-            m_overlaps.size() << ": " << key.toString() << std::endl;
+        log()->get(LogLevel::Debug)
+            << "Data " << nodeId << "/" << m_overlaps.size() << ": "
+            << key.toString() << std::endl;
 
-        m_pool->add([this, &view, &key, nodeId]()
-        {
+        m_pool->add([this, &view, &key, nodeId]() {
             const std::vector<PointId> added(readNode(*view, key, nodeId));
 
             std::lock_guard<std::mutex> lock(m_mutex);
@@ -601,7 +600,7 @@ PointViewSet EptReader::run(PointViewPtr view)
 }
 
 std::vector<PointId> EptReader::readNode(PointView& dst, const Key& key,
-        const uint64_t nodeId) const
+                                         const uint64_t nodeId) const
 {
     if (m_info->dataType() == EptInfo::DataType::Laszip)
         return readLaszip(dst, key, nodeId);
@@ -610,7 +609,7 @@ std::vector<PointId> EptReader::readNode(PointView& dst, const Key& key,
 }
 
 std::vector<PointId> EptReader::readLaszip(PointView& dst, const Key& key,
-        const uint64_t nodeId) const
+                                           const uint64_t nodeId) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
@@ -633,9 +632,8 @@ std::vector<PointId> EptReader::readLaszip(PointView& dst, const Key& key,
 
     const PointViewSet views(reader.execute(table));
     if (views.size() != 1)
-    {
-        throwError("Something went wrong with reading the tile: " + key.toString() +".");
-    }
+        throwError("Something went wrong with reading the tile: " +
+                   key.toString() + ".");
 
     auto& src(*views.begin());
 
@@ -646,7 +644,7 @@ std::vector<PointId> EptReader::readLaszip(PointView& dst, const Key& key,
 }
 
 std::vector<PointId> EptReader::readBinary(PointView& dst, const Key& key,
-        const uint64_t nodeId) const
+                                           const uint64_t nodeId) const
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
     ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
@@ -658,7 +656,8 @@ std::vector<PointId> EptReader::readBinary(PointView& dst, const Key& key,
 }
 
 std::vector<PointId> EptReader::processNode(PointView& dst,
-        const uint64_t nodeId, PointRef& pr, const uint64_t np) const
+                                            const uint64_t nodeId, PointRef& pr,
+                                            const uint64_t np) const
 {
     // Reserve all the points we are about to populate from this node.
     std::unique_lock<std::mutex> lock(m_mutex);
@@ -685,18 +684,22 @@ std::vector<PointId> EptReader::processNode(PointView& dst,
 }
 
 bool EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
-        const uint64_t pointId, const uint64_t dstId) const
+                        const uint64_t pointId, const uint64_t dstId) const
 {
     using D = Dimension::Id;
 
-    const double x = pr.getFieldAs<double>(D::X) *
-        m_xyzTransforms[0].m_scale.m_val + m_xyzTransforms[0].m_offset.m_val;
-    const double y = pr.getFieldAs<double>(D::Y) *
-        m_xyzTransforms[1].m_scale.m_val + m_xyzTransforms[1].m_offset.m_val;
-    const double z = pr.getFieldAs<double>(D::Z) *
-        m_xyzTransforms[2].m_scale.m_val + m_xyzTransforms[2].m_offset.m_val;
+    const double x =
+        pr.getFieldAs<double>(D::X) * m_xyzTransforms[0].m_scale.m_val +
+        m_xyzTransforms[0].m_offset.m_val;
+    const double y =
+        pr.getFieldAs<double>(D::Y) * m_xyzTransforms[1].m_scale.m_val +
+        m_xyzTransforms[1].m_offset.m_val;
+    const double z =
+        pr.getFieldAs<double>(D::Z) * m_xyzTransforms[2].m_scale.m_val +
+        m_xyzTransforms[2].m_offset.m_val;
 
-    const bool selected = m_queryOriginId == -1 ||
+    const bool selected =
+        m_queryOriginId == -1 ||
         pr.getFieldAs<int64_t>(D::OriginId) == m_queryOriginId;
 
     if (!selected || !m_queryBounds.contains(x, y, z))
@@ -712,8 +715,9 @@ bool EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
     {
         if (dt.m_id != D::X && dt.m_id != D::Y && dt.m_id != D::Z)
         {
-            const double d = pr.getFieldAs<double>(dt.m_id) *
-                dt.m_xform.m_scale.m_val + dt.m_xform.m_offset.m_val;
+            const double d =
+                pr.getFieldAs<double>(dt.m_id) * dt.m_xform.m_scale.m_val +
+                dt.m_xform.m_offset.m_val;
 
             dst.setField(dt.m_id, dstId, d);
         }
@@ -726,7 +730,7 @@ bool EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 }
 
 void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
-        const std::vector<PointId>& pointIds) const
+                          const std::vector<PointId>& pointIds) const
 {
     const uint64_t np(addon.points(key));
     if (!np)
@@ -749,10 +753,11 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
     }
 
     // If the addon hierarchy exists, it must match the EPT data.
-    if (np != m_overlaps.at(key)) throwError("Invalid addon hierarchy");
+    if (np != m_overlaps.at(key))
+        throwError("Invalid addon hierarchy");
 
-    const auto data(addon.ep().getBinary(
-                "ept-data/" + key.toString() + ".bin"));
+    const auto data(
+        addon.ep().getBinary("ept-data/" + key.toString() + ".bin"));
     const uint64_t dimSize(Dimension::size(addon.type()));
 
     if (np * dimSize != data.size())
@@ -768,11 +773,9 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
     }
 }
 
-
 Dimension::Type EptReader::getTypeTest(const NL::json& j)
 {
     return getType(j);
 }
 
 } // namespace pdal
-
