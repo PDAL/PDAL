@@ -55,6 +55,7 @@ public:
     TransformationFilter(const TransformationFilter&) = delete;
 
     std::string getName() const;
+    void doFilter(PointView& view, const Transform& matrix);
 
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -73,12 +74,12 @@ public:
     typedef double ValueType;
     typedef std::array<ValueType, Size> ArrayType;
 
-    Transform();
-    Transform(const ArrayType& arr);
+    PDAL_DLL Transform();
+    PDAL_DLL Transform(const ArrayType& arr);
 
-    double operator[](size_t off) const
+    PDAL_DLL double operator[](size_t off) const
         { return m_vals[off]; }
-    double& operator[](size_t off)
+    PDAL_DLL double& operator[](size_t off)
         { return m_vals[off]; }
 
 private:

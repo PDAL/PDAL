@@ -121,6 +121,14 @@ void TransformationFilter::addArgs(ProgramArgs& args)
 }
 
 
+void TransformationFilter::doFilter(PointView& view,
+    const TransformationFilter::Transform& matrix)
+{
+    *m_matrix = matrix;
+    filter(view);
+}
+
+
 bool TransformationFilter::processOne(PointRef& point)
 {
     Transform& matrix = *m_matrix;
