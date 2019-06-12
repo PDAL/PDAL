@@ -48,7 +48,7 @@ class PDAL_DLL TransformationFilter : public Filter, public Streamable
 {
 public:
     class Transform;
-public:
+
     TransformationFilter();
     ~TransformationFilter();
     TransformationFilter& operator=(const TransformationFilter&) = delete;
