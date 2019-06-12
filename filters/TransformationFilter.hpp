@@ -85,9 +85,9 @@ public:
 private:
     ArrayType m_vals;
 
-    friend std::istream& operator>>(std::istream& in,
+    PDAL_DLL friend std::istream& operator>>(std::istream& in,
         pdal::TransformationFilter::Transform& xform);
-    friend std::ostream& operator<<(std::ostream& out,
+    PDAL_DLL friend std::ostream& operator<<(std::ostream& out,
         const pdal::TransformationFilter::Transform& xform);
 };
 
