@@ -5,15 +5,6 @@ jobs:
     vmImage: vs2017-win2016
   timeoutInMinutes: 360
   steps:
-    - powershell: |
-        Write-Host "Installing CMake 3.14.4"
-        Invoke-WebRequest https://cmake.org/files/v3.14/cmake-3.14.4-win64-x64.zip -OutFile C:\cmake-3.14.4-win64-x64.zip
-        Expand-Archive C:\cmake-3.14.4-win64-x64.zip -DestinationPath C:\
-        Rename-Item -Path C:\cmake-3.14.4-win64-x64 -NewName C:\cmake
-        Write-Host "##vso[task.prependpath]C:\cmake\bin"
-      displayName: 'Install CMake'
-    - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
-      displayName: Add conda to PATH
 
     - script: |
         ECHO ON
