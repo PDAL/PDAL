@@ -25,9 +25,8 @@ jobs:
         call activate pdal
         call conda config --set always_yes True --set show_channel_urls True
         call conda config --add channels conda-forge
-        call conda install --yes --quiet --name pdal -c conda-forge ninja
+        call conda install --yes --quiet --name pdal -c conda-forge ninja gdal
         call conda install --yes --quiet --name pdal -c conda-forge pdal --only-deps
-        call conda upgrade gdal --yes
       displayName: Install PDAL dependencies
     - script: |
         call activate pdal
