@@ -20,6 +20,7 @@ jobs:
         call conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
       displayName: Install PDAL dependencies
     - script: |
+        ECHO ON
         call activate pdal
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
         echo %PATH%
@@ -66,9 +67,14 @@ jobs:
             -DBUILD_I3S_TESTS=OFF ^
             -DBUILD_OCI_TESTS=OFF ^
             ..
+      displayName: 'CMake'
     - script: |
         call activate pdal
         pushd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        echo %PATH%
+        set CC=cl.exe
+        set CXX=cl.exe
         ninja
       displayName: 'Build'
 
