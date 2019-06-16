@@ -66,6 +66,7 @@ jobs:
             -DBUILD_SQLITE_TESTS=OFF ^
             -DBUILD_I3S_TESTS=OFF ^
             -DBUILD_OCI_TESTS=OFF ^
+            -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING ^
             ..
       displayName: 'CMake'
     - script: |
