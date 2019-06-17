@@ -537,7 +537,7 @@ std::string Utils::demangle(const std::string& s)
 
 int Utils::screenWidth()
 {
-#ifdef WIN32
+#ifdef _WIN32
     return 80;
 #else
     struct winsize ws;

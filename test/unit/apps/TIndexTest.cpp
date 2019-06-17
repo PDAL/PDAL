@@ -107,7 +107,7 @@ TEST(TIndex, test2)
 TEST(TIndex, test3)
 {
 // No find on Windows.
-#ifndef WIN32
+#ifndef _WIN32
     std::string outSpec(Support::temppath("tindex.out"));
     std::string outPoints(Support::temppath("points.txt"));
 
