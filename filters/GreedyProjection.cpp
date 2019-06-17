@@ -188,7 +188,7 @@ void GreedyProjection::filter(PointView& view)
   std::vector<int> point2index (input_->points.size (), -1);
   for (int cp = 0; cp < static_cast<int> (indices_->size ()); ++cp)
   {
-    coords_.push_back(input_->points[(*indices_)[cp]].getVector3fMap());
+    coords_.push_back(input_->points[(*indices_)[cp]].getVector3dMap());
     point2index[(*indices_)[cp]] = cp;
   }
   **/

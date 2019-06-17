@@ -73,38 +73,36 @@ void GreyhoundWriter::prepared(PointTableRef table)
 
     // Don't include the addons here, since addons may be written more than
     // once.
-    std::map<std::string, const Json::Value*> remote;
+    std::map<std::string, const NL::json*> remote;
     for (const auto& d : m_info["schema"])
     {
-        if (!d["addon"].asBool())
-            remote[d["name"].asString()] = &d;
+        if (!d["addon"].get<bool>())
+            remote[d["name"].get<std::string>()] = &d;
     }
 
     auto& layout(*table.layout());
 
     // If no dimensions-to-write are explicitly passed in the options, use the
     // diff between the remote dimensions and the table dimensions.
-    if (m_writeDims.isNull())
+    if (m_writeDims.is_null())
     {
         for (const Dimension::Id id : layout.dims())
         {
             const std::string name(layout.dimName(id));
             if (!remote.count(name) && id != Dimension::Id::PointId)
-            {
-                m_writeDims.append(name);
-            }
+                m_writeDims.push_back(name);
         }
     }
 
-    for (const Json::Value& j : m_writeDims)
+    for (auto j : m_writeDims)
     {
-        const auto name(j.asString());
+        const auto name(j.get<std::string>());
         m_writeLayout.registerOrAssignDim(
                 name,
                 layout.dimType(layout.findDim(name)));
     }
 
-    if (!m_params.obounds().isNull())
+    if (!m_params.obounds().is_null())
     {
         m_writeLayout.registerDim(Dimension::Id::Omit);
     }

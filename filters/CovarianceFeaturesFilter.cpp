@@ -77,7 +77,7 @@ void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
     if (m_featureSet == "Dimensionality")
     {
         for (auto dim: {"Linearity", "Planarity", "Scattering", "Verticality"})
-            m_extraDims[dim] = layout->registerOrAssignDim(dim, Dimension::Type::Float);
+            m_extraDims[dim] = layout->registerOrAssignDim(dim, Dimension::Type::Double);
     }
 }
 
@@ -113,21 +113,21 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     auto B = eigen::computeCovariance(view, ids);
 
     // perform the eigen decomposition
-    SelfAdjointEigenSolver<Matrix3f> solver(B);
+    SelfAdjointEigenSolver<Matrix3d> solver(B);
     if (solver.info() != Success)
         throwError("Cannot perform eigen decomposition.");
 
     // Extract eigenvalues and eigenvectors in decreasing order (largest eigenvalue first)
     auto ev = solver.eigenvalues();
-    std::vector<float> lambda = {(std::max(ev[2],0.f)),
-                                 (std::max(ev[1],0.f)),
-                                 (std::max(ev[0],0.f))};
+    std::vector<double> lambda = {(std::max(ev[2],0.0)),
+                                  (std::max(ev[1],0.0)),
+                                  (std::max(ev[0],0.0))};
 
     if (lambda[0] == 0)
         throwError("Eigenvalues are all 0. Can't compute local features.");
 
     auto eigenVectors = solver.eigenvectors();
-    std::vector<float> v1(3), v2(3), v3(3);
+    std::vector<double> v1(3), v2(3), v3(3);
     for (int i=0; i < 3; i++)
     {
         v1[i] = eigenVectors.col(2)(i);
@@ -135,21 +135,21 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
         v3[i] = eigenVectors.col(0)(i);
     }
 
-    float linearity  = (sqrtf(lambda[0]) - sqrtf(lambda[1])) / sqrtf(lambda[0]);
-    float planarity  = (sqrtf(lambda[1]) - sqrtf(lambda[2])) / sqrtf(lambda[0]);
-    float scattering =  sqrtf(lambda[2]) / sqrtf(lambda[0]);
+    double linearity  = (sqrt(lambda[0]) - sqrt(lambda[1])) / sqrt(lambda[0]);
+    double planarity  = (sqrt(lambda[1]) - sqrt(lambda[2])) / sqrt(lambda[0]);
+    double scattering =  sqrt(lambda[2]) / sqrt(lambda[0]);
     view.setField(m_extraDims["Linearity"], id, linearity);
     view.setField(m_extraDims["Planarity"], id, planarity);
     view.setField(m_extraDims["Scattering"], id, scattering);
 
-    std::vector<float> unary_vector(3);
-    float norm = 0;
+    std::vector<double> unary_vector(3);
+    double norm = 0;
     for (int i=0; i <3 ; i++)
     {
-        unary_vector[i] = lambda[0] * fabsf(v1[i]) + lambda[1] * fabsf(v2[i]) + lambda[2] * fabsf(v3[i]);
+        unary_vector[i] = lambda[0] * fabs(v1[i]) + lambda[1] * fabs(v2[i]) + lambda[2] * fabs(v3[i]);
         norm += unary_vector[i] * unary_vector[i];
     }
-    norm = sqrtf(norm);
+    norm = sqrt(norm);
     view.setField(m_extraDims["Verticality"], id, unary_vector[2] / norm);
 }
 }

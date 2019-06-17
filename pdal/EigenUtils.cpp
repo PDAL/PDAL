@@ -58,7 +58,7 @@ Eigen::Vector3d computeCentroid(PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
-    
+
     double mx, my, mz;
     mx = my = mz = 0.0;
     point_count_t n(0);
@@ -83,7 +83,7 @@ Eigen::Vector3d computeCentroid(PointView& view,
     return centroid;
 }
 
-Eigen::Matrix3f computeCovariance(PointView& view,
+Eigen::Matrix3d computeCovariance(PointView& view,
     const std::vector<PointId>& ids)
 {
     using namespace Eigen;
@@ -93,7 +93,7 @@ Eigen::Matrix3f computeCovariance(PointView& view,
     Vector3d centroid = computeCentroid(view, ids);
 
     // demean the neighborhood
-    MatrixXf A(3, n);
+    MatrixXd A(3, n);
     size_t k = 0;
     for (auto const& j : ids)
     {
@@ -117,204 +117,12 @@ uint8_t computeRank(PointView& view, const std::vector<PointId>& ids,
 {
     using namespace Eigen;
 
-    Matrix3f B = computeCovariance(view, ids);
+    Matrix3d B = computeCovariance(view, ids);
 
-    JacobiSVD<Matrix3f> svd(B);
+    JacobiSVD<Matrix3d> svd(B);
     svd.setThreshold((float)threshold);
 
     return static_cast<uint8_t>(svd.rank());
-}
-
-Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
-                              Eigen::MatrixXd z, Eigen::MatrixXd xx,
-                              Eigen::MatrixXd yy)
-{
-    using namespace Eigen;
-
-    int num_rows;
-    int num_cols;
-
-    if (!Utils::numericCast(xx.rows(), num_rows) ||
-        !Utils::numericCast(xx.cols(), num_cols))
-        throw pdal_error("Too many columns/rows for spline computation");
-
-    MatrixXd S = MatrixXd::Zero(num_rows, num_cols);
-
-    for (auto col = 0; col < num_cols; ++col)
-    {
-        for (auto row = 0; row < num_rows; ++row)
-        {
-            // Further optimizations are achieved by estimating only the
-            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
-            // neighbourhood is used in our case) of the cell being filtered.
-            int radius = 3;
-
-            int c = static_cast<int>(std::floor(col/2));
-            int r = static_cast<int>(std::floor(row/2));
-
-            int cs = Utils::clamp(c-radius, 0, static_cast<int>(z.cols()-1));
-            int ce = Utils::clamp(c+radius, 0, static_cast<int>(z.cols()-1));
-            int col_size = ce - cs + 1;
-            int rs = Utils::clamp(r-radius, 0, static_cast<int>(z.rows()-1));
-            int re = Utils::clamp(r+radius, 0, static_cast<int>(z.rows()-1));
-            int row_size = re - rs + 1;
-
-            MatrixXd Xn = x.block(rs, cs, row_size, col_size);
-            MatrixXd Yn = y.block(rs, cs, row_size, col_size);
-            MatrixXd Hn = z.block(rs, cs, row_size, col_size);
-
-            int nsize = row_size * col_size;
-            VectorXd T = VectorXd::Zero(nsize);
-            MatrixXd P = MatrixXd::Zero(nsize, 3);
-            MatrixXd K = MatrixXd::Zero(nsize, nsize);
-
-            for (auto id = 0; id < nsize; ++id)
-            {
-                double xj = Xn(id);
-                double yj = Yn(id);
-                double zj = Hn(id);
-                if (std::isnan(xj) || std::isnan(yj) || std::isnan(zj))
-                    continue;
-                T(id) = zj;
-                P.row(id) << 1, xj, yj;
-                for (auto id2 = 0; id2 < nsize; ++id2)
-                {
-                    if (id == id2)
-                        continue;
-                    double xk = Xn(id2);
-                    double yk = Yn(id2);
-                    double zk = Hn(id2);
-                    if (std::isnan(xk) || std::isnan(yk) || std::isnan(zk))
-                        continue;
-                    double rsqr = (xj - xk) * (xj - xk) + (yj - yk) * (yj - yk);
-                    if (rsqr == 0.0)
-                        continue;
-                    K(id, id2) = rsqr * std::log10(std::sqrt(rsqr));
-                }
-            }
-
-            MatrixXd A = MatrixXd::Zero(nsize+3, nsize+3);
-            A.block(0,0,nsize,nsize) = K;
-            A.block(0,nsize,nsize,3) = P;
-            A.block(nsize,0,3,nsize) = P.transpose();
-
-            VectorXd b = VectorXd::Zero(nsize+3);
-            b.head(nsize) = T;
-
-            VectorXd x = A.fullPivHouseholderQr().solve(b);
-
-            Vector3d a = x.tail(3);
-            VectorXd w = x.head(nsize);
-
-            double sum = 0.0;
-            double xi2 = xx(row, col);
-            double yi2 = yy(row, col);
-            for (auto j = 0; j < nsize; ++j)
-            {
-                double xj = Xn(j);
-                double yj = Yn(j);
-                double zj = Hn(j);
-                if (std::isnan(xj) || std::isnan(yj) || std::isnan(zj))
-                    continue;
-                double rsqr = (xj - xi2) * (xj - xi2) + (yj - yi2) * (yj - yi2);
-                if (rsqr == 0.0)
-                    continue;
-                sum += w(j) * rsqr * std::log10(std::sqrt(rsqr));
-            }
-
-            S(row, col) = a(0) + a(1)*xi2 + a(2)*yi2 + sum;
-        }
-    }
-
-    return S;
-}
-
-Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
-                                double cell_size, BOX2D bounds)
-{
-    using namespace Dimension;
-    using namespace Eigen;
-
-    MatrixXd ZImin(rows, cols);
-    ZImin.setConstant(std::numeric_limits<double>::quiet_NaN());
-
-    for (PointId i = 0; i < view.size(); ++i)
-    {
-        double x = view.getFieldAs<double>(Id::X, i);
-        double y = view.getFieldAs<double>(Id::Y, i);
-        double z = view.getFieldAs<double>(Id::Z, i);
-
-        int c = Utils::clamp(static_cast<int>(floor(x-bounds.minx)/cell_size), 0, cols-1);
-        int r = Utils::clamp(static_cast<int>(floor(y-bounds.miny)/cell_size), 0, rows-1);
-
-        if (z < ZImin(r, c) || std::isnan(ZImin(r, c)))
-            ZImin(r, c) = z;
-    }
-
-    return ZImin;
-}
-
-Eigen::MatrixXd createMaxMatrix(PointView& view, int rows, int cols,
-                                double cell_size, BOX2D bounds)
-{
-    using namespace Dimension;
-    using namespace Eigen;
-
-    MatrixXd ZImax(rows, cols);
-    ZImax.setConstant(std::numeric_limits<double>::quiet_NaN());
-
-    for (PointId i = 0; i < view.size(); ++i)
-    {
-        double x = view.getFieldAs<double>(Id::X, i);
-        double y = view.getFieldAs<double>(Id::Y, i);
-        double z = view.getFieldAs<double>(Id::Z, i);
-
-        int c = Utils::clamp(static_cast<int>(floor(x-bounds.minx)/cell_size), 0, cols-1);
-        int r = Utils::clamp(static_cast<int>(floor(y-bounds.miny)/cell_size), 0, rows-1);
-
-        if (z > ZImax(r, c) || std::isnan(ZImax(r, c)))
-            ZImax(r, c) = z;
-    }
-
-    return ZImax;
-}
-
-Eigen::MatrixXd createMaxMatrix2(PointView& view, int rows, int cols,
-                                 double cell_size, BOX2D bounds)
-{
-    using namespace Dimension;
-    using namespace Eigen;
-
-    KD2Index kdi(view);
-    kdi.build();
-
-    MatrixXd ZImax(rows, cols);
-    ZImax.setConstant(std::numeric_limits<double>::quiet_NaN());
-
-    // for each grid center, search PointView for neighbors, and find max of those
-    for (int c = 0; c < cols; ++c)
-    {
-        double x = bounds.minx + (c + 0.5) * cell_size;
-
-        for (int r = 0; r < rows; ++r)
-        {
-            double y = bounds.miny + (r + 0.5) * cell_size;
-
-            auto neighbors = kdi.radius(x, y, cell_size * std::sqrt(2.0));
-
-            double val(std::numeric_limits<double>::lowest());
-            for (auto const& n : neighbors)
-            {
-                double z(view.getFieldAs<double>(Id::Z, n));
-                if (z > val)
-                    val = z;
-            }
-            if (val > std::numeric_limits<double>::lowest())
-                ZImax(r, c) = val;
-        }
-    }
-
-    return ZImax;
 }
 
 Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
@@ -366,129 +174,6 @@ Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
     }
 
     return ZImin;
-}
-
-
-Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
-{
-    using namespace Eigen;
-
-    MatrixXd data2 = padMatrix(data, radius);
-
-    int nrows = static_cast<int>(data2.rows());
-    int ncols = data2.cols();
-
-    MatrixXd minZ(nrows, ncols);
-    minZ.setConstant((std::numeric_limits<double>::max)());
-    MatrixXd maxZ(nrows, ncols);
-    maxZ.setConstant(std::numeric_limits<double>::lowest());
-    for (auto c = 0; c < ncols; ++c)
-    {
-        int cs = Utils::clamp(c-radius, 0, ncols-1);
-        int ce = Utils::clamp(c+radius, 0, ncols-1);
-
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int rs = Utils::clamp(r-radius, 0, nrows-1);
-            int re = Utils::clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (data2(row, col) > maxZ(r, c))
-                        maxZ(r, c) = data2(row, col);
-                }
-            }
-        }
-    }
-    for (auto c = 0; c < ncols; ++c)
-    {
-        int cs = Utils::clamp(c-radius, 0, ncols-1);
-        int ce = Utils::clamp(c+radius, 0, ncols-1);
-
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int rs = Utils::clamp(r-radius, 0, nrows-1);
-            int re = Utils::clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (maxZ(row, col) < minZ(r, c))
-                        minZ(r, c) = maxZ(row, col);
-                }
-            }
-        }
-    }
-
-    return minZ.block(radius, radius, data.rows(), data.cols());
-}
-
-Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
-{
-    using namespace Eigen;
-
-    MatrixXd data2 = padMatrix(data, radius);
-
-    int nrows = data2.rows();
-    int ncols = data2.cols();
-
-    MatrixXd minZ(nrows, ncols);
-    minZ.setConstant((std::numeric_limits<double>::max)());
-    MatrixXd maxZ(nrows, ncols);
-    maxZ.setConstant(std::numeric_limits<double>::lowest());
-    for (auto c = 0; c < ncols; ++c)
-    {
-        int cs = Utils::clamp(c-radius, 0, ncols-1);
-        int ce = Utils::clamp(c+radius, 0, ncols-1);
-
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int rs = Utils::clamp(r-radius, 0, nrows-1);
-            int re = Utils::clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (data2(row, col) < minZ(r, c))
-                        minZ(r, c) = data2(row, col);
-                }
-            }
-        }
-    }
-    for (auto c = 0; c < ncols; ++c)
-    {
-        int cs = Utils::clamp(c-radius, 0, ncols-1);
-        int ce = Utils::clamp(c+radius, 0, ncols-1);
-
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int rs = Utils::clamp(r-radius, 0, nrows-1);
-            int re = Utils::clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (minZ(row, col) > maxZ(r, c))
-                        maxZ(r, c) = minZ(row, col);
-                }
-            }
-        }
-    }
-
-    return maxZ.block(radius, radius, data.rows(), data.cols());
 }
 
 std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
@@ -608,114 +293,6 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     dataRowMajor = data.cast<float>();
 
     raster.writeBand((float*)dataRowMajor.data(), -9999.0f, 1);
-}
-
-Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data)
-{
-    using namespace Eigen;
-
-    auto CleanRasterScanLine = [](Eigen::MatrixXd data, Eigen::VectorXd datarow,
-                                  int mDim, int row, bool* prevSetCols,
-                                  bool* curSetCols)
-    {
-        auto InterpolateRasterPixelScanLine = [](Eigen::MatrixXd data, int mDim,
-                                              int x, int y, bool* prevSetCols)
-        {
-            const float c_background = FLT_MIN;
-            int yMinus, yPlus, xMinus, xPlus;
-            float tInterpValue;
-            bool tPrevInterp;
-
-            yMinus = y - 1;
-            yPlus = y + 1;
-            xMinus = x - 1;
-            xPlus = x + 1;
-
-            //North
-            tInterpValue = data(yMinus, x);
-            tPrevInterp = prevSetCols[x];
-            if (tInterpValue != c_background && tPrevInterp != true)
-                return tInterpValue;
-
-            //South
-            tInterpValue = data(yPlus, x);
-            if (tInterpValue != c_background)
-                return tInterpValue;
-
-            //East
-            tInterpValue = data(y, xPlus);
-            if (tInterpValue != c_background)
-                return tInterpValue;
-
-            //West
-            tInterpValue = data(y, xMinus);
-            if (tInterpValue != c_background)
-                return tInterpValue;
-
-            //NorthWest
-            tInterpValue = data(yMinus, xMinus);
-            tPrevInterp = prevSetCols[xMinus];
-            if (tInterpValue != c_background && tPrevInterp != true)
-                return tInterpValue;
-
-            //NorthWest
-            tInterpValue = data(yMinus, xPlus);
-            tPrevInterp = prevSetCols[xPlus];
-            if (tInterpValue != c_background && tPrevInterp != true)
-                return tInterpValue;
-
-            //SouthWest
-            tInterpValue = data(yPlus, xMinus);
-            if (tInterpValue != c_background)
-                return tInterpValue;
-
-            //SouthEast
-            tInterpValue = data(yPlus, xPlus);
-            if (tInterpValue != c_background)
-                return tInterpValue;
-
-            return 0.0f;
-        };
-
-        float tInterpValue;
-        float tValue;
-
-        int y = row;
-        for (int x = 1; x < mDim-1; ++x)
-        {
-            tValue = datarow(x);
-            const float c_background = FLT_MIN;
-
-            if (tValue == c_background)
-            {
-                tInterpValue = InterpolateRasterPixelScanLine(data, mDim, x, y,
-                               prevSetCols);
-                if (tInterpValue != c_background)
-                {
-                    curSetCols[x] = true;
-                    datarow(x) = tInterpValue;
-                }
-            }
-        }
-    };
-
-    {
-        int rows = data.rows();
-        int cols = data.cols();
-
-        std::unique_ptr<bool> prevSetCols(new bool[cols]);
-        std::unique_ptr<bool> curSetCols(new bool[cols]);
-
-        for (int y = 1; y < rows-1; ++y)
-        {
-            CleanRasterScanLine(data, data.row(1), cols, y,
-                                prevSetCols.get(), curSetCols.get());
-            memcpy(prevSetCols.get(), curSetCols.get(), cols);
-            memset(curSetCols.get(), 0, cols);
-        }
-    }
-
-    return data;
 }
 #pragma warning (pop)
 

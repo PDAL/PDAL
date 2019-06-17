@@ -37,17 +37,18 @@
 namespace pdal
 {
 
-void Expression::build(LogicGate& gate, const Json::Value& json)
+void Expression::build(LogicGate& gate, const NL::json& json)
 {
-    if (json.isArray())
+    if (json.is_array())
     {
-        for (const Json::Value& val : json) build(gate, val);
+        for (auto& val : json)
+            build(gate, val);
         return;
     }
 
-    if (!json.isObject())
+    if (!json.is_object())
     {
-        throw pdal_error("Unexpected expression: " + json.toStyledString());
+        throw pdal_error("Unexpected expression: " + json.get<std::string>());
     }
 
     LogicGate* active(&gate);
@@ -60,14 +61,15 @@ void Expression::build(LogicGate& gate, const Json::Value& json)
         active = outer.get();
     }
 
-    for (const std::string key : json.getMemberNames())
+    for (auto& it : json.items())
     {
-        const Json::Value& val(json[key]);
+        const NL::json& val(it.value());
+        const std::string& key(it.key());
 
         if (isLogicalOperator(key))
         {
             auto inner(LogicGate::create(key));
-            if (inner->type() != LogicalOperator::lNot && !val.isArray())
+            if (inner->type() != LogicalOperator::lNot && !val.is_array())
             {
                 throw pdal_error("Logical operator expressions must be arrays");
             }
@@ -75,7 +77,7 @@ void Expression::build(LogicGate& gate, const Json::Value& json)
             build(*inner, val);
             active->push(std::move(inner));
         }
-        else if (!val.isObject() || val.size() == 1)
+        else if (!val.is_object() || val.size() == 1)
         {
             // A comparison object.
             active->push(Comparison::create(m_layout, key, val));
@@ -90,10 +92,10 @@ void Expression::build(LogicGate& gate, const Json::Value& json)
             //
             // There cannot be any further nested logical operators
             // within val, since we've already selected a dimension.
-            for (const std::string& innerKey : val.getMemberNames())
+            for (auto inner : val.items())
             {
-                Json::Value nest;
-                nest[innerKey] = val[innerKey];
+                NL::json nest;
+                nest[inner.key()] = inner.value();
                 active->push(Comparison::create(m_layout, key, nest));
             }
         }

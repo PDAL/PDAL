@@ -10,7 +10,6 @@ RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
     yum install centos-release-scl -y && \
     yum install devtoolset-7 -y && \
     yum install -y  \
-        jsoncpp-devel \
         wget \
         cmake3 \
         ninja-build \
@@ -24,7 +23,9 @@ RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
         geos-devel
 
 
-ENV PATH /opt/rh/devtoolset-7/root/usr/bin:$PATH
+SHELL [ "/usr/bin/scl", "enable", "devtoolset-7"]
+
+RUN gcc --version
 
 RUN git clone --branch 6.0 https://github.com/OSGeo/proj.4.git \
     && cd proj.4 \
@@ -148,7 +149,6 @@ RUN yum update -y &&\
     yum install epel-release -y && \
     yum install centos-release-scl -y && \
     yum install -y  \
-        jsoncpp \
         zlib \
         python34 \
         libxml2 \

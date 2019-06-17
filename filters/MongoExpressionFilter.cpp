@@ -32,6 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <nlohmann/json.hpp>
+
 #include "MongoExpressionFilter.hpp"
 
 #include "private/mongoexpression/Expression.hpp"
@@ -43,7 +45,7 @@ static const StaticPluginInfo s_info
 {
     "filters.mongo",
     "Pass only points that pass a logic filter.",
-    "http://pdal.io/stages/filters.logic.html"
+    "http://pdal.io/stages/filters.mongo.html"
 };
 
 CREATE_STATIC_STAGE(MongoExpressionFilter, s_info);

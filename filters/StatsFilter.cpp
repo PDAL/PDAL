@@ -42,7 +42,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -275,12 +275,9 @@ void StatsFilter::extractMetadata(PointTableRef table)
         MetadataNode box_metadata = m_metadata.add("bbox");
         MetadataNode metadata = box_metadata.add("native");
 
-        Json::Reader jsonReader;
-        Json::Value json;
-        jsonReader.parse(p.json(), json);
-
+        NL::json json = p.json();
         MetadataNode boundary = metadata.addWithType("boundary",
-            json.toStyledString(), "json", "GeoJSON boundary");
+            json.dump(), "json", "GeoJSON boundary");
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -295,12 +292,9 @@ void StatsFilter::extractMetadata(PointTableRef table)
             MetadataNode dddbox = box_metadata.add("EPSG:4326");
             dddbox.add(epsg_4326_box);
 
-            Json::Reader jsonReader;
-            Json::Value json;
-            jsonReader.parse(p.json(), json);
-
+            json = p.json();
             MetadataNode ddboundary = dddbox.addWithType("boundary",
-                json.toStyledString(), "json", "GeoJSON boundary");
+                json.dump(), "json", "GeoJSON boundary");
         }
     }
 }

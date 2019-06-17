@@ -198,9 +198,13 @@ TEST(LasReaderTest, inspect)
 
     QuickInfo qi = reader.preview();
 
-    std::string testWkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
+    // This string is common for WKT1 and WKT2.  When we move to WKT2
+    // completely, this can be fixed.
+    std::string testWkt {
+         R"(GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433)"
+    };
 
-    EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
+    EXPECT_TRUE(Utils::startsWith(qi.m_srs.getWKT(), testWkt));
     EXPECT_EQ(qi.m_pointCount, 5380u);
 
     BOX3D bounds(-94.683465399999989, 31.0367341, 39.081000199999998,
@@ -531,5 +535,4 @@ TEST(LasReaderTest, IgnoreVLRs)
         m = m.findChild("data");
         EXPECT_FALSE(!m.empty()) << "No value for node " << i;
     }
-
 }

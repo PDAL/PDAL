@@ -37,7 +37,6 @@
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
 
 #include <memory>
 
@@ -45,6 +44,8 @@ class OGRGeometry;
 
 namespace pdal
 {
+
+class BOX3D;
 
 class PDAL_DLL Geometry
 {

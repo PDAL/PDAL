@@ -34,6 +34,7 @@
 
 #include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {

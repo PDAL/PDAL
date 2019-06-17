@@ -35,14 +35,14 @@
 // This file was originally in Entwine, which is LGPL2, but it has been
 // relicensed for inclusion in PDAL.
 
-
-
 #include "bounds.hpp"
 
 #include <cmath>
 #include <limits>
 #include <numeric>
 #include <iostream>
+
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -67,43 +67,34 @@ Bounds::Bounds(const Point& minimum, const Point& maximum)
     }
 }
 
-Bounds::Bounds(const Json::Value& json)
+Bounds::Bounds(const NL::json& j)
 {
-    if (!json.isArray() || (json.size() != 4 && json.size() != 6))
+    if (!j.is_array() || (j.size() != 4 && j.size() != 6))
     {
         throw std::runtime_error(
-            "Invalid JSON Bounds specification: " + json.toStyledString());
+            "Invalid JSON Bounds specification: " + j.dump());
     }
 
-    const bool is3d(json.size() == 6);
+    const bool is3d(j.size() == 6);
 
     if (is3d)
     {
-        m_min = Point(
-                json.get(Json::ArrayIndex(0), 0).asDouble(),
-                json.get(Json::ArrayIndex(1), 0).asDouble(),
-                json.get(Json::ArrayIndex(2), 0).asDouble());
-        m_max = Point(
-                json.get(Json::ArrayIndex(3), 0).asDouble(),
-                json.get(Json::ArrayIndex(4), 0).asDouble(),
-                json.get(Json::ArrayIndex(5), 0).asDouble());
+        m_min = Point(j.at(0).get<double>(), j.at(1).get<double>(),
+             j.at(2).get<double>());
+        m_max = Point(j.at(3).get<double>(), j.at(4).get<double>(),
+             j.at(5).get<double>());
     }
     else
     {
-        m_min = Point(
-                json.get(Json::ArrayIndex(0), 0).asDouble(),
-                json.get(Json::ArrayIndex(1), 0).asDouble());
-        m_max = Point(
-                json.get(Json::ArrayIndex(2), 0).asDouble(),
-                json.get(Json::ArrayIndex(3), 0).asDouble());
+        m_min = Point(j.at(0).get<double>(), j.at(1).get<double>());
+        m_min = Point(j.at(2).get<double>(), j.at(3).get<double>());
     }
-
     setMid();
 }
 
 Bounds::Bounds(const Point& center, const double radius)
     : Bounds(center - radius, center + radius)
-{ }
+{}
 
 Bounds::Bounds(
         const double xMin,
@@ -123,19 +114,11 @@ Bounds::Bounds(
     : Bounds(Point(xMin, yMin), Point(xMax, yMax))
 { }
 
-Json::Value Bounds::toJson() const
+NL::json Bounds::toJson() const
 {
-    Json::Value json;
-
-    json.append(m_min.x);
-    json.append(m_min.y);
-    if (is3d()) json.append(m_min.z);
-
-    json.append(m_max.x);
-    json.append(m_max.y);
-    if (is3d()) json.append(m_max.z);
-
-    return json;
+    if (is3d())
+        return { m_min.x, m_min.y, m_min.z, m_max.x, m_max.y, m_max.z };
+    return { m_min.x, m_min.y, m_max.x, m_max.y };
 }
 
 void Bounds::grow(const Bounds& other)

@@ -58,7 +58,7 @@ inline BaseType fromName(std::string name)
         return BaseType::Signed;
     else if (name == "unsigned")
         return BaseType::Unsigned;
-    else if (name == "floating")
+    else if (name == "floating" || name == "float")
         return BaseType::Floating;
     return BaseType::None;
 }
@@ -168,6 +168,19 @@ inline Type type(std::string s)
     if (s == "double" || s == "float64")
         return Type::Double;
     return Type::None;
+}
+
+inline Type type(const std::string& baseType, size_t size)
+{
+    BaseType base = fromName(baseType);
+    if (base == BaseType::None)
+        return Type::None;
+    if (size != 1 && size != 2 && size != 4 && size != 8)
+        return Type::None;
+    if ((size == 1 || size == 2) && base == BaseType::Floating)
+        return Type::None;
+
+    return static_cast<Type>((size_t)(base) | size);
 }
 
 /// Extract a dimension name of a string.  Dimension names start with an alpha

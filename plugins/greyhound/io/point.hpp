@@ -17,7 +17,8 @@
 #include <vector>
 #include <algorithm>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_export.hpp>
 
 namespace pdal
@@ -40,49 +41,44 @@ public:
     Point(double x, double y) noexcept : x(x), y(y), z(Point::emptyCoord()) { }
     Point(double x, double y, double z) noexcept : x(x), y(y), z(z) { }
 
-    Point(const Json::Value& json)
-        : Point()
+    Point(const NL::json& j)
     {
-        if (!json.isNull())
+        if (j.is_null())
+            return;
+        if (j.is_array())
         {
-            if (json.isArray())
+            if (j.size() == 2)
             {
-                x = json[0].asDouble();
-                y = json[1].asDouble();
-                if (json.size() > 2) z = json[2].asDouble();
+                x = j[0].get<double>();
+                y = j[1].get<double>();
             }
-            else if (json.isNumeric())
+            else if (j.size() == 3)
             {
-                x = y = z = json.asDouble();
+                x = j[0].get<double>();
+                y = j[1].get<double>();
+                z = j[2].get<double>();
             }
-            else if (json.isObject())
-            {
-                x = json["x"].asDouble();
-                y = json["y"].asDouble();
-                z = json["z"].asDouble();
-            }
+        }
+        else if (j.is_number())
+        {
+                x = y = z = j.get<double>();
+        }
+        else if (j.is_object())
+        {
+            x = j.value("x", Point::emptyCoord());
+            y = j.value("y", Point::emptyCoord());
+            z = j.value("z", Point::emptyCoord());
         }
     }
 
-    Json::Value toJson() const { return toJsonArray(); }
+    NL::json toJson() const
+    { return toJsonArray(); }
 
-    Json::Value toJsonArray() const
-    {
-        Json::Value json;
-        json.append(x);
-        json.append(y);
-        json.append(z);
-        return json;
-    }
+    NL::json toJsonArray() const
+    { return { x, y, z }; }
 
-    Json::Value toJsonObject() const
-    {
-        Json::Value json;
-        json["x"] = x;
-        json["y"] = y;
-        json["z"] = z;
-        return json;
-    }
+    NL::json toJsonObject() const
+    { return {{ {"x", x}, {"y", y}, {"z", z} }}; }
 
     double sqDist2d(const Point& other) const
     {
