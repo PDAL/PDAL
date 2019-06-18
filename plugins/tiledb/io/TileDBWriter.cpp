@@ -176,6 +176,8 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         m_compressor);
     args.add("compression_level", "TileDB compression level",
         m_compressionLevel, -1);
+    args.add("append", "Append to existing TileDB array",
+        m_append, false);
 }
 
 
@@ -190,40 +192,50 @@ void TileDBWriter::initialize()
         m_ctx.reset(new tiledb::Context());
 
     // If the array already exists on disk, throw an error
-    if (tiledb::Object::object(*m_ctx, m_arrayName).type() ==
-        tiledb::Object::Type::Array)
-        throwError("Array already exists.");
-
-    m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
-
-    if (!m_compressor.empty())
+    if (!m_append)
     {
-        tiledb::Filter filter = createFilter(*m_ctx, m_compressor);
-        filter.set_option(TILEDB_COMPRESSION_LEVEL, m_compressionLevel);
-        m_filterList.reset(new tiledb::FilterList(*m_ctx));
-        m_filterList->add_filter(filter);
-        m_schema->set_coords_filter_list(*m_filterList);
+        if (tiledb::Object::object(*m_ctx, m_arrayName).type() ==
+            tiledb::Object::Type::Array)
+            throwError("Array already exists.");
+        m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
+
+        if (!m_compressor.empty())
+        {
+            tiledb::Filter filter = createFilter(*m_ctx, m_compressor);
+            filter.set_option(TILEDB_COMPRESSION_LEVEL, m_compressionLevel);
+            m_filterList.reset(new tiledb::FilterList(*m_ctx));
+            m_filterList->add_filter(filter);
+            m_schema->set_coords_filter_list(*m_filterList);
+        }
     }
 }
 
 
 void TileDBWriter::ready(pdal::BasePointTable &table)
 {
+    auto layout = table.layout();
+    auto all = layout->dims();
+
     // get a list of all the dimensions & their types and add to schema
     // x,y,z will be tiledb dimensions other pdal dimensions will be
     // tiledb attributes
-    tiledb::Domain domain(*m_ctx);
-    auto layout = table.layout();
-    auto all = layout->dims();
-    double dimMin = std::numeric_limits<double>::lowest();
-    double dimMax = std::numeric_limits<double>::max();
+    if (!m_append)
+    {
+        tiledb::Domain domain(*m_ctx);
+        double dimMin = std::numeric_limits<double>::lowest();
+        double dimMax = std::numeric_limits<double>::max();
 
-    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
-        {{dimMin, dimMax}}, m_x_tile_size))
-        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
-        {{dimMin, dimMax}}, m_y_tile_size))
-        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-        {{dimMin, dimMax}}, m_z_tile_size));
+        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+            {{dimMin, dimMax}}, m_x_tile_size))
+            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+            {{dimMin, dimMax}}, m_y_tile_size))
+            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+            {{dimMin, dimMax}}, m_z_tile_size));
+
+        m_schema->set_domain(domain).set_order(
+            {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
+        m_schema->set_capacity(m_tile_capacity);
+    }
 
     for (const auto& d : all)
     {
@@ -231,10 +243,13 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         if ((dimName != "X") && (dimName != "Y") && (dimName != "Z"))
         {
             Dimension::Type type = layout->dimType(d);
-            tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
-            if (!m_compressor.empty())
-                att.set_filter_list(*m_filterList);
-            m_schema->add_attribute(att);
+            if (!m_append)
+            {
+                tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
+                if (!m_compressor.empty())
+                    att.set_filter_list(*m_filterList);
+                m_schema->add_attribute(att);
+            }
             m_attrs.emplace_back(dimName, d, type);
             // Size the buffers.
             m_attrs.back().m_buffer.resize(
@@ -242,11 +257,9 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         }
     }
 
-    m_schema->set_domain(domain).set_order(
-        {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
-    m_schema->set_capacity(m_tile_capacity);
+    if (!m_append)
+        tiledb::Array::create(m_arrayName, *m_schema);
 
-    tiledb::Array::create(m_arrayName, *m_schema);
     m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
     m_query->set_layout(TILEDB_UNORDERED);
@@ -255,8 +268,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
 bool TileDBWriter::processOne(PointRef& point)
 {
-    auto attrs = m_schema->attributes();
-
+    auto attrs = m_array->schema().attributes();
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
