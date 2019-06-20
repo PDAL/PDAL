@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2019, Howard Butler <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,31 +32,28 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <map>
-#include <mutex>
+#pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/pdal_types.hpp>
+#include <pdal/Filter.hpp>
+
+#include <vector>
+#include <string>
 
 namespace pdal
 {
 
-class StageExtensions
+class PDAL_DLL ShellFilter : public Filter
 {
 public:
-    StageExtensions(LogPtr log);
+    std::string getName() const override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize() override;
+    virtual PointViewSet run(PointViewPtr view) override;
 
-    PDAL_DLL void set(const std::string& stage, const StringList& exts);
-    std::string defaultReader(const std::string& filename);
-    std::string defaultWriter(const std::string& filename);
-    PDAL_DLL StringList extensions(const std::string& stage);
 private:
-    void load();
-
-    LogPtr m_log;
-    std::mutex m_mutex;
-    std::map<std::string, std::string> m_readers;
-    std::map<std::string, std::string> m_writers;
+    std::string m_command;
+    std::string m_command_output;
+    virtual void done(PointTableRef table) override;
 };
 
-}
+} // namespace pdal

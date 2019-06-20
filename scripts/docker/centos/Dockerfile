@@ -23,7 +23,9 @@ RUN yum update -y && yum groupinstall 'Development Tools' -y &&\
         geos-devel
 
 
-ENV PATH /opt/rh/devtoolset-7/root/usr/bin:$PATH
+SHELL [ "/usr/bin/scl", "enable", "devtoolset-7"]
+
+RUN gcc --version
 
 RUN git clone --branch 6.0 https://github.com/OSGeo/proj.4.git \
     && cd proj.4 \

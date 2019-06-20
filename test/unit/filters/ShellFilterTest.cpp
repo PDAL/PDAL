@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2018, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,31 +32,28 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <map>
-#include <mutex>
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Log.hpp>
-#include <pdal/pdal_types.hpp>
+#include <filters/ShellFilter.hpp>
+#include <pdal/StageFactory.hpp>
 
-namespace pdal
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(ShellFilterTest, test_shell_filter)
 {
+    PipelineManager mgr;
+	Utils::setenv("PDAL_ALLOW_SHELL", "1");
+    mgr.readPipeline(Support::configuredpath("pipeline/shell.json"));
 
-class StageExtensions
-{
-public:
-    StageExtensions(LogPtr log);
+    mgr.execute();
+    ConstPointTableRef table(mgr.pointTable());
 
-    PDAL_DLL void set(const std::string& stage, const StringList& exts);
-    std::string defaultReader(const std::string& filename);
-    std::string defaultWriter(const std::string& filename);
-    PDAL_DLL StringList extensions(const std::string& stage);
-private:
-    void load();
+    PointViewSet viewSet = mgr.views();
 
-    LogPtr m_log;
-    std::mutex m_mutex;
-    std::map<std::string, std::string> m_readers;
-    std::map<std::string, std::string> m_writers;
-};
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 106u);
 
 }
