@@ -236,7 +236,11 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
             {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
         m_schema->set_capacity(m_tile_capacity);
     }
-
+    else
+    {
+        m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
+    }
+    
     for (const auto& d : all)
     {
         std::string dimName = layout->dimName(d);
@@ -250,6 +254,15 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                     att.set_filter_list(*m_filterList);
                 m_schema->add_attribute(att);
             }
+            else
+            {
+                // check attribute exists in original tiledb array
+                auto attrs = m_array->schema().attributes();
+                auto it = attrs.find(dimName);
+                if (it == attrs.end())
+                    throwError("Attribute " + dimName + " does not exist in original array.");
+            }
+            
             m_attrs.emplace_back(dimName, d, type);
             // Size the buffers.
             m_attrs.back().m_buffer.resize(
@@ -258,9 +271,11 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     }
 
     if (!m_append)
+    {
         tiledb::Array::create(m_arrayName, *m_schema);
+        m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
+    }
 
-    m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
     m_query->set_layout(TILEDB_UNORDERED);
 }
