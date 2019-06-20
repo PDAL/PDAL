@@ -177,11 +177,8 @@ void CesiumWriter::write(const PointViewPtr v)
 
     OLeStream out(Utils::createFile(tile.binFilename()));
 
-std::cerr << "Mesh size = " << mesh->size() << "!\n";
-std::cerr << "Vertex size = " << v->size() << "!\n";
     for (const Triangle& t : *mesh)
         out << (uint32_t)t.m_a << (uint32_t)t.m_b << (uint32_t)t.m_c;
-std::cerr << "Position at index = " << out.position() << "!\n";
     for (PointId i = 0; i < v->size(); ++i)
     {
         float x = v->getFieldAs<float>(Dimension::Id::X, i);
@@ -191,7 +188,6 @@ std::cerr << "Position at index = " << out.position() << "!\n";
         bounds.grow(x, y, z);
         out << x << y << z;
     }
-std::cerr << "Position at vertex = " << out.position() << "!\n";
     out.close();
     m_tiles.push_back(tile);
 }
@@ -200,12 +196,8 @@ std::cerr << "Position at vertex = " << out.position() << "!\n";
 void CesiumWriter::done(PointTableRef table)
 {
     writeTilesetFile();
-    std::cerr << "Tile count = " << m_tiles.size() << "!\n";
     for (Tile& t : m_tiles)
-    {
-        std::cerr << "Write b3dm file!\n";
         writeB3dmFile(t);
-    }
 }
 
 
@@ -221,11 +213,11 @@ void CesiumWriter::writeTilesetFile()
 
         fullBounds.grow(t.bounds());
         c["boundingVolume"]["box"] = bounds(t.bounds());
-        c["geometricError"] = .1;
+        c["geometricError"] = 0;
         c["content"]["uri"] = FileUtils::getFilename(t.b3dmFilename());
         root["children"].push_back(c);
     }
-    root["geometricError"] = .1;
+    root["geometricError"] = 10;
     root["refine"] = "ADD";
     root["boundingVolume"]["box"] = bounds(fullBounds);
 
@@ -249,11 +241,9 @@ void CesiumWriter::writeB3dmFile(const Tile& tile)
     writeB3dmHeader(out, tile);
 
     std::streampos gltfStart = out.position();
-    std::cerr << "gltfStart = " << gltfStart << "!\n";
     writeGltfHeader(out);
     writeGltfJsonHeader(out);
     std::streampos gltfEnd = out.position();
-    std::cerr << "gltfEnd = " << gltfEnd << "!\n";
 
     // Location of the length is 8 bytes from the start.
     out.seek(b3dmStart + std::streampos(8));
@@ -360,7 +350,8 @@ void CesiumWriter::writeGltfJsonHeader(OLeStream& out)
     mesh["primitives"].push_back(
         {
             { "attributes", {{"POSITION", 1}} },
-            { "indices", 0 }
+            { "indices", 0 },
+            { "material", 0 }
         }
     );
 
@@ -369,12 +360,8 @@ void CesiumWriter::writeGltfJsonHeader(OLeStream& out)
 
     j["nodes"].push_back(
         {
-            { "children", { 1 } }
-        }
-    );
-    j["nodes"].push_back(
-        {
-            { "mesh", 0 }
+            { "mesh", 0 },
+            { "matrix", { 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 } }
         }
     );
 
@@ -384,7 +371,19 @@ void CesiumWriter::writeGltfJsonHeader(OLeStream& out)
         }
     );
 
-std::cerr << "J = " << j.dump(4) << "!\n";
+    j["materials"].push_back(
+        {
+            {
+                "pbrMetallicRoughness",
+                {
+                    { "metallicFactor", 0 },
+                    { "baseColorFactor", { .8, 0, 0, 1 } }
+                }
+            },
+            { "name", "Red" },
+            { "doubleSided", true }
+        }
+    );
 
     std::string js(j.dump());
     pad(js);
