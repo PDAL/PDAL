@@ -79,20 +79,23 @@ TEST(TranslateTest, t2)
     std::string in = Support::datapath("las/autzen_trim.las");
     std::string out = Support::temppath("out.las");
 
-    std::string json = " \
-        { \
-        \\\"pipeline\\\" : [ \
-        { \\\"type\\\":\\\"filters.stats\\\" }, \
-        { \\\"type\\\":\\\"filters.range\\\", \
-          \\\"limits\\\":\\\"Z[0:100]\\\" } \
-        ] \
-        }";
+    std::string json = R"(
+        [
+            {
+                \"type\": \"filters.stats\"
+            },
+            {
+                \"type\": \"filters.range\",
+                \"limits\": \"Z[0:100]\"
+            }
+        ]
+    )";
 
     // Check that we work with just a bunch of filters.
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
-    // Check that we fail with no bad input file.
+    // Check that we fail with no input file.
     FileUtils::deleteFile("foo.las");
     EXPECT_NE(runTranslate("foo.las " + out + " --json=\"" + json + "\"",
         output), 0);
@@ -102,32 +105,28 @@ TEST(TranslateTest, t2)
         output), 0);
 
     // Check that we work with no stages.
-    json = " \
-        { \
-        \\\"pipeline\\\" : [ \
-        ] \
-        }";
+    json = R"(
+        []
+    )";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we work with only an input (not specified as such).
-    json = " \
-        { \
-        \\\"pipeline\\\" : [ \
-          \\\"badinput.las\\\" \
-        ] \
-        }";
+    json = R"(
+        [
+          \"badinput.las\"
+        ]
+    )";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we work with an input and an output.
-    json = " \
-        { \
-        \\\"pipeline\\\" : [ \
-          \\\"badinput.las\\\", \
-          \\\"badoutput.las\\\" \
-        ] \
-        }";
+    json = R"(
+        [
+          \"badinput.las\",
+          \"badoutput.las\"
+        ]
+    )";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
@@ -157,7 +156,7 @@ TEST(TranslateTest, t2)
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
-    // Check that we fail with unchanined multiple writers.
+    // Check that we succeed with unchanined multiple writers.
     json = " \
         { \
         \\\"pipeline\\\" : [ \
@@ -168,7 +167,7 @@ TEST(TranslateTest, t2)
           \\\"badoutput2.las\\\" \
         ] \
         }";
-    EXPECT_NE(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we can handle chained writers.

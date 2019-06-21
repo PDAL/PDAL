@@ -434,4 +434,16 @@ TEST(json, issue_2159)
     EXPECT_EQ(srs, SpatialReference("EPSG:4326"));
 }
 
+TEST(json, issue_2438)
+{
+    std::string file1(Support::temppath("out2438_1.las"));
+    std::string file2(Support::temppath("out2438_1.las"));
+
+    FileUtils::deleteFile(file1);
+    FileUtils::deleteFile(file2);
+    run_pipeline("pipeline/issue2438.json");
+    EXPECT_TRUE(FileUtils::fileExists(file1));
+    EXPECT_TRUE(FileUtils::fileExists(file2));
+}
+
 } // namespace pdal
