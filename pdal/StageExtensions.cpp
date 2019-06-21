@@ -82,7 +82,9 @@ R"PDALEXTENSIONS(
     "readers.rxp" : "rxp",
     "readers.fbx" : "fbx",
     "readers.slpk" : "slpk",
-    "readers.i3s" : "i3s"
+    "readers.i3s" : "i3s",
+    "readers.e57" : "e57",
+    "writers.e57" : "e57"
 }
 
 )PDALEXTENSIONS"
@@ -168,6 +170,28 @@ std::string StageExtensions::defaultWriter(const std::string& extension)
     load();
     std::lock_guard<std::mutex> lock(m_mutex);
     return (m_writers[extension]);
+}
+
+
+StringList StageExtensions::extensions(const std::string& stage)
+{
+    StringList exts;
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if (Utils::startsWith(stage, "readers."))
+    {
+        for (auto& entry : m_readers)
+            if (entry.second == stage)
+                exts.push_back(entry.first);
+    }
+    else if (Utils::startsWith(stage, "writers."))
+    {
+        for (auto& entry : m_writers)
+            if (entry.second == stage)
+                exts.push_back(entry.first);
+    }
+    return exts;
 }
 
 } // namespace pdal

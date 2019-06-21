@@ -170,7 +170,11 @@ void PlyWriter::writeHeader(PointLayoutPtr layout) const
     if (m_faces)
     {
         *m_stream << "element face " << faceCount() << std::endl;
-        *m_stream << "property list uint8 uint32 vertex_indices" << std::endl;
+        if (m_sizedTypes)
+            *m_stream << "property list uint8 uint32 vertex_indices";
+        else
+            *m_stream << "property list uchar uint vertex_indices";
+        *m_stream << std::endl;
     }
     *m_stream << "end_header" << std::endl;
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2019 TileDB, Inc
+* Copyright (c) 2019, Howard Butler <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,69 +34,26 @@
 
 #pragma once
 
-#include <pdal/Streamable.hpp>
-#include <pdal/Writer.hpp>
-#include <tiledb/tiledb>
+#include <pdal/Filter.hpp>
+
+#include <vector>
+#include <string>
 
 namespace pdal
 {
 
-class PDAL_DLL TileDBWriter : public Writer, public Streamable
+class PDAL_DLL ShellFilter : public Filter
 {
 public:
-    struct DimBuffer
-    {
-        std::string m_name;
-        Dimension::Id m_id;
-        Dimension::Type m_type;
-        std::vector<uint8_t> m_buffer;
+    std::string getName() const override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize() override;
+    virtual PointViewSet run(PointViewPtr view) override;
 
-        DimBuffer(const std::string& name, Dimension::Id id,
-            Dimension::Type type) : m_name(name), m_id(id), m_type(type)
-        {}
-    };
-
-    TileDBWriter() = default;
-    std::string getName() const;
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual bool processOne(PointRef& point);
-    virtual void done(PointTableRef table);
-
-    bool flushCache(size_t size);
-
-    std::string m_arrayName;
-    std::string m_cfgFileName;
-
-    size_t m_tile_capacity;
-    size_t m_x_tile_size;
-    size_t m_y_tile_size;
-    size_t m_z_tile_size;
-    size_t m_current_idx;
-    size_t m_cache_size;
-
-
-    bool m_stats;
-    bool m_append;
-
-    BOX3D m_bbox;
-
-    std::unique_ptr<tiledb::FilterList> m_filterList;
-    std::string m_compressor;
-    int m_compressionLevel;
-
-    std::unique_ptr<tiledb::Context> m_ctx;
-    std::unique_ptr<tiledb::ArraySchema> m_schema;
-    std::unique_ptr<tiledb::Array> m_array;
-    std::unique_ptr<tiledb::Query> m_query;
-    std::vector<DimBuffer> m_attrs;
-    std::vector<double> m_coords;
-
-    TileDBWriter(const TileDBWriter&) = delete;
-    TileDBWriter& operator=(const TileDBWriter&) = delete;
+    std::string m_command;
+    std::string m_command_output;
+    virtual void done(PointTableRef table) override;
 };
 
 } // namespace pdal
