@@ -86,18 +86,18 @@ void PlaneFitFilter::filter(PointView& view)
     KD3Index& kdi = view.build3dIndex();
 
     point_count_t nloops = view.size();
-    std::vector<std::thread> threadPool(m_threads);
+    std::vector<std::thread> threadList(m_threads);
     for (int t = 0; t < m_threads; t++)
     {
-        threadPool[t] = std::thread(std::bind(
-            [&](const PointId start, const PointId end, const PointId t) {
+        threadList[t] = std::thread(std::bind(
+            [&](const PointId start, const PointId end) {
                 for (PointId i = start; i < end; i++)
                     setPlaneFit(view, i, kdi);
             },
             t * nloops / m_threads,
-            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads, t));
+            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
     }
-    for (auto& t : threadPool)
+    for (auto& t : threadList)
         t.join();
 }
 
