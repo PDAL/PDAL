@@ -103,12 +103,12 @@ void PlaneFitFilter::filter(PointView& view)
 
 double PlaneFitFilter::absDistance(PointView& view, const PointId& i,
                                    Eigen::Vector3d& centroid,
-                                   Eigen::Vector3f& normal)
+                                   Eigen::Vector3d& normal)
 {
     double x = view.getFieldAs<double>(Dimension::Id::X, i);
     double y = view.getFieldAs<double>(Dimension::Id::Y, i);
     double z = view.getFieldAs<double>(Dimension::Id::Z, i);
-    Eigen::Vector3f p;
+    Eigen::Vector3d p;
     p << x - centroid[0], y - centroid[1], z - centroid[2];
     double d = normal.dot(p);
     return std::fabs(d);
@@ -133,11 +133,11 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
 
     // Perform the eigen decomposition, using the eigenvector of the smallest
     // eigenvalue as the normal.
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(B);
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
     if (solver.info() != Eigen::Success)
         throwError("Cannot perform eigen decomposition.");
     auto eval = solver.eigenvalues();
-    Eigen::Vector3f normal = solver.eigenvectors().col(0);
+    Eigen::Vector3d normal = solver.eigenvectors().col(0);
 
     // Compute point to plane distance of the query point.
     double d = absDistance(view, i, centroid, normal);

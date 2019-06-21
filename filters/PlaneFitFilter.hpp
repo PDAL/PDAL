@@ -66,7 +66,7 @@ private:
 
     void setPlaneFit(PointView& view, const PointId& i, const KD3Index& kdi);
     double absDistance(PointView& view, const PointId& i,
-                       Eigen::Vector3d& centroid, Eigen::Vector3f& normal);
+                       Eigen::Vector3d& centroid, Eigen::Vector3d& normal);
 };
 
 } // namespace pdal
