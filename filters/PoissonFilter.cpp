@@ -34,10 +34,18 @@
 
 #include "PoissonFilter.hpp"
 #include "NormalFilter.hpp"
+#include "TransformationFilter.hpp"
 
 #include <kazhdan/PoissonRecon.h>
 #include <kazhdan/point_source/PointSource.h>
 
+// Note: For testing, download the eagle set here:
+// https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version8.0/
+// or here:
+// https://drive.google.com/file/d/11dYMNmNx3XVh0m13OYjW4UX3Bhb4aNXg/view?usp=sharing
+// Run with depth = 10.  You should get a good looking eagle out
+// that you can view with meshlab.  The output should have 1,893,883 vertices
+// and 3,787,635 faces.
 namespace pdal
 {
 
@@ -105,9 +113,11 @@ private:
 class PointViewMesh : public Kazhdan::Mesh
 {
 public:
-    PointViewMesh(PointView& view, bool color) : m_view(view),
-        m_mesh(*(m_view.createMesh("poisson"))), m_doColor(color)
-    { resetIterator(); }
+    PointViewMesh(PointView& view, bool color) :
+        m_view(view), m_mesh(*(m_view.createMesh("poisson"))), m_doColor(color)
+    {
+        resetIterator();
+    }
 
     virtual int pointCount() const
         { return static_cast<int>(m_view.size()); }
@@ -290,6 +300,18 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
     s.insert(outView);
     PointViewMesh mesh(*outView, m_doColor);
     recon.extractMesh(mesh);
+
+    // Note here that we're transforming the matrix in the traditional
+    // sense (rows become columns) because the transformation filter does
+    // right multiplication instead of left.
+    TransformationFilter::Transform transform;
+    auto xform = recon.inverseTransform();
+    size_t i = 0;
+    for (size_t c = 0; c < 4; ++c)
+        for (size_t r = 0; r < 4; ++r)
+            transform[i++] = xform.coords[r][c];
+
+    TransformationFilter().doFilter(*outView, transform);
     return s;
 }
 
