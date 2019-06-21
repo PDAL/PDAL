@@ -48,68 +48,103 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(TransformationFilter, s_info)
 
-std::string TransformationFilter::getName() const { return s_info.name; }
+TransformationFilter::Transform::Transform()
+{}
 
-TransformationMatrix transformationMatrixFromString(const std::string& s)
+
+TransformationFilter::Transform::Transform(
+    const TransformationFilter::Transform::ArrayType& arr) : m_vals(arr)
+{}
+
+
+std::istream& operator>>(std::istream& in,
+    pdal::TransformationFilter::Transform& xform)
 {
-    std::istringstream iss(s);
-	TransformationMatrix matrix{{ 0 }};
     double entry;
-    TransformationMatrix::size_type i = 0;
-    while (iss >> entry)
+
+    size_t i = 0;
+    while (in >> entry)
     {
-        if (i + 1 > matrix.size())
+        if (i + 1 > xform.Size)
         {
             std::stringstream msg;
             msg << "Too many entries in transformation matrix, should be "
-                << matrix.size();
+                << xform.Size;
             throw pdal_error("filters.transformation: " + msg.str());
         }
-        matrix[i++] = entry;
+        xform[i++] = entry;
     }
 
-    if (i != matrix.size())
+    if (i != xform.Size)
     {
         std::stringstream msg;
         msg << "Too few entries in transformation matrix: "
-            << i
-            << " (should be "
-            << matrix.size()
-            << ")";
-
+            << i << " (should be " << xform.Size << ")";
         throw pdal_error("filters.transformation: " + msg.str());
     }
+    in.clear();
 
-    return matrix;
+    return in;
 }
 
+
+std::ostream& operator<<(std::ostream& out,
+    const pdal::TransformationFilter::Transform& xform)
+{
+    for (size_t r = 0; r < xform.RowSize; ++r)
+    {
+        for (size_t c = 0; c < xform.ColSize; ++c)
+        {
+            if (c != 0)
+                out << "  ";
+            out << xform[r * xform.ColSize + c];
+        }
+        out << "\n";
+    }
+    return out;
+}
+
+
+TransformationFilter::TransformationFilter() : m_matrix(new Transform)
+{}
+
+
+TransformationFilter::~TransformationFilter()
+{}
+
+
+std::string TransformationFilter::getName() const { return s_info.name; }
 
 void TransformationFilter::addArgs(ProgramArgs& args)
 {
-    args.add("matrix", "Transformation matrix", m_matrixSpec).setPositional();
+    args.add("matrix", "Transformation matrix", *m_matrix).setPositional();
 }
 
 
-void TransformationFilter::initialize()
+void TransformationFilter::doFilter(PointView& view,
+    const TransformationFilter::Transform& matrix)
 {
-    m_matrix = transformationMatrixFromString(m_matrixSpec);
+    *m_matrix = matrix;
+    filter(view);
 }
 
 
 bool TransformationFilter::processOne(PointRef& point)
 {
+    Transform& matrix = *m_matrix;
+
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
 
     point.setField(Dimension::Id::X,
-        x * m_matrix[0] + y * m_matrix[1] + z * m_matrix[2] + m_matrix[3]);
+        x * matrix[0] + y * matrix[1] + z * matrix[2] + matrix[3]);
 
     point.setField(Dimension::Id::Y,
-        x * m_matrix[4] + y * m_matrix[5] + z * m_matrix[6] + m_matrix[7]);
+        x * matrix[4] + y * matrix[5] + z * matrix[6] + matrix[7]);
 
     point.setField(Dimension::Id::Z,
-        x * m_matrix[8] + y * m_matrix[9] + z * m_matrix[10] + m_matrix[11]);
+        x * matrix[8] + y * matrix[9] + z * matrix[10] + matrix[11]);
     return true;
 }
 
