@@ -37,9 +37,9 @@ users of this filter should find instructive.
 Example
 -------
 
-The sample pipeline below uses computes the LOF with a neighborhood of 20
-neighbors, followed by a range filter to crop out points whose
-``LocalOutlierFactor`` exceeds 1.2 before writing the output.
+The sample pipeline below computes the LOF with a neighborhood of 20 neighbors,
+followed by a range filter to crop out points whose ``LocalOutlierFactor``
+exceeds 1.2 before writing the output.
 
 .. code-block:: json
 
@@ -61,6 +61,4 @@ Options
 
 _`minpts`
   The number of k nearest neighbors. [Default: 10]
-
-.. [Breunig2000] Breunig, M.M., Kriegel, H.-P., Ng, R.T., Sander, J., 2000. LOF: Identifying Density-Based Local Outliers. Proc. 2000 Acm Sigmod Int. Conf. Manag. Data 1–12.
 
