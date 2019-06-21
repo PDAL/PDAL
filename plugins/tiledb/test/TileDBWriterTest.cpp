@@ -55,9 +55,11 @@ namespace pdal
             options.add("mode", "ramp");
             options.add("count", count);
             m_reader.setOptions(options);
+            m_reader2.setOptions(options);
         }
 
         FauxReader m_reader;
+        FauxReader m_reader2;
 
     };
 
@@ -128,6 +130,64 @@ namespace pdal
         ASSERT_DOUBLE_EQ(subarray[1], 1.0);
         ASSERT_DOUBLE_EQ(subarray[3], 1.0);
         ASSERT_DOUBLE_EQ(subarray[5], 1.0);
+    }
+
+    TEST_F(TileDBWriterTest, write_append)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_append_out");
+
+        Options options;
+        std::string sidecar = pth + "/pdal.json";
+        options.add("array_name", pth);
+        options.add("chunk_size", 80);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        // check the sidecar exists so that the execute has completed
+        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
+
+        options.add("append", true);
+        TileDBWriter append_writer;
+        append_writer.setOptions(options);
+        append_writer.setInput(m_reader2);
+
+        FixedPointTable table2(100);
+        append_writer.prepare(table2);
+        append_writer.execute(table2);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+        auto domain = array.non_empty_domain<double>();
+        std::vector<double> subarray;
+
+        for (const auto& kv: domain)
+        {
+            subarray.push_back(kv.second.first);
+            subarray.push_back(kv.second.second);
+        }
+
+        tiledb::Query q(ctx, array, TILEDB_READ);
+        q.set_subarray(subarray);
+
+        auto max_el = array.max_buffer_elements(subarray);
+        std::vector<double> coords(max_el[TILEDB_COORDS].second);
+        q.set_coordinates(coords);
+        q.submit();
+        array.close();
+
+        EXPECT_EQ((m_reader.count() * 3) + (m_reader2.count() * 3), coords.size());
     }
 }
 
