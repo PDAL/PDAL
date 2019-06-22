@@ -49,6 +49,7 @@ public:
     PDAL_DLL void set(const std::string& stage, const StringList& exts);
     std::string defaultReader(const std::string& filename);
     std::string defaultWriter(const std::string& filename);
+    PDAL_DLL StringList extensions(const std::string& stage);
 private:
     void load();
 

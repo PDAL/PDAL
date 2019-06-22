@@ -56,12 +56,26 @@ namespace
          "ScanDirectionFlag", "EdgeOfFlightLine", "Classification",
          "ScanAngleRank", "UserData", "PointSourceId", "GpsTime", "OriginId"
     };
+
+    // Most of our tests will exercise this laszip-based EPT dataset based on
+    // a 4-tile split of Lone Star Geyser.
+    const std::string sourceFilePath(
+            Support::datapath("ept/source/lone-star.laz"));
+    const std::string eptLaszipPath(
+            "ept://" + Support::datapath("ept/lone-star-laszip"));
+
+    // Also test a basic read of binary/zstandard versions of a smaller dataset.
+    const std::string ellipsoidEptBinaryPath(
+            "ept://" + Support::datapath("ept/ellipsoid-binary"));
+    const point_count_t ellipsoidNumPoints(100000);
+    const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
+            -8242446, 4966706, 50);
 }
 
 TEST(EptReaderTest, inspect)
 {
     Options options;
-    options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+    options.add("filename", eptLaszipPath);
 
     EptReader reader;
     reader.setOptions(options);
@@ -86,10 +100,10 @@ TEST(EptReaderTest, inspect)
     EXPECT_EQ(wkt, expSrsWkt);
 }
 
-TEST(EptReaderTest, fullRead)
+TEST(EptReaderTest, fullReadLaszip)
 {
     Options options;
-    options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+    options.add("filename", eptLaszipPath);
 
     PointTable table;
 
@@ -119,10 +133,10 @@ TEST(EptReaderTest, fullRead)
     EXPECT_EQ(np, expNumPoints);
 }
 
-TEST(EptReaderTest, zstandard)
+TEST(EptReaderTest, fullReadBinary)
 {
     Options options;
-    options.add("filename", "ept://" + Support::datapath("ept/extradim"));
+    options.add("filename", ellipsoidEptBinaryPath);
 
     PointTable table;
 
@@ -132,13 +146,10 @@ TEST(EptReaderTest, zstandard)
     const auto set(reader.execute(table));
 
     double x, y, z;
-    double l;
+    uint64_t o;
     uint64_t np(0);
     for (const PointViewPtr& view : set)
     {
-        auto dim_types = view->dimTypes();
-        auto classLabelDim = dim_types[dim_types.size() - 2];
-
         for (point_count_t i(0); i < view->size(); ++i)
         {
             ++np;
@@ -146,21 +157,20 @@ TEST(EptReaderTest, zstandard)
             x = view->getFieldAs<double>(Dimension::Id::X, i);
             y = view->getFieldAs<double>(Dimension::Id::Y, i);
             z = view->getFieldAs<double>(Dimension::Id::Z, i);
-            l = view->getFieldAs<double>(classLabelDim.m_id, i);
-//            o = view->getFieldAs<uint8_t >(, i);
-//            std::cout<<int(l)<<std::endl;
-            ASSERT_TRUE(l < 3);
-            ASSERT_TRUE(l > -1);
+            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+            ASSERT_TRUE(ellipsoidBoundsConforming.contains(x, y, z));
+            ASSERT_EQ(o, 0u);
         }
     }
 
-    EXPECT_EQ(np, expNumPoints);
+    EXPECT_EQ(np, ellipsoidNumPoints);
 }
+
 
 TEST(EptReaderTest, resolutionLimit)
 {
     Options options;
-    options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+    options.add("filename", eptLaszipPath);
 
     // Our test data cube is 44 units in length, with a span of 128.  Therefore
     // our resolution cell width values for the first few depths are:
@@ -176,7 +186,7 @@ TEST(EptReaderTest, resolutionLimit)
     // files in our dataset whose depth is less than 3.  This value is summed
     // from the hierarchy for depths 0 through 2 (our test dataset has depths
     // through 3, which are omitted here).
-    const point_count_t expectedCount = 303955;
+    const point_count_t expectedCount = 479269;
 
     PointTable table;
 
@@ -219,7 +229,7 @@ TEST(EptReaderTest, bounds2dXform)
     {
         EptReader reader;
         Options options;
-        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("filename", eptLaszipPath);
         options.add("bounds", eptBounds);
         reader.setOptions(options);
         PointTable eptTable;
@@ -230,7 +240,7 @@ TEST(EptReaderTest, bounds2dXform)
     {
         EptReader reader;
         Options options;
-        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("filename", eptLaszipPath);
         options.add("bounds", boxBounds);
         reader.setOptions(options);
         PointTable eptTable;
@@ -250,7 +260,7 @@ TEST(EptReaderTest, boundedRead2d)
     EptReader reader;
     {
         Options options;
-        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("filename", eptLaszipPath);
         options.add("bounds", bounds);
         reader.setOptions(options);
     }
@@ -281,7 +291,7 @@ TEST(EptReaderTest, boundedRead2d)
     LasReader source;
     {
         Options options;
-        options.add("filename", Support::datapath("ept/lone-star.laz"));
+        options.add("filename", sourceFilePath);
         source.setOptions(options);
     }
     CropFilter crop;
@@ -311,7 +321,7 @@ TEST(EptReaderTest, boundedRead3d)
     EptReader reader;
     {
         Options options;
-        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("filename", eptLaszipPath);
         options.add("bounds", bounds);
         reader.setOptions(options);
     }
@@ -342,7 +352,7 @@ TEST(EptReaderTest, boundedRead3d)
     LasReader source;
     {
         Options options;
-        options.add("filename", Support::datapath("ept/lone-star.laz"));
+        options.add("filename", sourceFilePath);
         source.setOptions(options);
     }
     CropFilter crop;
@@ -379,7 +389,7 @@ TEST(EptReaderTest, originRead)
     {
         EptReader reader;
         Options options;
-        options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        options.add("filename", eptLaszipPath);
         options.add("origin", origin);
         reader.setOptions(options);
         PointTable table;
@@ -405,33 +415,56 @@ TEST(EptReaderTest, badOriginQuery)
 {
     EptReader reader;
     Options options;
-    options.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+    options.add("filename", eptLaszipPath);
     options.add("origin", 4);
     reader.setOptions(options);
     PointTable table;
     EXPECT_THROW(reader.prepare(table), pdal_error);
 }
 
-TEST(EptReaderTest, getType)
+TEST(EptReaderTest, getRemoteType)
 {
-    NL::json j = {{ "scale", 1.0 }};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::Double);
+    NL::json j = {{ "type", "signed" }, { "size", 4 }, { "scale", 1.0 }};
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Signed32);
     j = {{ "scale", "foo" }};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::None);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
     j = {{ "type", "float"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::None);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
     j = {{ "type", "float"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::Float);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Float);
     j = {{ "type", "unsigned"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::Unsigned32);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Unsigned32);
     j = {{ "type", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::Signed16);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Signed16);
     j = {{ "tope", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::None);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
     j = {{ "type", "signed"}, {"size", 3}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::None);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
     j = {{ "type", "signed"}};
-    EXPECT_EQ(EptReader::getTypeTest(j), Dimension::Type::None);
+    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
+}
+
+TEST(EptReaderTest, getCoercedType)
+{
+    // Scaled attributes are coerced to doubles regardless of schema type.
+    NL::json j = {{ "type", "signed" }, { "size", 4 }, { "scale", 1.0 }};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Double);
+    j = {{ "scale", "foo" }};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
+    j = {{ "type", "float"}, {"size", 2}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
+    j = {{ "type", "float"}, {"size", 4}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Float);
+    j = {{ "type", "unsigned"}, {"size", 4}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Unsigned32);
+    j = {{ "type", "signed"}, {"size", 2}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Signed16);
+    j = {{ "tope", "signed"}, {"size", 2}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
+    j = {{ "type", "signed"}, {"size", 3}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
+    j = {{ "type", "signed"}};
+    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
 }
 
 } // namespace pdal

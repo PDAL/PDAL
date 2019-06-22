@@ -68,6 +68,10 @@ void PipelineKernel::validateSwitches(ProgramArgs& args)
 
     if (m_inputFile.empty())
         throw pdal_error("Input filename required.");
+
+    if (m_stream)
+        m_log->get(LogLevel::Warning) << "Option 'stream' is obsolete.  " <<
+            "Streaming occurs by default.\n";
 }
 
 

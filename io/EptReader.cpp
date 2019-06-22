@@ -62,7 +62,19 @@ namespace
 
     const std::string addonFilename { "ept-addon.json" };
 
-    Dimension::Type getType(const NL::json& dim)
+    Dimension::Type getRemoteType(const NL::json& dim)
+    {
+        try {
+            const std::string typestring(dim.at("type").get<std::string>());
+            const uint64_t size(dim.at("size").get<uint64_t>());
+            return Dimension::type(typestring, size);
+        }
+        catch (const NL::json::exception&)
+        {}
+        return Dimension::Type::None;
+    }
+
+    Dimension::Type getCoercedType(const NL::json& dim)
     {
         if (dim.contains("scale") && dim["scale"].is_number())
             return Dimension::Type::Double;
@@ -347,14 +359,17 @@ void EptReader::addDimensions(PointLayoutPtr layout)
         const std::string name(el["name"].get<std::string>());
 
         // If the dimension has a scale, make sure we register it as a double
-        // rather than its serialized type.
-        const Dimension::Type type = getType(el);
+        // rather than its serialized type.  However for our local PointTables
+        // which we will extract into our public-facing table, we'll need to
+        // make sure we match the remote dimension schema exactly.
+        const Dimension::Type remoteType = getRemoteType(el);
+        const Dimension::Type coercedType = getCoercedType(el);
 
         log()->get(LogLevel::Debug) << "Registering dim " << name << ": " <<
-            Dimension::interpretationName(type) << std::endl;
+            Dimension::interpretationName(coercedType) << std::endl;
 
-        layout->registerOrAssignDim(name, type);
-        m_remoteLayout->registerOrAssignDim(name, type);
+        layout->registerOrAssignDim(name, coercedType);
+        m_remoteLayout->registerOrAssignDim(name, remoteType);
     }
     m_remoteLayout->finalize();
 
@@ -399,7 +414,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             {
                 const NL::json addonInfo
                     { NL::json::parse(ep.get(addonFilename)) };
-                const Dimension::Type type(getType(addonInfo));
+                const Dimension::Type type(getRemoteType(addonInfo));
                 const Dimension::Id id(
                     layout->registerOrAssignDim(dimName, type));
                 m_addons.emplace_back(new Addon(*layout, ep, id));
@@ -768,9 +783,14 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
 }
 
 
-Dimension::Type EptReader::getTypeTest(const NL::json& j)
+Dimension::Type EptReader::getRemoteTypeTest(const NL::json& j)
 {
-    return getType(j);
+    return getRemoteType(j);
+}
+
+Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
+{
+    return getCoercedType(j);
 }
 
 } // namespace pdal

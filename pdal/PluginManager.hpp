@@ -95,8 +95,7 @@ public:
     static void loadAll();
     static bool loadDynamic(const std::string& driverName);
     static PluginManager<T>& get();
-    StageExtensions& extensions()
-        { return m_extensions; }
+    static StageExtensions& extensions();
 
 private:
     PluginManager();
