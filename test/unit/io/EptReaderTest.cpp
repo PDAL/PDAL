@@ -67,6 +67,8 @@ namespace
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
             "ept://" + Support::datapath("ept/ellipsoid-binary"));
+    const std::string ellipsoidEptZstandardPath(
+            "ept://" + Support::datapath("ept/ellipsoid-zstandard"));
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
             -8242446, 4966706, 50);
@@ -166,6 +168,38 @@ TEST(EptReaderTest, fullReadBinary)
     EXPECT_EQ(np, ellipsoidNumPoints);
 }
 
+TEST(EptReaderTest, fullReadZstandard)
+{
+    Options options;
+    options.add("filename", ellipsoidEptZstandardPath);
+
+    PointTable table;
+
+    EptReader reader;
+    reader.setOptions(options);
+    reader.prepare(table);
+    const auto set(reader.execute(table));
+
+    double x, y, z;
+    uint64_t o;
+    uint64_t np(0);
+    for (const PointViewPtr& view : set)
+    {
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            ++np;
+
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            z = view->getFieldAs<double>(Dimension::Id::Z, i);
+            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+            ASSERT_TRUE(ellipsoidBoundsConforming.contains(x, y, z));
+            ASSERT_EQ(o, 0u);
+        }
+    }
+
+    EXPECT_EQ(np, ellipsoidNumPoints);
+}
 
 TEST(EptReaderTest, resolutionLimit)
 {
