@@ -199,7 +199,7 @@ TEST(TranslateTest, t3)
     std::string meta = Support::temppath("meta.json");
 
     EXPECT_EQ(runTranslate(in + " " + out + " --metadata " + meta, output), 0);
-#ifndef WIN32
+#ifndef _WIN32
     Utils::run_shell_command("grep -c readers.las " + meta, output);
     EXPECT_EQ(std::stoi(output), 1);
     Utils::run_shell_command("grep -c writers.las " + meta, output);
