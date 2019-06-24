@@ -125,15 +125,6 @@ PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
         ${PCL_INCLUDE_DIRS}
 )
 
-PDAL_ADD_PLUGIN(icp_filter_libname filter icp
-    FILES
-        filters/IcpFilter.cpp
-    LINK_WITH
-        ${PCL_LIBRARIES}
-    INCLUDES
-        ${PCL_INCLUDE_DIRS}
-)
-
 #
 # PCL Kernel
 #
@@ -169,15 +160,5 @@ if (WITH_TESTS)
         test/PCLBlockFilterTest.cpp
     LINK_WITH ${pcd_reader_libname} ${pcd_writer_libname} ${pclblock_libname}
         ${pcl_libname} ${smooth_libname}
-    )
-
-    PDAL_ADD_TEST(pdal_filters_icp_test
-        FILES
-            test/IcpFilterTest.cpp
-        LINK_WITH
-            ${icp_filter_libname}
-        INCLUDES
-            ${PCL_INCLUDE_DIRS}
-            ${PDAL_VENDOR_DIR}/eigen
     )
 endif()

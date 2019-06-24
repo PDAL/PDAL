@@ -223,7 +223,7 @@ void PMFFilter::processGround(PointViewPtr view)
 {
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
-    view->calculateBounds(bounds);
+    calculateBounds(*view, bounds);
     size_t cols = static_cast<size_t>(
         ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1);
     size_t rows = static_cast<size_t>(
@@ -337,7 +337,6 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        using namespace eigen;
         std::vector<double> me = erodeDiamond(ZImin, rows, cols, iters);
         std::vector<double> mo = dilateDiamond(me, rows, cols, iters);
 
