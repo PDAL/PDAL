@@ -35,6 +35,8 @@ function(pdal_target_compile_settings target)
                 /wd4250
                 # some templates don't return
                 /wd4716
+                # unwind semantics
+                /wd4530
                 )
         endif()
 
