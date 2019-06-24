@@ -41,6 +41,7 @@ RUN \
         cmake \
         ninja \
         g++ \
+        bash \
     ; \
     apk add --no-cache \
         eigen-dev \
@@ -51,6 +52,7 @@ RUN \
         curl-dev \
         postgresql-dev \
         sqlite-dev \
+        zstd-dev \
         libcrypto1.1@edgemain \
         xerces-c@edgetesting \
         libspatialite-dev@edgetesting \

@@ -149,8 +149,8 @@ PointViewPtr CpdFilter::change(PointViewPtr fixed, PointViewPtr moving)
 
 void CpdFilter::cpd_rigid(PointViewPtr fixed, PointViewPtr moving)
 {
-    cpd::Matrix fixedMatrix = eigen::pointViewToEigen(*fixed);
-    cpd::Matrix movingMatrix = eigen::pointViewToEigen(*moving);
+    cpd::Matrix fixedMatrix = pointViewToEigen(*fixed);
+    cpd::Matrix movingMatrix = pointViewToEigen(*moving);
     cpd::RigidResult result = cpd::rigid(fixedMatrix, movingMatrix);
     movePoints(moving, result.points);
     addMetadata(this, static_cast<cpd::Result>(result));
@@ -160,8 +160,8 @@ void CpdFilter::cpd_rigid(PointViewPtr fixed, PointViewPtr moving)
 
 void CpdFilter::cpd_affine(PointViewPtr fixed, PointViewPtr moving)
 {
-    cpd::Matrix fixedMatrix = eigen::pointViewToEigen(*fixed);
-    cpd::Matrix movingMatrix = eigen::pointViewToEigen(*moving);
+    cpd::Matrix fixedMatrix = pointViewToEigen(*fixed);
+    cpd::Matrix movingMatrix = pointViewToEigen(*moving);
     cpd::AffineResult result = cpd::affine(fixedMatrix, movingMatrix);
     movePoints(moving, result.points);
     MetadataNode root = getMetadata();
@@ -170,8 +170,8 @@ void CpdFilter::cpd_affine(PointViewPtr fixed, PointViewPtr moving)
 
 void CpdFilter::cpd_nonrigid(PointViewPtr fixed, PointViewPtr moving)
 {
-    cpd::Matrix fixedMatrix = eigen::pointViewToEigen(*fixed);
-    cpd::Matrix movingMatrix = eigen::pointViewToEigen(*moving);
+    cpd::Matrix fixedMatrix = pointViewToEigen(*fixed);
+    cpd::Matrix movingMatrix = pointViewToEigen(*moving);
     cpd::NonrigidResult result = cpd::nonrigid(fixedMatrix, movingMatrix);
     movePoints(moving, result.points);
 }

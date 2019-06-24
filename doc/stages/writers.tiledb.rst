@@ -56,6 +56,9 @@ compression
 compression_level
   TileDB compression level for chosen compression [Optional]
 
+append
+  Append to an existing TileDB array with the same schema [Optional]
+
 stats
   Dump query stats to stdout [Optional]
 
