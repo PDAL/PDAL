@@ -42,7 +42,7 @@ namespace pdal
 EptInfo::EptInfo(const NL::json& info) : m_info(info)
 {
     m_bounds = toBox3d(m_info.at("bounds"));
-    m_points = m_info.at("points").get<uint64_t>();
+    m_points = m_info.value("points", 0);
     m_span = m_info.at("span").get<uint64_t>();
 
     auto iSrs = m_info.find("srs");

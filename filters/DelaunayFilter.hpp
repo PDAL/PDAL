@@ -42,15 +42,15 @@ namespace pdal
 class PDAL_DLL DelaunayFilter : public Filter
 {
 public:
-    DelaunayFilter() : Filter()
-    {}
+    DelaunayFilter& operator=(const DelaunayFilter&) = delete;
+    DelaunayFilter(const DelaunayFilter&) = delete;
+    DelaunayFilter();
+    virtual ~DelaunayFilter();
+
     std::string getName() const;
 
 private:
-    virtual PointViewSet run(PointViewPtr view);
-
-    DelaunayFilter& operator=(const DelaunayFilter&); // not implemented
-    DelaunayFilter(const DelaunayFilter&); // not implemented
+    virtual void filter(PointView& view);
 };
 
 } // namespace pdal

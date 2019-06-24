@@ -63,6 +63,14 @@ PluginManager<T>& PluginManager<T>::get()
     return instance;
 }
 
+
+template <typename T>
+StageExtensions& PluginManager<T>::extensions()
+{
+    return get().m_extensions;
+}
+
+
 template <typename T>
 StringList PluginManager<T>::names()
 {

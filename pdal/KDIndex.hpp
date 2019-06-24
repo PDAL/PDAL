@@ -38,6 +38,7 @@
 
 #include <nanoflann/nanoflann.hpp>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 
 namespace nanoflann
@@ -444,7 +445,7 @@ bool KDIndex<2>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX2D bounds;
-        m_buf.calculateBounds(bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
@@ -470,7 +471,7 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX3D bounds;
-        m_buf.calculateBounds(bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;

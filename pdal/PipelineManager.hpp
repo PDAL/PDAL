@@ -99,12 +99,8 @@ public:
         Stage& parent, Options options);
     Stage& makeWriter(StageCreationOptions& ops);
 
-    // returns true if the pipeline endpoint is a writer
-    bool isWriterPipeline() const
-        { return (bool)getStage(); }
-
-    // return the pipeline reader endpoint (or nullptr, if not a reader
-    // pipeline)
+    // Return the first leaf stage of a pipeline, or nullptr if the pipeline
+    // is empty.
     Stage* getStage() const
     {
         const auto& llist = leaves();
