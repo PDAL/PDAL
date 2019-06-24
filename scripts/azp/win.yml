@@ -76,6 +76,6 @@ jobs:
         echo %PATH%
         set CC=cl.exe
         set CXX=cl.exe
-        ninja VERBOSE=1
+        ninja
       displayName: 'Build'
 
