@@ -32,7 +32,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ^
             -DPDAL_PLUGIN_INSTALL_PATH:FILEPATH=%PDAL_PLUGIN_INSTALL_PATH% ^
             -DWITH_TESTS=ON ^
-            -DCMAKE_VERBOSE_MAKEFILE=OFF ^
+            -DCMAKE_VERBOSE_MAKEFILE=ON ^
             -DCMAKE_LIBRARY_PATH:FILEPATH="%CONDA_PREFIX%/Library/lib" ^
             -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
             -DOPENSSL_ROOT_DIR=%CONDA_PREFIX%/Library ^
@@ -76,6 +76,6 @@ jobs:
         echo %PATH%
         set CC=cl.exe
         set CXX=cl.exe
-        ninja
+        ninja VERBOSE=1
       displayName: 'Build'
 
