@@ -37,6 +37,7 @@
 #include <array>
 #include <random>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -225,66 +226,6 @@ TEST(PointViewTest, bigfile)
         EXPECT_EQ(
             view.getFieldAs<int>(Dimension::Id::Z, id), -(int)idx);
     }
-}
-
-
-static void check_bounds(const BOX3D& box,
-                         double minx, double maxx,
-                         double miny, double maxy,
-                         double minz, double maxz)
-{
-    EXPECT_DOUBLE_EQ(box.minx, minx);
-    EXPECT_DOUBLE_EQ(box.maxx, maxx);
-    EXPECT_DOUBLE_EQ(box.miny, miny);
-    EXPECT_DOUBLE_EQ(box.maxy, maxy);
-    EXPECT_DOUBLE_EQ(box.minz, minz);
-    EXPECT_DOUBLE_EQ(box.maxz, maxz);
-}
-
-
-TEST(PointViewTest, calcBounds)
-{
-    auto set_points = [](PointViewPtr view, PointId i, double x, double y,
-        double z)
-    {
-        view->setField(Dimension::Id::X, i, x);
-        view->setField(Dimension::Id::Y, i, y);
-        view->setField(Dimension::Id::Z, i, z);
-    };
-
-    PointTable table;
-    PointLayoutPtr layout(table.layout());
-
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-    layout->registerDim(Dimension::Id::Z);
-
-    const double lim_min = (std::numeric_limits<double>::lowest)();
-    const double lim_max = (std::numeric_limits<double>::max)();
-    PointViewPtr b0(new PointView(table));
-    BOX3D box_b0;
-    b0->calculateBounds(box_b0);
-    check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
-
-    PointViewPtr b1(new PointView(table));
-    set_points(b1, 0, 0.0, 0.0, 0.0);
-    set_points(b1, 1, 2.0, 2.0, 2.0);
-
-    PointViewPtr b2(new PointView(table));
-    set_points(b2, 0, 3.0, 3.0, 3.0);
-    set_points(b2, 1, 1.0, 1.0, 1.0);
-
-    PointViewSet bs;
-    bs.insert(b1);
-    bs.insert(b2);
-
-    BOX3D box_b1;
-    b1->calculateBounds(box_b1);
-    check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
-
-    BOX3D box_b2;
-    b2->calculateBounds(box_b2);
-    check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
 }
 
 TEST(PointViewTest, order)

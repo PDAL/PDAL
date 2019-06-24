@@ -34,6 +34,7 @@
 
 #include "MovingLeastSquaresFilter.hpp"
 
+#include <pdal/EigenUtils.hpp>
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
@@ -71,7 +72,7 @@ PointViewSet MovingLeastSquaresFilter::run(PointViewPtr input)
     log()->get(LogLevel::Debug2) << "Process MovingLeastSquaresFilter..." << std::endl;
 
     BOX3D buffer_bounds;
-    input->calculateBounds(buffer_bounds);
+    calculateBounds(*input, buffer_bounds);
 
     // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;

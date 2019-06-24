@@ -25,10 +25,9 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 //
-// Author: vladl@google.com (Vlad Losev)
-//
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This file contains tests verifying correctness of data provided via
 // UnitTest's public methods.
@@ -54,7 +53,7 @@ class UnitTestHelper {
  public:
   // Returns the array of pointers to all test cases sorted by the test case
   // name.  The caller is responsible for deleting the array.
-  static TestCase const** const GetSortedTestCases() {
+  static TestCase const** GetSortedTestCases() {
     UnitTest& unit_test = *UnitTest::GetInstance();
     TestCase const** const test_cases =
         new const TestCase*[unit_test.total_test_case_count()];
@@ -83,7 +82,7 @@ class UnitTestHelper {
   // Returns the array of pointers to all tests in a particular test case
   // sorted by the test name.  The caller is responsible for deleting the
   // array.
-  static TestInfo const** const GetSortedTests(const TestCase* test_case) {
+  static TestInfo const** GetSortedTests(const TestCase* test_case) {
     TestInfo const** const tests =
         new const TestInfo*[test_case->total_test_count()];
 
