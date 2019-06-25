@@ -53,6 +53,11 @@ function(pdal_target_compile_settings target)
         if (PDAL_USE_STATIC_RUNTIME)
             target_compile_options(${target} PRIVATE /MT)
         endif()
+
+        #
+        # Turn on exception handling
+        #
+        target_compile_options(${target} PRIVATE /EHsc)
     endif()
 endfunction()
 
