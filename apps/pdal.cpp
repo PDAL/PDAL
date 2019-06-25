@@ -164,13 +164,15 @@ void App::outputDrivers()
         StageExtensions& extensions = PluginManager<Stage>::extensions();
         for (auto name : stages)
         {
+            Stage *s = f.createStage(name);
             std::string description = PluginManager<Stage>::description(name);
             std::string link = PluginManager<Stage>::link(name);
             j.push_back(
                 { { "name", name },
                   { "description", description },
                   { "link", link },
-                  { "extensions", extensions.extensions(name) }
+                  { "extensions", extensions.extensions(name) },
+                  { "streamable", s->pipelineStreamable()}
                 }
             );
         }
@@ -210,13 +212,11 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
 
     if (!m_showJSON)
     {
-        const size_t indentSize = 2;
-        strm << stageName << " -- " << PluginManager<Stage>::link(stageName) <<
-             std::endl;
-        strm << headline << std::endl;
-        strm << std::string(indentSize, ' ') << "Streamable: " <<
-             (s->pipelineStreamable() ? "Yes" : "No") << "\n\n";
-        args.dump2(strm, indentSize, 6, headline.size());
+        strm  << stageName << " -- " << PluginManager<Stage>::link(stageName) <<
+            std::endl;
+        strm  << headline << std::endl;
+
+        args.dump2(strm , 2, 6, headline.size());
     }
     else
     {
