@@ -17,7 +17,7 @@ jobs:
         ECHO ON
         call activate pdal
         call conda config --set always_yes True --set show_channel_urls True
-        call conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
+        call conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
       displayName: Install PDAL dependencies
     - script: |
         ECHO ON
@@ -42,7 +42,6 @@ jobs:
             -DBUILD_PLUGIN_ICEBRIDGE=ON ^
             -DBUILD_PLUGIN_MRSID=OFF ^
             -DBUILD_PLUGIN_NITF=ON ^
-            -DBUILD_PLUGIN_PCL=ON ^
             -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
             -DBUILD_PLUGIN_OCI=OFF ^
             -DBUILD_PLUGIN_SQLITE=ON ^
@@ -58,7 +57,6 @@ jobs:
             -DORACLE_LIBRARY=%CONDA_PREFIX%/libs/oci.lib ^
             -DLazperf_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
             -DHDF5_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
-            -DPCL_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
             -DLazperf_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
             -DWITH_ZLIB=ON ^
             -Dgtest_force_shared_crt=ON ^
