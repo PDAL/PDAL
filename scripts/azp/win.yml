@@ -2,8 +2,8 @@
 jobs:
 - job: win
   variables:
-    PYTHONHOME: "C:\Miniconda"
-    PYTHONLIB: "C:\Miniconda\Lib"
+    PYTHONHOME: 'C:\Miniconda'
+    PYTHONLIB: 'C:\Miniconda\Lib'
 
   pool:
     vmImage: vs2017-win2016
