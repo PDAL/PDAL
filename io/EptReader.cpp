@@ -412,8 +412,8 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
             try
             {
-                const NL::json addonInfo
-                    { NL::json::parse(ep.get(addonFilename)) };
+                const NL::json addonInfo(
+                    NL::json::parse(ep.get(addonFilename)));
                 const Dimension::Type type(getRemoteType(addonInfo));
                 const Dimension::Id id(
                     layout->registerOrAssignDim(dimName, type));
