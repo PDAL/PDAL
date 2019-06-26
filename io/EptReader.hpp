@@ -92,7 +92,9 @@ private:
 
     uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
     uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
-    uint64_t readZstandard(PointView& view, const Key& key, uint64_t nodeId) const;
+    uint64_t readZstandard(PointView& view, const Key& key, uint64_t nodeId)
+        const;
+
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
             uint64_t pointId) const;
 

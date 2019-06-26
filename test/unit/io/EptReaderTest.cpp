@@ -168,6 +168,7 @@ TEST(EptReaderTest, fullReadBinary)
     EXPECT_EQ(np, ellipsoidNumPoints);
 }
 
+#ifdef PDAL_HAVE_ZSTD
 TEST(EptReaderTest, fullReadZstandard)
 {
     Options options;
@@ -200,6 +201,7 @@ TEST(EptReaderTest, fullReadZstandard)
 
     EXPECT_EQ(np, ellipsoidNumPoints);
 }
+#endif
 
 TEST(EptReaderTest, resolutionLimit)
 {

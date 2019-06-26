@@ -45,7 +45,10 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
+
+#ifdef PDAL_HAVE_ZSTD
 #include <pdal/compression/ZstdCompression.hpp>
+#endif
 
 namespace pdal
 {
@@ -196,6 +199,15 @@ void EptReader::initialize()
     {
         throwError(e.what());
     }
+
+#ifndef PDAL_HAVE_ZSTD
+    if (m_info->dataType() == EptInfo::DataType::Zstandard)
+    {
+        throw ept_error("Cannot read Zstandard dataType: "
+            "PDAL must be configured with WITH_ZSTD=On");
+    }
+#endif
+
     debug << "Got EPT info" << std::endl;
     debug << "SRS: " << m_info->srs() << std::endl;
 
@@ -680,6 +692,7 @@ uint64_t EptReader::readBinary(PointView& dst, const Key& key,
 uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
+#ifdef PDAL_HAVE_ZSTD
     auto compressed(m_ep->getBinary("ept-data/" + key.toString() + ".zst"));
     std::vector<char> uncompressed;
     pdal::ZstdDecompressor dec([&uncompressed](char* pos, std::size_t size)
@@ -689,7 +702,8 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
 
     dec.decompress(compressed.data(), compressed.size());
 
-    ShallowPointTable table(*m_remoteLayout,uncompressed.data(), uncompressed.size());
+    ShallowPointTable table(*m_remoteLayout,uncompressed.data(),
+            uncompressed.size());
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -704,6 +718,11 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
     }
 
     return startId;
+#else
+    throwError("Cannot read Zstandard dataType: "
+        "PDAL must be configured with WITH_ZSTD=On");
+    return 0;   // Suppress "control reaches end of non-void function" warning.
+#endif
 }
 
 void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
