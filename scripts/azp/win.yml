@@ -83,7 +83,7 @@ jobs:
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
         ctest -V --output-on-failure
       displayName: 'Test'
-      variables:
+      env:
         PYTHONHOME: 'C:/Miniconda/envs/pdal/'
         PYTHONLIB: 'C:/Miniconda/envs/pdal/Lib'
 
