@@ -1,6 +1,10 @@
 
 jobs:
 - job: win
+  variables:
+    PYTHONHOME: "C:\Miniconda"
+    PYTHONLIB: "C:\Miniconda\Lib"
+
   pool:
     vmImage: vs2017-win2016
   timeoutInMinutes: 360
@@ -80,8 +84,6 @@ jobs:
         call activate pdal
         pushd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-        set PYTHONHOME="C:\Miniconda\"
-        set PYTHONLIB="C:\Miniconda\Lib"
         ctest -V --output-on-failure
       displayName: 'Test'
 
