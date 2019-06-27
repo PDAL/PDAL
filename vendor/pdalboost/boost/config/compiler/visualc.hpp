@@ -72,18 +72,8 @@
 #  define BOOST_NO_INTRINSIC_WCHAR_T
 #endif
 
-//
-// check for exception handling support:
-#if !defined(_CPPUNWIND)
-#error _CPPUNWIND not defined
-#endif
-
 #if !defined(_CPPUNWIND) && !defined(BOOST_NO_EXCEPTIONS)
 #  define BOOST_NO_EXCEPTIONS
-#endif
-
-#ifdef BOOST_NO_EXCEPTIONS
-#error BOOST_NO_EXCEPTIONS defined
 #endif
 
 //
