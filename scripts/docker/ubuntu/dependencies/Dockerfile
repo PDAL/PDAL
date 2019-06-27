@@ -22,7 +22,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libhdf5-cpp-100 \
         liblapack-dev \
         libtiff5-dev \
-        libgeotiff-epsg \
         openssh-client \
         python-dev \
         python-numpy \
@@ -41,7 +40,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         subversion \
         clang \
         clang-6.0 \
-        libproj-dev \
         libc6-dev \
         libnetcdf-dev \
         libopenjp2-7-dev \
@@ -73,10 +71,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libopenscenegraph-dev \
         libzstd-dev \
         liblzma-dev \
-        libgdal-dev \
         libeigen3-dev \
-        proj-data \
         ninja-build \
+        sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/hobu/nitro \
@@ -158,6 +155,48 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
 RUN \
     curl -LO https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz && tar zxvf cmake-3.14.5.tar.gz && cd cmake-3.14.5; \
     ./bootstrap --prefix=/usr && make && make install
+
+
+RUN git clone https://github.com/OSGeo/PROJ.git --branch 6.1 proj \
+    && cd proj \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr \
+    && make -j 4 \
+    && make install \
+    && rm -rf /proj
+
+
+RUN git clone --branch master https://github.com/OSGeo/libgeotiff.git \
+    &&    cd libgeotiff/libgeotiff \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr --with-proj=/usr \
+    && make -j 4 \
+    && make install \
+    && rm -rf /libgeotiff
+
+RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
+    &&    cd gdal/gdal \
+    && ./configure --prefix=/usr \
+            --mandir=/usr/share/man \
+            --includedir=/usr/include/gdal \
+            --with-threads \
+            --with-grass=no \
+            --with-hide-internal-symbols=yes \
+            --with-rename-internal-libtiff-symbols=yes \
+            --with-rename-internal-libgeotiff-symbols=yes \
+            --with-libtiff=/usr/ \
+            --with-geos=/usr/bin/geos-config \
+            --with-geotiff=/usr \
+            --with-proj=/usr \
+            --with-geos \
+            --with-curl \
+            --with-pg \
+            --with-ecw=no \
+            --with-mrsid=no \
+    && make -j 4 \
+    && make install \
+    && DESTDIR=/ make install \
+    && rm -rf /gdal
 
 
 RUN \
