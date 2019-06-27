@@ -66,7 +66,6 @@ const std::string extension_json (
 R"PDALEXTENSIONS(
 
 {
-    "readers.greyhound" : "greyhound",
     "readers.icebridge" : "icebridge h5",
     "readers.matlab" : "mat",
     "writers.matlab" : "mat",
