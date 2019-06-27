@@ -80,6 +80,7 @@ private:
 
 
     bool m_stats;
+    bool m_append;
 
     BOX3D m_bbox;
 

@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.las",
+    {
+      "type":"filters.shell",
+      "command":"gdalinfo -json @CMAKE_SOURCE_DIR@/test/data/gdal/int16.tif"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/junk.las"
+  ]
+}

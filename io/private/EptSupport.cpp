@@ -41,9 +41,9 @@ namespace pdal
 
 EptInfo::EptInfo(const NL::json& info) : m_info(info)
 {
-    m_bounds = toBox3d(m_info["bounds"]);
-    m_points = m_info["points"].get<uint64_t>();
-    m_span = m_info["span"].get<uint64_t>();
+    m_bounds = toBox3d(m_info.at("bounds"));
+    m_points = m_info.value("points", 0);
+    m_span = m_info.at("span").get<uint64_t>();
 
     auto iSrs = m_info.find("srs");
     if (iSrs != m_info.end() && iSrs->size())
@@ -101,7 +101,7 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
             throw ept_error("Invalid/unknown srs.wkt specification.");
     }
 
-    const std::string dt = m_info["dataType"].get<std::string>();
+    const std::string dt = m_info.at("dataType").get<std::string>();
     if (dt == "laszip")
         m_dataType = DataType::Laszip;
     else if (dt == "binary")

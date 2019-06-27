@@ -44,34 +44,51 @@
 namespace pdal
 {
 
-// Transformation matrices are assumed to be stored in row-major order
-typedef std::array<double, 16> TransformationMatrix;
-
-
-TransformationMatrix
-PDAL_DLL transformationMatrixFromString(const std::string& s);
-
-
 class PDAL_DLL TransformationFilter : public Filter, public Streamable
 {
 public:
-    TransformationFilter() : Filter()
-    {}
+    class Transform;
+
+    TransformationFilter();
+    ~TransformationFilter();
+    TransformationFilter& operator=(const TransformationFilter&) = delete;
+    TransformationFilter(const TransformationFilter&) = delete;
 
     std::string getName() const;
+    void doFilter(PointView& view, const Transform& matrix);
 
 private:
-    TransformationFilter& operator=(const TransformationFilter&); // not implemented
-    TransformationFilter(const TransformationFilter&); // not implemented
-
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
-    std::string m_matrixSpec;
-    TransformationMatrix m_matrix;
+    std::unique_ptr<Transform> m_matrix;
 };
 
+class TransformationFilter::Transform
+{
+public:
+    static const size_t RowSize = 4;
+    static const size_t ColSize = 4;
+    static const size_t Size = RowSize * ColSize;
+    typedef double ValueType;
+    typedef std::array<ValueType, Size> ArrayType;
+
+    PDAL_DLL Transform();
+    PDAL_DLL Transform(const ArrayType& arr);
+
+    PDAL_DLL double operator[](size_t off) const
+        { return m_vals[off]; }
+    PDAL_DLL double& operator[](size_t off)
+        { return m_vals[off]; }
+
+private:
+    ArrayType m_vals;
+
+    PDAL_DLL friend std::istream& operator>>(std::istream& in,
+        pdal::TransformationFilter::Transform& xform);
+    PDAL_DLL friend std::ostream& operator<<(std::ostream& out,
+        const pdal::TransformationFilter::Transform& xform);
+};
 
 } // namespace pdal

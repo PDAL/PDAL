@@ -161,18 +161,20 @@ void App::outputDrivers()
     else
     {
         NL::json j;
+        StageExtensions& extensions = PluginManager<Stage>::extensions();
         for (auto name : stages)
         {
             std::string description = PluginManager<Stage>::description(name);
             std::string link = PluginManager<Stage>::link(name);
             j.push_back(
-                { {"name", name},
-                  {"description", description},
-                  {"link", link}
+                { { "name", name },
+                  { "description", description },
+                  { "link", link },
+                  { "extensions", extensions.extensions(name) }
                 }
             );
         }
-        m_out << j;
+        m_out << std::setw(4) << j;
     }
 }
 
@@ -224,7 +226,7 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         {
             array = NL::json::parse(ostr.str());
         }
-        catch (NL::json::parse_error)
+        catch (NL::json::parse_error&)
         {}
 
         NL::json object = { stageName, array };
