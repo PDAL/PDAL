@@ -86,6 +86,6 @@ jobs:
         set PYTHONLIB="C:/Miniconda/envs/pdal/Lib"
         echo %PYTHONHOME%
         echo %PYTHONLIB%
-        ctest -V --output-on-failure
+        ctest -VV --output-on-failure -DPYTHONHOME:STRING="C:/Miniconda/envs/pdal/" -DPYTHONLIB:STRING=="C:/Miniconda/envs/pdal/Lib"
       displayName: 'Test'
 

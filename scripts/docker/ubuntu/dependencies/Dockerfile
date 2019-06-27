@@ -54,11 +54,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libcurl4-openssl-dev \
         libssl-dev \
         python3-numpy \
-        libspatialite-dev \
         libdap-dev\
         cython \
         python3-pip \
-        libpcl-dev \
         time \
         libhpdf-dev \
         python3-setuptools \
@@ -70,3 +68,134 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         ninja-build \
         sqlite3 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN git clone https://github.com/hobu/nitro \
+    && cd nitro \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        .. \
+    && make \
+    && make install \
+    && rm -rf /nitro
+
+RUN git clone https://github.com/LASzip/LASzip.git laszip \
+    && cd laszip \
+    && git checkout 3.1.1 \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        . \
+    && make \
+    && make install \
+    && rm -rf /laszip
+
+
+RUN git clone https://github.com/hobu/hexer.git \
+    && cd hexer \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        .. \
+    && make \
+    && make install \
+    && rm -rf /hexer
+
+RUN git clone  https://github.com/hobu/laz-perf.git \
+    && cd laz-perf \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        .. \
+    && make \
+    && make install \
+    && rm -rf /laz-perf
+
+
+RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
+    && cd fgt \
+    && cmake . \
+        -DWITH_TESTS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3 \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install \
+    && rm -rf /fgt
+
+RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
+    && cd cpd \
+    && cmake . \
+        -DWITH_TESTS=OFF \
+        -DWITH_FGT=ON \
+        -DWITH_STRICT_WARNINGS=OFF \
+        -DWITH_DOCS=OFF \
+        -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3 \
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install \
+    && rm -rf /cpd
+
+
+RUN \
+    curl -LO https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz && tar zxvf cmake-3.14.5.tar.gz && cd cmake-3.14.5; \
+    ./bootstrap --prefix=/usr && make && make install
+
+
+RUN git clone https://github.com/OSGeo/PROJ.git --branch 6.1 proj \
+    && cd proj \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr \
+    && make -j 4 \
+    && make install \
+    && rm -rf /proj
+
+
+RUN git clone --branch master https://github.com/OSGeo/libgeotiff.git \
+    &&    cd libgeotiff/libgeotiff \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr --with-proj=/usr \
+    && make -j 4 \
+    && make install \
+    && rm -rf /libgeotiff
+
+RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
+    &&    cd gdal/gdal \
+    && ./configure --prefix=/usr \
+            --mandir=/usr/share/man \
+            --includedir=/usr/include/gdal \
+            --with-threads \
+            --with-grass=no \
+            --with-hide-internal-symbols=yes \
+            --with-rename-internal-libtiff-symbols=yes \
+            --with-rename-internal-libgeotiff-symbols=yes \
+            --with-libtiff=/usr/ \
+            --with-geos=/usr/bin/geos-config \
+            --with-geotiff=/usr \
+            --with-proj=/usr \
+            --with-geos \
+            --with-ogdi=no \
+            --with-curl \
+            --with-pg \
+            --with-ecw=no \
+            --with-mrsid=no \
+    && make -j 4 \
+    && make install \
+    && rm -rf /gdal
+
+
+RUN \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj && rm proj-datumgrid-europe-1.2.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
+
