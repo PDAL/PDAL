@@ -699,7 +699,7 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
 #endif
 }
 
-u_int64_t EptReader::processBinaryTable(PointView& dst, const uint64_t nodeId,
+uint64_t EptReader::processBinaryTable(PointView& dst, const uint64_t nodeId,
                                         ShallowPointTable& table) const
 {
     PointRef pr(table);
