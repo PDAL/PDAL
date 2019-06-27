@@ -82,6 +82,7 @@ TEST(E57Reader, testPreview)
     ASSERT_EQ(dimensions.size(),7u);
     ASSERT_EQ(qi.m_pointCount,6u);
     ASSERT_TRUE(qi.m_valid);
+    ASSERT_TRUE(qi.m_bounds.valid());
 }
 
 TEST(E57Reader, testHeader) 

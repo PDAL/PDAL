@@ -234,6 +234,9 @@ QuickInfo E57Reader::inspect()
         qi.m_dimNames.push_back(layout->dimName(*di));
     qi.m_pointCount = m_pointCount;
 
+    for (auto& scan: m_scans)
+        qi.m_bounds.grow(scan->getBoundingBox());
+
     qi.m_valid = true;
     return qi;
 }
