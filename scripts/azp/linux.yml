@@ -14,7 +14,7 @@ jobs:
       cd build
       cmake .. \
         -G Ninja \
-        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo\
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
@@ -24,6 +24,7 @@ jobs:
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_E57=ON \
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
+        -DPYTHON_EXECUTABLE=/usr/bin/python3 \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DWITH_LASZIP=ON \
         -DWITH_LAZPERF=ON \
@@ -35,6 +36,7 @@ jobs:
     displayName: 'Build'
   - script: |
       cd build
+      export PDAL_PYTHON_LIBRARY=/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu/libpython3.6.so
       ctest -V
     displayName: 'Test'
   - script: |
