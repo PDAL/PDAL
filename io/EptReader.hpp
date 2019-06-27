@@ -59,6 +59,7 @@ class EptInfo;
 class FixedPointLayout;
 class Key;
 class Pool;
+class ShallowPointTable;
 
 class PDAL_DLL EptReader : public Reader
 {
@@ -94,6 +95,8 @@ private:
     uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
     uint64_t readZstandard(PointView& view, const Key& key, uint64_t nodeId)
         const;
+    u_int64_t processBinaryTable(PointView& dst, const uint64_t nodeId,
+                                 ShallowPointTable& table) const;
 
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
             uint64_t pointId) const;

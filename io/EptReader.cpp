@@ -673,20 +673,7 @@ uint64_t EptReader::readBinary(PointView& dst, const Key& key,
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
     ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
-    PointRef pr(table);
-
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    const uint64_t startId(dst.size());
-
-    uint64_t pointId(0);
-    for (uint64_t pointId(0); pointId < table.numPoints(); ++pointId)
-    {
-        pr.setPointId(pointId);
-        process(dst, pr, nodeId, pointId);
-    }
-
-    return startId;
+    return processBinaryTable(dst, nodeId, table);
 }
 
 uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
@@ -704,6 +691,17 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
 
     ShallowPointTable table(*m_remoteLayout,uncompressed.data(),
             uncompressed.size());
+    return processBinaryTable(dst, nodeId, table);
+#else
+    throwError("Cannot read Zstandard dataType: "
+        "PDAL must be configured with WITH_ZSTD=On");
+    return 0;   // Suppress "control reaches end of non-void function" warning.
+#endif
+}
+
+u_int64_t EptReader::processBinaryTable(PointView& dst, const uint64_t nodeId,
+                                        ShallowPointTable& table) const
+{
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -718,11 +716,6 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
     }
 
     return startId;
-#else
-    throwError("Cannot read Zstandard dataType: "
-        "PDAL must be configured with WITH_ZSTD=On");
-    return 0;   // Suppress "control reaches end of non-void function" warning.
-#endif
 }
 
 void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
