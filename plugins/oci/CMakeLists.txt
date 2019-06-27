@@ -36,6 +36,7 @@ PDAL_ADD_PLUGIN(writer_libname writer oci
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${ORACLE_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
         ${PDAL_VENDOR_DIR}/pdalboost
         ${LIBXML2_INCLUDE_DIR}
 )
