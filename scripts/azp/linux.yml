@@ -43,6 +43,7 @@ jobs:
     displayName: 'Test'
   - script: |
       export PDAL_TEST_DIR=`pwd`/test
+      export PATH=$PATH:`pwd`/install/bin
       cd build
       ls build/lib/*
       ninja install
