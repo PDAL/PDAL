@@ -43,7 +43,8 @@ jobs:
     displayName: 'Test'
   - script: |
       export PDAL_TEST_DIR=`pwd`/test
-      export PATH=$PATH:`pwd`/install/bin
+      export INSTALL_DIR=`pwd`/install
+      export PATH=$PATH:$INSTALL_DIR/bin
       cd build
       ls build/lib/*
       ninja install
@@ -54,7 +55,7 @@ jobs:
       cd pdal-python
       git checkout 2.0.0
       python3 setup.py build
-      python3 setup.py test
+      LD_LIBRARY_PATH=$INSTALL_DIR/lib python3 setup.py test
     displayName: 'Python'
   - script: |
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
