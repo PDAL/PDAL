@@ -184,8 +184,7 @@ std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &p
 
     if (fieldName.substr(0,5) == "color")
         boundingBoxName = "colorLimits";
-    else if (fieldName.substr(0,1) == "x" || fieldName.substr(0,1) == "y"
-        || fieldName.substr(0,1) == "z")
+    else if (fieldName[0] == 'x' || fieldName[0] == 'y' || fieldName[0] == 'z')
         boundingBoxName = "cartesianBounds";
 
     if ( prototype.isDefined(boundingBoxName) )

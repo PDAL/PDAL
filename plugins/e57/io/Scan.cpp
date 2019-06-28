@@ -81,7 +81,7 @@ void Scan::transformPoint(pdal::PointRef pt) const
 }
 
 std::vector<double>
-Scan::transformPoint(const std::vector<double> &originalPoint) const
+Scan::transformPoint(const std::array<double,3> &originalPoint) const
 {
     std::vector<double> transformed {0,0,0};
     for (size_t i = 0; i < originalPoint.size(); i++)

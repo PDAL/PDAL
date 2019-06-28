@@ -71,7 +71,7 @@ private:
     std::unique_ptr<e57::CompressedVectorNode> m_rawPoints;
     pdal::point_count_t m_numPoints;
     std::vector<double>
-        transformPoint(const std::vector<double> &originalPoint) const;
+        transformPoint(const  std::array<double,3> &originalPoint) const;
 
     // supported configs
     std::set<std::string> m_e57TypeToPdalDimension;
