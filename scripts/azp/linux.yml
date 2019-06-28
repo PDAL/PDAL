@@ -10,6 +10,7 @@ jobs:
   timeoutInMinutes: 360
   steps:
   - script: |
+      echo "current directory:" `pwd`
       mkdir build
       cd build
       cmake .. \
@@ -17,6 +18,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=RelWithDebInfo\
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_CPD=ON \
+        -DCMAKE_INSTALL_PREFIX=`pwd` \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_I3S=ON \
         -DBUILD_PLUGIN_NITF=ON \
@@ -43,7 +45,6 @@ jobs:
       export PDAL_TEST_DIR=`pwd`/test
       cd build
       ninja install
-      cd /
       # Python extension testing
       #
       pip3 install packaging cython
