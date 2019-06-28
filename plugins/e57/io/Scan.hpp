@@ -70,7 +70,7 @@ private:
     std::unique_ptr<e57::StructureNode> m_rawData;
     std::unique_ptr<e57::CompressedVectorNode> m_rawPoints;
     pdal::point_count_t m_numPoints;
-    std::vector<double>
+    std::array<double,3>
         transformPoint(const  std::array<double,3> &originalPoint) const;
 
     // supported configs

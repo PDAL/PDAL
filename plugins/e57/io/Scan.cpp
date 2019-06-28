@@ -80,10 +80,10 @@ void Scan::transformPoint(pdal::PointRef pt) const
     pt.setField(pdal::Dimension::Id::Z,  x*m_rotation[2][0] + y*m_rotation[2][1] + z*m_rotation[2][2]  + m_translation[2]);
 }
 
-std::vector<double>
+std::array<double,3>
 Scan::transformPoint(const std::array<double,3> &originalPoint) const
 {
-    std::vector<double> transformed {0,0,0};
+    std::array<double,3> transformed {0,0,0};
     for (size_t i = 0; i < originalPoint.size(); i++)
     {
         transformed[i] =  m_translation[i];
