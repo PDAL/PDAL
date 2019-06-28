@@ -58,9 +58,10 @@ jobs:
       LD_LIBRARY_PATH=$INSTALL_DIR/lib python3 setup.py test
     displayName: 'Python'
   - script: |
+      export BASE=`pwd`
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
       do
-          cd /pdal/examples/$EXAMPLE
+          cd $BASE/examples/$EXAMPLE
           mkdir -p _build || exit 1
           cd _build || exit 1
           cmake -G "Ninja" .. && ninja
