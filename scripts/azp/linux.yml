@@ -45,6 +45,7 @@ jobs:
       ninja install
       cd /
       # Python extension testing
+      #
       pip3 install packaging cython
       git clone https://github.com/PDAL/python.git pdal-python
       cd pdal-python

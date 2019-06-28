@@ -67,6 +67,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-mi
         libeigen3-dev \
         ninja-build \
         sqlite3 \
+        libgeos-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/hobu/nitro \
@@ -181,7 +182,6 @@ RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
             --with-geos=/usr/bin/geos-config \
             --with-geotiff=/usr \
             --with-proj=/usr \
-            --with-geos \
             --with-ogdi=no \
             --with-curl \
             --with-pg \
@@ -191,6 +191,13 @@ RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
     && make install \
     && rm -rf /gdal
 
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
+        libfreexl-dev
+
+RUN curl -LOs http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-5.0.0-beta0.tar.gz && tar zxvf libspatialite-5.0.0-beta0.tar.gz && cd /libspatialite-5.0.0-beta0 \
+    && CXXFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" CFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" ./configure --prefix=/usr \
+    && make -j 4 \
+    && make install
 
 RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
