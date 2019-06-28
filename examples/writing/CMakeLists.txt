@@ -10,3 +10,4 @@ target_include_directories(tutorial PRIVATE
     ${PDAL_INCLUDE_DIRS}
     ${PDAL_INCLUDE_DIRS}/pdal)
 
+target_link_directories(tutorial PRIVATE ${PDAL_LIBRARY_DIRS})
