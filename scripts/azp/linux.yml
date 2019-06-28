@@ -64,7 +64,7 @@ jobs:
           cd $BASE/examples/$EXAMPLE
           mkdir -p _build || exit 1
           cd _build || exit 1
-          cmake -G "Ninja" .. -DPDAL_DIR=$BASE/install && ninja
+          cmake -G "Ninja" .. -DPDAL_DIR=$BASE/install/lib/cmake/PDAL && ninja
       done
     displayName: 'Examples'
 
