@@ -5,6 +5,7 @@ jobs:
   pool:
     vmImage: macOS-10.13
   timeoutInMinutes: 360
+  steps:
   - script: |
       echo "Removing homebrew from Azure to avoid conflicts."
       curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall > ~/uninstall_homebrew
