@@ -30,7 +30,6 @@ jobs:
       conda config --set always_yes True --set show_channel_urls True
       conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
     displayName: Install PDAL dependencies
-  steps:
   - script: |
       echo "current directory:" `pwd`
       mkdir build
