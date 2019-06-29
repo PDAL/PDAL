@@ -31,6 +31,7 @@ jobs:
       conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
     displayName: Install PDAL dependencies
   - script: |
+      source activate pdal
       echo "current directory:" `pwd`
       mkdir build
       cd build
