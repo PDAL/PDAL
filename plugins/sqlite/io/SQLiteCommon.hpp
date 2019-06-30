@@ -448,6 +448,11 @@ public:
         std::string lib_extension;
 #if defined(__APPLE__)
         so_extension = ".dylib";
+        std::string isConda;
+        Utils::getenv("CONDA_PREFIX", isConda);
+        // Conda uses '.so' for some reason
+        if (!isConda.empty())
+            so_extension = ".so";
         lib_extension = "mod_";
 #elif defined (_WIN32)
         so_extension = ".dll";

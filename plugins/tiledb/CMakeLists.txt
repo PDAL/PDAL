@@ -35,13 +35,17 @@ target_include_directories(${writer_libname} PRIVATE
     ${TILEDB_INCLUDE_DIR})
 
 if (WITH_TESTS)
-    PDAL_ADD_TEST(pdal_io_tiledb_writer_test
-        FILES
-            test/TileDBWriterTest.cpp
-        LINK_WITH
-            ${writer_libname}
-            ${TILEDB_LIBRARIES}
-    )
+
+    # Need to fix this #2596
+    IF (NOT APPLE)
+        PDAL_ADD_TEST(pdal_io_tiledb_writer_test
+            FILES
+                test/TileDBWriterTest.cpp
+            LINK_WITH
+                ${writer_libname}
+                ${TILEDB_LIBRARIES}
+        )
+    ENDIF()
 
     PDAL_ADD_TEST(pdal_io_tiledb_reader_test
         FILES
