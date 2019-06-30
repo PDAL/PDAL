@@ -132,7 +132,12 @@ public:
     {
         m_log->get(LogLevel::Debug3) << "Setting up config " << std::endl;
         sqlite3_shutdown();
-        sqlite3_config(SQLITE_CONFIG_LOG, log_callback, this);
+
+        std::string doLogging;
+        Utils::getenv("PDAL_SQLITE_LOG", doLogging);
+        if (doLogging.size())
+            sqlite3_config(SQLITE_CONFIG_LOG, log_callback, this);
+
         sqlite3_initialize();
         m_log->get(LogLevel::Debug3) << "Set up config " << std::endl;
         m_log->get(LogLevel::Debug3) << "SQLite version: " << sqlite3_libversion() << std::endl;
