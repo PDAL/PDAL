@@ -42,34 +42,45 @@ class OLeStream;
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL CesiumWriter : public Writer
+class PDAL_DLL GltfWriter : public Writer
 {
-    class Tile;
+    struct ViewData;
+
 public:
-    CesiumWriter()
+    GltfWriter()
     {}
-    CesiumWriter(const CesiumWriter&) = delete;
-    CesiumWriter& operator=(const CesiumWriter&) = delete;
+    ~GltfWriter()
+    {}
+    GltfWriter(const GltfWriter&) = delete;
+    GltfWriter& operator=(const GltfWriter&) = delete;
 
     std::string getName() const;
 
 private:
+    const size_t HeaderSize = 12;
+    const size_t JsonChunkSize = 5000;
+
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize(PointTableRef table);
+    virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr v);
     virtual void done(PointTableRef table);
 
-    std::string binFilename(int tileNum) const;
-    std::string b3dmFilename(int tileNum) const;
-    void writeTilesetFile();
-    void writeB3dmFile(const Tile& tile);
-    void writeB3dmHeader(OLeStream& out, const Tile& tile);
-    void writeGltfHeader(OLeStream& out);
-    void writeGltfJsonHeader(OLeStream& out);
+    void writeGltfHeader();
+    void writeGltfJsonHeader();
 
-    size_t m_tileNum = 0;
     std::string m_filename;
-    std::vector<Tile> m_tiles;
+    std::unique_ptr<OLeStream> m_stream;
+    std::vector<ViewData> m_viewData;
+    size_t m_totalSize;
+    size_t m_binSize;
+
+    double m_metallic;
+    double m_roughness;
+    double m_red;
+    double m_green;
+    double m_blue;
+    double m_alpha;
+    bool m_doubleSided;
 };
 
 } // namespace pdal
