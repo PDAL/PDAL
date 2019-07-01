@@ -4649,7 +4649,8 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-    const int64_t utcOffset(utcOffsetSeconds(std::mktime(&tm)));
+    std::time_t time = std::mktime(&tm)!=-1 ? std::mktime(&tm) :std::time(nullptr);
+    const int64_t utcOffset(utcOffsetSeconds(time));
 
     if (utcOffset > std::numeric_limits<int>::max())
         throw ArbiterError("Can't convert offset time in seconds to tm type.");
