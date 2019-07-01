@@ -4601,10 +4601,6 @@ std::string encodeAsHex(const std::string& input)
 #include <arbiter/util/types.hpp>
 #endif
 
-#ifdef WINDOWS
-#include<chrono>
-#endif // WINDOWS
-
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
 {
@@ -4617,18 +4613,6 @@ namespace
 {
     std::mutex mutex;
 
-#ifdef WINDOWS
-	int64_t utcToLocalOffsetSeconds() {
-        std::chrono::time_point<std::chrono::system_clock> time =
-            std::chrono::system_clock::now();
-        std::time_t now = std::chrono::system_clock::to_time_t(time);
-
-        std::lock_guard<std::mutex> lock(mutex);
-        std::tm utc(*std::gmtime(&now));
-        std::tm loc(*std::localtime(&now));
-        return (int64_t)std::difftime(std::mktime(&utc), std::mktime(&loc));
-	}
-#else
     int64_t utcOffsetSeconds(const std::time_t& now)
     {
         std::lock_guard<std::mutex> lock(mutex);
@@ -4636,7 +4620,6 @@ namespace
         std::tm loc(*std::localtime(&now));
         return (int64_t)std::difftime(std::mktime(&utc), std::mktime(&loc));
     }
-#endif // WINDOWS
 }
 
 const std::string Time::iso8601 = "%Y-%m-%dT%H:%M:%SZ";
@@ -4666,12 +4649,8 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-
-#ifdef WINDOWS
-    const int64_t utcOffset(utcToLocalOffsetSeconds());
-#else
-    const int64_t utcOffset(utcOffsetSeconds(std::mktime(&tm)));
-#endif // WINDOWS
+    std::time_t time = std::mktime(&tm)!=-1 ? std::mktime(&tm) :std::time(nullptr);
+    const int64_t utcOffset(utcOffsetSeconds(time));
 
     if (utcOffset > std::numeric_limits<int>::max())
         throw ArbiterError("Can't convert offset time in seconds to tm type.");
