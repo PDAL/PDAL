@@ -76,12 +76,12 @@ jobs:
       ninja install
       # Python extension testing
       #
-      pip3 install packaging cython
+      pip install packaging cython
       git clone https://github.com/PDAL/python.git pdal-python
       cd pdal-python
       git checkout 2.0.0
       python3 setup.py build
-      LD_LIBRARY_PATH=$INSTALL_DIR/lib python3 setup.py test
+      LD_LIBRARY_PATH=$INSTALL_DIR/lib python setup.py test
     displayName: 'Python'
   - script: |
       export BASE=`pwd`
