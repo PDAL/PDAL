@@ -12,7 +12,6 @@ PDAL_ADD_PLUGIN(python_libname filter python
         ${CMAKE_DL_LIBS}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}/../plang/include
     SYSTEM_INCLUDES
         ${PYTHON_ALL_INCLUDE_DIRS}
 )
