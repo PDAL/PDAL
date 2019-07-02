@@ -7,9 +7,13 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
     LINK_WITH
         ${PYTHON_LIBRARY}
         ${CMAKE_DL_LIBS}
+    INCLUDES
+        ${CMAKE_CURRENT_BINARY_DIR}/include
     SYSTEM_INCLUDES
         ${PYTHON_ALL_INCLUDE_DIRS}
     )
+target_compile_definitions(pdal_plugin_reader_numpy PRIVATE
+    PDAL_PYTHON_LIBRARY="${PYTHON_LIBRARY}")
 
 # Install headers so Python extension
 # can use them later

@@ -38,9 +38,11 @@
 
 #include "Environment.hpp"
 #include "Redirector.hpp"
+
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <sstream>
@@ -67,7 +69,9 @@ static void loadPython()
 
     pdal::Utils::getenv("PDAL_PYTHON_LIBRARY", libname);
     if (libname.empty())
-        libname = "libPython" + pdal::Utils::dynamicLibExtension;
+        libname = PDAL_PYTHON_LIBRARY;
+    libname = pdal::FileUtils::getFilename(libname);
+    std::cerr << "Python library = " << libname << "!\n";
     ::dlopen(libname.data(), RTLD_LAZY | RTLD_GLOBAL);
 }
 #endif
