@@ -71,7 +71,6 @@ static void loadPython()
     if (libname.empty())
         libname = PDAL_PYTHON_LIBRARY;
     libname = pdal::FileUtils::getFilename(libname);
-    std::cerr << "Python library = " << libname << "!\n";
     ::dlopen(libname.data(), RTLD_LAZY | RTLD_GLOBAL);
 }
 #endif
