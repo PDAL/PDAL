@@ -44,6 +44,13 @@
 namespace pdal
 {
 
+namespace
+{
+    const size_t HeaderSize = 12;
+    const size_t JsonChunkDataSize = 5000;
+    const size_t ChunkHeaderSize = 8;
+}
+
 struct GltfWriter::ViewData
 {
     BOX3D m_bounds;
@@ -75,7 +82,7 @@ void GltfWriter::addArgs(ProgramArgs& args)
     args.add("red", "Red factor [0-1]", m_red);
     args.add("green", "Green factor [0-1]", m_green);
     args.add("blue", "Blue factor [0-1]", m_blue);
-    args.add("alpha", "Alpha factor [0-1]", m_alpha);
+    args.add("alpha", "Alpha factor [0-1]", m_alpha, 1.0);
     args.add("double_sided", "Whether the material should be applied to "
         "both sides of the faces.", m_doubleSided);
 }
@@ -85,19 +92,18 @@ void GltfWriter::ready(PointTableRef table)
 {
     m_stream.reset(new OLeStream(m_filename));
 
+    OLeStream& out = *m_stream;
+
     // We write the data before we write the header.  To facilitate, we seek
     // to a point where we're pretty darn sure that we can write the header
     // with no problem later.  We'll verify and throw an error if the
     // assumption is bad.
-    m_stream->seek(HeaderSize + JsonChunkSize);
+    out.seek(HeaderSize + JsonChunkDataSize + (2 * ChunkHeaderSize));
     m_binSize = 0;
 }
 
 void GltfWriter::write(const PointViewPtr v)
 {
-    ViewData vd;
-
-    OLeStream& out = *m_stream;
     TriangularMesh *mesh = v->mesh();
     if (!mesh)
     {
@@ -106,12 +112,24 @@ void GltfWriter::write(const PointViewPtr v)
         return;
     }
 
-    std::streampos indexStart = out.position();
+    OLeStream& out = *m_stream;
+
+    ViewData vd;
+    vd.m_indexCount = mesh->size() * 3;
+    vd.m_vertexCount = v->size();
+    vd.m_indexOffset = m_binSize;
+    vd.m_indexByteLength = vd.m_indexCount * sizeof(uint32_t);
+    vd.m_vertexOffset = vd.m_indexOffset + vd.m_indexByteLength;
+    vd.m_vertexByteLength = v->size() * sizeof(float) * 3;  // 3 for X,Y,Z
+
+    m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
+    m_totalSize = static_cast<size_t>(out.position()) + m_binSize;
+    if (m_totalSize > std::numeric_limits<uint32_t>::max())
+        throwError("Data too large for file.");
+
     for (const Triangle& t : *mesh)
         out << (uint32_t)t.m_a << (uint32_t)t.m_b << (uint32_t)t.m_c;
-    std::streampos indexEnd = out.position();
 
-    std::streampos vertexStart = indexEnd;
     for (PointId i = 0; i < v->size(); ++i)
     {
         float x = v->getFieldAs<float>(Dimension::Id::X, i);
@@ -121,19 +139,6 @@ void GltfWriter::write(const PointViewPtr v)
         vd.m_bounds.grow(x, y, z);
         out << x << y << z;
     }
-    std::streampos vertexEnd = out.position();
-
-    vd.m_indexOffset = indexStart;
-    vd.m_indexByteLength = indexEnd - indexStart;
-    vd.m_vertexOffset = vertexStart;
-    vd.m_vertexByteLength = vertexEnd - vertexStart;
-    vd.m_vertexCount = v->size();
-    vd.m_indexCount = mesh->size() * 3;
-
-    m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
-    m_totalSize = (size_t)vertexEnd;
-    if (m_totalSize > std::numeric_limits<uint32_t>::max())
-        throwError("Data too large for file.");
 
     m_viewData.push_back(vd);
 }
@@ -144,7 +149,8 @@ void GltfWriter::done(PointTableRef table)
     // Go back to the beginning to write the headers.
     m_stream->seek(0);
     writeGltfHeader();
-    writeGltfJsonHeader();
+    writeJsonChunk();
+    writeBinHeader();
 }
 
 
@@ -158,7 +164,7 @@ void GltfWriter::writeGltfHeader()
 }
 
 
-void GltfWriter::writeGltfJsonHeader()
+void GltfWriter::writeJsonChunk()
 {
     OLeStream& out = *m_stream;
 
@@ -255,15 +261,24 @@ void GltfWriter::writeGltfJsonHeader()
     );
 
     std::string js(j.dump());
-    if (js.size() > JsonChunkSize)
+    if (js.size() > JsonChunkDataSize)
         throwError("JSON header too large. "
             "Please open a issue: 'https://github.com/PDAL/PDAL/issues'.");
     // Pad JSON to chunk size.
-    js += std::string(JsonChunkSize - js.size(), ' ');
+    js += std::string(JsonChunkDataSize - js.size(), ' ');
 
-    out << (uint32_t)JsonChunkSize;  // JSON chunk size
-    out.put("JSON");                 // Chunk type
+    out << (uint32_t)JsonChunkDataSize;  // JSON chunk size
+    out.put("JSON");                     // Chunk type
     out.put(js);
+}
+
+
+void GltfWriter::writeBinHeader()
+{
+    OLeStream& out = *m_stream;
+
+    out << (uint32_t)m_binSize;
+    out.put("BIN", 4);
 }
 
 } // namespace pdal

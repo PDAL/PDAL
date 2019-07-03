@@ -57,16 +57,14 @@ public:
     std::string getName() const;
 
 private:
-    const size_t HeaderSize = 12;
-    const size_t JsonChunkSize = 5000;
-
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr v);
     virtual void done(PointTableRef table);
 
     void writeGltfHeader();
-    void writeGltfJsonHeader();
+    void writeJsonChunk();
+    void writeBinHeader();
 
     std::string m_filename;
     std::unique_ptr<OLeStream> m_stream;
