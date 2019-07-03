@@ -250,6 +250,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
     m_query->set_layout(TILEDB_UNORDERED);
+    m_current_idx = 0;
 }
 
 
@@ -262,7 +263,7 @@ bool TileDBWriter::processOne(PointRef& point)
     double z = point.getFieldAs<double>(Dimension::Id::Z);
 
     for (auto& a : m_attrs)
-        writeAttributeValue(a, point, m_cache_size);
+        writeAttributeValue(a, point, m_current_idx);
 
     m_coords.push_back(x);
     m_coords.push_back(y);
@@ -409,6 +410,7 @@ bool TileDBWriter::flushCache(size_t size)
     }
 
     m_current_idx = 0;
+    m_coords.clear();
 
     if (status == tiledb::Query::Status::FAILED)
         return false;
