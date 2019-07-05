@@ -105,11 +105,10 @@ private:
             const NL::json& current, const Key& key);
 
     uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId,
-                        std::unique_ptr<PointTable>& pointTable =
-                            (std::unique_ptr<PointTable>) nullptr) const;
+                        std::unique_ptr<PointTable>& pointTable) const;
     uint64_t
     readBinary(PointView& view, const Key& key, uint64_t nodeId,
-               std::unique_ptr<ShallowPointTable>& shlwPointTable=(std::unique_ptr<ShallowPointTable>) nullptr) const;
+               std::unique_ptr<ShallowPointTable>& shlwPointTable) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
             uint64_t pointId) const;
 

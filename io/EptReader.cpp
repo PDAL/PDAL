@@ -587,9 +587,17 @@ PointViewSet EptReader::run(PointViewPtr view)
             uint64_t startId(0);
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
-                startId = readLaszip(*view, key, nodeId);
+            {
+				std::unique_ptr<PointTable> table(nullptr);
+                startId = readLaszip(*view, key, nodeId,table);
+                table.reset(nullptr);
+			}
             else
-                startId = readBinary(*view, key, nodeId);
+            {
+                std::unique_ptr<ShallowPointTable> table(nullptr);
+                startId = readBinary(*view, key, nodeId,table);
+                table.reset(nullptr);
+			}
 
             // Read addon information after the native data, we'll possibly
             // overwrite attributes.
