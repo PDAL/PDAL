@@ -36,7 +36,6 @@
 
 #include <limits>
 
-#include "private/EptSupport.hpp"
 
 #include "LasReader.hpp"
 
@@ -613,14 +612,18 @@ PointViewSet EptReader::run(PointViewPtr view)
 }
 
 uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
-        const uint64_t nodeId) const
+                               const uint64_t nodeId,
+                               std::unique_ptr<PointTable>& pointTable) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
     auto handle(m_ep->getLocalHandle("ept-data/" + key.toString() + ".laz"));
 
-    PointTable table;
+	if (pointTable == nullptr)
+    {
+		pointTable.reset(new PointTable());
+    }
 
     Options options;
     options.add("filename", handle->localPath());
@@ -630,10 +633,10 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     reader.setOptions(options);
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    reader.prepare(table);  // Geotiff SRS initialization is not thread-safe.
+    reader.prepare(*pointTable);  // Geotiff SRS initialization is not thread-safe.
     lock.unlock();
 
-    const auto views(reader.execute(table));
+    const auto views(reader.execute(*pointTable));
 
     uint64_t pointId(0);
 
@@ -653,19 +656,19 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     return startId;
 }
 
-uint64_t EptReader::readBinary(PointView& dst, const Key& key,
-        const uint64_t nodeId) const
+uint64_t EptReader::readBinary(PointView& dst, const Key& key, const uint64_t nodeId,
+                      std::unique_ptr<ShallowPointTable>& shlwPointTable) const
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
-    ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
-    PointRef pr(table);
+    shlwPointTable.reset(new ShallowPointTable(*m_remoteLayout, data.data(), data.size()));
+    PointRef pr(*shlwPointTable);
 
     std::lock_guard<std::mutex> lock(m_mutex);
 
     const uint64_t startId(dst.size());
 
     uint64_t pointId(0);
-    for (uint64_t pointId(0); pointId < table.numPoints(); ++pointId)
+    for (uint64_t pointId(0); pointId < shlwPointTable->numPoints(); ++pointId)
     {
         pr.setPointId(pointId);
         process(dst, pr, nodeId, pointId);
@@ -766,6 +769,85 @@ Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
 {
     return getCoercedType(j);
 }
+
+//============================================================================================
+// Pravin: APIs from here are written to make EPT Reader streamable.
+
+void EptReader::loadNextOverlap()
+{
+    Key key(m_keys.at(0));
+    m_keys.erase(m_keys.begin());
+    log()->get(LogLevel::Debug)
+        << "Streaming Data " << m_nodeId << "/" << m_overlaps.size() << ": "
+        << key.toString() << std::endl;
+
+	m_pointTable.reset(new PointTable());
+	m_pointView.reset(new PointView(*m_pointTable));
+    uint64_t startId(0);
+	if (m_info->dataType() == EptInfo::DataType::Laszip)
+    {
+		startId=readLaszip(*m_pointView, key, m_nodeId, m_pointTable);
+    }
+    else
+    {
+        startId = readBinary(*m_pointView, key, m_nodeId, m_shlwPointTable);
+	}
+    m_currentIndex = 0;
+
+    // Read addon information after the native data, we'll possibly
+    // overwrite attributes.
+    for (const auto& addon : m_addons)
+    {
+        readAddon(*m_pointView, key, *addon, startId);
+    }
+    m_nodeId++;
+}
+
+void EptReader::saveOverlapKeys()
+{
+    for (const auto& entry : m_overlaps)
+    {
+        const Key& key(entry.first);
+        m_keys.push_back(key);
+    }
+}
+
+void EptReader::fillPoint(PointRef& point)
+{
+    DimTypeList dims = m_pointView->dimTypes();
+	char* buffer = new char[m_pointView->pointSize()];
+    m_pointView->getPackedPoint(dims, m_currentIndex++, buffer);
+	point.setPackedData(dims, buffer);
+    delete[] buffer;
+}
+
+bool EptReader::processOne(PointRef& point)
+{
+    if (m_keys.size() == 0 && m_nodeId == 1)
+    {
+        saveOverlapKeys();
+    }
+
+    if (m_keys.size() == 0 && m_currentIndex==-1)
+    {
+        return false;
+    }
+
+    if (m_currentIndex == -1)
+    {
+        loadNextOverlap();
+    }
+
+    fillPoint(point);
+
+    if (m_currentIndex >= m_pointView->size())
+    {
+        m_currentIndex = -1;
+    }
+
+    return true;
+}
+//=============================================================================================
 
 } // namespace pdal
 

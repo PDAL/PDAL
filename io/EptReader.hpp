@@ -42,8 +42,11 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <nlohmann/json.hpp>
+
+#include "private/EptSupport.hpp"
 
 namespace pdal
 {
@@ -60,7 +63,7 @@ class FixedPointLayout;
 class Key;
 class Pool;
 
-class PDAL_DLL EptReader : public Reader
+class PDAL_DLL EptReader : public Reader, public Streamable
 {
     FRIEND_TEST(EptReaderTest, getRemoteType);
     FRIEND_TEST(EptReaderTest, getCoercedType);
@@ -71,6 +74,17 @@ public:
     std::string getName() const override;
 
 private:
+    uint64_t m_nodeId = 1;
+    std::vector<Key> m_keys;
+    std::unique_ptr<PointTable> m_pointTable;
+    std::unique_ptr<ShallowPointTable> m_shlwPointTable;
+    PointViewPtr m_pointView;
+    int m_currentIndex = -1;
+    virtual bool processOne(PointRef& point) override;
+    void loadNextOverlap();
+    void saveOverlapKeys();
+    void fillPoint(PointRef& point);
+
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize() override;
     virtual QuickInfo inspect() override;
@@ -90,8 +104,12 @@ private:
     void overlaps(const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
             const NL::json& current, const Key& key);
 
-    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
-    uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
+    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId,
+                        std::unique_ptr<PointTable>& pointTable =
+                            (std::unique_ptr<PointTable>) nullptr) const;
+    uint64_t
+    readBinary(PointView& view, const Key& key, uint64_t nodeId,
+               std::unique_ptr<ShallowPointTable>& shlwPointTable=(std::unique_ptr<ShallowPointTable>) nullptr) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
             uint64_t pointId) const;
 
