@@ -785,11 +785,11 @@ void EptReader::loadNextOverlap()
     {
         layout->registerOrAssignDim(m_remoteLayout->dimName(id),
                                     m_remoteLayout->dimType(id));
-	}
+    }
 
-	m_bufferPointView.reset(new PointView(*m_bufferPointTable));
+    m_bufferPointView.reset(new PointView(*m_bufferPointTable));
 
-	if (m_info->dataType() == EptInfo::DataType::Laszip)
+    if (m_info->dataType() == EptInfo::DataType::Laszip)
         startId = readLaszip(*m_bufferPointView, key, m_nodeId);
     else
         startId = readBinary(*m_bufferPointView, key, m_nodeId);
@@ -809,8 +809,9 @@ void EptReader::fillPoint(PointRef& point)
 {
     DimTypeList dims = m_bufferPointView->dimTypes();
     char* buffer = new char[m_bufferPointView->pointSize()];
-    m_bufferPointView->getPackedPoint(dims, m_currentIndex++, buffer);
-	point.setPackedData(dims, buffer);
+    m_bufferPointView->getPackedPoint(dims, m_currentIndex, buffer);
+    point.setPackedData(dims, buffer);
+    m_currentIndex++;
     delete[] buffer;
 }
 
