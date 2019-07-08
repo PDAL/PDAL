@@ -787,15 +787,14 @@ void EptReader::loadNextOverlap()
         << key.toString() << std::endl;
 
     uint64_t startId(0);
+	m_pointTable.reset(new PointTable());
 	if (m_info->dataType() == EptInfo::DataType::Laszip)
     {
-		m_pointTable.reset(new PointTable());
 		m_pointView.reset(new PointView(*m_pointTable));
 		startId=readLaszip(*m_pointView, key, m_nodeId, m_pointTable);
     }
     else
     {
-        m_pointTable.reset(new PointTable());
         std::unique_lock<std::mutex> lock(m_mutex);
         prepare(*m_pointTable);
         lock.unlock();
