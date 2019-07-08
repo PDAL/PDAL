@@ -594,9 +594,7 @@ PointViewSet EptReader::run(PointViewPtr view)
 			}
             else
             {
-                std::unique_ptr<ShallowPointTable> table(nullptr);
-                startId = readBinary(*view, key, nodeId,table);
-                table.reset(nullptr);
+                startId = readBinary(*view, key, nodeId);
 			}
 
             // Read addon information after the native data, we'll possibly
@@ -664,19 +662,18 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     return startId;
 }
 
-uint64_t EptReader::readBinary(PointView& dst, const Key& key, const uint64_t nodeId,
-                      std::unique_ptr<ShallowPointTable>& shlwPointTable) const
+uint64_t EptReader::readBinary(PointView& dst, const Key& key, const uint64_t nodeId) const
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
-    shlwPointTable.reset(new ShallowPointTable(*m_remoteLayout, data.data(), data.size()));
-    PointRef pr(*shlwPointTable);
+    ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
+    PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
 
     const uint64_t startId(dst.size());
 
     uint64_t pointId(0);
-    for (uint64_t pointId(0); pointId < shlwPointTable->numPoints(); ++pointId)
+    for (uint64_t pointId(0); pointId < table.numPoints(); ++pointId)
     {
         pr.setPointId(pointId);
         process(dst, pr, nodeId, pointId);
@@ -798,7 +795,7 @@ void EptReader::loadNextOverlap()
     }
     else
     {
-        startId = readBinary(*m_pointView, key, m_nodeId, m_shlwPointTable);
+        throwError("Only EPT LasZip format is supported in streamable mode, For EPT Binary use \"--nostream\" command line option.");
 	}
     m_currentIndex = 0;
 
