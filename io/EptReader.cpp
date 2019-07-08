@@ -588,9 +588,7 @@ PointViewSet EptReader::run(PointViewPtr view)
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
             {
-				std::unique_ptr<PointTable> table(nullptr);
-                startId = readLaszip(*view, key, nodeId,table);
-                table.reset(nullptr);
+                startId = readLaszip(*view, key, nodeId);
 			}
             else
             {
@@ -618,18 +616,14 @@ PointViewSet EptReader::run(PointViewPtr view)
 }
 
 uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
-                               const uint64_t nodeId,
-                               std::unique_ptr<PointTable>& pointTable) const
+                               const uint64_t nodeId) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
     auto handle(m_ep->getLocalHandle("ept-data/" + key.toString() + ".laz"));
 
-	if (pointTable == nullptr)
-    {
-		pointTable.reset(new PointTable());
-    }
+	PointTable table;
 
     Options options;
     options.add("filename", handle->localPath());
@@ -639,10 +633,10 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     reader.setOptions(options);
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    reader.prepare(*pointTable);  // Geotiff SRS initialization is not thread-safe.
+    reader.prepare(table);  // Geotiff SRS initialization is not thread-safe.
     lock.unlock();
 
-    const auto views(reader.execute(*pointTable));
+    const auto views(reader.execute(table));
 
     uint64_t pointId(0);
 
@@ -780,25 +774,30 @@ Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
 
 void EptReader::loadNextOverlap()
 {
-    Key key(m_keys.at(0));
-    m_keys.erase(m_keys.begin());
+    std::map<Key, uint64_t>::iterator itr = m_overlaps.begin();
+    std::advance(itr, m_nodeId-1);
+    Key key(itr->first);
     log()->get(LogLevel::Debug)
         << "Streaming Data " << m_nodeId << "/" << m_overlaps.size() << ": "
         << key.toString() << std::endl;
 
     uint64_t startId(0);
 	m_pointTable.reset(new PointTable());
+	PointLayoutPtr layout = m_pointTable->layout();
+    for (auto id : m_remoteLayout->dims())
+    {
+        layout->registerOrAssignDim(m_remoteLayout->dimName(id),
+                                    m_remoteLayout->dimType(id));
+	}
+
+	m_pointView.reset(new PointView(*m_pointTable));
+
 	if (m_info->dataType() == EptInfo::DataType::Laszip)
     {
-		m_pointView.reset(new PointView(*m_pointTable));
-		startId=readLaszip(*m_pointView, key, m_nodeId, m_pointTable);
+		startId=readLaszip(*m_pointView, key, m_nodeId);
     }
     else
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        prepare(*m_pointTable);
-        lock.unlock();
-        m_pointView.reset(new PointView(*m_pointTable));
         startId = readBinary(*m_pointView, key, m_nodeId);
 	}
     m_currentIndex = 0;
@@ -812,15 +811,6 @@ void EptReader::loadNextOverlap()
     m_nodeId++;
 }
 
-void EptReader::saveOverlapKeys()
-{
-    for (const auto& entry : m_overlaps)
-    {
-        const Key& key(entry.first);
-        m_keys.push_back(key);
-    }
-}
-
 void EptReader::fillPoint(PointRef& point)
 {
     DimTypeList dims = m_pointView->dimTypes();
@@ -832,18 +822,15 @@ void EptReader::fillPoint(PointRef& point)
 
 bool EptReader::processOne(PointRef& point)
 {
-    if (m_keys.size() == 0 && m_nodeId == 1)
+    if (m_nodeId > m_overlaps.size() && m_currentIndex==-1)
     {
-        saveOverlapKeys();
-    }
-
-    if (m_keys.size() == 0 && m_currentIndex==-1)
-    {
+		//We're done with all overlaps, Its time to finish reading.
         return false;
     }
 
     if (m_currentIndex == -1)
     {
+		//Either this is a first overlap or we've streamed all points from current overlap. So its time to load new overlap.
         loadNextOverlap();
     }
 
@@ -851,6 +838,7 @@ bool EptReader::processOne(PointRef& point)
 
     if (m_currentIndex >= m_pointView->size())
     {
+		// We're done with all points from current overlap.
         m_currentIndex = -1;
     }
 
