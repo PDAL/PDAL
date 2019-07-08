@@ -611,7 +611,7 @@ PointViewSet EptReader::run(PointViewPtr view)
     return views;
 }
 
-uint64_t EptReader::readLaszip(PointView& dst, const Key& key, 
+uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
@@ -652,7 +652,7 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     return startId;
 }
 
-uint64_t EptReader::readBinary(PointView& dst, const Key& key, 
+uint64_t EptReader::readBinary(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
