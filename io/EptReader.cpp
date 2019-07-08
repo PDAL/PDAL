@@ -786,16 +786,21 @@ void EptReader::loadNextOverlap()
         << "Streaming Data " << m_nodeId << "/" << m_overlaps.size() << ": "
         << key.toString() << std::endl;
 
-	m_pointTable.reset(new PointTable());
-	m_pointView.reset(new PointView(*m_pointTable));
     uint64_t startId(0);
 	if (m_info->dataType() == EptInfo::DataType::Laszip)
     {
+		m_pointTable.reset(new PointTable());
+		m_pointView.reset(new PointView(*m_pointTable));
 		startId=readLaszip(*m_pointView, key, m_nodeId, m_pointTable);
     }
     else
     {
-        throwError("Only EPT LasZip format is supported in streamable mode, For EPT Binary use \"--nostream\" command line option.");
+        m_pointTable.reset(new PointTable());
+        std::unique_lock<std::mutex> lock(m_mutex);
+        prepare(*m_pointTable);
+        lock.unlock();
+        m_pointView.reset(new PointView(*m_pointTable));
+        startId = readBinary(*m_pointView, key, m_nodeId);
 	}
     m_currentIndex = 0;
 
