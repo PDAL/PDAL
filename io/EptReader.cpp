@@ -611,15 +611,15 @@ PointViewSet EptReader::run(PointViewPtr view)
     return views;
 }
 
-uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
-                               const uint64_t nodeId) const
+uint64_t EptReader::readLaszip(PointView& dst, const Key& key, 
+        const uint64_t nodeId) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
     auto handle(m_ep->getLocalHandle("ept-data/" + key.toString() + ".laz"));
 
-	PointTable table;
+    PointTable table;
 
     Options options;
     options.add("filename", handle->localPath());
@@ -652,7 +652,8 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     return startId;
 }
 
-uint64_t EptReader::readBinary(PointView& dst, const Key& key, const uint64_t nodeId) const
+uint64_t EptReader::readBinary(PointView& dst, const Key& key, 
+        const uint64_t nodeId) const
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
     ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
