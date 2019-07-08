@@ -818,17 +818,17 @@ void EptReader::fillPoint(PointRef& point)
 bool EptReader::processOne(PointRef& point)
 {
     if (m_nodeId > m_overlaps.size() && m_currentIndex==-1)
-		//We're done with all overlaps, Its time to finish reading.
+        //We're done with all overlaps, Its time to finish reading.
         return false;
 
     if (m_currentIndex == -1)
-		//Either this is a first overlap or we've streamed all points from current overlap. So its time to load new overlap.
+        //Either this is a first overlap or we've streamed all points from current overlap. So its time to load new overlap.
         loadNextOverlap();
 
     fillPoint(point);
 
     if (m_currentIndex >= m_bufferPointView->size())
-		// We're done with all points from current overlap.
+        // We're done with all points from current overlap.
         m_currentIndex = -1;
 
     return true;
