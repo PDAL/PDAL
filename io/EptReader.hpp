@@ -74,14 +74,6 @@ public:
     std::string getName() const override;
 
 private:
-    uint64_t m_nodeId = 1;
-    std::unique_ptr<PointTable> m_pointTable;
-    PointViewPtr m_pointView;
-    int m_currentIndex = -1;
-    virtual bool processOne(PointRef& point) override;
-    void loadNextOverlap();
-    void fillPoint(PointRef& point);
-
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize() override;
     virtual QuickInfo inspect() override;
@@ -113,6 +105,11 @@ private:
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
     static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
 
+	//For streamable pipeline.
+    virtual bool processOne(PointRef& point) override;
+    void loadNextOverlap();
+    void fillPoint(PointRef& point);
+
     std::string m_root;
 
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
@@ -140,6 +137,12 @@ private:
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
+
+	// For streamable pipeline.
+    uint64_t m_nodeId = 1;
+    std::unique_ptr<PointTable> m_bufferPointTable;
+    PointViewPtr m_bufferPointView;
+    int m_currentIndex = -1;
 };
 
 } // namespace pdal

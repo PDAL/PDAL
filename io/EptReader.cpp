@@ -587,13 +587,9 @@ PointViewSet EptReader::run(PointViewPtr view)
             uint64_t startId(0);
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
-            {
                 startId = readLaszip(*view, key, nodeId);
-			}
             else
-            {
                 startId = readBinary(*view, key, nodeId);
-			}
 
             // Read addon information after the native data, we'll possibly
             // overwrite attributes.
@@ -782,40 +778,37 @@ void EptReader::loadNextOverlap()
         << key.toString() << std::endl;
 
     uint64_t startId(0);
-	m_pointTable.reset(new PointTable());
-	PointLayoutPtr layout = m_pointTable->layout();
+    m_bufferPointTable.reset(new PointTable());
+    PointLayoutPtr layout = m_bufferPointTable->layout();
     for (auto id : m_remoteLayout->dims())
     {
         layout->registerOrAssignDim(m_remoteLayout->dimName(id),
                                     m_remoteLayout->dimType(id));
 	}
 
-	m_pointView.reset(new PointView(*m_pointTable));
+	m_bufferPointView.reset(new PointView(*m_bufferPointTable));
 
 	if (m_info->dataType() == EptInfo::DataType::Laszip)
-    {
-		startId=readLaszip(*m_pointView, key, m_nodeId);
-    }
+        startId = readLaszip(*m_bufferPointView, key, m_nodeId);
     else
-    {
-        startId = readBinary(*m_pointView, key, m_nodeId);
-	}
+        startId = readBinary(*m_bufferPointView, key, m_nodeId);
+
     m_currentIndex = 0;
 
     // Read addon information after the native data, we'll possibly
     // overwrite attributes.
     for (const auto& addon : m_addons)
     {
-        readAddon(*m_pointView, key, *addon, startId);
+        readAddon(*m_bufferPointView, key, *addon, startId);
     }
     m_nodeId++;
 }
 
 void EptReader::fillPoint(PointRef& point)
 {
-    DimTypeList dims = m_pointView->dimTypes();
-	char* buffer = new char[m_pointView->pointSize()];
-    m_pointView->getPackedPoint(dims, m_currentIndex++, buffer);
+    DimTypeList dims = m_bufferPointView->dimTypes();
+    char* buffer = new char[m_bufferPointView->pointSize()];
+    m_bufferPointView->getPackedPoint(dims, m_currentIndex++, buffer);
 	point.setPackedData(dims, buffer);
     delete[] buffer;
 }
@@ -823,24 +816,18 @@ void EptReader::fillPoint(PointRef& point)
 bool EptReader::processOne(PointRef& point)
 {
     if (m_nodeId > m_overlaps.size() && m_currentIndex==-1)
-    {
 		//We're done with all overlaps, Its time to finish reading.
         return false;
-    }
 
     if (m_currentIndex == -1)
-    {
 		//Either this is a first overlap or we've streamed all points from current overlap. So its time to load new overlap.
         loadNextOverlap();
-    }
 
     fillPoint(point);
 
-    if (m_currentIndex >= m_pointView->size())
-    {
+    if (m_currentIndex >= m_bufferPointView->size())
 		// We're done with all points from current overlap.
         m_currentIndex = -1;
-    }
 
     return true;
 }
