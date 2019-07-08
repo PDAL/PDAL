@@ -105,7 +105,7 @@ private:
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
     static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
 
-	//For streamable pipeline.
+    //For streamable pipeline.
     virtual bool processOne(PointRef& point) override;
     void loadNextOverlap();
     void fillPoint(PointRef& point);
@@ -138,7 +138,7 @@ private:
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-	// For streamable pipeline.
+    // For streamable pipeline.
     uint64_t m_nodeId = 1;
     std::unique_ptr<PointTable> m_bufferPointTable;
     PointViewPtr m_bufferPointView;
