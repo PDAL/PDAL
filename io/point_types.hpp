@@ -1,7 +1,7 @@
 #pragma once
 
-#include <pcl/io/pcd_io.h>
-#include <pcl/io/impl/pcd_io.hpp>
+#include "pcd_io.h"
+#include "pcd_io.hpp"
 
 struct XYZIRGBA
 {
