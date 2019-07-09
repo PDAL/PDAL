@@ -467,4 +467,75 @@ TEST(EptReaderTest, getCoercedType)
     EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
 }
 
+void streamTest(const std::string src)
+{
+    Options ops;
+    ops.add("filename", src);
+    ops.add("resolution", 1);
+
+    EptReader eptReader;
+    eptReader.setOptions(ops);
+
+    PointTable t;
+    eptReader.prepare(t);
+    PointViewSet s = eptReader.execute(t);
+    PointViewPtr p = *s.begin();
+
+    class Checker : public Filter, public Streamable
+    {
+    public:
+        std::string getName() const
+        {
+            return "checker";
+        }
+        Checker(PointViewPtr v)
+            : m_cnt(0), m_view(v), m_bulkBuf(v->pointSize()),
+              m_buf(v->pointSize()), m_dims(v->dimTypes())
+        {
+        }
+
+    private:
+        point_count_t m_cnt;
+        PointViewPtr m_view;
+        std::vector<char> m_bulkBuf;
+        std::vector<char> m_buf;
+        DimTypeList m_dims;
+
+        bool processOne(PointRef& point)
+        {
+            PointRef bulkPoint = m_view->point(m_cnt);
+
+            bulkPoint.getPackedData(m_dims, m_bulkBuf.data());
+            point.getPackedData(m_dims, m_buf.data());
+            EXPECT_EQ(
+                memcmp(m_buf.data(), m_bulkBuf.data(), m_view->pointSize()), 0);
+            m_cnt++;
+            return true;
+        }
+
+        void done(PointTableRef)
+        {
+            EXPECT_EQ(m_cnt, m_view->size());
+        }
+    };
+
+    EptReader eptReader1;
+    eptReader1.setOptions(ops);
+
+    Checker c(p);
+    c.setInput(eptReader1);
+
+    FixedPointTable fixed(100);
+    c.prepare(fixed);
+    c.execute(fixed);
+}
+
+TEST(EptReaderTest, stream)
+{
+    streamTest(ellipsoidEptBinaryPath);
+#ifdef PDAL_HAVE_LASZIP
+    streamTest(eptLaszipPath);
+#endif
+}
+
 } // namespace pdal
