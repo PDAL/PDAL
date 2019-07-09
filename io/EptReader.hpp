@@ -46,8 +46,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include "private/EptSupport.hpp"
-
 namespace pdal
 {
 
@@ -143,7 +141,7 @@ private:
     std::unique_ptr<PointTable> m_bufferPointTable;
     PointViewPtr m_bufferPointView;
     PointLayoutPtr m_bufferLayout;
-    int m_currentIndex = -1;
+    point_count_t m_currentIndex = -1;
 };
 
 } // namespace pdal

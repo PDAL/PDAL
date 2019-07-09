@@ -36,6 +36,7 @@
 
 #include <limits>
 
+#include "private/EptSupport.hpp"
 
 #include "LasReader.hpp"
 
