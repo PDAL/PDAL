@@ -136,7 +136,7 @@ public:
 };
 
 
-EptReader::EptReader() : m_args(new EptReader::Args)
+EptReader::EptReader() : m_args(new EptReader::Args), m_currentIndex(0)
 {}
 
 EptReader::~EptReader()
@@ -768,9 +768,6 @@ Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
     return getCoercedType(j);
 }
 
-//============================================================================================
-// Pravin: APIs from here are written to make EPT Reader streamable.
-
 void EptReader::loadNextOverlap()
 {
     std::map<Key, uint64_t>::iterator itr = m_overlaps.begin();
@@ -801,9 +798,8 @@ void EptReader::loadNextOverlap()
     // Read addon information after the native data, we'll possibly
     // overwrite attributes.
     for (const auto& addon : m_addons)
-    {
         readAddon(*m_bufferPointView, key, *addon, startId);
-    }
+
     m_nodeId++;
 }
 
@@ -819,23 +815,25 @@ void EptReader::fillPoint(PointRef& point)
 
 bool EptReader::processOne(PointRef& point)
 {
-    if (m_nodeId > m_overlaps.size() && m_currentIndex==-1)
-        //We're done with all overlaps, Its time to finish reading.
+    // bufferView is not set if no tile has been read and
+    // currentIndex will be greater or equal to the view size when the
+    // whole tile has been read
+    bool finishedCurrentOverlap = !(m_bufferPointView &&
+        m_currentIndex < m_bufferPointView->size());
+
+    //We're done with all overlaps, Its time to finish reading.
+    if (m_nodeId > m_overlaps.size() && finishedCurrentOverlap)
         return false;
 
-    if (m_currentIndex == -1)
-        //Either this is a first overlap or we've streamed all points from current overlap. So its time to load new overlap.
+    //Either this is a first overlap or we've streamed all points
+    //from current overlap. So its time to load new overlap.
+    if (finishedCurrentOverlap)
         loadNextOverlap();
 
     fillPoint(point);
 
-    if (m_currentIndex >= m_bufferPointView->size())
-        // We're done with all points from current overlap.
-        m_currentIndex = -1;
-
     return true;
 }
-//=============================================================================================
 
 } // namespace pdal
 
