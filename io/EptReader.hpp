@@ -142,6 +142,7 @@ private:
     uint64_t m_nodeId = 1;
     std::unique_ptr<PointTable> m_bufferPointTable;
     PointViewPtr m_bufferPointView;
+    PointLayoutPtr m_bufferLayout;
     int m_currentIndex = -1;
 };
 

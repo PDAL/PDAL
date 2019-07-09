@@ -434,6 +434,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     {
         throwError(e.what());
     }
+    m_bufferLayout = layout;
 }
 
 void EptReader::ready(PointTableRef table)
@@ -781,10 +782,10 @@ void EptReader::loadNextOverlap()
     uint64_t startId(0);
     m_bufferPointTable.reset(new PointTable());
     PointLayoutPtr layout = m_bufferPointTable->layout();
-    for (auto id : m_remoteLayout->dims())
+    for (auto id : m_bufferLayout->dims())
     {
-        layout->registerOrAssignDim(m_remoteLayout->dimName(id),
-                                    m_remoteLayout->dimType(id));
+        layout->registerOrAssignDim(m_bufferLayout->dimName(id),
+                                    m_bufferLayout->dimType(id));
     }
 
     m_bufferPointView.reset(new PointView(*m_bufferPointTable));
