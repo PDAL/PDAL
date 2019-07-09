@@ -435,7 +435,11 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     {
         throwError(e.what());
     }
-    m_bufferLayout = layout;
+
+	// Backup the layout for streamable pipeline.
+	// Will be used to restore m_bufferPointTable layout after flushing points from previous tile.
+	if (pipelineStreamable())
+		m_bufferLayout = layout;
 }
 
 void EptReader::ready(PointTableRef table)
@@ -778,14 +782,19 @@ void EptReader::loadNextOverlap()
         << key.toString() << std::endl;
 
     uint64_t startId(0);
+
+	// Reset PointTable to make sure all points from previous tile are flushed.
     m_bufferPointTable.reset(new PointTable());
+
+	// We did reset PointTable,
+	// So it will not have the dimensions registered to it.
+	// Register/Restore Dimensions for PointTable layout.
     PointLayoutPtr layout = m_bufferPointTable->layout();
     for (auto id : m_bufferLayout->dims())
-    {
         layout->registerOrAssignDim(m_bufferLayout->dimName(id),
                                     m_bufferLayout->dimType(id));
-    }
 
+	// Reset PointView to have new point table.
     m_bufferPointView.reset(new PointView(*m_bufferPointTable));
 
     if (m_info->dataType() == EptInfo::DataType::Laszip)
