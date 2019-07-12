@@ -24,7 +24,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(WIN32)
+#ifdef _WIN32
 #if defined(_MSC_VER)
 #include <io.h>
 #elif defined(__GNUC__)
@@ -380,7 +380,7 @@ void CheckedFile::seek(off_t offset, OffsetMode omode)
 off_t CheckedFile::portableSeek(off_t offset, int whence)
 {
    off_t result;
-#if defined(WIN32)
+#ifdef _WIN32
    result = _lseeki64(fd_, offset, whence);
 #elif defined(LINUX) || defined(MACOS)
    result = ::lseek(fd_, offset, whence);

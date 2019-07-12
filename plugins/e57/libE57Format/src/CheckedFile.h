@@ -31,6 +31,10 @@
 
 #include "Common.h"
 
+#ifdef _WIN32
+typedef int64_t off_t;
+#endif
+
 namespace e57 {
 
    class CheckedFile
