@@ -138,8 +138,7 @@ CREATE_SHARED_STAGE(E57Reader, s_info)
 
 E57Reader::~E57Reader()
 {
-    if (m_imf)
-        m_imf->close();
+    closeFile();
 }
 
 
@@ -223,6 +222,25 @@ bool E57Reader::processOne(pdal::PointRef& point)
     return true;
 }
 
+QuickInfo E57Reader::inspect()
+{
+    QuickInfo qi;
+    std::unique_ptr<PointLayout> layout(new PointLayout());
+    initialize();
+    addDimensions(layout.get());
+
+    Dimension::IdList dims = layout->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        qi.m_dimNames.push_back(layout->dimName(*di));
+    qi.m_pointCount = m_pointCount;
+
+    for (auto& scan: m_scans)
+        qi.m_bounds.grow(scan->getBoundingBox());
+
+    qi.m_valid = true;
+    return qi;
+}
+
 std::vector<std::shared_ptr<e57::Scan>> E57Reader::getScans() const
 {
     return m_scans;
@@ -296,6 +314,12 @@ void E57Reader::openFile(const std::string &filename)
     {
         throwError("Unknown error in E57 plugin");
     }
+}
+
+void E57Reader::closeFile()
+{
+    if (m_imf)
+        m_imf->close();
 }
 
 void E57Reader::setupReader(pdal::point_count_t pointNumber)

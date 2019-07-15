@@ -107,8 +107,10 @@ private:
     virtual void initialize();
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual QuickInfo inspect();
 
     void openFile(const std::string &filename);
+    void closeFile();
     void setupReader(pdal::point_count_t pointNumber);
     point_count_t extractNumberPoints() const;
     void extractScans();
