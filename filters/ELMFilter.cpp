@@ -39,6 +39,8 @@
 
 #include "ELMFilter.hpp"
 
+#include <pdal/EigenUtils.hpp>
+
 #include <map>
 #include <string>
 
@@ -74,7 +76,7 @@ void ELMFilter::addDimensions(PointLayoutPtr layout)
 void ELMFilter::filter(PointView& view)
 {
     BOX2D bounds;
-    view.calculateBounds(bounds);
+    calculateBounds(view, bounds);
 
     size_t cols =
         static_cast<size_t>(((bounds.maxx - bounds.minx) / m_cell) + 1);

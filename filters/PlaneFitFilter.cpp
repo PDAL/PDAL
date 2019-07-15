@@ -126,10 +126,10 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
     // Covariance and normal are based off demeaned coordinates, so we record
     // the centroid to properly offset the coordinates when computing point to
     // plance distance.
-    auto centroid = eigen::computeCentroid(view, neighbors);
+    auto centroid = computeCentroid(view, neighbors);
 
     // Compute covariance of the neighbors.
-    auto B = eigen::computeCovariance(view, neighbors);
+    auto B = computeCovariance(view, neighbors);
 
     // Perform the eigen decomposition, using the eigenvector of the smallest
     // eigenvalue as the normal.

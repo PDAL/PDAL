@@ -423,8 +423,8 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             const arbiter::Endpoint ep(m_arbiter->getEndpoint(root));
             try
             {
-                const NL::json addonInfo
-                    { NL::json::parse(ep.get(addonFilename)) };
+                const NL::json addonInfo(
+                    NL::json::parse(ep.get(addonFilename)));
                 const Dimension::Type type(getRemoteType(addonInfo));
                 const Dimension::Id id(
                     layout->registerOrAssignDim(dimName, type));
@@ -572,6 +572,7 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
     else
     {
         {
+            //ABELL we could probably use a local mutex to lock the target map.
             std::lock_guard<std::mutex> lock(m_mutex);
             target[key] = static_cast<uint64_t>(numPoints);
         }
@@ -608,16 +609,13 @@ PointViewSet EptReader::run(PointViewPtr view)
             // Read addon information after the native data, we'll possibly
             // overwrite attributes.
             for (const auto& addon : m_addons)
-            {
                 readAddon(*view, key, *addon, startId);
-            }
         });
 
         ++nodeId;
     }
 
     m_pool->await();
-
     log()->get(LogLevel::Debug) << "Done reading!" << std::endl;
 
     PointViewSet views;
@@ -758,7 +756,7 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         const uint64_t pointId) const
 {
-    const uint64_t np(addon.points(key));
+    uint64_t np(addon.points(key));
     if (!np)
     {
         // If our addon has no points, then we are reading a superset of this
@@ -770,6 +768,10 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         // for an EPT-read of the full dataset.  If the native EPT set already
         // contains Classification, then we should overwrite it with zeroes
         // where the addon leaves off.
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        np = m_overlaps.at(key);
         for (uint64_t id(pointId); id < pointId + np; ++id)
         {
             dst.setField(addon.id(), id, 0);
@@ -790,6 +792,7 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         throwError("Invalid addon content length");
     }
 
+    std::lock_guard<std::mutex> lock(m_mutex);
     const char* pos(data.data());
     for (uint64_t id(pointId); id < pointId + np; ++id)
     {

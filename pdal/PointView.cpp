@@ -34,6 +34,7 @@
 
 #include <iomanip>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
@@ -100,26 +101,13 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
 
 void PointView::calculateBounds(BOX2D& output) const
 {
-    for (PointId idx = 0; idx < size(); idx++)
-    {
-        double x = getFieldAs<double>(Dimension::Id::X, idx);
-        double y = getFieldAs<double>(Dimension::Id::Y, idx);
-
-        output.grow(x, y);
-    }
+    pdal::calculateBounds(*this, output);
 }
 
 
 void PointView::calculateBounds(BOX3D& output) const
 {
-    for (PointId idx = 0; idx < size(); idx++)
-    {
-        double x = getFieldAs<double>(Dimension::Id::X, idx);
-        double y = getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = getFieldAs<double>(Dimension::Id::Z, idx);
-
-        output.grow(x, y, z);
-    }
+    pdal::calculateBounds(*this, output);
 }
 
 

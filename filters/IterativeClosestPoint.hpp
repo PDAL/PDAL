@@ -1,7 +1,7 @@
 /******************************************************************************
- * Copyright (c) 2017, Peter J. Gadomski <pete@gadom.ski>
+ * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
  *
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following
@@ -39,20 +39,32 @@
 namespace pdal
 {
 
-class PDAL_DLL IcpFilter : public Filter
+class PDAL_DLL IterativeClosestPoint : public Filter
 {
-  public:
-    IcpFilter() : Filter(), m_fixed(nullptr), m_complete(false)
-    {
-    }
-    std::string getName() const;
-    virtual PointViewSet run(PointViewPtr view);
+public:
+    IterativeClosestPoint() : Filter(), m_fixed(nullptr), m_complete(false)
+    {}
 
-  private:
-    PointViewPtr icp(PointViewPtr fixed, PointViewPtr moving) const;
+    std::string getName() const;
+
+private:
+    int m_max_iters;
+    int m_max_similar;
+    double m_rotation_threshold;
+    double m_translation_threshold;
+    double m_mse_abs;
+
+    virtual void addArgs(ProgramArgs& args);
+    virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef _);
+    PointViewPtr icp(PointViewPtr fixed, PointViewPtr moving) const;
 
     PointViewPtr m_fixed;
     bool m_complete;
+
+    IterativeClosestPoint&
+    operator=(const IterativeClosestPoint&);             // not implemented
+    IterativeClosestPoint(const IterativeClosestPoint&); // not implemented
 };
-}
+
+} // namespace pdal

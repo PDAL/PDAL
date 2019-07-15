@@ -62,7 +62,6 @@ namespace pdal
 
 using namespace Dimension;
 using namespace Eigen;
-using namespace eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -238,7 +237,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     m_srs = firstView->spatialReference();
 
-    firstView->calculateBounds(m_bounds);
+    calculateBounds(*firstView, m_bounds);
     m_cols = static_cast<int>(
         ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
     m_rows = static_cast<int>(

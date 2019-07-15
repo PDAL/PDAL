@@ -41,6 +41,7 @@ RUN \
         cmake \
         ninja \
         g++ \
+        bash \
     ; \
     apk add --no-cache \
         eigen-dev \
