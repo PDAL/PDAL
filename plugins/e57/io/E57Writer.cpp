@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/util/Algorithm.hpp>
+
 #include "E57Writer.hpp"
 #include "Utils.hpp"
 #include "Uuid.hpp"
@@ -110,6 +112,10 @@ void E57Writer::ChunkWriter::finalise()
 }
 
 
+E57Writer::E57Writer()
+{}
+
+
 E57Writer::~E57Writer()
 {
     if (m_imageFile)
@@ -185,7 +191,7 @@ void E57Writer::done(PointTableRef table)
     }
     
     // Set bounding boxes on case by case basis
-    if (Algorithms::contains(m_dimensionsToWrite, "colorRed"));
+    if (Utils::contains(m_dimensionsToWrite, "colorRed"))
     {
         // found color info
         e57::StructureNode colorbox = e57::StructureNode(*m_imageFile);
@@ -201,7 +207,7 @@ void E57Writer::done(PointTableRef table)
         m_scanNode->set("colorLimits", colorbox);
     }
     
-    if (Algorithms::contains(m_dimensionsToWrite, "intensity"))
+    if (Utils::contains(m_dimensionsToWrite, "intensity"))
     {
         // found intensity info
         e57::StructureNode colorbox = e57::StructureNode(*m_imageFile);
