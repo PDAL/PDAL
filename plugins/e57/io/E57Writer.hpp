@@ -46,7 +46,8 @@ class E57Writer : public pdal::Writer, public pdal::Streamable
 
     class ChunkWriter {
     public:
-        ChunkWriter(const std::vector<std::string> &dimensionsToWrite, e57::CompressedVectorNode &vectorNode);
+        ChunkWriter(const std::vector<std::string> &dimensionsToWrite,
+            e57::CompressedVectorNode &vectorNode);
 
         void write(pdal::PointRef &point);
 
@@ -61,7 +62,6 @@ class E57Writer : public pdal::Writer, public pdal::Streamable
     };
 
 public:
-    E57Writer();
     ~E57Writer();
     E57Writer(const E57Writer &) = delete;
     E57Writer& operator=(const E57Writer&) = delete;
