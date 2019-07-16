@@ -374,6 +374,14 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         return ret;
     }
 
+    // If we get here, all arguments should be consumed, if not, it's
+    // an error.
+    if (cmdArgs.size())
+    {
+        Utils::printError("Unexpected argument '" + cmdArgs[0] + "'.");
+        return -1;
+    }
+
     if (m_showVersion)
         outputVersion();
     else if (m_showDrivers)
