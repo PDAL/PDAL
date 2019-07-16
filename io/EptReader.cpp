@@ -439,7 +439,10 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     // Backup the layout for streamable pipeline.
     // Will be used to restore m_bufferPointTable layout after flushing points from previous tile.
     if (pipelineStreamable())
+    {
     	m_bufferLayout = layout;
+        m_temp_buffer.reserve(layout->pointSize());
+	}
 }
 
 void EptReader::ready(PointTableRef table)
@@ -818,11 +821,9 @@ void EptReader::loadNextOverlap()
 void EptReader::fillPoint(PointRef& point)
 {
     DimTypeList dims = m_bufferPointView->dimTypes();
-    char* buffer = new char[m_bufferPointView->pointSize()];
-    m_bufferPointView->getPackedPoint(dims, m_currentIndex, buffer);
-    point.setPackedData(dims, buffer);
+    m_bufferPointView->getPackedPoint(dims, m_currentIndex, m_temp_buffer.data());
+    point.setPackedData(dims, m_temp_buffer.data());
     m_currentIndex++;
-    delete[] buffer;
 }
 
 bool EptReader::processOne(PointRef& point)
