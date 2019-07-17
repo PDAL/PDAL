@@ -2516,11 +2516,9 @@ namespace
 
         const std::string& bucket() const { return m_bucket; }
         const std::string& object() const { return m_object; }
+        static const std::string exclusions;
         std::string endpoint() const
         {
-            // https://cloud.google.com/storage/docs/json_api/#encoding
-            static const std::string exclusions("!$&'()*+,;=:@");
-
             // https://cloud.google.com/storage/docs/json_api/v1/
             return
                 baseGoogleUrl + "b/" + bucket() +
@@ -2542,6 +2540,10 @@ namespace
         std::string m_object;
 
     };
+    
+    // https://cloud.google.com/storage/docs/json_api/#encoding
+    const std::string GResource::exclusions("!$&'()*+,;=:@");
+    
 } // unnamed namespace
 
 namespace drivers
@@ -2622,7 +2624,7 @@ void Google::put(
 
     http::Query query(userQuery);
     query["uploadType"] = "media";
-    query["name"] = resource.object();
+    query["name"] = http::sanitize(resource.object(), GResource::exclusions);
 
     drivers::Https https(m_pool);
     const auto res(https.internalPost(url, data, headers, query));

@@ -78,7 +78,9 @@ class E57Reader: public Reader, public Streamable
     };
 
 public:
-    E57Reader(): Reader(), Streamable() {};
+    E57Reader()
+    {}
+
     E57Reader(std::string filename);
     ~E57Reader();
     E57Reader(const E57Reader &) = delete;
@@ -106,7 +108,6 @@ private:
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual QuickInfo inspect();
-    // virtual void done(PointTableRef table);
 
     void openFile(const std::string &filename);
     void closeFile();
