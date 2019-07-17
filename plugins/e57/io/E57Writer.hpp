@@ -92,5 +92,8 @@ private:
 
     // What do we write?
     std::vector<std::string> m_dimensionsToWrite;
+
+    // Bounds
+    BOX3D m_bbox;
 };
 }
