@@ -1,4 +1,4 @@
-FROM pdal/ubuntu-dependencies builder
+FROM pdal/ubuntu-dependencies as builder
 MAINTAINER Howard Butler <howard@hobu.co>
 
 ARG PDAL_VERSION=master
