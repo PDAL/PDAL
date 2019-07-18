@@ -3,7 +3,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
-ARG PARALLEL=16
+ARG PARALLEL=2
 ARG tiledb_version=1.4.1
 
 ENV CC gcc
