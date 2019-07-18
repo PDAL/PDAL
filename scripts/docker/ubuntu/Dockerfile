@@ -3,6 +3,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
+ARG PARALLEL=16
 ARG tiledb_version=1.4.1
 
 ENV CC gcc
@@ -13,103 +14,108 @@ RUN apt-get update -qq; \
     apt-get install -y --fix-missing --no-install-recommends \
         software-properties-common
 
-RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
         build-essential \
         ca-certificates \
         cmake \
         curl \
         gfortran \
         git \
-        libgeotiff-dev \
+        libarmadillo-dev \
         libarpack2-dev \
         libflann-dev \
         libhdf5-serial-dev \
+        libhdf5-dev \
+        libhdf5-cpp-100 \
         liblapack-dev \
         libtiff5-dev \
         openssh-client \
         python3-dev \
         python3-numpy \
+        software-properties-common \
         wget \
         automake \
         libtool \
-        libspatialite-dev \
-        libsqlite3-mod-spatialite \
-        libhdf5-dev \
         libboost-filesystem1.65-dev \
         libboost-iostreams1.65-dev \
         libboost-program-options1.65-dev \
         libboost-system1.65-dev \
         libboost-thread1.65-dev \
+        subversion \
         clang \
-        libproj-dev \
+        clang-6.0 \
         libc6-dev \
-        libnetcdf-dev \
+        libopenjp2-7-dev \
         libpng-dev \
         libjpeg-dev \
         libgif-dev \
         libwebp-dev \
         libhdf4-alt-dev \
         libhdf5-dev \
+        libpq-dev \
+        libxerces-c-dev \
         unixodbc-dev \
         libsqlite3-dev \
+        libmysqlclient-dev \
         libltdl-dev \
         libcurl4-openssl-dev \
-        libspatialite-dev \
+        libssl-dev \
+        python3-numpy \
+        libdap-dev\
         cython \
         python3-pip \
         time \
-        ninja-build \
+        libhpdf-dev \
         python3-setuptools \
+        libhpdf-dev \
         unzip \
-        libeigen3-dev \
-        libxml2-dev \
-        libssl-dev \
+        libzstd-dev \
         liblzma-dev \
-        libzstd1-dev \
-        pkg-config \
-        libgdal-dev \
-        bash-completion
+        libeigen3-dev \
+        ninja-build \
+        sqlite3 \
+        libgeos-dev \
+	libfreexl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN    git clone https://github.com/LASzip/LASzip.git laszip; \
-    cd laszip; \
-    git checkout 3.4.1; \
-    cmake  \
+RUN git clone https://github.com/LASzip/LASzip.git laszip \
+    && cd laszip \
+    && git checkout 3.4.1 \
+    && cmake  \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr/ \
         -DCMAKE_BUILD_TYPE="Release" \
-     . ; \
-    ninja ; \
-    ninja install; \
-    DESTDIR=/ ninja install; \
-    rm -rf laszip
+     .  \
+    && ninja -j ${PARALLEL} \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf laszip
 
-RUN git clone  https://github.com/hobu/laz-perf.git; \
-    cd laz-perf; \
-    mkdir build; \
-    cd build; \
-    cmake .. \
+RUN git clone  https://github.com/hobu/laz-perf.git \
+    && cd laz-perf \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE="Release" \
-    ; \
-    ninja; \
-    ninja install; \
-    DESTDIR=/ ninja install; \
-    rm -rf /laz-perf
+    && ninja -j ${PARALLEL} \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf /laz-perf
 
 
-RUN mkdir /nitro; cd /nitro; \
-    git clone https://github.com/hobu/nitro; \
-    cd nitro; \
-    mkdir build; \
-    cd build; \
-    cmake ..\
+RUN mkdir /nitro && cd /nitro \
+    && git clone https://github.com/hobu/nitro \
+    && cd nitro \
+    && mkdir build \
+    && cd build \
+    && cmake ..\
         -G Ninja -DCMAKE_INSTALL_PREFIX=/usr/ \
-    ; \
-    ninja; \
-    ninja install; \
-    DESTDIR=/ ninja install; \
-    rm -rf /nitro
+    && ninja -j ${PARALLEL} \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf /nitro
 
 RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
     && cd fgt \
@@ -120,7 +126,7 @@ RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE=Release \
         -G "Ninja" \
-    && ninja \
+    && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
     && rm -rf /fgt
@@ -139,24 +145,64 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE=Release \
         -G "Ninja" \
-    && ninja  \
+    && ninja  -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install  \
     && rm -rf /cpd
 
-#RUN \
-#    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
-#    tar xzf ${tiledb_version}.tar.gz; \
-#    rm ${tiledb_version}.tar.gz; \
-#    cd TileDB-${tiledb_version}; \
-#    mkdir build; \
-#    cd build; \
-#    ../bootstrap --prefix=/usr --enable-s3; \
-#    make -j2; \
-#    make install-tiledb; \
-#    DESTDIR=/ make install-tiledb; \
-#    cd /; \
-#    rm -rf TileDB-${tiledb_version};
+RUN \
+    curl -LO https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz && tar zxvf cmake-3.14.5.tar.gz && cd cmake-3.14.5; \
+    ./bootstrap --parallel=${PARALLEL} --prefix=/usr && make -j ${PARALLEL} && make install
+
+
+RUN git clone https://github.com/OSGeo/PROJ.git --branch 6.1 proj \
+    && cd proj \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr \
+    && make -j ${PARALLEL} \
+    && make install \
+    && DESTDIR=/ make install \
+    && rm -rf /proj
+
+
+RUN git clone --branch master https://github.com/OSGeo/libgeotiff.git \
+    &&    cd libgeotiff/libgeotiff \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr --with-proj=/usr \
+    && make -j ${PARALLEL} \
+    && make install \
+    && DESTDIR=/ make install \
+    && rm -rf /libgeotiff
+
+RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
+    &&    cd gdal/gdal \
+    && ./configure --prefix=/usr \
+            --mandir=/usr/share/man \
+            --includedir=/usr/include/gdal \
+            --with-threads \
+            --with-grass=no \
+            --with-hide-internal-symbols=yes \
+            --with-rename-internal-libtiff-symbols=yes \
+            --with-rename-internal-libgeotiff-symbols=yes \
+            --with-libtiff=/usr/ \
+            --with-geos=/usr/bin/geos-config \
+            --with-geotiff=/usr \
+            --with-proj=/usr \
+            --with-ogdi=no \
+            --with-curl \
+            --with-pg \
+            --with-ecw=no \
+            --with-mrsid=no \
+    && make -j ${PARALLEL} \
+    && make install \
+    && DESTDIR=/ make install \
+    && rm -rf /gdal
+
+RUN curl -LOs http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-5.0.0-beta0.tar.gz && tar zxvf libspatialite-5.0.0-beta0.tar.gz && cd /libspatialite-5.0.0-beta0 \
+    && CXXFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" CFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" ./configure --prefix=/usr \
+    && make -j ${PARALLEL} \
+    && make install \
+    && DESTDIR=/ make install
 
 RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.git pdal-git; \
     cd pdal-git;  \
@@ -190,7 +236,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DWITH_PDAL_JNI=OFF \
         -DCMAKE_BUILD_TYPE=Release \
     ; \
-    ninja; \
+    ninja -j ${PARALLEL}; \
     ninja install; \
     DESTDIR=/ ninja install; \
     rm -rf /pdal-git
@@ -211,7 +257,7 @@ RUN git clone https://github.com/libharu/libharu \
         -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
         -DCMAKE_CXX_FLAGS="-isystem ${DESTDIR}/usr/include" \
       ..; \
-    ninja; \
+    ninja -j ${PARALLEL}; \
     ninja install; \
     DESTDIR=/ ninja install; \
     rm -rf /libharu
@@ -225,7 +271,7 @@ RUN git clone https://github.com/PDAL/PRC \
         -DPDAL_DIR="/usr/lib/pdal/cmake" \
         -DCMAKE_BUILD_TYPE=Release  .. \
       -G "Ninja" \
-    && ninja \
+    && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
     && rm -rf /PRC
@@ -242,7 +288,7 @@ RUN \
         -DPDAL_DIR="/usr/lib/pdal/cmake" \
         -DCMAKE_BUILD_TYPE=Release  .. \
       -G "Ninja" \
-    && ninja \
+    && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
     && rm -rf /pubgeo
@@ -254,8 +300,6 @@ RUN apt-get update; \
         sudo curl \
         vim unzip \
         unixodbc \
-        libgeotiff2 \
-        libgeotiff-epsg \
         libexpat1 \
         libxml2 \
         libwebp6 \
@@ -263,30 +307,29 @@ RUN apt-get update; \
         libhdf4-0-alt \
         libgif7 \
         libdapclient6v5 \
-        libspatialite7 \
-        libsqlite3-mod-spatialite \
-        spatialite-bin \
         libtiff5 \
         libflann1.9 \
         libssl1.1 \
-        libpython2.7 \
-        libproj-dev \
-        proj-bin \
-        gdal-bin \
-        proj-data \
         zlib1g \
         libpng16-16 \
         python3-setuptools \
         liblzma5 \
         libzstd1 \
-        libhdf5-cpp-100 ;\
-  rm -rf /var/lib/apt/lists/*
+        libhdf5-cpp-100 \
+        libfreexl1 \
+        libgeos-c1v5 \
+        libxerces-c3.2 \
+        libopenjp2-7 \
+        libpq5 \
+        libhpdf-2.3.0 \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN date
 
 COPY --from=builder  /build/usr/bin/ /usr/bin/
 COPY --from=builder  /build/usr/lib/ /usr/lib/
 COPY --from=builder  /build/usr/include/ /usr/include/
+COPY --from=builder  /build/usr/share/ /usr/share/
 
 RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
@@ -294,5 +337,3 @@ RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
-
-
