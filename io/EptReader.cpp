@@ -808,7 +808,7 @@ void EptReader::loadNextOverlap()
     else
         startId = readBinary(*m_bufferPointView, key, m_nodeId);
 
-	log()->get(LogLevel::Debug) << "Points : "<<m_bufferPointView->size() << std::endl;
+    log()->get(LogLevel::Debug) << "Points : "<<m_bufferPointView->size() << std::endl;
     m_currentIndex = 0;
 
     // Read addon information after the native data, we'll possibly
@@ -844,10 +844,10 @@ bool EptReader::processOne(PointRef& point)
     if (finishedCurrentOverlap)
         loadNextOverlap();
 
-	// In some rare cases there are 0 points in the overlap. 
-	// If this happen, fillPoint() will crash while retriving point information.
-	// In that case proceed to load next overlap.
-	if (m_bufferPointView->size())
+    // In some rare cases there are 0 points in the overlap. 
+    // If this happen, fillPoint() will crash while retriving point information.
+    // In that case proceed to load next overlap.
+    if (m_bufferPointView->size())
         fillPoint(point);
     else
         return processOne(point);
