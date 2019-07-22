@@ -34,9 +34,6 @@
 
 #include "CoordOperationFilter.hpp"
 
-#include <gdal_version.h>
-#if GDAL_VERSION_MAJOR >= 3
-
 #include <pdal/PointView.hpp>
 #include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -140,4 +137,3 @@ bool CoordOperationFilter::CoordTransform::transform(double &x, double &y, doubl
 
 } // namespace pdal
 
-#endif

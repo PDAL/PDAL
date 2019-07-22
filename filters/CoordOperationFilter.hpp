@@ -34,9 +34,6 @@
 
 #pragma once
 
-#include <gdal_version.h>
-#if GDAL_VERSION_MAJOR >= 3
-
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
@@ -89,4 +86,3 @@ private:
 
 } // namespace pdal
 
-#endif

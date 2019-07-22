@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <gdal_version.h>
-#if GDAL_VERSION_MAJOR >= 3
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/SpatialReference.hpp>
@@ -270,4 +268,3 @@ TEST(CoordOperationFilterTest, stream_test_2)
     f.execute(table3);
 }
 
-#endif
