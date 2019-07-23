@@ -22,6 +22,7 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         gfortran \
         git \
         libgeotiff-dev \
+        libgeotiff-epsg \
         libarpack2-dev \
         libflann-dev \
         libhdf5-serial-dev \
@@ -257,7 +258,6 @@ RUN apt-get update; \
         libexpat1 \
         libxml2 \
         libwebp6 \
-	gdal-bin \
         netcdf-bin \
         libhdf4-0-alt \
         libgif7 \
@@ -277,9 +277,10 @@ RUN apt-get update; \
         libopenjp2-7 \
         libpq5 \
         libhpdf-2.3.0 \
-	curl \
-	unzip \
-      proj-bin \
+        curl \
+        unzip \
+        proj-bin \
+        libgeotiff-epsg \
         gdal-bin \
         proj-data \
   && rm -rf /var/lib/apt/lists/*
