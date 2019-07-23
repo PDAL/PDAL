@@ -695,7 +695,7 @@ std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
 
             for (std::size_t pos(0); pos < fileSize; pos += chunkSize)
             {
-                const std::size_t end(std::min(pos + chunkSize, fileSize));
+                const std::size_t end((std::min)(pos + chunkSize, fileSize));
                 const std::string range("bytes=" +
                     std::to_string(pos) + "-" +
                     std::to_string(end - 1));
