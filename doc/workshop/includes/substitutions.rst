@@ -23,7 +23,7 @@
 .. |Hobu| replace:: `Hobu <https://hobu.co/>`__
 .. |Optech| replace:: `Optech <http://www.teledyneoptech.com/>`__
 .. |RIEGL| replace:: `RIEGL <http://riegl.com/>`__
-.. |Greyhound| replace:: `Greyhound <http://greyhound.io/>`__
+.. |Entwine| replace:: `Entwine <http://entwine.io/>`__
 .. |NCALM| replace:: `NCALM <http://ncalm.cive.uh.edu/>`__
 .. |UTM| replace:: `UTM <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`__
 .. |WGS84| replace:: `WGS84 <https://en.wikipedia.org/wiki/Geodetic_datum>`__

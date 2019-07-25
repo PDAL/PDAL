@@ -1,8 +1,8 @@
 {
     "pipeline": [
         {
-            "type": "readers.greyhound",
-            "url":"data.greyhound.io",
+            "type": "readers.entwine",
+            "url":"s3:// ...",
             "depth_begin":0,
             "depth_end":11,
             "resource":"dublin",

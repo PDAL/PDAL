@@ -26,7 +26,6 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
 
     .. literalinclude:: ./compression-command-verify.txt
 
-
     .. image:: ../../images/compression-verify.png
         :target: ../../../_images/compression-verify.png
 

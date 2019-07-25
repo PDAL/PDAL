@@ -1,6 +1,6 @@
-.. _workshop-greyhound:
+.. _workshop-entwine:
 
-Greyhound
+Entwine
 ================================================================================
 
 .. include:: ../../includes/substitutions.rst
@@ -8,70 +8,62 @@ Greyhound
 Exercise
 --------------------------------------------------------------------------------
 
-This exercise uses PDAL to fetch data from a Greyhound server. Greyhound is a
-web server for point cloud data. You can learn more about what it is by
-visiting http://lidarnews.com/articles/open-source-point-cloud-web-services-with-greyhound/
+This exercise uses PDAL to fetch data from an Entwine index stored in an Amazon Web Services object store (bucket). Entwine is a point cloud indexing strategy, which rearranges points into a lossless octree structure known as EPT, for Entwine Point Tiles. The structure is described here: https://entwine.io/entwine-point-tile.html.
 
-.. index:: greyhound, web services
+EPT indexes can be used for visualisation as well as analysis and data manipulation at any scale. The entwine format is
 
+Examples of Entwine usage can be found from very fine photogrammetric surveys to continental scale lidar management.
 
-See the Dublin data used in this example in your browser at
+.. index:: entwine, web services
 
-http://potree.entwine.io/data/dublin.html
+This example will use USGS data listed here: https://usgs.entwine.io/
 
 .. index:: Potree
 
 
-1. In your |Terminal|, navigate to the ``C:\Users\hobu\PDAL\exercises\translation``
+1. In your |Terminal|, navigate to the ``PDAL/exercises/translation``
    folder.
 
+    .. literalinclude:: ./entwine-cd-command.txt
 
-    .. literalinclude:: ./greyhound-cd-command.txt
-
-2. View the ``greyhound.json`` file in your editor. If the file does not exist, create
+2. View the ``entwine.json`` file in your editor. If the file does not exist, create
    it and paste the following JSON into it:
 
 
-    .. literalinclude:: ./greyhound.json
+    .. literalinclude:: ./entwine.json
 
     .. note::
 
         If you use the `Developer Console`_ when visiting
         http://speck.ly or http://potree.entwine.io, you can see the
         browser making requests against the Greyhound server at
-        http://data.greyhound.io
+        https://url-for-data
 
 3. Issue the following command in your |Terminal|.
 
+    .. literalinclude:: ./entwine-command.txt
 
-    .. literalinclude:: ./greyhound-command.txt
-
-    .. image:: ../../images/greyhound-command.png
-        :target: ../../../_images/greyhound-command.png
+    .. image:: ../../images/entwine-command.png
+        :target: ../../../_images/entwine-command.png
 
 .. _`Developer Console`: https://developers.google.com/web/tools/chrome-devtools/console/
 
 4. Verify that the data look ok:
 
-    .. literalinclude:: ./greyhound-info-command.txt
+    .. literalinclude:: ./entwine-info-command.txt
 
-    .. image:: ../../images/greyhound-info-verify.png
-        :target: ../../../_images/greyhound-info-verify.png
+    .. image:: ../../images/entwine-info-verify.png
+        :target: ../../../_images/entwine-info-verify.png
 
 
 5. Visualize the data in http://plas.io
 
-    .. image:: ../../images/greyhound-view.png
-        :target: ../../../_images/greyhound-view.png
+    .. image:: ../../images/entwine-view.png
+        :target: ../../../_images/entwine-view.png
 
 
 Notes
 --------------------------------------------------------------------------------
 
-1. :ref:`readers.greyhound` contains more detailed documentation about how to
-   use PDAL's |Greyhound| reader .
-
-2. As ``depth_end`` gets larger, the number of possible points goes up by
-   nearly a factor of 4. Use the ``bounds`` option of the reader to split
-   up the boxes you are querying to decrease the potential number of points a
-   query might return.
+1. :ref:`readers.entwine` contains more detailed documentation about how to
+   use PDAL's |Entwine| reader .
