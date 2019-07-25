@@ -89,12 +89,8 @@ void Printobject(PyObject* o)
     PyObject* r = PyObject_Repr(o);
     if (!r)
         throw pdal::pdal_error("couldn't make string representation of traceback value");
-#if PY_MAJOR_VERSION >= 3
     Py_ssize_t size;
     const char *d = PyUnicode_AsUTF8AndSize(r, &size);
-#else
-    const char *d = PyString_AsString(r);
-#endif
     std::cout << "raw_json" << d << std::endl;
 }
 void Invocation::compile()
@@ -265,11 +261,7 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
     while (PyDict_Next(m_varsOut, &pos, &key, &value))
     {
         const char* p(0);
-#if PY_MAJOR_VERSION >= 3
         p = PyBytes_AsString(PyUnicode_AsUTF8String(key));
-#else
-        p = PyString_AsString(key);
-#endif
         if (p)
             names.push_back(p);
     }

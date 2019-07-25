@@ -240,8 +240,8 @@ void E57Writer::setupFileHeader()
     e57::ustring libraryId;
     e57::Utilities::getVersions(astmMajor, astmMinor, libraryId);
 
-    m_rootNode->set("majorVersion", e57::IntegerNode(*m_imageFile, astmMajor));
-    m_rootNode->set("minorVersion", e57::IntegerNode(*m_imageFile, astmMinor));
+    m_rootNode->set("versionMajor", e57::IntegerNode(*m_imageFile, astmMajor));
+    m_rootNode->set("versionMinor", e57::IntegerNode(*m_imageFile, astmMinor));
     m_rootNode->set("e57LibraryVersion", e57::StringNode(*m_imageFile, libraryId));
 
     // Save a dummy string for coordinate system.
