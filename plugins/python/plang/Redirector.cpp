@@ -13,6 +13,7 @@
 
 #include <ostream>
 #include <string>
+#include <iostream>
 
 namespace pdal
 {
@@ -158,14 +159,12 @@ PyMODINIT_FUNC redirector_init(void)
 
 PyObject* Redirector::init()
 {
+std::cerr << "New redirector!\n";
     StdoutType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&StdoutType) < 0)
         return NULL;
-#if PY_MAJOR_VERSION >= 3
+std::cerr << "Create module!\n";
     PyObject* m = PyModule_Create(&redirectordef);
-#else
-    PyObject* m = Py_InitModule3("redirector", 0, 0);
-#endif
     if (m)
     {
         //ABELL - This is bad code as the type cast is invalid. (type pun
@@ -176,6 +175,7 @@ PyObject* Redirector::init()
         PyModule_AddObject(m, "Stdout", reinterpret_cast<PyObject*>(&StdoutType));
 #pragma GCC diagnostic pop
     }
+std::cerr << "Returning redirector!\n";
     return m;
 }
 
