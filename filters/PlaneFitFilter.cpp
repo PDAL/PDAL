@@ -136,7 +136,6 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
     if (solver.info() != Eigen::Success)
         throwError("Cannot perform eigen decomposition.");
-    auto eval = solver.eigenvalues();
     Eigen::Vector3d normal = solver.eigenvectors().col(0);
 
     // Compute point to plane distance of the query point.
