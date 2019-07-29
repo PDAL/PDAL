@@ -39,9 +39,9 @@ namespace pdal
 
 static StaticPluginInfo const s_info
 {
-    "readers.memory",
+    "readers.memoryview",
     "Memory Reader",
-    "http://pdal.io/stages/readers.memory.html",
+    "http://pdal.io/stages/readers.memoryview.html",
     {}
 };
 
