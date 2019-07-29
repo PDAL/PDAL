@@ -818,11 +818,10 @@ void EptReader::loadNextOverlap()
 void EptReader::fillPoint(PointRef& point)
 {
     DimTypeList dims = m_bufferPointView->dimTypes();
-    char* buffer = new char[m_bufferPointView->pointSize()];
-    m_bufferPointView->getPackedPoint(dims, m_currentIndex, buffer);
-    point.setPackedData(dims, buffer);
+    std::vector<char> buffer(m_bufferPointView->pointSize());
+    m_bufferPointView->getPackedPoint(dims, m_currentIndex, buffer.data());
+    point.setPackedData(dims, buffer.data());
     m_currentIndex++;
-    delete[] buffer;
 }
 
 bool EptReader::processOne(PointRef& point)
