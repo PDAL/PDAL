@@ -164,13 +164,15 @@ void App::outputDrivers()
         StageExtensions& extensions = PluginManager<Stage>::extensions();
         for (auto name : stages)
         {
+            Stage *s = f.createStage(name);
             std::string description = PluginManager<Stage>::description(name);
             std::string link = PluginManager<Stage>::link(name);
             j.push_back(
                 { { "name", name },
                   { "description", description },
                   { "link", link },
-                  { "extensions", extensions.extensions(name) }
+                  { "extensions", extensions.extensions(name) },
+                  { "streamable", s->pipelineStreamable() }
                 }
             );
         }
