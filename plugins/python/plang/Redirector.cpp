@@ -159,11 +159,9 @@ PyMODINIT_FUNC redirector_init(void)
 
 PyObject* Redirector::init()
 {
-std::cerr << "New redirector!\n";
     StdoutType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&StdoutType) < 0)
         return NULL;
-std::cerr << "Create module!\n";
     PyObject* m = PyModule_Create(&redirectordef);
     if (m)
     {
@@ -175,7 +173,6 @@ std::cerr << "Create module!\n";
         PyModule_AddObject(m, "Stdout", reinterpret_cast<PyObject*>(&StdoutType));
 #pragma GCC diagnostic pop
     }
-std::cerr << "Returning redirector!\n";
     return m;
 }
 

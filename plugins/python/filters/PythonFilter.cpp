@@ -63,7 +63,7 @@ struct PythonFilter::Args
 
 PythonFilter::PythonFilter() :
     m_script(nullptr), m_pythonMethod(nullptr), m_args(new Args)
-{ std::cerr << "Made python filter!\n"; }
+{}
 
 
 PythonFilter::~PythonFilter()
@@ -99,23 +99,16 @@ void PythonFilter::addDimensions(PointLayoutPtr layout)
 
 void PythonFilter::ready(PointTableRef table)
 {
-    std::cerr << "Ready!\n";
     if (m_args->m_source.empty())
         m_args->m_source = FileUtils::readFileIntoString(m_args->m_scriptFile);
-    std::cerr << "Get log stream!\n";
     std::ostream *out = log()->getLogStream();
-    std::cerr << "Get environment!\n";
     plang::EnvironmentPtr env = plang::Environment::get();
-    std::cerr << "Set stdout!\n";
     env->set_stdout(out);
-    std::cerr << "New script!\n";
     m_script = new plang::Script(m_args->m_source, m_args->m_module,
         m_args->m_function);
 
-    std::cerr << "New invocation!\n";
 	m_pythonMethod = new plang::Invocation(*m_script);
     m_pythonMethod->compile();
-    std::cerr << "Compiled!\n";
     m_totalMetadata = table.metadata();
 }
 
@@ -133,7 +126,6 @@ PointViewSet PythonFilter::run(PointViewPtr view)
         args << m_args->m_pdalargs;
         m_pythonMethod->setKWargs(args.str());
     }
-    std::cerr << "Executing python!\n";
     m_pythonMethod->execute();
 
     PointViewSet viewSet;

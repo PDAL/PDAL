@@ -116,18 +116,14 @@ Environment::Environment()
         import_array();
     };
 
-std::cerr << "Initialize check!\n";
     if (!Py_IsInitialized())
     {
-std::cerr << "Not init!\n";
-//        PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
-std::cerr << "Import inittab!\n";
+        PyImport_AppendInittab(const_cast<char*>("redirector"),
+            redirector_init);
         Py_Initialize();
-std::cerr << "Done py init!\n";
     }
     else
     {
-std::cerr << "Yes init!\n";
         m_redirector.init();
         PyObject* added = PyImport_AddModule("redirector");
         if (!added)
@@ -135,9 +131,7 @@ std::cerr << "Yes init!\n";
     }
 
     initNumpy();
-std::cerr << "Init redirector!\n";
     PyImport_ImportModule("redirector");
-std::cerr << "Done redirector!\n";
 }
 
 Environment::~Environment()
@@ -147,7 +141,6 @@ Environment::~Environment()
 
 void Environment::set_stdout(std::ostream* ostr)
 {
-    std::cerr << "Set stdout!\n";
     m_redirector.set_stdout(ostr);
 }
 
