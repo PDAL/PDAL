@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "MemoryReader.hpp"
+#include "MemoryViewReader.hpp"
 
 namespace pdal
 {
@@ -40,22 +40,22 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "readers.memoryview",
-    "Memory Reader",
+    "Memory View Reader",
     "http://pdal.io/stages/readers.memoryview.html",
     {}
 };
 
-CREATE_STATIC_STAGE(MemoryReader, s_info)
+CREATE_STATIC_STAGE(MemoryViewReader, s_info)
 
-std::string MemoryReader::getName() const { return s_info.name; }
+std::string MemoryViewReader::getName() const { return s_info.name; }
 
-MemoryReader::MemoryReader() : m_prepared(false)
+MemoryViewReader::MemoryViewReader() : m_prepared(false)
 {}
 
 
 // NOTE: - Forces reading of the entire file.
 /**
-QuickInfo MemoryReader::inspect()
+QuickInfo MemoryViewReader::inspect()
 {
     QuickInfo qi;
     FixedPointTable t(100);
@@ -90,10 +90,10 @@ QuickInfo MemoryReader::inspect()
 **/
 
 
-void MemoryReader::pushField(const Field& f)
+void MemoryViewReader::pushField(const Field& f)
 {
     if (m_prepared)
-        throwError("Can't pushField() after MemoryReader is prepared.");
+        throwError("Can't pushField() after MemoryViewReader is prepared.");
 
     for (auto& tempField : m_fields)
         if (tempField.m_name == f.m_name)
@@ -104,7 +104,7 @@ void MemoryReader::pushField(const Field& f)
 }
 
 
-void MemoryReader::addDimensions(PointLayoutPtr layout)
+void MemoryViewReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto& f : m_fields)
     {
@@ -116,13 +116,13 @@ void MemoryReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-void MemoryReader::initialize()
+void MemoryViewReader::initialize()
 {
     m_prepared = false;
 }
 
 
-void MemoryReader::prepared(PointTableRef)
+void MemoryViewReader::prepared(PointTableRef)
 {
     int xyz = 0;
     for (const FullField& f : m_fields)
@@ -169,7 +169,7 @@ void MemoryReader::prepared(PointTableRef)
 }
 
 
-void MemoryReader::ready(PointTableRef)
+void MemoryViewReader::ready(PointTableRef)
 {
     if (!m_incrementer)
         throwError("Points cannot be read without calling setIncrementer().");
@@ -177,7 +177,7 @@ void MemoryReader::ready(PointTableRef)
 }
 
 
-point_count_t MemoryReader::read(PointViewPtr v, point_count_t numPts)
+point_count_t MemoryViewReader::read(PointViewPtr v, point_count_t numPts)
 {
     PointId idx = v->size();
     point_count_t cnt = 0;
@@ -195,7 +195,7 @@ point_count_t MemoryReader::read(PointViewPtr v, point_count_t numPts)
 }
 
 
-bool MemoryReader::processOne(PointRef& point)
+bool MemoryViewReader::processOne(PointRef& point)
 {
     char *base = m_incrementer(m_index);
     if (!base)

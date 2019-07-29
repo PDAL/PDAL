@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MemoryReader : public Reader, public Streamable
+class PDAL_DLL MemoryViewReader : public Reader, public Streamable
 {
 public:
     enum class Order
@@ -111,7 +111,7 @@ private:
 public:
     std::string getName() const;
 
-    MemoryReader();
+    MemoryViewReader();
 
     /**
       Push a data field into the structure of ordered fields.
@@ -124,7 +124,7 @@ public:
       Set a function that handles modifying the memory location of
       subsequent points.
       
-      \param inc  A function that is called by MemoryReader with the
+      \param inc  A function that is called by MemoryViewReader with the
         current point ID.  The function should return the base pointer
         of the point, or nullptr if there are no more points to read.
     */
@@ -161,7 +161,7 @@ private:
     virtual void prepared(PointTableRef);
 
     /**
-      Make MemoryReader ready for reading.
+      Make MemoryViewReader ready for reading.
     */
     virtual void ready(PointTableRef);
 
@@ -197,15 +197,16 @@ private:
     size_t m_zDiv;
 };
 
-inline std::istream& operator>>(std::istream& in, MemoryReader::Order& order)
+inline std::istream& operator>>(std::istream& in,
+    MemoryViewReader::Order& order)
 {
     std::string s(std::istreambuf_iterator<char>(in), {});
 
     s = Utils::toupper(s);
     if (s == "ROW")
-        order = MemoryReader::Order::RowMajor;
+        order = MemoryViewReader::Order::RowMajor;
     else if (s == "COLUMN")
-        order = MemoryReader::Order::ColumnMajor;
+        order = MemoryViewReader::Order::ColumnMajor;
     else
         throw pdal_error("Invalid value for option 'order'.  Must be 'row'"
             " or 'column'.");
@@ -213,16 +214,17 @@ inline std::istream& operator>>(std::istream& in, MemoryReader::Order& order)
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-    const MemoryReader::Order& order)
+    const MemoryViewReader::Order& order)
 {
-    if (order == MemoryReader::Order::RowMajor)
+    if (order == MemoryViewReader::Order::RowMajor)
         out << "row";
     else
         out << "column";
     return out;
 }
 
-inline std::istream& operator>>(std::istream& in, MemoryReader::Shape& shape)
+inline std::istream& operator>>(std::istream& in,
+    MemoryViewReader::Shape& shape)
 {
     std::string s(std::istreambuf_iterator<char>(in), {});
     StringList values = Utils::split2(s, ',');
@@ -250,7 +252,7 @@ inline std::istream& operator>>(std::istream& in, MemoryReader::Shape& shape)
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-    const MemoryReader::Shape& shape)
+    const MemoryViewReader::Shape& shape)
 {
     out << shape.depth() << ", " << shape.rows() << ", " << shape.columns();
     return out;
