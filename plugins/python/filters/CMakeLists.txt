@@ -8,6 +8,7 @@ PDAL_ADD_PLUGIN(python_libname filter python
         ${PLANG}
         PythonFilter.cpp
     LINK_WITH
+        ${PYTHON_LIBRARY}
         ${CMAKE_DL_LIBS}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
@@ -16,7 +17,6 @@ PDAL_ADD_PLUGIN(python_libname filter python
 )
 target_compile_definitions(${python_libname} PRIVATE
     PDAL_PYTHON_LIBRARY="${PYTHON_LIBRARY}")
-target_link_options(${python_libname} PRIVATE "-Wl,-undefined" "-Wl,dynamic_lookup")
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_filters_python_test
