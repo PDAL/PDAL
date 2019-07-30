@@ -2,7 +2,7 @@
 # LZMA support
 #
 option(WITH_ZSTD
-    "Build support for compression/decompression with Zstd." FALSE)
+    "Build support for compression/decompression with Zstd." TRUE)
 if (WITH_ZSTD)
     find_package(ZSTD REQUIRED)
     set_package_properties(ZSTD PROPERTIES TYPE REQUIRED
