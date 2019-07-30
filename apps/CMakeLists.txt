@@ -21,13 +21,11 @@ target_link_libraries(${PDAL_APP}
     PRIVATE
         ${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
-        ${GDAL_LIBRARY}
         ${WINSOCK_LIBRARY}
 )
 target_include_directories(${PDAL_APP} PRIVATE
     ${NLOHMANN_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
-    ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
 #------------------------------------------------------------------------------
@@ -44,7 +42,7 @@ endif(APPLE AND PDAL_BUNDLE)
 
 set(PKGCONFIG_LIBRARY_DEFINITIONS "")
 set(PDAL_INCLUDE_DEFINITIONS
-    "-I${CMAKE_INSTALL_PREFIX}/include -I${GDAL_INCLUDE_DIR}")
+    "-I${CMAKE_INSTALL_PREFIX}/include ")
 set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} gdal")
 
 if(LIBXML2_FOUND)
