@@ -142,6 +142,7 @@ private:
     PointViewPtr m_bufferPointView;
     PointLayoutPtr m_bufferLayout;
     point_count_t m_currentIndex = -1;
+    std::vector<char> m_temp_buffer;
 };
 
 } // namespace pdal

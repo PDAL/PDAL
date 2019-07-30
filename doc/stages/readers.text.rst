@@ -70,7 +70,7 @@ filename
 .. include:: reader_opts.rst
 
 header
-  String to use as the file header.  All lines in the file as assumed to be
+  String to use as the file header.  All lines in the file are assumed to be
   records containing point data unless skipped with the `skip`_ option.
   [Default: None]
 

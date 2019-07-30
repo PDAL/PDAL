@@ -76,7 +76,7 @@ std::string GltfWriter::getName() const { return s_info.name; }
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output gltf filename", m_filename);
+    args.add("filename", "Output gltf filename", m_filename).setPositional();
     args.add("metallic", "Metallic factor [0-1]", m_metallic);
     args.add("roughness", "Roughness factor [0-1]", m_roughness);
     args.add("red", "Red factor [0-1]", m_red);
@@ -124,7 +124,7 @@ void GltfWriter::write(const PointViewPtr v)
 
     m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
     m_totalSize = static_cast<size_t>(out.position()) + m_binSize;
-    if (m_totalSize > std::numeric_limits<uint32_t>::max())
+    if (m_totalSize > (std::numeric_limits<uint32_t>::max)())
         throwError("Data too large for file.");
 
     for (const Triangle& t : *mesh)
