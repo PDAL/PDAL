@@ -45,13 +45,16 @@ invalidate an existing KD-tree.
    filters.hag
    filters.info
    filters.lof
+   filters.miniball
    filters.neighborclassifier
    filters.nndistance
    filters.normal
    filters.outlier
    filters.overlay
+   filters.planefit
    filters.pmf
    filters.radialdensity
+   filters.reciprocity
    filters.smrf
 
 :ref:`filters.approximatecoplanar`
@@ -97,6 +100,9 @@ invalidate an existing KD-tree.
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
 
+:ref:`filters.miniball`
+    Compute a criterion for point neighbors based on the miniball algorithm.
+
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
 
@@ -113,11 +119,18 @@ invalidate an existing KD-tree.
     Assign values to a dimension based on the extent of an OGR-readable data
     source or an OGR SQL query.
 
+:ref:`filters.planefit`
+    Compute a deviation of a point from a manifold approximating its neighbors.
+
 :ref:`filters.pmf`
     Label ground/non-ground returns using [Zhang2003]_.
 
 :ref:`filters.radialdensity`
     Compute pointwise density of points within a given radius.
+
+:ref:`filters.reciprocity`
+    Compute the percentage of points that are considered uni-directional
+    neighbors of a point.
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
