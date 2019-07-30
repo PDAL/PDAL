@@ -37,7 +37,7 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PointView.hpp>
 #include <io/LasReader.hpp>
-#include <filters/CoordOperationFilter.hpp>
+#include <filters/ProjPipelineFilter.hpp>
 #include <filters/StreamCallbackFilter.hpp>
 
 #include "Support.hpp"
@@ -57,7 +57,7 @@ void getPoint(const PointView& data, double& x, double& y, double& z)
 } // unnamed namespace
 
 
-TEST(CoordOperationFilterTest, CoordOperationFilterTest_test_1)
+TEST(ProjPipelineFilterTest, ProjPipelineFilterTest_test_1)
 {
     const char* proj_pipeline = "+proj=pipeline +step +inv +proj=utm +zone=15 +step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
@@ -79,12 +79,12 @@ TEST(CoordOperationFilterTest, CoordOperationFilterTest_test_1)
         Options options;
         options.add("coord_op", proj_pipeline);
 
-        CoordOperationFilter coordOperationFilter;
-        coordOperationFilter.setOptions(options);
-        coordOperationFilter.setInput(reader);
+        ProjPipelineFilter projPipelineFilter;
+        projPipelineFilter.setOptions(options);
+        projPipelineFilter.setInput(reader);
 
-        coordOperationFilter.prepare(table);
-        PointViewSet viewSet = coordOperationFilter.execute(table);
+        projPipelineFilter.prepare(table);
+        PointViewSet viewSet = projPipelineFilter.execute(table);
         EXPECT_EQ(viewSet.size(), 1u);
         PointViewPtr view = *viewSet.begin();
 
@@ -98,7 +98,7 @@ TEST(CoordOperationFilterTest, CoordOperationFilterTest_test_1)
 }
 
 
-TEST(CoordOperationFilterTest, CoordOperationFilterTest_test_inv)
+TEST(ProjPipelineFilterTest, ProjPipelineFilterTest_test_inv)
 {
     const char* proj_pipeline = "+proj=pipeline +step +inv +proj=utm +zone=15 +step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
@@ -120,12 +120,12 @@ TEST(CoordOperationFilterTest, CoordOperationFilterTest_test_inv)
         Options options;
         options.add("coord_op", proj_pipeline);
 
-        CoordOperationFilter coordOperationFilter;
-        coordOperationFilter.setOptions(options);
-        coordOperationFilter.setInput(reader);
+        ProjPipelineFilter projPipelineFilter;
+        projPipelineFilter.setOptions(options);
+        projPipelineFilter.setInput(reader);
 
-        coordOperationFilter.prepare(table);
-        PointViewSet viewSet = coordOperationFilter.execute(table);
+        projPipelineFilter.prepare(table);
+        PointViewSet viewSet = projPipelineFilter.execute(table);
         EXPECT_EQ(viewSet.size(), 1u);
         PointViewPtr view = *viewSet.begin();
 
@@ -139,7 +139,7 @@ TEST(CoordOperationFilterTest, CoordOperationFilterTest_test_inv)
 }
 
 // Test reprojecting UTM 15 to DD with a filter
-TEST(CoordOperationFilterTest, stream_test_1)
+TEST(ProjPipelineFilterTest, stream_test_1)
 {
     const char* proj_pipeline = "+proj=pipeline +step +inv +proj=utm +zone=15 +step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
@@ -152,9 +152,9 @@ TEST(CoordOperationFilterTest, stream_test_1)
     Options options;
     options.add("coord_op", proj_pipeline);
 
-    CoordOperationFilter coordOperationFilter;
-    coordOperationFilter.setOptions(options);
-    coordOperationFilter.setInput(reader);
+    ProjPipelineFilter projPipelineFilter;
+    projPipelineFilter.setOptions(options);
+    projPipelineFilter.setInput(reader);
 
     auto cb = [](PointRef& point)
     {
@@ -178,7 +178,7 @@ TEST(CoordOperationFilterTest, stream_test_1)
 
     StreamCallbackFilter stream;
     stream.setCallback(cb);
-    stream.setInput(coordOperationFilter);
+    stream.setInput(projPipelineFilter);
 
     FixedPointTable table(20);
 
@@ -188,7 +188,7 @@ TEST(CoordOperationFilterTest, stream_test_1)
 
 
 // Test reprojecting UTM 16 AND UTM 17 to DD
-TEST(CoordOperationFilterTest, stream_test_2)
+TEST(ProjPipelineFilterTest, stream_test_2)
 {
     const char* proj_pipeline = "+proj=pipeline +step +inv +proj=utm +zone=17 +step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
@@ -199,7 +199,7 @@ TEST(CoordOperationFilterTest, stream_test_2)
     reader1.setOptions(ops1);
 
     Options ops1a;
-    CoordOperationFilter coordOp1;
+    ProjPipelineFilter coordOp1;
     ops1a.add("coord_op", proj_pipeline);
     coordOp1.setInput(reader1);
     coordOp1.setOptions(ops1a);
@@ -216,7 +216,7 @@ TEST(CoordOperationFilterTest, stream_test_2)
     reader2.setOptions(ops2);
 
     Options ops2a;
-    CoordOperationFilter coordOp2;
+    ProjPipelineFilter coordOp2;
     ops2a.add("coord_op", proj_pipeline);
     coordOp2.setInput(reader2);
     coordOp2.setOptions(ops2a);

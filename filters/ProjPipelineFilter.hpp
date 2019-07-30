@@ -38,25 +38,26 @@
 #include <pdal/Streamable.hpp>
 
 #include <memory>
-#include <ogr_spatialref.h>
+
+class OGRCoordinateTransformation;
 
 namespace pdal
 {
 
 
-class PDAL_DLL CoordOperationFilter : public Filter, public Streamable
+class PDAL_DLL ProjPipelineFilter : public Filter, public Streamable
 {
 public:
     class CoordTransform;
 
-    CoordOperationFilter();
-    ~CoordOperationFilter();
+    ProjPipelineFilter();
+    ~ProjPipelineFilter();
 
     std::string getName() const;
 
 private:
-    CoordOperationFilter& operator=(const CoordOperationFilter&) = delete;
-    CoordOperationFilter(const CoordOperationFilter&) = delete;
+    ProjPipelineFilter& operator=(const ProjPipelineFilter&) = delete;
+    ProjPipelineFilter(const ProjPipelineFilter&) = delete;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -65,14 +66,14 @@ private:
 
     void createTransform(const std::string coordOperation, bool reverseTransfo);
 
-    SpatialReference m_aSRS;
+    SpatialReference m_outSRS;
     bool m_reverseTransfo;
     std::string m_coordOperation;
     std::unique_ptr<CoordTransform> m_coordTransform;
 };
 
 
-class CoordOperationFilter::CoordTransform
+class ProjPipelineFilter::CoordTransform
 {
 public:
     CoordTransform();

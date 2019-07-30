@@ -264,7 +264,7 @@ PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
 if (GDAL_3)
-    PDAL_ADD_TEST(pdal_filters_coordoperation_test FILES filters/CoordOperationFilterTest.cpp)
+    PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
 endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)

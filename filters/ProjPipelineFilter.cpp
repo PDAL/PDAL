@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "CoordOperationFilter.hpp"
+#include "ProjPipelineFilter.hpp"
 
 #include <pdal/PointView.hpp>
 #include <pdal/private/SrsTransform.hpp>
@@ -40,33 +40,31 @@
 
 #include <ogr_spatialref.h>
 
-//#include <memory>
-
 namespace pdal
 {
 
 static StaticPluginInfo const s_info
 {
-    "filters.coordoperation",
+    "filters.projpipeline",
     "Transform coordinates using Proj pipeline string, WKT2 coordinate operations or URN definition",
-    "http://pdal.io/stages/filters.coordoperation.html"
+    "http://pdal.io/stages/filters.projpipeline.html"
 };
 
-CREATE_STATIC_STAGE(CoordOperationFilter, s_info)
+CREATE_STATIC_STAGE(ProjPipelineFilter, s_info)
 
-std::string CoordOperationFilter::getName() const { return s_info.name; }
+std::string ProjPipelineFilter::getName() const { return s_info.name; }
 
-CoordOperationFilter::CoordOperationFilter()
+ProjPipelineFilter::ProjPipelineFilter()
 {}
 
 
-CoordOperationFilter::~CoordOperationFilter()
+ProjPipelineFilter::~ProjPipelineFilter()
 {}
 
 
-void CoordOperationFilter::addArgs(ProgramArgs& args)
+void ProjPipelineFilter::addArgs(ProgramArgs& args)
 {
-    args.add("a_srs", "Output spatial reference", m_aSRS);
+    args.add("out_srs", "Output spatial reference", m_outSRS);
     args.add("reverse_transfo", "Wether the coordinate operation should be evaluated in the reverse path",
              m_reverseTransfo, false);
     args.add("coord_op", "Coordinate operation (Proj pipeline or WKT2 string or urn definition)",
@@ -74,20 +72,20 @@ void CoordOperationFilter::addArgs(ProgramArgs& args)
 }
 
 
-void CoordOperationFilter::initialize()
+void ProjPipelineFilter::initialize()
 {
-    setSpatialReference(m_aSRS);
+    setSpatialReference(m_outSRS);
     createTransform(m_coordOperation, m_reverseTransfo);
 }
 
 
-void CoordOperationFilter::createTransform(const std::string coordOperation, bool reverseTransfo)
+void ProjPipelineFilter::createTransform(const std::string coordOperation, bool reverseTransfo)
 {
     m_coordTransform.reset(new CoordTransform(coordOperation, reverseTransfo));
 }
 
 
-PointViewSet CoordOperationFilter::run(PointViewPtr view)
+PointViewSet ProjPipelineFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
     PointViewPtr outView = view->makeNew();
@@ -105,7 +103,7 @@ PointViewSet CoordOperationFilter::run(PointViewPtr view)
 }
 
 
-bool CoordOperationFilter::processOne(PointRef& point)
+bool ProjPipelineFilter::processOne(PointRef& point)
 {
     double x(point.getFieldAs<double>(Dimension::Id::X));
     double y(point.getFieldAs<double>(Dimension::Id::Y));
@@ -121,16 +119,16 @@ bool CoordOperationFilter::processOne(PointRef& point)
     return ok;
 }
 
-CoordOperationFilter::CoordTransform::CoordTransform(){}
+ProjPipelineFilter::CoordTransform::CoordTransform(){}
 
-CoordOperationFilter::CoordTransform::CoordTransform(const std::string coordOperation, bool reverseTransfo){
+ProjPipelineFilter::CoordTransform::CoordTransform(const std::string coordOperation, bool reverseTransfo){
     OGRCoordinateTransformationOptions coordTransfoOptions;
     coordTransfoOptions.SetCoordinateOperation(coordOperation.c_str(), reverseTransfo);
     OGRSpatialReference nullSrs("");
     m_transform.reset(OGRCreateCoordinateTransformation(&nullSrs, &nullSrs, coordTransfoOptions));
 }
 
-bool CoordOperationFilter::CoordTransform::transform(double &x, double &y, double &z){
+bool ProjPipelineFilter::CoordTransform::transform(double &x, double &y, double &z){
 
     return m_transform && m_transform->Transform(1, &x, &y, &z);
 }
