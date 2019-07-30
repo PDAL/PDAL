@@ -184,6 +184,8 @@ std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &p
 
     if (fieldName.substr(0,5) == "color")
         boundingBoxName = "colorLimits";
+    else if (fieldName[0] == 'x' || fieldName[0] == 'y' || fieldName[0] == 'z')
+        boundingBoxName = "cartesianBounds";
 
     if ( prototype.isDefined(boundingBoxName) )
 	{
@@ -204,8 +206,7 @@ std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &p
 			min = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
 		}
 	}
-	
-	if (max == 0. && prototype.isDefined(fieldName) )
+    else if ( prototype.isDefined(fieldName) )
 	{
 		if (prototype.get(fieldName).type() == e57::E57_INTEGER)
 		{

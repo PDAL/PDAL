@@ -311,7 +311,7 @@ void Arbiter::copy(
 
             if (dstEndpoint.isLocal())
             {
-                mkdirp(getNonBasename(dstEndpoint.fullPath(subpath)));
+                mkdirp(getDirname(dstEndpoint.fullPath(subpath)));
             }
 
             dstEndpoint.put(subpath, getBinary(path));
@@ -337,7 +337,7 @@ void Arbiter::copyFile(
 
     if (verbose) std::cout << file << " -> " << dst << std::endl;
 
-    if (dstEndpoint.isLocal()) mkdirp(getNonBasename(dst));
+    if (dstEndpoint.isLocal()) mkdirp(getDirname(dst));
 
     if (getEndpoint(file).type() == dstEndpoint.type())
     {
@@ -411,30 +411,8 @@ std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
         const std::string path,
         const Endpoint& tempEndpoint) const
 {
-    std::unique_ptr<LocalHandle> localHandle;
-
-    if (isRemote(path))
-    {
-        if (tempEndpoint.isRemote())
-        {
-            throw ArbiterError("Temporary endpoint must be local.");
-        }
-
-        const auto ext(getExtension(path));
-        const std::string basename(
-                std::to_string(randomNumber()) +
-                (ext.size() ? "." + ext : ""));
-        tempEndpoint.put(basename, getBinary(path));
-        localHandle.reset(
-                new LocalHandle(tempEndpoint.root() + basename, true));
-    }
-    else
-    {
-        localHandle.reset(
-                new LocalHandle(expandTilde(stripType(path)), false));
-    }
-
-    return localHandle;
+    const Endpoint fromEndpoint(getEndpoint(getDirname(path)));
+    return fromEndpoint.getLocalHandle(getBasename(path));
 }
 
 std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
@@ -631,6 +609,7 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 #include <arbiter/util/transforms.hpp>
 #include <arbiter/util/util.hpp>
 #endif
+#include<fstream>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -642,6 +621,12 @@ namespace arbiter
 
 namespace
 {
+    constexpr std::size_t mb = 1024 * 1024;
+    const std::size_t chunkSize = 10 * mb;
+    const auto streamFlags(
+        std::ofstream::binary |
+        std::ofstream::out |
+        std::ofstream::app);
     std::string postfixSlash(std::string path)
     {
         if (path.empty()) throw ArbiterError("Invalid root path");
@@ -699,10 +684,36 @@ std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
                 (ext.size() ? "." + ext : ""));
 
         const std::string local(tmp + basename);
+        if (isHttpDerived())
+        {
+            const std::size_t fileSize = getSize(subpath);
+            std::ofstream stream(local, streamFlags);
+            if (!stream.good())
+            {
+                throw ArbiterError("Unable to create local handle");
+            }
 
-        drivers::Fs fs;
-        fs.put(local, getBinary(subpath));
+            for (std::size_t pos(0); pos < fileSize; pos += chunkSize)
+            {
+                const std::size_t end((std::min)(pos + chunkSize, fileSize));
+                const std::string range("bytes=" +
+                    std::to_string(pos) + "-" +
+                    std::to_string(end - 1));
+                const http::Headers headers { { "Range", range } };
+                const auto data(getBinary(subpath, headers));
+                stream.write(data.data(), data.size());
 
+                if (!stream.good())
+                {
+                    throw ArbiterError("Unable to write local handle");
+                }
+            }
+        }
+        else
+        {
+            drivers::Fs fs;
+            fs.put(local, getBinary(subpath));
+        }
         handle.reset(new LocalHandle(local, true));
     }
     else
@@ -1079,7 +1090,7 @@ bool mkdirp(std::string raw)
 
         const std::string cur(dir.begin(), it);
 #ifndef ARBITER_WINDOWS
-        const bool err(::mkdir(cur.c_str(), S_IRWXU | S_IRGRP | S_IROTH));
+        const bool err(::mkdir(cur.c_str(), 0777));
         if (err && errno != EEXIST) return false;
 #else
         // Use CreateDirectory instead of _mkdir; it is more reliable when creating directories on a drive other than the working path.
@@ -1600,6 +1611,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
+using namespace internal;
+
 namespace
 {
 #ifdef ARBITER_CURL
@@ -1869,11 +1882,9 @@ std::string S3::Config::extractRegion(
 
     const json c(s.size() ? json::parse(s) : json());
 
-    if (c.is_null()) return "us-east-1";
-
-    if (c.count("region"))
+    if (!c.is_null() && c.count("region"))
     {
-        return c["region"].get<std::string>();
+        return c.at("region").get<std::string>();
     }
     else if (auto p = env("AWS_REGION"))
     {
@@ -1893,7 +1904,7 @@ std::string S3::Config::extractRegion(
         }
     }
 
-    if (c.value("verbose", false))
+    if (!c.is_null() && c.value("verbose", false))
     {
         std::cout << "Region not found - defaulting to us-east-1" << std::endl;
     }
@@ -2496,12 +2507,14 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
+using namespace internal;
+
 namespace
 {
     std::mutex sslMutex;
 
-    const std::string baseGoogleUrl("www.googleapis.com/storage/v1/");
-    const std::string uploadUrl("www.googleapis.com/upload/storage/v1/");
+    const char baseGoogleUrl[] = "www.googleapis.com/storage/v1/";
+    const char uploadUrl[] = "www.googleapis.com/upload/storage/v1/";
     const http::Query altMediaQuery{ { "alt", "media" } };
 
     class GResource
@@ -2516,25 +2529,23 @@ namespace
 
         const std::string& bucket() const { return m_bucket; }
         const std::string& object() const { return m_object; }
+        static const char exclusions[];
         std::string endpoint() const
         {
-            // https://cloud.google.com/storage/docs/json_api/#encoding
-            static const std::string exclusions("!$&'()*+,;=:@");
-
             // https://cloud.google.com/storage/docs/json_api/v1/
             return
-                baseGoogleUrl + "b/" + bucket() +
+                std::string(baseGoogleUrl) + "b/" + bucket() +
                 "o/" + http::sanitize(object(), exclusions);
         }
 
         std::string uploadEndpoint() const
         {
-            return uploadUrl + "b/" + bucket() + "o";
+            return std::string(uploadUrl) + "b/" + bucket() + "o";
         }
 
         std::string listEndpoint() const
         {
-            return baseGoogleUrl + "b/" + bucket() + "o";
+            return std::string(baseGoogleUrl) + "b/" + bucket() + "o";
         }
 
     private:
@@ -2542,6 +2553,10 @@ namespace
         std::string m_object;
 
     };
+    
+    // https://cloud.google.com/storage/docs/json_api/#encoding
+    const char GResource::exclusions[] = "!$&'()*+,;=:@";
+    
 } // unnamed namespace
 
 namespace drivers
@@ -2574,7 +2589,7 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     if (res.ok() && res.headers().count("Content-Length"))
     {
         const auto& s(res.headers().at("Content-Length"));
-        return makeUnique<std::size_t>(std::stoul(s));
+        return makeUnique<std::size_t>(std::stoull(s));
     }
 
     return std::unique_ptr<std::size_t>();
@@ -2622,7 +2637,7 @@ void Google::put(
 
     http::Query query(userQuery);
     query["uploadType"] = "media";
-    query["name"] = resource.object();
+    query["name"] = http::sanitize(resource.object(), GResource::exclusions);
 
     drivers::Https https(m_pool);
     const auto res(https.internalPost(url, data, headers, query));
@@ -2899,6 +2914,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
+
+using namespace internal;
 
 namespace
 {
@@ -3255,6 +3272,9 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
+
+using namespace internal;
+
 namespace http
 {
 
@@ -4649,7 +4669,8 @@ Time::Time(const std::string& s, const std::string& format)
         throw ArbiterError("Failed to parse " + s + " as time: " + format);
     }
 #endif
-    const int64_t utcOffset(utcOffsetSeconds(std::mktime(&tm)));
+    std::time_t time = std::mktime(&tm)!=-1 ? std::mktime(&tm) :std::time(nullptr);
+    const int64_t utcOffset(utcOffsetSeconds(time));
 
     if (utcOffset > std::numeric_limits<int>::max())
         throw ArbiterError("Can't convert offset time in seconds to tm type.");
@@ -4779,7 +4800,7 @@ std::string getBasename(const std::string fullPath)
     return result;
 }
 
-std::string getNonBasename(const std::string fullPath)
+std::string getDirname(const std::string fullPath)
 {
     std::string result("");
 

@@ -136,7 +136,7 @@ public:
 };
 
 
-EptReader::EptReader() : m_args(new EptReader::Args)
+EptReader::EptReader() : m_args(new EptReader::Args), m_currentIndex(0)
 {}
 
 EptReader::~EptReader()
@@ -435,6 +435,11 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     {
         throwError(e.what());
     }
+
+    // Backup the layout for streamable pipeline.
+    // Will be used to restore m_bufferPointTable layout after flushing points from previous tile.
+    if (pipelineStreamable())
+    	m_bufferLayout = layout;
 }
 
 void EptReader::ready(PointTableRef table)
@@ -561,6 +566,7 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
     else
     {
         {
+            //ABELL we could probably use a local mutex to lock the target map.
             std::lock_guard<std::mutex> lock(m_mutex);
             target[key] = static_cast<uint64_t>(numPoints);
         }
@@ -595,16 +601,13 @@ PointViewSet EptReader::run(PointViewPtr view)
             // Read addon information after the native data, we'll possibly
             // overwrite attributes.
             for (const auto& addon : m_addons)
-            {
                 readAddon(*view, key, *addon, startId);
-            }
         });
 
         ++nodeId;
     }
 
     m_pool->await();
-
     log()->get(LogLevel::Debug) << "Done reading!" << std::endl;
 
     PointViewSet views;
@@ -716,7 +719,7 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         const uint64_t pointId) const
 {
-    const uint64_t np(addon.points(key));
+    uint64_t np(addon.points(key));
     if (!np)
     {
         // If our addon has no points, then we are reading a superset of this
@@ -728,6 +731,10 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         // for an EPT-read of the full dataset.  If the native EPT set already
         // contains Classification, then we should overwrite it with zeroes
         // where the addon leaves off.
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        np = m_overlaps.at(key);
         for (uint64_t id(pointId); id < pointId + np; ++id)
         {
             dst.setField(addon.id(), id, 0);
@@ -748,6 +755,7 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         throwError("Invalid addon content length");
     }
 
+    std::lock_guard<std::mutex> lock(m_mutex);
     const char* pos(data.data());
     for (uint64_t id(pointId); id < pointId + np; ++id)
     {
@@ -765,6 +773,77 @@ Dimension::Type EptReader::getRemoteTypeTest(const NL::json& j)
 Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
 {
     return getCoercedType(j);
+}
+
+void EptReader::loadNextOverlap()
+{
+    std::map<Key, uint64_t>::iterator itr = m_overlaps.begin();
+    std::advance(itr, m_nodeId-1);
+    Key key(itr->first);
+    log()->get(LogLevel::Debug)
+        << "Streaming Data " << m_nodeId << "/" << m_overlaps.size() << ": "
+        << key.toString() << std::endl;
+
+    uint64_t startId(0);
+
+    // Reset PointTable to make sure all points from previous tile are flushed.
+    m_bufferPointTable.reset(new PointTable());
+
+    // We did reset PointTable,
+    // So it will not have the dimensions registered to it.
+    // Register/Restore Dimensions for PointTable layout.
+    PointLayoutPtr layout = m_bufferPointTable->layout();
+    for (auto id : m_bufferLayout->dims())
+        layout->registerOrAssignDim(m_bufferLayout->dimName(id),
+                                    m_bufferLayout->dimType(id));
+
+    // Reset PointView to have new point table.
+    m_bufferPointView.reset(new PointView(*m_bufferPointTable));
+
+    if (m_info->dataType() == EptInfo::DataType::Laszip)
+        startId = readLaszip(*m_bufferPointView, key, m_nodeId);
+    else
+        startId = readBinary(*m_bufferPointView, key, m_nodeId);
+
+    m_currentIndex = 0;
+
+    // Read addon information after the native data, we'll possibly
+    // overwrite attributes.
+    for (const auto& addon : m_addons)
+        readAddon(*m_bufferPointView, key, *addon, startId);
+
+    m_nodeId++;
+}
+
+void EptReader::fillPoint(PointRef& point)
+{
+    DimTypeList dims = m_bufferPointView->dimTypes();
+    std::vector<char> buffer(m_bufferPointView->pointSize());
+    m_bufferPointView->getPackedPoint(dims, m_currentIndex, buffer.data());
+    point.setPackedData(dims, buffer.data());
+    m_currentIndex++;
+}
+
+bool EptReader::processOne(PointRef& point)
+{
+    // bufferView is not set if no tile has been read and
+    // currentIndex will be greater or equal to the view size when the
+    // whole tile has been read
+    bool finishedCurrentOverlap = !(m_bufferPointView &&
+        m_currentIndex < m_bufferPointView->size());
+
+    //We're done with all overlaps, Its time to finish reading.
+    if (m_nodeId > m_overlaps.size() && finishedCurrentOverlap)
+        return false;
+
+    //Either this is a first overlap or we've streamed all points
+    //from current overlap. So its time to load new overlap.
+    if (finishedCurrentOverlap)
+        loadNextOverlap();
+
+    fillPoint(point);
+
+    return true;
 }
 
 } // namespace pdal

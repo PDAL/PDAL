@@ -138,14 +138,14 @@ CREATE_SHARED_STAGE(E57Reader, s_info)
 
 E57Reader::~E57Reader()
 {
-    if (m_imf)
-        m_imf->close();
+    closeFile();
 }
 
-    E57Reader::E57Reader(std::string filename)
-    : Reader(), Streamable(), m_currentPoint(0), m_pointCount(0)
+
+// ABELL - Not sure the point of this.
+E57Reader::E57Reader(std::string filename) :
+    m_filenameManual(filename), m_currentPoint(0), m_pointCount(0)
 {
-    m_filenameManual = filename;
     initialize();
 }
 
@@ -162,7 +162,6 @@ void E57Reader::initialize()
     openFile(m_filename);
     extractScans();
     m_pointCount = extractNumberPoints();
-    m_chunk = std::unique_ptr<ChunkReader>(nullptr);
     m_currentPoint = 0;
 }
 
@@ -223,6 +222,25 @@ bool E57Reader::processOne(pdal::PointRef& point)
     return true;
 }
 
+QuickInfo E57Reader::inspect()
+{
+    QuickInfo qi;
+    std::unique_ptr<PointLayout> layout(new PointLayout());
+    initialize();
+    addDimensions(layout.get());
+
+    Dimension::IdList dims = layout->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        qi.m_dimNames.push_back(layout->dimName(*di));
+    qi.m_pointCount = m_pointCount;
+
+    for (auto& scan: m_scans)
+        qi.m_bounds.grow(scan->getBoundingBox());
+
+    qi.m_valid = true;
+    return qi;
+}
+
 std::vector<std::shared_ptr<e57::Scan>> E57Reader::getScans() const
 {
     return m_scans;
@@ -276,24 +294,32 @@ void E57Reader::openFile(const std::string &filename)
 {
     try
     {
-        m_imf = std::unique_ptr<e57::ImageFile>(new e57::ImageFile(filename,"r",e57::CHECKSUM_POLICY_SPARSE));
+        m_imf = std::unique_ptr<e57::ImageFile>(new e57::ImageFile(filename,
+            "r", e57::CHECKSUM_POLICY_SPARSE));
         if (!m_imf->isOpen())
             throwError("Failed opening the file : " + filename);
-
-        const e57::ustring normalsExtension("http://www.libe57.org/E57_NOR_surface_normals.txt");
+        const e57::ustring normalsExtension(
+            "http://www.libe57.org/E57_NOR_surface_normals.txt");
         e57::ustring _normalsExtension;
-        if (!m_imf->extensionsLookupPrefix("nor", _normalsExtension)) //the extension may already be registered
+
+        //the extension may already be registered
+        if (!m_imf->extensionsLookupPrefix("nor", _normalsExtension))
             m_imf->extensionsAdd("nor", normalsExtension);
     }
     catch(const e57::E57Exception& e)
     {
-        throwError("E57 error with code " + std::to_string(e.errorCode()) + " : " + e.context());
+        throwError(std::to_string(e.errorCode()) + " : " + e.context());
     }
     catch(...)
     {
-        std::string msg("Unknown error in E57 plugin");
-        throwError(msg);
+        throwError("Unknown error in E57 plugin");
     }
+}
+
+void E57Reader::closeFile()
+{
+    if (m_imf)
+        m_imf->close();
 }
 
 void E57Reader::setupReader(pdal::point_count_t pointNumber)

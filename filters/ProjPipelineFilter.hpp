@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Connor Manning (connor@hobu.co)
+* Copyright (c) 2019, Aurelien Vila (aurelien.vila@delair.aero)
 *
 * All rights reserved.
 *
@@ -34,38 +34,55 @@
 
 #pragma once
 
-#include <functional>
-#include <queue>
-#include <vector>
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
-#include <arbiter/arbiter.hpp>
+#include <memory>
 
-#include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include "GreyhoundCommon.hpp"
+class OGRCoordinateTransformation;
 
 namespace pdal
 {
 
-class PDAL_DLL GreyhoundReader : public pdal::Reader
+
+class PDAL_DLL ProjPipelineFilter : public Filter, public Streamable
 {
 public:
-    std::string getName() const override;
+    class CoordTransform;
+
+    ProjPipelineFilter();
+    ~ProjPipelineFilter();
+
+    std::string getName() const;
 
 private:
-    virtual void addArgs(ProgramArgs& args) override;
-    virtual void initialize(PointTableRef table) override;
-    virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void prepared(PointTableRef table) override;
-    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    ProjPipelineFilter& operator=(const ProjPipelineFilter&) = delete;
+    ProjPipelineFilter(const ProjPipelineFilter&) = delete;
 
-    GreyhoundArgs m_args;
-    GreyhoundParams m_params;
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
+    virtual PointViewSet run(PointViewPtr view);
+    virtual bool processOne(PointRef& point);
 
-    NL::json m_info;
-    PointLayout m_readLayout;
+    void createTransform(const std::string coordOperation, bool reverseTransfo);
+
+    SpatialReference m_outSRS;
+    bool m_reverseTransfo;
+    std::string m_coordOperation;
+    std::unique_ptr<CoordTransform> m_coordTransform;
+};
+
+
+class ProjPipelineFilter::CoordTransform
+{
+public:
+    CoordTransform();
+    CoordTransform(const std::string coordOperation, bool reverseTransfo);
+
+    bool transform(double& x, double& y, double& z);
+private:
+    std::unique_ptr<OGRCoordinateTransformation> m_transform;
+
 };
 
 } // namespace pdal
