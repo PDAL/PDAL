@@ -16,11 +16,6 @@ if(BUILD_PLUGIN_GEOWAVE)
     add_subdirectory(geowave)
 endif(BUILD_PLUGIN_GEOWAVE)
 
-if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
-    message(WARNING "*** Greyhound is deprecated as of PDAL 2.0 and will not be built ***")
-#    add_subdirectory(greyhound)
-endif()
-
 if(BUILD_PLUGIN_ICEBRIDGE)
     if (NOT PDAL_HAVE_LIBXML2)
         message(FATAL_ERROR "Can't build icebridge plugin without libxml2")

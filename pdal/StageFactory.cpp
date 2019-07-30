@@ -46,7 +46,7 @@ namespace pdal
 namespace
 {
 
-const std::vector<std::string> protocols { "ept", "greyhound", "i3s" };
+const std::vector<std::string> protocols { "ept", "i3s" };
 
 std::string getDriverProtocol(std::string filename)
 {

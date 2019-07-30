@@ -58,6 +58,7 @@ public:
 
     bool hasPose() const;
     void transformPoint(pdal::PointRef pt) const;
+    pdal::BOX3D getBoundingBox() const;
 
 private:
     /// Called only once on constructor called
@@ -69,6 +70,8 @@ private:
     std::unique_ptr<e57::StructureNode> m_rawData;
     std::unique_ptr<e57::CompressedVectorNode> m_rawPoints;
     pdal::point_count_t m_numPoints;
+    std::array<double,3>
+        transformPoint(const  std::array<double,3> &originalPoint) const;
 
     // supported configs
     std::set<std::string> m_e57TypeToPdalDimension;
@@ -80,5 +83,6 @@ private:
     double m_translation[3] = {0};
     double m_rotation[3][3] = {{0}};
     bool m_hasPose = false;
+    pdal::BOX3D m_bbox;
 };
 }

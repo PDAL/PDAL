@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 902d4fcdf24a8b63b763744f6a49b3d20be16c6e
+// Git SHA: 0d6fba8d4ec6a7805693b4fdce0cc0c31cd1e97b
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3909,7 +3909,7 @@ ARBITER_DLL std::string getBasename(std::string fullPath);
  * For directory paths, this corresponds to all directories above the
  * innermost directory.
  */
-ARBITER_DLL std::string getNonBasename(std::string fullPath);
+ARBITER_DLL std::string getDirname(std::string fullPath);
 
 /** @cond arbiter_internal */
 ARBITER_DLL inline bool isSlash(char c) { return c == '/' || c == '\\'; }
@@ -4035,6 +4035,9 @@ ARBITER_DLL std::vector<std::string> split(
 /** @brief Remove whitespace. */
 ARBITER_DLL std::string stripWhitespace(const std::string& s);
 
+namespace internal
+{
+
 template<typename T, typename... Args>
 std::unique_ptr<T> makeUnique(Args&&... args)
 {
@@ -4053,6 +4056,8 @@ std::unique_ptr<T> maybeClone(const T* t)
     if (t) return makeUnique<T>(*t);
     else return std::unique_ptr<T>();
 }
+
+} // namespace internal
 
 ARBITER_DLL uint64_t randomNumber();
 
@@ -4691,7 +4696,7 @@ public:
     { }
 
     Auth(std::string iamRole)
-        : m_role(makeUnique<std::string>(iamRole))
+        : m_role(internal::makeUnique<std::string>(iamRole))
     { }
 
     static std::unique_ptr<Auth> create(std::string j, std::string profile);

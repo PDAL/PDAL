@@ -188,6 +188,8 @@ void PlyWriter::ready(PointTableRef table)
             " points supported.");
 
     m_stream = Utils::createFile(m_filename, true);
+    if (!m_stream)
+        throwError("Couldn't open PLY file '" + m_filename + "' for writing.");
     writeHeader(table.layout());
 }
 

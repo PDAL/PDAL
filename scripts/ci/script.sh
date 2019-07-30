@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/ash -e
 # Builds and tests PDAL
 
 gcc --version

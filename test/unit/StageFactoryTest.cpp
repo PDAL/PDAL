@@ -68,9 +68,6 @@ TEST(StageFactoryTest, extensionTest)
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.laz"), "readers.las");
 
-    EXPECT_EQ(StageFactory::inferReaderDriver("greyhound://foo.bar.baz"),
-        "readers.greyhound");
-
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.ntf"), "readers.nitf");
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.ntf"), "writers.nitf");
 }

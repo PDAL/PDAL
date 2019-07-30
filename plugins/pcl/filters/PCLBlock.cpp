@@ -38,6 +38,7 @@
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "../PCLConversions.hpp"
@@ -77,7 +78,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
     BOX3D bounds;
-    input->calculateBounds(bounds);
+    calculateBounds(*input, bounds);
 
     // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;

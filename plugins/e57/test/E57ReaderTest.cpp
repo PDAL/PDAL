@@ -70,6 +70,21 @@ TEST(E57Reader, testGetDimension)
     }
 }
 
+TEST(E57Reader, testPreview)
+{
+    Options ops;
+    ops.add("filename", Support::datapath("e57/A_B.e57"));
+    E57Reader reader;
+    reader.setOptions(ops);
+    auto qi = reader.preview();
+
+    auto dimensions = qi.m_dimNames;
+    ASSERT_EQ(dimensions.size(),7u);
+    ASSERT_EQ(qi.m_pointCount,6u);
+    ASSERT_TRUE(qi.m_valid);
+    ASSERT_TRUE(qi.m_bounds.valid());
+}
+
 TEST(E57Reader, testHeader) 
 {
     Options ops;

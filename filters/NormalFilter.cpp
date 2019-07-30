@@ -124,7 +124,7 @@ void NormalFilter::filter(PointView& view)
         auto ids = kdi.neighbors(i, m_args->m_knn);
 
         // compute covariance of the neighborhood
-        auto B = eigen::computeCovariance(view, ids);
+        auto B = computeCovariance(view, ids);
 
         // perform the eigen decomposition
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
