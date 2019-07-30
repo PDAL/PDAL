@@ -1,20 +1,20 @@
-.. _filters.coordoperation:
+.. _filters.projpipeline:
 
-filters.coordoperation
+filters.projpipeline
 ======================
 
-The coordoperation filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a “urn:ogc:def:coordinateOperation:EPSG::XXXX” URN.
+The projpipeline filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a “urn:ogc:def:coordinateOperation:EPSG::XXXX” URN.
 
 
 .. note::
 
-    The coordoperation filter does not consider any spatial reference information. 
+    The projpipeline filter does not consider any spatial reference information. 
     However user could specify an output srs, but no check is done to ensure 
     the compliance with the provided transformation pipeline.
 
 .. note::
     
-    The coordoperation is enabled if the version of GDAL is superior or equal to 3.0
+    The projpipeline filter is enabled if the version of GDAL is superior or equal to 3.0
 
 .. streamable::
 
@@ -28,7 +28,7 @@ This example shift point on the z-axis.
   [
       "untransformed.las",
       {
-          "type":"filters.coordoperation",
+          "type":"filters.projpipeline",
           "coord_op":"+proj=affine +zoff=100"
       },
       {
@@ -46,10 +46,10 @@ to WGS84, using the reverse transfo flag. It also set the output srs
   [ 
       "utm10.las", 
       { 
-          "type":"filters.coordoperation", 
+          "type":"filters.projpipeline", 
           "coord_op":"+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=10 +step +proj=affine +zoff=100",
           "reverse_transfo": "true", 
-          "a_srs": "EPSG:4326" 
+          "out_srs": "EPSG:4326" 
       }, 
       { 
           "type":"writers.las", 
@@ -77,7 +77,7 @@ _`coord_op`
 _`reverse_transfo`
   Boolean, Whether the coordinate operation should be evaluated
   in the reverse path [Default: false]
-_`a_srs`
+_`out_srs`
   The spatial reference system of the file to be written. 
   Can be an EPSG string (e.g. “EPSG:26910”) or a WKT string. 
   No check is done to ensure the compliance with the specified coordinate

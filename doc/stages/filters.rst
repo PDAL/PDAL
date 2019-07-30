@@ -156,15 +156,11 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
    :glob:
    :hidden:
 
-   filters.coordoperation
    filters.cpd
    filters.icp
+   filters.projpipeline
    filters.reprojection
    filters.transformation
-
-:ref:`filters.coordoperation`
-    Apply coordinates operation on point triplets, based on PROJ pipeline string,
-    WKT2 coordinates operations or URN definitions.
 
 :ref:`filters.cpd`
     Compute and apply transformation between two point clouds using the
@@ -173,6 +169,10 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 :ref:`filters.icp`
     Compute and apply transformation between two point clouds using the
     Iterative Closest Point algorithm.
+
+:ref:`filters.projpipeline`
+    Apply coordinates operation on point triplets, based on PROJ pipeline string,
+    WKT2 coordinates operations or URN definitions.
 
 :ref:`filters.reprojection`
     Reproject data using GDAL from one coordinate system to another.
