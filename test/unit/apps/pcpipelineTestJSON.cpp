@@ -190,7 +190,7 @@ TEST(json, pipeline_verify)
     run_pipeline("pipeline/nonstreamable.json", "--validate",
         "\"streamable\": false");
     run_pipeline("pipeline/invalid1.json", "--validate",
-        "Unable to parse");
+        "unexpected string literal");
     run_pipeline("pipeline/invalid2.json", "--validate",
         "Unexpected argument");
     run_pipeline("pipeline/streamable.json", "-v Debug",

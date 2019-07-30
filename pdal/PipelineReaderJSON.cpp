@@ -146,6 +146,8 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
     }
     catch (NL::json::parse_error& err)
     {
+        // Look for a right bracket -- this indicates the start of the
+        // actual message from the parse error.
         std::string s(err.what());
         auto pos = s.find("]");
         if (pos != std::string::npos)
