@@ -43,6 +43,7 @@ cmake -G "Ninja" ^
     -DWITH_LAZPERF=ON ^
     -DWITH_LZMA=ON ^
     -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_ROOT%\Library\lib\liblzma.lib ^
+    -DZSTD_LIBRARY:FILEPATH=%CONDA_ROOT%\Library\lib\libzstd.lib ^
     -DWITH_LASZIP=ON ^
     -DORACLE_INCLUDE_DIR=%CONDA_ROOT%/include ^
     -DORACLE_LIBRARY=%CONDA_ROOT%/libs/oci.lib ^

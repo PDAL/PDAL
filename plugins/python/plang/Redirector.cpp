@@ -13,6 +13,7 @@
 
 #include <ostream>
 #include <string>
+#include <iostream>
 
 namespace pdal
 {
