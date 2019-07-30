@@ -240,6 +240,11 @@ if (NOT PDAL_HAVE_LAZPERF)
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
+if (NOT GDAL_3)
+    file(GLOB COORDOP_FILTER_SRCS
+        ${PDAL_FILTERS_DIR}/CoordOperationFilter.cpp)
+    list(REMOVE_ITEM SRCS ${COORDOP_FILTER_SRCS})
+endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 
 #
