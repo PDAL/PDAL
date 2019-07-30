@@ -124,7 +124,7 @@ void GltfWriter::write(const PointViewPtr v)
 
     m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
     m_totalSize = static_cast<size_t>(out.position()) + m_binSize;
-    if (m_totalSize > std::numeric_limits<uint32_t>::max())
+    if (m_totalSize > (std::numeric_limits<uint32_t>::max)())
         throwError("Data too large for file.");
 
     for (const Triangle& t : *mesh)
