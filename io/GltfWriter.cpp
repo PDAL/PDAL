@@ -76,7 +76,7 @@ std::string GltfWriter::getName() const { return s_info.name; }
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output gltf filename", m_filename);
+    args.add("filename", "Output gltf filename", m_filename).setPositional();
     args.add("metallic", "Metallic factor [0-1]", m_metallic);
     args.add("roughness", "Roughness factor [0-1]", m_roughness);
     args.add("red", "Red factor [0-1]", m_red);
