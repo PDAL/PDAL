@@ -91,6 +91,7 @@ TEST(TranslateTest, t2)
         ]
     )";
 
+std::cerr << "Json input = " << json << "!\n";
     // Check that we work with just a bunch of filters.
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
