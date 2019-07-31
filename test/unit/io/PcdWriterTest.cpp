@@ -228,7 +228,7 @@ TEST(PcdWriterTest, precision)
 
     Options o;
     o.add("precision", 5);
-    o.add("order", "X:4:F:0,Y:4:F:0,Z:4:F:0,Intensity:4:F:0");
+    o.add("order", "X=Float:0,Y=Float:0,Z=Float:0,Intensity=Float:0");
     o.add("filename", outfile);
 
     w.setInput(r);
@@ -260,4 +260,73 @@ TEST(PcdWriterTest, precision)
     EXPECT_DOUBLE_EQ(3, v->getFieldAs<float>(Dimension::Id::X, 2));
     EXPECT_DOUBLE_EQ(3, v->getFieldAs<float>(Dimension::Id::Y, 2));
     EXPECT_DOUBLE_EQ(3, v->getFieldAs<float>(Dimension::Id::Z, 2));
+}
+
+TEST(PcdWriterTest, binaryPdalTypes)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Intensity});
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 1);
+    view->setField(Id::Y, 0, 1);
+    view->setField(Id::Z, 0, 1);
+    view->setField(Id::Intensity, 0, 1);
+
+    view->setField(Id::X, 1, 2.2222222222);
+    view->setField(Id::Y, 1, 2.2222222222);
+    view->setField(Id::Z, 1, 2.2222222222);
+    view->setField(Id::Intensity, 1, 2.22222222);
+
+    view->setField(Id::X, 2, 3.33);
+    view->setField(Id::Y, 2, 3.33);
+    view->setField(Id::Z, 2, 3.33);
+    view->setField(Id::Intensity, 2, 3.33);
+
+    BufferReader r;
+    r.addView(view);
+
+    std::string outfile(Support::temppath("binary-test.pcd"));
+
+    PcdWriter w;
+
+    Options o;
+    o.add("order", "X=Float,Y=Float,Z=Float,Intensity=Unsigned32");
+    o.add("compression", "binary");
+    o.add("filename", outfile);
+
+    w.setInput(r);
+    w.setOptions(o);
+
+    w.prepare(table);
+    w.execute(table);
+
+    PcdReader pr;
+    Options po;
+    po.add("filename", outfile);
+    pr.setOptions(po);
+    PointTable t;
+    pr.prepare(t);
+    PointViewSet pvs = pr.execute(t);
+
+    PointViewPtr v = *pvs.begin();
+    EXPECT_EQ(3, v->size());
+
+    // Validate some point data.
+    EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::X, 0));
+    EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::Y, 0));
+    EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::Z, 0));
+    EXPECT_EQ(1, v->getFieldAs<uint32_t>(Dimension::Id::Intensity, 0));
+
+    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::X, 1), 0.0001);
+    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::Y, 1), 0.0001);
+    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::Z, 1), 0.0001);
+    EXPECT_EQ(2, v->getFieldAs<uint32_t>(Dimension::Id::Intensity, 1));
+
+    EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::X, 2), 0.0001);
+    EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::Y, 2), 0.0001);
+    EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::Z, 2), 0.0001);
+    EXPECT_EQ(3, v->getFieldAs<uint32_t>(Dimension::Id::Intensity, 2));
 }

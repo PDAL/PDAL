@@ -47,10 +47,11 @@ _`precision`
 _`order`
   Comma-separated list of dimension names in the desired output order. For
   example "X,Y,Z,Red,Green,Blue". Dimension names can optionally be followed
-  with a colon (':') seperated list of field size, type, and in the case of
-  ASCII, precision. Ex: "X:4:F:2, Y:4:F:2, Z:4:F:3" If no precision is
-  specified the value provided with the precision_ option is used. Size
-  defaults to 8 bytes and type defaults to float. [Default: none]
+  by a PDAL type (e.g., Unsigned32) and dimension-specific precision (used only
+  with "ascii" compression).  Ex: "X=Float:2, Y=Float:2, Z=Float:3,
+  Intensity=Unsigned32" If no precision is specified the value provided with
+  the precision_ option is used.  The default dimension type is double
+  precision float. [Default: none]
 
 keep_unspecified
   If true, writes all dimensions. Dimensions specified with the order_ option
