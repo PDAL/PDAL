@@ -47,6 +47,7 @@ using namespace pdal;
 
 static int runTranslate(std::string const& cmdline, std::string& output)
 {
+    std::cerr << "Command = " << cmdline << "!\n";
     const std::string cmd = Support::binpath(Support::exename("pdal")) +
         " translate";
 
@@ -122,11 +123,11 @@ std::cerr << "Json input = " << json << "!\n";
         output), 0);
 
     // Check that we work with an input and an output.
-    json = R"(
-        [
-          \"badinput.las\",
-          \"badoutput.las\"
-        ]
+    json = R"(\
+        [\
+          \"badinput.las\",\
+          \"badoutput.las\"\
+        ]\
     )";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
