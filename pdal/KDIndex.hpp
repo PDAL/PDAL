@@ -35,6 +35,7 @@
 #pragma once
 
 #include <memory>
+#include <valarray>
 
 #include <nanoflann/nanoflann.hpp>
 
@@ -246,12 +247,13 @@ public:
     }
 
     std::vector<PointId> neighbors(double x, double y, double z,
-        point_count_t k) const
+        point_count_t k, size_t stride=1) const
     {
         k = (std::min)(m_buf.size(), k);
-        std::vector<PointId> output(k);
-        std::vector<double> out_dist_sqr(k);
-        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
+        point_count_t k2 = stride*k;
+        std::vector<PointId> output(k2);
+        std::vector<double> out_dist_sqr(k2);
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k2);
 
         resultSet.init(&output[0], &out_dist_sqr[0]);
 
@@ -260,25 +262,29 @@ public:
         pt.push_back(y);
         pt.push_back(z);
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams());
+        std::valarray<PointId> temp(output.data(), output.size());
+        std::valarray<PointId> sliced = temp[std::slice(0,k,stride)];
+        output.assign(std::begin(sliced), std::end(sliced));
+        output.resize(k);
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k) const
+    std::vector<PointId> neighbors(PointId idx, point_count_t k, size_t stride=1) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
         double z = m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
 
-        return neighbors(x, y, z, k);
+        return neighbors(x, y, z, k, stride);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k) const
+    std::vector<PointId> neighbors(PointRef &point, point_count_t k, size_t stride=1) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
         double z = point.getFieldAs<double>(Dimension::Id::Z);
 
-        return neighbors(x, y, z, k);
+        return neighbors(x, y, z, k, stride);
     }
 
     void knnSearch(double x, double y, double z, point_count_t k,
