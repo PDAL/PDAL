@@ -46,12 +46,12 @@
 namespace pdal {
 class E57Reader: public Reader, public Streamable
 {
-
     class ChunkReader {
     public:
-        ChunkReader(const pdal::point_count_t &pointOffset, const pdal::point_count_t &maxPointRead,
-                    const std::shared_ptr<e57::Scan> &scan,
-                    const std::set<std::string> &e57Dimensions);
+        ChunkReader(const pdal::point_count_t &pointOffset,
+            const pdal::point_count_t &maxPointRead,
+            const std::shared_ptr<e57::Scan> &scan,
+            const std::set<std::string> &e57Dimensions);
 
         ~ChunkReader();
 

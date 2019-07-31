@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Hobu Inc.
+* Copyright (c) 2019, Aurelien Vila (aurelien.vila@delair.aero)
 *
 * All rights reserved.
 *
@@ -34,66 +34,56 @@
 
 #pragma once
 
-#include <array>
-#include <deque>
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
+
+#include <memory>
+
+class OGRCoordinateTransformation;
 
 namespace pdal
 {
 
-class PDAL_DLL Triangle
+
+class PDAL_DLL ProjPipelineFilter : public Filter, public Streamable
 {
 public:
-    Triangle(PointId a, PointId b, PointId c) : m_a(a), m_b(b), m_c(c)
-    {}
+    class CoordTransform;
 
-    PointId m_a;
-    PointId m_b;
-    PointId m_c;
+    ProjPipelineFilter();
+    ~ProjPipelineFilter();
 
-    friend bool operator == (const Triangle& a, const Triangle& b);
+    std::string getName() const;
+
+private:
+    ProjPipelineFilter& operator=(const ProjPipelineFilter&) = delete;
+    ProjPipelineFilter(const ProjPipelineFilter&) = delete;
+
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
+    virtual PointViewSet run(PointViewPtr view);
+    virtual bool processOne(PointRef& point);
+
+    void createTransform(const std::string coordOperation, bool reverseTransfo);
+
+    SpatialReference m_outSRS;
+    bool m_reverseTransfo;
+    std::string m_coordOperation;
+    std::unique_ptr<CoordTransform> m_coordTransform;
 };
 
-inline bool operator == (const Triangle& a, const Triangle& b)
-{
-    std::array<PointId, 3> aa { {a.m_a, a.m_b, a.m_c} };
-    std::array<PointId, 3> bb { {b.m_a, b.m_b, b.m_c} };
-    std::sort(aa.begin(), aa.end());
-    std::sort(bb.begin(), bb.end());
-    return aa == bb;
-}
 
-/**
-  A mesh is a way to represent a set of points connected by edges.  Point
-  indices are into a point view.
-*/
-class Mesh
-{};
-
-
-/**
-  A mesh where the faces are triangles.
-*/
-class TriangularMesh : public Mesh
+class ProjPipelineFilter::CoordTransform
 {
 public:
-    using const_iterator = std::deque<Triangle>::const_iterator;
+    CoordTransform();
+    CoordTransform(const std::string coordOperation, bool reverseTransfo);
 
-    PDAL_DLL TriangularMesh()
-    {}
+    bool transform(double& x, double& y, double& z);
+private:
+    std::unique_ptr<OGRCoordinateTransformation> m_transform;
 
-    size_t PDAL_DLL size() const
-        { return m_index.size(); }
-    void PDAL_DLL add(PointId a, PointId b, PointId c)
-        { m_index.emplace_back(a, b, c); }
-    const PDAL_DLL Triangle& operator[](PointId id) const
-        { return m_index[id]; }
-    const_iterator begin() const
-        { return m_index.begin(); }
-    const_iterator end() const
-        { return m_index.end(); }
-
-protected:
-    std::deque<Triangle> m_index;
 };
 
 } // namespace pdal
+

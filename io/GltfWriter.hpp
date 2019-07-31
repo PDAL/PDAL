@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Hobu Inc.
+* Copyright (c) 2018, Hobu Inc., info@hobu.co
 *
 * All rights reserved.
 *
@@ -34,66 +34,51 @@
 
 #pragma once
 
-#include <array>
-#include <deque>
+#include <pdal/Writer.hpp>
 
 namespace pdal
 {
+class OLeStream;
 
-class PDAL_DLL Triangle
+typedef std::shared_ptr<std::ostream> FileStreamPtr;
+
+class PDAL_DLL GltfWriter : public Writer
 {
+    struct ViewData;
+
 public:
-    Triangle(PointId a, PointId b, PointId c) : m_a(a), m_b(b), m_c(c)
+    GltfWriter()
     {}
-
-    PointId m_a;
-    PointId m_b;
-    PointId m_c;
-
-    friend bool operator == (const Triangle& a, const Triangle& b);
-};
-
-inline bool operator == (const Triangle& a, const Triangle& b)
-{
-    std::array<PointId, 3> aa { {a.m_a, a.m_b, a.m_c} };
-    std::array<PointId, 3> bb { {b.m_a, b.m_b, b.m_c} };
-    std::sort(aa.begin(), aa.end());
-    std::sort(bb.begin(), bb.end());
-    return aa == bb;
-}
-
-/**
-  A mesh is a way to represent a set of points connected by edges.  Point
-  indices are into a point view.
-*/
-class Mesh
-{};
-
-
-/**
-  A mesh where the faces are triangles.
-*/
-class TriangularMesh : public Mesh
-{
-public:
-    using const_iterator = std::deque<Triangle>::const_iterator;
-
-    PDAL_DLL TriangularMesh()
+    ~GltfWriter()
     {}
+    GltfWriter(const GltfWriter&) = delete;
+    GltfWriter& operator=(const GltfWriter&) = delete;
 
-    size_t PDAL_DLL size() const
-        { return m_index.size(); }
-    void PDAL_DLL add(PointId a, PointId b, PointId c)
-        { m_index.emplace_back(a, b, c); }
-    const PDAL_DLL Triangle& operator[](PointId id) const
-        { return m_index[id]; }
-    const_iterator begin() const
-        { return m_index.begin(); }
-    const_iterator end() const
-        { return m_index.end(); }
+    std::string getName() const;
 
-protected:
-    std::deque<Triangle> m_index;
+private:
+    virtual void addArgs(ProgramArgs& args);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr v);
+    virtual void done(PointTableRef table);
+
+    void writeGltfHeader();
+    void writeJsonChunk();
+    void writeBinHeader();
+
+    std::string m_filename;
+    std::unique_ptr<OLeStream> m_stream;
+    std::vector<ViewData> m_viewData;
+    size_t m_totalSize;
+    size_t m_binSize;
+
+    double m_metallic;
+    double m_roughness;
+    double m_red;
+    double m_green;
+    double m_blue;
+    double m_alpha;
+    bool m_doubleSided;
 };
 
 } // namespace pdal
