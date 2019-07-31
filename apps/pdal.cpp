@@ -164,13 +164,15 @@ void App::outputDrivers()
         StageExtensions& extensions = PluginManager<Stage>::extensions();
         for (auto name : stages)
         {
+            Stage *s = f.createStage(name);
             std::string description = PluginManager<Stage>::description(name);
             std::string link = PluginManager<Stage>::link(name);
             j.push_back(
                 { { "name", name },
                   { "description", description },
                   { "link", link },
-                  { "extensions", extensions.extensions(name) }
+                  { "extensions", extensions.extensions(name) },
+                  { "streamable", s->pipelineStreamable() }
                 }
             );
         }
@@ -372,6 +374,14 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             log->get(LogLevel::Error) << "Command '" << m_command <<
                 "' not recognized" << std::endl << std::endl;
         return ret;
+    }
+
+    // If we get here, all arguments should be consumed, if not, it's
+    // an error.
+    if (cmdArgs.size())
+    {
+        Utils::printError("Unexpected argument '" + cmdArgs[0] + "'.");
+        return -1;
     }
 
     if (m_showVersion)

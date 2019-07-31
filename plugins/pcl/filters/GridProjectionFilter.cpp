@@ -34,6 +34,7 @@
 
 #include "GridProjectionFilter.hpp"
 
+#include <pdal/EigenUtils.hpp>
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
@@ -72,7 +73,7 @@ PointViewSet GridProjectionFilter::run(PointViewPtr input)
     log()->get(LogLevel::Debug2) << "Process GridProjectionFilter..." << std::endl;
 
     BOX3D buffer_bounds;
-    input->calculateBounds(buffer_bounds);
+    calculateBounds(*input, buffer_bounds);
 
     // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;

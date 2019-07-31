@@ -34,6 +34,8 @@
 
 #include "MortonOrderFilter.hpp"
 
+#include <pdal/EigenUtils.hpp>
+
 #include <climits>
 #include <iostream>
 #include <limits>
@@ -139,7 +141,7 @@ PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
 
     // compute range
     BOX2D buffer_bounds;
-    inView->calculateBounds(buffer_bounds);
+    calculateBounds(*inView, buffer_bounds);
     const double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     const double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 
@@ -190,7 +192,7 @@ PointViewSet MortonOrderFilter::morton(PointViewPtr inView)
     std::multimap<Coord, PointId, CmpZOrder> sorted(compare);
 
     BOX2D buffer_bounds;
-    inView->calculateBounds(buffer_bounds);
+    calculateBounds(*inView, buffer_bounds);
     double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 

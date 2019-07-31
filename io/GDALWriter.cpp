@@ -35,6 +35,7 @@
 
 #include <sstream>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 
@@ -220,7 +221,7 @@ void GDALWriter::writeView(const PointViewPtr view)
     if (!m_fixedGrid)
     {
         BOX2D bounds;
-        view->calculateBounds(bounds);
+        calculateBounds(*view, bounds);
         if (!m_grid)
             createGrid(bounds);
         else

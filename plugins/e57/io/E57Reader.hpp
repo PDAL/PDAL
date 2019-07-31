@@ -46,12 +46,12 @@
 namespace pdal {
 class E57Reader: public Reader, public Streamable
 {
-
     class ChunkReader {
     public:
-        ChunkReader(const pdal::point_count_t &pointOffset, const pdal::point_count_t &maxPointRead,
-                    const std::shared_ptr<e57::Scan> &scan,
-                    const std::set<std::string> &e57Dimensions);
+        ChunkReader(const pdal::point_count_t &pointOffset,
+            const pdal::point_count_t &maxPointRead,
+            const std::shared_ptr<e57::Scan> &scan,
+            const std::set<std::string> &e57Dimensions);
 
         ~ChunkReader();
 
@@ -78,7 +78,9 @@ class E57Reader: public Reader, public Streamable
     };
 
 public:
-    E57Reader(): Reader(), Streamable() {};
+    E57Reader()
+    {}
+
     E57Reader(std::string filename);
     ~E57Reader();
     E57Reader(const E57Reader &) = delete;
@@ -105,9 +107,10 @@ private:
     virtual void initialize();
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
-    // virtual void done(PointTableRef table);
+    virtual QuickInfo inspect();
 
     void openFile(const std::string &filename);
+    void closeFile();
     void setupReader(pdal::point_count_t pointNumber);
     point_count_t extractNumberPoints() const;
     void extractScans();

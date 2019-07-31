@@ -101,7 +101,9 @@ void PythonFilter::ready(PointTableRef table)
 {
     if (m_args->m_source.empty())
         m_args->m_source = FileUtils::readFileIntoString(m_args->m_scriptFile);
-    plang::Environment::get()->set_stdout(log()->getLogStream());
+    std::ostream *out = log()->getLogStream();
+    plang::EnvironmentPtr env = plang::Environment::get();
+    env->set_stdout(out);
     m_script = new plang::Script(m_args->m_source, m_args->m_module,
         m_args->m_function);
 

@@ -46,6 +46,12 @@
 
 using namespace pdal;
 
+namespace
+{
+    const std::string eptLaszipPath(
+            "ept://" + Support::datapath("ept/lone-star-laszip"));
+}
+
 TEST(EptAddonWriterTest, fullLoop)
 {
     // Test the writing, and subsequent reading, of EPT addons from both
@@ -58,7 +64,7 @@ TEST(EptAddonWriterTest, fullLoop)
         EptReader reader;
         {
             Options o;
-            o.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+            o.add("filename", eptLaszipPath);
             reader.setOptions(o);
         }
 
@@ -116,7 +122,7 @@ TEST(EptAddonWriterTest, fullLoop)
         addons["Other"] = addonDir + "other";
 
         Options o;
-        o.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        o.add("filename", eptLaszipPath);
         o.add("addons", addons);
         reader.setOptions(o);
     }
@@ -154,7 +160,7 @@ TEST(EptAddonWriterTest, boundedWrite)
         EptReader reader;
         {
             Options o;
-            o.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+            o.add("filename", eptLaszipPath);
             o.add("bounds", boundsString);
             reader.setOptions(o);
         }
@@ -192,7 +198,7 @@ TEST(EptAddonWriterTest, boundedWrite)
         addons["Classification"] = addonDir + "bounded";
 
         Options o;
-        o.add("filename", "ept://" + Support::datapath("ept/ept-star"));
+        o.add("filename", eptLaszipPath);
         o.add("addons", addons);
         reader.setOptions(o);
     }

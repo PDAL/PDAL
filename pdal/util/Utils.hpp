@@ -64,15 +64,15 @@ namespace Utils
 {
 
 #if defined(__APPLE__) && defined(__MACH__)
-    const std::string dynamicLibExtension = ".dylib";
+    const char dynamicLibExtension[] = ".dylib";
     const char dirSeparator = '/';
     const char pathListSeparator = ':';
 #elif defined _WIN32
-    const std::string dynamicLibExtension = ".dll";
+    const char dynamicLibExtension[] = ".dll";
     const char dirSeparator = '\\';
     const char pathListSeparator = ';';
 #else
-    const std::string dynamicLibExtension = ".so";
+    const char dynamicLibExtension[] = ".so";
     const char dirSeparator = '/';
     const char pathListSeparator = ':';
 #endif

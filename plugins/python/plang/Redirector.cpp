@@ -13,6 +13,7 @@
 
 #include <ostream>
 #include <string>
+#include <iostream>
 
 namespace pdal
 {
@@ -113,9 +114,7 @@ static PyTypeObject StdoutType =
     0, /* tp_weaklist */
     0, /* tp_del */
     0, /* tp_version_tag */
-#if PY_MAJOR_VERSION >= 3
     0, /* tp_finalilzer */
-#endif
 };
 
 
@@ -135,37 +134,27 @@ Redirector::~Redirector()
 
 PyMODINIT_FUNC redirector_init(void)
 {
-#if PY_MAJOR_VERSION >= 3
     return Redirector::init();
-#else
-    Redirector::init();
-#endif
 }
 
-#if PY_MAJOR_VERSION >= 3
-    static struct PyModuleDef redirectordef = {
-        PyModuleDef_HEAD_INIT,
-        "redirector",     /* m_name */
-        "redirector.Stdout objects",  /* m_doc */
-        -1,                  /* m_size */
-        Stdout_methods,    /* m_methods */
-        NULL,                /* m_reload */
-        NULL,                /* m_traverse */
-        NULL,                /* m_clear */
-        NULL,                /* m_free */
-    };
-#endif
+static struct PyModuleDef redirectordef = {
+    PyModuleDef_HEAD_INIT,
+    "redirector",     /* m_name */
+    "redirector.Stdout objects",  /* m_doc */
+    -1,                  /* m_size */
+    Stdout_methods,    /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
 
 PyObject* Redirector::init()
 {
     StdoutType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&StdoutType) < 0)
         return NULL;
-#if PY_MAJOR_VERSION >= 3
     PyObject* m = PyModule_Create(&redirectordef);
-#else
-    PyObject* m = Py_InitModule3("redirector", 0, 0);
-#endif
     if (m)
     {
         //ABELL - This is bad code as the type cast is invalid. (type pun

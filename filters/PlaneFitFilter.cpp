@@ -86,18 +86,18 @@ void PlaneFitFilter::filter(PointView& view)
     KD3Index& kdi = view.build3dIndex();
 
     point_count_t nloops = view.size();
-    std::vector<std::thread> threadPool(m_threads);
+    std::vector<std::thread> threadList(m_threads);
     for (int t = 0; t < m_threads; t++)
     {
-        threadPool[t] = std::thread(std::bind(
-            [&](const PointId start, const PointId end, const PointId t) {
+        threadList[t] = std::thread(std::bind(
+            [&](const PointId start, const PointId end) {
                 for (PointId i = start; i < end; i++)
                     setPlaneFit(view, i, kdi);
             },
             t * nloops / m_threads,
-            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads, t));
+            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
     }
-    for (auto& t : threadPool)
+    for (auto& t : threadList)
         t.join();
 }
 
@@ -126,17 +126,16 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
     // Covariance and normal are based off demeaned coordinates, so we record
     // the centroid to properly offset the coordinates when computing point to
     // plance distance.
-    auto centroid = eigen::computeCentroid(view, neighbors);
+    auto centroid = computeCentroid(view, neighbors);
 
     // Compute covariance of the neighbors.
-    auto B = eigen::computeCovariance(view, neighbors);
+    auto B = computeCovariance(view, neighbors);
 
     // Perform the eigen decomposition, using the eigenvector of the smallest
     // eigenvalue as the normal.
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
     if (solver.info() != Eigen::Success)
         throwError("Cannot perform eigen decomposition.");
-    auto eval = solver.eigenvalues();
     Eigen::Vector3d normal = solver.eigenvectors().col(0);
 
     // Compute point to plane distance of the query point.
