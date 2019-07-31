@@ -249,23 +249,35 @@ public:
     std::vector<PointId> neighbors(double x, double y, double z,
         point_count_t k, size_t stride=1) const
     {
+        // Account for input buffer size smaller than requested number of
+        // neighbors, then determine the number of neighbors to extract based
+        // on the desired stride.
         k = (std::min)(m_buf.size(), k);
-        point_count_t k2 = stride*k;
+        point_count_t k2 = stride * k;
+
+        // Prepare output indices and squared distances.
         std::vector<PointId> output(k2);
         std::vector<double> out_dist_sqr(k2);
-        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k2);
-
-        resultSet.init(&output[0], &out_dist_sqr[0]);
-
+        
+        // Set the query point.
         std::vector<double> pt;
         pt.push_back(x);
         pt.push_back(y);
         pt.push_back(z);
+
+        // Extract k*stride neighbors, then return only k, selecting every nth
+        // neighbor at the given stride.
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k2);
+        resultSet.init(&output[0], &out_dist_sqr[0]);
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams());
-        std::valarray<PointId> temp(output.data(), output.size());
-        std::valarray<PointId> sliced = temp[std::slice(0,k,stride)];
-        output.assign(std::begin(sliced), std::end(sliced));
-        output.resize(k);
+
+        // Perform the downsampling if a stride is provided.
+        if (stride > 1)
+        {
+            for (size_t i = 1; i < k; ++i)
+                output[i] = output[i * stride];
+            output.resize(k);
+        }
         return output;
     }
 
