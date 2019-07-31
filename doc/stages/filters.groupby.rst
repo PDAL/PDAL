@@ -3,29 +3,31 @@
 filters.groupby
 ===============================================================================
 
-The groupby filter takes a single PointView as its input and creates a PointView
-for each category in the named ``dimension`` as its output.
+The **Groupby Filter** takes a single ``PointView`` as its input and
+creates a ``PointView`` for each category in the named dimension_ as
+its output.
 
 .. embed::
 
 Example
 -------
 
+The following pipeline will create a set of LAS files, where each file contains
+only points of a single ``Classification``.
+
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "input.las",
-        {
+  [
+      "input.las",
+      {
           "type":"filters.groupby",
           "dimension":"Classification"
-        },
-        "output_#.las"
-      ]
-    }
+      },
+      "output_#.las"
+  ]
 
 Options
 -------
 
-dimension
+_`dimension`
   The dimension containing data to be grouped.

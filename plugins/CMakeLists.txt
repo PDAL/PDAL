@@ -12,17 +12,9 @@ if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
 
-if(BUILD_PLUGIN_DELAUNAY)
-    add_subdirectory(delaunay)
-endif(BUILD_PLUGIN_DELAUNAY)
-
 if(BUILD_PLUGIN_GEOWAVE)
     add_subdirectory(geowave)
 endif(BUILD_PLUGIN_GEOWAVE)
-
-if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
-    add_subdirectory(greyhound)
-endif()
 
 if(BUILD_PLUGIN_ICEBRIDGE)
     if (NOT PDAL_HAVE_LIBXML2)
@@ -90,4 +82,12 @@ endif()
 
 if (BUILD_PLUGIN_FBX)
     add_subdirectory(fbx)
+endif()
+
+if(BUILD_PLUGIN_TILEDB)
+    add_subdirectory(tiledb)
+endif()
+
+if(BUILD_PLUGIN_E57)
+    add_subdirectory(e57)
 endif()

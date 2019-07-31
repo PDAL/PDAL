@@ -41,7 +41,7 @@
 #endif
 
 #include <pdal/PDALUtils.hpp>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -68,6 +68,10 @@ void PipelineKernel::validateSwitches(ProgramArgs& args)
 
     if (m_inputFile.empty())
         throw pdal_error("Input filename required.");
+
+    if (m_stream)
+        m_log->get(LogLevel::Warning) << "Option 'stream' is obsolete.  " <<
+            "Streaming occurs by default.\n";
 }
 
 
@@ -112,7 +116,7 @@ int PipelineKernel::execute()
 
     if (m_validate)
     {
-        Json::Value root;
+        NL::json root;
         // Validate the options of the pipeline we were
         // given, and once we succeed, we're done
         try
@@ -130,8 +134,7 @@ int PipelineKernel::execute()
             root["streamable"] = false;
         }
         Utils::closeProgress(m_progressFd);
-        Json::StyledWriter writer;
-        std::cout << writer.write(root);
+        std::cout << root.dump(4) << "\n";
         return 0;
     }
 

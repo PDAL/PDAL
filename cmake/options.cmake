@@ -12,11 +12,6 @@ option(BUILD_PLUGIN_CPD
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "Coherent Point Drift (CPD) computes rigid or nonrigid transformations between point sets")
 
-option(BUILD_PLUGIN_DELAUNAY
-    "Choose if the Delaunay triangulation filter should be built" FALSE)
-add_feature_info("Delaunay plugin" BUILD_PLUGIN_DELAUNAY
-    "perform Delaunay triangulation of point cloud")
-
 option(BUILD_PLUGIN_GEOWAVE
     "Choose if GeoWave support should be built" FALSE)
 add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
@@ -26,11 +21,6 @@ option(BUILD_PLUGIN_I3S
     "Choose if I3S and SLPK support should be built" FALSE)
 add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
     "Read from a I3S server or from a SLPK file")
-
-option(BUILD_PLUGIN_GREYHOUND
-    "Choose if Greyhound support should be built" FALSE)
-add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
-    "read points from a Greyhound server")
 
 option(BUILD_PLUGIN_ICEBRIDGE
     "Choose if Icebridge support should be built" FALSE)
@@ -102,6 +92,16 @@ option(BUILD_PLUGIN_FBX
     "Choose if FBX support should be built" FALSE)
 add_feature_info("FBX plugin" BUILD_PLUGIN_FBX
     "add features that depend on FBX")
+
+option(BUILD_PLUGIN_TILEDB
+    "Choose if TileDB support should be built" FALSE)
+add_feature_info("TileDB plugin" BUILD_PLUGIN_TILEDB
+    "read/write data from TileDB")
+
+option(BUILD_PLUGIN_E57
+        "Choose if e57 ui support should be built" FALSE)
+add_feature_info("E57 plugin" BUILD_PLUGIN_E57
+        "read/write data to and from e57 format")
 
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 

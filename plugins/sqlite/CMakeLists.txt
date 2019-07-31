@@ -30,7 +30,9 @@ PDAL_ADD_PLUGIN(writer_libname writer sqlite
         ${GDAL_LIBRARY}
         ${LIBXML2_LIBRARIES}
     INCLUDES
+        ${GDAL_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
 )
 
 #

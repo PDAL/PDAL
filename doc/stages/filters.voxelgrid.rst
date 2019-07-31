@@ -1,13 +1,13 @@
 .. _filters.voxelgrid:
 
-===============================================================================
 filters.voxelgrid
 ===============================================================================
 
-The Voxel Grid filter passes data through the Point Cloud Library (`PCL`_)
+The **Voxel Grid Filter** passes data through the Point Cloud Library (`PCL`_)
 VoxelGrid algorithm.
 
-VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples +
+VoxelGrid assembles a local 3D grid over a given PointCloud, and downsamples
+and
 filters the data. The VoxelGrid class creates a *3D voxel grid* (think about a
 voxel grid as a set of tiny 3D boxes in space) over the input point cloud data.
 Then, in each *voxel* (i.e., 3D box), all the points present will be
@@ -20,22 +20,18 @@ the underlying surface more accurately.
 Example
 -------
 
-
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "untransformed.las",
-        {
+  [
+      "untransformed.las",
+      {
           "type":"filters.voxelgrid"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"transformed.las"
-        }
-      ]
-    }
-
+      }
+  ]
 
 .. seealso::
 
@@ -47,10 +43,10 @@ Options
 -------------------------------------------------------------------------------
 
 leaf_x
-  Leaf size in X dimension. [Default: **1.0**]
+  Leaf size in X dimension. [Default: 1.0]
 
 leaf_y
-  Leaf size in Y dimension. [Default: **1.0**]
+  Leaf size in Y dimension. [Default: 1.0]
 
 leaf_z
-  Leaf size in Z dimension. [Default: **1.0**]
+  Leaf size in Z dimension. [Default: 1.0]

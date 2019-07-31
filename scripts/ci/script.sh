@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/ash -e
 # Builds and tests PDAL
 
 gcc --version
@@ -19,6 +19,7 @@ cmake .. \
     -DBUILD_PLUGIN_NITF=ON \
     -DBUILD_PLUGIN_ICEBRIDGE=ON \
     -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+    -DBUILD_PLUGIN_E57=ON \
     -DBUILD_PGPOINTCLOUD_TESTS=OFF \
     -DBUILD_PLUGIN_SQLITE=ON \
     -DWITH_LASZIP=ON \

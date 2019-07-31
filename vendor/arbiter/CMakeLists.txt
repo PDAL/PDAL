@@ -10,17 +10,15 @@ endif()
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
 target_include_directories(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
-        ${PDAL_JSONCPP_INCLUDE_DIR}
-        ${OPENSSL_INCLUDE_DIR})
+        ${NLOHMANN_INCLUDE_DIR}
+)
 target_link_libraries(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         ${CURL_LIBRARIES}
-        ${OPENSSL_LIBRARIES}
-        ${PDAL_JSONCPP_LIB_NAME})
+)
 target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
-        ARBITER_CURL
-        ARBITER_OPENSSL)
+        ARBITER_CURL)
 
 if (MSVC)
     find_library(SHLWAPI Shlwapi.lib)
@@ -40,6 +38,17 @@ if (ZLIB_FOUND)
     target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
         PRIVATE
             ARBITER_ZLIB)
+endif()
+if (OPENSSL_FOUND)
+    target_include_directories(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ${OPENSSL_INCLUDE_DIR})
+    target_link_libraries(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ${OPENSSL_LIBRARIES})
+    target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
+        PRIVATE
+            ARBITER_OPENSSL)
 endif()
 
 set_target_properties(${PDAL_ARBITER_LIB_NAME} PROPERTIES

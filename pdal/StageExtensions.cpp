@@ -34,7 +34,7 @@
 
 #include <sstream>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <pdal/StageExtensions.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -66,7 +66,6 @@ const std::string extension_json (
 R"PDALEXTENSIONS(
 
 {
-    "readers.greyhound" : "greyhound",
     "readers.icebridge" : "icebridge h5",
     "readers.matlab" : "mat",
     "writers.matlab" : "mat",
@@ -82,7 +81,9 @@ R"PDALEXTENSIONS(
     "readers.rxp" : "rxp",
     "readers.fbx" : "fbx",
     "readers.slpk" : "slpk",
-    "readers.i3s" : "i3s"
+    "readers.i3s" : "i3s",
+    "readers.e57" : "e57",
+    "writers.e57" : "e57"
 }
 
 )PDALEXTENSIONS"
@@ -93,7 +94,6 @@ R"PDALEXTENSIONS(
 StageExtensions::StageExtensions(LogPtr log) : m_log(log)
 {}
 
-// Called under lock from the get functions.
 void StageExtensions::load()
 {
     static bool loaded(false);
@@ -102,37 +102,41 @@ void StageExtensions::load()
         return;
     loaded = true;
 
-    Json::Value root;
-    Json::Reader reader;
+    NL::json root;
 
-    std::istringstream in(extension_json);
-    if (!reader.parse(in, root))
+    try
     {
-        std::string err = "Unable to parse 'pdal_extensions.json': " +
-            reader.getFormattedErrorMessages() +
+        root = NL::json::parse(extension_json);
+    }
+    catch (const NL::json::parse_error& err)
+    {
+        std::string e = "Unable to parse 'pdal_extensions.json': " +
+            std::string(err.what()) +
             " Plugins will not be able to be inferred from filenames.";
-        throw pdal_error(err);
+        throw pdal_error(e);
     }
 
-    if (!root.isObject())
+    if (!root.is_object())
     {
         throw pdal_error("Invalid root object in 'pdal_extensions.json'. "
             "Must be an object.");
     }
 
-    for (const std::string& stage : root.getMemberNames())
+    for (auto it : root.items())
     {
+        const std::string& stage = it.key();
+        const NL::json& val = it.value();
+
         if (!Utils::startsWith(stage, "readers") &&
             !Utils::startsWith(stage, "writers"))
         {
             throw pdal_error("Only readers and writers may define "
                 "extensions. '" +  stage + "' invalid.");
         }
-        Json::Value val = root[stage];
-        if (!val.isString())
+        if (!val.is_string())
             throw pdal_error("Extension value for '" + stage +
                 "' must be a string.");
-        set(stage, parse(val.asString()));
+        set(stage, parse(val.get<std::string>()));
     }
 }
 
@@ -165,6 +169,28 @@ std::string StageExtensions::defaultWriter(const std::string& extension)
     load();
     std::lock_guard<std::mutex> lock(m_mutex);
     return (m_writers[extension]);
+}
+
+
+StringList StageExtensions::extensions(const std::string& stage)
+{
+    StringList exts;
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if (Utils::startsWith(stage, "readers."))
+    {
+        for (auto& entry : m_readers)
+            if (entry.second == stage)
+                exts.push_back(entry.first);
+    }
+    else if (Utils::startsWith(stage, "writers."))
+    {
+        for (auto& entry : m_writers)
+            if (entry.second == stage)
+                exts.push_back(entry.first);
+    }
+    return exts;
 }
 
 } // namespace pdal

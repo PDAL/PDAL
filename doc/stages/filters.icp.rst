@@ -3,33 +3,51 @@
 filters.icp
 ==============
 
-The ICP filter uses the `PCL's Iterative Closest Point (ICP)`_ algorithm to
-calculate a rigid (rotation and translation) transformation that best aligns
-two datasets.  The first input to the ICP filter is considered the "fixed"
-points, and all subsequent points are "moving" points.  The output from the
-change filter are the "moving" points after the calculated transformation has
-been applied, one point view per input.  The transformation matrix is inserted
-into the stage's metadata.
+The **ICP filter** uses the Iterative Closest Point (ICP) algorithm to
+calculate a **rigid** (rotation and translation) transformation that best
+aligns two datasets.  The first input to the ICP filter is considered the
+"fixed" points, and all subsequent points are "moving" points.  The output from
+the filter are the "moving" points after the calculated transformation has been
+applied, one point view per input.  The transformation matrix is inserted into
+the stage's metadata.
 
-.. plugin::
+.. note::
+
+    ICP requires the initial pose of the two point sets to be adequately close,
+    which is not always possible, especially when the transformation is
+    non-rigid.  ICP can handle limited non-rigid transformations but be aware
+    ICP may be unable to escape a local minimum. Consider using CPD instead.
+
+    From :cite:`Xuechen2019`:
+
+    ICP starts with an initial guess of the transformation between the two
+    point sets and then iterates between finding the correspondence under the
+    current transformation and updating the transformation with the newly found
+    correspondence. ICP is widely used because it is rather straightforward and
+    easy to implement in practice; however, its biggest problem is that it does
+    not guarantee finding the globally optimal transformation. In fact, ICP
+    converges within a very small basin in the parameter space, and it easily
+    becomes trapped in local minima. Therefore, the results of ICP are very
+    sensitive to the initialization, especially when high levels of noise and
+    large proportions of outliers exist.
+
 
 Examples
 --------
 
 .. code-block:: json
 
-    {
-        "pipeline": [
-            "fixed.las",
-            "moving.las",
-            {
-                "type": "filters.icp"
-            },
-            "output.las"
-        ]
-    }
+  [
+      "fixed.las",
+      "moving.las",
+      {
+          "type": "filters.icp"
+      },
+      "output.las"
+  ]
 
-To get the transform matrix, you'll need to use the ``--metadata`` option:
+To get the transform matrix, you'll need to use the ``--metadata`` option
+from the pipeline command:
 
 ::
 
@@ -52,10 +70,23 @@ The metadata output might start something like:
 .. seealso::
 
     :ref:`filters.transformation` to apply a transform to other points.
+    :ref:`filters.cpd` for the use of a probabilistic assignment of correspondences between pointsets.
+
 
 Options
 --------
 
-None.
+max_iter
+  Maximum number of iterations. [Default: **100**]
 
-.. _PCL's Iterative Closest Point (ICP): http://docs.pointclouds.org/trunk/classpcl_1_1_iterative_closest_point.html
+max_similar
+  Max number of similar transforms to consider converged. [Default: **0**]
+
+mse_abs
+  Absolute threshold for MSE. [Default: **1e-12**]
+
+rt
+  Rotation threshold. [Default: **0.99999**]
+
+tt
+  Translation threshold. [Default: **9e-8**]

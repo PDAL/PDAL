@@ -48,7 +48,7 @@ if (WIN32)
 endif()
 
 # PCL's configuration clobbers Boost find_package - do it again
-find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
+#find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
 
 #set (PCL_LIBRARIES "${PCL_COMMON_LIBRARY};${PCL_REGISTRATION_LIBRARY};${PCL_FEATURES_LIBRARY};${PCL_FILTERS_LIBRARY};${PCL_SEARCH_LIBRARY};${PCL_SEGMENTATION_LIBRARY};${PCL_IO_LIBRARY}")
 #
@@ -56,6 +56,9 @@ find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem sy
 #
 PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
     FILES
+        io/PcdHeader.hpp
+        io/PcdHeader.cpp
+        io/PcdReader.hpp
         io/PcdReader.cpp
     LINK_WITH
         ${PCL_LIBRARIES}
@@ -90,10 +93,9 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
         filters/PCLBlock.cpp
     LINK_WITH
         ${PCL_LIBRARIES}
-        ${PDAL_JSONCPP_LIB_NAME}
     INCLUDES
         ${PCL_INCLUDE_DIRS}
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
@@ -117,15 +119,6 @@ PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
 PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
     FILES
         filters/GridProjectionFilter.cpp
-    LINK_WITH
-        ${PCL_LIBRARIES}
-    INCLUDES
-        ${PCL_INCLUDE_DIRS}
-)
-
-PDAL_ADD_PLUGIN(icp_filter_libname filter icp
-    FILES
-        filters/IcpFilter.cpp
     LINK_WITH
         ${PCL_LIBRARIES}
     INCLUDES
@@ -167,15 +160,5 @@ if (WITH_TESTS)
         test/PCLBlockFilterTest.cpp
     LINK_WITH ${pcd_reader_libname} ${pcd_writer_libname} ${pclblock_libname}
         ${pcl_libname} ${smooth_libname}
-    )
-
-    PDAL_ADD_TEST(pdal_filters_icp_test
-        FILES
-            test/IcpFilterTest.cpp
-        LINK_WITH
-            ${icp_filter_libname}
-        INCLUDES
-            ${PCL_INCLUDE_DIRS}
-            ${PDAL_VENDOR_DIR}/eigen
     )
 endif()

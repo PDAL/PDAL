@@ -36,6 +36,7 @@ invalidate an existing KD-tree.
    filters.cluster
    filters.colorinterp
    filters.colorization
+   filters.covariancefeatures
    filters.dem
    filters.eigenvalues
    filters.estimaterank
@@ -43,16 +44,17 @@ invalidate an existing KD-tree.
    filters.ferry
    filters.hag
    filters.info
-   filters.kdistance
    filters.lof
-   filters.mongus
+   filters.miniball
    filters.neighborclassifier
    filters.nndistance
    filters.normal
    filters.outlier
    filters.overlay
+   filters.planefit
    filters.pmf
    filters.radialdensity
+   filters.reciprocity
    filters.smrf
 
 :ref:`filters.approximatecoplanar`
@@ -74,6 +76,10 @@ invalidate an existing KD-tree.
 :ref:`filters.colorization`
     Fetch and assign RGB color information from a GDAL-readable datasource.
 
+:ref:`filters.covariancefeatures`
+    Filter that calculates local features based on the covariance matrix of a
+    point's neighborhood.
+
 :ref:`filters.eigenvalues`
     Compute pointwise eigenvalues, based on k-nearest neighbors.
 
@@ -90,16 +96,12 @@ invalidate an existing KD-tree.
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
 
-:ref:`filters.kdistance`
-    Compute pointwise K-Distance (the Euclidean distance to a point's k-th
-    nearest neighbor). [Deprecated - use :ref:`filters.nndistance`]
-
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
 
-:ref:`filters.mongus`
-    Label ground/non-ground returns using [Mongus2012]_.
+:ref:`filters.miniball`
+    Compute a criterion for point neighbors based on the miniball algorithm.
 
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
@@ -117,11 +119,18 @@ invalidate an existing KD-tree.
     Assign values to a dimension based on the extent of an OGR-readable data
     source or an OGR SQL query.
 
+:ref:`filters.planefit`
+    Compute a deviation of a point from a manifold approximating its neighbors.
+
 :ref:`filters.pmf`
     Label ground/non-ground returns using [Zhang2003]_.
 
 :ref:`filters.radialdensity`
     Compute pointwise density of points within a given radius.
+
+:ref:`filters.reciprocity`
+    Compute the percentage of points that are considered uni-directional
+    neighbors of a point.
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
@@ -162,6 +171,7 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 
    filters.cpd
    filters.icp
+   filters.projpipeline
    filters.reprojection
    filters.transformation
 
@@ -172,6 +182,10 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 :ref:`filters.icp`
     Compute and apply transformation between two point clouds using the
     Iterative Closest Point algorithm.
+
+:ref:`filters.projpipeline`
+    Apply coordinates operation on point triplets, based on PROJ pipeline string,
+    WKT2 coordinates operations or URN definitions.
 
 :ref:`filters.reprojection`
     Reproject data using GDAL from one coordinate system to another.
@@ -196,7 +210,7 @@ the input. These filters will invalidate an existing KD-tree.
    filters.iqr
    filters.locate
    filters.mad
-   filters.mongoexpression
+   filters.mongo
    filters.range
    filters.sample
    filters.tail
@@ -227,7 +241,7 @@ the input. These filters will invalidate an existing KD-tree.
     Cull points falling outside the computed Median Absolute Deviation for a
     given dimension.
 
-:ref:`filters.mongoexpression`
+:ref:`filters.mongo`
     Cull points using MongoDB-style expression syntax.
 
 :ref:`filters.range`

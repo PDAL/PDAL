@@ -38,6 +38,7 @@
 
 #include <nanoflann/nanoflann.hpp>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 
 namespace nanoflann
@@ -101,25 +102,25 @@ public:
             throw pdal_error("KD2Index: point view missing 'Y' dimension.");
     }
 
-    PointId neighbor(double x, double y)
+    PointId neighbor(double x, double y) const
     {
         std::vector<PointId> ids = neighbors(x, y, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointId idx)
+    PointId neighbor(PointId idx) const
     {
         std::vector<PointId> ids = neighbors(idx, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointRef &point)
+    PointId neighbor(PointRef &point) const
     {
         std::vector<PointId> ids = neighbors(point, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    std::vector<PointId> neighbors(double x, double y, point_count_t k)
+    std::vector<PointId> neighbors(double x, double y, point_count_t k) const
     {
         k = (std::min)(m_buf.size(), k);
         std::vector<PointId> output(k);
@@ -135,7 +136,7 @@ public:
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k)
+    std::vector<PointId> neighbors(PointId idx, point_count_t k) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -143,7 +144,7 @@ public:
         return neighbors(x, y, k);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k)
+    std::vector<PointId> neighbors(PointRef &point, point_count_t k) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -226,26 +227,26 @@ public:
             throw pdal_error("KD3Index: point view missing 'Z' dimension.");
     }
 
-    PointId neighbor(double x, double y, double z)
+    PointId neighbor(double x, double y, double z) const
     {
         std::vector<PointId> ids = neighbors(x, y, z, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointId idx)
+    PointId neighbor(PointId idx) const
     {
         std::vector<PointId> ids = neighbors(idx, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointRef &point)
+    PointId neighbor(PointRef &point) const
     {
         std::vector<PointId> ids = neighbors(point, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
     std::vector<PointId> neighbors(double x, double y, double z,
-        point_count_t k)
+        point_count_t k) const
     {
         k = (std::min)(m_buf.size(), k);
         std::vector<PointId> output(k);
@@ -262,7 +263,7 @@ public:
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k)
+    std::vector<PointId> neighbors(PointId idx, point_count_t k) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -271,7 +272,7 @@ public:
         return neighbors(x, y, z, k);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k)
+    std::vector<PointId> neighbors(PointRef &point, point_count_t k) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -444,7 +445,7 @@ bool KDIndex<2>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX2D bounds;
-        m_buf.calculateBounds(bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
@@ -470,7 +471,7 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX3D bounds;
-        m_buf.calculateBounds(bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;

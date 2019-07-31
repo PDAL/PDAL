@@ -384,6 +384,8 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     addForwardMetadata(forward, m, "offset_z", m_header.offsetZ(),
         "The offset for Z values.", 20);
 
+    m.add("point_length", m_header.pointLen(),
+        "The size, in bytes, of each point records.");
     m.add("header_size", m_header.vlrOffset(),
         "The size, in bytes, of the header block, including any extension "
         "by specific software.");
@@ -500,7 +502,6 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
         std::ostringstream name;
         name << "vlr_" << i++;
         MetadataNode vlrNode(name.str());
-        m.add(vlrNode);
 
         vlrNode.addEncoded("data",
             (const uint8_t *)vlr.data(), vlr.dataLen(), vlr.description());
@@ -510,6 +511,7 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
         vlrNode.add("record_id", vlr.recordId(),
             "Record ID specified by the user.");
         vlrNode.add("description", vlr.description());
+        m.add(vlrNode);
 
         if (vlr.userId() == TRANSFORM_USER_ID||
             vlr.userId() == LASZIP_USER_ID ||

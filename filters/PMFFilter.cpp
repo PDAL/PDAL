@@ -43,8 +43,8 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "private/Segmentation.hpp"
 #include "private/DimRange.hpp"
+#include "private/Segmentation.hpp"
 
 namespace pdal
 {
@@ -111,7 +111,7 @@ void PMFFilter::prepared(PointTableRef table)
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
             throwError("Invalid dimension name in 'ignored' option: '" +
-                r.m_name + "'.");
+                       r.m_name + "'.");
     }
 
     if (m_args->m_returns.size())
@@ -151,32 +151,60 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     if (m_args->m_ignored.empty())
         keptView->append(*input);
     else
-        Segmentation::ignoreDimRanges(m_args->m_ignored,
-            input, keptView, ignoredView);
+        Segmentation::ignoreDimRanges(m_args->m_ignored, input, keptView,
+                                      ignoredView);
 
-    // Classify remaining points with value of 1. processGround will mark ground
-    // returns as 2.
+    // Check for 0's in ReturnNumber and NumberOfReturns
+    bool nrOneZero(false);
+    bool rnOneZero(false);
+    bool nrAllZero(true);
+    bool rnAllZero(true);
     for (PointId i = 0; i < keptView->size(); ++i)
-        keptView->setField(Dimension::Id::Classification, i, 1);
+    {
+        uint8_t nr =
+            keptView->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        uint8_t rn =
+            keptView->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        if ((nr == 0) && !nrOneZero)
+            nrOneZero = true;
+        if ((rn == 0) && !rnOneZero)
+            rnOneZero = true;
+        if (nr != 0)
+            nrAllZero = false;
+        if (rn != 0)
+            rnAllZero = false;
+    }
+
+    if ((nrOneZero || rnOneZero) && !(nrAllZero && rnAllZero))
+        throwError("Some NumberOfReturns or ReternNumber values were 0, but "
+                   "not all. Check that all values in the input file are >= "
+                   "1.");
 
     // Segment kept view into two views
     PointViewPtr firstView = keptView->makeNew();
     PointViewPtr secondView = keptView->makeNew();
-    if (m_args->m_returns.size())
+    if (nrAllZero && rnAllZero)
     {
-        Segmentation::segmentReturns(keptView, firstView, secondView,
-                                     m_args->m_returns);
+        log()->get(LogLevel::Warning)
+            << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
+               "Proceeding without any further return filtering.\n";
+        firstView->append(*keptView);
     }
     else
     {
-        for (PointId i = 0; i < keptView->size(); ++i)
-            firstView->appendPoint(*keptView.get(), i);
+        Segmentation::segmentReturns(keptView, firstView, secondView,
+                                     m_args->m_returns);
     }
 
     if (!firstView->size())
     {
         throwError("No returns to process.");
     }
+
+    // Classify remaining points with value of 1. processGround will mark ground
+    // returns as 2.
+    for (PointId i = 0; i < secondView->size(); ++i)
+        secondView->setField(Dimension::Id::Classification, i, 1);
 
     // Run the actual PMF algorithm.
     processGround(firstView);
@@ -195,17 +223,15 @@ void PMFFilter::processGround(PointViewPtr view)
 {
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
-    view->calculateBounds(bounds);
-    size_t cols =
-        static_cast<size_t>(((bounds.maxx - bounds.minx) /
-            m_args->m_cellSize) + 1);
-    size_t rows =
-        static_cast<size_t>(((bounds.maxy - bounds.miny) /
-            m_args->m_cellSize) + 1);
+    calculateBounds(*view, bounds);
+    size_t cols = static_cast<size_t>(
+        ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1);
+    size_t rows = static_cast<size_t>(
+        ((bounds.maxy - bounds.miny) / m_args->m_cellSize) + 1);
 
     // initialize surface to NaN
     std::vector<double> ZImin(rows * cols,
-        std::numeric_limits<double>::quiet_NaN());
+                              std::numeric_limits<double>::quiet_NaN());
 
     // loop through all points, identifying minimum Z value for each populated
     // cell
@@ -311,7 +337,6 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        using namespace eigen;
         std::vector<double> me = erodeDiamond(ZImin, rows, cols, iters);
         std::vector<double> mo = dilateDiamond(me, rows, cols, iters);
 

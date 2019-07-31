@@ -39,18 +39,16 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.nitf",
           "filename":"mynitf.nitf"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -64,9 +62,8 @@ filename
 extra_dims
   Extra dimensions to be read as part of each point beyond those specified by
   the LAS point format.  The format of the option is
-  <dimension_name>=<type>, ... where type is one of:
-  int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double.
-  `_t` may be added to any of the type names as well (e.g., uint32_t).
+  ``<dimension_name>=<type>[, ...]``.  Any PDAL :ref:`type <types>` can
+  be specified.
 
   .. note::
 

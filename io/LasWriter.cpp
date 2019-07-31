@@ -56,6 +56,8 @@
 #include <iostream>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -87,7 +89,8 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0)
+    m_compression(LasCompression::None), m_srsCnt(0),
+    m_userVLRs(new NL::json)
 {}
 
 
@@ -144,7 +147,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
-    args.add("vlrs", "List of VLRs to set", m_userVLRs);
+    args.add("vlrs", "List of VLRs to set", *m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -228,27 +231,27 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-    for (const auto& v : m_userVLRs)
+    for (const auto& v : *m_userVLRs)
     {
         uint16_t recordId(1);
         std::string userId("");
         std::string description("");
         std::string b64data("");
         std::string user("");
-        if (! v.isMember("user_id"))
+        if (!v.contains("user_id"))
             throw pdal_error("VLR must contain a 'user_id'!");
-        userId = v["user_id"].asString();
+        userId = v["user_id"].get<std::string>();
 
-        if (!v.isMember("data"))
+        if (!v.contains("data"))
             throw pdal_error("VLR must contain a base64-encoded 'data' member");
-        b64data = v["data"].asString();
+        b64data = v["data"].get<std::string>();
 
         // Record ID should always be no more than 2 bytes.
-        if (v.isMember("record_id"))
-            recordId = static_cast<uint16_t>(v["record_id"].asUInt64());
+        if (v.contains("record_id"))
+            recordId = v["record_id"].get<uint16_t>();
 
-        if (v.isMember("description"))
-            description = v["description"].asString();
+        if (v.contains("description"))
+            description = v["description"].get<std::string>();
 
         std::vector<uint8_t> data = Utils::base64_decode(b64data);
         addVlr(userId, recordId, description, data);
@@ -270,18 +273,15 @@ void LasWriter::fillForwardList()
 
     static const StringList offset = { "offset_x", "offset_y", "offset_z" };
 
-    static StringList all;
-    all.insert(all.begin(), header.begin(), header.end());
-    all.insert(all.begin(), scale.begin(), scale.end());
-    all.insert(all.begin(), offset.begin(), offset.end());
-
     // Build the forward list, replacing special keywords with the proper
     // field names.
     for (auto& name : m_forwardSpec)
     {
         if (name == "all")
         {
-            m_forwards.insert(all.begin(), all.end());
+            m_forwards.insert(header.begin(), header.end());
+            m_forwards.insert(scale.begin(), scale.end());
+            m_forwards.insert(offset.begin(), offset.end());
             m_forwardVlrs = true;
         }
         else if (name == "header")
@@ -294,7 +294,11 @@ void LasWriter::fillForwardList()
             m_forwards.insert("dataformat_id");
         else if (name == "vlr")
             m_forwardVlrs = true;
-        else if (Utils::contains(all, name))
+        else if (
+            Utils::contains(header, name) ||
+            Utils::contains(scale, name) ||
+            Utils::contains(offset, name)
+        )
             m_forwards.insert(name);
         else
             throwError("Error in 'forward' option.  Unknown field for "
@@ -462,7 +466,8 @@ void LasWriter::addForwardVlrs()
         const MetadataNode& recordIdNode = n.findChild("record_id");
         if (recordIdNode.valid() && userIdNode.valid())
         {
-            data = Utils::base64_decode(n.value());
+            const MetadataNode& dataNode = n.findChild("data");
+            data = Utils::base64_decode(dataNode.value());
             uint16_t recordId = (uint16_t)std::stoi(recordIdNode.value());
             addVlr(userIdNode.value(), recordId, n.description(), data);
         }

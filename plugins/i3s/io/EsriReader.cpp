@@ -35,7 +35,7 @@
 #include "EsriReader.hpp"
 
 #include <Eigen/Geometry>
-#include <ogr_spatialref.h>
+#include <pdal/private/SrsTransform.hpp>
 
 #include "../lepcc/src/include/lepcc_types.h"
 
@@ -46,6 +46,14 @@
 
 namespace pdal
 {
+EsriReader::EsriReader()
+{}
+
+
+EsriReader::~EsriReader()
+{}
+
+
 void EsriReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds of the point cloud", m_args.bounds);
@@ -55,13 +63,13 @@ void EsriReader::addArgs(ProgramArgs& args)
             m_args.min_density, -1.0);
     args.add("max_density", "Maximum point density",
             m_args.max_density, -1.0);
-
 }
+
 
 void EsriReader::initialize(PointTableRef table)
 {
     //create proper density if min was set but max wasn't
-    if(m_args.min_density >= 0 && m_args.max_density < 0)
+    if (m_args.min_density >= 0 && m_args.max_density < 0)
         m_args.max_density = (std::numeric_limits<double>::max)();
 
     //create dimensions map for future lookup
@@ -69,23 +77,15 @@ void EsriReader::initialize(PointTableRef table)
     {
         for (std::string& dim : m_args.dimensions)
         {
-            std::transform(
-                    dim.begin(),
-                    dim.end(),
-                    dim.begin(),
-                    [](unsigned char c){ return std::toupper(c); });
-            if(esriDims.find(dim) != esriDims.end())
+            dim = Utils::toupper(dim);
+            if (esriDims.find(dim) != esriDims.end())
                 m_dimensions[dim] = esriDims.at(dim);
             else
                 m_dimensions[dim];
         }
     }
-    Json::Value config;
 
-    if (isDebug() && log()->getLevel() > LogLevel::Debug4)
-        config["arbiter"]["verbose"] = true;
-
-    m_arbiter.reset(new arbiter::Arbiter(config));
+    m_arbiter.reset(new arbiter::Arbiter());
 
     //adjust filename string
     const std::string pre("i3s://");
@@ -109,23 +109,21 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //create const for looking into
-    const Json::Value jsonBody = m_info;
-
-    //create pdal Bounds
-    m_bounds = createBounds();
+    const NL::json jsonBody = m_info;
 
     //find version
-    if (jsonBody["store"].isMember("version"))
-        m_version = Version(jsonBody["store"]["version"].asString());
+    if (jsonBody["store"].contains("version"))
+        m_version = Version(jsonBody["store"]["version"].get<std::string>());
+
     if (Version("2.0") < m_version || m_version < Version("1.6"))
         log()->get(LogLevel::Warning) << "This version may not work with "
             "the current implementation of i3s/slpk reader" << std::endl;
 
     //find number of nodes per nodepage
-    if (jsonBody["store"]["index"].isMember("nodesPerPage"))
-        m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].asInt();
-    else if (jsonBody["store"]["index"].isMember("nodePerIndexBlock"))
-        m_nodeCap = jsonBody["store"]["index"]["nodePerIndexBlock"].asInt();
+    if (jsonBody["store"]["index"].contains("nodesPerPage"))
+        m_nodeCap = jsonBody["store"]["index"]["nodesPerPage"].get<int>();
+    else if (jsonBody["store"]["index"].contains("nodePerIndexBlock"))
+        m_nodeCap = jsonBody["store"]["index"]["nodePerIndexBlock"].get<int>();
     else
     {
         log()->get(LogLevel::Warning) <<
@@ -135,46 +133,119 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //find the type of encoding
-    if (jsonBody["store"]["defaultGeometrySchema"].isMember("encoding"))
+    if (jsonBody["store"]["defaultGeometrySchema"].contains("encoding"))
     {
         std::string encoding = jsonBody["store"]
-            ["defaultGeometrySchema"]["encoding"].asString();
+            ["defaultGeometrySchema"]["encoding"].get<std::string>();
         if (encoding != "lepcc-xyz")
             throwError(std::string("Only lepcc encoding is supported "
                 "by this driver"));
     }
 
-    //output arguments for debugging
-    log()->get(LogLevel::Debug) << "filename: " <<
-        m_filename << std::endl;
-    log()->get(LogLevel::Debug) << "threads: " <<
-        m_args.threads << std::endl;
-    log()->get(LogLevel::Debug) << "bounds: " <<
-        m_args.bounds << std::endl;
-    log()->get(LogLevel::Debug) << "min_density: " <<
-        m_args.min_density << std::endl;
-    log()->get(LogLevel::Debug) << "max_density: " <<
-        m_args.max_density << std::endl;
-    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
-    for (std::string& dim : m_args.dimensions)
+    //create spatial reference objects
+    NL::json wkid = m_info["spatialReference"]["wkid"];
+    int system(0);
+    if (wkid.is_string())
     {
-        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
+        std::string sval = wkid.get<std::string>();
+        try
+        {
+            system = std::stoi(sval);
+        }
+        catch (...)
+        {}
+        if (system < 2000)
+            throwError("Invalid wkid string '" + sval + "' for spatial "
+                "reference.");
     }
+    else if (wkid.is_number())
+    {
+        system = wkid.get<int64_t>();
+        if (system < 2000)
+            throwError("Invalid wkid value '" + std::to_string(system) +
+                "' for spatial reference.");
+    }
+    std::string systemString("EPSG:" + std::to_string(system));
+    m_nativeSrs.set(systemString);
+    if (m_nativeSrs.empty())
+        throwError("Unable to create spatial reference for i3s for '" +
+            systemString + "'.");
+    setSpatialReference(m_nativeSrs);
+
+    m_ecefTransform.reset(new SrsTransform(m_nativeSrs,
+        SpatialReference("EPSG:4978")));
+    createBounds();
 }
+
+
+// We check to see if tiles (nodepages) intersect our bounding box by
+// converting them both to ECEF.
+void EsriReader::createBounds()
+{
+    const double mn((std::numeric_limits<double>::lowest)());
+    const double mx((std::numeric_limits<double>::max)());
+    if (m_args.bounds.is3d())
+    {
+        m_bounds = m_args.bounds.to3d();
+        for (size_t i = 0; i < 8; ++i)
+        {
+            double a = (i & 1 ? m_bounds.minx: m_bounds.maxx);
+            double b = (i & 2 ? m_bounds.miny: m_bounds.maxy);
+            double c = (i & 4 ? m_bounds.minz: m_bounds.maxz);
+            m_ecefTransform->transform(a, b, c);
+            m_ecefBounds.grow(a, b, c);
+        }
+    }
+    else
+    {
+        // No bounds specified.
+
+        // Distance to the center of the earth is 6.3 million meters, so
+        // 10 million should be a reasonable max for ECEF.
+        BOX2D b = m_args.bounds.to2d();
+        if (b.empty())
+        {
+            m_bounds = BOX3D(mn, mn, mn, mx, mx, mx);
+            m_ecefBounds = BOX3D(-10e6, -10e6, -10e6, 10e6, 10e6, 10e6);
+        }
+        else
+        {
+            m_bounds = BOX3D(b); // Will set z values to 0.
+            m_ecefBounds = m_bounds;
+            m_ecefTransform->transform(m_ecefBounds.minx, m_ecefBounds.miny,
+                m_ecefBounds.minz);
+            m_ecefTransform->transform(m_ecefBounds.maxx, m_ecefBounds.maxy,
+                m_ecefBounds.maxz);
+            m_bounds.minz = mn;
+            m_bounds.maxz = mx;
+            m_ecefBounds.minz = -10e6;
+            m_ecefBounds.maxz = 10e6;
+        }
+    }
+    // Transformation can invert coordinates
+    if (m_ecefBounds.minx > m_ecefBounds.maxx)
+        std::swap(m_ecefBounds.minx, m_ecefBounds.maxx);
+    if (m_ecefBounds.miny > m_ecefBounds.maxy)
+        std::swap(m_ecefBounds.miny, m_ecefBounds.maxy);
+    if (m_ecefBounds.minz > m_ecefBounds.maxz)
+        std::swap(m_ecefBounds.minz, m_ecefBounds.maxz);
+}
+
 
 void EsriReader::addDimensions(PointLayoutPtr layout)
 {
-    if (!m_info.isMember("attributeStorageInfo"))
+    if (!m_info.contains("attributeStorageInfo"))
         throwError("Attributes do not exist for this object");
-    const Json::Value attributes = m_info["attributeStorageInfo"];
+    const NL::json& attributes = m_info["attributeStorageInfo"];
     //automatically add xyz point dimensions
     layout->registerDim(Dimension::Id::X);
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
-    for (Json::ArrayIndex i = 0; i < attributes.size(); i++)
+
+    for (auto el : attributes)
     {
         dimData data;
-        std::string readName = attributes[i]["name"].asString();
+        std::string readName = el["name"].get<std::string>();
         data.name = readName;
 
         //test if this dimensions was requested by user
@@ -182,9 +253,9 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
             (m_dimensions.find(readName) == m_dimensions.end()))
             continue;
 
-        data.key = std::stoi(attributes[i]["key"].asString());
+        data.key = std::stoi(el["key"].get<std::string>());
 
-        if (!attributes[i].isMember("attributeValues"))
+        if (!el.contains("attributeValues"))
         {
             //Expect that Elevation will be bundled with xyz
             if (readName != "ELEVATION")
@@ -194,8 +265,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
             continue;
         }
 
-        data.dataType =
-            attributes[i]["attributeValues"]["valueType"].asString();
+        data.dataType = el["attributeValues"]["valueType"].get<std::string>();
 
         if (readName == "RGB")
         {
@@ -238,7 +308,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         else
         {
             std::string s =
-                attributes[i]["attributeValues"]["valueType"].asString();
+                el["attributeValues"]["valueType"].get<std::string>();
             const pdal::Dimension::Id id = layout->registerOrAssignDim(
                     readName, pdal::Dimension::type(s));
             if(data.dimType != Dimension::Type::None)
@@ -250,18 +320,21 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
 void EsriReader::ready(PointTableRef)
 {
-    Json::Value spatialJson = m_info["spatialReference"];
-    std::string spatialStr = "EPSG:" + spatialJson["wkid"].asString();
-    m_nativeSrs = SpatialReference(spatialStr);
-    setSpatialReference(m_nativeSrs);
+    //output arguments for debugging
+    log()->get(LogLevel::Debug) << "filename: " <<
+        m_filename << std::endl;
+    log()->get(LogLevel::Debug) << "threads: " <<
+        m_args.threads << std::endl;
+    log()->get(LogLevel::Debug) << "bounds: " <<
+        m_args.bounds << std::endl;
+    log()->get(LogLevel::Debug) << "min_density: " <<
+        m_args.min_density << std::endl;
+    log()->get(LogLevel::Debug) << "max_density: " <<
+        m_args.max_density << std::endl;
+    log()->get(LogLevel::Debug) << "dimensions: " << std::endl;
 
-    m_ecefSrs = SpatialReference("EPSG:4978");
-
-    m_ecefRef = OSRNewSpatialReference(m_ecefSrs.getWKT().c_str());
-    m_nativeRef = OSRNewSpatialReference(m_nativeSrs.getWKT().c_str());
-    m_toEcefTransform = OCTNewCoordinateTransformation(m_nativeRef, m_ecefRef);
-    m_toNativeTransform = OCTNewCoordinateTransformation(m_ecefRef,
-        m_nativeRef);
+    for (std::string& dim : m_args.dimensions)
+        log()->get(LogLevel::Debug) << "    -" << dim <<std::endl;
 }
 
 
@@ -278,7 +351,8 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 
     // Build the node list that will tell us which nodes overlap with bounds
     std::vector<int> nodes;
-    const Json::Value initJson = fetchJson(m_filename + "/nodepages/0");
+    NL::json initJson = fetchJson(m_filename + "/nodepages/0");
+    log()->get(LogLevel::Debug) << "Traversing metadata" << std::endl;
     traverseTree(initJson, 0, nodes, 0, 0);
 
     // Create view with overlapping nodes at desired depth
@@ -292,10 +366,11 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
         std::string localUrl;
 
         localUrl = m_filename + "/nodes/" + std::to_string(nodes[i]);
+        int nodeIndex(nodes[i]);
 
-        p.add([localUrl, this, &view]()
+        p.add([localUrl, nodeIndex, this, &view]()
         {
-            createView(localUrl, *view);
+            createView(localUrl, nodeIndex, *view);
         });
     }
     p.await();
@@ -303,29 +378,30 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 }
 
 
-//Traverse tree through nodepages. Create a nodebox for each node in
-//the tree and test if it overlaps with the bounds created by user.
-//If it's a leaf node(the highest resolution) and it overlaps, add
-//it to the list of nodes to be pulled later.
-void EsriReader::traverseTree(Json::Value page, int index,
+// Traverse tree through nodepages. Create a nodebox for each node in
+// the tree and test if it overlaps with the bounds created by user.
+// If it's a leaf node(the highest resolution) and it overlaps, add
+// it to the list of nodes to be pulled later.
+void EsriReader::traverseTree(NL::json page, int index,
     std::vector<int>& nodes, int depth, int pageIndex)
 {
     // find node information
-    int firstNode = page["nodes"][0]["resourceId"].asInt();
-    int name = page["nodes"][index]["resourceId"].asInt();
-    int firstChild = page["nodes"][index]["firstChild"].asInt();
-    int cCount = page["nodes"][index]["childCount"].asInt();
+    int firstNode = page["nodes"][0]["resourceId"].get<int>();
+    int name = page["nodes"][index]["resourceId"].get<int>();
+    int firstChild = page["nodes"][index]["firstChild"].get<int>();
+    int cCount = page["nodes"][index]["childCount"].get<int>();
 
     // find density information
     double area = page["nodes"][index][
         m_version >= Version("2.0") ?
             "lodThreshold" :
-            "effectiveArea" ].asDouble();
+            "effectiveArea" ].get<double>();
     int pCount = page["nodes"][index][
         m_version >= Version("2.0") ?
             "vertexCount" :
-            "pointCount" ].asInt();
-    double density = (double)pCount / area;
+            "pointCount" ].get<int>();
+
+    double density = pCount / area;
 
     // update maximum node to stop reading files at the right time
     if ((firstChild + cCount - 1) > m_maxNode)
@@ -333,14 +409,18 @@ void EsriReader::traverseTree(Json::Value page, int index,
         m_maxNode = firstChild + cCount - 1;
     }
 
-    // create box from OBB information and check for overlaps
-    BOX3D nodeBox = parseBox(page["nodes"][index]);
-    bool overlap = m_bounds.overlaps(nodeBox);
 
-    //if it doesn't overlap, then none of the nodes in this subtree will
+    BOX3D nodeBox = createCube(page["nodes"][index]);
+
+    // We're always comparing ECEF rectangular solids.
+    bool overlap = m_ecefBounds.overlaps(nodeBox);
+
+    // if it doesn't overlap, then none of the nodes in this subtree will
     if (!overlap)
         return;
-    // if it's a child node and the density hasn't been set, add leaf nodes
+
+
+    // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args.max_density == -1 && m_args.min_density == -1 && cCount == 0)
     {
         nodes.push_back(name);
@@ -389,79 +469,38 @@ void EsriReader::traverseTree(Json::Value page, int index,
 }
 
 
-// Create the BOX3D for the node. This will be used for testing overlap.
-BOX3D EsriReader::parseBox(Json::Value base)
+//Finds a sphere from the given center and halfsize vector of the OBB
+//and makes a cube around it. This should help with collision detection
+//and pruning of nodes before fetching binaries.
+BOX3D EsriReader::createCube(const NL::json& base)
 {
     // Pull XYZ in lat/lon.
-    Json::Value center = base["obb"]["center"];
-    double x = center[0].asDouble();
-    double y = center[1].asDouble();
-    double z = center[2].asDouble();
+    const NL::json& center = base["obb"]["center"];
+    double x = center[0].get<double>();
+    double y = center[1].get<double>();
+    double z = center[2].get<double>();
 
-    // Convert to ECEF so the OBB offsets in meters will match up.
-    OCTTransform(m_toEcefTransform, 1, &x, &y, &z);
+    // We believe that half-sizes are in meters.
+    const NL::json& hsize = base["obb"]["halfSize"];
+    double hx = hsize[0].get<double>();
+    double hy = hsize[1].get<double>();
+    double hz = hsize[2].get<double>();
 
-    Json::Value hsize = base["obb"]["halfSize"];
-    const double hx = hsize[0].asDouble();
-    const double hy = hsize[1].asDouble();
-    const double hz = hsize[2].asDouble();
+    // transform (x,y,z) to ECEF to match the half sizes in meters.
+    m_ecefTransform->transform(x, y, z);
 
-    Json::Value quat = base["obb"]["quaternion"];
-    const double w = quat[0].asDouble();
-    const double i = quat[1].asDouble();
-    const double j = quat[2].asDouble();
-    const double k = quat[3].asDouble();
+    // ABELL - Not sure why we're multiplying by sqrt(2).  The rest of the
+    // calculation is to get a radius of a sphere that encloses the OBB.
+    double r = std::sqrt(2) *
+        std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
 
-    // Create quat object and normalize it for use
-    Eigen::Quaterniond q(w, i, j, k);
-    q.normalize();
-
-    // Here we'll convert our halfsizes to x, y, and z vectors in respective
-    // directions, which will give us new bounding planes
-    Eigen::Vector3d vecx(hx,   0,   0);
-    Eigen::Vector3d vecy(0,   hy,   0);
-    Eigen::Vector3d vecz(0,    0,  hz);
-
-    // Create quaternion-like vectors
-    Eigen::Quaterniond quatVecX, pxmin, quatVecY, pymin, quatVecZ, pzmin;
-    quatVecX.w() = 0;
-    quatVecY.w() = 0;
-    quatVecZ.w() = 0;
-    quatVecX.vec() = vecx;
-    quatVecY.vec() = vecy;
-    quatVecZ.vec() = vecz;
-
-    // Rotate all the individual vectors
-    // gives us offset for the of the new x/y/zmax/min planes
-    Eigen::Quaterniond rotx = q * quatVecX * q.inverse();
-    Eigen::Quaterniond roty = q * quatVecY * q.inverse();
-    Eigen::Quaterniond rotz = q * quatVecZ * q.inverse();
-
-    BOX3D bounds;
-    for (std::size_t i(0); i < 8; ++i)
-    {
-        double a(x), b(y), c(z);
-
-        a += rotx.vec()[0] * (i & 1 ? 1.0 : -1.0);
-        b += rotx.vec()[1] * (i & 1 ? 1.0 : -1.0);
-        c += rotx.vec()[2] * (i & 1 ? 1.0 : -1.0);
-
-        a += roty.vec()[0] * (i & 2 ? 1.0 : -1.0);
-        b += roty.vec()[1] * (i & 2 ? 1.0 : -1.0);
-        c += roty.vec()[2] * (i & 2 ? 1.0 : -1.0);
-
-        a += rotz.vec()[0] * (i & 4 ? 1.0 : -1.0);
-        b += rotz.vec()[1] * (i & 4 ? 1.0 : -1.0);
-        c += rotz.vec()[2] * (i & 4 ? 1.0 : -1.0);
-
-        OCTTransform(m_toNativeTransform, 1, &a, &b, &c);
-        bounds.grow(a, b, c);
-    }
-    return bounds;
+    // Create cube around the sphere oriented as ECEF.
+    return BOX3D(x - r, y - r, z - r, x + r, y + r, z + r);
 }
 
 
-void EsriReader::createView(std::string localUrl, PointView& view)
+void EsriReader::createView(std::string localUrl, int nodeIndex,
+    PointView& view)
 {
     // pull the geometries to start
     const std::string geomUrl = localUrl + "/geometries/";
@@ -482,6 +521,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         startId = view.size();
+
 
         for (uint64_t j = 0; j < xyz.size(); ++j)
         {
@@ -572,6 +612,7 @@ void EsriReader::createView(std::string localUrl, PointView& view)
         }
         else if (dimId == Dimension::Id::NumberOfReturns)
         {
+
             const std::vector<char> data = fetchBinary(
                     attrUrl, std::to_string(key), ".bin.gz");
 
@@ -596,7 +637,6 @@ void EsriReader::createView(std::string localUrl, PointView& view)
                 view.setField(Dimension::Id::NumberOfReturns,
                         startId + i, numReturns);
             }
-
         }
         else
         {
@@ -620,41 +660,9 @@ void EsriReader::createView(std::string localUrl, PointView& view)
 }
 
 
-//Create bounding box that the user specified
-BOX3D EsriReader::createBounds()
-{
-    if (m_args.bounds.is3d())
-        return m_args.bounds.to3d();
-
-    // If empty, return maximal extents to select everything.
-    const BOX2D b(m_args.bounds.to2d());
-    if (b.empty())
-    {
-        double mn((std::numeric_limits<double>::lowest)());
-        double mx((std::numeric_limits<double>::max)());
-        return BOX3D(mn, mn, mn, mx, mx, mx);
-    }
-
-    // Finally if 2D and non-empty, convert to 3D with all-encapsulating
-    // Z-values.
-    return BOX3D(
-            b.minx, b.miny, (std::numeric_limits<double>::lowest)(),
-            b.maxx, b.maxy, (std::numeric_limits<double>::max)());
-}
-
-
 void EsriReader::done(PointTableRef)
 {
     m_stream.reset();
-
-    if (m_nativeRef)
-        OSRDestroySpatialReference(m_nativeRef);
-    if (m_ecefRef)
-        OSRDestroySpatialReference(m_ecefRef);
-    if (m_toEcefTransform)
-        OCTDestroyCoordinateTransformation(m_toEcefTransform);
-    if (m_toNativeTransform)
-        OCTDestroyCoordinateTransformation(m_toNativeTransform);
 }
 
 } //namespace pdal

@@ -1,0 +1,9 @@
+{
+  "bounds": "([0, 1], [0, 1], [0, 1])",
+  "pipeline":
+  [
+    {
+      "type": "readers.tiledb"
+    }
+  ]
+}

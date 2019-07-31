@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <filters/ChipperFilter.hpp>
@@ -78,8 +79,8 @@ TEST(ChipperTest, test_construction)
             BOX2D b1;
             BOX2D b2;
 
-            p1->calculateBounds(b1);
-            p2->calculateBounds(b2);
+            calculateBounds(*p1, b1);
+            calculateBounds(*p2, b2);
 
             return b1.minx < b2.minx ?  true :
                 b1.minx > b2.minx ? false :
@@ -90,7 +91,7 @@ TEST(ChipperTest, test_construction)
 
         PointViewPtr view = views[2];
         BOX2D bounds;
-        view->calculateBounds(bounds);
+        calculateBounds(*view, bounds);
 
         EXPECT_NEAR(bounds.minx, 635674.05, 0.05);
         EXPECT_NEAR(bounds.maxx, 635993.93, 0.05);
@@ -102,6 +103,30 @@ TEST(ChipperTest, test_construction)
     }
 }
 
+
+// Test that the chipper runs with multiple inputs.
+TEST(ChipperTest, issue_2479)
+{
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+
+    LasReader r1;
+    LasReader r2;
+    Options rOpts;
+
+    rOpts.add("filename", Support::datapath("las/autzen_trim.las"));
+    r1.setOptions(rOpts);
+    r2.setOptions(rOpts);
+
+    ChipperFilter chipper;
+    chipper.setInput(r1);
+    chipper.setInput(r2);
+
+    chipper.prepare(table);
+    PointViewSet viewSet = chipper.execute(table);
+
+    EXPECT_EQ(viewSet.size(), 44u);
+}
 
 // Make sure things don't crash if the point buffer is empty.
 TEST(ChipperTest, empty_buffer)
@@ -120,113 +145,3 @@ TEST(ChipperTest, empty_buffer)
     EXPECT_EQ(viewSet.size(), 0u);
 }
 
-//ABELL
-/**
-TEST(ChipperTest, test_ordering)
-{
-    std::string candidate_filename(Support::datapath("autzen-utm.las"));
-    std::string source_filename(Support::datapath("autzen-utm-chipped-25.las"));
-
-    Options options;
-    Option filename("filename", source_filename, "");
-    options.add(filename);
-
-    Option capacity("capacity", 25);
-    options.add(capacity);
-
-    LasReader candidate_reader(options);
-    std::shared_ptr<ChipperFilter> chipper(new ChipperFilter)(options);
-    chipper->setInput(&candidate_reader);
-    chipper->prepare();
-
-    Option& query = options.getOptionByRef("filename");
-    query.setValue<std::string>(source_filename);
-
-    LasReader source_reader(options);
-    source_reader.prepare();
-
-    EXPECT_EQ(chipper->getNumPoints(), source_reader.getNumPoints());
-
-    PointView candidate(chipper->getSchema(), chipper->getNumPoints());
-    PointView patch(chipper->getSchema(), chipper->getNumPoints());
-
-    StageSequentialIterator* iter_c = chipper->createSequentialIterator(patch);
-    uint64_t numRead(0);
-
-    while (true)
-    {
-        numRead = iter_c->read(patch);
-        if (! numRead)
-            break;
-        candidate.copyPointsFast(candidate.getNumPoints(), 0, patch, patch.getNumPoints());
-        candidate.setNumPoints(candidate.getNumPoints() + patch.getNumPoints());
-    }
-    EXPECT_EQ(candidate.getNumPoints(), chipper->getNumPoints());
-
-    PointView source(source_reader.getSchema(), source_reader.getNumPoints());
-
-    StageSequentialIterator* iter_s = source_reader.createSequentialIterator(source);
-    numRead = iter_s->read(source);
-    EXPECT_EQ(numRead, source_reader.getNumPoints());
-
-
-
-    Schema const& cs = candidate.getSchema();
-    Schema const& ss = source.getSchema();
-
-    Dimension const& sdimX = ss.getDimension("X");
-    Dimension const& sdimY = ss.getDimension("Y");
-    Dimension const& sdimZ = ss.getDimension("Z");
-    Dimension const& sdimIntensity = ss.getDimension("Intensity");
-    Dimension const& sdimRed = ss.getDimension("Red");
-    Dimension const& sdimGreen = ss.getDimension("Green");
-    Dimension const& sdimBlue = ss.getDimension("Blue");
-
-    Dimension const& cdimX = cs.getDimension("X");
-    Dimension const& cdimY = cs.getDimension("Y");
-    Dimension const& cdimZ = cs.getDimension("Z");
-    Dimension const& cdimIntensity = cs.getDimension("Intensity");
-    Dimension const& cdimRed = cs.getDimension("Red");
-    Dimension const& cdimGreen = cs.getDimension("Green");
-    Dimension const& cdimBlue = cs.getDimension("Blue");
-    //
-    // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
-    // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
-    // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
-    // int I[] = { 134, 75, 153, 93, 67, 167 };
-    // int R[] = { 142, 152, 146, 104, 113, 163 };
-    // int G[] = { 102, 108, 104, 96, 97, 118 };
-    // int B[] = { 137, 134, 140, 120, 123, 150 };
-    //
-    for (unsigned i = 0; i < candidate.getNumPoints(); ++i)
-    {
-        int32_t sx = source.getField<int32_t>(sdimX, i);
-        int32_t sy = source.getField<int32_t>(sdimY, i);
-        int32_t sz = source.getField<int32_t>(sdimZ, i);
-        uint16_t sintensity = source.getField<uint16_t>(sdimIntensity, i);
-        uint16_t sred = source.getField<uint16_t>(sdimRed, i);
-        uint16_t sgreen = source.getField<uint16_t>(sdimGreen, i);
-        uint16_t sblue = source.getField<uint16_t>(sdimBlue, i);
-
-        int32_t cx = candidate.getField<int32_t>(cdimX, i);
-        int32_t cy = candidate.getField<int32_t>(cdimY, i);
-        int32_t cz = candidate.getField<int32_t>(cdimZ, i);
-        uint16_t cintensity = candidate.getField<uint16_t>(cdimIntensity, i);
-        uint16_t cred = candidate.getField<uint16_t>(cdimRed, i);
-        uint16_t cgreen = candidate.getField<uint16_t>(cdimGreen, i);
-        uint16_t cblue = candidate.getField<uint16_t>(cdimBlue, i);
-
-
-        EXPECT_EQ(sx, cx);
-        EXPECT_EQ(sy, cy);
-        EXPECT_EQ(sz, cz);
-        EXPECT_EQ(sintensity, cintensity);
-        EXPECT_EQ(sred, cred);
-        EXPECT_EQ(sgreen, cgreen);
-        EXPECT_EQ(sblue, cblue);
-    }
-    delete iter_c;
-    delete iter_s;
-
-}
-**/

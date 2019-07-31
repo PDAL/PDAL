@@ -38,24 +38,27 @@ namespace pdal
 {
 
 std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
-        const std::string dimName, const Json::Value& json)
+        const std::string dimName, const NL::json& json)
 {
-    if (!json.isObject())
+    if (!json.is_object())
     {
         // If it's a value specified without the $eq operator, convert it.
-        Json::Value converted;
+        NL::json converted;
         converted["$eq"] = json;
         return create(layout, dimName, converted);
     }
 
     if (json.size() != 1)
     {
-        throw pdal_error("Invalid comparison object: " + json.toStyledString());
+        throw pdal_error("Invalid comparison object: " +
+            json.get<std::string>());
     }
 
-    const auto key(json.getMemberNames().at(0));
-    const ComparisonType co(toComparisonType(key));
-    const auto& val(json[key]);
+    auto it = json.begin();
+
+    //const auto key(json.getMemberNames().at(0));
+    const ComparisonType co(toComparisonType(it.key()));
+    const NL::json& val(it.value());
 
     const Dimension::Id dimId(layout.findDim(dimName));
     if (dimId == pdal::Dimension::Id::Unknown)
@@ -86,17 +89,14 @@ std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
     }
     else
     {
-        if (!val.isArray())
-        {
-            throw pdal_error("Invalid comparisons: " + val.toStyledString());
-        }
+        if (!val.is_array())
+            throw pdal_error("Invalid comparisons: " + val.dump());
 
         Operands ops;
-        for (const Json::Value& op : val)
+        for (auto& op : val)
         {
             ops.emplace_back(layout, op);
         }
-
         switch (co)
         {
         case ComparisonType::in:

@@ -34,6 +34,9 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>  // Suppresses windows 4251 warn. in ogr code.
+#include <ogr_geometry.h>
+
 #include <pdal/Geometry.hpp>
 
 namespace pdal
@@ -51,12 +54,14 @@ public:
     bool is3d() const;
     bool empty() const;
     void clear();
+    double x() const;
+    double y() const;
+    double z() const;
+    void x(double x);
+    void y(double y);
+    void z(double z);
 
     virtual void update(const std::string& wkt_or_json);
-
-    double x;
-    double y;
-    double z;
 };
 
 } // namespace filter

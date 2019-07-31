@@ -15,20 +15,18 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.qfit",
           "filename":"inputfile.qi",
           "flip_coordinates":"false",
           "scale_z":"1.0"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
@@ -45,7 +43,8 @@ scale_z
   Z scale. Use 0.001 to go from mm to m. [Default: **1**]
 
 little_endian
-  Are data in little endian format? This should be automatically detected by the driver.
+  Are data in little endian format? This should be automatically detected
+  by the driver. [Optional]
 
 .. _QFIT format: http://nsidc.org/data/docs/daac/icebridge/ilatm1b/docs/ReadMe.qfit.txt
 

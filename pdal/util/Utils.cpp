@@ -34,6 +34,7 @@
 
 #include <pdal/util/Utils.hpp>
 
+#include <array>
 #include <cassert>
 #include <cstdlib>
 #include <cctype>
@@ -416,31 +417,37 @@ std::string Utils::replaceAll(std::string result,
 }
 
 
-// Adapted from http://stackoverflow.com/a/11969098.
 std::string Utils::escapeJSON(const std::string &str)
 {
-    std::string escaped(str);
+    std::string s(str);
 
-    escaped.erase
-    (
-        remove_if(
-            escaped.begin(), escaped.end(), [](const char c)
-            {
-                return (c <= 31);
-            }
-        ),
-        escaped.end()
-    );
-
-    size_t pos(0);
-
-    while((pos = escaped.find_first_of("\"\\", pos)) != std::string::npos)
+    std::array<std::string, 35> replacements {
+      { "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004",
+        "\\u0005", "\\u0006", "\\u0007", "\\u0008", "\\t",
+        "\\n", "\\b", "\\f", "\\r", "\\u000E",
+        "\\u000F", "\\u0010", "\\u0011", "\\0012", "\\u0013",
+        "\\u0014", "\\u0015", "\\u0016", "\\u0017", "\\u0018",
+        "\\u0019", "\\u001A", "\\u001B", "\\u001C", "\\u001D",
+        "\\u001E", "\\u001F", " ", "!", "\\\"" }
+    };
+    for (std::string::size_type i = 0; i < s.size();)
     {
-        escaped.insert(pos, "\\");
-        pos += 2;
+        char val = s[i];
+        if (val < (char)replacements.size())
+        {
+            s.replace(i, 1, replacements[val]);
+            i += replacements[val].size();
+        }
+        else if (val == '\\')
+        {
+            s.replace(i, 1, "\\\\");
+            i += 2;
+        }
+        else
+            i++;
     }
 
-    return escaped;
+    return s;
 }
 
 
@@ -548,7 +555,7 @@ std::string Utils::demangle(const std::string& s)
 
 int Utils::screenWidth()
 {
-#ifdef WIN32
+#ifdef _WIN32
     return 80;
 #else
     struct winsize ws;

@@ -8,7 +8,7 @@ normalize common dimension types, like X, Y, Z, or Intensity, which are often
 found in LiDAR point clouds. Not all dimension types need to be fixed, however.
 Database drivers typically return unstructured lists of dimensions.  A reader
 might provide a simple file type, like :ref:`readers.text`, a complex database
-like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
+like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
 
 
 .. toctree::
@@ -19,14 +19,15 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.bpf
    readers.buffer
    readers.ept
+   readers.e57
    readers.faux
    readers.gdal
    readers.geowave
-   readers.greyhound
    readers.i3s
    readers.ilvis2
    readers.las
    readers.matlab
+   readers.memoryview
    readers.mbio
    readers.mrsid
    readers.nitf
@@ -45,6 +46,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
    readers.slpk
    readers.terrasolid
    readers.text
+   readers.tiledb
    readers.tindex
 
 :ref:`readers.bpf`
@@ -58,6 +60,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 :ref:`readers.ept`
     Used for reading `Entwine Point Tile <https://entwine.io>`__ format.
 
+:ref:`readers.e57`
+    Read point clouds in the E57 format.
+
 :ref:`readers.faux`
     Used for testing pipelines. It does not read from a file or database, but
     generates synthetic data to feed into the pipeline.
@@ -67,9 +72,6 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.geowave`
     Read point cloud data from Accumulo.
-
-:ref:`readers.greyhound`
-    Query point cloud data from a Greyhound server.
 
 :ref:`readers.i3s`
     Read data stored in the Esri I3S format.  The data is read from an
@@ -89,6 +91,10 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.mbio`
     Read sonar bathymetry data from formats supported by the MB-System library.
+
+:ref:`readers.memoryview`
+    Read data from memory where dimension data is arranged in rows.  For
+    use only with the PDAL API.
 
 :ref:`readers.mrsid`
     Read data compressed by the MrSID 4.0 LiDAR Compressor. Requires the
@@ -145,6 +151,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.greyhound`.
 
 :ref:`readers.text`
     Read point clouds from ASCII text files.
+
+:ref:`readers.tiledb`
+    Read point cloud data from a TileDB instance.
 
 :ref:`readers.tindex`
     The tindex (tile index) reader allows you to automatically merge and query

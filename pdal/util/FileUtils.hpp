@@ -41,6 +41,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "pdal_util_export.hpp"
 

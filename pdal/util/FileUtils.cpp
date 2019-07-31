@@ -36,7 +36,7 @@
 
 #include <iostream>
 #include <sstream>
-#ifndef WIN32
+#ifndef _WIN32
 #include <glob.h>
 #else
 #include <codecvt>
@@ -73,7 +73,7 @@ std::string addTrailingSlash(std::string path)
     return path;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 inline std::string fromNative(std::wstring const& in)
 {
     // TODO: C++11 define convert with static thread_local
@@ -285,7 +285,7 @@ std::string toAbsolutePath(const std::string& filename)
 {
     std::string result;
 
-#ifdef WIN32
+#ifdef _WIN32
     char buf[MAX_PATH]
     if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
         result = buf;
@@ -314,15 +314,17 @@ std::string toAbsolutePath(const std::string& filename)
 std::string toAbsolutePath(const std::string& filename, const std::string base)
 {
     const std::string newbase = toAbsolutePath(base);
-    return pdalboost::filesystem::absolute(toNative(filename), toNative(newbase)).string();
+    return pdalboost::filesystem::absolute(toNative(filename),
+        toNative(newbase)).string();
 }
+
 
 std::string getFilename(const std::string& path)
 {
 #ifdef _WIN32
     std::string pathsep("\\/");
 #else
-    char pathsep = '/';
+    char pathsep = Utils::dirSeparator;
 #endif
 
     std::string::size_type pos = path.find_last_of(pathsep);
@@ -370,7 +372,7 @@ bool isAbsolutePath(const std::string& path)
 void fileTimes(const std::string& filename, struct tm *createTime,
     struct tm *modTime)
 {
-#ifdef WIN32
+#ifdef _WIN32
     std::wstring const wfilename(toNative(filename));
     struct _stat statbuf;
     _wstat(wfilename.c_str(), &statbuf);

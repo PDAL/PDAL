@@ -37,6 +37,7 @@
 #include <pdal/FlexWriter.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Streamable.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

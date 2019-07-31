@@ -10,10 +10,10 @@ PDAL_ADD_PLUGIN(libname reader rdb
         io/RdbPointcloud.cpp
         io/RdbReader.cpp
     LINK_WITH
-        ${PDAL_JSONCPP_LIB_NAME}
         rdbcpp
     INCLUDES
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+        ${RDB_INCLUDE_CPP_DIR}
 )
 target_include_directories(${libname} PUBLIC "${PDAL_VENDOR_DIR}/eigen")
 
@@ -33,5 +33,6 @@ if (BUILD_RDBLIB_TESTS)
         INCLUDES
             ${PROJECT_BINARY_DIR}/plugins/rdb/test
             ${PROJECT_SOURCE_DIR}/plugins/rdb/io
+            ${RDB_INCLUDE_CPP_DIR}
     )
 endif()

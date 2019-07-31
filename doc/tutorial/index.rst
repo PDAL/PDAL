@@ -17,6 +17,7 @@ This section provides a collection of tutorials on how to use the PDAL
    :maxdepth: 1
 
    reading
+   iowa-entwine
    las
    pcl_block_tutorial
    pcl_ground/index

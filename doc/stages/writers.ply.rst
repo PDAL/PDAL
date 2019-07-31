@@ -17,19 +17,17 @@ Example
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.pcd",
           "filename":"inputfile.pcd"
-        },
-        {
+      },
+      {
           "type":"writers.ply",
           "storage_mode":"little endian",
           "filename":"outputfile.ply"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -41,14 +39,24 @@ filename
 storage_mode
   Type of ply file to write. Valid values are 'ascii', 'little endian',
   'big endian', and 'default'. 'default' is binary output in the endianness
-  of the machine. [Default: 'ascii']
+  of the machine. [Default: "ascii"]
 
 dims
-  List of dimensions to write as elements. [Default: all dimensions]
+  List of dimensions (and :ref:`types`) in the format
+  ``<dimension_name>[=<type>] [,...]`` to write as output.
+  (e.g., "Y=int32_t, X,Red=char")
+  [Default: All dimensions with stored types]
 
 faces
   Write a mesh as faces in addition to writing points as vertices.
   [Default: false]
+
+sized_types
+  PLY has variously been written with explicitly sized type strings
+  ('int8', 'float32", 'uint32', etc.) and implied sized type strings
+  ('char', 'float', 'int', etc.).  If true, explicitly sized type strings
+  are used.  If false, implicitly sized type strings are used.
+  [Default: true]
 
 precision
   If specified, the number of digits to the right of the decimal place

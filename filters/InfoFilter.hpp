@@ -36,10 +36,11 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
-#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
+
+class BOX3D;
 
 // This is just a pass-through filter, which collects some data about
 // the points that are fed through it

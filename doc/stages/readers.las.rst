@@ -13,7 +13,7 @@ In order to use compresed LAS (LAZ), your version of PDAL must be built
 with one of the two supported decompressors, `LASzip`_ or `LAZperf`_.
 See the :ref:`compression <las_compression>` option below for more information.
 
-.. _LASzip: http://www.laszip.org
+.. _LASzip: http://laszip.org
 .. _LAZperf: https://github.com/verma/laz-perf
 
 .. note::
@@ -55,20 +55,17 @@ Example
 -------
 
 .. code-block:: json
-    :linenos:
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.las",
           "filename":"inputfile.las"
-        },
-        {
+      },
+      {
           "type":"writers.text",
           "filename":"outputfile.txt",
-        }
-      ]
-    }
+      }
+  ]
 
 Options
 -------
@@ -81,9 +78,8 @@ _`filename`
 _`extra_dims`
   Extra dimensions to be read as part of each point beyond those specified by
   the LAS point format.  The format of the option is
-  <dimension_name>=<type>, ... where type is one of:
-  int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double.
-  `_t` may be added to any of the type names as well (e.g., uint32_t).
+  ``<dimension_name>=<type>[, ...]``.  Any valid PDAL :ref:`type <types>` can be
+  specified.
 
   .. note::
 

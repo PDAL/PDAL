@@ -94,15 +94,26 @@ void PipelineManager::readPipeline(const std::string& filename)
 }
 
 
+namespace
+{
+
+pdal_error stageError(const std::string& cls, const std::string& type)
+{
+    std::ostringstream ss;
+    ss << "Couldn't create " << cls << " stage of type '" << type << "'.\n";
+    ss << "You probably have a version of PDAL that didn't come with a plugin\n"
+        "you're trying to load.  Please see the FAQ at https://pdal.io/faq";
+    return pdal_error(ss.str());
+}
+
+}
+
+
 Stage& PipelineManager::addReader(const std::string& type)
 {
     Stage *reader = m_factory->createStage(type);
     if (!reader)
-    {
-        std::ostringstream ss;
-        ss << "Couldn't create reader stage of type '" << type << "'.";
-        throw pdal_error(ss.str());
-    }
+        throw stageError("reader", type);
     reader->setLog(m_log);
     reader->setProgressFd(m_progressFd);
     m_stages.push_back(reader);
@@ -114,11 +125,7 @@ Stage& PipelineManager::addFilter(const std::string& type)
 {
     Stage *filter = m_factory->createStage(type);
     if (!filter)
-    {
-        std::ostringstream ss;
-        ss << "Couldn't create filter stage of type '" << type << "'.";
-        throw pdal_error(ss.str());
-    }
+        throw stageError("filter", type);
     filter->setLog(m_log);
     filter->setProgressFd(m_progressFd);
     m_stages.push_back(filter);
@@ -130,11 +137,7 @@ Stage& PipelineManager::addWriter(const std::string& type)
 {
     Stage *writer = m_factory->createStage(type);
     if (!writer)
-    {
-        std::ostringstream ss;
-        ss << "Couldn't create writer stage of type '" << type << "'.";
-        throw pdal_error(ss.str());
-    }
+        throw stageError("writer", type);
     writer->setLog(m_log);
     writer->setProgressFd(m_progressFd);
     m_stages.push_back(writer);

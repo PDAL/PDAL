@@ -33,8 +33,6 @@
 
 #include <iostream>
 
-#include <json/json.h>
-
 #include "DimBuilder.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
@@ -123,36 +121,41 @@ bool DimBuilder::parseArgs(int argc, char *argv[])
 
 bool DimBuilder::execute()
 {
-    Json::Reader reader;
-
     std::ifstream in(m_input);
 
     if (!in)
         return false;
 
-    Json::Value root;
-    if (!reader.parse(in, root))
+    NL::json root;
+    try
     {
-        std::cerr << reader.getFormattedErrorMessages();
+        in >> root;
+    }
+    catch (NL::json::parse_error& err)
+    {
+        std::cerr << err.what() << "\n";
         return false;
     }
-    Json::Value dims = root.get("dimensions", Json::Value());
-    if (root.size() != 1 || !dims.isArray())
+
+    NL::json dims;
+    auto it = root.find("dimensions");
+    if (it != root.end())
+        dims = *it;
+    if (root.size() != 1 || !dims.is_array())
     {
         std::ostringstream oss;
 
         oss << "Root node must contain a single 'dimensions' array.";
         throw dimbuilder_error(oss.str());
     }
-    for (size_t i = 0; i < dims.size(); ++i)
+    for (auto& dim : dims)
     {
-        Json::Value& dim = dims[(int)i];
-        if (!dim.isObject())
+        if (!dim.is_object())
         {
             std::ostringstream oss;
 
             oss << "Found a dimension that is not an object: " <<
-                dim.asString();
+                dim.get<std::string>();
             throw dimbuilder_error(oss.str());
         }
         extractDim(dim);
@@ -171,32 +174,32 @@ bool DimBuilder::execute()
 }
 
 
-void DimBuilder::extractDim(Json::Value& dim)
+void DimBuilder::extractDim(NL::json& dim)
 {
     DimSpec d;
-    Json::Value empty;
 
     // Get dimension name.
-    Json::Value name = dim.get("name", empty);
-    dim.removeMember("name");
-    if (name.isNull())
+    auto it = dim.find("name");
+    if (it == dim.end())
         throw dimbuilder_error("Dimension missing name.");
-    if (!name.isString())
+    NL::json name = *it;
+    if (!name.is_string())
         throw dimbuilder_error("Dimension name must be a string.");
-    d.m_name = name.asString();
+    d.m_name = name.get<std::string>();
     validateDimension(d.m_name);
+    dim.erase(it);
 
     // Get dimension description.
-    Json::Value description = dim.get("description", empty);
-    dim.removeMember("description");
-    if (description.isNull())
+    it = dim.find("description");
+    if (it == dim.end())
     {
         std::ostringstream oss;
 
         oss << "Dimension '" << d.m_name << "' must have a description.";
         throw dimbuilder_error(oss.str());
     }
-    if (!description.isString())
+    NL::json description = *it;
+    if (!description.is_string())
     {
         std::ostringstream oss;
 
@@ -204,33 +207,48 @@ void DimBuilder::extractDim(Json::Value& dim)
             "string.";
         throw dimbuilder_error(oss.str());
     }
-    d.m_description = description.asString();
+    d.m_description = description.get<std::string>();
+    dim.erase(it);
 
     // Get dimension type
-    Json::Value type = dim.get("type", empty);
-    dim.removeMember("type");
-    if (type.isNull())
+    it = dim.find("type");
+    if (it == dim.end())
     {
         std::ostringstream oss;
 
         oss << "Dimension '" << d.m_name << "' must have a type.";
         throw dimbuilder_error(oss.str());
     }
-    d.m_type = Dimension::type(type.asString());
+    NL::json dimType = *it;
+    if (!dimType.is_string())
+    {
+        std::ostringstream oss;
+
+        oss << "Type of dimension '" << d.m_name << "' must be a "
+            "string.";
+        throw dimbuilder_error(oss.str());
+    }
+    d.m_type = Dimension::type(dimType.get<std::string>());
     if (d.m_type == Dimension::Type::None)
     {
         std::ostringstream oss;
 
-        oss << "Invalid type '" << type.asString() << "' specified for "
-            "dimension '" << d.m_name << "'.";
+        oss << "Invalid type '" << dimType.get<std::string>() <<
+            "' specified for " "dimension '" << d.m_name << "'.";
         throw dimbuilder_error(oss.str());
     }
+    dim.erase(it);
 
-    Json::Value altNames = dim.get("alt_names", empty);
-    dim.removeMember("alt_names");
-    if (!altNames.isNull())
+    NL::json altNames;
+    it = dim.find("alt_names");
+    if (it != dim.end())
     {
-        if (!altNames.isString())
+        altNames = *it;
+        dim.erase(it);
+    }
+    if (!altNames.is_null())
+    {
+        if (!altNames.is_string())
         {
             std::ostringstream oss;
 
@@ -238,7 +256,7 @@ void DimBuilder::extractDim(Json::Value& dim)
                 "be a string.";
             throw dimbuilder_error(oss.str());
         }
-        d.m_altNames = Utils::split2(altNames.asString(), ',');
+        d.m_altNames = Utils::split2(altNames.get<std::string>(), ',');
         for (auto& s : d.m_altNames)
         {
             Utils::trim(s);
@@ -249,7 +267,7 @@ void DimBuilder::extractDim(Json::Value& dim)
     {
         std::ostringstream oss;
 
-        oss << "Unexpected member '" << dim.getMemberNames()[0] << "' when "
+        oss << "Unexpected member '" << dim.begin().key() << "' when "
             "reading dimension '" << d.m_name << "'.";
         throw dimbuilder_error(oss.str());
     }

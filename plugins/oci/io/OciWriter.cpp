@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/pdal_features.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -889,7 +890,7 @@ void OciWriter::writeTile(const PointViewPtr view)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     BOX3D bounds;
-    view->calculateBounds(bounds);
+    calculateBounds(*view, bounds);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 

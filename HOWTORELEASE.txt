@@ -108,7 +108,6 @@ Release Process
 
 9) Write the release notes. Email PDAL mailing list with notice about release
 
-
 10) Update Alpine package
 
   - The PDAL Alpine package lives at
@@ -133,3 +132,8 @@ Release Process
     number should be submitted as PRs from a fork of the
     https://github.com/conda-forge/pdal-feedstock repository. In these cases,
     the build number should be incremented.
+
+12) Mint a new Zenodo DOI. Each new GitHub release should trigger a new release
+    in Zenodo. Just follow the instructions at
+    https://guides.github.com/activities/citable-code/ to publish the new
+    version and update the DOI for the new releae.

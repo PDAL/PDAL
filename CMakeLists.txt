@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.8.0" CACHE STRING "PDAL version")
+set(PDAL_VERSION_STRING "1.9.1" CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-set(PDAL_API_VERSION "7")
-set(PDAL_BUILD_VERSION "8.0.0")
+set(PDAL_API_VERSION "8")
+set(PDAL_BUILD_VERSION "9.0.1")
 
 # Name of C++ library
 
@@ -115,7 +115,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #------------------------------------------------------------------------------
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
-include(${PDAL_CMAKE_DIR}/geos.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
@@ -125,10 +124,10 @@ include(${PDAL_CMAKE_DIR}/lzma.cmake)
 include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
-include(${PDAL_CMAKE_DIR}/json.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 
 #------------------------------------------------------------------------------
@@ -178,9 +177,6 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
-if (NOT PDAL_HAVE_JSONCPP)
-    add_subdirectory(vendor/jsoncpp/dist)
-endif()
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -249,6 +245,11 @@ if (NOT PDAL_HAVE_ARBITER)
         io/EptReader.cpp)
     list(REMOVE_ITEM SRCS ${ARBITER_SRCS})
 endif()
+if (NOT GDAL_3)
+    file(GLOB PROJPIPELINE_FILTER_SRCS
+        ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)
+    list(REMOVE_ITEM SRCS ${PROJPIPELINE_FILTER_SRCS})
+endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 
 #
@@ -262,10 +263,10 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}
         ${PDAL_VENDOR_DIR}/eigen
         ${PDAL_VENDOR_DIR}/pdalboost
-        ${PDAL_JSONCPP_INCLUDE_DIR}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
-    INTERFACE
+        ${NLOHMANN_INCLUDE_DIR}
+    PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
@@ -273,7 +274,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${GDAL_LIBRARY}
-        ${GEOS_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
@@ -285,7 +285,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-        ${PDAL_JSONCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )

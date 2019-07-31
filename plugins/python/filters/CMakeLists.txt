@@ -9,12 +9,14 @@ PDAL_ADD_PLUGIN(python_libname filter python
         PythonFilter.cpp
     LINK_WITH
         ${PYTHON_LIBRARY}
-        ${PDAL_JSONCPP_LIB_NAME}
         ${CMAKE_DL_LIBS}
     INCLUDES
-        ${PYTHON_INCLUDE_DIR}
-        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+    SYSTEM_INCLUDES
+        ${PYTHON_ALL_INCLUDE_DIRS}
 )
+target_compile_definitions(${python_libname} PRIVATE
+    PDAL_PYTHON_LIBRARY="${PYTHON_LIBRARY}")
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_filters_python_test
@@ -22,5 +24,7 @@ if (WITH_TESTS)
             ../test/PythonFilterTest.cpp
         LINK_WITH
             ${python_libname} ${PYTHON_LIBRARY}
+        SYSTEM_INCLUDES
+            ${PYTHON_ALL_INCLUDE_DIRS}
     )
 endif()

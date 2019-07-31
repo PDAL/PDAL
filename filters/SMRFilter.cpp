@@ -62,7 +62,6 @@ namespace pdal
 
 using namespace Dimension;
 using namespace Eigen;
-using namespace eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -80,7 +79,6 @@ T ceil(double d)
 {
     return static_cast<T>(std::ceil(d));
 }
-
 }
 
 CREATE_STATIC_STAGE(SMRFilter, s_info)
@@ -132,12 +130,12 @@ void SMRFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    for (auto & r : m_args->m_ignored)
+    for (auto& r : m_args->m_ignored)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
             throwError("Invalid dimension name in 'ignored' option: '" +
-                r.m_name + "'.");
+                       r.m_name + "'.");
     }
     if (m_args->m_returns.size())
     {
@@ -185,20 +183,48 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         keptView->append(*view);
     else
         Segmentation::ignoreDimRanges(m_args->m_ignored, view, keptView,
-            ignoredView);
+                                      ignoredView);
+
+    // Check for 0's in ReturnNumber and NumberOfReturns
+    bool nrOneZero(false);
+    bool rnOneZero(false);
+    bool nrAllZero(true);
+    bool rnAllZero(true);
+    for (PointId i = 0; i < keptView->size(); ++i)
+    {
+        uint8_t nr =
+            keptView->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        uint8_t rn =
+            keptView->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        if ((nr == 0) && !nrOneZero)
+            nrOneZero = true;
+        if ((rn == 0) && !rnOneZero)
+            rnOneZero = true;
+        if (nr != 0)
+            nrAllZero = false;
+        if (rn != 0)
+            rnAllZero = false;
+    }
+
+    if ((nrOneZero || rnOneZero) && !(nrAllZero && rnAllZero))
+        throwError("Some NumberOfReturns or ReternNumber values were 0, but "
+                   "not all. Check that all values in the input file are >= "
+                   "1.");
 
     // Segment kept view into two views
     PointViewPtr firstView = keptView->makeNew();
     PointViewPtr secondView = keptView->makeNew();
-    if (m_args->m_returns.size())
+    if (nrAllZero && rnAllZero)
     {
-        Segmentation::segmentReturns(keptView, firstView, secondView,
-                                     m_args->m_returns);
+        log()->get(LogLevel::Warning)
+            << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
+               "Proceeding without any further return filtering.\n";
+        firstView->append(*keptView);
     }
     else
     {
-        for (PointId i = 0; i < keptView->size(); ++i)
-            firstView->appendPoint(*keptView.get(), i);
+        Segmentation::segmentReturns(keptView, firstView, secondView,
+                                     m_args->m_returns);
     }
 
     if (!firstView->size())
@@ -211,11 +237,11 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     m_srs = firstView->spatialReference();
 
-    firstView->calculateBounds(m_bounds);
-    m_cols = static_cast<int>(((m_bounds.maxx - m_bounds.minx) /
-            m_args->m_cell) + 1);
-    m_rows = static_cast<int>(((m_bounds.maxy - m_bounds.miny) /
-        m_args->m_cell) + 1);
+    calculateBounds(*firstView, m_bounds);
+    m_cols = static_cast<int>(
+        ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
+    m_rows = static_cast<int>(
+        ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1);
 
     // Create raster of minimum Z values per element.
     std::vector<double> ZImin = createZImin(firstView);

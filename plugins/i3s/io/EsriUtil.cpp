@@ -34,6 +34,8 @@
 
 #include "EsriUtil.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include "../lepcc/src/include/lepcc_c_api.h"
 #include "../lepcc/src/include/lepcc_types.h"
 
@@ -41,6 +43,27 @@ namespace pdal
 {
 namespace EsriUtil
 {
+
+/*Return value of data in json format*/
+NL::json parse(const std::string& data)
+{
+    NL::json j;
+
+    if (data.size())
+    {
+        try
+        {
+            j = NL::json::parse(data);
+        }
+        catch (const NL::json::parse_error& err)
+        {
+            throw json_parse_error(std::string("Error during parsing: ") +
+                err.what());
+        }
+    }
+    return j;
+}
+
 
 std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
 {

@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -89,7 +90,7 @@ void PcdWriter::writeView(const PointViewPtr view)
     BOX3D bounds;
     if (m_subtract_minimum)
     {
-        view->calculateBounds(bounds);
+        calculateBounds(*view, bounds);
         bounds.grow(bounds.minx + m_offset_x,
                     bounds.miny + m_offset_y,
                     bounds.minz + m_offset_z);

@@ -37,6 +37,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 
@@ -217,7 +218,7 @@ inline MetadataNode toMetadata(const BOX3D& bounds)
 
 inline int openProgress(const std::string& filename)
 {
-#ifdef WIN32
+#ifdef _WIN32
     return -1;
 #else
     int fd = open(filename.c_str(), O_WRONLY | O_NONBLOCK);
@@ -234,7 +235,7 @@ inline int openProgress(const std::string& filename)
 
 inline void closeProgress(int fd)
 {
-#ifdef WIN32
+#ifdef _WIN32
 #else
     if (fd >= 0)
         close(fd);
@@ -245,7 +246,7 @@ inline void closeProgress(int fd)
 inline void writeProgress(int fd, const std::string& type,
     const std::string& text)
 {
-#ifdef WIN32
+#ifdef _WIN32
 #else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"

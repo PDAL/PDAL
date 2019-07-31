@@ -69,7 +69,7 @@ void VoxelCentroidNearestNeighborFilter::addArgs(ProgramArgs& args)
 PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
 {
     BOX3D bounds;
-    view->calculateBounds(bounds);
+    calculateBounds(*view, bounds);
 
     KD3Index& kdi = view->build3dIndex();
 
@@ -93,7 +93,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
     PointViewPtr output = view->makeNew();
     for (auto const& t : populated_voxel_ids)
     {
-        Eigen::Vector3d centroid = eigen::computeCentroid(*view, t.second);
+        Eigen::Vector3d centroid = computeCentroid(*view, t.second);
         std::vector<PointId> neighbors =
             kdi.neighbors(centroid[0], centroid[1], centroid[2], 1);
         output->appendPoint(*view, neighbors[0]);
