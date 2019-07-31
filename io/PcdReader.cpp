@@ -137,7 +137,7 @@ bool PcdReader::fillFields()
             continue;
 
         Utils::trim(buf);
-        m_fields = Utils::split(buf, pdalboost::algorithm::is_any_of("\t\r "));
+        m_fields = Utils::split(buf, [](char c) { return c == '\t' || c == '\r' || c == ' '; });
         if (m_fields.size() != m_dims.size())
         {
             log()->get(LogLevel::Error)
