@@ -80,16 +80,15 @@ TEST(TranslateTest, t2)
     std::string in = Support::datapath("las/autzen_trim.las");
     std::string out = Support::temppath("out.las");
 
-    std::string json = R"(
-        [
-            {
-                \"type\": \"filters.stats\"
-            },
-            {
-                \"type\": \"filters.range\",
-                \"limits\": \"Z[0:100]\"
-            }
-        ]
+    std::string json = R"([\
+            {\
+                \"type\": \"filters.stats\"\
+            },\
+            {\
+                \"type\": \"filters.range\",\
+                \"limits\": \"Z[0:100]\"\
+            }\
+        ]\
     )";
 
 std::cerr << "Json input = " << json << "!\n";
@@ -123,11 +122,11 @@ std::cerr << "Json input = " << json << "!\n";
         output), 0);
 
     // Check that we work with an input and an output.
-    json = R"(\
-        [\
-          \"badinput.las\",\
-          \"badoutput.las\"\
-        ]\
+    json = R"(
+        [
+          \"badinput.las\",
+          \"badoutput.las\"
+        ]
     )";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
