@@ -80,15 +80,16 @@ TEST(TranslateTest, t2)
     std::string in = Support::datapath("las/autzen_trim.las");
     std::string out = Support::temppath("out.las");
 
-    std::string json = R"([\
-            {\
-                \"type\": \"filters.stats\"\
-            },\
-            {\
-                \"type\": \"filters.range\",\
-                \"limits\": \"Z[0:100]\"\
-            }\
-        ]\
+    std::string json = R"(
+        [
+            {
+                \"type\": \"filters.stats\"
+            },
+            {
+                \"type\": \"filters.range\",
+                \"limits\": \"Z[0:100]\"
+            }
+        ]
     )";
 
 std::cerr << "Json input = " << json << "!\n";
