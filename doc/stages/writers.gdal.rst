@@ -164,13 +164,13 @@ dimension
 
 bounds
   The bounds of the data to be written.  Points not in bounds are discarded.
-  The format is ([minx, maxx],[miny,maxy]). [Deprecated]
+  The format is ([minx, maxx],[miny,maxy]). [Optional]
 
 origin_x
-  X origin of the grid. [Default: None]
+  X origin (lower left corner) of the grid. [Default: None]
 
 origin_y
-  Y origin of the grid. [Default: None]
+  Y origin (lower left corner) of the grid. [Default: None]
 
 width
   Number of cells in the X direction. [Default: None]
@@ -179,5 +179,5 @@ height
   Number of cells in the Y direction. [Default: None]
 
 .. note::
-    The bounds option is deprecated.  Use 'origin_x', 'origin_y', 'width'
-    and 'height' instead.
+    You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
+    and 'height', but not both.
