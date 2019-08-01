@@ -62,7 +62,7 @@ class PDAL_DLL PipelineManager
 {
     FRIEND_TEST(json, tags);
 public:
-    PipelineManager();
+    PipelineManager(point_count_t streamLimit = 10000);
     ~PipelineManager();
 
     void setProgressFd(int fd)
@@ -114,6 +114,8 @@ public:
     QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
+    point_count_t executePreferStream();
+    void executeStream();
     void executeStream(StreamPointTable& table);
     void validateStageOptions() const;
     bool pipelineStreamable() const;
@@ -146,6 +148,8 @@ private:
     std::unique_ptr<StageFactory> m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
     PointTableRef m_table;
+    std::unique_ptr<FixedPointTable> m_streamTablePtr;
+    StreamPointTable& m_streamTable;
     Options m_commonOptions;
     OptionsMap m_stageOptions;
     PointViewSet m_viewSet;

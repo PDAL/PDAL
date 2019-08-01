@@ -44,8 +44,11 @@
 namespace pdal
 {
 
-PipelineManager::PipelineManager() : m_factory(new StageFactory),
+PipelineManager::PipelineManager(point_count_t streamLimit) :
+    m_factory(new StageFactory),
     m_tablePtr(new PointTable()), m_table(*m_tablePtr),
+    m_streamTablePtr(new FixedPointTable(streamLimit)),
+    m_streamTable(*m_streamTablePtr),
     m_progressFd(-1), m_input(nullptr)
 {}
 
@@ -200,10 +203,35 @@ void PipelineManager::prepare() const
 }
 
 
+point_count_t PipelineManager::executePreferStream()
+{
+    validateStageOptions();
+    Stage *s = getStage();
+    if (!s)
+        return 0;
+
+    // If a pipeline isn't streamable before being prepared, it's not
+    // going to become streamable, so just run it.
+    if (!s->pipelineStreamable())
+        return execute();
+    // After prepare a pipeline that was streamable might become
+    // non-streamable due to some options.
+    s->prepare(m_streamTable);
+    if (!s->pipelineStreamable())
+        // This will call validateStageOptions() a second time, but that
+        // doesn't seem important.  It will also re-prepare, but there's
+        // no helping this as we're using a different point table.
+        return execute();
+
+    // We can stream.
+    s->execute(m_streamTable);
+    return 0;
+}
+
+
 point_count_t PipelineManager::execute()
 {
     prepare();
-
     Stage *s = getStage();
     if (!s)
         return 0;
@@ -215,6 +243,18 @@ point_count_t PipelineManager::execute()
         cnt += view->size();
     }
     return cnt;
+}
+
+
+void PipelineManager::executeStream()
+{
+    validateStageOptions();
+    Stage *s = getStage();
+    if (!s)
+        return;
+
+    s->prepare(m_table);
+    s->execute(m_table);
 }
 
 

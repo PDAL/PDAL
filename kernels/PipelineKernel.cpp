@@ -139,13 +139,10 @@ int PipelineKernel::execute()
     }
 
     m_manager.readPipeline(m_inputFile);
-    if (m_noStream || !m_manager.pipelineStreamable())
+    if (m_noStream)
         m_manager.execute();
     else
-    {
-        FixedPointTable table(10000);
-        m_manager.executeStream(table);
-    }
+        m_manager.executePreferStream();
 
     if (m_metadataFile.size())
     {

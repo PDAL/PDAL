@@ -209,15 +209,10 @@ int TranslateKernel::execute()
         return 0;
     }
 
-    if (m_noStream || !m_manager.pipelineStreamable())
-    {
+    if (m_noStream)
         m_manager.execute();
-    }
     else
-    {
-        FixedPointTable t(10000);
-        m_manager.executeStream(t);
-    }
+        m_manager.executePreferStream();
 
     if (metaOut)
     {
