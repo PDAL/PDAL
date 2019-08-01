@@ -170,6 +170,18 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
 )
 
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_pcd_reader_test
+    FILES
+        io/PcdReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
+PDAL_ADD_TEST(pdal_io_pcd_writer_test
+    FILES
+        io/PcdWriterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
         io/PlyReaderTest.cpp

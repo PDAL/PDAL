@@ -32,7 +32,7 @@ endif()
 
 set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
-    PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, ICP filter, and ground, pcl, smooth, and view kernels")
+    PURPOSE "Enables various PCL-backed stages")
 
 add_definitions(${PCL_DEFINITIONS})
 #
@@ -49,40 +49,6 @@ endif()
 
 # PCL's configuration clobbers Boost find_package - do it again
 #find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
-
-#set (PCL_LIBRARIES "${PCL_COMMON_LIBRARY};${PCL_REGISTRATION_LIBRARY};${PCL_FEATURES_LIBRARY};${PCL_FILTERS_LIBRARY};${PCL_SEARCH_LIBRARY};${PCL_SEGMENTATION_LIBRARY};${PCL_IO_LIBRARY}")
-#
-# PCD Reader
-#
-PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
-    FILES
-        io/PcdHeader.hpp
-        io/PcdHeader.cpp
-        io/PcdReader.hpp
-        io/PcdReader.cpp
-    LINK_WITH
-        ${PCL_LIBRARIES}
-    INCLUDES
-        ${PCL_INCLUDE_DIRS}
-)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
-        set_source_files_properties(io/PcdReader.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
-    endif()
-
-#
-# PCD Writer
-#
-PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
-    FILES
-        io/PcdWriter.cpp
-    LINK_WITH
-        ${PCL_LIBRARIES}
-    INCLUDES
-        ${PCL_INCLUDE_DIRS}
-    )
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
-        set_source_files_properties(io/PcdWriter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
-    endif()
 
 #
 # PCLBlock Filter
