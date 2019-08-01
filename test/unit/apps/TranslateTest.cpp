@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2019, Hobu Inc.
+* Copyright (c) 2016, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -47,7 +47,6 @@ using namespace pdal;
 
 static int runTranslate(std::string const& cmdline, std::string& output)
 {
-    std::cerr << "Command = " << cmdline << "!\n";
     const std::string cmd = Support::binpath(Support::exename("pdal")) +
         " translate";
 
@@ -80,19 +79,15 @@ TEST(TranslateTest, t2)
     std::string in = Support::datapath("las/autzen_trim.las");
     std::string out = Support::temppath("out.las");
 
-    std::string json = R"(
-        [
-            {
-                \"type\": \"filters.stats\"
-            },
-            {
-                \"type\": \"filters.range\",
-                \"limits\": \"Z[0:100]\"
-            }
-        ]
-    )";
+    std::string json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+        { \\\"type\\\":\\\"filters.stats\\\" }, \
+        { \\\"type\\\":\\\"filters.range\\\", \
+          \\\"limits\\\":\\\"Z[0:100]\\\" } \
+        ] \
+        }";
 
-std::cerr << "Json input = " << json << "!\n";
     // Check that we work with just a bunch of filters.
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
@@ -107,82 +102,90 @@ std::cerr << "Json input = " << json << "!\n";
         output), 0);
 
     // Check that we work with no stages.
-    json = R"(
-        []
-    )";
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we work with only an input (not specified as such).
-    json = R"(
-        [
-          \"badinput.las\"
-        ]
-    )";
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          \\\"badinput.las\\\" \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we work with an input and an output.
-    json = R"(
-        [
-          \"badinput.las\",
-          \"badoutput.las\"
-        ]
-    )";
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          \\\"badinput.las\\\", \
+          \\\"badoutput.las\\\" \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we work with only an output.
-    json = R"(
-        [
-          {
-            \"type\": \"writers.las\",
-            \"filename\": \"badoutput.las\"
-          }
-        ]
-    )";
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"writers.las\\\", \
+          \\\"filename\\\":\\\"badoutput.las\\\" \
+          } \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we work with only an input.
-    json = R"(
-        [
-          {
-            \"type\": \"readers.las\",
-            \"filename\": \"badinput.las\"
-          }
-        ]
-    )";
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"readers.las\\\", \
+          \\\"filename\\\":\\\"badinput.las\\\" \
+          } \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
-    // Check that we succeed with unchanined multiple writers.
-    json = R"(
-        [
-          {
-            \"type\": \"writers.las\",
-            \"filename\": \"badoutput.las\"
-          },
-          \"badoutput2.las\"
-        ]
-    )";
+    // Check that we fail with unchanined multiple writers.
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"writers.las\\\", \
+          \\\"filename\\\":\\\"badoutput.las\\\" \
+          }, \
+          \\\"badoutput2.las\\\" \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we can handle chained writers.
-    json = R"(
-        [
-          {
-            \"type\": \"writers.las\",
-            \"filename\": \"badoutput.las\",
-            \"tag\": \"mytag\"
-          },
-          {
-            \"filename\": \"badoutput2.las\",
-            \"inputs\": \"mytag\"
-          }
-        ]
-    )";
+    json = " \
+        { \
+        \\\"pipeline\\\" : [ \
+          { \
+          \\\"type\\\":\\\"writers.las\\\", \
+          \\\"filename\\\":\\\"badoutput.las\\\", \
+          \\\"tag\\\":\\\"mytag\\\" \
+          }, \
+          { \
+          \\\"filename\\\":\\\"badoutput2.las\\\", \
+          \\\"inputs\\\": \\\"mytag\\\" \
+          } \
+        ] \
+        }";
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 }
