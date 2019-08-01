@@ -35,7 +35,6 @@
 #pragma once
 
 #include <memory>
-#include <valarray>
 
 #include <nanoflann/nanoflann.hpp>
 
