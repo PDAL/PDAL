@@ -41,6 +41,11 @@ threads
 feature_set
   The features to be computed. Currently only supports ``Dimensionality``. [Default: "Dimensionality"]
 
+stride
+  When finding k nearest neighbors, stride determines the sampling rate. A
+  stride of 1 retains each neighbor in order. A stride of two selects every
+  other neighbor and so on. [Default: 1]
+
 .. _dimensionality:
 
 Dimensionality feature set
