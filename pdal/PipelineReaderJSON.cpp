@@ -115,6 +115,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
+            inputs.push_back(s);
         }
         else
         {
@@ -145,9 +146,13 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
     }
     catch (NL::json::parse_error& err)
     {
-        throw pdal_error(
-            std::string("JSON pipeline: Unable to parse pipeline:\n") +
-            err.what());
+        // Look for a right bracket -- this indicates the start of the
+        // actual message from the parse error.
+        std::string s(err.what());
+        auto pos = s.find("]");
+        if (pos != std::string::npos)
+            s = s.substr(pos + 1);
+        throw pdal_error("Pipeline:" + s);
     }
 
     auto it = root.find("pipeline");
@@ -156,7 +161,7 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
     else if (root.is_array())
         parsePipeline(root);
     else
-        throw pdal_error("JSON pipeline: Root element is not a pipeline.");
+        throw pdal_error("Pipeline: root element is not a pipeline.");
 }
 
 
@@ -165,7 +170,7 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     std::istream* input = Utils::openFile(filename);
     if (!input)
     {
-        throw pdal_error("JSON pipeline: Unable to open stream for "
+        throw pdal_error("Pipeline: Unable to open stream for "
             "file \"" + filename + "\"");
     }
 
