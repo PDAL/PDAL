@@ -46,10 +46,6 @@ if(BUILD_PLUGIN_OCI)
     add_subdirectory(oci)
 endif()
 
-if(BUILD_PLUGIN_PCL)
-    add_subdirectory(pcl)
-endif()
-
 if(BUILD_PLUGIN_PGPOINTCLOUD)
     if (NOT PDAL_HAVE_LIBXML2)
         message(FATAL_ERROR "Can't build pgpointcloud plugin without libxml2")

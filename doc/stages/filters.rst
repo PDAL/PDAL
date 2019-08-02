@@ -384,14 +384,10 @@ These filters will invalidate an existing KD-tree.
    :hidden:
 
    filters.matlab
-   filters.pclblock
    filters.python
 
 :ref:`filters.matlab`
     Embed MATLAB software in a pipeline.
-
-:ref:`filters.pclblock`
-    Embed select PCL filters in a pipeline.
 
 :ref:`filters.python`
     Embed Python software in a pipeline.

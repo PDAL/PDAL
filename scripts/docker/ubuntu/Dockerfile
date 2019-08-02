@@ -173,7 +173,6 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
-        -DBUILD_PLUGIN_PCL=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DPYTHON_EXECUTABLE=/usr/bin/python3 \
         -DBUILD_PLUGIN_SQLITE=ON \
