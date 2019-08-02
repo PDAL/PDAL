@@ -80,8 +80,13 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("nodata", "No data value", m_noData,
         std::numeric_limits<double>::quiet_NaN());
     args.add("dimension", "Dimension to use", m_interpDimString, "Z");
-    args.add("bounds", "Bounds of data.  Required in streaming mode.",
-        m_bounds);
+    args.add("bounds", "Bounds of data. [deprecated]", m_bounds);
+    m_xOriginArg = &args.add("origin_x", "X origin for grid.", m_xOrigin);
+    m_yOriginArg = &args.add("origin_y", "Y origin for grid.", m_yOrigin);
+    m_widthArg = &args.add("width", "Number of cells in the X direction.",
+        m_width);
+    m_heightArg = &args.add("height", "Number of cells in the Y direction.",
+        m_height);
 }
 
 
@@ -111,6 +116,41 @@ void GDALWriter::initialize()
             throwError("Invalid output type: '" + ts + "'.");
     }
 
+    if (!m_radiusArg->set())
+        m_radius = m_edgeLength * sqrt(2.0);
+
+    int args = 0;
+    if (m_xOriginArg->set())
+        args |= 1;
+    if (m_yOriginArg->set())
+        args |= 2;
+    if (m_heightArg->set())
+        args |= 4;
+    if (m_widthArg->set())
+        args |= 8;
+    if (args != 0 && args != 15)
+        throwError("Must specify all or none of 'origin_x', 'origin_y', "
+            "'width' and 'height'.");
+    if (args == 15)
+    {
+        if (m_bounds.to2d().valid())
+            throwError("Specify either 'bounds' or 'origin_x'/'origin_y'/"
+                "'width'/'height' options -- not both");
+
+        // Subtracting .5 gets to the middle of the last cell.  This
+        // should get us back to the same place when figuring the
+        // cell count.
+        m_bounds = Bounds({m_xOrigin, m_yOrigin,
+            m_xOrigin + (m_edgeLength * (m_width - .5)),
+            m_yOrigin + (m_edgeLength * (m_height - .5))});
+    }
+
+    m_fixedGrid = m_bounds.to2d().valid();
+    // If we've specified a grid, we don't expand by point.  We also
+    // don't expand by point if we're running in standard mode.  That's
+    // set later in writeView.
+    m_expandByPoint = !m_fixedGrid;
+
     gdal::registerDrivers();
 }
 
@@ -121,13 +161,6 @@ void GDALWriter::prepared(PointTableRef table)
     if (m_interpDim == Dimension::Id::Unknown)
         throwError("Specified dimension '" + m_interpDimString +
             "' does not exist.");
-    if (!m_radiusArg->set())
-        m_radius = m_edgeLength * sqrt(2.0);
-    m_fixedGrid = m_bounds.to2d().valid();
-    // If we've specified a grid, we don't expand by point.  We also
-    // don't expand by point if we're running in standard mode.  That's
-    // set later in writeView.
-    m_expandByPoint = !m_fixedGrid;
 }
 
 
