@@ -8,4 +8,4 @@ Software Installation
 .. toctree::
    :maxdepth: 2
 
-   osgeo4w
+   conda
