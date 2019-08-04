@@ -1,0 +1,2 @@
+entwine build -i c:/users/hobu/PDAL/exercises/translation/just-ground.laz ^
+   -o c:/users/hobu/PDAL/exercises/translation/dublin-ground-ept

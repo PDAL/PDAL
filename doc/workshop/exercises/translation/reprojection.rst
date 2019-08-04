@@ -15,7 +15,7 @@ This exercise uses PDAL to reproject |ASPRSLAS| data
 .. _`LASzip`: http://laszip.org
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 
-Issue the following command in your `OSGeo4W Shell`.
+Issue the following command in your |Terminal|:
 
 
 .. literalinclude:: ./reprojection-command-1.txt
@@ -30,8 +30,7 @@ Unfortunately this doesn't produce the intended results for us. Issue the follow
 
 ::
 
-        pdal info c:/Users/hobu/PDAL/exercises/translation/csite-dd.laz --all ^
-            | jq .stats.bbox.native.bbox
+        pdal info c:/Users/hobu/PDAL/exercises/translation/csite-dd.laz --all | jq .stats.bbox.native.bbox
 
 .. image:: ../../images/reprojection-wrong-scale.png
     :target: ../../../_images/reprojection-wrong-scale.png
