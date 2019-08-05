@@ -34,7 +34,7 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
-today='July 25th, 2017'
+today='August 5th, 2019'
 docstitle='Home'
 
 intersphinx_mapping = {'pdal': ('https://www.pdal.io/', None)}
@@ -246,7 +246,7 @@ latex_elements = {
 
 # Latex figure (float) alignment
 'figure_align': 'htbp',
-'releasename':'07/25/2017',
+'releasename':'08/05/2019',
 # 'tocdepth':3,
 }
 

@@ -10,7 +10,7 @@ Exercise
 
 This exercise uses PDAL to fetch data from an Entwine index stored in an Amazon Web Services object store (bucket). Entwine is a point cloud indexing strategy, which rearranges points into a lossless octree structure known as EPT, for Entwine Point Tiles. The structure is described here: https://entwine.io/entwine-point-tile.html.
 
-EPT indexes can be used for visualisation as well as analysis and data manipulation at any scale. The entwine format is
+EPT indexes can be used for visualisation as well as analysis and data manipulation at any scale.
 
 Examples of Entwine usage can be found from very fine photogrammetric surveys to continental scale lidar management.
 
@@ -25,7 +25,7 @@ We will use a sample data set from Dublin, Ireland
 .. index:: Potree
 
 
-1. In your |Terminal|, navigate to the ``PDAL/exercises/translation``
+1. In your `Conda Shell`, navigate to the ``PDAL/exercises/translation``
    folder.
 
     .. literalinclude:: ./entwine-cd-command.txt
@@ -42,7 +42,7 @@ We will use a sample data set from Dublin, Ireland
         browser making requests against the EPT resource at
         http://na-c.entwine.io/dublin/ept.json
 
-3. Issue the following command in your |Terminal|.
+3. Issue the following command in your `Conda Shell`.
 
     .. literalinclude:: ./entwine-command.txt
 
@@ -69,4 +69,4 @@ Notes
 --------------------------------------------------------------------------------
 
 1. :ref:`readers.ept` contains more detailed documentation about how to
-   use PDAL's |EPT| reader .
+   use PDAL's EPT reader .

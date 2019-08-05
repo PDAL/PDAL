@@ -29,7 +29,7 @@ ability, you must have GDAL (and GeoTIFF_) linked in at compile time.
 
 Obtain `GDAL`_ via whatever method is convenient.  Linux platforms such as
 `Debian`_ have `DebianGIS`_, Mac OS X has the `KyngChaos`_ software frameworks,
-and Windows has the `OSGeo4W`_ platform.
+and Windows has the ``_ platform.
 
 * GDAL 1.9+ is required.
 

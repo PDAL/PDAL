@@ -111,8 +111,9 @@ The attributes in the ``attributes.json`` file include polygons with values
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
+Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
+The `--nostream` option disables stream mode
 
 .. literalinclude:: ./clipping-run-command.txt
     :linenos:
