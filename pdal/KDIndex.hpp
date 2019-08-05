@@ -38,6 +38,7 @@
 
 #include <nanoflann/nanoflann.hpp>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 
 namespace nanoflann
@@ -101,27 +102,27 @@ public:
             throw pdal_error("KD2Index: point view missing 'Y' dimension.");
     }
 
-    PointId neighbor(double x, double y)
+    PointId neighbor(double x, double y) const
     {
         std::vector<PointId> ids = neighbors(x, y, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointId idx)
+    PointId neighbor(PointId idx) const
     {
         std::vector<PointId> ids = neighbors(idx, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointRef &point)
+    PointId neighbor(PointRef &point) const
     {
         std::vector<PointId> ids = neighbors(point, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    std::vector<PointId> neighbors(double x, double y, point_count_t k)
+    std::vector<PointId> neighbors(double x, double y, point_count_t k) const
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         std::vector<PointId> output(k);
         std::vector<double> out_dist_sqr(k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -135,7 +136,7 @@ public:
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k)
+    std::vector<PointId> neighbors(PointId idx, point_count_t k) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -143,7 +144,7 @@ public:
         return neighbors(x, y, k);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k)
+    std::vector<PointId> neighbors(PointRef &point, point_count_t k) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -154,7 +155,7 @@ public:
     void knnSearch(double x, double y, point_count_t k,
         std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
 
         resultSet.init(&indices->front(), &sqr_dists->front());
@@ -226,64 +227,81 @@ public:
             throw pdal_error("KD3Index: point view missing 'Z' dimension.");
     }
 
-    PointId neighbor(double x, double y, double z)
+    PointId neighbor(double x, double y, double z) const
     {
         std::vector<PointId> ids = neighbors(x, y, z, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointId idx)
+    PointId neighbor(PointId idx) const
     {
         std::vector<PointId> ids = neighbors(idx, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    PointId neighbor(PointRef &point)
+    PointId neighbor(PointRef &point) const
     {
         std::vector<PointId> ids = neighbors(point, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
     std::vector<PointId> neighbors(double x, double y, double z,
-        point_count_t k)
+        point_count_t k, size_t stride=1) const
     {
-        k = std::min(m_buf.size(), k);
-        std::vector<PointId> output(k);
-        std::vector<double> out_dist_sqr(k);
-        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
+        // Account for input buffer size smaller than requested number of
+        // neighbors, then determine the number of neighbors to extract based
+        // on the desired stride.
+        k = (std::min)(m_buf.size(), k);
+        point_count_t k2 = stride * k;
 
-        resultSet.init(&output[0], &out_dist_sqr[0]);
-
+        // Prepare output indices and squared distances.
+        std::vector<PointId> output(k2);
+        std::vector<double> out_dist_sqr(k2);
+        
+        // Set the query point.
         std::vector<double> pt;
         pt.push_back(x);
         pt.push_back(y);
         pt.push_back(z);
+
+        // Extract k*stride neighbors, then return only k, selecting every nth
+        // neighbor at the given stride.
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k2);
+        resultSet.init(&output[0], &out_dist_sqr[0]);
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams());
+
+        // Perform the downsampling if a stride is provided.
+        if (stride > 1)
+        {
+            for (size_t i = 1; i < k; ++i)
+                output[i] = output[i * stride];
+            output.resize(k);
+        }
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k)
+    std::vector<PointId> neighbors(PointId idx, point_count_t k, size_t stride=1) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
         double z = m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
 
-        return neighbors(x, y, z, k);
+        return neighbors(x, y, z, k, stride);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k)
+    std::vector<PointId> neighbors(PointRef &point, point_count_t k, size_t stride=1) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
         double z = point.getFieldAs<double>(Dimension::Id::Z);
 
-        return neighbors(x, y, z, k);
+        return neighbors(x, y, z, k, stride);
     }
 
     void knnSearch(double x, double y, double z, point_count_t k,
         std::vector<PointId> *indices, std::vector<double> *sqr_dists)
     {
-        k = std::min(m_buf.size(), k);
+        k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
 
         resultSet.init(&indices->front(), &sqr_dists->front());
@@ -444,7 +462,7 @@ bool KDIndex<2>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX2D bounds;
-        m_buf.calculateBounds(bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
@@ -470,7 +488,7 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
     else
     {
         BOX3D bounds;
-        m_buf.calculateBounds(bounds);
+        calculateBounds(m_buf, bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;

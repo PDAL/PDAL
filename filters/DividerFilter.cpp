@@ -80,9 +80,9 @@ std::ostream& operator<<(std::ostream& out, const DividerFilter::Mode& mode)
 
 void DividerFilter::addArgs(ProgramArgs& args)
 {
-    args.add("mode", "A mode of ‘partition’ will write sequential points "
+    args.add("mode", "A mode of 'partition' will write sequential points "
         "to an output view until the view meets its predetermined size. "
-        "‘round_robin’ mode will iterate through the output views as it "
+        "'round_robin' mode will iterate through the output views as it "
         "writes sequential points.", m_mode, DividerFilter::Mode::Partition);
     m_cntArg = &args.add("count", "Number of output views", m_size);
     m_capArg = &args.add("capacity", "Maximum number of points in each "

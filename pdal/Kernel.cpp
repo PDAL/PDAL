@@ -40,6 +40,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <pdal/pdal_config.hpp>
@@ -132,10 +133,10 @@ std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 }
 
 
-void Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
+StringList Kernel::extractStageOptions(const StringList& cmdArgs)
 {
-    OptionsMap& stageOptions = m_manager.stageOptions();
     StringList stringArgs;
+    OptionsMap& stageOptions = m_manager.stageOptions();
 
     // Scan the argument vector for extra stage options.  Pull them out and
     // stick them in the list.  Let the ProgramArgs handle everything else.
@@ -162,26 +163,36 @@ void Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
         else
             stringArgs.push_back(cmdArgs[i]);
     }
+    return stringArgs;
+}
+
+bool Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
+{
+    StringList stringArgs = extractStageOptions(cmdArgs);
 
     try
     {
+        bool help;
+
         // parseSimple allows us to scan for the help option without
         // raising exception about missing arguments and so on.
         // It also removes consumed args from the arg list, so for now,
         // parse a copy that will be ignored by parse().
         ProgramArgs hargs;
-        hargs.add("help,h", "Print help message", m_showHelp);
+        hargs.add("help,h", "Print help message", help);
         hargs.parseSimple(stringArgs);
+        if (help)
+            return false;
 
         addBasicSwitches(args);
         addSwitches(args);
-        if (!m_showHelp)
-            args.parse(stringArgs);
+        args.parse(stringArgs);
     }
     catch (arg_error& e)
     {
         throw pdal_error(getName() + ": " + e.m_error);
     }
+    return true;
 }
 
 
@@ -191,16 +202,42 @@ int Kernel::doStartup()
 }
 
 
+// this just wraps ALL the code in total catch block
+int Kernel::run(const StringList& cmdArgs, LogPtr& log)
+{
+    m_log = log;
+    m_manager.setLog(m_log);
+
+    ProgramArgs args;
+
+    try
+    {
+        if (!doSwitches(cmdArgs, args))
+        {
+            outputHelp();
+            return 0;
+        }
+    }
+    catch (const pdal_error& e)
+    {
+        Utils::printError(e.what());
+        return 1;
+    }
+
+    int startup_status = doStartup();
+    if (startup_status)
+        return startup_status;
+
+    return doExecution(args);
+}
+
+
 int Kernel::doExecution(ProgramArgs& args)
 {
     if (m_hardCoreDebug)
-    {
-        int status = innerRun(args);
-        return status;
-    }
+        return innerRun(args);
 
     int status = 1;
-
     try
     {
         status = innerRun(args);
@@ -225,38 +262,6 @@ int Kernel::doExecution(ProgramArgs& args)
 }
 
 
-// this just wraps ALL the code in total catch block
-int Kernel::run(const StringList& cmdArgs, LogPtr& log)
-{
-    m_log = log;
-    m_manager.setLog(m_log);
-
-    ProgramArgs args;
-
-    try
-    {
-        doSwitches(cmdArgs, args);
-    }
-    catch (const pdal_error& e)
-    {
-        Utils::printError(e.what());
-        return 1;
-    }
-
-    if (m_showHelp)
-    {
-        outputHelp(args);
-        return 0;
-    }
-
-    int startup_status = doStartup();
-    if (startup_status)
-        return startup_status;
-
-    return doExecution(args);
-}
-
-
 int Kernel::innerRun(ProgramArgs& args)
 {
     try
@@ -264,10 +269,10 @@ int Kernel::innerRun(ProgramArgs& args)
         // do any user-level sanity checking
         validateSwitches(args);
     }
-    catch (pdal_error e)
+    catch (pdal_error& e)
     {
         Utils::printError(e.what());
-        outputHelp(args);
+        outputHelp();
         return -1;
     }
 
@@ -275,15 +280,21 @@ int Kernel::innerRun(ProgramArgs& args)
 }
 
 
-void Kernel::outputHelp(ProgramArgs& args)
+void Kernel::outputHelp()
 {
+    ProgramArgs basicArgs;
+    addBasicSwitches(basicArgs);
+
+    ProgramArgs args;
+    addSwitches(args);
+
     std::cout << "usage: " << "pdal " << getShortName() << " [options] " <<
         args.commandLine() << std::endl;
 
+    std::cout << "standard options:" << std::endl;
+    basicArgs.dump(std::cout, 2, Utils::screenWidth());
     std::cout << "options:" << std::endl;
     args.dump(std::cout, 2, Utils::screenWidth());
-
-    //ABELL - Fix me.
 
     std::cout <<"\nFor more information, see the full documentation for "
         "PDAL at http://pdal.io/\n" << std::endl;
@@ -292,10 +303,13 @@ void Kernel::outputHelp(ProgramArgs& args)
 
 void Kernel::addBasicSwitches(ProgramArgs& args)
 {
+    static bool s_help;
+
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
     args.add("driver", "Override reader driver", m_driverOverride);
+    args.add("help", "Print help and exit", s_help);
 }
 
 Stage& Kernel::makeReader(const std::string& inputFile, std::string driver)

@@ -42,7 +42,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -74,18 +74,22 @@ void Summary::extractMetadata(MetadataNode &m)
     if (!std::isinf(std) && !std::isnan(std))
         m.add("stddev", std, "standard deviation");
 
-    double k = kurtosis();
-    if (!std::isinf(k) && !std::isnan(k))
-        m.add("kurtosis", k, "kurtosis");
-
-    double sk = skewness();
-    if (!std::isinf(sk) && !std::isnan(sk))
-        m.add("skewness", skewness(), "skewness");
-
     double v = variance();
     if (!std::isinf(v) && !std::isnan(v))
         m.add("variance", v, "variance");
     m.add("name", m_name, "name");
+
+    if (m_advanced)
+    {
+        double k = kurtosis();
+        if (!std::isinf(k) && !std::isnan(k))
+            m.add("kurtosis", k, "kurtosis");
+
+        double sk = skewness();
+        if (!std::isinf(sk) && !std::isnan(sk))
+            m.add("skewness", skewness(), "skewness");
+    }
+
     if (m_enumerate == Enumerate)
     {
         for (auto& v : m_values)
@@ -169,6 +173,7 @@ void StatsFilter::addArgs(ProgramArgs& args)
     args.add("global", "Dimensions to compute global stats (median, mad, mode)",
         m_global);
     args.add("count", "Dimensions whose values should be counted", m_counts);
+    args.add("advanced", "Calculate skewness and kurtosis", m_advanced);
 }
 
 
@@ -232,7 +237,7 @@ void StatsFilter::prepared(PointTableRef table)
     // Create the summary objects.
     for (auto& dv : dims)
         m_stats.insert(std::make_pair(layout->findDim(dv.first),
-            Summary(dv.first, dv.second)));
+            Summary(dv.first, dv.second, m_advanced)));
 }
 
 
@@ -270,12 +275,9 @@ void StatsFilter::extractMetadata(PointTableRef table)
         MetadataNode box_metadata = m_metadata.add("bbox");
         MetadataNode metadata = box_metadata.add("native");
 
-        Json::Reader jsonReader;
-        Json::Value json;
-        jsonReader.parse(p.json(), json);
-
+        NL::json json = p.json();
         MetadataNode boundary = metadata.addWithType("boundary",
-            json.toStyledString(), "json", "GeoJSON boundary");
+            json.dump(), "json", "GeoJSON boundary");
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -284,18 +286,15 @@ void StatsFilter::extractMetadata(PointTableRef table)
         {
             p.setSpatialReference(ref);
             SpatialReference epsg4326("EPSG:4326");
-            pdal::Polygon pdd = p.transform(epsg4326);
-            BOX3D ddbox = pdd.bounds();
+            p.transform(epsg4326);
+            BOX3D ddbox = p.bounds();
             MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
             MetadataNode dddbox = box_metadata.add("EPSG:4326");
             dddbox.add(epsg_4326_box);
 
-            Json::Reader jsonReader;
-            Json::Value json;
-            jsonReader.parse(pdd.json(), json);
-
+            json = p.json();
             MetadataNode ddboundary = dddbox.addWithType("boundary",
-                json.toStyledString(), "json", "GeoJSON boundary");
+                json.dump(), "json", "GeoJSON boundary");
         }
     }
 }

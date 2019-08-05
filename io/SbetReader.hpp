@@ -38,6 +38,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/IStream.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -56,8 +57,10 @@ private:
     point_count_t m_numPts;
     point_count_t m_index;
     Dimension::IdList m_dims;
+    bool m_anglesAsDegrees;
 
     virtual bool processOne(PointRef& point);
+    virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);

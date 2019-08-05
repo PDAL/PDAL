@@ -66,34 +66,58 @@ void PlyWriter::addArgs(ProgramArgs& args)
     args.add("storage_mode", "PLY Storage Mode", m_format, Format::Ascii);
     args.add("dims", "Dimension names", m_dimNames);
     args.add("faces", "Write faces", m_faces);
+    args.add("sized_types",
+        "Write types as size-explicit strings (e.g. 'uint32')",
+        m_sizedTypes, true);
+    m_precisionArg = &args.add("precision", "Output precision", m_precision, 3);
 }
 
 
 void PlyWriter::prepared(PointTableRef table)
 {
+    PointLayoutPtr layout = table.layout();
+
+    if (m_precisionArg->set() && m_format != Format::Ascii)
+        throwError("Option 'precision' can only be set of the 'storage_mode' "
+            "is ascii.");
     if (m_dimNames.size())
     {
-        for (auto& name : m_dimNames)
+        for (auto& dimspec : m_dimNames)
         {
-            auto id = table.layout()->findDim(name);
+            Dimension::Type type;
+            StringList parts = Utils::split2(dimspec, '=');
+            std::string name = parts[0];
+            Utils::trim(name);
+            dimspec = Utils::tolower(name);
+            auto id = layout->findDim(name);
             if (id == Dimension::Id::Unknown)
                 throwError("Unknown dimension '" + name + "' in provided "
                     "dimension list.");
-            m_dims.push_back(id);
+            if (parts.size() == 1)
+                type = layout->dimType(id);
+            else if (parts.size() == 2)
+            {
+                Utils::trim(parts[1]);
+                type = Dimension::type(parts[1]);
+            }
+            else
+                throwError("Invalid format for dimension specification for "
+                    "dimension '" + name + "'. " "Must be 'name[=type]'.");
+            m_dims.emplace_back(id, type);
         }
     }
     else
     {
-        m_dims = table.layout()->dims();
-        for (auto dim : m_dims)
-            m_dimNames.push_back(Utils::tolower(table.layout()->dimName(dim)));
+        m_dims = layout->dimTypes();
+        for (const auto& dim : m_dims)
+            m_dimNames.push_back(Utils::tolower(layout->dimName(dim.m_id)));
     }
 }
 
 
 std::string PlyWriter::getType(Dimension::Type type) const
 {
-   static std::map<Dimension::Type, std::string> types =
+    static std::map<Dimension::Type, std::string> sizedTypes =
     {
         { Dimension::Type::Signed8, "int8" },
         { Dimension::Type::Unsigned8, "uint8" },
@@ -104,12 +128,23 @@ std::string PlyWriter::getType(Dimension::Type type) const
         { Dimension::Type::Float, "float32" },
         { Dimension::Type::Double, "float64" }
     };
+    static std::map<Dimension::Type, std::string> types =
+    {
+        { Dimension::Type::Signed8, "char" },
+        { Dimension::Type::Unsigned8, "uchar" },
+        { Dimension::Type::Signed16, "short" },
+        { Dimension::Type::Unsigned16, "ushort" },
+        { Dimension::Type::Signed32, "int" },
+        { Dimension::Type::Unsigned32, "uint" },
+        { Dimension::Type::Float, "float" },
+        { Dimension::Type::Double, "double" }
+    };
 
     try
     {
-        return types.at(type);
+        return m_sizedTypes ? sizedTypes.at(type) : types.at(type);
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {
         throwError("Can't write dimension of type '" +
                 Dimension::interpretationName(type) + "'.");
@@ -129,13 +164,17 @@ void PlyWriter::writeHeader(PointLayoutPtr layout) const
     for (auto dim : m_dims)
     {
         std::string name = *ni++;
-        std::string typeString = getType(layout->dimType(dim));
+        std::string typeString = getType(dim.m_type);
         *m_stream << "property " << typeString << " " << name << std::endl;
     }
     if (m_faces)
     {
         *m_stream << "element face " << faceCount() << std::endl;
-        *m_stream << "property list uint8 uint32 vertex_indices" << std::endl;
+        if (m_sizedTypes)
+            *m_stream << "property list uint8 uint32 vertex_indices";
+        else
+            *m_stream << "property list uchar uint vertex_indices";
+        *m_stream << std::endl;
     }
     *m_stream << "end_header" << std::endl;
 }
@@ -143,12 +182,14 @@ void PlyWriter::writeHeader(PointLayoutPtr layout) const
 
 void PlyWriter::ready(PointTableRef table)
 {
-    if (pointCount() > std::numeric_limits<uint32_t>::max())
+    if (pointCount() > (std::numeric_limits<uint32_t>::max)())
         throwError("Can't write PLY file.  Only " +
-            std::to_string(std::numeric_limits<uint32_t>::max()) +
+            std::to_string((std::numeric_limits<uint32_t>::max)()) +
             " points supported.");
 
     m_stream = Utils::createFile(m_filename, true);
+    if (!m_stream)
+        throwError("Couldn't open PLY file '" + m_filename + "' for writing.");
     writeHeader(table.layout());
 }
 
@@ -159,13 +200,85 @@ void PlyWriter::write(const PointViewPtr data)
 }
 
 
+template<typename T>
+void writeTextVal(std::ostream& out, PointRef& point, Dimension::Id dim)
+{
+    T t = point.getFieldAs<T>(dim);
+    out << t;
+}
+
+// Writing int/uint can write "char" type instead of numeric values.
+// Two specializations is easier than the SFINAE mess.
+template<>
+void writeTextVal<int8_t>(std::ostream& out, PointRef& point, Dimension::Id dim)
+{
+    int i = point.getFieldAs<int8_t>(dim);
+    out << i;
+}
+
+template<>
+void writeTextVal<uint8_t>(std::ostream& out, PointRef& point,
+    Dimension::Id dim)
+{
+    uint32_t i = point.getFieldAs<uint8_t>(dim);
+    out << i;
+}
+
+
 void PlyWriter::writeValue(PointRef& point, Dimension::Id dim,
     Dimension::Type type)
 {
     if (m_format == Format::Ascii)
     {
-        double d = point.getFieldAs<double>(dim);
-        *m_stream << d;
+        if (Dimension::base(type) == Dimension::BaseType::Floating)
+        {
+            if (m_precisionArg->set())
+            {
+                *m_stream << std::fixed;
+                m_stream->precision(m_precision);
+            }
+
+            if (type == Dimension::Type::Float)
+                writeTextVal<float>(*m_stream, point, dim);
+            else
+                writeTextVal<double>(*m_stream, point, dim);
+
+            if (m_precisionArg->set())
+                m_stream->unsetf(std::ios_base::fixed);
+        }
+        else
+        {
+            switch (type)
+            {
+            case Dimension::Type::Unsigned8:
+                writeTextVal<uint8_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Unsigned16:
+                writeTextVal<uint16_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Unsigned32:
+                writeTextVal<uint32_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Unsigned64:
+                writeTextVal<uint64_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Signed8:
+                writeTextVal<int8_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Signed16:
+                writeTextVal<int16_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Signed32:
+                writeTextVal<int32_t>(*m_stream, point, dim);
+                break;
+            case Dimension::Type::Signed64:
+                writeTextVal<int64_t>(*m_stream, point, dim);
+                break;
+            default:
+                throwError("Internal error: invalid type found writing "
+                    "output.");
+            }
+        }
     }
     else if (m_format == Format::BinaryLe)
     {
@@ -188,8 +301,7 @@ void PlyWriter::writePoint(PointRef& point, PointLayoutPtr layout)
 {
     for (auto it = m_dims.begin(); it != m_dims.end();)
     {
-        Dimension::Id dim = *it;
-        writeValue(point, dim, layout->dimType(dim));
+        writeValue(point, it->m_id, it->m_type);
         ++it;
         if (m_format == Format::Ascii && it != m_dims.end())
             *m_stream << " ";

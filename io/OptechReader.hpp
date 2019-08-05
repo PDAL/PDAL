@@ -55,7 +55,8 @@ public:
 
     static const size_t MaximumNumberOfReturns = 4;
     static const size_t NumBytesInRecord = 69;
-    static const size_t MaxNumRecordsInBuffer = 1e6 / NumBytesInRecord;
+    static const size_t BufferSize = 1000000;
+    static const size_t MaxNumRecordsInBuffer = BufferSize / NumBytesInRecord;
 
     OptechReader();
 

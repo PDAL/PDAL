@@ -39,6 +39,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <io/LasReader.hpp>
+#include <filters/StatsFilter.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -65,13 +66,12 @@ void run_pipeline(std::string const& pipelineFile,
     std::string file(Support::configuredpath(pipelineFile));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " +
         options + " 2>&1", output);
-    EXPECT_EQ(0, stat);
+    EXPECT_EQ(0, stat) << "Failure running '" << pipelineFile << "' with "
+        "options '" << options << "'.";
     if (stat)
         std::cerr << output << std::endl;
     if (lookFor.size())
-    {
         EXPECT_NE(output.find(lookFor), std::string::npos);
-    }
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
@@ -157,6 +157,7 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/decimate.json",
                             "pipeline/ferry-reproject.json",
                             "pipeline/las2csv.json",
+                            "pipeline/las2csv-with-unicode-paths.json",
                             "pipeline/las2geojson.json",
                             "pipeline/las2space-delimited.json",
                             "pipeline/merge.json",
@@ -185,11 +186,11 @@ TEST(json, pipeline_stdin)
 TEST(json, pipeline_verify)
 {
     run_pipeline("pipeline/streamable.json", "--validate",
-        "\"streamable\" : true");
+        "\"streamable\": true");
     run_pipeline("pipeline/nonstreamable.json", "--validate",
-        "\"streamable\" : false");
+        "\"streamable\": false");
     run_pipeline("pipeline/invalid1.json", "--validate",
-        "Unable to parse");
+        "unexpected string literal");
     run_pipeline("pipeline/invalid2.json", "--validate",
         "Unexpected argument");
     run_pipeline("pipeline/streamable.json", "-v Debug",
@@ -197,7 +198,6 @@ TEST(json, pipeline_verify)
     run_pipeline("pipeline/streamable.json", "-v Debug --nostream",
         "standard mode");
 }
-
 
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
 
@@ -305,7 +305,7 @@ TEST(json, tags)
     EXPECT_EQ(totalInputs, 3U);
 }
 
-TEST(json, issue1417)
+TEST(json, issue_1417)
 {
     std::string options = "--readers.las.filename=" +
         Support::datapath("las/utm15.las");
@@ -386,6 +386,64 @@ TEST(json, stagetags)
         " --stage.reader.compression=laszip "
         "--stage.reader.compression=lazperf", output);
     EXPECT_NE(stat, 0);
+}
+
+// Make sure that spatialreference works for random readers
+TEST(json, issue_2159)
+{
+    class XReader : public Reader
+    {
+        std::string getName() const
+            { return "readers.x"; }
+
+        virtual void addDimensions(PointLayoutPtr layout)
+        {
+            using namespace Dimension;
+
+            layout->registerDims( { Id::X, Id::Y, Id::Z } );
+        }
+
+        virtual point_count_t read(PointViewPtr v, point_count_t count)
+        {
+            using namespace Dimension;
+
+            for (PointId idx = 0; idx < count; ++idx)
+            {
+                v->setField(Id::X, idx, idx);
+                v->setField(Id::Y, idx, 10 * idx);
+                v->setField(Id::Z, idx, 1.152);
+            }
+            return count;
+        }
+    };
+
+    XReader xr;
+    Options rOpts;
+    rOpts.add("count", "1000");
+    rOpts.add("spatialreference", "EPSG:4326");
+    xr.setOptions(rOpts);
+
+    StatsFilter f;
+    f.setInput(xr);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    PointViewPtr v = *(s.begin());
+    SpatialReference srs = v->spatialReference();
+    EXPECT_EQ(srs, SpatialReference("EPSG:4326"));
+}
+
+TEST(json, issue_2438)
+{
+    std::string file1(Support::temppath("out2438_1.las"));
+    std::string file2(Support::temppath("out2438_1.las"));
+
+    FileUtils::deleteFile(file1);
+    FileUtils::deleteFile(file2);
+    run_pipeline("pipeline/issue2438.json");
+    EXPECT_TRUE(FileUtils::fileExists(file1));
+    EXPECT_TRUE(FileUtils::fileExists(file2));
 }
 
 } // namespace pdal

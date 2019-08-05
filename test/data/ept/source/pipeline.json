@@ -1,0 +1,17 @@
+{
+    "pipeline": [
+        "lone-star.laz",
+        {
+            "type": "filters.splitter",
+            "length": 25,
+            "origin_x": 515368,
+            "origin_y": 4918340
+        },
+        {
+            "type": "writers.las",
+            "forward": "all",
+            "filename": "split-star/split-#.laz"
+        }
+    ]
+}
+

@@ -37,6 +37,7 @@
 #include <array>
 #include <random>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -57,9 +58,9 @@ PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
     // write the data into the view
     for (PointId i = 0; i < cnt; i++)
     {
-        const uint8_t x = (uint8_t)(i + 1);
-        const int32_t y = i * 10;
-        const double z = i * 100;
+        const uint8_t x = static_cast<uint8_t>(i + 1);
+        const int32_t y = static_cast<int32_t>(i * 10);
+        const double z = static_cast<double>(i * 100);
 
         view->setField(Dimension::Id::Classification, i, x);
         view->setField(Dimension::Id::X, i, y);
@@ -227,70 +228,6 @@ TEST(PointViewTest, bigfile)
     }
 }
 
-
-static void check_bounds(const BOX3D& box,
-                         double minx, double maxx,
-                         double miny, double maxy,
-                         double minz, double maxz)
-{
-    EXPECT_FLOAT_EQ(box.minx, minx);
-    EXPECT_FLOAT_EQ(box.maxx, maxx);
-    EXPECT_FLOAT_EQ(box.miny, miny);
-    EXPECT_FLOAT_EQ(box.maxy, maxy);
-    EXPECT_FLOAT_EQ(box.minz, minz);
-    EXPECT_FLOAT_EQ(box.maxz, maxz);
-}
-
-
-TEST(PointViewTest, calcBounds)
-{
-    auto set_points = [](PointViewPtr view, PointId i, double x, double y,
-        double z)
-    {
-        view->setField(Dimension::Id::X, i, x);
-        view->setField(Dimension::Id::Y, i, y);
-        view->setField(Dimension::Id::Z, i, z);
-    };
-
-    PointTable table;
-    PointLayoutPtr layout(table.layout());
-
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-    layout->registerDim(Dimension::Id::Z);
-
-    const double lim_min = (std::numeric_limits<double>::lowest)();
-    const double lim_max = (std::numeric_limits<double>::max)();
-    PointViewPtr b0(new PointView(table));
-    BOX3D box_b0;
-    b0->calculateBounds(box_b0);
-    check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
-
-    PointViewPtr b1(new PointView(table));
-    set_points(b1, 0, 0.0, 0.0, 0.0);
-    set_points(b1, 1, 2.0, 2.0, 2.0);
-
-    PointViewPtr b2(new PointView(table));
-    set_points(b2, 0, 3.0, 3.0, 3.0);
-    set_points(b2, 1, 1.0, 1.0, 1.0);
-
-    PointViewSet bs;
-    bs.insert(b1);
-    bs.insert(b2);
-
-    BOX3D box_b1;
-    b1->calculateBounds(box_b1);
-    check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
-
-    BOX3D box_b2;
-    b2->calculateBounds(box_b2);
-    check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
-
-    BOX3D box_bs;
-    PointView::calculateBounds(bs, box_bs);
-    check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
-}
-
 TEST(PointViewTest, order)
 {
     PointTable table;
@@ -341,6 +278,17 @@ TEST(PointViewTest, issue1264)
     EXPECT_DOUBLE_EQ(d, -120.0);
     d = 260.0;
     EXPECT_THROW(v.setField(foo, 0, d), pdal_error);
+}
+
+TEST(PointViewTest, getFloatNan)
+{
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
+    layout->registerDim(Dimension::Id::ScanAngleRank, Dimension::Type::Float);
+    PointViewPtr view(new PointView(table));
+    const float scanAngleRank = std::numeric_limits<float>::quiet_NaN();
+    view->setField(Dimension::Id::ScanAngleRank, 0, scanAngleRank);
+    EXPECT_NO_THROW(view->getFieldAs<float>(Dimension::Id::ScanAngleRank, 0));
 }
 
 // Per discussions with @abellgithub (https://github.com/gadomski/PDAL/commit/c1d54e56e2de841d37f2a1b1c218ed723053f6a9#commitcomment-14415138)

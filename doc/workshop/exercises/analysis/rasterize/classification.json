@@ -1,0 +1,17 @@
+{
+  "pipeline":[
+    {
+        "type":"readers.ept",
+        "url":"http://na-c.entwine.io/dk",
+        "bounds":"([11045777.34375,11055492.1875],[-11852109.375,-11842394.53125],[223441.40625,233156.25])"
+    },
+    {
+      "type":"writers.gdal",
+      "filename":"denmark-classification.tif",
+      "dimension":"Classification",
+      "data_type":"uint16_t",
+      "output_type":"mean",
+      "resolution":30.0
+    }
+  ]
+}

@@ -139,7 +139,7 @@ class LzmaDecompressorImpl : public Lzma
 public:
     LzmaDecompressorImpl(BlockCb cb) : Lzma(cb)
     {
-        if (lzma_auto_decoder(&m_strm, std::numeric_limits<uint32_t>::max(),
+        if (lzma_auto_decoder(&m_strm, (std::numeric_limits<uint32_t>::max)(),
             LZMA_TELL_UNSUPPORTED_CHECK))
             throw compression_error("Can't create decompressor");
     }

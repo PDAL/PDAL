@@ -19,7 +19,7 @@ the JSON-formatted metadata created by PDAL to be written to a file.
 Metadata Nodes
 ------------------------------------------------------------------------------
 
-Each item of metadata is stored in an object known as a MetadataNode.
+Each item of metadata is stored in an object known as a ``MetadataNode``.
 Metadata nodes are reference types that can be copied cheaply.  Metadata nodes
 are annotated with the original data type to allow better interpretation of
 the data.

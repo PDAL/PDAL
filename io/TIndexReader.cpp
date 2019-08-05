@@ -110,15 +110,16 @@ void TIndexReader::addArgs(ProgramArgs& args)
         "index location", m_tileIndexColumnName, "location");
     args.add("sql", "OGR-compatible SQL statement for querying tile "
         "index layer", m_sql);
-    args.add("bounds", "PDAL-style bounds to limit query window (exclusive "
-        "of --polygon)", m_bounds);
-    args.add("wkt", "Well-known text description of bounds to limit query",
+    args.add("bounds", "Bounds box to limit query window. "
+       "Format: '([xmin,xmax],[ymin,ymax])'", m_bounds);
+    args.add("polygon", "Well-known text description of bounds to limit query",
         m_wkt);
+    args.addSynonym("polygon", "wkt");
     args.add("t_srs", "Transform SRS of tile index geometry", m_tgtSrsString,
         "EPSG:4326");
     args.add("filter_srs", "Transforms any wkt or boundary option to "
         "this coordinate system before filtering or reading data.",
-        m_filterSRS);
+        m_filterSRS, "EPSG:4326");
     args.add("where", "OGR SQL filter clause to use on the layer. It only "
         "works in combination with tile index layers that are defined "
         "with lyr_name", m_attributeFilter);
@@ -172,7 +173,9 @@ void TIndexReader::initialize()
     else
         m_out_ref.reset(new gdal::SpatialRef(m_out_ref->wkt()));
 
-    setSpatialReference(SpatialReference(m_out_ref->wkt()));
+    // Set SRS if not overridden.
+    if (getSpatialReference().empty())
+        setSpatialReference(SpatialReference(m_out_ref->wkt()));
 
     std::unique_ptr<gdal::Geometry> wkt_g;
 

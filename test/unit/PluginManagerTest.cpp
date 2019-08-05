@@ -121,11 +121,10 @@ TEST(PluginManagerTest, validnames)
 {
 #if defined(__APPLE__) && defined(__MACH__)
     static const std::string dlext(".dylib");
-#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || \
-      defined(__FreeBSD_kernel__) || defined(__GNU__)
-    static const std::string dlext(".so");
 #elif defined _WIN32
     static const std::string dlext(".dll");
+#else
+    static const std::string dlext(".so");
 #endif
 
     StringList type1 { "reader", "writer" };

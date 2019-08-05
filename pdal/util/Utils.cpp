@@ -34,26 +34,26 @@
 
 #include <pdal/util/Utils.hpp>
 
+#include <array>
 #include <cassert>
 #include <cstdlib>
 #include <cctype>
 #include <memory>
 #include <random>
+#include <sstream>
 
 #ifndef _WIN32
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
-#ifndef _WIN32
-#include <execinfo.h> // backtrace
-#endif
-#include <dlfcn.h> // dladdr
 #endif
 
 #pragma warning(disable: 4127)  // conditional expression is constant
 
 #include <stdio.h>
 #include <iomanip>
+
+#include "private/BacktraceImpl.hpp"
 
 typedef std::vector<std::string> StringList;
 
@@ -417,31 +417,37 @@ std::string Utils::replaceAll(std::string result,
 }
 
 
-// Adapted from http://stackoverflow.com/a/11969098.
 std::string Utils::escapeJSON(const std::string &str)
 {
-    std::string escaped(str);
+    std::string s(str);
 
-    escaped.erase
-    (
-        remove_if(
-            escaped.begin(), escaped.end(), [](const char c)
-            {
-                return (c <= 31);
-            }
-        ),
-        escaped.end()
-    );
-
-    size_t pos(0);
-
-    while((pos = escaped.find_first_of("\"\\/", pos)) != std::string::npos)
+    std::array<std::string, 35> replacements {
+      { "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004",
+        "\\u0005", "\\u0006", "\\u0007", "\\u0008", "\\t",
+        "\\n", "\\b", "\\f", "\\r", "\\u000E",
+        "\\u000F", "\\u0010", "\\u0011", "\\0012", "\\u0013",
+        "\\u0014", "\\u0015", "\\u0016", "\\u0017", "\\u0018",
+        "\\u0019", "\\u001A", "\\u001B", "\\u001C", "\\u001D",
+        "\\u001E", "\\u001F", " ", "!", "\\\"" }
+    };
+    for (std::string::size_type i = 0; i < s.size();)
     {
-        escaped.insert(pos, "\\");
-        pos += 2;
+        char val = s[i];
+        if (val < (char)replacements.size())
+        {
+            s.replace(i, 1, replacements[val]);
+            i += replacements[val].size();
+        }
+        else if (val == '\\')
+        {
+            s.replace(i, 1, "\\\\");
+            i += 2;
+        }
+        else
+            i++;
     }
 
-    return escaped;
+    return s;
 }
 
 
@@ -506,7 +512,7 @@ StringList Utils::wordWrap2(std::string const& s, size_t lineLength,
     size_t startPos = 0;
     while (true)
     {
-        size_t endPos = std::min(startPos + len - 1, s.size() - 1);
+        size_t endPos = (std::min)(startPos + len - 1, s.size() - 1);
         if (endPos + 1 == s.size())
         {
             pushWord(startPos, endPos);
@@ -549,7 +555,7 @@ std::string Utils::demangle(const std::string& s)
 
 int Utils::screenWidth()
 {
-#ifdef WIN32
+#ifdef _WIN32
     return 80;
 #else
     struct winsize ws;
@@ -598,66 +604,6 @@ double Utils::normalizeLongitude(double longitude)
     else if (longitude > 180)
         longitude -= 360;
     return longitude;
-}
-
-
-std::vector<std::string> Utils::backtrace()
-{
-    std::vector<std::string> lines;
-#ifndef _WIN32
-    const int MAX_STACK_SIZE(100);
-    void* buffer[MAX_STACK_SIZE];
-    std::vector<std::string> prefixes;
-    size_t maxPrefix(0);
-
-    std::size_t size(::backtrace(buffer, MAX_STACK_SIZE));
-    char** symbols(backtrace_symbols(buffer, size));
-
-    // Store strings and free symbols.  Start at 1 to remove this function
-    // from the stack.
-    for (std::size_t i(1); i < size; ++i)
-    {
-        lines.push_back(symbols[i]);
-        const std::string& symbol = lines.back();
-        std::string prefix;
-        std::size_t pos = symbol.find("0x");
-        if (pos != std::string::npos)
-            prefix = symbol.substr(0, pos);
-        else
-            prefix = std::to_string(i) + "  ???";
-        trimTrailing(prefix);
-        prefixes.push_back(prefix);
-        maxPrefix = std::max(prefix.size(), maxPrefix);
-    }
-    free(symbols);
-
-    // Replace the simple symbol with a better representation if possible.
-    for (std::size_t i(1); i < size; ++i)
-    {
-        std::string& symbol = lines[i - 1];
-        std::string& prefix = prefixes[i - 1];
-        prefix = prefix + std::string(maxPrefix + 2 - prefix.size(), ' ');
-
-        Dl_info info;
-        if (dladdr(buffer[i], &info))
-        {
-            const std::size_t offset(static_cast<char*>(buffer[i]) -
-                        static_cast<char*>(info.dli_saddr));
-
-            // Replace the address and mangled name with a human-readable
-            // name.
-            symbol = prefix + demangle(info.dli_sname) + " + " +
-                std::to_string(offset);
-        }
-        else
-        {
-            symbol = symbol.substr(maxPrefix + 2);
-            trimLeading(symbol);
-            symbol = prefix + symbol;
-        }
-    }
-#endif
-    return lines;
 }
 
 

@@ -34,6 +34,7 @@
 
 #include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
@@ -56,7 +57,7 @@ std::string Metadata::inferType(const std::string& val)
         pos = 0;
         l = std::stol(val, &pos);
     }
-    catch (std::invalid_argument)
+    catch (std::invalid_argument&)
     {}
     if (pos == val.length())
         return (l < 0 ? "nonNegativeInteger" : "integer");
@@ -66,7 +67,7 @@ std::string Metadata::inferType(const std::string& val)
         pos = 0;
         std::stod(val, &pos);
     }
-    catch(std::invalid_argument)
+    catch(std::invalid_argument&)
     {}
 
     if (pos == val.length())

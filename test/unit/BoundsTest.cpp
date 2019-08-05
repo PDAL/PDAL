@@ -33,8 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
-#include <pdal/util/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/SrsBounds.hpp>
+#include <pdal/util/Bounds.hpp>
 
 using namespace pdal;
 
@@ -288,14 +289,49 @@ TEST(BoundsTest, test_precisionloss)
     EXPECT_DOUBLE_EQ(b2.minx, 0.123456789);
 }
 
+namespace
+{
+    std::string fancySrs =
+    R"SRS(
+        COMPD_CS["OSGB36 / British National Grid + ODN",
+         PROJCS["OSGB 1936 / British National Grid",
+             GEOGCS["OSGB 1936",
+                 DATUM["OSGB_1936",
+                     SPHEROID["Airy 1830",6377563.396,299.3249646,
+                         AUTHORITY["EPSG","7001"]],
+                     TOWGS84[375,-111,431,0,0,0,0],
+                     AUTHORITY["EPSG","6277"]],
+                 PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],
+                 UNIT["DMSH",0.0174532925199433,AUTHORITY["EPSG","9108"]],
+                 AXIS["Lat",NORTH],
+                 AXIS["Long",EAST],
+                 AUTHORITY["EPSG","4277"]],
+             PROJECTION["Transverse_Mercator"],
+             PARAMETER["latitude_of_origin",49],
+             PARAMETER["central_meridian",-2],
+             PARAMETER["scale_factor",0.999601272],
+             PARAMETER["false_easting",400000],
+             PARAMETER["false_northing",-100000],
+             UNIT["metre",1,AUTHORITY["EPSG","9001"]],
+             AXIS["E",EAST],
+             AXIS["N",NORTH],
+             AUTHORITY["EPSG","27700"]],
+         VERT_CS["Newlyn",
+             VERT_DATUM["Ordnance Datum Newlyn",2005,AUTHORITY["EPSG","5101"]],
+             UNIT["metre",1,AUTHORITY["EPSG","9001"]],
+             AXIS["Up",UP],
+             AUTHORITY["EPSG","5701"]],
+         AUTHORITY["EPSG","7405"]]
+    )SRS";
+}
+
 TEST(BoundsTest, b1)
 {
     std::string s("([0,1],[0,1])");
-    std::istringstream iss(s);
 
     Bounds b;
 
-    iss >> b;
+    Utils::fromString(s, b);
     EXPECT_FALSE(b.is3d());
     EXPECT_TRUE(b.to3d().empty());
 
@@ -304,16 +340,45 @@ TEST(BoundsTest, b1)
     EXPECT_EQ(box.miny, 0.0);
     EXPECT_EQ(box.maxx, 1.0);
     EXPECT_EQ(box.maxy, 1.0);
+
+    std::string t("([+0e0,1.00000],[0,1e0]) / EPSG:2596");
+
+    SrsBounds sb;
+    Utils::fromString(t, sb);
+
+    EXPECT_FALSE(sb.is3d());
+    EXPECT_TRUE(sb.to3d().empty());
+
+    box = sb.to2d();
+    EXPECT_EQ(box.minx, 0.0);
+    EXPECT_EQ(box.miny, 0.0);
+    EXPECT_EQ(box.maxx, 1.0);
+    EXPECT_EQ(box.maxy, 1.0);
+
+    EXPECT_NE(std::string::npos,
+        sb.spatialReference().getWKT().find("Krassowsky 1940"));
+
+    Utils::fromString("([0, -1.00000],[0,-1e0] ) / " + fancySrs, sb);
+
+    EXPECT_FALSE(sb.is3d());
+    EXPECT_TRUE(sb.to3d().empty());
+
+    box = sb.to2d();
+    EXPECT_EQ(box.minx, 0.0);
+    EXPECT_EQ(box.miny, 0.0);
+    EXPECT_EQ(box.maxx, -1.0);
+    EXPECT_EQ(box.maxy, -1.0);
+    EXPECT_TRUE(sb.spatialReference().valid());
+    EXPECT_NE(std::string::npos,
+        sb.spatialReference().getWKT().find("Ordnance Datum Newlyn"));
 }
 
 TEST(BoundsTest, b2)
 {
     std::string s("([0,1],[0,1], [0,2])");
-    std::istringstream iss(s);
-
     Bounds b;
 
-    iss >> b;
+    Utils::fromString(s, b);
     EXPECT_TRUE(b.is3d());
 
     BOX2D box = b.to2d();
@@ -329,6 +394,35 @@ TEST(BoundsTest, b2)
     EXPECT_EQ(box3.maxy, 1.0);
     EXPECT_EQ(box3.minz, 0.0);
     EXPECT_EQ(box3.maxz, 2.0);
+
+    SrsBounds sb;
+    std::string t("([+0,1],[0,1.0000], [-0e0,2]) / EPSG:2596");
+    Utils::fromString(t, sb);
+    EXPECT_TRUE(sb.is3d());
+    box3 = sb.to3d();
+    EXPECT_EQ(box3.minx, 0.0);
+    EXPECT_EQ(box3.miny, 0.0);
+    EXPECT_EQ(box3.maxx, 1.0);
+    EXPECT_EQ(box3.maxy, 1.0);
+    EXPECT_EQ(box3.minz, 0.0);
+    EXPECT_EQ(box3.maxz, 2.0);
+
+    EXPECT_NE(std::string::npos,
+        sb.spatialReference().getWKT().find("Krassowsky 1940"));
+
+    Utils::fromString("([0,1],[0,1], [0,2]) / " + fancySrs, sb);
+    EXPECT_TRUE(sb.is3d());
+
+    box3 = sb.to3d();
+    EXPECT_EQ(box3.minx, 0.0);
+    EXPECT_EQ(box3.miny, 0.0);
+    EXPECT_EQ(box3.minz, 0.0);
+    EXPECT_EQ(box3.maxx, 1.0);
+    EXPECT_EQ(box3.maxy, 1.0);
+    EXPECT_EQ(box3.maxz, 2.0);
+    EXPECT_TRUE(sb.spatialReference().valid());
+    EXPECT_NE(std::string::npos,
+        sb.spatialReference().getWKT().find("Ordnance Datum Newlyn"));
 }
 
 TEST(BoundsTest, bounds_insertion)

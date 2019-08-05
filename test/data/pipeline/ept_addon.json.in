@@ -1,0 +1,13 @@
+ [
+      {
+          "type": "readers.ept",
+          "filename": "@CMAKE_SOURCE_DIR@/test/data/ept/ept-star",
+          "resolution": 100
+      },
+      {
+          "type": "writers.ept_addon",
+          "addons": {
+               "@CMAKE_SOURCE_DIR@/test/temp/Z": "Z"
+          }
+      }
+  ]

@@ -34,6 +34,8 @@
 
 #include "MortonOrderFilter.hpp"
 
+#include <pdal/EigenUtils.hpp>
+
 #include <climits>
 #include <iostream>
 #include <limits>
@@ -135,11 +137,11 @@ private:
 
 PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
 {
-    const int32_t cell = sqrt(inView->size());
+    const int32_t cell = static_cast<int32_t>(sqrt(inView->size()));
 
     // compute range
     BOX2D buffer_bounds;
-    inView->calculateBounds(buffer_bounds);
+    calculateBounds(*inView, buffer_bounds);
     const double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     const double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 
@@ -151,10 +153,14 @@ PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
         const double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
-        const int32_t xpos = floor((x - buffer_bounds.minx) / cell_width);
+        const int32_t xpos =
+            static_cast<int32_t>(std::floor((x - buffer_bounds.minx) /
+                cell_width));
 
         const double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
-        const int32_t ypos = floor((y - buffer_bounds.miny) / cell_height);
+        const int32_t ypos =
+            static_cast<int32_t>(std::floor((y - buffer_bounds.miny) /
+                cell_height));
 
         const uint32_t code = ReverseZOrder::encode_morton(xpos, ypos);
         const uint32_t reverse = ReverseZOrder::reverse_morton( code );
@@ -186,7 +192,7 @@ PointViewSet MortonOrderFilter::morton(PointViewPtr inView)
     std::multimap<Coord, PointId, CmpZOrder> sorted(compare);
 
     BOX2D buffer_bounds;
-    inView->calculateBounds(buffer_bounds);
+    calculateBounds(*inView, buffer_bounds);
     double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 

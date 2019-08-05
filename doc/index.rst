@@ -28,21 +28,15 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**04-06-2018**
+**05-09-2018**
 ................................................................................
 
-PDAL 1.7.1 has been released. Visit :ref:`download` to obtain a copy of the
-source code, or follow the :ref:`quickstart` to get going in a hurry with
-`Docker`_.
-
-
-.. _`Docker`: https://www.docker.com/
+PDAL 1.9.1 has been released. You can :ref:`download <download>` the source
+code or follow the :ref:`quickstart <quickstart>` to get going in a
+hurry with Conda.
 
 .. _`Howard Butler`: http://github.com/hobu
 .. _`Brad Chambers`: http://github.com/chambbj
-.. _`FOSS4GNA 2016`: https://2016.foss4g-na.org
-.. _`Point cloud web services with Greyhound, Entwine, and PDAL`: https://2016.foss4g-na.org/session/point-cloud-web-services-greyhound-entwine-and-pdal
-.. _`Filtering point clouds with PDAL and PCL`: https://2016.foss4g-na.org/session/filtering-point-clouds-pdal-and-pcl
 
 About
 --------------------------------------------------------------------------------
@@ -104,6 +98,14 @@ Dimensions
    :maxdepth: 2
 
    dimensions
+
+Types
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   types
 
 Python
 --------------------------------------------------------------------------------

@@ -157,6 +157,46 @@ TEST(PipelineManagerTest, InputGlobbing)
     FileUtils::deleteFile(Support::temppath("globbed.las"));
 }
 
+// EPT addon writer options are objects and not strings
+TEST(PipelineManagerTest, objects)
+{
+    std::string cmd = Support::binpath(Support::exename("pdal") +
+                                       " pipeline --validate");
+    std::string file = Support::configuredpath("pipeline/ept_addon.json");
+
+    std::string output;
+    EXPECT_NO_THROW(Utils::run_shell_command(cmd + " " + file, output));
+}
+
+TEST(PipelineManagerTest, arrayPipeline)
+{
+    std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline");
+
+    std::string file(Support::configuredpath("pipeline/array-pipeline.json"));
+
+    std::string output;
+    int stat = Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(stat, 0);
+
+    StageFactory f;
+    Stage *r = f.createStage("readers.las");
+
+    Options o;
+    o.add("filename", Support::temppath("array-pipeline.las"));
+    r->setOptions(o);
+
+    PointTable t;
+    r->prepare(t);
+    PointViewSet s = r->execute(t);
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr v = *(s.begin());
+
+    EXPECT_EQ(v->size(), 10653U);
+
+    FileUtils::deleteFile(Support::temppath("array-pipeline.las"));
+}
+
 TEST(PipelineManagerTest, replace)
 {
     PipelineManager mgr;

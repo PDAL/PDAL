@@ -54,9 +54,9 @@ void Check_Point(const PointView& data,
     double z = data.getFieldAs<double>(Dimension::Id::Z, index);
     int32_t t = data.getFieldAs<int32_t>(Dimension::Id::OffsetTime, index);
 
-    EXPECT_FLOAT_EQ(x, xref);
-    EXPECT_FLOAT_EQ(y, yref);
-    EXPECT_FLOAT_EQ(z, zref);
+    EXPECT_DOUBLE_EQ(x, xref);
+    EXPECT_DOUBLE_EQ(y, yref);
+    EXPECT_DOUBLE_EQ(z, zref);
     EXPECT_EQ(t, tref);
 }
 

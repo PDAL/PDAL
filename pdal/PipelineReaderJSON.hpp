@@ -1,5 +1,4 @@
-/******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+/****************************************************************************** * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -35,9 +34,8 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
-
-#include <json/json.h>
 
 #include <vector>
 #include <string>
@@ -57,26 +55,25 @@ class PDAL_DLL PipelineReaderJSON
 
 public:
     PipelineReaderJSON(PipelineManager&);
-    void parsePipeline(Json::Value&);
 
 private:
+    PipelineReaderJSON& operator=(const PipelineReaderJSON&) = delete;
+    PipelineReaderJSON(const PipelineReaderJSON&) = delete;
+
     typedef std::map<std::string, Stage *> TagMap;
 
+    void parsePipeline(NL::json&);
     void readPipeline(const std::string& filename);
     void readPipeline(std::istream& input);
-    std::string extractType(Json::Value& node);
-    std::string extractFilename(Json::Value& node);
-    std::string extractTag(Json::Value& node, TagMap& tags);
-    std::vector<Stage *> extractInputs(Json::Value& node, TagMap& tags);
-    Options extractOptions(Json::Value& node);
+    std::string extractType(NL::json& node);
+    std::string extractFilename(NL::json& node);
+    std::string extractTag(NL::json& node, TagMap& tags);
+    std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
+    Options extractOptions(NL::json& node);
     void handleInputTag(const std::string& tag, const TagMap& tags,
         std::vector<Stage *>& inputs);
 
     PipelineManager& m_manager;
-    std::string m_inputJSONFile;
-
-    PipelineReaderJSON& operator=(const PipelineReaderJSON&); // not implemented
-    PipelineReaderJSON(const PipelineReaderJSON&); // not implemented
 };
 
 } // namespace pdal

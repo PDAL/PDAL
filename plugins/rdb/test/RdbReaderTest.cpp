@@ -241,7 +241,7 @@ TEST(RdbReaderTest, Metadata) // reading metadata works?
             EXPECT_TRUE (dimension.findChild("minimum_value")      .valid());
             EXPECT_TRUE (dimension.findChild("maximum_value")      .valid());
             EXPECT_TRUE (dimension.findChild("default_value")      .valid());
-            EXPECT_TRUE (dimension.findChild("invalid_value")      .valid());
+//             EXPECT_TRUE (dimension.findChild("invalid_value")      .valid());
             EXPECT_TRUE (dimension.findChild("storage_class")      .valid());
             EXPECT_TRUE (dimension.findChild("compression_options").valid());
             EXPECT_TRUE (dimension.findChild("scale_factor")       .valid());

@@ -68,14 +68,25 @@ void SplitterFilter::addArgs(ProgramArgs& args)
         m_buffer, 0.0);
 }
 
-void SplitterFilter::initialize() {
-    if (!(m_buffer < m_length / 2.)) {
+
+void SplitterFilter::initialize()
+{
+    if (m_buffer >= m_length / 2)
+    {
         std::stringstream oss;
         oss << "Buffer (" << m_buffer <<
             ") must be less than half of length (" << m_length << ")";
-        throw pdal_error(oss.str());
+        throwError(oss.str());
     }
 }
+
+
+void SplitterFilter::setOrigin(double xOrigin, double yOrigin)
+{
+    m_xOrigin = xOrigin;
+    m_yOrigin = yOrigin;
+}
+
 
 PointViewSet SplitterFilter::run(PointViewPtr inView)
 {
@@ -83,51 +94,28 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     if (!inView->size())
         return viewSet;
 
-    auto addPoint = [this, &inView](PointId idx, int xpos, int ypos) {
+    auto addPoint = [this, &inView](PointRef& point, int xpos, int ypos) {
         Coord loc(xpos, ypos);
         PointViewPtr& outView = m_viewMap[loc];
         if (!outView)
             outView = inView->makeNew();
-        outView->appendPoint(*inView.get(), idx);
+        outView->appendPoint(*inView.get(), point.pointId());
     };
 
     // Use the location of the first point as the origin, unless specified.
     // (!= test == isnan(), which doesn't exist on windows)
     if (m_xOrigin != m_xOrigin)
-        m_xOrigin = inView->getFieldAs<double>(Dimension::Id::X, 0);
+        setOrigin(inView->getFieldAs<double>(Dimension::Id::X, 0), m_yOrigin);
     if (m_yOrigin != m_yOrigin)
-        m_yOrigin = inView->getFieldAs<double>(Dimension::Id::Y, 0);
+        setOrigin(m_xOrigin, inView->getFieldAs<double>(Dimension::Id::Y, 0));
     // Overlay a grid of squares on the points (m_length sides).  Each square
     // corresponds to a new point buffer.  Place the points falling in the
     // each square in the corresponding point buffer.
+    PointRef point(*inView, 0);
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
-        double dx = x - m_xOrigin;
-        int xpos = dx / m_length;
-        if (dx < 0)
-            xpos--;
-
-        double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
-        double dy = y - m_yOrigin;
-        int ypos = dy / m_length;
-        if (dy < 0)
-            ypos--;
-
-        addPoint(idx, xpos, ypos);
-
-        if (m_buffer > 0.0) {
-            if (squareContains(xpos - 1, ypos, x, y)) {
-                addPoint(idx, xpos - 1, ypos);
-            } else if (squareContains(xpos + 1, ypos, x, y)) {
-                addPoint(idx, xpos + 1, ypos);
-            }
-            if (squareContains(xpos, ypos - 1, x, y)) {
-                addPoint(idx, xpos, ypos - 1);
-            } else if (squareContains(xpos, ypos + 1, x, y)) {
-                addPoint(idx, xpos, ypos + 1);
-            }
-        }
+        point.setPointId(idx);
+        processPoint(point, addPoint);
     }
 
     // Pull the buffers out of the map and stick them in the standard
@@ -137,11 +125,56 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     return viewSet;
 }
 
-bool SplitterFilter::squareContains(int xpos, int ypos, double x, double y) const {
+
+void SplitterFilter::processPoint(PointRef& point, PointAdder adder)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double dx = x - m_xOrigin;
+    int xpos = static_cast<int>(dx / m_length);
+    if (dx < 0)
+        xpos--;
+
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    double dy = y - m_yOrigin;
+    int ypos = static_cast<int>(dy / m_length);
+    if (dy < 0)
+        ypos--;
+
+    adder(point, xpos, ypos);
+
+    // We check in initialize() to make sure that the buffer value isn't more
+    // than have the cell edge length.
+    if (m_buffer > 0.0) {
+        if (squareContains(xpos - 1, ypos, x, y))
+            adder(point, xpos - 1, ypos);
+        else if (squareContains(xpos + 1, ypos, x, y))
+            adder(point, xpos + 1, ypos);
+
+        if (squareContains(xpos, ypos - 1, x, y))
+            adder(point, xpos, ypos - 1);
+        else if (squareContains(xpos, ypos + 1, x, y))
+            adder(point, xpos, ypos + 1);
+
+        if (squareContains(xpos - 1, ypos - 1, x, y))
+            adder(point, xpos - 1, ypos - 1);
+        else if (squareContains(xpos - 1, ypos + 1, x, y))
+            adder(point, xpos - 1, ypos + 1);
+        else if (squareContains(xpos + 1, ypos - 1, x, y))
+            adder(point, xpos + 1, ypos - 1);
+        else if (squareContains(xpos + 1, ypos + 1, x, y))
+            adder(point, xpos + 1, ypos + 1);
+    }
+}
+
+
+bool SplitterFilter::squareContains(int xpos, int ypos,
+    double x, double y) const
+{
     double minx = m_xOrigin + xpos * m_length - m_buffer;
     double maxx = minx + m_length + 2 * m_buffer;
     double miny = m_yOrigin + ypos * m_length - m_buffer;
     double maxy = miny + m_length + 2 * m_buffer;
+
     return minx < x && x < maxx && miny < y && y < maxy;
 }
 

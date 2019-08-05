@@ -23,7 +23,7 @@ Materials
 Slides
 ................................................................................
 
-* `Slides <https://www.pdal.io/workshop/slides/>`__
+* `Slides <https://pdal.io/workshop/slides/>`__
 
 Workshop Materials
 ................................................................................

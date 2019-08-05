@@ -36,36 +36,28 @@
 
 #include <pdal/Filter.hpp>
 
-#include "private/DimRange.hpp"
-
+#include <memory>
 #include <string>
 
 namespace pdal
 {
 
+struct SMRArgs;
+
 class PDAL_DLL SMRFilter : public Filter
 {
 public:
-    SMRFilter() : Filter()
-    {
-    }
+    SMRFilter();
+    ~SMRFilter();
 
     std::string getName() const;
 
 private:
     int m_rows;
     int m_cols;
-    double m_cell;
-    double m_cut;
-    double m_slope;
-    double m_window;
-    double m_scalar;
-    double m_threshold;
-    std::string m_dir;
-    DimRange m_ignored;
-    bool m_lastOnly;
     BOX2D m_bounds;
     SpatialReference m_srs;
+    std::unique_ptr<SMRArgs> m_args;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);

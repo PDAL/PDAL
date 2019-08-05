@@ -34,9 +34,10 @@
 
 #include <memory>
 
-#include <pdal/SpatialReference.hpp>
-#include <pdal/PDALUtils.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 // gdal
@@ -66,8 +67,8 @@ using OGRScopedSpatialReference =
 OGRScopedSpatialReference ogrCreateSrs(std::string s = "")
 {
     return OGRScopedSpatialReference(
-            static_cast<OGRSpatialReference*>(
-                OSRNewSpatialReference(s.c_str())));
+        static_cast<OGRSpatialReference*>(
+            OSRNewSpatialReference(s.size() ? s.c_str() : nullptr)));
 }
 
 }
@@ -98,9 +99,43 @@ bool SpatialReference::valid() const
 }
 
 
+std::string SpatialReference::identifyHorizontalEPSG() const
+{
+    OGRScopedSpatialReference srs(ogrCreateSrs(getHorizontal()));
+
+    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
+        return "";
+
+    if (const char* c = srs->GetAuthorityCode(nullptr))
+        return std::string(c);
+
+    return "";
+}
+
+
+std::string SpatialReference::identifyVerticalEPSG() const
+{
+    OGRScopedSpatialReference srs(ogrCreateSrs(getVertical()));
+
+    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
+        return "";
+
+    if (const char* c = srs->GetAuthorityCode(nullptr))
+        return std::string(c);
+
+    return "";
+}
+
+
 std::string SpatialReference::getWKT() const
 {
     return m_wkt;
+}
+
+
+void SpatialReference::parse(const std::string& s, std::string::size_type& pos)
+{
+    set(s.substr(pos));
 }
 
 
@@ -112,10 +147,6 @@ void SpatialReference::set(std::string v)
         m_wkt.clear();
         return;
     }
-
-    std::string newV = FileUtils::readFileIntoString(v);
-    if (newV.size())
-        v = newV;
 
     if (isWKT(v))
     {
@@ -194,8 +225,6 @@ std::string SpatialReference::getVerticalUnits() const
 {
     std::string tmp;
 
-    std::string wkt = getVertical();
-    const char* poWKT = wkt.c_str();
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
     if (poSRS)
     {
@@ -238,8 +267,6 @@ std::string SpatialReference::getHorizontal() const
 
 std::string SpatialReference::getHorizontalUnits() const
 {
-    std::string wkt = getHorizontal();
-    const char* poWKT = wkt.c_str();
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
 
     if (!poSRS)
@@ -311,6 +338,17 @@ bool SpatialReference::isGeocentric() const
         return false;
 
     bool output = OSRIsGeocentric(current.get());
+    return output;
+}
+
+
+bool SpatialReference::isProjected() const
+{
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    if (!current)
+        return false;
+
+    bool output = OSRIsProjected(current.get());
     return output;
 }
 
@@ -389,89 +427,37 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 
 int SpatialReference::getUTMZone() const
 {
-
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
     if (!current)
         throw pdal_error("Could not fetch current SRS");
 
     int north(0);
     int zone = OSRGetUTMZone(current.get(), &north);
-    return north*zone;
+    return (north ? 1 : -1) * zone;
 }
 
-int SpatialReference::computeUTMZone(const BOX3D& box) const
+
+int SpatialReference::computeUTMZone(const BOX3D& cbox) const
 {
-    // Nothing we can do if we're an empty SRS
-    if (empty())
-        return 0;
+    SrsTransform transform(*this, SpatialReference("EPSG:4326"));
 
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
-    if (!current)
-        throw pdal_error("Could not fetch current SRS");
+    // We made the argument constant so copy so that we can modify.
+    BOX3D box(cbox);
 
-    OGRScopedSpatialReference wgs84 = ogrCreateSrs();
+    transform.transform(box.minx, box.miny, box.minz);
+    transform.transform(box.maxx, box.maxy, box.maxz);
 
-    if (OSRSetFromUserInput(wgs84.get(), "EPSG:4326") != OGRERR_NONE)
+    int minZone = calculateZone(box.minx, box.miny);
+    int maxZone = calculateZone(box.maxx, box.maxy);
+
+    if (minZone != maxZone)
     {
         std::ostringstream msg;
-        msg << "Could not import GDAL input spatial reference for WGS84";
+        msg << "computeUTMZone failed due to zone crossing. Zones "
+            "are " << minZone << " and " << maxZone << ".";
         throw pdal_error(msg.str());
     }
-
-    void* transform = OCTNewCoordinateTransformation(current.get(),
-            wgs84.get());
-
-    if (!transform)
-    {
-        throw pdal_error("Could not compute transform from "
-            "coordinate system to WGS84");
-    }
-
-    double minx(0.0), miny(0.0), minz(0.0);
-    double maxx(0.0), maxy(0.0), maxz(0.0);
-
-    // OCTTransform modifies values in-place
-    minx = box.minx; miny = box.miny; minz = box.minz;
-    maxx = box.maxx; maxy = box.maxy; maxz = box.maxz;
-
-    int ret = OCTTransform(transform, 1, &minx, &miny, &minz);
-    if (ret == 0)
-    {
-        OCTDestroyCoordinateTransformation(transform);
-        std::ostringstream msg;
-        msg << "Could not project minimum point for computeUTMZone::" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-
-    ret = OCTTransform(transform, 1, &maxx, &maxy, &maxz);
-    if (ret == 0)
-    {
-        OCTDestroyCoordinateTransformation(transform);
-        std::ostringstream msg;
-        msg << "Could not project maximum point for computeUTMZone::" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-
-    int min_zone(0);
-    int max_zone(0);
-    min_zone = calculateZone(minx, miny);
-    max_zone = calculateZone(maxx, maxy);
-
-    if (min_zone != max_zone)
-    {
-        OCTDestroyCoordinateTransformation(transform);
-        std::ostringstream msg;
-        msg << "Minimum zone is " << min_zone <<"' and maximum zone is '" <<
-            max_zone << "'. They do not match because they cross a "
-            "zone boundary";
-        throw pdal_error(msg.str());
-    }
-
-    OCTDestroyCoordinateTransformation(transform);
-
-    return min_zone;
+    return minZone;
 }
 
 
@@ -511,8 +497,6 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 
 std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 {
-    SpatialReference ref;
-
     std::ostringstream oss;
     oss << istr.rdbuf();
     srs.set(oss.str());

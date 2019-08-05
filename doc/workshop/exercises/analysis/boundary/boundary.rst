@@ -8,7 +8,7 @@ Finding the boundary
 .. index:: boundary, QGIS, OGR
 
 
-This exercise uses PDAL to find a tight-fighting boundary of an aerial scan.
+This exercise uses PDAL to find a tight-fitting boundary of an aerial scan.
 Printing the coordinates of the boundary for the file is quite simple using a
 single ``pdal info`` call, but visualizing the boundary is more complicated. To
 complete this exercise, we are going to use :ref:`qgis` to view the
@@ -78,4 +78,6 @@ Notes
    in LiDAR processing, and PDAL supports it through the ``tindex``
    application. You can also use this command to merge data together
    (query across boundaries, for example).
+
+.. _qgis: https://qgis.org
 

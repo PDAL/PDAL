@@ -16,11 +16,18 @@ if (APPLE AND PDAL_BUNDLE)
 else (APPLE AND PDAL_BUNDLE)
     add_executable(${PDAL_APP} pdal.cpp)
 endif(APPLE AND PDAL_BUNDLE)
-target_link_libraries(${PDAL_APP} PRIVATE
-    ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME})
+pdal_target_compile_settings(${PDAL_APP})
+target_link_libraries(${PDAL_APP}
+    PRIVATE
+        ${PDAL_BASE_LIB_NAME}
+        ${PDAL_UTIL_LIB_NAME}
+        ${GDAL_LIBRARY}
+        ${WINSOCK_LIBRARY}
+)
 target_include_directories(${PDAL_APP} PRIVATE
-    ${PDAL_JSONCPP_INCLUDE_DIR}
+    ${NLOHMANN_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
+    ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
 #------------------------------------------------------------------------------
@@ -47,9 +54,7 @@ if(LIBXML2_FOUND)
         "${PDAL_INCLUDE_DEFINITIONS} -I${LIBXML2_INCLUDE_DIR}")
 endif()
 
-set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} geos")
-set(PDAL_INCLUDE_DEFINITIONS
-    "${PDAL_INCLUDE_DEFINITIONS} -I${GEOS_INCLUDE_DIR}")
+set(PDAL_INCLUDE_DEFINITIONS ${PDAL_INCLUDE_DEFINITIONS})
 
 if (LASZIP_FOUND)
     set(PDAL_INCLUDE_DEFINITIONS

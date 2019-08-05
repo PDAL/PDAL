@@ -48,6 +48,12 @@ namespace pdal
 class PDAL_DLL BOX2D
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     double minx;  ///< Minimum X value.
     double maxx;  ///< Maximum X value.
     double miny;  ///< Minimum Y value.
@@ -91,15 +97,19 @@ public:
     void clear();
 
     /**
-      Expand the bounds of the box if a value is less than the current
-      minimum or greater than the current maximum.  If the bounds box is
-      currently empty, both minimum and maximum box bounds will be set to
-      the provided value.
+      Expand the bounds of the box to include the specified point.
 
-      \param x  X dimension value.
-      \param y  Y dimension value.
+      \param x  X point location.
+      \param y  Y point location.
     */
-    void grow(double x, double y);
+    BOX2D& grow(double x, double y);
+
+    /**
+      Expand the bounds of the box in all directions by a specified amount.
+
+      \param dist  Distance by which to expand the box.
+    */
+    BOX2D& grow(double dist);
 
     /**
       Determine if a bounds box contains a point.
@@ -157,13 +167,14 @@ public:
 
       \param other  Box that this box should contain.
     */
-    void grow(const BOX2D& other)
+    BOX2D& grow(const BOX2D& other)
     {
         if (other.minx < minx) minx = other.minx;
         if (other.maxx > maxx) maxx = other.maxx;
 
         if (other.miny < miny) miny = other.miny;
         if (other.maxy > maxy) maxy = other.maxy;
+        return *this;
     }
 
     /**
@@ -201,7 +212,7 @@ public:
       \param other  Box to test for overlap.
       \return  Whether the provided box overlaps this box.
     */
-    bool overlaps(const BOX2D& other)
+    bool overlaps(const BOX2D& other) const
     {
         return minx <= other.maxx && maxx >= other.minx &&
             miny <= other.maxy && maxy >= other.miny;
@@ -279,7 +290,17 @@ public:
       \return  A bounds box with infinite bounds,
     */
     static const BOX2D& getDefaultSpatialExtent();
+
+    /**
+      Parse a string as a BOX2D.
+
+      \param s    String representation of the box.
+      \param pos  Position in the string at which to start parsing.
+                  On return set to parsing end position.
+    */
+    void parse(const std::string& s, std::string::size_type& pos);
 };
+
 
 /**
   BOX3D represents a three-dimensional box with double-precision bounds.
@@ -287,6 +308,12 @@ public:
 class PDAL_DLL BOX3D : private BOX2D
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     using BOX2D::minx;
     using BOX2D::maxx;
     using BOX2D::miny;
@@ -347,7 +374,7 @@ public:
       \param y  Y dimension value.
       \param z  Z dimension value.
     */
-    void grow(double x, double y, double z);
+    BOX3D& grow(double x, double y, double z);
 
     /**
       Clear the bounds box to an empty state.
@@ -428,11 +455,25 @@ public:
 
       \param other  Box that this box should contain.
     */
-    void grow(const BOX3D& other)
+    BOX3D& grow(const BOX3D& other)
     {
         BOX2D::grow(other);
         if (other.minz < minz) minz = other.minz;
         if (other.maxz > maxz) maxz = other.maxz;
+        return *this;
+    }
+
+    /**
+      Expand this box by a specified amount.
+
+      \param dist  Distance by which box should be expanded.
+    */
+    BOX3D& grow(double dist)
+    {
+        BOX2D::grow(dist);
+        minz -= dist;
+        maxz += dist;
+        return *this;
     }
 
     /**
@@ -454,7 +495,7 @@ public:
       \param other  Box to test for overlap.
       \return  Whether the provided box overlaps this box.
     */
-    bool overlaps(const BOX3D& other)
+    bool overlaps(const BOX3D& other) const
     {
         return BOX2D::overlaps(other) &&
            minz <= other.maxz && maxz >= other.minz;
@@ -554,6 +595,15 @@ public:
       \return  A bounds box with infinite bounds,
     */
     static const BOX3D& getDefaultSpatialExtent();
+
+    /**
+      Parse a string as a BOX3D.
+
+      \param s    String representation of the box.
+      \param pos  Position in the string at which to start parsing.
+                  On return set to parsing end position.
+    */
+    void parse(const std::string& s, std::string::size_type& pos);
 };
 
 /**
@@ -563,6 +613,12 @@ public:
 class PDAL_DLL Bounds
 {
 public:
+    struct error : public std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
     Bounds()
     {}
 
@@ -572,6 +628,9 @@ public:
     BOX3D to3d() const;
     BOX2D to2d() const;
     bool is3d() const;
+    void grow(double x, double y);
+    void grow(double x, double y, double z);
+    void parse(const std::string& s, std::string::size_type& pos);
 
     friend PDAL_DLL std::istream& operator >> (std::istream& in,
         Bounds& bounds);
@@ -651,6 +710,6 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
-PDAL_DLL std::ostream& operator << (std::ostream& in, const Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds& bounds);
 
 } // namespace pdal

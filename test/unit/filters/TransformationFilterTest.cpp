@@ -71,40 +71,60 @@ TEST(TransformationMatrix, create)
 }
 
 
-TEST(TransformationMatrix, FromString)
+TEST(TransformationMatrix, init)
 {
+    auto check = [](const TransformationFilter::Transform& m)
+    {
+        EXPECT_DOUBLE_EQ(1, m[0]);
+        EXPECT_DOUBLE_EQ(0, m[1]);
+        EXPECT_DOUBLE_EQ(0, m[2]);
+        EXPECT_DOUBLE_EQ(0, m[3]);
+        EXPECT_DOUBLE_EQ(0, m[4]);
+        EXPECT_DOUBLE_EQ(1, m[5]);
+        EXPECT_DOUBLE_EQ(0, m[6]);
+        EXPECT_DOUBLE_EQ(0, m[7]);
+        EXPECT_DOUBLE_EQ(0, m[8]);
+        EXPECT_DOUBLE_EQ(0, m[9]);
+        EXPECT_DOUBLE_EQ(1, m[10]);
+        EXPECT_DOUBLE_EQ(0, m[11]);
+        EXPECT_DOUBLE_EQ(0, m[12]);
+        EXPECT_DOUBLE_EQ(0, m[13]);
+        EXPECT_DOUBLE_EQ(0, m[14]);
+        EXPECT_DOUBLE_EQ(1, m[15]);
+    };
+
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1";
-    TransformationMatrix m = transformationMatrixFromString(s);
-    EXPECT_DOUBLE_EQ(1, m[0]);
-    EXPECT_DOUBLE_EQ(0, m[1]);
-    EXPECT_DOUBLE_EQ(0, m[2]);
-    EXPECT_DOUBLE_EQ(0, m[3]);
-    EXPECT_DOUBLE_EQ(0, m[4]);
-    EXPECT_DOUBLE_EQ(1, m[5]);
-    EXPECT_DOUBLE_EQ(0, m[6]);
-    EXPECT_DOUBLE_EQ(0, m[7]);
-    EXPECT_DOUBLE_EQ(0, m[8]);
-    EXPECT_DOUBLE_EQ(0, m[9]);
-    EXPECT_DOUBLE_EQ(1, m[10]);
-    EXPECT_DOUBLE_EQ(0, m[11]);
-    EXPECT_DOUBLE_EQ(0, m[12]);
-    EXPECT_DOUBLE_EQ(0, m[13]);
-    EXPECT_DOUBLE_EQ(0, m[14]);
-    EXPECT_DOUBLE_EQ(1, m[15]);
+    TransformationFilter::Transform m;
+
+    std::stringstream iss(s);
+    iss >> m;
+    check(m);
+
+    TransformationFilter::Transform n { { 1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0, 1, 0,
+                                          0, 0, 0, 1 } };
+    check(n);
 }
 
 
 TEST(TransformationMatrix, TooShort)
 {
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0";
-    EXPECT_THROW(transformationMatrixFromString(s), pdal_error);
+    TransformationFilter::Transform m;
+    std::stringstream iss(s);
+
+    EXPECT_THROW(iss >> m, pdal_error);
 }
 
 
 TEST(TransformationMatrix, TooLong)
 {
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1 0";
-    EXPECT_THROW(transformationMatrixFromString(s), pdal_error);
+    TransformationFilter::Transform m;
+    std::stringstream iss(s);
+
+    EXPECT_THROW(iss >> m, pdal_error);
 }
 
 

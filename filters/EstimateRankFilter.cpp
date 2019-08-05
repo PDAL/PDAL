@@ -73,15 +73,14 @@ void EstimateRankFilter::addDimensions(PointLayoutPtr layout)
 
 void EstimateRankFilter::filter(PointView& view)
 {
-    KD3Index kdi(view);
-    kdi.build();
+    KD3Index& kdi = view.build3dIndex();
 
     for (PointId i = 0; i < view.size(); ++i)
     {
         // find the k-nearest neighbors
         auto ids = kdi.neighbors(i, m_knn);
 
-        view.setField(m_rank, i, eigen::computeRank(view, ids, m_thresh));
+        view.setField(m_rank, i, computeRank(view, ids, m_thresh));
     }
 }
 

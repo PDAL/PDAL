@@ -125,20 +125,40 @@ TEST(LasWriterTest, auto_offset)
     const std::string FILENAME(Support::temppath("offset_test.las"));
     PointTable table;
 
-    table.layout()->registerDim(Id::X);
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
     BufferReader bufferReader;
 
     PointViewPtr view(new PointView(table));
     view->setField(Id::X, 0, 125000.00);
     view->setField(Id::X, 1, 74529.00);
-    view->setField(Id::X, 2, 523523.02);
+    view->setField(Id::X, 2, 1000000.02);
+    view->setField(Id::Y, 0, 0);
+    view->setField(Id::Y, 1, 1);
+    view->setField(Id::Y, 2, 2);
+    view->setField(Id::Z, 0, -123);
+    view->setField(Id::Z, 1, 456.78);
+    view->setField(Id::Z, 2, 945.23);
+    bufferReader.addView(view);
+
+    view.reset(new PointView(table));
+    view->setField(Id::X, 0, 25.00);
+    view->setField(Id::X, 1, 74529.00);
+    view->setField(Id::X, 2, 534252.35);
+    view->setField(Id::Y, 0, 3);
+    view->setField(Id::Y, 1, 4);
+    view->setField(Id::Y, 2, 5);
+    view->setField(Id::Z, 0, 1.5);
+    view->setField(Id::Z, 1, 2147483524);
+    view->setField(Id::Z, 2, 745.23);
     bufferReader.addView(view);
 
     Options writerOps;
     writerOps.add("filename", FILENAME);
     writerOps.add("offset_x", "auto");
     writerOps.add("scale_x", "auto");
+    writerOps.add("offset_z", "auto");
+    writerOps.add("scale_z", "auto");
 
     LasWriter writer;
     writer.setOptions(writerOps);
@@ -156,16 +176,138 @@ TEST(LasWriterTest, auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ(74529.00, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ(25.00, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+    EXPECT_DOUBLE_EQ(-123, reader.header().offsetZ());
+
+    EXPECT_DOUBLE_EQ(0.00046564965530561733, reader.header().scaleX());
+    EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
+    // (max - min) are chosen to yield std::numeric_limits<int>::max();
+    EXPECT_DOUBLE_EQ(1.0, reader.header().scaleZ());
+
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 3u);
+    EXPECT_EQ(view->size(), 6u);
     EXPECT_NEAR(125000.00, view->getFieldAs<double>(Id::X, 0), .0001);
-    EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .0001);
-    EXPECT_NEAR(523523.02, view->getFieldAs<double>(Id::X, 2), .0001);
+    EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .001);
+    EXPECT_NEAR(1000000.02, view->getFieldAs<double>(Id::X, 2), .0001);
+    EXPECT_NEAR(25.00, view->getFieldAs<double>(Id::X, 3), .0001);
+    EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 4), .001);
+    EXPECT_NEAR(534252.35, view->getFieldAs<double>(Id::X, 5), .0001);
+
     FileUtils::deleteFile(FILENAME);
 }
+
+// Identical to above, but writes each input view to a separate output file.
+TEST(LasWriterTest, auto_offset2)
+{
+    using namespace Dimension;
+
+    const std::string outname(Support::temppath("offset_test#.las"));
+    const std::string inname1(Support::temppath("offset_test1.las"));
+    const std::string inname2(Support::temppath("offset_test2.las"));
+    PointTable table;
+
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader bufferReader;
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 125000.00);
+    view->setField(Id::X, 1, 74529.00);
+    view->setField(Id::X, 2, 1000000.02);
+    view->setField(Id::Y, 0, 0);
+    view->setField(Id::Y, 1, 1);
+    view->setField(Id::Y, 2, 2);
+    view->setField(Id::Z, 0, -123);
+    view->setField(Id::Z, 1, 456.78);
+    view->setField(Id::Z, 2, 945.23);
+    bufferReader.addView(view);
+
+    view.reset(new PointView(table));
+    view->setField(Id::X, 0, 25.00);
+    view->setField(Id::X, 1, 74529.00);
+    view->setField(Id::X, 2, 534252.35);
+    view->setField(Id::Y, 0, 3);
+    view->setField(Id::Y, 1, 4);
+    view->setField(Id::Y, 2, 5);
+    view->setField(Id::Z, 0, 1.5);
+    view->setField(Id::Z, 1, 2147483524);
+    view->setField(Id::Z, 2, 745.23);
+    bufferReader.addView(view);
+
+    Options writerOps;
+    writerOps.add("filename", outname);
+    writerOps.add("offset_x", "auto");
+    writerOps.add("scale_x", "auto");
+    writerOps.add("offset_z", "auto");
+    writerOps.add("scale_z", "auto");
+
+    LasWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(bufferReader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    {
+        Options readerOps;
+        readerOps.add("filename", inname1);
+        PointTable readTable;
+
+        LasReader reader;
+        reader.setOptions(readerOps);
+
+        reader.prepare(readTable);
+        EXPECT_DOUBLE_EQ(74529.00, reader.header().offsetX());
+        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+        EXPECT_DOUBLE_EQ(-123, reader.header().offsetZ());
+
+        EXPECT_NEAR(4.30956e-4, reader.header().scaleX(), 1e-4);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
+        // (max - min) are chosen to yield std::numeric_limits<int>::max();
+        EXPECT_NEAR(4.9743e-7, reader.header().scaleZ(), 1e-7);
+
+        PointViewSet viewSet = reader.execute(readTable);
+        EXPECT_EQ(viewSet.size(), 1u);
+        view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 3u);
+        EXPECT_NEAR(125000.00, view->getFieldAs<double>(Id::X, 0), .001);
+        EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .001);
+        EXPECT_NEAR(1000000.02, view->getFieldAs<double>(Id::X, 2), .0001);
+    }
+
+    {
+        Options readerOps;
+        readerOps.add("filename", inname2);
+        PointTable readTable;
+
+        LasReader reader;
+        reader.setOptions(readerOps);
+
+        reader.prepare(readTable);
+        EXPECT_DOUBLE_EQ(25.0, reader.header().offsetX());
+        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+        EXPECT_DOUBLE_EQ(1.5, reader.header().offsetZ());
+
+        EXPECT_NEAR(2.4876e-4, reader.header().scaleX(), 1e-7);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
+        EXPECT_NEAR(.99999, reader.header().scaleZ(), 1e-5);
+
+        PointViewSet viewSet = reader.execute(readTable);
+        EXPECT_EQ(viewSet.size(), 1u);
+        view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 3u);
+        EXPECT_NEAR(25.00, view->getFieldAs<double>(Id::X, 0), .0001);
+        EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .001);
+        EXPECT_NEAR(534252.35, view->getFieldAs<double>(Id::X, 2), .0001);
+    }
+
+    FileUtils::deleteFile(inname1);
+    FileUtils::deleteFile(inname2);
+}
+
 
 TEST(LasWriterTest, extra_dims)
 {
@@ -853,11 +995,11 @@ void compareFiles(const std::string& name1, const std::string& name2,
     EXPECT_EQ(d1.size(), d2.size());
     EXPECT_EQ(size1, size2);
 
-    for (PointId i = 0; i < std::min(size1, size2); i += increment)
+    for (PointId i = 0; i < (std::min)(size1, size2); i += increment)
     {
        v1->getPackedPoint(d1, i, buf1.data());
        v2->getPackedPoint(d2, i, buf2.data());
-       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), std::min(size1, size2)), 0);
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), (std::min)(size1, size2)), 0);
     }
 }
 
@@ -947,8 +1089,12 @@ TEST(LasWriterTest, fix1063_1064_1065)
 
     // https://github.com/PDAL/PDAL/issues/1065
     SpatialReference ref = v->spatialReference();
-    std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-    EXPECT_EQ(ref.getWKT(), wkt);
+    // This WKT is the leading common bit of WKT1 and WKT2 resolution.  When
+    // we're just doing WKT2, this can be improved.
+    std::string wkt {
+        R"(GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]])"
+    };
+    EXPECT_TRUE(Utils::startsWith(ref.getWKT(), wkt));
 }
 
 TEST(LasWriterTest, pdal_metadata)
@@ -1093,9 +1239,22 @@ TEST(LasWriterTest, forward_spec_3)
             !temp.findChild(recPred).empty() &&
             !temp.findChild(userPred).empty();
     };
+    MetadataNode origRoot = reader.getMetadata();
+    MetadataNodeList origNodes = origRoot.findChildren(pred);
+    EXPECT_EQ(origNodes.size(), 1u);
+    MetadataNode origNode = origNodes[0];
+
     MetadataNode root = reader2.getMetadata();
     MetadataNodeList nodes = root.findChildren(pred);
     EXPECT_EQ(nodes.size(), 1u);
+    MetadataNode node = nodes[0];
+
+    // Also test that we're properly forwarding data.
+    origNode = origNode.findChild("data");
+    node = node.findChild("data");
+    EXPECT_EQ(origNode.value().size(), 28u);
+    EXPECT_EQ(node.value().size(), origNode.value().size());
+    EXPECT_EQ(node.value(), origNode.value());
 }
 
 TEST(LasWriterTest, oversize_vlr)
@@ -1118,6 +1277,7 @@ TEST(LasWriterTest, oversize_vlr)
 }
 
 
+// Test auto scale/offset for streaming mode.
 TEST(LasWriterTest, issue1940)
 {
     StageFactory f;
@@ -1152,6 +1312,48 @@ TEST(LasWriterTest, issue1940)
     EXPECT_DOUBLE_EQ(h->scaleY(), .01);
 }
 
+
+#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
+// Make sure that we can translate this special test data to 1.4, dataformat 6.
+TEST(LasWriterTest, issue2320)
+{
+    std::string outfile(Support::temppath("2320.laz"));
+
+    {
+        LasReader r;
+        Options ro;
+        ro.add("filename", Support::datapath("las/wontcompress3.las"));
+        r.setOptions(ro);
+
+        LasWriter w;
+        Options wo;
+        wo.add("minor_version", 4);
+        wo.add("dataformat_id", 6);
+        wo.add("filename", outfile);
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    // Check that we can read.
+    {
+        LasReader r;
+        Options ro;
+        ro.add("filename", outfile);
+        r.setOptions(ro);
+
+        PointTable t;
+        r.prepare(t);
+        PointViewSet s = r.execute(t);
+        EXPECT_EQ(s.size(), 1U);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->size(), 1000U);
+    }
+}
+#endif
 
 /**
 

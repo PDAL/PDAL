@@ -34,6 +34,7 @@
 
 #include <iomanip>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
@@ -100,46 +101,13 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
 
 void PointView::calculateBounds(BOX2D& output) const
 {
-    for (PointId idx = 0; idx < size(); idx++)
-    {
-        double x = getFieldAs<double>(Dimension::Id::X, idx);
-        double y = getFieldAs<double>(Dimension::Id::Y, idx);
-
-        output.grow(x, y);
-    }
-}
-
-
-void PointView::calculateBounds(const PointViewSet& set, BOX2D& output)
-{
-    for (auto iter = set.begin(); iter != set.end(); ++iter)
-    {
-        PointViewPtr buf = *iter;
-        buf->calculateBounds(output);
-    }
+    pdal::calculateBounds(*this, output);
 }
 
 
 void PointView::calculateBounds(BOX3D& output) const
 {
-    for (PointId idx = 0; idx < size(); idx++)
-    {
-        double x = getFieldAs<double>(Dimension::Id::X, idx);
-        double y = getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = getFieldAs<double>(Dimension::Id::Z, idx);
-
-        output.grow(x, y, z);
-    }
-}
-
-
-void PointView::calculateBounds(const PointViewSet& set, BOX3D& output)
-{
-    for (auto iter = set.begin(); iter != set.end(); ++iter)
-    {
-        PointViewPtr buf = *iter;
-        buf->calculateBounds(output);
-    }
+    pdal::calculateBounds(*this, output);
 }
 
 
@@ -237,7 +205,7 @@ void PointView::dump(std::ostream& ostr) const
         {
             Dimension::Id d = *di;
             const Dimension::Detail *dd = layout->dimDetail(d);
-            ostr << Dimension::name(d) << " (" <<
+            ostr << layout->dimName(d) << " (" <<
                 Dimension::interpretationName(dd->type()) << ") : ";
 
             switch (dd->type())

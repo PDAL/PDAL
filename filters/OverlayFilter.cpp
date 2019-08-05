@@ -157,11 +157,13 @@ void OverlayFilter::ready(PointTableRef table)
 
 void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
 {
+    if (srs.empty())
+        return;
     for (auto& poly : m_polygons)
     {
         try
         {
-            poly.geom = poly.geom.transform(srs);
+            poly.geom.transform(srs);
         }
         catch (pdal_error& err)
         {

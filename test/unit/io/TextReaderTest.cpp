@@ -212,6 +212,7 @@ TEST(TextReaderTest, strip_whitespace_from_dimension_names)
     }
 }
 
+// Check that space-delimited files work with a CR/LF terminated file.
 TEST(TextReaderTest, issue1939)
 {
     TextReader reader;

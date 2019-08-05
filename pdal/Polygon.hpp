@@ -36,15 +36,13 @@
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
 #include <pdal/Geometry.hpp>
-
-#include <geos_c.h>
 
 namespace pdal
 {
 
-namespace geos { class ErrorHandler; }
+class BOX2D;
+class BOX3D;
 
 class PDAL_DLL Polygon : public Geometry
 {
@@ -57,38 +55,28 @@ public:
         SpatialReference ref = SpatialReference()) :
         Geometry(wkt_or_json, ref)
     {}
-    Polygon(const Polygon& poly) : Geometry(poly)
-    {}
-    Polygon(Polygon&& poly) : Geometry(poly)
-    {}
+
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
-    Polygon(GEOSGeometry* g, const SpatialReference& srs) :
-        Geometry(g, srs)
-    {}
     Polygon(OGRGeometryH g, const SpatialReference& srs);
-    Polygon& operator=(const Polygon&);
+    using Geometry::operator=;
 
     OGRGeometryH getOGRHandle();
 
-    Polygon simplify(double distance_tolerance, double area_tolerance) const;
-    Polygon transform(const SpatialReference& ref) const;
+    void simplify(double distance_tolerance, double area_tolerance);
     double area() const;
     std::vector<Polygon> polygons() const;
 
     bool covers(const PointRef& ref) const;
     bool equal(const Polygon& p) const;
-    bool covers(const Polygon& p) const;
     bool overlaps(const Polygon& p) const;
+    bool contains(double x, double y) const;
     bool contains(const Polygon& p) const;
     bool touches(const Polygon& p) const;
     bool within(const Polygon& p) const;
     bool crosses(const Polygon& p) const;
     Ring exteriorRing() const;
     std::vector<Ring> interiorRings() const;
-
-private:
-    void initializeFromBounds(const BOX3D& b);
 };
 
 } // namespace pdal

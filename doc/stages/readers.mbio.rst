@@ -26,19 +26,17 @@ This reads beams from a sonar data file and writes points to a LAS file.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type" : "readers.mbio",
           "filename" : "shipdata.m57",
           "format" : "MBF_EM3000RAW"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -47,9 +45,15 @@ Options
 filename
   Filename to read from [Required]
 
+.. include:: reader_opts.rst
+
 format
   Name of number of format of file being read.  See MB-System documentation
   for a list of `all formats`_. [Required]
+
+datatype
+  Type of data to read.  Either 'multibeam' or 'sidescan'.
+  [Default: 'multibeam']
 
 timegap
   The maximum number of seconds that can elapse between pings before the
@@ -59,9 +63,6 @@ speedmin
   The minimum speed that the ship can be moving to before the end of the
   data stream is assumed. [Default: 0]
 
-.. _MB-System: http://www.ldeo.columbia.edu/res/pi/MB-System/
+.. _MB-System: https://www.mbari.org/products/research-software/mb-system/
+.. _all formats: http://www3.mbari.org/products/mbsystem/html/mbsystem_formats.html
 
-.. _all formats: https://www.ldeo.columbia.edu/res/pi/MB-System/html/mbio.html#lbAI
-
-count
-  Maximum number of points to read [Optional]

@@ -45,13 +45,28 @@ namespace pdal
 class PDAL_DLL PointRef
 {
 public:
-    PointRef(PointContainer& container, PointId idx) :
+    PointRef(PointContainer& container, PointId idx = 0) :
         m_container(container), m_layout(*container.layout()), m_idx(idx)
     {}
 
+    /**
+      Determine if the point contains the specified dimension (defers to
+      the layout).
+
+      \param dim  Dimension to check for existence.
+      \return  Whether the point has a dimension.
+    */
     bool hasDim(Dimension::Id dim) const
     { return m_layout.hasDim(dim); }
 
+    /**
+      Get the value of a field/dimension, converting it to the type as
+      requested.  NOTE: Throws an exception if the value of the dimension
+      can't be converted to the requested type.
+
+      \param dim  Dimension to get.
+      \return  Value of the dimension.
+    */
     template<class T>
     T getFieldAs(Dimension::Id dim) const
     {
@@ -110,6 +125,12 @@ public:
         return val;
     }
 
+    /**
+      Set the value of a field/dimension for a point.
+
+      \param dim  Dimension to set.
+      \param val  Value to set.
+    */
     template<typename T>
     void setField(Dimension::Id dim, T val)
     {
@@ -156,14 +177,28 @@ public:
             m_container.setFieldInternal(dim, m_idx, &e);
     }
 
+    /**
+      Set the ID of a PointRef.
+
+      \param idx  point ID
+    */
     void setPointId(PointId idx)
         { m_idx = idx; }
+
+    /**
+      Fetch the ID of a PointRef.
+
+      \return  Current point ID.
+    */
     PointId pointId() const
         { return m_idx; }
+
     inline void getField(char *val, Dimension::Id d,
         Dimension::Type type) const;
     inline void setField(Dimension::Id dim,
         Dimension::Type type, const void *val);
+    inline void toMetadata(MetadataNode node) const;
+    inline MetadataNode toMetadata() const;
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
@@ -199,6 +234,15 @@ private:
     PointId m_idx;
 };
 
+
+/**
+  Get the value of a dimension of a point.
+
+  \param val  Pointer to buffer to which data should be written.  It must
+    be large enough to contain data of the requested \type.
+  \param d  Dimension to fetch.
+  \param type  Type to which data should be converted when fetched.
+*/
 inline void PointRef::getField(char *val, Dimension::Id d,
     Dimension::Type type) const
 {
@@ -242,6 +286,14 @@ inline void PointRef::getField(char *val, Dimension::Id d,
     memcpy(val, &e, Dimension::size(type));
 }
 
+
+/**
+  Set the value of a field in a point.
+
+  \param dim  Dimension to set.
+  \param type  PDAL type of data pointed to by \val
+  \param val  Pointer to data to set.
+*/
 inline void PointRef::setField(Dimension::Id dim,
     Dimension::Type type, const void *val)
 {
@@ -282,6 +334,33 @@ inline void PointRef::setField(Dimension::Id dim,
             break;
         case Dimension::Type::None:
             break;
+    }
+}
+
+/**
+  Convert a PointRef to metadata.
+
+  \return  A node containing the PointRef as metadata.
+*/
+inline MetadataNode PointRef::toMetadata() const
+{
+    MetadataNode node;
+
+    toMetadata(node);
+    return node;
+}
+
+/**
+  Add PointRef data to a root MetadataNode
+
+  \param root  Root node to which point data should be added.
+*/
+inline void PointRef::toMetadata(MetadataNode root) const
+{
+    for (Dimension::Id id : m_layout.dims())
+    {
+        double v = getFieldAs<double>(id);
+        root.add(m_layout.dimName(id), v);
     }
 }
 

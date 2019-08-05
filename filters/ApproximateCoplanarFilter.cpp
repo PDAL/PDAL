@@ -79,8 +79,7 @@ void ApproximateCoplanarFilter::filter(PointView& view)
 {
     using namespace Eigen;
 
-    KD3Index kdi(view);
-    kdi.build();
+    KD3Index& kdi = view.build3dIndex();
 
     for (PointId i = 0; i < view.size(); ++i)
     {
@@ -88,10 +87,10 @@ void ApproximateCoplanarFilter::filter(PointView& view)
         auto ids = kdi.neighbors(i, m_knn);
 
         // compute covariance of the neighborhood
-        auto B = eigen::computeCovariance(view, ids);
+        auto B = computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3f> solver(B);
+        SelfAdjointEigenSolver<Matrix3d> solver(B);
         if (solver.info() != Success)
             throwError("Cannot perform eigen decomposition.");
         auto ev = solver.eigenvalues();

@@ -35,8 +35,8 @@
 #pragma once
 
 #include <pdal/pdal_features.hpp>
-
 #include <pdal/FlexWriter.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/Streamable.hpp>
 
 #include "HeaderVal.hpp"
@@ -50,8 +50,6 @@
 #else
 using laszip_POINTER = void *;
 #endif
-
-#include <json/json.h>
 
 namespace pdal
 {
@@ -111,7 +109,7 @@ private:
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
     NumHeaderVal<uint8_t, 0, 10> m_dataformatId;
-    // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
+    // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
     // it as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_filesourceId;
     NumHeaderVal<uint16_t, 0, 31> m_globalEncoding;
@@ -130,7 +128,7 @@ private:
     StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
-    Json::Value m_userVLRs;
+    std::unique_ptr<NL::json> m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);
@@ -139,6 +137,9 @@ private:
     virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
+    virtual bool srsOverridden() const
+        { return m_aSrs.valid(); }
+    void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
     void spatialReferenceChanged(const SpatialReference& srs);

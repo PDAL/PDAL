@@ -19,7 +19,7 @@ What is its big idea?
 --------------------------------------------------------------------------------
 
 PDAL allows you to compose :ref:`operations <filters>` on point clouds into
-:ref:`pipelines <pipeline>` of :ref:`stages <stage_index>`. These pipelines can
+:ref:`pipelines <pipeline>` of stages. These pipelines can
 be written in a declarative JSON syntax or constructed using the available API.
 
 Why would you want to do that?
@@ -132,13 +132,7 @@ PCL
 `PCL`_ is a complementary, rather than substitute, open source software
 processing suite for point cloud data. The developer community of the PCL
 library is focused on algorithm development, robotic and computer vision, and
-real-time laser scanner processing. PDAL links and uses PCL, and PDAL provides
-a convenient pipeline mechanism to orchestrate PCL operations.
-
-.. note::
-
-    See :ref:`pcl_block_tutorial` for more detail on how to take advantage of
-    PCL capabilities within PDAL operations.
+real-time laser scanner processing. PDAL can read and write PCL's PCD format.
 
 Greyhound and Entwine
 ................................................................................

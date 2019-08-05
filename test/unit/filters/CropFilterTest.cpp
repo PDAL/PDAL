@@ -258,6 +258,7 @@ TEST(CropFilterTest, multibounds)
     EXPECT_EQ(total_cnt, 7);
 }
 
+
 TEST(CropFilterTest, stream)
 {
     using namespace Dimension;
@@ -301,6 +302,11 @@ TEST(CropFilterTest, stream)
                 point.setField(Id::X, 12);
                 point.setField(Id::Y, 2);
             }
+            else if (i == 5)
+            {
+                point.setField(Id::X, 105);
+                point.setField(Id::Y, 105);
+            }
             else
                 return false;
             i++;
@@ -315,39 +321,57 @@ TEST(CropFilterTest, stream)
     o.add("bounds", "([1, 3], [1, 3])");
     o.add("bounds", "([5, 7], [1, 3])");
     o.add("polygon", "POLYGON ((9 1, 11 1, 11 3, 9 3, 9 1))");
+    o.add("polygon", "MULTIPOLYGON (((9 1, 11 1, 11 3, 9 3, 9 1)),"
+        "((100 100, 110 100, 110 110, 100 110, 100 100 )))");
     crop.setInput(r);
     crop.setOptions(o);
 
-    auto cb = [](PointRef& point)
+    class TestFilter : public Filter, public Streamable
     {
-        static int i = 0;
-        if (i == 0)
+    public:
+        std::string getName() const
+            { return "filters.testfilter"; }
+        point_count_t m_count;
+
+    private:
+        virtual void ready(PointTableRef)
         {
-            EXPECT_EQ(point.getFieldAs<int>(Id::X), 2);
-            EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+            m_count = 0;
         }
-        if (i == 1)
+
+        virtual bool processOne(PointRef& point)
         {
-            EXPECT_EQ(point.getFieldAs<int>(Id::X), 6);
-            EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+            if (m_count == 0)
+            {
+                EXPECT_EQ(point.getFieldAs<int>(Id::X), 2);
+                EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+            }
+            if (m_count == 1)
+            {
+                EXPECT_EQ(point.getFieldAs<int>(Id::X), 6);
+                EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+            }
+            if (m_count == 2)
+            {
+                EXPECT_EQ(point.getFieldAs<int>(Id::X), 10);
+                EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+            }
+            if (m_count == 3)
+            {
+                EXPECT_EQ(point.getFieldAs<int>(Id::X), 105);
+                EXPECT_EQ(point.getFieldAs<int>(Id::Y), 105);
+            }
+            m_count++;
+            return true;
         }
-        if (i == 2)
-        {
-            EXPECT_EQ(point.getFieldAs<int>(Id::X), 10);
-            EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
-        }
-        else
-            return false;
-        i++;
-        return true;
     };
 
-    StreamCallbackFilter f;
-    f.setCallback(cb);
+    TestFilter f;
     f.setInput(crop);
 
     f.prepare(table);
     f.execute(table);
+    EXPECT_EQ(f.m_count, (point_count_t)4);
 }
 
 
@@ -461,3 +485,74 @@ TEST(CropFilterTest, sphere)
     }
 }
 
+TEST(CropFilterTest, bounds_inside_outside)
+{
+    point_count_t nStreamPoints = 0;
+    auto LCounter = [&nStreamPoints](PointRef&) -> bool
+    {
+        ++nStreamPoints;
+        return true;
+    };
+
+    // Tests cropping interesting.las with outside == false and outside == true
+    //  with non-streaming and streaming point tables.
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("las/interesting.las"));
+    LasReader lasReader;
+    lasReader.setOptions(readerOptions);
+
+    // Test outside == false.
+    Options cropInsideOptions;
+    cropInsideOptions.add("bounds", "([638000, 640000], [849000, 849500])");
+    cropInsideOptions.add("outside", false);
+    CropFilter cropInsideFilter;
+    cropInsideFilter.setOptions(cropInsideOptions);
+    cropInsideFilter.setInput(lasReader);
+    PointTable insideTable;
+    cropInsideFilter.prepare(insideTable);
+    PointViewSet insideViewSet = cropInsideFilter.execute(insideTable);
+    EXPECT_EQ(insideViewSet.size(), 1U);
+    PointViewPtr pInsidePointView = *(insideViewSet.begin());
+    // Expect 39 points when cropping to the inside of the bounds.
+    EXPECT_EQ(pInsidePointView->size(), 39U);
+
+    // Test outside == true.
+    Options cropOutsideOptions;
+    cropOutsideOptions.add("bounds", "([638000, 640000], [849000, 849500])");
+    cropOutsideOptions.add("outside", true);
+    CropFilter cropOutsideFilter;
+    cropOutsideFilter.setOptions(cropOutsideOptions);
+    cropOutsideFilter.setInput(lasReader);
+    PointTable outsideTable;
+    cropOutsideFilter.prepare(outsideTable);
+    PointViewSet outsideViewSet = cropOutsideFilter.execute(insideTable);
+    EXPECT_EQ(outsideViewSet.size(), 1U);
+    PointViewPtr pOutsidePointView = *(outsideViewSet.begin());
+    // Expect 1026 points when cropping to the outside of the bounds.
+    EXPECT_EQ(pOutsidePointView->size(), 1026U);
+
+    // Run same tests again with streaming point tables instead.
+    // Uses the StreamCallbackFilter to check the cropped point count.
+
+    // Test outside == false.
+    nStreamPoints = 0;
+    StreamCallbackFilter insideCallbackFilter;
+    insideCallbackFilter.setCallback(LCounter);
+    insideCallbackFilter.setInput(cropInsideFilter);
+    FixedPointTable insideStreamTable(1065);
+    insideCallbackFilter.prepare(insideStreamTable);
+    insideCallbackFilter.execute(insideStreamTable);
+    // Expect 39 points when cropping to the inside of the bounds.
+    EXPECT_EQ(nStreamPoints, 39U);
+
+    // Test outside == true.
+    nStreamPoints = 0;
+    StreamCallbackFilter outsideCallbackFilter;
+    outsideCallbackFilter.setCallback(LCounter);
+    outsideCallbackFilter.setInput(cropOutsideFilter);
+    FixedPointTable outsideStreamTable(1065);
+    outsideCallbackFilter.prepare(outsideStreamTable);
+    outsideCallbackFilter.execute(outsideStreamTable);
+    // Expect 1026 points when cropping to the outside of the bounds.
+    EXPECT_EQ(nStreamPoints, 1026U);
+}

@@ -199,8 +199,8 @@ void LasHeader::setSrs()
 
     if (incompatibleSrs())
     {
-        m_log->get(LogLevel::Error) << "Invalid SRS specification.  "
-            "GeoTiff not allowed with point formats 6 - 10." << std::endl;
+        m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "
+            "for point format 6 - 10." << std::endl;
     }
     else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
         findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
@@ -218,7 +218,7 @@ void LasHeader::setSrs()
         else
             setSrsFromGeotiff();
     }
-    catch (Geotiff::error err)
+    catch (Geotiff::error& err)
     {
         m_log->get(LogLevel::Error) << "Could not create an SRS: " <<
             err.what() << std::endl;
@@ -435,8 +435,11 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
 
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {
-        uint32_t legacyReturnCount = std::min(h.m_pointCountByReturn[i],
-            (uint64_t)(std::numeric_limits<uint32_t>::max)());
+        //ABELL - This needs fixing.  Should set to 0 when we exceed
+        // std::numeric_limits<uint32_t>::max().
+        uint32_t legacyReturnCount =
+            static_cast<uint32_t>((std::min)(h.m_pointCountByReturn[i],
+                (uint64_t)(std::numeric_limits<uint32_t>::max)()));
         out << legacyReturnCount;
     }
 

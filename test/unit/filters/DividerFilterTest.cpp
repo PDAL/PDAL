@@ -44,7 +44,8 @@ TEST(DividerFilterTest, partition_count)
     point_count_t count = 1000;
 
     Options readerOps;
-    readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
     readerOps.add("mode", "ramp");
     readerOps.add("count", count);
 
@@ -81,7 +82,8 @@ TEST(DividerFilterTest, partition_capacity)
     point_count_t count = 1000;
 
     Options readerOps;
-    readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
     readerOps.add("mode", "ramp");
     readerOps.add("count", count);
 
@@ -118,7 +120,8 @@ TEST(DividerFilterTest, round_robin_count)
     point_count_t count = 1000;
 
     Options readerOps;
-    readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
     readerOps.add("mode", "ramp");
     readerOps.add("count", count);
 
@@ -146,10 +149,10 @@ TEST(DividerFilterTest, round_robin_count)
     PointId start = 1;
     for (PointViewPtr v : s)
     {
-        double value = start;
+        double value = static_cast<double>(start);
         for (PointId i = 0 ; i < v->size(); i++)
         {
-            EXPECT_DOUBLE_EQ((double)value,
+            EXPECT_DOUBLE_EQ(value,
                 v->getFieldAs<double>(Dimension::Id::X, i));
             value += 10;
         }
@@ -163,7 +166,8 @@ TEST(DividerFilterTest, round_robin_capacity)
     point_count_t count = 1000;
 
     Options readerOps;
-    readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
     readerOps.add("mode", "ramp");
     readerOps.add("count", count);
 
@@ -191,7 +195,7 @@ TEST(DividerFilterTest, round_robin_capacity)
     PointId start = 1;
     for (PointViewPtr v : s)
     {
-        double value = start;
+        double value((double)start);
         for (PointId i = 0 ; i < v->size(); i++)
         {
             EXPECT_DOUBLE_EQ((double)value,

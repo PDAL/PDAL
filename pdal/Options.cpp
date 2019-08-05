@@ -35,7 +35,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -99,10 +99,21 @@ void Options::addConditional(const Option& option)
 }
 
 
-void Options::addConditional(const Options& options)
+void Options::addConditional(const Options& other)
 {
-    for (auto& o : options.m_options)
-        addConditional(o.second);
+    for (auto oi = other.m_options.begin(); oi != other.m_options.end();)
+    {
+        const std::string& name = oi->first;
+        if (m_options.find(name) == m_options.end())
+        {
+            do
+            {
+                m_options.insert(*oi++);
+            } while (oi != other.m_options.end() && name == oi->first);
+        }
+        else
+            oi++;
+    }
 }
 
 
@@ -180,32 +191,37 @@ Options Options::fromJsonFile(const std::string& filename, const std::string& s)
 {
     Options options;
 
-    Json::Reader reader;
-    Json::Value node;
-
-    if (!reader.parse(s, node))
-        throw pdal_error("Unable to parse options file '" + filename +
-            "' as JSON: \n" + reader.getFormattedErrorMessages());
-
-    for (const std::string& name : node.getMemberNames())
+    NL::json node;
+    try
     {
-        if (node[name].isString())
-            options.add(name, node[name].asString());
-        else if (node[name].isInt())
-            options.add(name, node[name].asInt64());
-        else if (node[name].isUInt())
-            options.add(name, node[name].asUInt64());
-        else if (node[name].isDouble())
-            options.add(name, node[name].asDouble());
-        else if (node[name].isBool())
-            options.add(name, node[name].asBool());
-        else if (node[name].isNull())
+        std::ifstream in(filename);
+        in >> node;
+    }
+    catch (NL::json::parse_error& err)
+    {
+        throw pdal_error("Unable to parse options file '" + filename +
+            "' as JSON: \n" + err.what());
+    }
+
+    for (auto& element : node.items())
+    {
+        const std::string& name = element.key();
+        const NL::json& n = element.value();
+
+        if (n.is_string())
+            options.add(name, n.get<std::string>());
+        else if (n.is_number_unsigned())
+            options.add(name, n.get<uint64_t>());
+        else if (n.is_number_integer())
+            options.add(name, n.get<int64_t>());
+        else if (n.is_number_float())
+            options.add(name, n.get<double>());
+        else if (n.is_boolean())
+            options.add(name, n.get<bool>());
+        else if (n.is_null())
             options.add(name, "");
-        else if (node[name].isArray() || node[name].isObject())
-        {
-            Json::FastWriter w;
-            options.add(name, w.write(node[name]));
-        }
+        else if (n.is_array() || n.is_object())
+            options.add(name, n.get<std::string>());
         else
             throw pdal_error("Value of stage option '" +
                 name + "' in options file '" + filename +
@@ -250,6 +266,19 @@ Options Options::fromCmdlineFile(const std::string& filename,
         options.add(o);
     }
     return options;
+}
+
+std::ostream& operator << (std::ostream& out, const Option& op)
+{
+    out << op.m_name << ":" << op.m_value;
+    return out;
+}
+
+std::ostream& operator << (std::ostream& out, const Options& ops)
+{
+    for (auto& op : ops.m_options)
+        out << op.second << "\n";
+    return out;
 }
 
 } // namespace pdal

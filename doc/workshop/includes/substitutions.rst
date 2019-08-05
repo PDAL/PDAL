@@ -14,14 +14,13 @@
 .. |CSV| replace:: `CSV <https://en.wikipedia.org/wiki/Comma-separated_values>`__
 .. |NumPy| replace:: `NumPy <http://www.numpy.org/>`__
 .. |Bash| replace:: `Bash <https://en.wikipedia.org/wiki/Bash_(Unix_shell)>`__
-.. |OSGeo4W| replace:: `OSGeo4W <https://trac.osgeo.org/osgeo4w/>`__
-.. |GEOS| replace:: `GEOS <https://trac.osgeo.org/geos/>`__
+.. |OSGeo4W| replace:: :ref:`conda`
 .. |LASzip| replace:: `LASzip <http://laszip.org>`__
 .. |Python| replace:: `Python <http://python.org/>`__
 .. |Docker| replace:: `Docker <https://www.docker.com/>`__
 .. |LiDAR| replace:: `LiDAR <https://en.wikipedia.org/wiki/Lidar>`__
 .. |CRREL| replace:: `CRREL <http://www.erdc.usace.army.mil/Locations/ColdRegionsResearchandEngineeringLaboratory.aspx>`__
-.. |Hobu| replace:: `Hobu <httsp://hobu.co/>`__
+.. |Hobu| replace:: `Hobu <https://hobu.co/>`__
 .. |Optech| replace:: `Optech <http://www.teledyneoptech.com/>`__
 .. |RIEGL| replace:: `RIEGL <http://riegl.com/>`__
 .. |Greyhound| replace:: `Greyhound <http://greyhound.io/>`__
@@ -29,4 +28,4 @@
 .. |UTM| replace:: `UTM <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`__
 .. |WGS84| replace:: `WGS84 <https://en.wikipedia.org/wiki/Geodetic_datum>`__
 .. |WellKnownText| replace:: `Well Known Text <https://en.wikipedia.org/wiki/Well-known_text#Coordinate_reference_systems>`__
-.. |Terminal| replace:: `OSGeo4W Shell`
+.. |Terminal| replace:: `Anaconda Shell`

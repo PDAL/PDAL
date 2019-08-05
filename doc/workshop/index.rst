@@ -7,7 +7,7 @@ Point Cloud Processing and Analysis with PDAL
 :Author: Pete Gadomski
 :Author: Dr. Craig Glennie
 :Contact: howard@hobu.co
-:Date: 07/25/2017
+:Date: 05/17/2018
 
 
 .. include:: ./includes/substitutions.rst

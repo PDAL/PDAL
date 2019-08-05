@@ -115,7 +115,7 @@ add a few options to have finer control over what is written. These include:
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `OSGeo4W Shell`:
+Invoke the following command, substituting accordingly, in your |Terminal|:
 
 .. literalinclude:: ./denoising-run-command.txt
 

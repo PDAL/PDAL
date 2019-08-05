@@ -217,8 +217,8 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     /* If the writer specifies a compression, we should set that */
     if (m_patch_compression_type == CompressionType::Dimensional)
         compression = "dimensional";
-    else if (m_patch_compression_type == CompressionType::Ght)
-        compression = "ght";
+    else if (m_patch_compression_type == CompressionType::Lazperf)
+        compression = "laz";
 
     Metadata metadata;
     MetadataNode m = metadata.getNode();
@@ -450,7 +450,9 @@ void PgWriter::writeTile(const PointViewPtr view)
 
     std::ostringstream options;
 
-    uint32_t num_points = htobe32(view->size());
+    if (view->size() > (std::numeric_limits<uint32_t>::max)())
+        throwError("Too many points for tile.");
+    uint32_t num_points = htobe32(static_cast<uint32_t>(view->size()));
     int32_t pcid = htobe32(m_pcid);
     CompressionType compression_v = CompressionType::None;
     uint32_t compression = htobe32(static_cast<uint32_t>(compression_v));

@@ -41,17 +41,17 @@ def visit_admonition(self, node):
 def visit_embed_node(self, node):
     self.body.append(self.starttag(
             node, 'div', CLASS=('admonition embed')))
-    self.set_first_last(node)
+#    self.set_first_last(node)
 
 def visit_plugin_node(self, node):
     self.body.append(self.starttag(
             node, 'div', CLASS=('admonition plugin')))
-    self.set_first_last(node)
+#    self.set_first_last(node)
 
 def visit_streamable_node(self, node):
     self.body.append(self.starttag(
             node, 'div', CLASS=('admonition streamable')))
-    self.set_first_last(node)
+#    self.set_first_last(node)
 
 def depart_node(self, node):
     self.depart_admonition(node)

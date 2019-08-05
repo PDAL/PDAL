@@ -3,8 +3,8 @@
 writers.gdal
 ================================================================================
 
-The `GDAL`_ writer creates a raster from a point cloud using an interpolation
-algorithm.  Output is produced using GDAL and can use any `driver
+The **GDAL writer** creates a raster from a point cloud using an interpolation
+algorithm.  Output is produced using `GDAL`_ and can use any `driver
 that supports creation of rasters`_.  A data_type_ can be specified for the
 raster (double, float, int32, etc.).  If no data type is specified, the
 data type with the largest range supported by the driver is used.
@@ -16,13 +16,10 @@ The technique used to create the raster is a simple interpolation where
 each point that falls within a given radius_ of a raster cell center
 potentially contributes to the raster's value.  If no radius is provided,
 it is set to the product of the resolution_ and the square root of two.
-This is consistent with the original Points2Grid_ application from which
-this algorithm has its roots.  If a circle with the provided radius
+If a circle with the provided radius
 doesn't encompass the entire cell, it is possible that some points will
 not be considered at all, including those that may be within the bounds
 of the raster cell.
-
-.. _Points2Grid: http://www.opentopography.org/otsoftware/points2grid
 
 The GDAL writer creates rasters using the data specified in the dimension_
 option (defaults to `Z`). The writer creates up to six rasters based on
@@ -81,16 +78,14 @@ whose values contribute to the cell value is 14.14.
 
 .. code-block:: json
 
-    {
-      "pipeline":[
-        "pdal/test/data/las/autzen_trim.las",
-        {
+  [
+      "pdal/test/data/las/autzen_trim.las",
+      {
           "resolution": 10,
           "radius": 14.14,
           "filename":"outputfile.tif"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -118,7 +113,10 @@ radius
     [Default: resolution_ * sqrt(2)]
 
 gdaldriver
-    Name of the GDAL driver to use to write the output. [Default: "GTiff"]
+    GDAL code of the `GDAL driver`_ to use to write the output.
+    [Default: "GTiff"]
+
+.. _`GDAL driver`: http://www.gdal.org/formats_list.html
 
 gdalopts
     A list of key/value options to pass directly to the GDAL driver.  The
@@ -132,10 +130,10 @@ gdalopts
 .. _data_type:
 
 data_type
-    The data type to use for the output raster (double, float, int32,
-    uint16, etc.).  Many GDAL drivers only
-    support a limited set of output data types. The default value depends
-    on the driver.
+    The :ref:`data type <types>` to use for the output raster.
+    Many GDAL drivers only
+    support a limited set of output data types.
+    [Default: depends on the driver]
 
 .. _nodata:
 
@@ -164,11 +162,22 @@ window_size
 dimension
   A dimension name to use for the interpolation. [Default: "Z"]
 
-.. _bounds:
-
 bounds
   The bounds of the data to be written.  Points not in bounds are discarded.
-  The format is ([minx, maxx],[miny,maxy]).
+  The format is ([minx, maxx],[miny,maxy]). [Optional]
+
+origin_x
+  X origin (lower left corner) of the grid. [Default: None]
+
+origin_y
+  Y origin (lower left corner) of the grid. [Default: None]
+
+width
+  Number of cells in the X direction. [Default: None]
+
+height
+  Number of cells in the Y direction. [Default: None]
 
 .. note::
-  The bounds_ option is required when a pipeline is run in streaming mode.
+    You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
+    and 'height', but not both.

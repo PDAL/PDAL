@@ -10,9 +10,14 @@ include (${PDAL_CMAKE_DIR}/spatialite.cmake)
 
 PDAL_ADD_PLUGIN(reader_libname reader sqlite
     FILES
+        io/SQLiteCommon.cpp
         io/SQLiteReader.cpp
-    LINK_WITH ${SQLITE3_LIBRARY})
-target_include_directories(${reader_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
+    LINK_WITH
+        ${SQLITE3_LIBRARY}
+        ${LIBXML2_LIBRARIES}
+    INCLUDES
+        ${LIBXML2_INCLUDE_DIR}
+)
 
 #
 # SQLite Writer
@@ -20,19 +25,32 @@ target_include_directories(${reader_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
 
 PDAL_ADD_PLUGIN(writer_libname writer sqlite
     FILES
+        io/SQLiteCommon.cpp
         io/SQLiteWriter.cpp
     LINK_WITH
-        ${SQLITE3_LIBRARY})
-target_include_directories(${writer_libname} PRIVATE ${LIBXML2_INCLUDE_DIR})
+        ${SQLITE3_LIBRARY}
+        ${GDAL_LIBRARY}
+        ${LIBXML2_LIBRARIES}
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+        ${LIBXML2_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+)
 
 #
 # SQLite tests
 #
 if(BUILD_SQLITE_TESTS)
 	PDAL_ADD_TEST(sqlitetest
-        FILES test/SQLiteTest.cpp
-        LINK_WITH ${reader_libname} ${writer_libname})
-    target_include_directories(sqlitetest PRIVATE
-        ${PDAL_IO_DIR}
-        ${LIBXML2_INCLUDE_DIR})
+        FILES
+            test/SQLiteTest.cpp
+        LINK_WITH
+            ${reader_libname}
+            ${writer_libname}
+            ${SQLITE3_LIBRARY}
+            ${LIBXML2_LIBRARY}
+        INCLUDES
+            ${PDAL_IO_DIR}
+            ${LIBXML2_INCLUDE_DIR}
+    )
 endif()

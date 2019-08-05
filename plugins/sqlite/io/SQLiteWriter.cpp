@@ -35,7 +35,7 @@
 #include "SQLiteWriter.hpp"
 
 #include <pdal/pdal_features.hpp>
-
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -426,7 +426,7 @@ void SQLiteWriter::CreateCloud()
     m_session->insert(oss.str(), rs);
     oss.str("");
 
-    long id = m_session->last_row_id();
+    int32_t id = static_cast<int32_t>(m_session->last_row_id());
     m_obj_id = id;
 
     log()->get(LogLevel::Debug) << "Point cloud id was " << id << std::endl;
@@ -481,7 +481,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
                 compressor.compress(outbuf.data(), size);
             }
         }
-        catch (pdal_error)
+        catch (pdal_error&)
         {
             compressor.done();
             throw;
@@ -515,7 +515,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 
     uint32_t precision(9);
     BOX3D b;
-    view->calculateBounds(b);
+    calculateBounds(*view, b);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
     std::string box = b.toBox(precision);

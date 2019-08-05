@@ -57,6 +57,12 @@ struct AssignRange : public DimRange
     double m_value;
 };
 
+struct AssignArgs
+{
+    std::vector<AssignRange> m_assignments;
+    DimRange m_condition;
+};
+
 void AssignRange::parse(const std::string& r)
 {
     std::string::size_type pos, count;
@@ -95,7 +101,7 @@ std::istream& operator>>(std::istream& in, AssignRange& r)
     {
         r.parse(s);
     }
-    catch (DimRange::error)
+    catch (DimRange::error&)
     {
         in.setstate(std::ios_base::failbit);
     }
@@ -111,7 +117,7 @@ std::ostream& operator<<(std::ostream& out, const AssignRange& r)
 }
 
 
-AssignFilter::AssignFilter()
+AssignFilter::AssignFilter() : m_args(new AssignArgs)
 {}
 
 
@@ -122,7 +128,9 @@ AssignFilter::~AssignFilter()
 void AssignFilter::addArgs(ProgramArgs& args)
 {
     args.add("assignment", "Values to assign to dimensions based on range.",
-        m_assignments);
+        m_args->m_assignments).setPositional();
+    args.add("condition", "Condition for assignment based on range.",
+        m_args->m_condition);
 }
 
 
@@ -130,7 +138,8 @@ void AssignFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
 
-    for (auto& r : m_assignments)
+    m_args->m_condition.m_id = layout->findDim(m_args->m_condition.m_name);
+    for (auto& r : m_args->m_assignments)
     {
         r.m_id = layout->findDim(r.m_name);
         if (r.m_id == Dimension::Id::Unknown)
@@ -142,7 +151,13 @@ void AssignFilter::prepared(PointTableRef table)
 
 bool AssignFilter::processOne(PointRef& point)
 {
-    for (AssignRange& r : m_assignments)
+    if (m_args->m_condition.m_id != Dimension::Id::Unknown)
+    {
+        double condVal = point.getFieldAs<double>(m_args->m_condition.m_id);
+        if (!m_args->m_condition.valuePasses(condVal))
+            return true;
+    }
+    for (AssignRange& r : m_args->m_assignments)
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
             point.setField(r.m_id, r.m_value);
     return true;

@@ -1,4 +1,246 @@
 ================================================================================
+1.9.1
+================================================================================
+
+Version 1.9.1 is a bug fix release.
+
+Bug Fixes
+---------
+
+-  When writing numerous LAS files with the PDAL API, an internal list
+   of fields to forward could grow excessively. This has been fixed.
+   (#2452)
+-  A computation in ``writers.gdal`` that could overflow with very large
+   rasters has been fixed. (#2454)
+-  A bug that could result in the same pipeline tag name being used for
+   multiple stages of the same type has been fixed. (#2458)
+-  A potential segmentation fault in ``pdal density`` has been fixed.
+   (#2461)
+-  A segmentation fault in ``filters.chipper`` when processing multiple
+   inputs has been fixed. (#2479)
+-  An issue with ``readers.ept`` overwriting temporary files before they
+   weren’t needed has been fixed. (#2474)
+-  Fixed an issue where ``filters.icp`` would create data that appeared
+   invalid due to the precision of data when positions weren’t located
+   near the origin. (#2492)
+
+================================================================================
+1.9.0
+================================================================================
+
+Changes of Note
+===============
+
+-  PDAL now requires at least version 2.2 of GDAL.
+-  Pipelines can optionally be specified as an array of stages (without
+   an encapsulating “pipeline” object).
+-  The location of installed cmake files has been changed to match the
+   cmake convention.
+-  ``filters.delaunay`` now uses the delaunator library instead of
+   geogram.
+-  PDAL no longer depends on the GEOS library. However, some polygon
+   functions will not work if PDAL isn’t built with a version of the
+   GDAL library that has GEOS support.
+-  PDAL now uses the standard cmake script to locate the necessary GDAL
+   files when building.
+-  ``readers.sbet`` now reads angles as degrees rather than radians.
+   (#2354)
+-  The ``tindex`` command now requires one of the subcommands ``create``
+   or ``merge``. It no longer accepts the ``merge`` option, which has
+   been replaced by the ``merge`` subcommand.
+-  The argument for the function ``PipelineManager::executeStream`` is
+   now of type ``StreamPointTable&`` instead of ``FixedPointTable&``.
+
+Enhancements
+============
+
+-  All readers now accept the ``default_srs`` and ``override_srs``
+   options. ``override_srs`` is an alias for the existing
+   ``spatialreference`` option. ``default_srs`` applies only if no
+   spatial reference exists in the source file. (#2194, #2195)
+-  Added some dimension detection capability to ``readers.pts``. (#2317)
+-  Hardened API use of LASzip in ``writers.las`` for points with data
+   format 6 and above and set the extended_point_type variable. (#2320,
+   #2329)
+-  Support the ``libgeotiff`` path suffix when searching for the geotiff
+   library with cmake.
+-  Added a ``resolution`` option to ``readers.ept`` to limit the number
+   of points read. (#2331)
+-  ``readers.rxp`` now supports stream mode.
+-  Added the ``invert`` option to ``filters.head`` and ``filters.tail``.
+-  Added support for subcommands in kernels. (#2293)
+
+New stages
+==========
+
+-  ``filters.mongo`` - Filtering of points using the mongo expression
+   language.
+-  ``readers.tiledb`` - Reads points from the tileDB database.
+-  ``writers.tiledb`` - Writes points to the tileDB database.
+-  ``writers.ept_addon`` - Adds sidecar data to an existing EPT dataset.
+
+Deprecated stages
+=================
+
+-  ``filters.kdistance`` - Replaced by ``filters.nndistance``.
+   ``filters.kdistance`` will be removed in the next PDAL release.
+-  ``filters.mongus`` - Replaces by ``filters.pmf`` and ``filters.smrf``
+
+Bug fixes
+=========
+
+-  The tindex command now uses sufficient precision when using the
+   ``fast_boundary`` option (#2271)
+-  ``filters.smrf`` and ``filters.pmf`` now process all points if the
+   ``NumberOfReturns`` or ``ReturnNumber`` dimension is missing. This
+   fixes a regression introduced with PDAL 1.8. (#2275)
+-  The density command is now found by pdal. This fixes a regression
+   introduced with PDAL 1.8. (#2378)
+-  The ``scale=auto`` and ``offset=auto`` options now work with
+   ``writers.bpf`` in stream mode. (#1983)
+-  Pipelines with diamond shapes now properly re-execute ancestor
+   stages. This fixes a regression introduced with PDAL 1.8. (#2290)
+-  ``filters.crop`` now uses the correct logic when the ``outside``
+   option is used in standard mode. (#2305)
+-  A bug in ``writers.gdal`` with streaming mode that caused an improper
+   location shift in some instances has been fixed. (#2292)
+-  Added an explicit dependency on the arbiter library for curl. This
+   fixes build issues on some Unix platforms. (#1822)
+-  Fixed a bug in ``filters.icp`` introduced by a change in PCL (see:
+   https://github.com/PointCloudLibrary/pcl/issues/2724) that improperly
+   removed a function call. (#2319)
+-  ``readers.tindex`` now provides a default of “EPSG:4326” for the
+   ``filter_srs`` option. (#2316)
+-  Points in buffer corners are now properly placed in tiles in
+   ``filters.splitter``. (#2372)
+-  Fixed reference counting in ``filters.python`` that might have caused
+   a crash in some circumstances.
+-  Generalized the python library re-loaded by PDAL when being used as a
+   python extension. This is only relevant on some Unix distributions.
+
+================================================================================
+1.8.0
+================================================================================
+
+Changes of Note
+===============
+
+-  PointTableRef is now publicly accessible from PointView (#1926)
+-  Minimum CMake version is now 3.5
+-  ``filters.hexbin`` is now a built-in stage, rather than a plugin.
+   (#2001)
+-  Removed support for ``ght`` compression in ``writers.pgpointcloud``.
+   (#2148)
+-  On OSX, plugins are now installed with ID of ``@rpath`` rather than
+   ``@loader_path/../lib``
+
+Enhancements
+============
+
+-  Added ``denoise`` and ``reset`` options to ``pdal ground``. (#1579)
+-  ``readers.gdal`` now supports stream mode and provides the ``header``
+   option to map dimensions. It also supports fetching bounds without
+   reading the entire file. (#1819)
+-  ``readers.mbio`` added ``datatype`` option to support reading
+   sidescan data. (#1852)
+-  ``filters.stats`` was computing expensive kurtosis and skewness
+   statistics by default. These statistics are now available with the
+   ``advanced`` option. (#1878)
+-  Added backtrace support for alpine linux-based Docker containers.
+   (#1904)
+-  Added a ``condition`` option for ``filters.assign`` to limit
+   assignment. (#1956)
+-  Add access to artifact manager keys. (#2026)
+-  Added support for LAZ compression in ``writers.pgpointcloud`` (#2050)
+-  Replaced ``last`` option with ``returns`` to support more flexible
+   segmentation in ``filters.smrf`` and ``filters.pmf``. (#2053)
+-  ``writers.text`` now supports stream mode. (#2064)
+-  Added ``pdal tile`` kernel with streaming support to conveniently
+   tile data. (#2065)
+-  A KD-tree used in one filter will now be reused in subsequent filters
+   when possible. (#2123)
+-  ``writers.ply`` now has a ``precision`` option to specify output
+   precision. (#2144)
+-  ``filters.smrf`` and ``filters.pmf`` supports complete range syntax
+   for the ``ignore`` option. (#2157)
+-  ``filters.hexbin`` now supports stream mode. (#2170)
+-  ``readers.numpy`` now has the ``order`` option, which replaces the
+   previous ``x``, ``y`` and ``z`` options. It also supports structured
+   numpy arrays and maps values to the X, Y and Z dimensions
+   accordingly.
+-  All readers now support setting a spatial reference to override any
+   in the data with the ``spatialreference`` option.
+-  Add support for unicode filenames in pipelines on Windows platforms.
+-  Added NumpyReader::setArray() to support direct setting of a numpy
+   array into ``readers.numpy``.
+-  Added StreamPointTable::setNumPoints() and support in
+   Streamable::execute() allowing custom point tables to know the number
+   of points in each pass through the point table.
+-  Added SpatialReference::isProjected() to allow callers to determine
+   if a spatial reference specifies a projection. Also added
+   SpatialReference::identifyHorizontalEPSG() and
+   SpatialReference::identifyVerticalEPSG() to return an EPSG code from
+   a spatial reference if possible.
+-  Added support for reading BPF files stored remotely.
+
+New stages
+==========
+
+-  ``readers.rdb`` - Support reading RIEGL RDB data.
+-  ``readers.i3s`` - Support reading of web service-style Esri I3S point
+   clouds.
+-  ``readers.slpk`` - Support reading of file-based I3S-style point
+   clouds.
+-  ``writers.fbx`` - Experimental Unity engine (SDK required) support.
+   (#2127)
+-  ``filters.nndistance`` - Replaces ``filters.kdistance`` and adds
+   average distance support. (#2071)
+-  ``filters.dem`` - Filter data based on bounds relative to a raster
+   value. (#2090)
+-  ``filters.delaunay`` - Create a delauany triangulation of a point
+   cloud. (#1855)
+-  ``filters.info`` - Generate metadata about an input point set. Used
+   by ``pdal info``.
+
+Deprecated stages
+=================
+
+-  ``filters.kdistance`` - Replaced by ``filters.nndistance``.
+
+Bug fixes
+=========
+
+-  Fixed an incorrect error message suggesting there were multiple SRSs
+   in some cases when reading multiple inputs. (#2009)
+-  Fixed a problem in ``filters.reprojection`` in stream mode that would
+   improperly reproject when there were multiple input sources with
+   differing SRSs. (#2058)
+-  Fixed a problem in stream mode where a stage with no SRS would
+   override the active SRS during processing. (#2069)
+-  Fixed a problem in ``writers.gdal`` where output would be aggregated
+   if multiple inputs were provided. (#2074)
+-  The ``count`` option was not respected in stream mode. It now
+   properly limits the number of points read. (#2086)
+-  Fixed an off-by-one error that could create improper values in
+   ``writers.gdal``. Most data differences were small and not usually
+   problematic. (#2095)
+-  Multiple option values can be specified on the command line by
+   repeating the option assignment. (#2114)
+-  Added a missing initialization in ``filters.returns`` that could
+   cause more point views to be returned than requested. (#2115)
+-  Emit an error if the ``count`` option isn’t set for ``readers.faux``.
+   (#2128)
+-  PipelineManager::getStage() now returns a proper leaf node. (#2149)
+-  Fixed logic for ``filters.crop`` in streaming mode with multiple crop
+   areas that could return too few points. (#2198)
+-  Added the ``minimal`` option for ``readers.rxp`` that was documented
+   but not fully implemented. (#2225)
+-  Fixed an error in failing to read all points in ``readers.rxp``
+   exposed with a newer SDK. (#2226)
+-  Fixed an error in fetching floating point data from a PointContainer
+   when the value was NaN. (#2239)
+
+================================================================================
 1.7.0
 ================================================================================
 
@@ -57,7 +299,7 @@ Enhancements
    files.
 -  ``pdal info`` now provides the ``--enumerate`` option. See the
    documentation for
-   `filters.stats <https://www.pdal.io/stages/filters.stats.html>`__ for
+   `filters.stats <https://pdal.io/stages/filters.stats.html>`__ for
    details.
 -  Added a general option ``--logtiming`` to cause log output to contain
    the elapsed time from the start of the program. (#1882)
@@ -339,12 +581,12 @@ Enhancements
 -  ``filters.pmf`` and ``filters.smrf`` improved performance #1531 and
    #1541
 -  ``filters.assign`` now supports
-   `Range <https://www.pdal.io/stages/filters.range.html>`__-based
+   `Range <https://pdal.io/stages/filters.range.html>`__-based
    filters
 -  ``filters.outlier`` now accepts a user-specified ``class`` to
    override the default value of ``7`` for points deemed outliers. #1545
 -  ``filters.pmf`` and ``filters.smrf`` now accept a
-   `Range <https://www.pdal.io/stages/ranges.html#ranges>`__ via the
+   `Range <https://pdal.io/stages/ranges.html#ranges>`__ via the
    ``ignore`` option to specify values that should be excluded from
    ground segmentation. #1545
 -  ``filters.pmf`` and ``filters.smrf`` now consider only last returns

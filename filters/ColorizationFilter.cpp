@@ -126,6 +126,14 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
 
 } // unnamed namespace
 
+ColorizationFilter::ColorizationFilter()
+{}
+
+
+ColorizationFilter::~ColorizationFilter()
+{}
+
+
 void ColorizationFilter::addArgs(ProgramArgs& args)
 {
     args.add("raster", "Raster filename", m_rasterFilename);
@@ -145,6 +153,7 @@ void ColorizationFilter::initialize()
         m_dimSpec = { "Red", "Green", "Blue" };
 
     uint32_t defaultBand = 1;
+    m_bands.clear();
     for (std::string& dim : m_dimSpec)
     {
         try
@@ -161,7 +170,6 @@ void ColorizationFilter::initialize()
             throwError("invalid --dimensions option: '" + dim + "': " + what);
         }
     }
-
 }
 
 

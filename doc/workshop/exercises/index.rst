@@ -45,6 +45,7 @@ Analysis
    analysis/thinning/thinning
    analysis/ground/ground
    analysis/dtm/dtm
+   analysis/rasterize/rasterize
 
 Python
 --------------------------------------------------------------------------------

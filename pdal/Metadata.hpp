@@ -120,6 +120,18 @@ private:
         return node;
     }
 
+    MetadataNodeImplPtr replace(MetadataNodeImplPtr node)
+    {
+        auto ni = m_subnodes.find(node->m_name);
+        if (ni == m_subnodes.end())
+            return MetadataNodeImplPtr();
+        MetadataImplList& l = ni->second;
+        if (l.size() != 1)
+            return MetadataNodeImplPtr();
+        l.front() = node;
+        return node;
+    }
+
     bool operator == (const MetadataNodeImpl& m) const
     {
         if (m_name != m.m_name || m_descrip != m.m_descrip ||
@@ -349,6 +361,34 @@ inline void MetadataNodeImpl::setValue(const Uuid& u)
     m_value = u.toString();
 }
 
+namespace MetadataDetail
+{
+
+class value_error
+{};
+
+template<typename T>
+T value(const std::string& type, const std::string& value)
+{
+    T t{};
+
+    if (type == "base64Binary")
+    {
+        std::vector<uint8_t> encVal = Utils::base64_decode(value);
+        encVal.resize(sizeof(T));
+        t = *(reinterpret_cast<T *>(encVal.data()));
+    }
+    else if (!Utils::fromString(value, t))
+        throw value_error();
+    return t;
+}
+
+template<>
+inline std::string value(const std::string&, const std::string& value)
+{ return value; }
+
+} // namespace MetadataDetail
+
 
 class PDAL_DLL MetadataNode
 {
@@ -455,8 +495,9 @@ public:
 
         if (l.empty())
             return add(lname, value);
-        MetadataNodeImplPtr impl = *l.begin();
+        MetadataNodeImplPtr impl(new MetadataNodeImpl(lname));
         impl->setValue(value);
+        l.front() = impl;
         return MetadataNode(impl);
     }
 
@@ -465,7 +506,20 @@ public:
         const std::string& descrip)
     {
         MetadataNode m = addOrUpdate(lname, value);
-        m_impl->m_descrip = descrip;
+        m.m_impl->m_descrip = descrip;
+        return m;
+    }
+
+    MetadataNode addOrUpdate(MetadataNode n)
+    {
+        if (m_impl->nodeType(n.name()) == MetadataType::Array)
+            throw pdal_error("Can't call addOrUpdate() on subnode list.");
+
+        MetadataNode m;
+        if (m_impl->subnodes(n.name()).empty())
+            m = add(n);
+        else
+            m = MetadataNode(m_impl->replace(n.m_impl));
         return m;
     }
 
@@ -483,30 +537,25 @@ public:
     {
         T t{};
 
-        if (m_impl->m_type == "base64Binary")
+        try
         {
-            std::vector<uint8_t> encVal =
-                Utils::base64_decode(m_impl->m_value);
-            encVal.resize(sizeof(T));
-            memcpy(&t, encVal.data(), sizeof(T));
+            t = MetadataDetail::value<T>(m_impl->m_type, m_impl->m_value);
         }
-        else
+        catch (MetadataDetail::value_error&)
         {
-            if (!Utils::fromString(m_impl->m_value, t))
-            {
-                // Static to get default initialization.
-                static T t2;
-                std::cerr << "Error converting metadata [" << name() <<
-                    "] = " << m_impl->m_value << " to type " <<
-                    Utils::typeidName<T>() << " -- return default initialized.";
-                t = t2;
-            }
+            // Reset in case the fromString conversion messed it up.
+            t = T();
+            std::cerr << "Error converting metadata [" << name() <<
+                "] = " << m_impl->m_value << " to type " <<
+                Utils::typeidName<T>() << " -- return default initialized.";
         }
         return t;
     }
 
     std::string value() const
-        { return m_impl->m_value; }
+    {
+        return value<std::string>();
+    }
 
     std::string jsonValue() const
     {
@@ -572,6 +621,8 @@ public:
         return names;
     }
 
+    operator bool () const
+        { return !empty(); }
     bool operator ! ()
         { return empty(); }
     bool valid() const
@@ -711,7 +762,6 @@ private:
     std::string m_name;
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
-
 
 } // namespace pdal
 

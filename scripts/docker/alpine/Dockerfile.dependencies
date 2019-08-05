@@ -1,0 +1,77 @@
+FROM alpine:3.10
+
+#
+# Nitro looks for unistd.h in the wrong place.
+#
+RUN \
+    mkdir -p /usr/include/linux; \
+    ln -sf /usr/include/unistd.h /usr/include/linux/unistd.h
+
+COPY \
+    gdal-dev-3.0.0-r0.apk gdal-dev-3.0.0-r0.apk
+COPY \
+    gdal-3.0.0-r0.apk gdal-3.0.0-r0.apk
+
+RUN \
+    echo "@edgetesting http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
+    echo "@edgemain http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
+    apk update; \
+    apk add --no-cache \
+        git \
+        cmake \
+        ninja \
+        g++ \
+        bash \
+    ; \
+    apk add --no-cache \
+        eigen-dev \
+        py3-numpy \
+        py-numpy-dev \
+        libxml2-dev \
+        python3-dev \
+        curl-dev \
+        postgresql-dev \
+        sqlite-dev \
+        zstd-dev \
+        libcrypto1.1@edgemain \
+        xerces-c@edgetesting \
+        libspatialite-dev@edgetesting \
+        libgeotiff-dev@edgetesting \
+        nitro@edgetesting \
+        nitro-dev@edgetesting \
+        laszip-dev@edgetesting \
+        laz-perf-dev@edgetesting \
+        hdf5-dev@edgetesting \
+        proj@edgetesting \
+        proj-datumgrid@edgetesting \
+        xerces-c@edgetesting \
+    ; \
+    apk add --allow-untrusted \
+        ./gdal-dev-3.0.0-r0.apk \
+        ./gdal-3.0.0-r0.apk;\
+#
+# These use PDAL's vendor/eigen
+#
+    git clone https://github.com/gadomski/fgt.git; \
+    cd fgt; \
+    mkdir build; \
+    cd build; \
+    cmake .. \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+    ; \
+    ninja install; \
+    cd /; \
+    rm -rf fgt; \
+    \
+    git clone https://github.com/gadomski/cpd.git; \
+    cd cpd; \
+    mkdir build; \
+    cd build; \
+    cmake .. \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+    ; \
+    ninja install; \
+    cd /; \
+    rm -rf cpd;

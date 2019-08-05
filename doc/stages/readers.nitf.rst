@@ -19,7 +19,7 @@ and types for convenience in file format transformation.
 .. note::
 
     Only LAS or LAZ data may be stored in the LIDARA segment. PDAL uses
-    the :ref:`readers.las` and :ref:`writers.las` :ref:`stages <stage_index>`
+    the :ref:`readers.las` and :ref:`writers.las`
     to actually read and write the data.
 
 .. note::
@@ -38,20 +38,17 @@ Example
 -------
 
 .. code-block:: json
-    :linenos:
 
-    {
-      "pipeline":[
-        {
+  [
+      {
           "type":"readers.nitf",
           "filename":"mynitf.nitf"
-        },
-        {
+      },
+      {
           "type":"writers.las",
           "filename":"outputfile.las"
-        }
-      ]
-    }
+      }
+  ]
 
 
 Options
@@ -60,21 +57,31 @@ Options
 filename
   Filename to read from [Required]
 
-count
-  Maximum number of points to read [Optional]
-
-spatialreference
-  Spatial reference to apply to data
+.. include:: reader_opts.rst
 
 extra_dims
-  Dimensions to assign to extra byte data
+  Extra dimensions to be read as part of each point beyond those specified by
+  the LAS point format.  The format of the option is
+  ``<dimension_name>=<type>[, ...]``.  Any PDAL :ref:`type <types>` can
+  be specified.
+
+  .. note::
+
+      The presence of an extra bytes VLR when reading a version
+      1.4 file or a version 1.0 - 1.3 file with **use_eb_vlr** set
+      causes this option to be ignored.
+
+use_eb_vlr
+  If an extra bytes VLR is found in a version 1.0 - 1.3 file, use it as if it
+  were in a 1.4 file. This option has no effect when reading a version 1.4 file.
+  [Default: false]
 
 compression
   May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
   or the LASzip decompressor for LAZ files.  PDAL must have been built with
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS.
-  [Default: "laszip"]
+  [Default: "none"]
 
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
 

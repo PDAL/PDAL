@@ -6,14 +6,14 @@ filters.colorinterp
 The color interpolation filter assigns scaled RGB values from an image based on
 a given dimension.  It provides three possible approaches:
 
-1. You provide a ``minimum`` and ``maximum``, and the data are scaled for the
-   given ``dimension`` accordingly.
+1. You provide a minimum_ and maximum_, and the data are scaled for the
+   given dimension_ accordingly.
 
-2. You provide a ``k`` and a ``mad`` setting, and the scaling is set based on
+2. You provide a k_ and a mad_ setting, and the scaling is set based on
    Median Absolute Deviation.
 
-3. You provide a ``k`` setting and the scaling is set based on the
-   ``k``-number of standard deviations from the median.
+3. You provide a k_ setting and the scaling is set based on the
+   k_-number of standard deviations from the median.
 
 You can provide your own `GDAL`_-readable image for the scale color factors,
 but a number of pre-defined ramps are embedded in PDAL.  The default ramps
@@ -31,8 +31,7 @@ Example
 
 .. code-block:: json
 
-  {
-    "pipeline":[
+  [
       "uncolored.las",
       {
         "type":"filters.colorinterp",
@@ -42,8 +41,7 @@ Example
         "dimension":"Z"
       },
       "colorized.las"
-    ]
-  }
+  ]
 
 .. figure:: ../images/pestel_scaled_helheim.png
     :scale: 80%
@@ -55,7 +53,7 @@ Default Ramps
 --------------------------------------------------------------------------------
 
 PDAL provides a number of default color ramps you can use in addition to
-providing your own. Give the ramp name as the ``ramp`` option to the filter
+providing your own. Give the ramp name as the ramp_ option to the filter
 and it will be used. Otherwise, provide a `GDAL`_-readable raster filename.
 
 ``awesome_green``
@@ -117,37 +115,38 @@ and it will be used. Otherwise, provide a `GDAL`_-readable raster filename.
 Options
 -------
 
-ramp
-  The raster file to use for the color ramp. Any format supported by `GDAL`_ may be read.
-  Alternatively, one of the default color ramp names can be used. [Default: ``pestel_shades``]
+_`ramp`
+  The raster file to use for the color ramp. Any format supported by `GDAL`_
+  may be read.  Alternatively, one of the default color ramp names can be
+  used. [Default: "pestel_shades"]
 
-dimension
-  A dimension name to use for the values to interpolate colors. [Default: ``Z``]
+_`dimension`
+  A dimension name to use for the values to interpolate colors. [Default: "Z"]
 
-minimum
+_`minimum`
   The minimum value to use to scale the data. If none is specified, one is
-  computed from the data. If one is specified but a ``k`` value is also
-  provided, the ``k`` value will be used.
+  computed from the data. If one is specified but a k_ value is also
+  provided, the k_ value will be used.
 
-maximum
+_`maximum`
   The maximum value to use to scale the data. If none is specified, one is
-  computed from the data. If one is specified but a ``k`` value is also
-  provided, the ``k`` value will be used.
+  computed from the data. If one is specified but a k_ value is also
+  provided, the k_ value will be used.
 
-invert
+_`invert`
   Invert the direction of the ramp? [Default: false]
 
-k
+_`k`
   Color based on the given number of standard deviations from the median. If
-  set, ``minimum`` and ``maximum`` will be computed from the median and setting
+  set, minimum_ and maximum_ will be computed from the median and setting
   them will have no effect.
 
-mad
-  If true, ``minimum`` and ``maximum`` will be computed by the median absolute
+_`mad`
+  If true, minimum_ and maximum_ will be computed by the median absolute
   deviation. See :ref:`filters.mad` for discussion. [Default: false]
 
-mad_multiplier
-  MAD threshold multiplier. Used in conjunction with ``k`` to threshold the
+_`mad_multiplier`
+  MAD threshold multiplier. Used in conjunction with k_ to threshold the
   diferencing. [Default: 1.4862]
 
 .. _`GDAL`: http://www.gdal.org

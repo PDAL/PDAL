@@ -40,8 +40,11 @@
 namespace pdal
 {
 
+class StreamableWrapper;
+
 class PDAL_DLL Streamable : public virtual Stage
 {
+    friend class StreamableWrapper;
 public:
     Streamable();
 
@@ -54,7 +57,7 @@ public:
       Not all stages support streaming mode and an exception will be thrown
       when attempting to \ref execute an unsupported stage.
 
-      Streaming points can reduce memory consumption, but may limit access
+      Streaming points can reduce memory consumption, but will limit access
       to algorithms that need to operate on full point sets.
 
       \param table  Streaming point table used for stage pipeline.  This must be
@@ -75,10 +78,13 @@ protected:
     Streamable& operator=(const Streamable&) = delete;
     Streamable(const Streamable&); // not implemented
 
-    void execute(StreamPointTable& table, std::list<Streamable *>& stages);
+    using SrsMap = std::map<Streamable *, SpatialReference>;
+
+    void execute(StreamPointTable& table, std::list<Streamable *>& stages,
+        SrsMap& srsMap);
 
     /**
-      Process a single point (streaming mode).  Implement in sublcass.
+      Process a single point (streaming mode).  Implement in subclass.
 
       \param point  Point to process.
       \return  Readers return false when no more points are to be read.
@@ -101,6 +107,14 @@ protected:
     */
     virtual void spatialReferenceChanged(const SpatialReference& /*srs*/)
     {}
+
+    /**
+      Find the first nonstreamable stage in a pipeline.
+
+      \return  NULL if the pipeline is streamable, otherwise return
+        a pointer to the first found stage that's not streamable.
+    */
+    const Stage *findNonstreamable() const;
 };
 
 } // namespace pdal

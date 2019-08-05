@@ -55,11 +55,9 @@ public:
     std::string getName() const;
 
 private:
-    StringList m_rangeSpec;
-    std::vector<DimRange> m_range_list;
+    std::vector<DimRange> m_ranges;
 
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);

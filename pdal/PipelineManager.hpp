@@ -99,14 +99,13 @@ public:
         Stage& parent, Options options);
     Stage& makeWriter(StageCreationOptions& ops);
 
-    // returns true if the pipeline endpoint is a writer
-    bool isWriterPipeline() const
-        { return (bool)getStage(); }
-
-    // return the pipeline reader endpoint (or nullptr, if not a reader
-    // pipeline)
+    // Return the first leaf stage of a pipeline, or nullptr if the pipeline
+    // is empty.
     Stage* getStage() const
-        { return m_stages.empty() ? nullptr : m_stages.back(); }
+    {
+        const auto& llist = leaves();
+        return llist.size() ? llist[0] : nullptr;
+    }
 
     // Set the log to be available to stages.
     void setLog(LogPtr& log)
@@ -115,7 +114,7 @@ public:
     QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
-    void executeStream(FixedPointTable& table);
+    void executeStream(StreamPointTable& table);
     void validateStageOptions() const;
     bool pipelineStreamable() const;
 

@@ -181,10 +181,10 @@ namespace
 #ifdef PDAL_ARBITER_ENABLED
 std::string tempFilename(const std::string& path)
 {
-    const std::string tempdir(arbiter::fs::getTempPath());
-    const std::string basename(arbiter::util::getBasename(path));
+    const std::string tempdir(arbiter::getTempPath());
+    const std::string basename(arbiter::getBasename(path));
 
-    return arbiter::util::join(tempdir, basename);
+    return arbiter::join(tempdir, basename);
 }
 #endif
 
@@ -272,7 +272,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
             ofs = new ArbiterOutStream(tempFilename(path), path,
                 asBinary ? ios::out | ios::binary : ios::out);
         }
-        catch (arbiter::ArbiterError)
+        catch (arbiter::ArbiterError&)
         {}
         if (ofs && !ofs->good())
         {
@@ -305,7 +305,7 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return new ArbiterInStream(tempFilename(path), path,
                 asBinary ? ios::in | ios::binary : ios::in);
         }
-        catch (arbiter::ArbiterError)
+        catch (arbiter::ArbiterError&)
         {
             return nullptr;
         }
@@ -394,7 +394,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
     maxDistSrcToCand = std::sqrt(maxDistSrcToCand);
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
 
-    return std::max(maxDistSrcToCand, maxDistCandToSrc);
+    return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
 }
 
 } // namespace Utils

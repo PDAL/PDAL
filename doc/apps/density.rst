@@ -9,11 +9,6 @@ output of :ref:`filters.hexbin`.
 
 .. _`OGR layer`: http://www.gdal.org/ogr_utilities.html
 
-.. note::
-
-    The ``density`` command is only available when PDAL is linked with Hexer
-    (BUILD_PLUGIN_HEXBIN=ON).
-
 ::
 
     $ pdal density <input> <output>

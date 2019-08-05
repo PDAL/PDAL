@@ -1588,10 +1588,13 @@ void Octree< Real >::_updateConstraintsFromCoarser( const FEMSystemFunctor& F , 
 	_localDepthAndOffset( node , d , off );
 
 	// Offset the constraints using the solution from lower resolutions.
-	int startX , endX , startY , endY , startZ , endZ;
+	int startX = 0, endX = 0, startY = 0, endY = 0, startZ = 0, endZ = 0;
+
 	_SetParentOverlapBounds< FEMDegree , FEMDegree >( node , startX , endX , startY , endY , startZ , endZ );
 
-	for( int x=startX ; x<endX ; x++ ) for( int y=startY ; y<endY ; y++ ) for( int z=startZ ; z<endZ ; z++ )
+	for( int x=startX ; x<endX ; x++ )
+        for( int y=startY ; y<endY ; y++ )
+            for( int z=startZ ; z<endZ ; z++ )
 		if( _isValidFEMNode( pNeighbors.neighbors[x][y][z] ) )
 		{
 			const TreeOctNode* _node = pNeighbors.neighbors[x][y][z];
@@ -1910,7 +1913,6 @@ void Octree< Real >::_addFEMConstraints( const FEMConstraintFunctor& F , const C
 	delete __constraints;
 
 	DenseNodeData< D > _coefficients( _sNodesEnd(maxDepth-1) );
-	memset( &_coefficients[0] , 0 , sizeof(D) * _sNodesEnd(maxDepth-1) );
 	for( LocalDepth d=maxDepth-1 ; d>=0 ; d-- )
 	{
 #pragma omp parallel for num_threads( threads )

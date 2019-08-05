@@ -56,7 +56,7 @@ CREATE_SHARED_STAGE(RxpReader, s_info)
 
 std::string RxpReader::getName() const { return s_info.name; }
 
-Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal, bool reflectanceAsIntensity)
+Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
 {
     using namespace Dimension;
     Dimension::IdList ids;
@@ -65,17 +65,14 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal, bool reflectanc
     ids.push_back(Id::Y);
     ids.push_back(Id::Z);
     ids.push_back(getTimeDimensionId(syncToPps));
-    if (!minimal)
-    {
-        ids.push_back(Id::ReturnNumber);
-        ids.push_back(Id::NumberOfReturns);
-        ids.push_back(Id::Amplitude);
-        ids.push_back(Id::Reflectance);
-        ids.push_back(Id::EchoRange);
-        ids.push_back(Id::Deviation);
-        ids.push_back(Id::BackgroundRadiation);
-        ids.push_back(Id::IsPpsLocked);
-    }
+    ids.push_back(Id::ReturnNumber);
+    ids.push_back(Id::NumberOfReturns);
+    ids.push_back(Id::Amplitude);
+    ids.push_back(Id::Reflectance);
+    ids.push_back(Id::EchoRange);
+    ids.push_back(Id::Deviation);
+    ids.push_back(Id::BackgroundRadiation);
+    ids.push_back(Id::IsPpsLocked);
     if (reflectanceAsIntensity) {
         ids.push_back(Id::Intensity);
     }
@@ -101,20 +98,32 @@ void RxpReader::initialize()
 
 void RxpReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(getRxpDimensions(m_syncToPps, m_minimal, m_reflectanceAsIntensity));
+    layout->registerDims(getRxpDimensions(m_syncToPps, m_reflectanceAsIntensity));
 }
 
 
 void RxpReader::ready(PointTableRef table)
 {
-    m_pointcloud.reset(new RxpPointcloud(m_uri, m_syncToPps, m_minimal, m_reflectanceAsIntensity, m_minReflectance, m_maxReflectance, table));
+    m_pointcloud.reset(new RxpPointcloud(m_uri, m_syncToPps, m_reflectanceAsIntensity, m_minReflectance, m_maxReflectance, table));
 }
 
 
-point_count_t RxpReader::read(PointViewPtr view, point_count_t count)
+point_count_t RxpReader::read(PointViewPtr view, point_count_t num)
 {
-    point_count_t numRead = m_pointcloud->read(view, count);
+    point_count_t numRead = 0;
+    PointRef point(view->point(0));
+    while (numRead < num && !m_pointcloud->endOfInput()) {
+        point.setPointId(numRead);
+        processOne(point);
+        ++numRead;
+    }
     return numRead;
+}
+
+
+bool RxpReader::processOne(PointRef& point)
+{
+    return m_pointcloud->readOne(point);
 }
 
 

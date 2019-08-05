@@ -103,7 +103,10 @@ void BpfReader::initialize()
     // Logfile doesn't get set until options are processed.
     m_header.setLog(log());
 
-    m_stream.open(m_filename);
+    m_istreamPtr = Utils::openFile(m_filename);
+    if (!m_istreamPtr)
+        throwError("Can't open file '" + m_filename + "'.");
+    m_stream = ILeStream(m_istreamPtr);
 
     // Resets the stream position in case it was already open.
     m_stream.seek(0);
@@ -167,18 +170,8 @@ void BpfReader::initialize()
             << "' and coordinate id: '" << m_header.m_coordId << "'";
        throwError(oss.str());
     }
-    SpatialReference srs(code);
-    setSpatialReference(srs);
 
-    try
-    {
-        SpatialReference srs(code);
-        setSpatialReference(srs);
-    }
-    catch (...)
-    {
-        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
-    }
+    setSpatialReference(code);
 
     if (m_header.m_version >= 3)
     {
@@ -199,6 +192,7 @@ void BpfReader::initialize()
     if (pos > m_header.m_len)
         throwError("BPF Header length exceeded that reported by file.");
     m_stream.close();
+    Utils::closeFile(m_istreamPtr);
 }
 
 
@@ -279,7 +273,8 @@ bool BpfReader::readPolarData()
 
 void BpfReader::ready(PointTableRef)
 {
-    m_stream.open(m_filename);
+    m_istreamPtr = Utils::openFile(m_filename);
+    m_stream = ILeStream(m_istreamPtr);
     m_stream.seek(m_header.m_len);
     m_index = 0;
     m_start = m_stream.position();
@@ -306,6 +301,7 @@ void BpfReader::done(PointTableRef)
     if (auto s = m_stream.popStream())
         delete s;
     m_stream.close();
+    Utils::closeFile(m_istreamPtr);
 }
 
 
@@ -563,7 +559,7 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
         uint32_t u32;
     };
     std::unique_ptr<union uu> uArr(
-        new uu[std::min(count, numPoints() - m_index)]);
+        new uu[(std::min)(count, numPoints() - m_index)]);
 
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
@@ -586,7 +582,7 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
                 u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
                 if (b == 3)
                 {
-                    u.f += m_dims[d].m_offset;
+                    u.f += static_cast<float>(m_dims[d].m_offset);
                     data->setField(m_dims[d].m_id, nextId, u.f);
                 }
             }

@@ -39,6 +39,10 @@
 
 #pragma once
 
+// This is for M_PI on Windows.
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -415,7 +419,7 @@ namespace pdal
         * \param[in] s index of the source point
         */
       inline void
-      addFringePoint (int v, int s)
+      addFringePoint (PointId v, PointId s)
       {
         source_[v] = s;
         part_[v] = part_[s];

@@ -431,3 +431,33 @@ TEST(UtilsTest, naninf)
     d = -d;
     EXPECT_EQ(Utils::toString(d), "-Infinity");
 }
+
+
+TEST(UtilsTest, numeric_cast)
+{
+    bool ok;
+    double d;
+    float f;
+
+    f = std::numeric_limits<float>::quiet_NaN();
+    ok = Utils::numericCast(f, d);
+    EXPECT_TRUE(ok);
+    EXPECT_TRUE(std::isnan(d));
+
+    d = std::numeric_limits<double>::quiet_NaN();
+    ok = Utils::numericCast(d, f);
+    EXPECT_TRUE(ok);
+    EXPECT_TRUE(std::isnan(f));
+
+    d = (std::numeric_limits<float>::max)() * 2;
+    EXPECT_FALSE(Utils::numericCast(d, f));
+
+    d = (std::numeric_limits<float>::max)() / 2;
+    EXPECT_TRUE(Utils::numericCast(d, f));
+}
+
+TEST(UtilsTest, escapeJSON)
+{
+    std::string escaped = Utils::escapeJSON("\u0001\t\f\n\\\"\u0016");
+    EXPECT_EQ(escaped, "\\u0001\\t\\f\\n\\\\\\\"\\u0016");
+}
