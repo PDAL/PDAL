@@ -58,7 +58,7 @@ static PluginInfo const s_info
 {
     "writers.fbx",
     "fbx writer",
-    "http://pdal.io/stages/writers.fbx.html"
+    "https://pdal.io/stages/writers.fbx.html"
 };
 
 CREATE_SHARED_STAGE(FbxWriter, s_info)
@@ -72,7 +72,7 @@ FbxWriter::FbxWriter()
 void FbxWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("ascii", "Write FBX as ASCII", m_ascii);
+    args.add("ascii", "Write FBX as ASCII", m_ascii, false);
 }
 
 
