@@ -52,10 +52,6 @@ option(BUILD_PLUGIN_OCI
 add_feature_info("Oracle OCI plugin" BUILD_PLUGIN_OCI
     "Read/write point clould patches to Oracle")
 
-option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
-add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
-    "provides PCL-based readers, writers, filters, and kernels")
-
 find_package(PostgreSQL QUIET)
 option(BUILD_PLUGIN_PGPOINTCLOUD
     "Choose if PostgreSQL PointCloud support should be built"

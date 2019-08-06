@@ -19,6 +19,10 @@ target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
     ${TILEDB_INCLUDE_DIR})
 
+if (WIN32)
+	target_compile_definitions(${reader_libname} PRIVATE -DNONMINMAX)
+endif()
+
 #
 # TileDB Writer
 #
@@ -33,6 +37,10 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
 target_include_directories(${writer_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
     ${TILEDB_INCLUDE_DIR})
+
+if (WIN32)
+	target_compile_definitions(${writer_libname} PRIVATE -DNONMINMAX)
+endif()
 
 if (WITH_TESTS)
 
@@ -54,4 +62,10 @@ if (WITH_TESTS)
             ${reader_libname}
             ${TILEDB_LIBRARIES}
     )
+
+if (WIN32)
+	target_compile_definitions(pdal_io_tiledb_writer_test PRIVATE -DNONMINMAX)
+	target_compile_definitions(pdal_io_tiledb_reader_test PRIVATE -DNONMINMAX)
+endif()
+
 endif()

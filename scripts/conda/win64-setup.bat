@@ -20,7 +20,6 @@ call conda install 	geotiff ^
 					nitro ^
 					curl ^
 					gdal ^
-					pcl ^
 					cmake ^
 					eigen ^
 					ninja ^

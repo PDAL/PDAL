@@ -15,7 +15,6 @@ cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DWITH_ICONV=ON \
-        -DBUILD_PLUGIN_PCL=ON \
         -DWITH_LASZIP=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_LIBXML2=ON \

@@ -143,6 +143,24 @@ GDALDataType toGdalType(Dimension::Type t)
 
 } //unnamed namespace
 
+
+/**
+  Reproject a point from a source projection to a destination.
+  \param x  X coordinate of point to be reprojected in-place.
+  \param y  Y coordinate of point to be reprojected in-place.
+  \param z  Z coordinate of point to be reprojected in-place.
+  \param srcSrs  String in WKT or other suitable format of box coordinates.
+  \param dstSrs  String in WKT or other suitable format to which
+    coordinates should be projected.
+  \return  Whether the reprojection was successful or not.
+*/
+bool reproject(double& x, double& y, double& z, const std::string& srcSrs,
+    const std::string& dstSrs)
+{
+    return SrsTransform(srcSrs, dstSrs).transform(x, y, z);
+}
+
+
 /**
   Reproject a bounds box from a source projection to a destination.
   \param box  Bounds box to be reprojected in-place.
