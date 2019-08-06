@@ -1,2 +1,2 @@
-pdal info c:/Users/hobu/pdal/exercises/info/interesting.las ^
+pdal info ./exercises/info/interesting.las ^
     --query "637301.20, 851217.57, 496.49/3"

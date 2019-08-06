@@ -1,6 +1,6 @@
 {
     "pipeline": [
-        "c:/Users/hobu/PDAL/exercises/analysis/denoising/18TWK820985.laz",
+        "./exercises/analysis/denoising/18TWK820985.laz",
         {
             "type": "filters.outlier",
             "method": "statistical",
@@ -16,7 +16,7 @@
             "compression": "true",
             "minor_version": "2",
             "dataformat_id": "0",
-            "filename":"c:/Users/hobu/PDAL/exercises/analysis/denoising/clean.laz"
+            "filename":"./exercises/analysis/denoising/clean.laz"
         }
     ]
 }

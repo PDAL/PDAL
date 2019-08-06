@@ -30,7 +30,7 @@ Unfortunately this doesn't produce the intended results for us. Issue the follow
 
 ::
 
-        pdal info c:/Users/hobu/PDAL/exercises/translation/csite-dd.laz --all ^
+        pdal info ./exercises/translation/csite-dd.laz --all ^
             | jq .stats.bbox.native.bbox
 
 .. image:: ../../images/reprojection-wrong-scale.png
@@ -79,5 +79,3 @@ Notes
 
 2. PDAL uses |Proj.4| library for reprojection. This library includes
    the capability to do both vertical and horizontal datum transformations.
-
-

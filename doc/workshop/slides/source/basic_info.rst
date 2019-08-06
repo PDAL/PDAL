@@ -53,7 +53,7 @@ Command (first point)
 .. literalinclude:: ../../exercises/info/single-point-command.txt
     :linenos:
 
-3. ``c:/Users/hobu/PDAL/exercises/info/interesting.las``:
+3. ``./exercises/info/interesting.las``:
    File to run ``info`` command on
 
 4. ``-p``: argument corresponds to "print a point".

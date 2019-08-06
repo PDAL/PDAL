@@ -23,7 +23,7 @@ Here's a summary of what's going on with that command invocation
 2. ``info``: We want to run :ref:`info_command` on the data. All commands
    are run by the ``pdal`` application.
 
-3. ``c:/Users/hobu/PDAL/exercises/info/interesting.las``: The file we
+3. ``./exercises/info/interesting.las``: The file we
    are running the command on. PDAL will be able to identify this file
    is an |ASPRSLAS| file from the extension, ``.las``, but not every
    file type is easily identified. You can use a :ref:`pipeline <pipeline_command>`

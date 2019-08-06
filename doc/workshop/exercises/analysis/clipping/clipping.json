@@ -1,9 +1,9 @@
 {
     "pipeline": [
-        "c:/Users/hobu/PDAL/exercises/analysis/clipping/autzen.laz",
+        "./exercises/analysis/clipping/autzen.laz",
         {
             "column": "CLS",
-            "datasource": "c:/Users/hobu/PDAL/exercises/analysis/clipping/attributes.vrt",
+            "datasource": "./exercises/analysis/clipping/attributes.vrt",
             "dimension": "Classification",
             "layer": "OGRGeoJSON",
             "type": "filters.overlay"
@@ -12,6 +12,6 @@
             "limits": "Classification[6:6]",
             "type": "filters.range"
         },
-        "c:/Users/hobu/PDAL/exercises/analysis/clipping/stadium.las"
+        "./exercises/analysis/clipping/stadium.las"
     ]
 }
