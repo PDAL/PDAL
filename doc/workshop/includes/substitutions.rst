@@ -14,7 +14,6 @@
 .. |CSV| replace:: `CSV <https://en.wikipedia.org/wiki/Comma-separated_values>`__
 .. |NumPy| replace:: `NumPy <http://www.numpy.org/>`__
 .. |Bash| replace:: `Bash <https://en.wikipedia.org/wiki/Bash_(Unix_shell)>`__
-.. || replace:: ` <https://trac.osgeo.org//>`__
 .. |GEOS| replace:: `GEOS <https://trac.osgeo.org/geos/>`__
 .. |LASzip| replace:: `LASzip <http://laszip.org>`__
 .. |Python| replace:: `Python <http://python.org/>`__

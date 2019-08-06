@@ -113,7 +113,8 @@ Execution
 
 Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
-The `--nostream` option disables stream mode
+The `--nostream` option disables stream mode. The point-in-polygon check (see notes)
+performs poorly in stream mode currently.
 
 .. literalinclude:: ./clipping-run-command.txt
     :linenos:
