@@ -12,7 +12,7 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
 
 .. _`LASzip`: http://laszip.org
 
-1. Issue the following command in your |Terminal|:
+1. Issue the following command in your `Conda Shell`.
 
 
     .. literalinclude:: ./compression-command.txt

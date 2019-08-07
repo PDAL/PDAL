@@ -4,7 +4,7 @@
                         "filename":"./exercies/python/athletic-fields.laz"
                     },
                     {
-                        "type":"filters.programmable",
+                        "type":"filters.python",
                         "function":"make_plot",
                         "module":"anything",
                         "pdalargs":"{\"filename\":\"histogram.png\"}",

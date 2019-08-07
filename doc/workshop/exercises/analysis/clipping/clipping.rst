@@ -118,8 +118,10 @@ We will write our content back out using a :ref:`writers.las`.
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
+Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
+The `--nostream` option disables stream mode. The point-in-polygon check (see notes)
+performs poorly in stream mode currently.
 
 .. literalinclude:: ./clipping-run-command.txt
     :linenos:

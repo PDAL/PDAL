@@ -1,2 +1,2 @@
 pdal pipeline ^
-    ./exercises/analysis/clipping/clipping.json
+    ./exercises/analysis/clipping/clipping.json --nostream

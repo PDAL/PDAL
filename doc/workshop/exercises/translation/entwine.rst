@@ -10,18 +10,22 @@ Exercise
 
 This exercise uses PDAL to fetch data from an Entwine index stored in an Amazon Web Services object store (bucket). Entwine is a point cloud indexing strategy, which rearranges points into a lossless octree structure known as EPT, for Entwine Point Tiles. The structure is described here: https://entwine.io/entwine-point-tile.html.
 
-EPT indexes can be used for visualisation as well as analysis and data manipulation at any scale. The entwine format is
+EPT indexes can be used for visualisation as well as analysis and data manipulation at any scale.
 
 Examples of Entwine usage can be found from very fine photogrammetric surveys to continental scale lidar management.
 
-.. index:: entwine, web services
+.. index:: EPT, web services
 
-This example will use USGS data listed here: https://usgs.entwine.io/
+US Geological Survey (USGS) example data is here: https://usgs.entwine.io/
+
+We will use a sample data set from Dublin, Ireland
+  http://potree.entwine.io/data/view.html?r=%22http://na-c.entwine.io/dublin/ept.json%22
+
 
 .. index:: Potree
 
 
-1. In your |Terminal|, navigate to the ``PDAL/exercises/translation``
+1. In your `Conda Shell`, navigate to the ``PDAL/exercises/translation``
    folder.
 
     .. literalinclude:: ./entwine-cd-command.txt
@@ -29,17 +33,16 @@ This example will use USGS data listed here: https://usgs.entwine.io/
 2. View the ``entwine.json`` file in your editor. If the file does not exist, create
    it and paste the following JSON into it:
 
-
     .. literalinclude:: ./entwine.json
 
     .. note::
 
         If you use the `Developer Console`_ when visiting
         http://speck.ly or http://potree.entwine.io, you can see the
-        browser making requests against the Greyhound server at
-        https://url-for-data
+        browser making requests against the EPT resource at
+        http://na-c.entwine.io/dublin/ept.json
 
-3. Issue the following command in your |Terminal|.
+3. Issue the following command in your `Conda Shell`.
 
     .. literalinclude:: ./entwine-command.txt
 
@@ -65,5 +68,5 @@ This example will use USGS data listed here: https://usgs.entwine.io/
 Notes
 --------------------------------------------------------------------------------
 
-1. :ref:`readers.entwine` contains more detailed documentation about how to
-   use PDAL's |Entwine| reader .
+1. :ref:`readers.ept` contains more detailed documentation about how to
+   use PDAL's EPT reader .

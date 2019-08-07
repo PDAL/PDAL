@@ -1,1 +1,1 @@
-pdal pipeline greyhound.json
+pdal pipeline entwine.json -v 7

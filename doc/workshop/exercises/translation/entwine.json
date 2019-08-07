@@ -1,21 +1,16 @@
 {
     "pipeline": [
         {
-            "type": "readers.entwine",
-            "url":"s3:// ...",
-            "depth_begin":0,
-            "depth_end":11,
-            "resource":"dublin",
-            "filter":{
-                "Classification": 2
-            }
+            "type": "readers.ept",
+            "filename":"ept://https://na-c.entwine.io/dublin/ept.json",
+            "resolution": 5
         },
         {
             "type": "writers.las",
             "compression": "true",
             "minor_version": "2",
             "dataformat_id": "0",
-            "filename":"just-ground.laz"
+            "filename":"dublin.laz"
         }
     ]
 }

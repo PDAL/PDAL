@@ -11,7 +11,7 @@ Exercise
 --------------------------------------------------------------------------------
 
 This exercise uses PDAL to print information from the first point. Issue the
-following command in your |Terminal|:
+following command in your `Conda Shell`.
 
 .. literalinclude:: ./single-point-command.txt
     :linenos:
@@ -52,4 +52,3 @@ Notes
 
 4. A common query with ``pdal info`` is ``--all``, which will print all header,
    metadata, and statistics about a file.
-
