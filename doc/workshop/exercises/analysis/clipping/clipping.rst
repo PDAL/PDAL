@@ -23,11 +23,8 @@ clip out the stadium into a new LAS file.
 .. image:: ../../../images/clipping-autzen-view.png
     :target: ../../../../_images/clipping-autzen-view.png
 
-
-
 Data preparation
 ................................................................................
-
 
 The data are mixed in two different coordinate systems. The :ref:`LAZ
 <readers.las>` file is in `Oregon State Plane Ft.`_ and the `GeoJSON`_ defining
@@ -37,7 +34,6 @@ or project the attribute polygons into the coordinate system of the points. The
 latter is preferable in this case because it will be less math and therefore
 less computation. To make it convenient, we can utilize `OGR`_'s `VRT`_
 capability to reproject the data for us on-the-fly:
-
 
 .. code:: xml
 
