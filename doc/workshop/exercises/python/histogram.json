@@ -1,14 +1,14 @@
 {
     "pipeline":[
                     {
-                        "filename":"c:/Users/hobu/PDAL/exercies/python/athletic-fields.laz"
+                        "filename":"./exercies/python/athletic-fields.laz"
                     },
                     {
-                        "type":"filters.programmable",
+                        "type":"filters.python",
                         "function":"make_plot",
                         "module":"anything",
                         "pdalargs":"{\"filename\":\"histogram.png\"}",
-                        "script":"c:/Users/hobu/PDAL/exercies/python/histogram.py"
+                        "script":"./exercies/python/histogram.py"
                     },
                     {
                         "type":"writers.null"

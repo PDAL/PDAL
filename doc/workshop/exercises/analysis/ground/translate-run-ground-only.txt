@@ -1,6 +1,6 @@
 pdal translate ^
-   c:/Users/hobu/PDAL/exercises/analysis/ground/CSite1_orig-utm.laz ^
-   -o c:/Users/hobu/PDAL/exercises/analysis/ground/denoised-ground-only.laz ^
+   ./exercises/analysis/ground/CSite1_orig-utm.laz ^
+   -o ./exercises/analysis/ground/denoised-ground-only.laz ^
    outlier smrf range ^
    --filters.outlier.method="statistical" ^
    --filters.outlier.mean_k=8 ^

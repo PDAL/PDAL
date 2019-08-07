@@ -34,7 +34,7 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
-today='May 17th, 2018'
+today='August 5th, 2019'
 docstitle='Home'
 
 intersphinx_mapping = {'pdal': ('https://pdal.io/', None)}
@@ -246,7 +246,7 @@ latex_elements = {
 
 # Latex figure (float) alignment
 'figure_align': 'htbp',
-'releasename':'05/17/2018',
+'releasename':'08/05/2019',
 # 'tocdepth':3,
 }
 
@@ -327,4 +327,3 @@ pdf_style_path = ['.' ]
 #pdf_fit_mode="shrink"
 pdf_use_numbered_links = True
 #pdf_fit_background_mode="scale"
-

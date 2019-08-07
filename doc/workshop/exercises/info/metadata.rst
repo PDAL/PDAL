@@ -11,7 +11,7 @@ Exercise
 --------------------------------------------------------------------------------
 
 This exercise uses PDAL to print metadata information. Issue the
-following command in your |Terminal|:
+following command in your `Conda Shell`.
 
 
 .. literalinclude:: ./metadata-command.txt
@@ -97,5 +97,3 @@ Notes
 4. Spatial reference system or coordinate system information is a kind of
    special metadata.  Spatial references are come directly from source data
    or are provided via options in PDAL.
-
-

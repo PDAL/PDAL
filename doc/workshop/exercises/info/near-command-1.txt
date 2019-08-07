@@ -1,2 +1,2 @@
-pdal info c:/Users/hobu/pdal/exercises/info/interesting.las --all ^
+pdal info ./exercises/info/interesting.las --all ^
     | jq .stats.bbox.native.bbox

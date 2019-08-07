@@ -26,7 +26,7 @@ Translation
 
    translation/compression
    translation/reprojection
-   translation/greyhound
+   translation/entwine
 
 
 .. _analysisa:
@@ -63,3 +63,12 @@ Georeferencing
     :maxdepth: 3
 
     georeferencing/index
+
+
+Batch Processing
+--------------------------------------------------------------------------------
+
+.. toctree::
+    :maxdepth: 3
+
+    batch_processing/index
