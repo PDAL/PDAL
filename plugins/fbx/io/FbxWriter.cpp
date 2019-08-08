@@ -132,9 +132,13 @@ void FbxWriter::done(PointTableRef table)
     const char *format = m_ascii ? "FBX ascii (*.fbx)" : "FBX binary (*.fbx)";
     int writer = registry->FindWriterIDByDescription(format);
 
+    // This is just to let you know what writers are supported and their
+    // magic number strings.  Uncomment if you need and then comment again.
+    /**
     int numWriters = registry->GetWriterFormatCount();
     for (int i = 0; i < numWriters; ++i)
         std::cerr << registry->GetWriterFormatDescription(i) << "\n";
+    **/
 
     exporter->Initialize(m_filename.data(), writer, settings);
     exporter->Export(m_scene);
