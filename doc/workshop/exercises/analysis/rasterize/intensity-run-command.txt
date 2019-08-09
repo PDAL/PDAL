@@ -1,6 +1,3 @@
-pdal pipeline classification.json ^
-    --writers.gdal.dimension="Intensity" ^
-    --writers.gdal.data_type="float" ^
-    --writers.gdal.filename="intensity.tif"
+pdal pipeline classification.json --writers.gdal.dimension="Intensity" --writers.gdal.data_type="float" --writers.gdal.filename="intensity.tif"
 
 gdal_translate intensity.tif intensity.png -of PNG

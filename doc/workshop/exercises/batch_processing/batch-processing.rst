@@ -16,12 +16,13 @@ Operating system variations
 
 How substitutions are passed generally depends on the operating system and tools available.
 In the unix/linux environments, this is primarily using the `find` and `ls` programs to get
-lists of files (either with directories or just filenames) and the `xargs` program to pass 
+lists of files (either with directories or just filenames) and the `xargs` or `parallel` program to pass 
 those files to the :ref:`pdal` application (although `-exec` with `find` can also be used). These
 tools are available in the `docker` environment if you are running `PDAL` under docker. They
 are also available under Windows one installs `Cygwin` or `MinGW`. They are also available if
 Git for Windows is installed. They are also available as win32 command line programs installed
-from the GNU Findutils (https://www.gnu.org/software/findutils/findutils.html). 
+from the GNU Findutils (https://www.gnu.org/software/findutils/findutils.html). They are 
+available for MacOS and Linux.
 
 
 Windows native tools
@@ -88,11 +89,11 @@ using the substitutions syntax to do this.
 
 .. code-block:: powershell
 
-  $env:PATH="$PATH;C:\OSGeo4W64\bin\"
-  $env:GDAL_DATA="C:\OSGeo4W64\share\gdal\"
-
-  PS C:\Users\hobu\exercises\batch> Get-ChildItem  C:\Users\administrator\exercises\batch\ll\*.laz | foreach {pdal pipeline C:\Users\hobu\exercises\batch\batch_srs_gdal.json --readers.las.filename=.\ll\$($_.BaseName).laz --writers.gdal.filename=.\dtm\$($_.BaseName).tif --filters.reprojection.out_srs=epsg:26919}
+  PS ./exercises/batch> Get-ChildItem  ./exercises/batch/source/*.laz | foreach {pdal pipeline ./exercises/batch/batch_srs_gdal.json --readers.las.filename=./source/$($_.BaseName).laz --writers.gdal.filename=./dtm/$($_.BaseName).tif --filters.reprojection.out_srs=epsg:26919}
   
+.. code-block:  bash
+
+  find ./exercises/batch_processing/source/*.laz | parallel -I{} pdal pipeline ./exercises/batch_processing/batch_srs_gdal.json --readers.las.filename={} --writers.gdal.filename=./excercises/batch_processing/dtm{/.}.tif --filters.reprojection.out_srs=epsg:xxxx}
 
 
 

@@ -1,4 +1,1 @@
-pdal density ^
-   ./exercises/analysis/density/uncompahgre.laz ^
-   -o ./exercises/analysis/density/density.sqlite ^
-   -f SQLite
+pdal density ./exercises/analysis/density/uncompahgre.laz  -o ./exercises/analysis/density/density.sqlite -f SQLite

@@ -1,3 +1,9 @@
-dir c:\Users\hobu\PDAL\exercises\translation\interesting.laz
+dir ./exercises/translation/interesting.laz
 
-dir c:\Users\hobu\PDAL\exercises\translation\interesting.las
+dir ./exercises/translation/interesting.las
+
+---
+
+ls -alh ./exercises/translation/interesting.laz
+
+ls -alh  ./exercises/translation/interesting.las

@@ -91,5 +91,4 @@ using the :ref:`pipeline_command` substitutions syntax to do this.
 
 .. literalinclude:: ./batch-dtm-powershell.txt
 
-
-
+.. literalinclude:: ./batch-dtm-bash.txt

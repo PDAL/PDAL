@@ -1,5 +1,1 @@
-pdal translate ^
-   ./exercises/analysis/density/uncompahgre.laz ^
-   ./exercises/analysis/thinning/uncompahgre-thin.laz ^
-   sample ^
-   --filters.sample.radius=20
+pdal translate ./exercises/analysis/density/uncompahgre.laz ./exercises/analysis/thinning/uncompahgre-thin.laz sample --filters.sample.radius=20

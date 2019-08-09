@@ -19,10 +19,11 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
 
     LAS is a very fluffy binary format. Because of the way the data are stored,
     there is ample redundant information, and |LASzip| is an open source solution
-    for compressing this information
+    for compressing this information. Note that we are actually inflating the data here. 
+    Its laz from the workshop and we are converting it to las.
 
 
-2. Verify that the data are in fact compressed:
+2. Verify that the laz data is compressed over the las:
 
     .. literalinclude:: ./compression-command-verify.txt
 
