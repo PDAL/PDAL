@@ -44,7 +44,6 @@ if (CMAKE_VERSION VERSION_LESS 3.0)
   project(gtest CXX C)
 else()
   cmake_policy(SET CMP0048 NEW)
-  project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 endif()
 cmake_minimum_required(VERSION 2.6.4)
 

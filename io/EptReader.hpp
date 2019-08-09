@@ -42,6 +42,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <nlohmann/json.hpp>
 
@@ -60,7 +61,7 @@ class FixedPointLayout;
 class Key;
 class Pool;
 
-class PDAL_DLL EptReader : public Reader
+class PDAL_DLL EptReader : public Reader, public Streamable
 {
     FRIEND_TEST(EptReaderTest, getRemoteType);
     FRIEND_TEST(EptReaderTest, getCoercedType);
@@ -102,6 +103,11 @@ private:
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
     static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
 
+    //For streamable pipeline.
+    virtual bool processOne(PointRef& point) override;
+    void loadNextOverlap();
+    void fillPoint(PointRef& point);
+
     std::string m_root;
 
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
@@ -129,6 +135,14 @@ private:
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
+
+    // For streamable pipeline.
+    uint64_t m_nodeId = 1;
+    std::unique_ptr<PointTable> m_bufferPointTable;
+    PointViewPtr m_bufferPointView;
+    PointLayoutPtr m_bufferLayout;
+    point_count_t m_currentIndex = -1;
+    std::vector<char> m_temp_buffer;
 };
 
 } // namespace pdal

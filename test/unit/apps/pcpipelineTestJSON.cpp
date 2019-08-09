@@ -190,7 +190,7 @@ TEST(json, pipeline_verify)
     run_pipeline("pipeline/nonstreamable.json", "--validate",
         "\"streamable\": false");
     run_pipeline("pipeline/invalid1.json", "--validate",
-        "Unable to parse");
+        "unexpected string literal");
     run_pipeline("pipeline/invalid2.json", "--validate",
         "Unexpected argument");
     run_pipeline("pipeline/streamable.json", "-v Debug",
@@ -432,6 +432,18 @@ TEST(json, issue_2159)
     PointViewPtr v = *(s.begin());
     SpatialReference srs = v->spatialReference();
     EXPECT_EQ(srs, SpatialReference("EPSG:4326"));
+}
+
+TEST(json, issue_2438)
+{
+    std::string file1(Support::temppath("out2438_1.las"));
+    std::string file2(Support::temppath("out2438_1.las"));
+
+    FileUtils::deleteFile(file1);
+    FileUtils::deleteFile(file2);
+    run_pipeline("pipeline/issue2438.json");
+    EXPECT_TRUE(FileUtils::fileExists(file1));
+    EXPECT_TRUE(FileUtils::fileExists(file2));
 }
 
 } // namespace pdal

@@ -92,7 +92,7 @@ TEST(TranslateTest, t2)
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
-    // Check that we fail with no bad input file.
+    // Check that we fail with no input file.
     FileUtils::deleteFile("foo.las");
     EXPECT_NE(runTranslate("foo.las " + out + " --json=\"" + json + "\"",
         output), 0);
@@ -168,7 +168,7 @@ TEST(TranslateTest, t2)
           \\\"badoutput2.las\\\" \
         ] \
         }";
-    EXPECT_NE(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we can handle chained writers.

@@ -45,13 +45,16 @@ invalidate an existing KD-tree.
    filters.hag
    filters.info
    filters.lof
+   filters.miniball
    filters.neighborclassifier
    filters.nndistance
    filters.normal
    filters.outlier
    filters.overlay
+   filters.planefit
    filters.pmf
    filters.radialdensity
+   filters.reciprocity
    filters.smrf
 
 :ref:`filters.approximatecoplanar`
@@ -97,6 +100,9 @@ invalidate an existing KD-tree.
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
 
+:ref:`filters.miniball`
+    Compute a criterion for point neighbors based on the miniball algorithm.
+
 :ref:`filters.neighborclassifier`
     Update pointwise classification using k-nearest neighbor consensus voting.
 
@@ -113,11 +119,18 @@ invalidate an existing KD-tree.
     Assign values to a dimension based on the extent of an OGR-readable data
     source or an OGR SQL query.
 
+:ref:`filters.planefit`
+    Compute a deviation of a point from a manifold approximating its neighbors.
+
 :ref:`filters.pmf`
     Label ground/non-ground returns using [Zhang2003]_.
 
 :ref:`filters.radialdensity`
     Compute pointwise density of points within a given radius.
+
+:ref:`filters.reciprocity`
+    Compute the percentage of points that are considered uni-directional
+    neighbors of a point.
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
@@ -158,6 +171,7 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 
    filters.cpd
    filters.icp
+   filters.projpipeline
    filters.reprojection
    filters.transformation
 
@@ -168,6 +182,10 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 :ref:`filters.icp`
     Compute and apply transformation between two point clouds using the
     Iterative Closest Point algorithm.
+
+:ref:`filters.projpipeline`
+    Apply coordinates operation on point triplets, based on PROJ pipeline string,
+    WKT2 coordinates operations or URN definitions.
 
 :ref:`filters.reprojection`
     Reproject data using GDAL from one coordinate system to another.
@@ -366,14 +384,10 @@ These filters will invalidate an existing KD-tree.
    :hidden:
 
    filters.matlab
-   filters.pclblock
    filters.python
 
 :ref:`filters.matlab`
     Embed MATLAB software in a pipeline.
-
-:ref:`filters.pclblock`
-    Embed select PCL filters in a pipeline.
 
 :ref:`filters.python`
     Embed Python software in a pipeline.

@@ -132,13 +132,7 @@ PCL
 `PCL`_ is a complementary, rather than substitute, open source software
 processing suite for point cloud data. The developer community of the PCL
 library is focused on algorithm development, robotic and computer vision, and
-real-time laser scanner processing. PDAL links and uses PCL, and PDAL provides
-a convenient pipeline mechanism to orchestrate PCL operations.
-
-.. note::
-
-    See :ref:`pcl_block_tutorial` for more detail on how to take advantage of
-    PCL capabilities within PDAL operations.
+real-time laser scanner processing. PDAL can read and write PCL's PCD format.
 
 Greyhound and Entwine
 ................................................................................

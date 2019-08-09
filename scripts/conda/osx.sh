@@ -24,8 +24,6 @@ CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
-        -DBUILD_PLUGIN_PCL=OFF \
-        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_TILEDB=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \

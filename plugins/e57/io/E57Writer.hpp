@@ -46,7 +46,8 @@ class E57Writer : public pdal::Writer, public pdal::Streamable
 
     class ChunkWriter {
     public:
-        ChunkWriter(const std::vector<std::string> &dimensionsToWrite, e57::CompressedVectorNode &vectorNode);
+        ChunkWriter(const std::vector<std::string> &dimensionsToWrite,
+            e57::CompressedVectorNode &vectorNode);
 
         void write(pdal::PointRef &point);
 
@@ -92,5 +93,8 @@ private:
 
     // What do we write?
     std::vector<std::string> m_dimensionsToWrite;
+
+    // Bounds
+    BOX3D m_bbox;
 };
 }

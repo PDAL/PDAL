@@ -3,6 +3,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 ARG PDAL_VERSION=master
 ARG DESTDIR="/build"
+ARG PARALLEL=2
 ARG tiledb_version=1.4.1
 
 ENV CC gcc
@@ -11,7 +12,11 @@ ENV CXX g++
 RUN apt-get update -qq; \
     apt-get -qq remove postgis; \
     apt-get install -y --fix-missing --no-install-recommends \
-        software-properties-common
+        software-properties-common \
+        apt-transport-https ca-certificates gnupg software-properties-common wget
+
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
+    && apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 
 RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
         build-essential \
@@ -21,6 +26,7 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         gfortran \
         git \
         libgeotiff-dev \
+        libgeotiff-epsg \
         libarpack2-dev \
         libflann-dev \
         libhdf5-serial-dev \
@@ -68,48 +74,53 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libzstd1-dev \
         pkg-config \
         libgdal-dev \
-        bash-completion
+        bash-completion \
+        ninja-build \
+        sqlite3 \
+        libgeos-dev \
+    libfreexl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN    git clone https://github.com/LASzip/LASzip.git laszip; \
-    cd laszip; \
-    git checkout 3.4.1; \
-    cmake  \
+
+
+RUN git clone https://github.com/LASzip/LASzip.git laszip \
+    && cd laszip \
+    && git checkout 3.4.1 \
+    && cmake  \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr/ \
         -DCMAKE_BUILD_TYPE="Release" \
-     . ; \
-    ninja ; \
-    ninja install; \
-    DESTDIR=/ ninja install; \
-    rm -rf laszip
+     .  \
+    && ninja -j ${PARALLEL} \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf laszip
 
-RUN git clone  https://github.com/hobu/laz-perf.git; \
-    cd laz-perf; \
-    mkdir build; \
-    cd build; \
-    cmake .. \
+RUN git clone  https://github.com/hobu/laz-perf.git \
+    && cd laz-perf \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE="Release" \
-    ; \
-    ninja; \
-    ninja install; \
-    DESTDIR=/ ninja install; \
-    rm -rf /laz-perf
+    && ninja -j ${PARALLEL} \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf /laz-perf
 
 
-RUN mkdir /nitro; cd /nitro; \
-    git clone https://github.com/hobu/nitro; \
-    cd nitro; \
-    mkdir build; \
-    cd build; \
-    cmake ..\
+RUN mkdir /nitro && cd /nitro \
+    && git clone https://github.com/hobu/nitro \
+    && cd nitro \
+    && mkdir build \
+    && cd build \
+    && cmake ..\
         -G Ninja -DCMAKE_INSTALL_PREFIX=/usr/ \
-    ; \
-    ninja; \
-    ninja install; \
-    DESTDIR=/ ninja install; \
-    rm -rf /nitro
+    && ninja -j ${PARALLEL} \
+    && ninja install \
+    && DESTDIR=/ ninja install \
+    && rm -rf /nitro
 
 RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
     && cd fgt \
@@ -120,7 +131,7 @@ RUN git clone --depth 1 --branch v0.4.6 https://github.com/gadomski/fgt.git \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE=Release \
         -G "Ninja" \
-    && ninja \
+    && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
     && rm -rf /fgt
@@ -139,24 +150,12 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE=Release \
         -G "Ninja" \
-    && ninja  \
+    && ninja  -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install  \
     && rm -rf /cpd
 
-#RUN \
-#    wget https://github.com/TileDB-Inc/TileDB/archive/${tiledb_version}.tar.gz; \
-#    tar xzf ${tiledb_version}.tar.gz; \
-#    rm ${tiledb_version}.tar.gz; \
-#    cd TileDB-${tiledb_version}; \
-#    mkdir build; \
-#    cd build; \
-#    ../bootstrap --prefix=/usr --enable-s3; \
-#    make -j2; \
-#    make install-tiledb; \
-#    DESTDIR=/ make install-tiledb; \
-#    cd /; \
-#    rm -rf TileDB-${tiledb_version};
+
 
 RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.git pdal-git; \
     cd pdal-git;  \
@@ -174,7 +173,6 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
-        -DBUILD_PLUGIN_PCL=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DPYTHON_EXECUTABLE=/usr/bin/python3 \
         -DBUILD_PLUGIN_SQLITE=ON \
@@ -190,7 +188,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DWITH_PDAL_JNI=OFF \
         -DCMAKE_BUILD_TYPE=Release \
     ; \
-    ninja; \
+    ninja -j ${PARALLEL}; \
     ninja install; \
     DESTDIR=/ ninja install; \
     rm -rf /pdal-git
@@ -211,7 +209,7 @@ RUN git clone https://github.com/libharu/libharu \
         -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
         -DCMAKE_CXX_FLAGS="-isystem ${DESTDIR}/usr/include" \
       ..; \
-    ninja; \
+    ninja -j ${PARALLEL}; \
     ninja install; \
     DESTDIR=/ ninja install; \
     rm -rf /libharu
@@ -225,7 +223,7 @@ RUN git clone https://github.com/PDAL/PRC \
         -DPDAL_DIR="/usr/lib/pdal/cmake" \
         -DCMAKE_BUILD_TYPE=Release  .. \
       -G "Ninja" \
-    && ninja \
+    && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
     && rm -rf /PRC
@@ -242,20 +240,23 @@ RUN \
         -DPDAL_DIR="/usr/lib/pdal/cmake" \
         -DCMAKE_BUILD_TYPE=Release  .. \
       -G "Ninja" \
-    && ninja \
+    && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
     && rm -rf /pubgeo
 
+RUN rm /build/usr/lib/lib*.a
+
 FROM ubuntu:bionic as runner
+
+RUN date
+
 
 RUN apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         sudo curl \
         vim unzip \
         unixodbc \
-        libgeotiff2 \
-        libgeotiff-epsg \
         libexpat1 \
         libxml2 \
         libwebp6 \
@@ -263,28 +264,31 @@ RUN apt-get update; \
         libhdf4-0-alt \
         libgif7 \
         libdapclient6v5 \
-        libspatialite7 \
-        libsqlite3-mod-spatialite \
-        spatialite-bin \
         libtiff5 \
         libflann1.9 \
         libssl1.1 \
-        libpython2.7 \
-        libproj-dev \
-        proj-bin \
-        gdal-bin \
-        proj-data \
         zlib1g \
         libpng16-16 \
         python3-setuptools \
         liblzma5 \
         libzstd1 \
-        libhdf5-cpp-100 ;\
-  rm -rf /var/lib/apt/lists/*
-
-RUN date
+        libhdf5-cpp-100 \
+        libfreexl1 \
+        libgeos-c1v5 \
+        libxerces-c3.2 \
+        libopenjp2-7 \
+        libpq5 \
+        libhpdf-2.3.0 \
+        curl \
+        unzip \
+        proj-bin \
+        libgeotiff-epsg \
+        gdal-bin \
+        proj-data \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder  /build/usr/bin/ /usr/bin/
+COPY --from=builder  /build/usr/lib/ /usr/lib/
 COPY --from=builder  /build/usr/lib/ /usr/lib/
 COPY --from=builder  /build/usr/include/ /usr/include/
 
@@ -294,5 +298,3 @@ RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
-
-

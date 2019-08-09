@@ -30,7 +30,6 @@
 #cmakedefine PDAL_HAVE_LZMA
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_PYTHON
-#cmakedefine PDAL_ARBITER_ENABLED
 
 /*
  * Debug or Release build?

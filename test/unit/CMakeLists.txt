@@ -170,6 +170,18 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
 )
 
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_pcd_reader_test
+    FILES
+        io/PcdReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
+PDAL_ADD_TEST(pdal_io_pcd_writer_test
+    FILES
+        io/PcdWriterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
         io/PlyReaderTest.cpp
@@ -263,6 +275,9 @@ PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
+if (GDAL_3)
+    PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
+endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
