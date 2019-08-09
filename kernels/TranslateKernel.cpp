@@ -87,8 +87,22 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
         m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
-    args.add("nostream", "Don't run in stream mode, even if technically "
-        "possible.", m_noStream);
+    args.add("nostream", "Run in standard mode", m_noStream);
+    args.add("stream", "Run in stream mode.  Error if not possible.", m_stream);
+}
+
+
+void TranslateKernel::validateSwitches(ProgramArgs&)
+{
+    if (m_stream && m_noStream)
+        throw pdal_error("Can't specify both 'stream' and 'nostream' options.");
+
+    if (m_stream)
+        m_mode = ExecMode::Stream;
+    else if (m_noStream)
+        m_mode = ExecMode::Standard;
+    else
+        m_mode = ExecMode::PreferStream;
 }
 
 

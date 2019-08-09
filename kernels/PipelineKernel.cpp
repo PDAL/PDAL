@@ -97,15 +97,24 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
     args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
-    args.add("stream", "This option is obsolete.", m_stream);
-    args.add("nostream", "Don't run in stream mode, even if technically "
-        "possible.", m_noStream);
+    args.add("stream", "Run in stream mode.  Error if not streamable.",
+        m_stream);
+    args.add("nostream", "Run in standard mode.", m_noStream);
     args.add("metadata", "Metadata filename", m_metadataFile);
 }
 
 
 int PipelineKernel::execute()
 {
+    if (m_stream && m_noStream)
+        throw pdal_error("Can't execute with 'stream' and 'nostream' options");
+    if (m_stream)
+        m_mode = ExecMode::Stream;
+    else if (m_noStream)
+        m_mode = ExecMode::Standard;
+    else
+        m_mode = ExecMode::PreferStream;
+
     if (!Utils::fileExists(m_inputFile))
         throw pdal_error("file not found: " + m_inputFile);
     if (m_progressFile.size())
@@ -139,10 +148,7 @@ int PipelineKernel::execute()
     }
 
     m_manager.readPipeline(m_inputFile);
-    if (m_noStream)
-        m_manager.execute();
-    else
-        m_manager.execute(ExecMode::PreferStream);
+    m_manager.execute(m_mode);
 
     if (m_metadataFile.size())
     {
