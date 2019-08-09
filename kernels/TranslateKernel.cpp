@@ -223,10 +223,9 @@ int TranslateKernel::execute()
         return 0;
     }
 
-    if (m_noStream)
-        m_manager.execute();
-    else
-        m_manager.execute(ExecMode::PreferStream);
+    if (m_manager.execute(m_mode).m_mode == ExecMode::None)
+        throw pdal_error("Couldn't run translation pipeline in requested "
+            "execution mode.");
 
     if (metaOut)
     {

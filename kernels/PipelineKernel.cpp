@@ -69,9 +69,14 @@ void PipelineKernel::validateSwitches(ProgramArgs& args)
     if (m_inputFile.empty())
         throw pdal_error("Input filename required.");
 
+    if (m_stream && m_noStream)
+        throw pdal_error("Can't execute with 'stream' and 'nostream' options");
     if (m_stream)
-        m_log->get(LogLevel::Warning) << "Option 'stream' is obsolete.  " <<
-            "Streaming occurs by default.\n";
+        m_mode = ExecMode::Stream;
+    else if (m_noStream)
+        m_mode = ExecMode::Standard;
+    else
+        m_mode = ExecMode::PreferStream;
 }
 
 
@@ -106,15 +111,6 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
 
 int PipelineKernel::execute()
 {
-    if (m_stream && m_noStream)
-        throw pdal_error("Can't execute with 'stream' and 'nostream' options");
-    if (m_stream)
-        m_mode = ExecMode::Stream;
-    else if (m_noStream)
-        m_mode = ExecMode::Standard;
-    else
-        m_mode = ExecMode::PreferStream;
-
     if (!Utils::fileExists(m_inputFile))
         throw pdal_error("file not found: " + m_inputFile);
     if (m_progressFile.size())
@@ -148,7 +144,8 @@ int PipelineKernel::execute()
     }
 
     m_manager.readPipeline(m_inputFile);
-    m_manager.execute(m_mode);
+    if (m_manager.execute(m_mode).m_mode == ExecMode::None)
+        throw pdal_error("Couldn't run pipeline in requested execution mode.");
 
     if (m_metadataFile.size())
     {
