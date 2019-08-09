@@ -62,6 +62,18 @@ class PDAL_DLL PipelineManager
 {
     FRIEND_TEST(json, tags);
 public:
+    struct ExecResult
+    {
+        ExecResult() : m_mode(ExecMode::None), m_count(0)
+        {}
+        ExecResult(ExecMode mode, point_count_t count) :
+            m_mode(mode), m_count(count)
+        {}
+
+        ExecMode m_mode;
+        point_count_t m_count;
+    };
+
     PipelineManager(point_count_t streamLimit = 10000);
     ~PipelineManager();
 
@@ -113,9 +125,8 @@ public:
 
     QuickInfo preview() const;
     void prepare() const;
+    ExecResult execute(ExecMode mode);
     point_count_t execute();
-    point_count_t executePreferStream();
-    void executeStream();
     void executeStream(StreamPointTable& table);
     void validateStageOptions() const;
     bool pipelineStreamable() const;

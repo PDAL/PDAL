@@ -238,7 +238,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
     {
         makePipeline();
         if (m_needPoints || m_showMetadata)
-            m_manager.executePreferStream();
+            m_manager.execute(ExecMode::PreferStream);
         else
             m_manager.prepare();
         dump(root);

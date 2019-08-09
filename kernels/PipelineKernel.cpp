@@ -142,7 +142,7 @@ int PipelineKernel::execute()
     if (m_noStream)
         m_manager.execute();
     else
-        m_manager.executePreferStream();
+        m_manager.execute(ExecMode::PreferStream);
 
     if (m_metadataFile.size())
     {

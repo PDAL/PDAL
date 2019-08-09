@@ -203,58 +203,71 @@ void PipelineManager::prepare() const
 }
 
 
-point_count_t PipelineManager::executePreferStream()
+PipelineManager::ExecResult PipelineManager::execute(ExecMode mode)
 {
+    ExecResult result;
+
     validateStageOptions();
     Stage *s = getStage();
     if (!s)
-        return 0;
+        return result;
+                
+    if (mode == ExecMode::PreferStream)
+    {
+        // If a pipeline isn't streamable before being prepared, it's not
+        // going to become streamable, so just run it or fail.
+        if (!s->pipelineStreamable())
+        {
+            mode = ExecMode::Standard;
+            goto next;
+        }
 
-    // If a pipeline isn't streamable before being prepared, it's not
-    // going to become streamable, so just run it.
-    if (!s->pipelineStreamable())
-        return execute();
-    // After prepare a pipeline that was streamable might become
-    // non-streamable due to some options.
-    s->prepare(m_streamTable);
-    if (!s->pipelineStreamable())
-        // This will call validateStageOptions() a second time, but that
-        // doesn't seem important.  It will also re-prepare, but there's
-        // no helping this as we're using a different point table.
-        return execute();
+        // After prepare a pipeline that was streamable might become
+        // non-streamable due to some options.
+        s->prepare(m_streamTable);
+        if (!s->pipelineStreamable())
+        {
+            // Note that in this case we've prepared the stream
+            // table and will then prepare the standard table,
+            // but that can't be helped.
+            mode = ExecMode::Standard;
+            goto next;
+        }
+        // We can stream.
+        s->execute(m_streamTable);
+        result.m_mode = ExecMode::Stream;
+        return result;
+    }
 
-    // We can stream.
-    s->execute(m_streamTable);
-    return 0;
+    next:
+    if (mode == ExecMode::Stream)
+    {
+        if (s->pipelineStreamable())
+        {
+            s->prepare(m_streamTable);
+            s->execute(m_streamTable);
+            result.m_mode = ExecMode::Stream;
+        }
+    }
+    else if (mode == ExecMode::Standard)
+    {
+        s->prepare(m_table);
+        m_viewSet = s->execute(m_table);
+        point_count_t cnt = 0;
+        for (auto pi = m_viewSet.begin(); pi != m_viewSet.end(); ++pi)
+        {
+            PointViewPtr view = *pi;
+            cnt += view->size();
+        }
+        result = { ExecMode::Standard, cnt };
+    }
+    return result;
 }
 
 
 point_count_t PipelineManager::execute()
 {
-    prepare();
-    Stage *s = getStage();
-    if (!s)
-        return 0;
-    m_viewSet = s->execute(m_table);
-    point_count_t cnt = 0;
-    for (auto pi = m_viewSet.begin(); pi != m_viewSet.end(); ++pi)
-    {
-        PointViewPtr view = *pi;
-        cnt += view->size();
-    }
-    return cnt;
-}
-
-
-void PipelineManager::executeStream()
-{
-    validateStageOptions();
-    Stage *s = getStage();
-    if (!s)
-        return;
-
-    s->prepare(m_table);
-    s->execute(m_table);
+    return execute(ExecMode::Standard).m_count;
 }
 
 
