@@ -116,9 +116,9 @@ function(FindFbxLibrariesGeneric _FBX_ROOT_DIR _OUT_FBX_LIBRARIES _OUT_FBX_LIBRA
 
     if(UNIX)
       if(APPLE) # APPLE requires to link with Carbon framework
-        find_library(CARBON_FRAMEWORK Carbon)
-        list(APPEND FBX_LIB ${CARBON_FRAMEWORK})
-        list(APPEND FBX_LIB_DEBUG ${CARBON_FRAMEWORK})
+#        find_library(CARBON_FRAMEWORK Carbon)
+#        list(APPEND FBX_LIB ${CARBON_FRAMEWORK})
+#        list(APPEND FBX_LIB_DEBUG ${CARBON_FRAMEWORK})
       else()
         find_package(Threads)
         list(APPEND FBX_LIB ${CMAKE_THREAD_LIBS_INIT} dl)
