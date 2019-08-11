@@ -1,0 +1,6 @@
+pdal translate ^
+./exercises/georeferencing/S1C1_csd_004.csd ^
+./exercises/georeferencing/S1C1_csd_004.laz ^
+reprojection range ^
+--filters.reprojection.out_srs="EPSG:32614" ^
+--filters.range.limits="Intensity[0:500]"
