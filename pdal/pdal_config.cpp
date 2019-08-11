@@ -98,11 +98,6 @@ bool hasFeature(Feature f)
         enabled = true;
 #endif
         break;
-    case Feature::ARBITER:
-#ifdef PDAL_HAVE_ARBITER
-        enabled = true;
-#endif
-        break;
     default:
         break;
     }

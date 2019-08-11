@@ -1,5 +1,5 @@
 call "%CONDA_ROOT%\Scripts\activate.bat" base
-call conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
+call conda install geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
 call conda config --set path_conflict clobber
 pushd "scripts\\appveyor\\conda\\recipe"
 REM pdal-%APPVEYOR_REPO_COMMIT%-py37_appveyor
