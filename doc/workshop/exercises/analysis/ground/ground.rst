@@ -68,6 +68,12 @@ technique we learned about in :ref:`denoising`.
 .. literalinclude:: ./ground-run-ground-only.txt
     :linenos:
     :emphasize-lines: 5
+    :language: console
+
+.. literalinclude:: ./ground-run-ground-only-win.txt
+    :linenos:
+    :emphasize-lines: 5
+    :language: bat
 
 .. image:: ../../../images/ground-ground-only-view.png
     :target: ../../../../_images/ground-ground-only-view.png
