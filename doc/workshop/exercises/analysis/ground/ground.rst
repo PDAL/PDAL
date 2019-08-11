@@ -38,6 +38,9 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 .. literalinclude:: ./ground-run-no-filter.txt
     :linenos:
 
+.. literalinclude:: ./ground-run-no-filter-win.txt
+    :linenos:
+
 .. image:: ../../../images/ground-run-command.png
     :target: ../../../../_images/ground-run-command.png
 
@@ -83,6 +86,9 @@ technique we learned about in :ref:`denoising`.
 :ref:`filters.outlier` and :ref:`filters.smrf` stages:
 
 .. literalinclude:: ./translate-run-ground-only.txt
+   :linenos:
+
+.. literalinclude:: ./translate-run-ground-only-win.txt
    :linenos:
 
 In this invocation, we have more control over the process. First the outlier

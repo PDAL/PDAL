@@ -4,5 +4,3 @@ pdal translate \
 smrf range \
 --filters.range.limits="Classification[2:2]" \
 -v 4
-
-
