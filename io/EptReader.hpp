@@ -43,6 +43,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/Streamable.hpp>
+#include <pdal/Polygon.hpp>
 
 #include <nlohmann/json.hpp>
 
@@ -143,6 +144,7 @@ private:
     PointLayoutPtr m_bufferLayout;
     point_count_t m_currentIndex = -1;
     std::vector<char> m_temp_buffer;
+    std::vector<Polygon> m_queryPolys;
 };
 
 } // namespace pdal

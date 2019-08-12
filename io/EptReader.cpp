@@ -132,6 +132,7 @@ public:
     std::string m_origin;
     std::size_t m_threads = 0;
     double m_resolution = 0;
+    std::vector<Polygon> m_polys;
     NL::json m_addons;
 };
 
@@ -152,6 +153,9 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
         m_args->m_addons);
+    args.add("polygon", "Bounding polygon(s) to crop requests", m_args->m_polys).
+        setErrorText("Invalid polygon specification.  "
+            "Must be valid GeoJSON/WKT");
 }
 
 
@@ -206,6 +210,7 @@ void EptReader::initialize()
     setSpatialReference(m_info->srs());
 
     m_queryBounds = m_args->m_bounds.to3d();
+    m_queryPolys = m_args->m_polys;
 
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
@@ -543,7 +548,18 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
         std::map<Key, uint64_t>& target, const NL::json& hier,
         const Key& key)
 {
+    // If this key doesn't overlap our query
+    // we can skip
     if (!key.b.overlaps(m_queryBounds)) return;
+
+    // Check the box of the key against our
+    // query polygon(s). If it doesn't overlap,
+    // we can skip
+    for(auto& p: m_queryPolys)
+    {
+        Polygon t(key.b);
+        if (!t.overlaps(p)) return;
+    }
     if (m_depthEnd && key.d >= m_depthEnd) return;
 
     auto it = hier.find(key.toString());
@@ -844,7 +860,7 @@ bool EptReader::processOne(PointRef& point)
     if (finishedCurrentOverlap)
         loadNextOverlap();
 
-    // In some rare cases there are 0 points in the overlap. 
+    // In some rare cases there are 0 points in the overlap.
     // If this happen, fillPoint() will crash while retriving point information.
     // In that case proceed to load next overlap.
     if (m_bufferPointView->size())

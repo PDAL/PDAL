@@ -99,7 +99,7 @@ void CropFilter::addArgs(ProgramArgs& args)
             "GeoJSON/WKT. Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
         m_args->m_distance);
-    args.add("polygon", "Bounding polying for cropped points", m_args->m_polys).
+    args.add("polygon", "Bounding polygon(s) for cropped points", m_args->m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
 }
