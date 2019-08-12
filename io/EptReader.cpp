@@ -39,6 +39,7 @@
 #include "private/EptSupport.hpp"
 
 #include "LasReader.hpp"
+#include "../filters/CropFilter.hpp"
 
 #include <arbiter/arbiter.hpp>
 
@@ -210,7 +211,18 @@ void EptReader::initialize()
     setSpatialReference(m_info->srs());
 
     m_queryBounds = m_args->m_bounds.to3d();
-    m_queryPolys = m_args->m_polys;
+
+    // Set geometry from polygons.
+    if (m_args->m_polys.size())
+    {
+        m_polys.clear();
+        for (Polygon& poly : m_args->m_polys)
+        {
+            // Throws if invalid.
+            poly.valid();
+            m_polys.emplace_back(poly);
+        }
+    }
 
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
@@ -560,6 +572,7 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
         Polygon t(key.b);
         if (!t.overlaps(p)) return;
     }
+
     if (m_depthEnd && key.d >= m_depthEnd) return;
 
     auto it = hier.find(key.toString());
