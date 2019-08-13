@@ -38,8 +38,6 @@
 #include <memory>
 #include <mutex>
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/Reader.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/Streamable.hpp>
@@ -61,6 +59,7 @@ class EptInfo;
 class FixedPointLayout;
 class Key;
 class Pool;
+class GridPnp;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -145,6 +144,7 @@ private:
     point_count_t m_currentIndex = -1;
     std::vector<char> m_temp_buffer;
     std::vector<Polygon> m_queryPolys;
+    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
 };
 
 } // namespace pdal

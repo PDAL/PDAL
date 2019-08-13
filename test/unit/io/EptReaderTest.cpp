@@ -538,4 +538,64 @@ TEST(EptReaderTest, stream)
 #endif
 }
 
+TEST(EptReaderTest, boundedCrop)
+{
+    BOX2D bounds(515380, 4918350, 515400, 4918370);
+
+    // First we'll query the EptReader for these bounds.
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptLaszipPath);
+        options.add("bounds", bounds);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    const auto set(reader.execute(eptTable));
+
+    double x, y, z;
+    uint64_t o;
+    uint64_t np(0);
+    for (const PointViewPtr& view : set)
+    {
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            ++np;
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            z = view->getFieldAs<double>(Dimension::Id::Z, i);
+            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+            ASSERT_TRUE(bounds.contains(x, y)) << bounds << ": " <<
+                x << ", " << y << ", " << z << std::endl;
+            ASSERT_TRUE(o < 4);
+        }
+    }
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", sourceFilePath);
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        Options options;
+        options.add("bounds", bounds);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_EQ(np, sourceNp);
+    EXPECT_EQ(np, 354211u);
+}
 } // namespace pdal

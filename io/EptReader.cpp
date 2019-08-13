@@ -39,13 +39,14 @@
 #include "private/EptSupport.hpp"
 
 #include "LasReader.hpp"
-#include "../filters/CropFilter.hpp"
 
 #include <arbiter/arbiter.hpp>
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
+#include "../filters/CropFilter.hpp"
+#include "../filters/private/pnp/GridPnp.hpp"
 
 namespace pdal
 {
@@ -215,12 +216,19 @@ void EptReader::initialize()
     // Set geometry from polygons.
     if (m_args->m_polys.size())
     {
-        m_polys.clear();
+        m_queryPolys.clear();
         for (Polygon& poly : m_args->m_polys)
         {
             // Throws if invalid.
             poly.valid();
-            m_polys.emplace_back(poly);
+            m_queryPolys.emplace_back(poly);
+        }
+
+        for (auto& p : m_queryPolys)
+        {
+            std::unique_ptr<GridPnp> gridPnp(new GridPnp(
+                p.exteriorRing(), p.interiorRings()));
+            m_queryGrids.push_back(std::move(gridPnp));
         }
     }
 
@@ -728,6 +736,15 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 
     if (selected && m_queryBounds.contains(x, y, z))
     {
+
+        // If we were given polys, check
+        // that our point is inside those
+        // polygons too.
+        if (m_queryPolys.size())
+            for (auto& grid: m_queryGrids)
+                if (!grid->inside(x,y))
+                    return;
+
         dst.setField(Dimension::Id::X, dstId, x);
         dst.setField(Dimension::Id::Y, dstId, y);
         dst.setField(Dimension::Id::Z, dstId, z);
