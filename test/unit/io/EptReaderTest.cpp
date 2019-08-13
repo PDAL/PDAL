@@ -39,6 +39,7 @@
 #include <io/EptReader.hpp>
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
+#include <filters/ReprojectionFilter.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
@@ -598,4 +599,78 @@ TEST(EptReaderTest, boundedCrop)
     EXPECT_EQ(eptNp, 47u);
     EXPECT_EQ(sourceNp, 47u);
 }
+
+TEST(EptReaderTest, boundedCropReprojection)
+{
+    std::istream* wkt_stream = FileUtils::openFile(
+        Support::datapath("autzen/autzen-selection-dd.wkt"));
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
+    std::string wkt(strbuf.str());
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        Option polygon("polygon", wkt);
+        options.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
+        Options reproOptions;
+        options.add(polygon);
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+    Options reproOptions;
+    reproOptions.add("out_srs", "EPSG:4326");
+
+    ReprojectionFilter reprojection;
+    reprojection.setOptions(reproOptions);
+    reprojection.setInput(reader);
+    reprojection.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reprojection.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        options.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
+        source.setOptions(options);
+    }
+    ReprojectionFilter reproj;
+    {
+        Options options;
+        options.add("out_srs", "EPSG:4326");
+        reproj.setOptions(options);
+        reproj.setInput(source);
+    }
+
+    CropFilter crop;
+    {
+        Options options;
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        crop.setOptions(options);
+        crop.setInput(reproj);
+    }
+
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 47u);
+    EXPECT_EQ(sourceNp, 47u);
+}
+
 } // namespace pdal

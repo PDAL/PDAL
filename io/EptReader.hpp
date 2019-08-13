@@ -105,6 +105,9 @@ private:
 
     //For streamable pipeline.
     virtual bool processOne(PointRef& point) override;
+    virtual void spatialReferenceChanged(const SpatialReference& srs) override;
+
+    void transform(const SpatialReference& srs);
     void loadNextOverlap();
     void fillPoint(PointRef& point);
 

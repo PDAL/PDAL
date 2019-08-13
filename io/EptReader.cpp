@@ -136,6 +136,8 @@ public:
     double m_resolution = 0;
     std::vector<Polygon> m_polys;
     NL::json m_addons;
+    SpatialReference m_assignedSrs;
+
 };
 
 
@@ -158,6 +160,8 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("polygon", "Bounding polygon(s) to crop requests", m_args->m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
+    args.add("a_srs", "Spatial reference for bounding region",
+        m_args->m_assignedSrs);
 }
 
 
@@ -220,7 +224,9 @@ void EptReader::initialize()
         for (Polygon& poly : m_args->m_polys)
         {
             // Throws if invalid.
-            poly.valid();
+            bool valid = poly.valid();
+            if (!valid)
+                throw pdal::pdal_error("Polygon given to 'polygon' option in readers.ept is not valid!");
             m_queryPolys.emplace_back(poly);
         }
 
@@ -470,12 +476,69 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 	}
 }
 
+void EptReader::spatialReferenceChanged(const SpatialReference& srs)
+{
+    transform(srs);
+}
+
+void EptReader::transform(const SpatialReference& srs)
+{
+    for (auto& geom : m_queryPolys)
+    {
+        try
+        {
+            geom.transform(srs);
+        }
+        catch (pdal_error& err)
+        {
+            throwError(err.what());
+        }
+    }
+
+    // If we don't have any SRS, do nothing.
+    if (srs.empty() && m_args->m_assignedSrs.empty())
+        return;
+
+    m_queryGrids.clear();
+    for (auto& p : m_queryPolys)
+    {
+        std::unique_ptr<GridPnp> gridPnp(new GridPnp(
+            p.exteriorRing(), p.interiorRings()));
+        m_queryGrids.push_back(std::move(gridPnp));
+    }
+
+
+    // Note that we should never have assigned SRS empty here since
+    // if it is missing we assign it from the point data.
+    assert(!m_args->m_assignedSrs.empty());
+    if (srs.empty() || m_args->m_assignedSrs.empty())
+        throwError("Unable to transform crop geometry to point "
+            "coordinate system.");
+
+    // Set the assigned SRS for the points/bounds to the one we've
+    // transformed to.
+    m_args->m_assignedSrs = srs;
+
+}
+
+
 void EptReader::ready(PointTableRef table)
 {
     // These may not exist, in general they are only needed to track point
     // origins and ordering for an EPT writer.
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
+
+    if (m_args->m_assignedSrs.empty())
+    {
+        m_args->m_assignedSrs = table.anySpatialReference();
+        if (!table.spatialReferenceUnique())
+            log()->get(LogLevel::Warning) << "Can't determine spatial "
+                "reference for provided bounds.  Consider using 'a_srs' "
+                "option.\n";
+    }
+    for (auto& geom : m_queryPolys)
+        geom.setSpatialReference(m_args->m_assignedSrs);
 
     m_overlaps.clear();
 
@@ -622,6 +685,9 @@ PointViewSet EptReader::run(PointViewPtr view)
     // Start these at 1 to differentiate from points added by other stages,
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
+
+    // FIXME: This is always empty and I don't know why
+    transform(view->spatialReference());
 
     for (const auto& entry : m_overlaps)
     {
