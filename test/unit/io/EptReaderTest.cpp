@@ -40,6 +40,7 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 namespace pdal
@@ -63,6 +64,8 @@ namespace
             Support::datapath("ept/source/lone-star.laz"));
     const std::string eptLaszipPath(
             "ept://" + Support::datapath("ept/lone-star-laszip"));
+    const std::string eptAutzenPath(
+            "ept://" + Support::datapath("ept/1.2-with-color"));
 
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
@@ -540,36 +543,31 @@ TEST(EptReaderTest, stream)
 
 TEST(EptReaderTest, boundedCrop)
 {
-    BOX2D bounds(515380, 4918350, 515400, 4918370);
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
+
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
+
+    std::string wkt(strbuf.str());
 
     // First we'll query the EptReader for these bounds.
     EptReader reader;
     {
         Options options;
-        options.add("filename", eptLaszipPath);
-        options.add("bounds", bounds);
+        options.add("filename", eptAutzenPath);
+        Option polygon("polygon", wkt);
+        options.add(polygon);
         reader.setOptions(options);
     }
+
     PointTable eptTable;
     reader.prepare(eptTable);
-    const auto set(reader.execute(eptTable));
 
-    double x, y, z;
-    uint64_t o;
-    uint64_t np(0);
-    for (const PointViewPtr& view : set)
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
     {
-        for (point_count_t i(0); i < view->size(); ++i)
-        {
-            ++np;
-            x = view->getFieldAs<double>(Dimension::Id::X, i);
-            y = view->getFieldAs<double>(Dimension::Id::Y, i);
-            z = view->getFieldAs<double>(Dimension::Id::Z, i);
-            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
-            ASSERT_TRUE(bounds.contains(x, y)) << bounds << ": " <<
-                x << ", " << y << ", " << z << std::endl;
-            ASSERT_TRUE(o < 4);
-        }
+        eptNp += view->size();
     }
 
     // Now we'll check the result against a crop filter of the source file with
@@ -577,13 +575,14 @@ TEST(EptReaderTest, boundedCrop)
     LasReader source;
     {
         Options options;
-        options.add("filename", sourceFilePath);
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
         source.setOptions(options);
     }
     CropFilter crop;
     {
         Options options;
-        options.add("bounds", bounds);
+        Option polygon("polygon", wkt);
+        options.add(polygon);
         crop.setOptions(options);
         crop.setInput(source);
     }
@@ -595,7 +594,8 @@ TEST(EptReaderTest, boundedCrop)
         sourceNp += view->size();
     }
 
-    EXPECT_EQ(np, sourceNp);
-    EXPECT_EQ(np, 354211u);
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 47u);
+    EXPECT_EQ(sourceNp, 47u);
 }
 } // namespace pdal
