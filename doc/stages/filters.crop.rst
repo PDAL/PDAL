@@ -49,12 +49,18 @@ bounds
 
 polygon
   The clipping polygon, expressed in a well-known text string,
-  eg: "POLYGON((0 0, 5000 10000, 10000 0, 0 0))".  This option can be
-  specified more than once by placing values in an array.
+  e.g.: "POLYGON((0 0, 5000 10000, 10000 0, 0 0))".  Multiple polygons can be
+  specified by providing an array of such WKT strings, in which case the
+  filter will let through points falling within the union of the provided
+  polygons.
 
 outside
-  Invert the cropping logic and only take points outside the cropping
-  bounds or polygon. [Default: false]
+  Include only points that fall outside, rather than inside, the cropping
+  bounds or polygon.  Note that when multiple polygons are provided, this will
+  let through points falling outside *any* of the polygons.  To correctly
+  invert a filter using multiple polygons, the crop filter must be used
+  multiple times in succession, using one polygon at a time with
+  ``"outside": true``. [Default: false]
 
 _`point`
   An array of WKT or GeoJSON 2D or 3D points. Requires distance_.
