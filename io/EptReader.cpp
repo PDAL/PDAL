@@ -578,7 +578,7 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
     for(auto& p: m_queryPolys)
     {
         Polygon t(key.b);
-        if (!t.intersects(p))
+        if (t.disjoint(p))
             return;
     }
 
