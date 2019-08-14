@@ -32,7 +32,6 @@ requirements:
     - laszip
     - curl
     - zlib
-    - pcl
     - hdf5
   run:
     - python
@@ -41,7 +40,6 @@ requirements:
     - laz-perf
     - geotiff
     - laszip
-    - pcl
     - hdf5
     - libgdal
     - {{ pin_compatible('numpy') }}

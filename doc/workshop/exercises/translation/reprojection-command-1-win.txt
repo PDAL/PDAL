@@ -1,0 +1,3 @@
+pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz ^
+  ./exercises/translation/csite-dd.laz reprojection ^
+  --filters.reprojection.out_srs="EPSG:4326"

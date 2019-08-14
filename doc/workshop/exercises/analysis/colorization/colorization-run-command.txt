@@ -1,2 +1,1 @@
-pdal pipeline ^
-    ./exercises/analysis/colorization/colorize.json
+pdal pipeline ./exercises/analysis/colorization/colorize.json

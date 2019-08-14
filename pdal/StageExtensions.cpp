@@ -83,7 +83,8 @@ R"PDALEXTENSIONS(
     "readers.slpk" : "slpk",
     "readers.i3s" : "i3s",
     "readers.e57" : "e57",
-    "writers.e57" : "e57"
+    "writers.e57" : "e57",
+    "writers.fbx" : "fbx"
 }
 
 )PDALEXTENSIONS"

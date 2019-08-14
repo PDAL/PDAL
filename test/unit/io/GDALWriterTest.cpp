@@ -37,6 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <filters/RangeFilter.hpp>
 #include <io/BufferReader.hpp>
+#include <io/FauxReader.hpp>
 #include <io/GDALWriter.hpp>
 #include <io/LasReader.hpp>
 #include <io/TextReader.hpp>
@@ -223,7 +224,11 @@ TEST(GDALWriterTest, min2)
     wo.add("filename", outfile);
 
     Options wo2 = wo;
-    wo2.add("bounds", "([-2, 4.7],[-2, 6.5])");
+//    wo2.add("bounds", "([-2, 4.7],[-2, 6.5])");
+    wo2.add("origin_x", -2);
+    wo2.add("origin_y", -2);
+    wo2.add("width", 7);
+    wo2.add("height", 9);
 
     const std::string output =
         "-9999.000 -9999.00 -9999.00 -9999.00 -9999.00 -9999.00    -1.00"
@@ -629,7 +634,11 @@ TEST(GDALWriterTest, bounds)
     wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
-    wo.add("bounds", "([0, 4.5],[0, 4.5])");
+//    wo.add("bounds", "([0, 4.5],[0, 4.5])");
+    wo.add("origin_x", 0);
+    wo.add("origin_y", 0);
+    wo.add("height", 5);
+    wo.add("width", 5);
 
     const std::string output =
         "5.000 -9999.000     7.000     8.000     8.967 "
@@ -758,7 +767,11 @@ TEST(GDALWriterTest, issue_2545)
     wOpts.add("radius", 10);
     wOpts.add("output_type", "idw");
     wOpts.add("gdaldriver", "GTiff");
-    wOpts.add("bounds", BOX2D(.5, .5, 6.5, 6.5));
+    wOpts.add("origin_x", .5);
+    wOpts.add("origin_y", .5);
+    wOpts.add("width", 7);
+    wOpts.add("height", 7);
+//    wOpts.add("bounds", BOX2D(.5, .5, 6.5, 6.5));
     wOpts.add("filename", outfile);
 
     w.setOptions(wOpts);
@@ -788,6 +801,71 @@ TEST(GDALWriterTest, issue_2545)
     EXPECT_EQ(data[index(6, 0)], 5.0);
     for (size_t i = 0; i < data.size(); ++i)
         EXPECT_TRUE(data[i] <= 10.0 && data[i] >= 0);
+}
+
+// Test that using the alternate grid specification works
+TEST(GDALWriterTest, alternate_grid)
+{
+    FauxReader r;
+    Options opts;
+    opts.add("count", 1000);
+    opts.add("mode", "constant");
+    r.setOptions(opts);
+
+    std::string outfile(Support::temppath("test.tif"));
+
+    {
+        Options opts;
+        opts.add("origin_x", "10.0");
+        opts.add("filename", outfile);
+        opts.add("resolution", 1.1);
+
+        PointTable t;
+        GDALWriter w;
+        w.setOptions(opts);
+        w.setInput(r);
+        EXPECT_THROW(w.prepare(t), pdal_error);
+    }
+
+    {
+        Options opts;
+        opts.add("origin_x", "10.0");
+        opts.add("origin_y", "20.0");
+        opts.add("width", 10);
+        opts.add("height", 5);
+        opts.add("bounds", "([1, 10],[5, 25])");
+        opts.add("filename", outfile);
+        opts.add("resolution", 1.1);
+
+        PointTable t;
+        GDALWriter w;
+        w.setOptions(opts);
+        w.setInput(r);
+        EXPECT_THROW(w.prepare(t), pdal_error);
+    }
+
+    {
+        Options opts;
+        opts.add("origin_x", "10.0");
+        opts.add("origin_y", "20.0");
+        opts.add("width", 10);
+        opts.add("height", 5);
+        opts.add("filename", outfile);
+        opts.add("resolution", 1);
+
+        PointTable t;
+        GDALWriter w;
+        w.setOptions(opts);
+        w.setInput(r);
+        w.prepare(t);
+        w.execute(t);
+
+        gdal::registerDrivers();
+        gdal::Raster raster(outfile, "GTiff");
+        raster.open();
+        EXPECT_EQ(raster.width(), 10);
+        EXPECT_EQ(raster.height(), 5);
+    }
 }
 
 } // namespace pdal

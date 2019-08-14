@@ -189,6 +189,18 @@ bool Polygon::contains(const Polygon& p) const
     return m_geom->Contains(p.m_geom.get());
 }
 
+
+/// Determine whether this polygon contains a point.
+/// \param x  Point x coordinate.
+/// \param y  Point y coordinate.
+/// \return  Whether the polygon contains the point or not.
+bool Polygon::contains(double x, double y) const
+{
+    OGRPoint p(x, y);
+    return m_geom->Contains(&p);
+}
+
+
 bool Polygon::touches(const Polygon& p) const
 {
     throwNoGeos();

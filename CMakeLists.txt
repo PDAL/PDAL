@@ -240,6 +240,11 @@ if (NOT PDAL_HAVE_LAZPERF)
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
+if (GDAL_VERSION VERSION_LESS 3.0.0)
+    file(GLOB PROJPIPELINE_FILTER_SRCS
+        ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)
+    list(REMOVE_ITEM SRCS ${PROJPIPELINE_FILTER_SRCS})
+endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 
 #

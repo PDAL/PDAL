@@ -14,11 +14,7 @@
 .. |CSV| replace:: `CSV <https://en.wikipedia.org/wiki/Comma-separated_values>`__
 .. |NumPy| replace:: `NumPy <http://www.numpy.org/>`__
 .. |Bash| replace:: `Bash <https://en.wikipedia.org/wiki/Bash_(Unix_shell)>`__
-<<<<<<< HEAD
-.. |OSGeo4W| replace:: :ref:`conda`
-=======
 .. |GEOS| replace:: `GEOS <https://trac.osgeo.org/geos/>`__
->>>>>>> f881aa2d15d4d177f3fd8159ea72751a183dd7ec
 .. |LASzip| replace:: `LASzip <http://laszip.org>`__
 .. |Python| replace:: `Python <http://python.org/>`__
 .. |Docker| replace:: `Docker <https://www.docker.com/>`__
@@ -32,8 +28,4 @@
 .. |UTM| replace:: `UTM <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`__
 .. |WGS84| replace:: `WGS84 <https://en.wikipedia.org/wiki/Geodetic_datum>`__
 .. |WellKnownText| replace:: `Well Known Text <https://en.wikipedia.org/wiki/Well-known_text#Coordinate_reference_systems>`__
-<<<<<<< HEAD
-.. |Terminal| replace:: `Anaconda Shell`
-=======
 .. |Terminal| replace:: `Conda Shell`
->>>>>>> f881aa2d15d4d177f3fd8159ea72751a183dd7ec

@@ -25,12 +25,7 @@ We will use a sample data set from Dublin, Ireland
 .. index:: Potree
 
 
-1. In your `Conda Shell`, navigate to the ``PDAL/exercises/translation``
-   folder.
-
-    .. literalinclude:: ./entwine-cd-command.txt
-
-2. View the ``entwine.json`` file in your editor. If the file does not exist, create
+1. View the ``entwine.json`` file in your editor. If the file does not exist, create
    it and paste the following JSON into it:
 
     .. literalinclude:: ./entwine.json
@@ -42,7 +37,7 @@ We will use a sample data set from Dublin, Ireland
         browser making requests against the EPT resource at
         http://na-c.entwine.io/dublin/ept.json
 
-3. Issue the following command in your `Conda Shell`.
+2. Issue the following command in your `Conda Shell`.
 
     .. literalinclude:: ./entwine-command.txt
 
@@ -51,7 +46,7 @@ We will use a sample data set from Dublin, Ireland
 
 .. _`Developer Console`: https://developers.google.com/web/tools/chrome-devtools/console/
 
-4. Verify that the data look ok:
+3. Verify that the data look ok:
 
     .. literalinclude:: ./entwine-info-command.txt
 
@@ -59,7 +54,7 @@ We will use a sample data set from Dublin, Ireland
         :target: ../../../_images/entwine-info-verify.png
 
 
-5. Visualize the data in http://plas.io
+4. Visualize the data in http://plas.io
 
     .. image:: ../../images/entwine-view.png
         :target: ../../../_images/entwine-view.png

@@ -1,1 +1,1 @@
-pdal pipeline classification.json
+pdal pipeline ./exercises/analysis/rasterize/classification.json -v 3

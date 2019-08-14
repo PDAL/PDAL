@@ -70,14 +70,14 @@ class Mesh
 {};
 
 
-
-
 /**
   A mesh where the faces are triangles.
 */
 class TriangularMesh : public Mesh
 {
 public:
+    using const_iterator = std::deque<Triangle>::const_iterator;
+
     PDAL_DLL TriangularMesh()
     {}
 
@@ -87,9 +87,13 @@ public:
         { m_index.emplace_back(a, b, c); }
     const PDAL_DLL Triangle& operator[](PointId id) const
         { return m_index[id]; }
+    const_iterator begin() const
+        { return m_index.begin(); }
+    const_iterator end() const
+        { return m_index.end(); }
+
 protected:
     std::deque<Triangle> m_index;
-
 };
 
 } // namespace pdal

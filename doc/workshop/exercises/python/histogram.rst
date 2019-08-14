@@ -43,7 +43,7 @@ script in a :ref:`filters.python` stage.
 .. note::
 
     This pipeline is available in your workshop materials in the
-    ``./exercies/python/histogram.json`` file.
+    ``./exercises/python/histogram.json`` file.
 
 
 Python script
@@ -63,7 +63,7 @@ dictionaries.
 
 .. literalinclude:: ./histogram.py
    :linenos:
-   :emphasize-lines: 34-40
+   :emphasize-lines: 21,34-40
 
 Run ``pdal pipeline``
 ................................................................................

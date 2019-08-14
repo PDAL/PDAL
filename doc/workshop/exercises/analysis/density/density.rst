@@ -27,6 +27,9 @@ Invoke the following command, substituting accordingly, in your ` Shell`:
 .. literalinclude:: ./density-command.txt
     :linenos:
 
+.. literalinclude:: ./density-command-win.txt
+    :linenos:
+
 
 .. image:: ../../../images/density-command-run.png
     :target: ../../../../_images/density-command-run.png

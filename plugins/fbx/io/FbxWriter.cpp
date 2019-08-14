@@ -58,7 +58,7 @@ static PluginInfo const s_info
 {
     "writers.fbx",
     "fbx writer",
-    "http://pdal.io/stages/writers.fbx.html"
+    "https://pdal.io/stages/writers.fbx.html"
 };
 
 CREATE_SHARED_STAGE(FbxWriter, s_info)
@@ -72,7 +72,7 @@ FbxWriter::FbxWriter()
 void FbxWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("ascii", "Write FBX as ASCII", m_ascii);
+    args.add("ascii", "Write FBX as ASCII", m_ascii, false);
 }
 
 
@@ -96,8 +96,9 @@ void FbxWriter::write(const PointViewPtr v)
             std::endl;
 
     FbxMesh *fbxMesh = FbxMesh::Create(m_scene, "mesh");
-    fbxMesh->InitControlPoints(v->size());
+    fbxMesh->InitControlPoints((int)v->size());
     FbxVector4 *points = fbxMesh->GetControlPoints();
+    for (size_t i = 0; i < v->size(); ++i)
     for (size_t i = 0; i < v->size(); ++i)
     {
         double x = v->getFieldAs<double>(Dimension::Id::X, i);
@@ -110,9 +111,9 @@ void FbxWriter::write(const PointViewPtr v)
     {
         const Triangle& t = (*mesh)[id];
         fbxMesh->BeginPolygon();
-        fbxMesh->AddPolygon(t.m_a);
-        fbxMesh->AddPolygon(t.m_b);
-        fbxMesh->AddPolygon(t.m_c);
+        fbxMesh->AddPolygon((int)t.m_a);
+        fbxMesh->AddPolygon((int)t.m_b);
+        fbxMesh->AddPolygon((int)t.m_c);
         fbxMesh->EndPolygon();
     }
 }
@@ -130,11 +131,15 @@ void FbxWriter::done(PointTableRef table)
     // ...
     const char *format = m_ascii ? "FBX ascii (*.fbx)" : "FBX binary (*.fbx)";
     int writer = registry->FindWriterIDByDescription(format);
+
+    // This is just to let you know what writers are supported and their
+    // magic number strings.  Uncomment if you need and then comment again.
     /**
     int numWriters = registry->GetWriterFormatCount();
     for (int i = 0; i < numWriters; ++i)
         std::cerr << registry->GetWriterFormatDescription(i) << "\n";
     **/
+
     exporter->Initialize(m_filename.data(), writer, settings);
     exporter->Export(m_scene);
 

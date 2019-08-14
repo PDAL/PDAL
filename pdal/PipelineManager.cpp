@@ -44,8 +44,11 @@
 namespace pdal
 {
 
-PipelineManager::PipelineManager() : m_factory(new StageFactory),
+PipelineManager::PipelineManager(point_count_t streamLimit) :
+    m_factory(new StageFactory),
     m_tablePtr(new PointTable()), m_table(*m_tablePtr),
+    m_streamTablePtr(new FixedPointTable(streamLimit)),
+    m_streamTable(*m_streamTablePtr),
     m_progressFd(-1), m_input(nullptr)
 {}
 
@@ -200,21 +203,71 @@ void PipelineManager::prepare() const
 }
 
 
-point_count_t PipelineManager::execute()
+PipelineManager::ExecResult PipelineManager::execute(ExecMode mode)
 {
-    prepare();
+    ExecResult result;
 
+    validateStageOptions();
     Stage *s = getStage();
     if (!s)
-        return 0;
-    m_viewSet = s->execute(m_table);
-    point_count_t cnt = 0;
-    for (auto pi = m_viewSet.begin(); pi != m_viewSet.end(); ++pi)
+        return result;
+                
+    if (mode == ExecMode::PreferStream)
     {
-        PointViewPtr view = *pi;
-        cnt += view->size();
+        // If a pipeline isn't streamable before being prepared, it's not
+        // going to become streamable, so just run it or fail.
+        if (!s->pipelineStreamable())
+        {
+            mode = ExecMode::Standard;
+            goto next;
+        }
+
+        // After prepare a pipeline that was streamable might become
+        // non-streamable due to some options.
+        s->prepare(m_streamTable);
+        if (!s->pipelineStreamable())
+        {
+            // Note that in this case we've prepared the stream
+            // table and will then prepare the standard table,
+            // but that can't be helped.
+            mode = ExecMode::Standard;
+            goto next;
+        }
+        // We can stream.
+        s->execute(m_streamTable);
+        result.m_mode = ExecMode::Stream;
+        return result;
     }
-    return cnt;
+
+    next:
+    if (mode == ExecMode::Stream)
+    {
+        if (s->pipelineStreamable())
+        {
+            s->prepare(m_streamTable);
+            s->execute(m_streamTable);
+            result.m_mode = ExecMode::Stream;
+        }
+    }
+    else if (mode == ExecMode::Standard)
+    {
+        s->prepare(m_table);
+        m_viewSet = s->execute(m_table);
+        point_count_t cnt = 0;
+        for (auto pi = m_viewSet.begin(); pi != m_viewSet.end(); ++pi)
+        {
+            PointViewPtr view = *pi;
+            cnt += view->size();
+        }
+        result = { ExecMode::Standard, cnt };
+    }
+    return result;
+}
+
+
+point_count_t PipelineManager::execute()
+{
+    return execute(ExecMode::Standard).m_count;
 }
 
 
