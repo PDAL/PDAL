@@ -1,3 +1,2 @@
-pdal pipeline ^
-   ./exercises/analysis/denoising/denoise.json
+pdal pipeline ./exercises/analysis/denoising/denoise.json
 

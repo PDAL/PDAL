@@ -9,7 +9,6 @@ if (WITH_LASZIP)
     set_package_properties(LASzip PROPERTIES TYPE RECOMMENDED
         PURPOSE "Provides LASzip compression")
     if(LASZIP_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES "${LASZIP_LIBRARY}")
         include_directories(${LASZIP_INCLUDE_DIR})
         mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR)
         mark_as_advanced(CLEAR LASZIP_LIBRARY)

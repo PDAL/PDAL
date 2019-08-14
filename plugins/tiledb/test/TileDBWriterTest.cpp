@@ -32,9 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#define NOMINMAX
+
 #include <stdio.h>
 #include <sys/types.h>
-#include <dirent.h>
 
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>

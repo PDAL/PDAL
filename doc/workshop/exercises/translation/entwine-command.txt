@@ -1,1 +1,1 @@
-pdal pipeline entwine.json -v 7
+pdal pipeline ./excercises/translation/entwine.json -v 7

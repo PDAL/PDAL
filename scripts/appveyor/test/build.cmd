@@ -1,5 +1,5 @@
 call "%CONDA_ROOT%\Scripts\activate.bat" base
-call conda install geotiff laszip nitro curl gdal pcl cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
+call conda install geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
 
 echo "before vcvars"
 dir
@@ -32,7 +32,6 @@ cmake -G "Ninja" ^
     -DBUILD_PLUGIN_ICEBRIDGE=ON ^
     -DBUILD_PLUGIN_MRSID=OFF ^
     -DBUILD_PLUGIN_NITF=ON ^
-    -DBUILD_PLUGIN_PCL=ON ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
     -DBUILD_PLUGIN_OCI=OFF ^
     -DBUILD_PLUGIN_SQLITE=ON ^
@@ -43,12 +42,12 @@ cmake -G "Ninja" ^
     -DWITH_LAZPERF=ON ^
     -DWITH_LZMA=ON ^
     -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_ROOT%\Library\lib\liblzma.lib ^
+    -DZSTD_LIBRARY:FILEPATH=%CONDA_ROOT%\Library\lib\libzstd.lib ^
     -DWITH_LASZIP=ON ^
     -DORACLE_INCLUDE_DIR=%CONDA_ROOT%/include ^
     -DORACLE_LIBRARY=%CONDA_ROOT%/libs/oci.lib ^
     -DLazperf_DIR:FILEPATH=%CONDA_ROOT%/Library/cmake ^
     -DHDF5_DIR:FILEPATH=%CONDA_ROOT%/Library/cmake ^
-    -DPCL_DIR:FILEPATH=%CONDA_ROOT%/Library/cmake ^
     -DLazperf_DIR:FILEPATH=%CONDA_ROOT%/Library/cmake ^
     -DWITH_ZLIB=ON ^
     -Dgtest_force_shared_crt=ON ^

@@ -1,2 +1,1 @@
-pdal pipeline ^
-   ./exercises/analysis/dtm/gdal.json
+pdal pipeline ./exercises/analysis/dtm/gdal.json

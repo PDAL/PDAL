@@ -71,4 +71,4 @@ Batch Processing
 .. toctree::
     :maxdepth: 3
 
-    batch_processing/index
+    batch_processing/batch-processing

@@ -62,7 +62,19 @@ class PDAL_DLL PipelineManager
 {
     FRIEND_TEST(json, tags);
 public:
-    PipelineManager();
+    struct ExecResult
+    {
+        ExecResult() : m_mode(ExecMode::None), m_count(0)
+        {}
+        ExecResult(ExecMode mode, point_count_t count) :
+            m_mode(mode), m_count(count)
+        {}
+
+        ExecMode m_mode;
+        point_count_t m_count;
+    };
+
+    PipelineManager(point_count_t streamLimit = 10000);
     ~PipelineManager();
 
     void setProgressFd(int fd)
@@ -113,6 +125,7 @@ public:
 
     QuickInfo preview() const;
     void prepare() const;
+    ExecResult execute(ExecMode mode);
     point_count_t execute();
     void executeStream(StreamPointTable& table);
     void validateStageOptions() const;
@@ -146,6 +159,8 @@ private:
     std::unique_ptr<StageFactory> m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
     PointTableRef m_table;
+    std::unique_ptr<FixedPointTable> m_streamTablePtr;
+    StreamPointTable& m_streamTable;
     Options m_commonOptions;
     OptionsMap m_stageOptions;
     PointViewSet m_viewSet;
