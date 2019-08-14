@@ -37,22 +37,8 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <gdal_version.h>
-
-#if GDAL_VERSION_MAJOR > 2 || \
-    (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR > 0)
-#define PDAL_GDAL2_1
-#endif
-
-#ifdef PDAL_GDAL2_1
 #include <gdal_priv.h>
 #include <ogr_feature.h>
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#include <ogrsf_frmts.h>
-#pragma GCC diagnostic pop
-#endif
 
 namespace pdal
 {
@@ -76,13 +62,8 @@ private:
     virtual void doneFile();
 
     // I don't think this needs to be deleted.
-#ifdef PDAL_GDAL2_1
     GDALDriver *m_driver;
     GDALDataset *m_ds;
-#else
-    OGRSFDriver *m_driver;
-    OGRDataSource *m_ds;
-#endif
     OGRLayer *m_layer;
     OGRFeature *m_feature;
     OGRwkbGeometryType m_geomType;
@@ -96,3 +77,4 @@ private:
 };
 
 }
+
