@@ -41,6 +41,7 @@
 #include "LasReader.hpp"
 
 #include <arbiter/arbiter.hpp>
+#include <nlohmann/json.hpp>
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
