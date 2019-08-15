@@ -33,9 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/Geometry.hpp>
-#include <pdal/private/SrsTransform.hpp>
-
-#include <ogr_geometry.h>
+#include <pdal/GDALUtils.hpp>
+#include "private/SrsTransform.hpp"
 
 namespace pdal
 {
@@ -231,12 +230,12 @@ std::ostream& operator<<(std::ostream& ostr, const Geometry& p)
 
 std::istream& operator>>(std::istream& istr, Geometry& p)
 {
-    std::ostringstream oss;
-    oss << istr.rdbuf();
+    // Read stream into string.
+    std::string s(std::istreambuf_iterator<char>(istr), {});
 
     try
     {
-        p.update(oss.str());
+        p.update(s);
     }
     catch (pdal_error& )
     {
