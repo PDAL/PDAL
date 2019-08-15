@@ -32,10 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
-#include "cpl_string.h"
-
-#include <ogr_geometry.h>
 
 namespace pdal
 {

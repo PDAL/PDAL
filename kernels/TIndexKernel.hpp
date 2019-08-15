@@ -34,13 +34,18 @@
 
 #pragma once
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
+
+namespace gdal
+{
+    class Geometry;
+    class SpatialRef;
+}
 
 class StageFactory;
 

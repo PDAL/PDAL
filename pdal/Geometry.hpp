@@ -33,7 +33,6 @@
 ****************************************************************************/
 #pragma once
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -41,6 +40,7 @@
 #include <memory>
 
 class OGRGeometry;
+using OGRGeometryH = void *;
 
 namespace pdal
 {

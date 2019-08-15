@@ -32,7 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -41,11 +40,16 @@
 #include <functional>
 #include <map>
 
+#include "GDALUtils.hpp"
+
 #include <ogr_spatialref.h>
 #include <ogr_p.h>
 
 #pragma warning(disable: 4127)  // conditional expression is constant
 
+
+namespace pdal
+{
 
 namespace oldgdalsupport
 {
@@ -54,8 +58,6 @@ namespace oldgdalsupport
 } // namespace oldgdalsupport
 
 
-namespace pdal
-{
 namespace gdal
 {
 
@@ -469,7 +471,6 @@ GDALError Raster::open()
     if (m_ds)
         return error;
 
-#if (GDAL_VERSION_MAJOR > 1)
     const char ** driverP = NULL;
     const char *drivers[2] = {0};
     if (!m_drivername.empty())
@@ -480,9 +481,6 @@ GDALError Raster::open()
 
     m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(), GA_ReadOnly, driverP,
         nullptr, nullptr);
-#else
-    m_ds = (GDALDataset *)GDALOpen(m_filename.c_str(), GA_ReadOnly);
-#endif
     error = wake();
     return error;
 }
@@ -702,11 +700,10 @@ void Raster::close()
 }
 
 
-OGRGeometry *createFromWkt(const char *s);
+OGRGeometry *createFromWkt(const char *s)
 {
     OGRGeometry *newGeom;
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
+#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
     char *cs = const_cast<char *>(s);
     oldgdalsupport::createFromWkt(&cs, &newGeom);
 #else
@@ -719,14 +716,13 @@ OGRGeometry *createFromWkt(const char *s);
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 {
     OGRGeometry *newGeom;
-	char *buf = s.data();
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
+	char *buf = const_cast<char *>(s.data());
+#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
     oldgdalsupport::createFromWkt(&buf, &newGeom);
 #else
     OGRGeometryFactory::createFromWkt(&buf, nullptr, &newGeom);
     if (!newGeom)
-        throw Geometry::error("Couldn't convert WKT string to geometry.");
+        throw pdal_error("Couldn't convert WKT string to geometry.");
 	srs = *buf;
 #endif
 
@@ -735,10 +731,10 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 	if (pos == srs.size())
 	{
 		srs.clear();
-		return;
+		return nullptr;
     }
 	if (srs[pos++] != '/')
-        throw Geometry::error("Invalid character following valid geometry.);
+        throw pdal_error("Invalid character following valid geometry.");
     pos += Utils::extractSpaces(srs, pos);
     srs = srs.substr(pos);
 
@@ -747,8 +743,7 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 
 OGRGeometry *createFromGeoJson(const char *s)
 {
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
+#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
     return oldgdalsupport::createFromGeoJson(s);
 #else
     return OGRGeometryFactory::createFromGeoJson(s);
@@ -760,11 +755,10 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 // Call this function instead after we've past supporting GDAL 2.2
 //    return OGRGeometryFactory::createFromGeoJson(s);
 
-    const char *s = s.data();
-    char *cs = const_cast<char *>(s);
+    char *cs = const_cast<char *>(s.data());
     OGRGeometry *newGeom = oldgdalsupport::createFromGeoJson(&cs);
     if (!newGeom)
-        throw Geometry::error("Couldn't convert GeoJSON to geometry.");
+        throw pdal_error("Couldn't convert GeoJSON to geometry.");
     srs = cs;
 
 	std::string::size_type pos = 0;
@@ -772,38 +766,22 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 	if (pos == srs.size())
 	{
 		srs.clear();
-		return;
+		return nullptr;
     }
 	if (srs[pos++] != '/')
-        throw Geometry::error("Invalid character following valid geometry.);
+        throw pdal_error("Invalid character following valid geometry.");
     pos += Utils::extractSpaces(srs, pos);
     srs = srs.substr(pos);
     return newGeom;
 }
 
-
 } // namespace gdal
 
-std::string transformWkt(std::string wkt, const SpatialReference& from,
-    const SpatialReference& to)
-{
-    //ABELL - Should this throw?  Return empty string?
-    if (from.empty() || to.empty())
-        return wkt;
-
-    gdal::SpatialRef fromRef(from.getWKT());
-    gdal::SpatialRef toRef(to.getWKT());
-    gdal::Geometry geom(wkt, fromRef);
-    geom.transform(toRef);
-    return geom.wkt();
-}
-
-#if (GDAL_VERSION_MAJOR < 2) || \
-    (GDAL_VERSION_MAJOR == 2) && (GDAL_VERSION_MINOR < 3)
 namespace oldgdalsupport
 {
-OGRErr createFromWkt(char **s, OGRGeometry **ppoReturn )
 
+#if (GDAL_VERSION_MAJOR == 2) && (GDAL_VERSION_MINOR < 3)
+OGRErr createFromWkt(char **s, OGRGeometry **ppoReturn )
 {
     const char *pszInput = *s;
     *ppoReturn = nullptr;
@@ -913,6 +891,7 @@ OGRErr createFromWkt(char **s, OGRGeometry **ppoReturn )
 
     return eErr;
 }
+#endif // GDAL version limit
 
 OGRGeometry* createFromGeoJson(char **s)
 {
@@ -967,6 +946,5 @@ OGRGeometry* createFromGeoJson(char **s)
 }
 
 } // namespace oldgdalsupport
-#endif // GDAL version limit
 
 } // namespace pdal

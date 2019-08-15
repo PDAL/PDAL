@@ -91,13 +91,13 @@ private:
     void overlaps(const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
             const NL::json& current, const Key& key);
 
-    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
-    uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
-            uint64_t pointId) const;
+        PointId pointId) const;
 
     void readAddon(PointView& dst, const Key& key, const Addon& addon,
-            uint64_t startId) const;
+        PointId startId) const;
 
     // To allow testing of hidden getRemoteType() and getCoercedType().
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
@@ -105,7 +105,6 @@ private:
 
     //For streamable pipeline.
     virtual bool processOne(PointRef& point) override;
-    virtual void spatialReferenceChanged(const SpatialReference& srs) override;
 
     void transform(const SpatialReference& srs);
     void loadNextOverlap();

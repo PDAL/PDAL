@@ -873,7 +873,4 @@ inline OGRGeometryH toHandle(OGRGeometry *h)
 
 } // namespace gdal
 
-PDAL_DLL std::string transformWkt(std::string wkt, const SpatialReference& from,
-    const SpatialReference& to);
-
 } // namespace pdal
