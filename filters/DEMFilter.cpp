@@ -34,9 +34,11 @@
 
 #include "DEMFilter.hpp"
 
-#include "private/DimRange.hpp"
 #include <string>
 #include <vector>
+
+#include <pdal/GDALUtils.hpp>
+#include "private/DimRange.hpp"
 
 namespace pdal
 {

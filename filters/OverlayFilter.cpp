@@ -36,8 +36,8 @@
 
 #include <vector>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/QuadIndex.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
