@@ -29,6 +29,13 @@ CloudCompare.
   PDAL implements Mischa Kazhdan's Poisson surface reconstruction algorithm. For
   details see `[Kazhdan2006]_`
 
+.. note::
+
+  `writers.ply` will write out mesh vertices by default. In this exercise we
+  set the attribute `faces="true"`. Try using the ply writer without it. Also,
+  if you're using a machine with a lot of processing power, try increasing the
+  `depth` parameter for a more detailed mesh.
+
 Command
 ................................................................................
 
@@ -38,7 +45,7 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
     :linenos:
 
 .. image:: ../../../images/meshing.png
-    :target: ../../../../_images/meshing-terrain.png
+    :target: ../../../../_images/meshing.png
 
 
 Filtering
@@ -49,7 +56,8 @@ filter based on point classification. These data have ground labelled as class 2
 and buildings as 6.
 
 In this exercise we will create a poisson mesh surface of a building and the ground
-surrounding it, using the same data subset as above.
+surrounding it, using the same data subset as above and adding a :ref:`filters.range`
+stage to limit the set of points used in mesh creation.
 
 Command
 ................................................................................
