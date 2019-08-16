@@ -34,6 +34,8 @@
 
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_test_main.hpp>
 
 #include <io/EptReader.hpp>

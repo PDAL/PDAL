@@ -34,12 +34,11 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/JsonFwd.hpp>
 
 #include "../plang/Invocation.hpp"
 
-#include <nlohmann/json.hpp>
 
 namespace pdal
 {

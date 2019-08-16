@@ -38,12 +38,11 @@
 #include <memory>
 #include <mutex>
 
-#include <pdal/Reader.hpp>
-#include <pdal/util/Bounds.hpp>
-#include <pdal/Streamable.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/Polygon.hpp>
-
-#include <nlohmann/json.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
