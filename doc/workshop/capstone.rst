@@ -13,18 +13,16 @@ you to use the capabilities of PDAL in a coherent processing strategy, and it
 will give you ideas about how to orchestrate PDAL in the context of larger data
 processing scenarios.
 
-
 Given the following pipeline for fetching the data, complete the rest of the tasks:
 
 
 .. code-block:: json
 
-
     {
         "pipeline": [
             {
                 "type": "readers.ept",
-                "resource":"dublin",
+                "filename":"http://na-c.entwine.io/dublin/",
                 "bounds":"([-697041.0, -696241.0], [7045398.0, 7046086.0],[-40, 400])"
 
             },
