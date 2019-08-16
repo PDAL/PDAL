@@ -546,13 +546,8 @@ TEST(EptReaderTest, stream)
 
 TEST(EptReaderTest, boundedCrop)
 {
-    std::istream* wkt_stream =
-        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
-
-    std::stringstream strbuf;
-    strbuf << wkt_stream->rdbuf();
-
-    std::string wkt(strbuf.str());
+    std::string wkt = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
 
     // First we'll query the EptReader for these bounds.
     EptReader reader;
@@ -604,37 +599,29 @@ TEST(EptReaderTest, boundedCrop)
 
 TEST(EptReaderTest, boundedCropReprojection)
 {
-    std::istream* wkt_stream = FileUtils::openFile(
+    std::string selection = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
+    std::string selection4326 = FileUtils::readFileIntoString(
         Support::datapath("autzen/autzen-selection-dd.wkt"));
-    std::stringstream strbuf;
-    strbuf << wkt_stream->rdbuf();
-    std::string wkt(strbuf.str());
+    std::string srs = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-srs.wkt"));
 
     EptReader reader;
     {
         Options options;
         options.add("filename", eptAutzenPath);
-        Option polygon("polygon", wkt);
-        options.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
-        Options reproOptions;
-        options.add(polygon);
+        options.add("override_srs", srs);
+        options.add("polygon", selection4326 + "/EPSG:4326");
         reader.setOptions(options);
     }
 
     PointTable eptTable;
-    Options reproOptions;
-    reproOptions.add("out_srs", "EPSG:4326");
 
-    ReprojectionFilter reprojection;
-    reprojection.setOptions(reproOptions);
-    reprojection.setInput(reader);
-    reprojection.prepare(eptTable);
+    reader.prepare(eptTable);
 
     uint64_t eptNp(0);
-    for (const PointViewPtr& view : reprojection.execute(eptTable))
-    {
+    for (const PointViewPtr& view : reader.execute(eptTable))
         eptNp += view->size();
-    }
 
     // Now we'll check the result against a crop filter of the source file with
     // the same bounds.
@@ -642,9 +629,10 @@ TEST(EptReaderTest, boundedCropReprojection)
     {
         Options options;
         options.add("filename", Support::datapath("las/1.2-with-color.las"));
-        options.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
+        options.add("override_srs", srs);
         source.setOptions(options);
     }
+
     ReprojectionFilter reproj;
     {
         Options options;
@@ -656,8 +644,8 @@ TEST(EptReaderTest, boundedCropReprojection)
     CropFilter crop;
     {
         Options options;
-        Option polygon("polygon", wkt);
-        options.add(polygon);
+        options.add("polygon", selection4326);
+        options.add("a_srs", "EPSG:4326");
         crop.setOptions(options);
         crop.setInput(reproj);
     }
@@ -666,9 +654,7 @@ TEST(EptReaderTest, boundedCropReprojection)
     crop.prepare(sourceTable);
     uint64_t sourceNp(0);
     for (const PointViewPtr& view : crop.execute(sourceTable))
-    {
         sourceNp += view->size();
-    }
 
     EXPECT_EQ(eptNp, sourceNp);
     EXPECT_EQ(eptNp, 47u);

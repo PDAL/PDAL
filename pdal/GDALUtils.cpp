@@ -723,20 +723,20 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
     OGRGeometryFactory::createFromWkt(&buf, nullptr, &newGeom);
     if (!newGeom)
         throw pdal_error("Couldn't convert WKT string to geometry.");
-	srs = *buf;
+	srs = buf;
 #endif
 
 	std::string::size_type pos = 0;
 	pos = Utils::extractSpaces(srs, pos);
 	if (pos == srs.size())
-	{
 		srs.clear();
-		return nullptr;
+    else
+    {
+        if (srs[pos++] != '/')
+            throw pdal_error("Invalid character following valid geometry.");
+        pos += Utils::extractSpaces(srs, pos);
+        srs = srs.substr(pos);
     }
-	if (srs[pos++] != '/')
-        throw pdal_error("Invalid character following valid geometry.");
-    pos += Utils::extractSpaces(srs, pos);
-    srs = srs.substr(pos);
 
     return newGeom;
 }
@@ -764,14 +764,14 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 	std::string::size_type pos = 0;
 	pos = Utils::extractSpaces(srs, pos);
 	if (pos == srs.size())
-	{
 		srs.clear();
-		return nullptr;
+    else
+    {
+        if (srs[pos++] != '/')
+            throw pdal_error("Invalid character following valid geometry.");
+        pos += Utils::extractSpaces(srs, pos);
+        srs = srs.substr(pos);
     }
-	if (srs[pos++] != '/')
-        throw pdal_error("Invalid character following valid geometry.");
-    pos += Utils::extractSpaces(srs, pos);
-    srs = srs.substr(pos);
     return newGeom;
 }
 
@@ -903,7 +903,7 @@ OGRGeometry* createFromGeoJson(char **s)
         std::string check("{}\"");
         std::string::size_type startPos(pos);
         pos = Utils::extractSpaces(s, pos);
-        if (s[pos] != '{')
+        if (s[pos++] != '{')
             return std::string::npos;
         int cnt = 1;
         while (cnt && pos != std::string::npos)
@@ -930,7 +930,6 @@ OGRGeometry* createFromGeoJson(char **s)
     };
 
     std::string ss(*s);
-
     // Search the string for the end of the JSON.
     std::string::size_type pos = findEnd(ss, 0);
     if (pos == std::string::npos)

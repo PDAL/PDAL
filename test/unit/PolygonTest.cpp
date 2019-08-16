@@ -46,30 +46,14 @@ namespace pdal
 
 std::string getWKT()
 {
-    std::istream* wkt_stream =
-        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
-
-    std::stringstream strbuf;
-    strbuf << wkt_stream->rdbuf();
-
-    std::string wkt(strbuf.str());
-
-    FileUtils::closeFile(wkt_stream);
-
-    return wkt;
+    return FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
 }
 
 std::string getJSON()
 {
-    std::istream* json_stream =
-        FileUtils::openFile(Support::datapath("autzen/autzen-selection.json"));
-
-    std::stringstream strbuf;
-    strbuf << json_stream->rdbuf();
-
-    std::string json(strbuf.str());
-    FileUtils::closeFile(json_stream);
-    return json;
+    return FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.json"));
 }
 
 TEST(PolygonTest, test_wkt_in)

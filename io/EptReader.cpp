@@ -215,14 +215,14 @@ void EptReader::initialize()
     m_queryBounds = m_args->m_bounds.to3d();
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
-            boundsSrs.getWKT(), m_info->srs().getWKT());
+            boundsSrs.getWKT(), getSpatialReference().getWKT());
 
     // Transform polygons and bounds to point source SRS.
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
             throwError("Geometrically invalid polyon in option 'polygon'.");
-        poly.transform(m_info->srs());
+        poly.transform(getSpatialReference());
     }
 
     try
