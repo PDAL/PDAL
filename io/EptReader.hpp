@@ -105,8 +105,6 @@ private:
 
     //For streamable pipeline.
     virtual bool processOne(PointRef& point) override;
-
-    void transform(const SpatialReference& srs);
     void loadNextOverlap();
     void fillPoint(PointRef& point);
 
@@ -145,7 +143,6 @@ private:
     PointLayoutPtr m_bufferLayout;
     point_count_t m_currentIndex = -1;
     std::vector<char> m_temp_buffer;
-    std::vector<Polygon> m_queryPolys;
     std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
 };
 
