@@ -23,11 +23,8 @@ Given the following pipeline for fetching the data, complete the rest of the tas
     {
         "pipeline": [
             {
-                "type": "readers.greyhound",
-                "url":"data.greyhound.io",
+                "type": "readers.ept",
                 "resource":"dublin",
-                "threads":8,
-                "depth_end":14,
                 "bounds":"([-697041.0, -696241.0], [7045398.0, 7046086.0],[-40, 400])"
 
             },
@@ -42,7 +39,7 @@ Given the following pipeline for fetching the data, complete the rest of the tas
     }
 
 
-* Read data from a |Greyhound| server using :ref:`readers.greyhound` (See :ref:`workshop-greyhound`)
+* Read data from an EPT resource using :ref:`readers.ept` (See :ref:`workshop-entwine`)
 * Thin it by 1.0 meter spacing using :ref:`filters.sample` (See :ref:`workshop-thinning`)
 * Filter out noise using :ref:`filters.outlier` (See :ref:`workshop-denoising`)
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
@@ -54,5 +51,3 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 
     You should review specific :ref:`exercises` for specifics how to
     achieve each task.
-
-
