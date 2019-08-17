@@ -26,10 +26,10 @@ How will we use Conda?
 PDAL stands on the shoulders of giants. It uses GDAL, GEOS, and
 :ref:`many other dependencies <building>`. Because of this, it is very
 challenging to build it yourself. We could easily burn an entire workshop
-learning the esoteric build miseries of PDAL and all of its dependencies.
+learning the esoteric build mysteries of PDAL and all of its dependencies.
 Fortunately, Conda provides us a fully-featured known
 configuration to run our examples and exercises without having to suffer
-so much, and provides in for Windows, Linux, and macOS.
+so much, and provides it for Windows, Linux, and macOS.
 
 
 .. note::
@@ -62,5 +62,5 @@ Installing Conda
 
 5. Install PDAL, Entwine, and GDAL, and install it from **conda-forge**::
 
-    conda install -c conda-forge pdal entwine gdal
+    conda install -c conda-forge pdal gdal entwine matplotlib
 
