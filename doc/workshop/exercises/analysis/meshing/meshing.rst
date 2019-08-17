@@ -44,8 +44,16 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 .. literalinclude:: ./meshing.txt
     :linenos:
 
+.. literalinclude:: ./meshing-win.txt
+    :linenos:    
+
 .. image:: ../../../images/meshing.png
     :target: ../../../../_images/meshing.png
+
+You can view the mesh in Cloud Compare, you should see something similar to
+
+.. image:: ../../../images/first-mesh.png
+    :target: ../../../../_images/first-mesh.png
 
 
 Filtering
@@ -65,6 +73,9 @@ Command
 Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 .. literalinclude:: ./meshing-buildings.txt
+    :linenos:
+
+.. literalinclude:: ./meshing-buildings-win.txt
     :linenos:
 
 .. image:: ../../../images/meshing-buildings.png

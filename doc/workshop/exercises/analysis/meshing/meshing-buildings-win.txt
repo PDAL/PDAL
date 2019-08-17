@@ -1,0 +1,7 @@
+pdal translate -i ept://http://act-2015-rgb.s3.amazonaws.com ^
+ -o ./exercises/analysis/meshing/building-exercise.ply ^
+ range poisson ^
+ --filters.range.limits="Classification[2:2],Classification[6:6]" ^
+ --filters.poisson.depth=16 ^
+ --readers.ept.bounds="([692738, 692967], [6092255,6092562])" ^
+ --verbose 4
