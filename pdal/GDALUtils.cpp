@@ -744,7 +744,7 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 OGRGeometry *createFromGeoJson(const char *s)
 {
 #if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    return oldgdalsupport::createFromGeoJson(&s);
+    return oldgdalsupport::createFromGeoJson((const**)&s);
 #else
     return OGRGeometryFactory::createFromGeoJson(s);
 #endif
