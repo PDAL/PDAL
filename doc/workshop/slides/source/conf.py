@@ -171,7 +171,7 @@ html_sidebars = {
 #html_additional_pages = {}
 
 # If false, no module index is generated.
-html_domain_indices = False
+#html_domain_indices = False
 
 # If false, no index is generated.
 #html_use_index = True
