@@ -99,9 +99,13 @@ void Geometry::update(const std::string& wkt_or_json)
     }
 
     // m_geom may be null if update() is called from a ctor.
-    if (srs.size())
+    if (newGeom->getSpatialReference() && srs.size())
+        throw pdal_error("Geometry contains spatial reference and one was "
+            "also provided following the geometry specification.");
+    if (!newGeom->getSpatialReference() && srs.size())
         newGeom->assignSpatialReference(
             new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
+    // m_geom may be null if update() is called from a ctor.
     else if (m_geom)
         newGeom->assignSpatialReference(m_geom->getSpatialReference());
     m_geom.reset(newGeom);
