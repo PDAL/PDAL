@@ -136,6 +136,8 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
 PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
     FILES
         io/EptAddonWriterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY} # EptAddonWriterTest uses the crop filter.
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
