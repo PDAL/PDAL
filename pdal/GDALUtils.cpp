@@ -723,7 +723,7 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
     OGRGeometryFactory::createFromWkt(&buf, nullptr, &newGeom);
     if (!newGeom)
         throw pdal_error("Couldn't convert WKT string to geometry.");
-	srs = buf;
+    srs = buf;
 #endif
 
 	std::string::size_type pos = 0;
