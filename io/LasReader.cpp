@@ -260,9 +260,12 @@ void LasReader::ready(PointTableRef table)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
+            delete m_decompressor;
+
             const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
-            delete m_decompressor;
+            if (!vlr)
+                throwError("LAZ file missing required laszip VLR.");
             m_decompressor = new LazPerfVlrDecompressor(*stream,
                 vlr->data(), m_header.pointOffset());
             m_decompressorBuf.resize(m_decompressor->pointSize());

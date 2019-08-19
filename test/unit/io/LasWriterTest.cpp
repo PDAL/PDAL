@@ -1313,7 +1313,7 @@ TEST(LasWriterTest, issue1940)
 }
 
 
-#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
+#if defined(PDAL_HAVE_LASZIP)
 // Make sure that we can translate this special test data to 1.4, dataformat 6.
 TEST(LasWriterTest, issue2320)
 {
@@ -1354,64 +1354,4 @@ TEST(LasWriterTest, issue2320)
     }
 }
 #endif
-
-/**
-
-namespace
-{
-
-bool diffdump(const std::string& f1, const std::string& f2)
-{
-    auto dump = [](const std::string& temp, const std::string& in)
-    {
-        std::stringstream ss;
-        ss << "lasdump -o " << temp << " " << in;
-        system(ss.str().c_str());
-    };
-
-    std::string t1 = Support::temppath("lasdump1.tmp");
-    std::string t2 = Support::temppath("lasdump2.tmp");
-
-    dump(t1, f1);
-    dump(t2, f2);
-
-    std::string diffFile = Support::temppath("dumpdiff.tmp");
-    std::stringstream ss;
-    ss << "diff " << t1 << " " << t2 << " > " << diffFile;
-    system(ss.str().c_str());
-
-    return true;
-}
-
-} // Unnamed namespace
-
-TEST(LasWriterTest, simple)
-{
-    PointTable table;
-
-    std::string infile(Support::datapath("las/1.2-with-color.las"));
-    std::string outfile(Support::temppath("simple.las"));
-
-    // remove file from earlier run, if needed
-    FileUtils::deleteFile(outfile);
-
-    Options readerOpts;
-    readerOpts.add("filename", infile);
-
-    Options writerOpts;
-    writerOpts.add("creation_year", 2014);
-    writerOpts.add("filename", outfile);
-
-    LasReader reader;
-    reader.setOptions(readerOpts);
-
-    LasWriter writer;
-    writer.setOptions(writerOpts);
-    writer.setInput(reader);
-    writer.prepare(table);
-    writer.execute(table);
-
-    diffdump(infile, outfile);
-}
-**/
 
