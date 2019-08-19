@@ -94,6 +94,12 @@ origin
     dimension, which can be determined from  the file's position in EPT
     metadata file ``entwine-files.json``.
 
+polygon
+  The clipping polygon, expressed in a well-known text string,
+  eg: "POLYGON((0 0, 5000 10000, 10000 0, 0 0))".  This option can be
+  specified more than once by placing values in an array.
+
+
 threads
     Number of worker threads used to download and process EPT data.  A
     minimum of 4 will be used no matter what value is specified.

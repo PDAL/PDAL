@@ -38,14 +38,12 @@
 #include <pdal/Streamable.hpp>
 #include <filters/StatsFilter.hpp>
 
-#include <gdal.h>
-#include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
-
 #include <map>
 
 namespace pdal
 {
+
+namespace gdal { class Raster; }
 
 // Interpolates color ramp into Red, Green, and Blue dimensions
 // for a given dimension
@@ -84,7 +82,7 @@ private:
     double m_min;
     double m_max;
     std::string m_colorramp;
-    std::shared_ptr<pdal::gdal::Raster> m_raster;
+    std::shared_ptr<gdal::Raster> m_raster;
     std::string m_rampFilename;
     std::vector<uint8_t> m_redBand;
     std::vector<uint8_t> m_greenBand;
