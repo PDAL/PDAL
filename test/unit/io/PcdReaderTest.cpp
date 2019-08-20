@@ -173,7 +173,7 @@ TEST(PcdReaderTest, throwCommaSeparated)
     EXPECT_EQ(s.size(), 1U);
     PointViewPtr v = *s.begin();
 
-    EXPECT_EQ(0, v->size());
+    EXPECT_EQ((size_t)0, v->size());
 }
 
 TEST(PcdReaderTest, compareSpaceSeparatedStreaming)
