@@ -45,3 +45,6 @@ Options
 
 knn
   The number of k-nearest neighbors. [Default: 8]
+
+normalize
+  Normalize eigenvalues such that the sum is 1. [Default: false]
