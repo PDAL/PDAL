@@ -723,7 +723,7 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
     OGRGeometryFactory::createFromWkt(&buf, nullptr, &newGeom);
     if (!newGeom)
         throw pdal_error("Couldn't convert WKT string to geometry.");
-	srs = buf;
+    srs = buf;
 #endif
 
 	std::string::size_type pos = 0;
@@ -744,7 +744,7 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 OGRGeometry *createFromGeoJson(const char *s)
 {
 #if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    return oldgdalsupport::createFromGeoJson(&s);
+    return oldgdalsupport::createFromGeoJson((const char**)&s);
 #else
     return OGRGeometryFactory::createFromGeoJson(s);
 #endif
