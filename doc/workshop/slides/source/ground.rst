@@ -9,8 +9,6 @@ Identifying ground
 Purpose:
     * Filter and classify ground points
 
-:ref:`Ground Workshop Materials <pdal:ground>`
-
 
 filters.ground
 ================================================================================
@@ -44,7 +42,7 @@ Ground (ground only)
 
 .. literalinclude:: ../../exercises/analysis/ground/ground-run-ground-only.txt
     :linenos:
-    :emphasize-lines: 6
+    :emphasize-lines: 5
 
 Ground (denoised first)
 ================================================================================

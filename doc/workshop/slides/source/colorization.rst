@@ -10,7 +10,6 @@ Purpose:
     * Improve visualization
     * Assign other GDAL data to points
 
-:ref:`Colorizing Workshop Materials <pdal:colorization>`
 
 
 Colorization (setup)
