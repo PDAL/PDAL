@@ -32,9 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-
 #include "PythonFilter.hpp"
+
+#include <nlohmann/json.hpp>
+
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>

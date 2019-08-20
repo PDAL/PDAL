@@ -41,10 +41,13 @@
 #include "LasReader.hpp"
 
 #include <arbiter/arbiter.hpp>
+#include <nlohmann/json.hpp>
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
+#include "../filters/CropFilter.hpp"
+#include "../filters/private/pnp/GridPnp.hpp"
 
 namespace pdal
 {
@@ -132,6 +135,7 @@ public:
     std::string m_origin;
     std::size_t m_threads = 0;
     double m_resolution = 0;
+    std::vector<Polygon> m_polys;
     NL::json m_addons;
 };
 
@@ -152,6 +156,9 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
         m_args->m_addons);
+    args.add("polygon", "Bounding polygon(s) to crop requests",
+        m_args->m_polys).setErrorText("Invalid polygon specification. "
+            "Must be valid GeoJSON/WKT");
 }
 
 
@@ -198,18 +205,25 @@ void EptReader::initialize()
     debug << "Got EPT info" << std::endl;
     debug << "SRS: " << m_info->srs() << std::endl;
 
+    setSpatialReference(m_info->srs());
+
+    // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
         throwError("Can't use bounds with SRS with data source that has "
             "no SRS.");
-
-    setSpatialReference(m_info->srs());
-
     m_queryBounds = m_args->m_bounds.to3d();
-
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
-            boundsSrs.getWKT(), m_info->srs().getWKT());
+            boundsSrs.getWKT(), getSpatialReference().getWKT());
+
+    // Transform polygons and bounds to point source SRS.
+    for (Polygon& poly : m_args->m_polys)
+    {
+        if (!poly.valid())
+            throwError("Geometrically invalid polyon in option 'polygon'.");
+        poly.transform(getSpatialReference());
+    }
 
     try
     {
@@ -437,13 +451,15 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     }
 
     // Backup the layout for streamable pipeline.
-    // Will be used to restore m_bufferPointTable layout after flushing points from previous tile.
+    // Will be used to restore m_bufferPointTable layout after flushing
+    // points from previous tile.
     if (pipelineStreamable())
     {
     	m_bufferLayout = layout;
         m_temp_buffer.reserve(layout->pointSize());
 	}
 }
+
 
 void EptReader::ready(PointTableRef table)
 {
@@ -464,7 +480,7 @@ void EptReader::ready(PointTableRef table)
         throwError(e.what());
     }
 
-    uint64_t overlapPoints(0);
+    point_count_t overlapPoints(0);
 
     // Convert the key/overlap map to JSON for output as metadata.
     NL::json j;
@@ -543,7 +559,18 @@ void EptReader::overlaps(const arbiter::Endpoint& ep,
         std::map<Key, uint64_t>& target, const NL::json& hier,
         const Key& key)
 {
-    if (!key.b.overlaps(m_queryBounds)) return;
+    // If this key doesn't overlap our query
+    // we can skip
+    if (!key.b.overlaps(m_queryBounds))
+        return;
+
+    // Check the box of the key against our
+    // query polygon(s). If it doesn't overlap,
+    // we can skip
+    for (auto& p: m_args->m_polys)
+        if (p.disjoint(key.b))
+            return;
+
     if (m_depthEnd && key.d >= m_depthEnd) return;
 
     auto it = hier.find(key.toString());
@@ -585,6 +612,13 @@ PointViewSet EptReader::run(PointViewPtr view)
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
 
+    for (auto& p : m_args->m_polys)
+    {
+        std::unique_ptr<GridPnp> gridPnp(new GridPnp(
+            p.exteriorRing(), p.interiorRings()));
+        m_queryGrids.push_back(std::move(gridPnp));
+    }
+
     for (const auto& entry : m_overlaps)
     {
         const Key& key(entry.first);
@@ -594,7 +628,7 @@ PointViewSet EptReader::run(PointViewPtr view)
 
         m_pool->add([this, &view, &key, nodeId]()
         {
-            uint64_t startId(0);
+            PointId startId(0);
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 startId = readLaszip(*view, key, nodeId);
@@ -618,7 +652,7 @@ PointViewSet EptReader::run(PointViewPtr view)
     return views;
 }
 
-uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
+PointId EptReader::readLaszip(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
@@ -641,10 +675,10 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
 
     const auto views(reader.execute(table));
 
-    uint64_t pointId(0);
+    PointId pointId(0);
 
     lock.lock();
-    const uint64_t startId(dst.size());
+    const PointId startId(dst.size());
     for (auto& src : views)
     {
         PointRef pr(*src);
@@ -659,7 +693,7 @@ uint64_t EptReader::readLaszip(PointView& dst, const Key& key,
     return startId;
 }
 
-uint64_t EptReader::readBinary(PointView& dst, const Key& key,
+PointId EptReader::readBinary(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
     auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
@@ -668,10 +702,10 @@ uint64_t EptReader::readBinary(PointView& dst, const Key& key,
 
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    const uint64_t startId(dst.size());
+    const PointId startId(dst.size());
 
-    uint64_t pointId(0);
-    for (uint64_t pointId(0); pointId < table.numPoints(); ++pointId)
+    PointId pointId(0);
+    for (PointId pointId(0); pointId < table.numPoints(); ++pointId)
     {
         pr.setPointId(pointId);
         process(dst, pr, nodeId, pointId);
@@ -681,7 +715,7 @@ uint64_t EptReader::readBinary(PointView& dst, const Key& key,
 }
 
 void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
-        const uint64_t pointId) const
+        const PointId pointId) const
 {
     using D = Dimension::Id;
 
@@ -697,8 +731,22 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
     const bool selected = m_queryOriginId == -1 ||
         pr.getFieldAs<int64_t>(D::OriginId) == m_queryOriginId;
 
-    if (selected && m_queryBounds.contains(x, y, z))
+    auto passesPolyFilter = [this](double x, double y)
     {
+        if (m_queryGrids.empty())
+            return true;
+
+        for (auto& grid: m_queryGrids)
+            if (grid->inside(x,y))
+                return true;
+        return false;
+    };
+
+    if (selected && m_queryBounds.contains(x, y, z) && passesPolyFilter(x, y))
+    {
+        // If we were given polys, check that our point is inside those
+        // polygons too.
+
         dst.setField(Dimension::Id::X, dstId, x);
         dst.setField(Dimension::Id::Y, dstId, y);
         dst.setField(Dimension::Id::Z, dstId, z);
@@ -719,10 +767,11 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
     }
 }
 
+
 void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
-        const uint64_t pointId) const
+    const PointId pointId) const
 {
-    uint64_t np(addon.points(key));
+    PointId np(addon.points(key));
     if (!np)
     {
         // If our addon has no points, then we are reading a superset of this
@@ -738,7 +787,7 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
         std::lock_guard<std::mutex> lock(m_mutex);
 
         np = m_overlaps.at(key);
-        for (uint64_t id(pointId); id < pointId + np; ++id)
+        for (PointId id(pointId); id < pointId + np; ++id)
         {
             dst.setField(addon.id(), id, 0);
         }
@@ -747,11 +796,12 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
     }
 
     // If the addon hierarchy exists, it must match the EPT data.
-    if (np != m_overlaps.at(key)) throwError("Invalid addon hierarchy");
+    if (np != m_overlaps.at(key))
+        throwError("Invalid addon hierarchy");
 
     const auto data(addon.ep().getBinary(
                 "ept-data/" + key.toString() + ".bin"));
-    const uint64_t dimSize(Dimension::size(addon.type()));
+    const size_t dimSize(Dimension::size(addon.type()));
 
     if (np * dimSize != data.size())
     {
@@ -760,7 +810,7 @@ void EptReader::readAddon(PointView& dst, const Key& key, const Addon& addon,
 
     std::lock_guard<std::mutex> lock(m_mutex);
     const char* pos(data.data());
-    for (uint64_t id(pointId); id < pointId + np; ++id)
+    for (PointId id(pointId); id < pointId + np; ++id)
     {
         dst.setField(addon.id(), addon.type(), id, pos);
         pos += dimSize;
@@ -808,7 +858,8 @@ void EptReader::loadNextOverlap()
     else
         startId = readBinary(*m_bufferPointView, key, m_nodeId);
 
-    log()->get(LogLevel::Debug) << "Points : "<<m_bufferPointView->size() << std::endl;
+    log()->get(LogLevel::Debug) << "Points : "<< m_bufferPointView->size() <<
+        std::endl;
     m_currentIndex = 0;
 
     // Read addon information after the native data, we'll possibly
@@ -819,13 +870,16 @@ void EptReader::loadNextOverlap()
     m_nodeId++;
 }
 
+
 void EptReader::fillPoint(PointRef& point)
 {
     DimTypeList dims = m_bufferPointView->dimTypes();
-    m_bufferPointView->getPackedPoint(dims, m_currentIndex, m_temp_buffer.data());
+    m_bufferPointView->getPackedPoint(dims, m_currentIndex,
+        m_temp_buffer.data());
     point.setPackedData(dims, m_temp_buffer.data());
     m_currentIndex++;
 }
+
 
 bool EptReader::processOne(PointRef& point)
 {
@@ -844,7 +898,7 @@ bool EptReader::processOne(PointRef& point)
     if (finishedCurrentOverlap)
         loadNextOverlap();
 
-    // In some rare cases there are 0 points in the overlap. 
+    // In some rare cases there are 0 points in the overlap.
     // If this happen, fillPoint() will crash while retriving point information.
     // In that case proceed to load next overlap.
     if (m_bufferPointView->size())
