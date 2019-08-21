@@ -37,8 +37,12 @@
 
 #pragma once
 
-#ifndef PDAL_DLL
-#if defined(_WIN32)
+#ifndef PDAL_DLL_EXPORT
+#define PDAL_DLL
+#define PDAL_LOCAL
+#else
+
+#ifdef _WIN32
 #   define PDAL_DLL   __declspec(dllexport)
 #else
 #  if defined(USE_GCC_VISIBILITY_FLAG)
@@ -46,6 +50,8 @@
 #  else
 #    define PDAL_DLL
 #  endif
-#endif
-#endif
+#  define PDAL_LOCAL     __attribute__((visibility("hidden")))
+#endif // _WIN32
+
+#endif // PDAL_DLL_EXPORT
 
