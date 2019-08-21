@@ -38,7 +38,7 @@ point cloud file we're going to read.
 
 ::
 
-    "c:/Users/hobu/PDAL/exercises/analysis/denoising/18TWK820985.laz",
+    "./exercises/analysis/denoising/18TWK820985.laz",
 
 2. :ref:`filters.outlier`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,7 +97,7 @@ add a few options to have finer control over what is written. These include:
         "compression": "true",
         "minor_version": "2",
         "dataformat_id": "0",
-        "filename":"c:/Users/hobu/PDAL/exercises/analysis/denoising/clean.laz"
+        "filename":"./exercises/analysis/denoising/clean.laz"
     }
 
 
@@ -115,7 +115,7 @@ add a few options to have finer control over what is written. These include:
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
+Invoke the following command, substituting accordingly, in your ` Shell`:
 
 .. literalinclude:: ./denoising-run-command.txt
 

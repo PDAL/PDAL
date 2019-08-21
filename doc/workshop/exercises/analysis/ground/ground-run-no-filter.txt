@@ -1,6 +1,4 @@
-pdal translate ^
-   c:/Users/hobu/PDAL/exercises/analysis/ground/CSite1_orig-utm.laz ^
-   -o c:/Users/hobu/PDAL/exercises/analysis/ground/ground.laz ^
-   smrf ^
-   -v 4
-
+pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz \
+-o ./exercises/analysis/ground/ground.laz \
+smrf \
+-v 4

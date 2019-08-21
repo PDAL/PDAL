@@ -6,8 +6,10 @@ Point Cloud Processing and Analysis with PDAL
 :Author: Howard Butler
 :Author: Pete Gadomski
 :Author: Dr. Craig Glennie
+:Author: Michael Smith
+:Author: Dr. Adam Steer
 :Contact: howard@hobu.co
-:Date: 05/17/2018
+:Date: 08/26/2019
 
 
 .. include:: ./includes/substitutions.rst

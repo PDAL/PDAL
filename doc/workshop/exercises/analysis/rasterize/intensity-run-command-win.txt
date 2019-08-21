@@ -1,0 +1,7 @@
+pdal pipeline ./exercises/analysis/rasterize/classification.json ^
+--writers.gdal.dimension="Intensity" ^
+--writers.gdal.data_type="float" ^
+--writers.gdal.filename="intensity.tif" ^
+-v 3
+
+gdal_translate intensity.tif intensity.png -of PNG

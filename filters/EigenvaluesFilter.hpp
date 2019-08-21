@@ -60,6 +60,7 @@ public:
 private:
     int m_knn;
     Dimension::Id m_e0, m_e1, m_e2;
+    bool m_normalize;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

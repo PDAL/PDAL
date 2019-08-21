@@ -16,14 +16,11 @@ Exercise
 
 
 .. note::
-    The exercise fetches its data from a `Greyhound`_ service that organizes the
+    The exercise fetches its data from a `Entwine`_ service that organizes the
     point cloud collection for the entire country of Denmark. You can view the
     data online at http://potree.entwine.io/data/denmark.html
 
-
 .. _`Digital Terrain Model`: https://en.wikipedia.org/wiki/Digital_elevation_model
-
-
 
 
 
@@ -34,13 +31,12 @@ PDAL capability to generate rasterized output is provided by the :ref:`writers.g
 There is no :ref:`application <apps>` to drive this stage, and we must use a pipeline.
 
 
-
 Pipeline breakdown
 ................................................................................
 
 
 .. literalinclude:: ./classification.json
-    :emphasize-lines: 3-7
+    :emphasize-lines: 4-7
 
 .. note::
 
@@ -53,11 +49,11 @@ Pipeline breakdown
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ./classification.json
-    :lines: 3-7
+    :lines: 3-8
 
-The data is read from a readers.greyhound server that hosts the Denmark data.
-We’re going to download a small patch of data by the Copenhagen airport that is
-the “full depth” of the tree.
+The data is read from a EPT resource that contains the Denmark data.
+We’re going to download a small patch of data by the Copenhagen airport area that is
+the limited to a spatial resolution of 5m.
 
 
 2. :ref:`writers.gdal`
@@ -67,7 +63,7 @@ The :ref:`writers.gdal` writer that bins the point cloud data with classificatio
 values.
 
 .. literalinclude:: ./classification.json
-    :lines: 8-15
+    :lines: 9-16
 
 Execution
 ................................................................................
@@ -84,14 +80,12 @@ Issue the :ref:`pipeline <pipeline>` operation to execute the interpolation:
 Visualization
 ................................................................................
 
-.. figure:: ../../../images/rasterization-denmark-no-ramp.png
-    :target: ../../../../_images/rasterization-denmark-no-ramp.png
-    :scale: 200%
+.. image:: ../../../images/rasterization-denmark-no-ramp.png
+      :target: ../../../../_images/rasterization-denmark-no-ramp.png
 
-    Basic interpolation of data with :ref:`writers.gdal` will output raw
-    classification values into the resulting raster file. We will need to add a
-    color ramp to the data for a satisfactory preview.
-
+Basic interpolation of data with :ref:`writers.gdal` will output raw
+classification values into the resulting raster file. We will need to add a
+color ramp to the data for a satisfactory preview.
 
 Unfortunately, this doesn’t give us a very satisfactory image to view. The
 reason is there is no color ramp associated with the file, and we’re looking at
@@ -100,25 +94,28 @@ pixel values with values from 0-31 according to the ASPRS LAS specification.
 We want colors that correspond to the classification values a bit more
 directly. We can use a color ramp to assign explicit values. :ref:`qgis` allows us to
 create a text file color ramp that gdaldem can consume to apply colors to the
-data.
+data. 
 
 .. literalinclude:: ./ramp.txt
    :linenos:
 
-With the ramp, we can use `gdaldem`_ to apply it to a new image:
+With this ramp, you can load the color values into QGIS as a color ramp if you 
+change the layer to Palatted/Unique Values, and then load the color ramp file:
+
+
+.. image:: ../../../images/rasterization-qgis-load-color-palette.png
+      :target: ../../../../_images/rasterization-qgis-load-color-palette.png
+
+
+With the ramp, we can also use `gdaldem`_ to apply it to a new image:
 
 .. literalinclude:: ./gdaldem-run-command.txt
    :linenos:
 
 
-.. figure:: ../../../images/rasterization-colored-classification.png
+.. image:: ../../../images/rasterization-colored-classification.png
     :target: ../../../../_images/rasterization-colored-classification.png
-    :scale: 200%
 
-    The use of ``-exact_color_entry`` for gdaldem ensures that specific
-    classification values are given the requested color. For categorical
-    data such as a classification surface, interpolated output would look
-    poor.
 
 Intensity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,13 +126,14 @@ relative intensity image:
 .. literalinclude:: ./intensity-run-command.txt
    :linenos:
 
-.. figure:: ../../../images/rasterization-colored-intensity.png
+.. literalinclude:: ./intensity-run-command-win.txt
+   :linenos:
+
+The same pipeline can be used to generate a preview image of the Intensity
+channel of the data by overriding pipeline arguments at the command line.
+
+.. image:: ../../../images/rasterization-colored-intensity.png
     :target: ../../../../_images/rasterization-colored-intensity.png
-    :scale: 200%
-
-    The same pipeline can be used to generate a preview image of the Intensity
-    channel of the data by overriding pipeline arguments at the command line.
-
 
 
 Notes
@@ -150,4 +148,4 @@ Notes
 
 .. _`TIN`: https://en.wikipedia.org/wiki/Triangulated_irregular_network
 .. _`gdaldem`: http://www.gdal.org/gdaldem.html
-.. _`Greyhound`: https://greyhound.io
+.. _`Entwine`: https://entwine.io
