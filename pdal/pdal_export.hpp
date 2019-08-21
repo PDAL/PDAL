@@ -34,23 +34,7 @@
 
 #pragma once
 
-#ifndef PDAL_DLL
-#ifdef _WIN32
-#if defined(PDAL_DLL_EXPORT)
-#   define PDAL_DLL   __declspec(dllexport)
-#elif defined(PDAL_DLL_IMPORT)
-#   define PDAL_DLL   __declspec(dllimport)
-#else
-#   define PDAL_DLL
-#endif
-#else
-#  if defined(USE_GCC_VISIBILITY_FLAG)
-#    define PDAL_DLL     __attribute__ ((visibility("default")))
-#  else
-#    define PDAL_DLL
-#  endif
-#endif
-#endif
+#include <pdal/util/pdal_util_export.hpp>
 
 #ifdef _WIN32
 #pragma warning(disable:4251)// [templated class] needs to have dll-interface...
