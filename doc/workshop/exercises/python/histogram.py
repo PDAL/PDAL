@@ -75,6 +75,3 @@ def make_plot(ins, outs):
     # filters.programmable scripts need to
     # return True to tell the filter it was successful.
     return True
-
-
-

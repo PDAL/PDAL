@@ -1,6 +1,1 @@
-gdaldem color-relief ^
-   denmark-classification.tif ^
-   ramp.txt ^
-   classified-color.png ^
-   -exact_color_entry ^
-   -of PNG
+gdaldem color-relief denmark-classification.tif ramp.txt classified-color.png -of PNG

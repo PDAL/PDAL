@@ -5,8 +5,7 @@ Software installation
 
 .. include:: ../../includes/substitutions.rst
 
-1. :ref:`workshop-osgeo4w`
-    * Install PDAL via :ref:`conda`
+1. * Install PDAL via :ref:`conda`
 
 2. :ref:`QGIS<qgis>`
     * Visualize vector and raster data
@@ -30,20 +29,10 @@ Software installation
 Data installation
 ================================================================================
 
-1. Copy entire contents of USB or data download:
+1. Extract contents of USB or data download:
 
-::
+https://pdal-workshop-2019.s3.amazonaws.com/PDAL-Workshop-complete.zip
 
-    C:\Users\hobu\PDAL
-
-::
-
-    https://s3.amazonaws.com/pdal/workshop/PDAL.zip
-
-Path Substitution
-================================================================================
-
-My username is ``hobu``, yours probably isn't.
 
 Next
 ================================================================================
