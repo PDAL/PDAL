@@ -11,10 +11,10 @@ Exercise
 PDAL doesn't provide every possible analysis option, but it strives to make it
 convenient to link PDAL to other places with substantial functionality.  One of
 those is the Python/Numpy universe, which is accessed through PDAL's
-:ref:`python` bindings and :ref:`filters.python` filter. These tools allow you to manipulate point
-cloud data with convenient Python tools rather than constructing substantial
-C/C++ software to achieve simple tasks, compute simple statistics, or
-investigate data quality issues.
+:ref:`python` bindings and the :ref:`filters.python` filter. These tools allow
+you to manipulate point cloud data with convenient Python tools rather than
+constructing substantial C/C++ software to achieve simple tasks, compute simple
+statistics, or investigate data quality issues.
 
 This exercise uses PDAL to create a histogram plot of all of the dimensions of
 a file. `matplotlib`_ is a Python package for plotting graphs and figures, and
@@ -43,7 +43,7 @@ script in a :ref:`filters.python` stage.
 .. note::
 
     This pipeline is available in your workshop materials in the
-    ``./exercies/python/histogram.json`` file.
+    ``./exercises/python/histogram.json`` file.
 
 
 Python script
@@ -59,11 +59,11 @@ dictionaries.
 .. note::
 
     This Python file is available in your workshop materials in the
-    ``./exercies/python/histogram.py`` file.
+    ``./exercises/python/histogram.py`` file.
 
 .. literalinclude:: ./histogram.py
    :linenos:
-   :emphasize-lines: 34-40
+   :emphasize-lines: 21,34-40
 
 Run ``pdal pipeline``
 ................................................................................

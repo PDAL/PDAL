@@ -1,2 +1,2 @@
-pdal info c:/Users/hobu/PDAL/exercises/info/interesting.las --metadata ^
-    | jq  ".metadata.compressed, .metadata.system_id"
+pdal info ./exercises/info/interesting.las --metadata \
+| jq  ".metadata.compressed, .metadata.system_id"

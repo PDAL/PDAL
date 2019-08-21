@@ -22,7 +22,19 @@ GDAL (2.2+)
 PDAL uses GDAL for spatial reference system description manipulation, and image
 reading supporting for the NITF driver, and :ref:`writers.oci` support. In
 conjunction with GeoTIFF_, GDAL is used to convert GeoTIFF keys and OGC WKT SRS
+<<<<<<< HEAD
 description strings into formats required by specific drivers.  ::
+=======
+description strings into formats required by specific drivers. While PDAL can
+be built without GDAL support, if you want SRS manipulation and description
+ability, you must have GDAL (and GeoTIFF_) linked in at compile time.
+
+Obtain `GDAL`_ via whatever method is convenient.  Linux platforms such as
+`Debian`_ have `DebianGIS`_, Mac OS X has the `KyngChaos`_ software frameworks,
+and Windows has the ``_ platform.
+
+* GDAL 1.9+ is required.
+>>>>>>> f881aa2d15d4d177f3fd8159ea72751a183dd7ec
 
     Source: https://github.com/OSGeo/gdal
     Conda: https://anaconda.org/conda-forge/gdal
