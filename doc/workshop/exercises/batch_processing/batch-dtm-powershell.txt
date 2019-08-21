@@ -1,0 +1,5 @@
+Get-ChildItem  .\exercises\batch_processing\source\*.laz ^
+| foreach {pdal pipeline .\excercises\batch_processing\batch_srs_gdal.json ^
+  --readers.las.filename=.\source\$($_.BaseName).laz ^
+  --writers.gdal.filename=.\dtm\$($_.BaseName).tif ^
+  --filters.reprojection.out_srs=epsg:26919}

@@ -23,11 +23,8 @@ clip out the stadium into a new LAS file.
 .. image:: ../../../images/clipping-autzen-view.png
     :target: ../../../../_images/clipping-autzen-view.png
 
-
-
 Data preparation
 ................................................................................
-
 
 The data are mixed in two different coordinate systems. The :ref:`LAZ
 <readers.las>` file is in `Oregon State Plane Ft.`_ and the `GeoJSON`_ defining
@@ -38,13 +35,12 @@ latter is preferable in this case because it will be less math and therefore
 less computation. To make it convenient, we can utilize `OGR`_'s `VRT`_
 capability to reproject the data for us on-the-fly:
 
-
 .. code:: xml
 
     <OGRVRTDataSource>
         <OGRVRTWarpedLayer>
             <OGRVRTLayer name="OGRGeoJSON">
-                <SrcDataSource>c:/Users/hobu/PDAL/exercises/analysis/clipping/attributes.json</SrcDataSource>
+                <SrcDataSource>./exercises/analysis/clipping/attributes.json</SrcDataSource>
                 <SrcLayer>attributes</SrcLayer>
                 <LayerSRS>EPSG:4326</LayerSRS>
             </OGRVRTLayer>
@@ -56,7 +52,7 @@ capability to reproject the data for us on-the-fly:
 
     This VRT file is available in your workshop materials in the
     ``./exercises/analysis/clipping/attributes.vrt`` file. You will need to
-    open this file, go to line 4 and replace ``c:/Users/hobu/PDAL/`` with
+    open this file, go to line 4 and replace ``./`` with
     the correct path for your machine.
 
     A GDAL or OGR VRT
@@ -86,7 +82,7 @@ Pipeline breakdown
 
     This pipeline is available in your workshop materials in the
     ``./exercises/analysis/clipping/clipping.json`` file. Remember
-    to replace each of the three occurrences of ``c:/Users/Hobu/PDAL/``
+    to replace each of the three occurrences of ``./``
     in this file with the correct location for your machine.
 
 1. Reader
@@ -118,8 +114,10 @@ We will write our content back out using a :ref:`writers.las`.
 Execution
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
+Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
+The `--nostream` option disables stream mode. The point-in-polygon check (see notes)
+performs poorly in stream mode currently.
 
 .. literalinclude:: ./clipping-run-command.txt
     :linenos:
@@ -131,7 +129,7 @@ Visualization
 ................................................................................
 
 Use one of the point cloud visualization tools you installed to take a look at
-your ``c:/Users/Howard/PDAL/exercises/analysis/clipping/stadium.las`` output.
+your ``./exercises/analysis/clipping/stadium.las`` output.
 In the example below, we opened the file to view it using the http://plas.io
 website.
 
@@ -163,4 +161,3 @@ Notes
 
 .. _`OGR`: http://www.gdal.org
 .. _`Shapefiles`: https://en.wikipedia.org/wiki/Shapefile
-

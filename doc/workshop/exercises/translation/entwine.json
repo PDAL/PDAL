@@ -1,0 +1,16 @@
+{
+    "pipeline": [
+        {
+            "type": "readers.ept",
+            "filename":"https://na-c.entwine.io/dublin/",
+            "resolution": 5
+        },
+        {
+            "type": "writers.las",
+            "compression": "true",
+            "minor_version": "2",
+            "dataformat_id": "0",
+            "filename":"dublin.laz"
+        }
+    ]
+}
