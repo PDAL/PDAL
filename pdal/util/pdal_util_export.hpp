@@ -44,6 +44,7 @@
 
 #ifdef _WIN32
 #   define PDAL_DLL   __declspec(dllexport)
+#   define PDAL_LOCAL
 #else
 #  if defined(USE_GCC_VISIBILITY_FLAG)
 #    define PDAL_DLL     __attribute__ ((visibility("default")))
