@@ -12,7 +12,6 @@ Purpose:
     * Balance speed/quality
     * Look with :ref:`qgis`
 
-:ref:`Boundary Workshop Materials <pdal:boundary>`
 
 Boundary (command)
 ================================================================================

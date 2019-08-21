@@ -25,14 +25,13 @@ Purpose:
     * Learn about point cloud data types
     * Familiarize yourself with terminal
 
-:ref:`Workshop Materials <pdal:workshop-single-point>`
 
 Start Terminal (first point)
 ================================================================================
 
-1. Start the |Terminal|
+1. Start the |Terminal| and activate the conda environment
 
-.. figure:: ./img/osgeo4w-shell.png
+.. figure:: ./img/terminal.png 
 
 Command (first point)
 ================================================================================
@@ -42,7 +41,7 @@ In your |Terminal|, issue the following:
 .. literalinclude:: ../../exercises/info/single-point-command.txt
     :linenos:
 
-1. ``pdal``: Inside the ``pdal/pdal`` image, run the `pdal` command
+1. ``pdal``: Run the `pdal` command
 
 2. ``info``: `info` is a "kernel" in PDAL-speak. It is a unit
    of functionality driven by the command line.
@@ -53,7 +52,7 @@ Command (first point)
 .. literalinclude:: ../../exercises/info/single-point-command.txt
     :linenos:
 
-3. ``c:/Users/hobu/PDAL/exercises/info/interesting.las``:
+3. ``./exercises/info/interesting.las``:
    File to run ``info`` command on
 
 4. ``-p``: argument corresponds to "print a point".
@@ -111,7 +110,6 @@ Purpose:
     * Neighborhood query
     * Point ordering
 
-:ref:`Near Workshop Materials <unavco:near>`
 
 Command (near - metadata)
 ================================================================================

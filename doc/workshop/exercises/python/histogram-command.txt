@@ -1,1 +1,1 @@
-pdal pipeline c:/Users/hobu/PDAL/exercises/python/histogram.json
+pdal pipeline ./exercises/python/histogram.json

@@ -22,9 +22,12 @@ simple interpolation, which we will use for visualization in |QGIS|.
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
+Invoke the following command, substituting accordingly, in your ` Shell`:
 
 .. literalinclude:: ./density-command.txt
+    :linenos:
+
+.. literalinclude:: ./density-command-win.txt
     :linenos:
 
 

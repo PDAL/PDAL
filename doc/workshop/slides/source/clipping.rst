@@ -1,6 +1,6 @@
 .. _clipping:
 
-Cliping data with polygons
+Clipping data with polygons
 ================================================================================
 
 .. include:: ../../includes/substitutions.rst
@@ -12,7 +12,6 @@ Purpose:
     * Assign attribute data
     * Use PDAL pipeline
 
-:ref:`Clipping Workshop Materials <pdal:workshop-clipping>`
 
 Clipping (Autzen)
 ================================================================================
