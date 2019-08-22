@@ -263,7 +263,6 @@ protected:
 
 private:
     std::stack<std::istream *> m_streams;
-	IStream(const IStream&);
 };
 
 /**

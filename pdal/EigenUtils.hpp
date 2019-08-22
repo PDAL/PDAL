@@ -37,7 +37,10 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #include <Eigen/Dense>
+#pragma GCC diagnostic pop
 
 #include <memory>
 #include <vector>
