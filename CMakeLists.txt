@@ -334,7 +334,10 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    PATTERN "pdal/io/private" EXCLUDE
+    PATTERN "pdal/pdal/private" EXCLUDE
     PATTERN "pdal/util/private" EXCLUDE
+    PATTERN "pdal/filters/private" EXCLUDE
     ${ZSTD_EXCLUDES}
     ${ZLIB_EXCLUDES}
     ${LZMA_EXCLUDES}
