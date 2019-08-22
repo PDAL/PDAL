@@ -56,8 +56,8 @@ GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
     m_width(width), m_height(height), m_windowSize(windowSize),
     m_edgeLength(edgeLength), m_radius(radius), m_outputTypes(outputTypes)
 {
-    if (width > (std::numeric_limits<int>::max)() ||
-        height > (std::numeric_limits<int>::max)())
+    if (width > (size_t)(std::numeric_limits<int>::max)() ||
+        height > (size_t)(std::numeric_limits<int>::max)())
     {
         std::ostringstream oss;
         oss << "Grid width or height is too large. Width and height are "
