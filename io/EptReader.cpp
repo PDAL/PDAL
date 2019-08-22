@@ -312,7 +312,7 @@ void EptReader::initializeHttpForwards()
         for (const auto& entry : obj.items())
         {
             if (!entry.value().is_string())
-                throwError("Invalid " + type + "parameters: "
+                throwError("Invalid " + type + " parameters: "
                     "expected string->string mapping");
             map[entry.key()] = entry.value().get<std::string>();
         }
