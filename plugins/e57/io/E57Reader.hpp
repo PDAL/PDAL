@@ -46,7 +46,7 @@
 namespace pdal {
 class PDAL_DLL E57Reader: public Reader, public Streamable
 {
-    class ChunkReader {
+    class PDAL_DLL ChunkReader {
     public:
         ChunkReader(const pdal::point_count_t &pointOffset,
             const pdal::point_count_t &maxPointRead,
