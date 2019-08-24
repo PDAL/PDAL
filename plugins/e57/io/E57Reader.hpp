@@ -44,7 +44,7 @@
 #include "Scan.hpp"
 
 namespace pdal {
-class E57Reader: public Reader, public Streamable
+class PDAL_DLL E57Reader: public Reader, public Streamable
 {
     class ChunkReader {
     public:
@@ -116,7 +116,7 @@ private:
     void extractScans();
 
     // members
-    std::unique_ptr<e57::ImageFile> m_imf; 
+    std::unique_ptr<e57::ImageFile> m_imf;
     std::vector<std::shared_ptr<e57::Scan>> m_scans;
 
     // Allows construction by filename
