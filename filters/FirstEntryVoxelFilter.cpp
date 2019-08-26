@@ -34,14 +34,6 @@
  ****************************************************************************/
 
 #include "FirstEntryVoxelFilter.hpp"
-#include <pdal/KDIndex.hpp>
-
-#include <future>
-#include <math.h>
-#include <set>
-#include <string>
-#include <tuple>
-#include <vector>
 
 namespace pdal
 {

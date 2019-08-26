@@ -38,9 +38,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-#include <cstdint>
-#include <string>
-
 #define POSITIVE_VALUE(x) x >= 0 ? x : -x
 #define HASH_COMBINE(x, y) x ^ (y << 1)
 
