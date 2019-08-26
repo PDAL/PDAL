@@ -304,3 +304,64 @@ TEST_F(PgpointcloudWriterTest, writeDeleteTable)
 
     optionsWrite(ops);
 }
+
+TEST_F(PgpointcloudWriterTest, selectExistingSchema)
+{
+    if (shouldSkipTests())
+    {
+	return;
+    }
+
+    executeOnTestDb("CREATE SCHEMA \"4dal-\"\"test\"\"-schema\"");
+
+    // Create a data table for one SRS
+    Options ops = getDbOptions();
+    ops.add("srid", 31467);
+    ops.replace("table", "data_srs_1");
+    optionsWrite(ops);
+
+    // Create a data table for another SRS
+    ops.replace("srid", 25832);
+    ops.replace("table", "data_srs_2");
+    optionsWrite(ops);
+
+
+    // Read the data from the first data table
+    PointTable table1;
+    StageFactory factory;
+    Stage* reader1(factory.createStage("readers.pgpointcloud"));
+    Options rops = getDbOptions();
+    rops.replace("table", "data_srs_1");
+    reader1->setOptions(rops);
+
+    // ... verify srs settings used by the reader 
+    reader1->prepare(table1);
+    PointViewSet pv1 = reader1->execute(table1);
+    EXPECT_TRUE(reader1->getSpatialReference().valid());
+    EXPECT_EQ("31467", reader1->getSpatialReference().identifyHorizontalEPSG());
+
+    // ... and verify the resulting SRS in the data table
+    EXPECT_NE( pv1.begin(), pv1.end());
+    SpatialReference srs = (*pv1.begin())->spatialReference();
+    EXPECT_TRUE(srs.valid());
+    EXPECT_EQ(std::string("31467"), srs.identifyHorizontalEPSG());
+
+
+    // Read the data from the second data table
+    PointTable table2;
+    Stage* reader2(factory.createStage("readers.pgpointcloud"));
+    rops.replace("table", "data_srs_2");
+
+    // ... verify srs settings used by the reader
+    reader2->setOptions(rops);
+    reader2->prepare(table2);
+    PointViewSet pv2 = reader2->execute(table2);
+    EXPECT_TRUE(reader2->getSpatialReference().valid());
+    EXPECT_EQ("25832", reader2->getSpatialReference().identifyHorizontalEPSG());
+
+    // ... and verify the resulting SRS in the data table
+    EXPECT_NE( pv2.begin(), pv2.end());
+    srs = (*pv2.begin())->spatialReference();
+    EXPECT_TRUE(srs.valid());
+    EXPECT_EQ(std::string("25832"), srs.identifyHorizontalEPSG());
+}
