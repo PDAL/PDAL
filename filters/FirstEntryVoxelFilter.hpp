@@ -59,10 +59,12 @@ private:
     virtual void addArgs(ProgramArgs& args) override;
     virtual PointViewSet run(PointViewPtr view) override;
     bool processOne(PointRef& point) override;
-    void done(PointTableRef) override;
     bool voxelize(const PointRef point);
     std::set<size_t> m_BufferMap;
     BOX3D m_Bounds;
+
+    FirstEntryVoxelFilter& operator=(const FirstEntryVoxelFilter&); // not implemented
+    FirstEntryVoxelFilter(const FirstEntryVoxelFilter&); // not implemented
 };
 
 } // namespace pdal

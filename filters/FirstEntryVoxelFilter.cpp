@@ -39,7 +39,7 @@ namespace pdal
 {
 
 static StaticPluginInfo const s_info{
-    "filters.voxelfirstentry",
+    "filters.firstentryvoxel",
     "First Entry Voxel Filter",
     ""};
 
@@ -60,7 +60,7 @@ PointViewSet FirstEntryVoxelFilter::run(PointViewPtr view)
     PointViewPtr output = view->makeNew();
     for (PointId id = 0; id < view->size(); ++id)
     {
-        if (processOne(view->point(id)))
+        if (voxelize(view->point(id)))
         {
             output->appendPoint(*view, id);
         }
@@ -96,21 +96,7 @@ bool FirstEntryVoxelFilter::voxelize(const PointRef point)
 
 bool FirstEntryVoxelFilter::processOne(PointRef& point)
 {
-    static int count = 0;
-    if (count % 10000000 == 0)
-    {
-        log()->get(LogLevel::Debug)
-            << "Processed : " << count
-            << " Points, Stored : " << m_BufferMap.size() << " Voxels"
-            << std::endl;
-    }
-    count++;
-
     return voxelize(point);
-}
-
-void FirstEntryVoxelFilter::done(PointTableRef) {
-    m_BufferMap.clear();
 }
 
 } // namespace pdal
