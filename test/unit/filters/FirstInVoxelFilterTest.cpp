@@ -38,14 +38,14 @@
 #include <pdal/StageFactory.hpp>
 #include<pdal/Reader.hpp>
 #include<pdal/Streamable.hpp>
-#include"filters/FirstEntryVoxelFilter.hpp"
+#include"filters/FirstInVoxelFilter.hpp"
 
 #include "Support.hpp"
 
 namespace pdal
 {
 
-TEST(FirstEntryVoxelFilterTest, standard)
+TEST(FirstInVoxelFilterTest, standard)
 {
     StageFactory fac;
 
@@ -54,7 +54,7 @@ TEST(FirstEntryVoxelFilterTest, standard)
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage *filter = fac.createStage("filters.firstentryvoxel");
+    Stage *filter = fac.createStage("filters.first-in-voxel");
     Options fo;
     fo.add("cell", 5);
     filter->setOptions(fo);
@@ -69,7 +69,7 @@ TEST(FirstEntryVoxelFilterTest, standard)
     EXPECT_EQ(v->size(), 5768U);
 }
 
-TEST(FirstEntryVoxelFilterTest, stream)
+TEST(FirstInVoxelFilterTest, stream)
 {
     using namespace Dimension;
 
@@ -128,7 +128,7 @@ TEST(FirstEntryVoxelFilterTest, stream)
 
     StreamReader r;
 
-    FirstEntryVoxelFilter voxelfilter;
+    FirstInVoxelFilter voxelfilter;
     Options o;
     o.add("cell", 5);
     voxelfilter.setInput(r);

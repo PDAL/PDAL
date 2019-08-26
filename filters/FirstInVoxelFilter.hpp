@@ -47,10 +47,10 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL FirstEntryVoxelFilter : public Filter, Streamable
+class PDAL_DLL FirstInVoxelFilter : public Filter, Streamable
 {
 public:
-    FirstEntryVoxelFilter() : Filter(), Streamable() {}
+    FirstInVoxelFilter() : Filter(), Streamable() {}
     std::string getName() const;
 
 private:
@@ -63,8 +63,8 @@ private:
     std::set<size_t> m_BufferMap;
     BOX3D m_Bounds;
 
-    FirstEntryVoxelFilter& operator=(const FirstEntryVoxelFilter&); // not implemented
-    FirstEntryVoxelFilter(const FirstEntryVoxelFilter&); // not implemented
+    FirstInVoxelFilter& operator=(const FirstInVoxelFilter&); // not implemented
+    FirstInVoxelFilter(const FirstInVoxelFilter&); // not implemented
 };
 
 } // namespace pdal

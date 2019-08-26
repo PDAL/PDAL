@@ -33,29 +33,29 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "FirstEntryVoxelFilter.hpp"
+#include "FirstInVoxelFilter.hpp"
 
 namespace pdal
 {
 
 static StaticPluginInfo const s_info{
-    "filters.firstentryvoxel",
+    "filters.first-in-voxel",
     "First Entry Voxel Filter",
     ""};
 
-CREATE_STATIC_STAGE(FirstEntryVoxelFilter, s_info)
+CREATE_STATIC_STAGE(FirstInVoxelFilter, s_info)
 
-std::string FirstEntryVoxelFilter::getName() const
+std::string FirstInVoxelFilter::getName() const
 {
     return s_info.name;
 }
 
-void FirstEntryVoxelFilter::addArgs(ProgramArgs& args)
+void FirstInVoxelFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell).setPositional();
 }
 
-PointViewSet FirstEntryVoxelFilter::run(PointViewPtr view)
+PointViewSet FirstInVoxelFilter::run(PointViewPtr view)
 {
     PointViewPtr output = view->makeNew();
     for (PointId id = 0; id < view->size(); ++id)
@@ -71,7 +71,7 @@ PointViewSet FirstEntryVoxelFilter::run(PointViewPtr view)
 	return viewSet;
 }
 
-bool FirstEntryVoxelFilter::voxelize(const PointRef point)
+bool FirstInVoxelFilter::voxelize(const PointRef point)
 {
     double gx = point.getFieldAs<double>(Dimension::Id::X) / m_cell;
     double gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
@@ -94,7 +94,7 @@ bool FirstEntryVoxelFilter::voxelize(const PointRef point)
     return false;
 }
 
-bool FirstEntryVoxelFilter::processOne(PointRef& point)
+bool FirstInVoxelFilter::processOne(PointRef& point)
 {
     return voxelize(point);
 }
