@@ -122,7 +122,6 @@ protected:
 
         try
         {
-            executeOnTestDb("CREATE EXTENSION postgis");
             executeOnTestDb("CREATE EXTENSION pointcloud");
         }
         catch( const pdal_error& )
@@ -144,7 +143,7 @@ protected:
         {
             PQfinish(m_testConnection);
         }
-        //dropTestDb();
+        dropTestDb();
         if (m_masterConnection)
         {
             PQfinish(m_masterConnection);
