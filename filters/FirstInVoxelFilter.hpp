@@ -1,7 +1,6 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re,
- *https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
