@@ -66,7 +66,7 @@ TEST(FirstInVoxelFilterTest, standard)
     EXPECT_EQ(set.size(), 1U);
     PointViewPtr v = *set.begin();
     PointRef p=v->point(0);
-    EXPECT_EQ(v->size(), 5768U);
+    EXPECT_EQ(v->size(), 26351U);
 }
 
 TEST(FirstInVoxelFilterTest, stream)
@@ -181,7 +181,7 @@ TEST(FirstInVoxelFilterTest, stream)
 
     f.prepare(table);
     f.execute(table);
-    EXPECT_EQ(f.m_count, (point_count_t)4);
+    EXPECT_EQ(f.m_count, (point_count_t)1);
 }
 
 } // namespace
