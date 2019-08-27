@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -35,7 +35,6 @@
 #include "VoxelCentroidNearestNeighborFilter.hpp"
 
 #include <pdal/EigenUtils.hpp>
-#include <pdal/KDIndex.hpp>
 
 #include <map>
 #include <string>
@@ -71,8 +70,6 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
     BOX3D bounds;
     calculateBounds(*view, bounds);
 
-    KD3Index& kdi = view->build3dIndex();
-
     // Make an initial pass through the input PointView to index PointIds by
     // row, column, and depth.
     std::map<std::tuple<size_t, size_t, size_t>, std::vector<PointId>>
@@ -93,10 +90,67 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
     PointViewPtr output = view->makeNew();
     for (auto const& t : populated_voxel_ids)
     {
-        Eigen::Vector3d centroid = computeCentroid(*view, t.second);
-        std::vector<PointId> neighbors =
-            kdi.neighbors(centroid[0], centroid[1], centroid[2], 1);
-        output->appendPoint(*view, neighbors[0]);
+        if (t.second.size() == 1)
+        {
+            // If there is only one point in the voxel, simply append it.
+            output->appendPoint(*view, t.second[0]);
+        }
+        else if (t.second.size() == 2)
+        {
+            // Else if there are only two, they are equidistant to the
+            // centroid, so append the one closest to voxel center.
+
+            // Compute voxel center.
+            double y0 = bounds.miny + (std::get<0>(t.first) + 0.5) * m_cell;
+            double x0 = bounds.minx + (std::get<1>(t.first) + 0.5) * m_cell;
+            double z0 = bounds.minz + (std::get<2>(t.first) + 0.5) * m_cell;
+
+            // Compute distance from first point to voxel center.
+            double x1 = view->getFieldAs<double>(Dimension::Id::X, t.second[0]);
+            double y1 = view->getFieldAs<double>(Dimension::Id::Y, t.second[0]);
+            double z1 = view->getFieldAs<double>(Dimension::Id::Z, t.second[0]);
+            double d1 = pow(x0 - x1, 2) + pow(y0 - y1, 2) + pow(z0 - z1, 2);
+
+            // Compute distance from second point to voxel center.
+            double x2 = view->getFieldAs<double>(Dimension::Id::X, t.second[1]);
+            double y2 = view->getFieldAs<double>(Dimension::Id::Y, t.second[1]);
+            double z2 = view->getFieldAs<double>(Dimension::Id::Z, t.second[1]);
+            double d2 = pow(x0 - x2, 2) + pow(y0 - y2, 2) + pow(z0 - z2, 2);
+
+            // Append the closer of the two.
+            if (d1 < d2)
+                output->appendPoint(*view, t.second[0]);
+            else
+                output->appendPoint(*view, t.second[1]);
+        }
+        else
+        {
+            // Else there are more than two neighbors, so choose the one
+            // closest to the centroid.
+
+            // Compute the centroid.
+            Eigen::Vector3d centroid = computeCentroid(*view, t.second);
+
+            // Compute distance from each point in the voxel to the centroid,
+            // retaining only th closest.
+            PointId pmin;
+            double dmin(std::numeric_limits<double>::max());
+            for (auto const& p : t.second)
+            {
+                double x = view->getFieldAs<double>(Dimension::Id::X, p);
+                double y = view->getFieldAs<double>(Dimension::Id::Y, p);
+                double z = view->getFieldAs<double>(Dimension::Id::Z, p);
+                double sqr_dist = pow(centroid.x() - x, 2) +
+                                  pow(centroid.y() - y, 2) +
+                                  pow(centroid.z() - z, 2);
+                if (sqr_dist < dmin)
+                {
+                    dmin = sqr_dist;
+                    pmin = p;
+                }
+            }
+            output->appendPoint(*view, pmin);
+        }
     }
 
     PointViewSet viewSet;
