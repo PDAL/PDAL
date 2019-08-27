@@ -38,7 +38,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-#define POSITIVE_VALUE(x) x >= 0 ? x : -x
 #define HASH_COMBINE(x, y) x ^ (y << 1)
 
 namespace pdal
@@ -60,7 +59,7 @@ private:
     virtual PointViewSet run(PointViewPtr view) override;
     bool processOne(PointRef& point) override;
     bool voxelize(const PointRef point);
-    std::set<size_t> m_BufferMap;
+    std::set<size_t> m_populatedVoxels;
     BOX3D m_Bounds;
 
     FirstInVoxelFilter& operator=(const FirstInVoxelFilter&); // not implemented

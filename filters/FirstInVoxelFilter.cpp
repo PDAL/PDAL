@@ -73,24 +73,53 @@ PointViewSet FirstInVoxelFilter::run(PointViewPtr view)
 
 bool FirstInVoxelFilter::voxelize(const PointRef point)
 {
+    /*
+	* Calculate the voxel coordinates for the incoming point.
+	* gx, gy, gz will be the global coordinates from (0, 0, 0).
+	*/
     double gx = point.getFieldAs<double>(Dimension::Id::X) / m_cell;
     double gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
     double gz = point.getFieldAs<double>(Dimension::Id::Z) / m_cell;
 
-    m_Bounds.grow(gx, gy, gz);
-
-    size_t const h1(std::hash<int>{}(static_cast<uint32_t>(POSITIVE_VALUE((gx - m_Bounds.minx)))));
-    size_t const h2(std::hash<int>{}(static_cast<uint32_t>(POSITIVE_VALUE((gy - m_Bounds.miny)))));
-    size_t const h3(std::hash<int>{}(static_cast<uint32_t>(POSITIVE_VALUE((gz - m_Bounds.minz)))));
-    size_t key = std::hash<size_t>{}(HASH_COMBINE((HASH_COMBINE(h1, h2)), h3));
-
-    auto pi = m_BufferMap.find(key);
-    if (pi == m_BufferMap.end())
+	static bool initialized=false;
+    if (!initialized)
     {
-        m_BufferMap.insert(key);
+        /*
+		* Save global coordinates of first incoming point. 
+		* This will act as a Pivot for calculation of local coordinates of the voxels.
+		*/
+		m_Bounds.grow(gx, gy, gz);
+		initialized=true;
+	}
+
+	/*
+	* Calculate the local voxel coordinates for incoming point, Using the Pivot voxel.
+	* Generate a combined hash key from local coordinates.
+	*/
+    size_t const hx(std::hash<int>{}(std::floor(gx - m_Bounds.minx)));
+    size_t const hy(std::hash<int>{}(std::floor(gy - m_Bounds.miny)));
+    size_t const hz(std::hash<int>{}(std::floor(gz - m_Bounds.minz)));
+    size_t key = std::hash<size_t>{}(HASH_COMBINE((HASH_COMBINE(hx, hy)), hz));
+
+	/*
+	* Is hash key already in populates voxels?
+	*/
+    auto pi = m_populatedVoxels.find(key);
+    if (pi == m_populatedVoxels.end())
+    {
+        /*
+		* No, Key is not there in populated voxels.
+		* Mark the voxel as populated by making entry in m_populatedVoxels.
+		* Accept this point.
+		*/
+        m_populatedVoxels.insert(key);
         return true;
     }
-
+	/*
+	* Yes, Key is already in populated voxel keys.
+	* That means the voxel is already contains a point.
+	* Ignore this point.
+	*/
     return false;
 }
 
