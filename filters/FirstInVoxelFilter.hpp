@@ -1,6 +1,7 @@
 /******************************************************************************
- * Copyright (c) 2019, Helix.re 
- * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
+ * Copyright (c) 2019, Helix.re
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -38,8 +39,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-#define HASH_COMBINE(x, y) x ^ (y << 1)
-
 namespace pdal
 {
 
@@ -60,10 +59,11 @@ private:
     bool processOne(PointRef& point) override;
     bool voxelize(const PointRef point);
     std::set<size_t> m_populatedVoxels;
-    BOX3D m_Bounds;
+    double m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
+                            // dimension.
 
     FirstInVoxelFilter& operator=(const FirstInVoxelFilter&); // not implemented
-    FirstInVoxelFilter(const FirstInVoxelFilter&); // not implemented
+    FirstInVoxelFilter(const FirstInVoxelFilter&);            // not implemented
 };
 
 } // namespace pdal
