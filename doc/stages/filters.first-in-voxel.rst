@@ -6,7 +6,8 @@ filters.first-in-voxel
 The **first-in-voxel filter** is a voxel-based sampling filter.
 The input point
 cloud is divided into 3D voxels at the given cell size. For each populated
-voxel, the first point fitting in the voxel is accepted and all others are ignored.
+voxel, the first point entering in the voxel is accepted and voxel is marked as populated. 
+All other points entering in the same voxel are ignored/skipped.
 
 Example
 -------
