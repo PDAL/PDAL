@@ -72,6 +72,7 @@ jobs:
     displayName: 'Build'
   - script: |
       cd build
+      export PDAL_DRIVER_PATH=`pwd`/lib
       source activate pdal
       ctest -V
     displayName: 'Test'
