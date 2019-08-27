@@ -39,6 +39,7 @@
 #include <mutex>
 
 #include <pdal/JsonFwd.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -57,6 +58,7 @@ class EptInfo;
 class FixedPointLayout;
 class Key;
 class Pool;
+class GridPnp;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -88,13 +90,13 @@ private:
     void overlaps(const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
             const NL::json& current, const Key& key);
 
-    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
-    uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
-            uint64_t pointId) const;
+        PointId pointId) const;
 
     void readAddon(PointView& dst, const Key& key, const Addon& addon,
-            uint64_t startId) const;
+        PointId startId) const;
 
     // To allow testing of hidden getRemoteType() and getCoercedType().
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
@@ -140,6 +142,7 @@ private:
     PointLayoutPtr m_bufferLayout;
     point_count_t m_currentIndex = -1;
     std::vector<char> m_temp_buffer;
+    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
 };
 
 } // namespace pdal

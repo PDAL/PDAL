@@ -41,7 +41,9 @@
 #include <io/EptReader.hpp>
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
+#include <filters/ReprojectionFilter.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 namespace pdal
@@ -65,6 +67,8 @@ namespace
             Support::datapath("ept/source/lone-star.laz"));
     const std::string eptLaszipPath(
             "ept://" + Support::datapath("ept/lone-star-laszip"));
+    const std::string eptAutzenPath(
+            "ept://" + Support::datapath("ept/1.2-with-color"));
 
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
@@ -538,6 +542,123 @@ TEST(EptReaderTest, stream)
 #ifdef PDAL_HAVE_LASZIP
     streamTest(eptLaszipPath);
 #endif
+}
+
+TEST(EptReaderTest, boundedCrop)
+{
+    std::string wkt = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
+
+    // First we'll query the EptReader for these bounds.
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+    reader.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        Options options;
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 47u);
+    EXPECT_EQ(sourceNp, 47u);
+}
+
+TEST(EptReaderTest, boundedCropReprojection)
+{
+    std::string selection = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
+    std::string selection4326 = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection-dd.wkt"));
+    std::string srs = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-srs.wkt"));
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        options.add("override_srs", srs);
+        options.add("polygon", selection4326 + "/EPSG:4326");
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+
+    reader.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
+        eptNp += view->size();
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        options.add("override_srs", srs);
+        source.setOptions(options);
+    }
+
+    ReprojectionFilter reproj;
+    {
+        Options options;
+        options.add("out_srs", "EPSG:4326");
+        reproj.setOptions(options);
+        reproj.setInput(source);
+    }
+
+    CropFilter crop;
+    {
+        Options options;
+        options.add("polygon", selection4326);
+        options.add("a_srs", "EPSG:4326");
+        crop.setOptions(options);
+        crop.setInput(reproj);
+    }
+
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+        sourceNp += view->size();
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 47u);
+    EXPECT_EQ(sourceNp, 47u);
 }
 
 } // namespace pdal

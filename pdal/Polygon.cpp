@@ -187,6 +187,19 @@ bool Polygon::contains(const Polygon& p) const
     return m_geom->Contains(p.m_geom.get());
 }
 
+bool Polygon::disjoint(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Disjoint(p.m_geom.get());
+}
+
+bool Polygon::intersects(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Intersects(p.m_geom.get());
+}
 
 /// Determine whether this polygon contains a point.
 /// \param x  Point x coordinate.
