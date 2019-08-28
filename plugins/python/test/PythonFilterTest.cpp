@@ -1075,7 +1075,10 @@ static void run_pipeline(std::string const& pipeline)
     int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
     EXPECT_EQ(0, stat);
     if (stat)
-        std::cerr << output << std::endl;
+    {
+        std::cerr << "error message in run_pipeline: " << output << std::endl;
+        std::cout << "error message in run_pipeline: " << output << std::endl;
+    }
 }
 
 class jsonWithProgrammable : public testing::TestWithParam<const char*> {};
