@@ -12,11 +12,16 @@ ENV CXX g++
 RUN apt-get update -qq; \
     apt-get -qq remove postgis; \
     apt-get install -y --fix-missing --no-install-recommends \
-        software-properties-common
+        software-properties-common \
+        apt-transport-https ca-certificates gnupg software-properties-common wget
+
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
+    && apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 
 RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
         build-essential \
         ca-certificates \
+        libfreexl-dev \
         cmake \
         curl \
         gfortran \
@@ -47,7 +52,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         clang-6.0 \
         libc6-dev \
         libopenjp2-7-dev \
-        libproj-dev \
         libc6-dev \
         libnetcdf-dev \
         libpng-dev \
@@ -108,7 +112,7 @@ RUN git clone https://github.com/LASzip/LASzip.git laszip \
     && ninja -j ${PARALLEL} \
     && ninja install \
     && DESTDIR=/ ninja install \
-    && rm -rf laszip
+    && rm -rf /laszip
 
 RUN git clone  https://github.com/hobu/laz-perf.git \
     && cd laz-perf \
@@ -170,10 +174,6 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
     && rm -rf /cpd
 
 
-RUN \
-    curl -LO https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz && tar zxvf cmake-3.14.5.tar.gz && cd cmake-3.14.5; \
-    ./bootstrap --prefix=/usr && make && make install
-
 
 RUN git clone https://github.com/OSGeo/PROJ.git --branch 6.1 proj \
     && cd proj \
@@ -181,6 +181,7 @@ RUN git clone https://github.com/OSGeo/PROJ.git --branch 6.1 proj \
     && ./configure --prefix=/usr \
     && make -j 4 \
     && make install \
+    && make install DESTDIR=/ \
     && rm -rf /proj
 
 
@@ -190,6 +191,7 @@ RUN git clone --branch master https://github.com/OSGeo/libgeotiff.git \
     && ./configure --prefix=/usr --with-proj=/usr \
     && make -j 4 \
     && make install \
+    && make install DESTDIR=/ \
     && rm -rf /libgeotiff
 
 RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
@@ -215,9 +217,6 @@ RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
     && make install \
     && rm -rf /gdal
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
-        libfreexl-dev
-
 RUN curl -LOs http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-5.0.0-beta0.tar.gz && tar zxvf libspatialite-5.0.0-beta0.tar.gz && cd /libspatialite-5.0.0-beta0 \
     && CXXFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" CFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" ./configure --prefix=/usr \
     && make -j 4 \
@@ -229,7 +228,3 @@ RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
-
-RUN \
-    curl -LO https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz && tar zxvf cmake-3.14.5.tar.gz && cd cmake-3.14.5; \
-    ./bootstrap --parallel=${PARALLEL} --prefix=/usr && make -j ${PARALLEL} && make install
