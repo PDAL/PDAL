@@ -1077,7 +1077,6 @@ static void run_pipeline(std::string const& pipeline)
     if (stat)
     {
         std::cerr << "error message in run_pipeline: " << output << std::endl;
-        std::cout << "error message in run_pipeline: " << output << std::endl;
     }
 }
 
