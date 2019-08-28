@@ -384,10 +384,7 @@ int Utils::run_shell_command(const std::string& cmd, std::string& output)
     FILE* fp = portable_popen(cmd.c_str(), "r");
 
     if (fp == NULL)
-    {
-        std::cerr << "portable_popen failed for '" << cmd.c_str() << "'"<< std::endl;
         return 1;
-    }
 
     while (!feof(fp))
     {

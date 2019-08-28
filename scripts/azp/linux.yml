@@ -28,6 +28,7 @@ jobs:
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
         -DBUILD_SQLITE_TESTS=OFF \
         -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+        -DPDAL_PYTHON_LIBRARY=/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu/libpython3.6.so \
         -DPython3_FIND_STRATEGY=LOCATION \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DWITH_LAZPERF=ON \
