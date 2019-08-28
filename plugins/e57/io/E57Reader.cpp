@@ -185,7 +185,7 @@ point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
     // How many do we read
     PointId nextId = view->size();
     point_count_t remainingInput = m_pointCount - nextId;
-    point_count_t toReadCount = std::min(count, remainingInput);
+    point_count_t toReadCount = (std::min)(count, remainingInput);
 
     point_count_t remaining = toReadCount;
     for (point_count_t i=0; i < remaining; i++)
