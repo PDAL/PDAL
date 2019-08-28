@@ -26,8 +26,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         curl \
         gfortran \
         git \
-        libgeotiff-dev \
-        libgeotiff-epsg \
         libarpack2-dev \
         libflann-dev \
         libhdf5-serial-dev \
@@ -40,8 +38,6 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         wget \
         automake \
         libtool \
-        libspatialite-dev \
-        libsqlite3-mod-spatialite \
         libhdf5-dev \
         libboost-filesystem1.65-dev \
         libboost-iostreams1.65-dev \
@@ -75,12 +71,10 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libhpdf-dev \
         unzip \
         libzstd-dev \
-        liblzma-dev \
         libeigen3-dev \
         ninja-build \
         sqlite3 \
         libgeos-dev \
-        libspatialite-dev \
         cython \
         python3-pip \
         time \
@@ -93,12 +87,12 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         liblzma-dev \
         libzstd1-dev \
         pkg-config \
-        libgdal-dev \
         bash-completion \
         ninja-build \
         sqlite3 \
         libgeos-dev \
-    libfreexl-dev \
+	libpq-dev \
+	libfreexl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
@@ -179,7 +173,7 @@ RUN git clone https://github.com/OSGeo/PROJ.git --branch 6.1 proj \
     && cd proj \
     && ./autogen.sh \
     && ./configure --prefix=/usr \
-    && make -j 4 \
+    && make -j  ${PARALLEL} \
     && make install \
     && make install DESTDIR=/ \
     && rm -rf /proj
@@ -189,7 +183,7 @@ RUN git clone --branch master https://github.com/OSGeo/libgeotiff.git \
     &&    cd libgeotiff/libgeotiff \
     && ./autogen.sh \
     && ./configure --prefix=/usr --with-proj=/usr \
-    && make -j 4 \
+    && make -j  ${PARALLEL} \
     && make install \
     && make install DESTDIR=/ \
     && rm -rf /libgeotiff
@@ -210,11 +204,11 @@ RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
             --with-proj=/usr \
             --with-ogdi=no \
             --with-curl \
-            --with-pg \
             --with-ecw=no \
             --with-mrsid=no \
-    && make -j 4 \
+    && make -j ${PARALLEL} \
     && make install \
+    && make install DESTDIR=/ \
     && rm -rf /gdal
 
 RUN curl -LOs http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-5.0.0-beta0.tar.gz && tar zxvf libspatialite-5.0.0-beta0.tar.gz && cd /libspatialite-5.0.0-beta0 \
@@ -228,3 +222,4 @@ RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
+
