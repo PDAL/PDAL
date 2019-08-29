@@ -88,7 +88,7 @@ jobs:
       pip install packaging cython
       git clone https://github.com/PDAL/python.git pdal-python
       cd pdal-python
-      git checkout 2.0.0
+      git checkout no-numpy-reader
       python3 setup.py build
       LD_LIBRARY_PATH=$INSTALL_DIR/lib python setup.py test
     displayName: 'Python'
