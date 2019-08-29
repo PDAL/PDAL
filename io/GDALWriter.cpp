@@ -67,6 +67,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_edgeLength).setPositional();
     m_radiusArg = &args.add("radius", "Radius from cell center to use to locate"
         " influencing points", m_radius);
+    args.add("power", "Power parameter for weighting points when using IDW",
+        m_power, 2.0);
     args.add("gdaldriver", "GDAL writer driver name", m_drivername, "GTiff");
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
@@ -204,7 +206,7 @@ void GDALWriter::createGrid(BOX2D bounds)
     try
     {
         m_grid.reset(new GDALGrid(c.x + 1, c.y + 1, m_edgeLength,
-            m_radius, m_outputTypes, m_windowSize));
+            m_radius, m_outputTypes, m_windowSize, m_power));
     }
     catch (GDALGrid::error& err)
     {

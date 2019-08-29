@@ -112,6 +112,15 @@ radius
     Radius about cell center bounding points to use to calculate a cell value.
     [Default: resolution_ * sqrt(2)]
 
+power
+    Exponent of the distance when computing IDW. Close points have higher
+    significance than far points. [Default: 2.0]
+
+    .. note::
+	Power is a newly added, optional argument, only used when computing
+	IDW. The default value of 2.0 represents a change from the previous
+        implementation, in which the power would have always been 1.0.
+
 gdaldriver
     GDAL code of the `GDAL driver`_ to use to write the output.
     [Default: "GTiff"]
