@@ -297,7 +297,7 @@ void App::addArgs(ProgramArgs& args)
 
 namespace
 {
-    LogPtr logPtr(new Log("PDAL", "stderr"));
+    LogPtr logPtr(Log::makeLog("PDAL", "stderr"));
 }
 
 int main(int argc, char* argv[])
