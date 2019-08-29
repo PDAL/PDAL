@@ -15,6 +15,7 @@ if (NOT (CMAKE_VERSION VERSION_LESS "3.14.0"))
         CACHE PATH "Location of Python include files.")
     set(PYTHON_NUMPY_INCLUDE_DIR ${Python3_NumPy_INCLUDE_DIRS}
         CACHE PATH "Location of NumPy include files.")
+    set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
     set(PDAL_HAVE_PYTHON 1)
 elseif (NOT (CMAKE_VERSION VERSION_LESS "3.12.0"))
     find_package(Python3 COMPONENTS Interpreter Development)
