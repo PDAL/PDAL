@@ -37,6 +37,8 @@ function(pdal_target_compile_settings target)
                 /wd4716
                 # unwind semantics
                 /wd4530
+                # Standard C++-type exception handling.
+                /EHsc
                 )
         endif()
 

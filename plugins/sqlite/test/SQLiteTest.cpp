@@ -161,7 +161,7 @@ TEST(SQLiteTest, readWriteCompressScale)
 
 TEST(SQLiteTest, Issue895)
 {
-    LogPtr log(new pdal::Log("Issue895", "stdout"));
+    LogPtr log(Log::makeLog("Issue895", "stdout"));
     log->setLevel(LogLevel::Debug);
 
     const std::string filename(Support::temppath("issue895.sqlite"));
@@ -172,7 +172,7 @@ TEST(SQLiteTest, Issue895)
 
     // make a DB, put a table in it
     {
-        SQLite db(filename, LogPtr(log));
+        SQLite db(filename, log);
         db.connect(true);
         sql = "CREATE TABLE MyTable (id INTEGER PRIMARY KEY AUTOINCREMENT, "
             "data)";
@@ -181,7 +181,7 @@ TEST(SQLiteTest, Issue895)
 
     // open the DB, manually check the tables
     {
-        SQLite db(filename, LogPtr(log));
+        SQLite db(filename, log);
         db.connect(false);
         sql = "SELECT name FROM sqlite_master WHERE type = \"table\"";
         db.query(sql);
@@ -228,7 +228,7 @@ TEST(SQLiteTest, Issue895)
 
 TEST(SQLiteTest, testSpatialite)
 {
-    LogPtr log(new pdal::Log("spat", "stdout"));
+    LogPtr log(Log::makeLog("spat", "stdout"));
     log->setLevel(LogLevel::Debug);
 
     const std::string filename(Support::temppath("spat.sqlite"));
@@ -251,7 +251,7 @@ TEST(SQLiteTest, testSpatialite)
 
 TEST(SQLiteTest, testVersionInfo)
 {
-    LogPtr log = std::shared_ptr<pdal::Log>(new pdal::Log("spver", "stdout"));
+    LogPtr log = Log::makeLog("spver", "stdout");
     log->setLevel(LogLevel::Debug);
 
     const std::string filename(Support::temppath("spver.sqlite"));
