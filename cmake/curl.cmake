@@ -2,7 +2,7 @@
 # curl support
 #
 
-find_package(Curl)
+find_package(CURL REQUIRED)
 if (CURL_FOUND)
     set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
     find_package(Threads REQUIRED)
@@ -12,5 +12,7 @@ if (CURL_FOUND)
     else()
         add_definitions("-DUNIX")
     endif()
+else()
+    message(FATAL_ERROR "Could not find curl")
 endif()
 

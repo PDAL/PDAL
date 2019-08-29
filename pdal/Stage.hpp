@@ -77,8 +77,7 @@ class PDAL_DLL Stage
     friend class Streamable;
 public:
     Stage();
-    virtual ~Stage()
-        {}
+    virtual ~Stage();
 
     /**
       Add a stage to the input list of this stage.

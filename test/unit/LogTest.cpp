@@ -49,13 +49,13 @@ TEST(Log, t1)
 
     // Scope makes sure file gets closed.
     {
-        Log l("", filename);
+        LogPtr l(Log::makeLog("", filename));
 
-        l.setLevel(LogLevel::Debug);
+        l->setLevel(LogLevel::Debug);
 
-        l.get(LogLevel::Debug) << "debug\n";
-        l.get(LogLevel::Debug5) << "debug5\n";
-        l.get(LogLevel::Info) << "info\n";
+        l->get(LogLevel::Debug) << "debug\n";
+        l->get(LogLevel::Debug5) << "debug5\n";
+        l->get(LogLevel::Info) << "info\n";
     }
 
     EXPECT_TRUE(Support::compare_text_files(filename,

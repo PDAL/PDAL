@@ -219,6 +219,9 @@ private:
 class PDAL_DLL ErrorHandler
 {
 public:
+    ErrorHandler();
+    ~ErrorHandler();
+
     /**
       Get the singleton error handler.
 
@@ -262,8 +265,6 @@ public:
     {
         ErrorHandler::getGlobalErrorHandler().handle(code, num, msg);
     }
-
-    ErrorHandler();
 
 private:
     void handle(::CPLErr level, int num, const char *msg);
