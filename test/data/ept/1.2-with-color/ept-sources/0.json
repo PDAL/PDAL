@@ -1,0 +1,61 @@
+{
+  "1.2-with-color.las": {
+    "bounds": [
+      635619.85,
+      848899.7000000001,
+      406.59000000000003,
+      638982.55,
+      853535.43,
+      586.38
+    ],
+    "metadata": {
+      "comp_spatialreference": "",
+      "compressed": false,
+      "count": 1065,
+      "creation_doy": 0,
+      "creation_year": 0,
+      "dataformat_id": 3,
+      "dataoffset": 229,
+      "filesource_id": 0,
+      "global_encoding": 0,
+      "global_encoding_base64": "AAA=",
+      "header_size": 227,
+      "major_version": 1,
+      "maxx": 638982.55,
+      "maxy": 853535.43,
+      "maxz": 586.38,
+      "minor_version": 2,
+      "minx": 635619.85,
+      "miny": 848899.7,
+      "minz": 406.59,
+      "offset_x": 0,
+      "offset_y": 0,
+      "offset_z": 0,
+      "point_length": 34,
+      "project_id": "00000000-0000-0000-0000-000000000000",
+      "scale_x": 0.01,
+      "scale_y": 0.01,
+      "scale_z": 0.01,
+      "software_id": "TerraScan",
+      "spatialreference": "",
+      "srs": {
+        "compoundwkt": "",
+        "horizontal": "",
+        "isgeocentric": false,
+        "isgeographic": false,
+        "prettycompoundwkt": "",
+        "prettywkt": "",
+        "proj4": "",
+        "units": {
+          "horizontal": "unknown",
+          "vertical": ""
+        },
+        "vertical": "",
+        "wkt": ""
+      },
+      "system_id": ""
+    },
+    "origin": 0,
+    "points": 1065
+  }
+}

@@ -15,8 +15,6 @@ Purpose:
     * Explore :ref:`writers.gdal` options
 
 
-:ref:`Rasterization Workshop Materials <pdal:workshop-rasterize>`
-
 .. _`gdaldem`: http://www.gdal.org/gdaldem.html
 
 

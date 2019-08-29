@@ -238,15 +238,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
     {
         makePipeline();
         if (m_needPoints || m_showMetadata)
-        {
-            if (m_manager.pipelineStreamable())
-            {
-                FixedPointTable fixedTable(10000);
-                m_manager.executeStream(fixedTable);
-            }
-            else
-                m_manager.execute();
-        }
+            m_manager.execute(ExecMode::PreferStream);
         else
             m_manager.prepare();
         dump(root);

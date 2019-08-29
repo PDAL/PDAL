@@ -226,5 +226,11 @@ bool GDALReader::processOne(PointRef& point)
     return true;
 }
 
+
+void GDALReader::done(PointTableRef table)
+{
+    m_raster->close();
+}
+
 } // namespace pdal
 

@@ -42,9 +42,10 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal {
     namespace uuidGenerator {
-        std::string generate_uuid();
+       PDAL_DLL std::string generate_uuid();
 }
 }

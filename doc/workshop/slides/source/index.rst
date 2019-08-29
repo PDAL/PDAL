@@ -7,7 +7,6 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :hidden:
 
    introduction
    lidar_intro
@@ -25,4 +24,5 @@ Overview
    thinning
    ground
    dtm
-
+   meshing
+   

@@ -11,12 +11,10 @@ Exercise
 --------------------------------------------------------------------------------
 
 This exercise uses PDAL to print metadata information. Issue the
-following command in your |Terminal|:
-
+following command in your `Conda Shell`.
 
 .. literalinclude:: ./metadata-command.txt
     :linenos:
-
 
 .. image:: ../../images/info-interesting-metadata.png
 
@@ -67,6 +65,9 @@ at the moment either. Let's focus on extracting what we want using the
 .. literalinclude:: ./metadata-command-jq.txt
     :linenos:
 
+.. literalinclude:: ./metadata-command-jq-win.txt
+    :linenos:
+
 .. image:: ../../images/info-interesting-metadata-jq.png
 
 .. note::
@@ -97,5 +98,3 @@ Notes
 4. Spatial reference system or coordinate system information is a kind of
    special metadata.  Spatial references are come directly from source data
    or are provided via options in PDAL.
-
-

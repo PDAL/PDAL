@@ -1,0 +1,3 @@
+pdal info dublin.laz | jq .stats.bbox.native.bbox
+
+pdal info dublin.laz -p 0
