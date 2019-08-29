@@ -84,10 +84,6 @@ jobs:
         call activate pdal
         pushd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-        set PYTHONHOME="C:/Miniconda/"
-        set PYTHONLIB="C:/Miniconda/Lib"
-        echo %PYTHONHOME%
-        echo %PYTHONLIB%
         ctest -VV --output-on-failure
       displayName: 'Test'
 
