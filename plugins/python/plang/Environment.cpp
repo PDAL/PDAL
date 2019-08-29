@@ -68,8 +68,6 @@ static void loadPython()
     std::string libname;
 
     pdal::Utils::getenv("PDAL_PYTHON_LIBRARY", libname);
-    std::cout << "libname:" << libname << std::endl;
-    std::cout << "PDAL_PYTHON_LIBRARY:" << PDAL_PYTHON_LIBRARY << std::endl;
 
 // PDAL_PYTHON_LIBRARY below is the result of the cmake FindPython script's
 // PYTHON_LIBRARY.
