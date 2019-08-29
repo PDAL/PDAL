@@ -63,14 +63,14 @@ set(PYTHON_LDSHARED ${PYTHON_LDSHARED}
 set(PYTHON_IS_SHARED_ENABLED ${Py_ENABLE_SHARED}
     CACHE PATH "Was Python dynamically linked?")
 
-if (APPLE)
-    if (NOT Py_ENABLE_SHARED)
-        # conda gives us -bundle, which isn't valid
-        string(REPLACE  "-bundle" "" PYTHON_LDSHARED "${PYTHON_LDSHARED}")
-        string(STRIP  ${PYTHON_LDSHARED} PYTHON_LDSHARED)
-        set(PYTHON_LIBRARY ${PYTHON_LDSHARED})
-    endif()
-endif()
+#if (APPLE)
+#    if (NOT Py_ENABLE_SHARED)
+#        # conda gives us -bundle, which isn't valid
+#        string(REPLACE  "-bundle" "" PYTHON_LDSHARED "${PYTHON_LDSHARED}")
+#        string(STRIP  ${PYTHON_LDSHARED} PYTHON_LDSHARED)
+#        set(PYTHON_LIBRARY ${PYTHON_LDSHARED})
+#    endif()
+#endif()
 
 
 set(PYTHON_ALL_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
