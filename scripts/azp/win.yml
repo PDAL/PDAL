@@ -38,6 +38,8 @@ jobs:
             -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
             -DOPENSSL_ROOT_DIR=%CONDA_PREFIX%/Library ^
             -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
+            -DPython3_FIND_STRATEGY=LOCATION \
+            -DPYTHON_EXECUTABLE=%CONDA_PREFIX/bin/python \
             -DBUILD_PLUGIN_CPD=OFF ^
             -DBUILD_PLUGIN_GREYHOUND=ON ^
             -DBUILD_PLUGIN_ICEBRIDGE=ON ^
