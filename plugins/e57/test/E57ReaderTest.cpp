@@ -133,18 +133,18 @@ TEST(E57Reader, testRead)
     ASSERT_EQ(cloud->size(),4u);
 
     auto pt = cloud->point(0);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::X),-44.300098);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::Y),-1.132100);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::Z),0.335800);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::Red),0);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::Green),65535);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::Blue),0);
-    ASSERT_FLOAT_EQ(pt.getFieldAs<double>(pdal::Dimension::Id::Intensity),0);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::X),-44.300098f);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::Y),-1.132100f);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::Z),0.335800f);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::Red),0.0f);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::Green),65535.0f);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::Blue),0.0f);
+    ASSERT_FLOAT_EQ(pt.getFieldAs<float>(pdal::Dimension::Id::Intensity),0.0f);
 
     auto pt2 = cloud->point(1);
-    ASSERT_FLOAT_EQ(pt2.getFieldAs<double>(pdal::Dimension::Id::X),-44.506901);
-    ASSERT_FLOAT_EQ(pt2.getFieldAs<double>(pdal::Dimension::Id::Y),-0.886000);
-    ASSERT_FLOAT_EQ(pt2.getFieldAs<double>(pdal::Dimension::Id::Z),0.328600);
+    ASSERT_FLOAT_EQ(pt2.getFieldAs<float>(pdal::Dimension::Id::X),-44.506901f);
+    ASSERT_FLOAT_EQ(pt2.getFieldAs<float>(pdal::Dimension::Id::Y),-0.886000f);
+    ASSERT_FLOAT_EQ(pt2.getFieldAs<float>(pdal::Dimension::Id::Z),0.328600f);
 }
 
 PointViewSet readertest_readE57(std::string filename,PointTableRef table)
@@ -180,9 +180,8 @@ TEST(E57Reader, testMultipleClouds)
         auto ptB = cloudB->point(i);
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
-        {
-            ASSERT_FLOAT_EQ(pt.getFieldAs<double>(dim),ptB.getFieldAs<double>(dim));
-        }
+            ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
+                ptB.getFieldAs<float>(dim));
     }
 
     for (int i =2; i < 6;i++)
@@ -190,9 +189,8 @@ TEST(E57Reader, testMultipleClouds)
         auto ptA = cloudA->point(i-2);
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
-        {
-            ASSERT_FLOAT_EQ(pt.getFieldAs<double>(dim),ptA.getFieldAs<double>(dim));
-        }
+            ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
+                ptA.getFieldAs<float>(dim));
     }
 }
 
@@ -220,7 +218,8 @@ TEST(E57Reader, testTransformMerge)
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
         {
-            ASSERT_FLOAT_EQ(pt.getFieldAs<double>(dim),ptB.getFieldAs<double>(dim));
+            ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
+                ptB.getFieldAs<float>(dim));
         }
     }
 
@@ -230,7 +229,8 @@ TEST(E57Reader, testTransformMerge)
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
         {
-            ASSERT_FLOAT_EQ(pt.getFieldAs<double>(dim),ptA.getFieldAs<double>(dim));
+            ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
+                ptA.getFieldAs<float>(dim));
         }
     }
 }

@@ -41,7 +41,7 @@
 
 namespace e57
 {
-class Scan
+class PDAL_DLL Scan
 {
 
 public:

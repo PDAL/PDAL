@@ -23,7 +23,7 @@ elseif (NOT (CMAKE_VERSION VERSION_LESS "3.12.0"))
     set(PYTHON_INCLUDE_DIR ${Python3_INCLUDE_DIRS}
         CACHE PATH "Location of Python include files.")
      set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-     find_package(NumPy 1.5 REQUIRED)
+     find_package(NumPy 1.13 REQUIRED)
     set(PDAL_HAVE_PYTHON 1)
 else()
     find_package(PythonInterp 3)

@@ -43,34 +43,37 @@
 
 #include "Scan.hpp"
 
-namespace pdal {
-class E57Reader: public Reader, public Streamable
+namespace pdal
 {
-    class ChunkReader {
+
+class PDAL_DLL E57Reader: public Reader, public Streamable
+{
+    class PDAL_DLL ChunkReader {
     public:
-        ChunkReader(const pdal::point_count_t &pointOffset,
-            const pdal::point_count_t &maxPointRead,
+        ChunkReader(const point_count_t &pointOffset,
+            const point_count_t &maxPointRead,
             const std::shared_ptr<e57::Scan> &scan,
             const std::set<std::string> &e57Dimensions);
 
         ~ChunkReader();
 
-        // returns false if the index falls out of the [pointOffset,pointOffset + m_maxPointRead] interval
-        bool isInScope(pdal::point_count_t index) const;
+        // returns false if the index falls out of the
+        // [pointOffset,pointOffset + m_maxPointRead] interval
+        bool isInScope(point_count_t index) const;
 
-        bool isInChunk(pdal::point_count_t index) const;
+        bool isInChunk(point_count_t index) const;
 
-        void setPoint(pdal::point_count_t pointIndex, pdal::PointRef point,
-                      const std::set<std::string> &e57Dimensions) const;
+        void setPoint(point_count_t pointIndex, PointRef point,
+            const std::set<std::string> &e57Dimensions) const;
 
         // Reads a new chunk of data
-        pdal::point_count_t read(pdal::point_count_t index);
+        point_count_t read(point_count_t index);
 
     private:
-        pdal::point_count_t m_startIndex;
-        pdal::point_count_t m_pointOffset;
-        pdal::point_count_t m_maxPointRead;
-        const pdal::point_count_t m_defaultChunkSize;
+        point_count_t m_startIndex;
+        point_count_t m_pointOffset;
+        point_count_t m_maxPointRead;
+        const point_count_t m_defaultChunkSize;
         std::map<std::string, std::vector<double>> m_doubleBuffers;
         std::vector<e57::SourceDestBuffer> m_e57buffers;
         std::unique_ptr<e57::CompressedVectorReader> m_dataReader;
@@ -92,7 +95,7 @@ public:
     point_count_t getNumberPoints() const;
 
     /// Gets the scan index of a given point index
-    int getScanIndex(pdal::point_count_t) const;
+    int getScanIndex(point_count_t) const;
 
     /// Gets the dimensions present within the set of clouds
     std::set<std::string> getDimensions();
@@ -111,12 +114,12 @@ private:
 
     void openFile(const std::string &filename);
     void closeFile();
-    void setupReader(pdal::point_count_t pointNumber);
+    void setupReader(point_count_t pointNumber);
     point_count_t extractNumberPoints() const;
     void extractScans();
 
     // members
-    std::unique_ptr<e57::ImageFile> m_imf; 
+    std::unique_ptr<e57::ImageFile> m_imf;
     std::vector<std::shared_ptr<e57::Scan>> m_scans;
 
     // Allows construction by filename
@@ -132,4 +135,5 @@ private:
     // Cache the total number of points
     point_count_t m_pointCount;
 };
-}
+
+} // namespace pdal
