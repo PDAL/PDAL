@@ -137,8 +137,10 @@ public:
     double m_resolution = 0;
     std::vector<Polygon> m_polys;
     NL::json m_addons;
-};
 
+    NL::json m_query;
+    NL::json m_headers;
+};
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_currentIndex(0)
 {}
@@ -159,6 +161,38 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->m_polys).setErrorText("Invalid polygon specification. "
             "Must be valid GeoJSON/WKT");
+    args.add("header", "Header fields to forward with HTTP requests",
+        m_args->m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests",
+        m_args->m_query);
+}
+
+
+std::string EptReader::get(const std::string path) const
+{
+    if (m_ep->isLocal())
+        return m_ep->get(path);
+    else
+        return m_ep->get(path, m_headers, m_query);
+}
+
+
+std::vector<char> EptReader::getBinary(const std::string path) const
+{
+    if (m_ep->isLocal())
+        return m_ep->getBinary(path);
+    else
+        return m_ep->getBinary(path, m_headers, m_query);
+}
+
+
+std::unique_ptr<arbiter::LocalHandle> EptReader::getLocalHandle(
+    const std::string path) const
+{
+    if (m_ep->isLocal())
+        return m_ep->getLocalHandle(path);
+    else
+        return m_ep->getLocalHandle(path, m_headers, m_query);
 }
 
 
@@ -167,6 +201,8 @@ void EptReader::initialize()
     m_root = m_filename;
 
     auto& debug(log()->get(LogLevel::Debug));
+
+    initializeHttpForwards();
 
     const std::string prefix("ept://");
     const std::string postfix("ept.json");
@@ -196,7 +232,7 @@ void EptReader::initialize()
     debug << "Endpoint: " << m_ep->prefixedRoot() << std::endl;
     try
     {
-        m_info.reset(new EptInfo(parse(m_ep->get("ept.json"))));
+        m_info.reset(new EptInfo(parse(get("ept.json"))));
     }
     catch (std::exception& e)
     {
@@ -263,6 +299,36 @@ void EptReader::initialize()
 }
 
 
+void EptReader::initializeHttpForwards()
+{
+    const auto remap([&](StringMap& map, NL::json obj, std::string type)
+    {
+        if (obj.is_null())
+            return;
+
+        if (!obj.is_object())
+            throwError("Invalid " + type + " parameters: expected object");
+
+        for (const auto& entry : obj.items())
+        {
+            if (!entry.value().is_string())
+                throwError("Invalid " + type + " parameters: "
+                    "expected string->string mapping");
+            map[entry.key()] = entry.value().get<std::string>();
+        }
+    });
+
+    remap(m_headers, m_args->m_headers, "header");
+    remap(m_query, m_args->m_query, "query");
+
+    auto& debug(log()->get(LogLevel::Debug));
+    if (!m_headers.empty())
+        debug << "Using header parameters" << std::endl;
+    if (!m_query.empty())
+        debug << "Using query parameters" << std::endl;
+}
+
+
 void EptReader::handleOriginQuery()
 {
     const std::string search(m_args->m_origin);
@@ -273,7 +339,7 @@ void EptReader::handleOriginQuery()
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
-    const NL::json sources(parse(m_ep->get("ept-sources/list.json")));
+    const NL::json sources(parse(get("ept-sources/list.json")));
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
     if (!sources.is_array())
@@ -520,7 +586,7 @@ void EptReader::overlaps()
         NL::json j;
         try
         {
-            j = NL::json::parse(ep.get(file));
+            j = NL::json::parse(get(file));
         }
         catch (NL::json::parse_error&)
         {
@@ -652,13 +718,14 @@ PointViewSet EptReader::run(PointViewPtr view)
     return views;
 }
 
+
 PointId EptReader::readLaszip(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
-    auto handle(m_ep->getLocalHandle("ept-data/" + key.toString() + ".laz"));
+    auto handle(getLocalHandle("ept-data/" + key.toString() + ".laz"));
 
     PointTable table;
 
@@ -696,7 +763,7 @@ PointId EptReader::readLaszip(PointView& dst, const Key& key,
 PointId EptReader::readBinary(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
-    auto data(m_ep->getBinary("ept-data/" + key.toString() + ".bin"));
+    auto data(getBinary("ept-data/" + key.toString() + ".bin"));
     ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
     PointRef pr(table);
 
