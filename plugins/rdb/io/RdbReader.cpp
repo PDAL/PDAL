@@ -220,7 +220,7 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
                 for (auto it : node.items())
                     add(object, it.key(), it.value());
             }
-            else if (node.isArray())
+            else if (node.is_array())
             {
                 for (size_t i = 0; i < node.size(); ++i)
                     add(parent, name, node.at(i));
