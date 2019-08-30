@@ -84,6 +84,7 @@ jobs:
         call activate pdal
         pushd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        set PYTHONHOME="%CONDA_PREFIX%
         ctest -VV --output-on-failure
       displayName: 'Test'
 
