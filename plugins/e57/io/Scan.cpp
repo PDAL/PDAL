@@ -102,8 +102,7 @@ pdal::BOX3D Scan::getBoundingBox() const
 
     auto bmin = transformPoint({m_bbox.minx,m_bbox.miny,m_bbox.minz});
     auto bmax = transformPoint({m_bbox.maxx,m_bbox.maxy,m_bbox.maxz});
-    pdal::BOX3D box(bmin[0],bmin[1],bmin[2],bmax[0],bmax[1],bmax[2]);
-    return box;
+    return pdal::BOX3D(bmin[0],bmin[1],bmin[2],bmax[0],bmax[1],bmax[2]);
 }
 
 void Scan::decodeHeader()
@@ -128,6 +127,8 @@ void Scan::decodeHeader()
     for (auto& field: supportedFields)
     {
         auto minmax = pdal::e57plugin::getLimits(*m_rawData,field);
+        //ABELL - This seems weird.  Could you not have one value that's
+        //  NaN and another not NaN?
         if (minmax == minmax) // not nan
             m_valueBounds[pdal::e57plugin::e57ToPdal(field)] = minmax;
     }

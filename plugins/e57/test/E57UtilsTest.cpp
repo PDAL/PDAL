@@ -63,9 +63,10 @@ TEST(E57Utils, pdalToE57Translation)
 
 TEST(E57Utils, rescaleE57ToPdal)
 {
-    ASSERT_FLOAT_EQ(rescaleE57ToPdalValue("fake",10.0,{0,100}),10.0) ;
-    ASSERT_FLOAT_EQ(rescaleE57ToPdalValue("intensity",0.5,{0,1}),std::numeric_limits<uint16_t>::max()/2.0) ;
-    ASSERT_FLOAT_EQ(rescaleE57ToPdalValue("intensity",5,{0,10}),std::numeric_limits<uint16_t>::max()/2.0) ;
+    ASSERT_DOUBLE_EQ(rescaleE57ToPdalValue("fake",10.0,{0,100}),10.0) ;
+    ASSERT_DOUBLE_EQ(rescaleE57ToPdalValue("intensity",0.5,{0,1}),
+        std::numeric_limits<uint16_t>::max()/2.0) ;
+    ASSERT_DOUBLE_EQ(rescaleE57ToPdalValue("intensity",5,{0,10}),std::numeric_limits<uint16_t>::max()/2.0);
 }
 
 

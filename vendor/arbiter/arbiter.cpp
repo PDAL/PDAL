@@ -599,6 +599,9 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 // Beginning of content of file: arbiter/endpoint.cpp
 // //////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+#include <fstream>
+
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/endpoint.hpp>
 
@@ -609,7 +612,6 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 #include <arbiter/util/transforms.hpp>
 #include <arbiter/util/util.hpp>
 #endif
-#include<fstream>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -671,7 +673,9 @@ bool Endpoint::isHttpDerived() const
 }
 
 std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
-        const std::string subpath) const
+        const std::string subpath,
+        http::Headers headers,
+        http::Query query) const
 {
     std::unique_ptr<LocalHandle> handle;
 
@@ -686,27 +690,35 @@ std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
         const std::string local(tmp + basename);
         if (isHttpDerived())
         {
-            const std::size_t fileSize = getSize(subpath);
-            std::ofstream stream(local, streamFlags);
-            if (!stream.good())
+            if (auto fileSize = tryGetSize(subpath))
             {
-                throw ArbiterError("Unable to create local handle");
-            }
-
-            for (std::size_t pos(0); pos < fileSize; pos += chunkSize)
-            {
-                const std::size_t end((std::min)(pos + chunkSize, fileSize));
-                const std::string range("bytes=" +
-                    std::to_string(pos) + "-" +
-                    std::to_string(end - 1));
-                const http::Headers headers { { "Range", range } };
-                const auto data(getBinary(subpath, headers));
-                stream.write(data.data(), data.size());
-
+                std::ofstream stream(local, streamFlags);
                 if (!stream.good())
                 {
-                    throw ArbiterError("Unable to write local handle");
+                    throw ArbiterError("Unable to create local handle");
                 }
+
+                for (std::size_t pos(0); pos < *fileSize; pos += chunkSize)
+                {
+                    const std::size_t end =
+                        (std::min)(pos + chunkSize, *fileSize);
+                    const std::string range("bytes=" +
+                        std::to_string(pos) + "-" +
+                        std::to_string(end - 1));
+                    headers["Range"] = range;
+                    const auto data(getBinary(subpath, headers, query));
+                    stream.write(data.data(), data.size());
+
+                    if (!stream.good())
+                    {
+                        throw ArbiterError("Unable to write local handle");
+                    }
+                }
+            }
+            else
+            {
+                drivers::Fs fs;
+                fs.put(local, getBinary(subpath, headers, query));
             }
         }
         else
@@ -714,6 +726,7 @@ std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
             drivers::Fs fs;
             fs.put(local, getBinary(subpath));
         }
+
         handle.reset(new LocalHandle(local, true));
     }
     else

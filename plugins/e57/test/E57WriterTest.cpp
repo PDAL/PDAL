@@ -40,7 +40,8 @@
 #include "plugins/e57/io/E57Reader.hpp"
 #include "plugins/e57/io/Utils.hpp"
 
-using namespace pdal;
+namespace pdal
+{
 
 TEST(E57Writer, testCtr)
 {
@@ -54,7 +55,7 @@ TEST(E57Writer, testCtr)
     remove(outfile.c_str());
 }
 
-PointViewSet writertest_readE57(std::string filename,PointTableRef table)
+PointViewSet writertest_readE57(std::string filename, PointTableRef table)
 {
   Options ops;
   ops.add("filename",filename);
@@ -65,7 +66,7 @@ PointViewSet writertest_readE57(std::string filename,PointTableRef table)
 }
 
 
-TEST(E57WRiter,testWrite)
+TEST(E57WRiter, testWrite)
 {
     std::string outfile(Support::datapath("e57/test.e57"));
     std::string infile(Support::datapath("e57/A4.e57"));
@@ -99,19 +100,25 @@ TEST(E57WRiter,testWrite)
     auto viewout = writertest_readE57(outfile,tableout);
     auto cloudout = *viewout.begin();
 
-    auto expectedDimensions = {pdal::Dimension::Id::X,pdal::Dimension::Id::Y,pdal::Dimension::Id::Z,
-        pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue,pdal::Dimension::Id::Intensity};
-    for (pdal::point_count_t i =0; i < cloudout->size();i++)
+    auto expectedDimensions =
+    {
+        Dimension::Id::X, Dimension::Id::Y,Dimension::Id::Z,
+        Dimension::Id::Red,Dimension::Id::Green,Dimension::Id::Blue,
+        Dimension::Id::Intensity
+    };
+    for (point_count_t i =0; i < cloudout->size();i++)
     {
         auto ptB = cloudin->point(i);
         auto pt = cloudout->point(i);
         for (auto& dim: expectedDimensions)
         {
             ASSERT_TRUE(pt.hasDim(dim));
-            ASSERT_FLOAT_EQ(pt.getFieldAs<double>(dim),ptB.getFieldAs<double>(dim));
+            ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
+                ptB.getFieldAs<float>(dim));
         }
     }
 
    remove(outfile.c_str());
-
 }
+
+} // namespace pdal
