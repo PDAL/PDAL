@@ -233,7 +233,7 @@ void GDALGrid::addPoint(double x, double y, double z)
 void GDALGrid::updateFirstQuadrant(double x, double y, double z)
 {
     int i, j;
-    int iStart, jStart;
+    int iStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -267,7 +267,7 @@ void GDALGrid::updateFirstQuadrant(double x, double y, double z)
 void GDALGrid::updateSecondQuadrant(double x, double y, double z)
 {
     int i, j;
-    int iStart, jStart;
+    int jStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -301,7 +301,7 @@ void GDALGrid::updateSecondQuadrant(double x, double y, double z)
 void GDALGrid::updateThirdQuadrant(double x, double y, double z)
 {
     int i, j;
-    int iStart, jStart;
+    int iStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -336,7 +336,7 @@ void GDALGrid::updateFourthQuadrant(double x, double y, double z)
 {
 
     int i, j;
-    int iStart, jStart;
+    int jStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 

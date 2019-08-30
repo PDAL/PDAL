@@ -80,6 +80,6 @@ TEST(ReciprocityFilterTest, BasicTest)
 
     Id reciprocity = table.layout()->findDim("Reciprocity");
 
-    ASSERT_FLOAT_EQ(100, outView->getFieldAs<double>(reciprocity, 0));
-    ASSERT_FLOAT_EQ(0, outView->getFieldAs<double>(reciprocity, 1));
+    ASSERT_FLOAT_EQ(100.0f, outView->getFieldAs<float>(reciprocity, 0));
+    ASSERT_FLOAT_EQ(0.0f, outView->getFieldAs<float>(reciprocity, 1));
 }
