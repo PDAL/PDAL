@@ -204,7 +204,7 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
         {
             if (node.is_null())
                 parent.add(name, "");
-            else if (node.is_bool())
+            else if (node.is_boolean())
                 parent.add(name, node.get<bool>());
             else if (node.is_number_unsigned())
                 parent.add(name, node.get<uint64_t>());
@@ -217,7 +217,7 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
             else if (node.is_object())
             {
                 MetadataNode object = parent.add(name);
-                for (auto it : node)
+                for (auto it : node.items())
                     add(object, it.key(), it.value());
             }
             else if (node.isArray())
