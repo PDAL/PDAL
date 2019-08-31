@@ -1,10 +1,8 @@
 set CONDA_ENVIRO=pdal-build
 
-del /s /q  %CONDA_ENVIRO%
-mkdir %CONDA_ENVIRO%
-pushd %CONDA_ENVIRO%
-
 call conda activate %CONDA_ENVIRO%
+
+cd %CONDA_ENVIRO%
 
 echo "conda prefix" %CONDA_PREFIX%
 REM set GENERATOR="Visual Studio 14 2015 Win64"
@@ -41,6 +39,8 @@ cmake -G %GENERATOR% ^
       -DWITH_LZMA=ON ^
       -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
       -DZSTD_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\libzstd.lib ^
+	  -DBUILD_PLUGIN_RDBLIB=ON ^
+	  -DRdb_ROOT=..\..\..\..\rdblib-2.2.1-x86_64-windows\interface\cpp ^
       .. --debug-trycompile
 
 call ninja
