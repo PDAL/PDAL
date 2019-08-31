@@ -34,7 +34,7 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
-today='May 17th, 2018'
+today='August 26th, 2019'
 docstitle='Home'
 
 intersphinx_mapping = {'pdal': ('https://pdal.io/', None)}
@@ -55,8 +55,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Point Cloud Processing and Analysis with PDAL'
-copyright = u'2018, Howard Butler, Pete Gadomski, Dr. Craig Glennie'
-author = u'Howard Butler, Pete Gadomski, Dr. Craig Glennie'
+copyright = u'2019, Howard Butler, Pete Gadomski, Dr. Craig Glennie, Michael Smith, Dr. Adam Steer'
+author = u'Howard Butler, Pete Gadomski, Dr. Craig Glennie, Michael Smith, Dr. Adam Steer'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -246,7 +246,7 @@ latex_elements = {
 
 # Latex figure (float) alignment
 'figure_align': 'htbp',
-'releasename':'05/17/2018',
+'releasename':'08/26/2019',
 # 'tocdepth':3,
 }
 
@@ -255,7 +255,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'PDAL-workshop.tex', u'Point Cloud Processing and Analysis with PDAL',
-     r'Howard Butler\\Pete Gadomski\\Dr. Craig Glennie', 'manual'),
+     r'Howard Butler\\Pete Gadomski\\Dr. Craig Glennie\\Michael Smith\\Dr. Adam Steer', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -315,16 +315,15 @@ texinfo_show_urls = 'footnote'
 #texinfo_no_detailmenu = False
 
 pdf_documents = [
-    ('index', u'PDAL-workshop', u'Point Cloud Processing and Analysis with PDAL', u'Howard Butler\\Pete Gadomski\\Dr. Craig Glennie'),
+    ('index', u'PDAL-workshop', u'Point Cloud Processing and Analysis with PDAL', u'Howard Butler\\Pete Gadomski\\Dr. Craig Glennie\\Michael Smith\\Dr. Adam Steer'),
 ]
 pdf_stylesheets = ['unavco']
-pdf_break_level = 2
-pdf_use_coverpage = True
+pdf_break_level = 1
+pdf_use_coverpage = False
 pdf_breakside = 'any'
-pdf_toc_depth = 4
+pdf_toc_depth = 2
 pdf_default_dpi = 96
 pdf_style_path = ['.' ]
-#pdf_fit_mode="shrink"
+pdf_fit_mode="shrink"
 pdf_use_numbered_links = True
 #pdf_fit_background_mode="scale"
-

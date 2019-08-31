@@ -55,9 +55,11 @@ point cloud:
 Command
 .............
 
-Invoke the following command, substituting accordingly, into your |Terminal|:
+Invoke the following command, substituting accordingly, into your ` Conda Shell`:
 
 .. literalinclude:: georeferencing-command.txt
+
+.. literalinclude:: georeferencing-command-win.txt
 
 .. image:: ../../images/georeferencing-run-command.png
     :target: ../../../_images/georeferencing-run-command.png

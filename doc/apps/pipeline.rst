@@ -4,8 +4,9 @@
 pipeline
 ********************************************************************************
 
-The ``pipeline`` command is used to execute :ref:`pipeline` JSON. The pipeline
-is run in stream mode if possible.  See :ref:`reading` or :ref:`pipeline` for
+The ``pipeline`` command is used to execute :ref:`pipeline` JSON. By default
+the pipeline is run in stream mode if possible, otherwise in standard mode.
+See :ref:`reading` or :ref:`pipeline` for
 more information.
 
 ::
@@ -23,8 +24,8 @@ more information.
       progress file.
   --stdin, -s               Read pipeline from standard input
   --metadata                Metadata filename
-  --nostream                Don't run in stream mode, even if technically
-      possible.
+  --stream                  Run in stream mode.  If not possible, exit.
+  --nostream                Run in standard mode.
 
 Substitutions
 ................................................................................

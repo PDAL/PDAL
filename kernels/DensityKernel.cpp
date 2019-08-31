@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "DensityKernel.hpp"
+
 #include "../filters/HexBinFilter.hpp"
 #include "private/density/OGR.hpp"
 

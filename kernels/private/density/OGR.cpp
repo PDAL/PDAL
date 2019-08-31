@@ -38,11 +38,10 @@
 #include <sstream>
 #include <functional>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <filters/private/hexer/HexGrid.hpp>
-#include <filters/private/hexer/HexIter.hpp>
+#include "../filters/private/hexer/HexGrid.hpp"
+#include "../filters/private/hexer/HexIter.hpp"
 
 using namespace std;
 

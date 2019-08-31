@@ -1,0 +1,1 @@
+find ./exercises/batch_processing/source/*.laz | parallel -I{} pdal pipeline ./exercises/batch_processing/batch_srs_gdal.json --readers.las.filename={} --writers.gdal.filename=./excercises/batch_processing/dtm{/.}.tif --filters.reprojection.out_srs=epsg:xxxx}

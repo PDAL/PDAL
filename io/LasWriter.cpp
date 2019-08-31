@@ -155,7 +155,11 @@ void LasWriter::initialize()
     std::string ext = FileUtils::extension(m_filename);
     ext = Utils::tolower(ext);
     if ((ext == ".laz") && (m_compression == LasCompression::None))
+#if defined(PDAL_HAVE_LASZIP)
         m_compression = LasCompression::LasZip;
+#elif defined(PDAL_HAVE_LAZPERF)
+        m_compression = LasCompression::LazPerf;
+#endif
 
     if (!m_aSrs.empty())
         setSpatialReference(m_aSrs);

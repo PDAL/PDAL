@@ -466,6 +466,7 @@ template<typename Derived> class MatrixBase
 
   protected:
     EIGEN_DEVICE_FUNC MatrixBase() : Base() {}
+    EIGEN_DEVICE_FUNC MatrixBase(const MatrixBase&) = default;
 
   private:
     EIGEN_DEVICE_FUNC explicit MatrixBase(int);

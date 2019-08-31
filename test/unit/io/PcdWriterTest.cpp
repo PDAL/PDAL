@@ -246,7 +246,7 @@ TEST(PcdWriterTest, precision)
     PointViewSet pvs = pr.execute(t);
 
     PointViewPtr v = *pvs.begin();
-    EXPECT_EQ(3, v->size());
+    EXPECT_EQ(3U, v->size());
 
     // Validate some point data.
     EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::X, 0));
@@ -312,21 +312,24 @@ TEST(PcdWriterTest, binaryPdalTypes)
     PointViewSet pvs = pr.execute(t);
 
     PointViewPtr v = *pvs.begin();
-    EXPECT_EQ(3, v->size());
+    EXPECT_EQ(3U, v->size());
 
     // Validate some point data.
     EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::X, 0));
     EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::Y, 0));
     EXPECT_DOUBLE_EQ(1, v->getFieldAs<float>(Dimension::Id::Z, 0));
-    EXPECT_EQ(1, v->getFieldAs<uint32_t>(Dimension::Id::Intensity, 0));
+    EXPECT_EQ(1, v->getFieldAs<int>(Dimension::Id::Intensity, 0));
 
-    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::X, 1), 0.0001);
-    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::Y, 1), 0.0001);
-    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::Z, 1), 0.0001);
-    EXPECT_EQ(2, v->getFieldAs<uint32_t>(Dimension::Id::Intensity, 1));
+    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::X, 1),
+        0.0001);
+    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::Y, 1),
+        0.0001);
+    EXPECT_NEAR(2.2222222222, v->getFieldAs<float>(Dimension::Id::Z, 1),
+        0.0001);
+    EXPECT_EQ(2, v->getFieldAs<int>(Dimension::Id::Intensity, 1));
 
     EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::X, 2), 0.0001);
     EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::Y, 2), 0.0001);
     EXPECT_NEAR(3.33, v->getFieldAs<float>(Dimension::Id::Z, 2), 0.0001);
-    EXPECT_EQ(3, v->getFieldAs<uint32_t>(Dimension::Id::Intensity, 2));
+    EXPECT_EQ(3, v->getFieldAs<int>(Dimension::Id::Intensity, 2));
 }

@@ -1,0 +1,2 @@
+pdal info ./exercises/info/interesting.las --metadata ^
+| jq  ".metadata.compressed, .metadata.system_id"

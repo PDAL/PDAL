@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.las",
+    {
+      "type":"filters.colorinterp",
+      "minimum": 2.2,
+      "maximum": 3.5
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/autzen_inter.las"
+  ]
+}

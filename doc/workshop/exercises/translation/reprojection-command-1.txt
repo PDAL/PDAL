@@ -1,4 +1,3 @@
-pdal translate c:/Users/hobu/PDAL/exercises/analysis/ground/CSite1_orig-utm.laz ^
-    c:/Users/hobu/PDAL/exercises/translation/csite-dd.laz ^
-    reprojection ^
-    --filters.reprojection.out_srs="EPSG:4326"
+pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz \
+  ./exercises/translation/csite-dd.laz reprojection \
+  --filters.reprojection.out_srs="EPSG:4326"

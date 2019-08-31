@@ -17,7 +17,6 @@ Purpose:
     * Learn about point cloud metadata
     * Learn about |ASPRSLAS|
 
-:ref:`Compression Workshop Materials <pdal:compression>`
 
 .. _`LAZ`: http://laszip.org
 

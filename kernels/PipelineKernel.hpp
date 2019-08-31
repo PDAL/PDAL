@@ -64,6 +64,7 @@ private:
     bool m_usestdin;
     bool m_stream;
     bool m_noStream;
+    ExecMode m_mode;
 };
 
 } // pdal

@@ -43,6 +43,8 @@ PDAL_ADD_PLUGIN(writer_libname writer sqlite
 if(BUILD_SQLITE_TESTS)
 	PDAL_ADD_TEST(sqlitetest
         FILES
+            io/SQLiteCommon.cpp
+            test/SQLiteTest.cpp
             test/SQLiteTest.cpp
         LINK_WITH
             ${reader_libname}

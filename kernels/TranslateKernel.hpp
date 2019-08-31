@@ -54,6 +54,7 @@ public:
 
 private:
     virtual void addSwitches(ProgramArgs& args);
+    virtual void validateSwitches(ProgramArgs& args);
     void makeJSONPipeline();
     void makeArgPipeline();
 
@@ -66,6 +67,8 @@ private:
     std::string m_filterJSON;
     std::string m_metadataFile;
     bool m_noStream;
+    bool m_stream;
+    ExecMode m_mode;
 };
 
 } // namespace pdal

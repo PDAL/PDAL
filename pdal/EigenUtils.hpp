@@ -37,7 +37,16 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
 
+#if (__GNUC__ > 9)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <Eigen/Dense>
+
+#if (__GNUC__ > 9)
+#pragma GCC diagnostic pop
+#endif  // GNUC
 
 #include <memory>
 #include <vector>

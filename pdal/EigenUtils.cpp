@@ -40,8 +40,6 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <Eigen/Dense>
-
 #include <cfloat>
 #include <numeric>
 #include <vector>
