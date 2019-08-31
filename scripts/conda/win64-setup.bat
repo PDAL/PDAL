@@ -31,6 +31,7 @@ call conda install 	geotiff ^
 					qhull ^
 					sqlite ^
 					hdf5 ^
+					libxml2 ^
 					tiledb
 
 REM IF ERRORLEVEL 1 GOTO CLEANUP
