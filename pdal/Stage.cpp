@@ -53,6 +53,10 @@ Stage::Stage() : m_progressFd(-1), m_verbose(0), m_pointCount(0),
 {}
 
 
+Stage::~Stage()
+{}
+
+
 void Stage::addConditionalOptions(const Options& opts)
 {
     for (const auto& o : opts.getOptions())
@@ -311,9 +315,9 @@ void Stage::setupLog()
     }
 
     if (!m_logname.empty())
-        m_log.reset(new Log("", m_logname));
+        m_log = Log::makeLog("", m_logname);
     else if (!m_log)
-        m_log.reset(new Log("", "stdlog"));
+        m_log = Log::makeLog("", "stdlog");
     m_log->setLevel(l);
 
     // Add the stage name to the existing leader.

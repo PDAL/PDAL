@@ -46,13 +46,15 @@
 
 namespace pdal
 {
+class Log;
+
+typedef std::shared_ptr<Log> LogPtr;
 
 /// pdal::Log is a logging object that is provided by pdal::Stage to
 /// facilitate logging operations.
 class PDAL_DLL Log
 {
-public:
-
+private:
     /// Constructs a pdal::Log instance.
     /// @param leaderString A string to presage all log entries with
     /// @param outputName A filename or one of 'stdout', 'stdlog', or 'stderr'
@@ -67,6 +69,13 @@ public:
     ///          the instance creating its own)
     /// @param timing Set to true to get timing output with log messages.
     Log(std::string const& leaderString, std::ostream* v, bool timing = false);
+
+public:
+    static LogPtr makeLog(std::string const& leaderString,
+        std::string const& outputName, bool timing = false);
+
+    static LogPtr makeLog(std::string const& leaderString,
+        std::ostream* v, bool timing = false);
 
     /** @name Destructor
     */
@@ -152,8 +161,6 @@ private:
     std::chrono::steady_clock m_clock;
     std::chrono::steady_clock::time_point m_start;
 };
-
-typedef std::shared_ptr<Log> LogPtr;
 
 } // namespace pdal
 

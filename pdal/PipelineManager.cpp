@@ -111,6 +111,11 @@ pdal_error stageError(const std::string& cls, const std::string& type)
 
 }
 
+void PipelineManager::setLog(const LogPtr& log)
+{
+    m_log = log;
+}
+
 
 Stage& PipelineManager::addReader(const std::string& type)
 {

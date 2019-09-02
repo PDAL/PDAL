@@ -215,8 +215,6 @@ std::string lastError()
 }
 
 
-static ErrorHandler* s_gdalErrorHandler= 0;
-
 void registerDrivers()
 {
     static std::once_flag flag;
@@ -239,15 +237,9 @@ void unregisterDrivers()
 
 ErrorHandler& ErrorHandler::getGlobalErrorHandler()
 {
-    static std::once_flag flag;
+    static ErrorHandler s_gdalErrorHandler;
 
-    auto init = []()
-    {
-       s_gdalErrorHandler = new ErrorHandler();
-    };
-
-    std::call_once(flag, init);
-    return *s_gdalErrorHandler;
+    return s_gdalErrorHandler;
 }
 
 ErrorHandler::ErrorHandler() : m_errorNum(0)
@@ -256,11 +248,17 @@ ErrorHandler::ErrorHandler() : m_errorNum(0)
 
     // Will return thread-local setting
     const char* set = CPLGetConfigOption("CPL_DEBUG", "");
-    m_cplSet = (bool)set ;
+    m_cplSet = (bool)set;
     m_debug = m_cplSet;
 
     // Push on a thread-local error handler
     CPLSetErrorHandler(&ErrorHandler::trampoline);
+}
+
+
+ErrorHandler::~ErrorHandler()
+{
+    CPLSetErrorHandler(nullptr);
 }
 
 

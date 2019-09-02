@@ -83,7 +83,7 @@ TEST(MatlabFilterTest, simple_fetch)
         reader.setOptions(reader_opts);
 
         Stage* xfilter(f.createStage("filters.matlab"));
-        LogPtr log = LogPtr(new Log("matlab.log", "stderr"));
+        LogPtr log = Log::makeLog("matlab.log", "stderr");
         log->setLevel(LogLevel::Debug2);
         xfilter->setLog(log);
         xfilter->setOptions(xfilter_opts);
@@ -138,7 +138,7 @@ TEST(MatlabFilterTest, logical)
 
 
         Stage* xfilter(f.createStage("filters.matlab"));
-        LogPtr log = LogPtr(new Log("matlab.log", "stderr"));
+        LogPtr log = Log::makeLog("matlab.log", "stderr");
         log->setLevel(LogLevel::Debug2);
         xfilter->setLog(log);
         xfilter->setOptions(xfilter_opts);
