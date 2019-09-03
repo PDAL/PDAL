@@ -68,7 +68,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     m_radiusArg = &args.add("radius", "Radius from cell center to use to locate"
         " influencing points", m_radius);
     args.add("power", "Power parameter for weighting points when using IDW",
-        m_power, 2.0);
+        m_power, 1.0);
     args.add("gdaldriver", "GDAL writer driver name", m_drivername, "GTiff");
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);

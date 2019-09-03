@@ -369,7 +369,6 @@ TEST(GDALWriterTest, idw)
     wo.add("output_type", "idw");
     wo.add("resolution", 1);
     wo.add("radius", .7071);
-    wo.add("power", 1);
     wo.add("filename", outfile);
 
     const std::string output =
@@ -392,7 +391,6 @@ TEST(GDALWriterTest, idwWindow)
     wo.add("output_type", "idw");
     wo.add("resolution", 1);
     wo.add("radius", .7071);
-    wo.add("power", 1);
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
@@ -742,7 +740,7 @@ TEST(GDALWriterTest, issue_2074)
 
 TEST(GDALWriterTest, issue_2095)
 {
-    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0);
+    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0, 1.0);
 
     EXPECT_EQ(grid.verticalIndex(0), 4);
     EXPECT_EQ(grid.verticalIndex(.5), 4);
@@ -767,7 +765,6 @@ TEST(GDALWriterTest, issue_2545)
     Options wOpts;
     wOpts.add("resolution", 1);
     wOpts.add("radius", 10);
-    wOpts.add("power", 1);
     wOpts.add("output_type", "idw");
     wOpts.add("gdaldriver", "GTiff");
     wOpts.add("origin_x", .5);
