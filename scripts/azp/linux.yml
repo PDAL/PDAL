@@ -7,7 +7,7 @@ jobs:
   container:
       image: pdal/azp-dependencies:latest
       options: --privileged
-  timeoutInMinutes: 360
+  timeoutInMinutes: 60
   steps:
   - script: |
       echo "current directory:" `pwd`
