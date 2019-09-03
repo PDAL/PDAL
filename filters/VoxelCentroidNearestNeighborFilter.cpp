@@ -67,8 +67,9 @@ void VoxelCentroidNearestNeighborFilter::addArgs(ProgramArgs& args)
 
 PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
 {
-    BOX3D bounds;
-    calculateBounds(*view, bounds);
+    double x0 = view->getFieldAs<double>(Dimension::Id::X, 0);
+    double y0 = view->getFieldAs<double>(Dimension::Id::Y, 0);
+    double z0 = view->getFieldAs<double>(Dimension::Id::Z, 0);
 
     // Make an initial pass through the input PointView to index PointIds by
     // row, column, and depth.
@@ -79,9 +80,9 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
         double y = view->getFieldAs<double>(Dimension::Id::Y, id);
         double x = view->getFieldAs<double>(Dimension::Id::X, id);
         double z = view->getFieldAs<double>(Dimension::Id::Z, id);
-        size_t r = static_cast<size_t>((y - bounds.miny) / m_cell);
-        size_t c = static_cast<size_t>((x - bounds.minx) / m_cell);
-        size_t d = static_cast<size_t>((z - bounds.minz) / m_cell);
+        size_t r = static_cast<size_t>((y - y0) / m_cell);
+        size_t c = static_cast<size_t>((x - x0) / m_cell);
+        size_t d = static_cast<size_t>((z - z0) / m_cell);
         populated_voxel_ids[std::make_tuple(r, c, d)].push_back(id);
     }
 
@@ -101,21 +102,21 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
             // centroid, so append the one closest to voxel center.
 
             // Compute voxel center.
-            double y0 = bounds.miny + (std::get<0>(t.first) + 0.5) * m_cell;
-            double x0 = bounds.minx + (std::get<1>(t.first) + 0.5) * m_cell;
-            double z0 = bounds.minz + (std::get<2>(t.first) + 0.5) * m_cell;
+            double y_center = y0 + (std::get<0>(t.first) + 0.5) * m_cell;
+            double x_center = x0 + (std::get<1>(t.first) + 0.5) * m_cell;
+            double z_center = z0 + (std::get<2>(t.first) + 0.5) * m_cell;
 
             // Compute distance from first point to voxel center.
             double x1 = view->getFieldAs<double>(Dimension::Id::X, t.second[0]);
             double y1 = view->getFieldAs<double>(Dimension::Id::Y, t.second[0]);
             double z1 = view->getFieldAs<double>(Dimension::Id::Z, t.second[0]);
-            double d1 = pow(x0 - x1, 2) + pow(y0 - y1, 2) + pow(z0 - z1, 2);
+            double d1 = pow(x_center - x1, 2) + pow(y_center - y1, 2) + pow(z_center - z1, 2);
 
             // Compute distance from second point to voxel center.
             double x2 = view->getFieldAs<double>(Dimension::Id::X, t.second[1]);
             double y2 = view->getFieldAs<double>(Dimension::Id::Y, t.second[1]);
             double z2 = view->getFieldAs<double>(Dimension::Id::Z, t.second[1]);
-            double d2 = pow(x0 - x2, 2) + pow(y0 - y2, 2) + pow(z0 - z2, 2);
+            double d2 = pow(x_center - x2, 2) + pow(y_center - y2, 2) + pow(z_center - z2, 2);
 
             // Append the closer of the two.
             if (d1 < d2)
@@ -132,7 +133,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
             Eigen::Vector3d centroid = computeCentroid(*view, t.second);
 
             // Compute distance from each point in the voxel to the centroid,
-            // retaining only th closest.
+            // retaining only the closest.
             PointId pmin;
             double dmin((std::numeric_limits<double>::max)());
             for (auto const& p : t.second)
