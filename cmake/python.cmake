@@ -42,26 +42,19 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-if(NOT WIN32)
+#if(NOT WIN32)
 # See https://bugs.python.org/msg277944
 # The "command to create shared modules". Used as variable in the "Makefile (and similar) templates to build python modules"
 # for both in-python and third party modules. Initialized to hold the value which works for third party modules to link
 # against the _installed_ python.
 # We strip off the first word though (which will be the compiler name).
-execute_process(
-    COMMAND
-    ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print(sysconfig.get_config_var('LDSHARED').split(' ', 1)[1])"
-    OUTPUT_VARIABLE PYTHON_LDSHARED
-    OUTPUT_STRIP_TRAILING_WHITESPACE
- )
- message("PYTHON Py_ENABLE_SHARED: ${Py_ENABLE_SHARED}")
- message("PYTHON USING LINK LINE: ${PYTHON_LDSHARED}")
-endif()
-
-set(PYTHON_LDSHARED ${PYTHON_LDSHARED}
-    CACHE PATH "Python LDSHARED linking line")
-set(PYTHON_IS_SHARED_ENABLED ${Py_ENABLE_SHARED}
-    CACHE PATH "Was Python dynamically linked?")
+#execute_process(
+#    COMMAND
+#    ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print(sysconfig.get_config_var('LDSHARED').split(' ', 1)[1])"
+#    OUTPUT_VARIABLE PYTHON_LDSHARED
+#    OUTPUT_STRIP_TRAILING_WHITESPACE
+# )
+#endif()
 
 #if (APPLE)
 #    if (NOT Py_ENABLE_SHARED)

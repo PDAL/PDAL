@@ -58,10 +58,6 @@ macro(PDAL_ADD_LIBRARY _name)
     if (NOT ${_library_type} STREQUAL "STATIC")
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
     endif()
-    if (WIN32)
-         set_target_properties(${_name} PROPERTIES LINK_FLAGS "/STACK:10000000")
-    endif()
-
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -135,9 +131,6 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         target_include_directories(${${_name}} SYSTEM PRIVATE
             ${PDAL_ADD_PLUGIN_SYSTEM_INCLUDES})
     endif()
-    if (WIN32)
-         set_target_properties(${${_name}} PROPERTIES LINK_FLAGS "/STACK:10000000")
-    endif()
     target_link_libraries(${${_name}}
         PRIVATE
             ${PDAL_BASE_LIB_NAME}
@@ -201,9 +194,6 @@ macro(PDAL_ADD_TEST _name)
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
-    if (WIN32)
-         set_target_properties(${_name} PROPERTIES LINK_FLAGS "/STACK:10000000")
-    endif()
     add_test(NAME ${_name}
         COMMAND
             "${PROJECT_BINARY_DIR}/bin/${_name}"

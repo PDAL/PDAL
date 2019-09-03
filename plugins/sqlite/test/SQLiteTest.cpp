@@ -265,8 +265,5 @@ TEST(SQLiteTest, testVersionInfo)
     const std::string p = db.getSQLiteVersion();
     EXPECT_EQ(p[0], '3'); // 3.8.9 as of this commit
 
-    const std::string q = db.getSpatialiteVersion();
-//    EXPECT_EQ(q[0], '4'); // Might be '4' or '5'
-
-//    FileUtils::deleteFile(filename);
+    FileUtils::deleteFile(filename);
 }
