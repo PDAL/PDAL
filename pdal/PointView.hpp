@@ -140,9 +140,9 @@ public:
     typename T::value_type getFieldAs(PointId pointIndex) const
     {
         if(T::type() == layout()->dimDetail(T::id())->type())
-            return getFieldInternal<T::value_type>(T::id(), pointIndex);
+            return getFieldInternal<typename T::value_type>(T::id(), pointIndex);
         else
-            return getFieldAs<T::value_type>(T::id(), pointIndex);
+            return getFieldAs<typename T::value_type>(T::id(), pointIndex);
     }
 
     /**

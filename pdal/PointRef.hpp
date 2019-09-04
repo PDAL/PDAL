@@ -193,7 +193,7 @@ public:
             return val;
         }
 
-        return getFieldAs<T::value_type>(T::id());
+        return getFieldAs<typename T::value_type>(T::id());
     }
 
     /**
