@@ -1,9 +1,9 @@
-.. _filters.first-in-voxel:
+.. _filters.firstInVoxel:
 
-filters.first-in-voxel
+filters.firstInVoxel
 ===============================================================================
 
-The **first-in-voxel filter** is a voxel-based sampling filter.
+The **firstInVoxel filter** is a voxel-based sampling filter.
 The input point
 cloud is divided into 3D voxels at the given cell size. For each populated
 voxel, the first point entering in the voxel is accepted and voxel is marked as populated. 
@@ -17,7 +17,7 @@ Example
   [
       "input.las",
       {
-          "type":"filters.first-in-voxel",
+          "type":"filters.firstInVoxel",
           "cell":1.0
       },
       "output.las"

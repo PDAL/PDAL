@@ -38,7 +38,7 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{"filters.first-in-voxel",
+static StaticPluginInfo const s_info{"filters.firstInVoxel",
                                      "First Entry Voxel Filter", ""};
 
 CREATE_STATIC_STAGE(FirstInVoxelFilter, s_info)
@@ -75,15 +75,15 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
      * Calculate the voxel coordinates for the incoming point.
      * gx, gy, gz will be the global coordinates from (0, 0, 0).
      */
-    double gx = point.getFieldAs<double>(Dimension::Id::X) / m_cell;
-    double gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
-    double gz = point.getFieldAs<double>(Dimension::Id::Z) / m_cell;
+    int gx = point.getFieldAs<double>(Dimension::Id::X) / m_cell;
+    int gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
+    int gz = point.getFieldAs<double>(Dimension::Id::Z) / m_cell;
 
     static bool initialized = false;
     if (!initialized)
     {
         /*
-         * Save global coordinates of first incoming point.
+         * Save global coordinates of first incoming point's voxel.
          * This will act as a Pivot for calculation of local coordinates of the
          * voxels.
          */
@@ -95,17 +95,15 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
 
     /*
      * Calculate the local voxel coordinates for incoming point, Using the Pivot
-     * voxel. Generate a combined hash key from local coordinates.
+     * voxel.
      */
-    size_t const hx(std::hash<int>{}(std::floor(gx - m_pivotVoxel[0])));
-    size_t const hy(std::hash<int>{}(std::floor(gy - m_pivotVoxel[1])));
-    size_t const hz(std::hash<int>{}(std::floor(gz - m_pivotVoxel[2])));
-    size_t key = std::hash<size_t>{}(hx ^ (hy << 1) ^ (hz << 1));
+    auto t=std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
+                    gz - m_pivotVoxel[2]);
 
     /*
      * Is hash key already in populates voxels?
      */
-    auto pi = m_populatedVoxels.find(key);
+    auto pi = m_populatedVoxels.find(t);
     if (pi == m_populatedVoxels.end())
     {
         /*
@@ -113,7 +111,7 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
          * Mark the voxel as populated by making entry in m_populatedVoxels.
          * Accept this point.
          */
-        m_populatedVoxels.insert(key);
+        m_populatedVoxels.insert(t);
         return true;
     }
     /*

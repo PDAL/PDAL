@@ -54,9 +54,9 @@ TEST(FirstInVoxelFilterTest, standard)
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage *filter = fac.createStage("filters.first-in-voxel");
+    Stage *filter = fac.createStage("filters.firstInVoxel");
     Options fo;
-    fo.add("cell", 5);
+    fo.add("cell", 10);
     filter->setOptions(fo);
     filter->setInput(*reader);
 
@@ -65,8 +65,7 @@ TEST(FirstInVoxelFilterTest, standard)
     PointViewSet set = filter->execute(t);
     EXPECT_EQ(set.size(), 1U);
     PointViewPtr v = *set.begin();
-    PointRef p=v->point(0);
-    EXPECT_EQ(v->size(), 26351U);
+    EXPECT_EQ(v->size(), 7788U);
 }
 
 TEST(FirstInVoxelFilterTest, stream)
@@ -96,28 +95,13 @@ TEST(FirstInVoxelFilterTest, stream)
             }
             else if (i == 1)
             {
-                point.setField(Id::X, 6);
+                point.setField(Id::X, 8);
                 point.setField(Id::Y, 2);
             }
             else if (i == 2)
             {
-                point.setField(Id::X, 8);
-                point.setField(Id::Y, 2);
-            }
-            else if (i == 3)
-            {
                 point.setField(Id::X, 10);
                 point.setField(Id::Y, 2);
-            }
-            else if (i == 4)
-            {
-                point.setField(Id::X, 12);
-                point.setField(Id::Y, 2);
-            }
-            else if (i == 5)
-            {
-                point.setField(Id::X, 105);
-                point.setField(Id::Y, 105);
             }
             else
                 return false;
@@ -163,13 +147,8 @@ TEST(FirstInVoxelFilterTest, stream)
             }
             if (m_count == 2)
             {
-                EXPECT_EQ(point.getFieldAs<int>(Id::X), 12);
+                EXPECT_EQ(point.getFieldAs<int>(Id::X), 10);
                 EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
-            }
-            if (m_count == 3)
-            {
-                EXPECT_EQ(point.getFieldAs<int>(Id::X), 105);
-                EXPECT_EQ(point.getFieldAs<int>(Id::Y), 105);
             }
             m_count++;
             return true;
@@ -181,7 +160,6 @@ TEST(FirstInVoxelFilterTest, stream)
 
     f.prepare(table);
     f.execute(table);
-    EXPECT_EQ(f.m_count, (point_count_t)4);
 }
 
 } // namespace
