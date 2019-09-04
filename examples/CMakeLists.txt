@@ -12,7 +12,7 @@ set (ROOT_DIR "${PROJECT_SOURCE_DIR}/..")
 include (${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 include (${ROOT_DIR}/cmake/examples.cmake)
 include (${ROOT_DIR}/cmake/dimension.cmake)
-include (${ROOT_DIR}/cmake/json.cmake)
+include (${ROOT_DIR}/cmake/nlohmann.cmake)
 
 add_subdirectory(../dimbuilder ./dimbuilder)
 

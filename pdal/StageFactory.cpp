@@ -83,6 +83,10 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     // Strip off '.' and make lowercase.
     if (ext.length())
         ext = Utils::tolower(ext.substr(1));
+
+    if (ext == "json" && Utils::endsWith(filename, "ept.json"))
+        return "readers.ept";
+
     return PluginManager<Stage>::extensions().defaultReader(ext);
 }
 

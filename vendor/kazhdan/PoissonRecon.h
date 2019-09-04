@@ -191,7 +191,7 @@ public:
     void start()
     {}
     void dumpOutput(const std::string& s)
-        { std::cerr << s << std::endl; }
+        {}
     void dumpOutput2(std::vector<std::string>& comments, const std::string& s)
     {
         comments.push_back(s);

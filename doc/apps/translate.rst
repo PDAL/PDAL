@@ -6,7 +6,9 @@ translate
 
 The ``translate`` command can be used for simple conversion of files based on
 their file extensions. It can also be used for constructing pipelines directly
-from the command-line.  Processing is done with stream mode if possible.
+from the command-line.  By default, processing is done in stream mode
+if possible, standard mode if not.
+
 
 ::
 
@@ -22,7 +24,8 @@ from the command-line.  Processing is done with stream mode if possible.
     --metadata, -m     Dump metadata output to the specified file
     --reader, -r       Reader type
     --writer, -w       Writer type
-    --nostream         Don't run in stream mode, even if technically possible.
+    --stream           Run in stream mode.  If not possible, exit.
+    --nostream         Run in standard mode.
 
 The ``--input`` and ``--output`` file names are required options.
 
@@ -81,15 +84,13 @@ Example 2:
 --------------------------------------------------------------------------------
 
 Given these tools, we can now construct a custom pipeline on-the-fly. The
-example below uses a simple LAS reader and writer, but stages a PCL-based voxel
-grid filter, followed by the PMF filter and a range filter. We can even set
+example below uses a simple LAS reader and writer, but stages a voxel
+grid filter, followed by the SMRF filter and a range filter. We can even set
 stage-specific parameters as shown.
 
 ::
 
-    $ pdal translate input.las output.las pclblock pmf range \
-        --filters.pclblock.methods="[{\"name\":\"VoxelGrid\"}]" \
-        --filters.pmf.approximate=true \
+    $ pdal translate input.las output.las voxelcenternearestneighbor smrf range \
         --filters.range.limits="Classification[2:2]"
 
 Example 3:

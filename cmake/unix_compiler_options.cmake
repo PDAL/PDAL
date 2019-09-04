@@ -41,4 +41,9 @@ function(pdal_target_compile_settings target)
         -Wno-unknown-pragmas
         -Wno-deprecated-declarations
     )
+    if (PDAL_COMPILER_CLANG)
+        target_compile_options(${target} PRIVATE
+            -Wno-unknown-warning-option
+        )
+    endif()
 endfunction()

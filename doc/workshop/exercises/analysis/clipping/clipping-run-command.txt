@@ -1,2 +1,1 @@
-pdal pipeline ^
-    c:/Users/hobu/PDAL/exercises/analysis/clipping/clipping.json
+pdal pipeline ./exercises/analysis/clipping/clipping.json --nostream

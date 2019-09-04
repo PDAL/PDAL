@@ -71,13 +71,13 @@ public:
         {}
     };
 
-    Ilvis2Reader()
-    {}
+    Ilvis2Reader();
+    ~Ilvis2Reader();
 
     std::string getName() const;
 
 private:
-    std::ifstream m_stream;
+    std::unique_ptr<std::ifstream> m_stream;
     IlvisMapping m_mapping;
     StringList m_fields;
     size_t m_lineNum;
@@ -92,6 +92,7 @@ private:
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
 
     virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
 };

@@ -1,8 +1,8 @@
 {
     "pipeline": [
-        "c:/Users/hobu/PDAL/exercises/analysis/ground/denoised-ground-only.laz",
+        "./exercises/analysis/ground/denoised-ground-only.laz",
         {
-            "filename":"c:/Users/hobu/PDAL/exercises/analysis/dtm/dtm.tif",
+            "filename":"./exercises/analysis/dtm/dtm.tif",
             "gdaldriver":"GTiff",
             "output_type":"all",
             "resolution":"2.0",

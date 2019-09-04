@@ -37,6 +37,7 @@
 #include <memory>
 #include <vector>
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
