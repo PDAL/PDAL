@@ -77,7 +77,7 @@ jobs:
         echo %PATH%
         set CC=cl.exe
         set CXX=cl.exe
-        ninja
+        ninja -v
       displayName: 'Build'
     - script: |
         ECHO ON
