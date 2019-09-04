@@ -185,7 +185,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DWITH_ZLIB=ON \
         -DWITH_TESTS=ON \
         -DWITH_PDAL_JNI=OFF \
-        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_BUILD_TYPE=Release \
     ; \
     ninja -j ${PARALLEL}; \
     ninja install; \

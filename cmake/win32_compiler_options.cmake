@@ -33,9 +33,9 @@ function(pdal_target_compile_settings target)
                 # inheritance.
                 /wd4250
                 # some templates don't return
-                /wd4716
+#                /wd4716
                 # unwind semantics
-                /wd4530
+#                /wd4530
                 # Standard C++-type exception handling.
                 /EHsc
                 )
@@ -55,10 +55,6 @@ function(pdal_target_compile_settings target)
             target_compile_options(${target} PRIVATE /MT)
         endif()
 
-        #
-        # Turn on exception handling
-        #
-        target_compile_options(${target} PRIVATE /EHsc)
     endif()
 endfunction()
 
