@@ -371,7 +371,7 @@
     },
     {
     "name": "Omit",
-    "type": "uint8_t",
+    "type": "uint8",
     "description": "Used to shallowly mark a point as being omitted without removing it"
     },
     {

@@ -228,7 +228,8 @@ void DimBuilder::extractDim(NL::json& dim)
             "string.";
         throw dimbuilder_error(oss.str());
     }
-    d.m_type = Dimension::type(dimType.get<std::string>());
+    d.m_typeName = dimType.get<std::string>();
+    d.m_type = Dimension::type(d.m_typeName);
     if (d.m_type == Dimension::Type::None)
     {
         std::ostringstream oss;
@@ -330,6 +331,8 @@ void DimBuilder::writeOutput(std::ostream& out)
     out << "\n";
     writeIds(out);
     out << "\n";
+    writeTraitStructs(out);
+    out << "\n";
     writeDescriptions(out);
     out << "\n";
     writeNameToId(out);
@@ -387,6 +390,29 @@ void DimBuilder::writeIds(std::ostream& out)
     }
     out << "};\n";
     out << "typedef std::vector<Id> IdList;\n";
+    out << "\n";
+}
+
+void DimBuilder::writeTraitStructs(std::ostream& out)
+{
+    out << "namespace Trait {\n";
+
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        DimSpec& d = *di;
+
+        out << "struct " << d.m_name << "\n";
+        out << "{\n";
+        out << "    typedef " << d.m_typeName << "_t value_type;\n";
+        out << "    static constexpr Id id() { return Id::" << d.m_name
+            << "; }\n";
+        out << "    static constexpr Dimension::Type type() { return "
+               "Dimension::Type::"
+            << getTypename(d.m_type) << "; }\n";
+        out << "};\n";
+    }
+
+    out << "}\n";
     out << "\n";
 }
 

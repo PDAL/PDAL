@@ -53,6 +53,7 @@ struct DimSpec
 {
     std::string m_name;
     std::string m_description;
+    std::string m_typeName;
     Dimension::Type m_type;
     std::vector<std::string> m_altNames;
 };
@@ -76,6 +77,7 @@ private:
     void writeHeader(std::ostream& out);
     void writeFooter(std::ostream& out);
     void writeIds(std::ostream& out);
+    void writeTraitStructs(std::ostream& out);
     void writeDescriptions(std::ostream& out);
     void writeNameToId(std::ostream& out);
     void writeIdToName(std::ostream& out);
