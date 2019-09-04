@@ -73,7 +73,12 @@ endmacro(PDAL_ADD_LIBRARY)
 # ARGN The source files for the library.
 #
 macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
-    add_library(${_name} ${_library_type} ${ARGN})
+
+    set(sources ${ARGN})
+    file(GLOB headers *.h *.hpp)
+    list(APPEND sources ${headers})
+
+    add_library(${_name} ${_library_type} ${sources})
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
@@ -118,6 +123,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     if (WIN32)
 	    list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
+
+    file(GLOB headers *.h *.hpp)
+    list(APPEND PDAL_ADD_PLUGIN_FILES ${headers})
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
     pdal_target_compile_settings(${${_name}})

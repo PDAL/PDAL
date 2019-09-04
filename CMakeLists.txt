@@ -190,16 +190,16 @@ if (APPLE)
 endif()
 
 file(GLOB BASE_SRCS
-    ${PDAL_FILTERS_DIR}/*.cpp
+    ${PDAL_FILTERS_DIR}/*.?pp
     ${PDAL_IO_DIR}/*.cpp
-    ${PDAL_KERNELS_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/compression/*.cpp)
+    ${PDAL_KERNELS_DIR}/*.?pp
+    ${PDAL_SRC_DIR}/*.?pp
+    ${PDAL_SRC_DIR}/compression/*.?pp)
 file(GLOB_RECURSE PRIVATE_SRCS
-    ${PDAL_FILTERS_DIR}/private/*.cpp
-    ${PDAL_IO_DIR}/private/*.cpp
-    ${PDAL_KERNELS_DIR}/private/*.cpp
-    ${PDAL_SRC_DIR}/private/*.cpp)
+    ${PDAL_FILTERS_DIR}/private/*.?pp
+    ${PDAL_IO_DIR}/private/*.?pp
+    ${PDAL_KERNELS_DIR}/private/*.?pp
+    ${PDAL_SRC_DIR}/private/*.?pp)
 list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
 
 #
@@ -207,38 +207,38 @@ list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
 #
 if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
-        io/Ilvis2MetadataReader.cpp
-        io/Ilvis2Metadata.cpp
-        io/Ilvis2Reader.cpp
-        ${PDAL_SRC_DIR}/DbWriter.cpp
-        ${PDAL_SRC_DIR}/DbReader.cpp
-        ${PDAL_SRC_DIR}/XMLSchema.cpp)
+        io/Ilvis2MetadataReader.?pp
+        io/Ilvis2Metadata.?pp
+        io/Ilvis2Reader.?pp
+        ${PDAL_SRC_DIR}/DbWriter.?pp
+        ${PDAL_SRC_DIR}/DbReader.?pp
+        ${PDAL_SRC_DIR}/XMLSchema.?pp)
     list(REMOVE_ITEM SRCS ${XML_SRCS})
 endif()
 if (NOT PDAL_HAVE_ZSTD)
     file(GLOB ZSTD_SRCS
-        ${PDAL_SRC_DIR}/compression/ZstdCompression.cpp)
+        ${PDAL_SRC_DIR}/compression/ZstdCompression.?pp)
     list(REMOVE_ITEM SRCS ${ZSTD_SRCS})
 endif()
 if (NOT PDAL_HAVE_ZLIB)
     file(GLOB ZLIB_SRCS
-        ${PDAL_SRC_DIR}/compression/DeflateCompression.cpp)
+        ${PDAL_SRC_DIR}/compression/DeflateCompression.?pp)
     list(REMOVE_ITEM SRCS ${ZLIB_SRCS})
 endif()
 if (NOT PDAL_HAVE_LZMA)
     file(GLOB LZMA_SRCS
-        ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
+        ${PDAL_SRC_DIR}/compression/LzmaCompression.?pp)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
 if (NOT PDAL_HAVE_LAZPERF)
     file(GLOB LAZPERF_SRCS
-        ${PDAL_SRC_DIR}/compression/LazPerfCompression.cpp
-        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
+        ${PDAL_SRC_DIR}/compression/LazPerfCompression.?pp
+        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.?pp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
 if (GDAL_VERSION VERSION_LESS 3.0.0)
     file(GLOB PROJPIPELINE_FILTER_SRCS
-        ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)
+        ${PDAL_FILTERS_DIR}/ProjPipelineFilter.?pp)
     list(REMOVE_ITEM SRCS ${PROJPIPELINE_FILTER_SRCS})
 endif()
 PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
