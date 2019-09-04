@@ -50,7 +50,7 @@ std::string FirstInVoxelFilter::getName() const
 
 void FirstInVoxelFilter::addArgs(ProgramArgs& args)
 {
-    args.add("cell", "Cell size", m_cell).setPositional();
+    args.add("cell", "Cell size", m_cell, 0.001);
 }
 
 PointViewSet FirstInVoxelFilter::run(PointViewPtr view)
