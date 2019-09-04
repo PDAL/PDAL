@@ -128,6 +128,33 @@ public:
     inline void setField(Dimension::Id dim, Dimension::Type type,
         PointId idx, const void *val);
 
+    /**
+      Get the value of a field/dimension, return type is based on
+      Dimension::Trait type (T::value_type).
+
+      \tparam T Dimension::Trait type to get.
+      \param pointIndex Index of point to get Dimension for.
+      \return Value of the dimension as Dimension type (T::value_type).
+     */
+    template <class T>
+    typename T::value_type getFieldAs(PointId pointIndex) const
+    {
+        return getFieldInternal<T::value_type>(T::id(), pointIndex);
+    }
+
+    /**
+      Set the value of a field/dimension for point idx.
+
+      \tparam T   Dimension::Trait type to set.
+      \param pointIndex Index of point to set Dimension for.
+      \param val  Value to set.
+     */
+    template <typename T>
+    void setField(PointId pointIndex, typename T::value_type val)
+    {
+        setFieldInternal(T::id(), pointIndex, &val);
+    }
+
     template <typename T>
     bool compare(Dimension::Id dim, PointId id1, PointId id2)
     {

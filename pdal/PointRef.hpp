@@ -178,6 +178,31 @@ public:
     }
 
     /**
+      Get the value of a field/dimension, return type is based on
+      Dimension::Trait type (T::value_type).
+
+      \tparam T Dimension::Trait type to get.
+      \return  Value of the dimension as Dimension type (T::value_type).
+    */
+    template <typename T> typename T::value_type getFieldAs() const
+    {
+        typename T::value_type val;
+        m_container.getFieldInternal(T::id(), m_idx, &val);
+        return val;
+    }
+
+    /**
+      Set the value of a field/dimension for a point.
+
+      \tparam T   Dimension::Trait type to set.
+      \param val  Value to set.
+    */
+    template <typename T> void setField(typename T::value_type val)
+    {
+        m_container.setFieldInternal(T::id(), m_idx, &val);
+    }
+
+    /**
       Set the ID of a PointRef.
 
       \param idx  point ID
