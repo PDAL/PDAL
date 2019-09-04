@@ -186,9 +186,14 @@ public:
     */
     template <typename T> typename T::value_type getFieldAs() const
     {
-        typename T::value_type val;
-        m_container.getFieldInternal(T::id(), m_idx, &val);
-        return val;
+        if(T::type() == m_layout.dimDetail(T::id())->type())
+        {
+            typename T::value_type val;
+            m_container.getFieldInternal(T::id(), m_idx, &val);
+            return val;
+        }
+
+        return getFieldAs<T::value_type>(T::id());
     }
 
     /**
@@ -199,7 +204,10 @@ public:
     */
     template <typename T> void setField(typename T::value_type val)
     {
-        m_container.setFieldInternal(T::id(), m_idx, &val);
+        if(T::type() == m_layout.dimDetail(T::id())->type())
+            m_container.setFieldInternal(T::id(), m_idx, &val);
+        else
+            setField(T::id(), val);
     }
 
     /**
