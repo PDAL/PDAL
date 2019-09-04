@@ -139,7 +139,7 @@ public:
     template <class T>
     typename T::value_type getFieldAs(PointId pointIndex) const
     {
-        if(T::type() == layout()->dimDetail(T::id())->type())
+        if(layout()->allTypesDefault())
             return getFieldInternal<typename T::value_type>(T::id(), pointIndex);
         else
             return getFieldAs<typename T::value_type>(T::id(), pointIndex);
@@ -155,7 +155,7 @@ public:
     template <typename T>
     void setField(PointId pointIndex, typename T::value_type val)
     {
-        if(T::type() == layout()->dimDetail(T::id())->type())
+        if(layout()->allTypesDefault())
             setFieldInternal(T::id(), pointIndex, &val);
         else
             setField(T::id(), pointIndex, val);

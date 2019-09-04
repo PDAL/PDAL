@@ -186,7 +186,7 @@ public:
     */
     template <typename T> typename T::value_type getFieldAs() const
     {
-        if(T::type() == m_layout.dimDetail(T::id())->type())
+        if(m_layout.allTypesDefault())
         {
             typename T::value_type val;
             m_container.getFieldInternal(T::id(), m_idx, &val);
@@ -204,7 +204,7 @@ public:
     */
     template <typename T> void setField(typename T::value_type val)
     {
-        if(T::type() == m_layout.dimDetail(T::id())->type())
+        if(m_layout.allTypesDefault())
             m_container.setFieldInternal(T::id(), m_idx, &val);
         else
             setField(T::id(), val);

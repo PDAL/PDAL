@@ -236,6 +236,8 @@ public:
     */
     PDAL_DLL MetadataNode toMetadata() const;
 
+    PDAL_DLL bool allTypesDefault() const { return m_allTypesDefault; }
+
 private:
     PDAL_DLL virtual bool update(Dimension::Detail dd, const std::string& name);
 
@@ -249,6 +251,7 @@ protected:
     int m_nextFree;
     std::size_t m_pointSize;
     bool m_finalized;
+    bool m_allTypesDefault = false;
 };
 
 typedef PointLayout* PointLayoutPtr;
