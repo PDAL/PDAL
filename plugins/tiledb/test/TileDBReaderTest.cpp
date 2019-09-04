@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#define NOMINMAX
+
 #include <pdal/Filter.hpp>
 #include <pdal/pdal_test_main.hpp>
 

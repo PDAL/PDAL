@@ -331,6 +331,8 @@ public:
         BOX2D(box), minz(box.minz), maxz(box.maxz)
     {}
 
+    BOX3D& operator=(const BOX3D& box) = default;
+
     explicit BOX3D(const BOX2D& box) :
         BOX2D(box), minz(0), maxz(0)
     {}

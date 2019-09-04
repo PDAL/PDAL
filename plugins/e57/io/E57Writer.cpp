@@ -193,9 +193,9 @@ void E57Writer::done(PointTableRef table)
             std::string name = Dimension::name(id);
             auto minmax = e57plugin::getPdalBounds(id);
             colorbox.set("color" + name + "Minimum",
-                e57::IntegerNode(*m_imageFile,minmax.first));
+                e57::IntegerNode(*m_imageFile, minmax.first));
             colorbox.set("color" + name + "Maximum",
-                e57::IntegerNode(*m_imageFile, minmax.second));
+                e57::IntegerNode(*m_imageFile,  minmax.second));
         }
         m_scanNode->set("colorLimits", colorbox);
     }

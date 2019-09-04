@@ -31,7 +31,7 @@ to define it.
 
     This JSON file is available in your workshop materials in the
     ``./exercises/analysis/colorization/colorize.json`` file. Remember to
-    open this file and replace each occurrence of ``c:/Users/hobu/PDAL/``
+    open this file and replace each occurrence of ``./``
     with the correct path for your machine.
 
 Pipeline breakdown
@@ -45,7 +45,7 @@ point cloud file we're going to read.
 
 ::
 
-    "c:/Users/hobu/PDAL/exercises/analysis/colorization/uncompahgre.laz",
+    "./exercises/analysis/colorization/uncompahgre.laz",
 
 2. :ref:`filters.colorization`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,7 +58,7 @@ filter will create PDAL dimensions ``Red``, ``Green``, and ``Blue``.
 
     {
         "type": "filters.colorization",
-        "raster": "c:/Users/hobu/PDAL/exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
+        "raster": "./exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
     },
 
 
@@ -89,7 +89,7 @@ add a few options to have finer control over what is written. These include:
         "compression": "true",
         "minor_version": "2",
         "dataformat_id": "3",
-        "filename":"c:/Users/hobu/PDAL/exercises/colorization/analysis/uncompahgre-colored.laz"
+        "filename":"./exercises/colorization/analysis/uncompahgre-colored.laz"
     }
 
 1. ``compression``: |LASzip| data is ~6x smaller than ASPRS LAS.

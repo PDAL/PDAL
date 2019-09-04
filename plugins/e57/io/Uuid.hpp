@@ -41,12 +41,11 @@
 #include <random>
 #include <sstream>
 #include <string>
-#include <vector>
+#include <pdal/pdal_export.hpp>
 
-namespace pdal
-{
-namespace uuidGenerator
-{
-std::string generate_uuid();
+namespace pdal {
+    namespace uuidGenerator {
+       PDAL_DLL std::string generate_uuid();
+}
 }
 } // namespace pdal

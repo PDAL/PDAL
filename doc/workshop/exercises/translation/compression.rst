@@ -12,20 +12,24 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
 
 .. _`LASzip`: http://laszip.org
 
-1. Issue the following command in your |Terminal|:
+1. Issue the following command in your `Conda Shell`.
 
 
     .. literalinclude:: ./compression-command.txt
 
+    .. literalinclude:: ./compression-command-win.txt
+
     LAS is a very fluffy binary format. Because of the way the data are stored,
     there is ample redundant information, and |LASzip| is an open source solution
-    for compressing this information
+    for compressing this information. Note that we are actually inflating the data here. 
+    Its laz from the workshop and we are converting it to las.
 
 
-2. Verify that the data are in fact compressed:
+2. Verify that the laz data is compressed over the las:
 
     .. literalinclude:: ./compression-command-verify.txt
 
+    .. literalinclude:: ./compression-command-verify-win.txt
 
     .. image:: ../../images/compression-verify.png
         :target: ../../../_images/compression-verify.png

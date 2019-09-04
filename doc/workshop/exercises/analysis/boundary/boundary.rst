@@ -45,6 +45,9 @@ file.
 .. literalinclude:: ./boundary-command-tindex.txt
     :linenos:
 
+.. literalinclude:: ./boundary-command-tindex-win.txt
+    :linenos:
+
 .. image:: ../../../images/boundary-tindex-run.png
     :target: ../../../../_images/boundary-tindex-run.png
 

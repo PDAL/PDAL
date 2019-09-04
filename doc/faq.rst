@@ -23,7 +23,7 @@ FAQ
   be found by running ``pdal --drivers``
 
   If you've built pdal yourself, make sure you've requested to build the
-  plugin in question (set BUILD_PLUGIN_PCL=ON, for example, in CMakeCache.txt).
+  plugin in question (set BUILD_PLUGIN_TILEDB=ON, for example, in CMakeCache.txt).
 
   If you've successfully built the plugin, a
   shared object called
@@ -40,8 +40,6 @@ FAQ
   You can also override the default search path by setting the environment
   variable ``PDAL_DRIVER_PATH`` to a list of directories that pdal should search
   for plugins.
-
-.. index:: PCL
 
 * Why am I using 100GB of memory when trying to process a 10GB LAZ file?
 
@@ -61,7 +59,6 @@ FAQ
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
   declarative pipeline syntax for orchestrating translation operations.
-  PDAL can also use PCL through the :ref:`filters.pclblock` mechanism.
   PDAL also supports reading and writing PCL PCD files using :ref:`readers.pcd`
   and :ref:`writers.pcd`.
 

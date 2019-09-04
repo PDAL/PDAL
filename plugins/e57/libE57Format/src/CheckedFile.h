@@ -31,10 +31,6 @@
 
 #include "Common.h"
 
-#ifdef _WIN32
-typedef int64_t off_t;
-#endif
-
 namespace e57 {
 
    class CheckedFile
@@ -118,7 +114,7 @@ namespace e57 {
       const off_t page = physicalOffset >> physicalPageSizeLog2;
       const size_t remainder = static_cast<size_t> (physicalOffset & physicalPageSizeMask);
 
-      return page*logicalPageSize + std::min(remainder, logicalPageSize);
+      return page*logicalPageSize + (std::min)(remainder, logicalPageSize);
    }
 
 }

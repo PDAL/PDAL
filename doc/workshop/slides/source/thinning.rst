@@ -8,7 +8,6 @@ Thinning
 Purpose:
     * Reduce collection density
 
-:ref:`Thinning Workshop Materials <pdal:thinning>`
 
 
 PDAL Thinning Techniques

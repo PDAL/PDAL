@@ -260,9 +260,12 @@ void LasReader::ready(PointTableRef table)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
+            delete m_decompressor;
+
             const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
-            delete m_decompressor;
+            if (!vlr)
+                throwError("LAZ file missing required laszip VLR.");
             m_decompressor = new LazPerfVlrDecompressor(*stream,
                 vlr->data(), m_header.pointOffset());
             m_decompressorBuf.resize(m_decompressor->pointSize());
@@ -297,7 +300,7 @@ void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
     }
 
     // If the old value and new values aren't the same, set an invalid flag.
-    MetadataNode temp = f.addOrUpdate("temp", val);
+    MetadataNode temp = f.addOrUpdate("temp", val, description, precision);
     if (f.value<std::string>() != temp.value<std::string>())
         forward.addOrUpdate(name + "INVALID", "");
 }
@@ -372,17 +375,17 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         "The year, expressed as a four digit number, in which the file was "
         "created.");
     addForwardMetadata(forward, m, "scale_x", m_header.scaleX(),
-        "The scale factor for X values.", 20);
+        "The scale factor for X values.", 15);
     addForwardMetadata(forward, m, "scale_y", m_header.scaleY(),
-        "The scale factor for Y values.", 20);
+        "The scale factor for Y values.", 15);
     addForwardMetadata(forward, m, "scale_z", m_header.scaleZ(),
-        "The scale factor for Z values.", 20);
+        "The scale factor for Z values.", 15);
     addForwardMetadata(forward, m, "offset_x", m_header.offsetX(),
-        "The offset for X values.", 20);
+        "The offset for X values.", 15);
     addForwardMetadata(forward, m, "offset_y", m_header.offsetY(),
-        "The offset for Y values.", 20);
+        "The offset for Y values.", 15);
     addForwardMetadata(forward, m, "offset_z", m_header.offsetZ(),
-        "The offset for Z values.", 20);
+        "The offset for Z values.", 15);
 
     m.add("point_length", m_header.pointLen(),
         "The size, in bytes, of each point records.");

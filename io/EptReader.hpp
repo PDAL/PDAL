@@ -38,13 +38,11 @@
 #include <memory>
 #include <mutex>
 
-#include <nlohmann/json.hpp>
-
+#include <pdal/JsonFwd.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/util/Bounds.hpp>
 #include <pdal/Streamable.hpp>
-
-#include <nlohmann/json.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
@@ -53,6 +51,7 @@ namespace arbiter
 {
     class Arbiter;
     class Endpoint;
+    class LocalHandle;
 }
 
 class Addon;
@@ -60,6 +59,7 @@ class EptInfo;
 class FixedPointLayout;
 class Key;
 class Pool;
+class GridPnp;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -79,6 +79,10 @@ private:
     virtual void ready(PointTableRef table) override;
     virtual PointViewSet run(PointViewPtr view) override;
 
+    // Users may supply header and query parameters to be forwarded with remote
+    // requests, deconstruct their JSON into our member maps.
+    void initializeHttpForwards();
+
     // If argument "origin" is specified, this function will clip the query
     // bounds to the bounds of the specified origin and set m_queryOriginId to
     // the selected OriginId value.  If the selected origin is not found, throw.
@@ -91,22 +95,28 @@ private:
     void overlaps(const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
             const NL::json& current, const Key& key);
 
-    uint64_t readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
-    uint64_t readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
-            uint64_t pointId) const;
+        PointId pointId) const;
 
     void readAddon(PointView& dst, const Key& key, const Addon& addon,
-            uint64_t startId) const;
+        PointId startId) const;
 
     // To allow testing of hidden getRemoteType() and getCoercedType().
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
     static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
 
-    //For streamable pipeline.
+    // For streamable pipeline.
     virtual bool processOne(PointRef& point) override;
     void loadNextOverlap();
     void fillPoint(PointRef& point);
+
+    // Data fetching - these forward user-specified query/header params.
+    std::string get(std::string path) const;
+    std::vector<char> getBinary(std::string path) const;
+    std::unique_ptr<arbiter::LocalHandle> getLocalHandle(std::string path)
+        const;
 
     std::string m_root;
 
@@ -122,6 +132,10 @@ private:
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
     std::vector<std::unique_ptr<Addon>> m_addons;
+
+    using StringMap = std::map<std::string, std::string>;
+    StringMap m_headers;
+    StringMap m_query;
 
     mutable std::mutex m_mutex;
 
@@ -143,6 +157,7 @@ private:
     PointLayoutPtr m_bufferLayout;
     point_count_t m_currentIndex = -1;
     std::vector<char> m_temp_buffer;
+    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
 };
 
 } // namespace pdal

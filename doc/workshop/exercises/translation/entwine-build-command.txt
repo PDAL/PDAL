@@ -1,0 +1,1 @@
+entwine build -i ./exercises/translation/just-ground.laz -o ./exercises/translation/dublin-ground-ept

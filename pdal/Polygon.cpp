@@ -32,10 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
-#include "cpl_string.h"
-
-#include <ogr_geometry.h>
 
 namespace pdal
 {
@@ -188,6 +186,31 @@ bool Polygon::contains(const Polygon& p) const
 
     return m_geom->Contains(p.m_geom.get());
 }
+
+bool Polygon::disjoint(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Disjoint(p.m_geom.get());
+}
+
+bool Polygon::intersects(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Intersects(p.m_geom.get());
+}
+
+/// Determine whether this polygon contains a point.
+/// \param x  Point x coordinate.
+/// \param y  Point y coordinate.
+/// \return  Whether the polygon contains the point or not.
+bool Polygon::contains(double x, double y) const
+{
+    OGRPoint p(x, y);
+    return m_geom->Contains(&p);
+}
+
 
 bool Polygon::touches(const Polygon& p) const
 {

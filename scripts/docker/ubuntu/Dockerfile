@@ -12,7 +12,11 @@ ENV CXX g++
 RUN apt-get update -qq; \
     apt-get -qq remove postgis; \
     apt-get install -y --fix-missing --no-install-recommends \
-        software-properties-common
+        software-properties-common \
+        apt-transport-https ca-certificates gnupg software-properties-common wget
+
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
+    && apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 
 RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
         build-essential \
@@ -76,6 +80,8 @@ RUN  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-m
         libgeos-dev \
     libfreexl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
     && cd laszip \
@@ -149,9 +155,6 @@ RUN git clone --depth 1 --branch v0.5.1 https://github.com/gadomski/cpd.git \
     && DESTDIR=/ ninja install  \
     && rm -rf /cpd
 
-RUN \
-    curl -LO https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz && tar zxvf cmake-3.14.5.tar.gz && cd cmake-3.14.5; \
-    ./bootstrap --parallel=${PARALLEL} --prefix=/usr && make -j ${PARALLEL} && make install
 
 
 RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.git pdal-git; \
@@ -170,7 +173,6 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
-        -DBUILD_PLUGIN_PCL=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DPYTHON_EXECUTABLE=/usr/bin/python3 \
         -DBUILD_PLUGIN_SQLITE=ON \

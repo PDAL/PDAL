@@ -40,11 +40,12 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Streamable.hpp>
 
 namespace pdal
 {
+
+namespace gdal { class Raster; }
 
 typedef std::map<std::string, Dimension::Id> DimensionMap;
 
@@ -61,8 +62,7 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t num);
-    virtual void done(PointTableRef table)
-        { m_raster->close(); }
+    virtual void done(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual QuickInfo inspect();
     virtual void addArgs(ProgramArgs& args);

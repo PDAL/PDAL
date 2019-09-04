@@ -34,11 +34,9 @@
 
 #include "ColorizationFilter.hpp"
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
-#include <gdal.h>
-#include <ogr_spatialref.h>
 
 #include <array>
 

@@ -1,0 +1,13 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/autzen_trim.las",
+    {
+        "filename" : "@CMAKE_SOURCE_DIR@/test/temp/out2438_1.las",
+        "type" : "writers.las"
+    },
+    {
+        "filename" : "@CMAKE_SOURCE_DIR@/test/temp/out2438_2.las",
+        "type" : "writers.las"
+    }
+  ]
+}

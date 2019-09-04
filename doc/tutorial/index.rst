@@ -19,8 +19,6 @@ This section provides a collection of tutorials on how to use the PDAL
    reading
    iowa-entwine
    las
-   pcl_block_tutorial
-   pcl_ground/index
    clipping/index
    ground-filters
 

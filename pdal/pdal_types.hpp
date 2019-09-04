@@ -224,5 +224,13 @@ public:
         {}
 };
 
+enum class ExecMode
+{
+    Standard,
+    Stream,
+    PreferStream,
+    None
+};
+
 } // namespace pdal
 

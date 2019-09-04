@@ -17,7 +17,6 @@ $CONDA_EXE install  -y laz-perf \
                 gdal \
                 postgresql \
                 hdf5 \
-                pcl \
                 cmake \
                 compilers \
                 libspatialite \

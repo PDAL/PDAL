@@ -38,11 +38,13 @@ should operate similarly for the :ref:`filters.voxelgrid` approach too.
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your `Docker
-Quickstart Terminal`:
+Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 
 .. literalinclude:: ./thinning-run-dartsample.txt
+    :linenos:
+
+.. literalinclude:: ./thinning-run-dartsample-win.txt
     :linenos:
 
 .. image:: ../../../images/thinning-command-run.png
