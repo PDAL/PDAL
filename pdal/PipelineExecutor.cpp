@@ -108,7 +108,7 @@ int64_t PipelineExecutor::execute()
 void PipelineExecutor::setLogStream(std::ostream& strm)
 {
 
-    LogPtr log = pdal::LogPtr(new pdal::Log("pypipeline", &strm));
+    LogPtr log(Log::makeLog("pypipeline", &strm));
     log->setLevel(m_logLevel);
     m_manager.setLog(log);
 
