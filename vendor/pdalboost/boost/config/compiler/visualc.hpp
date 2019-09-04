@@ -341,8 +341,7 @@
 #  define BOOST_COMPILER "Microsoft Visual C++ version " BOOST_STRINGIZE(BOOST_COMPILER_VERSION)
 #endif
 
-#include <boost/config/pragma_message.hpp>
-
+//#include <boost/config/pragma_message.hpp>
 //
 // last known and checked version is 19.12.25830.2 (VC++ 2017.3):
 #if (_MSC_VER > 1912)
