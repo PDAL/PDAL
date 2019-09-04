@@ -101,13 +101,13 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
                     gz - m_pivotVoxel[2]);
 
     /*
-     * Is hash key already in populates voxels?
+     * Is already in populates voxels?
      */
     auto pi = m_populatedVoxels.find(t);
     if (pi == m_populatedVoxels.end())
     {
         /*
-         * No, Key is not there in populated voxels.
+         * No, Voxel is not there in populated voxels.
          * Mark the voxel as populated by making entry in m_populatedVoxels.
          * Accept this point.
          */
@@ -115,7 +115,7 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
         return true;
     }
     /*
-     * Yes, Key is already in populated voxel keys.
+     * Yes, Voxel is already in populated voxels.
      * That means the voxel is already contains a point.
      * Ignore this point.
      */
