@@ -728,29 +728,29 @@ void LasReader::loadPointV10(PointRef& point, laszip_point& p)
     double y = p.Y * h.scaleY() + h.offsetY();
     double z = p.Z * h.scaleZ() + h.offsetZ();
 
-    point.setField(Dimension::Id::X, x);
-    point.setField(Dimension::Id::Y, y);
-    point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::Intensity, p.intensity);
-    point.setField(Dimension::Id::ReturnNumber, p.return_number);
-    point.setField(Dimension::Id::NumberOfReturns, p.number_of_returns);
-    point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
-    point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
+    point.setField<Dimension::Trait::X>(x);
+    point.setField<Dimension::Trait::Y>(y);
+    point.setField<Dimension::Trait::Z>(z);
+    point.setField<Dimension::Trait::Intensity>(p.intensity);
+    point.setField<Dimension::Trait::ReturnNumber>(p.return_number);
+    point.setField<Dimension::Trait::NumberOfReturns>(p.number_of_returns);
+    point.setField<Dimension::Trait::ScanDirectionFlag>(p.scan_direction_flag);
+    point.setField<Dimension::Trait::EdgeOfFlightLine>(p.edge_of_flight_line);
     uint8_t classification = p.classification | (p.synthetic_flag << 5) |
         (p.keypoint_flag << 6) | (p.withheld_flag << 7);
-    point.setField(Dimension::Id::Classification, classification);
-    point.setField(Dimension::Id::ScanAngleRank, p.scan_angle_rank);
-    point.setField(Dimension::Id::UserData, p.user_data);
-    point.setField(Dimension::Id::PointSourceId, p.point_source_ID);
+    point.setField<Dimension::Trait::Classification>(classification);
+    point.setField<Dimension::Trait::ScanAngleRank>(p.scan_angle_rank);
+    point.setField<Dimension::Trait::UserData>(p.user_data);
+    point.setField<Dimension::Trait::PointSourceId>(p.point_source_ID);
 
     if (h.hasTime())
-        point.setField(Dimension::Id::GpsTime, p.gps_time);
+        point.setField<Dimension::Trait::GpsTime>(p.gps_time);
 
     if (h.hasColor())
     {
-        point.setField(Dimension::Id::Red, p.rgb[0]);
-        point.setField(Dimension::Id::Green, p.rgb[1]);
-        point.setField(Dimension::Id::Blue, p.rgb[2]);
+        point.setField<Dimension::Trait::Red>(p.rgb[0]);
+        point.setField<Dimension::Trait::Green>(p.rgb[1]);
+        point.setField<Dimension::Trait::Blue>(p.rgb[2]);
     }
 
     if (m_extraDims.size())
@@ -789,33 +789,33 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
 
-    point.setField(Dimension::Id::X, x);
-    point.setField(Dimension::Id::Y, y);
-    point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::Intensity, intensity);
-    point.setField(Dimension::Id::ReturnNumber, returnNum);
-    point.setField(Dimension::Id::NumberOfReturns, numReturns);
-    point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
-    point.setField(Dimension::Id::EdgeOfFlightLine, flight);
-    point.setField(Dimension::Id::Classification, classification);
-    point.setField(Dimension::Id::ScanAngleRank, scanAngleRank);
-    point.setField(Dimension::Id::UserData, user);
-    point.setField(Dimension::Id::PointSourceId, pointSourceId);
+    point.setField<Dimension::Trait::X>(x);
+    point.setField<Dimension::Trait::Y>(y);
+    point.setField<Dimension::Trait::Z>(z);
+    point.setField<Dimension::Trait::Intensity>(intensity);
+    point.setField<Dimension::Trait::ReturnNumber>(returnNum);
+    point.setField<Dimension::Trait::NumberOfReturns>(numReturns);
+    point.setField<Dimension::Trait::ScanDirectionFlag>(scanDirFlag);
+    point.setField<Dimension::Trait::EdgeOfFlightLine>(flight);
+    point.setField<Dimension::Trait::Classification>(classification);
+    point.setField<Dimension::Trait::ScanAngleRank>(scanAngleRank);
+    point.setField<Dimension::Trait::UserData>(user);
+    point.setField<Dimension::Trait::PointSourceId>(pointSourceId);
 
     if (h.hasTime())
     {
         double time;
         istream >> time;
-        point.setField(Dimension::Id::GpsTime, time);
+        point.setField<Dimension::Trait::GpsTime>(time);
     }
 
     if (h.hasColor())
     {
         uint16_t red, green, blue;
         istream >> red >> green >> blue;
-        point.setField(Dimension::Id::Red, red);
-        point.setField(Dimension::Id::Green, green);
-        point.setField(Dimension::Id::Blue, blue);
+        point.setField<Dimension::Trait::Red>(red);
+        point.setField<Dimension::Trait::Green>(green);
+        point.setField<Dimension::Trait::Blue>(blue);
     }
 
     if (m_extraDims.size())
@@ -832,33 +832,32 @@ void LasReader::loadPointV14(PointRef& point, laszip_point& p)
     double y = p.Y * h.scaleY() + h.offsetY();
     double z = p.Z * h.scaleZ() + h.offsetZ();
 
-    point.setField(Dimension::Id::X, x);
-    point.setField(Dimension::Id::Y, y);
-    point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::Intensity, p.intensity);
-    point.setField(Dimension::Id::ReturnNumber, p.extended_return_number);
-    point.setField(Dimension::Id::NumberOfReturns,
-        p.extended_number_of_returns);
-    point.setField(Dimension::Id::ClassFlags, p.extended_classification_flags);
-    point.setField(Dimension::Id::ScanChannel, p.extended_scanner_channel);
-    point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
-    point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
-    point.setField(Dimension::Id::Classification, p.extended_classification);
-    point.setField(Dimension::Id::ScanAngleRank, p.extended_scan_angle * .006);
-    point.setField(Dimension::Id::UserData, p.user_data);
-    point.setField(Dimension::Id::PointSourceId, p.point_source_ID);
-    point.setField(Dimension::Id::GpsTime, p.gps_time);
+    point.setField<Dimension::Trait::X>(x);
+    point.setField<Dimension::Trait::Y>(y);
+    point.setField<Dimension::Trait::Z>(z);
+    point.setField<Dimension::Trait::Intensity>(p.intensity);
+    point.setField<Dimension::Trait::ReturnNumber>(p.extended_return_number);
+    point.setField<Dimension::Trait::NumberOfReturns>(        p.extended_number_of_returns);
+    point.setField<Dimension::Trait::ClassFlags>(p.extended_classification_flags);
+    point.setField<Dimension::Trait::ScanChannel>(p.extended_scanner_channel);
+    point.setField<Dimension::Trait::ScanDirectionFlag>(p.scan_direction_flag);
+    point.setField<Dimension::Trait::EdgeOfFlightLine>(p.edge_of_flight_line);
+    point.setField<Dimension::Trait::Classification>(p.extended_classification);
+    point.setField<Dimension::Trait::ScanAngleRank>(p.extended_scan_angle * .006f);
+    point.setField<Dimension::Trait::UserData>(p.user_data);
+    point.setField<Dimension::Trait::PointSourceId>(p.point_source_ID);
+    point.setField<Dimension::Trait::GpsTime>(p.gps_time);
 
     if (h.hasColor())
     {
-        point.setField(Dimension::Id::Red, p.rgb[0]);
-        point.setField(Dimension::Id::Green, p.rgb[1]);
-        point.setField(Dimension::Id::Blue, p.rgb[2]);
+        point.setField<Dimension::Trait::Red>(p.rgb[0]);
+        point.setField<Dimension::Trait::Green>(p.rgb[1]);
+        point.setField<Dimension::Trait::Blue>(p.rgb[2]);
     }
 
     if (h.hasInfrared())
     {
-        point.setField(Dimension::Id::Infrared, p.rgb[3]);
+        point.setField<Dimension::Trait::Infrared>(p.rgb[3]);
     }
 
     if (m_extraDims.size())
@@ -902,29 +901,29 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
 
-    point.setField(Dimension::Id::X, x);
-    point.setField(Dimension::Id::Y, y);
-    point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::Intensity, intensity);
-    point.setField(Dimension::Id::ReturnNumber, returnNum);
-    point.setField(Dimension::Id::NumberOfReturns, numReturns);
-    point.setField(Dimension::Id::ClassFlags, classFlags);
-    point.setField(Dimension::Id::ScanChannel, scanChannel);
-    point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
-    point.setField(Dimension::Id::EdgeOfFlightLine, flight);
-    point.setField(Dimension::Id::Classification, classification);
-    point.setField(Dimension::Id::ScanAngleRank, scanAngle * .006);
-    point.setField(Dimension::Id::UserData, user);
-    point.setField(Dimension::Id::PointSourceId, pointSourceId);
-    point.setField(Dimension::Id::GpsTime, gpsTime);
+    point.setField<Dimension::Trait::X>(x);
+    point.setField<Dimension::Trait::Y>(y);
+    point.setField<Dimension::Trait::Z>(z);
+    point.setField<Dimension::Trait::Intensity>(intensity);
+    point.setField<Dimension::Trait::ReturnNumber>(returnNum);
+    point.setField<Dimension::Trait::NumberOfReturns>(numReturns);
+    point.setField<Dimension::Trait::ClassFlags>(classFlags);
+    point.setField<Dimension::Trait::ScanChannel>(scanChannel);
+    point.setField<Dimension::Trait::ScanDirectionFlag>(scanDirFlag);
+    point.setField<Dimension::Trait::EdgeOfFlightLine>(flight);
+    point.setField<Dimension::Trait::Classification>(classification);
+    point.setField<Dimension::Trait::ScanAngleRank>(scanAngle * .006f);
+    point.setField<Dimension::Trait::UserData>(user);
+    point.setField<Dimension::Trait::PointSourceId>(pointSourceId);
+    point.setField<Dimension::Trait::GpsTime>(gpsTime);
 
     if (h.hasColor())
     {
         uint16_t red, green, blue;
         istream >> red >> green >> blue;
-        point.setField(Dimension::Id::Red, red);
-        point.setField(Dimension::Id::Green, green);
-        point.setField(Dimension::Id::Blue, blue);
+        point.setField<Dimension::Trait::Red>(red);
+        point.setField<Dimension::Trait::Green>(green);
+        point.setField<Dimension::Trait::Blue>(blue);
     }
 
     if (h.hasInfrared())
@@ -932,7 +931,7 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
         uint16_t nearInfraRed;
 
         istream >> nearInfraRed;
-        point.setField(Dimension::Id::Infrared, nearInfraRed);
+        point.setField<Dimension::Trait::Infrared>(nearInfraRed);
     }
 
     if (m_extraDims.size())

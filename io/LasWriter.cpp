@@ -895,9 +895,9 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     uint8_t numberOfReturns(1);
 
     if (point.hasDim(Id::ReturnNumber))
-        returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
+        returnNumber = point.getFieldAs<Trait::ReturnNumber>();
     if (point.hasDim(Id::NumberOfReturns))
-        numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
+        numberOfReturns = point.getFieldAs<Trait::NumberOfReturns>();
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -921,22 +921,22 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
         return i;
     };
 
-    double xOrig = point.getFieldAs<double>(Id::X);
-    double yOrig = point.getFieldAs<double>(Id::Y);
-    double zOrig = point.getFieldAs<double>(Id::Z);
+    double xOrig = point.getFieldAs<Trait::X>();
+    double yOrig = point.getFieldAs<Trait::Y>();
+    double zOrig = point.getFieldAs<Trait::Z>();
     double x = m_scaling.m_xXform.toScaled(xOrig);
     double y = m_scaling.m_yXform.toScaled(yOrig);
     double z = m_scaling.m_zXform.toScaled(zOrig);
 
-    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+    uint8_t scanChannel = point.getFieldAs<Trait::ScanChannel>();
     uint8_t scanDirectionFlag =
-        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+        point.getFieldAs<Trait::ScanDirectionFlag>();
     uint8_t edgeOfFlightLine =
-        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
-    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
+        point.getFieldAs<Trait::EdgeOfFlightLine>();
+    uint8_t classification = point.getFieldAs<Trait::Classification>();
     uint8_t classFlags = 0;
     if (point.hasDim(Id::ClassFlags))
-        classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        classFlags = point.getFieldAs<Trait::ClassFlags>();
     else
         classFlags = classification >> 5;
 
@@ -944,25 +944,25 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     p.X = converter(x, Id::X);
     p.Y = converter(y, Id::Y);
     p.Z = converter(z, Id::Z);
-    p.intensity = point.getFieldAs<uint16_t>(Id::Intensity);
+    p.intensity = point.getFieldAs<Trait::Intensity>();
     p.scan_direction_flag = scanDirectionFlag;
     p.edge_of_flight_line = edgeOfFlightLine;
     p.synthetic_flag = classFlags & 0x1;
     p.keypoint_flag = (classFlags >> 1) & 0x1;
     p.withheld_flag = (classFlags >> 2) & 0x1;
-    p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
-    p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
+    p.user_data = point.getFieldAs<Trait::UserData>();
+    p.point_source_ID = point.getFieldAs<Trait::PointSourceId>();
 
     if (has14Format)
     {
         p.classification = (classification & 0x1F) | (classFlags << 5);
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.scan_angle_rank = static_cast<laszip_I8>(point.getFieldAs<Trait::ScanAngleRank>());
         p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
         p.return_number = (std::min)((uint8_t)7, returnNumber);
 
         // This should always work if ScanAngleRank isn't wonky.
         p.extended_scan_angle = static_cast<laszip_I16>(
-            std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+            std::round(point.getFieldAs<Trait::ScanAngleRank>() / .006f));
         p.extended_point_type = 1;
         p.extended_scanner_channel = scanChannel;
         p.extended_classification_flags = classFlags;
@@ -974,23 +974,23 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     {
         p.return_number = returnNumber;
         p.number_of_returns = numberOfReturns;
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        p.scan_angle_rank = static_cast<laszip_I8>(point.getFieldAs<Trait::ScanAngleRank>());
         p.classification = classification;
         p.extended_point_type = 0;
     }
 
     if (m_lasHeader.hasTime())
-        p.gps_time = point.getFieldAs<double>(Id::GpsTime);
+        p.gps_time = point.getFieldAs<Trait::GpsTime>();
 
     if (m_lasHeader.hasColor())
     {
-        p.rgb[0] = point.getFieldAs<uint16_t>(Id::Red);
-        p.rgb[1] = point.getFieldAs<uint16_t>(Id::Green);
-        p.rgb[2] = point.getFieldAs<uint16_t>(Id::Blue);
+        p.rgb[0] = point.getFieldAs<Trait::Red>();
+        p.rgb[1] = point.getFieldAs<Trait::Green>();
+        p.rgb[2] = point.getFieldAs<Trait::Blue>();
     }
 
     if (m_lasHeader.hasInfrared())
-        p.rgb[3] = point.getFieldAs<uint16_t>(Id::Infrared);
+        p.rgb[3] = point.getFieldAs<Trait::Infrared>();
 
     if (m_extraDims.size())
     {
@@ -1040,9 +1040,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t returnNumber(1);
     uint8_t numberOfReturns(1);
     if (point.hasDim(Id::ReturnNumber))
-        returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
+        returnNumber = point.getFieldAs<Trait::ReturnNumber>();
     if (point.hasDim(Id::NumberOfReturns))
-        numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
+        numberOfReturns = point.getFieldAs<Trait::NumberOfReturns>();
     if (numberOfReturns > maxReturnCount)
     {
         if (m_discardHighReturnNumbers)
@@ -1066,9 +1066,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         return i;
     };
 
-    double xOrig = point.getFieldAs<double>(Id::X);
-    double yOrig = point.getFieldAs<double>(Id::Y);
-    double zOrig = point.getFieldAs<double>(Id::Z);
+    double xOrig = point.getFieldAs<Trait::X>();
+    double yOrig = point.getFieldAs<Trait::Y>();
+    double zOrig = point.getFieldAs<Trait::Z>();
     double x = m_scaling.m_xXform.toScaled(xOrig);
     double y = m_scaling.m_yXform.toScaled(yOrig);
     double z = m_scaling.m_zXform.toScaled(zOrig);
@@ -1077,20 +1077,20 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     ostream << converter(y, Id::Y);
     ostream << converter(z, Id::Z);
 
-    ostream << point.getFieldAs<uint16_t>(Id::Intensity);
+    ostream << point.getFieldAs<Trait::Intensity>();
 
-    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+    uint8_t scanChannel = point.getFieldAs<Trait::ScanChannel>();
     uint8_t scanDirectionFlag =
-        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+        point.getFieldAs<Trait::ScanDirectionFlag>();
     uint8_t edgeOfFlightLine =
-        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+        point.getFieldAs<Trait::EdgeOfFlightLine>();
 
     if (has14Format)
     {
         uint8_t bits = returnNumber | (numberOfReturns << 4);
         ostream << bits;
 
-        uint8_t classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        uint8_t classFlags = point.getFieldAs<Trait::ClassFlags>();
         bits = (classFlags & 0x0F) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirectionFlag & 0x01) << 6) |
@@ -1104,37 +1104,37 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         ostream << bits;
     }
 
-    ostream << point.getFieldAs<uint8_t>(Id::Classification);
+    ostream << point.getFieldAs<Trait::Classification>();
 
-    uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
+    uint8_t userData = point.getFieldAs<Trait::UserData>();
     if (has14Format)
     {
          // Guaranteed to fit if scan angle rank isn't wonky.
         int16_t scanAngleRank =
             static_cast<int16_t>(std::round(
-                point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+                point.getFieldAs<Trait::ScanAngleRank>() / .006f));
         ostream << userData << scanAngleRank;
     }
     else
     {
-        int8_t scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        auto scanAngleRank = static_cast<int8_t>(point.getFieldAs<Trait::ScanAngleRank>());
         ostream << scanAngleRank << userData;
     }
 
-    ostream << point.getFieldAs<uint16_t>(Id::PointSourceId);
+    ostream << point.getFieldAs<Trait::PointSourceId>();
 
     if (m_lasHeader.hasTime())
-        ostream << point.getFieldAs<double>(Id::GpsTime);
+        ostream << point.getFieldAs<Trait::GpsTime>();
 
     if (m_lasHeader.hasColor())
     {
-        ostream << point.getFieldAs<uint16_t>(Id::Red);
-        ostream << point.getFieldAs<uint16_t>(Id::Green);
-        ostream << point.getFieldAs<uint16_t>(Id::Blue);
+        ostream << point.getFieldAs<Trait::Red>();
+        ostream << point.getFieldAs<Trait::Green>();
+        ostream << point.getFieldAs<Trait::Blue>();
     }
 
     if (m_lasHeader.hasInfrared())
-        ostream << point.getFieldAs<uint16_t>(Id::Infrared);
+        ostream << point.getFieldAs<Trait::Infrared>();
 
     Everything e;
     for (auto& dim : m_extraDims)
