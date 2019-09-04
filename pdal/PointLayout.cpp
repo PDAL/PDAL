@@ -60,9 +60,10 @@ void PointLayout::finalize()
     m_finalized = true;
 
     m_allTypesDefault = true;
-    for(auto id : m_used)
+    for (auto id : m_used)
     {
-        m_allTypesDefault &= dimDetail(id)->type() == defaultType(id);
+        m_allTypesDefault &= Utils::toNative(id) >= Dimension::PROPRIETARY ||
+                             dimDetail(id)->type() == defaultType(id);
     }
 }
 
