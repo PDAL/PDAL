@@ -360,7 +360,7 @@ bool SQLite::loadSpatialite(const std::string& module_name)
     std::string so_extension;
     std::string lib_extension;
 #if defined(__APPLE__)
-    so_extension = ".dylib";
+    so_extension = "";
     lib_extension = "mod_";
 #elif defined (_WIN32)
     so_extension = ".dll";

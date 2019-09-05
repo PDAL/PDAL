@@ -35,8 +35,6 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 
-#include <boost/algorithm/string/classification.hpp>
-
 #include "PcdHeader.hpp"
 #include "PcdReader.hpp"
 
