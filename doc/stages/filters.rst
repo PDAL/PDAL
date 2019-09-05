@@ -229,7 +229,7 @@ the input. These filters will invalidate an existing KD-tree.
     value of the raster.
 
 :ref:`filters.firstinvoxel`
-    Filter out points that aren't the first encountered that lie in a voxel.
+    Retain the first point detected in each voxel.
 
 :ref:`filters.head`
     Return N points from beginning of the point cloud.
