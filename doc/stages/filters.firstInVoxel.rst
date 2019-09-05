@@ -34,4 +34,4 @@ Options
 -------------------------------------------------------------------------------
 
 cell
-  Cell size in the ``X``, ``Y``, and ``Z`` dimension.
+  Cell size in the ``X``, ``Y``, and ``Z`` dimension. [Default: 0.001]

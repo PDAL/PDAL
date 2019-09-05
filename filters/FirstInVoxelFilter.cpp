@@ -39,7 +39,8 @@ namespace pdal
 {
 
 static StaticPluginInfo const s_info{"filters.firstInVoxel",
-                                     "First Entry Voxel Filter", ""};
+                                     "First Entry Voxel Filter", 
+                                     "http://pdal.io/stages/filters.firstInVoxel.html"};
 
 CREATE_STATIC_STAGE(FirstInVoxelFilter, s_info)
 

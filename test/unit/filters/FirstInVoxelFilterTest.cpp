@@ -36,9 +36,9 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
-#include<pdal/Reader.hpp>
-#include<pdal/Streamable.hpp>
-#include"filters/FirstInVoxelFilter.hpp"
+#include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+#include "filters/FirstInVoxelFilter.hpp"
 
 #include "Support.hpp"
 
