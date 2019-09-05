@@ -100,30 +100,15 @@ endif()
 
 include(${PDAL_CMAKE_DIR}/options.cmake)
 
+# Extra configuration for Visual Studio Generator
+
+include(${PDAL_CMAKE_DIR}/vsconfig.cmake)
+
 #------------------------------------------------------------------------------
 # General build settings
 #------------------------------------------------------------------------------
 
 set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-
-# detect if we're setting up a visual studio solution
-if(CMAKE_GENERATOR MATCHES "^Visual Studio.*$")
-    set(VCPROJ ON)
-endif()
-
-# add user props to build directory to add to project settings
-if(VCPROJ)
-    file(GENERATE
-        OUTPUT "${CMAKE_BINARY_DIR}/user.props"
-        CONTENT "<?xml version='1.0' encoding='utf-8'?>
-<Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-  <PropertyGroup>
-    <LocalDebuggerEnvironment>PATH=${PDAL_PLUGIN_INSTALL_PATH};%PATH%</LocalDebuggerEnvironment>
-  </PropertyGroup>
-</Project>
-"
-    )
-endif()
 
 #------------------------------------------------------------------------------
 #  Dependencies.
