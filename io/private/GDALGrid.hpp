@@ -62,7 +62,7 @@ public:
 
     // Exported for testing.
     PDAL_DLL GDALGrid(size_t width, size_t height,
-        double edgeLength, double radius, int outputTypes, size_t windowSize);
+        double edgeLength, double radius, int outputTypes, size_t windowSize, double power);
 
     void expand(size_t width, size_t height, size_t xshift, size_t yshift);
 
@@ -90,6 +90,7 @@ private:
     size_t m_windowSize;
     double m_edgeLength;
     double m_radius;
+    double m_power;
 
     typedef std::vector<double> DataVec;
     typedef std::unique_ptr<DataVec> DataPtr;

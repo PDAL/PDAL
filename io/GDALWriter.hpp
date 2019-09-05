@@ -95,6 +95,7 @@ private:
     Arg *m_heightArg;
     Arg *m_widthArg;
     double m_radius;
+    double m_power;
     StringList m_options;
     StringList m_outputTypeString;
     size_t m_windowSize;
