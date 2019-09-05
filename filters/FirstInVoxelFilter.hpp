@@ -44,26 +44,28 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL FirstInVoxelFilter : public Filter, Streamable
+class PDAL_DLL FirstInVoxelFilter : public Filter, public Streamable
 {
 public:
-    FirstInVoxelFilter() : Filter(), Streamable(), m_pivotVoxelInitialized(false) {}
-    std::string getName() const;
+    FirstInVoxelFilter();
+    FirstInVoxelFilter& operator=(const FirstInVoxelFilter&) = delete;
+    FirstInVoxelFilter(const FirstInVoxelFilter&) = delete;
+
+    std::string getName() const override;
 
 private:
-    double m_cell;
-
     virtual void addArgs(ProgramArgs& args) override;
     virtual PointViewSet run(PointViewPtr view) override;
-    bool processOne(PointRef& point) override;
+    virtual void ready(PointTableRef) override;
+    virtual bool processOne(PointRef& point) override;
+
     bool voxelize(const PointRef point);
+
+    double m_cell;
     std::set<std::tuple<int,int,int>> m_populatedVoxels;
     int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
                             // dimension.
     bool m_pivotVoxelInitialized;
-
-    FirstInVoxelFilter& operator=(const FirstInVoxelFilter&); // not implemented
-    FirstInVoxelFilter(const FirstInVoxelFilter&);            // not implemented
 };
 
 } // namespace pdal

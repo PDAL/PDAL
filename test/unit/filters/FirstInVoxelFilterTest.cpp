@@ -1,6 +1,7 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *   https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -36,8 +37,8 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
-#include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
+#include "io/BufferReader.hpp"
 #include "filters/FirstInVoxelFilter.hpp"
 
 #include "Support.hpp"
@@ -54,7 +55,7 @@ TEST(FirstInVoxelFilterTest, standard)
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage *filter = fac.createStage("filters.firstInVoxel");
+    Stage *filter = fac.createStage("filters.firstinvoxel");
     Options fo;
     fo.add("cell", 10);
     filter->setOptions(fo);
@@ -66,6 +67,66 @@ TEST(FirstInVoxelFilterTest, standard)
     EXPECT_EQ(set.size(), 1U);
     PointViewPtr v = *set.begin();
     EXPECT_EQ(v->size(), 7788U);
+}
+
+TEST(FirstInVoxelFilterTest, origin)
+{
+    using namespace Dimension;
+
+    PointTable t;
+    t.layout()->registerDims({Id::X, Id::Y, Id::Z});
+    PointViewPtr v(new PointView(t));
+
+    v->setField(Id::X, 0, 1);
+    v->setField(Id::Y, 0, 1);
+    v->setField(Id::Z, 0, 1);
+
+    v->setField(Id::X, 1, 1);
+    v->setField(Id::Y, 1, 1);
+    v->setField(Id::Z, 1, 1);
+
+    v->setField(Id::X, 2, 1);
+    v->setField(Id::Y, 2, 1);
+    v->setField(Id::Z, 2, -1);
+
+    v->setField(Id::X, 3, 1);
+    v->setField(Id::Y, 3, -1);
+    v->setField(Id::Z, 3, 1);
+
+    v->setField(Id::X, 4, 1);
+    v->setField(Id::Y, 4, -1);
+    v->setField(Id::Z, 4, -1);
+
+    v->setField(Id::X, 5, -1);
+    v->setField(Id::Y, 5, 1);
+    v->setField(Id::Z, 5, 1);
+
+    v->setField(Id::X, 6, -1);
+    v->setField(Id::Y, 6, 1);
+    v->setField(Id::Z, 6, -1);
+
+    v->setField(Id::X, 7, -1);
+    v->setField(Id::Y, 7, -1);
+    v->setField(Id::Z, 7, 1);
+
+    v->setField(Id::X, 8, -1);
+    v->setField(Id::Y, 8, -1);
+    v->setField(Id::Z, 8, -1);
+
+    BufferReader r;
+    r.addView(v);
+
+    FirstInVoxelFilter f;
+    Options o;
+    o.add("cell", 10);
+    f.setOptions(o);
+    f.setInput(r);
+
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    EXPECT_EQ(s.size(), 1u);
+    v = *s.begin();
+    EXPECT_EQ(v->size(), 8u);
 }
 
 TEST(FirstInVoxelFilterTest, stream)

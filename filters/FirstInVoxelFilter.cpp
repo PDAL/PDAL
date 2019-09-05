@@ -38,11 +38,18 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info{"filters.firstInVoxel",
-                                     "First Entry Voxel Filter", 
-                                     "http://pdal.io/stages/filters.firstInVoxel.html"};
+static StaticPluginInfo const s_info
+{
+    "filters.firstinvoxel",
+    "First Entry Voxel Filter", 
+    "http://pdal.io/stages/filters.firstinvoxel.html"
+};
 
 CREATE_STATIC_STAGE(FirstInVoxelFilter, s_info)
+
+FirstInVoxelFilter::FirstInVoxelFilter()
+{}
+
 
 std::string FirstInVoxelFilter::getName() const
 {
@@ -53,6 +60,13 @@ void FirstInVoxelFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 0.001);
 }
+
+
+void FirstInVoxelFilter::ready(PointTableRef)
+{
+    m_pivotVoxelInitialized = false;
+}
+
 
 PointViewSet FirstInVoxelFilter::run(PointViewPtr view)
 {
@@ -76,9 +90,9 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
      * Calculate the voxel coordinates for the incoming point.
      * gx, gy, gz will be the global coordinates from (0, 0, 0).
      */
-    int gx = point.getFieldAs<double>(Dimension::Id::X) / m_cell;
-    int gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
-    int gz = point.getFieldAs<double>(Dimension::Id::Z) / m_cell;
+    int gx = std::floor(point.getFieldAs<double>(Dimension::Id::X) / m_cell);
+    int gy = std::floor(point.getFieldAs<double>(Dimension::Id::Y) / m_cell);
+    int gz = std::floor(point.getFieldAs<double>(Dimension::Id::Z) / m_cell);
 
     if (!m_pivotVoxelInitialized)
     {
@@ -100,26 +114,7 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-    /*
-     * Is already in populates voxels?
-     */
-    auto pi = m_populatedVoxels.find(t);
-    if (pi == m_populatedVoxels.end())
-    {
-        /*
-         * No, Voxel is not there in populated voxels.
-         * Mark the voxel as populated by making entry in m_populatedVoxels.
-         * Accept this point.
-         */
-        m_populatedVoxels.insert(t);
-        return true;
-    }
-    /*
-     * Yes, Voxel is already in populated voxels.
-     * That means the voxel is already contains a point.
-     * Ignore this point.
-     */
-    return false;
+    return (m_populatedVoxels.insert(t).second);
 }
 
 bool FirstInVoxelFilter::processOne(PointRef& point)
