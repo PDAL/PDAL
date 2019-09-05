@@ -90,9 +90,9 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
      * Calculate the voxel coordinates for the incoming point.
      * gx, gy, gz will be the global coordinates from (0, 0, 0).
      */
-    int gx = point.getFieldAs<double>(Dimension::Id::X) / m_cell;
-    int gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
-    int gz = point.getFieldAs<double>(Dimension::Id::Z) / m_cell;
+    int gx = std::floor(point.getFieldAs<double>(Dimension::Id::X) / m_cell);
+    int gy = std::floor(point.getFieldAs<double>(Dimension::Id::Y) / m_cell);
+    int gz = std::floor(point.getFieldAs<double>(Dimension::Id::Z) / m_cell);
 
     if (!m_pivotVoxelInitialized)
     {

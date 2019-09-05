@@ -44,7 +44,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL FirstInVoxelFilter : public Filter, Streamable
+class PDAL_DLL FirstInVoxelFilter : public Filter, public Streamable
 {
 public:
     FirstInVoxelFilter();
