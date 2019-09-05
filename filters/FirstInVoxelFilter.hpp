@@ -47,7 +47,7 @@ class PointView;
 class PDAL_DLL FirstInVoxelFilter : public Filter, Streamable
 {
 public:
-    FirstInVoxelFilter() : Filter(), Streamable() {}
+    FirstInVoxelFilter() : Filter(), Streamable(), m_pivotVoxelInitialized(false) {}
     std::string getName() const;
 
 private:
@@ -60,6 +60,7 @@ private:
     std::set<std::tuple<int,int,int>> m_populatedVoxels;
     int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
                             // dimension.
+	bool m_pivotVoxelInitialized;
 
     FirstInVoxelFilter& operator=(const FirstInVoxelFilter&); // not implemented
     FirstInVoxelFilter(const FirstInVoxelFilter&);            // not implemented

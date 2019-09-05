@@ -80,8 +80,7 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
     int gy = point.getFieldAs<double>(Dimension::Id::Y) / m_cell;
     int gz = point.getFieldAs<double>(Dimension::Id::Z) / m_cell;
 
-    static bool initialized = false;
-    if (!initialized)
+    if (!m_pivotVoxelInitialized)
     {
         /*
          * Save global coordinates of first incoming point's voxel.
@@ -91,15 +90,15 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
         m_pivotVoxel[0] = gx; // X Coordinate of an Pivot voxel
         m_pivotVoxel[1] = gy; // Y Coordinate of an Pivot voxel
         m_pivotVoxel[2] = gz; // Z Coordinate of an Pivot voxel
-        initialized = true;
+        m_pivotVoxelInitialized = true;
     }
 
     /*
      * Calculate the local voxel coordinates for incoming point, Using the Pivot
      * voxel.
      */
-    auto t=std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
-                    gz - m_pivotVoxel[2]);
+    auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
+                             gz - m_pivotVoxel[2]);
 
     /*
      * Is already in populates voxels?
