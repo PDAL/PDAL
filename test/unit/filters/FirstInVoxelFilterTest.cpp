@@ -54,7 +54,7 @@ TEST(FirstInVoxelFilterTest, standard)
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage *filter = fac.createStage("filters.firstInVoxel");
+    Stage *filter = fac.createStage("filters.firstinvoxel");
     Options fo;
     fo.add("cell", 10);
     filter->setOptions(fo);
