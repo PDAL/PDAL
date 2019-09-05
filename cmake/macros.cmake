@@ -216,4 +216,8 @@ macro(PDAL_ADD_TEST _name)
         set_property(TEST ${_name} PROPERTY ENVIRONMENT
             "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
     endif()
+    if(VCPROJ)
+        set_property(TARGET ${_name} PROPERTY VS_USER_PROPS "${CMAKE_BINARY_DIR}/user.props")
+    endif() 
+
 endmacro(PDAL_ADD_TEST)

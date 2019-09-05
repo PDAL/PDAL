@@ -30,6 +30,11 @@ target_include_directories(${PDAL_APP} PRIVATE
     ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
+if(VCPROJ)
+    set_property(TARGET ${PDAL_APP} PROPERTY VS_USER_PROPS "${CMAKE_BINARY_DIR}/user.props")
+endif() 
+
+
 #------------------------------------------------------------------------------
 # Targets installation
 #------------------------------------------------------------------------------
