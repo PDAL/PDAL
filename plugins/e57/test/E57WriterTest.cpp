@@ -65,10 +65,6 @@ PointViewSet writertest_readE57(std::string filename, PointTableRef table)
     return reader.execute(table);
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> upstream/master
 TEST(E57WRiter, testWrite)
 {
     std::string outfile(Support::datapath("e57/test.e57"));
@@ -102,14 +98,6 @@ TEST(E57WRiter, testWrite)
     auto viewout = writertest_readE57(outfile, tableout);
     auto cloudout = *viewout.begin();
 
-<<<<<<< HEAD
-    auto expectedDimensions = {
-        pdal::Dimension::Id::X,        pdal::Dimension::Id::Y,
-        pdal::Dimension::Id::Z,        pdal::Dimension::Id::Red,
-        pdal::Dimension::Id::Green,    pdal::Dimension::Id::Blue,
-        pdal::Dimension::Id::Intensity};
-    for (pdal::point_count_t i = 0; i < cloudout->size(); i++)
-=======
     auto expectedDimensions =
     {
         Dimension::Id::X, Dimension::Id::Y,Dimension::Id::Z,
@@ -117,22 +105,12 @@ TEST(E57WRiter, testWrite)
         Dimension::Id::Intensity
     };
     for (point_count_t i =0; i < cloudout->size();i++)
->>>>>>> upstream/master
     {
         auto ptB = cloudin->point(i);
         auto pt = cloudout->point(i);
         for (auto& dim : expectedDimensions)
         {
             ASSERT_TRUE(pt.hasDim(dim));
-<<<<<<< HEAD
-            ASSERT_FLOAT_EQ(pt.getFieldAs<double>(dim),
-                            ptB.getFieldAs<double>(dim));
-        }
-    }
-
-    remove(outfile.c_str());
-}
-=======
             ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
                 ptB.getFieldAs<float>(dim));
         }
@@ -142,4 +120,3 @@ TEST(E57WRiter, testWrite)
 }
 
 } // namespace pdal
->>>>>>> upstream/master
