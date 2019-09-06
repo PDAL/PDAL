@@ -740,7 +740,7 @@ TEST(GDALWriterTest, issue_2074)
 
 TEST(GDALWriterTest, issue_2095)
 {
-    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0);
+    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0, 1.0);
 
     EXPECT_EQ(grid.verticalIndex(0), 4);
     EXPECT_EQ(grid.verticalIndex(.5), 4);

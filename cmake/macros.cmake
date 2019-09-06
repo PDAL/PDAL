@@ -87,6 +87,9 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
             RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
             LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
             ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    else()
+        set_target_properties(${_name} PROPERTIES
+            POSITION_INDEPENDENT_CODE TRUE)
     endif()
 endmacro(PDAL_ADD_FREE_LIBRARY)
 

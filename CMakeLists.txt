@@ -283,6 +283,12 @@ target_compile_definitions(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${LASZIP_DEFINES}
 )
+
+target_compile_definitions(${PDAL_BASE_LIB_NAME}
+	PRIVATE
+		${ARBITER_DEFINES}
+)
+
 set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
@@ -397,3 +403,4 @@ if (WITH_COMPLETION)
                 "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
     endif()
 endif()
+

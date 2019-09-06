@@ -153,7 +153,7 @@ ErrCode FlagBytes::GetBlobSize(const Byte* pByte, int64 bufferSize, uint32& blob
 
   TopHeader refHd;
   Header1 hd1;
-  if (bufferSize < sizeof(refHd) + sizeof(hd1.blobSize))
+  if (bufferSize < (int64)(sizeof(refHd) + sizeof(hd1.blobSize)))
     return ErrCode::BufferTooSmall;
 
   if (0 != memcmp(pByte, refHd.fileKey, refHd.FileKeyLength()))    // file key
