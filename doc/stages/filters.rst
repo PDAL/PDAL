@@ -206,6 +206,7 @@ the input. These filters will invalidate an existing KD-tree.
 
    filters.crop
    filters.decimation
+   filters.firstinvoxel
    filters.head
    filters.iqr
    filters.locate
@@ -226,6 +227,9 @@ the input. These filters will invalidate an existing KD-tree.
 :ref:`filters.dem`
     Remove points that are in a raster cell but have a value far from the
     value of the raster.
+
+:ref:`filters.firstinvoxel`
+    Retain the first point detected in each voxel.
 
 :ref:`filters.head`
     Return N points from beginning of the point cloud.
