@@ -43,7 +43,6 @@ namespace pdal
 {
 namespace e57plugin
 {
-    // converts an e57 dimension string to a pdal dimension
     // returns pdal::Dimension::Id::Unknown in case the dimension is
     // not recognised
     PDAL_DLL pdal::Dimension::Id e57ToPdal(const std::string &e57Dimension);
@@ -57,8 +56,8 @@ namespace e57plugin
     PDAL_DLL double rescaleE57ToPdalValue(const std::string &e57Dimension,
         double value, const std::pair<double, double> &e57Bounds);
 
-    std::vector<pdal::Dimension::Id> supportedPdalTypes();
-    std::vector<std::string> supportedE57Types();
+    PDAL_DLL std::vector<pdal::Dimension::Id> supportedPdalTypes();
+    PDAL_DLL std::vector<std::string> supportedE57Types();
 
     // Tries to find the limit of a dimension in the e57 node headers
     // return nan if not found
@@ -68,5 +67,6 @@ namespace e57plugin
     // Get the bounds of a given dimension as expected by pdal
     PDAL_DLL std::pair<uint64_t, uint64_t>
     getPdalBounds(pdal::Dimension::Id id);
-}
-}
+
+} // namespace e57plugin
+} // namespace pdal
