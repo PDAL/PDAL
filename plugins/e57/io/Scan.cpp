@@ -59,9 +59,16 @@ e57::CompressedVectorNode Scan::getPoints() const
     return *m_rawPoints;
 }
 
-std::pair<double,double> Scan::getLimits(pdal::Dimension::Id pdalId) const
+bool Scan::getLimits(pdal::Dimension::Id pdalId, std::pair<double, double>& minMax) const
 {
-    return m_valueBounds.at(pdalId);
+    auto itMinMax = m_valueBounds.find(pdalId);
+    if (itMinMax != m_valueBounds.end())
+    {
+        minMax = itMinMax->second;
+        return true;
+    }
+
+    return false;
 }
 
 bool Scan::hasPose() const

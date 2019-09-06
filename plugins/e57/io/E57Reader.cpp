@@ -100,12 +100,13 @@ void E57Reader::ChunkReader::setPoint
         {
             double value;
             // Rescale the value if needed so that if fits Pdal expectations
-            try
+            std::pair<double, double> minmax;
+            if (m_scan->getLimits(pdalDimension, minmax))
             {
-                auto minmax = m_scan->getLimits(pdalDimension);
-                value = pdal::e57plugin::rescaleE57ToPdalValue(keyValue.first,keyValue.second[index],minmax);
+                value = e57plugin::rescaleE57ToPdalValue(keyValue.first,
+                    keyValue.second[index], minmax);
             }
-            catch (std::out_of_range &e)
+            else
             {
                 value = keyValue.second[index];
             }
