@@ -54,7 +54,7 @@ public:
 
     e57::CompressedVectorNode getPoints() const;
 
-    std::pair<double,double> getLimits(pdal::Dimension::Id pdalId) const;
+    bool getLimits(pdal::Dimension::Id pdalId, std::pair<double, double>& minMax) const;
 
     bool hasPose() const;
     void transformPoint(pdal::PointRef pt) const;
