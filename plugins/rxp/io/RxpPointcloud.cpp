@@ -52,10 +52,11 @@ Dimension::Id getTimeDimensionId(bool syncToPps)
 }
 
 
-Point::Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns)
+Point::Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns, bool edgeOfFlightLine)
     : target(target)
     , returnNumber(returnNumber)
     , numberOfReturns(numberOfReturns)
+    , edgeOfFlightLine(edgeOfFlightLine)
 {}
 
 
@@ -73,6 +74,7 @@ RxpPointcloud::RxpPointcloud(
     , m_maxReflectance(maxReflectance)
     , m_rc(scanlib::basic_rconnection::create(uri))
     , m_dec(m_rc)
+    , m_edge(false)
 {}
 
 
@@ -130,6 +132,7 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     to.setField(Id::Deviation, from.target.deviation);
     to.setField(Id::BackgroundRadiation, from.target.background_radiation);
     to.setField(Id::IsPpsLocked, from.target.is_pps_locked);
+    to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
 
     if (m_reflectanceAsIntensity) {
         uint16_t intensity;
@@ -142,7 +145,7 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
                         (from.target.reflectance - m_minReflectance) / (m_maxReflectance - m_minReflectance)));
         }
         to.setField(Id::Intensity, intensity);
-    }
+    }    
 }
 
 
@@ -163,9 +166,23 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
     unsigned int returnNumber = 1;
     for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
     {
-        m_points.emplace_back(targets[i], returnNumber, target_count);
+        //Only first return is marked as edge of flight line
+        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge);
+        if (m_edge)
+            m_edge = false;
     }
 }
 
-
+void RxpPointcloud::on_line_start_up(const scanlib::line_start_up<iterator_type> & arg)
+{
+    scanlib::pointcloud::on_line_start_up(arg);
+    m_edge = true;
 }
+
+void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg)
+{
+    scanlib::pointcloud::on_line_start_dn(arg);
+    m_edge = true;
+}
+
+} //pdal
