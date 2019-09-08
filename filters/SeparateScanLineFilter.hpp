@@ -53,7 +53,6 @@ public:
     std::string getName() const;
 
 private:
-    std::map<uint64_t, PointViewPtr> m_viewMap;
     uint64_t m_groupBy;
 
     virtual void addArgs(ProgramArgs& args);

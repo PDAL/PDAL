@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 };
 CREATE_STATIC_STAGE(SeparateScanLineFilter, s_info)
 
-SeparateScanLineFilter::SeparateScanLineFilter() : m_viewMap()
+SeparateScanLineFilter::SeparateScanLineFilter()
 {}
 
 std::string SeparateScanLineFilter::getName() const
@@ -70,11 +70,10 @@ void SeparateScanLineFilter::prepared(PointTableRef table)
 PointViewSet SeparateScanLineFilter::run(PointViewPtr inView)
 {
     PointViewSet result;
-    std::vector<PointViewPtr> views;
     PointViewPtr v(inView->makeNew());
     result.insert(v);
     
-    unsigned lineNum = 1;
+    uint64_t lineNum = 1;
     for (PointId i = 0; i < inView->size();++i)
     {
         v->appendPoint(*inView, i);
