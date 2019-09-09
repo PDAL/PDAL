@@ -117,7 +117,7 @@ void origin_test(std::string mode) {
     StreamableVoxelGridFilter f;
     Options o;
     o.add("cell", 10);
-    o.add("mode", "firstinvoxel");
+    o.add("mode", mode);
     f.setOptions(o);
     f.setInput(r);
 
