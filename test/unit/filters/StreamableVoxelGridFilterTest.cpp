@@ -220,7 +220,7 @@ void stream_test(std::string mode) {
 
 TEST(StreamableVoxelGridFilter, firstinvoxel_standard)
 {
-	standard_test("firstinvoxel");
+    standard_test("firstinvoxel");
 }
 
 TEST(StreamableVoxelGridFilter, firstinvoxel_origin)
