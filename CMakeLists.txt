@@ -285,8 +285,8 @@ target_compile_definitions(${PDAL_BASE_LIB_NAME}
 )
 
 target_compile_definitions(${PDAL_BASE_LIB_NAME}
-	PRIVATE
-		${ARBITER_DEFINES}
+    PRIVATE
+        ${ARBITER_DEFINES}
 )
 
 set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
@@ -403,4 +403,3 @@ if (WITH_COMPLETION)
                 "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
     endif()
 endif()
-
