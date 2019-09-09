@@ -44,12 +44,12 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL FirstInVoxelFilter : public Filter, public Streamable
+class PDAL_DLL StreamableVoxelGridFilter : public Filter, public Streamable
 {
 public:
-    FirstInVoxelFilter();
-    FirstInVoxelFilter& operator=(const FirstInVoxelFilter&) = delete;
-    FirstInVoxelFilter(const FirstInVoxelFilter&) = delete;
+    StreamableVoxelGridFilter();
+    StreamableVoxelGridFilter& operator=(const StreamableVoxelGridFilter&) = delete;
+    StreamableVoxelGridFilter(const StreamableVoxelGridFilter&) = delete;
 
     std::string getName() const override;
 
@@ -59,13 +59,20 @@ private:
     virtual void ready(PointTableRef) override;
     virtual bool processOne(PointRef& point) override;
 
-    bool voxelize(const PointRef point);
+    bool voxelize(PointRef point);
 
     double m_cell;
-    std::set<std::tuple<int,int,int>> m_populatedVoxels;
+    std::set<std::tuple<int, int, int>> m_populatedVoxels;
     int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
-                            // dimension.
+                             // dimension.
     bool m_pivotVoxelInitialized;
+    enum class DownsizingMode
+    {
+      VOXEL_CENTER,
+      FIRST_IN_VOXEL
+    };
+	DownsizingMode m_downsizingMode;
+	std::string m_mode;
 };
 
 } // namespace pdal

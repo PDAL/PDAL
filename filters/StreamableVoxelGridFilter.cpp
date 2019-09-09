@@ -33,42 +33,52 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "FirstInVoxelFilter.hpp"
+#include "StreamableVoxelGridFilter.hpp"
 
 namespace pdal
 {
 
 static StaticPluginInfo const s_info
 {
-    "filters.firstinvoxel",
+    "filters.streamablevoxeldownsize",
     "First Entry Voxel Filter", 
-    "http://pdal.io/stages/filters.firstinvoxel.html"
+    "http://pdal.io/stages/filters.streamablevoxeldownsize.html"
 };
 
-CREATE_STATIC_STAGE(FirstInVoxelFilter, s_info)
+CREATE_STATIC_STAGE(StreamableVoxelGridFilter, s_info)
 
-FirstInVoxelFilter::FirstInVoxelFilter()
+StreamableVoxelGridFilter::StreamableVoxelGridFilter()
 {}
 
 
-std::string FirstInVoxelFilter::getName() const
+std::string StreamableVoxelGridFilter::getName() const
 {
     return s_info.name;
 }
 
-void FirstInVoxelFilter::addArgs(ProgramArgs& args)
+void StreamableVoxelGridFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 0.001);
+    args.add("mode",
+             "Method for downsizing : voxelcenter / firstinvoxel",
+             m_mode, "voxelcenter");
 }
 
 
-void FirstInVoxelFilter::ready(PointTableRef)
+void StreamableVoxelGridFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
+
+    if (!m_mode.compare("voxelcenter"))
+        m_downsizingMode = DownsizingMode::VOXEL_CENTER;
+    else if (!m_mode.compare("firstinvoxel"))
+        m_downsizingMode = DownsizingMode::FIRST_IN_VOXEL;
+    else
+        throw pdal_error("Invalid Downsizing mode");
 }
 
 
-PointViewSet FirstInVoxelFilter::run(PointViewPtr view)
+PointViewSet StreamableVoxelGridFilter::run(PointViewPtr view)
 {
     PointViewPtr output = view->makeNew();
     for (PointId id = 0; id < view->size(); ++id)
@@ -84,7 +94,7 @@ PointViewSet FirstInVoxelFilter::run(PointViewPtr view)
     return viewSet;
 }
 
-bool FirstInVoxelFilter::voxelize(const PointRef point)
+bool StreamableVoxelGridFilter::voxelize(PointRef point)
 {
     /*
      * Calculate the voxel coordinates for the incoming point.
@@ -114,11 +124,32 @@ bool FirstInVoxelFilter::voxelize(const PointRef point)
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-    return (m_populatedVoxels.insert(t).second);
+	if (m_downsizingMode==DownsizingMode::FIRST_IN_VOXEL)
+		return (m_populatedVoxels.insert(t).second);
+    else
+    {
+        auto itr = m_populatedVoxels.find(t);
+        if (itr == m_populatedVoxels.end())
+        {
+            m_populatedVoxels.insert(t);
+            point.setField<double>(Dimension::Id::X, (gx + 0.5) * m_cell);
+            point.setField<double>(Dimension::Id::Y, (gy + 0.5) * m_cell);
+            point.setField<double>(Dimension::Id::Z, (gz + 0.5) * m_cell);
+            return true;
+        }
+	}
+	return false;
 }
 
-bool FirstInVoxelFilter::processOne(PointRef& point)
+bool StreamableVoxelGridFilter::processOne(PointRef& point)
 {
+
+    static point_count_t count = 0;
+    if (count % 10000000 == 0)
+    {
+        std::cout << count << std::endl;
+    }
+    ++count;
     return voxelize(point);
 }
 

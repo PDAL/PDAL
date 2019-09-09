@@ -39,14 +39,14 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include "io/BufferReader.hpp"
-#include "filters/FirstInVoxelFilter.hpp"
+#include "filters/StreamableVoxelGridFilter.hpp"
 
 #include "Support.hpp"
 
 namespace pdal
 {
 
-TEST(FirstInVoxelFilterTest, standard)
+TEST(StreamableVoxelGridFilter, standard)
 {
     StageFactory fac;
 
@@ -55,7 +55,7 @@ TEST(FirstInVoxelFilterTest, standard)
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage *filter = fac.createStage("filters.firstinvoxel");
+    Stage *filter = fac.createStage("filters.streamablevoxeldownsize");
     Options fo;
     fo.add("cell", 10);
     filter->setOptions(fo);
@@ -69,7 +69,7 @@ TEST(FirstInVoxelFilterTest, standard)
     EXPECT_EQ(v->size(), 7788U);
 }
 
-TEST(FirstInVoxelFilterTest, origin)
+TEST(StreamableVoxelGridFilter, origin)
 {
     using namespace Dimension;
 
@@ -116,7 +116,7 @@ TEST(FirstInVoxelFilterTest, origin)
     BufferReader r;
     r.addView(v);
 
-    FirstInVoxelFilter f;
+    StreamableVoxelGridFilter f;
     Options o;
     o.add("cell", 10);
     f.setOptions(o);
@@ -129,7 +129,7 @@ TEST(FirstInVoxelFilterTest, origin)
     EXPECT_EQ(v->size(), 8u);
 }
 
-TEST(FirstInVoxelFilterTest, stream)
+TEST(StreamableVoxelGridFilter, stream)
 {
     using namespace Dimension;
 
@@ -173,7 +173,7 @@ TEST(FirstInVoxelFilterTest, stream)
 
     StreamReader r;
 
-    FirstInVoxelFilter voxelfilter;
+    StreamableVoxelGridFilter voxelfilter;
     Options o;
     o.add("cell", 5);
     voxelfilter.setInput(r);
