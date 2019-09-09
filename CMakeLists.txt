@@ -284,11 +284,6 @@ target_compile_definitions(${PDAL_BASE_LIB_NAME}
         ${LASZIP_DEFINES}
 )
 
-target_compile_definitions(${PDAL_BASE_LIB_NAME}
-	PRIVATE
-		${ARBITER_DEFINES}
-)
-
 set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
