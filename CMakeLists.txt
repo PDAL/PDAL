@@ -398,4 +398,3 @@ if (WITH_COMPLETION)
                 "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
     endif()
 endif()
-
