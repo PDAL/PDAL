@@ -66,13 +66,15 @@ private:
     int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
                              // dimension.
     bool m_pivotVoxelInitialized;
+    
     enum class DownsizingMode
     {
       VOXEL_CENTER,
       FIRST_IN_VOXEL
     };
-	DownsizingMode m_downsizingMode;
-	std::string m_mode;
+    
+    DownsizingMode m_downsizingMode;
+    std::string m_mode;
 };
 
 } // namespace pdal
