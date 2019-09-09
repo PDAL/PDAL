@@ -36,9 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-#include <map>
-#include <string>
-
 namespace pdal
 {
 
@@ -49,6 +46,8 @@ class PDAL_DLL SeparateScanLineFilter : public Filter
 {
 public:
     SeparateScanLineFilter();
+    SeparateScanLineFilter& operator=(const SeparateScanLineFilter&) = delete;
+    SeparateScanLineFilter(const SeparateScanLineFilter&) = delete;
 
     std::string getName() const;
 
@@ -58,9 +57,6 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
-
-    SeparateScanLineFilter& operator=(const SeparateScanLineFilter&); // not implemented
-    SeparateScanLineFilter(const SeparateScanLineFilter&); // not implemented
 };
 
 } // namespace pdal
