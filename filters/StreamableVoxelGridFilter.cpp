@@ -124,8 +124,8 @@ bool StreamableVoxelGridFilter::voxelize(PointRef point)
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-	if (m_downsizingMode==DownsizingMode::FIRST_IN_VOXEL)
-		return (m_populatedVoxels.insert(t).second);
+    if (m_downsizingMode==DownsizingMode::FIRST_IN_VOXEL)
+        return (m_populatedVoxels.insert(t).second);
     else
     {
         auto itr = m_populatedVoxels.find(t);
