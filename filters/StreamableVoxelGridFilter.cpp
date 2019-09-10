@@ -69,12 +69,8 @@ void StreamableVoxelGridFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
 
-    if (!m_mode.compare("voxelcenter"))
-        m_downsizingMode = DownsizingMode::VOXEL_CENTER;
-    else if (!m_mode.compare("firstinvoxel"))
-        m_downsizingMode = DownsizingMode::FIRST_IN_VOXEL;
-    else
-        throw pdal_error("Invalid Downsizing mode");
+    if (m_mode.compare("voxelcenter")!=0 && m_mode.compare("firstinvoxel")!=0)
+		throw pdal_error("Invalid Downsizing mode");
 }
 
 
@@ -124,7 +120,7 @@ bool StreamableVoxelGridFilter::voxelize(PointRef point)
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-    if (m_downsizingMode==DownsizingMode::FIRST_IN_VOXEL)
+    if (m_mode.compare("firstinvoxel")==0)
         return (m_populatedVoxels.insert(t).second);
     else
     {
