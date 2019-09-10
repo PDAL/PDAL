@@ -133,8 +133,8 @@ bool StreamableVoxelDownsizeFilter::voxelize(PointRef point)
             point.setField<double>(Dimension::Id::Z, (gz + 0.5) * m_cell);
             return true;
         }
-	}
-	return false;
+    }
+    return false;
 }
 
 bool StreamableVoxelDownsizeFilter::processOne(PointRef& point)
