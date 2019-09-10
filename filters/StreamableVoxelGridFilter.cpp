@@ -143,13 +143,6 @@ bool StreamableVoxelGridFilter::voxelize(PointRef point)
 
 bool StreamableVoxelGridFilter::processOne(PointRef& point)
 {
-
-    static point_count_t count = 0;
-    if (count % 10000000 == 0)
-    {
-        std::cout << count << std::endl;
-    }
-    ++count;
     return voxelize(point);
 }
 
