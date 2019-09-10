@@ -39,5 +39,5 @@ cell
 
 mode
   Mode for voxel based filtering. [Default: voxelcenter]
-  **voxelcenter**: Point coordinates will be modified and set to the center of a populated voxel. This is a default mode.
+  **voxelcenter**: Point coordinates will be modified and set to the center of a populated voxel.
   **firstinvoxel**: Retain first point detected in each voxel.
