@@ -87,12 +87,15 @@ def read_version(filename):
     # project(PDAL VERSION 0.9.8 LANGUAGES CXX C)
     data = open(filename).readlines()
 
-    token = 'VERSION'
+    token = 'PDAL VERSION'
 
+    version = None
     for line in data:
         if str(token) in line:
-            version = re.search(r'\d.\d.\d', line).group(0)
-            break
+            match = re.search(r'\d.\d.\d', line)
+            if match is not None:
+                version = match.group(0)
+                break
     return version
 
 release = read_version('../CMakeLists.txt')

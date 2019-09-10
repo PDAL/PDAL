@@ -73,6 +73,7 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
     ids.push_back(Id::Deviation);
     ids.push_back(Id::BackgroundRadiation);
     ids.push_back(Id::IsPpsLocked);
+    ids.push_back(Id::EdgeOfFlightLine);
     if (reflectanceAsIntensity) {
         ids.push_back(Id::Intensity);
     }

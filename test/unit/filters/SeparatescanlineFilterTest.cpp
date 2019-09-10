@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2019, Helix Re Inc.
+* Copyright (c) 2019, Guilhem Villemin (guilhem.villemin@gmail.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Helix Re Inc. nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,57 +32,35 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/pdal_types.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/Dimension.hpp>
-#include <E57Format.h>
+#include <io/TextReader.hpp>
+#include <filters/SeparateScanLineFilter.hpp>
 
-namespace e57
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(SeparateScanLineFilter, partition_count)
 {
-class PDAL_DLL Scan
-{
+    PointTable table;
 
-public:
-    Scan(const e57::StructureNode& scanNode);
+    Options ops1;
+    std::string filename(Support::datapath("text/with_edgeofflightline.txt"));
+    ops1.add("filename", filename);
+    TextReader reader;
+    reader.setOptions(ops1);
 
-    pdal::point_count_t getNumPoints() const;
+    {
+        Options options;
+        Option groupby("groupby", 2);
+        options.add(groupby);
 
-    /// Get the pdal dimensions that can be read from this scan
-    std::set<std::string> getDimensions() const;
-
-    e57::CompressedVectorNode getPoints() const;
-
-    bool getLimits(pdal::Dimension::Id pdalId, std::pair<double, double>& minMax) const;
-
-    bool hasPose() const;
-    void transformPoint(pdal::PointRef pt) const;
-    pdal::BOX3D getBoundingBox() const;
-
-private:
-    /// Called only once on constructor called
-    void decodeHeader();
-
-    void getPose();
-
-    // Core data holders for underlying e57 object
-    std::unique_ptr<e57::StructureNode> m_rawData;
-    std::unique_ptr<e57::CompressedVectorNode> m_rawPoints;
-    pdal::point_count_t m_numPoints;
-    std::array<double,3>
-        transformPoint(const  std::array<double,3> &originalPoint) const;
-
-    // supported configs
-    std::set<std::string> m_e57TypeToPdalDimension;
-
-    // field limits in header
-    std::map<pdal::Dimension::Id,std::pair<double,double>> m_valueBounds;
-
-    // Pose information
-    double m_translation[3] = {0};
-    double m_rotation[3][3] = {{0}};
-    bool m_hasPose = false;
-    pdal::BOX3D m_bbox;
-};
+        SeparateScanLineFilter separator;
+        separator.setInput(reader);
+        separator.setOptions(options);
+        separator.prepare(table);
+        PointViewSet viewSet = separator.execute(table);
+        EXPECT_EQ(viewSet.size(), 5u);
+    }
 }

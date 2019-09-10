@@ -278,6 +278,7 @@ filters will invalidate an existing KD-tree.
    filters.divider
    filters.groupby
    filters.returns
+   filters.separatescanline
    filters.splitter
 
 :ref:`filters.chipper`
@@ -293,6 +294,9 @@ filters will invalidate an existing KD-tree.
 
 :ref:`filters.returns`
     Split data by return order (e.g., 'first', 'last', 'intermediate', 'only').
+
+:ref:`filters.separatescanline`
+    Split data based on scan lines.
 
 :ref:`filters.splitter`
     Split data based on a X/Y box length.
