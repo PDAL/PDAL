@@ -38,7 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include "io/BufferReader.hpp"
-#include "filters/StreamableVoxelGridFilter.hpp"
+#include "filters/StreamableVoxelDownsizeFilter.hpp"
 
 #include "Support.hpp"
 
@@ -114,7 +114,7 @@ void origin_test(std::string mode) {
     BufferReader r;
     r.addView(v);
 
-    StreamableVoxelGridFilter f;
+    StreamableVoxelDownsizeFilter f;
     Options o;
     o.add("cell", 10);
     o.add("mode", mode);
@@ -200,7 +200,7 @@ void stream_test(std::string mode) {
     };
 
     StreamReader r;
-    StreamableVoxelGridFilter voxelfilter;
+    StreamableVoxelDownsizeFilter voxelfilter;
     Options o;
     o.add("cell", 5);
     o.add("mode", mode);
@@ -218,32 +218,32 @@ void stream_test(std::string mode) {
     f.execute(table);
 }
 
-TEST(StreamableVoxelGridFilter, firstinvoxel_standard)
+TEST(StreamableVoxelDownsizeFilter, firstinvoxel_standard)
 {
     standard_test("firstinvoxel");
 }
 
-TEST(StreamableVoxelGridFilter, firstinvoxel_origin)
+TEST(StreamableVoxelDownsizeFilter, firstinvoxel_origin)
 {
     origin_test("firstinvoxel");
 }
 
-TEST(StreamableVoxelGridFilter, firstinvoxel_stream)
+TEST(StreamableVoxelDownsizeFilter, firstinvoxel_stream)
 {
     stream_test("firstinvoxel");
 }
 
-TEST(StreamableVoxelGridFilter, voxelcenter_standard)
+TEST(StreamableVoxelDownsizeFilter, voxelcenter_standard)
 {
     standard_test("voxelcenter");
 }
 
-TEST(StreamableVoxelGridFilter, voxelcenter_origin)
+TEST(StreamableVoxelDownsizeFilter, voxelcenter_origin)
 {
     origin_test("voxelcenter");
 }
 
-TEST(StreamableVoxelGridFilter, voxelcenter_stream)
+TEST(StreamableVoxelDownsizeFilter, voxelcenter_stream)
 {
     stream_test("voxelcenter");
 }

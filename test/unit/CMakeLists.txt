@@ -306,7 +306,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hexbin_test FILES filters/HexbinFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
-PDAL_ADD_TEST(pdal_filters_streamable_voxel_grid_test FILES filters/StreamableVoxelGridFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_streamable_voxel_downize_test FILES filters/StreamableVoxelDownsizeFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)

@@ -33,7 +33,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "StreamableVoxelGridFilter.hpp"
+#include "StreamableVoxelDownsizeFilter.hpp"
 
 namespace pdal
 {
@@ -45,18 +45,18 @@ static StaticPluginInfo const s_info
     "http://pdal.io/stages/filters.streamablevoxeldownsize.html"
 };
 
-CREATE_STATIC_STAGE(StreamableVoxelGridFilter, s_info)
+CREATE_STATIC_STAGE(StreamableVoxelDownsizeFilter, s_info)
 
-StreamableVoxelGridFilter::StreamableVoxelGridFilter()
+StreamableVoxelDownsizeFilter::StreamableVoxelDownsizeFilter()
 {}
 
 
-std::string StreamableVoxelGridFilter::getName() const
+std::string StreamableVoxelDownsizeFilter::getName() const
 {
     return s_info.name;
 }
 
-void StreamableVoxelGridFilter::addArgs(ProgramArgs& args)
+void StreamableVoxelDownsizeFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 0.001);
     args.add("mode",
@@ -65,7 +65,7 @@ void StreamableVoxelGridFilter::addArgs(ProgramArgs& args)
 }
 
 
-void StreamableVoxelGridFilter::ready(PointTableRef)
+void StreamableVoxelDownsizeFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
 
@@ -74,7 +74,7 @@ void StreamableVoxelGridFilter::ready(PointTableRef)
 }
 
 
-PointViewSet StreamableVoxelGridFilter::run(PointViewPtr view)
+PointViewSet StreamableVoxelDownsizeFilter::run(PointViewPtr view)
 {
     PointViewPtr output = view->makeNew();
     for (PointId id = 0; id < view->size(); ++id)
@@ -90,7 +90,7 @@ PointViewSet StreamableVoxelGridFilter::run(PointViewPtr view)
     return viewSet;
 }
 
-bool StreamableVoxelGridFilter::voxelize(PointRef point)
+bool StreamableVoxelDownsizeFilter::voxelize(PointRef point)
 {
     /*
      * Calculate the voxel coordinates for the incoming point.
@@ -137,7 +137,7 @@ bool StreamableVoxelGridFilter::voxelize(PointRef point)
 	return false;
 }
 
-bool StreamableVoxelGridFilter::processOne(PointRef& point)
+bool StreamableVoxelDownsizeFilter::processOne(PointRef& point)
 {
     return voxelize(point);
 }
