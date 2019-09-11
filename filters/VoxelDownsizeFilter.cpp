@@ -33,30 +33,30 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "StreamableVoxelDownsizeFilter.hpp"
+#include "VoxelDownsizeFilter.hpp"
 
 namespace pdal
 {
 
 static StaticPluginInfo const s_info
 {
-    "filters.streamablevoxeldownsize",
+    "filters.voxeldownsize",
     "First Entry Voxel Filter", 
-    "http://pdal.io/stages/filters.streamablevoxeldownsize.html"
+    "http://pdal.io/stages/filters.voxeldownsize.html"
 };
 
-CREATE_STATIC_STAGE(StreamableVoxelDownsizeFilter, s_info)
+CREATE_STATIC_STAGE(VoxelDownsizeFilter, s_info)
 
-StreamableVoxelDownsizeFilter::StreamableVoxelDownsizeFilter()
+VoxelDownsizeFilter::VoxelDownsizeFilter()
 {}
 
 
-std::string StreamableVoxelDownsizeFilter::getName() const
+std::string VoxelDownsizeFilter::getName() const
 {
     return s_info.name;
 }
 
-void StreamableVoxelDownsizeFilter::addArgs(ProgramArgs& args)
+void VoxelDownsizeFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 0.001);
     args.add("mode",
@@ -65,7 +65,7 @@ void StreamableVoxelDownsizeFilter::addArgs(ProgramArgs& args)
 }
 
 
-void StreamableVoxelDownsizeFilter::ready(PointTableRef)
+void VoxelDownsizeFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
 
@@ -74,7 +74,7 @@ void StreamableVoxelDownsizeFilter::ready(PointTableRef)
 }
 
 
-PointViewSet StreamableVoxelDownsizeFilter::run(PointViewPtr view)
+PointViewSet VoxelDownsizeFilter::run(PointViewPtr view)
 {
     PointViewPtr output = view->makeNew();
     for (PointId id = 0; id < view->size(); ++id)
@@ -90,7 +90,7 @@ PointViewSet StreamableVoxelDownsizeFilter::run(PointViewPtr view)
     return viewSet;
 }
 
-bool StreamableVoxelDownsizeFilter::voxelize(PointRef point)
+bool VoxelDownsizeFilter::voxelize(PointRef point)
 {
     /*
      * Calculate the voxel coordinates for the incoming point.
@@ -137,7 +137,7 @@ bool StreamableVoxelDownsizeFilter::voxelize(PointRef point)
     return false;
 }
 
-bool StreamableVoxelDownsizeFilter::processOne(PointRef& point)
+bool VoxelDownsizeFilter::processOne(PointRef& point)
 {
     return voxelize(point);
 }

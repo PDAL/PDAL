@@ -44,12 +44,12 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL StreamableVoxelDownsizeFilter : public Filter, public Streamable
+class PDAL_DLL VoxelDownsizeFilter : public Filter, public Streamable
 {
 public:
-    StreamableVoxelDownsizeFilter();
-    StreamableVoxelDownsizeFilter& operator=(const StreamableVoxelDownsizeFilter&) = delete;
-    StreamableVoxelDownsizeFilter(const StreamableVoxelDownsizeFilter&) = delete;
+    VoxelDownsizeFilter();
+    VoxelDownsizeFilter& operator=(const VoxelDownsizeFilter&) = delete;
+    VoxelDownsizeFilter(const VoxelDownsizeFilter&) = delete;
 
     std::string getName() const override;
 

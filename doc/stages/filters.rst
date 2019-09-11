@@ -206,7 +206,7 @@ the input. These filters will invalidate an existing KD-tree.
 
    filters.crop
    filters.decimation
-   filters.streamablevoxeldownsize
+   filters.voxeldownsize
    filters.head
    filters.iqr
    filters.locate
@@ -228,7 +228,7 @@ the input. These filters will invalidate an existing KD-tree.
     Remove points that are in a raster cell but have a value far from the
     value of the raster.
 
-:ref:`filters.streamablevoxeldownsize`
+:ref:`filters.voxeldownsize`
     Retain either first point detected in each voxel or center of a populated voxel, depending on mode argument.
 
 :ref:`filters.head`

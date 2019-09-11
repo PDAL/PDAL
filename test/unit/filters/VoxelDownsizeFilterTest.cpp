@@ -38,7 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include "io/BufferReader.hpp"
-#include "filters/StreamableVoxelDownsizeFilter.hpp"
+#include "filters/VoxelDownsizeFilter.hpp"
 
 #include "Support.hpp"
 
@@ -54,7 +54,7 @@ void standard_test(std::string mode) {
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage* filter = fac.createStage("filters.streamablevoxeldownsize");
+    Stage* filter = fac.createStage("filters.voxeldownsize");
     Options fo;
     fo.add("cell", 10);
     fo.add("mode", mode);
@@ -114,7 +114,7 @@ void origin_test(std::string mode) {
     BufferReader r;
     r.addView(v);
 
-    StreamableVoxelDownsizeFilter f;
+    VoxelDownsizeFilter f;
     Options o;
     o.add("cell", 10);
     o.add("mode", mode);
@@ -200,7 +200,7 @@ void stream_test(std::string mode) {
     };
 
     StreamReader r;
-    StreamableVoxelDownsizeFilter voxelfilter;
+    VoxelDownsizeFilter voxelfilter;
     Options o;
     o.add("cell", 5);
     o.add("mode", mode);
@@ -218,32 +218,32 @@ void stream_test(std::string mode) {
     f.execute(table);
 }
 
-TEST(StreamableVoxelDownsizeFilter, firstinvoxel_standard)
+TEST(VoxelDownsizeFilter, firstinvoxel_standard)
 {
     standard_test("firstinvoxel");
 }
 
-TEST(StreamableVoxelDownsizeFilter, firstinvoxel_origin)
+TEST(VoxelDownsizeFilter, firstinvoxel_origin)
 {
     origin_test("firstinvoxel");
 }
 
-TEST(StreamableVoxelDownsizeFilter, firstinvoxel_stream)
+TEST(VoxelDownsizeFilter, firstinvoxel_stream)
 {
     stream_test("firstinvoxel");
 }
 
-TEST(StreamableVoxelDownsizeFilter, voxelcenter_standard)
+TEST(VoxelDownsizeFilter, voxelcenter_standard)
 {
     standard_test("voxelcenter");
 }
 
-TEST(StreamableVoxelDownsizeFilter, voxelcenter_origin)
+TEST(VoxelDownsizeFilter, voxelcenter_origin)
 {
     origin_test("voxelcenter");
 }
 
-TEST(StreamableVoxelDownsizeFilter, voxelcenter_stream)
+TEST(VoxelDownsizeFilter, voxelcenter_stream)
 {
     stream_test("voxelcenter");
 }

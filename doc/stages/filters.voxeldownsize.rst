@@ -1,9 +1,9 @@
-.. _filters.streamablevoxeldownsize:
+.. _filters.voxeldownsize:
 
-filters.streamablevoxeldownsize
+filters.voxeldownsize
 ===============================================================================
 
-The **streamablevoxeldownsize filter** is a voxel-based sampling filter.
+The **voxeldownsize filter** is a voxel-based sampling filter.
 The input point
 cloud is divided into 3D voxels at the given cell size. For each populated
 voxel, either first point entering in the voxel or center of a voxel (depending on mode argument) is accepted and voxel is marked as populated. 
@@ -17,7 +17,7 @@ Example
   [
       "input.las",
       {
-          "type":"filters.streamablevoxeldownsize",
+          "type":"filters.voxeldownsize",
           "cell":1.0,
           "mode":"voxelcenter"
       },
