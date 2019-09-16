@@ -17,6 +17,7 @@ PDAL_ADD_PLUGIN(libname reader rxp
 )
 
 option(BUILD_RIVLIB_TESTS "Build rivlib tests" ON)
+if (WITH_TESTS)
 if (BUILD_RIVLIB_TESTS)
     configure_file(
         test/Config.hpp.in
@@ -33,4 +34,5 @@ if (BUILD_RIVLIB_TESTS)
             ${PROJECT_BINARY_DIR}/plugins/rxp/test
             ${PROJECT_SOURCE_DIR}/plugins/rxp/io
     )
+endif()
 endif()
