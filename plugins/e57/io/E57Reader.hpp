@@ -63,8 +63,7 @@ class PDAL_DLL E57Reader: public Reader, public Streamable
 
         bool isInChunk(point_count_t index) const;
 
-        void setPoint(point_count_t pointIndex, PointRef point,
-            const std::set<std::string> &e57Dimensions) const;
+        void setPoint(point_count_t pointIndex, PointRef point) const;
 
         // Reads a new chunk of data
         point_count_t read(point_count_t index);

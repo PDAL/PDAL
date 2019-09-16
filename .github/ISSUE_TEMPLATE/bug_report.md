@@ -24,6 +24,7 @@ $ pdal translate in.las out.las
 ```
 
 <details>
+  
 ```
 {
   "pipeline":[
@@ -32,6 +33,7 @@ $ pdal translate in.las out.las
   ]
 }
 ```
+
 </details>
 
 **Expected behavior**
@@ -51,14 +53,18 @@ $ pdal --version
 If installed via Conda, you may be asked to paste the output of `conda list` and `conda info` as well.
 
 <details>
+  
 ```
 $ conda list
 ```
+
 </details>
 
 <details>
+  
 ```
 $ conda info
 ```
+
 </details>
 

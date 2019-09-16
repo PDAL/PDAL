@@ -89,8 +89,7 @@ bool E57Reader::ChunkReader::isInChunk(point_count_t index) const
     return actualIndex < (m_startIndex+m_defaultChunkSize);
 }
 
-void E57Reader::ChunkReader::setPoint(point_count_t pointIndex, PointRef point,
-    const std::set<std::string>& e57Dimensions) const
+void E57Reader::ChunkReader::setPoint(point_count_t pointIndex, PointRef point) const
 {
     point_count_t actualIndex = pointIndex - m_pointOffset;
     point_count_t index = actualIndex - m_startIndex;
@@ -221,7 +220,7 @@ bool E57Reader::processOne(PointRef& point)
     if (!m_chunk->isInChunk(m_currentPoint))
         m_chunk->read(m_currentPoint);
 
-    m_chunk->setPoint(m_currentPoint,point, getDimensions());
+    m_chunk->setPoint(m_currentPoint,point);
     m_currentPoint++;
     return true;
 }
