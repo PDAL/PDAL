@@ -61,12 +61,15 @@ Simple translation
 
 .. figure:: ../images/filters.transformation.translation.svg.png
 
-    Can be used to move all points of the pointcloud along the desired
-    axis in the ammount of t:sub:`x` t:sub:`z` and t:sub:`z`.
+      Can be used to move all points of the pointcloud along the desired
+      axis in the ammount of t:sub:`x` t:sub:`z` and t:sub:`z`.
 
 Regarding to the figure above the following matrix will shift the 
-pointcloud 10 units along x-axis, 10 units along y-axis and 10 
-units along z-axis:
+pointcloud:
+
+* 10 units along x-axis
+* 10 units along y-axis
+* 10 units along z-axis
 
 .. code-block:: json
 
