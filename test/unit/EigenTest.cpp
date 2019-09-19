@@ -229,7 +229,7 @@ TEST(EigenTest, computeCentroid)
 {
     PointTable table;
     PointViewPtr view = makeTestView(table);
-    std::vector<PointId> ids(view->size());
+    PointIdList ids(view->size());
     std::iota(ids.begin(), ids.end(), 0);
     auto centroid = computeCentroid(*view, ids);
     EXPECT_EQ(80, centroid.x());

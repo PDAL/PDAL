@@ -131,7 +131,7 @@ private:
     PointId m_threshold;
     PointViewPtr m_inView;
     PointViewSet m_outViews;
-    std::vector<PointId> m_partitions;
+    PointIdList m_partitions;
     ChipRefList m_xvec;
     ChipRefList m_yvec;
     ChipRefList m_spare;

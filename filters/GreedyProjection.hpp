@@ -289,15 +289,15 @@ namespace pdal
       /** \brief List of point states **/
       std::vector<GP3Type> state_;
       /** \brief List of sources **/
-      std::vector<PointId> source_;
+      PointIdList source_;
       /** \brief List of fringe neighbors in one direction **/
-      std::vector<PointId> ffn_;
+      PointIdList ffn_;
       /** \brief List of fringe neighbors in other direction **/
-      std::vector<PointId> sfn_;
+      PointIdList sfn_;
       /** \brief Connected component labels for each point **/
-      std::vector<PointId> part_;
+      PointIdList part_;
       /** \brief Points on the outer edge from which the mesh is grown **/
-      std::vector<PointId> fringe_queue_;
+      PointIdList fringe_queue_;
 
       /** \brief Flag to set if the current point is free **/
       bool is_current_free_;
