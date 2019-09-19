@@ -58,6 +58,7 @@ private:
     virtual PointViewSet run(PointViewPtr view) override;
     virtual void ready(PointTableRef) override;
     virtual bool processOne(PointRef& point) override;
+    virtual void prepared(PointTableRef) override;
 
     bool voxelize(PointRef point);
 
@@ -67,6 +68,8 @@ private:
                              // dimension.
     bool m_pivotVoxelInitialized;
     std::string m_mode;
+
+	bool m_isFirstInVoxelMode; // True: firstinvoxel mode, False: voxelcenter mode
 };
 
 } // namespace pdal
