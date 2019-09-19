@@ -59,9 +59,9 @@ several sources out there in the net or in papers. But sometimes this
 4x4 matrix is ordered in different way. To avoid confusion about how this 
 filter expects values to perform transformation, you will find in the 
 sections below some simple examples to show you how the linearisation to 
-the pdal pipeline should be done. So figures shows alway the commonly used 
-4x4 matirx and the order of transformation components how they are expected 
-and the line on the right side shows how the 4x4 matrix is linearised to be 
+the pdal pipeline should be done. So figures show always the commonly used 
+4x4 matrix and the order of transformation components in it and the line 
+on the right side shows how the 4x4 matrix is linearised to be 
 consumable by `filter.transform`.
 
 Simple translation
