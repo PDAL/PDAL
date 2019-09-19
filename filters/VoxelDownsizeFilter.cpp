@@ -69,8 +69,12 @@ void VoxelDownsizeFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
 
+}
+void VoxelDownsizeFilter::prepared(PointTableRef) {
     if (m_mode.compare("voxelcenter")!=0 && m_mode.compare("firstinvoxel")!=0)
 		throw pdal_error("Invalid Downsizing mode");
+	
+	m_isFirstInVoxelMode = (m_mode.compare("firstinvoxel") == 0);
 }
 
 
@@ -120,7 +124,7 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-    if (m_mode.compare("firstinvoxel")==0)
+    if (m_isFirstInVoxelMode)
         return (m_populatedVoxels.insert(t).second);
     else
     {
