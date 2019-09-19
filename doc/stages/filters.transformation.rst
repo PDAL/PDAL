@@ -53,8 +53,15 @@ Further details
     This description should only give a high level overview about 3D 
     transformation abilities offered by PDAL.
 
-For more easy understanding of how transformation will work with this 
-filter please have a look at the following sketches.
+Normally transformation of coordinates in a 3 dimensional coordinate system
+is expressed in a 4x4 matrix. Whenever you will look for it you will find 
+several sources out there in the net or in papers. But sometimes tis 
+4x4 matrix is ordered in different way. To avoid confusion about how this 
+filter expects values to perform transformation you will find in the 
+sections below some simple examples to show you how the linearisation to 
+the pdal pipeline is done. So in the left 4x4 matirx shows the order of 
+transformation components how they are expected and the line of 
+elements right to it shows how the 4x4 matrix is linearised.
 
 Simple translation
 ..................
@@ -146,7 +153,7 @@ pointcloud 90° around the z-axis:
       "untransformed.las",
       {
           "type":"filters.transformation",
-          "matrix":"0  -1  0  0  0  1  0  0  0  0  1  0  0  0  0  1"
+          "matrix":"0  -1  0  0  1  0  0  0  0  0  1  0  0  0  0  1"
       },
       {
           "type":"writers.las",
