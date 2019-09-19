@@ -55,12 +55,12 @@ Further details
 
 Normally transformation of coordinates in a 3 dimensional coordinate system
 is expressed in a 4x4 matrix. Whenever you will look for it you will find 
-several sources out there in the net or in papers. But sometimes tis 
+several sources out there in the net or in papers. But sometimes this 
 4x4 matrix is ordered in different way. To avoid confusion about how this 
-filter expects values to perform transformation you will find in the 
+filter expects values to perform transformation, you will find in the 
 sections below some simple examples to show you how the linearisation to 
-the pdal pipeline is done. So in the left 4x4 matirx shows the order of 
-transformation components how they are expected and the line of 
+the pdal pipeline should be done. So in the left 4x4 matirx shows the order 
+of transformation components how they are expected and the line of 
 elements right to it shows how the 4x4 matrix is linearised.
 
 Simple translation
