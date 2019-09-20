@@ -59,6 +59,7 @@ public:
     bool hasPose() const;
     void transformPoint(pdal::PointRef pt) const;
     pdal::BOX3D getBoundingBox() const;
+    double rescale(pdal::Dimension::Id dim, double value);
 
 private:
     /// Called only once on constructor called
@@ -84,5 +85,7 @@ private:
     double m_rotation[3][3] = {{0}};
     bool m_hasPose = false;
     pdal::BOX3D m_bbox;
+	
+    std::map<pdal::Dimension::Id, double> m_rescaleFactors;
 };
 }

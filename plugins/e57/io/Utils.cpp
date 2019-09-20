@@ -124,87 +124,87 @@ std::vector<std::string> supportedE57Types()
         "cartesianInvalidState"};
 }
 
-double rescaleE57ToPdalValue(const std::string &e57Dimension, double value,
-    const std::pair<double, double> &e57Bounds)
+bool getLimits(const e57::StructureNode& prototype,
+               const std::string& fieldName, std::pair<double, double>& minmax)
 {
-    assert(e57Bounds.second >= e57Bounds.first);
-
-    if (e57Bounds.second == e57Bounds.first)
-        return value;
-
-    auto pdalDimension = e57ToPdal(e57Dimension);
-    std::pair<int64_t, int64_t> minmax;
-    try
-    {
-        minmax = getPdalBounds(pdalDimension);
-    }
-    catch (pdal_error&)
-    {
-        return value;
-    }
-    value = (value - e57Bounds.first) /
-        (e57Bounds.second - e57Bounds.first + 1e-10);
-    value = value * (minmax.second - minmax.first) + minmax.first;
-    return value;
-}
-
-std::pair<double, double> getLimits(const e57::StructureNode &prototype,
-    const std::string &fieldName)
-{
-    double maxVal = std::nan("max");
-    double minVal = std::nan("min");
+    // Reset minmax
+    minmax.first = minmax.second = 0;
 
     std::string minKey = fieldName + "Minimum";
     std::string maxKey = fieldName + "Maximum";
-    std::string boundingBoxName = fieldName +"Limits";
+    std::string boundingBoxName = fieldName + "Limits";
 
-    if (fieldName.substr(0,5) == "color")
+    if (fieldName.substr(0, 5) == "color")
         boundingBoxName = "colorLimits";
     else if (fieldName[0] == 'x' || fieldName[0] == 'y' || fieldName[0] == 'z')
         boundingBoxName = "cartesianBounds";
 
-    if ( prototype.isDefined(boundingBoxName) )
-	{
-		e57::StructureNode intbox(prototype.get(boundingBoxName));
-		if ( intbox.get(maxKey).type() == e57::E57_SCALED_INTEGER )
-		{
-			maxVal = static_cast<e57::ScaledIntegerNode>(intbox.get(maxKey)).scaledValue();
-			minVal = static_cast<e57::ScaledIntegerNode>(intbox.get(minKey)).scaledValue();
-		}
-		else if ( intbox.get(maxKey).type() == e57::E57_FLOAT )
-		{
-			maxVal = static_cast<e57::FloatNode>(intbox.get(maxKey)).value();
-			minVal = static_cast<e57::FloatNode>(intbox.get(minKey)).value();
-		}
-		else if ( intbox.get(maxKey).type() == e57::E57_INTEGER)
-		{
-			maxVal = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(maxKey)).value());
-			minVal = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
-		}
-	}
-    else if ( prototype.isDefined(fieldName) )
-	{
-		if (prototype.get(fieldName).type() == e57::E57_INTEGER)
-		{
-            minVal = static_cast<double>(static_cast<e57::IntegerNode>(prototype.get(fieldName)).minimum());
-            maxVal = static_cast<double>(static_cast<e57::IntegerNode>(prototype.get(fieldName)).maximum());
-		}
-		else if (prototype.get(fieldName).type() == e57::E57_SCALED_INTEGER)
-		{
-			double scale = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).scale();
-			double offset = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).offset();
-            int64_t minimum = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).minimum();
-            int64_t maximum = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).maximum();
-            minVal = minimum * scale + offset;	
-            maxVal = maximum * scale + offset;
-		}
-		else if (prototype.get(fieldName).type() == e57::E57_FLOAT)
-		{
-            minVal = static_cast<e57::FloatNode>(prototype.get(fieldName)).minimum();
-            maxVal = static_cast<e57::FloatNode>(prototype.get(fieldName)).maximum();  
-		}
-	}
-    return {minVal, maxVal};
+    if (prototype.isDefined(boundingBoxName))
+    {
+        e57::StructureNode intbox(prototype.get(boundingBoxName));
+        if (intbox.get(maxKey).type() == e57::E57_SCALED_INTEGER)
+        {
+            minmax.second =
+                static_cast<e57::ScaledIntegerNode>(intbox.get(maxKey))
+                    .scaledValue();
+            minmax.first =
+                static_cast<e57::ScaledIntegerNode>(intbox.get(minKey))
+                    .scaledValue();
+        }
+        else if (intbox.get(maxKey).type() == e57::E57_FLOAT)
+        {
+            minmax.second =
+                static_cast<e57::FloatNode>(intbox.get(maxKey)).value();
+            minmax.first =
+                static_cast<e57::FloatNode>(intbox.get(minKey)).value();
+        }
+        else if (intbox.get(maxKey).type() == e57::E57_INTEGER)
+        {
+            minmax.second = static_cast<double>(
+                static_cast<e57::IntegerNode>(intbox.get(maxKey)).value());
+            minmax.first = static_cast<double>(
+                static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
+        }
+    }
+    else if (prototype.isDefined(fieldName))
+    {
+        if (prototype.get(fieldName).type() == e57::E57_INTEGER)
+        {
+            minmax.first = static_cast<double>(
+                static_cast<e57::IntegerNode>(prototype.get(fieldName))
+                    .minimum());
+            minmax.second = static_cast<double>(
+                static_cast<e57::IntegerNode>(prototype.get(fieldName))
+                    .maximum());
+        }
+        else if (prototype.get(fieldName).type() == e57::E57_SCALED_INTEGER)
+        {
+            double scale =
+                static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
+                    .scale();
+            double offset =
+                static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
+                    .offset();
+            int64_t minimum =
+                static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
+                    .minimum();
+            int64_t maximum =
+                static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
+                    .maximum();
+            minmax.first = minimum * scale + offset;
+            minmax.second = maximum * scale + offset;
+        }
+        else if (prototype.get(fieldName).type() == e57::E57_FLOAT)
+        {
+            minmax.first =
+                static_cast<e57::FloatNode>(prototype.get(fieldName)).minimum();
+            minmax.second =
+                static_cast<e57::FloatNode>(prototype.get(fieldName)).maximum();
+        }
+    }
+    else
+        return false;
+    return true;
 }
 
 std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
@@ -231,6 +231,30 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
                 " is not currently supported.";
             throw pdal_error(msg);
     }
+}
+
+point_count_t numPoints(const e57::VectorNode data3D)
+{
+    point_count_t count(0);
+    int64_t scanCount = data3D.childCount();
+    try
+    {
+        for (int scanIndex = 0; scanIndex < scanCount; scanIndex++)
+        {
+            e57::StructureNode scan(data3D.get(scanIndex));
+            e57::CompressedVectorNode points(scan.get("points"));
+            count += points.childCount();
+        }
+    }
+    catch (e57::E57Exception& e)
+    {
+        e.report(__FILE__, __LINE__, __FUNCTION__);
+    }
+    catch (...)
+    {
+        throw pdal_error("Got an unknown exception");
+    }
+    return count;
 }
 
 } // namespace e57plugin
