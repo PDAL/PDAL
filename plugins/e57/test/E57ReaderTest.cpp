@@ -67,7 +67,7 @@ TEST(E57Reader, testPreview)
     ASSERT_TRUE(qi.m_bounds.valid());
 }
 
-TEST(E57Reader, testHeader) 
+TEST(E57Reader, testHeader)
 {
     Options ops;
     ops.add("filename", Support::datapath("e57/A_B.e57"));
@@ -80,12 +80,12 @@ TEST(E57Reader, testHeader)
     for (auto& e57Dim: expectedE57Dimensions)
     {
         if (e57Dim.find("nor:normal") == e57Dim.npos &&
-            e57Dim.find("cartesianInvalidState") == e57Dim.npos)
-			ASSERT_TRUE(table.layout()->hasDim(pdal::e57plugin::e57ToPdal(e57Dim)));
+                e57Dim.find("cartesianInvalidState") == e57Dim.npos)
+            ASSERT_TRUE(table.layout()->hasDim(pdal::e57plugin::e57ToPdal(e57Dim)));
     }
 }
 
-TEST(E57Reader, testRead) 
+TEST(E57Reader, testRead)
 {
     Options ops;
     ops.add("filename",Support::datapath("e57/A4.e57"));
@@ -124,7 +124,7 @@ PointViewSet readertest_readE57(std::string filename,PointTableRef table)
     return reader.execute(table);
 }
 
-TEST(E57Reader, testMultipleClouds) 
+TEST(E57Reader, testMultipleClouds)
 {
     PointTable table;
     PointViewSet viewSet = readertest_readE57(Support::datapath("e57/A_B.e57"),table);
@@ -141,27 +141,28 @@ TEST(E57Reader, testMultipleClouds)
     auto cloudB = *viewSetB.begin();
 
     auto expectedDimensions = {pdal::Dimension::Id::X,pdal::Dimension::Id::Y,pdal::Dimension::Id::Z,
-        pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue};
-    for (int i =0; i < 2;i++)
+                               pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue
+                              };
+    for (int i =0; i < 2; i++)
     {
         auto ptB = cloudB->point(i);
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
             ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
-                ptB.getFieldAs<float>(dim));
+                            ptB.getFieldAs<float>(dim));
     }
 
-    for (int i =2; i < 6;i++)
+    for (int i =2; i < 6; i++)
     {
         auto ptA = cloudA->point(i-2);
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
             ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
-                ptA.getFieldAs<float>(dim));
+                            ptA.getFieldAs<float>(dim));
     }
 }
 
-TEST(E57Reader, testTransformMerge) 
+TEST(E57Reader, testTransformMerge)
 {
     PointTable table;
     PointViewSet viewSet = readertest_readE57(Support::datapath("e57/A_moved_B.e57"),table);
@@ -178,26 +179,27 @@ TEST(E57Reader, testTransformMerge)
     auto cloudB = *viewSetB.begin();
 
     auto expectedDimensions = {pdal::Dimension::Id::X,pdal::Dimension::Id::Y,pdal::Dimension::Id::Z,
-        pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue};
-    for (int i =0; i < 2;i++)
+                               pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue
+                              };
+    for (int i =0; i < 2; i++)
     {
         auto ptB = cloudB->point(i);
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
         {
             ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
-                ptB.getFieldAs<float>(dim));
+                            ptB.getFieldAs<float>(dim));
         }
     }
 
-    for (int i =2; i < 6;i++)
+    for (int i =2; i < 6; i++)
     {
         auto ptA = cloudA->point(i-2);
         auto pt = cloud->point(i);
         for (auto& dim: expectedDimensions)
         {
             ASSERT_FLOAT_EQ(pt.getFieldAs<float>(dim),
-                ptA.getFieldAs<float>(dim));
+                            ptA.getFieldAs<float>(dim));
         }
     }
 }

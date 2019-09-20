@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-TEST(ScanTest,testScanCtr) 
+TEST(ScanTest,testScanCtr)
 {
     e57::ImageFile imf(Support::datapath("e57/A4.e57"), "r");
 
@@ -59,7 +59,7 @@ TEST(ScanTest,testScanCtr)
     imf.close();
 }
 
-TEST(ScanTest,getDimension) 
+TEST(ScanTest,getDimension)
 {
     e57::ImageFile imf(Support::datapath("e57/A4.e57"), "r");
     const e57::ustring normalsExtension(
@@ -76,7 +76,8 @@ TEST(ScanTest,getDimension)
     auto dimensions = scan->getDimensions();
     ASSERT_EQ(dimensions.size(),(unsigned long)7);
     std::vector<std::string> expectedDimensions = {"cartesianX","cartesianY","cartesianZ",
-        "colorRed","colorGreen","colorBlue","intensity"};
+                                                   "colorRed","colorGreen","colorBlue","intensity"
+                                                  };
     for (auto dim: expectedDimensions)
     {
         ASSERT_TRUE(dimensions.find(dim) != dimensions.end());
@@ -84,7 +85,7 @@ TEST(ScanTest,getDimension)
     imf.close();
 }
 
-TEST(ScanTest,testGetPoints) 
+TEST(ScanTest,testGetPoints)
 {
     e57::ImageFile imf(Support::datapath("e57/A_B.e57"), "r");
     const e57::ustring normalsExtension(
