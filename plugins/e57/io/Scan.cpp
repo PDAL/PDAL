@@ -107,7 +107,7 @@ void Scan::decodeHeader()
 
     auto supportedFields = pdal::e57plugin::supportedE57Types();
     e57::StructureNode prototype(m_rawPoints->prototype());
-    
+
     // Extract fields that can be extracted
     for (auto& field: supportedFields)
     {
@@ -119,25 +119,25 @@ void Scan::decodeHeader()
     // Get pose estimation
     getPose();
 
-	// Get rescale factors for new scan, These factors are only for
+    // Get rescale factors for new scan, These factors are only for
     // dimensions with limits. This is required Since,
     // 1. E57 support colors in uint8 as well as uint16. This is specified
     //    in header as "colorLimits".
-    //		- If colorLimits is 0-255 then it is uint8 and if 0-65535 then
+    //      - If colorLimits is 0-255 then it is uint8 and if 0-65535 then
     // it
     // is uint16.
-    //		- To make this consistant, We are rescaling colors to 0-65535
+    //      - To make this consistant, We are rescaling colors to 0-65535
     //        range, Since default types for colors in PDAL are Unsigned16.
     // 2. E57 supports intensity in float ranging 0-1.  This is specified in
     //    header as "intensityLimits".
-    //		- Since default type for intensity in PDAL is Unsigned16, E57
+    //      - Since default type for intensity in PDAL is Unsigned16, E57
     //        intensity (between 0-1) need to be rescaled in uint16 (between
     //        0-65535).
     // To do the rescling we need the rescale factors so that we can
     // directly multipy them with colors and intensity values. E.g. - If
     // color limit is 0-255 then rescale factor would be 257.00
     //        (double value) i.e 65535/(255-0)=257.
-    //		- If color limit is 0-65535 then rescale factor would be 1.00
+    //      - If color limit is 0-65535 then rescale factor would be 1.00
     //        (double value) i.e 65535/(65535-0)= 1.
     for (auto& field : supportedFields)
     {
@@ -153,7 +153,7 @@ void Scan::decodeHeader()
     // Cartesian Bounds
     auto minMaxx = std::make_pair(0.0, 0.0);
     auto minMaxy = std::make_pair(0.0, 0.0);
-	auto minMaxz = std::make_pair(0.0, 0.0);
+    auto minMaxz = std::make_pair(0.0, 0.0);
     pdal::e57plugin::getLimits(*m_rawData, "x", minMaxx);
     pdal::e57plugin::getLimits(*m_rawData, "y", minMaxy);
     pdal::e57plugin::getLimits(*m_rawData, "z", minMaxz);
@@ -164,7 +164,7 @@ void Scan::decodeHeader()
 void Scan::getPose()
 {
     if (m_rawData->isDefined("pose"))
-	{
+    {
         // Reset rotation and translation.
         m_rotation[0][0] = 1;
         m_rotation[0][1] = 0;
@@ -181,44 +181,44 @@ void Scan::getPose()
 
         m_hasPose = true;
 
-		e57::StructureNode pose(m_rawData->get("pose"));
-		if (pose.isDefined("rotation"))
-		{
-			e57::StructureNode rotNode(pose.get("rotation"));
-			double q[4];
-			q[0] = e57::FloatNode(rotNode.get("w")).value();
-			q[1] = e57::FloatNode(rotNode.get("x")).value();
-			q[2] = e57::FloatNode(rotNode.get("y")).value();
-			q[3] = e57::FloatNode(rotNode.get("z")).value();
+        e57::StructureNode pose(m_rawData->get("pose"));
+        if (pose.isDefined("rotation"))
+        {
+            e57::StructureNode rotNode(pose.get("rotation"));
+            double q[4];
+            q[0] = e57::FloatNode(rotNode.get("w")).value();
+            q[1] = e57::FloatNode(rotNode.get("x")).value();
+            q[2] = e57::FloatNode(rotNode.get("y")).value();
+            q[3] = e57::FloatNode(rotNode.get("z")).value();
 
-			double q11 = q[1] * q[1];
-			double q22 = q[2] * q[2];
-			double q33 = q[3] * q[3];
-			double q03 = q[0] * q[3];
-			double q13 = q[1] * q[3];
-			double q23 = q[2] * q[3];
-			double q02 = q[0] * q[2];
-			double q12 = q[1] * q[2];
-			double q01 = q[0] * q[1];
+            double q11 = q[1] * q[1];
+            double q22 = q[2] * q[2];
+            double q33 = q[3] * q[3];
+            double q03 = q[0] * q[3];
+            double q13 = q[1] * q[3];
+            double q23 = q[2] * q[3];
+            double q02 = q[0] * q[2];
+            double q12 = q[1] * q[2];
+            double q01 = q[0] * q[1];
 
-			m_rotation[0][0] = 1 - 2.0*(q22 + q33);
-			m_rotation[1][1] = 1 - 2.0*(q11 + q33);
-			m_rotation[2][2] = 1 - 2.0*(q11 + q22);
-			m_rotation[0][1] = 2.0*(q12 - q03);
-			m_rotation[1][0] = 2.0*(q12 + q03);
-			m_rotation[0][2] = 2.0*(q13 + q02);
-			m_rotation[2][0] = 2.0*(q13 - q02);
-			m_rotation[1][2] = 2.0*(q23 - q01);
+            m_rotation[0][0] = 1 - 2.0*(q22 + q33);
+            m_rotation[1][1] = 1 - 2.0*(q11 + q33);
+            m_rotation[2][2] = 1 - 2.0*(q11 + q22);
+            m_rotation[0][1] = 2.0*(q12 - q03);
+            m_rotation[1][0] = 2.0*(q12 + q03);
+            m_rotation[0][2] = 2.0*(q13 + q02);
+            m_rotation[2][0] = 2.0*(q13 - q02);
+            m_rotation[1][2] = 2.0*(q23 - q01);
             m_rotation[2][1] = 2.0*(q23 + q01);
-		}
+        }
 
-		if (pose.isDefined("translation"))
-		{
-			e57::StructureNode transNode(pose.get("translation"));  
-			m_translation[0] = e57::FloatNode(transNode.get("x")).value();
-			m_translation[1] = e57::FloatNode(transNode.get("y")).value();
-			m_translation[2] = e57::FloatNode(transNode.get("z")).value();
-		}
+        if (pose.isDefined("translation"))
+        {
+            e57::StructureNode transNode(pose.get("translation"));
+            m_translation[0] = e57::FloatNode(transNode.get("x")).value();
+            m_translation[1] = e57::FloatNode(transNode.get("y")).value();
+            m_translation[2] = e57::FloatNode(transNode.get("z")).value();
+        }
     }
     else
         m_hasPose = false;

@@ -70,7 +70,7 @@ private:
     std::unique_ptr<VectorNode> m_data3D;
     std::unique_ptr<CompressedVectorReader> m_reader;
     std::unique_ptr<StructureNode> m_e57PointPrototype;
-	std::shared_ptr<Scan> m_scan;
+    std::shared_ptr<Scan> m_scan;
 
     std::map<std::string, std::vector<double>> m_doubleBuffers;
     vector<SourceDestBuffer> m_destBuffers;

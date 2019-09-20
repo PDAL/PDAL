@@ -110,18 +110,18 @@ std::string pdalToE57(Dimension::Id pdalDimension)
 std::vector<Dimension::Id> supportedPdalTypes()
 {
     return {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z,
-        Dimension::Id::NormalX, Dimension::Id::NormalY, Dimension::Id::NormalZ,
-        Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue,
-        Dimension::Id::Intensity, Dimension::Id::Omit
-    };
+            Dimension::Id::NormalX, Dimension::Id::NormalY, Dimension::Id::NormalZ,
+            Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue,
+            Dimension::Id::Intensity, Dimension::Id::Omit
+           };
 }
 
 std::vector<std::string> supportedE57Types()
 {
-    return {"cartesianX",  "cartesianY", "cartesianZ", 
-        "nor:normalX", "nor:normalY", "nor:normalZ", 
-        "colorRed", "colorGreen", "colorBlue", "intensity", 
-        "cartesianInvalidState"};
+    return {"cartesianX",  "cartesianY", "cartesianZ",
+            "nor:normalX", "nor:normalY", "nor:normalZ",
+            "colorRed", "colorGreen", "colorBlue", "intensity",
+            "cartesianInvalidState"};
 }
 
 bool getLimits(const e57::StructureNode& prototype,
@@ -146,10 +146,10 @@ bool getLimits(const e57::StructureNode& prototype,
         {
             minmax.second =
                 static_cast<e57::ScaledIntegerNode>(intbox.get(maxKey))
-                    .scaledValue();
+                .scaledValue();
             minmax.first =
                 static_cast<e57::ScaledIntegerNode>(intbox.get(minKey))
-                    .scaledValue();
+                .scaledValue();
         }
         else if (intbox.get(maxKey).type() == e57::E57_FLOAT)
         {
@@ -161,9 +161,9 @@ bool getLimits(const e57::StructureNode& prototype,
         else if (intbox.get(maxKey).type() == e57::E57_INTEGER)
         {
             minmax.second = static_cast<double>(
-                static_cast<e57::IntegerNode>(intbox.get(maxKey)).value());
+                                static_cast<e57::IntegerNode>(intbox.get(maxKey)).value());
             minmax.first = static_cast<double>(
-                static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
+                               static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
         }
     }
     else if (prototype.isDefined(fieldName))
@@ -171,26 +171,26 @@ bool getLimits(const e57::StructureNode& prototype,
         if (prototype.get(fieldName).type() == e57::E57_INTEGER)
         {
             minmax.first = static_cast<double>(
-                static_cast<e57::IntegerNode>(prototype.get(fieldName))
-                    .minimum());
+                               static_cast<e57::IntegerNode>(prototype.get(fieldName))
+                               .minimum());
             minmax.second = static_cast<double>(
-                static_cast<e57::IntegerNode>(prototype.get(fieldName))
-                    .maximum());
+                                static_cast<e57::IntegerNode>(prototype.get(fieldName))
+                                .maximum());
         }
         else if (prototype.get(fieldName).type() == e57::E57_SCALED_INTEGER)
         {
             double scale =
                 static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
-                    .scale();
+                .scale();
             double offset =
                 static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
-                    .offset();
+                .offset();
             int64_t minimum =
                 static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
-                    .minimum();
+                .minimum();
             int64_t maximum =
                 static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName))
-                    .maximum();
+                .maximum();
             minmax.first = minimum * scale + offset;
             minmax.second = maximum * scale + offset;
         }
@@ -216,19 +216,19 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
     {
         case Dim::Red:
             return {std::numeric_limits<uint16_t>::min(),
-                std::numeric_limits<uint16_t>::max()};    
+                    std::numeric_limits<uint16_t>::max()};
         case Dim::Blue:
             return {std::numeric_limits<uint16_t>::min(),
-                std::numeric_limits<uint16_t>::max()};
+                    std::numeric_limits<uint16_t>::max()};
         case Dim::Green:
             return {std::numeric_limits<uint16_t>::min(),
-                std::numeric_limits<uint16_t>::max()};
+                    std::numeric_limits<uint16_t>::max()};
         case Dim::Intensity:
             return {std::numeric_limits<uint16_t>::min(),
-                std::numeric_limits<uint16_t>::max()};
+                    std::numeric_limits<uint16_t>::max()};
         default:
             std::string msg ="Dimension " + Dimension::name(id) +
-                " is not currently supported.";
+                             " is not currently supported.";
             throw pdal_error(msg);
     }
 }

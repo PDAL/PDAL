@@ -132,12 +132,12 @@ QuickInfo E57Reader::inspect()
         qi.m_dimNames.push_back(layout->dimName(*di));
     qi.m_pointCount = e57plugin::numPoints(*m_data3D);
 
-	auto numScans = m_data3D->childCount();
+    auto numScans = m_data3D->childCount();
     for (int i = 0; i < numScans; ++i)
     {
         Scan scan((StructureNode)m_data3D->get(i));
         qi.m_bounds.grow(scan.getBoundingBox());
-	}
+    }
 
     qi.m_valid = true;
     return qi;
@@ -154,7 +154,7 @@ void E57Reader::setupReader()
     {
         m_scan.reset(new Scan((StructureNode)m_data3D->get(m_currentScan)));
         m_reader.reset(new CompressedVectorReader(
-            m_scan->getPoints().reader(m_destBuffers)));
+                           m_scan->getPoints().reader(m_destBuffers)));
     }
     catch (E57Exception& e)
     {
@@ -227,7 +227,7 @@ point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
 {
     point_count_t numPoints = e57plugin::numPoints(*m_data3D);
     for (PointId counter = 0, nextId = view->size(); counter < numPoints;
-         ++counter, ++nextId)
+            ++counter, ++nextId)
     {
         fillPoint(view->point(nextId));
     }
