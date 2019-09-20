@@ -1,6 +1,7 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *                 https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -64,12 +65,10 @@ private:
 
     double m_cell;
     std::set<std::tuple<int, int, int>> m_populatedVoxels;
-    int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
-                             // dimension.
+    int m_pivotVoxel[3];                     // [0/1/2]: X/Y/Z dimension
     bool m_pivotVoxelInitialized;
     std::string m_mode;
-
-	bool m_isFirstInVoxelMode; // True: firstinvoxel mode, False: voxelcenter mode
+	bool m_isFirstInVoxelMode; // True: firstinvoxel, False: voxelcenter mode
 };
 
 } // namespace pdal
