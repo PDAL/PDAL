@@ -120,6 +120,29 @@ void E57Reader::ready(PointTableRef& ref)
     setupReader();
 }
 
+QuickInfo E57Reader::inspect()
+{
+    QuickInfo qi;
+    std::unique_ptr<PointLayout> layout(new PointLayout());
+    initialize();
+    addDimensions(layout.get());
+
+    Dimension::IdList dims = layout->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        qi.m_dimNames.push_back(layout->dimName(*di));
+    qi.m_pointCount = e57plugin::numPoints(*m_data3D);
+
+	auto numScans = m_data3D->childCount();
+    for (int i = 0; i < numScans; ++i)
+    {
+        Scan scan((StructureNode)m_data3D->get(i));
+        qi.m_bounds.grow(scan.getBoundingBox());
+	}
+
+    qi.m_valid = true;
+    return qi;
+}
+
 /// Setup reader to read next scan if available.
 void E57Reader::setupReader()
 {

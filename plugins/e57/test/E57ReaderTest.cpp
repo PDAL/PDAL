@@ -51,24 +51,6 @@ TEST(E57Reader, testCtr)
     ASSERT_TRUE(table.layout()->hasDim(Dimension::Id::X));
 }
 
-TEST(E57Reader, testGetDimension) 
-{
-    Options ops;
-    ops.add("filename", Support::datapath("e57/A_B.e57"));
-    E57Reader reader;
-    reader.setOptions(ops);
-    PointTable table;
-    reader.prepare(table);
-
-    auto dimensions = reader.getDimensions();
-    ASSERT_EQ(dimensions.size(),7u);
-    std::vector<std::string> expectedDimensions = {"cartesianX","cartesianY","cartesianZ",
-        "colorRed","colorGreen","colorBlue","intensity"};
-    for (auto dim: expectedDimensions)
-    {
-        ASSERT_TRUE(dimensions.find(dim) != dimensions.end());
-    }
-}
 
 TEST(E57Reader, testPreview)
 {
@@ -94,28 +76,13 @@ TEST(E57Reader, testHeader)
     PointTable table;
     reader.prepare(table);
 
-    auto expectedE57Dimensions = reader.getDimensions();
+    auto expectedE57Dimensions = e57plugin::supportedE57Types();
     for (auto& e57Dim: expectedE57Dimensions)
     {
-        ASSERT_TRUE(table.layout()->hasDim(pdal::e57plugin::e57ToPdal(e57Dim)));
+        if (e57Dim.find("nor:normal") == e57Dim.npos &&
+            e57Dim.find("cartesianInvalidState") == e57Dim.npos)
+			ASSERT_TRUE(table.layout()->hasDim(pdal::e57plugin::e57ToPdal(e57Dim)));
     }
-}
-
-TEST(E57Reader, pointCount)
-{
-    E57Reader reader(Support::datapath("e57/A4.e57"));
-    auto count = reader.getNumberPoints();
-    ASSERT_EQ(count,4u);
-}
-
-TEST(E57Reader, getScans)
-{
-    E57Reader reader(Support::datapath("e57/A_B.e57"));
-    auto scans = reader.getScans();
-    ASSERT_EQ(scans.size(),2u);
-    E57Reader reader2(Support::datapath("e57/A4.e57"));
-    scans = reader2.getScans();
-    ASSERT_EQ(scans.size(),1u);
 }
 
 TEST(E57Reader, testRead) 

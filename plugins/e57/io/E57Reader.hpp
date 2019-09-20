@@ -49,7 +49,7 @@ class PDAL_DLL E57Reader : public Reader, public Streamable
 {
 public:
     E57Reader();
-    std::string getName() const override;
+    std::string getName() const;
 
 private:
     /* Pdal section */
@@ -59,6 +59,7 @@ private:
     virtual void done(PointTableRef table) override;
     virtual bool processOne(PointRef&) override;
     virtual void ready(PointTableRef&) override;
+    virtual QuickInfo inspect() override;
 
     // Private members
     bool fillPoint(PointRef& point);

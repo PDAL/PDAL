@@ -59,17 +59,6 @@ e57::CompressedVectorNode Scan::getPoints() const
     return *m_rawPoints;
 }
 
-bool Scan::getLimits(pdal::Dimension::Id pdalId, std::pair<double, double>& minMax) const
-{
-    auto itMinMax = m_valueBounds.find(pdalId);
-    if (itMinMax != m_valueBounds.end())
-    {
-        minMax = itMinMax->second;
-        return true;
-    }
-
-    return false;
-}
 
 bool Scan::hasPose() const
 {
@@ -192,7 +181,6 @@ void Scan::getPose()
 
         m_hasPose = true;
 
-        m_rotation[0][0] = 1; m_rotation[1][1] = 1; m_rotation[2][2] = 1;
 		e57::StructureNode pose(m_rawData->get("pose"));
 		if (pose.isDefined("rotation"))
 		{

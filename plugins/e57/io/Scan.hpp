@@ -51,11 +51,7 @@ public:
 
     /// Get the pdal dimensions that can be read from this scan
     std::set<std::string> getDimensions() const;
-
     e57::CompressedVectorNode getPoints() const;
-
-    bool getLimits(pdal::Dimension::Id pdalId, std::pair<double, double>& minMax) const;
-
     bool hasPose() const;
     void transformPoint(pdal::PointRef pt) const;
     pdal::BOX3D getBoundingBox() const;
@@ -65,6 +61,11 @@ private:
     /// Called only once on constructor called
     void decodeHeader();
 
+	/// Decodes pose for the scan (if any). Pose is nothing but a transformation
+    /// to be applied on a scan. If pose is present, this will modify m_rotation 
+	/// and m_translation matrices. If pose is present but no rotation then 
+	/// m_rotation matrix will be a Identity matrix. If pose is present but no  
+	/// translation then m_translation matrix will be [0, 0, 0].
     void getPose();
 
     // Core data holders for underlying e57 object
@@ -76,10 +77,7 @@ private:
 
     // supported configs
     std::set<std::string> m_e57TypeToPdalDimension;
-
-    // field limits in header
-    std::map<pdal::Dimension::Id,std::pair<double,double>> m_valueBounds;
-
+	
     // Pose information
     double m_translation[3] = {0};
     double m_rotation[3][3] = {{0}};
