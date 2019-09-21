@@ -37,6 +37,7 @@
 #include <nlohmann/json.hpp>
 
 #include <pdal/PointView.hpp>
+#include <pdal/DimUtil.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -93,8 +94,17 @@ void PythonFilter::addArgs(ProgramArgs& args)
 
 void PythonFilter::addDimensions(PointLayoutPtr layout)
 {
-    for (const std::string& s : m_args->m_addDimensions)
-        layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
+    for (const std::string& s : m_args->m_addDimensions) {
+        std::size_t sep = s.find('=');
+        if (sep != std::string::npos)
+        {
+            std::string tval = s.substr(sep+1, s.length() - sep - 1),
+                        dval = s.substr(0, sep);
+            layout->registerOrAssignDim(dval, pdal::Dimension::type(tval));
+        } else {
+            layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
+        }
+    }
 }
 
 
