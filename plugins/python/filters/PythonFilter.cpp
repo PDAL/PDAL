@@ -95,12 +95,10 @@ void PythonFilter::addArgs(ProgramArgs& args)
 void PythonFilter::addDimensions(PointLayoutPtr layout)
 {
     for (const std::string& s : m_args->m_addDimensions) {
-        std::size_t sep = s.find('=');
-        if (sep != std::string::npos)
+        StringList spec = Utils::split2(s, '=');
+        if (spec.size() > 1)
         {
-            std::string tval = s.substr(sep+1, s.length() - sep - 1),
-                        dval = s.substr(0, sep);
-            layout->registerOrAssignDim(dval, pdal::Dimension::type(tval));
+            layout->registerOrAssignDim(spec[0], pdal::Dimension::type(spec[1]));
         } else {
             layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
         }
