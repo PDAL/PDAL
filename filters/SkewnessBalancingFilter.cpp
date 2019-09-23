@@ -67,7 +67,7 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
     point_count_t n1(0);
     double delta, delta_n, term1, M1, M2, M3;
     M1 = M2 = M3 = 0.0;
-    std::map<PointId, double> skewness;
+    std::vector<double> skewness;
     for (PointId i = 0; i < view->size(); ++i)
     {
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
