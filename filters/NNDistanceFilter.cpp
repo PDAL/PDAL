@@ -119,7 +119,7 @@ void NNDistanceFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        std::vector<PointId> indices(k);
+        PointIdList indices(k);
         std::vector<double> sqr_dists(k);
         index.knnSearch(idx, k, &indices, &sqr_dists);
         double val;

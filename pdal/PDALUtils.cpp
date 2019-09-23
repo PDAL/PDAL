@@ -354,7 +354,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     for (PointId i = 0; i < srcView->size(); ++i)
     {
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         PointRef srcPoint = srcView->point(i);
         candIndex.knnSearch(srcPoint, 1, &indices, &sqr_dists);
@@ -365,7 +365,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     for (PointId i = 0; i < candView->size(); ++i)
     {
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         PointRef candPoint = candView->point(i);
         srcIndex.knnSearch(candPoint, 1, &indices, &sqr_dists);

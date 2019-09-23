@@ -609,7 +609,7 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
             double x = m_bounds.minx + (c + 0.5) * m_args->m_cell;
             double y = m_bounds.miny + (r + 0.5) * m_args->m_cell;
             int k = 8;
-            std::vector<PointId> neighbors(k);
+            PointIdList neighbors(k);
             std::vector<double> sqr_dists(k);
             kdi.knnSearch(x, y, k, &neighbors, &sqr_dists);
 

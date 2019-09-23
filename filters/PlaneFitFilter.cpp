@@ -118,10 +118,10 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
                                  const KD3Index& kdi)
 {
     // Find k-nearest neighbors of i.
-    std::vector<PointId> ni = kdi.neighbors(i, m_knn + 1);
+    PointIdList ni = kdi.neighbors(i, m_knn + 1);
 
     // Normal based only on neighbors, so exclude first point.
-    std::vector<PointId> neighbors(ni.begin() + 1, ni.end());
+    PointIdList neighbors(ni.begin() + 1, ni.end());
 
     // Covariance and normal are based off demeaned coordinates, so we record
     // the centroid to properly offset the coordinates when computing point to
