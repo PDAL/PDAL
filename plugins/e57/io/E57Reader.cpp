@@ -34,6 +34,7 @@
 
 #include "E57Reader.hpp"
 #include "Utils.hpp"
+#include "arbiter/arbiter.hpp"
 
 namespace pdal
 {
@@ -49,7 +50,7 @@ std::string E57Reader::getName() const
 
 E57Reader::E57Reader()
     : Reader(), Streamable(), m_currentIndex(0), m_pointsInCurrentBatch(0), m_defaultChunkSize(1000000),
-    m_currentScan(-1)
+      m_currentScan(-1)
 {
 }
 
@@ -65,7 +66,9 @@ void E57Reader::initialize()
 {
     try
     {
-        m_imf.reset(new ImageFile(m_filename, "r"));
+        arbiter::Arbiter arb;
+        auto fileHandle = arb.getLocalHandle(m_filename);
+        m_imf.reset(new ImageFile(fileHandle->localPath(), "r"));
         StructureNode root = m_imf->root();
 
         if (!root.isDefined("/data3D"))
