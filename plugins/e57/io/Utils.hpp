@@ -43,30 +43,35 @@ namespace pdal
 {
 namespace e57plugin
 {
-    // returns pdal::Dimension::Id::Unknown in case the dimension is
-    // not recognised
-    PDAL_DLL pdal::Dimension::Id e57ToPdal(const std::string &e57Dimension);
+/// converts a E57 string to the corresponding pdal dimension.
+/// returns pdal::Dimension::Id::Unknown in case the dimension is
+/// not recognised
+PDAL_DLL pdal::Dimension::Id e57ToPdal(const std::string &e57Dimension);
 
-    // converts a pdal dimension to the corresponding E57 string
-    // returns an empty string in case the dimension is not recognised
-    PDAL_DLL std::string pdalToE57(pdal::Dimension::Id pdalDimension);
+/// converts a pdal dimension to the corresponding E57 string .
+/// returns a empty string in case the dimension is
+/// not recognised
+PDAL_DLL std::string pdalToE57(pdal::Dimension::Id pdalDimension);
 
-    /// Converts a value from E57 to pdal. Handles change in type representation
-    /// For example, intensity in e57 is between 0 and 1 and 0 and 2^16 in pdal
-    PDAL_DLL double rescaleE57ToPdalValue(const std::string &e57Dimension,
-        double value, const std::pair<double, double> &e57Bounds);
+PDAL_DLL std::vector<pdal::Dimension::Id> supportedPdalTypes();
 
-    PDAL_DLL std::vector<pdal::Dimension::Id> supportedPdalTypes();
-    PDAL_DLL std::vector<std::string> supportedE57Types();
+/// Returns a list of PDAL supported E57 dimensions.
+PDAL_DLL std::vector<std::string> supportedE57Types();
 
-    // Tries to find the limit of a dimension in the e57 node headers
-    // return nan if not found
-    std::pair<double, double> getLimits(const e57::StructureNode &prototype,
-        const std::string &fieldName);
+/// Tries to find the limit of a dimension in the e57 node headers
+/// if found, Fill minmax with minimum limit and maximum limit and return
+/// true otherwise returns false. if not found, minmax will be a pair of
+/// {0.0, 0.0} (double values).
+PDAL_DLL bool getLimits(const e57::StructureNode& prototype,
+                        const std::string& fieldName,
+                        std::pair<double, double>& minmax);
 
-    // Get the bounds of a given dimension as expected by pdal
-    PDAL_DLL std::pair<uint64_t, uint64_t>
-    getPdalBounds(pdal::Dimension::Id id);
+/// Get the bounds of a given dimension as expected by pdal
+PDAL_DLL std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id);
+
+/// Returns total number of points in data3D.
+/// Where data3D is a "/data3D" node from E57 hierarchy.
+point_count_t numPoints(const e57::VectorNode data3D);
 
 } // namespace e57plugin
 } // namespace pdal
