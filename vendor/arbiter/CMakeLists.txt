@@ -3,7 +3,7 @@
 #
 
 get_property(EXISTS GLOBAL PROPERTY _PDALARBITER_INCLUDED)
-if (NOT PDAL_ARBITER_ENABLED OR EXISTS)
+if (EXISTS)
     return()
 endif()
 

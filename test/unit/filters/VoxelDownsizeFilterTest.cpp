@@ -1,7 +1,6 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re,
- *   https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -39,25 +38,26 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include "io/BufferReader.hpp"
-#include "filters/FirstInVoxelFilter.hpp"
+#include "filters/VoxelDownsizeFilter.hpp"
 
 #include "Support.hpp"
 
 namespace pdal
 {
 
-TEST(FirstInVoxelFilterTest, standard)
-{
+using namespace Dimension;
+void standard_test(std::string mode) {
     StageFactory fac;
 
-    Stage *reader = fac.createStage("readers.las");
+    Stage* reader = fac.createStage("readers.las");
     Options ro;
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(ro);
 
-    Stage *filter = fac.createStage("filters.firstinvoxel");
+    Stage* filter = fac.createStage("filters.voxeldownsize");
     Options fo;
     fo.add("cell", 10);
+    fo.add("mode", mode);
     filter->setOptions(fo);
     filter->setInput(*reader);
 
@@ -69,10 +69,8 @@ TEST(FirstInVoxelFilterTest, standard)
     EXPECT_EQ(v->size(), 7788U);
 }
 
-TEST(FirstInVoxelFilterTest, origin)
-{
+void origin_test(std::string mode) {
     using namespace Dimension;
-
     PointTable t;
     t.layout()->registerDims({Id::X, Id::Y, Id::Z});
     PointViewPtr v(new PointView(t));
@@ -116,9 +114,10 @@ TEST(FirstInVoxelFilterTest, origin)
     BufferReader r;
     r.addView(v);
 
-    FirstInVoxelFilter f;
+    VoxelDownsizeFilter f;
     Options o;
     o.add("cell", 10);
+    o.add("mode", mode);
     f.setOptions(o);
     f.setInput(r);
 
@@ -129,55 +128,39 @@ TEST(FirstInVoxelFilterTest, origin)
     EXPECT_EQ(v->size(), 8u);
 }
 
-TEST(FirstInVoxelFilterTest, stream)
-{
-    using namespace Dimension;
+void stream_test(std::string mode) {
+	class StreamReader : public Reader, public Streamable
+	{
+	public:
+		std::string getName() const
+		{
+			return "readers.stream";
+		}
+		bool processOne(PointRef& point)
+		{
+			static int i = 0;
 
-    FixedPointTable table(2);
-    table.layout()->registerDim(Id::X);
-    table.layout()->registerDim(Id::Y);
-    table.layout()->registerDim(Id::Z);
-
-    class StreamReader : public Reader, public Streamable
-    {
-    public:
-        std::string getName() const
-        {
-            return "readers.stream";
-        }
-        bool processOne(PointRef& point)
-        {
-            static int i = 0;
-
-            if (i == 0)
-            {
-                point.setField(Id::X, 2);
-                point.setField(Id::Y, 2);
-            }
-            else if (i == 1)
-            {
-                point.setField(Id::X, 8);
-                point.setField(Id::Y, 2);
-            }
-            else if (i == 2)
-            {
-                point.setField(Id::X, 10);
-                point.setField(Id::Y, 2);
-            }
-            else
-                return false;
-            i++;
-            return true;
-        }
-    };
-
-    StreamReader r;
-
-    FirstInVoxelFilter voxelfilter;
-    Options o;
-    o.add("cell", 5);
-    voxelfilter.setInput(r);
-    voxelfilter.setOptions(o);
+			if (i == 0)
+			{
+				point.setField(Id::X, 2);
+				point.setField(Id::Y, 2);
+			}
+			else if (i == 1)
+			{
+				point.setField(Id::X, 8);
+				point.setField(Id::Y, 2);
+			}
+			else if (i == 2)
+			{
+				point.setField(Id::X, 10);
+				point.setField(Id::Y, 2);
+			}
+			else
+				return false;
+			i++;
+			return true;
+		}
+	};
 
     class TestFilter : public Filter, public Streamable
     {
@@ -216,11 +199,52 @@ TEST(FirstInVoxelFilterTest, stream)
         }
     };
 
+    StreamReader r;
+    VoxelDownsizeFilter voxelfilter;
+    Options o;
+    o.add("cell", 5);
+    o.add("mode", mode);
+    voxelfilter.setInput(r);
+    voxelfilter.setOptions(o);
+
+    FixedPointTable table(2);
+    table.layout()->registerDim(Id::X);
+    table.layout()->registerDim(Id::Y);
+    table.layout()->registerDim(Id::Z);
+
     TestFilter f;
     f.setInput(voxelfilter);
-
     f.prepare(table);
     f.execute(table);
 }
 
+TEST(VoxelDownsizeFilter, firstinvoxel_standard)
+{
+    standard_test("firstinvoxel");
+}
+
+TEST(VoxelDownsizeFilter, firstinvoxel_origin)
+{
+    origin_test("firstinvoxel");
+}
+
+TEST(VoxelDownsizeFilter, firstinvoxel_stream)
+{
+    stream_test("firstinvoxel");
+}
+
+TEST(VoxelDownsizeFilter, voxelcenter_standard)
+{
+    standard_test("voxelcenter");
+}
+
+TEST(VoxelDownsizeFilter, voxelcenter_origin)
+{
+    origin_test("voxelcenter");
+}
+
+TEST(VoxelDownsizeFilter, voxelcenter_stream)
+{
+    stream_test("voxelcenter");
+}
 } // namespace

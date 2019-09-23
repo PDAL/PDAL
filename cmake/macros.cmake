@@ -101,9 +101,6 @@ endmacro(PDAL_ADD_FREE_LIBRARY)
 #    LINK_WITH link plugin with libraries
 #    INCLUDES header directories
 #
-# The "generate_dimension_hpp" ensures that Dimension.hpp is built before
-#  attempting to build anything else in the "library".
-#
 # NOTE: _name is the name of a variable that will hold the plugin name
 #    when the macro completes
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
@@ -119,7 +116,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     if (WIN32)
-	    list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
+        list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})

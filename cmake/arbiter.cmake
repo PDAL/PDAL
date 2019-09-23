@@ -4,11 +4,4 @@
 
 include(${PDAL_CMAKE_DIR}/curl.cmake)
 
-set(PDAL_ARBITER_ENABLED 0)
-if (CURL_FOUND)
-    set(PDAL_ARBITER_ENABLED 1)
-    set(ARBITER_DEFINES "PDAL_ARBITER_ENABLED")
-    set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
-else()
-    set(ARBITER_DEFINES "")
-endif()
+set(PDAL_ARBITER_LIB_NAME pdal_arbiter)

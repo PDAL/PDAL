@@ -45,12 +45,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # See below for the rest of the magic.
 #
 if (APPLE OR WIN32)
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
 else()
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
+set(PDAL_LIB_NAME pdalcpp)
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
