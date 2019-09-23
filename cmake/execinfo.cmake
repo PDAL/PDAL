@@ -1,4 +1,6 @@
 #
 # Unwind
 #
-find_package(Libexecinfo QUIET)
+if(NOT MSVC)
+    find_package(Libexecinfo )
+endif()

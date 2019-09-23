@@ -438,7 +438,8 @@ template <class T>
 inline T PointView::getFieldAs(Dimension::Id dim,
     PointId pointIndex) const
 {
-    assert(pointIndex < m_size);
+    if (pointIndex >= m_size)
+        throw pdal_error("Point index " + std::to_string(pointIndex) + " goes beyond view size " + std::to_string(m_size));
     T retval;
     bool ok = false;
     const Dimension::Detail *dd = layout()->dimDetail(dim);

@@ -1,4 +1,6 @@
 #
 # Unwind
 #
-find_package(Libunwind QUIET)
+if(NOT MSVC)
+    find_package(Libunwind QUIET)
+endif()
