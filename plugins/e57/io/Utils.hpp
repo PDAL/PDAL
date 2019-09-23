@@ -46,17 +46,17 @@ namespace e57plugin
 /// converts a E57 string to the corresponding pdal dimension.
 /// returns pdal::Dimension::Id::Unknown in case the dimension is
 /// not recognised
-PDAL_DLL inline pdal::Dimension::Id e57ToPdal(const std::string &e57Dimension);
+PDAL_DLL pdal::Dimension::Id e57ToPdal(const std::string &e57Dimension);
 
 /// converts a pdal dimension to the corresponding E57 string .
 /// returns a empty string in case the dimension is
 /// not recognised
-PDAL_DLL inline std::string pdalToE57(pdal::Dimension::Id pdalDimension);
+PDAL_DLL std::string pdalToE57(pdal::Dimension::Id pdalDimension);
 
-PDAL_DLL inline std::vector<pdal::Dimension::Id> supportedPdalTypes();
+PDAL_DLL std::vector<pdal::Dimension::Id> supportedPdalTypes();
 
 /// Returns a list of PDAL supported E57 dimensions.
-PDAL_DLL inline std::vector<std::string> supportedE57Types();
+PDAL_DLL std::vector<std::string> supportedE57Types();
 
 /// Tries to find the limit of a dimension in the e57 node headers
 /// if found, Fill minmax with minimum limit and maximum limit and return
