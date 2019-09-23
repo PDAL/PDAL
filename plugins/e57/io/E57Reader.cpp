@@ -229,7 +229,8 @@ point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
     for (PointId counter = 0, nextId = view->size(); counter < numPoints;
             ++counter, ++nextId)
     {
-        fillPoint(view->point(nextId));
+        PointRef point(view->point(nextId));
+        fillPoint(point);
     }
 
     return view->size();
