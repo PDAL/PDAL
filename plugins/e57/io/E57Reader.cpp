@@ -34,6 +34,7 @@
 
 #include "E57Reader.hpp"
 #include "Utils.hpp"
+#include "arbiter/arbiter.hpp"
 
 namespace pdal
 {
@@ -65,7 +66,9 @@ void E57Reader::initialize()
 {
     try
     {
-        m_imf.reset(new ImageFile(m_filename, "r"));
+		arbiter::Arbiter arb;
+        auto fileHandle = arb.getLocalHandle(m_filename);
+        m_imf.reset(new ImageFile(fileHandle->localPath(), "r"));
         StructureNode root = m_imf->root();
 
         if (!root.isDefined("/data3D"))
