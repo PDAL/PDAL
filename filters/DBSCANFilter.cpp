@@ -132,12 +132,18 @@ public:
         {
             for (size_t i = 0; i < m_dims.size(); ++i)
             {
-                bb[i].low = std::numeric_limits<double>::max();
-                bb[i].high = std::numeric_limits<double>::lowest();
+                bb[i].low = 0.0;
+                bb[i].high = 0.0;
             }
         }
         else
         {
+            for (size_t i = 0; i < m_dims.size(); ++i)
+            {
+                bb[i].low = std::numeric_limits<double>::max();
+                bb[i].high = std::numeric_limits<double>::lowest();
+            }
+
             for (PointId i = 0; i < m_buf.size(); ++i)
             {
                 for (size_t j = 0; j < m_dims.size(); ++j)
