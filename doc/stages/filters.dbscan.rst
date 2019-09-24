@@ -21,7 +21,8 @@ Example
       {
           "type":"filters.dbscan",
           "min_points":10,
-          "eps":2.0
+          "eps":2.0,
+          "dimensions":"X,Y,Z"
       },
       {
           "type":"writers.bpf",
@@ -42,4 +43,7 @@ eps
   The epsilon parameter can be estimated from a k-distance graph (for k =
   ``min_points`` minus one). ``eps`` defines the Euclidean distance that will
   be used when searching for neighbors. [Default: 1.0]
+
+dimensions
+  Comma-separated string indicating dimensions to use for clustering.
 
