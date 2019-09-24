@@ -384,6 +384,125 @@ public:
     }
 };
 
+class KDFlexIndex
+{
+protected:
+    const PointView& m_buf;
+    const Dimension::IdList& m_dims;
+
+    typedef nanoflann::KDTreeSingleIndexAdaptor<
+        nanoflann::L2_Simple_Adaptor<double, KDFlexIndex, double>, KDFlexIndex,
+        -1, std::size_t>
+        my_kd_tree_t;
+
+    std::unique_ptr<my_kd_tree_t> m_index;
+
+public:
+    std::size_t kdtree_get_point_count() const
+    {
+        return m_buf.size();
+    }
+
+    void build()
+    {
+        m_index.reset(
+            new my_kd_tree_t(m_dims.size(), *this,
+                             nanoflann::KDTreeSingleIndexAdaptorParams(100)));
+        m_index->buildIndex();
+    }
+
+    KDFlexIndex(const PointView& buf, const Dimension::IdList& dims)
+        : m_buf(buf), m_dims(dims)
+    {
+    }
+
+    ~KDFlexIndex()
+    {
+    }
+
+    PointIdList radius(PointId idx, double r) const
+    {
+        PointIdList output;
+        std::vector<std::pair<std::size_t, double>> ret_matches;
+        nanoflann::SearchParams params;
+        params.sorted = true;
+
+        std::vector<double> pt;
+        for (auto const& dim : m_dims)
+        {
+            double val = m_buf.getFieldAs<double>(dim, idx);
+            pt.push_back(val);
+        }
+
+        // Our distance metric is square distance, so we use the square of
+        // the radius.
+        const std::size_t count =
+            m_index->radiusSearch(&pt[0], r * r, ret_matches, params);
+
+        for (std::size_t i = 0; i < count; ++i)
+            output.push_back(ret_matches[i].first);
+        return output;
+    }
+
+    inline double kdtree_get_pt(const PointId idx, int dim) const
+    {
+        if (idx >= m_buf.size())
+            return 0.0;
+
+        return m_buf.getFieldAs<double>(m_dims[dim], idx);
+    }
+
+    inline double kdtree_distance(const double* p1, const PointId idx,
+                                  size_t /*numDims*/) const
+    {
+        double result(0.0);
+        for (size_t i = 0; i < m_dims.size(); ++i)
+        {
+            double d = p1[i] - m_buf.getFieldAs<double>(m_dims[i], idx);
+            result += d * d;
+        }
+
+        return result;
+    }
+
+    template <class BBOX> bool kdtree_get_bbox(BBOX& bb) const
+    {
+        if (m_buf.empty())
+        {
+            for (size_t i = 0; i < m_dims.size(); ++i)
+            {
+                bb[i].low = 0.0;
+                bb[i].high = 0.0;
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < m_dims.size(); ++i)
+            {
+                bb[i].low = std::numeric_limits<double>::max();
+                bb[i].high = std::numeric_limits<double>::lowest();
+            }
+
+            for (PointId i = 0; i < m_buf.size(); ++i)
+            {
+                for (size_t j = 0; j < m_dims.size(); ++j)
+                {
+                    double val = m_buf.getFieldAs<double>(m_dims[j], i);
+                    if (val < bb[j].low)
+                        bb[j].low = val;
+                    if (val > bb[j].high)
+                        bb[j].high = val;
+                }
+            }
+        }
+        return true;
+    }
+
+private:
+    KDFlexIndex(const KDFlexIndex&);
+    KDFlexIndex& operator=(KDFlexIndex&);
+};
+
 template<>
 inline
 double KDIndex<2>::kdtree_get_pt(const PointId idx, int dim) const
