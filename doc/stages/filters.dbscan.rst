@@ -36,8 +36,8 @@ Options
 
 min_points
   The minimum cluster size ``min_points`` should be greater than or equal to
-  the number of dimensions plus one. As a rule of thumb, two times the number
-  of dimensions is often used. [Default: 6]
+  the number of dimensions (e.g., X, Y, and Z) plus one. As a rule of thumb,
+  two times the number of dimensions is often used. [Default: 6]
 
 eps
   The epsilon parameter can be estimated from a k-distance graph (for k =
