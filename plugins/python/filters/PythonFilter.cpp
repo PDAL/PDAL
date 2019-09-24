@@ -95,12 +95,20 @@ void PythonFilter::addArgs(ProgramArgs& args)
 void PythonFilter::addDimensions(PointLayoutPtr layout)
 {
     for (const std::string& s : m_args->m_addDimensions) {
-        StringList spec = Utils::split2(s, '=');
-        if (spec.size() > 1)
+        StringList spec = Utils::split(s, '=');
+        Utils::trim(spec[0]);
+        if (spec.size() == 2)
         {
-            layout->registerOrAssignDim(spec[0], pdal::Dimension::type(spec[1]));
-        } else {
+            Utils::trim(spec[1]);
+            auto type = pdal::Dimension::type(spec[1]);
+            if (type == pdal::Dimension::Type::None)
+                throwError("Invalid dimension type specified '" + spec[1] + "'.  See "
+                           "documentation for valid dimension types");
+            layout->registerOrAssignDim(spec[0], type);
+        } else if (spec.size() == 1){
             layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
+        } else {
+          throwError("Invalid dimension specified '" + s + "'.  Need <dimension> or <dimension>=<data_type>.");
         }
     }
 }
