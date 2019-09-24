@@ -175,6 +175,10 @@ std::string DBSCANFilter::getName() const
     return s_info.name;
 }
 
+DBSCANFilter::DBSCANFilter() : Filter()
+{
+}
+
 void DBSCANFilter::addArgs(ProgramArgs& args)
 {
     args.add("min_points", "Min points per cluster", m_minPoints,

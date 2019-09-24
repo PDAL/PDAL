@@ -46,9 +46,10 @@ class ProgramArgs;
 class PDAL_DLL DBSCANFilter : public Filter
 {
 public:
-    DBSCANFilter() : Filter()
-    {
-    }
+    DBSCANFilter();
+
+    DBSCANFilter& operator=(const DBSCANFilter&) = delete;
+    DBSCANFilter(const DBSCANFilter&) = delete;
 
     std::string getName() const;
 
@@ -63,9 +64,6 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
-
-    DBSCANFilter& operator=(const DBSCANFilter&); // not implemented
-    DBSCANFilter(const DBSCANFilter&);            // not implemented
 };
 
 } // namespace pdal
