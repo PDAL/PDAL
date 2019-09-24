@@ -262,17 +262,11 @@ void EptReader::initialize()
         poly.transform(getSpatialReference());
 
         std::vector<Polygon> polys = poly.polygons();
-        if (polys.size())
-            for (auto p: polys)
-            {
-                exploded.emplace_back(p);
-            }
+        exploded.insert(exploded.end(),
+            std::make_move_iterator(polys.begin()),
+            std::make_move_iterator(polys.end()));
     }
-
-    if (exploded.size())
-        m_args->m_polys.clear();
-        for (auto p: exploded)
-            m_args->m_polys.emplace_back(p);
+    m_args->m_polys = std::move(exploded);
 
     try
     {
