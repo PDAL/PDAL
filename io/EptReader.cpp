@@ -254,12 +254,25 @@ void EptReader::initialize()
             boundsSrs.getWKT(), getSpatialReference().getWKT());
 
     // Transform polygons and bounds to point source SRS.
+    std::vector <Polygon> exploded;
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
             throwError("Geometrically invalid polyon in option 'polygon'.");
         poly.transform(getSpatialReference());
+
+        std::vector<Polygon> polys = poly.polygons();
+        if (polys.size())
+            for (auto p: polys)
+            {
+                exploded.emplace_back(p);
+            }
     }
+
+    if (exploded.size())
+        m_args->m_polys.clear();
+        for (auto p: exploded)
+            m_args->m_polys.emplace_back(p);
 
     try
     {
