@@ -101,12 +101,20 @@ TEST(RandomizeFilterTest, seedZero)
     PointViewPtr v = *s.begin();
     EXPECT_EQ((size_t)count, v->size());
 
-    std::vector<double> vals{6, 2, 1, 7, 8, 4, 10, 9, 5, 3};
+    std::vector<double> vals(count, 0.0);
+    for (PointId i = 0; i < count; ++i)
+        vals[i] = v->getFieldAs<double>(Dimension::Id::X, i);
+
+    PointViewSet s2 = f.execute(t);
+
+    EXPECT_EQ(1u, s2.size());
+    PointViewPtr v2 = *s2.begin();
+    EXPECT_EQ((size_t)count, v2->size());
 
     for (PointId i = 0; i < count; ++i)
     {
-        double x = v->getFieldAs<double>(Dimension::Id::X, i);
-        EXPECT_EQ(vals[i], x);
+        double val = v2->getFieldAs<double>(Dimension::Id::X, i);
+        EXPECT_EQ(vals[i], val);
     }
 }
 
@@ -138,12 +146,20 @@ TEST(RandomizeFilterTest, seedOne)
     PointViewPtr v = *s.begin();
     EXPECT_EQ((size_t)count, v->size());
 
-    std::vector<double> vals{6, 10, 2, 5, 8, 1, 7, 9, 4, 3};
+    std::vector<double> vals(count, 0.0);
+    for (PointId i = 0; i < count; ++i)
+        vals[i] = v->getFieldAs<double>(Dimension::Id::X, i);
+
+    PointViewSet s2 = f.execute(t);
+
+    EXPECT_EQ(1u, s2.size());
+    PointViewPtr v2 = *s2.begin();
+    EXPECT_EQ((size_t)count, v2->size());
 
     for (PointId i = 0; i < count; ++i)
     {
-        double x = v->getFieldAs<double>(Dimension::Id::X, i);
-        EXPECT_EQ(vals[i], x);
+        double val = v2->getFieldAs<double>(Dimension::Id::X, i);
+        EXPECT_EQ(vals[i], val);
     }
 }
 
@@ -171,17 +187,21 @@ TEST(RandomizeFilterTest, unseeded)
     PointViewPtr v = *s.begin();
     EXPECT_EQ((size_t)count, v->size());
 
-    std::vector<double> vals{6, 2, 1, 7, 8, 4, 10, 9, 5, 3};
+    std::vector<double> vals(count, 0.0);
+    for (PointId i = 0; i < count; ++i)
+        vals[i] = v->getFieldAs<double>(Dimension::Id::X, i);
 
-    // I don't love this test. With such a small number of samples (even with a
-    // large number), there is some probability that at least one will match
-    // what we expect from seed=0. It was the best I could think of for now
-    // though. In short, some can match, but certainly not all of them should.
+    PointViewSet s2 = f.execute(t);
+
+    EXPECT_EQ(1u, s2.size());
+    PointViewPtr v2 = *s2.begin();
+    EXPECT_EQ((size_t)count, v2->size());
+
     size_t numMatches(0);
     for (PointId i = 0; i < count; ++i)
     {
-        double x = v->getFieldAs<double>(Dimension::Id::X, i);
-        if (vals[i] == x)
+        double val = v2->getFieldAs<double>(Dimension::Id::X, i);
+        if (vals[i] == val)
             numMatches++;
     }
     EXPECT_LT(numMatches, count);
