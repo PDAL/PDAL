@@ -45,5 +45,5 @@ eps
   be used when searching for neighbors. [Default: 1.0]
 
 dimensions
-  Comma-separated string indicating dimensions to use for clustering.
+  Comma-separated string indicating dimensions to use for clustering. [Default: X,Y,Z]
 

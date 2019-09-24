@@ -65,7 +65,8 @@ void DBSCANFilter::addArgs(ProgramArgs& args)
     args.add("min_points", "Min points per cluster", m_minPoints,
              static_cast<uint64_t>(6));
     args.add("eps", "Epsilon", m_eps, 1.0);
-    args.add("dimensions", "Dimensions to cluster", m_dimStringList);
+    args.add("dimensions", "Dimensions to cluster", m_dimStringList,
+             {"X", "Y", "Z"});
 }
 
 void DBSCANFilter::addDimensions(PointLayoutPtr layout)
