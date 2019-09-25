@@ -216,7 +216,6 @@ public:
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
     }
 
-private:
     std::string m_remotePath;
     TempFile m_localFile;
 };
@@ -233,7 +232,6 @@ public:
         open(localPath, mode);
     }
 
-private:
     TempFile m_localFile;
 };
 
@@ -281,6 +279,21 @@ std::ostream *createFile(const std::string& path, bool asBinary)
   \param asBinary  Whether the file should be opened binary.
   \return  Pointer to stream opened for input.
 */
+
+bool isRemote(const std::string& path)
+{
+    arbiter::Arbiter a;
+    return a.isRemote(path);
+}
+
+std::string fetchRemote(const std::string& path)
+{
+    std::string temp = tempFilename(path);
+    arbiter::Arbiter a;
+    a.put(path, a.getBinary(temp));
+    return temp;
+}
+
 std::istream *openFile(const std::string& path, bool asBinary)
 {
     arbiter::Arbiter a;

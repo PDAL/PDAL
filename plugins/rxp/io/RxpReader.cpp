@@ -41,6 +41,7 @@
 #include "RxpReader.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -93,6 +94,10 @@ void RxpReader::addArgs(ProgramArgs& args)
 
 void RxpReader::initialize()
 {
+
+    if (pdal::Utils::isRemote(m_filename))
+        m_filename = pdal::Utils::fetchRemote(m_filename);
+
     m_uri = m_isRdtp ? "rdtp://" + m_filename : "file:" + m_filename;
 }
 
