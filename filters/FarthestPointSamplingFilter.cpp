@@ -77,8 +77,7 @@ PointViewSet FarthestPointSamplingFilter::run(PointViewPtr inView)
     PointViewPtr outView = inView->makeNew();
 
     // Construct a KD-tree of the input view.
-    KD3Index kdi(*inView);
-    kdi.build();
+    KD3Index& kdi = inView->build3dIndex();
 
     // Seed the output view with the first point in the current sorting.
     PointId seedId(0);
