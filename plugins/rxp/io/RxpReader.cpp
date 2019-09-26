@@ -41,7 +41,7 @@
 #include "RxpReader.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
-#include <pdal/util/PDALUtils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
