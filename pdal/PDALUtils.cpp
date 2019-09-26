@@ -290,7 +290,7 @@ std::string fetchRemote(const std::string& path)
 {
     std::string temp = tempFilename(path);
     arbiter::Arbiter a;
-    a.put(path, a.getBinary(temp));
+    a.put(temp, a.getBinary(path));
     return temp;
 }
 
