@@ -819,7 +819,6 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
         if (options.count("geometry"))
         {
             std::string wkt_or_json = options.at("geometry").get<std::string>();
-            std::cout << "filter geometry!: " << wkt_or_json << std::endl;
             bool isJson = (wkt_or_json.find("{") != wkt_or_json.npos) ||
                           (wkt_or_json.find("}") != wkt_or_json.npos);
 
@@ -840,7 +839,6 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
         }
 
         std::string query = ogr.at("sql").get<std::string>();
-        std::cout << "query '" << query << "'" << std::endl;
         poLayer = ds->ExecuteSQL( query.c_str(),
                                   filterGeometry,
                                   dialect.c_str());
