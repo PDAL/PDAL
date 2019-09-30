@@ -308,6 +308,32 @@ protected:
     }
 };
 
+class PDAL_DLL VectorPointTable : public SimplePointTable
+{
+public:
+    VectorPointTable(PointLayout& layout) : SimplePointTable(layout) { }
+    virtual bool supportsView() const override { return true; }
+    void clear() { m_buffer.clear(); }
+    std::size_t numPoints() const
+    {
+        return m_buffer.size() / m_layoutRef.pointSize();
+    }
+
+protected:
+    virtual PointId addPoint() override
+    {
+        m_buffer.resize(m_buffer.size() + m_layoutRef.pointSize(), 0);
+        return numPoints() - 1;
+    }
+
+    virtual char* getPoint(PointId id) override
+    {
+        return m_buffer.data() + pointsToBytes(id);
+    }
+
+    std::vector<char> m_buffer;
+};
+
 class PDAL_DLL ShallowPointTable : public BasePointTable
 {
     // PointTable semantics around a raw buffer of data matching the specified
