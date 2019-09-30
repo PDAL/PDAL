@@ -44,6 +44,9 @@
 
 #include <ogr_spatialref.h>
 #include <ogr_p.h>
+#include <ogr_api.h>
+#include <ogrsf_frmts.h>
+#include <nlohmann/json.hpp>
 
 #pragma warning(disable: 4127)  // conditional expression is constant
 
@@ -772,6 +775,86 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
         srs = srs.substr(pos);
     }
     return newGeom;
+}
+
+
+std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
+{
+//    const NL::json el = json.value("ogr", NL::json::null_value);
+    const NL::json& layer = ogr.at("layer");
+    const NL::json& datasource = ogr.at("datasource");
+
+    const NL::json options = ogr.at("options");//, nullptr);
+
+    registerDrivers();
+    std::string dsString = datasource.get<std::string>();
+    unsigned int openFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR;
+    GDALDataset* ds = (GDALDataset*) GDALOpenEx( dsString.c_str(),
+                                                 openFlags,
+                                                 NULL, NULL, NULL );
+    if (!ds)
+        throw pdal_error("Unable to read datasource in fetchOGRGeometries " + datasource.dump() );
+
+
+    OGRLayer* poLayer(nullptr);
+
+    std::string lyrString = layer.get<std::string>();
+    poLayer = ds->GetLayerByName( lyrString.c_str() );
+
+    if (!poLayer)
+        throw pdal_error("Unable to read layer in fetchOGRGeometries " + layer.dump() );
+
+    std::vector<OGRGeometry*> output;
+
+    OGRFeature *poFeature (nullptr);
+    OGRGeometry* filterGeometry(nullptr);
+
+    poLayer->ResetReading();
+    if (ogr.count("sql"))
+    {
+        std::string dialect("OGRSQL");
+        if (options.count("dialect"))
+            dialect = options.at("dialect").get<std::string>();
+
+        if (options.count("geometry"))
+        {
+            std::string wkt_or_json = options.at("geometry").get<std::string>();
+            std::cout << "filter geometry!: " << wkt_or_json << std::endl;
+            bool isJson = (wkt_or_json.find("{") != wkt_or_json.npos) ||
+                          (wkt_or_json.find("}") != wkt_or_json.npos);
+
+            std::string srs;
+            if (isJson)
+            {
+                filterGeometry = createFromGeoJson(wkt_or_json, srs);
+                if (!filterGeometry)
+                    throw pdal_error("Unable to create filter geometry from input GeoJSON");
+            }
+            else
+            {
+                filterGeometry = createFromWkt(wkt_or_json, srs);
+                if (!filterGeometry)
+                    throw pdal_error("Unable to create filter geometry from input WKT");
+            }
+
+        }
+
+        std::string query = ogr.at("sql").get<std::string>();
+        std::cout << "query '" << query << "'" << std::endl;
+        poLayer = ds->ExecuteSQL( query.c_str(),
+                                  filterGeometry,
+                                  dialect.c_str());
+        if (!poLayer)
+            throw pdal_error("unable to execute sql query!");
+    }
+    while( (poFeature = poLayer->GetNextFeature()) != NULL )
+    {
+        OGRGeometry* poGeometry = poFeature->GetGeometryRef();
+        OGRGeometry* clone = poGeometry->clone();
+        output.emplace_back(clone);
+        OGRFeature::DestroyFeature( poFeature );
+    }
+    return output;
 }
 
 } // namespace gdal

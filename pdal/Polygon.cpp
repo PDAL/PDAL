@@ -59,6 +59,28 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
     }
 }
 
+Polygon::Polygon(OGRGeometryH g, OGRSpatialReferenceH srs) : Geometry(g, srs)
+{
+    // If the handle was null, we need to create an empty polygon.
+    if (!m_geom)
+    {
+        m_geom.reset(new OGRPolygon());
+        return;
+    }
+
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+
+    if (!(t == wkbPolygon ||
+        t == wkbMultiPolygon ||
+        t == wkbPolygon25D ||
+        t == wkbMultiPolygon25D))
+    {
+        throw pdal::pdal_error("pdal::Polygon() cannot construct geometry "
+            "because OGR geometry is not Polygon or MultiPolygon.");
+    }
+
+}
+
 Polygon::Polygon(const BOX2D& box)
 {
     OGRPolygon *poly = new OGRPolygon();

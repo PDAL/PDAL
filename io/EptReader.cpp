@@ -106,6 +106,8 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
+    EptBounds(const SrsBounds& b) : SrsBounds( b )
+    {}
 };
 
 namespace Utils
@@ -140,6 +142,7 @@ public:
 
     NL::json m_query;
     NL::json m_headers;
+    NL::json m_ogr;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_currentIndex(0)
@@ -165,6 +168,8 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests",
         m_args->m_query);
+    args.add("ogr", "OGR filter geometries",
+        m_args->m_ogr);
 }
 
 
@@ -243,6 +248,48 @@ void EptReader::initialize()
 
     setSpatialReference(m_info->srs());
 
+    if (!m_args->m_ogr.is_null())
+    {
+        // convert whatever we were given for an OGR source to
+        // polygons and override m_args->m_polys
+        m_args->m_polys.clear();
+        std::vector<OGRGeometry*> ogr_geoms = pdal::gdal::fetchOGRGeometries(m_args->m_ogr);
+        BOX3D layerBounds;
+
+        SpatialReference layerSrs;
+        for (auto g: ogr_geoms)
+        {
+
+            OGRSpatialReferenceH srs = (OGRSpatialReferenceH) g->getSpatialReference();
+            Polygon p = pdal::Polygon(g, srs);
+            m_args->m_polys.emplace_back(p);
+            if (layerSrs.empty())
+            {
+                SpatialReference gSrs = SpatialReference(srs);
+                if (!gSrs.empty())
+                    layerSrs = gSrs;
+            }
+
+            BOX3D box = p.bounds();
+            layerBounds.grow(box.minx, box.miny, EptBounds::LOWEST);
+
+            layerBounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
+            std::cout << "layerBounds: " << layerBounds << std::endl;
+            std::cout << "box: " << box << std::endl;
+        }
+
+        // Apply our overrides from the fetched layer by taking
+        // the intersection of the layer's bounds with whatever the
+        // user provided before
+        BOX3D filtered = m_args->m_bounds.to3d();
+        std::cout << "filtered: " << filtered << std::endl;
+        filtered.clip(layerBounds);
+        std::cout << "filtered: " << filtered << std::endl;
+        SrsBounds newBounds = SrsBounds(filtered, layerSrs);
+    }
+
+
+
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
@@ -252,6 +299,7 @@ void EptReader::initialize()
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
             boundsSrs.getWKT(), getSpatialReference().getWKT());
+
 
     // Transform polygons and bounds to point source SRS.
     std::vector <Polygon> exploded;

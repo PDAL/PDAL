@@ -158,6 +158,8 @@ private:
     point_count_t m_currentIndex = -1;
     std::vector<char> m_temp_buffer;
     std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
+
+
 };
 
 } // namespace pdal

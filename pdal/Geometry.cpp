@@ -74,6 +74,19 @@ Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) :
 }
 
 
+Geometry::Geometry(OGRGeometryH gh, OGRSpatialReferenceH srs) :
+    m_geom((reinterpret_cast<OGRGeometry *>(gh))->clone())
+{
+    OGRGeometry* g = reinterpret_cast<OGRGeometry *>(gh);
+    if (g)
+    {
+        OGRSpatialReferenceH ref = (OGRSpatialReferenceH) g->getSpatialReference();
+        OGR_G_AssignSpatialReference((OGRGeometry*)m_geom.get(), ref);
+        SpatialReference s(ref);
+        setSpatialReference(s);
+    }
+}
+
 Geometry::~Geometry()
 {}
 
