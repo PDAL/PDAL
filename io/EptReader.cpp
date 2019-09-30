@@ -62,7 +62,6 @@ namespace
         { "ept" }
     };
 
-    const std::size_t streamNodeCount(8);
     const std::string addonFilename { "ept-addon.json" };
 
     Dimension::Type getRemoteType(const NL::json& dim)
@@ -906,7 +905,7 @@ void EptReader::load()
     // Asynchronously trigger the fetching and point-view execution of
     // a lookahead buffer of nodes.
     while (
-        m_upcomingNodeBuffers.size() < streamNodeCount &&
+        m_upcomingNodeBuffers.size() < m_pool->size() &&
         m_overlapIt != m_overlaps.end())
     {
         const auto nodeId(m_nodeId++);
