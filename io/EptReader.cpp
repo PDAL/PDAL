@@ -274,17 +274,13 @@ void EptReader::initialize()
             layerBounds.grow(box.minx, box.miny, EptBounds::LOWEST);
 
             layerBounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
-            std::cout << "layerBounds: " << layerBounds << std::endl;
-            std::cout << "box: " << box << std::endl;
         }
 
         // Apply our overrides from the fetched layer by taking
         // the intersection of the layer's bounds with whatever the
         // user provided before
         BOX3D filtered = m_args->m_bounds.to3d();
-        std::cout << "filtered: " << filtered << std::endl;
         filtered.clip(layerBounds);
-        std::cout << "filtered: " << filtered << std::endl;
         SrsBounds newBounds = SrsBounds(filtered, layerSrs);
     }
 
