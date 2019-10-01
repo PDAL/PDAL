@@ -12,7 +12,7 @@ fi
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
+CFLAGS= CXXFLAGS= CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DPython3_ROOT_DIR:FILEPATH="$CONDA_PREFIX" \
