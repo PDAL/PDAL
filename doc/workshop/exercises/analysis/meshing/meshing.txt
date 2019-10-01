@@ -1,0 +1,5 @@
+pdal translate -i ept://http://act-2015-rgb.s3.amazonaws.com \
+ -o ./exercises/analysis/meshing/first-mesh.ply \
+ poisson --filters.poisson.depth=16 \
+ --readers.ept.bounds="([692738, 692967], [6092255,6092562])" \
+ --verbose 4

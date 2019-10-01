@@ -86,7 +86,16 @@ private:
     Position m_origin;
     double m_edgeLength;
     Arg *m_radiusArg;
+    double m_xOrigin;
+    double m_yOrigin;
+    size_t m_width;
+    size_t m_height;
+    Arg *m_xOriginArg;
+    Arg *m_yOriginArg;
+    Arg *m_heightArg;
+    Arg *m_widthArg;
     double m_radius;
+    double m_power;
     StringList m_options;
     StringList m_outputTypeString;
     size_t m_windowSize;

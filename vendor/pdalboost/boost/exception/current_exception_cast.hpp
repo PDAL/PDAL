@@ -13,7 +13,7 @@
 #endif
 
 namespace
-pdalboost
+boost
     {
     template <class E>
     inline

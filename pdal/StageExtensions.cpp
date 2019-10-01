@@ -34,8 +34,6 @@
 
 #include <sstream>
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/StageExtensions.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -45,55 +43,43 @@ namespace pdal
 namespace
 {
 
-StringList parse(const std::string& val)
-{
-    // This should yeild POSIX-compatible extensions
-    auto issplit = [](char c)
-    {
-        return (!std::isalnum(c) && c != '_');
-    };
-    return Utils::split2(val, issplit);
-}
-
-// This is here as JSON because I was going to parse it from a file at
-// runtime.  The advantage of that is that it allows people who make
-// their own plugins to add to the list.  For now we decided that managing
-// a configuration file like this wasn't worth it.
-
 // NOTE: Only extensions for dynamic stages go here.  Static stage extensions
 //  are defined in the stage files themselves.
-const std::string extension_json (
-R"PDALEXTENSIONS(
 
+using Extensions = std::map<std::string, StringList>;
+
+static const Extensions readerExtensions =
 {
-    "readers.greyhound" : "greyhound",
-    "readers.icebridge" : "icebridge h5",
-    "readers.matlab" : "mat",
-    "writers.matlab" : "mat",
-    "readers.numpy" : "npy",
-    "readers.nitf" : "nitf, nsf, ntf",
-    "writers.nitf" : "nitf, nsf, ntf",
-    "readers.pcd" : "pcd",
-    "writers.pcd" : "pcd",
-    "readers.rdb" : "rdbx",
-    "readers.sqlite" : "sqlite, gpkg",
-    "writers.sqlite" : "sqlite, gpkg",
-    "readers.mrsid" : "sid",
-    "readers.rxp" : "rxp",
-    "readers.fbx" : "fbx",
-    "readers.slpk" : "slpk",
-    "readers.i3s" : "i3s",
-    "readers.e57" : "e57",
-    "writers.e57" : "e57"
-}
+  {"readers.icebridge", { "icebridge", "h5" } },
+  { "readers.matlab", { "mat" } },
+  { "readers.numpy", { "npy" } },
+  { "readers.nitf", { "nitf", "nsf", "ntf" } },
+  { "readers.pcd", { "pcd" } },
+  { "readers.rdb", { "rdbx" } },
+  { "readers.sqlite", { "sqlite", "gpkg" } },
+  { "readers.mrsid", { "sid" } },
+  { "readers.rxp", { "rxp" } },
+  { "readers.fbx", { "fbx" } },
+  { "readers.slpk", { "slpk" } },
+  { "readers.i3s", { "i3s" } },
+  { "readers.e57", { "e57" } }
+};
 
-)PDALEXTENSIONS"
-);
+static const Extensions writerExtensions =
+{
+  { "writers.matlab", { "mat" } },
+  { "writers.nitf", { "nitf", "nsf", "ntf" } },
+  { "writers.pcd", { "pcd" } },
+  { "writers.sqlite", { "sqlite", "gpkg" } },
+  { "writers.e57", { "e57" } },
+  { "writers.fbx", { "fbx" } }
+};
 
 } // unnamed namespace
 
 StageExtensions::StageExtensions(LogPtr log) : m_log(log)
 {}
+
 
 void StageExtensions::load()
 {
@@ -103,41 +89,18 @@ void StageExtensions::load()
         return;
     loaded = true;
 
-    NL::json root;
-
-    try
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& p : readerExtensions)
     {
-        root = NL::json::parse(extension_json);
+        const std::string& stage = p.first;
+        for (auto& ext : p.second)
+            m_readers[ext] = stage;
     }
-    catch (const NL::json::parse_error& err)
+    for (auto& p : writerExtensions)
     {
-        std::string e = "Unable to parse 'pdal_extensions.json': " +
-            std::string(err.what()) +
-            " Plugins will not be able to be inferred from filenames.";
-        throw pdal_error(e);
-    }
-
-    if (!root.is_object())
-    {
-        throw pdal_error("Invalid root object in 'pdal_extensions.json'. "
-            "Must be an object.");
-    }
-
-    for (auto it : root.items())
-    {
-        const std::string& stage = it.key();
-        const NL::json& val = it.value();
-
-        if (!Utils::startsWith(stage, "readers") &&
-            !Utils::startsWith(stage, "writers"))
-        {
-            throw pdal_error("Only readers and writers may define "
-                "extensions. '" +  stage + "' invalid.");
-        }
-        if (!val.is_string())
-            throw pdal_error("Extension value for '" + stage +
-                "' must be a string.");
-        set(stage, parse(val.get<std::string>()));
+        const std::string& stage = p.first;
+        for (auto& ext : p.second)
+            m_writers[ext] = stage;
     }
 }
 

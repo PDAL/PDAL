@@ -37,14 +37,12 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-#include <gdal.h>
-#include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
-
 #include <map>
 
 namespace pdal
 {
+
+namespace gdal { class Raster; }
 
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier

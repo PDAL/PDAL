@@ -37,11 +37,13 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <filters/MergeFilter.hpp>
 
 namespace pdal
 {
+
+namespace gdal { class SpatialRef; }
+
 class PDAL_DLL TIndexReader : public Reader
 {
     struct FileInfo

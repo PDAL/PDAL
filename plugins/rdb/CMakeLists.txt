@@ -19,6 +19,7 @@ target_include_directories(${libname} PUBLIC "${PDAL_VENDOR_DIR}/eigen")
 
 set(RDB_TEST_NAME pdal_io_rdb_reader_test)
 option(BUILD_RDBLIB_TESTS "Build rdblib tests" ON)
+if (WITH_TESTS)
 if (BUILD_RDBLIB_TESTS)
     configure_file(
         test/Config.hpp.in
@@ -35,4 +36,5 @@ if (BUILD_RDBLIB_TESTS)
             ${PROJECT_SOURCE_DIR}/plugins/rdb/io
             ${RDB_INCLUDE_CPP_DIR}
     )
+endif()
 endif()

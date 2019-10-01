@@ -34,8 +34,11 @@
 
 #pragma once
 
+#define NOMINMAX
+
 #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
+
 #include <tiledb/tiledb>
 
 namespace pdal

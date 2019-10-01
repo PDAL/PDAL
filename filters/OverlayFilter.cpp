@@ -36,8 +36,8 @@
 
 #include <vector>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/QuadIndex.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -188,7 +188,7 @@ void OverlayFilter::filter(PointView& view)
 
     for (const auto& poly : m_polygons)
     {
-        std::vector<PointId> ids = idx.getPoints(poly.geom.bounds());
+        PointIdList ids = idx.getPoints(poly.geom.bounds());
 
         PointRef point(view, 0);
         for (PointId id : ids)

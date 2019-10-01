@@ -118,25 +118,24 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
                                  const KD3Index& kdi)
 {
     // Find k-nearest neighbors of i.
-    std::vector<PointId> ni = kdi.neighbors(i, m_knn + 1);
+    PointIdList ni = kdi.neighbors(i, m_knn + 1);
 
     // Normal based only on neighbors, so exclude first point.
-    std::vector<PointId> neighbors(ni.begin() + 1, ni.end());
+    PointIdList neighbors(ni.begin() + 1, ni.end());
 
     // Covariance and normal are based off demeaned coordinates, so we record
     // the centroid to properly offset the coordinates when computing point to
     // plance distance.
-    auto centroid = eigen::computeCentroid(view, neighbors);
+    auto centroid = computeCentroid(view, neighbors);
 
     // Compute covariance of the neighbors.
-    auto B = eigen::computeCovariance(view, neighbors);
+    auto B = computeCovariance(view, neighbors);
 
     // Perform the eigen decomposition, using the eigenvector of the smallest
     // eigenvalue as the normal.
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
     if (solver.info() != Eigen::Success)
         throwError("Cannot perform eigen decomposition.");
-    auto eval = solver.eigenvalues();
     Eigen::Vector3d normal = solver.eigenvectors().col(0);
 
     // Compute point to plane distance of the query point.

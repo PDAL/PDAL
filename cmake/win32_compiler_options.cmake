@@ -18,7 +18,7 @@ function(pdal_target_compile_settings target)
             )
             target_compile_options(${target} PRIVATE
                 # Yes, we don't understand GCC pragmas
-                /wd4068 
+                /wd4068
                 # Nitro makes use of Exception Specifications, which results in
                 # numerous warnings when compiling in MSVC. We will ignore
                 # them for now.
@@ -32,6 +32,12 @@ function(pdal_target_compile_settings target)
                 # Annoying warning about function hiding with virtual
                 # inheritance.
                 /wd4250
+                # some templates don't return
+#                /wd4716
+                # unwind semantics
+#                /wd4530
+                # Standard C++-type exception handling.
+                /EHsc
                 )
         endif()
 
@@ -48,6 +54,7 @@ function(pdal_target_compile_settings target)
         if (PDAL_USE_STATIC_RUNTIME)
             target_compile_options(${target} PRIVATE /MT)
         endif()
+
     endif()
 endfunction()
 

@@ -249,7 +249,11 @@ void BitStuffer2::BitUnStuff_Before_Lerc2v3(const Byte** ppByte, vector<unsigned
 
   unsigned int numUInts = (numElements * numBits + 31) / 32;
   unsigned int numBytes = numUInts * sizeof(unsigned int);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wcast-align"
   unsigned int* arr = (unsigned int*)(*ppByte);
+#pragma GCC diagnostic pop
 
   unsigned int* srcPtr = arr;
   srcPtr += numUInts;

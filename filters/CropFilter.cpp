@@ -34,12 +34,12 @@
 
 #include "CropFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #include "private/Point.hpp"
 #include "private/pnp/GridPnp.hpp"

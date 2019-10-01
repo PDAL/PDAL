@@ -109,10 +109,18 @@ void DividerFilter::initialize()
 
 PointViewSet DividerFilter::run(PointViewPtr inView)
 {
-    if (m_sizeMode == SizeMode::Capacity)
-        m_size = ((inView->size() - 1) / m_size) + 1;
-
     PointViewSet result;
+
+    if (inView->empty())
+    {
+	result.insert(inView);
+	return result;
+    }
+
+    if (m_sizeMode == SizeMode::Capacity)
+	m_size = ((inView->size() - 1) / m_size) + 1;
+
+
     std::vector<PointViewPtr> views;
     for (point_count_t i = 0; i < m_size; ++i)
     {

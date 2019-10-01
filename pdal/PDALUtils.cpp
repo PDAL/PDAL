@@ -33,11 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_features.hpp>  // PDAL_ARBITER_ENABLED
 
-#ifdef PDAL_ARBITER_ENABLED
-    #include <arbiter/arbiter.hpp>
-#endif
+#include <arbiter/arbiter.hpp>
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -178,7 +175,6 @@ void toJSON(const MetadataNode& m, std::ostream& o)
 namespace
 {
 
-#ifdef PDAL_ARBITER_ENABLED
 std::string tempFilename(const std::string& path)
 {
     const std::string tempdir(arbiter::getTempPath());
@@ -186,7 +182,6 @@ std::string tempFilename(const std::string& path)
 
     return arbiter::join(tempdir, basename);
 }
-#endif
 
 // RAII handling of a temp file to make sure file gets deleted.
 class TempFile
@@ -216,14 +211,11 @@ public:
 
     virtual ~ArbiterOutStream()
     {
-#ifdef PDAL_ARBITER_ENABLED
         close();
         arbiter::Arbiter a;
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
-#endif
     }
 
-private:
     std::string m_remotePath;
     TempFile m_localFile;
 };
@@ -235,16 +227,11 @@ public:
             std::ios::openmode mode) :
         m_localFile(localPath)
     {
-#ifdef PDAL_ARBITER_ENABLED
         arbiter::Arbiter a;
         a.put(localPath, a.getBinary(remotePath));
         open(localPath, mode);
-#else
-        throw pdal_error("Arbiter is not enabled for this configuration!");
-#endif
     }
 
-private:
     TempFile m_localFile;
 };
 
@@ -261,7 +248,6 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 {
     ostream *ofs(nullptr);
 
-#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     const bool remote(a.hasDriver(path) && a.isRemote(path));
 
@@ -281,7 +267,6 @@ std::ostream *createFile(const std::string& path, bool asBinary)
         }
     }
     else
-#endif
         ofs = FileUtils::createFile(path, asBinary);
     return ofs;
 }
@@ -294,9 +279,23 @@ std::ostream *createFile(const std::string& path, bool asBinary)
   \param asBinary  Whether the file should be opened binary.
   \return  Pointer to stream opened for input.
 */
+
+bool isRemote(const std::string& path)
+{
+    arbiter::Arbiter a;
+    return a.isRemote(path);
+}
+
+std::string fetchRemote(const std::string& path)
+{
+    std::string temp = tempFilename(path);
+    arbiter::Arbiter a;
+    a.put(temp, a.getBinary(path));
+    return temp;
+}
+
 std::istream *openFile(const std::string& path, bool asBinary)
 {
-#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     if (a.hasDriver(path) && a.isRemote(path))
     {
@@ -310,7 +309,6 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return nullptr;
         }
     }
-#endif
     return FileUtils::openFile(path, asBinary);
 }
 
@@ -344,13 +342,11 @@ void closeFile(std::istream *in)
 */
 bool fileExists(const std::string& path)
 {
-#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
     {
         return true;
     }
-#endif
 
     // Arbiter doesn't handle our STDIN hacks.
     return FileUtils::fileExists(path);
@@ -371,7 +367,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     for (PointId i = 0; i < srcView->size(); ++i)
     {
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         PointRef srcPoint = srcView->point(i);
         candIndex.knnSearch(srcPoint, 1, &indices, &sqr_dists);
@@ -382,7 +378,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     for (PointId i = 0; i < candView->size(); ++i)
     {
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         PointRef candPoint = candView->point(i);
         srcIndex.knnSearch(candPoint, 1, &indices, &sqr_dists);

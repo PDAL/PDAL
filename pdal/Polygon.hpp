@@ -59,7 +59,6 @@ public:
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
     Polygon(OGRGeometryH g, const SpatialReference& srs);
-    using Geometry::operator=;
 
     OGRGeometryH getOGRHandle();
 
@@ -70,7 +69,10 @@ public:
     bool covers(const PointRef& ref) const;
     bool equal(const Polygon& p) const;
     bool overlaps(const Polygon& p) const;
+    bool contains(double x, double y) const;
     bool contains(const Polygon& p) const;
+    bool intersects(const Polygon& p) const;
+    bool disjoint(const Polygon& p) const;
     bool touches(const Polygon& p) const;
     bool within(const Polygon& p) const;
     bool crosses(const Polygon& p) const;

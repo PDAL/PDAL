@@ -19,6 +19,10 @@ target_include_directories(${reader_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
     ${TILEDB_INCLUDE_DIR})
 
+if (WIN32)
+	target_compile_definitions(${reader_libname} PRIVATE -DNONMINMAX)
+endif()
+
 #
 # TileDB Writer
 #
@@ -34,14 +38,22 @@ target_include_directories(${writer_libname} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost
     ${TILEDB_INCLUDE_DIR})
 
+if (WIN32)
+	target_compile_definitions(${writer_libname} PRIVATE -DNONMINMAX)
+endif()
+
 if (WITH_TESTS)
-    PDAL_ADD_TEST(pdal_io_tiledb_writer_test
-        FILES
-            test/TileDBWriterTest.cpp
-        LINK_WITH
-            ${writer_libname}
-            ${TILEDB_LIBRARIES}
-    )
+
+    # Need to fix this #2596
+    IF (NOT APPLE)
+        PDAL_ADD_TEST(pdal_io_tiledb_writer_test
+            FILES
+                test/TileDBWriterTest.cpp
+            LINK_WITH
+                ${writer_libname}
+                ${TILEDB_LIBRARIES}
+        )
+    ENDIF()
 
     PDAL_ADD_TEST(pdal_io_tiledb_reader_test
         FILES
@@ -50,4 +62,10 @@ if (WITH_TESTS)
             ${reader_libname}
             ${TILEDB_LIBRARIES}
     )
+
+if (WIN32)
+	target_compile_definitions(pdal_io_tiledb_writer_test PRIVATE -DNONMINMAX)
+	target_compile_definitions(pdal_io_tiledb_reader_test PRIVATE -DNONMINMAX)
+endif()
+
 endif()

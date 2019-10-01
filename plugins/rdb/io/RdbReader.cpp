@@ -36,6 +36,7 @@
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/PDALUtils.hpp>
 #include "RdbReader.hpp"
 
 namespace pdal
@@ -84,6 +85,10 @@ std::string RdbReader::getName() const
 QuickInfo RdbReader::inspect()
 {
     using namespace riegl::rdb::pointcloud;
+
+    if (pdal::Utils::isRemote(m_filename))
+        m_filename = pdal::Utils::fetchRemote(m_filename);
+
     RdbPointcloud reader(m_filename, m_filter, m_extras);
     riegl::rdb::Pointcloud& rdb = reader.pointcloud();
     {
@@ -143,6 +148,9 @@ void RdbReader::addArgs(ProgramArgs& args)
 
 void RdbReader::initialize()
 {
+    if (pdal::Utils::isRemote(m_filename))
+        m_filename = pdal::Utils::fetchRemote(m_filename);
+
     m_pointcloud.reset(new RdbPointcloud(m_filename, m_filter, m_extras));
     // Set spatial reference form source if not overridden.
     if (getSpatialReference().empty())
@@ -204,7 +212,7 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
         {
             if (node.is_null())
                 parent.add(name, "");
-            else if (node.is_bool())
+            else if (node.is_boolean())
                 parent.add(name, node.get<bool>());
             else if (node.is_number_unsigned())
                 parent.add(name, node.get<uint64_t>());
@@ -217,10 +225,10 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
             else if (node.is_object())
             {
                 MetadataNode object = parent.add(name);
-                for (auto it : node)
+                for (auto it : node.items())
                     add(object, it.key(), it.value());
             }
-            else if (node.isArray())
+            else if (node.is_array())
             {
                 for (size_t i = 0; i < node.size(); ++i)
                     add(parent, name, node.at(i));

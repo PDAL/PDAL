@@ -29,13 +29,20 @@ PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
-    FILES EigenTest.cpp
-    INCLUDES ${PDAL_VENDOR_DIR}/eigen)
+    FILES
+        EigenTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
-    FILES KDIndexTest.cpp
-    INCLUDES ${PDAL_VENDOR_DIR})
+    FILES
+        KDIndexTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
@@ -57,7 +64,12 @@ PDAL_ADD_TEST(pdal_pipeline_writer_test
         ${PDAL_JSONCPP_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
-PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
+PDAL_ADD_TEST(pdal_point_view_test
+    FILES
+        PointViewTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 
 PDAL_ADD_TEST(pdal_program_arg_test
@@ -113,20 +125,24 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
-PDAL_ADD_TEST(pdal_io_ept_reader_test
-    FILES
-        io/EptReaderTest.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
-)
-PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
-    FILES
-        io/EptAddonWriterTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
-)
+if (PDAL_HAVE_LASZIP)
+    PDAL_ADD_TEST(pdal_io_ept_reader_test
+        FILES
+            io/EptReaderTest.cpp
+        LINK_WITH
+            ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+    PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
+        FILES
+            io/EptAddonWriterTest.cpp
+        LINK_WITH
+            ${GDAL_LIBRARY} # EptAddonWriterTest uses the crop filter.
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+endif(PDAL_HAVE_LASZIP)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
@@ -158,6 +174,18 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
 )
 
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_pcd_reader_test
+    FILES
+        io/PcdReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
+PDAL_ADD_TEST(pdal_io_pcd_writer_test
+    FILES
+        io/PcdWriterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
         io/PlyReaderTest.cpp
@@ -191,6 +219,7 @@ PDAL_ADD_TEST(pdal_filters_chipper_test
         filters/ChipperTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
 )
 PDAL_ADD_TEST(pdal_filters_nndistance_test
     FILES
@@ -228,7 +257,14 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
 
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_separatescanline_test FILES filters/SeparatescanlineFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_icp_test
+    FILES
+        filters/IcpFilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
@@ -244,6 +280,9 @@ PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
+if (GDAL_3)
+    PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
+endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
@@ -257,12 +296,17 @@ PDAL_ADD_TEST(pdal_filters_sort_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_splitter_test
+    FILES
+        filters/SplitterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen)
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hexbin_test FILES filters/HexbinFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
+PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)

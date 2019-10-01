@@ -36,74 +36,47 @@
 
 #include "Utils.hpp"
 
-pdal::Dimension::Id pdal::e57plugin::e57ToPdal(const std::string &e57Dimension) {
+namespace pdal
+{
+namespace e57plugin
+{
+
+Dimension::Id e57ToPdal(const std::string &e57Dimension)
+{
     if (e57Dimension == "cartesianX")
-    {
-        return pdal::Dimension::Id::X;
-    }
+        return Dimension::Id::X;
     else if (e57Dimension == "cartesianY")
-    {
-        return pdal::Dimension::Id::Y;
-    }
+        return Dimension::Id::Y;
     else if (e57Dimension == "cartesianZ")
-    {
-        return pdal::Dimension::Id::Z;
-    }
+        return Dimension::Id::Z;
     else if (e57Dimension == "sphericalRange")
-    {
-        return pdal::Dimension::Id::X;
-    }
+        return Dimension::Id::X;
     else if (e57Dimension == "sphericalAzimuth")
-    {
-        return pdal::Dimension::Id::Y;
-    }
+        return Dimension::Id::Y;
     else if (e57Dimension == "sphericalElevation")
-    {
-        return pdal::Dimension::Id::Z;
-    }
+        return Dimension::Id::Z;
     else if (e57Dimension == "nor:normalX")
-    {
-        return pdal::Dimension::Id::NormalX;
-    }
+        return Dimension::Id::NormalX;
     else if (e57Dimension == "nor:normalY")
-    {
-        return pdal::Dimension::Id::NormalY;
-    }
+        return Dimension::Id::NormalY;
     else if (e57Dimension == "nor:normalZ")
-    {
-        return pdal::Dimension::Id::NormalZ;
-    }
+        return Dimension::Id::NormalZ;
     else if (e57Dimension == "intensity")
-    {
-        return pdal::Dimension::Id::Intensity;
-    }
+        return Dimension::Id::Intensity;
     else if (e57Dimension == "colorRed")
-    {
-        return pdal::Dimension::Id::Red;
-    }
+        return Dimension::Id::Red;
     else if (e57Dimension == "colorBlue")
-    {
-        return pdal::Dimension::Id::Blue;
-    }
+        return Dimension::Id::Blue;
     else if (e57Dimension == "colorGreen")
-    {
-        return pdal::Dimension::Id::Green;
-    }
+        return Dimension::Id::Green;
     else if (e57Dimension == "cartesianInvalidState")
-    {
-        return pdal::Dimension::Id::Omit;
-    }
+        return Dimension::Id::Omit;
     else if (e57Dimension == "sphericalInvalidState")
-    {
-        return pdal::Dimension::Id::Omit;
-    }
-    else
-    {
-        return pdal::Dimension::Id::Unknown;
-    }
+        return Dimension::Id::Omit;
+    return Dimension::Id::Unknown;
 }
 
-std::string pdal::e57plugin::pdalToE57(pdal::Dimension::Id pdalDimension)
+std::string pdalToE57(Dimension::Id pdalDimension)
 {
     switch (pdalDimension)
     {
@@ -134,83 +107,87 @@ std::string pdal::e57plugin::pdalToE57(pdal::Dimension::Id pdalDimension)
     }
 }
 
-std::vector<pdal::Dimension::Id> pdal::e57plugin::supportedPdalTypes()
+std::vector<Dimension::Id> supportedPdalTypes()
 {
-    return {pdal::Dimension::Id::X,pdal::Dimension::Id::Y,pdal::Dimension::Id::Z,
-        pdal::Dimension::Id::NormalX,pdal::Dimension::Id::NormalY,pdal::Dimension::Id::NormalZ,
-        pdal::Dimension::Id::Red,pdal::Dimension::Id::Green,pdal::Dimension::Id::Blue,pdal::Dimension::Id::Intensity,
-        pdal::Dimension::Id::Omit};
+    return {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z,
+        Dimension::Id::NormalX, Dimension::Id::NormalY, Dimension::Id::NormalZ,
+        Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue,
+        Dimension::Id::Intensity, Dimension::Id::Omit
+    };
 }
 
-std::vector<std::string> pdal::e57plugin::supportedE57Types()
+std::vector<std::string> supportedE57Types()
 {
-    return {"cartesianX","cartesianY","cartesianZ",
-        "nor:normalX","nor:normalY","nor:normalZ",
-        "colorRed","colorGreen","colorBlue","intensity",
+    return {"cartesianX",  "cartesianY", "cartesianZ", 
+        "nor:normalX", "nor:normalY", "nor:normalZ", 
+        "colorRed", "colorGreen", "colorBlue", "intensity", 
         "cartesianInvalidState"};
 }
 
-double pdal::e57plugin::rescaleE57ToPdalValue(
-        const std::string &e57Dimension, double value, const std::pair<double, double> &e57Bounds)
+double rescaleE57ToPdalValue(const std::string &e57Dimension, double value,
+    const std::pair<double, double> &e57Bounds)
 {
     assert(e57Bounds.second >= e57Bounds.first);
+
     if (e57Bounds.second == e57Bounds.first)
         return value;
 
-    auto pdalDimension = pdal::e57plugin::e57ToPdal(e57Dimension);
-    std::pair<double,double> minmax;
+    auto pdalDimension = e57ToPdal(e57Dimension);
+    std::pair<int64_t, int64_t> minmax;
     try
     {
         minmax = getPdalBounds(pdalDimension);
     }
-    catch (std::invalid_argument &e)
+    catch (pdal_error&)
     {
         return value;
     }
-    value = (value - e57Bounds.first) / (e57Bounds.second - e57Bounds.first + 1e-10);
+    value = (value - e57Bounds.first) /
+        (e57Bounds.second - e57Bounds.first + 1e-10);
     value = value * (minmax.second - minmax.first) + minmax.first;
     return value;
 }
 
-std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &prototype, const std::string &fieldName)
+std::pair<double, double> getLimits(const e57::StructureNode &prototype,
+    const std::string &fieldName)
 {
-    double max = std::nan("max");
-    double min = std::nan("min");
-    assert(max != max && min != min);
+    double maxVal = std::nan("max");
+    double minVal = std::nan("min");
 
     std::string minKey = fieldName + "Minimum";
     std::string maxKey = fieldName + "Maximum";
-    std::string boundingBoxName = fieldName+"Limits";
+    std::string boundingBoxName = fieldName +"Limits";
 
     if (fieldName.substr(0,5) == "color")
         boundingBoxName = "colorLimits";
+    else if (fieldName[0] == 'x' || fieldName[0] == 'y' || fieldName[0] == 'z')
+        boundingBoxName = "cartesianBounds";
 
     if ( prototype.isDefined(boundingBoxName) )
 	{
 		e57::StructureNode intbox(prototype.get(boundingBoxName));
 		if ( intbox.get(maxKey).type() == e57::E57_SCALED_INTEGER )
 		{
-			max = static_cast<e57::ScaledIntegerNode>(intbox.get(maxKey)).scaledValue();
-			min = static_cast<e57::ScaledIntegerNode>(intbox.get(minKey)).scaledValue();
+			maxVal = static_cast<e57::ScaledIntegerNode>(intbox.get(maxKey)).scaledValue();
+			minVal = static_cast<e57::ScaledIntegerNode>(intbox.get(minKey)).scaledValue();
 		}
 		else if ( intbox.get(maxKey).type() == e57::E57_FLOAT )
 		{
-			max  = static_cast<e57::FloatNode>(intbox.get(maxKey)).value();
-			min  = static_cast<e57::FloatNode>(intbox.get(minKey)).value();
+			maxVal = static_cast<e57::FloatNode>(intbox.get(maxKey)).value();
+			minVal = static_cast<e57::FloatNode>(intbox.get(minKey)).value();
 		}
 		else if ( intbox.get(maxKey).type() == e57::E57_INTEGER)
 		{
-			max  = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(maxKey)).value());
-			min = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
+			maxVal = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(maxKey)).value());
+			minVal = static_cast<double>(static_cast<e57::IntegerNode>(intbox.get(minKey)).value());
 		}
 	}
-	
-	if (max == 0. && prototype.isDefined(fieldName) )
+    else if ( prototype.isDefined(fieldName) )
 	{
 		if (prototype.get(fieldName).type() == e57::E57_INTEGER)
 		{
-           min = static_cast<double>(static_cast<e57::IntegerNode>(prototype.get(fieldName)).minimum());
-            max = static_cast<double>(static_cast<e57::IntegerNode>(prototype.get(fieldName)).maximum());
+            minVal = static_cast<double>(static_cast<e57::IntegerNode>(prototype.get(fieldName)).minimum());
+            maxVal = static_cast<double>(static_cast<e57::IntegerNode>(prototype.get(fieldName)).maximum());
 		}
 		else if (prototype.get(fieldName).type() == e57::E57_SCALED_INTEGER)
 		{
@@ -218,34 +195,44 @@ std::pair<double, double> pdal::e57plugin::getLimits(const e57::StructureNode &p
 			double offset = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).offset();
             int64_t minimum = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).minimum();
             int64_t maximum = static_cast<e57::ScaledIntegerNode>(prototype.get(fieldName)).maximum();
-            min = minimum * scale + offset;	
-            max = maximum * scale + offset;
+            minVal = minimum * scale + offset;	
+            maxVal = maximum * scale + offset;
 		}
 		else if (prototype.get(fieldName).type() == e57::E57_FLOAT)
 		{
-            min  = static_cast<e57::FloatNode>(prototype.get(fieldName)).minimum();
-            max = static_cast<e57::FloatNode>(prototype.get(fieldName)).maximum();  
+            minVal = static_cast<e57::FloatNode>(prototype.get(fieldName)).minimum();
+            maxVal = static_cast<e57::FloatNode>(prototype.get(fieldName)).maximum();  
 		}
 	}
-    return {min,max};
+    return {minVal, maxVal};
 }
 
-std::pair<double,double> pdal::e57plugin::getPdalBounds(pdal::Dimension::Id id)
+std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
 {
+    //ABELL - This is strange.  PDAL doesn't specify limits for these.
+    //  Perhaps argument registration needs to be changed.
     using Dim = pdal::Dimension::Id;
     switch (id)
     {
         case Dim::Red:
-            return {std::numeric_limits<uint16_t>::min(),std::numeric_limits<uint16_t>::max()};    
+            return {std::numeric_limits<uint16_t>::min(),
+                std::numeric_limits<uint16_t>::max()};    
         case Dim::Blue:
-            return {std::numeric_limits<uint16_t>::min(),std::numeric_limits<uint16_t>::max()};
+            return {std::numeric_limits<uint16_t>::min(),
+                std::numeric_limits<uint16_t>::max()};
         case Dim::Green:
-            return {std::numeric_limits<uint16_t>::min(),std::numeric_limits<uint16_t>::max()};
+            return {std::numeric_limits<uint16_t>::min(),
+                std::numeric_limits<uint16_t>::max()};
         case Dim::Intensity:
-            return {std::numeric_limits<uint16_t>::min(),std::numeric_limits<uint16_t>::max()};
+            return {std::numeric_limits<uint16_t>::min(),
+                std::numeric_limits<uint16_t>::max()};
         default:
-            std::string msg ="Dimension " + pdal::Dimension::name(id) + " is not currently supported.";
-            throw std::invalid_argument(msg);
+            std::string msg ="Dimension " + Dimension::name(id) +
+                " is not currently supported.";
+            throw pdal_error(msg);
     }
 }
+
+} // namespace e57plugin
+} // namespace pdal
 

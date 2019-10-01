@@ -51,6 +51,7 @@ namespace pdal
 typedef uint64_t PointId;
 typedef uint64_t point_count_t;
 typedef std::vector<std::string> StringList;
+typedef std::vector<PointId> PointIdList;
 
 typedef union
 {
@@ -222,6 +223,14 @@ class pdal_error : public std::runtime_error
 public:
     inline pdal_error(std::string const& msg) : std::runtime_error(msg)
         {}
+};
+
+enum class ExecMode
+{
+    Standard,
+    Stream,
+    PreferStream,
+    None
 };
 
 } // namespace pdal

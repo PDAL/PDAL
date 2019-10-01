@@ -223,7 +223,7 @@ void PMFFilter::processGround(PointViewPtr view)
 {
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
-    view->calculateBounds(bounds);
+    calculateBounds(*view, bounds);
     size_t cols = static_cast<size_t>(
         ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1);
     size_t rows = static_cast<size_t>(
@@ -282,7 +282,7 @@ void PMFFilter::processGround(PointViewPtr view)
             double x = bounds.minx + (c + 0.5) * m_args->m_cellSize;
             double y = bounds.miny + (r + 0.5) * m_args->m_cellSize;
             int k = 1;
-            std::vector<PointId> neighbors(k);
+            PointIdList neighbors(k);
             std::vector<double> sqr_dists(k);
             kdi.knnSearch(x, y, k, &neighbors, &sqr_dists);
             out[idx] = temp->getFieldAs<double>(Dimension::Id::Z, neighbors[0]);
@@ -292,7 +292,7 @@ void PMFFilter::processGround(PointViewPtr view)
     ZImin.swap(out);
 
     // initialize ground indices
-    std::vector<PointId> groundIdx;
+    PointIdList groundIdx;
     for (PointId i = 0; i < view->size(); ++i)
         groundIdx.push_back(i);
 
@@ -337,11 +337,10 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        using namespace eigen;
         std::vector<double> me = erodeDiamond(ZImin, rows, cols, iters);
         std::vector<double> mo = dilateDiamond(me, rows, cols, iters);
 
-        std::vector<PointId> groundNewIdx;
+        PointIdList groundNewIdx;
         for (auto p_idx : groundIdx)
         {
             double x = view->getFieldAs<double>(Dimension::Id::X, p_idx);

@@ -218,7 +218,7 @@ inline MetadataNode toMetadata(const BOX3D& bounds)
 
 inline int openProgress(const std::string& filename)
 {
-#ifdef WIN32
+#ifdef _WIN32
     return -1;
 #else
     int fd = open(filename.c_str(), O_WRONLY | O_NONBLOCK);
@@ -235,7 +235,7 @@ inline int openProgress(const std::string& filename)
 
 inline void closeProgress(int fd)
 {
-#ifdef WIN32
+#ifdef _WIN32
 #else
     if (fd >= 0)
         close(fd);
@@ -246,7 +246,7 @@ inline void closeProgress(int fd)
 inline void writeProgress(int fd, const std::string& type,
     const std::string& text)
 {
-#ifdef WIN32
+#ifdef _WIN32
 #else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
@@ -268,6 +268,8 @@ std::ostream PDAL_DLL *createFile(const std::string& path,
     bool asBinary = true);
 void PDAL_DLL closeFile(std::istream *in);
 void PDAL_DLL closeFile(std::ostream *out);
+std::string PDAL_DLL fetchRemote(const std::string& path);
+bool PDAL_DLL isRemote(const std::string& path);
 bool PDAL_DLL fileExists(const std::string& path);
 std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
 double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);

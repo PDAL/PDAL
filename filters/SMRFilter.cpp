@@ -62,7 +62,6 @@ namespace pdal
 
 using namespace Dimension;
 using namespace Eigen;
-using namespace eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -238,7 +237,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     m_srs = firstView->spatialReference();
 
-    firstView->calculateBounds(m_bounds);
+    calculateBounds(*firstView, m_bounds);
     m_cols = static_cast<int>(
         ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
     m_rows = static_cast<int>(
@@ -610,7 +609,7 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
             double x = m_bounds.minx + (c + 0.5) * m_args->m_cell;
             double y = m_bounds.miny + (r + 0.5) * m_args->m_cell;
             int k = 8;
-            std::vector<PointId> neighbors(k);
+            PointIdList neighbors(k);
             std::vector<double> sqr_dists(k);
             kdi.knnSearch(x, y, k, &neighbors, &sqr_dists);
 

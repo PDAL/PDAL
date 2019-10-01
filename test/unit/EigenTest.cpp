@@ -40,8 +40,48 @@
 #include <Eigen/Dense>
 
 #include <limits>
+#include <numeric>
 
 using namespace pdal;
+
+PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
+{
+    PointLayoutPtr layout(table.layout());
+
+    layout->registerDim(Dimension::Id::Classification);
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+
+    PointViewPtr view(new PointView(table));
+
+    // write the data into the view
+    for (PointId i = 0; i < cnt; i++)
+    {
+        const uint8_t x = static_cast<uint8_t>(i + 1);
+        const int32_t y = static_cast<int32_t>(i * 10);
+        const double z = static_cast<double>(i * 100);
+
+        view->setField(Dimension::Id::Classification, i, x);
+        view->setField(Dimension::Id::X, i, y);
+        view->setField(Dimension::Id::Y, i, z);
+    }
+    EXPECT_EQ(view->size(), cnt);
+    return view;
+}
+
+
+static void check_bounds(const BOX3D& box,
+                         double minx, double maxx,
+                         double miny, double maxy,
+                         double minz, double maxz)
+{
+    EXPECT_DOUBLE_EQ(box.minx, minx);
+    EXPECT_DOUBLE_EQ(box.maxx, maxx);
+    EXPECT_DOUBLE_EQ(box.miny, miny);
+    EXPECT_DOUBLE_EQ(box.maxy, maxy);
+    EXPECT_DOUBLE_EQ(box.minz, minz);
+    EXPECT_DOUBLE_EQ(box.maxz, maxz);
+}
 
 TEST(EigenTest, PointViewToEigen)
 {
@@ -55,7 +95,7 @@ TEST(EigenTest, PointViewToEigen)
     pointView.setField(Dimension::Id::Z, 0, 3.0);
     Eigen::MatrixXd expected(1, 3);
     expected << 1.0, 2.0, 3.0;
-    Eigen::MatrixXd actual = eigen::pointViewToEigen(pointView);
+    Eigen::MatrixXd actual = pointViewToEigen(pointView);
     ASSERT_EQ(1, actual.rows());
     ASSERT_EQ(3, actual.cols());
     EXPECT_EQ(expected, actual);
@@ -71,7 +111,7 @@ TEST(EigenTest, ComputeValues)
 
     double spacing(1.4);
 
-    MatrixXd out = eigen::gradX(A);
+    MatrixXd out = gradX(A);
 
     Matrix3d gx;
     gx << -1.5151, -0.7457, 0.0238, 0.9511, 2.9186, 4.8861, -1.2958, 0.9536,
@@ -80,7 +120,7 @@ TEST(EigenTest, ComputeValues)
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gx(i), out(i), 0.0001);
 
-    MatrixXd out2 = eigen::gradY(A);
+    MatrixXd out2 = gradY(A);
 
     Matrix3d gy;
     gy << -4.0927, -1.6265, 3.2358, -0.4859, -0.3762, 1.2134, 3.1210, 0.8741,
@@ -99,8 +139,8 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Cv(C.data(), C.data() + C.size());
 
-    std::vector<double> Dv = eigen::dilateDiamond(Cv, 5, 5, 1);
-    std::vector<double> Dv2 = eigen::dilateDiamond(Cv, 5, 5, 2);
+    std::vector<double> Dv = dilateDiamond(Cv, 5, 5, 1);
+    std::vector<double> Dv2 = dilateDiamond(Cv, 5, 5, 2);
 
     EXPECT_EQ(0, Dv[0]);
     EXPECT_EQ(1, Dv[1]);
@@ -114,8 +154,8 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Ev(E.data(), E.data() + E.size());
 
-    std::vector<double> Fv = eigen::erodeDiamond(Ev, 5, 5, 1);
-    std::vector<double> Fv2 = eigen::erodeDiamond(Ev, 5, 5, 2);
+    std::vector<double> Fv = erodeDiamond(Ev, 5, 5, 1);
+    std::vector<double> Fv2 = erodeDiamond(Ev, 5, 5, 2);
 
     EXPECT_EQ(0, Fv[16]);
     EXPECT_EQ(1, Fv[12]);
@@ -129,4 +169,69 @@ TEST(EigenTest, RoundtripString)
     Utils::fromString(Utils::toString(identity), target);
     ASSERT_EQ(identity.size(), target.size());
     EXPECT_EQ(identity, target);
+}
+
+TEST(EigenTest, calcBounds)
+{
+    auto set_points = [](PointViewPtr view, PointId i, double x, double y,
+        double z)
+    {
+        view->setField(Dimension::Id::X, i, x);
+        view->setField(Dimension::Id::Y, i, y);
+        view->setField(Dimension::Id::Z, i, z);
+    };
+
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+
+    const double lim_min = (std::numeric_limits<double>::lowest)();
+    const double lim_max = (std::numeric_limits<double>::max)();
+    PointViewPtr b0(new PointView(table));
+    BOX3D box_b0;
+    calculateBounds(*b0, box_b0);
+    check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
+
+    PointViewPtr b1(new PointView(table));
+    set_points(b1, 0, 0.0, 0.0, 0.0);
+    set_points(b1, 1, 2.0, 2.0, 2.0);
+
+    PointViewPtr b2(new PointView(table));
+    set_points(b2, 0, 3.0, 3.0, 3.0);
+    set_points(b2, 1, 1.0, 1.0, 1.0);
+
+    PointViewSet bs;
+    bs.insert(b1);
+    bs.insert(b2);
+
+    BOX3D box_b1;
+    calculateBounds(*b1, box_b1);
+    check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
+
+    BOX3D box_b2;
+    calculateBounds(*b2, box_b2);
+    check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
+}
+
+TEST(EigenTest, demeanTest)
+{
+    PointTable table;
+    PointViewPtr view = makeTestView(table);
+    PointViewPtr demeanView = demeanPointView(*view);
+    EXPECT_EQ(-80, demeanView->getFieldAs<double>(Dimension::Id::X, 0));
+    EXPECT_EQ(-800, demeanView->getFieldAs<double>(Dimension::Id::Y, 0));
+}
+
+TEST(EigenTest, computeCentroid)
+{
+    PointTable table;
+    PointViewPtr view = makeTestView(table);
+    PointIdList ids(view->size());
+    std::iota(ids.begin(), ids.end(), 0);
+    auto centroid = computeCentroid(*view, ids);
+    EXPECT_EQ(80, centroid.x());
+    EXPECT_EQ(800, centroid.y());
 }

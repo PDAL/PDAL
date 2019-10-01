@@ -26,16 +26,19 @@ generate a ground surface.
 
 .. seealso::
 
-    You can read more about the specifics of the SMRF algorithm from [Pingle2013]_`
+    You can read more about the specifics of the SMRF algorithm from `[Pingle2013]_`
 
 .. _`Digital Terrain Model`: https://en.wikipedia.org/wiki/Digital_elevation_model
 
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
+Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 .. literalinclude:: ./ground-run-no-filter.txt
+    :linenos:
+
+.. literalinclude:: ./ground-run-no-filter-win.txt
     :linenos:
 
 .. image:: ../../../images/ground-run-command.png
@@ -60,14 +63,20 @@ Filtering
 
 We do not yet have a satisfactory surface for generating a DTM.  When we
 visualize the output of this ground operation, we notice there's still some
-noise. We can stack the call to PMF with a call to a the `filters.outlier`
-technique we learned about in :ref:`workshop-denoising`.
+noise. We can stack the call to SMRF with a call to a the `filters.outlier`
+technique we learned about in :ref:`denoising`.
 
-1. Let us start by removing the non-ground data:
+1. Let us start by removing the non-ground data to just view the ground data:
 
 .. literalinclude:: ./ground-run-ground-only.txt
     :linenos:
     :emphasize-lines: 5
+    :language: console
+
+.. literalinclude:: ./ground-run-ground-only-win.txt
+    :linenos:
+    :emphasize-lines: 5
+    :language: bat
 
 .. image:: ../../../images/ground-ground-only-view.png
     :target: ../../../../_images/ground-ground-only-view.png
@@ -79,9 +88,12 @@ technique we learned about in :ref:`workshop-denoising`.
 .. literalinclude:: ./translate-run-ground-only.txt
    :linenos:
 
+.. literalinclude:: ./translate-run-ground-only-win.txt
+   :linenos:
+
 In this invocation, we have more control over the process. First the outlier
 filter merely classifies outliers with a ``Classification`` value of 7. These
-outliers are then ignored during PMF processing with the ``ignore`` option.
+outliers are then ignored during SMRF processing with the ``ignore`` option.
 Finally, we add a range filter to extract only the ground returns (i.e.,
 ``Classification`` value of 2).
 

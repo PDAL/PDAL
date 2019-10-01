@@ -112,7 +112,7 @@ void HAGFilter::filter(PointView& view)
 {
     PointViewPtr gView = view.makeNew();
     PointViewPtr ngView = view.makeNew();
-    std::vector<PointId> gIdx, ngIdx;
+    PointIdList gIdx, ngIdx;
 
     // First pass: Separate into ground and non-ground views.
     for (PointId i = 0; i < view.size(); ++i)

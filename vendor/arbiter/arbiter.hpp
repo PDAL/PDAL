@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 902d4fcdf24a8b63b763744f6a49b3d20be16c6e
+// Git SHA: 098ed60a28d9a612a125a26ec667569c0bc90c8e
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3117,6 +3117,13 @@ inline std::string decompress(const char* data, std::size_t size)
 // //////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+#include <nlohmann/json.hpp>
+
+
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/util/exports.hpp
 // //////////////////////////////////////////////////////////////////////
@@ -3263,7 +3270,9 @@ private:
 
 #pragma once
 
-#include <nlohmann/json.hpp>
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/third/json/json.hpp>
+#endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -3909,7 +3918,7 @@ ARBITER_DLL std::string getBasename(std::string fullPath);
  * For directory paths, this corresponds to all directories above the
  * innermost directory.
  */
-ARBITER_DLL std::string getNonBasename(std::string fullPath);
+ARBITER_DLL std::string getDirname(std::string fullPath);
 
 /** @cond arbiter_internal */
 ARBITER_DLL inline bool isSlash(char c) { return c == '/' || c == '\\'; }
@@ -4035,6 +4044,9 @@ ARBITER_DLL std::vector<std::string> split(
 /** @brief Remove whitespace. */
 ARBITER_DLL std::string stripWhitespace(const std::string& s);
 
+namespace internal
+{
+
 template<typename T, typename... Args>
 std::unique_ptr<T> makeUnique(Args&&... args)
 {
@@ -4053,6 +4065,8 @@ std::unique_ptr<T> maybeClone(const T* t)
     if (t) return makeUnique<T>(*t);
     else return std::unique_ptr<T>();
 }
+
+} // namespace internal
 
 ARBITER_DLL uint64_t randomNumber();
 
@@ -4691,7 +4705,7 @@ public:
     { }
 
     Auth(std::string iamRole)
-        : m_role(makeUnique<std::string>(iamRole))
+        : m_role(internal::makeUnique<std::string>(iamRole))
     { }
 
     static std::unique_ptr<Auth> create(std::string j, std::string profile);
@@ -5144,7 +5158,10 @@ public:
     bool isHttpDerived() const;
 
     /** See Arbiter::getLocalHandle. */
-    std::unique_ptr<LocalHandle> getLocalHandle(std::string subpath) const;
+    std::unique_ptr<LocalHandle> getLocalHandle(
+            std::string subpath,
+            http::Headers headers = http::Headers(),
+            http::Query query = http::Query()) const;
 
     /** Passthrough to Driver::get. */
     std::string get(std::string subpath) const;

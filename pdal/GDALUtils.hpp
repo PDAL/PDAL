@@ -70,6 +70,8 @@ PDAL_DLL bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
     const std::string& dstSrs);
 PDAL_DLL bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
     const std::string& dstSrs);
+PDAL_DLL bool reproject(double& x, double& y, double& z,
+    const std::string& srcSrs, const std::string& dstSrs);
 PDAL_DLL std::string lastError();
 
 typedef std::shared_ptr<void> RefPtr;
@@ -217,6 +219,9 @@ private:
 class PDAL_DLL ErrorHandler
 {
 public:
+    ErrorHandler();
+    ~ErrorHandler();
+
     /**
       Get the singleton error handler.
 
@@ -260,8 +265,6 @@ public:
     {
         ErrorHandler::getGlobalErrorHandler().handle(code, num, msg);
     }
-
-    ErrorHandler();
 
 private:
     void handle(::CPLErr level, int num, const char *msg);
@@ -853,37 +856,15 @@ private:
 
 } // namespace gdal
 
-namespace oldgdalsupport
-{
-OGRErr createFromWkt(const char *s, OGRSpatialReference *srs,
-    OGRGeometry **newGeom);
-OGRGeometry* createFromGeoJson(const char *s);
-} // namespace oldgdalsupport
-
 namespace gdal
 {
-// We need this, but they aren't around until GDAL 2.3
-inline OGRGeometry *createFromWkt(const char *s)
-{
-    OGRGeometry *newGeom;
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    oldgdalsupport::createFromWkt(s, nullptr, &newGeom);
-#else
-    OGRGeometryFactory::createFromWkt(s, nullptr, &newGeom);
-#endif
-    return newGeom;
-}
+OGRGeometry *createFromWkt(const char *s);
+OGRGeometry *createFromGeoJson(const char *s);
 
-inline OGRGeometry *createFromGeoJson(const char *s)
-{
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    return oldgdalsupport::createFromGeoJson(s);
-#else
-    return OGRGeometryFactory::createFromGeoJson(s);
-#endif
-}
+// New signatures to support extraction of SRS from the end of geometry
+// specifications..
+OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
+OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
 
 inline OGRGeometry *fromHandle(OGRGeometryH geom)
 { return reinterpret_cast<OGRGeometry *>(geom); }
@@ -892,8 +873,5 @@ inline OGRGeometryH toHandle(OGRGeometry *h)
 { return reinterpret_cast<OGRGeometryH>(h); }
 
 } // namespace gdal
-
-PDAL_DLL std::string transformWkt(std::string wkt, const SpatialReference& from,
-    const SpatialReference& to);
 
 } // namespace pdal

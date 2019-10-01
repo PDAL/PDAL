@@ -81,7 +81,7 @@ void RadialDensityFilter::filter(PointView& view)
     double factor = 1.0 / ((4.0 / 3.0) * 3.14159 * (m_rad * m_rad * m_rad));
     for (PointId i = 0; i < view.size(); ++i)
     {
-        std::vector<PointId> pts = index.radius(i, m_rad);
+        PointIdList pts = index.radius(i, m_rad);
         view.setField(m_rdens, i, pts.size() * factor);
     }
 }

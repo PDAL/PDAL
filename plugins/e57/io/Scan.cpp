@@ -37,7 +37,7 @@
 
 namespace e57
 {
-    Scan::Scan(const e57::StructureNode &node) : m_numPoints(0)
+Scan::Scan(const e57::StructureNode &node) : m_numPoints(0)
 {
     m_rawData = std::unique_ptr<e57::StructureNode>(new e57::StructureNode(node));
     m_rawPoints = std::unique_ptr<CompressedVectorNode>(new CompressedVectorNode(m_rawData->get("points")));
@@ -59,9 +59,16 @@ e57::CompressedVectorNode Scan::getPoints() const
     return *m_rawPoints;
 }
 
-std::pair<double,double> Scan::getLimits(pdal::Dimension::Id pdalId) const
+bool Scan::getLimits(pdal::Dimension::Id pdalId, std::pair<double, double>& minMax) const
 {
-    return m_valueBounds.at(pdalId);
+    auto itMinMax = m_valueBounds.find(pdalId);
+    if (itMinMax != m_valueBounds.end())
+    {
+        minMax = itMinMax->second;
+        return true;
+    }
+
+    return false;
 }
 
 bool Scan::hasPose() const
@@ -80,7 +87,32 @@ void Scan::transformPoint(pdal::PointRef pt) const
     pt.setField(pdal::Dimension::Id::Z,  x*m_rotation[2][0] + y*m_rotation[2][1] + z*m_rotation[2][2]  + m_translation[2]);
 }
 
-    void Scan::decodeHeader()
+std::array<double,3>
+Scan::transformPoint(const std::array<double,3> &originalPoint) const
+{
+    std::array<double,3> transformed {0,0,0};
+    for (size_t i = 0; i < originalPoint.size(); i++)
+    {
+        transformed[i] =  m_translation[i];
+        for (size_t  j = 0; j < originalPoint.size(); j++)
+            transformed[i] += originalPoint[i]*m_rotation[i][j];
+    }
+    return transformed;
+}
+
+pdal::BOX3D Scan::getBoundingBox() const
+{
+    if (!hasPose())
+    {
+        return m_bbox;
+    }
+
+    auto bmin = transformPoint({m_bbox.minx,m_bbox.miny,m_bbox.minz});
+    auto bmax = transformPoint({m_bbox.maxx,m_bbox.maxy,m_bbox.maxz});
+    return pdal::BOX3D(bmin[0],bmin[1],bmin[2],bmax[0],bmax[1],bmax[2]);
+}
+
+void Scan::decodeHeader()
 {
     m_numPoints = m_rawPoints->childCount();
 
@@ -102,12 +134,21 @@ void Scan::transformPoint(pdal::PointRef pt) const
     for (auto& field: supportedFields)
     {
         auto minmax = pdal::e57plugin::getLimits(*m_rawData,field);
+        //ABELL - This seems weird.  Could you not have one value that's
+        //  NaN and another not NaN?
         if (minmax == minmax) // not nan
             m_valueBounds[pdal::e57plugin::e57ToPdal(field)] = minmax;
     }
+
+    // Cartesian Bounds
+    auto minMaxx = pdal::e57plugin::getLimits(*m_rawData,"x");
+    auto minMaxy = pdal::e57plugin::getLimits(*m_rawData,"y");
+    auto minMaxz = pdal::e57plugin::getLimits(*m_rawData,"z");
+    m_bbox.grow(minMaxx.first, minMaxy.first, minMaxz.first);
+    m_bbox.grow(minMaxx.second, minMaxy.second, minMaxz.second);
 }
 
-    void Scan::getPose()
+void Scan::getPose()
 {
     if (m_rawData->isDefined("pose"))
 	{

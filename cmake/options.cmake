@@ -22,11 +22,6 @@ option(BUILD_PLUGIN_I3S
 add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
     "Read from a I3S server or from a SLPK file")
 
-option(BUILD_PLUGIN_GREYHOUND
-    "Choose if Greyhound support should be built" FALSE)
-add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
-    "read points from a Greyhound server")
-
 option(BUILD_PLUGIN_ICEBRIDGE
     "Choose if Icebridge support should be built" FALSE)
 add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
@@ -56,10 +51,6 @@ option(BUILD_PLUGIN_OCI
     "Choose if OCI support should be built" FALSE)
 add_feature_info("Oracle OCI plugin" BUILD_PLUGIN_OCI
     "Read/write point clould patches to Oracle")
-
-option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
-add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
-    "provides PCL-based readers, writers, filters, and kernels")
 
 find_package(PostgreSQL QUIET)
 option(BUILD_PLUGIN_PGPOINTCLOUD

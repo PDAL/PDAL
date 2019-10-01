@@ -41,6 +41,7 @@
 #include "RxpReader.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -73,6 +74,7 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
     ids.push_back(Id::Deviation);
     ids.push_back(Id::BackgroundRadiation);
     ids.push_back(Id::IsPpsLocked);
+    ids.push_back(Id::EdgeOfFlightLine);
     if (reflectanceAsIntensity) {
         ids.push_back(Id::Intensity);
     }
@@ -92,6 +94,10 @@ void RxpReader::addArgs(ProgramArgs& args)
 
 void RxpReader::initialize()
 {
+
+    if (pdal::Utils::isRemote(m_filename))
+        m_filename = pdal::Utils::fetchRemote(m_filename);
+
     m_uri = m_isRdtp ? "rdtp://" + m_filename : "file:" + m_filename;
 }
 

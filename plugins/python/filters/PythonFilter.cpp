@@ -32,10 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-
 #include "PythonFilter.hpp"
+
+#include <nlohmann/json.hpp>
+
 #include <pdal/PointView.hpp>
+#include <pdal/DimUtil.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -92,8 +94,23 @@ void PythonFilter::addArgs(ProgramArgs& args)
 
 void PythonFilter::addDimensions(PointLayoutPtr layout)
 {
-    for (const std::string& s : m_args->m_addDimensions)
-        layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
+    for (const std::string& s : m_args->m_addDimensions) {
+        StringList spec = Utils::split(s, '=');
+        Utils::trim(spec[0]);
+        if (spec.size() == 2)
+        {
+            Utils::trim(spec[1]);
+            auto type = pdal::Dimension::type(spec[1]);
+            if (type == pdal::Dimension::Type::None)
+                throwError("Invalid dimension type specified '" + spec[1] + "'.  See "
+                           "documentation for valid dimension types");
+            layout->registerOrAssignDim(spec[0], type);
+        } else if (spec.size() == 1){
+            layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
+        } else {
+          throwError("Invalid dimension specified '" + s + "'.  Need <dimension> or <dimension>=<data_type>.");
+        }
+    }
 }
 
 
@@ -101,7 +118,9 @@ void PythonFilter::ready(PointTableRef table)
 {
     if (m_args->m_source.empty())
         m_args->m_source = FileUtils::readFileIntoString(m_args->m_scriptFile);
-    plang::Environment::get()->set_stdout(log()->getLogStream());
+    std::ostream *out = log()->getLogStream();
+    plang::EnvironmentPtr env = plang::Environment::get();
+    env->set_stdout(out);
     m_script = new plang::Script(m_args->m_source, m_args->m_module,
         m_args->m_function);
 

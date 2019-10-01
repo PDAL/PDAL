@@ -42,8 +42,6 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <nlohmann/json.hpp>
-
 namespace pdal
 {
 
@@ -275,9 +273,8 @@ void StatsFilter::extractMetadata(PointTableRef table)
         MetadataNode box_metadata = m_metadata.add("bbox");
         MetadataNode metadata = box_metadata.add("native");
 
-        NL::json json = p.json();
         MetadataNode boundary = metadata.addWithType("boundary",
-            json.dump(), "json", "GeoJSON boundary");
+            p.json(), "json", "GeoJSON boundary");
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -292,9 +289,8 @@ void StatsFilter::extractMetadata(PointTableRef table)
             MetadataNode dddbox = box_metadata.add("EPSG:4326");
             dddbox.add(epsg_4326_box);
 
-            json = p.json();
             MetadataNode ddboundary = dddbox.addWithType("boundary",
-                json.dump(), "json", "GeoJSON boundary");
+                p.json(), "json", "GeoJSON boundary");
         }
     }
 }

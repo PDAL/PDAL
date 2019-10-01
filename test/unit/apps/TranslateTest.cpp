@@ -92,7 +92,7 @@ TEST(TranslateTest, t2)
     EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
-    // Check that we fail with no bad input file.
+    // Check that we fail with no input file.
     FileUtils::deleteFile("foo.las");
     EXPECT_NE(runTranslate("foo.las " + out + " --json=\"" + json + "\"",
         output), 0);
@@ -168,7 +168,7 @@ TEST(TranslateTest, t2)
           \\\"badoutput2.las\\\" \
         ] \
         }";
-    EXPECT_NE(runTranslate(in + " " + out + " --json=\"" + json + "\"",
+    EXPECT_EQ(runTranslate(in + " " + out + " --json=\"" + json + "\"",
         output), 0);
 
     // Check that we can handle chained writers.
@@ -199,7 +199,7 @@ TEST(TranslateTest, t3)
     std::string meta = Support::temppath("meta.json");
 
     EXPECT_EQ(runTranslate(in + " " + out + " --metadata " + meta, output), 0);
-#ifndef WIN32
+#ifndef _WIN32
     Utils::run_shell_command("grep -c readers.las " + meta, output);
     EXPECT_EQ(std::stoi(output), 1);
     Utils::run_shell_command("grep -c writers.las " + meta, output);
