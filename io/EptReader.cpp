@@ -549,6 +549,8 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 
 void EptReader::ready(PointTableRef table)
 {
+    m_userLayout = table.layout();
+
     // These may not exist, in general they are only needed to track point
     // origins and ordering for an EPT writer.
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
@@ -702,7 +704,8 @@ PointViewSet EptReader::run(PointViewPtr view)
 
     for (auto& p : m_args->m_polys)
     {
-        m_queryGrids.emplace_back(p.exteriorRing(), p.interiorRings());
+        m_queryGrids.emplace_back(
+            new GridPnp(p.exteriorRing(), p.interiorRings()));
     }
 
     for (const auto& entry : m_overlaps)
@@ -824,16 +827,13 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
             return true;
 
         for (const auto& grid : m_queryGrids)
-            if (grid.inside(x, y))
+            if (grid->inside(x, y))
                 return true;
         return false;
     };
 
     if (selected && m_queryBounds.contains(x, y, z) && passesPolyFilter(x, y))
     {
-        // If we were given polys, check that our point is inside those
-        // polygons too.
-
         dst.setField(Dimension::Id::X, dstId, x);
         dst.setField(Dimension::Id::Y, dstId, y);
         dst.setField(Dimension::Id::Z, dstId, z);
@@ -946,7 +946,7 @@ void EptReader::load()
         m_pool->add([this, &loadingBuffer, nodeId, key]()
         {
             std::unique_ptr<NodeBuffer> nodeBuffer(
-                new NodeBuffer(*m_remoteLayout));
+                new NodeBuffer(*m_userLayout));
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 readLaszip(nodeBuffer->view, key, nodeId);
@@ -1015,9 +1015,12 @@ bool EptReader::processOne(PointRef& point)
         if (m_currentNodeBuffer->view.empty()) m_currentNodeBuffer.reset();
     }
 
-    point.setPackedData(
-        m_remoteLayout->dimTypes(),
-        m_currentNodeBuffer->view.getPoint(m_pointId));
+    for (const auto& id : m_currentNodeBuffer->table.layout()->dims())
+    {
+        point.setField(
+            id,
+            m_currentNodeBuffer->view.getFieldAs<double>(id, m_pointId));
+    }
 
     if (++m_pointId == m_currentNodeBuffer->view.size())
     {
