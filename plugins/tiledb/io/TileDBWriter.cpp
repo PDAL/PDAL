@@ -162,6 +162,7 @@ std::string TileDBWriter::getName() const { return s_info.name; }
 void TileDBWriter::addArgs(ProgramArgs& args)
 {
     args.add("array_name", "TileDB array name", m_arrayName).setPositional();
+    args.addSynonym("array_name", "filename");
     args.add("config_file", "TileDB configuration file location",
         m_cfgFileName);
     args.add("data_tile_capacity", "TileDB tile capacity", m_tile_capacity,

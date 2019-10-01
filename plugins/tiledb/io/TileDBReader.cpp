@@ -89,6 +89,7 @@ Dimension::Type getPdalType(tiledb_datatype_t t)
 void TileDBReader::addArgs(ProgramArgs& args)
 {
     args.add("array_name", "TileDB array name", m_arrayName).setPositional();
+    args.addSynonym("array_name", "filename");
     args.add("config_file", "TileDB configuration file location",
         m_cfgFileName);
     args.add("chunk_size", "TileDB read chunk size", m_chunkSize,
