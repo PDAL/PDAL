@@ -780,18 +780,41 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 
 std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
 {
-//    const NL::json el = json.value("ogr", NL::json::null_value);
     const NL::json& layer = ogr.at("layer");
     const NL::json& datasource = ogr.at("datasource");
+    const NL::json options = ogr.at("options");
 
-    const NL::json options = ogr.at("options");//, nullptr);
 
     registerDrivers();
+
+
+    char** papszDriverOptions = nullptr;
+    if (ogr.count("drivers"))
+    {
+
+        const NL::json& dops = ogr.at("drivers");
+        std::vector<std::string> driverOptions = dops.get<std::vector<std::string>>();
+        for(const auto& s: driverOptions)
+            papszDriverOptions = CSLAddString(papszDriverOptions, s.c_str());
+    }
+    std::vector<const char*> openoptions{};
+    char** papszOpenOptions = nullptr;
+    if (ogr.count("openoptions"))
+    {
+
+        const NL::json& oops = ogr.at("openoptions");
+        std::vector<std::string> openOptions = oops.get<std::vector<std::string>>();
+        for(const auto& s: openOptions)
+            papszOpenOptions = CSLAddString(papszOpenOptions, s.c_str());
+    }
+
     std::string dsString = datasource.get<std::string>();
     unsigned int openFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR;
     GDALDataset* ds = (GDALDataset*) GDALOpenEx( dsString.c_str(),
                                                  openFlags,
-                                                 NULL, NULL, NULL );
+                                                 papszDriverOptions, papszOpenOptions, NULL );
+    CSLDestroy(papszDriverOptions);
+    CSLDestroy(papszOpenOptions);
     if (!ds)
         throw pdal_error("Unable to read datasource in fetchOGRGeometries " + datasource.dump() );
 
