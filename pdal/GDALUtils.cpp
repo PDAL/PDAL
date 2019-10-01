@@ -780,13 +780,8 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 
 std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
 {
-    const NL::json& layer = ogr.at("layer");
-    const NL::json& datasource = ogr.at("datasource");
-    const NL::json options = ogr.at("options");
-
-
     registerDrivers();
-
+    const NL::json& datasource = ogr.at("datasource");
 
     char** papszDriverOptions = nullptr;
     if (ogr.count("drivers"))
@@ -798,6 +793,7 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
             papszDriverOptions = CSLAddString(papszDriverOptions, s.c_str());
     }
     std::vector<const char*> openoptions{};
+
     char** papszOpenOptions = nullptr;
     if (ogr.count("openoptions"))
     {
@@ -818,23 +814,26 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
     if (!ds)
         throw pdal_error("Unable to read datasource in fetchOGRGeometries " + datasource.dump() );
 
-
     OGRLayer* poLayer(nullptr);
 
-    std::string lyrString = layer.get<std::string>();
-    poLayer = ds->GetLayerByName( lyrString.c_str() );
+    if (ogr.count("layer"))
+    {
+        const NL::json& layer = ogr.at("layer");
+        std::string lyrString = layer.get<std::string>();
+        poLayer = ds->GetLayerByName( lyrString.c_str() );
 
-    if (!poLayer)
-        throw pdal_error("Unable to read layer in fetchOGRGeometries " + layer.dump() );
+        if (!poLayer)
+            throw pdal_error("Unable to read layer in fetchOGRGeometries " + layer.dump() );
+    }
 
     std::vector<OGRGeometry*> output;
 
     OGRFeature *poFeature (nullptr);
     OGRGeometry* filterGeometry(nullptr);
 
-    poLayer->ResetReading();
     if (ogr.count("sql"))
     {
+        const NL::json options = ogr.at("options");
         std::string dialect("OGRSQL");
         if (options.count("dialect"))
             dialect = options.at("dialect").get<std::string>();
@@ -848,26 +847,44 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
             std::string srs;
             if (isJson)
             {
-                filterGeometry = createFromGeoJson(wkt_or_json, srs);
+                filterGeometry = gdal::createFromGeoJson(wkt_or_json, srs);
                 if (!filterGeometry)
                     throw pdal_error("Unable to create filter geometry from input GeoJSON");
             }
             else
             {
-                filterGeometry = createFromWkt(wkt_or_json, srs);
+                filterGeometry = gdal::createFromWkt(wkt_or_json, srs);
                 if (!filterGeometry)
                     throw pdal_error("Unable to create filter geometry from input WKT");
             }
+            filterGeometry->assignSpatialReference(
+                new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
 
         }
 
         std::string query = ogr.at("sql").get<std::string>();
+
+        // execute the query to get the SRS without
+        // the filterGeometry, assign it to the filterGeometry,
+        // and then query again.
+        if (filterGeometry)
+        {
+            poLayer = ds->ExecuteSQL( query.c_str(),
+                                      NULL,
+                                      dialect.c_str());
+            if (!poLayer)
+                throw pdal_error("unable to execute sql query!");
+
+            filterGeometry->transformTo(poLayer->GetSpatialRef());
+        }
+
         poLayer = ds->ExecuteSQL( query.c_str(),
                                   filterGeometry,
                                   dialect.c_str());
         if (!poLayer)
             throw pdal_error("unable to execute sql query!");
     }
+
     while( (poFeature = poLayer->GetNextFeature()) != NULL )
     {
         OGRGeometry* poGeometry = poFeature->GetGeometryRef();

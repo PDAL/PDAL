@@ -250,41 +250,20 @@ void EptReader::initialize()
 
     if (!m_args->m_ogr.is_null())
     {
-        // convert whatever we were given for an OGR source to
-        // polygons and override m_args->m_polys
-        m_args->m_polys.clear();
         std::vector<OGRGeometry*> ogr_geoms = pdal::gdal::fetchOGRGeometries(m_args->m_ogr);
-        BOX3D layerBounds;
 
-        SpatialReference layerSrs;
+        debug << "Number of OGR filter geometries: "
+              << ogr_geoms.size()
+              << std::endl;
+
         for (auto g: ogr_geoms)
         {
-
             OGRSpatialReferenceH srs = (OGRSpatialReferenceH) g->getSpatialReference();
             Polygon p = pdal::Polygon(g, srs);
+            p.transform(getSpatialReference());
             m_args->m_polys.emplace_back(p);
-            if (layerSrs.empty())
-            {
-                SpatialReference gSrs = SpatialReference(srs);
-                if (!gSrs.empty())
-                    layerSrs = gSrs;
-            }
-
-            BOX3D box = p.bounds();
-            layerBounds.grow(box.minx, box.miny, EptBounds::LOWEST);
-
-            layerBounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
         }
-
-        // Apply our overrides from the fetched layer by taking
-        // the intersection of the layer's bounds with whatever the
-        // user provided before
-        BOX3D filtered = m_args->m_bounds.to3d();
-        filtered.clip(layerBounds);
-        SrsBounds newBounds = SrsBounds(filtered, layerSrs);
     }
-
-
 
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
@@ -295,7 +274,6 @@ void EptReader::initialize()
     if (boundsSrs.valid())
         gdal::reprojectBounds(m_queryBounds,
             boundsSrs.getWKT(), getSpatialReference().getWKT());
-
 
     // Transform polygons and bounds to point source SRS.
     std::vector <Polygon> exploded;
