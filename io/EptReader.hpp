@@ -131,7 +131,7 @@ private:
     std::unique_ptr<Args> m_args;
 
     BOX3D m_queryBounds;
-    std::vector<GridPnp> m_queryGrids;
+    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
     std::vector<std::unique_ptr<Addon>> m_addons;
@@ -156,6 +156,8 @@ private:
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
     // The below are for streaming operation only.
+    PointLayout* m_userLayout = nullptr;
+
     struct NodeBuffer;
     using NodeBufferMap = std::map<uint64_t, std::unique_ptr<NodeBuffer>>;
     using NodeBufferIt = NodeBufferMap::const_iterator;
