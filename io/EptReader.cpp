@@ -62,7 +62,6 @@ namespace
         { "ept" }
     };
 
-    const std::size_t streamNodeCount(8);
     const std::string addonFilename { "ept-addon.json" };
 
     Dimension::Type getRemoteType(const NL::json& dim)
@@ -950,7 +949,7 @@ void EptReader::load()
     // Asynchronously trigger the fetching and point-view execution of
     // a lookahead buffer of nodes.
     while (
-        m_upcomingNodeBuffers.size() < streamNodeCount &&
+        m_upcomingNodeBuffers.size() < m_pool->size() &&
         m_overlapIt != m_overlaps.end())
     {
         const auto nodeId(m_nodeId++);
@@ -979,7 +978,9 @@ void EptReader::load()
             for (const auto& addon : m_addons)
                 readAddon(nodeBuffer->view, key, *addon);
 
+            std::unique_lock<std::mutex> lock(m_mutex);
             loadingBuffer = std::move(nodeBuffer);
+            lock.unlock();
 
             // A node has been populated - notify our consumer thread.
             m_cv.notify_one();
@@ -1025,7 +1026,16 @@ bool EptReader::next()
 
 bool EptReader::processOne(PointRef& point)
 {
-    if (!m_currentNodeBuffer && !next()) return false;
+    while (!m_currentNodeBuffer)
+    {
+        if (!next()) return false;
+
+        // If we have a query bounds or query polygon, it's possible that the
+        // octree bounds of a node overlaps the query, but this node contains
+        // no matching points for the query.  So we may have a zero point
+        // buffer which we have to handle.
+        if (m_currentNodeBuffer->view.empty()) m_currentNodeBuffer.reset();
+    }
 
     point.setPackedData(
         m_remoteLayout->dimTypes(),
@@ -1033,7 +1043,7 @@ bool EptReader::processOne(PointRef& point)
 
     if (++m_pointId == m_currentNodeBuffer->view.size())
     {
-        m_currentNodeBuffer = nullptr;
+        m_currentNodeBuffer.reset();
     }
 
     return true;
