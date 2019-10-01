@@ -830,39 +830,45 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
 
     OGRFeature *poFeature (nullptr);
     OGRGeometry* filterGeometry(nullptr);
+    std::string dialect("OGRSQL");
 
     if (ogr.count("sql"))
     {
-        const NL::json options = ogr.at("options");
-        std::string dialect("OGRSQL");
-        if (options.count("dialect"))
-            dialect = options.at("dialect").get<std::string>();
 
-        if (options.count("geometry"))
+        const NL::json sql = ogr.at("sql");
+
+        if (ogr.count("options"))
         {
-            std::string wkt_or_json = options.at("geometry").get<std::string>();
-            bool isJson = (wkt_or_json.find("{") != wkt_or_json.npos) ||
-                          (wkt_or_json.find("}") != wkt_or_json.npos);
+            const NL::json options = ogr.at("options");
+            if (options.count("dialect"))
+                dialect = options.at("dialect").get<std::string>();
 
-            std::string srs;
-            if (isJson)
+            if (options.count("geometry"))
             {
-                filterGeometry = gdal::createFromGeoJson(wkt_or_json, srs);
-                if (!filterGeometry)
-                    throw pdal_error("Unable to create filter geometry from input GeoJSON");
-            }
-            else
-            {
-                filterGeometry = gdal::createFromWkt(wkt_or_json, srs);
-                if (!filterGeometry)
-                    throw pdal_error("Unable to create filter geometry from input WKT");
-            }
-            filterGeometry->assignSpatialReference(
-                new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
+                std::string wkt_or_json = options.at("geometry").get<std::string>();
+                bool isJson = (wkt_or_json.find("{") != wkt_or_json.npos) ||
+                              (wkt_or_json.find("}") != wkt_or_json.npos);
 
+                std::string srs;
+                if (isJson)
+                {
+                    filterGeometry = gdal::createFromGeoJson(wkt_or_json, srs);
+                    if (!filterGeometry)
+                        throw pdal_error("Unable to create filter geometry from input GeoJSON");
+                }
+                else
+                {
+                    filterGeometry = gdal::createFromWkt(wkt_or_json, srs);
+                    if (!filterGeometry)
+                        throw pdal_error("Unable to create filter geometry from input WKT");
+                }
+                filterGeometry->assignSpatialReference(
+                    new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
+
+            }
         }
 
-        std::string query = ogr.at("sql").get<std::string>();
+        std::string query = sql.get<std::string>();
 
         // execute the query to get the SRS without
         // the filterGeometry, assign it to the filterGeometry,
