@@ -109,10 +109,16 @@ private:
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
     static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
 
-    // For streamable pipeline.
+    // For streaming operation.
+    struct NodeBuffer;
+    using NodeBufferMap = std::map<uint64_t, std::unique_ptr<NodeBuffer>>;
+    using NodeBufferIt = NodeBufferMap::iterator;
+    using NodeBufferPair = NodeBufferMap::value_type;
+
     virtual bool processOne(PointRef& point) override;
     void load();    // Asynchronously fetch EPT nodes for streaming use.
     bool next();    // Acquire an already-fetched node for processing.
+    NodeBufferIt findBuffer();  // Find a fully acquired node.
 
     // Data fetching - these forward user-specified query/header params.
     std::string get(std::string path) const;
@@ -157,11 +163,6 @@ private:
 
     // The below are for streaming operation only.
     PointLayout* m_userLayout = nullptr;
-
-    struct NodeBuffer;
-    using NodeBufferMap = std::map<uint64_t, std::unique_ptr<NodeBuffer>>;
-    using NodeBufferIt = NodeBufferMap::const_iterator;
-    using NodeBufferPair = NodeBufferMap::value_type;
 
     // These represent a lookahead of asynchronously loaded nodes, when we have
     // finished processing a streaming node we will wait for something to be

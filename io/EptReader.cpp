@@ -944,6 +944,14 @@ void EptReader::load()
     }
 }
 
+EptReader::NodeBufferIt EptReader::findBuffer()
+{
+    return std::find_if(
+        m_upcomingNodeBuffers.begin(),
+        m_upcomingNodeBuffers.end(),
+        [this](const NodeBufferPair& p) { return !!p.second; });
+}
+
 bool EptReader::next()
 {
     // Asynchronously trigger the loading of some nodes.
@@ -955,10 +963,7 @@ bool EptReader::next()
     m_cv.wait(lock, [this]()
     {
         return m_upcomingNodeBuffers.empty() ||
-            std::any_of(
-                m_upcomingNodeBuffers.begin(),
-                m_upcomingNodeBuffers.end(),
-                [this](const NodeBufferPair& p) { return !!p.second; });
+            findBuffer() != m_upcomingNodeBuffers.end();
     });
 
     // Processing is complete.
@@ -967,11 +972,7 @@ bool EptReader::next()
     // We know at least one node is populated from our `wait` predicate, so find
     // the first one and transfer it out of our `upcoming` pool to make it the
     // current active node.
-    const auto it = std::find_if(
-        m_upcomingNodeBuffers.begin(),
-        m_upcomingNodeBuffers.end(),
-        [](const NodeBufferPair& p) { return !!p.second; }
-    );
+    const auto it = findBuffer();
 
     m_pointId = 0;
     m_currentNodeBuffer = std::move(it->second);
