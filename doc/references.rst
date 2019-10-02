@@ -34,6 +34,8 @@ Reference
 
 .. [Alexa2003] Alexa, Marc, et al. "Computing and rendering point set surfaces." Visualization and Computer Graphics, IEEE Transactions on 9.1 (2003): 3-15.
 
+.. [Bartels2010] Bartels, Marc, and Hong Wei. "Threshold-free object and ground point separation in LIDAR data." Pattern recognition letters 31.10 (2010): 1089-1099.
+
 .. [Breunig2000] Breunig, M.M., Kriegel, H.-P., Ng, R.T., Sander, J., 2000. LOF: Identifying Density-Based Local Outliers. Proc. 2000 Acm Sigmod Int. Conf. Manag. Data 1–12.
 
 .. [Chen2012] Chen, Ziyue et al. “Upward-Fusion Urban DTM Generating Method Using Airborne Lidar Data.” ISPRS Journal of Photogrammetry and Remote Sensing 72 (2012): 121–130.
