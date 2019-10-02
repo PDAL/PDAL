@@ -59,7 +59,6 @@ public:
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
     Polygon(OGRGeometryH g, const SpatialReference& srs);
-    Polygon(OGRGeometryH g, OGRSpatialReferenceH srs);
 
     OGRGeometryH getOGRHandle();
 

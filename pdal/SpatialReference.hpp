@@ -72,12 +72,6 @@ public:
     */
     SpatialReference(const std::string& wkt);
 
-    /**
-      Construct a spatial reference from an OGRSpatialReferenceH
-
-      \param srs  OGRSpatialReferenceH to clone via WKT translation.
-    */
-    SpatialReference(OGRSpatialReferenceH ref);
 
     /**
       Determine if this spatial reference is the same as another.

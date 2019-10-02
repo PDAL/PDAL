@@ -258,10 +258,13 @@ void EptReader::initialize()
 
         for (auto g: ogr_geoms)
         {
-            OGRSpatialReferenceH srs = (OGRSpatialReferenceH) g->getSpatialReference();
-            Polygon p = pdal::Polygon(g, srs);
-            p.transform(getSpatialReference());
-            m_args->m_polys.emplace_back(p);
+			OGRSpatialReference* srs = g->getSpatialReference();
+			char *poWKT = 0;
+			srs->exportToWkt(&poWKT);
+			Polygon p = pdal::Polygon(g, std::string(poWKT));
+			p.transform(getSpatialReference());
+			m_args->m_polys.emplace_back(p);
+			CPLFree(poWKT);
         }
     }
 

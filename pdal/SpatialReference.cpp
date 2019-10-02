@@ -81,19 +81,6 @@ SpatialReference::SpatialReference(const std::string& s)
     set(s);
 }
 
-SpatialReference::SpatialReference(OGRSpatialReferenceH ref)
-{
-
-    OGRSpatialReference* s = reinterpret_cast<OGRSpatialReference *>(ref);
-    if (s)
-    {
-        char *poWKT = 0;
-        s->exportToWkt(&poWKT);
-        m_wkt = poWKT;
-        CPLFree(poWKT);
-    }
-
-}
 
 bool SpatialReference::empty() const
 {
