@@ -67,15 +67,15 @@ public:
     E57Writer(const E57Writer &) = delete;
     E57Writer& operator=(const E57Writer&) = delete;
 
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
-    virtual void addArgs(ProgramArgs &args);
-    virtual void initialize();
-    virtual bool processOne(PointRef & point);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
+    virtual void addArgs(ProgramArgs &args) override;
+    virtual void initialize() override;
+    virtual bool processOne(PointRef & point) override;
+    virtual void ready(PointTableRef table) override;
+    virtual void write(const PointViewPtr view) override;
+    virtual void done(PointTableRef table) override;
 
     void setupFileHeader();
 

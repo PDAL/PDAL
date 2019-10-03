@@ -88,7 +88,7 @@ public:
     E57Reader(const E57Reader &) = delete;
     E57Reader& operator=(const E57Reader&) = delete;
 
-    std::string getName() const;
+    std::string getName() const override;
 
     /// Get the total number of points in the scan
     point_count_t getNumberPoints() const;
@@ -105,11 +105,11 @@ public:
 private:
 
     /* Pdal section */
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void initialize();
-    virtual bool processOne(PointRef& point);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual QuickInfo inspect();
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void initialize() override;
+    virtual bool processOne(PointRef& point) override;
+    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    virtual QuickInfo inspect() override;
 
     void openFile(const std::string &filename);
     void closeFile();
