@@ -50,7 +50,7 @@ contains the points in "utm3.las".
 .. code-block:: json
 
   [
-      "utm1.las"
+      "utm1.las",
       "utm2.las",
       "utm3.las",
       "out#.las"
@@ -65,7 +65,7 @@ and "utm2.las", while "out2.las" contains the points from "utm3.las".
 .. code-block:: json
 
   [
-      "utm1.las"
+      "utm1.las",
       "utm2.las",
       {
           "type" : "filters.merge"
