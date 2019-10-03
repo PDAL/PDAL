@@ -918,7 +918,8 @@ void EptReader::load()
         // Insert an empty placeholder node to keep track of the outstanding
         // nodes that are currently being fetched/executed.
         std::unique_lock<std::mutex> lock(m_mutex);
-        auto& loadingBuffer = m_upcomingNodeBuffers[nodeId];
+        m_upcomingNodeBuffers.emplace_front();
+        auto& loadingBuffer = m_upcomingNodeBuffers.front();
         lock.unlock();
 
         m_pool->add([this, &loadingBuffer, nodeId, key]()
@@ -949,8 +950,8 @@ EptReader::NodeBufferIt EptReader::findBuffer()
     return std::find_if(
         m_upcomingNodeBuffers.begin(),
         m_upcomingNodeBuffers.end(),
-        [this](const NodeBufferPair& p)
-            { return static_cast<bool>(p.second); });
+        [](const std::unique_ptr<NodeBuffer>& n)
+            { return static_cast<bool>(n); });
 }
 
 bool EptReader::next()
@@ -974,7 +975,7 @@ bool EptReader::next()
     if (it == m_upcomingNodeBuffers.end()) return false;
 
     m_pointId = 0;
-    m_currentNodeBuffer = std::move(it->second);
+    m_currentNodeBuffer = std::move(*it);
     m_upcomingNodeBuffers.erase(it);
 
     return true;

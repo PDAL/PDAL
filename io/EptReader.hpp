@@ -36,8 +36,12 @@
 
 #include <array>
 #include <condition_variable>
+#include <list>
+#include <map>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include <pdal/JsonFwd.hpp>
 #include <pdal/Polygon.hpp>
@@ -111,9 +115,8 @@ private:
 
     // For streaming operation.
     struct NodeBuffer;
-    using NodeBufferMap = std::map<uint64_t, std::unique_ptr<NodeBuffer>>;
-    using NodeBufferIt = NodeBufferMap::iterator;
-    using NodeBufferPair = NodeBufferMap::value_type;
+    using NodeBufferList = std::list<std::unique_ptr<NodeBuffer>>;
+    using NodeBufferIt = NodeBufferList::iterator;
 
     virtual bool processOne(PointRef& point) override;
     void load();    // Asynchronously fetch EPT nodes for streaming use.
@@ -167,7 +170,7 @@ private:
     // These represent a lookahead of asynchronously loaded nodes, when we have
     // finished processing a streaming node we will wait for something to be
     // loaded here.
-    NodeBufferMap m_upcomingNodeBuffers;
+    NodeBufferList m_upcomingNodeBuffers;
 
     // This is the node we are currently processing in streaming mode, which is
     // plucked out of our upcoming node buffers when we have finished our
