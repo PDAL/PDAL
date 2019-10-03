@@ -36,6 +36,8 @@
 
 #include "Utils.hpp"
 
+#include <E57Format.h>
+
 namespace pdal
 {
 namespace e57plugin

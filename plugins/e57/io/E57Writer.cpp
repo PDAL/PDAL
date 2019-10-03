@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/util/Algorithm.hpp>
+#include <E57Format.h>
 
 #include "E57Writer.hpp"
 #include "Utils.hpp"
@@ -49,6 +50,24 @@ static StaticPluginInfo const s_info
 };
 
 CREATE_SHARED_STAGE(E57Writer, s_info)
+
+class E57Writer::ChunkWriter
+{
+public:
+    ChunkWriter(const std::vector<std::string> &dimensionsToWrite,
+        e57::CompressedVectorNode &vectorNode);
+
+    void write(pdal::PointRef &point);
+
+    void finalise();
+
+private:
+    const pdal::point_count_t m_defaultChunkSize;
+    pdal::point_count_t m_currentIndex;
+    std::map<std::string, std::vector<double>> m_doubleBuffers;
+    std::vector<e57::SourceDestBuffer> m_e57buffers;
+    std::unique_ptr<e57::CompressedVectorWriter> m_dataWriter;
+};
 
 E57Writer::ChunkWriter::ChunkWriter
 (const std::vector<std::string>& dimensionsToWrite,

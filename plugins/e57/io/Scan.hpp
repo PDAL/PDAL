@@ -34,16 +34,24 @@
 
 #pragma once
 
-#include <pdal/pdal_types.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/Dimension.hpp>
 #include <E57Format.h>
+
+#include <pdal/Dimension.hpp>
+#include <pdal/pdal_types.hpp>
+#include <pdal/PointRef.hpp>
+#include <pdal/util/Bounds.hpp>
+#include <pdal/util/pdal_util_export.hpp>
+
+#include <array>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
 
 namespace e57
 {
 class PDAL_DLL Scan
 {
-
 public:
     Scan(const e57::StructureNode& scanNode);
 

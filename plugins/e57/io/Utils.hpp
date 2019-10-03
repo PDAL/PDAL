@@ -34,10 +34,18 @@
 
 #pragma once
 
-#include <string>
-#include <E57Format.h>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_types.hpp>
+
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace e57
+{
+class StructureNode;
+}
 
 namespace pdal
 {

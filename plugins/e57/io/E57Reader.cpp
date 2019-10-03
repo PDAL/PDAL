@@ -33,13 +33,47 @@
 ****************************************************************************/
 
 #include <iostream>
+#include <E57Format.h>
 #include <E57Exception.h>
 
 #include "E57Reader.hpp"
+#include "Scan.hpp"
 #include "Utils.hpp"
 
 namespace pdal
 {
+
+class E57Reader::ChunkReader
+{
+public:
+    ChunkReader(const point_count_t &pointOffset,
+                const point_count_t &maxPointRead,
+                const std::shared_ptr<e57::Scan> &scan,
+                const std::set<std::string> &e57Dimensions);
+
+    ~ChunkReader();
+
+    // returns false if the index falls out of the
+    // [pointOffset,pointOffset + m_maxPointRead] interval
+    bool isInScope(point_count_t index) const;
+
+    bool isInChunk(point_count_t index) const;
+
+    void setPoint(point_count_t pointIndex, PointRef point) const;
+
+    // Reads a new chunk of data
+    point_count_t read(point_count_t index);
+
+private:
+    point_count_t m_startIndex;
+    point_count_t m_pointOffset;
+    point_count_t m_maxPointRead;
+    const point_count_t m_defaultChunkSize;
+    std::map<std::string, std::vector<double>> m_doubleBuffers;
+    std::vector<e57::SourceDestBuffer> m_e57buffers;
+    std::unique_ptr<e57::CompressedVectorReader> m_dataReader;
+    std::shared_ptr<e57::Scan> m_scan;
+};
 
 E57Reader::ChunkReader::ChunkReader(const point_count_t &pointOffset,
     const point_count_t &maxPointRead, const std::shared_ptr<e57::Scan>& scan,
@@ -138,6 +172,8 @@ static PluginInfo const s_info
 };
 
 CREATE_SHARED_STAGE(E57Reader, s_info)
+
+E57Reader::E57Reader() = default; //must not be in header, due to forward declared classes
 
 E57Reader::~E57Reader()
 {

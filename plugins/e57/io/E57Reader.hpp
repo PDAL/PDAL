@@ -34,55 +34,30 @@
 
 #pragma once
 
-#include <string>
-
 #include <pdal/pdal_types.hpp>
-#include <E57Format.h>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-#include "Scan.hpp"
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
+
+namespace e57
+{
+class ImageFile;
+class Scan;
+}
 
 namespace pdal
 {
 
 class PDAL_DLL E57Reader: public Reader, public Streamable
 {
-    class PDAL_DLL ChunkReader {
-    public:
-        ChunkReader(const point_count_t &pointOffset,
-            const point_count_t &maxPointRead,
-            const std::shared_ptr<e57::Scan> &scan,
-            const std::set<std::string> &e57Dimensions);
-
-        ~ChunkReader();
-
-        // returns false if the index falls out of the
-        // [pointOffset,pointOffset + m_maxPointRead] interval
-        bool isInScope(point_count_t index) const;
-
-        bool isInChunk(point_count_t index) const;
-
-        void setPoint(point_count_t pointIndex, PointRef point) const;
-
-        // Reads a new chunk of data
-        point_count_t read(point_count_t index);
-
-    private:
-        point_count_t m_startIndex;
-        point_count_t m_pointOffset;
-        point_count_t m_maxPointRead;
-        const point_count_t m_defaultChunkSize;
-        std::map<std::string, std::vector<double>> m_doubleBuffers;
-        std::vector<e57::SourceDestBuffer> m_e57buffers;
-        std::unique_ptr<e57::CompressedVectorReader> m_dataReader;
-        std::shared_ptr<e57::Scan> m_scan;
-    };
+    class PDAL_LOCAL ChunkReader;
 
 public:
-    E57Reader()
-    {}
-
+    E57Reader();
     E57Reader(std::string filename);
     ~E57Reader();
     E57Reader(const E57Reader &) = delete;

@@ -35,31 +35,25 @@
 #pragma once
 
 #include <pdal/pdal_types.hpp>
-#include <E57Format.h>
 #include <pdal/Writer.hpp>
 #include <pdal/Streamable.hpp>
+#include <pdal/util/Bounds.hpp>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace e57
+{
+class ImageFile;
+class StructureNode;
+}
 
 namespace pdal
 {
-class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable 
+class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
 {
-
-    class PDAL_DLL ChunkWriter {
-    public:
-        ChunkWriter(const std::vector<std::string> &dimensionsToWrite,
-            e57::CompressedVectorNode &vectorNode);
-
-        void write(pdal::PointRef &point);
-
-        void finalise();
-
-    private:
-        const pdal::point_count_t m_defaultChunkSize;
-        pdal::point_count_t m_currentIndex;
-        std::map<std::string, std::vector<double>> m_doubleBuffers;
-        std::vector<e57::SourceDestBuffer> m_e57buffers;
-        std::unique_ptr<e57::CompressedVectorWriter> m_dataWriter;
-    };
+    class PDAL_LOCAL ChunkWriter;
 
 public:
     E57Writer();

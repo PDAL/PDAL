@@ -34,6 +34,10 @@
 
 #include "Uuid.hpp"
 
+#include <ios>
+#include <random>
+#include <sstream>
+
 namespace pdal {
     namespace uuidGenerator {
 unsigned char random_char()
