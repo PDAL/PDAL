@@ -966,13 +966,11 @@ bool EptReader::next()
             findBuffer() != m_upcomingNodeBuffers.end();
     });
 
-    // Processing is complete.
-    if (m_upcomingNodeBuffers.empty()) return false;
-
-    // We know at least one node is populated from our `wait` predicate, so find
-    // the first one and transfer it out of our `upcoming` pool to make it the
-    // current active node.
+    // Grab the first completed buffer from our list and transfer it out of our
+    // `upcoming` pool to make it the current active node.  If there are no
+    // completed buffers in the list, then we're done with processing.
     const auto it = findBuffer();
+    if (it == m_upcomingNodeBuffers.end()) return false;
 
     m_pointId = 0;
     m_currentNodeBuffer = std::move(it->second);
