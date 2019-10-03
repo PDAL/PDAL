@@ -43,7 +43,7 @@ merge the data.
           "type":"readers.tindex",
           "filter_srs":"+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs",
           "filename":"index.sqlite",
-          "where":"location LIKE \'%nteresting.las%\'",
+          "where":"location LIKE \"%nteresting.las%\"",
           "wkt":"POLYGON ((635629.85000000 848999.70000000, 635629.85000000 853535.43000000, 638982.55000000 853535.43000000, 638982.55000000 848999.70000000, 635629.85000000 848999.70000000))"
       },
       {
