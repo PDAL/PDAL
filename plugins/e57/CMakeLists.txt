@@ -49,8 +49,5 @@ if (WITH_TESTS)
         LINK_WITH
             ${e57plugin_reader}
             ${e57plugin_writer}
-            E57Format
-            ${XercesC_LIBRARY}
             )
-    target_include_directories(pdal_io_e57_write_test PRIVATE "libE57Format/include")
 endif()
