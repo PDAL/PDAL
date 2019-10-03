@@ -996,7 +996,7 @@ bool EptReader::processOne(PointRef& point)
     auto& sourceView(m_currentNodeBuffer->view);
     const auto& layout(*m_currentNodeBuffer->table.layout());
 
-    for (const auto& id : m_currentNodeBuffer->table.layout()->dims())
+    for (const auto& id : layout.dims())
     {
         point.setField(
             id,
@@ -1004,10 +1004,7 @@ bool EptReader::processOne(PointRef& point)
             sourceView.getPoint(m_pointId) + layout.dimOffset(id));
     }
 
-    if (++m_pointId == m_currentNodeBuffer->view.size())
-    {
-        m_currentNodeBuffer.reset();
-    }
+    if (++m_pointId == sourceView.size()) m_currentNodeBuffer.reset();
 
     return true;
 }
