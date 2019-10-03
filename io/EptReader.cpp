@@ -949,7 +949,8 @@ EptReader::NodeBufferIt EptReader::findBuffer()
     return std::find_if(
         m_upcomingNodeBuffers.begin(),
         m_upcomingNodeBuffers.end(),
-        [this](const NodeBufferPair& p) { return !!p.second; });
+        [this](const NodeBufferPair& p)
+            { return static_cast<bool>(p.second); });
 }
 
 bool EptReader::next()
