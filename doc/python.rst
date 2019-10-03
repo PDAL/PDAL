@@ -74,7 +74,7 @@ results as `Numpy`_ arrays:
 
     json = """
     {
-      [
+      "pipeline": [
         "1.2-with-color.las",
         {
             "type": "filters.sort",
