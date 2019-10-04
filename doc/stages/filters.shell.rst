@@ -55,7 +55,7 @@ command to construct overview bands for the data using average interpolation.
         {
           "type":"filters.shell",
           "command" : "gdaladdo -r average output-2m.tif 2 4 8 16"
-        }
+        },
         {
           "type":"filters.shell",
           "command" : "gdaladdo -r average output-5m.tif 2 4 8 16"

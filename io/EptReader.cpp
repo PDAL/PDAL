@@ -710,9 +710,6 @@ PointViewSet EptReader::run(PointViewPtr view)
     // Start these at 1 to differentiate from points added by other stages,
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
-
-
-
     for (const auto& entry : m_overlaps)
     {
         const Key& key(entry.first);
@@ -929,7 +926,7 @@ struct EptReader::NodeBuffer
 
 void EptReader::load()
 {
-    // Asynchronously trigger the fetching and point-view execution of
+        // Asynchronously trigger the fetching and point-view execution of
     // a lookahead buffer of nodes.
     while (
         m_upcomingNodeBuffers.size() < m_pool->size() &&
@@ -945,7 +942,8 @@ void EptReader::load()
         // Insert an empty placeholder node to keep track of the outstanding
         // nodes that are currently being fetched/executed.
         std::unique_lock<std::mutex> lock(m_mutex);
-        auto& loadingBuffer = m_upcomingNodeBuffers[nodeId];
+        m_upcomingNodeBuffers.emplace_front();
+        auto& loadingBuffer = m_upcomingNodeBuffers.front();
         lock.unlock();
 
         m_pool->add([this, &loadingBuffer, nodeId, key]()
@@ -971,6 +969,15 @@ void EptReader::load()
     }
 }
 
+EptReader::NodeBufferIt EptReader::findBuffer()
+{
+    return std::find_if(
+        m_upcomingNodeBuffers.begin(),
+        m_upcomingNodeBuffers.end(),
+        [](const std::unique_ptr<NodeBuffer>& n)
+            { return static_cast<bool>(n); });
+}
+
 bool EptReader::next()
 {
     // Asynchronously trigger the loading of some nodes.
@@ -982,30 +989,22 @@ bool EptReader::next()
     m_cv.wait(lock, [this]()
     {
         return m_upcomingNodeBuffers.empty() ||
-            std::any_of(
-                m_upcomingNodeBuffers.begin(),
-                m_upcomingNodeBuffers.end(),
-                [this](const NodeBufferPair& p) { return !!p.second; });
+            findBuffer() != m_upcomingNodeBuffers.end();
     });
 
-    // Processing is complete.
-    if (m_upcomingNodeBuffers.empty()) return false;
-
-    // We know at least one node is populated from our `wait` predicate, so find
-    // the first one and transfer it out of our `upcoming` pool to make it the
-    // current active node.
-    const auto it = std::find_if(
-        m_upcomingNodeBuffers.begin(),
-        m_upcomingNodeBuffers.end(),
-        [](const NodeBufferPair& p) { return !!p.second; }
-    );
+    // Grab the first completed buffer from our list and transfer it out of our
+    // `upcoming` pool to make it the current active node.  If there are no
+    // completed buffers in the list, then we're done with processing.
+    const auto it = findBuffer();
+    if (it == m_upcomingNodeBuffers.end()) return false;
 
     m_pointId = 0;
-    m_currentNodeBuffer = std::move(it->second);
+    m_currentNodeBuffer = std::move(*it);
     m_upcomingNodeBuffers.erase(it);
 
     return true;
 }
+
 
 bool EptReader::processOne(PointRef& point)
 {
@@ -1020,17 +1019,18 @@ bool EptReader::processOne(PointRef& point)
         if (m_currentNodeBuffer->view.empty()) m_currentNodeBuffer.reset();
     }
 
-    for (const auto& id : m_currentNodeBuffer->table.layout()->dims())
+    auto& sourceView(m_currentNodeBuffer->view);
+    const auto& layout(*m_currentNodeBuffer->table.layout());
+
+    for (const auto& id : layout.dims())
     {
         point.setField(
             id,
-            m_currentNodeBuffer->view.getFieldAs<double>(id, m_pointId));
+            layout.dimType(id),
+            sourceView.getPoint(m_pointId) + layout.dimOffset(id));
     }
 
-    if (++m_pointId == m_currentNodeBuffer->view.size())
-    {
-        m_currentNodeBuffer.reset();
-    }
+    if (++m_pointId == sourceView.size()) m_currentNodeBuffer.reset();
 
     return true;
 }
