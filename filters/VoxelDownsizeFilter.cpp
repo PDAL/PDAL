@@ -34,6 +34,8 @@
  ****************************************************************************/
 
 #include "VoxelDownsizeFilter.hpp"
+#include <arbiter/arbiter.hpp>
+#include "leveldb/cache.h"
 
 namespace pdal
 {
@@ -68,6 +70,16 @@ void VoxelDownsizeFilter::addArgs(ProgramArgs& args)
 void VoxelDownsizeFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
+	leveldb::Options ldbOptions;
+    ldbOptions.create_if_missing = true;
+	//ldbOptions.compression = leveldb::kNoCompression;
+    ldbOptions.block_cache = leveldb::NewLRUCache(1 * 1024 * 1024 * 1024);
+    std::time_t time;
+    std::time(&time);
+    std::string dbPath = arbiter::getTempPath() + "/" + std::to_string(time);
+    leveldb::Status status = leveldb::DB::Open(ldbOptions, dbPath, &m_ldb);
+    assert(status.ok());
+    m_pool.reset(new Pool(10));
 
 }
 void VoxelDownsizeFilter::prepared(PointTableRef) {
@@ -93,6 +105,45 @@ PointViewSet VoxelDownsizeFilter::run(PointViewPtr view)
     viewSet.insert(output);
     return viewSet;
 }
+
+bool VoxelDownsizeFilter::find(int gx, int gy, int gz)
+{
+    //m_pool->await();
+    auto itr = m_populatedVoxels.find(std::make_tuple(gx, gy, gz));
+    if (itr == m_populatedVoxels.end())
+    {
+        std::string val;
+        leveldb::Status s = m_ldb->Get(
+            leveldb::ReadOptions(),
+            std::to_string(gx) + std::to_string(gy) + std::to_string(gz), &val);
+        return (s.ok() && !val.empty());
+    }
+    return true;
+}
+
+bool VoxelDownsizeFilter::insert(int gx, int gy, int gz)
+{
+    if (m_populatedVoxels.size() > m_batchSize)
+    {
+		std::set<std::tuple<int, int, int>> tempMap;
+		std::swap(tempMap, m_populatedVoxels);
+        m_pool->add([tempMap]() { 
+			leveldb::WriteBatch batch;
+			for (auto itr=tempMap.begin();itr!=tempMap.end();++itr)
+            {	
+				auto t=*itr;
+                auto val = std::to_string(std::get<0>(t)) +
+                           std::to_string(std::get<1>(t)) +
+                           std::to_string(std::get<2>(t));
+                batch.Put(val,val);
+			}
+            assert(m_ldb->Write(leveldb::WriteOptions(), &batch).ok());
+		});
+        m_populatedVoxels.clear();
+    }
+    return m_populatedVoxels.insert(std::make_tuple(gx, gy, gz)).second;
+}
+
 
 bool VoxelDownsizeFilter::voxelize(PointRef point)
 {
@@ -124,26 +175,35 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-    if (m_isFirstInVoxelMode)
-        return (m_populatedVoxels.insert(t).second);
-    else
+    auto kx = gx - m_pivotVoxel[0], ky = gy - m_pivotVoxel[1],
+         kz = gz - m_pivotVoxel[2];
+    if (!find(kx, ky, kz))
     {
-        auto itr = m_populatedVoxels.find(t);
-        if (itr == m_populatedVoxels.end())
+        if (!m_isFirstInVoxelMode)
         {
-            m_populatedVoxels.insert(t);
             point.setField<double>(Dimension::Id::X, (gx + 0.5) * m_cell);
             point.setField<double>(Dimension::Id::Y, (gy + 0.5) * m_cell);
             point.setField<double>(Dimension::Id::Z, (gz + 0.5) * m_cell);
-            return true;
         }
+        return insert(kx, ky, kz);
     }
     return false;
 }
 
 bool VoxelDownsizeFilter::processOne(PointRef& point)
 {
+
+    static point_count_t count = 0;
+    if (++count % 1000000 == 0)
+    {
+        std::cout << count << std::endl;
+    }
+
     return voxelize(point);
+}
+
+void VoxelDownsizeFilter::done(PointTableRef) {
+	delete m_ldb;
 }
 
 } // namespace pdal
