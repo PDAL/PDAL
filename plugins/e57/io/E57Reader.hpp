@@ -100,7 +100,7 @@ public:
     std::set<std::string> getDimensions();
 
     /// returns the scans
-   std::vector<std::shared_ptr<e57::Scan>> getScans() const;
+    std::vector<std::shared_ptr<e57::Scan>> getScans() const;
 
 private:
 
