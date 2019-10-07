@@ -40,26 +40,17 @@ namespace pdal
 
 Polygon::Polygon(OGRGeometryH g) : Geometry(g)
 {
-    if (!m_geom)
-    {
-        m_geom.reset(new OGRPolygon());
-        return;
-    }
-
-    OGRwkbGeometryType t = m_geom->getGeometryType();
-
-    if (!(t == wkbPolygon ||
-        t == wkbMultiPolygon ||
-        t == wkbPolygon25D ||
-        t == wkbMultiPolygon25D))
-    {
-        throw pdal::pdal_error("pdal::Polygon() cannot construct geometry "
-            "because OGR geometry is not Polygon or MultiPolygon.");
-    }
+    init();
 }
 
 
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
+{
+    init();
+}
+
+
+void Polygon::init()
 {
     // If the handle was null, we need to create an empty polygon.
     if (!m_geom)
