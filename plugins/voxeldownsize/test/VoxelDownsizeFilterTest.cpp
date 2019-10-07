@@ -38,7 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include "io/BufferReader.hpp"
-#include "filters/VoxelDownsizeFilter.hpp"
+#include "filter/VoxelDownsizeFilter.hpp"
 
 #include "Support.hpp"
 
