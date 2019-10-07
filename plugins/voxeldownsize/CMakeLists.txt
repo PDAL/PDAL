@@ -6,5 +6,5 @@ PDAL_ADD_PLUGIN(filter_libname filter voxelownsize
         leveldb
     INCLUDES
         ${PDAL_VENDOR_DIR}
-		${PDAL_VENDOR_DIR}/nlohmann
+        ${PDAL_VENDOR_DIR}/nlohmann
 )
