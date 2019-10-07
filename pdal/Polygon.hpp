@@ -63,7 +63,7 @@ public:
 
     OGRGeometryH getOGRHandle();
 
-    void simplify(double distance_tolerance, double area_tolerance);
+    void simplify(double distance_tolerance, double area_tolerance, bool preserve_topology = true);
     double area() const;
     std::vector<Polygon> polygons() const;
 

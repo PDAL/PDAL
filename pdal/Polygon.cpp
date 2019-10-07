@@ -100,7 +100,7 @@ Polygon::Polygon(const BOX3D& box)
 }
 
 
-void Polygon::simplify(double distance_tolerance, double area_tolerance)
+void Polygon::simplify(double distance_tolerance, double area_tolerance, bool preserve_topology)
 {
     throwNoGeos();
 
@@ -126,7 +126,12 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
             OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
     };
 
-    OGRGeometry *g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    OGRGeometry *g;
+    if (preserve_topology)
+        g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    else
+        g = m_geom->Simplify(distance_tolerance);
+
     m_geom.reset(g);
 
     OGRwkbGeometryType t = m_geom->getGeometryType();
