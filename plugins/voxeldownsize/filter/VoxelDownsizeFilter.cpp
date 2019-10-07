@@ -187,7 +187,7 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
         }
         return insert(kx, ky, kz);
     }
-    return inserted;
+    return false;
 }
 
 bool VoxelDownsizeFilter::processOne(PointRef& point)
