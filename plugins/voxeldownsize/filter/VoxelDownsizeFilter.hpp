@@ -1,5 +1,7 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2019, Helix.re
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *                 https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -35,47 +37,48 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-
-#include <map>
-#include <memory>
-#include <string>
+#include <pdal/Streamable.hpp>
+#include <cassert>
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+#include "io/private/EptSupport.hpp"
 
 namespace pdal
 {
 
-class Options;
-
-struct Indices
-{
-    PointIdList inliers;
-    PointIdList outliers;
-};
-
-class PDAL_DLL OutlierFilter : public pdal::Filter
+class PointLayout;
+class PointView;
+class PDAL_DLL VoxelDownsizeFilter : public Filter, public Streamable
 {
 public:
-    OutlierFilter() : Filter()
-    {
-    }
+    VoxelDownsizeFilter();
+    VoxelDownsizeFilter& operator=(const VoxelDownsizeFilter&) = delete;
+    VoxelDownsizeFilter(const VoxelDownsizeFilter&) = delete;
 
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
-    std::string m_method;
-    int m_minK;
-    double m_radius;
-    int m_meanK;
-    double m_multiplier;
-    uint8_t m_class;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual PointViewSet run(PointViewPtr view) override;
+    virtual void ready(PointTableRef) override;
+    virtual bool processOne(PointRef& point) override;
+    virtual void prepared(PointTableRef) override;
+    virtual void done(PointTableRef) override;
+    bool find(int gx, int gy, int gz);
+    bool insert(int gx, int gy, int gz);
+    bool voxelize(PointRef point);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    Indices processRadius(PointViewPtr inView);
-    Indices processStatistical(PointViewPtr inView);
-    virtual PointViewSet run(PointViewPtr view);
+    double m_cell;
+    std::set<std::tuple<int, int, int>> m_populatedVoxels;
+    int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
+    // dimension.
+    bool m_pivotVoxelInitialized;
+    std::string m_mode;
 
-    OutlierFilter& operator=(const OutlierFilter&); // not implemented
-    OutlierFilter(const OutlierFilter&);            // not implemented
+    bool m_isFirstInVoxelMode; // True: firstinvoxel mode, False: voxelcenter mode
+    leveldb::DB* m_ldb;
+    point_count_t m_batchSize=10000000;
+    std::unique_ptr<Pool> m_pool;
 };
 
 } // namespace pdal

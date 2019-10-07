@@ -70,7 +70,7 @@ TEST(KDIndex, neighbors2D)
     EXPECT_EQ(index.neighbor(6.1, 6.1), 3u);
     EXPECT_EQ(index.neighbor(15, 15), 4u);
 
-    std::vector<PointId> ids;
+    PointIdList ids;
     ids = index.neighbors(0, 0, 5);
     EXPECT_EQ(ids.size(), 5u);
     EXPECT_EQ(ids[0], 0u);
@@ -154,7 +154,7 @@ TEST(KDIndex, neighbors3D)
     EXPECT_EQ(index.neighbor(6.1, 6.1, 6.1), 3u);
     EXPECT_EQ(index.neighbor(15, 15, 15), 4u);
 
-    std::vector<PointId> ids;
+    PointIdList ids;
     ids = index.neighbors(0, 0, 0, 5);
     EXPECT_EQ(ids.size(), 5u);
     EXPECT_EQ(ids[0], 0u);
@@ -281,7 +281,7 @@ TEST(KDIndex, radius2D)
     KD2Index index(view);
     index.build();
 
-    std::vector<PointId> ids;
+    PointIdList ids;
     ids = index.radius(0, 0, 4.25);
     
     EXPECT_EQ(ids.size(), 3u);
@@ -346,7 +346,7 @@ TEST(KDIndex, radius3D)
     KD3Index index(view);
     index.build();
 
-    std::vector<PointId> ids;
+    PointIdList ids;
     ids = index.radius(0, 0, 0, 5.2);
     
     EXPECT_EQ(ids.size(), 3u);

@@ -63,7 +63,7 @@ Example
       },
       {
           "type":"writers.text",
-          "filename":"outputfile.txt",
+          "filename":"outputfile.txt"
       }
   ]
 

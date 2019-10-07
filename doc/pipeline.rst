@@ -129,7 +129,7 @@ files from a single pipeline.  The crop filter creates two output point views
       "input.las",
       {
           "type" : "filters.crop",
-          "bounds" : [ "([0, 75], [0, 75])", "([50, 125], [50, 125])" ],
+          "bounds" : [ "([0, 75], [0, 75])", "([50, 125], [50, 125])" ]
       },
       "output#.las"
   ]

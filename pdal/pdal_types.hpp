@@ -51,6 +51,7 @@ namespace pdal
 typedef uint64_t PointId;
 typedef uint64_t point_count_t;
 typedef std::vector<std::string> StringList;
+typedef std::vector<PointId> PointIdList;
 
 typedef union
 {

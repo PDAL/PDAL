@@ -1,6 +1,6 @@
 .. _writers.tiledb:
 
-readers.tiledb
+writers.tiledb
 ==============
 
 Implements `TileDB`_ 1.4.1+ reads from an array.

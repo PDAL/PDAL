@@ -268,6 +268,8 @@ std::ostream PDAL_DLL *createFile(const std::string& path,
     bool asBinary = true);
 void PDAL_DLL closeFile(std::istream *in);
 void PDAL_DLL closeFile(std::ostream *out);
+std::string PDAL_DLL fetchRemote(const std::string& path);
+bool PDAL_DLL isRemote(const std::string& path);
 bool PDAL_DLL fileExists(const std::string& path);
 std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
 double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);

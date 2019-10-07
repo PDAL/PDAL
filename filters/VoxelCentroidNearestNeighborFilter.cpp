@@ -73,7 +73,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
 
     // Make an initial pass through the input PointView to index PointIds by
     // row, column, and depth.
-    std::map<std::tuple<size_t, size_t, size_t>, std::vector<PointId>>
+    std::map<std::tuple<size_t, size_t, size_t>, PointIdList>
         populated_voxel_ids;
     for (PointId id = 0; id < view->size(); ++id)
     {

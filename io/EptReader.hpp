@@ -35,8 +35,13 @@
 #pragma once
 
 #include <array>
+#include <condition_variable>
+#include <list>
+#include <map>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include <pdal/JsonFwd.hpp>
 #include <pdal/Polygon.hpp>
@@ -60,6 +65,7 @@ class FixedPointLayout;
 class Key;
 class Pool;
 class GridPnp;
+class VectorPointTable;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -101,16 +107,21 @@ private:
         PointId pointId) const;
 
     void readAddon(PointView& dst, const Key& key, const Addon& addon,
-        PointId startId) const;
+        PointId startId = 0) const;
 
     // To allow testing of hidden getRemoteType() and getCoercedType().
     static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
     static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
 
-    // For streamable pipeline.
+    // For streaming operation.
+    struct NodeBuffer;
+    using NodeBufferList = std::list<std::unique_ptr<NodeBuffer>>;
+    using NodeBufferIt = NodeBufferList::iterator;
+
     virtual bool processOne(PointRef& point) override;
-    void loadNextOverlap();
-    void fillPoint(PointRef& point);
+    void load();    // Asynchronously fetch EPT nodes for streaming use.
+    bool next();    // Acquire an already-fetched node for processing.
+    NodeBufferIt findBuffer();  // Find a fully acquired node.
 
     // Data fetching - these forward user-specified query/header params.
     std::string get(std::string path) const;
@@ -129,6 +140,7 @@ private:
     std::unique_ptr<Args> m_args;
 
     BOX3D m_queryBounds;
+    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
     std::vector<std::unique_ptr<Addon>> m_addons;
@@ -138,8 +150,10 @@ private:
     StringMap m_query;
 
     mutable std::mutex m_mutex;
+    mutable std::condition_variable m_cv;
 
-    std::map<Key, uint64_t> m_overlaps;
+    using Overlaps = std::map<Key, uint64_t>;
+    Overlaps m_overlaps;
     uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
     uint64_t m_hierarchyStep = 0;
 
@@ -150,14 +164,24 @@ private:
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-    // For streamable pipeline.
+    // The below are for streaming operation only.
+    PointLayout* m_userLayout = nullptr;
+
+    // These represent a lookahead of asynchronously loaded nodes, when we have
+    // finished processing a streaming node we will wait for something to be
+    // loaded here.
+    NodeBufferList m_upcomingNodeBuffers;
+
+    // This is the node we are currently processing in streaming mode, which is
+    // plucked out of our upcoming node buffers when we have finished our
+    // current buffer.
+    std::unique_ptr<NodeBuffer> m_currentNodeBuffer;
+
+    // The below represent our current state in streaming operation - in normal
+    // mode we use local variables for these.
+    Overlaps::const_iterator m_overlapIt;
     uint64_t m_nodeId = 1;
-    std::unique_ptr<PointTable> m_bufferPointTable;
-    PointViewPtr m_bufferPointView;
-    PointLayoutPtr m_bufferLayout;
-    point_count_t m_currentIndex = -1;
-    std::vector<char> m_temp_buffer;
-    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
+    PointId m_pointId = 0;
 };
 
 } // namespace pdal

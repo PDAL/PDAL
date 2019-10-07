@@ -87,3 +87,7 @@ endif()
 if(BUILD_PLUGIN_E57)
     add_subdirectory(e57)
 endif()
+
+if(BUILD_PLUGIN_VOXELDOWNSIZE)
+    add_subdirectory(voxeldownsize)
+endif()
