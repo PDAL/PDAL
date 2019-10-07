@@ -42,7 +42,6 @@
 #include <leveldb/write_batch.h>
 #include "io/private/EptSupport.hpp"
 
-
 namespace pdal
 {
 
@@ -66,7 +65,6 @@ private:
     virtual void done(PointTableRef) override;
     bool find(int gx, int gy, int gz);
     bool insert(int gx, int gy, int gz);
-
     bool voxelize(PointRef point);
 
     double m_cell;
@@ -83,7 +81,3 @@ private:
 };
 
 } // namespace pdal
-
-
-
-
