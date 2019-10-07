@@ -237,7 +237,7 @@ void HexBin::done(PointTableRef table)
     }
 
     if (m_doSmooth)
-        p.simplify(tolerance, cull);
+        p.simplify(tolerance, cull, m_preserve_topology);
 
     std::string boundary_text = p.wkt(m_precision);
 
