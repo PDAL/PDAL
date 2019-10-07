@@ -16,8 +16,8 @@ if(WITH_TESTS)
         LINK_WITH
             ${filter_libname}
         INCLUDES
-			${CMAKE_CURRENT_LIST_DIR}
-			${PDAL_VENDOR_DIR}
-			${PDAL_VENDOR_DIR}/nlohmann
+            ${CMAKE_CURRENT_LIST_DIR}
+            ${PDAL_VENDOR_DIR}
+            ${PDAL_VENDOR_DIR}/nlohmann
         )
 endif(WITH_TESTS)
