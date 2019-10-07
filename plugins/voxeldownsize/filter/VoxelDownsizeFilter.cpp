@@ -1,6 +1,7 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *                    https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -61,9 +62,8 @@ std::string VoxelDownsizeFilter::getName() const
 void VoxelDownsizeFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 0.001);
-    args.add("mode",
-             "Method for downsizing : voxelcenter / firstinvoxel",
-             m_mode, "voxelcenter");
+    args.add("mode", "Method for downsizing : voxelcenter / firstinvoxel",
+        m_mode, "voxelcenter");
 }
 
 
@@ -169,8 +169,8 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
     }
 
     /*
-     * Calculate the local voxel coordinates for incoming point, Using the Pivot
-     * voxel.
+     * Calculate the local voxel coordinates for incoming point, Using the
+     * Pivot voxel.
      */
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
@@ -187,7 +187,7 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
         }
         return insert(kx, ky, kz);
     }
-    return false;
+    return inserted;
 }
 
 bool VoxelDownsizeFilter::processOne(PointRef& point)

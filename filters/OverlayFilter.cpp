@@ -188,7 +188,7 @@ void OverlayFilter::filter(PointView& view)
 
     for (const auto& poly : m_polygons)
     {
-        std::vector<PointId> ids = idx.getPoints(poly.geom.bounds());
+        PointIdList ids = idx.getPoints(poly.geom.bounds());
 
         PointRef point(view, 0);
         for (PointId id : ids)

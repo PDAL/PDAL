@@ -216,7 +216,6 @@ public:
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
     }
 
-private:
     std::string m_remotePath;
     TempFile m_localFile;
 };
@@ -233,7 +232,6 @@ public:
         open(localPath, mode);
     }
 
-private:
     TempFile m_localFile;
 };
 
@@ -281,6 +279,21 @@ std::ostream *createFile(const std::string& path, bool asBinary)
   \param asBinary  Whether the file should be opened binary.
   \return  Pointer to stream opened for input.
 */
+
+bool isRemote(const std::string& path)
+{
+    arbiter::Arbiter a;
+    return a.isRemote(path);
+}
+
+std::string fetchRemote(const std::string& path)
+{
+    std::string temp = tempFilename(path);
+    arbiter::Arbiter a;
+    a.put(temp, a.getBinary(path));
+    return temp;
+}
+
 std::istream *openFile(const std::string& path, bool asBinary)
 {
     arbiter::Arbiter a;
@@ -354,7 +367,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     for (PointId i = 0; i < srcView->size(); ++i)
     {
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         PointRef srcPoint = srcView->point(i);
         candIndex.knnSearch(srcPoint, 1, &indices, &sqr_dists);
@@ -365,7 +378,7 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 
     for (PointId i = 0; i < candView->size(); ++i)
     {
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         PointRef candPoint = candView->point(i);
         srcIndex.knnSearch(candPoint, 1, &indices, &sqr_dists);

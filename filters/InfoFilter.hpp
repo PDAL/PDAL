@@ -92,8 +92,8 @@ private:
     std::list<NearPoint> m_results;
 
     std::string m_pointSpec;
-    std::vector<PointId> m_idList;
-    std::vector<PointId>::const_iterator m_idCur;
+    PointIdList m_idList;
+    PointIdList::const_iterator m_idCur;
     DimTypeList m_dims;
     size_t m_pointSize;
     PointId m_count;

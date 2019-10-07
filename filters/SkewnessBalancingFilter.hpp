@@ -1,7 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re,
- *                 https://github.com/pravinshinde825)
+ * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -37,48 +35,27 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/Streamable.hpp>
-#include <cassert>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
-#include "io/private/EptSupport.hpp"
 
 namespace pdal
 {
 
-class PointLayout;
-class PointView;
-class PDAL_DLL VoxelDownsizeFilter : public Filter, public Streamable
+class PDAL_DLL SkewnessBalancingFilter : public Filter
 {
 public:
-    VoxelDownsizeFilter();
-    VoxelDownsizeFilter& operator=(const VoxelDownsizeFilter&) = delete;
-    VoxelDownsizeFilter(const VoxelDownsizeFilter&) = delete;
+    SkewnessBalancingFilter() : Filter()
+    {
+    }
 
-    std::string getName() const override;
+    std::string getName() const;
 
 private:
-    virtual void addArgs(ProgramArgs& args) override;
-    virtual PointViewSet run(PointViewPtr view) override;
-    virtual void ready(PointTableRef) override;
-    virtual bool processOne(PointRef& point) override;
-    virtual void prepared(PointTableRef) override;
-    virtual void done(PointTableRef) override;
-    bool find(int gx, int gy, int gz);
-    bool insert(int gx, int gy, int gz);
-    bool voxelize(PointRef point);
+    virtual void addDimensions(PointLayoutPtr layout);
+    std::set<PointId> processGround(PointViewPtr view);
+    virtual PointViewSet run(PointViewPtr view);
 
-    double m_cell;
-    std::set<std::tuple<int, int, int>> m_populatedVoxels;
-    int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
-    // dimension.
-    bool m_pivotVoxelInitialized;
-    std::string m_mode;
-
-    bool m_isFirstInVoxelMode; // True: firstinvoxel mode, False: voxelcenter mode
-    leveldb::DB* m_ldb;
-    point_count_t m_batchSize=10000000;
-    std::unique_ptr<Pool> m_pool;
+    SkewnessBalancingFilter&
+    operator=(const SkewnessBalancingFilter&);               // not implemented
+    SkewnessBalancingFilter(const SkewnessBalancingFilter&); // not implemented
 };
 
 } // namespace pdal
