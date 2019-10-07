@@ -77,7 +77,9 @@ public:
 
         for (std::size_t i(0); i < m_numThreads; ++i)
         {
-            m_threads.emplace_back([this]() { work(); });
+            m_threads.emplace_back([this]() {
+                work();
+            });
         }
     }
 
@@ -103,7 +105,9 @@ public:
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_produceCv.wait(
-            lock, [this]() { return !m_outstanding && m_tasks.empty(); });
+        lock, [this]() {
+            return !m_outstanding && m_tasks.empty();
+        });
     }
 
     // Join and restart.
@@ -138,7 +142,9 @@ public:
         }
 
         m_produceCv.wait(lock,
-                         [this]() { return m_tasks.size() < m_queueSize; });
+        [this]() {
+            return m_tasks.size() < m_queueSize;
+        });
 
         m_tasks.emplace(task);
 
@@ -206,13 +212,13 @@ private:
     double m_cell;
     std::set<std::tuple<int, int, int>> m_populatedVoxels;
     int m_pivotVoxel[3]; // [0]: X dimension, [1]: Y dimension, [2]: Z
-                             // dimension.
+    // dimension.
     bool m_pivotVoxelInitialized;
     std::string m_mode;
 
-	bool m_isFirstInVoxelMode; // True: firstinvoxel mode, False: voxelcenter mode
-	leveldb::DB* m_ldb;
-	point_count_t m_batchSize=10000000;
+    bool m_isFirstInVoxelMode; // True: firstinvoxel mode, False: voxelcenter mode
+    leveldb::DB* m_ldb;
+    point_count_t m_batchSize=10000000;
     std::unique_ptr<Pool> m_pool;
 };
 

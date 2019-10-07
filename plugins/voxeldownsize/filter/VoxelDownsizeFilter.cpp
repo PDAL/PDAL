@@ -43,7 +43,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.voxeldownsize",
-    "First Entry Voxel Filter", 
+    "First Entry Voxel Filter",
     "http://pdal.io/stages/filters.voxeldownsize.html"
 };
 
@@ -70,9 +70,9 @@ void VoxelDownsizeFilter::addArgs(ProgramArgs& args)
 void VoxelDownsizeFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
-	leveldb::Options ldbOptions;
+    leveldb::Options ldbOptions;
     ldbOptions.create_if_missing = true;
-	//ldbOptions.compression = leveldb::kNoCompression;
+    //ldbOptions.compression = leveldb::kNoCompression;
     ldbOptions.block_cache = leveldb::NewLRUCache(1 * 1024 * 1024 * 1024);
     std::time_t time;
     std::time(&time);
@@ -84,9 +84,9 @@ void VoxelDownsizeFilter::ready(PointTableRef)
 }
 void VoxelDownsizeFilter::prepared(PointTableRef) {
     if (m_mode.compare("voxelcenter")!=0 && m_mode.compare("firstinvoxel")!=0)
-		throw pdal_error("Invalid Downsizing mode");
-	
-	m_isFirstInVoxelMode = (m_mode.compare("firstinvoxel") == 0);
+        throw pdal_error("Invalid Downsizing mode");
+
+    m_isFirstInVoxelMode = (m_mode.compare("firstinvoxel") == 0);
 }
 
 
@@ -114,8 +114,8 @@ bool VoxelDownsizeFilter::find(int gx, int gy, int gz)
     {
         std::string val;
         leveldb::Status s = m_ldb->Get(
-            leveldb::ReadOptions(),
-            std::to_string(gx) + std::to_string(gy) + std::to_string(gz), &val);
+                                leveldb::ReadOptions(),
+                                std::to_string(gx) + std::to_string(gy) + std::to_string(gz), &val);
         return (s.ok() && !val.empty());
     }
     return true;
@@ -125,20 +125,20 @@ bool VoxelDownsizeFilter::insert(int gx, int gy, int gz)
 {
     if (m_populatedVoxels.size() > m_batchSize)
     {
-		std::set<std::tuple<int, int, int>> tempMap;
-		std::swap(tempMap, m_populatedVoxels);
-        m_pool->add([this,tempMap]() { 
-			leveldb::WriteBatch batch;
-			for (auto itr=tempMap.begin();itr!=tempMap.end();++itr)
-            {	
-				auto t=*itr;
+        std::set<std::tuple<int, int, int>> tempMap;
+        std::swap(tempMap, m_populatedVoxels);
+        m_pool->add([this,tempMap]() {
+            leveldb::WriteBatch batch;
+            for (auto itr=tempMap.begin(); itr!=tempMap.end(); ++itr)
+            {
+                auto t=*itr;
                 auto val = std::to_string(std::get<0>(t)) +
                            std::to_string(std::get<1>(t)) +
                            std::to_string(std::get<2>(t));
                 batch.Put(val,val);
-			}
+            }
             assert(m_ldb->Write(leveldb::WriteOptions(), &batch).ok());
-		});
+        });
         m_populatedVoxels.clear();
     }
     return m_populatedVoxels.insert(std::make_tuple(gx, gy, gz)).second;
@@ -203,7 +203,7 @@ bool VoxelDownsizeFilter::processOne(PointRef& point)
 }
 
 void VoxelDownsizeFilter::done(PointTableRef) {
-	delete m_ldb;
+    delete m_ldb;
 }
 
 } // namespace pdal
