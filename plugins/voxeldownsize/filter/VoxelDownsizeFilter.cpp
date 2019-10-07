@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
     "http://pdal.io/stages/filters.voxeldownsize.html"
 };
 
-CREATE_STATIC_STAGE(VoxelDownsizeFilter, s_info)
+CREATE_SHARED_STAGE(VoxelDownsizeFilter, s_info)
 
 VoxelDownsizeFilter::VoxelDownsizeFilter()
 {}

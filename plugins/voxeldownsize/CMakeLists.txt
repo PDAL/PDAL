@@ -1,5 +1,5 @@
 include(${PDAL_CMAKE_DIR}/leveldb.cmake)
-PDAL_ADD_PLUGIN(filter_libname filter voxelownsize
+PDAL_ADD_PLUGIN(filter_libname filter voxeldownsize
     FILES
         filter/VoxelDownsizeFilter.cpp
     LINK_WITH
