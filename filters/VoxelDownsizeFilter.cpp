@@ -127,7 +127,7 @@ bool VoxelDownsizeFilter::insert(int gx, int gy, int gz)
     {
 		std::set<std::tuple<int, int, int>> tempMap;
 		std::swap(tempMap, m_populatedVoxels);
-        m_pool->add([tempMap]() { 
+        m_pool->add([this,tempMap]() { 
 			leveldb::WriteBatch batch;
 			for (auto itr=tempMap.begin();itr!=tempMap.end();++itr)
             {	
