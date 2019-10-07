@@ -83,6 +83,7 @@ void HexBin::addArgs(ProgramArgs& args)
     m_cullArg = &args.add("hole_cull_area_tolerance", "Tolerance area to "
         "apply to holes before cull", m_cullArea);
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
+    args.add("preserve_topology", "Preserve topology when smoothing", m_preserve_topology, true);
 }
 
 
