@@ -38,7 +38,19 @@
 namespace pdal
 {
 
+Polygon::Polygon(OGRGeometryH g) : Geometry(g)
+{
+    init();
+}
+
+
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
+{
+    init();
+}
+
+
+void Polygon::init()
 {
     // If the handle was null, we need to create an empty polygon.
     if (!m_geom)

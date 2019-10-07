@@ -250,22 +250,9 @@ void EptReader::initialize()
 
     if (!m_args->m_ogr.is_null())
     {
-        std::vector<OGRGeometry*> ogr_geoms = pdal::gdal::fetchOGRGeometries(m_args->m_ogr);
-
-        debug << "Number of OGR filter geometries: "
-              << ogr_geoms.size()
-              << std::endl;
-
-        for (auto g: ogr_geoms)
-        {
-			OGRSpatialReference* srs = g->getSpatialReference();
-			char *poWKT = 0;
-			srs->exportToWkt(&poWKT);
-			Polygon p = pdal::Polygon(g, std::string(poWKT));
-			p.transform(getSpatialReference());
-			m_args->m_polys.emplace_back(p);
-			CPLFree(poWKT);
-        }
+        auto& plist = m_args->m_polys;
+        std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->m_ogr);
+        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
     }
 
     // Transform query bounds to match point source SRS.

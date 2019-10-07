@@ -58,6 +58,7 @@ public:
 
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
+    Polygon(OGRGeometryH g);
     Polygon(OGRGeometryH g, const SpatialReference& srs);
 
     OGRGeometryH getOGRHandle();
@@ -78,6 +79,9 @@ public:
     bool crosses(const Polygon& p) const;
     Ring exteriorRing() const;
     std::vector<Ring> interiorRings() const;
+
+private:
+    void init();
 };
 
 } // namespace pdal

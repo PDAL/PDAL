@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/Polygon.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/Algorithm.hpp>
@@ -778,7 +779,7 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 }
 
 
-std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
+std::vector<Polygon> getPolygons(const NL::json& ogr)
 {
     registerDrivers();
     const NL::json& datasource = ogr.at("datasource");
@@ -825,8 +826,6 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
         if (!poLayer)
             throw pdal_error("Unable to read layer in fetchOGRGeometries " + layer.dump() );
     }
-
-    std::vector<OGRGeometry*> output;
 
     OGRFeature *poFeature (nullptr);
     OGRGeometry* filterGeometry(nullptr);
@@ -891,14 +890,13 @@ std::vector<OGRGeometry*> fetchOGRGeometries(const NL::json ogr)
             throw pdal_error("unable to execute sql query!");
     }
 
-    while( (poFeature = poLayer->GetNextFeature()) != NULL )
+    std::vector<Polygon> polys;
+    while ((poFeature = poLayer->GetNextFeature()) != NULL)
     {
-        OGRGeometry* poGeometry = poFeature->GetGeometryRef();
-        OGRGeometry* clone = poGeometry->clone();
-        output.emplace_back(clone);
+        polys.emplace_back(poFeature->GetGeometryRef());
         OGRFeature::DestroyFeature( poFeature );
     }
-    return output;
+    return polys;
 }
 
 } // namespace gdal
