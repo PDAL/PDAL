@@ -59,6 +59,7 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
     }
 }
 
+
 Polygon::Polygon(const BOX2D& box)
 {
     OGRPolygon *poly = new OGRPolygon();

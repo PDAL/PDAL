@@ -106,6 +106,8 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
+    EptBounds(const SrsBounds& b) : SrsBounds( b )
+    {}
 };
 
 namespace Utils
@@ -140,6 +142,7 @@ public:
 
     NL::json m_query;
     NL::json m_headers;
+    NL::json m_ogr;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args)
@@ -165,6 +168,8 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests",
         m_args->m_query);
+    args.add("ogr", "OGR filter geometries",
+        m_args->m_ogr);
 }
 
 
@@ -243,6 +248,26 @@ void EptReader::initialize()
 
     setSpatialReference(m_info->srs());
 
+    if (!m_args->m_ogr.is_null())
+    {
+        std::vector<OGRGeometry*> ogr_geoms = pdal::gdal::fetchOGRGeometries(m_args->m_ogr);
+
+        debug << "Number of OGR filter geometries: "
+              << ogr_geoms.size()
+              << std::endl;
+
+        for (auto g: ogr_geoms)
+        {
+			OGRSpatialReference* srs = g->getSpatialReference();
+			char *poWKT = 0;
+			srs->exportToWkt(&poWKT);
+			Polygon p = pdal::Polygon(g, std::string(poWKT));
+			p.transform(getSpatialReference());
+			m_args->m_polys.emplace_back(p);
+			CPLFree(poWKT);
+        }
+    }
+
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
@@ -267,6 +292,12 @@ void EptReader::initialize()
             std::make_move_iterator(polys.end()));
     }
     m_args->m_polys = std::move(exploded);
+
+    for (auto& p : m_args->m_polys)
+    {
+        m_queryGrids.emplace_back(
+            new GridPnp(p.exteriorRing(), p.interiorRings()));
+    }
 
     try
     {
@@ -679,13 +710,6 @@ PointViewSet EptReader::run(PointViewPtr view)
     // Start these at 1 to differentiate from points added by other stages,
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
-
-    for (auto& p : m_args->m_polys)
-    {
-        m_queryGrids.emplace_back(
-            new GridPnp(p.exteriorRing(), p.interiorRings()));
-    }
-
     for (const auto& entry : m_overlaps)
     {
         const Key& key(entry.first);
@@ -902,7 +926,7 @@ struct EptReader::NodeBuffer
 
 void EptReader::load()
 {
-    // Asynchronously trigger the fetching and point-view execution of
+        // Asynchronously trigger the fetching and point-view execution of
     // a lookahead buffer of nodes.
     while (
         m_upcomingNodeBuffers.size() < m_pool->size() &&
@@ -980,6 +1004,7 @@ bool EptReader::next()
 
     return true;
 }
+
 
 bool EptReader::processOne(PointRef& point)
 {

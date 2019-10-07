@@ -70,6 +70,8 @@ namespace
             "ept://" + Support::datapath("ept/lone-star-laszip"));
     const std::string eptAutzenPath(
             "ept://" + Support::datapath("ept/1.2-with-color"));
+    const std::string attributesPath(
+            Support::datapath("autzen/attributes.json"));
 
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
@@ -593,7 +595,8 @@ TEST(EptReaderTest, boundedCrop)
     {
         Options options;
         options.add("filename", eptAutzenPath);
-        Option polygon("polygon", wkt);
+        std::string overrides(wkt + "/ EPSG:3644");
+        Option polygon("polygon", overrides);
         options.add(polygon);
         reader.setOptions(options);
     }
@@ -617,8 +620,9 @@ TEST(EptReaderTest, boundedCrop)
     }
     CropFilter crop;
     {
+        std::string overrides(wkt + "/ EPSG:3644");
         Options options;
-        Option polygon("polygon", wkt);
+        Option polygon("polygon", overrides);
         options.add(polygon);
         crop.setOptions(options);
         crop.setInput(source);
@@ -699,5 +703,55 @@ TEST(EptReaderTest, boundedCropReprojection)
     EXPECT_EQ(eptNp, 47u);
     EXPECT_EQ(sourceNp, 47u);
 }
+
+
+TEST(EptReaderTest, ogrCrop)
+{
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        NL::json ogr;
+        ogr["drivers"] = {"GeoJSON"};
+        ogr["datasource"] = attributesPath;
+        ogr["sql"] = "select \"_ogr_geometry_\" from attributes";
+
+        options.add("ogr", ogr);
+
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+    reader.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("autzen/autzen-attribute-cropped.las"));
+        source.setOptions(options);
+    }
+    PointTable sourceTable;
+    source.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : source.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 86u);
+    EXPECT_EQ(sourceNp, 86u);
+}
+
+
 
 } // namespace pdal

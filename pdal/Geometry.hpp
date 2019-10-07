@@ -41,6 +41,7 @@
 
 class OGRGeometry;
 using OGRGeometryH = void *;
+using OGRSpatialReferenceH = void *;
 
 namespace pdal
 {
