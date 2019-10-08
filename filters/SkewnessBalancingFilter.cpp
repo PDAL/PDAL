@@ -83,7 +83,8 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
     }
 
     PointId j(0);
-    for (PointId i = view->size() - 1; i >= 0; --i)
+    const auto size(view->size());
+    for (PointId i = size - 1; i < size; --i)
     {
         if (skewness[i] <= 0)
         {
