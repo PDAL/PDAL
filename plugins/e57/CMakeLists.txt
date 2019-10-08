@@ -8,9 +8,9 @@ PDAL_ADD_PLUGIN(e57plugin_reader reader e57
             io/E57Reader.cpp
             io/Scan.cpp
             io/Utils.cpp
-		INCLUDES
-			${NLOHMANN_INCLUDE_DIR}
-			${PDAL_VENDOR_DIR}
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
         LINK_WITH
             E57Format
             ${XercesC_LIBRARY}
