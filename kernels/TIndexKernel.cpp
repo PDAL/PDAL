@@ -233,9 +233,8 @@ void TIndexKernel::createFile()
 
     if (m_files.empty())
     {
-        std::ostringstream out;
-        out << "Couldn't find files to index: " << m_filespec << ".";
-        throw pdal_error(out.str());
+        // Take what was given to us and use that instead
+        m_files.emplace_back(m_filespec);
     }
 
 //ABELL - Remove CPLGetBasename use.
@@ -269,8 +268,6 @@ void TIndexKernel::createFile()
     StageFactory factory(false);
     for (auto f : m_files)
     {
-        //ABELL - Not sure why we need to get absolute path here.
-        f = FileUtils::toAbsolutePath(f);
         FileInfo info;
         if (getFileInfo(factory, f, info))
         {
