@@ -36,6 +36,7 @@
 #include "Support.hpp"
 
 #include "plugins/e57/io/E57Reader.hpp"
+#include "plugins/e57/io/Scan.hpp"
 #include "plugins/e57/io/Utils.hpp"
 
 using namespace pdal;
