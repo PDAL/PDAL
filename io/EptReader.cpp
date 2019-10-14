@@ -106,7 +106,7 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
-    EptBounds(const SrsBounds& b) : SrsBounds( b )
+    EptBounds(const SrsBounds& b) : SrsBounds(b)
     {}
 };
 
@@ -436,12 +436,28 @@ QuickInfo EptReader::inspect()
     {
         initialize();
 
-        qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
+        const BOX3D fullBounds(toBox3d(m_info->json()["boundsConforming"]));
+
+        qi.m_bounds = fullBounds;
         qi.m_srs = m_info->srs();
         qi.m_pointCount = m_info->points();
 
         for (auto& el : m_info->schema())
             qi.m_dimNames.push_back(el["name"].get<std::string>());
+
+        // If we've passed a spatial query, determine an upper bound on the
+        // point count.
+        if (!m_queryBounds.contains(fullBounds) || m_queryGrids.size())
+        {
+            log()->get(LogLevel::Debug) <<
+                "Determining overlapping point count" << std::endl;
+
+            overlaps();
+
+            qi.m_pointCount = 0;
+            for (const auto& p : m_overlaps)
+                qi.m_pointCount += p.second;
+        }
     }
     catch (std::exception& e)
     {
