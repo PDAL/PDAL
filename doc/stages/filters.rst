@@ -55,6 +55,7 @@ invalidate an existing KD-tree.
    filters.pmf
    filters.radialdensity
    filters.reciprocity
+   filters.skewnessbalancing
    filters.smrf
 
 :ref:`filters.approximatecoplanar`
@@ -131,6 +132,9 @@ invalidate an existing KD-tree.
 :ref:`filters.reciprocity`
     Compute the percentage of points that are considered uni-directional
     neighbors of a point.
+
+:ref:`filters.skewnessbalancing`
+    Label ground/non-ground returns using [Bartels2010]_.
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.

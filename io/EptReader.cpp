@@ -107,6 +107,8 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
+    EptBounds(const SrsBounds& b) : SrsBounds( b )
+    {}
 };
 
 namespace Utils
@@ -141,6 +143,7 @@ public:
 
     NL::json m_query;
     NL::json m_headers;
+    NL::json m_ogr;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args)
@@ -166,6 +169,8 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests",
         m_args->m_query);
+    args.add("ogr", "OGR filter geometries",
+        m_args->m_ogr);
 }
 
 
@@ -244,6 +249,13 @@ void EptReader::initialize()
 
     setSpatialReference(m_info->srs());
 
+    if (!m_args->m_ogr.is_null())
+    {
+        auto& plist = m_args->m_polys;
+        std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->m_ogr);
+        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
+    }
+
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
@@ -268,6 +280,12 @@ void EptReader::initialize()
             std::make_move_iterator(polys.end()));
     }
     m_args->m_polys = std::move(exploded);
+
+    for (auto& p : m_args->m_polys)
+    {
+        m_queryGrids.emplace_back(
+            new GridPnp(p.exteriorRing(), p.interiorRings()));
+    }
 
     try
     {
@@ -954,7 +972,8 @@ void EptReader::load()
         // Insert an empty placeholder node to keep track of the outstanding
         // nodes that are currently being fetched/executed.
         std::unique_lock<std::mutex> lock(m_mutex);
-        auto& loadingBuffer = m_upcomingNodeBuffers[nodeId];
+        m_upcomingNodeBuffers.emplace_front();
+        auto& loadingBuffer = m_upcomingNodeBuffers.front();
         lock.unlock();
 
         m_pool->add([this, &loadingBuffer, nodeId, key]()
@@ -964,10 +983,8 @@ void EptReader::load()
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 readLaszip(nodeBuffer->view, key, nodeId);
-            else if (m_info->dataType() == EptInfo::DataType::Binary)
-                readBinary(nodeBuffer->view, key, nodeId);
             else
-                readZstandard(nodeBuffer->view, key, nodeId);
+                readBinary(nodeBuffer->view, key, nodeId);
 
             for (const auto& addon : m_addons)
                 readAddon(nodeBuffer->view, key, *addon);
@@ -982,6 +999,15 @@ void EptReader::load()
     }
 }
 
+EptReader::NodeBufferIt EptReader::findBuffer()
+{
+    return std::find_if(
+        m_upcomingNodeBuffers.begin(),
+        m_upcomingNodeBuffers.end(),
+        [](const std::unique_ptr<NodeBuffer>& n)
+            { return static_cast<bool>(n); });
+}
+
 bool EptReader::next()
 {
     // Asynchronously trigger the loading of some nodes.
@@ -993,26 +1019,17 @@ bool EptReader::next()
     m_cv.wait(lock, [this]()
     {
         return m_upcomingNodeBuffers.empty() ||
-            std::any_of(
-                m_upcomingNodeBuffers.begin(),
-                m_upcomingNodeBuffers.end(),
-                [this](const NodeBufferPair& p) { return !!p.second; });
+            findBuffer() != m_upcomingNodeBuffers.end();
     });
 
-    // Processing is complete.
-    if (m_upcomingNodeBuffers.empty()) return false;
-
-    // We know at least one node is populated from our `wait` predicate, so find
-    // the first one and transfer it out of our `upcoming` pool to make it the
-    // current active node.
-    const auto it = std::find_if(
-        m_upcomingNodeBuffers.begin(),
-        m_upcomingNodeBuffers.end(),
-        [](const NodeBufferPair& p) { return !!p.second; }
-    );
+    // Grab the first completed buffer from our list and transfer it out of our
+    // `upcoming` pool to make it the current active node.  If there are no
+    // completed buffers in the list, then we're done with processing.
+    const auto it = findBuffer();
+    if (it == m_upcomingNodeBuffers.end()) return false;
 
     m_pointId = 0;
-    m_currentNodeBuffer = std::move(it->second);
+    m_currentNodeBuffer = std::move(*it);
     m_upcomingNodeBuffers.erase(it);
 
     return true;
@@ -1031,17 +1048,18 @@ bool EptReader::processOne(PointRef& point)
         if (m_currentNodeBuffer->view.empty()) m_currentNodeBuffer.reset();
     }
 
-    for (const auto& id : m_currentNodeBuffer->table.layout()->dims())
+    auto& sourceView(m_currentNodeBuffer->view);
+    const auto& layout(*m_currentNodeBuffer->table.layout());
+
+    for (const auto& id : layout.dims())
     {
         point.setField(
             id,
-            m_currentNodeBuffer->view.getFieldAs<double>(id, m_pointId));
+            layout.dimType(id),
+            sourceView.getPoint(m_pointId) + layout.dimOffset(id));
     }
 
-    if (++m_pointId == m_currentNodeBuffer->view.size())
-    {
-        m_currentNodeBuffer.reset();
-    }
+    if (++m_pointId == sourceView.size()) m_currentNodeBuffer.reset();
 
     return true;
 }

@@ -41,6 +41,7 @@
 
 class OGRGeometry;
 using OGRGeometryH = void *;
+using OGRSpatialReferenceH = void *;
 
 namespace pdal
 {
@@ -55,6 +56,7 @@ protected:
     Geometry(Geometry&&);
     Geometry(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
+    Geometry(OGRGeometryH g);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
 
 public:

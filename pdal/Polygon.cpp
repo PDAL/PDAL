@@ -38,7 +38,19 @@
 namespace pdal
 {
 
+Polygon::Polygon(OGRGeometryH g) : Geometry(g)
+{
+    init();
+}
+
+
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
+{
+    init();
+}
+
+
+void Polygon::init()
 {
     // If the handle was null, we need to create an empty polygon.
     if (!m_geom)
@@ -58,6 +70,7 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
             "because OGR geometry is not Polygon or MultiPolygon.");
     }
 }
+
 
 Polygon::Polygon(const BOX2D& box)
 {
@@ -87,7 +100,7 @@ Polygon::Polygon(const BOX3D& box)
 }
 
 
-void Polygon::simplify(double distance_tolerance, double area_tolerance)
+void Polygon::simplify(double distance_tolerance, double area_tolerance, bool preserve_topology)
 {
     throwNoGeos();
 
@@ -113,7 +126,12 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
             OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
     };
 
-    OGRGeometry *g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    OGRGeometry *g;
+    if (preserve_topology)
+        g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    else
+        g = m_geom->Simplify(distance_tolerance);
+
     m_geom.reset(g);
 
     OGRwkbGeometryType t = m_geom->getGeometryType();

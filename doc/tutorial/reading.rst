@@ -74,7 +74,7 @@ at all in the destination format.  For example, some formats don't support
 spatial references for point data, some have no metadata support and others
 have limited :ref:`dimension <dimensions>` support.  Even when data types are
 supported in both source and destination formats, there may be limitations
-with regard to data type, precision or , scaling.  PDAL attempts to convert
+with regard to data type, precision or, scaling.  PDAL attempts to convert
 data as accurately as possible, but you should make sure that you're
 aware of the capabilities of the data formats you're using.
 
