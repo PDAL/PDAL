@@ -618,6 +618,13 @@ TEST(EptReaderTest, laszipStream)
 #endif
 }
 
+TEST(EptReaderTest, zstandardStream)
+{
+#ifdef PDAL_HAVE_ZSTANDARD
+    streamTest(ellipsoidEptZstandardPath);
+#endif
+}
+
 TEST(EptReaderTest, boundedCrop)
 {
     std::string wkt = FileUtils::readFileIntoString(
