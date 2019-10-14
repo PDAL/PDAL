@@ -800,6 +800,7 @@ PointId EptReader::readBinary(PointView& dst, const Key& key,
 uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
+#ifdef PDAL_HAVE_ZSTANDARD
     auto compressed(m_ep->getBinary("ept-data/" + key.toString() + ".zst"));
     std::vector<char> uncompressed;
     pdal::ZstdDecompressor dec([&uncompressed](char* pos, std::size_t size)
@@ -828,6 +829,11 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
     }
 
     return startId;
+#else
+    throwError("Cannot read Zstandard dataType: "
+        "PDAL must be configured with WITH_ZSTD=On");
+    return 0;   // Suppress "control reaches end of non-void function" warning.
+#endif
 }
 
 void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
