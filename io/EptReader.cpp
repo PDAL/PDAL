@@ -699,12 +699,6 @@ PointViewSet EptReader::run(PointViewPtr view)
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
 
-    for (auto& p : m_args->m_polys)
-    {
-        m_queryGrids.emplace_back(
-            new GridPnp(p.exteriorRing(), p.interiorRings()));
-    }
-
     for (const auto& entry : m_overlaps)
     {
         const Key& key(entry.first);
