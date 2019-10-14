@@ -977,6 +977,8 @@ void EptReader::load()
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 readLaszip(nodeBuffer->view, key, nodeId);
+            else if (m_info->dataType() == EptInfo::DataType::Zstandard)
+                readZstandard(nodeBuffer->view, key, nodeId);
             else
                 readBinary(nodeBuffer->view, key, nodeId);
 
