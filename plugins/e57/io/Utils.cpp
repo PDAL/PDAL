@@ -215,14 +215,8 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
     switch (id)
     {
         case Dim::Red:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
         case Dim::Blue:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
         case Dim::Green:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
         case Dim::Intensity:
             return {std::numeric_limits<uint16_t>::min(),
                     std::numeric_limits<uint16_t>::max()};

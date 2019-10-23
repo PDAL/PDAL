@@ -54,7 +54,7 @@ TEST(ScanTest,testScanCtr)
         imf.extensionsAdd("nor", normalsExtension);
 
     e57::VectorNode data3D(imf.root().get("/data3D"));
-    auto scan = new Scan((e57::StructureNode)data3D.get(0));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
     ASSERT_EQ(scan->getNumPoints(), (pdal::point_count_t)4);
     imf.close();
 }
@@ -71,7 +71,7 @@ TEST(ScanTest,getDimension)
         imf.extensionsAdd("nor", normalsExtension);
 
     e57::VectorNode data3D(imf.root().get("/data3D"));
-    auto scan = new Scan((e57::StructureNode)data3D.get(0));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
 
     auto dimensions = scan->getDimensions();
     ASSERT_EQ(dimensions.size(),(unsigned long)7);
@@ -97,12 +97,12 @@ TEST(ScanTest,testGetPoints)
         imf.extensionsAdd("nor", normalsExtension);
 
     e57::VectorNode data3D(imf.root().get("/data3D"));
-    auto scan = new Scan((e57::StructureNode)data3D.get(0));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
 
     auto pts = scan->getPoints();
     ASSERT_EQ((pdal::point_count_t)pts.childCount(), scan->getNumPoints());
     ASSERT_EQ(pts.childCount(),2);
-    auto secondScan = new Scan((e57::StructureNode)data3D.get(1));
+    auto secondScan = new e57::Scan((e57::StructureNode)data3D.get(1));
     pts = secondScan->getPoints();
     ASSERT_EQ((pdal::point_count_t)pts.childCount(),secondScan->getNumPoints());
     ASSERT_EQ(pts.childCount(),(int64_t)4);
@@ -121,7 +121,7 @@ TEST(ScanTest,testBbox)
         imf.extensionsAdd("nor", normalsExtension);
 
     e57::VectorNode data3D(imf.root().get("/data3D"));
-    auto scan = new Scan((e57::StructureNode)data3D.get(0));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
     BOX3D box = scan->getBoundingBox();
     ASSERT_DOUBLE_EQ(box.minx, -4.49522018432617188e+01);
     ASSERT_DOUBLE_EQ(box.maxx, -4.43000984191894531e+01);
