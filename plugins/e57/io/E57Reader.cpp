@@ -34,12 +34,14 @@
 
 #include "E57Reader.hpp"
 #include "Utils.hpp"
-#include "arbiter/arbiter.hpp"
+#include "vendor/arbiter/arbiter.hpp"
 
 namespace pdal
 {
 
-static PluginInfo const s_info{"readers.e57", "Reader for E57 files", ""};
+using namespace e57;
+static PluginInfo const s_info{"readers.e57", "Reader for E57 files",
+    "http://pdal.io/stages/reader.e57.html"};
 
 CREATE_SHARED_STAGE(E57Reader, s_info)
 
@@ -49,8 +51,7 @@ std::string E57Reader::getName() const
 }
 
 E57Reader::E57Reader()
-    : Reader(), Streamable(), m_currentIndex(0), m_pointsInCurrentBatch(0), m_defaultChunkSize(1000000),
-    m_currentScan(-1)
+    : Reader(), Streamable()
 {
 }
 
@@ -64,9 +65,13 @@ void E57Reader::addDimensions(PointLayoutPtr layout)
 
 void E57Reader::initialize()
 {
+    m_currentIndex = 0;
+    m_pointsInCurrentBatch = 0;
+    m_defaultChunkSize = 10000;
+    m_currentScan = -1;
     try
     {
-		arbiter::Arbiter arb;
+        arbiter::Arbiter arb;
         auto fileHandle= arb.getLocalHandle(m_filename);
         m_imf.reset(new ImageFile(fileHandle->localPath(), "r"));
 
@@ -207,7 +212,7 @@ bool E57Reader::fillPoint(PointRef& point)
 
     if (!m_pointsInCurrentBatch)
     {
-        // We're done with reding
+        // We're done with reading
         return false;
     }
 

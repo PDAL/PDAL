@@ -133,8 +133,8 @@ void Scan::decodeHeader()
     //      - Since default type for intensity in PDAL is Unsigned16, E57
     //        intensity (between 0-1) need to be rescaled in uint16 (between
     //        0-65535).
-    // To do the rescling we need the rescale factors so that we can
-    // directly multipy them with colors and intensity values. E.g. - If
+    // To do the rescaling we need the rescale factors so that we can
+    // directly multiply them with colors and intensity values. E.g. - If
     // color limit is 0-255 then rescale factor would be 257.00
     //        (double value) i.e 65535/(255-0)=257.
     //      - If color limit is 0-65535 then rescale factor would be 1.00

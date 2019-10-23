@@ -41,10 +41,6 @@
 
 namespace pdal
 {
-
-using namespace e57;
-using namespace std;
-
 class PDAL_DLL E57Reader : public Reader, public Streamable
 {
 public:
@@ -66,14 +62,14 @@ private:
     point_count_t readNextBatch();
     void setupReader();
 
-    std::unique_ptr<ImageFile> m_imf;
-    std::unique_ptr<VectorNode> m_data3D;
-    std::unique_ptr<CompressedVectorReader> m_reader;
-    std::unique_ptr<StructureNode> m_e57PointPrototype;
-    std::shared_ptr<Scan> m_scan;
+    std::unique_ptr<e57::ImageFile> m_imf;
+    std::unique_ptr<e57::VectorNode> m_data3D;
+    std::unique_ptr<e57::CompressedVectorReader> m_reader;
+    std::unique_ptr<e57::StructureNode> m_e57PointPrototype;
+    std::shared_ptr<e57::Scan> m_scan;
 
     std::map<std::string, std::vector<double>> m_doubleBuffers;
-    vector<SourceDestBuffer> m_destBuffers;
+    std::vector<e57::SourceDestBuffer> m_destBuffers;
 
     point_count_t m_currentIndex;
     point_count_t m_pointsInCurrentBatch;
