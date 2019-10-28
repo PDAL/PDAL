@@ -61,9 +61,8 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    plang::Script* m_script;
-    plang::Invocation *m_pythonMethod;
-    MetadataNode m_totalMetadata;
+    std::unique_ptr<plang::Script> m_script;
+    std::unique_ptr<plang::Invocation> m_pythonMethod;
 
     struct Args;
     std::unique_ptr<Args> m_args;

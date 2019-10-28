@@ -227,6 +227,7 @@ std::string getTraceback()
     return mssg.str();
 }
 
+// Returns a new reference.
 PyObject *fromMetadata(MetadataNode m)
 {
     std::string name = m.name();
@@ -246,11 +247,11 @@ PyObject *fromMetadata(MetadataNode m)
     PyDict_SetItemString(data, "name", PyUnicode_FromString(name.data()));
     PyDict_SetItemString(data, "value", PyUnicode_FromString(value.data()));
     PyDict_SetItemString(data, "type", PyUnicode_FromString(type.data()));
-    PyDict_SetItemString(data, "description", PyUnicode_FromString(description.data()));
+    PyDict_SetItemString(data, "description",
+        PyUnicode_FromString(description.data()));
+
     if (children.size())
-    {
         PyDict_SetItemString(data, "children", submeta);
-    }
     return data;
 }
 
