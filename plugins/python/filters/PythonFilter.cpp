@@ -116,6 +116,15 @@ void PythonFilter::addDimensions(PointLayoutPtr layout)
 }
 
 
+void PythonFilter::prepared(PointTableRef table)
+{
+    if (m_args->m_source.size() && m_args->m_scriptFile.size())
+        throwError("Can't set both 'source' and 'script' options.");
+    if (!m_args->m_source.size() && !m_args->m_scriptFile.size())
+        throwError("Must set one of 'source' and 'script' options.");
+}
+
+
 void PythonFilter::ready(PointTableRef table)
 {
     if (m_args->m_source.empty())

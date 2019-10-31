@@ -151,11 +151,11 @@ void Invocation::compile()
         std::ostringstream oss;
         oss << "unable to find target function '" << m_script.function() <<
             "' in module.";
-        throw pdal::pdal_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     if (!PyCallable_Check(m_function))
-        throw pdal::pdal_error(getTraceback());
+        throw pdal_error(getTraceback());
 }
 
 
@@ -185,7 +185,7 @@ PyObject * Invocation::addArray(std::string const& name, uint8_t* data,
 bool Invocation::execute(PointViewPtr& v, MetadataNode stageMetadata)
 {
     if (!m_module)
-        throw pdal::pdal_error("No code has been compiled");
+        throw pdal_error("No code has been compiled");
 
     PyObject *inArrays = prepareData(v);
     PyObject *outArrays;
@@ -215,7 +215,7 @@ bool Invocation::execute(PointViewPtr& v, MetadataNode stageMetadata)
     if (maskArray)
     {
         if (PyDict_Size(outArrays) > 1)
-            throw pdal_error("Mask output array must be the only "
+            throw pdal_error("'Mask' output array must be the only "
                 "output array.");
         v = maskData(v, maskArray);
     }
@@ -234,10 +234,9 @@ void *Invocation::extractArray(PyObject *array, std::string const& name,
     Dimension::Type t, size_t& num_elements)
 {
     if (!array)
-        throw pdal::pdal_error("plang output variable '" + name +
-            "' not found.");
+        throw pdal_error("plang output variable '" + name + "' not found.");
     if (!PyArray_Check(array))
-        throw pdal::pdal_error("Plang output variable  '" + name +
+        throw pdal_error("Plang output variable  '" + name +
             "' is not a numpy array");
 
     PyArrayObject* arr = (PyArrayObject*)array;
@@ -259,7 +258,7 @@ void *Invocation::extractArray(PyObject *array, std::string const& name,
         oss << "dtype of array has size " << dtype->elsize
             << " but PDAL dimension '" << name << "' has byte size of "
             << Dimension::size(t) << " bytes.";
-        throw pdal::pdal_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     using namespace Dimension;
@@ -270,7 +269,7 @@ void *Invocation::extractArray(PyObject *array, std::string const& name,
         oss << "dtype of array has a signed integer type but the " <<
             "dimension data type of '" << name <<
             "' is not pdal::Signed.";
-        throw pdal::pdal_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     if (dtype->kind == 'u' && b != BaseType::Unsigned)
@@ -279,7 +278,7 @@ void *Invocation::extractArray(PyObject *array, std::string const& name,
         oss << "dtype of array has a unsigned integer type but the " <<
             "dimension data type of '" << name <<
             "' is not pdal::Unsigned.";
-        throw pdal::pdal_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     if (dtype->kind == 'f' && b != BaseType::Floating)
@@ -287,7 +286,7 @@ void *Invocation::extractArray(PyObject *array, std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has a float type but the " <<
             "dimension data type of '" << name << "' is not pdal::Floating.";
-        throw pdal::pdal_error(oss.str());
+        throw pdal_error(oss.str());
     }
     return PyArray_GetPtr(arr, &zero);
 }
@@ -334,7 +333,7 @@ PyObject* getPyJSON(std::string const& s)
         throw pdal_error(getTraceback());
 
     if (PyDict_SetItemString(strict, "strict", Py_False))
-        throw pdal::pdal_error(getTraceback());
+        throw pdal_error(getTraceback());
 
     // New reference.
     PyObject* json = PyObject_Call(loads_func, json_args, strict);
@@ -344,7 +343,7 @@ PyObject* getPyJSON(std::string const& s)
     Py_DECREF(json_args);
     Py_DECREF(strict);
     if (!json)
-        throw pdal::pdal_error(getTraceback());
+        throw pdal_error(getTraceback());
 
     return json;
 }
@@ -433,8 +432,13 @@ void Invocation::extractData(PointViewPtr& view, PyObject *arrays)
     StringList names = dictKeys(arrays);
 
     PointLayoutPtr layout(view->m_pointTable.layout());
-    Dimension::IdList const& dims = layout->dims();
 
+    for (auto& name : names)
+        if (layout->findDim(name) == Dimension::Id::Unknown)
+            throw pdal_error("Can't set numpy array '" + name +
+                "' as output.  Dimension not registered.");
+
+    Dimension::IdList const& dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id d = *di;

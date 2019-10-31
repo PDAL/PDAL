@@ -847,6 +847,191 @@ TEST(PLangTest, log)
 }
 
 
+TEST_F(PythonFilterTest, ErrorTest1)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  outs['FOO'] = X\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest2)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  outs['Mask'] = X\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "myfunc");
+    opts.add(source);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest3)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  FOO = np.full([X.size + 1], True)\n"
+        "  outs['Mask'] = FOO\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "myfunc");
+    opts.add(source);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest4)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  FOO = np.full([X.size], True)\n"
+        "  outs['Mask'] = FOO\n"
+        "  outs['Y'] = ins['Y']\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "myfunc");
+    opts.add(source);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest5)
+{
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "f");
+
+    StageFactory f;
+    Stage *filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+
+    PointTable t;
+    EXPECT_THROW(filter->prepare(t), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest6)
+{
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "f");
+    opts.add("script", "some script");
+    opts.add("source", "some source");
+
+    StageFactory f;
+    Stage *filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+
+    PointTable t;
+    EXPECT_THROW(filter->prepare(t), pdal_error);
+}
+
+
 TEST_F(PythonFilterTest, PythonFilterTest_modify)
 {
     StageFactory f;
