@@ -41,14 +41,16 @@ Example
 Options
 -------
 
-_`dimensions`
+.. _stats-dimensions:
+
+dimensions
   A comma-separated list of dimensions whose statistics should be
   processed.  If not provided, statistics for all dimensions are calculated.
 
 _`enumerate`
   A comma-separated list of dimensions whose values should be enumerated.
   Note that this list does not add to the list of dimensions that may be
-  provided in the dimensions_ option.
+  provided in the :ref:`dimensions <stats-dimensions>` option.
 
 count
   Identical to the enumerate_ option, but provides a count of the number

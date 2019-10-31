@@ -19,7 +19,7 @@ Example
 
   [
       {
-          "type":"readers.bpf"
+          "type":"readers.bpf",
           "filename":"inputfile.las"
       },
       {

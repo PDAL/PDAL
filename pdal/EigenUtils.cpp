@@ -79,7 +79,7 @@ PointViewPtr demeanPointView(const PointView& view)
     using namespace Eigen;
     using namespace Dimension;
 
-    std::vector<PointId> ids(view.size());
+    PointIdList ids(view.size());
     std::iota(ids.begin(), ids.end(), 0);
     Vector3d centroid = computeCentroid(view, ids);
     PointViewPtr outView = view.makeNew();
@@ -155,7 +155,7 @@ void transformInPlace(PointView& view, double* matrix)
 }
 
 Eigen::Vector3d computeCentroid(const PointView& view,
-    const std::vector<PointId>& ids)
+    const PointIdList& ids)
 {
     using namespace Eigen;
 
@@ -184,7 +184,7 @@ Eigen::Vector3d computeCentroid(const PointView& view,
 }
 
 Eigen::Matrix3d computeCovariance(const PointView& view,
-    const std::vector<PointId>& ids)
+    const PointIdList& ids)
 {
     using namespace Eigen;
 
@@ -212,7 +212,7 @@ Eigen::Matrix3d computeCovariance(const PointView& view,
     return A * A.transpose() / (ids.size()-1);
 }
 
-uint8_t computeRank(const PointView& view, const std::vector<PointId>& ids,
+uint8_t computeRank(const PointView& view, const PointIdList& ids,
     double threshold)
 {
     using namespace Eigen;
@@ -362,7 +362,7 @@ Eigen::MatrixXd pointViewToEigen(const PointView& view)
     return matrix;
 }
 
-Eigen::MatrixXd pointViewToEigen(const PointView& view, const std::vector<PointId>& ids)
+Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdList& ids)
 {
     Eigen::MatrixXd matrix(ids.size(), 3);
     for (size_t i = 0; i < ids.size(); ++i)

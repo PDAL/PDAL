@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL CXX C)
+project(PDAL VERSION 2.0.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -26,16 +26,12 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-# the next line is the ONLY place in the entire pdal system where
-# the version info is hard-coded
-set(PDAL_VERSION_STRING "2.0.1" CACHE STRING "PDAL version")
-
-DISSECT_VERSION()
-GET_OS_INFO()
-SET_INSTALL_DIRS()
-
 set(PDAL_API_VERSION "9")
 set(PDAL_BUILD_VERSION "10")
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Name of C++ library
 
@@ -49,12 +45,11 @@ set(PDAL_BUILD_VERSION "10")
 # See below for the rest of the magic.
 #
 if (APPLE OR WIN32)
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
 else()
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
+set(PDAL_LIB_NAME pdalcpp)
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)

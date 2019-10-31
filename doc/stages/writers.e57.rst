@@ -40,7 +40,7 @@ Example
       {
           "type":"writers.e57",
           "filename":"outputfile.e57",
-	  "doublePrecision":false
+	        "doublePrecision":false
       }
   ]
 

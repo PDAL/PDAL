@@ -47,8 +47,8 @@ class Options;
 
 struct Indices
 {
-    std::vector<PointId> inliers;
-    std::vector<PointId> outliers;
+    PointIdList inliers;
+    PointIdList outliers;
 };
 
 class PDAL_DLL OutlierFilter : public pdal::Filter

@@ -71,6 +71,7 @@ private:
     bool m_outputTesselation;
     bool m_doSmooth;
     point_count_t m_count;
+    bool m_preserve_topology;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);

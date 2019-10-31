@@ -24,7 +24,7 @@ Example
           "type":"filters.hexbin"
       },
       {
-          "type":"writers.null",
+          "type":"writers.null"
       }
   ]
 

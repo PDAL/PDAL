@@ -50,10 +50,8 @@ namespace pdal
 namespace Segmentation
 {
 
-std::vector<std::vector<PointId>> extractClusters(PointView& view,
-                                                  uint64_t min_points,
-                                                  uint64_t max_points,
-                                                  double tolerance)
+std::vector<PointIdList> extractClusters(PointView& view, uint64_t min_points,
+                                         uint64_t max_points, double tolerance)
 {
     // Index the incoming PointView for subsequent radius searches.
     KD3Index kdi(view);
@@ -61,8 +59,8 @@ std::vector<std::vector<PointId>> extractClusters(PointView& view,
 
     // Create variables to track PointIds that have already been added to
     // clusters and to build the list of cluster indices.
-    std::vector<PointId> processed(view.size(), 0);
-    std::vector<std::vector<PointId>> clusters;
+    PointIdList processed(view.size(), 0);
+    std::vector<PointIdList> clusters;
 
     for (PointId i = 0; i < view.size(); ++i)
     {
@@ -72,7 +70,7 @@ std::vector<std::vector<PointId>> extractClusters(PointView& view,
 
         // Initialize list of indices belonging to current cluster, marking the
         // seed point as processed.
-        std::vector<PointId> seed_queue;
+        PointIdList seed_queue;
         size_t sq_idx = 0;
         seed_queue.push_back(i);
         processed[i] = 1;
@@ -84,7 +82,7 @@ std::vector<std::vector<PointId>> extractClusters(PointView& view,
         {
             // Find neighbors of the next cluster point.
             PointId j = seed_queue[sq_idx];
-            std::vector<PointId> ids = kdi.radius(j, tolerance);
+            PointIdList ids = kdi.radius(j, tolerance);
 
             // The case where the only neighbor is the query point.
             if (ids.size() == 1)

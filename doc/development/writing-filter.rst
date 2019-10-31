@@ -8,8 +8,8 @@ PDAL can be extended through the development of filter functions.
 
 .. seealso::
 
-    For more on filters and their role in PDAL, please refer to
-    :ref:`overview`.
+    For more on filters and their role in PDAL, and their lifecycle
+    please refer to :ref:`overview`.
 
 Every filter stage in PDAL is implemented as a plugin (sometimes referred to as
 a "driver"). Filters native to PDAL, such as :ref:`filters.ferry`, are

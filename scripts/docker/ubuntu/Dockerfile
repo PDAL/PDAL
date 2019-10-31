@@ -166,10 +166,9 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DCMAKE_INSTALL_PREFIX=/usr/ \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_MBIO=OFF \
-        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_I3S=ON \
-        -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DPython3_FIND_STRATEGY=LOCATION \
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
@@ -184,7 +183,7 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DWITH_LASZIP=ON \
         -DWITH_ZSTD=ON \
         -DWITH_ZLIB=ON \
-        -DWITH_TESTS=OFF \
+        -DWITH_TESTS=ON \
         -DWITH_PDAL_JNI=OFF \
         -DCMAKE_BUILD_TYPE=Release \
     ; \

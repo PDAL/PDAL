@@ -297,7 +297,7 @@ void App::addArgs(ProgramArgs& args)
 
 namespace
 {
-    LogPtr logPtr(new Log("PDAL", "stderr"));
+    LogPtr logPtr(Log::makeLog("PDAL", "stderr"));
 }
 
 int main(int argc, char* argv[])
@@ -326,7 +326,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         return -1;
     }
 
-    log.reset(new Log("PDAL", m_log, m_logtiming));
+    log = Log::makeLog("PDAL", m_log, m_logtiming);
     if (m_logLevel != LogLevel::None)
         log->setLevel(m_logLevel);
     else if (m_debug)

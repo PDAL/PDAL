@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 0d6fba8d4ec6a7805693b4fdce0cc0c31cd1e97b
+// Git SHA: 098ed60a28d9a612a125a26ec667569c0bc90c8e
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3117,6 +3117,13 @@ inline std::string decompress(const char* data, std::size_t size)
 // //////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+#include <nlohmann/json.hpp>
+
+
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/util/exports.hpp
 // //////////////////////////////////////////////////////////////////////
@@ -3263,7 +3270,9 @@ private:
 
 #pragma once
 
-#include <nlohmann/json.hpp>
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/third/json/json.hpp>
+#endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -5149,7 +5158,10 @@ public:
     bool isHttpDerived() const;
 
     /** See Arbiter::getLocalHandle. */
-    std::unique_ptr<LocalHandle> getLocalHandle(std::string subpath) const;
+    std::unique_ptr<LocalHandle> getLocalHandle(
+            std::string subpath,
+            http::Headers headers = http::Headers(),
+            http::Query query = http::Query()) const;
 
     /** Passthrough to Driver::get. */
     std::string get(std::string subpath) const;
