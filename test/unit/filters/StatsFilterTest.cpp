@@ -74,14 +74,50 @@ TEST(Stats, handcalc)
     EXPECT_DOUBLE_EQ(xstats.average(), 12.0 + 2.0 / 3.0);
     EXPECT_DOUBLE_EQ(xstats.sampleVariance(), 88.2 + .2 / 3);
     EXPECT_DOUBLE_EQ(xstats.sampleStddev(), std::sqrt(88.2 + .2 / 3));
-    EXPECT_NEAR(xstats.skewness(), 0.05589204039, 0.000000001);
+    EXPECT_NEAR(xstats.populationSkewness(), 0.05589204039, 0.000000001);
     EXPECT_NEAR(xstats.sampleSkewness(), 0.07653332827, 0.000000001);
 
-    EXPECT_NEAR(xstats.kurtosis(), 1.504435885, 0.000000001);
-    EXPECT_NEAR(xstats.excessKurtosis(), -1.495564114, 0.000000001);
+    EXPECT_NEAR(xstats.populationKurtosis(), 1.504435885, 0.000000001);
+    EXPECT_NEAR(xstats.populationExcessKurtosis(), -1.495564114, 0.000000001);
     EXPECT_NEAR(xstats.sampleKurtosis(), 4.387937998, 0.000000001);
     EXPECT_NEAR(xstats.sampleExcessKurtosis(), -1.862062002, 0.000000001);
 }
+
+
+TEST(Stats, baseline)
+{
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    PointViewPtr v(new PointView(table));
+
+    for (PointId idx = 0; idx < 100; idx++)
+        v->setField(Dimension::Id::X, idx, 55.2);
+
+    BufferReader r;
+    r.addView(v);
+    StatsFilter f;
+    f.setInput(r);
+    Options opts;
+    opts.add("advanced", true);
+    f.setOptions(opts);
+
+    f.prepare(table);
+    f.execute(table);
+
+    const stats::Summary& xstats = f.getStats(Dimension::Id::X);
+    EXPECT_EQ(xstats.minimum(), 55.2);
+    EXPECT_EQ(xstats.maximum(), 55.2);
+    EXPECT_EQ(xstats.average(), 55.2);
+    EXPECT_EQ(xstats.sampleVariance(), 0.0);
+    EXPECT_EQ(xstats.populationVariance(), 0.0);
+    EXPECT_EQ(xstats.sampleSkewness(), 0.0);
+    EXPECT_EQ(xstats.populationSkewness(), 0.0);
+    EXPECT_EQ(xstats.sampleKurtosis(), 0.0);
+    EXPECT_EQ(xstats.sampleExcessKurtosis(), 0.0);
+    EXPECT_EQ(xstats.populationKurtosis(), 0.0);
+    EXPECT_EQ(xstats.populationExcessKurtosis(), 0.0);
+}
+
 
 TEST(Stats, simple)
 {

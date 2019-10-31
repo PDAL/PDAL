@@ -67,15 +67,19 @@ public:
         { return m_max; }
     double average() const
         { return M1; }
-    double variance() const
+    double populationVariance() const
         { return M2 / m_cnt; }
     double sampleVariance() const
         { return M2 / (m_cnt - 1.0); }
-    double stddev() const
-        { return std::sqrt(variance()); }
+    double variance() const
+        { return sampleVariance(); }
+    double populationStddev() const
+        { return std::sqrt(populationVariance()); }
     double sampleStddev() const
         { return std::sqrt(sampleVariance()); }
-    double skewness() const
+    double stddev() const
+        { return sampleStddev(); }
+    double populationSkewness() const
     {
         if (!M2 || ! m_advanced)
             return 0;
@@ -86,26 +90,30 @@ public:
         if (M2 == 0 || m_cnt <= 2 || !m_advanced)
             return 0.0;
         double c(m_cnt);
-        return skewness() * std::sqrt(c) * std::sqrt(c - 1) / (c - 2);
+        return populationSkewness() * std::sqrt(c) * std::sqrt(c - 1) / (c - 2);
     }
-    double kurtosis() const
+    double skewness() const
+    {
+        return sampleSkewness();
+    }
+    double populationKurtosis() const
     {
         if (M2 == 0 || !m_advanced)
             return 0;
         return double(m_cnt) * M4 / (M2 * M2);
     }
-    double excessKurtosis() const
+    double populationExcessKurtosis() const
     {
         if (M2 == 0 || !m_advanced)
             return 0;
-        return kurtosis() - 3;
+        return populationKurtosis() - 3;
     }
     double sampleKurtosis() const
     {
         if (M2 == 0 || m_cnt <= 3 || !m_advanced)
             return 0;
         double c(m_cnt);
-        return kurtosis() * (c + 1) * (c - 1) / ((c - 2) * (c - 3));
+        return populationKurtosis() * (c + 1) * (c - 1) / ((c - 2) * (c - 3));
     }
     double sampleExcessKurtosis() const
     {
@@ -113,6 +121,10 @@ public:
             return 0;
         double c(m_cnt);
         return sampleKurtosis() - 3 * (c - 1) * (c - 1) / ((c - 2) * (c - 3));
+    }
+    double kurtosis() const
+    {
+        return sampleExcessKurtosis();
     }
     double median() const
         { return m_median; }

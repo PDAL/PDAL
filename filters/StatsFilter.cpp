@@ -85,7 +85,7 @@ void Summary::extractMetadata(MetadataNode &m)
 
         double sk = sampleSkewness();
         if (!std::isinf(sk) && !std::isnan(sk))
-            m.add("skewness", skewness(), "skewness");
+            m.add("skewness", sampleSkewness(), "skewness");
     }
 
     if (m_enumerate == Enumerate)
