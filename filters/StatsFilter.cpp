@@ -68,24 +68,24 @@ void Summary::extractMetadata(MetadataNode &m)
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
 
-    double std = stddev();
+    double std = sampleStddev();
     if (!std::isinf(std) && !std::isnan(std))
         m.add("stddev", std, "standard deviation");
 
-    double v = variance();
+    double v = sampleVariance();
     if (!std::isinf(v) && !std::isnan(v))
         m.add("variance", v, "variance");
     m.add("name", m_name, "name");
 
     if (m_advanced)
     {
-        double k = kurtosis();
+        double k = sampleExcessKurtosis();
         if (!std::isinf(k) && !std::isnan(k))
             m.add("kurtosis", k, "kurtosis");
 
-        double sk = skewness();
+        double sk = sampleSkewness();
         if (!std::isinf(sk) && !std::isnan(sk))
-            m.add("skewness", skewness(), "skewness");
+            m.add("skewness", sampleSkewness(), "skewness");
     }
 
     if (m_enumerate == Enumerate)

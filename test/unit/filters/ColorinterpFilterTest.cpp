@@ -251,7 +251,7 @@ TEST(ColorinterpFilterTest, k)
 
     auto test = [](int z, int r)
     {
-        if (z < 21 && r == 0)
+        if (z < 22 && r == 0)
             return true;
         if (z < 36 && r == 1)
             return true;
