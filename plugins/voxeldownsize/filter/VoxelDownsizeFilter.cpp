@@ -127,7 +127,7 @@ bool VoxelDownsizeFilter::insert(int gx, int gy, int gz)
     {
         std::set<std::tuple<int, int, int>> tempMap;
         std::swap(tempMap, m_populatedVoxels);
-        m_pool->add([this,tempMap]() {
+        m_pool->add([this, tempMap]() {
             leveldb::WriteBatch batch;
             for (auto itr=tempMap.begin(); itr!=tempMap.end(); ++itr)
             {
@@ -137,7 +137,8 @@ bool VoxelDownsizeFilter::insert(int gx, int gy, int gz)
                            std::to_string(std::get<2>(t));
                 batch.Put(val,val);
             }
-            assert(m_ldb->Write(leveldb::WriteOptions(), &batch).ok());
+            auto res = m_ldb->Write(leveldb::WriteOptions(), &batch).ok();
+            assert(res);
         });
         m_populatedVoxels.clear();
     }
