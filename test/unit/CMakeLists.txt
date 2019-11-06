@@ -351,7 +351,7 @@ if(PDAL_HAVE_LIBXML2)
         INCLUDES
             ${LIBXML2_INCLUDE_DIR}
     )
-	PDAL_ADD_TEST(pdal_filters_multiassign_test
+    PDAL_ADD_TEST(pdal_filters_multiassign_test
         FILES
             filters/MultiAssignFilterTest.cpp
         INCLUDES
