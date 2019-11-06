@@ -37,7 +37,6 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "private/DimRange.hpp"
 
 namespace pdal
 {
@@ -50,18 +49,6 @@ static StaticPluginInfo const s_info
 };
 
 CREATE_STATIC_STAGE(AssignFilter, s_info)
-
-struct AssignRange : public DimRange
-{
-    void parse(const std::string& r);
-    double m_value;
-};
-
-struct AssignArgs
-{
-    std::vector<AssignRange> m_assignments;
-    DimRange m_condition;
-};
 
 void AssignRange::parse(const std::string& r)
 {
