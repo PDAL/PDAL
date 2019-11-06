@@ -270,6 +270,12 @@ PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassif
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
+PDAL_ADD_TEST(pdal_filters_multiassign_test
+    FILES
+        filters/MultiAssignFilterTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
         filters/AdditionalMergeTest.cpp
@@ -351,10 +357,4 @@ if(PDAL_HAVE_LIBXML2)
         INCLUDES
             ${LIBXML2_INCLUDE_DIR}
     )
-    PDAL_ADD_TEST(pdal_filters_multiassign_test
-        FILES
-            filters/MultiAssignFilterTest.cpp
-        INCLUDES
-            ${NLOHMANN_INCLUDE_DIR})
- 
 endif()
