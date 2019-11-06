@@ -22,27 +22,27 @@ green where classification is 4 and blue where classification is >=5.
   [
       "autzen-dd.las",
       {
-        "type":"filters.multiassign",
-        "args":{
-			"assignments":[
-				{
-					"assign":"Red[:]=255,Green[:]=255,Blue[:]=255",
-					"condition":"Classification[:2]"
-				},
-				{
-					"assign":"Red[:]=255,Green[:]=0,Blue[:]=0",
-					"condition":"Classification[3:3]"
-				},
-				{
-					"assign":"Red[:]=0,Green[:]=255,Blue[:]=0",
-					"condition":"Classification[4:4]"
-				},
-				{
-					"assign":"Red[:]=0,Green[:]=0,Blue[:]=255",
-					"condition":"Classification[5:]"
-				}
-			]
-		}
+          "type":"filters.multiassign",
+          "args":{
+              "assignments":[
+		    {
+		        "assign":"Red[:]=255,Green[:]=255,Blue[:]=255",
+		        "condition":"Classification[:2]"
+		    },
+		    {
+		        "assign":"Red[:]=255,Green[:]=0,Blue[:]=0",
+		        "condition":"Classification[3:3]"
+		    },
+		    {
+		        "assign":"Red[:]=0,Green[:]=255,Blue[:]=0",
+		        "condition":"Classification[4:4]"
+		    },
+		    {
+		        "assign":"Red[:]=0,Green[:]=0,Blue[:]=255",
+		        "condition":"Classification[5:]"
+		    }
+	    ]
+          }
       },
       {
           "filename":"attributed.las",
