@@ -23,7 +23,7 @@ green where classification is 4 and blue where classification is >=5.
       "autzen-dd.las",
       {
         "type":"filters.multiassign",
-		"args":{
+        "args":{
 			"assignments":[
 				{
 					"assign":"Red[:]=255,Green[:]=255,Blue[:]=255",
