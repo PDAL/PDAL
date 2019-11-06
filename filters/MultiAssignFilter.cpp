@@ -45,7 +45,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.multiassign",
-    "Assign values for a dimension range to a specified value.",
+    "Assign values for dimensions range. Supports multiple assignments with optional condition to every assignment",
     "http://pdal.io/stages/filters.multiassign.html"};
 
 
