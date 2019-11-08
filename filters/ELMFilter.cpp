@@ -66,6 +66,21 @@ void ELMFilter::addArgs(ProgramArgs& args)
     args.add("cell", "Cell size", m_cell, 10.0);
     args.add("class", "Class to use for noise points", m_class, uint8_t(7));
     args.add("threshold", "Threshold value", m_threshold, 1.0);
+    args.add("maximum", "Compute Extended Local Maximum too", m_maximum, false);
+    args.add("z_dimension", "Dimension to filter", m_ZdimName, "Z");
+    args.add("cls_dimension", "Dimension to place 'class' value", m_ClassdimName, "Z");
+
+}
+
+void ELMFilter::prepared(PointTableRef table)
+{
+    m_Zdim = table.layout()->findDim(m_ZdimName);
+    if (m_Zdim == Dimension::Id::Unknown)
+        throwError("Dimension '" + m_ZdimName + "' not found.");
+
+    m_Classdim = table.layout()->findDim(m_ClassdimName);
+    if (m_Classdim == Dimension::Id::Unknown)
+        throwError("Dimension '" + m_ClassdimName + "' not found.");
 }
 
 void ELMFilter::addDimensions(PointLayoutPtr layout)
@@ -73,36 +88,15 @@ void ELMFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
-void ELMFilter::filter(PointView& view)
+
+point_count_t ELMFilter::cull(size_t cols,
+                              size_t rows,
+                              std::map<uint32_t, std::multimap<double, PointId>>& hash,
+                              PointView& view)
 {
-    BOX2D bounds;
-    calculateBounds(view, bounds);
-
-    size_t cols =
-        static_cast<size_t>(((bounds.maxx - bounds.minx) / m_cell) + 1);
-    size_t rows =
-        static_cast<size_t>(((bounds.maxy - bounds.miny) / m_cell) + 1);
-
-    // Make an initial pass through the input PointView to index elevation
-    // values and PointIds by row and column.
-    std::map<uint32_t, std::multimap<double, PointId>> hash;
-    for (PointId id = 0; id < view.size(); ++id)
-    {
-        double x = view.getFieldAs<double>(Dimension::Id::X, id);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, id);
-
-        size_t c = static_cast<size_t>(std::floor(x - bounds.minx) / m_cell);
-        size_t r = static_cast<size_t>(std::floor(y - bounds.miny) / m_cell);
-
-        hash[c * rows + r].emplace(z, id);
-    }
-
     // Count the number of points we classify as noise.
     point_count_t num(0);
 
-    // Make a second pass through the now rasterized PointView to compute the
-    // extended local minimum.
     for (size_t c = 0; c < cols; ++c)
     {
         for (size_t r = 0; r < rows; ++r)
@@ -122,16 +116,61 @@ void ELMFilter::filter(PointView& view)
 
                 // Otherwise this point is classified as noise, and we proceed
                 // to the next lowest value.
-                view.setField(Dimension::Id::Classification, it->second,
+                view.setField(m_Classdim, it->second,
                               m_class);
                 ++num;
             }
         }
     }
 
+    return num;
+
+}
+
+
+void ELMFilter::filter(PointView& view)
+{
+    BOX2D bounds;
+    calculateBounds(view, bounds);
+
+    size_t cols =
+        static_cast<size_t>(((bounds.maxx - bounds.minx) / m_cell) + 1);
+    size_t rows =
+        static_cast<size_t>(((bounds.maxy - bounds.miny) / m_cell) + 1);
+
+    // Make an initial pass through the input PointView to index elevation
+    // values and PointIds by row and column.
+    std::map<uint32_t, std::multimap<double, PointId>> plus_hash;
+    std::map<uint32_t, std::multimap<double, PointId>> neg_hash;
+    for (PointId id = 0; id < view.size(); ++id)
+    {
+        double x = view.getFieldAs<double>(Dimension::Id::X, id);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view.getFieldAs<double>(m_Zdim, id);
+
+        size_t c = static_cast<size_t>(std::floor(x - bounds.minx) / m_cell);
+        size_t r = static_cast<size_t>(std::floor(y - bounds.miny) / m_cell);
+
+        plus_hash[c * rows + r].emplace(z, id);
+        if (m_maximum)
+            neg_hash[c * rows + r].emplace(-z, id);
+    }
+
+    // Count the number of points we classify as noise.
+    point_count_t plus_num(0);
+    point_count_t neg_num(0);
+
+    plus_num = cull(cols, rows, plus_hash, view);
+
+    if (m_maximum)
+        neg_num = cull(cols, rows, neg_hash, view);
+
     log()->get(LogLevel::Info)
-        << "Classified " << num
+        << "Classified " << plus_num
         << " points as noise by Extended Local Minimum (ELM).\n";
+    log()->get(LogLevel::Info)
+        << "Classified " << neg_num
+        << " points as noise by Extended Local Maximum (ELM).\n";
 }
 
 } // namespace pdal

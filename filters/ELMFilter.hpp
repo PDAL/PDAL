@@ -58,9 +58,23 @@ private:
     double m_cell;
     double m_threshold;
     uint8_t m_class;
+    bool m_maximum;
+
+    Dimension::Id m_Zdim;
+    std::string m_ZdimName;
+
+    Dimension::Id m_Classdim;
+    std::string m_ClassdimName;
+
+
+    point_count_t cull(size_t cols,
+                       size_t rows,
+                       std::map<uint32_t, std::multimap<double, PointId>>& hash,
+                       PointView& view);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 
     ELMFilter& operator=(const ELMFilter&); // not implemented

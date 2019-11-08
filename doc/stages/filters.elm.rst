@@ -76,3 +76,12 @@ _`class`
 
 _`threshold`
   Threshold value to identify low noise points. [Default: 1.0]
+
+_`maximum`
+  Compute the Extended Local Maximum too [Default: false]
+
+_`z_dimension`
+  Z dimension name to filter [Default: Z]
+
+_`cls_dimension`
+  Classification dimension to place ``class`` value [Default: Classification]
