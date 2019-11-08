@@ -47,14 +47,6 @@ namespace pdal
 namespace plang
 {
 
-struct PythonDeleter
-{
-    void operator ()(PyObject *p)
-        { Py_XDECREF(p); }
-};
-
-using PythonPtr = std::unique_ptr<PyObject, PythonDeleter>;
-
 class PDAL_DLL Invocation
 {
 public:

@@ -192,23 +192,24 @@ bool Invocation::execute(PointViewPtr& v, MetadataNode stageMetadata)
 
     // New object.
     Py_ssize_t numArgs = argCount(m_function);
-    PythonPtr scriptArgs(PyTuple_New(numArgs));
+    PyObject *scriptArgs = PyTuple_New(numArgs);
 
     if (numArgs > 2)
         throw pdal_error("Only two arguments -- ins and outs "
             "numpy arrays -- can be passed!");
 
-    PyTuple_SetItem(scriptArgs.get(), 0, inArrays);
+    // inArrays and outArrays are owned by scriptArgs here.
+    PyTuple_SetItem(scriptArgs, 0, inArrays);
     if (numArgs > 1)
     {
         outArrays = PyDict_New();
-        PyTuple_SetItem(scriptArgs.get(), 1, outArrays);
+        PyTuple_SetItem(scriptArgs, 1, outArrays);
     }
 
-    PythonPtr scriptResult(PyObject_CallObject(m_function, scriptArgs.get()));
+    PyObject *scriptResult = PyObject_CallObject(m_function, scriptArgs);
     if (!scriptResult)
         throw pdal_error(getTraceback());
-    if (!PyBool_Check(scriptResult.get()))
+    if (!PyBool_Check(scriptResult))
         throw pdal_error("User function return value not boolean.");
 
     PyObject *maskArray = PyDict_GetItemString(outArrays, "Mask");
@@ -225,7 +226,11 @@ bool Invocation::execute(PointViewPtr& v, MetadataNode stageMetadata)
 
     // This looks weird, but booleans are implemented as static objects,
     // allowing this comparison (Py_True is a pointer to the "true" object.)
-    return (scriptResult.get() == Py_True);
+    bool ok = scriptResult == Py_True;
+
+    Py_DECREF(scriptArgs);
+    Py_DECREF(scriptResult);
+    return ok;
 }
 
 
