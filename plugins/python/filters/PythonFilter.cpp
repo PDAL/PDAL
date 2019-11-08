@@ -94,7 +94,8 @@ void PythonFilter::addArgs(ProgramArgs& args)
 
 void PythonFilter::addDimensions(PointLayoutPtr layout)
 {
-    for (const std::string& s : m_args->m_addDimensions) {
+    for (const std::string& s : m_args->m_addDimensions)
+    {
         StringList spec = Utils::split(s, '=');
         Utils::trim(spec[0]);
         if (spec.size() == 2)
@@ -102,15 +103,25 @@ void PythonFilter::addDimensions(PointLayoutPtr layout)
             Utils::trim(spec[1]);
             auto type = pdal::Dimension::type(spec[1]);
             if (type == pdal::Dimension::Type::None)
-                throwError("Invalid dimension type specified '" + spec[1] + "'.  See "
-                           "documentation for valid dimension types");
+                throwError("Invalid dimension type specified '" + spec[1] +
+                    "'.  See documentation for valid dimension types");
             layout->registerOrAssignDim(spec[0], type);
-        } else if (spec.size() == 1){
-            layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
-        } else {
-          throwError("Invalid dimension specified '" + s + "'.  Need <dimension> or <dimension>=<data_type>.");
         }
+        else if (spec.size() == 1)
+            layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
+        else
+          throwError("Invalid dimension specified '" + s +
+              "'.  Need <dimension> or <dimension>=<data_type>.");
     }
+}
+
+
+void PythonFilter::prepared(PointTableRef table)
+{
+    if (m_args->m_source.size() && m_args->m_scriptFile.size())
+        throwError("Can't set both 'source' and 'script' options.");
+    if (!m_args->m_source.size() && !m_args->m_scriptFile.size())
+        throwError("Must set one of 'source' and 'script' options.");
 }
 
 
@@ -121,12 +132,10 @@ void PythonFilter::ready(PointTableRef table)
     std::ostream *out = log()->getLogStream();
     plang::EnvironmentPtr env = plang::Environment::get();
     env->set_stdout(out);
-    m_script = new plang::Script(m_args->m_source, m_args->m_module,
-        m_args->m_function);
-
-	m_pythonMethod = new plang::Invocation(*m_script);
-    m_pythonMethod->compile();
-    m_totalMetadata = table.metadata();
+    m_script.reset(new plang::Script(m_args->m_source, m_args->m_module,
+        m_args->m_function));
+	m_pythonMethod.reset(new plang::Invocation(*m_script, table.metadata(),
+        m_args->m_pdalargs.dump(1)));
 }
 
 
@@ -134,38 +143,10 @@ PointViewSet PythonFilter::run(PointViewPtr view)
 {
     log()->get(LogLevel::Debug5) << "filters.python " << *m_script <<
         " processing " << view->size() << " points." << std::endl;
-    m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(*view, m_totalMetadata);
-
-    if (!m_args->m_pdalargs.empty())
-    {
-        std::ostringstream args;
-        args << m_args->m_pdalargs;
-        m_pythonMethod->setKWargs(args.str());
-    }
-    m_pythonMethod->execute();
+    m_pythonMethod->execute(view, getMetadata());
 
     PointViewSet viewSet;
-
-    if (m_pythonMethod->hasOutputVariable("Mask"))
-    {
-        PointViewPtr outview = view->makeNew();
-
-        size_t arrSize(0);
-        void *pydata = m_pythonMethod->extractResult("Mask",
-            Dimension::Type::Unsigned8, arrSize);
-        char *ok = (char *)pydata;
-        for (PointId idx = 0; idx < arrSize; ++idx)
-            if (*ok++)
-                outview->appendPoint(*view, idx);
-
-        viewSet.insert(outview);
-    }
-    else
-    {
-        m_pythonMethod->end(*view, getMetadata());
-        viewSet.insert(view);
-    }
+    viewSet.insert(view);
     return viewSet;
 }
 
@@ -173,8 +154,6 @@ PointViewSet PythonFilter::run(PointViewPtr view)
 void PythonFilter::done(PointTableRef table)
 {
     static_cast<plang::Environment*>(plang::Environment::get())->reset_stdout();
-    delete m_pythonMethod;
-    delete m_script;
 }
 
 } // namespace pdal
