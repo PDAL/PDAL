@@ -139,15 +139,15 @@ void Scan::decodeHeader()
     //        (double value) i.e 65535/(255-0)=257.
     //      - If color limit is 0-65535 then rescale factor would be 1.00
     //        (double value) i.e 65535/(65535-0)= 1.
+
+    std::fill_n(m_rescaleFactors, pdal::Dimension::COUNT, 1.0); //Re-initialize all rescale factors to 1.0
     for (auto& field : supportedFields)
     {
         auto minmax = std::make_pair(0.0, 0.0);
         if (pdal::e57plugin::getLimits(*m_rawData, field, minmax))
-        {
-            m_rescaleFactors[pdal::e57plugin::e57ToPdal(field)] =
+            m_rescaleFactors[(int)pdal::e57plugin::e57ToPdal(field)] =
                 (std::numeric_limits<uint16_t>::max)() /
                 (minmax.second - minmax.first);
-        }
     }
 
     // Cartesian Bounds
@@ -226,11 +226,7 @@ void Scan::getPose()
 
 double Scan::rescale(pdal::Dimension::Id dim, double value)
 {
-    auto itr = m_rescaleFactors.find(dim);
-    if (itr != m_rescaleFactors.end())
-        return value * itr->second;
-    else
-        return value;
+    return m_rescaleFactors[(int)dim] * value;
 }
 
 }
