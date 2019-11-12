@@ -52,8 +52,9 @@ CREATE_SHARED_STAGE(E57Writer, s_info)
 
 E57Writer::ChunkWriter::ChunkWriter
 (const std::vector<std::string>& dimensionsToWrite,
- e57::CompressedVectorNode& vectorNode) :
-    m_defaultChunkSize(1 << 20), m_currentIndex(0)
+    e57::CompressedVectorNode& vectorNode)
+    : m_defaultChunkSize(1 << 20), m_currentIndex(0), colorLimit(256),
+      intensityLimit(1)
 {
     // Initialise the write buffers
     for (auto& e57dim: dimensionsToWrite)
@@ -81,13 +82,26 @@ void E57Writer::ChunkWriter::write(pdal::PointRef& pt)
     }
 
     // Add point to buffer and increase index
+    using DimId = pdal::Dimension::Id;
     for (auto& keyValue: m_doubleBuffers)
     {
         auto pdaldim = pdal::e57plugin::e57ToPdal(keyValue.first);
-        if (pdaldim != pdal::Dimension::Id::Unknown)
+        if (pdaldim != DimId::Unknown)
         {
             auto val = pt.getFieldAs<double>(pdaldim);
-            keyValue.second[m_currentIndex] = val;
+            if ((pdaldim == DimId::Red || pdaldim == DimId::Green ||
+                 pdaldim == DimId::Blue) &&
+                val > colorLimit)
+            {
+                colorLimit = colorLimit << 8;  // Increase color bytes. 
+			}
+
+			if (pdaldim == DimId::Intensity && val > intensityLimit)
+            {
+                while (val > intensityLimit)
+					intensityLimit *= 10;  // Intensity limits values can be one of (1,10,100,...)
+			}
+			keyValue.second[m_currentIndex] = val;
         }
     }
     m_currentIndex++;
@@ -191,11 +205,10 @@ void E57Writer::done(PointTableRef table)
         for (auto id : colors)
         {
             std::string name = Dimension::name(id);
-            auto minmax = e57plugin::getPdalBounds(id);
             colorbox.set("color" + name + "Minimum",
-                e57::IntegerNode(*m_imageFile, minmax.first));
+                e57::IntegerNode(*m_imageFile, 0));
             colorbox.set("color" + name + "Maximum",
-                e57::IntegerNode(*m_imageFile,  minmax.second));
+                e57::IntegerNode(*m_imageFile,  m_chunkWriter->colorLimit-1));
         }
         m_scanNode->set("colorLimits", colorbox);
     }
@@ -204,11 +217,10 @@ void E57Writer::done(PointTableRef table)
     {
         // found intensity info
         e57::StructureNode colorbox = e57::StructureNode(*m_imageFile);
-        auto minmax = e57plugin::getPdalBounds(Dimension::Id::Intensity);
         colorbox.set("intensityMinimum",
-            e57::IntegerNode(*m_imageFile, minmax.first));
+            e57::IntegerNode(*m_imageFile, 0));
         colorbox.set("intensityMaximum",
-            e57::IntegerNode(*m_imageFile, minmax.second));
+            e57::IntegerNode(*m_imageFile, m_chunkWriter->intensityLimit));
         m_scanNode->set("intensityLimits", colorbox);
     }
 
@@ -288,7 +300,7 @@ void E57Writer::setupWriter()
         {
             auto bounds = e57plugin::getPdalBounds(pdal::Dimension::Id::Red);
             proto.set(e57Dimension,
-                e57::IntegerNode(*m_imageFile, 0, bounds.first,bounds.second));
+                      e57::IntegerNode(*m_imageFile, 0, bounds.first,bounds.second));
         }
         else if (e57Dimension.find("intensity") != std::string::npos)
         {

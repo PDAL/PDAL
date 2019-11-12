@@ -52,6 +52,7 @@ class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
         void write(pdal::PointRef &point);
 
         void finalise();
+        uint64_t colorLimit, intensityLimit;
 
     private:
         const pdal::point_count_t m_defaultChunkSize;
