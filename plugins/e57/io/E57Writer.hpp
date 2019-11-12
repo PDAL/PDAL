@@ -41,13 +41,14 @@
 
 namespace pdal
 {
-class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable 
+class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
 {
 
-    class PDAL_DLL ChunkWriter {
+    class PDAL_DLL ChunkWriter
+    {
     public:
         ChunkWriter(const std::vector<std::string> &dimensionsToWrite,
-            e57::CompressedVectorNode &vectorNode);
+                    e57::CompressedVectorNode &vectorNode);
 
         void write(pdal::PointRef &point);
 
