@@ -53,8 +53,8 @@ CREATE_SHARED_STAGE(E57Writer, s_info)
 E57Writer::ChunkWriter::ChunkWriter
 (const std::vector<std::string>& dimensionsToWrite,
  e57::CompressedVectorNode& vectorNode)
-    : m_defaultChunkSize(1 << 20), m_currentIndex(0), colorLimit(256),
-      intensityLimit(1)
+    : m_defaultChunkSize(1 << 20), m_currentIndex(0), m_colorLimit(256),
+      m_intensityLimit(1)
 {
     // Initialise the write buffers
     for (auto& e57dim: dimensionsToWrite)
@@ -91,15 +91,15 @@ void E57Writer::ChunkWriter::write(pdal::PointRef& pt)
             auto val = pt.getFieldAs<double>(pdaldim);
             if ((pdaldim == DimId::Red || pdaldim == DimId::Green ||
                     pdaldim == DimId::Blue) &&
-                    val > colorLimit)
+                    val > m_colorLimit)
             {
-                colorLimit = colorLimit << 8;  // Increase color bytes.
+                m_colorLimit = m_colorLimit << 8;  // Increase color bytes.
             }
 
-            if (pdaldim == DimId::Intensity && val > intensityLimit)
+            if (pdaldim == DimId::Intensity && val > m_intensityLimit)
             {
-                while (val > intensityLimit)
-                    intensityLimit *= 10;  // Intensity limits values can be one of (1,10,100,...)
+                while (val > m_intensityLimit)
+                    m_intensityLimit *= 10;  // Intensity limits values can be one of (1,10,100,...)
             }
             keyValue.second[m_currentIndex] = val;
         }
@@ -211,7 +211,7 @@ void E57Writer::done(PointTableRef table)
             colorbox.set("color" + name + "Minimum",
                          e57::IntegerNode(*m_imageFile, 0));
             colorbox.set("color" + name + "Maximum",
-                         e57::IntegerNode(*m_imageFile,  m_chunkWriter->colorLimit-1));
+                         e57::IntegerNode(*m_imageFile,  m_chunkWriter->getColorLimit()));
         }
         m_scanNode->set("colorLimits", colorbox);
     }
@@ -223,7 +223,7 @@ void E57Writer::done(PointTableRef table)
         colorbox.set("intensityMinimum",
                      e57::IntegerNode(*m_imageFile, 0));
         colorbox.set("intensityMaximum",
-                     e57::IntegerNode(*m_imageFile, m_chunkWriter->intensityLimit));
+                     e57::IntegerNode(*m_imageFile, m_chunkWriter->getIntensityLimit()));
         m_scanNode->set("intensityLimits", colorbox);
     }
 
