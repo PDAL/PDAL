@@ -41,17 +41,28 @@
 
 namespace pdal
 {
-class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable 
+class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
 {
 
-    class PDAL_DLL ChunkWriter {
+    class PDAL_DLL ChunkWriter
+    {
     public:
         ChunkWriter(const std::vector<std::string> &dimensionsToWrite,
-            e57::CompressedVectorNode &vectorNode);
+                    e57::CompressedVectorNode &vectorNode);
 
         void write(pdal::PointRef &point);
 
         void finalise();
+
+        inline uint64_t getColorLimit()
+        {
+            return m_colorLimit-1;
+        }
+
+        inline uint64_t getIntensityLimit()
+        {
+            return m_intensityLimit;
+        }
 
     private:
         const pdal::point_count_t m_defaultChunkSize;
@@ -59,6 +70,8 @@ class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
         std::map<std::string, std::vector<double>> m_doubleBuffers;
         std::vector<e57::SourceDestBuffer> m_e57buffers;
         std::unique_ptr<e57::CompressedVectorWriter> m_dataWriter;
+        uint64_t m_colorLimit;
+	uint64_t m_intensityLimit;
     };
 
 public:
