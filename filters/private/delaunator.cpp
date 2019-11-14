@@ -1,8 +1,11 @@
 
 #include "delaunator.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
+#include <tuple>
 
 namespace delaunator {
 

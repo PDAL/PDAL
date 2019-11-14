@@ -6,6 +6,7 @@
 #define INLINE
 #endif
 
+#include <limits>
 #include <vector>
 
 namespace delaunator {
