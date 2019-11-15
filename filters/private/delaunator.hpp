@@ -12,7 +12,7 @@
 namespace delaunator {
 
 constexpr std::size_t INVALID_INDEX =
-    std::numeric_limits<std::size_t>::max();
+    (std::numeric_limits<std::size_t>::max)();
 
 class Delaunator {
 
