@@ -163,7 +163,7 @@ void HAGFilter::addArgs(ProgramArgs& args)
     args.add("allow_extrapolation", "If true and count > 1, allow "
         "extrapolation [default: true].", m_allowExtrapolation, true);
     args.add("delaunay", "Construct local Delaunay fans and infer heights "
-        "from them [default: false].", m_delaunay, false);
+        "from them. [default: false].", m_delaunay, false);
 }
 
 
@@ -175,6 +175,12 @@ void HAGFilter::addDimensions(PointLayoutPtr layout)
 
 void HAGFilter::prepared(PointTableRef table)
 {
+    if (m_count == 0)
+        throwError("Option 'count' must be a positive integer.");
+    if (m_delaunay && m_count < 3)
+        throwError("Option 'count' must be at least 3 when using the "
+            "'delaunay' option.");
+
     const PointLayoutPtr layout(table.layout());
     if (!layout->hasDim(Dimension::Id::Classification))
         throwError("Missing Classification dimension in input PointView.");

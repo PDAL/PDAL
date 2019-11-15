@@ -74,35 +74,125 @@ TEST(HAGFilterTest, delaunay)
         int c = v->getFieldAs<int>(Dimension::Id::Classification, i);
         if (c == 2)
             EXPECT_EQ(hag, 0);
+        auto check = [&x, &y, &z, &hag](double xv, double yv, double zv,
+                                        double hagv)
+        {
+            EXPECT_EQ(x, xv) << "Bad X Value";
+            EXPECT_EQ(y, yv) << "Bad Y Value";
+            EXPECT_EQ(z, zv) << "Bad Z Value";
+            EXPECT_EQ(hag, hagv) << "Bad HAG Value";
+        };
+
         if (i == 0)
-        {
-            EXPECT_EQ(x, -2);
-            EXPECT_EQ(y, 4);
-            EXPECT_EQ(z, 20);
-            EXPECT_EQ(hag, 10);
-        }
+            check (-2, 4, 20, 10);
         if (i == 1)
-        {
-            EXPECT_EQ(x, 4);
-            EXPECT_EQ(y, 1);
-            EXPECT_EQ(z, 20);
-            EXPECT_EQ(hag, 11);
-        }
+            check(4, 1, 20, 11);
         if (i == 2)
-        {
-            EXPECT_EQ(x, 2);
-            EXPECT_EQ(y, 3);
-            EXPECT_EQ(z, 20);
-            EXPECT_EQ(hag, 14);
-        }
+            check(2, 3, 20, 14);
         if (i == 3)
-        {
-            EXPECT_EQ(x, 4);
-            EXPECT_EQ(y, 4);
-            EXPECT_EQ(z, 20);
-            EXPECT_EQ(hag, 16);
-        }
+            check(4, 4, 20, 16);
     }
 }
+
+TEST(HAGFilterTest, neighbors)
+{
+    Options ro;
+    ro.add("filename", Support::datapath("filters/hagtest.txt"));
+
+    StageFactory factory;
+    Stage& r = *(factory.createStage("readers.text"));
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("count", 2);
+    Stage& f = *(factory.createStage("filters.hag"));
+    f.setInput(r);
+    f.setOptions(fo);
+
+    PointTable t1;
+    f.prepare(t1);
+    PointViewSet s = f.execute(t1);
+    PointViewPtr v = *s.begin();
+
+    for (PointId i = 0; i < v->size(); ++i)
+    {
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = v->getFieldAs<double>(Dimension::Id::Z, i);
+        double hag = v->getFieldAs<double>(Dimension::Id::HeightAboveGround, i);
+        int c = v->getFieldAs<int>(Dimension::Id::Classification, i);
+        if (c == 2)
+            EXPECT_EQ(hag, 0);
+        auto check = [&x, &y, &z, &hag](double xv, double yv, double zv,
+                                        double hagv)
+        {
+            EXPECT_EQ(x, xv) << "Bad X Value";
+            EXPECT_EQ(y, yv) << "Bad Y Value";
+            EXPECT_EQ(z, zv) << "Bad Z Value";
+            EXPECT_DOUBLE_EQ(hag, hagv) << "Bad HAG Value";
+        };
+
+        if (i == 0)
+            check (-2, 4, 20, 10);
+        if (i == 1)
+            check(4, 1, 20, 10);
+        if (i == 2)
+            check(2, 3, 20, 14.8);
+        if (i == 3)
+            check(4, 4, 20, 15);
+    }
+}
+
+TEST(HAGFilterTest, closest)
+{
+    Options ro;
+    ro.add("filename", Support::datapath("filters/hagtest.txt"));
+
+    StageFactory factory;
+    Stage& r = *(factory.createStage("readers.text"));
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("count", 1);
+    Stage& f = *(factory.createStage("filters.hag"));
+    f.setInput(r);
+    f.setOptions(fo);
+
+    PointTable t1;
+    f.prepare(t1);
+    PointViewSet s = f.execute(t1);
+    PointViewPtr v = *s.begin();
+
+    for (PointId i = 0; i < v->size(); ++i)
+    {
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = v->getFieldAs<double>(Dimension::Id::Z, i);
+        double hag = v->getFieldAs<double>(Dimension::Id::HeightAboveGround, i);
+        int c = v->getFieldAs<int>(Dimension::Id::Classification, i);
+        if (c == 2)
+            EXPECT_EQ(hag, 0);
+        auto check = [&x, &y, &z, &hag](double xv, double yv, double zv,
+                                        double hagv)
+        {
+            EXPECT_EQ(x, xv) << "Bad X Value";
+            EXPECT_EQ(y, yv) << "Bad Y Value";
+            EXPECT_EQ(z, zv) << "Bad Z Value";
+            EXPECT_DOUBLE_EQ(hag, hagv) << "Bad HAG Value";
+        };
+
+        if (i == 0)
+            check (-2, 4, 20, 10);
+        if (i == 1)
+            check(4, 1, 20, 10);
+        if (i == 2)
+            check(2, 3, 20, 16);
+        if (i == 3)
+            check(4, 4, 20, 16);
+    }
+}
+
+// Should add tests for exact match in neighbors case and for
+// max_distance in neighbors case.
 
 } // namespace pdal
