@@ -256,7 +256,7 @@ point_count_t numPoints(const e57::VectorNode data3D)
     return count;
 }
 
-void dim::grow(double val)
+void Dim::grow(double val)
 {
     m_min = std::fmin(m_min, val);
     m_max = std::fmax(m_max, val);
@@ -264,7 +264,7 @@ void dim::grow(double val)
 
 void ExtraDims::addDim(std::string name, Dimension::Type type)
 {
-    dim d;
+    Dim d;
     d.m_name = name;
     d.m_type = type;
     m_dimMap.push_back(d);
@@ -275,25 +275,25 @@ uint16_t ExtraDims::numDims()
     return m_dimMap.size();
 }
 
-std::vector<dim>::iterator ExtraDims::begin()
+std::vector<Dim>::iterator ExtraDims::begin()
 {
     return m_dimMap.begin();
 }
 
-std::vector<dim>::iterator ExtraDims::end()
+std::vector<Dim>::iterator ExtraDims::end()
 {
     return m_dimMap.end();
 }
 
-std::vector<dim>::iterator ExtraDims::deleteDim(std::vector<dim>::iterator itr)
+std::vector<Dim>::iterator ExtraDims::deleteDim(std::vector<Dim>::iterator itr)
 {
     return m_dimMap.erase(itr);
 }
 
-std::vector<dim>::iterator ExtraDims::findDim(std::string name)
+std::vector<Dim>::iterator ExtraDims::findDim(std::string name)
 {
     return std::find_if(begin(), end(),
-                        [name](dim d)
+                        [name](Dim d)
     {
         return d.m_name == name;
     });

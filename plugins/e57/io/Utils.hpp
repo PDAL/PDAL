@@ -35,7 +35,6 @@
 #pragma once
 
 #include <E57Format.h>
-#include <set>
 #include <pdal/DimType.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_export.hpp>
@@ -75,7 +74,7 @@ PDAL_DLL std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id);
 /// Where data3D is a "/data3D" node from E57 hierarchy.
 PDAL_DLL point_count_t numPoints(const e57::VectorNode data3D);
 
-struct dim
+struct Dim
 {
     std::string m_name;
     Dimension::Id m_id;
@@ -83,23 +82,23 @@ struct dim
     double m_min;
     double m_max;
 
-    dim() : m_min(0), m_max(0) {}
+    Dim() : m_min(0), m_max(0) {}
     void grow(double val);
 };
 
 class ExtraDims
 {
 private:
-    std::vector<dim> m_dimMap;
+    std::vector<Dim> m_dimMap;
 
 public:
     ExtraDims() {};
     void addDim(std::string name, Dimension::Type type);
     uint16_t numDims();
-    std::vector<dim>::iterator begin();
-    std::vector<dim>::iterator end();
-    std::vector<dim>::iterator deleteDim(std::vector<dim>::iterator itr);
-    std::vector<dim>::iterator findDim(std::string name);
+    std::vector<Dim>::iterator begin();
+    std::vector<Dim>::iterator end();
+    std::vector<Dim>::iterator deleteDim(std::vector<Dim>::iterator itr);
+    std::vector<Dim>::iterator findDim(std::string name);
 };
 
 PDAL_DLL ExtraDims parse(pdal::StringList dimList);
