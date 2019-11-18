@@ -226,13 +226,9 @@ void HAGFilter::filter(PointView& view)
         double z0 = point.getFieldAs<double>(Id::Z);
         PointIdList ids = kdi.neighbors(point, m_count);
 
-        double z1 = std::numeric_limits<double>::quiet_NaN();
+        double z1 = gView->getFieldAs<double>(Id::Z, ids[0]);
         assert(ids.size() > 0);
-        if (ids.size() == 1)
-        {
-            z1 = gView->getFieldAs<double>(Id::Z, ids[0]);
-        }
-        else if (m_delaunay == false)
+        if (m_delaunay == false && ids.size() > 1)
         {
             // Nearest-Neighbor-based interpolation
             auto min_x = (std::numeric_limits<double>::max)();
