@@ -108,7 +108,7 @@ void E57Writer::ChunkWriter::write(pdal::PointRef& pt, std::unique_ptr<e57plugin
             auto val = pt.getFieldAs<double>(dim->m_id);
             keyValue.second[m_currentIndex] = val;
             dim->grow(val);
-		}
+        }
     }
     m_currentIndex++;
 }
@@ -164,7 +164,7 @@ void E57Writer::initialize()
 
 void E57Writer::addDimensions(PointLayoutPtr layout)
 {
-	m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
+    m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
     auto i = m_extraDims->begin();
     while (i != m_extraDims->end())
     {
@@ -175,7 +175,7 @@ void E57Writer::addDimensions(PointLayoutPtr layout)
             continue;
         }
 
-		i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);
+        i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);
         ++i;
     }
 }
@@ -187,15 +187,15 @@ void E57Writer::ready(PointTableRef table)
     m_dimensionsToWrite.clear();
     for (auto pdaldim: dimensions)
     {
-		std::string e57Dimension(pdal::e57plugin::pdalToE57(pdaldim));
-		if (!e57Dimension.empty())
-			m_dimensionsToWrite.push_back(e57Dimension);
+        std::string e57Dimension(pdal::e57plugin::pdalToE57(pdaldim));
+        if (!e57Dimension.empty())
+            m_dimensionsToWrite.push_back(e57Dimension);
     }
 
-	for (auto i = m_extraDims->begin(); i != m_extraDims->end(); ++i)
+    for (auto i = m_extraDims->begin(); i != m_extraDims->end(); ++i)
     {
         m_dimensionsToWrite.push_back(i->m_name);
-	}
+    }
 
     setupWriter();
 }
@@ -254,14 +254,14 @@ void E57Writer::done(PointTableRef table)
         // found intensity info
         e57::StructureNode intensityBox = e57::StructureNode(*m_imageFile);
         intensityBox.set("intensityMinimum",
-                     e57::IntegerNode(*m_imageFile, 0));
+                         e57::IntegerNode(*m_imageFile, 0));
         intensityBox.set(
             "intensityMaximum",
-                     e57::IntegerNode(*m_imageFile, m_chunkWriter->getIntensityLimit()));
+            e57::IntegerNode(*m_imageFile, m_chunkWriter->getIntensityLimit()));
         m_scanNode->set("intensityLimits", intensityBox);
     }
 
-	if (Utils::contains(m_dimensionsToWrite, "classification"))
+    if (Utils::contains(m_dimensionsToWrite, "classification"))
     {
         // found classification info
         e57::StructureNode classificationBox = e57::StructureNode(*m_imageFile);
@@ -273,8 +273,8 @@ void E57Writer::done(PointTableRef table)
         m_scanNode->set("classificationLimits", classificationBox);
     }
 
-	for (auto extradim = m_extraDims->begin(); extradim != m_extraDims->end();
-         ++extradim)
+    for (auto extradim = m_extraDims->begin(); extradim != m_extraDims->end();
+            ++extradim)
     {
         e57::StructureNode classificationBox = e57::StructureNode(*m_imageFile);
         classificationBox.set(extradim->m_name+"Minimum",
@@ -282,8 +282,8 @@ void E57Writer::done(PointTableRef table)
         classificationBox.set(extradim->m_name + "Maximum",
                               e57::IntegerNode(*m_imageFile, std::ceil(extradim->m_max)));
         m_scanNode->set(extradim->m_name + "Limits", classificationBox);
-		
-	}
+
+    }
 
     // Cartesian bounds
     e57::StructureNode bboxNode = e57::StructureNode(*m_imageFile);
@@ -358,8 +358,8 @@ void E57Writer::setupWriter()
     for (auto& e57Dimension: m_dimensionsToWrite)
     {
         if ((e57Dimension.find("color") != std::string::npos) ||
-            e57Dimension.find("intensity") != std::string::npos ||
-            e57Dimension.find("classification") != std::string::npos)
+                e57Dimension.find("intensity") != std::string::npos ||
+                e57Dimension.find("classification") != std::string::npos)
         {
             auto bounds = e57plugin::getPdalBounds(e57plugin::e57ToPdal(e57Dimension));
             proto.set(e57Dimension,

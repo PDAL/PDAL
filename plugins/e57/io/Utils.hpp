@@ -93,7 +93,7 @@ private:
     std::vector<dim> m_dimMap;
 
 public:
-    ExtraDims(){};
+    ExtraDims() {};
     void addDim(std::string name, Dimension::Type type);
     uint16_t numDims();
     std::vector<dim>::iterator begin();

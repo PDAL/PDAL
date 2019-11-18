@@ -256,55 +256,66 @@ point_count_t numPoints(const e57::VectorNode data3D)
     return count;
 }
 
-void dim::grow(double val) {
+void dim::grow(double val)
+{
     m_min = std::fmin(m_min, val);
     m_max = std::fmax(m_max, val);
 }
 
-void ExtraDims::addDim(std::string name, Dimension::Type type) {
+void ExtraDims::addDim(std::string name, Dimension::Type type)
+{
     dim d;
     d.m_name = name;
     d.m_type = type;
     m_dimMap.push_back(d);
 };
 
-uint16_t ExtraDims::numDims() {
+uint16_t ExtraDims::numDims()
+{
     return m_dimMap.size();
 }
 
-std::vector<dim>::iterator ExtraDims::begin() {
+std::vector<dim>::iterator ExtraDims::begin()
+{
     return m_dimMap.begin();
 }
 
-std::vector<dim>::iterator ExtraDims::end() {
+std::vector<dim>::iterator ExtraDims::end()
+{
     return m_dimMap.end();
 }
 
-std::vector<dim>::iterator ExtraDims::deleteDim(std::vector<dim>::iterator itr) {
+std::vector<dim>::iterator ExtraDims::deleteDim(std::vector<dim>::iterator itr)
+{
     return m_dimMap.erase(itr);
 }
 
-std::vector<dim>::iterator ExtraDims::findDim(std::string name) {
+std::vector<dim>::iterator ExtraDims::findDim(std::string name)
+{
     return std::find_if(begin(), end(),
-                        [name](dim d) { return d.m_name == name; });
+                        [name](dim d)
+    {
+        return d.m_name == name;
+    });
 }
 
-ExtraDims parse(pdal::StringList dimList) {
+ExtraDims parse(pdal::StringList dimList)
+{
     ExtraDims retList;
     for (auto& dim : dimList)
     {
         StringList s = Utils::split2(dim, '=');
         if (s.size() != 2)
             throw pdal_error("Invalid extra dimension specified: '" + dim +
-                        "'.  Need <dimension>=<type>..");
+                             "'.  Need <dimension>=<type>..");
         Utils::trim(s[0]);
         Utils::trim(s[1]);
         Dimension::Type type = Dimension::type(s[1]);
         if (type == Dimension::Type::None)
             throw pdal_error("Invalid extra dimension type specified: '" + dim +
-                        "'.  Need <dimension>=<type>. ");
+                             "'.  Need <dimension>=<type>. ");
         retList.addDim(s[0], type);
-	}
+    }
     return retList;
 }
 } // namespace e57plugin
