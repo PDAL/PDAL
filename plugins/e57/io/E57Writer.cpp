@@ -166,10 +166,11 @@ void E57Writer::addDimensions(PointLayoutPtr layout)
 {
     m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
     auto i = m_extraDims->begin();
+    auto supportedFields = e57plugin::supportedE57Types();
     while (i != m_extraDims->end())
     {
         auto id = Dimension::id(i->m_name);
-        if (layout->hasDim(id))
+        if (layout->hasDim(id) && Utils::contains(supportedFields, i->m_name))
         {
             i = m_extraDims->deleteDim(i);
             continue;
