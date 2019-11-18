@@ -73,6 +73,8 @@ Dimension::Id e57ToPdal(const std::string &e57Dimension)
         return Dimension::Id::Omit;
     else if (e57Dimension == "sphericalInvalidState")
         return Dimension::Id::Omit;
+    else if (e57Dimension == "classification")
+        return Dimension::Id::Classification;
     return Dimension::Id::Unknown;
 }
 
@@ -100,6 +102,8 @@ std::string pdalToE57(Dimension::Id pdalDimension)
             return "colorBlue";
         case pdal::Dimension::Id::Intensity:
             return "intensity";
+        case pdal::Dimension::Id::Classification:
+            return "classification";
         case pdal::Dimension::Id::Omit:
             return "cartesianInvalidState";
         default:
@@ -112,7 +116,7 @@ std::vector<Dimension::Id> supportedPdalTypes()
     return {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z,
             Dimension::Id::NormalX, Dimension::Id::NormalY, Dimension::Id::NormalZ,
             Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue,
-            Dimension::Id::Intensity, Dimension::Id::Omit
+            Dimension::Id::Intensity, Dimension::Id::Omit, Dimension::Id::Classification
            };
 }
 
@@ -121,7 +125,7 @@ std::vector<std::string> supportedE57Types()
     return {"cartesianX",  "cartesianY", "cartesianZ",
             "nor:normalX", "nor:normalY", "nor:normalZ",
             "colorRed", "colorGreen", "colorBlue", "intensity",
-            "cartesianInvalidState"};
+            "cartesianInvalidState", "classification"};
 }
 
 bool getLimits(const e57::StructureNode& prototype,
@@ -215,15 +219,10 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
     switch (id)
     {
         case Dim::Red:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
         case Dim::Blue:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
         case Dim::Green:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
         case Dim::Intensity:
+        case Dim::Classification:
             return {std::numeric_limits<uint16_t>::min(),
                     std::numeric_limits<uint16_t>::max()};
         default:
@@ -257,6 +256,57 @@ point_count_t numPoints(const e57::VectorNode data3D)
     return count;
 }
 
+void dim::grow(double val) {
+    m_min = std::fmin(m_min, val);
+    m_max = std::fmax(m_max, val);
+}
+
+void ExtraDims::addDim(std::string name, Dimension::Type type) {
+    dim d;
+    d.m_name = name;
+    d.m_type = type;
+    m_dimMap.push_back(d);
+};
+
+uint16_t ExtraDims::numDims() {
+    return m_dimMap.size();
+}
+
+std::vector<dim>::iterator ExtraDims::begin() {
+    return m_dimMap.begin();
+}
+
+std::vector<dim>::iterator ExtraDims::end() {
+    return m_dimMap.end();
+}
+
+std::vector<dim>::iterator ExtraDims::deleteDim(std::vector<dim>::iterator itr) {
+    return m_dimMap.erase(itr);
+}
+
+std::vector<dim>::iterator ExtraDims::findDim(std::string name) {
+    return std::find_if(begin(), end(),
+                        [name](dim d) { return d.m_name == name; });
+}
+
+ExtraDims parse(pdal::StringList dimList) {
+    ExtraDims retList;
+    for (auto& dim : dimList)
+    {
+        StringList s = Utils::split2(dim, '=');
+        if (s.size() != 2)
+            throw pdal_error("Invalid extra dimension specified: '" + dim +
+                        "'.  Need <dimension>=<type>..");
+        Utils::trim(s[0]);
+        Utils::trim(s[1]);
+        Dimension::Type type = Dimension::type(s[1]);
+        if (type == Dimension::Type::None)
+            throw pdal_error("Invalid extra dimension type specified: '" + dim +
+                        "'.  Need <dimension>=<type>. ");
+        retList.addDim(s[0], type);
+	}
+    return retList;
+}
 } // namespace e57plugin
 } // namespace pdal
 
