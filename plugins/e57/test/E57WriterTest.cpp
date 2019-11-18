@@ -169,4 +169,55 @@ TEST(E57Writer, testWriteRanges)
     writerTest_testColorRanges(new E57Reader(), Support::datapath("e57/A4.e57"), 0, 65535);
 }
 
+TEST(E57Writer, testExtraDims)
+{
+    std::string infile = Support::datapath("las/autzen_trim.las");
+    std::string outfile(Support::datapath("e57/test.e57"));
+    remove(outfile.c_str());
+
+    Options ro;
+
+    LasReader r;
+    ro.add("filename", infile);
+    r.setOptions(ro);
+
+    {
+        E57Writer w;
+        Options wo;
+
+        wo.add("filename", outfile);
+        wo.add("extra_dims", "PointSourceId=int,testDim=double");
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+
+        w.prepare(t);
+        w.execute(t);
+    }
+    e57::ImageFile imf(outfile, "r");
+
+    e57::VectorNode data3D(imf.root().get("/data3D"));
+
+	// Dimension which is present in input pointcloud
+    auto limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
+                           .get("PointSourceIdLimits");
+    ASSERT_EQ(((e57::IntegerNode)limits.get("PointSourceIdMinimum")).value(), 0);
+    ASSERT_EQ(((e57::IntegerNode)limits.get("PointSourceIdMaximum")).value(), 7326);
+
+	// Dimension which is not present in input point cloud. All values to this dimension should be 0.
+	// i.e minimum and maximum limits should be 0.
+	limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
+                      .get("testDimLimits");
+    ASSERT_EQ(((e57::IntegerNode)limits.get("testDimMinimum")).value(), 0);
+    ASSERT_EQ(((e57::IntegerNode)limits.get("testDimMaximum")).value(), 0);
+
+	// Classification dimension, This will be written if available in input otherwise ignored. Not configurable through extra_dims.
+	limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
+                      .get("classificationLimits");
+    ASSERT_EQ(((e57::IntegerNode)limits.get("classificationMinimum")).value(), 0);
+    ASSERT_EQ(((e57::IntegerNode)limits.get("classificationMaximum")).value(), 255);
+
+    remove(outfile.c_str());
+}
 } // namespace pdal
