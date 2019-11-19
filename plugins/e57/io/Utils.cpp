@@ -124,11 +124,6 @@ std::vector<std::string> supportedE57Types()
             "cartesianInvalidState"};
 }
 
-inline std::vector<std::string> rescalableE57Types()
-{
-    return {"colorRed", "colorGreen", "colorBlue", "intensity"};
-}
-
 bool getLimits(const e57::StructureNode& prototype,
                const std::string& fieldName, std::pair<double, double>& minmax)
 {
@@ -254,6 +249,11 @@ point_count_t numPoints(const e57::VectorNode data3D)
         throw pdal_error("Got an unknown exception");
     }
     return count;
+}
+
+std::vector<std::string> rescalableE57Types()
+{
+    return {"colorRed", "colorGreen", "colorBlue", "intensity"};
 }
 
 } // namespace e57plugin
