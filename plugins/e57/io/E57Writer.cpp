@@ -283,10 +283,10 @@ void E57Writer::done(PointTableRef table)
         e57::StructureNode extraDimBox = e57::StructureNode(*m_imageFile);
         extraDimBox.set(
             extradim->m_name + "Minimum",
-            e57::IntegerNode(*m_imageFile, std::floor(extradim->m_min)));
+            e57::FloatNode(*m_imageFile, extradim->m_min));
         extraDimBox.set(
             extradim->m_name + "Maximum",
-            e57::IntegerNode(*m_imageFile, std::ceil(extradim->m_max)));
+            e57::FloatNode(*m_imageFile, extradim->m_max));
         m_scanNode->set(extradim->m_name + "Limits", extraDimBox);
 
     }
