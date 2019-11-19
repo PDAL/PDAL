@@ -71,7 +71,10 @@ PDAL_DLL std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id);
 
 /// Returns total number of points in data3D.
 /// Where data3D is a "/data3D" node from E57 hierarchy.
-point_count_t numPoints(const e57::VectorNode data3D);
+PDAL_DLL point_count_t numPoints(const e57::VectorNode data3D);
+
+/// Returns the list of rescalable E57 fields.
+PDAL_DLL inline std::vector<std::string> rescalableE57Types();
 
 } // namespace e57plugin
 } // namespace pdal

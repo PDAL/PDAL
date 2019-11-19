@@ -124,6 +124,11 @@ std::vector<std::string> supportedE57Types()
             "cartesianInvalidState"};
 }
 
+inline std::vector<std::string> rescalableE57Types()
+{
+    return {"colorRed", "colorGreen", "colorBlue", "intensity"};
+}
+
 bool getLimits(const e57::StructureNode& prototype,
                const std::string& fieldName, std::pair<double, double>& minmax)
 {

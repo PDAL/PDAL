@@ -60,7 +60,7 @@ e57::CompressedVectorNode Scan::getPoints() const
 }
 
 
-bool Scan::hasPose() const
+inline bool Scan::hasPose() const
 {
     return m_hasPose;
 }
@@ -141,13 +141,16 @@ void Scan::decodeHeader()
     //        (double value) i.e 65535/(65535-0)= 1.
 
     std::fill_n(m_rescaleFactors, pdal::Dimension::COUNT, 1.0); //Re-initialize all rescale factors to 1.0
-    for (auto& field : supportedFields)
+    auto rescaleableFields = pdal::e57plugin::rescalableE57Types();
+    for (auto& field : rescaleableFields)
     {
         auto minmax = std::make_pair(0.0, 0.0);
         if (pdal::e57plugin::getLimits(*m_rawData, field, minmax))
+        {
             m_rescaleFactors[(int)pdal::e57plugin::e57ToPdal(field)] =
                 (std::numeric_limits<uint16_t>::max)() /
                 (minmax.second - minmax.first);
+        }
     }
 
     // Cartesian Bounds
