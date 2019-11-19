@@ -12,7 +12,27 @@
 namespace delaunator {
 
 constexpr std::size_t INVALID_INDEX =
-    (std::numeric_limits<std::size_t>::max)();
+    std::numeric_limits<std::size_t>::max();
+
+class Point
+{
+public:
+    Point(double x, double y) : m_x(x), m_y(y)
+    {}
+    Point() : m_x(0), m_y(0)
+    {}
+
+
+    double x() const
+    { return m_x; }
+
+    double y() const
+    { return m_y; }
+
+private:
+    double m_x;
+    double m_y;
+};
 
 class Delaunator {
 
@@ -30,8 +50,7 @@ public:
 
 private:
     std::vector<std::size_t> m_hash;
-    double m_center_x;
-    double m_center_y;
+    Point m_center;
     std::size_t m_hash_size;
     std::vector<std::size_t> m_edge_stack;
 

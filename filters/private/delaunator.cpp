@@ -74,7 +74,7 @@ inline bool orient(
     return (qy - py) * (rx - qx) - (qx - px) * (ry - qy) < 0.0;
 }
 
-inline std::pair<double, double> circumcenter(
+inline Point circumcenter(
     const double ax,
     const double ay,
     const double bx,
@@ -93,7 +93,7 @@ inline std::pair<double, double> circumcenter(
     const double x = ax + (ey * bl - dy * cl) * 0.5 / d;
     const double y = ay + (dx * cl - ex * bl) * 0.5 / d;
 
-    return std::make_pair(x, y);
+    return Point(x, y);
 }
 
 
@@ -102,8 +102,8 @@ struct compare {
     std::vector<double> const& coords;
     std::vector<double> dists;
 
-    compare(std::vector<double> const& coords,
-        double center_x, double center_y) : coords(coords)
+    compare(std::vector<double> const& coords, const Point& center) :
+        coords(coords)
     {
         size_t n = coords.size() / 2;
         dists.reserve(n);
@@ -111,7 +111,7 @@ struct compare {
         double const *ycoord = coords.data() + 1;
         while (n--)
         {
-            dists.push_back(dist(*xcoord, *ycoord, center_x, center_y));
+            dists.push_back(dist(*xcoord, *ycoord, center.x(), center.y()));
             xcoord += 2;
             ycoord += 2;
         }
@@ -192,8 +192,6 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
       hull_tri(),
       hull_start(),
       m_hash(),
-      m_center_x(),
-      m_center_y(),
       m_hash_size(),
       m_edge_stack() {
     std::size_t n = coords.size() >> 1;
@@ -279,10 +277,10 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
         std::swap(i1y, i2y);
     }
 
-    std::tie(m_center_x, m_center_y) = circumcenter(i0x, i0y, i1x, i1y, i2x, i2y);
+    m_center = circumcenter(i0x, i0y, i1x, i1y, i2x, i2y);
 
     // sort the points by distance from the seed triangle circumcenter
-    std::sort(ids.begin(), ids.end(), compare{ coords, m_center_x, m_center_y });
+    std::sort(ids.begin(), ids.end(), compare{ coords, m_center });
 
     // initialize a hash table for storing edges of the advancing convex hull
     m_hash_size = static_cast<std::size_t>(std::llround(std::ceil(std::sqrt(n))));
@@ -516,8 +514,8 @@ std::size_t Delaunator::legalize(std::size_t a) {
 }
 
 std::size_t Delaunator::hash_key(const double x, const double y) const {
-    const double dx = x - m_center_x;
-    const double dy = y - m_center_y;
+    const double dx = x - m_center.x();
+    const double dy = y - m_center.y();
     return fast_mod(
         static_cast<std::size_t>(std::llround(std::floor(pseudo_angle(dx, dy) * static_cast<double>(m_hash_size)))),
         m_hash_size);
