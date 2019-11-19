@@ -6,9 +6,9 @@
 #define INLINE
 #endif
 
-#if WIN32
+#if WINDOWS
 #undef max
-#endif // WIN32
+#endif // WINDOWS
 
 #include <limits>
 #include <vector>
