@@ -102,12 +102,15 @@ void E57Writer::ChunkWriter::write(pdal::PointRef& pt, std::unique_ptr<e57plugin
             }
             keyValue.second[m_currentIndex] = val;
         }
-        auto dim = extraDims->findDim(keyValue.first);
-        if (dim!=extraDims->end())
+        else
         {
-            auto val = pt.getFieldAs<double>(dim->m_id);
-            keyValue.second[m_currentIndex] = val;
-            dim->grow(val);
+            auto dim = extraDims->findDim(keyValue.first);
+            if (dim!=extraDims->end())
+            {
+                auto val = pt.getFieldAs<double>(dim->m_id);
+                keyValue.second[m_currentIndex] = val;
+                dim->grow(val);
+            }
         }
     }
     m_currentIndex++;
