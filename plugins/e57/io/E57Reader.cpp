@@ -92,8 +92,11 @@ void E57Reader::addDimensions(PointLayoutPtr layout)
         }
         else
         {
+            // Input E57 point point cloud do not have this dimension. It should be ignored.
             log()->get(LogLevel::Warning) << "Extra dimension specified in pipeline don't match in E57 prototype."
                                           " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
+            i = m_extraDims->deleteDim(i);
+            continue;
         }
         ++i;
     }
