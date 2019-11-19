@@ -280,12 +280,14 @@ void E57Writer::done(PointTableRef table)
     for (auto extradim = m_extraDims->begin(); extradim != m_extraDims->end();
             ++extradim)
     {
-        e57::StructureNode classificationBox = e57::StructureNode(*m_imageFile);
-        classificationBox.set(extradim->m_name+"Minimum",
-                              e57::IntegerNode(*m_imageFile, std::floor(extradim->m_min)));
-        classificationBox.set(extradim->m_name + "Maximum",
-                              e57::IntegerNode(*m_imageFile, std::ceil(extradim->m_max)));
-        m_scanNode->set(extradim->m_name + "Limits", classificationBox);
+        e57::StructureNode extraDimBox = e57::StructureNode(*m_imageFile);
+        extraDimBox.set(
+            extradim->m_name + "Minimum",
+            e57::IntegerNode(*m_imageFile, std::floor(extradim->m_min)));
+        extraDimBox.set(
+            extradim->m_name + "Maximum",
+            e57::IntegerNode(*m_imageFile, std::ceil(extradim->m_max)));
+        m_scanNode->set(extradim->m_name + "Limits", extraDimBox);
 
     }
 

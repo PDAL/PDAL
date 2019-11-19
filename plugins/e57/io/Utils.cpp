@@ -222,9 +222,11 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
         case Dim::Blue:
         case Dim::Green:
         case Dim::Intensity:
-        case Dim::Classification:
             return {std::numeric_limits<uint16_t>::min(),
                     std::numeric_limits<uint16_t>::max()};
+        case Dim::Classification:
+            return {std::numeric_limits<uint8_t>::min(),
+                    std::numeric_limits<uint8_t>::max()};
         default:
             std::string msg ="Dimension " + Dimension::name(id) +
                              " is not currently supported.";
