@@ -35,6 +35,7 @@
 #include "E57Reader.hpp"
 #include "Utils.hpp"
 #include "arbiter/arbiter.hpp"
+#include <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
@@ -54,11 +55,47 @@ E57Reader::E57Reader()
 {
 }
 
+void E57Reader::addArgs(ProgramArgs& args)
+{
+    args.add("extra_dims", "Extra dimensions to write to E57 data",
+             m_extraDimsSpec);
+}
+
 void E57Reader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto& keyVal : m_doubleBuffers)
+    auto supportedFields = e57plugin::supportedE57Types();
+    for (auto& dimension : supportedFields)
     {
-        layout->registerDim(e57plugin::e57ToPdal(keyVal.first));
+        if (m_e57PointPrototype->isDefined(dimension))
+        {
+            m_doubleBuffers[dimension] =
+                std::vector<double>(m_defaultChunkSize, 0);
+            layout->registerDim(e57plugin::e57ToPdal(dimension));
+		}
+    }
+
+    m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
+    auto i = m_extraDims->begin();
+    while (i != m_extraDims->end())
+    {
+		// Remove extra dims which are already in layout.
+        if (layout->hasDim(e57plugin::e57ToPdal(i->m_name)))
+        {
+            i = m_extraDims->deleteDim(i);
+            continue;
+		}
+
+		if (m_e57PointPrototype->isDefined(i->m_name))
+        {
+            m_doubleBuffers[i->m_name] = std::vector<double>(m_defaultChunkSize, 0);
+            i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);	
+		}
+        else
+        {
+            log()->get(LogLevel::Warning) << "Extra dimension specified in pipeline don't match in E57 prototype."
+                                             " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
+        }
+		++i;
     }
 }
 
@@ -89,14 +126,6 @@ void E57Reader::initialize()
         StructureNode scan(m_data3D->get(0));
         CompressedVectorNode points(scan.get("points"));
         m_e57PointPrototype.reset(new StructureNode(points.prototype()));
-
-        auto supportedFields = e57plugin::supportedE57Types();
-        for (auto& dimension : supportedFields)
-        {
-            if (m_e57PointPrototype->isDefined(dimension))
-                m_doubleBuffers[dimension] =
-                    std::vector<double>(m_defaultChunkSize, 0);
-        }
     }
     catch (E57Exception& e)
     {
@@ -215,8 +244,22 @@ bool E57Reader::fillPoint(PointRef& point)
         auto dim = e57plugin::e57ToPdal(keyValue.first);
 
         if (dim != Dimension::Id::Unknown)
-            point.setField(dim,
-                           m_scan->rescale(dim, keyValue.second[m_currentIndex]));
+        {
+            auto val = keyValue.second[m_currentIndex];
+            if (dim != Dimension::Id::Classification)
+            {
+                val = m_scan->rescale(dim, val);
+			}
+            point.setField(dim, val);
+        }
+		else
+		{
+            auto dim = m_extraDims->findDim(keyValue.first);
+            if (dim != m_extraDims->end())
+            {
+                point.setField(dim->m_id, keyValue.second[m_currentIndex]);
+			}
+		}
     }
 
     if (m_scan->hasPose())
