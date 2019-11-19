@@ -71,31 +71,31 @@ void E57Reader::addDimensions(PointLayoutPtr layout)
             m_doubleBuffers[dimension] =
                 std::vector<double>(m_defaultChunkSize, 0);
             layout->registerDim(e57plugin::e57ToPdal(dimension));
-		}
+        }
     }
 
     m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
     auto i = m_extraDims->begin();
     while (i != m_extraDims->end())
     {
-		// Remove extra dims which are already in layout.
+        // Remove extra dims which are already in layout.
         if (layout->hasDim(e57plugin::e57ToPdal(i->m_name)))
         {
             i = m_extraDims->deleteDim(i);
             continue;
-		}
+        }
 
-		if (m_e57PointPrototype->isDefined(i->m_name))
+        if (m_e57PointPrototype->isDefined(i->m_name))
         {
             m_doubleBuffers[i->m_name] = std::vector<double>(m_defaultChunkSize, 0);
-            i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);	
-		}
+            i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);
+        }
         else
         {
             log()->get(LogLevel::Warning) << "Extra dimension specified in pipeline don't match in E57 prototype."
-                                             " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
+                                          " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
         }
-		++i;
+        ++i;
     }
 }
 
@@ -249,17 +249,17 @@ bool E57Reader::fillPoint(PointRef& point)
             if (dim != Dimension::Id::Classification)
             {
                 val = m_scan->rescale(dim, val);
-			}
+            }
             point.setField(dim, val);
         }
-		else
-		{
+        else
+        {
             auto dim = m_extraDims->findDim(keyValue.first);
             if (dim != m_extraDims->end())
             {
                 point.setField(dim->m_id, keyValue.second[m_currentIndex]);
-			}
-		}
+            }
+        }
     }
 
     if (m_scan->hasPose())

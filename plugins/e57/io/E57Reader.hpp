@@ -82,7 +82,7 @@ private:
     point_count_t m_defaultChunkSize;
     signed int m_currentScan;
 
-	pdal::StringList m_extraDimsSpec;
+    pdal::StringList m_extraDimsSpec;
     std::unique_ptr<e57plugin::ExtraDims> m_extraDims;
 };
 
