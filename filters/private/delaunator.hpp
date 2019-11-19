@@ -6,6 +6,10 @@
 #define INLINE
 #endif
 
+#if WIN32
+#undef max
+#endif // WIN32
+
 #include <limits>
 #include <vector>
 
