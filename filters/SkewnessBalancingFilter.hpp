@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -36,46 +36,26 @@
 
 #include <pdal/Filter.hpp>
 
-#include <map>
-#include <memory>
-#include <string>
-
 namespace pdal
 {
 
-class Options;
-
-struct Indices
-{
-    PointIdList inliers;
-    PointIdList outliers;
-};
-
-class PDAL_DLL OutlierFilter : public pdal::Filter
+class PDAL_DLL SkewnessBalancingFilter : public Filter
 {
 public:
-    OutlierFilter() : Filter()
+    SkewnessBalancingFilter() : Filter()
     {
     }
 
     std::string getName() const;
 
 private:
-    std::string m_method;
-    int m_minK;
-    double m_radius;
-    int m_meanK;
-    double m_multiplier;
-    uint8_t m_class;
-
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    Indices processRadius(PointViewPtr inView);
-    Indices processStatistical(PointViewPtr inView);
+    std::set<PointId> processGround(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);
 
-    OutlierFilter& operator=(const OutlierFilter&); // not implemented
-    OutlierFilter(const OutlierFilter&);            // not implemented
+    SkewnessBalancingFilter&
+    operator=(const SkewnessBalancingFilter&);               // not implemented
+    SkewnessBalancingFilter(const SkewnessBalancingFilter&); // not implemented
 };
 
 } // namespace pdal

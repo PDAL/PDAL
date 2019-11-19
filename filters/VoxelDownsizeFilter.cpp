@@ -1,6 +1,7 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *                    https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -59,22 +60,26 @@ std::string VoxelDownsizeFilter::getName() const
 void VoxelDownsizeFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 0.001);
-    args.add("mode",
-             "Method for downsizing : voxelcenter / firstinvoxel",
-             m_mode, "voxelcenter");
+    args.add("mode", "Method for downsizing : voxelcenter / firstinvoxel",
+        m_mode, "voxelcenter");
 }
 
 
 void VoxelDownsizeFilter::ready(PointTableRef)
 {
     m_pivotVoxelInitialized = false;
-
 }
-void VoxelDownsizeFilter::prepared(PointTableRef) {
-    if (m_mode.compare("voxelcenter")!=0 && m_mode.compare("firstinvoxel")!=0)
-		throw pdal_error("Invalid Downsizing mode");
-	
-	m_isFirstInVoxelMode = (m_mode.compare("firstinvoxel") == 0);
+
+
+void VoxelDownsizeFilter::prepared(PointTableRef)
+{
+    m_mode = Utils::toupper(m_mode);
+    if (m_mode == "VOXELCENTER")
+        m_isFirstInVoxelMode = false;
+    else if (m_mode == "FIRSTINVOXEL")
+        m_isFirstInVoxelMode = true;
+    else
+        throwError("Invalid mode specified.");
 }
 
 
@@ -93,6 +98,7 @@ PointViewSet VoxelDownsizeFilter::run(PointViewPtr view)
     viewSet.insert(output);
     return viewSet;
 }
+
 
 bool VoxelDownsizeFilter::voxelize(PointRef point)
 {
@@ -118,27 +124,20 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
     }
 
     /*
-     * Calculate the local voxel coordinates for incoming point, Using the Pivot
-     * voxel.
+     * Calculate the local voxel coordinates for incoming point, Using the
+     * Pivot voxel.
      */
     auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
                              gz - m_pivotVoxel[2]);
 
-    if (m_isFirstInVoxelMode)
-        return (m_populatedVoxels.insert(t).second);
-    else
+    auto inserted = m_populatedVoxels.insert(t).second;
+    if (!m_isFirstInVoxelMode && inserted)
     {
-        auto itr = m_populatedVoxels.find(t);
-        if (itr == m_populatedVoxels.end())
-        {
-            m_populatedVoxels.insert(t);
-            point.setField<double>(Dimension::Id::X, (gx + 0.5) * m_cell);
-            point.setField<double>(Dimension::Id::Y, (gy + 0.5) * m_cell);
-            point.setField<double>(Dimension::Id::Z, (gz + 0.5) * m_cell);
-            return true;
-        }
+        point.setField<double>(Dimension::Id::X, (gx + 0.5) * m_cell);
+        point.setField<double>(Dimension::Id::Y, (gy + 0.5) * m_cell);
+        point.setField<double>(Dimension::Id::Z, (gz + 0.5) * m_cell);
     }
-    return false;
+    return inserted;
 }
 
 bool VoxelDownsizeFilter::processOne(PointRef& point)

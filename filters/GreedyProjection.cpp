@@ -138,7 +138,7 @@ void GreedyProjection::filter(PointView& view)
     nnn_ = (int)(std::min)((point_count_t)nnn_, view.size());
 
     // Variables to hold the results of nearest neighbor searches
-    std::vector<PointId> nnIdx(nnn_);
+    PointIdList nnIdx(nnn_);
     std::vector<double> sqrDists(nnn_);
 
     // current number of connected components

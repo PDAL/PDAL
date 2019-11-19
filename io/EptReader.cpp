@@ -106,6 +106,8 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
+    EptBounds(const SrsBounds& b) : SrsBounds(b)
+    {}
 };
 
 namespace Utils
@@ -140,9 +142,10 @@ public:
 
     NL::json m_query;
     NL::json m_headers;
+    NL::json m_ogr;
 };
 
-EptReader::EptReader() : m_args(new EptReader::Args), m_currentIndex(0)
+EptReader::EptReader() : m_args(new EptReader::Args)
 {}
 
 EptReader::~EptReader()
@@ -165,6 +168,8 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests",
         m_args->m_query);
+    args.add("ogr", "OGR filter geometries",
+        m_args->m_ogr);
 }
 
 
@@ -243,6 +248,13 @@ void EptReader::initialize()
 
     setSpatialReference(m_info->srs());
 
+    if (!m_args->m_ogr.is_null())
+    {
+        auto& plist = m_args->m_polys;
+        std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->m_ogr);
+        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
+    }
+
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
@@ -254,11 +266,24 @@ void EptReader::initialize()
             boundsSrs.getWKT(), getSpatialReference().getWKT());
 
     // Transform polygons and bounds to point source SRS.
+    std::vector <Polygon> exploded;
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
             throwError("Geometrically invalid polyon in option 'polygon'.");
         poly.transform(getSpatialReference());
+
+        std::vector<Polygon> polys = poly.polygons();
+        exploded.insert(exploded.end(),
+            std::make_move_iterator(polys.begin()),
+            std::make_move_iterator(polys.end()));
+    }
+    m_args->m_polys = std::move(exploded);
+
+    for (auto& p : m_args->m_polys)
+    {
+        m_queryGrids.emplace_back(
+            new GridPnp(p.exteriorRing(), p.interiorRings()));
     }
 
     try
@@ -411,12 +436,28 @@ QuickInfo EptReader::inspect()
     {
         initialize();
 
-        qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
+        const BOX3D fullBounds(toBox3d(m_info->json()["boundsConforming"]));
+
+        qi.m_bounds = fullBounds;
         qi.m_srs = m_info->srs();
         qi.m_pointCount = m_info->points();
 
         for (auto& el : m_info->schema())
             qi.m_dimNames.push_back(el["name"].get<std::string>());
+
+        // If we've passed a spatial query, determine an upper bound on the
+        // point count.
+        if (!m_queryBounds.contains(fullBounds) || m_queryGrids.size())
+        {
+            log()->get(LogLevel::Debug) <<
+                "Determining overlapping point count" << std::endl;
+
+            overlaps();
+
+            qi.m_pointCount = 0;
+            for (const auto& p : m_overlaps)
+                qi.m_pointCount += p.second;
+        }
     }
     catch (std::exception& e)
     {
@@ -515,20 +556,13 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     {
         throwError(e.what());
     }
-
-    // Backup the layout for streamable pipeline.
-    // Will be used to restore m_bufferPointTable layout after flushing
-    // points from previous tile.
-    if (pipelineStreamable())
-    {
-    	m_bufferLayout = layout;
-        m_temp_buffer.reserve(layout->pointSize());
-	}
 }
 
 
 void EptReader::ready(PointTableRef table)
 {
+    m_userLayout = table.layout();
+
     // These may not exist, in general they are only needed to track point
     // origins and ordering for an EPT writer.
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
@@ -619,6 +653,8 @@ void EptReader::overlaps()
         overlaps(addon->ep(), addon->hierarchy(), root, key);
         m_pool->await();
     }
+
+    m_overlapIt = m_overlaps.begin();
 }
 
 void EptReader::overlaps(const arbiter::Endpoint& ep,
@@ -677,14 +713,6 @@ PointViewSet EptReader::run(PointViewPtr view)
     // Start these at 1 to differentiate from points added by other stages,
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
-
-    for (auto& p : m_args->m_polys)
-    {
-        std::unique_ptr<GridPnp> gridPnp(new GridPnp(
-            p.exteriorRing(), p.interiorRings()));
-        m_queryGrids.push_back(std::move(gridPnp));
-    }
-
     for (const auto& entry : m_overlaps)
     {
         const Key& key(entry.first);
@@ -803,17 +831,14 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
         if (m_queryGrids.empty())
             return true;
 
-        for (auto& grid: m_queryGrids)
-            if (grid->inside(x,y))
+        for (const auto& grid : m_queryGrids)
+            if (grid->inside(x, y))
                 return true;
         return false;
     };
 
     if (selected && m_queryBounds.contains(x, y, z) && passesPolyFilter(x, y))
     {
-        // If we were given polys, check that our point is inside those
-        // polygons too.
-
         dst.setField(Dimension::Id::X, dstId, x);
         dst.setField(Dimension::Id::Y, dstId, y);
         dst.setField(Dimension::Id::Z, dstId, z);
@@ -895,86 +920,122 @@ Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
     return getCoercedType(j);
 }
 
-void EptReader::loadNextOverlap()
+struct EptReader::NodeBuffer
 {
-    std::map<Key, uint64_t>::iterator itr = m_overlaps.begin();
-    std::advance(itr, m_nodeId-1);
-    Key key(itr->first);
-    log()->get(LogLevel::Debug)
-        << "Streaming Data " << m_nodeId << "/" << m_overlaps.size() << ": "
-        << key.toString() << std::endl;
+    NodeBuffer(PointLayout& layout) : table(layout), view(table) { }
+    VectorPointTable table;
+    PointView view;
+};
 
-    uint64_t startId(0);
+void EptReader::load()
+{
+        // Asynchronously trigger the fetching and point-view execution of
+    // a lookahead buffer of nodes.
+    while (
+        m_upcomingNodeBuffers.size() < m_pool->size() &&
+        m_overlapIt != m_overlaps.end())
+    {
+        const auto nodeId(m_nodeId++);
+        const auto key(m_overlapIt->first);
+        ++m_overlapIt;
 
-    // Reset PointTable to make sure all points from previous tile are flushed.
-    m_bufferPointTable.reset(new PointTable());
+        log()->get(LogLevel::Debug) << nodeId << "/" << m_overlaps.size() <<
+            std::endl;
 
-    // We did reset PointTable,
-    // So it will not have the dimensions registered to it.
-    // Register/Restore Dimensions for PointTable layout.
-    PointLayoutPtr layout = m_bufferPointTable->layout();
-    for (auto id : m_bufferLayout->dims())
-        layout->registerOrAssignDim(m_bufferLayout->dimName(id),
-                                    m_bufferLayout->dimType(id));
+        // Insert an empty placeholder node to keep track of the outstanding
+        // nodes that are currently being fetched/executed.
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_upcomingNodeBuffers.emplace_front();
+        auto& loadingBuffer = m_upcomingNodeBuffers.front();
+        lock.unlock();
 
-    // Reset PointView to have new point table.
-    m_bufferPointView.reset(new PointView(*m_bufferPointTable));
+        m_pool->add([this, &loadingBuffer, nodeId, key]()
+        {
+            std::unique_ptr<NodeBuffer> nodeBuffer(
+                new NodeBuffer(*m_userLayout));
 
-    if (m_info->dataType() == EptInfo::DataType::Laszip)
-        startId = readLaszip(*m_bufferPointView, key, m_nodeId);
-    else
-        startId = readBinary(*m_bufferPointView, key, m_nodeId);
+            if (m_info->dataType() == EptInfo::DataType::Laszip)
+                readLaszip(nodeBuffer->view, key, nodeId);
+            else
+                readBinary(nodeBuffer->view, key, nodeId);
 
-    log()->get(LogLevel::Debug) << "Points : "<< m_bufferPointView->size() <<
-        std::endl;
-    m_currentIndex = 0;
+            for (const auto& addon : m_addons)
+                readAddon(nodeBuffer->view, key, *addon);
 
-    // Read addon information after the native data, we'll possibly
-    // overwrite attributes.
-    for (const auto& addon : m_addons)
-        readAddon(*m_bufferPointView, key, *addon, startId);
+            std::unique_lock<std::mutex> lock(m_mutex);
+            loadingBuffer = std::move(nodeBuffer);
+            lock.unlock();
 
-    m_nodeId++;
+            // A node has been populated - notify our consumer thread.
+            m_cv.notify_one();
+        });
+    }
 }
 
-
-void EptReader::fillPoint(PointRef& point)
+EptReader::NodeBufferIt EptReader::findBuffer()
 {
-    DimTypeList dims = m_bufferPointView->dimTypes();
-    m_bufferPointView->getPackedPoint(dims, m_currentIndex,
-        m_temp_buffer.data());
-    point.setPackedData(dims, m_temp_buffer.data());
-    m_currentIndex++;
+    return std::find_if(
+        m_upcomingNodeBuffers.begin(),
+        m_upcomingNodeBuffers.end(),
+        [](const std::unique_ptr<NodeBuffer>& n)
+            { return static_cast<bool>(n); });
+}
+
+bool EptReader::next()
+{
+    // Asynchronously trigger the loading of some nodes.
+    load();
+
+    // Now wait for a node to be populated, or for there to be no outstanding
+    // nodes left, in which case we're all done.
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_cv.wait(lock, [this]()
+    {
+        return m_upcomingNodeBuffers.empty() ||
+            findBuffer() != m_upcomingNodeBuffers.end();
+    });
+
+    // Grab the first completed buffer from our list and transfer it out of our
+    // `upcoming` pool to make it the current active node.  If there are no
+    // completed buffers in the list, then we're done with processing.
+    const auto it = findBuffer();
+    if (it == m_upcomingNodeBuffers.end()) return false;
+
+    m_pointId = 0;
+    m_currentNodeBuffer = std::move(*it);
+    m_upcomingNodeBuffers.erase(it);
+
+    return true;
 }
 
 
 bool EptReader::processOne(PointRef& point)
 {
-    // bufferView is not set if no tile has been read and
-    // currentIndex will be greater or equal to the view size when the
-    // whole tile has been read
-    bool finishedCurrentOverlap = !(m_bufferPointView &&
-        m_currentIndex < m_bufferPointView->size());
+    while (!m_currentNodeBuffer)
+    {
+        if (!next()) return false;
 
-    // We're done with all overlaps, Its time to finish reading.
-    if (m_nodeId > m_overlaps.size() && finishedCurrentOverlap)
-        return false;
+        // If we have a query bounds or query polygon, it's possible that the
+        // octree bounds of a node overlaps the query, but this node contains
+        // no matching points for the query.  So we may have a zero point
+        // buffer which we have to handle.
+        if (m_currentNodeBuffer->view.empty()) m_currentNodeBuffer.reset();
+    }
 
-    // Either this is a first overlap or we've streamed all points
-    // from current overlap. So its time to load new overlap.
-    if (finishedCurrentOverlap)
-        loadNextOverlap();
+    auto& sourceView(m_currentNodeBuffer->view);
+    const auto& layout(*m_currentNodeBuffer->table.layout());
 
-    // In some rare cases there are 0 points in the overlap.
-    // If this happen, fillPoint() will crash while retriving point information.
-    // In that case proceed to load next overlap.
-    if (m_bufferPointView->size())
-        fillPoint(point);
-    else
-        return processOne(point);
+    for (const auto& id : layout.dims())
+    {
+        point.setField(
+            id,
+            layout.dimType(id),
+            sourceView.getPoint(m_pointId) + layout.dimOffset(id));
+    }
+
+    if (++m_pointId == sourceView.size()) m_currentNodeBuffer.reset();
 
     return true;
 }
 
 } // namespace pdal
-

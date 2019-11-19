@@ -84,7 +84,7 @@ void LOFFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        std::vector<PointId> indices(m_minpts);
+        PointIdList indices(m_minpts);
         std::vector<double> sqr_dists(m_minpts);
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts-1]));
@@ -98,7 +98,7 @@ void LOFFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing lrd...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        std::vector<PointId> indices(m_minpts);
+        PointIdList indices(m_minpts);
         std::vector<double> sqr_dists(m_minpts);
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         double M1 = 0.0;
@@ -118,7 +118,7 @@ void LOFFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         double lrdp = view.getFieldAs<double>(m_lrd, i);
-        std::vector<PointId> indices(m_minpts);
+        PointIdList indices(m_minpts);
         std::vector<double> sqr_dists(m_minpts);
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         double M1 = 0.0;

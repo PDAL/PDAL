@@ -41,7 +41,7 @@ outlier.
       {
           "type":"filters.miniball",
           "knn":8
-      }
+      },
       "output.laz"
   ]
 

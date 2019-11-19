@@ -107,7 +107,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 {
     // Compute centroid of fixed PointView such that both the fixed an moving
     // PointViews can be centered.
-    std::vector<PointId> ids(fixed->size());
+    PointIdList ids(fixed->size());
     std::iota(ids.begin(), ids.end(), 0);
     auto centroid = computeCentroid(*fixed, ids);
 
@@ -136,7 +136,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 
         // Create empty lists to hold point correspondences, and initialize MSE
         // to zero.
-        std::vector<PointId> fixed_idx, moving_idx;
+        PointIdList fixed_idx, moving_idx;
         fixed_idx.reserve(tempMovingTransformed->size());
         moving_idx.reserve(tempMovingTransformed->size());
         double mse(0.0);
@@ -149,7 +149,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             // Find the index of the nearest neighbor, and the square distance
             // between each point.
             PointRef p = tempMovingTransformed->point(i);
-            std::vector<PointId> indices(1);
+            PointIdList indices(1);
             std::vector<double> sqr_dists(1);
             kd_fixed.knnSearch(p, 1, &indices, &sqr_dists);
 
@@ -261,7 +261,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     for (PointId i = 0; i < moving->size(); ++i)
     {
         PointRef p = moving->point(i);
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         kd_fixed_orig.knnSearch(p, 1, &indices, &sqr_dists);
         mse += std::sqrt(sqr_dists[0]);

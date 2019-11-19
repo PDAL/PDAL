@@ -67,16 +67,65 @@ public:
         { return m_max; }
     double average() const
         { return M1; }
+    double populationVariance() const
+        { return M2 / m_cnt; }
+    double sampleVariance() const
+        { return M2 / (m_cnt - 1.0); }
     double variance() const
-        { return M2/(m_cnt - 1.0); }
+        { return sampleVariance(); }
+    double populationStddev() const
+        { return std::sqrt(populationVariance()); }
+    double sampleStddev() const
+        { return std::sqrt(sampleVariance()); }
     double stddev() const
-        { return std::sqrt(variance()); }
+        { return sampleStddev(); }
+    double populationSkewness() const
+    {
+        if (!M2 || ! m_advanced)
+            return 0;
+        return std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5);
+    }
+    double sampleSkewness() const
+    {
+        if (M2 == 0 || m_cnt <= 2 || !m_advanced)
+            return 0.0;
+        double c(m_cnt);
+        return populationSkewness() * std::sqrt(c) * std::sqrt(c - 1) / (c - 2);
+    }
     double skewness() const
-        { return (M2 && m_advanced) ?
-            std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5) : 0.0; }
+    {
+        return sampleSkewness();
+    }
+    double populationKurtosis() const
+    {
+        if (M2 == 0 || !m_advanced)
+            return 0;
+        return double(m_cnt) * M4 / (M2 * M2);
+    }
+    double populationExcessKurtosis() const
+    {
+        if (M2 == 0 || !m_advanced)
+            return 0;
+        return populationKurtosis() - 3;
+    }
+    double sampleKurtosis() const
+    {
+        if (M2 == 0 || m_cnt <= 3 || !m_advanced)
+            return 0;
+        double c(m_cnt);
+        return populationKurtosis() * (c + 1) * (c - 1) / ((c - 2) * (c - 3));
+    }
+    double sampleExcessKurtosis() const
+    {
+        if (M2 == 0 || m_cnt <= 3 || !m_advanced)
+            return 0;
+        double c(m_cnt);
+        return sampleKurtosis() - 3 * (c - 1) * (c - 1) / ((c - 2) * (c - 3));
+    }
     double kurtosis() const
-        { return (M2 && m_advanced) ?
-            double(m_cnt)*M4 / (M2*M2) - 3.0 : 0.0; }
+    {
+        return sampleExcessKurtosis();
+    }
     double median() const
         { return m_median; }
     double mad() const
@@ -122,26 +171,25 @@ public:
 
         // Difference from the mean
         double delta = value - M1;
-        // Portion that this point's difference from the mean that it
-        // contributes to the mean.
+        // Portion that this point's difference from the mean contributes
+        // to the mean.
         double delta_n = delta / n;
+        double term1 = delta * delta_n * (n - 1);
 
         // First moment - average.
         M1 += delta_n;
-
-        double delta_2 = pow(delta, 2.0);
 
         if (m_advanced)
         {
             double delta_n2 = pow(delta_n, 2.0);
             // Fourth moment - kurtosis (sum part)
-            M4 += delta_2 * delta_n2 * (n*n - 3*n + 3) +
+            M4 += term1 * delta_n2 * (n*n - 3*n + 3) +
                 (6 * delta_n2 * M2) - (4 * delta_n * M3);
             // Third moment - skewness (sum part)
-            M3 += delta_2 * delta_n * (n - 2) - 3 * delta_n * M2;
+            M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
         }
         // Second moment - variance (sum part)
-        M2 += delta_2;
+        M2 += term1;
     }
 
 private:

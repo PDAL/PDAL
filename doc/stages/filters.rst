@@ -55,6 +55,7 @@ invalidate an existing KD-tree.
    filters.pmf
    filters.radialdensity
    filters.reciprocity
+   filters.skewnessbalancing
    filters.smrf
 
 :ref:`filters.approximatecoplanar`
@@ -132,6 +133,9 @@ invalidate an existing KD-tree.
     Compute the percentage of points that are considered uni-directional
     neighbors of a point.
 
+:ref:`filters.skewnessbalancing`
+    Label ground/non-ground returns using [Bartels2010]_.
+
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
 
@@ -206,7 +210,7 @@ the input. These filters will invalidate an existing KD-tree.
 
    filters.crop
    filters.decimation
-   filters.voxeldownsize
+   filters.farthestpointsampling
    filters.head
    filters.iqr
    filters.locate
@@ -217,6 +221,7 @@ the input. These filters will invalidate an existing KD-tree.
    filters.tail
    filters.voxelcenternearestneighbor
    filters.voxelcentroidnearestneighbor
+   filters.voxeldownsize
 
 :ref:`filters.crop`
     Filter points inside or outside a bounding box or a polygon
@@ -227,9 +232,11 @@ the input. These filters will invalidate an existing KD-tree.
 :ref:`filters.dem`
     Remove points that are in a raster cell but have a value far from the
     value of the raster.
-
-:ref:`filters.voxeldownsize`
-    Retain either first point detected in each voxel or center of a populated voxel, depending on mode argument.
+    
+:ref:`filters.farthestpointsampling`
+    The Farthest Point Sampling Filter adds points from the input to the output
+    PointView one at a time by selecting the point from the input cloud that is
+    farthest from any point currently in the output.
 
 :ref:`filters.head`
     Return N points from beginning of the point cloud.
@@ -262,6 +269,10 @@ the input. These filters will invalidate an existing KD-tree.
 
 :ref:`filters.voxelcentroidnearestneighbor`
     Return the point within each voxel that is nearest the voxel centroid.
+
+:ref:`filters.voxeldownsize`
+    Retain either first point detected in each voxel or center of a populated
+    voxel, depending on mode argument.
 
 New
 ---

@@ -108,7 +108,7 @@ void NeighborClassifierFilter::prepared(PointTableRef table)
 void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     KD3Index &kdi)
 {
-    std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
+    PointIdList iSrc = kdi.neighbors(point, m_k);
     double thresh = iSrc.size()/2.0;
 
     // vote NNs
