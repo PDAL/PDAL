@@ -60,7 +60,7 @@ e57::CompressedVectorNode Scan::getPoints() const
 }
 
 
-inline bool Scan::hasPose() const
+bool Scan::hasPose() const
 {
     return m_hasPose;
 }

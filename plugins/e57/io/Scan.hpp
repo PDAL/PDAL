@@ -52,7 +52,7 @@ public:
     /// Get the pdal dimensions that can be read from this scan
     std::set<std::string> getDimensions() const;
     e57::CompressedVectorNode getPoints() const;
-    inline bool hasPose() const;
+    bool hasPose() const;
     void transformPoint(pdal::PointRef pt) const;
     pdal::BOX3D getBoundingBox() const;
     double rescale(pdal::Dimension::Id dim, double value);
