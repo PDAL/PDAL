@@ -102,7 +102,8 @@ TEST(E57Writer, testWrite)
     auto expectedDimensions = {Dimension::Id::X,        Dimension::Id::Y,
                                Dimension::Id::Z,        Dimension::Id::Red,
                                Dimension::Id::Green,    Dimension::Id::Blue,
-                               Dimension::Id::Intensity};
+                               Dimension::Id::Intensity
+                              };
     for (point_count_t i = 0; i < cloudout->size(); i++)
     {
         auto ptB = cloudin->point(i);
@@ -118,7 +119,8 @@ TEST(E57Writer, testWrite)
     remove(outfile.c_str());
 }
 
-void writerTest_testColorRanges(pdal::Reader* r, std::string infile, int min, int max) {
+void writerTest_testColorRanges(pdal::Reader* r, std::string infile, int min, int max)
+{
     std::string outfile(Support::datapath("e57/test.e57"));
     remove(outfile.c_str());
 
@@ -144,7 +146,7 @@ void writerTest_testColorRanges(pdal::Reader* r, std::string infile, int min, in
 
     e57::VectorNode data3D(imf.root().get("/data3D"));
     auto colorLimits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
-                           .get("colorLimits");
+                       .get("colorLimits");
     std::vector<std::string> minDims{"colorRedMinimum", "colorGreenMinimum",
                                      "colorBlueMinimum"};
     std::vector<std::string> maxDims{"colorRedMaximum", "colorGreenMaximum",
@@ -199,22 +201,20 @@ TEST(E57Writer, testExtraDims)
 
     e57::VectorNode data3D(imf.root().get("/data3D"));
 
-	// Dimension which is present in input pointcloud
+    // Dimension which is present in input pointcloud
     auto limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
-                           .get("PointSourceIdLimits");
-    ASSERT_EQ(((e57::IntegerNode)limits.get("PointSourceIdMinimum")).value(), 0);
-    ASSERT_EQ(((e57::IntegerNode)limits.get("PointSourceIdMaximum")).value(), 7326);
+                  .get("PointSourceIdLimits");
+    ASSERT_EQ(((e57::FloatNode)limits.get("PointSourceIdMinimum")).value(), 0);
+    ASSERT_EQ(((e57::FloatNode)limits.get("PointSourceIdMaximum")).value(), 7326);
 
-	// Dimension which is not present in input point cloud. All values to this dimension should be 0.
-	// i.e minimum and maximum limits should be 0.
-	limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
-                      .get("testDimLimits");
-    ASSERT_EQ(((e57::IntegerNode)limits.get("testDimMinimum")).value(), 0);
-    ASSERT_EQ(((e57::IntegerNode)limits.get("testDimMaximum")).value(), 0);
+    // Dimension which is not present in input point cloud.
+    // This dimension should not be there in output E57.
+    ASSERT_THROW((e57::StructureNode)((e57::StructureNode)data3D.get(0))
+                 .get("testDimLimits"), E57Exception);
 
-	// Classification dimension, This will be written if available in input otherwise ignored. Not configurable through extra_dims.
-	limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
-                      .get("classificationLimits");
+    // Classification dimension, This will be written if available in input otherwise ignored. Not configurable through extra_dims.
+    limits = (e57::StructureNode)((e57::StructureNode)data3D.get(0))
+             .get("classificationLimits");
     ASSERT_EQ(((e57::IntegerNode)limits.get("classificationMinimum")).value(), 0);
     ASSERT_EQ(((e57::IntegerNode)limits.get("classificationMaximum")).value(), 255);
 

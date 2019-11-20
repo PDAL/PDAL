@@ -171,16 +171,29 @@ void E57Writer::addDimensions(PointLayoutPtr layout)
     m_extraDims->parse(m_extraDimsSpec);
     auto i = m_extraDims->begin();
     auto supportedFields = e57plugin::supportedE57Types();
+
+    // Filter extra dimensions.
     while (i != m_extraDims->end())
     {
-        auto id = Dimension::id(i->m_name);
-        if (layout->hasDim(id) && Utils::contains(supportedFields, i->m_name))
+        i->m_id = layout->findDim(i->m_name);
+        if (i->m_id == Dimension::Id::Unknown)
         {
+            // Incomming layout donot provide any data for this dimension.
+            // It should be ignored from writing in E57.
+            log()->get(LogLevel::Warning)
+                    << "Extra dimension specified in pipeline don't match in source point cloud."
+                    " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
             i = m_extraDims->deleteDim(i);
             continue;
         }
 
-        i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);
+        if (Utils::contains(supportedFields, i->m_name))
+        {
+            // This dimension is already in E57 dimensions and should not be treated as extra dimension.
+            i = m_extraDims->deleteDim(i);
+            continue;
+        }
+
         ++i;
     }
 }
