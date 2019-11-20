@@ -60,6 +60,14 @@ to the main PDAL installation.  The macro is supplied with the class name
 of the plugin and a PluginInfo object.  The PluginInfo objection includes
 the name of the plugin, a description, and a link to documentation.
 
+When making a shared plugin,
+the name of the shared library must correspond with the name of the reader
+provided here.  The name of the generated shared object must be
+
+::
+
+    libpdal_plugin_readers_<reader name>.<shared library extension>
+
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
    :lines: 8-15

@@ -65,7 +65,13 @@ elements - the filter name, description, and a link to documentation.
 
 PDAL requires that filter names always begin with ``filters.``, and end with a
 string that uniquely identifies the filter. The description will be displayed
-to users of the PDAL CLI (``pdal --drivers``).
+to users of the PDAL CLI (``pdal --drivers``).  When making a shared plugin,
+the name of the shared library must correspond with the name of the filter
+provided here.  The name of the generated shared object must be
+
+::
+
+    libpdal_plugin_filters_<filter name>.<shared library extension>
 
 Next, we pass the following to the ``CREATE_SHARED_STAGE`` macro, passing in
 the name of the stage and the ``PluginInfo`` struct.
