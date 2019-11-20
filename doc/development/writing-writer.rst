@@ -79,6 +79,13 @@ to create a SHARED stage, which means it will be external to the main PDAL
 installation.  When using the macro, we specify the name of the Stage and
 the PluginInfo struct we defined earlier.
 
+When making a shared plugin, the name of the shared library must
+correspond with the name of the writer
+provided here.  The name of the generated shared object must be
+
+::
+    libpdal_plugin_writers_<writer name>.<shared library extension>
+
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
    :lines: 20-31
