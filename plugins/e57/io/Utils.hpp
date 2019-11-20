@@ -102,7 +102,5 @@ public:
 	void parse(pdal::StringList dimList);
 };
 
-
-
 } // namespace e57plugin
 } // namespace pdal
