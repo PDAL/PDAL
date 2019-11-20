@@ -46,7 +46,6 @@ void Reader::readerAddArgs(ProgramArgs& args)
 
     args.add("override_srs", "Spatial reference to apply to data",
             m_overrideSrs);
-
     args.addSynonym("override_srs", "spatialreference");
 
     args.add("default_srs",
