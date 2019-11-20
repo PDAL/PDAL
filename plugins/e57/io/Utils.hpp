@@ -99,9 +99,10 @@ public:
     std::vector<Dim>::iterator end();
     std::vector<Dim>::iterator deleteDim(std::vector<Dim>::iterator itr);
     std::vector<Dim>::iterator findDim(std::string name);
+	void parse(pdal::StringList dimList);
 };
 
-PDAL_DLL ExtraDims parse(pdal::StringList dimList);
+
 
 } // namespace e57plugin
 } // namespace pdal

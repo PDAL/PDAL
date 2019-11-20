@@ -301,9 +301,8 @@ std::vector<Dim>::iterator ExtraDims::findDim(std::string name)
     });
 }
 
-ExtraDims parse(pdal::StringList dimList)
+void ExtraDims::parse(pdal::StringList dimList)
 {
-    ExtraDims retList;
     for (auto& dim : dimList)
     {
         StringList s = Utils::split2(dim, '=');
@@ -314,11 +313,13 @@ ExtraDims parse(pdal::StringList dimList)
         Utils::trim(s[1]);
         Dimension::Type type = Dimension::type(s[1]);
         if (type == Dimension::Type::None)
+        {
             throw pdal_error("Invalid extra dimension type specified: '" + dim +
                              "'.  Need <dimension>=<type>. ");
-        retList.addDim(s[0], type);
+        
+		}
+        addDim(s[0], type);
     }
-    return retList;
 }
 } // namespace e57plugin
 } // namespace pdal

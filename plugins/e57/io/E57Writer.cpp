@@ -167,7 +167,8 @@ void E57Writer::initialize()
 
 void E57Writer::addDimensions(PointLayoutPtr layout)
 {
-    m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
+    m_extraDims = std::make_unique<e57plugin::ExtraDims>();
+    m_extraDims->parse(m_extraDimsSpec);
     auto i = m_extraDims->begin();
     auto supportedFields = e57plugin::supportedE57Types();
     while (i != m_extraDims->end())

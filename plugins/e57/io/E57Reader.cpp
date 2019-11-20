@@ -74,7 +74,8 @@ void E57Reader::addDimensions(PointLayoutPtr layout)
         }
     }
 
-    m_extraDims = std::make_unique<e57plugin::ExtraDims>(e57plugin::parse(m_extraDimsSpec));
+    m_extraDims = std::make_unique<e57plugin::ExtraDims>();
+    m_extraDims->parse(m_extraDimsSpec);
     auto i = m_extraDims->begin();
     while (i != m_extraDims->end())
     {
