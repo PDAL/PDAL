@@ -98,7 +98,7 @@ void E57Writer::ChunkWriter::write(pdal::PointRef& pt, std::unique_ptr<e57plugin
 
             if (pdaldim == DimId::Intensity && val > m_intensityLimit)
             {
-                m_intensityLimit = fmax(val, m_intensityLimit);
+                m_intensityLimit = m_intensityLimit << 8;
             }
             keyValue.second[m_currentIndex] = val;
         }

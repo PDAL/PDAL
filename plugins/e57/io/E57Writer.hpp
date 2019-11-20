@@ -63,6 +63,10 @@ class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
 
         inline uint64_t getIntensityLimit()
         {
+            if (m_intensityLimit != 1)
+            {
+                return m_intensityLimit - 1;
+			}
             return m_intensityLimit;
         }
 
