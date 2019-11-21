@@ -66,7 +66,7 @@ provided here.  The name of the generated shared object must be
 
 ::
 
-    libpdal_plugin_readers_<reader name>.<shared library extension>
+    libpdal_plugin_reader_<reader name>.<shared library extension>
 
 .. literalinclude:: ../../examples/writing-reader/MyReader.cpp
    :language: cpp
