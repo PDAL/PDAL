@@ -80,7 +80,8 @@ TEST(E57Reader, testHeader)
     for (auto& e57Dim: expectedE57Dimensions)
     {
         if (e57Dim.find("nor:normal") == e57Dim.npos &&
-                e57Dim.find("cartesianInvalidState") == e57Dim.npos)
+                e57Dim.find("cartesianInvalidState") == e57Dim.npos &&
+                e57Dim.find("classification") == e57Dim.npos)
             ASSERT_TRUE(table.layout()->hasDim(pdal::e57plugin::e57ToPdal(e57Dim)));
     }
 }
