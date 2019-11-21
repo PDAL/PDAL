@@ -84,7 +84,7 @@ correspond with the name of the writer
 provided here.  The name of the generated shared object must be
 
 ::
-    libpdal_plugin_writers_<writer name>.<shared library extension>
+    libpdal_plugin_writer_<writer name>.<shared library extension>
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp

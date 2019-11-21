@@ -71,7 +71,7 @@ provided here.  The name of the generated shared object must be
 
 ::
 
-    libpdal_plugin_filters_<filter name>.<shared library extension>
+    libpdal_plugin_filter_<filter name>.<shared library extension>
 
 Next, we pass the following to the ``CREATE_SHARED_STAGE`` macro, passing in
 the name of the stage and the ``PluginInfo`` struct.
