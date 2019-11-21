@@ -68,6 +68,7 @@ PDAL_DLL bool getLimits(const e57::StructureNode& prototype,
                         std::pair<double, double>& minmax);
 
 /// Get the bounds of a given dimension as expected by pdal
+/// This will give positive bounds to default data type for id.
 PDAL_DLL std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id);
 
 /// Returns total number of points in data3D.
@@ -99,8 +100,10 @@ public:
     std::vector<Dim>::iterator end();
     std::vector<Dim>::iterator deleteDim(std::vector<Dim>::iterator itr);
     std::vector<Dim>::iterator findDim(std::string name);
-	void parse(pdal::StringList dimList);
+    void parse(pdal::StringList dimList);
 };
 
+/// Returns a list of scalable E57 dimensions.
+PDAL_DLL std::vector<std::string> scalableE57Types();
 } // namespace e57plugin
 } // namespace pdal

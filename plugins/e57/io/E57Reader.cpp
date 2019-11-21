@@ -249,12 +249,7 @@ bool E57Reader::fillPoint(PointRef& point)
 
         if (dim != Dimension::Id::Unknown)
         {
-            auto val = keyValue.second[m_currentIndex];
-            if (dim != Dimension::Id::Classification)
-            {
-                val = m_scan->rescale(dim, val);
-            }
-            point.setField(dim, val);
+            point.setField(dim, m_scan->rescale(dim, keyValue.second[m_currentIndex]));
         }
         else
         {
