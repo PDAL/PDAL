@@ -64,10 +64,11 @@ TEST(E57Utils, pdalToE57Translation)
 TEST(E57Utils, getPdalBounds)
 {
     using pdal::Dimension::Id;
-    auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity};
+    auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity, Id::Classification};
     for (auto type: pdalTypes)
     {
         ASSERT_NO_THROW(getPdalBounds(type));
     }
+    ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::X));
     ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::Unknown));
 }
