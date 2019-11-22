@@ -37,11 +37,87 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/StatsFilter.hpp>
+#include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
 
 #include "Support.hpp"
 
 using namespace pdal;
+
+TEST(Stats, handcalc)
+{
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    PointViewPtr v(new PointView(table));
+    v->setField(Dimension::Id::X, 0, 1);
+    v->setField(Dimension::Id::X, 1, 5);
+    v->setField(Dimension::Id::X, 2, 8);
+    v->setField(Dimension::Id::X, 3, 25);
+    v->setField(Dimension::Id::X, 4, 20);
+    v->setField(Dimension::Id::X, 5, 17);
+
+    BufferReader r;
+    r.addView(v);
+    StatsFilter f;
+    f.setInput(r);
+    Options opts;
+    opts.add("advanced", true);
+    f.setOptions(opts);
+
+    f.prepare(table);
+    f.execute(table);
+
+    const stats::Summary& xstats = f.getStats(Dimension::Id::X);
+
+    EXPECT_EQ(xstats.minimum(), 1.0);
+    EXPECT_EQ(xstats.maximum(), 25.0);
+    EXPECT_DOUBLE_EQ(xstats.average(), 12.0 + 2.0 / 3.0);
+    EXPECT_DOUBLE_EQ(xstats.sampleVariance(), 88.2 + .2 / 3);
+    EXPECT_DOUBLE_EQ(xstats.sampleStddev(), std::sqrt(88.2 + .2 / 3));
+    EXPECT_NEAR(xstats.populationSkewness(), 0.05589204039, 0.000000001);
+    EXPECT_NEAR(xstats.sampleSkewness(), 0.07653332827, 0.000000001);
+
+    EXPECT_NEAR(xstats.populationKurtosis(), 1.504435885, 0.000000001);
+    EXPECT_NEAR(xstats.populationExcessKurtosis(), -1.495564114, 0.000000001);
+    EXPECT_NEAR(xstats.sampleKurtosis(), 4.387937998, 0.000000001);
+    EXPECT_NEAR(xstats.sampleExcessKurtosis(), -1.862062002, 0.000000001);
+}
+
+
+TEST(Stats, baseline)
+{
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    PointViewPtr v(new PointView(table));
+
+    for (PointId idx = 0; idx < 100; idx++)
+        v->setField(Dimension::Id::X, idx, 55.2);
+
+    BufferReader r;
+    r.addView(v);
+    StatsFilter f;
+    f.setInput(r);
+    Options opts;
+    opts.add("advanced", true);
+    f.setOptions(opts);
+
+    f.prepare(table);
+    f.execute(table);
+
+    const stats::Summary& xstats = f.getStats(Dimension::Id::X);
+    EXPECT_EQ(xstats.minimum(), 55.2);
+    EXPECT_EQ(xstats.maximum(), 55.2);
+    EXPECT_EQ(xstats.average(), 55.2);
+    EXPECT_EQ(xstats.sampleVariance(), 0.0);
+    EXPECT_EQ(xstats.populationVariance(), 0.0);
+    EXPECT_EQ(xstats.sampleSkewness(), 0.0);
+    EXPECT_EQ(xstats.populationSkewness(), 0.0);
+    EXPECT_EQ(xstats.sampleKurtosis(), 0.0);
+    EXPECT_EQ(xstats.sampleExcessKurtosis(), 0.0);
+    EXPECT_EQ(xstats.populationKurtosis(), 0.0);
+    EXPECT_EQ(xstats.populationExcessKurtosis(), 0.0);
+}
+
 
 TEST(Stats, simple)
 {
@@ -85,17 +161,17 @@ TEST(Stats, simple)
     EXPECT_DOUBLE_EQ(statsY.average(), 52.0);
     EXPECT_DOUBLE_EQ(statsZ.average(), 53.0);
 
-    EXPECT_NEAR(statsX.variance(), 837.09351, .00001);
-    EXPECT_NEAR(statsY.variance(), 837.0965, .0001);
-    EXPECT_NEAR(statsZ.variance(), 837.1015, .0001);
+    EXPECT_NEAR(statsX.sampleVariance(), 835.8375, .0001);
+    EXPECT_NEAR(statsY.sampleVariance(), 835.8375, .0001);
+    EXPECT_NEAR(statsZ.sampleVariance(), 835.8375, .0001);
 
-    EXPECT_DOUBLE_EQ(statsX.skewness(), 0.0);
-    EXPECT_DOUBLE_EQ(statsY.skewness(), 0.0);
-    EXPECT_DOUBLE_EQ(statsZ.skewness(), 0.0);
+    EXPECT_DOUBLE_EQ(statsX.sampleSkewness(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.sampleSkewness(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.sampleSkewness(), 0.0);
 
-    EXPECT_DOUBLE_EQ(statsX.kurtosis(), 0.0);
-    EXPECT_DOUBLE_EQ(statsY.kurtosis(), 0.0);
-    EXPECT_DOUBLE_EQ(statsZ.kurtosis(), 0.0);
+    EXPECT_DOUBLE_EQ(statsX.sampleExcessKurtosis(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.sampleExcessKurtosis(), 0.0);
+    EXPECT_DOUBLE_EQ(statsZ.sampleExcessKurtosis(), 0.0);
 }
 
 TEST(Stats, advanced)
@@ -132,13 +208,13 @@ TEST(Stats, advanced)
     EXPECT_EQ(statsY.count(), 1000u);
     EXPECT_EQ(statsZ.count(), 1000u);
 
-    EXPECT_NEAR(statsX.skewness(), 7.6279972e+11, 10000);
-    EXPECT_NEAR(statsY.skewness(), 6.1023649e+12, 100000);
-    EXPECT_NEAR(statsZ.skewness(), 2.0595297e+13, 1000000);
+    EXPECT_NEAR(statsX.sampleSkewness(), -5.2235397e-16, 1e-23);
+    EXPECT_NEAR(statsY.sampleSkewness(), -5.7098153e-16, 1e-23);
+    EXPECT_NEAR(statsZ.sampleSkewness(), -5.5176534e-16, 1e-23);
 
-    EXPECT_NEAR(statsX.kurtosis(), -527558696e+4, 10000);
-    EXPECT_NEAR(statsY.kurtosis(), -422043928e+5, 100000);
-    EXPECT_NEAR(statsZ.kurtosis(), -142438122e+6, 1000000);
+    EXPECT_NEAR(statsX.sampleExcessKurtosis(), -1.2, .00001);
+    EXPECT_NEAR(statsY.sampleExcessKurtosis(), -1.2, .00001);
+    EXPECT_NEAR(statsZ.sampleExcessKurtosis(), -1.2, .00001);
 }
 
 

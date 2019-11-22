@@ -215,7 +215,7 @@ void ColorinterpFilter::filter(PointView& view)
         }
         else
         {
-             double threshold = (m_stdDevThreshold * summary.stddev());
+             double threshold = (m_stdDevThreshold * summary.sampleStddev());
              m_min = median - threshold;
              m_max = median + threshold;
 

@@ -43,8 +43,9 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
-#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/JsonFwd.hpp>
 
 #include <cpl_conv.h>
 #include <gdal_priv.h>
@@ -57,6 +58,8 @@ class OGRGeometry;
 
 namespace pdal
 {
+
+class Polygon;
 
 namespace gdal
 {
@@ -865,6 +868,8 @@ OGRGeometry *createFromGeoJson(const char *s);
 // specifications..
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
+
+std::vector<Polygon> getPolygons(const NL::json& ogr);
 
 inline OGRGeometry *fromHandle(OGRGeometryH geom)
 { return reinterpret_cast<OGRGeometry *>(geom); }
