@@ -233,4 +233,8 @@ double Scan::rescale(pdal::Dimension::Id dim, double value)
     return m_rescaleFactors[(int)dim] * value;
 }
 
+StructureNode Scan::getPointPrototype()
+{
+    return StructureNode(getPoints().prototype());
+}
 }

@@ -56,6 +56,7 @@ public:
     void transformPoint(pdal::PointRef pt) const;
     pdal::BOX3D getBoundingBox() const;
     double rescale(pdal::Dimension::Id dim, double value);
+    StructureNode getPointPrototype();
 
 private:
     /// Called only once on constructor called

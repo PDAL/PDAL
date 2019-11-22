@@ -67,6 +67,7 @@ private:
     bool fillPoint(PointRef& point);
     point_count_t readNextBatch();
     void setupReader();
+    void initializeBuffers();
 
     std::unique_ptr<ImageFile> m_imf;
     std::unique_ptr<VectorNode> m_data3D;
