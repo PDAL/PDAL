@@ -84,6 +84,6 @@ private:
     bool m_hasPose = false;
     pdal::BOX3D m_bbox;
 
-    std::map<pdal::Dimension::Id, double> m_rescaleFactors;
+    float m_rescaleFactors[pdal::Dimension::COUNT];
 };
 }

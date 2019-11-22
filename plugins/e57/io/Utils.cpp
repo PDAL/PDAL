@@ -128,6 +128,12 @@ std::vector<std::string> supportedE57Types()
             "cartesianInvalidState", "classification"};
 }
 
+std::vector<std::string> scalableE57Types()
+{
+    return {"colorRed", "colorGreen", "colorBlue", "intensity",
+            "classification"};
+}
+
 bool getLimits(const e57::StructureNode& prototype,
                const std::string& fieldName, std::pair<double, double>& minmax)
 {
@@ -211,27 +217,20 @@ bool getLimits(const e57::StructureNode& prototype,
     return true;
 }
 
+// This will give positive bounds to default data type for id.
 std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
 {
-    //ABELL - This is strange.  PDAL doesn't specify limits for these.
-    //  Perhaps argument registration needs to be changed.
-    using Dim = pdal::Dimension::Id;
-    switch (id)
+    // pdal::Dimension::size() returns number of bytes for the pdal::Dimesion::Type.
+    // eg: 1 for uint8, 2 for uint16, 4 for uint32, 8 for double, etc.
+    // Max range for data type = (2 ^ (8 * no. of bytes)) - 1
+    auto type = pdal::Dimension::defaultType(id);
+    auto typeName = pdal::Dimension::interpretationName(type);
+    if (typeName.find("uint") == 0)
     {
-        case Dim::Red:
-        case Dim::Blue:
-        case Dim::Green:
-        case Dim::Intensity:
-            return {std::numeric_limits<uint16_t>::min(),
-                    std::numeric_limits<uint16_t>::max()};
-        case Dim::Classification:
-            return {std::numeric_limits<uint8_t>::min(),
-                    std::numeric_limits<uint8_t>::max()};
-        default:
-            std::string msg ="Dimension " + Dimension::name(id) +
-                             " is not currently supported.";
-            throw pdal_error(msg);
+        auto maxVal = std::pow(2, 8 * pdal::Dimension::size(type)) - 1;
+        return {0, maxVal};
     }
+    throw pdal_error("Cannot retrieve bounds for : " + typeName);
 }
 
 point_count_t numPoints(const e57::VectorNode data3D)
@@ -316,8 +315,8 @@ void ExtraDims::parse(pdal::StringList dimList)
         {
             throw pdal_error("Invalid extra dimension type specified: '" + dim +
                              "'.  Need <dimension>=<type>. ");
-        
-		}
+
+        }
         addDim(s[0], type);
     }
 }
