@@ -224,8 +224,13 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
     // eg: 1 for uint8, 2 for uint16, 4 for uint32, 8 for double, etc.
     // Max range for data type = (2 ^ (8 * no. of bytes)) - 1
     auto type = pdal::Dimension::defaultType(id);
-    auto maxVal = std::pow(2, 8 * pdal::Dimension::size(type)) - 1;
-    return {0, maxVal};
+    auto typeName = pdal::Dimension::interpretationName(type);
+    if (typeName.find("uint") == 0)
+    {
+        auto maxVal = std::pow(2, 8 * pdal::Dimension::size(type)) - 1;
+        return {0, maxVal};
+    }
+    throw pdal_error("cannot retrive bounds for : " + typeName);
 }
 
 point_count_t numPoints(const e57::VectorNode data3D)
