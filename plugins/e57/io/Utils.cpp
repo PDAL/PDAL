@@ -230,7 +230,7 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
         auto maxVal = std::pow(2, 8 * pdal::Dimension::size(type)) - 1;
         return {0, maxVal};
     }
-    throw pdal_error("cannot retrive bounds for : " + typeName);
+    throw pdal_error("Cannot retrieve bounds for : " + typeName);
 }
 
 point_count_t numPoints(const e57::VectorNode data3D)
