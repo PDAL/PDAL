@@ -241,7 +241,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
     }
     
-    auto attrs = m_array->schema->attributes();
+    auto attrs = m_array->schema().attributes();
 
     for (const auto& d : all)
     {
