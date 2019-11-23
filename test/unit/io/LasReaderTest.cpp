@@ -191,8 +191,8 @@ TEST(LasReaderTest, test_different_formats)
 TEST(LasReaderTest, inspect)
 {
     Options ops;
-//    ops.add("filename", Support::datapath("las/epsg_4326.las"));
-    ops.add("filename", "gs://helix-dev-point-clouds/tmp/epsg_4326.las");
+    ops.add("filename", Support::datapath("las/epsg_4326.las"));
+
     LasReader reader;
     reader.setOptions(ops);
 
