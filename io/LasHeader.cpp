@@ -325,84 +325,95 @@ void LasHeader::setSrsFromGeotiff()
         m_srs = gtiffSrs;
 }
 
-
-ILeStream& operator>>(ILeStream& in, LasHeader& h)
+void LasHeader::readRawHeader(ILeStream& in)
 {
     uint8_t versionMajor;
     uint32_t legacyPointCount;
     uint32_t legacyReturnCount;
 
-    in.get(h.m_fileSig, 4);
-    if (!Utils::iequals(h.m_fileSig, LasHeader::FILE_SIGNATURE))
+    in.get(m_fileSig, 4);
+    if (!Utils::iequals(m_fileSig, LasHeader::FILE_SIGNATURE))
         throw LasHeader::error("File signature is not 'LASF', "
-            "is this an LAS/LAZ file?");
+                               "is this an LAS/LAZ file?");
 
-    in >> h.m_sourceId >> h.m_globalEncoding;
-    LasHeader::get(in, h.m_projectUuid);
-    in >> versionMajor >> h.m_versionMinor;
-    in.get(h.m_systemId, 32);
+    in >> m_sourceId >> m_globalEncoding;
+    LasHeader::get(in, m_projectUuid);
+    in >> versionMajor >> m_versionMinor;
+    in.get(m_systemId, 32);
 
-    in.get(h.m_softwareId, 32);
-    in >> h.m_createDOY >> h.m_createYear >> h.m_vlrOffset >>
-        h.m_pointOffset >> h.m_vlrCount >> h.m_pointFormat >>
-        h.m_pointLen >> legacyPointCount;
-    h.m_pointCount = legacyPointCount;
+    in.get(m_softwareId, 32);
+    in >> m_createDOY >> m_createYear >> m_vlrOffset >>
+       m_pointOffset >> m_vlrCount >> m_pointFormat >>
+       m_pointLen >> legacyPointCount;
+    m_pointCount = legacyPointCount;
 
     // Although it isn't part of the LAS spec, the two high bits have been used
     // to indicate compression, though only the high bit is currently used.
-    if (h.m_pointFormat & 0x80)
-        h.setCompressed(true);
-    h.m_pointFormat &= ~0xC0;
+    if (m_pointFormat & 0x80)
+        setCompressed(true);
+    m_pointFormat &= ~0xC0;
 
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {
         in >> legacyReturnCount;
-        h.m_pointCountByReturn[i] = legacyReturnCount;
+        m_pointCountByReturn[i] = legacyReturnCount;
     }
 
-    in >> h.m_scales[0] >> h.m_scales[1] >> h.m_scales[2];
-    in >> h.m_offsets[0] >> h.m_offsets[1] >> h.m_offsets[2];
+    in >> m_scales[0] >> m_scales[1] >> m_scales[2];
+    in >> m_offsets[0] >> m_offsets[1] >> m_offsets[2];
 
     double maxX, minX;
     double maxY, minY;
     double maxZ, minZ;
     in >> maxX >> minX >> maxY >> minY >> maxZ >> minZ;
-    h.m_bounds = BOX3D(minX, minY, minZ, maxX, maxY, maxZ);
+    m_bounds = BOX3D(minX, minY, minZ, maxX, maxY, maxZ);
 
-    if (h.versionAtLeast(1, 3))
+    if (versionAtLeast(1, 3))
     {
         uint64_t waveformOffset;
         in >> waveformOffset;
     }
-    if (h.versionAtLeast(1, 4))
+    if (versionAtLeast(1, 4))
     {
-        in >> h.m_eVlrOffset >> h.m_eVlrCount >> h.m_pointCount;
+        in >> m_eVlrOffset >> m_eVlrCount >> m_pointCount;
         for (size_t i = 0; i < LasHeader::RETURN_COUNT; ++i)
-            in >> h.m_pointCountByReturn[i];
+            in >> m_pointCountByReturn[i];
     }
+};
 
-    // Read regular VLRs.
-    in.seek(h.m_vlrOffset);
-    for (size_t i = 0; i < h.m_vlrCount; ++i)
+void LasHeader::readVlr(ILeStream& in)
+{
+    for (size_t i = 0; i < m_vlrCount; ++i)
     {
         LasVLR r;
         in >> r;
-        h.m_vlrs.push_back(std::move(r));
+        m_vlrs.push_back(std::move(r));
     }
+    setSrs();
+}
 
-    // Read extended VLRs.
-    if (h.versionAtLeast(1, 4))
+void LasHeader::readEVlr(ILeStream& in)
+{
+    // Read extended VLRs
+    if (versionAtLeast(1, 4))
     {
-        in.seek(h.m_eVlrOffset);
-        for (size_t i = 0; i < h.m_eVlrCount; ++i)
+        in.seek(m_eVlrOffset);
+        for (size_t i = 0; i < m_eVlrCount; ++i)
         {
             ExtLasVLR r;
             in >> r;
-            h.m_vlrs.push_back(std::move(r));
+            m_vlrs.push_back(std::move(r));
         }
     }
-    h.setSrs();
+}
 
+ILeStream& operator>>(ILeStream& in, LasHeader& h)
+{
+    h.readRawHeader(in);
+    in.seek(h.vlrOffset());
+    h.readVlr(in);
+    in.seek(h.eVlrOffset());
+    h.readEVlr(in);
     return in;
 }
 

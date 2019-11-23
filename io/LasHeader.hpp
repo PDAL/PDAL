@@ -388,7 +388,9 @@ public:
         { m_log = log; }
     const VlrList& vlrs() const
         { return m_vlrs; }
-
+    void readRawHeader(ILeStream& in);
+    void readVlr(ILeStream& in);
+    void readEVlr(ILeStream& in);
     PDAL_DLL friend ILeStream& operator>>(ILeStream&, LasHeader& h);
     friend OLeStream& operator<<(OLeStream&, const LasHeader& h);
     friend std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);

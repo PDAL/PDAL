@@ -39,13 +39,14 @@
 #include <sstream>
 #include <string.h>
 
-#include <pdal/pdal_features.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
+#include <pdal/pdal_features.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <vendor/arbiter/arbiter.hpp>
 
 #include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
@@ -56,6 +57,20 @@ namespace pdal
 
 namespace
 {
+
+std::stringstream headerStream(std::string filename, int start, int end)
+{
+    arbiter::http::Headers h;
+    arbiter::Arbiter a;
+    int finalByte = end > start ? end : 0;
+    h["Range"] = "bytes=" + std::to_string(start) + "-" +
+                 (finalByte ? std::to_string(finalByte - 1) : "");
+    std::string rawHeader(a.get(filename, h));
+    std::stringstream headerStream(rawHeader, std::ios_base::in |
+                                                  std::ios_base::out |
+                                                  std::ios_base::binary);
+    return headerStream;
+}
 
 struct invalid_stream : public std::runtime_error
 {
@@ -104,22 +119,45 @@ std::string LasReader::getName() const { return s_info.name; }
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
+
+    arbiter::Arbiter a;
+    ILeStream in;
+
+    if (a.isHttpDerived(m_filename))
+    {
+        const uint64_t maxHeaderSize(375);
+        auto stream = headerStream(m_filename, 0, maxHeaderSize);
+        in = ILeStream(&stream);
+        m_header.readRawHeader(in);
+        if (m_header.vlrCount() > 0)
+        {
+            stream = headerStream(m_filename, m_header.vlrOffset(),
+                                  m_header.pointOffset());
+            in = ILeStream(&stream);
+            m_header.readVlr(in);
+        }
+    }
+    else
+    {
+        createStream();
+        std::istream* stream(m_streamIf->m_istream);
+        stream->seekg(0);
+        in = ILeStream(stream);
+        m_header.readRawHeader(in);
+        in.seek(m_header.vlrOffset());
+        m_header.readVlr(in);
+    }
+
     std::unique_ptr<PointLayout> layout(new PointLayout());
-
-    PointTable table;
-    initialize(table);
     addDimensions(layout.get());
-
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
     if (!Utils::numericCast(m_header.pointCount(), qi.m_pointCount))
         qi.m_pointCount = (std::numeric_limits<point_count_t>::max)();
     qi.m_bounds = m_header.getBounds();
-    qi.m_srs = getSpatialReference();
+    qi.m_srs = m_header.srs();
     qi.m_valid = true;
-
-    done(table);
 
     return qi;
 }
