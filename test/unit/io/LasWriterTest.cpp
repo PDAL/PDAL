@@ -1189,12 +1189,6 @@ TEST(LasWriterTest, evlroffset)
 
     FileUtils::deleteFile(outfile);
     {
-        StageFactory f;
-        Stage& r = *(f.createStage("readers.faux"));
-        Options ro;
-        ro.add("count", 0);
-        r.addOptions(ro);
-
         LasWriter w;
         Options wo;
         std::vector<uint8_t> largeVlr(66000);
@@ -1204,10 +1198,8 @@ TEST(LasWriterTest, evlroffset)
             Utils::base64_encode(largeVlr) + "\" }]";
         wo.add("vlrs", vlr);
         wo.add("minor_version", 4);
-        wo.add("dataformat_id", 6);
         wo.add("filename", outfile);
         w.setOptions(wo);
-        w.setInput(r);
 
         PointTable t;
         w.prepare(t);
