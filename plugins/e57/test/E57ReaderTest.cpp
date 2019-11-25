@@ -248,3 +248,50 @@ TEST(E57Reader, testDimensionRescaling)
 
     remove(outfile.c_str());
 }
+
+TEST(E57Reader, testScansWithDifferentDimensions)
+{
+    std::string outfile(Support::datapath("las/test.las"));
+    {
+        E57Reader r;
+        Options ops;
+        ops.add("filename",
+                Support::datapath(
+                    "e57/A_B_different_dims.e57")); // This cloud have 2 different scans, One with colors and one without colors
+        r.setOptions(ops);
+
+        LasWriter w;
+        Options wo;
+
+        wo.add("filename", outfile);
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    Options lasOps;
+    lasOps.add("filename", outfile);
+    LasReader lasReader;
+    lasReader.setOptions(lasOps);
+
+    PointTable lasTable;
+    lasReader.prepare(lasTable);
+    auto lasViewSet = lasReader.execute(lasTable);
+    auto lasView = *lasViewSet.begin();
+
+    auto pt1 = lasView->point(0); // point from scan without colors.
+    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 0);
+    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 0);
+    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 0);
+
+    auto pt2 = lasView->point(1); // point from scan with colors.
+    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 19018);
+    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 23644);
+    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 13878);
+
+    remove(outfile.c_str());
+}
