@@ -1189,16 +1189,19 @@ TEST(LasWriterTest, evlroffset)
 
     FileUtils::deleteFile(outfile);
     {
-        LasReader r;
+        StageFactory f;
+        Stage& r = *(f.createStage("readers.faux"));
         Options ro;
-        ro.add("filename", Support::datapath("las/wontcompress3.las"));
-        r.setOptions(ro);
-
+        ro.add("count", 0);
+        r.addOptions(ro);
 
         LasWriter w;
         Options wo;
         std::vector<uint8_t> largeVlr(66000);
-        std::string vlr = " [ { \"description\": \"A description under 32 bytes\", \"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"" +Utils::base64_encode(largeVlr)+"\" }]";
+        std::string vlr =
+            " [ { \"description\": \"A description under 32 bytes\", "
+            "\"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"" +
+            Utils::base64_encode(largeVlr) + "\" }]";
         wo.add("vlrs", vlr);
         wo.add("minor_version", 4);
         wo.add("dataformat_id", 6);
@@ -1210,12 +1213,12 @@ TEST(LasWriterTest, evlroffset)
         w.prepare(t);
         w.execute(t);
         LasTester tester;
-        LasHeader *h = tester.header(w);
-        EXPECT_GT(h->eVlrOffset(),0);
-        EXPECT_EQ(h->eVlrCount(),1);
+        LasHeader* h = tester.header(w);
+        // No points in the file
+        EXPECT_EQ(h->eVlrOffset(), h->pointOffset());
+        EXPECT_EQ(h->eVlrCount(), 1u);
     }
 }
-
 
 // Make sure that we can forward the LAS_Spec/3 VLR
 TEST(LasWriterTest, forward_spec_3)
