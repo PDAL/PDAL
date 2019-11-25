@@ -155,21 +155,8 @@ void OverlayFilter::ready(PointTableRef table)
 }
 
 
-OverlayFilter::run(PointViewPtr view)
-{
-    transform(view->spatialReference());
-}
-
-
 void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
 {
-    transform(srs);
-}
-
-
-void OverlayFilter::transform(const SpatialReference& srs)
-{
-
     if (srs.empty())
         return;
     for (auto& poly : m_polygons)
@@ -177,9 +164,6 @@ void OverlayFilter::transform(const SpatialReference& srs)
         try
         {
             poly.geom.transform(srs);
-            std::unique_ptr<GridPnp> gridPnp(new GridPnp(
-                poly.exteriorRing(), p.interiorRings()));
-            m
         }
         catch (pdal_error& err)
         {
