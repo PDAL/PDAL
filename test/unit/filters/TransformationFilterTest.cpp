@@ -54,6 +54,7 @@ public:
         readerOpts.add("mode", "constant");
         readerOpts.add("count", 3);
         readerOpts.add("bounds", bounds);
+        readerOpts.add("override_srs", "EPSG:4326");
         m_reader.setOptions(readerOpts);
         m_filter.setInput(m_reader);
     }
@@ -189,5 +190,24 @@ TEST_F(TransformationFilterTest, Rotation)
     }
 }
 
+TEST_F(TransformationFilterTest, SrsReset)
+{
+    TransformationFilter::Transform ident { { 1, 0, 0, 0,
+                                              0, 1, 0, 0,
+                                              0, 0, 1, 0,
+                                              0, 0, 0, 1 } };
+
+    Options filterOpts;
+    filterOpts.add("matrix", ident);
+    filterOpts.add("override_srs", "EPSG:3857");
+    m_filter.setOptions(filterOpts);
+
+    PointTable table;
+    m_filter.prepare(table);
+    PointViewSet viewSet = m_filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->spatialReference(), SpatialReference("EPSG:3857"));
+}
 
 }
