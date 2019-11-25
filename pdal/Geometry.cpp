@@ -67,6 +67,11 @@ Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 {}
 
 
+Geometry::Geometry(OGRGeometryH g) :
+    m_geom((reinterpret_cast<OGRGeometry *>(g))->clone())
+{}
+
+
 Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) :
     m_geom((reinterpret_cast<OGRGeometry *>(g))->clone())
 {

@@ -106,6 +106,8 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
+    EptBounds(const SrsBounds& b) : SrsBounds(b)
+    {}
 };
 
 namespace Utils
@@ -140,6 +142,7 @@ public:
 
     NL::json m_query;
     NL::json m_headers;
+    NL::json m_ogr;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args)
@@ -165,6 +168,8 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests",
         m_args->m_query);
+    args.add("ogr", "OGR filter geometries",
+        m_args->m_ogr);
 }
 
 
@@ -243,6 +248,13 @@ void EptReader::initialize()
 
     setSpatialReference(m_info->srs());
 
+    if (!m_args->m_ogr.is_null())
+    {
+        auto& plist = m_args->m_polys;
+        std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->m_ogr);
+        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
+    }
+
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
     if (!m_info->srs().valid() && boundsSrs.valid())
@@ -267,6 +279,12 @@ void EptReader::initialize()
             std::make_move_iterator(polys.end()));
     }
     m_args->m_polys = std::move(exploded);
+
+    for (auto& p : m_args->m_polys)
+    {
+        m_queryGrids.emplace_back(
+            new GridPnp(p.exteriorRing(), p.interiorRings()));
+    }
 
     try
     {
@@ -418,12 +436,28 @@ QuickInfo EptReader::inspect()
     {
         initialize();
 
-        qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
+        const BOX3D fullBounds(toBox3d(m_info->json()["boundsConforming"]));
+
+        qi.m_bounds = fullBounds;
         qi.m_srs = m_info->srs();
         qi.m_pointCount = m_info->points();
 
         for (auto& el : m_info->schema())
             qi.m_dimNames.push_back(el["name"].get<std::string>());
+
+        // If we've passed a spatial query, determine an upper bound on the
+        // point count.
+        if (!m_queryBounds.contains(fullBounds) || m_queryGrids.size())
+        {
+            log()->get(LogLevel::Debug) <<
+                "Determining overlapping point count" << std::endl;
+
+            overlaps();
+
+            qi.m_pointCount = 0;
+            for (const auto& p : m_overlaps)
+                qi.m_pointCount += p.second;
+        }
     }
     catch (std::exception& e)
     {
@@ -679,13 +713,6 @@ PointViewSet EptReader::run(PointViewPtr view)
     // Start these at 1 to differentiate from points added by other stages,
     // which will be ignored by the EPT writer.
     uint64_t nodeId(1);
-
-    for (auto& p : m_args->m_polys)
-    {
-        m_queryGrids.emplace_back(
-            new GridPnp(p.exteriorRing(), p.interiorRings()));
-    }
-
     for (const auto& entry : m_overlaps)
     {
         const Key& key(entry.first);
@@ -902,7 +929,7 @@ struct EptReader::NodeBuffer
 
 void EptReader::load()
 {
-    // Asynchronously trigger the fetching and point-view execution of
+        // Asynchronously trigger the fetching and point-view execution of
     // a lookahead buffer of nodes.
     while (
         m_upcomingNodeBuffers.size() < m_pool->size() &&
@@ -980,6 +1007,7 @@ bool EptReader::next()
 
     return true;
 }
+
 
 bool EptReader::processOne(PointRef& point)
 {

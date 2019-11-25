@@ -47,70 +47,40 @@ namespace pdal
 namespace plang
 {
 
-
 class PDAL_DLL Invocation
 {
 public:
-    Invocation(const Script&);
-    ~Invocation();
+    Invocation(const Script&, MetadataNode m, const std::string& pdalArgs);
+    Invocation& operator=(Invocation const& rhs) = delete;
+    Invocation(const Invocation& other) = delete;
+    ~Invocation()
+    {}
 
-    void compile();
-
-    void resetArguments();
-
-
-    // creates a Python variable pointing to a (one dimensional) C array
-    // adds the new variable to the arguments dictionary
-    void insertArgument(std::string const& name,
-                        uint8_t* data,
-                        Dimension::Type t,
-                        point_count_t count);
-    void *extractResult(const std::string& name,
-                        Dimension::Type dataType,
-                        size_t& arrSize);
-
-    bool hasOutputVariable(const std::string& name) const;
-
-    // returns true iff the called python function returns true,
-    // as would be used for a predicate function
-    // (that is, the return value is NOT an error indicator)
-    bool execute();
-
-    // after a call to execute, this function will return you a list of
-    // the names in the 'outs' dictionary (this is used by the
-    // BufferedInvocation class to find the returned data -- faster to
-    // examine what's already in there than it is to iterate over all the
-    // possible names from the schema)
-    void getOutputNames(std::vector<std::string>& names);
-
-    void begin(PointView& view, MetadataNode m);
-    void end(PointView& view, MetadataNode m);
-
-    void setKWargs(std::string const& s);
+    bool execute(PointViewPtr& v, MetadataNode stageMetadata);
 
 private:
-    void cleanup();
+    void compile();
+    PyObject *prepareData(PointViewPtr& view);
+    void extractData(PointViewPtr& view, PyObject *outArrays);
+    PyObject *addArray(std::string const& name, uint8_t* data,
+        Dimension::Type t, point_count_t count);
+    void *extractArray(PyObject *array, const std::string& name,
+        Dimension::Type dataType, size_t& arrSize);
+    PointViewPtr maskData(PointViewPtr& view, PyObject *maskArray);
+    void extractMetadata(MetadataNode stageMetadata);
 
     Script m_script;
 
-    PyObject* m_bytecode;
     PyObject* m_module;
-    PyObject* m_dictionary;
+    // Pointer to the function in the module.  Owned by the module.
     PyObject* m_function;
 
-    PyObject* m_varsIn;
-    PyObject* m_varsOut;
-    PyObject* m_scriptArgs;
-    PyObject* m_scriptResult;
+    // Pointers to numpy arrays and contained data buffers for cleanup.
     std::vector<PyObject*> m_pyInputArrays;
+    std::vector<void *> m_numpyBuffers;
 
-    Invocation& operator=(Invocation const& rhs); // nope
-
-    std::vector<void *> m_buffers;
-    PyObject* m_metadata_PyObject;
-    PyObject* m_schema_PyObject;
-    PyObject* m_srs_PyObject;
-    PyObject* m_pdalargs_PyObject;
+    MetadataNode m_inputMetadata;
+    std::string m_pdalargs;
 };
 
 } // namespace plang
