@@ -133,16 +133,7 @@ void OverlayFilter::ready(PointTableRef table)
     do
     {
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
-        OGRwkbGeometryType t = OGR_G_GetGeometryType(geom);
         int32_t fieldVal = OGR_F_GetFieldAsInteger(feature.get(), field_index);
-
-        if (!(t == wkbPolygon ||
-            t == wkbMultiPolygon ||
-            t == wkbPolygon25D ||
-            t == wkbMultiPolygon25D))
-        {
-            throwError("Geometry is not Polygon or MultiPolygon!");
-        }
 
         // Don't think Polygon meets criteria for implicit move ctor.
         m_polygons.push_back(
@@ -176,27 +167,23 @@ void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
 bool OverlayFilter::processOne(PointRef& point)
 {
     for (const auto& poly : m_polygons)
-        if (poly.geom.covers(point))
+    {
+        double x = point.getFieldAs<double>(Dimension::Id::X);
+        double y = point.getFieldAs<double>(Dimension::Id::Y);
+        if (poly.geom.contains(x, y))
             point.setField(m_dim, poly.val);
+    }
     return true;
 }
 
 
 void OverlayFilter::filter(PointView& view)
 {
-    QuadIndex idx(view);
-
-    for (const auto& poly : m_polygons)
+    PointRef point(view, 0);
+    for (PointId id = 0; id < view.size(); ++id)
     {
-        PointIdList ids = idx.getPoints(poly.geom.bounds());
-
-        PointRef point(view, 0);
-        for (PointId id : ids)
-        {
-            point.setPointId(id);
-            if (poly.geom.covers(point))
-                point.setField(m_dim, poly.val);
-        }
+        point.setPointId(id);
+        processOne(point);
     }
 }
 
