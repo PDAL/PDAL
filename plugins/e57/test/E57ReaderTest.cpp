@@ -283,7 +283,7 @@ TEST(E57Reader, testScansWithDifferentDimensions)
     auto lasViewSet = lasReader.execute(lasTable);
     auto lasView = *lasViewSet.begin();
 
-    auto pt1 = lasView->point(0); // point form scan without colors.
+    auto pt1 = lasView->point(0); // point from scan without colors.
     ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 0);
     ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 0);
     ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 0);
