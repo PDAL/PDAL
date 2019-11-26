@@ -125,21 +125,18 @@ bool VoxelDownsizeFilter::insert(int gx, int gy, int gz)
 {
     if (m_populatedVoxels.size() > m_batchSize)
     {
-        std::set<std::tuple<int, int, int>> tempMap;
-        std::swap(tempMap, m_populatedVoxels);
-        m_pool->add([this, tempMap]() {
-            leveldb::WriteBatch batch;
-            for (auto itr=tempMap.begin(); itr!=tempMap.end(); ++itr)
-            {
-                auto t=*itr;
-                auto val = std::to_string(std::get<0>(t)) +
-                           std::to_string(std::get<1>(t)) +
-                           std::to_string(std::get<2>(t));
-                batch.Put(val,val);
-            }
-            auto res = m_ldb->Write(leveldb::WriteOptions(), &batch).ok();
-            assert(res);
-        });
+        std::set<std::tuple<int, int, int>> tempMap = m_populatedVoxels;
+        leveldb::WriteBatch batch;
+        for (auto itr=tempMap.begin(); itr!=tempMap.end(); ++itr)
+        {
+            auto t=*itr;
+            auto val = std::to_string(std::get<0>(t)) +
+                       std::to_string(std::get<1>(t)) +
+                       std::to_string(std::get<2>(t));
+            batch.Put(val,val);
+        }
+        auto res = m_ldb->Write(leveldb::WriteOptions(), &batch).ok();
+        assert(res);
         m_populatedVoxels.clear();
     }
     return m_populatedVoxels.insert(std::make_tuple(gx, gy, gz)).second;
@@ -173,9 +170,6 @@ bool VoxelDownsizeFilter::voxelize(PointRef point)
      * Calculate the local voxel coordinates for incoming point, Using the
      * Pivot voxel.
      */
-    auto t = std::make_tuple(gx - m_pivotVoxel[0], gy - m_pivotVoxel[1],
-                             gz - m_pivotVoxel[2]);
-
     auto kx = gx - m_pivotVoxel[0], ky = gy - m_pivotVoxel[1],
          kz = gz - m_pivotVoxel[2];
     if (!find(kx, ky, kz))
