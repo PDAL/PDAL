@@ -53,26 +53,6 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(OverlayFilter, s_info)
 
-struct OGRDataSourceDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        if (ptr)
-            ::OGR_DS_Destroy(ptr);
-    }
-};
-
-struct OGRFeatureDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        if (ptr)
-            ::OGR_F_Destroy(ptr);
-    }
-};
-
 
 void OverlayFilter::addArgs(ProgramArgs& args)
 {
@@ -105,7 +85,7 @@ void OverlayFilter::prepared(PointTableRef table)
 void OverlayFilter::ready(PointTableRef table)
 {
     m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
-            OGRDataSourceDeleter());
+            [](void *p){ if (p) ::OGR_DS_Destroy(p); });
     if (!m_ds)
         throwError("Unable to open data source '" + m_datasource + "'");
 
@@ -119,8 +99,13 @@ void OverlayFilter::ready(PointTableRef table)
     if (!m_lyr)
         throwError("Unable to select layer '" + m_layer + "'");
 
+    auto featureDeleter = [](void *p)
+    {
+        if (p)
+            ::OGR_F_Destroy(p);
+    };
     OGRFeaturePtr feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
-        OGRFeatureDeleter());
+        featureDeleter);
 
     int field_index(1); // default to first column if nothing was set
     if (m_column.size())
@@ -139,8 +124,7 @@ void OverlayFilter::ready(PointTableRef table)
         m_polygons.push_back(
             { Polygon(geom, table.anySpatialReference()), fieldVal} );
 
-        feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
-            OGRFeatureDeleter());
+        feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr), featureDeleter);
     }
     while (feature);
 }

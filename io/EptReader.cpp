@@ -47,7 +47,6 @@
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include "../filters/CropFilter.hpp"
-#include "../filters/private/pnp/GridPnp.hpp"
 
 namespace pdal
 {
@@ -280,12 +279,6 @@ void EptReader::initialize()
     }
     m_args->m_polys = std::move(exploded);
 
-    for (auto& p : m_args->m_polys)
-    {
-        m_queryGrids.emplace_back(
-            new GridPnp(p.exteriorRing(), p.interiorRings()));
-    }
-
     try
     {
         handleOriginQuery();
@@ -447,7 +440,7 @@ QuickInfo EptReader::inspect()
 
         // If we've passed a spatial query, determine an upper bound on the
         // point count.
-        if (!m_queryBounds.contains(fullBounds) || m_queryGrids.size())
+        if (!m_queryBounds.contains(fullBounds) || m_args->m_polys.size())
         {
             log()->get(LogLevel::Debug) <<
                 "Determining overlapping point count" << std::endl;
@@ -828,11 +821,11 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 
     auto passesPolyFilter = [this](double x, double y)
     {
-        if (m_queryGrids.empty())
+        if (m_args->m_polys.empty())
             return true;
 
-        for (const auto& grid : m_queryGrids)
-            if (grid->inside(x, y))
+        for (Polygon& poly : m_args->m_polys)
+            if (poly.contains(x, y))
                 return true;
         return false;
     };
