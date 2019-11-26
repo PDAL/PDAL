@@ -36,7 +36,6 @@
 
 #include <vector>
 
-#include <pdal/QuadIndex.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -120,7 +119,6 @@ void OverlayFilter::ready(PointTableRef table)
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
         int32_t fieldVal = OGR_F_GetFieldAsInteger(feature.get(), field_index);
 
-        // Don't think Polygon meets criteria for implicit move ctor.
         m_polygons.push_back(
             { Polygon(geom, table.anySpatialReference()), fieldVal} );
 
