@@ -1168,11 +1168,28 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
 
 void LasWriter::doneFile()
 {
-    finishOutput();
-    Utils::writeProgress(m_progressFd, "DONEFILE", m_curFilename);
-    getMetadata().addList("filename", m_curFilename);
-    delete m_ostream;
-    m_ostream = NULL;
+    try
+    {
+        finishOutput();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(err.what());
+    }
+
+    try
+    {
+        Utils::writeProgress(m_progressFd, "DONEFILE", m_curFilename);
+        getMetadata().addList("filename", m_curFilename);
+        delete m_ostream;
+        m_ostream = NULL;
+    }
+    catch (const std::exception& err)
+    {
+        throwError(err.what());
+    }
+    log()->get(LogLevel::Debug)
+        << "Writing completed" << std::endl;
 }
 
 
@@ -1221,7 +1238,13 @@ void LasWriter::finishOutput()
     out << m_lasHeader;
     out.seek(m_lasHeader.pointOffset());
 
+    log()->get(LogLevel::Debug)
+        << "Finished writing LAS header" << std::endl;
+
     m_ostream->flush();
+
+    log()->get(LogLevel::Debug)
+        << "Flushed to file" << std::endl;
 }
 
 
