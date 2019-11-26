@@ -204,7 +204,7 @@ void E57Reader::ready(PointTableRef& ref)
     
     m_currentIndex = 0;
     m_pointsInCurrentBatch = 0;
-    m_defaultChunkSize = 1000000;
+    m_defaultChunkSize = 10000;
     m_currentScan = -1;
     
     // Initial reader setup.
