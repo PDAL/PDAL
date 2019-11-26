@@ -40,7 +40,12 @@
 namespace pdal
 {
 using namespace e57;
-static PluginInfo const s_info{"readers.e57", "Reader for E57 files", ""};
+static PluginInfo const s_info
+{
+    "readers.e57",
+    "Reader for E57 files",
+    "http://pdal.io/stages/reader.e57.html"
+};
 
 CREATE_SHARED_STAGE(E57Reader, s_info)
 
@@ -50,8 +55,7 @@ std::string E57Reader::getName() const
 }
 
 E57Reader::E57Reader()
-    : Reader(), Streamable(), m_currentIndex(0), m_pointsInCurrentBatch(0), m_defaultChunkSize(1000000),
-      m_currentScan(-1)
+    : Reader(), Streamable()
 {
 }
 
@@ -197,6 +201,12 @@ void E57Reader::initialize()
 void E57Reader::ready(PointTableRef& ref)
 {
     log()->get(LogLevel::Info) << "Reading : " << m_filename;
+    
+    m_currentIndex = 0;
+    m_pointsInCurrentBatch = 0;
+    m_defaultChunkSize = 1000000;
+    m_currentScan = -1;
+    
     // Initial reader setup.
     setupReader();
 }
@@ -285,7 +295,7 @@ bool E57Reader::fillPoint(PointRef& point)
 
     if (!m_pointsInCurrentBatch)
     {
-        // We're done with reding
+        // We're done with reading
         return false;
     }
 
