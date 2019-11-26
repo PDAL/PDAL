@@ -241,9 +241,12 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
     }
     
+    auto attrs = m_array->schema().attributes();
+
     for (const auto& d : all)
     {
         std::string dimName = layout->dimName(d);
+
         if ((dimName != "X") && (dimName != "Y") && (dimName != "Z"))
         {
             Dimension::Type type = layout->dimType(d);
@@ -257,7 +260,6 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
             else
             {
                 // check attribute exists in original tiledb array
-                auto attrs = m_array->schema().attributes();
                 auto it = attrs.find(dimName);
                 if (it == attrs.end())
                     throwError("Attribute " + dimName + " does not exist in original array.");
@@ -284,7 +286,6 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
 bool TileDBWriter::processOne(PointRef& point)
 {
-    auto attrs = m_array->schema().attributes();
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
