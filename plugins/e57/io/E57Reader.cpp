@@ -61,7 +61,7 @@ E57Reader::E57Reader()
 
 void E57Reader::addArgs(ProgramArgs& args)
 {
-    args.add("extra_dims", "Extra dimensions to write to E57 data",
+    args.add("extra_dims", "Extra dimensions to read from E57 point cloud.",
              m_extraDimsSpec);
 }
 
