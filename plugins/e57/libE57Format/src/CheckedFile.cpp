@@ -77,7 +77,7 @@ using namespace std;
 // In C++17, "static constexpr" is implicitly inline, so these are not required.
 constexpr size_t     CheckedFile::physicalPageSizeLog2;
 constexpr size_t     CheckedFile::physicalPageSize;
-constexpr off_t   CheckedFile::physicalPageSizeMask;
+constexpr off_t_ll   CheckedFile::physicalPageSizeMask;
 constexpr size_t     CheckedFile::logicalPageSize;
 
 CheckedFile::CheckedFile( const ustring &fileName, Mode mode, ReadChecksumPolicy policy ) :
@@ -156,15 +156,15 @@ void CheckedFile::read(char* buf, size_t nRead, size_t /*bufSize*/)
    //??? need to keep track of logical length?
    //??? check bufSize OK
 
-   const off_t end = position( Logical ) + nRead;
-   const off_t logicalLength = length( Logical );
+   const long long end = position(Logical) + nRead;
+   const long long logicalLength = length(Logical);
 
    if (end > logicalLength)
    {
       throw E57_EXCEPTION2(E57_ERROR_INTERNAL, "fileName=" + fileName_ + " end=" + toString(end) + " length=" + toString(logicalLength));
    }
 
-   off_t page = 0;
+   off_t_ll page = 0;
    size_t   pageOffset = 0;
 
    getCurrentPageAndOffset(page, pageOffset);
@@ -222,9 +222,9 @@ void CheckedFile::write(const char* buf, size_t nWrite)
       throw E57_EXCEPTION2(E57_ERROR_FILE_IS_READ_ONLY, "fileName=" + fileName_);
    }
 
-   off_t end = position(Logical) + nWrite;
+   off_t_ll end = position(Logical) + nWrite;
 
-   off_t page = 0;
+   off_t_ll page = 0;
    size_t   pageOffset = 0;
 
    getCurrentPageAndOffset(page, pageOffset);
@@ -237,7 +237,7 @@ void CheckedFile::write(const char* buf, size_t nWrite)
 
    while (nWrite > 0)
    {
-      const off_t physicalLength = length( Physical );
+      const off_t_ll physicalLength = length( Physical );
 
       if ( page*physicalPageSize < physicalLength )
       {
@@ -370,16 +370,16 @@ template<class FTYPE> CheckedFile& CheckedFile::writeFloatingPoint(FTYPE value, 
    return(*this << s);
 }
 
-void CheckedFile::seek(off_t offset, OffsetMode omode)
+void CheckedFile::seek(long long offset, OffsetMode omode)
 {
    //??? check for seek beyond logicalLength_
-   const auto pos = static_cast<off_t>(omode==Physical ? offset : logicalToPhysical(offset));
+   const auto pos = static_cast<long long>(omode==Physical ? offset : logicalToPhysical(offset));
    portableSeek(pos, SEEK_SET);
 }
 
-off_t CheckedFile::portableSeek(off_t offset, int whence)
+long long CheckedFile::portableSeek(long long offset, int whence)
 {
-   off_t result;
+   long long result;
 #ifdef _WIN32
    result = _lseeki64(fd_, offset, whence);
 #elif defined(LINUX) || defined(MACOS)
@@ -399,10 +399,10 @@ off_t CheckedFile::portableSeek(off_t offset, int whence)
    return result;
 }
 
-off_t CheckedFile::position(OffsetMode omode)
+long long CheckedFile::position(OffsetMode omode)
 {
    /// Get current file cursor position
-   const off_t pos = portableSeek(0LL, SEEK_CUR);
+    const long long pos = portableSeek(0LL, SEEK_CUR);
 
    if ( omode == Physical )
    {
@@ -412,7 +412,7 @@ off_t CheckedFile::position(OffsetMode omode)
    return physicalToLogical( pos );
 }
 
-off_t CheckedFile::length( OffsetMode omode )
+long long CheckedFile::length(OffsetMode omode)
 {
    if ( omode == Physical )
    {
@@ -422,10 +422,10 @@ off_t CheckedFile::length( OffsetMode omode )
       }
 
       // Current file position
-      off_t original_pos = portableSeek( 0LL, SEEK_CUR );
+      long long original_pos = portableSeek(0LL, SEEK_CUR);
 
       // End file position
-      off_t end_pos = portableSeek( 0LL, SEEK_END );
+      long long end_pos = portableSeek( 0LL, SEEK_END );
 
       // Restore original position
       portableSeek( original_pos, SEEK_SET );
@@ -436,7 +436,7 @@ off_t CheckedFile::length( OffsetMode omode )
    return logicalLength_;
 }
 
-void CheckedFile::extend(off_t newLength, OffsetMode omode)
+void CheckedFile::extend(off_t_ll newLength, OffsetMode omode)
 {
 #ifdef E57_MAX_VERBOSE
    // cout << "extend newLength=" << newLength << " omode="<< omode << endl; //???
@@ -446,7 +446,7 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
       throw E57_EXCEPTION2(E57_ERROR_FILE_IS_READ_ONLY, "fileName=" + fileName_);
    }
 
-   off_t newLogicalLength = 0;
+   off_t_ll newLogicalLength = 0;
 
    if (omode==Physical)
    {
@@ -457,7 +457,7 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
       newLogicalLength = newLength;
    }
 
-   off_t currentLogicalLength = length(Logical);
+   off_t_ll currentLogicalLength = length(Logical);
 
    /// Make sure we are trying to make file longer
    if (newLogicalLength < currentLogicalLength) {
@@ -468,12 +468,12 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
    }
 
    /// Calc how may zero bytes we have to add to end
-   off_t nWrite = newLogicalLength - currentLogicalLength;
+   off_t_ll nWrite = newLogicalLength - currentLogicalLength;
 
    /// Seek to current end of file
    seek(currentLogicalLength, Logical);
 
-   off_t page = 0;
+   off_t_ll page = 0;
    size_t   pageOffset = 0;
 
    getCurrentPageAndOffset(page, pageOffset);
@@ -497,7 +497,7 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
 
    while (nWrite > 0)
    {
-      const off_t physicalLength = length( Physical );
+      const off_t_ll physicalLength = length( Physical );
 
       if ( page*physicalPageSize < physicalLength )
       {
@@ -600,7 +600,7 @@ void CheckedFile::verifyChecksum( char *page_buffer, size_t page )
 
    if ( check_sum_in_page != check_sum )
    {
-      const off_t physicalLength = length( Physical );
+      const off_t_ll physicalLength = length( Physical );
 
       throw E57_EXCEPTION2(E57_ERROR_BAD_CHECKSUM,
                            "fileName=" + fileName_
@@ -611,9 +611,9 @@ void CheckedFile::verifyChecksum( char *page_buffer, size_t page )
    }
 }
 
-void CheckedFile::getCurrentPageAndOffset(off_t& page, size_t& pageOffset, OffsetMode omode)
+void CheckedFile::getCurrentPageAndOffset(off_t_ll& page, size_t& pageOffset, OffsetMode omode)
 {
-   const off_t pos = position( omode );
+    const long long pos = position(omode);
 
    if (omode == Physical)
    {
@@ -627,14 +627,14 @@ void CheckedFile::getCurrentPageAndOffset(off_t& page, size_t& pageOffset, Offse
    }
 }
 
-void CheckedFile::readPhysicalPage(char* page_buffer, off_t page)
+void CheckedFile::readPhysicalPage(char* page_buffer, off_t_ll page)
 {
 #ifdef E57_MAX_VERBOSE
    // cout << "readPhysicalPage, page:" << page << endl;
 #endif
 
 #ifdef E57_CHECK_FILE_DEBUG
-   const off_t physicalLength = length( Physical );
+   const off_t_ll physicalLength = length( Physical );
 
    assert( page*physicalPageSize < physicalLength );
 #endif
@@ -656,7 +656,7 @@ void CheckedFile::readPhysicalPage(char* page_buffer, off_t page)
    }
 }
 
-void CheckedFile::writePhysicalPage(char* page_buffer, off_t page)
+void CheckedFile::writePhysicalPage(char* page_buffer, off_t_ll page)
 {
 #ifdef E57_MAX_VERBOSE
    // cout << "writePhysicalPage, page:" << page << endl;
