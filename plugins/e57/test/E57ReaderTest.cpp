@@ -284,14 +284,14 @@ TEST(E57Reader, testScansWithDifferentDimensions)
     auto lasView = *lasViewSet.begin();
 
     auto pt1 = lasView->point(0); // point from scan without colors.
-    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 0);
-    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 0);
-    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 0);
+    ASSERT_FLOAT_EQ(pt1.getFieldAs<double>(pdal::Dimension::Id::Red), 0.0f);
+    ASSERT_FLOAT_EQ(pt1.getFieldAs<double>(pdal::Dimension::Id::Green), 0.0f);
+    ASSERT_FLOAT_EQ(pt1.getFieldAs<double>(pdal::Dimension::Id::Blue), 0.0f);
 
     auto pt2 = lasView->point(1); // point from scan with colors.
-    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 19018);
-    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 23644);
-    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 13878);
+    ASSERT_FLOAT_EQ(pt2.getFieldAs<double>(pdal::Dimension::Id::Red), 19018.0f);
+    ASSERT_FLOAT_EQ(pt2.getFieldAs<double>(pdal::Dimension::Id::Green), 23644.0f);
+    ASSERT_FLOAT_EQ(pt2.getFieldAs<double>(pdal::Dimension::Id::Blue), 13878.0f);
 
     remove(outfile.c_str());
 }
