@@ -37,6 +37,8 @@
 
 #include "plugins/e57/io/E57Reader.hpp"
 #include "plugins/e57/io/Utils.hpp"
+#include "io/LasWriter.hpp"
+#include "io/LasReader.hpp"
 
 using namespace pdal;
 
@@ -80,7 +82,8 @@ TEST(E57Reader, testHeader)
     for (auto& e57Dim: expectedE57Dimensions)
     {
         if (e57Dim.find("nor:normal") == e57Dim.npos &&
-                e57Dim.find("cartesianInvalidState") == e57Dim.npos)
+                e57Dim.find("cartesianInvalidState") == e57Dim.npos &&
+                e57Dim.find("classification") == e57Dim.npos)
             ASSERT_TRUE(table.layout()->hasDim(pdal::e57plugin::e57ToPdal(e57Dim)));
     }
 }
@@ -204,3 +207,91 @@ TEST(E57Reader, testTransformMerge)
     }
 }
 
+
+TEST(E57Reader, testDimensionRescaling)
+{
+    std::string outfile(Support::datapath("las/test.las"));
+    {
+        E57Reader r;
+        Options ops;
+        ops.add("filename", Support::datapath("e57/A_B.e57")); // This cloud have colors in 0-255 range.
+        r.setOptions(ops);
+
+        LasWriter w;
+        Options wo;
+
+        wo.add("filename", outfile);
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    Options lasOps;
+    lasOps.add("filename", outfile);
+    LasReader lasReader;
+    lasReader.setOptions(lasOps);
+
+    PointTable lasTable;
+    lasReader.prepare(lasTable);
+    auto lasViewSet = lasReader.execute(lasTable);
+    auto lasView = *lasViewSet.begin();
+
+    auto pt3 = lasView->point(5);
+    ASSERT_FLOAT_EQ(pt3.getFieldAs<float>(pdal::Dimension::Id::Red), 0.0f);
+    ASSERT_FLOAT_EQ(pt3.getFieldAs<float>(pdal::Dimension::Id::Green), 65535.0f); //rescaled to 0-65535
+    ASSERT_FLOAT_EQ(pt3.getFieldAs<float>(pdal::Dimension::Id::Blue), 0.0f);
+    ASSERT_FLOAT_EQ(pt3.getFieldAs<float>(pdal::Dimension::Id::Intensity), 65535.0f); //rescaled to 0-65535
+
+    remove(outfile.c_str());
+}
+
+TEST(E57Reader, testScansWithDifferentDimensions)
+{
+    std::string outfile(Support::datapath("las/test.las"));
+    {
+        E57Reader r;
+        Options ops;
+        ops.add("filename",
+                Support::datapath(
+                    "e57/A_B_different_dims.e57")); // This cloud have 2 different scans, One with colors and one without colors
+        r.setOptions(ops);
+
+        LasWriter w;
+        Options wo;
+
+        wo.add("filename", outfile);
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    Options lasOps;
+    lasOps.add("filename", outfile);
+    LasReader lasReader;
+    lasReader.setOptions(lasOps);
+
+    PointTable lasTable;
+    lasReader.prepare(lasTable);
+    auto lasViewSet = lasReader.execute(lasTable);
+    auto lasView = *lasViewSet.begin();
+
+    auto pt1 = lasView->point(0); // point from scan without colors.
+    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 0);
+    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 0);
+    ASSERT_EQ(pt1.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 0);
+
+    auto pt2 = lasView->point(1); // point from scan with colors.
+    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Red), 19018);
+    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Green), 23644);
+    ASSERT_EQ(pt2.getFieldAs<UINT16>(pdal::Dimension::Id::Blue), 13878);
+
+    remove(outfile.c_str());
+}

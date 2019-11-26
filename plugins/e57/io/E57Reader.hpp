@@ -38,6 +38,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include "Scan.hpp"
+#include "Utils.hpp"
 
 namespace pdal
 {
@@ -56,11 +57,13 @@ private:
     virtual bool processOne(PointRef&) override;
     virtual void ready(PointTableRef&) override;
     virtual QuickInfo inspect() override;
+    virtual void addArgs(ProgramArgs& args) override;
 
     // Private members
     bool fillPoint(PointRef& point);
     point_count_t readNextBatch();
     void setupReader();
+    void initializeBuffers();
 
     std::unique_ptr<e57::ImageFile> m_imf;
     std::unique_ptr<e57::VectorNode> m_data3D;
@@ -76,6 +79,8 @@ private:
     point_count_t m_defaultChunkSize;
     signed int m_currentScan;
 
+    pdal::StringList m_extraDimsSpec;
+    std::unique_ptr<e57plugin::ExtraDims> m_extraDims;
 };
 
 } // namespace pdal

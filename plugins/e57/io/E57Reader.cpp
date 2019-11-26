@@ -34,14 +34,13 @@
 
 #include "E57Reader.hpp"
 #include "Utils.hpp"
-#include "vendor/arbiter/arbiter.hpp"
+#include "arbiter/arbiter.hpp"
+#include <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
-
 using namespace e57;
-static PluginInfo const s_info{"readers.e57", "Reader for E57 files",
-    "http://pdal.io/stages/reader.e57.html"};
+static PluginInfo const s_info{"readers.e57", "Reader for E57 files", ""};
 
 CREATE_SHARED_STAGE(E57Reader, s_info)
 
@@ -51,30 +50,122 @@ std::string E57Reader::getName() const
 }
 
 E57Reader::E57Reader()
-    : Reader(), Streamable()
+    : Reader(), Streamable(), m_currentIndex(0), m_pointsInCurrentBatch(0), m_defaultChunkSize(1000000),
+      m_currentScan(-1)
 {
+}
+
+void E57Reader::addArgs(ProgramArgs& args)
+{
+    args.add("extra_dims", "Extra dimensions to write to E57 data",
+             m_extraDimsSpec);
+}
+
+void E57Reader::initializeBuffers()
+{
+    m_doubleBuffers.clear();
+    m_destBuffers.clear();
+    m_e57PointPrototype.reset(new StructureNode(m_scan->getPointPrototype()));
+
+    // Initialize for supported dimensions.
+    auto supportedFields = e57plugin::supportedE57Types();
+    for (auto& dimension : supportedFields)
+    {
+        if (m_e57PointPrototype->isDefined(dimension))
+        {
+            m_doubleBuffers[dimension] =
+                std::vector<double>(m_defaultChunkSize, 0);
+        }
+    }
+
+    // Initialize for extra dimensions.
+    for (auto i = m_extraDims->begin(); i != m_extraDims->end(); ++i)
+    {
+        if (m_e57PointPrototype->isDefined(i->m_name))
+        {
+            m_doubleBuffers[i->m_name] =
+                std::vector<double>(m_defaultChunkSize, 0);
+        }
+    }
+
+    // Link to destination buffers.
+    for (auto& keyValue : m_doubleBuffers)
+    {
+        m_destBuffers.emplace_back(
+            *m_imf, keyValue.first, keyValue.second.data(), m_defaultChunkSize,
+            true,
+            (m_e57PointPrototype->get(keyValue.first).type() ==
+             e57::E57_SCALED_INTEGER));
+    }
 }
 
 void E57Reader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto& keyVal : m_doubleBuffers)
+    auto supportedFields = e57plugin::supportedE57Types();
+    auto numScans = m_data3D->childCount();
+    std::unique_ptr<Scan> tempScan;
+
+    for (auto& dimension : supportedFields)
     {
-        layout->registerDim(e57plugin::e57ToPdal(keyVal.first));
+        // Check if any of the scan have this dimension.
+        // If any of the scan have this dimension, we cannot ignore it.
+        for (auto p = 0; p < numScans; ++p)
+        {
+            tempScan.reset(new Scan((StructureNode)m_data3D->get(p)));
+            auto proto = tempScan->getPointPrototype();
+            if (proto.isDefined(dimension))
+            {
+                layout->registerDim(e57plugin::e57ToPdal(dimension));
+                break;
+            }
+        }
+    }
+
+    m_extraDims.reset(new e57plugin::ExtraDims());
+    m_extraDims->parse(m_extraDimsSpec);
+    auto i = m_extraDims->begin();
+    while (i != m_extraDims->end())
+    {
+        i->m_id = Dimension::Id::Unknown;
+        // Remove extra dims which are already in layout.
+        if (layout->hasDim(e57plugin::e57ToPdal(i->m_name)))
+        {
+            i = m_extraDims->deleteDim(i);
+            continue;
+        }
+
+        // Check if any of the scan have this dimension.
+        // If any of the scan have this dimension, we cannot ignore it.
+        for (auto p = 0; p < numScans; ++p)
+        {
+            tempScan.reset(new Scan((StructureNode)m_data3D->get(p)));
+            auto proto = tempScan->getPointPrototype();
+            if (proto.isDefined(i->m_name))
+            {
+                i->m_id = layout->registerOrAssignDim(i->m_name, i->m_type);
+                break;
+            }
+        }
+
+        if (i->m_id == Dimension::Id::Unknown)
+        {
+            // Input E57 point point cloud do not have this dimension. It should be ignored.
+            log()->get(LogLevel::Warning) << "Extra dimension specified in pipeline don't match in E57 prototype."
+                                          " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
+            i = m_extraDims->deleteDim(i);
+            continue;
+        }
+        ++i;
     }
 }
 
 void E57Reader::initialize()
 {
-    m_currentIndex = 0;
-    m_pointsInCurrentBatch = 0;
-    m_defaultChunkSize = 10000;
-    m_currentScan = -1;
     try
     {
         arbiter::Arbiter arb;
-        auto fileHandle= arb.getLocalHandle(m_filename);
+        auto fileHandle = arb.getLocalHandle(m_filename);
         m_imf.reset(new ImageFile(fileHandle->localPath(), "r"));
-
         StructureNode root = m_imf->root();
 
         if (!root.isDefined("/data3D"))
@@ -92,17 +183,6 @@ void E57Reader::initialize()
 
         m_data3D.reset(new VectorNode(root.get("/data3D")));
 
-        StructureNode scan(m_data3D->get(0));
-        CompressedVectorNode points(scan.get("points"));
-        m_e57PointPrototype.reset(new StructureNode(points.prototype()));
-
-        auto supportedFields = e57plugin::supportedE57Types();
-        for (auto& dimension : supportedFields)
-        {
-            if (m_e57PointPrototype->isDefined(dimension))
-                m_doubleBuffers[dimension] =
-                    std::vector<double>(m_defaultChunkSize, 0);
-        }
     }
     catch (E57Exception& e)
     {
@@ -116,15 +196,7 @@ void E57Reader::initialize()
 
 void E57Reader::ready(PointTableRef& ref)
 {
-    for (auto& keyValue : m_doubleBuffers)
-    {
-        m_destBuffers.emplace_back(
-            *m_imf, keyValue.first, keyValue.second.data(), m_defaultChunkSize,
-            true,
-            (m_e57PointPrototype->get(keyValue.first).type() ==
-             e57::E57_SCALED_INTEGER));
-    }
-
+    log()->get(LogLevel::Info) << "Reading : " << m_filename;
     // Initial reader setup.
     setupReader();
 }
@@ -162,6 +234,7 @@ void E57Reader::setupReader()
     try
     {
         m_scan.reset(new Scan((StructureNode)m_data3D->get(m_currentScan)));
+        initializeBuffers();
         m_reader.reset(new CompressedVectorReader(
                            m_scan->getPoints().reader(m_destBuffers)));
     }
@@ -212,7 +285,7 @@ bool E57Reader::fillPoint(PointRef& point)
 
     if (!m_pointsInCurrentBatch)
     {
-        // We're done with reading
+        // We're done with reding
         return false;
     }
 
@@ -221,8 +294,17 @@ bool E57Reader::fillPoint(PointRef& point)
         auto dim = e57plugin::e57ToPdal(keyValue.first);
 
         if (dim != Dimension::Id::Unknown)
-            point.setField(dim,
-                           m_scan->rescale(dim, keyValue.second[m_currentIndex]));
+        {
+            point.setField(dim, m_scan->rescale(dim, keyValue.second[m_currentIndex]));
+        }
+        else
+        {
+            auto dim = m_extraDims->findDim(keyValue.first);
+            if (dim != m_extraDims->end())
+            {
+                point.setField(dim->m_id, keyValue.second[m_currentIndex]);
+            }
+        }
     }
 
     if (m_scan->hasPose())
