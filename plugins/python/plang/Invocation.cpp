@@ -188,7 +188,7 @@ bool Invocation::execute(PointViewPtr& v, MetadataNode stageMetadata)
         throw pdal_error("No code has been compiled");
 
     PyObject *inArrays = prepareData(v);
-    PyObject *outArrays;
+    PyObject *outArrays(nullptr);
 
     // New object.
     Py_ssize_t numArgs = argCount(m_function);
