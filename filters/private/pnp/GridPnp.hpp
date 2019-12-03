@@ -466,7 +466,7 @@ private:
         return inside;
     }
 
-    // Determine if two edges interset.  Note that because of the way
+    // Determine if two edges intersect.  Note that because of the way
     // we've chosen reference points, the two segments should never be
     // collinear, which eliminates some special cases.
     //
@@ -489,6 +489,8 @@ private:
         double rCrossS = r.first * s.second - r.second * s.first;
         Vector pq = { q.first - p.first, q.second - p.second };
 
+        //ABELL - This can be improved to eliminate the division
+        //  because we're testing for 1 and 0.  Later...
         double pqCrossS = pq.first * s.second - pq.second * s.first;
         double t = (pqCrossS / rCrossS);
         bool tCloseEnough = Comparison::closeEnough(t, 0) ||
