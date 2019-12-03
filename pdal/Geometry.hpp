@@ -67,10 +67,11 @@ public:
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
+    virtual void modified();
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref);
     SpatialReference getSpatialReference() const;
-    void transform(const SpatialReference& ref) const;
+    void transform(const SpatialReference& ref);
 
     std::string wkt(double precision=15, bool bOutputZ=false) const;
     std::string json(double precision=15) const;

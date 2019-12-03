@@ -83,6 +83,10 @@ Geometry::~Geometry()
 {}
 
 
+void Geometry::modified()
+{}
+
+
 void Geometry::update(const std::string& wkt_or_json)
 {
     bool isJson = (wkt_or_json.find("{") != wkt_or_json.npos) ||
@@ -114,6 +118,7 @@ void Geometry::update(const std::string& wkt_or_json)
     else if (m_geom)
         newGeom->assignSpatialReference(m_geom->getSpatialReference());
     m_geom.reset(newGeom);
+    modified();
 }
 
 
@@ -121,6 +126,7 @@ Geometry& Geometry::operator=(const Geometry& input)
 {
     if (m_geom != input.m_geom)
         *m_geom = *input.m_geom;
+    modified();
     return *this;
 }
 
@@ -132,7 +138,7 @@ bool Geometry::srsValid() const
 }
 
 
-void Geometry::transform(const SpatialReference& out) const
+void Geometry::transform(const SpatialReference& out)
 {
     if (!srsValid() && out.empty())
         return;
@@ -145,6 +151,7 @@ void Geometry::transform(const SpatialReference& out) const
     SrsTransform transform(getSpatialReference(), out);
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
         throw pdal_error("Geometry::transform() failed.");
+    modified();
 }
 
 

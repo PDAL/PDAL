@@ -64,7 +64,6 @@ class EptInfo;
 class FixedPointLayout;
 class Key;
 class Pool;
-class GridPnp;
 class VectorPointTable;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
@@ -140,7 +139,6 @@ private:
     std::unique_ptr<Args> m_args;
 
     BOX3D m_queryBounds;
-    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
     std::vector<std::unique_ptr<Addon>> m_addons;
