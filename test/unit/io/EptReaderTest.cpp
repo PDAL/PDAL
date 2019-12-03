@@ -180,7 +180,7 @@ TEST(EptReaderTest, fullReadBinary)
 
 TEST(EptReaderTest, fullReadZstandard)
 {
-#ifdef PDAL_HAVE_ZSTANDARD
+#ifdef PDAL_HAVE_ZSTD
     Options options;
     options.add("filename", ellipsoidEptZstandardPath);
 
