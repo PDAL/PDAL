@@ -987,8 +987,10 @@ void EptReader::load()
                 readLaszip(nodeBuffer->view, key, nodeId);
             else if (m_info->dataType() == EptInfo::DataType::Zstandard)
                 readZstandard(nodeBuffer->view, key, nodeId);
-            else
+            else if (m_info->dataType() == EptInfo::DataType::Binary)
                 readBinary(nodeBuffer->view, key, nodeId);
+            else
+                throw ept_error("Unrecognized EPT dataType");
 
             for (const auto& addon : m_addons)
                 readAddon(nodeBuffer->view, key, *addon);
