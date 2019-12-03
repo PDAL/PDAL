@@ -714,8 +714,10 @@ PointViewSet EptReader::run(PointViewPtr view)
                 startId = readLaszip(*view, key, nodeId);
             else if (m_info->dataType() == EptInfo::DataType::Binary)
                 startId = readBinary(*view, key, nodeId);
-            else
+            else if (m_info->dataType() == EptInfo::DataType::Zstandard)
                 startId = readZstandard(*view, key, nodeId);
+            else
+                throw ept_error("Unrecognized EPT dataType");
 
             // Read addon information after the native data, we'll possibly
             // overwrite attributes.
