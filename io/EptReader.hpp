@@ -103,7 +103,10 @@ private:
 
     PointId readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
     PointId readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
-    PointId readZstandard(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readZstandard(PointView& view, const Key& key, uint64_t nodeId)
+        const;
+    PointId processPackedData(PointView& view, uint64_t nodeId, char* data,
+        uint64_t size) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
         PointId pointId) const;
 

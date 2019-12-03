@@ -784,11 +784,10 @@ PointId EptReader::readLaszip(PointView& dst, const Key& key,
     return startId;
 }
 
-PointId EptReader::readBinary(PointView& dst, const Key& key,
-        const uint64_t nodeId) const
+PointId EptReader::processPackedData(PointView& dst, const uint64_t nodeId,
+    char* data, const uint64_t size) const
 {
-    auto data(getBinary("ept-data/" + key.toString() + ".bin"));
-    ShallowPointTable table(*m_remoteLayout, data.data(), data.size());
+    ShallowPointTable table(*m_remoteLayout, data, size);
     PointRef pr(table);
 
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -805,37 +804,25 @@ PointId EptReader::readBinary(PointView& dst, const Key& key,
     return startId;
 }
 
+PointId EptReader::readBinary(PointView& dst, const Key& key,
+        const uint64_t nodeId) const
+{
+    auto data(getBinary("ept-data/" + key.toString() + ".bin"));
+    return processPackedData(dst, nodeId, data.data(), data.size());
+}
+
 uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
     auto compressed(m_ep->getBinary("ept-data/" + key.toString() + ".zst"));
-    std::vector<char> uncompressed;
-    pdal::ZstdDecompressor dec([&uncompressed](char* pos, std::size_t size)
+    std::vector<char> data;
+    pdal::ZstdDecompressor dec([&data](char* pos, std::size_t size)
     {
-        uncompressed.insert(uncompressed.end(), pos, pos + size);
+        data.insert(data.end(), pos, pos + size);
     });
 
     dec.decompress(compressed.data(), compressed.size());
-
-    ShallowPointTable table(
-        *m_remoteLayout,
-        uncompressed.data(),
-        uncompressed.size());
-
-    PointRef pr(table);
-
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    const uint64_t startId(dst.size());
-
-    uint64_t pointId(0);
-    for (uint64_t pointId(0); pointId < table.numPoints(); ++pointId)
-    {
-        pr.setPointId(pointId);
-        process(dst, pr, nodeId, pointId);
-    }
-
-    return startId;
+    return processPackedData(dst, nodeId, data.data(), data.size());
 }
 
 void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
