@@ -793,8 +793,6 @@ PointId EptReader::processPackedData(PointView& dst, const uint64_t nodeId,
     std::lock_guard<std::mutex> lock(m_mutex);
 
     const PointId startId(dst.size());
-
-    PointId pointId(0);
     for (PointId pointId(0); pointId < table.numPoints(); ++pointId)
     {
         pr.setPointId(pointId);
