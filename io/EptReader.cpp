@@ -48,7 +48,6 @@
 #include <pdal/compression/ZstdCompression.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include "../filters/CropFilter.hpp"
-#include "../filters/private/pnp/GridPnp.hpp"
 
 namespace pdal
 {
@@ -107,7 +106,7 @@ public:
     EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
         HIGHEST, HIGHEST, HIGHEST))
     {}
-    EptBounds(const SrsBounds& b) : SrsBounds( b )
+    EptBounds(const SrsBounds& b) : SrsBounds(b)
     {}
 };
 
@@ -281,12 +280,6 @@ void EptReader::initialize()
     }
     m_args->m_polys = std::move(exploded);
 
-    for (auto& p : m_args->m_polys)
-    {
-        m_queryGrids.emplace_back(
-            new GridPnp(p.exteriorRing(), p.interiorRings()));
-    }
-
     try
     {
         handleOriginQuery();
@@ -437,12 +430,28 @@ QuickInfo EptReader::inspect()
     {
         initialize();
 
-        qi.m_bounds = toBox3d(m_info->json()["boundsConforming"]);
+        const BOX3D fullBounds(toBox3d(m_info->json()["boundsConforming"]));
+
+        qi.m_bounds = fullBounds;
         qi.m_srs = m_info->srs();
         qi.m_pointCount = m_info->points();
 
         for (auto& el : m_info->schema())
             qi.m_dimNames.push_back(el["name"].get<std::string>());
+
+        // If we've passed a spatial query, determine an upper bound on the
+        // point count.
+        if (!m_queryBounds.contains(fullBounds) || m_args->m_polys.size())
+        {
+            log()->get(LogLevel::Debug) <<
+                "Determining overlapping point count" << std::endl;
+
+            overlaps();
+
+            qi.m_pointCount = 0;
+            for (const auto& p : m_overlaps)
+                qi.m_pointCount += p.second;
+        }
     }
     catch (std::exception& e)
     {
@@ -842,11 +851,11 @@ void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
 
     auto passesPolyFilter = [this](double x, double y)
     {
-        if (m_queryGrids.empty())
+        if (m_args->m_polys.empty())
             return true;
 
-        for (const auto& grid : m_queryGrids)
-            if (grid->inside(x, y))
+        for (Polygon& poly : m_args->m_polys)
+            if (poly.contains(x, y))
                 return true;
         return false;
     };

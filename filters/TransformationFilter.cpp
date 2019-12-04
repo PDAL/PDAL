@@ -118,6 +118,15 @@ std::string TransformationFilter::getName() const { return s_info.name; }
 void TransformationFilter::addArgs(ProgramArgs& args)
 {
     args.add("matrix", "Transformation matrix", *m_matrix).setPositional();
+    args.add("override_srs", "Spatial reference to apply to data.",
+        m_overrideSrs);
+}
+
+
+void TransformationFilter::initialize()
+{
+    if (! m_overrideSrs.empty())
+        setSpatialReference(m_overrideSrs);
 }
 
 
@@ -148,9 +157,20 @@ bool TransformationFilter::processOne(PointRef& point)
     return true;
 }
 
+void TransformationFilter::spatialReferenceChanged(const SpatialReference& srs)
+{
+    if (!srs.empty() && !m_overrideSrs.empty())
+        log()->get(LogLevel::Warning) << getName() <<
+            ": overriding input spatial reference." << std::endl;
+}
+
 
 void TransformationFilter::filter(PointView& view)
 {
+    if (!view.spatialReference().empty() && !m_overrideSrs.empty())
+        log()->get(LogLevel::Warning) << getName() <<
+            ": overriding input spatial reference." << std::endl;
+
     PointRef point(view, 0);
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
