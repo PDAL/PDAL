@@ -230,7 +230,8 @@ public:
     enum class DataType
     {
         Laszip,
-        Binary
+        Binary,
+        Zstandard
     };
 
     EptInfo(const NL::json& info);
