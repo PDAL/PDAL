@@ -278,6 +278,16 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )
+
+if (WIN32)
+    target_link_libraries(${PDAL_BASE_LIB_NAME}
+        PUBLIC
+            ${GDAL_LIBRARY}
+        INTERFACE
+            ${PDAL_LIBDIR}
+    )
+endif(WIN32)
+
 target_compile_definitions(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${LASZIP_DEFINES}
