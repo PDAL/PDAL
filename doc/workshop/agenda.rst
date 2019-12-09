@@ -23,16 +23,15 @@ Materials
 Slides
 ................................................................................
 
-* `Slides <https://pdal.io/workshop/slides/>`__
+* `Slides <https://pdal.s3.amazonaws.com/workshop/slides.zip>`__
 
 Workshop Materials
 ................................................................................
 
-These materials are available at http://pdal.io/workshop/ as both
-a PDF and an HTML website.
+These materials are available as a PDF and an HTML website.
 
-* `PDF download <https://pdal.io/PDAL.pdf>`__
-* `Website <https://pdal.io/workshop/>`__
+* `PDF download <https://pdal.s3.amazonaws.com/workshop/PDAL-workshop.pdf>`__
+* `HTML <https://pdal.s3.amazonaws.com/workshop/PDAL-workshop-html.zip>`__
 
 USB Example Data Drive
 ................................................................................
@@ -45,4 +44,4 @@ to follow along with these examples.
 .. note::
 
     A drive image is available for download at
-    https://s3.amazonaws.com/pdal/workshop/PDAL.zip
+    https://pdal.s3.amazonaws.com/workshop/PDAL-Workshop-complete.zip

@@ -14,9 +14,6 @@ Purpose:
     * Visualize DTM using :ref:`qgis`
 
 
-:ref:`DTM Workshop Materials <pdal:dtm>`
-
-
 writers.gdal
 ================================================================================
 
@@ -72,7 +69,9 @@ DTM (visualization)
 
 .. image:: ../../images/dtm-qgis-hillshade-done.png
 
-Home
+Next
 ================================================================================
-:ref:`Home <home>`
+
+On to :ref:`meshing`
+
 

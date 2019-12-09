@@ -84,15 +84,18 @@ copyright = u'%d' % year
 
 def read_version(filename):
     #
-    # set(PDAL_VERSION_STRING 0.9.8 CACHE STRING "PDAL version")
+    # project(PDAL VERSION 0.9.8 LANGUAGES CXX C)
     data = open(filename).readlines()
 
-    token = 'PDAL_VERSION_STRING'
+    token = 'PDAL VERSION'
 
+    version = None
     for line in data:
         if str(token) in line:
-            version = re.search(r'\d.\d.\d', line).group(0)
-            break
+            match = re.search(r'\d.\d.\d', line)
+            if match is not None:
+                version = match.group(0)
+                break
     return version
 
 release = read_version('../CMakeLists.txt')

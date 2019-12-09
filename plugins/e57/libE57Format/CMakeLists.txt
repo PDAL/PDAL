@@ -144,19 +144,3 @@ set_target_properties( E57Format PROPERTIES
     DEBUG_POSTFIX "-d"
     POSITION_INDEPENDENT_CODE ON
 )
-
-#
-# Install section
-#
-
-install(
-    TARGETS
-        E57Format
-    ARCHIVE DESTINATION lib
-)
-install(
-    FILES
-        include/E57Exception.h
-        include/E57Format.h
-    DESTINATION include/E57Format
-)

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.6)
 project(WritingTutorial)
 
-find_package(PDAL 1.6.0 REQUIRED CONFIG)
+find_package(PDAL 2.0.0 REQUIRED CONFIG)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(tutorial tutorial.cpp)
 

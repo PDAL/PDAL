@@ -16,13 +16,10 @@ The technique used to create the raster is a simple interpolation where
 each point that falls within a given radius_ of a raster cell center
 potentially contributes to the raster's value.  If no radius is provided,
 it is set to the product of the resolution_ and the square root of two.
-This is consistent with the original Points2Grid_ application from which
-this algorithm has its roots.  If a circle with the provided radius
+If a circle with the provided radius
 doesn't encompass the entire cell, it is possible that some points will
 not be considered at all, including those that may be within the bounds
 of the raster cell.
-
-.. _Points2Grid: http://www.opentopography.org/otsoftware/points2grid
 
 The GDAL writer creates rasters using the data specified in the dimension_
 option (defaults to `Z`). The writer creates up to six rasters based on
@@ -115,6 +112,10 @@ radius
     Radius about cell center bounding points to use to calculate a cell value.
     [Default: resolution_ * sqrt(2)]
 
+power
+    Exponent of the distance when computing IDW. Close points have higher
+    significance than far points. [Default: 1.0]
+
 gdaldriver
     GDAL code of the `GDAL driver`_ to use to write the output.
     [Default: "GTiff"]
@@ -165,11 +166,22 @@ window_size
 dimension
   A dimension name to use for the interpolation. [Default: "Z"]
 
-.. _bounds:
-
 bounds
   The bounds of the data to be written.  Points not in bounds are discarded.
-  The format is ([minx, maxx],[miny,maxy]).
+  The format is ([minx, maxx],[miny,maxy]). [Optional]
+
+origin_x
+  X origin (lower left corner) of the grid. [Default: None]
+
+origin_y
+  Y origin (lower left corner) of the grid. [Default: None]
+
+width
+  Number of cells in the X direction. [Default: None]
+
+height
+  Number of cells in the Y direction. [Default: None]
 
 .. note::
-  The bounds_ option is required when a pipeline is run in streaming mode.
+    You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
+    and 'height', but not both.

@@ -48,8 +48,7 @@ RGB values of an `ASPRS LAS`_ file using :ref:`writers.las`.
       {
           "type":"readers.gdal",
           "filename":"./pdal/test/data/autzen/autzen.jpg",
-          "header", "Red, Green, Blue"
-
+          "header": "Red, Green, Blue"
       },
       {
           "type":"writers.text",

@@ -8,6 +8,8 @@ to a provided value that pass a range filter.
 
 .. embed::
 
+.. streamable::
+
 Example 1
 ---------
 

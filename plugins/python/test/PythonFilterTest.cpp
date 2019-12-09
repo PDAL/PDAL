@@ -64,15 +64,22 @@ TEST_F(PythonFilterTest, PythonFilterTest_test1)
 {
     StageFactory f;
 
-    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    BOX3D bounds1(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    BOX3D bounds2(10.0, 10.0, 10.0, 11.0, 11.0, 11.0);
+    FauxReader reader1;
+    FauxReader reader2;
 
-    Options ops;
-    ops.add("bounds", bounds);
-    ops.add("count", 10);
-    ops.add("mode", "ramp");
+    Options ops1;
+    ops1.add("bounds", bounds1);
+    ops1.add("count", 10);
+    ops1.add("mode", "ramp");
+    reader1.setOptions(ops1);
 
-    FauxReader reader;
-    reader.setOptions(ops);
+    Options ops2;
+    ops2.add("bounds", bounds2);
+    ops2.add("count", 10);
+    ops2.add("mode", "ramp");
+    reader2.setOptions(ops2);
 
     Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
@@ -98,7 +105,8 @@ TEST_F(PythonFilterTest, PythonFilterTest_test1)
 
     Stage* filter(f.createStage("filters.python"));
     filter->setOptions(opts);
-    filter->setInput(reader);
+    filter->setInput(reader1);
+    filter->setInput(reader2);
 
     std::unique_ptr<StatsFilter> stats(new StatsFilter);
     stats->setInput(*filter);
@@ -107,18 +115,17 @@ TEST_F(PythonFilterTest, PythonFilterTest_test1)
 
     stats->prepare(table);
     PointViewSet viewSet = stats->execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(viewSet.size(), 2u);
 
     const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_DOUBLE_EQ(statsX.minimum(), 10.0);
-    EXPECT_DOUBLE_EQ(statsX.maximum(), 11.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 21.0);
 
     EXPECT_DOUBLE_EQ(statsY.minimum(), 0.0);
-    EXPECT_DOUBLE_EQ(statsY.maximum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsY.maximum(), 11.0);
 
     EXPECT_DOUBLE_EQ(statsZ.minimum(), 3.14);
     EXPECT_DOUBLE_EQ(statsZ.maximum(), 3.14);
@@ -194,7 +201,6 @@ TEST_F(PythonFilterTest, add_dimension)
         EXPECT_EQ(view->getFieldAs<uint16_t>(psid_id, i), 2);
     }
 }
-
 
 TEST_F(PythonFilterTest, metadata)
 {
@@ -585,11 +591,12 @@ TEST(PLangTest, PLangTest_basic)
         "  return True\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-    meth.execute();
-}
+    Invocation meth(script, MetadataNode(), "");
 
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    meth.execute(view, MetadataNode());
+}
 
 //---------------------------------------------------------------------------
 //
@@ -605,9 +612,7 @@ TEST(PLangTest, PLangTest_compile_error)
         "return True\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-
-    ASSERT_THROW(meth.compile(), pdal::pdal_error);
+    ASSERT_THROW(Invocation meth(script, MetadataNode(), ""), pdal::pdal_error);
 }
 
 
@@ -620,10 +625,11 @@ TEST(PLangTest, PLangTest_runtime_error)
         "  return True\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
+    Invocation meth(script, MetadataNode(), "");
 
-    ASSERT_THROW(meth.execute(), pdal::pdal_error);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    ASSERT_THROW(meth.execute(view, MetadataNode()), pdal::pdal_error);
 }
 
 
@@ -636,10 +642,11 @@ TEST(PLangTest, PLangTest_returnvoid)
         "  return\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
+    Invocation meth(script, MetadataNode(), "");
 
-    ASSERT_THROW(meth.execute(), pdal::pdal_error);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    ASSERT_THROW(meth.execute(view, MetadataNode()), pdal::pdal_error);
 }
 
 
@@ -652,69 +659,18 @@ TEST(PLangTest, PLangTest_returnint)
         "  return 7\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
+    Invocation meth(script, MetadataNode(), "");
 
-    ASSERT_THROW(meth.execute(), pdal::pdal_error);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    ASSERT_THROW(meth.execute(view, MetadataNode()), pdal::pdal_error);
 }
-
 
 //---------------------------------------------------------------------------
 //
 // PARAM tests
 //
 //---------------------------------------------------------------------------
-
-
-TEST(PLangTest, PLangTest_ins)
-{
-    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
-
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins,outs):\n"
-        "  #print ins['X']\n"
-        "  X = ins['X']\n"
-        "  #print X\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-    meth.insertArgument("X", (uint8_t*)data, Dimension::Type::Double, 5);
-    meth.execute();
-}
-
-
-TEST(PLangTest, PLangTest_outs)
-{
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins,outs):\n"
-        "  #print outs['X']\n"
-        "  X = np.ones(5)\n"
-        "  #print X\n"
-        "  outs['X'] = X\n"
-        "  #print outs['X']\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-    meth.execute();
-    EXPECT_TRUE(meth.hasOutputVariable("X"));
-
-    size_t arrSize;
-    void *output = meth.extractResult("X", Dimension::Type::Double, arrSize);
-
-    double *d = (double *)output;
-    EXPECT_DOUBLE_EQ(*d++, 1.0);
-    EXPECT_DOUBLE_EQ(*d++, 1.0);
-    EXPECT_DOUBLE_EQ(*d++, 1.0);
-    EXPECT_DOUBLE_EQ(*d++, 1.0);
-    EXPECT_DOUBLE_EQ(*d++, 1.0);
-}
-
 
 TEST(PLangTest, PLangTest_aliases)
 {
@@ -744,50 +700,37 @@ TEST(PLangTest, PLangTest_aliases)
         "  #print outs['prefix.Y']\n"
         "  return True\n"
         ;
+
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    Dimension::Id prefixX = table.layout()->assignDim("prefix.X",
+        Dimension::Type::Double);
+    Dimension::Id prefixY = table.layout()->assignDim("prefix.Y",
+        Dimension::Type::Double);
+    PointViewPtr view(new PointView(table));
+    view->setField(Dimension::Id::X, 0, 1);
+    view->setField(Dimension::Id::X, 1, 2);
+    view->setField(Dimension::Id::X, 2, 3);
+    view->setField(Dimension::Id::X, 3, 4);
+    view->setField(Dimension::Id::X, 4, 5);
+
+    view->setField(prefixX, 0, 1);
+    view->setField(prefixX, 1, 2);
+    view->setField(prefixX, 2, 3);
+    view->setField(prefixX, 3, 4);
+    view->setField(prefixX, 4, 5);
+
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
+    Invocation meth(script, MetadataNode(), "");
+    meth.execute(view, MetadataNode());
 
+    double ck = 2;
+    for (PointId idx = 0; idx < 5; ++idx)
     {
-        double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
-        meth.insertArgument("X", (uint8_t*)data, Dimension::Type::Double, 5);
-        meth.insertArgument("prefix.X", (uint8_t*)data,
-            Dimension::Type::Double, 5);
-    }
-    meth.execute();
-
-    {
-        EXPECT_TRUE(meth.hasOutputVariable("Y"));
-        EXPECT_TRUE(meth.hasOutputVariable("prefix.Y"));
-
-        size_t arrSize;
-        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
-        double *d = (double *)output;
-        EXPECT_DOUBLE_EQ(*d++, 2.0);
-        EXPECT_DOUBLE_EQ(*d++, 4.0);
-        EXPECT_DOUBLE_EQ(*d++, 6.0);
-        EXPECT_DOUBLE_EQ(*d++, 8.0);
-        EXPECT_DOUBLE_EQ(*d++, 10.0);
-
-        output = meth.extractResult("prefix.Y", Dimension::Type::Double, arrSize);
-        d = (double *)output;
-        EXPECT_DOUBLE_EQ(*d++, 2.0);
-        EXPECT_DOUBLE_EQ(*d++, 4.0);
-        EXPECT_DOUBLE_EQ(*d++, 6.0);
-        EXPECT_DOUBLE_EQ(*d++, 8.0);
-        EXPECT_DOUBLE_EQ(*d++, 10.0);
-    }
-
-    {
-        std::vector<std::string> names;
-        meth.getOutputNames(names);
-
-        // We're getting stuff from a hash, so it
-        // isn't stable
-        std::sort(names.begin(), names.end());
-        EXPECT_EQ(names.size(), 2u);
-        EXPECT_EQ(names[0], "Y");
-        EXPECT_EQ(names[1], "prefix.Y");
+        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Y, idx), ck);
+        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(prefixY, idx), ck);
+        ck += 2;
     }
 }
 
@@ -800,11 +743,12 @@ TEST(PLangTest, PLangTest_returntrue)
         "  return True\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
+    Invocation meth(script, MetadataNode(), "");
 
-    bool sts = meth.execute();
-    EXPECT_TRUE(sts);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+
+    EXPECT_TRUE(meth.execute(view, MetadataNode()));
 }
 
 
@@ -816,11 +760,11 @@ TEST(PLangTest, PLangTest_returnfalse)
         "  return False\n"
         ;
     Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
+    Invocation meth(script, MetadataNode(), "");
 
-    bool sts = meth.execute();
-    EXPECT_TRUE(!sts);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    EXPECT_FALSE(meth.execute(view, MetadataNode()));
 }
 
 
@@ -829,54 +773,6 @@ TEST(PLangTest, PLangTest_returnfalse)
 // MISC tests
 //
 //---------------------------------------------------------------------------
-
-TEST(PLangTest, PLangTest_reentry)
-{
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins,outs):\n"
-        "  X = ins['X']\n"
-        "  Y = X + 1.0\n"
-        "  #print Y\n"
-        "  outs['Y'] = Y\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-
-    {
-        double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
-        meth.insertArgument("X", (uint8_t*)indata1, Dimension::Type::Double, 5);
-        meth.execute();
-
-        size_t arrSize;
-        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
-
-        double *d = (double *)output;
-        EXPECT_DOUBLE_EQ(*d++, 1.0);
-        EXPECT_DOUBLE_EQ(*d++, 2.0);
-        EXPECT_DOUBLE_EQ(*d++, 3.0);
-        EXPECT_DOUBLE_EQ(*d++, 4.0);
-        EXPECT_DOUBLE_EQ(*d++, 5.0);
-    }
-
-    {
-        double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
-        meth.insertArgument("X", (uint8_t*)indata2, Dimension::Type::Double, 5);
-        meth.execute();
-
-        size_t arrSize;
-        void *output = meth.extractResult("Y", Dimension::Type::Double, arrSize);
-
-        double *d = (double *)output;
-        EXPECT_DOUBLE_EQ(*d++, 11.0);
-        EXPECT_DOUBLE_EQ(*d++, 21.0);
-        EXPECT_DOUBLE_EQ(*d++, 31.0);
-        EXPECT_DOUBLE_EQ(*d++, 41.0);
-        EXPECT_DOUBLE_EQ(*d++, 51.0);
-    }
-}
 
 TEST(PLangTest, log)
 {
@@ -951,48 +847,190 @@ TEST(PLangTest, log)
 }
 
 
-
-PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
+TEST_F(PythonFilterTest, ErrorTest1)
 {
-    PointLayoutPtr layout(table.layout());
+    StageFactory f;
 
-    layout->registerDim(Dimension::Id::Classification);
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
-    PointViewPtr view(new PointView(table));
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
 
-    // write the data into the view
-    for (PointId i = 0; i < cnt; i++)
-    {
-        const uint8_t x = static_cast<uint8_t>(i + 1);
-        const int32_t y = static_cast<int32_t>(i * 10);
-        const double z = static_cast<double>(i * 100);
+    FauxReader reader;
+    reader.setOptions(ops);
 
-        view->setField(Dimension::Id::Classification, i, x);
-        view->setField(Dimension::Id::X, i, y);
-        view->setField(Dimension::Id::Y, i, z);
-    }
-    EXPECT_EQ(view->size(), cnt);
-    return view;
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  outs['FOO'] = X\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
 }
 
-void verifyTestView(const PointView& view, point_count_t cnt = 17)
-{
-    // read the view back out
-    for (PointId i = 0; i < cnt; i++)
-    {
-        uint8_t x = view.getFieldAs<uint8_t>(
-            Dimension::Id::Classification, i);
-        int32_t y = view.getFieldAs<uint32_t>(Dimension::Id::X, i);
-        double z = view.getFieldAs<double>(Dimension::Id::Y, i);
 
-        EXPECT_EQ(x, (uint8_t)(i + 1));
-        EXPECT_EQ(y, (int32_t)(i * 10));
-        EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
-            (std::numeric_limits<double>::min)()));
-    }
+TEST_F(PythonFilterTest, ErrorTest2)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  outs['Mask'] = X\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "myfunc");
+    opts.add(source);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
 }
+
+
+TEST_F(PythonFilterTest, ErrorTest3)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  FOO = np.full([X.size + 1], True)\n"
+        "  outs['Mask'] = FOO\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "myfunc");
+    opts.add(source);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest4)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  FOO = np.full([X.size], True)\n"
+        "  outs['Mask'] = FOO\n"
+        "  outs['Y'] = ins['Y']\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "myfunc");
+    opts.add(source);
+
+    Stage* filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+    filter->prepare(table);
+    EXPECT_THROW(filter->execute(table), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest5)
+{
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "f");
+
+    StageFactory f;
+    Stage *filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+
+    PointTable t;
+    EXPECT_THROW(filter->prepare(t), pdal_error);
+}
+
+
+TEST_F(PythonFilterTest, ErrorTest6)
+{
+    Options opts;
+    opts.add("module", "MyModule");
+    opts.add("function", "f");
+    opts.add("script", "some script");
+    opts.add("source", "some source");
+
+    StageFactory f;
+    Stage *filter(f.createStage("filters.python"));
+    filter->setOptions(opts);
+
+    PointTable t;
+    EXPECT_THROW(filter->prepare(t), pdal_error);
+}
+
 
 TEST_F(PythonFilterTest, PythonFilterTest_modify)
 {
@@ -1075,7 +1113,9 @@ static void run_pipeline(std::string const& pipeline)
     int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
     EXPECT_EQ(0, stat);
     if (stat)
-        std::cerr << output << std::endl;
+    {
+        std::cerr << "error message in run_pipeline: " << output << std::endl;
+    }
 }
 
 class jsonWithProgrammable : public testing::TestWithParam<const char*> {};

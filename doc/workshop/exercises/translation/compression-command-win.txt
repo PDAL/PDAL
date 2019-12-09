@@ -1,0 +1,2 @@
+pdal translate ./exercises/translation/interesting.laz ^ 
+./exercises/translation/interesting.las

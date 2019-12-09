@@ -4,7 +4,7 @@
 option(WITH_ZSTD
     "Build support for compression/decompression with Zstd." TRUE)
 if (WITH_ZSTD)
-    find_package(ZSTD REQUIRED)
+    find_package(ZSTD QUIET)
     set_package_properties(ZSTD PROPERTIES TYPE REQUIRED
         PURPOSE "General compression support")
     if (ZSTD_FOUND)

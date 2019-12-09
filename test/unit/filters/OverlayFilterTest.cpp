@@ -53,7 +53,7 @@ void testOverlay(int numReaders, bool stream)
     fo.add("column", "cls");
     fo.add("datasource", Support::datapath("autzen/attributes.shp"));
 
-    LogPtr l(new Log("readers.las", "stderr"));
+    LogPtr l(Log::makeLog("readers.las", "stderr"));
     Stage& f = *(factory.createStage("filters.overlay"));
     for (int i = 0; i < numReaders; ++i)
     {

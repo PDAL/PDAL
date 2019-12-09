@@ -48,34 +48,46 @@ class PDAL_DLL Polygon : public Geometry
 {
     using Point = std::pair<double, double>;
     using Ring = std::vector<Point>;
-public:
-    Polygon()
-    {}
-    Polygon(const std::string& wkt_or_json,
-        SpatialReference ref = SpatialReference()) :
-        Geometry(wkt_or_json, ref)
-    {}
+    struct PrivateData;
 
+public:
+    Polygon();
+    virtual ~Polygon();
+
+    Polygon(const std::string& wkt_or_json,
+        SpatialReference ref = SpatialReference());
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
+    Polygon(OGRGeometryH g);
     Polygon(OGRGeometryH g, const SpatialReference& srs);
-    using Geometry::operator=;
+    Polygon(const Polygon& poly);
+    Polygon& operator=(const Polygon& src);
 
     OGRGeometryH getOGRHandle();
 
-    void simplify(double distance_tolerance, double area_tolerance);
+    virtual void modified() override;
+    void simplify(double distance_tolerance, double area_tolerance,
+        bool preserve_topology = true);
     double area() const;
     std::vector<Polygon> polygons() const;
 
     bool covers(const PointRef& ref) const;
     bool equal(const Polygon& p) const;
     bool overlaps(const Polygon& p) const;
+    bool contains(double x, double y) const;
     bool contains(const Polygon& p) const;
+    bool intersects(const Polygon& p) const;
+    bool disjoint(const Polygon& p) const;
     bool touches(const Polygon& p) const;
     bool within(const Polygon& p) const;
     bool crosses(const Polygon& p) const;
     Ring exteriorRing() const;
     std::vector<Ring> interiorRings() const;
+
+private:
+    void init();
+
+    std::unique_ptr<PrivateData> m_pd;
 };
 
 } // namespace pdal

@@ -47,7 +47,7 @@ TEST(SegmentationTest, BasicClustering)
 {
     using namespace Segmentation;
 
-    std::vector<std::vector<PointId>> clusters;
+    std::vector<PointIdList> clusters;
 
     PointTable table;
     PointLayoutPtr layout(table.layout());

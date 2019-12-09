@@ -34,12 +34,17 @@
 
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_test_main.hpp>
 
 #include <io/EptReader.hpp>
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <pdal/PointViewIter.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 namespace pdal
@@ -63,6 +68,10 @@ namespace
             Support::datapath("ept/source/lone-star.laz"));
     const std::string eptLaszipPath(
             "ept://" + Support::datapath("ept/lone-star-laszip"));
+    const std::string eptAutzenPath(
+            "ept://" + Support::datapath("ept/1.2-with-color"));
+    const std::string attributesPath(
+            Support::datapath("autzen/attributes.json"));
 
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
@@ -473,69 +482,276 @@ void streamTest(const std::string src)
     ops.add("filename", src);
     ops.add("resolution", 1);
 
-    EptReader eptReader;
-    eptReader.setOptions(ops);
+    // Execute the reader in normal non-streaming mode.
+    EptReader normalReader;
+    normalReader.setOptions(ops);
+    PointTable normalTable;
+    const auto nodeIdDim = normalTable.layout()->registerOrAssignDim(
+        "EptNodeId",
+        Dimension::Type::Unsigned32);
+    const auto pointIdDim = normalTable.layout()->registerOrAssignDim(
+        "EptPointId",
+        Dimension::Type::Unsigned32);
+    normalReader.prepare(normalTable);
+    const auto views = normalReader.execute(normalTable);
+    PointView& normalView = **views.begin();
 
-    PointTable t;
-    eptReader.prepare(t);
-    PointViewSet s = eptReader.execute(t);
-    PointViewPtr p = *s.begin();
-
-    class Checker : public Filter, public Streamable
+    // A table that satisfies the streaming interface and simply adds the data
+    // to a normal PointView.  We'll compare the result with the PointView
+    // resulting from standard execution.
+    class TestPointTable : public StreamPointTable
     {
     public:
-        std::string getName() const
-        {
-            return "checker";
-        }
-        Checker(PointViewPtr v)
-            : m_cnt(0), m_view(v), m_bulkBuf(v->pointSize()),
-              m_buf(v->pointSize()), m_dims(v->dimTypes())
-        {
-        }
+        TestPointTable(PointView& view)
+            : StreamPointTable(*view.table().layout(), 1024)
+            , m_view(view)
+        { }
 
-    private:
-        point_count_t m_cnt;
-        PointViewPtr m_view;
-        std::vector<char> m_bulkBuf;
-        std::vector<char> m_buf;
-        DimTypeList m_dims;
-
-        bool processOne(PointRef& point)
+    protected:
+        virtual void reset() override
         {
-            PointRef bulkPoint = m_view->point(m_cnt);
-
-            bulkPoint.getPackedData(m_dims, m_bulkBuf.data());
-            point.getPackedData(m_dims, m_buf.data());
-            EXPECT_EQ(
-                memcmp(m_buf.data(), m_bulkBuf.data(), m_view->pointSize()), 0);
-            m_cnt++;
-            return true;
+            m_offset += numPoints();
         }
 
-        void done(PointTableRef)
+        virtual char* getPoint(PointId index) override
         {
-            EXPECT_EQ(m_cnt, m_view->size());
+            return m_view.getOrAddPoint(m_offset + index);
         }
+
+        PointView& m_view;
+        PointId m_offset = 0;
     };
 
-    EptReader eptReader1;
-    eptReader1.setOptions(ops);
+    // Execute the reder in streaming mode.
+    EptReader streamReader;
+    streamReader.setOptions(ops);
+    std::vector<char> streamBuffer;
+    PointTable streamTable;
+    PointView streamView(streamTable);
+    TestPointTable testTable(streamView);
+    const auto streamNodeIdDim = streamTable.layout()->registerOrAssignDim(
+        "EptNodeId",
+        Dimension::Type::Unsigned32);
+    const auto streamPointIdDim = streamTable.layout()->registerOrAssignDim(
+        "EptPointId",
+        Dimension::Type::Unsigned32);
 
-    Checker c(p);
-    c.setInput(eptReader1);
+    ASSERT_EQ(streamNodeIdDim, nodeIdDim);
+    ASSERT_EQ(streamPointIdDim, pointIdDim);
 
-    FixedPointTable fixed(100);
-    c.prepare(fixed);
-    c.execute(fixed);
+    streamReader.prepare(testTable);
+    streamReader.execute(testTable);
+
+    // Make sure our non-streaming and streaming views are identical, note that
+    // we'll need to sort them since the EPT reader loads data asynchronously
+    // so we can't rely on their order being the same.
+    ASSERT_EQ(streamView.size(), normalView.size());
+    ASSERT_EQ(
+        streamTable.layout()->pointSize(),
+        normalTable.layout()->pointSize());
+
+    const std::size_t numPoints(normalView.size());
+    const std::size_t pointSize(normalTable.layout()->pointSize());
+
+    const auto sort([nodeIdDim, pointIdDim]
+        (const PointIdxRef& a, const PointIdxRef& b)
+    {
+        if (a.compare(nodeIdDim, b)) return true;
+        return !b.compare(nodeIdDim, a) && a.compare(pointIdDim, b);
+    });
+    std::stable_sort(normalView.begin(), normalView.end(), sort);
+    std::stable_sort(streamView.begin(), streamView.end(), sort);
+
+    for (PointId i(0); i < normalView.size(); ++i)
+    {
+        for (const auto& id : normalTable.layout()->dims())
+        {
+            ASSERT_EQ(
+                normalView.getFieldAs<double>(id, i),
+                streamView.getFieldAs<double>(id, i));
+        }
+    }
 }
 
-TEST(EptReaderTest, stream)
+TEST(EptReaderTest, binaryStream)
 {
     streamTest(ellipsoidEptBinaryPath);
+}
+
+TEST(EptReaderTest, laszipStream)
+{
 #ifdef PDAL_HAVE_LASZIP
     streamTest(eptLaszipPath);
 #endif
 }
+
+TEST(EptReaderTest, boundedCrop)
+{
+    std::string wkt = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
+
+    // First we'll query the EptReader for these bounds.
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        std::string overrides(wkt + "/ EPSG:3644");
+        Option polygon("polygon", overrides);
+        options.add(polygon);
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+    reader.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        std::string overrides(wkt + "/ EPSG:3644");
+        Options options;
+        Option polygon("polygon", overrides);
+        options.add(polygon);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 47u);
+    EXPECT_EQ(sourceNp, 47u);
+}
+
+TEST(EptReaderTest, boundedCropReprojection)
+{
+    std::string selection = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.wkt"));
+    std::string selection4326 = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection-dd.wkt"));
+    std::string srs = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-srs.wkt"));
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        options.add("override_srs", srs);
+        options.add("polygon", selection4326 + "/EPSG:4326");
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+
+    reader.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
+        eptNp += view->size();
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        options.add("override_srs", srs);
+        source.setOptions(options);
+    }
+
+    ReprojectionFilter reproj;
+    {
+        Options options;
+        options.add("out_srs", "EPSG:4326");
+        reproj.setOptions(options);
+        reproj.setInput(source);
+    }
+
+    CropFilter crop;
+    {
+        Options options;
+        options.add("polygon", selection4326);
+        options.add("a_srs", "EPSG:4326");
+        crop.setOptions(options);
+        crop.setInput(reproj);
+    }
+
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : crop.execute(sourceTable))
+        sourceNp += view->size();
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 47u);
+    EXPECT_EQ(sourceNp, 47u);
+}
+
+
+TEST(EptReaderTest, ogrCrop)
+{
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptAutzenPath);
+        NL::json ogr;
+        ogr["drivers"] = {"GeoJSON"};
+        ogr["datasource"] = attributesPath;
+        ogr["sql"] = "select \"_ogr_geometry_\" from attributes";
+
+        options.add("ogr", ogr);
+
+        reader.setOptions(options);
+    }
+
+    PointTable eptTable;
+    reader.prepare(eptTable);
+
+    uint64_t eptNp(0);
+    for (const PointViewPtr& view : reader.execute(eptTable))
+    {
+        eptNp += view->size();
+    }
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("autzen/autzen-attribute-cropped.las"));
+        source.setOptions(options);
+    }
+    PointTable sourceTable;
+    source.prepare(sourceTable);
+    uint64_t sourceNp(0);
+    for (const PointViewPtr& view : source.execute(sourceTable))
+    {
+        sourceNp += view->size();
+    }
+
+    EXPECT_EQ(eptNp, sourceNp);
+    EXPECT_EQ(eptNp, 86u);
+    EXPECT_EQ(sourceNp, 86u);
+}
+
+
 
 } // namespace pdal

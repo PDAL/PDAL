@@ -593,7 +593,7 @@ void Octree< Real >::_upSample( LocalDepth highDepth , DenseNodeData< C >& coeff
 		}
 		else
 		{
-			double downSampleValues[3][ BSplineSupportSizes< FEMDegree >::DownSample0Size > BSplineSupportSizes< FEMDegree >::DownSample1Size ? BSplineSupportSizes< FEMDegree >::DownSample0Size : BSplineSupportSizes< FEMDegree >::DownSample1Size ];
+			double downSampleValues[3][ BSplineSupportSizes< FEMDegree >::DownSample0Size > BSplineSupportSizes< FEMDegree >::DownSample1Size ? BSplineSupportSizes< FEMDegree >::DownSample0Size : BSplineSupportSizes< FEMDegree >::DownSample1Size ] {};
 			for( int ii=0 ; ii<BSplineSupportSizes< FEMDegree >::DownSampleSize[cx] ; ii++ ) downSampleValues[0][ii] = upSampleEvaluator.value( off[0] + ii + BSplineSupportSizes< FEMDegree >::DownSampleStart[cx] , 2*off[0] + cx );
 			for( int ii=0 ; ii<BSplineSupportSizes< FEMDegree >::DownSampleSize[cy] ; ii++ ) downSampleValues[1][ii] = upSampleEvaluator.value( off[1] + ii + BSplineSupportSizes< FEMDegree >::DownSampleStart[cy] , 2*off[1] + cy );
 			for( int ii=0 ; ii<BSplineSupportSizes< FEMDegree >::DownSampleSize[cz] ; ii++ ) downSampleValues[2][ii] = upSampleEvaluator.value( off[2] + ii + BSplineSupportSizes< FEMDegree >::DownSampleStart[cz] , 2*off[2] + cz );

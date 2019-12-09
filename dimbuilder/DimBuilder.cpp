@@ -246,9 +246,36 @@ void DimBuilder::extractDim(NL::json& dim)
         altNames = *it;
         dim.erase(it);
     }
+
     if (!altNames.is_null())
     {
-        if (!altNames.is_string())
+        bool typeError = false;
+
+        if (altNames.is_string())
+        {
+            try
+            {
+                std::string s = altNames.get<std::string>();
+                d.m_altNames = Utils::split2(s, ',');
+            }
+            catch (NL::json::parse_error&)
+            {
+                typeError = true;
+            }
+        }
+        else if (altNames.is_array())
+        {
+            for (auto it = altNames.begin(); it != altNames.end(); ++it)
+                if (it->is_string())
+                    d.m_altNames.push_back(it->get<std::string>());
+                else
+                    typeError = true;
+        }
+        else
+            typeError = true;
+
+        
+        if (typeError)
         {
             std::ostringstream oss;
 
@@ -256,7 +283,6 @@ void DimBuilder::extractDim(NL::json& dim)
                 "be a string.";
             throw dimbuilder_error(oss.str());
         }
-        d.m_altNames = Utils::split2(altNames.get<std::string>(), ',');
         for (auto& s : d.m_altNames)
         {
             Utils::trim(s);

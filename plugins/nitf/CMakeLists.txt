@@ -28,7 +28,7 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
 )
 if (WIN32)
 target_compile_definitions(${reader_libname} PRIVATE
-    NOMINMAX)
+    NOMINMAX WIN32 _WIN32)
 endif()
 #
 # NITF Writer
@@ -50,7 +50,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
 )
 if (WIN32)
 target_compile_definitions(${writer_libname} PRIVATE
-    NOMINMAX)
+    NOMINMAX WIN32 _WIN32)
 endif()
 
 if (WITH_TESTS)

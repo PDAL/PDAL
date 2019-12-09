@@ -38,7 +38,8 @@
 #include "plugins/e57/io/Scan.hpp"
 #include "plugins/e57/io/E57Reader.hpp"
 
-using namespace pdal;
+namespace pdal
+{
 
 TEST(ScanTest,testScanCtr) 
 {
@@ -83,11 +84,13 @@ TEST(ScanTest,testBbox)
     E57Reader reader(Support::datapath("e57/A4.e57"));
     auto scans = reader.getScans();
     auto firstScan = scans[0];
-    auto box = firstScan->getBoundingBox();
-    ASSERT_FLOAT_EQ(box.minx,-4.49522018432617188e+01);
-    ASSERT_FLOAT_EQ(box.maxx,-4.43000984191894531e+01);
-    ASSERT_FLOAT_EQ(box.miny,-1.34930002689361572);
-    ASSERT_FLOAT_EQ(box.maxy,-8.85999977588653564e-01);
-    ASSERT_FLOAT_EQ(box.minz,-6.07699990272521973e-01);
-    ASSERT_FLOAT_EQ(box.maxz,3.69399994611740112e-01);
+    BOX3D box = firstScan->getBoundingBox();
+    ASSERT_DOUBLE_EQ(box.minx, -4.49522018432617188e+01);
+    ASSERT_DOUBLE_EQ(box.maxx, -4.43000984191894531e+01);
+    ASSERT_DOUBLE_EQ(box.miny, -1.34930002689361572);
+    ASSERT_DOUBLE_EQ(box.maxy, -8.85999977588653564e-01);
+    ASSERT_DOUBLE_EQ(box.minz, -6.07699990272521973e-01);
+    ASSERT_DOUBLE_EQ(box.maxz, 3.69399994611740112e-01);
 }
+
+} // namespace pdal

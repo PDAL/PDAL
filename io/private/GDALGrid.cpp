@@ -52,12 +52,12 @@ namespace pdal
 //  moving data around every time the grid is resized.
 
 GDALGrid::GDALGrid(size_t width, size_t height, double edgeLength,
-        double radius, int outputTypes, size_t windowSize) :
+        double radius, int outputTypes, size_t windowSize, double power) :
     m_width(width), m_height(height), m_windowSize(windowSize),
-    m_edgeLength(edgeLength), m_radius(radius), m_outputTypes(outputTypes)
+    m_edgeLength(edgeLength), m_radius(radius), m_power(power), m_outputTypes(outputTypes)
 {
-    if (width > (std::numeric_limits<int>::max)() ||
-        height > (std::numeric_limits<int>::max)())
+    if (width > (size_t)(std::numeric_limits<int>::max)() ||
+        height > (size_t)(std::numeric_limits<int>::max)())
     {
         std::ostringstream oss;
         oss << "Grid width or height is too large. Width and height are "
@@ -233,7 +233,7 @@ void GDALGrid::addPoint(double x, double y, double z)
 void GDALGrid::updateFirstQuadrant(double x, double y, double z)
 {
     int i, j;
-    int iStart, jStart;
+    int iStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -267,7 +267,7 @@ void GDALGrid::updateFirstQuadrant(double x, double y, double z)
 void GDALGrid::updateSecondQuadrant(double x, double y, double z)
 {
     int i, j;
-    int iStart, jStart;
+    int jStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -301,7 +301,7 @@ void GDALGrid::updateSecondQuadrant(double x, double y, double z)
 void GDALGrid::updateThirdQuadrant(double x, double y, double z)
 {
     int i, j;
-    int iStart, jStart;
+    int iStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -336,7 +336,7 @@ void GDALGrid::updateFourthQuadrant(double x, double y, double z)
 {
 
     int i, j;
-    int iStart, jStart;
+    int jStart;
     int iOrigin = horizontalIndex(x);
     int jOrigin = verticalIndex(y);
 
@@ -426,8 +426,8 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
             }
             else
             {
-                idw += val / dist;
-                idwDist += 1 / dist;
+                idw += val / std::pow(dist, m_power);
+                idwDist += 1 / std::pow(dist, m_power);
             }
         }
     }

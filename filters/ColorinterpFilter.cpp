@@ -34,13 +34,9 @@
 
 #include "ColorinterpFilter.hpp"
 
-#include <pdal/PointView.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
-#include <gdal.h>
-#include <cpl_vsi.h>
-#include <ogr_spatialref.h>
 
 #include <array>
 #include <algorithm>
@@ -77,7 +73,7 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
 #define GETRAMP(name) \
     if (pdal::Utils::iequals(#name, rampFilename)) \
     { \
-        GByte* location(0); \
+        unsigned char* location(name); \
         int size (0); \
         location = name; \
         size = sizeof(name); \
@@ -219,7 +215,7 @@ void ColorinterpFilter::filter(PointView& view)
         }
         else
         {
-             double threshold = (m_stdDevThreshold * summary.stddev());
+             double threshold = (m_stdDevThreshold * summary.sampleStddev());
              m_min = median - threshold;
              m_max = median + threshold;
 

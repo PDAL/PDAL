@@ -104,26 +104,26 @@ public:
 
     PointId neighbor(double x, double y) const
     {
-        std::vector<PointId> ids = neighbors(x, y, 1);
+        PointIdList ids = neighbors(x, y, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
     PointId neighbor(PointId idx) const
     {
-        std::vector<PointId> ids = neighbors(idx, 1);
+        PointIdList ids = neighbors(idx, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
     PointId neighbor(PointRef &point) const
     {
-        std::vector<PointId> ids = neighbors(point, 1);
+        PointIdList ids = neighbors(point, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    std::vector<PointId> neighbors(double x, double y, point_count_t k) const
+    PointIdList neighbors(double x, double y, point_count_t k) const
     {
         k = (std::min)(m_buf.size(), k);
-        std::vector<PointId> output(k);
+        PointIdList output(k);
         std::vector<double> out_dist_sqr(k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
 
@@ -136,7 +136,7 @@ public:
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k) const
+    PointIdList neighbors(PointId idx, point_count_t k) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -144,7 +144,7 @@ public:
         return neighbors(x, y, k);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k) const
+    PointIdList neighbors(PointRef &point, point_count_t k) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -153,7 +153,7 @@ public:
     }
 
     void knnSearch(double x, double y, point_count_t k,
-        std::vector<PointId> *indices, std::vector<double> *sqr_dists)
+        PointIdList *indices, std::vector<double> *sqr_dists)
     {
         k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -166,7 +166,7 @@ public:
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
     }
 
-    void knnSearch(PointId idx, point_count_t k, std::vector<PointId> *indices,
+    void knnSearch(PointId idx, point_count_t k, PointIdList *indices,
         std::vector<double> *sqr_dists)
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
@@ -175,10 +175,10 @@ public:
         knnSearch(x, y, k, indices, sqr_dists);
     }
 
-    std::vector<PointId> radius(double const& x, double const& y,
+    PointIdList radius(double const& x, double const& y,
         double const& r) const
     {
-        std::vector<PointId> output;
+        PointIdList output;
         std::vector<std::pair<std::size_t, double>> ret_matches;
         nanoflann::SearchParams params;
         params.sorted = true;
@@ -197,7 +197,7 @@ public:
         return output;
     }
 
-    std::vector<PointId> radius(PointId idx, double const& r) const
+    PointIdList radius(PointId idx, double const& r) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -205,7 +205,7 @@ public:
         return radius(x, y, r);
     }
 
-    std::vector<PointId> radius(PointRef &point, double const& r) const
+    PointIdList radius(PointRef &point, double const& r) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -229,60 +229,77 @@ public:
 
     PointId neighbor(double x, double y, double z) const
     {
-        std::vector<PointId> ids = neighbors(x, y, z, 1);
+        PointIdList ids = neighbors(x, y, z, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
     PointId neighbor(PointId idx) const
     {
-        std::vector<PointId> ids = neighbors(idx, 1);
+        PointIdList ids = neighbors(idx, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
     PointId neighbor(PointRef &point) const
     {
-        std::vector<PointId> ids = neighbors(point, 1);
+        PointIdList ids = neighbors(point, 1);
         return (ids.size() ? ids[0] : 0);
     }
 
-    std::vector<PointId> neighbors(double x, double y, double z,
-        point_count_t k) const
+    PointIdList neighbors(double x, double y, double z,
+        point_count_t k, size_t stride=1) const
     {
+        // Account for input buffer size smaller than requested number of
+        // neighbors, then determine the number of neighbors to extract based
+        // on the desired stride.
         k = (std::min)(m_buf.size(), k);
-        std::vector<PointId> output(k);
-        std::vector<double> out_dist_sqr(k);
-        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
+        point_count_t k2 = stride * k;
 
-        resultSet.init(&output[0], &out_dist_sqr[0]);
-
+        // Prepare output indices and squared distances.
+        PointIdList output(k2);
+        std::vector<double> out_dist_sqr(k2);
+        
+        // Set the query point.
         std::vector<double> pt;
         pt.push_back(x);
         pt.push_back(y);
         pt.push_back(z);
+
+        // Extract k*stride neighbors, then return only k, selecting every nth
+        // neighbor at the given stride.
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k2);
+        resultSet.init(&output[0], &out_dist_sqr[0]);
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams());
+
+        // Perform the downsampling if a stride is provided.
+        if (stride > 1)
+        {
+            for (size_t i = 1; i < k; ++i)
+                output[i] = output[i * stride];
+            output.resize(k);
+        }
         return output;
     }
 
-    std::vector<PointId> neighbors(PointId idx, point_count_t k) const
+    PointIdList neighbors(PointId idx, point_count_t k, size_t stride=1) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
         double z = m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
 
-        return neighbors(x, y, z, k);
+        return neighbors(x, y, z, k, stride);
     }
 
-    std::vector<PointId> neighbors(PointRef &point, point_count_t k) const
+    PointIdList neighbors(PointRef &point, point_count_t k, size_t stride=1) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
         double z = point.getFieldAs<double>(Dimension::Id::Z);
 
-        return neighbors(x, y, z, k);
+        return neighbors(x, y, z, k, stride);
     }
 
     void knnSearch(double x, double y, double z, point_count_t k,
-        std::vector<PointId> *indices, std::vector<double> *sqr_dists)
+        PointIdList *indices, std::vector<double> *sqr_dists)
     {
         k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -296,7 +313,7 @@ public:
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
     }
 
-    void knnSearch(PointId idx, point_count_t k, std::vector<PointId> *indices,
+    void knnSearch(PointId idx, point_count_t k, PointIdList *indices,
         std::vector<double> *sqr_dists)
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
@@ -307,7 +324,7 @@ public:
     }
 
     void knnSearch(PointRef &point, point_count_t k,
-        std::vector<PointId> *indices, std::vector<double> *sqr_dists)
+        PointIdList *indices, std::vector<double> *sqr_dists)
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -316,9 +333,9 @@ public:
         knnSearch(x, y, z, k, indices, sqr_dists);
     }
 
-    std::vector<PointId> radius(double x, double y, double z, double r) const
+    PointIdList radius(double x, double y, double z, double r) const
     {
-        std::vector<PointId> output;
+        PointIdList output;
         std::vector<std::pair<std::size_t, double>> ret_matches;
         nanoflann::SearchParams params;
         params.sorted = true;
@@ -338,7 +355,7 @@ public:
         return output;
     }
 
-    std::vector<PointId> radius(PointId idx, double r) const
+    PointIdList radius(PointId idx, double r) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -347,7 +364,7 @@ public:
         return radius(x, y, z, r);
     }
 
-    std::vector<PointId> radius(PointRef &point, double r) const
+    PointIdList radius(PointRef &point, double r) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);

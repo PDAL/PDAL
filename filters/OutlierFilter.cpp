@@ -81,7 +81,7 @@ Indices OutlierFilter::processRadius(PointViewPtr inView)
 
     point_count_t np = inView->size();
 
-    std::vector<PointId> inliers, outliers;
+    PointIdList inliers, outliers;
 
     for (PointId i = 0; i < np; ++i)
     {
@@ -102,14 +102,14 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
     point_count_t np = inView->size();
 
-    std::vector<PointId> inliers, outliers;
+    PointIdList inliers, outliers;
 
     std::vector<double> distances(np, 0.0);
 
     // we increase the count by one because the query point itself will
     // be included with a distance of 0
     point_count_t count = m_meanK + 1;
-    std::vector<PointId> indices(count);
+    PointIdList indices(count);
     std::vector<double> sqr_dists(count);
     for (PointId i = 0; i < np; ++i)
     {

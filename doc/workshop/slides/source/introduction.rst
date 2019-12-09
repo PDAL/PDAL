@@ -3,8 +3,8 @@
 Order of business
 ================================================================================
 
-* Materials https://s3.amazonaws.com/pdal/workshop/PDAL.zip
-* Follow along https://pdal.io/workshop/slides/
+* Materials https://pdal-workshop-2019.s3.amazonaws.com/PDAL-Workshop-complete.zip
+* Follow along https://pdal-workshop-2019.s3.amazonaws.com/slides.zip
 * PDF http://pdal.io/PDAL.pdf
 * Links everywhere
 
@@ -22,19 +22,19 @@ Goals
 Who are we
 ================================================================================
 
-* Howard Butler
+* Adam Steer
 * Michael Smith
+* Connor Manning
 
 
-Howard Butler
+Adam Steer
 ================================================================================
-
-* Owns `Hobu, Inc.`_
-* Develops open source GIS and LiDAR software
-* Commits over 15 years
-* Tweets @ http://twitter.com/howardbutler
-
-.. _`Hobu, Inc.`: http://hobu.co
+* Uses and contributes to  open source GIS and LiDAR software
+* Tweets @ http://twitter.com/adamsteer
+* http://spatialised.net
+* https://www.researchgate.net/profile/Adam_Steer
+* http://au.linkedin.com/in/adamsteer
+* http://orcid.org/0000-0003-0046-7236 
 
 Michael Smith
 ================================================================================
@@ -42,7 +42,13 @@ Michael Smith
 * Physical Research Scientist, USACE CRREL
 * Develops open source GIS and LiDAR software
 * Commits over 15 years
-* Tweets @ http://twitter.com/michael_smith
+* Government Sponsor of PDAL Project
+
+Connor Manning
+================================================================================
+* Developer at Hobu, inc
+* Developer of Entwine and EPT
+
 
 Next
 ================================================================================

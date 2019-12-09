@@ -155,7 +155,11 @@ void LasWriter::initialize()
     std::string ext = FileUtils::extension(m_filename);
     ext = Utils::tolower(ext);
     if ((ext == ".laz") && (m_compression == LasCompression::None))
+#if defined(PDAL_HAVE_LASZIP)
         m_compression = LasCompression::LasZip;
+#elif defined(PDAL_HAVE_LAZPERF)
+        m_compression = LasCompression::LazPerf;
+#endif
 
     if (!m_aSrs.empty())
         setSpatialReference(m_aSrs);
@@ -1186,6 +1190,7 @@ void LasWriter::finishOutput()
     OLeStream out(m_ostream);
 
     // addVlr prevents any eVlrs from being added before version 1.4.
+    m_lasHeader.setEVlrOffset((uint32_t)m_ostream->tellp());
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;

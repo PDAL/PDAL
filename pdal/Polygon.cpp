@@ -32,16 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
-#include "cpl_string.h"
 
-#include <ogr_geometry.h>
+#include "../filters/private/pnp/GridPnp.hpp"
 
 namespace pdal
 {
 
+struct Polygon::PrivateData
+{
+    std::vector<GridPnp> m_grids;
+};
+
+
+Polygon::Polygon()
+{
+    init();
+}
+
+
+Polygon::~Polygon()
+{}
+
+
+Polygon::Polygon(OGRGeometryH g) : Geometry(g)
+{
+    init();
+}
+
+
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
 {
+    init();
+}
+
+
+void Polygon::init()
+{
+    m_pd.reset(new PrivateData());
+
     // If the handle was null, we need to create an empty polygon.
     if (!m_geom)
     {
@@ -61,7 +91,13 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
     }
 }
 
-Polygon::Polygon(const BOX2D& box)
+
+Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref) :
+    Geometry(wkt_or_json, ref), m_pd(new PrivateData)
+{}
+
+
+Polygon::Polygon(const BOX2D& box) : m_pd(new PrivateData)
 {
     OGRPolygon *poly = new OGRPolygon();
     m_geom.reset(poly);
@@ -75,7 +111,7 @@ Polygon::Polygon(const BOX2D& box)
 }
 
 
-Polygon::Polygon(const BOX3D& box)
+Polygon::Polygon(const BOX3D& box) : m_pd(new PrivateData)
 {
     OGRPolygon *poly = new OGRPolygon();
     m_geom.reset(poly);
@@ -89,7 +125,28 @@ Polygon::Polygon(const BOX3D& box)
 }
 
 
-void Polygon::simplify(double distance_tolerance, double area_tolerance)
+Polygon::Polygon(const Polygon& poly) : Geometry(poly)
+{
+    init();
+}
+
+
+Polygon& Polygon::operator=(const Polygon& src)
+{
+    ((Geometry *)this)->operator=((const Geometry&)src);
+    m_pd.reset(new PrivateData);
+    return *this;
+}
+
+
+void Polygon::modified()
+{
+    m_pd->m_grids.clear();
+}
+
+
+void Polygon::simplify(double distance_tolerance, double area_tolerance,
+    bool preserve_topology)
 {
     throwNoGeos();
 
@@ -115,7 +172,12 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
             OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
     };
 
-    OGRGeometry *g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    OGRGeometry *g;
+    if (preserve_topology)
+        g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+    else
+        g = m_geom->Simplify(distance_tolerance);
+
     m_geom.reset(g);
 
     OGRwkbGeometryType t = m_geom->getGeometryType();
@@ -133,6 +195,7 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance)
         for (int i = 0; i < mpoly->getNumGeometries(); ++i)
             deleteSmallRings(mpoly->getGeometryRef(i));
     }
+    modified();
 }
 
 
@@ -188,6 +251,36 @@ bool Polygon::contains(const Polygon& p) const
 
     return m_geom->Contains(p.m_geom.get());
 }
+
+bool Polygon::disjoint(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Disjoint(p.m_geom.get());
+}
+
+bool Polygon::intersects(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Intersects(p.m_geom.get());
+}
+
+/// Determine whether this polygon contains a point.
+/// \param x  Point x coordinate.
+/// \param y  Point y coordinate.
+/// \return  Whether the polygon contains the point or not.
+bool Polygon::contains(double x, double y) const
+{
+    if (m_pd->m_grids.empty())
+        for (const Polygon& p : polygons())
+            m_pd->m_grids.emplace_back(p.exteriorRing(), p.interiorRings());
+    for (auto& g : m_pd->m_grids)
+        if (g.inside(x, y))
+            return true;
+    return false;
+}
+
 
 bool Polygon::touches(const Polygon& p) const
 {

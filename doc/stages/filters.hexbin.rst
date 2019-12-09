@@ -117,3 +117,9 @@ threshold
 precision
   Minimum number of significant digits to use in writing out the
   well-known text of the boundary polygon. [Default: 8]
+
+preserve_topology
+  Use GEOS SimplifyPreserveTopology instead of Simplify for polygon simplification with  `smooth` option. [Default: true]
+
+smooth
+  Use GEOS simplify operations to smooth boundary to a tolerance [Default: true]

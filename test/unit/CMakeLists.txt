@@ -125,20 +125,24 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
-PDAL_ADD_TEST(pdal_io_ept_reader_test
-    FILES
-        io/EptReaderTest.cpp
-    LINK_WITH
-        ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
-)
-PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
-    FILES
-        io/EptAddonWriterTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
-)
+if (PDAL_HAVE_LASZIP)
+    PDAL_ADD_TEST(pdal_io_ept_reader_test
+        FILES
+            io/EptReaderTest.cpp
+        LINK_WITH
+            ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+    PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
+        FILES
+            io/EptAddonWriterTest.cpp
+        LINK_WITH
+            ${GDAL_LIBRARY} # EptAddonWriterTest uses the crop filter.
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+endif(PDAL_HAVE_LASZIP)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
@@ -170,6 +174,18 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
 )
 
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_pcd_reader_test
+    FILES
+        io/PcdReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
+PDAL_ADD_TEST(pdal_io_pcd_writer_test
+    FILES
+        io/PcdWriterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
         io/PlyReaderTest.cpp
@@ -241,6 +257,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
 
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_separatescanline_test FILES filters/SeparatescanlineFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_icp_test
     FILES
@@ -289,6 +306,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hexbin_test FILES filters/HexbinFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
+PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)

@@ -11,6 +11,14 @@ The output of the stats filter is metadata that can be stored by writers or
 used through the PDAL API.  Output from the stats filter can also be
 quickly obtained in JSON format by using the command "pdal info --stats".
 
+.. note::
+
+The filter can compute both sample and population statistics.  For kurtosis,
+the filter can also compute standard and excess kurtosis.  However, only
+a single value is reported for each statistic type in metadata, and that is
+the sample statistic, rather than the population statistic.  For kurtosis
+the sample excess kurtosis is reported.  This seems to match the behavior
+of many other software packages.
 
 Example
 ................................................................................
@@ -33,14 +41,16 @@ Example
 Options
 -------
 
-_`dimensions`
+.. _stats-dimensions:
+
+dimensions
   A comma-separated list of dimensions whose statistics should be
   processed.  If not provided, statistics for all dimensions are calculated.
 
 _`enumerate`
   A comma-separated list of dimensions whose values should be enumerated.
   Note that this list does not add to the list of dimensions that may be
-  provided in the dimensions_ option.
+  provided in the :ref:`dimensions <stats-dimensions>` option.
 
 count
   Identical to the enumerate_ option, but provides a count of the number

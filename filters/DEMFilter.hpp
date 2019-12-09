@@ -35,9 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Streamable.hpp>
-
 
 #include <cstdint>
 #include <memory>
@@ -48,6 +46,7 @@ namespace pdal
 
 struct DEMArgs;
 
+namespace gdal { class Raster; }
 class Options;
 class PointLayout;
 class PointView;

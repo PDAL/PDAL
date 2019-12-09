@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL CXX C)
+project(PDAL VERSION 2.0.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -26,16 +26,12 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-# the next line is the ONLY place in the entire pdal system where
-# the version info is hard-coded
-set(PDAL_VERSION_STRING "1.9.1" CACHE STRING "PDAL version")
+set(PDAL_API_VERSION "9")
+set(PDAL_BUILD_VERSION "10")
 
-DISSECT_VERSION()
-GET_OS_INFO()
-SET_INSTALL_DIRS()
-
-set(PDAL_API_VERSION "8")
-set(PDAL_BUILD_VERSION "9.0.1")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Name of C++ library
 
@@ -49,12 +45,11 @@ set(PDAL_BUILD_VERSION "9.0.1")
 # See below for the rest of the magic.
 #
 if (APPLE OR WIN32)
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
 else()
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
+set(PDAL_LIB_NAME pdalcpp)
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
@@ -240,7 +235,7 @@ if (NOT PDAL_HAVE_LAZPERF)
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
-if (NOT GDAL_3)
+if (GDAL_VERSION VERSION_LESS 3.0.0)
     file(GLOB PROJPIPELINE_FILTER_SRCS
         ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)
     list(REMOVE_ITEM SRCS ${PROJPIPELINE_FILTER_SRCS})
@@ -334,7 +329,10 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
     PATTERN "pdal/private" EXCLUDE
+    PATTERN "pdal/io/private" EXCLUDE
+    PATTERN "pdal/pdal/private" EXCLUDE
     PATTERN "pdal/util/private" EXCLUDE
+    PATTERN "pdal/filters/private" EXCLUDE
     ${ZSTD_EXCLUDES}
     ${ZLIB_EXCLUDES}
     ${LZMA_EXCLUDES}

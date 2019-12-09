@@ -1,4 +1,3 @@
-pdal tindex ^
-    --tindex c:/Users/hobu/PDAL/exercises/analysis/boundary/boundary.sqlite ^
-    --filespec c:/Users/hobu/PDAL/exercises/analysis/density/uncompahgre.laz ^
-    -f SQLite
+pdal tindex create --tindex ./exercises/analysis/boundary/boundary.sqlite \
+ --filespec ./exercises/analysis/density/uncompahgre.laz \
+ -f SQLite

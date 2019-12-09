@@ -1,0 +1,1 @@
+pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz -o ./exercises/analysis/ground/ground.laz 

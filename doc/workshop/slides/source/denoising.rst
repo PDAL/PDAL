@@ -9,8 +9,6 @@ Purpose:
     * Remove noise with a statistical method
     * Maintain point integrity
 
-:ref:`Denoising Workshop Materials <pdal:colorization>`
-
 
 Pipeline
 ================================================================================

@@ -12,7 +12,7 @@ fi
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
+CFLAGS= CXXFLAGS= CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DPython3_ROOT_DIR:FILEPATH="$CONDA_PREFIX" \
@@ -24,8 +24,9 @@ CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
-        -DBUILD_PLUGIN_PCL=OFF \
         -DBUILD_PLUGIN_TILEDB=ON \
+        -DBUILD_PLUGIN_RDBLIB=ON \
+        -Drdb_DIR=/Users/hobu/dev/release/riegl/rdblib-2.1.6-x86_64-darwin/interface/cpp/ \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \
         -DWITH_LASZIP=ON \

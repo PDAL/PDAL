@@ -41,11 +41,11 @@
 namespace pdal
 {
 
-E57Reader::ChunkReader::ChunkReader
-(const pdal::point_count_t &pointOffset,const pdal::point_count_t &maxPointRead,
-                                    const std::shared_ptr<e57::Scan> &scan,
-                                    const std::set<std::string>& e57Dimensions):
-m_startIndex(0), m_maxPointRead(maxPointRead), m_defaultChunkSize(1e6), m_scan(scan)
+E57Reader::ChunkReader::ChunkReader(const point_count_t &pointOffset,
+    const point_count_t &maxPointRead, const std::shared_ptr<e57::Scan>& scan,
+    const std::set<std::string>& e57Dimensions) :
+    m_startIndex(0), m_maxPointRead(maxPointRead),
+    m_defaultChunkSize(1000000), m_scan(scan)
 {
     // Initialise the read buffers
     for (auto& dimension: e57Dimensions)
@@ -56,7 +56,7 @@ m_startIndex(0), m_maxPointRead(maxPointRead), m_defaultChunkSize(1e6), m_scan(s
     for (auto& keyValue: m_doubleBuffers)
         m_e57buffers.emplace_back(vectorNode.destImageFile(), keyValue.first,
              keyValue.second.data(), m_defaultChunkSize, true,
-             (prototype.get(keyValue.first).type() == e57::E57_SCALED_INTEGER) );
+             (prototype.get(keyValue.first).type() == e57::E57_SCALED_INTEGER));
 
     m_pointOffset = pointOffset;
 
@@ -71,41 +71,44 @@ E57Reader::ChunkReader::~ChunkReader()
         m_dataReader->close();
 }
 
-bool E57Reader::ChunkReader::isInScope(pdal::point_count_t index) const
+bool E57Reader::ChunkReader::isInScope(point_count_t index) const
 {
-    pdal::point_count_t actualIndex = index - m_pointOffset;
+    point_count_t actualIndex = index - m_pointOffset;
     return (actualIndex < m_maxPointRead);
 }
 
-bool E57Reader::ChunkReader::isInChunk(pdal::point_count_t index) const
+bool E57Reader::ChunkReader::isInChunk(point_count_t index) const
 {
-    pdal::point_count_t actualIndex = index - m_pointOffset;
+    point_count_t actualIndex = index - m_pointOffset;
+
+    //ABELL - Better to throwError.
     if (actualIndex < m_startIndex)
-       throw std::out_of_range("E57 reader tries to go back in the data. Not allowed.");
+       throw pdal_error("E57 reader tries to go back in the data. "
+           "Not allowed.");
 
     return actualIndex < (m_startIndex+m_defaultChunkSize);
 }
 
-void E57Reader::ChunkReader::setPoint
-(pdal::point_count_t pointIndex, pdal::PointRef point, const std::set<std::string>& e57Dimensions) const
+void E57Reader::ChunkReader::setPoint(point_count_t pointIndex, PointRef point) const
 {
-    pdal::point_count_t actualIndex = pointIndex - m_pointOffset;
-    pdal::point_count_t index = actualIndex - m_startIndex;
+    point_count_t actualIndex = pointIndex - m_pointOffset;
+    point_count_t index = actualIndex - m_startIndex;
 
     // Sets values from buffer arrays for each dimension in the scan
     for (auto& keyValue: m_doubleBuffers)
     {
-        auto pdalDimension = pdal::e57plugin::e57ToPdal(keyValue.first);
-        if (pdalDimension != pdal::Dimension::Id::Unknown)
+        auto pdalDimension = e57plugin::e57ToPdal(keyValue.first);
+        if (pdalDimension != Dimension::Id::Unknown)
         {
             double value;
             // Rescale the value if needed so that if fits Pdal expectations
-            try
+            std::pair<double, double> minmax;
+            if (m_scan->getLimits(pdalDimension, minmax))
             {
-                auto minmax = m_scan->getLimits(pdalDimension);
-                value = pdal::e57plugin::rescaleE57ToPdalValue(keyValue.first,keyValue.second[index],minmax);
+                value = e57plugin::rescaleE57ToPdalValue(keyValue.first,
+                    keyValue.second[index], minmax);
             }
-            catch (std::out_of_range &e)
+            else
             {
                 value = keyValue.second[index];
             }
@@ -118,9 +121,9 @@ void E57Reader::ChunkReader::setPoint
         m_scan->transformPoint(point);
 }
 
-pdal::point_count_t E57Reader::ChunkReader::read(pdal::point_count_t  index)
+point_count_t E57Reader::ChunkReader::read(point_count_t  index)
 {
-    pdal::point_count_t actualIndex = index - m_pointOffset;
+    point_count_t actualIndex = index - m_pointOffset;
     m_startIndex = actualIndex;
     return m_dataReader->read();
 }
@@ -167,15 +170,15 @@ void E57Reader::initialize()
 
 void E57Reader::addDimensions(PointLayoutPtr layout)
 {
-    std::set<pdal::Dimension::Id> supportedDimensions;
+    std::set<Dimension::Id> supportedDimensions;
     if (m_scans.empty())
         return;
 
     auto commonDimensions = getDimensions();
     for (auto& dim: commonDimensions)
     {
-        auto pdalDimension = pdal::e57plugin::e57ToPdal(dim);
-        if (pdalDimension != pdal::Dimension::Id::Unknown)
+        auto pdalDimension = e57plugin::e57ToPdal(dim);
+        if (pdalDimension != Dimension::Id::Unknown)
             layout->registerDim(pdalDimension);
     }
 }
@@ -185,7 +188,7 @@ point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
     // How many do we read
     PointId nextId = view->size();
     point_count_t remainingInput = m_pointCount - nextId;
-    point_count_t toReadCount = std::min(count, remainingInput);
+    point_count_t toReadCount = (std::min)(count, remainingInput);
 
     point_count_t remaining = toReadCount;
     for (point_count_t i=0; i < remaining; i++)
@@ -200,7 +203,7 @@ point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
     return toReadCount;
 }
 
-bool E57Reader::processOne(pdal::PointRef& point)
+bool E57Reader::processOne(PointRef& point)
 {
     // Did we go too far?
     if (m_currentPoint >= m_pointCount)
@@ -217,7 +220,7 @@ bool E57Reader::processOne(pdal::PointRef& point)
     if (!m_chunk->isInChunk(m_currentPoint))
         m_chunk->read(m_currentPoint);
 
-    m_chunk->setPoint(m_currentPoint,point, getDimensions());
+    m_chunk->setPoint(m_currentPoint,point);
     m_currentPoint++;
     return true;
 }
@@ -246,16 +249,16 @@ std::vector<std::shared_ptr<e57::Scan>> E57Reader::getScans() const
     return m_scans;
 }
 
-int E57Reader::getScanIndex(pdal::point_count_t pointIndex) const
+int E57Reader::getScanIndex(point_count_t pointIndex) const
 {
     if (pointIndex > m_pointCount)
         return -1;
 
-    pdal::point_count_t counter = 0;
-    for (pdal::point_count_t i=0; i < m_scans.size(); i++)
+    point_count_t counter = 0;
+    for (int i = 0; i < (int)m_scans.size(); i++)
     {
         counter += m_scans[i]->getNumPoints();
-        if (pointIndex <counter)
+        if (pointIndex < counter)
             return i;
     }
     return -1;
@@ -285,7 +288,7 @@ std::set<std::string> E57Reader::getDimensions()
     return m_validDimensions;
 }
 
-pdal::point_count_t E57Reader::getNumberPoints() const
+point_count_t E57Reader::getNumberPoints() const
 {
     return m_pointCount;
 }
@@ -322,14 +325,14 @@ void E57Reader::closeFile()
         m_imf->close();
 }
 
-void E57Reader::setupReader(pdal::point_count_t pointNumber)
+void E57Reader::setupReader(point_count_t pointNumber)
 {
     int currentScan = getScanIndex(pointNumber);
     if (currentScan == -1)
-        throw std::out_of_range("Something went wrong in processing a point");
+        throwError("Something went wrong in processing a point");
 
-    pdal::point_count_t offset = 0;
-    pdal::point_count_t maxRead = m_scans[0]->getNumPoints();
+    point_count_t offset = 0;
+    point_count_t maxRead = m_scans[0]->getNumPoints();
     for (int i=1; i<=currentScan; i++)
     {
         maxRead = m_scans[i]->getNumPoints();
@@ -338,12 +341,13 @@ void E57Reader::setupReader(pdal::point_count_t pointNumber)
 
     m_chunk.reset();
     auto pointNode = m_scans[currentScan]->getPoints();
-    m_chunk = std::unique_ptr<ChunkReader>(new ChunkReader(offset,maxRead,m_scans[currentScan],getDimensions()));
+    m_chunk = std::unique_ptr<ChunkReader>(
+        new ChunkReader(offset,maxRead,m_scans[currentScan],getDimensions()));
 }
 
-pdal::point_count_t E57Reader::extractNumberPoints() const
+point_count_t E57Reader::extractNumberPoints() const
 {
-    pdal::point_count_t count = 0;
+    point_count_t count = 0;
     for (auto& scan: m_scans)
         count += scan->getNumPoints();
 
@@ -354,7 +358,7 @@ void E57Reader::extractScans()
 {
     e57::StructureNode root = m_imf->root();
     if (!root.isDefined("/data3D"))
-        throw std::invalid_argument("File does not contain valid 3D data");
+        throwError("File does not contain valid 3D data");
 
     //E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
     e57::VectorNode n(root.get("/data3D"));
