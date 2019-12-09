@@ -84,6 +84,10 @@ private:
     bool m_showSummary;
     bool m_needPoints;
     bool m_usestdin;
+    bool m_doReprojection;
+    std::string m_outSRS;
+    std::string m_inSRS;
+    std::string m_defaultSRS;
 
     Stage *m_statsStage;
     Stage *m_hexbinStage;

@@ -40,6 +40,7 @@
 #include <pdal/pdal_features.hpp>
 
 #include <filters/InfoFilter.hpp>
+#include <filters/ReprojectionFilter.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -61,8 +62,9 @@ std::string InfoKernel::getName() const { return s_info.name; }
 
 InfoKernel::InfoKernel() : m_showStats(false), m_showSchema(false),
     m_showAll(false), m_showMetadata(false), m_boundary(false),
-    m_showSummary(false), m_needPoints(false), m_statsStage(nullptr),
-    m_hexbinStage(nullptr), m_infoStage(nullptr), m_reader(nullptr)
+    m_showSummary(false), m_needPoints(false), m_doReprojection(false),
+    m_statsStage(nullptr), m_hexbinStage(nullptr), m_infoStage(nullptr),
+    m_reader(nullptr)
 {}
 
 
@@ -72,6 +74,9 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
 
     if (!m_usestdin && m_inputFile.empty())
         throw pdal_error("No input file specified.");
+
+    if (m_outSRS.size())
+        m_doReprojection = true;
 
     // All isn't really all.
     if (m_showAll)
@@ -151,6 +156,12 @@ void InfoKernel::addSwitches(ProgramArgs& args)
     args.add("summary", "Dump summary of the info", m_showSummary);
     args.add("metadata", "Dump file metadata info", m_showMetadata);
     args.add("stdin,s", "Read a pipeline file from standard input", m_usestdin);
+    args.add("t_srs", "Reproject input data to assigned coordinate system",
+        m_outSRS).setHidden();
+    args.add("a_srs", "Reproject input data to assigned coordinate system",
+        m_inSRS).setHidden();
+    args.add("default_srs", "Reproject input data to assigned coordinate system",
+        m_defaultSRS).setHidden();
 }
 
 
@@ -197,6 +208,21 @@ void InfoKernel::makeReader(const std::string& filename)
 void InfoKernel::makePipeline()
 {
     Stage *stage = m_reader;
+
+    if (m_doReprojection)
+    {
+        Options ops;
+        ops.add("out_srs", m_outSRS);
+        if (m_inSRS.size())
+            ops.add("in_srs", m_outSRS);
+        if (m_defaultSRS.size())
+        {
+            SpatialReference ref = m_reader->getSpatialReference();
+            if (ref.empty())
+                ops.add("in_srs", m_defaultSRS);
+        }
+        stage = &(m_manager.makeFilter("filters.reprojection", *stage, ops));
+    }
 
     Options iOps;
     if (m_queryPoint.size())
