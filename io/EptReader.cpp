@@ -729,8 +729,10 @@ PointViewSet EptReader::run(PointViewPtr view)
                 startId = readLaszip(*view, key, nodeId);
             else if (m_info->dataType() == EptInfo::DataType::Binary)
                 startId = readBinary(*view, key, nodeId);
+#ifdef PDAL_HAVE_ZSTD
             else if (m_info->dataType() == EptInfo::DataType::Zstandard)
                 startId = readZstandard(*view, key, nodeId);
+#endif
             else
                 throw ept_error("Unrecognized EPT dataType");
 
@@ -818,6 +820,7 @@ PointId EptReader::readBinary(PointView& dst, const Key& key,
     return processPackedData(dst, nodeId, data.data(), data.size());
 }
 
+#ifdef PDAL_HAVE_ZSTD
 uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
         const uint64_t nodeId) const
 {
@@ -831,6 +834,7 @@ uint64_t EptReader::readZstandard(PointView& dst, const Key& key,
     dec.decompress(compressed.data(), compressed.size());
     return processPackedData(dst, nodeId, data.data(), data.size());
 }
+#endif
 
 void EptReader::process(PointView& dst, PointRef& pr, const uint64_t nodeId,
         const PointId pointId) const
@@ -979,8 +983,10 @@ void EptReader::load()
 
             if (m_info->dataType() == EptInfo::DataType::Laszip)
                 readLaszip(nodeBuffer->view, key, nodeId);
+#ifdef PDAL_HAVE_ZSTD
             else if (m_info->dataType() == EptInfo::DataType::Zstandard)
                 readZstandard(nodeBuffer->view, key, nodeId);
+#endif
             else if (m_info->dataType() == EptInfo::DataType::Binary)
                 readBinary(nodeBuffer->view, key, nodeId);
             else
