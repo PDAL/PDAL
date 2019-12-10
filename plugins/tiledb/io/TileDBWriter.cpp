@@ -317,8 +317,6 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     {
         m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
     }
-    
-    auto attrs = m_array->schema().attributes();
 
     for (const auto& d : all)
     {
@@ -349,6 +347,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
             else
             {
                 // check attribute exists in original tiledb array
+                auto attrs = m_schema->attributes();
                 auto it = attrs.find(dimName);
                 if (it == attrs.end())
                     throwError("Attribute " + dimName + " does not exist in original array.");
