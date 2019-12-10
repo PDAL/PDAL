@@ -474,8 +474,6 @@ void TileDBWriter::done(PointTableRef table)
 {
     if (flushCache(m_current_idx))
     {
-        tiledb::VFS vfs(*m_ctx, m_ctx->config());
-
         // write pipeline metadata sidecar inside array
         MetadataNode anon;
         MetadataNode meta("pipeline");
@@ -492,6 +490,8 @@ void TileDBWriter::done(PointTableRef table)
         anon.add("bounds", pdal::Utils::toString(m_bbox));
 
         // serialize metadata
+#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
+        tiledb::VFS vfs(*m_ctx, m_ctx->config());
         tiledb::VFS::filebuf fbuf(vfs);
 
         if (vfs.is_dir(m_args->m_arrayName))
@@ -499,7 +499,7 @@ void TileDBWriter::done(PointTableRef table)
                 std::ios::out);
         else
         {
-            std::string fname = m_args->m_arrayName + "/pdal.json";
+            std::string fname = m_arrayName + "/pdal.json";
             vfs.touch(fname);
             fbuf.open(fname, std::ios::out);
         }
@@ -513,6 +513,10 @@ void TileDBWriter::done(PointTableRef table)
         pdal::Utils::toJSON(anon, os);
 
         fbuf.close();
+#else
+        std::string m = pdal::Utils::toJSON(anon);
+        m_array->put_metadata("_pdal", TILEDB_UINT8, m.length() + 1, m.c_str());
+#endif
         m_array->close();
     }
     else{

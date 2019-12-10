@@ -103,10 +103,21 @@ namespace pdal
         writer.prepare(table);
         writer.execute(table);
 
-        // check the sidecar exists
-        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
-
         tiledb::Array array(ctx, pth, TILEDB_READ);
+
+#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
+        // check the sidecar exists
+        std::string sidecar = pth + "/pdal.json";
+        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
+#else
+        tiledb_datatype_t v_type = TILEDB_UINT8;
+        const void* v_r;
+        uint32_t v_num;
+        array.get_metadata("_pdal", &v_type, &v_num, &v_r);
+        nlohmann::json meta = nlohmann::json::parse(static_cast<const char*>(v_r));
+        EXPECT_TRUE(meta.count("pipeline") > 0);
+#endif
+
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
 
@@ -159,9 +170,6 @@ namespace pdal
         writer.prepare(table);
         writer.execute(table);
 
-        // check the sidecar exists so that the execute has completed
-        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
-
         options.add("append", true);
         TileDBWriter append_writer;
         append_writer.setOptions(options);
@@ -174,6 +182,19 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
+
+#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
+        // check the sidecar exists so that the execute has completed
+        std::string sidecar = pth + "/pdal.json";
+        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
+#else
+        tiledb_datatype_t v_type = TILEDB_UINT8;
+        const void* v_r;
+        uint32_t v_num;
+        array.get_metadata("_pdal", &v_type, &v_num, &v_r);
+        nlohmann::json meta = nlohmann::json::parse(static_cast<const char*>(v_r));
+        EXPECT_TRUE(meta.count("pipeline") > 0);
+#endif
 
         for (const auto& kv: domain)
         {
