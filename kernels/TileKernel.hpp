@@ -71,6 +71,10 @@ private:
     SplitterFilter m_splitter;
     Streamable *m_repro;
     SpatialReference m_outSrs;
+    SpatialReference m_overrideSrs;
+    bool m_useEbVlr;
+    std::string m_inputCompression;
+    std::string m_outputCompression;
     std::string::size_type m_hashPos;
 };
 

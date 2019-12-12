@@ -22,15 +22,31 @@ differs in several ways.  The ``tile`` command:
 
 ::
 
-    --input, -i     Input filename
-    --output, -o    Output filename
-    --length        Edge length for cells [Default: 1000]
-    --origin_x      Origin in X axis for cells [Default: None]
-    --origin_y      Origin in Y axis for cells [Default: None]
-    --buffer        Size of buffer (overlap) to include around each tile.
-                    [Default: 0]
-    --out_srs       Spatial reference system to which all input points
-                    will be reprojected. [Default: None]
+    --input, -i       Input filename
+    --output, -o      Output filename
+    --length          Edge length for cells [Default: 1000]
+    --origin_x        Origin in X axis for cells [Default: None]
+    --origin_y        Origin in Y axis for cells [Default: None]
+    --buffer          Size of buffer (overlap) to include around each tile.
+                      [Default: 0]
+    --out_srs         Spatial reference system to which all input points
+                      will be reprojected. [Default: None]
+    --override_srs    Spatial reference to apply to the data. Overrides any
+                      SRS in the input itself. Can be specified as a WKT,
+                      proj.4 or EPSG string. [Default: none]
+    --use_eb_vlr      If an extra bytes VLR is found in a version 1.0 - 1.3 file,
+                      use it as if it were in a 1.4 file. This option has no
+                      effect when reading a version 1.4 file.
+    --in_compression  May be set to “lazperf” or “laszip” to choose either the
+                      LazPerf decompressor or the LASzip decompressor for LAZ files.
+                      PDAL must have been built with support for the decompressor
+                      being requested. The LazPerf decompressor doesn’t support
+                      version 1 LAZ files or version 1.4 of LAS. [Default: ‘none’]
+    --out_compression Set to “lazperf” or “laszip” to apply compression to the
+                      output, creating a LAZ file instead of an LAS file. “lazperf”
+                      selects the LazPerf compressor and “laszip” (or “true”) selects
+                      the LasZip compressor. PDAL must have been built with support
+                      for the requested compressor. [Default: “none”]
 
 The input filename can contain a `glob pattern`_ to allow multiple files
 as input.

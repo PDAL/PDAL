@@ -75,6 +75,16 @@ void TileKernel::addSwitches(ProgramArgs& args)
         m_buffer);
     args.add("out_srs", "Output SRS to which points will be reprojected",
         m_outSrs);
+    args.add("override_srs", "Spatial reference to apply to the data. Overrides any SRS in the input itself",
+        m_overrideSrs);
+    args.add("use_eb_vlr", "If an extra bytes VLR is found in a version 1.0 - 1.3 file, use it as if it were in a 1.4 file",
+        m_useEbVlr);
+    args.add("in_compression",
+        "May be set to “lazperf” or “laszip” to choose either the LazPerf decompressor or the LASzip decompressor for LAZ files",
+        m_inputCompression, "EITHER");
+    args.add("out_compression",
+        "May be set to “lazperf” or “laszip” to choose either the LazPerf compressor or the LASzip compressor for LAZ files",
+        m_outputCompression, "EITHER");
 }
 
 
@@ -176,7 +186,15 @@ void TileKernel::checkReaders(const Readers& readers)
 
 Streamable *TileKernel::prepareReader(const std::string& filename)
 {
-    Stage* r = &(m_manager.makeReader(filename, ""));
+    Options readerOptions;
+    readerOptions.add("compression", m_inputCompression);
+    if (!m_overrideSrs.empty())
+              readerOptions.add("override_srs", m_overrideSrs);
+
+    if (m_useEbVlr)
+              readerOptions.add("use_eb_vlr", m_useEbVlr);
+
+    Stage* r = &(m_manager.makeReader(filename, "", readerOptions));
 
     if (!r)
         throw pdal_error("Couldn't create reader for input file '" +
@@ -279,6 +297,8 @@ void TileKernel::process(const Readers& readers)
 void TileKernel::adder(PointRef& point, int xpos, int ypos)
 {
     Coord loc(xpos, ypos);
+    Options writerOptions;
+    writerOptions.add("compression", m_outputCompression);
 
     Stage *w;
     Streamable *sw;
@@ -291,7 +311,7 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
         std::string yname(std::to_string(ypos));
         filename.replace(m_hashPos, 1, (xname + "_" + yname));
 
-        w = &m_manager.makeWriter(filename, "");
+        w = &m_manager.makeWriter(filename, "", writerOptions);
         if (!w)
             throw pdal_error("Couldn't create writer for output file '" +
                 m_outputFile + "'.");
