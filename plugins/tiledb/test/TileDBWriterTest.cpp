@@ -114,7 +114,7 @@ namespace pdal
         const void* v_r;
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
-        nlohmann::json meta = nlohmann::json::parse(static_cast<const char*>(v_r));
+        NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
         EXPECT_TRUE(meta.count("pipeline") > 0);
 #endif
 
@@ -192,7 +192,7 @@ namespace pdal
         const void* v_r;
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
-        nlohmann::json meta = nlohmann::json::parse(static_cast<const char*>(v_r));
+        NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
         EXPECT_TRUE(meta.count("pipeline") > 0);
 #endif
 

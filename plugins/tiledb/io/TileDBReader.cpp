@@ -34,8 +34,17 @@
 
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+
 #include "TileDBReader.hpp"
 
+
+const char pathSeparator =
+#ifdef _WIN32
+        '\\';
+#else
+        '/';
+#endif
 namespace pdal {
 
 static PluginInfo const s_info
@@ -281,6 +290,42 @@ void TileDBReader::localReady()
             subarray.push_back(kv.second.second);
         }
         m_query->set_subarray(subarray);
+    }
+
+    // read spatial reference
+    NL::json meta = nullptr;
+
+#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
+    tiledb_datatype_t v_type = TILEDB_UINT8; // CPLSerializeXMLTree returns char*
+    const void* v_r;
+    uint32_t v_num;
+    m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
+    if (v_r != NULL)
+        meta = NL::json::parse(static_cast<const char*>(v_r));
+#endif
+
+    if (meta == nullptr)
+    {
+        tiledb::VFS vfs(*m_ctx, m_ctx->config());
+        tiledb::VFS::filebuf fbuf(vfs);
+        std::string metaFName = m_arrayName + pathSeparator + "pdal.json";
+
+        if (vfs.is_dir(m_arrayName))
+        {
+            auto nBytes = vfs.file_size(metaFName);
+            tiledb::VFS::filebuf fbuf(vfs);
+            fbuf.open(metaFName, std::ios::in);
+            std::istream is(&fbuf);
+            std::string s { std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>() };
+            fbuf.close();
+            meta = NL::json::parse(s);
+        }
+    }
+
+    if ((meta != nullptr) && (meta.count("spatialreference") > 0))
+    {
+        SpatialReference ref(meta["spatialreference"]);
+        setSpatialReference(ref);
     }
 
     // initialize read buffer variables

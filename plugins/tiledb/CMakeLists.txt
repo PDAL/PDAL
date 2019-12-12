@@ -16,6 +16,7 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
         ${TILEDB_LIBRARIES}
     INCLUDES
         ${TILEDB_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 if (WIN32)
@@ -63,6 +64,7 @@ if (BUILD_TILEDB_TESTS)
             test/TileDBReaderTest.cpp
         LINK_WITH
             ${reader_libname}
+            ${writer_libname}
             ${TILEDB_LIBRARIES}
     )
 
