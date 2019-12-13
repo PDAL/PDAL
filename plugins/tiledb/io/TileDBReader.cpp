@@ -236,10 +236,10 @@ void TileDBReader::ready(PointTableRef)
     if (!m_bbox.empty())
     {
         if (numDims == 2)
-            m_query->set_subarray({m_bbox.minx, m_bbox.minx,
+            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy});
         else
-            m_query->set_subarray({m_bbox.minx, m_bbox.minx,
+            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
     }
     else
