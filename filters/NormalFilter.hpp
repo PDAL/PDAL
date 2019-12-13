@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016, 2017, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -64,6 +64,9 @@ public:
 private:
     std::unique_ptr<NormalArgs> m_args;
     Arg* m_viewpointArg;
+
+    void compute(PointView& view, KD3Index& kdi);
+    void refine(PointView& view, KD3Index& kdi);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
