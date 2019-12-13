@@ -247,7 +247,7 @@ namespace pdal
         jsonOptions["OffsetTime"]["compression"] = "rle";
 
         options.add("array_name", pth);
-        options.add("filters", jsonOptions);
+        options.add("attr_filters", jsonOptions);
 
         if (vfs.is_dir(pth))
         {
@@ -300,7 +300,7 @@ namespace pdal
         options.add("array_name", pth);
         options.add("compression", "zstd");
         options.add("compression_level", 50);
-        options.add("filters", jsonOptions);
+        options.add("attr_filters", jsonOptions);
 
         if (vfs.is_dir(pth))
         {

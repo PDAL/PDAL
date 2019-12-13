@@ -244,7 +244,7 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         m_args->m_compressor);
     args.add("compression_level", "TileDB compression level",
         m_args->m_compressionLevel, -1);
-    args.add("filters", "Specify filter and level per dimension/attribute",
+    args.add("attr_filters", "Specify filter and level per dimension/attribute",
         m_args->m_filters);
     args.add("append", "Append to existing TileDB array",
         m_args->m_append, false);

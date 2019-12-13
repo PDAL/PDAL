@@ -62,7 +62,7 @@ append
 stats
   Dump query stats to stdout [Optional]
 
-filters
+attr_filters
   JSON array or object of compression filters for either `coords` or `attributes` of the form {coords/attributename : {"compression": name, compression_options: value, ...}} [Optional]
 
 
