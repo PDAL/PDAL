@@ -224,7 +224,9 @@ void HAGFilter::filter(PointView& view)
         double x0 = point.getFieldAs<double>(Id::X);
         double y0 = point.getFieldAs<double>(Id::Y);
         double z0 = point.getFieldAs<double>(Id::Z);
-        PointIdList ids = kdi.neighbors(point, m_count);
+        PointIdList ids(m_count);
+        std::vector<double> sqr_dists(m_count);
+        kdi.knnSearch(x0, y0, m_count, &ids, &sqr_dists);
 
         double z1 = gView->getFieldAs<double>(Id::Z, ids[0]);
         assert(ids.size() > 0);
@@ -244,8 +246,8 @@ void HAGFilter::filter(PointView& view)
                 auto x = gView->getFieldAs<double>(Id::X, ids[j]);
                 auto y = gView->getFieldAs<double>(Id::Y, ids[j]);
                 auto z = gView->getFieldAs<double>(Id::Z, ids[j]);
-                auto distance2 = std::pow(x - x0, 2) + std::pow(y - y0, 2);
-                if (distance2 == 0)
+                double sqr_dist = sqr_dists[j];
+                if (sqr_dist == 0)
                 {
                     //ABELL - This doesn't make sense.  Z1 is set, but if
                     // exact match is set, it gets overwritten outside of
@@ -254,10 +256,10 @@ void HAGFilter::filter(PointView& view)
                     z1 = z;
                     break;
                 }
-                if (maxDistance2 > 0 && distance2 > maxDistance2) {
+                if (maxDistance2 > 0 && sqr_dist > maxDistance2) {
                     break;
                 } else {
-                    auto weight = 1 / distance2;
+                    auto weight = 1 / sqr_dist;
                     weights += weight;
                     z_accumulator += weight * z;
                 }
