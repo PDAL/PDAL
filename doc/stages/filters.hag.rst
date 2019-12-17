@@ -159,9 +159,9 @@ _`delaunay`
     a point's non-ground height. [Default: false]
 
 max_distance
-    Eliminate non-ground points from consideration when their distance
-    from a ground point exceeds this amount.  Not used with the `delaunay`_
-    option.  [Default: N/A]
+    Use only ground points within `max_distance` of non-ground point when
+    performing neighbor interpolation.  Not used with the `delaunay`_
+    option.  [Default: None]
 
 allow_extrapolation
     If false and a non-ground point lies outside of the bounding box of
