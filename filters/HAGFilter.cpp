@@ -276,8 +276,6 @@ void HAGFilter::filter(PointView& view)
         double y = gView->getFieldAs<double>(Id::Y, ids[0]);
         double z = gView->getFieldAs<double>(Id::Z, ids[0]);
 
-        assert(ids.size() > 0);
-
         double z1;
         // If the close ground point is at the same X/Y as the non-ground
         // point, we're done.  Also, if there's only one ground point, we
