@@ -164,7 +164,11 @@ max_distance
     option.  [Default: N/A]
 
 allow_extrapolation
-    Does no extrapolation.  For ``HeightAboveGround`` to be calculated,
-    a ground point must be at the same location as the non-ground point
-    being evaluated.  Not used with the `delaunay`_ option.
+    If false and a non-ground point lies outside of the bounding box of
+    all ground points, its ``HeightAboveGround`` is set to 0.  If true
+    and ``delaunay`` is set, the ``HeightAboveGround`` is set to the
+    difference between the heights of the non-ground point and nearest
+    ground point.  If true and using neighbor interpolation (``delaunay``
+    is false), extrapolation is used to assign the ``HeightAboveGround``
+    value.
     [Default: false]

@@ -97,14 +97,25 @@ double distance_along_z(double x1, double y1, double z1,
 // The non-ground point (x0, y0) is in exactly 0 or 1 of the triangles of
 // the ground triangulation, so when we find a triangle containing the point,
 // return the interpolated z.
-// (I supposed the point could be on a edge of two triangles, but the
+// (I suppose the point could be on a edge of two triangles, but the
 //  result is the same, so this is still good.)
 double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
-    const std::vector<size_t>& triangles, const PointIdList& ids)
+    const PointIdList& ids)
 {
     using namespace pdal::Dimension;
 
-    double z1 = std::numeric_limits<double>::infinity();
+    // Delaunay-based interpolation
+    std::vector<double> neighbors;
+
+    for (size_t j = 0; j < ids.size(); ++j)
+    {
+        neighbors.push_back(gView->getFieldAs<double>(Id::X, ids[j]));
+        neighbors.push_back(gView->getFieldAs<double>(Id::Y, ids[j]));
+    }
+
+    delaunator::Delaunator triangulation(neighbors);
+    const std::vector<size_t>& triangles(triangulation.triangles);
+
     for (size_t j = 0; j < triangles.size(); j += 3)
     {
         auto ai = triangles[j+0];
@@ -122,13 +133,40 @@ double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
         double cy = gView->getFieldAs<double>(Id::Y, ids[ci]);
         double cz = gView->getFieldAs<double>(Id::Z, ids[ci]);
 
-        z1 = distance_along_z(ax, ay, az, bx, by, bz,
+        // Returns infinity unless the point x0/y0 is in the triangle.
+        double z1 = distance_along_z(ax, ay, az, bx, by, bz,
                 cx, cy, cz, x0, y0);
         if (z1 != std::numeric_limits<double>::infinity())
-            break;
-
+            return z1;
     }
-    return z1;
+    // If the non ground point was outside the triangulation of ground
+    // points, just use the Z coordinate of the closest
+    // ground point.
+    return gView->getFieldAs<double>(Id::Z, ids[0]);
+}
+
+double neighbor_interp_ground(PointViewPtr gView, const PointIdList& ids,
+    const std::vector<double>& sqr_dists, double maxDistance2, double zDefault)
+{
+    double weights = 0;
+    double z_accumulator = 0;
+
+    for (size_t j = 0; j < ids.size(); ++j)
+    {
+        auto z = gView->getFieldAs<double>(Dimension::Id::Z, ids[j]);
+        double sqr_dist = sqr_dists[j];
+        if (maxDistance2 > 0 && sqr_dist > maxDistance2)
+            break;
+        else {
+            double weight = 1 / sqr_dist;
+            weights += weight;
+            z_accumulator += weight * z;
+        }
+    }
+
+    if (weights)
+        return z_accumulator / weights;
+    return zDefault;
 }
 
 } // unnamed namespace
@@ -191,11 +229,10 @@ void HAGFilter::filter(PointView& view)
 {
     using namespace pdal::Dimension;
 
-    double maxDistance2 = std::pow(m_maxDistance, 2);
     PointViewPtr gView = view.makeNew();
     PointViewPtr ngView = view.makeNew();
 
-    // First pass: Separate into ground and non-ground views.
+    // Separate into ground and non-ground views.
     for (PointId i = 0; i < view.size(); ++i)
     {
         if (view.getFieldAs<short>(Id::Classification, i) == 2)
@@ -206,6 +243,8 @@ void HAGFilter::filter(PointView& view)
         else
             ngView->appendPoint(view, i);
     }
+    BOX2D gBounds;
+    gView->calculateBounds(gBounds);
 
     // Bail if there weren't any points classified as ground.
     if (gView->size() == 0)
@@ -215,85 +254,53 @@ void HAGFilter::filter(PointView& view)
     // Build the 2D KD-tree.
     const KD2Index& kdi = gView->build2dIndex();
 
-    // Second pass: Find Z difference between non-ground points and the nearest
+    double maxDistance2 = std::pow(m_maxDistance, 2.0);
+    // Find Z difference between non-ground points and the nearest
     // neighbor (2D) in the ground view or between non-ground points and the
     // locally-computed surface (Delaunay triangultion of the neighborhood).
     for (PointId i = 0; i < ngView->size(); ++i)
     {
         PointRef point = ngView->point(i);
+
+        // Non-ground view point for which we're trying to calc HAG
         double x0 = point.getFieldAs<double>(Id::X);
         double y0 = point.getFieldAs<double>(Id::Y);
         double z0 = point.getFieldAs<double>(Id::Z);
+
         PointIdList ids(m_count);
         std::vector<double> sqr_dists(m_count);
         kdi.knnSearch(x0, y0, m_count, &ids, &sqr_dists);
 
-        double z1 = gView->getFieldAs<double>(Id::Z, ids[0]);
+        // Closest ground point.
+        double x = gView->getFieldAs<double>(Id::X, ids[0]);
+        double y = gView->getFieldAs<double>(Id::Y, ids[0]);
+        double z = gView->getFieldAs<double>(Id::Z, ids[0]);
+
         assert(ids.size() > 0);
-        if (m_delaunay == false && ids.size() > 1)
-        {
-            // Nearest-Neighbor-based interpolation
-            auto min_x = (std::numeric_limits<double>::max)();
-            auto max_x = (std::numeric_limits<double>::lowest)();
-            auto min_y = (std::numeric_limits<double>::max)();
-            auto max_y = (std::numeric_limits<double>::lowest)();
 
-            double weights = 0;
-            double z_accumulator = 0;
-            bool exact_match = false;
-            for (size_t j = 0; j < ids.size(); ++j)
-            {
-                auto x = gView->getFieldAs<double>(Id::X, ids[j]);
-                auto y = gView->getFieldAs<double>(Id::Y, ids[j]);
-                auto z = gView->getFieldAs<double>(Id::Z, ids[j]);
-                double sqr_dist = sqr_dists[j];
-                if (sqr_dist == 0)
-                {
-                    //ABELL - This doesn't make sense.  Z1 is set, but if
-                    // exact match is set, it gets overwritten outside of
-                    // the for loop.
-                    exact_match = true;
-                    z1 = z;
-                    break;
-                }
-                if (maxDistance2 > 0 && sqr_dist > maxDistance2) {
-                    break;
-                } else {
-                    auto weight = 1 / sqr_dist;
-                    weights += weight;
-                    z_accumulator += weight * z;
-                }
-                max_x = (std::max)(x, max_x);
-                min_x = (std::min)(x, min_x);
-                max_y = (std::max)(y, max_y);
-                min_y = (std::min)(y, min_y);
-            }
-            if (exact_match || m_allowExtrapolation ||
-                (x0 > min_x && x0 < max_x && y0 > min_y && y0 < max_y))
-            {
-                z1 = z_accumulator / weights;
-            }
+        double z1;
+        // If the close ground point is at the same X/Y as the non-ground
+        // point, we're done.  Also, if there's only one ground point, we
+        // just use that.
+        if ((x0 == x && y0 == y) || ids.size() == 1)
+        {
+            z1 = z;
         }
-        else if (m_delaunay == true)
+        // If the non-ground point is outside the bounds of all the
+        // ground points and we're not doing extrapolation, just return
+        // its current Z, which will give a HAG of 0.
+        else if (!gBounds.contains(x0, y0) && !m_allowExtrapolation)
         {
-            // Delaunay-based interpolation
-            std::vector<double> neighbors;
-
-            for (size_t j = 0; j < ids.size(); ++j)
-            {
-                neighbors.push_back(gView->getFieldAs<double>(Id::X, ids[j]));
-                neighbors.push_back(gView->getFieldAs<double>(Id::Y, ids[j]));
-            }
-
-            delaunator::Delaunator triangulation(neighbors);
-            z1 = delaunay_interp_ground(x0, y0, gView,
-                triangulation.triangles, ids);
-
-            // If the non ground point was outside the triangulation of ground
-            // points, just use the Z coordinate of the closest
-            // ground point.
-            if (z1 == std::numeric_limits<double>::infinity())
-                z1 = gView->getFieldAs<double>(Id::Z, ids[0]);
+            z1 = z0;
+        }
+        else if (m_delaunay)
+        {
+            z1 = delaunay_interp_ground(x0, y0, gView, ids);
+        }
+        else
+        {
+            z1 = neighbor_interp_ground(gView, ids, sqr_dists,
+                maxDistance2, z0);
         }
         ngView->setField(Dimension::Id::HeightAboveGround, i, z0 - z1);
     }
