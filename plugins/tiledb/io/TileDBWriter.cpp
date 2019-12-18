@@ -229,17 +229,23 @@ std::string TileDBWriter::getName() const { return s_info.name; }
 
 void TileDBWriter::addArgs(ProgramArgs& args)
 {
-    args.add("array_name", "TileDB array name", m_args->m_arrayName).setPositional();
+    args.add("array_name", "TileDB array name",
+        m_args->m_arrayName).setPositional();
+    args.addSynonym("array_name", "filename");
     args.add("config_file", "TileDB configuration file location",
         m_args->m_cfgFileName);
-    args.add("data_tile_capacity", "TileDB tile capacity", m_args->m_tile_capacity,
-        size_t(100000));
-    args.add("x_tile_size", "TileDB tile size", m_args->m_x_tile_size, size_t(1000));
-    args.add("y_tile_size", "TileDB tile size", m_args->m_y_tile_size, size_t(1000));
-    args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size, size_t(1000));
+    args.add("data_tile_capacity", "TileDB tile capacity",
+        m_args->m_tile_capacity, size_t(100000));
+    args.add("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
+        size_t(1000));
+    args.add("y_tile_size", "TileDB tile size", m_args->m_y_tile_size,
+        size_t(1000));
+    args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
+        size_t(1000));
     args.add("chunk_size", "Point cache size for chunked writes",
         m_args->m_cache_size, size_t(10000));
-    args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats, false);
+    args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
+        false);
     args.add("compression", "TileDB compression type for attributes",
         m_args->m_compressor);
     args.add("compression_level", "TileDB compression level",
@@ -360,7 +366,8 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                 auto attrs = m_schema->attributes();
                 auto it = attrs.find(dimName);
                 if (it == attrs.end())
-                    throwError("Attribute " + dimName + " does not exist in original array.");
+                    throwError("Attribute " + dimName +
+                        " does not exist in original array.");
             }
             
             m_attrs.emplace_back(dimName, d, type);
@@ -373,7 +380,8 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     if (!m_args->m_append)
     {
         tiledb::Array::create(m_args->m_arrayName, *m_schema);
-        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+            TILEDB_WRITE));
     }
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
@@ -444,7 +452,8 @@ void TileDBWriter::done(PointTableRef table)
         tiledb::VFS::filebuf fbuf(vfs);
 
         if (vfs.is_dir(m_args->m_arrayName))
-            fbuf.open(m_args->m_arrayName + pathSeparator + "pdal.json", std::ios::out);
+            fbuf.open(m_args->m_arrayName + pathSeparator + "pdal.json",
+                std::ios::out);
         else
         {
             std::string fname = m_args->m_arrayName + "/pdal.json";
@@ -455,7 +464,8 @@ void TileDBWriter::done(PointTableRef table)
         std::ostream os(&fbuf);
 
         if (!os.good())
-            throwError("Unable to create sidecar file for " + m_args->m_arrayName);
+            throwError("Unable to create sidecar file for " +
+                m_args->m_arrayName);
 
         pdal::Utils::toJSON(anon, os);
 
