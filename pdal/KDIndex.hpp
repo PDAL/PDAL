@@ -153,7 +153,7 @@ public:
     }
 
     void knnSearch(double x, double y, point_count_t k,
-        PointIdList *indices, std::vector<double> *sqr_dists)
+        PointIdList *indices, std::vector<double> *sqr_dists) const
     {
         k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -167,10 +167,19 @@ public:
     }
 
     void knnSearch(PointId idx, point_count_t k, PointIdList *indices,
-        std::vector<double> *sqr_dists)
+        std::vector<double> *sqr_dists) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+
+        knnSearch(x, y, k, indices, sqr_dists);
+    }
+
+    void knnSearch(PointRef& point, point_count_t k, PointIdList *indices,
+        std::vector<double> *sqr_dists) const
+    {
+        double x = point.getFieldAs<double>(Dimension::Id::X);
+        double y = point.getFieldAs<double>(Dimension::Id::Y);
 
         knnSearch(x, y, k, indices, sqr_dists);
     }
@@ -289,7 +298,8 @@ public:
         return neighbors(x, y, z, k, stride);
     }
 
-    PointIdList neighbors(PointRef &point, point_count_t k, size_t stride=1) const
+    PointIdList neighbors(PointRef &point, point_count_t k,
+        size_t stride=1) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -299,7 +309,7 @@ public:
     }
 
     void knnSearch(double x, double y, double z, point_count_t k,
-        PointIdList *indices, std::vector<double> *sqr_dists)
+        PointIdList *indices, std::vector<double> *sqr_dists) const
     {
         k = (std::min)(m_buf.size(), k);
         nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
@@ -314,7 +324,7 @@ public:
     }
 
     void knnSearch(PointId idx, point_count_t k, PointIdList *indices,
-        std::vector<double> *sqr_dists)
+        std::vector<double> *sqr_dists) const
     {
         double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
         double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -324,7 +334,7 @@ public:
     }
 
     void knnSearch(PointRef &point, point_count_t k,
-        PointIdList *indices, std::vector<double> *sqr_dists)
+        PointIdList *indices, std::vector<double> *sqr_dists) const
     {
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
@@ -372,7 +382,6 @@ public:
 
         return radius(x, y, z, r);
     }
-
 };
 
 template<>

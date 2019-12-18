@@ -34,7 +34,6 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
