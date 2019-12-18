@@ -194,14 +194,14 @@ HAGFilter::HAGFilter()
 void HAGFilter::addArgs(ProgramArgs& args)
 {
     args.add("count", "The number of points to fetch to determine the "
-        "ground point [default: 1].", m_count, point_count_t(1));
-    args.add("max_distance", "The maximum distance to the farthest nearest "
-        "neighbor before the height above ground is not calculated "
-        "[default: 0 (disabled)]", m_maxDistance);
+        "ground point [Default: 1].", m_count, point_count_t(1));
+    args.add("max_distance", "Ground points beyond this distance will not "
+        "influence nearest neighbor interpolation of height above ground."
+        "[Default: None]", m_maxDistance);
     args.add("allow_extrapolation", "If true and count > 1, allow "
-        "extrapolation [default: true].", m_allowExtrapolation, true);
+        "extrapolation [Default: true].", m_allowExtrapolation, true);
     args.add("delaunay", "Construct local Delaunay fans and infer heights "
-        "from them. [default: false].", m_delaunay, false);
+        "from them. [Default: false].", m_delaunay, false);
 }
 
 
