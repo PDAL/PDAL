@@ -253,37 +253,46 @@ void TileDBWriter::addArgs(ProgramArgs& args)
 
 void TileDBWriter::initialize()
 {
-    if (!m_args->m_cfgFileName.empty())
+    try
     {
-        tiledb::Config cfg(m_args->m_cfgFileName);
-        m_ctx.reset(new tiledb::Context(cfg));
-    }
-    else
-        m_ctx.reset(new tiledb::Context());
-
-    if (!m_args->m_append)
-    {
-        if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
-            tiledb::Object::Type::Array)
-            throwError("Array already exists.");
-
-        m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
-
-        if (!m_args->m_compressor.empty() || m_args->m_filters.count("coords") > 0)
+        if (!m_args->m_cfgFileName.empty())
         {
-            if (!m_args->m_compressor.empty())
+            tiledb::Config cfg(m_args->m_cfgFileName);
+            m_ctx.reset(new tiledb::Context(cfg));
+        }
+        else
+            m_ctx.reset(new tiledb::Context());
+
+        if (!m_args->m_append)
+        {
+            if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
+                    tiledb::Object::Type::Array)
+                throwError("Array already exists.");
+
+            m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
+
+            if (!m_args->m_compressor.empty() ||
+                    m_args->m_filters.count("coords") > 0)
             {
-                NL::json opts;
-                opts["compression"] = m_args->m_compressor;
-                opts["compression_level"] = m_args->m_compressionLevel;
-                m_schema->set_coords_filter_list(*createFilterList(*m_ctx, opts));
-            }
-            else
-            {
-                m_schema->set_coords_filter_list(
-                    *createFilterList(*m_ctx, m_args->m_filters["coords"]));
+                if (!m_args->m_compressor.empty())
+                {
+                    NL::json opts;
+                    opts["compression"] = m_args->m_compressor;
+                    opts["compression_level"] = m_args->m_compressionLevel;
+                    m_schema->set_coords_filter_list(
+                        *createFilterList(*m_ctx, opts));
+                }
+                else
+                {
+                    m_schema->set_coords_filter_list(
+                        *createFilterList(*m_ctx, m_args->m_filters["coords"]));
+                }
             }
         }
+    }
+    catch (const tiledb::TileDBError& err)
+    {
+        throwError(std::string("TileDB Error: ") + err.what());
     }
 }
 
@@ -315,7 +324,8 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     }
     else
     {
-        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+            TILEDB_WRITE));
     }
 
     for (const auto& d : all)
