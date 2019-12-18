@@ -48,6 +48,8 @@ class PDAL_DLL ClusterFilter : public Filter
 public:
     ClusterFilter() : Filter()
     {}
+    ClusterFilter& operator=(const ClusterFilter&) = delete;
+    ClusterFilter(const ClusterFilter&) = delete;
 
     std::string getName() const;
 
@@ -55,14 +57,9 @@ private:
     uint64_t m_minPoints;
     uint64_t m_maxPoints;
     double m_tolerance;
-    Dimension::Id m_cluster;
 
     virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
-
-    ClusterFilter& operator=(const ClusterFilter&); // not implemented
-    ClusterFilter(const ClusterFilter&); // not implemented
 };
 
 } // namespace pdal
