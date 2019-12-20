@@ -69,3 +69,32 @@ TEST(ELMFilterTest, test1)
     EXPECT_EQ(noise, 2);
 }
 
+TEST(ELMFilterTest, test2)
+{
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("filters/elm2.txt"));
+
+    TextReader reader;
+    reader.setOptions(readerOps);
+
+    ELMFilter filter;
+    filter.setInput(reader);
+
+    PointTable table;
+
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 17u);
+    int noise(0);
+    for (size_t i = 0; i < view->size(); ++i)
+    {
+        int c = view->getFieldAs<int>(Dimension::Id::Classification, i);
+        if (c == 7)
+            noise++;
+    }
+    EXPECT_EQ(noise, 7);
+}
+
