@@ -188,7 +188,6 @@ class TileDBReaderTest : public ::testing::Test
         std::string pth = Support::temppath("tiledb_test_srs");
 
         Options options;
-        std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
 
