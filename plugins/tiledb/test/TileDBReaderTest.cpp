@@ -147,7 +147,6 @@ class TileDBReaderTest : public ::testing::Test
         Options options;
         options.add("array_name", pth);
 
-
         tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;

@@ -308,9 +308,9 @@ void TileDBReader::localReady()
     {
         tiledb::VFS vfs(*m_ctx, m_ctx->config());
         tiledb::VFS::filebuf fbuf(vfs);
-        std::string metaFName = m_arrayName + pathSeparator + "pdal.json";
+        std::string metaFName = m_filename + pathSeparator + "pdal.json";
 
-        if (vfs.is_dir(m_arrayName))
+        if (vfs.is_dir(m_filename))
         {
             auto nBytes = vfs.file_size(metaFName);
             tiledb::VFS::filebuf fbuf(vfs);
