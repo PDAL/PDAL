@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include "TransformationFilter.hpp"
+#include <pdal/util/FileUtils.hpp>
+
 
 #include <sstream>
 
@@ -60,10 +62,23 @@ TransformationFilter::Transform::Transform(
 std::istream& operator>>(std::istream& in,
     pdal::TransformationFilter::Transform& xform)
 {
+    std::string arg(std::istreambuf_iterator<char>(in), {});
+    std::stringstream matrix;
+    matrix.str(arg);
+
+    std::string matrix_str;
+    if (pdal::FileUtils::fileExists(arg))
+    {
+        matrix_str = pdal::FileUtils::readFileIntoString(arg);
+        matrix.str(matrix_str);
+    }
+
+    matrix.seekg(0);
+
     double entry;
 
     size_t i = 0;
-    while (in >> entry)
+    while (matrix >> entry)
     {
         if (i + 1 > xform.Size)
         {
