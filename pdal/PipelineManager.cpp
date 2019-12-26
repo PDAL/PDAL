@@ -427,7 +427,7 @@ Stage& PipelineManager::makeWriter(StageCreationOptions& o)
                 o.m_filename);
     }
 
-    if (!o.m_filename.empty())
+    if (!o.m_filename.empty() && o.m_driver != "writers.null")
         o.m_options.replace("filename", o.m_filename);
 
     auto& writer = addWriter(o.m_driver);

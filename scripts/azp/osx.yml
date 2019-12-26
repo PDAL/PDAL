@@ -28,7 +28,9 @@ jobs:
       ECHO ON
       source activate pdal
       conda config --set always_yes True --set show_channel_urls True
-      conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja  conda-forge-ci-setup=2 -y
+      conda config --add channels conda-forge
+      conda config --set channel_priority strict
+      conda install --yes --quiet --name pdal geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja  conda-forge-ci-setup=2 -y
     displayName: Install PDAL dependencies
   - script: |
       source activate pdal

@@ -88,12 +88,14 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef);
     virtual void ready(PointTableRef);
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
+    void localReady();
+    bool processPoint(PointRef& point);
 
-    std::string m_arrayName;
     std::string m_cfgFileName;
     point_count_t m_chunkSize;
     point_count_t m_offset;

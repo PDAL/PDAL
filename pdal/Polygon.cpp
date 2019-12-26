@@ -35,8 +35,26 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 
+#include "../filters/private/pnp/GridPnp.hpp"
+
 namespace pdal
 {
+
+struct Polygon::PrivateData
+{
+    std::vector<GridPnp> m_grids;
+};
+
+
+Polygon::Polygon()
+{
+    init();
+}
+
+
+Polygon::~Polygon()
+{}
+
 
 Polygon::Polygon(OGRGeometryH g) : Geometry(g)
 {
@@ -52,6 +70,8 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
 
 void Polygon::init()
 {
+    m_pd.reset(new PrivateData());
+
     // If the handle was null, we need to create an empty polygon.
     if (!m_geom)
     {
@@ -72,7 +92,12 @@ void Polygon::init()
 }
 
 
-Polygon::Polygon(const BOX2D& box)
+Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref) :
+    Geometry(wkt_or_json, ref), m_pd(new PrivateData)
+{}
+
+
+Polygon::Polygon(const BOX2D& box) : m_pd(new PrivateData)
 {
     OGRPolygon *poly = new OGRPolygon();
     m_geom.reset(poly);
@@ -86,7 +111,7 @@ Polygon::Polygon(const BOX2D& box)
 }
 
 
-Polygon::Polygon(const BOX3D& box)
+Polygon::Polygon(const BOX3D& box) : m_pd(new PrivateData)
 {
     OGRPolygon *poly = new OGRPolygon();
     m_geom.reset(poly);
@@ -100,7 +125,28 @@ Polygon::Polygon(const BOX3D& box)
 }
 
 
-void Polygon::simplify(double distance_tolerance, double area_tolerance, bool preserve_topology)
+Polygon::Polygon(const Polygon& poly) : Geometry(poly)
+{
+    init();
+}
+
+
+Polygon& Polygon::operator=(const Polygon& src)
+{
+    ((Geometry *)this)->operator=((const Geometry&)src);
+    m_pd.reset(new PrivateData);
+    return *this;
+}
+
+
+void Polygon::modified()
+{
+    m_pd->m_grids.clear();
+}
+
+
+void Polygon::simplify(double distance_tolerance, double area_tolerance,
+    bool preserve_topology)
 {
     throwNoGeos();
 
@@ -149,6 +195,7 @@ void Polygon::simplify(double distance_tolerance, double area_tolerance, bool pr
         for (int i = 0; i < mpoly->getNumGeometries(); ++i)
             deleteSmallRings(mpoly->getGeometryRef(i));
     }
+    modified();
 }
 
 
@@ -225,8 +272,13 @@ bool Polygon::intersects(const Polygon& p) const
 /// \return  Whether the polygon contains the point or not.
 bool Polygon::contains(double x, double y) const
 {
-    OGRPoint p(x, y);
-    return m_geom->Contains(&p);
+    if (m_pd->m_grids.empty())
+        for (const Polygon& p : polygons())
+            m_pd->m_grids.emplace_back(p.exteriorRing(), p.interiorRings());
+    for (auto& g : m_pd->m_grids)
+        if (g.inside(x, y))
+            return true;
+    return false;
 }
 
 

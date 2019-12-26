@@ -67,7 +67,7 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
     point_count_t n1(0);
     double delta, delta_n, term1, M1, M2, M3;
     M1 = M2 = M3 = 0.0;
-    std::vector<double> skewness;
+    std::vector<double> skewness(view->size());
     for (PointId i = 0; i < view->size(); ++i)
     {
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
@@ -83,14 +83,15 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
     }
 
     PointId j(0);
-    for (PointId i = view->size() - 1; i >= 0; --i)
+    PointId i(view->size());
+    do
     {
         if (skewness[i] <= 0)
         {
             j = i;
             break;
         }
-    }
+    } while (--i != 0);
 
     std::set<PointId> groundIdx;
     for (PointId i = 0; i <= j; ++i)
@@ -105,13 +106,16 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
 
 PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
 {
+    PointViewSet viewSet;
+    if (!input->size())
+        return viewSet;
+
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
 
     auto idx = processGround(input);
 
-    PointViewSet viewSet;
     if (!idx.empty())
     {
         // set the classification label of ground returns as 2

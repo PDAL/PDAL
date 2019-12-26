@@ -1183,6 +1183,34 @@ TEST(LasWriterTest, pdal_add_vlr)
     EXPECT_EQ(nodes.size(), 2UL);
 }
 
+TEST(LasWriterTest, evlroffset)
+{
+    std::string outfile(Support::temppath("evlr.las"));
+
+    FileUtils::deleteFile(outfile);
+    {
+        LasWriter w;
+        Options wo;
+        std::vector<uint8_t> largeVlr(66000);
+        std::string vlr =
+            " [ { \"description\": \"A description under 32 bytes\", "
+            "\"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"" +
+            Utils::base64_encode(largeVlr) + "\" }]";
+        wo.add("vlrs", vlr);
+        wo.add("minor_version", 4);
+        wo.add("filename", outfile);
+        w.setOptions(wo);
+
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+        LasTester tester;
+        LasHeader* h = tester.header(w);
+        // No points in the file
+        EXPECT_EQ(h->eVlrOffset(), h->pointOffset());
+        EXPECT_EQ(h->eVlrCount(), 1u);
+    }
+}
 
 // Make sure that we can forward the LAS_Spec/3 VLR
 TEST(LasWriterTest, forward_spec_3)
@@ -1353,7 +1381,6 @@ TEST(LasWRiterTest, issue2663)
     EXPECT_EQ(h.scaleY(), .001);
     EXPECT_EQ(h.scaleZ(), .001);
 }
-
 
 #if defined(PDAL_HAVE_LASZIP)
 // Make sure that we can translate this special test data to 1.4, dataformat 6.

@@ -36,6 +36,8 @@
 #include <cctype>
 #include <limits>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/util/FileUtils.hpp>
 
 #include "TileDBWriter.hpp"
@@ -56,6 +58,23 @@ static PluginInfo const s_info
     "Write data using TileDB.",
     "http://pdal.io/stages/drivers.tiledb.writer.html"
 };
+
+struct TileDBWriter::Args
+{
+    std::string m_arrayName;
+    std::string m_cfgFileName;
+    size_t m_tile_capacity;
+    size_t m_x_tile_size;
+    size_t m_y_tile_size;
+    size_t m_z_tile_size;
+    size_t m_cache_size;
+    bool m_stats;
+    std::string m_compressor;
+    int m_compressionLevel;
+    NL::json m_filters;
+    bool m_append;
+};
+
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
 
@@ -137,76 +156,149 @@ tiledb::Attribute createAttribute(const tiledb::Context& ctx,
 }
 
 
-tiledb::Filter createFilter(const tiledb::Context& ctx, const std::string& name)
+std::unique_ptr<tiledb::Filter> createFilter(const tiledb::Context& ctx, const NL::json& opts)
 {
+    std::unique_ptr<tiledb::Filter> filter;
+    std::string name = opts["compression"];
+
     if (name.empty())
-        return tiledb::Filter(ctx, TILEDB_FILTER_NONE);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_NONE));
     else if (name == "gzip")
-        return tiledb::Filter(ctx, TILEDB_FILTER_GZIP);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_GZIP));
     else if (name == "zstd")
-        return tiledb::Filter(ctx, TILEDB_FILTER_ZSTD);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_ZSTD));
     else if (name == "lz4")
-        return tiledb::Filter(ctx, TILEDB_FILTER_LZ4);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_LZ4));
     else if (name == "rle")
-        return tiledb::Filter(ctx, TILEDB_FILTER_RLE);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_RLE));
     else if (name == "bzip2")
-        return tiledb::Filter(ctx, TILEDB_FILTER_BZIP2);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BZIP2));
     else if (name == "double-delta")
-        return tiledb::Filter(ctx, TILEDB_FILTER_DOUBLE_DELTA);
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_DOUBLE_DELTA));
+    else if (name == "bit-width-reduction")
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BIT_WIDTH_REDUCTION));
+    else if (name == "bit-shuffle")
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BITSHUFFLE));
+    else if (name == "byte-shuffle")
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BYTESHUFFLE));
+    else if (name == "positive-delta")
+        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_POSITIVE_DELTA));
     else
         throw tiledb::TileDBError("Unable to parse compression type: " + name);
+
+    if (opts.count("compression_level") > 0)
+        filter->set_option(TILEDB_COMPRESSION_LEVEL, opts["compression_level"].get<int>());
+
+    if (opts.count("bit_width_max_window") > 0)
+        filter->set_option(TILEDB_BIT_WIDTH_MAX_WINDOW, opts["bit_width_max_window"].get<int>());
+
+    if (opts.count("positive_delta_max_window") > 0)
+        filter->set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW, opts["positive_delta_max_window"].get<int>());
+
+    return filter;
 }
+
+
+std::unique_ptr<tiledb::FilterList> createFilterList(const tiledb::Context& ctx, const NL::json& opts)
+{
+    std::unique_ptr<tiledb::FilterList> filterList(new tiledb::FilterList(ctx));
+
+    if (opts.is_array())
+    {
+        for (auto& el : opts.items())
+        {
+            auto v = el.value();
+            filterList->add_filter(*createFilter(ctx, v));
+        }
+    }
+    else
+    {
+        filterList->add_filter(*createFilter(ctx, opts));
+    }
+    return filterList;
+}
+
+TileDBWriter::TileDBWriter(): m_args(new TileDBWriter::Args){}
+
+
+TileDBWriter::~TileDBWriter(){}
+
 
 std::string TileDBWriter::getName() const { return s_info.name; }
 
+
 void TileDBWriter::addArgs(ProgramArgs& args)
 {
-    args.add("array_name", "TileDB array name", m_arrayName).setPositional();
+    args.add("array_name", "TileDB array name",
+        m_args->m_arrayName).setPositional();
+    args.addSynonym("array_name", "filename");
     args.add("config_file", "TileDB configuration file location",
-        m_cfgFileName);
-    args.add("data_tile_capacity", "TileDB tile capacity", m_tile_capacity,
-        size_t(100000));
-    args.add("x_tile_size", "TileDB tile size", m_x_tile_size, size_t(1000));
-    args.add("y_tile_size", "TileDB tile size", m_y_tile_size, size_t(1000));
-    args.add("z_tile_size", "TileDB tile size", m_z_tile_size, size_t(1000));
+        m_args->m_cfgFileName);
+    args.add("data_tile_capacity", "TileDB tile capacity",
+        m_args->m_tile_capacity, size_t(100000));
+    args.add("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
+        size_t(1000));
+    args.add("y_tile_size", "TileDB tile size", m_args->m_y_tile_size,
+        size_t(1000));
+    args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
+        size_t(1000));
     args.add("chunk_size", "Point cache size for chunked writes",
-        m_cache_size, size_t(10000));
-    args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
+        m_args->m_cache_size, size_t(10000));
+    args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
+        false);
     args.add("compression", "TileDB compression type for attributes",
-        m_compressor);
+        m_args->m_compressor);
     args.add("compression_level", "TileDB compression level",
-        m_compressionLevel, -1);
+        m_args->m_compressionLevel, -1);
+    args.add("filters", "Specify filter and level per dimension/attribute",
+        m_args->m_filters);
     args.add("append", "Append to existing TileDB array",
-        m_append, false);
+        m_args->m_append, false);
 }
 
 
 void TileDBWriter::initialize()
 {
-    if (!m_cfgFileName.empty())
+    try
     {
-        tiledb::Config cfg(m_cfgFileName);
-        m_ctx.reset(new tiledb::Context(cfg));
-    }
-    else
-        m_ctx.reset(new tiledb::Context());
-
-    // If the array already exists on disk, throw an error
-    if (!m_append)
-    {
-        if (tiledb::Object::object(*m_ctx, m_arrayName).type() ==
-            tiledb::Object::Type::Array)
-            throwError("Array already exists.");
-        m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
-
-        if (!m_compressor.empty())
+        if (!m_args->m_cfgFileName.empty())
         {
-            tiledb::Filter filter = createFilter(*m_ctx, m_compressor);
-            filter.set_option(TILEDB_COMPRESSION_LEVEL, m_compressionLevel);
-            m_filterList.reset(new tiledb::FilterList(*m_ctx));
-            m_filterList->add_filter(filter);
-            m_schema->set_coords_filter_list(*m_filterList);
+            tiledb::Config cfg(m_args->m_cfgFileName);
+            m_ctx.reset(new tiledb::Context(cfg));
         }
+        else
+            m_ctx.reset(new tiledb::Context());
+
+        if (!m_args->m_append)
+        {
+            if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
+                    tiledb::Object::Type::Array)
+                throwError("Array already exists.");
+
+            m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
+
+            if (!m_args->m_compressor.empty() ||
+                    m_args->m_filters.count("coords") > 0)
+            {
+                if (!m_args->m_compressor.empty())
+                {
+                    NL::json opts;
+                    opts["compression"] = m_args->m_compressor;
+                    opts["compression_level"] = m_args->m_compressionLevel;
+                    m_schema->set_coords_filter_list(
+                        *createFilterList(*m_ctx, opts));
+                }
+                else
+                {
+                    m_schema->set_coords_filter_list(
+                        *createFilterList(*m_ctx, m_args->m_filters["coords"]));
+                }
+            }
+        }
+    }
+    catch (const tiledb::TileDBError& err)
+    {
+        throwError(std::string("TileDB Error: ") + err.what());
     }
 }
 
@@ -219,61 +311,77 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     // get a list of all the dimensions & their types and add to schema
     // x,y,z will be tiledb dimensions other pdal dimensions will be
     // tiledb attributes
-    if (!m_append)
+    if (!m_args->m_append)
     {
         tiledb::Domain domain(*m_ctx);
         double dimMin = std::numeric_limits<double>::lowest();
         double dimMax = std::numeric_limits<double>::max();
 
         domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
-            {{dimMin, dimMax}}, m_x_tile_size))
+            {{dimMin, dimMax}}, m_args->m_x_tile_size))
             .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
-            {{dimMin, dimMax}}, m_y_tile_size))
+            {{dimMin, dimMax}}, m_args->m_y_tile_size))
             .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-            {{dimMin, dimMax}}, m_z_tile_size));
+            {{dimMin, dimMax}}, m_args->m_z_tile_size));
 
         m_schema->set_domain(domain).set_order(
             {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
-        m_schema->set_capacity(m_tile_capacity);
+        m_schema->set_capacity(m_args->m_tile_capacity);
     }
     else
     {
-        m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
+        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+            TILEDB_WRITE));
     }
-    
+
     for (const auto& d : all)
     {
         std::string dimName = layout->dimName(d);
+
         if ((dimName != "X") && (dimName != "Y") && (dimName != "Z"))
         {
             Dimension::Type type = layout->dimType(d);
-            if (!m_append)
+            if (!m_args->m_append)
             {
                 tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
-                if (!m_compressor.empty())
-                    att.set_filter_list(*m_filterList);
+                if (!m_args->m_compressor.empty())
+                {
+                    NL::json opts;
+                    opts["compression"] = m_args->m_compressor;
+                    opts["compression_level"] = m_args->m_compressionLevel;
+                    att.set_filter_list(*createFilterList(*m_ctx, opts));
+                }
+                else
+                {
+                    if (m_args->m_filters.count(dimName) > 0)
+                        att.set_filter_list(
+                            *createFilterList(*m_ctx, m_args->m_filters[dimName]));
+                }
+
                 m_schema->add_attribute(att);
             }
             else
             {
                 // check attribute exists in original tiledb array
-                auto attrs = m_array->schema().attributes();
+                auto attrs = m_schema->attributes();
                 auto it = attrs.find(dimName);
                 if (it == attrs.end())
-                    throwError("Attribute " + dimName + " does not exist in original array.");
+                    throwError("Attribute " + dimName +
+                        " does not exist in original array.");
             }
             
             m_attrs.emplace_back(dimName, d, type);
             // Size the buffers.
             m_attrs.back().m_buffer.resize(
-                m_cache_size * Dimension::size(type));
+                m_args->m_cache_size * Dimension::size(type));
         }
     }
 
-    if (!m_append)
+    if (!m_args->m_append)
     {
-        tiledb::Array::create(m_arrayName, *m_schema);
-        m_array.reset(new tiledb::Array(*m_ctx, m_arrayName, TILEDB_WRITE));
+        tiledb::Array::create(m_args->m_arrayName, *m_schema);
+        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+            TILEDB_WRITE));
     }
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
@@ -284,7 +392,6 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
 bool TileDBWriter::processOne(PointRef& point)
 {
-    auto attrs = m_array->schema().attributes();
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
@@ -297,7 +404,7 @@ bool TileDBWriter::processOne(PointRef& point)
     m_coords.push_back(z);
     m_bbox.grow(x, y, z);
 
-    if (++m_current_idx == m_cache_size)
+    if (++m_current_idx == m_args->m_cache_size)
     {
         if (!flushCache(m_current_idx))
         {
@@ -344,11 +451,12 @@ void TileDBWriter::done(PointTableRef table)
         // serialize metadata
         tiledb::VFS::filebuf fbuf(vfs);
 
-        if (vfs.is_dir(m_arrayName))
-            fbuf.open(m_arrayName + pathSeparator + "pdal.json", std::ios::out);
+        if (vfs.is_dir(m_args->m_arrayName))
+            fbuf.open(m_args->m_arrayName + pathSeparator + "pdal.json",
+                std::ios::out);
         else
         {
-            std::string fname = m_arrayName + "/pdal.json";
+            std::string fname = m_args->m_arrayName + "/pdal.json";
             vfs.touch(fname);
             fbuf.open(fname, std::ios::out);
         }
@@ -356,7 +464,8 @@ void TileDBWriter::done(PointTableRef table)
         std::ostream os(&fbuf);
 
         if (!os.good())
-            throwError("Unable to create sidecar file for " + m_arrayName);
+            throwError("Unable to create sidecar file for " +
+                m_args->m_arrayName);
 
         pdal::Utils::toJSON(anon, os);
 
@@ -425,12 +534,12 @@ bool TileDBWriter::flushCache(size_t size)
         }
     }
 
-    if (m_stats)
+    if (m_args->m_stats)
         tiledb::Stats::enable();
 
     tiledb::Query::Status status = m_query->submit();
 
-    if (m_stats)
+    if (m_args->m_stats)
     {
         tiledb::Stats::dump(stdout);
         tiledb::Stats::disable();

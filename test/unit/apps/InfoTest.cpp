@@ -131,8 +131,8 @@ std::string r = R"foo(
         "minimum": 636001.76,
         "name": "X",
         "position": 0,
-        "stddev": 1946.814556,
-        "variance": 3790086.914
+        "stddev": 314.9304199,
+        "variance": 99181.16939
       },
       {
         "average": 849145.7857,
@@ -141,8 +141,8 @@ std::string r = R"foo(
         "minimum": 848935.2,
         "name": "Y",
         "position": 1,
-        "stddev": 2564.046991,
-        "variance": 6574336.973
+        "stddev": 124.3281512,
+        "variance": 15457.48917
       },
 )foo";
 

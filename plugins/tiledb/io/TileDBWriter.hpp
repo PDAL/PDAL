@@ -59,7 +59,8 @@ public:
         {}
     };
 
-    TileDBWriter() = default;
+    TileDBWriter();
+    ~TileDBWriter();
     std::string getName() const;
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -71,25 +72,11 @@ private:
 
     bool flushCache(size_t size);
 
-    std::string m_arrayName;
-    std::string m_cfgFileName;
-
-    size_t m_tile_capacity;
-    size_t m_x_tile_size;
-    size_t m_y_tile_size;
-    size_t m_z_tile_size;
-    size_t m_current_idx;
-    size_t m_cache_size;
-
-
-    bool m_stats;
-    bool m_append;
+    struct Args;
+    std::unique_ptr<TileDBWriter::Args> m_args;
 
     BOX3D m_bbox;
-
-    std::unique_ptr<tiledb::FilterList> m_filterList;
-    std::string m_compressor;
-    int m_compressionLevel;
+    size_t m_current_idx;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::ArraySchema> m_schema;

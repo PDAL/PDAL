@@ -106,6 +106,8 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
         m_dataType = DataType::Laszip;
     else if (dt == "binary")
         m_dataType = DataType::Binary;
+    else if (dt == "zstandard")
+        m_dataType = DataType::Zstandard;
     else
         throw ept_error("Unrecognized EPT dataType: " + dt);
 }

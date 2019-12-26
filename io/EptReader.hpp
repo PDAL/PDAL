@@ -64,7 +64,6 @@ class EptInfo;
 class FixedPointLayout;
 class Key;
 class Pool;
-class GridPnp;
 class VectorPointTable;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
@@ -103,6 +102,10 @@ private:
 
     PointId readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
     PointId readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
+    PointId readZstandard(PointView& view, const Key& key, uint64_t nodeId)
+        const;
+    PointId processPackedData(PointView& view, uint64_t nodeId, char* data,
+        uint64_t size) const;
     void process(PointView& view, PointRef& pr, uint64_t nodeId,
         PointId pointId) const;
 
@@ -140,7 +143,6 @@ private:
     std::unique_ptr<Args> m_args;
 
     BOX3D m_queryBounds;
-    std::vector<std::unique_ptr<GridPnp>> m_queryGrids;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
     std::vector<std::unique_ptr<Addon>> m_addons;

@@ -37,6 +37,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
@@ -190,5 +192,138 @@ namespace pdal
 
         EXPECT_EQ((m_reader.count() * 3) + (m_reader2.count() * 3), coords.size());
     }
-}
 
+
+    TEST_F(TileDBWriterTest, write_simple_compression)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_compress_simple_out");
+
+        Options options;
+        options.add("array_name", pth);
+        options.add("compression", "zstd");
+        options.add("compression_level", 50);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+
+        tiledb::FilterList fl = array.schema().coords_filter_list();
+        EXPECT_EQ(fl.nfilters(), 1U);
+
+        tiledb::Filter f = fl.filter(0);
+        EXPECT_EQ(f.filter_type(), TILEDB_FILTER_ZSTD);
+        int32_t compressionLevel;
+        f.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 50);
+    }
+
+    TEST_F(TileDBWriterTest, write_options)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_write_options");
+
+        Options options;
+        NL::json jsonOptions;
+
+        // add an array filter
+        jsonOptions["coords"] = {
+            {{"compression", "bit-shuffle"}},
+            {{"compression", "zstd"}, {"compression_level", 50}}
+        };
+        jsonOptions["OffsetTime"]["compression"] = "rle";
+
+        options.add("array_name", pth);
+        options.add("filters", jsonOptions);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+
+        tiledb::FilterList fl = array.schema().coords_filter_list();
+        EXPECT_EQ(fl.nfilters(), 2U);
+
+        tiledb::Filter f1 = fl.filter(0);
+        tiledb::Filter f2 = fl.filter(1);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+        EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_ZSTD);
+        int32_t compressionLevel;
+        f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 50);
+
+        tiledb::Attribute att = array.schema().attributes().begin()->second;
+        tiledb::FilterList flAtts = att.filter_list();
+        EXPECT_EQ(flAtts.nfilters(), 1U);
+        tiledb::Filter fAtt = flAtts.filter(0);
+        EXPECT_EQ(fAtt.filter_type(), TILEDB_FILTER_RLE);
+    }
+
+   TEST_F(TileDBWriterTest, dup_options)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_write_options");
+
+        Options options;
+        NL::json jsonOptions;
+
+        // add an array filter
+        jsonOptions["coords"] = {
+            {{"compression", "bit-shuffle"}},
+            {{"compression", "gzip"}, {"compression_level", 9}}
+        };
+
+        options.add("array_name", pth);
+        options.add("compression", "zstd");
+        options.add("compression_level", 50);
+        options.add("filters", jsonOptions);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+
+        tiledb::FilterList fl = array.schema().coords_filter_list();
+        EXPECT_EQ(fl.nfilters(), 1U);
+
+        tiledb::Filter f = fl.filter(0);
+        EXPECT_EQ(f.filter_type(), TILEDB_FILTER_ZSTD);
+        int32_t compressionLevel;
+        f.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 50);
+    }
+}

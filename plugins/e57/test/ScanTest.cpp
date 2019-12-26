@@ -41,56 +41,95 @@
 namespace pdal
 {
 
-TEST(ScanTest,testScanCtr) 
+TEST(ScanTest,testScanCtr)
 {
-    E57Reader reader(Support::datapath("e57/A4.e57"));
-    auto scans = reader.getScans();
-    auto firstScan = scans[0];
-    ASSERT_EQ(firstScan->getNumPoints(),(pdal::point_count_t)4);
+    e57::ImageFile imf(Support::datapath("e57/A4.e57"), "r");
+
+    const e57::ustring normalsExtension(
+        "http://www.libe57.org/E57_NOR_surface_normals.txt");
+    e57::ustring _normalsExtension;
+
+    // the extension may already be registered
+    if (!imf.extensionsLookupPrefix("nor", _normalsExtension))
+        imf.extensionsAdd("nor", normalsExtension);
+
+    e57::VectorNode data3D(imf.root().get("/data3D"));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
+    ASSERT_EQ(scan->getNumPoints(), (pdal::point_count_t)4);
+    imf.close();
 }
 
-TEST(ScanTest,getDimension) 
+TEST(ScanTest,getDimension)
 {
-    E57Reader reader(Support::datapath("e57/A4.e57"));
-    auto scans = reader.getScans();
-    auto firstscan = scans[0];
+    e57::ImageFile imf(Support::datapath("e57/A4.e57"), "r");
+    const e57::ustring normalsExtension(
+        "http://www.libe57.org/E57_NOR_surface_normals.txt");
+    e57::ustring _normalsExtension;
 
-    auto dimensions = firstscan->getDimensions();
+    // the extension may already be registered
+    if (!imf.extensionsLookupPrefix("nor", _normalsExtension))
+        imf.extensionsAdd("nor", normalsExtension);
+
+    e57::VectorNode data3D(imf.root().get("/data3D"));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
+
+    auto dimensions = scan->getDimensions();
     ASSERT_EQ(dimensions.size(),(unsigned long)7);
     std::vector<std::string> expectedDimensions = {"cartesianX","cartesianY","cartesianZ",
-        "colorRed","colorGreen","colorBlue","intensity"};
+                                                   "colorRed","colorGreen","colorBlue","intensity"
+                                                  };
     for (auto dim: expectedDimensions)
     {
         ASSERT_TRUE(dimensions.find(dim) != dimensions.end());
     }
+    imf.close();
 }
 
-TEST(ScanTest,testGetPoints) 
+TEST(ScanTest,testGetPoints)
 {
-    E57Reader reader(Support::datapath("e57/A_B.e57"));
-    auto scans = reader.getScans();
-    auto firstScan = scans[0];
-    auto pts = firstScan->getPoints();
-    ASSERT_EQ((pdal::point_count_t)pts.childCount(),firstScan->getNumPoints());
+    e57::ImageFile imf(Support::datapath("e57/A_B.e57"), "r");
+    const e57::ustring normalsExtension(
+        "http://www.libe57.org/E57_NOR_surface_normals.txt");
+    e57::ustring _normalsExtension;
+
+    // the extension may already be registered
+    if (!imf.extensionsLookupPrefix("nor", _normalsExtension))
+        imf.extensionsAdd("nor", normalsExtension);
+
+    e57::VectorNode data3D(imf.root().get("/data3D"));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
+
+    auto pts = scan->getPoints();
+    ASSERT_EQ((pdal::point_count_t)pts.childCount(), scan->getNumPoints());
     ASSERT_EQ(pts.childCount(),2);
-    auto secondScan = scans[1];
+    auto secondScan = new e57::Scan((e57::StructureNode)data3D.get(1));
     pts = secondScan->getPoints();
     ASSERT_EQ((pdal::point_count_t)pts.childCount(),secondScan->getNumPoints());
     ASSERT_EQ(pts.childCount(),(int64_t)4);
+    imf.close();
 }
 
 TEST(ScanTest,testBbox)
 {
-    E57Reader reader(Support::datapath("e57/A4.e57"));
-    auto scans = reader.getScans();
-    auto firstScan = scans[0];
-    BOX3D box = firstScan->getBoundingBox();
+    e57::ImageFile imf(Support::datapath("e57/A4.e57"), "r");
+    const e57::ustring normalsExtension(
+        "http://www.libe57.org/E57_NOR_surface_normals.txt");
+    e57::ustring _normalsExtension;
+
+    // the extension may already be registered
+    if (!imf.extensionsLookupPrefix("nor", _normalsExtension))
+        imf.extensionsAdd("nor", normalsExtension);
+
+    e57::VectorNode data3D(imf.root().get("/data3D"));
+    auto scan = new e57::Scan((e57::StructureNode)data3D.get(0));
+    BOX3D box = scan->getBoundingBox();
     ASSERT_DOUBLE_EQ(box.minx, -4.49522018432617188e+01);
     ASSERT_DOUBLE_EQ(box.maxx, -4.43000984191894531e+01);
     ASSERT_DOUBLE_EQ(box.miny, -1.34930002689361572);
     ASSERT_DOUBLE_EQ(box.maxy, -8.85999977588653564e-01);
     ASSERT_DOUBLE_EQ(box.minz, -6.07699990272521973e-01);
     ASSERT_DOUBLE_EQ(box.maxz, 3.69399994611740112e-01);
+    imf.close();
 }
 
 } // namespace pdal

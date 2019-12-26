@@ -99,16 +99,19 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 */
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
-    std::string ext;
-
     const std::string driverProtocol = getDriverProtocol(filename);
 
-    if (filename == "STDOUT")
+    std::string lFilename = Utils::tolower(filename);
+    if (lFilename == "devnull" || lFilename == "/dev/null")
+        return "writers.null";
+
+    std::string ext;
+    if (lFilename == "stdout")
         ext = ".txt";
     else if (!driverProtocol.empty())
         ext = "." + driverProtocol;
     else
-        ext = Utils::tolower(FileUtils::extension(filename));
+        ext = Utils::tolower(FileUtils::extension(lFilename));
     // Strip off '.' and make lowercase.
     if (ext.length())
         ext = Utils::tolower(ext.substr(1));
