@@ -75,7 +75,6 @@ private:
     struct Args;
     std::unique_ptr<TileDBWriter::Args> m_args;
 
-    BOX3D m_bbox;
     size_t m_current_idx;
 
     std::unique_ptr<tiledb::Context> m_ctx;

@@ -115,7 +115,7 @@ namespace pdal
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
-        EXPECT_TRUE(meta.count("pipeline") > 0);
+        EXPECT_TRUE(meta.count("writers.tiledb") > 0);
 #endif
 
         auto domain = array.non_empty_domain<double>();
@@ -193,7 +193,7 @@ namespace pdal
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
-        EXPECT_TRUE(meta.count("pipeline") > 0);
+        EXPECT_TRUE(meta.count("writers.tiledb") > 0);
 #endif
 
         for (const auto& kv: domain)
