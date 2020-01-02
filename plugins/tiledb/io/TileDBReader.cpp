@@ -322,7 +322,9 @@ void TileDBReader::localReady()
         }
     }
 
-    if ((meta != nullptr) && (meta["writers.tiledb"].count("spatialreference") > 0))
+    if ((meta != nullptr) &&
+        (meta.count("writers.tiledb") > 0) &&
+        (meta["writers.tiledb"].count("spatialreference") > 0))
     {
         SpatialReference ref(meta["writers.tiledb"]["spatialreference"]);
         setSpatialReference(ref);
