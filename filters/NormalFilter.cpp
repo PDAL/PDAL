@@ -32,6 +32,14 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+// Normal refinement algorithm is presented in [1] and adapted to PDAL based on
+// the implementation provided in [2].
+//
+// [1] H. Hoppe, T.  DeRose, T. Duchamp, J. McDonald, and W. Stuetzle, "Surface
+// reconstruction from unorganized points," Computer Graphics, vol. 26. no. 2,
+// pp. 71-78, 1992.
+// [2] https://github.com/CloudCompare/CloudCompare.
+
 #include "NormalFilter.hpp"
 #include "private/Point.hpp"
 
