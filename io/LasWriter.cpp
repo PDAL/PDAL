@@ -120,6 +120,7 @@ void LasWriter::addArgs(ProgramArgs& args)
         m_extraDimSpec);
     args.add("forward", "Dimensions to forward from LAS reader", m_forwardSpec);
 
+    args.add("filesource_id", "File source ID number.", m_filesourceId);
     args.add("major_version", "LAS major version", m_majorVersion,
         decltype(m_majorVersion)(1));
     args.add("minor_version", "LAS minor version", m_minorVersion,
