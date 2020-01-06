@@ -55,26 +55,6 @@
 namespace pdal
 {
 
-struct Edge
-{
-    PointId m_v0;
-    PointId m_v1;
-    float m_weight;
-
-    Edge(PointId i, PointId j, float weight)
-        : m_v0(i), m_v1(j), m_weight(weight)
-    {
-    }
-};
-
-struct CompareEdgeWeight
-{
-    bool operator()(Edge const& lhs, Edge const& rhs)
-    {
-        return lhs.m_weight > rhs.m_weight;
-    }
-};
-
 using namespace Eigen;
 using namespace Dimension;
 
@@ -175,12 +155,9 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
             // viewpoint by taking the dot product of the vector connecting the
             // point with the viewpoint and the normal. Flip the normal, where
             // the dot product is negative.
-            float dx = static_cast<float>(m_args->m_viewpoint.x() -
-                                          p.getFieldAs<double>(Id::X));
-            float dy = static_cast<float>(m_args->m_viewpoint.y() -
-                                          p.getFieldAs<double>(Id::Y));
-            float dz = static_cast<float>(m_args->m_viewpoint.z() -
-                                          p.getFieldAs<double>(Id::Z));
+            double dx = m_args->m_viewpoint.x() - p.getFieldAs<double>(Id::X);
+            double dy = m_args->m_viewpoint.y() - p.getFieldAs<double>(Id::Y);
+            double dz = m_args->m_viewpoint.z() - p.getFieldAs<double>(Id::Z);
             Vector3d vp(dx, dy, dz);
             if (vp.dot(normal) < 0)
                 normal *= -1.0;
@@ -203,6 +180,27 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
 
 void NormalFilter::refine(PointView& view, KD3Index& kdi)
 {
+
+struct Edge
+{
+    PointId m_v0;
+    PointId m_v1;
+    float m_weight;
+
+    Edge(PointId i, PointId j, float weight)
+        : m_v0(i), m_v1(j), m_weight(weight)
+    {
+    }
+};
+
+struct CompareEdgeWeight
+{
+    bool operator()(Edge const& lhs, Edge const& rhs)
+    {
+        return lhs.m_weight > rhs.m_weight;
+    }
+};
+
     log()->get(LogLevel::Debug)
         << "Refining normals using minimum spanning tree\n";
 
@@ -227,22 +225,24 @@ void NormalFilter::refine(PointView& view, KD3Index& kdi)
 
             // Consider neighbors of the newly added PointId, adding them to
             // the edge queue if they are not already part of the minimum
-            // spanning tree.
+            // spanning tree. The first neighbor is the query point which is
+            // already part of the minimum spanning tree and can safely be
+            // skipped.
             PointIdList neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+            neighbors.erase(neighbors.begin());
             PointRef p = view.point(updateIdx);
-            Vector3d N1(p.getFieldAs<double>(Id::NormalX),
+            Vector3d N0(p.getFieldAs<double>(Id::NormalX),
                         p.getFieldAs<double>(Id::NormalY),
                         p.getFieldAs<double>(Id::NormalZ));
             for (PointId const& neighborIdx : neighbors)
             {
-                if (updateIdx != neighborIdx && !inMST[neighborIdx])
+                if (!inMST[neighborIdx])
                 {
                     PointRef q = view.point(neighborIdx);
-                    Vector3d N2(q.getFieldAs<double>(Id::NormalX),
+                    Vector3d N1(q.getFieldAs<double>(Id::NormalX),
                                 q.getFieldAs<double>(Id::NormalY),
                                 q.getFieldAs<double>(Id::NormalZ));
-                    float weight = std::max(
-                        0.0, 1.0 - static_cast<float>(std::fabs(N1.dot(N2))));
+                    float weight = 1.0 - static_cast<float>(std::fabs(N0.dot(N1)));
                     edge_queue.emplace(updateIdx, neighborIdx, weight);
                 }
             }
@@ -263,29 +263,29 @@ void NormalFilter::refine(PointView& view, KD3Index& kdi)
             PointId newIdx(0);
             Vector3d normal;
             PointRef p = view.point(edge.m_v0);
-            Vector3d N1(p.getFieldAs<double>(Id::NormalX),
+            Vector3d N0(p.getFieldAs<double>(Id::NormalX),
                         p.getFieldAs<double>(Id::NormalY),
                         p.getFieldAs<double>(Id::NormalZ));
             PointRef q = view.point(edge.m_v1);
-            Vector3d N2(q.getFieldAs<double>(Id::NormalX),
+            Vector3d N1(q.getFieldAs<double>(Id::NormalX),
                         q.getFieldAs<double>(Id::NormalY),
                         q.getFieldAs<double>(Id::NormalZ));
             if (!inMST[edge.m_v0])
             {
                 newIdx = edge.m_v0;
-                normal = N1;
+                normal = N0;
             }
             else if (!inMST[edge.m_v1])
             {
                 newIdx = edge.m_v1;
-                normal = N2;
+                normal = N1;
             }
             else
                 continue;
 
             // Where the dot product of the normals is less than 0, invert the
             // normal of the selected PointId.
-            if (N1.dot(N2) < 0)
+            if (N0.dot(N1) < 0)
             {
                 normal *= -1;
                 view.setField(Id::NormalX, newIdx, normal(0));
