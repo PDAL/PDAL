@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <filters/NormalFilter.hpp>
+#include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/PointView.hpp>
 
@@ -153,6 +154,104 @@ TEST(NormalFilterTest, YZPlane)
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 1.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), 0.0);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0);
+    }
+}
+
+TEST(NormalFilterTest, RampPlane)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader;
+    NormalFilter filter;
+    Options filterOps;
+    filterOps.add("knn", 3);
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+    filter.prepare(table);
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 0);
+    view->setField(Id::X, 1, 0);
+    view->setField(Id::X, 2, 1);
+    view->setField(Id::X, 3, 1);
+    view->setField(Id::Y, 0, 0);
+    view->setField(Id::Y, 1, 1);
+    view->setField(Id::Y, 2, 0);
+    view->setField(Id::Y, 3, 1);
+    view->setField(Id::Z, 0, 0);
+    view->setField(Id::Z, 1, 0);
+    view->setField(Id::Z, 2, 1);
+    view->setField(Id::Z, 3, 1);
+    reader.addView(view);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    Dimension::Id nx = table.layout()->findDim("NormalX");
+    Dimension::Id ny = table.layout()->findDim("NormalY");
+    Dimension::Id nz = table.layout()->findDim("NormalZ");
+    Dimension::Id c = table.layout()->findDim("Curvature");
+
+    double expected = std::sqrt(2.0) / 2.0;
+    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    {
+        PointRef p = outView->point(idx);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), -expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0);
+    }
+}
+
+TEST(NormalFilterTest, RampPlane2)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader;
+    NormalFilter filter;
+    Options filterOps;
+    filterOps.add("knn", 3);
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+    filter.prepare(table);
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 0);
+    view->setField(Id::X, 1, 0);
+    view->setField(Id::X, 2, 1);
+    view->setField(Id::X, 3, 1);
+    view->setField(Id::Y, 0, 0);
+    view->setField(Id::Y, 1, 1);
+    view->setField(Id::Y, 2, 0);
+    view->setField(Id::Y, 3, 1);
+    view->setField(Id::Z, 0, 0);
+    view->setField(Id::Z, 1, 1);
+    view->setField(Id::Z, 2, 0);
+    view->setField(Id::Z, 3, 1);
+    reader.addView(view);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    Dimension::Id nx = table.layout()->findDim("NormalX");
+    Dimension::Id ny = table.layout()->findDim("NormalY");
+    Dimension::Id nz = table.layout()->findDim("NormalZ");
+    Dimension::Id c = table.layout()->findDim("Curvature");
+
+    double expected = std::sqrt(2.0) / 2.0;
+    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    {
+        PointRef p = outView->point(idx);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), -expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), expected);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0);
     }
 }
