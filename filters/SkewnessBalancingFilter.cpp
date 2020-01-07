@@ -67,6 +67,8 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
     point_count_t n1(0);
     double delta, delta_n, term1, M1, M2, M3;
     M1 = M2 = M3 = 0.0;
+
+    PointId ground = 0;
     std::vector<double> skewness(view->size());
     for (PointId i = 0; i < view->size(); ++i)
     {
@@ -80,26 +82,19 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
         M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
         M2 += term1;
         skewness[i] = std::sqrt(n) * M3 / std::pow(M2, 1.5);
+
+        // Keep track of the highest point with a skewness <= 0
+        if (skewness[i] <= 0)
+            ground = i;
     }
 
-    PointId j(0);
-    PointId i(view->size());
-    do
-    {
-        if (skewness[i] <= 0)
-        {
-            j = i;
-            break;
-        }
-    } while (--i != 0);
-
     std::set<PointId> groundIdx;
-    for (PointId i = 0; i <= j; ++i)
+    for (PointId i = 0; i <= ground; ++i)
         groundIdx.insert(i);
 
     log()->get(LogLevel::Debug)
         << "Stopped with " << groundIdx.size()
-        << " ground returns and skewness of " << skewness[j] << std::endl;
+        << " ground returns and skewness of " << skewness[ground] << std::endl;
 
     return groundIdx;
 }
