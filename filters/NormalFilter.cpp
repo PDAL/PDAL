@@ -72,7 +72,7 @@ struct NormalArgs
     bool m_refine;
 };
 
-NormalFilter::NormalFilter() : m_args(new NormalArgs) {}
+NormalFilter::NormalFilter() : m_args(new NormalArgs), m_count(0) {}
 
 NormalFilter::~NormalFilter() {}
 
@@ -178,81 +178,60 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
     }
 }
 
+void NormalFilter::update(
+    PointView& view, KD3Index& kdi, std::vector<bool> inMST,
+    std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue,
+    PointId updateIdx)
+{
+    // Add the current PointId to the minimum spanning tree.
+    inMST[updateIdx] = true;
+    ++m_count;
+
+    // Consider neighbors of the newly added PointId, adding them to
+    // the edge queue if they are not already part of the minimum
+    // spanning tree. The first neighbor is the query point which is
+    // already part of the minimum spanning tree and can safely be
+    // skipped.
+    PointIdList neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+    neighbors.erase(neighbors.begin());
+    PointRef p = view.point(updateIdx);
+    Vector3d N0(p.getFieldAs<double>(Id::NormalX),
+                p.getFieldAs<double>(Id::NormalY),
+                p.getFieldAs<double>(Id::NormalZ));
+    for (PointId const& neighborIdx : neighbors)
+    {
+        if (!inMST[neighborIdx])
+        {
+            PointRef q = view.point(neighborIdx);
+            Vector3d N1(q.getFieldAs<double>(Id::NormalX),
+                        q.getFieldAs<double>(Id::NormalY),
+                        q.getFieldAs<double>(Id::NormalZ));
+            double weight = 1.0 - std::fabs(N0.dot(N1));
+            edge_queue.emplace(updateIdx, neighborIdx, weight);
+        }
+    }
+}
+
 void NormalFilter::refine(PointView& view, KD3Index& kdi)
 {
-
-struct Edge
-{
-    PointId m_v0;
-    PointId m_v1;
-    float m_weight;
-
-    Edge(PointId i, PointId j, float weight)
-        : m_v0(i), m_v1(j), m_weight(weight)
-    {
-    }
-};
-
-struct CompareEdgeWeight
-{
-    bool operator()(Edge const& lhs, Edge const& rhs)
-    {
-        return lhs.m_weight > rhs.m_weight;
-    }
-};
-
     log()->get(LogLevel::Debug)
         << "Refining normals using minimum spanning tree\n";
 
-    typedef std::vector<Edge> EdgeList;
     std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue;
     std::vector<bool> inMST(view.size(), false);
     PointId nextIdx(0);
-    point_count_t count(0);
-    while (count < view.size())
+    while (m_count < view.size())
     {
         // Find the PointId of the next point not currently part of the minimum
         // spanning tree.
         while (inMST[nextIdx])
             ++nextIdx;
 
-        // Lambda to add the current PointId to the minimum spanning tree and
-        // update the edge queue.
-        auto update = [&](PointId updateIdx) {
-            // Add the current PointId to the minimum spanning tree.
-            inMST[updateIdx] = true;
-            ++count;
-
-            // Consider neighbors of the newly added PointId, adding them to
-            // the edge queue if they are not already part of the minimum
-            // spanning tree. The first neighbor is the query point which is
-            // already part of the minimum spanning tree and can safely be
-            // skipped.
-            PointIdList neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
-            neighbors.erase(neighbors.begin());
-            PointRef p = view.point(updateIdx);
-            Vector3d N0(p.getFieldAs<double>(Id::NormalX),
-                        p.getFieldAs<double>(Id::NormalY),
-                        p.getFieldAs<double>(Id::NormalZ));
-            for (PointId const& neighborIdx : neighbors)
-            {
-                if (!inMST[neighborIdx])
-                {
-                    PointRef q = view.point(neighborIdx);
-                    Vector3d N1(q.getFieldAs<double>(Id::NormalX),
-                                q.getFieldAs<double>(Id::NormalY),
-                                q.getFieldAs<double>(Id::NormalZ));
-                    float weight = 1.0 - static_cast<float>(std::fabs(N0.dot(N1)));
-                    edge_queue.emplace(updateIdx, neighborIdx, weight);
-                }
-            }
-        };
-
-        update(nextIdx);
+        update(view, kdi, inMST, edge_queue, nextIdx);
 
         // Iterate on the edge queue until empty (or all points have been added
         // to the minimum spanning tree).
-        while (!edge_queue.empty() && (count < view.size()))
+        while (!edge_queue.empty() && (m_count < view.size()))
         {
             // Retrieve the edge with the smallest weight.
             Edge edge(edge_queue.top());
@@ -293,7 +272,7 @@ struct CompareEdgeWeight
                 view.setField(Id::NormalZ, newIdx, normal(2));
             }
 
-            update(newIdx);
+            update(view, kdi, inMST, edge_queue, newIdx);
         }
     }
 }
