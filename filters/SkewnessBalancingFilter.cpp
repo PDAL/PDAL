@@ -56,7 +56,7 @@ void SkewnessBalancingFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
-std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
+void SkewnessBalancingFilter::processGround(PointViewPtr view)
 {
     auto cmp = [](const PointIdxRef& p1, const PointIdxRef& p2) {
         return p1.compare(Dimension::Id::Z, p2);
@@ -68,8 +68,14 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
     double delta, delta_n, term1, M1, M2, M3;
     M1 = M2 = M3 = 0.0;
 
-    PointId ground = 0;
-    std::vector<double> skewness(view->size());
+    auto setGround = [&view](PointId start, PointId end)
+    {
+        for (PointId idx = start; idx <= end; ++end)
+            view->setField(Dimension::Id::Classificiation, idx, 2);
+    };
+
+    PointId lastPositive = 0;
+    double skewness;
     for (PointId i = 0; i < view->size(); ++i)
     {
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
@@ -81,22 +87,17 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
         M1 += delta_n;
         M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
         M2 += term1;
-        skewness[i] = std::sqrt(n) * M3 / std::pow(M2, 1.5);
-
-        // Keep track of the highest point with a skewness <= 0
-        if (skewness[i] <= 0)
-            ground = i;
+        skewness = std::sqrt(n) * M3 / std::pow(M2, 1.5);
+        if (skewness > 0)
+        {
+            setGround(lastPositive, i - 1);
+            lastPositive = i;
+        }
     }
-
-    std::set<PointId> groundIdx;
-    for (PointId i = 0; i <= ground; ++i)
-        groundIdx.insert(i);
-
-    log()->get(LogLevel::Debug)
-        << "Stopped with " << groundIdx.size()
-        << " ground returns and skewness of " << skewness[ground] << std::endl;
-
-    return groundIdx;
+    // It's possible that all our points have skewness <= 0, in which case
+    // we've never had an opportunity to set the ground state.  Do so now.
+    if (lastPositive == 0 && skewness <= 0)
+        setGround(lastPositive, view->size() - 1);
 }
 
 PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
