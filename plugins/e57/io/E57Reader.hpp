@@ -46,7 +46,7 @@ class PDAL_DLL E57Reader : public Reader, public Streamable
 {
 public:
     E57Reader();
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
     /* Pdal section */
