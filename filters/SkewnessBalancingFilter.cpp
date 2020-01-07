@@ -71,7 +71,7 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
     auto setGround = [&view](PointId start, PointId end)
     {
         for (PointId idx = start; idx <= end; ++end)
-            view->setField(Dimension::Id::Classificiation, idx, 2);
+            view->setField(Dimension::Id::Classification, idx, 2);
     };
 
     PointId lastPositive = 0;
@@ -105,13 +105,15 @@ PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
     PointViewSet viewSet;
     if (!input->size())
         return viewSet;
+    viewSet.insert(input);
 
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
 
-    auto idx = processGround(input);
+    processGround(input);
 
+    /**
     if (!idx.empty())
     {
         // set the classification label of ground returns as 2
@@ -130,6 +132,7 @@ PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
         // return the input buffer unchanged
         viewSet.insert(input);
     }
+    **/
 
     return viewSet;
 }
