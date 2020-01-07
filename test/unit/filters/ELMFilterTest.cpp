@@ -1,5 +1,4 @@
 /******************************************************************************
-* Copyright (c) 2019, Helix Re Inc.
 *
 * All rights reserved.
 *
@@ -13,7 +12,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Helix Re Inc. nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,43 +31,41 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <gtest/gtest.h>
+#include <pdal/pdal_test_main.hpp>
 
-#include "plugins/e57/io/Utils.hpp"
+#include <io/TextReader.hpp>
+#include <filters/ELMFilter.hpp>
 
-using namespace pdal::e57plugin;
+#include "Support.hpp"
 
-TEST(E57Utils, e57ToPdalTranslation)
+using namespace pdal;
+
+TEST(ELMFilterTest, test1)
 {
-    ASSERT_EQ(e57ToPdal("cartesianX"),pdal::Dimension::Id::X);
-    ASSERT_EQ(e57ToPdal("fake"),pdal::Dimension::Id::Unknown);
-    ASSERT_EQ(e57ToPdal("cartesianY"),pdal::Dimension::Id::Y);
-    ASSERT_EQ(e57ToPdal("cartesianZ"),pdal::Dimension::Id::Z);
-    ASSERT_EQ(e57ToPdal("colorRed"),pdal::Dimension::Id::Red);
-    ASSERT_EQ(e57ToPdal("colorGreen"),pdal::Dimension::Id::Green);
-    ASSERT_EQ(e57ToPdal("colorBlue"),pdal::Dimension::Id::Blue);
-    ASSERT_EQ(e57ToPdal("intensity"),pdal::Dimension::Id::Intensity);
-}
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("filters/elm1.txt"));
 
-TEST(E57Utils, pdalToE57Translation)
-{
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::X),"cartesianX");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Y),"cartesianY");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Z),"cartesianZ");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Red),"colorRed");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Green),"colorGreen");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Blue),"colorBlue");
-    ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Intensity),"intensity");
-}
+    TextReader reader;
+    reader.setOptions(readerOps);
 
-TEST(E57Utils, getPdalBounds)
-{
-    using pdal::Dimension::Id;
-    auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity, Id::Classification};
-    for (auto type: pdalTypes)
+    ELMFilter filter;
+    filter.setInput(reader);
+
+    PointTable table;
+
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 10u);
+    int noise(0);
+    for (size_t i = 0; i < view->size(); ++i)
     {
-        ASSERT_NO_THROW(getPdalBounds(type));
+        int c = view->getFieldAs<int>(Dimension::Id::Classification, i);
+        if (c == 7)
+            noise++;
     }
-    ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::X));
-    ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::Unknown));
+    EXPECT_EQ(noise, 2);
 }
+

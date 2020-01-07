@@ -177,7 +177,7 @@ offset_x, offset_y, offset_z
 
 filesource_id
   The file source id number to use for this file (a value between
-  1 and 65535) [Default: 0]
+  0 and 65535 - 0 implies "unassigned") [Default: 0]
 
 discard_high_return_numbers
   If true, discard all points with a return number greater than the maximum

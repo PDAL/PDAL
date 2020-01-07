@@ -248,6 +248,7 @@ PDAL_ADD_TEST(pdal_filters_decimation_test FILES
 PDAL_ADD_TEST(pdal_filters_delaunay_test FILES filters/DelaunayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_covariancefeatures_test FILES filters/CovarianceFeaturesTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_elm_test FILES filters/ELMFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES
         filters/MongoExpressionFilterTest.cpp
