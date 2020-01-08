@@ -70,12 +70,14 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
 
     auto setGround = [&view](PointId start, PointId end)
     {
-        for (PointId idx = start; idx <= end; ++end)
+        // 2 is the ASPRS LAS classification for ground.
+        for (PointId idx = start; idx <= end; ++idx)
             view->setField(Dimension::Id::Classification, idx, 2);
     };
 
     PointId lastPositive = 0;
-    double skewness;
+    double skewness = 0;
+    double lastSkewness = std::numeric_limits<double>::quiet_NaN();
     for (PointId i = 0; i < view->size(); ++i)
     {
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
@@ -88,11 +90,12 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
         M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
         M2 += term1;
         skewness = std::sqrt(n) * M3 / std::pow(M2, 1.5);
-        if (skewness > 0)
+        if (skewness > 0 && lastSkewness <= 0)
         {
             setGround(lastPositive, i - 1);
             lastPositive = i;
         }
+        lastSkewness = skewness;
     }
     // It's possible that all our points have skewness <= 0, in which case
     // we've never had an opportunity to set the ground state.  Do so now.
@@ -112,27 +115,6 @@ PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
         log()->floatPrecision(8);
 
     processGround(input);
-
-    /**
-    if (!idx.empty())
-    {
-        // set the classification label of ground returns as 2
-        // (corresponding to ASPRS LAS specification)
-        for (const auto& i : idx)
-            input->setField(Dimension::Id::Classification, i, 2);
-
-        viewSet.insert(input);
-    }
-    else
-    {
-        if (idx.empty())
-            log()->get(LogLevel::Debug2)
-                << "Filtered cloud has no ground returns!\n";
-
-        // return the input buffer unchanged
-        viewSet.insert(input);
-    }
-    **/
 
     return viewSet;
 }
