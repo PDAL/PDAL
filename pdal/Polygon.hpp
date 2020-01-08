@@ -76,6 +76,10 @@ public:
     bool crosses(const Polygon& p) const;
     Ring exteriorRing() const;
     std::vector<Ring> interiorRings() const;
+
+private:
+    void removeSmallRings(double tolerance);
+    void removeSmallHoles(OGRGeometry *g, double tolerance);
 };
 
 } // namespace pdal

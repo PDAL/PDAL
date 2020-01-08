@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
@@ -95,6 +96,37 @@ TEST(PolygonTest, test_wkt_out)
     std::string w = p.wkt();
     EXPECT_EQ(expected, w);
 
+}
+
+
+TEST(PolygonTest, simplify)
+{
+    std::string s =
+
+    R"( MULTIPOLYGON ( ( (0 0, 0 6, 6 6, 6 1, 6 .9, 6 .8, 6 .7, 6 .5, 6 0, 0 0), (.5 1, 1.5 1, 1 2, .5 1), (.5 3, 1.5 3, 1 4, .5 3), (2 1, 5 1, 5 4, 2 4, 2 1)), ( (3 2, 3 3, 4 3, 4 2, 3 2), (3.2 2.2, 3.7 2.2, 3.7 2.7, 3.2 2.7, 3.2 2.2))))";
+//GDAL doesn't currently handle newlines in WKT
+/**
+    R"( MULTIPOLYGON ( ( (0 0, 6 0, 6 .5, 6 .7, 6 .8, 6 .9, 6 1, 6 6, 0 6, 0 0), (.5 1, 1.5 1, 1 2, .5 1), (.5 3, 1.5 3, 1 4, .5 3), (2 1, 5 1, 5 4, 2 4, 2 1)), ( (3 2, 4 2, 4 3, 3 3, 3 2), (3.2 2.2, 3.7 2.2, 3.7 2.7, 3.2 2.7, 3.2 2.2))))";
+      MULTIPOLYGON (
+        (
+          (0 0, 6 0, 6 .5, 6 .7, 6 .8, 6 .9, 6 1, 6 6, 0 6, 0 0),
+          (0 0, 0 6, 6 6, 6 1, 6 .9, 6 .8, 6 .7, 6 .5, 6 0, 0 0),
+            (.5 1, 1.5 1, 1 2, .5 1),
+            (.5 3, 1.5 3, 1 4, .5 3),
+            (2 1, 5 1, 5 4, 2 4, 2 1)
+        ),
+        (
+          (3 2, 3 3, 4 3, 4 2, 3 2),
+            (3.2 2.2, 3.7 2.2, 3.7 2.7, 3.2 2.7, 3.2 2.2)
+        )
+      )
+**/
+    Polygon p(s);
+
+    p.simplify(1, 1);
+    s = p.wkt();
+    Utils::remove(s, ' ');
+    EXPECT_EQ(s, "MULTIPOLYGON(((00,06,66,60,00),(21,51,54,24,21)))");
 }
 
 
