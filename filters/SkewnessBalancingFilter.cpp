@@ -56,6 +56,7 @@ void SkewnessBalancingFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
+
 void SkewnessBalancingFilter::processGround(PointViewPtr view)
 {
     auto cmp = [](const PointIdxRef& p1, const PointIdxRef& p2) {
@@ -63,17 +64,18 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
     };
     std::sort(view->begin(), view->end(), cmp);
 
+    auto setClass = [&view](PointId first, PointId last, int cl)
+    {
+        for (PointId idx = first; idx <= last; ++idx)
+            view->setField(Dimension::Id::Classification, idx, cl);
+    };
+
+    const int Ground(2);
+    const int NonGround(1);
     point_count_t n(0);
     point_count_t n1(0);
     double delta, delta_n, term1, M1, M2, M3;
     M1 = M2 = M3 = 0.0;
-
-    auto setGround = [&view](PointId start, PointId end)
-    {
-        // 2 is the ASPRS LAS classification for ground.
-        for (PointId idx = start; idx <= end; ++idx)
-            view->setField(Dimension::Id::Classification, idx, 2);
-    };
 
     PointId lastPositive = 0;
     double skewness = 0;
@@ -92,16 +94,20 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
         skewness = std::sqrt(n) * M3 / std::pow(M2, 1.5);
         if (skewness > 0 && lastSkewness <= 0)
         {
-            setGround(lastPositive, i - 1);
+            setClass(lastPositive, i - 1, Ground);
             lastPositive = i;
         }
         lastSkewness = skewness;
     }
     // It's possible that all our points have skewness <= 0, in which case
     // we've never had an opportunity to set the ground state.  Do so now.
+    // Otherwise, set the remaining points to non-ground.
     if (lastPositive == 0 && skewness <= 0)
-        setGround(lastPositive, view->size() - 1);
+        setClass(lastPositive, view->size() - 1, Ground);
+    else
+        setClass(lastPositive, view->size() - 1, NonGround);
 }
+
 
 PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
 {
