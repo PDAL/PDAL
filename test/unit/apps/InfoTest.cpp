@@ -89,6 +89,7 @@ std::string r = R"foo(
   }
 )foo";
 
+    std::cerr << "Test 1!\n";
     test("-p 5", r);
 }
 
@@ -116,6 +117,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    std::cerr << "Test 2!\n";
     test("--query 0,0/5", r);
 }
 
@@ -146,6 +148,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    std::cerr << "Test 3!\n";
     test("", r);
 
 std::string s = R"foo(
@@ -161,6 +164,7 @@ std::string s = R"foo(
           "minz": 123.828048
         },
 )foo";
+    std::cerr << "Test 4!\n";
     test("", s);
 }
 
@@ -178,7 +182,7 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
-
+    std::cerr << "Test 5!\n";
     test("--schema", r);
 }
 
@@ -196,6 +200,6 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
-
+    std::cerr << "Test 6!\n";
     test("--all", r);
 }
