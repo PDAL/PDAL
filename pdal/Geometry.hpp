@@ -67,6 +67,7 @@ public:
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
+    virtual void clear() = 0;
     virtual void modified();
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref);
