@@ -59,6 +59,11 @@ void test(const std::string options, const std::string validation)
         Support::datapath("las/autzen_trim.las") + " 2>&1";
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
     EXPECT_NE(output.find(validation), std::string::npos);
+    if (output.find(validation) == std::string::npos)
+    {
+        std::cerr << "Output = " << output << "!\n";
+        std::cerr << "Validation = " << validation << "!\n";
+    }
 }
 
 TEST(Info, point)
