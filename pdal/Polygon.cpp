@@ -145,57 +145,70 @@ void Polygon::modified()
 }
 
 
+void Polygon::clear()
+{
+    m_geom.reset(new OGRPolygon());
+    modified();
+}
+
+
 void Polygon::simplify(double distance_tolerance, double area_tolerance,
     bool preserve_topology)
 {
     throwNoGeos();
 
-    auto deleteSmallRings = [area_tolerance](OGRGeometry *geom)
-    {
-// Missing until GDAL 2.3.
-//        OGRPolygon *poly = geom->toPolygon();
-        OGRPolygon *poly = static_cast<OGRPolygon *>(geom);
-
-        std::vector<int> deleteRings;
-        for (int i = 0; i < poly->getNumInteriorRings(); ++i)
-        {
-            OGRLinearRing *lr = poly->getInteriorRing(i);
-            if (lr->get_Area() < area_tolerance)
-                deleteRings.push_back(i + 1);
-        }
-        // Note that interior rings are in a list with the exterior ring,
-        // which is why the ring numbers are offset by one when used in
-        // this context (what a mess).
-        for (auto i : deleteRings)
-// Missing until 2.3
-//            poly->removeRing(i, true);
-            OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
-    };
-
-    OGRGeometry *g;
     if (preserve_topology)
-        g = m_geom->SimplifyPreserveTopology(distance_tolerance);
+        m_geom.reset(m_geom->SimplifyPreserveTopology(distance_tolerance));
     else
-        g = m_geom->Simplify(distance_tolerance);
+        m_geom.reset(m_geom->Simplify(distance_tolerance));
 
-    m_geom.reset(g);
+    removeSmallRings(area_tolerance);
+    removeSmallHoles(m_geom.get(), area_tolerance);
+    modified();
+}
 
+
+void Polygon::removeSmallRings(double tolerance)
+{
     OGRwkbGeometryType t = m_geom->getGeometryType();
     if (t == wkbPolygon || t == wkbPolygon25D)
-        deleteSmallRings(m_geom.get());
+    {
+        if (area() < tolerance)
+            clear();
+    }
     else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
-// Missing until 2.3
-/**
-        OGRMultiPolygon *mpoly = m_geom->toMultiPolygon();
-        for (auto it = mpoly->begin(); it != mpoly->end(); ++it)
-            deleteSmallRings(*it);
-**/
-        OGRMultiPolygon *mpoly = static_cast<OGRMultiPolygon *>(m_geom.get());
-        for (int i = 0; i < mpoly->getNumGeometries(); ++i)
-            deleteSmallRings(mpoly->getGeometryRef(i));
+        OGRMultiPolygon *mPoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = mPoly->getNumGeometries() - 1; i >= 0; --i)
+        {
+            OGRPolygon *poly =
+                static_cast<OGRPolygon *>(mPoly->getGeometryRef(i));
+            if (poly->get_Area() < tolerance)
+                mPoly->removeGeometry(i, true);
+        }
     }
-    modified();
+}
+
+
+void Polygon::removeSmallHoles(OGRGeometry *g, double tolerance)
+{
+    OGRwkbGeometryType t = g->getGeometryType();
+    if (t == wkbPolygon || t == wkbPolygon25D)
+    {
+        OGRPolygon *poly = static_cast<OGRPolygon *>(g);
+        for (int i = poly->getNumInteriorRings() - 1; i >= 0; --i)
+        {
+            OGRLinearRing *lr = poly->getInteriorRing(i);
+            if (lr->get_Area() < tolerance)
+                OGR_G_RemoveGeometry(gdal::toHandle(poly), i + 1, true);
+        }
+    }
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
+    {
+        OGRMultiPolygon *mPoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = mPoly->getNumGeometries() - 1; i >= 0; --i)
+            removeSmallHoles(mPoly->getGeometryRef(i), tolerance);
+    }
 }
 
 
