@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <E57Format.h>
 #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/pdal_types.hpp>

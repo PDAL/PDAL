@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <E57Format.h>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include "Scan.hpp"
