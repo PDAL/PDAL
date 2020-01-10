@@ -4,6 +4,8 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
         NumpyReader.cpp
         ../plang/Environment.cpp
         ../plang/Redirector.cpp
+        ../plang/Script.cpp
+        ../plang/Invocation.cpp
     LINK_WITH
         ${PYTHON_LIBRARY}
         ${CMAKE_DL_LIBS}

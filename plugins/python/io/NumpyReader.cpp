@@ -39,7 +39,11 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
+
+#include <nlohmann/json.hpp>
+
 
 #include "../plang/Environment.hpp"
 
@@ -69,6 +73,14 @@ static PluginInfo const s_info
     "readers.numpy",
     "Read data from .npy files.",
     ""
+};
+
+struct NumpyReader::Args
+{
+    std::string module;
+    std::string function;
+    std::string source;
+    std::string fargs;
 };
 
 CREATE_SHARED_STAGE(NumpyReader, s_info)
@@ -106,6 +118,13 @@ std::istream& operator >> (std::istream& in, NumpyReader::Order& order)
     return in;
 }
 
+NumpyReader::NumpyReader()
+    : m_array(nullptr)
+    , m_args(new NumpyReader::Args)
+{}
+
+NumpyReader::~NumpyReader()
+{}
 
 void NumpyReader::setArray(PyObject* array)
 {
@@ -117,7 +136,7 @@ void NumpyReader::setArray(PyObject* array)
     Py_XINCREF(m_array);
 }
 
-PyArrayObject* load_npy(std::string const& filename)
+PyArrayObject* load_npy_file(std::string const& filename)
 {
 
     PyObject *py_filename =  PyUnicode_FromString(filename.c_str());
@@ -147,6 +166,34 @@ PyArrayObject* load_npy(std::string const& filename)
     return reinterpret_cast<PyArrayObject*>(array);
 }
 
+PyArrayObject* load_npy_script(std::string const& source,
+                               std::string const& module,
+                               std::string const& function,
+                               std::string const& fargs)
+{
+
+    MetadataNode m;
+    std::unique_ptr<plang::Script> script(new plang::Script(source, module, function));
+    std::unique_ptr<plang::Invocation> method(new plang::Invocation(*script, m, fargs));
+
+    StringList args = Utils::split(fargs,',');
+
+    PyObject *scriptArgs = PyTuple_New(args.size());
+    for(size_t i=0; i < args.size(); ++i)
+    {
+        PyObject* arg = PyUnicode_FromString(args[i].c_str());
+            if (!arg)
+                throw pdal_error(plang::getTraceback());
+        PyTuple_SetItem(scriptArgs, i, arg);
+
+    }
+
+    PyObject *array = PyObject_CallObject(method->m_function, scriptArgs);
+    if (!array)
+        throw pdal_error(plang::getTraceback());
+
+    return reinterpret_cast<PyArrayObject*>(array);
+}
 
 void NumpyReader::initialize()
 {
@@ -163,14 +210,25 @@ void NumpyReader::initialize()
     m_innersizeptr = NULL;
     m_dtype = NULL;
 
-    if (m_filename.size())
+    if (m_args->function.size() )
     {
-        m_array = load_npy(m_filename);
+        // Invoke the script and use the returned
+        // numpy array
+        //
+        m_args->source = pdal::FileUtils::readFileIntoString(m_filename);
+        m_array = load_npy_script(m_args->source,
+                                  m_args->module,
+                                  m_args->function,
+                                  m_args->fargs);
     }
-    if (m_array)
-        if (!PyArray_Check(m_array))
-            throw pdal::pdal_error("Object in file  '" + m_filename +
-                "' is not a numpy array");
+    else if (m_filename.size())
+    {
+        m_array = load_npy_file(m_filename);
+    }
+
+    if (!PyArray_Check(m_array))
+        throw pdal::pdal_error("Object in file  '" + m_filename +
+            "' is not a numpy array");
 }
 
 
@@ -239,6 +297,13 @@ void NumpyReader::addArgs(ProgramArgs& args)
     m_orderArg = &args.add("order", "Order of dimension interpretation "
         "of the array.  Either 'row'-major (C) or 'column'-major (Fortran)",
         m_order);
+
+    args.add("module", "Python module containing the function to run",
+        m_args->module, "");
+    args.add("function", "Function nameto call",
+        m_args->function, "");
+    args.add("fargs", "Args to call function with ", m_args->fargs);
+
 }
 
 

@@ -236,3 +236,60 @@ TEST(NumpyReaderTest, threedim_col)
     }
 }
 
+
+TEST(NumpyReaderTest, threedim_row_script)
+{
+    StageFactory f;
+
+    Options opts;
+    opts.add("filename", Support::datapath("plang/threedim.py"));
+    opts.add("order", "row");
+    opts.add("function", "load");
+    opts.add("module", "threedim");
+    opts.add("fargs",  Support::datapath("plang/threedim.npy"));
+
+    NumpyReader reader;
+    reader.setOptions(opts);
+
+    PointTable table;
+
+    reader.prepare(table);
+
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+    PointLayoutPtr layout = view->layout();
+    Dimension::Id health = layout->findDim("Health");
+    Dimension::Id foo = layout->findDim("Foo");
+
+    EXPECT_EQ(view->size(), 24u);
+    int ex = 0;
+    int ey = 0;
+    int ez = 0;
+    for (PointId id = 0; id < view->size(); ++id)
+    {
+        int f = view->getFieldAs<int>(foo, id);
+        int h = view->getFieldAs<int>(health, id);
+        int i = view->getFieldAs<int>(Dimension::Id::Intensity, id);
+        int x = view->getFieldAs<int>(Dimension::Id::X, id);
+        int y = view->getFieldAs<int>(Dimension::Id::Y, id);
+        int z = view->getFieldAs<int>(Dimension::Id::Z, id);
+        EXPECT_EQ(f, ((int)id / 12) % 2);
+        EXPECT_EQ(h, ((int)id / 4) % 3);
+        EXPECT_EQ(i, (int)id % 4);
+        EXPECT_EQ(x, ex);
+        EXPECT_EQ(y, ey);
+        EXPECT_EQ(z, ez);
+        // Array is 2 x 3 x 4
+        ez++;
+        if (ez == 4)
+        {
+            ez = 0;
+            ey++;
+            if (ey == 3)
+            {
+                ey = 0;
+                ex++;
+            }
+        }
+    }
+}
