@@ -9,6 +9,8 @@ PDAL_ADD_PLUGIN(numpy_reader reader numpy
     LINK_WITH
         ${PYTHON_LIBRARY}
         ${CMAKE_DL_LIBS}
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
     SYSTEM_INCLUDES
         ${PYTHON_ALL_INCLUDE_DIRS}
     )
