@@ -290,6 +290,7 @@ PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_returns_test FILES filters/ReturnsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_shell_test FILES filters/ShellFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_skewness_test FILES filters/SkewnessFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_filters_smrf_test FILES filters/SMRFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_sort_test

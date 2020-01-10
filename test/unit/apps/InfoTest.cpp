@@ -59,6 +59,11 @@ void test(const std::string options, const std::string validation)
         Support::datapath("las/autzen_trim.las") + " 2>&1";
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
     EXPECT_NE(output.find(validation), std::string::npos);
+    if (output.find(validation) == std::string::npos)
+    {
+        std::cerr << "Output = " << output << "!\n";
+        std::cerr << "Validation = " << validation << "!\n";
+    }
 }
 
 TEST(Info, point)
@@ -89,6 +94,7 @@ std::string r = R"foo(
   }
 )foo";
 
+    std::cerr << "Test 1!\n";
     test("-p 5", r);
 }
 
@@ -116,6 +122,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    std::cerr << "Test 2!\n";
     test("--query 0,0/5", r);
 }
 
@@ -146,6 +153,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    std::cerr << "Test 3!\n";
     test("", r);
 
 // 10-Jan-20 - Broken by a change to proj which converts meters to ft, I think.
@@ -163,6 +171,7 @@ std::string s = R"foo(
           "minz": 123.828048
         },
 )foo";
+    std::cerr << "Test 4!\n";
     test("", s);
 **/
 }
@@ -181,7 +190,7 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
-
+    std::cerr << "Test 5!\n";
     test("--schema", r);
 }
 
@@ -199,6 +208,6 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
-
+    std::cerr << "Test 6!\n";
     test("--all", r);
 }
