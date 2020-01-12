@@ -50,7 +50,7 @@ public:
 
 private:
     virtual void addDimensions(PointLayoutPtr layout);
-    std::set<PointId> processGround(PointViewPtr view);
+    void processGround(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);
 
     SkewnessBalancingFilter&
