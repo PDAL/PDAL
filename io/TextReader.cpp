@@ -160,8 +160,10 @@ void TextReader::parseUnquotedHeader(const std::string& header)
         m_dimNames = Utils::split(header, m_separator);
     else
         m_dimNames = Utils::split2(header, m_separator);
+
     for (auto& s : m_dimNames)
     {
+        Utils::trim(s);
         size_t cnt = Dimension::extractName(s, 0);
         if (cnt != s.size())
             throwError("Invalid character '" + std::string(1, s[cnt]) +
