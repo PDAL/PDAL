@@ -9,10 +9,24 @@ into a number of fields by a separator.  Each field represents a value for
 a point's dimension.  Each value needs to be `formatted`_ properly for
 C++ language double-precision values.
 
-The text reader expects a header line to 1) indicate the separator character
-for the fields and 2) name the point dimension for each field.  Any
-single non-alphanumeric character can be used as a separator.  The header line
-separator can be overridden by the `separator`_ option.  Each line in the
+The text reader expects a header line to indicate the dimensions are
+in each subsequent line.  There are two types of header lines.
+
+Quoted dimension names
+----------------------
+When the first character of the header is a double quote, each dimension name
+is assumed to be surrounded by double quotes.  Any text following a quoted
+dimension name and the start of the next dimension name is ignored.  The
+`separator`_ option can't be used with quoted dimension names.
+
+Unquoted dimension names
+------------------------
+
+The first non alpha-numeric character encountered is treated as a separator
+between dimension names.  The separator in the header line can be overridden
+by the `separator`_ option.
+
+Each line in the
 file must contain the same number of fields as indicated by
 dimension names in the header.  Spaces are generally ignored in the input
 unless used as a separator.  When a space character is used as a separator,
