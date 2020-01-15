@@ -86,8 +86,8 @@ TEST(AssignFilterTest, value)
     for (PointId i = 0; i < v->size(); ++i)
     {
         EXPECT_DOUBLE_EQ(v->getFieldAs<double>(Dimension::Id::X, i), 27.5);
-        EXPECT_EQ(v->getFieldAs<uint16_t>(
-            Dimension::Id::Classification, i), 0);
+        EXPECT_EQ(v->getFieldAs<uint8_t>(
+            Dimension::Id::Classification, i), ClassLabel::CreatedNeverClassified);
         EXPECT_DOUBLE_EQ(v->getFieldAs<double>(
             Dimension::Id::GpsTime, i), 3000.0);
         EXPECT_EQ(v->getFieldAs<int>(

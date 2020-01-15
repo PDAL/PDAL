@@ -133,7 +133,7 @@ void SMRFilter::prepared(PointTableRef table)
     for (auto& r : m_args->m_ignored)
     {
         r.m_id = layout->findDim(r.m_name);
-        if (r.m_id == Dimension::Id::Unknown)
+        if (r.m_id == Id::Unknown)
             throwError("Invalid dimension name in 'ignored' option: '" +
                        r.m_name + "'.");
     }
@@ -149,8 +149,8 @@ void SMRFilter::prepared(PointTableRef table)
             }
         }
 
-        if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
-            !layout->hasDim(Dimension::Id::NumberOfReturns))
+        if (!layout->hasDim(Id::ReturnNumber) ||
+            !layout->hasDim(Id::NumberOfReturns))
         {
             log()->get(LogLevel::Warning) << "Could not find ReturnNumber and "
                                              "NumberOfReturns. Skipping "
@@ -193,9 +193,9 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     for (PointId i = 0; i < keptView->size(); ++i)
     {
         uint8_t nr =
-            keptView->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+            keptView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
         uint8_t rn =
-            keptView->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+            keptView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -233,7 +233,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     }
 
     for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Dimension::Id::Classification, i, 1);
+        secondView->setField(Id::Classification, i, uint8_t(ClassLabel::Unclassified));
 
     m_srs = firstView->spatialReference();
 
@@ -362,9 +362,9 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         // vertical distance between each LIDAR point and the provisional
         // DEM, and applying a threshold calculation."
         if (std::fabs(ZIpro[c * m_rows + r] - z) > thresh(r, c))
-            view->setField(Id::Classification, i, 1);
+            view->setField(Id::Classification, i, uint8_t(ClassLabel::Unclassified));
         else
-            view->setField(Id::Classification, i, 2);
+            view->setField(Id::Classification, i, uint8_t(ClassLabel::Ground));
     }
 }
 
@@ -448,8 +448,6 @@ std::vector<int> SMRFilter::createObjMask(std::vector<double> const& ZImin)
 
 std::vector<double> SMRFilter::createZImin(PointViewPtr view)
 {
-    using namespace Dimension;
-
     // "As with many other ground filtering algorithms, the first step is
     // generation of ZImin from the cell size parameter and the extent of the
     // data."

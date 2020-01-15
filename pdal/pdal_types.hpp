@@ -165,6 +165,33 @@ enum class LogLevel
     None
 };
 
+enum ClassLabel : uint8_t
+{
+    CreatedNeverClassified = 0,
+    Unclassified,
+    Ground,
+    LowVegetation,
+    MediumVegetation,
+    HighVegetation,
+    Building,
+    LowPoint,
+    ModelKeypoint,
+    Water,
+    Rail,
+    RoadSurface,
+    Overlap,
+    WireGuard,
+    WireConductor,
+    TransmissionTower,
+    WireStructureConnector,
+    BridgeDeck,
+    HighNoise,
+    OverheadStructure,
+    IgnoredGround,
+    Snow,
+    TemporalExclusion
+};
+
 namespace
 {
     const StringList logNames { "error", "warning", "info", "debug", "debug1",

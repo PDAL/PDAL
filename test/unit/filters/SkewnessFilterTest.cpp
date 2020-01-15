@@ -63,7 +63,7 @@ TEST(SkewnessTest, t1)
     for (PointId id = 0; id < v->size(); ++id)
     {
         uint8_t cl = v->getFieldAs<uint8_t>(Dimension::Id::Classification, id);
-        if (cl == 2)
+        if (cl == ClassLabel::Ground)
             ground++;
     }
     EXPECT_EQ(ground, 102234u);
@@ -94,7 +94,7 @@ TEST(SkewnessTest, t2)
     for (PointId id = 0; id < v->size(); ++id)
     {
         uint8_t cl = v->getFieldAs<uint8_t>(Dimension::Id::Classification, id);
-        if (cl == 2)
+        if (cl == ClassLabel::Ground)
             ground++;
     }
     EXPECT_EQ(ground, 0);
@@ -129,7 +129,7 @@ TEST(SkewnessTest, t3)
     for (PointId id = 0; id < v->size(); ++id)
     {
         uint8_t cl = v->getFieldAs<uint8_t>(Dimension::Id::Classification, id);
-        if (cl == 2)
+        if (cl == ClassLabel::Ground)
             ground++;
     }
     EXPECT_EQ(ground, 10);
