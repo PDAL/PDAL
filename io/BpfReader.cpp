@@ -412,6 +412,19 @@ point_count_t BpfReader::readPointMajor(PointViewPtr view, point_count_t count)
 }
 
 
+BpfReader::~BpfReader()
+{
+#ifdef PDAL_HAVE_ZLIB
+    if (m_header.m_compression)
+    {
+        for( auto& stream: m_streams )
+        {
+            delete stream->popStream();
+        }
+    }
+#endif
+}
+
 void BpfReader::readDimMajor(PointRef& point)
 {
     if (m_streams.empty())
@@ -558,7 +571,7 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
         float f;
         uint32_t u32;
     };
-    std::unique_ptr<union uu> uArr(
+    std::unique_ptr<union uu[]> uArr(
         new uu[(std::min)(count, numPoints() - m_index)]);
 
     for (size_t d = 0; d < m_dims.size(); ++d)
