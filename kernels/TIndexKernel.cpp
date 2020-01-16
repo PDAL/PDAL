@@ -212,8 +212,12 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 
     bool output(false);
     OGR_L_ResetReading(m_layer);
-    if (OGR_L_GetNextFeature(m_layer))
+    auto hFeat = OGR_L_GetNextFeature(m_layer);
+    if( hFeat )
+    {
+        OGR_F_Destroy(hFeat);
         output = true;
+    }
     OGR_L_ResetReading(m_layer);
     OGR_L_SetAttributeFilter(m_layer, NULL);
     return output;
@@ -289,6 +293,8 @@ void TIndexKernel::createFile()
     if (!filecount)
         throw pdal_error("Couldn't index any files.");
     OGR_DS_Destroy(m_dataset);
+    m_dataset = nullptr;
+    m_layer = nullptr;
 }
 
 
@@ -347,6 +353,11 @@ void TIndexKernel::mergeFile()
 
         OGR_F_Destroy(feature);
     }
+
+    OGR_DS_Destroy(m_dataset);
+    m_dataset = nullptr;
+    m_layer = nullptr;
+
     m_log->get(LogLevel::Info) << "Merge filecount: " <<
         files.size() << std::endl;
 
@@ -432,6 +443,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         oss << "Unable to import source spatial reference '" <<
             fileInfo.m_srs << "' for file '" <<
             fileInfo.m_filename << "'.";
+        OGR_F_Destroy(hFeature);
         throw pdal_error(oss.str());
     }
 
@@ -463,6 +475,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
             m_log->get(LogLevel::Warning) << "Unable to convert SRS to "
                 "proj.4 format for file '" << fileInfo.m_filename << "'" <<
                 std::endl;
+            OGR_F_Destroy(hFeature);
             return false;
         }
         std::string srs = std::string(pszProj4);
@@ -472,11 +485,11 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 
     // Set the geometry in the feature
     Geometry g = prepareGeometry(fileInfo);
-    char *pgeom;
-    OGR_G_ExportToWkt(g.get(), &pgeom);
     OGR_F_SetGeometry(hFeature, g.get());
 
-    return (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
+    const bool bRet = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
+    OGR_F_Destroy(hFeature);
+    return bRet;
 }
 
 
