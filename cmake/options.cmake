@@ -27,6 +27,11 @@ option(BUILD_PLUGIN_ICEBRIDGE
 add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
     "read data in the Icebridge format")
 
+option(BUILD_PLUGIN_HDF
+    "Choose if HDF support should be built" FALSE)
+add_feature_info("HDF plugin" BUILD_PLUGIN_HDF
+    "read data in the HDF format")
+
 option(BUILD_PLUGIN_MATLAB
     "Choose if Matlab support should be built" FALSE)
 add_feature_info("Matlab plugin" BUILD_PLUGIN_MATLAB

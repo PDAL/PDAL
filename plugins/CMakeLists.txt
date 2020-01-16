@@ -23,6 +23,13 @@ if(BUILD_PLUGIN_ICEBRIDGE)
     add_subdirectory(icebridge)
 endif()
 
+if(BUILD_PLUGIN_HDF)
+    if (NOT PDAL_HAVE_LIBXML2)
+        message(FATAL_ERROR "Can't build hdf plugin without libxml2")
+    endif()
+    add_subdirectory(hdf)
+endif()
+
 if(BUILD_PLUGIN_MATLAB)
     add_subdirectory(matlab)
 endif()
