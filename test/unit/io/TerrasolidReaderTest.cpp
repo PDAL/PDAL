@@ -119,7 +119,7 @@ TEST_F(TerrasolidReaderTest, ReadingPoints)
     EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::Alpha, 0));
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
-    EXPECT_EQ(2, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    EXPECT_EQ(2, view->getFieldAs<uint8_t>(Dimension::Id::Classification, ClassLabel::CreatedNeverClassified));
     EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::Flag, 0));
     EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::Mark, 0));
 }
