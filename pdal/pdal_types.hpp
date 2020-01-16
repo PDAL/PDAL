@@ -190,6 +190,7 @@ namespace ClassLabel
     const uint8_t IgnoredGround = 20;
     const uint8_t Snow = 21;
     const uint8_t TemporalExclusion = 22;
+    const uint8_t Synthetic = 32;
 }
 
 namespace

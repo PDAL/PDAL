@@ -141,6 +141,20 @@ void ignoreDimRanges(std::vector<DimRange>& ranges, PointViewPtr input,
     }
 }
 
+void ignoreSynthetic(PointViewPtr input, PointViewPtr keep, PointViewPtr ignore)
+{
+    using namespace Dimension;
+
+    for (PointId i = 0; i < input->size(); ++i)
+    {
+        uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
+        if (c & ClassLabel::Synthetic)
+            ignore->appendPoint(*input, i);
+        else
+            keep->appendPoint(*input, i);
+    }
+}
+
 void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                         PointViewPtr other)
 {
@@ -190,7 +204,7 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
         {
             uint8_t rn = input->getFieldAs<uint8_t>(Id::ReturnNumber, i);
             uint8_t nr = input->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-            
+
             if ((((rn == 1) && (nr > 1)) && returnFirst) ||
                 (((rn > 1) && (rn < nr)) && returnIntermediate) ||
                 (((rn == nr) && (nr > 1)) && returnLast) ||
