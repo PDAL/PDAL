@@ -173,8 +173,8 @@ PyArrayObject* load_npy_script(std::string const& source,
 {
 
     MetadataNode m;
-    std::unique_ptr<plang::Script> script(new plang::Script(source, module, function));
-    std::unique_ptr<plang::Invocation> method(new plang::Invocation(*script, m, fargs));
+    plang::Script script(source, module, function);
+    plang::Invocation method(script, m, fargs);
 
     StringList args = Utils::split(fargs,',');
 
@@ -188,9 +188,11 @@ PyArrayObject* load_npy_script(std::string const& source,
 
     }
 
-    PyObject *array = PyObject_CallObject(method->m_function, scriptArgs);
+    PyObject *array = PyObject_CallObject(method.m_function, scriptArgs);
     if (!array)
         throw pdal_error(plang::getTraceback());
+
+    Py_XDECREF(scriptArgs);
 
     return reinterpret_cast<PyArrayObject*>(array);
 }
@@ -220,15 +222,24 @@ void NumpyReader::initialize()
                                   m_args->module,
                                   m_args->function,
                                   m_args->fargs);
+        if (!PyArray_Check(m_array))
+        {
+            std::stringstream errMsg;
+            errMsg << "Object returned from function '"
+                   << m_args->function <<
+                   "' in '" << m_filename <<
+                   "' is not a Numpy array";
+            throw pdal::pdal_error(errMsg.str());
+        }
     }
     else if (m_filename.size())
     {
         m_array = load_npy_file(m_filename);
-    }
+        if (!PyArray_Check(m_array))
+            throw pdal::pdal_error("Object in file  '" + m_filename +
+                "' is not a Numpy array");
 
-    if (!PyArray_Check(m_array))
-        throw pdal::pdal_error("Object in file  '" + m_filename +
-            "' is not a numpy array");
+    }
 }
 
 
@@ -299,9 +310,9 @@ void NumpyReader::addArgs(ProgramArgs& args)
         m_order);
 
     args.add("module", "Python module containing the function to run",
-        m_args->module, "");
+        m_args->module);
     args.add("function", "Function nameto call",
-        m_args->function, "");
+        m_args->function);
     args.add("fargs", "Args to call function with ", m_args->fargs);
 
 }
