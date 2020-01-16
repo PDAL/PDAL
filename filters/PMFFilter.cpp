@@ -204,7 +204,7 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
     for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Dimension::Id::Classification, i, 1);
+        secondView->setField(Dimension::Id::Classification, i, ClassLabel::Unclassified);
 
     // Run the actual PMF algorithm.
     processGround(firstView);
@@ -369,7 +369,7 @@ void PMFFilter::processGround(PointViewPtr view)
     // set the classification label of ground returns as 2
     // (corresponding to ASPRS LAS specification)
     for (const auto& i : groundIdx)
-        view->setField(Dimension::Id::Classification, i, 2);
+        view->setField(Dimension::Id::Classification, i, ClassLabel::Ground);
 }
 
 } // namespace pdal

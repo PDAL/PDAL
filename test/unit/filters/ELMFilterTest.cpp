@@ -62,8 +62,8 @@ TEST(ELMFilterTest, test1)
     int noise(0);
     for (size_t i = 0; i < view->size(); ++i)
     {
-        int c = view->getFieldAs<int>(Dimension::Id::Classification, i);
-        if (c == 7)
+        uint8_t c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::LowPoint)
             noise++;
     }
     EXPECT_EQ(noise, 2);

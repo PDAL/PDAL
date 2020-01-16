@@ -235,7 +235,7 @@ void HAGFilter::filter(PointView& view)
     // Separate into ground and non-ground views.
     for (PointId i = 0; i < view.size(); ++i)
     {
-        if (view.getFieldAs<short>(Id::Classification, i) == 2)
+        if (view.getFieldAs<uint8_t>(Id::Classification, i) == ClassLabel::Ground)
         {
             view.setField(Id::HeightAboveGround, i, 0);
             gView->appendPoint(view, i);
