@@ -42,9 +42,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 
-#include <nlohmann/json.hpp>
-
-
 #include "../plang/Environment.hpp"
 
 
