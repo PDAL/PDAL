@@ -233,7 +233,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     }
 
     for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Id::Classification, i, uint8_t(ClassLabel::Unclassified));
+        secondView->setField(Id::Classification, i, ClassLabel::Unclassified);
 
     m_srs = firstView->spatialReference();
 
@@ -362,9 +362,9 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         // vertical distance between each LIDAR point and the provisional
         // DEM, and applying a threshold calculation."
         if (std::fabs(ZIpro[c * m_rows + r] - z) > thresh(r, c))
-            view->setField(Id::Classification, i, uint8_t(ClassLabel::Unclassified));
+            view->setField(Id::Classification, i, ClassLabel::Unclassified);
         else
-            view->setField(Id::Classification, i, uint8_t(ClassLabel::Ground));
+            view->setField(Id::Classification, i, ClassLabel::Ground);
     }
 }
 

@@ -559,7 +559,7 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
         ok = convertAndSet<T, uint64_t>(dim, idx, val);
         break;
     case Dimension::Type::None:
-        val = 0;
+        val = (T)0;
         break;
     }
     if (!ok)

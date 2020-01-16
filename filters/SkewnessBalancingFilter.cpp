@@ -92,7 +92,7 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
         skewness = std::sqrt(n) * M3 / std::pow(M2, 1.5);
         if (skewness > 0 && lastSkewness <= 0)
         {
-            setClass(lastPositive, i - 1, uint8_t(ClassLabel::Ground));
+            setClass(lastPositive, i - 1, ClassLabel::Ground);
             lastPositive = i;
         }
         lastSkewness = skewness;
@@ -101,9 +101,9 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
     // we've never had an opportunity to set the ground state.  Do so now.
     // Otherwise, set the remaining points to non-ground.
     if (lastPositive == 0 && skewness <= 0)
-        setClass(lastPositive, view->size() - 1, uint8_t(ClassLabel::Ground));
+        setClass(lastPositive, view->size() - 1, ClassLabel::Ground);
     else
-        setClass(lastPositive, view->size() - 1, uint8_t(ClassLabel::Unclassified));
+        setClass(lastPositive, view->size() - 1, ClassLabel::Unclassified);
 }
 
 

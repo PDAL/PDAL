@@ -165,7 +165,7 @@ enum class LogLevel
     None
 };
 
-enum ClassLabel : uint8_t
+enum ClassLabel
 {
     CreatedNeverClassified = 0,
     Unclassified = 1,

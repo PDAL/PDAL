@@ -64,7 +64,7 @@ std::string ELMFilter::getName() const
 void ELMFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 10.0);
-    args.add("class", "Class to use for noise points", m_class, uint8_t(ClassLabel::LowPoint));
+    args.add("class", "Class to use for noise points", m_class, (uint8_t)ClassLabel::LowPoint);
     args.add("threshold", "Threshold value", m_threshold, 1.0);
 }
 
