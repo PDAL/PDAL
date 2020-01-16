@@ -165,32 +165,32 @@ enum class LogLevel
     None
 };
 
-enum ClassLabel
+namespace ClassLabel
 {
-    CreatedNeverClassified = 0,
-    Unclassified = 1,
-    Ground = 2,
-    LowVegetation = 3,
-    MediumVegetation = 4,
-    HighVegetation = 5,
-    Building = 6,
-    LowPoint = 7,
-    ModelKeypoint = 8,
-    Water = 9,
-    Rail = 10,
-    RoadSurface = 11,
-    Overlap = 12,
-    WireGuard = 13,
-    WireConductor = 14,
-    TransmissionTower = 15,
-    WireStructureConnector = 16,
-    BridgeDeck = 17,
-    HighNoise = 18,
-    OverheadStructure = 19,
-    IgnoredGround = 20,
-    Snow = 21,
-    TemporalExclusion = 22
-};
+    const uint8_t CreatedNeverClassified = 0;
+    const uint8_t Unclassified = 1;
+    const uint8_t Ground = 2;
+    const uint8_t LowVegetation = 3;
+    const uint8_t MediumVegetation = 4;
+    const uint8_t HighVegetation = 5;
+    const uint8_t Building = 6;
+    const uint8_t LowPoint = 7;
+    const uint8_t ModelKeypoint = 8;
+    const uint8_t Water = 9;
+    const uint8_t Rail = 10;
+    const uint8_t RoadSurface = 11;
+    const uint8_t Overlap = 12;
+    const uint8_t WireGuard = 13;
+    const uint8_t WireConductor = 14;
+    const uint8_t TransmissionTower = 15;
+    const uint8_t WireStructureConnector = 16;
+    const uint8_t BridgeDeck = 17;
+    const uint8_t HighNoise = 18;
+    const uint8_t OverheadStructure = 19;
+    const uint8_t IgnoredGround = 20;
+    const uint8_t Snow = 21;
+    const uint8_t TemporalExclusion = 22;
+}
 
 namespace
 {
