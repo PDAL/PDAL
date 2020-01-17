@@ -208,7 +208,7 @@ TEST(EptAddonWriterTest, boundedWrite)
     const auto set(reader.execute(table));
 
     double x, y;
-    uint16_t c;
+    uint8_t c;
 
     int in(0), out(0);
 
@@ -218,7 +218,7 @@ TEST(EptAddonWriterTest, boundedWrite)
         {
             x = view->getFieldAs<double>(Dimension::Id::X, i);
             y = view->getFieldAs<double>(Dimension::Id::Y, i);
-            c = view->getFieldAs<uint16_t>(Dimension::Id::Classification, i);
+            c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
 
             if (bounds.contains(x, y))
             {

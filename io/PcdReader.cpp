@@ -240,7 +240,16 @@ void PcdReader::initialize()
     m_istreamPtr = Utils::openFile(m_filename, false);
     if (!m_istreamPtr)
         throwError("Can't open file '" + m_filename + "'.");
-    *m_istreamPtr >> m_header;
+    try
+    {
+        *m_istreamPtr >> m_header;
+    }
+    catch( ... )
+    {
+        Utils::closeFile(m_istreamPtr);
+        m_istreamPtr = nullptr;
+        throw;
+    }
     m_line = m_header.m_numLines;
 
     Utils::closeFile(m_istreamPtr);

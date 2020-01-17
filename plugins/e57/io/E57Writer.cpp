@@ -52,8 +52,9 @@ CREATE_SHARED_STAGE(E57Writer, s_info)
 
 E57Writer::ChunkWriter::ChunkWriter
 (const std::vector<std::string>& dimensionsToWrite,
- e57::CompressedVectorNode& vectorNode) :
-    m_defaultChunkSize(1 << 20), m_currentIndex(0)
+ e57::CompressedVectorNode& vectorNode)
+    : m_defaultChunkSize(1 << 20), m_currentIndex(0), m_colorLimit(256),
+      m_intensityLimit(1)
 {
     // Initialise the write buffers
     for (auto& e57dim: dimensionsToWrite)
@@ -62,7 +63,7 @@ E57Writer::ChunkWriter::ChunkWriter
 
     for (auto& keyValue : m_doubleBuffers)
         m_e57buffers.emplace_back(vectorNode.destImageFile(), keyValue.first,
-             keyValue.second.data(), m_defaultChunkSize, true, true );
+                                  keyValue.second.data(), m_defaultChunkSize, true, true);
 
     // Setup the writer
     m_dataWriter.reset(
@@ -70,7 +71,7 @@ E57Writer::ChunkWriter::ChunkWriter
 
 }
 
-void E57Writer::ChunkWriter::write(pdal::PointRef& pt)
+void E57Writer::ChunkWriter::write(pdal::PointRef& pt, std::unique_ptr<e57plugin::ExtraDims>& extraDims)
 {
 // If buffer full, write to disk and reinitialise buffer
 
@@ -81,13 +82,35 @@ void E57Writer::ChunkWriter::write(pdal::PointRef& pt)
     }
 
     // Add point to buffer and increase index
+    using DimId = pdal::Dimension::Id;
     for (auto& keyValue: m_doubleBuffers)
     {
         auto pdaldim = pdal::e57plugin::e57ToPdal(keyValue.first);
-        if (pdaldim != pdal::Dimension::Id::Unknown)
+        if (pdaldim != DimId::Unknown)
         {
             auto val = pt.getFieldAs<double>(pdaldim);
+            if ((pdaldim == DimId::Red || pdaldim == DimId::Green ||
+                    pdaldim == DimId::Blue) &&
+                    val > m_colorLimit)
+            {
+                m_colorLimit = m_colorLimit << 8;  // Increase color bytes.
+            }
+
+            if (pdaldim == DimId::Intensity && val > m_intensityLimit)
+            {
+                m_intensityLimit = m_intensityLimit << 8;
+            }
             keyValue.second[m_currentIndex] = val;
+        }
+        else
+        {
+            auto dim = extraDims->findDim(keyValue.first);
+            if (dim!=extraDims->end())
+            {
+                auto val = pt.getFieldAs<double>(dim->m_id);
+                keyValue.second[m_currentIndex] = val;
+                dim->grow(val);
+            }
         }
     }
     m_currentIndex++;
@@ -115,25 +138,63 @@ E57Writer::~E57Writer()
         m_imageFile->close();
 }
 
-std::string E57Writer::getName() const { return s_info.name; }
+std::string E57Writer::getName() const
+{
+    return s_info.name;
+}
 
 void E57Writer::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("doublePrecision",
-        "Double precision for storage (false by default)", m_doublePrecision);
+             "Double precision for storage (false by default)", m_doublePrecision);
+    args.add("extra_dims", "Extra dimensions to write to E57 data",
+             m_extraDimsSpec);
 }
 
 void E57Writer::initialize()
 {
-    try 
+    try
     {
         m_imageFile.reset(new e57::ImageFile(m_filename, "w"));
         setupFileHeader();
     }
-    catch (...) 
+    catch (...)
     {
         throwError("Could not open file '" + m_filename + "'.");
+    }
+}
+
+void E57Writer::addDimensions(PointLayoutPtr layout)
+{
+    m_extraDims.reset(new e57plugin::ExtraDims());
+    m_extraDims->parse(m_extraDimsSpec);
+    auto i = m_extraDims->begin();
+    auto supportedFields = e57plugin::supportedE57Types();
+
+    // Filter extra dimensions.
+    while (i != m_extraDims->end())
+    {
+        i->m_id = layout->findDim(i->m_name);
+        if (i->m_id == Dimension::Id::Unknown)
+        {
+            // Incomming layout donot provide any data for this dimension.
+            // It should be ignored from writing in E57.
+            log()->get(LogLevel::Warning)
+                    << "Extra dimension specified in pipeline don't match in source point cloud."
+                    " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
+            i = m_extraDims->deleteDim(i);
+            continue;
+        }
+
+        if (Utils::contains(supportedFields, i->m_name))
+        {
+            // This dimension is already in E57 dimensions and should not be treated as extra dimension.
+            i = m_extraDims->deleteDim(i);
+            continue;
+        }
+
+        ++i;
     }
 }
 
@@ -148,6 +209,12 @@ void E57Writer::ready(PointTableRef table)
         if (!e57Dimension.empty())
             m_dimensionsToWrite.push_back(e57Dimension);
     }
+
+    for (auto i = m_extraDims->begin(); i != m_extraDims->end(); ++i)
+    {
+        m_dimensionsToWrite.push_back(i->m_name);
+    }
+
     setupWriter();
 }
 
@@ -164,11 +231,12 @@ bool E57Writer::processOne(PointRef& point)
 {
     // Update bounding box
     m_bbox.grow(point.getFieldAs<double>(Dimension::Id::X),
-         point.getFieldAs<double>(Dimension::Id::Y),
-         point.getFieldAs<double>(Dimension::Id::Z));
+                point.getFieldAs<double>(Dimension::Id::Y),
+                point.getFieldAs<double>(Dimension::Id::Z));
 
     // Write point
-    m_chunkWriter->write(point);
+    m_chunkWriter->write(point, m_extraDims);
+
     return true;
 }
 
@@ -178,7 +246,7 @@ void E57Writer::done(PointTableRef table)
     {
         m_chunkWriter->finalise();
     }
-    
+
     // Set bounding boxes on case by case basis
     if (Utils::contains(m_dimensionsToWrite, "colorRed"))
     {
@@ -187,29 +255,54 @@ void E57Writer::done(PointTableRef table)
 
         e57::StructureNode colorbox = e57::StructureNode(*m_imageFile);
         std::vector<Id> colors { Id::Red, Id::Green, Id::Blue };
-            
+
         for (auto id : colors)
         {
             std::string name = Dimension::name(id);
-            auto minmax = e57plugin::getPdalBounds(id);
             colorbox.set("color" + name + "Minimum",
-                e57::IntegerNode(*m_imageFile, minmax.first));
+                         e57::IntegerNode(*m_imageFile, 0));
             colorbox.set("color" + name + "Maximum",
-                e57::IntegerNode(*m_imageFile,  minmax.second));
+                         e57::IntegerNode(*m_imageFile,  m_chunkWriter->getColorLimit()));
         }
         m_scanNode->set("colorLimits", colorbox);
     }
-    
+
     if (Utils::contains(m_dimensionsToWrite, "intensity"))
     {
         // found intensity info
-        e57::StructureNode colorbox = e57::StructureNode(*m_imageFile);
-        auto minmax = e57plugin::getPdalBounds(Dimension::Id::Intensity);
-        colorbox.set("intensityMinimum",
-            e57::IntegerNode(*m_imageFile, minmax.first));
-        colorbox.set("intensityMaximum",
-            e57::IntegerNode(*m_imageFile, minmax.second));
-        m_scanNode->set("intensityLimits", colorbox);
+        e57::StructureNode intensityBox = e57::StructureNode(*m_imageFile);
+        intensityBox.set("intensityMinimum",
+                         e57::IntegerNode(*m_imageFile, 0));
+        intensityBox.set(
+            "intensityMaximum",
+            e57::IntegerNode(*m_imageFile, m_chunkWriter->getIntensityLimit()));
+        m_scanNode->set("intensityLimits", intensityBox);
+    }
+
+    if (Utils::contains(m_dimensionsToWrite, "classification"))
+    {
+        // found classification info
+        e57::StructureNode classificationBox = e57::StructureNode(*m_imageFile);
+        classificationBox.set("classificationMinimum",
+                              e57::IntegerNode(*m_imageFile, 0));
+        classificationBox.set(
+            "classificationMaximum",
+            e57::IntegerNode(*m_imageFile, 255));
+        m_scanNode->set("classificationLimits", classificationBox);
+    }
+
+    for (auto extradim = m_extraDims->begin(); extradim != m_extraDims->end();
+            ++extradim)
+    {
+        e57::StructureNode extraDimBox = e57::StructureNode(*m_imageFile);
+        extraDimBox.set(
+            extradim->m_name + "Minimum",
+            e57::FloatNode(*m_imageFile, extradim->m_min));
+        extraDimBox.set(
+            extradim->m_name + "Maximum",
+            e57::FloatNode(*m_imageFile, extradim->m_max));
+        m_scanNode->set(extradim->m_name + "Limits", extraDimBox);
+
     }
 
     // Cartesian bounds
@@ -221,7 +314,7 @@ void E57Writer::done(PointTableRef table)
     bboxNode.set("zMinimum", e57::FloatNode(*m_imageFile, m_bbox.minz));
     bboxNode.set("zMaximum", e57::FloatNode(*m_imageFile, m_bbox.maxz));
     m_scanNode->set("cartesianBounds", bboxNode);
-    
+
 }
 
 void E57Writer::setupFileHeader()
@@ -234,15 +327,15 @@ void E57Writer::setupFileHeader()
     // (in the default namespace).
     m_imageFile->extensionsAdd("", E57_V1_0_URI);
     m_imageFile->extensionsAdd("nor",
-        "http://www.libe57.org/E57_NOR_surface_normals.txt");
+                               "http://www.libe57.org/E57_NOR_surface_normals.txt");
 
     // Set per-file properties.
     // Path names: "/formatName", "/majorVersion", "/minorVersion",
     // "/coordinateMetadata"
     m_rootNode->set("formatName",
-        e57::StringNode(*m_imageFile, "ASTM E57 3D Imaging Data File"));
+                    e57::StringNode(*m_imageFile, "ASTM E57 3D Imaging Data File"));
     m_rootNode->set("guid",
-        e57::StringNode(*m_imageFile, uuidGenerator::generate_uuid()));
+                    e57::StringNode(*m_imageFile, uuidGenerator::generate_uuid()));
 
     // Get ASTM version number supported by library, so can write it into file
     int astmMajor;
@@ -253,7 +346,7 @@ void E57Writer::setupFileHeader()
     m_rootNode->set("versionMajor", e57::IntegerNode(*m_imageFile, astmMajor));
     m_rootNode->set("versionMinor", e57::IntegerNode(*m_imageFile, astmMinor));
     m_rootNode->set("e57LibraryVersion",
-        e57::StringNode(*m_imageFile, libraryId));
+                    e57::StringNode(*m_imageFile, libraryId));
 
     // Save a dummy string for coordinate system.
     m_rootNode->set("coordinateMetadata", e57::StringNode(*m_imageFile, ""));
@@ -262,12 +355,12 @@ void E57Writer::setupFileHeader()
     e57::StructureNode creationDateTime = e57::StructureNode(*m_imageFile);
     creationDateTime.set("dateTimeValue", e57::FloatNode(*m_imageFile, 0.0));
     creationDateTime.set("isAtomicClockReferenced",
-        e57::IntegerNode(*m_imageFile, 0));
+                         e57::IntegerNode(*m_imageFile, 0));
     m_rootNode->set("creationDateTime", creationDateTime);
 
 //ABELL - This description seems too specific.
     m_rootNode->set("description",
-        e57::StringNode(*m_imageFile,"E57 file generated by PDAL"));
+                    e57::StringNode(*m_imageFile,"E57 file generated by PDAL"));
 }
 
 void E57Writer::setupWriter()
@@ -276,7 +369,7 @@ void E57Writer::setupWriter()
     // that will store the points
     m_scanNode.reset(new e57::StructureNode(*m_imageFile));
     m_scanNode->set("guid",
-        e57::StringNode(*m_imageFile, uuidGenerator::generate_uuid()));
+                    e57::StringNode(*m_imageFile, uuidGenerator::generate_uuid()));
 
     // Prototype and buffer arrays for the CompressedVectorNodeWriter
     e57::StructureNode proto = e57::StructureNode(*m_imageFile);
@@ -284,27 +377,22 @@ void E57Writer::setupWriter()
         m_doublePrecision ? e57::E57_DOUBLE : e57::E57_SINGLE;
     for (auto& e57Dimension: m_dimensionsToWrite)
     {
-        if (e57Dimension.find("color") != std::string::npos)
+        if ((e57Dimension.find("color") != std::string::npos) ||
+                e57Dimension.find("intensity") != std::string::npos ||
+                e57Dimension.find("classification") != std::string::npos)
         {
-            auto bounds = e57plugin::getPdalBounds(pdal::Dimension::Id::Red);
+            auto bounds = e57plugin::getPdalBounds(e57plugin::e57ToPdal(e57Dimension));
             proto.set(e57Dimension,
-                e57::IntegerNode(*m_imageFile, 0, bounds.first,bounds.second));
-        }
-        else if (e57Dimension.find("intensity") != std::string::npos)
-        {
-            auto bounds = pdal::e57plugin::getPdalBounds(
-                pdal::Dimension::Id::Intensity);
-            proto.set(e57Dimension,
-                e57::IntegerNode(*m_imageFile, 0, bounds.first,bounds.second));
+                      e57::IntegerNode(*m_imageFile, 0, bounds.first,bounds.second));
         }
         else
             proto.set(e57Dimension,
-                e57::FloatNode(*m_imageFile, 0.0, precision));
+                      e57::FloatNode(*m_imageFile, 0.0, precision));
     }
 
-	// Create CompressedVector for storing points.
+    // Create CompressedVector for storing points.
     e57::VectorNode codecs = e57::VectorNode(*m_imageFile, true);
-	e57::CompressedVectorNode points =
+    e57::CompressedVectorNode points =
         e57::CompressedVectorNode(*m_imageFile, proto, codecs);
 
     // Add the points to the file hierarchy
@@ -321,7 +409,7 @@ void E57Writer::setupWriter()
     catch (e57::E57Exception &e)
     {
         std::string msg = "E57 error with code " +
-            std::to_string(e.errorCode()) + " - " + e.context();
+                          std::to_string(e.errorCode()) + " - " + e.context();
         throwError(msg);
     }
 }

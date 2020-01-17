@@ -61,22 +61,14 @@ TEST(E57Utils, pdalToE57Translation)
     ASSERT_EQ(pdalToE57(pdal::Dimension::Id::Intensity),"intensity");
 }
 
-TEST(E57Utils, rescaleE57ToPdal)
-{
-    ASSERT_NEAR(rescaleE57ToPdalValue("fake",10.0,{0,100}),10.0, .00001) ;
-    ASSERT_NEAR(rescaleE57ToPdalValue("intensity",0.5,{0,1}),
-        std::numeric_limits<uint16_t>::max()/2.0, .00001) ;
-    ASSERT_NEAR(rescaleE57ToPdalValue("intensity",5,{0,10}),std::numeric_limits<uint16_t>::max()/2.0, .00001);
-}
-
-
 TEST(E57Utils, getPdalBounds)
 {
     using pdal::Dimension::Id;
-    auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity};
+    auto pdalTypes = {Id::Red,Id::Green,Id::Blue,Id::Intensity, Id::Classification};
     for (auto type: pdalTypes)
     {
         ASSERT_NO_THROW(getPdalBounds(type));
     }
+    ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::X));
     ASSERT_ANY_THROW(getPdalBounds(pdal::Dimension::Id::Unknown));
 }
