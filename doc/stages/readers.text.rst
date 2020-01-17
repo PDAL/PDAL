@@ -44,8 +44,8 @@ This input file contains X, Y and Z value for 10 points.
     289818.01,4320980.38,170.61
     289818.50,4320980.59,170.58
 
-Example Pipeline
-----------------
+Example #1
+----------
 
 .. code-block:: json
 
@@ -53,6 +53,28 @@ Example Pipeline
       {
           "type":"readers.text",
           "filename":"inputfile.txt"
+      },
+      {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+      }
+  ]
+
+  
+Example #2
+----------
+
+This reads the data in the input file as Red, Green and Blue instead of
+as X, Y and Z.
+
+.. code-block:: json
+
+  [
+      {
+          "type":"readers.text",
+          "filename":"inputfile.txt",
+          "header":"Red, Green, Blue",
+          "skip":1
       },
       {
           "type":"writers.text",
