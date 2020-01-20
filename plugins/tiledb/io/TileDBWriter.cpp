@@ -495,7 +495,7 @@ void TileDBWriter::done(PointTableRef table)
                     std::ios::out);
             else
             {
-                std::string fname = m_arrayName + "/pdal.json";
+                std::string fname = m_args->m_arrayName + "/pdal.json";
                 vfs.touch(fname);
                 fbuf.open(fname, std::ios::out);
             }

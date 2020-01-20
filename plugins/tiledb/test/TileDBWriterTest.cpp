@@ -107,7 +107,6 @@ namespace pdal
 
 #if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
         // check the sidecar exists
-        std::string sidecar = pth + "/pdal.json";
         EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
 #else
         tiledb_datatype_t v_type = TILEDB_UINT8;
@@ -185,7 +184,6 @@ namespace pdal
 
 #if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
         // check the sidecar exists so that the execute has completed
-        std::string sidecar = pth + "/pdal.json";
         EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
 #else
         tiledb_datatype_t v_type = TILEDB_UINT8;
