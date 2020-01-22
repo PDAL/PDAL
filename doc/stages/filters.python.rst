@@ -14,6 +14,15 @@ filter and the ``outs`` array represents the points after filtering.
 
 .. warning::
 
+    Make sure `NumPy`_ is installed in your `Python`_ environment.
+
+    .. code-block:: shell
+
+        $ python3 -c "import numpy; print(numpy.__version__)"
+        1.18.1
+
+.. warning::
+
     Each array contains all the :ref:`dimensions` of the incoming ``ins``
     point schema.  Each array in the ``outs`` list matches the `NumPy`_
     array of the same type as provided as ``ins`` for shape and type.
