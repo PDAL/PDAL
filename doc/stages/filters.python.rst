@@ -216,7 +216,7 @@ basic Python function while substituting values as necessary.
           "type":"filters.python",
           "module":"anything",
           "function":"filter",
-          "source":"arguments.py",
+          "script":"arguments.py",
           "pdalargs":"{\"factor\":0.3048,\"an_argument\":42, \"another\": \"a string\"}"
       },
       "output.las"
