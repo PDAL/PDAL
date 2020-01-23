@@ -148,6 +148,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
+    args.add("transform_points_by_offset", "Only scale the nominal values and write the offset to the header.", m_transformPointsByOffset, false);
     args.add("vlrs", "List of VLRs to set", *m_userVLRs);
 }
 
@@ -643,9 +644,12 @@ void LasWriter::handleHeaderForwards(MetadataNode& forward)
     m_scaling.m_xXform.m_scale.set(m_scaleX.val());
     m_scaling.m_yXform.m_scale.set(m_scaleY.val());
     m_scaling.m_zXform.m_scale.set(m_scaleZ.val());
-    m_scaling.m_xXform.m_offset.set(m_offsetX.val());
-    m_scaling.m_yXform.m_offset.set(m_offsetY.val());
-    m_scaling.m_zXform.m_offset.set(m_offsetZ.val());
+    if (!m_transformPointsByOffset) {
+      // The offset should only be written to the header, not applied to the points.
+      m_scaling.m_xXform.m_offset.set(m_offsetX.val());
+      m_scaling.m_yXform.m_offset.set(m_offsetY.val());
+      m_scaling.m_zXform.m_offset.set(m_offsetZ.val());
+    }
 }
 
 /// Fill the LAS header with values as provided in options or forwarded
@@ -1201,6 +1205,12 @@ void LasWriter::finishOutput()
     // Reset the offset/scale since it may have been auto-computed
     try
     {
+        if (m_transformPointsByOffset) {
+          // If m_transformPointsByOffset is false these values weren't set at the beginning of the processing.
+          m_scaling.m_xXform.m_offset.set(m_offsetX.val());
+          m_scaling.m_yXform.m_offset.set(m_offsetY.val());
+          m_scaling.m_zXform.m_offset.set(m_offsetZ.val());
+        }
         m_lasHeader.setScaling(m_scaling);
     }
     catch (const LasHeader::error& err)

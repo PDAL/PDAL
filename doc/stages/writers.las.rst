@@ -166,6 +166,7 @@ scale_x, scale_y, scale_z
   dimensions to range from [0, 2147483647].  [Default: .01]
 
   Note: written value = (nominal value - offset) / scale.
+  ``transform_points_by_offset`` may change this.
 
 offset_x, offset_y, offset_z
    Offset to be subtracted from the X, Y and Z nominal values, respectively,
@@ -174,6 +175,14 @@ offset_x, offset_y, offset_z
    dimension.  [Default: 0]
 
    Note: written value = (nominal value - offset) / scale.
+   ``transform_points_by_offset`` may change this.
+
+transform_points_by_offset
+  If true the offset is only written to the header but not applied to the
+  X, Y and Z nominal values. The scaling is still applied.  [Default: false]
+
+  Note: If this is true, the written values is nominal value / scale.
+
 
 filesource_id
   The file source id number to use for this file (a value between

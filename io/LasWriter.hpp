@@ -126,6 +126,7 @@ private:
     StringHeaderVal<0> m_offsetX;
     StringHeaderVal<0> m_offsetY;
     StringHeaderVal<0> m_offsetZ;
+    bool m_transformPointsByOffset;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
     std::unique_ptr<NL::json> m_userVLRs;
