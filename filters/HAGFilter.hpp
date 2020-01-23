@@ -43,6 +43,7 @@
 namespace pdal
 {
 
+namespace gdal { class Raster; }
 class Options;
 class PointLayout;
 class PointView;
@@ -60,8 +61,11 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
 
+    std::unique_ptr<gdal::Raster> m_raster;
+    std::string m_rasterName;
     bool m_allowExtrapolation;
     bool m_delaunay;
     double m_maxDistance;

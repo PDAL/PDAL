@@ -35,6 +35,7 @@
 #include "HAGFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #include "private/delaunator.hpp"
 
@@ -195,6 +196,7 @@ void HAGFilter::addArgs(ProgramArgs& args)
 {
     args.add("count", "The number of points to fetch to determine the "
         "ground point [Default: 1].", m_count, point_count_t(1));
+    args.add("raster", "GDAL-readable raster to use for DEM (uses band 1)", m_rasterName, "NONE");
     args.add("max_distance", "Ground points beyond this distance will not "
         "influence nearest neighbor interpolation of height above ground."
         "[Default: None]", m_maxDistance);
@@ -211,16 +213,27 @@ void HAGFilter::addDimensions(PointLayoutPtr layout)
 }
 
 
+void HAGFilter::ready(PointTableRef table)
+{
+    if (m_rasterName != "NONE") {
+      gdal::registerDrivers();
+      m_raster.reset(new gdal::Raster(m_rasterName));
+      m_raster->open();
+    }
+}
+
 void HAGFilter::prepared(PointTableRef table)
 {
-    if (m_count == 0)
+    if (m_delaunay && m_rasterName != "NONE")
+        throwError("'delaunay' option not compatible with 'raster' option");
+    if (m_count == 0 && m_rasterName == "NONE")
         throwError("Option 'count' must be a positive integer.");
     if (m_delaunay && m_count < 3)
         throwError("Option 'count' must be at least 3 when using the "
             "'delaunay' option.");
 
     const PointLayoutPtr layout(table.layout());
-    if (!layout->hasDim(Dimension::Id::Classification))
+    if (m_rasterName == "NONE" && !layout->hasDim(Dimension::Id::Classification))
         throwError("Missing Classification dimension in input PointView.");
 }
 
@@ -228,6 +241,27 @@ void HAGFilter::prepared(PointTableRef table)
 void HAGFilter::filter(PointView& view)
 {
     using namespace pdal::Dimension;
+
+    // If using a raster as the DTM, check each point against it and write
+    // the HAG dimension
+    if (m_rasterName != "NONE") {
+      static std::vector<double> data;
+      for (PointId i = 0; i < view.size(); ++i)
+      {
+        double x = view.getFieldAs<double>(Id::X, i);
+        double y = view.getFieldAs<double>(Id::Y, i);
+        double z = view.getFieldAs<double>(Id::Z, i);
+
+        if (m_raster->read(x, y, data) == gdal::GDALError::None)
+        {
+          double hag = z - data[0];
+          view.setField(Dimension::Id::HeightAboveGround, i, hag);
+        }
+      }
+      // We are done as raster-mode doesn't need to do any of the heavy
+      // lifting involved in generating an index from ground points
+      return;
+    }
 
     PointViewPtr gView = view.makeNew();
     PointViewPtr ngView = view.makeNew();
