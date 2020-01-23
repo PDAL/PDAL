@@ -254,7 +254,7 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
 {
     BpfHeader h;
     BpfDimensionList dims;
-    LogPtr l(new Log("nitfwrap", "devnull"));
+    LogPtr l(Log::makeLog("nitfwrap", "devnull"));
 
     h.setLog(l);
 
