@@ -1,5 +1,4 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +12,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,67 +30,71 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/PointRef.hpp>
-#include <pdal/SpatialReference.hpp>
+#include <pdal/pdal_test_main.hpp>
 
-#include <memory>
+#include <io/TextReader.hpp>
+#include <filters/ELMFilter.hpp>
 
-class OGRGeometry;
-using OGRGeometryH = void *;
-using OGRSpatialReferenceH = void *;
+#include "Support.hpp"
 
-namespace pdal
+using namespace pdal;
+
+TEST(ELMFilterTest, test1)
 {
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("filters/elm1.txt"));
 
-class BOX3D;
+    TextReader reader;
+    reader.setOptions(readerOps);
 
-class PDAL_DLL Geometry
+    ELMFilter filter;
+    filter.setInput(reader);
+
+    PointTable table;
+
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 10u);
+    int noise(0);
+    for (size_t i = 0; i < view->size(); ++i)
+    {
+        uint8_t c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::LowPoint)
+            noise++;
+    }
+    EXPECT_EQ(noise, 2);
+}
+
+TEST(ELMFilterTest, test2)
 {
-protected:
-    Geometry();
-    Geometry(const Geometry&);
-    Geometry(Geometry&&);
-    Geometry(const std::string& wkt_or_json,
-           SpatialReference ref = SpatialReference());
-    Geometry(OGRGeometryH g);
-    Geometry(OGRGeometryH g, const SpatialReference& srs);
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("filters/elm2.txt"));
 
-public:
-    Geometry& operator=(const Geometry&);
-    virtual ~Geometry();
+    TextReader reader;
+    reader.setOptions(readerOps);
 
-    OGRGeometryH getOGRHandle()
-    { return m_geom.get(); }
+    ELMFilter filter;
+    filter.setInput(reader);
 
-    virtual void update(const std::string& wkt_or_json);
-    virtual bool valid() const;
-    virtual void clear() = 0;
-    virtual void modified();
-    bool srsValid() const;
-    void setSpatialReference(const SpatialReference& ref);
-    SpatialReference getSpatialReference() const;
-    void transform(const SpatialReference& ref);
+    PointTable table;
 
-    std::string wkt(double precision=15, bool bOutputZ=false) const;
-    std::string json(double precision=15) const;
-
-    BOX3D bounds() const;
-
-    operator bool () const
-        { return m_geom != NULL; }
-    static void throwNoGeos();
-
-protected:
-    std::unique_ptr<OGRGeometry> m_geom;
-
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
-        const Geometry& p);
-    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
-        Geometry& p);
-};
-
-} // namespace pdal
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 17u);
+    int noise(0);
+    for (size_t i = 0; i < view->size(); ++i)
+    {
+        uint8_t c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::LowPoint)
+            noise++;
+    }
+    EXPECT_EQ(noise, 7);
+}
 

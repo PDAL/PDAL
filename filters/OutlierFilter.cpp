@@ -66,7 +66,7 @@ void OutlierFilter::addArgs(ProgramArgs& args)
     args.add("radius", "Radius", m_radius, 1.0);
     args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
     args.add("multiplier", "Standard deviation threshold", m_multiplier, 2.0);
-    args.add("class", "Class to use for noise points", m_class, uint8_t(7));
+    args.add("class", "Class to use for noise points", m_class, ClassLabel::LowPoint);
 }
 
 void OutlierFilter::addDimensions(PointLayoutPtr layout)

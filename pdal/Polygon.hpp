@@ -63,9 +63,8 @@ public:
     Polygon(const Polygon& poly);
     Polygon& operator=(const Polygon& src);
 
-    OGRGeometryH getOGRHandle();
-
     virtual void modified() override;
+    virtual void clear() override;
     void simplify(double distance_tolerance, double area_tolerance,
         bool preserve_topology = true);
     double area() const;
@@ -86,6 +85,8 @@ public:
 
 private:
     void init();
+    void removeSmallRings(double tolerance);
+    void removeSmallHoles(OGRGeometry *g, double tolerance);
 
     std::unique_ptr<PrivateData> m_pd;
 };

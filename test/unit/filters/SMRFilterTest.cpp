@@ -84,13 +84,13 @@ TEST(SMRFFilterTest, noreturns)
     EXPECT_EQ(s.size(), 1U);
     PointViewPtr v = *s.begin();
     EXPECT_EQ(v->size(), 10U);
-    std::map<int, int> classCount;
+    std::map<uint8_t, int> classCount;
     for (PointId idx = 0; idx < v->size(); ++idx)
     {
-        int classification = v->getFieldAs<int>(Dimension::Id::Classification,
+        uint8_t classification = v->getFieldAs<uint8_t>(Dimension::Id::Classification,
             idx);
         classCount[classification]++;
     }
     EXPECT_EQ(classCount.size(), 1U);
-    EXPECT_EQ(classCount[2], 10);
+    EXPECT_EQ(classCount[ClassLabel::Ground], 10);
 }

@@ -59,6 +59,8 @@ public:
 
     virtual point_count_t numPoints() const
         { return (point_count_t)m_header.m_numPts; }
+    ~BpfReader();
+
 private:
     std::istream* m_istreamPtr;
     ILeStream m_stream;

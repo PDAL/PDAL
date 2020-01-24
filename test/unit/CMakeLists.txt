@@ -248,6 +248,7 @@ PDAL_ADD_TEST(pdal_filters_decimation_test FILES
 PDAL_ADD_TEST(pdal_filters_delaunay_test FILES filters/DelaunayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_covariancefeatures_test FILES filters/CovarianceFeaturesTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_elm_test FILES filters/ELMFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES
         filters/MongoExpressionFilterTest.cpp
@@ -289,6 +290,7 @@ PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_returns_test FILES filters/ReturnsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_shell_test FILES filters/ShellFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_skewness_test FILES filters/SkewnessFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_filters_smrf_test FILES filters/SMRFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_sort_test

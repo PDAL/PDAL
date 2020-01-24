@@ -228,13 +228,12 @@ std::string Geometry::wkt(double precision, bool bOutputZ) const
 
 std::string Geometry::json(double precision) const
 {
-    char **papszOptions = NULL;
+    CPLStringList aosOptions;
     std::string p(std::to_string((int)precision));
-    papszOptions = CSLSetNameValue(papszOptions, "COORDINATE_PRECISION",
-        p.data());
+    aosOptions.SetNameValue("COORDINATE_PRECISION", p.data());
 
     char* json = OGR_G_ExportToJsonEx(gdal::toHandle(m_geom.get()),
-        papszOptions);
+        aosOptions.List());
     std::string output(json);
     OGRFree(json);
     return output;

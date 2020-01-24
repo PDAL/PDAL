@@ -55,6 +55,7 @@ void Ilvis2MetadataReader::readMetadataFile(std::string filename,
 
     parseGranuleMetaDataFile(node, m);
 
+    xmlFreeDoc(doc);
     xmlCleanupParser();
     xmlMemoryDump();
 }
