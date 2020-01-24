@@ -63,10 +63,12 @@ private:
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
+    void set_HAG_from_raster(PointView& view);
 
     std::unique_ptr<gdal::Raster> m_raster;
     std::string m_rasterName;
     bool m_allowExtrapolation;
+    bool m_respectGroundClassification;
     bool m_delaunay;
     double m_maxDistance;
     point_count_t m_count;

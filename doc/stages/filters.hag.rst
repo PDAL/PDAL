@@ -21,7 +21,7 @@ also be referred to as *height above ground* (HAG) or *above ground level* (AGL)
 heights. In the end, it is simply a measure of a point's relative height as
 opposed to its raw elevation value.
 
-There are two modes of operation:
+There are three modes of operation:
 
 Weighted Nearest Point
 ----------------------
@@ -51,6 +51,19 @@ If, for example, all the ground points near a non-ground point lay on
 one side of that non-ground point, finding a containing triangle will fail.
 
 .. embed::
+
+DEM Raster Comparison
+---------------------
+Used when the `raster`_ option is set. The filter loads a GDAL readable raster
+specifying the DEM to calculate ``HeightAboveGround`` from. The ``Z`` value
+of each point is compared against the value at the corresponding X,Y point in
+the DEM raster.
+
+If `respect_ground_classification`_ is set, any points classified as ground will
+have their ``HeightAboveGround`` value set to 0 regardless of the raster.
+
+Any points that do not have a corresponding value in the raster DEM will not have
+a ``HeightAboveGround`` value set.
 
 Example #1
 ----------
@@ -158,6 +171,9 @@ _`delaunay`
     to aid in interpolation of a ground height to use as a difference to
     a point's non-ground height. [Default: false]
 
+_`raster`
+    GDAL-readable raster to use for DEM (uses band 1, starting from 1)
+
 max_distance
     Use only ground points within `max_distance` of non-ground point when
     performing neighbor interpolation.  Not used with the `delaunay`_
@@ -172,3 +188,8 @@ allow_extrapolation
     is false), extrapolation is used to assign the ``HeightAboveGround``
     value.
     [Default: false]
+
+respect_ground_classification
+    If true, set HAG of ground-classified points to 0 rather than comparing
+    ``Z`` value to raster DEM
+    [Default: true]
