@@ -64,6 +64,11 @@ void ClusterFilter::addArgs(ProgramArgs& args)
     args.add("tolerance", "Radius", m_tolerance, 1.0);
 }
 
+void ClusterFilter::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDim(Dimension::Id::ClusterID);
+}
+
 void ClusterFilter::filter(PointView& view)
 {
     auto clusters = Segmentation::extractClusters(view, m_minPoints,
