@@ -967,9 +967,9 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
     }
 
     OGRFeature *poFeature (nullptr);
-
     if (ogr.count("sql"))
     {
+        std::string dialect("OGRSQL");
         std::string query = ogr.at("sql").get<std::string>();
 
         Polygon poly;
@@ -977,7 +977,6 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
         if (ogr.count("options"))
         {
             const NL::json options = ogr.at("options");
-            std::string dialect("OGRSQL");
             if (options.count("dialect"))
                 dialect = options.at("dialect").get<std::string>();
 
