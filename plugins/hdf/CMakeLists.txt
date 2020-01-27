@@ -1,12 +1,12 @@
 #
-# Icebridge plugin CMake configuration
+# HDF plugin CMake configuration
 #
 
 include (${PDAL_CMAKE_DIR}/hdf5.cmake)
 
 
 if (NOT PDAL_HAVE_HDF5)
-    message(FATAL "HDF5 not found but is required for Icebridge.")
+    message(FATAL "HDF5 not found but is required for HDF.")
 else()
     PDAL_ADD_PLUGIN(libname reader hdf
         FILES
@@ -19,4 +19,9 @@ else()
             ${LIBXML2_INCLUDE_DIR}
     )
 
+    if (WITH_TESTS)
+        PDAL_ADD_TEST(hdftest
+            FILES test/HdfReadertest.cpp
+            LINK_WITH ${libname})
+    endif()
 endif()

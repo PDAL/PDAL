@@ -67,6 +67,7 @@ private:
     virtual bool eof();
 
     std::string m_metadataFile;
+    std::string m_datasetName;
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.
     HdfReader(const HdfReader&);              // Not implemented.

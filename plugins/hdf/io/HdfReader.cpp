@@ -185,7 +185,8 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 
 void HdfReader::addArgs(ProgramArgs& args)
 {
-    args.add("metadata", "Metadata file", m_metadataFile);
+    // args.add("metadata", "Metadata file", m_metadataFile);
+    args.add("dataset", "HDF dataset to open", m_datasetName);
 }
 
 void HdfReader::initialize()

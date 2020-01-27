@@ -52,7 +52,97 @@ void Hdf5Handler::initialize(
 {
     try
     {
+        int numPoints = 1065; // TODO pull this out of the file
         m_h5File.reset(new H5::H5File(filename, H5F_ACC_RDONLY));
+
+        std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
+        H5::DataSet dset = m_h5File.get()->openDataSet("/autzen");
+        H5::DataSpace dspace = dset.getSpace();
+        std::cout << "Number of dataspacedimensions: " << dspace.getSimpleExtentNdims() << std::endl;
+        H5::CompType ctype = dset.getCompType();//H5::CompType(dset);
+        std::cout << "Point length: " << ctype.getSize() << std::endl;
+        std::cout << "Number of HDF compound type members (PDAL dimensions): " << ctype.getNmembers() << std::endl;
+
+        // print names
+        for(int j = 0; j < ctype.getNmembers(); ++j) {
+            H5T_class_t vauge_type = ctype.getMemberDataType(j).getClass();
+            H5::IntType int_type = ctype.getMemberIntType(j);
+            H5::FloatType float_type = ctype.getMemberFloatType(j);
+            switch(vauge_type) {
+                case H5T_COMPOUND:
+                    std::cout << "Compound type";
+                    std::cout << "Nested compound types not supported" << std::endl;
+                    break;
+                case H5T_INTEGER:
+                    if(int_type.getSign() == H5T_SGN_NONE) {
+                        std::cout << "uint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
+                    } else if(int_type.getSign() == H5T_SGN_2) {
+                        std::cout << "sint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
+                    } else {
+                        std::cout << "sign error";
+                    }
+                    break;
+                case H5T_FLOAT:
+                    std::cout << "float, s:" << float_type.getSize() << ", e:" << float_type.getOrder();
+                    break;
+                default:
+                    std::cout << "Unkown type: " << vauge_type;
+            }
+            std::cout << ", o:" << ctype.getMemberOffset(j) << ", " << ctype.getMemberName(j);
+            std::cout  << std::endl;
+        }
+
+        // std::vector<char> data;
+        //char data[numPoints*s];
+        // autzen_t* data = new autzen_t[numPoints];
+        // dset.read(data.data(), ctype, dspace);
+
+        // std::cout << data.data() << std::endl << std::endl;
+/*
+        // std::cout << "Size of compound type: " << ctype.getSize() << std::endl;
+        if(type_class == H5T_COMPOUND) std::cout << "Compound type" <<std::endl;
+
+        H5::DataType dtype = dset.getDataType();
+        H5T_class_t clas = dtype.getClass();
+        std::cout << "clas: " << clas << std::endl;
+        std::cout << "THING: " << H5Tget_native_type(clas, H5T_DIR_DEFAULT) << std::endl;
+        // std::cout << dtype << std::endl;
+        //dset.read(data, dtype, dspace);
+        ctype.insertMember("red"  , HOFFSET(autzen_t, red), H5::PredType::STD_I16LE);
+        ctype.insertMember("green", HOFFSET(autzen_t, green), H5::PredType::STD_I16LE);
+        ctype.insertMember("blue" , HOFFSET(autzen_t, blue), H5::PredType::STD_I16LE);
+        dset.read(data, ctype, dspace);
+        // std::cout << dspace.getNumMembers(h5type) << std::endl;
+        // char hex[2];
+        // for(char *p = data; p < data+s*numPoints; p++) {
+        //     sprintf(hex, "%X", *p);
+        //     // std::cout << hex;
+        // }
+
+        autzen_t *struct_data = (autzen_t *) data;
+        for(int j = 0; j < numPoints; j++) {
+            autzen_t point = struct_data[j];
+            std::cout << "Point number: " << j << ", RGB: " << point.red << ", " << point.green << ", " << point.blue << std::endl;
+        }
+
+        std::cout << std::endl;
+        std::cout << "Got here!" << std::endl;
+        */
+
+        // auto accessPlist = m_h5File.get()->getAccessPlist();
+        // for(auto i = 0; i < accessPlist.get) {
+
+        // }
+
+        // hid_t *p = (hid_t *)malloc(sizeof(hid_t) * objCount);
+        // for(auto i = 0; i < objCount; ++i) {
+        //     std::cout << "p[" << i << "]: " << p[i] << std::endl;
+        // }
+        // m_h5File.get()->getObjIDs(H5F_OBJ_DATASET, INT32_MAX, p);
+        // for(auto i = 0; i < objCount; ++i) {
+        //     auto thing = p[i];
+        //     std::cout << "p[" << i << "]: " << thing << std::endl;
+        // }
     }
     catch (const H5::FileIException&)
     {
