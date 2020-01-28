@@ -1,0 +1,128 @@
+/******************************************************************************
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+*
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following
+* conditions are met:
+*
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in
+*       the documentation and/or other materials provided
+*       with the distribution.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+* OF SUCH DAMAGE.
+****************************************************************************/
+
+#include "HAGDEMFilter.hpp"
+
+#include <pdal/KDIndex.hpp>
+#include <pdal/GDALUtils.hpp>
+
+#include <string>
+#include <vector>
+#include <cmath>
+
+namespace pdal
+{
+
+static StaticPluginInfo const s_info
+{
+    "filters.hag_dem",
+    "Computes height above ground using a DEM raster.",
+    "http://pdal.io/stages/filters.hag_dem.html"
+};
+
+CREATE_STATIC_STAGE(HAGDEMFilter, s_info)
+
+std::string HAGDEMFilter::getName() const
+{
+    return s_info.name;
+}
+
+
+HAGDEMFilter::HAGDEMFilter()
+{}
+
+
+void HAGDEMFilter::addArgs(ProgramArgs& args)
+{
+    args.add("raster", "GDAL-readable raster to use for DEM (uses band 1, "
+        "starting from 1)", m_rasterName, "");
+    args.add("band", "Band number to filter (count from 1)", m_band, 1);
+    args.add("zero_ground", "If true, set HAG of ground-classified points "
+        "to 0 rather than comparing Z value to raster DEM",
+        m_zeroGround, true);
+}
+
+
+void HAGDEMFilter::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDim(Dimension::Id::HeightAboveGround);
+}
+
+
+void HAGDEMFilter::ready(PointTableRef table)
+{
+    gdal::registerDrivers();
+    m_raster.reset(new gdal::Raster(m_rasterName));
+    m_raster->open();
+}
+
+void HAGDEMFilter::prepared(PointTableRef table)
+{
+  if (m_rasterName == "")
+    throwError("Must specify a 'raster' DEM");
+  if (m_band <= 0)
+    throwError("'band' must be greater than 1");
+}
+
+void HAGDEMFilter::filter(PointView& view)
+{
+    using namespace pdal::Dimension;
+    static std::vector<double> data;
+
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+
+        // If "zero_ground" option is set, all ground points get HAG of 0
+        if (m_zeroGround && view.getFieldAs<uint8_t>(Id::Classification, i) == ClassLabel::Ground)
+        {
+            view.setField(Id::HeightAboveGround, i, 0);
+        }
+        else
+        {
+          double x = view.getFieldAs<double>(Id::X, i);
+          double y = view.getFieldAs<double>(Id::Y, i);
+          double z = view.getFieldAs<double>(Id::Z, i);
+
+          // If raster has a point at X, Y of pointcloud point, use it. Otherwise the HAG
+          // value is not set.
+          if (m_raster->read(x, y, data) == gdal::GDALError::None)
+          {
+              double hag = z - data[m_band - 1];
+              view.setField(Dimension::Id::HeightAboveGround, i, hag);
+          }
+       }
+    }
+}
+
+} // namespace pdal
