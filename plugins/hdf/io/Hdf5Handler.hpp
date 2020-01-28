@@ -57,6 +57,29 @@ namespace hdf5
         const std::string name;
         const H5::PredType predType;
     };
+
+    struct DimInfo
+    {
+        DimInfo(
+            const std::string& name,
+            const H5T_class_t hdf_type,
+            const H5T_order_t endianness,
+            const size_t s,
+            const int offset)
+            : name(name)
+            , hdf_type(hdf_type)
+            , endianness(endianness)
+            , s(s)
+            , offset(offset)
+        { }
+
+        std::string name;
+        H5T_class_t hdf_type;
+        H5T_order_t endianness;
+        size_t s;
+        int offset;
+    };
+
 }
 
 class Hdf5Handler
@@ -71,11 +94,12 @@ public:
     Hdf5Handler();
 
     void initialize(
-            const std::string& filename,
-            const std::vector<hdf5::Hdf5ColumnData>& columns);
+            const std::string& filename);
+            // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
 
     uint64_t getNumPoints() const;
+    std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
 
     void getColumnEntries(
             void* data,
@@ -106,6 +130,8 @@ private:
         H5::DataSpace dataSpace;
     };
 
+    // std::vector<std::string> m_dimNames;
+    std::vector<pdal::hdf5::DimInfo> m_dimInfos;
     hsize_t getColumnNumEntries(const std::string& dataSetName) const;
     const ColumnData& getColumnData(const std::string& dataSetName) const;
 

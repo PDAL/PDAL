@@ -68,6 +68,7 @@ private:
 
     std::string m_metadataFile;
     std::string m_datasetName;
+    Dimension::IdList m_idlist;
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.
     HdfReader(const HdfReader&);              // Not implemented.

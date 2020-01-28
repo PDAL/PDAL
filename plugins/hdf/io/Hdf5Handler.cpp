@@ -47,12 +47,10 @@ Hdf5Handler::Hdf5Handler()
 { }
 
 void Hdf5Handler::initialize(
-        const std::string& filename,
-        const std::vector<Hdf5ColumnData>& columns)
+        const std::string& filename)
 {
     try
     {
-        int numPoints = 1065; // TODO pull this out of the file
         m_h5File.reset(new H5::H5File(filename, H5F_ACC_RDONLY));
 
         std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
@@ -60,11 +58,15 @@ void Hdf5Handler::initialize(
         H5::DataSpace dspace = dset.getSpace();
         std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
         H5::CompType ctype = dset.getCompType();//H5::CompType(dset);
+        m_numPoints = ctype.getNmembers();
+        std::cout << "Number of points: " << m_numPoints << std::endl;
         std::cout << "Point length: " << ctype.getSize() << std::endl;
         std::cout << "Number of HDF compound type members (PDAL dimensions): " << ctype.getNmembers() << std::endl;
 
         // print names
         for(int j = 0; j < ctype.getNmembers(); ++j) {
+            // m_dimNames.push_back(ctype.getMemberName(j));
+
             H5T_class_t vauge_type = ctype.getMemberDataType(j).getClass();
             H5::IntType int_type = ctype.getMemberIntType(j);
             H5::FloatType float_type = ctype.getMemberFloatType(j);
@@ -75,8 +77,22 @@ void Hdf5Handler::initialize(
                     break;
                 case H5T_INTEGER:
                     if(int_type.getSign() == H5T_SGN_NONE) {
+                        m_dimInfos.push_back(DimInfo(
+                            ctype.getMemberName(j),
+                            vauge_type,
+                            int_type.getOrder(),
+                            int_type.getSize(),
+                            int_type.getOffset())         
+                        );
                         std::cout << "uint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
                     } else if(int_type.getSign() == H5T_SGN_2) {
+                        m_dimInfos.push_back(DimInfo(
+                            ctype.getMemberName(j),
+                            vauge_type,
+                            int_type.getOrder(),
+                            int_type.getSize(),
+                            int_type.getOffset())
+                        );
                         std::cout << "sint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
                     } else {
                         std::cout << "sign error";
@@ -84,12 +100,21 @@ void Hdf5Handler::initialize(
                     break;
                 case H5T_FLOAT:
                     std::cout << "float, s:" << float_type.getSize() << ", e:" << float_type.getOrder();
+                    m_dimInfos.push_back(DimInfo(
+                        ctype.getMemberName(j),
+                        vauge_type,
+                        float_type.getOrder(),
+                        float_type.getSize(),
+                        float_type.getOffset())         
+                    );
                     break;
                 default:
                     std::cout << "Unkown type: " << vauge_type;
             }
             std::cout << ", o:" << ctype.getMemberOffset(j) << ", " << ctype.getMemberName(j);
             std::cout  << std::endl;
+
+
         }
     }
     catch (const H5::FileIException&)
@@ -100,21 +125,21 @@ void Hdf5Handler::initialize(
     try
     {
         // Open each HDF5 DataSet and its corresponding DataSpace.
-        for (const auto& col : columns)
-        {
-            const std::string dataSetName = col.name;
-            const H5::PredType predType = col.predType;
-            const H5::DataSet dataSet = m_h5File->openDataSet(dataSetName);
-            const H5::DataSpace dataSpace = dataSet.getSpace();
+        // for (const auto& col : columns)
+        // {
+        //     const std::string dataSetName = col.name;
+        //     const H5::PredType predType = col.predType;
+        //     const H5::DataSet dataSet = m_h5File->openDataSet(dataSetName);
+        //     const H5::DataSpace dataSpace = dataSet.getSpace();
 
-            m_columnDataMap.insert(std::make_pair(
-                        dataSetName,
-                        ColumnData(predType, dataSet, dataSpace)));
+        //     m_columnDataMap.insert(std::make_pair(
+        //                 dataSetName,
+        //                 ColumnData(predType, dataSet, dataSpace)));
 
-            // Does not check whether all the columns are the same length.
-            m_numPoints = (std::max)((uint64_t)getColumnNumEntries(dataSetName),
-                m_numPoints);
-        }
+        //     // Does not check whether all the columns are the same length.
+        //     m_numPoints = (std::max)((uint64_t)getColumnNumEntries(dataSetName),
+        //         m_numPoints);
+        // }
     }
     catch (const H5::Exception&)
     {
@@ -161,6 +186,10 @@ void Hdf5Handler::getColumnEntries(
     {
         throw error("Could not read from dataset.");
     }
+}
+
+std::vector<pdal::hdf5::DimInfo> Hdf5Handler::getDimensionInfos() {
+    return m_dimInfos;
 }
 
 hsize_t

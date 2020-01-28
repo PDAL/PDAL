@@ -41,21 +41,21 @@
 
 namespace
 {
-    const std::vector<pdal::hdf5::Hdf5ColumnData> hdf5Columns =
-    {
-        { "instrument_parameters/time_hhmmss",  H5::PredType::NATIVE_FLOAT },
-        { "latitude",                           H5::PredType::NATIVE_FLOAT },
-        { "longitude",                          H5::PredType::NATIVE_FLOAT },
-        { "elevation",                          H5::PredType::NATIVE_FLOAT },
-        { "instrument_parameters/xmt_sigstr",   H5::PredType::NATIVE_INT   },
-        { "instrument_parameters/rcv_sigstr",   H5::PredType::NATIVE_INT   },
-        { "instrument_parameters/azimuth",      H5::PredType::NATIVE_FLOAT },
-        { "instrument_parameters/pitch",        H5::PredType::NATIVE_FLOAT },
-        { "instrument_parameters/roll",         H5::PredType::NATIVE_FLOAT },
-        { "instrument_parameters/gps_pdop",     H5::PredType::NATIVE_FLOAT },
-        { "instrument_parameters/pulse_width",  H5::PredType::NATIVE_FLOAT },
-        { "instrument_parameters/rel_time",     H5::PredType::NATIVE_FLOAT }
-    };
+    // const std::vector<pdal::hdf5::Hdf5ColumnData> hdf5Columns =
+    // {
+    //     { "instrument_parameters/time_hhmmss",  H5::PredType::NATIVE_FLOAT },
+    //     { "latitude",                           H5::PredType::NATIVE_FLOAT },
+    //     { "longitude",                          H5::PredType::NATIVE_FLOAT },
+    //     { "elevation",                          H5::PredType::NATIVE_FLOAT },
+    //     { "instrument_parameters/xmt_sigstr",   H5::PredType::NATIVE_INT   },
+    //     { "instrument_parameters/rcv_sigstr",   H5::PredType::NATIVE_INT   },
+    //     { "instrument_parameters/azimuth",      H5::PredType::NATIVE_FLOAT },
+    //     { "instrument_parameters/pitch",        H5::PredType::NATIVE_FLOAT },
+    //     { "instrument_parameters/roll",         H5::PredType::NATIVE_FLOAT },
+    //     { "instrument_parameters/gps_pdop",     H5::PredType::NATIVE_FLOAT },
+    //     { "instrument_parameters/pulse_width",  H5::PredType::NATIVE_FLOAT },
+    //     { "instrument_parameters/rel_time",     H5::PredType::NATIVE_FLOAT }
+    // };
 }
 
 namespace pdal
@@ -72,31 +72,28 @@ CREATE_SHARED_STAGE(HdfReader, s_info)
 
 std::string HdfReader::getName() const { return s_info.name; }
 
-namespace
-{
-
-Dimension::IdList dimensions()
-{
-    using namespace Dimension;
-
-    return IdList { Id::OffsetTime, Id::Y, Id::X, Id::Z, Id::StartPulse,
-        Id::ReflectedPulse, Id::Azimuth, Id::Pitch, Id::Roll, Id::Pdop,
-        Id::PulseWidth, Id::GpsTime };
-}
-
-} // unnamed namespace
 
 void HdfReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(dimensions());
+    // layout->registerDims(dimensions());
+    std::cout << "HdfReader::addDimensions begin" << std::endl;
+    auto infos = m_hdf5Handler.getDimensionInfos();
+    for(auto info : infos) {
+        m_idlist.push_back(
+            layout->registerOrAssignDim(info.name, Dimension::Type::Unsigned64)
+        ); // TODO: add correct type
+    }
+    std::cout << "HdfReader::addDimensions end" << std::endl;
 }
 
 
 void HdfReader::ready(PointTableRef table)
 {
+    std::cout << "HdfReader::ready" << std::endl;
     try
     {
-        m_hdf5Handler.initialize(m_filename, hdf5Columns);
+        // m_hdf5Handler.initialize(m_filename, hdf5Columns);
+        // m_hdf5Handler.initialize(m_filename);
     }
     catch (const Hdf5Handler::error& err)
     {
@@ -112,7 +109,7 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     //  just allocate once and forget it.
     //This could be a huge allocation.  Perhaps we should do something
     //  in the icebridge handler?
-
+    std::cout << "HdfReader::read" << std::endl;
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
@@ -120,66 +117,77 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     std::unique_ptr<unsigned char>
         rawData(new unsigned char[count * sizeof(float)]);
 
-    //Not loving the position-linked data, but fine for now.
-    Dimension::IdList dims = dimensions();
-    auto di = dims.begin();
-    for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
-    {
+    // for(std::size_t di = 0; di < m_idlist.size(); di++) {
+        // Dimension::Id dimId = m_idlist[di];
+    std::cout << m_idlist.size() << std::endl;
+    for(auto dimId : m_idlist) {
         PointId nextId = startId;
-        PointId idx = m_index;
-        const hdf5::Hdf5ColumnData& column = *ci;
-
-        try
-        {
-            m_hdf5Handler.getColumnEntries(rawData.get(), column.name, count,
-                m_index);
-            void *p = (void *)rawData.get();
-
-            // This is ugly but avoids a test in a tight loop.
-            if (column.predType == H5::PredType::NATIVE_FLOAT)
-            {
-                // Offset time is in ms but icebridge stores in seconds.
-                if (*di == Dimension::Id::OffsetTime)
-                {
-                    float *fval = (float *)p;
-                    for (PointId i = 0; i < count; ++i)
-                    {
-                        view->setField(*di, nextId++, *fval * 1000);
-                        fval++;
-                    }
-                }
-                else if (*di == Dimension::Id::X)
-                {
-                    float *fval = (float *)p;
-                    for (PointId i = 0; i < count; ++i)
-                    {
-                        double dval = (double)(*fval);
-                        // Longitude is 0-360. Convert
-                        dval = Utils::normalizeLongitude(dval);
-                        view->setField(*di, nextId++, dval);
-                        fval++;
-                    }
-
-                }
-                else
-                {
-                    float *fval = (float *)p;
-                    for (PointId i = 0; i < count; ++i)
-                        view->setField(*di, nextId++, *fval++);
-                }
-            }
-            else if (column.predType == H5::PredType::NATIVE_INT)
-            {
-                int32_t *ival = (int32_t *)p;
-                for (PointId i = 0; i < count; ++i)
-                    view->setField(*di, nextId++, *ival++);
-            }
-        }
-        catch(const Hdf5Handler::error& err)
-        {
-            throwError(err.what());
+        std::cout << (int)dimId << std::endl;
+        for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+            view->setField(dimId, nextId++, 0);
         }
     }
+
+    //Not loving the position-linked data, but fine for now.
+    // Dimension::IdList dims = dimensions();
+    // auto di = dims.begin();
+    // for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
+    // {
+    //     PointId nextId = startId;
+    //     PointId idx = m_index;
+    //     const hdf5::Hdf5ColumnData& column = *ci;
+
+    //     try
+    //     {
+    //         m_hdf5Handler.getColumnEntries(rawData.get(), column.name, count,
+    //             m_index);
+    //         void *p = (void *)rawData.get();
+
+    //         // This is ugly but avoids a test in a tight loop.
+    //         if (column.predType == H5::PredType::NATIVE_FLOAT)
+    //         {
+    //             // Offset time is in ms but icebridge stores in seconds.
+    //             if (*di == Dimension::Id::OffsetTime)
+    //             {
+    //                 float *fval = (float *)p;
+    //                 for (PointId i = 0; i < count; ++i)
+    //                 {
+    //                     view->setField(*di, nextId++, *fval * 1000);
+    //                     fval++;
+    //                 }
+    //             }
+    //             else if (*di == Dimension::Id::X)
+    //             {
+    //                 float *fval = (float *)p;
+    //                 for (PointId i = 0; i < count; ++i)
+    //                 {
+    //                     double dval = (double)(*fval);
+    //                     // Longitude is 0-360. Convert
+    //                     dval = Utils::normalizeLongitude(dval);
+    //                     view->setField(*di, nextId++, dval);
+    //                     fval++;
+    //                 }
+
+    //             }
+    //             else
+    //             {
+    //                 float *fval = (float *)p;
+    //                 for (PointId i = 0; i < count; ++i)
+    //                     view->setField(*di, nextId++, *fval++);
+    //             }
+    //         }
+    //         else if (column.predType == H5::PredType::NATIVE_INT)
+    //         {
+    //             int32_t *ival = (int32_t *)p;
+    //             for (PointId i = 0; i < count; ++i)
+    //                 view->setField(*di, nextId++, *ival++);
+    //         }
+    //     }
+        // catch(const Hdf5Handler::error& err)
+        // {
+            // throwError(err.what());
+        // }
+    // }
     return count;
 }
 
@@ -191,10 +199,12 @@ void HdfReader::addArgs(ProgramArgs& args)
 
 void HdfReader::initialize()
 {
+    std::cout << "HdfReader::initialize()" << std::endl;
     if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
     {
         throwError("Invalid metadata file: '" + m_metadataFile + "'");
     }
+    m_hdf5Handler.initialize(m_filename);
 
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
