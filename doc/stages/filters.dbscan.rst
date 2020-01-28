@@ -11,6 +11,8 @@ cluster ID. Points that do not belong to a cluster are given a Cluster ID of
 
 .. embed::
 
+.. versionadded:: 2.1
+
 Example
 -------
 
