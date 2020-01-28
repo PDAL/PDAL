@@ -150,7 +150,7 @@ void Invocation::compile()
     {
         std::ostringstream oss;
         oss << "unable to find target function '" << m_script.function() <<
-            "' in module.";
+            "' in module '" << m_script.module() << "'";
         throw pdal_error(oss.str());
     }
 

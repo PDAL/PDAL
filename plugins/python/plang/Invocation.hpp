@@ -58,6 +58,8 @@ public:
 
     bool execute(PointViewPtr& v, MetadataNode stageMetadata);
 
+    PyObject* m_function;
+
 private:
     void compile();
     PyObject *prepareData(PointViewPtr& view);
@@ -73,7 +75,6 @@ private:
 
     PyObject* m_module;
     // Pointer to the function in the module.  Owned by the module.
-    PyObject* m_function;
 
     // Pointers to numpy arrays and contained data buffers for cleanup.
     std::vector<PyObject*> m_pyInputArrays;
