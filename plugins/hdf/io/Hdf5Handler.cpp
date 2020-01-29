@@ -35,11 +35,32 @@
 #include "Hdf5Handler.hpp"
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_types.hpp>
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
+// Dimension::Type getPdalType(DimInfo info) {
+//     Dimension::BaseType b = Dimension::BaseType::None;
+//     Dimension::Type t = Dimension::Type::None;
+//     if(info.hdf_type == H5T_INTEGER) {
+//         if(info.sign == H5T_SGN_NONE) {
+//             b = Dimension::BaseType::Unsigned;
+//         }
+//         else if(info.sign == H5T_SGN_2) {
+//             b = Dimension::BaseType::Signed;
+//         }
+//     } else if(info.hdf_type == H5T_FLOAT) {
+//         b = Dimension::BaseType::Floating;
+//     } else {
+//         throwError("Invalid hdf type");
+//     }
 
+//     t = Dimension::Type(unsigned(b) | info.size);
+//     return t;
+// }
 using namespace hdf5;
+
+
 
 Hdf5Handler::Hdf5Handler()
     : m_numPoints(0)
@@ -56,13 +77,14 @@ void Hdf5Handler::initialize(
         std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
         H5::DataSet dset = m_h5File.get()->openDataSet("/autzen");
         H5::DataSpace dspace = dset.getSpace();
+        m_numPoints = 1065; //TODO FIX
         std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
         H5::CompType ctype = dset.getCompType();//H5::CompType(dset);
-        m_numPoints = ctype.getNmembers();
         std::cout << "Number of points: " << m_numPoints << std::endl;
         std::cout << "Point length: " << ctype.getSize() << std::endl;
         std::cout << "Number of HDF compound type members (PDAL dimensions): " << ctype.getNmembers() << std::endl;
-
+        m_buf = malloc(ctype.getSize() * m_numPoints); //TODO free
+        dset.read(m_buf, ctype);
         // print names
         for(int j = 0; j < ctype.getNmembers(); ++j) {
             // m_dimNames.push_back(ctype.getMemberName(j));
@@ -81,8 +103,10 @@ void Hdf5Handler::initialize(
                             ctype.getMemberName(j),
                             vauge_type,
                             int_type.getOrder(),
+                            int_type.getSign(),
                             int_type.getSize(),
-                            int_type.getOffset())         
+                            int_type.getOffset(),
+                            Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize()))
                         );
                         std::cout << "uint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
                     } else if(int_type.getSign() == H5T_SGN_2) {
@@ -90,8 +114,10 @@ void Hdf5Handler::initialize(
                             ctype.getMemberName(j),
                             vauge_type,
                             int_type.getOrder(),
+                            int_type.getSign(),
                             int_type.getSize(),
-                            int_type.getOffset())
+                            int_type.getOffset(),
+                            Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()))
                         );
                         std::cout << "sint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
                     } else {
@@ -99,14 +125,16 @@ void Hdf5Handler::initialize(
                     }
                     break;
                 case H5T_FLOAT:
-                    std::cout << "float, s:" << float_type.getSize() << ", e:" << float_type.getOrder();
                     m_dimInfos.push_back(DimInfo(
                         ctype.getMemberName(j),
                         vauge_type,
                         float_type.getOrder(),
+                        H5T_SGN_ERROR,
                         float_type.getSize(),
-                        float_type.getOffset())         
+                        float_type.getOffset(),
+                        Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize()))
                     );
+                    std::cout << "float, s:" << float_type.getSize() << ", e:" << float_type.getOrder();
                     break;
                 default:
                     std::cout << "Unkown type: " << vauge_type;
@@ -190,6 +218,10 @@ void Hdf5Handler::getColumnEntries(
 
 std::vector<pdal::hdf5::DimInfo> Hdf5Handler::getDimensionInfos() {
     return m_dimInfos;
+}
+void *
+Hdf5Handler::getBuffer() {
+    return m_buf;
 }
 
 hsize_t

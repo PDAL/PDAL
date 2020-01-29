@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>  // Suppresses windows 4251 messages
+#include <pdal/Dimension.hpp>
 #include "H5Cpp.h"
 
 #include <memory>
@@ -64,22 +65,28 @@ namespace hdf5
             const std::string& name,
             const H5T_class_t hdf_type,
             const H5T_order_t endianness,
-            const size_t s,
-            const int offset)
+            const H5T_sign_t sign,
+            const size_t size,
+            const int offset,
+            Dimension::Type pdal_type)
             : name(name)
             , hdf_type(hdf_type)
             , endianness(endianness)
-            , s(s)
+            , sign(sign)
+            , size(size)
             , offset(offset)
+            , pdal_type(pdal_type)
         { }
 
         std::string name;
         H5T_class_t hdf_type;
         H5T_order_t endianness;
-        size_t s;
+        H5T_sign_t sign;
+        size_t size;
         int offset;
+        Dimension::Type pdal_type;
+        Dimension::Id id;
     };
-
 }
 
 class Hdf5Handler
@@ -97,6 +104,8 @@ public:
             const std::string& filename);
             // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
+
+    void *getBuffer();
 
     uint64_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
@@ -134,6 +143,7 @@ private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
     hsize_t getColumnNumEntries(const std::string& dataSetName) const;
     const ColumnData& getColumnData(const std::string& dataSetName) const;
+    void *m_buf;
 
     std::unique_ptr<H5::H5File> m_h5File;
     uint64_t m_numPoints;

@@ -77,12 +77,33 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
 {
     // layout->registerDims(dimensions());
     std::cout << "HdfReader::addDimensions begin" << std::endl;
-    auto infos = m_hdf5Handler.getDimensionInfos();
-    for(auto info : infos) {
-        m_idlist.push_back(
-            layout->registerOrAssignDim(info.name, Dimension::Type::Unsigned64)
-        ); // TODO: add correct type
-    }
+    m_infos = m_hdf5Handler.getDimensionInfos();
+    for(int i = 0; i < m_infos.size(); i++) {
+        // Dimension::BaseType b = Dimension::BaseType::None;
+        // Dimension::Type t = Dimension::Type::None;
+        // if(info.hdf_type == H5T_INTEGER) {
+        //     if(info.sign == H5T_SGN_NONE) {
+        //         b = Dimension::BaseType::Unsigned;
+        //     }
+        //     else if(info.sign == H5T_SGN_2) {
+        //         b = Dimension::BaseType::Signed;
+        //     }
+        // } else if(info.hdf_type == H5T_FLOAT) {
+        //     b = Dimension::BaseType::Floating;
+        // } else {
+        //     throwError("Invalid hdf type");
+        // }
+
+        // t = Dimension::Type(unsigned(b) | info.size);
+        // m_idlist.push_back(
+        std::cout << unsigned(m_infos[i].id) << " : ";
+        m_infos[i].id = layout->registerOrAssignDim(m_infos[i].name, m_infos[i].pdal_type);
+        std::cout << unsigned(m_infos[i].id) << std::endl;
+        // ); // TODO: add correct type
+    };
+    for(auto info: m_infos) {
+        std::cout << unsigned(info.id) << std::endl;
+    };
     std::cout << "HdfReader::addDimensions end" << std::endl;
 }
 
@@ -110,21 +131,69 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     //This could be a huge allocation.  Perhaps we should do something
     //  in the icebridge handler?
     std::cout << "HdfReader::read" << std::endl;
+    size_t point_size = 52; //TODO Fix
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
 
-    std::unique_ptr<unsigned char>
-        rawData(new unsigned char[count * sizeof(float)]);
+    // std::unique_ptr<unsigned char>
+    //     rawData(new unsigned char[count * point_size]);
 
     // for(std::size_t di = 0; di < m_idlist.size(); di++) {
         // Dimension::Id dimId = m_idlist[di];
-    std::cout << m_idlist.size() << std::endl;
-    for(auto dimId : m_idlist) {
+    // std::cout << m_idlist.size() << std::endl;
+    // for(auto dimId : m_idlist) {
+    for(auto info : m_infos) {
         PointId nextId = startId;
-        std::cout << (int)dimId << std::endl;
+        std::cout << (unsigned)info.id << ": ";
         for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-            view->setField(dimId, nextId++, 0);
+            // void *p = (void *)rawData.get() + 0*pi*point_size + info.offset;
+            void *p = m_hdf5Handler.getBuffer() + pi*point_size + info.offset;
+            switch(info.pdal_type) {
+                case Dimension::Type::Double:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((double *) p));
+                    break;
+                case Dimension::Type::Float:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((float *) p));
+                    break;
+                case Dimension::Type::Signed8:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((int8_t *) p));
+                    break;
+                case Dimension::Type::Signed16:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((int16_t *) p));
+                    break;
+                case Dimension::Type::Signed32:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((int32_t *) p));
+                    break;
+                case Dimension::Type::Signed64:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((int64_t *) p));
+                    break;
+                 case Dimension::Type::Unsigned8:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((uint8_t *) p));
+                    break;
+                case Dimension::Type::Unsigned16:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((uint16_t *) p));
+                    break;
+                case Dimension::Type::Unsigned32:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((uint32_t *) p));
+                    break;
+                case Dimension::Type::Unsigned64:
+                    if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+                    view->setField(info.id, nextId++, * ((uint64_t *) p));
+                    break;
+                default:
+                    view->setField(info.id, nextId, 0);
+                    break;
+            }
         }
     }
 

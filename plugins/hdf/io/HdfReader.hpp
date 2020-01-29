@@ -69,6 +69,7 @@ private:
     std::string m_metadataFile;
     std::string m_datasetName;
     Dimension::IdList m_idlist;
+    std::vector<hdf5::DimInfo> m_infos;
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.
     HdfReader(const HdfReader&);              // Not implemented.
