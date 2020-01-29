@@ -39,7 +39,6 @@ jobs:
             -DOPENSSL_ROOT_DIR=%CONDA_PREFIX%/Library ^
             -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
             -DPython3_FIND_STRATEGY=LOCATION ^
-            -DPYTHON_EXECUTABLE="%CONDA_PREFIX/bin/python" ^
             -DBUILD_PLUGIN_CPD=OFF ^
             -DBUILD_PLUGIN_GREYHOUND=ON ^
             -DBUILD_PLUGIN_ICEBRIDGE=ON ^
@@ -50,7 +49,6 @@ jobs:
             -DBUILD_PLUGIN_SQLITE=ON ^
             -DBUILD_PLUGIN_I3S=ON ^
             -DBUILD_PLUGIN_RIVLIB=OFF ^
-            -DBUILD_PLUGIN_PYTHON=ON ^
             -DENABLE_CTEST=OFF ^
             -DWITH_LAZPERF=ON ^
             -DWITH_LZMA=ON ^
@@ -84,7 +82,6 @@ jobs:
         call activate pdal
         pushd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-        set PYTHONHOME=%CONDA_PREFIX%
         ctest -VV --output-on-failure
       displayName: 'Test'
 
