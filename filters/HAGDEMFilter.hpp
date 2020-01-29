@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -48,7 +49,7 @@ class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL HAGDEMFilter : public Filter
+class PDAL_DLL HAGDEMFilter : public Filter, public Streamable
 {
 public:
     HAGDEMFilter();
@@ -63,6 +64,7 @@ private:
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
+    virtual bool processOne(PointRef& point);
 
     std::unique_ptr<gdal::Raster> m_raster;
     std::string m_rasterName;

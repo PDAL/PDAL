@@ -34,12 +34,7 @@
 
 #include "HAGDEMFilter.hpp"
 
-#include <pdal/KDIndex.hpp>
 #include <pdal/GDALUtils.hpp>
-
-#include <string>
-#include <vector>
-#include <cmath>
 
 namespace pdal
 {
@@ -97,32 +92,39 @@ void HAGDEMFilter::prepared(PointTableRef table)
 
 void HAGDEMFilter::filter(PointView& view)
 {
+    PointRef point(view, 0);
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+      point.setPointId(i);
+      processOne(point);
+    }
+}
+
+bool HAGDEMFilter::processOne(PointRef& point)
+{
     using namespace pdal::Dimension;
     static std::vector<double> data;
 
-    for (PointId i = 0; i < view.size(); ++i)
+    // If "zero_ground" option is set, all ground points get HAG of 0
+    if (m_zeroGround && point.getFieldAs<uint8_t>(Id::Classification) == ClassLabel::Ground)
     {
-
-        // If "zero_ground" option is set, all ground points get HAG of 0
-        if (m_zeroGround && view.getFieldAs<uint8_t>(Id::Classification, i) == ClassLabel::Ground)
-        {
-            view.setField(Id::HeightAboveGround, i, 0);
-        }
-        else
-        {
-          double x = view.getFieldAs<double>(Id::X, i);
-          double y = view.getFieldAs<double>(Id::Y, i);
-          double z = view.getFieldAs<double>(Id::Z, i);
-
-          // If raster has a point at X, Y of pointcloud point, use it. Otherwise the HAG
-          // value is not set.
-          if (m_raster->read(x, y, data) == gdal::GDALError::None)
-          {
-              double hag = z - data[m_band - 1];
-              view.setField(Dimension::Id::HeightAboveGround, i, hag);
-          }
-       }
+        point.setField(Id::HeightAboveGround, 0);
     }
+    else
+    {
+        double x = point.getFieldAs<double>(Id::X);
+        double y = point.getFieldAs<double>(Id::Y);
+        double z = point.getFieldAs<double>(Id::Z);
+
+        // If raster has a point at X, Y of pointcloud point, use it. Otherwise the HAG
+        // value is not set.
+        if (m_raster->read(x, y, data) == gdal::GDALError::None)
+        {
+            double hag = z - data[m_band - 1];
+            point.setField(Dimension::Id::HeightAboveGround, hag);
+        }
+    }
+    return true;
 }
 
 } // namespace pdal

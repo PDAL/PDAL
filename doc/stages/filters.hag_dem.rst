@@ -3,17 +3,6 @@
 filters.hag_dem
 ===============================================================================
 
- loads a GDAL readable raster
- specifying the DEM to calculate ``HeightAboveGround`` from. The ``Z`` value
- of each point is compared against the value at the corresponding X,Y point in
- the DEM raster.
-
- If `respect_ground_classification`_ is set, any points classified as ground will
- have their ``HeightAboveGround`` value set to 0 regardless of the raster.
-
- Any points that do not have a corresponding value in the raster DEM will not have
- a ``HeightAboveGround`` value set.
-
 The **Height Above Ground (HAG) Digital Elevation Model (DEM) filter** loads
 a GDAL-readable raster image specifying the DEM. The ``Z`` value of each point
 in the input is compared against the value at the corresponding X,Y location
@@ -27,6 +16,8 @@ opposed to its raw elevation value.
 
 .. embed::
 
+.. streamable::
+
 Example #1
 ----------
 
@@ -39,7 +30,8 @@ and a DEM generated from it
 
 ::
   
-  # pdal translate autzen.laz autzen-dem.tiff filters.smrf
+  # pdal translate autzen.laz autzen-dem.tiff filters.smrf \
+      --writers.gdal.resolution=1
 
 we execute the following pipeline
 
