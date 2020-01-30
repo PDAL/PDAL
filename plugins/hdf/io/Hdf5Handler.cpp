@@ -105,7 +105,7 @@ void Hdf5Handler::initialize(
                             int_type.getOrder(),
                             int_type.getSign(),
                             int_type.getSize(),
-                            int_type.getOffset(),
+                            ctype.getMemberOffset(j),
                             Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize()))
                         );
                         std::cout << "uint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
@@ -116,7 +116,7 @@ void Hdf5Handler::initialize(
                             int_type.getOrder(),
                             int_type.getSign(),
                             int_type.getSize(),
-                            int_type.getOffset(),
+                            ctype.getMemberOffset(j),
                             Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()))
                         );
                         std::cout << "sint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
@@ -131,7 +131,7 @@ void Hdf5Handler::initialize(
                         float_type.getOrder(),
                         H5T_SGN_ERROR,
                         float_type.getSize(),
-                        float_type.getOffset(),
+                        ctype.getMemberOffset(j),
                         Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize()))
                     );
                     std::cout << "float, s:" << float_type.getSize() << ", e:" << float_type.getOrder();
