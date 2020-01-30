@@ -77,7 +77,8 @@ void Hdf5Handler::initialize(
         std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
         H5::DataSet dset = m_h5File.get()->openDataSet("/autzen");
         H5::DataSpace dspace = dset.getSpace();
-        m_numPoints = 1065; //TODO FIX
+        m_numPoints = dspace.getSelectNpoints();
+        std::cout << "--" << m_numPoints << "--" << std::endl;
         std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
         H5::CompType ctype = dset.getCompType();//H5::CompType(dset);
         std::cout << "Number of points: " << m_numPoints << std::endl;
