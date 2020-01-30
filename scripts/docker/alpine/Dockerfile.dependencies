@@ -34,6 +34,10 @@ RUN \
         xerces-c-dev \
         proj-dev \
         proj-datumgrid \
+        bzip2-dev \
+        openssl-dev \
+        zlib-dev \
+        lz4-dev \
         libspatialite-dev@edgetesting \
         libgeotiff-dev@edgetesting \
         nitro@edgetesting \
@@ -67,4 +71,14 @@ RUN \
     ; \
     ninja install; \
     cd /; \
-    rm -rf cpd;
+    rm -rf cpd; \
+    \
+    git clone https://github.com/TileDB-Inc/TileDB.git; \
+    cd TileDB; \
+    git checkout 1.7.2; \
+    mkdir build; \
+    cd build; \
+    cmake .. -G Ninja -DTILEDB_TBB=OFF -DTILEDB_TESTS=OFF; \
+    ninja install; \
+    cd /; # \
+    rm -rf TileDB;
