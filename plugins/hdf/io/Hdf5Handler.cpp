@@ -105,6 +105,7 @@ void Hdf5Handler::initialize(
                             int_type.getOrder(),
                             int_type.getSign(),
                             int_type.getSize(),
+                            ctype.getSize(),
                             ctype.getMemberOffset(j),
                             Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize()))
                         );
@@ -116,6 +117,7 @@ void Hdf5Handler::initialize(
                             int_type.getOrder(),
                             int_type.getSign(),
                             int_type.getSize(),
+                            ctype.getSize(),
                             ctype.getMemberOffset(j),
                             Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()))
                         );
@@ -130,6 +132,7 @@ void Hdf5Handler::initialize(
                         vauge_type,
                         float_type.getOrder(),
                         H5T_SGN_ERROR,
+                        ctype.getSize(),
                         float_type.getSize(),
                         ctype.getMemberOffset(j),
                         Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize()))

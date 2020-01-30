@@ -66,14 +66,16 @@ namespace hdf5
             const H5T_class_t hdf_type,
             const H5T_order_t endianness,
             const H5T_sign_t sign,
-            const size_t size,
+            const size_t compound_size,
+            const size_t member_size,
             const int offset,
             Dimension::Type pdal_type)
             : name(name)
             , hdf_type(hdf_type)
             , endianness(endianness)
             , sign(sign)
-            , size(size)
+            , compound_size(compound_size)
+            , member_size(member_size)
             , offset(offset)
             , pdal_type(pdal_type)
         { }
@@ -82,7 +84,7 @@ namespace hdf5
         H5T_class_t hdf_type;
         H5T_order_t endianness;
         H5T_sign_t sign;
-        size_t size;
+        size_t member_size, compound_size;
         int offset;
         Dimension::Type pdal_type;
         Dimension::Id id;

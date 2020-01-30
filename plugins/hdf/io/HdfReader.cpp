@@ -131,7 +131,7 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     //This could be a huge allocation.  Perhaps we should do something
     //  in the icebridge handler?
     std::cout << "HdfReader::read" << std::endl;
-    size_t point_size = 52; //TODO Fix
+    size_t point_size = m_infos.at(0).compound_size;
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
