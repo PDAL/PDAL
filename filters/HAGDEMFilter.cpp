@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2020, Julian Fell (hi@jtfell.com)
 *
 * All rights reserved.
 *
