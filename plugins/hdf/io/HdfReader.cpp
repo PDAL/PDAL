@@ -273,7 +273,7 @@ void HdfReader::initialize()
     {
         throwError("Invalid metadata file: '" + m_metadataFile + "'");
     }
-    m_hdf5Handler.initialize(m_filename);
+    m_hdf5Handler.initialize(m_filename, m_datasetName);
 
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for

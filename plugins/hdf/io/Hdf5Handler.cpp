@@ -68,14 +68,15 @@ Hdf5Handler::Hdf5Handler()
 { }
 
 void Hdf5Handler::initialize(
-        const std::string& filename)
+        const std::string& filename,
+        const std::string& datasetName)
 {
     try
     {
         m_h5File.reset(new H5::H5File(filename, H5F_ACC_RDONLY));
 
         std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
-        H5::DataSet dset = m_h5File.get()->openDataSet("/autzen");
+        H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
         H5::DataSpace dspace = dset.getSpace();
         m_numPoints = dspace.getSelectNpoints();
         std::cout << "--" << m_numPoints << "--" << std::endl;
