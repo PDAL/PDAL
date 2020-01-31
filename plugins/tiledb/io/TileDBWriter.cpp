@@ -75,6 +75,80 @@ struct TileDBWriter::Args
     bool m_append;
 };
 
+NL::json attributeDefaults =
+    {{
+        {{
+            "coords",
+                {{"compression", "bit-shuffle"}},
+                {{"compression", "gzip"}, {"compression_level", 9}}
+        }},
+        {{
+            "Intensity", {
+                {{"compression", "bzip2"}, {"compression_level", 5}}
+            }
+        }},
+        {{
+            "ReturnNumber", {
+                {{"compression", "zstd"}, {"compression_level", 75}}
+            }
+        }},
+        {{
+            "NumberOfReturns", {
+                {{"compression", "zstd"}, {"compression_level", 75}}
+            }
+        }},
+        {{
+            "ScanDirectionFlag", {
+                {{"compression", "bzip2"}, {"compression_level", 5}}
+            }
+        }},
+        {{
+            "EdgeOfFlightLine", {
+                {{"compression", "bzip2"}, {"compression_level", 5}}
+            }
+        }},
+        {{
+            "Classification", {
+                {{"compression", "gzip"}, {"compression_level", 9}}
+            }
+        }},
+        {{
+            "ScanAngleRank", {
+                {{"compression", "bzip2"}, {"compression_level", 5}}
+            }
+        }},
+        {{
+            "UserData", {
+                {{"compression", "gzip"}, {"compression_level", 9}}
+            }
+        }},
+        {{
+            "PointSourceId", {
+                {{"compression", "bzip2"}}
+            }
+        }},
+        {{
+            "Red", {
+                {{"compression", "rle"}}
+            }
+        }},
+        {{
+            "Green", {
+                {{"compression", "rle"}}
+            }
+        }},
+        {{
+            "Blue", {
+                {{"compression", "rle"}}
+            }
+        }},
+        {{
+            "GpsTime", {
+                {{"compression", "bit-shuffle"}},
+                {{"compression", "zstd"}, {"compression_level", 75}}
+            }
+        }}
+    }};
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
 
@@ -271,6 +345,8 @@ void TileDBWriter::initialize()
 
         if (!m_args->m_append)
         {
+            NL::json opts;
+
             if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
                     tiledb::Object::Type::Array)
                 throwError("Array already exists.");
@@ -280,20 +356,24 @@ void TileDBWriter::initialize()
             if (!m_args->m_compressor.empty() ||
                     m_args->m_filters.count("coords") > 0)
             {
-                if (!m_args->m_compressor.empty())
+                if (m_args->m_compressor.empty())
                 {
-                    NL::json opts;
-                    opts["compression"] = m_args->m_compressor;
-                    opts["compression_level"] = m_args->m_compressionLevel;
-                    m_schema->set_coords_filter_list(
-                        *createFilterList(*m_ctx, opts));
+                    opts =  m_args->m_filters["coords"];
                 }
                 else
                 {
-                    m_schema->set_coords_filter_list(
-                        *createFilterList(*m_ctx, m_args->m_filters["coords"]));
+                    opts["compression"] = m_args->m_compressor;
+                    opts["compression_level"] = m_args->m_compressionLevel;
                 }
             }
+            else
+            {
+                // set defaults for coords
+                opts = attributeDefaults["coords"];
+            }
+
+            m_schema->set_coords_filter_list(
+                *createFilterList(*m_ctx, opts));
         }
     }
     catch (const tiledb::TileDBError& err)
@@ -343,20 +423,26 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
             Dimension::Type type = layout->dimType(d);
             if (!m_args->m_append)
             {
+                NL::json opts;
                 tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
-                if (!m_args->m_compressor.empty())
+                if (m_args->m_filters.count(dimName) > 0)
                 {
-                    NL::json opts;
+                    opts = m_args->m_filters[dimName];
+                }
+                else if (!m_args->m_compressor.empty())
+                {
                     opts["compression"] = m_args->m_compressor;
                     opts["compression_level"] = m_args->m_compressionLevel;
-                    att.set_filter_list(*createFilterList(*m_ctx, opts));
                 }
                 else
                 {
-                    if (m_args->m_filters.count(dimName) > 0)
-                        att.set_filter_list(
-                            *createFilterList(*m_ctx, m_args->m_filters[dimName]));
+                    if (attributeDefaults.count(dimName) > 0)
+                        opts = attributeDefaults[dimName];
                 }
+
+                if (!opts.empty())
+                    att.set_filter_list(
+                        *createFilterList(*m_ctx, opts));
 
                 m_schema->add_attribute(att);
             }

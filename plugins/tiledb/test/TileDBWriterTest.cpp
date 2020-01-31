@@ -318,12 +318,48 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
         tiledb::FilterList fl = array.schema().coords_filter_list();
+        EXPECT_EQ(fl.nfilters(), 2U);
+
+        tiledb::Filter f1 = fl.filter(0);
+        tiledb::Filter f2 = fl.filter(1);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+        EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_GZIP);
+        int32_t compressionLevel;
+        f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+    }
+
+    TEST_F(TileDBWriterTest, default_options)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_write_options");
+
+        Options options;
+        options.add("array_name", pth);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+
+        tiledb::FilterList fl = array.schema().coords_filter_list();
         EXPECT_EQ(fl.nfilters(), 1U);
 
-        tiledb::Filter f = fl.filter(0);
-        EXPECT_EQ(f.filter_type(), TILEDB_FILTER_ZSTD);
+        tiledb::Filter f1 = fl.filter(0);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_ZSTD);
         int32_t compressionLevel;
-        f.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-        EXPECT_EQ(compressionLevel, 50);
+        f1.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 75);
     }
 }
