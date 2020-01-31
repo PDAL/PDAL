@@ -58,11 +58,10 @@ void test(const std::string options, const std::string validation)
     cmd = appName() + " " + options + " " +
         Support::datapath("las/autzen_trim.las") + " 2>&1";
 
-    std::cout <<"command:" << output << std::endl;
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
-    EXPECT_NE(output.find(validation), std::string::npos);
-    std::cout <<"validation:" << validation << std::endl;
-    std::cout <<"command:" << output << std::endl;
+    EXPECT_NE(output.find(validation), std::string::npos)
+        << "Found: '" << output << "'" << std::endl
+        << "expected: '" << validation<<"'" << std::endl;
 }
 
 TEST(Info, point)
@@ -90,7 +89,7 @@ std::string r = R"foo(
       "Y": 849397.08,
       "Z": 410.89
     }
-  },
+  }
 )foo";
 
     test("-p 5", r);
