@@ -83,12 +83,11 @@ void Hdf5Handler::initialize(
         std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
         H5::DataType dtype = dset.getDataType();
         H5T_class_t thing = dtype.getClass();
-        H5::CompType ctype;
         if(thing != H5T_COMPOUND) {
             H5T_class_t vauge_type = dtype.getClass();
             std::cout << vauge_type << std::endl;
 
-            H5::IntType int_type = dset.getIntType();// ctype.getMemberIntType(j);
+            H5::IntType int_type = dset.getIntType();
             H5::FloatType float_type = dset.getFloatType();
 
             switch(vauge_type) {
@@ -137,13 +136,13 @@ void Hdf5Handler::initialize(
                 default:
                     std::cout << "Unkown type: " << vauge_type;
             }
-            // std::cout << ", o:" << ctype.getMemberOffset(j) << ", " << ctype.getMemberName(j);
             std::cout  << std::endl;
             m_buf = malloc(dtype.getSize() * m_numPoints); //TODO free
             dset.read(m_buf, dtype);
             return;
         };
 
+        H5::CompType ctype = dset.getCompType();
         std::cout << "Number of points: " << m_numPoints << std::endl;
         std::cout << "Point length: " << ctype.getSize() << std::endl;
         std::cout << "Number of HDF compound type members (PDAL dimensions): " << ctype.getNmembers() << std::endl;
