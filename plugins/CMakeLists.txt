@@ -65,13 +65,6 @@ if(BUILD_PLUGIN_RIVLIB)
     add_subdirectory(rxp)
 endif(BUILD_PLUGIN_RIVLIB)
 
-if(BUILD_PLUGIN_SQLITE)
-    if (NOT PDAL_HAVE_LIBXML2)
-        message(FATAL_ERROR "Can't build sqlite plugin without libxml2")
-    endif()
-    add_subdirectory(sqlite)
-endif()
-
 if (BUILD_PLUGIN_FBX)
     add_subdirectory(fbx)
 endif()
