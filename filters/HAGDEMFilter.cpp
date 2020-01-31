@@ -61,7 +61,7 @@ HAGDEMFilter::HAGDEMFilter()
 void HAGDEMFilter::addArgs(ProgramArgs& args)
 {
     args.add("raster", "GDAL-readable raster to use for DEM (uses band 1, "
-        "starting from 1)", m_rasterName, "");
+        "starting from 1)", m_rasterName).setPositional();
     args.add("band", "Band number to filter (count from 1)", m_band, 1);
     args.add("zero_ground", "If true, set HAG of ground-classified points "
         "to 0 rather than comparing Z value to raster DEM",
@@ -84,8 +84,6 @@ void HAGDEMFilter::ready(PointTableRef table)
 
 void HAGDEMFilter::prepared(PointTableRef table)
 {
-  if (m_rasterName == "")
-    throwError("Must specify a 'raster' DEM");
   if (m_band <= 0)
     throwError("'band' must be greater than 1");
 }
@@ -114,12 +112,12 @@ bool HAGDEMFilter::processOne(PointRef& point)
     {
         double x = point.getFieldAs<double>(Id::X);
         double y = point.getFieldAs<double>(Id::Y);
-        double z = point.getFieldAs<double>(Id::Z);
 
         // If raster has a point at X, Y of pointcloud point, use it. Otherwise the HAG
         // value is not set.
         if (m_raster->read(x, y, data) == gdal::GDALError::None)
         {
+            double z = point.getFieldAs<double>(Id::Z);
             double hag = z - data[m_band - 1];
             point.setField(Dimension::Id::HeightAboveGround, hag);
         }
