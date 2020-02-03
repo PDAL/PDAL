@@ -4,11 +4,10 @@ jobs:
 - job: linux
   pool:
     vmImage: ubuntu-16.04
-  container:
-      image: pdal/azp-dependencies:latest
-      options: --privileged
   timeoutInMinutes: 60
   steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: Add conda to PATH
   - script: |
       echo "current directory:" `pwd`
       mkdir build

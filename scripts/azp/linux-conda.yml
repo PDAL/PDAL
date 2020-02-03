@@ -4,21 +4,14 @@ jobs:
 - job: linux_conda
   pool:
     vmImage: ubuntu-16.04
-  container:
-      image: continuumio/miniconda
-      options: --privileged
   timeoutInMinutes: 60
   steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
   - script: |
-      whoami
-      chown -R vsts_azpcontainer:vsts_azpcontainer /opt/conda
-      chmod -r 777 /opt/conda
-
-      . /opt/conda/etc/profile.d/conda.sh
-      source activate base
       conda create --yes --quiet --name pdal
 
-      source activate pdal
+      conda activate pdal
       conda config --set always_yes True --set show_channel_urls True
       conda config --add channels conda-forge
       conda config --set channel_priority strict
@@ -27,7 +20,7 @@ jobs:
     displayName: Install PDAL dependencies
   - script: |
       . /opt/conda/etc/profile.d/conda.sh
-      source activate pdal
+      conda activate pdal
       echo "current directory:" `pwd`
       mkdir build
       cd build
@@ -50,28 +43,28 @@ jobs:
   - script: |
       . /opt/conda/etc/profile.d/conda.sh
       cd build
-      source activate pdal
+      conda activate pdal
       ninja
     displayName: 'Build'
   - script: |
       . /opt/conda/etc/profile.d/conda.sh
       cd build
       export PDAL_DRIVER_PATH=`pwd`/lib
-      source activate pdal
+      conda activate pdal
       ctest -V
     displayName: 'Test'
   - script: |
       . /opt/conda/etc/profile.d/conda.sh
       export PDAL_TEST_DIR=`pwd`/test
       cd build
-      source activate pdal
+      conda activate pdal
       ls build/lib/*
       ninja install
     displayName: 'Install'
   - script: |
       . /opt/conda/etc/profile.d/conda.sh
       export BASE=`pwd`
-      source activate pdal
+      conda activate pdal
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
       do
           cd $BASE/examples/$EXAMPLE
