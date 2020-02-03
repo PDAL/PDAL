@@ -11,8 +11,9 @@ jobs:
   steps:
   - script: |
       whoami
-      sudo chown -R 1001:1001 /opt/conda
-      sudo chmod -r 777 /opt/conda
+      chown -R vsts_azpcontainer:vsts_azpcontainer /opt/conda
+      chmod -r 777 /opt/conda
+
       . /opt/conda/etc/profile.d/conda.sh
       source activate base
       conda create --yes --quiet --name pdal
