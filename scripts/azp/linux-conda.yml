@@ -16,7 +16,7 @@ jobs:
       conda config --set always_yes True --set show_channel_urls True
       conda config --add channels conda-forge
       conda config --set channel_priority strict
-      conda install --yes --quiet --name pdal -c conda-forge gdal=3.0.2=py37hbb2a789_0 python=3.7 conda-build ninja  conda-forge-ci-setup=2 -y
+      conda install --yes --quiet --name pdal -c conda-forge gdal=3.0.2=py37hbb6b9fb_8 python=3.7 conda-build ninja  conda-forge-ci-setup=2 -y
       conda install --yes --quiet --name pdal -c conda-forge pdal  --only-deps -y
     displayName: Install PDAL dependencies
   - script: |
