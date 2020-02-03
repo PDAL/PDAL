@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016-2017, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -63,23 +63,19 @@ namespace pdal
 using namespace Dimension;
 using namespace Eigen;
 
-static StaticPluginInfo const s_info
-{
-    "filters.smrf",
-    "Simple Morphological Filter (Pingel et al., 2013)",
-    "http://pdal.io/stages/filters.smrf.html"
-};
+static StaticPluginInfo const s_info{
+    "filters.smrf", "Simple Morphological Filter (Pingel et al., 2013)",
+    "http://pdal.io/stages/filters.smrf.html"};
 
 // Without the cast, MSVC complains, which is ridiculous when the output
 // is, by definition, an int.
 namespace
 {
-template<typename T>
-T ceil(double d)
+template <typename T> T ceil(double d)
 {
     return static_cast<T>(std::ceil(d));
 }
-}
+} // namespace
 
 CREATE_STATIC_STAGE(SMRFilter, s_info)
 
@@ -96,11 +92,9 @@ struct SMRArgs
     StringList m_returns;
 };
 
-SMRFilter::SMRFilter() : m_args(new SMRArgs)
-{}
+SMRFilter::SMRFilter() : m_args(new SMRArgs) {}
 
-SMRFilter::~SMRFilter()
-{}
+SMRFilter::~SMRFilter() {}
 
 std::string SMRFilter::getName() const
 {
@@ -192,10 +186,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     bool rnAllZero(true);
     for (PointId i = 0; i < keptView->size(); ++i)
     {
-        uint8_t nr =
-            keptView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-        uint8_t rn =
-            keptView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
+        uint8_t nr = keptView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
+        uint8_t rn = keptView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -212,39 +204,42 @@ PointViewSet SMRFilter::run(PointViewPtr view)
                    "1.");
 
     // Segment kept view into two views
-    PointViewPtr firstView = keptView->makeNew();
-    PointViewPtr secondView = keptView->makeNew();
+    PointViewPtr modifiedReturnsView = keptView->makeNew();
+    PointViewPtr staticReturnsView = keptView->makeNew();
     if (nrAllZero && rnAllZero)
     {
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        firstView->append(*keptView);
+        modifiedReturnsView->append(*keptView);
     }
     else
     {
-        Segmentation::segmentReturns(keptView, firstView, secondView,
-                                     m_args->m_returns);
+        Segmentation::segmentReturns(keptView, modifiedReturnsView,
+                                     staticReturnsView, m_args->m_returns);
     }
 
-    if (!firstView->size())
+    if (!modifiedReturnsView->size())
     {
         throwError("No returns to process.");
     }
 
-    for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Id::Classification, i, ClassLabel::Unclassified);
+    // Classify remaining points with value of 1. SMRF processing will mark
+    // ground returns as 2.
+    for (PointId i = 0; i < modifiedReturnsView->size(); ++i)
+        modifiedReturnsView->setField(Id::Classification, i,
+                                      ClassLabel::Unclassified);
 
-    m_srs = firstView->spatialReference();
+    m_srs = modifiedReturnsView->spatialReference();
 
-    calculateBounds(*firstView, m_bounds);
+    calculateBounds(*modifiedReturnsView, m_bounds);
     m_cols = static_cast<int>(
         ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
     m_rows = static_cast<int>(
         ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1);
 
     // Create raster of minimum Z values per element.
-    std::vector<double> ZImin = createZImin(firstView);
+    std::vector<double> ZImin = createZImin(modifiedReturnsView);
 
     // Create raster mask of pixels containing low outlier points.
     std::vector<int> Low = createLowMask(ZImin);
@@ -264,16 +259,19 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // original ZImin (not ZInet), however the net cut mask will still force
     // interpolation at these pixels.
     std::vector<double> ZIpro =
-        createZIpro(firstView, ZImin, Low, isNetCell, Obj);
+        createZIpro(modifiedReturnsView, ZImin, Low, isNetCell, Obj);
 
     // Classify ground returns by comparing elevation values to the provisional
     // DEM.
-    classifyGround(firstView, ZIpro);
+    classifyGround(modifiedReturnsView, ZIpro);
 
     PointViewPtr outView = view->makeNew();
+    // ignoredView and staticReturnsView are appended to the output untouched.
     outView->append(*ignoredView);
-    outView->append(*secondView);
-    outView->append(*firstView);
+    outView->append(*staticReturnsView);
+    // modifiedReturnsView is appended to the output, the only PointView whose
+    // classifications may have been altered.
+    outView->append(*modifiedReturnsView);
     viewSet.insert(outView);
 
     return viewSet;
