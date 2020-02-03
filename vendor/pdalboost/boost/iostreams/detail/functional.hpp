@@ -38,7 +38,9 @@ public:
         { }
     void operator()() const { pdalboost::iostreams::close(t_, which_); }
 private:
-    device_close_operation& operator=(const device_close_operation&);
+    device_close_operation& operator=(const device_close_operation&) = delete;
+    device_close_operation (const device_close_operation&) = delete;
+
     T&                   t_;
     BOOST_IOS::openmode  which_;
 };
