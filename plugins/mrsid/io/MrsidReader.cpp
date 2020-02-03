@@ -277,45 +277,20 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
             if (Utils::iequals(name, "X") &&
                 m_pointInfo.hasChannel(CHANNEL_NAME_X))
             {
-                if (t == Type::Double)
-                {
-                    view->setField<double>( d,
-                                            pointIndex,
-                                            getData<double>(points, CHANNEL_NAME_X, pointIndex));
-                } else if (t == Type::Signed32)
-                {
-                    view->setField<int32_t>(d,
-                                            pointIndex,
-                                            getData<int32_t>(points, CHANNEL_NAME_X, pointIndex));
-                }
-            } else if (Utils::iequals(name, "Y") &&
-                       m_pointInfo.hasChannel(CHANNEL_NAME_Y))
+                view->setField(d, pointIndex,
+                    getData<double>(points, CHANNEL_NAME_X, pointIndex));
+            }
+            else if (Utils::iequals(name, "Y") &&
+                m_pointInfo.hasChannel(CHANNEL_NAME_Y))
             {
-                if (t == Type::Double)
-                {
-                    view->setField<double>( d,
-                                            pointIndex,
-                                            getData<double>(points, CHANNEL_NAME_Y, pointIndex));
-                } else if (t == Type::Signed32)
-                {
-                    view->setField<int32_t>(d,
-                                            pointIndex,
-                                            getData<int32_t>(points, CHANNEL_NAME_Y, pointIndex));
-                }
-            } else if (Utils::iequals(name, "Z") &&
-                       m_pointInfo.hasChannel(CHANNEL_NAME_Z))
+                view->setField(d, pointIndex,
+                    getData<double>(points, CHANNEL_NAME_Y, pointIndex));
+            }
+            else if (Utils::iequals(name, "Z") &&
+                m_pointInfo.hasChannel(CHANNEL_NAME_Z))
             {
-                if (t == Type::Double)
-                {
-                    view->setField<double>( d,
-                                            pointIndex,
-                                            getData<double>(points, CHANNEL_NAME_Z, pointIndex));
-                } else if (t == Type::Signed32)
-                {
-                    view->setField<int32_t>(d,
-                                            pointIndex,
-                                            getData<int32_t>(points, CHANNEL_NAME_Z, pointIndex));
-                }
+                view->setField(d, pointIndex,
+                    getData<double>(points, CHANNEL_NAME_Z, pointIndex));
             }
 #ifdef CHANNEL_NAME_GPSTime
             else if (Utils::iequals(name, "GpsTime") &&

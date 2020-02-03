@@ -83,8 +83,16 @@ void PointLayout::registerDim(Dimension::Id id)
 
 void PointLayout::registerDim(Dimension::Id id, Dimension::Type type)
 {
-    Dimension::Detail dd = m_detail[Utils::toNative(id)];
-    dd.setType(resolveType(type, dd.type()));
+    using namespace Dimension;
+
+    Detail dd = m_detail[Utils::toNative(id)];
+
+    // Force X, Y and Z to always be doubles.
+    if (id == Id::X || id == Id::Y || id == Id::Z)
+        type = Type::Double;
+    else
+        type = resolveType(type, dd.type());
+    dd.setType(type);
     update(dd, Dimension::name(id));
 }
 
