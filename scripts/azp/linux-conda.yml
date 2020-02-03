@@ -6,11 +6,10 @@ jobs:
     vmImage: ubuntu-16.04
   container:
       image: continuumio/miniconda
-      options: --privileged
+      options: --privileged --user 1001 --gid 1001
   timeoutInMinutes: 60
   steps:
   - script: |
-      ECHO ON
       . /opt/conda/etc/profile.d/conda.sh
       source activate base
       conda create --yes --quiet --name pdal
