@@ -53,10 +53,6 @@ if(BUILD_PLUGIN_PGPOINTCLOUD)
     add_subdirectory(pgpointcloud)
 endif()
 
-if(BUILD_PLUGIN_PYTHON)
-    add_subdirectory(python)
-endif()
-
 if(BUILD_PLUGIN_OPENSCENEGRAPH)
     add_subdirectory(openscenegraph)
 endif()
