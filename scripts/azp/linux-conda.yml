@@ -19,7 +19,6 @@ jobs:
       conda install --yes --quiet --name pdal -c conda-forge pdal --only-deps -y
     displayName: Install PDAL dependencies
   - script: |
-      . /opt/conda/etc/profile.d/conda.sh
       conda activate pdal
       echo "current directory:" `pwd`
       mkdir build
@@ -41,20 +40,17 @@ jobs:
         ..
     displayName: 'CMake'
   - script: |
-      . /opt/conda/etc/profile.d/conda.sh
       cd build
       conda activate pdal
       ninja
     displayName: 'Build'
   - script: |
-      . /opt/conda/etc/profile.d/conda.sh
       cd build
       export PDAL_DRIVER_PATH=`pwd`/lib
       conda activate pdal
       ctest -V
     displayName: 'Test'
   - script: |
-      . /opt/conda/etc/profile.d/conda.sh
       export PDAL_TEST_DIR=`pwd`/test
       cd build
       conda activate pdal
@@ -62,7 +58,6 @@ jobs:
       ninja install
     displayName: 'Install'
   - script: |
-      . /opt/conda/etc/profile.d/conda.sh
       export BASE=`pwd`
       conda activate pdal
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
