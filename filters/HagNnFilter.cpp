@@ -75,10 +75,10 @@ double neighbor_interp_ground(PointViewPtr gView, const PointIdList& ids,
 
 static StaticPluginInfo const s_info
 {
-    "filters.hag-nn",
+    "filters.hag_nn",
     "Computes height above ground using nearest-neighbor ground-classified "
         "returns.",
-    "http://pdal.io/stages/filters.hag-nn.html"
+    "http://pdal.io/stages/filters.hag_nn.html"
 };
 
 CREATE_STATIC_STAGE(HagNnFilter, s_info)

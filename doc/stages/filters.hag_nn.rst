@@ -1,6 +1,6 @@
-.. _filters.hag-nn:
+.. _filters.hag_nn:
 
-filters.hag-nn
+filters.hag_nn
 ===============================================================================
 
 The **Height Above Ground Nearest Neighbor filter** takes as input a
@@ -46,7 +46,7 @@ we execute the following pipeline
   [
       "autzen.laz",
       {
-          "type":"filters.hag-nn"
+          "type":"filters.hag_nn"
       },
       {
           "type":"writers.bpf",
@@ -80,7 +80,7 @@ then follow the height filter with :ref:`filters.ferry` as shown
   [
       "autzen.laz",
       {
-          "type":"filters.hag-nn",
+          "type":"filters.hag_nn",
           "count": 10,
           "delaunay": true
       },
@@ -106,7 +106,7 @@ or :ref:`filters.smrf` to label ground returns, as shown
           "type":"filters.smrf"
       },
       {
-          "type":"filters.hag-nn",
+          "type":"filters.hag_nn",
           "count":4
       },
       {
@@ -120,9 +120,9 @@ which is equivalent to the command:
 
 ::
 
-    $ pdal translate autzen.laz autzen-height-as-Z-smrf.bpf smrf hag-nn ferry \
+    $ pdal translate autzen.laz autzen-height-as-Z-smrf.bpf smrf hag_nn ferry \
         --filters.ferry.dimensions="HeightAboveGround=Z" \
-        --filters.hag-nn.count=4
+        --filters.hag_nn.count=4
 
 Options
 -------------------------------------------------------------------------------

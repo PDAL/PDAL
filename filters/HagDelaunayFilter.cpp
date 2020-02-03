@@ -150,10 +150,10 @@ double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
 
 static StaticPluginInfo const s_info
 {
-    "filters.hag-delaunay",
+    "filters.hag_delaunay",
     "Computes height above ground using delaunay interpolation of "
         "ground returns.",
-    "http://pdal.io/stages/filters.hag-delaunay.html"
+    "http://pdal.io/stages/filters.hag_delaunay.html"
 };
 
 CREATE_STATIC_STAGE(HagDelaunayFilter, s_info)

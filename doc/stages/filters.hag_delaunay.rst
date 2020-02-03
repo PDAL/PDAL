@@ -1,6 +1,6 @@
-.. _filters.hag-delaunay:
+.. _filters.hag_delaunay:
 
-filters.hag-delaunay
+filters.hag_delaunay
 ===============================================================================
 
 The **Height Above Ground Delaunay `filter** takes as input a point cloud with
@@ -53,7 +53,7 @@ we execute the following pipeline
   [
       "autzen.laz",
       {
-          "type":"filters.hag-delaunay"
+          "type":"filters.hag_delaunay"
       },
       {
           "type":"writers.bpf",
@@ -66,7 +66,7 @@ which is equivalent to the ``pdal translate`` command
 
 ::
 
-    $ pdal translate autzen.laz autzen-height.bpf hag-delaunay \
+    $ pdal translate autzen.laz autzen-height.bpf hag_delaunay \
         --writers.bpf.output_dims="X,Y,Z,HeightAboveGround"
 
 In either case, the result, when colored by the normalized height instead of
@@ -78,9 +78,9 @@ elevation is
 ::
 
     $ pdal translate autzen.laz autzen-height-as-Z-smrf.bpf \
-        smrf hag-delanay ferry \
+        smrf hag_delanay ferry \
         --filters.ferry.dimensions="HeightAboveGround=Z" \
-        --filters.hag-delanay.count=15
+        --filters.hag_delanay.count=15
 
 Options
 -------------------------------------------------------------------------------
