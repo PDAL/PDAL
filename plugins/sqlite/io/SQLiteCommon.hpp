@@ -117,7 +117,7 @@ public:
 };
 typedef std::shared_ptr<Patch> PatchPtr;
 
-class PDAL_LOCAL SQLite
+class SQLite
 {
 public:
     SQLite(std::string const& connection, LogPtr log);

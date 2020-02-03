@@ -67,8 +67,6 @@ private:
     std::string m_source;
     std::string m_module;
     std::string m_function;
-
-    Script& operator=(Script const& rhs); // nope
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);

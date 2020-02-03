@@ -65,6 +65,11 @@ static PyMethodDef Stdout_methods[] =
 };
 
 
+// Sometimes new items are added to the object type, so ignore those fields
+// and assume 0-initialization is OK.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 static PyTypeObject StdoutType =
 {
     PyVarObject_HEAD_INIT(0, 0)
@@ -116,6 +121,7 @@ static PyTypeObject StdoutType =
     0, /* tp_version_tag */
     0, /* tp_finalilzer */
 };
+#pragma GCC diagnostic pop
 
 
 Redirector::Redirector()
