@@ -9,19 +9,12 @@ jobs:
       options: --privileged
   timeoutInMinutes: 60
   steps:
-  - bash: |
-      echo "##vso[task.prependpath]$CONDA/bin"
-      sudo chown -R $USER $CONDA
-    displayName: Add conda to PATH
-
   - script: |
       ECHO ON
+      . /opt/conda/etc/profile.d/conda.sh
       source activate base
       conda create --yes --quiet --name pdal
-    displayName: Create conda environment
 
-  - script: |
-      ECHO ON
       source activate pdal
       conda config --set always_yes True --set show_channel_urls True
       conda config --add channels conda-forge
@@ -30,6 +23,7 @@ jobs:
       conda install --yes --quiet --name pdal -c conda-forge pdal --only-deps -y
     displayName: Install PDAL dependencies
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       source activate pdal
       echo "current directory:" `pwd`
       mkdir build
@@ -51,17 +45,20 @@ jobs:
         ..
     displayName: 'CMake'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       cd build
       source activate pdal
       ninja
     displayName: 'Build'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       cd build
       export PDAL_DRIVER_PATH=`pwd`/lib
       source activate pdal
       ctest -V
     displayName: 'Test'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       export PDAL_TEST_DIR=`pwd`/test
       cd build
       source activate pdal
@@ -69,6 +66,7 @@ jobs:
       ninja install
     displayName: 'Install'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       export BASE=`pwd`
       source activate pdal
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
