@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2015-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2015-2017, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -49,12 +49,9 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
-{
-    "filters.pmf",
-    "Progressive morphological filter",
-    "http://pdal.io/stages/filters.pmf.html"
-};
+static StaticPluginInfo const s_info{"filters.pmf",
+                                     "Progressive morphological filter",
+                                     "http://pdal.io/stages/filters.pmf.html"};
 
 struct PMFArgs
 {
@@ -70,11 +67,9 @@ struct PMFArgs
 
 CREATE_STATIC_STAGE(PMFFilter, s_info)
 
-PMFFilter::PMFFilter() : m_args(new PMFArgs)
-{}
+PMFFilter::PMFFilter() : m_args(new PMFArgs) {}
 
-PMFFilter::~PMFFilter()
-{}
+PMFFilter::~PMFFilter() {}
 
 std::string PMFFilter::getName() const
 {
@@ -203,8 +198,9 @@ PointViewSet PMFFilter::run(PointViewPtr input)
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
-    for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Dimension::Id::Classification, i, ClassLabel::Unclassified);
+    for (PointId i = 0; i < firstView->size(); ++i)
+        firstView->setField(Dimension::Id::Classification, i,
+                            ClassLabel::Unclassified);
 
     // Run the actual PMF algorithm.
     processGround(firstView);
