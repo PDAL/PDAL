@@ -46,6 +46,8 @@ Reference
 
 .. [Dippe1985] Dippé, Mark AZ, and Erling Henry Wold. "Antialiasing through stochastic sampling." *ACM Siggraph Computer Graphics* 19.3 (1985): 69-78.
 
+.. [Ester1996] Ester, Martin, et al. "A density-based algorithm for discovering clusters in large spatial databases with noise." Kdd. Vol. 96. No. 34. 1996.
+
 .. [Fischer2010] Fischer, Kaspar, Bernd Gärtner, and Martin Kutz. “Fast Smallest-Enclosing-Ball Computation in High Dimensions.” 26473 (2010): 630–641. Web.
 
 .. [Guinard2017] Guinard S., Landrieu L. "Weakly Supervised Segmented-Aided Classification of Urban Scenes From 3D LIDAR Point Clouds." Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci., XLII-1/W1, 151-157, 2017
