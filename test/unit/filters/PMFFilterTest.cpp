@@ -99,5 +99,6 @@ TEST(PMFFilterTEst, classOneAndTwoOnly)
         if (cl == ClassLabel::CreatedNeverClassified)
             classZero++;
     }
+    EXPECT_EQ(v->size(), 110000u);
     EXPECT_EQ(classZero, 0u);
 }

@@ -176,43 +176,43 @@ PointViewSet PMFFilter::run(PointViewPtr input)
                    "1.");
 
     // Segment kept view into two views
-    PointViewPtr modifiedReturnsView = keptView->makeNew();
-    PointViewPtr staticReturnsView = keptView->makeNew();
+    PointViewPtr inlierView = keptView->makeNew();
+    PointViewPtr outlierView = keptView->makeNew();
     if (nrAllZero && rnAllZero)
     {
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        modifiedReturnsView->append(*keptView);
+        inlierView->append(*keptView);
     }
     else
     {
-        Segmentation::segmentReturns(keptView, modifiedReturnsView,
-                                     staticReturnsView, m_args->m_returns);
+        Segmentation::segmentReturns(keptView, inlierView, outlierView,
+                                     m_args->m_returns);
+        ignoredView->append(*outlierView);
     }
 
-    if (!modifiedReturnsView->size())
+    if (!inlierView->size())
     {
         throwError("No returns to process.");
     }
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
-    for (PointId i = 0; i < modifiedReturnsView->size(); ++i)
-        modifiedReturnsView->setField(Dimension::Id::Classification, i,
-                                      ClassLabel::Unclassified);
+    for (PointId i = 0; i < inlierView->size(); ++i)
+        inlierView->setField(Dimension::Id::Classification, i,
+                             ClassLabel::Unclassified);
 
     // Run the actual PMF algorithm.
-    processGround(modifiedReturnsView);
+    processGround(inlierView);
 
     // Prepare the output PointView.
     PointViewPtr outView = input->makeNew();
-    // ignoredView and staticReturnsView are appended to the output untouched.
+    // ignoredView is appended to the output untouched.
     outView->append(*ignoredView);
-    outView->append(*staticReturnsView);
-    // modifiedReturnsView is appended to the output, the only PointView whose
+    // inlierView is appended to the output, the only PointView whose
     // classifications may have been altered.
-    outView->append(*modifiedReturnsView);
+    outView->append(*inlierView);
     viewSet.insert(outView);
 
     return viewSet;
