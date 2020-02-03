@@ -10,7 +10,8 @@ jobs:
   timeoutInMinutes: 60
   steps:
   - script: |
-      sudo chown -R 1001 /opt/conda
+      sudo chown -R 1001:1001 /opt/conda
+      sudo chmod -r u+rwx /opt/conda
       . /opt/conda/etc/profile.d/conda.sh
       source activate base
       conda create --yes --quiet --name pdal
