@@ -104,6 +104,7 @@ public:
 
     void initialize(
             const std::string& filename,
+            const std::string& dimName,
             const std::string& datasetName);
             // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();

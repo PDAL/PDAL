@@ -264,6 +264,7 @@ void HdfReader::addArgs(ProgramArgs& args)
 {
     // args.add("metadata", "Metadata file", m_metadataFile);
     args.add("dataset", "HDF dataset to open", m_datasetName);
+    args.add("name", "PDAL Dimension name of the selected dataset", m_dimName);
 }
 
 void HdfReader::initialize()
@@ -273,7 +274,7 @@ void HdfReader::initialize()
     {
         throwError("Invalid metadata file: '" + m_metadataFile + "'");
     }
-    m_hdf5Handler.initialize(m_filename, m_datasetName);
+    m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
 
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for

@@ -69,10 +69,12 @@ Hdf5Handler::Hdf5Handler()
 
 void Hdf5Handler::initialize(
         const std::string& filename,
+        const std::string& dimName,
         const std::string& datasetName)
 {
     try
     {
+        std::cout << "Dim name: " << dimName << std::endl;
         m_h5File.reset(new H5::H5File(filename, H5F_ACC_RDONLY));
 
         std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
@@ -94,7 +96,7 @@ void Hdf5Handler::initialize(
                 case H5T_INTEGER:
                     if(int_type.getSign() == H5T_SGN_NONE) {
                         m_dimInfos.push_back(DimInfo(
-                            datasetName,
+                            dimName.empty() ? datasetName : dimName,
                             vauge_type,
                             int_type.getOrder(),
                             int_type.getSign(),
@@ -106,7 +108,7 @@ void Hdf5Handler::initialize(
                         std::cout << "uint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
                     } else if(int_type.getSign() == H5T_SGN_2) {
                         m_dimInfos.push_back(DimInfo(
-                            datasetName,
+                            dimName.empty() ? datasetName : dimName,
                             vauge_type,
                             int_type.getOrder(),
                             int_type.getSign(),
@@ -122,7 +124,7 @@ void Hdf5Handler::initialize(
                     break;
                 case H5T_FLOAT:
                     m_dimInfos.push_back(DimInfo(
-                        datasetName,
+                        dimName.empty() ? datasetName : dimName,
                         vauge_type,
                         float_type.getOrder(),
                         H5T_SGN_ERROR,
