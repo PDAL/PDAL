@@ -181,8 +181,6 @@ ErrCode ClusterRGB::ComputeNumBytesNeededToEncode(uint32 nPts, const RGB_t* colo
   vector<Point3D> clusterCenters(numColors);
   vector<int> counts(numColors, 0);
 
-  memset(&clusterCenters[0], 0, numColors * sizeof(Point3D));
-
   // second pass:  cluster all RGB points
   for (uint32 i = 0; i < nPts; i++)
   {
