@@ -36,13 +36,14 @@
 #else
 #error "no supported compiler defined"
 #endif
-#elif defined(LINUX)
+
+#elif defined(__linux__) || defined(__GNU__) || defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
 #define _LARGEFILE64_SOURCE
 #define __LARGE64_FILES
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#elif defined(MACOS)
+#elif defined(__APPLE__)
 #include <sys/types.h>
 #include <unistd.h>
 #else
@@ -382,10 +383,8 @@ off_t CheckedFile::portableSeek(off_t offset, int whence)
    off_t result;
 #ifdef _WIN32
    result = _lseeki64(fd_, offset, whence);
-#elif defined(LINUX) || defined(MACOS)
-   result = ::lseek(fd_, offset, whence);
 #else
-#  error "no supported OS platform defined"
+   result = ::lseek(fd_, offset, whence);
 #endif
    if (result < 0)
    {
