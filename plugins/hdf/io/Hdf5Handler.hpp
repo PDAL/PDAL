@@ -61,24 +61,28 @@ namespace hdf5
 
     struct DimInfo
     {
-        DimInfo(
-            const std::string& name,
-            const H5T_class_t hdf_type,
-            const H5T_order_t endianness,
-            const H5T_sign_t sign,
-            const size_t compound_size,
-            const size_t member_size,
-            const int offset,
-            Dimension::Type pdal_type)
-            : name(name)
-            , hdf_type(hdf_type)
-            , endianness(endianness)
-            , sign(sign)
-            , compound_size(compound_size)
-            , member_size(member_size)
-            , offset(offset)
-            , pdal_type(pdal_type)
-        { }
+        // DimInfo(
+        //     const std::string& name,
+        //     const H5T_class_t hdf_type,
+        //     const H5T_order_t endianness,
+        //     const H5T_sign_t sign,
+        //     const size_t compound_size,
+        //     const size_t member_size,
+        //     const int offset,
+        //     Dimension::Type pdal_type)
+        //     : name(name)
+        //     , hdf_type(hdf_type)
+        //     , endianness(endianness)
+        //     , sign(sign)
+        //     , compound_size(compound_size)
+        //     , member_size(member_size)
+        //     , offset(offset)
+        //     , pdal_type(pdal_type)
+        // { }
+
+        DimInfo(const std::string& dimName, H5::IntType int_type);
+
+        DimInfo(const std::string& dimName, H5::FloatType float_type);
 
         std::string name;
         H5T_class_t hdf_type;

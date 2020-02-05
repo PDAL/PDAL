@@ -67,6 +67,36 @@ Hdf5Handler::Hdf5Handler()
     , m_columnDataMap()
 { }
 
+DimInfo::DimInfo(
+    const std::string& dimName,
+    H5::IntType int_type)
+{
+    name = dimName;
+    hdf_type = H5T_INTEGER;
+    endianness = int_type.getOrder();
+    sign = int_type.getSign();
+    compound_size = int_type.getSize();
+    member_size = int_type.getSize();
+    offset = 0;
+    pdal_type = sign == H5T_SGN_2 ?
+        Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()) :
+        Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize());
+}
+
+DimInfo::DimInfo(
+    const std::string& dimName,
+    H5::FloatType float_type)
+{
+    name = dimName;
+    hdf_type = H5T_FLOAT;
+    endianness = float_type.getOrder();
+    sign = H5T_SGN_ERROR;
+    compound_size = float_type.getSize();
+    member_size = float_type.getSize();
+    offset = 0;
+    pdal_type = Dimension::Type(unsigned(Dimension::BaseType::Signed) | float_type.getSize());
+}
+
 void Hdf5Handler::initialize(
         const std::string& filename,
         const std::string& dimName,
@@ -76,73 +106,7 @@ void Hdf5Handler::initialize(
     {
         std::cout << "Dim name: " << dimName << std::endl;
         m_h5File.reset(new H5::H5File(filename, H5F_ACC_RDONLY));
-
         std::cout << "Number of HD5 Objects: " << m_h5File.get()->getObjCount() <<std::endl;
-        H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
-        H5::DataSpace dspace = dset.getSpace();
-        m_numPoints = dspace.getSelectNpoints();
-        std::cout << "--" << m_numPoints << "--" << std::endl;
-        std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
-        H5::DataType dtype = dset.getDataType();
-        H5T_class_t thing = dtype.getClass();
-        if(thing != H5T_COMPOUND) {
-            H5T_class_t vauge_type = dtype.getClass();
-            std::cout << vauge_type << std::endl;
-
-            H5::IntType int_type = dset.getIntType();
-            H5::FloatType float_type = dset.getFloatType();
-
-            switch(vauge_type) {
-                case H5T_INTEGER:
-                    if(int_type.getSign() == H5T_SGN_NONE) {
-                        m_dimInfos.push_back(DimInfo(
-                            dimName.empty() ? datasetName : dimName,
-                            vauge_type,
-                            int_type.getOrder(),
-                            int_type.getSign(),
-                            int_type.getSize(),
-                            int_type.getSize(),
-                            0,
-                            Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize()))
-                        );
-                        std::cout << "uint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
-                    } else if(int_type.getSign() == H5T_SGN_2) {
-                        m_dimInfos.push_back(DimInfo(
-                            dimName.empty() ? datasetName : dimName,
-                            vauge_type,
-                            int_type.getOrder(),
-                            int_type.getSign(),
-                            int_type.getSize(),
-                            int_type.getSize(),
-                            0,
-                            Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()))
-                        );
-                        std::cout << "sint,  s:" << int_type.getSize() << ", e:" << int_type.getOrder();
-                    } else {
-                        std::cout << "sign error";
-                    }
-                    break;
-                case H5T_FLOAT:
-                    m_dimInfos.push_back(DimInfo(
-                        dimName.empty() ? datasetName : dimName,
-                        vauge_type,
-                        float_type.getOrder(),
-                        H5T_SGN_ERROR,
-                        float_type.getSize(),
-                        float_type.getSize(),
-                        0,
-                        Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize()))
-                    );
-                    std::cout << "float, s:" << float_type.getSize() << ", e:" << float_type.getOrder();
-                    break;
-                default:
-                    std::cout << "Unkown type: " << vauge_type;
-            }
-            std::cout  << std::endl;
-            m_buf = malloc(dtype.getSize() * m_numPoints); //TODO free
-            dset.read(m_buf, dtype);
-            return;
-        };
     }
     catch (const H5::FileIException&)
     {
@@ -167,6 +131,36 @@ void Hdf5Handler::initialize(
         //     m_numPoints = (std::max)((uint64_t)getColumnNumEntries(dataSetName),
         //         m_numPoints);
         // }
+        H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
+        H5::DataSpace dspace = dset.getSpace();
+        m_numPoints = dspace.getSelectNpoints();
+        std::cout << "--" << m_numPoints << "--" << std::endl;
+        std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
+        H5::DataType dtype = dset.getDataType();
+        H5T_class_t vauge_type = dtype.getClass();
+
+        if(vauge_type == H5T_COMPOUND) {
+            throw error("Compound types not supported");
+        }
+        else if(vauge_type == H5T_INTEGER) {
+            m_dimInfos.push_back(
+                DimInfo(
+                    dimName.empty() ? datasetName : dimName,
+                    dset.getIntType()                )
+            );
+        }
+        else if(vauge_type == H5T_FLOAT) {
+            m_dimInfos.push_back(
+                DimInfo(
+                    dimName.empty() ? datasetName : dimName,
+                    dset.getFloatType()
+                )
+            );
+        } else {
+            throw error("Unkown type: " + vauge_type);
+        }
+        m_buf = malloc(dtype.getSize() * m_numPoints); //TODO free
+        dset.read(m_buf, dtype);
     }
     catch (const H5::Exception&)
     {
