@@ -102,17 +102,17 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
         auto convert = [] (std::vector<std::string> in)
         {
             std::vector<int> output;
-            std::transform(in.begin(),
-                           in.end(), std::back_inserter(output),
-                   [](const std::string& str)
-                   {
-                       try {
-                            return std::stoi(str);
-                        } catch (std::invalid_argument&)
-                        {
-                            throw pdal_error("Unable to convert axis ordering to integer");
-                        }
-                        });
+            for (auto& str: in)
+            {
+               try
+               {
+                    output.push_back(std::stoi(str));
+               } catch (std::invalid_argument&)
+               {
+                    throw pdal_error("Unable to convert axis ordering to integer");
+               }
+
+            }
             return output;
 
         };
