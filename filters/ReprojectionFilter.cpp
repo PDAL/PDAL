@@ -66,12 +66,19 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
 {
     args.add("out_srs", "Output spatial reference", m_outSRS).setPositional();
     args.add("in_srs", "Input spatial reference", m_inSRS);
+    args.add("in_axis_ordering", "Axis ordering override for in_srs", m_inAxisOrdering, {} );
+    args.add("out_axis_ordering", "Axis ordering override for out_srs", m_outAxisOrdering, {} );
 }
 
 
 void ReprojectionFilter::initialize()
 {
     m_inferInputSRS = m_inSRS.empty();
+    if (m_inAxisOrdering.size())
+        m_inSRS.setAxisOrdering(m_inAxisOrdering);
+
+    if (m_outAxisOrdering.size())
+        m_outSRS.setAxisOrdering(m_outAxisOrdering);
     setSpatialReference(m_outSRS);
 }
 

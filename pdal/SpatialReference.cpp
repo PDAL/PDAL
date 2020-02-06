@@ -81,6 +81,12 @@ SpatialReference::SpatialReference(const std::string& s)
     set(s);
 }
 
+SpatialReference::SpatialReference(const std::string& s,
+                                   const std::vector<int>& ordering)
+{
+    m_axisOrdering = ordering;
+    set(s);
+}
 
 bool SpatialReference::empty() const
 {
@@ -139,6 +145,18 @@ void SpatialReference::parse(const std::string& s, std::string::size_type& pos)
 }
 
 
+/// Set axis mapping strategy
+void SpatialReference::setAxisOrdering(const std::vector<int>& v)
+{
+    m_axisOrdering = v;
+}
+
+const std::vector<int>& SpatialReference::getAxisOrdering() const
+{
+
+    return m_axisOrdering;
+}
+
 void SpatialReference::set(std::string v)
 {
     m_horizontalWkt.clear();
@@ -168,6 +186,12 @@ void SpatialReference::set(std::string v)
         oss << "Could not import coordinate system '" << input << "': " <<
             msg << ".";
         throw pdal_error(oss.str());
+    }
+
+    if (m_axisOrdering.size())
+    {
+        // Automatically implies SetAxisMappingStrategy(OAMS_CUSTOM)
+        srs.SetDataAxisToSRSAxisMapping(m_axisOrdering);
     }
 
     char *poWKT = 0;
@@ -439,7 +463,7 @@ int SpatialReference::getUTMZone() const
 
 int SpatialReference::computeUTMZone(const BOX3D& cbox) const
 {
-    SrsTransform transform(*this, SpatialReference("EPSG:4326"));
+    SrsTransform transform(*this, SpatialReference("EPSG:4326", {2, 1}));
 
     // We made the argument constant so copy so that we can modify.
     BOX3D box(cbox);

@@ -72,6 +72,15 @@ public:
     */
     SpatialReference(const std::string& wkt);
 
+    /**
+      Construct a spatial reference from well-known text.
+
+      \param wkt  Well-known text from which to construct SRS.
+      \param ordering  Axis override ordering.
+    */
+    SpatialReference(const std::string& wkt, const std::vector<int>& ordering);
+
+
 
     /**
       Determine if this spatial reference is the same as another.
@@ -152,6 +161,11 @@ public:
     void dump() const;
     MetadataNode toMetadata() const;
 
+
+    /// Set axis mapping strategy
+    void setAxisOrdering(const std::vector<int>& v);
+    const std::vector<int>& getAxisOrdering() const;
+
     bool isGeographic() const;
     bool isGeocentric() const;
     bool isProjected() const;
@@ -166,6 +180,8 @@ public:
 private:
     std::string m_wkt;
     mutable std::string m_horizontalWkt;
+    std::vector<int> m_axisOrdering;
+
     friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
         const SpatialReference& srs);
     friend PDAL_DLL std::istream& operator>>(std::istream& istr,
