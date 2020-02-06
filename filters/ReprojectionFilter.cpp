@@ -74,11 +74,6 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
 void ReprojectionFilter::initialize()
 {
     m_inferInputSRS = m_inSRS.empty();
-    if (m_inAxisOrdering.size())
-        m_inSRS.setAxisOrdering(m_inAxisOrdering);
-
-    if (m_outAxisOrdering.size())
-        m_outSRS.setAxisOrdering(m_outAxisOrdering);
     setSpatialReference(m_outSRS);
 }
 
@@ -98,7 +93,24 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
             throwError("source data has no spatial reference and "
                 "none is specified with the 'in_srs' option.");
     }
-    m_transform.reset(new SrsTransform(m_inSRS, m_outSRS));
+
+    if (m_inAxisOrdering.size() || m_outAxisOrdering.size())
+    {
+        std::vector<int> inOrdering;
+        std::vector<int> outOrdering;
+        std::transform(m_inAxisOrdering.begin(),
+                       m_inAxisOrdering.end(), std::back_inserter(inOrdering),
+               [](const std::string& str) { return std::stoi(str); });
+        std::transform(m_outAxisOrdering.begin(),
+                       m_outAxisOrdering.end(), std::back_inserter(outOrdering),
+               [](const std::string& str) { return std::stoi(str); });
+        m_transform.reset(new SrsTransform(m_inSRS,
+                                           inOrdering,
+                                           m_outSRS,
+                                           outOrdering));
+    }
+    else
+        m_transform.reset(new SrsTransform(m_inSRS, m_outSRS));
 }
 
 

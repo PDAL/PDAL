@@ -393,8 +393,6 @@ TEST(SpatialReferenceTest, merge)
 
     Options o2;
     o2.add("filename", Support::datapath("las/test_epsg_4326.las"));
-    o2.add("in_axis_ordering", "2");
-    o2.add("in_axis_ordering", "1");
     LasReader r2;
     r2.setOptions(o2);
 
@@ -406,8 +404,6 @@ TEST(SpatialReferenceTest, merge)
 
     Options o4;
     o4.add("out_srs", "EPSG:4326");
-    o4.add("out_axis_ordering", "2");
-    o4.add("out_axis_ordering", "1");
     ReprojectionFilter repro;
     repro.setOptions(o4);
     repro.setInput(r1);
@@ -443,7 +439,7 @@ TEST(SpatialReferenceTest, test_bounds)
     std::string wgs84_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
 
 
-    SpatialReference wgs84(wgs84_wkt, {2, 1});
+    SpatialReference wgs84(wgs84_wkt);
     BOX2D box17(289814.15, 4320978.61, 289818.50, 4320980.59);
     pdal::Polygon p(box17);
     p.setSpatialReference(utm17);
@@ -522,27 +518,40 @@ TEST(SpatialReferenceTest, set_srs)
 // Test setting EPSG:4326 from User string
 TEST(SpatialReferenceTest, axis_ordering)
 {
-    SpatialReference wgs84("EPSG:4326", {2, 1});
-
-    std::vector<int> axis = wgs84.getAxisOrdering();
-
-    EXPECT_EQ(axis[0], 2);
-    EXPECT_EQ(axis[1], 1);
+    SpatialReference wgs84("EPSG:4326");
 
 
-    SpatialReference utm17("EPSG:26917");
-    BOX2D box_utm17(289814.15, 4320978.61, 289818.50, 4320980.59);
-//     BOX2D box_dd(-83.427597f, 39.0126f, -83.427551f, 39.01261f);
-    BOX2D box_dd(39.0126f, -83.427597f, 39.0126f, -83.427551f);
-    pdal::Polygon p(box_utm17);
-    p.setSpatialReference(utm17);
-    p.transform(wgs84);
 
-    BOX3D b2 = p.bounds();
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.minx), -83.427597f);
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.miny), 39.0126f);
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.maxx), -83.427551f);
-    EXPECT_FLOAT_EQ(static_cast<float>(b2.maxy), 39.01261f);
+    Options o2;
+    o2.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    LasReader r;
+    r.setOptions(o2);
+
+
+    Options o;
+    o.add("out_srs", "EPSG:4326");
+    o.add("in_axis_ordering", "2, 1");
+    ReprojectionFilter repro;
+    repro.setOptions(o);
+    repro.setInput(r);
+
+    FileUtils::deleteFile(Support::temppath("axis.las"));
+    Options o5;
+    o5.add("filename", Support::temppath("axis.las"));
+    o5.add("scale_x", .0001);
+    o5.add("scale_y", .0001);
+    o5.add("scale_z", .0001);
+    LasWriter w;
+    w.setOptions(o5);
+    w.setInput(repro);
+
+    PointTable t1;
+    w.prepare(t1);
+    w.execute(t1);
+
+    Support::checkXYZ(Support::temppath("axis.las"),
+        Support::datapath("las/test_epsg_4326_axis.las"));
+
 
 }
 

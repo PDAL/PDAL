@@ -68,8 +68,8 @@ private:
     SpatialReference m_outSRS;
     bool m_inferInputSRS;
     std::unique_ptr<SrsTransform> m_transform;
-    std::vector<int> m_inAxisOrdering;
-    std::vector<int> m_outAxisOrdering;
+    std::vector<std::string> m_inAxisOrdering;
+    std::vector<std::string> m_outAxisOrdering;
 };
 
 } // namespace pdal
