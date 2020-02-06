@@ -98,12 +98,27 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     {
         std::vector<int> inOrdering;
         std::vector<int> outOrdering;
-        std::transform(m_inAxisOrdering.begin(),
-                       m_inAxisOrdering.end(), std::back_inserter(inOrdering),
-               [](const std::string& str) { return std::stoi(str); });
-        std::transform(m_outAxisOrdering.begin(),
-                       m_outAxisOrdering.end(), std::back_inserter(outOrdering),
-               [](const std::string& str) { return std::stoi(str); });
+
+        auto convert = [] (std::vector<std::string> in)
+        {
+            std::vector<int> output;
+            std::transform(in.begin(),
+                           in.end(), std::back_inserter(output),
+                   [](const std::string& str)
+                   {
+                       try {
+                            return std::stoi(str);
+                        } catch (std::invalid_argument&)
+                        {
+                            throw pdal_error("Unable to convert axis ordering to integer");
+                        }
+                        });
+            return output;
+
+        };
+        inOrdering = convert(m_inAxisOrdering);
+        outOrdering = convert(m_outAxisOrdering);
+
         m_transform.reset(new SrsTransform(m_inSRS,
                                            inOrdering,
                                            m_outSRS,
