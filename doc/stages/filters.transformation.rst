@@ -49,165 +49,149 @@ _`matrix`
 Further details
 ---------------
 
-.. note::
-    This description should only give a high level overview about 3D 
-    transformation abilities offered by PDAL.
+A full tutorial about transformation matrices is beyond the scope of this
+documentation. Instead, we will provide a few pointers to introduce core
+concepts, especially as pertains to PDAL's handling of the ``matrix`` argument.
 
-Normally transformation of coordinates in a 3 dimensional coordinate system
-is expressed in a 4x4 matrix. If read about it, you will find details in
-several sources out there in the net or in papers. But sometimes this 
-4x4 matrix is ordered in different way. To avoid confusion about how this 
-filter expects values to perform transformation, you will find in the 
-sections below some simple examples to show you how the linearisation to 
-the pdal pipeline should be done. So figures show always the commonly used 
-4x4 matrix and the order of transformation components in it and the line 
-on the right side shows how the 4x4 matrix is linearised to be 
-consumable by `filter.transform`.
+Transformations in a 3-dimensional coordinate system can be represented as an
+affine transformation using homogeneous coordinates. This 4x4 matrix can
+represent transformations describing operations like translation, rotation, and
+scaling of coordinates.
 
-Simple translation
-..................
+The transformation filter's ``matrix`` argument is a space delimited, 16
+element string. This string is simply a row-major representation of the 4x4
+matrix (i.e., first four elements correspond to the top row of the
+transformation matrix and so on).
 
-.. figure:: ../images/filters.transformation.translation.svg.png
+In the event that readers are accustomed to an alternate representation of the
+transformation matrix, we provide some simple examples in the form of pure
+translations, rotations, and scaling, and show the corresponding ``matrix``
+string.
 
-   Can be used to move all points of the pointcloud along the desired
-   axis in the ammount of t:sub:`x` t:sub:`z` and t:sub:`z`.
+Translation
+...........
 
-Regarding to the figure above the following matrix will shift the 
-pointcloud:
+A pure translation by :math:`t_x`, :math:`t_y`, and :math:`t_z` in the X, Y,
+and Z dimensions is represented by the following matrix.
 
-* 10 units along x-axis
-* 10 units along y-axis
-* 10 units along z-axis
+.. math::
 
-Or in other words: This sums 10 units to each coordinate triple element.
+    \begin{matrix}
+        1 & 0 & 0 & t_x \\
+        0 & 1 & 0 & t_y \\
+        0 & 0 & 1 & t_z \\
+        0 & 0 & 0 & 1
+    \end{matrix}
+
+The JSON syntax required for such a translation is written as follows for :math:`t_x=7`, :math:`t_y=8`, and :math:`t_z=9`.
 
 .. code-block:: json
 
   [
-      "untransformed.las",
       {
           "type":"filters.transformation",
-          "matrix":"1  0  0  10  0  1  0  10  0  0  1  10  0  0  0  1"
-      },
-      {
-          "type":"writers.las",
-          "filename":"transformed.las"
+          "matrix":"1  0  0  7  0  1  0  8  0  0  1  9  0  0  0  1"
       }
   ]
    
-Simple scaling
-..............
+Scaling
+.......
 
-.. figure:: ../images/filters.transformation.scaling.svg.png
+Scaling of coordinates is also possible using a transformation matrix. The
+matrix shown below will scale the X coordinates by :math:`s_x`, the Y
+coordinates by :math:`s_y`, and Z by :math:`s_z`.
 
-   Can be used to scale all points of the pointcloud along the desired
-   axis times of s:sub:`x` s:sub:`z` and s:sub:`z`.
+.. math::
 
-Regarding to the figure above the following matrix will scale the 
-pointcloud:
+    \begin{matrix}
+        s_x &   0 &   0 & 0 \\
+          0 & s_y &   0 & 0 \\
+          0 &   0 & s_z & 0 \\
+          0 &   0 &   0 & 1
+    \end{matrix}
 
-* 2 times x-axis values
-* 2 times y-axis values
-* 2 times z-axis values
-
-Or in other words: This multiplies 2 with each coordinate triple element.
+We again provide an example JSON snippet to demonstrate the scaling
+transformation. In the example, X and Y are not scaled at all (i.e.,
+:math:`s_x=s_y=1`) and Z is magnified by a factor of 2 (:math:`s_z=2`).
 
 .. code-block:: json
 
   [
-      "untransformed.las",
       {
           "type":"filters.transformation",
-          "matrix":"2  0  0  0  0  2  0  0  0  0  2  0  0  0  0  1"
-      },
-      {
-          "type":"writers.las",
-          "filename":"transformed.las"
+          "matrix":"1  0  0  0  0  1  0  0  0  0  2  0  0  0  0  1"
       }
   ]
 
-Typical usecase might be the exaggeration of height to make differences 
-more visible.
+Rotation
+........
 
-Rotation in general
-...................
+A rotation of coordinates by :math:`\theta` radians counter-clockswise about
+the z-axis is accomplished with the following matrix.
 
-Please keep in mind that rotation is always be done around native axis 
-of your used CRS. So you will end up with really big transformed 
-coordinates. If you want to rotate the pointcloud right in place you 
-need to translate it first to your desired rotation axis.
+.. math::
 
-Simple z-axis rotation (counter-clockwise)
-.................................................
+    \begin{matrix}
+        \cos{\theta} & -\sin{\theta} & 0 & 0 \\
+        \sin{\theta} &  \cos{\theta} & 0 & 0 \\
+                   0 &             0 & 1 & 0 \\
+                   0 &             0 & 0 & 1
+    \end{matrix}
 
-.. figure:: ../images/filters.transformation.rotation_z_axis_counter-clockwise.svg.png
-
-   Can be used to rotate all points of the pointcloud around the z-axis with 
-   the ammount of calculated SINUS and COSINUS of Φ.
-
-Regarding to the figure above the following matrix will rotate the 
-pointcloud 90° around the z-axis:
+In JSON, a rotation of 90 degrees (:math:`\theta=1.57` radians) takes the form
+shown below.
 
 .. code-block:: json
 
   [
-      "untransformed.las",
       {
           "type":"filters.transformation",
-          "matrix":"0  -1  0  0  1  0  0  0  0  0  1  0  0  0  0  1"
-      },
-      {
-          "type":"writers.las",
-          "filename":"transformed.las"
+          "matrix":"0  0  -1  0  1  0  0  0  0  0  1  0  0  0  0  1"
       }
   ]
 
-Simple x-axis rotation (counter-clockwise)
-.................................................
+Similarly, a rotation about the x-axis by :math:`\theta` radians is represented
+as
 
-.. figure:: ../images/filters.transformation.rotation_x_axis_counter-clockwise.svg.png
+.. math::
 
-   Can be used to rotate all points of the pointcloud around the x-axis with 
-   the ammount of calculated SINUS and COSINUS of Φ.
+    \begin{matrix}
+        1 &            0 &             0 & 0 \\
+        0 & \cos{\theta} & -\sin{\theta} & 0 \\
+        0 & \sin{\theta} &  \cos{\theta} & 0 \\
+        0 &            0 &             0 & 1
+    \end{matrix}
 
-Regarding to the figure above the following matrix will rotate the 
-pointcloud 90° around the x-axis:
+which takes the following form in JSON for a rotation of 45 degrees (:math:`\theta=0.785` radians)
 
 .. code-block:: json
 
   [
-      "untransformed.las",
       {
           "type":"filters.transformation",
-          "matrix":"1  0  0  0  0  0  -1  0  0  1  0  0  0  0  0  1"
-      },
-      {
-          "type":"writers.las",
-          "filename":"transformed.las"
+          "matrix":"1  0  0  0  0  0.707  -0.707  0  0  0.707  0.707  0  0  0  0  1"
       }
   ]
 
-Simple y-axis rotation (counter-clockwise)
-.................................................
+Finally, a rotation by :math:`\theta` radians about the y-axis is accomplished
+with the matrix
 
-.. figure:: ../images/filters.transformation.rotation_y_axis_counter-clockwise.svg.png
+.. math::
 
-   Can be used to rotate all points of the pointcloud around the y-axis with 
-   the ammount of calculated SINUS and COSINUS of Φ.
+    \begin{matrix}
+         \cos{\theta} & 0 & \sin{\theta} & 0 \\
+                    0 & 1 &            0 & 0 \\
+        -\sin{\theta} & 0 & \cos{\theta} & 0 \\
+                    0 & 0 &            0 & 1
+    \end{matrix}
 
-Regarding to the figure above the following matrix will rotate the 
-pointcloud 90° around the y-axis:
+and the JSON string for a rotation of 10 degrees (:math:`\theta=0.175` radians) becomes
 
 .. code-block:: json
 
   [
-      "untransformed.las",
       {
           "type":"filters.transformation",
-          "matrix":"0  0  1  0  0  1  0  0  -1  0  0  0  0  0  0  1"
-      },
-      {
-          "type":"writers.las",
-          "filename":"transformed.las"
+          "matrix":"0.985  0  0.174  0  0  1  0  0  -0.174  0  0.985  0  0  0  0  1"
       }
   ]
