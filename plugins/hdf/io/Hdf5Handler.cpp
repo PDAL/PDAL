@@ -94,7 +94,7 @@ DimInfo::DimInfo(
     compound_size = float_type.getSize();
     member_size = float_type.getSize();
     offset = 0;
-    pdal_type = Dimension::Type(unsigned(Dimension::BaseType::Signed) | float_type.getSize());
+    pdal_type = Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize());
 }
 
 void Hdf5Handler::initialize(
@@ -146,7 +146,8 @@ void Hdf5Handler::initialize(
             m_dimInfos.push_back(
                 DimInfo(
                     dimName.empty() ? datasetName : dimName,
-                    dset.getIntType()                )
+                    dset.getIntType()
+                )
             );
         }
         else if(vauge_type == H5T_FLOAT) {
