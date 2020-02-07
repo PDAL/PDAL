@@ -1,18 +1,41 @@
 set CONDA_ENVIRO=pdal-build
 
+<<<<<<< Updated upstream
+=======
+REM del /s /q  %CONDA_ENVIRO%
+mkdir %CONDA_ENVIRO%
+pushd %CONDA_ENVIRO%
+
+>>>>>>> Stashed changes
 call conda activate %CONDA_ENVIRO%
 
 cd %CONDA_ENVIRO%
 
 echo "conda prefix" %CONDA_PREFIX%
+<<<<<<< Updated upstream
 REM set GENERATOR="Visual Studio 14 2015 Win64"
 set GENERATOR="NMake Makefiles"
+=======
+set GENERATOR="Visual Studio 14 2015 Win64"
+REM set GENERATOR="NMake Makefiles"
+>>>>>>> Stashed changes
 set GENERATOR="Ninja"
 
 set ORACLE_HOME=%CONDA_PREFIX%
 cmake -G %GENERATOR% ^
       -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo ^
+<<<<<<< Updated upstream
       -DCMAKE_LIBRARY_PATH:FILEPATH="=%CONDA_PREFIX%/Library/lib" ^
+=======
+      -DCMAKE_LIBRARY_PATH:FILEPATH="%CONDA_PREFIX%/Library/lib" ^
+      -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
+      -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
+      -DZSTD_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\libzstd.lib ^
+      -DCMAKE_INSTALL_PREFIX:FILEPATH="%CONDA_PREFIX%/" ^
+	  -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
+      -DPython3_FIND_STRATEGY=LOCATION ^
+      -DPYTHON_EXECUTABLE="%CONDA_PREFIX%\python" ^
+>>>>>>> Stashed changes
       -DBUILD_PLUGIN_PYTHON=ON ^
 	  -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
 	  -DPython3_FIND_STRATEGY=LOCATION ^
