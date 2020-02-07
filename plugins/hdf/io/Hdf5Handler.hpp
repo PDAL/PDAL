@@ -38,6 +38,7 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
 #include "H5Cpp.h"
+#include <nlohmann/json.hpp>
 
 #include <memory>
 #include <vector>
@@ -109,8 +110,7 @@ public:
 
     void initialize(
             const std::string& filename,
-            const std::string& dimName,
-            const std::string& datasetName);
+            const NL::json& map);
             // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
 

@@ -104,8 +104,7 @@ DimInfo::DimInfo(
 
 void Hdf5Handler::initialize(
         const std::string& filename,
-        const std::string& dimName,
-        const std::string& datasetName)
+        const NL::json& map)
 {
     try
     {
@@ -115,7 +114,9 @@ void Hdf5Handler::initialize(
     {
         throw error("Could not open HDF5 file '" + filename + "'.");
     }
-
+    auto pathDimPair = map.begin();
+    auto datasetName = pathDimPair.key();
+    auto dimName = pathDimPair.value();
     m_dset = m_h5File.get()->openDataSet(datasetName);
     m_dspace = m_dset.getSpace();
     m_numPoints = m_dspace.getSelectNpoints();
@@ -139,18 +140,12 @@ void Hdf5Handler::initialize(
     }
     else if(vauge_type == H5T_INTEGER) {
         m_dimInfos.push_back(
-            DimInfo(
-                dimName.empty() ? datasetName : dimName,
-                m_dset.getIntType()
-            )
+            DimInfo(dimName, m_dset.getIntType())
         );
     }
     else if(vauge_type == H5T_FLOAT) {
         m_dimInfos.push_back(
-            DimInfo(
-                dimName.empty() ? datasetName : dimName,
-                m_dset.getFloatType()
-            )
+            DimInfo(dimName, m_dset.getFloatType())
         );
     } else {
         throw error("Unkown type: " + vauge_type);

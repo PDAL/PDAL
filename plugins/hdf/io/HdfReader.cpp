@@ -113,7 +113,7 @@ void addField(PointViewPtr view, hdf5::DimInfo& info, PointId id, void *p) {
 void HdfReader::addDimensions(PointLayoutPtr layout)
 {
     m_hdf5Handler.setLog(log());
-    m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
+    m_hdf5Handler.initialize(m_filename, m_pathDimMap);
 
     // layout->registerDims(dimensions());
     std::cout << "HdfReader::addDimensions begin" << std::endl;
