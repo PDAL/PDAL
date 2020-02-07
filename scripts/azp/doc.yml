@@ -20,15 +20,15 @@ jobs:
       cd doc
       make html
     displayName: 'Make HTML'
-    #  - script: |
-    #  cd doc
-    #  make latexpdf
-    #displayName: 'Make PDF'
+    - script: |
+      cd doc
+      make latexpdf
+    displayName: 'Make PDF'
   - script: |
       export AWS_ACCESS_KEY_ID = variables['aws-credentials.AWS_ACCESS_KEY_ID']
       export AWS_SECRET_ACCESS_KEY = variables['aws-credentials.AWS_SECRET_ACCESS_KEY']
       cd doc/build
       aws s3 sync html "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
-      aws s3 cp latexpdf/PDAL.pdf "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
+      aws s3 cp latex/PDAL.pdf "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
     displayName: 'Upload https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/'
 
