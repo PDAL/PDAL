@@ -180,12 +180,12 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
             auto info = m_infos.at(0);
             int bufIndex = pi % m_hdf5Handler.m_chunkSize;
             if(bufIndex == 0) {
-                std::cout << "bufIndex: " << bufIndex <<
-                    " pi: " << pi << std::endl;
+                // std::cout << "bufIndex: " << bufIndex <<
+                //     " pi: " << pi << std::endl;
                 buf = m_hdf5Handler.getNextChunk();
             }
             void *p = buf + bufIndex*point_size + info.offset;
-            if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
+            // if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
             addField(view, info, nextId, p);
         // }
         nextId++;
@@ -258,11 +258,19 @@ void HdfReader::addArgs(ProgramArgs& args)
 {
     // args.add("metadata", "Metadata file", m_metadataFile);
     args.add("dataset", "HDF dataset to open", m_datasetName);
+    args.add("map", "Map of HDF path to PDAL dimension", m_pathDimMap);
     args.add("name", "PDAL Dimension name of the selected dataset", m_dimName);
 }
 
 void HdfReader::initialize()
 {
+    std::cout << "***JSON TESTING***" << std::endl;
+    std::cout << m_pathDimMap << std::endl;
+    std::cout << "----------------" << std::endl;
+    for(auto it = m_pathDimMap.begin(); it != m_pathDimMap.end(); ++it) {
+        std::cout << "Key: " << it.key() << ", Val: " << it.value() <<std::endl;
+    }
+
     std::cout << "HdfReader::initialize()" << std::endl;
     if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
     {

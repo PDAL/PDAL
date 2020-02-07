@@ -194,15 +194,15 @@ void *Hdf5Handler::getNextChunk() {
     // m_logger->get(LogLevel::Warning) << "Points remainging: " << elementsRemaining;
     H5::DataSpace memspace(1, &selectionSize);
     m_dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffset);
-    m_logger->get(LogLevel::Warning) << "m_data: " << (void *)m_data.data() << std::endl;
-    m_logger->get(LogLevel::Warning) << "chunkOffset: " << m_chunkOffset << std::endl;
-    m_logger->get(LogLevel::Warning) << "chunkSize: " << selectionSize << std::endl;
+    // m_logger->get(LogLevel::Warning) << "m_data: " << (void *)m_data.data() << std::endl;
+    // m_logger->get(LogLevel::Warning) << "chunkOffset: " << m_chunkOffset << std::endl;
+    // m_logger->get(LogLevel::Warning) << "chunkSize: " << selectionSize << std::endl;
     m_dset.read(m_data.data(),
                 m_dset.getDataType(),
                 memspace,
                 m_dspace );
     m_chunkOffset += m_chunkSize;
-    m_logger->get(LogLevel::Warning) << "m_data[0] = " << *((double *)m_data.data()) << std::endl;
+    // m_logger->get(LogLevel::Warning) << "m_data[0] = " << *((double *)m_data.data()) << std::endl;
     return m_data.data();
 }
 

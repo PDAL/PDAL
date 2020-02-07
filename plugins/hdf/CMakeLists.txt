@@ -17,6 +17,7 @@ else()
         INCLUDES
             ${ROOT_DIR}
             ${LIBXML2_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     if (WITH_TESTS)

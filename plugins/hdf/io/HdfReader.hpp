@@ -39,6 +39,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
+#include <nlohmann/json.hpp>
 
 #include "Hdf5Handler.hpp"
 
@@ -69,6 +70,7 @@ private:
     std::string m_metadataFile;
     std::string m_datasetName;
     std::string m_dimName;
+    NL::json m_pathDimMap;
     Dimension::IdList m_idlist;
     std::vector<hdf5::DimInfo> m_infos;
 
