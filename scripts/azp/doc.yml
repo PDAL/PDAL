@@ -1,9 +1,9 @@
 # -*- mode: yaml -*-
 
-variables:
-  - group: aws-credentials
 jobs:
 - job: docs
+  variables:
+    - group: aws-credentials
   pool:
     vmImage: ubuntu-16.04
   container:
