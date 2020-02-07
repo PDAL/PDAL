@@ -72,13 +72,53 @@ CREATE_SHARED_STAGE(HdfReader, s_info)
 
 std::string HdfReader::getName() const { return s_info.name; }
 
+void addField(PointViewPtr view, hdf5::DimInfo& info, PointId id, void *p) {
+    switch(info.pdal_type) {
+        case Dimension::Type::Double:
+            view->setField(info.id, id, * ((double *) p));
+            break;
+        case Dimension::Type::Float:
+            view->setField(info.id, id, * ((float *) p));
+            break;
+        case Dimension::Type::Signed8:
+            view->setField(info.id, id, * ((int8_t *) p));
+            break;
+        case Dimension::Type::Signed16:
+            view->setField(info.id, id, * ((int16_t *) p));
+            break;
+        case Dimension::Type::Signed32:
+            view->setField(info.id, id, * ((int32_t *) p));
+            break;
+        case Dimension::Type::Signed64:
+            view->setField(info.id, id, * ((int64_t *) p));
+            break;
+            case Dimension::Type::Unsigned8:
+            view->setField(info.id, id, * ((uint8_t *) p));
+            break;
+        case Dimension::Type::Unsigned16:
+            view->setField(info.id, id, * ((uint16_t *) p));
+            break;
+        case Dimension::Type::Unsigned32:
+            view->setField(info.id, id, * ((uint32_t *) p));
+            break;
+        case Dimension::Type::Unsigned64:
+            view->setField(info.id, id, * ((uint64_t *) p));
+            break;
+        default:
+            view->setField(info.id, id, 0);
+            break;
+    }
+}
 
 void HdfReader::addDimensions(PointLayoutPtr layout)
 {
+    m_hdf5Handler.setLog(log());
+    m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
+
     // layout->registerDims(dimensions());
     std::cout << "HdfReader::addDimensions begin" << std::endl;
     m_infos = m_hdf5Handler.getDimensionInfos();
-    for(int i = 0; i < m_infos.size(); i++) {
+    for(uint64_t i = 0; i < m_infos.size(); i++) {
         // Dimension::BaseType b = Dimension::BaseType::None;
         // Dimension::Type t = Dimension::Type::None;
         // if(info.hdf_type == H5T_INTEGER) {
@@ -113,18 +153,6 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
 
 void HdfReader::ready(PointTableRef table)
 {
-    std::cout << "HdfReader::ready" << std::endl;
-    m_hdf5Handler.setLog(log());
-    try
-    {
-        // m_hdf5Handler.initialize(m_filename, hdf5Columns);
-        // m_hdf5Handler.initialize(m_filename);
-        m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
-    }
-    catch (const Hdf5Handler::error& err)
-    {
-        throwError(err.what());
-    }
     m_index = 0;
 }
 
@@ -144,16 +172,12 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     // std::unique_ptr<unsigned char>
     //     rawData(new unsigned char[count * point_size]);
 
-    // for(std::size_t di = 0; di < m_idlist.size(); di++) {
-        // Dimension::Id dimId = m_idlist[di];
-    // std::cout << m_idlist.size() << std::endl;
-    // for(auto dimId : m_idlist) {
-    for(auto info : m_infos) {
-        PointId nextId = startId;
-        std::cout << (unsigned)info.id << ": ";
-        void *buf = NULL;
-        // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-        for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+    PointId nextId = startId;
+    void *buf = NULL;
+    // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+    for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+        // for(auto info : m_infos) {
+            auto info = m_infos.at(0);
             int bufIndex = pi % m_hdf5Handler.m_chunkSize;
             if(bufIndex == 0) {
                 std::cout << "bufIndex: " << bufIndex <<
@@ -162,42 +186,9 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
             }
             void *p = buf + bufIndex*point_size + info.offset;
             if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
-            switch(info.pdal_type) {
-                case Dimension::Type::Double:
-                    view->setField(info.id, nextId++, * ((double *) p));
-                    break;
-                case Dimension::Type::Float:
-                    view->setField(info.id, nextId++, * ((float *) p));
-                    break;
-                case Dimension::Type::Signed8:
-                    view->setField(info.id, nextId++, * ((int8_t *) p));
-                    break;
-                case Dimension::Type::Signed16:
-                    view->setField(info.id, nextId++, * ((int16_t *) p));
-                    break;
-                case Dimension::Type::Signed32:
-                    view->setField(info.id, nextId++, * ((int32_t *) p));
-                    break;
-                case Dimension::Type::Signed64:
-                    view->setField(info.id, nextId++, * ((int64_t *) p));
-                    break;
-                 case Dimension::Type::Unsigned8:
-                    view->setField(info.id, nextId++, * ((uint8_t *) p));
-                    break;
-                case Dimension::Type::Unsigned16:
-                    view->setField(info.id, nextId++, * ((uint16_t *) p));
-                    break;
-                case Dimension::Type::Unsigned32:
-                    view->setField(info.id, nextId++, * ((uint32_t *) p));
-                    break;
-                case Dimension::Type::Unsigned64:
-                    view->setField(info.id, nextId++, * ((uint64_t *) p));
-                    break;
-                default:
-                    view->setField(info.id, nextId, 0);
-                    break;
-            }
-        }
+            addField(view, info, nextId, p);
+        // }
+        nextId++;
     }
 
     //Not loving the position-linked data, but fine for now.

@@ -156,8 +156,9 @@ void Hdf5Handler::initialize(
         throw error("Unkown type: " + vauge_type);
     }
     // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
-    m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
+    // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
     m_data.resize(m_chunkSize*dtype.getSize());
+    m_logger->get(LogLevel::Warning) << "m_data.size: " << m_data.size() << std::endl;
     m_logger->get(LogLevel::Warning) << "Chunk offset: " << m_chunkOffset << std::endl;
     // dspace.selectElements(H5S_SELECT_SET, m_chunkSize, &m_chunkOffset);
     // dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
@@ -184,12 +185,24 @@ void Hdf5Handler::close()
 void *Hdf5Handler::getNextChunk() {
     // m_logger->get(LogLevel::Warning) << "chunk size: " << m_chunkSize << ", chunk offset: "
     //     << m_chunkOffset << std::endl;
-    m_dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
+    hsize_t elementsRemaining = m_numPoints - m_chunkOffset;
+    // if(elementsRemaining < m_chunkSize) {
+    //     selectionSize = elementsRemaining;
+    // }
+    hsize_t selectionSize = std::min(elementsRemaining, m_chunkSize);
+
+    // m_logger->get(LogLevel::Warning) << "Points remainging: " << elementsRemaining;
+    H5::DataSpace memspace(1, &selectionSize);
+    m_dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffset);
+    m_logger->get(LogLevel::Warning) << "m_data: " << (void *)m_data.data() << std::endl;
+    m_logger->get(LogLevel::Warning) << "chunkOffset: " << m_chunkOffset << std::endl;
+    m_logger->get(LogLevel::Warning) << "chunkSize: " << selectionSize << std::endl;
     m_dset.read(m_data.data(),
                 m_dset.getDataType(),
-                H5::DataSpace::ALL,
+                memspace,
                 m_dspace );
     m_chunkOffset += m_chunkSize;
+    m_logger->get(LogLevel::Warning) << "m_data[0] = " << *((double *)m_data.data()) << std::endl;
     return m_data.data();
 }
 
