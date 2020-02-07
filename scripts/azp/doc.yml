@@ -20,7 +20,7 @@ jobs:
       cd doc
       make html
     displayName: 'Make HTML'
-    - script: |
+  - script: |
       cd doc
       make latexpdf
     displayName: 'Make PDF'
