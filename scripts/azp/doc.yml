@@ -1,0 +1,26 @@
+# -*- mode: yaml -*-
+
+jobs:
+- job: linux
+  pool:
+    vmImage: ubuntu-16.04
+  container:
+      image: osgeo/proj-docs:latest
+      options: --privileged
+  timeoutInMinutes: 60
+  steps:
+  - script: |
+      echo "current directory:" `pwd`
+      cd doc
+      make doxygen
+    displayName: 'Make Doxygen'
+  - script: |
+      cd doc
+      make html
+    displayName: 'Make HTML'
+  - script: |
+      cd doc
+      make pdf
+      ninja
+    displayName: 'Make PDF'
+
