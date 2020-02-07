@@ -85,7 +85,7 @@ void HAGDEMFilter::ready(PointTableRef table)
 void HAGDEMFilter::prepared(PointTableRef table)
 {
   if (m_band <= 0)
-    throwError("'band' must be greater than 1");
+    throwError("Band must be greater than 0");
 }
 
 void HAGDEMFilter::filter(PointView& view)
