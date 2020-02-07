@@ -31,7 +31,7 @@ jobs:
       export AWS_SECRET_ACCESS_KEY = $(AWS_SECRET_ACCESS_KEY)
       cd doc/build
       aws s3 sync html --quiet "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
-      aws s3 cp latex/PDAL.pdf "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
+      aws s3 cp --quiet latex/PDAL.pdf "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
       echo "PDF location: https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/PDAL.pdf"
       echo "HTML location: https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/index.html"
     displayName: 'Upload https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/index.html'
