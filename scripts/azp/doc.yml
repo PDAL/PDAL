@@ -30,5 +30,7 @@ jobs:
       cd doc/build
       aws s3 sync html "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
       aws s3 cp latex/PDAL.pdf "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
+      echo "PDF location: https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/PDAL.pdf"
+      echo "HTML location: https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/"
     displayName: 'Upload https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/'
 
