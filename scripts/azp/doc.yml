@@ -20,14 +20,14 @@ jobs:
       cd doc
       make html
     displayName: 'Make HTML'
+    #  - script: |
+    #  cd doc
+    #  make latexpdf
+    #displayName: 'Make PDF'
   - script: |
-      cd doc
-      make latexpdf
-    displayName: 'Make PDF'
-  - script: |
-      export AWS_ACCESS_KEY_ID = variables['aws-credentials.AWS_ACCESS_KEY_ID']
-      export AWS_SECRET_ACCESS_KEY = variables['aws-credentials.AWS_SECRET_ACCESS_KEY']
+      export AWS_ACCESS_KEY_ID=$(aws-credentials.AWS_ACCESS_KEY_ID)
+      export AWS_SECRET_ACCESS_KEY=$(aws-credentials.AWS_SECRET_ACCESS_KEY)
       cd doc/build
-      aws s3 sync . "s3://pdal/docs/$BUILD_SOURCEVERSION/" --acl public-read
-    displayName: 'Upload https://github.com/OSGeo/gdal/commit/$BUILD_SOURCEVERSION to https://pdal.s3.amazonaws.com/docs/$BUILD_SOURCEVERSION/html/'
+      aws s3 sync . "s3://pdal/docs/$(Build.SourceVersion)/" --acl public-read
+    displayName: 'Upload to https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/'
 
