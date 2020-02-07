@@ -23,7 +23,6 @@ jobs:
   - script: |
       cd doc
       make latexpdf
-      ninja
     displayName: 'Make PDF'
   - script: |
       export AWS_ACCESS_KEY_ID = variables['aws-credentials.AWS_ACCESS_KEY_ID']
