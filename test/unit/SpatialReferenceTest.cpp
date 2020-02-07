@@ -514,7 +514,9 @@ TEST(SpatialReferenceTest, set_srs)
         std::string::npos);
 }
 
+#endif // PDAL_HAVE_LIBXML2
 
+#if GDAL_VERSION_MAJOR >= 3
 // Test setting EPSG:4326 from User string
 TEST(SpatialReferenceTest, axis_ordering)
 {
@@ -554,8 +556,8 @@ TEST(SpatialReferenceTest, axis_ordering)
 
 
 }
+#endif 
 
 
-#endif // PDAL_HAVE_LIBXML2
 
 } // namespace pdal
