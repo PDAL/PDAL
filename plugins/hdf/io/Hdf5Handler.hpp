@@ -114,6 +114,7 @@ public:
     void close();
 
     void *getBuffer();
+    void *getNextChunk();
 
     uint64_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
@@ -123,6 +124,7 @@ public:
             const std::string& dataSetName,
             const hsize_t numEntries,
             const hsize_t offset) const;
+    hsize_t m_chunkSize;
 
 private:
     struct ColumnData
@@ -152,6 +154,11 @@ private:
     hsize_t getColumnNumEntries(const std::string& dataSetName) const;
     const ColumnData& getColumnData(const std::string& dataSetName) const;
     void *m_buf;
+    void *m_nextVal;
+    // hsize_t m_chunkSize;
+    H5::DataSet m_dset;
+    H5::DataSpace m_dspace;
+    hsize_t m_chunkOffset;
 
     std::unique_ptr<H5::H5File> m_h5File;
     uint64_t m_numPoints;

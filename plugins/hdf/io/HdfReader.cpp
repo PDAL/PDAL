@@ -99,6 +99,9 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
         std::cout << unsigned(m_infos[i].id) << " : ";
         m_infos[i].id = layout->registerOrAssignDim(m_infos[i].name, m_infos[i].pdal_type);
         std::cout << unsigned(m_infos[i].id) << std::endl;
+        std::cout << unsigned(m_infos[i].pdal_type) << std::endl;
+        std::cout << unsigned(pdal::Dimension::Type::Double) << std::endl;
+        std::cout << unsigned(pdal::Dimension::Type::Signed64) << std::endl;
         // ); // TODO: add correct type
     };
     for(auto info: m_infos) {
@@ -146,8 +149,10 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     for(auto info : m_infos) {
         PointId nextId = startId;
         std::cout << (unsigned)info.id << ": ";
-        for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-            void *p = m_hdf5Handler.getBuffer() + pi*point_size + info.offset;
+        void *buf = m_hdf5Handler.getNextChunk();
+        // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+        for(uint64_t pi = 0; pi < m_hdf5Handler.m_chunkSize; pi++) {
+            void *p = buf + pi*point_size + info.offset;
             if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
             switch(info.pdal_type) {
                 case Dimension::Type::Double:

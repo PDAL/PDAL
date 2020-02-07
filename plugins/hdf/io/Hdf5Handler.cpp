@@ -65,6 +65,7 @@ using namespace hdf5;
 Hdf5Handler::Hdf5Handler()
     : m_numPoints(0)
     , m_columnDataMap()
+    , m_chunkOffset(0)
 { }
 
 DimInfo::DimInfo(
@@ -134,7 +135,18 @@ void Hdf5Handler::initialize(
         H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
         H5::DataSpace dspace = dset.getSpace();
         m_numPoints = dspace.getSelectNpoints();
-        std::cout << "--" << m_numPoints << "--" << std::endl;
+        if(dset.getCreatePlist().getLayout() == H5D_CHUNKED) {
+            int dimensionality = dset.getCreatePlist().getChunk(1, &m_chunkSize);
+            if(dimensionality != 1)
+                std::cout << "Something is wrong" << std::endl <<
+                    "expected dimensionality 1, got " << dimensionality
+                    << std::endl;
+        } else {
+            std::cout << "Dataset not chunked; proceeding to read one element at a time" << std::endl;
+            m_chunkSize = 1;
+        }
+        std::cout << "Chunk size: " << m_chunkSize << std::endl;
+        std::cout << "Num points: " << m_numPoints << std::endl;
         std::cout << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
         H5::DataType dtype = dset.getDataType();
         H5T_class_t vauge_type = dtype.getClass();
@@ -160,8 +172,13 @@ void Hdf5Handler::initialize(
         } else {
             throw error("Unkown type: " + vauge_type);
         }
+        // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
         m_buf = malloc(dtype.getSize() * m_numPoints); //TODO free
-        dset.read(m_buf, dtype);
+        std::cout << "Chunk offset: " << m_chunkOffset << std::endl;
+        // dspace.selectElements(H5S_SELECT_SET, m_chunkSize, &m_chunkOffset);
+        dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
+        // H5::DataSpace mspace( 1, &m_chunkOffset);
+        dset.read(m_buf, dtype, H5::DataSpace::ALL, dspace);
     }
     catch (const H5::Exception&)
     {
@@ -172,6 +189,13 @@ void Hdf5Handler::initialize(
 void Hdf5Handler::close()
 {
     m_h5File->close();
+}
+
+void *Hdf5Handler::getNextChunk() {
+    // m_dset.read(m_buf, m_dset.getDataType(), memspace, thing);
+    // m_dset.read(m_buf, m_dset.getDataType());
+    m_chunkOffset += m_chunkSize;
+    return m_buf;
 }
 
 uint64_t Hdf5Handler::getNumPoints() const
