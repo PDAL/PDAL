@@ -19,4 +19,4 @@
 # Some tests depend on this configuration.
 test/data/bpf/bundle1 text eol=lf
 test/data/bpf/bundle2 text eol=lf
-apps/pdal-config text eol=lf
+apps/pdal-config.in text eol=lf
