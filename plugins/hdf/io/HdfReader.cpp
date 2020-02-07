@@ -149,10 +149,16 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     for(auto info : m_infos) {
         PointId nextId = startId;
         std::cout << (unsigned)info.id << ": ";
-        void *buf = m_hdf5Handler.getNextChunk();
+        void *buf = NULL;
         // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-        for(uint64_t pi = 0; pi < m_hdf5Handler.m_chunkSize; pi++) {
-            void *p = buf + pi*point_size + info.offset;
+        for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+            int bufIndex = pi % m_hdf5Handler.m_chunkSize;
+            if(bufIndex == 0) {
+                std::cout << "bufIndex: " << bufIndex <<
+                    " pi: " << pi << std::endl;
+                buf = m_hdf5Handler.getNextChunk();
+            }
+            void *p = buf + bufIndex*point_size + info.offset;
             if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
             switch(info.pdal_type) {
                 case Dimension::Type::Double:
