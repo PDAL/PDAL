@@ -100,22 +100,13 @@ namespace hdf5
 class Hdf5Handler
 {
 public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
-    Hdf5Handler();
-
     void initialize(
             const std::string& filename,
             const NL::json& map);
             // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
 
-    void *getBuffer();
-    void *getNextChunk();
+    uint8_t *getNextChunk();
 
     uint64_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
@@ -155,17 +146,18 @@ private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
     hsize_t getColumnNumEntries(const std::string& dataSetName) const;
     const ColumnData& getColumnData(const std::string& dataSetName) const;
-    void *m_buf;
-    void *m_nextVal;
     std::vector<uint8_t> m_data;
     // hsize_t m_chunkSize;
-    H5::DataSet m_dset;
-    H5::DataSpace m_dspace;
-    hsize_t m_chunkOffset;
+    // H5::DataSet m_dset;
+    // H5::DataSpace m_dspace;
+    std::vector<H5::DataSet> m_dsets;
+    std::vector<H5::DataSpace> m_dspaces;
+
+    hsize_t m_chunkOffset = 0;
     pdal::LogPtr m_logger;
 
     std::unique_ptr<H5::H5File> m_h5File;
-    uint64_t m_numPoints;
+    uint64_t m_numPoints = 0;
 
     std::map<std::string, ColumnData> m_columnDataMap;
 };

@@ -60,14 +60,6 @@ namespace pdal
 // }
 using namespace hdf5;
 
-
-
-Hdf5Handler::Hdf5Handler()
-    : m_chunkOffset(0)
-    , m_numPoints(0)
-    , m_columnDataMap()
-{ }
-
 void Hdf5Handler::setLog(pdal::LogPtr log) {
     m_logger = log;
 }
@@ -112,50 +104,53 @@ void Hdf5Handler::initialize(
     }
     catch (const H5::FileIException&)
     {
-        throw error("Could not open HDF5 file '" + filename + "'.");
+        throw pdal_error("Could not open HDF5 file '" + filename + "'.");
     }
-    auto pathDimPair = map.begin();
-    auto datasetName = pathDimPair.key();
-    auto dimName = pathDimPair.value();
-    m_dset = m_h5File.get()->openDataSet(datasetName);
-    m_dspace = m_dset.getSpace();
-    m_numPoints = m_dspace.getSelectNpoints();
-    H5::DSetCreatPropList plist = m_dset.getCreatePlist();
-    if(plist.getLayout() == H5D_CHUNKED) {
-        int dimensionality = plist.getChunk(1, &m_chunkSize);
-        if(dimensionality != 1)
-            throw error("Only 1-dimensional arrays are supported.");
-    } else {
-        m_logger->get(LogLevel::Warning) << "Dataset not chunked; proceeding to read 1024 elements at a time" << std::endl;
-        m_chunkSize = 1024;
-    }
-    m_logger->get(LogLevel::Warning) << "Chunk size: " << m_chunkSize << std::endl;
-    m_logger->get(LogLevel::Warning) << "Num points: " << m_numPoints << std::endl;
-    m_logger->get(LogLevel::Warning) << "Number of dataspace dimensions: " << m_dspace.getSimpleExtentNdims() << std::endl;
-    H5::DataType dtype = m_dset.getDataType();
-    H5T_class_t vauge_type = dtype.getClass();
+    for(const auto& [datasetName, dimName] : map.items()) {
+        // auto datasetName = it.key();
+        // auto dimName = it.value();
+        H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
+        m_dsets.push_back(dset);
+        H5::DataSpace dspace = dset.getSpace();
+        m_dspaces.push_back(dspace);
+        m_numPoints = dspace.getSelectNpoints();
+        H5::DSetCreatPropList plist = dset.getCreatePlist();
+        if(plist.getLayout() == H5D_CHUNKED) {
+            int dimensionality = plist.getChunk(1, &m_chunkSize);
+            if(dimensionality != 1)
+                throw pdal_error("Only 1-dimensional arrays are supported.");
+        } else {
+            m_logger->get(LogLevel::Warning) << "Dataset not chunked; proceeding to read 1024 elements at a time" << std::endl;
+            m_chunkSize = 1024;
+        }
+        m_logger->get(LogLevel::Warning) << "Chunk size: " << m_chunkSize << std::endl;
+        m_logger->get(LogLevel::Warning) << "Num points: " << m_numPoints << std::endl;
+        m_logger->get(LogLevel::Warning) << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
+        H5::DataType dtype = dset.getDataType();
+        H5T_class_t vague_type = dtype.getClass();
 
-    if(vauge_type == H5T_COMPOUND) {
-        throw error("Compound types not supported");
+        if(vague_type == H5T_COMPOUND) {
+            throw pdal_error("Compound types not supported");
+        }
+        else if(vague_type == H5T_INTEGER) {
+            m_dimInfos.push_back(
+                DimInfo(dimName, dset.getIntType())
+            );
+        }
+        else if(vague_type == H5T_FLOAT) {
+            m_dimInfos.push_back(
+                DimInfo(dimName, dset.getFloatType())
+            );
+        } else {
+            throw pdal_error("Unkown type: " + vague_type);
+        }
+        // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
+        // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
+        m_data.resize(m_chunkSize*dtype.getSize());
+        m_logger->get(LogLevel::Warning) << "m_data.size: " << m_data.size() << std::endl;
+        m_logger->get(LogLevel::Warning) << "Chunk offset: " << m_chunkOffset << std::endl;
     }
-    else if(vauge_type == H5T_INTEGER) {
-        m_dimInfos.push_back(
-            DimInfo(dimName, m_dset.getIntType())
-        );
-    }
-    else if(vauge_type == H5T_FLOAT) {
-        m_dimInfos.push_back(
-            DimInfo(dimName, m_dset.getFloatType())
-        );
-    } else {
-        throw error("Unkown type: " + vauge_type);
-    }
-    // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
-    // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
-    m_data.resize(m_chunkSize*dtype.getSize());
-    m_logger->get(LogLevel::Warning) << "m_data.size: " << m_data.size() << std::endl;
-    m_logger->get(LogLevel::Warning) << "Chunk offset: " << m_chunkOffset << std::endl;
-    // dspace.selectElements(H5S_SELECT_SET, m_chunkSize, &m_chunkOffset);
+    // datasetName.selectElements(H5S_SELECT_SET, m_chunkSize, &m_chunkOffset);
     // dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
     // H5::DataSpace mspace( 1, &m_chunkOffset);
     // dset.read(m_buf, dtype, H5::DataSpace::ALL, dspace);
@@ -177,7 +172,7 @@ void Hdf5Handler::close()
 //     return buf;
 // }
 
-void *Hdf5Handler::getNextChunk() {
+uint8_t *Hdf5Handler::getNextChunk() {
     // m_logger->get(LogLevel::Warning) << "chunk size: " << m_chunkSize << ", chunk offset: "
     //     << m_chunkOffset << std::endl;
     hsize_t elementsRemaining = m_numPoints - m_chunkOffset;
@@ -188,14 +183,14 @@ void *Hdf5Handler::getNextChunk() {
 
     // m_logger->get(LogLevel::Warning) << "Points remainging: " << elementsRemaining;
     H5::DataSpace memspace(1, &selectionSize);
-    m_dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffset);
+    m_dspaces.at(0).selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffset);
     // m_logger->get(LogLevel::Warning) << "m_data: " << (void *)m_data.data() << std::endl;
     // m_logger->get(LogLevel::Warning) << "chunkOffset: " << m_chunkOffset << std::endl;
     // m_logger->get(LogLevel::Warning) << "chunkSize: " << selectionSize << std::endl;
-    m_dset.read(m_data.data(),
-                m_dset.getDataType(),
+    m_dsets.at(0).read(m_data.data(),
+                m_dsets.at(0).getDataType(),
                 memspace,
-                m_dspace );
+                m_dspaces.at(0) );
     m_chunkOffset += m_chunkSize;
     // m_logger->get(LogLevel::Warning) << "m_data[0] = " << *((double *)m_data.data()) << std::endl;
     return m_data.data();
@@ -234,16 +229,12 @@ void Hdf5Handler::getColumnEntries(
     }
     catch (const H5::Exception&)
     {
-        throw error("Could not read from dataset.");
+        throw pdal_error("Could not read from dataset.");
     }
 }
 
 std::vector<pdal::hdf5::DimInfo> Hdf5Handler::getDimensionInfos() {
     return m_dimInfos;
-}
-void *
-Hdf5Handler::getBuffer() {
-    return m_buf;
 }
 
 hsize_t
@@ -263,7 +254,7 @@ Hdf5Handler::getColumnData(const std::string& dataSetName) const
 
     if (columnDataIt == m_columnDataMap.end())
     {
-        throw error("Could not retrieve column data.");
+        throw pdal_error("Could not retrieve column data.");
     }
 
     return columnDataIt->second;

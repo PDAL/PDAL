@@ -72,7 +72,7 @@ CREATE_SHARED_STAGE(HdfReader, s_info)
 
 std::string HdfReader::getName() const { return s_info.name; }
 
-void addField(PointViewPtr view, hdf5::DimInfo& info, PointId id, void *p) {
+void addField(PointViewPtr view, hdf5::DimInfo& info, PointId id, uint8_t *p) {
     switch(info.pdal_type) {
         case Dimension::Type::Double:
             view->setField(info.id, id, * ((double *) p));
@@ -119,7 +119,7 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
     std::cout << "HdfReader::addDimensions begin" << std::endl;
     m_infos = m_hdf5Handler.getDimensionInfos();
     for(uint64_t i = 0; i < m_infos.size(); i++) {
-        // Dimension::BaseType b = Dimension::BaseType::None;
+        // Dimension::BaseType b = Dimension::BaseTyppathDimPaire::None;
         // Dimension::Type t = Dimension::Type::None;
         // if(info.hdf_type == H5T_INTEGER) {
         //     if(info.sign == H5T_SGN_NONE) {
@@ -173,7 +173,7 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     //     rawData(new unsigned char[count * point_size]);
 
     PointId nextId = startId;
-    void *buf = NULL;
+    uint8_t *buf = nullptr;
     // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
     for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
         // for(auto info : m_infos) {
@@ -184,9 +184,10 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
                 //     " pi: " << pi << std::endl;
                 buf = m_hdf5Handler.getNextChunk();
             }
-            void *p = buf + bufIndex*point_size + info.offset;
+            uint8_t *p = buf + bufIndex*point_size + info.offset;
             // if(pi == 0) std::cout<< Dimension::interpretationName(info.pdal_type) <<std::endl;
-            addField(view, info, nextId, p);
+            // addField(view, info, nextId, p);
+            view->setField(info.id, info.pdal_type, nextId, (void*) p);
         // }
         nextId++;
     }
@@ -267,9 +268,13 @@ void HdfReader::initialize()
     std::cout << "***JSON TESTING***" << std::endl;
     std::cout << m_pathDimMap << std::endl;
     std::cout << "----------------" << std::endl;
-    for(auto it = m_pathDimMap.begin(); it != m_pathDimMap.end(); ++it) {
-        std::cout << "Key: " << it.key() << ", Val: " << it.value() <<std::endl;
+    for(const auto& [key, value] : m_pathDimMap.items()) {
+        std::cout << "Key: " << key << ", Val: " << value <<std::endl;
     }
+
+    // for(auto it = m_pathDimMap.begin(); it != m_pathDimMap.end(); ++it) {
+    //     std::cout << "Key: " << it.key() << ", Val: " << it.value() <<std::endl;
+    // }
 
     std::cout << "HdfReader::initialize()" << std::endl;
     if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
