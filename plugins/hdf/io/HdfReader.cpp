@@ -114,10 +114,12 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
 void HdfReader::ready(PointTableRef table)
 {
     std::cout << "HdfReader::ready" << std::endl;
+    m_hdf5Handler.setLog(log());
     try
     {
         // m_hdf5Handler.initialize(m_filename, hdf5Columns);
         // m_hdf5Handler.initialize(m_filename);
+        m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
     }
     catch (const Hdf5Handler::error& err)
     {
@@ -275,8 +277,8 @@ void HdfReader::initialize()
     {
         throwError("Invalid metadata file: '" + m_metadataFile + "'");
     }
-    m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
-
+    // m_hdf5Handler.initialize(m_filename, m_dimName, m_datasetName);
+    // m_hdf5Handler.setLog(log());
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
     // background

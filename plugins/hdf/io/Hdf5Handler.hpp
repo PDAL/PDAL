@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_export.hpp>  // Suppresses windows 4251 messages
 #include <pdal/Dimension.hpp>
+#include <pdal/Log.hpp>
 #include "H5Cpp.h"
 
 #include <memory>
@@ -125,6 +126,7 @@ public:
             const hsize_t numEntries,
             const hsize_t offset) const;
     hsize_t m_chunkSize;
+    void setLog(pdal::LogPtr log);
 
 private:
     struct ColumnData
@@ -155,10 +157,12 @@ private:
     const ColumnData& getColumnData(const std::string& dataSetName) const;
     void *m_buf;
     void *m_nextVal;
+    std::vector<uint8_t> m_data;
     // hsize_t m_chunkSize;
     H5::DataSet m_dset;
     H5::DataSpace m_dspace;
     hsize_t m_chunkOffset;
+    pdal::LogPtr m_logger;
 
     std::unique_ptr<H5::H5File> m_h5File;
     uint64_t m_numPoints;

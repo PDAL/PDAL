@@ -63,10 +63,14 @@ using namespace hdf5;
 
 
 Hdf5Handler::Hdf5Handler()
-    : m_numPoints(0)
+    : m_chunkOffset(0)
+    , m_numPoints(0)
     , m_columnDataMap()
-    , m_chunkOffset(0)
 { }
+
+void Hdf5Handler::setLog(pdal::LogPtr log) {
+    m_logger = log;
+}
 
 DimInfo::DimInfo(
     const std::string& dimName,
@@ -121,12 +125,12 @@ void Hdf5Handler::initialize(
         if(dimensionality != 1)
             throw error("Only 1-dimensional arrays are supported.");
     } else {
-        std::cout << "Dataset not chunked; proceeding to read one element at a time" << std::endl;
+        m_logger->get(LogLevel::Warning) << "Dataset not chunked; proceeding to read 1024 elements at a time" << std::endl;
         m_chunkSize = 1024;
     }
-    std::cout << "Chunk size: " << m_chunkSize << std::endl;
-    std::cout << "Num points: " << m_numPoints << std::endl;
-    std::cout << "Number of dataspace dimensions: " << m_dspace.getSimpleExtentNdims() << std::endl;
+    m_logger->get(LogLevel::Warning) << "Chunk size: " << m_chunkSize << std::endl;
+    m_logger->get(LogLevel::Warning) << "Num points: " << m_numPoints << std::endl;
+    m_logger->get(LogLevel::Warning) << "Number of dataspace dimensions: " << m_dspace.getSimpleExtentNdims() << std::endl;
     H5::DataType dtype = m_dset.getDataType();
     H5T_class_t vauge_type = dtype.getClass();
 
@@ -153,7 +157,8 @@ void Hdf5Handler::initialize(
     }
     // m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
     m_buf = malloc(dtype.getSize() * m_chunkSize); //TODO free
-    std::cout << "Chunk offset: " << m_chunkOffset << std::endl;
+    m_data.resize(m_chunkSize*dtype.getSize());
+    m_logger->get(LogLevel::Warning) << "Chunk offset: " << m_chunkOffset << std::endl;
     // dspace.selectElements(H5S_SELECT_SET, m_chunkSize, &m_chunkOffset);
     // dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
     // H5::DataSpace mspace( 1, &m_chunkOffset);
@@ -165,16 +170,29 @@ void Hdf5Handler::close()
     m_h5File->close();
 }
 
+// void *Hdf5Handler::getNextChunk() {
+//     void *buf = malloc(m_dset.getDataType().getSize() * m_chunkSize);
+//     m_logger->get(LogLevel::Warning) << "chunk size: " << m_chunkSize << ", chunk offset: "
+//         << m_chunkOffset << std::endl;
+//     m_dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
+//     m_dset.read(buf, m_dset.getDataType(), H5::DataSpace::ALL, m_dspace);
+//     // m_dset.read(m_buf, m_dset.getDataType());
+//     m_chunkOffset += m_chunkSize;
+//     return buf;
+// }
+
 void *Hdf5Handler::getNextChunk() {
-    void *buf = malloc(m_dset.getDataType().getSize() * m_chunkSize);
-    std::cout << "chunk size: " << m_chunkSize << ", chunk offset: "
-        << m_chunkOffset << std::endl;
+    // m_logger->get(LogLevel::Warning) << "chunk size: " << m_chunkSize << ", chunk offset: "
+    //     << m_chunkOffset << std::endl;
     m_dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
-    m_dset.read(buf, m_dset.getDataType(), H5::DataSpace::ALL, m_dspace);
-    // m_dset.read(m_buf, m_dset.getDataType());
+    m_dset.read(m_data.data(),
+                m_dset.getDataType(),
+                H5::DataSpace::ALL,
+                m_dspace );
     m_chunkOffset += m_chunkSize;
-    return buf;
+    return m_data.data();
 }
+
 
 uint64_t Hdf5Handler::getNumPoints() const
 {
