@@ -33,4 +33,5 @@ jobs:
       echo "PDF location: https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/PDAL.pdf"
       echo "HTML location: https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/"
     displayName: 'Upload https://pdal.s3.amazonaws.com/docs/$(Build.SourceVersion)/html/'
+    condition: in(variables['Build.Reason'], 'PullRequest')
 
