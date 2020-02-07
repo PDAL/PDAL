@@ -99,7 +99,6 @@ void Hdf5Handler::initialize(
         }
         m_logger->get(LogLevel::Warning) << "Chunk size: " << m_chunkSize << std::endl;
         m_logger->get(LogLevel::Warning) << "Num points: " << m_numPoints << std::endl;
-        m_logger->get(LogLevel::Warning) << "Number of dataspace dimensions: " << dspace.getSimpleExtentNdims() << std::endl;
         H5::DataType dtype = dset.getDataType();
         H5T_class_t vague_type = dtype.getClass();
 
@@ -119,13 +118,7 @@ void Hdf5Handler::initialize(
             throw pdal_error("Unkown type: " + vague_type);
         }
         m_data.resize(m_chunkSize*dtype.getSize());
-        m_logger->get(LogLevel::Warning) << "m_data.size: " << m_data.size() << std::endl;
-        m_logger->get(LogLevel::Warning) << "Chunk offset: " << m_chunkOffset << std::endl;
     }
-    // datasetName.selectElements(H5S_SELECT_SET, m_chunkSize, &m_chunkOffset);
-    // dspace.selectHyperslab(H5S_SELECT_SET, &m_chunkSize, &m_chunkOffset);
-    // H5::DataSpace mspace( 1, &m_chunkOffset);
-    // dset.read(m_buf, dtype, H5::DataSpace::ALL, dspace);
 }
 
 void Hdf5Handler::close()
@@ -157,6 +150,11 @@ uint64_t Hdf5Handler::getNumPoints() const
 
 std::vector<pdal::hdf5::DimInfo> Hdf5Handler::getDimensionInfos() {
     return m_dimInfos;
+}
+
+
+hsize_t Hdf5Handler::getChunkSize() {
+    return m_chunkSize;
 }
 
 } // namespace pdal

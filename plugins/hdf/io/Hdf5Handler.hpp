@@ -91,40 +91,13 @@ public:
     uint64_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
 
-    void getColumnEntries(
-            void* data,
-            const std::string& dataSetName,
-            const hsize_t numEntries,
-            const hsize_t offset) const;
-    hsize_t m_chunkSize;
     void setLog(pdal::LogPtr log);
+    hsize_t getChunkSize();
 
 private:
-    struct ColumnData
-    {
-        ColumnData(
-                H5::PredType predType,
-                H5::DataSet dataSet,
-                H5::DataSpace dataSpace)
-            : predType(predType)
-            , dataSet(dataSet)
-            , dataSpace(dataSpace)
-        { }
-
-        ColumnData(H5::PredType predType)
-            : predType(predType)
-            , dataSet()
-            , dataSpace()
-        { }
-
-        H5::PredType predType;
-        H5::DataSet dataSet;
-        H5::DataSpace dataSpace;
-    };
-
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
     std::vector<uint8_t> m_data;
-    // hsize_t m_chunkSize;
+    hsize_t m_chunkSize;
     // H5::DataSet m_dset;
     // H5::DataSpace m_dspace;
     std::vector<H5::DataSet> m_dsets;
@@ -135,8 +108,6 @@ private:
 
     std::unique_ptr<H5::H5File> m_h5File;
     uint64_t m_numPoints = 0;
-
-    std::map<std::string, ColumnData> m_columnDataMap;
 };
 
 } // namespace pdal

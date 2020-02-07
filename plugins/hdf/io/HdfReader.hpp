@@ -67,9 +67,6 @@ private:
     virtual void done(PointTableRef table);
     virtual bool eof();
 
-    std::string m_metadataFile;
-    std::string m_datasetName;
-    std::string m_dimName;
     NL::json m_pathDimMap;
     Dimension::IdList m_idlist;
     std::vector<hdf5::DimInfo> m_infos;
