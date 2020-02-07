@@ -20,8 +20,8 @@ jobs:
     #  make latexpdf
     #displayName: 'Make PDF'
   - script: |
-      export AWS_ACCESS_KEY_ID=variables["aws-credentials.AWS_ACCESS_KEY_ID"]
-      export AWS_SECRET_ACCESS_KEY=variables["aws-credentials.AWS_SECRET_ACCESS_KEY"]
+      export AWS_ACCESS_KEY_ID=variables['aws-credentials.AWS_ACCESS_KEY_ID']
+      export AWS_SECRET_ACCESS_KEY=variables['aws-credentials.AWS_SECRET_ACCESS_KEY']
       cd doc/build
       aws s3 sync html "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
       aws s3 sync latexpdf/PDAL.pdf "s3://pdal/docs/$(Build.SourceVersion)/html/" --acl public-read
