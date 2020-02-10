@@ -158,7 +158,6 @@ bool Huffman::ComputeCodes(const vector<int>& histo)
   }
 
   m_codeTable.resize(size);
-  memset(&m_codeTable[0], 0, size * sizeof(m_codeTable[0]));
   if (!pq.top().TreeToLUT(0, 0, m_codeTable))    // fill the LUT
     return false;
 
@@ -280,8 +279,8 @@ bool Huffman::ReadCodeTable(const Byte** ppByte, int lerc2Version)
   if (!bitStuffer2.Decode(&ptr, dataVec, lerc2Version))    // unstuff the code lengths
     return false;
 
+  m_codeTable.clear();
   m_codeTable.resize(size);
-  memset(&m_codeTable[0], 0, size * sizeof(m_codeTable[0]));
 
   for (int i = i0; i < i1; i++)
   {

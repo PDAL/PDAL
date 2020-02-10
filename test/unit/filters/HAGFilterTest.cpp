@@ -71,8 +71,8 @@ TEST(HAGFilterTest, delaunay)
         double y = v->getFieldAs<double>(Dimension::Id::Y, i);
         double z = v->getFieldAs<double>(Dimension::Id::Z, i);
         double hag = v->getFieldAs<double>(Dimension::Id::HeightAboveGround, i);
-        int c = v->getFieldAs<int>(Dimension::Id::Classification, i);
-        if (c == 2)
+        uint8_t c = v->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::Ground)
             EXPECT_EQ(hag, 0);
         auto check = [&x, &y, &z, &hag](double xv, double yv, double zv,
                                         double hagv)
@@ -120,8 +120,8 @@ TEST(HAGFilterTest, neighbors)
         double y = v->getFieldAs<double>(Dimension::Id::Y, i);
         double z = v->getFieldAs<double>(Dimension::Id::Z, i);
         double hag = v->getFieldAs<double>(Dimension::Id::HeightAboveGround, i);
-        int c = v->getFieldAs<int>(Dimension::Id::Classification, i);
-        if (c == 2)
+        uint8_t c = v->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::Ground)
             EXPECT_EQ(hag, 0);
         auto check = [&x, &y, &z, &hag](double xv, double yv, double zv,
                                         double hagv)
@@ -169,8 +169,8 @@ TEST(HAGFilterTest, closest)
         double y = v->getFieldAs<double>(Dimension::Id::Y, i);
         double z = v->getFieldAs<double>(Dimension::Id::Z, i);
         double hag = v->getFieldAs<double>(Dimension::Id::HeightAboveGround, i);
-        int c = v->getFieldAs<int>(Dimension::Id::Classification, i);
-        if (c == 2)
+        uint8_t c = v->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::Ground)
             EXPECT_EQ(hag, 0);
         auto check = [&x, &y, &z, &hag](double xv, double yv, double zv,
                                         double hagv)

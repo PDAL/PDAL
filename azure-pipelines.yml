@@ -1,4 +1,6 @@
 jobs:
   - template: ./scripts/azp/linux.yml
+  - template: ./scripts/azp/linux-conda.yml
   - template: ./scripts/azp/win.yml
   - template: ./scripts/azp/osx.yml
+  - template: ./scripts/azp/doc.yml

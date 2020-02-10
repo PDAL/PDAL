@@ -112,6 +112,9 @@ void PcdReader::addDimensions(PointLayoutPtr layout)
         Dimension::Type t =
             static_cast<Dimension::Type>(unsigned(base) | i.m_size);
         Utils::trim(i.m_label);
+        i.m_label = Utils::toupper(i.m_label);
+        if (i.m_label == "X" || i.m_label == "Y" || i.m_label == "Z")
+            t = Dimension::Type::Double;
         Dimension::Id id = layout->registerOrAssignDim(i.m_label, t);
         if (Utils::contains(m_dims, id) && id != pdal::Dimension::Id::Unknown)
             throwError("Duplicate dimension '" + i.m_label +

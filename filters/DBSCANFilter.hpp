@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -43,23 +43,26 @@ namespace pdal
 
 class ProgramArgs;
 
-class PDAL_DLL ClusterFilter : public Filter
+class PDAL_DLL DBSCANFilter : public Filter
 {
 public:
-    ClusterFilter() : Filter()
-    {}
-    ClusterFilter& operator=(const ClusterFilter&) = delete;
-    ClusterFilter(const ClusterFilter&) = delete;
+    DBSCANFilter();
+
+    DBSCANFilter& operator=(const DBSCANFilter&) = delete;
+    DBSCANFilter(const DBSCANFilter&) = delete;
 
     std::string getName() const;
 
 private:
     uint64_t m_minPoints;
-    uint64_t m_maxPoints;
-    double m_tolerance;
+    double m_eps;
+    Dimension::Id m_cluster;
+    StringList m_dimStringList;
+    Dimension::IdList m_dimIdList;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 };
 

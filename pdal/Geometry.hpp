@@ -63,7 +63,8 @@ public:
     Geometry& operator=(const Geometry&);
     virtual ~Geometry();
 
-    OGRGeometryH getOGRHandle();
+    OGRGeometryH getOGRHandle()
+    { return m_geom.get(); }
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
