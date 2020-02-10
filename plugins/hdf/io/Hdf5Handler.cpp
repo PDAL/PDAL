@@ -82,7 +82,10 @@ void Hdf5Handler::initialize(
     {
         throw pdal_error("Could not open HDF5 file '" + filename + "'.");
     }
-    for(const auto& [datasetName, dimName] : map.items()) {
+    for(const auto& [dimName, datasetName] : map.items()) {
+        m_logger->get(LogLevel::Warning) << "Opening dataset '"
+            << datasetName << "' with dimension name '" << dimName
+            << "'" << std::endl;
         H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
         m_dsets.push_back(dset);
         H5::DataSpace dspace = dset.getSpace();
