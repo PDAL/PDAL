@@ -1,0 +1,63 @@
+# -*- mode: yaml -*-
+
+jobs:
+- job: alpine
+  pool:
+    vmImage: ubuntu-16.04
+  container:
+      image: pdal/alpinebase:latest
+      options: --privileged
+  timeoutInMinutes: 60
+  steps:
+  - script: |
+      echo "current directory:" `pwd`
+
+      gcc --version
+      g++ --version
+
+      mkdir build
+      cd build
+      cmake .. \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_PLUGIN_CPD=ON \
+          -DBUILD_PLUGIN_GREYHOUND=ON \
+          -DBUILD_PLUGIN_I3S=ON \
+          -DBUILD_PLUGIN_NITF=ON \
+          -DBUILD_PLUGIN_ICEBRIDGE=ON \
+          -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+          -DBUILD_PLUGIN_E57=ON \
+          -DBUILD_PGPOINTCLOUD_TESTS=OFF \
+          -DBUILD_PLUGIN_SQLITE=ON \
+          -DWITH_LASZIP=ON \
+          -DWITH_LAZPERF=ON \
+          -DWITH_TESTS=ON
+
+
+    displayName: 'CMake'
+  - script: |
+      cd build
+      ninja
+    displayName: 'Build'
+  - script: |
+      cd build
+      ctest -V
+    displayName: 'Test'
+  - script: |
+      export PDAL_TEST_DIR=`pwd`/test
+      export INSTALL_DIR=`pwd`/install
+      export PATH=$PATH:$INSTALL_DIR/bin
+      cd build
+      ls build/lib/*
+      ninja install
+  - script: |
+      export BASE=`pwd`
+      for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+      do
+          cd $BASE/examples/$EXAMPLE
+          mkdir -p _build || exit 1
+          cd _build || exit 1
+          cmake -G "Ninja" .. -DPDAL_DIR=$BASE/install/lib/cmake/PDAL && ninja
+      done
+    displayName: 'Examples'
+
