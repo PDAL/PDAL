@@ -168,7 +168,6 @@ RUN git clone --depth 1 --branch ${PDAL_VERSION} https://github.com/PDAL/PDAL.gi
         -DBUILD_PLUGIN_MBIO=OFF \
         -DBUILD_PLUGIN_I3S=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
-        -DPython3_FIND_STRATEGY=LOCATION \
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_OCI=OFF \
