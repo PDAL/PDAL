@@ -64,7 +64,7 @@ TEST(PMFFilterTest, validReturns)
     EXPECT_NO_THROW(filter.prepare(table));
 }
 
-TEST(PMFFilterTEst, classOneAndTwoOnly)
+TEST(PMFFilterTest, classOneAndTwoOnly)
 {
     StageFactory f;
 
