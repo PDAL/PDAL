@@ -37,11 +37,15 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
+#include "../plang/Invocation.hpp"
+
 #include <Python.h>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+
+#include <memory>
 
 namespace pdal
 {
@@ -60,8 +64,8 @@ class PDAL_DLL NumpyReader : public Reader, public Streamable
 public:
     NumpyReader& operator=(const NumpyReader&) = delete;
     NumpyReader(const NumpyReader&) = delete;
-    NumpyReader() : m_array(NULL)
-    {}
+    NumpyReader();
+    ~NumpyReader();
 
     void setArray(PyObject* array);
     std::string getName() const;
@@ -119,6 +123,10 @@ private:
     };
     std::vector<Field> m_fields;
     point_count_t m_index;
+
+    struct Args;
+    std::unique_ptr<Args> m_args;
+
 };
 
 } // namespace pdal

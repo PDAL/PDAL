@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2020, Julian Fell (hi@jtfell.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,67 +31,45 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/PointRef.hpp>
-#include <pdal/SpatialReference.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
+#include <cstdint>
 #include <memory>
-
-class OGRGeometry;
-using OGRGeometryH = void *;
-using OGRSpatialReferenceH = void *;
+#include <string>
 
 namespace pdal
 {
 
-class BOX3D;
+namespace gdal { class Raster; }
+class Options;
+class PointLayout;
+class PointView;
 
-class PDAL_DLL Geometry
+class PDAL_DLL HAGDEMFilter : public Filter, public Streamable
 {
-protected:
-    Geometry();
-    Geometry(const Geometry&);
-    Geometry(Geometry&&);
-    Geometry(const std::string& wkt_or_json,
-           SpatialReference ref = SpatialReference());
-    Geometry(OGRGeometryH g);
-    Geometry(OGRGeometryH g, const SpatialReference& srs);
-
 public:
-    Geometry& operator=(const Geometry&);
-    virtual ~Geometry();
+    HAGDEMFilter();
+    HAGDEMFilter& operator=(const HAGDEMFilter&) = delete;
+    HAGDEMFilter(const HAGDEMFilter&) = delete;
 
-    OGRGeometryH getOGRHandle()
-    { return m_geom.get(); }
+    std::string getName() const;
 
-    virtual void update(const std::string& wkt_or_json);
-    virtual bool valid() const;
-    virtual void clear() = 0;
-    virtual void modified();
-    bool srsValid() const;
-    void setSpatialReference(const SpatialReference& ref);
-    SpatialReference getSpatialReference() const;
-    void transform(const SpatialReference& ref);
+private:
+    virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual bool processOne(PointRef& point);
 
-    std::string wkt(double precision=15, bool bOutputZ=false) const;
-    std::string json(double precision=15) const;
-
-    BOX3D bounds() const;
-
-    operator bool () const
-        { return m_geom != NULL; }
-    static void throwNoGeos();
-
-protected:
-    std::unique_ptr<OGRGeometry> m_geom;
-
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
-        const Geometry& p);
-    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
-        Geometry& p);
+    std::unique_ptr<gdal::Raster> m_raster;
+    std::string m_rasterName;
+    bool m_zeroGround;
+    int32_t m_band;
 };
 
 } // namespace pdal
-

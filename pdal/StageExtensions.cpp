@@ -52,7 +52,7 @@ static const Extensions readerExtensions =
 {
   {"readers.icebridge", { "icebridge", "h5" } },
   { "readers.matlab", { "mat" } },
-  { "readers.numpy", { "npy" } },
+  { "readers.numpy", { "npy", "py" } },
   { "readers.nitf", { "nitf", "nsf", "ntf" } },
   { "readers.pcd", { "pcd" } },
   { "readers.rdb", { "rdbx" } },

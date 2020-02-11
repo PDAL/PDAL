@@ -43,6 +43,7 @@ invalidate an existing KD-tree.
    filters.elm
    filters.ferry
    filters.hag
+   filters.hag_dem
    filters.info
    filters.lof
    filters.miniball
@@ -96,6 +97,9 @@ invalidate an existing KD-tree.
 :ref:`filters.hag`
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
+
+:ref:`filters.hag_dem`
+    Compute pointwise height above GDAL-readable DEM raster.
 
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local

@@ -102,7 +102,7 @@ void DEMFilter::prepared(PointTableRef table)
     if (m_args->m_dim == Dimension::Id::Unknown)
         throwError("Missing dimension with name '" + m_args->m_range.m_name + "'in input PointView.");
     if (m_args->m_band <= 0)
-        throwError("Band must be greater than 1!");
+        throwError("Band must be greater than 0");
 
 }
 

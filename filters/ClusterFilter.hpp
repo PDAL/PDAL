@@ -59,6 +59,7 @@ private:
     double m_tolerance;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
 };
 
