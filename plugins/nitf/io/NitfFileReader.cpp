@@ -37,8 +37,13 @@
 #include <pdal/Metadata.hpp>
 
 #include "MetadataReader.hpp"
-#include "tre_plugins.hpp"
 
+#ifdef _WIN32
+// Nitro incorrectly uses WIN32 as a macro
+#define WIN32
+#endif
+#include "tre_plugins.hpp"
+#undef WIN32
 
 // Set to true if you want the metadata to contain
 // NITF fields that are empty; if false, those fields

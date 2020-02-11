@@ -47,7 +47,12 @@
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wunused-private-field"
 
+#ifdef _WIN32
+// Nitf incorrectly uses WIN32 as a macro
+#define WIN32
+#endif
 #include <nitro/c++/import/nitf.hpp>
+#undef WIN32
 
 #pragma GCC diagnostic pop
 

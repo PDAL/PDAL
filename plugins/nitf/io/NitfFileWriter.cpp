@@ -36,7 +36,12 @@
 
 #include <pdal/util/FileUtils.hpp>
 
+#ifdef _WIN32
+// Nitro incorrectly uses WIN32 as a macro
+#define WIN32
+#endif
 #include "tre_plugins.hpp"
+#undef WIN32
 
 namespace pdal
 {
