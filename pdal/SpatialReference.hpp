@@ -156,6 +156,8 @@ public:
     bool isGeocentric() const;
     bool isProjected() const;
 
+    std::vector<int> getAxisOrdering() const;
+
     int computeUTMZone(const BOX3D& box) const;
 
     const std::string& getName() const;

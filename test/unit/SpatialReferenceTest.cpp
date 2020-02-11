@@ -520,9 +520,6 @@ TEST(SpatialReferenceTest, set_srs)
 // Test setting EPSG:4326 from User string
 TEST(SpatialReferenceTest, axis_ordering)
 {
-    SpatialReference wgs84("EPSG:4326");
-
-
 
     Options o2;
     o2.add("filename", Support::datapath("las/test_epsg_4326.las"));
@@ -554,9 +551,8 @@ TEST(SpatialReferenceTest, axis_ordering)
     Support::checkXYZ(Support::temppath("axis.las"),
         Support::datapath("las/test_epsg_4326_axis.las"));
 
-
 }
-#endif 
+#endif
 
 
 
