@@ -33,8 +33,10 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <io/BufferReader.hpp>
 #include <io/TextReader.hpp>
 #include <filters/ELMFilter.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
 
@@ -69,3 +71,53 @@ TEST(ELMFilterTest, test1)
     EXPECT_EQ(noise, 2);
 }
 
+TEST(ELMFilterTest, test2)
+{
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("filters/elm2.txt"));
+
+    TextReader reader;
+    reader.setOptions(readerOps);
+
+    ELMFilter filter;
+    filter.setInput(reader);
+
+    PointTable table;
+
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 17u);
+    int noise(0);
+    for (size_t i = 0; i < view->size(); ++i)
+    {
+        uint8_t c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        if (c == ClassLabel::LowPoint)
+            noise++;
+    }
+    EXPECT_EQ(noise, 7);
+}
+
+TEST(ELMFilterTest, emptyView)
+{
+    PointTable table;
+    table.layout()->registerDims(
+        {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z});
+
+    PointViewPtr view(new PointView(table));
+    BufferReader reader;
+    reader.addView(view);
+
+    StageFactory factory;
+    Stage* filter(factory.createStage("filters.elm"));
+    filter->setInput(reader);
+    filter->prepare(table);
+
+    PointViewSet s = filter->execute(table);
+    EXPECT_EQ(s.size(), 1u);
+
+    PointViewPtr v = *s.begin();
+    EXPECT_EQ(v->size(), 0u);
+}

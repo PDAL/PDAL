@@ -38,20 +38,27 @@ namespace lepcc
   {
     Byte r, g, b;
 
-    RGB_t()  {}
-    RGB_t(Byte r0, Byte g0, Byte b0) : r(r0), g(g0), b(b0)  {}
+    RGB_t() : r{0}, g{0}, b{0}
+    {}
+    RGB_t(Byte r0, Byte g0, Byte b0) : r(r0), g(g0), b(b0)
+    {}
 
-    bool operator==(const RGB_t& v) const  { return r == v.r && g == v.g && b == v.b; }
+    bool operator==(const RGB_t& v) const
+    { return r == v.r && g == v.g && b == v.b; }
   };
 
   struct Point3D
   {
     double x, y, z;
 
-    Point3D()  {}
-    Point3D(double a, double b, double c) : x(a), y(b), z(c)  {}
+    Point3D() : x{0}, y{0}, z{0}
+    {}
 
-    Point3D operator-(const Point3D& b) const { return Point3D(x - b.x, y - b.y, z - b.z); }
+    Point3D(double a, double b, double c) : x(a), y(b), z(c)
+    {}
+
+    Point3D operator-(const Point3D& b) const
+    { return Point3D(x - b.x, y - b.y, z - b.z); }
   };
 
   struct Extent3D

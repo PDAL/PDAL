@@ -1,51 +1,31 @@
 # -*- mode: yaml -*-
 
 jobs:
-- job: osx
+- job: linux_conda
   pool:
-    vmImage: macOS-10.14
-  timeoutInMinutes: 360
+    vmImage: ubuntu-16.04
+  timeoutInMinutes: 60
   steps:
-  - script: |
-      echo "Removing homebrew from Azure to avoid conflicts."
-      curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall > ~/uninstall_homebrew
-      chmod +x ~/uninstall_homebrew
-      ~/uninstall_homebrew -fq
-      rm ~/uninstall_homebrew
-    displayName: Remove homebrew
-  - bash: |
-      echo "##vso[task.prependpath]$CONDA/bin"
-      sudo chown -R $USER $CONDA
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
-
   - script: |
-      ECHO ON
-      source activate base
+      . /opt/conda/etc/profile.d/conda.sh
       conda create --yes --quiet --name pdal
-    displayName: Create conda environment
 
-  - script: |
-      ECHO ON
       source activate pdal
       conda config --set always_yes True --set show_channel_urls True
       conda config --add channels conda-forge
       conda config --set channel_priority strict
-      conda install --yes --quiet --name pdal geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja  conda-forge-ci-setup=2 -y
+      conda install --yes --quiet --name pdal -c conda-forge gdal=3.0.2=py37hbb6b9fb_8 python=3.7 conda-build ninja  conda-forge-ci-setup=2 -y
+      conda install --yes --quiet --name pdal -c conda-forge pdal  --only-deps -y
     displayName: Install PDAL dependencies
   - script: |
-      source activate pdal
-      export CI=azure
-      source run_conda_forge_build_setup
-    env: {
-      OSX_FORCE_SDK_DOWNLOAD: "1"
-    }
-    displayName: Configure OSX SDK
-  - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       source activate pdal
       echo "current directory:" `pwd`
       mkdir build
       cd build
-      cmake   -G Ninja  \
+      LDFLAGS="$LDFLAGS -Wl,-rpath-link,$CONDA_PREFIX/lib" cmake   -G Ninja  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DCMAKE_FIND_FRAMEWORK="NEVER" \
@@ -62,23 +42,28 @@ jobs:
         ..
     displayName: 'CMake'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       cd build
       source activate pdal
       ninja
     displayName: 'Build'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       cd build
       export PDAL_DRIVER_PATH=`pwd`/lib
       source activate pdal
       ctest -V
     displayName: 'Test'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       export PDAL_TEST_DIR=`pwd`/test
       cd build
       source activate pdal
       ls build/lib/*
       ninja install
+    displayName: 'Install'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
       export BASE=`pwd`
       source activate pdal
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
@@ -89,5 +74,4 @@ jobs:
           cmake -G "Ninja" .. -DPDAL_DIR=$CONDA_PREFIX/lib/cmake/PDAL && ninja
       done
     displayName: 'Examples'
-
 

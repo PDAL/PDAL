@@ -181,8 +181,6 @@ ErrCode ClusterRGB::ComputeNumBytesNeededToEncode(uint32 nPts, const RGB_t* colo
   vector<Point3D> clusterCenters(numColors);
   vector<int> counts(numColors, 0);
 
-  memset(&clusterCenters[0], 0, numColors * sizeof(Point3D));
-
   // second pass:  cluster all RGB points
   for (uint32 i = 0; i < nPts; i++)
   {
@@ -414,12 +412,12 @@ ErrCode ClusterRGB::Decode(const Byte** ppByte, int64 bufferSize, uint32& nPtsIn
       return ErrCode::BufferTooSmall;
 
     m_colorMap.resize(numColors);
-    memset(&m_colorMap[0], 0, m_colorMap.size() * sizeof(m_colorMap[0]));
 
     for (uint16 i = 0; i < numColors; i++)    // read colormap
     {
-      memcpy(&m_colorMap[i], ptr, 3);
-      ptr += 3;
+      m_colorMap[i].r = *ptr++;
+      m_colorMap[i].g = *ptr++;
+      m_colorMap[i].b = *ptr++;
     }
 
     RGB_t* dstPtr = colors;
@@ -432,18 +430,14 @@ ErrCode ClusterRGB::Decode(const Byte** ppByte, int64 bufferSize, uint32& nPtsIn
       for (uint32 i = 0; i < hd1.numPoints; i++)    // read color index per point
       {
         Byte index = *ptr++;
-        memcpy(dstPtr, &m_colorMap[index], 3);
-        dstPtr++;
+        *dstPtr++ = m_colorMap[index];
       }
     }
     else if (hd1.colorIndexCompressionMethod == AllConst)
     {
-      RGBA_t rgba = m_colorMap[0];
-
       for (uint32 i = 0; i < hd1.numPoints; i++)    // special case all points have same color
       {
-        memcpy(dstPtr, &rgba, 3);
-        dstPtr++;
+        *dstPtr++ = m_colorMap[0];
       }
     }
 

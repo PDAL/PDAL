@@ -37,6 +37,7 @@ invalidate an existing KD-tree.
    filters.colorinterp
    filters.colorization
    filters.covariancefeatures
+   filters.dbscan
    filters.dem
    filters.eigenvalues
    filters.estimaterank
@@ -70,6 +71,10 @@ invalidate an existing KD-tree.
     Extract and label clusters using Euclidean distance metric. Returns a new
     dimension ``ClusterID`` that indicates the cluster that a point belongs
     to. Points not belonging to a cluster are given a cluster ID of 0.
+
+:ref:`filters.dbscan`
+    Perform Density-Based Spatial Clustering of Applications with Noise
+    (DBSCAN) [Ester1996]_.
 
 :ref:`filters.colorinterp`
     Assign RGB colors based on a dimension and a ramp
