@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2020, Julian Fell (hi@jtfell.com)
 *
 * All rights reserved.
 *
@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -43,16 +44,17 @@
 namespace pdal
 {
 
+namespace gdal { class Raster; }
 class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL HAGFilter : public Filter
+class PDAL_DLL HagDemFilter : public Filter, public Streamable
 {
 public:
-    HAGFilter();
-    HAGFilter& operator=(const HAGFilter&) = delete;
-    HAGFilter(const HAGFilter&) = delete;
+    HagDemFilter();
+    HagDemFilter& operator=(const HagDemFilter&) = delete;
+    HagDemFilter(const HagDemFilter&) = delete;
 
     std::string getName() const;
 
@@ -60,12 +62,14 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
+    virtual bool processOne(PointRef& point);
 
-    bool m_allowExtrapolation;
-    bool m_delaunay;
-    double m_maxDistance;
-    point_count_t m_count;
+    std::unique_ptr<gdal::Raster> m_raster;
+    std::string m_rasterName;
+    bool m_zeroGround;
+    int32_t m_band;
 };
 
 } // namespace pdal
