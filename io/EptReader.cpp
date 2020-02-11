@@ -483,7 +483,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             Dimension::interpretationName(coercedType) << std::endl;
 
         layout->registerOrAssignDim(name, coercedType);
-        m_remoteLayout->registerOrAssignDim(name, remoteType);
+        m_remoteLayout->registerOrAssignFixedDim(name, remoteType);
     }
 
     m_remoteLayout->finalize();
