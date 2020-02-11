@@ -38,7 +38,9 @@ public:
         { }
     void operator()() const { pdalboost::iostreams::close(t_, which_); }
 private:
-    device_close_operation& operator=(const device_close_operation&);
+    device_close_operation& operator=(const device_close_operation&) = delete;
+    device_close_operation (const device_close_operation&) = delete;
+
     T&                   t_;
     BOOST_IOS::openmode  which_;
 };
@@ -52,7 +54,8 @@ public:
         { }
     void operator()() const { pdalboost::iostreams::close(t_, snk_, which_); }
 private:
-    filter_close_operation& operator=(const filter_close_operation&);
+    //ABELL
+    filter_close_operation& operator=(const filter_close_operation&) = delete;
     T&                   t_;
     Sink&                snk_;
     BOOST_IOS::openmode  which_;
@@ -78,7 +81,8 @@ public:
     device_close_all_operation(T& t) : t_(t) { }
     void operator()() const { detail::close_all(t_); }
 private:
-    device_close_all_operation& operator=(const device_close_all_operation&);
+    //ABELL
+    device_close_all_operation& operator=(const device_close_all_operation&) = delete;
     T& t_;
 };
 
@@ -89,7 +93,8 @@ public:
     filter_close_all_operation(T& t, Sink& snk) : t_(t), snk_(snk) { }
     void operator()() const { detail::close_all(t_, snk_); }
 private:
-    filter_close_all_operation& operator=(const filter_close_all_operation&);
+    //ABELL
+    filter_close_all_operation& operator=(const filter_close_all_operation&) = delete;
     T&     t_;
     Sink&  snk_;
 };
@@ -115,7 +120,8 @@ public:
         { }
     void operator()() const { t_.close(which_); }
 private:
-    member_close_operation& operator=(const member_close_operation&);
+    //ABELL
+    member_close_operation& operator=(const member_close_operation&) = delete;
     T&                   t_;
     BOOST_IOS::openmode  which_;
 };
@@ -133,7 +139,8 @@ public:
     reset_operation(T& t) : t_(t) { }
     void operator()() const { t_.reset(); }
 private:
-    reset_operation& operator=(const reset_operation&);
+    //ABELL
+    reset_operation& operator=(const reset_operation&) = delete;
     T& t_;
 };
 
@@ -149,7 +156,8 @@ public:
     clear_flags_operation(T& t) : t_(t) { }
     void operator()() const { t_ = 0; }
 private:
-    clear_flags_operation& operator=(const clear_flags_operation&);
+    //ABELL
+    clear_flags_operation& operator=(const clear_flags_operation&) = delete;
     T& t_;
 };
 
@@ -173,7 +181,8 @@ public:
             buf_.flush(dev_);
     }
 private:
-    flush_buffer_operation& operator=(const flush_buffer_operation&);
+    //ABELL
+    flush_buffer_operation& operator=(const flush_buffer_operation&) = delete;
     Buffer&  buf_;
     Device&  dev_;
     bool     flush_;

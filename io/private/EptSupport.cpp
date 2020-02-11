@@ -168,5 +168,25 @@ void Pool::work()
     }
 }
 
+void FixedPointLayout::registerFixedDim(const Dimension::Id id,
+    const Dimension::Type type)
+{
+    Dimension::Detail dd = m_detail[Utils::toNative(id)];
+    dd.setType(type);
+    update(dd, Dimension::name(id));
+}
+
+Dimension::Id FixedPointLayout::registerOrAssignFixedDim(const std::string name,
+    const Dimension::Type type)
+{
+    Dimension::Id id = Dimension::id(name);
+    if (id != Dimension::Id::Unknown)
+    {
+        registerFixedDim(id, type);
+        return id;
+    }
+    return assignDim(name, type);
+}
+
 } // namespace pdal
 
