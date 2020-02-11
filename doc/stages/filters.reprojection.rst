@@ -101,3 +101,13 @@ out_srs
   "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text
   string. [Required]
 
+in_axis_ordering
+  An array of numbers that override the axis order for the in_srs (or if 
+  not specified, the inferred SRS from the previous Stage). "2, 1" for 
+  example would swap X and Y, which may be commonly needed for 
+  something like "EPSG:4326". 
+  
+out_axis_ordering
+  An array of numbers that override the axis order for the out_srs. 
+  "2, 1" for example would swap X and Y, which may be commonly needed for 
+  something like "EPSG:4326". 
