@@ -6,9 +6,6 @@ if (NOT NITRO_FOUND)
     message(FATAL_ERROR "Can't find NITRO support required by NITF.")
 endif()
 
-#
-# NITF Reader
-#
 PDAL_ADD_PLUGIN(reader_libname reader nitf
     FILES
         io/NitfFileReader.cpp
@@ -24,9 +21,6 @@ if (WIN32)
             WIN32
     )
 endif()
-#
-# NITF Writer
-#
 
 PDAL_ADD_PLUGIN(writer_libname writer nitf
     FILES
