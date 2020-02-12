@@ -21,8 +21,10 @@ else()
     )
 
     if (WITH_TESTS)
-        PDAL_ADD_TEST(hdftest
+        PDAL_ADD_TEST(pdal_io_hdf_reader_test
             FILES test/HdfReadertest.cpp
-            LINK_WITH ${libname})
+            LINK_WITH ${libname}
+            INCLUDES
+                ${NLOHMANN_INCLUDE_DIR})
     endif()
 endif()

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Connor Manning, connor@hobu.co
+* Copyright (c) 2020, Ryan Pals, ryan@hobu.co
 *
 * All rights reserved.
 *
@@ -45,8 +45,8 @@ namespace pdal
 static PluginInfo const s_info
 {
     "readers.hdf",
-    "HDF Reader (WIP)",
-    "http://pdal.io/"
+    "HDF Reader",
+    "http://pdal.io/stages/readers.hdf.html"
 };
 
 CREATE_SHARED_STAGE(HdfReader, s_info)
@@ -82,7 +82,6 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
     PointId nextId = startId;
-
     log()->get(LogLevel::Info) << "num infos: " << m_infos.size() << std::endl;
     log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
 
@@ -132,10 +131,8 @@ void HdfReader::initialize()
         log()->get(LogLevel::Info) << "Key: " << key << ", Val: " << value <<std::endl;
     }
 
-    // Data are WGS84 (4326) with ITRF2000 datum (6656)
-    // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
-    // background
-    setSpatialReference(SpatialReference("EPSG:4326"));
+    // ICESat-2 datasets are EPSG:7912
+    setSpatialReference(SpatialReference("EPSG:7912"));
 }
 
 void HdfReader::done(PointTableRef table)

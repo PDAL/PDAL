@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Connor Manning, connor@hobu.co
+* Copyright (c) 2020, Ryan Pals, ryan@hobu.co
 *
 * All rights reserved.
 *
