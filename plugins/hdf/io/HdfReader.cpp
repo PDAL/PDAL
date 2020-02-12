@@ -76,41 +76,25 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
-
-
     PointId nextId = startId;
-    uint8_t *buf = nullptr;
-    // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-    //     int index = 0;
-    //     for(auto info : m_infos) {
-    //         // auto info = m_infos.at(0);
-    //         int bufIndex = pi % m_hdf5Handler.getChunkSize();
-    //         if(bufIndex == 0) {
-    //             buf = m_hdf5Handler.getNextChunk(index);
-    //         }
-    //         uint8_t *p = buf + bufIndex*point_size;
-    //         view->setField(info.id, info.pdal_type, nextId, (void*) p);
-    //         index++;
-    //     }
-    //     nextId++;
-    // }
-    int index = 0;
+
+    for(auto& info : m_infos) {
+        m_bufs.push_back((uint8_t *)nullptr);
+    }
     log()->get(LogLevel::Info) << "num infos: " << m_infos.size() << std::endl;
     log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
-    for(auto info: m_infos) {
-        size_t point_size = info.size;
-        log()->get(LogLevel::Info) << "type info: " << pdal::Dimension::interpretationName(info.pdal_type) << std::endl;
-        nextId=0;
-        for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+
+    for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+        for(int index = 0; index < m_infos.size(); ++index) {
+            auto& info = m_infos.at(0);
             int bufIndex = pi % info.chunkSize;
             if(bufIndex == 0) {
-                buf = m_hdf5Handler.getNextChunk(index);
+                m_bufs.at(index) = m_hdf5Handler.getNextChunk(index);
             }
-            uint8_t *p = buf + bufIndex*point_size;
+            uint8_t *p = m_bufs.at(index) + bufIndex*info.size;
             view->setField(info.id, info.pdal_type, nextId, (void*) p);
-            nextId++;
         }
-        index++;
+        nextId++;
     }
 
     return count;
