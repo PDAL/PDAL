@@ -102,7 +102,7 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
         log()->get(LogLevel::Info) << "type info: " << pdal::Dimension::interpretationName(info.pdal_type) << std::endl;
         nextId=0;
         for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-            int bufIndex = pi % m_hdf5Handler.getChunkSize();
+            int bufIndex = pi % info.chunkSize;
             if(bufIndex == 0) {
                 buf = m_hdf5Handler.getNextChunk(index);
             }

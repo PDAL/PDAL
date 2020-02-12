@@ -50,28 +50,18 @@ namespace pdal
 
 namespace hdf5
 {
-    struct Hdf5ColumnData
-    {
-        Hdf5ColumnData(const std::string& name, const H5::PredType predType)
-            : name(name)
-            , predType(predType)
-        { }
-
-        const std::string name;
-        const H5::PredType predType;
-    };
-
     struct DimInfo
     {
-        DimInfo(const std::string& dimName, H5::IntType int_type);
+        DimInfo(const std::string& dimName, H5::IntType int_type, hsize_t chunkSize);
 
-        DimInfo(const std::string& dimName, H5::FloatType float_type);
+        DimInfo(const std::string& dimName, H5::FloatType float_type, hsize_t chunkSize);
 
         std::string name;
         H5T_class_t hdf_type;
         H5T_order_t endianness;
         H5T_sign_t sign;
         size_t size;
+        hsize_t chunkSize;
         Dimension::Type pdal_type;
         Dimension::Id id = Dimension::Id::Unknown;
     };
@@ -83,7 +73,6 @@ public:
     void initialize(
             const std::string& filename,
             const NL::json& map);
-            // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
 
     uint8_t *getNextChunk(int index);
@@ -92,14 +81,10 @@ public:
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
 
     void setLog(pdal::LogPtr log);
-    hsize_t getChunkSize();
 
 private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
     std::vector<std::vector<uint8_t>> m_buffers;
-    hsize_t m_chunkSize;
-    // H5::DataSet m_dset;
-    // H5::DataSpace m_dspace;
     std::vector<H5::DataSet> m_dsets;
     std::vector<H5::DataSpace> m_dspaces;
 
