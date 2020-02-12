@@ -64,6 +64,11 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
     }
 }
 
+void HdfReader::prepared(PointTableRef table) {
+    for(auto& info : m_infos) {
+        m_bufs.push_back((uint8_t *)nullptr);
+    }
+}
 
 void HdfReader::ready(PointTableRef table)
 {
@@ -78,9 +83,6 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     count = (std::min)(count, remaining);
     PointId nextId = startId;
 
-    for(auto& info : m_infos) {
-        m_bufs.push_back((uint8_t *)nullptr);
-    }
     log()->get(LogLevel::Info) << "num infos: " << m_infos.size() << std::endl;
     log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
 

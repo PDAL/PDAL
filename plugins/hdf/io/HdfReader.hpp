@@ -60,6 +60,7 @@ private:
     point_count_t m_index;
 
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
