@@ -513,6 +513,47 @@ TEST(SpatialReferenceTest, set_srs)
     EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"2029\"]]"),
         std::string::npos);
 }
+
 #endif // PDAL_HAVE_LIBXML2
+
+#if GDAL_VERSION_MAJOR >= 3
+// Test setting EPSG:4326 from User string
+TEST(SpatialReferenceTest, axis_ordering)
+{
+
+    Options o2;
+    o2.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    LasReader r;
+    r.setOptions(o2);
+
+
+    Options o;
+    o.add("out_srs", "EPSG:4326");
+    o.add("in_axis_ordering", "2, 1");
+    ReprojectionFilter repro;
+    repro.setOptions(o);
+    repro.setInput(r);
+
+    FileUtils::deleteFile(Support::temppath("axis.las"));
+    Options o5;
+    o5.add("filename", Support::temppath("axis.las"));
+    o5.add("scale_x", .0001);
+    o5.add("scale_y", .0001);
+    o5.add("scale_z", .0001);
+    LasWriter w;
+    w.setOptions(o5);
+    w.setInput(repro);
+
+    PointTable t1;
+    w.prepare(t1);
+    w.execute(t1);
+
+    Support::checkXYZ(Support::temppath("axis.las"),
+        Support::datapath("las/test_epsg_4326_axis.las"));
+
+}
+#endif
+
+
 
 } // namespace pdal
