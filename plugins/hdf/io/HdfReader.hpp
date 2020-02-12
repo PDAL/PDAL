@@ -37,6 +37,7 @@
 #include <pdal/pdal_features.hpp>
 
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
 #include <nlohmann/json.hpp>
@@ -48,10 +49,10 @@
 namespace pdal
 {
 
-class PDAL_DLL HdfReader : public pdal::Reader
+class PDAL_DLL HdfReader : public pdal::Reader, public pdal::Streamable
 {
 public:
-    HdfReader() : pdal::Reader()
+    HdfReader() : pdal::Reader(), pdal::Streamable()
         {}
     std::string getName() const;
 
@@ -65,6 +66,7 @@ private:
     virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
     virtual bool eof();
 

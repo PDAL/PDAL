@@ -102,6 +102,22 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     return count;
 }
 
+
+bool HdfReader::processOne(PointRef& point) {
+    for(int index = 0; index < m_infos.size(); ++index) {
+        auto& info = m_infos.at(index);
+        int bufIndex = m_index % info.chunkSize;
+        if(bufIndex == 0) {
+            m_bufs.at(index) = m_hdf5Handler.getNextChunk(index);
+        }
+        uint8_t *p = m_bufs.at(index) + bufIndex*info.size;
+        point.setField(info.id, info.pdal_type, p);
+    }
+
+    m_index++;
+    return m_index <= m_hdf5Handler.getNumPoints();
+}
+
 void HdfReader::addArgs(ProgramArgs& args)
 {
     args.add("map", "Map of HDF path to PDAL dimension", m_pathDimMap);
