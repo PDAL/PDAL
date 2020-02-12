@@ -86,7 +86,7 @@ public:
             // const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
 
-    uint8_t *getNextChunk();
+    uint8_t *getNextChunk(int index);
 
     uint64_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
@@ -96,14 +96,14 @@ public:
 
 private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
-    std::vector<uint8_t> m_data;
+    std::vector<std::vector<uint8_t>> m_buffers;
     hsize_t m_chunkSize;
     // H5::DataSet m_dset;
     // H5::DataSpace m_dspace;
     std::vector<H5::DataSet> m_dsets;
     std::vector<H5::DataSpace> m_dspaces;
 
-    hsize_t m_chunkOffset = 0;
+    std::vector<hsize_t> m_chunkOffsets;
     pdal::LogPtr m_logger;
 
     std::unique_ptr<H5::H5File> m_h5File;

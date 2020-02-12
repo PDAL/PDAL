@@ -82,6 +82,9 @@ void Hdf5Handler::initialize(
     {
         throw pdal_error("Could not open HDF5 file '" + filename + "'.");
     }
+    int index = 0;
+    std::vector<hsize_t> m_chunkOffset();
+
     for(const auto& [dimName, datasetName] : map.items()) {
         m_logger->get(LogLevel::Warning) << "Opening dataset '"
             << datasetName << "' with dimension name '" << dimName
@@ -120,7 +123,10 @@ void Hdf5Handler::initialize(
         } else {
             throw pdal_error("Unkown type: " + vague_type);
         }
-        m_data.resize(m_chunkSize*dtype.getSize());
+        m_chunkOffsets.push_back(0);
+        m_buffers.push_back(std::vector<uint8_t>());
+        m_buffers.at(index).resize(m_chunkSize*dtype.getSize());
+        index++;
     }
 }
 
@@ -130,18 +136,19 @@ void Hdf5Handler::close()
 }
 
 
-uint8_t *Hdf5Handler::getNextChunk() {
-    hsize_t elementsRemaining = m_numPoints - m_chunkOffset;
+uint8_t *Hdf5Handler::getNextChunk(int index) {
+    hsize_t elementsRemaining = m_numPoints - m_chunkOffsets.at(index);
     hsize_t selectionSize = std::min(elementsRemaining, m_chunkSize);
 
     H5::DataSpace memspace(1, &selectionSize);
-    m_dspaces.at(0).selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffset);
-    m_dsets.at(0).read(m_data.data(),
-                m_dsets.at(0).getDataType(),
+    m_dspaces.at(index).selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffsets.at(index));
+    auto& data = m_buffers.at(index);
+    m_dsets.at(index).read(data.data(),
+                m_dsets.at(index).getDataType(),
                 memspace,
-                m_dspaces.at(0) );
-    m_chunkOffset += m_chunkSize;
-    return m_data.data();
+                m_dspaces.at(index) );
+    m_chunkOffsets.at(index) += m_chunkSize;
+    return data.data();
 }
 
 

@@ -73,7 +73,6 @@ void HdfReader::ready(PointTableRef table)
 
 point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 {
-    size_t point_size = m_infos.at(0).size;
     PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
@@ -81,17 +80,37 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 
     PointId nextId = startId;
     uint8_t *buf = nullptr;
-    for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-        // for(auto info : m_infos) {
-            auto info = m_infos.at(0);
+    // for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+    //     int index = 0;
+    //     for(auto info : m_infos) {
+    //         // auto info = m_infos.at(0);
+    //         int bufIndex = pi % m_hdf5Handler.getChunkSize();
+    //         if(bufIndex == 0) {
+    //             buf = m_hdf5Handler.getNextChunk(index);
+    //         }
+    //         uint8_t *p = buf + bufIndex*point_size;
+    //         view->setField(info.id, info.pdal_type, nextId, (void*) p);
+    //         index++;
+    //     }
+    //     nextId++;
+    // }
+    int index = 0;
+    std::cout << "num infos: " << m_infos.size() << std::endl;
+    std::cout << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
+    for(auto info: m_infos) {
+        size_t point_size = info.size;
+        std::cout << "type info: " << pdal::Dimension::interpretationName(info.pdal_type) << std::endl;
+        nextId=0;
+        for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
             int bufIndex = pi % m_hdf5Handler.getChunkSize();
             if(bufIndex == 0) {
-                buf = m_hdf5Handler.getNextChunk();
+                buf = m_hdf5Handler.getNextChunk(index);
             }
             uint8_t *p = buf + bufIndex*point_size;
             view->setField(info.id, info.pdal_type, nextId, (void*) p);
-        // }
-        nextId++;
+            nextId++;
+        }
+        index++;
     }
 
     return count;
