@@ -161,7 +161,7 @@ bool CropFilter::processOne(PointRef& point)
             if (crop(point, box.to2d()))
                 return true;
         }
-        
+
 
     for (auto& center: m_args->m_centers)
         if (crop(point, center))
@@ -277,27 +277,24 @@ bool CropFilter::crop(const PointRef& point, const BOX2D& box)
 
 void CropFilter::crop(const Bounds& box, PointView& input, PointView& output)
 {
-    PointRef point = input.point(0);
     bool is3d = box.is3d();
+    if (is3d)
+        crop(box.to3d(), input, output);
+    else
+        crop(box.to2d(), input, output);
+
+}
+
+void CropFilter::crop(const BOX3D& box, PointView& input, PointView& output)
+{
+    PointRef point = input.point(0);
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         point.setPointId(idx);
-        if (is3d)
-        {
-            if (crop(point, box.to3d()))
-            {
-                output.appendPoint(input, idx);
-            }
-        } else 
-        {
-            if (crop(point, box.to2d()))
-            {
-                output.appendPoint(input, idx);
-            }
-        }
+        if (crop(point, box))
+            output.appendPoint(input, idx);
     }
 }
-
 
 void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 {

@@ -87,6 +87,7 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     bool crop(const PointRef& point, const BOX2D& box);
     bool crop(const PointRef& point, const BOX3D& box);
+    void crop(const BOX3D& box, PointView& input, PointView& output);
     void crop(const BOX2D& box, PointView& input, PointView& output);
     void crop(const Bounds& box, PointView& input, PointView& output);
     bool crop(const PointRef& point, GridPnp& g);
