@@ -95,11 +95,11 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     //     nextId++;
     // }
     int index = 0;
-    std::cout << "num infos: " << m_infos.size() << std::endl;
-    std::cout << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
+    log()->get(LogLevel::Info) << "num infos: " << m_infos.size() << std::endl;
+    log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
     for(auto info: m_infos) {
         size_t point_size = info.size;
-        std::cout << "type info: " << pdal::Dimension::interpretationName(info.pdal_type) << std::endl;
+        log()->get(LogLevel::Info) << "type info: " << pdal::Dimension::interpretationName(info.pdal_type) << std::endl;
         nextId=0;
         for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
             int bufIndex = pi % m_hdf5Handler.getChunkSize();
@@ -123,11 +123,11 @@ void HdfReader::addArgs(ProgramArgs& args)
 
 void HdfReader::initialize()
 {
-    std::cout << "***JSON TESTING***" << std::endl;
-    std::cout << m_pathDimMap << std::endl;
-    std::cout << "----------------" << std::endl;
+    log()->get(LogLevel::Info) << "***JSON TESTING***" << std::endl;
+    log()->get(LogLevel::Info) << m_pathDimMap << std::endl;
+    log()->get(LogLevel::Info) << "----------------" << std::endl;
     for(const auto& [key, value] : m_pathDimMap.items()) {
-        std::cout << "Key: " << key << ", Val: " << value <<std::endl;
+        log()->get(LogLevel::Info) << "Key: " << key << ", Val: " << value <<std::endl;
     }
 
     // Data are WGS84 (4326) with ITRF2000 datum (6656)

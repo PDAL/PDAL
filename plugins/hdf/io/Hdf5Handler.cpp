@@ -86,7 +86,7 @@ void Hdf5Handler::initialize(
     std::vector<hsize_t> m_chunkOffset();
 
     for(const auto& [dimName, datasetName] : map.items()) {
-        m_logger->get(LogLevel::Warning) << "Opening dataset '"
+        m_logger->get(LogLevel::Info) << "Opening dataset '"
             << datasetName << "' with dimension name '" << dimName
             << "'" << std::endl;
         H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
@@ -103,8 +103,8 @@ void Hdf5Handler::initialize(
             m_logger->get(LogLevel::Warning) << "Dataset not chunked; proceeding to read 1024 elements at a time" << std::endl;
             m_chunkSize = 1024;
         }
-        m_logger->get(LogLevel::Warning) << "Chunk size: " << m_chunkSize << std::endl;
-        m_logger->get(LogLevel::Warning) << "Num points: " << m_numPoints << std::endl;
+        m_logger->get(LogLevel::Info) << "Chunk size: " << m_chunkSize << std::endl;
+        m_logger->get(LogLevel::Info) << "Num points: " << m_numPoints << std::endl;
         H5::DataType dtype = dset.getDataType();
         H5T_class_t vague_type = dtype.getClass();
 
