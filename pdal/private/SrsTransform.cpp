@@ -57,6 +57,32 @@ SrsTransform::SrsTransform(const SpatialReference& src,
     m_transform.reset(OGRCreateCoordinateTransformation(&srcRef, &dstRef));
 }
 
+
+SrsTransform::SrsTransform(const SpatialReference& src,
+                           std::vector<int> srcOrder,
+                           const SpatialReference& dst,
+                           std::vector<int> dstOrder)
+{
+    OGRSpatialReference srcRef(src.getWKT().data());
+    OGRSpatialReference dstRef(dst.getWKT().data());
+
+// Starting with version 3, the axes (X, Y, Z or lon, lat, h or whatever)
+// are mapped according to the WKT definition.  In particular, this means
+// that for EPSG:4326 the mapping is X -> lat, Y -> lon, rather than the
+// more conventional X -> lon, Y -> lat.  Setting this flag reverses things
+// such that the traditional ordering is maintained.  There are other
+// SRSes where this comes up.  See "axis order issues" in the GDAL WKT2
+// discussion for more info.
+//
+#if GDAL_VERSION_MAJOR >= 3
+    if (srcOrder.size())
+        srcRef.SetDataAxisToSRSAxisMapping(srcOrder);
+    if (dstOrder.size())
+        dstRef.SetDataAxisToSRSAxisMapping(dstOrder);
+#endif
+    m_transform.reset(OGRCreateCoordinateTransformation(&srcRef, &dstRef));
+}
+
 SrsTransform::~SrsTransform()
 {}
 

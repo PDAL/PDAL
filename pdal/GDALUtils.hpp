@@ -69,6 +69,8 @@ using ITER_VAL = typename std::iterator_traits<ITER>::value_type;
 
 PDAL_DLL void registerDrivers();
 PDAL_DLL void unregisterDrivers();
+PDAL_DLL bool reprojectBounds(Bounds& box, const std::string& srcSrs,
+    const std::string& dstSrs);
 PDAL_DLL bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
     const std::string& dstSrs);
 PDAL_DLL bool reprojectBounds(BOX2D& box, const std::string& srcSrs,

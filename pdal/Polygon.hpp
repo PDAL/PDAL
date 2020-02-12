@@ -63,8 +63,6 @@ public:
     Polygon(const Polygon& poly);
     Polygon& operator=(const Polygon& src);
 
-    OGRGeometryH getOGRHandle();
-
     virtual void modified() override;
     virtual void clear() override;
     void simplify(double distance_tolerance, double area_tolerance,

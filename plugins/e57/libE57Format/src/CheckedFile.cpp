@@ -36,13 +36,14 @@
 #else
 #error "no supported compiler defined"
 #endif
-#elif defined(LINUX)
+
+#elif defined(__linux__) || defined(__GNU__) || defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
 #define _LARGEFILE64_SOURCE
 #define __LARGE64_FILES
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#elif defined(MACOS)
+#elif defined(__APPLE__)
 #include <sys/types.h>
 #include <unistd.h>
 #else
@@ -175,7 +176,7 @@ void CheckedFile::read(char* buf, size_t nRead, size_t /*bufSize*/)
    vector<char> page_buffer_v( physicalPageSize );
    char* page_buffer = &page_buffer_v[0];
 
-   auto   checksumMod = static_cast<const unsigned int>( std::nearbyint( 100.0 / checkSumPolicy_ ) );
+   auto   checksumMod = static_cast<unsigned int>( std::nearbyint( 100.0 / checkSumPolicy_ ) );
 
    while ( nRead > 0 )
    {
@@ -239,7 +240,7 @@ void CheckedFile::write(const char* buf, size_t nWrite)
    {
       const off_t physicalLength = length( Physical );
 
-      if ( page*physicalPageSize < physicalLength )
+      if ( (off_t)(page*physicalPageSize) < physicalLength )
       {
          readPhysicalPage( page_buffer, page );
       }
@@ -382,10 +383,8 @@ off_t CheckedFile::portableSeek(off_t offset, int whence)
    off_t result;
 #ifdef _WIN32
    result = _lseeki64(fd_, offset, whence);
-#elif defined(LINUX) || defined(MACOS)
-   result = ::lseek(fd_, offset, whence);
 #else
-#  error "no supported OS platform defined"
+   result = ::lseek(fd_, offset, whence);
 #endif
    if (result < 0)
    {
@@ -482,7 +481,7 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
    /// Watch out for different int sizes here.
    size_t n = 0;
 
-   if (nWrite < logicalPageSize - pageOffset)
+   if (nWrite < (off_t)(logicalPageSize - pageOffset))
    {
       n = static_cast<size_t>(nWrite);
    }
@@ -499,7 +498,7 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
    {
       const off_t physicalLength = length( Physical );
 
-      if ( page*physicalPageSize < physicalLength )
+      if ( (off_t)(page*physicalPageSize) < physicalLength )
       {
          readPhysicalPage( page_buffer, page );
       }
@@ -514,7 +513,7 @@ void CheckedFile::extend(off_t newLength, OffsetMode omode)
       pageOffset = 0;
       ++page;
 
-      if (nWrite < logicalPageSize)
+      if (nWrite < (off_t)logicalPageSize)
       {
          n = static_cast<size_t>(nWrite);
       }

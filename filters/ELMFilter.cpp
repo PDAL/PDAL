@@ -75,6 +75,9 @@ void ELMFilter::addDimensions(PointLayoutPtr layout)
 
 void ELMFilter::filter(PointView& view)
 {
+    if (!view.size())
+        return;
+
     BOX2D bounds;
     calculateBounds(view, bounds);
 

@@ -97,7 +97,7 @@ TEST(SkewnessTest, t2)
         if (cl == ClassLabel::Ground)
             ground++;
     }
-    EXPECT_EQ(ground, 0);
+    EXPECT_EQ(ground, 0U);
 }
 
 
@@ -132,7 +132,7 @@ TEST(SkewnessTest, t3)
         if (cl == ClassLabel::Ground)
             ground++;
     }
-    EXPECT_EQ(ground, 10);
+    EXPECT_EQ(ground, 10U);
 }
 
 

@@ -56,6 +56,7 @@
 
 #include <cstdint>
 #include <string>
+#include <iomanip>
 
 #include "pdal_util_export.hpp"
 
@@ -163,16 +164,17 @@ public:
 
     std::string unparse() const
     {
-        std::vector<char> buf(36 + 1);
-        const char fmt[] = "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X";
+        std::stringstream out;
 
-        // TODO: use snprintf after switch to C++11
-        sprintf(buf.data(), fmt,
-            m_data.time_low, m_data.time_mid, m_data.time_hi_and_version,
-            m_data.clock_seq >> 8, m_data.clock_seq & 0xFF,
-            m_data.node[0], m_data.node[1], m_data.node[2],
-            m_data.node[3], m_data.node[4], m_data.node[5]);
-        return std::string(buf.data());
+        out << std::hex << std::uppercase << std::setfill('0');
+        out << std::setw(8) << m_data.time_low << '-';
+        out << std::setw(4) << m_data.time_mid << '-';
+        out << std::setw(4) << m_data.time_hi_and_version << '-';
+        out << std::setw(2) << (m_data.clock_seq >> 8);
+        out << std::setw(2) << (m_data.clock_seq & 0xFF) << '-';
+        for (size_t i = 0; i < 6; ++i)
+            out << std::setw(2) << (int)m_data.node[i];
+        return out.str();
     }
 
     std::string toString() const
@@ -190,12 +192,8 @@ public:
         return true;
     }
 
-/**
-    // Sadly, MS doesn't do constexpr.
     static constexpr size_t size()
         { return sizeof(m_data); }
-**/
-    static const int size = sizeof(uuid);
 
 private:
     uuid m_data;

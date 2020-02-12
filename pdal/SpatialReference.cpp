@@ -352,6 +352,17 @@ bool SpatialReference::isProjected() const
     return output;
 }
 
+std::vector<int> SpatialReference::getAxisOrdering() const
+{
+    std::vector<int> output;
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+
+    output = current.get()->GetDataAxisToSRSAxisMapping();
+    return output;
+}
+
+
+
 int SpatialReference::calculateZone(double lon, double lat)
 {
     int zone = 0;

@@ -68,12 +68,15 @@ namespace lepcc
       int rMax, gMax, bMax;
     };
 
-    struct RGBA_t
+    struct RGBA_t : public RGB_t
     {
-      Byte r, g, b, a;
+      Byte a;
 
-      RGBA_t()  {}
-      RGBA_t(Byte r0, Byte g0, Byte b0, Byte a0 = 0) : r(r0), g(g0), b(b0), a(a0)  {}
+      RGBA_t() : a{0}
+      {}
+      RGBA_t(Byte r0, Byte g0, Byte b0, Byte a0 = 0) :
+          RGB_t(r0, g0, b0), a(a0)
+      {}
 
       int DistRGB(RGBA_t v)
       {
