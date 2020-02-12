@@ -39,49 +39,10 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
-
+#include <nlohmann/json.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
-
-template <typename T>
-void checkDimension(const PointView& data, std::size_t index,
-    Dimension::Id dim, T expected)
-{
-    T actual = data.getFieldAs<T>(dim, index);
-    EXPECT_FLOAT_EQ((float)expected, (float)actual);
-}
-
-void checkPoint(
-        const PointView& data,
-        std::size_t index,
-        float time,
-        float latitude,
-        float longitude,
-        float elevation,
-        int xmtSig,
-        int rcvSig,
-        float azimuth,
-        float pitch,
-        float roll,
-        float gpsPdop,
-        float pulseWidth,
-        float relTime)
-{
-    using namespace Dimension;
-    checkDimension(data, index, Id::OffsetTime, time);
-    checkDimension(data, index, Id::Y, latitude);
-    checkDimension(data, index, Id::X, longitude);
-    checkDimension(data, index, Id::Z, elevation);
-    checkDimension(data, index, Id::StartPulse, xmtSig);
-    checkDimension(data, index, Id::ReflectedPulse, rcvSig);
-    checkDimension(data, index, Id::Azimuth, azimuth);
-    checkDimension(data, index, Id::Pitch, pitch);
-    checkDimension(data, index, Id::Roll, roll);
-    checkDimension(data, index, Id::Pdop, gpsPdop);
-    checkDimension(data, index, Id::PulseWidth, pulseWidth);
-    checkDimension(data, index, Id::GpsTime, relTime);
-}
 
 std::string getFilePath()
 {
@@ -95,8 +56,10 @@ TEST(HdfReaderTest, testRead)
     EXPECT_TRUE(reader);
 
     Option filename("filename", getFilePath());
-    std::cout << getFilePath() << std::endl;
-    Option dataset("dataset", "/autzen");
+
+    NL::json j = {{ "X" ,"autzen/X"}, {"Y" , "autzen/Y"},  {"Z" , "autzen/Z" }};
+    Option dataset("map", j.dump());
+    
     Options options(filename);
     options.add(dataset);
     reader->setOptions(options);
@@ -104,50 +67,8 @@ TEST(HdfReaderTest, testRead)
     PointTable table;
     reader->prepare(table);
     PointViewSet viewSet = reader->execute(table);
-    // EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-//     EXPECT_EQ(view->size(), 2u);
-
-//     checkPoint(
-//             *view,
-//             0,
-//             1414375e2f,      // time
-//             82.60531f,       // latitude
-//             -58.59381f,      // longitude
-//             18.678f,         // elevation
-//             2408,            // xmtSig
-//             181,             // rcvSig
-//             49.91f,          // azimuth
-//             -4.376f,         // pitch
-//             0.608f,          // roll
-//             2.9f,            // gpsPdop
-//             20.0f,           // pulseWidth
-//             0.0f);           // relTime
-
-//     checkPoint(
-//             *view,
-//             1,
-//             1414375e2f,      // time
-//             82.60528f,       // latitude
-//             -58.59512f,      // longitude
-//             18.688f,         // elevation
-//             2642,            // xmtSig
-//             173,             // rcvSig
-//             52.006f,         // azimuth
-//             -4.376f,         // pitch
-//             0.609f,          // roll
-//             2.9f,            // gpsPdop
-//             17.0f,           // pulseWidth
-//             0.0f);           // relTime
+    EXPECT_EQ(view->size(), 1065u);
+    Support::check_p0_p1_p2(*view); 
 }
-
-// TEST(HdfReaderTest, testPipeline)
-// {
-//     PipelineManager manager;
-
-//     manager.readPipeline(Support::configuredpath("hdf/pipeline.json"));
-
-//     point_count_t numPoints = manager.execute();
-//     EXPECT_EQ(numPoints, 2u);
-//     FileUtils::deleteFile(Support::datapath("hdf/outfile.txt"));
-// }
