@@ -30,6 +30,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         io/tre_plugins.cpp
     LINK_WITH
         ${NITRO_LIBRARIES}
+        ${GDAL_LIBRARY}
 )
 if (WIN32)
     target_compile_definitions(${writer_libname}
