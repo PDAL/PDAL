@@ -78,9 +78,9 @@ elevation is
 ::
 
     $ pdal translate autzen.laz autzen-height-as-Z-smrf.bpf \
-        smrf hag_delanay ferry \
+        smrf hag_delaunay ferry \
         --filters.ferry.dimensions="HeightAboveGround=Z" \
-        --filters.hag_delanay.count=15
+        --filters.hag_delaunay.count=15
 
 Options
 -------------------------------------------------------------------------------
