@@ -85,9 +85,9 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
 
     for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
-        for(int index = 0; index < m_infos.size(); ++index) {
-            auto& info = m_infos.at(0);
-            int bufIndex = pi % info.chunkSize;
+        for(uint64_t index = 0; index < m_infos.size(); ++index) {
+            auto& info = m_infos.at(index);
+            uint64_t bufIndex = pi % info.chunkSize;
             if(bufIndex == 0) {
                 m_bufs.at(index) = m_hdf5Handler.getNextChunk(index);
             }
