@@ -37,6 +37,7 @@
 #include <pdal/pdal_types.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include "Hdf5Handler.hpp"
 
 #include <map>
 
@@ -56,14 +57,21 @@ CREATE_SHARED_STAGE(HdfReader, s_info)
 
 std::string HdfReader::getName() const { return s_info.name; }
 
+HdfReader::HdfReader()
+    : m_hdf5Handler(new Hdf5Handler())
+    { }
+
+
 void HdfReader::addDimensions(PointLayoutPtr layout)
 {
-    m_hdf5Handler.setLog(log());
-    m_hdf5Handler.initialize(m_filename, m_pathDimMap);
+    m_hdf5Handler->setLog(log());
+    m_hdf5Handler->initialize(m_filename, m_pathDimMap);
 
-    m_infos = m_hdf5Handler.getDimensionInfos();
-    for(auto& info : m_infos) {
-        info.id = layout->registerOrAssignDim(info.name, info.pdal_type);
+    for (const auto& d : m_hdf5Handler->getDimensionInfos()) 
+    {
+        std::unique_ptr<hdf5::DimInfo> p(new hdf5::DimInfo(d));
+        p->id = layout->registerOrAssignDim(p->name, p->pdal_type);
+        m_infos.push_back(std::move(p));
     }
 }
 
@@ -82,21 +90,21 @@ void HdfReader::ready(PointTableRef table)
 point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 {
     PointId startId = view->size();
-    point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
+    point_count_t remaining = m_hdf5Handler->getNumPoints() - m_index;
     count = (std::min)(count, remaining);
     PointId nextId = startId;
     log()->get(LogLevel::Info) << "num infos: " << m_infos.size() << std::endl;
-    log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler.getNumPoints() << std::endl;
+    log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler->getNumPoints() << std::endl;
 
-    for(uint64_t pi = 0; pi < m_hdf5Handler.getNumPoints(); pi++) {
+    for(uint64_t pi = 0; pi < m_hdf5Handler->getNumPoints(); pi++) {
         for(uint64_t index = 0; index < m_infos.size(); ++index) {
             auto& info = m_infos.at(index);
-            uint64_t bufIndex = pi % info.chunkSize;
+            uint64_t bufIndex = pi % info->chunkSize;
             if(bufIndex == 0) {
-                m_bufs.at(index) = m_hdf5Handler.getNextChunk(index);
+                m_bufs.at(index) = m_hdf5Handler->getNextChunk(index);
             }
-            uint8_t *p = m_bufs.at(index) + bufIndex*info.size;
-            view->setField(info.id, info.pdal_type, nextId, (void*) p);
+            uint8_t *p = m_bufs.at(index) + bufIndex*info->size;
+            view->setField(info->id, info->pdal_type, nextId, (void*) p);
         }
         nextId++;
     }
@@ -109,16 +117,16 @@ bool HdfReader::processOne(PointRef& point)
 {
     for(uint64_t index = 0; index < m_infos.size(); ++index) {
         auto& info = m_infos.at(index);
-        uint64_t bufIndex = m_index % info.chunkSize;
+        uint64_t bufIndex = m_index % info->chunkSize;
         if(bufIndex == 0) {
-            m_bufs.at(index) = m_hdf5Handler.getNextChunk(index);
+            m_bufs.at(index) = m_hdf5Handler->getNextChunk(index);
         }
-        uint8_t *p = m_bufs.at(index) + bufIndex*info.size;
-        point.setField(info.id, info.pdal_type, p);
+        uint8_t *p = m_bufs.at(index) + bufIndex*info->size;
+        point.setField(info->id, info->pdal_type, p);
     }
 
     m_index++;
-    return m_index <= m_hdf5Handler.getNumPoints();
+    return m_index <= m_hdf5Handler->getNumPoints();
 }
 
 void HdfReader::addArgs(ProgramArgs& args)
@@ -148,7 +156,7 @@ void HdfReader::validateMap()
         throw pdal_error("Option 'map' must be a JSON object, not a " +
             std::string(m_pathDimMap.type_name()));
     }
-    
+
     for(auto& [dimName, datasetName] : m_pathDimMap.items()) {
         log()->get(LogLevel::Info) << "Key: " << dimName << ", Value: "
             << datasetName << ", Type: " << datasetName.type_name() << std::endl;
@@ -163,13 +171,13 @@ void HdfReader::validateMap()
 
 void HdfReader::done(PointTableRef table)
 {
-    m_hdf5Handler.close();
+    m_hdf5Handler->close();
 }
 
 
 bool HdfReader::eof()
 {
-    return m_index >= m_hdf5Handler.getNumPoints();
+    return m_index >= m_hdf5Handler->getNumPoints();
 }
 
 } // namespace pdal

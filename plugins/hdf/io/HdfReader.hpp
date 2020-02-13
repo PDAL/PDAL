@@ -42,22 +42,25 @@
 #include <pdal/StageFactory.hpp>
 #include <nlohmann/json.hpp>
 
-#include "Hdf5Handler.hpp"
-
 #include <vector>
 
 namespace pdal
 {
 
+class Hdf5Handler;
+namespace hdf5
+{
+    struct DimInfo;
+}
+
 class PDAL_DLL HdfReader : public pdal::Reader, public pdal::Streamable
 {
 public:
-    HdfReader() : pdal::Reader(), pdal::Streamable()
-        {}
+    HdfReader();
     std::string getName() const;
 
 private:
-    Hdf5Handler m_hdf5Handler;
+    std::unique_ptr<Hdf5Handler> m_hdf5Handler;
     point_count_t m_index;
 
     virtual void addDimensions(PointLayoutPtr layout);
@@ -72,7 +75,7 @@ private:
 
     NL::json m_pathDimMap;
     Dimension::IdList m_idlist;
-    std::vector<hdf5::DimInfo> m_infos;
+    std::vector<std::unique_ptr<hdf5::DimInfo>> m_infos;
     std::vector<uint8_t *> m_bufs;
     void validateMap();
 
