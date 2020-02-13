@@ -141,17 +141,46 @@ void ignoreDimRanges(std::vector<DimRange>& ranges, PointViewPtr input,
     }
 }
 
-void ignoreSynthetic(PointViewPtr input, PointViewPtr keep, PointViewPtr ignore)
+void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
+                     PointViewPtr ignore, StringList classbits)
 {
     using namespace Dimension;
 
-    for (PointId i = 0; i < input->size(); ++i)
+    bool ignoreSynthetic = false;
+    bool ignoreKeypoint = false;
+    bool ignoreWithheld = false;
+
+    if (!classbits.size())
     {
-        uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
-        if (c & ClassLabel::Synthetic)
-            ignore->appendPoint(*input, i);
-        else
-            keep->appendPoint(*input, i);
+        keep->append(*input);
+    }
+    else
+    {
+        for (auto& b : classbits)
+        {
+            Utils::trim(b);
+            if (b == "synthetic")
+                ignoreSynthetic = true;
+            else if (b == "keypoint")
+                ignoreKeypoint = true;
+            else if (b == "withheld")
+                ignoreWithheld = true;
+        }
+
+        for (PointId i = 0; i < input->size(); ++i)
+        {
+            uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
+	    if (((c & ClassLabel::Synthetic) && ignoreSynthetic) ||
+                ((c & ClassLabel::Keypoint) && ignoreKeypoint) ||
+		((c & ClassLabel::Withheld) && ignoreWithheld))
+            {
+                ignore->appendPoint(*input, i);
+            }
+	    else
+            {
+                keep->appendPoint(*input, i);
+            }
+        }
     }
 }
 

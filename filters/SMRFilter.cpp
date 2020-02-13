@@ -90,7 +90,7 @@ struct SMRArgs
     std::string m_dir;
     std::vector<DimRange> m_ignored;
     StringList m_returns;
-    bool m_allowSynthetic;
+    StringList m_classbits;
 };
 
 SMRFilter::SMRFilter() : m_args(new SMRArgs) {}
@@ -114,8 +114,8 @@ void SMRFilter::addArgs(ProgramArgs& args)
     args.add("ignore", "Ignore values", m_args->m_ignored);
     args.add("returns", "Include last returns?", m_args->m_returns,
              {"last", "only"});
-    args.add("synthetic", "Allow synthetic returns?", m_args->m_allowSynthetic,
-             true);
+    args.add("classbits", "Ignore synthetic|keypoint|withheld classification bits?",
+             m_args->m_classbits, {""});
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -184,10 +184,11 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     PointViewPtr syntheticView = keptView->makeNew();
     PointViewPtr realView = keptView->makeNew();
-    if (m_args->m_allowSynthetic)
+    if (!m_args->m_classbits.size())
         realView->append(*keptView);
     else
-        Segmentation::ignoreSynthetic(keptView, realView, syntheticView);
+        Segmentation::ignoreClassBits(keptView, realView, syntheticView,
+                                      m_args->m_classbits);
 
     // Check for 0's in ReturnNumber and NumberOfReturns
     bool nrOneZero(false);
