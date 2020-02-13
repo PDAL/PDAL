@@ -142,10 +142,13 @@ void HdfReader::validateMap()
     log()->get(LogLevel::Info) << "**JSON map**" << std::endl;
     log()->get(LogLevel::Info) << m_pathDimMap << std::endl;
 
-    if(!m_pathDimMap.is_object()) {
+    if(m_pathDimMap.is_null()) {
+        throw pdal_error("Required option 'map' was not set");
+    } else if(!m_pathDimMap.is_object()) {
         throw pdal_error("Option 'map' must be a JSON object, not a " +
             std::string(m_pathDimMap.type_name()));
     }
+    
     for(auto& [dimName, datasetName] : m_pathDimMap.items()) {
         log()->get(LogLevel::Info) << "Key: " << dimName << ", Value: "
             << datasetName << ", Type: " << datasetName.type_name() << std::endl;
