@@ -62,47 +62,47 @@ TEST(PointTable, resolveType)
     EXPECT_EQ(layout->dimType(Id::X), Type::Double);
 
     /// Build as we go.
-    layout->registerDim(Id::Y, Type::Unsigned8);
-    EXPECT_EQ(layout->dimSize(Id::Y), 1u);
-    EXPECT_EQ(layout->dimType(Id::Y), Type::Unsigned8);
+    layout->registerDim(Id::Intensity, Type::Unsigned8);
+    EXPECT_EQ(layout->dimSize(Id::Intensity), 1u);
+    EXPECT_EQ(layout->dimType(Id::Intensity), Type::Unsigned8);
 
-    layout->registerDim(Id::Y, Type::Unsigned8);
-    EXPECT_EQ(layout->dimSize(Id::Y), 1u);
-    EXPECT_EQ(layout->dimType(Id::Y), Type::Unsigned8);
+    layout->registerDim(Id::Intensity, Type::Unsigned8);
+    EXPECT_EQ(layout->dimSize(Id::Intensity), 1u);
+    EXPECT_EQ(layout->dimType(Id::Intensity), Type::Unsigned8);
 
-    layout->registerDim(Id::Y, Type::Signed8);
-    // Signed 8 and Unsigned 8 should yeild signed 16.
-    EXPECT_EQ(layout->dimSize(Id::Y), 2u);
-    EXPECT_EQ(layout->dimType(Id::Y), Type::Signed16);
+    layout->registerDim(Id::Intensity, Type::Signed8);
+    // Signed 8 and Unsigned 8 should yield signed 16.
+    EXPECT_EQ(layout->dimSize(Id::Intensity), 2u);
+    EXPECT_EQ(layout->dimType(Id::Intensity), Type::Signed16);
 
-    layout->registerDim(Id::Y, Type::Signed16);
-    EXPECT_EQ(layout->dimSize(Id::Y), 2u);
-    EXPECT_EQ(layout->dimType(Id::Y), Type::Signed16);
+    layout->registerDim(Id::Intensity, Type::Signed16);
+    EXPECT_EQ(layout->dimSize(Id::Intensity), 2u);
+    EXPECT_EQ(layout->dimType(Id::Intensity), Type::Signed16);
 
-    layout->registerDim(Id::Y, Type::Float);
-    EXPECT_EQ(layout->dimSize(Id::Y), 4u);
-    EXPECT_EQ(layout->dimType(Id::Y), Type::Float);
+    layout->registerDim(Id::Intensity, Type::Float);
+    EXPECT_EQ(layout->dimSize(Id::Intensity), 4u);
+    EXPECT_EQ(layout->dimType(Id::Intensity), Type::Float);
 
-    layout->registerDim(Id::Y, Type::Double);
-    EXPECT_EQ(layout->dimSize(Id::Y), 8u);
-    EXPECT_EQ(layout->dimType(Id::Y), Type::Double);
+    layout->registerDim(Id::Intensity, Type::Double);
+    EXPECT_EQ(layout->dimSize(Id::Intensity), 8u);
+    EXPECT_EQ(layout->dimType(Id::Intensity), Type::Double);
 
     ///
-    layout->registerDim(Id::Z, Type::Unsigned16);
-    EXPECT_EQ(layout->dimSize(Id::Z), 2u);
-    EXPECT_EQ(layout->dimType(Id::Z), Type::Unsigned16);
+    layout->registerDim(Id::Red, Type::Unsigned16);
+    EXPECT_EQ(layout->dimSize(Id::Red), 2u);
+    EXPECT_EQ(layout->dimType(Id::Red), Type::Unsigned16);
 
-    layout->registerDim(Id::Z, Type::Signed8);
-    EXPECT_EQ(layout->dimSize(Id::Z), 4u);
-    EXPECT_EQ(layout->dimType(Id::Z), Type::Signed32);
+    layout->registerDim(Id::Red, Type::Signed8);
+    EXPECT_EQ(layout->dimSize(Id::Red), 4u);
+    EXPECT_EQ(layout->dimType(Id::Red), Type::Signed32);
 
-    layout->registerDim(Id::Z, Type::Signed16);
-    EXPECT_EQ(layout->dimSize(Id::Z), 4u);
-    EXPECT_EQ(layout->dimType(Id::Z), Type::Signed32);
+    layout->registerDim(Id::Red, Type::Signed16);
+    EXPECT_EQ(layout->dimSize(Id::Red), 4u);
+    EXPECT_EQ(layout->dimType(Id::Red), Type::Signed32);
 
-    layout->registerDim(Id::Z, Type::Double);
-    EXPECT_EQ(layout->dimSize(Id::Z), 8u);
-    EXPECT_EQ(layout->dimType(Id::Z), Type::Double);
+    layout->registerDim(Id::Red, Type::Double);
+    EXPECT_EQ(layout->dimSize(Id::Red), 8u);
+    EXPECT_EQ(layout->dimType(Id::Red), Type::Double);
 }
 
 TEST(PointTable, userView)

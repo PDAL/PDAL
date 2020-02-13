@@ -200,14 +200,9 @@ void BpfReader::addDimensions(PointLayoutPtr layout)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
-        Dimension::Type type = Dimension::Type::Float;
-
         BpfDimension& dim = m_dims[i];
-        if (dim.m_label == "X" ||
-            dim.m_label == "Y" ||
-            dim.m_label == "Z")
-            type = Dimension::Type::Double;
-        dim.m_id = layout->registerOrAssignDim(dim.m_label, type);
+        dim.m_id = layout->registerOrAssignDim(dim.m_label,
+            Dimension::Type::Float);
     }
 }
 
