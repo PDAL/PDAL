@@ -74,6 +74,7 @@ private:
     Dimension::IdList m_idlist;
     std::vector<hdf5::DimInfo> m_infos;
     std::vector<uint8_t *> m_bufs;
+    void validateMap();
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.
     HdfReader(const HdfReader&);              // Not implemented.

@@ -34,10 +34,13 @@
 
 #include "HdfReader.hpp"
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_types.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <map>
+
+
 
 namespace pdal
 {
@@ -102,7 +105,8 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 }
 
 
-bool HdfReader::processOne(PointRef& point) {
+bool HdfReader::processOne(PointRef& point)
+{
     for(uint64_t index = 0; index < m_infos.size(); ++index) {
         auto& info = m_infos.at(index);
         uint64_t bufIndex = m_index % info.chunkSize;
@@ -124,15 +128,34 @@ void HdfReader::addArgs(ProgramArgs& args)
 
 void HdfReader::initialize()
 {
-    log()->get(LogLevel::Info) << "***JSON TESTING***" << std::endl;
-    log()->get(LogLevel::Info) << m_pathDimMap << std::endl;
-    log()->get(LogLevel::Info) << "----------------" << std::endl;
     for(const auto& [key, value] : m_pathDimMap.items()) {
         log()->get(LogLevel::Info) << "Key: " << key << ", Val: " << value <<std::endl;
     }
+    validateMap();
 
     // ICESat-2 datasets are EPSG:7912
     setSpatialReference(SpatialReference("EPSG:7912"));
+}
+
+void HdfReader::validateMap()
+{
+    log()->get(LogLevel::Info) << "**JSON map**" << std::endl;
+    log()->get(LogLevel::Info) << m_pathDimMap << std::endl;
+
+    if(!m_pathDimMap.is_object()) {
+        throw pdal_error("Option 'map' must be a JSON object, not a " +
+            std::string(m_pathDimMap.type_name()));
+    }
+    for(auto& [dimName, datasetName] : m_pathDimMap.items()) {
+        log()->get(LogLevel::Info) << "Key: " << dimName << ", Value: "
+            << datasetName << ", Type: " << datasetName.type_name() << std::endl;
+
+        if(!datasetName.is_string()) {
+            throw pdal_error("Every value in 'map' must be a string. Key '"
+                + dimName + "' has value with type '" +
+                std::string(datasetName.type_name()) + "'");
+        }
+    }
 }
 
 void HdfReader::done(PointTableRef table)
