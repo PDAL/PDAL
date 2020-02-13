@@ -230,7 +230,14 @@ PointViewSet CSFilter::run(PointViewPtr view)
     std::vector<int> groundIdx, offGroundIdx;
     c.setLog(log());
     c.setPointCloud(csfPC);
-    c.do_filtering(groundIdx, offGroundIdx, true);
+    try
+    {
+        c.do_filtering(groundIdx, offGroundIdx, true);
+    }
+    catch (std::exception& e)
+    {
+        throwError(e.what());
+    }
 
     for (auto const& i : groundIdx)
         firstView->setField(Dimension::Id::Classification, i, 2);
