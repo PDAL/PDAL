@@ -103,9 +103,9 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 
 
 bool HdfReader::processOne(PointRef& point) {
-    for(int index = 0; index < m_infos.size(); ++index) {
+    for(uint64_t index = 0; index < m_infos.size(); ++index) {
         auto& info = m_infos.at(index);
-        int bufIndex = m_index % info.chunkSize;
+        uint64_t bufIndex = m_index % info.chunkSize;
         if(bufIndex == 0) {
             m_bufs.at(index) = m_hdf5Handler.getNextChunk(index);
         }
