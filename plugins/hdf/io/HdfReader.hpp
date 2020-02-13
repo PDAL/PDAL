@@ -64,7 +64,6 @@ private:
     point_count_t m_index;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef table);
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
@@ -75,8 +74,14 @@ private:
 
     NL::json m_pathDimMap;
     Dimension::IdList m_idlist;
-    std::vector<std::unique_ptr<hdf5::DimInfo>> m_infos;
-    std::vector<uint8_t *> m_bufs;
+    struct BufferInfo {
+        BufferInfo(const hdf5::DimInfo& info);
+        std::unique_ptr<hdf5::DimInfo> info;
+        uint8_t * buffer = nullptr;
+    };
+    std::vector<BufferInfo> m_info;
+    // std::vector<std::unique_ptr<hdf5::DimInfo>> m_infos;
+    // std::vector<uint8_t *> m_bufs;
     void validateMap();
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.
