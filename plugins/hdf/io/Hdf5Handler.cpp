@@ -94,11 +94,18 @@ void Hdf5Handler::initialize(
         m_logger->get(LogLevel::Info) << "Opening dataset '"
             << datasetName << "' with dimension name '" << dimName
             << "'" << std::endl;
+        // Will throw if dataset doesn't exists. Gives adequate error message
         H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
-        m_dsets.push_back(dset);
         H5::DataSpace dspace = dset.getSpace();
+        m_dsets.push_back(dset);
         m_dspaces.push_back(dspace);
-        m_numPoints = dspace.getSelectNpoints();
+        if(index == 0) {
+            m_numPoints = dspace.getSelectNpoints();
+        } else {
+            if(m_numPoints != dspace.getSelectNpoints()) {
+                throw pdal_error("All given datasets must have the same length");
+            }
+        }
         H5::DSetCreatPropList plist = dset.getCreatePlist();
         if(plist.getLayout() == H5D_CHUNKED) {
             int dimensionality = plist.getChunk(1, &chunkSize);
