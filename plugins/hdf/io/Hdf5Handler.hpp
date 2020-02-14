@@ -72,7 +72,7 @@ class Hdf5Handler
 public:
     void initialize(
             const std::string& filename,
-            const NL::json& map);
+            const std::map<std::string,std::string>& map);
     void close();
 
     uint8_t *getNextChunk(int index);

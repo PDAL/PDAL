@@ -76,7 +76,7 @@ DimInfo::DimInfo(
 
 void Hdf5Handler::initialize(
         const std::string& filename,
-        const NL::json& map)
+        const std::map<std::string,std::string>& map)
 {
     try
     {
@@ -89,8 +89,11 @@ void Hdf5Handler::initialize(
     int index = 0;
     std::vector<hsize_t> m_chunkOffset;
 
-    for(const auto& [dimName, datasetName] : map.items()) {
+    for( auto const& entry : map) {
+        std::string const& dimName = entry.first;
+        std::string const& datasetName = entry.second;
         hsize_t chunkSize;
+
         m_logger->get(LogLevel::Info) << "Opening dataset '"
             << datasetName << "' with dimension name '" << dimName
             << "'" << std::endl;
@@ -150,7 +153,7 @@ void Hdf5Handler::close()
 
 uint8_t *Hdf5Handler::getNextChunk(int index) {
     hsize_t elementsRemaining = m_numPoints - m_chunkOffsets.at(index);
-    hsize_t chunkSize = m_dimInfos.at(0).chunkSize;
+    hsize_t chunkSize = m_dimInfos.at(index).chunkSize;
     hsize_t selectionSize = std::min(elementsRemaining, chunkSize);
 
     H5::DataSpace memspace(1, &selectionSize);

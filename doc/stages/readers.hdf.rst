@@ -48,14 +48,25 @@ properly mapped and then outputs a LAS file.
     ]
 
 
-This example reads the X, Y, and Z coordinates from the ICESAT2
-ATL03 format and converts them into a LAS file.
-
 .. note::
     All dimensions must be simple numeric HDF datasets with
     equal lengths. Compound types, enum types, string types,
     etc. are not supported.
 
+
+.. warning::
+    The HDF reader does not set an SRS.
+
+
+Common Use Cases
+----------------
+
+A common use case for this data is reading NASA's ICESAT2 data.
+This example reads the X, Y, and Z coordinates from the ICESAT2
+ATL03 format and converts them into a LAS file.
+
+.. note::
+    ICESAT2 data use EPSG:7912.
 
 .. code-block:: json
 
@@ -85,9 +96,6 @@ Options
 
 .. include:: reader_opts.rst
 
-map
+dimensions
   A JSON map with PDAL dimension names as the keys and HDF dataset paths as the values.
-
-metadata
-  TBD
 

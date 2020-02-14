@@ -130,40 +130,38 @@ bool HdfReader::processOne(PointRef& point)
 
 void HdfReader::addArgs(ProgramArgs& args)
 {
-    args.add("map", "Map of HDF path to PDAL dimension", m_pathDimMap);
+    args.add("dimensions", "Map of HDF path to PDAL dimension", m_pathDimJson);
 }
 
 void HdfReader::initialize()
 {
-    for(const auto& [key, value] : m_pathDimMap.items()) {
-        log()->get(LogLevel::Info) << "Key: " << key << ", Val: " << value <<std::endl;
-    }
-    validateMap();
-
-    // ICESat-2 datasets are EPSG:7912
-    setSpatialReference(SpatialReference("EPSG:7912"));
+    parseDimensions();
 }
 
-void HdfReader::validateMap()
+void HdfReader::parseDimensions()
 {
     log()->get(LogLevel::Info) << "**JSON map**" << std::endl;
-    log()->get(LogLevel::Info) << m_pathDimMap << std::endl;
+    log()->get(LogLevel::Info) << m_pathDimJson << std::endl;
 
-    if(m_pathDimMap.is_null()) {
+    if(m_pathDimJson.is_null()) {
         throw pdal_error("Required option 'map' was not set");
-    } else if(!m_pathDimMap.is_object()) {
-        throw pdal_error("Option 'map' must be a JSON object, not a " +
-            std::string(m_pathDimMap.type_name()));
+    } else if(!m_pathDimJson.is_object()) {
+        throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
+            std::string(m_pathDimJson.type_name()));
     }
 
-    for(auto& [dimName, datasetName] : m_pathDimMap.items()) {
+    for(auto& entry : m_pathDimJson.items()) {
+        std::string dimName = entry.key();
+        auto datasetName = entry.value();
         log()->get(LogLevel::Info) << "Key: " << dimName << ", Value: "
             << datasetName << ", Type: " << datasetName.type_name() << std::endl;
 
         if(!datasetName.is_string()) {
-            throw pdal_error("Every value in 'map' must be a string. Key '"
+            throw pdal_error("Every value in 'dimensions' must be a string. Key '"
                 + dimName + "' has value with type '" +
                 std::string(datasetName.type_name()) + "'");
+        } else {
+            m_pathDimMap[dimName] = datasetName;
         }
     }
 }
@@ -173,10 +171,5 @@ void HdfReader::done(PointTableRef table)
     m_hdf5Handler->close();
 }
 
-
-bool HdfReader::eof()
-{
-    return m_index >= m_hdf5Handler->getNumPoints();
-}
 
 } // namespace pdal
