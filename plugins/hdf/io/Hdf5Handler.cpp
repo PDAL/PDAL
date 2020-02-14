@@ -87,7 +87,7 @@ void Hdf5Handler::initialize(
         throw pdal_error("Could not open HDF5 file '" + filename + "'.");
     }
     int index = 0;
-    std::vector<hsize_t> m_chunkOffset();
+    std::vector<hsize_t> m_chunkOffset;
 
     for(const auto& [dimName, datasetName] : map.items()) {
         hsize_t chunkSize;
