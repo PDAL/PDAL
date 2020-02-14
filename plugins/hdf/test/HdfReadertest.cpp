@@ -64,6 +64,12 @@ TEST(HdfReaderTest, testRead)
     options.add(dataset);
     reader->setOptions(options);
 
+    /*
+        throw exception on bad map
+        test other dimension types like intensity
+        check that coord system is empty
+        metadata (eventually)
+    */
     PointTable table;
     reader->prepare(table);
     PointViewSet viewSet = reader->execute(table);

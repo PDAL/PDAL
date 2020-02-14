@@ -83,9 +83,6 @@ ATL03 format and converts them into a LAS file.
 Options
 -------
 
-filename
-  File to read from [Required]
-
 .. include:: reader_opts.rst
 
 map
