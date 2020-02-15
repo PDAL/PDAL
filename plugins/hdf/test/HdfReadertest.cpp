@@ -61,7 +61,7 @@ TEST(HdfReaderTest, testRead)
     NL::json j = {
         // double types
         {"X", "autzen/X"},
-        {"Y", "autzen/Y"}, 
+        {"Y", "autzen/Y"},
         {"Z", "autzen/Z"},
         {"GpsTime", "autzen/GpsTime"},
         // int types
@@ -72,7 +72,7 @@ TEST(HdfReaderTest, testRead)
         {"Blue", "autzen/Blue"},
     };
     Option dataset("dimensions", j.dump());
-    
+
     Options options(filename);
     options.add(dataset);
     reader->setOptions(options);
@@ -85,7 +85,7 @@ TEST(HdfReaderTest, testRead)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065u);
     //point equality
-    Support::check_p0_p1_p2(*view);    
+    Support::check_p0_p1_p2(*view);
     PointViewPtr view2 = view->makeNew();
     view2->appendPoint(*view, 100);
     view2->appendPoint(*view, 101);
@@ -94,8 +94,8 @@ TEST(HdfReaderTest, testRead)
     //color equality
     //should work, but the GPS time is 0.00004 units off
     // FP rounding problem?
-    // Support::check_pN(*view, 99, 636699.44, 849829.23, 420.8,
-        // 246504.0303, 50, 65, 65);
+    Support::check_pN(*view, 99, 636699.44, 849829.23, 420.8,
+         246504.03026135918, 50, 65, 65);
 }
 
 TEST(HdfReaderTest, testOptions)
@@ -108,7 +108,7 @@ TEST(HdfReaderTest, testOptions)
 
     NL::json j = {{ "X" ,"autzen/X"}, {"Y" , 1234}};
     Option dataset("dimensions", j.dump());
-    
+
     Options options(filename);
     options.add(dataset);
     reader->setOptions(options);
