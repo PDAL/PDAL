@@ -51,30 +51,69 @@ std::string getFilePath()
 
 TEST(HdfReaderTest, testRead)
 {
+    //setup
     StageFactory f;
     Stage* reader(f.createStage("readers.hdf"));
     EXPECT_TRUE(reader);
 
     Option filename("filename", getFilePath());
 
-    NL::json j = {{ "X" ,"autzen/X"}, {"Y" , "autzen/Y"},  {"Z" , "autzen/Z" }};
-    Option dataset("map", j.dump());
+    NL::json j = {
+        // double types
+        {"X", "autzen/X"},
+        {"Y", "autzen/Y"}, 
+        {"Z", "autzen/Z"},
+        {"GpsTime", "autzen/GpsTime"},
+        // int types
+        {"Classification", "autzen/Classification"},
+        {"Intensity", "autzen/Intensity"},
+        {"Red", "autzen/Red"},
+        {"Green", "autzen/Green"},
+        {"Blue", "autzen/Blue"},
+    };
+    Option dataset("dimensions", j.dump());
     
     Options options(filename);
     options.add(dataset);
     reader->setOptions(options);
 
-    /*
-        throw exception on bad map
-        test other dimension types like intensity
-        check that coord system is empty
-        metadata (eventually)
-    */
     PointTable table;
     reader->prepare(table);
     PointViewSet viewSet = reader->execute(table);
+    //size equality
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065u);
-    Support::check_p0_p1_p2(*view); 
+    //point equality
+    Support::check_p0_p1_p2(*view);    
+    PointViewPtr view2 = view->makeNew();
+    view2->appendPoint(*view, 100);
+    view2->appendPoint(*view, 101);
+    view2->appendPoint(*view, 102);
+    Support::check_p100_p101_p102(*view2);
+    //color equality
+    //should work, but the GPS time is 0.00004 units off
+    // FP rounding problem?
+    // Support::check_pN(*view, 99, 636699.44, 849829.23, 420.8,
+        // 246504.0303, 50, 65, 65);
+}
+
+TEST(HdfReaderTest, testOptions)
+{
+    StageFactory f;
+    Stage* reader(f.createStage("readers.hdf"));
+    EXPECT_TRUE(reader);
+
+    Option filename("filename", getFilePath());
+
+    NL::json j = {{ "X" ,"autzen/X"}, {"Y" , 1234}};
+    Option dataset("dimensions", j.dump());
+    
+    Options options(filename);
+    options.add(dataset);
+    reader->setOptions(options);
+
+    PointTable table;
+    ASSERT_THROW(reader->prepare(table), pdal_error);
+    ASSERT_TRUE(reader->getSpatialReference().empty());
 }
