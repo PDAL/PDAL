@@ -3,8 +3,13 @@
 readers.hdf
 ===============
 
-The **HDF reader** reads from files in the HDF5 format. See the
-TODO for more information.
+The **HDF reader** reads data from files in the
+`HDF5 format. <https://www.hdfgroup.org/solutions/hdf5/>`_
+You must explicitly specify a mapping of HDF datasets to PDAL
+dimensions using the dimensions parameter. ALL dimensions must
+be scalars and be of the same length. Compound types are not
+supported at this time.
+
 
 .. plugin::
 
@@ -21,7 +26,7 @@ properly mapped and then outputs a LAS file.
         {
             "type": "readers.hdf",
             "filename": "test/data/hdf/autzen.h5",
-            "map":
+            "dimensions":
             {
                 "X" : "autzen/X",
                 "Y" : "autzen/Y",
@@ -43,7 +48,13 @@ properly mapped and then outputs a LAS file.
         },
         {
             "type" : "writers.las",
-            "filename": "output.las"
+            "filename": "output.las",
+            "scale_x": 1.0e-5,
+            "scale_y": 1.0e-5,
+            "scale_z": 1.0e-5,
+            "offset_x": "auto",
+            "offset_y": "auto",
+            "offset_z": "auto"
         }
     ]
 
@@ -61,7 +72,7 @@ properly mapped and then outputs a LAS file.
 Common Use Cases
 ----------------
 
-A common use case for this data is reading NASA's ICESAT2 data.
+A possible use case for this driver is reading NASA's ICESAT2 data.
 This example reads the X, Y, and Z coordinates from the ICESAT2
 ATL03 format and converts them into a LAS file.
 
@@ -74,11 +85,11 @@ ATL03 format and converts them into a LAS file.
         { 
             "type": "readers.hdf", 
             "filename": "ATL03_20190906201911_10800413_002_01.h5",  
-            "map": 
+            "dimensions":
             { 
                 "X" : "gt1l/heights/lon_ph", 
                 "Y" : "gt1l/heights/lat_ph", 
-                "Z" : "gt1l/heights/h_ph", 
+                "Z" : "gt1l/heights/h_ph"
             } 
         }, 
         { 
