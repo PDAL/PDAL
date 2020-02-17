@@ -77,7 +77,7 @@ public:
 
     uint8_t *getNextChunk(int index);
 
-    uint64_t getNumPoints() const;
+    hsize_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
 
     void setLog(pdal::LogPtr log);
@@ -92,7 +92,7 @@ private:
     pdal::LogPtr m_logger;
 
     std::unique_ptr<H5::H5File> m_h5File;
-    uint64_t m_numPoints = 0;
+    hsize_t m_numPoints = 0;
 };
 
 } // namespace pdal

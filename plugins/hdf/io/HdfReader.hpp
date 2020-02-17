@@ -57,7 +57,7 @@ class PDAL_DLL HdfReader : public pdal::Reader, public pdal::Streamable
 {
 public:
     HdfReader();
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
     std::unique_ptr<Hdf5Handler> m_hdf5Handler;

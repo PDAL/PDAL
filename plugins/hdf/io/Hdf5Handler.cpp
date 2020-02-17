@@ -102,10 +102,13 @@ void Hdf5Handler::initialize(
         H5::DataSpace dspace = dset.getSpace();
         m_dsets.push_back(dset);
         m_dspaces.push_back(dspace);
+        if(dspace.getSelectNpoints() < 0)
+            throw pdal_error("Selection had a negative number of points. "
+                "this should never happen, and it's probably a PDAL bug.");
         if(index == 0) {
-            m_numPoints = dspace.getSelectNpoints();
+            m_numPoints = (hsize_t) dspace.getSelectNpoints();
         } else {
-            if(m_numPoints != dspace.getSelectNpoints()) {
+            if(m_numPoints != (hsize_t) dspace.getSelectNpoints()) {
                 throw pdal_error("All given datasets must have the same length");
             }
         }
@@ -123,10 +126,7 @@ void Hdf5Handler::initialize(
         H5::DataType dtype = dset.getDataType();
         H5T_class_t vague_type = dtype.getClass();
 
-        if(vague_type == H5T_COMPOUND) {
-            throw pdal_error("Compound types not supported");
-        }
-        else if(vague_type == H5T_INTEGER) {
+        if(vague_type == H5T_INTEGER) {
             m_dimInfos.push_back(
                 DimInfo(dimName, dset.getIntType(), chunkSize)
             );
@@ -136,7 +136,8 @@ void Hdf5Handler::initialize(
                 DimInfo(dimName, dset.getFloatType(), chunkSize)
             );
         } else {
-            throw pdal_error("Unkown type: " + vague_type);
+            throw pdal_error("Dataset '" + datasetName + "' has an " +
+                "unsupported type. Only integer and float types are supported.");
         }
         m_chunkOffsets.push_back(0);
         m_buffers.push_back(std::vector<uint8_t>());
@@ -168,7 +169,7 @@ uint8_t *Hdf5Handler::getNextChunk(int index) {
 }
 
 
-uint64_t Hdf5Handler::getNumPoints() const
+hsize_t Hdf5Handler::getNumPoints() const
 {
     return m_numPoints;
 }
