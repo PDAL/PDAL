@@ -91,9 +91,7 @@ TEST(HdfReaderTest, testRead)
     view2->appendPoint(*view, 101);
     view2->appendPoint(*view, 102);
     Support::check_p100_p101_p102(*view2);
-    //color equality
-    //should work, but the GPS time is 0.00004 units off
-    // FP rounding problem?
+    //color and GPS time equality
     Support::check_pN(*view, 99, 636699.44, 849829.23, 420.8,
          246504.03026135918, 50, 65, 65);
 }

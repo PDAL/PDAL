@@ -80,8 +80,6 @@ private:
         uint8_t * buffer = nullptr;
     };
     std::vector<BufferInfo> m_info;
-    // std::vector<std::unique_ptr<hdf5::DimInfo>> m_infos;
-    // std::vector<uint8_t *> m_bufs;
     void parseDimensions();
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.
