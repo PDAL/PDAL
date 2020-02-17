@@ -24,9 +24,6 @@ if(BUILD_PLUGIN_ICEBRIDGE)
 endif()
 
 if(BUILD_PLUGIN_HDF)
-    if (NOT PDAL_HAVE_LIBXML2)
-        message(FATAL_ERROR "Can't build hdf plugin without libxml2")
-    endif()
     add_subdirectory(hdf)
 endif()
 
