@@ -47,9 +47,9 @@
 namespace pdal
 {
 
-class Hdf5Handler;
 namespace hdf5
 {
+    class Handler;
     struct DimInfo;
 }
 
@@ -60,7 +60,7 @@ public:
     std::string getName() const override;
 
 private:
-    std::unique_ptr<Hdf5Handler> m_hdf5Handler;
+    std::unique_ptr<hdf5::Handler> m_hdf5Handler;
     point_count_t m_index;
 
     virtual void addDimensions(PointLayoutPtr layout) override;

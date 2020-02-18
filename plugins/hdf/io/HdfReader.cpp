@@ -58,7 +58,7 @@ CREATE_SHARED_STAGE(HdfReader, s_info)
 std::string HdfReader::getName() const { return s_info.name; }
 
 HdfReader::HdfReader()
-    : m_hdf5Handler(new Hdf5Handler())
+    : m_hdf5Handler(new hdf5::Handler())
     { }
 
 

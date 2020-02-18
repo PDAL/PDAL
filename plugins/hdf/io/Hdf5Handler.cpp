@@ -42,7 +42,7 @@ namespace pdal
 
 using namespace hdf5;
 
-void Hdf5Handler::setLog(pdal::LogPtr log) {
+void Handler::setLog(pdal::LogPtr log) {
     m_logger = log;
 }
 
@@ -80,7 +80,7 @@ DimInfo::DimInfo(
         buffer.resize(chunkSize*size);
     }
 
-void Hdf5Handler::initialize(
+void Handler::initialize(
         const std::string& filename,
         const std::map<std::string,std::string>& map)
 {
@@ -146,13 +146,13 @@ void Hdf5Handler::initialize(
     }
 }
 
-void Hdf5Handler::close()
+void Handler::close()
 {
     m_h5File->close();
 }
 
 
-uint8_t *Hdf5Handler::getValue(DimInfo& info, pdal::point_count_t pointIndex) {
+uint8_t *Handler::getValue(DimInfo& info, pdal::point_count_t pointIndex) {
     uint8_t *p = info.buffer.data();
 
     if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
@@ -178,13 +178,13 @@ uint8_t *Hdf5Handler::getValue(DimInfo& info, pdal::point_count_t pointIndex) {
 }
 
 
-hsize_t Hdf5Handler::getNumPoints() const
+hsize_t Handler::getNumPoints() const
 {
     return m_numPoints;
 }
 
 
-std::vector<pdal::hdf5::DimInfo>& Hdf5Handler::getDimensionInfos() {
+std::vector<pdal::hdf5::DimInfo>& Handler::getDimensionInfos() {
     return m_dimInfos;
 }
 

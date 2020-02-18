@@ -50,26 +50,25 @@ namespace pdal
 
 namespace hdf5
 {
-    struct DimInfo
-    {
-        DimInfo(const std::string& dimName, const std::string& datasetName, H5::IntType int_type, hsize_t chunkSize);
+struct DimInfo
+{
+    DimInfo(const std::string& dimName, const std::string& datasetName, H5::IntType int_type, hsize_t chunkSize);
 
-        DimInfo(const std::string& dimName, const std::string& datasetName, H5::FloatType float_type, hsize_t chunkSize);
+    DimInfo(const std::string& dimName, const std::string& datasetName, H5::FloatType float_type, hsize_t chunkSize);
 
-        std::string name;
-        std::string hdfPath;
-        H5T_class_t hdf_type;
-        H5T_sign_t sign;
-        size_t size;
-        hsize_t chunkSize;
-        Dimension::Type pdal_type;
-        Dimension::Id id = Dimension::Id::Unknown;
-        hsize_t chunkUpperBound = 0, chunkLowerBound = 0;
-        std::vector<uint8_t> buffer;
-    };
-}
+    std::string name;
+    std::string hdfPath;
+    H5T_class_t hdf_type;
+    H5T_sign_t sign;
+    size_t size;
+    hsize_t chunkSize;
+    Dimension::Type pdal_type;
+    Dimension::Id id = Dimension::Id::Unknown;
+    hsize_t chunkUpperBound = 0, chunkLowerBound = 0;
+    std::vector<uint8_t> buffer;
+};
 
-class Hdf5Handler
+class Handler
 {
 public:
     void initialize(
@@ -92,6 +91,8 @@ private:
     std::unique_ptr<H5::H5File> m_h5File;
     hsize_t m_numPoints = 0;
 };
+
+} //namespace hdf5
 
 } // namespace pdal
 
