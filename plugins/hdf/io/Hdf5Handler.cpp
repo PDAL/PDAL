@@ -107,8 +107,6 @@ void Hdf5Handler::initialize(
         // Will throw if dataset doesn't exists. Gives adequate error message
         H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
         H5::DataSpace dspace = dset.getSpace();
-        // m_dsets.push_back(dset);
-        // m_dspaces.push_back(dspace);
         if(dspace.getSelectNpoints() < 0)
             throw pdal_error("Selection had a negative number of points. "
                 "this should never happen, and it's probably a PDAL bug.");
@@ -156,8 +154,7 @@ void Hdf5Handler::close()
 }
 
 
-uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex) {
-    DimInfo& info = m_dimInfos.at(dimInfoIndex);
+uint8_t *Hdf5Handler::getValue(DimInfo& info, pdal::point_count_t pointIndex) {
     uint8_t *p = info.buffer.data();
 
     if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
@@ -172,7 +169,7 @@ uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointI
 
         H5::DataSpace memspace(1, &selectionSize);
         dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
-        dset.read(p,
+        dset.read(  p,
                     dset.getDataType(),
                     memspace,
                     dspace );

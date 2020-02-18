@@ -78,7 +78,7 @@ public:
             const std::map<std::string,std::string>& map);
     void close();
 
-    uint8_t *loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex);
+    uint8_t *getValue(hdf5::DimInfo& info, pdal::point_count_t pointIndex);
 
     hsize_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo>& getDimensionInfos();
@@ -87,8 +87,6 @@ public:
 
 private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
-    // std::vector<H5::DataSet> m_dsets;
-    // std::vector<H5::DataSpace> m_dspaces;
 
     pdal::LogPtr m_logger;
 
