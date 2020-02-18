@@ -52,11 +52,12 @@ namespace hdf5
 {
     struct DimInfo
     {
-        DimInfo(const std::string& dimName, H5::IntType int_type, hsize_t chunkSize);
+        DimInfo(const std::string& dimName, const std::string& datasetName, H5::IntType int_type, hsize_t chunkSize);
 
-        DimInfo(const std::string& dimName, H5::FloatType float_type, hsize_t chunkSize);
+        DimInfo(const std::string& dimName, const std::string& datasetName, H5::FloatType float_type, hsize_t chunkSize);
 
         std::string name;
+        std::string hdfPath;
         H5T_class_t hdf_type;
         H5T_order_t endianness;
         H5T_sign_t sign;
@@ -86,8 +87,8 @@ public:
 
 private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
-    std::vector<H5::DataSet> m_dsets;
-    std::vector<H5::DataSpace> m_dspaces;
+    // std::vector<H5::DataSet> m_dsets;
+    // std::vector<H5::DataSpace> m_dspaces;
 
     pdal::LogPtr m_logger;
 

@@ -48,9 +48,11 @@ void Hdf5Handler::setLog(pdal::LogPtr log) {
 
 DimInfo::DimInfo(
     const std::string& dimName,
+    const std::string& datasetName,
     H5::IntType int_type,
     hsize_t chunkSize)
     : name(dimName)
+    , hdfPath(datasetName)
     , hdf_type(H5T_INTEGER)
     , endianness(int_type.getOrder())
     , sign(int_type.getSign())
@@ -65,9 +67,11 @@ DimInfo::DimInfo(
 
 DimInfo::DimInfo(
     const std::string& dimName,
+    const std::string& datasetName,
     H5::FloatType float_type,
     hsize_t chunkSize)
     : name(dimName)
+    , hdfPath(datasetName)
     , hdf_type(H5T_FLOAT)
     , endianness(float_type.getOrder())
     , sign(H5T_SGN_ERROR)
@@ -103,8 +107,8 @@ void Hdf5Handler::initialize(
         // Will throw if dataset doesn't exists. Gives adequate error message
         H5::DataSet dset = m_h5File.get()->openDataSet(datasetName);
         H5::DataSpace dspace = dset.getSpace();
-        m_dsets.push_back(dset);
-        m_dspaces.push_back(dspace);
+        // m_dsets.push_back(dset);
+        // m_dspaces.push_back(dspace);
         if(dspace.getSelectNpoints() < 0)
             throw pdal_error("Selection had a negative number of points. "
                 "this should never happen, and it's probably a PDAL bug.");
@@ -131,12 +135,12 @@ void Hdf5Handler::initialize(
 
         if(vague_type == H5T_INTEGER) {
             m_dimInfos.push_back(
-                DimInfo(dimName, dset.getIntType(), chunkSize)
+                DimInfo(dimName, datasetName, dset.getIntType(), chunkSize)
             );
         }
         else if(vague_type == H5T_FLOAT) {
             m_dimInfos.push_back(
-                DimInfo(dimName, dset.getFloatType(), chunkSize)
+                DimInfo(dimName, datasetName, dset.getFloatType(), chunkSize)
             );
         } else {
             throw pdal_error("Dataset '" + datasetName + "' has an " +
@@ -155,6 +159,8 @@ void Hdf5Handler::close()
 uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex) {
     DimInfo& info = m_dimInfos.at(dimInfoIndex);
     uint8_t *p = info.buffer.data();
+    auto dset = m_h5File.get()->openDataSet(info.hdfPath);
+    auto dspace = dset.getSpace();
 
     if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
         // load new chunk
@@ -165,11 +171,11 @@ uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointI
         hsize_t selectionSize = info.chunkUpperBound - info.chunkLowerBound;
 
         H5::DataSpace memspace(1, &selectionSize);
-        m_dspaces.at(dimInfoIndex).selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
-        m_dsets.at(dimInfoIndex).read(p,
-                    m_dsets.at(dimInfoIndex).getDataType(),
+        dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
+        dset.read(p,
+                    dset.getDataType(),
                     memspace,
-                    m_dspaces.at(dimInfoIndex) );
+                    dspace );
 
     }
     hsize_t pointOffsetWithinChunk = pointIndex - info.chunkLowerBound;
