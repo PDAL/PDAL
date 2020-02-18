@@ -152,19 +152,34 @@ void Hdf5Handler::close()
 }
 
 
-uint8_t *Hdf5Handler::getNextChunk(int index) {
-    hsize_t elementsRemaining = m_numPoints - m_chunkOffsets.at(index);
-    hsize_t chunkSize = m_dimInfos.at(index).chunkSize;
-    hsize_t selectionSize = std::min(elementsRemaining, chunkSize);
+uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex) {
+    DimInfo& info = m_dimInfos.at(dimInfoIndex);
+    auto& data = m_buffers.at(dimInfoIndex);
 
-    H5::DataSpace memspace(1, &selectionSize);
-    m_dspaces.at(index).selectHyperslab(H5S_SELECT_SET, &selectionSize, &m_chunkOffsets.at(index));
-    auto& data = m_buffers.at(index);
-    m_dsets.at(index).read(data.data(),
-                m_dsets.at(index).getDataType(),
-                memspace,
-                m_dspaces.at(index) );
-    m_chunkOffsets.at(index) += chunkSize;
+    if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
+        // load new chunk
+        info.chunkLowerBound = (pointIndex / info.chunkSize) * info.chunkSize;
+        info.chunkUpperBound = std::min(info.chunkLowerBound + info.chunkSize, m_numPoints);
+
+        // hsize_t elementsRemaining = m_numPoints - m_chunkOffsets.at(dimInfoIndex);
+        // hsize_t chunkSize = m_dimInfos.at(dimInfoIndex).chunkSize;
+        hsize_t selectionSize = info.chunkUpperBound - info.chunkLowerBound;
+
+        H5::DataSpace memspace(1, &selectionSize);
+        // m_logger->get(LogLevel::Info) << std::endl
+        //     << "Lower bound:" << info.chunkLowerBound << std::endl
+        //     << "upper bound:" << info.chunkUpperBound <<  std::endl
+        //     <<"selection:   " << selectionSize << std::endl
+        //     <<"point index: " << pointIndex << std::endl;
+        m_dspaces.at(dimInfoIndex).selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
+        m_dsets.at(dimInfoIndex).read(data.data(),
+                    m_dsets.at(dimInfoIndex).getDataType(),
+                    memspace,
+                    m_dspaces.at(dimInfoIndex) );
+        // m_chunkOffsets.at(dimInfoIndex) += chunkSize;
+        // return data.data() + m_dimInfos.at(dimInfoIndex).size * (pointIndex - m_chunkOffsets.at(dimInfoIndex));
+
+    }
     return data.data();
 }
 

@@ -64,6 +64,7 @@ namespace hdf5
         hsize_t chunkSize;
         Dimension::Type pdal_type;
         Dimension::Id id = Dimension::Id::Unknown;
+        hsize_t chunkUpperBound = 0, chunkLowerBound = 0;
     };
 }
 
@@ -75,7 +76,7 @@ public:
             const std::map<std::string,std::string>& map);
     void close();
 
-    uint8_t *getNextChunk(int index);
+    uint8_t *loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex);
 
     hsize_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
