@@ -87,7 +87,6 @@ void Hdf5Handler::initialize(
         throw pdal_error("Could not open HDF5 file '" + filename + "'.");
     }
     int index = 0;
-    std::vector<hsize_t> m_chunkOffset;
 
     for( auto const& entry : map) {
         std::string const& dimName = entry.first;
@@ -114,7 +113,7 @@ void Hdf5Handler::initialize(
         }
         H5::DSetCreatPropList plist = dset.getCreatePlist();
         if(plist.getLayout() == H5D_CHUNKED) {
-            int dimensionality = plist.getChunk(1, &chunkSize);
+            int dimensionality = plist.getChunk(1, &chunkSize); //modifies chunkSize
             if(dimensionality != 1)
                 throw pdal_error("Only 1-dimensional arrays are supported.");
         } else {
@@ -139,7 +138,6 @@ void Hdf5Handler::initialize(
             throw pdal_error("Dataset '" + datasetName + "' has an " +
                 "unsupported type. Only integer and float types are supported.");
         }
-        m_chunkOffsets.push_back(0);
         m_buffers.push_back(std::vector<uint8_t>());
         m_buffers.at(index).resize(chunkSize*dtype.getSize());
         index++;
@@ -161,23 +159,14 @@ uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointI
         info.chunkLowerBound = (pointIndex / info.chunkSize) * info.chunkSize;
         info.chunkUpperBound = std::min(info.chunkLowerBound + info.chunkSize, m_numPoints);
 
-        // hsize_t elementsRemaining = m_numPoints - m_chunkOffsets.at(dimInfoIndex);
-        // hsize_t chunkSize = m_dimInfos.at(dimInfoIndex).chunkSize;
         hsize_t selectionSize = info.chunkUpperBound - info.chunkLowerBound;
 
         H5::DataSpace memspace(1, &selectionSize);
-        // m_logger->get(LogLevel::Info) << std::endl
-        //     << "Lower bound:" << info.chunkLowerBound << std::endl
-        //     << "upper bound:" << info.chunkUpperBound <<  std::endl
-        //     <<"selection:   " << selectionSize << std::endl
-        //     <<"point index: " << pointIndex << std::endl;
         m_dspaces.at(dimInfoIndex).selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
         m_dsets.at(dimInfoIndex).read(data.data(),
                     m_dsets.at(dimInfoIndex).getDataType(),
                     memspace,
                     m_dspaces.at(dimInfoIndex) );
-        // m_chunkOffsets.at(dimInfoIndex) += chunkSize;
-        // return data.data() + m_dimInfos.at(dimInfoIndex).size * (pointIndex - m_chunkOffsets.at(dimInfoIndex));
 
     }
     hssize_t pointOffsetWithinChunk = pointIndex - info.chunkLowerBound;

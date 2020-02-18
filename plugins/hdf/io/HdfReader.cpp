@@ -61,20 +61,12 @@ HdfReader::HdfReader()
     : m_hdf5Handler(new Hdf5Handler())
     { }
 
-// HdfReader::BufferInfo::BufferInfo(const hdf5::DimInfo& d)
-//     : info(new hdf5::DimInfo(d))
-//     { }
-
 
 void HdfReader::addDimensions(PointLayoutPtr layout)
 {
     m_hdf5Handler->setLog(log());
     m_hdf5Handler->initialize(m_filename, m_pathDimMap);
 
-    // for (const auto& d : m_hdf5Handler->m_dimInfos) 
-    // {
-    //     m_info.push_back(d);
-    // }
     for (auto& info : m_hdf5Handler->getDimensionInfos())
     {
         info.id = layout->registerOrAssignDim(info.name, info.pdal_type);

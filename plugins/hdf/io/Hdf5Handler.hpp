@@ -89,7 +89,6 @@ private:
     std::vector<H5::DataSet> m_dsets;
     std::vector<H5::DataSpace> m_dspaces;
 
-    std::vector<hsize_t> m_chunkOffsets;
     pdal::LogPtr m_logger;
 
     std::unique_ptr<H5::H5File> m_h5File;
