@@ -159,11 +159,11 @@ void Hdf5Handler::close()
 uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex) {
     DimInfo& info = m_dimInfos.at(dimInfoIndex);
     uint8_t *p = info.buffer.data();
-    auto dset = m_h5File.get()->openDataSet(info.hdfPath);
-    auto dspace = dset.getSpace();
 
     if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
         // load new chunk
+        auto dset = m_h5File.get()->openDataSet(info.hdfPath);
+        auto dspace = dset.getSpace();
 
         info.chunkLowerBound = (pointIndex / info.chunkSize) * info.chunkSize;
         info.chunkUpperBound = std::min(info.chunkLowerBound + info.chunkSize, m_numPoints);
