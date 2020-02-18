@@ -154,10 +154,11 @@ void Hdf5Handler::close()
 
 uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex) {
     DimInfo& info = m_dimInfos.at(dimInfoIndex);
-    auto& data = info.buffer;
+    uint8_t *p = info.buffer.data();
 
     if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
         // load new chunk
+
         info.chunkLowerBound = (pointIndex / info.chunkSize) * info.chunkSize;
         info.chunkUpperBound = std::min(info.chunkLowerBound + info.chunkSize, m_numPoints);
 
@@ -165,14 +166,14 @@ uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointI
 
         H5::DataSpace memspace(1, &selectionSize);
         m_dspaces.at(dimInfoIndex).selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
-        m_dsets.at(dimInfoIndex).read(data.data(),
+        m_dsets.at(dimInfoIndex).read(p,
                     m_dsets.at(dimInfoIndex).getDataType(),
                     memspace,
                     m_dspaces.at(dimInfoIndex) );
 
     }
-    hssize_t pointOffsetWithinChunk = pointIndex - info.chunkLowerBound;
-    return data.data() + pointOffsetWithinChunk * info.size;
+    hsize_t pointOffsetWithinChunk = pointIndex - info.chunkLowerBound;
+    return p + pointOffsetWithinChunk * info.size;
 }
 
 
