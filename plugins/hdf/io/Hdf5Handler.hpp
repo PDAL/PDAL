@@ -79,7 +79,7 @@ public:
     uint8_t *loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex);
 
     hsize_t getNumPoints() const;
-    std::vector<pdal::hdf5::DimInfo> getDimensionInfos();
+    std::vector<pdal::hdf5::DimInfo>& getDimensionInfos();
 
     void setLog(pdal::LogPtr log);
 

@@ -74,12 +74,12 @@ private:
     NL::json m_pathDimJson;
     std::map<std::string,std::string> m_pathDimMap;
     Dimension::IdList m_idlist;
-    struct BufferInfo {
-        BufferInfo(const hdf5::DimInfo& info);
-        std::unique_ptr<hdf5::DimInfo> info;
-        uint8_t * buffer = nullptr;
-    };
-    std::vector<BufferInfo> m_info;
+    // struct BufferInfo {
+    //     BufferInfo(const hdf5::DimInfo& info);
+    //     std::unique_ptr<hdf5::DimInfo> info;
+    //     uint8_t * valPtr = nullptr;
+    // };
+    // std::vector<hdf5::DimInfo>& m_info;
     void parseDimensions();
 
     HdfReader& operator=(const HdfReader&);   // Not implemented.

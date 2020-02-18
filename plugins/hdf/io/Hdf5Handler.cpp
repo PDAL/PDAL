@@ -191,7 +191,7 @@ hsize_t Hdf5Handler::getNumPoints() const
 }
 
 
-std::vector<pdal::hdf5::DimInfo> Hdf5Handler::getDimensionInfos() {
+std::vector<pdal::hdf5::DimInfo>& Hdf5Handler::getDimensionInfos() {
     return m_dimInfos;
 }
 
