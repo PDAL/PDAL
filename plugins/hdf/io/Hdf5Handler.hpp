@@ -59,7 +59,6 @@ namespace hdf5
         std::string name;
         std::string hdfPath;
         H5T_class_t hdf_type;
-        H5T_order_t endianness;
         H5T_sign_t sign;
         size_t size;
         hsize_t chunkSize;
