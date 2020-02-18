@@ -46,22 +46,6 @@ void Handler::setLog(pdal::LogPtr log) {
     m_logger = log;
 }
 
-// DimInfo::DimInfo(
-//     const std::string& dimName,
-//     const std::string& datasetName)
-//     : name(dimName)
-//     , hdfPath(datasetName)
-//     , hdf_type(H5T_INTEGER)
-//     , sign(int_type.getSign())
-//     , size(int_type.getSize())
-//     , chunkSize(1024)
-//     , pdal_type(sign == H5T_SGN_2 ?
-//         Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()) :
-//         Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize()))
-//     {
-//         buffer.resize(chunkSize*size);
-//     }
-
 DimInfo::DimInfo(
     const std::string& dimName,
     const std::string& datasetName,
@@ -69,7 +53,6 @@ DimInfo::DimInfo(
     )
     : name(dimName)
     , hdfPath(datasetName)
-    // , hdf_type(H5T_FLOAT)
     , chunkSize(1024)
     {
         // Will throw if dataset doesn't exists. Gives adequate error message
@@ -78,6 +61,7 @@ DimInfo::DimInfo(
         if(dspace.getSelectNpoints() < 0)
             throw pdal_error("Selection had a negative number of points. "
                 "this should never happen, and it's probably a PDAL bug.");
+        
         numPoints = (hsize_t) dspace.getSelectNpoints();
         H5::DSetCreatPropList plist = dset.getCreatePlist();
         if(plist.getLayout() == H5D_CHUNKED) {
@@ -85,19 +69,14 @@ DimInfo::DimInfo(
             if(dimensionality != 1)
                 throw pdal_error("Only 1-dimensional arrays are supported.");
         } else {
-            // std::cout << "Dataset not chunked; proceeding to read 1024 elements at a time" << std::endl;
             chunkSize = 1024;
         }
-        // std::cout << "Chunk size: " << chunkSize << std::endl;
-        // std::cout << "Num points: " << numPoints << std::endl;
-        H5::DataType dtype = dset.getDataType();
-        H5T_class_t vague_type = dtype.getClass();
+        H5T_class_t vague_type = dset.getDataType().getClass();
 
         if(vague_type == H5T_INTEGER) {
             auto int_type = dset.getIntType();
             sign = int_type.getSign();
             size = int_type.getSize();
-            hdf_type = H5T_FLOAT;
             if(sign == H5T_SGN_2)
                 pdal_type = Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize());
             else
@@ -107,9 +86,9 @@ DimInfo::DimInfo(
             auto float_type = dset.getFloatType();
             sign = H5T_SGN_ERROR;
             size = float_type.getSize();
-            hdf_type = H5T_FLOAT;
             pdal_type = Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize());
-        } else {
+        }
+        else {
             throw pdal_error("Dataset '" + datasetName + "' has an " +
                 "unsupported type. Only integer and float types are supported.");
         }
@@ -135,7 +114,7 @@ void Handler::initialize(
         std::string const& datasetName = entry.second;
         m_dimInfos.emplace_back(DimInfo(dimName, datasetName, m_h5File));
     }
-    
+
     m_numPoints = m_dimInfos.at(0).numPoints;
     for( auto& info : m_dimInfos) {
         if(m_numPoints != info.numPoints) {

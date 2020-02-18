@@ -50,20 +50,22 @@ namespace pdal
 
 namespace hdf5
 {
-struct DimInfo
+
+class DimInfo
 {
-    // DimInfo(const std::string& dimName, const std::string& datasetName);
+public:
+    DimInfo(
+        const std::string& dimName,
+        const std::string& datasetName,
+        std::shared_ptr<H5::H5File> file);
 
-    DimInfo(const std::string& dimName, const std::string& datasetName, std::shared_ptr<H5::H5File> file);
-
+    Dimension::Id id = Dimension::Id::Unknown;
     std::string name;
     std::string hdfPath;
-    H5T_class_t hdf_type;
     H5T_sign_t sign;
     size_t size;
     hsize_t chunkSize;
     Dimension::Type pdal_type;
-    Dimension::Id id = Dimension::Id::Unknown;
     hsize_t chunkUpperBound = 0, chunkLowerBound = 0, numPoints = 0;
     std::vector<uint8_t> buffer;
 };
