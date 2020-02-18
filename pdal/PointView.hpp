@@ -129,12 +129,12 @@ public:
         PointId idx, const void *val);
 
     template <typename T>
-    bool compare(Dimension::Id dim, PointId id1, PointId id2)
+    bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
         return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
     }
 
-    bool compare(Dimension::Id dim, PointId id1, PointId id2)
+    virtual bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
         const Dimension::Detail *dd = layout()->dimDetail(dim);
 
@@ -317,8 +317,18 @@ private:
     virtual void setFieldInternal(Dimension::Id dim, PointId idx,
         const void *buf);
     virtual void getFieldInternal(Dimension::Id dim, PointId idx,
-        void *buf) const
-    { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
+            void *buf) const
+        { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
+    virtual void swapItems(PointId id1, PointId id2)
+    {
+        PointId temp = m_index[id2];
+        m_index[id2] = m_index[id1];
+        m_index[id1] = temp;
+    }
+    virtual void setItem(PointId dst, PointId src)
+    {
+        m_index[dst] = m_index[src];
+    }
 
     template<class T>
     T getFieldInternal(Dimension::Id dim, PointId pointIndex) const;

@@ -51,6 +51,16 @@ private:
         const void *val) = 0;
     virtual void getFieldInternal(Dimension::Id dim, PointId idx,
         void *val) const = 0;
+    virtual void swapItems(PointId id1, PointId id2)
+        { throw pdal_error("Can't swap items in this container."); }
+    virtual void setItem(PointId dst, PointId src)
+        { throw pdal_error("Can't set item in this container."); }
+    virtual bool compare(Dimension::Id dim, PointId id1, PointId id2) const
+        { throw pdal_error("Can't compare items in this container."); }
+    virtual PointId getTemp(PointId id)
+        { throw pdal_error("Can't get temp item in this container."); }
+    virtual void freeTemp(PointId id)
+        { throw pdal_error("Can't free temp item in this container."); }
 public:
     virtual PointLayoutPtr layout() const = 0;
 };

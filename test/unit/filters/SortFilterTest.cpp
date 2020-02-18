@@ -48,7 +48,8 @@ using namespace pdal;
 namespace
 {
 
-void doSort(point_count_t count, const std::string & dim="X", const std::string & order="")
+void doSort(point_count_t count, const std::string & dim="X",
+    const std::string & order="")
 {
     Options opts;
 
@@ -63,12 +64,16 @@ void doSort(point_count_t count, const std::string & dim="X", const std::string 
     PointViewPtr view(new PointView(table));
 
     table.layout()->registerDim(Dimension::Id::X);
+    table.finalize();
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(0.0, (double)count);
 
     for (PointId i = 0; i < count; ++i)
-        view->setField(Dimension::Id::X, i, dist(generator));
+    {
+        double x = dist(generator);
+        view->setField(Dimension::Id::X, i, x);
+    }
 
     filter.prepare(table);
     FilterWrapper::ready(filter, table);
@@ -80,7 +85,7 @@ void doSort(point_count_t count, const std::string & dim="X", const std::string 
     {
         double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
-        if(order.empty() || order == "ASC")
+        if (order.empty() || order == "ASC")
             EXPECT_TRUE(d1 <= d2);
         else // DES(cending)
             EXPECT_TRUE(d1 >= d2);
@@ -91,9 +96,8 @@ void doSort(point_count_t count, const std::string & dim="X", const std::string 
 
 TEST(SortFilterTest, simple)
 {
-    // note that this also tests default sort order ASC
-    point_count_t inc = 1;
-    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
+    // note that this also tests default sort order ASC /**
+    for (point_count_t count = 3; count < 8; count++)
         doSort(count);
 }
 

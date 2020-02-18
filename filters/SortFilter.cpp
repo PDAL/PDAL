@@ -52,7 +52,8 @@ void SortFilter::addArgs(ProgramArgs& args)
 {
     args.add("dimension", "Dimension on which to sort", m_dimName).
         setPositional();
-    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order, SortOrder::ASC);
+    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
+        SortOrder::ASC);
 }
 
 void SortFilter::prepared(PointTableRef table)
@@ -64,13 +65,15 @@ void SortFilter::prepared(PointTableRef table)
 
 void SortFilter::filter(PointView& view)
 {
-    auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
+    auto cmp = [this, &view](const PointRef& p1, const PointRef& p2)
     {
-        bool result = p1.compare(m_dim, p2);
+        bool result = view.compare(m_dim, p1.pointId(), p2.pointId());
         return (m_order == SortOrder::ASC) ? result : !result;
     };
 
+    std::cerr << "Stable sort!\n";
     std::stable_sort(view.begin(), view.end(), cmp);
+//    std::sort(view.begin(), view.end(), cmp);
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)
