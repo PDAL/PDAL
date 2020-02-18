@@ -59,7 +59,9 @@ DimInfo::DimInfo(
     , pdal_type(sign == H5T_SGN_2 ?
         Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize()) :
         Dimension::Type(unsigned(Dimension::BaseType::Unsigned) | int_type.getSize()))
-    { }
+    {
+        buffer.resize(chunkSize*size);
+    }
 
 DimInfo::DimInfo(
     const std::string& dimName,
@@ -72,7 +74,9 @@ DimInfo::DimInfo(
     , size(float_type.getSize())
     , chunkSize(chunkSize)
     , pdal_type(Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize()))
-    { }
+    {
+        buffer.resize(chunkSize*size);
+    }
 
 void Hdf5Handler::initialize(
         const std::string& filename,
@@ -138,8 +142,6 @@ void Hdf5Handler::initialize(
             throw pdal_error("Dataset '" + datasetName + "' has an " +
                 "unsupported type. Only integer and float types are supported.");
         }
-        m_buffers.push_back(std::vector<uint8_t>());
-        m_buffers.at(index).resize(chunkSize*dtype.getSize());
         index++;
     }
 }
@@ -152,7 +154,7 @@ void Hdf5Handler::close()
 
 uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointIndex) {
     DimInfo& info = m_dimInfos.at(dimInfoIndex);
-    auto& data = m_buffers.at(dimInfoIndex);
+    auto& data = info.buffer;
 
     if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
         // load new chunk

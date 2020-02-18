@@ -65,6 +65,7 @@ namespace hdf5
         Dimension::Type pdal_type;
         Dimension::Id id = Dimension::Id::Unknown;
         hsize_t chunkUpperBound = 0, chunkLowerBound = 0;
+        std::vector<uint8_t> buffer;
     };
 }
 
@@ -85,7 +86,6 @@ public:
 
 private:
     std::vector<pdal::hdf5::DimInfo> m_dimInfos;
-    std::vector<std::vector<uint8_t>> m_buffers;
     std::vector<H5::DataSet> m_dsets;
     std::vector<H5::DataSpace> m_dspaces;
 
