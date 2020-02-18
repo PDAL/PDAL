@@ -129,7 +129,7 @@ void HdfReader::parseDimensions()
     log()->get(LogLevel::Info) << m_pathDimJson << std::endl;
 
     if(m_pathDimJson.is_null()) {
-        throw pdal_error("Required option 'map' was not set");
+        throw pdal_error("Required option 'dimensions' was not set");
     } else if(!m_pathDimJson.is_object()) {
         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
             std::string(m_pathDimJson.type_name()));
