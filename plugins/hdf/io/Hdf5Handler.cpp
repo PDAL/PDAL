@@ -180,7 +180,8 @@ uint8_t *Hdf5Handler::loadNewChunk(uint dimInfoIndex, pdal::point_count_t pointI
         // return data.data() + m_dimInfos.at(dimInfoIndex).size * (pointIndex - m_chunkOffsets.at(dimInfoIndex));
 
     }
-    return data.data();
+    hssize_t pointOffsetWithinChunk = pointIndex - info.chunkLowerBound;
+    return data.data() + pointOffsetWithinChunk * info.size;
 }
 
 

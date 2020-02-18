@@ -97,11 +97,7 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     for(uint64_t pi = 0; pi < m_hdf5Handler->getNumPoints(); pi++) {
         for(uint64_t index = 0; index < m_info.size(); ++index) {
             auto& info = m_info.at(index);
-            uint64_t bufIndex = pi % info.info->chunkSize;
-            // if(bufIndex == 0) {
-                info.buffer = m_hdf5Handler->loadNewChunk(index, pi);
-            // }
-            uint8_t *p = info.buffer + bufIndex*info.info->size;
+            uint8_t *p = m_hdf5Handler->loadNewChunk(index, pi);
             view->setField(info.info->id, info.info->pdal_type, nextId, (void*) p);
         }
         nextId++;
@@ -116,11 +112,7 @@ bool HdfReader::processOne(PointRef& point)
     // each dimension can have a different chunk size
     for(uint64_t index = 0; index < m_info.size(); ++index) {
         auto& info = m_info.at(index);
-        uint64_t bufIndex = m_index % info.info->chunkSize;
-        // if(bufIndex == 0) {
-            info.buffer = m_hdf5Handler->loadNewChunk(index, m_index);
-        // }
-        uint8_t *p = info.buffer + bufIndex*info.info->size;
+        uint8_t *p = m_hdf5Handler->loadNewChunk(index, m_index);
         point.setField(info.info->id, info.info->pdal_type, p);
     }
 
