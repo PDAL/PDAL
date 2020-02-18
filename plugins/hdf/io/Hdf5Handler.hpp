@@ -52,9 +52,9 @@ namespace hdf5
 {
 struct DimInfo
 {
-    DimInfo(const std::string& dimName, const std::string& datasetName, H5::IntType int_type, hsize_t chunkSize);
+    // DimInfo(const std::string& dimName, const std::string& datasetName);
 
-    DimInfo(const std::string& dimName, const std::string& datasetName, H5::FloatType float_type, hsize_t chunkSize);
+    DimInfo(const std::string& dimName, const std::string& datasetName, std::shared_ptr<H5::H5File> file);
 
     std::string name;
     std::string hdfPath;
@@ -64,7 +64,7 @@ struct DimInfo
     hsize_t chunkSize;
     Dimension::Type pdal_type;
     Dimension::Id id = Dimension::Id::Unknown;
-    hsize_t chunkUpperBound = 0, chunkLowerBound = 0;
+    hsize_t chunkUpperBound = 0, chunkLowerBound = 0, numPoints = 0;
     std::vector<uint8_t> buffer;
 };
 
@@ -88,7 +88,7 @@ private:
 
     pdal::LogPtr m_logger;
 
-    std::unique_ptr<H5::H5File> m_h5File;
+    std::shared_ptr<H5::H5File> m_h5File;
     hsize_t m_numPoints = 0;
 };
 
