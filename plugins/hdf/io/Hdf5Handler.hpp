@@ -60,17 +60,28 @@ public:
         std::shared_ptr<H5::H5File> file);
 
     uint8_t *getValue(pdal::point_count_t pointIndex);
+    //setters
+    void setId(Dimension::Id id);
+    //getters
+    Dimension::Id getId();
+    Dimension::Type getPdalType();
+    std::string getName();
+    hsize_t getNumPoints();
 
-    Dimension::Id id = Dimension::Id::Unknown;
-    std::string name;
-    std::string hdfPath;
+private:
+    std::vector<uint8_t> m_buffer;
+    std::string m_name;
+    Dimension::Type m_pdalType;
+    Dimension::Id m_pdalId = Dimension::Id::Unknown;
+    hsize_t chunkUpperBound = 0,
+            chunkLowerBound = 0,
+            m_numPoints = 0,
+            m_chunkSize;
+    H5::DataSet m_dset;
+    size_t m_size;
+    //not used currently
     H5T_sign_t sign;
-    size_t size;
-    hsize_t chunkSize;
-    H5::DataSet dset;
-    Dimension::Type pdal_type;
-    hsize_t chunkUpperBound = 0, chunkLowerBound = 0, numPoints = 0;
-    std::vector<uint8_t> buffer;
+    std::string m_hdfPath;
 };
 
 class Handler
@@ -82,7 +93,7 @@ public:
     void close();
 
     hsize_t getNumPoints() const;
-    std::vector<pdal::hdf5::DimInfo>& getDimensionInfos();
+    std::vector<pdal::hdf5::DimInfo>& getDimensions();
 
     void setLog(pdal::LogPtr log);
 

@@ -67,9 +67,9 @@ void HdfReader::addDimensions(PointLayoutPtr layout)
     m_hdf5Handler->setLog(log());
     m_hdf5Handler->initialize(m_filename, m_pathDimMap);
 
-    for (auto& info : m_hdf5Handler->getDimensionInfos())
+    for (hdf5::DimInfo& dim : m_hdf5Handler->getDimensions())
     {
-        info.id = layout->registerOrAssignDim(info.name, info.pdal_type);
+        dim.setId(layout->registerOrAssignDim(dim.getName(), dim.getPdalType()));
     }
 }
 
@@ -86,14 +86,11 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
     point_count_t remaining = m_hdf5Handler->getNumPoints() - m_index;
     count = (std::min)(count, remaining);
     PointId nextId = startId;
-    auto& infos = m_hdf5Handler->getDimensionInfos();
-    log()->get(LogLevel::Info) << "num infos: " << infos.size() << std::endl;
-    log()->get(LogLevel::Info) << "num points: " << m_hdf5Handler->getNumPoints() << std::endl;
 
     for(uint64_t pi = 0; pi < m_hdf5Handler->getNumPoints(); pi++) {
-        for(auto& info : m_hdf5Handler->getDimensionInfos()) {
-            uint8_t *p = info.getValue(pi);
-            view->setField(info.id, info.pdal_type, nextId, (void*) p);
+        for(hdf5::DimInfo& dim : m_hdf5Handler->getDimensions()) {
+            uint8_t *p = dim.getValue(pi);
+            view->setField(dim.getId(), dim.getPdalType(), nextId, (void*) p);
         }
         m_index++;
         nextId++;
@@ -105,9 +102,9 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 
 bool HdfReader::processOne(PointRef& point)
 {
-    for(auto& info : m_hdf5Handler-> getDimensionInfos()) {
-        uint8_t *p = info.getValue(m_index);
-        point.setField(info.id, info.pdal_type, p);
+    for(hdf5::DimInfo& dim : m_hdf5Handler-> getDimensions()) {
+        uint8_t *p = dim.getValue(m_index);
+        point.setField(dim.getId(), dim.getPdalType(), p);
     }
 
     m_index++;
