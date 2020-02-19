@@ -624,7 +624,7 @@ private:
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = PointRef;
-    using difference_type = point_count_t;
+    using difference_type = ptrdiff_t;
     using pointer = PointRef*;
     using reference = PointRef;
 
@@ -651,7 +651,7 @@ public:
     PointViewIter operator-=(const difference_type& n)
         { m_id -= n; return *this; }
     difference_type operator-(const PointViewIter& i) const
-        { return m_id - i.m_id; }
+        { return static_cast<difference_type>(m_id - i.m_id); }
 
     bool operator==(const PointViewIter& i)
         { return m_id == i.m_id; }
@@ -667,6 +667,8 @@ public:
         { return m_id >= i.m_id; }
 
     reference operator*()
+        { return PointRef(*m_view, m_id); }
+    const reference operator*() const
         { return PointRef(*m_view, m_id); }
     pointer operator->()
         { return nullptr; }
