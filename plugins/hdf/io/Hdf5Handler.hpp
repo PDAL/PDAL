@@ -57,7 +57,7 @@ public:
     DimInfo(
         const std::string& dimName,
         const std::string& datasetName,
-        std::shared_ptr<H5::H5File> file);
+        H5::H5File *file);
 
     uint8_t *getValue(pdal::point_count_t pointIndex);
     //setters
@@ -99,7 +99,7 @@ private:
 
     pdal::LogPtr m_logger;
 
-    std::shared_ptr<H5::H5File> m_h5File;
+    std::unique_ptr<H5::H5File> m_h5File;
     hsize_t m_numPoints = 0;
 };
 

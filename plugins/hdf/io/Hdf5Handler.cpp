@@ -64,7 +64,7 @@ void Handler::initialize(
     for( auto const& entry : map) {
         std::string const& dimName = entry.first;
         std::string const& datasetName = entry.second;
-        m_dimInfos.emplace_back(DimInfo(dimName, datasetName, m_h5File));
+        m_dimInfos.emplace_back(DimInfo(dimName, datasetName, m_h5File.get()));
     }
 
     // Check that all dimensions have equal lengths
@@ -114,10 +114,10 @@ hsize_t Handler::getNumPoints() const
 DimInfo::DimInfo(
     const std::string& dimName,
     const std::string& datasetName,
-    std::shared_ptr<H5::H5File> file
+    H5::H5File *file
     )
     : m_name(dimName)
-    , m_dset(file.get()->openDataSet(datasetName))
+    , m_dset(file->openDataSet(datasetName))
     {
         // Will throw if dataset doesn't exists. Gives adequate error message
         H5::DataSpace dspace = m_dset.getSpace();
