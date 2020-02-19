@@ -42,7 +42,6 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
-#include <pdal/PointViewIter.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"

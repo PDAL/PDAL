@@ -1,6 +1,7 @@
 /******************************************************************************
  * Copyright (c) 2019, Helix.re
- * Contact Person : Pravin Shinde (pravin@helix.re, https://github.com/pravinshinde825)
+ * Contact Person : Pravin Shinde (pravin@helix.re,
+ *    https://github.com/pravinshinde825)
  *
  * All rights reserved.
  *
@@ -69,47 +70,32 @@ void standard_test(std::string mode) {
     EXPECT_EQ(v->size(), 7788U);
 }
 
-void origin_test(std::string mode) {
+void origin_test(std::string mode)
+{
     using namespace Dimension;
     PointTable t;
     t.layout()->registerDims({Id::X, Id::Y, Id::Z});
     PointViewPtr v(new PointView(t));
 
-    v->setField(Id::X, 0, 1);
-    v->setField(Id::Y, 0, 1);
-    v->setField(Id::Z, 0, 1);
+    std::vector<std::array<double, 3>> plist 
+        { { 5, 5, 5 },
+          { 1, 1, -1 },
+          { 1, -1, 1 },
+          { 1, -1, -1 },
+          { -1, 1, 1 },
+          { -1, 1, -1 },
+          { -1, -1, 1 },
+          { -1, -1, -1 },
+          { 1, 1, 1 } };
 
-    v->setField(Id::X, 1, 1);
-    v->setField(Id::Y, 1, 1);
-    v->setField(Id::Z, 1, 1);
-
-    v->setField(Id::X, 2, 1);
-    v->setField(Id::Y, 2, 1);
-    v->setField(Id::Z, 2, -1);
-
-    v->setField(Id::X, 3, 1);
-    v->setField(Id::Y, 3, -1);
-    v->setField(Id::Z, 3, 1);
-
-    v->setField(Id::X, 4, 1);
-    v->setField(Id::Y, 4, -1);
-    v->setField(Id::Z, 4, -1);
-
-    v->setField(Id::X, 5, -1);
-    v->setField(Id::Y, 5, 1);
-    v->setField(Id::Z, 5, 1);
-
-    v->setField(Id::X, 6, -1);
-    v->setField(Id::Y, 6, 1);
-    v->setField(Id::Z, 6, -1);
-
-    v->setField(Id::X, 7, -1);
-    v->setField(Id::Y, 7, -1);
-    v->setField(Id::Z, 7, 1);
-
-    v->setField(Id::X, 8, -1);
-    v->setField(Id::Y, 8, -1);
-    v->setField(Id::Z, 8, -1);
+    PointId id = 0;
+    for (std::array<double, 3>& p : plist)
+    {
+        v->setField(Id::X, id, p[0]);
+        v->setField(Id::Y, id, p[1]);
+        v->setField(Id::Z, id, p[2]);
+        ++id;
+    }
 
     BufferReader r;
     r.addView(v);
@@ -126,6 +112,22 @@ void origin_test(std::string mode) {
     EXPECT_EQ(s.size(), 1u);
     v = *s.begin();
     EXPECT_EQ(v->size(), 8u);
+    if (mode == "center")
+    {
+        PointId id = 0;
+        for (PointRef p : *v)
+        {
+            double x = p.getFieldAs<double>(Dimension::Id::X);
+            double y = p.getFieldAs<double>(Dimension::Id::Y);
+            double z = p.getFieldAs<double>(Dimension::Id::Z);
+            std::cerr << "x/y/z = " << x << "/" << y << "/" << z << "!\n";
+            /**
+            EXPECT_EQ(p.getFieldAs<double>(Dimension::Id::X),
+                plist[id][0] * 
+            **/
+            id++;
+        }
+    }
 }
 
 void stream_test(std::string mode) {
@@ -181,16 +183,19 @@ void stream_test(std::string mode) {
         {
             if (m_count == 0)
             {
+                std::cerr << "0 Point ID = " << point.pointId() << "!\n";
                 EXPECT_EQ(point.getFieldAs<int>(Id::X), 2);
                 EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
             }
             if (m_count == 1)
             {
+                std::cerr << "1 Point ID = " << point.pointId() << "!\n";
                 EXPECT_EQ(point.getFieldAs<int>(Id::X), 8);
                 EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
             }
             if (m_count == 2)
             {
+                std::cerr << "2 Point ID = " << point.pointId() << "!\n";
                 EXPECT_EQ(point.getFieldAs<int>(Id::X), 10);
                 EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
             }
@@ -218,19 +223,25 @@ void stream_test(std::string mode) {
     f.execute(table);
 }
 
-TEST(VoxelDownsizeFilter, firstinvoxel_standard)
-{
-    standard_test("firstinvoxel");
-}
-
 TEST(VoxelDownsizeFilter, firstinvoxel_origin)
 {
-    origin_test("firstinvoxel");
+    origin_test("first");
 }
 
+TEST(VoxelDownsizeFilter, voxelcenter_origin)
+{
+    origin_test("center");
+}
+
+/**
 TEST(VoxelDownsizeFilter, firstinvoxel_stream)
 {
     stream_test("firstinvoxel");
+}
+
+TEST(VoxelDownsizeFilter, firstinvoxel_standard)
+{
+    standard_test("firstinvoxel");
 }
 
 TEST(VoxelDownsizeFilter, voxelcenter_standard)
@@ -238,13 +249,10 @@ TEST(VoxelDownsizeFilter, voxelcenter_standard)
     standard_test("voxelcenter");
 }
 
-TEST(VoxelDownsizeFilter, voxelcenter_origin)
-{
-    origin_test("voxelcenter");
-}
-
 TEST(VoxelDownsizeFilter, voxelcenter_stream)
 {
     stream_test("voxelcenter");
 }
+**/
+
 } // namespace

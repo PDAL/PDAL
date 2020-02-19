@@ -58,9 +58,9 @@ private:
     virtual bool compare(Dimension::Id dim, PointId id1, PointId id2) const
         { throw pdal_error("Can't compare items in this container."); }
     virtual PointId getTemp(PointId id)
-        { throw pdal_error("Can't get temp item in this container."); }
+        { return id; }
     virtual void freeTemp(PointId id)
-        { throw pdal_error("Can't free temp item in this container."); }
+        {}
 public:
     virtual PointLayoutPtr layout() const = 0;
 };

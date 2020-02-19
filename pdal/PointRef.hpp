@@ -203,6 +203,7 @@ public:
         case Dimension::Type::None:
             break;
         }
+
         if (success)
             m_container->setFieldInternal(dim, m_idx, &e);
     }

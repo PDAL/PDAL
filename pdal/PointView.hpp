@@ -39,8 +39,8 @@
 #include <pdal/Mesh.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
-#include <pdal/PointRef.hpp>
 #include <pdal/PointTable.hpp>
+#include <pdal/PointRef.hpp>
 
 #include <memory>
 #include <queue>
@@ -612,5 +612,66 @@ inline PointId PointView::getTemp(PointId id)
 }
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointView&);
+
+// PointViewIter
+
+class PointViewIter
+{
+private:
+    PointView *m_view;
+    PointId m_id;
+
+public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = PointRef;
+    using difference_type = point_count_t;
+    using pointer = PointRef*;
+    using reference = PointRef;
+
+    PointViewIter()
+    {}
+    PointViewIter(PointView* view, PointId id) : m_view(view), m_id(id)
+    {}
+
+    PointViewIter& operator++()
+        { m_id++; return *this; }
+    PointViewIter operator++(int)
+        { return PointViewIter(m_view, m_id++); }
+    PointViewIter& operator--()
+        { --m_id; return *this; }
+    PointViewIter operator--(int)
+        { return PointViewIter(m_view, m_id--); }
+
+    PointViewIter operator+(const difference_type& n) const
+        { return PointViewIter(m_view, m_id + n); }
+    PointViewIter operator+=(const difference_type& n)
+        { m_id += n; return *this; }
+    PointViewIter operator-(const difference_type& n) const
+        { return PointViewIter(m_view, m_id - n); }
+    PointViewIter operator-=(const difference_type& n)
+        { m_id -= n; return *this; }
+    difference_type operator-(const PointViewIter& i) const
+        { return m_id - i.m_id; }
+
+    bool operator==(const PointViewIter& i)
+        { return m_id == i.m_id; }
+    bool operator!=(const PointViewIter& i)
+        { return m_id != i.m_id; }
+    bool operator<(const PointViewIter& i)
+        { return m_id < i.m_id; }
+    bool operator<=(const PointViewIter& i)
+        { return m_id <= i.m_id; }
+    bool operator>(const PointViewIter& i)
+        { return m_id > i.m_id; }
+    bool operator>=(const PointViewIter& i)
+        { return m_id >= i.m_id; }
+
+    reference operator*()
+        { return PointRef(*m_view, m_id); }
+    pointer operator->()
+        { return nullptr; }
+    reference operator[](const difference_type& n) const
+        { return PointRef(*m_view, m_id + n); }
+};
 
 } // namespace pdal
