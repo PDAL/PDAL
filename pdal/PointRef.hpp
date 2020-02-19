@@ -224,21 +224,6 @@ public:
     PointId pointId() const
         { return m_idx; }
 
-    PointRef& operator+=(point_count_t n)
-        { m_idx += n; return *this; }
-    PointRef& operator-=(point_count_t n)
-        { m_idx -= n; return *this; }
-    bool operator==(const PointRef& r) const
-        { return (m_container == r.m_container) && (m_idx == r.m_idx); }
-    bool operator<(const PointRef& r) const
-        { return (m_container == r.m_container) && (m_idx < r.m_idx); }
-    bool operator<=(const PointRef& r) const
-        { return (m_container == r.m_container) && (m_idx <= r.m_idx); }
-    bool operator>(const PointRef& r) const
-        { return (m_container == r.m_container) && (m_idx > r.m_idx); }
-    bool operator>=(const PointRef& r) const
-        { return (m_container == r.m_container) && (m_idx >= r.m_idx); }
-
     inline void getField(char *val, Dimension::Id d,
         Dimension::Type type) const;
     inline void setField(Dimension::Id dim,
