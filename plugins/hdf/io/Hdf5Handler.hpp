@@ -79,9 +79,6 @@ private:
             m_chunkSize;
     H5::DataSet m_dset;
     size_t m_size;
-    //not used currently
-    H5T_sign_t sign;
-    std::string m_hdfPath;
 };
 
 class Handler

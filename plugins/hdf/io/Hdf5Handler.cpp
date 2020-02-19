@@ -144,7 +144,7 @@ DimInfo::DimInfo(
 
         if(vague_type == H5T_INTEGER) {
             H5::IntType int_type = m_dset.getIntType();
-            sign = int_type.getSign();
+            H5T_sign_t sign = int_type.getSign();
             m_size = int_type.getSize();
             if(sign == H5T_SGN_2)
                 m_pdalType = Dimension::Type(unsigned(Dimension::BaseType::Signed) | int_type.getSize());
@@ -153,7 +153,6 @@ DimInfo::DimInfo(
         }
         else if(vague_type == H5T_FLOAT) {
             H5::FloatType float_type = m_dset.getFloatType();
-            sign = H5T_SGN_ERROR;
             m_size = float_type.getSize();
             m_pdalType = Dimension::Type(unsigned(Dimension::BaseType::Floating) | float_type.getSize());
         }
