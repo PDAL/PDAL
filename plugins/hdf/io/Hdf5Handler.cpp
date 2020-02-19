@@ -69,7 +69,7 @@ void Handler::initialize(
 
     // Check that all dimensions have equal lengths
     m_numPoints = m_dimInfos.at(0).getNumPoints();
-    for( auto& info : m_dimInfos) {
+    for( DimInfo& info : m_dimInfos) {
         if(m_numPoints != info.getNumPoints()) {
             throw pdal_error("All given datasets must have the same length");
         }
@@ -86,7 +86,7 @@ void Handler::close()
 uint8_t *DimInfo::getValue(pdal::point_count_t pointIndex) {
     if(pointIndex < chunkLowerBound || pointIndex >= chunkUpperBound) {
         // load new chunk
-        auto dspace = m_dset.getSpace();
+        H5::DataSpace dspace = m_dset.getSpace();
 
         chunkLowerBound = (pointIndex / m_chunkSize) * m_chunkSize;
         chunkUpperBound = std::min(chunkLowerBound + m_chunkSize, m_numPoints);
