@@ -50,7 +50,7 @@ namespace pdal
 namespace hdf5
 {
     class Handler;
-    struct DimInfo;
+    class DimInfo;
 }
 
 class PDAL_DLL HdfReader : public pdal::Reader, public pdal::Streamable
