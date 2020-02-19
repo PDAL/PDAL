@@ -92,9 +92,10 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 
     for(uint64_t pi = 0; pi < m_hdf5Handler->getNumPoints(); pi++) {
         for(auto& info : m_hdf5Handler->getDimensionInfos()) {
-            uint8_t *p = m_hdf5Handler->getValue(info, pi);
+            uint8_t *p = info.getValue(pi);
             view->setField(info.id, info.pdal_type, nextId, (void*) p);
         }
+        m_index++;
         nextId++;
     }
 
@@ -105,7 +106,7 @@ point_count_t HdfReader::read(PointViewPtr view, point_count_t count)
 bool HdfReader::processOne(PointRef& point)
 {
     for(auto& info : m_hdf5Handler-> getDimensionInfos()) {
-        uint8_t *p = m_hdf5Handler->getValue(info, m_index);
+        uint8_t *p = info.getValue(m_index);
         point.setField(info.id, info.pdal_type, p);
     }
 

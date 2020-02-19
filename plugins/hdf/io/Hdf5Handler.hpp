@@ -59,12 +59,15 @@ public:
         const std::string& datasetName,
         std::shared_ptr<H5::H5File> file);
 
+    uint8_t *getValue(pdal::point_count_t pointIndex);
+
     Dimension::Id id = Dimension::Id::Unknown;
     std::string name;
     std::string hdfPath;
     H5T_sign_t sign;
     size_t size;
     hsize_t chunkSize;
+    H5::DataSet dset;
     Dimension::Type pdal_type;
     hsize_t chunkUpperBound = 0, chunkLowerBound = 0, numPoints = 0;
     std::vector<uint8_t> buffer;
@@ -77,8 +80,6 @@ public:
             const std::string& filename,
             const std::map<std::string,std::string>& map);
     void close();
-
-    uint8_t *getValue(hdf5::DimInfo& info, pdal::point_count_t pointIndex);
 
     hsize_t getNumPoints() const;
     std::vector<pdal::hdf5::DimInfo>& getDimensionInfos();

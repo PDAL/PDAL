@@ -54,9 +54,9 @@ DimInfo::DimInfo(
     : name(dimName)
     , hdfPath(datasetName)
     , chunkSize(1024)
+    , dset(file.get()->openDataSet(datasetName))
     {
         // Will throw if dataset doesn't exists. Gives adequate error message
-        H5::DataSet dset = file.get()->openDataSet(datasetName);
         H5::DataSpace dspace = dset.getSpace();
         if(dspace.getSelectNpoints() < 0)
             throw pdal_error("Selection had a negative number of points. "
@@ -129,29 +129,28 @@ void Handler::close()
 }
 
 
-uint8_t *Handler::getValue(DimInfo& info, pdal::point_count_t pointIndex) {
-    uint8_t *p = info.buffer.data();
+uint8_t *DimInfo::getValue(pdal::point_count_t pointIndex) {
+    uint8_t *p = buffer.data();
 
-    if(pointIndex < info.chunkLowerBound || pointIndex >= info.chunkUpperBound) {
+    if(pointIndex < chunkLowerBound || pointIndex >= chunkUpperBound) {
         // load new chunk
-        auto dset = m_h5File.get()->openDataSet(info.hdfPath);
         auto dspace = dset.getSpace();
 
-        info.chunkLowerBound = (pointIndex / info.chunkSize) * info.chunkSize;
-        info.chunkUpperBound = std::min(info.chunkLowerBound + info.chunkSize, m_numPoints);
+        chunkLowerBound = (pointIndex / chunkSize) * chunkSize;
+        chunkUpperBound = std::min(chunkLowerBound + chunkSize, numPoints);
 
-        hsize_t selectionSize = info.chunkUpperBound - info.chunkLowerBound;
+        hsize_t selectionSize = chunkUpperBound - chunkLowerBound;
 
         H5::DataSpace memspace(1, &selectionSize);
-        dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &info.chunkLowerBound);
+        dspace.selectHyperslab(H5S_SELECT_SET, &selectionSize, &chunkLowerBound);
         dset.read(  p,
                     dset.getDataType(),
                     memspace,
                     dspace );
 
     }
-    hsize_t pointOffsetWithinChunk = pointIndex - info.chunkLowerBound;
-    return p + pointOffsetWithinChunk * info.size;
+    hsize_t pointOffsetWithinChunk = pointIndex - chunkLowerBound;
+    return p + pointOffsetWithinChunk * size;
 }
 
 
