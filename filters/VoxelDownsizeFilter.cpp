@@ -141,11 +141,6 @@ bool VoxelDownsizeFilter::voxelize(PointRef& point)
     Voxel v = std::make_tuple((int)(std::floor(x / m_cell)),
         (int)(std::floor(y / m_cell)), (int)(std::floor(z / m_cell)));
 
-    std::cerr << "V = " <<
-        std::get<0>(v) << "/" <<
-        std::get<1>(v) << "/" <<
-        std::get<2>(v) << "!\n";
-
     auto inserted = m_populatedVoxels.insert(v).second;
     if ((m_mode == Mode::Center) && inserted)
     {
@@ -155,10 +150,6 @@ bool VoxelDownsizeFilter::voxelize(PointRef& point)
             (std::get<1>(v) + 0.5) * m_cell + m_originY);
         point.setField(Dimension::Id::Z,
             (std::get<2>(v) + 0.5) * m_cell + m_originZ);
-        std::cerr << "Center = " <<
-            (std::get<0>(v) + .5) * m_cell + m_originX << "/" <<
-            (std::get<1>(v) + .5) * m_cell + m_originY << "/" <<
-            (std::get<2>(v) + .5) * m_cell + m_originZ << "!\n";
     }
     return inserted;
 }
