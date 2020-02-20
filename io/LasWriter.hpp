@@ -127,7 +127,7 @@ private:
     StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
-    std::vector<LasVLR> m_userVLRs;
+    std::vector<ExtLasVLR> m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);
@@ -170,6 +170,7 @@ private:
     void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
+    void addVlr(const ExtLasVLR& evlr);
     void deleteVlr(const std::string& userId, uint16_t recordId);
     void addGeotiffVlrs();
     bool addWktVlr();

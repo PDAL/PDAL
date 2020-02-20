@@ -1184,7 +1184,6 @@ TEST(LasWriterTest, pdal_add_vlr)
 
     PointTable t2;
     Options readerOpts2;
-    std::cerr << "Reading filename = " << outfile << "!\n";
     readerOpts2.add("filename", outfile);
     LasReader reader2;
     reader2.setOptions(readerOpts2);
@@ -1210,9 +1209,9 @@ TEST(LasWriterTest, evlroffset)
         Options wo;
         std::vector<uint8_t> largeVlr(66000);
         std::string vlr =
-            " [ { \"description\": \"A description under 32 bytes\", "
+            " { \"description\": \"A description under 32 bytes\", "
             "\"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"" +
-            Utils::base64_encode(largeVlr) + "\" }]";
+            Utils::base64_encode(largeVlr) + "\" }";
         wo.add("vlrs", vlr);
         wo.add("minor_version", 4);
         wo.add("filename", outfile);

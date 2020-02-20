@@ -76,8 +76,9 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     } while (std::isspace(c));
     if (!in.eof())
         throw pdal_error("Invalid characters following LAS VLR JSON object.");
-    in.clear();
 
+    // We forced an EOF above, so clear the error state.
+    in.clear();
     if (!j.is_object())
         throw pdal_error("LAS VLR must be specified as a JSON object.");
 
@@ -145,6 +146,12 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
 }
 
 
+std::istream& operator>>(std::istream& in, ExtLasVLR& v)
+{
+    return (in >> (LasVLR&)v);
+}
+
+
 std::ostream& operator<<(std::ostream& out, const LasVLR& v)
 {
     const unsigned char *d(reinterpret_cast<const unsigned char *>(v.data()));
@@ -156,6 +163,11 @@ std::ostream& operator<<(std::ostream& out, const LasVLR& v)
     out << "  \"data\": \"" <<Utils::base64_encode(d, v.dataLen()) << "\"\n";
     out << "}\n";
     return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const ExtLasVLR& v)
+{
+    return (out << (LasVLR&)v);
 }
 
 

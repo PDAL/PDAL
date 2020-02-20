@@ -234,7 +234,7 @@ void LasWriter::prepared(PointTableRef table)
 void LasWriter::addUserVlrs()
 {
     for (const auto& v : m_userVLRs)
-        m_vlrs.push_back(std::move(v));
+        addVlr(v);
 }
 
 
@@ -547,23 +547,24 @@ void LasWriter::addExtraBytesVlr()
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, std::vector<uint8_t>& data)
 {
-    if (data.size() > LasVLR::MAX_DATA_SIZE)
+    addVlr(ExtLasVLR(userId, recordId, description, data));
+}
+
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  evlr  VLR to add.
+void LasWriter::addVlr(const ExtLasVLR& evlr)
+{
+    if (evlr.dataLen() > LasVLR::MAX_DATA_SIZE)
     {
         if (m_lasHeader.versionAtLeast(1, 4))
-        {
-            ExtLasVLR evlr(userId, recordId, description, data);
             m_eVlrs.push_back(std::move(evlr));
-        }
         else
             throwError("Can't write VLR with user ID/record ID = " +
-                userId + "/" + std::to_string(recordId) +
+                evlr.userId() + "/" + std::to_string(evlr.recordId()) +
                 ".  The data size exceeds the maximum supported.");
     }
     else
-    {
-        LasVLR vlr(userId, recordId, description, data);
-        m_vlrs.push_back(std::move(vlr));
-    }
+        m_vlrs.push_back(std::move(static_cast<const LasVLR&>(evlr)));
 }
 
 /// Delete a VLR from the vlr list.

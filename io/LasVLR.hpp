@@ -126,6 +126,8 @@ public:
     friend ILeStream& operator>>(ILeStream& in, ExtLasVLR& v);
     friend OLeStream& operator<<(OLeStream& out,
         const ExtLasVLR& v);
+    friend std::istream& operator>>(std::istream& in, ExtLasVLR& v);
+    friend std::ostream& operator<<(std::ostream& out, const ExtLasVLR& v);
 };
 
 } // namespace pdal
