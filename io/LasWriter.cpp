@@ -89,8 +89,7 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0),
-    m_userVLRs(new NL::json)
+    m_compression(LasCompression::None), m_srsCnt(0)
 {}
 
 
@@ -148,7 +147,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
-    args.add("vlrs", "List of VLRs to set", *m_userVLRs);
+    args.add("vlrs", "List of VLRs to set", m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -236,31 +235,11 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-    for (const auto& v : *m_userVLRs)
-    {
-        uint16_t recordId(1);
-        std::string userId("");
-        std::string description("");
-        std::string b64data("");
-        std::string user("");
-        if (!v.contains("user_id"))
-            throw pdal_error("VLR must contain a 'user_id'!");
-        userId = v["user_id"].get<std::string>();
-
-        if (!v.contains("data"))
-            throw pdal_error("VLR must contain a base64-encoded 'data' member");
-        b64data = v["data"].get<std::string>();
-
-        // Record ID should always be no more than 2 bytes.
-        if (v.contains("record_id"))
-            recordId = v["record_id"].get<uint16_t>();
-
-        if (v.contains("description"))
-            description = v["description"].get<std::string>();
-
-        std::vector<uint8_t> data = Utils::base64_decode(b64data);
-        addVlr(userId, recordId, description, data);
-    }
+    for (const auto& v : m_userVLRs)
+{
+        std::cerr << "Adding a user vlr!\n";
+        m_vlrs.push_back(std::move(v));
+}
 }
 
 
