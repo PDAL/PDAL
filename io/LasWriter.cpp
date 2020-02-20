@@ -327,7 +327,8 @@ void LasWriter::readyTable(PointTableRef table)
         addPipelineVlr();
     }
     addExtraBytesVlr();
-    addUserVlrs();
+    if (!m_userVLRs->empty())
+        addUserVlrs();
     addForwardVlrs();
 }
 
