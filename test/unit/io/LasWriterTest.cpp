@@ -1199,6 +1199,80 @@ TEST(LasWriterTest, pdal_add_vlr)
     EXPECT_EQ(nodes.size(), 2UL);
 }
 
+TEST(LasWriterTest, badVlr)
+{
+    auto doTest = [](const std::string& vlr, bool expectThrow = true)
+    {
+        Options opts;
+        opts.add("filename", Support::temppath("testfile"));
+        opts.add("vlrs", vlr);
+
+        LasWriter w;
+        w.setOptions(opts);
+
+        PointTable t;
+        if (expectThrow)
+            EXPECT_THROW(w.prepare(t), pdal_error);
+        else
+            EXPECT_NO_THROW(w.prepare(t));
+    };
+
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })", false
+    );
+    doTest(
+      R"({
+        "description": "A description over 32 bytes is one that's way too long",
+        "record_id": 42,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "A userID that's way too long",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "hobu"
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42.234,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 422340,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+}
+
 TEST(LasWriterTest, evlroffset)
 {
     std::string outfile(Support::temppath("evlr.las"));
@@ -1357,7 +1431,7 @@ TEST(LasWriterTest, issue1940)
 }
 
 // Make sure that we can forward scale from multiple files if they match.
-TEST(LasWRiterTest, issue2663)
+TEST(LasWriterTest, issue2663)
 {
     std::string outfile(Support::temppath("out.las"));
     {
