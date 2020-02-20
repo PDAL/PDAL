@@ -1271,6 +1271,14 @@ TEST(LasWriterTest, badVlr)
         "data": "dGhpcyBpcyBzb21lIHRleHQ="
       })"
     );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      } junk after valid VLR )"
+    );
 }
 
 TEST(LasWriterTest, evlroffset)
