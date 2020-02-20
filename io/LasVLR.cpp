@@ -67,7 +67,16 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     NL::json j;
     in >> j;
 
-    std::cout << j << "!\n";
+    // Make sure there isn't stuff in the input stream after the JSON
+    // object.
+    char c;
+    do
+    {
+        in >> c;
+    } while (std::isspace(c));
+    if (!in.eof())
+        throw pdal_error("Invalid characters following LAS VLR JSON object.");
+    in.clear();
 
     if (!j.is_object())
         throw pdal_error("LAS VLR must be specified as a JSON object.");

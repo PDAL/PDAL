@@ -236,10 +236,7 @@ void LasWriter::prepared(PointTableRef table)
 void LasWriter::addUserVlrs()
 {
     for (const auto& v : m_userVLRs)
-{
-        std::cerr << "Adding a user vlr!\n";
         m_vlrs.push_back(std::move(v));
-}
 }
 
 

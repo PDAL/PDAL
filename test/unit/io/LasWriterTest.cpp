@@ -1151,8 +1151,22 @@ TEST(LasWriterTest, pdal_add_vlr)
     Options readerOpts;
     readerOpts.add("filename", infile);
 
-    std::string vlr1( "{ \"description\": \"A description under 32 bytes\", \"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIHRleHQ=\" }");
-    std::string vlr2( "{ \"description\": \"A description under 32 bytes\", \"record_id\": 43, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIG1vcmUgdGV4dA==\" }");
+    std::string vlr1(
+      R"({
+          "description": "A description under 32 bytes",
+          "record_id": 42,
+          "user_id": "hobu",
+          "data": "dGhpcyBpcyBzb21lIHRleHQ="
+         })"
+    );
+    std::string vlr2(
+      R"({
+          "description": "A description under 32 bytes",
+          "record_id": 43,
+          "user_id": "hobu",
+          "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
+         })"
+    );
 
     Options writerOpts;
     writerOpts.add("vlrs", vlr1);
