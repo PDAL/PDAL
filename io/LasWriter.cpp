@@ -56,8 +56,6 @@
 #include <iostream>
 #include <vector>
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
