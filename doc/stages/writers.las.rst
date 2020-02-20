@@ -30,7 +30,7 @@ containing `user_id` and `data` items.
       },
       {
           "type":"writers.las",
-          "vlrs": [{
+          "vlrs": {"json":[{
               "description": "A description under 32 bytes",
               "record_id": 42,
               "user_id": "hobu",
@@ -41,7 +41,7 @@ containing `user_id` and `data` items.
               "record_id": 43,
               "user_id": "hobu",
               "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
-              }],
+              }]},
           "filename":"outputfile.las"
       }
   ]

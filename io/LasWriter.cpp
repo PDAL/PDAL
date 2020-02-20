@@ -236,7 +236,11 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-    for (const auto& v : *m_userVLRs)
+    NL::json* p_vlrs = m_userVLRs.get();
+    if (!(*p_vlrs).contains("json"))
+        throwError("VLR JSON object containing list of VLR entries must be at 'json' node");
+    NL::json vlrs = (*p_vlrs)["json"];
+    for (const auto& v : vlrs)
     {
         uint16_t recordId(1);
         std::string userId("");
