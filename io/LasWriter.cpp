@@ -564,7 +564,8 @@ void LasWriter::addVlr(const ExtLasVLR& evlr)
                 ".  The data size exceeds the maximum supported.");
     }
     else
-        m_vlrs.push_back(std::move(static_cast<const LasVLR&>(evlr)));
+//        m_vlrs.push_back(std::move(static_cast<const LasVLR&>(evlr)));
+        m_vlrs.push_back(std::move(evlr));
 }
 
 /// Delete a VLR from the vlr list.
