@@ -72,8 +72,10 @@ std::ostream& operator<<(std::ostream& out,
     {
     case VoxelDownsizeFilter::Mode::Center:
         out << "center";
+        break;
     case VoxelDownsizeFilter::Mode::First:
         out << "first";
+        break;
     }
     return out;
 }
