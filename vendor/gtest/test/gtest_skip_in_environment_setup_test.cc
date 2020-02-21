@@ -1,4 +1,4 @@
-// Copyright 2005, Google Inc.
+// Copyright 2019, Google LLC.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC. nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,16 +26,24 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// This test verifies that skipping in the environment results in the
+// testcases being skipped.
 
-// A sample program demonstrating using Google C++ testing framework.
+#include <iostream>
+#include "gtest/gtest.h"
 
-#ifndef GTEST_SAMPLES_SAMPLE1_H_
-#define GTEST_SAMPLES_SAMPLE1_H_
+class SetupEnvironment : public testing::Environment {
+ public:
+  void SetUp() override { GTEST_SKIP() << "Skipping the entire environment"; }
+};
 
-// Returns n! (the factorial of n).  For negative n, n! is defined to be 1.
-int Factorial(int n);
+TEST(Test, AlwaysFails) { EXPECT_EQ(true, false); }
 
-// Returns true if and only if n is a prime number.
-bool IsPrime(int n);
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
 
-#endif  // GTEST_SAMPLES_SAMPLE1_H_
+  testing::AddGlobalTestEnvironment(new SetupEnvironment());
+
+  return RUN_ALL_TESTS();
+}
