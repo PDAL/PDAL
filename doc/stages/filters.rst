@@ -42,8 +42,9 @@ invalidate an existing KD-tree.
    filters.estimaterank
    filters.elm
    filters.ferry
-   filters.hag
+   filters.hag_delaunay
    filters.hag_dem
+   filters.hag_nn
    filters.info
    filters.lof
    filters.miniball

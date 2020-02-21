@@ -26,14 +26,17 @@ Using the autzen dataset (here shown colored by elevation)
 .. image:: ./images/autzen-elevation.png
    :height: 400px
 
-and a DEM generated from it
+we generate a DEM based on the points already classified as ground
 
 ::
   
-  # pdal translate autzen.laz autzen-dem.tiff filters.smrf \
-      --writers.gdal.resolution=1
+    $ pdal translate autzen.laz autzen_dem.tif range \
+        --filters.range.limits="Classification[2:2]" \
+        --writers.gdal.output_type="idw" \
+        --writers.gdal.resolution=6 \
+        --writers.gdal.window_size=24
 
-we execute the following pipeline
+and execute the following pipeline
 
 .. code-block:: json
 
@@ -41,12 +44,12 @@ we execute the following pipeline
       "autzen.laz",
       {
           "type":"filters.hag_dem",
-          "raster": "autzen-dem.tiff"
+          "raster": "autzen_dem.tif"
       },
       {
-          "type":"writers.bpf",
-          "filename":"autzen-height.bpf",
-          "output_dims":"X,Y,Z,HeightAboveGround"
+          "type":"writers.las",
+          "filename":"autzen_hag_dem.laz",
+          "extra_dims":"HeightAboveGround=float32"
       }
   ]
 
@@ -54,14 +57,14 @@ which is equivalent to the ``pdal translate`` command
 
 ::
 
-    $ pdal translate autzen.laz autzen-height.bpf hag_dem \
-        --filters.hag_dem.raster=autzen-dem.tiff \
-        --writers.bpf.output_dims="X,Y,Z,HeightAboveGround"
+    $ pdal translate autzen.laz autzen_hag_dem.laz hag_dem \
+        --filters.hag_dem.raster=autzen_dem.tif \
+        --writers.las.extra_dims="HeightAboveGround=float32"
 
 In either case, the result, when colored by the normalized height instead of
 elevation is
 
-.. image:: ./images/autzen-height.png
+.. image:: ./images/autzen-hag-dem.png
    :height: 400px
 
 Options
