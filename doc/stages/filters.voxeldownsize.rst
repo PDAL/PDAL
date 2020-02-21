@@ -46,5 +46,7 @@ mode
 
 .. warning::
     If you choose **voxelcenter** mode, you are overwriting the X, Y and Z
-    values of retained points.
+    values of retained points.  This may invalidate other dimensions of
+    the point if they depend on this location or the location of other points
+    in the input.
   
