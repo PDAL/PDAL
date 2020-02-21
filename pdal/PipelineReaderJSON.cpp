@@ -349,17 +349,19 @@ Options PipelineReaderJSON::extractOptions(NL::json& node)
             continue;
         }
 
-        if (extractOption(options, name, subnode))
-            continue;
-        else if (subnode.is_array())
+        if (subnode.is_array())
         {
             for (const NL::json& val : subnode)
-                if (!extractOption(options, name, val))
+                if (val.is_object())
+                    options.add(name, val);
+                else if (!extractOption(options, name, val))
                     throw pdal_error("JSON pipeline: Invalid value type for "
                         "option list '" + name + "'.");
         }
         else if (subnode.is_object())
             options.add(name, subnode);
+        else if (extractOption(options, name, subnode))
+            continue;
         else
             throw pdal_error("JSON pipeline: Value of stage option '" +
                 name + "' cannot be converted.");

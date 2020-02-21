@@ -1199,6 +1199,24 @@ TEST(LasWriterTest, pdal_add_vlr)
     EXPECT_EQ(nodes.size(), 2UL);
 }
 
+// Make sure we can read an array of VLRs in a pipeline.
+TEST(LasWriterTest, issue2937)
+{
+    std::string infile = Support::configuredpath("pipeline/issue2937.json");
+
+    std::string cmd = Support::binpath("pdal") + " pipeline --nostream " +
+        infile;
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    std::string outfile = Support::temppath("issue2937_out.las");
+    cmd = Support::binpath("pdal") + " info --metadata " + outfile;
+    Utils::run_shell_command(cmd, output);
+
+    EXPECT_NE(output.find("dGhpcyBpcy"), std::string::npos);
+    EXPECT_NE(output.find("dGhpcyAqdtB"), std::string::npos);
+}
+
 TEST(LasWriterTest, badVlr)
 {
     auto doTest = [](const std::string& vlr, bool expectThrow = true)
