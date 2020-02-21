@@ -41,7 +41,7 @@ cell
 mode
   Mode for voxel based filtering. [Default: voxelcenter]
   **voxelcenter**: Coordinates of the first point found in each voxel will
-  be modified to those at the center of the voxel.
+  be modified to be the center of the voxel.
   **firstinvoxel**: Only the first point found in each voxel is retained.
 
 .. warning::
