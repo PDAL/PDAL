@@ -354,12 +354,18 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
         tiledb::FilterList fl = array.schema().coords_filter_list();
-        EXPECT_EQ(fl.nfilters(), 1U);
+        EXPECT_EQ(fl.nfilters(), 2U);
 
         tiledb::Filter f1 = fl.filter(0);
-        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_ZSTD);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+        tiledb::Filter f2 = fl.filter(1);
+        EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_GZIP);
         int32_t compressionLevel;
-        f1.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-        EXPECT_EQ(compressionLevel, 75);
+        f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+
+        tiledb::Attribute att = array.schema().attributes().begin()->second;
+        tiledb::FilterList flAtts = att.filter_list();
+        EXPECT_EQ(flAtts.nfilters(), 0U);
     }
 }
