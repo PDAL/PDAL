@@ -195,7 +195,7 @@ void stream_test(std::string mode)
 
         virtual bool processOne(PointRef& point)
         {
-            EXPECT_LT(m_count, 5);
+            EXPECT_LT(m_count, 5U);
 
             int x = point.getFieldAs<int>(Dimension::Id::X);
             int y = point.getFieldAs<int>(Dimension::Id::Y);
