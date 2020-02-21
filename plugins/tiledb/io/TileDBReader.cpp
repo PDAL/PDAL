@@ -296,7 +296,7 @@ void TileDBReader::localReady()
     NL::json meta = nullptr;
 
 #if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
-    tiledb_datatype_t v_type = TILEDB_UINT8; // CPLSerializeXMLTree returns char*
+    tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
     uint32_t v_num;
     m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
