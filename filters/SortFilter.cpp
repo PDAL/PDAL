@@ -65,9 +65,9 @@ void SortFilter::prepared(PointTableRef table)
 
 void SortFilter::filter(PointView& view)
 {
-    auto cmp = [this, &view](const PointRef& p1, const PointRef& p2)
+    auto cmp = [this](const PointRef& p1, const PointRef& p2)
     {
-        bool result = view.compare(m_dim, p1.pointId(), p2.pointId());
+        bool result = p1.compare(m_dim, p2);
         return (m_order == SortOrder::ASC) ? result : !result;
     };
 
