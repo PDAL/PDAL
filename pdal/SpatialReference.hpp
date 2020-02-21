@@ -164,6 +164,7 @@ public:
     static int calculateZone(double lon, double lat);
     static bool isWKT(const std::string& wkt);
     static std::string prettyWkt(const std::string& wkt);
+    static std::string convertToWKT1(const std::string& wkt);
 
 private:
     std::string m_wkt;

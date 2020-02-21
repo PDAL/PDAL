@@ -507,6 +507,8 @@ bool LasWriter::addWktVlr()
     if (wkt.empty())
         return false;
 
+    // LAS 1.4 requires WKTv1
+    wkt = SpatialReference::convertToWKT1(wkt);
     std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
     // This tacks a NULL to the end of the data, which is required by the spec.
     wktBytes.resize(wktBytes.size() + 1, 0);

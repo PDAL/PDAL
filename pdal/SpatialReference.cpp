@@ -438,6 +438,28 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
     return outWkt;
 }
 
+std::string SpatialReference::convertToWKT1(const std::string& wkt)
+{
+    std::string outWkt(wkt);
+
+// WKT flavors only exist in GDAL 3.x+
+#if GDAL_VERSION_MAJOR >= 3
+    OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
+    if (!srs)
+        return outWkt;
+
+    char *buf = nullptr;
+
+    char **papszOptions = nullptr;
+    papszOptions = CSLAddNameValue(papszOptions, "FORMAT", "WKT1_GDAL");
+    srs->exportToWkt(&buf, papszOptions);
+
+    outWkt = buf;
+    CPLFree(buf);
+#endif
+    return outWkt;
+}
+
 
 int SpatialReference::getUTMZone() const
 {
