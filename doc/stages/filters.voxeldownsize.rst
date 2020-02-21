@@ -20,7 +20,7 @@ Example
       {
           "type":"filters.voxeldownsize",
           "cell":1.0,
-          "mode":"voxelcenter"
+          "mode":"center"
       },
       "output.las"
   ]
@@ -39,12 +39,14 @@ cell
   Cell size in the ``X``, ``Y``, and ``Z`` dimension. [Default: 0.001]
 
 mode
-  Mode for voxel based filtering. [Default: voxelcenter]
-  **voxelcenter**: Coordinates of the first point found in each voxel will
-  be modified to those at the center of the voxel.
-  **firstinvoxel**: Only the first point found in each voxel is retained.
+  Mode for voxel based filtering. [Default: center]
+  **center**: Coordinates of the first point found in each voxel will
+  be modified to be the center of the voxel.
+  **first**: Only the first point found in each voxel is retained.
 
 .. warning::
-    If you choose **voxelcenter** mode, you are overwriting the X, Y and Z
-    values of retained points.
+    If you choose **center** mode, you are overwriting the X, Y and Z
+    values of retained points.  This may invalidate other dimensions of
+    the point if they depend on this location or the location of other points
+    in the input.
   
