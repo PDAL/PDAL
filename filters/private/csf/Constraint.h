@@ -29,8 +29,6 @@ const double doubleMove[14] = { 0.4, 0.48, 0.496, 0.4992, 0.49984, 0.49997, 0.49
 class Constraint {
 private:
 
-    double rest_distance; // the length between particle p1 and p2 in rest configuration
-
 public:
 
     Particle *p1, *p2; // the two particles that are connected through this constraint

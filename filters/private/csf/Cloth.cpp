@@ -29,7 +29,6 @@ Cloth::Cloth(const Vec3& _origin_pos,
              int         rigidness,
              double      time_step)
     : constraint_iterations(rigidness),
-    time_step(time_step),
     smoothThreshold(_smoothThreshold),
     heightThreshold(_heightThreshold),
     origin_pos(_origin_pos),

@@ -80,10 +80,8 @@ private:
     // total number of particles is num_particles_width * num_particles_height
     int constraint_iterations;
 
-    int rigidness;
-    double time_step;
-
-    std::vector<Particle> particles; // all particles that are part of this cloth
+     // all particles that are part of this cloth
+    std::vector<Particle> particles;
 
     double smoothThreshold;
     double heightThreshold;
