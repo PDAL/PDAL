@@ -360,9 +360,7 @@ Options PipelineReaderJSON::extractOptions(NL::json& node)
         }
         else if (subnode.is_object())
             options.add(name, subnode);
-        else if (extractOption(options, name, subnode))
-            continue;
-        else
+        else if (!extractOption(options, name, subnode))
             throw pdal_error("JSON pipeline: Value of stage option '" +
                 name + "' cannot be converted.");
     }
