@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/PointViewIter.hpp>
 
 namespace pdal
 {
