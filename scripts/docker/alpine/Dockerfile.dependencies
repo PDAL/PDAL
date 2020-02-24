@@ -79,6 +79,6 @@ RUN \
     mkdir build; \
     cd build; \
     cmake .. -G Ninja -DTILEDB_TBB=OFF -DTILEDB_TESTS=OFF; \
-    ninja install; \
+    ninja install-tiledb; \
     cd /; # \
     rm -rf TileDB;
