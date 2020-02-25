@@ -72,9 +72,8 @@ TEST(NormalFilterTest, XYPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    for (auto const& p : *outView)
     {
-        PointRef p = outView->point(idx);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), 1.0);
@@ -110,9 +109,8 @@ TEST(NormalFilterTest, XZPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    for (auto const& p : *outView)
     {
-        PointRef p = outView->point(idx);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 1.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), 0.0);
@@ -148,9 +146,8 @@ TEST(NormalFilterTest, YZPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    for (auto const& p : *outView)
     {
-        PointRef p = outView->point(idx);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 1.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), 0.0);
@@ -197,9 +194,8 @@ TEST(NormalFilterTest, RampPlane)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    for (auto const& p : *outView)
     {
-        PointRef p = outView->point(idx);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), -expected);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), expected);
@@ -246,9 +242,8 @@ TEST(NormalFilterTest, RampPlane2)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (point_count_t idx = 0; idx < outView->size(); ++idx)
+    for (auto const& p : *outView)
     {
-        PointRef p = outView->point(idx);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), -expected);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), expected);

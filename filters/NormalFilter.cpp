@@ -127,13 +127,11 @@ void NormalFilter::prepared(PointTableRef table)
 void NormalFilter::compute(PointView& view, KD3Index& kdi)
 {
     log()->get(LogLevel::Debug) << "Computing normal vectors\n";
-    for (PointId idx = 0; idx < view.size(); ++idx)
+    for (auto&& p : view)
     {
-        PointRef p = view.point(idx);
-
         // Perform eigen decomposition of covariance matrix computed from
         // neighborhood composed of k-nearest neighbors.
-        PointIdList neighbors = kdi.neighbors(idx, m_args->m_knn);
+        PointIdList neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
         auto B = computeCovariance(view, neighbors);
         SelfAdjointEigenSolver<Matrix3d> solver(B);
         if (solver.info() != Success)
