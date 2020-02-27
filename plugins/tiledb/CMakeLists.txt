@@ -43,8 +43,6 @@ endif()
 
 if (WITH_TESTS)
 
-if (BUILD_TILEDB_TESTS)
-
     # Need to fix this #2596
     IF (NOT APPLE)
         PDAL_ADD_TEST(pdal_io_tiledb_writer_test
@@ -73,5 +71,4 @@ if (WIN32)
     target_compile_definitions(pdal_io_tiledb_reader_test PRIVATE -DNONMINMAX)
 endif()
 
-endif()
 endif()
