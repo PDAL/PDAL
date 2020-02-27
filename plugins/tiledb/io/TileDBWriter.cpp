@@ -445,7 +445,6 @@ bool TileDBWriter::processOne(PointRef& point)
     m_coords.push_back(x);
     m_coords.push_back(y);
     m_coords.push_back(z);
-    m_bbox.grow(x, y, z);
 
     if (++m_current_idx == m_args->m_cache_size)
     {
@@ -474,45 +473,47 @@ void TileDBWriter::done(PointTableRef table)
 {
     if (flushCache(m_current_idx))
     {
-        tiledb::VFS vfs(*m_ctx, m_ctx->config());
-
-        // write pipeline metadata sidecar inside array
-        MetadataNode anon;
-        MetadataNode meta("pipeline");
-        anon.addList(meta);
-        // set output to tiledb reader
-        meta.add("type", "readers.tiledb");
-        if (!getSpatialReference().empty() && table.spatialReferenceUnique())
+        if (!m_args->m_append)
         {
-            // The point view takes on the spatial reference of that stage,
-            // if it had one.
-            anon.add("spatialreference", 
-                Utils::toString(getSpatialReference()));
+            // write pipeline metadata sidecar inside array
+            MetadataNode node = getMetadata();
+            if (!getSpatialReference().empty() && table.spatialReferenceUnique())
+            {
+                // The point view takes on the spatial reference of that stage,
+                // if it had one.
+                node.add("spatialreference", 
+                    Utils::toString(getSpatialReference()));
+            }
+
+            // serialize metadata
+#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
+            tiledb::VFS vfs(*m_ctx, m_ctx->config());
+            tiledb::VFS::filebuf fbuf(vfs);
+
+            if (vfs.is_dir(m_args->m_arrayName))
+                fbuf.open(m_args->m_arrayName + pathSeparator + "pdal.json",
+                    std::ios::out);
+            else
+            {
+                std::string fname = m_args->m_arrayName + "/pdal.json";
+                vfs.touch(fname);
+                fbuf.open(fname, std::ios::out);
+            }
+
+            std::ostream os(&fbuf);
+
+            if (!os.good())
+                throwError("Unable to create sidecar file for " +
+                    m_args->m_arrayName);
+
+            pdal::Utils::toJSON(node, os);
+
+            fbuf.close();
+#else
+            std::string m = pdal::Utils::toJSON(node);
+            m_array->put_metadata("_pdal", TILEDB_UINT8, m.length() + 1, m.c_str());
+#endif
         }
-        anon.add("bounds", pdal::Utils::toString(m_bbox));
-
-        // serialize metadata
-        tiledb::VFS::filebuf fbuf(vfs);
-
-        if (vfs.is_dir(m_args->m_arrayName))
-            fbuf.open(m_args->m_arrayName + pathSeparator + "pdal.json",
-                std::ios::out);
-        else
-        {
-            std::string fname = m_args->m_arrayName + "/pdal.json";
-            vfs.touch(fname);
-            fbuf.open(fname, std::ios::out);
-        }
-
-        std::ostream os(&fbuf);
-
-        if (!os.good())
-            throwError("Unable to create sidecar file for " +
-                m_args->m_arrayName);
-
-        pdal::Utils::toJSON(anon, os);
-
-        fbuf.close();
         m_array->close();
     }
     else{
