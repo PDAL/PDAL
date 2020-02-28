@@ -59,6 +59,12 @@ filter and the ``outs`` array represents the points after filtering.
        "add_dimension": [ "NewDimensionOne", "NewDimensionTwo", "NewDimensionThree" ]
 
 
+   You can also specify the :ref:`type <types>` of the dimension using an ``=``.
+   ::
+
+       "add_dimension": "NewDimensionOne=uint8"
+
+
 Modification Example
 --------------------------------------------------------------------------------
 
