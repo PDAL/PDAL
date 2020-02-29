@@ -197,7 +197,15 @@ void TextReader::initialize(PointTableRef table)
         checkHeader(header);
     }
 
-    parseHeader(header);
+    try
+    {
+        parseHeader(header);
+    }
+    catch( const pdal_error& )
+    {
+        Utils::closeFile(m_istream);
+        throw;
+    }
     Utils::closeFile(m_istream);
 }
 
