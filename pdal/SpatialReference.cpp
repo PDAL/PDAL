@@ -444,18 +444,27 @@ std::string SpatialReference::convertToWKT1(const std::string& wkt)
 
 // WKT flavors only exist in GDAL 3.x+
 #if GDAL_VERSION_MAJOR >= 3
+
     OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
     if (!srs)
         return outWkt;
 
     char *buf = nullptr;
 
-    char **papszOptions = nullptr;
-    papszOptions = CSLAddNameValue(papszOptions, "FORMAT", "WKT1_GDAL");
-    srs->exportToWkt(&buf, papszOptions);
+    const char* apszOptions[] = { "FORMAT=WKT1_GDAL", nullptr };
+    srs->exportToWkt(&buf, apszOptions);
 
-    outWkt = buf;
-    CPLFree(buf);
+    // If we couldn't convert to WKT1, return empty
+    if (buf == nullptr)
+    {
+        outWkt = "";
+    }
+    else
+    {
+        outWkt = buf;
+        CPLFree(buf);
+    }
+
 #endif
     return outWkt;
 }
