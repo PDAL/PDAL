@@ -167,7 +167,7 @@ std::ostream& operator<<(std::ostream& out, const LasVLR& v)
 
 std::ostream& operator<<(std::ostream& out, const ExtLasVLR& v)
 {
-    return (out << (LasVLR&)v);
+    return (out << static_cast<const LasVLR&>(v));
 }
 
 
