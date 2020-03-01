@@ -73,6 +73,9 @@ add_library(E57Format STATIC
     contrib/CRCpp/inc/CRC.h
 )
 pdal_target_compile_settings(E57Format)
+target_compile_options(E57Format PRIVATE
+    /wd4244
+    )
 target_link_libraries(E57Format
     PUBLIC
         ${XercesC_LIBRARIES}
