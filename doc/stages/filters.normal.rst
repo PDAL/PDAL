@@ -23,10 +23,10 @@ stages for more advanced filtering.
 The eigenvalue decomposition is performed using Eigen's
 `SelfAdjointEigenSolver <https://eigen.tuxfamily.org/dox/classEigen_1_1SelfAdjointEigenSolver.html>`_.
 
-Normals will be automatically flipped towards the viewpoint to be consistent. By
-default the viewpoint is located at the midpoint of the X and Y extents, and
-1000 units above the max Z value. Users can override any of the XYZ coordinates,
-or set them all to zero to effectively disable the normal flipping.
+Normals will be automatically flipped towards positive Z, unless the always_up_
+flag is set to `false`. Users can optionally set any of the XYZ coordinates to
+specify a custom viewpoint_ or set them all to zero to effectively disable the
+normal flipping.
 
 .. note::
 
@@ -35,6 +35,14 @@ or set them all to zero to effectively disable the normal flipping.
   instead be inverted such that they are oriented towards the viewpoint,
   regardless of the always_up_ flag. To disable all normal flipping, do not
   provide a viewpoint_ and set `always_up`_ to false.
+
+In addition to always_up_ and viewpoint_, users can run a refinement step (on
+by default) that propagates normals using a minimum spanning tree. The
+propagated normals can lead to much more consistent results across the dataset.
+
+.. note::
+
+  To disable normal propagation, users can set refine_ to `false`.
 
 .. embed::
 
@@ -73,3 +81,7 @@ _`viewpoint`
 _`always_up`
   A flag indicating whether or not normals should be inverted only when the Z
   component is negative. [Default: true]
+
+_`refine`
+  A flag indicating whether or not to reorient normals using minimum spanning
+  tree propagation. [Default: true]

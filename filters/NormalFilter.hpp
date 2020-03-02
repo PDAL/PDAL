@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016, 2017, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -48,6 +48,28 @@ class PointLayout;
 class PointView;
 struct NormalArgs;
 
+struct Edge
+{
+    PointId m_v0;
+    PointId m_v1;
+    double m_weight;
+
+    Edge(PointId i, PointId j, double weight)
+        : m_v0(i), m_v1(j), m_weight(weight)
+    {
+    }
+};
+
+struct CompareEdgeWeight
+{
+    bool operator()(Edge const& lhs, Edge const& rhs)
+    {
+        return lhs.m_weight > rhs.m_weight;
+    }
+};
+
+typedef std::vector<Edge> EdgeList;
+
 class PDAL_DLL NormalFilter : public Filter
 {
 public:
@@ -63,7 +85,15 @@ public:
 
 private:
     std::unique_ptr<NormalArgs> m_args;
+    point_count_t m_count;
     Arg* m_viewpointArg;
+
+    void compute(PointView& view, KD3Index& kdi);
+    void refine(PointView& view, KD3Index& kdi);
+    void
+    update(PointView& view, KD3Index& kdi, std::vector<bool> inMST,
+           std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue,
+           PointId updateIdx);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
