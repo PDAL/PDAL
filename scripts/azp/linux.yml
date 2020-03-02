@@ -5,7 +5,7 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   container:
-      image: pdal/azp-dependencies:latest
+      image: pdal/ubuntubase:latest
       options: --privileged
   timeoutInMinutes: 60
   steps:
@@ -20,6 +20,7 @@ jobs:
         -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
         -DBUILD_PLUGIN_I3S=ON \
         -DBUILD_PLUGIN_NITF=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
