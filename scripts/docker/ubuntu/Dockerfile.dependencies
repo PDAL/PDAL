@@ -213,17 +213,6 @@ RUN git clone --branch release/3.0 https://github.com/OSGeo/gdal.git \
     && make install DESTDIR=/ \
     && rm -rf /gdal
 
-RUN git clone --branch ${TILEDB_VERSION} \
-    https://github.com/TileDB-Inc/TileDB.git \
-    && cd TileDB \
-    && mkdir build \
-    && cd build \
-    && cmake .. -G "Unix Makefiles" -DTILEDB_TBB=OFF -DTILEDB_TESTS=OFF \
-    && make \
-    && make install-tiledb \
-    && cd / \
-    && rm -rf TileDB
-
 RUN curl -LOs http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-5.0.0-beta0.tar.gz && tar zxvf libspatialite-5.0.0-beta0.tar.gz && cd /libspatialite-5.0.0-beta0 \
     && CXXFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" \
         CFLAGS="-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" \
@@ -237,4 +226,15 @@ RUN \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip;
+
+RUN git clone --branch ${TILEDB_VERSION} \
+    https://github.com/TileDB-Inc/TileDB.git \
+    && cd TileDB \
+    && mkdir build \
+    && cd build \
+    && cmake .. -G "Unix Makefiles" -DTILEDB_TBB=OFF -DTILEDB_TESTS=OFF \
+    && make \
+    && make install-tiledb DESTDIR=/ \
+    && cd / \
+    && rm -rf TileDB
 
