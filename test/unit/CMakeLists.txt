@@ -279,6 +279,7 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES

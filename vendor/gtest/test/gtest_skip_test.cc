@@ -1,5 +1,5 @@
-// Copyright 2005, Google Inc.
-// All rights reserved.
+// Copyright 2008 Google Inc.
+// All Rights Reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -26,16 +26,30 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Author: arseny.aprelev@gmail.com (Arseny Aprelev)
+//
 
-// A sample program demonstrating using Google C++ testing framework.
+#include "gtest/gtest.h"
 
-#ifndef GTEST_SAMPLES_SAMPLE1_H_
-#define GTEST_SAMPLES_SAMPLE1_H_
+using ::testing::Test;
 
-// Returns n! (the factorial of n).  For negative n, n! is defined to be 1.
-int Factorial(int n);
+TEST(SkipTest, DoesSkip) {
+  GTEST_SKIP();
+  EXPECT_EQ(0, 1);
+}
 
-// Returns true if and only if n is a prime number.
-bool IsPrime(int n);
+class Fixture : public Test {
+ protected:
+  void SetUp() override {
+    GTEST_SKIP() << "skipping all tests for this fixture";
+  }
+};
 
-#endif  // GTEST_SAMPLES_SAMPLE1_H_
+TEST_F(Fixture, SkipsOneTest) {
+  EXPECT_EQ(5, 7);
+}
+
+TEST_F(Fixture, SkipsAnotherTest) {
+  EXPECT_EQ(99, 100);
+}

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2008, Google Inc.
-# All rights reserved.
+# Copyright 2019 Google LLC.  All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -28,39 +27,27 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""Tests Google Test's gtest skip in environment setup  behavior.
 
-"""Verifies that Google Test warns the user when not initialized properly."""
+This script invokes gtest_skip_in_environment_setup_test_ and verifies its
+output.
+"""
 
 import gtest_test_utils
 
-COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-uninitialized-test_')
+# Path to the gtest_skip_in_environment_setup_test binary
+EXE_PATH = gtest_test_utils.GetTestExecutablePath(
+    'gtest_skip_in_environment_setup_test')
+
+OUTPUT = gtest_test_utils.Subprocess([EXE_PATH]).output
 
 
-def Assert(condition):
-  if not condition:
-    raise AssertionError
+# Test.
+class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
 
-
-def AssertEq(expected, actual):
-  if expected != actual:
-    print('Expected: %s' % (expected,))
-    print('  Actual: %s' % (actual,))
-    raise AssertionError
-
-
-def TestExitCodeAndOutput(command):
-  """Runs the given command and verifies its exit code and output."""
-
-  # Verifies that 'command' exits with code 1.
-  p = gtest_test_utils.Subprocess(command)
-  if p.exited and p.exit_code == 0:
-    Assert('IMPORTANT NOTICE' in p.output);
-  Assert('InitGoogleTest' in p.output)
-
-
-class GTestUninitializedTest(gtest_test_utils.TestCase):
-  def testExitCodeAndOutput(self):
-    TestExitCodeAndOutput(COMMAND)
+  def testSkipEntireEnvironmentTest(self):
+    self.assertIn('Skipping the entire environment', OUTPUT)
+    self.assertNotIn('FAILED', OUTPUT)
 
 
 if __name__ == '__main__':
