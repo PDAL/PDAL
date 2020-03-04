@@ -35,14 +35,20 @@ jobs:
         -DWITH_TESTS=ON
     displayName: 'CMake'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       cd build
       ninja
     displayName: 'Build'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       cd build
       ctest -V
     displayName: 'Test'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       export PDAL_TEST_DIR=`pwd`/test
       export INSTALL_DIR=`pwd`/install
       export PATH=$PATH:$INSTALL_DIR/bin
@@ -50,6 +56,8 @@ jobs:
       ls build/lib/*
       ninja install
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       export BASE=`pwd`
       for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
       do
