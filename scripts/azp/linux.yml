@@ -11,6 +11,8 @@ jobs:
   steps:
   - script: |
       echo "current directory:" `pwd`
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       mkdir build
       cd build
       cmake .. \
