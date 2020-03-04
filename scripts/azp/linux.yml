@@ -43,7 +43,6 @@ jobs:
       ctest -V
     displayName: 'Test'
   - script: |
-      echo "test"
       export PDAL_TEST_DIR=`pwd`/test
       export INSTALL_DIR=`pwd`/install
       export PATH=$PATH:$INSTALL_DIR/bin
