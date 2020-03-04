@@ -978,7 +978,6 @@ namespace
             if (homeDrive && homePath) s = *homeDrive + *homePath;
         }
 #endif
-        if (s.empty()) std::cout << "No home directory found" << std::endl;
 
         return s;
     }
@@ -1297,9 +1296,9 @@ std::vector<std::string> glob(std::string path)
 std::string expandTilde(std::string in)
 {
     std::string out(in);
-    static std::string home(getHome());
     if (!in.empty() && in.front() == '~')
     {
+        const std::string home = getHome();
         if (home.empty()) throw ArbiterError("No home directory found");
         out = home + in.substr(1);
     }
@@ -2566,10 +2565,10 @@ namespace
         std::string m_object;
 
     };
-    
+
     // https://cloud.google.com/storage/docs/json_api/#encoding
     const char GResource::exclusions[] = "!$&'()*+,;=:@";
-    
+
 } // unnamed namespace
 
 namespace drivers
