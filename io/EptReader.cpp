@@ -191,8 +191,7 @@ std::vector<char> EptReader::getBinary(const std::string path) const
 }
 
 
-std::unique_ptr<arbiter::LocalHandle> EptReader::getLocalHandle(
-    const std::string path) const
+arbiter::LocalHandle EptReader::getLocalHandle(const std::string path) const
 {
     if (m_ep->isLocal())
         return m_ep->getLocalHandle(path);
@@ -765,7 +764,7 @@ PointId EptReader::readLaszip(PointView& dst, const Key& key,
     PointTable table;
 
     Options options;
-    options.add("filename", handle->localPath());
+    options.add("filename", handle.localPath());
     options.add("use_eb_vlr", true);
 
     LasReader reader;
