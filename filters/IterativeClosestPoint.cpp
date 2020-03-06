@@ -109,8 +109,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // be reasonable to alternately accept an initial guess.
     Eigen::Matrix4d final_transformation = Eigen::Matrix4d::Identity();
 
-    // Construct 3D KD-tree of the centered, fixed PointView to facilitate
-    // nearest neighbor searches in each iteration.
+    // Construct 3D KD-tree of the fixed PointView to facilitate nearest
+    // neighbor searches in each iteration.
     KD3Index& kd_fixed = fixed->build3dIndex();
 
     // Iterate to the max number of iterations or until converged.
@@ -119,8 +119,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     int num_similar(0);
     for (int iter = 0; iter < m_max_iters; ++iter)
     {
-        // At the beginning of each iteration, transform our centered, moving
-        // PointView by the current final_transformation.
+	// At the beginning of each iteration, transform our moving PointView
+	// by the current final_transformation.
         PointViewPtr tempMovingTransformed =
             transform(*moving, final_transformation.data());
 
@@ -131,9 +131,9 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         moving_idx.reserve(tempMovingTransformed->size());
         double mse(0.0);
 
-        // For every point in the centered, moving PointView, find the nearest
-        // neighbor in the centered fixed PointView. Record the indices of each
-        // and update the MSE.
+	// For every point in the moving PointView, find the nearest neighbor
+	// in the fixed PointView. Record the indices of each and update the
+	// MSE.
         for (PointRef&& point : *tempMovingTransformed)
         {
             // Find the index of the nearest neighbor, and the square distance
