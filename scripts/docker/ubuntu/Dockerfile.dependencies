@@ -25,3 +25,41 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     conda install --yes --name pdal -c conda-forge git cmake ninja \
         conda-forge-ci-setup && \
     conda install --yes --name pdal -c conda-forge pdal --only-deps
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    conda install --yes --name pdal -c conda-forge eigen
+
+#
+# We install fgt and cpd in /usr.  By default they'll go in /usr/local.
+# When in /usr/local, we'd have to run ldconfig in order for them to be found
+# at run-time.  This is an issue for the CPD filter and test.  We could also
+# put them in the conda directory and set the rpath when building the
+# test.  Probably better is just to stick this stuff in vendor and build
+# as a static lib(s).
+#
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    git clone https://github.com/PDAL/fgt.git && \
+    mkdir -p fgt/build && \
+    cd fgt/build && \
+    cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -G Ninja .. && \
+    ninja install && \
+    cd / && \
+    rm -rf fgt
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    git clone https://github.com/PDAL/cpd.git && \
+    mkdir -p cpd/build && \
+    cd cpd/build && \
+    cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DWITH_FGT=ON \
+        -G Ninja .. && \
+    ninja install && \
+    cd / && \
+    rm -rf cpd
+

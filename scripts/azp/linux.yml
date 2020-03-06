@@ -15,7 +15,8 @@ jobs:
       conda activate pdal
       mkdir build
       cd build
-      cmake .. \
+      CC=gcc-6 CXX=g++-6 \
+        cmake .. \
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
         -DBUILD_PLUGIN_CPD=ON \
@@ -59,7 +60,8 @@ jobs:
       . /opt/conda/etc/profile.d/conda.sh
       conda activate pdal
       export BASE=`pwd`
-      for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+      for EXAMPLE in writing writing-filter writing-kernel \
+          writing-reader writing-writer
       do
           cd $BASE/examples/$EXAMPLE
           mkdir -p _build || exit 1
