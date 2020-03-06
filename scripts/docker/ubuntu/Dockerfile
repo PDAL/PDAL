@@ -42,14 +42,24 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     cd pdal/build  && \
     ninja install
 
-RUN apt-get -y remove bzip2 gcc-6 g++-6 ca-certificates && \
+RUN apt-get -y remove unzip bzip2 gcc-6 g++-6 ca-certificates && \
    apt-get -y autoremove 
 
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     conda activate pdal && \
     conda remove -c conda-forge git cmake ninja conda-forge-ci-setup
 
-RUN rm /opt/conda/envs/pdal/lib/*.a
+RUN rm /opt/conda/envs/pdal/lib/*.a && \
+    rm /opt/conda/envs/pdal/include/H5*.h && \
+    rm /opt/conda/envs/pdal/include/h5*.mod && \
+    rm /opt/conda/envs/pdal/include/tcl*.h && \
+    rm /opt/conda/envs/pdal/include/itcl*.h && \
+    rm /opt/conda/envs/pdal/include/tk*.h && \
+    rm -rf /opt/conda/envs/pdal/include/spatialite && \
+    rm -rf /opt/conda/envs/pdal/include/freetype2 && \
+    rm -rf /opt/conda/envs/pdal/include/informix && \
+    rm -rf /opt/conda/envs/pdal/include/fontconfig && \
+    rm -rf /opt/conda/envs/pdal/include/X11
 
 FROM ubuntu:bionic
 

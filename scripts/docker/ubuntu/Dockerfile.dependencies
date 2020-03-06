@@ -7,7 +7,7 @@ ENV CXX g++-6
 
 RUN apt-get update --fix-missing && \
     apt-get install -y \
-        wget bzip2 gcc-6 g++-6 ca-certificates curl && \
+        wget unzip bzip2 gcc-6 g++-6 ca-certificates curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -62,4 +62,13 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     ninja install && \
     cd / && \
     rm -rf cpd
+
+RUN \
+    mkdir gridzip && \
+    cd gridzip && \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj && rm proj-datumgrid-europe-1.2.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip
 
