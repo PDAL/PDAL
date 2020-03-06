@@ -105,23 +105,13 @@ void IterativeClosestPoint::done(PointTableRef _)
 PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
                                         PointViewPtr moving) const
 {
-    // Compute centroid of fixed PointView such that both the fixed an moving
-    // PointViews can be centered.
-    PointIdList ids(fixed->size());
-    std::iota(ids.begin(), ids.end(), 0);
-    auto centroid = computeCentroid(*fixed, ids);
-
-    // Demean the fixed and moving PointViews.
-    PointViewPtr tempFixed = demeanPointView(*fixed, centroid.data());
-    PointViewPtr tempMoving = demeanPointView(*moving, centroid.data());
-
     // Initialize the final_transformation to identity. In the future, it would
     // be reasonable to alternately accept an initial guess.
     Eigen::Matrix4d final_transformation = Eigen::Matrix4d::Identity();
 
     // Construct 3D KD-tree of the centered, fixed PointView to facilitate
     // nearest neighbor searches in each iteration.
-    KD3Index& kd_fixed = tempFixed->build3dIndex();
+    KD3Index& kd_fixed = fixed->build3dIndex();
 
     // Iterate to the max number of iterations or until converged.
     bool converged(false);
@@ -132,7 +122,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         // At the beginning of each iteration, transform our centered, moving
         // PointView by the current final_transformation.
         PointViewPtr tempMovingTransformed =
-            transform(*tempMoving, final_transformation.data());
+            transform(*moving, final_transformation.data());
 
         // Create empty lists to hold point correspondences, and initialize MSE
         // to zero.
@@ -144,20 +134,19 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         // For every point in the centered, moving PointView, find the nearest
         // neighbor in the centered fixed PointView. Record the indices of each
         // and update the MSE.
-        for (PointId i = 0; i < tempMovingTransformed->size(); ++i)
+        for (PointRef&& point : *tempMovingTransformed)
         {
             // Find the index of the nearest neighbor, and the square distance
             // between each point.
-            PointRef p = tempMovingTransformed->point(i);
             PointIdList indices(1);
             std::vector<double> sqr_dists(1);
-            kd_fixed.knnSearch(p, 1, &indices, &sqr_dists);
+            kd_fixed.knnSearch(point, 1, &indices, &sqr_dists);
 
             // In the PCL code, there would've been a check that the square
             // distance did not exceed a threshold value.
 
             // Store the indices of the correspondence and update the MSE.
-            moving_idx.push_back(i);
+            moving_idx.push_back(point.pointId());
             fixed_idx.push_back(indices[0]);
             mse += std::sqrt(sqr_dists[0]);
         }
@@ -168,7 +157,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 
         // Estimate rigid transformation using Umeyama method, logging the
         // current translation in X and Y.
-        auto A = pointViewToEigen(*tempFixed, fixed_idx);
+        auto A = pointViewToEigen(*fixed, fixed_idx);
         auto B = pointViewToEigen(*tempMovingTransformed, moving_idx);
         auto T = Eigen::umeyama(B.transpose(), A.transpose(), false);
         log()->get(LogLevel::Debug2) << "Current dx: " << T.coeff(0, 3) << ", "
@@ -229,41 +218,37 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     }
 
     // Apply the final_transformation to the moving PointView.
-    for (PointId i = 0; i < moving->size(); ++i)
+    for (PointRef&& point : *moving)
     {
-        double x =
-            moving->getFieldAs<double>(Dimension::Id::X, i) - centroid.x();
-        double y =
-            moving->getFieldAs<double>(Dimension::Id::Y, i) - centroid.y();
-        double z =
-            moving->getFieldAs<double>(Dimension::Id::Z, i) - centroid.z();
-        moving->setField(Dimension::Id::X, i,
-                         x * final_transformation.coeff(0, 0) +
-                             y * final_transformation.coeff(0, 1) +
-                             z * final_transformation.coeff(0, 2) +
-                             final_transformation.coeff(0, 3) + centroid.x());
-        moving->setField(Dimension::Id::Y, i,
-                         x * final_transformation.coeff(1, 0) +
-                             y * final_transformation.coeff(1, 1) +
-                             z * final_transformation.coeff(1, 2) +
-                             final_transformation.coeff(1, 3) + centroid.y());
-        moving->setField(Dimension::Id::Z, i,
-                         x * final_transformation.coeff(2, 0) +
-                             y * final_transformation.coeff(2, 1) +
-                             z * final_transformation.coeff(2, 2) +
-                             final_transformation.coeff(2, 3) + centroid.z());
+        double x = point.getFieldAs<double>(Dimension::Id::X);
+        double y = point.getFieldAs<double>(Dimension::Id::Y);
+        double z = point.getFieldAs<double>(Dimension::Id::Z);
+        point.setField(Dimension::Id::X,
+                       x * final_transformation.coeff(0, 0) +
+                       y * final_transformation.coeff(0, 1) +
+                       z * final_transformation.coeff(0, 2) +
+                       final_transformation.coeff(0, 3));
+        point.setField(Dimension::Id::Y,
+                       x * final_transformation.coeff(1, 0) +
+                       y * final_transformation.coeff(1, 1) +
+                       z * final_transformation.coeff(1, 2) +
+                       final_transformation.coeff(1, 3));
+        point.setField(Dimension::Id::Z,
+                       x * final_transformation.coeff(2, 0) +
+                       y * final_transformation.coeff(2, 1) +
+                       z * final_transformation.coeff(2, 2) +
+                       final_transformation.coeff(2, 3));
     }
 
     // Compute the MSE one last time, using the unaltered, fixed PointView and
     // the transformed, moving PointView.
     double mse(0.0);
     KD3Index& kd_fixed_orig = fixed->build3dIndex();
-    for (PointId i = 0; i < moving->size(); ++i)
+    for (PointRef&& point : *moving)
     {
-        PointRef p = moving->point(i);
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
-        kd_fixed_orig.knnSearch(p, 1, &indices, &sqr_dists);
+        kd_fixed_orig.knnSearch(point, 1, &indices, &sqr_dists);
         mse += std::sqrt(sqr_dists[0]);
     }
     mse /= moving->size();
