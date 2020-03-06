@@ -10,7 +10,7 @@ jobs:
   timeoutInMinutes: 60
   steps:
   - script: |
-      echo "current directory:" `pwd`
+      echo "Current directory:" `pwd`
       . /opt/conda/etc/profile.d/conda.sh
       conda activate pdal
       mkdir build
