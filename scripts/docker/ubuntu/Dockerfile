@@ -1,4 +1,4 @@
-FROM pdal/ubuntubase:latest
+FROM pdal/ubuntubase:latest as builder
 MAINTAINER Andrew Bell <andrew@hobu.co>
 
 SHELL ["/bin/bash", "-c"]
@@ -13,12 +13,9 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     conda activate pdal && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
-    LDFLAGS="$LDFLAGS -Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
-        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
-        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
-        -DCMAKE_FIND_FRAMEWORK="NEVER" \
-        -DCMAKE_BUILD_TYPE=Debug \
+    cmake -G Ninja  \
         -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
@@ -38,4 +35,30 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     conda activate pdal && \
     cd pdal/build  && \
-    ctest
+    ctest -V
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    cd pdal/build  && \
+    ninja install
+
+RUN apt-get -y remove bzip2 gcc-6 g++-6 ca-certificates && \
+   apt-get -y autoremove 
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    conda remove -c conda-forge git cmake ninja conda-forge-ci-setup
+
+RUN rm /opt/conda/envs/pdal/lib/*.a
+
+FROM ubuntu:bionic
+
+ARG PDAL_CONDA=/opt/conda/envs/pdal
+
+COPY --from=builder /usr/ /usr/
+COPY --from=builder /lib/ /lib/
+COPY --from=builder /${PDAL_CONDA}/lib/ /usr/lib/
+COPY --from=builder /${PDAL_CONDA}/include/ /usr/include/
+COPY --from=builder /${PDAL_CONDA}/share/ /usr/share/
+COPY --from=builder /${PDAL_CONDA}/bin/pdal /usr/bin/pdal
+
