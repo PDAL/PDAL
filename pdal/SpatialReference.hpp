@@ -116,6 +116,7 @@ public:
     bool valid() const;
 
     std::string getWKT() const;
+    std::string getWKT1() const;
 
     /// Parse the string starting at position `pos` as a spatial reference.
     /// \param s    String to parse.
@@ -164,7 +165,6 @@ public:
     static int calculateZone(double lon, double lat);
     static bool isWKT(const std::string& wkt);
     static std::string prettyWkt(const std::string& wkt);
-    static std::string convertToWKT1(const std::string& wkt);
 
 private:
     std::string m_wkt;
