@@ -1808,7 +1808,7 @@ S3::Config::Config(const std::string s, const std::string profile)
 
     m_precheck = c.value("precheck", false);
 
-    if (c.value("sse", false)|| env("AWS_SSE"))
+    if (c.value("sse", false) || env("AWS_SSE"))
     {
         m_baseHeaders["x-amz-server-side-encryption"] = "AES256";
     }
@@ -2369,12 +2369,21 @@ S3::Resource::Resource(std::string base, std::string fullPath)
     m_bucket = fullPath.substr(0, split);
     if (split != std::string::npos) m_object = fullPath.substr(split + 1);
 
-    // Always use virtual-host style paths.  We'll use HTTP for our back-end
-    // calls to allow this.  If we were to use HTTPS on the back-end, then we
-    // would have to use non-virtual-hosted paths if the bucket name contained
-    // '.' characters.
-    //
-    // m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
+    // We would prefer to use virtual-hosted URLs all the time since path-style
+    // URLs are being deprecated in 2020.  We also want to use HTTPS all the
+    // time, which is required for KMS-managed server-side encryption.  However,
+    // these two desires are incompatible if the bucket name contains dots,
+    // because the SSL cert will not allow virtual-hosted paths to be accessed
+    // over HTTPS.  So we'll fall back to path-style requests for buckets
+    // containing dots.  A fix for this should be announced by September 30,
+    // 2020, at which point maybe we can use virtual-hosted paths all the time.
+
+    // Deprecation plan for path-style URLs:
+    // https://aws.amazon.com/blogs/aws/amazon-s3-path-deprecation-plan-the-rest-of-the-story/
+
+    // Dots in bucket name limitation with virtual-hosting over HTTPS:
+    // https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html#VirtualHostingLimitations
+    m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
 }
 
 std::string S3::Resource::baseUrl() const
@@ -2391,7 +2400,7 @@ std::string S3::Resource::url() const
 {
     if (m_virtualHosted)
     {
-        return "http://" + m_bucket + "." + m_baseUrl + m_object;
+        return "https://" + m_bucket + "." + m_baseUrl + m_object;
     }
     else
     {
