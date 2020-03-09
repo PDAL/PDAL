@@ -33,9 +33,9 @@ that gives users access to executing
 :ref:`pipeline <pipeline>` instantiations and capturing the results
 in `Java`_ interfaces.
 This mode of operation is useful if you are looking to have PDAL simply act as
-your data format and processing handler. 
+your data format and processing handler.
 
-Users are expected to construct their own PDAL :ref:`pipeline <pipeline>`, 
+Users are expected to construct their own PDAL :ref:`pipeline <pipeline>`,
 execute it, and retrieve points into Java memory:
 
 .. code-block:: scala
@@ -70,7 +70,7 @@ execute it, and retrieve points into Java memory:
     val pv: PointView          = pvs.next() // let's take the first PointView
 
     // load all points into JVM memory
-    // PointCloud provides operations on PDAL points that 
+    // PointCloud provides operations on PDAL points that
     // are loaded in this case into JVM memory as a single Array[Byte]
     val pointCloud: PointCloud = pv.getPointCloud()
     val x: Double = pointCloud.getDouble(0, DimType.X) // get a point with PointId = 0 and only a single dimensions
@@ -112,7 +112,7 @@ PDAL Scala project introduces a DSL to simplify PDAL Pipeline construction (this
     val pv: PointView          = pvs.next() // let's take the first PointView
 
     // load all points into JVM memory
-    // PointCloud provides operations on PDAL points that 
+    // PointCloud provides operations on PDAL points that
     // are loaded in this case into JVM memory as a single Array[Byte]
     val pointCloud: PointCloud = pv.getPointCloud()
     val x: Double = pointCloud.getDouble(0, DimType.X) // get a point with PointId = 0 and only a single dimensions
@@ -130,7 +130,7 @@ PDAL Scala project introduces a DSL to simplify PDAL Pipeline construction (this
     pv.close()
     pipeline.close()
 
-It covers PDAL 2.0.x, but to use any custom DSL that is not covered by the 
+It covers PDAL 2.0.x, but to use any custom DSL that is not covered by the
 current Scala API you can use `RawExpr`_ type to build `Pipeline Expression`_:
 
 .. code-block:: scala
@@ -139,9 +139,9 @@ current Scala API you can use `RawExpr`_ type to build `Pipeline Expression`_:
     import io.pdal.pipeline._
     import io.circe.syntax._
 
-    val pipelineWithRawExpr = 
-      ReadLas("1.2-with-color.las") ~ 
-      RawExpr(Map("type" -> "filters.crop").asJson) ~ 
+    val pipelineWithRawExpr =
+      ReadLas("1.2-with-color.las") ~
+      RawExpr(Map("type" -> "filters.crop").asJson) ~
       WriteLas("1.2-with-color-out.las")
 
 Installation
@@ -150,7 +150,7 @@ Installation
 .. index:: Install, Java, Scala
 
 PDAL Java artifacts are cross published for `Scala 2.13`_, `2.12`_ and `2.11`_.
-However, if it is not required, a separate artifact that has no Scala specific 
+However, if it is not required, a separate artifact that has no Scala specific
 artifact postfix is published as well.
 
 .. code-block:: scala
@@ -169,10 +169,10 @@ artifact postfix is published as well.
 
 The latest version is: |Maven Central|
 
-.. |Maven Central| image:: https://maven-badges.herokuapp.com/maven-central/io.pdal/pdal/badge.svg
+.. |Maven Central| image:: https://maven-badges.herokuapp.com/maven-central/io.pdal/pdal/badge.png
    :target: https://search.maven.org/search?q=g:io.pdal
 
-There is also an `example SBT PDAL Demo project <https://github.com/PDAL/java/tree/master/examples/pdal-jni>`_ in the 
+There is also an `example SBT PDAL Demo project <https://github.com/PDAL/java/tree/master/examples/pdal-jni>`_ in the
 bindings repository, that can be used for a quick start.
 
 Compilation
@@ -181,7 +181,7 @@ Compilation
 .. index:: Compile, Java, Scala
 
 Development purposes (including binaries) compilation:
-  1. Install PDAL (using brew / package managers (unix) / build from sources / etc)     
+  1. Install PDAL (using brew / package managers (unix) / build from sources / etc)
   2. Build native libs `./sbt native/nativeCompile`_ (optionally, binaries would be built during tests run)
   3. Run `./sbt core/test`_ to run PDAL tests
 
@@ -195,7 +195,7 @@ Only Java development purposes compilation:
 If you would like to use your own bindings binary, it is necessary to set `java.library.path`:
 
 .. code-block:: scala
-    
+
     // Mac OS X example with manual JNI installation
     // cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni.2.1.dylib /usr/local/lib/libpdaljni.2.1.dylib
     // place built binary into /usr/local/lib, and pass java.library.path to your JVM
