@@ -66,8 +66,7 @@ void ClusterFilter::addArgs(ProgramArgs& args)
 
 void ClusterFilter::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-    m_cluster = layout->registerOrAssignDim("ClusterID", Type::Unsigned64);
+    layout->registerDim(Dimension::Id::ClusterID);
 }
 
 void ClusterFilter::filter(PointView& view)
@@ -79,7 +78,7 @@ void ClusterFilter::filter(PointView& view)
     for (auto const& c : clusters)
     {
         for (auto const& i : c)
-            view.setField(m_cluster, i, id);
+            view.setField(Dimension::Id::ClusterID, i, id);
         id++;
     }
 }

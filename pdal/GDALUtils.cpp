@@ -195,6 +195,18 @@ bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
 }
 
 
+bool reprojectBounds(Bounds& box, const std::string& srcSrs,
+    const std::string& dstSrs)
+{
+    SrsTransform transform(srcSrs, dstSrs);
+
+    BOX3D b = box.to3d();
+    bool ok = transform.transform(b.minx, b.miny, b.minz);
+    if (ok)
+        ok = transform.transform(b.maxx, b.maxy, b.maxz);
+    return ok;
+}
+
 /**
   Reproject a bounds box from a source projection to a destination.
   \param box  2D Bounds box to be reprojected in-place.
@@ -213,12 +225,19 @@ bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
 }
 
 
+/**
+  Get the last error from a GDAL/OGR operation as a string.
+  \return  Error message.
+*/
 std::string lastError()
 {
     return CPLGetLastErrorMsg();
 }
 
 
+/**
+  Register GDAL/OGR drivers.
+*/
 void registerDrivers()
 {
     static std::once_flag flag;
@@ -233,12 +252,20 @@ void registerDrivers()
 }
 
 
+/**
+  Unregister GDAL/OGR drivers.
+*/
 void unregisterDrivers()
 {
     GDALDestroyDriverManager();
 }
 
 
+/**
+  Return a reference to the global error handler.
+
+  \return  Reference to the global error handler.
+*/
 ErrorHandler& ErrorHandler::getGlobalErrorHandler()
 {
     static ErrorHandler s_gdalErrorHandler;
@@ -246,6 +273,10 @@ ErrorHandler& ErrorHandler::getGlobalErrorHandler()
     return s_gdalErrorHandler;
 }
 
+
+/**
+  Constructor for a GDAL error handler.
+*/
 ErrorHandler::ErrorHandler() : m_errorNum(0)
 {
     std::string value;
@@ -260,12 +291,20 @@ ErrorHandler::ErrorHandler() : m_errorNum(0)
 }
 
 
+/**
+  Destructor for a GDAL error handler.
+*/
 ErrorHandler::~ErrorHandler()
 {
     CPLSetErrorHandler(nullptr);
 }
 
 
+/**
+  Set the output destination and debug for the error handler.
+  \param log  Pointer to logger.
+  \param debug  Whether GDAL debugging should be turned on.
+*/
 void ErrorHandler::set(LogPtr log, bool debug)
 {
     setLog(log);
@@ -273,6 +312,10 @@ void ErrorHandler::set(LogPtr log, bool debug)
 }
 
 
+/**
+  Set the log destination for GDAL errors.
+  \param log  Pointer to the logger.
+*/
 void ErrorHandler::setLog(LogPtr log)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -280,6 +323,10 @@ void ErrorHandler::setLog(LogPtr log)
 }
 
 
+/**
+  Set the log state for GDAL logging.
+  \param debug  If true, sets the CPL_DEBUG logging option for GDAL 
+*/
 void ErrorHandler::setDebug(bool debug)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -291,12 +338,24 @@ void ErrorHandler::setDebug(bool debug)
         CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
 }
 
+
+/**
+  Get the number of the last GDAL error.
+  \return  Last GDAL error number.
+*/
 int ErrorHandler::errorNum()
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_errorNum;
 }
 
+
+/**
+  Callback for GDAL error.
+  \param level  Error level
+  \param num  Error number
+  \param msg  Error message.
+*/
 void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -317,10 +376,15 @@ void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
     }
 }
 
+
+/**
+  Create a copy of the raster in memory.
+  \return  Pointer to the new raster.
+*/
 Raster* Raster::memoryCopy() const
 {
 
-    GDALDriver *mem= GetGDALDriverManager()->GetDriverByName( "MEM");
+    GDALDriver *mem = GetGDALDriverManager()->GetDriverByName("MEM");
     if (!mem)
     {
         return nullptr;
@@ -329,13 +393,20 @@ Raster* Raster::memoryCopy() const
     if (!m_ds)
         throw pdal::pdal_error("driver is not open!");
 
-    GDALDataset* mem_ds = mem->CreateCopy("", m_ds, FALSE, nullptr, nullptr, nullptr);
+    GDALDataset* mem_ds = mem->CreateCopy("", m_ds, FALSE, nullptr, nullptr,
+        nullptr);
 
     Raster* r = new Raster(mem_ds);
     r->wake();
     return r;
 }
 
+
+/**
+  Constructor for reading a raster.
+  \param filename  Raster filename.
+  \param drivername  Driver to use when opening raster.
+*/
 Raster::Raster(const std::string& filename, const std::string& drivername)
     : m_filename(filename)
     , m_width(0)
@@ -353,6 +424,12 @@ Raster::Raster(const std::string& filename, const std::string& drivername)
 }
 
 
+/**
+  Constructor to use when creating a raster.
+  \param filename  Filename of raster.
+  \param drivername  Driver to use when opening the raster.
+
+*/
 Raster::Raster(const std::string& filename, const std::string& drivername,
     const SpatialReference& srs, const std::array<double, 6> pixelToPos)
     : m_filename(filename)
@@ -366,6 +443,15 @@ Raster::Raster(const std::string& filename, const std::string& drivername,
 {}
 
 
+/**
+  Open a raster destined for output.
+  \param width  Raster width.
+  \param height  Raster height.
+  \param numBands  Number of bands in the raster.
+  \param type  Datatype of the raster.
+  \param noData  Nodata value for "empty" cells.
+  \param options  A list of option strings that are passed to the GDAL driver.
+*/
 GDALError Raster::open(int width, int height, int numBands,
     Dimension::Type type, double noData, StringList options)
 {
@@ -465,8 +551,10 @@ GDALError Raster::open(int width, int height, int numBands,
 }
 
 
-
-
+/**
+  Open a raster for output.
+  \return  Error code, or GDALError::None.
+*/
 GDALError Raster::open()
 {
     GDALError error = GDALError::None;
@@ -487,6 +575,10 @@ GDALError Raster::open()
     return error;
 }
 
+
+/**
+  Initialize a raster after opening.
+*/
 GDALError Raster::wake()
 {
     GDALError error = GDALError::None;
@@ -564,6 +656,12 @@ GDALError Raster::validateType(Dimension::Type& type,
 }
 
 
+/**
+  Convert a pixel X/Y position to a position in a coord. reference system.
+  \param col  Pixel column.
+  \param row  Pixel row.
+  \param[out] output  Array of 2 doubles with of the position in a CRS.
+*/
 void Raster::pixelToCoord(int col, int row, std::array<double, 2>& output) const
 {
     /**
@@ -593,8 +691,13 @@ void Raster::pixelToCoord(int col, int row, std::array<double, 2>& output) const
 }
 
 
-// Determines the pixel/line position given an x/y.
-// No reprojection is done at this time.
+/**
+  Determines the pixel/line position given a coordinate position.
+  \param x  X coordinate of point.
+  \param y  Y coordinate of point.
+  \param[out] pixel  Raster pixel (column) position.
+  \param[out] line  Raster line (row) position.
+*/
 bool Raster::getPixelAndLinePosition(double x, double y,
     int32_t& pixel, int32_t& line)
 {
@@ -609,9 +712,10 @@ bool Raster::getPixelAndLinePosition(double x, double y,
 }
 
 
-/*
+/**
   Compute a vector of the PDAL datatypes that are stored in the raster
   bands of a dataset.
+  \return  Error code or GDALError::None.
 */
 GDALError Raster::computePDALDimensionTypes()
 {
@@ -641,6 +745,13 @@ GDALError Raster::computePDALDimensionTypes()
 }
 
 
+/**
+  Fetch the raster data associated with the point at a position.
+  \param x  X position of point to fetch raster data for.
+  \param y  Y position of point to fetch raster data for.
+  \param[out] data  Vector of raster data associated with the provided point.
+  \return  Error code or GDALError::None.
+*/
 GDALError Raster::read(double x, double y, std::vector<double>& data)
 {
     if (!m_ds)
@@ -678,6 +789,10 @@ GDALError Raster::read(double x, double y, std::vector<double>& data)
 }
 
 
+/**
+  Get the spatial reference associated with a raster.
+  \return  Associated spatial reference.
+*/
 SpatialReference Raster::getSpatialRef() const
 {
     SpatialReference srs;
@@ -688,12 +803,18 @@ SpatialReference Raster::getSpatialRef() const
 }
 
 
+/**
+  Destructor.  Closes the raster if open.
+*/
 Raster::~Raster()
 {
     close();
 }
 
 
+/**
+  Close an open raster.
+*/
 void Raster::close()
 {
     GDALClose(m_ds);
@@ -702,6 +823,11 @@ void Raster::close()
 }
 
 
+/**
+  Create OGR geometry given a well-known text string.
+  \param s  WKT string to convert to OGR Geometry.
+  \return  Pointer to new geometry.
+*/
 OGRGeometry *createFromWkt(const char *s)
 {
     OGRGeometry *newGeom;
@@ -715,6 +841,12 @@ OGRGeometry *createFromWkt(const char *s)
 }
 
 
+/**
+  Create OGR geometry given a well-known text string and text SRS.
+  \param s  WKT string to convert to OGR Geometry.
+  \param srs  Text representation of coordinate reference system.
+  \return  Pointer to new geometry.
+*/
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 {
     OGRGeometry *newGeom;
@@ -743,6 +875,12 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
     return newGeom;
 }
 
+
+/**
+  Create OGR geometry given a GEOjson text string.
+  \param s  GEOjson string to convert to OGR Geometry.
+  \return  Pointer to new geometry.
+*/
 OGRGeometry *createFromGeoJson(const char *s)
 {
 #if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
@@ -753,6 +891,13 @@ OGRGeometry *createFromGeoJson(const char *s)
 #endif
 }
 
+
+/**
+  Create OGR geometry given a GEOjson text string and text SRS.
+  \param s  GEOjson string to convert to OGR Geometry.
+  \param srs  Text representation of coordinate reference system.
+  \return  Pointer to new geometry.
+*/
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 {
 // Call this function instead after we've past supporting GDAL 2.2
@@ -779,6 +924,11 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 }
 
 
+/**
+  Load polygons from an OGR datasource specified by JSON.
+  \param ogr  JSON that specifies how to load data.
+  \return  Vector of polygons read from datasource.
+*/
 std::vector<Polygon> getPolygons(const NL::json& ogr)
 {
     registerDrivers();
@@ -789,8 +939,9 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
     {
 
         const NL::json& dops = ogr.at("drivers");
-        std::vector<std::string> driverOptions = dops.get<std::vector<std::string>>();
-        for(const auto& s: driverOptions)
+        std::vector<std::string> driverOptions =
+            dops.get<std::vector<std::string>>();
+        for (const auto& s: driverOptions)
             papszDriverOptions = CSLAddString(papszDriverOptions, s.c_str());
     }
     std::vector<const char*> openoptions{};
@@ -798,25 +949,25 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
     char** papszOpenOptions = nullptr;
     if (ogr.count("openoptions"))
     {
-
         const NL::json& oops = ogr.at("openoptions");
-        std::vector<std::string> openOptions = oops.get<std::vector<std::string>>();
+        std::vector<std::string> openOptions =
+            oops.get<std::vector<std::string>>();
         for(const auto& s: openOptions)
             papszOpenOptions = CSLAddString(papszOpenOptions, s.c_str());
     }
 
     std::string dsString = datasource.get<std::string>();
-    unsigned int openFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR;
-    GDALDataset* ds = (GDALDataset*) GDALOpenEx( dsString.c_str(),
-                                                 openFlags,
-                                                 papszDriverOptions, papszOpenOptions, NULL );
+    unsigned int openFlags =
+        GDAL_OF_READONLY | GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR;
+    GDALDataset* ds;
+    ds = (GDALDataset*) GDALOpenEx(dsString.c_str(), openFlags,
+        papszDriverOptions, papszOpenOptions, NULL);
     CSLDestroy(papszDriverOptions);
     CSLDestroy(papszOpenOptions);
     if (!ds)
-        throw pdal_error("Unable to read datasource in fetchOGRGeometries " + datasource.dump() );
+        throw pdal_error("Unable to read OGR datasource: " + datasource.dump());
 
     OGRLayer* poLayer(nullptr);
-
     if (ogr.count("layer"))
     {
         const NL::json& layer = ogr.at("layer");
@@ -824,18 +975,17 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
         poLayer = ds->GetLayerByName( lyrString.c_str() );
 
         if (!poLayer)
-            throw pdal_error("Unable to read layer in fetchOGRGeometries " + layer.dump() );
+            throw pdal_error("Unable to read OGR layer: " + layer.dump());
     }
 
     OGRFeature *poFeature (nullptr);
-    OGRGeometry* filterGeometry(nullptr);
-    std::string dialect("OGRSQL");
-
     if (ogr.count("sql"))
     {
+        std::string dialect("OGRSQL");
+        std::string query = ogr.at("sql").get<std::string>();
 
-        const NL::json sql = ogr.at("sql");
-
+        Polygon poly;
+        OGRGeometry *geom = nullptr;
         if (ogr.count("options"))
         {
             const NL::json options = ogr.at("options");
@@ -844,48 +994,24 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 
             if (options.count("geometry"))
             {
-                std::string wkt_or_json = options.at("geometry").get<std::string>();
-                bool isJson = (wkt_or_json.find("{") != wkt_or_json.npos) ||
-                              (wkt_or_json.find("}") != wkt_or_json.npos);
+                // Determine the layer's SRS and assign it to the geometry
+                // or transform to that SRS.
+                poLayer = ds->ExecuteSQL(query.c_str(), NULL, dialect.c_str());
+                if (!poLayer)
+                    throw pdal_error("Unable to execute OGR SQL query.");
+                SpatialRef sref;
+                sref.setFromLayer(poLayer);
+                ds->ReleaseResultSet(poLayer);
 
-                std::string srs;
-                if (isJson)
-                {
-                    filterGeometry = gdal::createFromGeoJson(wkt_or_json, srs);
-                    if (!filterGeometry)
-                        throw pdal_error("Unable to create filter geometry from input GeoJSON");
-                }
+                poly.update(options.at("geometry").get<std::string>());
+                if (poly.getSpatialReference().valid())
+                    poly.transform(sref.wkt());
                 else
-                {
-                    filterGeometry = gdal::createFromWkt(wkt_or_json, srs);
-                    if (!filterGeometry)
-                        throw pdal_error("Unable to create filter geometry from input WKT");
-                }
-                filterGeometry->assignSpatialReference(
-                    new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
-
+                    poly.setSpatialReference(sref.wkt());
+                geom = (OGRGeometry *)poly.getOGRHandle();
             }
         }
-
-        std::string query = sql.get<std::string>();
-
-        // execute the query to get the SRS without
-        // the filterGeometry, assign it to the filterGeometry,
-        // and then query again.
-        if (filterGeometry)
-        {
-            poLayer = ds->ExecuteSQL( query.c_str(),
-                                      NULL,
-                                      dialect.c_str());
-            if (!poLayer)
-                throw pdal_error("unable to execute sql query!");
-
-            filterGeometry->transformTo(poLayer->GetSpatialRef());
-        }
-
-        poLayer = ds->ExecuteSQL( query.c_str(),
-                                  filterGeometry,
-                                  dialect.c_str());
+        poLayer = ds->ExecuteSQL(query.c_str(), geom, dialect.c_str());
         if (!poLayer)
             throw pdal_error("unable to execute sql query!");
     }
@@ -896,6 +1022,7 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
         polys.emplace_back(poFeature->GetGeometryRef());
         OGRFeature::DestroyFeature( poFeature );
     }
+    ds->ReleaseResultSet(poLayer);
     return polys;
 }
 
@@ -904,6 +1031,13 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 namespace oldgdalsupport
 {
 
+/**
+  Create an OGRGeometry from a WKT string.
+  
+  \param s Pointer to an array of characters to parse as WKT.
+  \param ppoReturn  Address in which to place a pointer to a created
+    OGRGeometry.
+*/
 #if (GDAL_VERSION_MAJOR == 2) && (GDAL_VERSION_MINOR < 3)
 OGRErr createFromWkt(char **s, OGRGeometry **ppoReturn )
 {
@@ -1017,7 +1151,14 @@ OGRErr createFromWkt(char **s, OGRGeometry **ppoReturn )
 }
 #endif // GDAL version limit
 
-OGRGeometry* createFromGeoJson(char **s)
+
+/**
+  Create an OGRGeometry given a GEOjson string.
+  \param s  Pointer to GEOjson string to be parsed.  The string is updated
+    such that s points just past the extracted JSON.
+  \return  Pointer to created OGRGeometry.
+*/
+OGRGeometry *createFromGeoJson(char **s)
 {
     // Go through a supposed JSON object string, looking for the
     // closing brace.  Return just past its position.

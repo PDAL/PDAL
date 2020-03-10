@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL VERSION 2.0.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.1.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -378,6 +378,9 @@ install(
     DESTINATION
         "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
+target_include_directories(${PDAL_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:${PDAL_INCLUDE_DIRS}>)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?

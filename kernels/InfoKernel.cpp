@@ -245,6 +245,18 @@ MetadataNode InfoKernel::run(const std::string& filename)
     }
     root.add("filename", filename);
     root.add("pdal_version", Config::fullVersionString());
+
+    std::time_t now
+    = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::stringstream t;
+    t << std::put_time( std::localtime( &now ), "%FT%T%z" );
+    root.add("reader", m_reader->getName());
+    root.add("now", t.str());
+    
+    if (pdal::FileUtils::fileExists(filename) &&
+            (!pdal::FileUtils::isDirectory(filename))) // allow for s3 uris and directories
+        root.add("file_size", pdal::FileUtils::fileSize(filename));
+    
     return root;
 }
 

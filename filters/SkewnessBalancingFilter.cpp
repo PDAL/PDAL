@@ -34,7 +34,6 @@
 
 #include "SkewnessBalancingFilter.hpp"
 
-#include <pdal/PointViewIter.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -56,18 +55,28 @@ void SkewnessBalancingFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
-std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
+
+void SkewnessBalancingFilter::processGround(PointViewPtr view)
 {
-    auto cmp = [](const PointIdxRef& p1, const PointIdxRef& p2) {
+    auto cmp = [](const PointRef& p1, const PointRef& p2) {
         return p1.compare(Dimension::Id::Z, p2);
     };
     std::sort(view->begin(), view->end(), cmp);
+
+    auto setClass = [&view](PointId first, PointId last, int cl)
+    {
+        for (PointId idx = first; idx <= last; ++idx)
+            view->setField(Dimension::Id::Classification, idx, cl);
+    };
 
     point_count_t n(0);
     point_count_t n1(0);
     double delta, delta_n, term1, M1, M2, M3;
     M1 = M2 = M3 = 0.0;
-    std::vector<double> skewness(view->size());
+
+    PointId lastPositive = 0;
+    double skewness = 0;
+    double lastSkewness = std::numeric_limits<double>::quiet_NaN();
     for (PointId i = 0; i < view->size(); ++i)
     {
         double z = view->getFieldAs<double>(Dimension::Id::Z, i);
@@ -79,61 +88,36 @@ std::set<PointId> SkewnessBalancingFilter::processGround(PointViewPtr view)
         M1 += delta_n;
         M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
         M2 += term1;
-        skewness[i] = std::sqrt(n) * M3 / std::pow(M2, 1.5);
-    }
-
-    PointId j(0);
-    PointId i(view->size());
-    do
-    {
-        if (skewness[i] <= 0)
+        skewness = std::sqrt(n) * M3 / std::pow(M2, 1.5);
+        if (skewness > 0 && lastSkewness <= 0)
         {
-            j = i;
-            break;
+            setClass(lastPositive, i - 1, ClassLabel::Ground);
+            lastPositive = i;
         }
-    } while (--i != 0);
-
-    std::set<PointId> groundIdx;
-    for (PointId i = 0; i <= j; ++i)
-        groundIdx.insert(i);
-
-    log()->get(LogLevel::Debug)
-        << "Stopped with " << groundIdx.size()
-        << " ground returns and skewness of " << skewness[j] << std::endl;
-
-    return groundIdx;
+        lastSkewness = skewness;
+    }
+    // It's possible that all our points have skewness <= 0, in which case
+    // we've never had an opportunity to set the ground state.  Do so now.
+    // Otherwise, set the remaining points to non-ground.
+    if (lastPositive == 0 && skewness <= 0)
+        setClass(lastPositive, view->size() - 1, ClassLabel::Ground);
+    else
+        setClass(lastPositive, view->size() - 1, ClassLabel::Unclassified);
 }
+
 
 PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
 {
     PointViewSet viewSet;
     if (!input->size())
         return viewSet;
+    viewSet.insert(input);
 
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
 
-    auto idx = processGround(input);
-
-    if (!idx.empty())
-    {
-        // set the classification label of ground returns as 2
-        // (corresponding to ASPRS LAS specification)
-        for (const auto& i : idx)
-            input->setField(Dimension::Id::Classification, i, 2);
-
-        viewSet.insert(input);
-    }
-    else
-    {
-        if (idx.empty())
-            log()->get(LogLevel::Debug2)
-                << "Filtered cloud has no ground returns!\n";
-
-        // return the input buffer unchanged
-        viewSet.insert(input);
-    }
+    processGround(input);
 
     return viewSet;
 }

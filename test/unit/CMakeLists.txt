@@ -243,11 +243,13 @@ PDAL_ADD_TEST(pdal_filters_crop_test
     LINK_WITH
         ${GDAL_LIBRARY}
 )
+PDAL_ADD_TEST(pdal_filters_csf_test FILES filters/CSFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_delaunay_test FILES filters/DelaunayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_covariancefeatures_test FILES filters/CovarianceFeaturesTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_elm_test FILES filters/ELMFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES
         filters/MongoExpressionFilterTest.cpp
@@ -257,6 +259,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
 
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_separatescanline_test FILES filters/SeparatescanlineFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_icp_test
@@ -276,6 +279,7 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
@@ -288,6 +292,7 @@ PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_returns_test FILES filters/ReturnsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_shell_test FILES filters/ShellFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_skewness_test FILES filters/SkewnessFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_filters_smrf_test FILES filters/SMRFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_sort_test

@@ -37,7 +37,6 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/PointViewIter.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal

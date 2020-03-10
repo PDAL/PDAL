@@ -200,14 +200,9 @@ void BpfReader::addDimensions(PointLayoutPtr layout)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
-        Dimension::Type type = Dimension::Type::Float;
-
         BpfDimension& dim = m_dims[i];
-        if (dim.m_label == "X" ||
-            dim.m_label == "Y" ||
-            dim.m_label == "Z")
-            type = Dimension::Type::Double;
-        dim.m_id = layout->registerOrAssignDim(dim.m_label, type);
+        dim.m_id = layout->registerOrAssignDim(dim.m_label,
+            Dimension::Type::Float);
     }
 }
 
@@ -412,6 +407,19 @@ point_count_t BpfReader::readPointMajor(PointViewPtr view, point_count_t count)
 }
 
 
+BpfReader::~BpfReader()
+{
+#ifdef PDAL_HAVE_ZLIB
+    if (m_header.m_compression)
+    {
+        for( auto& stream: m_streams )
+        {
+            delete stream->popStream();
+        }
+    }
+#endif
+}
+
 void BpfReader::readDimMajor(PointRef& point)
 {
     if (m_streams.empty())
@@ -558,7 +566,7 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
         float f;
         uint32_t u32;
     };
-    std::unique_ptr<union uu> uArr(
+    std::unique_ptr<union uu[]> uArr(
         new uu[(std::min)(count, numPoints() - m_index)]);
 
     for (size_t d = 0; d < m_dims.size(); ++d)

@@ -5,7 +5,7 @@ filters.crop
 
 The **crop filter** removes points that fall outside or inside a
 cropping bounding
-box (2D), polygon, or point+distance.  If more than one bounding region is
+box (2D or 3D), polygon, or point+distance.  If more than one bounding region is
 specified, the filter will pass all input points through each bounding region,
 creating an output point set for each input crop region.
 
@@ -46,6 +46,16 @@ bounds
   The extent of the clipping rectangle in the format
   "([xmin, xmax], [ymin, ymax])".  This option can be specified more than
   once by placing values in an array.
+
+
+  .. note::
+
+    3D bounds can be given in the form ``([xmin, xmax, zmax], [ymin, ymax, zmax])``.
+
+  .. warning::
+
+    If a 3D bounds is given to the filter, a 3D crop will be attempted, even
+    if the Z values are invalid or inconsistent with the data.
 
 polygon
   The clipping polygon, expressed in a well-known text string,

@@ -129,8 +129,7 @@ private:
     // Data fetching - these forward user-specified query/header params.
     std::string get(std::string path) const;
     std::vector<char> getBinary(std::string path) const;
-    std::unique_ptr<arbiter::LocalHandle> getLocalHandle(std::string path)
-        const;
+    arbiter::LocalHandle getLocalHandle(std::string path) const;
 
     std::string m_root;
 

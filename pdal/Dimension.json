@@ -375,6 +375,11 @@
     "description": "Used to shallowly mark a point as being omitted without removing it"
     },
     {
+    "name": "ClusterID",
+    "type": "uint64_t",
+    "description": "ID assigned to a point by a point-clustering algorithm."
+    },
+    {
     "name": "NNDistance",
     "type": "double",
     "description": "Distance metric related to a point's nearest neighbors."

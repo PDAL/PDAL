@@ -31,6 +31,7 @@ namespace pdal
 
   void MyReader::ready(PointTableRef)
   {
+    m_index = 0;
     SpatialReference ref("EPSG:4385");
     setSpatialReference(ref);
   }

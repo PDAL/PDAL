@@ -64,7 +64,7 @@ std::string ELMFilter::getName() const
 void ELMFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size", m_cell, 10.0);
-    args.add("class", "Class to use for noise points", m_class, uint8_t(7));
+    args.add("class", "Class to use for noise points", m_class, ClassLabel::LowPoint);
     args.add("threshold", "Threshold value", m_threshold, 1.0);
 }
 
@@ -75,6 +75,9 @@ void ELMFilter::addDimensions(PointLayoutPtr layout)
 
 void ELMFilter::filter(PointView& view)
 {
+    if (!view.size())
+        return;
+
     BOX2D bounds;
     calculateBounds(view, bounds);
 

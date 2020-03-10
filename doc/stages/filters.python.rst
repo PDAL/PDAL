@@ -14,6 +14,15 @@ filter and the ``outs`` array represents the points after filtering.
 
 .. warning::
 
+    Make sure `NumPy`_ is installed in your `Python`_ environment.
+
+    .. code-block:: shell
+
+        $ python3 -c "import numpy; print(numpy.__version__)"
+        1.18.1
+
+.. warning::
+
     Each array contains all the :ref:`dimensions` of the incoming ``ins``
     point schema.  Each array in the ``outs`` list matches the `NumPy`_
     array of the same type as provided as ``ins`` for shape and type.
@@ -48,6 +57,12 @@ filter and the ``outs`` array represents the points after filtering.
    ::
 
        "add_dimension": [ "NewDimensionOne", "NewDimensionTwo", "NewDimensionThree" ]
+
+
+   You can also specify the :ref:`type <types>` of the dimension using an ``=``.
+   ::
+
+       "add_dimension": "NewDimensionOne=uint8"
 
 
 Modification Example
@@ -102,14 +117,14 @@ classified 1 or 2 to be dropped from the point stream.
   def filter(ins,outs):
      cls = ins['Classification']
 
-     keep_classes = [1,2]
+     keep_classes = [1, 2]
 
      # Use the first test for our base array.
      keep = np.equal(cls, keep_classes[0])
 
      # For 1:n, test each predicate and join back
      # to our existing predicate array
-     for k in range(1,len(keep_classes)):
+     for k in range(1, len(keep_classes)):
          t = np.equal(cls, keep_classes[k])
          keep = keep + t
 
@@ -164,9 +179,9 @@ for the in-scope :ref:`filters.python` :cpp:class:`pdal::Stage`.
 .. code-block:: python
 
    def myfunc(ins,outs):
-       print ('schema: ', schema)
-       print ('srs: ', spatialreference)
-       print ('metadata: ', metadata)
+       print('schema: ', schema)
+       print('srs: ', spatialreference)
+       print('metadata: ', metadata)
        outs = ins
        return True
 
@@ -207,7 +222,7 @@ basic Python function while substituting values as necessary.
           "type":"filters.python",
           "module":"anything",
           "function":"filter",
-          "source":"arguments.py",
+          "script":"arguments.py",
           "pdalargs":"{\"factor\":0.3048,\"an_argument\":42, \"another\": \"a string\"}"
       },
       "output.las"

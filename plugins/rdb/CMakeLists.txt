@@ -17,6 +17,12 @@ PDAL_ADD_PLUGIN(libname reader rdb
 )
 target_include_directories(${libname} PUBLIC "${PDAL_VENDOR_DIR}/eigen")
 
+# windows requires explicit linking against 
+# rdbcpp
+if (WIN32)
+	set(RDB_LIBRARY "rdbcpp")
+endif()
+	
 set(RDB_TEST_NAME pdal_io_rdb_reader_test)
 option(BUILD_RDBLIB_TESTS "Build rdblib tests" ON)
 if (WITH_TESTS)
@@ -30,7 +36,7 @@ if (BUILD_RDBLIB_TESTS)
         FILES
             test/RdbReaderTest.cpp
         LINK_WITH
-            ${libname}
+            ${libname} ${RDB_LIBRARY}
         INCLUDES
             ${PROJECT_BINARY_DIR}/plugins/rdb/test
             ${PROJECT_SOURCE_DIR}/plugins/rdb/io

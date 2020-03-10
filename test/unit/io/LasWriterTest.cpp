@@ -1151,10 +1151,26 @@ TEST(LasWriterTest, pdal_add_vlr)
     Options readerOpts;
     readerOpts.add("filename", infile);
 
-    std::string vlr( " [ { \"description\": \"A description under 32 bytes\", \"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIHRleHQ=\" },  { \"description\": \"A description under 32 bytes\", \"record_id\": 43, \"user_id\": \"hobu\", \"data\": \"dGhpcyBpcyBzb21lIG1vcmUgdGV4dA==\" } ]");
+    std::string vlr1(
+      R"({
+          "description": "A description under 32 bytes",
+          "record_id": 42,
+          "user_id": "hobu",
+          "data": "dGhpcyBpcyBzb21lIHRleHQ="
+         })"
+    );
+    std::string vlr2(
+      R"({
+          "description": "A description under 32 bytes",
+          "record_id": 43,
+          "user_id": "hobu",
+          "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
+         })"
+    );
 
     Options writerOpts;
-    writerOpts.add("vlrs", vlr);
+    writerOpts.add("vlrs", vlr1);
+    writerOpts.add("vlrs", vlr2);
     writerOpts.add("filename", outfile);
 
     LasReader reader;
@@ -1183,6 +1199,106 @@ TEST(LasWriterTest, pdal_add_vlr)
     EXPECT_EQ(nodes.size(), 2UL);
 }
 
+// Make sure we can read an array of VLRs in a pipeline.
+TEST(LasWriterTest, issue2937)
+{
+    std::string infile = Support::configuredpath("pipeline/issue2937.json");
+
+    std::string cmd = Support::binpath("pdal") + " pipeline --nostream " +
+        infile;
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    std::string outfile = Support::temppath("issue2937_out.las");
+    cmd = Support::binpath("pdal") + " info --metadata " + outfile;
+    Utils::run_shell_command(cmd, output);
+
+    EXPECT_NE(output.find("dGhpcyBpcy"), std::string::npos);
+    EXPECT_NE(output.find("dGhpcyAqdtB"), std::string::npos);
+}
+
+TEST(LasWriterTest, badVlr)
+{
+    auto doTest = [](const std::string& vlr, bool expectThrow = true)
+    {
+        Options opts;
+        opts.add("filename", Support::temppath("testfile"));
+        opts.add("vlrs", vlr);
+
+        LasWriter w;
+        w.setOptions(opts);
+
+        PointTable t;
+        if (expectThrow)
+            EXPECT_THROW(w.prepare(t), pdal_error);
+        else
+            EXPECT_NO_THROW(w.prepare(t));
+    };
+
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })", false
+    );
+    doTest(
+      R"({
+        "description": "A description over 32 bytes is one that's way too long",
+        "record_id": 42,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "A userID that's way too long",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "hobu"
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42.234,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 422340,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      })"
+    );
+    doTest(
+      R"({
+        "description": "A description under 32 bytes",
+        "record_id": 42,
+        "user_id": "hobu",
+        "data": "dGhpcyBpcyBzb21lIHRleHQ="
+      } junk after valid VLR )"
+    );
+}
+
 TEST(LasWriterTest, evlroffset)
 {
     std::string outfile(Support::temppath("evlr.las"));
@@ -1193,9 +1309,9 @@ TEST(LasWriterTest, evlroffset)
         Options wo;
         std::vector<uint8_t> largeVlr(66000);
         std::string vlr =
-            " [ { \"description\": \"A description under 32 bytes\", "
+            " { \"description\": \"A description under 32 bytes\", "
             "\"record_id\": 42, \"user_id\": \"hobu\", \"data\": \"" +
-            Utils::base64_encode(largeVlr) + "\" }]";
+            Utils::base64_encode(largeVlr) + "\" }";
         wo.add("vlrs", vlr);
         wo.add("minor_version", 4);
         wo.add("filename", outfile);
@@ -1341,7 +1457,7 @@ TEST(LasWriterTest, issue1940)
 }
 
 // Make sure that we can forward scale from multiple files if they match.
-TEST(LasWRiterTest, issue2663)
+TEST(LasWriterTest, issue2663)
 {
     std::string outfile(Support::temppath("out.las"));
     {
@@ -1424,4 +1540,51 @@ TEST(LasWriterTest, issue2320)
     }
 }
 #endif
+
+TEST(LasWriterTest, synthetic_points)
+{
+    using namespace Dimension;
+
+    const std::string FILENAME(Support::temppath("synthetic_test.las"));
+    PointTable table;
+
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+
+    BufferReader bufferReader;
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 1.0);
+    view->setField(Id::Y, 0, 2.0);
+    view->setField(Id::Z, 0, 3.0);
+    view->setField(Id::Classification, 0, ClassLabel::Ground | ClassLabel::Synthetic);
+    bufferReader.addView(view);
+
+    Options writerOps;
+    writerOps.add("filename", FILENAME);
+
+    LasWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(bufferReader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options readerOps;
+    readerOps.add("filename", FILENAME);
+
+    PointTable readTable;
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(readTable);
+    PointViewSet viewSet = reader.execute(readTable);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1u);
+    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic, view->getFieldAs<uint8_t>(Id::Classification, 0));
+
+    FileUtils::deleteFile(FILENAME);
+}
+
 

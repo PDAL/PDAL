@@ -122,7 +122,7 @@ private:
     std::string::size_type m_linePos;
     std::stack<std::string> m_lines;
     std::istream *m_stream;
-    std::istream::streampos m_dataPos;
+    std::istream::pos_type m_dataPos;
     std::vector<Element> m_elements;
     PointId m_index;
     Element *m_vertexElt;

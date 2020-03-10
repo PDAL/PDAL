@@ -165,6 +165,36 @@ enum class LogLevel
     None
 };
 
+namespace ClassLabel
+{
+    const uint8_t CreatedNeverClassified = 0;
+    const uint8_t Unclassified = 1;
+    const uint8_t Ground = 2;
+    const uint8_t LowVegetation = 3;
+    const uint8_t MediumVegetation = 4;
+    const uint8_t HighVegetation = 5;
+    const uint8_t Building = 6;
+    const uint8_t LowPoint = 7;
+    const uint8_t ModelKeypoint = 8;
+    const uint8_t Water = 9;
+    const uint8_t Rail = 10;
+    const uint8_t RoadSurface = 11;
+    const uint8_t Overlap = 12;
+    const uint8_t WireGuard = 13;
+    const uint8_t WireConductor = 14;
+    const uint8_t TransmissionTower = 15;
+    const uint8_t WireStructureConnector = 16;
+    const uint8_t BridgeDeck = 17;
+    const uint8_t HighNoise = 18;
+    const uint8_t OverheadStructure = 19;
+    const uint8_t IgnoredGround = 20;
+    const uint8_t Snow = 21;
+    const uint8_t TemporalExclusion = 22;
+    const uint8_t Synthetic = 32;
+    const uint8_t Keypoint = 64;
+    const uint8_t Withheld = 128;
+}
+
 namespace
 {
     const StringList logNames { "error", "warning", "info", "debug", "debug1",
