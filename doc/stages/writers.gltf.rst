@@ -7,7 +7,7 @@ GLTF is a file format `specification`_ for 3D graphics data.
 If a mesh has been generated
 for a PDAL point view, the **GLTF Writer** will produce simple output in
 the GLTF format.  PDAL does not currently support many of the attributes
-that can be found in a GLTF file.
+that can be found in a GLTF file.  This writer creates a *binary* GLTF.
 
 .. _specification: https://www.khronos.org/gltf/
 
@@ -26,7 +26,7 @@ Example
       },
       {
           "type":"writers.gltf",
-          "filename":"output.gltf",
+          "filename":"output.glb",
           "red": 0.8,
           "metallic": 0.5
       }
@@ -36,7 +36,7 @@ Options
 -------
 
 filename
-    Name of the GLTF file to be written. [Required]
+    Name of the GLTF (.glb) file to be written. [Required]
 
 metallic
     The metallic factor of the faces. [Default: 0]
