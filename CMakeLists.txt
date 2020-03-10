@@ -378,6 +378,9 @@ install(
     DESTINATION
         "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
+target_include_directories(${PDAL_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:${PDAL_INCLUDE_DIRS}>)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?
