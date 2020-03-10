@@ -503,11 +503,11 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
+    // LAS 1.4 requires WKTv1
     std::string wkt = m_srs.getWKT1();
     if (wkt.empty())
         return false;
 
-    // LAS 1.4 requires WKTv1
     std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
     // This tacks a NULL to the end of the data, which is required by the spec.
     wktBytes.resize(wktBytes.size() + 1, 0);
