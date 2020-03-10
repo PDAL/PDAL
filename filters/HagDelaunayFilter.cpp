@@ -65,7 +65,7 @@ double distance_along_z(double x1, double y1, double z1,
     if (detT != 0.0)
     {
         // Compute the barycentric coordinates of x,y (relative to
-        // x1/y1, x2/y2, x3/y3).  Essentially the wieght that each
+        // x1/y1, x2/y2, x3/y3).  Essentially the weight that each
         // corner of the triangle contributes to the point in question.
 
         // Another way to think about this is that we're making a basis
