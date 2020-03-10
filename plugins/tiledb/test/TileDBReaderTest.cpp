@@ -92,6 +92,24 @@ class TileDBReaderTest : public ::testing::Test
         EXPECT_EQ(table.numPoints(), 50);
     }
 
+    TEST_F(TileDBReaderTest, read_zero_bbox)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth(Support::datapath("tiledb/array"));
+        Options options;
+        options.add("array_name", pth);
+        options.add("bbox3d", "([1.1, 1.2], [1.1, 1.2], [1.1, 1.2])");
+
+        TileDBReader reader;
+        reader.setOptions(options);
+
+        FixedPointTable table(100);
+        reader.prepare(table);
+        reader.execute(table);
+        EXPECT_EQ(table.numPoints(), 0);
+    }
+
     TEST_F(TileDBReaderTest, read)
     {
         class Checker : public Filter, public Streamable
