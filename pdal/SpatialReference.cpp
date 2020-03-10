@@ -442,24 +442,30 @@ std::string SpatialReference::getWKT1() const
 {
 #if GDAL_VERSION_MAJOR < 3
     return getWkt();
-#endif
-
+#else
     std::string wkt = getWKT();
+    if (wkt.empty())
+        return wkt;
+
     OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
+    std::string wkt1;
     if (srs)
     {
         char *buf = nullptr;
         const char* apszOptions[] = { "FORMAT=WKT1_GDAL", nullptr };
-        srs->exportToWkt(&buf, apszOptions);
 
-        // If we couldn't convert to WKT1, return empty
+        srs->exportToWkt(&buf, apszOptions);
         if (buf)
         {
-            wkt = buf;
+            wkt1 = buf;
             CPLFree(buf);
         }
     }
-    return wkt;
+    if (wkt1.empty())
+        throw pdal_error("Couldn't convert spatial reference to WKT "
+            "version 1.");
+    return wkt1;
+#endif
 }
 
 
