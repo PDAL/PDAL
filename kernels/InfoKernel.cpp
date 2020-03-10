@@ -252,7 +252,11 @@ MetadataNode InfoKernel::run(const std::string& filename)
     t << std::put_time( std::localtime( &now ), "%FT%T%z" );
     root.add("reader", m_reader->getName());
     root.add("now", t.str());
-    root.add("file_size", pdal::FileUtils::fileSize(filename));
+    
+    if (pdal::FileUtils::fileExists(filename) &&
+            (!pdal::FileUtils::isDirectory(filename))) // allow for s3 uris and directories
+        root.add("file_size", pdal::FileUtils::fileSize(filename));
+    
     return root;
 }
 

@@ -72,12 +72,13 @@ properly mapped and then outputs a LAS file.
 Common Use Cases
 ----------------
 
-A possible use case for this driver is reading NASA's ICESAT2 data.
-This example reads the X, Y, and Z coordinates from the ICESAT2
-ATL03 format and converts them into a LAS file.
+A possible use case for this driver is reading NASA's `ICESat-2 <https://icesat-2.gsfc.nasa.gov/>`__ data.
+This example reads the X, Y, and Z coordinates from the ICESat-2
+`ATL03 <https://icesat-2.gsfc.nasa.gov/sites/default/files/page_files/ICESat2_ATL03_ATBD_r002.pdf>`__ format and converts them into a LAS file.
 
 .. note::
-    ICESAT2 data use EPSG:7912.
+    ICESat-2 data use `EPSG:7912 <https://epsg.io/7912>`__. ICESat-2 Data products documentation can be found `here <https://icesat-2.gsfc.nasa.gov/science/data-products>`_
+
 
 .. code-block:: json
 
@@ -99,9 +100,8 @@ ATL03 format and converts them into a LAS file.
     ] 
 
 
-`ICESAT2 Data products Documentation <https://icesat-2.gsfc.nasa.gov/science/data-products>`_
-~                                                                                              
-~             
+
+
 Options
 -------
 

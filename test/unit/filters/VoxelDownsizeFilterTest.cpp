@@ -118,10 +118,9 @@ void origin_test(std::string mode)
     EXPECT_EQ(v->size(), 8u);
     if (mode == "center")
     {
-        PointRef p(*v);
-        for (PointId id = 0; id < v->size(); ++id)
+        PointId id = 0;
+        for (PointRef p : *v)
         {
-            p.setPointId(id);
             double x = p.getFieldAs<double>(Dimension::Id::X);
             double y = p.getFieldAs<double>(Dimension::Id::Y);
             double z = p.getFieldAs<double>(Dimension::Id::Z);
@@ -138,6 +137,7 @@ void origin_test(std::string mode)
             EXPECT_EQ(tx, x);
             EXPECT_EQ(ty, y);
             EXPECT_EQ(tz, z);
+            id++;
         }
     }
 }
@@ -195,7 +195,7 @@ void stream_test(std::string mode)
 
         virtual bool processOne(PointRef& point)
         {
-            EXPECT_LT(m_count, 5);
+            EXPECT_LT(m_count, 5U);
 
             int x = point.getFieldAs<int>(Dimension::Id::X);
             int y = point.getFieldAs<int>(Dimension::Id::Y);

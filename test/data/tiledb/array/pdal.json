@@ -5,5 +5,8 @@
     {
       "type": "readers.tiledb"
     }
-  ]
+  ],
+  "writers.tiledb": {
+    "spatialreference": "EPSG:26916"
+  }
 }

@@ -39,8 +39,8 @@
 #include <pdal/Mesh.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
-#include <pdal/PointRef.hpp>
 #include <pdal/PointTable.hpp>
+#include <pdal/PointRef.hpp>
 
 #include <memory>
 #include <queue>
@@ -129,12 +129,12 @@ public:
         PointId idx, const void *val);
 
     template <typename T>
-    bool compare(Dimension::Id dim, PointId id1, PointId id2)
+    bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
         return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
     }
 
-    bool compare(Dimension::Id dim, PointId id1, PointId id2)
+    virtual bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
         const Dimension::Detail *dd = layout()->dimDetail(dim);
 
@@ -317,8 +317,18 @@ private:
     virtual void setFieldInternal(Dimension::Id dim, PointId idx,
         const void *buf);
     virtual void getFieldInternal(Dimension::Id dim, PointId idx,
-        void *buf) const
-    { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
+            void *buf) const
+        { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
+    virtual void swapItems(PointId id1, PointId id2)
+    {
+        PointId temp = m_index[id2];
+        m_index[id2] = m_index[id1];
+        m_index[id1] = temp;
+    }
+    virtual void setItem(PointId dst, PointId src)
+    {
+        m_index[dst] = m_index[src];
+    }
 
     template<class T>
     T getFieldInternal(Dimension::Id dim, PointId pointIndex) const;
@@ -602,5 +612,68 @@ inline PointId PointView::getTemp(PointId id)
 }
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointView&);
+
+// PointViewIter
+
+class PointViewIter
+{
+private:
+    PointView *m_view;
+    PointId m_id;
+
+public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = PointRef;
+    using difference_type = ptrdiff_t;
+    using pointer = PointRef*;
+    using reference = PointRef;
+
+    PointViewIter()
+    {}
+    PointViewIter(PointView* view, PointId id) : m_view(view), m_id(id)
+    {}
+
+    PointViewIter& operator++()
+        { m_id++; return *this; }
+    PointViewIter operator++(int)
+        { return PointViewIter(m_view, m_id++); }
+    PointViewIter& operator--()
+        { --m_id; return *this; }
+    PointViewIter operator--(int)
+        { return PointViewIter(m_view, m_id--); }
+
+    PointViewIter operator+(const difference_type& n) const
+        { return PointViewIter(m_view, m_id + n); }
+    PointViewIter operator+=(const difference_type& n)
+        { m_id += n; return *this; }
+    PointViewIter operator-(const difference_type& n) const
+        { return PointViewIter(m_view, m_id - n); }
+    PointViewIter operator-=(const difference_type& n)
+        { m_id -= n; return *this; }
+    difference_type operator-(const PointViewIter& i) const
+        { return static_cast<difference_type>(m_id - i.m_id); }
+
+    bool operator==(const PointViewIter& i)
+        { return m_id == i.m_id; }
+    bool operator!=(const PointViewIter& i)
+        { return m_id != i.m_id; }
+    bool operator<(const PointViewIter& i)
+        { return m_id < i.m_id; }
+    bool operator<=(const PointViewIter& i)
+        { return m_id <= i.m_id; }
+    bool operator>(const PointViewIter& i)
+        { return m_id > i.m_id; }
+    bool operator>=(const PointViewIter& i)
+        { return m_id >= i.m_id; }
+
+    reference operator*()
+        { return PointRef(*m_view, m_id); }
+    const reference operator*() const
+        { return PointRef(*m_view, m_id); }
+    pointer operator->()
+        { return nullptr; }
+    reference operator[](const difference_type& n) const
+        { return PointRef(*m_view, m_id + n); }
+};
 
 } // namespace pdal

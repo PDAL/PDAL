@@ -16,6 +16,7 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
         ${TILEDB_LIBRARIES}
     INCLUDES
         ${TILEDB_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 if (WIN32)
@@ -42,8 +43,6 @@ endif()
 
 if (WITH_TESTS)
 
-if (BUILD_TILEDB_TESTS)
-
     # Need to fix this #2596
     IF (NOT APPLE)
         PDAL_ADD_TEST(pdal_io_tiledb_writer_test
@@ -63,6 +62,7 @@ if (BUILD_TILEDB_TESTS)
             test/TileDBReaderTest.cpp
         LINK_WITH
             ${reader_libname}
+            ${writer_libname}
             ${TILEDB_LIBRARIES}
     )
 
@@ -71,5 +71,4 @@ if (WIN32)
     target_compile_definitions(pdal_io_tiledb_reader_test PRIVATE -DNONMINMAX)
 endif()
 
-endif()
 endif()
