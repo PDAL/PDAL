@@ -121,7 +121,7 @@ void CropFilter::initialize()
 
     m_boxes.clear();
     for (auto& bound : m_args->m_bounds)
-        m_boxes.push_back(bound.to2d());
+        m_boxes.push_back(bound);
 
     m_distance2 = m_args->m_distance * m_args->m_distance;
 }
@@ -151,8 +151,17 @@ bool CropFilter::processOne(PointRef& point)
                 return true;
 
     for (auto& box : m_boxes)
-        if (crop(point, box))
-            return true;
+        if (box.is3d())
+        {
+            if (crop(point, box.to3d()))
+                return true;
+        }
+        else
+        {
+            if (crop(point, box.to2d()))
+                return true;
+        }
+
 
     for (auto& center: m_args->m_centers)
         if (crop(point, center))
@@ -247,6 +256,15 @@ PointViewSet CropFilter::run(PointViewPtr view)
     return viewSet;
 }
 
+bool CropFilter::crop(const PointRef& point, const BOX3D& box)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    double z = point.getFieldAs<double>(Dimension::Id::Z);
+
+    // Return true if we're keeping a point.
+    return (m_args->m_cropOutside != box.contains(x, y, z));
+}
 
 bool CropFilter::crop(const PointRef& point, const BOX2D& box)
 {
@@ -257,6 +275,26 @@ bool CropFilter::crop(const PointRef& point, const BOX2D& box)
     return (m_args->m_cropOutside != box.contains(x, y));
 }
 
+void CropFilter::crop(const Bounds& box, PointView& input, PointView& output)
+{
+    bool is3d = box.is3d();
+    if (is3d)
+        crop(box.to3d(), input, output);
+    else
+        crop(box.to2d(), input, output);
+
+}
+
+void CropFilter::crop(const BOX3D& box, PointView& input, PointView& output)
+{
+    PointRef point = input.point(0);
+    for (PointId idx = 0; idx < input.size(); ++idx)
+    {
+        point.setPointId(idx);
+        if (crop(point, box))
+            output.appendPoint(input, idx);
+    }
+}
 
 void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 {

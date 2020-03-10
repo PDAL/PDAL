@@ -107,12 +107,7 @@ void MemoryViewReader::pushField(const Field& f)
 void MemoryViewReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto& f : m_fields)
-    {
-        Dimension::Type type = f.m_type;
-        if (f.m_name == "X" || f.m_name == "Y" || f.m_name == "Z")
-            type = Dimension::Type::Double;
-        f.m_id = layout->registerOrAssignDim(f.m_name, type);
-    }
+        f.m_id = layout->registerOrAssignDim(f.m_name, f.m_type);
 }
 
 

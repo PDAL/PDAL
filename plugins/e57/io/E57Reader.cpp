@@ -168,8 +168,8 @@ void E57Reader::initialize()
     try
     {
         arbiter::Arbiter arb;
-        auto fileHandle = arb.getLocalHandle(m_filename);
-        m_imf.reset(new ImageFile(fileHandle->localPath(), "r"));
+        arbiter::LocalHandle fileHandle = arb.getLocalHandle(m_filename);
+        m_imf.reset(new ImageFile(fileHandle.localPath(), "r"));
         StructureNode root = m_imf->root();
 
         if (!root.isDefined("/data3D"))

@@ -18,7 +18,8 @@ jobs:
         ECHO ON
         call activate pdal
         call conda config --set always_yes True --set show_channel_urls True
-        call conda install --yes --quiet --name pdal -c conda-forge geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja -y
+        call conda install --yes --quiet --name pdal -c conda-forge conda-build ninja -y
+        call conda install -c conda-forge pdal --only-deps -y
       displayName: Install PDAL dependencies
     - script: |
         ECHO ON
@@ -39,18 +40,16 @@ jobs:
             -DOPENSSL_ROOT_DIR=%CONDA_PREFIX%/Library ^
             -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
             -DPython3_FIND_STRATEGY=LOCATION ^
-            -DPYTHON_EXECUTABLE="%CONDA_PREFIX/bin/python" ^
             -DBUILD_PLUGIN_CPD=OFF ^
             -DBUILD_PLUGIN_GREYHOUND=ON ^
             -DBUILD_PLUGIN_ICEBRIDGE=ON ^
+            -DBUILD_PLUGIN_HDF=ON ^
             -DBUILD_PLUGIN_MRSID=OFF ^
             -DBUILD_PLUGIN_NITF=ON ^
             -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
             -DBUILD_PLUGIN_OCI=OFF ^
-            -DBUILD_PLUGIN_SQLITE=ON ^
             -DBUILD_PLUGIN_I3S=ON ^
             -DBUILD_PLUGIN_RIVLIB=OFF ^
-            -DBUILD_PLUGIN_PYTHON=ON ^
             -DENABLE_CTEST=OFF ^
             -DWITH_LAZPERF=ON ^
             -DWITH_LZMA=ON ^
@@ -64,7 +63,6 @@ jobs:
             -DWITH_ZLIB=ON ^
             -Dgtest_force_shared_crt=ON ^
             -DBUILD_PGPOINTCLOUD_TESTS=OFF ^
-            -DBUILD_SQLITE_TESTS=OFF ^
             -DBUILD_I3S_TESTS=OFF ^
             -DBUILD_OCI_TESTS=OFF ^
             -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING ^
@@ -84,7 +82,6 @@ jobs:
         call activate pdal
         pushd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-        set PYTHONHOME=%CONDA_PREFIX%
         ctest -VV --output-on-failure
       displayName: 'Test'
 

@@ -48,12 +48,10 @@ void DbReader::loadSchema(PointLayoutPtr layout, const XMLSchema& schema)
     m_layout = layout;
     m_dims = schema.xmlDims();
 
-    // Override XYZ to doubles and use those going forward
-    // we will apply any scaling set before handing it off
-    // to PDAL.
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-    layout->registerDim(Dimension::Id::Z);
+    // Always register X, Y and Z.  We will apply any scaling set
+    // before handing it off to PDAL.
+    using namespace Dimension;
+    layout->registerDims( {Id::X, Id::Y, Id::Z} );
 
     m_orientation = schema.orientation();
     m_packedPointSize = 0;

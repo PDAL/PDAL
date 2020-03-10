@@ -12,7 +12,6 @@ cd _build || exit 1
 cmake .. \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_PLUGIN_PYTHON=ON \
     -DBUILD_PLUGIN_CPD=ON \
     -DBUILD_PLUGIN_GREYHOUND=ON \
     -DBUILD_PLUGIN_I3S=ON \
@@ -30,14 +29,6 @@ ninja -v
 ctest -V
 ninja install
 cd /
-
-# Python extension testing
-pip3 install packaging cython
-git clone https://github.com/PDAL/python.git pdal-python
-cd pdal-python
-git checkout 2.0.0
-python3 setup.py build
-PDAL_TEST_DIR=/pdal/_build/test python3 setup.py test
 
 for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
 do

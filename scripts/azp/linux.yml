@@ -5,31 +5,30 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   container:
-      image: pdal/azp-dependencies:latest
+      image: pdal/ubuntubase:latest
       options: --privileged
   timeoutInMinutes: 60
   steps:
   - script: |
-      echo "current directory:" `pwd`
+      echo "Current directory:" `pwd`
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       mkdir build
       cd build
-      cmake .. \
+      CC=gcc-6 CXX=g++-6 \
+        cmake .. \
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
-        -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_CPD=ON \
         -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
         -DBUILD_PLUGIN_I3S=ON \
         -DBUILD_PLUGIN_NITF=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
-        -DBUILD_PLUGIN_SQLITE=OFF \
         -DBUILD_PLUGIN_E57=ON \
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-        -DBUILD_SQLITE_TESTS=OFF \
-        -DPYTHON_EXECUTABLE=/usr/bin/python3 \
-        -DPython3_FIND_STRATEGY=LOCATION \
-        -DBUILD_PLUGIN_SQLITE=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_LASZIP=ON \
         -DWITH_ZSTD=ON \
@@ -37,32 +36,32 @@ jobs:
         -DWITH_TESTS=ON
     displayName: 'CMake'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       cd build
       ninja
     displayName: 'Build'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       cd build
       ctest -V
     displayName: 'Test'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       export PDAL_TEST_DIR=`pwd`/test
       export INSTALL_DIR=`pwd`/install
       export PATH=$PATH:$INSTALL_DIR/bin
       cd build
       ls build/lib/*
       ninja install
-      # Python extension testing
-      #
-      pip3 install packaging cython
-      git clone https://github.com/PDAL/python.git pdal-python
-      cd pdal-python
-      git checkout 2.0.0
-      python3 setup.py build
-      LD_LIBRARY_PATH=$INSTALL_DIR/lib python3 setup.py test
-    displayName: 'Python'
   - script: |
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate pdal
       export BASE=`pwd`
-      for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+      for EXAMPLE in writing writing-filter writing-kernel \
+          writing-reader writing-writer
       do
           cd $BASE/examples/$EXAMPLE
           mkdir -p _build || exit 1

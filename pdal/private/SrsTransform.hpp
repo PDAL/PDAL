@@ -44,6 +44,10 @@ public:
     /// Object that performs transformation from a \src spatial reference
     /// to a \dest spatial reference.
     SrsTransform(const SpatialReference& src, const SpatialReference& dst);
+    SrsTransform(const SpatialReference& src,
+                 std::vector<int> srcOrder,
+                 const SpatialReference& dst,
+                 std::vector<int> dstOrder);
     ~SrsTransform();
 
     /// Get the underlying transformation.

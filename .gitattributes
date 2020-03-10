@@ -15,7 +15,8 @@
 *.las binary
 *.laz binary
 
-# Declare files that must never have CRLF line endings on checkout,
-# otherwise tests will fail.
+# Declare files that must never have CRLF line endings on checkout.
+# Some tests depend on this configuration.
 test/data/bpf/bundle1 text eol=lf
 test/data/bpf/bundle2 text eol=lf
+apps/pdal-config.in text eol=lf

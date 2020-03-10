@@ -195,6 +195,18 @@ bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
 }
 
 
+bool reprojectBounds(Bounds& box, const std::string& srcSrs,
+    const std::string& dstSrs)
+{
+    SrsTransform transform(srcSrs, dstSrs);
+
+    BOX3D b = box.to3d();
+    bool ok = transform.transform(b.minx, b.miny, b.minz);
+    if (ok)
+        ok = transform.transform(b.maxx, b.maxy, b.maxz);
+    return ok;
+}
+
 /**
   Reproject a bounds box from a source projection to a destination.
   \param box  2D Bounds box to be reprojected in-place.

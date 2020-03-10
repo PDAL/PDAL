@@ -284,7 +284,15 @@ class FixedPointLayout : public PointLayout
     // The default PointLayout class may reorder dimension entries for packing
     // efficiency.  However if a PointLayout is intended to be mapped to data
     // coming from a remote source, then the dimensions must retain their order.
-    // FixedPointLayout retains the order of dimensions as they are registered.
+    // FixedPointLayout retains the order of dimensions as they are registered,
+    // as well as adding a custom assignment function that makes sure XYZ are
+    // registered as their appropriate remote type rather than always as
+    // doubles.
+public:
+    void registerFixedDim(Dimension::Id id, Dimension::Type type);
+    Dimension::Id registerOrAssignFixedDim(std::string name,
+        Dimension::Type type);
+
 protected:
     PDAL_DLL virtual bool update(
             pdal::Dimension::Detail dimDetail,

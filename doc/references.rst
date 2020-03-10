@@ -46,6 +46,8 @@ Reference
 
 .. [Dippe1985] Dippé, Mark AZ, and Erling Henry Wold. "Antialiasing through stochastic sampling." *ACM Siggraph Computer Graphics* 19.3 (1985): 69-78.
 
+.. [Ester1996] Ester, Martin, et al. "A density-based algorithm for discovering clusters in large spatial databases with noise." Kdd. Vol. 96. No. 34. 1996.
+
 .. [Fischer2010] Fischer, Kaspar, Bernd Gärtner, and Martin Kutz. “Fast Smallest-Enclosing-Ball Computation in High Dimensions.” 26473 (2010): 630–641. Web.
 
 .. [Guinard2017] Guinard S., Landrieu L. "Weakly Supervised Segmented-Aided Classification of Urban Scenes From 3D LIDAR Point Clouds." Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci., XLII-1/W1, 151-157, 2017
@@ -65,3 +67,5 @@ Reference
 .. [Weyrich2004] Weyrich, T et al. “Post-Processing of Scanned 3D Surface Data.” Proceedings of Eurographics Symposium on Point-Based Graphics 2004 (2004): 85–94. Print.
 
 .. [Zhang2003] Zhang, Keqi, et al. "A progressive morphological filter for removing nonground measurements from airborne LIDAR data." Geoscience and Remote Sensing, IEEE Transactions on 41.4 (2003): 872-882.
+
+.. [Zhang2016] Zhang, Wuming, et al. "An easy-to-use airborne LiDAR data filtering method based on cloth simulation." Remote Sensing 8.6 (2016): 501.

@@ -243,6 +243,7 @@ PDAL_ADD_TEST(pdal_filters_crop_test
     LINK_WITH
         ${GDAL_LIBRARY}
 )
+PDAL_ADD_TEST(pdal_filters_csf_test FILES filters/CSFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_delaunay_test FILES filters/DelaunayFilterTest.cpp)
@@ -278,6 +279,7 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES

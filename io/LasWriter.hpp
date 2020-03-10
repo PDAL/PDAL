@@ -36,7 +36,6 @@
 
 #include <pdal/pdal_features.hpp>
 #include <pdal/FlexWriter.hpp>
-#include <pdal/JsonFwd.hpp>
 #include <pdal/Streamable.hpp>
 
 #include "HeaderVal.hpp"
@@ -128,7 +127,7 @@ private:
     StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
     bool m_writePDALMetadata;
-    std::unique_ptr<NL::json> m_userVLRs;
+    std::vector<ExtLasVLR> m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);
@@ -171,6 +170,7 @@ private:
     void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
+    void addVlr(const ExtLasVLR& evlr);
     void deleteVlr(const std::string& userId, uint16_t recordId);
     void addGeotiffVlrs();
     bool addWktVlr();

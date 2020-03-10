@@ -103,10 +103,20 @@ namespace pdal
         writer.prepare(table);
         writer.execute(table);
 
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+
+#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
         // check the sidecar exists
         EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
+#else
+        tiledb_datatype_t v_type = TILEDB_UINT8;
+        const void* v_r;
+        uint32_t v_num;
+        array.get_metadata("_pdal", &v_type, &v_num, &v_r);
+        NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
+        EXPECT_TRUE(meta.count("writers.tiledb") > 0);
+#endif
 
-        tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
 
@@ -159,9 +169,6 @@ namespace pdal
         writer.prepare(table);
         writer.execute(table);
 
-        // check the sidecar exists so that the execute has completed
-        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
-
         options.add("append", true);
         TileDBWriter append_writer;
         append_writer.setOptions(options);
@@ -174,6 +181,18 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
+
+#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
+        // check the sidecar exists so that the execute has completed
+        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
+#else
+        tiledb_datatype_t v_type = TILEDB_UINT8;
+        const void* v_r;
+        uint32_t v_num;
+        array.get_metadata("_pdal", &v_type, &v_num, &v_r);
+        NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
+        EXPECT_TRUE(meta.count("writers.tiledb") > 0);
+#endif
 
         for (const auto& kv: domain)
         {
@@ -318,12 +337,54 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
         tiledb::FilterList fl = array.schema().coords_filter_list();
-        EXPECT_EQ(fl.nfilters(), 1U);
+        EXPECT_EQ(fl.nfilters(), 2U);
 
-        tiledb::Filter f = fl.filter(0);
-        EXPECT_EQ(f.filter_type(), TILEDB_FILTER_ZSTD);
+        tiledb::Filter f1 = fl.filter(0);
+        tiledb::Filter f2 = fl.filter(1);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+        EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_GZIP);
         int32_t compressionLevel;
-        f.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-        EXPECT_EQ(compressionLevel, 50);
+        f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+    }
+
+    TEST_F(TileDBWriterTest, default_options)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_write_options");
+
+        Options options;
+        options.add("array_name", pth);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+
+        tiledb::FilterList fl = array.schema().coords_filter_list();
+        EXPECT_EQ(fl.nfilters(), 2U);
+
+        tiledb::Filter f1 = fl.filter(0);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+        tiledb::Filter f2 = fl.filter(1);
+        EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_GZIP);
+        int32_t compressionLevel;
+        f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+
+        tiledb::Attribute att = array.schema().attributes().begin()->second;
+        tiledb::FilterList flAtts = att.filter_list();
+        EXPECT_EQ(flAtts.nfilters(), 0U);
     }
 }

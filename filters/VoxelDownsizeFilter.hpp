@@ -47,6 +47,12 @@ class PointView;
 
 class PDAL_DLL VoxelDownsizeFilter : public Filter, public Streamable
 {
+    using Voxel = std::tuple<int, int, int>;
+    enum class Mode
+    {
+        First,
+        Center
+    };
 public:
     VoxelDownsizeFilter();
     VoxelDownsizeFilter& operator=(const VoxelDownsizeFilter&) = delete;
@@ -59,16 +65,20 @@ private:
     virtual PointViewSet run(PointViewPtr view) override;
     virtual void ready(PointTableRef) override;
     virtual bool processOne(PointRef& point) override;
-    virtual void prepared(PointTableRef) override;
 
-    bool voxelize(PointRef point);
+    bool voxelize(PointRef& point);
 
     double m_cell;
-    std::set<std::tuple<int, int, int>> m_populatedVoxels;
-    int m_pivotVoxel[3];                     // [0/1/2]: X/Y/Z dimension
-    bool m_pivotVoxelInitialized;
-    std::string m_mode;
-	bool m_isFirstInVoxelMode; // True: firstinvoxel, False: voxelcenter mode
+    double m_originX;
+    double m_originY;
+    double m_originZ;
+    std::set<Voxel> m_populatedVoxels;
+    Mode m_mode;
+
+    friend std::istream& operator>>(std::istream& in,
+        VoxelDownsizeFilter::Mode&);
+    friend std::ostream& operator<<(std::ostream& out,
+        const VoxelDownsizeFilter::Mode&);    
 };
 
 } // namespace pdal

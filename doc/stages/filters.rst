@@ -37,6 +37,8 @@ invalidate an existing KD-tree.
    filters.colorinterp
    filters.colorization
    filters.covariancefeatures
+   filters.csf
+   filters.dbscan
    filters.dem
    filters.eigenvalues
    filters.estimaterank
@@ -73,6 +75,10 @@ invalidate an existing KD-tree.
     dimension ``ClusterID`` that indicates the cluster that a point belongs
     to. Points not belonging to a cluster are given a cluster ID of 0.
 
+:ref:`filters.dbscan`
+    Perform Density-Based Spatial Clustering of Applications with Noise
+    (DBSCAN) [Ester1996]_.
+
 :ref:`filters.colorinterp`
     Assign RGB colors based on a dimension and a ramp
 
@@ -82,6 +88,9 @@ invalidate an existing KD-tree.
 :ref:`filters.covariancefeatures`
     Filter that calculates local features based on the covariance matrix of a
     point's neighborhood.
+
+:ref:`filters.csf`
+    Label ground/non-ground returns using [Zhang2016]_.
 
 :ref:`filters.eigenvalues`
     Compute pointwise eigenvalues, based on k-nearest neighbors.
