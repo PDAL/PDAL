@@ -14,7 +14,11 @@
                 "description": "A second record",
                 "record_id": 43,
                 "user_id": "hobu",
+<<<<<<< HEAD
                 "data": "dGhpcyAqdtBpcyBzb21lIHRle=="
+=======
+                "data": "dGhpcyAqdtBpcyBzb21lIHRleHQ="
+>>>>>>> origin/master
             }
         ]
     }

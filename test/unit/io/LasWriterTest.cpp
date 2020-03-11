@@ -1541,3 +1541,50 @@ TEST(LasWriterTest, issue2320)
 }
 #endif
 
+TEST(LasWriterTest, synthetic_points)
+{
+    using namespace Dimension;
+
+    const std::string FILENAME(Support::temppath("synthetic_test.las"));
+    PointTable table;
+
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+
+    BufferReader bufferReader;
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 1.0);
+    view->setField(Id::Y, 0, 2.0);
+    view->setField(Id::Z, 0, 3.0);
+    view->setField(Id::Classification, 0, ClassLabel::Ground | ClassLabel::Synthetic);
+    bufferReader.addView(view);
+
+    Options writerOps;
+    writerOps.add("filename", FILENAME);
+
+    LasWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(bufferReader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options readerOps;
+    readerOps.add("filename", FILENAME);
+
+    PointTable readTable;
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(readTable);
+    PointViewSet viewSet = reader.execute(readTable);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1u);
+    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic, view->getFieldAs<uint8_t>(Id::Classification, 0));
+
+    FileUtils::deleteFile(FILENAME);
+}
+
+

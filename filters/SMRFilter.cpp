@@ -90,6 +90,7 @@ struct SMRArgs
     std::string m_dir;
     std::vector<DimRange> m_ignored;
     StringList m_returns;
+    StringList m_classbits;
 };
 
 SMRFilter::SMRFilter() : m_args(new SMRArgs) {}
@@ -113,6 +114,8 @@ void SMRFilter::addArgs(ProgramArgs& args)
     args.add("ignore", "Ignore values", m_args->m_ignored);
     args.add("returns", "Include last returns?", m_args->m_returns,
              {"last", "only"});
+    args.add("classbits", "Ignore synthetic|keypoint|withheld classification bits?",
+             m_args->m_classbits, {""});
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -179,15 +182,23 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         Segmentation::ignoreDimRanges(m_args->m_ignored, view, keptView,
                                       ignoredView);
 
+    PointViewPtr syntheticView = keptView->makeNew();
+    PointViewPtr realView = keptView->makeNew();
+    if (!m_args->m_classbits.size())
+        realView->append(*keptView);
+    else
+        Segmentation::ignoreClassBits(keptView, realView, syntheticView,
+                                      m_args->m_classbits);
+
     // Check for 0's in ReturnNumber and NumberOfReturns
     bool nrOneZero(false);
     bool rnOneZero(false);
     bool nrAllZero(true);
     bool rnAllZero(true);
-    for (PointId i = 0; i < keptView->size(); ++i)
+    for (PointId i = 0; i < realView->size(); ++i)
     {
-        uint8_t nr = keptView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-        uint8_t rn = keptView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
+        uint8_t nr = realView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
+        uint8_t rn = realView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -204,18 +215,18 @@ PointViewSet SMRFilter::run(PointViewPtr view)
                    "1.");
 
     // Segment kept view into two views
-    PointViewPtr inlierView = keptView->makeNew();
-    PointViewPtr outlierView = keptView->makeNew();
+    PointViewPtr inlierView = realView->makeNew();
+    PointViewPtr outlierView = realView->makeNew();
     if (nrAllZero && rnAllZero)
     {
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        inlierView->append(*keptView);
+        inlierView->append(*realView);
     }
     else
     {
-        Segmentation::segmentReturns(keptView, inlierView, outlierView,
+        Segmentation::segmentReturns(realView, inlierView, outlierView,
                                      m_args->m_returns);
         ignoredView->append(*outlierView);
     }

@@ -45,9 +45,39 @@ namespace pdal
 class PDAL_DLL PointRef
 {
 public:
-    PointRef(PointContainer& container, PointId idx = 0) :
-        m_container(container), m_layout(*container.layout()), m_idx(idx)
+    PointRef() : m_container(nullptr), m_layout(nullptr), m_idx(0), m_tmp(false)
     {}
+
+    PointRef(PointContainer& container, PointId idx = 0) :
+        m_container(&container), m_layout(container.layout()), m_idx(idx),
+        m_tmp(false)
+    {}
+
+    PointRef(const PointRef& r) :
+        m_container(r.m_container), m_layout(r.m_layout), m_tmp(true)
+    {
+        m_idx = m_container->getTemp(r.m_idx);
+    }
+
+    ~PointRef()
+    {
+        if (m_tmp)
+            m_container->freeTemp(m_idx);
+    }
+
+    PointRef& operator=(const PointRef& r)
+    {
+        if (!m_container)
+        {
+            m_container = r.m_container;
+            m_layout = r.m_layout;
+            m_idx = m_container->getTemp(r.m_idx);
+            m_tmp = true;
+        }
+        else
+            m_container->setItem(m_idx, r.m_idx);
+        return *this;
+    }
 
     /**
       Determine if the point contains the specified dimension (defers to
@@ -57,7 +87,7 @@ public:
       \return  Whether the point has a dimension.
     */
     bool hasDim(Dimension::Id dim) const
-    { return m_layout.hasDim(dim); }
+    { return m_layout->hasDim(dim); }
 
     /**
       Get the value of a field/dimension, converting it to the type as
@@ -73,9 +103,9 @@ public:
         T val(0);
         bool success = true;
         Everything e;
-        Dimension::Type type = m_layout.dimDetail(dim)->type();
+        Dimension::Type type = m_layout->dimDetail(dim)->type();
 
-        m_container.getFieldInternal(dim, m_idx, &e);
+        m_container->getFieldInternal(dim, m_idx, &e);
         switch (type)
         {
         case Dimension::Type::Unsigned8:
@@ -134,7 +164,7 @@ public:
     template<typename T>
     void setField(Dimension::Id dim, T val)
     {
-        Dimension::Type type = m_layout.dimDetail(dim)->type();
+        Dimension::Type type = m_layout->dimDetail(dim)->type();
         Everything e;
         bool success = false;
 
@@ -173,8 +203,9 @@ public:
         case Dimension::Type::None:
             break;
         }
+
         if (success)
-            m_container.setFieldInternal(dim, m_idx, &e);
+            m_container->setFieldInternal(dim, m_idx, &e);
     }
 
     /**
@@ -227,12 +258,29 @@ public:
         }
     }
 
+    bool compare(Dimension::Id dim, const PointRef& r) const
+    {
+        assert(m_container == r.m_container);
+        return m_container->compare(dim, m_idx, r.m_idx);
+    }
+
+    static void swap(const PointRef& r1, const PointRef& r2)
+    {
+        assert(r1.m_container == r2.m_container);
+        r1.m_container->swapItems(r1.m_idx, r2.m_idx);
+    }
 
 private:
-    PointContainer& m_container;
-    PointLayout& m_layout;
+    PointContainer *m_container;
+    PointLayout *m_layout;
     PointId m_idx;
+    bool m_tmp;
 };
+
+inline void swap(const PointRef& r1, const PointRef& r2)
+{
+    PointRef::swap(r1, r2);
+}
 
 
 /**
@@ -357,10 +405,10 @@ inline MetadataNode PointRef::toMetadata() const
 */
 inline void PointRef::toMetadata(MetadataNode root) const
 {
-    for (Dimension::Id id : m_layout.dims())
+    for (Dimension::Id id : m_layout->dims())
     {
         double v = getFieldAs<double>(id);
-        root.add(m_layout.dimName(id), v);
+        root.add(m_layout->dimName(id), v);
     }
 }
 

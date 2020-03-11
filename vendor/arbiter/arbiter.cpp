@@ -162,7 +162,7 @@ Arbiter::Arbiter(const std::string s)
 
 bool Arbiter::hasDriver(const std::string path) const
 {
-    return m_drivers.count(getType(path));
+    return m_drivers.count(getProtocol(path));
 }
 
 void Arbiter::addDriver(const std::string type, std::unique_ptr<Driver> driver)
@@ -173,42 +173,42 @@ void Arbiter::addDriver(const std::string type, std::unique_ptr<Driver> driver)
 
 std::string Arbiter::get(const std::string path) const
 {
-    return getDriver(path).get(stripType(path));
+    return getDriver(path).get(stripProtocol(path));
 }
 
 std::vector<char> Arbiter::getBinary(const std::string path) const
 {
-    return getDriver(path).getBinary(stripType(path));
+    return getDriver(path).getBinary(stripProtocol(path));
 }
 
 std::unique_ptr<std::string> Arbiter::tryGet(std::string path) const
 {
-    return getDriver(path).tryGet(stripType(path));
+    return getDriver(path).tryGet(stripProtocol(path));
 }
 
 std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(std::string path) const
 {
-    return getDriver(path).tryGetBinary(stripType(path));
+    return getDriver(path).tryGetBinary(stripProtocol(path));
 }
 
 std::size_t Arbiter::getSize(const std::string path) const
 {
-    return getDriver(path).getSize(stripType(path));
+    return getDriver(path).getSize(stripProtocol(path));
 }
 
 std::unique_ptr<std::size_t> Arbiter::tryGetSize(const std::string path) const
 {
-    return getDriver(path).tryGetSize(stripType(path));
+    return getDriver(path).tryGetSize(stripProtocol(path));
 }
 
 void Arbiter::put(const std::string path, const std::string& data) const
 {
-    return getDriver(path).put(stripType(path), data);
+    return getDriver(path).put(stripProtocol(path), data);
 }
 
 void Arbiter::put(const std::string path, const std::vector<char>& data) const
 {
-    return getDriver(path).put(stripType(path), data);
+    return getDriver(path).put(stripProtocol(path), data);
 }
 
 std::string Arbiter::get(
@@ -216,7 +216,7 @@ std::string Arbiter::get(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).get(stripType(path), headers, query);
+    return getHttpDriver(path).get(stripProtocol(path), headers, query);
 }
 
 std::unique_ptr<std::string> Arbiter::tryGet(
@@ -224,7 +224,7 @@ std::unique_ptr<std::string> Arbiter::tryGet(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).tryGet(stripType(path), headers, query);
+    return getHttpDriver(path).tryGet(stripProtocol(path), headers, query);
 }
 
 std::vector<char> Arbiter::getBinary(
@@ -232,7 +232,7 @@ std::vector<char> Arbiter::getBinary(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).getBinary(stripType(path), headers, query);
+    return getHttpDriver(path).getBinary(stripProtocol(path), headers, query);
 }
 
 std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
@@ -240,7 +240,7 @@ std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).tryGetBinary(stripType(path), headers, query);
+    return getHttpDriver(path).tryGetBinary(stripProtocol(path), headers, query);
 }
 
 void Arbiter::put(
@@ -249,7 +249,7 @@ void Arbiter::put(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).put(stripType(path), data, headers, query);
+    return getHttpDriver(path).put(stripProtocol(path), data, headers, query);
 }
 
 void Arbiter::put(
@@ -258,7 +258,7 @@ void Arbiter::put(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).put(stripType(path), data, headers, query);
+    return getHttpDriver(path).put(stripProtocol(path), data, headers, query);
 }
 
 void Arbiter::copy(
@@ -343,7 +343,7 @@ void Arbiter::copyFile(
     {
         // If this copy is within the same driver domain, defer to the
         // hopefully specialized copy method.
-        getDriver(file).copy(stripType(file), stripType(dst));
+        getDriver(file).copy(stripProtocol(file), stripProtocol(dst));
     }
     else
     {
@@ -376,17 +376,17 @@ std::vector<std::string> Arbiter::resolve(
         const std::string path,
         const bool verbose) const
 {
-    return getDriver(path).resolve(stripType(path), verbose);
+    return getDriver(path).resolve(stripProtocol(path), verbose);
 }
 
 Endpoint Arbiter::getEndpoint(const std::string root) const
 {
-    return Endpoint(getDriver(root), stripType(root));
+    return Endpoint(getDriver(root), stripProtocol(root));
 }
 
 const Driver& Arbiter::getDriver(const std::string path) const
 {
-    const auto type(getType(path));
+    const auto type(getProtocol(path));
 
     if (!m_drivers.count(type))
     {
@@ -407,7 +407,7 @@ const drivers::Http& Arbiter::getHttpDriver(const std::string path) const
     else throw ArbiterError("Cannot get driver for " + path + " as HTTP");
 }
 
-std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
+LocalHandle Arbiter::getLocalHandle(
         const std::string path,
         const Endpoint& tempEndpoint) const
 {
@@ -415,52 +415,12 @@ std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
     return fromEndpoint.getLocalHandle(getBasename(path));
 }
 
-std::unique_ptr<LocalHandle> Arbiter::getLocalHandle(
+LocalHandle Arbiter::getLocalHandle(
         const std::string path,
         std::string tempPath) const
 {
     if (tempPath.empty()) tempPath = getTempPath();
     return getLocalHandle(path, getEndpoint(tempPath));
-}
-
-std::string Arbiter::getType(const std::string path)
-{
-    std::string type("file");
-    const std::size_t pos(path.find(delimiter));
-
-    if (pos != std::string::npos)
-    {
-        type = path.substr(0, pos);
-    }
-
-    return type;
-}
-
-std::string Arbiter::stripType(const std::string raw)
-{
-    std::string result(raw);
-    const std::size_t pos(raw.find(delimiter));
-
-    if (pos != std::string::npos)
-    {
-        result = raw.substr(pos + delimiter.size());
-    }
-
-    return result;
-}
-
-std::string Arbiter::getExtension(const std::string path)
-{
-    const std::size_t pos(path.find_last_of('.'));
-
-    if (pos != std::string::npos) return path.substr(pos + 1);
-    else return std::string();
-}
-
-std::string Arbiter::stripExtension(const std::string path)
-{
-    const std::size_t pos(path.find_last_of('.'));
-    return path.substr(0, pos);
 }
 
 } // namespace arbiter
@@ -631,14 +591,13 @@ namespace
         std::ofstream::app);
     std::string postfixSlash(std::string path)
     {
-        if (path.empty()) throw ArbiterError("Invalid root path");
-        if (path.back() != '/') path.push_back('/');
+        if (!path.empty() && path.back() != '/') path.push_back('/');
         return path;
     }
 }
 
 Endpoint::Endpoint(const Driver& driver, const std::string root)
-    : m_driver(driver)
+    : m_driver(&driver)
     , m_root(expandTilde(postfixSlash(root)))
 { }
 
@@ -654,12 +613,12 @@ std::string Endpoint::prefixedRoot() const
 
 std::string Endpoint::type() const
 {
-    return m_driver.type();
+    return m_driver->type();
 }
 
 bool Endpoint::isRemote() const
 {
-    return m_driver.isRemote();
+    return m_driver->isRemote();
 }
 
 bool Endpoint::isLocal() const
@@ -672,17 +631,15 @@ bool Endpoint::isHttpDerived() const
     return tryGetHttpDriver() != nullptr;
 }
 
-std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
+LocalHandle Endpoint::getLocalHandle(
         const std::string subpath,
         http::Headers headers,
         http::Query query) const
 {
-    std::unique_ptr<LocalHandle> handle;
-
     if (isRemote())
     {
         const std::string tmp(getTempPath());
-        const auto ext(Arbiter::getExtension(subpath));
+        const auto ext(getExtension(subpath));
         const std::string basename(
                 std::to_string(randomNumber()) +
                 (ext.size() ? "." + ext : ""));
@@ -727,59 +684,57 @@ std::unique_ptr<LocalHandle> Endpoint::getLocalHandle(
             fs.put(local, getBinary(subpath));
         }
 
-        handle.reset(new LocalHandle(local, true));
+        return LocalHandle(local, true);
     }
     else
     {
-        handle.reset(new LocalHandle(expandTilde(fullPath(subpath)), false));
+        return LocalHandle(expandTilde(fullPath(subpath)), false);
     }
-
-    return handle;
 }
 
 std::string Endpoint::get(const std::string subpath) const
 {
-    return m_driver.get(fullPath(subpath));
+    return m_driver->get(fullPath(subpath));
 }
 
 std::unique_ptr<std::string> Endpoint::tryGet(const std::string subpath)
     const
 {
-    return m_driver.tryGet(fullPath(subpath));
+    return m_driver->tryGet(fullPath(subpath));
 }
 
 std::vector<char> Endpoint::getBinary(const std::string subpath) const
 {
-    return m_driver.getBinary(fullPath(subpath));
+    return m_driver->getBinary(fullPath(subpath));
 }
 
 std::unique_ptr<std::vector<char>> Endpoint::tryGetBinary(
         const std::string subpath) const
 {
-    return m_driver.tryGetBinary(fullPath(subpath));
+    return m_driver->tryGetBinary(fullPath(subpath));
 }
 
 std::size_t Endpoint::getSize(const std::string subpath) const
 {
-    return m_driver.getSize(fullPath(subpath));
+    return m_driver->getSize(fullPath(subpath));
 }
 
 std::unique_ptr<std::size_t> Endpoint::tryGetSize(
         const std::string subpath) const
 {
-    return m_driver.tryGetSize(fullPath(subpath));
+    return m_driver->tryGetSize(fullPath(subpath));
 }
 
 void Endpoint::put(const std::string subpath, const std::string& data) const
 {
-    m_driver.put(fullPath(subpath), data);
+    m_driver->put(fullPath(subpath), data);
 }
 
 void Endpoint::put(
         const std::string subpath,
         const std::vector<char>& data) const
 {
-    m_driver.put(fullPath(subpath), data);
+    m_driver->put(fullPath(subpath), data);
 }
 
 std::string Endpoint::get(
@@ -879,7 +834,7 @@ std::string Endpoint::prefixedFullPath(const std::string& subpath) const
 
 Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 {
-    return Endpoint(m_driver, m_root + subpath);
+    return Endpoint(*m_driver, m_root + subpath);
 }
 
 std::string Endpoint::softPrefix() const
@@ -889,7 +844,7 @@ std::string Endpoint::softPrefix() const
 
 const drivers::Http* Endpoint::tryGetHttpDriver() const
 {
-    return dynamic_cast<const drivers::Http*>(&m_driver);
+    return dynamic_cast<const drivers::Http*>(m_driver);
 }
 
 const drivers::Http& Endpoint::getHttpDriver() const
@@ -978,7 +933,6 @@ namespace
             if (homeDrive && homePath) s = *homeDrive + *homePath;
         }
 #endif
-        if (s.empty()) std::cout << "No home directory found" << std::endl;
 
         return s;
     }
@@ -1297,9 +1251,9 @@ std::vector<std::string> glob(std::string path)
 std::string expandTilde(std::string in)
 {
     std::string out(in);
-    static std::string home(getHome());
     if (!in.empty() && in.front() == '~')
     {
+        const std::string home = getHome();
         if (home.empty()) throw ArbiterError("No home directory found");
         out = home + in.substr(1);
     }
@@ -1563,7 +1517,7 @@ Response Http::internalPost(
 
 std::string Http::typedPath(const std::string& p) const
 {
-    if (Arbiter::getType(p) != "file") return p;
+    if (getProtocol(p) != "file") return p;
     else return type() + "://" + p;
 }
 
@@ -1854,7 +1808,7 @@ S3::Config::Config(const std::string s, const std::string profile)
 
     m_precheck = c.value("precheck", false);
 
-    if (c.value("sse", false)|| env("AWS_SSE"))
+    if (c.value("sse", false) || env("AWS_SSE"))
     {
         m_baseHeaders["x-amz-server-side-encryption"] = "AES256";
     }
@@ -2114,7 +2068,7 @@ void S3::put(
     Headers headers(m_config->baseHeaders());
     headers.insert(userHeaders.begin(), userHeaders.end());
 
-    if (Arbiter::getExtension(rawPath) == "json")
+    if (getExtension(rawPath) == "json")
     {
         headers["Content-Type"] = "application/json";
     }
@@ -2415,12 +2369,21 @@ S3::Resource::Resource(std::string base, std::string fullPath)
     m_bucket = fullPath.substr(0, split);
     if (split != std::string::npos) m_object = fullPath.substr(split + 1);
 
-    // Always use virtual-host style paths.  We'll use HTTP for our back-end
-    // calls to allow this.  If we were to use HTTPS on the back-end, then we
-    // would have to use non-virtual-hosted paths if the bucket name contained
-    // '.' characters.
-    //
-    // m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
+    // We would prefer to use virtual-hosted URLs all the time since path-style
+    // URLs are being deprecated in 2020.  We also want to use HTTPS all the
+    // time, which is required for KMS-managed server-side encryption.  However,
+    // these two desires are incompatible if the bucket name contains dots,
+    // because the SSL cert will not allow virtual-hosted paths to be accessed
+    // over HTTPS.  So we'll fall back to path-style requests for buckets
+    // containing dots.  A fix for this should be announced by September 30,
+    // 2020, at which point maybe we can use virtual-hosted paths all the time.
+
+    // Deprecation plan for path-style URLs:
+    // https://aws.amazon.com/blogs/aws/amazon-s3-path-deprecation-plan-the-rest-of-the-story/
+
+    // Dots in bucket name limitation with virtual-hosting over HTTPS:
+    // https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html#VirtualHostingLimitations
+    m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
 }
 
 std::string S3::Resource::baseUrl() const
@@ -2437,7 +2400,7 @@ std::string S3::Resource::url() const
 {
     if (m_virtualHosted)
     {
-        return "http://" + m_bucket + "." + m_baseUrl + m_object;
+        return "https://" + m_bucket + "." + m_baseUrl + m_object;
     }
     else
     {
@@ -2566,10 +2529,10 @@ namespace
         std::string m_object;
 
     };
-    
+
     // https://cloud.google.com/storage/docs/json_api/#encoding
     const char GResource::exclusions[] = "!$&'()*+,;=:@";
-    
+
 } // unnamed namespace
 
 namespace drivers
@@ -2599,10 +2562,18 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     const auto res(
             https.internalHead(resource.endpoint(), headers, altMediaQuery));
 
-    if (res.ok() && res.headers().count("Content-Length"))
+    if (res.ok())
     {
-        const auto& s(res.headers().at("Content-Length"));
-        return makeUnique<std::size_t>(std::stoull(s));
+        if (res.headers().count("Content-Length"))
+        {
+            const auto& s(res.headers().at("Content-Length"));
+            return makeUnique<std::size_t>(std::stoull(s));
+        }
+        else if (res.headers().count("content-length"))
+        {
+            const auto& s(res.headers().at("content-length"));
+            return makeUnique<std::size_t>(std::stoull(s));
+        }
     }
 
     return std::unique_ptr<std::size_t>();
@@ -3003,14 +2974,13 @@ Headers Dropbox::httpPostHeaders() const
     return headers;
 }
 
-std::unique_ptr<std::size_t> Dropbox::tryGetSize(
-        const std::string rawPath) const
+std::unique_ptr<std::size_t> Dropbox::tryGetSize(const std::string path) const
 {
     std::unique_ptr<std::size_t> result;
 
     Headers headers(httpPostHeaders());
 
-    json tx { { "path", "/" + sanitize(rawPath) } };
+    json tx { { "path", "/" + path } };
     const std::string f(tx.dump());
     const std::vector<char> postData(f.begin(), f.end());
 
@@ -3031,13 +3001,11 @@ std::unique_ptr<std::size_t> Dropbox::tryGetSize(
 }
 
 bool Dropbox::get(
-        const std::string rawPath,
+        const std::string path,
         std::vector<char>& data,
         const Headers userHeaders,
         const Query query) const
 {
-    const std::string path(sanitize(rawPath));
-
     Headers headers(httpGetHeaders());
 
     headers["Dropbox-API-Arg"] = json{{ "path", "/" + path }}.dump();
@@ -3100,13 +3068,11 @@ bool Dropbox::get(
 }
 
 void Dropbox::put(
-        const std::string rawPath,
+        const std::string path,
         const std::vector<char>& data,
         const Headers userHeaders,
         const Query query) const
 {
-    const std::string path(sanitize(rawPath));
-
     Headers headers(httpGetHeaders());
     headers["Dropbox-API-Arg"] = json{{ "path", "/" + path }}.dump();
     headers["Content-Type"] = "application/octet-stream";
@@ -4762,6 +4728,8 @@ namespace arbiter
 
 namespace
 {
+    const std::string protocolDelimiter("://");
+
     std::mutex randomMutex;
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -4793,9 +4761,9 @@ std::string stripPostfixing(const std::string path)
 
 std::string getBasename(const std::string fullPath)
 {
-    std::string result(fullPath);
+    std::string result(stripProtocol(fullPath));
 
-    const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
+    const std::string stripped(stripPostfixing(stripProtocol(fullPath)));
 
     // Now do the real slash searching.
     std::size_t pos(stripped.rfind('/'));
@@ -4817,7 +4785,7 @@ std::string getDirname(const std::string fullPath)
 {
     std::string result("");
 
-    const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
+    const std::string stripped(stripPostfixing(stripProtocol(fullPath)));
 
     // Now do the real slash searching.
     const std::size_t pos(stripped.rfind('/'));
@@ -4828,8 +4796,8 @@ std::string getDirname(const std::string fullPath)
         result = sub;
     }
 
-    const std::string type(Arbiter::getType(fullPath));
-    if (type != "file") result = type + "://" + result;
+    const std::string protocol(getProtocol(fullPath));
+    if (protocol != "file") result = protocol + "://" + result;
 
     return result;
 }
@@ -4891,6 +4859,47 @@ std::string stripWhitespace(const std::string& in)
                 [](char c) { return std::isspace(c); }),
             out.end());
     return out;
+}
+
+std::string getProtocol(const std::string path)
+{
+    std::string type("file");
+    const std::size_t pos(path.find(protocolDelimiter));
+
+    if (pos != std::string::npos)
+    {
+        type = path.substr(0, pos);
+    }
+
+    return type;
+}
+
+std::string stripProtocol(const std::string raw)
+{
+    std::string result(raw);
+    const std::size_t pos(raw.find(protocolDelimiter));
+
+    if (pos != std::string::npos)
+    {
+        result = raw.substr(pos + protocolDelimiter.size());
+    }
+
+    return result;
+}
+
+std::string getExtension(std::string path)
+{
+    path = getBasename(path);
+    const std::size_t pos(path.find_last_of('.'));
+
+    if (pos != std::string::npos) return path.substr(pos + 1);
+    else return std::string();
+}
+
+std::string stripExtension(const std::string path)
+{
+    const std::size_t pos(path.find_last_of('.'));
+    return path.substr(0, pos);
 }
 
 } // namespace arbiter

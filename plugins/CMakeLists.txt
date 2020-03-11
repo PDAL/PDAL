@@ -23,6 +23,10 @@ if(BUILD_PLUGIN_ICEBRIDGE)
     add_subdirectory(icebridge)
 endif()
 
+if(BUILD_PLUGIN_HDF)
+    add_subdirectory(hdf)
+endif()
+
 if(BUILD_PLUGIN_MATLAB)
     add_subdirectory(matlab)
 endif()

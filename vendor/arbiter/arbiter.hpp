@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 098ed60a28d9a612a125a26ec667569c0bc90c8e
+// Git SHA: e9f91be5d7b36213e82bab86c1810f9bcc9225d3
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -4070,6 +4070,22 @@ std::unique_ptr<T> maybeClone(const T* t)
 
 ARBITER_DLL uint64_t randomNumber();
 
+/** If no delimiter of "://" is found, returns "file".  Otherwise, returns
+ * the substring prior to but not including this delimiter.
+ */
+ARBITER_DLL std::string getProtocol(std::string path);
+
+/** Strip the type and delimiter `://`, if they exist. */
+ARBITER_DLL std::string stripProtocol(std::string path);
+
+/** Get the characters following the final instance of '.', or an empty
+ * string if there are no '.' characters. */
+ARBITER_DLL std::string getExtension(std::string path);
+
+/** Strip the characters following (and including) the final instance of
+ * '.' if one exists, otherwise return the full path. */
+ARBITER_DLL std::string stripExtension(std::string path);
+
 } // namespace arbiter
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -4292,10 +4308,9 @@ ARBITER_DLL std::vector<std::string> glob(std::string path);
  */
 class ARBITER_DLL LocalHandle
 {
-    friend class arbiter::Arbiter;
-    friend class arbiter::Endpoint;
-
 public:
+    LocalHandle(std::string localPath, bool isRemote);
+
     /** @brief Deletes the local path if the data was copied from a remote
      * source.
      *
@@ -4323,8 +4338,6 @@ public:
     }
 
 private:
-    LocalHandle(std::string localPath, bool isRemote);
-
     const std::string m_localPath;
     bool m_erase;
 };
@@ -5158,7 +5171,7 @@ public:
     bool isHttpDerived() const;
 
     /** See Arbiter::getLocalHandle. */
-    std::unique_ptr<LocalHandle> getLocalHandle(
+    LocalHandle getLocalHandle(
             std::string subpath,
             http::Headers headers = http::Headers(),
             http::Query query = http::Query()) const;
@@ -5287,7 +5300,7 @@ private:
     const drivers::Http* tryGetHttpDriver() const;
     const drivers::Http& getHttpDriver() const;
 
-    const Driver& m_driver;
+    const Driver* m_driver;
     std::string m_root;
 };
 
@@ -5566,7 +5579,7 @@ public:
      *
      * @return A LocalHandle for local access to the resulting file.
      */
-    std::unique_ptr<LocalHandle> getLocalHandle(
+    LocalHandle getLocalHandle(
             std::string path,
             const Endpoint& tempEndpoint) const;
 
@@ -5575,25 +5588,9 @@ public:
      * If @p tempPath is not specified, the environment will be searched for a
      * temporary location.
      */
-    std::unique_ptr<LocalHandle> getLocalHandle(
+    LocalHandle getLocalHandle(
             std::string path,
             std::string tempPath = "") const;
-
-    /** If no delimiter of "://" is found, returns "file".  Otherwise, returns
-     * the substring prior to but not including this delimiter.
-     */
-    static std::string getType(std::string path);
-
-    /** Strip the type and delimiter `://`, if they exist. */
-    static std::string stripType(std::string path);
-
-    /** Get the characters following the final instance of '.', or an empty
-     * string if there are no '.' characters. */
-    static std::string getExtension(std::string path);
-
-    /** Strip the characters following (and including) the final instance of
-     * '.' if one exists, otherwise return the full path. */
-    static std::string stripExtension(std::string path);
 
     /** Fetch the common HTTP pool, which may be useful when dynamically
      * constructing adding a Driver via Arbiter::addDriver.

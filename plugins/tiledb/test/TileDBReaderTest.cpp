@@ -40,14 +40,18 @@
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
+#include <io/FauxReader.hpp>
 
 #include "Support.hpp"
 
 #include "../io/TileDBReader.hpp"
+#include "../io/TileDBWriter.hpp"
 
 
 namespace pdal
 {
+
+const SpatialReference utm16("EPSG:26916");
 
 class TileDBReaderTest : public ::testing::Test
 {
@@ -86,6 +90,24 @@ class TileDBReaderTest : public ::testing::Test
         reader.prepare(table);
         reader.execute(table);
         EXPECT_EQ(table.numPoints(), 50);
+    }
+
+    TEST_F(TileDBReaderTest, read_zero_bbox)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth(Support::datapath("tiledb/array"));
+        Options options;
+        options.add("array_name", pth);
+        options.add("bbox3d", "([1.1, 1.2], [1.1, 1.2], [1.1, 1.2])");
+
+        TileDBReader reader;
+        reader.setOptions(options);
+
+        FixedPointTable table(100);
+        reader.prepare(table);
+        reader.execute(table);
+        EXPECT_EQ(table.numPoints(), 0);
     }
 
     TEST_F(TileDBReaderTest, read)
@@ -143,7 +165,6 @@ class TileDBReaderTest : public ::testing::Test
         Options options;
         options.add("array_name", pth);
 
-
         tiledb::Array array(ctx, pth, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
@@ -172,6 +193,48 @@ class TileDBReaderTest : public ::testing::Test
         c.setInput(reader);
         c.prepare(table);
         c.execute(table);
+        // test using a sidecar file
+        EXPECT_EQ(reader.getSpatialReference(), utm16);
     }
+
+#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
+    TEST_F(TileDBReaderTest, spatial_reference)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_srs");
+
+        Options options;
+        options.add("array_name", pth);
+        options.add("chunk_size", 80);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        FauxReader reader;
+        Options reader_options;
+        reader_options.add("mode", "ramp");
+        reader_options.add("count", 50);
+        reader.addOptions(reader_options);
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(reader);
+        writer.setSpatialReference(utm16);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        TileDBReader rdr;
+        rdr.setOptions(options);
+        FixedPointTable table2(100);
+        rdr.prepare(table2);
+        rdr.execute(table2);
+        EXPECT_EQ(rdr.getSpatialReference(), utm16);
+    }
+#endif
 }
 

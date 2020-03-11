@@ -48,11 +48,12 @@ using namespace pdal;
 namespace
 {
 
-void doSort(point_count_t count, const std::string & dim="X", const std::string & order="")
+void doSort(point_count_t count, Dimension::Id dim,
+    const std::string & order="")
 {
     Options opts;
 
-    opts.add("dimension", dim);
+    opts.add("dimension", Dimension::name(dim));
     if (!order.empty())
         opts.add("order", order);
 
@@ -62,13 +63,14 @@ void doSort(point_count_t count, const std::string & dim="X", const std::string 
     PointTable table;
     PointViewPtr view(new PointView(table));
 
-    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(dim);
+    table.finalize();
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(0.0, (double)count);
 
     for (PointId i = 0; i < count; ++i)
-        view->setField(Dimension::Id::X, i, dist(generator));
+        view->setField(dim, i, dist(generator));
 
     filter.prepare(table);
     FilterWrapper::ready(filter, table);
@@ -78,9 +80,9 @@ void doSort(point_count_t count, const std::string & dim="X", const std::string 
     EXPECT_EQ(count, view->size());
     for (PointId i = 1; i < count; ++i)
     {
-        double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
-        double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
-        if(order.empty() || order == "ASC")
+        double d1 = view->getFieldAs<double>(dim, i - 1);
+        double d2 = view->getFieldAs<double>(dim, i);
+        if (order.empty() || order == "ASC")
             EXPECT_TRUE(d1 <= d2);
         else // DES(cending)
             EXPECT_TRUE(d1 >= d2);
@@ -91,16 +93,14 @@ void doSort(point_count_t count, const std::string & dim="X", const std::string 
 
 TEST(SortFilterTest, simple)
 {
-    // note that this also tests default sort order ASC
-    point_count_t inc = 1;
-    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
-        doSort(count);
+    // note that this also tests default sort order ASC /**
+    for (point_count_t count = 3; count < 8; count++)
+        doSort(count, Dimension::Id::X);
 }
 
 TEST(SortFilterTest, testUnknownOptions)
 {
-    EXPECT_THROW( doSort(1, "not a dimension"), std::exception );
-    EXPECT_THROW( doSort(1, "X", "not an order"), std::exception );
+    EXPECT_THROW(doSort(1, Dimension::Id::X, "not an order"), std::exception);
 }
 
 TEST(SortFilterTest, pipelineJSON)
@@ -164,8 +164,8 @@ TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
     point_count_t inc = 1;
     for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
     {
-        doSort(count, "X", "ASC");
-        doSort(count, "X", "DESC");
+        doSort(count, Dimension::Id::X, "ASC");
+        doSort(count, Dimension::Id::X, "DESC");
     }
 }
 

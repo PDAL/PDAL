@@ -34,7 +34,6 @@
 
 #include "SkewnessBalancingFilter.hpp"
 
-#include <pdal/PointViewIter.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -59,7 +58,7 @@ void SkewnessBalancingFilter::addDimensions(PointLayoutPtr layout)
 
 void SkewnessBalancingFilter::processGround(PointViewPtr view)
 {
-    auto cmp = [](const PointIdxRef& p1, const PointIdxRef& p2) {
+    auto cmp = [](const PointRef& p1, const PointRef& p2) {
         return p1.compare(Dimension::Id::Z, p2);
     };
     std::sort(view->begin(), view->end(), cmp);
