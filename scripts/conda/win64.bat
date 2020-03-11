@@ -16,12 +16,11 @@ cmake -G %GENERATOR% ^
       -DBUILD_PLUGIN_PYTHON=ON ^
 	  -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
 	  -DPython3_FIND_STRATEGY=LOCATION ^
-  	  -DFBX_ROOT_DIR:FILEPATH="C:\fbx\2019.0" ^
       -DBUILD_PLUGIN_OCI=OFF ^
       -DBUILD_PLUGIN_I3S=ON ^
 	  -DBUILD_PLUGIN_E57=ON ^
 	  -DBUILD_PLUGIN_TILEDB=ON ^
-      -DBUILD_PLUGIN_FBX=ON ^
+      -DBUILD_PLUGIN_FBX=OFF ^
       -DBUILD_PLUGIN_ICEBRIDGE=ON ^
       -DBUILD_PLUGIN_NITF=ON ^
       -DBUILD_PLUGIN_TILEDB=ON ^
@@ -39,7 +38,7 @@ cmake -G %GENERATOR% ^
       -DWITH_LZMA=ON ^
       -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
       -DZSTD_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\libzstd.lib ^
-	  -DBUILD_PLUGIN_RDBLIB=ON ^
+	  -DBUILD_PLUGIN_RDBLIB=OFF ^
 	  -DRdb_ROOT=..\..\..\..\rdblib-2.2.1-x86_64-windows\interface\cpp ^
       .. --debug-trycompile
 
