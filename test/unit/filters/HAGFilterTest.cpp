@@ -55,8 +55,7 @@ TEST(HAGFilterTest, delaunay)
 
     Options fo;
     fo.add("count", 10);
-    fo.add("delaunay", true);
-    Stage& f = *(factory.createStage("filters.hag"));
+    Stage& f = *(factory.createStage("filters.hag_delaunay"));
     f.setInput(r);
     f.setOptions(fo);
 
@@ -105,7 +104,7 @@ TEST(HAGFilterTest, neighbors)
 
     Options fo;
     fo.add("count", 2);
-    Stage& f = *(factory.createStage("filters.hag"));
+    Stage& f = *(factory.createStage("filters.hag_nn"));
     f.setInput(r);
     f.setOptions(fo);
 
@@ -154,7 +153,7 @@ TEST(HAGFilterTest, closest)
 
     Options fo;
     fo.add("count", 1);
-    Stage& f = *(factory.createStage("filters.hag"));
+    Stage& f = *(factory.createStage("filters.hag_nn"));
     f.setInput(r);
     f.setOptions(fo);
 
