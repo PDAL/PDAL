@@ -441,7 +441,7 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 std::string SpatialReference::getWKT1() const
 {
 #if GDAL_VERSION_MAJOR < 3
-    return getWkt();
+    return getWKT();
 #else
     std::string wkt = getWKT();
     if (wkt.empty())
