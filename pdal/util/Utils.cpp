@@ -291,6 +291,10 @@ std::vector<uint8_t> Utils::base64_decode(std::string const& encoded_string)
     unsigned char char_array_4[4], char_array_3[3];
     std::vector<uint8_t> ret;
 
+    if (in_len % 4)
+        throw std::runtime_error("Can't decode base64 string whose length "
+            "is not divisible by 4");
+
     while (in_len-- && (encoded_string[in_] != '=') &&
         is_base64(encoded_string[in_]))
     {
