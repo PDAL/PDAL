@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Connor Manning, connor@hobu.co
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,87 +34,36 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>  // Suppresses windows 4251 messages
-#include "H5Cpp.h"
+#include <pdal/Filter.hpp>
 
+#include <cstdint>
 #include <memory>
-#include <vector>
 #include <string>
-#include <map>
-#include <stdexcept>
 
 namespace pdal
 {
 
-namespace hdf5
-{
-    struct Hdf5ColumnData
-    {
-        Hdf5ColumnData(const std::string& name, const H5::PredType predType)
-            : name(name)
-            , predType(predType)
-        { }
+class Options;
+class PointLayout;
+class PointView;
 
-        const std::string name;
-        const H5::PredType predType;
-    };
-}
-
-class Hdf5Handler
+class PDAL_DLL HagDelaunayFilter : public Filter
 {
 public:
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
+    HagDelaunayFilter();
+    HagDelaunayFilter& operator=(const HagDelaunayFilter&) = delete;
+    HagDelaunayFilter(const HagDelaunayFilter&) = delete;
 
-    Hdf5Handler();
-
-    void initialize(
-            const std::string& filename,
-            const std::vector<hdf5::Hdf5ColumnData>& columns);
-    void close();
-
-    uint64_t getNumPoints() const;
-
-    void getColumnEntries(
-            void* data,
-            const std::string& dataSetName,
-            const hsize_t numEntries,
-            const hsize_t offset) const;
+    std::string getName() const;
 
 private:
-    struct ColumnData
-    {
-        ColumnData(
-                H5::PredType predType,
-                H5::DataSet dataSet,
-                H5::DataSpace dataSpace)
-            : predType(predType)
-            , dataSet(dataSet)
-            , dataSpace(dataSpace)
-        { }
+    virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
+    virtual void filter(PointView& view);
 
-        ColumnData(H5::PredType predType)
-            : predType(predType)
-            , dataSet()
-            , dataSpace()
-        { }
-
-        H5::PredType predType;
-        H5::DataSet dataSet;
-        H5::DataSpace dataSpace;
-    };
-
-    hsize_t getColumnNumEntries(const std::string& dataSetName) const;
-    const ColumnData& getColumnData(const std::string& dataSetName) const;
-
-    std::unique_ptr<H5::H5File> m_h5File;
-    uint64_t m_numPoints;
-
-    std::map<std::string, ColumnData> m_columnDataMap;
+    bool m_allowExtrapolation;
+    point_count_t m_count;
 };
 
 } // namespace pdal
-

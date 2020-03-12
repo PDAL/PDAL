@@ -442,12 +442,19 @@ bool TileDBReader::processPoint(PointRef& point)
         }     
     }
 
-    for (DimInfo& dim : m_dims)
-        if (!setField(point, dim, m_offset))
-            throwError("Invalid dimension type when setting data.");
+    if (m_resultSize > 0)
+    {
+        for (DimInfo& dim : m_dims)
+            if (!setField(point, dim, m_offset))
+                throwError("Invalid dimension type when setting data.");
 
-    ++m_offset;
-    return true;
+        ++m_offset;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
