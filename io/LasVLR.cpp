@@ -73,7 +73,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     do
     {
         in >> c;
-    } while (std::isspace(c));
+    } while (in.good() && std::isspace(c));
     if (!in.eof())
         throw pdal_error("Invalid characters following LAS VLR JSON object.");
 
