@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,86 +32,39 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
+#pragma once
+
+#include <pdal/Filter.hpp>
+
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace pdal
 {
 
-class Triangle;
+class Options;
+class PointLayout;
+class PointView;
 
-class PDAL_DLL PlyWriter : public Writer
+class PDAL_DLL HagNnFilter : public Filter
 {
 public:
-    enum class Format
-    {
-        Ascii,
-        BinaryLe,
-        BinaryBe
-    };
+    HagNnFilter();
+    HagNnFilter& operator=(const HagNnFilter&) = delete;
+    HagNnFilter(const HagNnFilter&) = delete;
 
     std::string getName() const;
 
-    PlyWriter();
-
 private:
     virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
+    virtual void filter(PointView& view);
 
-    std::string getType(Dimension::Type type) const;
-    void writeHeader(PointLayoutPtr layout) const;
-    void writeValue(PointRef& point, Dimension::Id dim, Dimension::Type type);
-    void writePoint(PointRef& point, PointLayoutPtr layout);
-    void writeTriangle(const Triangle& t, size_t offset);
-
-    std::ostream *m_stream;
-    std::string m_filename;
-    Format m_format;
-    bool m_faces;
-    StringList m_dimNames;
-    DimTypeList m_dims;
-    int m_precision;
-    bool m_sizedTypes;
-    Arg *m_precisionArg;
-    std::vector<PointViewPtr> m_views;
+    bool m_allowExtrapolation;
+    double m_maxDistance;
+    point_count_t m_count;
 };
 
-inline std::istream& operator>>(std::istream& in, PlyWriter::Format& f)
-{
-    std::string s;
-    std::getline(in, s);
-    Utils::trim(s);
-    Utils::tolower(s);
-    if (s == "ascii")
-        f = PlyWriter::Format::Ascii;
-    else if (s == "little endian" || s == "binary_little_endian")
-        f = PlyWriter::Format::BinaryLe;
-    else if (s == "big endian" || s == "binary_big_endian")
-        f = PlyWriter::Format::BinaryBe;
-    else
-        in.setstate(std::ios_base::failbit);
-    return in;
-}
-
-
-inline std::ostream& operator<<(std::ostream& out, const PlyWriter::Format& f)
-{
-    switch (f)
-    {
-    case PlyWriter::Format::Ascii:
-        out << "ascii";
-        break;
-    case PlyWriter::Format::BinaryLe:
-        out << "binary_little_endian";
-        break;
-    case PlyWriter::Format::BinaryBe:
-        out << "binary_big_endian";
-        break;
-    }
-    return out;
-}
-
-}
+} // namespace pdal
