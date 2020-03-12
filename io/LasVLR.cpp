@@ -69,11 +69,13 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
 
     // Make sure there isn't stuff in the input stream after the JSON
     // object.
+std::cerr << "Start of extraction loop!\n";
     char c;
     do
     {
         in >> c;
     } while (std::isspace(c));
+std::cerr << "End of extraction loop!\n";
     if (!in.eof())
         throw pdal_error("Invalid characters following LAS VLR JSON object.");
 
@@ -131,6 +133,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
             throw pdal_error("Invalid key '" + el.key() + "' in VLR "
                 "specificiation.");
     }
+std::cerr << "Looped items!\n";
     if (b64data.empty())
         throw pdal_error("LAS VLR must contain 'data' member.");
     if (userId.empty())
@@ -142,6 +145,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     v.m_recordId = recordId;
     v.m_description = description;
     v.m_data = Utils::base64_decode(b64data);
+std::cerr << "Decoded Data size = " << v.m_data.size() << "!\n";
     return in;
 }
 
@@ -160,7 +164,10 @@ std::ostream& operator<<(std::ostream& out, const LasVLR& v)
     out << "  \"description\": \"" << v.description() << "\",\n";
     out << "  \"record_id\": " << v.recordId() << ",\n";
     out << "  \"user_id\": \"" << v.userId() << "\",\n";
-    out << "  \"data\": \"" <<Utils::base64_encode(d, v.dataLen()) << "\"\n";
+    std::cerr << "VLR data len = " << v.dataLen() << "!\n";
+    std::cerr << "VLR encoded data len = " << Utils::base64_encode(d, v.dataLen()).size() << "!\n";
+    out << "  \"data\": \"" << Utils::base64_encode(d, v.dataLen()) << "\"\n";
+    std::cerr << "Done writing encoded data!\n";
     out << "}\n";
     return out;
 }
