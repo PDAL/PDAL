@@ -380,7 +380,7 @@ install(
 include(${PDAL_CMAKE_DIR}/config.cmake)
 target_include_directories(${PDAL_LIB_NAME}
     INTERFACE
-        $<INSTALL_INTERFACE:${PDAL_INCLUDE_DIRS}>)
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?
