@@ -85,7 +85,7 @@ inline std::istream& operator>>(std::istream& in, PlyWriter::Format& f)
     std::getline(in, s);
     Utils::trim(s);
     Utils::tolower(s);
-    if (s == "ascii" || s == "default")
+    if (s == "ascii")
         f = PlyWriter::Format::Ascii;
     else if (s == "little endian" || s == "binary_little_endian")
         f = PlyWriter::Format::BinaryLe;
