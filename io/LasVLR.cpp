@@ -74,7 +74,7 @@ std::cerr << "Start of extraction loop!\n";
     do
     {
         in >> c;
-    } while (std::isspace(c));
+    } while (in.good() && std::isspace(c));
 std::cerr << "End of extraction loop!\n";
     if (!in.eof())
         throw pdal_error("Invalid characters following LAS VLR JSON object.");
