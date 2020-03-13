@@ -273,6 +273,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // status, and MSE.
     MetadataNode root = getMetadata();
     root.add("transform", Eigen::MatrixXd(final_transformation.cast<double>()));
+    root.add("centroid", Eigen::MatrixXd(centroid.cast<double>()));
     root.add("converged", converged);
     root.add("fitness", mse);
 
