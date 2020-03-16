@@ -378,6 +378,18 @@ install(
     DESTINATION
         "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
+
+#
+# Allow downstream cmake projects to find PDAL header files without
+# being explicit.
+#
+target_include_directories(${PDAL_BASE_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+target_include_directories(${PDAL_UTIL_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?
