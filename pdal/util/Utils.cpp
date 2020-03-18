@@ -436,7 +436,7 @@ std::string Utils::escapeJSON(const std::string &str)
     };
     for (std::string::size_type i = 0; i < s.size();)
     {
-        char val = s[i];
+        unsigned char val = s[i];
         if (val < (char)replacements.size())
         {
             s.replace(i, 1, replacements[val]);
