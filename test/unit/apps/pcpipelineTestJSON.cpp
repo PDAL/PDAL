@@ -74,7 +74,6 @@ void run_pipeline(std::string const& pipelineFile,
         EXPECT_NE(output.find(lookFor), std::string::npos);
 }
 
-// most pipelines (those with a writer) will be invoked via `pdal pipeline`
 void run_bad_pipeline(std::string const& pipelineFile,
     const std::string options = std::string(), const std::string lookFor = "")
 {
