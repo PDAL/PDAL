@@ -282,7 +282,8 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    const StringList prefixes { "gs://", "dropbox://", "http://", "https://" };
+    const StringList prefixes
+        { "s3://", "gs://", "dropbox://", "http://", "https://" };
 
     for (const string& prefix : prefixes)
         if (Utils::startsWith(path, prefix))
