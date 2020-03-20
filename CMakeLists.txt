@@ -26,8 +26,8 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-set(PDAL_API_VERSION "9")
-set(PDAL_BUILD_VERSION "10")
+set(PDAL_API_VERSION "10")
+set(PDAL_BUILD_VERSION "11")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -328,31 +328,31 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
-    PATTERN "pdal/private" EXCLUDE
-    PATTERN "pdal/io/private" EXCLUDE
-    PATTERN "pdal/pdal/private" EXCLUDE
-    PATTERN "pdal/util/private" EXCLUDE
-    PATTERN "pdal/filters/private" EXCLUDE
-    ${ZSTD_EXCLUDES}
-    ${ZLIB_EXCLUDES}
-    ${LZMA_EXCLUDES}
-    ${LAZPERF_EXCLUDES}
+#    PATTERN "pdal/private" EXCLUDE
+#    PATTERN "pdal/io/private" EXCLUDE
+#    PATTERN "pdal/pdal/private" EXCLUDE
+#    PATTERN "pdal/util/private" EXCLUDE
+#    PATTERN "pdal/filters/private" EXCLUDE
+#    ${ZSTD_EXCLUDES}
+#    ${ZLIB_EXCLUDES}
+#    ${LZMA_EXCLUDES}
+#    ${LAZPERF_EXCLUDES}
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
+#    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_IO_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
+#    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_FILTERS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
+#    PATTERN "private" EXCLUDE
 )
 
 install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}

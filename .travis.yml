@@ -15,7 +15,7 @@ script:
 
 after_success: |
   if [[ "$TRAVIS_SECURE_ENV_VARS" == "true" &&
-        "$TRAVIS_BRANCH" == "2.0-maintenance" &&
+        "$TRAVIS_BRANCH" == "2.1-maintenance" &&
         -n "$encrypted_6a5172b96922_key" ]]
   then
       cd scripts/ci
