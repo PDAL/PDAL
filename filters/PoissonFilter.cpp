@@ -271,7 +271,11 @@ void PoissonFilter::addArgs(ProgramArgs& args)
 PointViewSet PoissonFilter::run(PointViewPtr view)
 {
     if (!m_normalsProvided)
-        NormalFilter().doFilter(*view);
+    {
+        NormalFilter f;
+        f.setLog(log());
+        f.doFilter(*view);
+    }
 
     std::unique_ptr<PointSource> source;
     if (m_doColor)
