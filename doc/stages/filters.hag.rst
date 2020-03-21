@@ -3,7 +3,7 @@
 filters.hag
 ===============================================================================
 
-.. note::
+.. warning::
 
     The HAG filter is deprecated and has been replaced by :ref:`filters.hag_nn`,
     :ref:`filters.hag_dem` and :ref:`filters.hag_delaunay`.  Please use
