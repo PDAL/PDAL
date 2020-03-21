@@ -14,7 +14,6 @@ IF "%1" == "--includes" echo @PDAL_INCLUDE_DEFINITIONS@ & goto exit
 IF "%1" == "--cflags" echo @CMAKE_C_FLAGS@ & goto exit
 IF "%1" == "--cxxflags" echo @CMAKE_CXX_FLAGS@ -std=c++11 & goto exit
 IF "%1" == "--version" echo @PDAL_VERSION@ & goto exit
-IF "%1" == "--python-version" echo @PDAL_PYTHON_VERSION_STRING@ & goto exit
 
 
 echo Usage: pdal-config [OPTIONS]
@@ -26,6 +25,5 @@ echo    [--includes]
 echo    [--libs]
 echo    [--plugin-dir]
 echo    [--version]
-echo    [--python-version]
 
 :exit
