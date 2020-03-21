@@ -129,7 +129,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
         }
         else
             throw pdal_error("Invalid key '" + el.key() + "' in VLR "
-                "specificiation.");
+                "specification.");
     }
     if (b64data.empty())
         throw pdal_error("LAS VLR must contain 'data' member.");
