@@ -64,11 +64,6 @@ option(BUILD_PLUGIN_PGPOINTCLOUD
 add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
     "read/write PostgreSQL PointCloud objects")
 
-option(BUILD_PLUGIN_SQLITE
-    "Choose if SQLite database support should be built" FALSE)
-add_feature_info("SQLite plugin" BUILD_PLUGIN_SQLITE
-    "read/write SQLite objects")
-
 option(BUILD_PLUGIN_RIVLIB
     "Choose if RiVLib support should be built" FALSE)
 add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
@@ -78,11 +73,6 @@ option(BUILD_PLUGIN_RDBLIB
     "Choose if rdblib support should be built" FALSE)
 add_feature_info("rdblib plugin" BUILD_PLUGIN_RDBLIB
     "read data in the RDB format")
-
-option(BUILD_PLUGIN_PYTHON
-    "Choose if Python support should be built" FALSE)
-add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
-    "add features that depend on python")
 
 option(BUILD_PLUGIN_MBIO
     "Choose if MBIO support should be built" FALSE)
@@ -124,9 +114,6 @@ include(CMakeDependentOption)
 cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS
     "Choose if PostgreSQL PointCloud tests should be built"
     ON "BUILD_PLUGIN_PGPOINTCLOUD; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_SQLITE_TESTS
-    "Choose if SQLite tests should be built"
-    ON "BUILD_PLUGIN_SQLITE; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_OCI_TESTS
     "Choose if OCI tests should be built"
     ON "BUILD_PLUGIN_OCI; WITH_TESTS" OFF)

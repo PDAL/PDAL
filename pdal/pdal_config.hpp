@@ -53,7 +53,6 @@ enum class Feature
     ZLIB,
     LZMA,
     LIBXML2,
-    PYTHON,
 };
 
 PDAL_DLL bool hasFeature(Feature f);
