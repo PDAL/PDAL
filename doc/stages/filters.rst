@@ -108,6 +108,10 @@ invalidate an existing KD-tree.
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
 
+:ref:`filters.hag_delaunay`
+    Compute pointwise height above ground using triangulation. Requires points to
+    classified as ground/non-ground prior to estimating.
+
 :ref:`filters.hag_dem`
     Compute pointwise height above GDAL-readable DEM raster.
 
@@ -246,7 +250,7 @@ the input. These filters will invalidate an existing KD-tree.
 :ref:`filters.dem`
     Remove points that are in a raster cell but have a value far from the
     value of the raster.
-    
+
 :ref:`filters.farthestpointsampling`
     The Farthest Point Sampling Filter adds points from the input to the output
     PointView one at a time by selecting the point from the input cloud that is

@@ -23,6 +23,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
    readers.faux
    readers.gdal
    readers.geowave
+   readers.hdf
    readers.i3s
    readers.ilvis2
    readers.las
