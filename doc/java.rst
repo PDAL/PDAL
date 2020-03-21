@@ -13,15 +13,15 @@ in building PDAL with a special flag or building JNI binaries manually.
 
 The project consists of the following modules:
 
-* `pdal-native`_ - with packed OS specific libraries to link PDAL to JNI proxy classes. Dependency contains bindings for `x86_64-darwin`_ and `x86_64-linux`_, other versions are not supported yet.
-* `pdal`_ - with the core bindings functionality.
-* `pdal-scala`_ - a Scala API package that simplifies PDAL Pipeline construction.
+* ``pdal-native`` - with packed OS specific libraries to link PDAL to JNI proxy classes. Dependency contains bindings for ``x86_64-darwin`` and ``x86_64-linux``, other versions are not supported yet.
+* ``pdal`` - with the core bindings functionality.
+* ``pdal-scala`` - a Scala API package that simplifies PDAL Pipeline construction.
 
 Versions
 --------------------------------------------------------------------------------
 
-PDAL JNI major version usually follows PDAL versioning i.e. `pdal-java 1.8.x`_ was
-built and tested against `PDAL 1.8.x`_ and `pdal-java 2.1.x`_ against `PDAL 2.x.x`_.
+PDAL JNI major version usually follows PDAL versioning i.e. ``pdal-java 1.8.x`` was
+built and tested against ``PDAL 1.8.x`` and ``pdal-java 2.1.x`` against ``PDAL 2.x.x``.
 
 Using PDAL Java bindings
 --------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ Using PDAL Java bindings
 PDAL provides `JNI bindings <https://docs.oracle.com/javase/8/docs/technotes/guides/jni/index.html>`_
 that gives users access to executing
 :ref:`pipeline <pipeline>` instantiations and capturing the results
-in `Java`_ interfaces.
+in ``Java`` interfaces.
 This mode of operation is useful if you are looking to have PDAL simply act as
 your data format and processing handler.
 
@@ -131,7 +131,7 @@ PDAL Scala project introduces a DSL to simplify PDAL Pipeline construction (this
     pipeline.close()
 
 It covers PDAL 2.0.x, but to use any custom DSL that is not covered by the
-current Scala API you can use `RawExpr`_ type to build `Pipeline Expression`_:
+current Scala API you can use ``RawExpr`` type to build a ``Pipeline Expression``:
 
 .. code-block:: scala
 
@@ -149,7 +149,7 @@ Installation
 
 .. index:: Install, Java, Scala
 
-PDAL Java artifacts are cross published for `Scala 2.13`_, `2.12`_ and `2.11`_.
+PDAL Java artifacts are cross published for ``Scala 2.13``, ``2.12`` and ``2.11``.
 However, if it is not required, a separate artifact that has no Scala specific
 artifact postfix is published as well.
 
@@ -182,17 +182,17 @@ Compilation
 
 Development purposes (including binaries) compilation:
   1. Install PDAL (using brew / package managers (unix) / build from sources / etc)
-  2. Build native libs `./sbt native/nativeCompile`_ (optionally, binaries would be built during tests run)
-  3. Run `./sbt core/test`_ to run PDAL tests
+  2. Build native libs ``./sbt native/nativeCompile`` (optionally, binaries would be built during tests run)
+  3. Run ``./sbt core/test`` to run PDAL tests
 
 Only Java development purposes compilation:
-  1. Provide `$LD_LIBRARY_PATH`_ or `$DYLD_LIBRARY_PATH`_
-  2. If you don't want to provide global variable you can pass `-Djava.library.path=<path>`_ into sbt:
-    `./sbt -Djava.library.path=<path>`_
-  3. Set `PDAL_DEPEND_ON_NATIVE=false`_ (to disable `native` project build)
-  4. Run `PDAL_DEPEND_ON_NATIVE=false ./sbt`_
+  1. Provide ``$LD_LIBRARY_PATH`` or ``$DYLD_LIBRARY_PATH``
+  2. If you don't want to provide global variable you can pass ``-Djava.library.path=<path>`` into sbt:
+    ``./sbt -Djava.library.path=<path>``
+  3. Set ``PDAL_DEPEND_ON_NATIVE=false`` (to disable ``native`` project build)
+  4. Run ``PDAL_DEPEND_ON_NATIVE=false ./sbt``
 
-If you would like to use your own bindings binary, it is necessary to set `java.library.path`:
+If you would like to use your own bindings binary, it is necessary to set ``java.library.path``:
 
 .. code-block:: scala
 
@@ -202,5 +202,5 @@ If you would like to use your own bindings binary, it is necessary to set `java.
     javaOptions += "-Djava.library.path=/usr/local/lib"
 
 
-You can use `pdal-native` dep in case you don't have installed JNI bindings and to avoid steps described above.
-Dependency contains bindings for `x86_64-darwin`_ and `x86_64-linux`_, other versions are not supported yet.
+You can use ``pdal-native`` dep in case you don't have installed JNI bindings and to avoid steps described above.
+Dependency contains bindings for ``x86_64-darwin`` and ``x86_64-linux``, other versions are not supported yet.
