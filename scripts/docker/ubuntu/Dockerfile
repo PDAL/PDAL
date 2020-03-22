@@ -43,7 +43,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     ninja install
 
 RUN apt-get -y remove unzip bzip2 gcc-6 g++-6 ca-certificates && \
-   apt-get -y autoremove 
+   apt-get -y autoremove
 
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     conda activate pdal && \
@@ -64,6 +64,13 @@ RUN rm /opt/conda/envs/pdal/lib/*.a && \
 FROM ubuntu:bionic
 
 ARG PDAL_CONDA=/opt/conda/envs/pdal
+
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y \
+        sudo && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/ /usr/
 COPY --from=builder /lib/ /lib/
