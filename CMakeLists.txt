@@ -385,10 +385,10 @@ include(${PDAL_CMAKE_DIR}/config.cmake)
 #
 target_include_directories(${PDAL_BASE_LIB_NAME}
     INTERFACE
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+        $<INSTALL_INTERFACE:include>)
 target_include_directories(${PDAL_UTIL_LIB_NAME}
     INTERFACE
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+        $<INSTALL_INTERFACE:include>)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
