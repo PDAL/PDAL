@@ -79,3 +79,6 @@ COPY --from=builder /${PDAL_CONDA}/include/ /usr/include/
 COPY --from=builder /${PDAL_CONDA}/share/ /usr/share/
 COPY --from=builder /${PDAL_CONDA}/bin/pdal /usr/bin/pdal
 
+ENV GDAL_DATA=/usr/share/gdal
+ENV PDAL_DRIVER_PATH=/usr/lib
+ENV PROJ_LIB=/usr/share/proj
