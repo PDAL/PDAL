@@ -1261,9 +1261,9 @@ public:
                 out << name << std::string(postNameSpacing, ' ') <<
                     descrip[0] << std::endl;
             }
-            for (size_t i = 1; i < descrip.size(); ++i)
+            for (size_t ii = 1; ii < descrip.size(); ++ii)
                 out << std::string(secondIndent, ' ') <<
-                    descrip[i] << std::endl;
+                    descrip[ii] << std::endl;
         }
     }
 
