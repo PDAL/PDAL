@@ -163,7 +163,6 @@ void FauxReader::initialize()
             m_delZ = 0;
         }
     }
-
 }
 
 
