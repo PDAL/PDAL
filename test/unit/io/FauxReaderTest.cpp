@@ -241,7 +241,7 @@ TEST(FauxReaderTest, uniform)
 {
     Options ops;
 
-    ops.add("bounds", BOX3D(1, 100, 1, 100, 1, 100));
+    ops.add("bounds", BOX3D(0, 100, 0, 100, 0, 100));
     ops.add("count", 1000);
     ops.add("seed", 2121212);
     ops.add("mode", "uniform");
@@ -259,17 +259,17 @@ TEST(FauxReaderTest, uniform)
     double hz[10] {};
     for (size_t i = 0; i < 1000; ++i)
     {
-        int x = v->getFieldAs<int>(Dimension::Id::X, i) / 10;
-        int y = v->getFieldAs<int>(Dimension::Id::Y, i) / 10;
-        int z = v->getFieldAs<int>(Dimension::Id::Z, i) / 10;
+        int x = (int)(v->getFieldAs<double>(Dimension::Id::X, i) / 10);
+        int y = (int)(v->getFieldAs<double>(Dimension::Id::Y, i) / 10);
+        int z = (int)(v->getFieldAs<double>(Dimension::Id::Z, i) / 10);
         hx[x]++;
         hy[y]++;
         hz[z]++;
     }
 
-    int xtot[] = { 110, 90, 104, 91, 86, 125, 104, 98, 106, 87 };
-    int ytot[] = { 90, 101, 102, 86, 103, 109, 101, 100, 115, 91 };
-    int ztot[] = { 82, 96, 105, 107, 104, 101, 116, 88, 86, 110 };
+    int xtot[] = { 117, 95, 94, 93, 90, 118, 102, 97, 102, 92 };
+    int ytot[] = { 97, 108, 93, 83, 114, 98, 100, 105, 110, 92 };
+    int ztot[] = { 92, 99, 106, 100, 105, 106, 109, 88, 84, 111 };
 
     for (size_t i = 0; i < 10; ++i)
     {
