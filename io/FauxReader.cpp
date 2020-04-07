@@ -65,15 +65,37 @@ void FauxReader::addArgs(ProgramArgs& args)
     args.add("stdev_z", "Z standard deviation", m_stdev_z, 1.0);
     args.add("mode", "Point creation mode", m_mode);
     args.add("number_of_returns", "Max number of returns", m_numReturns);
+    m_seedArg = &args.add("seed", "Random generator seed", m_seed);
 }
 
 
-void FauxReader::initialize()
+void FauxReader::prepared(PointTableRef table)
 {
     if (!m_countArg->set() && m_mode != Mode::Grid)
         throwError("Argument 'count' needs a value and none was provided.");
     if (m_numReturns > 10)
         throwError("Option 'number_of_returns' must be in the range [0,10].");
+
+    if (!(m_mode == Mode::Normal || m_mode == Mode::Uniform))
+    {
+        if (m_seedArg->set())
+        {
+            std::ostringstream out;
+            out << "Option 'seed' not supported with mode '" << m_mode << "'.";
+            throwError(out.str());
+        }
+    }
+}
+
+
+void FauxReader::initialize()
+{
+    if (m_mode == Mode::Uniform || m_mode == Mode::Normal)
+    {
+        if (!m_seedArg->set())
+            m_seed = (uint32_t)std::time(NULL);
+        m_generator.seed(m_seed);
+    }
     if (m_mode == Mode::Grid)
     {
         m_bounds.minx = ceil(m_bounds.minx);
@@ -109,6 +131,22 @@ void FauxReader::initialize()
             count = 0;
         if (!Utils::numericCast(count, m_count))
             throwError("Requested range generates more points than supported.");
+    }
+    else if (m_mode == Mode::Normal)
+    {
+        //using nd = std::normal_distribution<double>;
+
+        m_normalX.reset(new nd(m_mean_x, m_stdev_x));
+        m_normalY.reset(new nd(m_mean_y, m_stdev_y));
+        m_normalZ.reset(new nd(m_mean_z, m_stdev_z));
+    }
+    else if (m_mode == Mode::Uniform)
+    {
+        //using urd = std::uniform_real_distribution<double>;
+
+        m_uniformX.reset(new urd(m_bounds.minx, m_bounds.maxx));
+        m_uniformY.reset(new urd(m_bounds.miny, m_bounds.maxy));
+        m_uniformZ.reset(new urd(m_bounds.minz, m_bounds.maxz));
     }
     else
     {
@@ -164,11 +202,6 @@ bool FauxReader::processOne(PointRef& point)
 
     switch (m_mode)
     {
-    case Mode::Random:
-        x = Utils::random(m_bounds.minx, m_bounds.maxx);
-        y = Utils::random(m_bounds.miny, m_bounds.maxy);
-        z = Utils::random(m_bounds.minz, m_bounds.maxz);
-        break;
     case Mode::Constant:
         x = m_bounds.minx;
         y = m_bounds.miny;
@@ -179,15 +212,15 @@ bool FauxReader::processOne(PointRef& point)
         y = m_bounds.miny + m_delY * m_index;
         z = m_bounds.minz + m_delZ * m_index;
         break;
-    case Mode::Uniform:
-        x = Utils::uniform(m_bounds.minx, m_bounds.maxx, m_seed++);
-        y = Utils::uniform(m_bounds.miny, m_bounds.maxy, m_seed++);
-        z = Utils::uniform(m_bounds.minz, m_bounds.maxz, m_seed++);
-        break;
     case Mode::Normal:
-        x = Utils::normal(m_mean_x, m_stdev_x, m_seed++);
-        y = Utils::normal(m_mean_y, m_stdev_y, m_seed++);
-        z = Utils::normal(m_mean_z, m_stdev_z, m_seed++);
+        x = (*m_normalX)(m_generator);
+        y = (*m_normalY)(m_generator);
+        z = (*m_normalZ)(m_generator);
+        break;
+    case Mode::Uniform:
+        x = (*m_uniformX)(m_generator);
+        y = (*m_uniformY)(m_generator);
+        z = (*m_uniformZ)(m_generator);
         break;
     case Mode::Grid:
     {
