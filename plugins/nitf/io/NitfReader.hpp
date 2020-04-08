@@ -55,16 +55,17 @@ class PDAL_DLL NitfReader : public LasReader
         typedef typename std::basic_filebuf<CharT, Traits> Base;
 
         Shiftbuf(Shiftbuf::off_type offset) : m_offset(offset)
-        {
-            seekpos(0);
-        }
+        {}
 
     protected:
         virtual pos_type seekpos(Shiftbuf::pos_type sp,
             std::ios_base::openmode which =
                 std::ios_base::in | std::ios_base::binary) override
         {
-            return Base::seekpos(sp + m_offset, which);
+            pos_type p = Base::seekpos(sp + m_offset, which);
+            if (p >= 0)
+                p -= m_offset;
+            return p;
         }
 
         virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir,
@@ -72,8 +73,23 @@ class PDAL_DLL NitfReader : public LasReader
                 std::ios_base::in | std::ios_base::binary) override
         {
             if (dir == std::ios_base::beg)
+            {
                 off += m_offset;
-            return Base::seekoff(off, dir, which);
+                pos_type p = Base::seekoff(off, dir, which);
+                if (p >= 0)
+                    p -= m_offset;
+                return p;
+            }
+            else if ((dir == std::ios_base::cur) ||
+                     (dir == std::ios_base::end))
+            {
+                pos_type p = Base::seekoff(off, dir, which);
+                if (p >= 0)
+                    p -= m_offset;
+                return p;
+            }
+            else
+                return 0;
         }
 
     private:
@@ -110,6 +126,9 @@ class PDAL_DLL NitfReader : public LasReader
         NitfStreamIf(const std::string& filename, ShiftStream::off_type off)
         {
             m_istream = new ShiftStream(filename, off);
+            // This makes sure that the stream is positioned at the beginning
+            // of the embedded (LAS/LAZ) data.
+            m_istream->seekg(0);
         }
 
         virtual ~NitfStreamIf()
