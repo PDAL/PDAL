@@ -263,11 +263,19 @@ TEST(EptReaderTest, resolutionLimit)
 
 TEST(EptReaderTest, bounds2dXform)
 {
-    SrsBounds eptBounds(BOX2D(515380.0001, 4918360.0001,
-                              515390.0001, 4918370.0001));
+
+    // Tests represent un-shifted values.
+    // Don't let later versions of PROJ shift
+    // them and give us different results.
+    std::string previous;
+    Utils::getenv("PROJ_NETWORK", previous);
+    Utils::setenv("PROJ_NETWORK", "OFF");
+
+    SrsBounds eptBounds(BOX2D(515380, 4918360,
+                              515390, 4918370));
     SrsBounds boxBounds(
-        BOX2D(-110.806808903230, 44.418370692596,
-              -110.806682992919, 44.418460509155),
+        BOX2D(-110.80680478060, 44.418368816508,
+            -110.80667887010, 44.418458631945),
         SpatialReference("EPSG:4326"));
 
     PointViewPtr v1;
@@ -296,6 +304,7 @@ TEST(EptReaderTest, bounds2dXform)
     }
 
     EXPECT_EQ(v1->size(), v2->size());
+    Utils::setenv("PROJ_NETWORK", previous);
 }
 
 TEST(EptReaderTest, boundedRead2d)
