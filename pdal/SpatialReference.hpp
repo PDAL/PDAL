@@ -163,6 +163,7 @@ public:
 
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
+    static SpatialReference fromZone(int zone);
     static bool isWKT(const std::string& wkt);
     static std::string prettyWkt(const std::string& wkt);
 
