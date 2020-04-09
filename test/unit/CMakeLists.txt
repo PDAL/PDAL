@@ -134,6 +134,7 @@ if (PDAL_HAVE_LASZIP)
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
     )
+    set_tests_properties(pdal_io_ept_reader_test PROPERTIES ENVIRONMENT "PROJ_NETWORK=OFF")
     PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
         FILES
             io/EptAddonWriterTest.cpp

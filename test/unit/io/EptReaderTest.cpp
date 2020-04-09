@@ -264,13 +264,6 @@ TEST(EptReaderTest, resolutionLimit)
 TEST(EptReaderTest, bounds2dXform)
 {
 
-    // Tests represent un-shifted values.
-    // Don't let later versions of PROJ shift
-    // them and give us different results.
-    std::string previous;
-    Utils::getenv("PROJ_NETWORK", previous);
-    Utils::setenv("PROJ_NETWORK", "OFF");
-
     SrsBounds eptBounds(BOX2D(515380, 4918360,
                               515390, 4918370));
     SrsBounds boxBounds(
@@ -304,7 +297,6 @@ TEST(EptReaderTest, bounds2dXform)
     }
 
     EXPECT_EQ(v1->size(), v2->size());
-    Utils::setenv("PROJ_NETWORK", previous);
 }
 
 TEST(EptReaderTest, boundedRead2d)
