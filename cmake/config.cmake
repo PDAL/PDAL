@@ -1,5 +1,5 @@
 set(INCLUDE_INSTALL_DIR include/ CACHE PATH "include")
-set(LIB_INSTALL_DIR ${PDAL_LIB_INSTALL_DIR} CACHE PATH "lib")
+set(LIB_INSTALL_DIR lib CACHE PATH "lib")
 set(SYSCONFIG_INSTALL_DIR etc/pdal/ CACHE PATH "sysconfig")
 
 include(CMakePackageConfigHelpers)
