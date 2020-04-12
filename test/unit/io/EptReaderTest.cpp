@@ -263,10 +263,12 @@ TEST(EptReaderTest, resolutionLimit)
 
 TEST(EptReaderTest, bounds2dXform)
 {
-    SrsBounds eptBounds(BOX2D(515380, 4918360, 515390, 4918370));
+
+    SrsBounds eptBounds(BOX2D(515380, 4918360,
+                              515390, 4918370));
     SrsBounds boxBounds(
         BOX2D(-110.80680478060, 44.418368816508,
-              -110.80667887010, 44.418458631945),
+            -110.80667887010, 44.418458631945),
         SpatialReference("EPSG:4326"));
 
     PointViewPtr v1;

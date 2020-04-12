@@ -50,7 +50,7 @@ bounds
 
   .. note::
 
-    3D bounds can be given in the form ``([xmin, xmax, zmax], [ymin, ymax, zmax])``.
+    3D bounds can be given in the form ``([xmin, xmax], [ymin, ymax], [zmin, zmax])``.
 
   .. warning::
 

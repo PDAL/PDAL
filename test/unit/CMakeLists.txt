@@ -134,6 +134,7 @@ if (PDAL_HAVE_LASZIP)
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
     )
+    set_tests_properties(pdal_io_ept_reader_test PROPERTIES ENVIRONMENT "PROJ_NETWORK=OFF")
     PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
         FILES
             io/EptAddonWriterTest.cpp
@@ -317,6 +318,8 @@ PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
 PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
+    set_tests_properties(pdal_tile_test PROPERTIES ENVIRONMENT "PROJ_NETWORK=OFF")
+
 PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)

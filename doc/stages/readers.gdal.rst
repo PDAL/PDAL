@@ -63,7 +63,7 @@ Options
 filename
   `GDALOpen`_ 'able raster file to read [Required]
 
-.. _`GDALOpen`: http://www.gdal.org/gdal_8h.html#a6836f0f810396c5e45622c8ef94624d4
+.. _`GDALOpen`: https://gdal.org/api/raster_c_api.html#gdal_8h_1aca05455472359964151f9c891d678d5e
 
 .. include:: reader_opts.rst
 
