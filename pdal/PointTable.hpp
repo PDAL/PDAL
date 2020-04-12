@@ -270,7 +270,7 @@ public:
 
 protected:
     virtual void reset()
-        { std::fill(m_buf.begin(), m_buf.end(), '\0'); }
+        { std::fill(m_buf.begin(), m_buf.end(), 0); }
 
     virtual char *getPoint(PointId idx)
         { return m_buf.data() + pointsToBytes(idx); }
