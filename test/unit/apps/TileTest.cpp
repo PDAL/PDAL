@@ -101,7 +101,6 @@ TEST(Tile, test2)
     std::string tx1_cmd = Support::binpath("pdal") + " translate \"" +
         file1 + "\" \"" + file2 + "\" -f reprojection "
         "--filters.reprojection.out_srs=\"EPSG:2031\"";
-    std::cerr << "Cmd = " << tx1_cmd << "!\n";
     Utils::run_shell_command(tx1_cmd, output);
     std::string tx2_cmd = Support::binpath("pdal") + " translate \"" +
         file1 + "\" \"" + file3 + "\" -f reprojection "
