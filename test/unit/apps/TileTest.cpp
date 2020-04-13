@@ -91,7 +91,24 @@ TEST(Tile, test1)
 
 TEST(Tile, test2)
 {
-    std::string inSpec(Support::datapath("las/tile/*.las"));
+    std::string output;
+    std::string file1(Support::datapath("las/tile/file1.las"));
+    std::string file2(Support::datapath("las/tile/file2.las"));
+    std::string file3(Support::datapath("las/tile/file3.las"));
+    FileUtils::deleteFile(file2);
+    FileUtils::deleteFile(file3);
+    
+    std::string tx1_cmd = Support::binpath("pdal") + " translate \"" +
+        file1 + "\" \"" + file2 + "\" -f reprojection "
+        "--filters.reprojection.out_srs=\"EPSG:2031\"";
+    std::cerr << "Cmd = " << tx1_cmd << "!\n";
+    Utils::run_shell_command(tx1_cmd, output);
+    std::string tx2_cmd = Support::binpath("pdal") + " translate \"" +
+        file1 + "\" \"" + file3 + "\" -f reprojection "
+        "--filters.reprojection.out_srs=\"EPSG:2958\"";
+    Utils::run_shell_command(tx2_cmd, output);
+    
+    std::string inSpec(Support::datapath("las/tile/file*.las"));
     std::string outSpec(Support::temppath("tile/out#.txt"));
 
     std::string baseCmd = Support::binpath("pdal") + " tile \"" +
@@ -100,7 +117,6 @@ TEST(Tile, test2)
     FileUtils::deleteDirectory(Support::temppath("tile"));
     FileUtils::createDirectory(Support::temppath("tile"));
 
-    std::string output;
     std::string cmd = baseCmd + " --origin_x=500000 --origin_y=5000000 "
         "--length=10 --out_srs=EPSG:2029 --writers.text.order=X,Y,Z "
         "--writers.text.keep_unspecified=false";
