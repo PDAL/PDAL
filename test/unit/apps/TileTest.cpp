@@ -33,7 +33,6 @@
 
 #include <fstream>
 #include <string>
-#include <iomanip>
 
 #include <pdal/pdal_test_main.hpp>
 
@@ -48,7 +47,6 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
     std::string header;
     std::string t(Support::temppath("tile/out" +
         std::to_string(i) + "_" + std::to_string(j) + ".txt"));
-    std::cerr << "File = " << t << "!\n";
     std::ifstream in(t);
     std::getline(in, header);
 
@@ -64,11 +62,7 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
         EXPECT_GE(y, yoff + (j * 10));
         EXPECT_LT(y, yoff + ((j + 1) * 10));
         if (in)
-{
-std::cerr << "X/Y = " << std::setprecision(17) << x << "/" <<
-    std::setprecision(17) << y << "!\n";
             count++;
-}
     }
     EXPECT_EQ(count, lines);
 }
