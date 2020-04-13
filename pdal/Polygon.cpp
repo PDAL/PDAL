@@ -214,6 +214,9 @@ void Polygon::removeSmallHoles(OGRGeometry *g, double tolerance)
 
 double Polygon::area() const
 {
+    if (!valid())
+        return 0;
+
     throwNoGeos();
 
     OGRwkbGeometryType t = m_geom->getGeometryType();

@@ -72,6 +72,13 @@ public:
     */
     SpatialReference(const std::string& wkt);
 
+    /**
+      Construct a spatial reference from well-known text.
+
+      \param wkt  Well-known text from which to construct SRS.
+    */
+    SpatialReference(const char *wkt);
+
 
     /**
       Determine if this spatial reference is the same as another.

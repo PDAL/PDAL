@@ -282,15 +282,16 @@ void StatsFilter::extractMetadata(PointTableRef table)
         if (!ref.empty())
         {
             p.setSpatialReference(ref);
-            SpatialReference epsg4326("EPSG:4326");
-            p.transform(epsg4326);
-            BOX3D ddbox = p.bounds();
-            MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
-            MetadataNode dddbox = box_metadata.add("EPSG:4326");
-            dddbox.add(epsg_4326_box);
+            if (p.transform("EPSG:4326"))
+            {
+                BOX3D ddbox = p.bounds();
+                MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
+                MetadataNode dddbox = box_metadata.add("EPSG:4326");
+                dddbox.add(epsg_4326_box);
 
-            MetadataNode ddboundary = dddbox.addWithType("boundary",
-                p.json(), "json", "GeoJSON boundary");
+                MetadataNode ddboundary = dddbox.addWithType("boundary",
+                        p.json(), "json", "GeoJSON boundary");
+            }
         }
     }
 }

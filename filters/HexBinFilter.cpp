@@ -226,13 +226,10 @@ void HexBin::done(PointTableRef table)
         int zone = SpatialReference::calculateZone(box.minx, box.miny);
 
         SpatialReference utm("EPSG:327" + std::to_string(std::abs(zone)));
-        density_p.transform(utm);
+        // If the transform fails, reset the polygon.
+        if (!density_p.transform(utm))
+            density_p = Polygon();
     }
-
-    m_metadata.add("boundary", p.wkt(m_precision),
-        "Approximated MULTIPOLYGON of domain");
-    m_metadata.addWithType("boundary_json", p.json(), "json",
-        "Approximated MULTIPOLYGON of domain");
 
     double area = density_p.area();
     double density = m_count / area;
@@ -247,6 +244,11 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
     m_metadata.add("avg_pt_spacing", std::sqrt(1 / density),
         "Avg point spacing (x/y units)");
+
+    m_metadata.add("boundary", p.wkt(m_precision),
+        "Approximated MULTIPOLYGON of domain");
+    m_metadata.addWithType("boundary_json", p.json(), "json",
+        "Approximated MULTIPOLYGON of domain");
 
     int n(0);
     point_count_t totalCount(0);
