@@ -59,13 +59,16 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
         double x, y, z;
 
         in >> x >> c >> y >> c >> z;
-        std::cerr << "X/Y = " << x << "/" << std::setprecision(8) << y << "!\n";
         EXPECT_GE(x, xoff + (i * 10));
         EXPECT_LT(x, xoff + ((i + 1) * 10));
         EXPECT_GE(y, yoff + (j * 10));
         EXPECT_LT(y, yoff + ((j + 1) * 10));
         if (in)
+{
+std::cerr << "X/Y = " << std::setprecision(17) << x << "/" <<
+    std::setprecision(17) << y << "!\n";
             count++;
+}
     }
     EXPECT_EQ(count, lines);
 }
