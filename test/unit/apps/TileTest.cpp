@@ -48,6 +48,7 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
     std::string header;
     std::string t(Support::temppath("tile/out" +
         std::to_string(i) + "_" + std::to_string(j) + ".txt"));
+    std::cerr << "File = " << t << "!\n";
     std::ifstream in(t);
     std::getline(in, header);
 
@@ -127,6 +128,7 @@ TEST(Tile, test2)
     auto files = FileUtils::directoryList(Support::temppath("tile"));
     for (auto f : files)
         std::cerr << "File = " << f << "!\n";
+    checkFile(-1, 0, 3, 500000, 5000000);
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             checkFile(i, j, 3, 500000, 5000000);
