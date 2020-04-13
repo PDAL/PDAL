@@ -39,7 +39,7 @@
 
 int main(int argc, char *argv[])
 {
-    std::deque<string> args;
+    std::deque<std::string> args;
 
     for (int i = 1; i < argc; ++i)
         args.push_back(argv[i]);
@@ -235,7 +235,7 @@ void Dumper::loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& b
 }
 
 
-int Dumper::processArgs(deque<string> args)
+int Dumper::processArgs(std::deque<std::string> args)
 {
 
     if (args.size() == 3)
