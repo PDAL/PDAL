@@ -405,7 +405,7 @@ int SpatialReference::calculateZone(double lon, double lat)
   \return  A SpatialReference that represents the specified zone, or
     an invalid SpatialReference on error.
 */
-SpatialReference SpatialReference::fromZone(int zone)
+SpatialReference SpatialReference::wgs84FromZone(int zone)
 {
     uint32_t abszone(std::abs(zone));
 

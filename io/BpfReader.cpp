@@ -135,7 +135,7 @@ void BpfReader::initialize()
     }
     else if (m_header.m_coordType == static_cast<int>(BpfCoordType::UTM))
     {
-       srs = SpatialReference::fromZone(m_header.m_coordId);
+       srs = SpatialReference::wgs84FromZone(m_header.m_coordId);
        if (!srs.valid())
           throwError("BPF file contains an invalid UTM zone " +
             Utils::toString(m_header.m_coordId));
