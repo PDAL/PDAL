@@ -21,7 +21,6 @@ target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
         ARBITER_CURL)
 
 if (MSVC)
-#    find_library(SHLWAPI Shlwapi.lib)
     target_link_libraries(${PDAL_ARBITER_LIB_NAME} PRIVATE Shlwapi.lib)
     target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
         PRIVATE
