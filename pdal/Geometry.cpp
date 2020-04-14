@@ -138,20 +138,23 @@ bool Geometry::srsValid() const
 }
 
 
-void Geometry::transform(const SpatialReference& out)
+StatusWithReason Geometry::transform(SpatialReference out)
 {
     if (!srsValid() && out.empty())
-        return;
+        return StatusWithReason();
 
     if (!srsValid())
-        throw pdal_error("Geometry::transform() failed.  NULL source SRS.");
+        return StatusWithReason(-2,
+            "Geometry::transform() failed.  NULL source SRS.");
     if (out.empty())
-        throw pdal_error("Geometry::transform() failed.  NULL target SRS.");
+        return StatusWithReason(-2,
+            "Geometry::transform() failed.  NULL target SRS.");
 
     SrsTransform transform(getSpatialReference(), out);
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
-        throw pdal_error("Geometry::transform() failed.");
+        return StatusWithReason(-1, "Geometry::transform() failed.");
     modified();
+    return StatusWithReason();
 }
 
 

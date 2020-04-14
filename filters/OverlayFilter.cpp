@@ -134,14 +134,9 @@ void OverlayFilter::spatialReferenceChanged(const SpatialReference& srs)
         return;
     for (auto& poly : m_polygons)
     {
-        try
-        {
-            poly.geom.transform(srs);
-        }
-        catch (pdal_error& err)
-        {
-            throwError(err.what());
-        }
+        auto ok = poly.geom.transform(srs);
+        if (!ok)
+            throwError(ok.what());
     }
 }
 
