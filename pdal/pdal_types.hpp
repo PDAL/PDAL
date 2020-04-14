@@ -255,12 +255,13 @@ public:
         {}
 };
 
-class ReasonReturn
+class StatusWithReason
 {
 public:
-    ReasonReturn() : m_code(0)
+    StatusWithReason() : m_code(0)
     {}
-    ReasonReturn(int code, const std::string& what) : m_code(code), m_what(what)
+    StatusWithReason(int code, const std::string& what) :
+        m_code(code), m_what(what)
     {}
 
     int code() const

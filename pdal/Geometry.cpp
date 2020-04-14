@@ -138,23 +138,23 @@ bool Geometry::srsValid() const
 }
 
 
-ReasonReturn Geometry::transform(SpatialReference out)
+StatusWithReason Geometry::transform(SpatialReference out)
 {
     if (!srsValid() && out.empty())
-        return ReasonReturn();
+        return StatusWithReason();
 
     if (!srsValid())
-        return ReasonReturn(-2,
+        return StatusWithReason(-2,
             "Geometry::transform() failed.  NULL source SRS.");
     if (out.empty())
-        return ReasonReturn(-2,
+        return StatusWithReason(-2,
             "Geometry::transform() failed.  NULL target SRS.");
 
     SrsTransform transform(getSpatialReference(), out);
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
-        return ReasonReturn(-1, "Geometry::transform() failed.");
+        return StatusWithReason(-1, "Geometry::transform() failed.");
     modified();
-    return ReasonReturn();
+    return StatusWithReason();
 }
 
 
