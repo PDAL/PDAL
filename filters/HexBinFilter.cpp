@@ -224,10 +224,7 @@ void HexBin::done(PointTableRef table)
         // Compute a UTM polygon
         BOX3D box = p.bounds();
         int zone = SpatialReference::calculateZone(box.minx, box.miny);
-
-        SpatialReference utm("EPSG:327" + std::to_string(std::abs(zone)));
-        // If the transform fails, reset the polygon.
-        if (!density_p.transform(utm))
+        if (!density_p.transform(SpatialReference::wgs84FromZone(zone)))
             density_p = Polygon();
     }
 

@@ -406,6 +406,31 @@ int SpatialReference::calculateZone(double lon, double lat)
 }
 
 
+/**
+  Create a spatial reference that represents a specific UTM zone.
+
+  \param zone  Zone number.  Must be non-zero and <= 60 and >= -60
+  \return  A SpatialReference that represents the specified zone, or
+    an invalid SpatialReference on error.
+*/
+SpatialReference SpatialReference::wgs84FromZone(int zone)
+{
+    uint32_t abszone(std::abs(zone));
+
+    if (abszone == 0 || abszone > 60)
+        return SpatialReference();
+
+    std::string code;
+    if (zone > 0)
+        code = "EPSG:326";
+    else
+        code = "EPSG:327";
+
+    code += ((abszone < 10) ? "0" : "") + Utils::toString(abszone);
+    return SpatialReference(code);
+}
+
+
 bool SpatialReference::isWKT(const std::string& wkt)
 {
     // List comes from GDAL.  WKT includes FITTED_CS, but this isn't
