@@ -82,6 +82,14 @@ SpatialReference::SpatialReference(const std::string& s)
 }
 
 
+//NOTE that this ctor allows a string constant to be used in places
+// where a SpatialReference is extpected.
+SpatialReference::SpatialReference(const char *s)
+{
+    set(s);
+}
+
+
 bool SpatialReference::empty() const
 {
     return m_wkt.empty();
