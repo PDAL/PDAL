@@ -89,7 +89,7 @@ TEST(LasWriterTest, srs)
 
     LasTester tester;
     SpatialReference srs = tester.srs(writer);
-    EXPECT_EQ(srs, SpatialReference("EPSG:26915"));
+    EXPECT_EQ(srs, "EPSG:26915");
 }
 
 
@@ -114,7 +114,7 @@ TEST(LasWriterTest, srs2)
 
     LasTester tester;
     SpatialReference srs = tester.srs(writer);
-    EXPECT_EQ(srs, SpatialReference("EPSG:32615"));
+    EXPECT_EQ(srs, "EPSG:32615");
 }
 
 

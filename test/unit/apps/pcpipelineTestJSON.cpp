@@ -454,7 +454,7 @@ TEST(json, issue_2159)
     PointViewSet s = f.execute(t);
     PointViewPtr v = *(s.begin());
     SpatialReference srs = v->spatialReference();
-    EXPECT_EQ(srs, SpatialReference("EPSG:4326"));
+    EXPECT_EQ(srs, "EPSG:4326");
 }
 
 TEST(json, issue_2438)

@@ -245,7 +245,7 @@ bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed)
     }
     compressed = h.compressed();
     bounds = h.getBounds();
-    gdal::reprojectBounds(bounds, h.srs(), SpatialReference("EPSG:4326"));
+    gdal::reprojectBounds(bounds, h.srs(), "EPSG:4326");
     return true;
 }
 
@@ -281,7 +281,7 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
         }
     }
     SpatialReference srs = SpatialReference::fromZone(h.m_coordId);
-    gdal::reprojectBounds(bounds, srs, SpatialReference("EPSG:4326"));
+    gdal::reprojectBounds(bounds, srs, "EPSG:4326");
     return true;
 }
 

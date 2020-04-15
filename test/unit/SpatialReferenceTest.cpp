@@ -380,7 +380,7 @@ TEST(SpatialReferenceTest, readerOptions)
 
         PointTable t;
         r.prepare(t);
-        EXPECT_EQ(r.getSpatialReference(), SpatialReference("EPSG:26916"));
+        EXPECT_EQ(r.getSpatialReference(), "EPSG:26916");
     }
 }
 
