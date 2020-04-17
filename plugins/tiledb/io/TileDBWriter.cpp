@@ -427,8 +427,6 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
             TILEDB_WRITE));
     }
 
-    m_query.reset(new tiledb::Query(*m_ctx, *m_array));
-    m_query->set_layout(TILEDB_UNORDERED);
     m_current_idx = 0;
 }
 
@@ -442,9 +440,9 @@ bool TileDBWriter::processOne(PointRef& point)
     for (auto& a : m_attrs)
         writeAttributeValue(a, point, m_current_idx);
 
-    m_coords.push_back(x);
-    m_coords.push_back(y);
-    m_coords.push_back(z);
+    m_xs.push_back(x);
+    m_ys.push_back(y);
+    m_zs.push_back(z);
 
     if (++m_current_idx == m_args->m_cache_size)
     {
@@ -524,7 +522,25 @@ void TileDBWriter::done(PointTableRef table)
 
 bool TileDBWriter::flushCache(size_t size)
 {
-    m_query->set_coordinates(m_coords);
+    tiledb::Query query(*m_ctx, *m_array);
+    query.set_layout(TILEDB_UNORDERED);
+
+#if TILEDB_VERSION_MAJOR == 1
+    // backwards compatibility requires a copy
+    std::vector<double> coords;
+
+    for(unsigned i = 0; i < m_xs.size(); i++)
+    {
+        coords.push_back(m_xs[i]);
+        coords.push_back(m_ys[i]);
+        coords.push_back(m_zs[i]);
+    }
+    query.set_coordinates(coords);
+#else
+    query.set_buffer("X", m_xs);
+    query.set_buffer("Y", m_ys);
+    query.set_buffer("Z", m_zs);
+#endif
 
     // set tiledb buffers
     for (const auto& a : m_attrs)
@@ -533,43 +549,43 @@ bool TileDBWriter::flushCache(size_t size)
         switch (a.m_type)
         {
         case Dimension::Type::Double:
-            m_query->set_buffer(a.m_name, reinterpret_cast<double *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<double *>(buf),
                 size);
             break;
         case Dimension::Type::Float:
-            m_query->set_buffer(a.m_name, reinterpret_cast<float *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<float *>(buf),
                 size);
             break;
         case Dimension::Type::Signed8:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int8_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int8_t *>(buf),
                 size);
             break;
         case Dimension::Type::Signed16:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int16_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int16_t *>(buf),
                 size);
             break;
         case Dimension::Type::Signed32:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int32_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int32_t *>(buf),
                 size);
             break;
         case Dimension::Type::Signed64:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int64_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int64_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned8:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint8_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint8_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned16:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint16_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint16_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned32:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint32_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint32_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned64:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint64_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint64_t *>(buf),
                 size);
             break;
         case Dimension::Type::None:
@@ -581,7 +597,7 @@ bool TileDBWriter::flushCache(size_t size)
     if (m_args->m_stats)
         tiledb::Stats::enable();
 
-    tiledb::Query::Status status = m_query->submit();
+    tiledb::Query::Status status = query.submit();
 
     if (m_args->m_stats)
     {
@@ -590,7 +606,9 @@ bool TileDBWriter::flushCache(size_t size)
     }
 
     m_current_idx = 0;
-    m_coords.clear();
+    m_xs.clear();
+    m_ys.clear();
+    m_zs.clear();
 
     if (status == tiledb::Query::Status::FAILED)
         return false;
