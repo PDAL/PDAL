@@ -63,14 +63,13 @@ bool Kernel::isStagePrefix(const std::string& stageType)
 }
 
 
-bool Kernel::parseStageOption(std::string o, std::string& stage,
-    std::string& option, std::string& value)
+Kernel::ParseStageResult
+Kernel::parseStageOption(std::string o, std::string& stage, std::string& option,
+    std::string& value)
 {
     value.clear();
-    if (o.size() < 2)
-        return false;
-    if (o[0] != '-' || o[1] != '-')
-        return false;
+    if ((o.size() < 2) || (o[0] != '-') || (o[1] != '-'))
+        return ParseStageResult::Unknown;
 
     o = o.substr(2);
 
@@ -91,10 +90,8 @@ bool Kernel::parseStageOption(std::string o, std::string& stage,
     count = Utils::extract(o, pos, islc);
     pos += count;
     std::string stageType = o.substr(0, pos);
-    if (!isStagePrefix(stageType))
-        return false;
-    if (pos >= o.length() || o[pos++] != '.')
-        return false;
+    if (!isStagePrefix(stageType) || pos >= o.length() || o[pos++] != '.')
+        return ParseStageResult::Unknown;
 
     // Get stage_name.
     bool ok;
@@ -103,10 +100,11 @@ bool Kernel::parseStageOption(std::string o, std::string& stage,
     else
         ok = Stage::parseName(o, pos);
     if (!ok)
-        return false;
+        return ParseStageResult::Unknown;
+
     stage = o.substr(0, pos);
     if (pos >= o.length() || o[pos++] != '.')
-        return false;
+        return ParseStageResult::Unknown;
 
     // Get option name.
     std::string::size_type optionStart = pos;
@@ -116,13 +114,16 @@ bool Kernel::parseStageOption(std::string o, std::string& stage,
 
     // We've gotten a good option name, so return true, even if the value
     // is missing.  The caller can handle the missing value if desired.
-    if (pos >= o.length() || o[pos++] != '=')
-        return true;
+    if (pos >= o.length())
+        return ParseStageResult::Ok;
 
-    // The command-line parser takes care of quotes around an argument
-    // value and such.  May want to do something to handle escaped characters?
-    value = o.substr(pos);
-    return true;
+    if (o[pos++] == '=')
+    {
+        value = o.substr(pos);
+        if (value.size())
+            return ParseStageResult::Ok;
+    }
+    return ParseStageResult::Invalid;
 }
 
 
@@ -143,25 +144,28 @@ StringList Kernel::extractStageOptions(const StringList& cmdArgs)
     // NOTE: This depends on the format being "option=value" rather than
     //   "option value".  This is what we've always expected, so no problem,
     //   but it would be better to be more flexible.
-    for (size_t i = 0; i < cmdArgs.size(); ++i)
+    for (auto it = cmdArgs.begin(); it != cmdArgs.end(); ++it)
     {
-        std::string stageName, opName, value;
+        const std::string& cmd = *it;
 
-        if (parseStageOption(cmdArgs[i], stageName, opName, value))
+        std::string stageName, opName, value;
+        auto res = parseStageOption(cmd, stageName, opName, value);
+        if (res == ParseStageResult::Unknown)
+            stringArgs.push_back(cmd);
+        else if (res == ParseStageResult::Invalid)
+            throw pdal_error("Stage option '" + cmd + "' not valid.");
+        else  // ParseStageResult::Ok
         {
             if (value.empty())
             {
-                std::ostringstream oss;
-                oss << "Stage option '" << stageName << "." << opName <<
-                    "' must be specified " << " as --" << stageName << "." <<
-                    opName << "=<value>" << ".";
-                throw pdal_error(oss.str());
+                if (++it == cmdArgs.end())
+                    throw pdal_error("Stage option '" + stageName + "." +
+                        opName + "' has no value.");
+                value = *it;
             }
             Option op(opName, value);
             stageOptions[stageName].add(op);
         }
-        else
-            stringArgs.push_back(cmdArgs[i]);
     }
     return stringArgs;
 }
@@ -358,8 +362,8 @@ Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
 }
 
 
-bool Kernel::test_parseStageOption(std::string o, std::string& stage,
-    std::string& option, std::string& value)
+Kernel::ParseStageResult Kernel::test_parseStageOption(
+    std::string o, std::string& stage, std::string& option, std::string& value)
 {
     class TestKernel : public Kernel
     {
