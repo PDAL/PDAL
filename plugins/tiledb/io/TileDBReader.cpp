@@ -34,8 +34,17 @@
 
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+
 #include "TileDBReader.hpp"
 
+
+const char pathSeparator =
+#ifdef _WIN32
+        '\\';
+#else
+        '/';
+#endif
 namespace pdal {
 
 static PluginInfo const s_info
@@ -283,6 +292,44 @@ void TileDBReader::localReady()
         m_query->set_subarray(subarray);
     }
 
+    // read spatial reference
+    NL::json meta = nullptr;
+
+#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
+    tiledb_datatype_t v_type = TILEDB_UINT8;
+    const void* v_r;
+    uint32_t v_num;
+    m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
+    if (v_r != NULL)
+        meta = NL::json::parse(static_cast<const char*>(v_r));
+#endif
+
+    if (meta == nullptr)
+    {
+        tiledb::VFS vfs(*m_ctx, m_ctx->config());
+        tiledb::VFS::filebuf fbuf(vfs);
+        std::string metaFName = m_filename + pathSeparator + "pdal.json";
+
+        if (vfs.is_dir(m_filename))
+        {
+            auto nBytes = vfs.file_size(metaFName);
+            tiledb::VFS::filebuf fbuf(vfs);
+            fbuf.open(metaFName, std::ios::in);
+            std::istream is(&fbuf);
+            std::string s { std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>() };
+            fbuf.close();
+            meta = NL::json::parse(s);
+        }
+    }
+
+    if ((meta != nullptr) &&
+        (meta.count("writers.tiledb") > 0) &&
+        (meta["writers.tiledb"].count("spatialreference") > 0))
+    {
+        SpatialReference ref(meta["writers.tiledb"]["spatialreference"]);
+        setSpatialReference(ref);
+    }
+
     // initialize read buffer variables
     m_offset = 0;
     m_resultSize = 0;
@@ -395,12 +442,19 @@ bool TileDBReader::processPoint(PointRef& point)
         }     
     }
 
-    for (DimInfo& dim : m_dims)
-        if (!setField(point, dim, m_offset))
-            throwError("Invalid dimension type when setting data.");
+    if (m_resultSize > 0)
+    {
+        for (DimInfo& dim : m_dims)
+            if (!setField(point, dim, m_offset))
+                throwError("Invalid dimension type when setting data.");
 
-    ++m_offset;
-    return true;
+        ++m_offset;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)

@@ -172,8 +172,7 @@ void EsriReader::initialize(PointTableRef table)
             systemString + "'.");
     setSpatialReference(m_nativeSrs);
 
-    m_ecefTransform.reset(new SrsTransform(m_nativeSrs,
-        SpatialReference("EPSG:4978")));
+    m_ecefTransform.reset(new SrsTransform(m_nativeSrs, "EPSG:4978"));
     createBounds();
 }
 

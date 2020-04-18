@@ -16,10 +16,11 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
         ${TILEDB_LIBRARIES}
     INCLUDES
         ${TILEDB_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 if (WIN32)
-	target_compile_definitions(${reader_libname} PRIVATE -DNONMINMAX)
+    target_compile_definitions(${reader_libname} PRIVATE -DNONMINMAX)
 endif()
 
 #
@@ -37,7 +38,7 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
 )
 
 if (WIN32)
-	target_compile_definitions(${writer_libname} PRIVATE -DNONMINMAX)
+    target_compile_definitions(${writer_libname} PRIVATE -DNONMINMAX)
 endif()
 
 if (WITH_TESTS)
@@ -61,12 +62,13 @@ if (WITH_TESTS)
             test/TileDBReaderTest.cpp
         LINK_WITH
             ${reader_libname}
+            ${writer_libname}
             ${TILEDB_LIBRARIES}
     )
 
 if (WIN32)
-	target_compile_definitions(pdal_io_tiledb_writer_test PRIVATE -DNONMINMAX)
-	target_compile_definitions(pdal_io_tiledb_reader_test PRIVATE -DNONMINMAX)
+    target_compile_definitions(pdal_io_tiledb_writer_test PRIVATE -DNONMINMAX)
+    target_compile_definitions(pdal_io_tiledb_reader_test PRIVATE -DNONMINMAX)
 endif()
 
 endif()

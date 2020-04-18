@@ -536,3 +536,21 @@ TEST(LasReaderTest, IgnoreVLRs)
         EXPECT_FALSE(!m.empty()) << "No value for node " << i;
     }
 }
+
+TEST(LasReaderTest, SyntheticPoints)
+{
+    using namespace Dimension;
+
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/synthetic_test.las"));
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic, outView->getFieldAs<uint8_t>(Id::Classification, 0));
+}

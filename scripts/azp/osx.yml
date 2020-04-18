@@ -3,7 +3,7 @@
 jobs:
 - job: osx
   pool:
-    vmImage: macOS-10.13
+    vmImage: macOS-10.14
   timeoutInMinutes: 360
   steps:
   - script: |
@@ -48,19 +48,15 @@ jobs:
       cmake   -G Ninja  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
-        -DPython3_ROOT_DIR:FILEPATH="$CONDA_PREFIX" \
-        -DPython3_FIND_STRATEGY=LOCATION \
         -DCMAKE_FIND_FRAMEWORK="NEVER" \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
-        -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
-        -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_TILEDB=ON \
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-        -DBUILD_SQLITE_TESTS=OFF \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \
         -DWITH_LASZIP=ON \
@@ -83,14 +79,6 @@ jobs:
       source activate pdal
       ls build/lib/*
       ninja install
-      # Python extension testing
-      #
-      pip install packaging cython
-      git clone https://github.com/PDAL/python.git pdal-python
-      cd pdal-python
-      git checkout master
-      python3 setup.py test
-    displayName: 'Python'
   - script: |
       export BASE=`pwd`
       source activate pdal

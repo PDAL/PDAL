@@ -141,6 +141,49 @@ void ignoreDimRanges(std::vector<DimRange>& ranges, PointViewPtr input,
     }
 }
 
+void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
+                     PointViewPtr ignore, StringList classbits)
+{
+    using namespace Dimension;
+
+    bool ignoreSynthetic = false;
+    bool ignoreKeypoint = false;
+    bool ignoreWithheld = false;
+
+    if (!classbits.size())
+    {
+        keep->append(*input);
+    }
+    else
+    {
+        for (auto& b : classbits)
+        {
+            Utils::trim(b);
+            if (b == "synthetic")
+                ignoreSynthetic = true;
+            else if (b == "keypoint")
+                ignoreKeypoint = true;
+            else if (b == "withheld")
+                ignoreWithheld = true;
+        }
+
+        for (PointId i = 0; i < input->size(); ++i)
+        {
+            uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
+	    if (((c & ClassLabel::Synthetic) && ignoreSynthetic) ||
+                ((c & ClassLabel::Keypoint) && ignoreKeypoint) ||
+		((c & ClassLabel::Withheld) && ignoreWithheld))
+            {
+                ignore->appendPoint(*input, i);
+            }
+	    else
+            {
+                keep->appendPoint(*input, i);
+            }
+        }
+    }
+}
+
 void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                         PointViewPtr other)
 {
@@ -190,7 +233,7 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
         {
             uint8_t rn = input->getFieldAs<uint8_t>(Id::ReturnNumber, i);
             uint8_t nr = input->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-            
+
             if ((((rn == 1) && (nr > 1)) && returnFirst) ||
                 (((rn > 1) && (rn < nr)) && returnIntermediate) ||
                 (((rn == nr) && (nr > 1)) && returnLast) ||

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2015-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2015-2017, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -49,12 +49,9 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
-{
-    "filters.pmf",
-    "Progressive morphological filter",
-    "http://pdal.io/stages/filters.pmf.html"
-};
+static StaticPluginInfo const s_info{"filters.pmf",
+                                     "Progressive morphological filter",
+                                     "http://pdal.io/stages/filters.pmf.html"};
 
 struct PMFArgs
 {
@@ -70,11 +67,9 @@ struct PMFArgs
 
 CREATE_STATIC_STAGE(PMFFilter, s_info)
 
-PMFFilter::PMFFilter() : m_args(new PMFArgs)
-{}
+PMFFilter::PMFFilter() : m_args(new PMFArgs) {}
 
-PMFFilter::~PMFFilter()
-{}
+PMFFilter::~PMFFilter() {}
 
 std::string PMFFilter::getName() const
 {
@@ -181,39 +176,43 @@ PointViewSet PMFFilter::run(PointViewPtr input)
                    "1.");
 
     // Segment kept view into two views
-    PointViewPtr firstView = keptView->makeNew();
-    PointViewPtr secondView = keptView->makeNew();
+    PointViewPtr inlierView = keptView->makeNew();
+    PointViewPtr outlierView = keptView->makeNew();
     if (nrAllZero && rnAllZero)
     {
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        firstView->append(*keptView);
+        inlierView->append(*keptView);
     }
     else
     {
-        Segmentation::segmentReturns(keptView, firstView, secondView,
+        Segmentation::segmentReturns(keptView, inlierView, outlierView,
                                      m_args->m_returns);
+        ignoredView->append(*outlierView);
     }
 
-    if (!firstView->size())
+    if (!inlierView->size())
     {
         throwError("No returns to process.");
     }
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
-    for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Dimension::Id::Classification, i, ClassLabel::Unclassified);
+    for (PointId i = 0; i < inlierView->size(); ++i)
+        inlierView->setField(Dimension::Id::Classification, i,
+                             ClassLabel::Unclassified);
 
     // Run the actual PMF algorithm.
-    processGround(firstView);
+    processGround(inlierView);
 
     // Prepare the output PointView.
     PointViewPtr outView = input->makeNew();
+    // ignoredView is appended to the output untouched.
     outView->append(*ignoredView);
-    outView->append(*secondView);
-    outView->append(*firstView);
+    // inlierView is appended to the output, the only PointView whose
+    // classifications may have been altered.
+    outView->append(*inlierView);
     viewSet.insert(outView);
 
     return viewSet;

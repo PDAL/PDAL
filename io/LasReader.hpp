@@ -74,7 +74,7 @@ protected:
         LasStreamIf(const std::string& filename)
             { m_istream = Utils::openFile(filename); }
 
-        ~LasStreamIf()
+        virtual ~LasStreamIf()
         {
             if (m_istream)
                 Utils::closeFile(m_istream);

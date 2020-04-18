@@ -39,8 +39,6 @@
 #include "Script.hpp"
 #include "Environment.hpp"
 
-#include <json/json.h>
-
 namespace pdal
 {
 

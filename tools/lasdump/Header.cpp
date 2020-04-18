@@ -97,9 +97,9 @@ namespace
 {
 void get(ILeStream& in, Uuid& uuid)
 {
-    std::vector<char> buf(uuid.size);
+    std::vector<char> buf(uuid.size());
 
-    in.get(buf.data(), uuid.size);
+    in.get(buf.data(), uuid.size());
     uuid.unpack(buf.data());
 }
 

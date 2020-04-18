@@ -199,6 +199,7 @@ protected:
     StreamPointTable(PointLayout& layout, point_count_t capacity)
         : SimplePointTable(layout)
         , m_capacity(capacity)
+        , m_numPoints(0)
         , m_skips(m_capacity, false)
     {}
 

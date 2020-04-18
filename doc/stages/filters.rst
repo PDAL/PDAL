@@ -37,12 +37,16 @@ invalidate an existing KD-tree.
    filters.colorinterp
    filters.colorization
    filters.covariancefeatures
+   filters.csf
+   filters.dbscan
    filters.dem
    filters.eigenvalues
    filters.estimaterank
    filters.elm
    filters.ferry
-   filters.hag
+   filters.hag_delaunay
+   filters.hag_dem
+   filters.hag_nn
    filters.info
    filters.lof
    filters.miniball
@@ -71,6 +75,10 @@ invalidate an existing KD-tree.
     dimension ``ClusterID`` that indicates the cluster that a point belongs
     to. Points not belonging to a cluster are given a cluster ID of 0.
 
+:ref:`filters.dbscan`
+    Perform Density-Based Spatial Clustering of Applications with Noise
+    (DBSCAN) [Ester1996]_.
+
 :ref:`filters.colorinterp`
     Assign RGB colors based on a dimension and a ramp
 
@@ -80,6 +88,9 @@ invalidate an existing KD-tree.
 :ref:`filters.covariancefeatures`
     Filter that calculates local features based on the covariance matrix of a
     point's neighborhood.
+
+:ref:`filters.csf`
+    Label ground/non-ground returns using [Zhang2016]_.
 
 :ref:`filters.eigenvalues`
     Compute pointwise eigenvalues, based on k-nearest neighbors.
@@ -96,6 +107,13 @@ invalidate an existing KD-tree.
 :ref:`filters.hag`
     Compute pointwise height above ground estimate. Requires points to be
     classified as ground/non-ground prior to estimating.
+
+:ref:`filters.hag_delaunay`
+    Compute pointwise height above ground using triangulation. Requires points to
+    classified as ground/non-ground prior to estimating.
+
+:ref:`filters.hag_dem`
+    Compute pointwise height above GDAL-readable DEM raster.
 
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
@@ -232,7 +250,7 @@ the input. These filters will invalidate an existing KD-tree.
 :ref:`filters.dem`
     Remove points that are in a raster cell but have a value far from the
     value of the raster.
-    
+
 :ref:`filters.farthestpointsampling`
     The Farthest Point Sampling Filter adds points from the input to the output
     PointView one at a time by selecting the point from the input cloud that is

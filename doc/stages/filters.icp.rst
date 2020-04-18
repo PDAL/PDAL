@@ -62,10 +62,43 @@ The metadata output might start something like:
         {
             "filters.icp":
             {
+                "centroid": "    583394  5.2831e+06   498.152",
                 "converged": true,
                 "fitness": 0.01953125097,
                 "transform": "           1  2.60209e-18 -1.97906e-09       -0.375  8.9407e-08            1  5.58794e-09      -0.5625 6.98492e -10 -5.58794e-09            1   0.00411987           0            0            0            1"
             }
+
+
+To apply this transformation to other points, the centroid and transform
+metadata items can by used with filters.transform in another pipeline.  First,
+move the centroid of the points to (0,0,0), then apply the transform, then move
+the points back to the original location.  For the above metadata, the pipeline
+would be similar to:
+
+.. code-block:: json
+
+    [
+        {
+            "type": "readers.las",
+            "filename": "in.las"
+        },
+        {
+            "type": "filters.transformation",
+            "matrix": "1 0 0 -583394   0 1 0 -5.2831e+06   0 0 1 -498.152   0 0 0 1"
+        },
+        {
+            "type": "filters.transformation",
+            "matrix": "1  2.60209e-18 -1.97906e-09       -0.375  8.9407e-08            1  5.58794e-09      -0.5625 6.98492e -10 -5.58794e-09            1   0.00411987           0            0            0            1"
+        },
+        {
+            "type": "filters.transformation",
+            "matrix": "1 0 0 583394   0 1 0 5.2831e+06  0 0 1 498.152  0 0 0 1"
+        },
+        {
+            "type": "writers.las",
+            "filename": "out.las"
+        }
+    ]
 
 .. seealso::
 

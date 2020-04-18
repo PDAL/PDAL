@@ -380,7 +380,7 @@ TEST(SpatialReferenceTest, readerOptions)
 
         PointTable t;
         r.prepare(t);
-        EXPECT_EQ(r.getSpatialReference(), SpatialReference("EPSG:26916"));
+        EXPECT_EQ(r.getSpatialReference(), "EPSG:26916");
     }
 }
 
@@ -431,19 +431,16 @@ TEST(SpatialReferenceTest, merge)
 
 TEST(SpatialReferenceTest, test_bounds)
 {
-
     const std::string utm17_wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]";
 
     SpatialReference utm17(utm17_wkt);
 
     std::string wgs84_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
 
-
-    SpatialReference wgs84(wgs84_wkt);
     BOX2D box17(289814.15, 4320978.61, 289818.50, 4320980.59);
     pdal::Polygon p(box17);
     p.setSpatialReference(utm17);
-    p.transform(wgs84);
+    p.transform(wgs84_wkt);
 
     BOX3D b2 = p.bounds();
     EXPECT_FLOAT_EQ(static_cast<float>(b2.minx), -83.427597f);
@@ -513,6 +510,47 @@ TEST(SpatialReferenceTest, set_srs)
     EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"2029\"]]"),
         std::string::npos);
 }
+
 #endif // PDAL_HAVE_LIBXML2
+
+#if GDAL_VERSION_MAJOR >= 3
+// Test setting EPSG:4326 from User string
+TEST(SpatialReferenceTest, axis_ordering)
+{
+
+    Options o2;
+    o2.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    LasReader r;
+    r.setOptions(o2);
+
+
+    Options o;
+    o.add("out_srs", "EPSG:4326");
+    o.add("in_axis_ordering", "2, 1");
+    ReprojectionFilter repro;
+    repro.setOptions(o);
+    repro.setInput(r);
+
+    FileUtils::deleteFile(Support::temppath("axis.las"));
+    Options o5;
+    o5.add("filename", Support::temppath("axis.las"));
+    o5.add("scale_x", .0001);
+    o5.add("scale_y", .0001);
+    o5.add("scale_z", .0001);
+    LasWriter w;
+    w.setOptions(o5);
+    w.setInput(repro);
+
+    PointTable t1;
+    w.prepare(t1);
+    w.execute(t1);
+
+    Support::checkXYZ(Support::temppath("axis.las"),
+        Support::datapath("las/test_epsg_4326_axis.las"));
+
+}
+#endif
+
+
 
 } // namespace pdal

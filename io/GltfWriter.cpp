@@ -67,7 +67,7 @@ static StaticPluginInfo const s_info
     "writers.gltf",
     "Gltf Writer",
     "http://pdal.io/stages/writers.gltf.html",
-    { "gltf" }
+    { "gltf", "glb" }
 };
 
 CREATE_STATIC_STAGE(GltfWriter, s_info)

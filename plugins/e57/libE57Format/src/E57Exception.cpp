@@ -238,15 +238,9 @@ namespace e57
    */
    void Utilities::getVersions(int& astmMajor, int& astmMinor, std::string& libraryId)
    {
-      /// REVISION_ID should be passed from compiler command line
-
-      #ifndef REVISION_ID
-      #error "Need to specify REVISION_ID on command line"
-      #endif
-
       astmMajor = E57_FORMAT_MAJOR;
       astmMinor = E57_FORMAT_MINOR;
-      libraryId = REVISION_ID;
+      libraryId = "E57 API library";
    }
 
    /*!

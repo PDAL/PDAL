@@ -72,6 +72,13 @@ public:
     */
     SpatialReference(const std::string& wkt);
 
+    /**
+      Construct a spatial reference from well-known text.
+
+      \param wkt  Well-known text from which to construct SRS.
+    */
+    SpatialReference(const char *wkt);
+
 
     /**
       Determine if this spatial reference is the same as another.
@@ -116,6 +123,7 @@ public:
     bool valid() const;
 
     std::string getWKT() const;
+    std::string getWKT1() const;
 
     /// Parse the string starting at position `pos` as a spatial reference.
     /// \param s    String to parse.
@@ -156,10 +164,13 @@ public:
     bool isGeocentric() const;
     bool isProjected() const;
 
+    std::vector<int> getAxisOrdering() const;
+
     int computeUTMZone(const BOX3D& box) const;
 
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
+    static SpatialReference wgs84FromZone(int zone);
     static bool isWKT(const std::string& wkt);
     static std::string prettyWkt(const std::string& wkt);
 

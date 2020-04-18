@@ -224,7 +224,7 @@ public:
 
       \param log  Log pointer.
     */
-    void setLog(LogPtr& log)
+    void setLog(const LogPtr& log)
         { m_log = log; }
 
     /**

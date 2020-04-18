@@ -5,7 +5,7 @@ option(WITH_ZSTD
     "Build support for compression/decompression with Zstd." TRUE)
 if (WITH_ZSTD)
     find_package(ZSTD QUIET)
-    set_package_properties(ZSTD PROPERTIES TYPE REQUIRED
+    set_package_properties(ZSTD PROPERTIES TYPE
         PURPOSE "General compression support")
     if (ZSTD_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}

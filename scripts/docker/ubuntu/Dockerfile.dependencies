@@ -1,0 +1,74 @@
+FROM ubuntu:bionic
+MAINTAINER Andrew Bell<andrew@hobu.co>
+
+SHELL ["/bin/bash", "-c"]
+ENV CC gcc-6
+ENV CXX g++-6
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y \
+        wget unzip bzip2 gcc-6 g++-6 ca-certificates curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    /opt/conda/bin/conda update -n base -c defaults conda && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.profile && \
+    echo "conda activate base" >> ~/.profile
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda create --yes --quiet --name pdal && \
+    conda activate pdal && \
+    conda install --yes --name pdal -c conda-forge git cmake ninja \
+        conda-forge-ci-setup && \
+    conda install --yes --name pdal -c conda-forge pdal --only-deps
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    conda install --yes --name pdal -c conda-forge eigen
+
+#
+# We install fgt and cpd in /usr.  By default they'll go in /usr/local.
+# When in /usr/local, we'd have to run ldconfig in order for them to be found
+# at run-time.  This is an issue for the CPD filter and test.  We could also
+# put them in the conda directory and set the rpath when building the
+# test.  Probably better is just to stick this stuff in vendor and build
+# as a static lib(s).
+#
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    git clone https://github.com/PDAL/fgt.git && \
+    mkdir -p fgt/build && \
+    cd fgt/build && \
+    cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -G Ninja .. && \
+    ninja install && \
+    cd / && \
+    rm -rf fgt
+
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate pdal && \
+    git clone https://github.com/PDAL/cpd.git && \
+    mkdir -p cpd/build && \
+    cd cpd/build && \
+    cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DWITH_FGT=ON \
+        -G Ninja .. && \
+    ninja install && \
+    cd / && \
+    rm -rf cpd
+
+RUN \
+    mkdir gridzip && \
+    cd gridzip && \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj && rm proj-datumgrid-1.8.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj && rm proj-datumgrid-europe-1.2.zip ; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj && rm proj-datumgrid-oceania-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj && rm proj-datumgrid-world-1.0.zip; \
+    curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj && rm proj-datumgrid-north-america-1.2.zip
+

@@ -191,8 +191,7 @@ std::vector<char> EptReader::getBinary(const std::string path) const
 }
 
 
-std::unique_ptr<arbiter::LocalHandle> EptReader::getLocalHandle(
-    const std::string path) const
+arbiter::LocalHandle EptReader::getLocalHandle(const std::string path) const
 {
     if (m_ep->isLocal())
         return m_ep->getLocalHandle(path);
@@ -271,8 +270,9 @@ void EptReader::initialize()
     {
         if (!poly.valid())
             throwError("Geometrically invalid polyon in option 'polygon'.");
-        poly.transform(getSpatialReference());
-
+        auto ok = poly.transform(getSpatialReference());
+        if (!ok)
+            throwError(ok.what());
         std::vector<Polygon> polys = poly.polygons();
         exploded.insert(exploded.end(),
             std::make_move_iterator(polys.begin()),
@@ -483,7 +483,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             Dimension::interpretationName(coercedType) << std::endl;
 
         layout->registerOrAssignDim(name, coercedType);
-        m_remoteLayout->registerOrAssignDim(name, remoteType);
+        m_remoteLayout->registerOrAssignFixedDim(name, remoteType);
     }
 
     m_remoteLayout->finalize();
@@ -765,7 +765,7 @@ PointId EptReader::readLaszip(PointView& dst, const Key& key,
     PointTable table;
 
     Options options;
-    options.add("filename", handle->localPath());
+    options.add("filename", handle.localPath());
     options.add("use_eb_vlr", true);
 
     LasReader reader;

@@ -66,6 +66,8 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
 {
     args.add("out_srs", "Output spatial reference", m_outSRS).setPositional();
     args.add("in_srs", "Input spatial reference", m_inSRS);
+    args.add("in_axis_ordering", "Axis ordering override for in_srs", m_inAxisOrderingArg, {} );
+    args.add("out_axis_ordering", "Axis ordering override for out_srs", m_outAxisOrderingArg, {} );
 }
 
 
@@ -81,6 +83,57 @@ void ReprojectionFilter::spatialReferenceChanged(const SpatialReference& srs)
     createTransform(srs);
 }
 
+void ReprojectionFilter::prepared(PointTableRef table)
+{
+
+    // convert string args to integers and throw if
+    // we can't
+    auto convert = [] (const std::vector<std::string>& in)
+    {
+        std::vector<int> output;
+        for (auto& str: in)
+        {
+           try
+           {
+                output.push_back(std::stoi(str));
+           } catch (std::invalid_argument&)
+           {
+                throw pdal_error("Unable to convert axis ordering to integer");
+           }
+
+        }
+        return output;
+
+    };
+
+    // Check that the sorted vector is 1,2 or 1,2,3
+    auto check = [this] (const std::vector<int>& in)
+    {
+        auto test = in;
+        std::sort(test.begin(), test.end());
+        if (test.size() > 3)
+            throwError("Axis ordering vector is too long");
+        if (test.at(0) != 1 && test.at(1) != 2)
+            throwError("Axis ordering is invalid");
+        if (test.size() > 2)
+            if (test.at(2) != 3)
+                throwError("Axis ordering for 3rd dimension is invalid");
+
+    };
+
+    if (m_inAxisOrderingArg.size())
+    {
+        m_inAxisOrdering = convert(m_inAxisOrderingArg);
+        check(m_inAxisOrdering);
+    }
+
+    if (m_outAxisOrderingArg.size())
+    {
+        m_outAxisOrdering = convert(m_outAxisOrderingArg);
+        check(m_outAxisOrdering);
+    }
+
+}
 
 void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
 {
@@ -91,7 +144,19 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
             throwError("source data has no spatial reference and "
                 "none is specified with the 'in_srs' option.");
     }
-    m_transform.reset(new SrsTransform(m_inSRS, m_outSRS));
+
+
+    // If either vector is empty, GDAL's default ordering is used.
+    if (m_inAxisOrdering.size() || m_outAxisOrdering.size())
+    {
+
+        m_transform.reset(new SrsTransform(m_inSRS,
+                                           m_inAxisOrdering,
+                                           m_outSRS,
+                                           m_outAxisOrdering));
+    } else {
+        m_transform.reset(new SrsTransform(m_inSRS, m_outSRS));
+    }
 }
 
 

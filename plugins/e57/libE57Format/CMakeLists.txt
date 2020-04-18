@@ -30,17 +30,6 @@
 # If you find any errors or have suggestion to improve the build script:
 # patches are most welcome! Please send them to the development mailing list.
 
-
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
-set(CMAKE_CXX_STANDARD 11)
-
-# Override flags to enable prepare for linking to static runtime
-set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/c_flag_overrides.cmake)
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cxx_flag_overrides.cmake)
-
-# Set a private module find path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
-
 project(E57Format)
 
 # developer adjustable version numbers
@@ -48,70 +37,13 @@ set(${PROJECT_NAME}_MAJOR_VERSION 2)
 set(${PROJECT_NAME}_MINOR_VERSION 0)
 set(${PROJECT_NAME}_PATCH_VERSION 1)
 
-include(Tags)
-
-# propose a default installation directory
-#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#    string(REGEX REPLACE "/${PROJECT_NAME}" "" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-#    set(T_ ${PROJECT_NAME})
-#    set(T_ ${T_}-${${PROJECT_NAME}_MAJOR_VERSION})
-#    set(T_ ${T_}.${${PROJECT_NAME}_MINOR_VERSION})
-#    set(T_ ${T_}-${${PROJECT_NAME}_BUILD_TAG})
-#    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${T_}
-#        CACHE PATH
-#        "Install path prefix, prepended onto install directories."
-#        FORCE
-#    )
-#endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
-find_package( Threads REQUIRED )
-
-# Xerces-c
-find_package( XercesC )
-
-if ( NOT XercesC_FOUND )
-    set( XercesC_INCLUDE_DIR "" CACHE PATH "Xerces include directory" )
-endif()
-
-if ( WIN32 )
-    option( USING_STATIC_XERCES "Turn on if you are linking with Xerces as a static lib" OFF )
-
-    if ( USING_STATIC_XERCES )
-        add_definitions( -DXERCES_STATIC_LIBRARY )
-    endif()
-endif()
-
-set( XML_INCLUDE_DIRS ${XercesC_INCLUDE_DIR} )
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_definitions(-DLINUX)
-    #    find_package(ICU REQUIRED)
-    #    set(XML_INCLUDE_DIRS ${XML_INCLUDE_DIRS} ${ICU_INCLUDE_DIRS})
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    add_definitions(-DMACOS)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_definitions(-DWINDOWS)
-endif()
-
-add_definitions(-DREVISION_ID="${PROJECT_NAME}-${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION}-${${PROJECT_NAME}_BUILD_TAG}")
-
-include_directories(
-    ${PROJECT_BINARY_DIR}/include
-    include
-    src/
-    ${XML_INCLUDE_DIRS}
-)
-
-# CRCpp from here: https://github.com/d-bahr/CRCpp
-add_definitions( -DCRCPP_USE_CPP11 )
-add_definitions( -DCRCPP_BRANCHLESS )
-include_directories( contrib/CRCpp/inc )
+find_package(XercesC REQUIRED)
 
 #
 # The reference implementation
 #
 
-add_library( E57Format STATIC
+add_library(E57Format STATIC
     src/CheckedFile.h
     src/CheckedFile.cpp
     src/Common.h
@@ -140,7 +72,30 @@ add_library( E57Format STATIC
     include/E57Format.h
     contrib/CRCpp/inc/CRC.h
 )
+pdal_target_compile_settings(E57Format)
+if (WIN32)
+target_compile_options(E57Format PRIVATE
+    /wd4244
+    )
+endif()
+target_link_libraries(E57Format
+    PUBLIC
+        ${XercesC_LIBRARIES}
+)
+
+# CRCpp from here: https://github.com/d-bahr/CRCpp
+target_include_directories(E57Format
+    PRIVATE
+        include
+        contrib/CRCpp/inc
+)
+
+target_compile_definitions(E57Format
+    PRIVATE
+        CRCPP_USE_CPP11
+        CRCPP_BRANCHLESS
+)
+
 set_target_properties( E57Format PROPERTIES
-    DEBUG_POSTFIX "-d"
     POSITION_INDEPENDENT_CODE ON
 )

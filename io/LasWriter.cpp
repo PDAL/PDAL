@@ -56,8 +56,6 @@
 #include <iostream>
 #include <vector>
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/pdal_features.hpp>
 #include <pdal/DimUtil.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -89,8 +87,7 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0),
-    m_userVLRs(new NL::json)
+    m_compression(LasCompression::None), m_srsCnt(0)
 {}
 
 
@@ -148,7 +145,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", m_offsetX);
     args.add("offset_y", "Y offset", m_offsetY);
     args.add("offset_z", "Z offset", m_offsetZ);
-    args.add("vlrs", "List of VLRs to set", *m_userVLRs);
+    args.add("vlrs", "List of VLRs to set", m_userVLRs);
 }
 
 void LasWriter::initialize()
@@ -156,11 +153,13 @@ void LasWriter::initialize()
     std::string ext = FileUtils::extension(m_filename);
     ext = Utils::tolower(ext);
     if ((ext == ".laz") && (m_compression == LasCompression::None))
+    {
 #if defined(PDAL_HAVE_LASZIP)
         m_compression = LasCompression::LasZip;
 #elif defined(PDAL_HAVE_LAZPERF)
         m_compression = LasCompression::LazPerf;
 #endif
+    }
 
     if (!m_aSrs.empty())
         setSpatialReference(m_aSrs);
@@ -236,31 +235,8 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-    for (const auto& v : *m_userVLRs)
-    {
-        uint16_t recordId(1);
-        std::string userId("");
-        std::string description("");
-        std::string b64data("");
-        std::string user("");
-        if (!v.contains("user_id"))
-            throw pdal_error("VLR must contain a 'user_id'!");
-        userId = v["user_id"].get<std::string>();
-
-        if (!v.contains("data"))
-            throw pdal_error("VLR must contain a base64-encoded 'data' member");
-        b64data = v["data"].get<std::string>();
-
-        // Record ID should always be no more than 2 bytes.
-        if (v.contains("record_id"))
-            recordId = v["record_id"].get<uint16_t>();
-
-        if (v.contains("description"))
-            description = v["description"].get<std::string>();
-
-        std::vector<uint8_t> data = Utils::base64_decode(b64data);
-        addVlr(userId, recordId, description, data);
-    }
+    for (const auto& v : m_userVLRs)
+        addVlr(v);
 }
 
 
@@ -529,7 +505,8 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
-    std::string wkt = m_srs.getWKT();
+    // LAS 1.4 requires WKTv1
+    std::string wkt = m_srs.getWKT1();
     if (wkt.empty())
         return false;
 
@@ -573,23 +550,24 @@ void LasWriter::addExtraBytesVlr()
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, std::vector<uint8_t>& data)
 {
-    if (data.size() > LasVLR::MAX_DATA_SIZE)
+    addVlr(ExtLasVLR(userId, recordId, description, data));
+}
+
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  evlr  VLR to add.
+void LasWriter::addVlr(const ExtLasVLR& evlr)
+{
+    if (evlr.dataLen() > LasVLR::MAX_DATA_SIZE)
     {
         if (m_lasHeader.versionAtLeast(1, 4))
-        {
-            ExtLasVLR evlr(userId, recordId, description, data);
             m_eVlrs.push_back(std::move(evlr));
-        }
         else
             throwError("Can't write VLR with user ID/record ID = " +
-                userId + "/" + std::to_string(recordId) +
+                evlr.userId() + "/" + std::to_string(evlr.recordId()) +
                 ".  The data size exceeds the maximum supported.");
     }
     else
-    {
-        LasVLR vlr(userId, recordId, description, data);
-        m_vlrs.push_back(std::move(vlr));
-    }
+        m_vlrs.push_back(std::move(evlr));
 }
 
 /// Delete a VLR from the vlr list.

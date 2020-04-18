@@ -140,26 +140,46 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'rtd_theme'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-
-# Add any paths that contain custom themes here, relative to this directory.
-
-#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = 'pdal_rtd'
 html_theme_path = ['.']
-# The name for this set of Sphinx documents.  If None, it defaults to
-# "<project> v<release> documentation".
 html_title = "pdal.io"
+
+
+html_context = {
+  'display_github': True,
+  'theme_vcs_pageview_mode': 'edit',
+  'github_user': 'PDAL',
+  'github_repo': 'PDAL',
+  'github_version': '/master/doc/'
+}
+
+html_theme_options = {
+    'canonical_url': 'https://pdal.io/',
+    'analytics_id': '',  #  Provided by Google in your dashboard
+    'logo_only': True,
+    'display_version': True,
+    'prev_next_buttons_location': 'both',
+    'style_external_links': False,
+    #'vcs_pageview_mode': '',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    #'navigation_depth': 4,
+    'includehidden': True,
+    'logo_only': True,
+    'titles_only': False
+}
+
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title = "Documentation"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = './_static/pdal_logo_small.png'
+#html_logo = './_static/pdal_logo_small.png'
+#html_logo = './_static/logo/pdal_logo_only.png'
+
+theme_logo_only=False
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

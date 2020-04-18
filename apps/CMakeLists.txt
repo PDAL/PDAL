@@ -68,42 +68,26 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
     DESTINATION "${PDAL_LIB_INSTALL_DIR}/pkgconfig/"
     PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
-if(UNIX OR APPLE)
-    # Autoconf compatibility variables to use the same script source.
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in"
-                   "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in"
+               "${PDAL_OUTPUT_BIN_DIR}/pdal-config" @ONLY
+               NEWLINE_STYLE UNIX)
+install(PROGRAMS "${PDAL_OUTPUT_BIN_DIR}/pdal-config"
+    DESTINATION
+        "${CMAKE_INSTALL_PREFIX}/bin"
+    PERMISSIONS
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE
+        WORLD_READ WORLD_EXECUTE)
 
-    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config"
-        DESTINATION
-            "${PDAL_OUTPUT_BIN_DIR}/"
-        FILE_PERMISSIONS
-	    OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE)
-
-    install(PROGRAMS "${PDAL_OUTPUT_BIN_DIR}/pdal-config"
-        DESTINATION
-            "${CMAKE_INSTALL_PREFIX}/bin"
-        PERMISSIONS
-            OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE)
-
-elseif(WIN32)
+if(WIN32)
     # Autoconf compatibility variables to use the same script source.
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pdal-config-bat.in"
-                   "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.bat" @ONLY)
-
-    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.bat"
-         DESTINATION
-            "${PDAL_OUTPUT_BIN_DIR}/"
-         FILE_PERMISSIONS
-            OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE)
-
+                   "${PDAL_OUTPUT_BIN_DIR}/pdal-config.bat" @ONLY
+                   NEWLINE_STYLE CRLF)
     install(PROGRAMS "${PDAL_OUTPUT_BIN_DIR}/pdal-config.bat"
         DESTINATION
             "${CMAKE_INSTALL_PREFIX}/bin"
         PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
             WORLD_READ WORLD_EXECUTE)
-
 endif()

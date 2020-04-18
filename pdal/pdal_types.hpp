@@ -190,6 +190,9 @@ namespace ClassLabel
     const uint8_t IgnoredGround = 20;
     const uint8_t Snow = 21;
     const uint8_t TemporalExclusion = 22;
+    const uint8_t Synthetic = 32;
+    const uint8_t Keypoint = 64;
+    const uint8_t Withheld = 128;
 }
 
 namespace
@@ -250,6 +253,29 @@ class pdal_error : public std::runtime_error
 public:
     inline pdal_error(std::string const& msg) : std::runtime_error(msg)
         {}
+};
+
+class StatusWithReason
+{
+public:
+    StatusWithReason() : m_code(0)
+    {}
+    StatusWithReason(int code, const std::string& what) :
+        m_code(code), m_what(what)
+    {}
+
+    int code() const
+    { return m_code; }
+
+    operator bool () const
+    { return (m_code == 0); }
+
+    std::string what() const
+    { return m_what; }
+
+private:
+    int m_code;
+    std::string m_what;
 };
 
 enum class ExecMode

@@ -142,7 +142,7 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
 
     try
     {
-        input >> root;
+        root = NL::json::parse(input);
     }
     catch (NL::json::parse_error& err)
     {
@@ -349,18 +349,18 @@ Options PipelineReaderJSON::extractOptions(NL::json& node)
             continue;
         }
 
-        if (extractOption(options, name, subnode))
-            continue;
-        else if (subnode.is_array())
+        if (subnode.is_array())
         {
             for (const NL::json& val : subnode)
-                if (!extractOption(options, name, val))
+                if (val.is_object())
+                    options.add(name, val);
+                else if (!extractOption(options, name, val))
                     throw pdal_error("JSON pipeline: Invalid value type for "
                         "option list '" + name + "'.");
         }
         else if (subnode.is_object())
             options.add(name, subnode);
-        else
+        else if (!extractOption(options, name, subnode))
             throw pdal_error("JSON pipeline: Value of stage option '" +
                 name + "' cannot be converted.");
     }

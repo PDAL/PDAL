@@ -63,7 +63,8 @@ public:
     Geometry& operator=(const Geometry&);
     virtual ~Geometry();
 
-    OGRGeometryH getOGRHandle();
+    OGRGeometryH getOGRHandle()
+    { return m_geom.get(); }
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
@@ -72,7 +73,7 @@ public:
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref);
     SpatialReference getSpatialReference() const;
-    void transform(const SpatialReference& ref);
+    StatusWithReason transform(SpatialReference ref);
 
     std::string wkt(double precision=15, bool bOutputZ=false) const;
     std::string json(double precision=15) const;
