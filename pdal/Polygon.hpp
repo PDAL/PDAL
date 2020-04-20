@@ -86,7 +86,7 @@ public:
 private:
     void init();
     void removeSmallRings(double tolerance);
-    void removeSmallHoles(OGRGeometry *g, double tolerance);
+    void removeSmallHoles(double tolerance);
 
     std::unique_ptr<PrivateData> m_pd;
 };
