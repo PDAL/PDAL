@@ -280,7 +280,7 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
             bounds.maxz = d.m_max;
         }
     }
-    SpatialReference srs = SpatialReference::fromZone(h.m_coordId);
+    SpatialReference srs = SpatialReference::wgs84FromZone(h.m_coordId);
     gdal::reprojectBounds(bounds, srs, "EPSG:4326");
     return true;
 }
