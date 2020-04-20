@@ -73,7 +73,8 @@ BOX3D NitfWriter::reprojectBoxToDD(const SpatialReference& reference,
         return BOX3D();
 
     BOX3D output(box);
-    if (!gdal::reprojectBounds(output, reference.getWKT(), "EPSG:4326"))
+    if (!gdal::reprojectBounds(output, reference.getWKT(),
+            SpatialReference("EPSG:4326")))
         throwError("Couldn't reproject corner points to geographic: " +
             gdal::lastError());
     return output;

@@ -82,6 +82,14 @@ SpatialReference::SpatialReference(const std::string& s)
 }
 
 
+//NOTE that this ctor allows a string constant to be used in places
+// where a SpatialReference is extpected.
+SpatialReference::SpatialReference(const char *s)
+{
+    set(s);
+}
+
+
 bool SpatialReference::empty() const
 {
     return m_wkt.empty();
@@ -395,6 +403,31 @@ int SpatialReference::calculateZone(double lon, double lat)
     }
 
     return zone;
+}
+
+
+/**
+  Create a spatial reference that represents a specific UTM zone.
+
+  \param zone  Zone number.  Must be non-zero and <= 60 and >= -60
+  \return  A SpatialReference that represents the specified zone, or
+    an invalid SpatialReference on error.
+*/
+SpatialReference SpatialReference::wgs84FromZone(int zone)
+{
+    uint32_t abszone(std::abs(zone));
+
+    if (abszone == 0 || abszone > 60)
+        return SpatialReference();
+
+    std::string code;
+    if (zone > 0)
+        code = "EPSG:326";
+    else
+        code = "EPSG:327";
+
+    code += ((abszone < 10) ? "0" : "") + Utils::toString(abszone);
+    return SpatialReference(code);
 }
 
 

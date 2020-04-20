@@ -181,14 +181,9 @@ void CropFilter::transform(const SpatialReference& srs)
 {
     for (auto& geom : m_geoms)
     {
-        try
-        {
-            geom.m_poly.transform(srs);
-        }
-        catch (pdal_error& err)
-        {
-            throwError(err.what());
-        }
+        auto ok = geom.m_poly.transform(srs);
+        if (!ok)
+            throwError(ok.what());
         geom.m_gridPnps.clear();
         std::vector<Polygon> polys = geom.m_poly.polygons();
         for (auto& p : polys)
@@ -219,7 +214,9 @@ void CropFilter::transform(const SpatialReference& srs)
     for (auto& point : m_args->m_centers)
     {
         point.setSpatialReference(m_args->m_assignedSrs);
-        point.transform(srs);
+        auto ok = point.transform(srs);
+        if (!ok)
+            throwError(ok.what());
     }
     // Set the assigned SRS for the points/bounds to the one we've
     // transformed to.

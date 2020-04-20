@@ -48,6 +48,7 @@ using std::uint32_t;
 using std::int64_t;
 using std::uint64_t;
 
+using FileOffset = int64_t;
 // Shorthand for unicode string
 //! @brief UTF-8 encodeded Unicode string
 using ustring = std::string;

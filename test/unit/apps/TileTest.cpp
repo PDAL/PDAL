@@ -42,7 +42,7 @@
 
 using namespace pdal;
 
-void checkFile(int i, int j, int lines)
+void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
 {
     std::string header;
     std::string t(Support::temppath("tile/out" +
@@ -57,10 +57,10 @@ void checkFile(int i, int j, int lines)
         double x, y, z;
 
         in >> x >> c >> y >> c >> z;
-        EXPECT_GE(x, i * 10);
-        EXPECT_LT(x, (i + 1) * 10);
-        EXPECT_GE(y, j * 10);
-        EXPECT_LT(y, (j + 1) * 10);
+        EXPECT_GE(x, xoff + (i * 10));
+        EXPECT_LT(x, xoff + ((i + 1) * 10));
+        EXPECT_GE(y, yoff + (j * 10));
+        EXPECT_LT(y, yoff + ((j + 1) * 10));
         if (in)
             count++;
     }
@@ -91,30 +91,45 @@ TEST(Tile, test1)
 
 TEST(Tile, test2)
 {
-    std::string inSpec(Support::datapath("las/tile/*"));
+    std::string output;
+    std::string infile(Support::datapath("tile/tile.txt"));
+    std::string file1(Support::temppath("tile/file1.las"));
+    std::string file2(Support::temppath("tile/file2.las"));
+    std::string file3(Support::temppath("tile/file3.las"));
+
+    FileUtils::deleteDirectory(Support::temppath("tile"));
+    FileUtils::createDirectory(Support::temppath("tile"));
+    
+    std::string tx1_cmd = Support::binpath("pdal") + " translate \"" +
+        infile + "\" \"" + file1 +
+        "\" --readers.text.override_srs=\"EPSG:2029\"";
+    Utils::run_shell_command(tx1_cmd, output);
+
+    std::string tx2_cmd = Support::binpath("pdal") + " translate \"" +
+        infile + "\" \"" + file2 + "\" -f reprojection "
+        "--filters.reprojection.in_srs=\"EPSG:2029\" "
+        "--filters.reprojection.out_srs=\"EPSG:2031\"";
+    Utils::run_shell_command(tx2_cmd, output);
+
+    std::string tx3_cmd = Support::binpath("pdal") + " translate \"" +
+        infile + "\" \"" + file3 + "\" -f reprojection "
+        "--filters.reprojection.in_srs=\"EPSG:2029\" "
+        "--filters.reprojection.out_srs=\"EPSG:2958\"";
+    Utils::run_shell_command(tx3_cmd, output);
+    
+    std::string inSpec(Support::temppath("tile/file*.las"));
     std::string outSpec(Support::temppath("tile/out#.txt"));
 
     std::string baseCmd = Support::binpath("pdal") + " tile \"" +
         inSpec + "\" \"" + outSpec + "\" ";
 
-    FileUtils::deleteDirectory(Support::temppath("tile"));
-    FileUtils::createDirectory(Support::temppath("tile"));
-
-    std::string output;
-    std::string cmd = baseCmd + " --origin_x=0 --origin_y=0 --length=10 "
-        "--out_srs=EPSG:2029 --writers.text.order=X,Y,Z "
+    std::string cmd = baseCmd + " --origin_x=500000 --origin_y=5000000 "
+        "--length=10 --out_srs=EPSG:2029 --writers.text.order=X,Y,Z "
         "--writers.text.keep_unspecified=false";
     Utils::run_shell_command(cmd, output);
 
-    EXPECT_EQ(FileUtils::directoryList(Support::temppath("tile")).size(), 10U);
-    checkFile(-1, 0, 1);
-    checkFile(0, 0, 3);
-    checkFile(0, 1, 4);
-    checkFile(0, 2, 4);
-    checkFile(1, 0, 3);
-    checkFile(1, 1, 2);
-    checkFile(1, 2, 3);
-    checkFile(2, 0, 2);
-    checkFile(2, 1, 3);
-    checkFile(2, 2, 2);
+    auto files = FileUtils::directoryList(Support::temppath("tile/out*.txt"));
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            checkFile(i, j, 3, 500000, 5000000);
 }

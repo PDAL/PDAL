@@ -215,7 +215,6 @@ TEST(FauxReaderTest, test_return_number)
     }
 }
 
-
 TEST(FauxReaderTest, one_point)
 {
     Options ops;
@@ -236,6 +235,113 @@ TEST(FauxReaderTest, one_point)
     EXPECT_EQ(1, view->getFieldAs<int>(Dimension::Id::X, 0));
     EXPECT_EQ(2, view->getFieldAs<int>(Dimension::Id::Y, 0));
     EXPECT_EQ(3, view->getFieldAs<int>(Dimension::Id::Z, 0));
+}
+
+TEST(FauxReaderTest, uniform)
+{
+    Options ops;
+
+    ops.add("bounds", BOX3D(0, 100, 0, 100, 0, 100));
+    ops.add("count", 1000);
+    ops.add("seed", 2121212);
+    ops.add("mode", "uniform");
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    PointTable t;
+    reader.prepare(t);
+    PointViewSet vs = reader.execute(t);
+    EXPECT_EQ(vs.size(), 1u);
+    PointViewPtr v = *vs.begin();
+    EXPECT_EQ(v->size(), 1000u);
+    double hx[10] {};
+    double hy[10] {};
+    double hz[10] {};
+    for (size_t i = 0; i < 1000; ++i)
+    {
+        int x = (int)(v->getFieldAs<double>(Dimension::Id::X, i) / 10);
+        int y = (int)(v->getFieldAs<double>(Dimension::Id::Y, i) / 10);
+        int z = (int)(v->getFieldAs<double>(Dimension::Id::Z, i) / 10);
+        hx[x]++;
+        hy[y]++;
+        hz[z]++;
+    }
+
+    int xtot[] = { 117, 95, 94, 93, 90, 118, 102, 97, 102, 92 };
+    int ytot[] = { 97, 108, 93, 83, 114, 98, 100, 105, 110, 92 };
+    int ztot[] = { 92, 99, 106, 100, 105, 106, 109, 88, 84, 111 };
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+        EXPECT_EQ(hx[i], xtot[i]);
+        EXPECT_EQ(hy[i], ytot[i]);
+        EXPECT_EQ(hz[i], ztot[i]);
+    }
+}
+
+TEST(FauxReaderTest, normal)
+{
+    Options ops;
+
+    ops.add("count", 1000);
+    ops.add("seed", 2121212);
+    ops.add("mode", "normal");
+    ops.add("mean_x", 50);
+    ops.add("mean_y", 100);
+    ops.add("mean_z", 150);
+    ops.add("stdev_x", 10);
+    ops.add("stdev_y", 10);
+    ops.add("stdev_z", 10);
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    PointTable t;
+    reader.prepare(t);
+    PointViewSet vs = reader.execute(t);
+    EXPECT_EQ(vs.size(), 1u);
+    PointViewPtr v = *vs.begin();
+    EXPECT_EQ(v->size(), 1000u);
+    double hx[10] {};
+    double hy[10] {};
+    double hz[10] {};
+    for (size_t i = 0; i < 1000; ++i)
+    {
+        int x = v->getFieldAs<int>(Dimension::Id::X, i) / 10;
+        int y = (v->getFieldAs<int>(Dimension::Id::Y, i) - 50) / 10;
+        int z = (v->getFieldAs<int>(Dimension::Id::Z, i) - 100) / 10;
+        x = Utils::clamp(x, 0, 9);
+        y = Utils::clamp(y, 0, 9);
+        z = Utils::clamp(z, 0, 9);
+        hx[x]++;
+        hy[y]++;
+        hz[z]++;
+    }
+
+    int xtot[] = { 0, 3, 19, 145, 313, 340, 156, 22, 2, 0 };
+    int ytot[] = { 0, 1, 23, 129, 355, 333, 134, 23, 2, 0 };
+    int ztot[] = { 0, 0, 20, 131, 339, 357, 118, 31, 4, 0 };
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+        EXPECT_EQ(hx[i], xtot[i]);
+        EXPECT_EQ(hy[i], ytot[i]);
+        EXPECT_EQ(hz[i], ztot[i]);
+    }
+}
+
+TEST(FauxReaderTest, badseed)
+{
+    Options ops;
+
+    ops.add("mode", "ramp");
+    ops.add("count", 100);
+    ops.add("seed", 100);
+    ops.add("bounds", BOX3D(1, 100, 1, 100, 1, 100));
+    FauxReader r;
+    r.setOptions(ops);
+
+    PointTable t;
+    EXPECT_THROW(r.prepare(t), pdal_error);
 }
 
 void testGrid(point_count_t xlimit, point_count_t ylimit, point_count_t zlimit)

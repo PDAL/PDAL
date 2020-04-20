@@ -51,7 +51,7 @@ static PluginInfo const s_info
     "http://pdal.io/stages/filters.matlab.html"
 };
 
-CREATE_SHARED_STAGE(MatlabFilter, Filter)
+CREATE_SHARED_STAGE(MatlabFilter, s_info)
 
 std::string MatlabFilter::getName() const { return s_info.name; }
 

@@ -14,7 +14,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
     cmake -G Ninja  \
-        -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
@@ -59,12 +59,12 @@ RUN rm /opt/conda/envs/pdal/lib/*.a && \
     rm -rf /opt/conda/envs/pdal/include/freetype2 && \
     rm -rf /opt/conda/envs/pdal/include/informix && \
     rm -rf /opt/conda/envs/pdal/include/fontconfig && \
-    rm -rf /opt/conda/envs/pdal/include/X11
+    rm -rf /opt/conda/envs/pdal/include/X11 && \
+    rm -rf /opt/conda/envs/pdal/lib/cmake
 
 FROM ubuntu:bionic
 
 ARG PDAL_CONDA=/opt/conda/envs/pdal
-
 
 RUN apt-get update --fix-missing && \
     apt-get install -y \
@@ -77,5 +77,7 @@ COPY --from=builder /lib/ /lib/
 COPY --from=builder /${PDAL_CONDA}/lib/ /usr/lib/
 COPY --from=builder /${PDAL_CONDA}/include/ /usr/include/
 COPY --from=builder /${PDAL_CONDA}/share/ /usr/share/
-COPY --from=builder /${PDAL_CONDA}/bin/pdal /usr/bin/pdal
 
+ENV GDAL_DATA=/usr/share/gdal
+ENV PDAL_DRIVER_PATH=/usr/lib
+ENV PROJ_LIB=/usr/share/proj

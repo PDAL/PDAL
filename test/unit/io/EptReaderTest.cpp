@@ -42,6 +42,7 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
@@ -263,11 +264,10 @@ TEST(EptReaderTest, resolutionLimit)
 
 TEST(EptReaderTest, bounds2dXform)
 {
-    SrsBounds eptBounds(BOX2D(515380, 4918360, 515390, 4918370));
-    SrsBounds boxBounds(
-        BOX2D(-110.80680478060, 44.418368816508,
-              -110.80667887010, 44.418458631945),
-        SpatialReference("EPSG:4326"));
+    BOX2D b(515380, 4918360, 515390, 4918370);
+    SrsBounds eptBounds(b);
+    gdal::reprojectBounds(b, "EPSG:26912", "EPSG:4326");
+    SrsBounds boxBounds(b, "EPSG:4326");
 
     PointViewPtr v1;
     PointViewPtr v2;
@@ -294,7 +294,9 @@ TEST(EptReaderTest, bounds2dXform)
         v2 = *vset.begin();
     }
 
-    EXPECT_EQ(v1->size(), v2->size());
+    // There is some small error when we round-trip the bounds, so allow us
+    // to be off by 15 points.
+    EXPECT_NEAR(v1->size(), v2->size(), 15u);
 }
 
 TEST(EptReaderTest, boundedRead2d)
