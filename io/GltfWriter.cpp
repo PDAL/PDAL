@@ -46,21 +46,10 @@ namespace pdal
 
 namespace
 {
-    const size_t HeaderSize = 12;
-    const size_t JsonChunkDataSize = 5000;
-    const size_t ChunkHeaderSize = 8;
+const size_t HeaderSize = 12;
+const size_t JsonChunkDataSize = 5000;
+const size_t ChunkHeaderSize = 8;
 }
-
-struct GltfWriter::ViewData
-{
-    BOX3D m_bounds;
-    size_t m_indexOffset;
-    size_t m_indexByteLength;
-    size_t m_indexCount;
-    size_t m_vertexOffset;
-    size_t m_vertexByteLength;
-    size_t m_vertexCount;
-};
 
 static StaticPluginInfo const s_info
 {
@@ -72,7 +61,9 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(GltfWriter, s_info)
 
-std::string GltfWriter::getName() const { return s_info.name; }
+std::string GltfWriter::getName() const {
+    return s_info.name;
+}
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {
@@ -84,7 +75,7 @@ void GltfWriter::addArgs(ProgramArgs& args)
     args.add("blue", "Blue factor [0-1]", m_blue);
     args.add("alpha", "Alpha factor [0-1]", m_alpha, 1.0);
     args.add("double_sided", "Whether the material should be applied to "
-        "both sides of the faces.", m_doubleSided);
+             "both sides of the faces.", m_doubleSided);
 }
 
 
@@ -102,13 +93,14 @@ void GltfWriter::ready(PointTableRef table)
     m_binSize = 0;
 }
 
+
 void GltfWriter::write(const PointViewPtr v)
 {
     TriangularMesh *mesh = v->mesh();
     if (!mesh)
     {
         log()->get(LogLevel::Warning) << "Attempt to write point view with "
-            "no mesh. Skipping.\n";
+                                      "no mesh. Skipping.\n";
         return;
     }
 
@@ -121,6 +113,14 @@ void GltfWriter::write(const PointViewPtr v)
     vd.m_indexByteLength = vd.m_indexCount * sizeof(uint32_t);
     vd.m_vertexOffset = vd.m_indexOffset + vd.m_indexByteLength;
     vd.m_vertexByteLength = v->size() * sizeof(float) * 3;  // 3 for X,Y,Z
+
+    m_writeNormals = v->hasDim(Dimension::Id::NormalX)
+                     && v->hasDim(Dimension::Id::NormalY)
+                     && v->hasDim(Dimension::Id::NormalZ);
+    if (m_writeNormals) {
+        // Add the length of 3 normals to the vertex byte length
+        vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for X,Y,Z
+    }
 
     m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
     m_totalSize = static_cast<size_t>(out.position()) + m_binSize;
@@ -138,6 +138,14 @@ void GltfWriter::write(const PointViewPtr v)
 
         vd.m_bounds.grow(x, y, z);
         out << x << y << z;
+
+        if (m_writeNormals) {
+            float normal_x = v->getFieldAs<float>(Dimension::Id::NormalX, i);
+            float normal_y = v->getFieldAs<float>(Dimension::Id::NormalY, i);
+            float normal_z = v->getFieldAs<float>(Dimension::Id::NormalZ, i);
+
+            out << normal_x << normal_y << normal_z;
+        }
     }
 
     m_viewData.push_back(vd);
@@ -173,97 +181,135 @@ void GltfWriter::writeJsonChunk()
     j["asset"]["version"] = "2.0";
 
     j["buffers"].push_back(
-        {
-            { "byteLength", m_binSize }   // Total size of bin data.
-        }
+    {
+        { "byteLength", m_binSize }   // Total size of bin data.
+    }
     );
+
+    u_short elementSize;
+    if ( m_writeNormals ) {
+        elementSize = sizeof(float) * 6; // X, Y, Z, NormalX, NormalY, NormalZ
+    } else {
+        elementSize = sizeof(float) * 3; // X, Y, Z
+    }
 
     int bufferViewCount = 0;
     for (const ViewData& vd : m_viewData)
     {
+        // Buffer views
+        // Vertex indices (faces)
+        const u_short faceBufferViewIndex = 0;
         j["bufferViews"].push_back(
-            {
-                { "buffer", 0 },
-                { "byteOffset", vd.m_indexOffset },
-                { "byteLength", vd.m_indexByteLength },
-                { "target", 34963 }      // Vertex indices code
-            }
+        {
+            { "buffer", 0 },
+            { "byteOffset", vd.m_indexOffset },
+            { "byteLength", vd.m_indexByteLength },
+            { "target", 34963 }      // Vertex indices code
+        }
         );
+        // Vertex positions and normals
+        const u_short positionBufferViewIndex = 1;
         j["bufferViews"].push_back(
-            {
-                { "buffer", 0 },
-                { "byteOffset", vd.m_vertexOffset },
-                { "byteLength", vd.m_vertexByteLength },
-                { "target", 34962 }      // Vertices code
-            }
+        {
+            { "buffer", 0 },
+            { "byteOffset", vd.m_vertexOffset },
+            { "byteLength", vd.m_vertexByteLength },
+            { "target", 34962 },      // Vertices code
+            { "byteStride", elementSize },
+        }
         );
+
+        // Accessors
+        // Face index accessor
         j["accessors"].push_back(
-            {
-                { "bufferView", bufferViewCount++ },
-                { "componentType", 5125 },      // unsigned int code
-                { "type", "SCALAR" },
-                { "count", vd.m_indexCount }
-            }
+        {
+            { "bufferView", faceBufferViewIndex },
+            { "componentType", 5125 },      // unsigned int code
+            { "type", "SCALAR" },
+            { "count", vd.m_indexCount }
+        }
         );
         const BOX3D& b = vd.m_bounds;
+        // Vertex position accessor
         j["accessors"].push_back(
+        {
+            { "bufferView", positionBufferViewIndex },
+            { "componentType", 5126 },      // float code
+            { "type", "VEC3" },
+            { "count", vd.m_vertexCount },
+            { "byteOffset", 0 },
+            { "min", { b.minx, b.miny, b.minz } },
+            { "max", { b.maxx, b.maxy, b.maxz } }
+        }
+        );
+
+        if (m_writeNormals) {
+            // Vertex normal accessor
+            j["accessors"].push_back(
             {
-                { "bufferView", bufferViewCount++ },
+                { "bufferView", positionBufferViewIndex },
                 { "componentType", 5126 },      // float code
                 { "type", "VEC3" },
+                { "byteOffset", sizeof(float) * 3 },
                 { "count", vd.m_vertexCount },
-                { "min", { b.minx, b.miny, b.minz } },
-                { "max", { b.maxx, b.maxy, b.maxz } }
             }
-        );
+            );
+        }
+    }
+
+    NL::json meshAttributes({});
+    meshAttributes["POSITION"] = 1;
+    if (m_writeNormals) {
+        meshAttributes["NORMAL"] = 2;
     }
 
     NL::json mesh;
     mesh["primitives"].push_back(
-        {
-            { "attributes", {{"POSITION", 1}} },
-            { "indices", 0 },
-            { "material", 0 }
-        }
+    {
+        { "attributes", meshAttributes },
+        { "indices", 0 },
+        { "material", 0 }
+    }
     );
 
     j["meshes"].push_back(mesh);
     j["scene"] = 0;
 
     j["nodes"].push_back(
-        {
-            { "mesh", 0 },
-            { "matrix", { 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 } }
-        }
+    {
+        { "mesh", 0 },
+        { "matrix", { 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 } }
+    }
     );
 
     j["scenes"].push_back(
-        {
-            { "nodes", { 0 } }
-        }
+    {
+        { "nodes", { 0 } }
+    }
     );
 
     // This seems very crude.  But I'm not sure we can do much else at this
     // point.
     j["materials"].push_back(
+    {
         {
+            "pbrMetallicRoughness",
             {
-                "pbrMetallicRoughness",
-                {
-                    { "metallicFactor", m_metallic },
-                    { "roughnessFactor", m_roughness },
-                    { "baseColorFactor", { m_red, m_blue, m_green, m_alpha } }
-                }
-            },
-            { "name", "Color" },
-            { "doubleSided", m_doubleSided }
-        }
+                { "metallicFactor", m_metallic },
+                { "roughnessFactor", m_roughness },
+                { "baseColorFactor", { m_red, m_blue, m_green, m_alpha } }
+            }
+        },
+        { "name", "Color" },
+        { "doubleSided", m_doubleSided }
+    }
     );
 
     std::string js(j.dump());
     if (js.size() > JsonChunkDataSize)
         throwError("JSON header too large. "
-            "Please open a issue: 'https://github.com/PDAL/PDAL/issues'.");
+                   "Please open a issue: 'https://github.com/PDAL/PDAL/issues'"
+                   ".");
     // Pad JSON to chunk size.
     js += std::string(JsonChunkDataSize - js.size(), ' ');
 

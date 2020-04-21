@@ -71,6 +71,7 @@ private:
     std::vector<ViewData> m_viewData;
     size_t m_totalSize;
     size_t m_binSize;
+    bool m_writeNormals;
 
     double m_metallic;
     double m_roughness;
@@ -79,6 +80,17 @@ private:
     double m_blue;
     double m_alpha;
     bool m_doubleSided;
+};
+
+struct GltfWriter::ViewData
+{
+    BOX3D m_bounds;
+    size_t m_indexOffset;
+    size_t m_indexByteLength;
+    size_t m_indexCount;
+    size_t m_vertexOffset;
+    size_t m_vertexByteLength;
+    size_t m_vertexCount;
 };
 
 } // namespace pdal
