@@ -46,13 +46,25 @@ namespace pdal
 {
 
 
-void testWrite(bool writeNormals, std::string path)
+void testWrite(bool writeNormals, bool writeColors, std::string path)
 {
     PointTable t;
 
     t.layout()->registerDim(Dimension::Id::X);
     t.layout()->registerDim(Dimension::Id::Y);
     t.layout()->registerDim(Dimension::Id::Z);
+
+    if (writeNormals) {
+        t.layout()->registerDim(Dimension::Id::NormalX);
+        t.layout()->registerDim(Dimension::Id::NormalY);
+        t.layout()->registerDim(Dimension::Id::NormalZ);
+    }
+
+    if (writeColors) {
+        t.layout()->registerDim(Dimension::Id::Red);
+        t.layout()->registerDim(Dimension::Id::Blue);
+        t.layout()->registerDim(Dimension::Id::Green);
+    }
 
     PointViewPtr v(new PointView(t));
     v->setField(Dimension::Id::X, 0, 1);
@@ -71,12 +83,9 @@ void testWrite(bool writeNormals, std::string path)
     v->setField(Dimension::Id::Y, 3, 2);
     v->setField(Dimension::Id::Z, 3, 2);
 
+
     if (writeNormals)
     {
-        t.layout()->registerDim(Dimension::Id::NormalX);
-        t.layout()->registerDim(Dimension::Id::NormalY);
-        t.layout()->registerDim(Dimension::Id::NormalZ);
-
         v->setField(Dimension::Id::NormalX, 0, 0);
         v->setField(Dimension::Id::NormalY, 0, 1);
         v->setField(Dimension::Id::NormalZ, 0, 0);
@@ -92,6 +101,25 @@ void testWrite(bool writeNormals, std::string path)
         v->setField(Dimension::Id::NormalX, 3, 0);
         v->setField(Dimension::Id::NormalY, 3, 1);
         v->setField(Dimension::Id::NormalZ, 3, 0);
+    }
+
+    if (writeColors)
+    {
+        v->setField(Dimension::Id::Red, 0, 255);
+        v->setField(Dimension::Id::Blue, 0, 0);
+        v->setField(Dimension::Id::Green, 0, 0);
+
+        v->setField(Dimension::Id::Red, 1, 0);
+        v->setField(Dimension::Id::Blue, 1, 255);
+        v->setField(Dimension::Id::Green, 1, 0);
+
+        v->setField(Dimension::Id::Red, 2, 0);
+        v->setField(Dimension::Id::Blue, 2, 0);
+        v->setField(Dimension::Id::Green, 2, 255);
+
+        v->setField(Dimension::Id::Red, 3, 255);
+        v->setField(Dimension::Id::Blue, 3, 0);
+        v->setField(Dimension::Id::Green, 3, 0);
     }
 
     TriangularMesh* mesh = v->createMesh("foo");
@@ -116,7 +144,7 @@ void testWrite(bool writeNormals, std::string path)
 TEST(GltfWriter, Write)
 {
     std::string path = Support::temppath("out.glb");
-    testWrite(false, path);
+    testWrite(false, false, path);
     ASSERT_EQ(FileUtils::fileSize(path), 5100);
 }
 
@@ -124,8 +152,24 @@ TEST(GltfWriter, Write)
 TEST(GltfWriter, WriteWithNormals)
 {
     std::string path = Support::temppath("out_normals.glb");
-    testWrite(true, path);
+    testWrite(true, false, path);
     ASSERT_EQ(FileUtils::fileSize(path), 5148);
+}
+
+
+TEST(GltfWriter, WriteWithColors)
+{
+    std::string path = Support::temppath("out_colors.glb");
+    testWrite(false, true, path);
+    ASSERT_EQ(FileUtils::fileSize(path), 5148);
+}
+
+
+TEST(GltfWriter, WriteWithNormalsAndColors)
+{
+    std::string path = Support::temppath("out_normals_colors.glb");
+    testWrite(true, true, path);
+    ASSERT_EQ(FileUtils::fileSize(path), 5196);
 }
 
 

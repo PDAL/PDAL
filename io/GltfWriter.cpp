@@ -36,7 +36,6 @@
 
 #include <iostream>
 #include <nlohmann/json.hpp>
-
 #include <pdal/PointView.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/OStream.hpp>
@@ -76,6 +75,10 @@ void GltfWriter::addArgs(ProgramArgs& args)
     args.add("alpha", "Alpha factor [0-1]", m_alpha, 1.0);
     args.add("double_sided", "Whether the material should be applied to "
              "both sides of the faces.", m_doubleSided);
+    args.add("color_vertices", "If color data is present for each point, write "
+             "it to the output vertices. Note that most renderers will "
+             "interpolate the color of each vertex across a face, so this may "
+             "look odd.", m_colorVertices, true);
 }
 
 
@@ -122,6 +125,17 @@ void GltfWriter::write(const PointViewPtr v)
         vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for X,Y,Z
     }
 
+    // Only color vertices if color dimensions are present and the option is
+    // enabled
+    m_colorVertices = v->hasDim(Dimension::Id::Red)
+                      && v->hasDim(Dimension::Id::Green)
+                      && v->hasDim(Dimension::Id::Blue)
+                      && m_colorVertices;
+    if (m_colorVertices) {
+        // Add the length of 3 colors to the vertex byte length
+        vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for R,G,B
+    }
+
     m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
     m_totalSize = static_cast<size_t>(out.position()) + m_binSize;
     if (m_totalSize > (std::numeric_limits<uint32_t>::max)())
@@ -140,12 +154,21 @@ void GltfWriter::write(const PointViewPtr v)
         out << x << y << z;
 
         if (m_writeNormals) {
-            float normal_x = v->getFieldAs<float>(Dimension::Id::NormalX, i);
-            float normal_y = v->getFieldAs<float>(Dimension::Id::NormalY, i);
-            float normal_z = v->getFieldAs<float>(Dimension::Id::NormalZ, i);
+            float normalX = v->getFieldAs<float>(Dimension::Id::NormalX, i);
+            float normalY = v->getFieldAs<float>(Dimension::Id::NormalY, i);
+            float normalZ = v->getFieldAs<float>(Dimension::Id::NormalZ, i);
 
-            out << normal_x << normal_y << normal_z;
+            out << normalX << normalY << normalZ;
         }
+
+        if (m_colorVertices) {
+            float colorR = v->getFieldAs<float>(Dimension::Id::Red, i) / 255.0;
+            float colorG = v->getFieldAs<float>(Dimension::Id::Green, i) / 255.0;
+            float colorB = v->getFieldAs<float>(Dimension::Id::Blue, i) / 255.0;
+
+            out << colorR << colorG << colorB;
+        }
+
     }
 
     m_viewData.push_back(vd);
@@ -186,14 +209,20 @@ void GltfWriter::writeJsonChunk()
     }
     );
 
-    u_short elementSize;
+    u_short elementSize =  sizeof(float) * 3; // X, Y, Z
     if ( m_writeNormals ) {
-        elementSize = sizeof(float) * 6; // X, Y, Z, NormalX, NormalY, NormalZ
-    } else {
-        elementSize = sizeof(float) * 3; // X, Y, Z
+        elementSize += sizeof(float) * 3; // NormalX, NormalY, NormalZ
+    }
+    if ( m_colorVertices ) {
+        elementSize += sizeof(float) * 3; // R, G, B
     }
 
     int bufferViewCount = 0;
+    u_short nextAccessorIndex = 0;
+    u_short normalAccessorIndex = 0;
+    u_short colorAccessorIndex = 0;
+    u_short positionAccessorIndex = 0;
+    u_short faceAccessorIndex = 0;
     for (const ViewData& vd : m_viewData)
     {
         // Buffer views
@@ -207,8 +236,8 @@ void GltfWriter::writeJsonChunk()
             { "target", 34963 }      // Vertex indices code
         }
         );
-        // Vertex positions and normals
-        const u_short positionBufferViewIndex = 1;
+        // Vertex attributes (positions, normals, and colors)
+        const u_short vertexAttributeBufferViewIndex = 1;
         j["bufferViews"].push_back(
         {
             { "buffer", 0 },
@@ -221,6 +250,7 @@ void GltfWriter::writeJsonChunk()
 
         // Accessors
         // Face index accessor
+        faceAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
         {
             { "bufferView", faceBufferViewIndex },
@@ -230,27 +260,47 @@ void GltfWriter::writeJsonChunk()
         }
         );
         const BOX3D& b = vd.m_bounds;
+        u_short byteOffset = 0;
+
         // Vertex position accessor
+        positionAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
         {
-            { "bufferView", positionBufferViewIndex },
+            { "bufferView", vertexAttributeBufferViewIndex },
             { "componentType", 5126 },      // float code
             { "type", "VEC3" },
             { "count", vd.m_vertexCount },
-            { "byteOffset", 0 },
+            { "byteOffset", byteOffset },
             { "min", { b.minx, b.miny, b.minz } },
             { "max", { b.maxx, b.maxy, b.maxz } }
         }
         );
 
         if (m_writeNormals) {
+            byteOffset += sizeof(float) * 3;
             // Vertex normal accessor
+            normalAccessorIndex = nextAccessorIndex++;
             j["accessors"].push_back(
             {
-                { "bufferView", positionBufferViewIndex },
+                { "bufferView", vertexAttributeBufferViewIndex },
                 { "componentType", 5126 },      // float code
                 { "type", "VEC3" },
-                { "byteOffset", sizeof(float) * 3 },
+                { "byteOffset", byteOffset },
+                { "count", vd.m_vertexCount },
+            }
+            );
+        }
+
+        if (m_colorVertices) {
+            byteOffset += sizeof(float) * 3;
+            // Vertex color accessor
+            colorAccessorIndex = nextAccessorIndex++;
+            j["accessors"].push_back(
+            {
+                { "bufferView", vertexAttributeBufferViewIndex },
+                { "componentType", 5126 },      // float code
+                { "type", "VEC3" },
+                { "byteOffset", byteOffset },
                 { "count", vd.m_vertexCount },
             }
             );
@@ -258,9 +308,12 @@ void GltfWriter::writeJsonChunk()
     }
 
     NL::json meshAttributes({});
-    meshAttributes["POSITION"] = 1;
+    meshAttributes["POSITION"] = positionAccessorIndex;
     if (m_writeNormals) {
-        meshAttributes["NORMAL"] = 2;
+        meshAttributes["NORMAL"] = normalAccessorIndex;
+    }
+    if (m_colorVertices) {
+        meshAttributes["COLOR_0"] = colorAccessorIndex;
     }
 
     NL::json mesh;

@@ -80,7 +80,9 @@ private:
     double m_blue;
     double m_alpha;
     bool m_doubleSided;
+    bool m_colorVertices;
 };
+
 
 struct GltfWriter::ViewData
 {
@@ -92,5 +94,6 @@ struct GltfWriter::ViewData
     size_t m_vertexByteLength;
     size_t m_vertexCount;
 };
+
 
 } // namespace pdal
