@@ -209,7 +209,7 @@ TEST_F(TransformationFilterTest, SrsReset)
     PointViewSet viewSet = m_filter.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(view->spatialReference(), SpatialReference("EPSG:3857"));
+    EXPECT_EQ(view->spatialReference(), "EPSG:3857");
 }
 
 TEST(TransformationMatrix, init_file_oneline)

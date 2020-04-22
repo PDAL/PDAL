@@ -267,7 +267,7 @@ TEST(EptReaderTest, bounds2dXform)
     BOX2D b(515380, 4918360, 515390, 4918370);
     SrsBounds eptBounds(b);
     gdal::reprojectBounds(b, "EPSG:26912", "EPSG:4326");
-    SrsBounds boxBounds(b, SpatialReference("EPSG:4326"));
+    SrsBounds boxBounds(b, "EPSG:4326");
 
     PointViewPtr v1;
     PointViewPtr v2;

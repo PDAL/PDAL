@@ -388,7 +388,7 @@ TEST(Streaming, issue_2069)
             { return "filters.test"; }
     private:
         virtual void spatialReferenceChanged(const SpatialReference& srs)
-            { EXPECT_EQ(srs, SpatialReference("EPSG:4326")); }
+            { EXPECT_EQ(srs, "EPSG:4326"); }
         virtual bool processOne(PointRef& point)
             { return true; }
     };
