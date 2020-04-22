@@ -27,7 +27,11 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 #------------------------------------------------------------------------------
 
 set(PDAL_API_VERSION "10")
-set(PDAL_BUILD_VERSION "11")
+
+# change this according to SOVERSION naming rules. See
+# https://github.com/libspatialindex/libspatialindex/pull/44#issuecomment-57088783 for
+# details
+set(PDAL_BUILD_VERSION "11.0.0")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
