@@ -257,9 +257,8 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
-    PUBLIC
-        $<BUILD_INTERFACE:${GDAL_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${LASZIP_INCLUDE_DIR}>
+        ${GDAL_INCLUDE_DIR}
+        ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
