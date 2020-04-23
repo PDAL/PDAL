@@ -345,6 +345,9 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     auto layout = table.layout();
     auto all = layout->dims();
 
+    if (m_args->m_stats)
+        tiledb::Stats::enable();
+
     // get a list of all the dimensions & their types and add to schema
     // x,y,z will be tiledb dimensions other pdal dimensions will be
     // tiledb attributes
@@ -594,15 +597,12 @@ bool TileDBWriter::flushCache(size_t size)
         }
     }
 
-    if (m_args->m_stats)
-        tiledb::Stats::enable();
-
     tiledb::Query::Status status = query.submit();
 
     if (m_args->m_stats)
     {
         tiledb::Stats::dump(stdout);
-        tiledb::Stats::disable();
+        tiledb::Stats::reset();
     }
 
     m_current_idx = 0;

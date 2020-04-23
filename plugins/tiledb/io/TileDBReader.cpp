@@ -127,6 +127,9 @@ void TileDBReader::initialize()
 
     try
     {
+        if (m_stats)
+            tiledb::Stats::enable();
+
         m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
     }
     catch (const tiledb::TileDBError& err)
@@ -412,13 +415,13 @@ bool TileDBReader::processPoint(PointRef& point)
         else
         {
             tiledb::Query::Status status;
-            if (m_stats)
-                tiledb::Stats::enable();
+
             m_query->submit();
+
             if (m_stats)
             {
                 tiledb::Stats::dump(stdout);
-                tiledb::Stats::disable();
+                tiledb::Stats::reset();
             }
 
             status = m_query->query_status();
