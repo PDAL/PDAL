@@ -246,6 +246,7 @@ PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 # Interface include directories allow downstream project to get the directory
 # without specification.
 #
+
 target_include_directories(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${ROOT_DIR}
@@ -256,7 +257,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
-    PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
@@ -385,10 +385,10 @@ include(${PDAL_CMAKE_DIR}/config.cmake)
 #
 target_include_directories(${PDAL_BASE_LIB_NAME}
     INTERFACE
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+        $<INSTALL_INTERFACE:include>)
 target_include_directories(${PDAL_UTIL_LIB_NAME}
     INTERFACE
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+        $<INSTALL_INTERFACE:include>)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
