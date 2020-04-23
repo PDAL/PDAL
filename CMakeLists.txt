@@ -246,7 +246,6 @@ PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
 # Interface include directories allow downstream project to get the directory
 # without specification.
 #
-
 target_include_directories(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${ROOT_DIR}
