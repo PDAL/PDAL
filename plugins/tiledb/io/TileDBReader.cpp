@@ -152,8 +152,13 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = dim.name();
+#if TILEDB_VERSION_MAJOR == 1
         di.m_offset = i;
         di.m_span = dims.size();
+#else
+        di.m_offset = 0;
+        di.m_span = 1;
+#endif
         di.m_dimCategory = DimCategory::Dimension;
         di.m_tileType = dim.type();
         di.m_type = getPdalType(di.m_tileType);
@@ -254,22 +259,27 @@ void TileDBReader::localReady()
 
     DimInfo& di = *it;
     Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
+
+#if TILEDB_VERSION_MAJOR == 1
     m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
     m_buffers.push_back(std::unique_ptr<Buffer>(dimBuf));
+#endif
 
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
+#if TILEDB_VERSION_MAJOR == 1 
         if (di.m_dimCategory == DimCategory::Dimension)
-            di.m_buffer = dimBuf;
-        else
         {
-            std::unique_ptr<Buffer> dimBuf(
-                new Buffer(di.m_tileType, m_chunkSize));
-            di.m_buffer = dimBuf.get();
-            m_buffers.push_back(std::move(dimBuf));
-            setQueryBuffer(di);
+            di.m_buffer = dimBuf;
+            continue;
         }
+#endif
+        std::unique_ptr<Buffer> dimBuf(
+            new Buffer(di.m_tileType, m_chunkSize));
+        di.m_buffer = dimBuf.get();
+        m_buffers.push_back(std::move(dimBuf));
+        setQueryBuffer(di);
     }
 
     // Set the extent of the query.
@@ -430,10 +440,13 @@ bool TileDBReader::processPoint(PointRef& point)
             // returned by the query for dimensions.  So if there are three
             // dimensions, the number of points returned is the buffer count
             // divided by the number of dimensions.
+#if TILEDB_VERSION_MAJOR == 1
             m_resultSize =
                 (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
                 m_array->schema().domain().dimensions().size();
-
+#else
+            m_resultSize = (int)m_query->result_buffer_elements()["X"].second;
+#endif
             if (status == tiledb::Query::Status::INCOMPLETE &&
                     m_resultSize == 0)
                 throwError("Need to increase chunk_size for reader.");
