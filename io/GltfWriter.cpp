@@ -78,7 +78,7 @@ void GltfWriter::addArgs(ProgramArgs& args)
     args.add("color_vertices", "If color data is present for each point, write "
              "it to the output vertices. Note that most renderers will "
              "interpolate the color of each vertex across a face, so this may "
-             "look odd.", m_colorVertices, true);
+             "look odd.", m_colorVertices, false);
 }
 
 

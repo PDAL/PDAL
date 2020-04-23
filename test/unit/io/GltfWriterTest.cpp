@@ -98,8 +98,8 @@ void testWrite(bool writeNormals, bool writeColors, std::string path)
         v->setField(Dimension::Id::NormalY, 2, 1);
         v->setField(Dimension::Id::NormalZ, 2, 0);
 
-        v->setField(Dimension::Id::NormalX, 3, 0);
-        v->setField(Dimension::Id::NormalY, 3, 1);
+        v->setField(Dimension::Id::NormalX, 3, 1);
+        v->setField(Dimension::Id::NormalY, 3, 0);
         v->setField(Dimension::Id::NormalZ, 3, 0);
     }
 
@@ -124,7 +124,7 @@ void testWrite(bool writeNormals, bool writeColors, std::string path)
 
     TriangularMesh* mesh = v->createMesh("foo");
     mesh->add(0, 1, 2);
-    mesh->add(1, 2, 3);
+    mesh->add(3, 2, 1);
 
     BufferReader r;
     r.addView(v);
@@ -134,6 +134,9 @@ void testWrite(bool writeNormals, bool writeColors, std::string path)
 
     Options writerOptions;
     writerOptions.add("filename", path);
+    if (writeColors) {
+        writerOptions.add("color_vertices", true);
+    }
     writer->setOptions(writerOptions);
     writer->setInput(r);
     writer->prepare(t);
