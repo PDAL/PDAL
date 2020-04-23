@@ -142,7 +142,7 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
 
     try
     {
-        input >> root;
+        root = NL::json::parse(input);
     }
     catch (NL::json::parse_error& err)
     {

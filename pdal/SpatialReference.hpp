@@ -72,6 +72,13 @@ public:
     */
     SpatialReference(const std::string& wkt);
 
+    /**
+      Construct a spatial reference from well-known text.
+
+      \param wkt  Well-known text from which to construct SRS.
+    */
+    SpatialReference(const char *wkt);
+
 
     /**
       Determine if this spatial reference is the same as another.
@@ -163,6 +170,7 @@ public:
 
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
+    static SpatialReference wgs84FromZone(int zone);
     static bool isWKT(const std::string& wkt);
     static std::string prettyWkt(const std::string& wkt);
 

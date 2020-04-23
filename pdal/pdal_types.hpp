@@ -255,6 +255,29 @@ public:
         {}
 };
 
+class StatusWithReason
+{
+public:
+    StatusWithReason() : m_code(0)
+    {}
+    StatusWithReason(int code, const std::string& what) :
+        m_code(code), m_what(what)
+    {}
+
+    int code() const
+    { return m_code; }
+
+    operator bool () const
+    { return (m_code == 0); }
+
+    std::string what() const
+    { return m_what; }
+
+private:
+    int m_code;
+    std::string m_what;
+};
+
 enum class ExecMode
 {
     Standard,

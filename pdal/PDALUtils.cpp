@@ -248,11 +248,11 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 {
     ostream *ofs(nullptr);
 
-    arbiter::Arbiter a;
-    const bool remote(a.hasDriver(path) && a.isRemote(path));
-
-    if (remote)
+    if (isRemote(path))
     {
+        arbiter::Arbiter a;
+        if (!a.hasDriver(path))
+            return ofs;
         try
         {
             ofs = new ArbiterOutStream(tempFilename(path), path,
@@ -282,9 +282,15 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    arbiter::Arbiter a;
-    return a.isRemote(path);
+    const StringList prefixes
+        { "s3://", "gs://", "dropbox://", "http://", "https://" };
+
+    for (const string& prefix : prefixes)
+        if (Utils::startsWith(path, prefix))
+            return true;
+    return false;
 }
+
 
 std::string fetchRemote(const std::string& path)
 {
@@ -296,9 +302,11 @@ std::string fetchRemote(const std::string& path)
 
 std::istream *openFile(const std::string& path, bool asBinary)
 {
-    arbiter::Arbiter a;
-    if (a.hasDriver(path) && a.isRemote(path))
+    if (isRemote(path))
     {
+        arbiter::Arbiter a;
+        if (!a.hasDriver(path))
+            return nullptr;
         try
         {
             return new ArbiterInStream(tempFilename(path), path,
@@ -342,10 +350,10 @@ void closeFile(std::istream *in)
 */
 bool fileExists(const std::string& path)
 {
-    arbiter::Arbiter a;
-    if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
+    if (isRemote(path))
     {
-        return true;
+        arbiter::Arbiter a;
+        return (a.hasDriver(path) && a.exists(path));
     }
 
     // Arbiter doesn't handle our STDIN hacks.

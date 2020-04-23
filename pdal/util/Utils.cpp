@@ -81,25 +81,6 @@ double Utils::random(double minimum, double maximum)
 }
 
 
-double Utils::uniform(const double& minimum, const double& maximum,
-    uint32_t seed)
-{
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(minimum, maximum);
-
-    return dist(gen);
-}
-
-
-double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
-{
-    std::mt19937 gen(seed);
-    std::normal_distribution<double> dist(mean, sigma);
-
-    return dist(gen);
-}
-
-
 int Utils::getenv(const std::string& name, std::string& val)
 {
     char* value = ::getenv(name.c_str());
@@ -436,8 +417,8 @@ std::string Utils::escapeJSON(const std::string &str)
     };
     for (std::string::size_type i = 0; i < s.size();)
     {
-        char val = s[i];
-        if (val < (char)replacements.size())
+        unsigned char val = s[i];
+        if (val < replacements.size())
         {
             s.replace(i, 1, replacements[val]);
             i += replacements[val].size();

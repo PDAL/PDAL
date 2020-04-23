@@ -52,11 +52,9 @@ static const Extensions readerExtensions =
 {
   {"readers.icebridge", { "icebridge", "h5" } },
   { "readers.matlab", { "mat" } },
-  { "readers.numpy", { "npy", "py" } },
   { "readers.nitf", { "nitf", "nsf", "ntf" } },
   { "readers.pcd", { "pcd" } },
   { "readers.rdb", { "rdbx" } },
-  { "readers.sqlite", { "sqlite", "gpkg" } },
   { "readers.mrsid", { "sid" } },
   { "readers.rxp", { "rxp" } },
   { "readers.fbx", { "fbx" } },
@@ -70,7 +68,6 @@ static const Extensions writerExtensions =
   { "writers.matlab", { "mat" } },
   { "writers.nitf", { "nitf", "nsf", "ntf" } },
   { "writers.pcd", { "pcd" } },
-  { "writers.sqlite", { "sqlite", "gpkg" } },
   { "writers.e57", { "e57" } },
   { "writers.fbx", { "fbx" } }
 };

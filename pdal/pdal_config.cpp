@@ -93,11 +93,6 @@ bool hasFeature(Feature f)
         enabled = true;
 #endif
         break;
-    case Feature::PYTHON:
-#ifdef PDAL_HAVE_PYTHON
-        enabled = true;
-#endif
-        break;
     default:
         break;
     }

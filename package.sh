@@ -46,6 +46,7 @@ else
     cmake -G Ninja ..
 fi
 ninja dist
+chmod u+x ./bin/pdal-config
 RELNAME=$(./bin/pdal-config --version)
 
 OUTPUTDIR="/data/release-$RELNAME"

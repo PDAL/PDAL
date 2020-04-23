@@ -27,9 +27,8 @@ their own applications.
 Versions
 --------------------------------------------------------------------------------
 
-PDAL supports both Python 2.7 and Python 3.4+. :ref:`integration` tests Python
-2.7 on both Linux and Windows. Python 3 is used by a number of developers
-for adhoc development and testing.
+PDAL supports both Python 3.5+. :ref:`integration` tests Python
+Linux, OSX, and Windows.
 
 Embed
 --------------------------------------------------------------------------------
@@ -84,8 +83,6 @@ results as `Numpy`_ arrays:
 
     import pdal
     pipeline = pdal.Pipeline(json)
-    pipeline.validate() # check if our JSON and options were good
-    pipeline.loglevel = 8 #really noisy
     count = pipeline.execute()
     arrays = pipeline.arrays
     metadata = pipeline.metadata
@@ -101,6 +98,13 @@ The PDAL Python extension requires a working
 method, make sure that you a current, working version of PDAL before
 installing the extension.
 
+.. note::
+
+    Previous to PDAL 2.1, Python support was spread across the embedded
+    stages (:ref:`readers.numpy` and :ref:`filters.python`) which were installed
+    by PDAL itself and the PDAL extension that was installed from PyPI.
+    As of PDAL 2.1 and PDAL/python 2.3, both the embedded stages and the
+    extension are installed from PyPI.
 
 Installation Using pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,23 +127,21 @@ Installation from Source
 
 .. index:: Install, Python, Source
 
-The PDAL Python extension is hosted on
+PDAL Python support is hosted in a separate repository than PDAL itself at
 `GitHub <https://github.com/PDAL/python>`_.  If you have a working PDAL
 installation and a working Python installation, you can install the extension
 using the following procedure on Unix.  The procedure on Windows is similar ::
 
     $ git clone https://github.com/PDAL/python pdalextension
     $ cd pdalextension
-    $ python setup.py build
-    # this should be run as administrator/super user
-    $ python setup.py install
+    $ pip install .
 
 Install using Conda
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. index:: Install, Python, Conda
 
-The PDAL Python extension can also be installed using the `Conda`_
+The PDAL Python support can also be installed using the `Conda`_
 package manager.  An advantage of using Conda to install the extension is
 that Conda will install PDAL. We recommend installing PDAL and the PDAL
 Python extension in an environment other than the base environment.  To

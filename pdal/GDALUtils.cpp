@@ -168,8 +168,8 @@ GDALDataType toGdalType(Dimension::Type t)
     coordinates should be projected.
   \return  Whether the reprojection was successful or not.
 */
-bool reproject(double& x, double& y, double& z, const std::string& srcSrs,
-    const std::string& dstSrs)
+bool reproject(double& x, double& y, double& z, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs)
 {
     return SrsTransform(srcSrs, dstSrs).transform(x, y, z);
 }
@@ -183,8 +183,8 @@ bool reproject(double& x, double& y, double& z, const std::string& srcSrs,
     coordinates should be projected.
   \return  Whether the reprojection was successful or not.
 */
-bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
-    const std::string& dstSrs)
+bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs)
 {
     SrsTransform transform(srcSrs, dstSrs);
 
@@ -195,8 +195,8 @@ bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
 }
 
 
-bool reprojectBounds(Bounds& box, const std::string& srcSrs,
-    const std::string& dstSrs)
+bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs)
 {
     SrsTransform transform(srcSrs, dstSrs);
 
@@ -215,8 +215,8 @@ bool reprojectBounds(Bounds& box, const std::string& srcSrs,
     coordinates should be projected.
   \return  Whether the reprojection was successful or not.
 */
-bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
-    const std::string& dstSrs)
+bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs)
 {
     BOX3D b(box);
     bool res = reprojectBounds(b, srcSrs, dstSrs);
@@ -1005,7 +1005,11 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 
                 poly.update(options.at("geometry").get<std::string>());
                 if (poly.getSpatialReference().valid())
-                    poly.transform(sref.wkt());
+                {
+                    auto ok = poly.transform(sref.wkt());
+                    if (!ok)
+                        throw pdal_error(ok.what());
+                }
                 else
                     poly.setSpatialReference(sref.wkt());
                 geom = (OGRGeometry *)poly.getOGRHandle();

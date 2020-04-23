@@ -28,10 +28,10 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**08-23-2018**
+**03-21-2020**
 ................................................................................
 
-PDAL 2.0.1 has been released. You can :ref:`download <download>` the source
+PDAL 2.1.0 has been released. You can :ref:`download <download>` the source
 code or follow the :ref:`quickstart <quickstart>` to get going in a
 hurry with Conda.
 

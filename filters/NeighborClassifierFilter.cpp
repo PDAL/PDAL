@@ -64,7 +64,7 @@ NeighborClassifierFilter::~NeighborClassifierFilter()
 void NeighborClassifierFilter::addArgs(ProgramArgs& args)
 {
     args.add("domain", "Selects which points will be subject to "
-        "KNN-based assignmenassignment", m_domainSpec);
+        "KNN-based assignment", m_domainSpec);
     args.add("k", "Number of nearest neighbors to consult",
         m_k).setPositional();
     args.add("candidate", "candidate file name", m_candidateFile);

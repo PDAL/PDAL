@@ -197,7 +197,7 @@ size_t GetThreadCount() {
   if (sysctl(mib, miblen, NULL, &size, NULL, 0)) {
     return 0;
   }
-  mib[5] = size / mib[4];
+  mib[5] = (int)size / mib[4];
 
   // populate array of structs
   struct kinfo_proc info[mib[5]];
@@ -207,11 +207,11 @@ size_t GetThreadCount() {
 
   // exclude empty members
   int nthreads = 0;
-  for (int i = 0; i < size / mib[4]; i++) {
+  for (int i = 0; i < static_cast<int>(size) / mib[4]; i++) {
     if (info[i].p_tid != -1)
       nthreads++;
   }
-  return nthreads;
+  return static_cast<size_t>(nthreads);
 }
 
 #elif GTEST_OS_QNX
