@@ -47,10 +47,8 @@ class PDAL_DLL GltfWriter : public Writer
     struct ViewData;
 
 public:
-    GltfWriter()
-    {}
-    ~GltfWriter()
-    {}
+    GltfWriter();
+    ~GltfWriter();
     GltfWriter(const GltfWriter&) = delete;
     GltfWriter& operator=(const GltfWriter&) = delete;
 
