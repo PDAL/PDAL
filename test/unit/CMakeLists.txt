@@ -162,10 +162,6 @@ PDAL_ADD_TEST(pdal_io_gdal_writer_test
     INCLUDES
         ${GDAL_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_io_gltf_writer_test
-    FILES
-        io/GltfWriterTest.cpp
-)
 PDAL_ADD_TEST(pdal_io_las_reader_test
     FILES
         io/LasReaderTest.cpp
