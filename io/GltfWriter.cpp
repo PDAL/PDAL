@@ -246,35 +246,35 @@ void GltfWriter::writeJsonChunk()
         // Vertex indices (faces)
         const uint16_t faceBufferViewIndex = 0;
         j["bufferViews"].push_back(
-        {
-            { "buffer", 0 },
-            { "byteOffset", vd.m_indexOffset },
-            { "byteLength", vd.m_indexByteLength },
-            { "target", 34963 }      // Vertex indices code
-        }
+            {
+                { "buffer", 0 },
+                { "byteOffset", vd.m_indexOffset },
+                { "byteLength", vd.m_indexByteLength },
+                { "target", 34963 }      // Vertex indices code
+            }
         );
         // Vertex attributes (positions, normals, and colors)
         const uint16_t vertexAttributeBufferViewIndex = 1;
         j["bufferViews"].push_back(
-        {
-            { "buffer", 0 },
-            { "byteOffset", vd.m_vertexOffset },
-            { "byteLength", vd.m_vertexByteLength },
-            { "target", 34962 },      // Vertices code
-            { "byteStride", elementSize },
-        }
+            {
+                { "buffer", 0 },
+                { "byteOffset", vd.m_vertexOffset },
+                { "byteLength", vd.m_vertexByteLength },
+                { "target", 34962 },      // Vertices code
+                { "byteStride", elementSize },
+            }
         );
 
         // Accessors
         // Face index accessor
         faceAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
-        {
-            { "bufferView", faceBufferViewIndex },
-            { "componentType", 5125 },      // unsigned int code
-            { "type", "SCALAR" },
-            { "count", vd.m_indexCount }
-        }
+            {
+                { "bufferView", faceBufferViewIndex },
+                { "componentType", 5125 },      // unsigned int code
+                { "type", "SCALAR" },
+                { "count", vd.m_indexCount }
+            }
         );
         const BOX3D& b = vd.m_bounds;
         uint16_t byteOffset = 0;
@@ -282,15 +282,15 @@ void GltfWriter::writeJsonChunk()
         // Vertex position accessor
         positionAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
-        {
-            { "bufferView", vertexAttributeBufferViewIndex },
-            { "componentType", 5126 },      // float code
-            { "type", "VEC3" },
-            { "count", vd.m_vertexCount },
-            { "byteOffset", byteOffset },
-            { "min", { b.minx, b.miny, b.minz } },
-            { "max", { b.maxx, b.maxy, b.maxz } }
-        }
+            {
+                { "bufferView", vertexAttributeBufferViewIndex },
+                { "componentType", 5126 },      // float code
+                { "type", "VEC3" },
+                { "count", vd.m_vertexCount },
+                { "byteOffset", byteOffset },
+                { "min", { b.minx, b.miny, b.minz } },
+                { "max", { b.maxx, b.maxy, b.maxz } }
+            }
         );
 
         if (m_writeNormals) {
@@ -298,13 +298,13 @@ void GltfWriter::writeJsonChunk()
             // Vertex normal accessor
             normalAccessorIndex = nextAccessorIndex++;
             j["accessors"].push_back(
-            {
-                { "bufferView", vertexAttributeBufferViewIndex },
-                { "componentType", 5126 },      // float code
-                { "type", "VEC3" },
-                { "byteOffset", byteOffset },
-                { "count", vd.m_vertexCount },
-            }
+                {
+                    { "bufferView", vertexAttributeBufferViewIndex },
+                    { "componentType", 5126 },      // float code
+                    { "type", "VEC3" },
+                    { "byteOffset", byteOffset },
+                    { "count", vd.m_vertexCount },
+                }
             );
         }
 
@@ -313,13 +313,13 @@ void GltfWriter::writeJsonChunk()
             // Vertex color accessor
             colorAccessorIndex = nextAccessorIndex++;
             j["accessors"].push_back(
-            {
-                { "bufferView", vertexAttributeBufferViewIndex },
-                { "componentType", 5126 },      // float code
-                { "type", "VEC3" },
-                { "byteOffset", byteOffset },
-                { "count", vd.m_vertexCount },
-            }
+                {
+                    { "bufferView", vertexAttributeBufferViewIndex },
+                    { "componentType", 5126 },      // float code
+                    { "type", "VEC3" },
+                    { "byteOffset", byteOffset },
+                    { "count", vd.m_vertexCount },
+                }
             );
         }
     }
@@ -335,44 +335,44 @@ void GltfWriter::writeJsonChunk()
 
     NL::json mesh;
     mesh["primitives"].push_back(
-    {
-        { "attributes", meshAttributes },
-        { "indices", 0 },
-        { "material", 0 }
-    }
+        {
+            { "attributes", meshAttributes },
+            { "indices", 0 },
+            { "material", 0 }
+        }
     );
 
     j["meshes"].push_back(mesh);
     j["scene"] = 0;
 
     j["nodes"].push_back(
-    {
-        { "mesh", 0 },
-        { "matrix", { 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 } }
-    }
+        {
+            { "mesh", 0 },
+            { "matrix", { 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 } }
+        }
     );
 
     j["scenes"].push_back(
-    {
-        { "nodes", { 0 } }
-    }
+        {
+            { "nodes", { 0 } }
+        }
     );
 
     // This seems very crude.  But I'm not sure we can do much else at this
     // point.
     j["materials"].push_back(
-    {
         {
-            "pbrMetallicRoughness",
             {
-                { "metallicFactor", m_metallic },
-                { "roughnessFactor", m_roughness },
-                { "baseColorFactor", { m_red, m_blue, m_green, m_alpha } }
-            }
-        },
-        { "name", "Color" },
-        { "doubleSided", m_doubleSided }
-    }
+                "pbrMetallicRoughness",
+                {
+                    { "metallicFactor", m_metallic },
+                    { "roughnessFactor", m_roughness },
+                    { "baseColorFactor", { m_red, m_blue, m_green, m_alpha } }
+                }
+            },
+            { "name", "Color" },
+            { "doubleSided", m_doubleSided }
+        }
     );
 
     std::string js(j.dump());
