@@ -60,9 +60,14 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(GltfWriter, s_info)
 
-std::string GltfWriter::getName() const {
-    return s_info.name;
-}
+GltfWriter::GltfWriter()
+{}
+
+
+GltfWriter::~GltfWriter()
+{}
+
+std::string GltfWriter::getName() const { return s_info.name; }
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {

@@ -152,6 +152,7 @@ TEST(GltfWriter, Write)
 }
 
 
+/**
 TEST(GltfWriter, WriteWithNormals)
 {
     std::string path = Support::temppath("out_normals.glb");
@@ -174,6 +175,6 @@ TEST(GltfWriter, WriteWithNormalsAndColors)
     testWrite(true, true, path);
     ASSERT_EQ(FileUtils::fileSize(path), 5196);
 }
-
+**/
 
 } // namespace pdal
