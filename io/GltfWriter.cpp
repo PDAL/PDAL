@@ -60,14 +60,9 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(GltfWriter, s_info)
 
-GltfWriter::GltfWriter()
-{}
-
-
-GltfWriter::~GltfWriter()
-{}
-
-std::string GltfWriter::getName() const { return s_info.name; }
+std::string GltfWriter::getName() const {
+    return s_info.name;
+}
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {
@@ -84,6 +79,31 @@ void GltfWriter::addArgs(ProgramArgs& args)
              "it to the output vertices. Note that most renderers will "
              "interpolate the color of each vertex across a face, so this may "
              "look odd.", m_colorVertices, false);
+}
+
+
+void GltfWriter::prepared(PointTableRef table) {
+
+    m_writeNormals = table.layout()->hasDim(Dimension::Id::NormalX)
+                     && table.layout()->hasDim(Dimension::Id::NormalY)
+                     && table.layout()->hasDim(Dimension::Id::NormalZ);
+
+    // Only color vertices if color dimensions are present and the option is
+    // enabled
+    const bool hasColors = table.layout()->hasDim(Dimension::Id::Red)
+                           && table.layout()->hasDim(Dimension::Id::Green)
+                           && table.layout()->hasDim(Dimension::Id::Blue);
+
+    if (!hasColors && m_colorVertices) {
+        log()->get(LogLevel::Warning) << getName()
+                                      << ": Option 'color_vertices' is set to "
+                                      "true, but one or more color dimensions "
+                                      "are missing. Not writing out vertex "
+                                      "colors."
+                                      << std::endl;
+        m_colorVertices = false;
+    }
+
 }
 
 
@@ -122,20 +142,12 @@ void GltfWriter::write(const PointViewPtr v)
     vd.m_vertexOffset = vd.m_indexOffset + vd.m_indexByteLength;
     vd.m_vertexByteLength = v->size() * sizeof(float) * 3;  // 3 for X,Y,Z
 
-    m_writeNormals = v->hasDim(Dimension::Id::NormalX)
-                     && v->hasDim(Dimension::Id::NormalY)
-                     && v->hasDim(Dimension::Id::NormalZ);
+
     if (m_writeNormals) {
         // Add the length of 3 normals to the vertex byte length
         vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for X,Y,Z
     }
 
-    // Only color vertices if color dimensions are present and the option is
-    // enabled
-    m_colorVertices = v->hasDim(Dimension::Id::Red)
-                      && v->hasDim(Dimension::Id::Green)
-                      && v->hasDim(Dimension::Id::Blue)
-                      && m_colorVertices;
     if (m_colorVertices) {
         // Add the length of 3 colors to the vertex byte length
         vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for R,G,B
@@ -214,7 +226,7 @@ void GltfWriter::writeJsonChunk()
     }
     );
 
-    u_short elementSize =  sizeof(float) * 3; // X, Y, Z
+    uint16_t elementSize =  sizeof(float) * 3; // X, Y, Z
     if ( m_writeNormals ) {
         elementSize += sizeof(float) * 3; // NormalX, NormalY, NormalZ
     }
@@ -223,16 +235,16 @@ void GltfWriter::writeJsonChunk()
     }
 
     int bufferViewCount = 0;
-    u_short nextAccessorIndex = 0;
-    u_short normalAccessorIndex = 0;
-    u_short colorAccessorIndex = 0;
-    u_short positionAccessorIndex = 0;
-    u_short faceAccessorIndex = 0;
+    uint16_t nextAccessorIndex = 0;
+    uint16_t normalAccessorIndex = 0;
+    uint16_t colorAccessorIndex = 0;
+    uint16_t positionAccessorIndex = 0;
+    uint16_t faceAccessorIndex = 0;
     for (const ViewData& vd : m_viewData)
     {
         // Buffer views
         // Vertex indices (faces)
-        const u_short faceBufferViewIndex = 0;
+        const uint16_t faceBufferViewIndex = 0;
         j["bufferViews"].push_back(
         {
             { "buffer", 0 },
@@ -242,7 +254,7 @@ void GltfWriter::writeJsonChunk()
         }
         );
         // Vertex attributes (positions, normals, and colors)
-        const u_short vertexAttributeBufferViewIndex = 1;
+        const uint16_t vertexAttributeBufferViewIndex = 1;
         j["bufferViews"].push_back(
         {
             { "buffer", 0 },
@@ -265,7 +277,7 @@ void GltfWriter::writeJsonChunk()
         }
         );
         const BOX3D& b = vd.m_bounds;
-        u_short byteOffset = 0;
+        uint16_t byteOffset = 0;
 
         // Vertex position accessor
         positionAccessorIndex = nextAccessorIndex++;

@@ -59,6 +59,7 @@ private:
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr v);
     virtual void done(PointTableRef table);
+    virtual void prepared(PointTableRef table);
 
     void writeGltfHeader();
     void writeJsonChunk();
