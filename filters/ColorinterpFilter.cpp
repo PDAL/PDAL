@@ -37,6 +37,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <array>
 #include <algorithm>
@@ -111,6 +112,9 @@ void ColorinterpFilter::addArgs(ProgramArgs& args)
         std::numeric_limits<double>::quiet_NaN());
     args.add("maximum", "Maximum value to use for scaling", m_max,
         std::numeric_limits<double>::quiet_NaN());
+    args.add("clamp",
+        "Clamp and color values outside the range [minimum, maximum]",
+        m_clamp, false);
     args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp,
         "pestel_shades");
     args.add("invert", "Invert the ramp direction", m_invertRamp, false);
@@ -134,10 +138,14 @@ void ColorinterpFilter::prepared(PointTableRef table)
     PointLayoutPtr layout(table.layout());
     m_interpDim = layout->findDim(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
+    {
         throwError("Dimension '" + m_interpDimString + "' does not exist.");
+    }
     if (!std::isnan(m_min) && !std::isnan(m_max) && m_max <= m_min)
+    {
         throwError("Specified 'minimum' value must be less than "
             "'maximum' value.");
+    }
 }
 
 
@@ -153,7 +161,9 @@ void ColorinterpFilter::ready(PointTableRef table)
     m_raster = openRamp(m_colorramp);
     gdal::GDALError err = m_raster->open();
     if (err != gdal::GDALError::None && err != gdal::GDALError::NoTransform)
+    {
         throwError(m_raster->errorMsg());
+    }
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: " <<
         m_raster->filename() << std::endl;
@@ -243,9 +253,13 @@ void ColorinterpFilter::filter(PointView& view)
         }
 
         if (std::isnan(m_min))
+        {
             m_min = summary.minimum();
+        }
         if (std::isnan(m_max))
+        {
             m_max = summary.maximum();
+        }
     }
 
     PointRef point(view, 0);
@@ -260,7 +274,9 @@ void ColorinterpFilter::filter(PointView& view)
 bool ColorinterpFilter::pipelineStreamable() const
 {
     if (std::isnan(m_min) || std::isnan(m_max))
+    {
         return false;
+    }
     return Streamable::pipelineStreamable();
 }
 
@@ -269,16 +285,33 @@ bool ColorinterpFilter::processOne(PointRef& point)
 {
     double v = point.getFieldAs<double>(m_interpDim);
 
-    // Don't color points that aren't in the min/max range.
-    if (v < m_min || v >= m_max)
+    if (m_clamp)
+    {
+         v = Utils::clamp(v, m_min, m_max);
+    }
+
+    // Don't color points that aren't in the min/max range
+    // unless they've been clamped. Allow v == m_max so that
+    // if the user wants to clamp all values outside m_min
+    // and m_max the values greater than m_max are colored
+    // as expected.
+    if (v < m_min || v > m_max)
+    {
         return true;
+    }
 
     double factor = (v - m_min) / (m_max - m_min);
     size_t img_width = m_redBand.size();
     size_t position = size_t(std::floor(factor * img_width));
 
+    // Handle the case that v == m_max (position == img_width) by clamping
+    // position to img_width - 1
+    position = std::min(position, img_width - 1);
+
     if (m_invertRamp)
+    {
         position = (img_width - 1) - position;
+    }
 
     point.setField(Dimension::Id::Red, m_redBand[position]);
     point.setField(Dimension::Id::Blue, m_blueBand[position]);

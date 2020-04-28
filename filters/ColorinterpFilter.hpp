@@ -58,6 +58,7 @@ public:
         , m_interpDimString("Z")
         , m_min(0.0)
         , m_max(0.0)
+        , m_clamp(false)
         , m_rampFilename("/vsimem/colorramp.png")
         , m_invertRamp(false)
         , m_stdDevThreshold(0.0)
@@ -81,6 +82,7 @@ private:
     std::string m_interpDimString;
     double m_min;
     double m_max;
+    bool m_clamp;
     std::string m_colorramp;
     std::shared_ptr<gdal::Raster> m_raster;
     std::string m_rampFilename;
