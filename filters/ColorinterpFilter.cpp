@@ -138,14 +138,10 @@ void ColorinterpFilter::prepared(PointTableRef table)
     PointLayoutPtr layout(table.layout());
     m_interpDim = layout->findDim(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)
-    {
         throwError("Dimension '" + m_interpDimString + "' does not exist.");
-    }
     if (!std::isnan(m_min) && !std::isnan(m_max) && m_max <= m_min)
-    {
         throwError("Specified 'minimum' value must be less than "
             "'maximum' value.");
-    }
 }
 
 
@@ -161,9 +157,7 @@ void ColorinterpFilter::ready(PointTableRef table)
     m_raster = openRamp(m_colorramp);
     gdal::GDALError err = m_raster->open();
     if (err != gdal::GDALError::None && err != gdal::GDALError::NoTransform)
-    {
         throwError(m_raster->errorMsg());
-    }
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: " <<
         m_raster->filename() << std::endl;
@@ -253,13 +247,9 @@ void ColorinterpFilter::filter(PointView& view)
         }
 
         if (std::isnan(m_min))
-        {
             m_min = summary.minimum();
-        }
         if (std::isnan(m_max))
-        {
             m_max = summary.maximum();
-        }
     }
 
     PointRef point(view, 0);
@@ -306,12 +296,10 @@ bool ColorinterpFilter::processOne(PointRef& point)
 
     // Handle the case that v == m_max (position == img_width) by clamping
     // position to img_width - 1
-    position = std::min(position, img_width - 1);
+    position = (std::min)(position, img_width - 1);
 
     if (m_invertRamp)
-    {
         position = (img_width - 1) - position;
-    }
 
     point.setField(Dimension::Id::Red, m_redBand[position]);
     point.setField(Dimension::Id::Blue, m_blueBand[position]);
