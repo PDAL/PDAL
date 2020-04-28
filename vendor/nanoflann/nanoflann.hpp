@@ -47,6 +47,7 @@
 #ifndef NANOFLANN_HPP_
 #define NANOFLANN_HPP_
 
+#include <iostream>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -767,6 +768,7 @@ public:
      */
     lim1 = left;
     right = count - 1;
+    std::cerr << "Left/Right = " << left << "/" << right << "!\n";
     for (;;) {
       while (left <= right && dataset_get(obj, ind[left], cutfeat) <= cutval)
         ++left;
@@ -1083,11 +1085,13 @@ public:
       // count_leaf += (node->lr.right-node->lr.left);  // Removed since was
       // neither used nor returned to the user.
       DistanceType worst_dist = result_set.worstDist();
+std::cerr << "worst_dist = " << worst_dist << "!\n";
       for (IndexType i = node->node_type.lr.left; i < node->node_type.lr.right;
            ++i) {
         const IndexType index = BaseClassRef::vind[i]; // reorder... : i;
         DistanceType dist = distance.evalMetric(
             vec, index, (DIM > 0 ? DIM : BaseClassRef::dim));
+std::cerr << "Dist = " << dist << "!\n";
         if (dist < worst_dist) {
           if (!result_set.addPoint(dist, BaseClassRef::vind[i])) {
             // the resultset doesn't want to receive any more points, we're done
@@ -1117,6 +1121,7 @@ public:
       otherChild = node->child1;
       cut_dist = distance.accum_dist(val, node->node_type.sub.divlow, idx);
     }
+std::cerr << "Cut dist = " << cut_dist << "!\n";
 
     /* Call recursively to search next level down. */
     if (!searchLevel(result_set, vec, bestChild, mindistsq, dists, epsError)) {

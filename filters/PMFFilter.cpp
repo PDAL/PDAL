@@ -222,7 +222,7 @@ void PMFFilter::processGround(PointViewPtr view)
 {
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
-    calculateBounds(*view, bounds);
+    view->calculateBounds(bounds);
     size_t cols = static_cast<size_t>(
         ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1);
     size_t rows = static_cast<size_t>(

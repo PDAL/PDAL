@@ -192,7 +192,7 @@ TEST(EigenTest, calcBounds)
     const double lim_max = (std::numeric_limits<double>::max)();
     PointViewPtr b0(new PointView(table));
     BOX3D box_b0;
-    calculateBounds(*b0, box_b0);
+    b0->calculateBounds(box_b0);
     check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
 
     PointViewPtr b1(new PointView(table));
@@ -208,11 +208,11 @@ TEST(EigenTest, calcBounds)
     bs.insert(b2);
 
     BOX3D box_b1;
-    calculateBounds(*b1, box_b1);
+    b1->calculateBounds(box_b1);
     check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
 
     BOX3D box_b2;
-    calculateBounds(*b2, box_b2);
+    b2->calculateBounds(box_b2);
     check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
 }
 
