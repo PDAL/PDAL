@@ -264,9 +264,7 @@ void ColorinterpFilter::filter(PointView& view)
 bool ColorinterpFilter::pipelineStreamable() const
 {
     if (std::isnan(m_min) || std::isnan(m_max))
-    {
         return false;
-    }
     return Streamable::pipelineStreamable();
 }
 
