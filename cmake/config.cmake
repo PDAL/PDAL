@@ -1,19 +1,13 @@
 set(INCLUDE_INSTALL_DIR include/ CACHE PATH "include")
-set(LIB_INSTALL_DIR ${PDAL_LIB_INSTALL_DIR} CACHE PATH "lib")
-set(SYSCONFIG_INSTALL_DIR etc/pdal/ CACHE PATH "sysconfig")
+set(LIB_INSTALL_DIR lib/ CACHE PATH "lib")
 
 include(CMakePackageConfigHelpers)
-
-set(PDAL_CONFIG_INCLUDE_DIRS
-  "${CMAKE_INSTALL_PREFIX}/include")
-set(PDAL_CONFIG_LIBRARY_DIRS
-  "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
 
 configure_package_config_file(
   PDALConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/PDALConfig.cmake
   INSTALL_DESTINATION ${LIB_INSTALL_DIR}/cmake/PDAL
-  PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
+  PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR)
 
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/PDALConfigVersion.cmake
