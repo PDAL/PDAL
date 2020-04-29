@@ -100,13 +100,26 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
 
 void PointView::calculateBounds(BOX2D& output) const
 {
-    pdal::calculateBounds(*this, output);
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        double x = getFieldAs<double>(Dimension::Id::X, idx);
+        double y = getFieldAs<double>(Dimension::Id::Y, idx);
+
+        output.grow(x, y);
+    }
 }
 
 
 void PointView::calculateBounds(BOX3D& output) const
 {
-    pdal::calculateBounds(*this, output);
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        double x = getFieldAs<double>(Dimension::Id::X, idx);
+        double y = getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = getFieldAs<double>(Dimension::Id::Z, idx);
+
+        output.grow(x, y, z);
+    }
 }
 
 

@@ -79,7 +79,7 @@ void ELMFilter::filter(PointView& view)
         return;
 
     BOX2D bounds;
-    calculateBounds(view, bounds);
+    view.calculateBounds(bounds);
 
     size_t cols =
         static_cast<size_t>(((bounds.maxx - bounds.minx) / m_cell) + 1);

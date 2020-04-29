@@ -66,9 +66,9 @@ TEST(ColorinterpFilterTest, minmax)
     FauxReader f;
     Options options;
 
-    options.add("count", 100);
+    options.add("count", 101);
     options.add("mode", "ramp");
-    options.add("bounds", "([0,99],[0,99],[0,99])");
+    options.add("bounds", "([0,100],[0,100],[0,100])");
 
     f.setOptions(options);
 
@@ -93,9 +93,14 @@ TEST(ColorinterpFilterTest, minmax)
         int g = point.getFieldAs<int>(Dimension::Id::Green);
         int b = point.getFieldAs<int>(Dimension::Id::Blue);
 
-        if (z != 99)
+        if (z != 100)
+        {
+            std::stringstream ss;
+            ss << "Z = " << z << "; R = " << r;
+            SCOPED_TRACE(ss.str());
             EXPECT_EQ((int)(z / 25) + 1, r);
-        if (z == 99)
+        }
+        if (z == 100)
             EXPECT_EQ(0, r);
         EXPECT_EQ(0, g);
         EXPECT_EQ(0, b);
@@ -207,6 +212,9 @@ void standardTest(Options& coptions, std::function<bool(int, int)> test)
         int g = point.getFieldAs<int>(Dimension::Id::Green);
         int b = point.getFieldAs<int>(Dimension::Id::Blue);
 
+        std::stringstream ss;
+	ss << "Z = " << z << "; R = " << r;
+        SCOPED_TRACE(ss.str());
         EXPECT_TRUE(test(z, r));
         EXPECT_EQ(0, g);
         EXPECT_EQ(0, b);
@@ -232,13 +240,10 @@ TEST(ColorinterpFilterTest, autorange)
 
     auto test = [](int z, int r)
     {
-        if (z < 99)
-            return ((int)(z / 25) + 1 == r);
-        else if (z == 99 && r == 0)
-            return true;
-        return false;
+        return ((int)(z / 25) + 1 == r);
     };
 
+    SCOPED_TRACE("autorange");
     standardTest(coptions, test);
 }
 
@@ -266,6 +271,7 @@ TEST(ColorinterpFilterTest, k)
         return false;
     };
 
+    SCOPED_TRACE("k");
     standardTest(coptions, test);
 }
 
@@ -293,6 +299,8 @@ TEST(ColorinterpFilterTest, mad)
             return true;
         return false;
     };
+
+    SCOPED_TRACE("mad");
     standardTest(coptions, test);
 }
 

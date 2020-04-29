@@ -49,30 +49,6 @@ namespace pdal
 #pragma warning (push)
 #pragma warning (disable: 4244)
 
-void calculateBounds(const PointView& view, BOX2D& output)
-{
-    for (PointId idx = 0; idx < view.size(); idx++)
-    {
-        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
-
-        output.grow(x, y);
-    }
-}
-
-
-void calculateBounds(const PointView& view, BOX3D& output)
-{
-    for (PointId idx = 0; idx < view.size(); idx++)
-    {
-        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, idx);
-
-        output.grow(x, y, z);
-    }
-}
-
 PointViewPtr demeanPointView(const PointView& view)
 {
     using namespace Eigen;

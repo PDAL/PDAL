@@ -243,7 +243,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     m_srs = inlierView->spatialReference();
 
-    calculateBounds(*inlierView, m_bounds);
+    inlierView->calculateBounds(m_bounds);
     m_cols = static_cast<int>(
         ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
     m_rows = static_cast<int>(
