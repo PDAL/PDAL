@@ -38,7 +38,6 @@
 
 #include <nanoflann/nanoflann.hpp>
 
-//#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 
 namespace nanoflann
