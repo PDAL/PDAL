@@ -59,19 +59,6 @@ class SpatialReference;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 
-/*! @return a cumulated bounds of all points in the PointView.
-    \verbatim embed:rst
-    .. note::
-
-        This method requires that an `X`, `Y`, and `Z` dimension be
-        available, and that it can be casted into a *double* data
-        type using the :cpp:func:`pdal::Dimension::applyScaling`
-        method. Otherwise, an exception will be thrown.
-    \endverbatim
-*/
-PDAL_DLL void calculateBounds(const PointView& view, BOX2D& box);
-PDAL_DLL void calculateBounds(const PointView& view, BOX3D& box);
-
 PDAL_DLL PointViewPtr demeanPointView(const PointView& view);
 PDAL_DLL PointViewPtr demeanPointView(const PointView& ,double* centroid);
 PDAL_DLL PointViewPtr transform(const PointView&, double* matrix);

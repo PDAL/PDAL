@@ -256,7 +256,7 @@ void GDALWriter::writeView(const PointViewPtr view)
     if (!m_fixedGrid)
     {
         BOX2D bounds;
-        calculateBounds(*view, bounds);
+        view->calculateBounds(bounds);
         if (!m_grid)
             createGrid(bounds);
         else
