@@ -15,7 +15,7 @@ PDAL_ADD_PLUGIN(libname reader rdb
         ${NLOHMANN_INCLUDE_DIR}
         ${RDB_INCLUDE_CPP_DIR}
 )
-target_include_directories(${libname} PUBLIC "${PDAL_VENDOR_DIR}/eigen")
+target_include_directories(${libname} PRIVATE "${PDAL_VENDOR_DIR}/eigen")
 
 # windows requires explicit linking against 
 # rdbcpp
