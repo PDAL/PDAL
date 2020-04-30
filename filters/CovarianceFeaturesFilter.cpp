@@ -120,9 +120,9 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
 
     // Extract eigenvalues and eigenvectors in decreasing order (largest eigenvalue first)
     auto ev = solver.eigenvalues();
-    std::vector<double> lambda = {(std::max(ev[2],0.0)),
-                                  (std::max(ev[1],0.0)),
-                                  (std::max(ev[0],0.0))};
+    std::vector<double> lambda = {((std::max)(ev[2],0.0)),
+                                  ((std::max)(ev[1],0.0)),
+                                  ((std::max)(ev[0],0.0))};
 
     if (lambda[0] == 0)
         throwError("Eigenvalues are all 0. Can't compute local features.");
