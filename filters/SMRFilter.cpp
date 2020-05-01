@@ -279,6 +279,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     PointViewPtr outView = view->makeNew();
     // ignoredView is appended to the output untouched.
     outView->append(*ignoredView);
+    outView->append(*syntheticView);
     // inlierView is appended to the output, the only PointView whose
     // classifications may have been altered.
     outView->append(*inlierView);
