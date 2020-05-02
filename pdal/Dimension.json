@@ -142,7 +142,7 @@
     {
     "name": "Deviation",
     "type": "float",
-    "description": "A larger value for deviation indicates larger distortion."
+    "description": "Difference between the shape of the reference pulse and the retun pulse. A larger value for deviation indicates larger distortion."
     },
     {
     "name": "PassiveSignal",
