@@ -595,7 +595,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     {
         Dimension::Id srcId = addon.srcId();
         BasePointTable *t = tile.addonTable(srcId);
-        PointRef addonPoint(*t, m_pointId);
+        PointRef addonPoint(*t, pointId);
         double val = addonPoint.getFieldAs<double>(srcId);
         dst.setField(addon.dstId(), val);
     }
