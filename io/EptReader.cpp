@@ -629,6 +629,11 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
         else
             m_contentsCv.wait(l);
     } while (m_nodeId <= m_tileCount && numRead <= count);
+
+    // Wait for any running threads to finish and don't start any others.
+    // Only relevant if we hit the count limit before reading all the tiles.
+    m_pool->stop();
+
     return numRead;
 }
 

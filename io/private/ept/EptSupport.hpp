@@ -434,6 +434,16 @@ public:
         m_threads.clear();
     }
 
+    // join() and empty the queue of tasks that may have been waiting to run.
+    void stop()
+    {
+        join();
+
+        // Effectively clear the queue.
+        std::queue<std::function<void()>> q;
+        m_tasks.swap(q);
+    }
+
     // Wait for all current tasks to complete.  As opposed to join, tasks may
     // continue to be added while a thread is await()-ing the queue to empty.
     void await()
@@ -486,8 +496,7 @@ public:
     std::size_t numThreads() const { return m_numThreads; }
 
 private:
-    // Worker thread function.  Wait for a task and run it - or if stop() is
-    // called, complete any outstanding task and return.
+    // Worker thread function.  Wait for a task and run it.
     void work();
 
     bool m_verbose;
