@@ -39,9 +39,97 @@
 namespace pdal
 {
 
-EptInfo::EptInfo(const NL::json& info) : m_info(info)
+namespace
 {
+
+void setForwards(const NL::json& fwd, arbiter::StringMap& map,
+    const std::string& type)
+{
+    if (fwd.is_null())
+        return;
+    if (!fwd.is_object())
+        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
+    for (auto& entry : fwd.items())
+    {
+        if (!entry.value().is_string())
+            throw pdal_error("Invalid '" + type + "' parameters: "
+                "expected string->string mapping.");
+        map[entry.key()] = entry.value().get<std::string>();
+    }
+}
+
+std::string createRoot(std::string filename, const std::string& prefix,
+    const std::string& postfix)
+{
+    if (Utils::startsWith(filename, prefix))
+        filename = filename.substr(prefix.size());
+    if (Utils::endsWith(filename, postfix))
+        filename = filename.substr(0, filename.size() - postfix.size());
+    if (filename.empty())
+        throw pdal_error("Missing input filename");
+    filename = arbiter::expandTilde(filename);
+    return filename;
+}
+
+} // Unnamed namespace
+
+//
+// Endpoint
+//
+
+Endpoint::Endpoint()
+{}
+
+Endpoint::Endpoint(const arbiter::Arbiter& arbiter, const std::string& root,
+        const StringMap& headers, const StringMap& query) :
+    m_ep(arbiter.getEndpoint(root)), m_headers(headers), m_query(query)
+{}    
+
+std::string Endpoint::get(const std::string& path) const
+{
+    if (m_ep.isLocal())
+        return m_ep.get(path);
+    else
+        return m_ep.get(path, m_headers, m_query);
+}
+
+NL::json Endpoint::getJson(const std::string& path) const
+{
+    return parse(get(path));
+}
+
+std::vector<char> Endpoint::getBinary(const std::string& path) const
+{
+    if (m_ep.isLocal())
+        return m_ep.getBinary(path);
+    else
+        return m_ep.getBinary(path, m_headers, m_query);
+}
+
+
+arbiter::LocalHandle Endpoint::getLocalHandle(const std::string& path) const
+{
+    if (m_ep.isLocal())
+        return m_ep.getLocalHandle(path);
+    else
+        return m_ep.getLocalHandle(path, m_headers, m_query);
+}
+
+//
+// EptInfo
+//
+
+EptInfo::EptInfo(const std::string& filename, const NL::json& headers,
+    const NL::json& query)
+{
+    setForwards(headers, m_headers, "header");
+    setForwards(query, m_query, "query");
+    std::string root = createRoot(filename, "ept://", "ept.json");
+    m_endpoint = Endpoint(m_arbiter, root, m_headers, m_query);
+    m_info = m_endpoint.getJson("ept.json");
+
     m_bounds = toBox3d(m_info.at("bounds"));
+    m_boundsConforming = toBox3d(m_info.at("boundsConforming"));
     m_points = m_info.value("points", 0);
     m_span = m_info.at("span").get<uint64_t>();
 
@@ -110,7 +198,70 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
         m_dataType = DataType::Zstandard;
     else
         throw ept_error("Unrecognized EPT dataType: " + dt);
+
+    NL::json& schema = m_info["schema"];
+    for (NL::json element: schema)
+    {
+        std::string name = element["name"].get<std::string>();
+        std::string typestring = element["type"].get<std::string>();
+        uint64_t size = element["size"].get<uint64_t>();
+        Dimension::Type type = Dimension::type(typestring, size);
+        double scale = element.value("scale", 1.0);
+        double offset = element.value("offset", 0);
+
+        Dimension::Id id = m_remoteLayout.registerOrAssignFixedDim(name, type);
+        m_dims[name] = DimType(id, type, scale, offset);
+    }
+    m_remoteLayout.finalize();
 }
+
+DimType EptInfo::dimType(Dimension::Id id) const
+{
+    //ABELL - This is yuck.  The map of strings to DimType is bad.
+    for (auto it = m_dims.begin(); it != m_dims.end(); ++it)
+        if (it->second.m_id == id)
+            return it->second;
+    return DimType();
+}
+
+void EptInfo::loadAddonInfo(const NL::json& addonSpec)
+{
+    std::string filename;
+    try
+    {
+        // These could be launched in threads but we'd have to 
+        // 1) lock the addon list
+        // 2) do something about exception propagation.
+        for (auto it : addonSpec.items())
+        {
+            std::string dimName = it.key();
+            const NL::json& val = it.value();
+
+            std::string filename = val.get<std::string>();
+            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
+        }
+    }
+    catch (NL::json::parse_error&)
+    {
+        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
+    }
+}
+
+
+void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
+{
+    Endpoint ep(m_arbiter, root, m_headers, m_query);
+    NL::json info = ep.getJson("ept-addon.json");
+    std::string typestring = info["type"].get<std::string>();
+    uint64_t size = info["size"].get<uint64_t>();
+    Dimension::Type type = Dimension::type(typestring, size);
+
+    m_addons.emplace_back(ep, dimName, type);
+}
+
+//
+// Pool
+//
 
 
 void Pool::work()

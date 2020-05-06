@@ -39,7 +39,7 @@
 #include <arbiter/arbiter.hpp>
 #include <nlohmann/json.hpp>
 
-#include "private/EptSupport.hpp"
+#include "private/ept/EptSupport.hpp"
 
 namespace pdal
 {
@@ -110,7 +110,8 @@ void EptAddonWriter::prepared(PointTableRef table)
         const Dimension::Id id(layout.findDim(dimName));
         if (id == Dimension::Id::Unknown)
             throwError("Cannot find dimension '" + dimName + "'.");
-        m_addons.emplace_back(new Addon(layout, endpoint, id));
+//ABELL
+//        m_addons.emplace_back(new Addon(layout, endpoint, id));
     }
 }
 
@@ -131,7 +132,8 @@ void EptAddonWriter::ready(PointTableRef table)
         const auto keys(parse(meta.findChild("keys").value<std::string>()));
 
         m_hierarchyStep = meta.findChild("step").value<uint64_t>();
-        m_info.reset(new EptInfo(info));
+//ABELL
+//        m_info.reset(new EptInfo(info));
 
         for (auto el : keys.items())
             m_hierarchy[Key(el.key())] = el.value().get<uint64_t>();
@@ -146,8 +148,11 @@ void EptAddonWriter::write(const PointViewPtr view)
 {
     for (const auto& addon : m_addons)
     {
+//ABELL
+/**
         log()->get(LogLevel::Debug) << "Writing addon dimension " <<
             addon->name() << " to " << addon->ep().prefixedRoot() << std::endl;
+**/
 
         writeOne(view, *addon);
 
@@ -161,10 +166,13 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     buffers.reserve(m_hierarchy.size());
 
     // Create an addon buffer for each node we're going to write.
+//ABELL
+/**
     for (const auto& p : m_hierarchy)
     {
         buffers.emplace_back(p.second * addon.size(), 0);
     }
+**/
 
     // Fill in our buffers with the data from the view.
     PointRef pr(*view);
@@ -182,13 +190,17 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
         nodeId -= 1;
         pointId = pr.getFieldAs<uint64_t>(m_pointIdDim);
 
+/**
         auto& buffer(buffers.at(nodeId));
         assert(pointId * addon.size() + addon.size() <= buffer.size());
         char* dst = buffer.data() + pointId * addon.size();
         pr.getField(dst, addon.id(), addon.type());
+**/
     }
 
+/**
     const arbiter::Endpoint& ep(addon.ep());
+
     const arbiter::Endpoint dataEp(ep.getSubEndpoint("ept-data"));
     const arbiter::Endpoint hierEp(ep.getSubEndpoint("ept-hierarchy"));
 
@@ -213,8 +225,10 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     }
 
     m_pool->await();
+**/
 
     // Write the addon hierarchy data.
+/**
     NL::json h;
     Key key;
     key.b = m_info->bounds();
@@ -231,6 +245,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     meta["dataType"] = "binary";
 
     ep.put("ept-addon.json", meta.dump());
+**/
 }
 
 void EptAddonWriter::writeHierarchy(NL::json& curr, const Key& key,

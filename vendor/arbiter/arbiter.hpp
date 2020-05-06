@@ -3185,6 +3185,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
+using StringMap = std::map<std::string, std::string>;
+
 /** @brief Exception class for all internally thrown runtime errors. */
 class ArbiterError : public std::runtime_error
 {
@@ -3196,10 +3198,10 @@ namespace http
 {
 
 /** HTTP header fields. */
-using Headers = std::map<std::string, std::string>;
+using Headers = StringMap;
 
 /** HTTP query parameters. */
-using Query = std::map<std::string, std::string>;
+using Query = StringMap;
 
 /** @cond arbiter_internal */
 
@@ -5144,6 +5146,9 @@ class ARBITER_DLL Endpoint
     friend class Arbiter;
 
 public:
+    Endpoint() : m_driver(nullptr)
+    {}
+
     /** Returns root directory name without any type-prefixing, and will
      * always end with the character `/`.  For example `~/data/`, or
      * `my-bucket/nested-directory/`.

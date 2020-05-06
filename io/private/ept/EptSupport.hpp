@@ -36,6 +36,7 @@
 
 #include <condition_variable>
 
+#include <list>
 #include <queue>
 #include <thread>
 #include <vector>
@@ -54,6 +55,9 @@
 
 namespace pdal
 {
+
+using StringMap = std::map<std::string, std::string>;
+using BasePointTablePtr = std::unique_ptr<BasePointTable>;
 
 class ept_error : public pdal_error
 {
@@ -172,6 +176,11 @@ public:
     }
 };
 
+inline bool operator==(const Key& a, const Key& b)
+{
+    return a.d == b.d && a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
 inline bool operator<(const Key& a, const Key& b)
 {
     if (a.d < b.d) return true;
@@ -187,97 +196,64 @@ inline bool operator<(const Key& a, const Key& b)
     return false;
 }
 
-using EptHierarchy = std::map<Key, uint64_t>;
+struct Overlap
+{
+    Key m_key;
+    point_count_t m_count;
+};
+
+class Endpoint
+{
+    arbiter::Endpoint m_ep;
+    StringMap m_headers;
+    StringMap m_query;
+
+public:
+    Endpoint();
+    Endpoint(const arbiter::Arbiter& arbiter, const std::string& root,
+        const StringMap& headers, const StringMap& query);
+
+    std::string get(const std::string& path) const;
+    NL::json getJson(const std::string& path) const;
+    std::vector<char> getBinary(const std::string& path) const;
+    arbiter::LocalHandle getLocalHandle(const std::string& path) const;
+};
 
 class PDAL_DLL Addon
 {
 public:
-    Addon(const PointLayout& layout, const arbiter::Endpoint& ep,
-            Dimension::Id id)
-        : m_ep(ep)
-        , m_id(id)
-        , m_type(layout.dimType(m_id))
-        , m_size(layout.dimSize(m_id))
-        , m_name(layout.dimName(m_id))
-    { }
+    Addon(const Endpoint& endpoint, const std::string& dimName,
+            Dimension::Type type) :
+        m_endpoint(endpoint), m_name(dimName), m_type(type)
+    { m_srcId = m_layout.registerOrAssignDim(dimName, type); }
 
-    const arbiter::Endpoint& ep() const { return m_ep; }
-    Dimension::Id id() const { return m_id; }
-    Dimension::Type type() const { return m_type; }
-    uint64_t size() const { return m_size; }
-    const std::string& name() const { return m_name; }
-
-    EptHierarchy& hierarchy() { return m_hierarchy; }
-    uint64_t points(const Key& key) const
-    {
-        return m_hierarchy.count(key) ? m_hierarchy.at(key) : 0;
-    }
-
-private:
-    const arbiter::Endpoint m_ep;
-
-    const Dimension::Id m_id = Dimension::Id::Unknown;
-    const Dimension::Type m_type = Dimension::Type::None;
-    const uint64_t m_size = 0;
-    const std::string m_name;
-
-    EptHierarchy m_hierarchy;
-};
-
-class PDAL_DLL EptInfo
-{
-public:
-    enum class DataType
-    {
-        Laszip,
-        Binary,
-        Zstandard
-    };
-
-    EptInfo(const NL::json& info);
-
-    const BOX3D& bounds() const { return m_bounds; }
-    uint64_t points() const { return m_points; }
-    uint64_t span() const { return m_span; }
-    DataType dataType() const { return m_dataType; }
-    const SpatialReference& srs() const { return m_srs; }
-    const NL::json& schema() const { return m_info["schema"]; }
-    const NL::json dim(std::string name) const
-    {
-        NL::json j;
-        for (auto el : schema())
-        {
-            if (el["name"].get<std::string>() == name)
-            {
-                j = el;
-                break;
-            }
-        }
-        return j;
-    }
-
-    uint64_t sources() const { return m_info["sources"].get<uint64_t>(); }
-
-    const NL::json& json() { return m_info; }
+    const Endpoint& endpoint() const
+        { return m_endpoint; }
+    const std::string& name() const
+        { return m_name; }
+    Dimension::Type type() const
+        { return m_type; }
+    Dimension::Id srcId() const
+        { return m_srcId; }
+    Dimension::Id dstId() const
+        { return m_dstId; }
+    void setDstId(Dimension::Id dstId)
+        { m_dstId = dstId; }
+    std::list<Overlap>& overlaps()
+        { return m_overlaps; }
+    PointLayout& layout() const
+        { return const_cast<PointLayout &>(m_layout); }
 
 private:
-    // Info comes from the values here:
-    // https://entwine.io/entwine-point-tile.html#ept-json
-    const NL::json m_info;
-    BOX3D m_bounds;
-    uint64_t m_points = 0;
+    Endpoint m_endpoint;
+    std::string m_name;
+    Dimension::Type m_type;
+    Dimension::Id m_srcId;
+    Dimension::Id m_dstId;
 
-    // The span is the length, width, and depth of the octree grid.  For
-    // example, a dataset oriented as a 256*256*256 octree grid would have a
-    // span of 256.
-    //
-    // See: https://entwine.io/entwine-point-tile.html#span
-    uint64_t m_span = 0;
-
-    DataType m_dataType;
-    SpatialReference m_srs;
+    std::list<Overlap> m_overlaps;
+    PointLayout m_layout;
 };
-
 
 class FixedPointLayout : public PointLayout
 {
@@ -317,88 +293,98 @@ protected:
     }
 };
 
+class PDAL_DLL EptInfo
+{
+public:
+    enum class DataType
+    {
+        Laszip,
+        Binary,
+        Zstandard
+    };
+
+    EptInfo(const std::string& filename, const NL::json& headers,
+        const NL::json& query);
+
+    const BOX3D& bounds() const { return m_bounds; }
+    const BOX3D& boundsConforming() const { return m_boundsConforming; }
+    uint64_t points() const { return m_points; }
+    uint64_t span() const { return m_span; }
+    DataType dataType() const { return m_dataType; }
+    const SpatialReference& srs() const { return m_srs; }
+    void setHttpForwards(NL::json headers, NL::json query);
+    const NL::json& json() { return m_info; }
+    void loadAddonInfo(const NL::json& addSpec);
+    const Endpoint& endpoint() const { return m_endpoint; }
+    std::map<std::string, DimType>& dims() { return m_dims; }
+    DimType dimType(Dimension::Id id) const;
+    std::vector<Addon>& addons() { return m_addons; }
+    const std::vector<Addon>& addons() const { return m_addons; }
+    PointLayout& remoteLayout() { return m_remoteLayout; }
+
+private:
+    arbiter::Arbiter m_arbiter;
+    // Info comes from the values here:
+    // https://entwine.io/entwine-point-tile.html#ept-json
+    NL::json m_info;
+    Endpoint m_endpoint;
+    BOX3D m_bounds;
+    BOX3D m_boundsConforming;
+    uint64_t m_points = 0;
+    std::map<std::string, DimType> m_dims;
+    FixedPointLayout m_remoteLayout;
+    std::vector<Addon> m_addons;
+
+    // The span is the length, width, and depth of the octree grid.  For
+    // example, a dataset oriented as a 256*256*256 octree grid would have a
+    // span of 256.
+    //
+    // See: https://entwine.io/entwine-point-tile.html#span
+    uint64_t m_span = 0;
+
+    DataType m_dataType;
+    SpatialReference m_srs;
+    arbiter::http::Headers m_headers;
+    arbiter::http::Query m_query;
+
+    void loadAddon(const std::string& dimName, const std::string& root);
+};
+
+
 class PDAL_DLL VectorPointTable : public SimplePointTable
 {
 public:
-    VectorPointTable(PointLayout& layout) : SimplePointTable(layout) { }
-    virtual bool supportsView() const override { return true; }
-    void clear() { m_buffer.clear(); }
+    VectorPointTable(PointLayout& layout) : SimplePointTable(layout)
+    {}
+
+    virtual PointId addPoint() override
+    {
+        return 0;
+    }
+
+    virtual bool supportsView() const override
+    {
+        return true;
+    }        
+
     std::size_t numPoints() const
     {
         return m_buffer.size() / m_layoutRef.pointSize();
     }
 
-protected:
-    virtual PointId addPoint() override
+    std::vector<char>& buffer()
     {
-        m_buffer.resize(m_buffer.size() + m_layoutRef.pointSize(), 0);
-        return numPoints() - 1;
+        return m_buffer;
     }
 
+protected:
     virtual char* getPoint(PointId id) override
     {
         return m_buffer.data() + pointsToBytes(id);
     }
 
+private:
     std::vector<char> m_buffer;
-};
-
-class PDAL_DLL ShallowPointTable : public BasePointTable
-{
-    // PointTable semantics around a raw buffer of data matching the specified
-    // layout.  Intended for accessing data from a remote source.
-public:
-    ShallowPointTable(PointLayout& layout, char* data, std::size_t size)
-        : BasePointTable(layout)
-        , m_data(data)
-        , m_size(size)
-    {}
-
-    std::size_t numPoints() const { return m_size / layout()->pointSize(); }
-
-protected:
-    virtual PointId addPoint() override
-    {
-        throw ept_error("Cannot add points to ShallowPointTable");
-    }
-
-    virtual char* getPoint(PointId i) override
-    {
-        return m_data + i * layout()->pointSize();
-    }
-
-    // Identical to SimplePointTable's implementation.
-    void setFieldInternal(Dimension::Id id, PointId idx, const void* value)
-        override
-    {
-        const Dimension::Detail* d = layout()->dimDetail(id);
-        const char* src  = (const char*)value;
-        char* dst = getDimension(d, idx);
-        std::copy(src, src + d->size(), dst);
-    }
-
-    void getFieldInternal(Dimension::Id id, PointId idx, void* value) const
-        override
-    {
-        const Dimension::Detail* d = layout()->dimDetail(id);
-        const char* src = getDimension(d, idx);
-        char* dst = (char*)value;
-        std::copy(src, src + d->size(), dst);
-    }
-
-    char *getDimension(const Dimension::Detail* d, PointId idx)
-    {
-        return getPoint(idx) + d->offset();
-    }
-
-    const char *getDimension(const Dimension::Detail* d, PointId idx) const
-    {
-        ShallowPointTable* ncThis = const_cast<ShallowPointTable*>(this);
-        return ncThis->getPoint(idx) + d->offset();
-    }
-
-    char* m_data;
-    std::size_t m_size;
 };
 
 class PDAL_DLL Pool

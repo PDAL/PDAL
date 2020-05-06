@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <numeric>
 #include <iomanip>
 
 #include <pdal/EigenUtils.hpp>
@@ -50,12 +51,31 @@ m_size(0), m_id(0)
 	m_id = ++m_lastId;
 }
 
+// Special constructor that creates a view that maps to the first 'size'
+// points in a point table.
+PointView::PointView(PointTableRef pointTable, point_count_t size) :
+    m_pointTable(pointTable), m_index(size), m_size(size), m_id(0)
+{
+    m_id = ++m_lastId;
+    std::iota(m_index.begin(), m_index.end(), 0);
+}
+
 PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
 	m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
 {
 	m_id = ++m_lastId;
 }
 
+// Special constructor that creates a view that maps to the first 'size'
+// points in a point table.
+PointView::PointView(PointTableRef pointTable, const SpatialReference& srs,
+        point_count_t size) :
+    m_pointTable(pointTable), m_index(size), m_size(size), m_id(0),
+    m_spatialReference(srs)
+{
+    m_id = ++m_lastId;
+    std::iota(m_index.begin(), m_index.end(), 0);
+}
 
 PointView::~PointView()
 {}
