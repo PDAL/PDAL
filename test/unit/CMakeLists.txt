@@ -209,6 +209,7 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
 
 #
 # sources for the native filters
