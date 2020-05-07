@@ -273,6 +273,7 @@ PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
+PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
@@ -282,6 +283,11 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
 )
 PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_planefit_test
+    FILES
+        filters/PlaneFitFilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
