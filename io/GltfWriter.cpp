@@ -240,17 +240,20 @@ void GltfWriter::writeJsonChunk()
         elementSize += sizeof(float) * 3; // R, G, B
     }
 
-    int bufferViewCount = 0;
+    NL::json mesh;
     uint16_t nextAccessorIndex = 0;
-    uint16_t normalAccessorIndex = 0;
-    uint16_t colorAccessorIndex = 0;
-    uint16_t positionAccessorIndex = 0;
-    uint16_t faceAccessorIndex = 0;
+    uint16_t nextBufferViewIndex = 0;
     for (const ViewData& vd : m_viewData)
     {
+        uint16_t normalAccessorIndex = 0;
+        uint16_t colorAccessorIndex = 0;
+        uint16_t positionAccessorIndex = 0;
+        uint16_t faceAccessorIndex = 0;
+        NL::json meshAttributes({});
+
         // Buffer views
         // Vertex indices (faces)
-        const uint16_t faceBufferViewIndex = 0;
+        const uint16_t faceBufferViewIndex = nextBufferViewIndex++;
         j["bufferViews"].push_back(
             {
                 { "buffer", 0 },
@@ -260,7 +263,7 @@ void GltfWriter::writeJsonChunk()
             }
         );
         // Vertex attributes (positions, normals, and colors)
-        const uint16_t vertexAttributeBufferViewIndex = 1;
+        const uint16_t vertexAttributeBufferViewIndex = nextBufferViewIndex++;
         j["bufferViews"].push_back(
             {
                 { "buffer", 0 },
@@ -298,6 +301,7 @@ void GltfWriter::writeJsonChunk()
                 { "max", { b.maxx, b.maxy, b.maxz } }
             }
         );
+        meshAttributes["POSITION"] = positionAccessorIndex;
 
         if (m_writeNormals) {
             byteOffset += sizeof(float) * 3;
@@ -312,6 +316,7 @@ void GltfWriter::writeJsonChunk()
                     { "count", vd.m_vertexCount },
                 }
             );
+            meshAttributes["NORMAL"] = normalAccessorIndex;
         }
 
         if (m_colorVertices) {
@@ -327,26 +332,17 @@ void GltfWriter::writeJsonChunk()
                     { "count", vd.m_vertexCount },
                 }
             );
+            meshAttributes["COLOR_0"] = colorAccessorIndex;
         }
-    }
 
-    NL::json meshAttributes({});
-    meshAttributes["POSITION"] = positionAccessorIndex;
-    if (m_writeNormals) {
-        meshAttributes["NORMAL"] = normalAccessorIndex;
+        mesh["primitives"].push_back(
+            {
+                { "attributes", meshAttributes },
+                { "indices", faceBufferViewIndex },
+                { "material", 0 }
+            }
+        );
     }
-    if (m_colorVertices) {
-        meshAttributes["COLOR_0"] = colorAccessorIndex;
-    }
-
-    NL::json mesh;
-    mesh["primitives"].push_back(
-        {
-            { "attributes", meshAttributes },
-            { "indices", 0 },
-            { "material", 0 }
-        }
-    );
 
     j["meshes"].push_back(mesh);
     j["scene"] = 0;
