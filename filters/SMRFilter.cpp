@@ -599,6 +599,10 @@ std::vector<double> SMRFilter::knnfill(PointViewPtr view,
         }
     }
 
+    // https://github.com/PDAL/PDAL/issues/2794#issuecomment-625297062
+    if (!temp->size())
+        return cz;
+
     KD2Index& kdi = temp->build2dIndex();
 
     // Where the raster has voids (i.e., NaN), we search for that cell's eight
