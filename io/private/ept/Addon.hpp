@@ -32,72 +32,63 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "EptSupport.hpp"
+#pragma once
 
-#include <pdal/util/Utils.hpp>
+#include <list>
+#include <string>
+
+#include <pdal/JsonFwd.hpp>
+#include <pdal/PointLayout.hpp>
+
+#include "Overlap.hpp"
 
 namespace pdal
 {
 
-namespace
+class Addon;
+class Connector;
+using AddonList = std::vector<Addon>;
+
+class Addon
 {
+public:
+    Addon(const std::string& dimName, const std::string& filename,
+            Dimension::Type type) :
+        m_name(dimName), m_filename(filename), m_type(type)
+    { m_srcId = m_layout.registerOrAssignDim(dimName, type); }
 
-/**
-void setForwards(const NL::json& fwd, arbiter::StringMap& map,
-    const std::string& type)
-{
-    if (fwd.is_null())
-        return;
-    if (!fwd.is_object())
-        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
-    for (auto& entry : fwd.items())
-    {
-        if (!entry.value().is_string())
-            throw pdal_error("Invalid '" + type + "' parameters: "
-                "expected string->string mapping.");
-        map[entry.key()] = entry.value().get<std::string>();
-    }
-}
-**/
+    std::string name() const
+        { return m_name; }
+    Dimension::Type type() const
+        { return m_type; }
+    Dimension::Id srcId() const
+        { return m_srcId; }
+    Dimension::Id dstId() const
+        { return m_dstId; }
+    void setDstId(Dimension::Id dstId)
+        { m_dstId = dstId; }
+    std::list<Overlap>& overlaps()
+        { return m_overlaps; }
+    PointLayout& layout() const
+        { return const_cast<PointLayout &>(m_layout); }
+    std::string dataDir() const;
+    std::string hierarchyDir() const;
+    static AddonList load(const Connector& connector, const NL::json& spec,
+        bool dimAsKey);
 
-} // Unnamed namespace
+private:
+    std::string m_name;
+    std::string m_filename;
+    Dimension::Type m_type;
+    Dimension::Id m_srcId;
+    Dimension::Id m_dstId;
 
-/**
-void EptInfo::loadAddonInfo(const NL::json& addonSpec)
-{
-    std::string filename;
-    try
-    {
-        // These could be launched in threads but we'd have to 
-        // 1) lock the addon list
-        // 2) do something about exception propagation.
-        for (auto it : addonSpec.items())
-        {
-            std::string dimName = it.key();
-            const NL::json& val = it.value();
+    std::list<Overlap> m_overlaps;
+    PointLayout m_layout;
 
-            std::string filename = val.get<std::string>();
-            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
-        }
-    }
-    catch (NL::json::parse_error&)
-    {
-        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
-    }
-}
-
-
-void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
-{
-    Endpoint ep(m_arbiter, root, m_headers, m_query);
-    NL::json info = ep.getJson("ept-addon.json");
-    std::string typestring = info["type"].get<std::string>();
-    uint64_t size = info["size"].get<uint64_t>();
-    Dimension::Type type = Dimension::type(typestring, size);
-
-    m_addons.emplace_back(ep, dimName, type);
-}
-**/
+    static Addon loadAddon(const Connector& connector,
+        const std::string& dimName, const std::string& filename);
+};
 
 } // namespace pdal
 

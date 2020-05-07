@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2018, Connor Manning
+ * Copyright (c) 2020, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -32,72 +32,52 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "EptSupport.hpp"
+#include <pdal/util/Algorithm.hpp>
 
-#include <pdal/util/Utils.hpp>
+#include "FixedPointLayout.hpp"
 
 namespace pdal
 {
 
-namespace
+bool FixedPointLayout::update(Dimension::Detail dimDetail,
+    const std::string& name)
 {
+    if (m_finalized)
+        return m_propIds.count(name);
 
-/**
-void setForwards(const NL::json& fwd, arbiter::StringMap& map,
-    const std::string& type)
-{
-    if (fwd.is_null())
-        return;
-    if (!fwd.is_object())
-        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
-    for (auto& entry : fwd.items())
+    if (!Utils::contains(m_used, dimDetail.id()))
     {
-        if (!entry.value().is_string())
-            throw pdal_error("Invalid '" + type + "' parameters: "
-                "expected string->string mapping.");
-        map[entry.key()] = entry.value().get<std::string>();
-    }
-}
-**/
+        dimDetail.setOffset(m_pointSize);
 
-} // Unnamed namespace
+        m_pointSize += dimDetail.size();
+        m_used.push_back(dimDetail.id());
+        m_detail[Utils::toNative(dimDetail.id())] = dimDetail;
 
-/**
-void EptInfo::loadAddonInfo(const NL::json& addonSpec)
-{
-    std::string filename;
-    try
-    {
-        // These could be launched in threads but we'd have to 
-        // 1) lock the addon list
-        // 2) do something about exception propagation.
-        for (auto it : addonSpec.items())
-        {
-            std::string dimName = it.key();
-            const NL::json& val = it.value();
+        return true;
+    }
 
-            std::string filename = val.get<std::string>();
-            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
-        }
-    }
-    catch (NL::json::parse_error&)
-    {
-        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
-    }
+    return false;
 }
 
-
-void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
+void FixedPointLayout::registerFixedDim(const Dimension::Id id,
+    const Dimension::Type type)
 {
-    Endpoint ep(m_arbiter, root, m_headers, m_query);
-    NL::json info = ep.getJson("ept-addon.json");
-    std::string typestring = info["type"].get<std::string>();
-    uint64_t size = info["size"].get<uint64_t>();
-    Dimension::Type type = Dimension::type(typestring, size);
-
-    m_addons.emplace_back(ep, dimName, type);
+    Dimension::Detail dd = m_detail[Utils::toNative(id)];
+    dd.setType(type);
+    update(dd, Dimension::name(id));
 }
-**/
+
+Dimension::Id FixedPointLayout::registerOrAssignFixedDim(const std::string name,
+    const Dimension::Type type)
+{
+    Dimension::Id id = Dimension::id(name);
+    if (id != Dimension::Id::Unknown)
+    {
+        registerFixedDim(id, type);
+        return id;
+    }
+    return assignDim(name, type);
+}
 
 } // namespace pdal
 

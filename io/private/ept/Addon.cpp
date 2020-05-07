@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2018, Connor Manning
+ * Copyright (c) 2020, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -32,72 +32,61 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "EptSupport.hpp"
+#include <nlohmann/json.hpp>
 
-#include <pdal/util/Utils.hpp>
+#include <pdal/util/FileUtils.hpp>
+
+#include "Addon.hpp"
+#include "Connector.hpp"
 
 namespace pdal
 {
 
-namespace
+std::string Addon::dataDir() const
 {
-
-/**
-void setForwards(const NL::json& fwd, arbiter::StringMap& map,
-    const std::string& type)
-{
-    if (fwd.is_null())
-        return;
-    if (!fwd.is_object())
-        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
-    for (auto& entry : fwd.items())
-    {
-        if (!entry.value().is_string())
-            throw pdal_error("Invalid '" + type + "' parameters: "
-                "expected string->string mapping.");
-        map[entry.key()] = entry.value().get<std::string>();
-    }
+    return FileUtils::getDirectory(m_filename) + "ept-data/";
 }
-**/
 
-} // Unnamed namespace
-
-/**
-void EptInfo::loadAddonInfo(const NL::json& addonSpec)
+std::string Addon::hierarchyDir() const
 {
+    return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
+}
+
+AddonList Addon::load(const Connector& connector, const NL::json& spec,
+    bool dimAsKey)
+{
+    AddonList addons;
     std::string filename;
     try
     {
-        // These could be launched in threads but we'd have to 
-        // 1) lock the addon list
-        // 2) do something about exception propagation.
-        for (auto it : addonSpec.items())
+        for (auto it : spec.items())
         {
             std::string dimName = it.key();
-            const NL::json& val = it.value();
+            std::string filename = it.value().get<std::string>();
+            if (!dimAsKey)
+                std::swap(dimName, filename);
 
-            std::string filename = val.get<std::string>();
-            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
+            addons.push_back(loadAddon(connector, dimName, filename));
         }
     }
     catch (NL::json::parse_error&)
     {
         throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
     }
+    return addons;
 }
 
 
-void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
+Addon Addon::loadAddon(const Connector& connector,
+    const std::string& dimName, const std::string& filename)
 {
-    Endpoint ep(m_arbiter, root, m_headers, m_query);
-    NL::json info = ep.getJson("ept-addon.json");
+    NL::json info = connector.getJson(filename);
     std::string typestring = info["type"].get<std::string>();
     uint64_t size = info["size"].get<uint64_t>();
     Dimension::Type type = Dimension::type(typestring, size);
 
-    m_addons.emplace_back(ep, dimName, type);
+    return Addon(dimName, filename, type);
 }
-**/
 
 } // namespace pdal
 

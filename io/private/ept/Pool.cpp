@@ -32,72 +32,65 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "EptSupport.hpp"
-
-#include <pdal/util/Utils.hpp>
+#include "Pool.hpp"
 
 namespace pdal
 {
 
-namespace
+void Pool::work()
 {
-
-/**
-void setForwards(const NL::json& fwd, arbiter::StringMap& map,
-    const std::string& type)
-{
-    if (fwd.is_null())
-        return;
-    if (!fwd.is_object())
-        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
-    for (auto& entry : fwd.items())
+    while (true)
     {
-        if (!entry.value().is_string())
-            throw pdal_error("Invalid '" + type + "' parameters: "
-                "expected string->string mapping.");
-        map[entry.key()] = entry.value().get<std::string>();
-    }
-}
-**/
-
-} // Unnamed namespace
-
-/**
-void EptInfo::loadAddonInfo(const NL::json& addonSpec)
-{
-    std::string filename;
-    try
-    {
-        // These could be launched in threads but we'd have to 
-        // 1) lock the addon list
-        // 2) do something about exception propagation.
-        for (auto it : addonSpec.items())
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_consumeCv.wait(lock, [this]()
         {
-            std::string dimName = it.key();
-            const NL::json& val = it.value();
+            return m_tasks.size() || !m_running;
+        });
 
-            std::string filename = val.get<std::string>();
-            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
+        if (m_tasks.size())
+        {
+            ++m_outstanding;
+            auto task(std::move(m_tasks.front()));
+            m_tasks.pop();
+
+            lock.unlock();
+
+            // Notify add(), which may be waiting for a spot in the queue.
+            m_produceCv.notify_all();
+
+            std::string err;
+            try
+            {
+                task();
+            }
+            catch (std::exception& e)
+            {
+                err = e.what();
+            }
+            catch (...)
+            {
+                err = "Unknown error";
+            }
+
+            lock.lock();
+            --m_outstanding;
+            if (err.size())
+            {
+                if (m_verbose)
+                    std::cout << "Exception in pool task: " << err << std::endl;
+                m_errors.push_back(err);
+            }
+            lock.unlock();
+
+            // Notify await(), which may be waiting for a running task.
+            m_produceCv.notify_all();
+        }
+        else if (!m_running)
+        {
+            return;
         }
     }
-    catch (NL::json::parse_error&)
-    {
-        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
-    }
 }
-
-
-void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
-{
-    Endpoint ep(m_arbiter, root, m_headers, m_query);
-    NL::json info = ep.getJson("ept-addon.json");
-    std::string typestring = info["type"].get<std::string>();
-    uint64_t size = info["size"].get<uint64_t>();
-    Dimension::Type type = Dimension::type(typestring, size);
-
-    m_addons.emplace_back(ep, dimName, type);
-}
-**/
 
 } // namespace pdal
 

@@ -423,6 +423,15 @@ LocalHandle Arbiter::getLocalHandle(
     return getLocalHandle(path, getEndpoint(tempPath));
 }
 
+LocalHandle Arbiter::getLocalHandle(
+        const std::string path,
+        http::Headers headers,
+        http::Query query) const
+{
+    const Endpoint fromEndpoint(getEndpoint(getDirname(path)));
+    return fromEndpoint.getLocalHandle(path, headers, query);
+}
+
 } // namespace arbiter
 
 #ifdef ARBITER_CUSTOM_NAMESPACE

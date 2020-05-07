@@ -35,19 +35,22 @@
 #include <io/LasReader.hpp>
 #include <pdal/compression/ZstdCompression.hpp>
 
+#include "Connector.hpp"
+#include "EptInfo.hpp"
 #include "TileContents.hpp"
+#include "VectorPointTable.hpp"
 
-    namespace pdal
-    {
+namespace pdal
+{
 
-    void TileContents::read()
-    {
-        if (m_info->dataType() == EptInfo::DataType::Laszip)
+void TileContents::read()
+{
+    if (m_info.dataType() == EptInfo::DataType::Laszip)
         readLaszip();
-    else if (m_info->dataType() == EptInfo::DataType::Binary)
+    else if (m_info.dataType() == EptInfo::DataType::Binary)
         readBinary();
 #ifdef PDAL_HAVE_ZSTD
-    else if (m_info->dataType() == EptInfo::DataType::Zstandard)
+    else if (m_info.dataType() == EptInfo::DataType::Zstandard)
         readZstandard();
 #endif
     else
@@ -55,7 +58,7 @@
 
     // Read addon information after the native data, we'll possibly
     // overwrite attributes.
-    for (const Addon& addon : m_info->addons())
+    for (const Addon& addon : m_addons)
         readAddon(addon, m_view->size());
 }
 
@@ -64,8 +67,8 @@ void TileContents::readLaszip()
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
-    std::string filename = "ept-data/" + m_overlap.m_key.toString() + ".laz";
-    auto handle = m_info->endpoint().getLocalHandle(filename);
+    std::string filename = m_info.dataDir() + key().toString() + ".laz";
+    auto handle = m_connector.getLocalHandle(filename);
 
     m_table.reset(new PointTable);
 
@@ -87,10 +90,10 @@ void TileContents::readLaszip()
 
 void TileContents::readBinary()
 {
-    std::string filename = "ept-data/" + m_overlap.m_key.toString() + ".bin";
-    auto data(m_info->endpoint().getBinary(filename));
+    std::string filename = m_info.dataDir() + key().toString() + ".bin";
+    auto data(m_connector.getBinary(filename));
 
-    VectorPointTable *vpt = new VectorPointTable(m_info->remoteLayout());
+    VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
     m_view.reset(new PointView(*m_table, vpt->numPoints()));
@@ -101,8 +104,8 @@ void TileContents::readBinary()
 #ifdef PDAL_HAVE_ZSTD
 void TileContents::readZstandard()
 {
-    std::string filename = "ept-data/" + m_overlap.m_key.toString() + ".zst";
-    auto compressed(m_info->endpoint().getBinary(filename));
+    std::string filename = m_info.dataDir() + key().toString() + ".zst";
+    auto compressed(m_connector.getBinary(filename));
     std::vector<char> data;
     pdal::ZstdDecompressor dec([&data](char* pos, std::size_t size)
     {
@@ -111,7 +114,7 @@ void TileContents::readZstandard()
 
     dec.decompress(compressed.data(), compressed.size());
 
-    VectorPointTable *vpt = new VectorPointTable(m_info->remoteLayout());
+    VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
     m_view.reset(new PointView(*m_table, vpt->numPoints()));
@@ -126,20 +129,17 @@ void TileContents::readZstandard() const
 
 void TileContents::readAddon(const Addon& addon, size_t expectedPts)
 {
-    const Key& key = m_overlap.m_key;
-    point_count_t np = m_overlap.m_count;
-
-    if (np == 0)
+    if (size() == 0)
         return;
 
     // If the addon hierarchy exists, it must match the EPT data.
-    if (np != expectedPts)
+    if (size() != expectedPts)
         throw pdal_error("Invalid addon hierarchy");
 
-    std::string filename = "ept-data/" + key.toString() + ".bin";
-    const auto data(addon.endpoint().getBinary(filename));
+    std::string filename = addon.dataDir() + key().toString() + ".bin";
+    const auto data(m_connector.getBinary(filename));
 
-    if (np * Dimension::size(addon.type()) != data.size())
+    if (size() * Dimension::size(addon.type()) != data.size())
         throw pdal_error("Invalid addon content length");
 
     VectorPointTable *vpt = new VectorPointTable(addon.layout());
@@ -152,9 +152,9 @@ void TileContents::transform()
     using D = Dimension::Id;
 
     // Shorten long name.
-    const XForm& xf = m_info->dimType(Dimension::Id::X).m_xform;
-    const XForm& yf = m_info->dimType(Dimension::Id::Y).m_xform;
-    const XForm& zf = m_info->dimType(Dimension::Id::Z).m_xform;
+    const XForm& xf = m_info.dimType(Dimension::Id::X).m_xform;
+    const XForm& yf = m_info.dimType(Dimension::Id::Y).m_xform;
+    const XForm& zf = m_info.dimType(Dimension::Id::Z).m_xform;
 
     for (PointRef p : *m_view)
     {

@@ -36,34 +36,49 @@
 
 #include <limits>
 
-#include "private/ept/EptSupport.hpp"
-#include "private/ept/TileContents.hpp"
-
-#include "LasReader.hpp"
-
-#include <arbiter/arbiter.hpp>
-#include <nlohmann/json.hpp>
-
 #include <pdal/GDALUtils.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
-#include <pdal/compression/ZstdCompression.hpp>
-#include <pdal/util/Algorithm.hpp>
-#include "../filters/CropFilter.hpp"
+
+#include "private/ept/Connector.hpp"
+#include "private/ept/EptInfo.hpp"
+#include "private/ept/EptSupport.hpp"
+#include "private/ept/Pool.hpp"
+#include "private/ept/TileContents.hpp"
 
 namespace pdal
 {
 
 namespace
 {
-    const StaticPluginInfo s_info
-    {
-        "readers.ept",
-        "EPT Reader",
-        "http://pdal.io/stages/reader.ept.html",
-        { "ept" }
-    };
 
-    const std::string addonFilename { "ept-addon.json" };
+const StaticPluginInfo s_info
+{
+    "readers.ept",
+    "EPT Reader",
+    "http://pdal.io/stages/reader.ept.html",
+    { "ept" }
+};
+
+const std::string addonFilename { "ept-addon.json" };
+
+StringMap toStringMap(const NL::json& fwd)
+{
+    StringMap map;
+
+    if (fwd.is_null())
+        return map;
+    if (!fwd.is_object())
+        throw pdal_error("Not an object type.");
+    for (auto& entry : fwd.items())
+    {
+        if (!entry.value().is_string())
+            throw pdal_error("Expected string type.");
+        map.insert({entry.key(), entry.value().get<std::string>()});
+    }
+    return map;
+}
+
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -144,6 +159,27 @@ void EptReader::addArgs(ProgramArgs& args)
 }
 
 
+void EptReader::setForwards(StringMap& headers, StringMap& query)
+{
+    try
+    {
+        headers = toStringMap(m_args->m_headers);
+    }
+    catch (const pdal_error& err)
+    {
+        throwError(std::string("Error parsing 'headers': ") + err.what());
+    }
+
+    try
+    {
+        query = toStringMap(m_args->m_query);
+    }
+    catch (const pdal_error& err)
+    {
+        throwError(std::string("Error parsing 'query': ") + err.what());
+    }
+}
+
 void EptReader::initialize()
 {
     auto& debug(log()->get(LogLevel::Debug));
@@ -156,8 +192,14 @@ void EptReader::initialize()
     }
     m_pool.reset(new Pool(threads));
 
-    m_info.reset(new EptInfo(m_filename, m_args->m_headers, m_args->m_query));
+    StringMap headers;
+    StringMap query;
+    setForwards(headers, query);
+    m_connector.reset(new Connector(headers, query));
+
+    m_info.reset(new EptInfo(m_filename, *m_connector));
     setSpatialReference(m_info->srs());
+    m_addons = Addon::load(*m_connector, m_args->m_addons, true);
 
     if (!m_args->m_ogr.is_null())
     {
@@ -227,8 +269,6 @@ void EptReader::initialize()
 
     debug << "Query bounds: " << m_queryBounds << "\n";
     debug << "Threads: " << m_pool->size() << std::endl;
-
-    m_info->loadAddonInfo(m_args->m_addons);
 }
 
 void EptReader::handleOriginQuery()
@@ -241,7 +281,8 @@ void EptReader::handleOriginQuery()
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
-    const NL::json sources(m_info->endpoint().getJson("ept-sources/list.json"));
+    std::string filename = m_info->sourcesDir() + "list.json";
+    const NL::json sources(m_connector->getJson(filename));
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
     if (!sources.is_array())
@@ -351,7 +392,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             layout->registerOrAssignDim(name, dt.m_type);
     }
 
-    for (Addon& addon : m_info->addons())
+    for (Addon& addon : m_addons)
         addon.setDstId(layout->registerOrAssignDim(addon.name(), addon.type()));
 }
 
@@ -363,7 +404,7 @@ void EptReader::load(const Overlap& overlap)
     m_pool->add([this, overlap]()
         {
             // Read the tile.
-            TileContents tile(overlap, m_info.get());
+            TileContents tile(overlap, *m_info, *m_connector, m_addons);
             tile.read();
 
             // Put the tile on the output queue.
@@ -467,27 +508,27 @@ void EptReader::overlaps()
     // thread pool.
     Key key;
     key.b = m_info->bounds();
-    const std::string file("ept-hierarchy/" + key.toString() + ".json");
 
     {
-        const NL::json root = m_info->endpoint().getJson(file);
+        std::string filename =
+            m_info->hierarchyDir() + key.toString() + ".json";
+
         // First, determine the overlapping nodes from the EPT resource.
-        overlaps(m_info->endpoint(), m_overlaps, root, key);
+        overlaps(m_overlaps, m_connector->getJson(filename), key);
         m_pool->await();
     }
 
     // Determine the addons that exist to correspond to tiles.
-    for (auto& addon : m_info->addons())
+    for (auto& addon : m_addons)
     {
-        // Next, determine the overlapping nodes from each addon dimension.
-        const NL::json root = addon.endpoint().getJson(file);
-        overlaps(addon.endpoint(), addon.overlaps(), root, key);
+        std::string filename = addon.hierarchyDir() + key.toString() + ".json";
+        overlaps(addon.overlaps(), m_connector->getJson(filename), key);
     }
     m_pool->await();
 }
 
 
-void EptReader::overlaps(const Endpoint& ep, std::list<Overlap>& target,
+void EptReader::overlaps(std::list<Overlap>& target,
     const NL::json& hier, const Key& key)
 {
     // If this key doesn't overlap our query
@@ -517,11 +558,12 @@ void EptReader::overlaps(const Endpoint& ep, std::list<Overlap>& target,
 
         // If the hierarchy points value here is -1, then we need to fetch the
         // hierarchy subtree corresponding to this root.
-        m_pool->add([this, &ep, &target, key]()
+        m_pool->add([this, &target, key]()
         {
-            const auto subRoot(ep.getJson(
-                "ept-hierarchy/" + key.toString() + ".json"));
-            overlaps(ep, target, subRoot, key);
+            std::string filename =
+                m_info->hierarchyDir() + key.toString() + ".json";
+            const auto subRoot(m_connector->getJson(filename));
+            overlaps(target, subRoot, key);
         });
     }
     else if (numPoints < 0)
@@ -537,7 +579,7 @@ void EptReader::overlaps(const Endpoint& ep, std::list<Overlap>& target,
         }
 
         for (uint64_t dir(0); dir < 8; ++dir)
-            overlaps(ep, target, hier, key.bisect(dir));
+            overlaps(target, hier, key.bisect(dir));
     }
 }
 
@@ -591,7 +633,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     dst.setField(Id::Z, z);
     dst.setField(m_nodeIdDim, m_nodeId);
     dst.setField(m_pointIdDim, pointId);
-    for (Addon& addon : m_info->addons())
+    for (Addon& addon : m_addons)
     {
         Dimension::Id srcId = addon.srcId();
         BasePointTable *t = tile.addonTable(srcId);

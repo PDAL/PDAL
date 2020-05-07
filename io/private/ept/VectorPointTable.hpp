@@ -32,72 +32,35 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "EptSupport.hpp"
+#pragma once
 
-#include <pdal/util/Utils.hpp>
+#include <pdal/PointTable.hpp>
 
 namespace pdal
 {
 
-namespace
+class PDAL_DLL VectorPointTable : public SimplePointTable
 {
+public:
+    VectorPointTable(PointLayout& layout) : SimplePointTable(layout)
+    {}
 
-/**
-void setForwards(const NL::json& fwd, arbiter::StringMap& map,
-    const std::string& type)
-{
-    if (fwd.is_null())
-        return;
-    if (!fwd.is_object())
-        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
-    for (auto& entry : fwd.items())
-    {
-        if (!entry.value().is_string())
-            throw pdal_error("Invalid '" + type + "' parameters: "
-                "expected string->string mapping.");
-        map[entry.key()] = entry.value().get<std::string>();
-    }
-}
-**/
+    virtual PointId addPoint() override
+        { return 0; }
+    virtual bool supportsView() const override
+        { return true; }
+    std::size_t numPoints() const
+        { return m_buffer.size() / m_layoutRef.pointSize(); }
+    std::vector<char>& buffer()
+        { return m_buffer; }
 
-} // Unnamed namespace
+protected:
+    virtual char* getPoint(PointId id) override
+        { return m_buffer.data() + pointsToBytes(id); }
 
-/**
-void EptInfo::loadAddonInfo(const NL::json& addonSpec)
-{
-    std::string filename;
-    try
-    {
-        // These could be launched in threads but we'd have to 
-        // 1) lock the addon list
-        // 2) do something about exception propagation.
-        for (auto it : addonSpec.items())
-        {
-            std::string dimName = it.key();
-            const NL::json& val = it.value();
-
-            std::string filename = val.get<std::string>();
-            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
-        }
-    }
-    catch (NL::json::parse_error&)
-    {
-        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
-    }
-}
-
-
-void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
-{
-    Endpoint ep(m_arbiter, root, m_headers, m_query);
-    NL::json info = ep.getJson("ept-addon.json");
-    std::string typestring = info["type"].get<std::string>();
-    uint64_t size = info["size"].get<uint64_t>();
-    Dimension::Type type = Dimension::type(typestring, size);
-
-    m_addons.emplace_back(ep, dimName, type);
-}
-**/
+private:
+    std::vector<char> m_buffer;
+};
 
 } // namespace pdal
 

@@ -32,72 +32,30 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "EptSupport.hpp"
+#pragma once
 
-#include <pdal/util/Utils.hpp>
+#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
 
-namespace
+using StringMap = std::map<std::string, std::string>;
+
+class Connector
 {
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    StringMap m_headers;
+    StringMap m_query;
 
-/**
-void setForwards(const NL::json& fwd, arbiter::StringMap& map,
-    const std::string& type)
-{
-    if (fwd.is_null())
-        return;
-    if (!fwd.is_object())
-        throw pdal_error("Invalid '" + type + "' parameters: expected object.");
-    for (auto& entry : fwd.items())
-    {
-        if (!entry.value().is_string())
-            throw pdal_error("Invalid '" + type + "' parameters: "
-                "expected string->string mapping.");
-        map[entry.key()] = entry.value().get<std::string>();
-    }
-}
-**/
+public:
+    Connector();
+    Connector(const StringMap& headers, const StringMap& query);
 
-} // Unnamed namespace
-
-/**
-void EptInfo::loadAddonInfo(const NL::json& addonSpec)
-{
-    std::string filename;
-    try
-    {
-        // These could be launched in threads but we'd have to 
-        // 1) lock the addon list
-        // 2) do something about exception propagation.
-        for (auto it : addonSpec.items())
-        {
-            std::string dimName = it.key();
-            const NL::json& val = it.value();
-
-            std::string filename = val.get<std::string>();
-            loadAddon(dimName, createRoot(filename, "", "ept-addon.json"));
-        }
-    }
-    catch (NL::json::parse_error&)
-    {
-        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
-    }
-}
-
-
-void EptInfo::loadAddon(const std::string& dimName, const std::string& root)
-{
-    Endpoint ep(m_arbiter, root, m_headers, m_query);
-    NL::json info = ep.getJson("ept-addon.json");
-    std::string typestring = info["type"].get<std::string>();
-    uint64_t size = info["size"].get<uint64_t>();
-    Dimension::Type type = Dimension::type(typestring, size);
-
-    m_addons.emplace_back(ep, dimName, type);
-}
-**/
+    std::string get(const std::string& path) const;
+    NL::json getJson(const std::string& path) const;
+    std::vector<char> getBinary(const std::string& path) const;
+    arbiter::LocalHandle getLocalHandle(const std::string& path) const;
+};
 
 } // namespace pdal
 

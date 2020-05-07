@@ -39,7 +39,10 @@
 #include <arbiter/arbiter.hpp>
 #include <nlohmann/json.hpp>
 
-#include "private/ept/EptSupport.hpp"
+#include "private/ept/Addon.hpp"
+#include "private/ept/Key.hpp"
+#include "private/ept/Pool.hpp"
+#include "private/ept/EptInfo.hpp"
 
 namespace pdal
 {
@@ -99,20 +102,7 @@ void EptAddonWriter::prepared(PointTableRef table)
     m_pool.reset(new Pool(threads));
 
     const PointLayout& layout(*table.layout());
-    for (auto it : m_args->m_addons.items())
-    {
-        const std::string& path = it.key();
-        const std::string& dimName = it.value().get<std::string>();
-
-        const auto endpoint(
-                m_arbiter->getEndpoint(arbiter::expandTilde(path)));
-
-        const Dimension::Id id(layout.findDim(dimName));
-        if (id == Dimension::Id::Unknown)
-            throwError("Cannot find dimension '" + dimName + "'.");
-//ABELL
-//        m_addons.emplace_back(new Addon(layout, endpoint, id));
-    }
+    m_addons = Addon::load(*m_connector, m_args->m_addons, false);
 }
 
 void EptAddonWriter::ready(PointTableRef table)
@@ -128,13 +118,10 @@ void EptAddonWriter::ready(PointTableRef table)
 
     try
     {
-        const auto info(parse(meta.findChild("info").value<std::string>()));
+        m_info.reset(new EptInfo(meta.findChild("info").value<std::string>()));
         const auto keys(parse(meta.findChild("keys").value<std::string>()));
 
         m_hierarchyStep = meta.findChild("step").value<uint64_t>();
-//ABELL
-//        m_info.reset(new EptInfo(info));
-
         for (auto el : keys.items())
             m_hierarchy[Key(el.key())] = el.value().get<uint64_t>();
     }

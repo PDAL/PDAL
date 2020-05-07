@@ -34,38 +34,30 @@
 
 #pragma once
 
-#include <array>
-#include <condition_variable>
-#include <list>
 #include <map>
+#include <string>
+#include <list>
+#include <queue>
 #include <memory>
 #include <mutex>
-#include <string>
-#include <vector>
+#include <condition_variable>
 
-#include <pdal/JsonFwd.hpp>
-#include <pdal/Polygon.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
+#include "private/ept/Addon.hpp"
+
 namespace pdal
 {
 
-namespace arbiter
-{
-    class Arbiter;
-}
-
-class Addon;
+class Connector;
 class EptInfo;
-class Endpoint;
-class FixedPointLayout;
 class Key;
 struct Overlap;
 class Pool;
 class TileContents;
-class VectorPointTable;
+using StringMap = std::map<std::string, std::string>;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -90,13 +82,14 @@ private:
     // bounds to the bounds of the specified origin and set m_queryOriginId to
     // the selected OriginId value.  If the selected origin is not found, throw.
     void handleOriginQuery();
+    void setForwards(StringMap& headers, StringMap& query);
 
     // Aggregate all EPT keys overlapping our query bounds and their number of
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(const Endpoint& ep, std::list<Overlap>& target,
-            const NL::json& current, const Key& key);
+    void overlaps(std::list<Overlap>& target, const NL::json& current,
+        const Key& key);
     void process(PointViewPtr dstView, const TileContents& tile,
         point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
@@ -109,6 +102,7 @@ private:
 
     void load(const Overlap& overlap);
 
+    std::unique_ptr<Connector> m_connector;
     std::unique_ptr<EptInfo> m_info;
     // This is a list-based queue so that we don't need to expose TileContents
     // here as you do with a deque.
@@ -122,6 +116,7 @@ private:
     BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
+    AddonList m_addons;
 
     using StringMap = std::map<std::string, std::string>;
     StringMap m_headers;

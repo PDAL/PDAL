@@ -5597,6 +5597,16 @@ public:
             std::string path,
             std::string tempPath = "") const;
 
+    /** @brief Get a LocalHandle to a possibly remote file.
+     *
+     * If @p tempPath is not specified, the environment will be searched for a
+     * temporary location.
+     */
+    LocalHandle getLocalHandle(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
+
     /** Fetch the common HTTP pool, which may be useful when dynamically
      * constructing adding a Driver via Arbiter::addDriver.
      */
