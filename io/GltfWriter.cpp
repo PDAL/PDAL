@@ -36,7 +36,6 @@
 
 #include <iostream>
 #include <nlohmann/json.hpp>
-
 #include <pdal/PointView.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/OStream.hpp>
@@ -46,21 +45,10 @@ namespace pdal
 
 namespace
 {
-    const size_t HeaderSize = 12;
-    const size_t JsonChunkDataSize = 5000;
-    const size_t ChunkHeaderSize = 8;
+const size_t HeaderSize = 12;
+const size_t JsonChunkDataSize = 5000;
+const size_t ChunkHeaderSize = 8;
 }
-
-struct GltfWriter::ViewData
-{
-    BOX3D m_bounds;
-    size_t m_indexOffset;
-    size_t m_indexByteLength;
-    size_t m_indexCount;
-    size_t m_vertexOffset;
-    size_t m_vertexByteLength;
-    size_t m_vertexCount;
-};
 
 static StaticPluginInfo const s_info
 {
@@ -72,7 +60,15 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(GltfWriter, s_info)
 
-std::string GltfWriter::getName() const { return s_info.name; }
+GltfWriter::GltfWriter()
+{}
+
+GltfWriter::~GltfWriter()
+{}
+
+std::string GltfWriter::getName() const {
+    return s_info.name;
+}
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {
@@ -84,7 +80,36 @@ void GltfWriter::addArgs(ProgramArgs& args)
     args.add("blue", "Blue factor [0-1]", m_blue);
     args.add("alpha", "Alpha factor [0-1]", m_alpha, 1.0);
     args.add("double_sided", "Whether the material should be applied to "
-        "both sides of the faces.", m_doubleSided);
+             "both sides of the faces.", m_doubleSided);
+    args.add("color_vertices", "If color data is present for each point, write "
+             "it to the output vertices. Note that most renderers will "
+             "interpolate the color of each vertex across a face, so this may "
+             "look odd.", m_colorVertices, false);
+}
+
+
+void GltfWriter::prepared(PointTableRef table) {
+
+    m_writeNormals = table.layout()->hasDim(Dimension::Id::NormalX)
+                     && table.layout()->hasDim(Dimension::Id::NormalY)
+                     && table.layout()->hasDim(Dimension::Id::NormalZ);
+
+    // Only color vertices if color dimensions are present and the option is
+    // enabled
+    const bool hasColors = table.layout()->hasDim(Dimension::Id::Red)
+                           && table.layout()->hasDim(Dimension::Id::Green)
+                           && table.layout()->hasDim(Dimension::Id::Blue);
+
+    if (!hasColors && m_colorVertices) {
+        log()->get(LogLevel::Warning) << getName()
+                                      << ": Option 'color_vertices' is set to "
+                                      "true, but one or more color dimensions "
+                                      "are missing. Not writing out vertex "
+                                      "colors."
+                                      << std::endl;
+        m_colorVertices = false;
+    }
+
 }
 
 
@@ -102,13 +127,14 @@ void GltfWriter::ready(PointTableRef table)
     m_binSize = 0;
 }
 
+
 void GltfWriter::write(const PointViewPtr v)
 {
     TriangularMesh *mesh = v->mesh();
     if (!mesh)
     {
         log()->get(LogLevel::Warning) << "Attempt to write point view with "
-            "no mesh. Skipping.\n";
+                                      "no mesh. Skipping.\n";
         return;
     }
 
@@ -121,6 +147,17 @@ void GltfWriter::write(const PointViewPtr v)
     vd.m_indexByteLength = vd.m_indexCount * sizeof(uint32_t);
     vd.m_vertexOffset = vd.m_indexOffset + vd.m_indexByteLength;
     vd.m_vertexByteLength = v->size() * sizeof(float) * 3;  // 3 for X,Y,Z
+
+
+    if (m_writeNormals) {
+        // Add the length of 3 normals to the vertex byte length
+        vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for X,Y,Z
+    }
+
+    if (m_colorVertices) {
+        // Add the length of 3 colors to the vertex byte length
+        vd.m_vertexByteLength += v->size() * sizeof(float) * 3; // 3 for R,G,B
+    }
 
     m_binSize += vd.m_indexByteLength + vd.m_vertexByteLength;
     m_totalSize = static_cast<size_t>(out.position()) + m_binSize;
@@ -138,6 +175,23 @@ void GltfWriter::write(const PointViewPtr v)
 
         vd.m_bounds.grow(x, y, z);
         out << x << y << z;
+
+        if (m_writeNormals) {
+            float normalX = v->getFieldAs<float>(Dimension::Id::NormalX, i);
+            float normalY = v->getFieldAs<float>(Dimension::Id::NormalY, i);
+            float normalZ = v->getFieldAs<float>(Dimension::Id::NormalZ, i);
+
+            out << normalX << normalY << normalZ;
+        }
+
+        if (m_colorVertices) {
+            float colorR = v->getFieldAs<float>(Dimension::Id::Red, i) / 255.0;
+            float colorG = v->getFieldAs<float>(Dimension::Id::Green, i) / 255.0;
+            float colorB = v->getFieldAs<float>(Dimension::Id::Blue, i) / 255.0;
+
+            out << colorR << colorG << colorB;
+        }
+
     }
 
     m_viewData.push_back(vd);
@@ -173,14 +227,33 @@ void GltfWriter::writeJsonChunk()
     j["asset"]["version"] = "2.0";
 
     j["buffers"].push_back(
-        {
-            { "byteLength", m_binSize }   // Total size of bin data.
-        }
+    {
+        { "byteLength", m_binSize }   // Total size of bin data.
+    }
     );
 
-    int bufferViewCount = 0;
+    uint16_t elementSize =  sizeof(float) * 3; // X, Y, Z
+    if ( m_writeNormals ) {
+        elementSize += sizeof(float) * 3; // NormalX, NormalY, NormalZ
+    }
+    if ( m_colorVertices ) {
+        elementSize += sizeof(float) * 3; // R, G, B
+    }
+
+    NL::json mesh;
+    uint16_t nextAccessorIndex = 0;
+    uint16_t nextBufferViewIndex = 0;
     for (const ViewData& vd : m_viewData)
     {
+        uint16_t normalAccessorIndex = 0;
+        uint16_t colorAccessorIndex = 0;
+        uint16_t positionAccessorIndex = 0;
+        uint16_t faceAccessorIndex = 0;
+        NL::json meshAttributes({});
+
+        // Buffer views
+        // Vertex indices (faces)
+        const uint16_t faceBufferViewIndex = nextBufferViewIndex++;
         j["bufferViews"].push_back(
             {
                 { "buffer", 0 },
@@ -189,43 +262,87 @@ void GltfWriter::writeJsonChunk()
                 { "target", 34963 }      // Vertex indices code
             }
         );
+        // Vertex attributes (positions, normals, and colors)
+        const uint16_t vertexAttributeBufferViewIndex = nextBufferViewIndex++;
         j["bufferViews"].push_back(
             {
                 { "buffer", 0 },
                 { "byteOffset", vd.m_vertexOffset },
                 { "byteLength", vd.m_vertexByteLength },
-                { "target", 34962 }      // Vertices code
+                { "target", 34962 },      // Vertices code
+                { "byteStride", elementSize },
             }
         );
+
+        // Accessors
+        // Face index accessor
+        faceAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
             {
-                { "bufferView", bufferViewCount++ },
+                { "bufferView", faceBufferViewIndex },
                 { "componentType", 5125 },      // unsigned int code
                 { "type", "SCALAR" },
                 { "count", vd.m_indexCount }
             }
         );
         const BOX3D& b = vd.m_bounds;
+        uint16_t byteOffset = 0;
+
+        // Vertex position accessor
+        positionAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
             {
-                { "bufferView", bufferViewCount++ },
+                { "bufferView", vertexAttributeBufferViewIndex },
                 { "componentType", 5126 },      // float code
                 { "type", "VEC3" },
                 { "count", vd.m_vertexCount },
+                { "byteOffset", byteOffset },
                 { "min", { b.minx, b.miny, b.minz } },
                 { "max", { b.maxx, b.maxy, b.maxz } }
             }
         );
-    }
+        meshAttributes["POSITION"] = positionAccessorIndex;
 
-    NL::json mesh;
-    mesh["primitives"].push_back(
-        {
-            { "attributes", {{"POSITION", 1}} },
-            { "indices", 0 },
-            { "material", 0 }
+        if (m_writeNormals) {
+            byteOffset += sizeof(float) * 3;
+            // Vertex normal accessor
+            normalAccessorIndex = nextAccessorIndex++;
+            j["accessors"].push_back(
+                {
+                    { "bufferView", vertexAttributeBufferViewIndex },
+                    { "componentType", 5126 },      // float code
+                    { "type", "VEC3" },
+                    { "byteOffset", byteOffset },
+                    { "count", vd.m_vertexCount },
+                }
+            );
+            meshAttributes["NORMAL"] = normalAccessorIndex;
         }
-    );
+
+        if (m_colorVertices) {
+            byteOffset += sizeof(float) * 3;
+            // Vertex color accessor
+            colorAccessorIndex = nextAccessorIndex++;
+            j["accessors"].push_back(
+                {
+                    { "bufferView", vertexAttributeBufferViewIndex },
+                    { "componentType", 5126 },      // float code
+                    { "type", "VEC3" },
+                    { "byteOffset", byteOffset },
+                    { "count", vd.m_vertexCount },
+                }
+            );
+            meshAttributes["COLOR_0"] = colorAccessorIndex;
+        }
+
+        mesh["primitives"].push_back(
+            {
+                { "attributes", meshAttributes },
+                { "indices", faceBufferViewIndex },
+                { "material", 0 }
+            }
+        );
+    }
 
     j["meshes"].push_back(mesh);
     j["scene"] = 0;
@@ -263,7 +380,8 @@ void GltfWriter::writeJsonChunk()
     std::string js(j.dump());
     if (js.size() > JsonChunkDataSize)
         throwError("JSON header too large. "
-            "Please open a issue: 'https://github.com/PDAL/PDAL/issues'.");
+                   "Please open a issue: 'https://github.com/PDAL/PDAL/issues'"
+                   ".");
     // Pad JSON to chunk size.
     js += std::string(JsonChunkDataSize - js.size(), ' ');
 
