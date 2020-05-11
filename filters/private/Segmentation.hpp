@@ -110,5 +110,8 @@ PDAL_DLL void segmentLastReturns(PointViewPtr input, PointViewPtr last,
 PDAL_DLL void segmentReturns(PointViewPtr input, PointViewPtr first,
                              PointViewPtr second, StringList returns);
 
+
+PDAL_DLL PointIdList farthestPointSampling(PointView& view, point_count_t count);
+
 } // namespace Segmentation
 } // namespace pdal

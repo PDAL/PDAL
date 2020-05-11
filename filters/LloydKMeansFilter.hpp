@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2020, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -32,56 +32,36 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "FarthestPointSamplingFilter.hpp"
+#pragma once
 
-#include "private/Segmentation.hpp"
+#include <pdal/Filter.hpp>
 
-#include <pdal/KDIndex.hpp>
-#include <pdal/util/ProgramArgs.hpp>
-
-#include <algorithm>
-#include <limits>
-#include <numeric>
 #include <string>
-#include <vector>
 
 namespace pdal
 {
 
-static PluginInfo const s_info{"filters.fps", "Farthest point sampling filter",
-                               "http://pdal.io/stages/filters.fps.html"};
+class ProgramArgs;
 
-CREATE_STATIC_STAGE(FarthestPointSamplingFilter, s_info)
-
-std::string FarthestPointSamplingFilter::getName() const
+class PDAL_DLL LloydKMeansFilter : public Filter
 {
-    return s_info.name;
-}
+public:
+    LloydKMeansFilter() : Filter() {}
+    LloydKMeansFilter& operator=(const LloydKMeansFilter&) = delete;
+    LloydKMeansFilter(const LloydKMeansFilter&) = delete;
 
-FarthestPointSamplingFilter::FarthestPointSamplingFilter()
-{
-}
+    std::string getName() const;
 
-void FarthestPointSamplingFilter::addArgs(ProgramArgs& args)
-{
-    args.add("count", "Target number of points after sampling", m_count,
-             point_count_t(1000));
-}
+private:
+    uint16_t m_k;
+    uint16_t m_maxiters;
+    StringList m_dimStringList;
+    Dimension::IdList m_dimIdList;
 
-PointViewSet FarthestPointSamplingFilter::run(PointViewPtr inView)
-{
-    // Return empty PointViewSet if the input PointView has no points.
-    PointViewSet viewSet;
-    if (!inView->size() || (inView->size() < m_count))
-        return viewSet;
-
-    PointIdList ids = Segmentation::farthestPointSampling(*inView, m_count);
-
-    PointViewPtr outView = inView->makeNew();
-    for (auto const& id : ids)
-        outView->appendPoint(*inView, id);
-    viewSet.insert(outView);
-    return viewSet;
-}
+    virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
+    virtual void filter(PointView& view);
+};
 
 } // namespace pdal

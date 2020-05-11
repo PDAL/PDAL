@@ -266,5 +266,51 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
     }
 }
 
+PointIdList farthestPointSampling(PointView& view, point_count_t count)
+{
+    // Construct a KD-tree of the input view.
+    KD3Index& kdi = view.build3dIndex();
+
+    // Seed the output view with the first point in the current sorting.
+    PointId seedId(0);
+    PointIdList ids(count);
+    ids[0] = seedId;
+
+    // Compute distances from seedId to all other points.
+    PointIdList indices(view.size());
+    std::vector<double> sqr_dists(view.size());
+    kdi.knnSearch(seedId, view.size(), &indices, &sqr_dists);
+
+    // Sort distances by PointId.
+    std::vector<double> min_dists(view.size());
+    for (PointId i = 0; i < view.size(); ++i)
+        min_dists[indices[i]] = sqr_dists[i];
+
+    // Proceed until we have m_count points in the output PointView.
+    for (PointId i = 1; i < count; ++i)
+    {
+        // Find the max distance in min_dists, this is the farthest point from
+        // any point currently in the output PointView.
+        auto it = std::max_element(min_dists.begin(), min_dists.end());
+
+        // Record the PointId of the farthest point and add it to the output
+        // PointView.
+        PointId idx(it - min_dists.begin());
+	ids[i] = idx;
+
+        // Compute distances from idx to all other points.
+        kdi.knnSearch(idx, view.size(), &indices, &sqr_dists);
+
+        // Update distances.
+        for (PointId j = 0; j < view.size(); ++j)
+        {
+            if (sqr_dists[j] < min_dists[indices[j]])
+                min_dists[indices[j]] = sqr_dists[j];
+        }
+    }
+
+    return ids;
+}
+
 } // namespace Segmentation
 } // namespace pdal
