@@ -83,4 +83,26 @@ arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
         return m_arbiter->getLocalHandle(path, m_headers, m_query);
 }
 
+void Connector::put(const std::string& path, const std::vector<char>& buf) const
+{
+    if (m_arbiter->isLocal(path))
+        return m_arbiter->put(path, buf);
+    else
+        return m_arbiter->put(path, buf, m_headers, m_query);
+}
+
+void Connector::put(const std::string& path, const std::string& data) const
+{
+    if (m_arbiter->isLocal(path))
+        return m_arbiter->put(path, data);
+    else
+        return m_arbiter->put(path, data, m_headers, m_query);
+}
+
+void Connector::makeDir(const std::string& path) const
+{
+    if (m_arbiter->isLocal(path))
+        arbiter::mkdirp(path);
+}
+
 } // namespace pdal

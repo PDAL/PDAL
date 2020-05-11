@@ -59,6 +59,8 @@ public:
 
     std::string name() const
         { return m_name; }
+    std::string filename() const
+        { return m_filename; }
     Dimension::Type type() const
         { return m_type; }
     Dimension::Id srcId() const
@@ -73,8 +75,9 @@ public:
         { return const_cast<PointLayout &>(m_layout); }
     std::string dataDir() const;
     std::string hierarchyDir() const;
-    static AddonList load(const Connector& connector, const NL::json& spec,
-        bool dimAsKey);
+    static AddonList store(const Connector& connector, const NL::json& spec,
+        const PointLayout& layout);        
+    static AddonList load(const Connector& connector, const NL::json& spec);
 
 private:
     std::string m_name;

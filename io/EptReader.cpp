@@ -39,6 +39,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/pdal_features.hpp>
 
 #include "private/ept/Connector.hpp"
 #include "private/ept/EptInfo.hpp"
@@ -59,8 +60,6 @@ const StaticPluginInfo s_info
     "http://pdal.io/stages/reader.ept.html",
     { "ept" }
 };
-
-const std::string addonFilename { "ept-addon.json" };
 
 StringMap toStringMap(const NL::json& fwd)
 {
@@ -199,7 +198,7 @@ void EptReader::initialize()
 
     m_info.reset(new EptInfo(m_filename, *m_connector));
     setSpatialReference(m_info->srs());
-    m_addons = Addon::load(*m_connector, m_args->m_addons, true);
+    m_addons = Addon::load(*m_connector, m_args->m_addons);
 
     if (!m_args->m_ogr.is_null())
     {
@@ -443,7 +442,7 @@ void EptReader::ready(PointTableRef table)
     for (const Overlap& overlap : m_overlaps)
     {
         overlapPoints += overlap.m_count;
-        j[overlap.m_key.toString()] = overlap.m_count;
+        j[overlap.m_key.toString()] = { overlap.m_count, overlap.m_nodeId };
     }
 
     log()->get(LogLevel::Debug) << "Overlap nodes: " << m_overlaps.size() <<
@@ -469,9 +468,6 @@ void EptReader::ready(PointTableRef table)
 
     // A million is a silly-large number for the number of tiles.
     m_pool.reset(new Pool(m_pool->numThreads(), 1000000));
-    // Start node ID at 1 to differentiate from points added by other stages,
-    // which will be ignored by the EPT writer.
-    m_nodeId = 1;
     m_pointId = 0;
     m_tileCount = m_overlaps.size();
 
@@ -510,6 +506,7 @@ void EptReader::overlaps()
     key.b = m_info->bounds();
 
     {
+        m_nodeId = 1;
         std::string filename =
             m_info->hierarchyDir() + key.toString() + ".json";
 
@@ -521,6 +518,7 @@ void EptReader::overlaps()
     // Determine the addons that exist to correspond to tiles.
     for (auto& addon : m_addons)
     {
+        m_nodeId = 1;
         std::string filename = addon.hierarchyDir() + key.toString() + ".json";
         overlaps(addon.overlaps(), m_connector->getJson(filename), key);
     }
@@ -575,7 +573,7 @@ void EptReader::overlaps(std::list<Overlap>& target,
         {
             //ABELL we could probably use a local mutex to lock the target map.
             std::lock_guard<std::mutex> lock(m_mutex);
-            target.push_back({key, (point_count_t)numPoints});
+            target.push_back({key, (point_count_t)numPoints, m_nodeId++});
         }
 
         for (uint64_t dir(0); dir < 8; ++dir)
@@ -586,6 +584,12 @@ void EptReader::overlaps(std::list<Overlap>& target,
 bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 {
     using namespace Dimension;
+
+    if (tile.error().size())
+    {
+        m_pool->stop();
+        throwError("Error reading tile: " + tile.error());
+    }
 
     const PointViewPtr v = tile.view();
 
@@ -631,7 +635,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     dst.setField(Id::X, x);
     dst.setField(Id::Y, y);
     dst.setField(Id::Z, z);
-    dst.setField(m_nodeIdDim, m_nodeId);
+    dst.setField(m_nodeIdDim, tile.nodeId());
     dst.setField(m_pointIdDim, pointId);
     for (Addon& addon : m_addons)
     {
@@ -667,10 +671,11 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
             l.unlock();
             process(view, tile, count - numRead);
             numRead += tile.size();
+            m_tileCount--;
         }
         else
             m_contentsCv.wait(l);
-    } while (m_nodeId <= m_tileCount && numRead <= count);
+    } while (m_tileCount && numRead <= count);
 
     // Wait for any running threads to finish and don't start any others.
     // Only relevant if we hit the count limit before reading all the tiles.
@@ -693,7 +698,6 @@ void EptReader::process(PointViewPtr dstView, const TileContents& tile,
         if (--count == 0)
             return;
     }
-    m_nodeId++;
 }
 
 
@@ -733,8 +737,7 @@ top:
         m_pointId = 0;
         m_currentTile = nullptr;
         m_contents.pop();
-        m_nodeId++;
-        if (m_nodeId > m_tileCount)
+        if (--m_tileCount == 0)
             return false;
     }
 

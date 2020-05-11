@@ -36,11 +36,14 @@
 
 #include <cassert>
 
-#include <arbiter/arbiter.hpp>
 #include <nlohmann/json.hpp>
 
+#include <pdal/Metadata.hpp>
+
 #include "private/ept/Addon.hpp"
+#include "private/ept/Connector.hpp"
 #include "private/ept/Key.hpp"
+#include "private/ept/Overlap.hpp"
 #include "private/ept/Pool.hpp"
 #include "private/ept/EptInfo.hpp"
 
@@ -91,8 +94,7 @@ void EptAddonWriter::addDimensions(PointLayoutPtr layout)
 
 void EptAddonWriter::prepared(PointTableRef table)
 {
-    m_arbiter.reset(new arbiter::Arbiter());
-
+    std::cerr << "Prepared!\n";
     const std::size_t threads(std::max<std::size_t>(m_args->m_numThreads, 4));
     if (threads > 100)
     {
@@ -101,14 +103,20 @@ void EptAddonWriter::prepared(PointTableRef table)
     }
     m_pool.reset(new Pool(threads));
 
-    const PointLayout& layout(*table.layout());
-    m_addons = Addon::load(*m_connector, m_args->m_addons, false);
+    //ABELL
+    // Perhaps we need to wait to load addons until we have the
+    // headers/query from metadata.
+    m_connector.reset(new Connector());
+    std::cerr << "About to store!\n";
+    m_addons = Addon::store(*m_connector, m_args->m_addons, *(table.layout()));
+    std::cerr << "Done addon store!\n";
 }
 
 void EptAddonWriter::ready(PointTableRef table)
 {
     MetadataNode meta(table.privateMetadata("ept"));
 
+    std::cerr << "ready!\n";
     if (meta.findChild("info").value().empty())
     {
         throwError(
@@ -118,12 +126,24 @@ void EptAddonWriter::ready(PointTableRef table)
 
     try
     {
-        m_info.reset(new EptInfo(meta.findChild("info").value<std::string>()));
-        const auto keys(parse(meta.findChild("keys").value<std::string>()));
+        MetadataNode sNode = meta.findChild("step");
+        m_hierarchyStep = sNode.value<uint64_t>();
 
-        m_hierarchyStep = meta.findChild("step").value<uint64_t>();
+        MetadataNode iNode = meta.findChild("info");
+        m_info.reset(new EptInfo(iNode.value<std::string>()));
+
+        MetadataNode kNode = meta.findChild("keys");
+        const auto keys(NL::json::parse(kNode.value<std::string>()));
         for (auto el : keys.items())
-            m_hierarchy[Key(el.key())] = el.value().get<uint64_t>();
+        {
+            const std::string& key = el.key();
+            uint64_t count = el.value()[0].get<uint64_t>();
+            uint64_t nodeId = el.value()[1].get<uint64_t>();
+
+            using Entry = std::pair<const std::string, Overlap>;
+            Entry e {key, {key, count, nodeId}};
+            m_overlaps.insert(e);
+        }
     }
     catch (std::exception& e)
     {
@@ -133,15 +153,13 @@ void EptAddonWriter::ready(PointTableRef table)
 
 void EptAddonWriter::write(const PointViewPtr view)
 {
+    std::cerr << "Write!\n";
     for (const auto& addon : m_addons)
     {
-//ABELL
-/**
         log()->get(LogLevel::Debug) << "Writing addon dimension " <<
-            addon->name() << " to " << addon->ep().prefixedRoot() << std::endl;
-**/
+            addon.name() << " to " << addon.filename() << std::endl;
 
-        writeOne(view, *addon);
+        writeOne(view, addon);
 
         log()->get(LogLevel::Debug) << "\tWritten" << std::endl;
     }
@@ -149,17 +167,18 @@ void EptAddonWriter::write(const PointViewPtr view)
 
 void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 {
-    std::vector<std::vector<char>> buffers;
-    buffers.reserve(m_hierarchy.size());
+std::cerr << "Write one: " << addon.name() << "!\n";
+    std::vector<std::vector<char>> buffers(m_overlaps.size());
 
     // Create an addon buffer for each node we're going to write.
-//ABELL
-/**
-    for (const auto& p : m_hierarchy)
+
+    size_t itemSize = Dimension::size(addon.type());
+    for (const auto& entry : m_overlaps)
     {
-        buffers.emplace_back(p.second * addon.size(), 0);
+        const Overlap& overlap = entry.second;
+        std::vector<char>& b = buffers[overlap.m_nodeId - 1];
+        b.resize(overlap.m_count * itemSize);
     }
-**/
 
     // Fill in our buffers with the data from the view.
     PointRef pr(*view);
@@ -172,99 +191,97 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
         // Node IDs are 1-based to distinguish points that do not come from the
         // EPT reader.
-        if (!nodeId) continue;
+        if (!nodeId)
+            continue;
 
-        nodeId -= 1;
         pointId = pr.getFieldAs<uint64_t>(m_pointIdDim);
 
-/**
-        auto& buffer(buffers.at(nodeId));
-        assert(pointId * addon.size() + addon.size() <= buffer.size());
-        char* dst = buffer.data() + pointId * addon.size();
-        pr.getField(dst, addon.id(), addon.type());
-**/
+        auto& buffer(buffers.at(nodeId - 1));
+        assert(pointId * itemSize + itemSize <= buffer.size());
+        char* dst = buffer.data() + pointId * itemSize;
+        pr.getField(dst, addon.dstId(), addon.type());
     }
 
-/**
-    const arbiter::Endpoint& ep(addon.ep());
+    std::string dataDir = addon.dataDir();
 
-    const arbiter::Endpoint dataEp(ep.getSubEndpoint("ept-data"));
-    const arbiter::Endpoint hierEp(ep.getSubEndpoint("ept-hierarchy"));
-
-    if (ep.isLocal())
-    {
-        arbiter::mkdirp(dataEp.root());
-        arbiter::mkdirp(hierEp.root());
-    }
+    m_connector->makeDir(dataDir);
 
     // Write the binary dimension data for the addon.
-    nodeId = 0;
-    for (const auto& p : m_hierarchy)
+    for (const auto& p : m_overlaps)
     {
-        const Key key(p.first);
+        const Overlap& overlap = p.second;
 
-        m_pool->add([&dataEp, &buffers, key, nodeId]()
+        std::vector<char>& buffer = buffers.at(overlap.m_nodeId - 1);
+        std::string filename = dataDir + overlap.m_key.toString() + ".bin";
+std::cerr << "About to write to " << filename << "!\n";
+        m_pool->add([this, filename, &buffer]()
         {
-            dataEp.put(key.toString() + ".bin", buffers.at(nodeId));
+            m_connector->put(filename, buffer);
         });
-
-        ++nodeId;
     }
 
     m_pool->await();
-**/
 
     // Write the addon hierarchy data.
-/**
     NL::json h;
     Key key;
     key.b = m_info->bounds();
-    writeHierarchy(h, key, hierEp);
-    hierEp.put(key.toString() + ".json", h.dump());
+
+    std::string hierarchyDir = addon.hierarchyDir();
+    m_connector->makeDir(hierarchyDir);
+
+    writeHierarchy(hierarchyDir, h, key);
+    std::string filename = hierarchyDir + key.toString() + ".json";
+    m_connector->put(filename, h.dump());
 
     m_pool->await();
 
     // Write the top-level addon metadata.
     NL::json meta;
     meta["type"] = getTypeString(addon.type());
-    meta["size"] = addon.size();
+    meta["size"] = Dimension::size(addon.type());
     meta["version"] = "1.0.0";
     meta["dataType"] = "binary";
 
-    ep.put("ept-addon.json", meta.dump());
-**/
+    m_connector->put("ept-addon.json", meta.dump());
 }
 
-void EptAddonWriter::writeHierarchy(NL::json& curr, const Key& key,
-        const arbiter::Endpoint& hierEp) const
+void EptAddonWriter::writeHierarchy(const std::string& directory,
+    NL::json& curr, const Key& key) const
 {
-    const std::string keyName(key.toString());
-    if (!m_hierarchy.count(keyName)) return;
+    std::string keyName = key.toString();
 
-    const uint64_t np(m_hierarchy.at(keyName));
-    if (!np) return;
+    auto it = m_overlaps.find(keyName);
+    if (it == m_overlaps.end())
+        return;
+
+    const Overlap& overlap = it->second;;
+    if (!overlap.m_count)
+        return;
 
     if (m_hierarchyStep && key.d && (key.d % m_hierarchyStep == 0))
     {
         curr[keyName] = -1;
 
         // Create a new hierarchy subtree.
-        NL::json next {{ keyName, np }};
+        NL::json next {{ keyName, overlap.m_count }};
 
         for (uint64_t dir(0); dir < 8; ++dir)
-            writeHierarchy(next, key.bisect(dir), hierEp);
+            writeHierarchy(directory, next, key.bisect(dir));
 
-        m_pool->add([&hierEp, keyName, next]()
+        std::string filename = directory + keyName + ".json";
+        std::string data = next.dump();
+        m_pool->add([this, filename, data]()
         {
-            hierEp.put(keyName + ".json", next.dump());
+            m_connector->put(filename, data);
         });
     }
     else
     {
-        curr[keyName] = np;
+        curr[keyName] = overlap.m_count;
         for (uint64_t dir(0); dir < 8; ++dir)
         {
-            writeHierarchy(curr, key.bisect(dir), hierEp);
+            writeHierarchy(directory, curr, key.bisect(dir));
         }
     }
 }

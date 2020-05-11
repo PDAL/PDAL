@@ -42,6 +42,12 @@
 namespace pdal
 {
 
+Writer::Writer()
+{}
+
+Writer::~Writer()
+{}
+
 std::string::size_type Writer::handleFilenameTemplate(
     const std::string& filename)
 {

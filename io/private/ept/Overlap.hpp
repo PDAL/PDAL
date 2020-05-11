@@ -43,6 +43,7 @@ struct Overlap
 {
     Key m_key;
     point_count_t m_count;
+    uint64_t m_nodeId;
 };
 
 } // namespace pdal

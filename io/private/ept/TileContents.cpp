@@ -45,21 +45,32 @@ namespace pdal
 
 void TileContents::read()
 {
-    if (m_info.dataType() == EptInfo::DataType::Laszip)
-        readLaszip();
-    else if (m_info.dataType() == EptInfo::DataType::Binary)
-        readBinary();
+    try
+    {
+        if (m_info.dataType() == EptInfo::DataType::Laszip)
+            readLaszip();
+        else if (m_info.dataType() == EptInfo::DataType::Binary)
+            readBinary();
 #ifdef PDAL_HAVE_ZSTD
-    else if (m_info.dataType() == EptInfo::DataType::Zstandard)
-        readZstandard();
+        else if (m_info.dataType() == EptInfo::DataType::Zstandard)
+            readZstandard();
 #endif
-    else
-        throw ept_error("Unrecognized EPT dataType");
+        else
+            throw ept_error("Unrecognized EPT dataType");
 
-    // Read addon information after the native data, we'll possibly
-    // overwrite attributes.
-    for (const Addon& addon : m_addons)
-        readAddon(addon, m_view->size());
+        // Read addon information after the native data, we'll possibly
+        // overwrite attributes.
+        for (const Addon& addon : m_addons)
+            readAddon(addon, m_view->size());
+    }
+    catch (const std::exception& ex)
+    {
+        m_error = ex.what();
+    }
+    catch (...)
+    {
+        m_error = "Unknown exception when reading tile contents";
+    }
 }
 
 void TileContents::readLaszip()

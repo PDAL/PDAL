@@ -41,7 +41,6 @@
 namespace pdal
 {
 
-class Writer;
 class UserCallback;
 
 /**
@@ -56,11 +55,10 @@ class PDAL_DLL Writer : public virtual Stage
     friend class FlexWriter;
 
 public:
-    /**
-      Construct a writer.
-    */
-    Writer()
-        {}
+    Writer();
+    ~Writer();
+    Writer& operator=(const Writer&) = delete;
+    Writer(const Writer&) = delete;
 
     /**
       Locate template placeholder ('#') and validate filename with respect
@@ -86,9 +84,6 @@ private:
     */
     virtual void write(const PointViewPtr /*view*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
 };
 
 } // namespace pdal

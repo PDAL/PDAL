@@ -52,8 +52,51 @@ std::string Addon::hierarchyDir() const
     return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
 }
 
-AddonList Addon::load(const Connector& connector, const NL::json& spec,
-    bool dimAsKey)
+AddonList Addon::store(const Connector& connector, const NL::json& spec,
+    const PointLayout& layout)
+{
+    AddonList addons;
+    std::string filename;
+    try
+    {
+        for (auto it : spec.items())
+        {
+            std::string filename = it.key();
+            std::string dimName = it.value().get<std::string>();
+            if (!Utils::endsWith(filename, "ept-addon.json"))
+                filename += "/ept-addon.json";
+
+            Dimension::Id id = layout.findDim(dimName);
+            if (id == Dimension::Id::Unknown)
+                throw pdal_error("Invalid dimension '" + dimName + "' in "
+                    "addon specificiation. Does not exist in source data.");
+            Dimension::Type type = layout.dimType(id);
+            std::string typestring = Dimension::toName(Dimension::base(type));
+            size_t size = Dimension::size(type);
+
+            Addon addon(dimName, filename, type);
+
+            NL::json meta;
+            meta["type"] = typestring;
+            meta["size"] = size;
+            meta["version"] = "1.0.0";
+            meta["dataType"] = "binary";
+
+            connector.makeDir(FileUtils::getDirectory(filename));
+            connector.put(filename, meta.dump());
+
+            addons.emplace_back(dimName, filename, type);
+            addons.back().setDstId(id);
+        }
+    }
+    catch (NL::json::parse_error&)
+    {
+        throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
+    }
+    return addons;
+}
+
+AddonList Addon::load(const Connector& connector, const NL::json& spec)
 {
     AddonList addons;
     std::string filename;
@@ -63,8 +106,8 @@ AddonList Addon::load(const Connector& connector, const NL::json& spec,
         {
             std::string dimName = it.key();
             std::string filename = it.value().get<std::string>();
-            if (!dimAsKey)
-                std::swap(dimName, filename);
+            if (!Utils::endsWith(filename, "ept-addon.json"))
+                filename += "/ept-addon.json";
 
             addons.push_back(loadAddon(connector, dimName, filename));
         }

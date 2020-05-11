@@ -133,8 +133,8 @@ private:
 
     TileContents *m_currentTile;
 
-    uint64_t m_nodeId = 1;
     PointId m_pointId = 0;
+    uint64_t m_nodeId;
 };
 
 } // namespace pdal

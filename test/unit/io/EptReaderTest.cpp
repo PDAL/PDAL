@@ -67,17 +67,17 @@ namespace
     const std::string sourceFilePath(
             Support::datapath("ept/source/lone-star.laz"));
     const std::string eptLaszipPath(
-            "ept://" + Support::datapath("ept/lone-star-laszip"));
+            Support::datapath("ept/lone-star-laszip/ept.json"));
     const std::string eptAutzenPath(
-            "ept://" + Support::datapath("ept/1.2-with-color"));
+            Support::datapath("ept/1.2-with-color/ept.json"));
     const std::string attributesPath(
             Support::datapath("autzen/attributes.json"));
 
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
-            "ept://" + Support::datapath("ept/ellipsoid-binary"));
+            Support::datapath("ept/ellipsoid-binary/ept.json"));
     const std::string ellipsoidEptZstandardPath(
-            "ept://" + Support::datapath("ept/ellipsoid-zstandard"));
+            Support::datapath("ept/ellipsoid-zstandard/ept.json"));
 
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,

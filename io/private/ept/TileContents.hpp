@@ -63,6 +63,10 @@ public:
         { return m_overlap.m_count; }
     const Key& key() const
         { return m_overlap.m_key; }
+    point_count_t nodeId() const
+        { return m_overlap.m_nodeId; }
+    const std::string& error() const
+        { return m_error; }
     BasePointTable *addonTable(Dimension::Id id) const
         { return const_cast<TileContents *>(this)->m_addonTables[id].get(); }
     void read();
@@ -72,6 +76,7 @@ private:
     const EptInfo& m_info;
     const Connector& m_connector;
     const AddonList& m_addons;
+    std::string m_error;
     // Table for the base point data.
     BasePointTablePtr m_table;
     // View into m_table.

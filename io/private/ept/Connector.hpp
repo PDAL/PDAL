@@ -55,6 +55,9 @@ public:
     NL::json getJson(const std::string& path) const;
     std::vector<char> getBinary(const std::string& path) const;
     arbiter::LocalHandle getLocalHandle(const std::string& path) const;
+    void put(const std::string& path, const std::vector<char>& data) const;
+    void put(const std::string& path, const std::string& data) const;
+    void makeDir(const std::string& path) const;
 };
 
 } // namespace pdal

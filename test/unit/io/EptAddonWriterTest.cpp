@@ -49,7 +49,7 @@ using namespace pdal;
 namespace
 {
     const std::string eptLaszipPath(
-            "ept://" + Support::datapath("ept/lone-star-laszip"));
+            Support::datapath("ept/lone-star-laszip/ept.json"));
 }
 
 TEST(EptAddonWriterTest, fullLoop)
@@ -99,8 +99,8 @@ TEST(EptAddonWriterTest, fullLoop)
         EptAddonWriter writer;
         {
             NL::json addons;
-            addons[addonDir + "class"] = "Classification";
-            addons[addonDir + "other"] = "Other";
+            addons[addonDir + "class/ept.json"] = "Classification";
+            addons[addonDir + "other/ept.json"] = "Other";
 
             Options o;
             o.add("addons", addons);
@@ -118,8 +118,8 @@ TEST(EptAddonWriterTest, fullLoop)
     EptReader reader;
     {
         NL::json addons;
-        addons["Classification"] = addonDir + "class";
-        addons["Other"] = addonDir + "other";
+        addons["Classification"] = addonDir + "class/ept.json";
+        addons["Other"] = addonDir + "other/ept.json";
 
         Options o;
         o.add("filename", eptLaszipPath);
@@ -186,12 +186,14 @@ TEST(EptAddonWriterTest, boundedWrite)
 
         PointTable table;
         writer.prepare(table);
+        std::cerr << "Running addon writer!\n";
         writer.execute(table);
     }
 
     // Now we'll query the whole dataset with this addon - points outside the
     // bounds should have a Classification of zero.
 
+    std::cerr << "Re-reading!\n";
     EptReader reader;
     {
         NL::json addons;
