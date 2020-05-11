@@ -82,7 +82,7 @@ private:
     std::unique_ptr<Pool> m_pool;
     std::unique_ptr<EptInfo> m_info;
     AddonList m_addons;
-    std::unordered_map<std::string, Overlap> m_overlaps;
+    std::unique_ptr<Hierarchy> m_hierarchy;
     uint64_t m_hierarchyStep = 0;
 };
 

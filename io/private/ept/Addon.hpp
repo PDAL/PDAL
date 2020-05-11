@@ -69,10 +69,11 @@ public:
         { return m_dstId; }
     void setDstId(Dimension::Id dstId)
         { m_dstId = dstId; }
-    std::list<Overlap>& overlaps()
-        { return m_overlaps; }
+    Hierarchy& hierarchy()
+        { return m_hierarchy; }
     PointLayout& layout() const
         { return const_cast<PointLayout &>(m_layout); }
+    point_count_t points(const Key& key) const;
     std::string dataDir() const;
     std::string hierarchyDir() const;
     static AddonList store(const Connector& connector, const NL::json& spec,
@@ -86,7 +87,7 @@ private:
     Dimension::Id m_srcId;
     Dimension::Id m_dstId;
 
-    std::list<Overlap> m_overlaps;
+    Hierarchy m_hierarchy;
     PointLayout m_layout;
 
     static Addon loadAddon(const Connector& connector,

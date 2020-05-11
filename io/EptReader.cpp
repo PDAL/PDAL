@@ -36,13 +36,14 @@
 
 #include <limits>
 
+#include <pdal/ArtifactManager.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/pdal_features.hpp>
 
 #include "private/ept/Connector.hpp"
-#include "private/ept/EptInfo.hpp"
+#include "private/ept/EptArtifact.hpp"
 #include "private/ept/EptSupport.hpp"
 #include "private/ept/Pool.hpp"
 #include "private/ept/TileContents.hpp"
@@ -130,7 +131,8 @@ public:
     NL::json m_ogr;
 };
 
-EptReader::EptReader() : m_args(new EptReader::Args), m_currentTile(nullptr)
+EptReader::EptReader() : m_args(new EptReader::Args), m_currentTile(nullptr),
+    m_artifactMgr(nullptr)
 {}
 
 EptReader::~EptReader()
@@ -369,8 +371,8 @@ QuickInfo EptReader::inspect()
         overlaps();
 
         qi.m_pointCount = 0;
-        for (const auto& p : m_overlaps)
-            qi.m_pointCount += p.m_count;
+        for (const Overlap& overlap : *m_hierarchy)
+            qi.m_pointCount += overlap.m_count;
     }
     qi.m_valid = true;
 
@@ -423,7 +425,7 @@ void EptReader::ready(PointTableRef table)
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
 
-    m_overlaps.clear();
+    m_hierarchy.reset(new Hierarchy);
 
     // Determine all overlapping data files we'll need to fetch.
     try
@@ -436,19 +438,8 @@ void EptReader::ready(PointTableRef table)
     }
 
     point_count_t overlapPoints(0);
-
-    // Convert the key/overlap map to JSON for output as metadata.
-    NL::json j;
-    for (const Overlap& overlap : m_overlaps)
-    {
+    for (const Overlap& overlap : *m_hierarchy)
         overlapPoints += overlap.m_count;
-        j[overlap.m_key.toString()] = { overlap.m_count, overlap.m_nodeId };
-    }
-
-    log()->get(LogLevel::Debug) << "Overlap nodes: " << m_overlaps.size() <<
-        std::endl;
-    log()->get(LogLevel::Debug) << "Overlap points: " << overlapPoints <<
-        std::endl;
 
     if (overlapPoints > 1e8)
     {
@@ -456,20 +447,14 @@ void EptReader::ready(PointTableRef table)
             " will be downloaded" << std::endl;
     }
 
+    //ABELL
     if (m_nodeIdDim != Dimension::Id::Unknown)
-    {
-        // If we have an EPT writer in this pipeline, serialize some metadata
-        // which will be needed to create addon dimensions.
-        MetadataNode meta(table.privateMetadata("ept"));
-        meta.add("info", m_info->json().dump());
-        meta.add("keys", j.dump());
-        meta.add("step", m_hierarchyStep);
-    }
+    ;
 
     // A million is a silly-large number for the number of tiles.
     m_pool.reset(new Pool(m_pool->numThreads(), 1000000));
     m_pointId = 0;
-    m_tileCount = m_overlaps.size();
+    m_tileCount = m_hierarchy->size();
 
     // If we're running in standard mode, queue up all the requests for data.
     // In streaming mode, queue up at most 4 to avoid having a ton of data
@@ -477,17 +462,17 @@ void EptReader::ready(PointTableRef table)
     // are handled.
     if (table.supportsView())
     {
-        for (const Overlap& overlap : m_overlaps)
+        m_artifactMgr = &table.artifactManager();
+        for (const Overlap& overlap : *m_hierarchy)
             load(overlap);
-        m_overlaps.clear();
     }
     else
     {
         int count = 4;
-        while (m_overlaps.size() && count)
+        auto m_hierarchyIter = m_hierarchy->begin();
+        while (m_hierarchyIter != m_hierarchy->end() && count)
         {
-            load(m_overlaps.front());
-            m_overlaps.pop_front();
+            load(*m_hierarchyIter++);
             count--;
         }
     }
@@ -511,7 +496,7 @@ void EptReader::overlaps()
             m_info->hierarchyDir() + key.toString() + ".json";
 
         // First, determine the overlapping nodes from the EPT resource.
-        overlaps(m_overlaps, m_connector->getJson(filename), key);
+        overlaps(*m_hierarchy, m_connector->getJson(filename), key);
         m_pool->await();
     }
 
@@ -520,14 +505,14 @@ void EptReader::overlaps()
     {
         m_nodeId = 1;
         std::string filename = addon.hierarchyDir() + key.toString() + ".json";
-        overlaps(addon.overlaps(), m_connector->getJson(filename), key);
+        overlaps(addon.hierarchy(), m_connector->getJson(filename), key);
     }
     m_pool->await();
 }
 
 
-void EptReader::overlaps(std::list<Overlap>& target,
-    const NL::json& hier, const Key& key)
+void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
+    const Key& key)
 {
     // If this key doesn't overlap our query
     // we can skip
@@ -573,7 +558,7 @@ void EptReader::overlaps(std::list<Overlap>& target,
         {
             //ABELL we could probably use a local mutex to lock the target map.
             std::lock_guard<std::mutex> lock(m_mutex);
-            target.push_back({key, (point_count_t)numPoints, m_nodeId++});
+            target.emplace(key, (point_count_t)numPoints, m_nodeId++);
         }
 
         for (uint64_t dir(0); dir < 8; ++dir)
@@ -641,9 +626,12 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     {
         Dimension::Id srcId = addon.srcId();
         BasePointTable *t = tile.addonTable(srcId);
-        PointRef addonPoint(*t, pointId);
-        double val = addonPoint.getFieldAs<double>(srcId);
-        dst.setField(addon.dstId(), val);
+        if (t)
+        {
+            PointRef addonPoint(*t, pointId);
+            double val = addonPoint.getFieldAs<double>(srcId);
+            dst.setField(addon.dstId(), val);
+        }
     }
     return true;
 }
@@ -681,6 +669,16 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     // Only relevant if we hit the count limit before reading all the tiles.
     m_pool->stop();
 
+    // If we're using the addon writer, transfer the info and hierarchy
+    // to that stage.
+    if (m_nodeIdDim != Dimension::Id::Unknown)
+    {
+        EptArtifactPtr artifact
+            (new EptArtifact(std::move(m_info), std::move(m_hierarchy),
+                m_hierarchyStep));
+        m_artifactMgr->put("ept", artifact);
+    }
+
     return numRead;
 }
 
@@ -715,11 +713,8 @@ top:
             {
                 m_currentTile = &m_contents.front();
                 l.unlock();
-                if (m_overlaps.size())
-                {
-                    load(m_overlaps.front());
-                    m_overlaps.pop_front();
-                }
+                if (m_hierarchyIter != m_hierarchy->end())
+                    load(*m_hierarchyIter++);
                 break;
             }
             else

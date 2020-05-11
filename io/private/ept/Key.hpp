@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <functional>  // for hash
+
 #include "EptError.hpp"
 
 namespace pdal
@@ -47,7 +49,7 @@ public:
     Key()
     {}
 
-    Key(std::string s)
+    Key(const std::string& s)
     {
         const StringList tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
@@ -59,10 +61,11 @@ public:
     }
 
     BOX3D b;
-    uint64_t d = 0;
-    uint64_t x = 0;
-    uint64_t y = 0;
-    uint64_t z = 0;
+
+    uint32_t d = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t z = 0;
 
     std::string toString() const
     {
@@ -84,7 +87,7 @@ public:
         }
     }
 
-    uint64_t& idAt(uint64_t i)
+    uint32_t& idAt(uint64_t i)
     {
         switch (i)
         {
@@ -145,4 +148,20 @@ inline bool operator<(const Key& a, const Key& b)
 }
 
 } // namespace pdal
+
+namespace std
+{
+    template<>
+    struct hash<pdal::Key>
+    {
+        std::size_t operator()(pdal::Key const& k) const noexcept
+        {
+            std::hash<uint64_t> h;
+
+            uint64_t k1 = ((uint64_t)k.d << 32) | k.x;
+            uint64_t k2 = ((uint64_t)k.y << 32) | k.z;
+            return h(k1) ^ (h(k2) << 1);
+        }
+    };
+}
 

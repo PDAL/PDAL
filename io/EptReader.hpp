@@ -47,6 +47,7 @@
 #include <pdal/util/Bounds.hpp>
 
 #include "private/ept/Addon.hpp"
+#include "private/ept/Overlap.hpp"
 
 namespace pdal
 {
@@ -54,7 +55,6 @@ namespace pdal
 class Connector;
 class EptInfo;
 class Key;
-struct Overlap;
 class Pool;
 class TileContents;
 using StringMap = std::map<std::string, std::string>;
@@ -88,8 +88,7 @@ private:
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(std::list<Overlap>& target, const NL::json& current,
-        const Key& key);
+    void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
     void process(PointViewPtr dstView, const TileContents& tile,
         point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
@@ -108,7 +107,8 @@ private:
     // here as you do with a deque.
     std::queue<TileContents, std::list<TileContents>> m_contents;
     uint64_t m_tileCount;
-    std::list<Overlap> m_overlaps;
+    std::unique_ptr<Hierarchy> m_hierarchy;
+    Hierarchy::const_iterator m_hierarchyIter;
 
     struct Args;
     std::unique_ptr<Args> m_args;
@@ -132,6 +132,7 @@ private:
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
     TileContents *m_currentTile;
+    ArtifactManager *m_artifactMgr;
 
     PointId m_pointId = 0;
     uint64_t m_nodeId;

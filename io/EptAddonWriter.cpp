@@ -38,14 +38,13 @@
 
 #include <nlohmann/json.hpp>
 
+#include <pdal/ArtifactManager.hpp>
 #include <pdal/Metadata.hpp>
 
 #include "private/ept/Addon.hpp"
+#include "private/ept/EptArtifact.hpp"
 #include "private/ept/Connector.hpp"
-#include "private/ept/Key.hpp"
-#include "private/ept/Overlap.hpp"
 #include "private/ept/Pool.hpp"
-#include "private/ept/EptInfo.hpp"
 
 namespace pdal
 {
@@ -94,7 +93,6 @@ void EptAddonWriter::addDimensions(PointLayoutPtr layout)
 
 void EptAddonWriter::prepared(PointTableRef table)
 {
-    std::cerr << "Prepared!\n";
     const std::size_t threads(std::max<std::size_t>(m_args->m_numThreads, 4));
     if (threads > 100)
     {
@@ -107,53 +105,28 @@ void EptAddonWriter::prepared(PointTableRef table)
     // Perhaps we need to wait to load addons until we have the
     // headers/query from metadata.
     m_connector.reset(new Connector());
-    std::cerr << "About to store!\n";
     m_addons = Addon::store(*m_connector, m_args->m_addons, *(table.layout()));
-    std::cerr << "Done addon store!\n";
 }
 
 void EptAddonWriter::ready(PointTableRef table)
 {
     MetadataNode meta(table.privateMetadata("ept"));
 
-    std::cerr << "ready!\n";
-    if (meta.findChild("info").value().empty())
+    EptArtifactPtr eap = table.artifactManager().get<EptArtifact>("ept");
+    if (!eap)
     {
         throwError(
                 "Cannot use writers.ept_addon without reading using "
                 "readers.ept");
     }
 
-    try
-    {
-        MetadataNode sNode = meta.findChild("step");
-        m_hierarchyStep = sNode.value<uint64_t>();
-
-        MetadataNode iNode = meta.findChild("info");
-        m_info.reset(new EptInfo(iNode.value<std::string>()));
-
-        MetadataNode kNode = meta.findChild("keys");
-        const auto keys(NL::json::parse(kNode.value<std::string>()));
-        for (auto el : keys.items())
-        {
-            const std::string& key = el.key();
-            uint64_t count = el.value()[0].get<uint64_t>();
-            uint64_t nodeId = el.value()[1].get<uint64_t>();
-
-            using Entry = std::pair<const std::string, Overlap>;
-            Entry e {key, {key, count, nodeId}};
-            m_overlaps.insert(e);
-        }
-    }
-    catch (std::exception& e)
-    {
-        throwError(e.what());
-    }
+    m_hierarchyStep = eap->m_hierarchyStep;
+    m_info = std::move(eap->m_info);
+    m_hierarchy = std::move(eap->m_hierarchy);
 }
 
 void EptAddonWriter::write(const PointViewPtr view)
 {
-    std::cerr << "Write!\n";
     for (const auto& addon : m_addons)
     {
         log()->get(LogLevel::Debug) << "Writing addon dimension " <<
@@ -167,15 +140,13 @@ void EptAddonWriter::write(const PointViewPtr view)
 
 void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 {
-std::cerr << "Write one: " << addon.name() << "!\n";
-    std::vector<std::vector<char>> buffers(m_overlaps.size());
+    std::vector<std::vector<char>> buffers(m_hierarchy->size());
 
     // Create an addon buffer for each node we're going to write.
 
     size_t itemSize = Dimension::size(addon.type());
-    for (const auto& entry : m_overlaps)
+    for (const Overlap& overlap : *m_hierarchy)
     {
-        const Overlap& overlap = entry.second;
         std::vector<char>& b = buffers[overlap.m_nodeId - 1];
         b.resize(overlap.m_count * itemSize);
     }
@@ -207,13 +178,10 @@ std::cerr << "Write one: " << addon.name() << "!\n";
     m_connector->makeDir(dataDir);
 
     // Write the binary dimension data for the addon.
-    for (const auto& p : m_overlaps)
+    for (const Overlap& overlap : *m_hierarchy)
     {
-        const Overlap& overlap = p.second;
-
         std::vector<char>& buffer = buffers.at(overlap.m_nodeId - 1);
         std::string filename = dataDir + overlap.m_key.toString() + ".bin";
-std::cerr << "About to write to " << filename << "!\n";
         m_pool->add([this, filename, &buffer]()
         {
             m_connector->put(filename, buffer);
@@ -249,16 +217,15 @@ std::cerr << "About to write to " << filename << "!\n";
 void EptAddonWriter::writeHierarchy(const std::string& directory,
     NL::json& curr, const Key& key) const
 {
-    std::string keyName = key.toString();
-
-    auto it = m_overlaps.find(keyName);
-    if (it == m_overlaps.end())
+    auto it = m_hierarchy->find(key);
+    if (it == m_hierarchy->end())
         return;
 
-    const Overlap& overlap = it->second;;
+    const Overlap& overlap = *it;
     if (!overlap.m_count)
         return;
 
+    const std::string keyName = key.toString();
     if (m_hierarchyStep && key.d && (key.d % m_hierarchyStep == 0))
     {
         curr[keyName] = -1;
@@ -280,9 +247,7 @@ void EptAddonWriter::writeHierarchy(const std::string& directory,
     {
         curr[keyName] = overlap.m_count;
         for (uint64_t dir(0); dir < 8; ++dir)
-        {
             writeHierarchy(directory, curr, key.bisect(dir));
-        }
     }
 }
 

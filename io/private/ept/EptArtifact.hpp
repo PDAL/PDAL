@@ -34,43 +34,29 @@
 
 #pragma once
 
-#include <unordered_set>
+#include <memory>
 
-#include "Key.hpp"
+#include <pdal/Artifact.hpp>
+#include "EptInfo.hpp"
+#include "Overlap.hpp"
 
 namespace pdal
 {
 
-struct Overlap
+class EptArtifact : public Artifact
 {
-    Overlap(const Key& key) : m_key(key), m_count(0), m_nodeId(0)
-    {}
-    Overlap(const Key& key, point_count_t count, uint64_t nodeId) :
-        m_key(key), m_count(count), m_nodeId(nodeId)
+public:
+    EptArtifact(std::unique_ptr<EptInfo> info,
+            std::unique_ptr<Hierarchy> hierarchy, size_t hierarchyStep) :
+        m_info(std::move(info)), m_hierarchy(std::move(hierarchy)),
+        m_hierarchyStep(hierarchyStep)
     {}
 
-    Key m_key;
-    point_count_t m_count;
-    uint64_t m_nodeId;
+    std::unique_ptr<EptInfo> m_info;
+    std::unique_ptr<Hierarchy> m_hierarchy;
+    size_t m_hierarchyStep;
 };
-using Hierarchy = std::unordered_set<Overlap>;
-
-inline bool operator==(const Overlap& a, const Overlap& b)
-{
-    return a.m_key == b.m_key;
-}
+using EptArtifactPtr = std::shared_ptr<EptArtifact>;
 
 } // namespace pdal
-
-namespace std
-{
-    template<>
-    struct hash<pdal::Overlap>
-    {
-        std::size_t operator()(const pdal::Overlap& o) const noexcept
-        {
-            return std::hash<pdal::Key>{}(o.m_key);
-        }
-    };
-}
 

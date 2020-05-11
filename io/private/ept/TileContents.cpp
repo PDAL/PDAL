@@ -140,11 +140,14 @@ void TileContents::readZstandard() const
 
 void TileContents::readAddon(const Addon& addon, size_t expectedPts)
 {
-    if (size() == 0)
+    m_addonTables[addon.srcId()] = nullptr;
+
+    point_count_t addonPoints = addon.points(key());
+    if (addonPoints == 0)
         return;
 
     // If the addon hierarchy exists, it must match the EPT data.
-    if (size() != expectedPts)
+    if (addonPoints != expectedPts)
         throw pdal_error("Invalid addon hierarchy");
 
     std::string filename = addon.dataDir() + key().toString() + ".bin";
