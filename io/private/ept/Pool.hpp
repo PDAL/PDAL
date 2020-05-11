@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <thread>
 #include <condition_variable>
+#include <functional>
 #include <queue>
+#include <thread>
 
 #include "EptError.hpp"
 

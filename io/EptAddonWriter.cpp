@@ -39,7 +39,6 @@
 #include <nlohmann/json.hpp>
 
 #include <pdal/ArtifactManager.hpp>
-#include <pdal/Metadata.hpp>
 
 #include "private/ept/Addon.hpp"
 #include "private/ept/EptArtifact.hpp"
@@ -110,8 +109,6 @@ void EptAddonWriter::prepared(PointTableRef table)
 
 void EptAddonWriter::ready(PointTableRef table)
 {
-    MetadataNode meta(table.privateMetadata("ept"));
-
     EptArtifactPtr eap = table.artifactManager().get<EptArtifact>("ept");
     if (!eap)
     {

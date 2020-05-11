@@ -59,8 +59,6 @@ public:
 
     const PointViewPtr view() const
         { return m_view; }
-    point_count_t size() const
-        { return m_overlap.m_count; }
     const Key& key() const
         { return m_overlap.m_key; }
     point_count_t nodeId() const
