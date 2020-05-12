@@ -63,6 +63,8 @@ public:
         { return m_overlap.m_key; }
     point_count_t nodeId() const
         { return m_overlap.m_nodeId; }
+    point_count_t size() const
+        { return m_overlap.m_count; }
     const std::string& error() const
         { return m_error; }
     BasePointTable *addonTable(Dimension::Id id) const
