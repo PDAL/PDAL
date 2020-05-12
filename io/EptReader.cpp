@@ -469,7 +469,7 @@ void EptReader::ready(PointTableRef table)
     else
     {
         int count = 4;
-        auto m_hierarchyIter = m_hierarchy->cbegin();
+        m_hierarchyIter = m_hierarchy->cbegin();
         while (m_hierarchyIter != m_hierarchy->cend() && count)
         {
             load(*m_hierarchyIter++);
