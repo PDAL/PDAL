@@ -469,8 +469,8 @@ void EptReader::ready(PointTableRef table)
     else
     {
         int count = 4;
-        auto m_hierarchyIter = m_hierarchy->begin();
-        while (m_hierarchyIter != m_hierarchy->end() && count)
+        auto m_hierarchyIter = m_hierarchy->cbegin();
+        while (m_hierarchyIter != m_hierarchy->cend() && count)
         {
             load(*m_hierarchyIter++);
             count--;
@@ -723,7 +723,7 @@ top:
             {
                 m_currentTile = &m_contents.front();
                 l.unlock();
-                if (m_hierarchyIter != m_hierarchy->end())
+                if (m_hierarchyIter != m_hierarchy->cend())
                     load(*m_hierarchyIter++);
                 break;
             }
