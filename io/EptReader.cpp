@@ -522,11 +522,21 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
     // Check the box of the key against our
     // query polygon(s). If it doesn't overlap,
     // we can skip
-    for (auto& p: m_args->m_polys)
-        if (p.disjoint(key.b))
-            return;
+    auto polysOverlap = [this, &key]()
+    {
+        if (m_args->m_polys.empty())
+            return true;
+        for (auto& p: m_args->m_polys)
+            if (!p.disjoint(key.b))
+                return true;
+        return false;
+    };
 
-    if (m_depthEnd && key.d >= m_depthEnd) return;
+    if (!polysOverlap())
+        return;
+
+    if (m_depthEnd && key.d >= m_depthEnd)
+        return;
 
     auto it = hier.find(key.toString());
     if (it == hier.end())
