@@ -47,7 +47,6 @@
 #ifndef NANOFLANN_HPP_
 #define NANOFLANN_HPP_
 
-#include <iostream>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -61,6 +60,16 @@
 
 /** Library version: 0xMmP (M=Major,m=minor,P=patch) */
 #define NANOFLANN_VERSION 0x131
+
+// Avoid conflicting declaration of min/max macros in windows headers
+#if !defined(NOMINMAX) &&                                                      \
+    (defined(_WIN32) || defined(_WIN32_) || defined(WIN32) || defined(_WIN64))
+#define NOMINMAX
+#ifdef max
+#undef max
+#undef min
+#endif
+#endif
 
 namespace nanoflann {
 /** @addtogroup nanoflann_grp nanoflann C++ library for ANN
@@ -629,8 +638,6 @@ public:
                      BoundingBox &bbox) {
     NodePtr node = obj.pool.template allocate<Node>(); // allocate memory
 
-std::cerr << "left/right/max = " << left << "/" << right << "/" <<
- obj.m_leaf_max_size << "!\n";
     /* If too few exemplars remain, then make this a leaf node. */
     if ((right - left) <= static_cast<IndexType>(obj.m_leaf_max_size)) {
       node->child1 = node->child2 = NULL; /* Mark as leaf node. */
@@ -671,8 +678,8 @@ std::cerr << "left/right/max = " << left << "/" << right << "/" <<
       node->node_type.sub.divhigh = right_bbox[cutfeat].low;
 
       for (int i = 0; i < (DIM > 0 ? DIM : obj.dim); ++i) {
-        bbox[i].low = (std::min)(left_bbox[i].low, right_bbox[i].low);
-        bbox[i].high = (std::max)(left_bbox[i].high, right_bbox[i].high);
+        bbox[i].low = std::min(left_bbox[i].low, right_bbox[i].low);
+        bbox[i].high = std::max(left_bbox[i].high, right_bbox[i].high);
       }
     }
 
@@ -682,7 +689,6 @@ std::cerr << "left/right/max = " << left << "/" << right << "/" <<
   void middleSplit_(Derived &obj, IndexType *ind, IndexType count,
                     IndexType &index, int &cutfeat, DistanceType &cutval,
                     const BoundingBox &bbox) {
-std::cerr << "Middle split!\n";
     const DistanceType EPS = static_cast<DistanceType>(0.00001);
     ElementType max_span = bbox[0].high - bbox[0].low;
     for (int i = 1; i < (DIM > 0 ? DIM : obj.dim); ++i) {
@@ -691,7 +697,6 @@ std::cerr << "Middle split!\n";
         max_span = span;
       }
     }
-std::cerr << "Calc spread!\n";
     ElementType max_spread = -1;
     cutfeat = 0;
     for (int i = 0; i < (DIM > 0 ? DIM : obj.dim); ++i) {
@@ -719,7 +724,6 @@ std::cerr << "Calc spread!\n";
     else
       cutval = split_val;
 
-std::cerr << "Plane split!\n";
     IndexType lim1, lim2;
     planeSplit(obj, ind, count, cutfeat, cutval, lim1, lim2);
 
@@ -763,7 +767,6 @@ std::cerr << "Plane split!\n";
      */
     lim1 = left;
     right = count - 1;
-std::cerr << "Left/Right = " << left << "/" << right << "!\n";
     for (;;) {
       while (left <= right && dataset_get(obj, ind[left], cutfeat) <= cutval)
         ++left;
@@ -907,8 +910,7 @@ public:
     BaseClassRef::dim = dimensionality;
     if (DIM > 0)
       BaseClassRef::dim = DIM;
-//    BaseClassRef::m_leaf_max_size = params.leaf_max_size;
-    BaseClassRef::m_leaf_max_size = 20;
+    BaseClassRef::m_leaf_max_size = params.leaf_max_size;
 
     // Create a permutable array of indices to the input vectors.
     init_vind();
@@ -964,7 +966,6 @@ public:
     assign(dists, (DIM > 0 ? DIM : BaseClassRef::dim),
            zero); // Fill it with zeros.
     DistanceType distsq = this->computeInitialDistances(*this, vec, dists);
-    std::cerr << "Initial dist = " << std::sqrt(distsq) << "!\n";
     searchLevel(result, vec, BaseClassRef::root_node, distsq, dists,
                 epsError); // "count_leaf" parameter removed since was neither
                            // used nor returned to the user.
@@ -1082,22 +1083,18 @@ public:
       // count_leaf += (node->lr.right-node->lr.left);  // Removed since was
       // neither used nor returned to the user.
       DistanceType worst_dist = result_set.worstDist();
-std::cerr << "worst_dist = " << worst_dist << "!\n";
       for (IndexType i = node->node_type.lr.left; i < node->node_type.lr.right;
            ++i) {
         const IndexType index = BaseClassRef::vind[i]; // reorder... : i;
         DistanceType dist = distance.evalMetric(
             vec, index, (DIM > 0 ? DIM : BaseClassRef::dim));
-//std::cerr << "Dist = " << std::sqrt(dist);
         if (dist < worst_dist) {
-//std::cerr << " - adding";
           if (!result_set.addPoint(dist, BaseClassRef::vind[i])) {
             // the resultset doesn't want to receive any more points, we're done
             // searching!
             return false;
           }
         }
-//std::cerr << "!\n";
       }
       return true;
     }
@@ -1105,8 +1102,6 @@ std::cerr << "worst_dist = " << worst_dist << "!\n";
     /* Which child branch should be taken first? */
     int idx = node->node_type.sub.divfeat;
     ElementType val = vec[idx];
-    std::cerr << "Idx/low/high = " << idx << "/" <<
-        node->node_type.sub.divlow << "/" << node->node_type.sub.divhigh << "!\n";
     DistanceType diff1 = val - node->node_type.sub.divlow;
     DistanceType diff2 = val - node->node_type.sub.divhigh;
 
@@ -1122,7 +1117,6 @@ std::cerr << "worst_dist = " << worst_dist << "!\n";
       otherChild = node->child1;
       cut_dist = distance.accum_dist(val, node->node_type.sub.divlow, idx);
     }
-std::cerr << "Cut dist/idx = " << cut_dist << "/" << idx << "!\n";
 
     /* Call recursively to search next level down. */
     if (!searchLevel(result_set, vec, bestChild, mindistsq, dists, epsError)) {
@@ -1132,9 +1126,7 @@ std::cerr << "Cut dist/idx = " << cut_dist << "/" << idx << "!\n";
     }
 
     DistanceType dst = dists[idx];
-std::cerr << "+Mindist/Cut dist/dst = " << mindistsq << "/" << cut_dist << "/" << dst << "!\n";
     mindistsq = mindistsq + cut_dist - dst;
-std::cerr << "-Min Dist = " << mindistsq << "!\n";
     dists[idx] = cut_dist;
     if (mindistsq * epsError <= result_set.worstDist()) {
       if (!searchLevel(result_set, vec, otherChild, mindistsq, dists,
@@ -1144,7 +1136,6 @@ std::cerr << "-Min Dist = " << mindistsq << "!\n";
         return false;
       }
     }
-std::cerr << "Setting dst = " << dst << "!\n";
     dists[idx] = dst;
     return true;
   }
