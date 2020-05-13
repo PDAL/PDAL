@@ -57,11 +57,12 @@ void TileContents::read()
 #endif
         else
             throw ept_error("Unrecognized EPT dataType");
-
+//ABELL - Should check that we read the number of points specified in the
+//  overlap.
         // Read addon information after the native data, we'll possibly
         // overwrite attributes.
         for (const Addon& addon : m_addons)
-            readAddon(addon, m_view->size());
+            readAddon(addon);
     }
     catch (const std::exception& ex)
     {
@@ -95,8 +96,10 @@ void TileContents::readLaszip()
     reader.prepare(*m_table);  // Geotiff SRS initialization is not thread-safe.
     lock.unlock();
 
-    PointViewSet s = reader.execute(*m_table);
-    m_view = *s.begin();
+//ABELL
+    reader.execute(*m_table);
+//    PointViewSet s = reader.execute(*m_table);
+//    m_view = *s.begin();
 }
 
 void TileContents::readBinary()
@@ -107,7 +110,7 @@ void TileContents::readBinary()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
-    m_view.reset(new PointView(*m_table, vpt->numPoints()));
+//    m_view.reset(new PointView(*m_table, vpt->numPoints()));
 
     transform();
 }
@@ -128,7 +131,7 @@ void TileContents::readZstandard()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
-    m_view.reset(new PointView(*m_table, vpt->numPoints()));
+//    m_view.reset(new PointView(*m_table, vpt->numPoints()));
 
     transform();
 }
@@ -138,7 +141,7 @@ void TileContents::readZstandard() const
 }
 #endif // PDAL_HAVE_ZSTD
 
-void TileContents::readAddon(const Addon& addon, size_t expectedPts)
+void TileContents::readAddon(const Addon& addon)
 {
     m_addonTables[addon.localId()] = nullptr;
 
@@ -147,7 +150,7 @@ void TileContents::readAddon(const Addon& addon, size_t expectedPts)
         return;
 
     // If the addon hierarchy exists, it must match the EPT data.
-    if (addonPoints != expectedPts)
+    if (addonPoints != size())
         throw pdal_error("Invalid addon hierarchy");
 
     std::string filename = addon.dataDir() + key().toString() + ".bin";
@@ -170,8 +173,11 @@ void TileContents::transform()
     const XForm& yf = m_info.dimType(Dimension::Id::Y).m_xform;
     const XForm& zf = m_info.dimType(Dimension::Id::Z).m_xform;
 
-    for (PointRef p : *m_view)
+    PointRef p(*m_table);
+    for (PointId i = 0; i < size(); ++i)
     {
+        p.setPointId(i);
+
         // Scale the XYZ values.
         p.setField(D::X, p.getFieldAs<double>(D::X) * xf.m_scale.m_val +
             xf.m_offset.m_val);

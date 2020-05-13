@@ -448,12 +448,8 @@ void EptReader::ready(PointTableRef table)
             " will be downloaded" << std::endl;
     }
 
-    //ABELL
-    if (m_nodeIdDim != Dimension::Id::Unknown)
-    ;
-
-    // A million is a silly-large number for the number of tiles.
-    m_pool.reset(new Pool(m_pool->numThreads(), 1000000));
+    // Ten million is a silly-large number for the number of tiles.
+    m_pool.reset(new Pool(m_pool->numThreads(), 10000000));
     m_pointId = 0;
     m_tileCount = m_hierarchy->size();
 
@@ -587,13 +583,14 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
         throwError("Error reading tile: " + tile.error());
     }
 
-    const PointViewPtr v = tile.view();
+    BasePointTable& t = tile.table();
 
     // Save current point ID and increment so that we can return without
-    // worrying about m_pointId.
+    // worrying about m_pointId being correct on exit.
     PointId pointId = m_pointId++;
 
-    int64_t originId = v->getFieldAs<int64_t>(Id::OriginId, pointId);
+    PointRef p(t, pointId);
+    int64_t originId = p.getFieldAs<int64_t>(Id::OriginId);
     if (m_queryOriginId != -1 && originId != m_queryOriginId)
         return false;
 
@@ -608,9 +605,9 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
         return false;
     };
 
-    double x = v->getFieldAs<double>(Id::X, pointId);
-    double y = v->getFieldAs<double>(Id::Y, pointId);
-    double z = v->getFieldAs<double>(Id::Z, pointId);
+    double x = p.getFieldAs<double>(Id::X);
+    double y = p.getFieldAs<double>(Id::Y);
+    double z = p.getFieldAs<double>(Id::Z);
 
     if (!m_queryBounds.contains(x, y, z) || !passesPolyFilter(x, y))
         return false;
@@ -622,7 +619,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
                 dt.m_id != Dimension::Id::Y &&
                 dt.m_id != Dimension::Id::Z)
         {
-            const double val = v->getFieldAs<double>(dt.m_id, pointId) *
+            const double val = p.getFieldAs<double>(dt.m_id) *
                 dt.m_xform.m_scale.m_val + dt.m_xform.m_offset.m_val;
 
             dst.setField(dt.m_id, val);

@@ -57,8 +57,8 @@ public:
         m_addons(addons)
     {}
 
-    const PointViewPtr view() const
-        { return m_view; }
+    BasePointTable& table() const
+        { return *m_table; }
     const Key& key() const
         { return m_overlap.m_key; }
     point_count_t nodeId() const
@@ -79,15 +79,13 @@ private:
     std::string m_error;
     // Table for the base point data.
     BasePointTablePtr m_table;
-    // View into m_table.
-    PointViewPtr m_view;
     // Tables for the add on data.
     std::map<Dimension::Id, BasePointTablePtr> m_addonTables;
 
     void readLaszip();
     void readBinary();
     void readZstandard();
-    void readAddon(const Addon& addon, size_t expectedPts);
+    void readAddon(const Addon& addon);
     void transform();
 };
 

@@ -78,10 +78,7 @@ public:
     PointView(const PointView&) = delete;
     PointView& operator=(const PointView&) = delete;
     PointView(PointTableRef pointTable);
-    PointView(PointTableRef pointTable, point_count_t size);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
-    PointView(PointTableRef pointTable, const SpatialReference& srs,
-        point_count_t size);
     virtual ~PointView();
 
     PointViewIter begin();
