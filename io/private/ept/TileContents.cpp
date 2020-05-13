@@ -140,7 +140,7 @@ void TileContents::readZstandard() const
 
 void TileContents::readAddon(const Addon& addon, size_t expectedPts)
 {
-    m_addonTables[addon.srcId()] = nullptr;
+    m_addonTables[addon.localId()] = nullptr;
 
     point_count_t addonPoints = addon.points(key());
     if (addonPoints == 0)
@@ -158,7 +158,7 @@ void TileContents::readAddon(const Addon& addon, size_t expectedPts)
 
     VectorPointTable *vpt = new VectorPointTable(addon.layout());
     vpt->buffer() = std::move(data);
-    m_addonTables[addon.srcId()] = BasePointTablePtr(vpt);
+    m_addonTables[addon.localId()] = BasePointTablePtr(vpt);
 }
 
 void TileContents::transform()

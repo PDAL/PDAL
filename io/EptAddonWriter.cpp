@@ -167,7 +167,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
         auto& buffer(buffers.at(nodeId - 1));
         assert(pointId * itemSize + itemSize <= buffer.size());
         char* dst = buffer.data() + pointId * itemSize;
-        pr.getField(dst, addon.dstId(), addon.type());
+        pr.getField(dst, addon.externalId(), addon.type());
     }
 
     std::string dataDir = addon.dataDir();

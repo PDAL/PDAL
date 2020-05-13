@@ -186,14 +186,12 @@ TEST(EptAddonWriterTest, boundedWrite)
 
         PointTable table;
         writer.prepare(table);
-        std::cerr << "Running addon writer!\n";
         writer.execute(table);
     }
 
     // Now we'll query the whole dataset with this addon - points outside the
     // bounds should have a Classification of zero.
 
-    std::cerr << "Re-reading!\n";
     EptReader reader;
     {
         NL::json addons;

@@ -92,7 +92,7 @@ AddonList Addon::store(const Connector& connector, const NL::json& spec,
             connector.put(filename, meta.dump());
 
             addons.emplace_back(dimName, filename, type);
-            addons.back().setDstId(id);
+            addons.back().setExternalId(id);
         }
     }
     catch (NL::json::parse_error&)

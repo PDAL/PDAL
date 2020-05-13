@@ -394,7 +394,8 @@ void EptReader::addDimensions(PointLayoutPtr layout)
     }
 
     for (Addon& addon : m_addons)
-        addon.setDstId(layout->registerOrAssignDim(addon.name(), addon.type()));
+        addon.setExternalId(
+            layout->registerOrAssignDim(addon.name(), addon.type()));
 }
 
 
@@ -634,13 +635,13 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     dst.setField(m_pointIdDim, pointId);
     for (Addon& addon : m_addons)
     {
-        Dimension::Id srcId = addon.srcId();
+        Dimension::Id srcId = addon.localId();
         BasePointTable *t = tile.addonTable(srcId);
         if (t)
         {
             PointRef addonPoint(*t, pointId);
             double val = addonPoint.getFieldAs<double>(srcId);
-            dst.setField(addon.dstId(), val);
+            dst.setField(addon.externalId(), val);
         }
     }
     return true;
