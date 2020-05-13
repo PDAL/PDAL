@@ -43,34 +43,6 @@
 namespace pdal
 {
 
-/**
-inline NL::json parse(const std::string& data)
-{
-    NL::json j;
-
-    try
-    {
-        j = NL::json::parse(data);
-    }
-    catch (NL::json::parse_error& err)
-    {
-        throw ept_error(std::string("Error during parsing: ") + err.what());
-    }
-    return j;
-}
-
-inline BOX3D toBox3d(const NL::json& b)
-{
-    if (!b.is_array() || b.size() != 6)
-    {
-        throw ept_error("Invalid bounds specification: " + b.dump());
-    }
-
-    return BOX3D(b[0].get<double>(), b[1].get<double>(), b[2].get<double>(),
-            b[3].get<double>(), b[4].get<double>(), b[5].get<double>());
-}
-**/
-
 class Connector;
 
 class EptInfo

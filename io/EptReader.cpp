@@ -751,16 +751,4 @@ top:
     return true;
 }
 
-/**
-Dimension::Type EptReader::getRemoteTypeTest(const NL::json& j)
-{
-    return getRemoteType(j);
-}
-
-Dimension::Type EptReader::getCoercedTypeTest(const NL::json& j)
-{
-    return getCoercedType(j);
-}
-**/
-
 } // namespace pdal

@@ -37,7 +37,6 @@
 #include <cstddef>
 #include <memory>
 #include <vector>
-#include <unordered_map>
 
 #include <pdal/JsonFwd.hpp>
 #include <pdal/Writer.hpp>

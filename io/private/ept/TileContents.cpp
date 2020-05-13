@@ -96,10 +96,7 @@ void TileContents::readLaszip()
     reader.prepare(*m_table);  // Geotiff SRS initialization is not thread-safe.
     lock.unlock();
 
-//ABELL
     reader.execute(*m_table);
-//    PointViewSet s = reader.execute(*m_table);
-//    m_view = *s.begin();
 }
 
 void TileContents::readBinary()
@@ -110,7 +107,6 @@ void TileContents::readBinary()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
-//    m_view.reset(new PointView(*m_table, vpt->numPoints()));
 
     transform();
 }
@@ -131,7 +127,6 @@ void TileContents::readZstandard()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
-//    m_view.reset(new PointView(*m_table, vpt->numPoints()));
 
     transform();
 }
