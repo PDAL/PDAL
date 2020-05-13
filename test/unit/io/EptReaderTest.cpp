@@ -473,55 +473,6 @@ TEST(EptReaderTest, badOriginQuery)
     EXPECT_THROW(reader.prepare(table), pdal_error);
 }
 
-/**
-TEST(EptReaderTest, getRemoteType)
-{
-    NL::json j = {{ "type", "signed" }, { "size", 4 }, { "scale", 1.0 }};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Signed32);
-    j = {{ "scale", "foo" }};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Float);
-    j = {{ "type", "unsigned"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Unsigned32);
-    j = {{ "type", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Signed16);
-    j = {{ "tope", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}, {"size", 3}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-}
-**/
-
-/**
-TEST(EptReaderTest, getCoercedType)
-{
-    // Scaled attributes are coerced to doubles regardless of schema type.
-    NL::json j = {{ "type", "signed" }, { "size", 4 }, { "scale", 1.0 }};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Double);
-    j = {{ "scale", "foo" }};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Float);
-    j = {{ "type", "unsigned"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Unsigned32);
-    j = {{ "type", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Signed16);
-    j = {{ "tope", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}, {"size", 3}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-}
-**/
-
 void streamTest(const std::string src)
 {
     Options ops;
