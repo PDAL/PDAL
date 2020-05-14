@@ -623,7 +623,7 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
 
     // https://github.com/PDAL/PDAL/issues/2794#issuecomment-625297062
     if (!temp->size())
-        return cz;
+        return;
 
     KD2Index& kdi = temp->build2dIndex();
 
