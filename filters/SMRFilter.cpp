@@ -184,11 +184,8 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     PointViewPtr syntheticView = keptView->makeNew();
     PointViewPtr realView = keptView->makeNew();
-    if (!m_args->m_classbits)
-        realView->append(*keptView);
-    else
-        Segmentation::ignoreClassBits(keptView, realView, syntheticView,
-                                      m_args->m_classbits);
+    Segmentation::ignoreClassBits(keptView, realView, syntheticView,
+                                  m_args->m_classbits);
 
     // Check for 0's in ReturnNumber and NumberOfReturns
     bool nrOneZero(false);

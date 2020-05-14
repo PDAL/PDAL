@@ -76,11 +76,11 @@ std::istream& operator>>(std::istream& in, PointClasses& classes)
 std::ostream& operator<<(std::ostream& out, const PointClasses& classes)
 {
     std::string s;
-    if (classes & ClassLabel::Keypoint)
+    if (classes.m_classes & ClassLabel::Keypoint)
         s += "keypoint,";
-    if (classes & ClassLabel::Synthetic)
+    if (classes.m_classes & ClassLabel::Synthetic)
         s += "synthetic,";
-    if (classes & ClassLabel::Withheld)
+    if (classes.m_classes & ClassLabel::Withheld)
         s += "withheld,";
     if (Utils::endsWith(s, ","))
         s.resize(s.size() - 1);
@@ -184,7 +184,7 @@ void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
 {
     using namespace Dimension;
 
-    if (!classbits)
+    if (classbits.isNone())
     {
         keep->append(*input);
     }
@@ -193,7 +193,7 @@ void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
         for (PointId i = 0; i < input->size(); ++i)
         {
             uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
-            if (classbits & c)
+            if (classbits.bits() & c)
                 ignore->appendPoint(*input, i);
             else
                 keep->appendPoint(*input, i);

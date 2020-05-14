@@ -49,10 +49,9 @@ class PointView;
 namespace Segmentation
 {
 
-struct PointClasses
+class PointClasses
 {
-    uint32_t m_classes;
-
+public:
     PointClasses() : m_classes(0)
     {}
 
@@ -64,8 +63,15 @@ struct PointClasses
     { return m_classes & ClassLabel::Synthetic; }
     bool isNone() const
     { return m_classes == 0; }
-    operator bool () const
-    { return !isNone(); }
+    uint32_t bits() const
+    { return m_classes; }
+
+private:
+    uint32_t m_classes;
+
+    friend std::istream& operator>>(std::istream& in, PointClasses& classes);
+    friend std::ostream& operator<<(std::ostream& out,
+        const PointClasses& classes);
 };
 
 std::istream& operator>>(std::istream& in, PointClasses& classes);
