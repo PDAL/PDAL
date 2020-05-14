@@ -49,6 +49,28 @@ class PointView;
 namespace Segmentation
 {
 
+struct PointClasses
+{
+    uint32_t m_classes;
+
+    PointClasses() : m_classes(0)
+    {}
+
+    bool isWithheld() const
+    { return m_classes & ClassLabel::Withheld; }
+    bool isKeypoint() const
+    { return m_classes & ClassLabel::Keypoint; }
+    bool isSynthetic() const
+    { return m_classes & ClassLabel::Synthetic; }
+    bool isNone() const
+    { return m_classes == 0; }
+    operator bool () const
+    { return !isNone(); }
+};
+
+std::istream& operator>>(std::istream& in, PointClasses& classes);
+std::ostream& operator<<(std::ostream& out, const PointClasses& classes);
+
 /**
   Extract clusters of points from input PointView.
 
@@ -74,7 +96,7 @@ PDAL_DLL void ignoreDimRanges(std::vector<DimRange>& ranges,
     PointViewPtr input, PointViewPtr keep, PointViewPtr ignore);
 
 PDAL_DLL void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
-                              PointViewPtr ignore, StringList classbits);
+                              PointViewPtr ignore, PointClasses classbits);
 
 PDAL_DLL void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                                  PointViewPtr other);

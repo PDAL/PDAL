@@ -90,7 +90,7 @@ struct SMRArgs
     std::string m_dir;
     std::vector<DimRange> m_ignored;
     StringList m_returns;
-    StringList m_classbits;
+    Segmentation::PointClasses m_classbits;
 };
 
 SMRFilter::SMRFilter() : m_args(new SMRArgs) {}
@@ -114,8 +114,8 @@ void SMRFilter::addArgs(ProgramArgs& args)
     args.add("ignore", "Ignore values", m_args->m_ignored);
     args.add("returns", "Include last returns?", m_args->m_returns,
              {"last", "only"});
-    args.add("classbits", "Ignore synthetic|keypoint|withheld classification bits?",
-             m_args->m_classbits, {""});
+    args.add("classbits", "Ignore synthetic|keypoint|withheld "
+        "classification bits?", m_args->m_classbits);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -184,7 +184,7 @@ PointViewSet SMRFilter::run(PointViewPtr view)
 
     PointViewPtr syntheticView = keptView->makeNew();
     PointViewPtr realView = keptView->makeNew();
-    if (!m_args->m_classbits.size())
+    if (!m_args->m_classbits)
         realView->append(*keptView);
     else
         Segmentation::ignoreClassBits(keptView, realView, syntheticView,

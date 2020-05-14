@@ -50,6 +50,44 @@ namespace pdal
 namespace Segmentation
 {
 
+std::istream& operator>>(std::istream& in, PointClasses& classes)
+{
+    std::string s;
+
+    classes.m_classes = 0;
+
+    in >> s;
+    s = Utils::tolower(s);
+    StringList sl = Utils::split(s, ',');
+    for (const std::string& c : sl)
+    {
+        if (c == "keypoint")
+            classes.m_classes |= ClassLabel::Keypoint;
+        else if (c == "synthetic")
+            classes.m_classes |= ClassLabel::Synthetic;
+        else if (c == "withheld")
+            classes.m_classes |= ClassLabel::Withheld;
+        else
+            in.setstate(std::ios::failbit);
+    }
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const PointClasses& classes)
+{
+    std::string s;
+    if (classes & ClassLabel::Keypoint)
+        s += "keypoint,";
+    if (classes & ClassLabel::Synthetic)
+        s += "synthetic,";
+    if (classes & ClassLabel::Withheld)
+        s += "withheld,";
+    if (Utils::endsWith(s, ","))
+        s.resize(s.size() - 1);
+    out << s;
+    return out;
+}
+
 std::vector<PointIdList> extractClusters(PointView& view, uint64_t min_points,
                                          uint64_t max_points, double tolerance)
 {
@@ -142,44 +180,23 @@ void ignoreDimRanges(std::vector<DimRange>& ranges, PointViewPtr input,
 }
 
 void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
-                     PointViewPtr ignore, StringList classbits)
+                     PointViewPtr ignore, PointClasses classbits)
 {
     using namespace Dimension;
 
-    bool ignoreSynthetic = false;
-    bool ignoreKeypoint = false;
-    bool ignoreWithheld = false;
-
-    if (!classbits.size())
+    if (!classbits)
     {
         keep->append(*input);
     }
     else
     {
-        for (auto& b : classbits)
-        {
-            Utils::trim(b);
-            if (b == "synthetic")
-                ignoreSynthetic = true;
-            else if (b == "keypoint")
-                ignoreKeypoint = true;
-            else if (b == "withheld")
-                ignoreWithheld = true;
-        }
-
         for (PointId i = 0; i < input->size(); ++i)
         {
             uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
-	    if (((c & ClassLabel::Synthetic) && ignoreSynthetic) ||
-                ((c & ClassLabel::Keypoint) && ignoreKeypoint) ||
-		((c & ClassLabel::Withheld) && ignoreWithheld))
-            {
+            if (classbits & c)
                 ignore->appendPoint(*input, i);
-            }
-	    else
-            {
+            else
                 keep->appendPoint(*input, i);
-            }
         }
     }
 }
