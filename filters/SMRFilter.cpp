@@ -509,20 +509,19 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     // values are found by applying a morphological open operation with a disk
     // shaped structuring element of radius (2*wkmax)."
     std::vector<double> ZInetV = ZImin;
+    std::vector<double> dilated = ZImin;
     if (m_args->m_cut > 0.0)
     {
         int v = ceil<int>(m_args->m_cut / m_args->m_cell);
-        std::vector<double> bigErode =
-            erodeDiamond(ZImin, m_rows, m_cols, 2 * v);
-        std::vector<double> bigOpen =
-            dilateDiamond(bigErode, m_rows, m_cols, 2 * v);
+        erodeDiamond(dilated, m_rows, m_cols, 2 * v);
+        dilateDiamond(dilated, m_rows, m_cols, 2 * v);
         for (auto c = 0; c < m_cols; ++c)
         {
             for (auto r = 0; r < m_rows; ++r)
             {
                 if (isNetCell[c * m_rows + r] == 1)
                 {
-                    ZInetV[c * m_rows + r] = bigOpen[c * m_rows + r];
+                    ZInetV[c * m_rows + r] = dilated[c * m_rows + r];
                 }
             }
         }
@@ -648,7 +647,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     // the ceiling value)."
     int max_radius = static_cast<int>(std::ceil(max_window / m_args->m_cell));
     std::vector<double> prevSurface = ZImin;
-    std::vector<double> prevErosion = ZImin;
+    std::vector<double> erosion = ZImin;
 
     // "...the radius of the element at each step [is] increased by one pixel
     // from a starting value of one pixel to the pixel equivalent of the maximum
@@ -658,11 +657,9 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     {
         // "On the first iteration, the minimum surface (ZImin) is opened using
         // a disk-shaped structuring element with a radius of one pixel."
-        std::vector<double> curErosion =
-            erodeDiamond(prevErosion, m_rows, m_cols, 1);
-        std::vector<double> curOpening =
-            dilateDiamond(curErosion, m_rows, m_cols, radius);
-        prevErosion = curErosion;
+        erodeDiamond(erosion, m_rows, m_cols, 1);
+        std::vector<double> curOpening = erosion;
+        dilateDiamond(curOpening, m_rows, m_cols, radius);
 
         // "An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product
@@ -672,29 +669,24 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
         // "This elevation threshold is applied to the difference of the minimum
         // and the opened surfaces."
 
-        // Need to provide means of diffing two vectors.
-        std::vector<double> diff;
-        std::transform(prevSurface.begin(), prevSurface.end(),
-                       curOpening.begin(), std::back_inserter(diff),
-                       [&](double l, double r) { return std::fabs(l - r); });
-
         // "Any grid cell with a difference value exceeding the calculated
         // elevation threshold for the iteration is then flagged as an OBJ
         // cell."
-        std::vector<int> foo;
-        std::transform(diff.begin(), diff.end(), std::back_inserter(foo),
-                       [threshold](double x) {
-                           return (x > threshold) ? int(1) : int(0);
-                       });
-        std::transform(Obj.begin(), Obj.end(), foo.begin(), Obj.begin(),
-                       [](int a, int b) { return (std::max)(a, b); });
+        size_t ng = 0;
+        for (size_t i = 0; i < prevSurface.size(); ++i)
+        {
+            double diff = std::fabs(prevSurface[i] - curOpening[i]);
+            if (diff > threshold)
+                Obj[i] = 1;
+            if (Obj[i])
+                ng++;
+        }
 
         // "The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting
         // as the minimum surface for the next difference calculation."
-        prevSurface = curOpening;
+        prevSurface = std::move(curOpening);
 
-        size_t ng = std::count(Obj.begin(), Obj.end(), 1);
         size_t g(Obj.size() - ng);
         double p(100.0 * double(ng) / double(Obj.size()));
         log()->floatPrecision(2);
