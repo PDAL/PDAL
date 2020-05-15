@@ -346,10 +346,8 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        size_t c =
-            static_cast<size_t>(std::floor(x - m_bounds.minx) / m_args->m_cell);
-        size_t r =
-            static_cast<size_t>(std::floor(y - m_bounds.miny) / m_args->m_cell);
+        int c = static_cast<int>(floor((x - m_bounds.minx) / m_args->m_cell));
+        int r = static_cast<int>(floor((y - m_bounds.miny) / m_args->m_cell));
 
         // TODO(chambbj): We don't quite do this by the book and yet it seems to
         // work reasonably well:
@@ -469,8 +467,8 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = static_cast<int>(floor(x - m_bounds.minx) / m_args->m_cell);
-        int r = static_cast<int>(floor(y - m_bounds.miny) / m_args->m_cell);
+        int c = static_cast<int>(floor((x - m_bounds.minx) / m_args->m_cell));
+        int r = static_cast<int>(floor((y - m_bounds.miny) / m_args->m_cell));
 
         if (z < ZIminV[c * m_rows + r] || std::isnan(ZIminV[c * m_rows + r]))
             ZIminV[c * m_rows + r] = z;
