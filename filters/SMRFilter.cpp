@@ -684,24 +684,29 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
         // "This elevation threshold is applied to the difference of the minimum
         // and the opened surfaces."
 
+        // Need to provide means of diffing two vectors.
+        std::vector<double> diff;
+        std::transform(prevSurface.begin(), prevSurface.end(),
+                       curOpening.begin(), std::back_inserter(diff),
+                       [&](double l, double r) { return std::fabs(l - r); });
+
         // "Any grid cell with a difference value exceeding the calculated
         // elevation threshold for the iteration is then flagged as an OBJ
         // cell."
-        size_t ng = 0;
-        for (size_t i = 0; i < prevSurface.size(); ++i)
-        {
-            double diff = std::fabs(prevSurface[i] - curOpening[i]);
-            if (diff > threshold)
-                Obj[i] = 1;
-            if (Obj[i])
-                ng++;
-        }
+        std::vector<int> foo;
+        std::transform(diff.begin(), diff.end(), std::back_inserter(foo),
+                       [threshold](double x) {
+                           return (x > threshold) ? int(1) : int(0);
+                       });
+        std::transform(Obj.begin(), Obj.end(), foo.begin(), Obj.begin(),
+                       [](int a, int b) { return (std::max)(a, b); });
 
         // "The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting
         // as the minimum surface for the next difference calculation."
-        prevSurface = std::move(curOpening);
+        prevSurface = curOpening;
 
+        size_t ng = std::count(Obj.begin(), Obj.end(), 1);
         size_t g(Obj.size() - ng);
         double p(100.0 * double(ng) / double(Obj.size()));
         log()->floatPrecision(2);
