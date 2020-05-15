@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2020, Bradley J. Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -32,55 +32,53 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include <filters/PlaneFitFilter.hpp>
+#include <io/BufferReader.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Filter.hpp>
+using namespace pdal;
 
-#include <memory>
-#include <string>
-
-namespace pdal
+TEST(PlaneFitFilterTest, BasicTest)
 {
+    using namespace Dimension;
 
-struct SMRArgs;
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
 
-class PDAL_DLL SMRFilter : public Filter
-{
-public:
-    SMRFilter();
-    ~SMRFilter();
-    SMRFilter& operator=(const SMRFilter&) = delete;
-    SMRFilter(const SMRFilter&) = delete;
+    BufferReader br;
+    PlaneFitFilter filter;
+    Options opts;
+    opts.add("knn", 4);
+    filter.setInput(br);
+    filter.setOptions(opts);
+    filter.prepare(table);
 
-    std::string getName() const;
+    PointViewPtr src(new PointView(table));
+    src->setField(Dimension::Id::X, 0, 0.0);
+    src->setField(Dimension::Id::Y, 0, 0.0);
+    src->setField(Dimension::Id::Z, 0, 1.0);
+    src->setField(Dimension::Id::X, 1, -1.0);
+    src->setField(Dimension::Id::Y, 1, 0.0);
+    src->setField(Dimension::Id::Z, 1, 0.0);
+    src->setField(Dimension::Id::X, 2, 1.0);
+    src->setField(Dimension::Id::Y, 2, 0.0);
+    src->setField(Dimension::Id::Z, 2, 0.0);
+    src->setField(Dimension::Id::X, 3, 0.0);
+    src->setField(Dimension::Id::Y, 3, -1.0);
+    src->setField(Dimension::Id::Z, 3, 0.0);
+    src->setField(Dimension::Id::X, 4, 0.0);
+    src->setField(Dimension::Id::Y, 4, 1.0);
+    src->setField(Dimension::Id::Z, 4, 0.0);
 
-private:
-    int m_rows;
-    int m_cols;
-    BOX2D m_bounds;
-    SpatialReference m_srs;
-    std::unique_ptr<SMRArgs> m_args;
+    br.addView(src);
 
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual PointViewSet run(PointViewPtr view);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
 
-    void classifyGround(PointViewPtr, std::vector<double>&);
-    std::vector<int> createLowMask(std::vector<double> const&);
-    std::vector<int> createNetMask();
-    std::vector<int> createObjMask(std::vector<double> const&);
-    std::vector<double> createZImin(PointViewPtr view);
-    std::vector<double> createZInet(std::vector<double> const&,
-                                    std::vector<int> const&);
-    std::vector<double> createZIpro(PointViewPtr, std::vector<double> const&,
-                                    std::vector<int> const&,
-                                    std::vector<int> const&,
-                                    std::vector<int> const&);
-    void knnfill(PointViewPtr, std::vector<double>&);
-    std::vector<int> progressiveFilter(std::vector<double> const&, double,
-                                       double);
-};
+    Id planefit = table.layout()->findDim("PlaneFit");
 
-} // namespace pdal
+    ASSERT_FLOAT_EQ(1.0f, outView->getFieldAs<float>(planefit, 0));
+}
