@@ -515,9 +515,9 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     // values are found by applying a morphological open operation with a disk
     // shaped structuring element of radius (2*wkmax)."
     std::vector<double> ZInetV = ZImin;
-    std::vector<double> dilated = ZImin;
     if (m_args->m_cut > 0.0)
     {
+        std::vector<double> dilated = ZImin;
         int v = ceil<int>(m_args->m_cut / m_args->m_cell);
         erodeDiamond(dilated, m_rows, m_cols, 2 * v);
         dilateDiamond(dilated, m_rows, m_cols, 2 * v);
