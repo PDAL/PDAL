@@ -96,6 +96,65 @@ TEST(SegmentationTest, BasicClustering)
     EXPECT_EQ(1u, clusters[0].size());
 }
 
+TEST(SegmentationTest, Clustering2D)
+{
+    using namespace Segmentation;
+
+    std::deque<PointIdList> clusters;
+
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+
+    PointViewPtr src(new PointView(table));
+
+    // Single point, single cluster
+    src->setField(Dimension::Id::X, 0, 0.0);
+    src->setField(Dimension::Id::Y, 0, 0.0);
+    src->setField(Dimension::Id::Z, 0, 0.0);
+    clusters = extractClusters<KD2Index>(*src, 1, 10, 1.0);
+    EXPECT_EQ(1u, clusters.size());
+    EXPECT_EQ(1u, clusters[0].size());
+
+    // Two separate clusters, both with single point
+    src->setField(Dimension::Id::X, 1, 10.0);
+    src->setField(Dimension::Id::Y, 1, 10.0);
+    src->setField(Dimension::Id::Z, 1, 10.0);
+    clusters = extractClusters<KD2Index>(*src, 1, 10, 1.0);
+    EXPECT_EQ(2u, clusters.size());
+    EXPECT_EQ(1u, clusters[0].size());
+    EXPECT_EQ(1u, clusters[1].size());
+
+    // Still two clusters, one with two points
+    src->setField(Dimension::Id::X, 2, 0.0);
+    src->setField(Dimension::Id::Y, 2, 0.0);
+    src->setField(Dimension::Id::Z, 2, 10.0);
+    clusters = extractClusters<KD2Index>(*src, 1, 10, 1.0);
+    EXPECT_EQ(2u, clusters.size());
+    EXPECT_EQ(2u, clusters[0].size());
+    EXPECT_EQ(1u, clusters[1].size());
+
+    // In 3D, should be three clusters
+    clusters = extractClusters<KD3Index>(*src, 1, 10, 1.0);
+    EXPECT_EQ(3u, clusters.size());
+    EXPECT_EQ(1u, clusters[0].size());
+    EXPECT_EQ(1u, clusters[1].size());
+    EXPECT_EQ(1u, clusters[2].size());
+
+    // Reject the cluster with only one point
+    clusters = extractClusters<KD2Index>(*src, 2, 10, 1.0);
+    EXPECT_EQ(1u, clusters.size());
+    EXPECT_EQ(2u, clusters[0].size());
+
+    // Reject the cluster with two points
+    clusters = extractClusters<KD2Index>(*src, 1, 1, 1.0);
+    EXPECT_EQ(1u, clusters.size());
+    EXPECT_EQ(1u, clusters[0].size());
+}
+
 TEST(SegmentationTest, SegmentReturns)
 {
     using namespace Segmentation;
