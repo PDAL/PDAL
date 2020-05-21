@@ -88,8 +88,72 @@ std::ostream& operator<<(std::ostream& out, const PointClasses& classes)
     return out;
 }
 
-std::vector<PointIdList> extractClusters(PointView& view, uint64_t min_points,
-                                         uint64_t max_points, double tolerance)
+std::deque<PointIdList> extractClusters2D(PointView& view, uint64_t min_points,
+                                          uint64_t max_points, double tolerance)
+{
+    // Index the incoming PointView for subsequent radius searches.
+    KD2Index kdi(view);
+    kdi.build();
+
+    // Create variables to track PointIds that have already been added to
+    // clusters and to build the list of cluster indices.
+    PointIdList processed(view.size(), 0);
+    std::deque<PointIdList> clusters;
+
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        // Points can only belong to a single cluster.
+        if (processed[i])
+            continue;
+
+        // Initialize list of indices belonging to current cluster, marking the
+        // seed point as processed.
+        PointIdList seed_queue;
+        size_t sq_idx = 0;
+        seed_queue.push_back(i);
+        processed[i] = 1;
+
+        // Check each point in the cluster for additional neighbors within the
+        // given tolerance, remembering that the list can grow if we add points
+        // to the cluster.
+        while (sq_idx < seed_queue.size())
+        {
+            // Find neighbors of the next cluster point.
+            PointId j = seed_queue[sq_idx];
+            PointIdList ids = kdi.radius(j, tolerance);
+
+            // The case where the only neighbor is the query point.
+            if (ids.size() == 1)
+            {
+                sq_idx++;
+                continue;
+            }
+
+            // Skip neighbors that already belong to a cluster and add the rest
+            // to this cluster.
+            for (auto const& k : ids)
+            {
+                if (processed[k])
+                    continue;
+                seed_queue.push_back(k);
+                processed[k] = 1;
+            }
+
+            sq_idx++;
+        }
+
+        // Keep clusters that are within the min/max number of points.
+        if (seed_queue.size() >= min_points && seed_queue.size() <= max_points)
+            clusters.push_back(seed_queue);
+    }
+
+    return clusters;
+}
+
+
+
+std::deque<PointIdList> extractClusters3D(PointView& view, uint64_t min_points,
+                                          uint64_t max_points, double tolerance)
 {
     // Index the incoming PointView for subsequent radius searches.
     KD3Index kdi(view);
@@ -98,7 +162,7 @@ std::vector<PointIdList> extractClusters(PointView& view, uint64_t min_points,
     // Create variables to track PointIds that have already been added to
     // clusters and to build the list of cluster indices.
     PointIdList processed(view.size(), 0);
-    std::vector<PointIdList> clusters;
+    std::deque<PointIdList> clusters;
 
     for (PointId i = 0; i < view.size(); ++i)
     {

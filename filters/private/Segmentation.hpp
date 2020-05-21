@@ -91,10 +91,14 @@ std::ostream& operator<<(std::ostream& out, const PointClasses& classes);
   \param[in] tolerance the tolerance for adding points to a cluster.
   \returns a vector of clusters (themselves vectors of PointIds).
 */
-PDAL_DLL std::vector<PointIdList> extractClusters(PointView& view,
-                                                  uint64_t min_points,
-                                                  uint64_t max_points,
-                                                  double tolerance);
+PDAL_DLL std::deque<PointIdList> extractClusters2D(PointView& view,
+                                                   uint64_t min_points,
+                                                   uint64_t max_points,
+                                                   double tolerance);
+PDAL_DLL std::deque<PointIdList> extractClusters3D(PointView& view,
+                                                   uint64_t min_points,
+                                                   uint64_t max_points,
+                                                   double tolerance);
 
 PDAL_DLL void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
                              PointViewPtr ignore);

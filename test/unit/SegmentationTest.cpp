@@ -47,7 +47,7 @@ TEST(SegmentationTest, BasicClustering)
 {
     using namespace Segmentation;
 
-    std::vector<PointIdList> clusters;
+    std::deque<PointIdList> clusters;
 
     PointTable table;
     PointLayoutPtr layout(table.layout());
@@ -62,7 +62,7 @@ TEST(SegmentationTest, BasicClustering)
     src->setField(Dimension::Id::X, 0, 0.0);
     src->setField(Dimension::Id::Y, 0, 0.0);
     src->setField(Dimension::Id::Z, 0, 0.0);
-    clusters = extractClusters(*src, 1, 10, 1.0);
+    clusters = extractClusters3D(*src, 1, 10, 1.0);
     EXPECT_EQ(1u, clusters.size());
     EXPECT_EQ(1u, clusters[0].size());
 
@@ -70,7 +70,7 @@ TEST(SegmentationTest, BasicClustering)
     src->setField(Dimension::Id::X, 1, 10.0);
     src->setField(Dimension::Id::Y, 1, 10.0);
     src->setField(Dimension::Id::Z, 1, 10.0);
-    clusters = extractClusters(*src, 1, 10, 1.0);
+    clusters = extractClusters3D(*src, 1, 10, 1.0);
     EXPECT_EQ(2u, clusters.size());
     EXPECT_EQ(1u, clusters[0].size());
     EXPECT_EQ(1u, clusters[1].size());
@@ -79,18 +79,18 @@ TEST(SegmentationTest, BasicClustering)
     src->setField(Dimension::Id::X, 2, 0.5);
     src->setField(Dimension::Id::Y, 2, 0.5);
     src->setField(Dimension::Id::Z, 2, 0.5);
-    clusters = extractClusters(*src, 1, 10, 1.0);
+    clusters = extractClusters3D(*src, 1, 10, 1.0);
     EXPECT_EQ(2u, clusters.size());
     EXPECT_EQ(2u, clusters[0].size());
     EXPECT_EQ(1u, clusters[1].size());
 
     // Reject the cluster with only one point
-    clusters = extractClusters(*src, 2, 10, 1.0);
+    clusters = extractClusters3D(*src, 2, 10, 1.0);
     EXPECT_EQ(1u, clusters.size());
     EXPECT_EQ(2u, clusters[0].size());
 
     // Reject the cluster with two points
-    clusters = extractClusters(*src, 1, 1, 1.0);
+    clusters = extractClusters3D(*src, 1, 1, 1.0);
     EXPECT_EQ(1u, clusters.size());
     EXPECT_EQ(1u, clusters[0].size());
 }
