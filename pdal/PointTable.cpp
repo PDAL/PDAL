@@ -125,23 +125,6 @@ char *PointTable::getPoint(PointId idx)
 }
 
 
-ContiguousPointTable::~ContiguousPointTable()
-{}
-
-
-PointId ContiguousPointTable::addPoint()
-{
-    m_buf.resize(pointsToBytes(m_numPts + 1));
-    return m_numPts++;
-}
-
-
-char *ContiguousPointTable::getPoint(PointId idx)
-{
-    return m_buf.data() + pointsToBytes(idx);
-}
-
-
 MetadataNode BasePointTable::toMetadata() const
 {
     return layout()->toMetadata();

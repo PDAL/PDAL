@@ -210,8 +210,8 @@ public:
          { return layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return layout()->dimTypes(); }
-    inline PointLayoutPtr layout() const
-        { return m_pointTable.layout(); }
+    PointLayoutPtr layout() const
+        { return m_layout; }
     inline PointTableRef table() const
         { return m_pointTable;}
     SpatialReference spatialReference() const
@@ -297,6 +297,7 @@ public:
 
 protected:
     PointTableRef m_pointTable;
+    PointLayoutPtr m_layout;
     std::deque<PointId> m_index;
     // The index might be larger than the size to support temporary point
     // references.
@@ -311,6 +312,7 @@ protected:
 private:
     static int m_lastId;
 
+    PointId tableId(PointId idx);
     template<typename T_IN, typename T_OUT>
     bool convertAndSet(Dimension::Id dim, PointId idx, T_IN in);
 
@@ -451,49 +453,50 @@ inline T PointView::getFieldAs(Dimension::Id dim,
     assert(pointIndex < m_size);
     T retval;
     bool ok = false;
-    const Dimension::Detail *dd = layout()->dimDetail(dim);
+    const Dimension::Detail *dd = m_layout->dimDetail(dim);
     Everything e;
 
+    char *pos = m_pointTable.getDimension(dd, m_index[pointIndex]);
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        e.f = getFieldInternal<float>(dim, pointIndex);
+        e.f = *reinterpret_cast<float *>(pos);
         ok = Utils::numericCast(e.f, retval);
         break;
     case Dimension::Type::Double:
-        e.d = getFieldInternal<double>(dim, pointIndex);
+        e.d = *reinterpret_cast<double *>(pos);
         ok = Utils::numericCast(e.d, retval);
         break;
     case Dimension::Type::Signed8:
-        e.s8 = getFieldInternal<int8_t>(dim, pointIndex);
+        e.s8 = *reinterpret_cast<int8_t *>(pos);
         ok = Utils::numericCast(e.s8, retval);
         break;
     case Dimension::Type::Signed16:
-        e.s16 = getFieldInternal<int16_t>(dim, pointIndex);
+        e.s16 = *reinterpret_cast<int16_t *>(pos);
         ok = Utils::numericCast(e.s16, retval);
         break;
     case Dimension::Type::Signed32:
-        e.s32 = getFieldInternal<int32_t>(dim, pointIndex);
+        e.s32 = *reinterpret_cast<int32_t *>(pos);
         ok = Utils::numericCast(e.s32, retval);
         break;
     case Dimension::Type::Signed64:
-        e.s64 = getFieldInternal<int64_t>(dim, pointIndex);
+        e.s64 = *reinterpret_cast<int64_t *>(pos);
         ok = Utils::numericCast(e.s64, retval);
         break;
     case Dimension::Type::Unsigned8:
-        e.u8 = getFieldInternal<uint8_t>(dim, pointIndex);
+        e.u8 = *reinterpret_cast<uint8_t *>(pos);
         ok = Utils::numericCast(e.u8, retval);
         break;
     case Dimension::Type::Unsigned16:
-        e.u16 = getFieldInternal<uint16_t>(dim, pointIndex);
+        e.u16 = *reinterpret_cast<uint16_t *>(pos);
         ok = Utils::numericCast(e.u16, retval);
         break;
     case Dimension::Type::Unsigned32:
-        e.u32 = getFieldInternal<uint32_t>(dim, pointIndex);
+        e.u32 = *reinterpret_cast<uint32_t *>(pos);
         ok = Utils::numericCast(e.u32, retval);
         break;
     case Dimension::Type::Unsigned64:
-        e.u64 = getFieldInternal<uint64_t>(dim, pointIndex);
+        e.u64 = *reinterpret_cast<uint64_t *>(pos);
         ok = Utils::numericCast(e.u64, retval);
         break;
     case Dimension::Type::None:
@@ -535,38 +538,90 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
 {
     const Dimension::Detail *dd = layout()->dimDetail(dim);
 
+    Everything e;
     bool ok = true;
+    char *c;
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        ok = convertAndSet<T, float>(dim, idx, val);
+        ok = Utils::numericCast(val, e.f);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<float *>(c) = e.f;
+        }
         break;
     case Dimension::Type::Double:
-        ok = convertAndSet<T, double>(dim, idx, val);
+        ok = Utils::numericCast(val, e.d);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<double *>(c) = e.d;
+        }
         break;
     case Dimension::Type::Signed8:
-        ok = convertAndSet<T, int8_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.s8);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<int8_t *>(c) = e.s8;
+        }
         break;
     case Dimension::Type::Signed16:
-        ok = convertAndSet<T, int16_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.s16);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<int16_t *>(c) = e.s16;
+        }
         break;
     case Dimension::Type::Signed32:
-        ok = convertAndSet<T, int32_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.s32);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<int32_t *>(c) = e.s32;
+        }
         break;
     case Dimension::Type::Signed64:
-        ok = convertAndSet<T, int64_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.s64);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<int64_t *>(c) = e.s64;
+        }
         break;
     case Dimension::Type::Unsigned8:
-        ok = convertAndSet<T, uint8_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.u8);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<uint8_t *>(c) = e.u8;
+        }
         break;
     case Dimension::Type::Unsigned16:
-        ok = convertAndSet<T, uint16_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.u16);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<uint16_t *>(c) = e.u16;
+        }
         break;
     case Dimension::Type::Unsigned32:
-        ok = convertAndSet<T, uint32_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.u32);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<uint32_t *>(c) = e.u32;
+        }
         break;
     case Dimension::Type::Unsigned64:
-        ok = convertAndSet<T, uint64_t>(dim, idx, val);
+        ok = Utils::numericCast(val, e.u64);
+        if (ok)
+        {
+            c = m_pointTable.getDimension(dd, tableId(idx));
+            *reinterpret_cast<uint64_t *>(c) = e.u64;
+        }
         break;
     case Dimension::Type::None:
         val = 0;

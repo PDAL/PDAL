@@ -252,9 +252,6 @@ TEST(PointTable, simple)
 {
     PointTable t;
     simpleTest(t);
-
-    ContiguousPointTable t2;
-    simpleTest(t2);
 }
 
 } // namespace

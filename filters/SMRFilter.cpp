@@ -83,7 +83,6 @@ struct SMRArgs
 {
     double m_cell;
     double m_slope;
-    double m_window;
     double m_scalar;
     double m_threshold;
     double m_cut;
@@ -91,6 +90,8 @@ struct SMRArgs
     std::vector<DimRange> m_ignored;
     StringList m_returns;
     Segmentation::PointClasses m_classbits;
+    double m_window;
+    Arg *m_windowArg;
 };
 
 SMRFilter::SMRFilter() : m_args(new SMRArgs) {}
@@ -106,7 +107,6 @@ void SMRFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size?", m_args->m_cell, 1.0);
     args.add("slope", "Percent slope?", m_args->m_slope, 0.15);
-    args.add("window", "Max window size?", m_args->m_window, 18.0);
     args.add("scalar", "Elevation scalar?", m_args->m_scalar, 1.25);
     args.add("threshold", "Elevation threshold?", m_args->m_threshold, 0.5);
     args.add("cut", "Cut net size?", m_args->m_cut, 0.0);
@@ -116,6 +116,8 @@ void SMRFilter::addArgs(ProgramArgs& args)
              {"last", "only"});
     args.add("classbits", "Ignore synthetic|keypoint|withheld "
         "classification bits?", m_args->m_classbits);
+    m_args->m_windowArg = &args.add("window", "Max window size?",
+        m_args->m_window);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -156,6 +158,9 @@ void SMRFilter::prepared(PointTableRef table)
             m_args->m_returns.clear();
         }
     }
+
+    if (!m_args->m_windowArg->set())
+        m_args->m_window = 18 * m_args->m_cell;
 }
 
 void SMRFilter::ready(PointTableRef table)
@@ -245,6 +250,10 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
     m_rows = static_cast<int>(
         ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1);
+    if (m_cols * m_rows < 10000)
+        log()->get(LogLevel::Warning) << "SMRF running with a small number "
+            "of cells (" << (m_cols * m_rows) << ").  Consider changing "
+            "cell size.\n";
 
     // Create raster of minimum Z values per element.
     std::vector<double> ZImin = createZImin(inlierView);
@@ -389,7 +398,7 @@ std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
     std::vector<double> negZImin;
     std::transform(ZImin.begin(), ZImin.end(), std::back_inserter(negZImin),
                    [](double v) { return -v; });
-    std::vector<int> LowV = progressiveFilter(negZImin, 5.0, 1.0);
+    std::vector<int> LowV = progressiveFilter(negZImin, 5.0, m_args->m_cell);
 
     if (!m_args->m_dir.empty())
     {
@@ -598,6 +607,8 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
     // can construct a 2D KDIndex and perform nearest neighbor searches.
     PointViewPtr temp = view->makeNew();
     PointId i(0);
+    size_t nancells = 0;
+    size_t cells = m_cols * m_rows;
     for (int c = 0; c < m_cols; ++c)
     {
         for (int r = 0; r < m_rows; ++r)
@@ -605,7 +616,10 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             size_t cell = c * m_rows + r;
             double val = cz[cell];
             if (std::isnan(val))
+            {
+                nancells++;
                 continue;
+            }
 
             temp->setField(Id::X, i,
                            m_bounds.minx + (c + 0.5) * m_args->m_cell);
@@ -615,6 +629,9 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             i++;
         }
     }
+    std::cerr << "Size = " << cells << "!\n";
+    std::cerr << "Nancells = " << nancells << "!\n";
+    std::cerr << "Filled cells = " << (cells - nancells) << "!\n";
 
     // https://github.com/PDAL/PDAL/issues/2794#issuecomment-625297062
     if (!temp->size())

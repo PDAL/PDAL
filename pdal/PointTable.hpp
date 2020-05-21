@@ -98,6 +98,7 @@ public:
 private:
     // Point data operations.
     virtual PointId addPoint() = 0;
+    virtual char *getDimension(const Dimension::Detail *d, PointId idx) = 0;
 
 protected:
     virtual char *getPoint(PointId idx) = 0;
@@ -166,24 +167,41 @@ private:
     PointLayout m_layout;
 };
 
-class PDAL_DLL ContiguousPointTable : public SimplePointTable
+// This provides a context for processing a set of points and allows the library
+// to be used to process multiple point sets simultaneously.
+class PDAL_DLL ColumnPointTable : public SimplePointTable
 {
 private:
-    std::vector<char> m_buf;
+    // Point storage.
+    using DimBlockList = std::vector<char *>;
+    using MemBlocks = std::vector<DimBlockList>;
+
+    // List of dimension memory block lists.
+    MemBlocks m_blocks;
     point_count_t m_numPts;
+    static const point_count_t m_blockPtCnt = 16384;
 
 public:
-    ContiguousPointTable() : SimplePointTable(m_layout), m_numPts(0)
+    ColumnPointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
-    virtual ~ContiguousPointTable();
+    virtual ~ColumnPointTable();
     virtual bool supportsView() const
         { return true; }
-
-protected:
-    virtual char *getPoint(PointId idx);
+    virtual void finalize();
+    virtual char *getPoint(PointId idx)
+        { return nullptr; }
 
 private:
+    virtual void setFieldInternal(Dimension::Id id, PointId idx,
+        const void *value);
+    virtual void getFieldInternal(Dimension::Id id, PointId idx,
+        void *value) const;
+
     virtual PointId addPoint();
+
+    // Hide base class calls for now.
+    const char *getDimension(const Dimension::Detail *d, PointId idx) const;
+    char *getDimension(const Dimension::Detail *d, PointId idx);
 
     PointLayout m_layout;
 };
