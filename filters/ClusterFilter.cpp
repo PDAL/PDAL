@@ -34,6 +34,8 @@
 
 #include "ClusterFilter.hpp"
 
+#include <pdal/KDIndex.hpp>
+
 #include "private/Segmentation.hpp"
 
 #include <string>
@@ -74,10 +76,10 @@ void ClusterFilter::filter(PointView& view)
 {
     std::deque<PointIdList> clusters;
     if (m_is3d)
-        clusters = Segmentation::extractClusters3D(view, m_minPoints,
+        clusters = Segmentation::extractClusters<KD3Index>(view, m_minPoints,
             m_maxPoints, m_tolerance);
     else
-        clusters = Segmentation::extractClusters2D(view, m_minPoints,
+        clusters = Segmentation::extractClusters<KD2Index>(view, m_minPoints,
             m_maxPoints, m_tolerance);
 
     uint64_t id = 1;

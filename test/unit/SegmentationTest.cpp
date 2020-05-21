@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/Dimension.hpp>
+#include <pdal/KDIndex.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
@@ -62,7 +63,7 @@ TEST(SegmentationTest, BasicClustering)
     src->setField(Dimension::Id::X, 0, 0.0);
     src->setField(Dimension::Id::Y, 0, 0.0);
     src->setField(Dimension::Id::Z, 0, 0.0);
-    clusters = extractClusters3D(*src, 1, 10, 1.0);
+    clusters = extractClusters<KD3Index>(*src, 1, 10, 1.0);
     EXPECT_EQ(1u, clusters.size());
     EXPECT_EQ(1u, clusters[0].size());
 
@@ -70,7 +71,7 @@ TEST(SegmentationTest, BasicClustering)
     src->setField(Dimension::Id::X, 1, 10.0);
     src->setField(Dimension::Id::Y, 1, 10.0);
     src->setField(Dimension::Id::Z, 1, 10.0);
-    clusters = extractClusters3D(*src, 1, 10, 1.0);
+    clusters = extractClusters<KD3Index>(*src, 1, 10, 1.0);
     EXPECT_EQ(2u, clusters.size());
     EXPECT_EQ(1u, clusters[0].size());
     EXPECT_EQ(1u, clusters[1].size());
@@ -79,18 +80,18 @@ TEST(SegmentationTest, BasicClustering)
     src->setField(Dimension::Id::X, 2, 0.5);
     src->setField(Dimension::Id::Y, 2, 0.5);
     src->setField(Dimension::Id::Z, 2, 0.5);
-    clusters = extractClusters3D(*src, 1, 10, 1.0);
+    clusters = extractClusters<KD3Index>(*src, 1, 10, 1.0);
     EXPECT_EQ(2u, clusters.size());
     EXPECT_EQ(2u, clusters[0].size());
     EXPECT_EQ(1u, clusters[1].size());
 
     // Reject the cluster with only one point
-    clusters = extractClusters3D(*src, 2, 10, 1.0);
+    clusters = extractClusters<KD3Index>(*src, 2, 10, 1.0);
     EXPECT_EQ(1u, clusters.size());
     EXPECT_EQ(2u, clusters[0].size());
 
     // Reject the cluster with two points
-    clusters = extractClusters3D(*src, 1, 1, 1.0);
+    clusters = extractClusters<KD3Index>(*src, 1, 1, 1.0);
     EXPECT_EQ(1u, clusters.size());
     EXPECT_EQ(1u, clusters[0].size());
 }
