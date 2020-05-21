@@ -56,6 +56,8 @@ private:
     std::string m_featureSet;
     std::map<std::string,Dimension::Id> m_extraDims;
     size_t m_stride;
+    double m_radius;
+    int m_minK;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs &args);
