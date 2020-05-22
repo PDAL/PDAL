@@ -89,14 +89,14 @@ std::ostream& operator<<(std::ostream& out, const PointClasses& classes);
   \param[in] min_points the minimum number of points in a cluster.
   \param[in] max_points the maximum number of points in a cluster.
   \param[in] tolerance the tolerance for adding points to a cluster.
-  \returns a vector of clusters (themselves vectors of PointIds).
+  \returns a deque of clusters (themselves vectors of PointIds).
 */
-template <class T>
+template <class KDINDEX>
 PDAL_DLL std::deque<PointIdList> extractClusters(PointView& view, uint64_t min_points,
                                                  uint64_t max_points, double tolerance)
 {
     // Index the incoming PointView for subsequent radius searches.
-    T kdi(view);
+    KDINDEX kdi(view);
     kdi.build();
 
     // Create variables to track PointIds that have already been added to
