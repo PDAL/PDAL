@@ -607,6 +607,7 @@ GDALError Raster::wake()
     m_width = m_ds->GetRasterXSize();
     m_height = m_ds->GetRasterYSize();
     m_numBands = m_ds->GetRasterCount();
+    std::cerr << "Num bands = " << m_numBands << "!\n";
 
     if (computePDALDimensionTypes() == GDALError::InvalidBand)
         error = GDALError::InvalidBand;

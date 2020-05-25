@@ -278,7 +278,7 @@ private:
     std::mutex m_mutex;
     bool m_debug;
     pdal::LogPtr m_log;
-    int m_errorNum;
+    mutable int m_errorNum;
     bool m_cplSet;
 };
 
@@ -799,11 +799,28 @@ public:
 
     std::string const& filename() { return m_filename; }
 
-    void statistics(int nBand, double* minimum, double* maximum, double* mean,
-        double* stddev, int bApprox = TRUE, int bForce = TRUE) const
+    GDALError statistics(int nBand, double* minimum, double* maximum,
+        double* mean, double* stddev, int bApprox = TRUE,
+        int bForce = TRUE) const
     {
-        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
-            bApprox, bForce);
+        try
+        {
+            Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
+                bApprox, bForce);
+        }
+        catch (InvalidBand)
+        {
+            m_errorMsg = "Unable to get band " + std::to_string(nBand) +
+                " from raster '" + m_filename + "'.";
+            return GDALError::InvalidBand;
+        }
+        catch (BadBand)
+        {
+            m_errorMsg = "Unable to read band/block information from "
+                "raster '" + m_filename + "'.";
+            return GDALError::BadBand;
+        }
+        return GDALError::None;
     }
 
     BOX2D bounds() const
@@ -826,7 +843,9 @@ public:
 
         double minimum; double maximum;
         double mean; double stddev;
-        statistics(nBand, &minimum, &maximum, &mean, &stddev);
+        if (statistics(nBand, &minimum, &maximum, &mean, &stddev) !=
+                GDALError::None)
+            return BOX3D();
 
         return BOX3D(box2.minx, box2.miny, minimum,
                      box2.maxx, box2.maxy, maximum);
@@ -848,7 +867,7 @@ private:
 
     GDALError wake();
 
-    std::string m_errorMsg;
+    mutable std::string m_errorMsg;
     mutable std::vector<pdal::Dimension::Type> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
