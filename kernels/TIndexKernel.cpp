@@ -39,6 +39,7 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/private/SrsTransform.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -679,14 +680,6 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
 
-//     /* Load in memory existing file names in SHP */
-//     int nExistingFiles = (int)OGR_L_GetFeatureCount(m_layer, FALSE);
-//     for (auto i = 0; i < nExistingFiles; i++)
-//     {
-//         OGRFeatureH hFeature = OGR_L_GetNextFeature(m_layer);
-//         m_files.push_back(OGR_F_GetFieldAsString(hFeature, indexes.m_filename));
-//         OGR_F_Destroy(hFeature);
-//     }
     return indexes;
 }
 
@@ -697,11 +690,9 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 
     std::ostringstream oss;
 
+    SpatialReference tgtSrs(m_tgtSrsString);
 
-    SpatialRef srcSrs(fileInfo.m_srs);
-    SpatialRef tgtSrs(m_tgtSrsString);
-    if (!tgtSrs)
-        throw pdal_error("Unable to import target SRS.");
+    SrsTransform transform(fileInfo.m_srs, SpatialReference(m_tgtSrsString));
 
     Geometry g;
     if (fileInfo.m_boundary.empty())
@@ -712,7 +703,7 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
     }
     try
     {
-       g = prepareGeometry(fileInfo.m_boundary, srcSrs, tgtSrs);
+       g = prepareGeometry(fileInfo.m_boundary, fileInfo.m_srs, &transform);
     }
     catch (pdal_error& e)
     {
@@ -731,14 +722,15 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 
 
 gdal::Geometry TIndexKernel::prepareGeometry(const std::string& wkt,
-   const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs)
+   const SpatialReference& inSrs, SrsTransform* transform)
 {
     // Create OGR geometry from text.
 
-    gdal::Geometry g(wkt, inSrs);
+    gdal::SpatialRef ref(inSrs.getWKT());
+    gdal::Geometry g(wkt, ref);
 
     if (g)
-        if (OGR_G_TransformTo(g.get(), outSrs.get()) != OGRERR_NONE)
+        if (OGR_G_Transform(g.get(), transform->get()) != OGRERR_NONE)
             throw pdal_error("Unable to transform geometry.");
 
     return g;
