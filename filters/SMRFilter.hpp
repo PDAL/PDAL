@@ -49,6 +49,8 @@ class PDAL_DLL SMRFilter : public Filter
 public:
     SMRFilter();
     ~SMRFilter();
+    SMRFilter& operator=(const SMRFilter&) = delete;
+    SMRFilter(const SMRFilter&) = delete;
 
     std::string getName() const;
 
@@ -76,12 +78,9 @@ private:
                                     std::vector<int> const&,
                                     std::vector<int> const&,
                                     std::vector<int> const&);
-    std::vector<double> knnfill(PointViewPtr, std::vector<double> const&);
+    void knnfill(PointViewPtr, std::vector<double>&);
     std::vector<int> progressiveFilter(std::vector<double> const&, double,
                                        double);
-
-    SMRFilter& operator=(const SMRFilter&); // not implemented
-    SMRFilter(const SMRFilter&);            // not implemented
 };
 
 } // namespace pdal

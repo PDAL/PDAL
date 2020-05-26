@@ -555,7 +555,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     }
     if (m_header.hasInfrared())
         layout->registerDim(Id::Infrared);
-    if (m_header.versionAtLeast(1, 4))
+    if (m_header.has14Format())
     {
         layout->registerDim(Id::ScanChannel);
         layout->registerDim(Id::ClassFlags);
