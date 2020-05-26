@@ -117,7 +117,7 @@ void Octree< Real >::_getSampleDepthAndWeight( const DensityEstimator& densityWe
 	temp = _spaceRoot;
 	while( _localDepth( temp )<densityWeights.kernelDepth() )
 	{
-		if( !IsActiveNode( temp->children ) ) break;// fprintf( stderr , "[ERROR] Octree::GetSampleDepthAndWeight\n" ) , exit( 0 );
+		if( !IsActiveNode( temp->children ) ) break;
 		int cIndex = TreeOctNode::CornerIndex( myCenter , position );
 		temp = temp->children + cIndex;
 		myWidth /= 2;
@@ -269,7 +269,7 @@ V Octree< Real >::_evaluate( const Coefficients& coefficients , Point3D< Real > 
 		memset( dx , 0 , sizeof( double ) * DIMENSION * PointSupportKey< DataDegree >::Size );
 		{
 			const TreeOctNode* n = dataKey.neighbors[d].neighbors[ PointSupportKey< DataDegree >::LeftRadius ][ PointSupportKey< DataDegree >::LeftRadius ][ PointSupportKey< DataDegree >::LeftRadius ];
-			if( !n ) fprintf( stderr , "[ERROR] Point is not centered on a node\n" ) , exit( 0 );
+			assert(n);   // Point is not centered on a node.
 			int fIdx[3];
 			functionIndex< DataDegree , BType >( n , fIdx );
 			int fStart , fEnd;
