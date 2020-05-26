@@ -42,3 +42,7 @@ tolerance
   Cluster tolerance - maximum Euclidean distance for a point to be added to the
   cluster. [Default: 1.0]
 
+is3d
+  By default, clusters are formed by considering neighbors in a 3D sphere, but
+  if ``is3d`` is set to false, it will instead consider neighbors in a 2D
+  cylinder (XY plane only). [Default: true]
