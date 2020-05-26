@@ -39,6 +39,7 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -320,17 +321,10 @@ void TIndexKernel::mergeFile()
 
     FieldIndexes indexes = getFields();
 
-    SpatialRef outSrs(m_tgtSrsString);
-    if (!outSrs)
-        throw pdal_error("Couldn't interpret target SRS string.");
-
     if (!m_wkt.empty())
     {
-        Geometry g(m_wkt, outSrs);
-
-        if (!g)
-            throw pdal_error("Couldn't interpret geometry filter string.");
-        OGR_L_SetSpatialFilter(m_layer, g.get());
+        pdal::Polygon g(m_wkt, m_tgtSrsString);
+        OGR_L_SetSpatialFilter(m_layer, g.getOGRHandle());
     }
 
     std::vector<FileInfo> files;
@@ -484,8 +478,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     }
 
     // Set the geometry in the feature
-    Geometry g = prepareGeometry(fileInfo);
-    OGR_F_SetGeometry(hFeature, g.get());
+    Polygon g = prepareGeometry(fileInfo);
+    OGR_F_SetGeometry(hFeature, g.getOGRHandle());
 
     const bool bRet = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
     OGR_F_Destroy(hFeature);
@@ -683,13 +677,16 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
 }
 
 
-gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
+pdal::Polygon TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 {
     using namespace gdal;
 
-    Geometry g(fileInfo.m_boundary, fileInfo.m_srs);
+    Polygon g(fileInfo.m_boundary, fileInfo.m_srs);
     if (m_tgtSrsString.size())
-        g.transform(m_tgtSrsString);
+    {
+        SpatialReference out(m_tgtSrsString);
+        g.transform(out);
+    }
     return g;
 }
 
