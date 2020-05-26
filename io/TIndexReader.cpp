@@ -62,7 +62,7 @@ TIndexReader::FieldIndexes TIndexReader::getFields()
     if (indexes.m_filename < 0)
         throwError("Unable to find field '" + m_tileIndexColumnName +
             "' in file '" + m_filename + "'.");
-    if (m_srsColumnName.size()
+    if (m_srsColumnName.size())
         indexes.m_srs = OGR_FD_GetFieldIndex(fDefn, m_srsColumnName.c_str());
 
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
@@ -228,7 +228,7 @@ void TIndexReader::initialize()
         reader->setOptions(readerOptions);
         Stage *premerge = reader;
 
-        if (m_tgtSrsString && m_tgtSrsString.size() )
+        if (m_tgtSrsString.size() )
         {
             Stage *repro = m_factory.createStage("filters.reprojection");
             repro->setInput(*reader);
