@@ -91,8 +91,6 @@ private:
         FileInfo& info);
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
-    gdal::Geometry prepareGeometry(const std::string& wkt,
-        const SpatialReference& inSrs, SrsTransform* transform);
     void createFields();
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
     bool slowBoundary(Stage& hexer, FileInfo& fileInfo);

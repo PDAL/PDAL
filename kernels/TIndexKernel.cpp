@@ -39,7 +39,6 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <pdal/private/SrsTransform.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -688,51 +687,9 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 {
     using namespace gdal;
 
-    std::ostringstream oss;
-
-    SpatialReference tgtSrs(m_tgtSrsString);
-
-    SrsTransform transform(fileInfo.m_srs, SpatialReference(m_tgtSrsString));
-
-    Geometry g;
-    if (fileInfo.m_boundary.empty())
-    {
-        oss << "Empty boundary for file " <<
-            fileInfo.m_filename ;
-        throw pdal_error(oss.str());
-    }
-    try
-    {
-       g = prepareGeometry(fileInfo.m_boundary, fileInfo.m_srs, &transform);
-    }
-    catch (pdal_error& e)
-    {
-        oss << "Unable to transform geometry from source to target SRS for " <<
-            fileInfo.m_filename << "'. Message is '" << e.what() << "'";
-        throw pdal_error(oss.str());
-    }
-    if (!g)
-    {
-        oss << "Update to create geometry from WKT for '" <<
-            fileInfo.m_filename << "'.";
-        throw pdal_error(oss.str());
-    }
-    return g;
-}
-
-
-gdal::Geometry TIndexKernel::prepareGeometry(const std::string& wkt,
-   const SpatialReference& inSrs, SrsTransform* transform)
-{
-    // Create OGR geometry from text.
-
-    gdal::SpatialRef ref(inSrs.getWKT());
-    gdal::Geometry g(wkt, ref);
-
-    if (g)
-        if (OGR_G_Transform(g.get(), transform->get()) != OGRERR_NONE)
-            throw pdal_error("Unable to transform geometry.");
-
+    Geometry g(fileInfo.m_boundary, fileInfo.m_srs);
+    if (m_tgtSrsString.size())
+        g.transform(m_tgtSrsString);
     return g;
 }
 
