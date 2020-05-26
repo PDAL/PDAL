@@ -119,7 +119,7 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     // if insufficient number of neighbors, eigen solver will fail anyway, it
     // may be okay to silently return without setting any of the computed
     // features?
-    if (ids.size() < m_minK)
+    if (ids.size() < (size_t)m_minK)
         return;
 
     // compute covariance of the neighborhood
