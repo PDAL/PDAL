@@ -557,9 +557,8 @@ GDALError Raster::open(int width, int height, int numBands,
 */
 GDALError Raster::open()
 {
-    GDALError error = GDALError::None;
     if (m_ds)
-        return error;
+        return GDALError::None;
 
     const char ** driverP = NULL;
     const char *drivers[2] = {0};
@@ -569,10 +568,9 @@ GDALError Raster::open()
         driverP = drivers;
     }
 
-    m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(), GA_ReadOnly, driverP,
-        nullptr, nullptr);
-    error = wake();
-    return error;
+    m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(),
+        GDAL_OF_READONLY | GDAL_OF_RASTER, driverP, nullptr, nullptr);
+    return wake();
 }
 
 
@@ -607,7 +605,6 @@ GDALError Raster::wake()
     m_width = m_ds->GetRasterXSize();
     m_height = m_ds->GetRasterYSize();
     m_numBands = m_ds->GetRasterCount();
-    std::cerr << "Num bands = " << m_numBands << "!\n";
 
     if (computePDALDimensionTypes() == GDALError::InvalidBand)
         error = GDALError::InvalidBand;

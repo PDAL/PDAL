@@ -84,8 +84,6 @@ void GDALReader::initialize()
     m_width = m_raster->width();
     m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
-    std::cerr << "Width/Height/NumBands = " << m_width << "/" << m_height << "/" <<
-        m_bandTypes.size() << "!\n";
 
     m_dimNames.clear();
     if (m_header.size())
