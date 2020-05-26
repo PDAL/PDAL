@@ -537,8 +537,6 @@ void Octree< Real >::_copyFinerSliceIsoEdgeKeys( LocalDepth depth , int slice , 
 					case 0: c1 = Cube::CornerIndex( 0 , y , z ) , c2 = Cube::CornerIndex( 1 , y , z ) ; break;
 					case 1: c1 = Cube::CornerIndex( y , 0 , z ) , c2 = Cube::CornerIndex( y , 1 , z ) ; break;
 					}
-					// [SANITY CHECK]
-//					if( _isValidSpaceNode( _sNodes.treeNodes[i]->children + c1 )!=_isValidSpaceNode( _sNodes.treeNodes[i]->children + c2 ) ) fprintf( stderr , "[WARNING] Finer edges should both be valid or invalid\n" ) , exit( 0 );
 					if( !_isValidSpaceNode( _sNodes.treeNodes[i]->children + c1 ) || !_isValidSpaceNode( _sNodes.treeNodes[i]->children + c2 ) ) continue;
 
 					int cIndex1 = cSliceData.edgeIndices( _sNodes.treeNodes[i]->children + c1 )[fe];
@@ -598,8 +596,6 @@ void Octree< Real >::_copyFinerXSliceIsoEdgeKeys( LocalDepth depth , int slab , 
 				{
 					int c0 = Cube::CornerIndex( x , y , 0 ) , c1 = Cube::CornerIndex( x , y , 1 );
 
-					// [SANITY CHECK]
-//					if( _isValidSpaceNode( _sNodes.treeNodes[i]->children + c0 )!=_isValidSpaceNode( _sNodes.treeNodes[i]->children + c1 ) ) fprintf( stderr , "[ERROR] Finer edges should both be valid or invalid\n" ) , exit( 0 );
 					if( !_isValidSpaceNode( _sNodes.treeNodes[i]->children + c0 ) || !_isValidSpaceNode( _sNodes.treeNodes[i]->children + c1 ) ) continue;
 
 					int cIndex0 = cSliceData0.edgeIndices( _sNodes.treeNodes[i]->children + c0 )[fc];
@@ -670,7 +666,7 @@ void Octree< Real >::_setSliceIsoEdges( LocalDepth depth , int slice , int z , s
 					fe.count = MarchingSquares::AddEdgeIndices( mcIndex , isoEdges );
 					for( int j=0 ; j<fe.count ; j++ ) for( int k=0 ; k<2 ; k++ )
 					{
-						if( !sValues.edgeSet[ eIndices[ isoEdges[2*j+k] ] ] ) fprintf( stderr , "[ERROR] Edge not set 1: %d / %d\n" , slice , 1<<depth ) , exit( 0 );
+						assert(sValues.edgeSet[ eIndices[ isoEdges[2*j+k] ] ] );
 						fe.edges[j][k] = sValues.edgeKeys[ eIndices[ isoEdges[2*j+k] ] ];
 					}
 					sValues.faceSet[ fIndices[0] ] = 1;
@@ -740,14 +736,14 @@ void Octree< Real >::_setXSliceIsoEdges( LocalDepth depth , int slab , std::vect
 							if( _o==1 ) // Cross-edge
 							{
 								int idx = o==0 ? cIndices[ Square::CornerIndex(_x,x) ] : cIndices[ Square::CornerIndex(x,_x) ];
-								if( !xValues.edgeSet[ idx ] ) fprintf( stderr , "[ERROR] Edge not set 3: %d / %d\n" , slab , 1<<depth ) , exit( 0 );
+								assert(xValues.edgeSet[ idx ]);
 								fe.edges[j][k] = xValues.edgeKeys[ idx ];
 							}
 							else
 							{
 								const typename Octree::template _SliceValues< Vertex >& sValues = (_x==0) ? bValues : fValues;
 								int idx = sValues.sliceData.edgeIndices(i)[ Square::EdgeIndex(o,x) ];
-								if( !sValues.edgeSet[ idx ] ) fprintf( stderr , "[ERROR] Edge not set 5: %d / %d\n" , slab , 1<<depth ) , exit( 0 );
+								assert(sValues.edgeSet[ idx ] );
 								fe.edges[j][k] = sValues.edgeKeys[ idx ];
 							}
 						}
@@ -826,7 +822,8 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 								const std::vector< _IsoEdge >& _edges = iter->second;
 								for( size_t j=0 ; j<_edges.size() ; j++ ) edges.push_back( _IsoEdge( _edges[j][flip] , _edges[j][1-flip] ) );
 							}
-							else fprintf( stderr , "[ERROR] Invalid faces: %d  %d %d\n" , i , d , o ) , exit( 0 );
+							else
+                                assert(false);
 						}
 					}
 					else
@@ -846,7 +843,8 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 								const std::vector< _IsoEdge >& _edges = iter->second;
 								for( size_t j=0 ; j<_edges.size() ; j++ ) edges.push_back( _IsoEdge( _edges[j][flip] , _edges[j][1-flip] ) );
 							}
-							else fprintf( stderr , "[ERROR] Invalid faces: %d  %d %d\n" , i , d , o ) , exit( 0 );
+							else
+                                assert(false);
 						}
 					}
 				}
@@ -872,8 +870,8 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 							{
 								LocalDepth d ; LocalOffset off;
 								_localDepthAndOffset( leaf , d , off );
-								fprintf( stderr , "[ERROR] Failed to close loop [%d: %d %d %d] | (%d): %lld\n" , d-1 , off[0] , off[1] , off[2] , i , current );
-								exit( 0 );
+                                // Failed to close loop.
+                                assert(false);
 							}
 						}
 						else
@@ -896,7 +894,8 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 						if     ( ( iter=bValues.edgeVertexMap.find( key ) )!=bValues.edgeVertexMap.end() ) polygon[k] = iter->second;
 						else if( ( iter=fValues.edgeVertexMap.find( key ) )!=fValues.edgeVertexMap.end() ) polygon[k] = iter->second;
 						else if( ( iter=xValues.edgeVertexMap.find( key ) )!=xValues.edgeVertexMap.end() ) polygon[k] = iter->second;
-						else fprintf( stderr , "[ERROR] Couldn't find vertex in edge map\n" ) , exit( 0 );
+						else
+                            assert(false);
 					}
 					_addIsoPolygons( mesh , polygon , polygonMesh , addBarycenter , vOffset );
 				}
@@ -972,7 +971,7 @@ bool Octree< Real >::_getIsoVertex( const BSplineData< ColorDegree , BType >* co
 		// We have a linear function L, with L(0) = x0 and L(1) = x1
 		// => L(t) = x0 + t * (x1-x0)
 		// => L(t) = isoValue <=> t = ( isoValue - x0 ) / ( x1 - x0 )
-		if( x0==x1 ) fprintf( stderr , "[ERROR] Not a zero-crossing root: %g %g\n" , x0 , x1 ) , exit( 0 );
+		assert( x0!=x1 );  // Not a zero-crossing root.
 		averageRoot = ( isoValue - x0 ) / ( x1 - x0 );
 	}
 	if( averageRoot<0 || averageRoot>1 )
@@ -1044,7 +1043,7 @@ bool Octree< Real >::_getIsoVertex( const BSplineData< ColorDegree , BType >* co
 		// We have a linear function L, with L(0) = x0 and L(1) = x1
 		// => L(t) = x0 + t * (x1-x0)
 		// => L(t) = isoValue <=> t = ( isoValue - x0 ) / ( x1 - x0 )
-		if( x0==x1 ) fprintf( stderr , "[ERROR] Not a zero-crossing root: %g %g\n" , x0 , x1 ) , exit( 0 );
+		assert ( x0!=x1 );
 		averageRoot = ( isoValue - x0 ) / ( x1 - x0 );
 	}
 	if( averageRoot<0 || averageRoot>1 )

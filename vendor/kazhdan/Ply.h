@@ -149,42 +149,6 @@ typedef struct PlyFile {        /* description of PLY file */
 extern char *my_alloc();
 #define myalloc(mem_size) my_alloc((mem_size), __LINE__, __FILE__)
 
-#ifndef ALLOCN
-#define REALLOCN(PTR,TYPE,OLD_N,NEW_N)							\
-{										\
-	if ((OLD_N) == 0)                                           		\
-{   ALLOCN((PTR),TYPE,(NEW_N));}                            		\
-	else									\
-{								    		\
-	(PTR) = (TYPE *)realloc((PTR),(NEW_N)*sizeof(TYPE));			\
-	if (((PTR) == NULL) && ((NEW_N) != 0))					\
-{									\
-	fprintf(stderr, "Memory reallocation failed on line %d in %s\n", 	\
-	__LINE__, __FILE__);                             		\
-	fprintf(stderr, "  tried to reallocate %d->%d\n",       		\
-	(OLD_N), (NEW_N));                              		\
-	exit(-1);								\
-}									\
-	if ((NEW_N)>(OLD_N))							\
-	memset((char *)(PTR)+(OLD_N)*sizeof(TYPE), 0,			\
-	((NEW_N)-(OLD_N))*sizeof(TYPE));				\
-}										\
-}
-
-#define  ALLOCN(PTR,TYPE,N) 					\
-{ (PTR) = (TYPE *) calloc(((unsigned)(N)),sizeof(TYPE));\
-	if ((PTR) == NULL) {    				\
-	fprintf(stderr, "Memory allocation failed on line %d in %s\n", \
-	__LINE__, __FILE__);                           \
-	exit(-1);                                             \
-	}							\
-}
-
-
-#define FREE(PTR)  { free((PTR)); (PTR) = NULL; }
-#endif
-
-
 /*** delcaration of routines ***/
 
 extern PlyFile *ply_write(FILE *, int, const char **, int);
