@@ -46,7 +46,8 @@ class ProgramArgs;
 class PDAL_DLL LloydKMeansFilter : public Filter
 {
 public:
-    LloydKMeansFilter() : Filter() {}
+    LloydKMeansFilter();
+
     LloydKMeansFilter& operator=(const LloydKMeansFilter&) = delete;
     LloydKMeansFilter(const LloydKMeansFilter&) = delete;
 

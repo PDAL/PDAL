@@ -296,7 +296,7 @@ PointIdList farthestPointSampling(PointView& view, point_count_t count)
         // Record the PointId of the farthest point and add it to the output
         // PointView.
         PointId idx(it - min_dists.begin());
-	ids[i] = idx;
+        ids[i] = idx;
 
         // Compute distances from idx to all other points.
         kdi.knnSearch(idx, view.size(), &indices, &sqr_dists);

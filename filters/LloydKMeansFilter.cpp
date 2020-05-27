@@ -49,6 +49,8 @@ static StaticPluginInfo const s_info{
 
 CREATE_STATIC_STAGE(LloydKMeansFilter, s_info)
 
+LloydKMeansFilter::LloydKMeansFilter() {}
+
 std::string LloydKMeansFilter::getName() const
 {
     return s_info.name;
@@ -100,10 +102,7 @@ void LloydKMeansFilter::filter(PointView& view)
     // additional dimensions as specified via filter options
     PointTable table;
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
-    for (auto const& dimid : m_dimIdList)
-    {
-        table.layout()->registerDim(dimid);
-    }
+    table.layout()->registerDims(m_dimIdList);
 
     // create view of initial cluster centers
     PointViewPtr centers(new PointView(table));
@@ -157,9 +156,9 @@ void LloydKMeansFilter::filter(PointView& view)
                 centers->setField(m_dimIdList[i], id, M1[i][id]);
             }
         }
+        centers->invalidateProducts();
+        centers->build3dIndex();
     }
-    centers->invalidateProducts();
-    centers->build3dIndex();
 }
 
 } // namespace pdal
