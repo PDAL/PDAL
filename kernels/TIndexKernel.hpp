@@ -40,10 +40,10 @@
 
 namespace pdal
 {
+    class Polygon;
 
 namespace gdal
 {
-    class Geometry;
     class SpatialRef;
 }
 
@@ -89,9 +89,7 @@ private:
     bool getFileInfo(StageFactory& factory, const std::string& filename,
         FileInfo& info);
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
-    gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
-    gdal::Geometry prepareGeometry(const std::string& wkt,
-        const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs);
+    pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
     void createFields();
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
     bool slowBoundary(Stage& hexer, FileInfo& fileInfo);
