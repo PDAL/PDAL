@@ -298,6 +298,42 @@ public:
         m_index.buildIndex();
     }
 
+    PointIdList neighbors(PointRef &point, point_count_t k, size_t stride) const
+    {
+        // Account for input buffer size smaller than requested number of
+        // neighbors, then determine the number of neighbors to extract based
+        // on the desired stride.
+        k = (std::min)(m_buf.size(), k);
+        point_count_t k2 = stride * k;
+
+        // Prepare output indices and squared distances.
+        PointIdList output(k2);
+        std::vector<double> out_dist_sqr(k2);
+
+        // Set the query point.
+        std::vector<double> pt;
+        for (auto const& dim : m_dims)
+        {
+            double val = point.getFieldAs<double>(dim);
+            pt.push_back(val);
+        }
+
+        // Extract k*stride neighbors, then return only k, selecting every nth
+        // neighbor at the given stride.
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k2);
+        resultSet.init(&output[0], &out_dist_sqr[0]);
+        m_index.findNeighbors(resultSet, &pt[0], nanoflann::SearchParams());
+
+        // Perform the downsampling if a stride is provided.
+        if (stride > 1)
+        {
+            for (size_t i = 1; i < k; ++i)
+                output[i] = output[i * stride];
+            output.resize(k);
+        }
+        return output;
+    }
+
     PointIdList radius(PointId idx, double r) const
     {
         PointIdList output;

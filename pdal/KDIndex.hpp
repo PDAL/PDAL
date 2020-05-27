@@ -110,6 +110,8 @@ public:
     ~KDFlexIndex();
 
     void build();
+    PointId neighbor(PointRef &point) const;
+    PointIdList neighbors(PointRef &point, point_count_t k, size_t stride = 1) const;
     PointIdList radius(PointId idx, double r) const;
 
 private:
