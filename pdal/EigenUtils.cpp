@@ -39,6 +39,7 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
+#include <array>
 #include <cfloat>
 #include <numeric>
 #include <vector>
@@ -251,10 +252,10 @@ Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows, int cols,
     return ZImin;
 }
 
-std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
+void dilateDiamond(std::vector<double>& data, size_t rows, size_t cols, int iterations)
 {
     std::vector<double> out(data.size(), std::numeric_limits<double>::lowest());
-    std::vector<size_t> idx(5);
+    std::array<size_t, 5> idx;
 
     for (int iter = 0; iter < iterations; ++iter)
     {
@@ -288,13 +289,13 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
         }
         data.swap(out);
     }
-    return data;
 }
 
-std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
+void erodeDiamond(std::vector<double>& data, size_t rows, size_t cols,
+    int iterations)
 {
     std::vector<double> out(data.size(), (std::numeric_limits<double>::max)());
-    std::vector<size_t> idx(5);
+    std::array<size_t, 5> idx;
 
     for (int iter = 0; iter < iterations; ++iter)
     {
@@ -322,7 +323,6 @@ std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t c
         }
         data.swap(out);
     }
-    return data;
 }
 
 Eigen::MatrixXd pointViewToEigen(const PointView& view)
