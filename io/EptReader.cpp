@@ -41,6 +41,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/pdal_features.hpp>
+#include <nlohmann/json.hpp>
 
 #include "private/ept/Connector.hpp"
 #include "private/ept/EptArtifact.hpp"
@@ -141,45 +142,25 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_ogr);
 }
 
-namespace
-{
-
-// Extract a string map from JSON.  Used in setForwards().
-StringMap toStringMap(const NL::json& fwd)
-{
-    StringMap map;
-
-    if (fwd.is_null())
-        return map;
-    if (!fwd.is_object())
-        throw pdal_error("Not an object type.");
-    for (auto& entry : fwd.items())
-    {
-        if (!entry.value().is_string())
-            throw pdal_error("Expected string type.");
-        map.insert({entry.key(), entry.value().get<std::string>()});
-    }
-    return map;
-}
-
-}
 
 void EptReader::setForwards(StringMap& headers, StringMap& query)
 {
     try
     {
-        headers = toStringMap(m_args->m_headers);
+        if (!m_args->m_headers.is_null())
+            headers = m_args->m_headers.get<StringMap>();
     }
-    catch (const pdal_error& err)
+    catch (const std::exception& err)
     {
         throwError(std::string("Error parsing 'headers': ") + err.what());
     }
 
     try
     {
-        query = toStringMap(m_args->m_query);
+        if (!m_args->m_query.is_null())
+            query = m_args->m_query.get<StringMap>();
     }
-    catch (const pdal_error& err)
+    catch (const std::exception& err)
     {
         throwError(std::string("Error parsing 'query': ") + err.what());
     }
