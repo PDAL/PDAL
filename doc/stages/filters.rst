@@ -422,12 +422,16 @@ These filters will invalidate an existing KD-tree.
 
    filters.matlab
    filters.python
+   filters.julia
 
 :ref:`filters.matlab`
     Embed MATLAB software in a pipeline.
 
 :ref:`filters.python`
     Embed Python software in a pipeline.
+
+:ref:`filters.julia`
+    Embed Julia software in a pipeline.
 
 Other
 -----

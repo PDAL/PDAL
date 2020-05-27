@@ -35,6 +35,6 @@ filename
 
 .. include:: reader_opts.rst
 
-.. _Point Cloud Data (PCD): http://pointclouds.org/documentation/tutorials/pcd_file_format.php
+.. _Point Cloud Data (PCD): https://pcl-tutorials.readthedocs.io/en/latest/pcd_file_format.html
 .. _Point Cloud Library (PCL): http://pointclouds.org
 

@@ -39,6 +39,7 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -320,17 +321,10 @@ void TIndexKernel::mergeFile()
 
     FieldIndexes indexes = getFields();
 
-    SpatialRef outSrs(m_tgtSrsString);
-    if (!outSrs)
-        throw pdal_error("Couldn't interpret target SRS string.");
-
     if (!m_wkt.empty())
     {
-        Geometry g(m_wkt, outSrs);
-
-        if (!g)
-            throw pdal_error("Couldn't interpret geometry filter string.");
-        OGR_L_SetSpatialFilter(m_layer, g.get());
+        pdal::Polygon g(m_wkt, m_tgtSrsString);
+        OGR_L_SetSpatialFilter(m_layer, g.getOGRHandle());
     }
 
     std::vector<FileInfo> files;
@@ -484,8 +478,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     }
 
     // Set the geometry in the feature
-    Geometry g = prepareGeometry(fileInfo);
-    OGR_F_SetGeometry(hFeature, g.get());
+    Polygon g = prepareGeometry(fileInfo);
+    OGR_F_SetGeometry(hFeature, g.getOGRHandle());
 
     const bool bRet = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
     OGR_F_Destroy(hFeature);
@@ -679,68 +673,20 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
 
-//     /* Load in memory existing file names in SHP */
-//     int nExistingFiles = (int)OGR_L_GetFeatureCount(m_layer, FALSE);
-//     for (auto i = 0; i < nExistingFiles; i++)
-//     {
-//         OGRFeatureH hFeature = OGR_L_GetNextFeature(m_layer);
-//         m_files.push_back(OGR_F_GetFieldAsString(hFeature, indexes.m_filename));
-//         OGR_F_Destroy(hFeature);
-//     }
     return indexes;
 }
 
 
-gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
+pdal::Polygon TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 {
     using namespace gdal;
 
-    std::ostringstream oss;
-
-
-    SpatialRef srcSrs(fileInfo.m_srs);
-    SpatialRef tgtSrs(m_tgtSrsString);
-    if (!tgtSrs)
-        throw pdal_error("Unable to import target SRS.");
-
-    Geometry g;
-    if (fileInfo.m_boundary.empty())
+    Polygon g(fileInfo.m_boundary, fileInfo.m_srs);
+    if (m_tgtSrsString.size())
     {
-        oss << "Empty boundary for file " <<
-            fileInfo.m_filename ;
-        throw pdal_error(oss.str());
+        SpatialReference out(m_tgtSrsString);
+        g.transform(out);
     }
-    try
-    {
-       g = prepareGeometry(fileInfo.m_boundary, srcSrs, tgtSrs);
-    }
-    catch (pdal_error& e)
-    {
-        oss << "Unable to transform geometry from source to target SRS for " <<
-            fileInfo.m_filename << "'. Message is '" << e.what() << "'";
-        throw pdal_error(oss.str());
-    }
-    if (!g)
-    {
-        oss << "Update to create geometry from WKT for '" <<
-            fileInfo.m_filename << "'.";
-        throw pdal_error(oss.str());
-    }
-    return g;
-}
-
-
-gdal::Geometry TIndexKernel::prepareGeometry(const std::string& wkt,
-   const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs)
-{
-    // Create OGR geometry from text.
-
-    gdal::Geometry g(wkt, inSrs);
-
-    if (g)
-        if (OGR_G_TransformTo(g.get(), outSrs.get()) != OGRERR_NONE)
-            throw pdal_error("Unable to transform geometry.");
-
     return g;
 }
 

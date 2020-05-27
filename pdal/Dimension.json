@@ -376,7 +376,7 @@
     },
     {
     "name": "ClusterID",
-    "type": "uint64_t",
+    "type": "int64_t",
     "description": "ID assigned to a point by a point-clustering algorithm."
     },
     {

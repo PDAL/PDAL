@@ -31,7 +31,7 @@ Data installation
 
 1. Extract contents of USB or data download:
 
-https://pdal-workshop-2019.s3.amazonaws.com/PDAL-Workshop-complete.zip
+https://pdal.s3.amazonaws.com/workshop/PDAL-Workshop-complete.zip
 
 
 Next

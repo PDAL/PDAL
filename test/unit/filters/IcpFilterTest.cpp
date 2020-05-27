@@ -103,7 +103,7 @@ TEST(IcpFilterTest, DefaultIdentity)
 
     MetadataNode root = filter->getMetadata();
     MetadataNode transform = root.findChild("transform");
-    EXPECT_EQ("matrix", transform.type());
+    EXPECT_EQ("string", transform.type());
     Eigen::MatrixXd transformMatrix = transform.value<Eigen::MatrixXd>();
     EXPECT_TRUE(transformMatrix.isApprox(Eigen::MatrixXd::Identity(4, 4), 1.0));
 }
@@ -134,6 +134,36 @@ TEST(IcpFilterTest, RecoverTranslation)
     EXPECT_NEAR(-2.0, transform(1, 3), tolerance);
     EXPECT_NEAR(-3.0, transform(2, 3), tolerance);
     checkPointsEqualReader(pointViewSet, tolerance);
+}
+
+TEST(IcpFilterTest, RecoverRotation)
+{
+    auto reader1 = newReader();
+    auto reader2 = newReader();
+    TransformationFilter transformationFilter;
+    Options transformationOptions;
+    transformationOptions.add("matrix", "0.996 0 0.087 0\n0 1 0 0\n-0.087 0 0.996 0\n0 0 0 1");
+    transformationFilter.setOptions(transformationOptions);
+    transformationFilter.setInput(*reader2);
+
+    auto filter = newFilter();
+    filter->setInput(*reader1);
+    filter->setInput(transformationFilter);
+
+    PointTable table;
+    filter->prepare(table);
+    PointViewSet pointViewSet = filter->execute(table);
+
+    MetadataNode root = filter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    double tolerance = 0.001;
+    EXPECT_NEAR(0.996, transform(0, 0), tolerance);
+    EXPECT_NEAR(-0.087, transform(0, 2), tolerance);
+    EXPECT_NEAR(0.087, transform(2, 0), tolerance);
+    EXPECT_NEAR(0.996, transform(2, 2), tolerance);
+    double tolerance2 = 0.5;
+    checkPointsEqualReader(pointViewSet, tolerance2);
 }
 
 TEST(IcpFilterTest, TooFewInputs)

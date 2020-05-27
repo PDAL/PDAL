@@ -296,7 +296,8 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
     }
 
     PoissonRecon<double> recon(opts, *source);
-    recon.execute();
+    if (!recon.execute())
+        throwError("Failure executing poisson algorithm.");
     recon.evaluate();
 
     PointViewSet s;

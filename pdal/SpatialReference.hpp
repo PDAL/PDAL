@@ -36,8 +36,6 @@
 
 #include <pdal/pdal_internal.hpp>
 
-using OGRSpatialReferenceH = void *;
-
 namespace pdal
 {
 

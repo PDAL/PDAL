@@ -34,6 +34,8 @@
 
 #include "ClusterFilter.hpp"
 
+#include <pdal/KDIndex.hpp>
+
 #include "private/Segmentation.hpp"
 
 #include <string>
@@ -62,6 +64,7 @@ void ClusterFilter::addArgs(ProgramArgs& args)
     args.add("max_points", "Max points per cluster", m_maxPoints,
         (std::numeric_limits<uint64_t>::max)());
     args.add("tolerance", "Radius", m_tolerance, 1.0);
+    args.add("is3d", "Perform cluster extraction in 3D?", m_is3d, true);
 }
 
 void ClusterFilter::addDimensions(PointLayoutPtr layout)
@@ -71,8 +74,13 @@ void ClusterFilter::addDimensions(PointLayoutPtr layout)
 
 void ClusterFilter::filter(PointView& view)
 {
-    auto clusters = Segmentation::extractClusters(view, m_minPoints,
-        m_maxPoints, m_tolerance);
+    std::deque<PointIdList> clusters;
+    if (m_is3d)
+        clusters = Segmentation::extractClusters<KD3Index>(view, m_minPoints,
+            m_maxPoints, m_tolerance);
+    else
+        clusters = Segmentation::extractClusters<KD2Index>(view, m_minPoints,
+            m_maxPoints, m_tolerance);
 
     uint64_t id = 1;
     for (auto const& c : clusters)

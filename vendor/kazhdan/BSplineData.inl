@@ -225,9 +225,9 @@ template< int Degree1 , BoundaryType BType1 , int Degree2 , BoundaryType BType2 
 template< unsigned int D1 , unsigned int D2 >
 double BSplineIntegrationData< Degree1 , BType1 , Degree2 , BType2 >::Dot( int depth1 ,  int off1 , int depth2 , int off2 )
 {
-	if( D1>Degree1 ) fprintf( stderr , "[ERROR] BSplineIntegrationData::Dot: taking more derivatives than the degree: %d > %d\n" , D1 , Degree1 ) , exit( 0 );
-	if( D2>Degree2 ) fprintf( stderr , "[ERROR] BSplineIntegrationData::Dot: taking more derivatives than the degree: %d > %d\n" , D2 , Degree2 ) , exit( 0 );
-	const int _Degree1 = ( Degree1>=D1 ) ? Degree1 - D1 : 0 , _Degree2 = ( Degree2>=D2 ) ? Degree2 - D2 : 0;
+	const int _Degree1 = ( Degree1>=D1 ) ? Degree1 - D1 : 0;
+    const int _Degree2 = ( Degree2>=D2 ) ? Degree2 - D2 : 0;
+
 	int sums[ Degree1+1 ][ Degree2+1 ];
 
 	int depth = std::max< int >( depth1 , depth2 );
@@ -246,7 +246,8 @@ double BSplineIntegrationData< Degree1 , BType1 , Degree2 , BType2 >::Dot( int d
 
 	BSplineElements< Degree1-D1 > db1;
 	BSplineElements< Degree2-D2 > db2;
-	b1.template differentiate< D1 >( db1 ) , b2.template differentiate< D2 >( db2 );
+	b1.template differentiate< D1 >( db1 );
+    b2.template differentiate< D2 >( db2 );
 
 	int start1=-1 , end1=-1 , start2=-1 , end2=-1;
 	for( int i=0 ; i<int( b1.size() ) ; i++ )
@@ -262,8 +263,10 @@ double BSplineIntegrationData< Degree1 , BType1 , Degree2 , BType2 >::Dot( int d
 			if( b2[i][j] ) end2 = i+1;
 		}
 	}
-	if( start1==end1 || start2==end2 || start1>=end2 || start2>=end1 ) return 0.;
-	int start = std::max< int >( start1 , start2 ) , end = std::min< int >( end1 , end2 );
+	if( start1==end1 || start2==end2 || start1>=end2 || start2>=end1 )
+        return 0.;
+	int start = std::max< int >( start1 , start2 );
+    int end = std::min< int >( end1 , end2 );
 	memset( sums , 0 , sizeof( sums ) );
 
 	// Iterate over the support
