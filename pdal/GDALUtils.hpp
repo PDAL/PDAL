@@ -54,11 +54,9 @@
 #include <ogr_srs_api.h>
 
 class OGRSpatialReference;
-class OGRGeometry;
 
 namespace pdal
 {
-
 class Polygon;
 
 namespace gdal
@@ -135,82 +133,6 @@ private:
         m_ref = RefPtr(v, [](void* t){ OSRDestroySpatialReference(t); } );
     }
 
-    RefPtr m_ref;
-};
-
-class Geometry
-{
-public:
-    Geometry()
-        {}
-    Geometry(const std::string& wkt, const SpatialRef& srs)
-    {
-        OGRGeometryH geom;
-
-        char *p_wkt = const_cast<char *>(wkt.data());
-        OGRSpatialReferenceH ref = srs.get();
-        if (srs.empty())
-        {
-            ref = NULL;
-        }
-        bool isJson = wkt.find("{") != wkt.npos ||
-                      wkt.find("}") != wkt.npos;
-
-        if (!isJson)
-        {
-            OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
-            if (err != OGRERR_NONE)
-            {
-                std::cout << "wkt: " << wkt << std::endl;
-                std::ostringstream oss;
-                oss << "unable to construct OGR Geometry";
-                oss << " '" << CPLGetLastErrorMsg() << "'";
-                throw pdal::pdal_error(oss.str());
-            }
-        }
-        else
-        {
-            // Assume it is GeoJSON and try constructing from that
-            geom = OGR_G_CreateGeometryFromJson(p_wkt);
-
-            if (!geom)
-                throw pdal_error("Unable to create geometry from "
-                    "input GeoJSON");
-
-            OGR_G_AssignSpatialReference(geom, ref);
-        }
-
-        newRef(geom);
-    }
-
-    operator bool () const
-        { return get() != NULL; }
-    OGRGeometryH get() const
-        { return m_ref.get(); }
-
-    void transform(const SpatialRef& out_srs)
-    {
-        OGR_G_TransformTo(m_ref.get(), out_srs.get());
-    }
-
-    std::string wkt() const
-    {
-        char* p_wkt = 0;
-        OGRErr err = OGR_G_ExportToWkt(m_ref.get(), &p_wkt);
-        return std::string(p_wkt);
-    }
-
-    void setFromGeometry(OGRGeometryH geom)
-        {
-            if (geom)
-                newRef(OGR_G_Clone(geom));
-        }
-
-private:
-    void newRef(void *v)
-    {
-        m_ref = RefPtr(v, [](void* t){ OGR_G_DestroyGeometry(t); } );
-    }
     RefPtr m_ref;
 };
 

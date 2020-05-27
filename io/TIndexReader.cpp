@@ -34,6 +34,7 @@
 
 #include "TIndexReader.hpp"
 #include <pdal/GDALUtils.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -179,25 +180,20 @@ void TIndexReader::initialize()
     if (getSpatialReference().empty())
         setSpatialReference(SpatialReference(m_out_ref->wkt()));
 
-    std::unique_ptr<gdal::Geometry> wkt_g;
-
     // If the user set either explicit 'polygon' or 'boundary' options
     // we will filter by that geometry. The user can set a 'filter_srs'
     // option to override the SRS of the input geometry and we will
     // reproject to the output projection as needed.
+    Polygon poly;
     if (m_wkt.size())
     {
         // Reproject the given wkt to the output SRS so
         // filtering/cropping works
-        gdal::SpatialRef assign(m_filterSRS);
-        gdal::Geometry before(m_wkt, assign);
-        before.transform(*m_out_ref);
+        poly = Polygon(m_wkt, m_filterSRS);
+        poly.transform(m_out_ref->wkt());
 
-        wkt_g.reset (new gdal::Geometry(before.wkt(), *m_out_ref));
-
-        geometry = wkt_g->get();
-        m_wkt = wkt_g->wkt();
-        OGR_L_SetSpatialFilter(m_layer, geometry);
+        m_wkt = poly.wkt();
+        OGR_L_SetSpatialFilter(m_layer, poly.getOGRHandle());
     }
 
     if (m_attributeFilter.size())
