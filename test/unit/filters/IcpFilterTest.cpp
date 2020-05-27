@@ -103,7 +103,7 @@ TEST(IcpFilterTest, DefaultIdentity)
 
     MetadataNode root = filter->getMetadata();
     MetadataNode transform = root.findChild("transform");
-    EXPECT_EQ("matrix", transform.type());
+    EXPECT_EQ("string", transform.type());
     Eigen::MatrixXd transformMatrix = transform.value<Eigen::MatrixXd>();
     EXPECT_TRUE(transformMatrix.isApprox(Eigen::MatrixXd::Identity(4, 4), 1.0));
 }
