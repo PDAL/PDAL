@@ -57,6 +57,7 @@ private:
     uint64_t m_minPoints;
     uint64_t m_maxPoints;
     double m_tolerance;
+    bool m_is3d;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);

@@ -182,9 +182,8 @@ PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows,
          structuring element.
   \return the morphological dilation of the input raster.
 */
-PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
-                                           size_t rows, size_t cols,
-                                           int iterations);
+PDAL_DLL void dilateDiamond(std::vector<double>& data,
+        size_t rows, size_t cols, int iterations);
 
 /**
   Perform a morphological erosion of the input raster.
@@ -201,9 +200,8 @@ PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
          structuring element.
   \return the morphological erosion of the input raster.
 */
-PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
-                                          size_t rows, size_t cols,
-                                          int iterations);
+PDAL_DLL void erodeDiamond(std::vector<double>& data,
+        size_t rows, size_t cols, int iterations);
 
 /**
   Converts a PointView into an Eigen::MatrixXd.

@@ -242,8 +242,6 @@ void EptReader::initialize()
     {
         throwError(e.what());
     }
-    debug << "Got EPT info" << std::endl;
-    debug << "SRS: " << m_info->srs() << std::endl;
 
     setSpatialReference(m_info->srs());
 

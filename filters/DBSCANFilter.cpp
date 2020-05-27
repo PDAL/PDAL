@@ -45,6 +45,8 @@
 namespace pdal
 {
 
+using namespace Dimension;
+
 static StaticPluginInfo const s_info{
     "filters.dbscan", "DBSCAN Clustering.",
     "http://pdal.io/stages/filters.dbscan.html"};
@@ -71,8 +73,7 @@ void DBSCANFilter::addArgs(ProgramArgs& args)
 
 void DBSCANFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_cluster =
-        layout->registerOrAssignDim("ClusterID", Dimension::Type::Signed64);
+    layout->registerDim(Id::ClusterID);
 }
 
 void DBSCANFilter::prepared(PointTableRef table)
@@ -83,8 +84,8 @@ void DBSCANFilter::prepared(PointTableRef table)
     {
         for (std::string& s : m_dimStringList)
         {
-            Dimension::Id id = layout->findDim(s);
-            if (id == Dimension::Id::Unknown)
+            Id id = layout->findDim(s);
+            if (id == Id::Unknown)
                 throwError("Invalid dimension '" + s +
                            "' specified for "
                            "'dimensions' option.");
@@ -105,7 +106,7 @@ void DBSCANFilter::filter(PointView& view)
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         neighbors[idx] = kdfi.radius(idx, m_eps);
-        view.setField(m_cluster, idx, -2);
+        view.setField(Id::ClusterID, idx, -2);
     }
 
     // Second pass through point cloud performs DBSCAN clustering.
@@ -113,14 +114,14 @@ void DBSCANFilter::filter(PointView& view)
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         // Point has already been labeled, so move on to next.
-        if (view.getFieldAs<int64_t>(m_cluster, idx) != -2)
+        if (view.getFieldAs<int64_t>(Id::ClusterID, idx) != -2)
             continue;
 
         // Density of the neighborhood does not meet minimum number of points
         // constraint, label as noise.
         if (neighbors[idx].size() < m_minPoints)
         {
-            view.setField(m_cluster, idx, -1);
+            view.setField(Id::ClusterID, idx, -1);
             continue;
         }
 
@@ -132,7 +133,7 @@ void DBSCANFilter::filter(PointView& view)
         neighbors_visited.insert(idx);
 
         // Unlabeled point encountered; assign cluster label.
-        view.setField(m_cluster, idx, cluster_label);
+        view.setField(Id::ClusterID, idx, cluster_label);
 
         // Consider all neighbors.
         while (!neighbors_next.empty())
@@ -143,15 +144,15 @@ void DBSCANFilter::filter(PointView& view)
             neighbors_visited.insert(p);
 
             // Reassign cluster label to neighbor previously marked as noise.
-            if (view.getFieldAs<int64_t>(m_cluster, p) == -1)
-                view.setField(m_cluster, p, cluster_label);
+            if (view.getFieldAs<int64_t>(Id::ClusterID, p) == -1)
+                view.setField(Id::ClusterID, p, cluster_label);
 
             // Neighbor has already been labeled, so move on to next.
-            if (view.getFieldAs<int64_t>(m_cluster, p) != -2)
+            if (view.getFieldAs<int64_t>(Id::ClusterID, p) != -2)
                 continue;
 
             // Assign cluster label to neighbor.
-            view.setField(m_cluster, p, cluster_label);
+            view.setField(Id::ClusterID, p, cluster_label);
 
             // If density of neighbor's neighborhood is sufficient, add it's
             // neighbors to the set of neighbors to consider if they are not

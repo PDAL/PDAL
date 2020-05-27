@@ -277,6 +277,17 @@ void KDFlexIndex::build()
     m_impl->build();
 }
 
+PointId KDFlexIndex::neighbor(PointRef &point) const
+{
+    PointIdList ids = neighbors(point, 1);
+    return (ids.size() ? ids[0] : 0);
+}
+
+PointIdList KDFlexIndex::neighbors(PointRef &point, point_count_t k, size_t stride) const
+{
+    return m_impl->neighbors(point, k, stride);
+}
+
 PointIdList KDFlexIndex::radius(PointId idx, double r) const
 {
     return m_impl->radius(idx, r);

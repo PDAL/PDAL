@@ -269,11 +269,33 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     mse /= moving->size();
     log()->get(LogLevel::Debug2) << "MSE: " << mse << std::endl;
 
+    // Transformation to demean coords
+    Eigen::Matrix4d pretrans = Eigen::Matrix4d::Identity();
+    pretrans.block<3, 1>(0, 3) = -centroid;
+
+    // Transformation to return to global coords
+    Eigen::Matrix4d posttrans = Eigen::Matrix4d::Identity();
+    posttrans.block<3, 1>(0, 3) = centroid;
+
+    // The composed transformation is built from right to left in order of
+    // operations.
+    Eigen::Matrix4d composed_transformation =
+        posttrans * final_transformation * pretrans;
+
     // Populate metadata nodes to capture the final transformation, convergence
     // status, and MSE.
+    Eigen::IOFormat MetadataFmt(Eigen::FullPrecision, Eigen::DontAlignCols,
+                                " ", "\n", "", "", "", "");
     MetadataNode root = getMetadata();
-    root.add("transform", Eigen::MatrixXd(final_transformation.cast<double>()));
-    root.add("centroid", Eigen::MatrixXd(centroid.cast<double>()));
+    std::stringstream ss;
+    ss << final_transformation.format(MetadataFmt);
+    root.add("transform", ss.str());
+    ss.str("");
+    ss << composed_transformation.format(MetadataFmt);
+    root.add("composed", ss.str());
+    ss.str("");
+    ss << centroid.format(MetadataFmt);
+    root.add("centroid", ss.str());
     root.add("converged", converged);
     root.add("fitness", mse);
 

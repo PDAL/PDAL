@@ -526,18 +526,17 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     std::vector<double> ZInetV = ZImin;
     if (m_args->m_cut > 0.0)
     {
+        std::vector<double> dilated = ZImin;
         int v = ceil<int>(m_args->m_cut / m_args->m_cell);
-        std::vector<double> bigErode =
-            erodeDiamond(ZImin, m_rows, m_cols, 2 * v);
-        std::vector<double> bigOpen =
-            dilateDiamond(bigErode, m_rows, m_cols, 2 * v);
+        erodeDiamond(dilated, m_rows, m_cols, 2 * v);
+        dilateDiamond(dilated, m_rows, m_cols, 2 * v);
         for (auto c = 0; c < m_cols; ++c)
         {
             for (auto r = 0; r < m_rows; ++r)
             {
                 if (isNetCell[c * m_rows + r] == 1)
                 {
-                    ZInetV[c * m_rows + r] = bigOpen[c * m_rows + r];
+                    ZInetV[c * m_rows + r] = dilated[c * m_rows + r];
                 }
             }
         }
@@ -680,7 +679,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     // the ceiling value)."
     int max_radius = static_cast<int>(std::ceil(max_window / m_args->m_cell));
     std::vector<double> prevSurface = ZImin;
-    std::vector<double> prevErosion = ZImin;
+    std::vector<double> erosion = ZImin;
 
     // "...the radius of the element at each step [is] increased by one pixel
     // from a starting value of one pixel to the pixel equivalent of the maximum
@@ -690,11 +689,9 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     {
         // "On the first iteration, the minimum surface (ZImin) is opened using
         // a disk-shaped structuring element with a radius of one pixel."
-        std::vector<double> curErosion =
-            erodeDiamond(prevErosion, m_rows, m_cols, 1);
-        std::vector<double> curOpening =
-            dilateDiamond(curErosion, m_rows, m_cols, radius);
-        prevErosion = curErosion;
+        erodeDiamond(erosion, m_rows, m_cols, 1);
+        std::vector<double> curOpening = erosion;
+        dilateDiamond(curOpening, m_rows, m_cols, radius);
 
         // "An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product

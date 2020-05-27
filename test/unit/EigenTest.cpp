@@ -139,8 +139,10 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Cv(C.data(), C.data() + C.size());
 
-    std::vector<double> Dv = dilateDiamond(Cv, 5, 5, 1);
-    std::vector<double> Dv2 = dilateDiamond(Cv, 5, 5, 2);
+    std::vector<double> Dv = Cv;
+    dilateDiamond(Dv, 5, 5, 1);
+    std::vector<double> Dv2 = Cv;
+    dilateDiamond(Dv2, 5, 5, 2);
 
     EXPECT_EQ(0, Dv[0]);
     EXPECT_EQ(1, Dv[1]);
@@ -154,8 +156,10 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Ev(E.data(), E.data() + E.size());
 
-    std::vector<double> Fv = erodeDiamond(Ev, 5, 5, 1);
-    std::vector<double> Fv2 = erodeDiamond(Ev, 5, 5, 2);
+    std::vector<double> Fv = Ev;
+    erodeDiamond(Fv, 5, 5, 1);
+    std::vector<double> Fv2 = Ev;
+    erodeDiamond(Fv2, 5, 5, 2);
 
     EXPECT_EQ(0, Fv[16]);
     EXPECT_EQ(1, Fv[12]);
