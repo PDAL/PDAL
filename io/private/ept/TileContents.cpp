@@ -56,7 +56,7 @@ void TileContents::read()
             readZstandard();
 #endif
         else
-            throw ept_error("Unrecognized EPT dataType");
+            throw pdal_error("Unrecognized EPT dataType");
 //ABELL - Should check that we read the number of points specified in the
 //  overlap.
         // Read addon information after the native data, we'll possibly

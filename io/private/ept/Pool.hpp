@@ -39,7 +39,7 @@
 #include <queue>
 #include <thread>
 
-#include "EptError.hpp"
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
@@ -133,7 +133,7 @@ public:
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
         {
-            throw ept_error("Attempted to add a task to a stopped Pool");
+            throw pdal_error("Attempted to add a task to a stopped Pool");
         }
 
         m_produceCv.wait(lock, [this]()

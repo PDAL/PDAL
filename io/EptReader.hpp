@@ -93,6 +93,7 @@ private:
         point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
     void load(const Overlap& overlap);
+    void checkTile(const TileContents& tile);
 
     std::unique_ptr<Connector> m_connector;
     std::unique_ptr<EptInfo> m_info;
@@ -111,10 +112,6 @@ private:
     std::unique_ptr<Pool> m_pool;
     AddonList m_addons;
 
-    using StringMap = std::map<std::string, std::string>;
-    StringMap m_headers;
-    StringMap m_query;
-
     mutable std::mutex m_mutex;
     mutable std::condition_variable m_contentsCv;
 
@@ -124,7 +121,7 @@ private:
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-    TileContents *m_currentTile;
+    std::unique_ptr<TileContents> m_currentTile;
     ArtifactManager *m_artifactMgr;
 
     PointId m_pointId = 0;

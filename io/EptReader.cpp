@@ -62,23 +62,6 @@ const StaticPluginInfo s_info
     { "ept" }
 };
 
-StringMap toStringMap(const NL::json& fwd)
-{
-    StringMap map;
-
-    if (fwd.is_null())
-        return map;
-    if (!fwd.is_object())
-        throw pdal_error("Not an object type.");
-    for (auto& entry : fwd.items())
-    {
-        if (!entry.value().is_string())
-            throw pdal_error("Expected string type.");
-        map.insert({entry.key(), entry.value().get<std::string>()});
-    }
-    return map;
-}
-
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -131,8 +114,7 @@ public:
     NL::json m_ogr;
 };
 
-EptReader::EptReader() : m_args(new EptReader::Args), m_currentTile(nullptr),
-    m_artifactMgr(nullptr)
+EptReader::EptReader() : m_args(new EptReader::Args), m_artifactMgr(nullptr)
 {}
 
 EptReader::~EptReader()
@@ -159,6 +141,28 @@ void EptReader::addArgs(ProgramArgs& args)
         m_args->m_ogr);
 }
 
+namespace
+{
+
+// Extract a string map from JSON.  Used in setForwards().
+StringMap toStringMap(const NL::json& fwd)
+{
+    StringMap map;
+
+    if (fwd.is_null())
+        return map;
+    if (!fwd.is_object())
+        throw pdal_error("Not an object type.");
+    for (auto& entry : fwd.items())
+    {
+        if (!entry.value().is_string())
+            throw pdal_error("Expected string type.");
+        map.insert({entry.key(), entry.value().get<std::string>()});
+    }
+    return map;
+}
+
+}
 
 void EptReader::setForwards(StringMap& headers, StringMap& query)
 {
@@ -494,7 +498,6 @@ void EptReader::overlaps()
 
         // First, determine the overlapping nodes from the EPT resource.
         overlaps(*m_hierarchy, m_connector->getJson(filename), key);
-        m_pool->await();
     }
 
     // Determine the addons that exist to correspond to tiles.
@@ -503,8 +506,8 @@ void EptReader::overlaps()
         m_nodeId = 1;
         std::string filename = addon.hierarchyDir() + key.toString() + ".json";
         overlaps(addon.hierarchy(), m_connector->getJson(filename), key);
+        m_pool->await();
     }
-    m_pool->await();
 }
 
 
@@ -535,11 +538,19 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
     if (m_depthEnd && key.d >= m_depthEnd)
         return;
 
+    // If our key isn't in the hierarchy, we've totally traversed this tree
+    // branch (there are no lower nodes).
     auto it = hier.find(key.toString());
     if (it == hier.end())
         return;
 
-    int64_t numPoints = it->get<int64_t>();
+    int64_t numPoints(-2);  // -2 will trigger an error below
+    try
+    {
+        numPoints = it->get<int64_t>();
+    }
+    catch (...)
+    {}
 
     if (numPoints == -1)
     {
@@ -562,8 +573,10 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
     }
     else
     {
+        // Note that when processing addons, we set node IDs which may
+        // not match the base hierarchy, but it doesn't matter since
+        // they are never used.
         {
-            //ABELL we could probably use a local mutex to lock the target map.
             std::lock_guard<std::mutex> lock(m_mutex);
             target.emplace(key, (point_count_t)numPoints, m_nodeId++);
         }
@@ -573,15 +586,19 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
     }
 }
 
-bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
+void EptReader::checkTile(const TileContents& tile)
 {
-    using namespace Dimension;
-
     if (tile.error().size())
     {
         m_pool->stop();
         throwError("Error reading tile: " + tile.error());
     }
+}
+
+
+bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
+{
+    using namespace Dimension;
 
     BasePointTable& t = tile.table();
 
@@ -665,6 +682,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
             TileContents tile = std::move(m_contents.front());
             m_contents.pop();
             l.unlock();
+            checkTile(tile);
             process(view, tile, count - numRead);
             numRead += tile.size();
             m_tileCount--;
@@ -683,7 +701,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     {
         EptArtifactPtr artifact
             (new EptArtifact(std::move(m_info), std::move(m_hierarchy),
-                m_hierarchyStep));
+                std::move(m_connector), m_hierarchyStep));
         m_artifactMgr->put("ept", artifact);
     }
 
@@ -719,7 +737,9 @@ top:
             std::unique_lock<std::mutex> l(m_mutex);
             if (m_contents.size())
             {
-                m_currentTile = &m_contents.front();
+                m_currentTile.reset(
+                    new TileContents(std::move(m_contents.front())));
+                m_contents.pop();
                 l.unlock();
                 if (m_hierarchyIter != m_hierarchy->cend())
                     load(*m_hierarchyIter++);
@@ -728,6 +748,7 @@ top:
             else
                 m_contentsCv.wait(l);
         } while (true);
+        checkTile(*m_currentTile);
     }
 
     bool ok = processPoint(point, *m_currentTile);
@@ -738,8 +759,7 @@ top:
     if (m_pointId == m_currentTile->size())
     {
         m_pointId = 0;
-        m_currentTile = nullptr;
-        m_contents.pop();
+        m_currentTile.reset();
         if (--m_tileCount == 0)
             return false;
     }
