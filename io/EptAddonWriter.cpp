@@ -100,9 +100,9 @@ void EptAddonWriter::prepared(PointTableRef table)
     }
     m_pool.reset(new Pool(threads));
 
-    //ABELL
-    // Perhaps we need to wait to load addons until we have the
-    // headers/query from metadata.
+    // Note that we use a generic connector here.  In ready() we steal
+    // the connector that was used in the EptReader that uses any
+    // headers/query that was set.
     m_connector.reset(new Connector());
     m_addons = Addon::store(*m_connector, m_args->m_addons, *(table.layout()));
 }
@@ -120,6 +120,7 @@ void EptAddonWriter::ready(PointTableRef table)
     m_hierarchyStep = eap->m_hierarchyStep;
     m_info = std::move(eap->m_info);
     m_hierarchy = std::move(eap->m_hierarchy);
+    m_connector = std::move(eap->m_connector);
 }
 
 void EptAddonWriter::write(const PointViewPtr view)
@@ -152,7 +153,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     PointRef pr(*view);
     uint64_t nodeId(0);
     uint64_t pointId(0);
-    for (uint64_t i(0); i < view->size(); ++i)
+    for (PointId i = 0; i < view->size(); ++i)
     {
         pr.setPointId(i);
         nodeId = pr.getFieldAs<uint64_t>(m_nodeIdDim);
@@ -203,7 +204,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 
     // Write the top-level addon metadata.
     NL::json meta;
-    meta["type"] = getTypeString(addon.type());
+    meta["type"] = Dimension::toName(Dimension::base(addon.type()));
     meta["size"] = Dimension::size(addon.type());
     meta["version"] = "1.0.0";
     meta["dataType"] = "binary";
@@ -246,23 +247,6 @@ void EptAddonWriter::writeHierarchy(const std::string& directory,
         for (uint64_t dir(0); dir < 8; ++dir)
             writeHierarchy(directory, curr, key.bisect(dir));
     }
-}
-
-std::string EptAddonWriter::getTypeString(Dimension::Type t) const
-{
-    std::string s;
-    const auto base(Dimension::base(t));
-
-    if (base == Dimension::BaseType::Signed)
-        s = "signed";
-    else if (base == Dimension::BaseType::Unsigned)
-        s = "unsigned";
-    else if (base == Dimension::BaseType::Floating)
-        s = "float";
-    else
-        throwError("Invalid dimension type");
-
-    return s;
 }
 
 }

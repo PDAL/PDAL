@@ -81,17 +81,17 @@ void EptInfo::initialize()
         if (iWkt != iSrs->end())
         {
             if (!iWkt->is_string())
-                throw ept_error("srs.wkt must be specified as a string. "
+                throw pdal_error("srs.wkt must be specified as a string. "
                         "Found '" + iWkt->dump() + "'.");
             wkt = iWkt->get<std::string>();
         }
         else
         {
             if (iAuthority == iSrs->end() || iHorizontal == iSrs->end())
-                throw ept_error("srs must be defined with at least one of "
+                throw pdal_error("srs must be defined with at least one of "
                         "wkt or both authority and horizontal specifications.");
             if (!iAuthority->is_string())
-                throw ept_error("srs.authority must be specified as a "
+                throw pdal_error("srs.authority must be specified as a "
                         "string.  Found '" + iAuthority->dump() + "'.");
             wkt = iAuthority->get<std::string>();
 
@@ -101,7 +101,7 @@ void EptInfo::initialize()
             else if (iHorizontal->is_string())
                 horiz = iHorizontal->get<std::string>();
             else
-                throw ept_error("srs.horizontal must be specified as a "
+                throw pdal_error("srs.horizontal must be specified as a "
                     "non-negative integer or equivalent string. "
                     "Found '" + iHorizontal->dump() + "'.");
             wkt += ":" + horiz;
@@ -114,7 +114,7 @@ void EptInfo::initialize()
                 else if (iVertical->is_string())
                     vert = iVertical->get<std::string>();
                 else
-                    throw ept_error("srs.vertical must be specified as a "
+                    throw pdal_error("srs.vertical must be specified as a "
                             "non-negative integer or equivalent string. "
                             "Found '" + iVertical->dump() + "'.");
                 wkt += "+" + vert;
@@ -122,7 +122,7 @@ void EptInfo::initialize()
         }
         m_srs.set(wkt);
         if (!m_srs.valid())
-            throw ept_error("Invalid/unknown srs.wkt specification.");
+            throw pdal_error("Invalid/unknown srs.wkt specification.");
     }
 
     const std::string dt = m_info.at("dataType").get<std::string>();
@@ -133,7 +133,7 @@ void EptInfo::initialize()
     else if (dt == "zstandard")
         m_dataType = DataType::Zstandard;
     else
-        throw ept_error("Unrecognized EPT dataType: " + dt);
+        throw pdal_error("Unrecognized EPT dataType: " + dt);
 
     NL::json& schema = m_info["schema"];
     for (NL::json element: schema)

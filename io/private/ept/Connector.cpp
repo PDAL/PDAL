@@ -33,7 +33,8 @@
  ****************************************************************************/
 
 #include "Connector.hpp"
-#include "EptError.hpp"
+
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
@@ -61,7 +62,7 @@ NL::json Connector::getJson(const std::string& path) const
     }
     catch (NL::json::parse_error& err)
     {
-        throw ept_error("File '" + path + "' contained invalid JSON: " +
+        throw pdal_error("File '" + path + "' contained invalid JSON: " +
             err.what());
     }
 }

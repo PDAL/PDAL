@@ -36,8 +36,6 @@
 
 #include <functional>  // for hash
 
-#include "EptError.hpp"
-
 namespace pdal
 {
 
@@ -53,7 +51,7 @@ public:
     {
         const StringList tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
-            throw ept_error("Invalid EPT KEY: " + s);
+            throw pdal_error("Invalid EPT KEY: " + s);
         d = std::stoull(tokens[0]);
         x = std::stoull(tokens[1]);
         y = std::stoull(tokens[2]);
@@ -83,7 +81,7 @@ public:
             case 3: return b.maxx;
             case 4: return b.maxy;
             case 5: return b.maxz;
-            default: throw ept_error("Invalid Key[] index");
+            default: throw pdal_error("Invalid Key[] index");
         }
     }
 
@@ -94,7 +92,7 @@ public:
             case 0: return x;
             case 1: return y;
             case 2: return z;
-            default: throw ept_error("Invalid Key::idAt index");
+            default: throw pdal_error("Invalid Key::idAt index");
         }
     }
 
