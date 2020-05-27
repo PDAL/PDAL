@@ -91,6 +91,7 @@ struct SMRArgs
     std::vector<DimRange> m_ignored;
     StringList m_returns;
     Segmentation::PointClasses m_classbits;
+    Arg *m_windowArg;
 };
 
 SMRFilter::SMRFilter() : m_args(new SMRArgs) {}
@@ -106,7 +107,6 @@ void SMRFilter::addArgs(ProgramArgs& args)
 {
     args.add("cell", "Cell size?", m_args->m_cell, 1.0);
     args.add("slope", "Percent slope?", m_args->m_slope, 0.15);
-    args.add("window", "Max window size?", m_args->m_window, 18.0);
     args.add("scalar", "Elevation scalar?", m_args->m_scalar, 1.25);
     args.add("threshold", "Elevation threshold?", m_args->m_threshold, 0.5);
     args.add("cut", "Cut net size?", m_args->m_cut, 0.0);
@@ -116,6 +116,8 @@ void SMRFilter::addArgs(ProgramArgs& args)
              {"last", "only"});
     args.add("classbits", "Ignore synthetic|keypoint|withheld "
         "classification bits?", m_args->m_classbits);
+    m_args->m_windowArg = &args.add("window", "Max window size?",
+        m_args->m_window);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -156,6 +158,8 @@ void SMRFilter::prepared(PointTableRef table)
             m_args->m_returns.clear();
         }
     }
+    if (!m_args->m_windowArg->set())
+        m_args->m_window = 18 * m_args->m_cell;
 }
 
 void SMRFilter::ready(PointTableRef table)
@@ -389,7 +393,7 @@ std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
     std::vector<double> negZImin;
     std::transform(ZImin.begin(), ZImin.end(), std::back_inserter(negZImin),
                    [](double v) { return -v; });
-    std::vector<int> LowV = progressiveFilter(negZImin, 5.0, 1.0);
+    std::vector<int> LowV = progressiveFilter(negZImin, 5.0, m_args->m_cell);
 
     if (!m_args->m_dir.empty())
     {
