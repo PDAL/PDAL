@@ -141,7 +141,7 @@ private:
 
 // This provides a context for processing a set of points and allows the library
 // to be used to process multiple point sets simultaneously.
-class PDAL_DLL PointTable : public SimplePointTable
+class PDAL_DLL RowPointTable : public SimplePointTable
 {
 private:
     // Point storage.
@@ -152,9 +152,9 @@ private:
     static const point_count_t m_blockPtCnt = 65536;
 
 public:
-    PointTable() : SimplePointTable(m_layout), m_numPts(0)
+    RowPointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
-    virtual ~PointTable();
+    virtual ~RowPointTable();
     virtual bool supportsView() const
         { return true; }
 
@@ -167,6 +167,7 @@ private:
 
     PointLayout m_layout;
 };
+using PointTable = RowPointTable;
 
 // This provides a context for processing a set of points and allows the library
 // to be used to process multiple point sets simultaneously.

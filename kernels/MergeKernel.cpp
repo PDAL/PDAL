@@ -72,8 +72,6 @@ void MergeKernel::validateSwitches(ProgramArgs& args)
 
 int MergeKernel::execute()
 {
-    PointTable table;
-
     MergeFilter filter;
 
     for (size_t i = 0; i < m_files.size(); ++i)
@@ -83,6 +81,8 @@ int MergeKernel::execute()
     }
 
     Stage& writer = makeWriter(m_outputFile, filter, "");
+
+    ColumnPointTable table;
     writer.prepare(table);
     writer.execute(table);
     return 0;

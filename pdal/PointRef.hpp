@@ -105,6 +105,9 @@ public:
         Everything e;
         Dimension::Type type = m_layout->dimDetail(dim)->type();
 
+        // We don't hoist getFieldInternal() out of the switch stmt.
+        // because we don't want to call if the type is bad.  We also
+        // don't want an extra check on type.
         switch (type)
         {
         case Dimension::Type::Unsigned8:

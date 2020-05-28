@@ -401,7 +401,7 @@ void TIndexKernel::mergeFile()
     catch (std::bad_cast&)
     {}
 
-    PointTable table;
+    ColumnPointTable table;
     writer.prepare(table);
     writer.execute(table);
 }
@@ -502,7 +502,7 @@ bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 
 bool TIndexKernel::slowBoundary(Stage& hexer, FileInfo& fileInfo)
 {
-    PointTable table;
+    ColumnPointTable table;
     hexer.prepare(table);
     PointViewSet set = hexer.execute(table);
 

@@ -91,7 +91,7 @@ void GroundKernel::addSwitches(ProgramArgs& args)
 
 int GroundKernel::execute()
 {
-    PointTable table;
+    ColumnPointTable table;
 
     Options assignOptions;
     assignOptions.add("assignment", "Classification[:]=0");

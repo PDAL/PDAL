@@ -106,7 +106,7 @@ QuickInfo LasReader::inspect()
     QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    PointTable table;
+    RowPointTable table;
     initialize(table);
     addDimensions(layout.get());
 

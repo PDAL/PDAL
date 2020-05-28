@@ -99,13 +99,13 @@ void SimplePointTable::getFieldInternal(Dimension::Id id, PointId idx,
 }
 
 
-PointTable::~PointTable()
+RowPointTable::~RowPointTable()
 {
     for (auto vi = m_blocks.begin(); vi != m_blocks.end(); ++vi)
         delete [] *vi;
 }
 
-PointId PointTable::addPoint()
+PointId RowPointTable::addPoint()
 {
     if (m_numPts % m_blockPtCnt == 0)
     {
@@ -118,7 +118,7 @@ PointId PointTable::addPoint()
 }
 
 
-char *PointTable::getPoint(PointId idx)
+char *RowPointTable::getPoint(PointId idx)
 {
     char *buf = m_blocks[idx / m_blockPtCnt];
     return buf + pointsToBytes(idx % m_blockPtCnt);

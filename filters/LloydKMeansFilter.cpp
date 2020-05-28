@@ -100,7 +100,7 @@ void LloydKMeansFilter::filter(PointView& view)
 
     // setup table with at least XYZ as required by KDIndex, plus any
     // additional dimensions as specified via filter options
-    PointTable table;
+    ColumnPointTable table;
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
     table.layout()->registerDims(m_dimIdList);
 
