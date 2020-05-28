@@ -95,6 +95,7 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
         SpatialReferenceTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${GDAL_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
