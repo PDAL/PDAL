@@ -606,8 +606,6 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
     // can construct a 2D KDIndex and perform nearest neighbor searches.
     PointViewPtr temp = view->makeNew();
     PointId i(0);
-    size_t nancells = 0;
-    size_t cells = m_cols * m_rows;
     for (int c = 0; c < m_cols; ++c)
     {
         for (int r = 0; r < m_rows; ++r)
@@ -615,10 +613,7 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             size_t cell = c * m_rows + r;
             double val = cz[cell];
             if (std::isnan(val))
-            {
-                nancells++;
                 continue;
-            }
 
             temp->setField(Id::X, i,
                            m_bounds.minx + (c + 0.5) * m_args->m_cell);
@@ -628,9 +623,6 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             i++;
         }
     }
-    std::cerr << "Size = " << cells << "!\n";
-    std::cerr << "Nancells = " << nancells << "!\n";
-    std::cerr << "Filled cells = " << (cells - nancells) << "!\n";
 
     // https://github.com/PDAL/PDAL/issues/2794#issuecomment-625297062
     if (!temp->size())
