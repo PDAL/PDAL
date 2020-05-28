@@ -72,13 +72,60 @@ PointId ColumnPointTable::addPoint()
 }
 
 
-void ColumnPointTable::setFieldInternal(Dimension::Id id, PointId idx,
-    const void *value)
+void ColumnPointTable::setFieldInternal(Dimension::Id dim,
+    PointId idx, const void *src)
 {
-    const Dimension::Detail *d = m_layoutRef.dimDetail(id);
-    const char *src  = (const char *)value;
-    char *dst = getDimension(d, idx);
-    std::copy(src, src + d->size(), dst);
+    const Dimension::Detail *d = m_layoutRef.dimDetail(dim);
+    const DimBlockList& dimBlocks = m_blocks[d->order()];
+    char *buf = dimBlocks[idx / m_blockPtCnt];
+    char *dst = buf + (Dimension::size(d->type()) * (idx % m_blockPtCnt));
+
+    switch (d->type())
+    {
+    case Dimension::Type::Double:
+        *reinterpret_cast<double *>(dst) =
+            *reinterpret_cast<const double *>(src);
+        break;
+    case Dimension::Type::Float:
+        *reinterpret_cast<float *>(dst) =
+            *reinterpret_cast<const float*>(src);
+        break;
+    case Dimension::Type::Signed8:
+        *reinterpret_cast<int8_t *>(dst) =
+            *reinterpret_cast<const int8_t *>(src);
+        break;
+    case Dimension::Type::Signed16:
+        *reinterpret_cast<int16_t *>(dst) =
+            *reinterpret_cast<const int16_t *>(src);
+        break;
+    case Dimension::Type::Signed32:
+        *reinterpret_cast<int32_t *>(dst) =
+            *reinterpret_cast<const int32_t *>(src);
+        break;
+    case Dimension::Type::Signed64:
+        *reinterpret_cast<int64_t *>(dst) =
+            *reinterpret_cast<const int64_t *>(src);
+        break;
+    case Dimension::Type::Unsigned8:
+        *reinterpret_cast<uint8_t *>(dst) =
+            *reinterpret_cast<const uint8_t *>(src);
+        break;
+    case Dimension::Type::Unsigned16:
+        *reinterpret_cast<uint16_t *>(dst) =
+            *reinterpret_cast<const uint16_t *>(src);
+        break;
+    case Dimension::Type::Unsigned32:
+        *reinterpret_cast<uint32_t *>(dst) =
+            *reinterpret_cast<const uint32_t *>(src);
+        break;
+    case Dimension::Type::Unsigned64:
+        *reinterpret_cast<uint64_t *>(dst) =
+            *reinterpret_cast<const uint64_t *>(src);
+        break;
+    case Dimension::Type::None:
+    default:
+        break;
+    }
 }
 
 

@@ -147,6 +147,8 @@ private:
     // Point storage.
     std::vector<char *> m_blocks;
     point_count_t m_numPts;
+
+    // Make sure this is power-of-2 to facilitate fast div and mod ops.
     static const point_count_t m_blockPtCnt = 65536;
 
 public:
@@ -178,6 +180,8 @@ private:
     // List of dimension memory block lists.
     MemBlocks m_blocks;
     point_count_t m_numPts;
+
+    // Make sure this is power-of-2 to facilitate fast div and mod ops.
     static const point_count_t m_blockPtCnt = 16384;
 
 public:
