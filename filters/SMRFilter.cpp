@@ -83,6 +83,7 @@ struct SMRArgs
 {
     double m_cell;
     double m_slope;
+    double m_window;
     double m_scalar;
     double m_threshold;
     double m_cut;
@@ -90,7 +91,6 @@ struct SMRArgs
     std::vector<DimRange> m_ignored;
     StringList m_returns;
     Segmentation::PointClasses m_classbits;
-    double m_window;
     Arg *m_windowArg;
 };
 
@@ -158,7 +158,6 @@ void SMRFilter::prepared(PointTableRef table)
             m_args->m_returns.clear();
         }
     }
-
     if (!m_args->m_windowArg->set())
         m_args->m_window = 18 * m_args->m_cell;
 }
