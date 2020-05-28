@@ -53,15 +53,8 @@ public:
 
     double kdtree_get_pt(const PointId idx, int dim) const
     {
-        if (idx >= m_buf.size())
-            return 0.0;
-
         using namespace Dimension;
         std::array<Id, 2> ids { Id::X, Id::Y };
-        if ((size_t)dim >= ids.size())
-            throw pdal_error("kdtree_get_pt: Request for invalid dimension "
-                "from nanoflann");
-
         return m_buf.getFieldAs<double>(ids[dim], idx);
     }
     
