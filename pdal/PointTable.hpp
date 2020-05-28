@@ -129,7 +129,6 @@ private:
     virtual void getFieldInternal(Dimension::Id id, PointId idx,
         void *value) const;
 
-    // The number of points in each memory block.
     char *getDimension(const Dimension::Detail *d, PointId idx)
         { return getPoint(idx) + d->offset(); }
 

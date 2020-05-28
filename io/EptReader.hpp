@@ -34,37 +34,30 @@
 
 #pragma once
 
-#include <array>
-#include <condition_variable>
-#include <list>
 #include <map>
+#include <string>
+#include <list>
+#include <queue>
 #include <memory>
 #include <mutex>
-#include <string>
-#include <vector>
+#include <condition_variable>
 
-#include <pdal/JsonFwd.hpp>
-#include <pdal/Polygon.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
+#include "private/ept/Addon.hpp"
+#include "private/ept/Overlap.hpp"
+
 namespace pdal
 {
 
-namespace arbiter
-{
-    class Arbiter;
-    class Endpoint;
-    class LocalHandle;
-}
-
-class Addon;
+class Connector;
 class EptInfo;
-class FixedPointLayout;
 class Key;
 class Pool;
-class VectorPointTable;
+class TileContents;
+using StringMap = std::map<std::string, std::string>;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -82,107 +75,57 @@ private:
     virtual QuickInfo inspect() override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void ready(PointTableRef table) override;
-    virtual PointViewSet run(PointViewPtr view) override;
-
-    // Users may supply header and query parameters to be forwarded with remote
-    // requests, deconstruct their JSON into our member maps.
-    void initializeHttpForwards();
+    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    virtual bool processOne(PointRef& point) override;
 
     // If argument "origin" is specified, this function will clip the query
     // bounds to the bounds of the specified origin and set m_queryOriginId to
     // the selected OriginId value.  If the selected origin is not found, throw.
     void handleOriginQuery();
+    void setForwards(StringMap& headers, StringMap& query);
 
     // Aggregate all EPT keys overlapping our query bounds and their number of
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(const arbiter::Endpoint& ep, std::map<Key, uint64_t>& target,
-            const NL::json& current, const Key& key);
+    void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
+    void process(PointViewPtr dstView, const TileContents& tile,
+        point_count_t count);
+    bool processPoint(PointRef& dst, const TileContents& tile);
+    void load(const Overlap& overlap);
+    void checkTile(const TileContents& tile);
 
-    PointId readLaszip(PointView& view, const Key& key, uint64_t nodeId) const;
-    PointId readBinary(PointView& view, const Key& key, uint64_t nodeId) const;
-    PointId readZstandard(PointView& view, const Key& key, uint64_t nodeId)
-        const;
-    PointId processPackedData(PointView& view, uint64_t nodeId, char* data,
-        uint64_t size) const;
-    void process(PointView& view, PointRef& pr, uint64_t nodeId,
-        PointId pointId) const;
-
-    void readAddon(PointView& dst, const Key& key, const Addon& addon,
-        PointId startId = 0) const;
-
-    // To allow testing of hidden getRemoteType() and getCoercedType().
-    static Dimension::Type getRemoteTypeTest(const NL::json& dimInfo);
-    static Dimension::Type getCoercedTypeTest(const NL::json& dimInfo);
-
-    // For streaming operation.
-    struct NodeBuffer;
-    using NodeBufferList = std::list<std::unique_ptr<NodeBuffer>>;
-    using NodeBufferIt = NodeBufferList::iterator;
-
-    virtual bool processOne(PointRef& point) override;
-    void load();    // Asynchronously fetch EPT nodes for streaming use.
-    bool next();    // Acquire an already-fetched node for processing.
-    NodeBufferIt findBuffer();  // Find a fully acquired node.
-
-    // Data fetching - these forward user-specified query/header params.
-    std::string get(std::string path) const;
-    std::vector<char> getBinary(std::string path) const;
-    arbiter::LocalHandle getLocalHandle(std::string path) const;
-
-    std::string m_root;
-
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
-    std::unique_ptr<arbiter::Endpoint> m_ep;
+    std::unique_ptr<Connector> m_connector;
     std::unique_ptr<EptInfo> m_info;
+    // This is a list-based queue so that we don't need to expose TileContents
+    // here as you do with a deque.
+    std::queue<TileContents, std::list<TileContents>> m_contents;
+    uint64_t m_tileCount;
+    std::unique_ptr<Hierarchy> m_hierarchy;
+    Hierarchy::const_iterator m_hierarchyIter;
 
     struct Args;
-
     std::unique_ptr<Args> m_args;
 
     BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
     std::unique_ptr<Pool> m_pool;
-    std::vector<std::unique_ptr<Addon>> m_addons;
-
-    using StringMap = std::map<std::string, std::string>;
-    StringMap m_headers;
-    StringMap m_query;
+    AddonList m_addons;
 
     mutable std::mutex m_mutex;
-    mutable std::condition_variable m_cv;
+    mutable std::condition_variable m_contentsCv;
 
-    using Overlaps = std::map<Key, uint64_t>;
-    Overlaps m_overlaps;
     uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
     uint64_t m_hierarchyStep = 0;
-
-    std::unique_ptr<FixedPointLayout> m_remoteLayout;
-    DimTypeList m_dimTypes;
-    std::array<XForm, 3> m_xyzTransforms;
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-    // The below are for streaming operation only.
-    PointLayout* m_userLayout = nullptr;
+    std::unique_ptr<TileContents> m_currentTile;
+    ArtifactManager *m_artifactMgr;
 
-    // These represent a lookahead of asynchronously loaded nodes, when we have
-    // finished processing a streaming node we will wait for something to be
-    // loaded here.
-    NodeBufferList m_upcomingNodeBuffers;
-
-    // This is the node we are currently processing in streaming mode, which is
-    // plucked out of our upcoming node buffers when we have finished our
-    // current buffer.
-    std::unique_ptr<NodeBuffer> m_currentNodeBuffer;
-
-    // The below represent our current state in streaming operation - in normal
-    // mode we use local variables for these.
-    Overlaps::const_iterator m_overlapIt;
-    uint64_t m_nodeId = 1;
     PointId m_pointId = 0;
+    uint64_t m_nodeId;
 };
 
 } // namespace pdal

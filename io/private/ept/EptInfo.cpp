@@ -32,16 +32,40 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "Connector.hpp"
+#include "EptInfo.hpp"
 #include "EptSupport.hpp"
 
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
 
-EptInfo::EptInfo(const NL::json& info) : m_info(info)
+EptInfo::EptInfo(const std::string& info)
+{
+    try
+    {
+        m_info = NL::json::parse(info);
+    }
+    catch(NL::json::parse_error& err)
+    {
+        throw pdal_error("Unable to parse EPT info as JSON.");
+    }
+    initialize();
+}
+
+EptInfo::EptInfo(const std::string& filename, const Connector& connector) :
+    m_filename(filename)
+{
+    m_info = connector.getJson(m_filename);
+    initialize();
+}
+
+void EptInfo::initialize()
 {
     m_bounds = toBox3d(m_info.at("bounds"));
+    m_boundsConforming = toBox3d(m_info.at("boundsConforming"));
     m_points = m_info.value("points", 0);
     m_span = m_info.at("span").get<uint64_t>();
 
@@ -57,17 +81,17 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
         if (iWkt != iSrs->end())
         {
             if (!iWkt->is_string())
-                throw ept_error("srs.wkt must be specified as a string. "
+                throw pdal_error("srs.wkt must be specified as a string. "
                         "Found '" + iWkt->dump() + "'.");
             wkt = iWkt->get<std::string>();
         }
         else
         {
             if (iAuthority == iSrs->end() || iHorizontal == iSrs->end())
-                throw ept_error("srs must be defined with at least one of "
+                throw pdal_error("srs must be defined with at least one of "
                         "wkt or both authority and horizontal specifications.");
             if (!iAuthority->is_string())
-                throw ept_error("srs.authority must be specified as a "
+                throw pdal_error("srs.authority must be specified as a "
                         "string.  Found '" + iAuthority->dump() + "'.");
             wkt = iAuthority->get<std::string>();
 
@@ -77,7 +101,7 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
             else if (iHorizontal->is_string())
                 horiz = iHorizontal->get<std::string>();
             else
-                throw ept_error("srs.horizontal must be specified as a "
+                throw pdal_error("srs.horizontal must be specified as a "
                     "non-negative integer or equivalent string. "
                     "Found '" + iHorizontal->dump() + "'.");
             wkt += ":" + horiz;
@@ -90,7 +114,7 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
                 else if (iVertical->is_string())
                     vert = iVertical->get<std::string>();
                 else
-                    throw ept_error("srs.vertical must be specified as a "
+                    throw pdal_error("srs.vertical must be specified as a "
                             "non-negative integer or equivalent string. "
                             "Found '" + iVertical->dump() + "'.");
                 wkt += "+" + vert;
@@ -98,7 +122,7 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
         }
         m_srs.set(wkt);
         if (!m_srs.valid())
-            throw ept_error("Invalid/unknown srs.wkt specification.");
+            throw pdal_error("Invalid/unknown srs.wkt specification.");
     }
 
     const std::string dt = m_info.at("dataType").get<std::string>();
@@ -109,83 +133,46 @@ EptInfo::EptInfo(const NL::json& info) : m_info(info)
     else if (dt == "zstandard")
         m_dataType = DataType::Zstandard;
     else
-        throw ept_error("Unrecognized EPT dataType: " + dt);
-}
+        throw pdal_error("Unrecognized EPT dataType: " + dt);
 
-
-void Pool::work()
-{
-    while (true)
+    NL::json& schema = m_info["schema"];
+    for (NL::json element: schema)
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        m_consumeCv.wait(lock, [this]()
-        {
-            return m_tasks.size() || !m_running;
-        });
+        std::string name = element["name"].get<std::string>();
+        std::string typestring = element["type"].get<std::string>();
+        uint64_t size = element["size"].get<uint64_t>();
+        Dimension::Type type = Dimension::type(typestring, size);
+        double scale = element.value("scale", 1.0);
+        double offset = element.value("offset", 0);
 
-        if (m_tasks.size())
-        {
-            ++m_outstanding;
-            auto task(std::move(m_tasks.front()));
-            m_tasks.pop();
-
-            lock.unlock();
-
-            // Notify add(), which may be waiting for a spot in the queue.
-            m_produceCv.notify_all();
-
-            std::string err;
-            try
-            {
-                task();
-            }
-            catch (std::exception& e)
-            {
-                err = e.what();
-            }
-            catch (...)
-            {
-                err = "Unknown error";
-            }
-
-            lock.lock();
-            --m_outstanding;
-            if (err.size())
-            {
-                if (m_verbose)
-                    std::cout << "Exception in pool task: " << err << std::endl;
-                m_errors.push_back(err);
-            }
-            lock.unlock();
-
-            // Notify await(), which may be waiting for a running task.
-            m_produceCv.notify_all();
-        }
-        else if (!m_running)
-        {
-            return;
-        }
+        Dimension::Id id = m_remoteLayout.registerOrAssignFixedDim(name, type);
+        m_dims[name] = DimType(id, type, scale, offset);
     }
+    m_remoteLayout.finalize();
 }
 
-void FixedPointLayout::registerFixedDim(const Dimension::Id id,
-    const Dimension::Type type)
+DimType EptInfo::dimType(Dimension::Id id) const
 {
-    Dimension::Detail dd = m_detail[Utils::toNative(id)];
-    dd.setType(type);
-    update(dd, Dimension::name(id));
+    //ABELL - This is yuck.  The map of strings to DimType is bad.
+    for (auto it = m_dims.begin(); it != m_dims.end(); ++it)
+        if (it->second.m_id == id)
+            return it->second;
+    return DimType();
 }
 
-Dimension::Id FixedPointLayout::registerOrAssignFixedDim(const std::string name,
-    const Dimension::Type type)
+std::string EptInfo::dataDir() const
 {
-    Dimension::Id id = Dimension::id(name);
-    if (id != Dimension::Id::Unknown)
-    {
-        registerFixedDim(id, type);
-        return id;
-    }
-    return assignDim(name, type);
+    return FileUtils::getDirectory(m_filename) + "ept-data/";
+}
+
+std::string EptInfo::hierarchyDir() const
+{
+    return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
+}
+
+std::string EptInfo::sourcesDir() const
+{
+    return FileUtils::getDirectory(m_filename) + "ept-sources/";
 }
 
 } // namespace pdal
