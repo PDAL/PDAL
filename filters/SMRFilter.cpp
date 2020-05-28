@@ -249,6 +249,10 @@ PointViewSet SMRFilter::run(PointViewPtr view)
         ((m_bounds.maxx - m_bounds.minx) / m_args->m_cell) + 1);
     m_rows = static_cast<int>(
         ((m_bounds.maxy - m_bounds.miny) / m_args->m_cell) + 1);
+    if (m_cols * m_rows < 10000)
+        log()->get(LogLevel::Warning) << "SMRF running with a small number "
+            "of cells (" << (m_cols * m_rows) << ").  Consider changing "
+            "cell size.\n";
 
     // Create raster of minimum Z values per element.
     std::vector<double> ZImin = createZImin(inlierView);
