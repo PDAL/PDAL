@@ -336,8 +336,8 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        std::vector<double> me = erodeDiamond(ZImin, rows, cols, iters);
-        std::vector<double> mo = dilateDiamond(me, rows, cols, iters);
+        erodeDiamond(ZImin, rows, cols, iters);
+        dilateDiamond(ZImin, rows, cols, iters);
 
         PointIdList groundNewIdx;
         for (auto p_idx : groundIdx)
@@ -351,11 +351,9 @@ void PMFFilter::processGround(PointViewPtr view)
             int r =
                 static_cast<int>(floor((y - bounds.miny) / m_args->m_cellSize));
 
-            if ((z - mo[c * rows + r]) < htvec[j])
+            if ((z - ZImin[c * rows + r]) < htvec[j])
                 groundNewIdx.push_back(p_idx);
         }
-
-        ZImin.swap(mo);
         groundIdx.swap(groundNewIdx);
 
         log()->get(LogLevel::Debug)

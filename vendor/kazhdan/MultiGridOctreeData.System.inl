@@ -297,7 +297,7 @@ template< bool Reverse , class I >
 Point3D< double > FEMVFConstraintFunctor< VFDegree , VFBType , FEMDegree , FEMBType >::_integrate( const I& integrator , const int off1[] , const int off2[] ) const
 {
 #define D_DOT( D1 , D2 ) { integrator.dot( off1[0] , off2[0] , Reverse ? D2 : D1 , Reverse ? D1 : D2 ) , integrator.dot( off1[1] , off2[1] , Reverse ? D2 : D1 , Reverse ? D1 : D2 ) , integrator.dot( off1[2] , off2[2] , Reverse ? D2 : D1 , Reverse ? D1 : D2 ) }
-	if( FEMDegree==0 ) fprintf( stderr , "[ERROR] FEMDegree does not support differentiation: %d\n" , FEMDegree  ) , exit( 0 );
+	assert( FEMDegree );
 	if( VFDegree==0 || FEMDegree==1 )
 	{
 		double d00[] = D_DOT( 0 , 0 ) , d01[] = D_DOT( 0 , 1 );
@@ -1707,7 +1707,7 @@ template< class Real >
 template< int FEMDegree , BoundaryType BType , class FEMSystemFunctor , bool HasGradients >
 void Octree< Real >::setSystemMatrix( const FEMSystemFunctor& F , const InterpolationInfo<  HasGradients >* interpolationInfo , LocalDepth depth , SparseMatrix< Real >& matrix ) const
 {
-	if( depth<0 || depth>_maxDepth ) fprintf( stderr , "[ERROR] System depth out of bounds: %d <= %d <= %d\n" , 0 , depth , _maxDepth ) , exit( 0 );
+	assert( depth>= 0 && depth <= _maxDepth);
 	typename BSplineIntegrationData< FEMDegree , BType , FEMDegree , BType >::FunctionIntegrator::template Integrator< DERIVATIVES( FEMDegree ) , DERIVATIVES( FEMDegree ) > integrator;
 	BSplineIntegrationData< FEMDegree , BType , FEMDegree , BType >::SetIntegrator( integrator , depth );
 	BSplineData< FEMDegree , BType > bsData( depth );

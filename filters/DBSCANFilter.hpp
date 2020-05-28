@@ -56,7 +56,6 @@ public:
 private:
     uint64_t m_minPoints;
     double m_eps;
-    Dimension::Id m_cluster;
     StringList m_dimStringList;
     Dimension::IdList m_dimIdList;
 

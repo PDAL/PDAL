@@ -373,42 +373,7 @@ public:
 	int outOfCorePointCount(void);
 	int polygonCount( void );
 };
-class BufferedReadWriteFile
-{
-	bool tempFile;
-	FILE* _fp;
-	char *_buffer , _fileName[1024];
-	size_t _bufferIndex , _bufferSize;
-public:
-	BufferedReadWriteFile( char* fileName=NULL , int bufferSize=(1<<20) );
-	~BufferedReadWriteFile( void );
-	bool write( const void* data , size_t size );
-	bool read ( void* data , size_t size );
-	void reset( void );
-};
-template< class Vertex >
-class CoredFileMeshData : public CoredMeshData< Vertex >
-{
-	char pointFileName[1024] , polygonFileName[1024];
-	BufferedReadWriteFile *oocPointFile , *polygonFile;
-	int oocPoints , polygons;
-public:
-	CoredFileMeshData( void );
-	~CoredFileMeshData( void );
 
-	void resetIterator( void );
-
-	int addOutOfCorePoint( const Vertex& p );
-	int addOutOfCorePoint_s( const Vertex& p );
-	int addPolygon_s( const std::vector< CoredVertexIndex >& vertices );
-	int addPolygon_s( const std::vector< int >& vertices );
-
-	int nextOutOfCorePoint( Vertex& p );
-	int nextPolygon( std::vector< CoredVertexIndex >& vertices );
-
-	int outOfCorePointCount( void );
-	int polygonCount( void );
-};
 #include "Geometry.inl"
 
 #endif // GEOMETRY_INCLUDED

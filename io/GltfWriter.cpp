@@ -185,9 +185,12 @@ void GltfWriter::write(const PointViewPtr v)
         }
 
         if (m_colorVertices) {
-            float colorR = v->getFieldAs<float>(Dimension::Id::Red, i) / 255.0;
-            float colorG = v->getFieldAs<float>(Dimension::Id::Green, i) / 255.0;
-            float colorB = v->getFieldAs<float>(Dimension::Id::Blue, i) / 255.0;
+            float colorR =
+                v->getFieldAs<float>(Dimension::Id::Red, i) / 255.0;
+            float colorG =
+                v->getFieldAs<float>(Dimension::Id::Green, i) / 255.0;
+            float colorB =
+                v->getFieldAs<float>(Dimension::Id::Blue, i) / 255.0;
 
             out << colorR << colorG << colorB;
         }
@@ -248,7 +251,6 @@ void GltfWriter::writeJsonChunk()
         uint16_t normalAccessorIndex = 0;
         uint16_t colorAccessorIndex = 0;
         uint16_t positionAccessorIndex = 0;
-        uint16_t faceAccessorIndex = 0;
         NL::json meshAttributes({});
 
         // Buffer views
@@ -275,8 +277,6 @@ void GltfWriter::writeJsonChunk()
         );
 
         // Accessors
-        // Face index accessor
-        faceAccessorIndex = nextAccessorIndex++;
         j["accessors"].push_back(
             {
                 { "bufferView", faceBufferViewIndex },

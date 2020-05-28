@@ -54,11 +54,9 @@
 #include <ogr_srs_api.h>
 
 class OGRSpatialReference;
-class OGRGeometry;
 
 namespace pdal
 {
-
 class Polygon;
 
 namespace gdal
@@ -138,82 +136,6 @@ private:
     RefPtr m_ref;
 };
 
-class Geometry
-{
-public:
-    Geometry()
-        {}
-    Geometry(const std::string& wkt, const SpatialRef& srs)
-    {
-        OGRGeometryH geom;
-
-        char *p_wkt = const_cast<char *>(wkt.data());
-        OGRSpatialReferenceH ref = srs.get();
-        if (srs.empty())
-        {
-            ref = NULL;
-        }
-        bool isJson = wkt.find("{") != wkt.npos ||
-                      wkt.find("}") != wkt.npos;
-
-        if (!isJson)
-        {
-            OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
-            if (err != OGRERR_NONE)
-            {
-                std::cout << "wkt: " << wkt << std::endl;
-                std::ostringstream oss;
-                oss << "unable to construct OGR Geometry";
-                oss << " '" << CPLGetLastErrorMsg() << "'";
-                throw pdal::pdal_error(oss.str());
-            }
-        }
-        else
-        {
-            // Assume it is GeoJSON and try constructing from that
-            geom = OGR_G_CreateGeometryFromJson(p_wkt);
-
-            if (!geom)
-                throw pdal_error("Unable to create geometry from "
-                    "input GeoJSON");
-
-            OGR_G_AssignSpatialReference(geom, ref);
-        }
-
-        newRef(geom);
-    }
-
-    operator bool () const
-        { return get() != NULL; }
-    OGRGeometryH get() const
-        { return m_ref.get(); }
-
-    void transform(const SpatialRef& out_srs)
-    {
-        OGR_G_TransformTo(m_ref.get(), out_srs.get());
-    }
-
-    std::string wkt() const
-    {
-        char* p_wkt = 0;
-        OGRErr err = OGR_G_ExportToWkt(m_ref.get(), &p_wkt);
-        return std::string(p_wkt);
-    }
-
-    void setFromGeometry(OGRGeometryH geom)
-        {
-            if (geom)
-                newRef(OGR_G_Clone(geom));
-        }
-
-private:
-    void newRef(void *v)
-    {
-        m_ref = RefPtr(v, [](void* t){ OGR_G_DestroyGeometry(t); } );
-    }
-    RefPtr m_ref;
-};
-
 
 // This is a little confusing because we have a singleton error handler with
 // a single log pointer, but we set the log pointer/debug state as if we
@@ -278,7 +200,7 @@ private:
     std::mutex m_mutex;
     bool m_debug;
     pdal::LogPtr m_log;
-    int m_errorNum;
+    mutable int m_errorNum;
     bool m_cplSet;
 };
 
@@ -799,11 +721,28 @@ public:
 
     std::string const& filename() { return m_filename; }
 
-    void statistics(int nBand, double* minimum, double* maximum, double* mean,
-        double* stddev, int bApprox = TRUE, int bForce = TRUE) const
+    GDALError statistics(int nBand, double* minimum, double* maximum,
+        double* mean, double* stddev, int bApprox = TRUE,
+        int bForce = TRUE) const
     {
-        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
-            bApprox, bForce);
+        try
+        {
+            Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
+                bApprox, bForce);
+        }
+        catch (InvalidBand)
+        {
+            m_errorMsg = "Unable to get band " + std::to_string(nBand) +
+                " from raster '" + m_filename + "'.";
+            return GDALError::InvalidBand;
+        }
+        catch (BadBand)
+        {
+            m_errorMsg = "Unable to read band/block information from "
+                "raster '" + m_filename + "'.";
+            return GDALError::BadBand;
+        }
+        return GDALError::None;
     }
 
     BOX2D bounds() const
@@ -826,7 +765,9 @@ public:
 
         double minimum; double maximum;
         double mean; double stddev;
-        statistics(nBand, &minimum, &maximum, &mean, &stddev);
+        if (statistics(nBand, &minimum, &maximum, &mean, &stddev) !=
+                GDALError::None)
+            return BOX3D();
 
         return BOX3D(box2.minx, box2.miny, minimum,
                      box2.maxx, box2.maxy, maximum);
@@ -848,7 +789,7 @@ private:
 
     GDALError wake();
 
-    std::string m_errorMsg;
+    mutable std::string m_errorMsg;
     mutable std::vector<pdal::Dimension::Type> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
