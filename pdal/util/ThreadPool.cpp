@@ -32,12 +32,12 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Pool.hpp"
+#include "ThreadPool.hpp"
 
 namespace pdal
 {
 
-void Pool::work()
+void ThreadPool::work()
 {
     while (true)
     {

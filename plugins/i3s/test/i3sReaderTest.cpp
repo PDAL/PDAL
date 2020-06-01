@@ -6,6 +6,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
@@ -21,7 +22,7 @@ TEST(i3sReaderTest, options_test)
     //create args
     Options i3s_options;
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
-    i3s_options.add("threads", 64);
+    i3s_options.add("threads", 4);
     i3s_options.add("dimensions", "RGB, intenSITY");
 
     I3SReader reader;
@@ -47,7 +48,7 @@ TEST(i3sReaderTest, density_test)
 
     Options i3s_options;
     i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
-    i3s_options.add("threads", 64);
+    i3s_options.add("threads", 4);
     i3s_options.add("min_density", 0);
     i3s_options.add("max_density", 0.5);
 
@@ -62,6 +63,39 @@ TEST(i3sReaderTest, density_test)
 
     //1,709,518 points in the autzen data between 0 and 0.5
     EXPECT_EQ(view->size(), 1709518u);
+}
+
+
+TEST(i3sReaderTest, density_stream_test)
+{
+    StageFactory f;
+
+    Options i3s_options;
+    i3s_options.add("filename", "i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest/services/AUTZEN_LiDAR/SceneServer");
+    i3s_options.add("threads", 4);
+    i3s_options.add("min_density", 0);
+    i3s_options.add("max_density", 0.5);
+
+    I3SReader reader;
+    reader.setOptions(i3s_options);
+
+    int cnt = 0;
+    auto cb = [&cnt](PointRef& f)
+    {
+        cnt++;
+        return true;
+    };
+    StreamCallbackFilter filt;
+    filt.setInput(reader);
+    filt.setCallback(cb);
+
+    FixedPointTable table(1000);
+
+    filt.prepare(table);
+    filt.execute(table);
+
+    //1,709,518 points in the autzen data between 0 and 0.5
+    EXPECT_EQ(cnt, 1709518u);
 }
 
 

@@ -39,6 +39,7 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include "SlpkExtractor.hpp"
+#include "EsriUtil.hpp"
 
 namespace pdal
 {
@@ -62,7 +63,7 @@ struct zheader
 void SlpkExtractor::extract() const
 {
     if (!FileUtils::directoryExists(m_directory))
-        throw slpk_error("Output directory doesn't exist.");
+        throw i3s::EsriError("Output directory doesn't exist.");
 
     ILeStream in(m_filename);
 
@@ -92,10 +93,10 @@ void SlpkExtractor::extract() const
         }
 
         if (h.m_compression != 0)
-            throw slpk_error("Found compressed file in slpk archive.");
+            throw i3s::EsriError("Found compressed file in slpk archive.");
         if (h.m_compressedSize != h.m_uncompressedSize)
-            throw slpk_error("Compressed and uncompressed sizes don't match "
-                "in slpk archive.");
+            throw i3s::EsriError("Compressed and uncompressed sizes don't "
+                "match in slpk archive.");
         writeFile(name, in, h.m_compressedSize);
         in.get(reinterpret_cast<char *>(&magic), sizeof(magic));
     }
@@ -112,7 +113,7 @@ void SlpkExtractor::writeFile(std::string filename, ILeStream& in,
 
     std::ofstream out(filename, std::ios_base::out | std::ios_base::binary);
     if (!out)
-        throw slpk_error("Couldn't open output file '" + filename + "'.");
+        throw i3s::EsriError("Couldn't open output file '" + filename + "'.");
 
     const size_t bufsize(100000);
     char buf[bufsize];

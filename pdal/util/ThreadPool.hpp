@@ -44,14 +44,14 @@
 namespace pdal
 {
 
-class PDAL_DLL Pool
+class PDAL_DLL ThreadPool
 {
 public:
     // After numThreads tasks are actively running, and queueSize tasks have
     // been enqueued to wait for an available worker thread, subsequent calls
     // to Pool::add will block until an enqueued task has been popped from the
     // queue.
-    Pool(
+    ThreadPool(
             std::size_t numThreads,
             std::size_t queueSize = 1,
             bool verbose = true)
@@ -62,7 +62,10 @@ public:
         go();
     }
 
-    ~Pool() { join(); }
+    ~ThreadPool() { join(); }
+
+    ThreadPool(const ThreadPool& other) = delete;
+    ThreadPool& operator=(const ThreadPool& other) = delete;
 
     // Start worker threads.
     void go()
@@ -133,7 +136,7 @@ public:
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
         {
-            throw pdal_error("Attempted to add a task to a stopped Pool");
+            throw pdal_error("Attempted to add a task to a stopped ThreadPool");
         }
 
         m_produceCv.wait(lock, [this]()
@@ -171,10 +174,6 @@ private:
     mutable std::mutex m_mutex;
     std::condition_variable m_produceCv;
     std::condition_variable m_consumeCv;
-
-    // Disable copy/assignment.
-    Pool(const Pool& other);
-    Pool& operator=(const Pool& other);
 };
 
 } // namespace pdal

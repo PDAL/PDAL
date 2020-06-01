@@ -24,6 +24,7 @@ set(PDAL_UTIL_SOURCES
     "${PDAL_UTIL_DIR}/Charbuf.cpp"
     "${PDAL_UTIL_DIR}/FileUtils.cpp"
     "${PDAL_UTIL_DIR}/Georeference.cpp"
+    "${PDAL_UTIL_DIR}/ThreadPool.cpp"
     "${PDAL_UTIL_DIR}/Utils.cpp"
     "${PDAL_UTIL_DIR}/Backtrace.cpp"
     "${PDAL_UTIL_DIR}/private/${BACKTRACE_SOURCE}"

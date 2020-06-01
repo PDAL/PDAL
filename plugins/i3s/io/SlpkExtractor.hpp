@@ -39,18 +39,6 @@
 namespace pdal
 {
 
-class slpk_error
-{
-public:
-    slpk_error(const std::string& error) : m_error(error)
-    {}
-
-    std::string what() const
-        { return m_error; }
-
-    std::string m_error;
-};
-
 class ILeStream;
 
 class SlpkExtractor

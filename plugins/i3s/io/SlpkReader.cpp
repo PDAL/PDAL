@@ -35,7 +35,6 @@
 #include "SlpkReader.hpp"
 #include <pdal/util/FileUtils.hpp>
 
-#include "pool.hpp"
 #include "EsriUtil.hpp"
 #include "SlpkExtractor.hpp"
 
@@ -53,7 +52,7 @@ CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
 
 std::string SlpkReader::getName() const { return slpkInfo.name; }
 
-void SlpkReader::initInfo()
+NL::json SlpkReader::initInfo()
 {
     // create temp path
     std::string path = arbiter::getTempPath();
@@ -71,23 +70,27 @@ void SlpkReader::initInfo()
         fullPath << std::endl;
 
     // unarchive and decompress the 3dscenelayer and create json info object
-    auto compressed = m_arbiter->get(m_filename + "/3dSceneLayer.json.gz");
-    std::string jsonString;
+    std::string filename = m_filename + "/3dSceneLayer.json.gz";
+    auto compressed = m_arbiter->get(filename);
 
+    std::string jsonString;
     m_decomp.decompress(jsonString, compressed.data(), compressed.size());
-    m_info = EsriUtil::parse(jsonString);
-    if (m_info.empty())
+    NL::json info = i3s::parse(jsonString, "Invalid JSON in file '" +
+        filename + "'.");
+
+    if (info.empty())
         throwError(std::string("Incorrect Json object"));
+    return info;
 }
 
 
-NL::json SlpkReader::fetchJson(std::string filepath)
+std::string SlpkReader::fetchJson(std::string filepath)
 {
     std::string output;
     auto compressed = m_arbiter->get(filepath + ".json.gz");
     m_decomp.decompress<std::string>(output, compressed.data(),
         compressed.size());
-    return EsriUtil::parse(output);
+    return output;
 
 }
 
