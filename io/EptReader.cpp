@@ -709,6 +709,9 @@ void EptReader::process(PointViewPtr dstView, const TileContents& tile,
 bool EptReader::processOne(PointRef& point)
 {
 top:
+    if (m_tileCount == 0)
+        return false;
+
     // If there is no active tile, grab one off the queue and ask for
     // another if there are more.  If none are available, wait.
     if (!m_currentTile)
@@ -741,8 +744,7 @@ top:
     {
         m_pointId = 0;
         m_currentTile.reset();
-        if (--m_tileCount == 0)
-            return false;
+        --m_tileCount;
     }
 
     // If we didn't pass a point, try again.
