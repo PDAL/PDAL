@@ -76,7 +76,7 @@ namespace
 struct EsriReader::Args
 {
     Bounds bounds;
-    uint16_t threads;
+    int threads;
     std::vector<std::string> dimensions;
     double min_density;
     double max_density;
@@ -127,7 +127,7 @@ EsriReader::~EsriReader()
 void EsriReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds of the point cloud", m_args->bounds);
-    args.add("threads", "Number of threads to be used." , m_args->threads, 4);
+    args.add("threads", "Number of threads to be used.", m_args->threads, 4);
     args.add("dimensions", "Dimensions to be used in pulls",
         m_args->dimensions);
     args.add("min_density", "Minimum point density", m_args->min_density, -1.0);
