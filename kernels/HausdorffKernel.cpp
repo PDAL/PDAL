@@ -68,7 +68,7 @@ void HausdorffKernel::addSwitches(ProgramArgs& args)
 
 
 PointViewPtr HausdorffKernel::loadSet(const std::string& filename,
-                                      PointTable& table)
+                                      PointTableRef table)
 {
     Stage& reader = makeReader(filename, "");
     reader.prepare(table);
@@ -80,10 +80,10 @@ PointViewPtr HausdorffKernel::loadSet(const std::string& filename,
 
 int HausdorffKernel::execute()
 {
-    PointTable srcTable;
+    ColumnPointTable srcTable;
     PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
 
-    PointTable candTable;
+    ColumnPointTable candTable;
     PointViewPtr candView = loadSet(m_candidateFile, candTable);
 
     double hausdorff = Utils::computeHausdorff(srcView, candView);

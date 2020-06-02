@@ -155,7 +155,7 @@ bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp,
 
 
 PointViewPtr NeighborClassifierFilter::loadSet(const std::string& filename,
-    PointTable& table)
+    PointTableRef table)
 {
     PipelineManager mgr;
 
@@ -181,7 +181,7 @@ void NeighborClassifierFilter::filter(PointView& view)
     }
     else
     {   // NN comes from candidate file
-        PointTable candTable;
+        ColumnPointTable candTable;
         PointViewPtr candView = loadSet(m_candidateFile, candTable);
         KD3Index& kdiCand = candView->build3dIndex();
         PointRef point_nn(*candView, 0);
