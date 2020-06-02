@@ -346,8 +346,6 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         }
         else
         {
-            dim.type = Dimension::Type::None;
-
             std::string dimTypeName = 
                 el["attributeValues"]["valueType"].get<std::string>();
             auto typeIt = typeMapping.find(dimTypeName);
