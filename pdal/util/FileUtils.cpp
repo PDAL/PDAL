@@ -32,12 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <fcntl.h>
 #include <sys/stat.h>
 
 #include <iostream>
 #include <sstream>
 #ifndef _WIN32
 #include <glob.h>
+#include <sys/mman.h>
 #else
 #include <codecvt>
 #include <Windows.h>
@@ -442,6 +444,74 @@ std::vector<std::string> glob(std::string path)
     globfree(&glob_result);
 #endif
     return filenames;
+}
+
+
+MapContext mapFile(const std::string& filename, bool readOnly,
+    size_t pos, size_t size)
+{
+    MapContext ctx;
+
+    if (!readOnly)
+    {
+        ctx.m_error = "readOnly must be true.";
+        return ctx;
+    }
+
+    ctx.m_fd = open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+    if (ctx.m_fd == -1)
+    {
+        ctx.m_error = "File couldn't be opened.";
+        return ctx;
+    }
+    ctx.m_size = size;
+#ifndef _WIN32
+    ctx.m_addr = ::mmap(0, size, PROT_READ, MAP_SHARED, ctx.m_fd, (off_t)pos);
+    if (ctx.m_addr == MAP_FAILED)
+    {
+        ctx.m_addr = nullptr;
+        ctx.m_error = "Couldn't map file";
+    }
+#else
+    HANDLE ctx.m_handle = CreateFileMapping((HANDLE)_get_osfhandle(ctx.m_fd),
+        NULL, PAGE_READONLY, FILE_MAP_READ,  0, 0, NULL);
+    uint32_t low = pos & 0xFFFFFFFF;
+    uint32_t high = (pos >> 8);
+    ctx.m_addr = MapViewOfFile(ctx.m_handle, FILE_MAP_READ, high, low,
+        ctx.m_size);
+    if (ctx.m_addr == MAP_FAILED)
+        ctx.m_error = "Couldn't map file";
+#endif
+    return ctx;
+}
+
+MapContext unmapFile(MapContext ctx)
+{
+#ifndef _WIN32
+    if (::munmap(ctx.m_addr, ctx.m_size) == -1)
+        ctx.m_error = "Couldn't unmap file.";
+    else
+    {
+        ctx.m_addr = nullptr;
+        ctx.m_size = 0;
+        ctx.m_error = "";
+    }
+    close(ctx.m_fd);
+#else
+    if (UnmapViewOfFile(ctx.m_addr) == 0)
+    {
+        ctx.m_error = "Couldn't unmap file.";
+    }
+    else
+    {
+        ctx.m_addr = nullptr;
+        ctx.m_size = 0;
+        ctx.m_error = "";
+    }
+    CloseHandle(ctx.m_handle);
+#endif
+    close(ctx.m_fd);
+    return ctx;
 }
 
 } // namespace FileUtils

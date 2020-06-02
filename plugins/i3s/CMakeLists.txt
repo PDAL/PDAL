@@ -6,7 +6,6 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
     FILES
       io/I3SReader.cpp
       io/EsriUtil.cpp
-      io/SlpkExtractor.cpp
       io/EsriReader.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
@@ -31,7 +30,6 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         io/SlpkReader.cpp
         io/EsriUtil.cpp
         io/EsriReader.cpp
-        io/SlpkExtractor.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
         ${GDAL_LIBRARY}

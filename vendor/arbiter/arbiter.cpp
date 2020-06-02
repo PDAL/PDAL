@@ -429,7 +429,7 @@ LocalHandle Arbiter::getLocalHandle(
         http::Query query) const
 {
     const Endpoint fromEndpoint(getEndpoint(getDirname(path)));
-    return fromEndpoint.getLocalHandle(path, headers, query);
+    return fromEndpoint.getLocalHandle(getBasename(path), headers, query);
 }
 
 } // namespace arbiter
