@@ -458,7 +458,11 @@ MapContext mapFile(const std::string& filename, bool readOnly,
         return ctx;
     }
 
-    ctx.m_fd = open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+#ifndef WIN32
+    ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+#else
+    ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+#endif
     if (ctx.m_fd == -1)
     {
         ctx.m_error = "File couldn't be opened.";
@@ -473,7 +477,7 @@ MapContext mapFile(const std::string& filename, bool readOnly,
         ctx.m_error = "Couldn't map file";
     }
 #else
-    HANDLE ctx.m_handle = CreateFileMapping((HANDLE)_get_osfhandle(ctx.m_fd),
+    ctx.m_handle = CreateFileMapping((HANDLE)_get_osfhandle(ctx.m_fd),
         NULL, PAGE_READONLY, FILE_MAP_READ,  0, 0, NULL);
     uint32_t low = pos & 0xFFFFFFFF;
     uint32_t high = (pos >> 8);
