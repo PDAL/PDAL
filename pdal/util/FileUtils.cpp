@@ -463,12 +463,14 @@ MapContext mapFile(const std::string& filename, bool readOnly,
 #else
     ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #endif
+
     if (ctx.m_fd == -1)
     {
-        ctx.m_error = "File couldn't be opened.";
+        ctx.m_error = "Mapped file couldn't be opened.";
         return ctx;
     }
     ctx.m_size = size;
+
 #ifndef _WIN32
     ctx.m_addr = ::mmap(0, size, PROT_READ, MAP_SHARED, ctx.m_fd, (off_t)pos);
     if (ctx.m_addr == MAP_FAILED)
@@ -486,6 +488,7 @@ MapContext mapFile(const std::string& filename, bool readOnly,
     if (ctx.m_addr == nullptr)
         ctx.m_error = "Couldn't map file";
 #endif
+
     return ctx;
 }
 
@@ -500,12 +503,10 @@ MapContext unmapFile(MapContext ctx)
         ctx.m_size = 0;
         ctx.m_error = "";
     }
-    close(ctx.m_fd);
+    ::close(ctx.m_fd);
 #else
     if (UnmapViewOfFile(ctx.m_addr) == 0)
-    {
         ctx.m_error = "Couldn't unmap file.";
-    }
     else
     {
         ctx.m_addr = nullptr;
@@ -513,8 +514,8 @@ MapContext unmapFile(MapContext ctx)
         ctx.m_error = "";
     }
     CloseHandle(ctx.m_handle);
+    ::_close(ctx.m_fd);
 #endif
-    close(ctx.m_fd);
     return ctx;
 }
 
