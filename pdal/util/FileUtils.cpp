@@ -42,7 +42,6 @@
 #include <sys/mman.h>
 #else
 #include <codecvt>
-#include <Windows.h>
 #endif
 
 #include <boost/filesystem.hpp>
