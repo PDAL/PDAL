@@ -263,7 +263,7 @@ namespace FileUtils
     */
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
 
-    struct MapContext
+    struct PDAL_DLL MapContext
     {
     public:
         MapContext() : m_fd(-1), m_addr(nullptr)
@@ -301,7 +301,7 @@ namespace FileUtils
       \param ctx  Previously returned MapContext
       \return  MapContext indicating current state of the file mapping.
     */
-    MapContext unmapFile(MapContext ctx);
+    PDAL_DLL MapContext unmapFile(MapContext ctx);
 }
 
 } // namespace pdal
