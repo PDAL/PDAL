@@ -10,7 +10,6 @@
 
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
-#include "../io/SlpkReader.hpp"
 
 using namespace pdal;
 
@@ -25,7 +24,7 @@ TEST(SlpkReaderTest, read_local)
     slpk_options.add("threads", 2);
     slpk_options.add("dimensions", "intensity, returns");
 
-    SlpkReader reader;
+    Stage& reader = *f.createStage("readers.slpk");
     reader.setOptions(slpk_options);
 
     PointTable table;
@@ -52,7 +51,7 @@ TEST(SlpkReaderTest, read_stream_local)
     slpk_options.add("threads", 2);
     slpk_options.add("dimensions", "intensity, returns");
 
-    SlpkReader reader;
+    Stage& reader = *f.createStage("readers.slpk");
     reader.setOptions(slpk_options);
 
     StreamCallbackFilter filt;
@@ -87,7 +86,7 @@ TEST(SlpkReaderTest, bounded)
         Support::datapath("i3s/SMALL_AUTZEN_LAS_All.slpk"));
     slpk_options.add("threads", 64);
 
-    SlpkReader reader;
+    Stage& reader = *f.createStage("readers.slpk");
     reader.setOptions(slpk_options);
 
     PointTable table;
@@ -103,7 +102,7 @@ TEST(SlpkReaderTest, bounded)
     slpk2_options.add("threads", 64);
     slpk2_options.add("bounds", Bounds(bounds));
 
-    SlpkReader reader2;
+    Stage& reader2 = *f.createStage("readers.slpk");
     reader2.setOptions(slpk2_options);
 
     PointTable table2;
