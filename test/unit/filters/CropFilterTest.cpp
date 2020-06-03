@@ -46,6 +46,10 @@
 #include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
+//ABELL
+#include <pdal/util/Bounds.hpp>
+#include <pdal/GDALUtils.hpp>
+
 using namespace pdal;
 
 TEST(CropFilterTest, create)
@@ -615,4 +619,55 @@ TEST(CropFilterTest, bounds_inside_outside)
     outsideCallbackFilter.execute(outsideStreamTable);
     // Expect 1026 points when cropping to the outside of the bounds.
     EXPECT_EQ(nStreamPoints, 1026U);
+}
+
+// Make sure that transformed 2D and 3D bounds work.
+TEST(CropFilterTest, issue_3114)
+{
+    using namespace Dimension;
+
+    auto tst = [](const std::string& bounds, size_t count)
+    {
+        ColumnPointTable table;
+
+        table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+        table.finalize();
+
+        PointViewPtr view(new PointView(table));
+        
+        view->setField(Id::X, 0, 555000);
+        view->setField(Id::Y, 0, 4180000);
+        view->setField(Id::Z, 0, 100);
+
+        view->setField(Id::X, 1, 555000);
+        view->setField(Id::Y, 1, 4180000);
+        view->setField(Id::Z, 1, 1000);
+
+        view->setField(Id::X, 2, 565000);
+        view->setField(Id::Y, 2, 4180000);
+        view->setField(Id::Z, 2, 100);
+
+        BufferReader r;
+        r.addView(view);
+
+        Options ropts;
+        ropts.add("override_srs", "EPSG:26910");
+        r.setOptions(ropts);
+
+        CropFilter f;
+
+        Options copts;
+        copts.add("bounds", bounds);
+        copts.add("a_srs", "EPSG:4326");
+        f.setOptions(copts);
+        f.setInput(r);
+
+        f.prepare(table);
+        PointViewSet s = f.execute(table);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->size(), count);
+    };
+
+    tst("([-122.530, -122.347], [37.695, 37.816])", 2);
+    tst("([-122.530, -122.347], [37.695, 37.816], [0,500])", 1);
 }
