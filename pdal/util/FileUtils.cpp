@@ -478,7 +478,7 @@ MapContext mapFile(const std::string& filename, bool readOnly,
     }
 #else
     ctx.m_handle = CreateFileMapping((HANDLE)_get_osfhandle(ctx.m_fd),
-        NULL, PAGE_READONLY, FILE_MAP_READ,  0, 0, NULL);
+        NULL, PAGE_READONLY, 0, 0, NULL);
     uint32_t low = pos & 0xFFFFFFFF;
     uint32_t high = (pos >> 8);
     ctx.m_addr = MapViewOfFile(ctx.m_handle, FILE_MAP_READ, high, low,
