@@ -41,6 +41,7 @@
 #include <glob.h>
 #include <sys/mman.h>
 #else
+#include <io.h>
 #include <codecvt>
 #endif
 
@@ -482,7 +483,7 @@ MapContext mapFile(const std::string& filename, bool readOnly,
     uint32_t high = (pos >> 8);
     ctx.m_addr = MapViewOfFile(ctx.m_handle, FILE_MAP_READ, high, low,
         ctx.m_size);
-    if (ctx.m_addr == MAP_FAILED)
+    if (ctx.m_addr == nullptr)
         ctx.m_error = "Couldn't map file";
 #endif
     return ctx;
