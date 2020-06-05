@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <pdal/Stage.hpp>
 
 namespace pdal
@@ -46,23 +48,22 @@ class FilterWrapper;
 class PDAL_DLL Filter : public virtual Stage
 {
     friend class FilterWrapper;
+
+    struct Args;
 public:
-    Filter()
-        {}
+    Filter();
+    ~Filter();
+
+    Filter& operator=(const Filter&) = delete;
+    Filter(const Filter&) = delete;
 
 private:
-    virtual PointViewSet run(PointViewPtr view)
-    {
-        PointViewSet viewSet;
-        filter(*view);
-        viewSet.insert(view);
-        return viewSet;
-    }
+    virtual void l_addArgs(ProgramArgs& args) final;
+    virtual PointViewSet run(PointViewPtr view);
     virtual void filter(PointView& /*view*/)
     {}
 
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
+    std::unique_ptr<Args> m_args;
 };
 
 }  // namespace pdal

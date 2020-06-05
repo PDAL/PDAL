@@ -75,6 +75,7 @@ private:
         viewSet.insert(view);
         return viewSet;
     }
+    virtual void l_addArgs(ProgramArgs& args) final;
     virtual void writerInitialize(PointTableRef table)
     {}
 

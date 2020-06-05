@@ -73,6 +73,9 @@ class PDAL_DLL Stage
     friend class StageWrapper;
     friend class StageRunner;
     friend class Streamable;
+    friend class Reader;
+    friend class Filter;
+    friend class Writer;
 public:
     Stage();
     virtual ~Stage();
@@ -370,9 +373,8 @@ private:
     void setupLog();
     void handleOptions();
 
-    void l_addArgs(ProgramArgs& args);
-    virtual void readerAddArgs(ProgramArgs& /*args*/)
-        {}
+    virtual void l_addArgs(ProgramArgs& args);
+
     virtual void readerInitialize(PointTableRef /*table*/)
         {}
     virtual void writerInitialize(PointTableRef /*table*/)

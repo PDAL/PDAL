@@ -300,7 +300,6 @@ void Stage::l_addArgs(ProgramArgs& args)
     // help and options list.
     args.add("option_file", "File from which to read additional options",
         m_optionFile);
-    readerAddArgs(args);
 }
 
 
