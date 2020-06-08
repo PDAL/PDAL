@@ -39,7 +39,6 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-#include "SlpkExtractor.hpp"
 #include "../lepcc/src/include/lepcc_types.h"
 
 namespace pdal
@@ -77,7 +76,7 @@ namespace
 struct EsriReader::Args
 {
     Bounds bounds;
-    uint16_t threads = 8;
+    int threads;
     std::vector<std::string> dimensions;
     double min_density;
     double max_density;
@@ -128,7 +127,7 @@ EsriReader::~EsriReader()
 void EsriReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds of the point cloud", m_args->bounds);
-    args.add("threads", "Number of threads to be used." , m_args->threads);
+    args.add("threads", "Number of threads to be used.", m_args->threads, 4);
     args.add("dimensions", "Dimensions to be used in pulls",
         m_args->dimensions);
     args.add("min_density", "Minimum point density", m_args->min_density, -1.0);
@@ -396,7 +395,7 @@ void EsriReader::ready(PointTableRef table)
     */
 
     // Build the node list that will tell us which nodes overlap with bounds
-    std::string filename = m_filename + "/nodepages/0";
+    std::string filename = "nodepages/0";
     std::string s = fetchJson(filename);
     NL::json initJson = i3s::parse(s,
         "Invalid json in file '" + filename + "'.");
@@ -646,7 +645,7 @@ void EsriReader::traverseTree(NL::json page, int index, int depth,
                     page = m_nodepages[pageIndex];
                 else
                 {
-                    std::string filename = m_filename + "/nodepages/" +
+                    std::string filename = "nodepages/" +
                         std::to_string(pageIndex);
                     std::string s = fetchJson(filename);
                     page = i3s::parse(s,
@@ -699,13 +698,13 @@ BOX3D EsriReader::createCube(const NL::json& base)
 
 void EsriReader::load(int nodeId)
 {
-    std::string localUrl = m_filename + "/nodes/" + std::to_string(nodeId);
-    m_pool->add([this, localUrl]()
+    std::string filepath = "nodes/" + std::to_string(nodeId);
+    m_pool->add([this, filepath]()
         {
             TileContents tile;
             try
             {
-                tile = loadUrl(localUrl);
+                tile = loadPath(filepath);
             }
             //ABELL - Need to make sure we trap all the errors
             // from size check, fetchBinary, decompress...
@@ -725,7 +724,7 @@ void EsriReader::load(int nodeId)
 }
 
 
-EsriReader::TileContents EsriReader::loadUrl(const std::string& localUrl)
+EsriReader::TileContents EsriReader::loadPath(const std::string& filepath)
 {
     auto checkSize = [](const DimData& dim, size_t exp, size_t actual)
     {
@@ -735,14 +734,14 @@ EsriReader::TileContents EsriReader::loadUrl(const std::string& localUrl)
         return err;
     };
 
-    TileContents tile(localUrl, m_extraDimCount);
+    TileContents tile(filepath, m_extraDimCount);
 
-    const std::string geomUrl = localUrl + "/geometries/";
+    const std::string geomUrl = filepath + "/geometries/";
     auto xyzFetch = fetchBinary(geomUrl, "0", ".bin.pccxyz");
     tile.m_xyz = i3s::decompressXYZ(&xyzFetch);
 
     size_t size = tile.m_xyz.size();
-    const std::string attrUrl = localUrl + "/attributes/";
+    const std::string attrUrl = filepath + "/attributes/";
     for (const DimData& dim : m_esriDims)
     {
         if (dim.name == "RGB")

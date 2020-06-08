@@ -10,8 +10,6 @@
 
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
-#include "../io/I3SReader.hpp"
-#include "../io/SlpkReader.hpp"
 
 using namespace pdal;
 //test full autzen lidar i3s with bounds that hold the entire data
@@ -25,7 +23,7 @@ TEST(i3sReaderTest, options_test)
     i3s_options.add("threads", 4);
     i3s_options.add("dimensions", "RGB, intenSITY");
 
-    I3SReader reader;
+    Stage& reader = *f.createStage("readers.i3s");
     reader.setOptions(i3s_options);
 
     PointTable table;
@@ -52,7 +50,7 @@ TEST(i3sReaderTest, density_test)
     i3s_options.add("min_density", 0);
     i3s_options.add("max_density", 0.5);
 
-    I3SReader reader;
+    Stage& reader = *f.createStage("readers.i3s");
     reader.setOptions(i3s_options);
 
     PointTable table;
@@ -76,7 +74,7 @@ TEST(i3sReaderTest, density_stream_test)
     i3s_options.add("min_density", 0);
     i3s_options.add("max_density", 0.5);
 
-    I3SReader reader;
+    Stage& reader = *f.createStage("readers.i3s");
     reader.setOptions(i3s_options);
 
     int cnt = 0;

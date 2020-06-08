@@ -33,10 +33,9 @@
 ****************************************************************************/
 
 #include "SlpkReader.hpp"
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/IStream.hpp>
 
 #include "EsriUtil.hpp"
-#include "SlpkExtractor.hpp"
 
 namespace pdal
 {
@@ -52,31 +51,25 @@ CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
 
 std::string SlpkReader::getName() const { return slpkInfo.name; }
 
+SlpkReader::~SlpkReader()
+{
+    FileUtils::unmapFile(m_ctx);
+}
+
+
 NL::json SlpkReader::initInfo()
 {
-    // create temp path
-    std::string path = arbiter::getTempPath();
-
-    // use arbiter to create new directory if doesn't already exist
-    std::string fullPath(path + FileUtils::stem(
-        FileUtils::getFilename(m_filename)));
-    arbiter::mkdirp(fullPath);
-
     // un-archive the slpk archive
-    SlpkExtractor slpk(m_filename, fullPath);
-    slpk.extract();
-    m_filename = fullPath;
-    log()->get(LogLevel::Debug) << "Making directory at: " <<
-        fullPath << std::endl;
+    unarchive();
 
-    // unarchive and decompress the 3dscenelayer and create json info object
-    std::string filename = m_filename + "/3dSceneLayer.json.gz";
-    auto compressed = m_arbiter->get(filename);
+    size_t fileSize = FileUtils::fileSize(m_filename);
+    m_ctx = FileUtils::mapFile(m_filename, true, 0 , fileSize);
+    if (m_ctx.addr() == nullptr)
+        throwError("Error mapping file SLPK file '" + m_filename +
+            "': " + m_ctx.what() + ".");
 
-    std::string jsonString;
-    m_decomp.decompress(jsonString, compressed.data(), compressed.size());
-    NL::json info = i3s::parse(jsonString, "Invalid JSON in file '" +
-        filename + "'.");
+    std::string json = fetchJson("3dSceneLayer");
+    NL::json info = i3s::parse(json, "Invalid JSON in '3dSceneLayer.json.gz'.");
 
     if (info.empty())
         throwError(std::string("Incorrect Json object"));
@@ -84,31 +77,101 @@ NL::json SlpkReader::initInfo()
 }
 
 
+void SlpkReader::unarchive()
+{
+    #pragma pack(1)
+struct zheader
+{
+    uint16_t m_version;
+    uint16_t m_purpose;
+    uint16_t m_compression;
+    uint32_t m_time;
+    uint32_t m_crc;
+    uint32_t m_compressedSize;
+    uint32_t m_uncompressedSize;
+    uint16_t m_nameLen;
+    uint16_t m_extraLen;
+};
+#pragma pack()
+
+    ILeStream in(m_filename);
+
+    zheader h;
+    std::string name;
+    std::vector<char> extra;
+    int32_t magic;
+
+    in.get(reinterpret_cast<char *>(&magic), sizeof(magic));
+    while (magic == 0x04034b50)
+    {
+        in >> h.m_version;
+        in >> h.m_purpose;
+        in >> h.m_compression;
+        in >> h.m_time;
+        in >> h.m_crc;
+        in >> h.m_compressedSize;
+        in >> h.m_uncompressedSize;
+        in >> h.m_nameLen;
+        in >> h.m_extraLen;
+
+        in.get(name, h.m_nameLen);
+        if (h.m_extraLen)
+        {
+            extra.resize(h.m_extraLen);
+            in.get(extra);
+        }
+
+        if (h.m_compression != 0)
+            throw i3s::EsriError("Found compressed file in slpk archive.");
+        if (h.m_compressedSize != h.m_uncompressedSize)
+            throw i3s::EsriError("Compressed and uncompressed sizes don't "
+                "match in slpk archive.");
+        m_locMap[name] = { (size_t)in.position(), h.m_compressedSize };
+        in.skip(h.m_compressedSize);
+        in.get(reinterpret_cast<char *>(&magic), sizeof(magic));
+    }
+}
+
+
 std::string SlpkReader::fetchJson(std::string filepath)
 {
-    std::string output;
-    auto compressed = m_arbiter->get(filepath + ".json.gz");
-    m_decomp.decompress<std::string>(output, compressed.data(),
-        compressed.size());
-    return output;
+    filepath += ".json.gz";
+    auto li = m_locMap.find(filepath);
+    if (li == m_locMap.end())
+        throwError("Couldn't find file '" + filepath + "' in SLPK file '" +
+            m_filename + "'.");
 
+    Location& loc = li->second;
+
+    std::string output;
+    const char *c = reinterpret_cast<const char *>(m_ctx.addr()) + loc.m_pos;
+    m_decomp.decompress<std::string>(output, c, loc.m_length);
+    return output;
 }
 
 // fetch data using arbiter to get a char vector
 std::vector<char> SlpkReader::fetchBinary(std::string url, std::string attNum,
     std::string ext) const
 {
+    std::vector<char> output;
+
     url += attNum + ext;
 
-    auto data(m_arbiter->getBinary(url));
+    auto li = m_locMap.find(url);
+    if (li == m_locMap.end())
+        return output;
 
+    const Location& loc = li->second;
+
+    const char *c = reinterpret_cast<const char *>(m_ctx.addr()) + loc.m_pos;
     if (FileUtils::extension(url) != ".gz")
-        return data;
+    {
+        output.assign(c, c + loc.m_length);
+        return output;
+    }
 
-    std::vector<char> decomp;
-    m_decomp.decompress<std::vector<char>>(decomp, data.data(),
-            data.size());
-    return decomp;
+    m_decomp.decompress<std::vector<char>>(output, c, loc.m_length);
+    return output;
 }
 
 } //namespace pdal

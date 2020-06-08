@@ -108,7 +108,7 @@ private:
     BOX3D parseBox(const NL::json& base);
     void traverseTree(NL::json page, int index, int depth, int pageIndex);
     void load(int nodeId);
-    TileContents loadUrl(const std::string& url);
+    TileContents loadPath(const std::string& url);
     void checkTile(const TileContents& tile);
     void process(PointViewPtr dstView, const TileContents& tile,
         point_count_t count);
