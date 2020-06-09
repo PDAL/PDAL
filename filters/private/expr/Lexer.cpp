@@ -1,3 +1,5 @@
+//ABELL
+#include <iostream>
 
 #include "Lexer.hpp"
 
@@ -6,183 +8,217 @@ namespace pdal
 namespace expr
 {
 
-Token Lexer::get(TokenClass cls)
+namespace
+{
+struct EofException
+{};
+
+}
+
+char Lexer::getChar()
+{
+    char c = 0;
+    if (m_pos < m_buf.size())
+        c = m_buf[m_pos];
+    m_pos++;
+    return c;
+}
+
+void Lexer::putChar()
+{
+    //ABELL
+    if (m_pos == 0)
+        throw std::runtime_error("Put back a bad character.");
+    m_pos--;
+}
+
+Token Lexer::get()
 {
     char c;
-
-    size_t originalPos = m_pos;
-    while (isspace(m_buf[m_pos]))
-        m_pos++;
-
-    if (m_pos == m_buf.size())
-        return Token(TokenType::Eof);
-
     Token tok;
-    if (cls == TokenClass::Or)
-    {
-        tok = logicalOperator();
-        if (tok.type() != TokenType::Or)
-            tok = Token(TokenType::Error);
-    }
-    else if (cls == TokenClass::And)
-    {
-        tok = logicalOperator();
-        if (tok.type() != TokenType::And)
-            tok = Token(TokenType::Error);
-    }
-    else if (cls == TokenClass::Compare)
-        tok = comparisonOperator();
-    else if (cls == TokenClass::Add)
-    {
-        tok = arithmeticOperator();
-        if (tok.type() != TokenType::Add && tok.type() != TokenType::Subtract)
-            tok = Token(TokenType::Error);
-    }
-    else if (cls == TokenClass::Multiply)
-    {
-        tok = arithmeticOperator();
-        if (tok.type() != TokenType::Multiply &&
-              tok.type() != TokenType::Divide)
-            tok = Token(TokenType::Error);
-    }
-    else if (cls == TokenClass::Primary)
-    {
-        tok = dimension();
-        if (!tok)
-        {
-            tok = number();
-            if (!tok)
-                tok = Token(TokenType::Error);
-        }
-    }
-    else if (cls == TokenClass::Lparen)
-    {
-        tok = misc();
-        if (tok.type() != TokenType::Lparen)
-            tok = Token(TokenType::Error);
-    }
-    else if (cls == TokenClass::Rparen)
-    {
-        tok = misc();
-        if (tok.type() != TokenType::Rparen)
-            tok = Token(TokenType::Error);
-    }
 
-    if (tok)
-        m_pos = tok.end();
-    else
-        m_pos = originalPos;
+    if (m_pos >= m_buf.size())
+        return Token(TokenType::Eof, m_buf.size(), m_buf.size(), "");
+    while (true)
+    {
+        m_tokPos = m_pos;
+        c = getChar();
+
+        if (std::isspace(c))
+            continue;
+
+        tok = top(c);
+        break;
+    }
     return tok;
 }
 
-
-Token Lexer::misc()
+void Lexer::put(Token t)
 {
-    char c = m_buf[m_pos];
-    if (c == '(')
-        return Token(TokenType::Lparen, m_pos, m_pos + 1);
-    if (c == ')')
-        return Token(TokenType::Rparen, m_pos, m_pos + 1);
-    return Token(TokenType::Error);
+    m_pos = t.m_start;
 }
 
-Token Lexer::arithmeticOperator()
+void Lexer::putEnd(Token t)
 {
-    char c = m_buf[m_pos];
-
-    //ABELL - Need to check for rparen?
-    if (c == '+')
-    {
-        char d = m_buf[m_pos + 1];
-        if (d != '+')
-            return Token(TokenType::Add, m_pos, m_pos + 1);
-    }
-    if (c == '-')
-    {
-        char d = m_buf[m_pos + 1];
-        if (d != '-')
-            return Token(TokenType::Subtract, m_pos, m_pos + 1);
-    }
-    if (c == '/')
-        return Token(TokenType::Divide, m_pos, m_pos + 1);
-    if (c == '*')
-        return Token(TokenType::Multiply, m_pos, m_pos + 1);
-    return Token(TokenType::Error);
+    m_pos = t.m_end;
 }
 
-Token Lexer::comparisonOperator()
+Token Lexer::top(char c)
 {
-    Token tok(TokenType::Error);
+    Token tok;
 
-    char c = m_buf[m_pos];
-    if (!c)
-        return Token(TokenType::Error);
-
-    char d = m_buf[m_pos + 1];
-    if (d)
+    switch (c)
     {
-        if (c == '=' && d == '=')
-            return Token(TokenType::Equal, m_pos, m_pos + 2);
-        if (c == '!' && d == '=')
-            return Token(TokenType::NotEqual, m_pos, m_pos + 2);
-        if (c == '>' && d == '=')
-            return Token(TokenType::GreaterEqual, m_pos, m_pos + 2);
-        if (c == '<' && d == '=')
-            return Token(TokenType::LessEqual, m_pos, m_pos + 2);
+    case '&':
+        tok = ampersand();
+        break;
+    case '|':
+        tok = bar();
+        break;
+    case '!':
+        tok = exclamation();
+        break;
+    case '-':
+        tok = dash();
+        break;
+    case '<':
+        tok = less();
+        break;
+    case '>':
+        tok = greater();
+        break;
+    case '=':
+        tok = equal();
+        break;
+    case '+':
+        tok = Token(TokenType::Plus, m_tokPos, m_pos, "+");
+        break;
+    case '*':
+        tok = Token(TokenType::Asterisk, m_tokPos, m_pos, "*");
+        break;
+    case '/':
+        tok = Token(TokenType::Slash, m_tokPos, m_pos, "/");
+        break;
+    case '(':
+        tok = Token(TokenType::Lparen, m_tokPos, m_pos, "(");
+        break;
+    case ')':
+        tok = Token(TokenType::Rparen, m_tokPos, m_pos, ")");
+        break;
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+        tok = number();
+        break;
+    case 'a': case 'b': case 'c': case 'd': case 'e':
+    case 'f': case 'g': case 'h': case 'i': case 'j':
+    case 'k': case 'l': case 'm': case 'n': case 'o':
+    case 'p': case 'q': case 'r': case 's': case 't':
+    case 'u': case 'v': case 'w': case 'x': case 'y':
+    case 'z':
+    case 'A': case 'B': case 'C': case 'D': case 'E':
+    case 'F': case 'G': case 'H': case 'I': case 'J':
+    case 'K': case 'L': case 'M': case 'N': case 'O':
+    case 'P': case 'Q': case 'R': case 'S': case 'T':
+    case 'U': case 'V': case 'W': case 'X': case 'Y':
+    case 'Z':
+        tok = letter();
+        break;
+    default:
+        tok = Token(TokenType::Error, m_tokPos, m_pos, "Syntax error.");    
+        break;
     }
-    if (c == '>')
-        return Token(TokenType::Greater, m_pos, m_pos + 1);
-    if (c == '<')
-        return Token(TokenType::Less, m_pos, m_pos + 1);
-    return Token(TokenType::Error);
+    return tok;
 }
 
-Token Lexer::logicalOperator()
+Token Lexer::ampersand()
 {
-    char c = m_buf[m_pos];
-    if (!c)
-        return Token(TokenType::Error);
-    char d = m_buf[m_pos + 1];
-    if (d)
-    {
-        if (c == '&' && d == '&')
-            return Token(TokenType::And, m_pos, m_pos + 2);
-        if (c == '|' && d == '|')
-            return Token(TokenType::Or, m_pos, m_pos + 2);
-    }
-    return Token(TokenType::Error);
+    char c = getChar();
+    if (c == '&')
+        return Token(TokenType::And, m_tokPos, m_pos, "&&");
+    putChar();
+    return Token(TokenType::Error, m_tokPos, m_pos, "'&' invalid in this "
+        "context.");
 }
 
+Token Lexer::bar()
+{
+    char c = getChar();
+    if (c == '|')
+        return Token(TokenType::Or, m_tokPos, m_pos, "||");
+    putChar();
+    return Token(TokenType::Error, m_tokPos, m_pos, "'!' invalid in this "
+        "context.");
+}
+
+Token Lexer::exclamation()
+{
+    char c = getChar();
+    if (c == '=')
+        return Token(TokenType::NotEqual, m_tokPos, m_pos, "!=");
+    putChar();
+    return Token(TokenType::Not, m_tokPos, m_pos, "!");
+}
+
+Token Lexer::dash()
+{
+    char c = getChar();
+    putChar();
+    if (c != '-')
+        return Token(TokenType::Dash, m_tokPos, m_pos, "-");
+    return Token(TokenType::Error, m_tokPos, m_pos,
+        "Found disallowed consecutive dashes: '--'");
+}
+
+Token Lexer::equal()
+{
+    char c = getChar();
+    if (c == '=')
+        return Token(TokenType::Equal, m_tokPos, m_pos, "==");
+    putChar();
+    return Token(TokenType::Error, m_tokPos, m_pos, "'=' invalid in this "
+        "context");
+}
+
+Token Lexer::less()
+{
+    char c = getChar();
+    if (c == '=')
+        return Token(TokenType::LessEqual, m_tokPos, m_pos, "<=");
+    putChar();
+    return Token(TokenType::Less, m_tokPos, m_pos, "<");
+}
+
+Token Lexer::greater()
+{
+    char c = getChar();
+    if (c == '=')
+        return Token(TokenType::GreaterEqual, m_tokPos, m_pos, ">=");
+    putChar();
+    return Token(TokenType::Greater, m_tokPos, m_pos, ">");
+}
 
 Token Lexer::number()
 {
-    const char *start = m_buf.data() + m_pos;
+    const char *start = m_buf.data() + m_tokPos;
     char *end;
-
     double v = strtod(start, &end);
-    if (start == end)
-        return Token(TokenType::Error);
-    return Token(TokenType::Number, m_pos, end - m_buf.data(), v);
+    m_pos = end - m_buf.data();
+    return Token(TokenType::Number, m_tokPos, m_pos,
+        m_buf.substr(m_tokPos, m_pos), v);
 }
 
-
-Token Lexer::dimension()
+Token Lexer::letter()
 {
-    size_t end;
-    for (end = m_pos; end < m_buf.size(); ++end)
-        if (!std::isalpha((int)m_buf[end]))
-            break;
-
-    if (end > m_pos)
-        return Token(TokenType::Dimension, m_pos, end,
-            m_buf.substr(m_pos, end - m_pos));
-    return Token(TokenType::Error);
-     
-/**    
-    size_t end = Dimension::extractName(m_buf, m_pos);
-    return Token(TokenType::Dimension, m_pos, m_pos + end,
-        m_buf.substr(m_pos, end));
-**/
+    while (true)
+    {
+        char c = getChar();
+        if (!std::isalpha(c) && c != '_')
+        {
+            putChar();
+            return Token(TokenType::Identifier, m_tokPos, m_pos, 
+                m_buf.substr(m_tokPos, m_pos - m_tokPos));
+        }
+    } 
 }
 
 } // namespace expr

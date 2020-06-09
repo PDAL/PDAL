@@ -13,28 +13,38 @@ namespace expr
 class Lexer
 {
 public:
-    Lexer() : m_pos(0)
+    Lexer() : m_pos(0), m_tokPos(0)
+    {}
+    Lexer(const std::string& s) : m_buf(s), m_pos(0), m_tokPos(0)
     {}
 
-    void lex(const std::string& s)
+    void reset(const std::string& s)
     {
         m_buf = s;
         m_pos = 0;
+        m_tokPos = 0;
     }
-
-    Token get(TokenClass cls);
+    Token get();
+    void put(Token t);
+    void putEnd(Token t);
 
 private:
-    Token get(char c);
-    Token arithmeticOperator();
-    Token logicalOperator();
-    Token comparisonOperator();
-    Token misc();
+    char getChar();
+    void putChar();
+    Token top(char c);
+    Token ampersand();
+    Token bar();
+    Token exclamation();
+    Token dash();
+    Token equal();
+    Token less();
+    Token greater();
     Token number();
-    Token dimension();
+    Token letter();
 
     std::string m_buf;
     std::string::size_type m_pos;
+    std::string::size_type m_tokPos;
 };
 
 } // namespace expr

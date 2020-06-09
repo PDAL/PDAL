@@ -10,8 +10,20 @@ bool Parser::parse(const std::string& s)
     std::stack<NodePtr> nodes;
     nodes.swap(m_nodes);
 
-    m_lexer.lex(s);
-    return expression();
+    m_lexer.reset(s);
+    m_error.clear();
+    bool ok = expression();
+    if (ok)
+    {
+        // If we're at the end, we should have exhausted all tokens.
+        Token tok = m_lexer.get();
+        if (tok != TokenType::Eof)
+        {
+            m_error = "Found '" + tok.sval() + "' after valid expression.";
+            return false;
+        }
+    }
+    return ok;
 }
 
 
@@ -44,11 +56,28 @@ double Parser::eval(PointRef& p) const
 **/
 
 
-Token Parser::popToken(TokenClass cls)
+Token Parser::curToken() const
 {
-    return m_lexer.get(cls);
+    return m_curTok;
 }
 
+bool Parser::match(TokenType type)
+{
+    Token t = m_lexer.get();
+    if (t.type() == type)
+    {
+        m_curTok = t;
+        return true;
+    }
+    m_lexer.put(t);
+    return false;
+}
+
+void Parser::setError(const std::string& err)
+{
+    if (m_error.empty())
+        m_error = err;
+}
 
 bool Parser::expression()
 {
@@ -64,13 +93,12 @@ bool Parser::orexpr()
 
     while (true)
     {
-        Token tok = popToken(TokenClass::Or);
-        if (!tok)
+        if (!match(TokenType::Or))
             return true;
 
         if (!andexpr())
         {
-            m_error = "OR Operator not followed by rvalue.";
+            setError("Expected expression following '||'.");
             return false;
         }
 
@@ -98,13 +126,12 @@ bool Parser::andexpr()
 
     while (true)
     {
-        Token tok = popToken(TokenClass::And);
-        if (!tok)
+        if (!match(TokenType::And))
             return true;
 
         if (!compareexpr())
         {
-            m_error = "Operator not followed by rvalue.";
+            setError("Expected expression following '&&'.");
             return false;
         }
 
@@ -134,33 +161,32 @@ bool Parser::compareexpr()
 
     while (true)
     {
-        Token tok = popToken(TokenClass::Compare);
-        if (!tok)
-            return true;
+        NodeType type = NodeType::None;
 
-        NodeType type;
-        if (tok.type() == TokenType::Equal)
+        if (match(TokenType::Equal))
             type = NodeType::Equal;
-        else if (tok.type() == TokenType::NotEqual)
+        else if (match(TokenType::NotEqual))
             type = NodeType::NotEqual;
-        else if (tok.type() == TokenType::Greater)
+        else if (match(TokenType::Greater))
             type = NodeType::Greater;
-        else if (tok.type() == TokenType::GreaterEqual)
+        else if (match(TokenType::GreaterEqual))
             type = NodeType::GreaterEqual;
-        else if (tok.type() == TokenType::Less)
+        else if (match(TokenType::Less))
             type = NodeType::Less;
-        else if (tok.type() == TokenType::LessEqual)
+        else if (match(TokenType::LessEqual))
             type = NodeType::LessEqual;
+        else
+            return true;
 
         if (!addexpr())
         {
-            m_error = "COMP Operator not followed by rvalue.";
+            setError("Expected expression following '" +
+                curToken().sval() + "'.");
             return false;
         }
 
         NodePtr right = popNode();
         NodePtr left = popNode();
-
         ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
         ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
         if (leftVal && rightVal)
@@ -194,19 +220,19 @@ bool Parser::addexpr()
 
     while (true)
     {
-        Token tok = popToken(TokenClass::Add);
-        if (!tok)
-            return true;
-
         NodeType type;
-        if (tok.type() == TokenType::Add)
+
+        if (match(TokenType::Plus))
             type = NodeType::Add;
-        else if (tok.type() == TokenType::Subtract)
+        else if (match(TokenType::Dash))
             type = NodeType::Subtract;
+        else
+            return true;
 
         if (!multexpr())
         {
-            m_error = "ADD Operator not followed by rvalue.";
+            setError("Expected expression following '" +
+                curToken().sval() + "'.");
             return false;
         }
 
@@ -231,25 +257,23 @@ bool Parser::addexpr()
 
 bool Parser::multexpr()
 {
-    if (!primary())
+    if (!notexpr())
         return false;
 
     while (true)
     {
-        Token tok = popToken(TokenClass::Multiply);
-        if (!tok)
+        NodeType type;
+        if (match(TokenType::Asterisk))
+            type = NodeType::Multiply;
+        else if (match(TokenType::Slash))
+            type = NodeType::Divide;
+        else
             return true;
 
-        NodeType type;
-        if (tok.type() == TokenType::Multiply)
-            type = NodeType::Multiply;
-        else if (tok.type() == TokenType::Divide)
-            type = NodeType::Divide;
-
-
-        if (!primary())
+        if (!notexpr())
         {
-            m_error = "MULT Operator not followed by rvalue.";
+            setError("Expected expression following '" +
+                curToken().sval() + "'.");
             return false;
         }
 
@@ -267,7 +291,7 @@ bool Parser::multexpr()
             {
                 if (rightVal->value() == 0.0)
                 {
-                    m_error = "Divide by 0.";
+                    setError("Divide by 0.");
                     return false;
                 }
                 v = leftVal->value() / rightVal->value();
@@ -281,17 +305,62 @@ bool Parser::multexpr()
     return true;
 }
 
+bool Parser::notexpr()
+{
+    if (!match(TokenType::Not))
+        return uminus();
+
+    if (!uminus())
+    {
+        setError("Expected expression following '!'.");
+        return false;
+    }
+
+    NodePtr sub = popNode();
+    ValNode *node = dynamic_cast<ValNode *>(sub.get());
+    if (node)
+    {
+        double v = !node->value();
+        pushNode(NodePtr(new ValNode(v)));
+    }
+    else
+        pushNode(NodePtr(new UnNode(NodeType::Not, std::move(sub))));
+    return true;
+}
+
+bool Parser::uminus()
+{
+    if (!match(TokenType::Dash))
+        return primary();
+
+    if (!primary())
+    {
+        setError("Expecting expression following '-'.");
+        return false;
+    }
+
+    NodePtr sub = popNode();
+    ValNode *node = dynamic_cast<ValNode *>(sub.get());
+    if (node)
+    {
+        double v = -(node->value());
+        pushNode(NodePtr(new ValNode(v)));
+    }
+    else
+        pushNode(NodePtr(new UnNode(NodeType::Negative, std::move(sub))));
+    return true;
+}
+
 bool Parser::primary()
 {
-    Token tok = popToken(TokenClass::Primary);
-    if (tok.type() == TokenType::Number)
+    if (match(TokenType::Number))
     {
-        pushNode(NodePtr(new ValNode(tok.dval())));
+        pushNode(NodePtr(new ValNode(curToken().dval())));
         return true;
     }
-    else if (tok.type() == TokenType::Dimension)
+    else if (match(TokenType::Identifier))
     {
-        pushNode(NodePtr(new VarNode(tok.sval())));
+        pushNode(NodePtr(new VarNode(curToken().sval())));
         return true;
     }
 
@@ -301,15 +370,20 @@ bool Parser::primary()
 
 bool Parser::parexpr()
 {
-    Token tok = popToken(TokenClass::Lparen);
-    if (!tok)
+    if (!match(TokenType::Lparen))
         return false;
 
     if (!expression())
+    {
+        setError("Expected expression following '('.");
         return false;
-    tok = popToken(TokenClass::Rparen);
-    if (!tok)
+    }
+
+    if (!match(TokenType::Rparen))
+    {
+        setError("Expected ')' following expression.");
         return false;
+    }
     return true;
 }
 

@@ -20,14 +20,17 @@ enum class NodeType
     Subtract,
     Multiply,
     Divide,
+    Not,
     Equal,
     NotEqual,
     Greater,
     GreaterEqual,
     Less,
     LessEqual,
+    Negative,
     Value,
-    Variable
+    Identifier,
+    None
 };
 
 class Node
@@ -42,7 +45,7 @@ public:
     NodeType type() const
     { return m_type; }
 
-    virtual std::string print() = 0;
+    virtual std::string print() const = 0;
     /**
     virtual void prepare(PointLayoutPtr l) = 0;
     virtual double eval(PointRef& p) const = 0;
@@ -57,6 +60,21 @@ protected:
 };
 using NodePtr = std::unique_ptr<Node>;
 
+class UnNode : public Node
+{
+public:
+    UnNode(NodeType type, NodePtr sub) : Node(type), m_sub(std::move(sub))
+    {}
+
+    virtual std::string print() const
+    {
+        return "!(" + m_sub->print() + ")";
+    }
+
+private:
+    NodePtr m_sub;
+};
+
 class BinNode : public Node
 {
 public:
@@ -64,7 +82,7 @@ public:
         Node(type), m_left(std::move(left)), m_right(std::move(right))
     {}
 
-    virtual std::string print()
+    virtual std::string print() const
     {
         std::string s;
 
@@ -128,7 +146,7 @@ public:
         Node(type), m_left(std::move(left)), m_right(std::move(right))
     {}
 
-    virtual std::string print()
+    virtual std::string print() const
     {
         std::string s;
         switch (type())
@@ -198,7 +216,7 @@ public:
     ValNode(double d) : Node(NodeType::Value), m_val(d)
     {}
 
-    virtual std::string print()
+    virtual std::string print() const
     {
         return std::to_string(m_val);
     }
@@ -221,11 +239,11 @@ private:
 class VarNode : public Node
 {
 public:
-    VarNode(const std::string& s) : Node(NodeType::Variable), m_name(s)
+    VarNode(const std::string& s) : Node(NodeType::Identifier), m_name(s)
 //    , m_id(Dimension::Id::Unknown)
     {}
 
-    virtual std::string print()
+    virtual std::string print() const
     { return m_name; }
 
     /**
@@ -250,7 +268,7 @@ class Parser
 public:
     bool parse(const std::string& s);
     std::string error() const
-    { return m_error; }
+        { return m_error; }
     void dump();
     /**
     void prepare(PointLayoutPtr l);
@@ -268,17 +286,23 @@ private:
         return n;
     }
 
-    Token popToken(TokenClass cls);
+    bool match(TokenType type);
+    Token curToken() const;
+    void setError(const std::string& err);
+
     bool expression();
+    bool notexpr();
     bool orexpr();
     bool andexpr();
     bool compareexpr();
     bool addexpr();
     bool multexpr();
+    bool uminus();
     bool primary();
     bool parexpr();
 
     Lexer m_lexer;
+    Token m_curTok;
     std::stack<NodePtr> m_nodes;
     std::string m_error;
 };

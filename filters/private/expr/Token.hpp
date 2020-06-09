@@ -8,31 +8,20 @@ namespace pdal
 namespace expr
 {
 
-enum class TokenClass
-{
-    Or,
-    And,
-    Compare,
-    Add,
-    Multiply,
-    Primary,
-    Lparen,
-    Rparen,
-    None
-};
-
 enum class TokenType
 {
     Eof,
     Error,
-    Add,
-    Subtract,
-    Divide,
-    Multiply,
+
+    Plus,
+    Dash,
+    Slash,
+    Asterisk,
+
     Lparen,
     Rparen,
-    Number,
-    Dimension,
+
+    Not,
     Or,
     And,
     Greater,
@@ -40,11 +29,16 @@ enum class TokenType
     Equal,
     NotEqual,
     LessEqual,
-    GreaterEqual
+    GreaterEqual,
+
+    Number,
+    Identifier
 };
 
 class Token
 {
+    friend class Lexer;
+
     // Union with string requires a bunch of muck, so...
     struct Value
     {
@@ -54,14 +48,13 @@ class Token
 
 public:
     Token(TokenType type, std::string::size_type start,
-            std::string::size_type end, double d) :
+            std::string::size_type end, const std::string& s, double d = 0) :
         m_type(type), m_start(start), m_end(end)
-    { m_val.d = d; }
+    {
+        m_val.s = s;
+        m_val.d = d;
+    }
 
-    Token(TokenType type, std::string::size_type start,
-            std::string::size_type end, const std::string& s) :
-        m_type(type), m_start(start), m_end(end)
-    { m_val.s = s; }
 
     Token(TokenType type, std::string::size_type start,
             std::string::size_type end) :
@@ -71,8 +64,6 @@ public:
     {}
     Token() : m_type(TokenType::Error), m_start(0), m_end(0)
     {}
-
-    TokenClass cls() const;
 
     TokenType type() const
     { return m_type; }
@@ -94,6 +85,18 @@ public:
 
     operator bool () const
     { return valid() && m_type != TokenType::Eof; }
+
+    bool operator == (TokenType type) const
+    { return m_type == type; }
+
+    bool operator == (const Token& other) const
+    { return m_type == other.m_type; }
+
+    bool operator != (TokenType type) const
+    { return m_type != type; }
+
+    bool operator != (const Token& other) const
+    { return m_type != other.m_type; }
 
 private:
     TokenType m_type;
