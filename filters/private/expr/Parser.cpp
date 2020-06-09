@@ -7,8 +7,7 @@ namespace expr
 
 bool Parser::parse(const std::string& s)
 {
-    std::stack<NodePtr> nodes;
-    nodes.swap(m_nodes);
+    m_expression.clear();
 
     m_lexer.reset(s);
     m_error.clear();
@@ -24,12 +23,6 @@ bool Parser::parse(const std::string& s)
         }
     }
     return ok;
-}
-
-
-void Parser::dump()
-{
-    std::cout << m_nodes.top()->print() << "\n";
 }
 
 /**
@@ -102,18 +95,18 @@ bool Parser::orexpr()
             return false;
         }
 
-        NodePtr right = popNode();
-        NodePtr left = popNode();
+        NodePtr right = m_expression.popNode();
+        NodePtr left = m_expression.popNode();
 
         ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
         ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
         if (leftVal && rightVal)
         {
             double v = leftVal->value() || rightVal->value();
-            pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ValNode(v)));
         }
         else
-            pushNode(NodePtr(new BoolNode(NodeType::Or,
+            m_expression.pushNode(NodePtr(new BoolNode(NodeType::Or,
                 std::move(left), std::move(right))));
     }
     return true;
@@ -135,18 +128,18 @@ bool Parser::andexpr()
             return false;
         }
 
-        NodePtr right = popNode();
-        NodePtr left = popNode();
+        NodePtr right = m_expression.popNode();
+        NodePtr left = m_expression.popNode();
 
         ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
         ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
         if (leftVal && rightVal)
         {
             double v = leftVal->value() && rightVal->value();
-            pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ValNode(v)));
         }
         else
-            pushNode(NodePtr(new BoolNode(NodeType::And,
+            m_expression.pushNode(NodePtr(new BoolNode(NodeType::And,
                 std::move(left), std::move(right))));
     }
     return true;
@@ -185,8 +178,8 @@ bool Parser::compareexpr()
             return false;
         }
 
-        NodePtr right = popNode();
-        NodePtr left = popNode();
+        NodePtr right = m_expression.popNode();
+        NodePtr left = m_expression.popNode();
         ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
         ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
         if (leftVal && rightVal)
@@ -204,10 +197,10 @@ bool Parser::compareexpr()
                 v = (leftVal->value() < rightVal->value());
             else if (type == NodeType::LessEqual)
                 v = (leftVal->value() <= rightVal->value());
-            pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ValNode(v)));
         }
         else
-            pushNode(NodePtr(new BoolNode(type,
+            m_expression.pushNode(NodePtr(new BoolNode(type,
                 std::move(left), std::move(right))));
     }
     return true;
@@ -236,8 +229,8 @@ bool Parser::addexpr()
             return false;
         }
 
-        NodePtr right(popNode());
-        NodePtr left(popNode());
+        NodePtr right = m_expression.popNode();
+        NodePtr left = m_expression.popNode();
 
         ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
         ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
@@ -246,10 +239,10 @@ bool Parser::addexpr()
             double v = (type == NodeType::Add) ?
                 leftVal->value() + rightVal->value() :
                 leftVal->value() - rightVal->value();
-            pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ValNode(v)));
         }
         else
-            pushNode(NodePtr(new BinNode(type,
+            m_expression.pushNode(NodePtr(new BinNode(type,
                 std::move(left), std::move(right))));
     }
     return true;
@@ -277,8 +270,8 @@ bool Parser::multexpr()
             return false;
         }
 
-        NodePtr right = popNode();
-        NodePtr left = popNode();
+        NodePtr right = m_expression.popNode();
+        NodePtr left = m_expression.popNode();
 
         ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
         ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
@@ -296,10 +289,10 @@ bool Parser::multexpr()
                 }
                 v = leftVal->value() / rightVal->value();
             }
-            pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ValNode(v)));
         }
         else
-            pushNode(NodePtr(new BinNode(type,
+            m_expression.pushNode(NodePtr(new BinNode(type,
                 std::move(left), std::move(right))));
     }
     return true;
@@ -316,15 +309,16 @@ bool Parser::notexpr()
         return false;
     }
 
-    NodePtr sub = popNode();
+    NodePtr sub = m_expression.popNode();
     ValNode *node = dynamic_cast<ValNode *>(sub.get());
     if (node)
     {
         double v = !node->value();
-        pushNode(NodePtr(new ValNode(v)));
+        m_expression.pushNode(NodePtr(new ValNode(v)));
     }
     else
-        pushNode(NodePtr(new UnNode(NodeType::Not, std::move(sub))));
+        m_expression.pushNode(
+            NodePtr(new UnNode(NodeType::Not, std::move(sub))));
     return true;
 }
 
@@ -339,15 +333,16 @@ bool Parser::uminus()
         return false;
     }
 
-    NodePtr sub = popNode();
+    NodePtr sub = m_expression.popNode();
     ValNode *node = dynamic_cast<ValNode *>(sub.get());
     if (node)
     {
         double v = -(node->value());
-        pushNode(NodePtr(new ValNode(v)));
+        m_expression.pushNode(NodePtr(new ValNode(v)));
     }
     else
-        pushNode(NodePtr(new UnNode(NodeType::Negative, std::move(sub))));
+        m_expression.pushNode(
+            NodePtr(new UnNode(NodeType::Negative, std::move(sub))));
     return true;
 }
 
@@ -355,12 +350,12 @@ bool Parser::primary()
 {
     if (match(TokenType::Number))
     {
-        pushNode(NodePtr(new ValNode(curToken().dval())));
+        m_expression.pushNode(NodePtr(new ValNode(curToken().dval())));
         return true;
     }
     else if (match(TokenType::Identifier))
     {
-        pushNode(NodePtr(new VarNode(curToken().sval())));
+        m_expression.pushNode(NodePtr(new VarNode(curToken().sval())));
         return true;
     }
 
