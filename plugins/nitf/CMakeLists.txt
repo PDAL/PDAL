@@ -32,7 +32,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${NITRO_LIBRARIES}
         ${GDAL_LIBRARY}
     INCLUDES
-        ${GDAL_INCLUDES}
+        ${GDAL_INCLUDE_DIR}
 )
 if (WIN32)
     target_compile_definitions(${writer_libname}
