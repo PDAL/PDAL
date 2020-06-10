@@ -163,9 +163,8 @@ GDALDataType toGdalType(Dimension::Type t)
   \param x  X coordinate of point to be reprojected in-place.
   \param y  Y coordinate of point to be reprojected in-place.
   \param z  Z coordinate of point to be reprojected in-place.
-  \param srcSrs  String in WKT or other suitable format of box coordinates.
-  \param dstSrs  String in WKT or other suitable format to which
-    coordinates should be projected.
+  \param srcSrs  Source SRS
+  \param dstSrs  Destination SRS
   \return  Whether the reprojection was successful or not.
 */
 bool reproject(double& x, double& y, double& z, const SpatialReference& srcSrs,
@@ -178,9 +177,8 @@ bool reproject(double& x, double& y, double& z, const SpatialReference& srcSrs,
 /**
   Reproject a bounds box from a source projection to a destination.
   \param box  Bounds box to be reprojected in-place.
-  \param srcSrs  String in WKT or other suitable format of box coordinates.
-  \param dstSrs  String in WKT or other suitable format to which
-    coordinates should be projected.
+  \param srcSrs  Source SRS.
+  \param dstSrs  Destination SRS.
   \return  Whether the reprojection was successful or not.
 */
 bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
@@ -195,24 +193,37 @@ bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
 }
 
 
+/**
+  Reproject a bounds box from a source projection to a destination.
+  \param box  2D or 3D bounds box to be reprojected.
+  \param srcSrs  Source SRS.
+  \param dstSrs  Destination SRS.
+  \return  Whether the reprojection was successful or not.
+*/
 bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
     const SpatialReference& dstSrs)
 {
-    SrsTransform transform(srcSrs, dstSrs);
-
-    BOX3D b = box.to3d();
-    bool ok = transform.transform(b.minx, b.miny, b.minz);
-    if (ok)
-        ok = transform.transform(b.maxx, b.maxy, b.maxz);
+    bool ok = false;
+    if (box.is3d())
+    {
+        BOX3D b3 = box.to3d();
+        ok = reprojectBounds(b3, srcSrs, dstSrs);
+        box.reset(b3);
+    }
+    else
+    {
+        BOX2D b2 = box.to2d();
+        ok = reprojectBounds(b2, srcSrs, dstSrs);
+        box.reset(b2);
+    }
     return ok;
 }
 
 /**
   Reproject a bounds box from a source projection to a destination.
   \param box  2D Bounds box to be reprojected in-place.
-  \param srcSrs  String in WKT or other suitable format of box coordinates.
-  \param dstSrs  String in WKT or other suitable format to which
-    coordinates should be projected.
+  \param srcSrs  Source SRS.
+  \param dstSrs  Destination SRS.
   \return  Whether the reprojection was successful or not.
 */
 bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,

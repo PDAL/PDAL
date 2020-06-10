@@ -138,8 +138,10 @@ bool Geometry::srsValid() const
 }
 
 
-StatusWithReason Geometry::transform(SpatialReference out)
+Utils::StatusWithReason Geometry::transform(SpatialReference out)
 {
+    using namespace Utils;
+
     if (!srsValid() && out.empty())
         return StatusWithReason();
 
