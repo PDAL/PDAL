@@ -25,6 +25,12 @@ std::string UnNode::print() const
     return "!(" + m_sub->print() + ")";
 }
 
+Utils::StatusWithReason UnNode::prepare(PointLayoutPtr l)
+{
+    return m_sub->prepare(l);
+}
+    
+
 BinNode::BinNode(NodeType type, NodePtr left, NodePtr right) :
     Node(type), m_left(std::move(left)), m_right(std::move(right))
 {}
@@ -54,13 +60,15 @@ std::string BinNode::print() const
     return "(" + m_left->print() + " " + s + " " + m_right->print() + ")";
 }
 
-/**
-virtual void prepare(PointLayoutPtr l)
+Utils::StatusWithReason BinNode::prepare(PointLayoutPtr l)
 {
-m_left->prepare(l);
-m_right->prepare(l);
+    auto status = m_left->prepare(l);
+    if (status)
+        status = m_right->prepare(l);
+    return status;
 }
 
+/**
 virtual double eval(PointRef& p) const
 {
 double l = m_left->eval(p);
@@ -121,13 +129,13 @@ std::string BoolNode::print() const
     return "(" + m_left->print() + " " + s + " " + m_right->print() + ")";
 }
 
-    /**
-    virtual void prepare(PointLayoutPtr l)
-    {
-        m_left->prepare(l);
-        m_right->prepare(l);
-    }
-    **/
+Utils::StatusWithReason BoolNode::prepare(PointLayoutPtr l)
+{
+    auto status = m_left->prepare(l);
+    if (status)
+        status = m_right->prepare(l);
+    return status;
+}
 
     /**
     virtual double eval(PointRef& p) const
@@ -152,10 +160,10 @@ std::string ValNode::print() const
     return std::to_string(m_val);
 }
 
-    /**
-    virtual void prepare(PointLayoutPtr l)
-    {}
+Utils::StatusWithReason ValNode::prepare(PointLayoutPtr l)
+{ return true; }
 
+    /**
     virtual double eval(PointRef&) const
     { return m_val; }
     **/
@@ -163,24 +171,25 @@ std::string ValNode::print() const
 double ValNode::value() const
 { return m_val; }
 
-VarNode::VarNode(const std::string& s) : Node(NodeType::Identifier), m_name(s)
-//    , m_id(Dimension::Id::Unknown)
+VarNode::VarNode(const std::string& s) : Node(NodeType::Identifier), m_name(s),
+    m_id(Dimension::Id::Unknown)
 {}
 
 std::string VarNode::print() const
 { return m_name; }
 
-    /**
-    virtual void prepare(PointLayoutPtr l)
-    {
-        m_id = l->findDim(m_name);
-        if (m_id == Dimension::Id::Unknown)
-            std::cerr << "Unknown dimension '" << m_name << "' in assigment.";
-    }
+Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
+{
+    m_id = l->findDim(m_name);
+    if (m_id == Dimension::Id::Unknown)
+        return { -1, "Unknown dimension '" + m_name + "' in assigment." };
+    return true;
+}
 
+/**
     virtual double eval(PointRef& p) const
     { return p.getFieldAs<double>(m_id); }
-    **/
+**/
 
 Expression::Expression()
 {}
@@ -242,6 +251,13 @@ NodePtr Expression::popNode()
 void Expression::pushNode(NodePtr node)
 {
     m_nodes.push(std::move(node));
+}
+
+Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
+{
+    if (m_nodes.size())
+        return m_nodes.top()->prepare(layout);
+    return true;
 }
 
 std::ostream& operator<<(std::ostream& out, const Expression& expr)

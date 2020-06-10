@@ -57,11 +57,24 @@ PointViewSet Filter::run(PointViewPtr view)
     return viewSet;
 }
 
+void Filter::l_initialize(PointTableRef table)
+{
+    Stage::l_initialize(table);
+}
+
 void Filter::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);
     args.add("where", "Expression describing points to be passed to this "
         "filter", m_args->m_where);
+}
+
+void Filter::l_prepared(PointTableRef table)
+{
+    Stage::l_prepared(table);
+    auto status = m_args->m_where.prepare(table.layout());
+    if (!status)
+        throwError("Invalid 'where': " + status.what());
 }
 
 } // namespace pdal

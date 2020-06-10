@@ -374,13 +374,8 @@ private:
     void handleOptions();
 
     virtual void l_addArgs(ProgramArgs& args);
-
-    virtual void readerInitialize(PointTableRef /*table*/)
-        {}
-    virtual void writerInitialize(PointTableRef /*table*/)
-        {}
-
-    void l_initialize(PointTableRef table);
+    virtual void l_initialize(PointTableRef table);
+    virtual void l_prepared(PointTableRef table);
 
     /**
       Get basic metadata (avoids reading points).  Implement in subclass.

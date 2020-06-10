@@ -77,8 +77,10 @@ void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
 }
 
 
-void Reader::readerInitialize(PointTableRef)
+void Reader::l_initialize(PointTableRef table)
 {
+    Stage::l_initialize(table);
+
     if (m_overrideSrs.valid() && m_defaultSrs.valid())
         throwError("Cannot specify both 'override_srs' and 'default_srs'");
 
@@ -86,6 +88,11 @@ void Reader::readerInitialize(PointTableRef)
         setSpatialReference(m_overrideSrs);
     else if (m_defaultSrs.valid())
         setSpatialReference(m_defaultSrs);
+}
+
+void Reader::l_prepared(PointTableRef table)
+{
+    Stage::l_prepared(table);
 }
 
 } // namespace pdal

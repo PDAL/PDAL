@@ -30,6 +30,7 @@ public:
 private:
     bool match(TokenType type);
     Token curToken() const;
+    Token lastToken() const;
     void setError(const std::string& err);
 
     bool expression();

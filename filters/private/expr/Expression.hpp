@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include <pdal/Dimension.hpp>
+#include <pdal/PointLayout.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -42,8 +44,8 @@ public:
     NodeType type() const;
 
     virtual std::string print() const = 0;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l) = 0;
     /**
-    virtual void prepare(PointLayoutPtr l) = 0;
     virtual double eval(PointRef& p) const = 0;
     **/
 
@@ -62,6 +64,7 @@ public:
     UnNode(NodeType type, NodePtr sub);
 
     virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
 
 private:
     NodePtr m_sub;
@@ -73,14 +76,9 @@ public:
     BinNode(NodeType type, NodePtr left, NodePtr right);
 
     virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
 
     /**
-    virtual void prepare(PointLayoutPtr l)
-    {
-        m_left->prepare(l);
-        m_right->prepare(l);
-    }
-
     virtual double eval(PointRef& p) const
     {
         double l = m_left->eval(p);
@@ -112,14 +110,7 @@ public:
     BoolNode(NodeType type, NodePtr left, NodePtr right);
 
     virtual std::string print() const;
-
-    /**
-    virtual void prepare(PointLayoutPtr l)
-    {
-        m_left->prepare(l);
-        m_right->prepare(l);
-    }
-    **/
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
 
     /**
     virtual double eval(PointRef& p) const
@@ -147,11 +138,9 @@ public:
     ValNode(double d);
 
     virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
 
     /**
-    virtual void prepare(PointLayoutPtr l)
-    {}
-
     virtual double eval(PointRef&) const
     { return m_val; }
     **/
@@ -168,22 +157,16 @@ public:
     VarNode(const std::string& s);
 
     virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
 
     /**
-    virtual void prepare(PointLayoutPtr l)
-    {
-        m_id = l->findDim(m_name);
-        if (m_id == Dimension::Id::Unknown)
-            std::cerr << "Unknown dimension '" << m_name << "' in assigment.";
-    }
-
     virtual double eval(PointRef& p) const
     { return p.getFieldAs<double>(m_id); }
     **/
 
 private:
     std::string m_name;
-//    Dimension::Id m_id;
+    Dimension::Id m_id;
 };
 
 class Expression
@@ -200,6 +183,7 @@ public:
     std::string print() const;
     NodePtr popNode();
     void pushNode(NodePtr node);
+    Utils::StatusWithReason prepare(PointLayoutPtr layout);
 
 private:
     std::string m_error;

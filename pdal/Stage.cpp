@@ -151,6 +151,7 @@ void Stage::prepare(PointTableRef table)
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
+    l_prepared(table);
     prepared(table);
     stopLogging();
 }
@@ -291,18 +292,6 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
 }
 
 
-void Stage::l_addArgs(ProgramArgs& args)
-{
-    args.add("user_data", "User JSON", m_userDataJSON);
-    args.add("log", "Debug output filename", m_logname);
-    // We never really bind anything to this variable.  We extract the option
-    // before parsing the command line.  This entry allows a line in the
-    // help and options list.
-    args.add("option_file", "File from which to read additional options",
-        m_optionFile);
-}
-
-
 void Stage::setupLog()
 {
     LogLevel l(LogLevel::Error);
@@ -328,12 +317,26 @@ void Stage::setupLog()
 }
 
 
+void Stage::l_addArgs(ProgramArgs& args)
+{
+    args.add("user_data", "User JSON", m_userDataJSON);
+    args.add("log", "Debug output filename", m_logname);
+    // We never really bind anything to this variable.  We extract the option
+    // before parsing the command line.  This entry allows a line in the
+    // help and options list.
+    args.add("option_file", "File from which to read additional options",
+        m_optionFile);
+}
+
+
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
-    readerInitialize(table);
-    writerInitialize(table);
 }
+
+
+void Stage::l_prepared(PointTableRef table)
+{}
 
 
 const SpatialReference& Stage::getSpatialReference() const

@@ -26,17 +26,6 @@ bool Parser::parse(const std::string& s)
 }
 
 /**
-void Parser::prepare(PointLayoutPtr l)
-{
-    if (m_nodes.size() != 1)
-    {
-        std::cerr << "Can't prepare.  Node tree not properly parsed.\n";
-        return;
-    }
-    m_nodes.top()->prepare(l);
-}
-
-
 double Parser::eval(PointRef& p) const
 {
     if (m_nodes.size() != 1)
@@ -376,7 +365,8 @@ bool Parser::parexpr()
 
     if (!match(TokenType::Rparen))
     {
-        setError("Expected ')' following expression.");
+        setError("Expected ')' following expression at '" +
+            curToken().sval() + "'.");
         return false;
     }
     return true;

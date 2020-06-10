@@ -76,8 +76,8 @@ private:
         return viewSet;
     }
     virtual void l_addArgs(ProgramArgs& args) final;
-    virtual void writerInitialize(PointTableRef table)
-    {}
+    virtual void l_initialize(PointTableRef table);
+    virtual void l_prepared(PointTableRef table) final;
 
     /**
       Write the point in a PointView.  This is a simplification of the
