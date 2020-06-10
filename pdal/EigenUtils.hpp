@@ -279,7 +279,9 @@ namespace Utils
 {
 
 template <>
-inline bool fromString<Eigen::MatrixXd>(const std::string& s, Eigen::MatrixXd& matrix) {
+inline StatusWithReason fromString(const std::string& s,
+    Eigen::MatrixXd& matrix)
+{
     std::stringstream ss(s);
     std::string line;
     std::vector<std::vector<double>> rows;

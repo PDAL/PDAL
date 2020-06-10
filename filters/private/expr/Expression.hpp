@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include <pdal/util/Utils.hpp>
+
 namespace pdal
 {
 namespace expr
@@ -188,19 +190,37 @@ class Expression
 {
 public:
     Expression();
+    Expression(const Expression& expr);
+    Expression& operator=(const Expression& expr);
     ~Expression();
 
     void clear();
     bool parse(const std::string& s);
     std::string error() const;
-    void print() const;
+    std::string print() const;
     NodePtr popNode();
     void pushNode(NodePtr node);
 
 private:
     std::string m_error;
     std::stack<NodePtr> m_nodes;
+
+    friend std::ostream& operator<<(std::ostream& out, const Expression& expr);
 };
 
 } // namespace expr
+
+namespace Utils
+{
+
+template<>
+inline StatusWithReason fromString(const std::string& from,
+    pdal::expr::Expression& expr)
+{
+    bool ok = expr.parse(from);
+    return { ok ? 0 : -1, expr.error() };
+}
+
+} // namespace Util
+
 } // namespace pdal

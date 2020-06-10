@@ -185,8 +185,25 @@ std::string VarNode::print() const
 Expression::Expression()
 {}
 
+// This is a strange copy ctor that ignores the source.  At this point we
+// don't need it to do anything, but we do need the an expression to
+// be copyable.  In order to copy, we'd actually have to deep-copy the
+// nodes, but there is no way to do that right now.
+Expression::Expression(const Expression& expr)
+{}
+
 Expression::~Expression()
 {}
+
+// This is a strange copy ctor that ignores the source.  At this point we
+// don't need it to do anything, but we do need the an expression to
+// be copyable.  In order to copy, we'd actually have to deep-copy the
+// nodes, but there is no way to do that right now.
+Expression& Expression::operator=(const Expression& expr)
+{
+    clear();
+    return *this;
+}
 
 void Expression::clear()
 {
@@ -206,10 +223,14 @@ bool Expression::parse(const std::string& s)
 }
 
 std::string Expression::error() const
-{ return m_error; }
+{
+    return m_error;
+}
 
-void Expression::print() const
-{ std::cout << m_nodes.top()->print() << "\n"; }
+std::string Expression::print() const
+{
+    return m_nodes.top()->print();
+}
 
 NodePtr Expression::popNode()
 {
@@ -223,5 +244,12 @@ void Expression::pushNode(NodePtr node)
     m_nodes.push(std::move(node));
 }
 
+std::ostream& operator<<(std::ostream& out, const Expression& expr)
+{
+    out << expr.print();
+    return out;
+}
+
 } // namespace expr
 } // namespace pdal
+
