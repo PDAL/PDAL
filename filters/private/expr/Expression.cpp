@@ -16,26 +16,60 @@ NodeType Node::type() const
 { return m_type; }
 
 
-UnNode::UnNode(NodeType type, NodePtr sub) :
-    Node(type), m_sub(std::move(sub))
+//
+// NotNode
+//
+NotNode::NotNode(NodeType type, NodePtr sub) :
+    LogicalNode(type), m_sub(std::move(sub))
 {}
 
-std::string UnNode::print() const
+std::string NotNode::print() const
 {
     return "!(" + m_sub->print() + ")";
 }
 
-Utils::StatusWithReason UnNode::prepare(PointLayoutPtr l)
+Utils::StatusWithReason NotNode::prepare(PointLayoutPtr l)
 {
     return m_sub->prepare(l);
 }
-    
 
-BinNode::BinNode(NodeType type, NodePtr left, NodePtr right) :
-    Node(type), m_left(std::move(left)), m_right(std::move(right))
+Result NotNode::eval(PointRef& p) const
+{
+    return !(m_sub->eval(p).m_bval);
+}
+
+
+//
+// UnMathNode
+//
+UnMathNode::UnMathNode(NodeType type, NodePtr sub) :
+    ValueNode(type), m_sub(std::move(sub))
 {}
 
-std::string BinNode::print() const
+std::string UnMathNode::print() const
+{
+    return "-(" + m_sub->print() + ")";
+}
+
+Utils::StatusWithReason UnMathNode::prepare(PointLayoutPtr l)
+{
+    return m_sub->prepare(l);
+}
+
+Result UnMathNode::eval(PointRef& p) const
+{
+    return -(m_sub->eval(p).m_dval);
+}
+
+
+//
+// BinMathNode
+//
+BinMathNode::BinMathNode(NodeType type, NodePtr left, NodePtr right) :
+    ValueNode(type), m_left(std::move(left)), m_right(std::move(right))
+{}
+
+std::string BinMathNode::print() const
 {
     std::string s;
 
@@ -60,7 +94,7 @@ std::string BinNode::print() const
     return "(" + m_left->print() + " " + s + " " + m_right->print() + ")";
 }
 
-Utils::StatusWithReason BinNode::prepare(PointLayoutPtr l)
+Utils::StatusWithReason BinMathNode::prepare(PointLayoutPtr l)
 {
     auto status = m_left->prepare(l);
     if (status)
@@ -68,29 +102,35 @@ Utils::StatusWithReason BinNode::prepare(PointLayoutPtr l)
     return status;
 }
 
-/**
-virtual double eval(PointRef& p) const
+Result BinMathNode::eval(PointRef& p) const
 {
-double l = m_left->eval(p);
-double r = m_right->eval(p);
-switch (type())
-{
-case NodeType::Add:
-return l + r;
-case NodeType::Subtract:
-return l - r;
-case NodeType::Multiply:
-return l * r;
-case NodeType::Divide:
-return l / r;
-default:
-return 0;
-}
-}
-**/
+    double l = m_left->eval(p).m_dval;
+    double r = m_right->eval(p).m_dval;
 
+    switch (type())
+    {
+    case NodeType::Add:
+        return l + r;
+    case NodeType::Subtract:
+        return l - r;
+    case NodeType::Multiply:
+        return l * r;
+    case NodeType::Divide:
+        if (r == 0)
+            return std::numeric_limits<double>::quiet_NaN();
+        return l / r;
+    default:
+        break;
+    }
+    assert(false);
+    return 0.0;
+}
+
+//
+// Bool node
+//
 BoolNode::BoolNode(NodeType type, NodePtr left, NodePtr right) :
-    Node(type), m_left(std::move(left)), m_right(std::move(right))
+    LogicalNode(type), m_left(std::move(left)), m_right(std::move(right))
 {}
 
 std::string BoolNode::print() const
@@ -104,6 +144,59 @@ std::string BoolNode::print() const
     case NodeType::Or:
         s = "||";
         break;
+    default:
+        break;
+    }
+
+    return "(" + m_left->print() + " " + s + " " + m_right->print() + ")";
+}
+
+Utils::StatusWithReason BoolNode::prepare(PointLayoutPtr l)
+{
+    auto status = m_left->prepare(l);
+    if (status)
+        status = m_right->prepare(l);
+    return status;
+}
+
+Result BoolNode::eval(PointRef& p) const
+{
+    bool l = m_left->eval(p).m_bval;
+    bool r = m_right->eval(p).m_bval;
+    switch (type())
+    {
+    case NodeType::And:
+        return l && r;
+    case NodeType::Or:
+        return l || r;
+    default:
+        break;
+    }
+    assert(false);
+    return false;
+
+}
+
+//
+// CompareNode
+//
+CompareNode::CompareNode(NodeType type, NodePtr left, NodePtr right) :
+    LogicalNode(type), m_left(std::move(left)), m_right(std::move(right))
+{}
+
+Utils::StatusWithReason CompareNode::prepare(PointLayoutPtr l)
+{
+    auto status = m_left->prepare(l);
+    if (status)
+        status = m_right->prepare(l);
+    return status;
+}
+
+std::string CompareNode::print() const
+{
+    std::string s;
+    switch (type())
+    {
     case NodeType::Equal:
         s = "==";
         break;
@@ -125,58 +218,105 @@ std::string BoolNode::print() const
     default:
         break;
     }
-
-    return "(" + m_left->print() + " " + s + " " + m_right->print() + ")";
+    return "(" + m_left->print() + s + m_right->print() + ")";
 }
 
-Utils::StatusWithReason BoolNode::prepare(PointLayoutPtr l)
+Result CompareNode::eval(PointRef& p) const
 {
-    auto status = m_left->prepare(l);
-    if (status)
-        status = m_right->prepare(l);
-    return status;
+    double l = m_left->eval(p).m_dval;
+    double r = m_right->eval(p).m_dval;
+    switch (type())
+    {
+    case NodeType::Equal:
+        return l == r;
+    case NodeType::NotEqual:
+        return l != r;
+    case NodeType::Less:
+        return l < r;
+    case NodeType::LessEqual:
+        return l <= r;
+    case NodeType::Greater:
+        return l > r;
+    case NodeType::GreaterEqual:
+        return l >= r;
+    default:
+        break;
+    }
+    assert(false);
+    return false;
 }
 
-    /**
-    virtual double eval(PointRef& p) const
-    {
-        switch (type())
-        {
-        case NodeType::And:
-            return m_left->eval(p) && m_right->eval(p);
-        case NodeType::Or:
-            return m_left->eval(p) || m_right->eval(p);
-        default:
-            return 0;
-        }
-    }
-    **/
-
-ValNode::ValNode(double d) : Node(NodeType::Value), m_val(d)
+//
+// ConstValueNode
+//
+ConstValueNode::ConstValueNode(double d) : ValueNode(NodeType::Value), m_val(d)
 {}
 
-std::string ValNode::print() const
+
+std::string ConstValueNode::print() const
 {
     return std::to_string(m_val);
 }
 
-Utils::StatusWithReason ValNode::prepare(PointLayoutPtr l)
-{ return true; }
+Utils::StatusWithReason ConstValueNode::prepare(PointLayoutPtr l)
+{
+    return true;
+}
 
-    /**
-    virtual double eval(PointRef&) const
-    { return m_val; }
-    **/
+Result ConstValueNode::eval(PointRef&) const
+{
+    return m_val;
+}
 
-double ValNode::value() const
-{ return m_val; }
+double ConstValueNode::value() const
+{
+    return m_val;
+}
 
-VarNode::VarNode(const std::string& s) : Node(NodeType::Identifier), m_name(s),
-    m_id(Dimension::Id::Unknown)
+//
+// ConstLogicalNode
+//
+ConstLogicalNode::ConstLogicalNode(bool b) :
+    LogicalNode(NodeType::Value), m_val(b)
+{}
+
+
+std::string ConstLogicalNode::print() const
+{
+    return m_val ? "true" : "false";
+}
+
+Utils::StatusWithReason ConstLogicalNode::prepare(PointLayoutPtr l)
+{
+    return true;
+}
+
+Result ConstLogicalNode::eval(PointRef&) const
+{
+    return m_val;
+}
+
+bool ConstLogicalNode::value() const
+{
+    return m_val;
+}
+
+//
+// Var Node
+//
+VarNode::VarNode(const std::string& s) : ValueNode(NodeType::Identifier),
+    m_name(s), m_id(Dimension::Id::Unknown)
 {}
 
 std::string VarNode::print() const
-{ return m_name; }
+{
+    return m_name;
+}
+
+Result VarNode::eval(PointRef& p) const
+{
+    return p.getFieldAs<double>(m_id);
+}
 
 Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
 {
@@ -186,11 +326,9 @@ Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
     return true;
 }
 
-/**
-    virtual double eval(PointRef& p) const
-    { return p.getFieldAs<double>(m_id); }
-**/
-
+//
+// Expression
+//
 Expression::Expression()
 {}
 
@@ -255,9 +393,40 @@ void Expression::pushNode(NodePtr node)
 
 Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
 {
+    /**
     if (m_nodes.size())
         return m_nodes.top()->prepare(layout);
+    **/
+    if (m_nodes.size())
+    {
+        Node *top = m_nodes.top().get();
+        auto status = top->prepare(layout);
+        std::cerr << top->print() << "!\n";
+        if (status)
+        {
+            if (top->isValue())
+                status =
+                    { -1, "Expression evalutes to a value, not a boolean." };
+            else
+            {
+                ConstLogicalNode *n = dynamic_cast<ConstLogicalNode *>(top);
+                if (n)
+                {
+                    if (n->value())
+                        status = { -1, "Expression is always true." };
+                    else
+                        status = { -1, "Expression is always false." };
+                }
+            }
+        }
+        return status;
+    }
     return true;
+}
+
+bool Expression::eval(PointRef& p) const
+{
+    return m_nodes.top()->eval(p).m_bval;
 }
 
 std::ostream& operator<<(std::ostream& out, const Expression& expr)

@@ -87,16 +87,13 @@ bool Parser::orexpr()
         NodePtr right = m_expression.popNode();
         NodePtr left = m_expression.popNode();
 
-        ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
-        ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
-        if (leftVal && rightVal)
+        if (left->isValue() || right->isValue())
         {
-            double v = leftVal->value() || rightVal->value();
-            m_expression.pushNode(NodePtr(new ValNode(v)));
+            setError("Can't apply '||' to numeric expression.");
+            return false;
         }
-        else
-            m_expression.pushNode(NodePtr(new BoolNode(NodeType::Or,
-                std::move(left), std::move(right))));
+        m_expression.pushNode(NodePtr(new BoolNode(NodeType::Or,
+            std::move(left), std::move(right))));
     }
     return true;
 }
@@ -120,16 +117,13 @@ bool Parser::andexpr()
         NodePtr right = m_expression.popNode();
         NodePtr left = m_expression.popNode();
 
-        ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
-        ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
-        if (leftVal && rightVal)
+        if (left->isValue() || right->isValue())
         {
-            double v = leftVal->value() && rightVal->value();
-            m_expression.pushNode(NodePtr(new ValNode(v)));
+            setError("Can't apply '&&' to numeric expression.");
+            return false;
         }
-        else
-            m_expression.pushNode(NodePtr(new BoolNode(NodeType::And,
-                std::move(left), std::move(right))));
+        m_expression.pushNode(NodePtr(new BoolNode(NodeType::And,
+            std::move(left), std::move(right))));
     }
     return true;
 }
@@ -169,28 +163,36 @@ bool Parser::compareexpr()
 
         NodePtr right = m_expression.popNode();
         NodePtr left = m_expression.popNode();
-        ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
-        ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
+        ConstValueNode *leftVal = dynamic_cast<ConstValueNode *>(left.get());
+        ConstValueNode *rightVal = dynamic_cast<ConstValueNode *>(right.get());
         if (leftVal && rightVal)
         {
-            double v(0);
+            bool b(false);
             if (type == NodeType::Equal)
-                v = (leftVal->value() == rightVal->value());
+                b = (leftVal->value() == rightVal->value());
             else if (type == NodeType::NotEqual)
-                v = (leftVal->value() != rightVal->value());
+                b = (leftVal->value() != rightVal->value());
             else if (type == NodeType::Greater)
-                v = (leftVal->value() > rightVal->value());
+                b = (leftVal->value() > rightVal->value());
             else if (type == NodeType::GreaterEqual)
-                v = (leftVal->value() >= rightVal->value());
+                b = (leftVal->value() >= rightVal->value());
             else if (type == NodeType::Less)
-                v = (leftVal->value() < rightVal->value());
+                b = (leftVal->value() < rightVal->value());
             else if (type == NodeType::LessEqual)
-                v = (leftVal->value() <= rightVal->value());
-            m_expression.pushNode(NodePtr(new ValNode(v)));
+                b = (leftVal->value() <= rightVal->value());
+            m_expression.pushNode(NodePtr(new ConstLogicalNode(b)));
         }
         else
-            m_expression.pushNode(NodePtr(new BoolNode(type,
+        {
+            if (left->isBool() || right->isBool())
+            {
+                setError("Can't apply '" + curToken().sval() + "' to "
+                    "logical expression.");
+                return false;
+            }
+            m_expression.pushNode(NodePtr(new CompareNode(type,
                 std::move(left), std::move(right))));
+        }
     }
     return true;
 }
@@ -221,18 +223,26 @@ bool Parser::addexpr()
         NodePtr right = m_expression.popNode();
         NodePtr left = m_expression.popNode();
 
-        ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
-        ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
+        ConstValueNode *leftVal = dynamic_cast<ConstValueNode *>(left.get());
+        ConstValueNode *rightVal = dynamic_cast<ConstValueNode *>(right.get());
         if (leftVal && rightVal)
         {
             double v = (type == NodeType::Add) ?
                 leftVal->value() + rightVal->value() :
                 leftVal->value() - rightVal->value();
-            m_expression.pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ConstValueNode(v)));
         }
         else
-            m_expression.pushNode(NodePtr(new BinNode(type,
+        {
+            if (left->isBool() || right->isBool())
+            {
+                setError("Can't apply '" + curToken().sval() + "' to "
+                    "logical expression.");
+                return false;
+            }
+            m_expression.pushNode(NodePtr(new BinMathNode(type,
                 std::move(left), std::move(right))));
+        }
     }
     return true;
 }
@@ -262,8 +272,9 @@ bool Parser::multexpr()
         NodePtr right = m_expression.popNode();
         NodePtr left = m_expression.popNode();
 
-        ValNode *leftVal = dynamic_cast<ValNode *>(left.get());
-        ValNode *rightVal = dynamic_cast<ValNode *>(right.get());
+        ConstValueNode *leftVal = dynamic_cast<ConstValueNode *>(left.get());
+        ConstValueNode *rightVal = dynamic_cast<ConstValueNode *>(right.get());
+
         if (leftVal && rightVal)
         {
             double v;
@@ -278,11 +289,19 @@ bool Parser::multexpr()
                 }
                 v = leftVal->value() / rightVal->value();
             }
-            m_expression.pushNode(NodePtr(new ValNode(v)));
+            m_expression.pushNode(NodePtr(new ConstValueNode(v)));
         }
         else
-            m_expression.pushNode(NodePtr(new BinNode(type,
+        {
+            if (left->isBool() || right->isBool())
+            {
+                setError("Can't apply '" + curToken().sval() + "' to "
+                    "logical expression.");
+                return false;
+            }
+            m_expression.pushNode(NodePtr(new BinMathNode(type,
                 std::move(left), std::move(right))));
+        }
     }
     return true;
 }
@@ -299,15 +318,13 @@ bool Parser::notexpr()
     }
 
     NodePtr sub = m_expression.popNode();
-    ValNode *node = dynamic_cast<ValNode *>(sub.get());
-    if (node)
+    if (sub->isValue())
     {
-        double v = !node->value();
-        m_expression.pushNode(NodePtr(new ValNode(v)));
+        setError("Can't apply '!' to numeric value.");
+        return false;
     }
-    else
-        m_expression.pushNode(
-            NodePtr(new UnNode(NodeType::Not, std::move(sub))));
+    m_expression.pushNode(
+        NodePtr(new NotNode(NodeType::Not, std::move(sub))));
     return true;
 }
 
@@ -323,15 +340,23 @@ bool Parser::uminus()
     }
 
     NodePtr sub = m_expression.popNode();
-    ValNode *node = dynamic_cast<ValNode *>(sub.get());
+    ConstValueNode *node = dynamic_cast<ConstValueNode *>(sub.get());
     if (node)
     {
         double v = -(node->value());
-        m_expression.pushNode(NodePtr(new ValNode(v)));
+        m_expression.pushNode(NodePtr(new ConstValueNode(v)));
     }
     else
+    {
+        if (node->isBool())
+        {
+            setError("Can't apply '-' to logical expression '" +
+                sub->print() + "'.");
+            return false;
+        }
         m_expression.pushNode(
-            NodePtr(new UnNode(NodeType::Negative, std::move(sub))));
+            NodePtr(new UnMathNode(NodeType::Negative, std::move(sub))));
+    }
     return true;
 }
 
@@ -339,7 +364,7 @@ bool Parser::primary()
 {
     if (match(TokenType::Number))
     {
-        m_expression.pushNode(NodePtr(new ValNode(curToken().dval())));
+        m_expression.pushNode(NodePtr(new ConstValueNode(curToken().dval())));
         return true;
     }
     else if (match(TokenType::Identifier))

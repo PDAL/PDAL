@@ -6,6 +6,7 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/PointLayout.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -34,6 +35,25 @@ enum class NodeType
     None
 };
 
+struct Result
+{
+    Result(double d)
+    { m_dval = d; m_bval = false; }
+
+    Result(bool b)
+    { m_bval = b; m_dval = 0; }
+
+    enum class Type
+    {
+        Bool,
+        Val
+    };
+
+    double m_dval;
+    bool m_bval;
+    Type m_type;
+};
+
 class Node
 {
 protected:
@@ -45,9 +65,10 @@ public:
 
     virtual std::string print() const = 0;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l) = 0;
-    /**
-    virtual double eval(PointRef& p) const = 0;
-    **/
+    virtual Result eval(PointRef& p) const = 0;
+    virtual bool isBool() const = 0;
+    virtual bool isValue() const
+    { return !isBool(); }
 
 private:
     NodeType m_type;
@@ -58,92 +79,102 @@ protected:
 };
 using NodePtr = std::unique_ptr<Node>;
 
-class UnNode : public Node
+class LogicalNode : public Node
 {
 public:
-    UnNode(NodeType type, NodePtr sub);
+    LogicalNode(NodeType type) : Node(type)
+    {}
 
-    virtual std::string print() const;
-    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
-
-private:
-    NodePtr m_sub;
+    virtual bool isBool() const
+    { return true; }
 };
 
-class BinNode : public Node
+class ValueNode : public Node
 {
 public:
-    BinNode(NodeType type, NodePtr left, NodePtr right);
+    ValueNode(NodeType type) : Node(type)
+    {}
+
+    virtual bool isBool() const
+    { return false; }
+};
+
+class BinMathNode : public ValueNode
+{
+public:
+    BinMathNode(NodeType type, NodePtr left, NodePtr right);
 
     virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
-
-    /**
-    virtual double eval(PointRef& p) const
-    {
-        double l = m_left->eval(p);
-        double r = m_right->eval(p);
-        switch (type())
-        {
-        case NodeType::Add:
-            return l + r;
-        case NodeType::Subtract:
-            return l - r;
-        case NodeType::Multiply:
-            return l * r;
-        case NodeType::Divide:
-            return l / r;
-        default:
-            return 0;
-        }
-    }
-    **/
+    virtual Result eval(PointRef& p) const;
 
 private:
     NodePtr m_left;
     NodePtr m_right;
 };
 
-class BoolNode : public Node
+class UnMathNode : public ValueNode
+{
+public:
+    UnMathNode(NodeType type, NodePtr sub);
+
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef& p) const;
+
+private:
+    NodePtr m_sub;
+};
+
+class NotNode : public LogicalNode
+{
+public:
+    NotNode(NodeType type, NodePtr sub);
+
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef& p) const;
+
+private:
+    NodePtr m_sub;
+};
+
+class BoolNode : public LogicalNode
 {
 public:
     BoolNode(NodeType type, NodePtr left, NodePtr right);
 
     virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
-
-    /**
-    virtual double eval(PointRef& p) const
-    {
-        switch (type())
-        {
-        case NodeType::And:
-            return m_left->eval(p) && m_right->eval(p);
-        case NodeType::Or:
-            return m_left->eval(p) || m_right->eval(p);
-        default:
-            return 0;
-        }
-    }
-    **/
+    virtual Result eval(PointRef& p) const;
 
 private:
     NodePtr m_left;
     NodePtr m_right;
 };
 
-class ValNode : public Node
+class CompareNode : public LogicalNode
 {
 public:
-    ValNode(double d);
+    CompareNode(NodeType type, NodePtr left, NodePtr right);
 
     virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef& p) const;
 
-    /**
-    virtual double eval(PointRef&) const
-    { return m_val; }
-    **/
+private:
+    NodePtr m_left;
+    NodePtr m_right;
+};
+
+class ConstValueNode : public ValueNode
+{
+public:
+    ConstValueNode(double d);
+
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef&) const;
 
     double value() const;
 
@@ -151,18 +182,29 @@ private:
     double m_val;
 };
 
-class VarNode : public Node
+class ConstLogicalNode : public LogicalNode
+{
+public:
+    ConstLogicalNode(bool b);
+
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef&) const;
+
+    bool value() const;
+
+private:
+    bool m_val;
+};
+
+class VarNode : public ValueNode
 {
 public:
     VarNode(const std::string& s);
 
     virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
-
-    /**
-    virtual double eval(PointRef& p) const
-    { return p.getFieldAs<double>(m_id); }
-    **/
+    virtual Result eval(PointRef& p) const;
 
 private:
     std::string m_name;
@@ -184,6 +226,7 @@ public:
     NodePtr popNode();
     void pushNode(NodePtr node);
     Utils::StatusWithReason prepare(PointLayoutPtr layout);
+    bool eval(PointRef& p) const;
 
 private:
     std::string m_error;

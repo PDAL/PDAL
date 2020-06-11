@@ -41,6 +41,7 @@ namespace pdal
 struct Filter::Args
 {
     expr::Expression m_where;
+    Arg *m_whereArg;
 };
 
 Filter::Filter() : m_args(new Args)
@@ -65,16 +66,43 @@ void Filter::l_initialize(PointTableRef table)
 void Filter::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);
-    args.add("where", "Expression describing points to be passed to this "
+    m_args->m_whereArg = &args.add("where",
+        "Expression describing points to be passed to this "
         "filter", m_args->m_where);
 }
 
 void Filter::l_prepared(PointTableRef table)
 {
     Stage::l_prepared(table);
+    std::cerr << "+ Prepare!\n";
     auto status = m_args->m_where.prepare(table.layout());
+    std::cerr << "- Prepare!\n";
     if (!status)
         throwError("Invalid 'where': " + status.what());
+}
+
+void Filter::l_prerun(const PointViewSet& views, PointViewSet& keeps,
+    PointViewSet& skips)
+{
+    if (m_args->m_whereArg->set())
+    {
+        for (PointViewPtr v : views)
+        {
+            PointViewPtr keep = v->makeNew();
+            keeps.insert(keep);
+            PointViewPtr skip = v->makeNew();
+            skips.insert(skip);
+            PointView *k = keep.get();
+            PointView *s = skip.get();
+            for (PointRef p : *v)
+            {
+                PointView *active = m_args->m_where.eval(p) ? k : s;
+                active->appendPoint(*v, p.pointId());
+            }
+        }
+    }
+    else
+        keeps = std::move(views);
 }
 
 } // namespace pdal

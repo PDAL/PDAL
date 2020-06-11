@@ -413,7 +413,8 @@ public:
             std::string error(m_error);
 
             if (error.empty())
-                error = status.what();
+                error = "Invalid value for argument '" + m_longname + "': " +
+                    status.what();
             if (error.empty())
                 error = "Invalid value '" + s + "' for argument '" +
                     m_longname + "'.";
@@ -764,9 +765,11 @@ public:
             std::string error(m_error);
 
             if (error.empty())
-                error = "'" + m_longname + "': " + status.what();
+                error = "Invalid value for argument '" + m_longname + "': " +
+                    status.what();
             if (error.empty())
-                error = "Invalid value for argument '" + m_longname + "'.";
+                error = "Invalid value '" + s + "' for argument '" +
+                    m_longname + "'.";
             throw arg_val_error(error);
         }
         if (!m_set)

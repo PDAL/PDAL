@@ -58,6 +58,8 @@ public:
     Filter(const Filter&) = delete;
 
 private:
+    virtual void l_prerun(const PointViewSet& views,
+        PointViewSet& keeps, PointViewSet& skips) final;
     virtual void l_initialize(PointTableRef table) final;
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;

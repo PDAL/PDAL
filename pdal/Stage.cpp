@@ -258,11 +258,17 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
         if (m)
             m_faceCount += m->size();
     }
+
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
-    prerun(views);
-    for (auto const& it : views)
+
+    //ABELL - Filter out points based on "where" clause.
+
+    PointViewSet keeps, skips;
+    l_prerun(views, keeps, skips);
+    prerun(keeps);
+    for (auto const& it : keeps)
     {
         StageRunnerPtr runner(new StageRunner(this, it));
         runners.push_back(runner);
@@ -284,6 +290,7 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
                 v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
+    outViews.insert(skips.begin(), skips.end());
     done(table);
     stopLogging();
     m_pointCount = 0;
