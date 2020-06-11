@@ -57,6 +57,8 @@ public:
     Filter& operator=(const Filter&) = delete;
     Filter(const Filter&) = delete;
 
+    bool eval(PointRef& p) const;
+
 private:
     virtual void l_prerun(const PointViewSet& views,
         PointViewSet& keeps, PointViewSet& skips) final;

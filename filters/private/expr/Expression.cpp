@@ -393,10 +393,6 @@ void Expression::pushNode(NodePtr node)
 
 Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
 {
-    /**
-    if (m_nodes.size())
-        return m_nodes.top()->prepare(layout);
-    **/
     if (m_nodes.size())
     {
         Node *top = m_nodes.top().get();

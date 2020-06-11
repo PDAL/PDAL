@@ -103,5 +103,12 @@ void Filter::l_prerun(const PointViewSet& views, PointViewSet& keeps,
         keeps = std::move(views);
 }
 
+bool Filter::eval(PointRef& p) const
+{
+    if (!m_args->m_whereArg->set())
+        return true;
+    return m_args->m_where.eval(p);
+}
+
 } // namespace pdal
 
