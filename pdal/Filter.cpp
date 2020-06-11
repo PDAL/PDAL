@@ -74,9 +74,7 @@ void Filter::l_addArgs(ProgramArgs& args)
 void Filter::l_prepared(PointTableRef table)
 {
     Stage::l_prepared(table);
-    std::cerr << "+ Prepare!\n";
     auto status = m_args->m_where.prepare(table.layout());
-    std::cerr << "- Prepare!\n";
     if (!status)
         throwError("Invalid 'where': " + status.what());
 }

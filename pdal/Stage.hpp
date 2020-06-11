@@ -459,7 +459,7 @@ private:
      */
      virtual void l_prerun(const PointViewSet& views,
          PointViewSet& keeps, PointViewSet& skips)
-     {}
+     { keeps = std::move(views); }
 
     /**
       Pass all the point views at once to the stage for cases where we need
