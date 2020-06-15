@@ -397,7 +397,6 @@ Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
     {
         Node *top = m_nodes.top().get();
         auto status = top->prepare(layout);
-        std::cerr << top->print() << "!\n";
         if (status)
         {
             if (top->isValue())

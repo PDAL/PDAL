@@ -212,7 +212,7 @@ Token Lexer::letter()
     while (true)
     {
         char c = getChar();
-        if (!std::isalpha(c) && c != '_')
+        if (!std::isalnum(c) && c != '_')
         {
             putChar();
             return Token(TokenType::Identifier, m_tokPos, m_pos, 
