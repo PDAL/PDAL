@@ -90,7 +90,7 @@ void NormalFilter::addArgs(ProgramArgs& args)
              m_args->m_up, true);
     args.add("refine",
              "Refine normals using minimum spanning tree propagation?",
-             m_args->m_refine, true);
+             m_args->m_refine, false);
 }
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
