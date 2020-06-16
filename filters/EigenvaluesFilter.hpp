@@ -61,6 +61,9 @@ private:
     int m_knn;
     Dimension::Id m_e0, m_e1, m_e2;
     bool m_normalize;
+    size_t m_stride;
+    double m_radius;
+    int m_minK;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

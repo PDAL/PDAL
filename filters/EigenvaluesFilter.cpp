@@ -65,6 +65,9 @@ void EigenvaluesFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 8);
     args.add("normalize", "Normalize eigenvalues?", m_normalize, false);
+    args.add("stride", "Compute features on strided neighbors", m_stride, size_t(1));
+    args.add("radius", "Radius for nearest neighbor search", m_radius, 0.0);
+    args.add("min_k", "Minimum number of neighbors in radius", m_minK, 3);
 }
 
 
@@ -83,8 +86,18 @@ void EigenvaluesFilter::filter(PointView& view)
 
     for (PointId i = 0; i < view.size(); ++i)
     {
-        // find the k-nearest neighbors
-        auto ids = kdi.neighbors(i, m_knn);
+        // find neighbors, either by radius or k nearest neighbors
+        PointIdList ids;
+        if (m_radius > 0.0)
+            ids = kdi.radius(i, m_radius);
+        else
+            ids = kdi.neighbors(i, m_knn + 1, m_stride);
+
+        // if insufficient number of neighbors, eigen solver will fail anyway, it
+        // may be okay to silently return without setting any of the computed
+        // features?
+        if (ids.size() < (size_t)m_minK)
+            return;
 
         // compute covariance of the neighborhood
         auto B = computeCovariance(view, ids);
