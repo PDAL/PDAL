@@ -291,10 +291,11 @@ TEST(TextReaderTest, insertHeader)
 
 TEST(TextReaderTest, quotedHeader)
 {
-    auto testme = [](Options& options)
+    auto testme = [](Options& options,
+        const std::string& filename = "text/quoted.txt")
     {
         TextReader reader;
-        options.add("filename", Support::datapath("text/quoted.txt"));
+        options.add("filename", Support::datapath(filename));
         reader.setOptions(options);
 
         PointTable table;
@@ -315,22 +316,35 @@ TEST(TextReaderTest, quotedHeader)
 
     {
         Options opts;
-        opts.add("header", "\"X\"\"Y\"   \"Z\"  ");
+        opts.add("header", "\"X\",\"Y\",\"Z\"");
         opts.add("skip", 1);
         testme(opts);
     }
 
     {
         Options opts;
-        opts.add("header", "\"X\"\"Y\"   \"  ");
+        opts.add("header", "\"X\",  \"Y\"  , \"Z\"  ");
+        opts.add("skip", 1);
+        testme(opts);
+    }
+
+    {
+        Options opts;
+        opts.add("header", "\"X\",\"Y\"   \"  ");
         opts.add("skip", 1);
         EXPECT_THROW(testme(opts), pdal_error);
     }
 
     {
         Options opts;
-        opts.add("header", "  \"X\"\"Y\"   \"  ");
+        opts.add("header", "  \"X\",,\"Y\",\"Z\"");
         opts.add("skip", 1);
         EXPECT_THROW(testme(opts), pdal_error);
+    }
+
+    {
+        Options opts;
+        opts.add("separator", ' ');
+        testme(opts, "text/quoted2.txt");
     }
 }

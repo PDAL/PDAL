@@ -82,7 +82,7 @@ int SortKernel::execute()
         writerOptions.add("forward_metadata", true);
     Stage& writer = makeWriter(m_outputFile, sortStage, "", writerOptions);
 
-    PointTable table;
+    ColumnPointTable table;
     writer.prepare(table);
     writer.execute(table);
 

@@ -45,13 +45,14 @@ namespace pdal
 int PointView::m_lastId = 0;
 
 PointView::PointView(PointTableRef pointTable) : m_pointTable(pointTable),
-m_size(0), m_id(0)
+    m_layout(pointTable.layout()), m_size(0), m_id(0)
 {
 	m_id = ++m_lastId;
 }
 
 PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
-	m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
+	m_pointTable(pointTable), m_layout(pointTable.layout()), m_size(0),
+    m_id(0), m_spatialReference(srs)
 {
 	m_id = ++m_lastId;
 }
@@ -69,6 +70,22 @@ PointViewIter PointView::begin()
 PointViewIter PointView::end()
 {
     return PointViewIter(this, size());
+}
+
+
+PointId PointView::tableId(PointId idx)
+{
+    if (idx > size())
+        throw pdal_error("Point index must increment.");
+    if (idx == size())
+    {
+        PointId rawId = m_pointTable.addPoint();
+        m_index.push_back(rawId);
+        m_size++;
+        assert(m_temps.empty());
+        return rawId;
+    }
+    return m_index[idx];
 }
 
 

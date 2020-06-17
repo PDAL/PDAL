@@ -15,9 +15,13 @@ in each subsequent line.  There are two types of header lines.
 Quoted dimension names
 ----------------------
 When the first character of the header is a double quote, each dimension name
-is assumed to be surrounded by double quotes.  Any text following a quoted
-dimension name and the start of the next dimension name is ignored.  The
-`separator`_ option can't be used with quoted dimension names.
+is assumed to be surrounded by double quotes.  A single separator character
+is expected between the dimension names (spaces are stripped).  If no separator
+character is found, a space is assumed.  You can set the `separator`_ character
+if it differs from that in the header.  Note that PDAL requires dimension
+names that consist only of alphabetic characters and underscores.  Edit
+the header line or use the `header`_ option to set the dimension names to
+ones that PDAL understands.
 
 Unquoted dimension names
 ------------------------
@@ -104,7 +108,7 @@ filename
 
 .. include:: reader_opts.rst
 
-header
+_`header`
   String to use as the file header.  All lines in the file are assumed to be
   records containing point data unless skipped with the `skip`_ option.
   [Default: None]

@@ -62,8 +62,9 @@ private:
     virtual void filter(PointView& view);
     virtual void initialize();
     void doOneNoDomain(PointRef &point, PointRef& temp, KD3Index &kdi);
-    PointViewPtr loadSet(const std::string &candFileName, PointTable &table);
-    NeighborClassifierFilter& operator=(const NeighborClassifierFilter&) = delete;
+    PointViewPtr loadSet(const std::string &candFileName, PointTableRef table);
+    NeighborClassifierFilter& operator=(
+        const NeighborClassifierFilter&) = delete;
     NeighborClassifierFilter(const NeighborClassifierFilter&) = delete;
     StringList m_domainSpec;
     std::vector<DimRange> m_domain;

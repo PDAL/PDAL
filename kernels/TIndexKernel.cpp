@@ -401,7 +401,7 @@ void TIndexKernel::mergeFile()
     catch (std::bad_cast&)
     {}
 
-    PointTable table;
+    ColumnPointTable table;
     writer.prepare(table);
     writer.execute(table);
 }
@@ -441,41 +441,9 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         throw pdal_error(oss.str());
     }
 
-    // We have a limit of like 254 characters in some formats (notably
-    // shapefile), so try to get the condensed version of the SRS.
-
-    // Failing that, get the proj.4 version.  Not sure what's supposed to
-    // happen if we overflow 254 with proj.4.
-
-    std::string epsg =
-        SpatialReference(fileInfo.m_srs).identifyHorizontalEPSG();
-    if (epsg.size())
-    {
-        epsg = "EPSG:" + epsg;
-        OGR_F_SetFieldString(hFeature, indexes.m_srs, epsg.data());
-    }
-    else
-    {
-        char* pszProj4 = NULL;
-        int err = -1;
-        try
-        {
-            err = OSRExportToProj4(srcSrs.get(), &pszProj4);
-        }
-        catch (pdal_error&)
-        {}
-        if (err != OGRERR_NONE)
-        {
-            m_log->get(LogLevel::Warning) << "Unable to convert SRS to "
-                "proj.4 format for file '" << fileInfo.m_filename << "'" <<
-                std::endl;
-            OGR_F_Destroy(hFeature);
-            return false;
-        }
-        std::string srs = std::string(pszProj4);
-        OGR_F_SetFieldString(hFeature, indexes.m_srs, srs.c_str());
-        CPLFree(pszProj4);
-    }
+    std::string wkt =
+        SpatialReference(fileInfo.m_srs).getWKT();
+    OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
 
     // Set the geometry in the feature
     Polygon g = prepareGeometry(fileInfo);
@@ -502,7 +470,7 @@ bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 
 bool TIndexKernel::slowBoundary(Stage& hexer, FileInfo& fileInfo)
 {
-    PointTable table;
+    ColumnPointTable table;
     hexer.prepare(table);
     PointViewSet set = hexer.execute(table);
 
@@ -630,7 +598,6 @@ void TIndexKernel::createFields()
     OGR_Fld_Destroy(hFieldDefn);
 
     hFieldDefn = OGR_Fld_Create(m_srsColumnName.c_str(), OFTString);
-    OGR_Fld_SetWidth(hFieldDefn, 254);
     OGR_L_CreateField(m_layer, hFieldDefn, TRUE );
     OGR_Fld_Destroy(hFieldDefn);
 

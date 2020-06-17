@@ -100,7 +100,7 @@ int RandomKernel::execute()
         writerOptions.add("compression", true);
     Stage& writer = makeWriter(m_outputFile, reader, "", writerOptions);
 
-    PointTable table;
+    ColumnPointTable table;
     writer.prepare(table);
     writer.execute(table);
 

@@ -73,7 +73,7 @@ public:
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref);
     SpatialReference getSpatialReference() const;
-    StatusWithReason transform(SpatialReference ref);
+    Utils::StatusWithReason transform(SpatialReference ref);
 
     std::string wkt(double precision=15, bool bOutputZ=false) const;
     std::string json(double precision=15) const;

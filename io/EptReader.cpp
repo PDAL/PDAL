@@ -354,6 +354,7 @@ QuickInfo EptReader::inspect()
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
 
+        m_hierarchy.reset(new Hierarchy);
         overlaps();
 
         qi.m_pointCount = 0;
@@ -481,6 +482,7 @@ void EptReader::overlaps()
         // First, determine the overlapping nodes from the EPT resource.
         overlaps(*m_hierarchy, m_connector->getJson(filename), key);
     }
+    m_pool->await();
 
     // Determine the addons that exist to correspond to tiles.
     for (auto& addon : m_addons)
@@ -710,6 +712,9 @@ void EptReader::process(PointViewPtr dstView, const TileContents& tile,
 bool EptReader::processOne(PointRef& point)
 {
 top:
+    if (m_tileCount == 0)
+        return false;
+
     // If there is no active tile, grab one off the queue and ask for
     // another if there are more.  If none are available, wait.
     if (!m_currentTile)
@@ -742,8 +747,7 @@ top:
     {
         m_pointId = 0;
         m_currentTile.reset();
-        if (--m_tileCount == 0)
-            return false;
+        --m_tileCount;
     }
 
     // If we didn't pass a point, try again.

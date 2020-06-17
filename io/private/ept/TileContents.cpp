@@ -82,7 +82,7 @@ void TileContents::readLaszip()
     std::string filename = m_info.dataDir() + key().toString() + ".laz";
     auto handle = m_connector.getLocalHandle(filename);
 
-    m_table.reset(new PointTable);
+    m_table.reset(new ColumnPointTable);
 
     Options options;
     options.add("filename", handle.localPath());

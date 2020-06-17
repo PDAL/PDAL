@@ -227,7 +227,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     }
 
     if (!(min_radius < (std::numeric_limits<double>::max()))) {
-        throw std::runtime_error("not triangulation");
+        throw std::runtime_error("All points collinear");
     }
 
     double i2x = coords[2 * i2];
