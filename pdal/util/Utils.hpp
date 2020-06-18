@@ -82,6 +82,14 @@ namespace Utils
     public:
         StatusWithReason() : m_code(0)
         {}
+        StatusWithReason(bool ok)
+        {
+            if (ok)
+                m_code = 0;
+            else
+                m_code = -1;
+        }
+        StatusWithReason(int code);  // Not defined
         StatusWithReason(int code, const std::string& what) :
             m_code(code), m_what(what)
         {}
@@ -929,7 +937,7 @@ namespace Utils
 
 
     template<typename T>
-    bool fromString(const std::string& from, T* & to)
+    StatusWithReason fromString(const std::string& from, T* & to)
     {
         void *v;
         // Uses sscanf instead of operator>>(istream, void*&) as a workaround
@@ -951,7 +959,7 @@ namespace Utils
       \return  \c true if the conversion was successful, \c false otherwise.
     */
     template<typename T>
-    bool fromString(const std::string& from, T& to)
+    StatusWithReason fromString(const std::string& from, T& to)
     {
         std::istringstream iss(from);
 
@@ -961,7 +969,7 @@ namespace Utils
 
     // Optimization of above.
     template<>
-    inline bool fromString(const std::string& from, std::string& to)
+    inline StatusWithReason fromString(const std::string& from, std::string& to)
     {
         to = from;
         return true;
@@ -975,7 +983,7 @@ namespace Utils
       \return  \c true if the conversion was successful, \c false otherwise.
     */
     template<>
-    inline bool fromString<char>(const std::string& s, char& to)
+    inline StatusWithReason fromString(const std::string& s, char& to)
     {
         try
         {
@@ -1006,8 +1014,7 @@ namespace Utils
       \return  \c true if the conversion was successful, \c false otherwise.
     */
     template<>
-    inline bool fromString<unsigned char>(const std::string& s,
-        unsigned char& to)
+    inline StatusWithReason fromString(const std::string& s, unsigned char& to)
     {
         try
         {
@@ -1039,7 +1046,7 @@ namespace Utils
       \return  \c true if the conversion was successful, \c false otherwise.
     */
     template<>
-    inline bool fromString<signed char>(const std::string& s, signed char& to)
+    inline StatusWithReason fromString(const std::string& s, signed char& to)
     {
         try
         {
@@ -1070,7 +1077,7 @@ namespace Utils
       \return  \c true if the conversion was successful, \c false otherwise.
     */
     template<>
-    inline bool fromString<double>(const std::string& s, double& d)
+    inline StatusWithReason fromString(const std::string& s, double& d)
     {
         if (s == "nan" || s == "NaN")
         {
