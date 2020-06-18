@@ -407,10 +407,14 @@ public:
         }
 
         m_rawVal = s;
-        if (!Utils::fromString(s, m_var))
+        auto status = Utils::fromString(s, m_var);
+        if (!status)
         {
             std::string error(m_error);
 
+            if (error.empty())
+                error = "Invalid value for argument '" + m_longname + "': " +
+                    status.what();
             if (error.empty())
                 error = "Invalid value '" + s + "' for argument '" +
                     m_longname + "'.";
@@ -755,12 +759,17 @@ public:
         T var;
 
         m_rawVal = s;
-        if (!Utils::fromString(s, var))
+        auto status = Utils::fromString(s, var);
+        if (!status)
         {
             std::string error(m_error);
 
             if (error.empty())
-                error = "Invalid value for argument '" + m_longname + "'.";
+                error = "Invalid value for argument '" + m_longname + "': " +
+                    status.what();
+            if (error.empty())
+                error = "Invalid value '" + s + "' for argument '" +
+                    m_longname + "'.";
             throw arg_val_error(error);
         }
         if (!m_set)

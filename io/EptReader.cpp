@@ -83,7 +83,7 @@ public:
 namespace Utils
 {
     template<>
-    bool fromString<EptBounds>(const std::string& s, EptBounds& bounds)
+    StatusWithReason fromString(const std::string& s, EptBounds& bounds)
     {
         if (!fromString(s, (SrsBounds&)bounds))
             return false;
