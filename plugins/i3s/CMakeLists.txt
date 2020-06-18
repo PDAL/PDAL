@@ -7,6 +7,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
       io/I3SReader.cpp
       io/EsriUtil.cpp
       io/EsriReader.cpp
+      io/Obb.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
         ${ZLIB_LIBRARY}
@@ -46,6 +47,10 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_slpk_reader_test
             FILES
                 test/SlpkReaderTest.cpp
+                io/Obb.cpp
+            INCLUDES
+                ${NLOHMANN_INCLUDE_DIR}
+                ${PDAL_VENDOR_DIR}/eigen
     )
 
     if (BUILD_I3S_TESTS)
