@@ -1,7 +1,5 @@
 #include <pdal/pdal_test_main.hpp>
 
-#include <nlohmann/json.hpp>
-
 #include "Support.hpp"
 
 #include <pdal/PipelineManager.hpp>
@@ -13,46 +11,7 @@
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
 
-#include "../io/Obb.hpp"
-
 using namespace pdal;
-
-TEST(SlpkReaderTest, obb)
-{
-    using namespace i3s;
-
-    std::string baseString = R"(
-        {
-            "center" : [ 0, 0, 0 ],
-            "halfSize" : [ 2, 1, 1.5 ],
-            "quaternion" : [ 0, 0, 0, 1 ]
-        }
-    )";
-    std::string clipString = R"(
-        {
-            "center" : [ 2, 1, 1 ],
-            "halfSize" : [
-                2.12132034355,
-                0.707106781186,
-                1
-            ],
-            "quaternion" : [
-                0,
-                0,
-                -0.3826834324,
-                0.9238795325
-            ]
-        }
-    )";
-
-    NL::json base = NL::json::parse(baseString);
-    NL::json clip = NL::json::parse(clipString);
-
-    Obb b(base);
-    Obb c(clip);
-    bool ok = b.intersect(c);
-    std::cerr << "Intersect = " << ok << "!\n";
-}
 
 //test small autzen slpk data provided by esri
 TEST(SlpkReaderTest, read_local)

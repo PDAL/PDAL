@@ -50,38 +50,42 @@ using Segment = std::pair<Eigen::Vector3d, Eigen::Vector3d>;
 
 class Obb
 {
+    FRIEND_TEST(ObbTest, obb);
 public:
     // Can throw EsriError.
+    Obb();
     Obb(const NL::json& spec);
     void parse(NL::json spec);
     bool intersect(Obb clip);
     void transform(const SrsTransform& xform);
+    bool valid() const;
 
 private:
     void verifyArray(const NL::json& spec, const std::string& name, size_t cnt);
     bool intersectNormalized(const Segment& seg);
     Eigen::Vector3d corner(size_t pos);
     Segment segment(size_t pos);
+    // Test support
+    void setCenter(const Eigen::Vector3d& center);
 
+    bool m_valid;
     Eigen::Vector3d m_p;
     double m_hx;
     double m_hy;
     double m_hz;    
     Eigen::Quaterniond m_quat;
+
+    friend std::ostream& operator<<(std::ostream&, const Obb&);
 };
-
-
 
 } //namespace i3s
 
-//ABELL
-/**
 namespace Utils
 {
 
 template<>
 inline StatusWithReason fromString(const std::string& from,
-    const pdal::i3s::Obb& obb)
+    pdal::i3s::Obb& obb)
 {
     NL::json spec;
     try
@@ -96,7 +100,7 @@ inline StatusWithReason fromString(const std::string& from,
     {
         obb.parse(spec);
     }
-    catch (const EsriError& err)
+    catch (const i3s::EsriError& err)
     {
         return { -1, err.what() };
     }
@@ -104,5 +108,4 @@ inline StatusWithReason fromString(const std::string& from,
 }
 
 } // namespace Utils
-**/
 } // namespace pdal 

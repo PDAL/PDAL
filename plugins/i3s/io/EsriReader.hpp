@@ -104,8 +104,6 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual bool processOne(PointRef&) override;
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
-    BOX3D createCube(const NL::json& base);
-    BOX3D parseBox(const NL::json& base);
     void traverseTree(NL::json page, int index, int depth, int pageIndex);
     void load(int nodeId);
     TileContents loadPath(const std::string& url);
@@ -113,9 +111,6 @@ private:
     void process(PointViewPtr dstView, const TileContents& tile,
         point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
-
-private:
-    void createBounds();
 };
 
 } // namespace pdal

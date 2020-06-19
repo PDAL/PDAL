@@ -4,10 +4,10 @@ add_subdirectory(lepcc)
 
 PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
     FILES
-      io/I3SReader.cpp
-      io/EsriUtil.cpp
-      io/EsriReader.cpp
-      io/Obb.cpp
+        io/I3SReader.cpp
+        io/EsriUtil.cpp
+        io/EsriReader.cpp
+        io/Obb.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
         ${ZLIB_LIBRARY}
@@ -28,6 +28,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         io/SlpkReader.cpp
         io/EsriUtil.cpp
         io/EsriReader.cpp
+        io/Obb.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
         ${ZLIB_LIBRARY}
@@ -45,12 +46,17 @@ target_compile_definitions(${slpk_reader_libname}
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_slpk_reader_test
-            FILES
-                test/SlpkReaderTest.cpp
-                io/Obb.cpp
-            INCLUDES
-                ${NLOHMANN_INCLUDE_DIR}
-                ${PDAL_VENDOR_DIR}/eigen
+        FILES
+            test/SlpkReaderTest.cpp
+    )
+
+    PDAL_ADD_TEST(pdal_i3s_obb_test
+        FILES
+            test/ObbTest.cpp
+            io/Obb.cpp
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}/eigen
     )
 
     if (BUILD_I3S_TESTS)

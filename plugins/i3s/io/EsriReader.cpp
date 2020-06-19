@@ -39,6 +39,7 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
+#include "Obb.hpp"
 #include "../lepcc/src/include/lepcc_types.h"
 
 namespace pdal
@@ -75,7 +76,7 @@ namespace
 
 struct EsriReader::Args
 {
-    Bounds bounds;
+    Obb obb;
     int threads;
     std::vector<std::string> dimensions;
     double min_density;
@@ -126,7 +127,7 @@ EsriReader::~EsriReader()
 
 void EsriReader::addArgs(ProgramArgs& args)
 {
-    args.add("bounds", "Bounds of the point cloud", m_args->bounds);
+    args.add("obb", "Oriented bounding box of clip region.", m_args->obb);
     args.add("threads", "Number of threads to be used.", m_args->threads, 4);
     args.add("dimensions", "Dimensions to be used in pulls",
         m_args->dimensions);
@@ -229,69 +230,16 @@ void EsriReader::initialize(PointTableRef table)
             throwError("Invalid wkid value '" + std::to_string(system) +
                 "' for spatial reference.");
     }
-    std::string systemString("EPSG:" + std::to_string(system));
-    m_nativeSrs.set(systemString);
-    if (m_nativeSrs.empty())
-        throwError("Unable to create spatial reference for i3s for '" +
-            systemString + "'.");
-    setSpatialReference(m_nativeSrs);
-
-    m_ecefTransform.reset(new SrsTransform(m_nativeSrs, "EPSG:4978"));
-    createBounds();
-}
-
-
-// We check to see if tiles (nodepages) intersect our bounding box by
-// converting them both to ECEF.
-void EsriReader::createBounds()
-{
-    const double mn((std::numeric_limits<double>::lowest)());
-    const double mx((std::numeric_limits<double>::max)());
-    if (m_args->bounds.is3d())
+    
+    // If we're doing transform from 4326 to ECEF, go ahead and transform
+    // the center of our clip box.
+    if (system == 4326)
     {
-        m_bounds = m_args->bounds.to3d();
-        for (size_t i = 0; i < 8; ++i)
-        {
-            double a = (i & 1 ? m_bounds.minx: m_bounds.maxx);
-            double b = (i & 2 ? m_bounds.miny: m_bounds.maxy);
-            double c = (i & 4 ? m_bounds.minz: m_bounds.maxz);
-            m_ecefTransform->transform(a, b, c);
-            m_ecefBounds.grow(a, b, c);
-        }
+        m_ecefTransform.reset(new SrsTransform("EPSG:4326", "EPSG:4978"));
+        if (m_args->obb.valid())
+            m_args->obb.transform(*m_ecefTransform);
     }
-    else
-    {
-        // No bounds specified.
-
-        // Distance to the center of the earth is 6.3 million meters, so
-        // 10 million should be a reasonable max for ECEF.
-        BOX2D b = m_args->bounds.to2d();
-        if (b.empty())
-        {
-            m_bounds = BOX3D(mn, mn, mn, mx, mx, mx);
-            m_ecefBounds = BOX3D(-10e6, -10e6, -10e6, 10e6, 10e6, 10e6);
-        }
-        else
-        {
-            m_bounds = BOX3D(b); // Will set z values to 0.
-            m_ecefBounds = m_bounds;
-            m_ecefTransform->transform(m_ecefBounds.minx, m_ecefBounds.miny,
-                m_ecefBounds.minz);
-            m_ecefTransform->transform(m_ecefBounds.maxx, m_ecefBounds.maxy,
-                m_ecefBounds.maxz);
-            m_bounds.minz = mn;
-            m_bounds.maxz = mx;
-            m_ecefBounds.minz = -10e6;
-            m_ecefBounds.maxz = 10e6;
-        }
-    }
-    // Transformation can invert coordinates
-    if (m_ecefBounds.minx > m_ecefBounds.maxx)
-        std::swap(m_ecefBounds.minx, m_ecefBounds.maxx);
-    if (m_ecefBounds.miny > m_ecefBounds.maxy)
-        std::swap(m_ecefBounds.miny, m_ecefBounds.maxy);
-    if (m_ecefBounds.minz > m_ecefBounds.maxz)
-        std::swap(m_ecefBounds.minz, m_ecefBounds.maxz);
+    setSpatialReference("EPSG:" + std::to_string(system));
 }
 
 
@@ -374,8 +322,8 @@ void EsriReader::ready(PointTableRef table)
         m_filename << std::endl;
     log()->get(LogLevel::Debug) << "threads: " <<
         m_args->threads << std::endl;
-    log()->get(LogLevel::Debug) << "bounds: " <<
-        m_args->bounds << std::endl;
+    log()->get(LogLevel::Debug) << "obb: " <<
+        m_args->obb << std::endl;
     log()->get(LogLevel::Debug) << "min_density: " <<
         m_args->min_density << std::endl;
     log()->get(LogLevel::Debug) << "max_density: " <<
@@ -603,16 +551,22 @@ void EsriReader::traverseTree(NL::json page, int index, int depth,
         m_maxNode = firstChild + cCount - 1;
     }
 
-
-    BOX3D nodeBox = createCube(page["nodes"][index]);
-
-    // We're always comparing ECEF rectangular solids.
-    bool overlap = m_ecefBounds.overlaps(nodeBox);
-
-    // if it doesn't overlap, then none of the nodes in this subtree will
-    if (!overlap)
-        return;
-
+    try
+    {
+        Obb obb(page["nodes"][index]);
+        if (m_ecefTransform)
+            obb.transform(*m_ecefTransform);
+        if (!obb.intersect(m_args->obb))
+            return;
+    }
+    catch (const EsriError& err)
+    {
+        throwError(err.what());
+    }
+    catch (const NL::json::exception& err)
+    {
+        throwError(err.what());
+    }
 
     // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args->max_density == -1 && m_args->min_density == -1 && cCount == 0)
@@ -663,36 +617,6 @@ void EsriReader::traverseTree(NL::json page, int index, int depth,
             traverseTree(page, index, depth, pageIndex);
         }
     }
-}
-
-
-//Finds a sphere from the given center and halfsize vector of the OBB
-//and makes a cube around it. This should help with collision detection
-//and pruning of nodes before fetching binaries.
-BOX3D EsriReader::createCube(const NL::json& base)
-{
-    // Pull XYZ in lat/lon.
-    const NL::json& center = base["obb"]["center"];
-    double x = center[0].get<double>();
-    double y = center[1].get<double>();
-    double z = center[2].get<double>();
-
-    // We believe that half-sizes are in meters.
-    const NL::json& hsize = base["obb"]["halfSize"];
-    double hx = hsize[0].get<double>();
-    double hy = hsize[1].get<double>();
-    double hz = hsize[2].get<double>();
-
-    // transform (x,y,z) to ECEF to match the half sizes in meters.
-    m_ecefTransform->transform(x, y, z);
-
-    // ABELL - Not sure why we're multiplying by sqrt(2).  The rest of the
-    // calculation is to get a radius of a sphere that encloses the OBB.
-    double r = std::sqrt(2) *
-        std::sqrt(std::pow(hx, 2) + std::pow(hy, 2) + std::pow(hz, 2));
-
-    // Create cube around the sphere oriented as ECEF.
-    return BOX3D(x - r, y - r, z - r, x + r, y + r, z + r);
 }
 
 

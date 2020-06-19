@@ -61,10 +61,20 @@ namespace pdal
 namespace i3s
 {
 
+Obb::Obb() : m_valid(false)
+{}
+
 Obb::Obb(const NL::json& spec)
 {
     parse(spec);
 }
+
+
+bool Obb::valid() const
+{
+    return m_valid;
+}
+
 
 void Obb::verifyArray(const NL::json& spec, const std::string& name, size_t cnt)
 {
@@ -117,6 +127,7 @@ void Obb::parse(NL::json spec)
         throw EsriError("Invalid OBB: found invalid key '" +
             spec.begin().key() + "'.");
     }
+    m_valid = true;
 }
 
 void Obb::transform(const SrsTransform& xform)
@@ -141,6 +152,10 @@ Segment Obb::segment(size_t pos)
 {
     assert(pos < 12);
 
+    // Each pair is a set of indices that represent the corners of an edge.
+    // Top row is the segments that make up the "top" rectangle.  Second
+    // row makes up the "bottom" rectangle.  Third row makes up the edges
+    // connecting the top corners to the bottom corners.
     std::array<std::pair<std::size_t, std::size_t>, 12> segs
     {{
         {0, 2}, {2, 6}, {6, 4}, {4, 0},
@@ -185,14 +200,12 @@ bool Obb::intersect(Obb c)
         pmax.z() = (std::max)(pmax.z(), corner.z());
         pmin.z() = (std::min)(pmin.z(), corner.z());
     }
-std::cerr << "Not all corners contained!\n";
 
     // If the clip box surrounds this box, we're done.
     if (pmax.x() > m_hx && pmin.x() < -m_hx &&
         pmax.y() > m_hy && pmin.y() < -m_hy &&
         pmax.z() > m_hz && pmin.z() < -m_hz)
         return true;
-std::cerr << "Not surrounded!\n";
 
     // If any of the segments that make up the clip region intersect
     // this normalized box, we're done.
@@ -200,22 +213,23 @@ std::cerr << "Not surrounded!\n";
     {
         Segment s = c.segment(i);
         if (intersectNormalized(s))
-            ;
-//            return true;
+            return true;
     }
 
     // No intersection.
     return false;
 }
 
-// Note that this is just here to support the above.
+// Note that this is just here to support the above.  The box we're
+// testing is treated as centered at the origin with faces parallel to
+// planes formed by the axes.
 bool Obb::intersectNormalized(const Segment& seg)
 {
     Eigen::Vector3d p0 = seg.first;
     Eigen::Vector3d p1 = seg.second;
 
     // These represent both points on the faces of this box and
-    // normal vectors to those faces.
+    // outward-facing normal vectors to those faces.
     const size_t numFaces = 6;
     std::array<Eigen::Vector3d, numFaces> faces
     {{
@@ -227,6 +241,7 @@ bool Obb::intersectNormalized(const Segment& seg)
         {0, 0, -m_hz}
     }};
 
+    // Faces of the base box represented as 2D areas.
     std::array<BOX2D, 3> boxes
     {{
         {-m_hy, -m_hz, m_hy, m_hz},
@@ -243,14 +258,28 @@ bool Obb::intersectNormalized(const Segment& seg)
 
         Eigen::Vector3d v1 = face - p0;
         Eigen::Vector3d v2 = p1 - p0;
-        //ABELL div by 0.
-        double t = v1.dot(face) / v2.dot(face);
-        Eigen::Vector3d isect = t * (p1 -p0) + p0;
+
+        double num = v1.dot(face);
+        double den = v2.dot(face);
+        if (den == 0)
+            return false;
+        double t = num / den;
+
+        // t is the distance on the line from p0 to p1 in parametric form
+        // where the line intersects the plane of the face.
+        Eigen::Vector3d isect = t * (p1 - p0) + p0;
+
+        // If t < 0 or > 1, then the edge doesn't intersect the plane
+        // between p0 and p1.
         if (t < 0 || t > 1)
             continue;
 
+        // We know that the edge intersects the plane of the face. Now
+        // check that it intersects in the face itself.
+
         // Convert our 3d point to a 2d one, ignoring the dimension
-        // in the direction of the normal.
+        // in the direction of the normal.  Find the coordinates of the
+        // face in 2d, ignoring the dimension in the direction of the normal.
         double coord[2];
         size_t pos = 0;
         BOX2D *box;
@@ -261,20 +290,30 @@ bool Obb::intersectNormalized(const Segment& seg)
             else
                 coord[pos++] = isect[i];
         }
+        // Now just determine if the 2D point is in the 2D area.
         if (box->contains(coord[0], coord[1]))
-        {
-            std::cerr << "t = " << t << "!\n";
-            std::cerr << "Intersection point = " << isect.transpose() << "!\n";
-            std::cerr << "Box bounds[" << i << "] = " << *box << "!\n";
-            std::cerr << "Coord check = " << coord[0] << "/" << coord[1] << "!\n";
-            std::cerr << "\n";
-//            return true;
-        }
-        else
-            std::cerr << "Doesn't contain - t = " << t << "!\n\n";
+            return true;
     }
 
     return false;
+}
+
+void Obb::setCenter(const Eigen::Vector3d& center)
+{
+    m_p = center;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const Obb& obb)
+{
+    NL::json j;
+    j["center"] = { obb.m_p.x(), obb.m_p.y(), obb.m_p.z() };
+    j["halfSize"] = { obb.m_hx, obb.m_hy, obb.m_hz };
+    const Eigen::Vector3d& v = obb.m_quat.vec();
+    j["quaternion"] = { v.x(), v.y(), v.z(), obb.m_quat.w() };
+
+    out << j;
+    return out;
 }
 
 } // namespace i3s
