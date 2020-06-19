@@ -353,6 +353,7 @@ QuickInfo EptReader::inspect()
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
 
+        m_hierarchy.reset(new Hierarchy);
         overlaps();
 
         qi.m_pointCount = 0;
@@ -480,6 +481,7 @@ void EptReader::overlaps()
         // First, determine the overlapping nodes from the EPT resource.
         overlaps(*m_hierarchy, m_connector->getJson(filename), key);
     }
+    m_pool->await();
 
     // Determine the addons that exist to correspond to tiles.
     for (auto& addon : m_addons)
