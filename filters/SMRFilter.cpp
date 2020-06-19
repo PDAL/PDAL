@@ -396,7 +396,7 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
     log()->floatPrecision(2);
     log()->get(LogLevel::Debug) << "\t" << g << " ground points"
                                 << "\t" << ng << " non-ground points"
-                                << "\t(" << p << "%)\n";
+                                << "\t(" << p << "% classified as ground)\n";
 }
 
 std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
@@ -734,7 +734,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
         log()->get(LogLevel::Debug) << "progressiveFilter: radius = " << radius
                                     << "\t" << g << " ground cells"
                                     << "\t" << ng << " non-ground cells"
-                                    << "\t(" << p << "%)\n";
+                                    << "\t(" << p << "% of cells contain ground)\n";
     }
 
     return Obj;
