@@ -231,6 +231,8 @@ void EptReader::initialize()
 
     // Figure out our max depth.
     const double queryResolution(m_args->m_resolution);
+    //reseting depthEnd if initialize() has been called before
+    m_depthEnd = 0;
     if (queryResolution)
     {
         double currentResolution =
