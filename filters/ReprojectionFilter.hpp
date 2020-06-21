@@ -61,6 +61,7 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     virtual bool processOne(PointRef& point);
     virtual void spatialReferenceChanged(const SpatialReference& srs);
+    virtual void prepared(PointTableRef table);
 
     void createTransform(const SpatialReference& srs);
 
@@ -68,6 +69,10 @@ private:
     SpatialReference m_outSRS;
     bool m_inferInputSRS;
     std::unique_ptr<SrsTransform> m_transform;
+    std::vector<std::string> m_inAxisOrderingArg;
+    std::vector<std::string> m_outAxisOrderingArg;
+    std::vector<int> m_inAxisOrdering;
+    std::vector<int> m_outAxisOrdering;
 };
 
 } // namespace pdal

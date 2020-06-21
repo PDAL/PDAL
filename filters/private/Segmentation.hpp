@@ -49,6 +49,34 @@ class PointView;
 namespace Segmentation
 {
 
+class PointClasses
+{
+public:
+    PointClasses() : m_classes(0)
+    {}
+
+    bool isWithheld() const
+    { return m_classes & ClassLabel::Withheld; }
+    bool isKeypoint() const
+    { return m_classes & ClassLabel::Keypoint; }
+    bool isSynthetic() const
+    { return m_classes & ClassLabel::Synthetic; }
+    bool isNone() const
+    { return m_classes == 0; }
+    uint32_t bits() const
+    { return m_classes; }
+
+private:
+    uint32_t m_classes;
+
+    friend std::istream& operator>>(std::istream& in, PointClasses& classes);
+    friend std::ostream& operator<<(std::ostream& out,
+        const PointClasses& classes);
+};
+
+std::istream& operator>>(std::istream& in, PointClasses& classes);
+std::ostream& operator<<(std::ostream& out, const PointClasses& classes);
+
 /**
   Extract clusters of points from input PointView.
 
@@ -61,23 +89,87 @@ namespace Segmentation
   \param[in] min_points the minimum number of points in a cluster.
   \param[in] max_points the maximum number of points in a cluster.
   \param[in] tolerance the tolerance for adding points to a cluster.
-  \returns a vector of clusters (themselves vectors of PointIds).
+  \returns a deque of clusters (themselves vectors of PointIds).
 */
-PDAL_DLL std::vector<std::vector<PointId>> extractClusters(PointView& view,
-                                                           uint64_t min_points,
-                                                           uint64_t max_points,
-                                                           double tolerance);
+template <class KDINDEX>
+PDAL_DLL std::deque<PointIdList> extractClusters(PointView& view, uint64_t min_points,
+                                                 uint64_t max_points, double tolerance)
+{
+    // Index the incoming PointView for subsequent radius searches.
+    KDINDEX kdi(view);
+    kdi.build();
+
+    // Create variables to track PointIds that have already been added to
+    // clusters and to build the list of cluster indices.
+    PointIdList processed(view.size(), 0);
+    std::deque<PointIdList> clusters;
+
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        // Points can only belong to a single cluster.
+        if (processed[i])
+            continue;
+
+        // Initialize list of indices belonging to current cluster, marking the
+        // seed point as processed.
+        PointIdList seed_queue;
+        size_t sq_idx = 0;
+        seed_queue.push_back(i);
+        processed[i] = 1;
+
+        // Check each point in the cluster for additional neighbors within the
+        // given tolerance, remembering that the list can grow if we add points
+        // to the cluster.
+        while (sq_idx < seed_queue.size())
+        {
+            // Find neighbors of the next cluster point.
+            PointId j = seed_queue[sq_idx];
+            PointIdList ids = kdi.radius(j, tolerance);
+
+            // The case where the only neighbor is the query point.
+            if (ids.size() == 1)
+            {
+                sq_idx++;
+                continue;
+            }
+
+            // Skip neighbors that already belong to a cluster and add the rest
+            // to this cluster.
+            for (auto const& k : ids)
+            {
+                if (processed[k])
+                    continue;
+                seed_queue.push_back(k);
+                processed[k] = 1;
+            }
+
+            sq_idx++;
+        }
+
+        // Keep clusters that are within the min/max number of points.
+        if (seed_queue.size() >= min_points && seed_queue.size() <= max_points)
+            clusters.push_back(seed_queue);
+    }
+
+    return clusters;
+}
 
 PDAL_DLL void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
                              PointViewPtr ignore);
 PDAL_DLL void ignoreDimRanges(std::vector<DimRange>& ranges,
     PointViewPtr input, PointViewPtr keep, PointViewPtr ignore);
 
+PDAL_DLL void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
+                              PointViewPtr ignore, PointClasses classbits);
+
 PDAL_DLL void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                                  PointViewPtr other);
 
 PDAL_DLL void segmentReturns(PointViewPtr input, PointViewPtr first,
                              PointViewPtr second, StringList returns);
+
+
+PDAL_DLL PointIdList farthestPointSampling(PointView& view, point_count_t count);
 
 } // namespace Segmentation
 } // namespace pdal

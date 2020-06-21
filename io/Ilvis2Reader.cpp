@@ -90,6 +90,14 @@ std::ostream& operator<<(std::ostream& out,
 }
 
 
+Ilvis2Reader::Ilvis2Reader()
+{}
+
+
+Ilvis2Reader::~Ilvis2Reader()
+{}
+
+
 void Ilvis2Reader::addArgs(ProgramArgs& args)
 {
     args.add("mapping", "Mapping for values", m_mapping, IlvisMapping::ALL);
@@ -125,7 +133,7 @@ void Ilvis2Reader::initialize(PointTableRef)
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
     // background
-    setSpatialReference(SpatialReference("EPSG:4326"));
+    setSpatialReference("EPSG:4326");
 }
 
 
@@ -204,12 +212,12 @@ void Ilvis2Reader::ready(PointTableRef table)
     std::string line;
 
     m_lineNum = 0;
-    m_stream.open(m_filename);
+    m_stream.reset(new std::ifstream(m_filename));
     m_layout = table.layout();
     m_resample = false;
     for (size_t i = 0; i < HeaderSize; ++i)
     {
-        std::getline(m_stream, line);
+        std::getline(*m_stream, line);
         m_lineNum++;
     }
 }
@@ -233,7 +241,7 @@ bool Ilvis2Reader::processOne(PointRef& point)
             return true;
         }
 
-        if (!std::getline(m_stream, line))
+        if (!std::getline(*m_stream, line))
             return false;
         m_fields = Utils::split2(line, ' ');
         if (m_fields.size() != 12)
@@ -282,6 +290,12 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
     }
 
     return numRead;
+}
+
+
+void Ilvis2Reader::done(PointTableRef table)
+{
+    m_stream.reset();
 }
 
 } // namespace pdal

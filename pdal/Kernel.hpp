@@ -73,6 +73,13 @@ public:
         return names.size() == 2 ? names[1] : std::string();
     }
 
+    enum class ParseStageResult
+    {
+        Ok,
+        Invalid,
+        Unknown
+    };
+
 protected:
     Kernel();
 
@@ -115,11 +122,11 @@ private:
     void outputVersion();
     int doStartup();
     int doExecution(ProgramArgs& args);
-    bool parseStageOption(std::string o, std::string& stage,
+    ParseStageResult parseStageOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
 
-    static bool test_parseStageOption(std::string o, std::string& stage,
-        std::string& option, std::string& value);
+    static ParseStageResult test_parseStageOption(std::string o,
+        std::string& stage, std::string& option, std::string& value);
 
     bool m_showOptions;
     bool m_showTime;

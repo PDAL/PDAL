@@ -47,7 +47,6 @@ Log::Log(std::string const& leaderString, std::string const& outputName,
     , m_deleteStreamOnCleanup(false)
     , m_timing(timing)
 {
-
     if (Utils::iequals(outputName, "stdlog"))
         m_log = &std::clog;
     else if (Utils::iequals(outputName, "stderr"))
@@ -78,10 +77,22 @@ Log::Log(std::string const& leaderString, std::ostream* v, bool timing)
         m_start = m_clock.now();
 }
 
+LogPtr Log::makeLog(std::string const& leaderString,
+    std::string const& outputName, bool timing)
+{
+    return LogPtr(new Log(leaderString, outputName, timing));
+}
+
+
+LogPtr Log::makeLog(std::string const& leaderString, std::ostream* v,
+    bool timing)
+{
+    return LogPtr(new Log(leaderString, v, timing));
+}
+
 
 Log::~Log()
 {
-
     if (m_deleteStreamOnCleanup)
     {
         m_log->flush();

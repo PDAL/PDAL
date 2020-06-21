@@ -1,4 +1,4 @@
-gdaldem hillshade ^
-    C:/Users/hobu/pdal/exercises/analysis/dtm/dtm.tif ^
-    C:/Users/hobu/pdal/exercises/analysis/dtm/hillshade.tif ^
-    -z 1.0 -s 1.0 -az 315.0 -alt 45.0 -of GTiff
+gdaldem hillshade ./exercises/analysis/dtm/dtm.tif \
+./exercises/analysis/dtm/hillshade.tif \
+-z 1.0 -s 1.0 -az 315.0 -alt 45.0 \
+-of GTiff

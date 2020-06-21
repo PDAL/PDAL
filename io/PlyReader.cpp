@@ -295,7 +295,16 @@ void PlyReader::initialize()
     m_stream = Utils::openFile(m_filename, true);
     if (!m_stream)
         throwError("Couldn't open '" + m_filename + "'.");
-    extractHeader();
+    try
+    {
+        extractHeader();
+    }
+    catch( ... )
+    {
+        Utils::closeFile(m_stream);
+        m_stream = nullptr;
+        throw;
+    }
     Utils::closeFile(m_stream);
     m_stream = nullptr;
 }

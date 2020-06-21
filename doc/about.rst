@@ -355,6 +355,25 @@ comfortable and familiar language environment for geospatial practitioners.
 
 .. _`Numpy`: http://www.numpy.org/
 
+Julia Plugin
+................................................................................
+
+.. index:: Julia
+
+PDAL supports embedding |Julia| filters. These allow you to dynamically interact
+with point cloud data in a more comfortable and familiar language environment
+for geospatial practitioners, while still maintaining high performance.
+
+Additionally the TypedTables.jl, RoamesGeometry.jl and AcceleratedArrays.jl libraries
+provide some very high-level interfaces for writing efficient filters.
+
+.. seealso::
+
+    The github repo at https://github.com/cognitive-earth/PDAL-julia contains
+    a docker image, build instructions and some sample filters.
+
+    Documentation for the stage :ref:`filters.julia`
+
 
 Conclusion
 --------------------------------------------------------------------------------

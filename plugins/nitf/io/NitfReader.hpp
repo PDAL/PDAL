@@ -34,8 +34,7 @@
 
 #pragma once
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/restrict.hpp>
+#include <fstream>
 
 #include <io/LasReader.hpp>
 #include <pdal/StageFactory.hpp>
@@ -47,42 +46,106 @@ namespace pdal
 
 class PDAL_DLL NitfReader : public LasReader
 {
-typedef pdalboost::iostreams::restriction<std::istream> RDevice;
-typedef pdalboost::iostreams::stream<RDevice> RStream;
+    template <class CharT, class Traits = std::char_traits<CharT>>
+    class Shiftbuf : public std::basic_filebuf<CharT, Traits>
+    {
+    public:
+        typedef typename Traits::off_type off_type;
+        typedef typename Traits::pos_type pos_type;
+        typedef typename std::basic_filebuf<CharT, Traits> Base;
+
+        Shiftbuf(Shiftbuf::off_type offset) : m_offset(offset)
+        {}
+
+    protected:
+        virtual pos_type seekpos(Shiftbuf::pos_type sp,
+            std::ios_base::openmode which =
+                std::ios_base::in | std::ios_base::binary) override
+        {
+            pos_type p = Base::seekpos(sp + m_offset, which);
+            if (p >= 0)
+                p -= m_offset;
+            return p;
+        }
+
+        virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+            std::ios_base::openmode which =
+                std::ios_base::in | std::ios_base::binary) override
+        {
+            if (dir == std::ios_base::beg)
+            {
+                off += m_offset;
+                pos_type p = Base::seekoff(off, dir, which);
+                if (p >= 0)
+                    p -= m_offset;
+                return p;
+            }
+            else if ((dir == std::ios_base::cur) ||
+                     (dir == std::ios_base::end))
+            {
+                pos_type p = Base::seekoff(off, dir, which);
+                if (p >= 0)
+                    p -= m_offset;
+                return p;
+            }
+            else
+                return 0;
+        }
+
+    private:
+        off_type m_offset;
+    };
+
+    template <class CharT, class Traits = std::char_traits<CharT>>
+    class basic_ShiftStream : public std::basic_istream<CharT, Traits>
+    {
+    public:
+        typedef typename Traits::off_type off_type;
+        typedef typename std::basic_istream<CharT, Traits> Base;
+
+        basic_ShiftStream(const std::string& filename, off_type offset) :
+            Base(&m_buf), m_buf(offset)
+        {
+            Base::init(&m_buf);
+            if (!m_buf.open(filename,
+                    std::ios_base::in | std::ios_base::binary))
+                Base::setstate(std::ios_base::failbit);
+        }
+
+        ~basic_ShiftStream()
+        { m_buf.close(); }
+
+    private:
+        Shiftbuf<CharT, Traits> m_buf;
+    };
+    using ShiftStream = basic_ShiftStream<char>;
 
     class NitfStreamIf : public LasStreamIf
     {
     public:
-        NitfStreamIf(const std::string& filename, uint64_t offset, uint64_t len)
+        NitfStreamIf(const std::string& filename, ShiftStream::off_type off)
         {
-            m_baseStream = FileUtils::openFile(filename);
-            if (m_baseStream)
-            {
-                m_rdevice.reset(new RDevice(*m_baseStream, offset, len));
-                m_rstream.reset(new RStream(*m_rdevice));
-                m_istream = m_rstream.get();
-            }
+            m_istream = new ShiftStream(filename, off);
+            // This makes sure that the stream is positioned at the beginning
+            // of the embedded (LAS/LAZ) data.
+            m_istream->seekg(0);
         }
 
-        ~NitfStreamIf()
+        virtual ~NitfStreamIf()
         {
-            m_rstream.reset();
-            m_rdevice.reset();
-            if (m_baseStream)
-                FileUtils::closeFile(m_baseStream);
-            m_baseStream = NULL;
-            m_istream = NULL;
-        }
+            delete m_istream;
 
-    private:
-        std::istream *m_baseStream;
-        std::unique_ptr<RDevice> m_rdevice;
-        std::unique_ptr<RStream> m_rstream;
+            // Important - Otherwise the base class will attempt to use in dtor.
+            m_istream = nullptr;
+        }
     };
 
 public:
     NitfReader() : LasReader(), m_offset(0), m_length(0)
     {}
+    NitfReader& operator=(const NitfReader&) = delete;
+    NitfReader(const NitfReader&) = delete;
+
     std::string getName() const;
 
 protected:
@@ -90,7 +153,7 @@ protected:
     {
         if (m_streamIf)
             std::cerr << "Attempt to create stream twice!\n";
-        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset, m_length));
+        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
     }
 
 private:
@@ -98,8 +161,6 @@ private:
     uint64_t m_length;
 
     virtual void initialize(PointTableRef table);
-    NitfReader& operator=(const NitfReader&); // not implemented
-    NitfReader(const NitfReader&); // not implemented
 };
 
 } // namespace pdal

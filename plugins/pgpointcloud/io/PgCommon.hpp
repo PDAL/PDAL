@@ -89,6 +89,8 @@ inline void pg_execute(PGconn* session, std::string const& sql)
     if ( (!result) || (PQresultStatus(result) != PGRES_COMMAND_OK) )
     {
         std::string errmsg = std::string(PQerrorMessage(session));
+        if( result )
+            PQclear(result);
         throw pdal_error(errmsg);
     }
     PQclear(result);

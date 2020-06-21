@@ -1,0 +1,94 @@
+# -*- mode: yaml -*-
+
+jobs:
+- job: osx
+  pool:
+    vmImage: macOS-10.14
+  timeoutInMinutes: 360
+  steps:
+  - script: |
+      echo "Removing homebrew from Azure to avoid conflicts."
+      curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall > ~/uninstall_homebrew
+      chmod +x ~/uninstall_homebrew
+      ~/uninstall_homebrew -fq
+      rm ~/uninstall_homebrew
+    displayName: Remove homebrew
+  - bash: |
+      echo "##vso[task.prependpath]$CONDA/bin"
+      sudo chown -R $USER $CONDA
+    displayName: Add conda to PATH
+
+  - script: |
+      ECHO ON
+      source activate base
+      conda create --yes --quiet --name pdal
+    displayName: Create conda environment
+
+  - script: |
+      ECHO ON
+      source activate pdal
+      conda config --set always_yes True --set show_channel_urls True
+      conda config --add channels conda-forge
+      conda config --set channel_priority strict
+      conda install --yes --quiet --name pdal geotiff laszip nitro curl gdal cmake eigen ninja libgdal zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb conda-build ninja  conda-forge-ci-setup=2 -y
+    displayName: Install PDAL dependencies
+  - script: |
+      source activate pdal
+      export CI=azure
+      source run_conda_forge_build_setup
+    env: {
+      OSX_FORCE_SDK_DOWNLOAD: "1"
+    }
+    displayName: Configure OSX SDK
+  - script: |
+      source activate pdal
+      echo "current directory:" `pwd`
+      mkdir build
+      cd build
+      cmake   -G Ninja  \
+        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
+        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
+        -DCMAKE_FIND_FRAMEWORK="NEVER" \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+        -DBUILD_PLUGIN_NITF=ON \
+        -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DBUILD_PLUGIN_HDF=ON \
+        -DBUILD_PLUGIN_TILEDB=ON \
+        -DBUILD_PGPOINTCLOUD_TESTS=OFF \
+        -DWITH_LAZPERF=ON \
+        -DWITH_ZSTD=ON \
+        -DWITH_LASZIP=ON \
+        ..
+    displayName: 'CMake'
+  - script: |
+      cd build
+      source activate pdal
+      ninja
+    displayName: 'Build'
+  - script: |
+      cd build
+      export PDAL_DRIVER_PATH=`pwd`/lib
+      source activate pdal
+      ctest -V
+    displayName: 'Test'
+  - script: |
+      export PDAL_TEST_DIR=`pwd`/test
+      cd build
+      source activate pdal
+      ls build/lib/*
+      ninja install
+  - script: |
+      export BASE=`pwd`
+      source activate pdal
+      for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+      do
+          cd $BASE/examples/$EXAMPLE
+          mkdir -p _build || exit 1
+          cd _build || exit 1
+          cmake -G "Ninja" .. -DPDAL_DIR=$CONDA_PREFIX/lib/cmake/PDAL && ninja
+      done
+    displayName: 'Examples'
+
+

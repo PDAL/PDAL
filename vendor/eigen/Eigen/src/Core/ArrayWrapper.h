@@ -59,6 +59,8 @@ class ArrayWrapper : public ArrayBase<ArrayWrapper<ExpressionType> >
 
     EIGEN_DEVICE_FUNC
     explicit EIGEN_STRONG_INLINE ArrayWrapper(ExpressionType& matrix) : m_expression(matrix) {}
+    //ABELL - Added
+    EIGEN_STRONG_INLINE ArrayWrapper(const ArrayWrapper& wrapper) = default;
 
     EIGEN_DEVICE_FUNC
     inline Index rows() const { return m_expression.rows(); }

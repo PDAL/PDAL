@@ -36,7 +36,7 @@ Example
 
   [
       {
-          "type":"readers.las"
+          "type":"readers.las",
           "filename":"inputfile.las"
       },
       {

@@ -48,7 +48,7 @@ following commands:
 
       conda install -c conda-forge pdal -y
 
-4. Insure PDAL works by listing the available drivers
+4. Ensure PDAL works by listing the available drivers
 
 
    ::

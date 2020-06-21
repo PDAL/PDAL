@@ -16,33 +16,28 @@ Release Process
 1) Increment Version Numbers
 
   - CMakeLists.txt
-    * set(PDAL_VERSION_STRING "1.0.0" CACHE STRING "PDAL version")
-    * DISSECT_VERSION() CMake macro will break version down into
-      PDAL_VERSION_MAJOR, PDAL_VERSION_MINOR, PDAL_VERSION_PATCH,
-      and PDAL_CANDIDATE_VERSION strings.
+    * project(PDAL VERSION 1.0.0 LANGUAGES CXX C)
+    * CMake will break version down into PDAL_VERSION_MAJOR,
+      PDAL_VERSION_MINOR, PDAL_VERSION_PATCH, and PDAL_VERSION_TWEAK.
 
-  - Update SO versioning
-    set(PDAL_API_VERSION "1")
-    set(PDAL_BUILD_VERSION "1.0.0")
-    * https://github.com/libspatialindex/libspatialindex/pull/44#issuecomment-57088783
-
-  - doc/quickstart.rst has a number of current-release references
+  - Update library version in CMakeLists.txt:
+    set(PDAL_SOLIB_MAJOR 11)
+    set(PDAL_SOLIB_MINOR 0)
+    set(PDAL_SOLIB_BUILD 0)
 
   - doc/download.rst point to new release
-
-  - appveyor.yml
 
   - Make and push new release branch
 
     ::
 
-        git branch 1.8-maintenance
-        git push origin 1.8-maintenance
+        git branch 2.0-maintenance
+        git push origin 2.0-maintenance
 
 
   - Increment the doc build branch of .travis.yml:
 
-    "$TRAVIS_BRANCH" = "1.8-maintenance"
+    "$TRAVIS_BRANCH" = "2.0-maintenance"
 
   - Make DockerHub build entry for new release branch.
 
@@ -92,23 +87,10 @@ Release Process
 
 6) Update docs/download.txt to point at the location of the new release
 
-7) Upload the new release to download.osgeo.org:/osgeo/download/pdal
 
-  ::
+7) Write the release notes. Email PDAL mailing list with notice about release
 
-        scp PDAL-* hobu@download.osgeo.org:/osgeo/download/pdal
-
-8) Tag the release.  Use the ``-f`` switch if you are retagging because you
-   missed something.
-
-  ::
-        git tag 1.0.0
-        git push --tags
-
-
-9) Write the release notes. Email PDAL mailing list with notice about release
-
-10) Update Alpine package
+8) Update Alpine package
 
   - The PDAL Alpine package lives at
     https://github.com/alpinelinux/aports/blob/master/testing/pdal/APKBUILD.
@@ -119,7 +101,7 @@ Release Process
   - Pull requests should have a commit message of the following form
     `testing/pdal: <description>`.
 
-11) Update Conda package
+9) Update Conda package
 
   - For PDAL releases that bump version number, but do not change dependencies
     or build configurations, the `regro-cf-autotick-bot` should automatically
@@ -132,8 +114,3 @@ Release Process
     number should be submitted as PRs from a fork of the
     https://github.com/conda-forge/pdal-feedstock repository. In these cases,
     the build number should be incremented.
-
-12) Mint a new Zenodo DOI. Each new GitHub release should trigger a new release
-    in Zenodo. Just follow the instructions at
-    https://guides.github.com/activities/citable-code/ to publish the new
-    version and update the DOI for the new releae.

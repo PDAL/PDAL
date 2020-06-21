@@ -52,7 +52,8 @@ void SortFilter::addArgs(ProgramArgs& args)
 {
     args.add("dimension", "Dimension on which to sort", m_dimName).
         setPositional();
-    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order, SortOrder::ASC);
+    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
+        SortOrder::ASC);
 }
 
 void SortFilter::prepared(PointTableRef table)
@@ -64,7 +65,7 @@ void SortFilter::prepared(PointTableRef table)
 
 void SortFilter::filter(PointView& view)
 {
-    auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
+    auto cmp = [this](const PointRef& p1, const PointRef& p2)
     {
         bool result = p1.compare(m_dim, p2);
         return (m_order == SortOrder::ASC) ? result : !result;

@@ -37,7 +37,6 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/PointViewIter.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 namespace pdal
@@ -46,17 +45,17 @@ namespace pdal
 int PointView::m_lastId = 0;
 
 PointView::PointView(PointTableRef pointTable) : m_pointTable(pointTable),
-m_size(0), m_id(0)
+    m_layout(pointTable.layout()), m_size(0), m_id(0)
 {
 	m_id = ++m_lastId;
 }
 
 PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
-	m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
+	m_pointTable(pointTable), m_layout(pointTable.layout()), m_size(0),
+    m_id(0), m_spatialReference(srs)
 {
 	m_id = ++m_lastId;
 }
-
 
 PointView::~PointView()
 {}
@@ -71,6 +70,22 @@ PointViewIter PointView::begin()
 PointViewIter PointView::end()
 {
     return PointViewIter(this, size());
+}
+
+
+PointId PointView::tableId(PointId idx)
+{
+    if (idx > size())
+        throw pdal_error("Point index must increment.");
+    if (idx == size())
+    {
+        PointId rawId = m_pointTable.addPoint();
+        m_index.push_back(rawId);
+        m_size++;
+        assert(m_temps.empty());
+        return rawId;
+    }
+    return m_index[idx];
 }
 
 
@@ -101,13 +116,26 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
 
 void PointView::calculateBounds(BOX2D& output) const
 {
-    pdal::calculateBounds(*this, output);
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        double x = getFieldAs<double>(Dimension::Id::X, idx);
+        double y = getFieldAs<double>(Dimension::Id::Y, idx);
+
+        output.grow(x, y);
+    }
 }
 
 
 void PointView::calculateBounds(BOX3D& output) const
 {
-    pdal::calculateBounds(*this, output);
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        double x = getFieldAs<double>(Dimension::Id::X, idx);
+        double y = getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = getFieldAs<double>(Dimension::Id::Z, idx);
+
+        output.grow(x, y, z);
+    }
 }
 
 

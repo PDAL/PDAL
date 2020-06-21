@@ -83,6 +83,8 @@ void HexBin::addArgs(ProgramArgs& args)
     m_cullArg = &args.add("hole_cull_area_tolerance", "Tolerance area to "
         "apply to holes before cull", m_cullArea);
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
+    args.add("preserve_topology", "Preserve topology when smoothing",
+        m_preserve_topology, true);
 }
 
 
@@ -188,6 +190,8 @@ void HexBin::done(PointTableRef table)
             "Boundary MULTIPOLYGON of domain");
     }
 
+    SpatialReference srs(table.anySpatialReference());
+    pdal::Polygon p(polygon.str(), srs);
 
     /***
       We want to make these bumps on edges go away, which means that
@@ -204,49 +208,28 @@ void HexBin::done(PointTableRef table)
        A /        \ D
 
     ***/
-    double tolerance = 1.1 * m_grid->height() / 2;
-
-    double cull = m_cullArg->set() ? m_cullArea : (6 * tolerance * tolerance);
-
-    SpatialReference srs(table.anySpatialReference());
-    pdal::Polygon p(polygon.str(), srs);
-    pdal::Polygon density_p(polygon.str(), srs);
+    if (m_doSmooth)
+    {
+        double tolerance = 1.1 * m_grid->height() / 2;
+        double cull = m_cullArg->set() ?
+            m_cullArea : (6 * tolerance * tolerance);
+        p.simplify(tolerance, cull, m_preserve_topology);
+    }
 
     // If the SRS was geographic, use relevant
     // UTM for area and density computation
+    Polygon density_p(p);
     if (srs.isGeographic())
     {
         // Compute a UTM polygon
         BOX3D box = p.bounds();
         int zone = SpatialReference::calculateZone(box.minx, box.miny);
-
-        auto makezone = [] (int zone) -> std::string
-        {
-
-            std::ostringstream z;
-
-            // Use WGS84 UTM zones
-            z << "EPSG:327" << abs(zone);
-            return z.str();
-        };
-
-        SpatialReference utm(makezone(zone));
-        density_p = p;
-        density_p.transform(utm);
+        if (!density_p.transform(SpatialReference::wgs84FromZone(zone)))
+            density_p = Polygon();
     }
 
-    if (m_doSmooth)
-        p.simplify(tolerance, cull);
-
-    std::string boundary_text = p.wkt(m_precision);
-
-    m_metadata.add("boundary", boundary_text,
-        "Approximated MULTIPOLYGON of domain");
-    m_metadata.addWithType("boundary_json", p.json(), "json",
-        "Approximated MULTIPOLYGON of domain");
     double area = density_p.area();
-
-    double density = (double) m_count/ area ;
+    double density = m_count / area;
     if (std::isinf(density))
     {
         density = -1.0;
@@ -256,29 +239,27 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("density", density,
         "Number of points per square unit (total area)");
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
+    m_metadata.add("avg_pt_spacing", std::sqrt(1 / density),
+        "Avg point spacing (x/y units)");
 
-    double moving_avg(0.0);
-    double avg_count(0.0);
+    m_metadata.add("boundary", p.wkt(m_precision),
+        "Approximated MULTIPOLYGON of domain");
+    m_metadata.addWithType("boundary_json", p.json(), "json",
+        "Approximated MULTIPOLYGON of domain");
 
-    double hex_area(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     int n(0);
     point_count_t totalCount(0);
-    double totalArea(0.0);
     for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
     {
         HexInfo h = *hi;
         totalCount += h.density();
-        totalArea += hex_area;
         ++n;
     }
 
-    double avg_density = totalArea /(double) totalCount;
+    double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
+    double avg_density = (n * hexArea) / totalCount;
     m_metadata.add("avg_pt_per_sq_unit", avg_density, "Number of points "
         "per square unit (tessellated area within inclusions)");
-
-    double avg_spacing = std::sqrt(1/density);
-    m_metadata.add("avg_pt_spacing", avg_spacing,
-        "Avg point spacing (x/y units)");
 }
 
 } // namespace pdal

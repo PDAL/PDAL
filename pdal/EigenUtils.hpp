@@ -37,7 +37,16 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
 
+#if (__GNUC__ > 9)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <Eigen/Dense>
+
+#if (__GNUC__ > 9)
+#pragma GCC diagnostic pop
+#endif  // GNUC
 
 #include <memory>
 #include <vector>
@@ -49,19 +58,6 @@ class PointView;
 class SpatialReference;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
-
-/*! @return a cumulated bounds of all points in the PointView.
-    \verbatim embed:rst
-    .. note::
-
-        This method requires that an `X`, `Y`, and `Z` dimension be
-        available, and that it can be casted into a *double* data
-        type using the :cpp:func:`pdal::Dimension::applyScaling`
-        method. Otherwise, an exception will be thrown.
-    \endverbatim
-*/
-PDAL_DLL void calculateBounds(const PointView& view, BOX2D& box);
-PDAL_DLL void calculateBounds(const PointView& view, BOX3D& box);
 
 PDAL_DLL PointViewPtr demeanPointView(const PointView& view);
 PDAL_DLL PointViewPtr demeanPointView(const PointView& ,double* centroid);
@@ -91,7 +87,7 @@ PDAL_DLL void transformInPlace(PointView&, double* matrix);
   \return the 3D centroid of the XYZ dimensions.
 */
 PDAL_DLL Eigen::Vector3d computeCentroid(const PointView& view,
-    const std::vector<PointId>& ids);
+    const PointIdList& ids);
 
 /**
   Compute the covariance matrix of a collection of points.
@@ -116,7 +112,7 @@ PDAL_DLL Eigen::Vector3d computeCentroid(const PointView& view,
   \return the covariance matrix of the XYZ dimensions.
 */
 PDAL_DLL Eigen::Matrix3d computeCovariance(const PointView& view,
-    const std::vector<PointId>& ids);
+    const PointIdList& ids);
 
 /**
   Compute the rank of a collection of points.
@@ -148,7 +144,7 @@ PDAL_DLL Eigen::Matrix3d computeCovariance(const PointView& view,
   \return the estimated rank.
 */
 PDAL_DLL uint8_t computeRank(const PointView& view,
-        const std::vector<PointId>& ids, double threshold);
+        const PointIdList& ids, double threshold);
 
 /**
   Find local minimum elevations by extended local minimum.
@@ -186,9 +182,8 @@ PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows,
          structuring element.
   \return the morphological dilation of the input raster.
 */
-PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
-                                           size_t rows, size_t cols,
-                                           int iterations);
+PDAL_DLL void dilateDiamond(std::vector<double>& data,
+        size_t rows, size_t cols, int iterations);
 
 /**
   Perform a morphological erosion of the input raster.
@@ -205,9 +200,8 @@ PDAL_DLL std::vector<double> dilateDiamond(std::vector<double> data,
          structuring element.
   \return the morphological erosion of the input raster.
 */
-PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
-                                          size_t rows, size_t cols,
-                                          int iterations);
+PDAL_DLL void erodeDiamond(std::vector<double>& data,
+        size_t rows, size_t cols, int iterations);
 
 /**
   Converts a PointView into an Eigen::MatrixXd.
@@ -216,7 +210,7 @@ PDAL_DLL std::vector<double> erodeDiamond(std::vector<double> data,
   API. It is not currently used in the PDAL codebase itself.
 */
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
-PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view, const std::vector<PointId>& ids);
+PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdList& ids);
 
 /**
   Write Eigen Matrix as a GDAL raster.
@@ -285,7 +279,9 @@ namespace Utils
 {
 
 template <>
-inline bool fromString<Eigen::MatrixXd>(const std::string& s, Eigen::MatrixXd& matrix) {
+inline StatusWithReason fromString(const std::string& s,
+    Eigen::MatrixXd& matrix)
+{
     std::stringstream ss(s);
     std::string line;
     std::vector<std::vector<double>> rows;

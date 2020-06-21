@@ -46,7 +46,7 @@ Example
       "example.las",
       {
           "type":"filters.chipper",
-          "capacity":"400",
+          "capacity":"400"
       },
       {
           "type":"writers.pgpointcloud",

@@ -54,11 +54,12 @@ namespace pdal
 Dimension::Id getTimeDimensionId(bool syncToPps);
 
 struct Point {
-    Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns);
+    Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns, bool edgeOfFlightLine);
 
     scanlib::target target;
     unsigned int returnNumber;
     unsigned int numberOfReturns;
+    bool edgeOfFlightLine;
 };
 
 
@@ -84,6 +85,8 @@ public:
 
 protected:
     void on_echo_transformed(echo_type echo);
+    void on_line_start_up(const scanlib::line_start_up<iterator_type> & arg);
+    void on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg);
 
 private:
     bool readSavedPoint(PointRef& point);
@@ -91,6 +94,7 @@ private:
     void savePoints();
 
     bool m_syncToPps;
+    bool m_edge;
     bool m_reflectanceAsIntensity;
     float m_minReflectance;
     float m_maxReflectance;

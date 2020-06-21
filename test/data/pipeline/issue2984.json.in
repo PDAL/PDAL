@@ -1,0 +1,10 @@
+[
+    "somefile",
+    {
+        "key":"value",
+        "key2":"value2"
+    }
+]
+
+Some stuff at the end.
+

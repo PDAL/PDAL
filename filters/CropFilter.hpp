@@ -76,7 +76,7 @@ private:
     std::unique_ptr<CropArgs> m_args;
     double m_distance2;
     std::vector<ViewGeom> m_geoms;
-    std::vector<BOX2D> m_boxes;
+    std::vector<Bounds> m_boxes;
 
     void addArgs(ProgramArgs& args);
     virtual void initialize();
@@ -86,7 +86,10 @@ private:
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
     bool crop(const PointRef& point, const BOX2D& box);
+    bool crop(const PointRef& point, const BOX3D& box);
+    void crop(const BOX3D& box, PointView& input, PointView& output);
     void crop(const BOX2D& box, PointView& input, PointView& output);
+    void crop(const Bounds& box, PointView& input, PointView& output);
     bool crop(const PointRef& point, GridPnp& g);
     void crop(const ViewGeom& g, PointView& input, PointView& output);
     bool crop(const PointRef& point, const filter::Point& center);

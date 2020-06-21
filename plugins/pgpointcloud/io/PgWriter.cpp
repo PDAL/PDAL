@@ -230,8 +230,10 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
     {
-        PGresult *result = pg_query_result(m_session,
-            "SELECT pcid, schema FROM pointcloud_formats");
+        oss.str("");
+        oss.clear();
+        oss << "SELECT pcid, schema FROM pointcloud_formats WHERE srid = " << srid;
+        PGresult *result = pg_query_result(m_session, oss.str());
         for (int i = 0; i < PQntuples(result); ++i)
         {
             char *pcid_str = PQgetvalue(result, i, 0);
@@ -284,6 +286,8 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     }
 
     const char* paramValues = xml.c_str();
+    oss.str("");
+    oss.clear();
     oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
         "VALUES (" << pcid << "," << srid << ",$1)";
     PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1,

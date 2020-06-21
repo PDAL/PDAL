@@ -69,10 +69,13 @@ inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
     {
     case LasCompression::LasZip:
         out << "LasZip";
+        break;
     case LasCompression::LazPerf:
         out << "LazPerf";
+        break;
     case LasCompression::None:
         out << "None";
+        break;
     }
     return out;
 }

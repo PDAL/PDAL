@@ -11,7 +11,7 @@
 #ifndef EIGEN_MAP_H
 #define EIGEN_MAP_H
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 template<typename PlainObjectType, int MapOptions, typename StrideType>
@@ -151,6 +151,8 @@ template<typename PlainObjectType, int MapOptions, typename StrideType> class Ma
     {
       PlainObjectType::Base::_check_template_params();
     }
+
+    EIGEN_DEVICE_FUNC Map(const Map&) = default;
 
     EIGEN_INHERIT_ASSIGNMENT_OPERATORS(Map)
 

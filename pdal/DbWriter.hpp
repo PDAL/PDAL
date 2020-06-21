@@ -43,7 +43,6 @@
 namespace pdal
 {
 
-class SQLiteWriter;
 class PgWriter;
 class OciWriter;
 

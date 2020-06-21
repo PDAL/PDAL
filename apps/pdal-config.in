@@ -15,7 +15,6 @@ Options:
 	[--libs]
 	[--plugin-dir]
 	[--version]
-	[--python-version]
 EOF
 	exit $1
 }
@@ -58,11 +57,7 @@ case $1 in
     ;;
 
   --version)
-    echo @PDAL_VERSION_STRING@
-    ;;
-
-  --python-version)
-    echo @PDAL_PYTHON_VERSION_STRING@
+    echo @PDAL_VERSION@
     ;;
 
   *)

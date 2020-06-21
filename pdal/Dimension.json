@@ -73,16 +73,19 @@
     {
     "name": "Red",
     "type": "uint16",
+    "alt_names": "diffuse_red",
     "description": "Red image channel value"
     },
     {
     "name": "Green",
     "type": "uint16",
+    "alt_names": "diffuse_green",
     "description": "Green image channel value"
     },
     {
     "name": "Blue",
     "type": "uint16",
+    "alt_names": "diffuse_blue",
     "description": "Blue image channel value"
     },
     {
@@ -139,7 +142,7 @@
     {
     "name": "Deviation",
     "type": "float",
-    "description": "A larger value for deviation indicates larger distortion."
+    "description": "Difference between the shape of the reference pulse and the retun pulse. A larger value for deviation indicates larger distortion."
     },
     {
     "name": "PassiveSignal",
@@ -340,19 +343,19 @@
     },
     {
     "name": "NormalX",
-    "alt_names": "nx",
+    "alt_names": ["nx", "normal_x", "normalx" ],
     "type": "double",
     "description": "X component of a vector normal to surface at this point"
     },
     {
     "name": "NormalY",
-    "alt_names": "ny",
+    "alt_names": ["ny", "normal_y", "normaly" ],
     "type": "double",
     "description": "Y component of a vector normal to surface at this point"
     },
     {
     "name": "NormalZ",
-    "alt_names": "nz",
+    "alt_names": ["nz", "normal_z", "normalz"],
     "type": "double",
     "description": "Z component of a vector normal to surface at this point"
     },
@@ -370,6 +373,11 @@
     "name": "Omit",
     "type": "uint8_t",
     "description": "Used to shallowly mark a point as being omitted without removing it"
+    },
+    {
+    "name": "ClusterID",
+    "type": "int64_t",
+    "description": "ID assigned to a point by a point-clustering algorithm."
     },
     {
     "name": "NNDistance",

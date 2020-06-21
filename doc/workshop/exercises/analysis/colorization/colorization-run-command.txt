@@ -1,2 +1,1 @@
-pdal pipeline ^
-    c:/Users/hobu/PDAL/exercises/analysis/colorization/colorize.json
+pdal pipeline ./exercises/analysis/colorization/colorize.json

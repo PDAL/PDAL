@@ -244,6 +244,9 @@ void TileKernel::process(const Readers& readers)
             }
             PointId last = idx - 1;
 
+            SpatialReference srs = r.getSpatialReference();
+            if (!srs.empty())
+                m_table.setSpatialReference(srs);
             // Reproject if necessary.
             if (m_repro)
             {
@@ -253,6 +256,9 @@ void TileKernel::process(const Readers& readers)
                     if (!StreamableWrapper::processOne(*m_repro, point))
                         skips[idx] = true;
                 }
+                SpatialReference srs = r.getSpatialReference();
+                if (!srs.empty())
+                    m_table.setSpatialReference(srs);
             }
 
             // Split and write.
@@ -302,6 +308,7 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
         m_writers[loc] = sw;
 
         sw->prepare(m_table);
+        StreamableWrapper::spatialReferenceChanged(*sw, m_outSrs);
         StreamableWrapper::ready(*sw, m_table);
     }
     else

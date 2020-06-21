@@ -486,6 +486,21 @@ public:
         return MetadataNode(impl);
     }
 
+    MetadataNode addOrUpdate(const std::string& lname, const double& value,
+        const std::string& descrip = std::string(), size_t precision = 10)
+    {
+        if (m_impl->nodeType(lname) == MetadataType::Array)
+            throw pdal_error("Can't call addOrUpdate() on subnode list.");
+        MetadataImplList& l = m_impl->subnodes(lname);
+
+        if (l.empty())
+            return add(lname, value, descrip, precision);
+        MetadataNodeImplPtr impl(new MetadataNodeImpl(lname));
+        impl->setValue(value, precision);
+        l.front() = impl;
+        return MetadataNode(impl);
+    }
+
     template<typename T>
     MetadataNode addOrUpdate(const std::string& lname, const T& value)
     {

@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <random>
+
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
@@ -43,7 +45,6 @@ namespace pdal
 enum class Mode
 {
     Constant,
-    Random,
     Ramp,
     Uniform,
     Normal,
@@ -58,12 +59,10 @@ inline std::istream& operator>>(std::istream& in, Mode& m)
     s = Utils::tolower(s);
     if (s == "constant")
         m = Mode::Constant;
-    else if (s == "random")
-        m = Mode::Random;
+    else if (s == "random" || s == "uniform")
+        m = Mode::Uniform;
     else if (s == "ramp")
         m = Mode::Ramp;
-    else if (s  == "uniform")
-        m = Mode::Uniform;
     else if (s == "normal")
         m = Mode::Normal;
     else if (s == "grid")
@@ -79,8 +78,6 @@ inline std::ostream& operator<<(std::ostream& out, const Mode& m)
     {
     case Mode::Constant:
         out << "Constant";
-    case Mode::Random:
-        out << "Random";
     case Mode::Ramp:
         out << "Ramp";
     case Mode::Uniform:
@@ -130,6 +127,9 @@ public:
     std::string getName() const;
 
 private:
+    using nd = std::normal_distribution<double>;
+    using urd = std::uniform_real_distribution<double>;
+
     Mode m_mode;
     BOX3D m_bounds;
     double m_mean_x;
@@ -145,9 +145,18 @@ private:
     int m_numReturns;
     int m_returnNum;
     point_count_t m_index;
+    Arg *m_seedArg;
     uint32_t m_seed;
+    std::mt19937 m_generator;
+    std::unique_ptr<nd> m_normalX;
+    std::unique_ptr<nd> m_normalY;
+    std::unique_ptr<nd> m_normalZ;
+    std::unique_ptr<urd> m_uniformX;
+    std::unique_ptr<urd> m_uniformY;
+    std::unique_ptr<urd> m_uniformZ;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);

@@ -1,0 +1,21 @@
+[
+    {
+        "type": "writers.las",
+        "filename": "@CMAKE_SOURCE_DIR@/test/temp/issue2937_out.las",
+        "vlrs":
+        [
+            {
+                "description": "A first record",
+                "record_id": 42,
+                "user_id": "hobu",
+                "data": "dGhpcyBpcyBzb21lIHRleHQ="
+            },
+            {
+                "description": "A second record",
+                "record_id": 43,
+                "user_id": "hobu",
+                "data": "dGhpcyAqdtBpcyBzb21lIHRlbe=="
+            }
+        ]
+    }
+]

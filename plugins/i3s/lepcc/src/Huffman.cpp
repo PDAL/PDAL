@@ -49,7 +49,10 @@ bool Huffman::Encode(Byte** ppByte, int64 bufferSize, const std::vector<Byte>& d
   if (!WriteCodeTable(ppByte))
     return false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
   uint32* arr = (uint32*)(*ppByte);
+#pragma GCC diagnostic pop
   uint32* dstPtr = arr;
   int bitPos = 0;
 
@@ -98,7 +101,10 @@ bool Huffman::Decode(const Byte** ppByte, int64 bufferSize, std::vector<Byte>& d
   if (!ReadCodeTable(ppByte) || !BuildTreeFromCodes(numBitsLUT))
     return false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
   const uint32* arr = (const uint32*)(*ppByte);
+#pragma GCC diagnostic pop
   const uint32* srcPtr = arr;
   int bitPos = 0;
 
@@ -152,7 +158,6 @@ bool Huffman::ComputeCodes(const vector<int>& histo)
   }
 
   m_codeTable.resize(size);
-  memset(&m_codeTable[0], 0, size * sizeof(m_codeTable[0]));
   if (!pq.top().TreeToLUT(0, 0, m_codeTable))    // fill the LUT
     return false;
 
@@ -274,8 +279,8 @@ bool Huffman::ReadCodeTable(const Byte** ppByte, int lerc2Version)
   if (!bitStuffer2.Decode(&ptr, dataVec, lerc2Version))    // unstuff the code lengths
     return false;
 
+  m_codeTable.clear();
   m_codeTable.resize(size);
-  memset(&m_codeTable[0], 0, size * sizeof(m_codeTable[0]));
 
   for (int i = i0; i < i1; i++)
   {
@@ -499,7 +504,11 @@ bool Huffman::BitStuffCodes(Byte** ppByte, int i0, int i1) const
   if (!ppByte)
     return false;
 
+ 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
   unsigned int* arr = (unsigned int*)(*ppByte);
+#pragma GCC diagnostic pop
   unsigned int* dstPtr = arr;
   int size = (int)m_codeTable.size();
   int bitPos = 0;
@@ -545,7 +554,10 @@ bool Huffman::BitUnStuffCodes(const Byte** ppByte, int i0, int i1)
   if (!ppByte || !(*ppByte))
     return false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
   const unsigned int* arr = (const unsigned int*)(*ppByte);
+#pragma GCC diagnostic pop
   const unsigned int* srcPtr = arr;
   int size = (int)m_codeTable.size();
   int bitPos = 0;

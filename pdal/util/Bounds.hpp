@@ -331,6 +331,8 @@ public:
         BOX2D(box), minz(box.minz), maxz(box.maxz)
     {}
 
+    BOX3D& operator=(const BOX3D& box) = default;
+
     explicit BOX3D(const BOX2D& box) :
         BOX2D(box), minz(0), maxz(0)
     {}
@@ -628,6 +630,8 @@ public:
     BOX3D to3d() const;
     BOX2D to2d() const;
     bool is3d() const;
+    void reset(const BOX3D& box);
+    void reset(const BOX2D& box);
     void grow(double x, double y);
     void grow(double x, double y, double z);
     void parse(const std::string& s, std::string::size_type& pos);

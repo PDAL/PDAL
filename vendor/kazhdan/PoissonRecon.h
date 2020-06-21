@@ -191,7 +191,7 @@ public:
     void start()
     {}
     void dumpOutput(const std::string& s)
-        { std::cerr << s << std::endl; }
+        {}
     void dumpOutput2(std::vector<std::string>& comments, const std::string& s)
     {
         comments.push_back(s);
@@ -208,7 +208,7 @@ public:
         m_xForm(XForm4x4<Real>::Identity()),
         m_samples(new OctreeSampleVec<Real>), m_isoValue(0)
     {}
-    void execute();
+    bool execute();
     void evaluate();
     void extractMesh(Kazhdan::Mesh& mesh);
     std::vector<std::string> comments() const
@@ -220,7 +220,7 @@ private:
     void readData();
     void calcDensity();
     void calcNormalData();
-    void readXForm(const std::string& filename);
+    bool readXForm(const std::string& filename);
     void trim();
     void addFEMConstraints();
     void addInterpolationConstraints();
@@ -333,17 +333,17 @@ void PoissonRecon<Real>::writeSurface(Kazhdan::Mesh& mesh)
 }
 
 template<typename Real>
-void PoissonRecon<Real>::readXForm(const std::string& filename)
+bool PoissonRecon<Real>::readXForm(const std::string& filename)
 {
     if (filename.empty())
-        return;
+        return true;
 
     FILE* fp = fopen(filename.data(), "r" );
     if( !fp )
     {
         fprintf( stderr , "[WARNING] Could not read x-form from: %s\n" ,
             filename.data());
-        return;
+        return false;
     }
     for( int i=0 ; i<4 ; i++ )
         for( int j=0 ; j<4 ; j++ )
@@ -352,11 +352,12 @@ void PoissonRecon<Real>::readXForm(const std::string& filename)
             if ( fscanf( fp , " %f " , &f )!= 1 )
             {
                 fprintf( stderr , "[ERROR] Execute: Failed to read xform\n" );
-                exit( 0 );
+                return false;
             }
             m_xForm(i,j) = (Real)f;
         }
     fclose( fp );
+    return true;
 }
 
 template<typename Real>
@@ -488,9 +489,10 @@ void PoissonRecon<Real>::solve()
 }
 
 template<typename Real>
-void PoissonRecon<Real>::execute()
+bool PoissonRecon<Real>::execute()
 {
-    readXForm(m_opts.m_xformFilename);
+    if (!readXForm(m_opts.m_xformFilename))
+        return false;
     m_comments.push_back("Running Screened Poisson Reconstruction "
         "(Version 9.01)");
 //    m_debug.dump(m_comments.back());
@@ -504,6 +506,8 @@ void PoissonRecon<Real>::execute()
     addFEMConstraints();
     addInterpolationConstraints();
     solve();
+
+    return true;
 }
 
 template<typename Real>

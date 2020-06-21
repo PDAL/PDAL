@@ -278,13 +278,73 @@ TEST(TextReaderTest, insertHeader)
 
     PointTable table;
     reader.prepare(table);
-    PointViewSet pointViewSet = reader.execute(table);
-    PointViewPtr pointViewPtr = *pointViewSet.begin();
+    PointViewSet s = reader.execute(table);
+    PointViewPtr v = *s.begin();
 
-    EXPECT_EQ(pointViewPtr->size(), 11U);
+    EXPECT_EQ(v->size(), 11U);
     PointLayoutPtr layout = table.layout();
     EXPECT_TRUE(layout->findDim("A") != Dimension::Id::Unknown);
     EXPECT_TRUE(layout->findDim("B") != Dimension::Id::Unknown);
     EXPECT_TRUE(layout->findDim("C") != Dimension::Id::Unknown);
     EXPECT_TRUE(layout->findDim("G") != Dimension::Id::Unknown);
+}
+
+TEST(TextReaderTest, quotedHeader)
+{
+    auto testme = [](Options& options,
+        const std::string& filename = "text/quoted.txt")
+    {
+        TextReader reader;
+        options.add("filename", Support::datapath(filename));
+        reader.setOptions(options);
+
+        PointTable table;
+        reader.prepare(table);
+        PointViewSet s = reader.execute(table);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->size(), 9U);
+        PointLayoutPtr layout = table.layout();
+        EXPECT_TRUE(layout->findDim("X") != Dimension::Id::Unknown);
+        EXPECT_TRUE(layout->findDim("Y") != Dimension::Id::Unknown);
+        EXPECT_TRUE(layout->findDim("Z") != Dimension::Id::Unknown);
+    };
+
+    {
+        Options opts;
+        testme(opts);
+    }
+
+    {
+        Options opts;
+        opts.add("header", "\"X\",\"Y\",\"Z\"");
+        opts.add("skip", 1);
+        testme(opts);
+    }
+
+    {
+        Options opts;
+        opts.add("header", "\"X\",  \"Y\"  , \"Z\"  ");
+        opts.add("skip", 1);
+        testme(opts);
+    }
+
+    {
+        Options opts;
+        opts.add("header", "\"X\",\"Y\"   \"  ");
+        opts.add("skip", 1);
+        EXPECT_THROW(testme(opts), pdal_error);
+    }
+
+    {
+        Options opts;
+        opts.add("header", "  \"X\",,\"Y\",\"Z\"");
+        opts.add("skip", 1);
+        EXPECT_THROW(testme(opts), pdal_error);
+    }
+
+    {
+        Options opts;
+        opts.add("separator", ' ');
+        testme(opts, "text/quoted2.txt");
+    }
 }

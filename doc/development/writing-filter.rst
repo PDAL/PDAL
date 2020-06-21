@@ -8,8 +8,8 @@ PDAL can be extended through the development of filter functions.
 
 .. seealso::
 
-    For more on filters and their role in PDAL, please refer to
-    :ref:`overview`.
+    For more on filters and their role in PDAL, and their lifecycle
+    please refer to :ref:`overview`.
 
 Every filter stage in PDAL is implemented as a plugin (sometimes referred to as
 a "driver"). Filters native to PDAL, such as :ref:`filters.ferry`, are
@@ -65,7 +65,13 @@ elements - the filter name, description, and a link to documentation.
 
 PDAL requires that filter names always begin with ``filters.``, and end with a
 string that uniquely identifies the filter. The description will be displayed
-to users of the PDAL CLI (``pdal --drivers``).
+to users of the PDAL CLI (``pdal --drivers``).  When making a shared plugin,
+the name of the shared library must correspond with the name of the filter
+provided here.  The name of the generated shared object must be
+
+::
+
+    libpdal_plugin_filter_<filter name>.<shared library extension>
 
 Next, we pass the following to the ``CREATE_SHARED_STAGE`` macro, passing in
 the name of the stage and the ``PluginInfo`` struct.

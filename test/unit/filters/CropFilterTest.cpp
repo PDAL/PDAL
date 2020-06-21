@@ -46,6 +46,10 @@
 #include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
+//ABELL
+#include <pdal/util/Bounds.hpp>
+#include <pdal/GDALUtils.hpp>
+
 using namespace pdal;
 
 TEST(CropFilterTest, create)
@@ -116,6 +120,66 @@ TEST(CropFilterTest, test_crop)
     EXPECT_NEAR(avgZ, 500.00000, delZ);
 }
 
+TEST(CropFilterTest, test_crop_3d)
+{
+    BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    Options opts;
+    opts.add("bounds", srcBounds);
+    opts.add("count", 1000);
+    opts.add("mode", "ramp");
+    FauxReader reader;
+    reader.setOptions(opts);
+
+    // crop the window to 20% the size in each dimension
+    BOX3D dstBounds(2.0, 20.0, 200.0, 4.0, 40.0, 400.0);
+    Options cropOpts;
+    cropOpts.add("bounds", dstBounds);
+
+    CropFilter filter;
+    filter.setOptions(cropOpts);
+    filter.setInput(reader);
+
+    Options statOpts;
+
+    StatsFilter stats;
+    stats.setOptions(statOpts);
+    stats.setInput(filter);
+
+    PointTable table;
+    stats.prepare(table);
+    PointViewSet viewSet = stats.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr buf = *viewSet.begin();
+
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    EXPECT_EQ(buf->size(), 200u);
+
+    const double minX = statsX.minimum();
+    const double minY = statsY.minimum();
+    const double minZ = statsZ.minimum();
+    const double maxX = statsX.maximum();
+    const double maxY = statsY.maximum();
+    const double maxZ = statsZ.maximum();
+    const double avgX = statsX.average();
+    const double avgY = statsY.average();
+    const double avgZ = statsZ.average();
+
+    const double delX = 10.0 / 999.0 * 100.0;
+    const double delY = 100.0 / 999.0 * 100.0;
+    const double delZ = 1000.0 / 999.0 * 100.0;
+
+    EXPECT_NEAR(minX, 2.0, delX);
+    EXPECT_NEAR(minY, 20.0, delY);
+    EXPECT_NEAR(minZ, 200.0, delZ);
+    EXPECT_NEAR(maxX, 4.0, delX);
+    EXPECT_NEAR(maxY, 40.0, delY);
+    EXPECT_NEAR(maxZ, 400.0, delZ);
+    EXPECT_NEAR(avgX, 3.00000, delX);
+    EXPECT_NEAR(avgY, 30.00000, delY);
+    EXPECT_NEAR(avgZ, 300.00000, delZ);
+}
 
 TEST(CropFilterTest, test_crop_polygon)
 {
@@ -555,4 +619,55 @@ TEST(CropFilterTest, bounds_inside_outside)
     outsideCallbackFilter.execute(outsideStreamTable);
     // Expect 1026 points when cropping to the outside of the bounds.
     EXPECT_EQ(nStreamPoints, 1026U);
+}
+
+// Make sure that transformed 2D and 3D bounds work.
+TEST(CropFilterTest, issue_3114)
+{
+    using namespace Dimension;
+
+    auto tst = [](const std::string& bounds, size_t count)
+    {
+        ColumnPointTable table;
+
+        table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+        table.finalize();
+
+        PointViewPtr view(new PointView(table));
+        
+        view->setField(Id::X, 0, 555000);
+        view->setField(Id::Y, 0, 4180000);
+        view->setField(Id::Z, 0, 100);
+
+        view->setField(Id::X, 1, 555000);
+        view->setField(Id::Y, 1, 4180000);
+        view->setField(Id::Z, 1, 1000);
+
+        view->setField(Id::X, 2, 565000);
+        view->setField(Id::Y, 2, 4180000);
+        view->setField(Id::Z, 2, 100);
+
+        BufferReader r;
+        r.addView(view);
+
+        Options ropts;
+        ropts.add("override_srs", "EPSG:26910");
+        r.setOptions(ropts);
+
+        CropFilter f;
+
+        Options copts;
+        copts.add("bounds", bounds);
+        copts.add("a_srs", "EPSG:4326");
+        f.setOptions(copts);
+        f.setInput(r);
+
+        f.prepare(table);
+        PointViewSet s = f.execute(table);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->size(), count);
+    };
+
+    tst("([-122.530, -122.347], [37.695, 37.816])", 2);
+    tst("([-122.530, -122.347], [37.695, 37.816], [0,500])", 1);
 }

@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL CXX C)
+project(PDAL VERSION 2.1.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -26,16 +26,28 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-# the next line is the ONLY place in the entire pdal system where
-# the version info is hard-coded
-set(PDAL_VERSION_STRING "1.9.1" CACHE STRING "PDAL version")
+#
+# Must be changed if there is an ABI change.  This builds the SONAME
+# that's embedded in the library itself.
+#
+set(PDAL_SOLIB_MAJOR 11)
+#
+# Change if there's a new release with no ABI change
+#
+set(PDAL_SOLIB_MINOR 0)
+#
+# Build number.  Increment for builds within minor versions.  Probably
+# always 0 for PDAL
+#
+set(PDAL_SOLIB_BUILD 0)
 
-DISSECT_VERSION()
-GET_OS_INFO()
-SET_INSTALL_DIRS()
 
-set(PDAL_API_VERSION "8")
-set(PDAL_BUILD_VERSION "9.0.1")
+set(PDAL_API_VERSION ${PDAL_SOLIB_MAJOR})
+set(PDAL_BUILD_VERSION
+    "${PDAL_SOLIB_MAJOR}.${PDAL_SOLIB_MINOR}.${PDAL_SOLIB_BUILD}")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Name of C++ library
 
@@ -49,12 +61,11 @@ set(PDAL_BUILD_VERSION "9.0.1")
 # See below for the rest of the magic.
 #
 if (APPLE OR WIN32)
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
 else()
-    set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdal_base)
 endif()
+set(PDAL_LIB_NAME pdalcpp)
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
@@ -261,7 +272,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
-    PUBLIC
         ${GDAL_INCLUDE_DIR}
         ${LASZIP_INCLUDE_DIR}
 )
@@ -333,28 +343,31 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
     PATTERN "gitsha.h"
-    PATTERN "pdal/private" EXCLUDE
-    PATTERN "pdal/util/private" EXCLUDE
-    ${ZSTD_EXCLUDES}
-    ${ZLIB_EXCLUDES}
-    ${LZMA_EXCLUDES}
-    ${LAZPERF_EXCLUDES}
+#    PATTERN "pdal/private" EXCLUDE
+#    PATTERN "pdal/io/private" EXCLUDE
+#    PATTERN "pdal/pdal/private" EXCLUDE
+#    PATTERN "pdal/util/private" EXCLUDE
+#    PATTERN "pdal/filters/private" EXCLUDE
+#    ${ZSTD_EXCLUDES}
+#    ${ZLIB_EXCLUDES}
+#    ${LZMA_EXCLUDES}
+#    ${LAZPERF_EXCLUDES}
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
+#    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_IO_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
+#    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_FILTERS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "private" EXCLUDE
+#    PATTERN "private" EXCLUDE
 )
 
 install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
@@ -380,6 +393,18 @@ install(
     DESTINATION
         "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
+
+#
+# Allow downstream cmake projects to find PDAL header files without
+# being explicit.
+#
+target_include_directories(${PDAL_BASE_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:include>)
+target_include_directories(${PDAL_UTIL_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:include>)
+
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?

@@ -235,3 +235,12 @@ TEST(TranslateTest, issue_2114)
     EXPECT_FALSE(FileUtils::fileExists(Support::temppath("out4.las")));
 }
 
+TEST(TranslateTest, issue2835)
+{
+    FileUtils::deleteFile("devnull");
+
+    std::string output;
+    std::string in = Support::datapath("las/autzen_trim.las");
+    EXPECT_EQ(runTranslate(in + " " + "devnull", output), 0);
+    EXPECT_FALSE(FileUtils::fileExists("devnull"));
+}

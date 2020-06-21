@@ -42,8 +42,6 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include <nlohmann/json.hpp>
-
 namespace pdal
 {
 
@@ -70,24 +68,24 @@ void Summary::extractMetadata(MetadataNode &m)
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
 
-    double std = stddev();
+    double std = sampleStddev();
     if (!std::isinf(std) && !std::isnan(std))
         m.add("stddev", std, "standard deviation");
 
-    double v = variance();
+    double v = sampleVariance();
     if (!std::isinf(v) && !std::isnan(v))
         m.add("variance", v, "variance");
     m.add("name", m_name, "name");
 
     if (m_advanced)
     {
-        double k = kurtosis();
+        double k = sampleExcessKurtosis();
         if (!std::isinf(k) && !std::isnan(k))
             m.add("kurtosis", k, "kurtosis");
 
-        double sk = skewness();
+        double sk = sampleSkewness();
         if (!std::isinf(sk) && !std::isnan(sk))
-            m.add("skewness", skewness(), "skewness");
+            m.add("skewness", sampleSkewness(), "skewness");
     }
 
     if (m_enumerate == Enumerate)
@@ -275,9 +273,8 @@ void StatsFilter::extractMetadata(PointTableRef table)
         MetadataNode box_metadata = m_metadata.add("bbox");
         MetadataNode metadata = box_metadata.add("native");
 
-        NL::json json = p.json();
         MetadataNode boundary = metadata.addWithType("boundary",
-            json.dump(), "json", "GeoJSON boundary");
+            p.json(), "json", "GeoJSON boundary");
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -285,16 +282,16 @@ void StatsFilter::extractMetadata(PointTableRef table)
         if (!ref.empty())
         {
             p.setSpatialReference(ref);
-            SpatialReference epsg4326("EPSG:4326");
-            p.transform(epsg4326);
-            BOX3D ddbox = p.bounds();
-            MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
-            MetadataNode dddbox = box_metadata.add("EPSG:4326");
-            dddbox.add(epsg_4326_box);
+            if (p.transform("EPSG:4326"))
+            {
+                BOX3D ddbox = p.bounds();
+                MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
+                MetadataNode dddbox = box_metadata.add("EPSG:4326");
+                dddbox.add(epsg_4326_box);
 
-            json = p.json();
-            MetadataNode ddboundary = dddbox.addWithType("boundary",
-                json.dump(), "json", "GeoJSON boundary");
+                MetadataNode ddboundary = dddbox.addWithType("boundary",
+                        p.json(), "json", "GeoJSON boundary");
+            }
         }
     }
 }

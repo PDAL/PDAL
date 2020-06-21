@@ -49,7 +49,7 @@ using namespace pdal;
 namespace
 {
     const std::string eptLaszipPath(
-            "ept://" + Support::datapath("ept/lone-star-laszip"));
+        Support::datapath("ept/lone-star-laszip/ept.json"));
 }
 
 TEST(EptAddonWriterTest, fullLoop)
@@ -153,7 +153,6 @@ TEST(EptAddonWriterTest, boundedWrite)
     const std::string addonDir(Support::datapath("ept/addon/"));
     FileUtils::deleteDirectory(addonDir);
 
-    const std::string boundsString("([515380, 515400], [4918350, 4918370])");
     BOX2D bounds(515380, 4918350, 515400, 4918370);
 
     {
@@ -161,7 +160,7 @@ TEST(EptAddonWriterTest, boundedWrite)
         {
             Options o;
             o.add("filename", eptLaszipPath);
-            o.add("bounds", boundsString);
+            o.add("bounds", bounds);
             reader.setOptions(o);
         }
 
@@ -208,7 +207,7 @@ TEST(EptAddonWriterTest, boundedWrite)
     const auto set(reader.execute(table));
 
     double x, y;
-    uint16_t c;
+    uint8_t c;
 
     int in(0), out(0);
 
@@ -218,8 +217,10 @@ TEST(EptAddonWriterTest, boundedWrite)
         {
             x = view->getFieldAs<double>(Dimension::Id::X, i);
             y = view->getFieldAs<double>(Dimension::Id::Y, i);
-            c = view->getFieldAs<uint16_t>(Dimension::Id::Classification, i);
+            c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
 
+            EXPECT_GT(x, 0);
+            EXPECT_GT(y, 0);
             if (bounds.contains(x, y))
             {
                 ++in;
@@ -237,6 +238,100 @@ TEST(EptAddonWriterTest, boundedWrite)
     // appropriately.
     EXPECT_GT(in, 0);
     EXPECT_GT(out, 0);
+}
+
+TEST(EptAddonWriterTest, boundedRead)
+{
+    // Make sure that when we query an EPT set using a boundary that it
+    // looks consistent.
+
+    const std::string addonDir(Support::datapath("ept/addon/"));
+    FileUtils::deleteDirectory(addonDir);
+
+    {
+        EptReader reader;
+        {
+            Options o;
+            o.add("filename", eptLaszipPath);
+            reader.setOptions(o);
+        }
+
+        AssignFilter assign;
+        {
+            Options o;
+            o.add("assignment", "Classification[:]=42");
+            assign.setOptions(o);
+            assign.setInput(reader);
+        }
+
+        EptAddonWriter writer;
+        {
+            NL::json addons;
+            addons[addonDir + "bounded"] = "Classification";
+
+            Options o;
+            o.add("addons", addons);
+            writer.setOptions(o);
+            writer.setInput(assign);
+        }
+
+        PointTable table;
+        writer.prepare(table);
+        writer.execute(table);
+    }
+
+    // Now we'll query the whole dataset with this addon - points outside the
+    // bounds should have a Classification of zero.
+
+    BOX2D bounds(515380, 4918300, 515450, 4918370);
+    EptReader reader;
+    {
+        NL::json addons;
+        addons["Classification"] = addonDir + "bounded";
+
+        Options o;
+        o.add("filename", eptLaszipPath);
+        o.add("bounds", bounds);
+        o.add("addons", addons);
+        reader.setOptions(o);
+    }
+
+    PointTable table;
+    reader.prepare(table);
+    const auto set(reader.execute(table));
+
+    double x, y;
+    uint8_t c;
+
+    int in(0), out(0);
+
+    for (const PointViewPtr& view : set)
+    {
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            c = view->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+
+            EXPECT_GT(x, 0);
+            EXPECT_GT(y, 0);
+            if (bounds.contains(x, y))
+            {
+                ++in;
+                ASSERT_EQ(c, 42u);
+            }
+            else
+            {
+                ++out;
+                ASSERT_EQ(c, 0u);
+            }
+        }
+    }
+
+    // Make sure our bounds are actually selecting data and pruning
+    // appropriately.
+    EXPECT_GT(in, 0);
+    EXPECT_EQ(out, 0);
 }
 
 TEST(EptAddonWriterTest, mustDescendFromEptReader)

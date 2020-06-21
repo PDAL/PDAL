@@ -120,8 +120,7 @@ public:
     }
 
     // Set the log to be available to stages.
-    void setLog(LogPtr& log)
-        { m_log = log; }
+    void setLog(const LogPtr& log);
 
     QuickInfo preview() const;
     void prepare() const;
@@ -157,7 +156,7 @@ private:
     Options stageOptions(Stage& stage);
 
     std::unique_ptr<StageFactory> m_factory;
-    std::unique_ptr<PointTable> m_tablePtr;
+    std::unique_ptr<SimplePointTable> m_tablePtr;
     PointTableRef m_table;
     std::unique_ptr<FixedPointTable> m_streamTablePtr;
     StreamPointTable& m_streamTable;

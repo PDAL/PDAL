@@ -43,8 +43,9 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
-#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/JsonFwd.hpp>
 
 #include <cpl_conv.h>
 #include <gdal_priv.h>
@@ -53,10 +54,10 @@
 #include <ogr_srs_api.h>
 
 class OGRSpatialReference;
-class OGRGeometry;
 
 namespace pdal
 {
+class Polygon;
 
 namespace gdal
 {
@@ -66,12 +67,14 @@ using ITER_VAL = typename std::iterator_traits<ITER>::value_type;
 
 PDAL_DLL void registerDrivers();
 PDAL_DLL void unregisterDrivers();
-PDAL_DLL bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
-    const std::string& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX2D& box, const std::string& srcSrs,
-    const std::string& dstSrs);
+PDAL_DLL bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs);
+PDAL_DLL bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs);
+PDAL_DLL bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs);
 PDAL_DLL bool reproject(double& x, double& y, double& z,
-    const std::string& srcSrs, const std::string& dstSrs);
+    const SpatialReference& srcSrs, const SpatialReference& dstSrs);
 PDAL_DLL std::string lastError();
 
 typedef std::shared_ptr<void> RefPtr;
@@ -133,82 +136,6 @@ private:
     RefPtr m_ref;
 };
 
-class Geometry
-{
-public:
-    Geometry()
-        {}
-    Geometry(const std::string& wkt, const SpatialRef& srs)
-    {
-        OGRGeometryH geom;
-
-        char *p_wkt = const_cast<char *>(wkt.data());
-        OGRSpatialReferenceH ref = srs.get();
-        if (srs.empty())
-        {
-            ref = NULL;
-        }
-        bool isJson = wkt.find("{") != wkt.npos ||
-                      wkt.find("}") != wkt.npos;
-
-        if (!isJson)
-        {
-            OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
-            if (err != OGRERR_NONE)
-            {
-                std::cout << "wkt: " << wkt << std::endl;
-                std::ostringstream oss;
-                oss << "unable to construct OGR Geometry";
-                oss << " '" << CPLGetLastErrorMsg() << "'";
-                throw pdal::pdal_error(oss.str());
-            }
-        }
-        else
-        {
-            // Assume it is GeoJSON and try constructing from that
-            geom = OGR_G_CreateGeometryFromJson(p_wkt);
-
-            if (!geom)
-                throw pdal_error("Unable to create geometry from "
-                    "input GeoJSON");
-
-            OGR_G_AssignSpatialReference(geom, ref);
-        }
-
-        newRef(geom);
-    }
-
-    operator bool () const
-        { return get() != NULL; }
-    OGRGeometryH get() const
-        { return m_ref.get(); }
-
-    void transform(const SpatialRef& out_srs)
-    {
-        OGR_G_TransformTo(m_ref.get(), out_srs.get());
-    }
-
-    std::string wkt() const
-    {
-        char* p_wkt = 0;
-        OGRErr err = OGR_G_ExportToWkt(m_ref.get(), &p_wkt);
-        return std::string(p_wkt);
-    }
-
-    void setFromGeometry(OGRGeometryH geom)
-        {
-            if (geom)
-                newRef(OGR_G_Clone(geom));
-        }
-
-private:
-    void newRef(void *v)
-    {
-        m_ref = RefPtr(v, [](void* t){ OGR_G_DestroyGeometry(t); } );
-    }
-    RefPtr m_ref;
-};
-
 
 // This is a little confusing because we have a singleton error handler with
 // a single log pointer, but we set the log pointer/debug state as if we
@@ -219,6 +146,9 @@ private:
 class PDAL_DLL ErrorHandler
 {
 public:
+    ErrorHandler();
+    ~ErrorHandler();
+
     /**
       Get the singleton error handler.
 
@@ -263,8 +193,6 @@ public:
         ErrorHandler::getGlobalErrorHandler().handle(code, num, msg);
     }
 
-    ErrorHandler();
-
 private:
     void handle(::CPLErr level, int num, const char *msg);
 
@@ -272,7 +200,7 @@ private:
     std::mutex m_mutex;
     bool m_debug;
     pdal::LogPtr m_log;
-    int m_errorNum;
+    mutable int m_errorNum;
     bool m_cplSet;
 };
 
@@ -793,11 +721,28 @@ public:
 
     std::string const& filename() { return m_filename; }
 
-    void statistics(int nBand, double* minimum, double* maximum, double* mean,
-        double* stddev, int bApprox = TRUE, int bForce = TRUE) const
+    GDALError statistics(int nBand, double* minimum, double* maximum,
+        double* mean, double* stddev, int bApprox = TRUE,
+        int bForce = TRUE) const
     {
-        Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
-            bApprox, bForce);
+        try
+        {
+            Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
+                bApprox, bForce);
+        }
+        catch (InvalidBand)
+        {
+            m_errorMsg = "Unable to get band " + std::to_string(nBand) +
+                " from raster '" + m_filename + "'.";
+            return GDALError::InvalidBand;
+        }
+        catch (BadBand)
+        {
+            m_errorMsg = "Unable to read band/block information from "
+                "raster '" + m_filename + "'.";
+            return GDALError::BadBand;
+        }
+        return GDALError::None;
     }
 
     BOX2D bounds() const
@@ -820,7 +765,9 @@ public:
 
         double minimum; double maximum;
         double mean; double stddev;
-        statistics(nBand, &minimum, &maximum, &mean, &stddev);
+        if (statistics(nBand, &minimum, &maximum, &mean, &stddev) !=
+                GDALError::None)
+            return BOX3D();
 
         return BOX3D(box2.minx, box2.miny, minimum,
                      box2.maxx, box2.maxy, maximum);
@@ -842,7 +789,7 @@ private:
 
     GDALError wake();
 
-    std::string m_errorMsg;
+    mutable std::string m_errorMsg;
     mutable std::vector<pdal::Dimension::Type> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
@@ -855,37 +802,17 @@ private:
 
 } // namespace gdal
 
-namespace oldgdalsupport
-{
-OGRErr createFromWkt(const char *s, OGRSpatialReference *srs,
-    OGRGeometry **newGeom);
-OGRGeometry* createFromGeoJson(const char *s);
-} // namespace oldgdalsupport
-
 namespace gdal
 {
-// We need this, but they aren't around until GDAL 2.3
-inline OGRGeometry *createFromWkt(const char *s)
-{
-    OGRGeometry *newGeom;
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    oldgdalsupport::createFromWkt(s, nullptr, &newGeom);
-#else
-    OGRGeometryFactory::createFromWkt(s, nullptr, &newGeom);
-#endif
-    return newGeom;
-}
+OGRGeometry *createFromWkt(const char *s);
+OGRGeometry *createFromGeoJson(const char *s);
 
-inline OGRGeometry *createFromGeoJson(const char *s)
-{
-#if (GDAL_VERSION_MAJOR < 2) || \
-    ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    return oldgdalsupport::createFromGeoJson(s);
-#else
-    return OGRGeometryFactory::createFromGeoJson(s);
-#endif
-}
+// New signatures to support extraction of SRS from the end of geometry
+// specifications..
+OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
+OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
+
+std::vector<Polygon> getPolygons(const NL::json& ogr);
 
 inline OGRGeometry *fromHandle(OGRGeometryH geom)
 { return reinterpret_cast<OGRGeometry *>(geom); }
@@ -894,8 +821,5 @@ inline OGRGeometryH toHandle(OGRGeometry *h)
 { return reinterpret_cast<OGRGeometryH>(h); }
 
 } // namespace gdal
-
-PDAL_DLL std::string transformWkt(std::string wkt, const SpatialReference& from,
-    const SpatialReference& to);
 
 } // namespace pdal

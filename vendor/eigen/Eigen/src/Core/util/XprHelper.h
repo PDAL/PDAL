@@ -89,7 +89,8 @@ struct promote_scalar_arg_unsupported<S,T,S,false,true> {};
 class no_assignment_operator
 {
   private:
-    no_assignment_operator& operator=(const no_assignment_operator&);
+    //ABELL - Added "= delete".
+    no_assignment_operator& operator=(const no_assignment_operator&) = delete;
 };
 
 /** \internal return the index type with the largest number of bits */

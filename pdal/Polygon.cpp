@@ -32,16 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
-#include "cpl_string.h"
 
-#include <ogr_geometry.h>
+#include "../filters/private/pnp/GridPnp.hpp"
 
 namespace pdal
 {
 
+struct Polygon::PrivateData
+{
+    std::vector<GridPnp> m_grids;
+};
+
+
+Polygon::Polygon()
+{
+    init();
+}
+
+
+Polygon::~Polygon()
+{}
+
+
+Polygon::Polygon(OGRGeometryH g) : Geometry(g)
+{
+    init();
+}
+
+
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
 {
+    init();
+}
+
+
+void Polygon::init()
+{
+    m_pd.reset(new PrivateData());
+
     // If the handle was null, we need to create an empty polygon.
     if (!m_geom)
     {
@@ -61,7 +91,13 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
     }
 }
 
-Polygon::Polygon(const BOX2D& box)
+
+Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref) :
+    Geometry(wkt_or_json, ref), m_pd(new PrivateData)
+{}
+
+
+Polygon::Polygon(const BOX2D& box) : m_pd(new PrivateData)
 {
     OGRPolygon *poly = new OGRPolygon();
     m_geom.reset(poly);
@@ -75,7 +111,7 @@ Polygon::Polygon(const BOX2D& box)
 }
 
 
-Polygon::Polygon(const BOX3D& box)
+Polygon::Polygon(const BOX3D& box) : m_pd(new PrivateData)
 {
     OGRPolygon *poly = new OGRPolygon();
     m_geom.reset(poly);
@@ -89,55 +125,100 @@ Polygon::Polygon(const BOX3D& box)
 }
 
 
-void Polygon::simplify(double distance_tolerance, double area_tolerance)
+Polygon::Polygon(const Polygon& poly) : Geometry(poly)
+{
+    init();
+}
+
+
+Polygon& Polygon::operator=(const Polygon& src)
+{
+    ((Geometry *)this)->operator=((const Geometry&)src);
+    m_pd.reset(new PrivateData);
+    return *this;
+}
+
+
+void Polygon::modified()
+{
+    m_pd->m_grids.clear();
+}
+
+
+void Polygon::clear()
+{
+    m_geom.reset(new OGRPolygon());
+    modified();
+}
+
+
+void Polygon::simplify(double distance_tolerance, double area_tolerance,
+    bool preserve_topology)
 {
     throwNoGeos();
 
-    auto deleteSmallRings = [area_tolerance](OGRGeometry *geom)
-    {
-// Missing until GDAL 2.3.
-//        OGRPolygon *poly = geom->toPolygon();
-        OGRPolygon *poly = static_cast<OGRPolygon *>(geom);
+    if (preserve_topology)
+        m_geom.reset(m_geom->SimplifyPreserveTopology(distance_tolerance));
+    else
+        m_geom.reset(m_geom->Simplify(distance_tolerance));
 
-        std::vector<int> deleteRings;
-        for (int i = 0; i < poly->getNumInteriorRings(); ++i)
+    removeSmallRings(area_tolerance);
+    removeSmallHoles(area_tolerance);
+    modified();
+}
+
+
+void Polygon::removeSmallRings(double tolerance)
+{
+    OGRwkbGeometryType t = m_geom->getGeometryType();
+    if (t == wkbPolygon || t == wkbPolygon25D)
+    {
+        if (area() < tolerance)
+            clear();
+    }
+    else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
+    {
+        OGRMultiPolygon *mPoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = mPoly->getNumGeometries() - 1; i >= 0; --i)
+        {
+            OGRPolygon *poly =
+                static_cast<OGRPolygon *>(mPoly->getGeometryRef(i));
+            if (poly->get_Area() < tolerance)
+                mPoly->removeGeometry(i, true);
+        }
+    }
+}
+
+
+void Polygon::removeSmallHoles(double tolerance)
+{
+    auto remove = [tolerance](OGRPolygon *poly)
+    {
+        for (int i = poly->getNumInteriorRings() - 1; i >= 0; --i)
         {
             OGRLinearRing *lr = poly->getInteriorRing(i);
-            if (lr->get_Area() < area_tolerance)
-                deleteRings.push_back(i + 1);
+            if (lr->get_Area() < tolerance)
+                OGR_G_RemoveGeometry(gdal::toHandle(poly), i + 1, true);
         }
-        // Note that interior rings are in a list with the exterior ring,
-        // which is why the ring numbers are offset by one when used in
-        // this context (what a mess).
-        for (auto i : deleteRings)
-// Missing until 2.3
-//            poly->removeRing(i, true);
-            OGR_G_RemoveGeometry(gdal::toHandle(poly), i, true);
     };
-
-    OGRGeometry *g = m_geom->SimplifyPreserveTopology(distance_tolerance);
-    m_geom.reset(g);
 
     OGRwkbGeometryType t = m_geom->getGeometryType();
     if (t == wkbPolygon || t == wkbPolygon25D)
-        deleteSmallRings(m_geom.get());
+        remove(static_cast<OGRPolygon *>(m_geom.get()));
     else if (t == wkbMultiPolygon || t == wkbMultiPolygon25D)
     {
-// Missing until 2.3
-/**
-        OGRMultiPolygon *mpoly = m_geom->toMultiPolygon();
-        for (auto it = mpoly->begin(); it != mpoly->end(); ++it)
-            deleteSmallRings(*it);
-**/
-        OGRMultiPolygon *mpoly = static_cast<OGRMultiPolygon *>(m_geom.get());
-        for (int i = 0; i < mpoly->getNumGeometries(); ++i)
-            deleteSmallRings(mpoly->getGeometryRef(i));
+        OGRMultiPolygon *mPoly = static_cast<OGRMultiPolygon *>(m_geom.get());
+        for (int i = mPoly->getNumGeometries() - 1; i >= 0; --i)
+            remove(static_cast<OGRPolygon *>(mPoly->getGeometryRef(i)));
     }
 }
 
 
 double Polygon::area() const
 {
+    if (!valid())
+        return 0;
+
     throwNoGeos();
 
     OGRwkbGeometryType t = m_geom->getGeometryType();
@@ -189,6 +270,19 @@ bool Polygon::contains(const Polygon& p) const
     return m_geom->Contains(p.m_geom.get());
 }
 
+bool Polygon::disjoint(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Disjoint(p.m_geom.get());
+}
+
+bool Polygon::intersects(const Polygon& p) const
+{
+    throwNoGeos();
+
+    return m_geom->Intersects(p.m_geom.get());
+}
 
 /// Determine whether this polygon contains a point.
 /// \param x  Point x coordinate.
@@ -196,8 +290,13 @@ bool Polygon::contains(const Polygon& p) const
 /// \return  Whether the polygon contains the point or not.
 bool Polygon::contains(double x, double y) const
 {
-    OGRPoint p(x, y);
-    return m_geom->Contains(&p);
+    if (m_pd->m_grids.empty())
+        for (const Polygon& p : polygons())
+            m_pd->m_grids.emplace_back(p.exteriorRing(), p.interiorRings());
+    for (auto& g : m_pd->m_grids)
+        if (g.inside(x, y))
+            return true;
+    return false;
 }
 
 

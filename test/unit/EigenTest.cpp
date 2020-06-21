@@ -139,8 +139,10 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Cv(C.data(), C.data() + C.size());
 
-    std::vector<double> Dv = dilateDiamond(Cv, 5, 5, 1);
-    std::vector<double> Dv2 = dilateDiamond(Cv, 5, 5, 2);
+    std::vector<double> Dv = Cv;
+    dilateDiamond(Dv, 5, 5, 1);
+    std::vector<double> Dv2 = Cv;
+    dilateDiamond(Dv2, 5, 5, 2);
 
     EXPECT_EQ(0, Dv[0]);
     EXPECT_EQ(1, Dv[1]);
@@ -154,8 +156,10 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Ev(E.data(), E.data() + E.size());
 
-    std::vector<double> Fv = erodeDiamond(Ev, 5, 5, 1);
-    std::vector<double> Fv2 = erodeDiamond(Ev, 5, 5, 2);
+    std::vector<double> Fv = Ev;
+    erodeDiamond(Fv, 5, 5, 1);
+    std::vector<double> Fv2 = Ev;
+    erodeDiamond(Fv2, 5, 5, 2);
 
     EXPECT_EQ(0, Fv[16]);
     EXPECT_EQ(1, Fv[12]);
@@ -192,7 +196,7 @@ TEST(EigenTest, calcBounds)
     const double lim_max = (std::numeric_limits<double>::max)();
     PointViewPtr b0(new PointView(table));
     BOX3D box_b0;
-    calculateBounds(*b0, box_b0);
+    b0->calculateBounds(box_b0);
     check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
 
     PointViewPtr b1(new PointView(table));
@@ -208,11 +212,11 @@ TEST(EigenTest, calcBounds)
     bs.insert(b2);
 
     BOX3D box_b1;
-    calculateBounds(*b1, box_b1);
+    b1->calculateBounds(box_b1);
     check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
 
     BOX3D box_b2;
-    calculateBounds(*b2, box_b2);
+    b2->calculateBounds(box_b2);
     check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
 }
 
@@ -229,7 +233,7 @@ TEST(EigenTest, computeCentroid)
 {
     PointTable table;
     PointViewPtr view = makeTestView(table);
-    std::vector<PointId> ids(view->size());
+    PointIdList ids(view->size());
     std::iota(ids.begin(), ids.end(), 0);
     auto centroid = computeCentroid(*view, ids);
     EXPECT_EQ(80, centroid.x());

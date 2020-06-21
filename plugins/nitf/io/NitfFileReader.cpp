@@ -37,8 +37,8 @@
 #include <pdal/Metadata.hpp>
 
 #include "MetadataReader.hpp"
-#include "tre_plugins.hpp"
 
+#include "tre_plugins.hpp"
 
 // Set to true if you want the metadata to contain
 // NITF fields that are empty; if false, those fields

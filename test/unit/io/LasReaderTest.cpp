@@ -281,7 +281,7 @@ TEST(LasReaderTest, extraBytes)
     reader.prepare(table);
 
     DimTypeList dimTypes = layout->dimTypes();
-    EXPECT_EQ(dimTypes.size(), (size_t)24);
+    EXPECT_EQ(dimTypes.size(), (size_t)22);
 
     Dimension::Id color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
@@ -535,4 +535,22 @@ TEST(LasReaderTest, IgnoreVLRs)
         m = m.findChild("data");
         EXPECT_FALSE(!m.empty()) << "No value for node " << i;
     }
+}
+
+TEST(LasReaderTest, SyntheticPoints)
+{
+    using namespace Dimension;
+
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/synthetic_test.las"));
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic, outView->getFieldAs<uint8_t>(Id::Classification, 0));
 }

@@ -1,0 +1,3 @@
+dir ./exercises/translation/interesting.laz
+
+dir ./exercises/translation/interesting.las

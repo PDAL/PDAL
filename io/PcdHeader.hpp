@@ -103,9 +103,9 @@ struct PcdHeader
 
     PcdVersion m_version;
     PcdFieldList m_fields;
-    unsigned int m_width;
-    unsigned int m_height;
-    uint64_t m_pointCount;
+    point_count_t m_width;
+    point_count_t m_height;
+    point_count_t m_pointCount;
 
     Eigen::Vector4f m_origin;
     Eigen::Quaternionf m_orientation;

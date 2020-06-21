@@ -85,29 +85,39 @@ const CsdHeader& OptechReader::getHeader() const { return m_header; }
 
 void OptechReader::initialize()
 {
-    ILeStream stream(Utils::openFile(m_filename));
-    if (!stream)
+    std::istream* rawStream = Utils::openFile(m_filename);
+    if (!rawStream)
         throwError("Unable to open " + m_filename + " for reading.");
+    ILeStream stream(rawStream);
 
-    stream.get(m_header.signature, 4);
-    if (strcmp(m_header.signature, "CSD") != 0)
-        throwError("Invalid header signature when reading CSD file: '" +
-            std::string(m_header.signature) + "'");
-
-    stream.get(m_header.vendorId, 64);
-    stream.get(m_header.softwareVersion, 32);
-    stream >> m_header.formatVersion >> m_header.headerSize >>
-        m_header.gpsWeek >> m_header.minTime >> m_header.maxTime >>
-        m_header.numRecords >> m_header.numStrips;
-    for (size_t i = 0; i < 256; ++i)
+    try
     {
-        stream >> m_header.stripPointers[i];
+        stream.get(m_header.signature, 4);
+        if (strcmp(m_header.signature, "CSD") != 0)
+            throwError("Invalid header signature when reading CSD file: '" +
+                std::string(m_header.signature) + "'");
+
+        stream.get(m_header.vendorId, 64);
+        stream.get(m_header.softwareVersion, 32);
+        stream >> m_header.formatVersion >> m_header.headerSize >>
+            m_header.gpsWeek >> m_header.minTime >> m_header.maxTime >>
+            m_header.numRecords >> m_header.numStrips;
+        for (size_t i = 0; i < 256; ++i)
+        {
+            stream >> m_header.stripPointers[i];
+        }
+        stream >> m_header.misalignmentAngles[0] >>
+            m_header.misalignmentAngles[1] >> m_header.misalignmentAngles[2] >>
+            m_header.imuOffsets[0] >> m_header.imuOffsets[1] >>
+            m_header.imuOffsets[2] >> m_header.temperature >> m_header.pressure;
+        stream.get(m_header.freeSpace, 830);
     }
-    stream >> m_header.misalignmentAngles[0] >>
-        m_header.misalignmentAngles[1] >> m_header.misalignmentAngles[2] >>
-        m_header.imuOffsets[0] >> m_header.imuOffsets[1] >>
-        m_header.imuOffsets[2] >> m_header.temperature >> m_header.pressure;
-    stream.get(m_header.freeSpace, 830);
+    catch( ... )
+    {
+        Utils::closeFile(rawStream);
+        throw;
+    }
+    Utils::closeFile(rawStream);
 
     m_boresightMatrix = createOptechRotationMatrix(
         m_header.misalignmentAngles[0] + m_header.imuOffsets[0],
@@ -116,7 +126,7 @@ void OptechReader::initialize()
 
     // The Optech docs say that their lat/longs are referenced
     // to the WGS84 reference frame.
-    setSpatialReference(SpatialReference("EPSG:4326"));
+    setSpatialReference("EPSG:4326");
 }
 
 

@@ -271,7 +271,11 @@ void PoissonFilter::addArgs(ProgramArgs& args)
 PointViewSet PoissonFilter::run(PointViewPtr view)
 {
     if (!m_normalsProvided)
-        NormalFilter().doFilter(*view);
+    {
+        NormalFilter f;
+        f.setLog(log());
+        f.doFilter(*view);
+    }
 
     std::unique_ptr<PointSource> source;
     if (m_doColor)
@@ -292,7 +296,8 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
     }
 
     PoissonRecon<double> recon(opts, *source);
-    recon.execute();
+    if (!recon.execute())
+        throwError("Failure executing poisson algorithm.");
     recon.evaluate();
 
     PointViewSet s;

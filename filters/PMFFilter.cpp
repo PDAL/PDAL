@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2015-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2015-2017, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -49,12 +49,9 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
-{
-    "filters.pmf",
-    "Progressive morphological filter",
-    "http://pdal.io/stages/filters.pmf.html"
-};
+static StaticPluginInfo const s_info{"filters.pmf",
+                                     "Progressive morphological filter",
+                                     "http://pdal.io/stages/filters.pmf.html"};
 
 struct PMFArgs
 {
@@ -70,11 +67,9 @@ struct PMFArgs
 
 CREATE_STATIC_STAGE(PMFFilter, s_info)
 
-PMFFilter::PMFFilter() : m_args(new PMFArgs)
-{}
+PMFFilter::PMFFilter() : m_args(new PMFArgs) {}
 
-PMFFilter::~PMFFilter()
-{}
+PMFFilter::~PMFFilter() {}
 
 std::string PMFFilter::getName() const
 {
@@ -181,39 +176,43 @@ PointViewSet PMFFilter::run(PointViewPtr input)
                    "1.");
 
     // Segment kept view into two views
-    PointViewPtr firstView = keptView->makeNew();
-    PointViewPtr secondView = keptView->makeNew();
+    PointViewPtr inlierView = keptView->makeNew();
+    PointViewPtr outlierView = keptView->makeNew();
     if (nrAllZero && rnAllZero)
     {
         log()->get(LogLevel::Warning)
             << "Both NumberOfReturns and ReturnNumber are filled with 0's. "
                "Proceeding without any further return filtering.\n";
-        firstView->append(*keptView);
+        inlierView->append(*keptView);
     }
     else
     {
-        Segmentation::segmentReturns(keptView, firstView, secondView,
+        Segmentation::segmentReturns(keptView, inlierView, outlierView,
                                      m_args->m_returns);
+        ignoredView->append(*outlierView);
     }
 
-    if (!firstView->size())
+    if (!inlierView->size())
     {
         throwError("No returns to process.");
     }
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
-    for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Dimension::Id::Classification, i, 1);
+    for (PointId i = 0; i < inlierView->size(); ++i)
+        inlierView->setField(Dimension::Id::Classification, i,
+                             ClassLabel::Unclassified);
 
     // Run the actual PMF algorithm.
-    processGround(firstView);
+    processGround(inlierView);
 
     // Prepare the output PointView.
     PointViewPtr outView = input->makeNew();
+    // ignoredView is appended to the output untouched.
     outView->append(*ignoredView);
-    outView->append(*secondView);
-    outView->append(*firstView);
+    // inlierView is appended to the output, the only PointView whose
+    // classifications may have been altered.
+    outView->append(*inlierView);
     viewSet.insert(outView);
 
     return viewSet;
@@ -223,7 +222,7 @@ void PMFFilter::processGround(PointViewPtr view)
 {
     // initialize bounds, rows, columns, and surface
     BOX2D bounds;
-    calculateBounds(*view, bounds);
+    view->calculateBounds(bounds);
     size_t cols = static_cast<size_t>(
         ((bounds.maxx - bounds.minx) / m_args->m_cellSize) + 1);
     size_t rows = static_cast<size_t>(
@@ -282,7 +281,7 @@ void PMFFilter::processGround(PointViewPtr view)
             double x = bounds.minx + (c + 0.5) * m_args->m_cellSize;
             double y = bounds.miny + (r + 0.5) * m_args->m_cellSize;
             int k = 1;
-            std::vector<PointId> neighbors(k);
+            PointIdList neighbors(k);
             std::vector<double> sqr_dists(k);
             kdi.knnSearch(x, y, k, &neighbors, &sqr_dists);
             out[idx] = temp->getFieldAs<double>(Dimension::Id::Z, neighbors[0]);
@@ -292,7 +291,7 @@ void PMFFilter::processGround(PointViewPtr view)
     ZImin.swap(out);
 
     // initialize ground indices
-    std::vector<PointId> groundIdx;
+    PointIdList groundIdx;
     for (PointId i = 0; i < view->size(); ++i)
         groundIdx.push_back(i);
 
@@ -337,10 +336,10 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        std::vector<double> me = erodeDiamond(ZImin, rows, cols, iters);
-        std::vector<double> mo = dilateDiamond(me, rows, cols, iters);
+        erodeDiamond(ZImin, rows, cols, iters);
+        dilateDiamond(ZImin, rows, cols, iters);
 
-        std::vector<PointId> groundNewIdx;
+        PointIdList groundNewIdx;
         for (auto p_idx : groundIdx)
         {
             double x = view->getFieldAs<double>(Dimension::Id::X, p_idx);
@@ -352,11 +351,9 @@ void PMFFilter::processGround(PointViewPtr view)
             int r =
                 static_cast<int>(floor((y - bounds.miny) / m_args->m_cellSize));
 
-            if ((z - mo[c * rows + r]) < htvec[j])
+            if ((z - ZImin[c * rows + r]) < htvec[j])
                 groundNewIdx.push_back(p_idx);
         }
-
-        ZImin.swap(mo);
         groundIdx.swap(groundNewIdx);
 
         log()->get(LogLevel::Debug)
@@ -369,7 +366,7 @@ void PMFFilter::processGround(PointViewPtr view)
     // set the classification label of ground returns as 2
     // (corresponding to ASPRS LAS specification)
     for (const auto& i : groundIdx)
-        view->setField(Dimension::Id::Classification, i, 2);
+        view->setField(Dimension::Id::Classification, i, ClassLabel::Ground);
 }
 
 } // namespace pdal

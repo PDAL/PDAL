@@ -37,42 +37,11 @@
 #include <pdal/StageFactory.hpp>
 #include <io/FauxReader.hpp>
 #include <filters/TransformationFilter.hpp>
+#include "Support.hpp"
 
 namespace pdal
 {
 
-
-class TransformationFilterTest : public ::testing::Test
-{
-public:
-    virtual void SetUp()
-    {
-        StageFactory f;
-
-        BOX3D bounds(1, 2, 3, 4, 5, 6);
-        Options readerOpts;
-        readerOpts.add("mode", "constant");
-        readerOpts.add("count", 3);
-        readerOpts.add("bounds", bounds);
-        m_reader.setOptions(readerOpts);
-        m_filter.setInput(m_reader);
-    }
-
-    FauxReader m_reader;
-    TransformationFilter m_filter;
-};
-
-
-TEST(TransformationMatrix, create)
-{
-    StageFactory f;
-    Stage* filter(f.createStage("filters.transformation"));
-    EXPECT_TRUE(filter);
-}
-
-
-TEST(TransformationMatrix, init)
-{
     auto check = [](const TransformationFilter::Transform& m)
     {
         EXPECT_DOUBLE_EQ(1, m[0]);
@@ -93,6 +62,40 @@ TEST(TransformationMatrix, init)
         EXPECT_DOUBLE_EQ(1, m[15]);
     };
 
+
+
+class TransformationFilterTest : public ::testing::Test
+{
+public:
+    virtual void SetUp()
+    {
+        StageFactory f;
+
+        BOX3D bounds(1, 2, 3, 4, 5, 6);
+        Options readerOpts;
+        readerOpts.add("mode", "constant");
+        readerOpts.add("count", 3);
+        readerOpts.add("bounds", bounds);
+        readerOpts.add("override_srs", "EPSG:4326");
+        m_reader.setOptions(readerOpts);
+        m_filter.setInput(m_reader);
+    }
+
+    FauxReader m_reader;
+    TransformationFilter m_filter;
+};
+
+
+TEST(TransformationMatrix, create)
+{
+    StageFactory f;
+    Stage* filter(f.createStage("filters.transformation"));
+    EXPECT_TRUE(filter);
+}
+
+
+TEST(TransformationMatrix, init)
+{
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1";
     TransformationFilter::Transform m;
 
@@ -187,6 +190,60 @@ TEST_F(TransformationFilterTest, Rotation)
         EXPECT_DOUBLE_EQ(-1, view->getFieldAs<double>(Dimension::Id::Y, i));
         EXPECT_DOUBLE_EQ(3, view->getFieldAs<double>(Dimension::Id::Z, i));
     }
+}
+
+TEST_F(TransformationFilterTest, SrsReset)
+{
+    TransformationFilter::Transform ident { { 1, 0, 0, 0,
+                                              0, 1, 0, 0,
+                                              0, 0, 1, 0,
+                                              0, 0, 0, 1 } };
+
+    Options filterOpts;
+    filterOpts.add("matrix", ident);
+    filterOpts.add("override_srs", "EPSG:3857");
+    m_filter.setOptions(filterOpts);
+
+    PointTable table;
+    m_filter.prepare(table);
+    PointViewSet viewSet = m_filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->spatialReference(), "EPSG:3857");
+}
+
+TEST(TransformationMatrix, init_file_oneline)
+{
+
+    std::string s = Support::datapath("filters/transform-oneline.txt");
+    TransformationFilter::Transform m;
+
+    std::stringstream iss(s);
+    iss >> m;
+    check(m);
+
+    TransformationFilter::Transform n { { 1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0, 1, 0,
+                                          0, 0, 0, 1 } };
+    check(n);
+}
+
+TEST(TransformationMatrix, init_file_multiline)
+{
+
+    std::string s = Support::datapath("filters/transform-newlines.txt");
+    TransformationFilter::Transform m;
+
+    std::stringstream iss(s);
+    iss >> m;
+    check(m);
+
+    TransformationFilter::Transform n { { 1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0, 1, 0,
+                                          0, 0, 0, 1 } };
+    check(n);
 }
 
 

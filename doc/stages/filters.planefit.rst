@@ -43,7 +43,7 @@ outlier.
       {
           "type":"filters.planefit",
           "knn":8
-      }
+      },
       "output.laz"
   ]
 

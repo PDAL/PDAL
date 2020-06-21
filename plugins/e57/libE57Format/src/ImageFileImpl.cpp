@@ -78,7 +78,7 @@ namespace e57
       : isWriter_( false ),
         writerCount_(0),
         readerCount_(0),
-        checksumPolicy( std::max( 0, std::min( policy, 100 ) ) ),
+        checksumPolicy( (std::max)( 0, (std::min)( policy, 100 ) ) ),
         file_(nullptr),
         xmlLogicalOffset_( 0 ),
         xmlLogicalLength_( 0 ),
@@ -773,7 +773,7 @@ namespace e57
       }
 
       /// Check if file length matches actual physical length
-      if (header.filePhysicalLength != file->length(CheckedFile::Physical))
+      if ((FileOffset)header.filePhysicalLength != file->length(CheckedFile::Physical))
       {
          throw E57_EXCEPTION2(E57_ERROR_BAD_FILE_LENGTH,
                               "fileName=" + file->fileName()

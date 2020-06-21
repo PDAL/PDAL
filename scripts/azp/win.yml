@@ -1,0 +1,87 @@
+
+jobs:
+- job: win
+
+  pool:
+    vmImage: vs2017-win2016
+  timeoutInMinutes: 360
+  steps:
+    - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+      displayName: Add conda to PATH
+
+    - script: |
+        ECHO ON
+        call conda create --yes --quiet --name pdal
+      displayName: Create conda environment
+
+    - script: |
+        ECHO ON
+        call activate pdal
+        call conda config --set always_yes True --set show_channel_urls True
+        call conda install --yes --quiet --name pdal -c conda-forge conda-build ninja -y
+        call conda install -c conda-forge pdal --only-deps -y
+      displayName: Install PDAL dependencies
+    - script: |
+        ECHO ON
+        call activate pdal
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        echo %PATH%
+        set CC=cl.exe
+        set CXX=cl.exe
+        mkdir build
+        pushd build
+        cmake -G "Ninja" ^
+            -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ^
+            -DPDAL_PLUGIN_INSTALL_PATH:FILEPATH=%PDAL_PLUGIN_INSTALL_PATH% ^
+            -DWITH_TESTS=ON ^
+            -DCMAKE_VERBOSE_MAKEFILE=OFF ^
+            -DCMAKE_LIBRARY_PATH:FILEPATH="%CONDA_PREFIX%/Library/lib" ^
+            -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
+            -DOPENSSL_ROOT_DIR=%CONDA_PREFIX%/Library ^
+            -DPython3_ROOT_DIR:FILEPATH="%CONDA_PREFIX%" ^
+            -DPython3_FIND_STRATEGY=LOCATION ^
+            -DBUILD_PLUGIN_CPD=OFF ^
+            -DBUILD_PLUGIN_GREYHOUND=ON ^
+            -DBUILD_PLUGIN_ICEBRIDGE=ON ^
+            -DBUILD_PLUGIN_HDF=ON ^
+            -DBUILD_PLUGIN_MRSID=OFF ^
+            -DBUILD_PLUGIN_NITF=ON ^
+            -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
+            -DBUILD_PLUGIN_OCI=OFF ^
+            -DBUILD_PLUGIN_I3S=ON ^
+            -DBUILD_PLUGIN_RIVLIB=OFF ^
+            -DENABLE_CTEST=OFF ^
+            -DWITH_LAZPERF=ON ^
+            -DWITH_LZMA=ON ^
+            -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
+            -DWITH_LASZIP=ON ^
+            -DORACLE_INCLUDE_DIR=%CONDA_PREFIX%/include ^
+            -DORACLE_LIBRARY=%CONDA_PREFIX%/libs/oci.lib ^
+            -DLazperf_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
+            -DHDF5_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
+            -DLazperf_DIR:FILEPATH=%CONDA_PREFIX%/Library/cmake ^
+            -DWITH_ZLIB=ON ^
+            -Dgtest_force_shared_crt=ON ^
+            -DBUILD_PGPOINTCLOUD_TESTS=OFF ^
+            -DBUILD_I3S_TESTS=OFF ^
+            -DBUILD_OCI_TESTS=OFF ^
+            -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING ^
+            ..
+      displayName: 'CMake'
+    - script: |
+        call activate pdal
+        pushd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        echo %PATH%
+        set CC=cl.exe
+        set CXX=cl.exe
+        ninja -v
+      displayName: 'Build'
+    - script: |
+        ECHO ON
+        call activate pdal
+        pushd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        ctest -VV --output-on-failure
+      displayName: 'Test'
+

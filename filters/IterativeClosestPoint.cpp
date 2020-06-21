@@ -107,7 +107,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 {
     // Compute centroid of fixed PointView such that both the fixed an moving
     // PointViews can be centered.
-    std::vector<PointId> ids(fixed->size());
+    PointIdList ids(fixed->size());
     std::iota(ids.begin(), ids.end(), 0);
     auto centroid = computeCentroid(*fixed, ids);
 
@@ -136,7 +136,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 
         // Create empty lists to hold point correspondences, and initialize MSE
         // to zero.
-        std::vector<PointId> fixed_idx, moving_idx;
+        PointIdList fixed_idx, moving_idx;
         fixed_idx.reserve(tempMovingTransformed->size());
         moving_idx.reserve(tempMovingTransformed->size());
         double mse(0.0);
@@ -149,7 +149,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             // Find the index of the nearest neighbor, and the square distance
             // between each point.
             PointRef p = tempMovingTransformed->point(i);
-            std::vector<PointId> indices(1);
+            PointIdList indices(1);
             std::vector<double> sqr_dists(1);
             kd_fixed.knnSearch(p, 1, &indices, &sqr_dists);
 
@@ -261,7 +261,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     for (PointId i = 0; i < moving->size(); ++i)
     {
         PointRef p = moving->point(i);
-        std::vector<PointId> indices(1);
+        PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         kd_fixed_orig.knnSearch(p, 1, &indices, &sqr_dists);
         mse += std::sqrt(sqr_dists[0]);
@@ -269,10 +269,33 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     mse /= moving->size();
     log()->get(LogLevel::Debug2) << "MSE: " << mse << std::endl;
 
+    // Transformation to demean coords
+    Eigen::Matrix4d pretrans = Eigen::Matrix4d::Identity();
+    pretrans.block<3, 1>(0, 3) = -centroid;
+
+    // Transformation to return to global coords
+    Eigen::Matrix4d posttrans = Eigen::Matrix4d::Identity();
+    posttrans.block<3, 1>(0, 3) = centroid;
+
+    // The composed transformation is built from right to left in order of
+    // operations.
+    Eigen::Matrix4d composed_transformation =
+        posttrans * final_transformation * pretrans;
+
     // Populate metadata nodes to capture the final transformation, convergence
     // status, and MSE.
+    Eigen::IOFormat MetadataFmt(Eigen::FullPrecision, Eigen::DontAlignCols,
+                                " ", "\n", "", "", "", "");
     MetadataNode root = getMetadata();
-    root.add("transform", Eigen::MatrixXd(final_transformation.cast<double>()));
+    std::stringstream ss;
+    ss << final_transformation.format(MetadataFmt);
+    root.add("transform", ss.str());
+    ss.str("");
+    ss << composed_transformation.format(MetadataFmt);
+    root.add("composed", ss.str());
+    ss.str("");
+    ss << centroid.format(MetadataFmt);
+    root.add("centroid", ss.str());
     root.add("converged", converged);
     root.add("fitness", mse);
 

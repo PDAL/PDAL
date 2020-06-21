@@ -34,14 +34,12 @@
 
 #include <pdal/EigenUtils.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <Eigen/Dense>
-
+#include <array>
 #include <cfloat>
 #include <numeric>
 #include <vector>
@@ -52,36 +50,12 @@ namespace pdal
 #pragma warning (push)
 #pragma warning (disable: 4244)
 
-void calculateBounds(const PointView& view, BOX2D& output)
-{
-    for (PointId idx = 0; idx < view.size(); idx++)
-    {
-        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
-
-        output.grow(x, y);
-    }
-}
-
-
-void calculateBounds(const PointView& view, BOX3D& output)
-{
-    for (PointId idx = 0; idx < view.size(); idx++)
-    {
-        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, idx);
-
-        output.grow(x, y, z);
-    }
-}
-
 PointViewPtr demeanPointView(const PointView& view)
 {
     using namespace Eigen;
     using namespace Dimension;
 
-    std::vector<PointId> ids(view.size());
+    PointIdList ids(view.size());
     std::iota(ids.begin(), ids.end(), 0);
     Vector3d centroid = computeCentroid(view, ids);
     PointViewPtr outView = view.makeNew();
@@ -157,7 +131,7 @@ void transformInPlace(PointView& view, double* matrix)
 }
 
 Eigen::Vector3d computeCentroid(const PointView& view,
-    const std::vector<PointId>& ids)
+    const PointIdList& ids)
 {
     using namespace Eigen;
 
@@ -186,7 +160,7 @@ Eigen::Vector3d computeCentroid(const PointView& view,
 }
 
 Eigen::Matrix3d computeCovariance(const PointView& view,
-    const std::vector<PointId>& ids)
+    const PointIdList& ids)
 {
     using namespace Eigen;
 
@@ -214,7 +188,7 @@ Eigen::Matrix3d computeCovariance(const PointView& view,
     return A * A.transpose() / (ids.size()-1);
 }
 
-uint8_t computeRank(const PointView& view, const std::vector<PointId>& ids,
+uint8_t computeRank(const PointView& view, const PointIdList& ids,
     double threshold)
 {
     using namespace Eigen;
@@ -278,10 +252,10 @@ Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows, int cols,
     return ZImin;
 }
 
-std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
+void dilateDiamond(std::vector<double>& data, size_t rows, size_t cols, int iterations)
 {
     std::vector<double> out(data.size(), std::numeric_limits<double>::lowest());
-    std::vector<size_t> idx(5);
+    std::array<size_t, 5> idx;
 
     for (int iter = 0; iter < iterations; ++iter)
     {
@@ -315,13 +289,13 @@ std::vector<double> dilateDiamond(std::vector<double> data, size_t rows, size_t 
         }
         data.swap(out);
     }
-    return data;
 }
 
-std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t cols, int iterations)
+void erodeDiamond(std::vector<double>& data, size_t rows, size_t cols,
+    int iterations)
 {
     std::vector<double> out(data.size(), (std::numeric_limits<double>::max)());
-    std::vector<size_t> idx(5);
+    std::array<size_t, 5> idx;
 
     for (int iter = 0; iter < iterations; ++iter)
     {
@@ -349,7 +323,6 @@ std::vector<double> erodeDiamond(std::vector<double> data, size_t rows, size_t c
         }
         data.swap(out);
     }
-    return data;
 }
 
 Eigen::MatrixXd pointViewToEigen(const PointView& view)
@@ -364,7 +337,7 @@ Eigen::MatrixXd pointViewToEigen(const PointView& view)
     return matrix;
 }
 
-Eigen::MatrixXd pointViewToEigen(const PointView& view, const std::vector<PointId>& ids)
+Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdList& ids)
 {
     Eigen::MatrixXd matrix(ids.size(), 3);
     for (size_t i = 0; i < ids.size(); ++i)

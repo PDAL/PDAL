@@ -53,11 +53,11 @@ public:
         setupGrid();
     }
 
-    bool inside(const Point& p)
+    bool inside(const Point& p) const
     { return inside(p.first, p.second); }
 
     // Determine if a point is inside the polygon attached to this class.
-    bool inside(double x, double y)
+    bool inside(double x, double y) const
     {
         // Find the index of the grid cell at the position.
         // If the position isn't in the grid, we're certainly outside.
@@ -105,7 +105,7 @@ private:
             { return m_edges.empty(); }
         void setPoint(double x, double y)
             { m_point = Point(x, y); }
-        bool computed()
+        bool computed() const
             { return !std::isnan(m_point.first); }
         GridPnp::Point point() const
             { return m_point; }
@@ -157,16 +157,16 @@ private:
     };
 
 
-    Point& point1(EdgeId id)
+    const Point& point1(EdgeId id) const
         { return m_rings[id]; }
-    Point& point2(EdgeId id)
+    const Point& point2(EdgeId id) const
         { return m_rings[id + 1]; }
-    double xval(const Point& p)
+    double xval(const Point& p) const
         { return p.first; }
-    double yval(const Point& p)
+    double yval(const Point& p) const
         { return p.second; }
 
-    void validateRing(const Ring& r)
+    void validateRing(const Ring& r) const
     {
         if (r.size() < 4)
             throw grid_error("Invalid ring. Ring must consist of at least "
@@ -267,9 +267,9 @@ private:
     // though, in preprocessing vs. actual pnp tests.  Hopefully more work
     // can be done on this later.  My stupid way of dealing with this is
     // to set a minimum grid size of 1000 cells.
-    XYIndex calcGridSize(double xAvgLen, double yAvgLen)
+    XYIndex calcGridSize(double xAvgLen, double yAvgLen) const
     {
-        // I'm setting a minmum number of cells as 1000, because, why not?
+        // I'm setting a minimum number of cells as 1000, because, why not?
         // m_rings isn't necessarily an exact count of edges, but it's close
         // enough for this purpose.
         size_t m = (std::max)((size_t)1000, m_rings.size());
@@ -313,8 +313,8 @@ private:
         for (EdgeIt it(m_rings); it; it.next())
         {
             EdgeId id = *it;
-            Point& p1 = point1(id);
-            Point& p2 = point2(id);
+            const Point& p1 = point1(id);
+            const Point& p2 = point2(id);
             Point origin = m_grid->origin();
             VoxelRayTrace vrt(m_grid->cellWidth(), m_grid->cellHeight(),
                 xval(origin), yval(origin),
@@ -327,14 +327,14 @@ private:
 
 
     // Determine if a point is collinear with an edge.
-    bool pointCollinear(double x, double y, EdgeId edgeId)
+    bool pointCollinear(double x, double y, EdgeId edgeId) const
     {
-        Point& p1 = point1(edgeId);
-        Point& p2 = point2(edgeId);
-        double x1 = xval(p1);
-        double x2 = xval(p2);
-        double y1 = yval(p1);
-        double y2 = yval(p2);
+        const Point& p1 = point1(edgeId);
+        const Point& p2 = point2(edgeId);
+        const double x1 = xval(p1);
+        const double x2 = xval(p2);
+        const double y1 = yval(p1);
+        const double y2 = yval(p2);
 
         // If p1 == p2, this will fail.
 
@@ -346,7 +346,7 @@ private:
 
     // Put a reference point in the cell.  Figure out if the reference point
     // is inside the polygon.
-    void computeCell(Cell& cell, XYIndex& pos)
+    void computeCell(Cell& cell, XYIndex& pos) const
     {
         generateRefPoint(cell, pos);
         determinePointStatus(cell, pos);
@@ -359,7 +359,7 @@ private:
     // a known status (inside or outside the polygon).  So we just pick a point
     // that isn't collinear with any of the segments in the cell.  Eliminating
     // collinearity eliminates special cases when counting crossings.
-    void generateRefPoint(Cell& cell, XYIndex& pos)
+    void generateRefPoint(Cell& cell, XYIndex& pos) const
     {
         // A test point is valid if it's not collinear with any segments
         // in the cell.
@@ -389,7 +389,7 @@ private:
     // If we're determining the status of the leftmost cell, choose a point
     // to the left of the leftmost cell, which is guaranteed to be outside
     // the polygon.
-    void determinePointStatus(Cell& cell, XYIndex& pos)
+    void determinePointStatus(Cell& cell, XYIndex& pos) const
     {
         Point p1(cell.point());
 
@@ -433,7 +433,7 @@ private:
     // Determine the number of intersections between an edge and
     // all edges indexes by the 'edges' list.
     template<typename EDGES>
-    size_t intersections(Edge& e1, const EDGES& edges)
+    size_t intersections(Edge& e1, const EDGES& edges) const
     {
         size_t isect = 0;
         for (auto& edgeId : edges)
@@ -449,7 +449,7 @@ private:
     // Determine if a point in a cell is inside the polygon or outside.
     // We're always calling a point that lies on an edge as 'inside'
     // the polygon.
-    bool testCell(Cell& cell, double x, double y)
+    bool testCell(Cell& cell, double x, double y) const
     {
         Edge tester({x, y}, cell.point());
 
@@ -466,7 +466,7 @@ private:
         return inside;
     }
 
-    // Determine if two edges interset.  Note that because of the way
+    // Determine if two edges intersect.  Note that because of the way
     // we've chosen reference points, the two segments should never be
     // collinear, which eliminates some special cases.
     //
@@ -474,7 +474,7 @@ private:
     // is one or 0 and the other factor is between 0 and 1.
     // This is standard math, but it's shown nicely on Stack Overflow
     // question 563198.  The variable names map to the good response there.
-    IntersectType intersects(Edge& e1, Edge& e2)
+    IntersectType intersects(Edge& e1, Edge& e2) const
     {
         using Vector = std::pair<double, double>;
 
@@ -489,6 +489,8 @@ private:
         double rCrossS = r.first * s.second - r.second * s.first;
         Vector pq = { q.first - p.first, q.second - p.second };
 
+        //ABELL - This can be improved to eliminate the division
+        //  because we're testing for 1 and 0.  Later...
         double pqCrossS = pq.first * s.second - pq.second * s.first;
         double t = (pqCrossS / rCrossS);
         bool tCloseEnough = Comparison::closeEnough(t, 0) ||
@@ -512,7 +514,7 @@ private:
     }
 
     RingList m_rings;
-    std::mt19937 m_ranGen;
+    mutable std::mt19937 m_ranGen;
     std::unique_ptr<std::uniform_real_distribution<>> m_xDistribution;
     std::unique_ptr<std::uniform_real_distribution<>> m_yDistribution;
     std::unique_ptr<Grid<Cell>> m_grid;

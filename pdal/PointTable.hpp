@@ -98,6 +98,7 @@ public:
 private:
     // Point data operations.
     virtual PointId addPoint() = 0;
+    virtual char *getDimension(const Dimension::Detail *d, PointId idx) = 0;
 
 protected:
     virtual char *getPoint(PointId idx) = 0;
@@ -128,7 +129,6 @@ private:
     virtual void getFieldInternal(Dimension::Id id, PointId idx,
         void *value) const;
 
-    // The number of points in each memory block.
     char *getDimension(const Dimension::Detail *d, PointId idx)
         { return getPoint(idx) + d->offset(); }
 
@@ -141,18 +141,20 @@ private:
 
 // This provides a context for processing a set of points and allows the library
 // to be used to process multiple point sets simultaneously.
-class PDAL_DLL PointTable : public SimplePointTable
+class PDAL_DLL RowPointTable : public SimplePointTable
 {
 private:
     // Point storage.
     std::vector<char *> m_blocks;
     point_count_t m_numPts;
+
+    // Make sure this is power-of-2 to facilitate fast div and mod ops.
     static const point_count_t m_blockPtCnt = 65536;
 
 public:
-    PointTable() : SimplePointTable(m_layout), m_numPts(0)
+    RowPointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
-    virtual ~PointTable();
+    virtual ~RowPointTable();
     virtual bool supportsView() const
         { return true; }
 
@@ -165,25 +167,45 @@ private:
 
     PointLayout m_layout;
 };
+using PointTable = RowPointTable;
 
-class PDAL_DLL ContiguousPointTable : public SimplePointTable
+// This provides a context for processing a set of points and allows the library
+// to be used to process multiple point sets simultaneously.
+class PDAL_DLL ColumnPointTable : public SimplePointTable
 {
 private:
-    std::vector<char> m_buf;
+    // Point storage.
+    using DimBlockList = std::vector<char *>;
+    using MemBlocks = std::vector<DimBlockList>;
+
+    // List of dimension memory block lists.
+    MemBlocks m_blocks;
     point_count_t m_numPts;
 
+    // Make sure this is power-of-2 to facilitate fast div and mod ops.
+    static const point_count_t m_blockPtCnt = 16384;
+
 public:
-    ContiguousPointTable() : SimplePointTable(m_layout), m_numPts(0)
+    ColumnPointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
-    virtual ~ContiguousPointTable();
+    virtual ~ColumnPointTable();
     virtual bool supportsView() const
         { return true; }
-
-protected:
-    virtual char *getPoint(PointId idx);
+    virtual void finalize();
+    virtual char *getPoint(PointId idx)
+        { return nullptr; }
 
 private:
+    virtual void setFieldInternal(Dimension::Id id, PointId idx,
+        const void *value);
+    virtual void getFieldInternal(Dimension::Id id, PointId idx,
+        void *value) const;
+
     virtual PointId addPoint();
+
+    // Hide base class calls for now.
+    const char *getDimension(const Dimension::Detail *d, PointId idx) const;
+    char *getDimension(const Dimension::Detail *d, PointId idx);
 
     PointLayout m_layout;
 };
@@ -199,6 +221,7 @@ protected:
     StreamPointTable(PointLayout& layout, point_count_t capacity)
         : SimplePointTable(layout)
         , m_capacity(capacity)
+        , m_numPoints(0)
         , m_skips(m_capacity, false)
     {}
 

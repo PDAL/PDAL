@@ -64,7 +64,7 @@ NeighborClassifierFilter::~NeighborClassifierFilter()
 void NeighborClassifierFilter::addArgs(ProgramArgs& args)
 {
     args.add("domain", "Selects which points will be subject to "
-        "KNN-based assignmenassignment", m_domainSpec);
+        "KNN-based assignment", m_domainSpec);
     args.add("k", "Number of nearest neighbors to consult",
         m_k).setPositional();
     args.add("candidate", "candidate file name", m_candidateFile);
@@ -108,7 +108,7 @@ void NeighborClassifierFilter::prepared(PointTableRef table)
 void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     KD3Index &kdi)
 {
-    std::vector<PointId> iSrc = kdi.neighbors(point, m_k);
+    PointIdList iSrc = kdi.neighbors(point, m_k);
     double thresh = iSrc.size()/2.0;
 
     // vote NNs
@@ -155,7 +155,7 @@ bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp,
 
 
 PointViewPtr NeighborClassifierFilter::loadSet(const std::string& filename,
-    PointTable& table)
+    PointTableRef table)
 {
     PipelineManager mgr;
 
@@ -181,7 +181,7 @@ void NeighborClassifierFilter::filter(PointView& view)
     }
     else
     {   // NN comes from candidate file
-        PointTable candTable;
+        ColumnPointTable candTable;
         PointViewPtr candView = loadSet(m_candidateFile, candTable);
         KD3Index& kdiCand = candView->build3dIndex();
         PointRef point_nn(*candView, 0);

@@ -117,9 +117,22 @@ private:
       Parse a header line into a list of dimension names.
 
       \param header  Header line to parse.
-      \return  List of dimension names.
     */
     void parseHeader(const std::string& header);
+
+    /**
+      Parse a header line that starts with a quote.
+
+      \param header Header line to parse.
+    */
+    void parseQuotedHeader(const std::string& header);
+
+    /**
+      Parse a header line that doesn't start with a quote.
+
+      \param header Header line to parse.
+    */
+    void parseUnquotedHeader(const std::string& header);
 
     /**
       Check a header line to see if it appears header-like.  Display a

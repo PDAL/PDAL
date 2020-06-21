@@ -33,7 +33,6 @@
 ****************************************************************************/
 #pragma once
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -41,6 +40,8 @@
 #include <memory>
 
 class OGRGeometry;
+using OGRGeometryH = void *;
+using OGRSpatialReferenceH = void *;
 
 namespace pdal
 {
@@ -55,20 +56,24 @@ protected:
     Geometry(Geometry&&);
     Geometry(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
+    Geometry(OGRGeometryH g);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
 
 public:
     Geometry& operator=(const Geometry&);
     virtual ~Geometry();
 
-    OGRGeometryH getOGRHandle();
+    OGRGeometryH getOGRHandle()
+    { return m_geom.get(); }
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
+    virtual void clear() = 0;
+    virtual void modified();
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref);
     SpatialReference getSpatialReference() const;
-    void transform(const SpatialReference& ref) const;
+    Utils::StatusWithReason transform(SpatialReference ref);
 
     std::string wkt(double precision=15, bool bOutputZ=false) const;
     std::string json(double precision=15) const;

@@ -1,12 +1,23 @@
 # QGIS Generated Color Map Export File
-0,255,0,0,255
-1,234,234,234,255
-2,222,126,44,255
-3,30,62,15,255
-4,45,255,6,255
-5,209,230,201,255
-6,249,12,6,255
-7,146,197,222,255
-8,133,5,2,255
-9,0,0,255,255
-10,255,255,255,255
+2 139 51 38 255 Ground
+3 143 201 157 255 Low Veg
+4 5 159 43 255 Med Veg
+5 47 250 11 255 High Veg
+6 209 151 25 255 Building
+7 232 41 7 255 Low Point
+8 197 0 204 255 reserved
+9 26 44 240 255 Water
+10 165 160 173 255 Rail
+11 81 87 81 255 Road
+12 203 210 73 255 Reserved
+13 209 228 214 255 Wire - Guard (Shield)
+14 160 168 231 255 Wire - Conductor (Phase)
+15 220 213 164 255 Transmission Tower
+16 214 211 143 255 Wire-Structure Connector (Insulator)
+17 151 98 203 255 Bridge Deck
+18 236 49 74 255 High Noise
+19 185 103 45 255 Reserved
+21 58 55 9 255 255 Reserved
+22 76 46 58 255 255 Reserved
+23 20 76 38 255 255 Reserved
+26 78 92 32 255 255 Reserved

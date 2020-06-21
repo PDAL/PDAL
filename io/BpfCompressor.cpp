@@ -71,7 +71,7 @@ void BpfCompressor::compress()
     uint32_t rawWritten = (uint32_t)m_out.position();
 
     // Pop our temp stream so that we can write the real output file.
-    m_out.popStream();
+    delete m_out.popStream();
 
     m_rawSize += rawWritten;
 
@@ -100,7 +100,7 @@ void BpfCompressor::compress()
 void BpfCompressor::finish()
 {
     // Pop our special stream so that we can write the the file.
-    m_out.popStream();
+    delete m_out.popStream();
 
     // Deflate and write the result to the output file.
     int ret = Z_OK;

@@ -38,8 +38,7 @@ filename
 
 storage_mode
   Type of ply file to write. Valid values are 'ascii', 'little endian',
-  'big endian', and 'default'. 'default' is binary output in the endianness
-  of the machine. [Default: "ascii"]
+  'big endian'.  [Default: "ascii"]
 
 dims
   List of dimensions (and :ref:`types`) in the format

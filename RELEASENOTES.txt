@@ -1,4 +1,279 @@
 ================================================================================
+2.1.0
+================================================================================
+
+Changes of Note
+===============
+
+-  The X, Y and Z dimensions are now always stored internally as
+   double-precision floating point. This was normally case previously,
+   but it is now enforced. (#2892)
+-  The interface include file directory is now set for downstream
+   projects using cmake, eliminating the need to explicitly set the
+   location of PDAL header files. (#2262)
+-  PDAL is now always built using the arbiter library, which is included
+   in the source distribution.
+-  ``filters.python`` has been removed from the primary PDAL library and
+   is part of the `PDAL python <https://pdal.io/python.html>`__ library.
+-  When the ``bounds`` option of ``filters.crop`` represents a 3D
+   volume, the filter now does 3D cropping, rather than 2D cropping as
+   in previous releases. (#2904)
+-  ``writers.ply`` no longer accepts ``default`` as a valid value for
+   the ``storage_mode`` option. (#2385)
+
+API User Notes
+==============
+
+-  Support has been added for range-based iteration of PointView
+   objects. The dereferenced iterator yields a PointRef object.
+-  We are now providing private header files as part of the
+   distribution. The API exposed by these files may change or be
+   eliminated in a future release. Use of these files may require the
+   installation of the header files from other packages. The symbols for
+   some of these functions may not be public, especially on Windows.
+-  There are now enumerations for classifications (pdal::ClassLabel).
+-  N-dimensional KD-tree support has been added.
+-  There are some small API changes (const changes, for example), but
+   almost all code using the PDAL library should build without
+   modification.
+-  We do not guarantee ABI compatibility, though in most cases this
+   release should be backward compatible.
+
+New Stages
+==========
+
+-  ``filters.voxeldownsize`` provides streamed support for voxel
+   filtering. (#2699 - Thanks
+   `Helix.re <http://https://helixre.com/>`__!)
+-  ``filters.separatescanline`` splits input into separate output point
+   views based on associated scan lines. (#2724 - Thanks Guilhem
+   Villemin)
+-  ``filters.farthestpointsampling`` add points from the input to the
+   output one-at-a-time by selecting the point in the input that is the
+   furthest from any point in the output. (#2761)
+-  ``filters.skewnessbalancing`` classifies ground points using the
+   method of Bartels. (#2740)
+-  ``filters.dbscan`` provides density-based clustering. (#2748)
+-  ``filters.csf`` provides ground classification of points using the
+   cloth simulation method of Zhang. (#2765)
+-  ``readers.hdf`` provides generic support for many HDF files. (#2934)
+-  ``filters.hag_nn``, ``filters.hag_delaunay`` and ``filters.hag_dem``
+   have been created to replace ``filters.hag``. (#2886)
+
+Deprecated Stages
+=================
+
+-  ``filters.hag`` is deprecated and will be removed in a future
+   release. Use ``filters.hag_nn``, ``filters.hag_delaunay`` and
+   ``filters.hag_dem`` instead.
+
+Removed Stages
+==============
+
+-  ``readers.sqlite`` and ``writers.sqlite``
+
+Enhancements
+============
+
+-  ``readers.ept`` now supports the ``headers`` and ``query`` options to
+   be forwarded to remote endpoints. (#2690)
+-  ``readers.ept`` now supports multipolygons for point filtering.
+   (#2758)
+-  ``readers.ept`` now supports asynchronous operation when streaming.
+   (#2772)
+-  ``readers.ept`` now supports filtering via OGR queries. (#2295)
+-  ``writers.ept`` now supports Zstandard compression. (#2561)
+-  ``writers.gdal`` now supports a ``power`` option that can be used to
+   impact the output of inverse distance weighting mode. (#2550)
+-  Eliminated an error as exception in ``readers.e57`` in order to
+   improve performance. (#2721)
+-  ``readers.rxp`` now supports reading the ``EdgeOfFlightLine``
+   dimension. (#2367)
+-  ``filters.randomize`` now has a ``seed`` option to initialize the
+   random number generator. (#2736)
+-  ``filters.rdb`` and ``filters.rxp`` now support fetching data from
+   remote sources.
+-  ``filters.hexbin`` now has the option ``smooth``, to smooth generated
+   geometry, and ``preserve_topology`` that forces creation of valid
+   geometry during the smoothing operation.
+-  ``filters.transformation`` now has a ``spatialreference`` option to
+   set the spatial reference of output data. (#2796)
+-  ``filters.overlay`` now uses the same point-in-polygon algorithm used
+   by ``filters.crop``. (#2812)
+-  ``writers.tiledb`` now supports TileDB attribute filters. (#2828)
+-  Output from ``pdal translate`` can now be directed to the null device
+   by using either ``devnull`` or ``/dev/null`` as the output filename.
+   (#2835)
+-  ``filters.transformation`` now supports providing a filename as the
+   ``matrix`` option if the referenced file contains a matrix that
+   matches the format supported inline. (#2856)
+-  ``writers.las`` now allows specification of a ``filesource_id`` as an
+   option. (#2862)
+-  ``readers.text`` now handles quoted dimension names in a header line.
+   (#2201)
+-  ``pdal info`` now reports the reader used for a file, the current
+   time and the size of the file. (#2900)
+-  ``filters.reprojection`` now supports the options
+   ``in_axis_ordering`` and ``out_axis_ordering`` to allow the matching
+   feature in GDAL 3+ be accessed. (#2916)
+-  ``filters.normal`` added the ``refine`` option to re-orient normal
+   vectors using a minimum spanning tree. (#2860)
+
+Bug Fixes
+=========
+
+-  ``readers.e57`` and ``writers.e57`` now build cleanly on Windows.
+-  ``writers.pgpointcloud`` no longer uses the wrong schema when
+   creating a new database and there is an existing database using the
+   same SRS. (#2692)
+-  Fixed a potential crash when destroying logs on shutdown. (#2702)
+-  Fixed a case where ``filters.voxelcentroidnearestneighbor`` could
+   return points for a voxel that weren’t actually in the voxel. (#2703)
+-  Fixed a typo in the alternate names of the ``NormalY`` dimension.
+   (#2723)
+-  ``filters.divider`` now handles empty input. (#2727)
+-  An error in calculating variance, standard deviation, skewness and
+   kurtosis has been fixed in ``filters.stats``. (#2790)
+-  An error where a list of dimensions would be expanded improperly in
+   ``writers.ply`` under certain API uses. (#2791)
+-  Crashes in filters using the delaunay triangulation code have been
+   fixed. (#2805)
+-  ``writers.pcd`` now always writes dimension names as lowercase.
+   (#2789)
+-  The extended VLR offset was not being written to LAS files. This has
+   been fixed. (#2823)
+-  Fixed some small memory leaks.
+-  ``filters.elm`` now works properly when input is an empty point view.
+   (#2921)
+-  ``filters.pmf`` now classifies all points either as “Ground” or
+   “Unclassified”. Points are no longer marked as “Created, Never
+   Classified”. (#2898)
+-  LAS VLRs specified in a pipeline are now properly handled by
+   ``writers.las``. (#2937)
+-  When not building with LASzip or LAZperf, ``writers.las`` would fail
+   to properly set a spatial reference in some cases. This has been
+   fixed.
+-  ``writers.las`` now always uses WKT version 1. In the previous
+   release it may have used WKT version 2 in some cases. (#2943)
+-  A bug in ``pdal tile`` where the input spatial reference wasn’t set
+   on the output has been fixed. (#2976)
+
+================================================================================
+2.0.0
+================================================================================
+
+Changes of Note
+===============
+
+-  Python support now requires at least version 3.5+ of Python and
+   version 1.13 of Numpy.
+-  ``filters.icp`` is no longer a plugin and provides options not
+   previously available.
+-  Linear algebra that was using single-precision math is now using
+   double-precision math.
+-  Support was added for GDAL version 3+.
+-  PCL support has been removed. PCD read/write and ``filters.icp`` is
+   now natively supported. The PCL filters have been moved to the
+   `unsupported-plugins <https://github.com/PDAL/unsuppported-plugins>`__
+   repository for those that might need functionality they provided.
+-  PDAL now uses a JSON library that doesn’t support comments. If your
+   pipelines contains non-standard JSON, they will no longer be
+   accepted.
+-  PDAL now supports GCC 9.2, clang 8.0.1 and Visual Studio 17
+
+New Stages
+==========
+
+-  ``filters.covariancefeatures`` computes statistics about features of
+   points in a neighborhood. (#2455 - Thanks
+   `Helix.re <http://https://helixre.com/>`__!)
+-  ``readers.e57`` reads the E57 format. (#2442 - Thanks
+   `Helix.re <http://https://helixre.com/>`__!)
+-  ``writers.e57`` writes the E57 format. (#2442 - Thanks
+   `Helix.re <http://https://helixre.com/>`__!)
+-  ``writers.gltf`` provides simple glTF mesh output support. (#2643)
+-  ``filters.reciprocity`` computes the percentage of points that are
+   considered uni-directional. (#2504 - @chambbj)
+-  ``filters.miniball`` computes a criterion for neighbors based on the
+   miniball algorithm. (#2504 - @chambbj)
+-  ``filters.planefit`` computes a deviation of a point from a manifold
+   approximating its neighbors. (#2504 - @chambbj)
+-  ``readers.memory`` provides an API interface for direct reading of
+   row-oriented point data. (#2620)
+-  ``filters.projpipeline`` processes point through a `PROJ
+   pipeline <https://proj.org/operations/transformations/deformation.html>`__.
+   (#2626 - Thanks @vilaa!)
+
+Deprecated Stages
+=================
+
+-  readers.sqlite (will be moved to
+   `unsupported-plugins <https://github.com/PDAL/unsuppported-plugins>`__
+   in a future release)
+-  writers.sqlite (will be moved to
+   `unsupported-plugins <https://github.com/PDAL/unsuppported-plugins>`__
+   in a future release)
+-  readers.geowave (will be moved to
+   `unsupported-plugins <https://github.com/PDAL/unsuppported-plugins>`__
+   in a future release)
+-  writers.geowave (will be moved to
+   `unsupported-plugins <https://github.com/PDAL/unsuppported-plugins>`__
+   in a future release)
+
+Removed Stages
+==============
+
+-  ``filters.mongus``
+-  ``filters.kdistance``
+-  ``readers.greyhound``
+
+Enhancements
+============
+
+-  ``readers.mrsid`` now supports more recent versions of the Mr. Sid
+   SDK. (#2460)
+-  ``readers.tiledb`` and ``writers.tiledb`` now support stream mode
+   processing. It also supports an ``append`` option.
+-  ``readers.ept`` now accepts an optional ``\<spatial reference>``
+   after the bounds specification in the ``bounds`` option to indicate
+   the SRS of the provided boundary. (#2295)
+-  ``filters.hag`` now supports interpolation from a TIN (triangulated
+   network) of points. (#2520 - Thanks `James
+   McClain <https://github.com/jamesmcclain>`__!)
+-  ``filters.poisson`` now properly applies an inverse transform to
+   points it creates. (#1840)
+-  ``pdal --drivers`` now shows the file extensions associated with each
+   driver. It also shows when stages are streamable. (#2571, #2528)
+-  Some threaded execution has been added to ``readers.ept``.
+-  Alternate dimension names have been added for “Red”, “Green” and
+   “Blue” to better support PLY input. (#2570)
+
+Bug Fixes
+=========
+
+-  Fixed a problem where data in a forwarded LAS VLR would be lost.
+   (#2542)
+-  Clear dimension list in ``filters.colorization`` to eliminate the
+   possibility of writing invalid data. (#2487)
+-  Delete code that removed control characters when converting to JSON.
+   (#2355)
+-  Fixed an issue where nested geometries were being written as invalid
+   WKT in ``filter.hexbin``. (#2507)
+-  Fixed a segmentation fault in ``readers.bpf`` if the specified file
+   didn’t exist. (#2515)
+-  Fixed an issue in ``writers.gdal`` where interpolation would
+   terminate if the process hit the raster edge. (#2545)
+-  Fixed an issue writing JSON when characters needed to be escaped.
+   (#2558)
+-  Delaunay triangulation no longer segfaults with fewer than three
+   points. (#2513)
+-  Issues with reading binary data with ``filters.ept`` have been fixed.
+   (#2585)
+-  ``pdal`` now errors if an option is provided that wasn’t expected.
+   (#2574)
+-  Forwarding for scale with multiple LAS inputs was fixed. (#2663)
+
+================================================================================
 1.9.1
 ================================================================================
 

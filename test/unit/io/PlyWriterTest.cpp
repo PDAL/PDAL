@@ -71,6 +71,8 @@ TEST(PlyWriter, Write)
     writer.setInput(reader);
 
     PointTable table;
+    // Executing prepare twice tests #2791
+    writer.prepare(table);
     writer.prepare(table);
     writer.execute(table);
 }

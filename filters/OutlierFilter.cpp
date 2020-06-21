@@ -66,7 +66,7 @@ void OutlierFilter::addArgs(ProgramArgs& args)
     args.add("radius", "Radius", m_radius, 1.0);
     args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
     args.add("multiplier", "Standard deviation threshold", m_multiplier, 2.0);
-    args.add("class", "Class to use for noise points", m_class, uint8_t(7));
+    args.add("class", "Class to use for noise points", m_class, ClassLabel::LowPoint);
 }
 
 void OutlierFilter::addDimensions(PointLayoutPtr layout)
@@ -81,7 +81,7 @@ Indices OutlierFilter::processRadius(PointViewPtr inView)
 
     point_count_t np = inView->size();
 
-    std::vector<PointId> inliers, outliers;
+    PointIdList inliers, outliers;
 
     for (PointId i = 0; i < np; ++i)
     {
@@ -102,14 +102,14 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
     point_count_t np = inView->size();
 
-    std::vector<PointId> inliers, outliers;
+    PointIdList inliers, outliers;
 
     std::vector<double> distances(np, 0.0);
 
     // we increase the count by one because the query point itself will
     // be included with a distance of 0
     point_count_t count = m_meanK + 1;
-    std::vector<PointId> indices(count);
+    PointIdList indices(count);
     std::vector<double> sqr_dists(count);
     for (PointId i = 0; i < np; ++i)
     {

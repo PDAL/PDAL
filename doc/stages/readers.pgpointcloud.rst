@@ -25,7 +25,7 @@ Example
           "table":"lidar",
           "column":"pa",
           "spatialreference":"EPSG:26910",
-          "where":"PC_Intersects(pa, ST_MakeEnvelope(560037.36, 5114846.45, 562667.31, 5118943.24, 26910))",
+          "where":"PC_Intersects(pa, ST_MakeEnvelope(560037.36, 5114846.45, 562667.31, 5118943.24, 26910))"
       },
       {
           "type":"writers.text",

@@ -245,7 +245,7 @@ bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed)
     }
     compressed = h.compressed();
     bounds = h.getBounds();
-    gdal::reprojectBounds(bounds, h.srs().getWKT(), "EPSG:4326");
+    gdal::reprojectBounds(bounds, h.srs(), "EPSG:4326");
     return true;
 }
 
@@ -254,7 +254,7 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
 {
     BpfHeader h;
     BpfDimensionList dims;
-    LogPtr l(new Log("nitfwrap", "devnull"));
+    LogPtr l(Log::makeLog("nitfwrap", "devnull"));
 
     h.setLog(l);
 
@@ -280,13 +280,8 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
             bounds.maxz = d.m_max;
         }
     }
-    int32_t zone(abs(h.m_coordId));
-    std::string code;
-    if (h.m_coordId > 0)
-        code = "EPSG:326" + Utils::toString(zone);
-    else
-        code = "EPSG:327" + Utils::toString(zone);
-    gdal::reprojectBounds(bounds, code, "EPSG:4326");
+    SpatialReference srs = SpatialReference::wgs84FromZone(h.m_coordId);
+    gdal::reprojectBounds(bounds, srs, "EPSG:4326");
     return true;
 }
 

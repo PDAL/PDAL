@@ -88,10 +88,12 @@ QuickInfo TextReader::inspect()
 }
 
 
+// Make sure we have a header line.
 void TextReader::checkHeader(const std::string& header)
 {
     auto it = std::find_if(header.begin(), header.end(),
         [](char c){ return std::isalpha(c); });
+
     if (it == header.end())
         log()->get(LogLevel::Warning) << getName() <<
             ": file '" << m_filename <<
@@ -101,6 +103,51 @@ void TextReader::checkHeader(const std::string& header)
 
 void TextReader::parseHeader(const std::string& header)
 {
+    // If the first character is a double quote, assume that we have quoted
+    // field names.
+    if (header[0] == '"')
+        parseQuotedHeader(header);
+    else
+        parseUnquotedHeader(header);
+}
+
+
+void TextReader::parseQuotedHeader(const std::string& header)
+{
+    // We know there's a double quote at position 0.
+    std::string::size_type pos = 1;
+    while (true)
+    {
+        size_t count = Dimension::extractName(header, pos);
+        m_dimNames.push_back(header.substr(pos, count));
+        pos += count;
+        if (header[pos] != '"')
+            throwError("Invalid character '" + std::string(1, header[pos]) +
+                "' found while parsing quoted header line.");
+        pos++; // Skip ending quote.
+
+        // Skip everything other than a double quote.
+        count = Utils::extract(header, pos, [](char c){ return c != '"'; });
+
+        // Find a separator.
+        if (!m_separatorArg->set())
+        {
+            std::string sep = header.substr(pos, count);
+            Utils::trim(sep);
+            if (sep.size() > 1)
+                throwError("Found separator longer than a single character.");
+            if (sep.size() == 0)
+                sep = ' ';
+            m_separatorArg->setValue(sep);
+        }
+        pos += count;
+        if (header[pos++] != '"')
+            break;
+    }
+}
+
+void TextReader::parseUnquotedHeader(const std::string& header)
+{
     auto isspecial = [](char c)
         { return (!std::isalnum(c)); };
 
@@ -108,7 +155,7 @@ void TextReader::parseHeader(const std::string& header)
     // from the header line.
     if (!m_separatorArg->set())
     {
-        // Scan string for some character not a number, space or letter.
+        // Scan string for some character not a number or letter.
         for (size_t i = 0; i < header.size(); ++i)
             if (isspecial(header[i]))
             {
@@ -121,6 +168,15 @@ void TextReader::parseHeader(const std::string& header)
         m_dimNames = Utils::split(header, m_separator);
     else
         m_dimNames = Utils::split2(header, m_separator);
+
+    for (auto& s : m_dimNames)
+    {
+        Utils::trim(s);
+        size_t cnt = Dimension::extractName(s, 0);
+        if (cnt != s.size())
+            throwError("Invalid character '" + std::string(1, s[cnt]) +
+                "' in dimension name.");
+    }
 }
 
 
@@ -149,7 +205,15 @@ void TextReader::initialize(PointTableRef table)
         checkHeader(header);
     }
 
-    parseHeader(header);
+    try
+    {
+        parseHeader(header);
+    }
+    catch( const pdal_error& )
+    {
+        Utils::closeFile(m_istream);
+        throw;
+    }
     Utils::closeFile(m_istream);
 }
 

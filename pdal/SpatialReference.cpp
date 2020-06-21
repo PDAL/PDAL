@@ -82,6 +82,14 @@ SpatialReference::SpatialReference(const std::string& s)
 }
 
 
+//NOTE that this ctor allows a string constant to be used in places
+// where a SpatialReference is extpected.
+SpatialReference::SpatialReference(const char *s)
+{
+    set(s);
+}
+
+
 bool SpatialReference::empty() const
 {
     return m_wkt.empty();
@@ -352,6 +360,20 @@ bool SpatialReference::isProjected() const
     return output;
 }
 
+std::vector<int> SpatialReference::getAxisOrdering() const
+{
+    std::vector<int> output;
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+
+
+#if GDAL_VERSION_MAJOR >= 3
+    output = current.get()->GetDataAxisToSRSAxisMapping();
+#endif
+    return output;
+}
+
+
+
 int SpatialReference::calculateZone(double lon, double lat)
 {
     int zone = 0;
@@ -381,6 +403,31 @@ int SpatialReference::calculateZone(double lon, double lat)
     }
 
     return zone;
+}
+
+
+/**
+  Create a spatial reference that represents a specific UTM zone.
+
+  \param zone  Zone number.  Must be non-zero and <= 60 and >= -60
+  \return  A SpatialReference that represents the specified zone, or
+    an invalid SpatialReference on error.
+*/
+SpatialReference SpatialReference::wgs84FromZone(int zone)
+{
+    uint32_t abszone(std::abs(zone));
+
+    if (abszone == 0 || abszone > 60)
+        return SpatialReference();
+
+    std::string code;
+    if (zone > 0)
+        code = "EPSG:326";
+    else
+        code = "EPSG:327";
+
+    code += ((abszone < 10) ? "0" : "") + Utils::toString(abszone);
+    return SpatialReference(code);
 }
 
 
@@ -422,6 +469,36 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
     outWkt = buf;
     CPLFree(buf);
     return outWkt;
+}
+
+std::string SpatialReference::getWKT1() const
+{
+#if GDAL_VERSION_MAJOR < 3
+    return getWKT();
+#else
+    std::string wkt = getWKT();
+    if (wkt.empty())
+        return wkt;
+
+    OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
+    std::string wkt1;
+    if (srs)
+    {
+        char *buf = nullptr;
+        const char* apszOptions[] = { "FORMAT=WKT1_GDAL", nullptr };
+
+        srs->exportToWkt(&buf, apszOptions);
+        if (buf)
+        {
+            wkt1 = buf;
+            CPLFree(buf);
+        }
+    }
+    if (wkt1.empty())
+        throw pdal_error("Couldn't convert spatial reference to WKT "
+            "version 1.");
+    return wkt1;
+#endif
 }
 
 

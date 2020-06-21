@@ -71,6 +71,8 @@ void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
     args.add("feature_set", "Set of features to be computed", m_featureSet, "Dimensionality");
     args.add("stride", "Compute features on strided neighbors", m_stride, size_t(1));
+    args.add("radius", "Radius for nearest neighbor search", m_radius, 0.0);
+    args.add("min_k", "Minimum number of neighbors in radius", m_minK, 3);
 }
 
 void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
@@ -107,8 +109,18 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
 {
     using namespace Eigen;
 
-    // find the k-nearest neighbors
-    auto ids = kid.neighbors(id, m_knn + 1, m_stride);
+    // find neighbors, either by radius or k nearest neighbors
+    PointIdList ids;
+    if (m_radius > 0.0)
+        ids = kid.radius(id, m_radius);
+    else
+        ids = kid.neighbors(id, m_knn + 1, m_stride);
+
+    // if insufficient number of neighbors, eigen solver will fail anyway, it
+    // may be okay to silently return without setting any of the computed
+    // features?
+    if (ids.size() < (size_t)m_minK)
+        return;
 
     // compute covariance of the neighborhood
     auto B = computeCovariance(view, ids);
@@ -120,9 +132,9 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
 
     // Extract eigenvalues and eigenvectors in decreasing order (largest eigenvalue first)
     auto ev = solver.eigenvalues();
-    std::vector<double> lambda = {(std::max(ev[2],0.0)),
-                                  (std::max(ev[1],0.0)),
-                                  (std::max(ev[0],0.0))};
+    std::vector<double> lambda = {((std::max)(ev[2],0.0)),
+                                  ((std::max)(ev[1],0.0)),
+                                  ((std::max)(ev[0],0.0))};
 
     if (lambda[0] == 0)
         throwError("Eigenvalues are all 0. Can't compute local features.");

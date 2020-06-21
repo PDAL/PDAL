@@ -1,7 +1,7 @@
 <OGRVRTDataSource>
     <OGRVRTWarpedLayer>
         <OGRVRTLayer name="OGRGeoJSON">
-            <SrcDataSource>c:/Users/hobu/PDAL/exercises/analysis/clipping/attributes.json</SrcDataSource>
+            <SrcDataSource>./exercises/analysis/clipping/attributes.json</SrcDataSource>
             <SrcLayer>attributes</SrcLayer>
             <LayerSRS>EPSG:4326</LayerSRS>
         </OGRVRTLayer>

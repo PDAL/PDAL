@@ -9,8 +9,6 @@ Visualizing acquisition density
 Purpose:
     * Characterize collection density
 
-:ref:`Density Workshop Materials <pdal:density>`
-
 
 Density (execution)
 ================================================================================

@@ -50,68 +50,42 @@ namespace pdal
 namespace Segmentation
 {
 
-std::vector<std::vector<PointId>> extractClusters(PointView& view,
-                                                  uint64_t min_points,
-                                                  uint64_t max_points,
-                                                  double tolerance)
+std::istream& operator>>(std::istream& in, PointClasses& classes)
 {
-    // Index the incoming PointView for subsequent radius searches.
-    KD3Index kdi(view);
-    kdi.build();
+    std::string s;
 
-    // Create variables to track PointIds that have already been added to
-    // clusters and to build the list of cluster indices.
-    std::vector<PointId> processed(view.size(), 0);
-    std::vector<std::vector<PointId>> clusters;
+    classes.m_classes = 0;
 
-    for (PointId i = 0; i < view.size(); ++i)
+    in >> s;
+    s = Utils::tolower(s);
+    StringList sl = Utils::split(s, ',');
+    for (const std::string& c : sl)
     {
-        // Points can only belong to a single cluster.
-        if (processed[i])
-            continue;
-
-        // Initialize list of indices belonging to current cluster, marking the
-        // seed point as processed.
-        std::vector<PointId> seed_queue;
-        size_t sq_idx = 0;
-        seed_queue.push_back(i);
-        processed[i] = 1;
-
-        // Check each point in the cluster for additional neighbors within the
-        // given tolerance, remembering that the list can grow if we add points
-        // to the cluster.
-        while (sq_idx < seed_queue.size())
-        {
-            // Find neighbors of the next cluster point.
-            PointId j = seed_queue[sq_idx];
-            std::vector<PointId> ids = kdi.radius(j, tolerance);
-
-            // The case where the only neighbor is the query point.
-            if (ids.size() == 1)
-            {
-                sq_idx++;
-                continue;
-            }
-
-            // Skip neighbors that already belong to a cluster and add the rest
-            // to this cluster.
-            for (auto const& k : ids)
-            {
-                if (processed[k])
-                    continue;
-                seed_queue.push_back(k);
-                processed[k] = 1;
-            }
-
-            sq_idx++;
-        }
-
-        // Keep clusters that are within the min/max number of points.
-        if (seed_queue.size() >= min_points && seed_queue.size() <= max_points)
-            clusters.push_back(seed_queue);
+        if (c == "keypoint")
+            classes.m_classes |= ClassLabel::Keypoint;
+        else if (c == "synthetic")
+            classes.m_classes |= ClassLabel::Synthetic;
+        else if (c == "withheld")
+            classes.m_classes |= ClassLabel::Withheld;
+        else
+            in.setstate(std::ios::failbit);
     }
+    return in;
+}
 
-    return clusters;
+std::ostream& operator<<(std::ostream& out, const PointClasses& classes)
+{
+    std::string s;
+    if (classes.m_classes & ClassLabel::Keypoint)
+        s += "keypoint,";
+    if (classes.m_classes & ClassLabel::Synthetic)
+        s += "synthetic,";
+    if (classes.m_classes & ClassLabel::Withheld)
+        s += "withheld,";
+    if (Utils::endsWith(s, ","))
+        s.resize(s.size() - 1);
+    out << s;
+    return out;
 }
 
 void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
@@ -140,6 +114,28 @@ void ignoreDimRanges(std::vector<DimRange>& ranges, PointViewPtr input,
             ignore->appendPoint(*input, i);
         else
             keep->appendPoint(*input, i);
+    }
+}
+
+void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
+                     PointViewPtr ignore, PointClasses classbits)
+{
+    using namespace Dimension;
+
+    if (classbits.isNone())
+    {
+        keep->append(*input);
+    }
+    else
+    {
+        for (PointId i = 0; i < input->size(); ++i)
+        {
+            uint8_t c = input->getFieldAs<uint8_t>(Id::Classification, i);
+            if (classbits.bits() & c)
+                ignore->appendPoint(*input, i);
+            else
+                keep->appendPoint(*input, i);
+        }
     }
 }
 
@@ -192,7 +188,7 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
         {
             uint8_t rn = input->getFieldAs<uint8_t>(Id::ReturnNumber, i);
             uint8_t nr = input->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-            
+
             if ((((rn == 1) && (nr > 1)) && returnFirst) ||
                 (((rn > 1) && (rn < nr)) && returnIntermediate) ||
                 (((rn == nr) && (nr > 1)) && returnLast) ||
@@ -206,6 +202,52 @@ void segmentReturns(PointViewPtr input, PointViewPtr first,
             }
         }
     }
+}
+
+PointIdList farthestPointSampling(PointView& view, point_count_t count)
+{
+    // Construct a KD-tree of the input view.
+    KD3Index& kdi = view.build3dIndex();
+
+    // Seed the output view with the first point in the current sorting.
+    PointId seedId(0);
+    PointIdList ids(count);
+    ids[0] = seedId;
+
+    // Compute distances from seedId to all other points.
+    PointIdList indices(view.size());
+    std::vector<double> sqr_dists(view.size());
+    kdi.knnSearch(seedId, view.size(), &indices, &sqr_dists);
+
+    // Sort distances by PointId.
+    std::vector<double> min_dists(view.size());
+    for (PointId i = 0; i < view.size(); ++i)
+        min_dists[indices[i]] = sqr_dists[i];
+
+    // Proceed until we have m_count points in the output PointView.
+    for (PointId i = 1; i < count; ++i)
+    {
+        // Find the max distance in min_dists, this is the farthest point from
+        // any point currently in the output PointView.
+        auto it = std::max_element(min_dists.begin(), min_dists.end());
+
+        // Record the PointId of the farthest point and add it to the output
+        // PointView.
+        PointId idx(it - min_dists.begin());
+        ids[i] = idx;
+
+        // Compute distances from idx to all other points.
+        kdi.knnSearch(idx, view.size(), &indices, &sqr_dists);
+
+        // Update distances.
+        for (PointId j = 0; j < view.size(); ++j)
+        {
+            if (sqr_dists[j] < min_dists[indices[j]])
+                min_dists[indices[j]] = sqr_dists[j];
+        }
+    }
+
+    return ids;
 }
 
 } // namespace Segmentation

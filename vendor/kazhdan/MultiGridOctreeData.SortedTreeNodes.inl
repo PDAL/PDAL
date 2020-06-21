@@ -160,9 +160,13 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 		int d , off[3];
 		node->depthAndOffset( d , off );
 		int z;
-		if     ( off[2]==offset-1 ) z = 1;
-		else if( off[2]==offset   ) z = 0;
-		else fprintf( stderr , "[ERROR] Node out of bounds: %d %d\n" , offset , off[2] ) , exit( 0 );
+		if ( off[2]==offset-1 )
+            z = 1;
+		else if( off[2]==offset)
+            z = 0;
+		else
+            assert(false);
+
 		// Process the corners
 		for( int x=0 ; x<2 ; x++ ) for( int y=0 ; y<2 ; y++ )
 		{

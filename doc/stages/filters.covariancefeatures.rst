@@ -46,6 +46,14 @@ stride
   stride of 1 retains each neighbor in order. A stride of two selects every
   other neighbor and so on. [Default: 1]
 
+min_k
+  Minimum number of neighbors in radius (radius search only). [Default: 3]
+
+radius
+  If radius specified greater than zero, neighbors will be obtained by radius
+  search rather than k nearest neighbors, subject to meeting the minimum number
+  of neighbors (``min_k``). [Default: 0.0]
+
 .. _dimensionality:
 
 Dimensionality feature set

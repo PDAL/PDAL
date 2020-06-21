@@ -9,19 +9,17 @@ Rasterizing Attributes
 
 
 Purpose:
-    * Utilize :ref:`readers.greyhound`
+    * Utilize :ref:`readers.ept`
     * Interpolate data (Intensity, Classification)
     * Use `gdaldem`_ to apply color ramps
     * Explore :ref:`writers.gdal` options
 
 
-:ref:`Rasterization Workshop Materials <pdal:workshop-rasterize>`
-
 .. _`gdaldem`: http://www.gdal.org/gdaldem.html
 
 
 
-:ref:`readers.greyhound`
+:ref:`readers.ept`
 ================================================================================
 
   .. literalinclude:: ../../exercises/analysis/rasterize/classification.json
@@ -37,7 +35,6 @@ Yuck
 ================================================================================
 
 .. image:: ../../images/rasterization-denmark-no-ramp.png
-    :scale: 200%
 
 
 Color Ramp
@@ -55,7 +52,6 @@ Better
 ================================================================================
 
 .. image:: ../../images/rasterization-colored-classification.png
-    :scale: 200%
 
 Intensity
 ================================================================================
@@ -67,10 +63,10 @@ Intensity Image
 ================================================================================
 
 .. image:: ../../images/rasterization-colored-intensity.png
-    :scale: 200%
 
 
-Home
+Next
 ================================================================================
-:ref:`Home <home>`
+
+On to :ref:`workshop-histogram`
 

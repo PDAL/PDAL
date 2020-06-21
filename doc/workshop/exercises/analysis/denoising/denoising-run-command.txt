@@ -1,3 +1,2 @@
-pdal pipeline ^
-   c:/Users/hobu/PDAL/exercises/analysis/denoising/denoise.json
+pdal pipeline ./exercises/analysis/denoising/denoise.json
 

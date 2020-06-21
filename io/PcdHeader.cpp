@@ -271,7 +271,7 @@ std::ostream& operator<<(std::ostream& out, PcdHeader& header)
 
     out << "FIELDS";
     for (auto i : header.m_fields)
-        out << " " << i.m_label;
+        out << " " << Utils::tolower(i.m_label);
     out << std::endl;
 
     out << "SIZE";

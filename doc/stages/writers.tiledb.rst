@@ -1,6 +1,6 @@
 .. _writers.tiledb:
 
-readers.tiledb
+writers.tiledb
 ==============
 
 Implements `TileDB`_ 1.4.1+ reads from an array.
@@ -62,5 +62,35 @@ append
 stats
   Dump query stats to stdout [Optional]
 
+filters
+  JSON array or object of compression filters for either `coords` or `attributes` of the form {coords/attributename : {"compression": name, compression_options: value, ...}} [Optional]
+
+
+By default TileDB will use the following set of compression filters for coordinates and attributes;
+
+.. code-block:: json
+
+  {
+      "coords":[
+          {"compression": "bit-shuffle"},
+          {"compression": "gzip", "compression_level": 9}
+      ],
+      "Intensity":{"compression": "bzip2", "compression_level": 5},
+      "ReturnNumber": {"compression": "zstd", "compression_level": 75},
+      "NumberOfReturns": {"compression": "zstd", "compression_level": 75},
+      "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
+      "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
+      "Classification": {"compression": "gzip", "compression_level": 9},
+      "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
+      "UserData": {"compression": "gzip", "compression_level": 9},
+      "PointSourceId": {"compression": "bzip2"},
+      "Red": {"compression": "rle"},
+      "Green": {"compression": "rle"},
+      "Blue": {"compression": "rle"},
+      "GpsTime": [
+          {"compression": "bit-shuffle"},
+          {"compression": "zstd", "compression_level": 75}
+      ]
+  }
 
 .. _TileDB: https://tiledb.io

@@ -3,8 +3,8 @@
 Order of business
 ================================================================================
 
-* Materials https://s3.amazonaws.com/pdal/workshop/PDAL.zip
-* Follow along https://pdal.io/workshop/slides/
+* Materials https://pdal.s3.amazonaws.com/workshop/PDAL-Workshop-complete.zip
+* Website https://pdal.io/workshop/index.html
 * PDF http://pdal.io/PDAL.pdf
 * Links everywhere
 
@@ -23,26 +23,13 @@ Who are we
 ================================================================================
 
 * Howard Butler
-* Michael Smith
 
 
 Howard Butler
 ================================================================================
-
-* Owns `Hobu, Inc.`_
-* Develops open source GIS and LiDAR software
-* Commits over 15 years
+* Uses and contributes to  open source GIS and LiDAR software
 * Tweets @ http://twitter.com/howardbutler
-
-.. _`Hobu, Inc.`: http://hobu.co
-
-Michael Smith
-================================================================================
-
-* Physical Research Scientist, USACE CRREL
-* Develops open source GIS and LiDAR software
-* Commits over 15 years
-* Tweets @ http://twitter.com/michael_smith
+* https://hobu.co
 
 Next
 ================================================================================

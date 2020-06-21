@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include "TransformationFilter.hpp"
+#include <pdal/util/FileUtils.hpp>
+
 
 #include <sstream>
 
@@ -60,10 +62,23 @@ TransformationFilter::Transform::Transform(
 std::istream& operator>>(std::istream& in,
     pdal::TransformationFilter::Transform& xform)
 {
+    std::string arg(std::istreambuf_iterator<char>(in), {});
+    std::stringstream matrix;
+    matrix.str(arg);
+
+    std::string matrix_str;
+    if (pdal::FileUtils::fileExists(arg))
+    {
+        matrix_str = pdal::FileUtils::readFileIntoString(arg);
+        matrix.str(matrix_str);
+    }
+
+    matrix.seekg(0);
+
     double entry;
 
     size_t i = 0;
-    while (in >> entry)
+    while (matrix >> entry)
     {
         if (i + 1 > xform.Size)
         {
@@ -118,6 +133,15 @@ std::string TransformationFilter::getName() const { return s_info.name; }
 void TransformationFilter::addArgs(ProgramArgs& args)
 {
     args.add("matrix", "Transformation matrix", *m_matrix).setPositional();
+    args.add("override_srs", "Spatial reference to apply to data.",
+        m_overrideSrs);
+}
+
+
+void TransformationFilter::initialize()
+{
+    if (! m_overrideSrs.empty())
+        setSpatialReference(m_overrideSrs);
 }
 
 
@@ -148,9 +172,20 @@ bool TransformationFilter::processOne(PointRef& point)
     return true;
 }
 
+void TransformationFilter::spatialReferenceChanged(const SpatialReference& srs)
+{
+    if (!srs.empty() && !m_overrideSrs.empty())
+        log()->get(LogLevel::Warning) << getName() <<
+            ": overriding input spatial reference." << std::endl;
+}
+
 
 void TransformationFilter::filter(PointView& view)
 {
+    if (!view.spatialReference().empty() && !m_overrideSrs.empty())
+        log()->get(LogLevel::Warning) << getName() <<
+            ": overriding input spatial reference." << std::endl;
+
     PointRef point(view, 0);
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
