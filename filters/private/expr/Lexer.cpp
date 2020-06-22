@@ -1,5 +1,5 @@
-//ABELL
-#include <iostream>
+
+#include <cctype>
 
 #include "Lexer.hpp"
 
@@ -26,9 +26,8 @@ char Lexer::getChar()
 
 void Lexer::putChar()
 {
-    //ABELL
-    if (m_pos == 0)
-        throw std::runtime_error("Put back a bad character.");
+    assert(m_pos != 0);
+
     m_pos--;
 }
 
