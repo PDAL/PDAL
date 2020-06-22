@@ -367,7 +367,7 @@ private:
     // we stick in ProgramArgs so that it shows up in help and an options list.
     std::string m_optionFile;
 
-    Stage& operator=(const Stage&); // not implemented
+    Stage& operator=(const Stage&) = delete;
     Stage(const Stage&); // not implemented
 
     void setupLog();
