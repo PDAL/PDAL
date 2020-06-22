@@ -68,7 +68,7 @@ ARG PDAL_CONDA=/opt/conda/envs/pdal
 
 RUN apt-get update --fix-missing && \
     apt-get install -y \
-        sudo && \
+        sudo ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
