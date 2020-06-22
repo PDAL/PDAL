@@ -35,6 +35,8 @@
 #include "EsriReader.hpp"
 
 #include <Eigen/Geometry>
+
+#include <pdal/EigenUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/SrsTransform.hpp>
@@ -389,6 +391,9 @@ point_count_t EsriReader::read(PointViewPtr view, point_count_t count)
 {
     point_count_t numRead = 0;
 
+    if (m_tilesToProcess == 0)
+        return 0;
+
     do
     {
         std::unique_lock<std::mutex> l(m_mutex);
@@ -483,16 +488,20 @@ bool EsriReader::processPoint(PointRef& dst, const TileContents& tile)
 
     PointId pointId = m_pointId++;
 
-    double x = tile.m_xyz[m_pointId].x;
-    double y = tile.m_xyz[m_pointId].y;
-    double z = tile.m_xyz[m_pointId].z;
+    Eigen::Vector3d coord { tile.m_xyz[m_pointId].x, tile.m_xyz[m_pointId].y,
+        tile.m_xyz[m_pointId].z };
 
-    if (!m_bounds.contains(x, y, z))
-        return false;
+    if (m_args->obb.valid())
+    {
+        coord -= m_args->obb.center();
+        coord = rotate(coord, m_args->obb.quat().inverse());
+        if (!m_args->obb.bounds().contains(coord.x(), coord.y(), coord.z()))
+            return false;
+    }
 
-    dst.setField(Id::X, x);
-    dst.setField(Id::Y, y);
-    dst.setField(Id::Z, z);
+    dst.setField(Id::X, coord.x());
+    dst.setField(Id::Y, coord.y());
+    dst.setField(Id::Z, coord.z());
 
     for (const DimData& dim : m_esriDims)
     {
@@ -553,10 +562,10 @@ void EsriReader::traverseTree(NL::json page, int index, int depth,
 
     try
     {
-        Obb obb(page["nodes"][index]);
+        Obb obb(page["nodes"][index]["obb"]);
         if (m_ecefTransform)
             obb.transform(*m_ecefTransform);
-        if (!obb.intersect(m_args->obb))
+        if (m_args->obb.valid() && !obb.intersect(m_args->obb))
             return;
     }
     catch (const EsriError& err)

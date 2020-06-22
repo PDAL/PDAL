@@ -36,25 +36,11 @@
 
 #include <nlohmann/json.hpp>
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
 #include "Obb.hpp"
-
-namespace
-{
-
-Eigen::Vector3d rotate(const Eigen::Vector3d& v, Eigen::Quaterniond rot)
-{
-    rot.normalize();
-    Eigen::Quaterniond p;
-    p.w() = 0;
-    p.vec() = v;
-    p = rot * p * rot.inverse();
-    return p.vec();
-}
-
-} //unnamed namespace
 
 namespace pdal
 {
@@ -76,12 +62,29 @@ bool Obb::valid() const
 }
 
 
+Eigen::Vector3d Obb::center() const
+{
+    return m_p;
+}
+
+
+Eigen::Quaterniond Obb::quat() const
+{
+    return m_quat;
+}
+
+
+BOX3D Obb::bounds() const
+{
+    return { -m_hx, -m_hy, -m_hz, m_hx, m_hy, m_hz };
+}
+
+
 void Obb::verifyArray(const NL::json& spec, const std::string& name, size_t cnt)
 {
     if (spec.count(name) != 1)
-    {
         throw EsriError("Invalid OBB - missing '" + name + "' entry.");
-    }
+
     NL::json arr = spec[name];
     if (!arr.is_array())
         throw EsriError("Invalid OBB - '" + name + "' is not an array.");
@@ -118,6 +121,7 @@ void Obb::parse(NL::json spec)
     double qw = spec["quaternion"][3].get<double>();
 
     m_quat = Eigen::Quaterniond(qw, qx, qy, qz);
+    m_quat.normalize();
 
     spec.erase("center");
     spec.erase("halfSize");

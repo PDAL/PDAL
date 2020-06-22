@@ -59,6 +59,9 @@ public:
     bool intersect(Obb clip);
     void transform(const SrsTransform& xform);
     bool valid() const;
+    Eigen::Vector3d center() const;
+    Eigen::Quaterniond quat() const;
+    BOX3D bounds() const;
 
 private:
     void verifyArray(const NL::json& spec, const std::string& name, size_t cnt);

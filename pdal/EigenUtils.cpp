@@ -384,4 +384,22 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
 }
 #pragma warning (pop)
 
+
+/**
+    Rotate a point using the given quaternion.
+    NOTE: quaternion must be normalized before this call.
+
+    \param p     Point to rotate about origin.
+    \param quat  Quaternion specification for rotation.
+    \return  Coordinates of rotated point.
+*/
+Eigen::Vector3d rotate(const Eigen::Vector3d& v, const Eigen::Quaterniond& rot)
+{
+    Eigen::Quaterniond p;
+    p.w() = 0;
+    p.vec() = v;
+    p = rot * p * rot.inverse();
+    return p.vec();
+}
+
 } // namespace pdal

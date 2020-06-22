@@ -43,6 +43,7 @@
 #endif
 
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 #if (__GNUC__ > 9)
 #pragma GCC diagnostic pop
@@ -321,5 +322,8 @@ inline void MetadataNodeImpl::setValue(const Eigen::MatrixXd& matrix)
     m_type = "matrix";
     m_value = Utils::toString(matrix);
 }
+
+
+Eigen::Vector3d rotate(const Eigen::Vector3d& p, const Eigen::Quaterniond& rot);
 
 } // namespace pdal
