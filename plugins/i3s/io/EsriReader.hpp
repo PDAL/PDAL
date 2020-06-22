@@ -77,8 +77,6 @@ private:
 
     std::unique_ptr<Args> m_args;
     NL::json m_info;
-    BOX3D m_bounds;
-    BOX3D m_ecefBounds;
     int m_nodeCap;
     int m_maxNode = 0;
     i3s::Version m_version;
