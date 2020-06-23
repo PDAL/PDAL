@@ -77,65 +77,6 @@ PDAL_DLL bool reproject(double& x, double& y, double& z,
     const SpatialReference& srcSrs, const SpatialReference& dstSrs);
 PDAL_DLL std::string lastError();
 
-typedef std::shared_ptr<void> RefPtr;
-
-class SpatialRef
-{
-public:
-    SpatialRef()
-        { newRef(OSRNewSpatialReference("")); }
-    SpatialRef(const std::string& srs)
-    {
-        newRef(OSRNewSpatialReference(""));
-        if (OSRSetFromUserInput(get(), srs.data()) != OGRERR_NONE)
-            m_ref.reset();
-    }
-
-    void setFromLayer(OGRLayerH layer)
-    {
-        if (layer)
-        {
-            OGRSpatialReferenceH s = OGR_L_GetSpatialRef(layer);
-            if (s)
-            {
-                OGRSpatialReferenceH clone = OSRClone(s);
-                newRef(clone);
-            }
-        }
-    }
-    operator bool () const
-        { return m_ref.get() != NULL; }
-    OGRSpatialReferenceH get() const
-        { return m_ref.get(); }
-    std::string wkt() const
-    {
-        std::string output;
-
-        if (m_ref.get())
-        {
-            char *pszWKT = NULL;
-            OSRExportToWkt(m_ref.get(), &pszWKT);
-            bool valid = (bool)*pszWKT;
-            output = pszWKT;
-            CPLFree(pszWKT);
-        }
-        return output;
-    }
-
-    bool empty() const
-    {
-        return wkt().empty();
-    }
-
-private:
-    void newRef(void *v)
-    {
-        m_ref = RefPtr(v, [](void* t){ OSRDestroySpatialReference(t); } );
-    }
-
-    RefPtr m_ref;
-};
-
 
 // This is a little confusing because we have a singleton error handler with
 // a single log pointer, but we set the log pointer/debug state as if we
