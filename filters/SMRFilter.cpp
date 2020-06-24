@@ -349,6 +349,8 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         }
     }
 
+    point_count_t ng(0);
+    point_count_t g(0);
     for (PointId i = 0; i < view->size(); ++i)
     {
         double x = view->getFieldAs<double>(Id::X, i);
@@ -380,10 +382,21 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         // vertical distance between each LIDAR point and the provisional
         // DEM, and applying a threshold calculation."
         if (std::fabs(ZIpro[cell] - z) > thresh(r, c))
+        {
+            ng++;
             view->setField(Id::Classification, i, ClassLabel::Unclassified);
+        }
         else
+        {
+            g++;
             view->setField(Id::Classification, i, ClassLabel::Ground);
+        }
     }
+    double p(100.0 * double(ng) / double(view->size()));
+    log()->floatPrecision(2);
+    log()->get(LogLevel::Debug) << "\t" << g << " ground points"
+                                << "\t" << ng << " non-ground points"
+                                << "\t(" << p << "% classified as ground)\n";
 }
 
 std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
@@ -719,9 +732,9 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
         double p(100.0 * double(ng) / double(Obj.size()));
         log()->floatPrecision(2);
         log()->get(LogLevel::Debug) << "progressiveFilter: radius = " << radius
-                                    << "\t" << g << " ground"
-                                    << "\t" << ng << " non-ground"
-                                    << "\t(" << p << "%)\n";
+                                    << "\t" << g << " ground cells"
+                                    << "\t" << ng << " non-ground cells"
+                                    << "\t(" << p << "% of cells contain ground)\n";
     }
 
     return Obj;
