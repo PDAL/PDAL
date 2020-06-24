@@ -131,15 +131,14 @@ if (PDAL_HAVE_LASZIP)
         FILES
             io/EptReaderTest.cpp
         LINK_WITH
-            ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
+            ${GDAL_LIBRARY}
         INCLUDES
+            ${GDAL_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
     PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
         FILES
             io/EptAddonWriterTest.cpp
-        LINK_WITH
-            ${GDAL_LIBRARY} # EptAddonWriterTest uses the crop filter.
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
     )
@@ -242,6 +241,8 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )

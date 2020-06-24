@@ -37,6 +37,7 @@
 #include <pdal/private/SrsTransform.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 #include <functional>
 #include <map>
@@ -564,6 +565,7 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
                 poLayer = ds->ExecuteSQL(query.c_str(), NULL, dialect.c_str());
                 if (!poLayer)
                     throw pdal_error("Unable to execute OGR SQL query.");
+
                 SpatialRef sref;
                 sref.setFromLayer(poLayer);
                 ds->ReleaseResultSet(poLayer);
@@ -577,6 +579,7 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
                 }
                 else
                     poly.setSpatialReference(sref.wkt());
+
                 geom = (OGRGeometry *)poly.getOGRHandle();
             }
         }

@@ -42,6 +42,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 #include "../io/LasWriter.hpp"
 
@@ -429,8 +430,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     if (fileInfo.m_srs.empty() || m_overrideASrs)
         fileInfo.m_srs = m_assignSrsString;
 
-    SpatialRef srcSrs(fileInfo.m_srs);
-    if (srcSrs.empty())
+    if (fileInfo.m_srs.empty())
     {
         std::ostringstream oss;
 
@@ -567,9 +567,7 @@ bool TIndexKernel::openLayer(const std::string& layerName)
 
 bool TIndexKernel::createLayer(std::string const& layername)
 {
-    using namespace gdal;
-
-    SpatialRef srs(m_tgtSrsString);
+    gdal::SpatialRef srs(m_tgtSrsString);
     if (!srs)
         m_log->get(LogLevel::Error) << "Unable to import srs for layer "
            "creation" << std::endl;

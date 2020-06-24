@@ -89,7 +89,8 @@ uint8_t *DimInfo::getValue(pdal::point_count_t pointIndex) {
         H5::DataSpace dspace = m_dset.getSpace();
 
         chunkLowerBound = (pointIndex / m_chunkSize) * m_chunkSize;
-        chunkUpperBound = std::min(chunkLowerBound + m_chunkSize, m_numPoints);
+        chunkUpperBound =
+            (std::min)(chunkLowerBound + m_chunkSize, m_numPoints);
 
         hsize_t selectionSize = chunkUpperBound - chunkLowerBound;
 

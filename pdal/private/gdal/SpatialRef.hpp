@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -31,44 +31,35 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <string>
-
-#include <pdal/GDALUtils.hpp>
-
-#include "ogr_api.h"
-#include "gdal.h"
-
-namespace hexer
-{
-    class HexGrid;
-}
+#include <memory>
 
 namespace pdal
 {
-
-class OGR
+namespace gdal
 {
 
+class SpatialRef
+{
+    using OGRLayerH = void *;
+    typedef std::shared_ptr<void> RefPtr;
 public:
-    OGR(std::string const& filename, const std::string& srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
+    SpatialRef();
+    SpatialRef(const std::string& srs);
 
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
+    void setFromLayer(OGRLayerH layer);
+    operator bool () const;
+    OGRSpatialReferenceH get() const;
+    std::string wkt() const;
+    bool empty() const;
 
 private:
-    std::string m_filename;
-    std::string m_driver;
+    void newRef(void *v);
 
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
-
-    void createLayer(const std::string& wkt);
+    RefPtr m_ref;
 };
 
+} // namespace gdal
 } // namespace pdal
-
