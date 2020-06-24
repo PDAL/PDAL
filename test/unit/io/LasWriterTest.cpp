@@ -1164,8 +1164,7 @@ TEST(LasWriterTest, pdal_add_vlr)
           "description": "A description under 32 bytes",
           "record_id": 43,
           "user_id": "hobu",
-          "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
-         })"
+          "filename": ")" + Support::datapath("las/vlr-43.bin") + R"("})"
     );
 
     Options writerOpts;
