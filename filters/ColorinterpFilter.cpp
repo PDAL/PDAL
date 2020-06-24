@@ -38,10 +38,13 @@
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 #include <array>
 #include <algorithm>
 #include <cmath>
+
+#include <cpl_vsi.h>
 
 #include "ColorInterpRamps.hpp"
 
@@ -79,9 +82,10 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE)); \
+        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, false)); \
     }
 //
+
 std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
 {
     // If the user selected a default ramp name, it will be opened by

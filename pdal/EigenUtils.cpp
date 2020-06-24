@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 #include <pdal/EigenUtils.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 #include <array>
 #include <cfloat>
@@ -354,10 +354,6 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
                  const std::string& driver, double cell_size, BOX2D bounds,
                  SpatialReference srs)
 {
-    using namespace Eigen;
-
-    gdal::registerDrivers();
-
     std::array<double, 6> pixelToPos;
     pixelToPos[0] = bounds.minx;
     pixelToPos[1] = cell_size;
@@ -377,6 +373,7 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     // but GDALUtils expects row major, so we can convert it. Also, double
     // doesn't seem to work for some reason, so maybe we go back and make the
     // incoming matrix always be a float, but for now just cast it.
+    using namespace Eigen;
     Eigen::Matrix<float, Dynamic, Dynamic, RowMajor> dataRowMajor;
     dataRowMajor = data.cast<float>();
 

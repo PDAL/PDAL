@@ -36,8 +36,8 @@
 
 #include <sstream>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 namespace pdal
 {
@@ -72,8 +72,6 @@ GDALReader::~GDALReader()
 
 void GDALReader::initialize()
 {
-    gdal::registerDrivers();
-
     m_raster.reset(new gdal::Raster(m_filename));
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
