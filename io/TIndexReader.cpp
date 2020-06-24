@@ -36,6 +36,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 namespace pdal
 {

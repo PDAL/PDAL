@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -31,44 +31,85 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
 #include <string>
 
-#include <pdal/GDALUtils.hpp>
+#include <ogr_srs_api.h>
+#include <ogr_api.h>
+#include <cpl_conv.h>
 
-#include "ogr_api.h"
-#include "gdal.h"
-
-namespace hexer
-{
-    class HexGrid;
-}
+#include "SpatialRef.hpp"
 
 namespace pdal
 {
-
-class OGR
+namespace gdal
 {
 
-public:
-    OGR(std::string const& filename, const std::string& srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
+SpatialRef::SpatialRef()
+{
+    newRef(OSRNewSpatialReference(""));
+}
 
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
 
-private:
-    std::string m_filename;
-    std::string m_driver;
+SpatialRef::SpatialRef(const std::string& srs)
+{
+    newRef(OSRNewSpatialReference(""));
+    if (OSRSetFromUserInput(get(), srs.data()) != OGRERR_NONE)
+        m_ref.reset();
+}
 
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
 
-    void createLayer(const std::string& wkt);
-};
+void SpatialRef::setFromLayer(OGRLayerH layer)
+{
+    if (layer)
+    {
+        OGRSpatialReferenceH s = OGR_L_GetSpatialRef(layer);
+        if (s)
+        {
+            OGRSpatialReferenceH clone = OSRClone(s);
+            newRef(clone);
+        }
+    }
+}
 
+
+SpatialRef::operator bool () const
+{
+    return m_ref.get() != NULL;
+}
+
+
+OGRSpatialReferenceH SpatialRef::get() const
+{
+    return m_ref.get();
+}
+
+
+std::string SpatialRef::wkt() const
+{
+    std::string output;
+
+    if (m_ref.get())
+    {
+        char *pszWKT = NULL;
+        OSRExportToWkt(m_ref.get(), &pszWKT);
+        bool valid = (bool)*pszWKT;
+        output = pszWKT;
+        CPLFree(pszWKT);
+    }
+    return output;
+}
+
+
+bool SpatialRef::empty() const
+{
+    return wkt().empty();
+}
+
+void SpatialRef::newRef(void *v)
+{
+    m_ref = RefPtr(v, [](void* t){ OSRDestroySpatialReference(t); } );
+}
+
+} // namespace gdal
 } // namespace pdal
-
