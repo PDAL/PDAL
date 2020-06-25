@@ -60,7 +60,7 @@ class Raster;
 /*
   Slight abstraction of a GDAL raster band.
 */
-class BaseBand
+class PDAL_DLL BaseBand
 {
 protected:
     BaseBand(GDALDataset *ds, int bandNum, const std::string& name);
