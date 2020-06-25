@@ -43,7 +43,7 @@ Options
 
 invert
   If set to true, applies the inverse of the provided transformation matrix.
-  [Default: true]
+  [Default: false]
 
 _`matrix`
   A whitespace-delimited transformation matrix.
