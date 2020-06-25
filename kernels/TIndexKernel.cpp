@@ -37,6 +37,8 @@
 #include <memory>
 #include <vector>
 
+#include <ogr_api.h>
+
 #include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>

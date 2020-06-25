@@ -32,6 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <gdal.h>
+#include <gdal_priv.h>
+
 #include <pdal/GDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 

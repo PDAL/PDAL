@@ -32,6 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <ogr_api.h>
+#include <ogr_geometry.h>
+
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 

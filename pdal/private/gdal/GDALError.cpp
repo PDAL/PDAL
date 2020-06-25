@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,53 +32,48 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <string>
 
-#include <pdal/JsonFwd.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
-
-class OGRGeometry;
-typedef void *OGRGeometryH;
-class GDALDataset;
-class OGRLayer;
-
-#include <vector>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
-class Polygon;
-
 namespace gdal
 {
 
-PDAL_DLL void registerDrivers();
-PDAL_DLL void unregisterDrivers();
-PDAL_DLL bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reproject(double& x, double& y, double& z,
-    const SpatialReference& srcSrs, const SpatialReference& dstSrs);
-PDAL_DLL std::string lastError();
+enum class GDALError
+{
+    None,
+    NotOpen,
+    CantOpen,
+    NoData,
+    InvalidBand,
+    BadBand,
+    NoTransform,
+    NotInvertible,
+    CantReadBlock,
+    InvalidDriver,
+    DriverNotFound,
+    CantCreate,
+    InvalidOption,
+    CantWriteBlock,
+    InvalidType
+};
 
-OGRGeometry *createFromWkt(const char *s);
-OGRGeometry *createFromGeoJson(const char *s);
+struct InvalidBand {};
+struct BadBand {};
+struct CantReadBlock {};
+struct CantWriteBlock
+{
+    CantWriteBlock()
+    {}
 
-// New signatures to support extraction of SRS from the end of geometry
-// specifications..
-OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
-OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
+    CantWriteBlock(const std::string& w) : what(w)
+    {}
 
-std::vector<Polygon> getPolygons(const NL::json& ogr);
-
-inline OGRGeometry *fromHandle(OGRGeometryH geom)
-{ return reinterpret_cast<OGRGeometry *>(geom); }
-
-inline OGRGeometryH toHandle(OGRGeometry *h)
-{ return reinterpret_cast<OGRGeometryH>(h); }
+    std::string what;
+};
 
 } // namespace gdal
 } // namespace pdal
+

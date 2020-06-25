@@ -32,26 +32,22 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+/**
+#pragma warning(disable: 4127)  // conditional expression is constant
+**/
+
+#include <gdal.h>
+#include <gdal_priv.h>
+#include <ogr_api.h>
+#include <ogr_geometry.h>
+#include <ogrsf_frmts.h>
+
+#include <nlohmann/json.hpp>
 #include <pdal/Polygon.hpp>
-#include <pdal/SpatialReference.hpp>
 #include <pdal/private/SrsTransform.hpp>
-#include <pdal/util/Algorithm.hpp>
-#include <pdal/util/Utils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
-#include <functional>
-#include <map>
-
 #include "GDALUtils.hpp"
-
-#include <ogr_spatialref.h>
-#include <ogr_p.h>
-#include <ogr_api.h>
-#include <ogrsf_frmts.h>
-#include <nlohmann/json.hpp>
-
-#pragma warning(disable: 4127)  // conditional expression is constant
-
 
 namespace pdal
 {
@@ -65,99 +61,6 @@ namespace oldgdalsupport
 
 namespace gdal
 {
-
-namespace
-{
-
-/**
-  Convert a GDAL type string to a PDAL dimension type.
-
-  \param gdalType  String representing the GDAL type.
-  \return  PDAL type associated with \gdalType.
-*/
-Dimension::Type toPdalType(const std::string& gdalType)
-{
-    if (gdalType == "Byte")
-        return Dimension::Type::Unsigned8;
-    else if (gdalType == "UInt16")
-        return Dimension::Type::Unsigned16;
-    else if (gdalType == "Int16")
-        return Dimension::Type::Signed16;
-    else if (gdalType == "UInt32")
-        return Dimension::Type::Unsigned32;
-    else if (gdalType == "Int32")
-        return Dimension::Type::Signed32;
-    else if (gdalType == "Float32")
-        return Dimension::Type::Float;
-    else if (gdalType == "Float64")
-        return Dimension::Type::Double;
-    return Dimension::Type::None;
-}
-
-
-Dimension::Type toPdalType(GDALDataType t)
-{
-    switch (t)
-    {
-        case GDT_Byte:
-            return Dimension::Type::Unsigned8;
-        case GDT_UInt16:
-            return Dimension::Type::Unsigned16;
-        case GDT_Int16:
-            return Dimension::Type::Signed16;
-        case GDT_UInt32:
-            return Dimension::Type::Unsigned32;
-        case GDT_Int32:
-            return Dimension::Type::Signed32;
-        case GDT_Float32:
-            return Dimension::Type::Float;
-        case GDT_Float64:
-            return Dimension::Type::Double;
-        case GDT_CInt16:
-        case GDT_CInt32:
-        case GDT_CFloat32:
-        case GDT_CFloat64:
-            throw pdal_error("GDAL complex float type unsupported.");
-        case GDT_Unknown:
-            throw pdal_error("GDAL unknown type unsupported.");
-        case GDT_TypeCount:
-            throw pdal_error("Detected bad GDAL data type.");
-    }
-    return Dimension::Type::None;
-}
-
-GDALDataType toGdalType(Dimension::Type t)
-{
-    switch (t)
-    {
-    case Dimension::Type::Unsigned8:
-    case Dimension::Type::Signed8:
-        return GDT_Byte;
-    case Dimension::Type::Unsigned16:
-        return GDT_UInt16;
-    case Dimension::Type::Signed16:
-        return GDT_Int16;
-    case Dimension::Type::Unsigned32:
-        return GDT_UInt32;
-    case Dimension::Type::Signed32:
-        return GDT_Int32;
-    case Dimension::Type::Float:
-        return GDT_Float32;
-    case Dimension::Type::Double:
-        return GDT_Float64;
-    case Dimension::Type::Unsigned64:
-    case Dimension::Type::Signed64:
-        throw pdal_error("PDAL 64-bit integer type unsupported.");
-    case Dimension::Type::None:
-        throw pdal_error("PDAL 'none' type unsupported.");
-	default:
-        throw pdal_error("Unrecognized PDAL dimension type.");
-
-    }
-}
-
-} //unnamed namespace
-
 
 /**
   Reproject a point from a source projection to a destination.
@@ -270,122 +173,6 @@ void registerDrivers()
 void unregisterDrivers()
 {
     GDALDestroyDriverManager();
-}
-
-
-/**
-  Return a reference to the global error handler.
-
-  \return  Reference to the global error handler.
-*/
-ErrorHandler& ErrorHandler::getGlobalErrorHandler()
-{
-    static ErrorHandler s_gdalErrorHandler;
-
-    return s_gdalErrorHandler;
-}
-
-
-/**
-  Constructor for a GDAL error handler.
-*/
-ErrorHandler::ErrorHandler() : m_errorNum(0)
-{
-    std::string value;
-
-    // Will return thread-local setting
-    const char* set = CPLGetConfigOption("CPL_DEBUG", "");
-    m_cplSet = (bool)set;
-    m_debug = m_cplSet;
-
-    // Push on a thread-local error handler
-    CPLSetErrorHandler(&ErrorHandler::trampoline);
-}
-
-
-/**
-  Destructor for a GDAL error handler.
-*/
-ErrorHandler::~ErrorHandler()
-{
-    CPLSetErrorHandler(nullptr);
-}
-
-
-/**
-  Set the output destination and debug for the error handler.
-  \param log  Pointer to logger.
-  \param debug  Whether GDAL debugging should be turned on.
-*/
-void ErrorHandler::set(LogPtr log, bool debug)
-{
-    setLog(log);
-    setDebug(debug);
-}
-
-
-/**
-  Set the log destination for GDAL errors.
-  \param log  Pointer to the logger.
-*/
-void ErrorHandler::setLog(LogPtr log)
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_log = log;
-}
-
-
-/**
-  Set the log state for GDAL logging.
-  \param debug  If true, sets the CPL_DEBUG logging option for GDAL 
-*/
-void ErrorHandler::setDebug(bool debug)
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_debug = debug;
-
-    if (debug)
-        CPLSetThreadLocalConfigOption("CPL_DEBUG", "ON");
-    else
-        CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
-}
-
-
-/**
-  Get the number of the last GDAL error.
-  \return  Last GDAL error number.
-*/
-int ErrorHandler::errorNum()
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return m_errorNum;
-}
-
-
-/**
-  Callback for GDAL error.
-  \param level  Error level
-  \param num  Error number
-  \param msg  Error message.
-*/
-void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    std::ostringstream oss;
-
-    m_errorNum = num;
-    if (level == CE_Failure || level == CE_Fatal)
-    {
-        oss << "GDAL failure (" << num << ") " << msg;
-        if (m_log)
-            m_log->get(LogLevel::Error) << oss.str() << std::endl;
-    }
-    else if (m_debug && level == CE_Debug)
-    {
-        oss << "GDAL debug: " << msg;
-        if (m_log)
-            m_log->get(LogLevel::Debug) << oss.str() << std::endl;
-    }
 }
 
 
