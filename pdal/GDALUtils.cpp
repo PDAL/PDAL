@@ -36,6 +36,8 @@
 #pragma warning(disable: 4127)  // conditional expression is constant
 **/
 
+#include <mutex>
+
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <ogr_api.h>
