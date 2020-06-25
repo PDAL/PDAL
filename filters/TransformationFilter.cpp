@@ -151,29 +151,26 @@ void TransformationFilter::initialize()
 
         Transform& matrix = *m_matrix;
 
-        // rotation matrix P is simply inverted
-        Matrix3d P;
-        P << matrix[0], matrix[1], matrix[2],
-             matrix[4], matrix[5], matrix[6],
-             matrix[8], matrix[9], matrix[10];
-        Matrix3d Pinv = P.inverse();
-        matrix[0] = Pinv(0,0);
-        matrix[1] = Pinv(0,1);
-        matrix[2] = Pinv(0,2);
-        matrix[4] = Pinv(1,0);
-        matrix[5] = Pinv(1,1);
-        matrix[6] = Pinv(1,2);
-        matrix[8] = Pinv(2,0);
-        matrix[9] = Pinv(2,1);
-        matrix[10] = Pinv(2,2);
-        
-        // translation vector v is multiplied by the inverse of negative P
-        Vector3d v;
-        v << matrix[3], matrix[7], matrix[11];
-        Vector3d negPinvV = (-P).inverse() * v;
-        matrix[3] = negPinvV(0);
-        matrix[7] = negPinvV(1);
-        matrix[11] = negPinvV(2);
+	Affine3d T;
+	Matrix4d m;
+	m << matrix[0], matrix[1], matrix[2], matrix[3],
+	     matrix[4], matrix[5], matrix[6], matrix[7],
+	     matrix[8], matrix[9], matrix[10], matrix[11],
+	     matrix[12], matrix[13], matrix[14], matrix[15];
+	T.matrix() = m;
+	Affine3d Tinv = T.inverse();
+	matrix[0] = Tinv.matrix()(0,0);
+	matrix[1] = Tinv.matrix()(0,1);
+	matrix[2] = Tinv.matrix()(0,2);
+	matrix[3] = Tinv.matrix()(0,3);
+	matrix[4] = Tinv.matrix()(1,0);
+	matrix[5] = Tinv.matrix()(1,1);
+	matrix[6] = Tinv.matrix()(1,2);
+	matrix[7] = Tinv.matrix()(1,3);
+	matrix[8] = Tinv.matrix()(2,0);
+	matrix[9] = Tinv.matrix()(2,1);
+	matrix[10] = Tinv.matrix()(2,2);
+	matrix[11] = Tinv.matrix()(2,3);
     }
 }
 
