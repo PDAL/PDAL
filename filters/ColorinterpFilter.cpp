@@ -34,10 +34,10 @@
 
 #include "ColorinterpFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/Raster.hpp>
 
 #include <array>

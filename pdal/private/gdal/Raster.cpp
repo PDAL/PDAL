@@ -35,10 +35,10 @@
 #include <gdal.h>
 #include <gdal_priv.h>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 #include "Raster.hpp"
+#include "GDALUtils.hpp"
 
 namespace pdal
 {

@@ -38,7 +38,11 @@
 #include <sstream>
 #include <functional>
 
+#include <gdal.h>
+#include <ogr_api.h>
+
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
 #include "../filters/private/hexer/HexGrid.hpp"
@@ -133,6 +137,7 @@ OGR::~OGR()
 
 void OGR::createLayer(const std::string& wkt)
 {
+    gdal::registerDrivers();
     OGRSFDriverH driver = OGRGetDriverByName(m_driver.c_str());
     if (driver == NULL)
     {

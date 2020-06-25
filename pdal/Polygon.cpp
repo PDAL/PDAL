@@ -35,8 +35,8 @@
 #include <ogr_api.h>
 #include <ogr_geometry.h>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "../filters/private/pnp/GridPnp.hpp"
 

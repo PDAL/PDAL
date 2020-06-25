@@ -38,8 +38,8 @@
 
 #include <ogr_api.h>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 namespace pdal
 {

@@ -36,7 +36,8 @@
 #include <ogr_geometry.h>
 
 #include <pdal/Geometry.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+
 #include "private/SrsTransform.hpp"
 
 namespace pdal

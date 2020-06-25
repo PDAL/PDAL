@@ -35,11 +35,6 @@
 
 #include <string>
 
-#include <pdal/GDALUtils.hpp>
-
-#include "ogr_api.h"
-#include "gdal.h"
-
 namespace hexer
 {
     class HexGrid;
@@ -50,6 +45,8 @@ namespace pdal
 
 class OGR
 {
+    using OGRDataSourceH = void *;
+    using OGRLayerH = void *;
 
 public:
     OGR(std::string const& filename, const std::string& srs,
