@@ -1,0 +1,20 @@
+{
+    "pipeline": 
+        [
+            {
+                 "type": "readers.las",
+                 "filename": "#"
+            },
+            {
+                 "type": "filters.reprojection",
+                 "in_srs": "EPSG:2193",
+                 "out_srs": "EPSG:2193"
+            },
+            {
+                 "type": "writers.las",
+                 "filename": "#",
+                 "a_srs": "EPSG:2193", 
+                 "forward": "all"
+            }
+        ]
+}
