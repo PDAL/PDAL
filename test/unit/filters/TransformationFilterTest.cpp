@@ -173,6 +173,27 @@ TEST_F(TransformationFilterTest, Translation)
 }
 
 
+TEST_F(TransformationFilterTest, InvertTranslation)
+{
+    Options filterOpts;
+    filterOpts.add("matrix", "1 0 0 1\n0 1 0 2\n0 0 1 3\n0 0 0 1");
+    filterOpts.add("invert", true);
+    m_filter.setOptions(filterOpts);
+
+    PointTable table;
+    m_filter.prepare(table);
+    PointViewSet viewSet = m_filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    for (point_count_t i = 0; i < view->size(); ++i)
+    {
+        EXPECT_DOUBLE_EQ(0, view->getFieldAs<double>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(0, view->getFieldAs<double>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(0, view->getFieldAs<double>(Dimension::Id::Z, i));
+    }
+}
+
+
 TEST_F(TransformationFilterTest, Rotation)
 {
     Options filterOpts;
