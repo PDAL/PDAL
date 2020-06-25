@@ -37,6 +37,7 @@
 #include <limits>
 #include <nlohmann/json.hpp>
 
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -85,6 +86,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     std::string description;
     std::string b64data;
     std::string userId;
+    std::vector<uint8_t> data;
     double recordId(std::numeric_limits<double>::quiet_NaN());
     for (auto& el : j.items())
     {
@@ -122,16 +124,39 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
         }
         else if (el.key() == "data")
         {
+            if (data.size())
+                throw pdal_error("Can't specify both 'data' and 'filename' "
+                    "in VLR specification.");
             if (!el.value().is_string())
                 throw pdal_error("LAS VLR data must be specified as "
                     "a base64-encoded string.");
-            b64data = el.value().get<std::string>();
+            data = Utils::base64_decode(el.value().get<std::string>());
+        }
+        else if (el.key() == "filename")
+        {
+            if (data.size())
+                throw pdal_error("Can't specify both 'data' and 'filename' "
+                    "in VLR specification.");
+            if (!el.value().is_string())
+                throw pdal_error("LAS VLR filename must be a string.");
+            std::string filename = el.value().get<std::string>();
+            size_t fileSize = FileUtils::fileSize(filename);
+            auto ctx = FileUtils::mapFile(filename, true, 0, fileSize);
+            if (ctx.addr())
+            {
+                uint8_t *addr = reinterpret_cast<uint8_t *>(ctx.addr());
+                data.insert(data.begin(), addr, addr + fileSize);
+            }
+            FileUtils::unmapFile(ctx);
+            if (!ctx.addr())
+                throw pdal_error("Couldn't open file '" + filename + "' "
+                    "from which to read VLR data: " + ctx.what());
         }
         else
             throw pdal_error("Invalid key '" + el.key() + "' in VLR "
                 "specification.");
     }
-    if (b64data.empty())
+    if (data.size() == 0)
         throw pdal_error("LAS VLR must contain 'data' member.");
     if (userId.empty())
         throw pdal_error("LAS VLR must contain 'user_id' member.");
@@ -141,7 +166,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     v.m_userId = userId;
     v.m_recordId = recordId;
     v.m_description = description;
-    v.m_data = Utils::base64_decode(b64data);
+    v.m_data = std::move(data);
     return in;
 }
 
