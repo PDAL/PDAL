@@ -148,23 +148,32 @@ void TransformationFilter::initialize()
     if (m_invert)
     {
         using namespace Eigen;
+
         Transform& matrix = *m_matrix;
+
+        // rotation matrix P is simply inverted
         Matrix3d P;
+        P << matrix[0], matrix[1], matrix[2],
+             matrix[4], matrix[5], matrix[6],
+             matrix[8], matrix[9], matrix[10];
+        Matrix3d Pinv = P.inverse();
+        matrix[0] = Pinv(0,0);
+        matrix[1] = Pinv(0,1);
+        matrix[2] = Pinv(0,2);
+        matrix[4] = Pinv(1,0);
+        matrix[5] = Pinv(1,1);
+        matrix[6] = Pinv(1,2);
+        matrix[8] = Pinv(2,0);
+        matrix[9] = Pinv(2,1);
+        matrix[10] = Pinv(2,2);
+        
+        // translation vector v is multiplied by the inverse of negative P
         Vector3d v;
-        P << matrix[0], matrix[1], matrix[2], matrix[4], matrix[5], matrix[6], matrix[8], matrix[9], matrix[10];
         v << matrix[3], matrix[7], matrix[11];
-        matrix[0] = P.inverse()(0,0);
-        matrix[1] = P.inverse()(0,1);
-        matrix[2] = P.inverse()(0,2);
-        matrix[4] = P.inverse()(1,0);
-        matrix[5] = P.inverse()(1,1);
-        matrix[6] = P.inverse()(1,2);
-        matrix[8] = P.inverse()(2,0);
-        matrix[9] = P.inverse()(2,1);
-        matrix[10] = P.inverse()(2,2);
-        matrix[3] = ((-P).inverse() * v)(0);
-        matrix[7] = ((-P).inverse() * v)(1);
-        matrix[11] = ((-P).inverse() * v)(2);
+        Vector3d negPinvV = (-P).inverse() * v;
+        matrix[3] = negPinvV(0);
+        matrix[7] = negPinvV(1);
+        matrix[11] = negPinvV(2);
     }
 }
 
