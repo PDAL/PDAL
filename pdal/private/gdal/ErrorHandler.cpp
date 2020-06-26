@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <mutex>
+
 #include <cpl_conv.h>
 #include <cpl_error.h>
 
