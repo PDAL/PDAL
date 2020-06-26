@@ -37,11 +37,13 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/GDALUtils.hpp>
+#include <ogr_api.h>
+
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
 #include "../io/LasWriter.hpp"

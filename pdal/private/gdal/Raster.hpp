@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -35,178 +35,58 @@
 #pragma once
 
 #include <array>
-#include <functional>
-#include <mutex>
-#include <sstream>
-#include <vector>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Dimension.hpp>
-#include <pdal/Log.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/DimUtil.hpp>
+#include <pdal/pdal_types.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/JsonFwd.hpp>
+#include <pdal/util/Bounds.hpp>
 
-#include <cpl_conv.h>
-#include <gdal_priv.h>
-#include <ogr_api.h>
-#include <ogr_geometry.h>
-#include <ogr_srs_api.h>
+#include "GDALError.hpp"
 
-class OGRSpatialReference;
+class GDALDataset;
+class GDALDriver;
+class GDALRasterBand;
 
 namespace pdal
 {
-class Polygon;
-
 namespace gdal
 {
 
 template<typename ITER>
 using ITER_VAL = typename std::iterator_traits<ITER>::value_type;
 
-PDAL_DLL void registerDrivers();
-PDAL_DLL void unregisterDrivers();
-PDAL_DLL bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reproject(double& x, double& y, double& z,
-    const SpatialReference& srcSrs, const SpatialReference& dstSrs);
-PDAL_DLL std::string lastError();
-
-
-// This is a little confusing because we have a singleton error handler with
-// a single log pointer, but we set the log pointer/debug state as if we
-// were taking advantage of GDAL's thread-specific error handing.
-//
-// We lock the log/debug so that it doesn't
-// get changed while another thread is using or setting.
-class PDAL_DLL ErrorHandler
-{
-public:
-    ErrorHandler();
-    ~ErrorHandler();
-
-    /**
-      Get the singleton error handler.
-
-      \return  Reference to the error handler.
-    */
-    static ErrorHandler& getGlobalErrorHandler();
-
-    /**
-      Set the log and debug state of the error handler.  This is
-      a convenience and is equivalent to calling setLog() and setDebug().
-
-      \param log  Log to write to.
-      \param doDebug  Debug state of the error handler.
-    */
-    void set(LogPtr log, bool doDebug);
-
-    /**
-      Set the log to which error/debug messages should be written.
-
-      \param log  Log to write to.
-    */
-    void setLog(LogPtr log);
-
-    /**
-      Set the debug state of the error handler.  Setting to true will also
-      set the environment variable CPL_DEBUG to "ON".  This will force GDAL
-      to emit debug error messages which will be logged by this handler.
-
-      \param doDebug  Whether we're setting or clearing the debug state.
-    */
-    void setDebug(bool doDebug);
-
-    /**
-      Get the last error and clear the error last error value.
-
-      \return  The last error number.
-    */
-    int errorNum();
-
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
-    {
-        ErrorHandler::getGlobalErrorHandler().handle(code, num, msg);
-    }
-
-private:
-    void handle(::CPLErr level, int num, const char *msg);
-
-private:
-    std::mutex m_mutex;
-    bool m_debug;
-    pdal::LogPtr m_log;
-    mutable int m_errorNum;
-    bool m_cplSet;
-};
-
-class ErrorHandlerSuspender
-{
-public:
-    ErrorHandlerSuspender()
-        { CPLPushErrorHandler(CPLQuietErrorHandler); }
-    ~ErrorHandlerSuspender()
-        { (void)CPLPopErrorHandler(); }
-};
-
-enum class GDALError
-{
-    None,
-    NotOpen,
-    CantOpen,
-    NoData,
-    InvalidBand,
-    BadBand,
-    NoTransform,
-    NotInvertible,
-    CantReadBlock,
-    InvalidDriver,
-    DriverNotFound,
-    CantCreate,
-    InvalidOption,
-    CantWriteBlock,
-    InvalidType
-};
-
-struct InvalidBand {};
-struct BadBand {};
-struct CantReadBlock {};
-struct CantWriteBlock
-{
-    CantWriteBlock()
-    {}
-
-    CantWriteBlock(const std::string& w) : what(w)
-    {}
-
-    std::string what;
-};
-
 class Raster;
 
 /*
   Slight abstraction of a GDAL raster band.
 */
+class PDAL_DLL BaseBand
+{
+protected:
+    BaseBand(GDALDataset *ds, int bandNum, const std::string& name);
+
+    void totalSize(int& x, int& y);
+    void blockSize(int& x, int& y);
+    void readBlockBuf(int x, int y, uint8_t *buf);
+    void writeBlockBuf(int x, int y, const uint8_t *buf);
+    void statistics(double *minimum, double *maximum, double *mean,
+        double *stddev, bool approx, bool force) const;
+
+private:
+    GDALRasterBand *m_band;             /// Band handle
+};
+
 template<typename T>
-class Band
+class Band : public BaseBand
 {
 friend class Raster;
 
 private:
-    GDALDataset *m_ds;                  /// Dataset handle
-    int m_bandNum;                      /// Band number. 1-indexed.
     double m_dstNoData;                 /// Output no data value.
-    GDALRasterBand *m_band;             /// Band handle
     size_t m_xTotalSize, m_yTotalSize;  /// Total size (x and y) of the raster
     size_t m_xBlockSize, m_yBlockSize;  /// Size (x and y) of blocks
     size_t m_xBlockCnt, m_yBlockCnt;    /// Number of blocks in each direction
     std::vector<T> m_buf;               /// Block read buffer.
-    std::string m_name;              /// Band name.
 
     /**
       Create an object for reading a band of a GDAL dataset.
@@ -217,28 +97,17 @@ private:
       \param name  Name of the raster band.
     */
     Band(GDALDataset *ds, int bandNum, double dstNoData = -9999.0,
-            const std::string& name = "") :
-        m_ds(ds), m_bandNum(bandNum), m_dstNoData(dstNoData),
-        m_xBlockSize(0), m_yBlockSize(0)
+            const std::string& name = "") : BaseBand(ds, bandNum, name),
+        m_dstNoData(dstNoData), m_xBlockSize(0), m_yBlockSize(0)
     {
-        m_band = m_ds->GetRasterBand(m_bandNum);
-        if (!m_band)
-            throw InvalidBand();
+        int xTotalSize;
+        int yTotalSize;
+        totalSize(xTotalSize, yTotalSize);
 
-        if (name.size())
-        {
-            m_band->SetDescription(name.data());
-            // We don't care about offset, but this sets the flag to indicate
-            // that the metadata has changed.
-            m_band->SetOffset(m_band->GetOffset(NULL) + .00001);
-            m_band->SetOffset(m_band->GetOffset(NULL) - .00001);
-        }
+        int xBlockSize;
+        int yBlockSize;
+        blockSize(xBlockSize, yBlockSize);
 
-        int xTotalSize = m_band->GetXSize();
-        int yTotalSize = m_band->GetYSize();
-
-        int xBlockSize, yBlockSize;
-        m_band->GetBlockSize(&xBlockSize, &yBlockSize);
         if (xBlockSize <= 0 || yBlockSize <= 0 ||
             xTotalSize <= 0 || yTotalSize <= 0)
             throw BadBand();
@@ -286,12 +155,9 @@ private:
      */
     void readBlock(size_t x, size_t y, std::vector<T>& data)
     {
-        uint8_t *buf = reinterpret_cast<uint8_t *>(m_buf.data());
-
         // Block indices are guaranteed not to overflow an int.
-        if (m_band->ReadBlock(static_cast<int>(x),
-                              static_cast<int>(y), buf) != CPLE_None)
-            throw CantReadBlock();
+        readBlockBuf(static_cast<int>(x), static_cast<int>(y),
+            reinterpret_cast<uint8_t *>(m_buf.data()));
 
         size_t xWidth = 0;
         if (x == m_xBlockCnt - 1)
@@ -400,16 +266,8 @@ private:
         }
 
         //  x and y are guaranteed to fit into an int
-        if (m_band->WriteBlock(static_cast<int>(x),
-                               static_cast<int>(y), m_buf.data()) != CPLE_None)
-            throw CantWriteBlock();
-    }
-
-    void statistics(double* minimum, double* maximum,
-                    double* mean, double* stddev,
-                    int bApprox, int bForce) const
-    {
-        m_band->GetStatistics(bApprox, bForce, minimum, maximum, mean, stddev);
+        writeBlockBuf(static_cast<int>(x), static_cast<int>(y),
+            reinterpret_cast<const uint8_t *>(m_buf.data()));
     }
 };
 
@@ -532,7 +390,7 @@ public:
     {
         try
         {
-            switch(m_bandType)
+            switch (m_bandType)
             {
             case Dimension::Type::Unsigned8:
                 Band<uint8_t>(m_ds, nBand, m_dstNoData, name).
@@ -660,59 +518,15 @@ public:
     int height() const
         { return m_height; }
 
-    std::string const& filename() { return m_filename; }
+    std::string const& filename()
+        { return m_filename; }
 
     GDALError statistics(int nBand, double* minimum, double* maximum,
-        double* mean, double* stddev, int bApprox = TRUE,
-        int bForce = TRUE) const
-    {
-        try
-        {
-            Band<double>(m_ds, nBand).statistics(minimum, maximum, mean, stddev,
-                bApprox, bForce);
-        }
-        catch (InvalidBand)
-        {
-            m_errorMsg = "Unable to get band " + std::to_string(nBand) +
-                " from raster '" + m_filename + "'.";
-            return GDALError::InvalidBand;
-        }
-        catch (BadBand)
-        {
-            m_errorMsg = "Unable to read band/block information from "
-                "raster '" + m_filename + "'.";
-            return GDALError::BadBand;
-        }
-        return GDALError::None;
-    }
+        double* mean, double* stddev, bool approx = true,
+        bool force = true) const;
 
-    BOX2D bounds() const
-    {
-        std::array<double, 2> coords;
-
-        pixelToCoord(height(), width(), coords);
-        double maxx = coords[0];
-        double maxy = coords[1];
-
-        pixelToCoord(0, 0, coords);
-        double minx = coords[0];
-        double miny = coords[1];
-        return BOX2D(minx, miny, maxx, maxy);
-    }
-
-    BOX3D bounds(int nBand) const
-    {
-        BOX2D box2 = bounds();
-
-        double minimum; double maximum;
-        double mean; double stddev;
-        if (statistics(nBand, &minimum, &maximum, &mean, &stddev) !=
-                GDALError::None)
-            return BOX3D();
-
-        return BOX3D(box2.minx, box2.miny, minimum,
-                     box2.maxx, box2.maxy, maximum);
-    }
+    BOX2D bounds() const;
+    BOX3D bounds(int nBand) const;
 
 private:
     std::string m_filename;
@@ -740,27 +554,6 @@ private:
     GDALError computePDALDimensionTypes();
 };
 
-
 } // namespace gdal
-
-namespace gdal
-{
-OGRGeometry *createFromWkt(const char *s);
-OGRGeometry *createFromGeoJson(const char *s);
-
-// New signatures to support extraction of SRS from the end of geometry
-// specifications..
-OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
-OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
-
-std::vector<Polygon> getPolygons(const NL::json& ogr);
-
-inline OGRGeometry *fromHandle(OGRGeometryH geom)
-{ return reinterpret_cast<OGRGeometry *>(geom); }
-
-inline OGRGeometryH toHandle(OGRGeometry *h)
-{ return reinterpret_cast<OGRGeometryH>(h); }
-
-} // namespace gdal
-
 } // namespace pdal
+

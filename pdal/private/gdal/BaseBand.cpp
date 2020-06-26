@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -31,41 +31,63 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
-#include <string>
+#include <gdal.h>
+#include <gdal_priv.h>
 
-namespace hexer
-{
-    class HexGrid;
-}
+#include "Raster.hpp"
 
 namespace pdal
 {
-
-class OGR
+namespace gdal
 {
-    using OGRDataSourceH = void *;
-    using OGRLayerH = void *;
 
-public:
-    OGR(std::string const& filename, const std::string& srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
+BaseBand::BaseBand(GDALDataset *ds, int bandNum, const std::string& name)
+{
+    m_band = ds->GetRasterBand(bandNum);
+    if (!m_band)
+        throw InvalidBand();
 
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
+    if (name.size())
+    {
+        m_band->SetDescription(name.data());
+        // We don't care about offset, but this sets the flag to indicate
+        // that the metadata has changed.
+        m_band->SetOffset(m_band->GetOffset(NULL) + .00001);
+        m_band->SetOffset(m_band->GetOffset(NULL) - .00001);
+    }
+}
 
-private:
-    std::string m_filename;
-    std::string m_driver;
+void BaseBand::totalSize(int& x, int& y)
+{
+    x = m_band->GetXSize();
+    y = m_band->GetYSize();
+}
 
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
+void BaseBand::blockSize(int& x, int& y)
+{
+    m_band->GetBlockSize(&x, &y);
+}
 
-    void createLayer(const std::string& wkt);
-};
+void BaseBand::readBlockBuf(int x, int y, uint8_t *buf)
+{
+    if (m_band->ReadBlock(x, y, buf) != CPLE_None)
+        throw CantReadBlock();
+}
 
+void BaseBand::writeBlockBuf(int x, int y, const uint8_t *buf)
+{
+    void *v = reinterpret_cast<void *>(const_cast<uint8_t *>(buf));
+    if (m_band->WriteBlock(x, y, reinterpret_cast<void *>(v)) != CPLE_None)
+        throw CantWriteBlock();
+}
+
+void BaseBand::statistics(double* minimum, double* maximum,
+                    double* mean, double* stddev,
+                    bool approx, bool force) const
+{
+    m_band->GetStatistics(approx, force, minimum, maximum, mean, stddev);
+}
+
+} // namespace gdal
 } // namespace pdal
-

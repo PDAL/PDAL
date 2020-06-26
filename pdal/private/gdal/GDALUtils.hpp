@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -31,41 +31,54 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <string>
+#include <pdal/JsonFwd.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Bounds.hpp>
 
-namespace hexer
-{
-    class HexGrid;
-}
+class OGRGeometry;
+typedef void *OGRGeometryH;
+class GDALDataset;
+class OGRLayer;
+
+#include <vector>
 
 namespace pdal
 {
+class Polygon;
 
-class OGR
+namespace gdal
 {
-    using OGRDataSourceH = void *;
-    using OGRLayerH = void *;
 
-public:
-    OGR(std::string const& filename, const std::string& srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
+PDAL_DLL void registerDrivers();
+PDAL_DLL void unregisterDrivers();
+PDAL_DLL bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs);
+PDAL_DLL bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs);
+PDAL_DLL bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
+    const SpatialReference& dstSrs);
+PDAL_DLL bool reproject(double& x, double& y, double& z,
+    const SpatialReference& srcSrs, const SpatialReference& dstSrs);
+PDAL_DLL std::string lastError();
 
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
+OGRGeometry *createFromWkt(const char *s);
+OGRGeometry *createFromGeoJson(const char *s);
 
-private:
-    std::string m_filename;
-    std::string m_driver;
+// New signatures to support extraction of SRS from the end of geometry
+// specifications..
+OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
+OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
 
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
+std::vector<Polygon> getPolygons(const NL::json& ogr);
 
-    void createLayer(const std::string& wkt);
-};
+inline OGRGeometry *fromHandle(OGRGeometryH geom)
+{ return reinterpret_cast<OGRGeometry *>(geom); }
 
+inline OGRGeometryH toHandle(OGRGeometry *h)
+{ return reinterpret_cast<OGRGeometryH>(h); }
+
+} // namespace gdal
 } // namespace pdal
-

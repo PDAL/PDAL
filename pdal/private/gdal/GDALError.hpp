@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -31,41 +31,47 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
-
-#include <string>
-
-namespace hexer
-{
-    class HexGrid;
-}
 
 namespace pdal
 {
-
-class OGR
+namespace gdal
 {
-    using OGRDataSourceH = void *;
-    using OGRLayerH = void *;
 
-public:
-    OGR(std::string const& filename, const std::string& srs,
-        std::string driver = "ESRI Shapefile", std::string layerName ="");
-    ~OGR();
-
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
-
-private:
-    std::string m_filename;
-    std::string m_driver;
-
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-    std::string m_layerName;
-
-    void createLayer(const std::string& wkt);
+enum class GDALError
+{
+    None,
+    NotOpen,
+    CantOpen,
+    NoData,
+    InvalidBand,
+    BadBand,
+    NoTransform,
+    NotInvertible,
+    CantReadBlock,
+    InvalidDriver,
+    DriverNotFound,
+    CantCreate,
+    InvalidOption,
+    CantWriteBlock,
+    InvalidType
 };
 
+struct InvalidBand {};
+struct BadBand {};
+struct CantReadBlock {};
+struct CantWriteBlock
+{
+    CantWriteBlock()
+    {}
+
+    CantWriteBlock(const std::string& w) : what(w)
+    {}
+
+    std::string what;
+};
+
+} // namespace gdal
 } // namespace pdal
 
