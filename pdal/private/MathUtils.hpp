@@ -53,11 +53,15 @@
 
 namespace pdal
 {
+
 class BOX2D;
 class PointView;
 class SpatialReference;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
+
+namespace math
+{
 
 PDAL_DLL PointViewPtr demeanPointView(const PointView& view);
 PDAL_DLL PointViewPtr demeanPointView(const PointView& ,double* centroid);
@@ -275,6 +279,8 @@ PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
     return out;
 }
 
+} // namespace math
+
 namespace Utils
 {
 
@@ -313,7 +319,8 @@ inline StatusWithReason fromString(const std::string& s,
     }
     return true;
 }
-}
+
+} // namespace Utils
 
 template <>
 inline void MetadataNodeImpl::setValue(const Eigen::MatrixXd& matrix)

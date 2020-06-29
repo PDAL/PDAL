@@ -34,9 +34,9 @@
 
 #include "EigenvaluesFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -136,7 +136,7 @@ void EigenvaluesFilter::filter(PointView& view)
         }
 
         // compute covariance of the neighborhood
-        auto B = computeCovariance(view, ids);
+        auto B = math::computeCovariance(view, ids);
 
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3d> solver(B);

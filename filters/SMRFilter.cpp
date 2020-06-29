@@ -39,10 +39,10 @@
 
 #include "SMRFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include "private/DimRange.hpp"
 #include "private/Segmentation.hpp"
@@ -310,8 +310,8 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         MatrixXd ZIproM = Map<MatrixXd>(ZIpro.data(), m_rows, m_cols);
         MatrixXd scaled = ZIproM / m_args->m_cell;
 
-        MatrixXd gx = gradX(scaled);
-        MatrixXd gy = gradY(scaled);
+        MatrixXd gx = math::gradX(scaled);
+        MatrixXd gy = math::gradY(scaled);
         gsurfs = (gx.cwiseProduct(gx) + gy.cwiseProduct(gy)).cwiseSqrt();
         std::vector<double> gsurfsV(gsurfs.data(),
                                     gsurfs.data() + gsurfs.size());
@@ -328,24 +328,21 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         {
             std::string fname =
                 FileUtils::toAbsolutePath("gx.tif", m_args->m_dir);
-            writeMatrix(gx, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+            math::writeMatrix(gx, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gy.tif", m_args->m_dir);
-            writeMatrix(gy, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+            math::writeMatrix(gy, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gsurfs.tif", m_args->m_dir);
-            writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell, m_bounds,
-                        m_srs);
+            math::writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gsurfs_fill.tif", m_args->m_dir);
             MatrixXd gsurfs_fill =
                 Map<MatrixXd>(gsurfs_fillV.data(), m_rows, m_cols);
-            writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell, m_bounds,
-                        m_srs);
+            math::writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("thresh.tif", m_args->m_dir);
-            writeMatrix(thresh, fname, "GTiff", m_args->m_cell, m_bounds,
-                        m_srs);
+            math::writeMatrix(thresh, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
         }
     }
 
@@ -417,8 +414,7 @@ std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
         std::string fname =
             FileUtils::toAbsolutePath("zilow.tif", m_args->m_dir);
         MatrixXi Low = Map<MatrixXi>(LowV.data(), m_rows, m_cols);
-        writeMatrix(Low.cast<double>(), fname, "GTiff", m_args->m_cell,
-                    m_bounds, m_srs);
+        math::writeMatrix(Low.cast<double>(), fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return LowV;
@@ -470,8 +466,7 @@ std::vector<int> SMRFilter::createObjMask(std::vector<double> const& ZImin)
         std::string fname =
             FileUtils::toAbsolutePath("ziobj.tif", m_args->m_dir);
         MatrixXi Obj = Map<MatrixXi>(ObjV.data(), m_rows, m_cols);
-        writeMatrix(Obj.cast<double>(), fname, "GTiff", m_args->m_cell,
-                    m_bounds, m_srs);
+        math::writeMatrix(Obj.cast<double>(), fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ObjV;
@@ -514,12 +509,11 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
         std::string fname =
             FileUtils::toAbsolutePath("zimin.tif", m_args->m_dir);
         MatrixXd ZImin = Map<MatrixXd>(ZIminV.data(), m_rows, m_cols);
-        writeMatrix(ZImin, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        math::writeMatrix(ZImin, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
         fname = FileUtils::toAbsolutePath("zimin_fill.tif", m_args->m_dir);
         MatrixXd ZImin_fill = Map<MatrixXd>(ZImin_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds,
-                    m_srs);
+        math::writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZImin_fillV;
@@ -540,8 +534,8 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     {
         std::vector<double> dilated = ZImin;
         int v = ceil<int>(m_args->m_cut / m_args->m_cell);
-        erodeDiamond(dilated, m_rows, m_cols, 2 * v);
-        dilateDiamond(dilated, m_rows, m_cols, 2 * v);
+        math::erodeDiamond(dilated, m_rows, m_cols, 2 * v);
+        math::dilateDiamond(dilated, m_rows, m_cols, 2 * v);
         for (auto c = 0; c < m_cols; ++c)
         {
             for (auto r = 0; r < m_rows; ++r)
@@ -559,7 +553,7 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
         std::string fname =
             FileUtils::toAbsolutePath("zinet.tif", m_args->m_dir);
         MatrixXd ZInet = Map<MatrixXd>(ZInetV.data(), m_rows, m_cols);
-        writeMatrix(ZInet, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        math::writeMatrix(ZInet, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZInetV;
@@ -594,12 +588,11 @@ std::vector<double> SMRFilter::createZIpro(PointViewPtr view,
         std::string fname =
             FileUtils::toAbsolutePath("zipro.tif", m_args->m_dir);
         MatrixXd ZIpro = Map<MatrixXd>(ZIproV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        math::writeMatrix(ZIpro, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
         fname = FileUtils::toAbsolutePath("zipro_fill.tif", m_args->m_dir);
         MatrixXd ZIpro_fill = Map<MatrixXd>(ZIpro_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell, m_bounds,
-                    m_srs);
+        math::writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZIpro_fillV;
@@ -693,9 +686,9 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     {
         // "On the first iteration, the minimum surface (ZImin) is opened using
         // a disk-shaped structuring element with a radius of one pixel."
-        erodeDiamond(erosion, m_rows, m_cols, 1);
+        math::erodeDiamond(erosion, m_rows, m_cols, 1);
         std::vector<double> curOpening = erosion;
-        dilateDiamond(curOpening, m_rows, m_cols, radius);
+        math::dilateDiamond(curOpening, m_rows, m_cols, radius);
 
         // "An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product

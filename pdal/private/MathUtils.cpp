@@ -32,19 +32,22 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/EigenUtils.hpp>
+#include <array>
+#include <cfloat>
+#include <numeric>
+#include <vector>
+
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/private/gdal/Raster.hpp>
 
-#include <array>
-#include <cfloat>
-#include <numeric>
-#include <vector>
+#include "MathUtils.hpp"
 
 namespace pdal
+{
+namespace math
 {
 
 #pragma warning (push)
@@ -381,4 +384,5 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
 }
 #pragma warning (pop)
 
+} // namespace math
 } // namespace pdal
