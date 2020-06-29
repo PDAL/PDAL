@@ -35,7 +35,6 @@
 
 #include <sstream>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/private/gdal/Raster.hpp>
 

@@ -38,8 +38,8 @@
 #include <io/LasReader.hpp>
 #include <memory>
 #include <pdal/pdal_test_main.hpp>
-#include <pdal/EigenUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 namespace pdal
 {

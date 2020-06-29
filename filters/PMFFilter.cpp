@@ -39,9 +39,9 @@
 
 #include "PMFFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include "private/DimRange.hpp"
 #include "private/Segmentation.hpp"
@@ -336,8 +336,8 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        erodeDiamond(ZImin, rows, cols, iters);
-        dilateDiamond(ZImin, rows, cols, iters);
+        math::erodeDiamond(ZImin, rows, cols, iters);
+        math::dilateDiamond(ZImin, rows, cols, iters);
 
         PointIdList groundNewIdx;
         for (auto p_idx : groundIdx)
