@@ -35,7 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
-//#include <pdal/EigenUtils.hpp>
 #include <io/LasReader.hpp>
 #include <io/FauxReader.hpp>
 #include <filters/SplitterFilter.hpp>
