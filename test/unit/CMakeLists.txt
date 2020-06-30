@@ -173,7 +173,15 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_io_obj_reader_test
+    FILES
+        io/ObjReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+)
+
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+
 PDAL_ADD_TEST(pdal_io_pcd_reader_test
     FILES
         io/PcdReaderTest.cpp
