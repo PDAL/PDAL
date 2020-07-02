@@ -63,10 +63,13 @@ typedef std::shared_ptr<PointView> PointViewPtr;
 namespace math
 {
 
-PDAL_DLL PointViewPtr demeanPointView(const PointView& view);
-PDAL_DLL PointViewPtr demeanPointView(const PointView& ,double* centroid);
-PDAL_DLL PointViewPtr transform(const PointView&, double* matrix);
-PDAL_DLL void transformInPlace(PointView&, double* matrix);
+PointViewPtr demeanPointView(const PointView& view);
+PointViewPtr demeanPointView(const PointView& ,double* centroid);
+PointViewPtr transform(const PointView&, double* matrix);
+void transformInPlace(PointView&, double* matrix);
+double barycentricInterpolation(double x1, double y1, double z1,
+    double x2, double y2, double z2, double x3, double y3, double z3,
+    double x, double y);
 
 /**
   Compute the centroid of a collection of points.
@@ -90,7 +93,7 @@ PDAL_DLL void transformInPlace(PointView&, double* matrix);
   \param ids a vector of PointIds specifying a subset of points.
   \return the 3D centroid of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Vector3d computeCentroid(const PointView& view,
+Eigen::Vector3d computeCentroid(const PointView& view,
     const PointIdList& ids);
 
 /**
@@ -115,7 +118,7 @@ PDAL_DLL Eigen::Vector3d computeCentroid(const PointView& view,
   \param ids a vector of PointIds specifying a subset of points.
   \return the covariance matrix of the XYZ dimensions.
 */
-PDAL_DLL Eigen::Matrix3d computeCovariance(const PointView& view,
+Eigen::Matrix3d computeCovariance(const PointView& view,
     const PointIdList& ids);
 
 /**
@@ -147,8 +150,8 @@ PDAL_DLL Eigen::Matrix3d computeCovariance(const PointView& view,
   \param ids a vector of PointIds specifying a subset of points.
   \return the estimated rank.
 */
-PDAL_DLL uint8_t computeRank(const PointView& view,
-        const PointIdList& ids, double threshold);
+uint8_t computeRank(const PointView& view,
+    const PointIdList& ids, double threshold);
 
 /**
   Find local minimum elevations by extended local minimum.
@@ -168,8 +171,8 @@ PDAL_DLL uint8_t computeRank(const PointView& view,
   \param bounds the 2D bounds of the PointView.
   \return the matrix of minimum Z values (ignoring low outliers).
 */
-PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows,
-        int cols, double cell_size, BOX2D bounds);
+Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows,
+    int cols, double cell_size, BOX2D bounds);
 
 /**
   Perform a morphological dilation of the input raster.
@@ -186,8 +189,7 @@ PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(const PointView& view, int rows,
          structuring element.
   \return the morphological dilation of the input raster.
 */
-PDAL_DLL void dilateDiamond(std::vector<double>& data,
-        size_t rows, size_t cols, int iterations);
+void dilateDiamond(std::vector<double>& data, size_t rows, size_t cols, int iterations);
 
 /**
   Perform a morphological erosion of the input raster.
@@ -204,8 +206,7 @@ PDAL_DLL void dilateDiamond(std::vector<double>& data,
          structuring element.
   \return the morphological erosion of the input raster.
 */
-PDAL_DLL void erodeDiamond(std::vector<double>& data,
-        size_t rows, size_t cols, int iterations);
+void erodeDiamond(std::vector<double>& data, size_t rows, size_t cols, int iterations);
 
 /**
   Converts a PointView into an Eigen::MatrixXd.
@@ -213,8 +214,8 @@ PDAL_DLL void erodeDiamond(std::vector<double>& data,
   This method exists (as of this writing) purely as a convenience method in the
   API. It is not currently used in the PDAL codebase itself.
 */
-PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
-PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdList& ids);
+Eigen::MatrixXd pointViewToEigen(const PointView& view);
+Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdList& ids);
 
 /**
   Write Eigen Matrix as a GDAL raster.
@@ -225,7 +226,7 @@ PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdLi
   \param bounds the 2D bounds of the data.
   \param srs the spatial reference system of the data.
 */
-PDAL_DLL void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
+void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
                           const std::string& driver, double cell_size,
                           BOX2D bounds, SpatialReference srs);
 
@@ -239,7 +240,7 @@ PDAL_DLL void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
   \return the X component of the two-dimensional gradient.
 */
 template <typename Derived>
-PDAL_DLL Derived gradX(const Eigen::MatrixBase<Derived>& A)
+Derived gradX(const Eigen::MatrixBase<Derived>& A)
 {
     Derived out = Derived::Zero(A.rows(), A.cols());
 
@@ -264,7 +265,7 @@ PDAL_DLL Derived gradX(const Eigen::MatrixBase<Derived>& A)
   \return the Y component of the two-dimensional gradient.
 */
 template <typename Derived>
-PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
+Derived gradY(const Eigen::MatrixBase<Derived>& A)
 {
     Derived out = Derived::Zero(A.rows(), A.cols());
 
