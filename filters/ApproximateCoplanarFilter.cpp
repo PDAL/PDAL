@@ -34,9 +34,9 @@
 
 #include "ApproximateCoplanarFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -87,7 +87,7 @@ void ApproximateCoplanarFilter::filter(PointView& view)
         auto ids = kdi.neighbors(i, m_knn);
 
         // compute covariance of the neighborhood
-        auto B = computeCovariance(view, ids);
+        auto B = math::computeCovariance(view, ids);
 
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3d> solver(B);

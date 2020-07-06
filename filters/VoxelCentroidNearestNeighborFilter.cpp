@@ -34,14 +34,14 @@
 
 #include "VoxelCentroidNearestNeighborFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
-
 #include <map>
 #include <string>
 #include <tuple>
 #include <vector>
 
 #include <Eigen/Dense>
+
+#include <pdal/private/MathUtils.hpp>
 
 namespace pdal
 {
@@ -130,7 +130,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
             // closest to the centroid.
 
             // Compute the centroid.
-            Eigen::Vector3d centroid = computeCentroid(*view, t.second);
+            Eigen::Vector3d centroid = math::computeCentroid(*view, t.second);
 
             // Compute distance from each point in the voxel to the centroid,
             // retaining only the closest.

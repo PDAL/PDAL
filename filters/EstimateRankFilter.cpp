@@ -34,12 +34,12 @@
 
 #include "EstimateRankFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
-#include <pdal/KDIndex.hpp>
-#include <pdal/util/ProgramArgs.hpp>
-
 #include <string>
 #include <vector>
+
+#include <pdal/KDIndex.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 namespace pdal
 {
@@ -80,7 +80,7 @@ void EstimateRankFilter::filter(PointView& view)
         // find the k-nearest neighbors
         auto ids = kdi.neighbors(i, m_knn);
 
-        view.setField(m_rank, i, computeRank(view, ids, m_thresh));
+        view.setField(m_rank, i, math::computeRank(view, ids, m_thresh));
     }
 }
 

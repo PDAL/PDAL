@@ -35,8 +35,9 @@
 
 #pragma once
 
+#include <Eigen/Dense>
+
 #include <pdal/Dimension.hpp>
-#include <pdal/EigenUtils.hpp>
 #include <pdal/util/OStream.hpp>
 
 namespace pdal
