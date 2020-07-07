@@ -83,63 +83,63 @@ TEST(ObjReader, ReadBinary)
 }
 
 
-// TEST(ObjReader, ReadBinaryStream)
-// {
-//     class Checker : public Filter, public Streamable
-//     {
-//     public:
-//         std::string getName() const
-//             { return "checker"; }
-//     private:
-//         bool processOne(PointRef& point)
-//         {
-//             static int cnt = 0;
-//             if (cnt == 0)
-//             {
-//                 EXPECT_DOUBLE_EQ(-1,
-//                     point.getFieldAs<double>(Dimension::Id::X));
-//                 EXPECT_DOUBLE_EQ(0,
-//                     point.getFieldAs<double>(Dimension::Id::Y));
-//                 EXPECT_DOUBLE_EQ(0,
-//                     point.getFieldAs<double>(Dimension::Id::Z));
-//             }
-//             if (cnt == 1)
-//             {
-//                 EXPECT_DOUBLE_EQ(0,
-//                     point.getFieldAs<double>(Dimension::Id::X));
-//                 EXPECT_DOUBLE_EQ(1,
-//                     point.getFieldAs<double>(Dimension::Id::Y));
-//                 EXPECT_DOUBLE_EQ(0,
-//                     point.getFieldAs<double>(Dimension::Id::Z));
-//             }
-//             if (cnt == 2)
-//             {
-//                 EXPECT_DOUBLE_EQ(1,
-//                     point.getFieldAs<double>(Dimension::Id::X));
-//                 EXPECT_DOUBLE_EQ(0,
-//                     point.getFieldAs<double>(Dimension::Id::Y));
-//                 EXPECT_DOUBLE_EQ(0,
-//                     point.getFieldAs<double>(Dimension::Id::Z));
-//             }
-//             cnt++;
-//             return true;
-//         }
-//     };
-//
-//     ObjReader reader;
-//     Options options;
-//     options.add("filename", Support::datapath("obj/simple_binary.obj"));
-//     reader.setOptions(options);
-//
-//     FixedPointTable table(10);
-//
-//     Checker c;
-//     c.setInput(reader);
-//
-//     c.prepare(table);
-//     c.execute(table);
-// }
-//
+TEST(ObjReader, ReadBinaryStream)
+{
+    class Checker : public Filter, public Streamable
+    {
+    public:
+        std::string getName() const
+            { return "checker"; }
+    private:
+        bool processOne(PointRef& point)
+        {
+            static int cnt = 0;
+            if (cnt == 0)
+            {
+                EXPECT_DOUBLE_EQ(-1,
+                    point.getFieldAs<double>(Dimension::Id::X));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Y));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Z));
+            }
+            if (cnt == 1)
+            {
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::X));
+                EXPECT_DOUBLE_EQ(1,
+                    point.getFieldAs<double>(Dimension::Id::Y));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Z));
+            }
+            if (cnt == 2)
+            {
+                EXPECT_DOUBLE_EQ(1,
+                    point.getFieldAs<double>(Dimension::Id::X));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Y));
+                EXPECT_DOUBLE_EQ(0,
+                    point.getFieldAs<double>(Dimension::Id::Z));
+            }
+            cnt++;
+            return true;
+        }
+    };
+
+    ObjReader reader;
+    Options options;
+    options.add("filename", Support::datapath("obj/simple_binary.obj"));
+    reader.setOptions(options);
+
+    FixedPointTable table(10);
+
+    Checker c;
+    c.setInput(reader);
+
+    c.prepare(table);
+    c.execute(table);
+}
+
 
 TEST(ObjReader, NoVertex)
 {
@@ -149,7 +149,12 @@ TEST(ObjReader, NoVertex)
     reader.setOptions(options);
 
     PointTable table;
-    EXPECT_THROW(reader.prepare(table), pdal_error);
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 0u);
+
 }
 
 }

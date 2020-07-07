@@ -38,6 +38,8 @@
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/Streamable.hpp>
+
 
 
 #ifndef TINYOBJLOADER_USE_DOUBLE
@@ -52,7 +54,7 @@
 namespace pdal
 {
 
-class PDAL_DLL ObjReader : public Reader
+class PDAL_DLL ObjReader : public Reader, public Streamable
 {
 public:
     ObjReader()
@@ -61,7 +63,9 @@ public:
         , m_index(0)
         , m_shape_idx(0)
         , m_face_idx(0)
+        , m_face_offset(0)
         , m_vert_idx(0)
+        , m_face_vertex_id(0)
         {}
 
     std::string getName() const override;
@@ -84,12 +88,19 @@ private:
 
     size_t m_shape_idx;
     size_t m_face_idx;
+    size_t m_face_offset;
     size_t m_vert_idx;
+    size_t m_face_vertex_id;
 
+    double m_color_scale_factor;
+
+    void fillPoint(PointRef& point);
+    void updateIndexes();
 
     virtual void initialize() override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void ready(PointTableRef table) override;
+    virtual bool processOne(PointRef& point) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void addArgs(ProgramArgs& args) override;
     virtual bool eof()
