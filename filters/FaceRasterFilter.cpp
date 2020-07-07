@@ -96,16 +96,16 @@ void FaceRasterFilter::filter(PointView& v)
 
     for (const Triangle& t : *m)
     {
-        double x1 = v.getFieldAs<double>(Dimension::Id::X, t.m_a) - m_limits.xOrigin;
-        double y1 = v.getFieldAs<double>(Dimension::Id::Y, t.m_a) - m_limits.yOrigin;
+        double x1 = v.getFieldAs<double>(Dimension::Id::X, t.m_a);
+        double y1 = v.getFieldAs<double>(Dimension::Id::Y, t.m_a);
         double z1 = v.getFieldAs<double>(Dimension::Id::Z, t.m_a);
 
-        double x2 = v.getFieldAs<double>(Dimension::Id::X, t.m_b) - m_limits.xOrigin;
-        double y2 = v.getFieldAs<double>(Dimension::Id::Y, t.m_b) - m_limits.yOrigin;
+        double x2 = v.getFieldAs<double>(Dimension::Id::X, t.m_b);
+        double y2 = v.getFieldAs<double>(Dimension::Id::Y, t.m_b);
         double z2 = v.getFieldAs<double>(Dimension::Id::Z, t.m_b);
 
-        double x3 = v.getFieldAs<double>(Dimension::Id::X, t.m_c) - m_limits.xOrigin;
-        double y3 = v.getFieldAs<double>(Dimension::Id::Y, t.m_c) - m_limits.yOrigin;
+        double x3 = v.getFieldAs<double>(Dimension::Id::X, t.m_c);
+        double y3 = v.getFieldAs<double>(Dimension::Id::Y, t.m_c);
         double z3 = v.getFieldAs<double>(Dimension::Id::Z, t.m_c);
 
         double xmax = (std::max)((std::max)(x1, x2), x3);
@@ -114,11 +114,11 @@ void FaceRasterFilter::filter(PointView& v)
         double ymin = (std::min)((std::min)(y1, y2), y3);
 
         double halfEdge = m_limits.edgeLength / 2;
-        int ax = raster->horizontalIndex(xmin + halfEdge);
-        int ay = raster->verticalIndex(ymin + halfEdge);
+        int ax = raster->xCell(xmin + halfEdge);
+        int ay = raster->yCell(ymin + halfEdge);
 
-        int bx = raster->horizontalIndex(xmax + halfEdge);
-        int by = raster->verticalIndex(ymax + halfEdge);
+        int bx = raster->xCell(xmax + halfEdge);
+        int by = raster->yCell(ymax + halfEdge);
 
         ax = Utils::clamp(ax, 0, (int)m_limits.width);
         bx = Utils::clamp(bx, 0, (int)m_limits.width);
@@ -128,8 +128,8 @@ void FaceRasterFilter::filter(PointView& v)
         for (size_t xi = ax; (int)xi < bx; ++xi)
             for (size_t yi = ay; (int)yi < by; ++yi)
             {
-                double x = raster->horizontalPos(xi);
-                double y = raster->verticalPos(yi);
+                double x = raster->xCellPos(xi);
+                double y = raster->yCellPos(yi);
 
                 double val = math::barycentricInterpolation(x1, y1, z1,
                     x2, y2, z2, x3, y3, z3, x, y);

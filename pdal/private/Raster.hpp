@@ -37,6 +37,7 @@
 #include <vector>
 
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -44,6 +45,13 @@ namespace pdal
 struct RasterLimits
 {
 public:
+    RasterLimits(double xOrigin, double yOrigin, int width, int height, double edgeLength) :
+        xOrigin(xOrigin), yOrigin(yOrigin), width(width), height(height), edgeLength(edgeLength)
+    {}
+
+    RasterLimits()
+    {}
+
     void addArgs(ProgramArgs& args)
     {
          args.add("resolution", "Cell edge size in units of X/Y", edgeLength).setPositional();
@@ -70,8 +78,8 @@ public:
 public:
     double xOrigin;
     double yOrigin;
-    size_t width;
-    size_t height;
+    int width;
+    int height;
     double edgeLength;
 
 private:
@@ -87,8 +95,9 @@ template <typename T>
 class Raster
 {
 public:
-    using iterator = typename std::vector<T>::iterator;
-    using const_iterator = typename std::vector<T>::const_iterator;
+    using DataVec = std::vector<T>;
+    using iterator = typename DataVec::iterator;
+    using const_iterator = typename DataVec::const_iterator;
 
     Raster(const T& initializer = T()) : m_initializer(initializer)
     {}
@@ -97,10 +106,10 @@ public:
         m_limits(limits), m_data(width() * height(), initializer), m_initializer(initializer)
     {}
 
-    size_t width() const
+    int width() const
         { return m_limits.width; }
 
-    size_t height() const
+    int height() const
         { return m_limits.height; }
 
     double edgeLength() const
@@ -112,20 +121,17 @@ public:
     double yOrigin() const
         { return m_limits.yOrigin; }
 
-    size_t index(size_t i, size_t j) const
-        { return (j * width()) + i; }
+    int xCell(double x) const
+        { return std::floor((x - m_limits.xOrigin) / m_limits.edgeLength); }
 
-    int horizontalIndex(double x) const
-        { return (int)(x / edgeLength()); }
+    int yCell(double y) const
+        { return std::floor((y - m_limits.yOrigin) / m_limits.edgeLength); }
 
-    int verticalIndex(double y) const
-        { return height() - (int)(y / edgeLength()) - 1; }
+    double xCellPos(size_t i) const
+        { return m_limits.xOrigin + (i + .5) * edgeLength(); }
 
-    double horizontalPos(size_t i) const
-        { return (i + .5) * edgeLength(); }
-
-    double verticalPos(size_t j) const
-        { return (height() - (j + .5)) * edgeLength(); }
+    double yCellPos(size_t j) const
+        { return m_limits.yOrigin + (j + .5) * edgeLength(); }
 
     const T *data() const
         { return m_data.data(); }
@@ -133,11 +139,23 @@ public:
     T *data()
         { return m_data.data(); }
 
-    const T& at(size_t x, size_t y) const
-        { return m_data[index(x, y)]; }
+    const T& at(int x, int y) const
+        { return m_data[index(x, height() - y - 1)]; }
 
-    T& at(size_t x, size_t y)
-        { return m_data[index(x, y)]; }
+    T& at(int x, int y)
+        { return m_data[index(x, height() - y - 1)]; }
+
+    const T& at(size_t idx) const
+        { return m_data[idx]; }
+
+    T& at(size_t idx)
+        { return m_data[idx]; }
+
+    const T& operator[](size_t idx) const
+        { return m_data[idx]; }
+
+    T& operator[](size_t idx)
+        { return m_data[idx]; }
 
     iterator begin()
         { return m_data.begin(); }
@@ -151,22 +169,32 @@ public:
     const_iterator end() const
         { return m_data.end(); }
 
-    void setLimits(const RasterLimits& limits)
-    {
-        m_limits = limits;
-        m_data.swap(std::vector<T>(width() * height(), m_initializer));
-    }
+    void expandToInclude(double x, double y);
+
+    //ABELL - This should probably call expand().
+    void setLimits(const RasterLimits& limits);
 
     const RasterLimits& limits() const
         { return m_limits; }
 
+    size_t size() const
+        { return m_data.size(); }
+
 private:
     RasterLimits m_limits;
-    std::vector<T> m_data;
+    DataVec m_data;
     T m_initializer;
+
+    Utils::StatusWithReason expand(int w, int h, int xshift, int yshift);
+
+    // You need to pass in internal (Y down) indices.
+    size_t index(int i, int j) const
+        { return (j * width()) + i; }
+
 };
 
 using Rasterd = Raster<double>;
+extern template class Raster<double>;
 
 } // namespace pdal
 
