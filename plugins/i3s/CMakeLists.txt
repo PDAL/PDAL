@@ -8,6 +8,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         io/EsriUtil.cpp
         io/EsriReader.cpp
         io/Obb.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
         ${ZLIB_LIBRARY}
@@ -29,6 +30,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         io/EsriUtil.cpp
         io/EsriReader.cpp
         io/Obb.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
         ${ZLIB_LIBRARY}
@@ -54,6 +56,7 @@ if (WITH_TESTS)
         FILES
             test/ObbTest.cpp
             io/Obb.cpp
+            ${PDAL_SRC_DIR}/private/MathUtils.cpp
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
             ${PDAL_VENDOR_DIR}/eigen
