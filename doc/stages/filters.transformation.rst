@@ -41,6 +41,10 @@ This example rotates the points around the z-axis while translating them.
 Options
 -------
 
+invert
+  If set to true, applies the inverse of the provided transformation matrix.
+  [Default: false]
+
 _`matrix`
   A whitespace-delimited transformation matrix.
   The matrix is assumed to be presented in row-major order.

@@ -34,9 +34,9 @@
 
 #include "IterativeClosestPoint.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -109,11 +109,11 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // PointViews can be centered.
     PointIdList ids(fixed->size());
     std::iota(ids.begin(), ids.end(), 0);
-    auto centroid = computeCentroid(*fixed, ids);
+    auto centroid = math::computeCentroid(*fixed, ids);
 
     // Demean the fixed and moving PointViews.
-    PointViewPtr tempFixed = demeanPointView(*fixed, centroid.data());
-    PointViewPtr tempMoving = demeanPointView(*moving, centroid.data());
+    PointViewPtr tempFixed = math::demeanPointView(*fixed, centroid.data());
+    PointViewPtr tempMoving = math::demeanPointView(*moving, centroid.data());
 
     // Initialize the final_transformation to identity. In the future, it would
     // be reasonable to alternately accept an initial guess.
@@ -132,7 +132,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         // At the beginning of each iteration, transform our centered, moving
         // PointView by the current final_transformation.
         PointViewPtr tempMovingTransformed =
-            transform(*tempMoving, final_transformation.data());
+            math::transform(*tempMoving, final_transformation.data());
 
         // Create empty lists to hold point correspondences, and initialize MSE
         // to zero.
@@ -168,8 +168,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 
         // Estimate rigid transformation using Umeyama method, logging the
         // current translation in X and Y.
-        auto A = pointViewToEigen(*tempFixed, fixed_idx);
-        auto B = pointViewToEigen(*tempMovingTransformed, moving_idx);
+        auto A = math::pointViewToEigen(*tempFixed, fixed_idx);
+        auto B = math::pointViewToEigen(*tempMovingTransformed, moving_idx);
         auto T = Eigen::umeyama(B.transpose(), A.transpose(), false);
         log()->get(LogLevel::Debug2) << "Current dx: " << T.coeff(0, 3) << ", "
                                      << "dy: " << T.coeff(1, 3) << std::endl;

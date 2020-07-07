@@ -36,9 +36,9 @@
 
 #include <Eigen/Geometry>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ThreadPool.hpp>
+#include <pdal/private/MathUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
 #include "Obb.hpp"
@@ -494,7 +494,7 @@ bool EsriReader::processPoint(PointRef& dst, const TileContents& tile)
     if (m_args->obb.valid())
     {
         coord -= m_args->obb.center();
-        coord = rotate(coord, m_args->obb.quat().inverse());
+        coord = math::rotate(coord, m_args->obb.quat().inverse());
         if (!m_args->obb.bounds().contains(coord.x(), coord.y(), coord.z()))
             return false;
     }

@@ -263,6 +263,7 @@ namespace FileUtils
     */
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
 
+
     struct PDAL_DLL MapContext
     {
     public:
@@ -281,10 +282,9 @@ namespace FileUtils
 #ifdef _WIN32
         HANDLE m_handle;
 #endif
-    }; 
+    };
     /**
       Map a file to memory.
-
       \param filename  Filename to map.
       \param readOnly  Must be true at this time.
       \param pos       Starting position of file to map.
@@ -297,11 +297,10 @@ namespace FileUtils
 
     /**
       Unmap a previously mapped file.
-
       \param ctx  Previously returned MapContext
       \return  MapContext indicating current state of the file mapping.
     */
     PDAL_DLL MapContext unmapFile(MapContext ctx);
-}
 
+} // namespace FileUtils
 } // namespace pdal

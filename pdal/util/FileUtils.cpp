@@ -520,6 +520,5 @@ MapContext unmapFile(MapContext ctx)
 }
 
 } // namespace FileUtils
-
 } // namespace pdal
 

@@ -36,8 +36,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/private/MathUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
 #include "Obb.hpp"
@@ -147,7 +147,7 @@ Eigen::Vector3d Obb::corner(size_t pos)
     Eigen::Vector3d v((pos & 1) ? -m_hx : m_hx,
                       (pos & 2) ? -m_hy : m_hy,
                       (pos & 4) ? -m_hz : m_hz);
-    v = rotate(v, m_quat);
+    v = math::rotate(v, m_quat);
     v += m_p;
     return v;
 }
@@ -178,7 +178,7 @@ bool Obb::intersect(Obb c)
 
     // Rotate the clip box by the inverse of this box's rotation to
     // bring it to the same relative location as this box unrotated.
-    c.m_p = rotate(c.m_p, m_quat.inverse());
+    c.m_p = math::rotate(c.m_p, m_quat.inverse());
 
     // BOX3D representation of this OBB (translated to 0, 0, 0)
     BOX3D box(-m_hx, -m_hy, -m_hz, m_hx, m_hy, m_hz);

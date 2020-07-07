@@ -34,7 +34,7 @@
 
 #include "HagDemFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 namespace pdal
 {
@@ -77,7 +77,6 @@ void HagDemFilter::addDimensions(PointLayoutPtr layout)
 
 void HagDemFilter::ready(PointTableRef table)
 {
-    gdal::registerDrivers();
     m_raster.reset(new gdal::Raster(m_rasterName));
     m_raster->open();
 }

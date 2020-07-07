@@ -39,11 +39,11 @@
 #include <nlohmann/json.hpp>
 
 #include <pdal/ArtifactManager.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/util/ThreadPool.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "private/ept/Connector.hpp"
 #include "private/ept/EptArtifact.hpp"
@@ -232,6 +232,8 @@ void EptReader::initialize()
 
     // Figure out our max depth.
     const double queryResolution(m_args->m_resolution);
+    //reseting depthEnd if initialize() has been called before
+    m_depthEnd = 0;
     if (queryResolution)
     {
         double currentResolution =

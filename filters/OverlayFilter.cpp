@@ -36,8 +36,10 @@
 
 #include <vector>
 
-#include <pdal/GDALUtils.hpp>
+#include <ogr_api.h>
+
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 namespace pdal
 {

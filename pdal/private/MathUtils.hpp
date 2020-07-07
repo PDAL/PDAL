@@ -54,11 +54,15 @@
 
 namespace pdal
 {
+
 class BOX2D;
 class PointView;
 class SpatialReference;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
+
+namespace math
+{
 
 PDAL_DLL PointViewPtr demeanPointView(const PointView& view);
 PDAL_DLL PointViewPtr demeanPointView(const PointView& ,double* centroid);
@@ -89,6 +93,16 @@ PDAL_DLL void transformInPlace(PointView&, double* matrix);
 */
 PDAL_DLL Eigen::Vector3d computeCentroid(const PointView& view,
     const PointIdList& ids);
+
+/**
+    Rotate a point using the given quaternion.
+    NOTE: quaternion must be normalized before this call.
+
+    \param p     Point to rotate about origin.
+    \param quat  Quaternion specification for rotation.
+    \return  Coordinates of rotated point.
+*/
+Eigen::Vector3d rotate(const Eigen::Vector3d& p, const Eigen::Quaterniond& rot);
 
 /**
   Compute the covariance matrix of a collection of points.
@@ -276,6 +290,8 @@ PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
     return out;
 }
 
+} // namespace math
+
 namespace Utils
 {
 
@@ -314,7 +330,8 @@ inline StatusWithReason fromString(const std::string& s,
     }
     return true;
 }
-}
+
+} // namespace Utils
 
 template <>
 inline void MetadataNodeImpl::setValue(const Eigen::MatrixXd& matrix)
@@ -322,8 +339,5 @@ inline void MetadataNodeImpl::setValue(const Eigen::MatrixXd& matrix)
     m_type = "matrix";
     m_value = Utils::toString(matrix);
 }
-
-
-Eigen::Vector3d rotate(const Eigen::Vector3d& p, const Eigen::Quaterniond& rot);
 
 } // namespace pdal

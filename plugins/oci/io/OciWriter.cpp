@@ -33,13 +33,12 @@
 ****************************************************************************/
 
 #include <pdal/pdal_features.hpp>
-#include <pdal/EigenUtils.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "OciWriter.hpp"
 
@@ -891,7 +890,7 @@ void OciWriter::writeTile(const PointViewPtr view)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     BOX3D bounds;
-    calculateBounds(*view, bounds);
+    view->calculateBounds(bounds);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 
