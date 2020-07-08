@@ -4797,7 +4797,7 @@ std::string getDirname(const std::string fullPath)
     const std::string stripped(stripPostfixing(stripProtocol(fullPath)));
 
     // Now do the real slash searching.
-    const std::size_t pos(stripped.rfind('/'));
+    const std::size_t pos(stripped.find_last_of("/\\"));
 
     if (pos != std::string::npos)
     {
