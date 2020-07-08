@@ -31,6 +31,7 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
