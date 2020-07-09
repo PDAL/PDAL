@@ -77,9 +77,10 @@ void FaceRasterFilter::prepared(PointTableRef)
 void FaceRasterFilter::filter(PointView& v)
 {
     double halfEdge = m_limits.edgeLength / 2;
+    double edgeBit = m_limits.edgeLength * .000001;
 
     // If the user hasn't set bounds, set them based on the data.
-    if (!m_computeLimits)
+    if (m_computeLimits)
     {
         BOX2D bounds;
         v.calculateBounds(bounds);
@@ -94,7 +95,7 @@ void FaceRasterFilter::filter(PointView& v)
 
     TriangularMesh *m = v.mesh(m_meshName);
     if (!m)
-        throwError("Mesh '" + m_meshName + "; does not exist.");
+        throwError("Mesh '" + m_meshName + "' does not exist.");
 
     for (const Triangle& t : *m)
     {
@@ -115,9 +116,16 @@ void FaceRasterFilter::filter(PointView& v)
         double ymax = (std::max)((std::max)(y1, y2), y3);
         double ymin = (std::min)((std::min)(y1, y2), y3);
 
-        int ax = raster->xCell(xmin + halfEdge);
-        int ay = raster->yCell(ymin + halfEdge);
+        // Since we're checking cell centers, we add 1/2 the edge length to avoid testing cells
+        // where we know the limiting position can't intersect the cell center.  The
+        // subtraction of edgeBit for the lower bound is to allow for the case where the
+        // minimum position is exactly aligned with a cell center (we could simply start one cell
+        // lower and to the left, but this small adjustment eliminates that extra row/col in most
+        // cases).
+        int ax = raster->xCell(xmin + halfEdge - edgeBit);
+        int ay = raster->yCell(ymin + halfEdge - edgeBit);
 
+        // edgeBit adjustment not necessary here since we're rounding up for exact values.
         int bx = raster->xCell(xmax + halfEdge);
         int by = raster->yCell(ymax + halfEdge);
 
