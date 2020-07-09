@@ -73,15 +73,21 @@ TEST(FaceRasterTest, basic)
     PointViewSet s = f.execute(t1);
     PointViewPtr v = *s.begin();
 
+    const std::vector<double> expected
+    {
+        0, 10, 0, 0, 0, 0,
+        0, 9, 7, 0, 0, 0,
+        10, 8, 6, 4, 0, 0,
+        6.66667, 4.66667, 2.66667, 6, 7, 0,
+        3.33333, 1.33333, 4.66667, 8, 9, 10,
+        0, 3.33333, 6.66667, 10, 0, 0 
+    };
+    const double *k = expected.data();
+
     Rasterd *raster = v->raster();
     for (int j = raster->height() - 1; j >= 0; j--)
-    {
         for (int i = 0; i < raster->width(); ++i)
-        {
-            std::cerr << raster->at(i, j) << "\t";
-        }
-        std::cerr << "\n";
-    }
+            EXPECT_NEAR(raster->at(i, j), *k++, .00001);
 }
 
 } // namespace pdal
