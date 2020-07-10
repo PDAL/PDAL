@@ -31,6 +31,7 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
@@ -260,6 +261,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
