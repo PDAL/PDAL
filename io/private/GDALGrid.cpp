@@ -53,8 +53,8 @@ namespace pdal
 
 GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, double edgeLength,
         double radius, int outputTypes, size_t windowSize, double power) :
-    m_windowSize(windowSize), m_edgeLength(edgeLength),
-    m_radius(radius), m_power(power), m_outputTypes(outputTypes)
+    m_windowSize(windowSize), m_edgeLength(edgeLength), m_radius(radius), m_power(power),
+    m_outputTypes(outputTypes)
 {
     if (width > (size_t)(std::numeric_limits<int>::max)() ||
         height > (size_t)(std::numeric_limits<int>::max)())

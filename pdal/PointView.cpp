@@ -185,7 +185,7 @@ Rasterd *PointView::createRaster(const std::string& name, const RasterLimits& li
     if (Utils::contains(m_rasters, name))
         return nullptr;
     auto res = m_rasters.insert(std::make_pair(name,
-        std::unique_ptr<Rasterd>(new Rasterd(limits))));
+        std::unique_ptr<Rasterd>(new Rasterd(limits, name))));
     if (res.second)
         return res.first->second.get();
     return nullptr;

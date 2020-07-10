@@ -76,13 +76,16 @@ void FaceRasterFilter::prepared(PointTableRef)
 
 void FaceRasterFilter::filter(PointView& v)
 {
+    double halfEdge = m_limits.edgeLength / 2;
+    double edgeBit = m_limits.edgeLength * .000001;
+
     // If the user hasn't set bounds, set them based on the data.
-    if (!m_computeLimits)
+    if (m_computeLimits)
     {
         BOX2D bounds;
         v.calculateBounds(bounds);
-        m_limits.xOrigin = bounds.minx - (m_limits.edgeLength / 2);
-        m_limits.yOrigin = bounds.miny - (m_limits.edgeLength / 2);
+        m_limits.xOrigin = bounds.minx - halfEdge;
+        m_limits.yOrigin = bounds.miny - halfEdge;
         m_limits.width = ((bounds.maxx - m_limits.xOrigin) / m_limits.edgeLength) + 1;
         m_limits.height = ((bounds.maxy - m_limits.yOrigin) / m_limits.edgeLength) + 1;
     }
@@ -92,7 +95,7 @@ void FaceRasterFilter::filter(PointView& v)
 
     TriangularMesh *m = v.mesh(m_meshName);
     if (!m)
-        throwError("Mesh '" + m_meshName + "; does not exist.");
+        throwError("Mesh '" + m_meshName + "' does not exist.");
 
     for (const Triangle& t : *m)
     {
@@ -113,10 +116,16 @@ void FaceRasterFilter::filter(PointView& v)
         double ymax = (std::max)((std::max)(y1, y2), y3);
         double ymin = (std::min)((std::min)(y1, y2), y3);
 
-        double halfEdge = m_limits.edgeLength / 2;
-        int ax = raster->xCell(xmin + halfEdge);
-        int ay = raster->yCell(ymin + halfEdge);
+        // Since we're checking cell centers, we add 1/2 the edge length to avoid testing cells
+        // where we know the limiting position can't intersect the cell center.  The
+        // subtraction of edgeBit for the lower bound is to allow for the case where the
+        // minimum position is exactly aligned with a cell center (we could simply start one cell
+        // lower and to the left, but this small adjustment eliminates that extra row/col in most
+        // cases).
+        int ax = raster->xCell(xmin + halfEdge - edgeBit);
+        int ay = raster->yCell(ymin + halfEdge - edgeBit);
 
+        // edgeBit adjustment not necessary here since we're rounding up for exact values.
         int bx = raster->xCell(xmax + halfEdge);
         int by = raster->yCell(ymax + halfEdge);
 
@@ -125,8 +134,8 @@ void FaceRasterFilter::filter(PointView& v)
         ay = Utils::clamp(ay, 0, (int)m_limits.height);
         by = Utils::clamp(by, 0, (int)m_limits.height);
 
-        for (size_t xi = ax; (int)xi < bx; ++xi)
-            for (size_t yi = ay; (int)yi < by; ++yi)
+        for (int xi = ax; xi < bx; ++xi)
+            for (int yi = ay; yi < by; ++yi)
             {
                 double x = raster->xCellPos(xi);
                 double y = raster->yCellPos(yi);
