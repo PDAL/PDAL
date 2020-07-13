@@ -180,12 +180,13 @@ TriangularMesh *PointView::mesh(const std::string& name)
 }
 
 
-Rasterd *PointView::createRaster(const std::string& name, const RasterLimits& limits)
+Rasterd *PointView::createRaster(const std::string& name, const RasterLimits& limits,
+    double nodata)
 {
     if (Utils::contains(m_rasters, name))
         return nullptr;
-    auto res = m_rasters.insert(std::make_pair(name,
-        std::unique_ptr<Rasterd>(new Rasterd(limits, name))));
+    Rasterd *r = new Rasterd(limits, name, nodata);
+    auto res = m_rasters.insert(std::make_pair(name, std::unique_ptr<Rasterd>(r)));
     if (res.second)
         return res.first->second.get();
     return nullptr;
