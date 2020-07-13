@@ -90,7 +90,7 @@ void FaceRasterFilter::filter(PointView& v)
         m_limits.width = ((bounds.maxx - m_limits.xOrigin) / m_limits.edgeLength) + 1;
         m_limits.height = ((bounds.maxy - m_limits.yOrigin) / m_limits.edgeLength) + 1;
     }
-    Rasterd *raster = v.createRaster("faceraster", m_limits);
+    Rasterd *raster = v.createRaster("faceraster", m_limits, m_noData);
     if (!raster)
         throwError("Raster already exists");
 

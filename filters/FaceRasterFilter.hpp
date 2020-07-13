@@ -59,6 +59,7 @@ private:
 
     RasterLimits m_limits;
     std::string m_meshName;
+    double m_noData;
     bool m_computeLimits;
 };
 
