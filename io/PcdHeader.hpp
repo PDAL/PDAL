@@ -97,10 +97,9 @@ typedef std::vector<PcdField> PcdFieldList;
 struct PcdHeader
 {
     PcdHeader()
-        : m_version(PcdVersion::PCD_V6), m_width(1), m_height(0),
-          m_pointCount(0), m_origin(0, 0, 0, 0), m_orientation(1, 0, 0, 0)
-    {
-    }
+    { clear(); }
+
+    void clear();
 
     PcdVersion m_version;
     PcdFieldList m_fields;

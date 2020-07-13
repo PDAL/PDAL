@@ -245,6 +245,7 @@ void PcdReader::initialize()
         throwError("Can't open file '" + m_filename + "'.");
     try
     {
+        m_header.clear();
         *m_istreamPtr >> m_header;
     }
     catch( ... )
