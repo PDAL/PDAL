@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 #include <filters/RangeFilter.hpp>
 #include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
@@ -85,8 +85,6 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             w.execute(t);
         }
 
-        using namespace gdal;
-
         std::istringstream iss(values);
 
         std::vector<double> arr;
@@ -99,9 +97,8 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             arr.push_back(d);
         }
 
-        registerDrivers();
-        Raster raster(outfile, "GTiff");
-        if (raster.open() != GDALError::None)
+        gdal::Raster raster(outfile, "GTiff");
+        if (raster.open() != gdal::GDALError::None)
         {
             throw pdal_error(raster.errorMsg());
         }
@@ -176,9 +173,8 @@ void runGdalWriter2(const Options& wo, const std::string& outfile,
         arr.push_back(d);
     }
 
-    registerDrivers();
-    Raster raster(outfile, "GTiff");
-    if (raster.open() != GDALError::None)
+    gdal::Raster raster(outfile, "GTiff");
+    if (raster.open() != gdal::GDALError::None)
     {
         throw pdal_error(raster.errorMsg());
     }
@@ -581,9 +577,8 @@ TEST(GDALWriterTest, btint)
         arr.push_back(d);
     }
 
-    registerDrivers();
-    Raster raster(outfile, "BT");
-    if (raster.open() != GDALError::None)
+    gdal::Raster raster(outfile, "BT");
+    if (raster.open() != gdal::GDALError::None)
     {
         throw pdal_error(raster.errorMsg());
     }
@@ -697,7 +692,6 @@ TEST(GDALWriterTest, issue_2074)
     w.prepare(t);
     w.execute(t);
 
-    gdal::registerDrivers();
     gdal::Raster raster(Support::temppath("gdal1.tif"), "GTiff");
     if (raster.open() != gdal::GDALError::None)
     {
@@ -860,7 +854,6 @@ TEST(GDALWriterTest, alternate_grid)
         w.prepare(t);
         w.execute(t);
 
-        gdal::registerDrivers();
         gdal::Raster raster(outfile, "GTiff");
         raster.open();
         EXPECT_EQ(raster.width(), 10);

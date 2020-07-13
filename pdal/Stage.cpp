@@ -32,13 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/ErrorHandler.hpp>
 
 #include "private/StageRunner.hpp"
 

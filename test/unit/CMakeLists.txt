@@ -31,6 +31,7 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
@@ -131,15 +132,14 @@ if (PDAL_HAVE_LASZIP)
         FILES
             io/EptReaderTest.cpp
         LINK_WITH
-            ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
+            ${GDAL_LIBRARY}
         INCLUDES
+            ${GDAL_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
     PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
         FILES
             io/EptAddonWriterTest.cpp
-        LINK_WITH
-            ${GDAL_LIBRARY} # EptAddonWriterTest uses the crop filter.
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
     )
@@ -242,6 +242,8 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
@@ -259,6 +261,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)

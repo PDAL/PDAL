@@ -37,10 +37,10 @@
 #include <filters/CpdFilter.hpp>
 #include <filters/TransformationFilter.hpp>
 #include <io/LasReader.hpp>
-#include <pdal/EigenUtils.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_test_main.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 namespace pdal
 {

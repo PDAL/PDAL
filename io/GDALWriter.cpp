@@ -35,9 +35,8 @@
 
 #include <sstream>
 
-#include <pdal/EigenUtils.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 #include "private/GDALGrid.hpp"
 
@@ -152,8 +151,6 @@ void GDALWriter::initialize()
     // don't expand by point if we're running in standard mode.  That's
     // set later in writeView.
     m_expandByPoint = !m_fixedGrid;
-
-    gdal::registerDrivers();
 }
 
 

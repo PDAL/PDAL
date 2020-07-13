@@ -36,12 +36,13 @@
 
 #include <limits>
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/ArtifactManager.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/pdal_features.hpp>
-#include <nlohmann/json.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "private/ept/Connector.hpp"
 #include "private/ept/EptArtifact.hpp"

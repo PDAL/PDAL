@@ -39,8 +39,6 @@
 
 #include "ELMFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
-
 #include <map>
 #include <string>
 

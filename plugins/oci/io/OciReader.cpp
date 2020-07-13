@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 #include <pdal/pdal_features.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "OciReader.hpp"
 

@@ -37,7 +37,6 @@
 #include "../filters/HexBinFilter.hpp"
 #include "private/density/OGR.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
@@ -88,8 +87,6 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 
 int DensityKernel::execute()
 {
-    gdal::registerDrivers();
-
     if (m_inputFile == "STDIN" ||
         (FileUtils::extension(m_inputFile) == ".xml" ||
         FileUtils::extension(m_inputFile) == ".json"))

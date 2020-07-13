@@ -39,7 +39,6 @@
 
 #include "CSFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
