@@ -38,6 +38,11 @@
 namespace pdal
 {
 
+PcdHeader::PcdHeader()
+{
+    clear();
+}
+
 void PcdHeader::clear()
 {
     m_version = PcdVersion::PCD_V6;

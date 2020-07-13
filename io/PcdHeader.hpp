@@ -96,8 +96,7 @@ typedef std::vector<PcdField> PcdFieldList;
 
 struct PcdHeader
 {
-    PcdHeader()
-    { clear(); }
+    PcdHeader();
 
     void clear();
 
