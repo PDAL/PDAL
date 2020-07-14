@@ -17,7 +17,7 @@ with `Potree`_ or `Plasio`_.
 Example
 --------------------------------------------------------------------------------
 
-This example downloads a small area around the the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in `Potree`_ or `Plasio`_.
+This example downloads a small area around the the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in `Potree`_.
 
 .. code-block:: json
 
