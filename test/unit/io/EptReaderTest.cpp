@@ -93,7 +93,17 @@ TEST(EptReaderTest, protocol)
     EptReader reader;
     reader.setOptions(opts);
 
-    EXPECT_THROW(reader.preview(), pdal_error);
+    bool gotEx = false;
+    try
+    {
+        reader.preview();
+    }
+    catch (const pdal_error& err)
+    {
+        EXPECT_TRUE(strstr(err.what(), "ept.json"));
+        gotEx = true;
+    }
+    EXPECT_TRUE(gotEx);
 }
 
 TEST(EptReaderTest, inspect)
