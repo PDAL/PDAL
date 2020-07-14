@@ -78,8 +78,12 @@ the PDAL maintenance branch.
 
     It is a good idea to install PDAL in it's own environment (or
     add it to an existing one). You will **NOT** want to add it to your default
-    environment named ``base``. Managing environments is beyond the scope of
-    the quickstart, but you can read more about it `here <https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs>`_.
+    environment named ``base``. If you do add it to the ``base`` environment you
+    will also want to set the environment variable ``PDAL_DRIVER_PATH`` so that
+    all available plugins can be detected. On *nix the path would typically be
+    ``$CONDA_PREFIX/lib`` and on Windows ``%CONDA_PREFIX%\Library\bin``.
+    Managing environments is beyond the scope of the quickstart, but you can
+    read more about it `here <https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs>`_.
 
 To install the PDAL package so that we can use it to run PDAL commands, we run
 the following command to create an environment named ``myenv``, installing PDAL
