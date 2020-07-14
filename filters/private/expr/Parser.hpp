@@ -22,10 +22,6 @@ public:
     bool parse(const std::string& s);
     std::string error() const
         { return m_error; }
-    /**
-    void prepare(PointLayoutPtr l);
-    double eval(PointRef& p) const;
-    **/
 
 private:
     bool match(TokenType type);
