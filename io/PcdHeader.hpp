@@ -113,7 +113,10 @@ struct PcdHeader
     std::istream::pos_type m_dataOffset;
     size_t m_numLines;
 };
+
 std::istream& operator>>(std::istream& in, PcdHeader& header);
 std::ostream& operator<<(std::ostream& out, PcdHeader& header);
 OLeStream& operator<<(OLeStream& out, PcdHeader& header);
-}
+
+} // namespace pdal
+

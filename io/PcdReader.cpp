@@ -56,6 +56,9 @@ std::string PcdReader::getName() const
     return s_info.name;
 }
 
+PcdReader::PcdReader()
+{}
+
 QuickInfo PcdReader::inspect()
 {
     QuickInfo qi;
