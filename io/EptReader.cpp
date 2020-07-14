@@ -184,9 +184,16 @@ void EptReader::initialize()
     setForwards(headers, query);
     m_connector.reset(new Connector(headers, query));
 
-    m_info.reset(new EptInfo(m_filename, *m_connector));
-    setSpatialReference(m_info->srs());
-    m_addons = Addon::load(*m_connector, m_args->m_addons);
+    try
+    {
+        m_info.reset(new EptInfo(m_filename, *m_connector));
+        setSpatialReference(m_info->srs());
+        m_addons = Addon::load(*m_connector, m_args->m_addons);
+    }
+    catch (const arbiter::ArbiterError& err)
+    {
+        throwError(err.what());
+    }
 
     if (!m_args->m_ogr.is_null())
     {
@@ -271,7 +278,15 @@ void EptReader::handleOriginQuery()
         std::endl;
 
     std::string filename = m_info->sourcesDir() + "list.json";
-    const NL::json sources(m_connector->getJson(filename));
+    NL::json sources;
+    try
+    {
+        sources = m_connector->getJson(filename);
+    }
+    catch (const arbiter::ArbiterError& err)
+    {
+        throwError(err.what());
+    }
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
     if (!sources.is_array())
@@ -547,10 +562,16 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
         // hierarchy subtree corresponding to this root.
         m_pool->add([this, &target, key]()
         {
-            std::string filename =
-                m_info->hierarchyDir() + key.toString() + ".json";
-            const auto subRoot(m_connector->getJson(filename));
-            overlaps(target, subRoot, key);
+            try
+            {
+                std::string filename = m_info->hierarchyDir() + key.toString() + ".json";
+                const auto subRoot(m_connector->getJson(filename));
+                overlaps(target, subRoot, key);
+            }
+            catch (const arbiter::ArbiterError& err)
+            {
+                throwError(err.what());
+            }
         });
     }
     else if (numPoints < 0)

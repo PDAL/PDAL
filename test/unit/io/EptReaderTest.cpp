@@ -85,6 +85,17 @@ namespace
             -8242446, 4966706, 50);
 }
 
+TEST(EptReaderTest, protocol)
+{
+    Options opts;
+    opts.add("filename", "ept://http://testfile");
+
+    EptReader reader;
+    reader.setOptions(opts);
+
+    EXPECT_THROW(reader.preview(), pdal_error);
+}
+
 TEST(EptReaderTest, inspect)
 {
     Options options;
