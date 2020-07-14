@@ -349,8 +349,9 @@ QuickInfo EptReader::inspect()
     for (auto& el : m_info->dims())
         qi.m_dimNames.push_back(el.first);
 
-    // If we've passed a spatial query, determine an upper bound on the
-    // point count.
+    // If there is a spatial query from an explicit --bounds, an origin query,
+    // or polygons, then we'll limit our number of points to be an upper bound,
+    // and clip our bounds to the selected region.
     if (!m_queryBounds.contains(qi.m_bounds) || m_args->m_polys.size())
     {
         log()->get(LogLevel::Debug) <<
@@ -359,9 +360,25 @@ QuickInfo EptReader::inspect()
         m_hierarchy.reset(new Hierarchy);
         overlaps();
 
+        // If we've passed a spatial query, determine an upper bound on the
+        // point count based on the hierarchy.
         qi.m_pointCount = 0;
         for (const Overlap& overlap : *m_hierarchy)
             qi.m_pointCount += overlap.m_count;
+
+        // Also clip the resulting bounds to the intersection of:
+        //  - the query bounds (from an explicit bounds or an origin query)
+        //  - the extents of the polygon selection
+        qi.m_bounds.clip(m_queryBounds);
+        if (m_args->m_polys.size())
+        {
+            BOX3D b;
+            for (const auto& poly : m_args->m_polys)
+            {
+                b.grow(poly.bounds());
+            }
+            qi.m_bounds.clip(b);
+        }
     }
     qi.m_valid = true;
 
