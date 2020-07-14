@@ -56,6 +56,9 @@ std::string PcdReader::getName() const
     return s_info.name;
 }
 
+PcdReader::PcdReader()
+{}
+
 QuickInfo PcdReader::inspect()
 {
     QuickInfo qi;
@@ -245,6 +248,7 @@ void PcdReader::initialize()
         throwError("Can't open file '" + m_filename + "'.");
     try
     {
+        m_header.clear();
         *m_istreamPtr >> m_header;
     }
     catch( ... )
