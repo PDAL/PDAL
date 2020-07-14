@@ -53,7 +53,7 @@ Options
 --------------------------------------------------------------------------------
 
 filename
-    Path to the EPT resource from which to read, ending with ``ept.json``.  For example, ``/Users/connor/entwine/autzen/ept.json`` or ``http://na.entwine.io/autzen/ept.json``.  For remote paths which are not on the local filesystem, PDAL must be built with Curl support. [Required]
+    Path to the EPT resource from which to read, ending with ``ept.json``.  For example, ``/Users/connor/entwine/autzen/ept.json`` or ``http://na.entwine.io/autzen/ept.json``. [Required]
 
 spatialreference
     Spatial reference to apply to the data.  Overrides any SRS in the input
