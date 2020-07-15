@@ -486,46 +486,52 @@ bool EsriReader::processPoint(PointRef& dst, const TileContents& tile)
 {
     using namespace Dimension;
 
-    PointId pointId = m_pointId++;
+    auto pointInObb = [this](Eigen::Vector3d coord)
+    {
+        if (m_args->obb.valid())
+        {
+            coord -= m_args->obb.center();
+            coord = math::rotate(coord, m_args->obb.quat().inverse());
+            if (!m_args->obb.bounds().contains(coord.x(), coord.y(), coord.z()))
+                return false;
+        }
+        return true;
+    };
 
     Eigen::Vector3d coord { tile.m_xyz[m_pointId].x, tile.m_xyz[m_pointId].y,
         tile.m_xyz[m_pointId].z };
 
-    if (m_args->obb.valid())
+    if (pointInObb(coord))
     {
-        coord -= m_args->obb.center();
-        coord = math::rotate(coord, m_args->obb.quat().inverse());
-        if (!m_args->obb.bounds().contains(coord.x(), coord.y(), coord.z()))
-            return false;
-    }
+        dst.setField(Id::X, coord.x());
+        dst.setField(Id::Y, coord.y());
+        dst.setField(Id::Z, coord.z());
 
-    dst.setField(Id::X, coord.x());
-    dst.setField(Id::Y, coord.y());
-    dst.setField(Id::Z, coord.z());
-
-    for (const DimData& dim : m_esriDims)
-    {
-        if (dim.name == "RGB")
+        for (const DimData& dim : m_esriDims)
         {
-            dst.setField(Id::Red, tile.m_rgb[m_pointId].r);
-            dst.setField(Id::Green, tile.m_rgb[m_pointId].g);
-            dst.setField(Id::Blue, tile.m_rgb[m_pointId].b);
-        }
-        else if (dim.name == "INTENSITY")
-            dst.setField(Id::Intensity, tile.m_intensity[m_pointId]);
-        else if (dim.name == "RETURNS")
-        {
-            const std::vector<char>& d = tile.m_data[dim.pos];
-            dst.setField(Id::ReturnNumber, d[m_pointId] & 0x0F);
-            dst.setField(Id::NumberOfReturns, d[m_pointId] >> 4);
-        }
-        else
-        {
-            const std::vector<char>& d = tile.m_data[dim.pos];
-            dst.setField(dim.dstId, dim.type,
-                d.data() + m_pointId * Dimension::size(dim.type));
+            if (dim.name == "RGB")
+            {
+                dst.setField(Id::Red, tile.m_rgb[m_pointId].r);
+                dst.setField(Id::Green, tile.m_rgb[m_pointId].g);
+                dst.setField(Id::Blue, tile.m_rgb[m_pointId].b);
+            }
+            else if (dim.name == "INTENSITY")
+                dst.setField(Id::Intensity, tile.m_intensity[m_pointId]);
+            else if (dim.name == "RETURNS")
+            {
+                const std::vector<char>& d = tile.m_data[dim.pos];
+                dst.setField(Id::ReturnNumber, d[m_pointId] & 0x0F);
+                dst.setField(Id::NumberOfReturns, d[m_pointId] >> 4);
+            }
+            else
+            {
+                const std::vector<char>& d = tile.m_data[dim.pos];
+                dst.setField(dim.dstId, dim.type,
+                        d.data() + m_pointId * Dimension::size(dim.type));
+            }
         }
     }
+    m_pointId++;
     return true;
 }
 
