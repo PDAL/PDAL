@@ -40,10 +40,26 @@
 
 namespace pdal {
 
+class FeatureType
+{
+public:
+    static const int Linearity = 1;
+    static const int Planarity = 2;
+    static const int Scattering = 4;
+    static const int Verticality = 8;
+    static const int Omnivariance = 16;
+    static const int Anisotropy = 32;
+    static const int Eigenentropy = 64;
+    static const int Sum = 128;
+    static const int SurfaceVariation = 256;
+    static const int DemantkeVerticality = 512;
+    static const int Density = 1024;
+};
+
 class PDAL_DLL CovarianceFeaturesFilter: public Filter
 {
 public:
-    CovarianceFeaturesFilter() : Filter() {}
+    CovarianceFeaturesFilter() : m_featureTypes(0) {}
     CovarianceFeaturesFilter &operator=(const CovarianceFeaturesFilter &) = delete;
     CovarianceFeaturesFilter(const CovarianceFeaturesFilter &) = delete;
 
@@ -57,15 +73,21 @@ private:
         Normalized
     };
 
+    enum class FeatureSet
+    {
+        Dimensionality,
+    };
+
     int m_knn;
     int m_threads;
-    std::string m_featureSet;
+    FeatureSet m_featureSet;
     std::map<std::string,Dimension::Id> m_extraDims;
     size_t m_stride;
     double m_radius;
     int m_minK;
-    Arg* m_featuresArg;
+    Arg* m_featureSetArg;
     StringList m_features;
+    int m_featureTypes;
     Mode m_mode;
     Dimension::Id m_kopt, m_ropt;
     Arg* m_radiusArg;
@@ -74,6 +96,7 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs &args);
     virtual void filter(PointView &view);
+    virtual void initialize();
     virtual void prepared(PointTableRef table);
 
     void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
@@ -82,6 +105,10 @@ private:
         CovarianceFeaturesFilter::Mode& mode);
     friend std::ostream& operator<<(std::ostream& in,
         const CovarianceFeaturesFilter::Mode& mode);
+    friend std::istream& operator>>(std::istream& in,
+        CovarianceFeaturesFilter::FeatureSet& featureset);
+    friend std::ostream& operator<<(std::ostream& in,
+        const CovarianceFeaturesFilter::FeatureSet& featureset);
 };
 }
 

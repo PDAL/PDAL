@@ -97,53 +97,120 @@ std::ostream& operator<<(std::ostream& out, const CovarianceFeaturesFilter::Mode
     return out;
 }
 
+std::istream& operator>>(std::istream& in, CovarianceFeaturesFilter::FeatureSet& featureset)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "dimensionality")
+        featureset = CovarianceFeaturesFilter::FeatureSet::Dimensionality;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const CovarianceFeaturesFilter::FeatureSet& featureset)
+{
+    switch (featureset)
+    {
+    case CovarianceFeaturesFilter::FeatureSet::Dimensionality:
+        out << "dimensionality";
+    }
+    return out;
+}
+
+
 void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 10);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
-    args.add("feature_set", "Set of features to be computed", m_featureSet, "Dimensionality");
+    m_featureSetArg = &args.add("feature_set", "Set of features to be computed", m_featureSet);
     args.add("stride", "Compute features on strided neighbors", m_stride, size_t(1));
-    args.add("radius", "Radius for nearest neighbor search", m_radius, 0.0);
+    m_radiusArg = &args.add("radius", "Radius for nearest neighbor search", m_radius);
     args.add("min_k", "Minimum number of neighbors in radius", m_minK, 3);
-    m_featuresArg = &args.add("features", "List of featurs to be computed", m_features);
-    args.add("mode", "Raw, normalized, or sqrt of eigenvalues", m_mode, Mode::Raw);
+    args.add("features", "List of features to be computed", m_features, {"all"});
+    args.add("mode", "Raw, normalized, or sqrt of eigenvalues", m_mode, Mode::SQRT);
     args.add("optimized", "Use OptimalKNN or OptimalRadius?", m_optimal, false);
 }
 
 void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
 {
-    if (m_featuresArg->set())
+    if (m_featureSetArg->set() && (m_featureSet == FeatureSet::Dimensionality))
+    {
+        m_mode = Mode::SQRT;
+        for (auto dim :
+             {"Linearity", "Planarity", "Scattering", "Verticality"})
+            m_extraDims[dim] =
+                layout->registerOrAssignDim(dim, Dimension::Type::Double);
+    }
+    else
     {
         log()->get(LogLevel::Info)
             << "Feature list provided. Ignoring feature_set " << m_featureSet
             << ".\n";
-        for (auto& dim : m_features)
-            m_extraDims[dim] =
-                layout->registerOrAssignDim(dim, Dimension::Type::Double);
-
-        // TODO(chambbj): currently no error checking on valid features, maybe
-        // should happen in prepared, but also want to avoid needlessly
-        // creating dimensions
+        if (m_featureTypes & FeatureType::Linearity)
+            m_extraDims["Linearity"] = layout->registerOrAssignDim("Linearity", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Planarity)
+            m_extraDims["Planarity"] = layout->registerOrAssignDim("Planarity", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Scattering)
+            m_extraDims["Scattering"] = layout->registerOrAssignDim("Scattering", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Verticality)
+            m_extraDims["Verticality"] = layout->registerOrAssignDim("Verticality", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Omnivariance)
+            m_extraDims["Omnivariance"] = layout->registerOrAssignDim("Omnivariance", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Anisotropy)
+            m_extraDims["Anisotropy"] = layout->registerOrAssignDim("Anisotropy", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Eigenentropy)
+            m_extraDims["Eigenentropy"] = layout->registerOrAssignDim("Eigenentropy", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Sum)
+            m_extraDims["Sum"] = layout->registerOrAssignDim("Sum", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::SurfaceVariation)
+            m_extraDims["SurfaceVariation"] = layout->registerOrAssignDim("SurfaceVariation", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::DemantkeVerticality)
+            m_extraDims["DemantkeVerticality"] = layout->registerOrAssignDim("DemantkeVerticality", Dimension::Type::Double);
+        if (m_featureTypes & FeatureType::Density)
+            m_extraDims["Density"] = layout->registerOrAssignDim("Density", Dimension::Type::Double);
     }
-    else
+}
+
+void CovarianceFeaturesFilter::initialize()
+{
+    for (auto& feat : m_features)
     {
-        if (m_featureSet == "Dimensionality")
+        std::string f = Utils::tolower(feat);
+        Utils::trim(f);
+        std::cerr << f << std::endl;
+        if (f == "all")
         {
-            m_mode = Mode::SQRT;
-            for (auto dim :
-                 {"Linearity", "Planarity", "Scattering", "Verticality"})
-                m_extraDims[dim] =
-                    layout->registerOrAssignDim(dim, Dimension::Type::Double);
+            m_featureTypes = ~0;
+            break;
         }
+        if (f == "linearity")
+            m_featureTypes |= FeatureType::Linearity;
+        else if (f == "planarity")
+            m_featureTypes |= FeatureType::Planarity;
+        else if (f == "scattering")
+            m_featureTypes |= FeatureType::Scattering;
+        else if (f == "verticality")
+            m_featureTypes |= FeatureType::Verticality;
+        else if (f == "omnivariane")
+            m_featureTypes |= FeatureType::Omnivariance;
+        else if (f == "anisotropy")
+            m_featureTypes |= FeatureType::Anisotropy;
+        else if (f == "eigenentropy")
+            m_featureTypes |= FeatureType::Eigenentropy;
+        else if (f == "sum")
+            m_featureTypes |= FeatureType::Sum;
+        else if (f == "surfacevariation")
+            m_featureTypes |= FeatureType::SurfaceVariation;
+        else if (f == "demantkeverticality")
+            m_featureTypes |= FeatureType::DemantkeVerticality;
+        else if (f == "density")
+            m_featureTypes |= FeatureType::Density;
         else
-        {
-            for (auto dim :
-                 {"Linearity", "Planarity", "Scattering", "Verticality",
-                  "Omnivariance", "Sum", "Eigenentropy", "Anisotropy",
-                  "SurfaceVariation", "DemantkeVerticality", "Density"})
-                m_extraDims[dim] =
-                    layout->registerOrAssignDim(dim, Dimension::Type::Double);
-        }
+            throwError("Invalid feature type: '" + f + "'.");
+        std::cerr << m_featureTypes << std::endl;
     }
 }
 
