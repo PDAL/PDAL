@@ -263,11 +263,11 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     // through the stage.
     ready(table);
 
-    //ABELL - Filter out points based on "where" clause.
-
+    // Filter out points based on "where" clause.
     PointViewSet keeps, skips;
     l_prerun(views, keeps, skips);
     prerun(keeps);
+
     for (auto const& it : keeps)
     {
         StageRunnerPtr runner(new StageRunner(this, it));
@@ -290,7 +290,10 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
                 v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
+
+    // Add skipped views back into the list of views.
     outViews.insert(skips.begin(), skips.end());
+
     done(table);
     stopLogging();
     m_pointCount = 0;

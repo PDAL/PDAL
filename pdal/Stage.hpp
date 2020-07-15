@@ -368,7 +368,7 @@ private:
     std::string m_optionFile;
 
     Stage& operator=(const Stage&) = delete;
-    Stage(const Stage&); // not implemented
+    Stage(const Stage&) = delete;
 
     void setupLog();
     void handleOptions();
