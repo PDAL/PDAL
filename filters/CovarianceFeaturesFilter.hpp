@@ -50,6 +50,12 @@ public:
     std::string getName() const;
 
 private:
+    enum class Mode
+    {
+        Raw,
+        SQRT,
+        Normalized
+    };
 
     int m_knn;
     int m_threads;
@@ -60,7 +66,7 @@ private:
     int m_minK;
     Arg* m_featuresArg;
     StringList m_features;
-    std::string m_mode;
+    Mode m_mode;
     Dimension::Id m_kopt, m_ropt;
     Arg* m_radiusArg;
     bool m_optimal;
@@ -71,6 +77,11 @@ private:
     virtual void prepared(PointTableRef table);
 
     void setDimensionality(PointView &view, const PointId &id, const KD3Index &kid);
+
+    friend std::istream& operator>>(std::istream& in,
+        CovarianceFeaturesFilter::Mode& mode);
+    friend std::ostream& operator<<(std::ostream& in,
+        const CovarianceFeaturesFilter::Mode& mode);
 };
 }
 

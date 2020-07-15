@@ -66,6 +66,37 @@ std::string CovarianceFeaturesFilter::getName() const
     return s_info.name;
 }
 
+std::istream& operator>>(std::istream& in, CovarianceFeaturesFilter::Mode& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "raw")
+        mode = CovarianceFeaturesFilter::Mode::Raw;
+    else if (s == "sqrt")
+        mode = CovarianceFeaturesFilter::Mode::SQRT;
+    else if (s == "normalized")
+        mode = CovarianceFeaturesFilter::Mode::Normalized;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const CovarianceFeaturesFilter::Mode& mode)
+{
+    switch (mode)
+    {
+    case CovarianceFeaturesFilter::Mode::Raw:
+        out << "raw";
+    case CovarianceFeaturesFilter::Mode::SQRT:
+        out << "sqrt";
+    case CovarianceFeaturesFilter::Mode::Normalized:
+        out << "normalized";
+    }
+    return out;
+}
+
 void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 10);
@@ -75,7 +106,7 @@ void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
     args.add("radius", "Radius for nearest neighbor search", m_radius, 0.0);
     args.add("min_k", "Minimum number of neighbors in radius", m_minK, 3);
     m_featuresArg = &args.add("features", "List of featurs to be computed", m_features);
-    args.add("mode", "Raw, normalized, or sqrt of eigenvalues", m_mode, "");
+    args.add("mode", "Raw, normalized, or sqrt of eigenvalues", m_mode, Mode::Raw);
     args.add("optimized", "Use OptimalKNN or OptimalRadius?", m_optimal, false);
 }
 
@@ -98,7 +129,7 @@ void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
     {
         if (m_featureSet == "Dimensionality")
         {
-            m_mode = "SQRT";
+            m_mode = Mode::SQRT;
             for (auto dim :
                  {"Linearity", "Planarity", "Scattering", "Verticality"})
                 m_extraDims[dim] =
@@ -165,10 +196,6 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     else if (m_radiusArg->set())
     {
         ids = kdi.radius(p, m_radius);
-
-        // if insufficient number of neighbors, eigen solver will fail anyway,
-        // it may be okay to silently return without setting any of the computed
-        // features?
         if (ids.size() < (size_t)m_minK)
             return;
     }
@@ -195,9 +222,7 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
     if (lambda[0] == 0)
         throwError("Eigenvalues are all 0. Can't compute local features.");
 
-    // TODO(chambbj): currently no error checking on mode, should probably be an enum anyway
-
-    if (m_mode == "SQRT")
+    if (m_mode == Mode::SQRT)
     {
 	// Gressin, Adrien, Clément Mallet, and N. David. "Improving 3d lidar
 	// point cloud registration using optimal neighborhood knowledge."
@@ -207,7 +232,7 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
         std::transform(lambda.begin(), lambda.end(), lambda.begin(),
                        [](double v) -> double { return std::sqrt(v); });
     }
-    else if (m_mode == "NORM")
+    else if (m_mode == Mode::Normalized)
     {
         std::transform(lambda.begin(), lambda.end(), lambda.begin(),
                        [&sum](double v) -> double { return v / sum; });
