@@ -50,3 +50,6 @@ min_height
 radius
   The seed point for the non-tree cluster is the farthest point in a 2D
   Euclidean sense from the seed point for the current tree. [Default: 100.0]
+
+.. include:: filter_opts.rst
+

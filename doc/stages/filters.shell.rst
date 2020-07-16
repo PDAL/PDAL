@@ -71,3 +71,5 @@ command
   The shell command to run. It is run in relation to the current 
   working directory of the pipeline executing it.
 
+.. include:: filter_opts.rst
+

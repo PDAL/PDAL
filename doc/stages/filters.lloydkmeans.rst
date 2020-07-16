@@ -44,3 +44,6 @@ maxiters
 dimensions
   Comma-separated string indicating dimensions to use for clustering.
   [Default: X,Y,Z]
+
+.. include:: filter_opts.rst
+

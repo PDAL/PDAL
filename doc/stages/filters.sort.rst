@@ -33,3 +33,6 @@ _`dimension`
 
 _`order`
   The order in which to sort, ASC or DESC [Default: "ASC"]
+
+.. include:: filter_opts.rst
+

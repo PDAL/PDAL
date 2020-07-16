@@ -51,3 +51,5 @@ Options
 knn
   The number of k nearest neighbors. [Default: 8]
 
+.. include:: filter_opts.rst
+

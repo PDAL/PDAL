@@ -54,6 +54,8 @@ radius
   search rather than k nearest neighbors, subject to meeting the minimum number
   of neighbors (``min_k``). [Default: 0.0]
 
+.. include:: filter_opts.rst
+
 .. _dimensionality:
 
 Dimensionality feature set

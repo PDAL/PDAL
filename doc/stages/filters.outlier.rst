@@ -147,3 +147,6 @@ _`mean_k`
 
 _`multiplier`
   Standard deviation threshold (statistical method only). [Default: 2.0]
+
+.. include:: filter_opts.rst
+

@@ -57,6 +57,7 @@ keep_unspecified
   If true, writes all dimensions. Dimensions specified with the order_ option
   precede those not specified. [Default: **true**]
 
+.. include:: writer_opts.rst
 
 .. _Point Cloud Data (PCD): https://pcl-tutorials.readthedocs.io/en/latest/pcd_file_format.html
 .. _Point Cloud Library (PCL): http://pointclouds.org

@@ -99,3 +99,6 @@ _`max_window_size`
 
 _`slope`
   Slope. [Default: 1.0]
+
+.. include:: filter_opts.rst
+

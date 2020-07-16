@@ -66,3 +66,6 @@ depth
   Maximum depth of the tree used for reconstruction. The output is sentsitve
   to this parameter.  Increase if the results appear unsatisfactory.
   [Default: 8]
+
+.. include:: filter_opts.rst
+

@@ -94,6 +94,8 @@ _`method`
     Valid values are "rigid", "affine", and "nonrigid".
     [Default: "rigid""]
 
+.. include:: filter_opts.rst
+
 .. _Coherent Point Drift (CPD): https://github.com/gadomski/cpd
 
 .. bibliography:: references.bib

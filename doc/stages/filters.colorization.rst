@@ -114,4 +114,6 @@ dimensions
   If not supplied, the scaling factor is 1.0.
   [Default: "Red:1:1.0, Green:2:1.0, Blue:3:1.0"]
 
+.. include:: filter_opts.rst
+
 .. _format: https://www.gdal.org/formats_list.html

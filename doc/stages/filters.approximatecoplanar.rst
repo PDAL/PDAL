@@ -60,3 +60,6 @@ thresh1
 
 thresh2
   The threshold to be applied to the second smallest eigenvalue. [Default: 6]
+
+.. include:: filter_opts.rst
+

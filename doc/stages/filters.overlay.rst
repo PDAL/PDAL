@@ -94,3 +94,5 @@ _`query`
 layer
   The data source's layer to use. [Defalt: first layer]
 
+.. include:: filter_opts.rst
+
