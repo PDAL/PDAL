@@ -282,12 +282,13 @@ std::string getcwd()
 }
 
 
-std::string toCanonicalPath(const std::string& filename)
+std::string toCanonicalPath(std::string filename)
 {
     std::string result;
 
 #ifdef _WIN32
-    char buf[MAX_PATH]
+    filename = addTrailingSlash(filename);
+    char buf[MAX_PATH];
     if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
         result = buf;
 #else

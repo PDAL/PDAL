@@ -215,7 +215,7 @@ namespace FileUtils
       \param filename  Name of file to convert to canonical path.
       \return  Canonical version of provided filename, or empty string.
     */
-    PDAL_DLL std::string toCanonicalPath(const std::string& filename);
+    PDAL_DLL std::string toCanonicalPath(std::string filename);
 
 
     /**

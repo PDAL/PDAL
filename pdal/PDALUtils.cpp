@@ -410,7 +410,7 @@ std::string dllDir()
 {
     std::string s;
 
-#ifdef WIN32
+#ifdef _WIN32
     HMODULE hm = NULL;
 
     if (GetModuleHandleEx(
@@ -418,8 +418,8 @@ std::string dllDir()
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         (LPCSTR)&dllDir, &hm))
     {
-        wchar_t path[MAX_PATH];
-        DWORD cnt = GetModuleFileName(hm, path, sizeof(path));
+        char path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
         if (cnt > 0 && cnt < MAX_PATH)
             s = path;
     }

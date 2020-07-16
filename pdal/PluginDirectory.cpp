@@ -61,10 +61,7 @@ StringList pluginSearchPaths()
         {
             s = FileUtils::toCanonicalPath(s);
             if (s.size() && !Utils::contains(searchPaths, s))
-{
                 searchPaths.push_back(s);
-std::cerr << "Search path = " << s << "!\n";
-}
         }
     }
     return searchPaths;
