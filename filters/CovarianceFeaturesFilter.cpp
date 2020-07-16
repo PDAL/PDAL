@@ -150,27 +150,38 @@ void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
             << "Feature list provided. Ignoring feature_set " << m_featureSet
             << ".\n";
         if (m_featureTypes & FeatureType::Linearity)
-            m_extraDims["Linearity"] = layout->registerOrAssignDim("Linearity", Dimension::Type::Double);
+            m_extraDims["Linearity"] = layout->registerOrAssignDim(
+                "Linearity", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Planarity)
-            m_extraDims["Planarity"] = layout->registerOrAssignDim("Planarity", Dimension::Type::Double);
+            m_extraDims["Planarity"] = layout->registerOrAssignDim(
+                "Planarity", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Scattering)
-            m_extraDims["Scattering"] = layout->registerOrAssignDim("Scattering", Dimension::Type::Double);
+            m_extraDims["Scattering"] = layout->registerOrAssignDim(
+                "Scattering", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Verticality)
-            m_extraDims["Verticality"] = layout->registerOrAssignDim("Verticality", Dimension::Type::Double);
+            m_extraDims["Verticality"] = layout->registerOrAssignDim(
+                "Verticality", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Omnivariance)
-            m_extraDims["Omnivariance"] = layout->registerOrAssignDim("Omnivariance", Dimension::Type::Double);
+            m_extraDims["Omnivariance"] = layout->registerOrAssignDim(
+                "Omnivariance", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Anisotropy)
-            m_extraDims["Anisotropy"] = layout->registerOrAssignDim("Anisotropy", Dimension::Type::Double);
+            m_extraDims["Anisotropy"] = layout->registerOrAssignDim(
+                "Anisotropy", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Eigenentropy)
-            m_extraDims["Eigenentropy"] = layout->registerOrAssignDim("Eigenentropy", Dimension::Type::Double);
+            m_extraDims["Eigenentropy"] = layout->registerOrAssignDim(
+                "Eigenentropy", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Sum)
-            m_extraDims["Sum"] = layout->registerOrAssignDim("Sum", Dimension::Type::Double);
+            m_extraDims["Sum"] =
+                layout->registerOrAssignDim("Sum", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::SurfaceVariation)
-            m_extraDims["SurfaceVariation"] = layout->registerOrAssignDim("SurfaceVariation", Dimension::Type::Double);
+            m_extraDims["SurfaceVariation"] = layout->registerOrAssignDim(
+                "SurfaceVariation", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::DemantkeVerticality)
-            m_extraDims["DemantkeVerticality"] = layout->registerOrAssignDim("DemantkeVerticality", Dimension::Type::Double);
+            m_extraDims["DemantkeVerticality"] = layout->registerOrAssignDim(
+                "DemantkeVerticality", Dimension::Type::Double);
         if (m_featureTypes & FeatureType::Density)
-            m_extraDims["Density"] = layout->registerOrAssignDim("Density", Dimension::Type::Double);
+            m_extraDims["Density"] =
+                layout->registerOrAssignDim("Density", Dimension::Type::Double);
     }
 }
 
@@ -221,16 +232,16 @@ void CovarianceFeaturesFilter::prepared(PointTableRef table)
     {
         m_kopt = layout->findDim("OptimalKNN");
         if (m_kopt == Dimension::Id::Unknown)
-            throwError("No dimension \"OptimalKNN\".");
+            throwError("No dimension 'OptimalKNN'.");
         m_ropt = layout->findDim("OptimalRadius");
         if (m_ropt == Dimension::Id::Unknown)
-            throwError("No dimension \"OptimalRadius\".");
+            throwError("No dimension 'OptimalRadius'.");
     }
 }
 
 void CovarianceFeaturesFilter::filter(PointView& view)
 {
-    KD3Index& kdin = view.build3dIndex();
+    KD3Index& kdi = view.build3dIndex();
 
     point_count_t nloops = view.size();
     std::vector<std::thread> threadList(m_threads);
@@ -240,7 +251,7 @@ void CovarianceFeaturesFilter::filter(PointView& view)
                 [&](const PointId start, const PointId end)
                 {
                     for(PointId i = start;i<end;i++)
-                        setDimensionality(view, i, kdin);
+                        setDimensionality(view, i, kdi);
                 },
                 t*nloops/m_threads,(t+1)==m_threads?nloops:(t+1)*nloops/m_threads));
     }
