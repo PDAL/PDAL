@@ -9,24 +9,24 @@ covariance matrix of a point's neighborhood.
 
 The user can pick a set of feature descriptors by setting the ``feature_set``
 option. Currently, the only supported feature is the dimensionality_ set of
-feature descriptors introduced below. Specifying any unrecognized
-``feature_set`` will trigger computation of all available covariance features.
+feature descriptors introduced below.
 
 Alternately, the user can provide a comma-separated list of ``features`` to
 explicitly itemize those covariance features they wish to be computed.
 
 Supported features include:
 
+* Anisotropy
+* DemantkeVerticality
+* Density
+* Eigenentropy
 * Linearity
+* Omnivariance
 * Planarity
 * Scattering
-* Verticality
-* DemantkeVerticality
-* Omnivariance
-* Anisotropy
 * Sum
-* Eigenentropy
 * SurfaceVariation
+* Verticality
 
 Example #1
 -------------------------------------------------------------------------------
@@ -86,7 +86,6 @@ threads
 
 feature_set
   The features to be computed. Currently only supports ``Dimensionality``.
-  [Default: "Dimensionality"]
 
 stride
   When finding k nearest neighbors, stride determines the sampling rate. A
@@ -97,23 +96,24 @@ min_k
   Minimum number of neighbors in radius (radius search only). [Default: 3]
 
 radius
-  If radius specified greater than zero, neighbors will be obtained by radius
-  search rather than k nearest neighbors, subject to meeting the minimum number
-  of neighbors (``min_k``). [Default: 0.0]
+  If radius is specified, neighbors will be obtained by radius search rather
+  than k nearest neighbors, subject to meeting the minimum number of neighbors
+  (``min_k``).
 
 features
-  A comma-separated list of individual features to be computed.
+  A comma-separated list of individual features to be computed. [Default: "all"]
 
 mode
-  By default, filter will compute features using raw eigenvalues. ``mode`` can
-  be set to "SQRT" to take the square root of each eigenvalue, thus computing
-  features on the standard deviation along each eigenvector. ``mode`` also
-  accepts "NORM" which normalizes eigenvalue such that they sum to one.
+  By default, features are computed using the standard deviation along each
+  eigenvector, i.e., using the square root of the computed eigenvalues
+  (``mode="SQRT"``). ``mode`` also accepts "Normalized" which normalizes
+  eigenvalue such that they sum to one, or "Raw" such that the eigenvalues are
+  used directly. [Default: "SQRT"]
 
 optimized
   ``optimized`` can be set to ``true`` to enable computation of features using
   precomputed optimal neighborhoods (see :ref:`filters.optimalneighborhood`).
-  Enables computation of ``Density`` feature as well. [Default: false]
+  Enables computation of ``Density`` feature. [Default: false]
 
 .. _dimensionality:
 
