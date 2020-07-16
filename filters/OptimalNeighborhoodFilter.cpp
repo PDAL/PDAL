@@ -82,7 +82,7 @@ void OptimalNeighborhood::filter(PointView& view)
         std::vector<double> dists(m_kMax);
         index.knnSearch(p, m_kMax, &id3, &dists);
 
-        double minentropy(std::numeric_limits<double>::max());
+        double minentropy = (std::numeric_limits<double>::max)();
         point_count_t kopt(0);
         double ropt(0.0);
         double mx(0.0);
