@@ -191,7 +191,6 @@ void CovarianceFeaturesFilter::initialize()
     {
         std::string f = Utils::tolower(feat);
         Utils::trim(f);
-        std::cerr << f << std::endl;
         if (f == "all")
         {
             m_featureTypes = ~0;
@@ -221,7 +220,6 @@ void CovarianceFeaturesFilter::initialize()
             m_featureTypes |= FeatureType::Density;
         else
             throwError("Invalid feature type: '" + f + "'.");
-        std::cerr << m_featureTypes << std::endl;
     }
 }
 
