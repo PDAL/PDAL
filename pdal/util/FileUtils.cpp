@@ -282,9 +282,7 @@ std::string getcwd()
 }
 
 
-/***
-// Non-boost alternative.  Requires file existence.
-std::string toAbsolutePath(const std::string& filename)
+std::string toCanonicalPath(const std::string& filename)
 {
     std::string result;
 
@@ -299,7 +297,7 @@ std::string toAbsolutePath(const std::string& filename)
 #endif
     return result;
 }
-***/
+
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that

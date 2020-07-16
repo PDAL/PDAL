@@ -209,6 +209,16 @@ namespace FileUtils
     PDAL_DLL bool isDirectory(const std::string& path);
 
     /**
+      Return the path with all ".", ".." and symbolic links removed.
+      The file must exist.
+
+      \param filename  Name of file to convert to canonical path.
+      \return  Canonical version of provided filename, or empty string.
+    */
+    PDAL_DLL std::string toCanonicalPath(const std::string& filename);
+
+
+    /**
       If the filename is an absolute path, just return it otherwise,
       make it absolute (relative to current working dir) and return it.
 
