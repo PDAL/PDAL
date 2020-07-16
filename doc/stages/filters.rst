@@ -98,14 +98,9 @@ Height Above Ground
    :glob:
    :hidden:
 
-   filters.hag
    filters.hag_delaunay
    filters.hag_dem
    filters.hag_nn
-
-:ref:`filters.hag`
-    Deprecated. Use :ref:`filters.hag_delaunay`, :ref:`filters.hag_dem`, or
-    :ref:`filters.hag_nn`.
 
 :ref:`filters.hag_delaunay`
     Compute pointwise height above ground using triangulation. Requires points to

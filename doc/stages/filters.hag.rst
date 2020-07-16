@@ -5,7 +5,7 @@ filters.hag
 
 .. warning::
 
-    The HAG filter is deprecated and has been replaced by :ref:`filters.hag_nn`,
+    The HAG filter has been eliminated was replaced by :ref:`filters.hag_nn`,
     :ref:`filters.hag_dem` and :ref:`filters.hag_delaunay`.  Please use
     the new filter
     that matches your needs as this filter will be removed in a future release.
