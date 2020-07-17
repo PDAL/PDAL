@@ -50,7 +50,7 @@ public:
     static const int Omnivariance = 16;
     static const int Anisotropy = 32;
     static const int Eigenentropy = 64;
-    static const int Sum = 128;
+    static const int EigenvalueSum = 128;
     static const int SurfaceVariation = 256;
     static const int DemantkeVerticality = 512;
     static const int Density = 1024;
