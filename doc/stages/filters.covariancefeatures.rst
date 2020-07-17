@@ -112,8 +112,10 @@ mode
 
 optimized
   ``optimized`` can be set to ``true`` to enable computation of features using
-  precomputed optimal neighborhoods (see :ref:`filters.optimalneighborhood`).
-  Enables computation of ``Density`` feature. [Default: false]
+  precomputed optimal neighborhoods. Requires
+  :ref:`filters.optimalneighborhood` be run prior to this stage. Enables
+  computation of ``Density`` feature and use of ``OptimalKNN`` to define local
+  neighborhood size. [Default: false]
 
 .. _dimensionality:
 

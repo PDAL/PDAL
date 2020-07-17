@@ -81,7 +81,6 @@ private:
     int m_knn;
     int m_threads;
     FeatureSet m_featureSet;
-    std::map<std::string,Dimension::Id> m_extraDims;
     size_t m_stride;
     double m_radius;
     int m_minK;
@@ -89,7 +88,6 @@ private:
     StringList m_features;
     int m_featureTypes;
     Mode m_mode;
-    Dimension::Id m_kopt, m_ropt;
     Arg* m_radiusArg;
     bool m_optimal;
 
