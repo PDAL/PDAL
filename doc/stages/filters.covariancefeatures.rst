@@ -24,7 +24,7 @@ Supported features include:
 * Omnivariance
 * Planarity
 * Scattering
-* Sum
+* EigenvalueSum
 * SurfaceVariation
 * Verticality
 
