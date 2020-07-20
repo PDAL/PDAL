@@ -44,7 +44,6 @@
 
 #include <Eigen/Dense>
 
-#define _USE_MATH_DEFINES  // for M_PI
 #include <cmath>
 #include <numeric>
 #include <string>
@@ -335,8 +334,9 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
         {
             double kopt = p.getFieldAs<uint64_t>(Id::OptimalKNN);
             double ropt = p.getFieldAs<double>(Id::OptimalRadius);
+	    double pi = 3.14159265;
             p.setField(Id::Density,
-                       (kopt + 1) / ((4 / 3) * M_PI * std::pow(ropt, 3)));
+                       (kopt + 1) / ((4 / 3) * pi * std::pow(ropt, 3)));
         }
     }
 }
