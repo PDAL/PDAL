@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 // This is an implementation of the local feature descriptors introduced in
-// WEAKLY SUPERVISED SEGMENTATION-AIDED CLASSIFICATION OF URBANSCENES FROM 3D LIDAR POINT CLOUDS
-// Stéphane Guinard, Loïc Landrieu, 2017
+// WEAKLY SUPERVISED SEGMENTATION-AIDED CLASSIFICATION OF URBANSCENES FROM 3D
+// LIDAR POINT CLOUDS Stéphane Guinard, Loïc Landrieu, 2017
 
 #include "CovarianceFeaturesFilter.hpp"
 
@@ -57,7 +57,8 @@ using namespace Dimension;
 static StaticPluginInfo const s_info
 {
     "filters.covariancefeatures",
-    "Filter that calculates local features based on the covariance matrix of a point's neighborhood.",
+    "Filter that calculates local features based on the covariance matrix of a "
+    "point's neighborhood.",
     "http://pdal.io/stages/filters.covariancefeatures.html"
 };
 
@@ -99,128 +100,75 @@ std::ostream& operator<<(std::ostream& out, const CovarianceFeaturesFilter::Mode
     return out;
 }
 
-std::istream& operator>>(std::istream& in, CovarianceFeaturesFilter::FeatureSet& featureset)
-{
-    std::string s;
-    in >> s;
-
-    s = Utils::tolower(s);
-    if (s == "dimensionality")
-        featureset = CovarianceFeaturesFilter::FeatureSet::Dimensionality;
-    else
-        in.setstate(std::ios_base::failbit);
-    return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const CovarianceFeaturesFilter::FeatureSet& featureset)
-{
-    switch (featureset)
-    {
-    case CovarianceFeaturesFilter::FeatureSet::Dimensionality:
-        out << "dimensionality";
-    }
-    return out;
-}
-
-
 void CovarianceFeaturesFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest neighbors", m_knn, 10);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
-    m_featureSetArg = &args.add("feature_set", "Set of features to be computed", m_featureSet);
+    args.add("feature_set", "Set of features to be computed", m_featureSetString,
+             {"dimensionality"});
     args.add("stride", "Compute features on strided neighbors", m_stride, size_t(1));
     m_radiusArg = &args.add("radius", "Radius for nearest neighbor search", m_radius);
     args.add("min_k", "Minimum number of neighbors in radius", m_minK, 3);
-    args.add("features", "List of features to be computed", m_features, {"all"});
     args.add("mode", "Raw, normalized, or sqrt of eigenvalues", m_mode, Mode::SQRT);
     args.add("optimized", "Use OptimalKNN or OptimalRadius?", m_optimal, false);
 }
 
 void CovarianceFeaturesFilter::addDimensions(PointLayoutPtr layout)
 {
-    if (m_featureSetArg->set() && (m_featureSet == FeatureSet::Dimensionality))
+    for (auto& feat : m_featureSetString)
     {
-        m_mode = Mode::SQRT;
-        layout->registerDims(
-            {Id::Linearity, Id::Planarity, Id::Scattering, Id::Verticality});
+        std::string featureSet = Utils::tolower(feat);
+        Utils::trim(featureSet);
+        if (featureSet == "dimensionality")
+            m_extraDims.insert(m_extraDims.end(),
+                               {Id::Linearity, Id::Planarity, Id::Scattering,
+                                Id::Verticality});
+        else if (featureSet == "all")
+            m_extraDims.insert(m_extraDims.end(),
+                               {Id::Linearity, Id::Planarity, Id::Scattering,
+                                Id::Verticality, Id::Omnivariance,
+                                Id::Anisotropy, Id::Eigenentropy,
+                                Id::EigenvalueSum, Id::SurfaceVariation,
+                                Id::DemantkeVerticality, Id::Density});
+        else if (featureSet == "linearity")
+            m_extraDims.push_back(Id::Linearity);
+        else if (featureSet == "planarity")
+            m_extraDims.push_back(Id::Planarity);
+        else if (featureSet == "scattering")
+            m_extraDims.push_back(Id::Scattering);
+        else if (featureSet == "verticality")
+            m_extraDims.push_back(Id::Verticality);
+        else if (featureSet == "omnivariance")
+            m_extraDims.push_back(Id::Omnivariance);
+        else if (featureSet == "anisotropy")
+            m_extraDims.push_back(Id::Anisotropy);
+        else if (featureSet == "eigenentropy")
+            m_extraDims.push_back(Id::Eigenentropy);
+        else if (featureSet == "eigenvaluesum")
+            m_extraDims.push_back(Id::EigenvalueSum);
+        else if (featureSet == "surfacevariation")
+            m_extraDims.push_back(Id::SurfaceVariation);
+        else if (featureSet == "demantkeverticality")
+            m_extraDims.push_back(Id::DemantkeVerticality);
+        else if (featureSet == "density")
+            m_extraDims.push_back(Id::Density);
     }
-    else
-    {
-        log()->get(LogLevel::Info)
-            << "Feature list provided. Ignoring feature_set " << m_featureSet
-            << ".\n";
-        if (m_featureTypes & FeatureType::Linearity)
-            layout->registerDim(Id::Linearity);
-        if (m_featureTypes & FeatureType::Planarity)
-            layout->registerDim(Id::Planarity);
-        if (m_featureTypes & FeatureType::Scattering)
-            layout->registerDim(Id::Scattering);
-        if (m_featureTypes & FeatureType::Verticality)
-            layout->registerDim(Id::Verticality);
-        if (m_featureTypes & FeatureType::Omnivariance)
-            layout->registerDim(Id::Omnivariance);
-        if (m_featureTypes & FeatureType::Anisotropy)
-            layout->registerDim(Id::Anisotropy);
-        if (m_featureTypes & FeatureType::Eigenentropy)
-            layout->registerDim(Id::Eigenentropy);
-        if (m_featureTypes & FeatureType::EigenvalueSum)
-            layout->registerDim(Id::EigenvalueSum);
-        if (m_featureTypes & FeatureType::SurfaceVariation)
-            layout->registerDim(Id::SurfaceVariation);
-        if (m_featureTypes & FeatureType::DemantkeVerticality)
-            layout->registerDim(Id::DemantkeVerticality);
-        if (m_featureTypes & FeatureType::Density)
-            layout->registerDim(Id::Density);
-    }
-}
 
-void CovarianceFeaturesFilter::initialize()
-{
-    for (auto& feat : m_features)
-    {
-        std::string f = Utils::tolower(feat);
-        Utils::trim(f);
-        if (f == "all")
-        {
-            m_featureTypes = ~0;
-            break;
-        }
-        if (f == "linearity")
-            m_featureTypes |= FeatureType::Linearity;
-        else if (f == "planarity")
-            m_featureTypes |= FeatureType::Planarity;
-        else if (f == "scattering")
-            m_featureTypes |= FeatureType::Scattering;
-        else if (f == "verticality")
-            m_featureTypes |= FeatureType::Verticality;
-        else if (f == "omnivariane")
-            m_featureTypes |= FeatureType::Omnivariance;
-        else if (f == "anisotropy")
-            m_featureTypes |= FeatureType::Anisotropy;
-        else if (f == "eigenentropy")
-            m_featureTypes |= FeatureType::Eigenentropy;
-        else if (f == "sum")
-            m_featureTypes |= FeatureType::EigenvalueSum;
-        else if (f == "surfacevariation")
-            m_featureTypes |= FeatureType::SurfaceVariation;
-        else if (f == "demantkeverticality")
-            m_featureTypes |= FeatureType::DemantkeVerticality;
-        else if (f == "density")
-            m_featureTypes |= FeatureType::Density;
-        else
-            throwError("Invalid feature type: '" + f + "'.");
-    }
+    layout->registerDims(m_extraDims);
 }
 
 void CovarianceFeaturesFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
+    if (std::count(m_extraDims.begin(), m_extraDims.end(), Id::Density))
+    {
+        if (!(layout->hasDim(Id::OptimalKNN) && layout->hasDim(Id::OptimalRadius)))
+            throwError("Missing OptimalKNN and OptimalRadius dimensions in input PointView.");
+    }
     if (m_optimal)
     {
         if (!layout->hasDim(Id::OptimalKNN))
             throwError("Missing OptimalKNN dimension in input PointView.");
-        if (!layout->hasDim(Id::OptimalRadius))
-            throwError("Missing OptimalRadius dimension in input PointView.");
     }
 }
 
@@ -310,81 +258,86 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
         v3[i] = eigenVectors.col(0)(i);
     }
 
-    if (m_featureTypes & FeatureType::Linearity)
+    for (auto const& dim : m_extraDims)
     {
-        double linearity  = (lambda[0] - lambda[1]) / lambda[0];
-        p.setField(Id::Linearity, linearity);
-    }
-    
-    if (m_featureTypes & FeatureType::Planarity)
-    {
-        double planarity  = (lambda[1] - lambda[2]) / lambda[0];
-        p.setField(Id::Planarity, planarity);
-    }
-
-    if (m_featureTypes & FeatureType::Scattering)
-    {
-        double scattering =  lambda[2] / lambda[0];
-        p.setField(Id::Scattering, scattering);
-    }
-
-    if (m_featureTypes & FeatureType::Verticality)
-    {
-        std::vector<double> unary_vector(3);
-        double norm = 0;
-        for (int i=0; i <3 ; i++)
+        if (dim == Id::Linearity)
         {
-            unary_vector[i] = lambda[0] * fabs(v1[i]) + lambda[1] * fabs(v2[i]) + lambda[2] * fabs(v3[i]);
-            norm += unary_vector[i] * unary_vector[i];
+            double linearity = (lambda[0] - lambda[1]) / lambda[0];
+            p.setField(Id::Linearity, linearity);
         }
-        norm = sqrt(norm);
-        p.setField(Id::Verticality, unary_vector[2] / norm);
-    }
 
-    if (m_featureTypes & FeatureType::Omnivariance)
-    {
-        double omnivariance = std::cbrt(lambda[2] * lambda[1] * lambda[0]);
-        p.setField(Id::Omnivariance, omnivariance);
-    }
+        if (dim == Id::Planarity)
+        {
+            double planarity = (lambda[1] - lambda[2]) / lambda[0];
+            p.setField(Id::Planarity, planarity);
+        }
 
-    if (m_featureTypes & FeatureType::EigenvalueSum)
-    {
-        p.setField(Id::EigenvalueSum, sum);
-    }
+        if (dim == Id::Scattering)
+        {
+            double scattering = lambda[2] / lambda[0];
+            p.setField(Id::Scattering, scattering);
+        }
 
-    if (m_featureTypes & FeatureType::Eigenentropy)
-    {
-        double eigenentropy = -(lambda[2] * std::log(lambda[2]) +
-                                lambda[1] * std::log(lambda[1]) +
-                                lambda[0] * std::log(lambda[0]));
-        p.setField(Id::Eigenentropy, eigenentropy);
-    }
+        if (dim == Id::Verticality)
+        {
+            std::vector<double> unary_vector(3);
+            double norm = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                unary_vector[i] = lambda[0] * fabs(v1[i]) +
+                                  lambda[1] * fabs(v2[i]) +
+                                  lambda[2] * fabs(v3[i]);
+                norm += unary_vector[i] * unary_vector[i];
+            }
+            norm = sqrt(norm);
+            p.setField(Id::Verticality, unary_vector[2] / norm);
+        }
 
-    if (m_featureTypes & FeatureType::Anisotropy)
-    {
-        double anisotropy = (lambda[0] - lambda[2]) / lambda[0];
-        p.setField(Id::Anisotropy, anisotropy);
-    }
+        if (dim == Id::Omnivariance)
+        {
+            double omnivariance = std::cbrt(lambda[2] * lambda[1] * lambda[0]);
+            p.setField(Id::Omnivariance, omnivariance);
+        }
 
-    if (m_featureTypes & FeatureType::SurfaceVariation)
-    {
-        double surfaceVariation = lambda[2] / sum;
-        p.setField(Id::SurfaceVariation, surfaceVariation);
-    }
+        if (dim == Id::EigenvalueSum)
+        {
+            p.setField(Id::EigenvalueSum, sum);
+        }
 
-    if (m_featureTypes & FeatureType::DemantkeVerticality)
-    {
-        auto e3 = solver.eigenvectors().col(0);
-        double verticality = 1 - std::fabs(e3[2]);
-        p.setField(Id::DemantkeVerticality, verticality);
-    }
+        if (dim == Id::Eigenentropy)
+        {
+            double eigenentropy = -(lambda[2] * std::log(lambda[2]) +
+                                    lambda[1] * std::log(lambda[1]) +
+                                    lambda[0] * std::log(lambda[0]));
+            p.setField(Id::Eigenentropy, eigenentropy);
+        }
 
-    if (m_optimal && (m_featureTypes & FeatureType::Density))
-    {
-        double kopt = p.getFieldAs<uint64_t>(Id::OptimalKNN);
-        double ropt = p.getFieldAs<double>(Id::OptimalRadius);
-        p.setField(Id::Density,
-                   (kopt + 1) / ((4 / 3) * M_PI * std::pow(ropt, 3)));
+        if (dim == Id::Anisotropy)
+        {
+            double anisotropy = (lambda[0] - lambda[2]) / lambda[0];
+            p.setField(Id::Anisotropy, anisotropy);
+        }
+
+        if (dim == Id::SurfaceVariation)
+        {
+            double surfaceVariation = lambda[2] / sum;
+            p.setField(Id::SurfaceVariation, surfaceVariation);
+        }
+
+        if (dim == Id::DemantkeVerticality)
+        {
+            auto e3 = solver.eigenvectors().col(0);
+            double verticality = 1 - std::fabs(e3[2]);
+            p.setField(Id::DemantkeVerticality, verticality);
+        }
+
+        if (dim == Id::Density)
+        {
+            double kopt = p.getFieldAs<uint64_t>(Id::OptimalKNN);
+            double ropt = p.getFieldAs<double>(Id::OptimalRadius);
+            p.setField(Id::Density,
+                       (kopt + 1) / ((4 / 3) * M_PI * std::pow(ropt, 3)));
+        }
     }
 }
 } // namespace pdal

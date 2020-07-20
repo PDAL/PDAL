@@ -8,11 +8,11 @@ This filter implements various local feature descriptors that are based on the
 covariance matrix of a point's neighborhood.
 
 The user can pick a set of feature descriptors by setting the ``feature_set``
-option. Currently, the only supported feature is the dimensionality_ set of
-feature descriptors introduced below.
-
-Alternately, the user can provide a comma-separated list of ``features`` to
-explicitly itemize those covariance features they wish to be computed.
+option. The dimensionality_ set of feature descriptors introduced below is the
+default. The user can also provide a comma-separated list of features to
+explicitly itemize those covariance features they wish to be computed. This can
+be combined with any suppported presets like "Dimensionality".  Specifying "all"
+will compute all available features.
 
 Supported features include:
 
@@ -27,6 +27,12 @@ Supported features include:
 * EigenvalueSum
 * SurfaceVariation
 * Verticality
+
+.. note::
+
+    Density requires both ``OptimalKNN`` and ``OptimalRadius`` which can be
+    computed by running :ref:`filters.optimalneighborhood` prior to
+    ``filters.covariancefeatures``.
 
 Example #1
 -------------------------------------------------------------------------------
@@ -63,7 +69,7 @@ Example #2
           "knn":8,
           "threads": 2,
           "optimized":true,
-          "features": "Linearity,Omnivariance,Density"
+          "feature_set": "Linearity,Omnivariance,Density"
       },
       {
           "type":"writers.las",
@@ -85,7 +91,9 @@ threads
   The number of threads used for computing the feature descriptors. [Default: 1]
 
 feature_set
-  The features to be computed. Currently only supports ``Dimensionality``.
+  A comma-separated list of individual features or feature presets (e.g.,
+  "Dimensionality") to be computed. To compute all available features, specify
+  "all". [Default: "Dimensionality"]
 
 stride
   When finding k nearest neighbors, stride determines the sampling rate. A
@@ -100,9 +108,6 @@ radius
   than k nearest neighbors, subject to meeting the minimum number of neighbors
   (``min_k``).
 
-features
-  A comma-separated list of individual features to be computed. [Default: "all"]
-
 mode
   By default, features are computed using the standard deviation along each
   eigenvector, i.e., using the square root of the computed eigenvalues
@@ -112,15 +117,15 @@ mode
 
 optimized
   ``optimized`` can be set to ``true`` to enable computation of features using
-  precomputed optimal neighborhoods. Requires
-  :ref:`filters.optimalneighborhood` be run prior to this stage. Enables
-  computation of ``Density`` feature and use of ``OptimalKNN`` to define local
-  neighborhood size. [Default: false]
+  precomputed optimal neighborhoods (found in the ``OptimalKNN`` dimension).
+  Requires :ref:`filters.optimalneighborhood` be run prior to this stage.
+  [Default: false]
 
 .. _dimensionality:
 
 Dimensionality feature set
 ................................................................................
+
 The features introduced in [Demantke2011]_ describe the shape of the
 neighborhood, indicating whether the local geometry is more linear (1D), planar
 (2D) or volumetric (3D) while the one introduced in [Guinard2017]_ adds the
