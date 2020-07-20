@@ -54,6 +54,7 @@ TEST(DimensionalityTest, Linearity)
     CovarianceFeaturesFilter filter;
     Options ops;
     ops.add("knn", 3);
+    ops.add("feature_set", "Dimensionality,Omnivariance,Anisotropy,Eigenentropy,EigenvalueSum,SurfaceVariation,DemantkeVerticality");
     filter.setInput(bufferReader);
     filter.setOptions(ops);
     filter.prepare(table);
@@ -98,6 +99,7 @@ TEST(DimensionalityTest, Planarity)
     BufferReader bufferReader;
     CovarianceFeaturesFilter filter;
     Options ops;
+    ops.add("feature_set", "Dimensionality,Omnivariance,Anisotropy,Eigenentropy,EigenvalueSum,SurfaceVariation,DemantkeVerticality");
     filter.setInput(bufferReader);
     filter.setOptions(ops);
     filter.prepare(table);
@@ -147,6 +149,7 @@ TEST(DimensionalityTest, Scattering)
     BufferReader bufferReader;
     CovarianceFeaturesFilter filter;
     Options ops;
+    ops.add("feature_set", "Dimensionality,Omnivariance,Anisotropy,Eigenentropy,EigenvalueSum,SurfaceVariation,DemantkeVerticality");
     filter.setInput(bufferReader);
     filter.setOptions(ops);
     filter.prepare(table);
