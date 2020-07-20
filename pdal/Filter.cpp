@@ -42,6 +42,8 @@ struct Filter::Args
 {
     expr::Expression m_where;
     Arg *m_whereArg;
+    Stage::WhereMergeMode m_whereMerge;
+    Arg *m_whereMergeArg;
 };
 
 Filter::Filter() : m_args(new Args)
@@ -69,6 +71,9 @@ void Filter::l_addArgs(ProgramArgs& args)
     m_args->m_whereArg = &args.add("where",
         "Expression describing points to be passed to this "
         "filter", m_args->m_where);
+    m_args->m_whereMergeArg = &args.add("where_merge", "If 'where' option is set, describes "
+        "how skipped points should be merged with kept points in standard mode.",
+        m_whereMerge, WhereMergeMode::Auto);
 }
 
 void Filter::l_prepared(PointTableRef table)
@@ -77,6 +82,8 @@ void Filter::l_prepared(PointTableRef table)
     auto status = m_args->m_where.prepare(table.layout());
     if (!status)
         throwError("Invalid 'where': " + status.what());
+    if (m_args->m_whereMergeArg->set() && !m_args->m_whereArg->set())
+        throwError("Can't set 'where_merge' options without also setting 'where' option.");
 }
 
 void Filter::l_prerun(const PointViewSet& views, PointViewSet& keeps,
@@ -101,6 +108,11 @@ void Filter::l_prerun(const PointViewSet& views, PointViewSet& keeps,
     }
     else
         keeps = std::move(views);
+}
+
+Stage::WhereMergeMode Filter::mergeMode() const
+{
+    return m_args->m_whereMerge;
 }
 
 bool Filter::eval(PointRef& p) const

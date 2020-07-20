@@ -247,17 +247,7 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     for (auto it = views.rbegin(); it != views.rend(); it++)
         table.addSpatialReference((*it)->spatialReference());
 
-    // Count the number of views and the number of points and faces so they're
-    // available to stages.
-    m_pointCount = 0;
-    m_faceCount = 0;
-    for (auto const& it : views)
-    {
-        m_pointCount += it->size();
-        auto m = it->mesh();
-        if (m)
-            m_faceCount += m->size();
-    }
+    countElements(views);
 
     // Do the ready operation and then start running all the views
     // through the stage.
@@ -268,11 +258,19 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     l_prerun(views, keeps, skips);
     prerun(keeps);
 
-    for (auto const& it : keeps)
+    // Note that keeps and skips should be paired in order because of the
+    // way the key is generated.
+    auto ki = keeps.begin();
+    auto si = skips.begin();
+    for (; ki != keeps.end(); ++ki)
     {
-        StageRunnerPtr runner(new StageRunner(this, it));
+        PointViewPtr k = *ki;
+        PointViewPtr s = ((si != skips.end()) ? *si : PointViewPtr());
+        StageRunnerPtr runner(new StageRunner(this, k, s));
         runners.push_back(runner);
         runner->run();
+        if (si != skips.end())
+            si++;
     }
 
     // As the stages complete (synchronously at this time), propagate the
@@ -291,9 +289,6 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
         outViews.insert(temp.begin(), temp.end());
     }
 
-    // Add skipped views back into the list of views.
-    outViews.insert(skips.begin(), skips.end());
-
     done(table);
     stopLogging();
     m_pointCount = 0;
@@ -301,6 +296,20 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     return outViews;
 }
 
+void Stage::countElements(const PointViewSet& views)
+{
+    // Count the number of views and the number of points and faces so they're
+    // available to stages.
+    m_pointCount = 0;
+    m_faceCount = 0;
+    for (auto const& v : views)
+    {
+        m_pointCount += v->size();
+        auto m = v->mesh();
+        if (m)
+            m_faceCount += m->size();
+    }
+}
 
 void Stage::setupLog()
 {
@@ -416,6 +425,46 @@ void Stage::startLogging() const
 void Stage::stopLogging() const
 {
     m_log->popLeader();
+}
+
+Stage::WhereMergeMode Stage::mergeMode() const
+{
+    return WhereMergeMode::Auto;
+}
+
+std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "auto")
+        mode = Stage::WhereMergeMode::Auto;
+    else if (s == "true")
+        mode = Stage::WhereMergeMode::True;
+    else if (s == "false")
+        mode = Stage::WhereMergeMode::False;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Stage::WhereMergeMode& mode)
+{
+    switch (mode)
+    {
+    case Stage::WhereMergeMode::Auto:
+        out << "auto";
+        break;
+    case Stage::WhereMergeMode::True:
+        out << "true";
+        break;
+    case Stage::WhereMergeMode::False:
+        out << "false";
+        break;
+    }
+
+    return out;
 }
 
 } // namespace pdal

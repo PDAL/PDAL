@@ -65,11 +65,13 @@ private:
     virtual void l_initialize(PointTableRef table) final;
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;
+    virtual WhereMergeMode mergeMode() const;
     virtual PointViewSet run(PointViewPtr view);
     virtual void filter(PointView& /*view*/)
     {}
 
     std::unique_ptr<Args> m_args;
+    Stage::WhereMergeMode m_whereMerge;
 };
 
 }  // namespace pdal

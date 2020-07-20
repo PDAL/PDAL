@@ -77,6 +77,14 @@ class PDAL_DLL Stage
     friend class Filter;
     friend class Writer;
 public:
+    enum class WhereMergeMode
+    {
+        True,
+        False,
+        Auto
+    };
+
+public:
     Stage();
     virtual ~Stage();
 
@@ -372,10 +380,12 @@ private:
 
     void setupLog();
     void handleOptions();
+    void countElements(const PointViewSet& views);
 
     virtual void l_addArgs(ProgramArgs& args);
     virtual void l_initialize(PointTableRef table);
     virtual void l_prepared(PointTableRef table);
+    virtual WhereMergeMode mergeMode() const;
 
     /**
       Get basic metadata (avoids reading points).  Implement in subclass.
@@ -494,6 +504,9 @@ private:
     */
     const Options& getOptions() const
         { return m_options; }
+
+    friend std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode);
+    friend std::ostream& operator<<(std::ostream& out, const Stage::WhereMergeMode& mode);
 };
 
 } // namespace pdal

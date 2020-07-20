@@ -34,30 +34,25 @@
 
 #pragma once
 
-#include <memory>
-
-#include <pdal/Stage.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
 
+class Stage;
+
 class StageRunner
 {
 public:
-    StageRunner(Stage *s, PointViewPtr view) :
-        m_stage(s), m_view(view)
-    {}
+    StageRunner(Stage *s, PointViewPtr keeps, PointViewPtr skips);
 
-    // For now this is all synchronous
-    void run()
-        { m_viewSet = m_stage->run(m_view); }
-
-    PointViewSet wait()
-        { return m_viewSet; }
+    void run();
+    PointViewSet wait();
 
 private:
     Stage *m_stage;
-    PointViewPtr m_view;
+    PointViewPtr m_keep;
+    PointViewPtr m_skip;
     PointViewSet m_viewSet;
 };
 typedef std::shared_ptr<StageRunner> StageRunnerPtr;
