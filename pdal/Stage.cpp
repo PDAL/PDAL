@@ -423,46 +423,5 @@ void Stage::stopLogging() const
     m_log->popLeader();
 }
 
-Stage::WhereMergeMode Stage::mergeMode() const
-{
-    return WhereMergeMode::Auto;
-}
-
-std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode)
-{
-    std::string s;
-    in >> s;
-
-    s = Utils::tolower(s);
-    std::cerr << "Mode = " << s << "!\n";
-    if (s == "auto")
-        mode = Stage::WhereMergeMode::Auto;
-    else if (s == "true")
-        mode = Stage::WhereMergeMode::True;
-    else if (s == "false")
-        mode = Stage::WhereMergeMode::False;
-    else
-        in.setstate(std::ios_base::failbit);
-    return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const Stage::WhereMergeMode& mode)
-{
-    switch (mode)
-    {
-    case Stage::WhereMergeMode::Auto:
-        out << "auto";
-        break;
-    case Stage::WhereMergeMode::True:
-        out << "true";
-        break;
-    case Stage::WhereMergeMode::False:
-        out << "false";
-        break;
-    }
-
-    return out;
-}
-
 } // namespace pdal
 

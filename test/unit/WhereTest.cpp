@@ -46,7 +46,8 @@ namespace
     size_t g_count;
 }
 
-TEST(WhereTest, t1)
+void exec1(const std::string& where, size_t expKeep, size_t expViews,
+    Filter::WhereMergeMode mm = Filter::WhereMergeMode::Auto)
 {
     StageFactory factory;
 
@@ -56,7 +57,6 @@ TEST(WhereTest, t1)
     ro.add("bounds", BOX3D(0, 0, 100, 99, 9.9, 199));
     ro.add("mode", "ramp");
     r->setOptions(ro);
-
 
     class TestFilter : public Filter
     {
@@ -71,17 +71,125 @@ TEST(WhereTest, t1)
 
     TestFilter f;
     Options fo;
-    fo.add("where", "X<50");
+    fo.add("where", where);
+    fo.add("where_merge", mm);
     f.setOptions(fo);
     f.setInput(*r);
 
     PointTable t;
     f.prepare(t);
     PointViewSet s = f.execute(t);
+    EXPECT_EQ(s.size(), expViews);
+    size_t total = 0;
     for (auto vp : s)
-        std::cerr << "View size = " << vp->size() << "!\n";
-    PointViewPtr v = *s.begin();
-    std::cerr << "Filter/Post size = " << g_count << "/" << v->size() << "!\n";
+        total += vp->size();
+    EXPECT_EQ(total, 100);
+    EXPECT_EQ(g_count, expKeep);
+}
+
+void exec2(const std::string& where, size_t expKeep, size_t expViews,
+    Filter::WhereMergeMode mm = Filter::WhereMergeMode::Auto)
+{
+    StageFactory factory;
+
+    Stage *r = factory.createStage("readers.faux");
+    Options ro;
+    ro.add("count", 100);
+    ro.add("bounds", BOX3D(0, 0, 100, 99, 9.9, 199));
+    ro.add("mode", "ramp");
+    r->setOptions(ro);
+
+    class TestFilter : public Filter
+    {
+        std::string getName() const
+        { return "filters.test"; }
+
+        void filter(PointView& v)
+        {
+            g_count = v.size();
+            v.setField(Dimension::Id::X, v.size(), 1);
+        }
+    };
+
+    TestFilter f;
+    Options fo;
+    fo.add("where", where);
+    fo.add("where_merge", mm);
+    f.setOptions(fo);
+    f.setInput(*r);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    EXPECT_EQ(s.size(), expViews);
+    size_t total = 0;
+    for (auto vp : s)
+        total += vp->size();
+    EXPECT_EQ(total, 101);
+    EXPECT_EQ(g_count, expKeep);
+}
+
+void exec3(const std::string& where, size_t expKeep, size_t expViews,
+    Filter::WhereMergeMode mm = Filter::WhereMergeMode::Auto)
+{
+    StageFactory factory;
+
+    Stage *r = factory.createStage("readers.faux");
+    Options ro;
+    ro.add("count", 100);
+    ro.add("bounds", BOX3D(0, 0, 100, 99, 9.9, 199));
+    ro.add("mode", "ramp");
+    r->setOptions(ro);
+
+    class TestFilter : public Filter
+    {
+        std::string getName() const
+        { return "filters.test"; }
+
+        PointViewSet run(PointViewPtr v)
+        {
+            g_count = v->size();
+            PointViewSet s;
+            s.insert(v);
+            s.insert(v->makeNew());
+            return s;
+        }
+    };
+
+    TestFilter f;
+    Options fo;
+    fo.add("where", where);
+    fo.add("where_merge", mm);
+    f.setOptions(fo);
+    f.setInput(*r);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    EXPECT_EQ(s.size(), expViews);
+    size_t total = 0;
+    for (auto vp : s)
+        total += vp->size();
+    EXPECT_EQ(total, 100);
+    EXPECT_EQ(g_count, expKeep);
+}
+
+TEST(WhereTest, t1)
+{
+    exec1("X<50", 50, 1);
+    exec1("X<50 && Y < 2.5", 25, 1);
+    exec1("X<50 && Y < 2.5", 25, 1, Filter::WhereMergeMode::True);
+    exec1("X<50 && Y < 2.5", 25, 2, Filter::WhereMergeMode::False);
+
+    exec2("X<50", 50, 2);
+    exec2("X<50 && Y < 2.5", 25, 2);
+    exec2("X<50 && Y < 2.5", 25, 1, Filter::WhereMergeMode::True);
+    exec2("X<50 && Y < 2.5", 25, 2, Filter::WhereMergeMode::False);
+
+    exec3("X<50", 50, 3);
+    exec3("X<50 && Y < 2.5", 25, 3);
+    exec3("X<50 && Y < 2.5", 25, 2, Filter::WhereMergeMode::True);
+    exec3("X<50 && Y < 2.5", 25, 3, Filter::WhereMergeMode::False);
 }
 
 } // namespace pdal

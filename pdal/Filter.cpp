@@ -42,7 +42,7 @@ struct Filter::Args
 {
     expr::Expression m_where;
     Arg *m_whereArg;
-    Stage::WhereMergeMode m_whereMerge;
+    Filter::WhereMergeMode m_whereMerge;
     Arg *m_whereMergeArg;
 };
 
@@ -102,7 +102,7 @@ void Filter::splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPt
         keep = view;
 }
 
-Stage::WhereMergeMode Filter::mergeMode() const
+Filter::WhereMergeMode Filter::mergeMode() const
 {
     return m_args->m_whereMerge;
 }
@@ -112,6 +112,41 @@ bool Filter::eval(PointRef& p) const
     if (!m_args->m_whereArg->set())
         return true;
     return m_args->m_where.eval(p);
+}
+
+std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "auto")
+        mode = Filter::WhereMergeMode::Auto;
+    else if (s == "true")
+        mode = Filter::WhereMergeMode::True;
+    else if (s == "false")
+        mode = Filter::WhereMergeMode::False;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode)
+{
+    switch (mode)
+    {
+    case Filter::WhereMergeMode::Auto:
+        out << "auto";
+        break;
+    case Filter::WhereMergeMode::True:
+        out << "true";
+        break;
+    case Filter::WhereMergeMode::False:
+        out << "false";
+        break;
+    }
+
+    return out;
 }
 
 } // namespace pdal

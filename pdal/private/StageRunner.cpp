@@ -61,34 +61,33 @@ PointViewPtr StageRunner::keeps()
 void StageRunner::run()
 {
     point_count_t keepSize = m_keeps->size();
-    int keepId = m_keeps->id();
     m_viewSet = m_stage->run(m_keeps);
 
-    if (m_skips && m_skips->size())
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (!f || !m_skips || m_skips->size() == 0)
+        return;
+
+    if (f->mergeMode() == Filter::WhereMergeMode::True)
     {
-        if (m_stage->mergeMode() == Stage::WhereMergeMode::True)
+        if (m_viewSet.size())
         {
-            if (m_viewSet.size())
+            (*m_viewSet.begin())->append(*m_skips);
+                return;
+        }
+    }
+    else if (f->mergeMode() == Filter::WhereMergeMode::Auto)
+    {
+        if (m_viewSet.size() == 1)
+        {
+            PointViewPtr keeps = *m_viewSet.begin();
+            if (keeps.get() == m_keeps.get() && keepSize == keeps->size())
             {
-                (*m_viewSet.begin())->append(*m_skips);
+                keeps->append(*m_skips);
                 return;
             }
-
         }
-        else if (m_stage->mergeMode() == Stage::WhereMergeMode::Auto)
-        {
-            if (m_viewSet.size() == 1)
-            {
-                PointViewPtr keeps = *m_viewSet.begin();
-                if (keeps->id() == keepId && keepSize == keeps->size())
-                {
-                    keeps->append(*m_skips);
-                    return;
-                }
-            }
-        }
-        m_viewSet.insert(m_skips);
     }
+    m_viewSet.insert(m_skips);
 }
 
 PointViewSet StageRunner::wait()
