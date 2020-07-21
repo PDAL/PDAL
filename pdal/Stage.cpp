@@ -253,33 +253,29 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     // through the stage.
     ready(table);
 
-    // Filter out points based on "where" clause.
-    PointViewSet keeps, skips;
-    l_prerun(views, keeps, skips);
+    // Create a runner for each view.
+    for (PointViewPtr v : views)
+    {
+        StageRunnerPtr runner(new StageRunner(this, v));
+        runners.push_back(runner);
+    }
+
+    // The stage runner separates the point view into keeps and skips. We put all the
+    // kept points together to pass to prerun().
+    PointViewSet keeps;
+    for (StageRunnerPtr r : runners)
+        keeps.insert(r->keeps());
     prerun(keeps);
 
-    // Note that keeps and skips should be paired in order because of the
-    // way the key is generated.
-    auto ki = keeps.begin();
-    auto si = skips.begin();
-    for (; ki != keeps.end(); ++ki)
-    {
-        PointViewPtr k = *ki;
-        PointViewPtr s = ((si != skips.end()) ? *si : PointViewPtr());
-        StageRunnerPtr runner(new StageRunner(this, k, s));
-        runners.push_back(runner);
-        runner->run();
-        if (si != skips.end())
-            si++;
-    }
+    for (StageRunnerPtr r : runners)
+        r->run();
 
     // As the stages complete (synchronously at this time), propagate the
     // spatial reference and merge the output views.
     srs = getSpatialReference();
-    for (auto const& it : runners)
+    for (StageRunnerPtr r : runners)
     {
-        StageRunnerPtr runner(it);
-        PointViewSet temp = runner->wait();
+        PointViewSet temp = r->wait();
 
         // If our stage has a spatial reference, the view takes it on once
         // the stage has been run.
@@ -438,6 +434,7 @@ std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode)
     in >> s;
 
     s = Utils::tolower(s);
+    std::cerr << "Mode = " << s << "!\n";
     if (s == "auto")
         mode = Stage::WhereMergeMode::Auto;
     else if (s == "true")

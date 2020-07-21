@@ -464,13 +464,6 @@ private:
     virtual void ready(PointTableRef /*table*/)
         {}
 
-     /**
-      Prerun version that doesn't bleed down to the actual stages.
-     */
-     virtual void l_prerun(const PointViewSet& views,
-         PointViewSet& keeps, PointViewSet& skips)
-     { keeps = std::move(views); }
-
     /**
       Pass all the point views at once to the stage for cases where we need
       such information.  You normally shouldn't need to implement this call.

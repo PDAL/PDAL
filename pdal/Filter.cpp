@@ -73,7 +73,7 @@ void Filter::l_addArgs(ProgramArgs& args)
         "filter", m_args->m_where);
     m_args->m_whereMergeArg = &args.add("where_merge", "If 'where' option is set, describes "
         "how skipped points should be merged with kept points in standard mode.",
-        m_whereMerge, WhereMergeMode::Auto);
+        m_args->m_whereMerge, WhereMergeMode::Auto);
 }
 
 void Filter::l_prepared(PointTableRef table)
@@ -86,28 +86,20 @@ void Filter::l_prepared(PointTableRef table)
         throwError("Can't set 'where_merge' options without also setting 'where' option.");
 }
 
-void Filter::l_prerun(const PointViewSet& views, PointViewSet& keeps,
-    PointViewSet& skips)
+void Filter::splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPtr& skip)
 {
     if (m_args->m_whereArg->set())
     {
-        for (PointViewPtr v : views)
+        PointView *k = keep.get();
+        PointView *s = skip.get();
+        for (PointRef p : *view)
         {
-            PointViewPtr keep = v->makeNew();
-            keeps.insert(keep);
-            PointViewPtr skip = v->makeNew();
-            skips.insert(skip);
-            PointView *k = keep.get();
-            PointView *s = skip.get();
-            for (PointRef p : *v)
-            {
-                PointView *active = m_args->m_where.eval(p) ? k : s;
-                active->appendPoint(*v, p.pointId());
-            }
+            PointView *active = m_args->m_where.eval(p) ? k : s;
+            active->appendPoint(*view, p.pointId());
         }
     }
     else
-        keeps = std::move(views);
+        keep = view;
 }
 
 Stage::WhereMergeMode Filter::mergeMode() const

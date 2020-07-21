@@ -44,15 +44,16 @@ class Stage;
 class StageRunner
 {
 public:
-    StageRunner(Stage *s, PointViewPtr keeps, PointViewPtr skips);
+    StageRunner(Stage *s, PointViewPtr view);
 
     void run();
+    PointViewPtr keeps();
     PointViewSet wait();
 
 private:
     Stage *m_stage;
-    PointViewPtr m_keep;
-    PointViewPtr m_skip;
+    PointViewPtr m_keeps;
+    PointViewPtr m_skips;
     PointViewSet m_viewSet;
 };
 typedef std::shared_ptr<StageRunner> StageRunnerPtr;

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc.
+* Copyright (c) 2020, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,69 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "StageRunner.hpp"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Filter.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/util/Bounds.hpp>
 
 namespace pdal
 {
 
-StageRunner::StageRunner(Stage *s, PointViewPtr view) : m_stage(s)
+namespace
 {
-    m_keeps = view->makeNew();
-    Filter *f = dynamic_cast<Filter *>(m_stage);
-    if (f)
+    size_t g_count;
+}
+
+TEST(WhereTest, t1)
+{
+    StageFactory factory;
+
+    Stage *r = factory.createStage("readers.faux");
+    Options ro;
+    ro.add("count", 100);
+    ro.add("bounds", BOX3D(0, 0, 100, 99, 9.9, 199));
+    ro.add("mode", "ramp");
+    r->setOptions(ro);
+
+
+    class TestFilter : public Filter
     {
-        m_skips = view->makeNew();
-        f->splitView(view, m_keeps, m_skips);
-    }
-    else
-        m_keeps = view;
-}
+        std::string getName() const
+        { return "filters.test"; }
 
-PointViewPtr StageRunner::keeps()
-{
-    return m_keeps;
-}
-
-// For now this is all synchronous
-void StageRunner::run()
-{
-    point_count_t keepSize = m_keeps->size();
-    int keepId = m_keeps->id();
-    m_viewSet = m_stage->run(m_keeps);
-
-    if (m_skips && m_skips->size())
-    {
-        if (m_stage->mergeMode() == Stage::WhereMergeMode::True)
+        void filter(PointView& v)
         {
-            if (m_viewSet.size())
-            {
-                (*m_viewSet.begin())->append(*m_skips);
-                return;
-            }
-
+            g_count = v.size();
         }
-        else if (m_stage->mergeMode() == Stage::WhereMergeMode::Auto)
-        {
-            if (m_viewSet.size() == 1)
-            {
-                PointViewPtr keeps = *m_viewSet.begin();
-                if (keeps->id() == keepId && keepSize == keeps->size())
-                {
-                    keeps->append(*m_skips);
-                    return;
-                }
-            }
-        }
-        m_viewSet.insert(m_skips);
-    }
-}
+    };
 
-PointViewSet StageRunner::wait()
-{
-    return m_viewSet;
+    TestFilter f;
+    Options fo;
+    fo.add("where", "X<50");
+    f.setOptions(fo);
+    f.setInput(*r);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    for (auto vp : s)
+        std::cerr << "View size = " << vp->size() << "!\n";
+    PointViewPtr v = *s.begin();
+    std::cerr << "Filter/Post size = " << g_count << "/" << v->size() << "!\n";
 }
 
 } // namespace pdal
-

@@ -57,11 +57,10 @@ public:
     Filter& operator=(const Filter&) = delete;
     Filter(const Filter&) = delete;
 
+    void splitView(const PointViewPtr& views, PointViewPtr& keeps, PointViewPtr& skips);
     bool eval(PointRef& p) const;
 
 private:
-    virtual void l_prerun(const PointViewSet& views,
-        PointViewSet& keeps, PointViewSet& skips) final;
     virtual void l_initialize(PointTableRef table) final;
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;
@@ -71,7 +70,6 @@ private:
     {}
 
     std::unique_ptr<Args> m_args;
-    Stage::WhereMergeMode m_whereMerge;
 };
 
 }  // namespace pdal
