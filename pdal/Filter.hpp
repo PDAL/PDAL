@@ -77,8 +77,8 @@ private:
     virtual void filter(PointView& /*view*/)
     {}
 
-    friend std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode);
-    friend std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode);
+    friend PDAL_DLL std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode);
+    friend PDAL_DLL std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode);
 
     std::unique_ptr<Args> m_args;
 };
