@@ -88,9 +88,6 @@ TEST(PluginManagerTest, SearchPaths)
     Utils::unsetenv("PDAL_DRIVER_PATH");
 
     StringList paths = PluginDirectory::test_pluginSearchPaths();
-    EXPECT_TRUE(Utils::contains(paths, "./lib"));
-    EXPECT_TRUE(Utils::contains(paths, "../lib"));
-    EXPECT_TRUE(Utils::contains(paths, "../bin"));
     EXPECT_TRUE(Utils::contains(paths, Config::pluginInstallPath()));
 
 #ifdef _WIN32
