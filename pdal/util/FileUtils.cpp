@@ -292,9 +292,12 @@ std::string toCanonicalPath(std::string filename)
     if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
         result = buf;
 #else
-    char buf[PATH_MAX];
-    if (realpath(filename.c_str(), buf))
+    char *buf = realpath(filename.c_str(), NULL);
+    if (buf)
+    {
         result = buf;
+        free(buf);
+    }
 #endif
     return result;
 }
