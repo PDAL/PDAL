@@ -64,16 +64,23 @@ private:
     virtual void done(PointTableRef table);
 
 private:
+    struct XYZ
+    {
+        double x;
+        double y;
+        double z;
+    };
     std::vector<XYZ> m_vertices;
     std::vector<XYZ> m_textureVertices;
     std::vector<XYZ> m_normalVertices;
     using VTN = std::tuple<size_t, size_t, size_t>;
     std::unordered_map<VTN, PointId> m_points;
+    using TRI = std::array<VTN, 3>;
 
-    void newVertex(double x, double y, double z);
-    void newTextureVertex(double x, double y, double z);
-    void newNormalVertex(double x, double y, double z);
-    void newFace(size_t v1, size_t v2, size_t v3);
+    bool newVertex(double x, double y, double z);
+    bool newTextureVertex(double x, double y, double z);
+    bool newNormalVertex(double x, double y, double z);
+    bool newTriangle(TRI vertices);
 };
 
 } // namespace pdal
