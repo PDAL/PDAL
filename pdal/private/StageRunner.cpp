@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,67 +32,67 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Reader.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include "StageRunner.hpp"
+
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
 
-void Reader::l_addArgs(ProgramArgs& args)
+StageRunner::StageRunner(Stage *s, PointViewPtr view) : m_stage(s)
 {
-    Stage::l_addArgs(args);
-    m_filenameArg = &args.add("filename", "Name of file to read", m_filename);
-    m_countArg = &args.add("count", "Maximum number of points read", m_count,
-        (std::numeric_limits<point_count_t>::max)());
-
-    args.add("override_srs", "Spatial reference to apply to data",
-            m_overrideSrs);
-    args.addSynonym("override_srs", "spatialreference");
-
-    args.add("default_srs",
-            "Spatial reference to apply to data if one cannot be inferred",
-            m_defaultSrs);
-}
-
-
-void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
-{
-    if (srs.empty() && !m_defaultSrs.empty())
+    m_keeps = view->makeNew();
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (f)
     {
-        // If an attempt comes in to clear the SRS but we have a default,
-        // revert to the default rather than clearing.
-        Stage::setSpatialReference(m, m_defaultSrs);
-        return;
-    }
-
-    if (getSpatialReference().empty() || m_overrideSrs.empty())
-    {
-        Stage::setSpatialReference(m, srs);
+        m_skips = view->makeNew();
+        f->splitView(view, m_keeps, m_skips);
     }
     else
+        m_keeps = view;
+}
+
+PointViewPtr StageRunner::keeps()
+{
+    return m_keeps;
+}
+
+// For now this is all synchronous
+void StageRunner::run()
+{
+    point_count_t keepSize = m_keeps->size();
+    m_viewSet = m_stage->run(m_keeps);
+
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (!f || !m_skips || m_skips->size() == 0)
+        return;
+
+    if (f->mergeMode() == Filter::WhereMergeMode::True)
     {
-        log()->get(LogLevel::Debug) <<
-            "Ignoring setSpatialReference attempt: an override was set";
+        if (m_viewSet.size())
+        {
+            (*m_viewSet.begin())->append(*m_skips);
+                return;
+        }
     }
+    else if (f->mergeMode() == Filter::WhereMergeMode::Auto)
+    {
+        if (m_viewSet.size() == 1)
+        {
+            PointViewPtr keeps = *m_viewSet.begin();
+            if (keeps.get() == m_keeps.get() && keepSize == keeps->size())
+            {
+                keeps->append(*m_skips);
+                return;
+            }
+        }
+    }
+    m_viewSet.insert(m_skips);
 }
 
-
-void Reader::l_initialize(PointTableRef table)
+PointViewSet StageRunner::wait()
 {
-    Stage::l_initialize(table);
-
-    if (m_overrideSrs.valid() && m_defaultSrs.valid())
-        throwError("Cannot specify both 'override_srs' and 'default_srs'");
-
-    if (m_overrideSrs.valid())
-        setSpatialReference(m_overrideSrs);
-    else if (m_defaultSrs.valid())
-        setSpatialReference(m_defaultSrs);
-}
-
-void Reader::l_prepared(PointTableRef table)
-{
-    Stage::l_prepared(table);
+    return m_viewSet;
 }
 
 } // namespace pdal
