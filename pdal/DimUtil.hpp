@@ -199,6 +199,16 @@ inline std::size_t extractName(const std::string& s, std::string::size_type p)
     return Utils::extract(s, p, isvalid) + 1;
 }
 
+inline bool nameValid(std::string name)
+{
+    name = Utils::toupper(name);
+    if (extractName(name, 0) != name.size())
+        return false;
+    if (name == "WHERE")
+        return false;
+    return true;
+}
+
 inline std::istream& operator>>(std::istream& in, Dimension::Type& type)
 {
     std::string sval;
