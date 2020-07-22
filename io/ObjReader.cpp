@@ -83,7 +83,7 @@ bool ObjReader::newNormalVertex(double x, double y, double z)
 {
 }
 
-bool ObjReader::newFace(size_t v1, size_t v2, size_t v3)
+bool ObjReader::newTriangle(TRI vertices)
 {
 }
 

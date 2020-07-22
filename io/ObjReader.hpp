@@ -73,7 +73,7 @@ private:
     std::vector<XYZ> m_vertices;
     std::vector<XYZ> m_textureVertices;
     std::vector<XYZ> m_normalVertices;
-    using VTN = std::tuple<size_t, size_t, size_t>;
+    using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::unordered_map<VTN, PointId> m_points;
     using TRI = std::array<VTN, 3>;
 
