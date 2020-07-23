@@ -1,0 +1,44 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: *
+  pull_request:
+    branches: *
+
+jobs:
+  docs:
+    name: Docs
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    container: osgeo/proj-docs
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Print versions
+      shell: bash -l {0}
+      run: |
+          python3 --version
+          sphinx-build --version
+    - name: Lint .rst files
+      shell: bash -l {0}
+      run: |
+        if find . -name '*.rst' | xargs grep -P '\t'; then echo 'Tabs are bad, please use four spaces in .rst files.'; false; fi
+      working-directory: ./doc
+    - name: HTML
+      shell: bash -l {0}
+      run: |
+        make html
+      working-directory: ./doc
+    - name: PDF
+      shell: bash -l {0}
+      run: |
+        make latexpdf
+      working-directory: ./doc
+    - name: Spelling
+      shell: bash -l {0}
+      run: |
+        make spell
+      working-directory: ./doc
