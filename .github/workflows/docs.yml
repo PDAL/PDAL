@@ -55,8 +55,5 @@ jobs:
       with:
         name: HTML
         path: doc/build/html/*
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Doxygen
-        path: doc/doxygen/*
+
 
