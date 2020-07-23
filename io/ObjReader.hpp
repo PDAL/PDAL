@@ -40,6 +40,7 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {

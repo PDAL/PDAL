@@ -125,6 +125,7 @@ bool ObjReader::readFace(TRI vertices)
 		}
 		else if(lineType == "v") {
 			// Vertex
+			newVertex(0, 0, 0);
 		}
 		else if(lineType == "vt") {
 			// Vertex texture
@@ -138,6 +139,7 @@ bool ObjReader::readFace(TRI vertices)
 		}
 		else {
 			//TODO handle this case
+			throwError("Unkown line type");
 		}
 	}
 	return true;
