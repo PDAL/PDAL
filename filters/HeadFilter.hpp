@@ -43,7 +43,7 @@ namespace pdal
 class PDAL_DLL HeadFilter : public Filter, public Streamable
 {
 public:
-    HeadFilter() : m_index(0)
+    HeadFilter()
     {}
     HeadFilter& operator=(const HeadFilter&) = delete;
     HeadFilter(const HeadFilter&) = delete;
@@ -58,6 +58,8 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
+    virtual void ready(PointTableRef table);
+
 };
 
 } // namespace pdal
