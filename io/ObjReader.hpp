@@ -56,7 +56,7 @@ private:
 
       \param table  Point table being initialized.
     */
-    virtual QuickInfo inspect();
+    //virtual QuickInfo inspect();
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
@@ -73,14 +73,17 @@ private:
     std::vector<XYZ> m_vertices;
     std::vector<XYZ> m_textureVertices;
     std::vector<XYZ> m_normalVertices;
+    TriangularMesh *m_mesh;
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
-    std::unordered_map<VTN, PointId> m_points;
+    std::map<VTN, PointId> m_points;
     using TRI = std::array<VTN, 3>;
 
     bool newVertex(double x, double y, double z);
     bool newTextureVertex(double x, double y, double z);
     bool newNormalVertex(double x, double y, double z);
     bool newTriangle(TRI vertices);
+    bool readFace(TRI vertices);
+    std::istream *m_istream;
 };
 
 } // namespace pdal

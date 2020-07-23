@@ -48,43 +48,99 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(ObjReader, s_info)
 
 std::string ObjReader::getName() const { return s_info.name; }
-
+void ObjReader::addArgs(ProgramArgs& args) {}
+void ObjReader::addDimensions(PointLayoutPtr layout) {}
+void ObjReader::ready(PointTableRef table) {
+	m_istream = Utils::openFile(m_filename, false);
+}
+//point_count_t ObjReader::read(PointViewPtr view, point_count_t numPts){}
+void ObjReader::done(PointTableRef table){}
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 {
-    while (...)
+    while (true)
     {
-        TRI tri
+        TRI tri;
         bool ok = readFace(tri);
 
+	PointId pointId1, pointId2, pointId3;
         auto it = m_points.find(tri[0]);
-        if (it != m__points.end())
+        if (it != m_points.end())
         {
 //            pointId1 = addPoint;
             m_points.insert({tri[0], pointId1});
         }
         else
             pointId1 = it->second;
+        if (it != m_points.end())
+        {
+//            pointId2 = addPoint;
+            m_points.insert({tri[1], pointId2});
+        }
+        else
+            pointId1 = it->second;
+        if (it != m_points.end())
+        {
+//            pointId3 = addPoint;
+            m_points.insert({tri[2], pointId3});
+        }
+        else
+            pointId1 = it->second;
 
         //... repeat for points 2 and 3 or stick in a lambda.
 
-        m_mesh->add(pointId1, pointId2, pointId 3);
+        m_mesh->add(pointId1, pointId2, pointId3);
     }
 }
 
 bool ObjReader::newVertex(double x, double y, double z)
 {
+	return false;
 }
 
 bool ObjReader::newTextureVertex(double x, double y, double z)
 {
+	return false;
 }
 
 bool ObjReader::newNormalVertex(double x, double y, double z)
 {
+	return false;
 }
 
 bool ObjReader::newTriangle(TRI vertices)
 {
+	return false;
+}
+
+bool ObjReader::readFace(TRI vertices)
+{
+	if(m_istream->peek() == EOF) return false;
+	while(true) {
+		std::string line;
+		std::getline(*m_istream, line);
+		auto lineType = line.substr(0, line.find(' '));
+		if(lineType == "#") {
+			// Coment
+			// Do nothing
+		}
+		else if(lineType == "v") {
+			// Vertex
+		}
+		else if(lineType == "vt") {
+			// Vertex texture
+		}
+		else if(lineType == "vn") {
+			// Vertex texture
+		}
+		else if(lineType == "f") {
+			// Face
+			break;
+		}
+		else {
+			//TODO handle this case
+		}
+	}
+	return true;
 }
 
 } // namespace pdal
