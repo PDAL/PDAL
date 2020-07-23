@@ -285,7 +285,7 @@ public:
     }
 
     /**
-      Return a staticly-allocated Bounds extent that represents infinity
+      Return a statically-allocated Bounds extent that represents infinity
 
       \return  A bounds box with infinite bounds,
     */
@@ -592,7 +592,7 @@ public:
     }
 
     /**
-      Return a staticly-allocated Bounds extent that represents infinity
+      Return a statically-allocated Bounds extent that represents infinity
 
       \return  A bounds box with infinite bounds,
     */

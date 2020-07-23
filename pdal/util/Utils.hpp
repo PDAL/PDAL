@@ -254,8 +254,8 @@ namespace Utils
     /**
       Fetch the value of an environment variable.
 
-      \param name  Name of environment varaible.
-      \param name  Value of the environemnt variable if it exists, empty
+      \param name  Name of environment variable.
+      \param name  Value of the environment variable if it exists, empty
         otherwise.
       \return  0 on success, -1 on failure
     */
@@ -286,14 +286,14 @@ namespace Utils
     PDAL_DLL void eatwhitespace(std::istream& s);
 
     /**
-      Remove whitspace from the beginning of a string.
+      Remove whitespace from the beginning of a string.
 
       \param s  String to be trimmed.
     */
     PDAL_DLL void trimLeading(std::string& s);
 
     /**
-      Remove whitspace from the end of a string.
+      Remove whitespace from the end of a string.
 
       \param s  String to be trimmed.
     */

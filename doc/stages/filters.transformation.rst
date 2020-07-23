@@ -97,7 +97,7 @@ The JSON syntax required for such a translation is written as follows for :math:
           "matrix":"1  0  0  7  0  1  0  8  0  0  1  9  0  0  0  1"
       }
   ]
-   
+
 Scaling
 .......
 
@@ -130,7 +130,7 @@ transformation. In the example, X and Y are not scaled at all (i.e.,
 Rotation
 ........
 
-A rotation of coordinates by :math:`\theta` radians counter-clockswise about
+A rotation of coordinates by :math:`\theta` radians counter-clockwise about
 the z-axis is accomplished with the following matrix.
 
 .. math::
