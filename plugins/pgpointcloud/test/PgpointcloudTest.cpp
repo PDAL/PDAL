@@ -88,11 +88,11 @@ Options getDbOptions()
     return options;
 }
 
-class PgpointcloudWriterTest : public testing::Test
+class PgpointcloudTest : public testing::Test
 {
 public:
-    PgpointcloudWriterTest() : m_masterConnection(0), m_testConnection(0),
-                               m_bSkipTests(false) {};
+    PgpointcloudTest() : m_masterConnection(0), m_testConnection(0),
+        m_bSkipTests(false) {};
 protected:
     virtual void SetUp()
     {
@@ -174,6 +174,10 @@ private:
     PGconn* m_masterConnection;
     PGconn* m_testConnection;
     bool m_bSkipTests;
+};
+
+class PgpointcloudWriterTest : public PgpointcloudTest
+{
 };
 
 namespace
@@ -365,3 +369,17 @@ TEST_F(PgpointcloudWriterTest, selectExistingSchema)
     EXPECT_TRUE(srs.valid());
     EXPECT_EQ(std::string("25832"), srs.identifyHorizontalEPSG());
 }
+
+class PgpointcloudReaderTest : public PgpointcloudTest
+{
+};
+
+// make sure Pgpointcloud readers supports streaming
+TEST_F(PgpointcloudReaderTest, streaming )
+{
+    StageFactory factory;
+    Stage* reader(factory.createStage("readers.pgpointcloud"));
+    EXPECT_TRUE(reader->pipelineStreamable());
+}
+
+

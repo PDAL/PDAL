@@ -298,6 +298,16 @@ point_count_t PgReader::readPgPatch(PointViewPtr view, point_count_t numPts)
     return numRead;
 }
 
+bool PgReader::readPgPatch(PointRef& point)
+{
+    size_t offset = (m_patch.count - m_patch.remaining) * packedPointSize();
+    char *pos = (char *)(m_patch.binary.data() + offset);
+
+    writePoint(point, pos);
+    m_patch.remaining--;
+
+    return true;
+}
 
 bool PgReader::NextBuffer()
 {
@@ -353,6 +363,14 @@ point_count_t PgReader::read(PointViewPtr view, point_count_t count)
         totalNumRead += numRead;
     }
     return totalNumRead;
+}
+
+bool PgReader::processOne(PointRef& point)
+{
+    if (m_patch.remaining == 0)
+        if (!NextBuffer())
+            return false;
+    return readPgPatch(point);
 }
 
 } // pdal
