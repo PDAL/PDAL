@@ -137,7 +137,7 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		Utils::trim(line);
 		if(line.length() == 0) continue;
 		//std::string lineType = line.substr(0, line.find(' '));
-		StringList fields = Utils::split2(line, '\t');
+		StringList fields = Utils::split2(line, ' ');
 		std::cout << "line " << debugCtr << ": " << line;
 		if(Utils::startsWith(line, "#")) {
 			// Coment
@@ -151,8 +151,12 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		*/
 		else if(Utils::startsWith(line, "v")) {
 			// Vertex
-			// Utils::fromString(fields[1]);
-			newVertex(view, 1.0, 2.0, 3.0);
+			double x, y, z;
+			//std::cout << "fields length: " << fields.size() << std::endl;
+			Utils::fromString(fields[1], x);
+			Utils::fromString(fields[2], y);
+			Utils::fromString(fields[3], z);
+			newVertex( view, x, y, z );
 			std::cout << "; vertex";
 		}
 		else if(Utils::startsWith(line, "vt")) {
@@ -172,7 +176,8 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		}
 		else {
 			//TODO handle this case
-			throwError("Unkown line type: " + line);
+			// For now, we just ignore the line and move on
+			//throwError("Unkown line type: " + line);
 		}
 		debugCtr++;
 		std::cout << std::endl;
