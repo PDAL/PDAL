@@ -51,10 +51,11 @@ jobs:
           ninja
           ninja install
       working-directory: ./build
-    - name: Compile
+    - name: Test
       shell: bash -l {0}
       run: |
           ctest -V
+      working-directory: ./build
 
     - name: Examples
       shell: bash -l {0}
