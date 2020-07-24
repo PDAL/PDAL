@@ -42,11 +42,11 @@ jobs:
       run: |
         make latexpdf
       working-directory: ./doc
-      #    - name: Spelling
-      #      shell: bash -l {0}
-      #      run: |
-      #        make spell
-      #      working-directory: ./doc
+    - name: Spelling
+      shell: bash -l {0}
+      run: |
+        make spell
+      working-directory: ./doc
     - uses: actions/upload-artifact@v2
       with:
         name: PDF
@@ -55,5 +55,9 @@ jobs:
       with:
         name: HTML
         path: doc/build/html/*
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Misspelled
+        path: doc/build/spelling/output.txt
 
 
