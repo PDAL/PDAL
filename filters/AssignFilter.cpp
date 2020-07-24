@@ -61,6 +61,7 @@ struct AssignArgs
 {
     std::vector<AssignRange> m_assignments;
     DimRange m_condition;
+    expr::AssignExpression m_expr;
 };
 
 void AssignRange::parse(const std::string& r)

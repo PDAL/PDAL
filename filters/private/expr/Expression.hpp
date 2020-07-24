@@ -214,10 +214,8 @@ private:
 class Expression
 {
 public:
-    Expression();
     Expression(const Expression& expr);
     Expression& operator=(const Expression& expr);
-    ~Expression();
 
     void clear();
     bool parse(const std::string& s);

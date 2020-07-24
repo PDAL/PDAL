@@ -16,10 +16,7 @@ namespace expr
 class Parser
 {
 public:
-    Parser(Expression& expression) : m_expression(expression)
-    {}
-
-    bool parse(const std::string& s);
+    bool parse(const std::string& s, Expression& expr);
     std::string error() const
         { return m_error; }
 
@@ -29,16 +26,17 @@ private:
     Token lastToken() const;
     void setError(const std::string& err);
 
-    bool expression();
-    bool notexpr();
-    bool orexpr();
-    bool andexpr();
-    bool compareexpr();
-    bool addexpr();
-    bool multexpr();
-    bool uminus();
-    bool primary();
-    bool parexpr();
+protected:
+    virtual bool expression(Expression& expr);
+    virtual bool notexpr(Expression& expr);
+    virtual bool orexpr(Expression& expr);
+    virtual bool andexpr(Expression& expr);
+    virtual bool compareexpr(Expression& expr);
+    virtual bool addexpr(Expression& expr);
+    virtual bool multexpr(Expression& expr);
+    virtual bool uminus(Expression& expr);
+    virtual bool primary(Expression& expr);
+    virtual bool parexpr(Expression& expr);
 
     Expression& m_expression;
     Lexer m_lexer;
