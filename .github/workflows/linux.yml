@@ -22,3 +22,54 @@ jobs:
       shell: bash -l {0}
       run: |
           conda install -c conda-forge pdal --only-deps -y
+          conda install -c conda-forge cmake ninja compilers -y
+          mkdir build
+    - name: CMake
+      shell: bash -l {0}
+      run: |
+          cmake .. \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_PLUGIN_CPD=ON \
+          -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
+          -DBUILD_PLUGIN_I3S=ON \
+          -DBUILD_PLUGIN_NITF=ON \
+          -DBUILD_PLUGIN_TILEDB=ON \
+          -DBUILD_PLUGIN_ICEBRIDGE=ON \
+          -DBUILD_PLUGIN_HDF=ON \
+          -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+          -DBUILD_PLUGIN_E57=ON \
+          -DBUILD_PGPOINTCLOUD_TESTS=OFF \
+          -DWITH_LAZPERF=ON \
+          -DWITH_LASZIP=ON \
+          -DWITH_ZSTD=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_TESTS=ON
+      working-directory: ./build
+    - name: Compile
+      shell: bash -l {0}
+      run: |
+          ninja
+          ninja install
+      working-directory: ./build
+    - name: Compile
+      shell: bash -l {0}
+      run: |
+          ctest -V
+
+    - name: Examples
+      shell: bash -l {0}
+      run: |
+          ctest -V
+
+          export BASE=`pwd`
+          for EXAMPLE in writing writing-filter writing-kernel \
+              writing-reader writing-writer
+          do
+          cd $BASE/examples/$EXAMPLE
+          mkdir -p _build || exit 1
+          cd _build || exit 1
+          cmake -G "Ninja" .. -DPDAL_DIR=$BASE/install/lib/cmake/PDAL && ninja
+      done
+    displayName: 'Examples'
+
