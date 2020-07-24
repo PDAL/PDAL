@@ -49,9 +49,14 @@ CREATE_STATIC_STAGE(ObjReader, s_info)
 
 std::string ObjReader::getName() const { return s_info.name; }
 void ObjReader::addArgs(ProgramArgs& args) {}
-void ObjReader::addDimensions(PointLayoutPtr layout) {}
+void ObjReader::addDimensions(PointLayoutPtr layout) {
+	layout->registerDim(Dimension::Id::X);
+	layout->registerDim(Dimension::Id::Y);
+	layout->registerDim(Dimension::Id::Z);
+}
 void ObjReader::ready(PointTableRef table) {
 	m_istream = Utils::openFile(m_filename, false);
+	m_index = 0;
 }
 //point_count_t ObjReader::read(PointViewPtr view, point_count_t numPts){}
 void ObjReader::done(PointTableRef table){}
@@ -60,7 +65,9 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
     while (true)
     {
         TRI tri;
-        bool ok = readFace(tri);
+        bool ok = readFace(tri, view);
+	//TEMPORARY
+	return 0;
 
 	PointId pointId1, pointId2, pointId3;
         auto it = m_points.find(tri[0]);
@@ -90,10 +97,18 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 
         m_mesh->add(pointId1, pointId2, pointId3);
     }
+    return m_index;
 }
 
-bool ObjReader::newVertex(double x, double y, double z)
+bool ObjReader::newVertex(PointViewPtr view, double x, double y, double z)
 {
+	std::cout << "adding vertex (" << x << ", " << y << ", " << z << ")" << std::endl;
+	auto point = view->point(m_index);
+	m_index++;
+	point.setField(Dimension::Id::X, x);
+	point.setField(Dimension::Id::Y, y);
+	point.setField(Dimension::Id::Z, z);
+	
 	return false;
 }
 
@@ -112,35 +127,55 @@ bool ObjReader::newTriangle(TRI vertices)
 	return false;
 }
 
-bool ObjReader::readFace(TRI vertices)
+bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 {
+	int debugCtr = 0;
 	if(m_istream->peek() == EOF) return false;
 	while(true) {
 		std::string line;
 		std::getline(*m_istream, line);
-		auto lineType = line.substr(0, line.find(' '));
-		if(lineType == "#") {
+		Utils::trim(line);
+		if(line.length() == 0) continue;
+		//std::string lineType = line.substr(0, line.find(' '));
+		StringList fields = Utils::split2(line, '\t');
+		std::cout << "line " << debugCtr << ": " << line;
+		if(Utils::startsWith(line, "#")) {
 			// Coment
 			// Do nothing
 		}
-		else if(lineType == "v") {
+		/*
+		else if(line.length() == 0) {
+			// Empty
+			// Do nothing
+		}
+		*/
+		else if(Utils::startsWith(line, "v")) {
 			// Vertex
-			newVertex(0, 0, 0);
+			// Utils::fromString(fields[1]);
+			newVertex(view, 1.0, 2.0, 3.0);
+			std::cout << "; vertex";
 		}
-		else if(lineType == "vt") {
+		else if(Utils::startsWith(line, "vt")) {
 			// Vertex texture
 		}
-		else if(lineType == "vn") {
+		else if(Utils::startsWith(line,  "vn")) {
 			// Vertex texture
 		}
-		else if(lineType == "f") {
+		else if(Utils::startsWith(line, "f")) {
 			// Face
+			// Do something...
 			break;
+		}
+		else if(Utils::startsWith(line, "o")) {
+		}
+		else if(Utils::startsWith(line, "usemtl")) {
 		}
 		else {
 			//TODO handle this case
-			throwError("Unkown line type");
+			throwError("Unkown line type: " + line);
 		}
+		debugCtr++;
+		std::cout << std::endl;
 	}
 	return true;
 }

@@ -79,12 +79,13 @@ private:
     std::map<VTN, PointId> m_points;
     using TRI = std::array<VTN, 3>;
 
-    bool newVertex(double x, double y, double z);
+    bool newVertex(PointViewPtr view, double x, double y, double z);
     bool newTextureVertex(double x, double y, double z);
     bool newNormalVertex(double x, double y, double z);
     bool newTriangle(TRI vertices);
-    bool readFace(TRI vertices);
+    bool readFace(TRI vertices, PointViewPtr view);
     std::istream *m_istream;
+    point_count_t m_index;
 };
 
 } // namespace pdal
