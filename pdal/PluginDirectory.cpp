@@ -59,7 +59,9 @@ StringList pluginSearchPaths()
 
         for (std::string s : possiblePaths)
         {
+            std::cerr << "Path/Canonical = " << s << " / ";
             s = FileUtils::toCanonicalPath(s);
+            std::cerr << s << "!\n";
             if (s.size() && !Utils::contains(searchPaths, s))
                 searchPaths.push_back(s);
         }
