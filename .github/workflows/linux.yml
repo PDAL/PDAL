@@ -30,7 +30,6 @@ jobs:
           cmake .. \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=Debug \
-          -DBUILD_PLUGIN_CPD=ON \
           -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
           -DBUILD_PLUGIN_I3S=ON \
           -DBUILD_PLUGIN_NITF=ON \
