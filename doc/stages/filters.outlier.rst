@@ -47,7 +47,7 @@ A global mean :math:`\overline{\mu}` of these mean distances is then computed al
 
 where :math:`m` is a user-defined multiplier specified by multiplier_.
 
-We now integrate over the pre-computed mean distances :math:`\mu_i` and compare to computed threshold value. If :math:`\mu_i` is greater than the threshold, it is marked as an outlier.
+We now iterate over the pre-computed mean distances :math:`\mu_i` and compare to computed threshold value. If :math:`\mu_i` is greater than the threshold, it is marked as an outlier.
 
 .. math::
 
