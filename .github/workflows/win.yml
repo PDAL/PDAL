@@ -23,6 +23,7 @@ jobs:
     - name: Setup
       shell: cmd /C CALL "{0}"
       run: |
+          echo %PATH%
           conda install -c conda-forge pdal --only-deps -y
           conda install -c conda-forge cmake ninja compilers -y
           mkdir build
@@ -69,17 +70,17 @@ jobs:
               -DBUILD_OCI_TESTS=OFF ^
               -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING ^
               ..
-      working-directory: ./build
+      working-directory: .\build
     - name: Compile
       shell: cmd /C CALL "{0}"
       run: |
           ninja -v
           ninja install
-      working-directory: ./build
+      working-directory: .\build
     - name: Test
       shell: cmd /C CALL "{0}"
       run: |
           ctest -VV --output-on-failure
-      working-directory: ./build
+      working-directory: .\build
 
 
