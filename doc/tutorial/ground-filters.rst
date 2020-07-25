@@ -11,7 +11,7 @@ Ground Filter Tutorial
 Background
 --------------------------------------------------------------------------------
 
-In previous tutorials we introduced our implmentation of the
+In previous tutorials we introduced our implementation of the
 :ref:`Progressive Morphological Filter (PMF)
 <filters.pmf>`, a :ref:`ground kernel <ground_command>` to simplify command-line
 access to PMF, and a filter for :ref:`removing outliers <filters.outlier>`.
@@ -28,8 +28,8 @@ the context of a ground segmentation workflow. Specifically, we will discuss:
 * Extracting ground returns as a post-processing step
 
 .. note::
-  
-    The pipeline discussed in this tutoral requires `PDAL v1.5
+
+    The pipeline discussed in this tutorial requires `PDAL v1.5
     <https://github.com/PDAL/PDAL/releases/tag/1.5.0>`_.
 
 The Pipeline
@@ -43,7 +43,7 @@ contents.
     :linenos:
 
 .. note::
-  
+
     For users familiar with PDAL pipelines, this example may seem to be missing
     a couple of very important stages, namely the reader and writer! A new
     feature of PDAL is the ability to provide a PDAL pipeline with no reader or
@@ -92,11 +92,11 @@ dimension for every point.
     :lines: 7-10
 
 .. note::
-  
+
     Previously, you could do the same thing (with a slightly different syntax)
     using ``filters.attribute``, but this filter has been deprecated and split
     into :ref:`filters.assign` and :ref:`filters.overlay`.
-    
+
 Extended Local Minimum
 ................................................................................
 
@@ -138,13 +138,13 @@ version had actually drifted quite far from the authors' published approach,
 namely in the area of filling voids. We have reverted the code to match the
 published work, but for now are only using the nearest neighbors approach to
 filling voids. The morphological operations are also accelerated by moving to an
-iterative approach and using a diamond struturing element.
+iterative approach and using a diamond structuring element.
 
 .. literalinclude:: ground-filters-pipeline.json
     :linenos:
     :lineno-start: 17
     :lines: 17-25
-    
+
 In addition to specifying some of the SMRF-specific arguments, our example also
 demonstrates the use of two optional pre-filtering capabilities: ``ignore`` and
 ``last``.
@@ -179,14 +179,14 @@ segmentation.
     returns. Neither PMF nor SMRF make this assertion, but our implementations
     still consider only last returns by default. This behavior can be changed by
     setting ``last=false``.
-    
+
     For an example of how to filter on last returns outside the context of SMRF
     and PMF, see `this
     <https://github.com/PDAL/PDAL/blob/master/test/data/pipeline/predicate-keep-last-return.json.in>`_
     within PDAL's source tree.
-    
+
 .. note::
-  
+
     SMRF is not intended to be a replacement for the :ref:`Progressive
     Morphological Filter (PMF) <filters.pmf>` [Zhang2003]_. Rather, it is
     offered as an alternative. PMF has been a part of PDAL since v1.0, first as
@@ -207,14 +207,14 @@ points, e.g., to create a *digital terrain model* (DTM). In this case, we use a
     :linenos:
     :lineno-start: 26
     :lines: 26-29
-    
+
 The :ref:`range filter <filters.range>` accepts a ``limits`` option that
 identifies the dimension(s) on which to filter and the :ref:`range <ranges>` of
 values to passthrough. In this case, we are indicating that the filter should
 only pass points whose ``Classification`` value is equal to 2.
 
 .. note::
-  
+
     The default behavior of both :ref:`PMF <filters.pmf>` and :ref:`SMRF
     <filters.smrf>` is to classify points, which has not changed from previous
     versions of PDAL. The ``extract`` and ``classify`` options have been removed
@@ -229,5 +229,5 @@ Now let's run our ``pipeline.json`` example, using it to
 :ref:`translate_command` ``input.las`` to ``output.las``.
 
 ::
-  
+
     $ pdal translate input.las output.las --json pipeline.json

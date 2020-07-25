@@ -175,7 +175,7 @@ pipeline.
     should occur at this time.  If the initialization requires knowledge of
     the point table, implement the function that accepts one, otherwise
     implement the no-argument version.  Whether to place initialization code
-    at this step or in prepared() or ready() (see below) is a judgement call,
+    at this step or in prepared() or ready() (see below) is a judgment call,
     but detection of errors earlier in the process allows faster termination of
     a command.  Files opened in this step should also be closed before
     returning.
@@ -247,14 +247,14 @@ bool processOne(PointRef& ref)
     This method allows processing of a single point.  A reader will typically
     read a point from an input source.  When a reader returns 'false' from
     this function, it indicates that there are no more points to be read.
-    When a filter returns 'false' from this funciton, it indicates
+    When a filter returns 'false' from this function, it indicates
     that the point just processed should be filtered out and not passed
     to subsequent stages for processing.
 
 Implementing a Reader
 ................................................................................
 
-A reader is a stage that takes input from a point clould format supported by
+A reader is a stage that takes input from a point cloud format supported by
 PDAL and loads points into a point table through a point view.
 
 A reader needs to register or assign those dimensions that it will reference

@@ -35,11 +35,12 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL HeadFilter : public Filter
+class PDAL_DLL HeadFilter : public Filter, public Streamable
 {
 public:
     HeadFilter()
@@ -51,43 +52,14 @@ public:
 
 private:
     point_count_t m_count;
+    point_count_t m_index;
     bool m_invert;
 
-    void addArgs(ProgramArgs& args)
-    {
-        args.add("count", "Number of points to return from beginning.  "
-            "If 'invert' is true, number of points to drop from the beginning.",
-            m_count, point_count_t(10));
-        args.add("invert", "If true, 'count' specifies the number of points "
-            "to skip from the beginning.", m_invert);
-    }
+    virtual void addArgs(ProgramArgs& args);
+    virtual bool processOne(PointRef& point);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void ready(PointTableRef table);
 
-
-    PointViewSet run(PointViewPtr view)
-    {
-        if (m_count > view->size())
-            log()->get(LogLevel::Warning)
-                << "Requested number of points (count=" << m_count
-                << ") exceeds number of available points.\n";
-        PointViewSet viewSet;
-        PointViewPtr outView = view->makeNew();
-        PointId start;
-        PointId end;
-        if (m_invert)
-        {
-            start = m_count;
-            end = view->size();
-        }
-        else
-        {
-            start = 0;
-            end = (std::min)(m_count, view->size());
-        }
-        for (PointId i = start; i < end; ++i)
-            outView->appendPoint(*view, i);
-        viewSet.insert(outView);
-        return viewSet;
-    }
 };
 
 } // namespace pdal

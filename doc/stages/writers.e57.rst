@@ -21,7 +21,7 @@ The writer supports E57 files with Cartesian point clouds.
    The E57 `cartesianInvalidState` dimension is mapped to the Omit
    PDAL dimension.  A range filter can be used to filter out the
    invalid points.
-   
+
 .. plugin::
 
 .. streamable::
@@ -40,11 +40,11 @@ Example
       {
           "type":"writers.e57",
           "filename":"outputfile.e57",
-	        "doublePrecision":false
+            "doublePrecision":false
       }
   ]
 
-  
+
 Options
 -------
 

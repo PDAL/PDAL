@@ -57,7 +57,7 @@ table_namespace
   The table name to be used when interacting with GeoWave. [Required]
 
 feature_type_name
-  The feature type name to be used when ineracting GeoWave. [Default: PDAL_Point]
+  The feature type name to be used when interacting GeoWave. [Default: PDAL_Point]
 
 data_adapter
   FeatureCollectionDataAdapter stores multiple points per Accumulo entry. FeatureDataAdapter stores a single point per Accumulo entry. [Default: FeatureCollectionDataAdapter]

@@ -78,7 +78,8 @@ void RadialDensityFilter::filter(PointView& view)
     // neighbors (which includes the query point) is normalized by the volume
     // of the search sphere and recorded as the density.
     log()->get(LogLevel::Debug) << "Computing densities...\n";
-    double factor = 1.0 / ((4.0 / 3.0) * 3.14159 * (m_rad * m_rad * m_rad));
+    // double factor = 1.0 / ((4.0 / 3.0) * 3.14159 * (m_rad * m_rad * m_rad));
+    double factor = 1.0;
     for (PointId i = 0; i < view.size(); ++i)
     {
         PointIdList pts = index.radius(i, m_rad);
