@@ -1,4 +1,4 @@
-name: OSX
+name: Conda OSX and Linux
 
 on:
   push:
@@ -8,8 +8,13 @@ on:
 
 jobs:
   build:
+    name: ${{ matrix.os }}
 
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
 
     steps:
     - uses: actions/checkout@v2
