@@ -53,9 +53,19 @@ void ObjReader::addDimensions(PointLayoutPtr layout) {
 	layout->registerDim(Dimension::Id::X);
 	layout->registerDim(Dimension::Id::Y);
 	layout->registerDim(Dimension::Id::Z);
+	layout->registerDim(Dimension::Id::NormalX);
+	layout->registerDim(Dimension::Id::NormalY);
+	layout->registerDim(Dimension::Id::NormalZ);
+	layout->registerDim(Dimension::Id::TextureX);
+	layout->registerDim(Dimension::Id::TextureY);
+	layout->registerDim(Dimension::Id::Red);
+	layout->registerDim(Dimension::Id::Green);
+	layout->registerDim(Dimension::Id::Blue);
 }
 void ObjReader::ready(PointTableRef table) {
 	m_istream = Utils::openFile(m_filename, false);
+	std::cout << "opening file: " << m_filename << std::endl;
+	std::cout.flush();
 	m_index = 0;
 }
 //point_count_t ObjReader::read(PointViewPtr view, point_count_t numPts){}
@@ -69,6 +79,7 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 	//TEMPORARY
 	return 0;
 
+/*
 	PointId pointId1, pointId2, pointId3;
         auto it = m_points.find(tri[0]);
         if (it != m_points.end())
@@ -96,6 +107,7 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
         //... repeat for points 2 and 3 or stick in a lambda.
 
         m_mesh->add(pointId1, pointId2, pointId3);
+*/
     }
     return m_index;
 }
@@ -103,22 +115,24 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 bool ObjReader::newVertex(PointViewPtr view, double x, double y, double z)
 {
 	std::cout << "adding vertex (" << x << ", " << y << ", " << z << ")" << std::endl;
+	m_vertices.push_back({x, y, z});
 	auto point = view->point(m_index);
 	m_index++;
 	point.setField(Dimension::Id::X, x);
 	point.setField(Dimension::Id::Y, y);
 	point.setField(Dimension::Id::Z, z);
-	
 	return false;
 }
 
 bool ObjReader::newTextureVertex(double x, double y, double z)
 {
+	m_textureVertices.push_back({x, y, z});
 	return false;
 }
 
 bool ObjReader::newNormalVertex(double x, double y, double z)
 {
+	m_normalVertices.push_back({x, y, z});
 	return false;
 }
 
@@ -133,6 +147,7 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 	if(m_istream->peek() == EOF) return false;
 	while(true) {
 		std::string line;
+		std::cout.flush();
 		std::getline(*m_istream, line);
 		Utils::trim(line);
 		if(line.length() == 0) continue;
@@ -161,13 +176,29 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		}
 		else if(Utils::startsWith(line, "vt")) {
 			// Vertex texture
+			double x, y, z;
+			Utils::fromString(fields[1], x);
+			Utils::fromString(fields[2], y);
+			Utils::fromString(fields[3], z);
+			newTextureVertex( x, y, z );
+
 		}
 		else if(Utils::startsWith(line,  "vn")) {
 			// Vertex texture
+			double x, y, z;
+			Utils::fromString(fields[1], x);
+			Utils::fromString(fields[2], y);
+			Utils::fromString(fields[3], z);
+			newNormalVertex( x, y, z );
 		}
 		else if(Utils::startsWith(line, "f")) {
 			// Face
 			// Do something...
+			PointId x, y, z;
+			Utils::fromString(fields[1], x);
+			Utils::fromString(fields[2], y);
+			Utils::fromString(fields[3], z);
+			newTriangle( {x, y, z} );
 			break;
 		}
 		else if(Utils::startsWith(line, "o")) {
