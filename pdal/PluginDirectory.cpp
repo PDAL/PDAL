@@ -59,9 +59,7 @@ StringList pluginSearchPaths()
 
         for (std::string s : possiblePaths)
         {
-            std::cerr << "Path/Canonical = " << s << " / ";
             s = FileUtils::toCanonicalPath(s);
-            std::cerr << s << "!\n";
             if (s.size() && !Utils::contains(searchPaths, s))
                 searchPaths.push_back(s);
         }
@@ -139,11 +137,6 @@ PluginDirectory::PluginDirectory()
                 m_drivers.insert(std::make_pair(plugin, file));
         }
     }
-}
-
-StringList PluginDirectory::test_pluginSearchPaths()
-{
-    return pluginSearchPaths();
 }
 
 std::string PluginDirectory::test_validPlugin(const std::string& path,
