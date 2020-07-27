@@ -5,13 +5,13 @@ namespace pdal
 namespace expr
 {
 
-bool Parser::parse(const std::string& s, Expression& expr, Lexer& lexer)
+bool Parser::parse(const std::string& s)
 {
-    _lexer.reset(s);
-    m_error.clear();
+    m_expression.clear();
 
-    expr.clear();
-    bool ok = expression(expr);
+    m_lexer.reset(s);
+    m_error.clear();
+    bool ok = expression();
     if (ok)
     {
         // If we're at the end, we should have exhausted all tokens.

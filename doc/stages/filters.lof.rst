@@ -62,3 +62,5 @@ Options
 _`minpts`
   The number of k nearest neighbors. [Default: 10]
 
+.. include:: filter_opts.rst
+

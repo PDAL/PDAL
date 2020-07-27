@@ -215,6 +215,8 @@ pdal_metadata
   Write two VLRs containing `JSON`_ output with both the :ref:`metadata` and
   :ref:`pipeline` serialization. [Default: false]
 
+.. include:: writer_opts.rst
+
 .. _`JSON`: http://www.json.org/
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 

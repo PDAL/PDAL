@@ -12,7 +12,7 @@ Morphological Filter (SMRF)` technique.
 
 .. note::
 
-    This excerise is an adaptation of the :ref:`pcl_ground` tutorial on the
+    This exercise is an adaptation of the :ref:`pcl_ground` tutorial on the
     PDAL website by Brad Chambers. You can find more detail and example
     invocations there.
 

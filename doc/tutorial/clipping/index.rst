@@ -14,7 +14,7 @@ Introduction
 This tutorial describes how to construct a pipeline that takes in geometries
 and clips out data with given geometry attributes.  It is common to desire
 to cut or clip point cloud data with 2D geometries, often from
-auxillary data sources such as `OGR`_-readable `Shapefiles`_.  This tutorial
+auxiliary data sources such as `OGR`_-readable `Shapefiles`_.  This tutorial
 describes how to construct a pipeline that takes in geometries and clips out
 point cloud data inside geometries with matching attributes.
 
@@ -84,7 +84,7 @@ for us on-the-fly:
 .. note::
 
     The GeoJSON file does not have an externally-defined coordinate system,
-    so we are explictly setting one with the LayerSRS parameter. If your
+    so we are explicitly setting one with the LayerSRS parameter. If your
     data does have coordinate system information, you don't need to do that.
 
 Save this VRT definition to a file, called ``attributes.vrt`` in the same

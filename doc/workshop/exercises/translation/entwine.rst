@@ -10,7 +10,7 @@ Exercise
 
 This exercise uses PDAL to fetch data from an Entwine index stored in an Amazon Web Services object store (bucket). Entwine is a point cloud indexing strategy, which rearranges points into a lossless octree structure known as EPT, for Entwine Point Tiles. The structure is described here: https://entwine.io/entwine-point-tile.html.
 
-EPT indexes can be used for visualisation as well as analysis and data manipulation at any scale.
+EPT indexes can be used for visualization as well as analysis and data manipulation at any scale.
 
 Examples of Entwine usage can be found from very fine photogrammetric surveys to continental scale lidar management.
 

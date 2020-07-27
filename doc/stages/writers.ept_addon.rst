@@ -119,5 +119,7 @@ addons
 threads
     Number of worker threads used to write EPT addon data.  A minimum of 4 will be used no matter what value is specified.
 
+.. include:: writer_opts.rst
+
 .. _Entwine Point Tile: https://entwine.io/entwine-point-tile.html
 

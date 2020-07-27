@@ -24,7 +24,7 @@ as opposed to its raw elevation value.
 
 The filter creates a delaunay triangulation of the `count`_ ground points
 closest to the non-ground point in question.  If the non-ground point is within
-the trianulated area, the assigned ``HeightAboveGround`` is the difference
+the triangulated area, the assigned ``HeightAboveGround`` is the difference
 between its ``Z`` value and a ground height interpolated from the three
 vertices of the containing triangle.  If the non-ground point is outside of the
 triangulated area, its ``HeightAboveGround`` is calculated as the difference
@@ -88,3 +88,6 @@ allow_extrapolation
     and ``delaunay`` is set, the ``HeightAboveGround`` is set to the
     difference between the heights of the non-ground point and nearest
     ground point.  [Default: false]
+
+.. include:: filter_opts.rst
+

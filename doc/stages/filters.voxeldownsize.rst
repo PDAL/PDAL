@@ -44,6 +44,8 @@ mode
   be modified to be the center of the voxel.
   **first**: Only the first point found in each voxel is retained.
 
+.. include:: filter_opts.rst
+
 .. warning::
     If you choose **center** mode, you are overwriting the X, Y and Z
     values of retained points.  This may invalidate other dimensions of

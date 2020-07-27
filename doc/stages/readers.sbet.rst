@@ -3,7 +3,7 @@
 readers.sbet
 ============
 
-The **SBET reader** read from files in the SBET format, used for exchange data from interital measurement units (IMUs).
+The **SBET reader** read from files in the SBET format, used for exchange data from inertial measurement units (IMUs).
 SBET files store angles as radians, but by default this reader converts all angle-based measurements to degrees.
 Set ``angles_as_degrees`` to ``false`` to disable this conversion.
 

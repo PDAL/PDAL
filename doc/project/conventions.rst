@@ -84,7 +84,7 @@ Other Conventions
 * For public headers from the ./include/pdal directory, use angle brackets:
   #include <pdal/Stage.h>
 
-* For private headers (from somehwere in ./src), use quotes:
+* For private headers (from somewhere in ./src), use quotes:
   #include "Support.hpp"
 
 * Don't #include a file where a simple forward declaration will do.
