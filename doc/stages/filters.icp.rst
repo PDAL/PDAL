@@ -128,3 +128,6 @@ rt
 
 tt
   Translation threshold. [Default: **9e-8**]
+
+.. include:: filter_opts.rst
+

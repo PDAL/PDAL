@@ -50,3 +50,5 @@ k
 dimension
   The name of the dimension to filter.
 
+.. include:: filter_opts.rst
+

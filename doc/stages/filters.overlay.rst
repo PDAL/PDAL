@@ -94,3 +94,5 @@ _`query`
 layer
   The data source's layer to use. [Default: first layer]
 
+.. include:: filter_opts.rst
+

@@ -13,12 +13,12 @@ quickly obtained in JSON format by using the command "pdal info --stats".
 
 .. note::
 
-The filter can compute both sample and population statistics.  For kurtosis,
-the filter can also compute standard and excess kurtosis.  However, only
-a single value is reported for each statistic type in metadata, and that is
-the sample statistic, rather than the population statistic.  For kurtosis
-the sample excess kurtosis is reported.  This seems to match the behavior
-of many other software packages.
+    The filter can compute both sample and population statistics.  For kurtosis,
+    the filter can also compute standard and excess kurtosis.  However, only
+    a single value is reported for each statistic type in metadata, and that is
+    the sample statistic, rather than the population statistic.  For kurtosis
+    the sample excess kurtosis is reported.  This seems to match the behavior
+    of many other software packages.
 
 Example
 ................................................................................
@@ -62,4 +62,6 @@ global
 
 advanced
   Calculate advanced statistics (skewness, kurtosis). [Default: false]
+
+.. include:: filter_opts.rst
 

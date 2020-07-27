@@ -97,6 +97,8 @@ _`a_srs`
   it is assumed that the spatial reference of the bounding region matches
   that of the points.
 
+.. include:: filter_opts.rst
+
 Notes
 --------------------------------------------------------------------------------
 

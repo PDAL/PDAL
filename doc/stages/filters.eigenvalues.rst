@@ -48,3 +48,6 @@ knn
 
 normalize
   Normalize eigenvalues such that the sum is 1. [Default: false]
+
+.. include:: filter_opts.rst
+

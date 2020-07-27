@@ -61,3 +61,6 @@ filename
 
 ascii
     Write ASCII FBX format.  [Default: false]
+
+.. include:: writer_opts.rst
+

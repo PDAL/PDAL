@@ -5,7 +5,7 @@ filters.separatescanline
 
 The **Separate scan line Filter** takes a single ``PointView`` as its input and
 creates a ``PointView`` for each scan line as its output. ``PointView`` must contain
-the ``EdgeOfFlightLine`` dimension_.
+the ``EdgeOfFlightLine`` dimension.
 
 .. embed::
 
@@ -31,3 +31,6 @@ Options
 
 _`groupby`
   The number of lines to be grouped by. [Default : 1]
+
+.. include:: filter_opts.rst
+

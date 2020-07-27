@@ -105,6 +105,8 @@ output_dims
   If specified, limits the dimensions written for each point.  Dimensions
   are listed by name and separated by commas.
 
+.. include:: writer_opts.rst
+
 .. _PostgreSQL Pointcloud: http://github.com/pramsey/pointcloud
 .. _laz-perf: https://github.com/hobu/laz-perf
 .. _EPSG code: http://www.epsg.org

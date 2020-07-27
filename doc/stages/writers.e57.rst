@@ -53,3 +53,6 @@ _`filename`
 
 doublePrecision
   Use double precision for storage (false by default).
+
+.. include:: writer_opts.rst
+
