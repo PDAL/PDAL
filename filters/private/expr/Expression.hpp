@@ -234,18 +234,4 @@ private:
 };
 
 } // namespace expr
-
-namespace Utils
-{
-
-template<>
-inline StatusWithReason fromString(const std::string& from,
-    pdal::expr::Expression& expr)
-{
-    bool ok = expr.parse(from);
-    return { ok ? 0 : -1, expr.error() };
-}
-
-} // namespace Util
-
 } // namespace pdal

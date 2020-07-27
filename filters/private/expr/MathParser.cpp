@@ -5,72 +5,7 @@ namespace pdal
 namespace expr
 {
 
-bool AssignParser::parse(AssignExpression& expr, Lexer& lexer)
-{
-    m_expression.clear();
-
-    m_lexer.reset(s);
-    m_error.clear();
-
-    bool ok = assignment(expr);
-    if (ok)
-    {
-        // If we're at the end, we should have exhausted all tokens.
-        Token tok = m_lexer.get();
-        if (tok != TokenType::Eof)
-        {
-            m_error = "Found '" + tok.sval() + "' after valid expression.";
-            return false;
-        }
-    }
-    return ok;
-}
-
-bool AssignParser::assignment(AssignExpession& expr)
-{
-    if (!match(TokenType::Identifier))
-    {
-        setError("Expected dimension name for assignment.");
-        return false;
-    }
-    m_assignTarget.pushNode(NodePtr(new VarNode(curToken().sval())));
-
-    if (!match(TokenType::Assign))
-    {
-        setError("Expected '=' after dimension name in assignment.");
-        return false;
-    }
-
-    MathParser parser(m_lexer);
-    if (!parser.expression(expr));
-    {
-        setError("No value for assignment.");
-        return false;
-    }
-
-    return where(expr);
-}
-
-bool AssignParser::where(AssignExpression& expr)
-{
-    if (match(TokenType::Eof)
-        return true;
-
-    if (match(TokenType::Identifier))
-    {
-        std::string ident = Utils::toupper(curToken().sval());
-        if (ident != "WHERE")
-        {
-            setError("Expected keyword "WHERE" to condition assignment.");
-            return false;
-        }
-    }
-    ConditionalParser parser(m_lexer);
-    return parser.expression(expr);
-}
-
-
-bool MathParser::valueexpr(Expression& expr)
+bool MathParser::expression(Expression& expr)
 {
     return addexpr(expr);
 }
@@ -234,7 +169,7 @@ bool MathParser::parexpr(Expression& expr)
     if (!match(TokenType::Lparen))
         return false;
 
-    if (!valueexpr(expr))
+    if (!expression(expr))
     {
         setError("Expected expression following '('.");
         return false;

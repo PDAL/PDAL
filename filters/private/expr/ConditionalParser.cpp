@@ -5,57 +5,14 @@ namespace pdal
 namespace expr
 {
 
-bool Parser::parse(const std::string& s, Expression& expr, Lexer& lexer)
-{
-    _lexer.reset(s);
-    m_error.clear();
-
-    expr.clear();
-    bool ok = expression(expr);
-    if (ok)
-    {
-        // If we're at the end, we should have exhausted all tokens.
-        Token tok = m_lexer.get();
-        if (tok != TokenType::Eof)
-        {
-            m_error = "Found '" + tok.sval() + "' after valid expression.";
-            return false;
-        }
-    }
-    return ok;
-}
-
-Token Parser::curToken() const
-{
-    return m_curTok;
-}
-
-bool Parser::match(TokenType type)
-{
-    Token t = m_lexer.get();
-    if (t.type() == type)
-    {
-        m_curTok = t;
-        return true;
-    }
-    m_lexer.put(t);
-    return false;
-}
-
-void Parser::setError(const std::string& err)
-{
-    if (m_error.empty())
-        m_error = err;
-}
-
-bool Parser::expression(Expression& expr)
+bool ConditionalParser::expression(Expression& expr)
 {
     if (!orexpr(expr))
         return false;
     return true;
 }
 
-bool Parser::orexpr(Expression& expr)
+bool ConditionalParser::orexpr(Expression& expr)
 {
     if (!andexpr(expr))
         return false;
@@ -84,7 +41,7 @@ bool Parser::orexpr(Expression& expr)
     return true;
 }
 
-bool Parser::andexpr(Expression& expr)
+bool ConditionalParser::andexpr(Expression& expr)
 {
     if (!compareexpr(expr))
         return false;
@@ -115,7 +72,7 @@ bool Parser::andexpr(Expression& expr)
 
 //ABELL - This treats == and >= at the same precendence level.  In C++,
 // <, >, <=, >= come before ==, !=
-bool Parser::compareexpr(Expression& expr)
+bool ConditionalParser::compareexpr(Expression& expr)
 {
     if (!addexpr(expr))
         return false;
@@ -181,7 +138,7 @@ bool Parser::compareexpr(Expression& expr)
     return true;
 }
 
-bool Parser::addexpr(Expression& expr)
+bool ConditionalParser::addexpr(Expression& expr)
 {
     if (!multexpr(expr))
         return false;
@@ -230,7 +187,7 @@ bool Parser::addexpr(Expression& expr)
     return true;
 }
 
-bool Parser::multexpr(Expression& expr)
+bool ConditionalParser::multexpr(Expression& expr)
 {
     if (!notexpr(expr))
         return false;
@@ -287,7 +244,7 @@ bool Parser::multexpr(Expression& expr)
     return true;
 }
 
-bool Parser::notexpr(Expression& expr)
+bool ConditionalParser::notexpr(Expression& expr)
 {
     if (!match(TokenType::Not))
         return uminus(expr);
@@ -308,7 +265,7 @@ bool Parser::notexpr(Expression& expr)
     return true;
 }
 
-bool Parser::uminus(Expression& expr)
+bool ConditionalParser::uminus(Expression& expr)
 {
     if (!match(TokenType::Dash))
         return primary(expr);
@@ -339,7 +296,7 @@ bool Parser::uminus(Expression& expr)
     return true;
 }
 
-bool Parser::primary(Expression& expr)
+bool ConditionalParser::primary(Expression& expr)
 {
     if (match(TokenType::Number))
     {
@@ -355,7 +312,7 @@ bool Parser::primary(Expression& expr)
     return parexpr(expr);
 }
 
-bool Parser::parexpr(Expression& expr)
+bool ConditionalParser::parexpr(Expression& expr)
 {
     if (!match(TokenType::Lparen))
         return false;

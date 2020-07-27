@@ -329,23 +329,20 @@ Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
 //
 // Expression
 //
-Expression::Expression()
-{}
 
 // This is a strange copy ctor that ignores the source.  At this point we
 // don't need it to do anything, but we do need the an expression to
-// be copyable.  In order to copy, we'd actually have to deep-copy the
-// nodes, but there is no way to do that right now.
+// be copyable in order to be used by ProgramArgs.
+// In order to copy, we'd actually have to deep-copy the nodes, but there is
+/  no way to do that right now.
 Expression::Expression(const Expression& expr)
 {}
 
-Expression::~Expression()
-{}
-
-// This is a strange copy ctor that ignores the source.  At this point we
+// This is a strange assignment operator that ignores the source.  At this point we
 // don't need it to do anything, but we do need the an expression to
-// be copyable.  In order to copy, we'd actually have to deep-copy the
-// nodes, but there is no way to do that right now.
+// be assigned in order to be used by ProgramArgs.
+// In order to copy, we'd actually have to deep-copy the nodes, but there is
+// no way to do that right now.
 Expression& Expression::operator=(const Expression& expr)
 {
     clear();

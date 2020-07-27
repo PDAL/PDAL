@@ -17,18 +17,11 @@ namespace expr
 class AssignExpression : public Expression
 {
 public:
-    AssignExpression();
-    AssignExpression(const Expression& expr);
-    AssignExpression& operator=(const Expression& expr);
-    ~AssignExpression();
-
-    bool parse(const std::string& s);
     Utils::StatusWithReason prepare(PointLayoutPtr layout);
     Expression& valueExpr();
     Expression& conditionalExpr();
 
 private:
-    std::string m_error;
     Expression m_valueExpr;
     Expression m_conditionalExpr;
 
