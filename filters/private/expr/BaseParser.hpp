@@ -1,10 +1,5 @@
 #pragma once
 
-#include <queue>
-#include <stack>
-#include <iostream>
-#include <iomanip>
-
 #include "Lexer.hpp"
 #include "Expression.hpp"
 
@@ -16,10 +11,10 @@ namespace expr
 class BaseParser
 {
 public:
-    Parser(Lexer& lexer) : m_lexer(lexer)
+    BaseParser(Lexer& lexer) : m_lexer(lexer)
     {}
 
-    bool parse(Expression& expr);
+    bool checkEnd();
     std::string error() const
         { return m_error; }
 
@@ -28,6 +23,7 @@ protected:
     Token curToken() const;
     Token lastToken() const;
     void setError(const std::string& err);
+    void clearError();
     Lexer& lexer()
         { return m_lexer; }
 

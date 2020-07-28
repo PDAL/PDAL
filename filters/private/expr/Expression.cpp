@@ -1,5 +1,4 @@
 #include "Expression.hpp"
-#include "Parser.hpp"
 
 namespace pdal
 {
@@ -330,11 +329,17 @@ Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
 // Expression
 //
 
+Expression::Expression()
+{}
+
+Expression::~Expression()
+{}
+
 // This is a strange copy ctor that ignores the source.  At this point we
 // don't need it to do anything, but we do need the an expression to
 // be copyable in order to be used by ProgramArgs.
 // In order to copy, we'd actually have to deep-copy the nodes, but there is
-/  no way to do that right now.
+// no way to do that right now.
 Expression::Expression(const Expression& expr)
 {}
 
@@ -354,16 +359,6 @@ void Expression::clear()
     std::stack<NodePtr> empty;
     m_nodes.swap(empty);
     m_error.clear();
-}
-
-bool Expression::parse(const std::string& s)
-{
-    clear();
-    Parser p(*this);
-    bool ok = p.parse(s);
-    if (!ok)
-        m_error = p.error();
-    return ok;
 }
 
 std::string Expression::error() const
@@ -388,37 +383,14 @@ void Expression::pushNode(NodePtr node)
     m_nodes.push(std::move(node));
 }
 
-Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
+Node *Expression::topNode()
 {
-    if (m_nodes.size())
-    {
-        Node *top = m_nodes.top().get();
-        auto status = top->prepare(layout);
-        if (status)
-        {
-            if (top->isValue())
-                status =
-                    { -1, "Expression evalutes to a value, not a boolean." };
-            else
-            {
-                ConstLogicalNode *n = dynamic_cast<ConstLogicalNode *>(top);
-                if (n)
-                {
-                    if (n->value())
-                        status = { -1, "Expression is always true." };
-                    else
-                        status = { -1, "Expression is always false." };
-                }
-            }
-        }
-        return status;
-    }
-    return true;
+    return m_nodes.size() ? m_nodes.top().get() : nullptr;
 }
 
-bool Expression::eval(PointRef& p) const
+const Node *Expression::topNode() const
 {
-    return m_nodes.top()->eval(p).m_bval;
+    return m_nodes.size() ? m_nodes.top().get() : nullptr;
 }
 
 std::ostream& operator<<(std::ostream& out, const Expression& expr)

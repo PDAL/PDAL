@@ -94,7 +94,7 @@ void GDALReader::initialize()
     else
     {
         for (size_t i = 0; i < m_bandTypes.size(); ++i)
-            m_dimNames.push_back("band-" + std::to_string(i + 1));
+            m_dimNames.push_back("band_" + std::to_string(i + 1));
     }
 
     int zBand = 1;

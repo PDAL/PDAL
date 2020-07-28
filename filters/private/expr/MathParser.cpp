@@ -1,4 +1,4 @@
-#include "Parser.hpp"
+#include "MathParser.hpp"
 
 namespace pdal
 {
@@ -74,7 +74,7 @@ bool MathParser::multexpr(Expression& expr)
         else
             return true;
 
-        if (!uminus())
+        if (!uminus(expr))
         {
             setError("Expected expression following '" +
                 curToken().sval() + "'.");

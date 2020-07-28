@@ -1,47 +1,29 @@
 #pragma once
 
-#include <queue>
-#include <stack>
-#include <iostream>
-#include <iomanip>
-
-#include "Lexer.hpp"
-#include "Expression.hpp"
+#include "BaseParser.hpp"
 
 namespace pdal
 {
 namespace expr
 {
 
-class Parser
+class ConditionalParser : public BaseParser
 {
 public:
-    bool parse(const std::string& s, Expression& expr);
-    std::string error() const
-        { return m_error; }
-
-private:
-    bool match(TokenType type);
-    Token curToken() const;
-    Token lastToken() const;
-    void setError(const std::string& err);
+    ConditionalParser(Lexer& lexer) : BaseParser(lexer)
+    {}
+    bool expression(Expression& expr);
 
 protected:
-    virtual bool expression(Expression& expr);
-    virtual bool notexpr(Expression& expr);
-    virtual bool orexpr(Expression& expr);
-    virtual bool andexpr(Expression& expr);
-    virtual bool compareexpr(Expression& expr);
-    virtual bool addexpr(Expression& expr);
-    virtual bool multexpr(Expression& expr);
-    virtual bool uminus(Expression& expr);
-    virtual bool primary(Expression& expr);
-    virtual bool parexpr(Expression& expr);
-
-    Expression& m_expression;
-    Lexer m_lexer;
-    Token m_curTok;
-    std::string m_error;
+    bool notexpr(Expression& expr);
+    bool orexpr(Expression& expr);
+    bool andexpr(Expression& expr);
+    bool compareexpr(Expression& expr);
+    bool addexpr(Expression& expr);
+    bool multexpr(Expression& expr);
+    bool uminus(Expression& expr);
+    bool primary(Expression& expr);
+    bool parexpr(Expression& expr);
 };
 
 } // namespace expr

@@ -1,13 +1,9 @@
 #pragma once
 
-#include <stack>
-#include <string>
-#include <memory>
-
-#include <pdal/Dimension.hpp>
-#include <pdal/PointLayout.hpp>
-#include <pdal/PointRef.hpp>
-#include <pdal/util/Utils.hpp>
+#include "AssignParser.hpp"
+#include "ConditionalExpression.hpp"
+#include "MathExpression.hpp"
+#include "Lexer.hpp"
 
 namespace pdal
 {
@@ -17,15 +13,14 @@ namespace expr
 class AssignExpression : public Expression
 {
 public:
-    Utils::StatusWithReason prepare(PointLayoutPtr layout);
     Expression& valueExpr();
     Expression& conditionalExpr();
 
-private:
-    Expression m_valueExpr;
-    Expression m_conditionalExpr;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr layout);
 
-    friend std::ostream& operator<<(std::ostream& out, const AssignExpression& expr);
+private:
+    MathExpression m_valueExpr;
+    ConditionalExpression m_conditionalExpr;
 };
 
 } // namespace expr
@@ -35,9 +30,11 @@ namespace Utils
 
 template<>
 inline StatusWithReason fromString(const std::string& from,
-    pdal::expr::Expression& expr)
+    pdal::expr::AssignExpression& expr)
 {
-    bool ok = expr.parse(from);
+    expr::Lexer lexer(from);
+    expr::AssignParser parser(lexer);
+    bool ok = parser.expression(expr) && parser.checkEnd();
     return { ok ? 0 : -1, expr.error() };
 }
 

@@ -214,6 +214,8 @@ private:
 class Expression
 {
 public:
+    Expression();
+    ~Expression();
     Expression(const Expression& expr);
     Expression& operator=(const Expression& expr);
 
@@ -223,8 +225,9 @@ public:
     std::string print() const;
     NodePtr popNode();
     void pushNode(NodePtr node);
-    Utils::StatusWithReason prepare(PointLayoutPtr layout);
-    bool eval(PointRef& p) const;
+    Node *topNode();
+    const Node *topNode() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr layout) = 0;
 
 private:
     std::string m_error;

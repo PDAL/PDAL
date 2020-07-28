@@ -38,6 +38,7 @@
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/DimRange.hpp"
+#include "private/expr/AssignExpression.hpp"
 
 namespace pdal
 {
@@ -132,6 +133,8 @@ void AssignFilter::addArgs(ProgramArgs& args)
         m_args->m_assignments).setPositional();
     args.add("condition", "Condition for assignment based on range.",
         m_args->m_condition);
+    args.add("value", "Value to assign to dimension based on expression.",
+        m_args->m_expr);
 }
 
 
