@@ -194,11 +194,55 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		else if(Utils::startsWith(line, "f")) {
 			// Face
 			// Do something...
-			PointId x, y, z;
-			Utils::fromString(fields[1], x);
+			// PointId x, y, z;
+			PointId vertex1CoordIndex, vertex1NormalIndex, vertex1TextureIndex,
+					vertex2CoordIndex, vertex2NormalIndex, vertex2TextureIndex,
+					vertex3CoordIndex, vertex3NormalIndex, vertex3TextureIndex;
+
+			StringList vertex1data = Utils::split2(fields[1], '/');
+			Utils::fromString(vertex1data[0], vertex1CoordIndex);
+			Utils::fromString(vertex1data[1], vertex1NormalIndex);
+			Utils::fromString(vertex1data[2], vertex1TextureIndex);
+			VTN vertex1 = {vertex1CoordIndex, vertex1TextureIndex, vertex1NormalIndex};
+
+			StringList vertex2data = Utils::split2(fields[2], '/');
+			Utils::fromString(vertex2data[0], vertex2CoordIndex);
+			Utils::fromString(vertex2data[1], vertex2NormalIndex);
+			Utils::fromString(vertex2data[2], vertex2TextureIndex);
+			VTN vertex2 = {vertex2CoordIndex, vertex2TextureIndex, vertex2NormalIndex};
+
+			StringList vertex3data = Utils::split2(fields[3], '/');
+			Utils::fromString(vertex3data[0], vertex3CoordIndex);
+			Utils::fromString(vertex3data[1], vertex3NormalIndex);
+			Utils::fromString(vertex3data[2], vertex3TextureIndex);
+			VTN vertex3 = {vertex3CoordIndex, vertex3TextureIndex, vertex3NormalIndex};
+
+/*
+			XYZ vertex1Coords = m_vertices.at(vertex1CoordIndex);
+			XYZ vertex2Coords = m_vertices.at(vertex2CoordIndex);
+			XYZ vertex3Coords = m_vertices.at(vertex3CoordIndex);
+			
+			XYZ vertex1Normals = m_vertices.at(vertex1NormalIndex);
+			XYZ vertex2Normals = m_vertices.at(vertex2NormalIndex);
+			XYZ vertex3Normals = m_vertices.at(vertex3NormalIndex);
+
+			XYZ vertex1Texture = m_vertices.at(vertex1TextureIndex);
+			XYZ vertex2Texture = m_vertices.at(vertex2TextureIndex);
+			XYZ vertex3Texture = m_vertices.at(vertex3TextureIndex);
+*/
+			/*
+			Utils::fromString(vertex1data[1], x);
 			Utils::fromString(fields[2], y);
 			Utils::fromString(fields[3], z);
 			newTriangle( {x, y, z} );
+			*/
+			/*
+			vertices[0] = vertex1;
+			vertices[1] = vertex2;
+			vertices[2] = vertex3;
+			*/
+			vertices = {vertex1, vertex2, vertex3};
+			newTriangle({vertex1, vertex2, vertex3});
 			break;
 		}
 		else if(Utils::startsWith(line, "o")) {
