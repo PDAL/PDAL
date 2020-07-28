@@ -181,6 +181,7 @@ Pointwise Features
    filters.miniball
    filters.nndistance
    filters.normal
+   filters.optimalneighborhood
    filters.planefit
    filters.radialdensity
    filters.reciprocity
@@ -212,6 +213,11 @@ Pointwise Features
 
 :ref:`filters.normal`
     Compute pointwise normal and curvature, based on k-nearest neighbors.
+
+:ref:`filters.optimalneighborhood`
+    Compute optimal k nearest neighbors and corresponding radius by minimizing
+    pointwise eigenentropy. Creates two new dimensions ``OptimalKNN`` and
+    ``OptimalRadius``.
 
 :ref:`filters.planefit`
     Compute a deviation of a point from a manifold approximating its neighbors.
