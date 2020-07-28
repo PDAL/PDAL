@@ -53,6 +53,7 @@ void ObjReader::addDimensions(PointLayoutPtr layout) {
 	layout->registerDim(Dimension::Id::X);
 	layout->registerDim(Dimension::Id::Y);
 	layout->registerDim(Dimension::Id::Z);
+	/*
 	layout->registerDim(Dimension::Id::NormalX);
 	layout->registerDim(Dimension::Id::NormalY);
 	layout->registerDim(Dimension::Id::NormalZ);
@@ -61,6 +62,7 @@ void ObjReader::addDimensions(PointLayoutPtr layout) {
 	layout->registerDim(Dimension::Id::Red);
 	layout->registerDim(Dimension::Id::Green);
 	layout->registerDim(Dimension::Id::Blue);
+	*/
 }
 void ObjReader::ready(PointTableRef table) {
 	m_istream = Utils::openFile(m_filename, false);
@@ -76,51 +78,89 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
     {
         TRI tri;
         bool ok = readFace(tri, view);
-	//TEMPORARY
-	return 0;
+		// TEMPORARY
+		// return 0;
 
-/*
-	PointId pointId1, pointId2, pointId3;
-        auto it = m_points.find(tri[0]);
+
+		PointId pointId1, pointId2, pointId3;
+		auto it = m_points.find(tri[0]);
         if (it != m_points.end())
         {
-//            pointId1 = addPoint;
+            //pointId1 = view->point((point_count_t)pointId1);;
+			//PointRef pt = view->point(m_index);
+			//m_index++;
+			pointId1 = addPoint(view, tri[0]);
             m_points.insert({tri[0], pointId1});
         }
         else
             pointId1 = it->second;
+        it = m_points.find(tri[1]);
         if (it != m_points.end())
         {
-//            pointId2 = addPoint;
+            //pointId2 = view->point(pointId2);
+			//PointRef pt = view->point(m_index);
+			//m_index++;
+			pointId2 = addPoint(view, tri[1]);
             m_points.insert({tri[1], pointId2});
         }
         else
-            pointId1 = it->second;
+            pointId2 = it->second;
+        it = m_points.find(tri[2]);
         if (it != m_points.end())
         {
-//            pointId3 = addPoint;
+            //pointId3 = view->point(pointId3);
+			//PointRef pt = view->point(m_index);
+			//m_index++;
+			pointId3 = addPoint(view, tri[2]);
             m_points.insert({tri[2], pointId3});
         }
         else
-            pointId1 = it->second;
+            pointId3 = it->second;
 
-        //... repeat for points 2 and 3 or stick in a lambda.
 
-        m_mesh->add(pointId1, pointId2, pointId3);
-*/
+        //m_mesh->add(pointId1, pointId2, pointId3);
+		if(!ok) return m_index;
     }
     return m_index;
+}
+PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
+	XYZ v, t, n;
+	PointRef pt = view->point(m_index);
+	m_index++;
+
+	int64_t vertexIndex = std::get<0>(vertex);
+	v = m_vertices.at(vertexIndex);
+	pt.setField(Dimension::Id::X, v.x);
+	pt.setField(Dimension::Id::Y, v.y);
+	pt.setField(Dimension::Id::Z, v.z);
+
+	int64_t textureIndex = std::get<1>(vertex);
+	if(textureIndex >= 0) {
+		t = m_textureVertices.at(textureIndex);
+		pt.setField(Dimension::Id::NormalX, n.x);
+		pt.setField(Dimension::Id::NormalY, n.y);
+		pt.setField(Dimension::Id::NormalZ, n.z);
+	}
+
+	int64_t normalIndex = std::get<2>(vertex);
+	if(normalIndex >= 0) {
+		n = m_normalVertices.at(normalIndex);
+		pt.setField(Dimension::Id::TextureX, t.x);
+		pt.setField(Dimension::Id::TextureY, t.y);
+	}
+
+	return pt.pointId();
 }
 
 bool ObjReader::newVertex(PointViewPtr view, double x, double y, double z)
 {
 	std::cout << "adding vertex (" << x << ", " << y << ", " << z << ")" << std::endl;
 	m_vertices.push_back({x, y, z});
-	auto point = view->point(m_index);
-	m_index++;
-	point.setField(Dimension::Id::X, x);
-	point.setField(Dimension::Id::Y, y);
-	point.setField(Dimension::Id::Z, z);
+	//auto point = view->point(m_index);
+	//m_index++;
+	//point.setField(Dimension::Id::X, x);
+	//point.setField(Dimension::Id::Y, y);
+	//point.setField(Dimension::Id::Z, z);
 	return false;
 }
 
@@ -138,14 +178,16 @@ bool ObjReader::newNormalVertex(double x, double y, double z)
 
 bool ObjReader::newTriangle(TRI vertices)
 {
+	// Check if 
+	// TODO add to m_mesh
 	return false;
 }
 
 bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 {
 	int debugCtr = 0;
-	if(m_istream->peek() == EOF) return false;
 	while(true) {
+		if(m_istream->peek() == EOF) return false;
 		std::string line;
 		std::cout.flush();
 		std::getline(*m_istream, line);
@@ -201,21 +243,28 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 
 			StringList vertex1data = Utils::split2(fields[1], '/');
 			Utils::fromString(vertex1data[0], vertex1CoordIndex);
-			Utils::fromString(vertex1data[1], vertex1NormalIndex);
-			Utils::fromString(vertex1data[2], vertex1TextureIndex);
-			VTN vertex1 = {vertex1CoordIndex, vertex1TextureIndex, vertex1NormalIndex};
+			std::cout << "vertex1data length: " << vertex1data.size() << std::endl << std::flush;
+			//Utils::fromString(vertex1data[1], vertex1NormalIndex);
+			//Utils::fromString(vertex1data[2], vertex1TextureIndex);
+			vertex1TextureIndex = -1;
+			vertex1NormalIndex  = -1;
+			VTN vertex1 = {vertex1CoordIndex - 1, vertex1TextureIndex - 1, vertex1NormalIndex - 1};
 
 			StringList vertex2data = Utils::split2(fields[2], '/');
 			Utils::fromString(vertex2data[0], vertex2CoordIndex);
-			Utils::fromString(vertex2data[1], vertex2NormalIndex);
-			Utils::fromString(vertex2data[2], vertex2TextureIndex);
-			VTN vertex2 = {vertex2CoordIndex, vertex2TextureIndex, vertex2NormalIndex};
+			//Utils::fromString(vertex2data[1], vertex2NormalIndex);
+			//Utils::fromString(vertex2data[2], vertex2TextureIndex);
+			vertex2TextureIndex = -1;
+			vertex2NormalIndex  = -1;
+			VTN vertex2 = {vertex2CoordIndex - 1, vertex2TextureIndex - 1, vertex2NormalIndex - 1};
 
 			StringList vertex3data = Utils::split2(fields[3], '/');
 			Utils::fromString(vertex3data[0], vertex3CoordIndex);
-			Utils::fromString(vertex3data[1], vertex3NormalIndex);
-			Utils::fromString(vertex3data[2], vertex3TextureIndex);
-			VTN vertex3 = {vertex3CoordIndex, vertex3TextureIndex, vertex3NormalIndex};
+			//Utils::fromString(vertex3data[1], vertex3NormalIndex);
+			//Utils::fromString(vertex3data[2], vertex3TextureIndex);
+			vertex3TextureIndex = -1;
+			vertex3NormalIndex  = -1;
+			VTN vertex3 = {vertex3CoordIndex - 1, vertex3TextureIndex - 1, vertex3NormalIndex - 1};
 
 /*
 			XYZ vertex1Coords = m_vertices.at(vertex1CoordIndex);
