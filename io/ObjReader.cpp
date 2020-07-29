@@ -78,17 +78,23 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
     {
         TRI tri;
         bool ok = readFace(tri, view);
-		// TEMPORARY
-		// return 0;
+        if (!ok)
+            break;
 
+    std::cerr << "READ TRI = ";
+    std::cerr << "OK = " << ok << "!\n";
+    for (size_t i = 0; i < 3; ++i)
+    {
+        std::cerr << std::get<0>(tri[i]) << "/" <<
+            std::get<1>(tri[i]) << "/" <<
+            std::get<2>(tri[i]) << " ";
+    }
+    std::cerr << "\n";
 
 		PointId pointId1, pointId2, pointId3;
 		auto it = m_points.find(tri[0]);
         if (it == m_points.end())
         {
-            //pointId1 = view->point((point_count_t)pointId1);;
-			//PointRef pt = view->point(m_index);
-			//m_index++;
 			pointId1 = addPoint(view, tri[0]);
             m_points.insert({tri[0], pointId1});
         }
@@ -97,9 +103,6 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
         it = m_points.find(tri[1]);
         if (it == m_points.end())
         {
-            //pointId2 = view->point(pointId2);
-			//PointRef pt = view->point(m_index);
-			//m_index++;
 			pointId2 = addPoint(view, tri[1]);
             m_points.insert({tri[1], pointId2});
         }
@@ -108,18 +111,11 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
         it = m_points.find(tri[2]);
         if (it == m_points.end())
         {
-            //pointId3 = view->point(pointId3);
-			//PointRef pt = view->point(m_index);
-			//m_index++;
 			pointId3 = addPoint(view, tri[2]);
             m_points.insert({tri[2], pointId3});
         }
         else
             pointId3 = it->second;
-
-
-        //m_mesh->add(pointId1, pointId2, pointId3);
-		if(!ok) return m_index;
     }
     return m_index;
 }
@@ -129,21 +125,24 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
 	m_index++;
 
 	int64_t vertexIndex = std::get<0>(vertex);
-	v = m_vertices.at(vertexIndex);
+	v = m_vertices.at(vertexIndex - 1);
+    std::cerr << "Set " << v.x << "/" << v.y << "/" << v.z << "!\n";
 	pt.setField(Dimension::Id::X, v.x);
 	pt.setField(Dimension::Id::Y, v.y);
 	pt.setField(Dimension::Id::Z, v.z);
 
 	int64_t textureIndex = std::get<1>(vertex);
 	if(textureIndex >= 0) {
-		t = m_textureVertices.at(textureIndex);
+		t = m_textureVertices.at(textureIndex - 1);
+        std::cerr << "Set texture " << t.x << "/" << t.y << "!\n";
 		pt.setField(Dimension::Id::TextureX, t.x);
 		pt.setField(Dimension::Id::TextureY, t.y);
 	}
 
 	int64_t normalIndex = std::get<2>(vertex);
 	if(normalIndex >= 0) {
-		n = m_normalVertices.at(normalIndex);
+		n = m_normalVertices.at(normalIndex - 1);
+        std::cerr << "Set normal " << n.x << "/" << n.y << "/" << n.z << "!\n";
 		pt.setField(Dimension::Id::NormalX, n.x);
 		pt.setField(Dimension::Id::NormalY, n.y);
 		pt.setField(Dimension::Id::NormalZ, n.z);
@@ -177,11 +176,12 @@ bool ObjReader::newTriangle(TRI vertices)
 	return false;
 }
 
-bool ObjReader::readFace(TRI vertices, PointViewPtr view)
+bool ObjReader::readFace(TRI& tri, PointViewPtr view)
 {
 	int debugCtr = 0;
 	while(true) {
-		if(m_istream->peek() == EOF) return false;
+		if(m_istream->peek() == EOF)
+            return false;
 		std::string line;
 		std::cout.flush();
 		std::getline(*m_istream, line);
@@ -234,7 +234,8 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
             if (fields.size() < 4)
                 throwError("Not enough vertices in face specification.");
             StringList vertices(fields.begin() + 1, fields.end());
-            extractFace(vertices);
+            tri = extractFace(vertices);
+            return true;
 		}
 		else if(Utils::startsWith(line, "o")) {
 		}
@@ -251,13 +252,20 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 	return true;
 }
 
-void ObjReader::extractFace(StringList fields)
+ObjReader::TRI ObjReader::extractFace(StringList fields)
 {
     TRI tri;
 
+    std::cerr << "TRI = ";
     for (size_t i = 0; i < 3; ++i)
-        tri[i] = extractVertex(fields[0]);
-    newTriangle(tri);
+    {
+        tri[i] = extractVertex(fields[i]);
+        std::cerr << std::get<0>(tri[i]) << "/" <<
+            std::get<1>(tri[i]) << "/" <<
+            std::get<2>(tri[i]) << " ";
+    }
+    std::cerr << "\n";
+    return tri;
 }
 
 ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
@@ -284,7 +292,7 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
 
     if (parts.size() > 2)
     {
-        int i = std::stoi(parts[1], &len);
+        int i = std::stoi(parts[2], &len);
         if (len != 0 && len != parts[1].size())
             throwError("Invalid index in face specification.");
         if (i)

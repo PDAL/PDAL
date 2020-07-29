@@ -83,8 +83,8 @@ private:
     bool newTextureVertex(double x, double y, double z);
     bool newNormalVertex(double x, double y, double z);
     bool newTriangle(TRI vertices);
-    bool readFace(TRI vertices, PointViewPtr view);
-    void extractFace(StringList fields);
+    bool readFace(TRI& vertices, PointViewPtr view);
+    TRI extractFace(StringList fields);
     VTN extractVertex(const std::string& vstring);
     PointId addPoint(PointViewPtr view, VTN vertex);
     std::istream *m_istream;
